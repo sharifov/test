@@ -183,22 +183,7 @@ $bundle = \frontend\assets\AppCrudAsset::register($this);
         </div>
         </div>
         <!-- /page content -->
-        <!-- footer content -->
-        <footer>
-            <p class="pull-left">&copy; <?=Yii::$app->name ?> <?= date('Y') ?>,
-                <span title="<?=Yii::$app->params['release']['git_branch'] ?? ''?> : <?=Yii::$app->params['release']['git_hash'] ?? ''?>">
-                    v. <?php echo ReleaseVersionHelper::getReleaseVersion(true) ?? '' ?>
-                </span>
-                <span title="Hostname">
-                    , host: <?=Yii::$app->params['appHostname'] ?? ''?>
-                </span>
-            </p>
-
-            <p class="pull-right"><small><i><?=date('Y-m-d H:i:s')?></i></small></p>
-
-            <div class="clearfix"></div>
-        </footer>
-        <!-- /footer content -->
+        <?= $this->render('_footer') ?>
     </div>
 </div>
 <!-- /footer content -->

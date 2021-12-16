@@ -15,6 +15,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\helpers\Url;
 use yii\widgets\Pjax;
+use modules\qaTask\src\abac\QaTaskAbacObject;
 
 /* @var $this yii\web\View */
 /* @var $searchModel modules\qaTask\src\entities\qaTask\search\QaTaskCrudSearch */
@@ -35,22 +36,43 @@ $this->params['breadcrumbs'][] = $this->title;
         </button>
         <div class="dropdown-menu">
             <p>
-                <?php echo
+                <?php /** @abac null, QaTaskAbacObject::ACT_USER_ASSIGN, QaTaskAbacObject::ACTION_ACCESS, Assign Multiple Tasks To QA*/ ?>
+                <?php if (Yii::$app->abac->can(null, QaTaskAbacObject::ACT_USER_ASSIGN, QaTaskAbacObject::ACTION_ACCESS)) : ?>
+                    <?php echo
                     Html::a(
                         '<i class="fa fa-edit text-warning"></i> Assign user',
                         null,
-                        ['class' => 'dropdown-item btn-multiple-update',
+                        [
+                            'class' => 'dropdown-item btn-multiple-update',
                             'data' => [
                                 'url' => Url::to(['/qa-task/qa-task-action/user-assign']),
                                 'title' => 'Multiple update',
                             ],
                         ]
                     )
-                ?>
+                    ?>
+                <?php endif; ?>
+
+                <?php /** @abac null, QaTaskAbacObject::ACT_MULTI_CANCEL, QaTaskAbacObject::ACTION_ACCESS, Cancel Multiple Qa Tasks */ ?>
+                <?php if (Yii::$app->abac->can(null, QaTaskAbacObject::ACT_MULTI_CANCEL, QaTaskAbacObject::ACTION_ACCESS)) : ?>
+                    <?php echo
+                    Html::a(
+                        '<i class="fa fa-times text-danger"></i> Multiple Cancel',
+                        null,
+                        [
+                            'class' => 'dropdown-item btn-multiple-cancel',
+                            'data' => [
+                                'url' => Url::to(['/qa-task/qa-task-action/multiple-cancel']),
+                                'title' => 'Multiple cancel',
+                            ],
+                        ]
+                    )
+                    ?>
+                <?php endif; ?>
             </p>
         </div>
     </div>
-    <?php Pjax::begin(); ?>
+    <?php Pjax::begin(['scrollTo' => 0]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([
@@ -196,9 +218,20 @@ $(document).on('click', '#btn-check-all',  function (e) {
     }
 });
 
+function checkedVerify(title) {
+    if (!$("input[name='selection[]']:checked").length) {
+        new PNotify({title: title, type: "error", text: 'Not selected rows.', hide: true});
+        return false;
+    }
+    return true;
+}
+
 $(document).on('click', '.btn-multiple-update', function(e) {
     e.preventDefault();        
     let arrIds = [];
+    
+    if (!checkedVerify('Assign user')) return false;
+    
     if (sessionStorage.selectedTasks) {
         let data = jQuery.parseJSON( sessionStorage.selectedTasks );
         arrIds = Object.values(data);    
@@ -223,8 +256,55 @@ $(document).on('click', '.btn-multiple-update', function(e) {
             success: function (data) {
                 modal.find('.modal-body').html(data);
             },
-            error: function (xhr) {                  
-                modal.find('.modal-body').html('Error: ' + xhr.responseText);            
+            error: function (xhr) {
+                if (xhr.status != 403) {
+                    modal.find('.modal-body').html('Error: ' + xhr.responseText);
+                } else {
+                    modal.find('.modal-body').html('Access denied.');
+                }
+                            
+            },
+        });
+    }
+});
+
+$(document).on('click', '.btn-multiple-cancel', function(e) {
+    e.preventDefault();        
+    let arrIds = [];
+    
+    if (!checkedVerify('Multiple cancel')) return false;
+    
+    if (sessionStorage.selectedTasks) {
+        let data = jQuery.parseJSON( sessionStorage.selectedTasks );
+        arrIds = Object.values(data);    
+        
+        let modal = $('#modal-df');
+        let urlAction = $(this).data('url');
+        let title = $(this).data('title');
+        
+        console.log(arrIds);
+        
+        $.ajax({
+            type: 'get',
+            url: urlAction,
+            dataType: 'html',
+            cache: false,
+            data: {'gid[]': arrIds.length ? arrIds : []},
+            beforeSend: function () {
+                modal.find('.modal-body').html('<div><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
+                modal.find('.modal-title').html(title);
+                modal.modal('show');
+            },
+            success: function (data) {
+                modal.find('.modal-body').html(data);
+            },
+            error: function (xhr) {
+                if (xhr.status != 403) {
+                    modal.find('.modal-body').html('Error: ' + xhr.responseText);
+                } else {
+                    modal.find('.modal-body').html('Access denied.');
+                }
+                            
             },
         });
     }

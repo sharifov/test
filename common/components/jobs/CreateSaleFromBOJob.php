@@ -3,7 +3,6 @@
 namespace common\components\jobs;
 
 use sales\services\cases\CasesSaleService;
-use yii\base\BaseObject;
 use yii\helpers\VarDumper;
 use yii\queue\JobInterface;
 use Yii;
@@ -33,7 +32,7 @@ class CreateSaleFromBOJob extends BaseJob implements JobInterface
      */
     public function execute($queue): bool
     {
-        $this->executionTimeRegister();
+        $this->waitingTimeRegister();
         try {
             if ($this->checkParams()) {
                 $this->casesSaleService = Yii::createObject(CasesSaleService::class);

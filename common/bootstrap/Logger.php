@@ -12,6 +12,7 @@ use common\models\LeadPreferences;
 use common\models\Quote;
 use common\models\QuotePrice;
 use common\models\Setting;
+use sales\entities\cases\Cases;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
 use sales\services\log\GlobalEntityAttributeFormatServiceService;
@@ -32,6 +33,7 @@ class Logger implements BootstrapInterface
         Quote::class,
         QuotePrice::class,
         Setting::class,
+        Cases::class,
     ];
 
     /**

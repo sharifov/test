@@ -20,7 +20,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('Create Billing Info', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-    <?php Pjax::begin(); ?>
+    <?php Pjax::begin(['scrollTo' => 0]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([
@@ -35,6 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'bi_middle_name',
             'bi_company_name',
             'bi_cc_id',
+            'bi_hash',
             //'bi_address_line1',
             //'bi_address_line2',
             //'bi_city',

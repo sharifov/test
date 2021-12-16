@@ -35,17 +35,12 @@ $this->registerCssFile('/css/style-duplicate.css');
 }
 </style>
 
-
-
-<h1>
-    <?=\yii\helpers\Html::encode($this->title)?>
-</h1>
+<h1> <?=\yii\helpers\Html::encode($this->title)?> </h1>
 <div class="lead-duplicate">
 
-    <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
+    <?php Pjax::begin(['timeout' => 5000, 'scrollTo' => 0]); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
 
     <?php
-
 
     $gridColumns = [
         [
@@ -218,9 +213,6 @@ $this->registerCssFile('/css/style-duplicate.css');
             ]
         ],
 
-
-
-
         /*[
             'label' => 'Origin Request Details',
             'content' => function (\common\models\Lead $model) {
@@ -265,7 +257,6 @@ $this->registerCssFile('/css/style-duplicate.css');
             ],
         ],
 
-
         [
             'label' => 'Diff Request Details',
             'content' => function (\common\models\Lead $model) {
@@ -292,7 +283,6 @@ $this->registerCssFile('/css/style-duplicate.css');
                     'ignoreCase' => false
                 );
 
-
                 if (!is_array($content)) {
                     $lines1 = explode("\n", $content);
                 }
@@ -315,9 +305,7 @@ $this->registerCssFile('/css/style-duplicate.css');
 
                 return $diff->render($renderer);
 
-
                 //return $c; //$diff->Render($renderer);
-
 
                 //return $content;
             },
@@ -329,10 +317,6 @@ $this->registerCssFile('/css/style-duplicate.css');
                 //'class' => 'text-warning'
             ],
         ],
-
-
-
-
 
 //        [
 //            'attribute' => 'Quotes ',
@@ -521,6 +505,7 @@ $this->registerCssFile('/css/style-duplicate.css');
 <?php
 
 echo \yii\grid\GridView::widget([
+    'id' => 'lead-duplicate-gv',
     'dataProvider' => $dataProvider,
     'filterModel' => $searchModel,
     'columns' => $gridColumns,

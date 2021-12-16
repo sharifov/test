@@ -30,7 +30,6 @@ use yii\db\ActiveRecord;
  * @property ClientRepository $clientRepository
  * @property ClientPhoneRepository $clientPhoneRepository
  * @property ClientEmailRepository $clientEmailRepository
- * @property InternalPhoneGuard $internalPhoneGuard
  * @property ServiceFinder $finder
  * @property ClientChatVisitorRepository $clientChatVisitorRepository
  * @property ClientVisitorRepository $clientVisitorRepository
@@ -40,7 +39,6 @@ class ClientManageService
     private $clientRepository;
     private $clientPhoneRepository;
     private $clientEmailRepository;
-    private $internalPhoneGuard;
     private $finder;
     /**
      * @var ClientChatVisitorRepository
@@ -54,7 +52,6 @@ class ClientManageService
      * @param ClientRepository $clientRepository
      * @param ClientPhoneRepository $clientPhoneRepository
      * @param ClientEmailRepository $clientEmailRepository
-     * @param InternalPhoneGuard $internalPhoneGuard
      * @param ServiceFinder $finder
      * @param ClientChatVisitorRepository $clientChatVisitorRepository
      * @param ClientVisitorRepository $clientVisitorRepository
@@ -63,7 +60,6 @@ class ClientManageService
         ClientRepository $clientRepository,
         ClientPhoneRepository $clientPhoneRepository,
         ClientEmailRepository $clientEmailRepository,
-        InternalPhoneGuard $internalPhoneGuard,
         ServiceFinder $finder,
         ClientChatVisitorRepository $clientChatVisitorRepository,
         ClientVisitorRepository $clientVisitorRepository
@@ -71,7 +67,6 @@ class ClientManageService
         $this->clientRepository = $clientRepository;
         $this->clientPhoneRepository = $clientPhoneRepository;
         $this->clientEmailRepository = $clientEmailRepository;
-        $this->internalPhoneGuard = $internalPhoneGuard;
         $this->finder = $finder;
         $this->clientChatVisitorRepository = $clientChatVisitorRepository;
         $this->clientVisitorRepository = $clientVisitorRepository;

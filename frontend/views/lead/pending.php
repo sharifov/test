@@ -38,12 +38,9 @@ $this->params['breadcrumbs'][] = $this->title;
 
 <div class="lead-pending">
 
-
-
-    <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
+    <?php Pjax::begin(['scrollTo' => 0]); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
 
     <?php
-
     $gridColumns = [
         ['class' => 'yii\grid\SerialColumn'],
 
@@ -165,7 +162,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ]
         ],
 
-
         /*[
             'attribute' => 'client.name',
             'header' => 'Client name',
@@ -244,9 +240,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'options' => ['style' => 'width:90px'],
         ],
 
-
-
-
         [
             //'attribute' => 'Quotes',
             'label' => 'Calls',
@@ -262,7 +255,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             //'format' => 'raw'
         ],
-
 
         [
             'header' => 'Depart',
@@ -327,7 +319,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ]
         ],
 
-
         [
             'attribute' => 'cabin',
             'value' => static function (\common\models\Lead $model) {
@@ -335,7 +326,6 @@ $this->params['breadcrumbs'][] = $this->title;
             },
             'filter' => \common\models\Lead::CABIN_LIST
         ],
-
 
         [
             'attribute' => 'l_call_status_id',
@@ -444,7 +434,7 @@ $this->params['breadcrumbs'][] = $this->title;
     ?>
 <?php
 echo GridView::widget([
-
+    'id' => 'lead-pending-gv',
     'dataProvider' => $dataProvider,
     'filterModel' => $searchModel,
     'columns' => $gridColumns,
@@ -461,7 +451,6 @@ echo GridView::widget([
 ?>
 <?php Pjax::end(); ?>
 </div>
-
 
 <?php
 /*$js = '
@@ -488,3 +477,4 @@ initCountDown();
 ';
 
 $this->registerJs($js);*/
+?>

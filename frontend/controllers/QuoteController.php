@@ -29,6 +29,7 @@ use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatLead\entity\ClientChatLead;
+use sales\model\project\entity\projectRelation\ProjectRelationQuery;
 use sales\model\quoteLabel\service\QuoteLabelService;
 use sales\services\metrics\MetricsService;
 use sales\services\parsingDump\BaggageService;
@@ -132,7 +133,7 @@ class QuoteController extends FController
 //            $pjaxId = Yii::$app->request->post('pjaxId', '');
 
             if ($lead !== null) {
-                $keyCache = sprintf('quote-search-%d-%s-%s', $lead->id, $gds, $lead->generateLeadKey());
+                $keyCache = sprintf('quick-search-new-%d-%s-%s', $lead->id, $gds, $lead->generateLeadKey());
 
                 $quotes = \Yii::$app->cacheFile->get($keyCache);
 
@@ -153,7 +154,7 @@ class QuoteController extends FController
                         throw new \RuntimeException(!empty($quotes['error']) ? JsonHelper::decode($quotes['error'])['Message'] : 'No search results', self::RUNTIME_ERROR_QUOTES_NO_RESULTS);
                     }
                 }
-//                VarDumper::dump($quotes);die;
+//                VarDumper::dump($quotes, 9, true);die;
 
                 $form = new FlightQuoteSearchForm();
                 $form->load(Yii::$app->request->post() ?: Yii::$app->request->get());
@@ -164,8 +165,7 @@ class QuoteController extends FController
 
                 $viewData = SearchService::getAirlineLocationInfo($quotes);
 
-                $quotes = $form->applyFilters($quotes);
-//                VarDumper::dump(ArrayHelper::toArray($form));die;
+                $quotes = $form->applyFilters($quotes, $lead->leadFlightSegments);
 
                 $dataProvider = new ArrayDataProvider([
                     'allModels' => $quotes['results'] ?? [],
@@ -540,7 +540,7 @@ class QuoteController extends FController
             }
             $gds = Yii::$app->request->post('gds', '');
 
-            $keyCache = sprintf('quote-search-%d-%s-%s', $lead->id, $gds, $lead->generateLeadKey());
+            $keyCache = sprintf('quick-search-new-%d-%s-%s', $lead->id, $gds, $lead->generateLeadKey());
             $quotes = \Yii::$app->cacheFile->get($keyCache);
 
             if ($quotes === false) {
@@ -562,6 +562,11 @@ class QuoteController extends FController
             }
             $form = new FlightQuoteSearchForm();
 
+            $defaultSort = [];
+            if ($form->getSortBy()) {
+                $defaultSort = [$form->getSortBy() => $form->getSortType()];
+            }
+
             $dataProvider = new ArrayDataProvider([
                 'allModels' => $quotes['results'] ?? [],
                 'pagination' => [
@@ -570,7 +575,7 @@ class QuoteController extends FController
                 ],
                 'sort' => [
                     'attributes' => ['price', 'duration'],
-                    'defaultOrder' => [$form->getSortBy() => $form->getSortType()],
+                    'defaultOrder' => $defaultSort,
                 ],
             ]);
 
@@ -607,7 +612,7 @@ class QuoteController extends FController
             if (isset($attr['quotes'])) {
                 foreach ($attr['quotes'] as $quote) {
                     $model = Quote::findOne(['uid' => $quote]);
-                    if ($model !== null && in_array($model->status, [Quote::STATUS_SEND, Quote::STATUS_CREATED, Quote::STATUS_OPENED])) {
+                    if ($model !== null && in_array($model->status, [Quote::STATUS_SENT, Quote::STATUS_CREATED, Quote::STATUS_OPENED])) {
                         $model->status = $model::STATUS_DECLINED;
                         if (!$model->save()) {
                             $result['errors'][] = $model->getErrors();
@@ -1025,6 +1030,14 @@ class QuoteController extends FController
                                 } else {
                                     $quote->base();
                                 }
+                            }
+
+                            $randomProjectProviderIdEnabled = $lead->project->params->object->quote->enableRandomProjectProviderId;
+                            if ($randomProjectProviderIdEnabled && $projectRelationsIds = ProjectRelationQuery::getRelatedProjectIds($lead->project_id)) {
+                                Yii::info(VarDumper::dumpAsString($projectRelationsIds), 'info\countProjectRelations');
+                                $projectRelationsCount = count($projectRelationsIds);
+                                $randomProjectIndex = $projectRelationsCount > 1 ? random_int(0, $projectRelationsCount - 1) : 0;
+                                $quote->provider_project_id = $projectRelationsIds[$randomProjectIndex] ?? null;
                             }
 
                             if ($quote->save(false)) {

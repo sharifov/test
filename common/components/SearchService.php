@@ -29,6 +29,7 @@ class SearchService
     public const GDS_ONEPOINT      = 'M';
     public const GDS_NDC_PROXY     = 'Y';
     public const GDS_AMADEUS_IGNORE_AVAIL = 'B';
+    public const GDS_AWARD_TKTS    = 'R';
 
     public const GDS_LIST = [
         self::GDS_SABRE => 'Sabre',
@@ -43,6 +44,7 @@ class SearchService
         self::GDS_PKFARE => 'Pkfare',
         self::GDS_AMADEUS_IGNORE_AVAIL => 'Amadeus ignore avail',
         self::GDS_NDC_PROXY => 'Ndc Proxy',
+        self::GDS_AWARD_TKTS => 'Award TKTS',
     ];
 
     public const
@@ -266,7 +268,7 @@ class SearchService
         $toDateTime = new \DateTime($to);
         $interval = $toDateTime->diff($fromDateTime);
 
-        return $interval->format('%hh %im');
+        return $interval->format('%dd %hh %im');
     }
 
     protected static function getType($type)

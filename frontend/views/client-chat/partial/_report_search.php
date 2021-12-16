@@ -16,24 +16,24 @@ use yii\widgets\ActiveForm;
             <div class="row">
                 <div class="col-md-12">
                     <?= $form->field($model, 'timeRange', [
-                        'options' => ['class' => 'form-group']
-                    ])->widget(\kartik\daterange\DateRangePicker::class, [
-                        'presetDropdown' => false,
-                        'hideInput' => true,
-                        'convertFormat' => true,
-                        'pluginOptions' => [
-                            //'minDate' => date("Y-m-d 00:00", strtotime("- 61 days")),
-                            //'maxDate' => date("Y-m-d 23:59"),
-                            'timePicker' => true,
-                            'timePickerIncrement' => 1,
-                            'timePicker24Hour' => true,
-                            'locale' => [
-                                'format' => 'Y-m-d H:i',
-                                'separator' => ' - '
+                            'options' => ['class' => 'form-group']
+                        ])->widget(\kartik\daterange\DateRangePicker::class, [
+                            'presetDropdown' => false,
+                            'hideInput' => true,
+                            'convertFormat' => true,
+                            'pluginOptions' => [
+                                //'minDate' => date("Y-m-d 00:00", strtotime("- 61 days")),
+                                //'maxDate' => date("Y-m-d 23:59"),
+                                'timePicker' => true,
+                                'timePickerIncrement' => 1,
+                                'timePicker24Hour' => true,
+                                'locale' => [
+                                    'format' => 'Y-m-d H:i',
+                                    'separator' => ' - '
+                                ]
                             ]
-                        ]
-                    ])->label('Chat Created Date / Message Send Date');
-?>
+                        ])->label('Chat Created Date / Message Send Date');
+                    ?>
                 </div>
             </div>
         </div>

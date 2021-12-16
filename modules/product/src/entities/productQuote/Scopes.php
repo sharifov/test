@@ -15,6 +15,11 @@ class Scopes extends \yii\db\ActiveQuery
         return $this->andWhere(['pq_order_id' => $orderId]);
     }
 
+    public function byId(int $id): self
+    {
+        return $this->andWhere(['pq_id' => $id]);
+    }
+
     public function applied(): self
     {
         return $this->andWhere(['pq_status_id' => ProductQuoteStatus::APPLIED]);
@@ -28,6 +33,11 @@ class Scopes extends \yii\db\ActiveQuery
     public function booked(): self
     {
         return $this->andWhere(['pq_status_id' => ProductQuoteStatus::BOOKED]);
+    }
+
+    public function byStatuses(array $statuses): self
+    {
+        return $this->andWhere(['pq_status_id' => $statuses]);
     }
 
     public function flightQuotes(): self

@@ -22,9 +22,9 @@ use yii\web\View;
         <div class="status-confirmation"></div>
       </div>
         <ul class="call-filter">
-            <li class="call-filter__alert is-visible"><a href="#" class="call-filter__toggle call-filter__toggle--line-active" title="Active Calls" data-call-filter="active">0</a></li>
-            <li class="call-filter__alert is-visible"><a href="#" class="call-filter__toggle call-filter__toggle--line-direct" title="Direct Line" data-call-filter="direct">0</a></li>
-            <li class="call-filter__alert is-visible"><a href="#" class="call-filter__toggle call-filter__toggle--line-general" title="General Line" data-call-filter="general">0</a></li>
+            <li class="call-filter__alert is-visible"><a class="call-filter__toggle call-filter__toggle--line-active" title="Active Calls" data-call-filter="active">0</a></li>
+            <li class="call-filter__alert is-visible"><a class="call-filter__toggle call-filter__toggle--line-direct" title="Direct Line" data-call-filter="direct">0</a></li>
+            <li class="call-filter__alert is-visible"><a class="call-filter__toggle call-filter__toggle--line-general" title="General Line" data-call-filter="general">0</a></li>
         </ul>
 
         <div id="widget-phone-notifications"></div>
@@ -81,8 +81,8 @@ use yii\web\View;
 
         <!-- <a href="#" class="phone-widget__dev header-action-small toggle-bar-logs"><i class="fas fa-tools"></i></a> -->
       <!-- <span class="phone-widget__title">Calls</span> -->
-      <a href="#" class="phone-widget__settings header-action-small toggle-bar-settings"><i class="fa fa-cog"></i></a>
-      <a href="#" class="phone-widget__close header-action-small">
+      <a class="phone-widget__settings header-action-small toggle-bar-settings"><i class="fa fa-cog"></i></a>
+      <a class="phone-widget__close header-action-small">
         <!-- <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path
             d="M7 8.20625L12.7937 14L13.9999 12.7938L8.2062 7.00004L14 1.20621L12.7938 0L7 5.79383L1.2062 0L0 1.20621L5.7938 7.00004L7.97135e-05 12.7938L1.20628 14L7 8.20625Z"
@@ -93,14 +93,14 @@ use yii\web\View;
     </div>
     <ul class="phone-widget__header-actions">
       <li>
-        <a href="#" data-toggle-tab="tab-phone" class="is_active" data-call-in-progress="false">
+        <a data-toggle-tab="tab-phone" class="is_active" data-call-in-progress="false">
           <i class="fas fa-phone"></i>
           <span>Call</span>
         </a>
       </li>
         <?php if (Auth::can('PhoneWidget_HistoryTab')) : ?>
             <li>
-                <a href="#" data-toggle-tab="tab-history" data-missed-calls="0" style="margin-right: 15px">
+                <a data-toggle-tab="tab-history" data-missed-calls="0" style="margin-right: 15px">
                     <i class="fas fa-file-invoice"></i>
                     <span>history</span>
                 </a>
@@ -108,7 +108,7 @@ use yii\web\View;
         <?php endif;?>
         <?php if (Auth::can('PhoneWidget_ContactsTab')) : ?>
               <li>
-                <a href="#" data-toggle-tab="tab-contacts" >
+                <a data-toggle-tab="tab-contacts" >
                   <i class="far fa-address-book"></i>
                   <span>Contacts</span>
                 </a>
@@ -132,7 +132,7 @@ use yii\web\View;
       <div class="widget-line-overlay__header">
           <div class="widget-line-overlay__queue-marker">
               <span data-queue-marker>Calls Queue</span>
-              <a href="#" class="widget-line-overlay__show-all-queues" data-call-filter="all" >All Calls</a>
+              <a class="widget-line-overlay__show-all-queues" data-call-filter="all" >All Calls</a>
           </div>
       </div>
       <div class="widget-line-overlay__body scrollable-block">
@@ -458,7 +458,7 @@ use yii\web\View;
       <span class="additional-bar__header-title">
         Settings
       </span>
-      <a href="#" class="additional-bar__close">
+      <a class="additional-bar__close">
         <i class="fas fa-times"></i>
       </a>
     </div>

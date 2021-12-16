@@ -9,14 +9,15 @@ use yii\grid\DataColumn;
  * Class DateTimeColumn
  *
  * Ex.
- * [
- * 'class' => \common\components\grid\DateTimeColumn::class,
- * 'attribute' => 'pbl_updated_dt',
- * ],
+  [
+    'class' => \common\components\grid\DateTimeColumn::class,
+    'attribute' => 'pbl_updated_dt',
+  ],
  */
 class DateTimeColumn extends DataColumn
 {
     public $format = 'byUserDateTime';
+    public $limitEndDay = true;
 
     public function init(): void
     {
@@ -31,7 +32,7 @@ class DateTimeColumn extends DataColumn
                     'format' => 'yyyy-mm-dd',
                     'clearBtn' => true,
                     'startDate' => date('Y-m-d', strtotime('2018-01-01')),
-                    'endDate' => date('Y-m-d', time())
+                    'endDate' => $this->limitEndDay ? date('Y-m-d', time()) : null,
                 ],
                 'options' => [
                     'autocomplete' => 'off',

@@ -1,6 +1,9 @@
 <?php
 
+use common\components\logger\FilebeatTarget;
+use common\helpers\LogHelper;
 use frontend\assets\groups\BootstrapGroupAsset;
+use kartik\daterange\MomentAsset;
 use kivork\rbacExportImport\src\rbac\DbManager;
 use kivork\rbacExportImport\RbacImportExportModule;
 use common\models\Employee;
@@ -18,6 +21,8 @@ use modules\product\ProductModule;
 use modules\qaTask\QaTaskModule;
 use common\components\i18n\Formatter;
 use modules\rentCar\RentCarModule;
+use yii\log\DbTarget;
+use yii\log\FileTarget;
 use yii\web\JqueryAsset;
 use yii\bootstrap\BootstrapAsset;
 use yii\bootstrap\BootstrapPluginAsset;
@@ -72,59 +77,76 @@ return [
         ],*/
 
         'session' => [
-            // this is the name of the session cookie used for login on the frontend
             'name' => 'advanced-crm',
         ],
 
         'log' => [
             'traceLevel' => 0,
             'targets' => [
-                [
-                    'class' => 'yii\log\FileTarget',
+                'file' => [
+                    'class' => FileTarget::class,
                     'logVars' => [],
                     'levels' => ['error', 'warning'],
                 ],
-                [
-                    'class' => 'yii\log\DbTarget',
+                'db-error' => [
+                    'class' => DbTarget::class,
                     'levels' => ['error', 'warning'],
                     'except' => [
                         'yii\web\HttpException:404',
-                        'yii\web\HttpException:403'
+                        'yii\web\HttpException:403',
+                        'yii\web\HttpException:400',
                     ],
 //                    'logVars' => YII_DEBUG ? ['_GET', '_POST', '_FILES', '_COOKIE', '_SESSION', '_SERVER'] : [],
                     'logVars' => [],
                     'prefix' => static function () {
-                        $userID = Yii::$app->user->isGuest ? '-' : Yii::$app->user->id;
-                        $ip = $_SERVER['REMOTE_ADDR'];
-                        $hostname = php_uname('n');
-                        return "[$hostname][frontend][$ip][$userID]";
+                        return LogHelper::getFrontendPrefixDB();
                     },
                     'db' => 'db_postgres'
                 ],
-                [
-                    'class' => 'yii\log\DbTarget',
+                'db-info' => [
+                    'class' => DbTarget::class,
                     'levels' => ['info'],
                     'logVars' => [],
-                    'categories' => ['info\*'],
+                    'categories' => ['info\*', 'log\*'],
                     'prefix' => static function () {
-                        $userID = Yii::$app->user->isGuest ? '-' : Yii::$app->user->id;
-                        $ip = $_SERVER['REMOTE_ADDR'];
-                        $hostname = php_uname('n');
-                        return "[$hostname][frontend][$ip][$userID]";
+                        return LogHelper::getFrontendPrefixDB();
                     },
                     'db' => 'db_postgres'
                 ],
-                [
-                    'class' => \common\components\logger\AirFileTarget::class,
+                'file-fb-error' => [
+                    'class' => FilebeatTarget::class,
                     'levels' => ['error', 'warning'],
                     'except' => [
                         'yii\web\HttpException:404',
-                        'yii\web\HttpException:403'
+//                        'yii\web\HttpException:403'
                     ],
                     //'logVars' => YII_DEBUG ? ['_GET', '_POST', '_FILES', '_COOKIE', '_SESSION', '_SERVER'] : [],
                     'logVars' => [],
+                    'prefix' => static function () {
+                        return LogHelper::getFrontendPrefixData();
+                    },
                     'logFile' => '@runtime/logs/stash.log'
                 ],
+                'file-fb-info' => [
+                    'class' => FilebeatTarget::class,
+                    'levels' => ['info'],
+                    'categories' => ['log\*', 'elk\*'],
+                    'logVars' => [],
+                    'prefix' => static function () {
+                        return LogHelper::getFrontendPrefixData();
+                    },
+                    'logFile' => '@runtime/logs/stash.log'
+                ],
+//                'analytics-fb-log' => [
+//                    'class' => FilebeatTarget::class,
+//                    'levels' => ['info'],
+//                    'categories' => ['analytics\*', 'AS\*'],
+//                    'logVars' => [],
+//                    'prefix' => static function () {
+//                        return LogHelper::getAnalyticPrefixData();
+//                    },
+//                    'logFile' => '@runtime/logs/stash.log'
+//                ],
             ],
 
         ],
@@ -183,7 +205,8 @@ return [
                 ],
 
                 \yii\bootstrap4\BootstrapAsset::class => [
-                    'class' => BootstrapGroupAsset::class,
+                    'css' => [],
+                    'js' => []
                 ],
                 \yii\bootstrap4\BootstrapPluginAsset::class => [
                     'class' => BootstrapGroupAsset::class,

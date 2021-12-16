@@ -104,7 +104,19 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
             ['dpp_priority', 'default', 'value' => 0],
             ['dpp_priority', 'integer', 'max' => 6500, 'min' => -6500],
             ['dpp_priority', 'filter', 'filter' => 'intval', 'skipOnError' => true, 'skipOnEmpty' => true],
+
+            ['dpp_source_id', 'sourceValidation', 'skipOnEmpty' => true, 'skipOnError' => true],
         ];
+    }
+
+    public function sourceValidation(): void
+    {
+        if (!$this->dpp_project_id || !$this->dpp_source_id) {
+            return;
+        }
+        if (!Sources::find()->andWhere(['project_id' => $this->dpp_project_id, 'id' => $this->dpp_source_id])->exists()) {
+            $this->addError('dpp_source_id', 'Source wrong. Different project.');
+        }
     }
 
     /**

@@ -2,8 +2,12 @@
 
 namespace webapi\modules\v2\controllers;
 
+use common\components\jobs\WebEngageLeadRequestJob;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
+use modules\webEngage\settings\WebEngageDictionary;
+use modules\webEngage\src\service\webEngageEventData\lead\eventData\LeadCreatedEventData;
+use sales\helpers\app\AppHelper;
 use sales\model\lead\LeadCodeException;
 use sales\model\lead\useCases\lead\api\create\LeadCreateMessage;
 use sales\model\lead\useCases\lead\api\create\LeadCreateValue;
@@ -80,10 +84,11 @@ class LeadController extends BaseController
      * @apiParam {string{1}=E-ECONOMY, B-BUSINESS, F-FIRST, P-PREMIUM} [lead.cabin]   Cabin (by default E)
      * @apiParam {int}                  [lead.flight_id]                            BO Flight ID
      * @apiParam {string{5}}            lead.user_language                          User Language
-     * @apiParam {datetime{YYYY-MM-DD HH:mm:ss}}  [lead.expire_at]                    Expire at
-     * @apiParam {object[]}             [lead.lead_data]                         Array of Lead Data
-     * @apiParam {string{50}}           [lead.lead_data.field_key]               Lead Data Key
-     * @apiParam {string{500}}          [lead.lead_data.field_value]             Lead Data Value
+     * @apiParam {bool}                 [lead.is_test]                              Is test lead (default false)
+     * @apiParam {datetime{YYYY-MM-DD HH:mm:ss}}  [lead.expire_at]                  Expire at
+     * @apiParam {object[]}             [lead.lead_data]                            Array of Lead Data
+     * @apiParam {string{50}}           [lead.lead_data.field_key]                  Lead Data Key
+     * @apiParam {string{500}}          [lead.lead_data.field_value]                Lead Data Value
      *
      * @apiParamExample {json} Request-Example:
      *
@@ -109,6 +114,7 @@ class LeadController extends BaseController
      *           "user_agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36",
      *           "flight_id": 12457,
      *           "user_language": "en-GB",
+     *           "is_test": true,
      *           "expire_at": "2020-01-20 12:12:12",
      *           "flights": [
      *               {
@@ -191,6 +197,7 @@ class LeadController extends BaseController
      *               "user_agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36",
      *               "flight_id": 12457,
      *               "user_language": "en-GB",
+     *               "is_test": true,
      *               "expire_at": "2020-01-20 12:12:12",
      *               "flights": [
      *                   {
@@ -316,6 +323,15 @@ class LeadController extends BaseController
                 new ErrorsMessage($e->getMessage()),
                 new CodeMessage($e->getCode())
             );
+        }
+
+        try {
+            if (LeadCreatedEventData::checkByApiUser($this->auth)) {
+                $job = new WebEngageLeadRequestJob($lead->id, WebEngageDictionary::EVENT_LEAD_CREATED);
+                Yii::$app->queue_job->priority(100)->push($job);
+            }
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableLog($throwable), 'LeadController:v2:WebEngageLeadRequest');
         }
 
         return new SuccessResponse(

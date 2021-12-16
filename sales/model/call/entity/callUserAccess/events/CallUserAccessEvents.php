@@ -16,7 +16,7 @@ class CallUserAccessEvents extends Component
     /**
      * @param $params
      */
-    public function updateUserStatus($params): void
+    public static function updateUserStatus($params): void
     {
 
         /**
@@ -55,7 +55,7 @@ class CallUserAccessEvents extends Component
     /**
      * @param $params
      */
-    public function resetHasCallAccess($params): void
+    public static function resetHasCallAccess($params): void
     {
         /**
          * @var $callUserAccess CallUserAccess

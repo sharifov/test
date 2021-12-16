@@ -195,6 +195,18 @@ class AbacService
 //                            }
                             $operator = $value . ' not in ' . $field;
                             break;
+                        case AbacBaseModel::OP_CONTAINS:
+                            $operator = '';
+                            if (is_array($value)) {
+                                $opList = [];
+                                foreach ($value as $val) {
+                                    $opList[] =  '"' . $val . '" in ' . $field;
+                                }
+                                if ($opList) {
+                                    $operator .= implode(' || ', $opList);
+                                }
+                            }
+                            break;
                         default:
                             $operator = $field;
                     }

@@ -9,8 +9,8 @@ namespace sales\model\project\entity\params;
  * @property ObjectParams $object
  * @property CallParams $call
  * @property SmsParams $sms
- * @property string $webHookEndpoint
  * @property Webhook $webhook
+ * @property ClientNotification $clientNotification
  */
 class Params
 {
@@ -19,6 +19,7 @@ class Params
     public CallParams $call;
     public SmsParams $sms;
     public Webhook $webhook;
+    public ClientNotification $clientNotification;
 
     private function __construct(array $params)
     {
@@ -27,6 +28,7 @@ class Params
         $this->call = new CallParams($params['call'] ?? []);
         $this->sms = new SmsParams($params['sms'] ?? []);
         $this->webhook = new Webhook($params['webhook'] ?? []);
+        $this->clientNotification = new ClientNotification($params['clientNotification'] ?? []);
     }
 
     public static function fromArray(array $params): self
@@ -60,7 +62,8 @@ class Params
             'object' => ObjectParams::default(),
             'call' => CallParams::default(),
             'sms' => SmsParams::default(),
-            'webhook' => Webhook::default()
+            'webhook' => Webhook::default(),
+            'clientNotification' => new ClientNotification([])
         ];
     }
 }

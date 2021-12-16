@@ -247,6 +247,12 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                         }
                     }
 
+                    if (obj.cmd === 'hidePhoneNotifications') {
+                        if (typeof PhoneWidgetCall === 'object') {
+                            PhoneWidgetCall.hidePhoneNotifications();
+                        }
+                    }
+
                     if (obj.cmd === 'removeIncomingRequest') {
                         if (typeof obj.data !== 'undefined') {
                             if (typeof PhoneWidgetCall === 'object') {
@@ -437,7 +443,7 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                     if (obj.cmd === 'clientChatAddQuoteButton') {
                         let chatId = parseInt(obj.data.chatId, 10);
                         let leadId = parseInt(obj.data.leadId, 10);
-                        let content = '<span class="chat-offer" data-chat-id="' + chatId + '" data-lead-id="' + leadId + '" data-url="'+obj.data.url+'"><i class="fa fa-plane"> </i> Quotes</span>';
+                        let content = '<a class="chat-offer dropdown-item" data-chat-id="' + chatId + '" data-lead-id="' + leadId + '" data-url="'+obj.data.url+'"><i class="fa fa-plane"> </i> Send Quotes</a>';
                         $(document).find('span[data-cc-lead-info-quote="' + leadId + '"]').html(content);
                     }
 
@@ -450,7 +456,7 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                     if (obj.cmd === 'clientChatAddOfferButton') {
                         let chatId = parseInt(obj.data.chatId, 10);
                         let leadId = parseInt(obj.data.leadId, 10);
-                        let content = '<span class="chat-offer" data-chat-id="' + chatId + '" data-lead-id="' + leadId + '" data-url="'+obj.data.url+'"><i class="fa fa-plane"> </i> Offer</span>';
+                        let content = '<a class="chat-offer dropdown-item" data-chat-id="' + chatId + '" data-lead-id="' + leadId + '" data-url="'+obj.data.url+'"><i class="fa fa-plane"> </i> Offer</a>';
                         $(document).find('span[data-cc-lead-info-offer="' + leadId + '"]').html(content);
                     }
 
@@ -518,6 +524,14 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
 
                     if (obj.cmd === 'quoteBooked') {
                         $('.btn-delete-product[data-product-id="' + obj.data.productId + '"]').hide();
+                    }
+
+                    if (obj.cmd === 'leadRedialAutoTake') {
+                        if (obj.data.callSid === window.connectCallSid) {
+                            //var strWindowFeatures = "menubar=no,location=no,resizable=yes,scrollbars=yes,status=no";
+                            let windowObjectReference = window.open(leadViewPageShortUrl + '/' + obj.data.leadGid, 'window' + obj.data.leadId); //, strWindowFeatures);
+                            windowObjectReference.focus();
+                        }
                     }
                 }
                 // onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');

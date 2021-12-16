@@ -3,6 +3,7 @@
 namespace sales\model\email\useCase;
 
 use common\components\jobs\CreateSaleFromBOJob;
+use common\components\jobs\WebEngageLeadRequestJob;
 use common\components\purifier\Purifier;
 use common\models\DepartmentEmailProject;
 use common\models\Email;
@@ -22,8 +23,12 @@ use modules\fileStorage\src\entity\fileStorage\FileStorageRepository;
 use modules\fileStorage\src\FileSystem;
 use modules\fileStorage\src\services\CreateByApiDto;
 use modules\fileStorage\src\services\url\UrlGenerator;
+use modules\webEngage\settings\WebEngageDictionary;
+use sales\entities\cases\CaseEventLog;
 use sales\entities\cases\Cases;
 use sales\helpers\app\AppHelper;
+use sales\model\leadData\services\LeadDataCreateService;
+use sales\model\leadData\services\LeadDataDictionary;
 use sales\services\cases\CasesManageService;
 use sales\services\cases\CasesSaleService;
 use sales\services\email\EmailService;
@@ -197,6 +202,7 @@ class DownloadEmails
 
                         if ($case_id) {
                             $caseArray[$case_id] = $case_id;
+                            CaseEventLog::add($case_id, null, 'Email received from customer');
                         }
 
                         if (!$email->save()) {
@@ -218,6 +224,9 @@ class DownloadEmails
                                     $email->e_case_id = $process->caseId;
                                     $email->e_client_id = $this->emailService->detectClientId($email->e_email_from);
                                     $email->save(false);
+                                    if ($email->e_case_id) {
+                                        CaseEventLog::add($email->e_case_id, null, 'Email received from customer');
+                                    }
                                 } catch (\Throwable $e) {
                                     Yii::error($e->getMessage(), 'DownloadEmails:EmailIncomingService:create');
                                 }
@@ -254,6 +263,19 @@ class DownloadEmails
                             if ($userID) {
                                 $userLead = ['user' => $userID, 'lead_short_link' => Purifier::createLeadShortLink($lead)];
                                 $notifyByLeads[] = $userLead;
+                            }
+
+                            try {
+                                if (!LeadDataCreateService::isExist($lead->id, LeadDataDictionary::KEY_WE_EMAIL_REPLIED)) {
+                                    (new LeadDataCreateService())->createWeEmailReplied($lead);
+                                    $job = new WebEngageLeadRequestJob($lead->id, WebEngageDictionary::EVENT_LEAD_EMAIL_REPLIED);
+                                    Yii::$app->queue_job->priority(100)->push($job);
+                                }
+                            } catch (\Throwable $throwable) {
+                                Yii::warning(
+                                    AppHelper::throwableLog($throwable),
+                                    'DownloadEmails:download:we_email_replied'
+                                );
                             }
                         }
 

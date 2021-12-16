@@ -2,15 +2,18 @@
 
 namespace common\models;
 
+use common\components\jobs\CallOutEndedJob;
 use common\components\jobs\CallPriceJob;
 use common\components\jobs\CheckClientCallJoinToConferenceJob;
 use common\components\purifier\Purifier;
 use common\models\query\CallQuery;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use sales\behaviors\metric\MetricCallCounterBehavior;
 use sales\helpers\app\AppHelper;
 use sales\helpers\PhoneFormatter;
 use sales\helpers\setting\SettingHelper;
 use sales\helpers\UserCallIdentity;
+use sales\model\call\entity\call\data\CreatorType;
 use sales\model\call\entity\call\data\Data;
 use sales\model\call\entity\call\data\QueueLongTime;
 use sales\model\call\entity\call\data\Repeat;
@@ -31,11 +34,13 @@ use sales\model\call\services\FriendlyName;
 use sales\model\call\services\RecordManager;
 use sales\model\call\socket\CallUpdateMessage;
 use sales\model\callLog\services\CallLogTransferService;
+use sales\model\client\notifications\ClientNotificationCanceler;
+use sales\model\callLogFilterGuard\entity\CallLogFilterGuard;
 use sales\model\conference\service\ConferenceDataService;
-use sales\model\leadUserConversion\entity\LeadUserConversion;
-use sales\model\leadUserConversion\repository\LeadUserConversionRepository;
 use sales\model\leadUserConversion\service\LeadUserConversionDictionary;
+use sales\model\leadUserConversion\service\LeadUserConversionService;
 use sales\model\phoneList\entity\PhoneList;
+use sales\model\user\entity\userStatus\UserStatus;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\services\cases\CasesManageService;
@@ -127,6 +132,7 @@ use Locale;
  * @property ConferenceParticipant[] $conferenceParticipants
  * @property ConferenceParticipant $currentParticipant
  * @property Conference[] $conferences
+ * @property CallLogFilterGuard $callLogFilterGuard
  */
 class Call extends \yii\db\ActiveRecord
 {
@@ -224,6 +230,7 @@ class Call extends \yii\db\ActiveRecord
     public const SOURCE_INTERNAL        = 10;
     public const SOURCE_LEAD        = 11;
     public const SOURCE_CASE        = 12;
+    public const SOURCE_CLIENT_NOTIFICATION = 13;
 
     public const SOURCE_LIST = [
         self::SOURCE_GENERAL_LINE => 'General Line',
@@ -238,6 +245,7 @@ class Call extends \yii\db\ActiveRecord
         self::SOURCE_INTERNAL  => 'Internal',
         self::SOURCE_LEAD  => 'Lead',
         self::SOURCE_CASE  => 'Case',
+        self::SOURCE_CLIENT_NOTIFICATION  => 'Client notification',
     ];
 
     public const SHORT_SOURCE_LIST = [
@@ -253,6 +261,7 @@ class Call extends \yii\db\ActiveRecord
         self::SOURCE_INTERNAL  => 'Internal',
         self::SOURCE_LEAD  => 'Lead',
         self::SOURCE_CASE  => 'Case',
+        self::SOURCE_CLIENT_NOTIFICATION  => 'Client notification',
     ];
 
     public const TW_RECORDING_STATUS_PAUSED = 'paused';
@@ -270,13 +279,42 @@ class Call extends \yii\db\ActiveRecord
     public const DEFAULT_PRIORITY_VALUE = 0;
 
     public const STIR_STATUS_FULL = 'A';
+    public const STIR_STATUS_FULL_FAILED = 'AF';
     public const STIR_STATUS_PARTIAL = 'B';
+    public const STIR_STATUS_PARTIAL_FAILED = 'BF';
     public const STIR_STATUS_GATEWAY = 'C';
+    public const STIR_STATUS_GATEWAY_FAILED = 'CF';
+    public const STIR_STATUS_NO_VALIDATION = 'NV';
+    public const STIR_STATUS_VALIDATION_FAILED = 'VF';
 
     public const STIR_STATUS_LIST = [
         self::STIR_STATUS_FULL => 'Full Attestation (A)',
         self::STIR_STATUS_PARTIAL => 'Partial Attestation (B)',
         self::STIR_STATUS_GATEWAY => 'Gateway Attestation (C)',
+        self::STIR_STATUS_FULL_FAILED => 'Full Attestation (AF) Failed',
+        self::STIR_STATUS_PARTIAL_FAILED => 'Partial Attestation (BF) Failed',
+        self::STIR_STATUS_GATEWAY_FAILED => 'Gateway Attestation (CF) Failed',
+        self::STIR_STATUS_NO_VALIDATION => '(NV) No Validation',
+        self::STIR_STATUS_VALIDATION_FAILED => '(VF) Validation Failed',
+    ];
+
+    public const STIR_VERSTAT_LIST = [
+        'TN-Validation-Passed-A' => self::STIR_STATUS_FULL,
+        'TN-Validation-Passed-B' => self::STIR_STATUS_PARTIAL,
+        'TN-Validation-Passed-C' => self::STIR_STATUS_GATEWAY,
+        'TN-Validation-Failed-A' => self::STIR_STATUS_FULL_FAILED,
+        'TN-Validation-Failed-B' => self::STIR_STATUS_PARTIAL_FAILED,
+        'TN-Validation-Failed-C' => self::STIR_STATUS_GATEWAY_FAILED,
+        'No-TN-Validation' => self::STIR_STATUS_NO_VALIDATION,
+        'TN-Validation-Failed' => self::STIR_STATUS_VALIDATION_FAILED,
+        'A' => self::STIR_STATUS_FULL,
+        'B' => self::STIR_STATUS_PARTIAL,
+        'C' => self::STIR_STATUS_GATEWAY
+    ];
+
+    public const STIR_TRUSTED_GROUP = [
+        'TN-Validation-Passed-A',
+        'TN-Validation-Passed-B'
     ];
 
     private ?Data $data = null;
@@ -512,17 +550,18 @@ class Call extends \yii\db\ActiveRecord
         $call->c_project_id = $projectId;
         $call->c_dep_id = $depId;
         $call->c_client_id = $clientId;
-        $call->c_stir_status = ArrayHelper::getValue($requestDataDTO, 'callData.StirStatus');
+        $call->c_stir_status = self::getStirStatusByVerstatKey(ArrayHelper::getValue($requestDataDTO, 'callData.StirVerstat', ''));
         $call->setStatusIvr();
         return $call;
     }
 
-    public function assignParentCall(int $callId, int $projectId, int $depId, int $sourceTypeId): void
+    public function assignParentCall(int $callId, int $projectId, int $depId, int $sourceTypeId, ?int $stirStatus): void
     {
         $this->c_parent_id = $callId;
         $this->c_project_id = $projectId;
         $this->c_dep_id = $depId;
         $this->c_source_type_id = $sourceTypeId;
+        $this->c_stir_status = $stirStatus;
     }
 
     /**
@@ -635,6 +674,11 @@ class Call extends \yii\db\ActiveRecord
     public function getCallUserAccesses(): ActiveQuery
     {
         return $this->hasMany(CallUserAccess::class, ['cua_call_id' => 'c_id']);
+    }
+
+    public function getCallLogFilterGuard(): ActiveQuery
+    {
+        return $this->hasOne(CallLogFilterGuard::class, ['clfg_call_id' => 'c_id']);
     }
 
     /**
@@ -888,53 +932,82 @@ class Call extends \yii\db\ActiveRecord
         if ($this->c_parent_id && ($insert || $isChangedStatusFromEmptyInclude) && $this->c_lead_id && $this->isOut() && $this->isEnded()) {
             $lead = $this->cLead;
 
-            if (($lqc = LeadQcall::findOne($this->c_lead_id)) && time() > strtotime($lqc->lqc_dt_from)) {
-                $lf = LeadFlow::find()->where(['lead_id' => $this->c_lead_id])->orderBy(['id' => SORT_DESC])->limit(1)->one();
-                if ($lf) {
-                    $lf->lf_out_calls = (int)$lf->lf_out_calls + 1;
-                    if (!$lf->update()) {
-                        Yii::error(VarDumper::dumpAsString($lf->errors), 'Call:afterSave:LeadFlow:update');
-                    }
-
-                    $attempts = 0;
-                    try {
-                        $attempts = (int)Yii::$app->params['settings']['redial_pending_to_follow_up_attempts'];
-                    } catch (\Throwable $e) {
-                        Yii::error($e, 'Not found redial_pending_to_follow_up_attempts setting');
-                    }
-
-                    if ($lf->lf_out_calls >= $attempts && $lead->isPending()) {
-                        try {
-                            $lead->followUp(null, null, 'Redial Pending max attempts reached');
-                            $leadRepository->save($lead);
-                            $qCallService->remove($lead->id);
-                            $qCallService->create(
-                                $lead->id,
-                                new Config($lead->status, $lead->getCountOutCallsLastFlow()),
-                                new FindWeightParams($lead->project_id, $lead->status),
-                                $lead->offset_gmt,
-                                new FindPhoneParams($lead->project_id, $lead->l_dep_id)
-                            );
-                        } catch (\Throwable $e) {
-                            Yii::error('CallId: ' . $this->c_id . ' LeadId: ' . $lead->id . ' Message: ' . $e->getMessage(), 'Call:AfterSave:Lead follow up');
-                        }
-                    }
-
-                    try {
-                        $attempts = (int)Yii::$app->params['settings']['redial_max_attempts_for_dates_passed'];
-                        if (
-                            $lf->lf_out_calls > $attempts
-                            && ($departure = $lead->getDeparture())
-                            && strtotime($departure) < time()
-                        ) {
-                            $qCallService->remove($lead->id);
-                            $lead->trash($lead->employee_id, null, 'Travel Dates Passed');
-                            $leadRepository->save($lead);
-                        }
-                    } catch (\Throwable $e) {
-                        Yii::error($e, 'redial_max_attempts_for_dates_passed');
-                    }
+            $lqc = LeadQcall::findOne($this->c_lead_id);
+            if ($lqc) {
+                $timeFromValidationIsOk = true;
+                $currentTime = time();
+                if (SettingHelper::leadRedialQCallAttemptsFromTimeValidationEnabled()) {
+                    $timeFromValidationIsOk = $currentTime >= strtotime($lqc->lqc_dt_from);
                 }
+                if ($timeFromValidationIsOk) {
+                    $lf = LeadFlow::find()->where(['lead_id' => $this->c_lead_id])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+                    if ($lf) {
+                        $lf->lf_out_calls = (int)$lf->lf_out_calls + 1;
+                        if (!$lf->save()) {
+                            Yii::error(VarDumper::dumpAsString($lf->errors), 'Call:afterSave:LeadFlow:update');
+                        }
+
+                        $attempts = 0;
+                        try {
+                            $attempts = (int)Yii::$app->params['settings']['redial_pending_to_follow_up_attempts'];
+                        } catch (\Throwable $e) {
+                            Yii::error($e, 'Not found redial_pending_to_follow_up_attempts setting');
+                        }
+
+                        if ($lf->lf_out_calls >= $attempts && $lead->isPending()) {
+                            try {
+                                $lead->followUp(null, null, 'Redial Pending max attempts reached');
+                                $leadRepository->save($lead);
+                                $qCallService->remove($lead->id);
+                                $qCallService->create(
+                                    $lead->id,
+                                    new Config($lead->status, $lead->getCountOutCallsLastFlow()),
+                                    new FindWeightParams($lead->project_id, $lead->status),
+                                    $lead->offset_gmt,
+                                    new FindPhoneParams($lead->project_id, $lead->l_dep_id)
+                                );
+                            } catch (\Throwable $e) {
+                                Yii::error('CallId: ' . $this->c_id . ' LeadId: ' . $lead->id . ' Message: ' . $e->getMessage(), 'Call:AfterSave:Lead follow up');
+                            }
+                        }
+
+                        try {
+                            $attempts = (int)Yii::$app->params['settings']['redial_max_attempts_for_dates_passed'];
+                            if (
+                                $lf->lf_out_calls > $attempts
+                                && ($departure = $lead->getDeparture())
+                                && strtotime($departure) < time()
+                            ) {
+                                $qCallService->remove($lead->id);
+                                $lead->trash($lead->employee_id, null, 'Travel Dates Passed');
+                                $leadRepository->save($lead);
+                            }
+                        } catch (\Throwable $e) {
+                            Yii::error($e, 'redial_max_attempts_for_dates_passed');
+                        }
+                    } else {
+                        Yii::error([
+                            'message' => 'Not found lead flow.',
+                            'leadId' => $this->c_lead_id,
+                            'callId' => $this->c_id,
+                        ], 'LeadRedial');
+                    }
+                } else {
+                    Yii::error([
+                        'message' => 'Detected Redial Call finished with date time from validation error.',
+                        'leadId' => $this->c_lead_id,
+                        'callId' => $this->c_id,
+                        'currentTime' => $currentTime,
+                        'lqc_dt_from' => $lqc->lqc_dt_from,
+                        'lqc_dt_from_to_time' => strtotime($lqc->lqc_dt_from),
+                    ], 'LeadRedial');
+                }
+            } elseif ($this->isRedialCall()) {
+                Yii::error([
+                    'message' => 'Detected Redial Call finished without LeadQCall record.',
+                    'leadId' => $this->c_lead_id,
+                    'callId' => $this->c_id,
+                ], 'LeadRedial');
             }
 
             if ($lead->leadQcall) {
@@ -1058,121 +1131,123 @@ class Call extends \yii\db\ActiveRecord
 //            }
 
             //Yii::info(VarDumper::dumpAsString($this->attributes), 'info\Call:afterSave');
+        }
 
-            if (
-                ($this->c_lead_id || $this->c_case_id)
-                && $this->isIn()
-                && $this->isStatusInProgress()
-                && $isChangedStatusFromEmptyInclude
-                && in_array($changedAttributes['c_status_id'], [self::STATUS_RINGING, self::STATUS_QUEUE, null], true)
-            ) {
-                $host = \Yii::$app->params['url_address'] ?? '';
+        if (
+            $this->c_created_user_id
+            && ($this->c_lead_id || $this->c_case_id)
+            && $isChangedStatusFromEmptyInclude
+            && in_array($changedAttributes['c_status_id'], [self::STATUS_RINGING, null], true)
+            && $this->isStatusInProgress()
+            && $this->isIn()
+        ) {
+            $host = \Yii::$app->params['url_address'] ?? '';
 
-                if ($this->c_dep_id && ($departmentParams = $this->cDep->getParams())) {
-                    if ($this->c_lead_id && $departmentParams->object->type->isLead()) {
-                        $lead = $this->cLead;
+            if ($this->c_dep_id && ($departmentParams = $this->cDep->getParams())) {
+                if ($this->c_lead_id && $departmentParams->object->type->isLead()) {
+                    $lead = $this->cLead;
 
-                        if ($lead && !$lead->employee_id && $this->c_created_user_id && $lead->isPending()) {
-                            //Yii::info(VarDumper::dumpAsString(['changedAttributes' => $changedAttributes, 'Call' => $this->attributes, 'Lead' => $lead->attributes]), 'info\Call:Lead:afterSave');
-                            try {
-                                $lead->answered();
-                                $lead->processing(
-                                    $this->c_created_user_id,
-                                    null,
-                                    LeadFlow::DESCRIPTION_CALL_AUTO_CREATED_LEAD
-                                );
-                                $leadRepository->save($lead);
+                    if ($lead && !$lead->employee_id && $lead->isPending()) {
+                        //Yii::info(VarDumper::dumpAsString(['changedAttributes' => $changedAttributes, 'Call' => $this->attributes, 'Lead' => $lead->attributes]), 'info\Call:Lead:afterSave');
+                        try {
+                            $lead->answered();
+                            $lead->processing(
+                                $this->c_created_user_id,
+                                null,
+                                LeadFlow::DESCRIPTION_CALL_AUTO_CREATED_LEAD
+                            );
+                            $leadRepository->save($lead);
 
-                                $leadUserConversion = LeadUserConversion::create(
-                                    $lead->id,
-                                    $this->c_created_user_id,
-                                    LeadUserConversionDictionary::DESCRIPTION_CALL_AUTO_TAKE
-                                );
-                                (new LeadUserConversionRepository())->save($leadUserConversion);
+                            $leadUserConversionService = Yii::createObject(LeadUserConversionService::class);
+                            $leadUserConversionService->addAutomate(
+                                $lead->id,
+                                $this->c_created_user_id,
+                                LeadUserConversionDictionary::DESCRIPTION_CALL_AUTO_TAKE,
+                                $this->c_created_user_id
+                            );
 
-                                $qCallService->remove($lead->id);
+                            $qCallService->remove($lead->id);
 
-                                if (
-                                    $ntf = Notifications::create(
-                                        $lead->employee_id,
-                                        'AutoCreated new Lead (' . $lead->id . ')',
-                                        'A new Lead (Id: ' . Purifier::createLeadShortLink($lead) . ') has been created for you. Call Id: ' . $this->c_id,
-                                        Notifications::TYPE_SUCCESS,
-                                        true
-                                    )
-                                ) {
-                                    $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-                                    Notifications::publish(
-                                        'getNewNotification',
-                                        ['user_id' => $lead->employee_id],
-                                        $dataNotification
-                                    );
-                                }
-//                            $userListSocketNotification[$lead->employee_id] = $lead->employee_id;
-                                // Notifications::publish('openUrl', ['user_id' => $lead->employee_id], ['url' => $host . '/lead/view/' . $lead->gid], false);
-
-                                $pubChannel = UserConnection::getLastUserChannel($lead->employee_id);
-                                Notifications::pub(
-                                    [$pubChannel],
-                                    'openUrl',
-                                    ['url' => $host . '/lead/view/' . $lead->gid]
-                                );
-                            } catch (\Throwable $e) {
-                                Yii::error(
-                                    'CallId: ' . $this->c_id . ' LeadId: ' . $lead->id . ' Message: ' . $e->getMessage(),
-                                    'Call:afterSave:Lead:Answered:Processing'
+                            if (
+                                $ntf = Notifications::create(
+                                    $lead->employee_id,
+                                    'AutoCreated new Lead (' . $lead->id . ')',
+                                    'A new Lead (Id: ' . Purifier::createLeadShortLink($lead) . ') has been created for you. Call Id: ' . $this->c_id,
+                                    Notifications::TYPE_SUCCESS,
+                                    true
+                                )
+                            ) {
+                                $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+                                Notifications::publish(
+                                    'getNewNotification',
+                                    ['user_id' => $lead->employee_id],
+                                    $dataNotification
                                 );
                             }
+//                            $userListSocketNotification[$lead->employee_id] = $lead->employee_id;
+                            // Notifications::publish('openUrl', ['user_id' => $lead->employee_id], ['url' => $host . '/lead/view/' . $lead->gid], false);
+
+                            $pubChannel = UserConnection::getLastUserChannel($lead->employee_id);
+                            Notifications::pub(
+                                [$pubChannel],
+                                'openUrl',
+                                ['url' => $host . '/lead/view/' . $lead->gid]
+                            );
+                        } catch (\Throwable $e) {
+                            Yii::error(
+                                'CallId: ' . $this->c_id . ' LeadId: ' . $lead->id . ' Message: ' . $e->getMessage(),
+                                'Call:afterSave:Lead:Answered:Processing'
+                            );
                         }
                     }
+                }
 
 
-                    if ($this->c_case_id && $departmentParams->object->type->isCase()) {
-                        $case = $this->cCase;
+                if ($this->c_case_id && $departmentParams->object->type->isCase()) {
+                    $case = $this->cCase;
 
-                        if ($case && !$case->cs_user_id && $this->c_created_user_id && $case->isPending()) {
-                            try {
-                                $casesManageService = Yii::createObject(CasesManageService::class);
-                                $casesManageService->callAutoTake(
-                                    $this->c_case_id,
-                                    $this->c_created_user_id,
-                                    null,
-                                    'Call auto take'
-                                );
+                    if ($case && !$case->cs_user_id && $case->isPending()) {
+                        try {
+                            $casesManageService = Yii::createObject(CasesManageService::class);
+                            $casesManageService->callAutoTake(
+                                $this->c_case_id,
+                                $this->c_created_user_id,
+                                null,
+                                'Call auto take'
+                            );
 
 //                            $caseRepo = Yii::createObject(CasesRepository::class);
 //                            $case->processing((int)$this->c_created_user_id, null);
 //                            $caseRepo->save($case);
 
-                                if (
-                                    $ntf = Notifications::create(
-                                        $this->c_created_user_id,
-                                        'AutoCreated new Case (' . $case->cs_id . ')',
-                                        'A new Case (Id: ' . Purifier::createCaseShortLink($case) . ') has been created for you. Call Id: ' . $this->c_id,
-                                        Notifications::TYPE_SUCCESS,
-                                        true
-                                    )
-                                ) {
-                                    $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-                                    Notifications::publish(
-                                        'getNewNotification',
-                                        ['user_id' => $this->c_created_user_id],
-                                        $dataNotification
-                                    );
-                                }
+                            if (
+                                $ntf = Notifications::create(
+                                    $this->c_created_user_id,
+                                    'AutoCreated new Case (' . $case->cs_id . ')',
+                                    'A new Case (Id: ' . Purifier::createCaseShortLink($case) . ') has been created for you. Call Id: ' . $this->c_id,
+                                    Notifications::TYPE_SUCCESS,
+                                    true
+                                )
+                            ) {
+                                $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+                                Notifications::publish(
+                                    'getNewNotification',
+                                    ['user_id' => $this->c_created_user_id],
+                                    $dataNotification
+                                );
+                            }
 
 //                            $userListSocketNotification[$case->cs_user_id] = $case->cs_user_id;
-                                // Notifications::publish('openUrl', ['user_id' => $case->cs_user_id], ['url' => $host . '/cases/view/' . $case->cs_gid], false);
-                                $pubChannel = UserConnection::getLastUserChannel($this->c_created_user_id);
-                                Notifications::pub(
-                                    [$pubChannel],
-                                    'openUrl',
-                                    ['url' => $host . '/cases/view/' . $case->cs_gid]
-                                );
-                            } catch (\DomainException $e) {
-                            } catch (\Throwable $e) {
-                                Yii::error($e->getMessage(), 'Call:afterSave:Case:update');
-                            }
+                            // Notifications::publish('openUrl', ['user_id' => $case->cs_user_id], ['url' => $host . '/cases/view/' . $case->cs_gid], false);
+                            $pubChannel = UserConnection::getLastUserChannel($this->c_created_user_id);
+                            Notifications::pub(
+                                [$pubChannel],
+                                'openUrl',
+                                ['url' => $host . '/cases/view/' . $case->cs_gid]
+                            );
+                        } catch (\DomainException $e) {
+                        } catch (\Throwable $e) {
+                            Yii::error($e->getMessage(), 'Call:afterSave:Case:update');
                         }
                     }
                 }
@@ -1301,54 +1376,58 @@ class Call extends \yii\db\ActiveRecord
 
         if ($this->cCase) {
             $this->cCase->updateLastAction();
-        }
-
-
-
-        if ($isChangedStatus) {
-            NativeEventDispatcher::recordEvent(CallEvents::class, CallEvents::CHANGE_STATUS, [CallEvents::class, 'updateUserStatus'], ['call' => $this, 'changedAttributes' => $changedAttributes]);
-            NativeEventDispatcher::trigger(CallEvents::class, CallEvents::CHANGE_STATUS);
-        }
-
-        if (
-            $this->c_created_user_id && ($insert || $isChangedStatusFromEmptyInclude)
-            && (!($this->isIn() && $this->isStatusQueue()))
-            && (!($this->isIn() && $this->isStatusDelay()))
-            && (!$this->isInternal() || $this->isEnded())
-//            && (!($this->isIn() && $this->isStatusRinging() && $this->isInternal()))
-            && (!($this->isOut() && $this->isChild()))
-            && (!($this->isIn() && $this->isChild() && $this->isStatusRinging()))
-        ) {
-            if (
-                $this->isEnded()
-                || !$this->currentParticipant
-                || ($this->currentParticipant && ($this->currentParticipant->isAgent() || $this->currentParticipant->isUser()))
-            ) {
-                $message = (new CallUpdateMessage())->create($this, $isChangedStatus, $this->c_created_user_id);
-
-//                $infoData = [];
-//                $infoData['user_id'] = $this->c_created_user_id;
-//                $infoData['attributes'] = $this->getAttributes();
-//
-//                //$infoData['message'] = $message;
-//
-//                if ($this->c_created_user_id == 843) {
-//                    Yii::info($infoData, 'info\Call:callUpdate\user-' . $this->c_created_user_id);
-//                    $infoData['message'] = $message;
-//                    Yii::info($infoData, 'info\Call:callUpdate2\user-' . $this->c_created_user_id);
-//                    //Yii::info(VarDumper::dumpAsString($message, 10), 'info\Call:callUpdate2\user-' . $this->c_created_user_id);
-//                    //Yii::info($message, 'info\Call:callUpdate2\user-' . $this->c_created_user_id);
-//                }
-                Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id], $message);
+            if ($this->c_parent_id && $this->isOut() && $this->isEnded() && $isChangedStatus) {
+                $this->cCase->addEventLog(null, $this->getCallTypeName() . ' call finished in status: ' . $this->getStatusName() . '. By: ' . $this->cCreatedUser->username);
             }
         }
 
-        if ($this->c_created_user_id && $this->isInternal()) {
+
+//        if (
+//            $this->c_created_user_id && ($insert || $isChangedStatusFromEmptyInclude)
+//            && (!($this->isIn() && $this->isStatusQueue()))
+//            && (!($this->isIn() && $this->isStatusDelay()))
+//            && (!$this->isInternal() || $this->isEnded())
+////            && (!($this->isIn() && $this->isStatusRinging() && $this->isInternal()))
+//            && (!($this->isOut() && $this->isChild()))
+//            && (!($this->isIn() && $this->isChild() && $this->isStatusRinging()))
+//        ) {
+//            if (
+//                $this->isEnded()
+//                || !$this->currentParticipant
+//                || ($this->currentParticipant && ($this->currentParticipant->isAgent() || $this->currentParticipant->isUser()))
+//            ) {
+//                $message = (new CallUpdateMessage())->create($this, $isChangedStatus, $this->c_created_user_id);
+//
+//                Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id], $message);
+//                if ($this->isActiveStatus()) {
+//                    UserStatus::isOnCallOn($this->c_created_user_id);
+//                } else {
+//                    UserStatus::isOnCallOff($this->c_created_user_id);
+//                }
+//            }
+//        }
+
+        if ($this->c_created_user_id && ($insert || $isChangedStatusFromEmptyInclude) && $this->getDataCreatorType()->isAgent()) {
+            if ($this->isStatusRinging() && !$this->isOut()) {
+            } else {
+                $message = (new CallUpdateMessage())->create($this, $isChangedStatus, $this->c_created_user_id);
+                Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id], $message);
+            }
+
+            if ($this->isActiveStatus()) {
+                UserStatus::isOnCallOn($this->c_created_user_id);
+            } else {
+                UserStatus::isOnCallOff($this->c_created_user_id);
+            }
+        }
+
+        if ($this->c_created_user_id && $this->getDataCreatorType()->isUser()) {
             $isChangedStatus = array_key_exists('c_status_id', $changedAttributes);
 
             if ($this->isOut() && ($insert || $isChangedStatus) && $this->isStatusRinging()) {
                 $message = (new CallUpdateMessage())->create($this, $isChangedStatus, $this->c_created_user_id);
                 Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id], $message);
+                UserStatus::isOnCallOn($this->c_created_user_id);
             }
 
             if ($this->isIn() && ($insert || $isChangedStatus) && $this->c_parent_id && $this->isStatusRinging()) {
@@ -1356,32 +1435,52 @@ class Call extends \yii\db\ActiveRecord
                 $internalParent->c_status_id = self::STATUS_RINGING;
                 $message = (new CallUpdateMessage())->create($internalParent, $isChangedStatus, $this->c_created_user_id);
                 Notifications::publish('callUpdate', ['user_id' => $internalParent->c_created_user_id], $message);
+                if ($internalParent->isActiveStatus()) {
+                    UserStatus::isOnCallOn($internalParent->c_created_user_id);
+                }
             }
 
             if ($this->isIn() && ($insert || $isChangedStatus) && $this->c_parent_id && $this->isStatusInProgress()) {
                 $internalParent = $this->cParent;
                 $parentMessage = (new CallUpdateMessage())->create($internalParent, $isChangedStatus, $this->c_created_user_id);
                 Notifications::publish('callUpdate', ['user_id' => $internalParent->c_created_user_id], $parentMessage);
+                if ($internalParent->isActiveStatus()) {
+                    UserStatus::isOnCallOn($internalParent->c_created_user_id);
+                }
 
                 $message = (new CallUpdateMessage())->create($this, $isChangedStatus, $this->c_created_user_id);
                 Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id], $message);
+                if ($this->isActiveStatus()) {
+                    UserStatus::isOnCallOn($this->c_created_user_id);
+                }
+            }
+
+            if (($insert || $isChangedStatus) && !$this->isActiveStatus()) {
+                $message = (new CallUpdateMessage())->create($this, $isChangedStatus, $this->c_created_user_id);
+                Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id], $message);
+                UserStatus::isOnCallOff($this->c_created_user_id);
             }
         }
 
-        if (($this->c_lead_id || $this->c_case_id) && !$this->isJoin()) {
-            //Notifications::socket(null, $this->c_lead_id, 'updateCommunication', ['lead_id' => $this->c_lead_id, 'status_id' => $this->c_status_id, 'status' => $this->getStatusName()], true);
-
-            $socketParams = [];
-            if ($this->c_lead_id) {
-                $socketParams['lead_id'] = $this->c_lead_id;
-            }
-
-            if ($this->c_case_id) {
-                $socketParams['case_id'] = $this->c_case_id;
-            }
-
-            Notifications::publish('updateCommunication', $socketParams, ['lead_id' => $this->c_lead_id, 'case_id' => $this->c_case_id, 'status_id' => $this->c_status_id, 'status' => $this->getStatusName()]);
+        if ($isChangedStatus) {
+            NativeEventDispatcher::recordEvent(CallEvents::class, CallEvents::CHANGE_STATUS, [CallEvents::class, 'updateUserStatus'], ['call' => $this, 'changedAttributes' => $changedAttributes]);
+            NativeEventDispatcher::trigger(CallEvents::class, CallEvents::CHANGE_STATUS);
         }
+
+//        if (($this->c_lead_id || $this->c_case_id) && !$this->isJoin()) {
+//            //Notifications::socket(null, $this->c_lead_id, 'updateCommunication', ['lead_id' => $this->c_lead_id, 'status_id' => $this->c_status_id, 'status' => $this->getStatusName()], true);
+//
+//            $socketParams = [];
+//            if ($this->c_lead_id) {
+//                $socketParams['lead_id'] = $this->c_lead_id;
+//            }
+//
+//            if ($this->c_case_id) {
+//                $socketParams['case_id'] = $this->c_case_id;
+//            }
+//
+//            Notifications::publish('updateCommunication', $socketParams, ['lead_id' => $this->c_lead_id, 'case_id' => $this->c_case_id, 'status_id' => $this->c_status_id, 'status' => $this->getStatusName()]);
+//        }
 
 //        if ($userListSocketNotification) {
 //            foreach ($userListSocketNotification as $userId) {
@@ -1404,6 +1503,10 @@ class Call extends \yii\db\ActiveRecord
 //                && (!$conferenceBase || ($conferenceBase && !$this->c_conference_id))
             ) {
                 (Yii::createObject(CallLogTransferService::class))->transfer($this);
+                if ($this->c_client_id && $this->isOut() && $this->getDataCreatorType()->isClient()) {
+                    $callOutEndedJob = new CallOutEndedJob($this->c_client_id, $this->c_id);
+                    Yii::$app->queue_job->priority(10)->push($callOutEndedJob);
+                }
             }
 //            if (($insert || $isChangedTwStatus) && $this->isTwFinishStatus()) {
 //                if (Yii::$app->id === 'app-webapi') {
@@ -2160,6 +2263,11 @@ class Call extends \yii\db\ActiveRecord
         return $this->c_source_type_id === self::SOURCE_DIRECT_CALL;
     }
 
+    public function isRedialCall(): bool
+    {
+        return $this->c_source_type_id === self::SOURCE_REDIAL_CALL;
+    }
+
 
     /**
      * @param string $statusName
@@ -2662,6 +2770,20 @@ class Call extends \yii\db\ActiveRecord
         $this->setData($data);
     }
 
+    public function setDataCreatorType(?int $id): void
+    {
+        $data = $this->getData();
+        $data->creatorType = new CreatorType([
+            'id' => $id,
+        ]);
+        $this->setData($data);
+    }
+
+    public function getDataCreatorType(): CreatorType
+    {
+        return $this->getData()->creatorType;
+    }
+
     /**
      * @return array
      */
@@ -2711,5 +2833,36 @@ class Call extends \yii\db\ActiveRecord
             }
         }
         return $data;
+    }
+
+
+    public function isClientNotification(): bool
+    {
+        return $this->c_source_type_id === self::SOURCE_CLIENT_NOTIFICATION;
+    }
+
+    public static function getStirStatusByVerstatKey(string $verstatKey): ?string
+    {
+        return self::STIR_VERSTAT_LIST[$verstatKey] ?? null;
+    }
+
+    public static function isTrustedVerstat(string $key): bool
+    {
+        return in_array($key, self::STIR_TRUSTED_GROUP);
+    }
+
+    public function isActiveStatus(): bool
+    {
+        return in_array($this->c_status_id, [self::STATUS_RINGING, self::STATUS_IN_PROGRESS], true);
+    }
+
+    public function getClientPhoneNumber(): ?string
+    {
+        return $this->isIn() ? $this->c_from : $this->c_to;
+    }
+
+    public function getInternalPhoneNumber(): ?string
+    {
+        return $this->isIn() ? $this->c_to : $this->c_from;
     }
 }

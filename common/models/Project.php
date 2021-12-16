@@ -5,6 +5,7 @@ namespace common\models;
 use common\models\local\ContactInfo;
 use common\models\query\ProjectQuery;
 use frontend\helpers\JsonHelper;
+use modules\flight\src\useCases\voluntaryExchange\service\CaseVoluntaryExchangeService;
 use modules\qaTask\src\entities\qaTask\QaTask;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\entity\projectConfig\ClientChatProjectConfig;
@@ -277,6 +278,16 @@ class Project extends \yii\db\ActiveRecord
         return ArrayHelper::getValue($this->p_params_json, 'object.case.reprotection_quote', []);
     }
 
+    public function getVoluntaryRefundEmailConfig(): array
+    {
+        return ArrayHelper::getValue($this->p_params_json, 'object.case.voluntary_refund', []);
+    }
+
+    public function getVoluntaryChangeEmailConfig(): array
+    {
+        return ArrayHelper::getValue($this->p_params_json, 'object.case.voluntary_exchange', []);
+    }
+
     public static function getListByUserWithProjectKeys(int $user_id = 0): array
     {
         return self::find()->select([
@@ -326,10 +337,7 @@ class Project extends \yii\db\ActiveRecord
                     $pr->project_key = $projectItem['project_key'];
                     $pr->link = $projectItem['link'];
                     $pr->closed = (bool)$projectItem['closed'];
-                    /* $pr->last_update = date('Y-m-d H:i:s');
-                     if (isset(Yii::$app->user) && Yii::$app->user->id) {
-                         $pr->p_update_user_id = Yii::$app->user->id;
-                     }*/
+
                     if (!$pr->save()) {
                         Yii::error(
                             VarDumper::dumpAsString($pr->errors),
@@ -340,9 +348,14 @@ class Project extends \yii\db\ActiveRecord
                             $source = Sources::findOne(['id' => $sourceId]);
 
                             if (!$source) {
-                                $source = new Sources();
-                                $source->id = $sourceId;
-                                $source->project_id = $pr->id;
+                                $source = Sources::find()->where(['project_id' => $sourceAttr['project_id'], 'cid' => $sourceAttr['cid']])->orderBy(['id' => SORT_DESC])->one();
+                                if (!$source) {
+                                    $source = new Sources();
+                                    $source->id = $sourceId;
+                                    $source->project_id = $pr->id;
+                                } else {
+                                    $source->id = $sourceId;
+                                }
                             }
 
                             $source->scenario = Sources::SCENARIO_SYNCH;

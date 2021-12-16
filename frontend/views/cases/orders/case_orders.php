@@ -46,7 +46,7 @@ use yii\web\View;
                 'emptyText' => '<div class="text-center">Not found orders</div>',
                 //'layout' => "\n{items}<div class=\"text-center\">{pager}</div>\n", // {summary}\n<div class="text-center">{pager}</div>
                 'itemView' => function ($model, $key, $index, $widget) use ($case, $caseAbacDto) {
-                    return $this->render('_list_item', ['order' => $model, 'index' => $index, 'caseId' => $case->cs_id, 'caseAbacDto' => $caseAbacDto]);
+                    return $this->render('_list_item', ['order' => $model, 'index' => $index, 'case' => $case, 'caseAbacDto' => $caseAbacDto]);
                 },
 
                 'itemOptions' => [
@@ -427,6 +427,32 @@ $js = <<<JS
         modal.find('.modal-title').html('Product Quote [' + gid + '] Details');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
             if (status == 'error') {
+                if (xhr.status !== 403) {
+                    createNotify('Error', xhr.responseText, 'error');
+                }
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
+            btn.removeClass('disabled').find('i').attr('class', btnClass);
+        });
+    });
+    
+    $(document).on('click', '.btn-show-refund-quote-details', function(e){        
+        e.preventDefault();
+        let btn = $(this);
+        let url = btn.data('url');
+        let id = btn.data('refund-quote-id');
+        let modal = $('#modal-lg');
+        let btnClass = btn.find('i').attr('class');
+          
+        btn.addClass('disabled').find('i').attr('class', 'fas fa-spinner fa-spin');
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Product Quote Refund [' + id + '] Details');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            if (status == 'error') {
                 createNotify('Error', xhr.responseText, 'error');
             } else {
                 modal.modal({
@@ -460,7 +486,109 @@ $js = <<<JS
             btn.removeClass('disabled').find('i').attr('class', btnClass);
         });
     });
+
+    $(document).on('click', '.btn_create_voluntary', function(e) {
+        e.preventDefault();
+        let btn = $(this);
+        let url = btn.data('url');
+        let modal = $('#modal-lg');
+        let btnClass = btn.find('i').attr('class');
+          
+        btn.addClass('disabled').find('i').attr('class', 'fas fa-spinner fa-spin');
+        
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Create Voluntary Quote from dump');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            if (status === 'error' && xhr.status !== 403) {
+                createNotify('Error', xhr.responseText, 'error');
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
+            btn.removeClass('disabled').find('i').attr('class', btnClass);
+        });
+    });
     
+    $(document).on('click', '.btn_create_voluntary_refund', function(e) {
+        e.preventDefault();
+        let btn = $(this);
+        let url = btn.data('url');
+        let modal = $('#modal-lg');
+        let btnClass = btn.find('i').attr('class');
+          
+        btn.addClass('disabled').find('i').attr('class', 'fas fa-spinner fa-spin');
+        
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Add Voluntary Refund');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            console.log(xhr);
+            if (status === 'error') {
+                if (xhr.status !== 403) {
+                    createNotify('Error', xhr.responseText, 'error');
+                }                
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
+            btn.removeClass('disabled').find('i').attr('class', btnClass);
+        });
+    });
+    
+    $(document).on('click', '.btn-edit-voluntary-refund-quote', function(e) {
+        e.preventDefault();
+        let btn = $(this);
+        let url = btn.data('url');
+        let modal = $('#modal-lg');
+        let btnClass = btn.find('i').attr('class');
+          
+        btn.addClass('disabled').find('i').attr('class', 'fas fa-spinner fa-spin');
+        
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Edit voluntary refund');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            if (status === 'error') {
+                createNotify('Error', xhr.responseText, 'error');
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
+            btn.removeClass('disabled').find('i').attr('class', btnClass);
+        });
+    });
+    
+
+    $(document).on('click', '.btn_create_change', function(e) {
+        e.preventDefault();
+        let btn = $(this);
+        let url = btn.data('url');
+        let modal = $('#modal-sm');
+        let btnClass = btn.find('i').attr('class');
+          
+        btn.addClass('disabled').find('i').attr('class', 'fas fa-spinner fa-spin');
+        
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Add Change');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            if (status === 'error') {
+                if (xhr.status !== 403) {
+                    createNotify('Error', xhr.responseText, 'error');
+                }                
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
+            btn.removeClass('disabled').find('i').attr('class', btnClass);
+        });
+    });
+
     $(document).on('click', '.btn-invoice-status-log', function(e){        
         e.preventDefault();
         let url = $(this).data('url');
@@ -755,6 +883,7 @@ $js = <<<JS
         let menu = $(this);
         let productQuoteId = menu.data('product-quote-id');
         let orderId = menu.data('order-id');
+        let caseId = menu.data('case-id');
         let url = menu.data('url');
         
         //menu.find('.dropdown-menu').html('<a href="#" class="dropdown-item"><i class="fa fa-spin fa-spinner"></i> Loading ...</a>');
@@ -763,7 +892,7 @@ $js = <<<JS
         $.ajax({
               url: url,
               type: 'post',
-              data: {'product_quote_id': productQuoteId, 'order_id': orderId},
+              data: {'product_quote_id': productQuoteId, 'order_id': orderId, 'case_id': caseId},
               dataType: 'json',
           })
               .done(function(data) {
@@ -777,7 +906,7 @@ $js = <<<JS
                   } else {
                       
                       // pjaxReload({container: '#pjax-lead-orders', timout: 2000});
-                      pjaxReload({container: '#pjax-lead-orders'});
+                      pjaxReload({container: '#pjax-case-orders'});
                       new PNotify({
                             title: 'Quote was successfully deleted',
                             type: 'success',
@@ -787,11 +916,34 @@ $js = <<<JS
                   }
               })
             .fail(function( jqXHR, textStatus ) {
-                alert( "Request failed: " + textStatus );
+                if (jqXHR.status != 403) {
+                    alert( "Request failed: " + textStatus );
+                }                
             }).always(function() {
                 $('#preloader').addClass('d-none');
             });
     });
+    
+    $(document).on('click', '.btn-product-quote-status-log', function(e){        
+        e.preventDefault();
+        let url = $(this).data('url');
+        let gid = $(this).data('gid');
+        let modal = $('#modal-lg');
+          
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('Product quote [' + gid + '] status history');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            //$('#preloader').addClass('d-none');
+            if (status == 'error') {
+                alert(response);
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
+        });
+     });
 JS;
 
 $this->registerJs($js, View::POS_READY, 'case-order-js');

@@ -1,7 +1,11 @@
 <?php
 
+use common\components\logger\FilebeatTarget;
+use common\helpers\LogHelper;
 use modules\hotel\HotelModule;
 use modules\rentCar\RentCarModule;
+use yii\log\DbTarget;
+use yii\log\FileTarget;
 
 $params = array_merge(
     require __DIR__ . '/../../common/config/params.php',
@@ -55,47 +59,67 @@ return [
             'traceLevel' => 0,
             'targets' => [
                 'file' => [
-                    'class' => 'yii\log\FileTarget',
+                    'class' => FileTarget::class,
                     'levels' => ['error', 'warning'],
                 ],
                 'db-error' => [
-                    'class' => 'yii\log\DbTarget',
+                    'class' => DbTarget::class,
                     'levels' => ['error', 'warning'],
                     'except' => [
                         'yii\web\HttpException:404',
                     ],
                     'logVars' => [],
                     'prefix' => static function () {
-                        //$ip = $_SERVER['REMOTE_ADDR'];
-                        $hostname = php_uname('n');
-                        return "[$hostname][console]";
+                        return LogHelper::getConsolePrefixDB();
                     },
                     'db' => 'db_postgres',
                 ],
                 'db-info' => [
-                    'class' => \yii\log\DbTarget::class,
+                    'class' => DbTarget::class,
                     'levels' => ['info'],
                     'except' => [
                         'yii\web\HttpException:404',
                     ],
                     'logVars' => [],
-                    'categories' => ['info\*'],
+                    'categories' => ['info\*', 'log\*'],
                     'prefix' => static function () {
-                        $hostname = php_uname('n');
-                        return "[$hostname][console]";
+                        return LogHelper::getConsolePrefixDB();
                     },
                     'db' => 'db_postgres',
                 ],
-                'file-air' => [
-                    'class' => \common\components\logger\AirFileTarget::class,
+                'file-fb-error' => [
+                    'class' => FilebeatTarget::class,
                     'levels' => ['error', 'warning'],
                     'except' => [
                         'yii\web\HttpException:404',
                     ],
+                    'prefix' => static function () {
+                        return LogHelper::getConsolePrefixData();
+                    },
                     //'logVars' => YII_DEBUG ? ['_GET', '_POST', '_FILES', '_COOKIE', '_SESSION', '_SERVER'] : [],
                     'logVars' => [],
                     'logFile' => '@runtime/logs/stash.log',
                 ],
+                'file-fb-log' => [
+                    'class' => FilebeatTarget::class,
+                    'levels' => ['info'],
+                    'categories' => ['log\*', 'elk\*'],
+                    'logVars' => [],
+                    'prefix' => static function () {
+                        return LogHelper::getConsolePrefixData();
+                    },
+                    'logFile' => '@runtime/logs/stash.log'
+                ],
+//                'analytics-fb-log' => [
+//                    'class' => FilebeatTarget::class,
+//                    'levels' => ['info'],
+//                    'categories' => ['analytics\*', 'AS\*'],
+//                    'logVars' => [],
+//                    'prefix' => static function () {
+//                        return LogHelper::getAnalyticPrefixData();
+//                    },
+//                    'logFile' => '@runtime/logs/stash.log'
+//                ],
             ],
         ],
         'i18n' => [
@@ -120,6 +144,9 @@ return [
             'identityClass' => 'common\models\Employee',
             'enableSession' => false
         ],*/
+        'urlManager' => [
+            'scriptUrl' => '/'
+        ],
 
     ],
     'modules' => [

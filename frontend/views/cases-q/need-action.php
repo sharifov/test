@@ -17,9 +17,12 @@ use sales\entities\cases\Cases;
 use yii\widgets\Pjax;
 use common\models\Language;
 
-/* @var $this yii\web\View */
-/* @var $searchModel sales\entities\cases\CasesQSearch */
-/* @var $dataProvider yii\data\ActiveDataProvider */
+/**
+ * @var $this yii\web\View
+ * @var $isAgent bool
+ * @var $searchModel sales\entities\cases\CasesQSearch
+ * @var $dataProvider yii\data\ActiveDataProvider
+ */
 
 $this->title = 'Need Action Queue';
 $this->params['breadcrumbs'][] = $this->title;
@@ -40,12 +43,13 @@ $lists = new ListsAccess($user->id);
 
 <div class="cases-q-need-action">
 
-    <?php Pjax::begin(['id' => 'cases-q-follow-up-pjax-list', 'timeout' => 5000, 'enablePushState' => true]); ?>
+    <?php Pjax::begin(['id' => 'cases-q-follow-up-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'scrollTo' => 0]); ?>
 
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
 
     <?= GridView::widget([
+        'id' => 'need-action-gv',
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [

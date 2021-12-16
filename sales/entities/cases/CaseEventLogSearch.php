@@ -2,9 +2,10 @@
 
 namespace sales\entities\cases;
 
-use sales\entities\cases\CaseEventLog;
+use common\models\Employee;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
+use yii\db\Expression;
 
 /**
  * CaseEventLogSearch represents the model behind the search form of `sales\entities\cases\CaseEventLog`.
@@ -17,7 +18,7 @@ class CaseEventLogSearch extends CaseEventLog
     public function rules()
     {
         return [
-            [['cel_id', 'cel_case_id'], 'integer'],
+            [['cel_id', 'cel_case_id', 'cel_category_id', 'cel_type_id'], 'integer'],
             [['cel_data_json'], 'safe'],
             ['cel_description', 'string'],
             ['cel_created_dt', 'date', 'format' => 'php:Y-m-d'],
@@ -68,6 +69,8 @@ class CaseEventLogSearch extends CaseEventLog
             'cel_id' => $this->cel_id,
             'cel_case_id' => $this->cel_case_id,
             'date(cel_created_dt)' => $this->cel_created_dt,
+            'cel_category_id' => $this->cel_category_id,
+            'cel_type_id' => $this->cel_type_id
         ]);
 
         $query->andFilterWhere(['like', 'cel_description', $this->cel_description])
@@ -81,9 +84,10 @@ class CaseEventLogSearch extends CaseEventLog
      *
      * @param array $params
      *
+     * @param Employee $employee
      * @return ActiveDataProvider
      */
-    public function searchByCase($params)
+    public function searchByCase($params, Employee $employee)
     {
         $query = CaseEventLog::find()->where(['cel_case_id' => $params['case_id']]);
 
@@ -109,6 +113,13 @@ class CaseEventLogSearch extends CaseEventLog
             return $dataProvider;
         }
 
+        if (!$employee->isAdmin() && !$employee->isSuperAdmin()) {
+            $query->andFilterWhere([
+                'OR',
+                ['<>', 'cel_category_id', CaseEventLog::CATEGORY_DEBUG],
+                ['is', 'cel_category_id', new Expression('NULL')]
+            ]);
+        }
 
         // grid filtering conditions
         $query->andFilterWhere([

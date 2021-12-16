@@ -27,45 +27,26 @@ use yii\helpers\VarDumper;
 class FlightQuoteCreateForm extends CompositeForm
 {
     public $recordLocator;
-
     public $gds;
-
     public $pcc;
-
     public $tripType;
-
     public $cabin;
-
     public $validatingCarrier;
-
     public $fareType;
-
     public $quoteCreator;
-
     public $reservationDump;
-
     public $pricingInfo;
-
     public $itinerary = [];
-
     public $parsedPricingInfo = [];
-
     public $oldPrices;
-
     public $action;
-
     public $serviceFee;
-
     public $currencyRate;
-
     public $currencyCode;
-
     public $clientSelling;
-
     private $flight;
 
     private $warning = false;
-
     private $warningMessages = [];
 
     public const ACTION_APPLY_PRICING_INFO = 'apply_pricing';

@@ -11,6 +11,11 @@ use yii\db\ActiveQuery;
  */
 class Scopes extends ActiveQuery
 {
+    public function byId(int $id): self
+    {
+        return $this->andWhere(['pqc_id' => $id]);
+    }
+
     public function byProductQuote(int $quoteId): self
     {
         return $this->andWhere(['pqc_pq_id' => $quoteId]);
@@ -19,6 +24,26 @@ class Scopes extends ActiveQuery
     public function byCaseId(int $id): self
     {
         return $this->andWhere(['pqc_case_id' => $id]);
+    }
+
+    public function isNotDecided(): self
+    {
+        return $this->andWhere(['IS', 'pqc_decision_type_id', null]);
+    }
+
+    public function excludeStatuses(array $statuses): self
+    {
+        return $this->andWhere(['NOT IN', 'pqc_status_id', $statuses]);
+    }
+
+    public function scheduleChangeType(): self
+    {
+        return $this->andWhere(['pqc_type_id' => ProductQuoteChange::TYPE_RE_PROTECTION]);
+    }
+
+    public function byType(int $typeId): self
+    {
+        return $this->andWhere(['pqc_type_id' => $typeId]);
     }
 
     /**

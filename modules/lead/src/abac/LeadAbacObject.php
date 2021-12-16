@@ -30,10 +30,14 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     public const ACT_CLIENT_ADD_EMAIL  = self::NS . 'act/client-add-email';
     public const ACT_CLIENT_EDIT_EMAIL  = self::NS . 'act/client-edit-email';
     public const ACT_USER_SAME_EMAIL_INFO  = self::NS . 'act/user-same-email-info';
+    public const ACT_TAKE_LEAD = self::NS . 'act/take-lead';
     public const ACT_CLIENT_UPDATE  = self::NS . 'act/client-update';
     public const ACT_CLIENT_SUBSCRIBE  = self::NS . 'act/client-subscribe';
     public const ACT_CLIENT_UNSUBSCRIBE  = self::NS . 'act/client-unsubscribe';
     public const ACT_SEARCH_LEADS_BY_IP  = self::NS . 'act/search-leads-by-ip';
+    public const ACT_CREATE_FROM_PHONE_WIDGET = self::NS . 'act/create-from-phone-widget';
+    public const ACT_LINK_TO_CALL = self::NS . 'act/link-to-call';
+    public const ACT_TAKE_LEAD_FROM_CALL = self::NS . 'act/take-from-call';
 
     /** UI PERMISSION */
     public const UI_BLOCK_CLIENT_INFO  = self::NS . 'ui/block/client-info';
@@ -58,6 +62,10 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     public const QUERY_SOLD_IS_OWNER = self::NS . 'query/sold/is_owner';
     public const QUERY_SOLD_IS_EMPTY_OWNER = self::NS . 'query/sold/is_empty_owner';
 
+    /** OBJECT PERMISSION */
+    public const OBJ_LEAD_PREFERENCES    = self::NS . 'obj/lead_preferences';
+    public const OBJ_LEAD                = self::NS . 'obj/lead';
+
     /** --------------- OBJECT LIST --------------------------- */
     public const OBJECT_LIST = [
         self::ACT_USER_CONVERSION   => self::ACT_USER_CONVERSION,
@@ -71,6 +79,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_CLIENT_UPDATE    => self::ACT_CLIENT_UPDATE,
         self::ACT_CLIENT_SUBSCRIBE    => self::ACT_CLIENT_SUBSCRIBE,
         self::ACT_CLIENT_UNSUBSCRIBE    => self::ACT_CLIENT_UNSUBSCRIBE,
+        self::ACT_TAKE_LEAD => self::ACT_TAKE_LEAD,
         self::UI_BLOCK_CLIENT_INFO  => self::UI_BLOCK_CLIENT_INFO,
         self::UI_MENU_CLIENT_INFO   => self::UI_MENU_CLIENT_INFO,
         self::ACT_SEARCH_LEADS_BY_IP   => self::ACT_SEARCH_LEADS_BY_IP,
@@ -87,6 +96,11 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::QUERY_SOLD_IS_EMPTY_OWNER   => self::QUERY_SOLD_IS_EMPTY_OWNER,
         self::UI_DISPLAY_QUOTE_SEARCH_PARAMS => self::UI_DISPLAY_QUOTE_SEARCH_PARAMS,
         self::CMD_AUTO_REDIAL => self::CMD_AUTO_REDIAL,
+        self::ACT_CREATE_FROM_PHONE_WIDGET => self::ACT_CREATE_FROM_PHONE_WIDGET,
+        self::ACT_LINK_TO_CALL => self::ACT_LINK_TO_CALL,
+        self::ACT_TAKE_LEAD_FROM_CALL => self::ACT_TAKE_LEAD_FROM_CALL,
+        self::OBJ_LEAD_PREFERENCES => self::OBJ_LEAD_PREFERENCES,
+        self::OBJ_LEAD => self::OBJ_LEAD
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -98,10 +112,12 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     public const ACTION_UNMASK  = 'unmask';
     public const ACTION_QUERY_AND  = 'and';
     public const ACTION_QUERY_OR  = 'or';
+    public const ACTION_SET_DELAY_CHARGE  = 'setDelayedCharge';
+    public const ACTION_CLONE = 'clone';
 
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
-        self::ACT_USER_CONVERSION  => [self::ACTION_READ, self::ACTION_DELETE],
+        self::ACT_USER_CONVERSION  => [self::ACTION_READ, self::ACTION_DELETE, self::ACTION_CREATE],
         self::ACT_CLIENT_DETAILS => [self::ACTION_ACCESS],
         self::ACT_CLIENT_ADD_PHONE => [self::ACTION_ACCESS, self::ACTION_CREATE],
         self::ACT_CLIENT_EDIT_PHONE => [self::ACTION_ACCESS, self::ACTION_UPDATE],
@@ -115,6 +131,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_CLIENT_SUBSCRIBE => [self::ACTION_ACCESS],
         self::ACT_CLIENT_UNSUBSCRIBE => [self::ACTION_ACCESS],
         self::ACT_SEARCH_LEADS_BY_IP => [self::ACTION_ACCESS],
+        self::ACT_TAKE_LEAD => [self::ACTION_ACCESS],
         self::LOGIC_CLIENT_DATA  => [self::ACTION_UNMASK],
         self::UI_FIELD_PHONE_FORM_ADD_PHONE  => [self::ACTION_CREATE, self::ACTION_UPDATE],
         self::UI_FIELD_EMAIL_FORM_ADD_EMAIL  => [self::ACTION_CREATE, self::ACTION_UPDATE],
@@ -128,13 +145,18 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::QUERY_SOLD_IS_EMPTY_OWNER  => [self::ACTION_QUERY_AND, self::ACTION_QUERY_OR],
         self::UI_DISPLAY_QUOTE_SEARCH_PARAMS => [self::ACTION_ACCESS],
         self::CMD_AUTO_REDIAL => [self::ACTION_ACCESS],
+        self::ACT_CREATE_FROM_PHONE_WIDGET => [self::ACTION_CREATE],
+        self::ACT_LINK_TO_CALL => [self::ACTION_ACCESS],
+        self::ACT_TAKE_LEAD_FROM_CALL => [self::ACTION_ACCESS],
+        self::OBJ_LEAD_PREFERENCES => [self::ACTION_SET_DELAY_CHARGE],
+        self::OBJ_LEAD => [self::ACTION_CLONE]
     ];
 
     protected const ATTR_LEAD_IS_OWNER = [
-        'optgroup' => 'Lead',
+        'optgroup' => 'User',
         'id' => self::NS . 'is_owner',
         'field' => 'is_owner',
-        'label' => 'Is Owner',
+        'label' => 'Is Lead`s Owner',
 
         'type' => self::ATTR_TYPE_BOOLEAN,
         'input' => self::ATTR_INPUT_RADIO,
@@ -174,6 +196,84 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         'id' => self::NS . 'is_common_group',
         'field' => 'is_common_group',
         'label' => 'Is Common Group',
+
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
+    protected const ATTR_IS_EMPLOYEE_SHIFT_TIME = [
+        'optgroup' => 'User',
+        'id' => self::NS . 'isShiftTime',
+        'field' => 'isShiftTime',
+        'label' => 'Is Shift Time',
+
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
+    protected const ATTR_WITHIN_PERSONAL_TAKE_LIMITS = [
+        'optgroup' => 'Lead',
+        'id' => self::NS . 'withinPersonalTakeLimits',
+        'field' => 'withinPersonalTakeLimits',
+        'label' => 'Within Personal Take Limits',
+
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
+    protected const ATTR_HAS_APPLIED_QUOTE = [
+        'optgroup' => 'Lead',
+        'id' => self::NS . 'hasAppliedQuote',
+        'field' => 'hasAppliedQuote',
+        'label' => 'Has Applied Quote',
+
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
+    protected const ATTR_CAN_TAKE_BY_FREQUENCY_MINUTES = [
+        'optgroup' => 'User',
+        'id' => self::NS . 'canTakeByFrequencyMinutes',
+        'field' => 'canTakeByFrequencyMinutes',
+        'label' => 'Can Take By Frequency Minutes',
+
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
+    protected const ATTR_IS_IN_DEPARTMENT = [
+        'optgroup' => 'User',
+        'id' => self::NS . 'isInDepartment',
+        'field' => 'isInDepartment',
+        'label' => 'Has Access to Lead`s Department',
+
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
+    protected const ATTR_IS_IN_PROJECT = [
+        'optgroup' => 'User',
+        'id' => self::NS . 'isInProject',
+        'field' => 'isInProject',
+        'label' => 'Has Access to Lead`s Project',
 
         'type' => self::ATTR_TYPE_BOOLEAN,
         'input' => self::ATTR_INPUT_RADIO,
@@ -262,11 +362,41 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
             self::ATTR_LEAD_HAS_OWNER,
             self::ATTR_IS_COMMON_GROUP
         ],
+
+        self::ACT_TAKE_LEAD    => [
+            self::ATTR_IS_EMPLOYEE_SHIFT_TIME,
+            self::ATTR_IS_IN_PROJECT,
+            self::ATTR_IS_IN_DEPARTMENT,
+            self::ATTR_HAS_APPLIED_QUOTE,
+            self::ATTR_WITHIN_PERSONAL_TAKE_LIMITS,
+            self::ATTR_LEAD_IS_OWNER,
+            self::ATTR_CAN_TAKE_BY_FREQUENCY_MINUTES,
+        ],
+
+        self::OBJ_LEAD_PREFERENCES    => [
+            self::ATTR_LEAD_IS_OWNER,
+            self::ATTR_LEAD_HAS_OWNER,
+            self::ATTR_IS_COMMON_GROUP
+        ],
+
+        self::OBJ_LEAD => [
+            self::ATTR_LEAD_IS_OWNER,
+            self::ATTR_LEAD_HAS_OWNER,
+            self::ATTR_IS_COMMON_GROUP,
+            self::ATTR_IS_EMPLOYEE_SHIFT_TIME,
+            self::ATTR_IS_IN_PROJECT,
+            self::ATTR_IS_IN_DEPARTMENT,
+            self::ATTR_HAS_APPLIED_QUOTE,
+            self::ATTR_WITHIN_PERSONAL_TAKE_LIMITS,
+            self::ATTR_CAN_TAKE_BY_FREQUENCY_MINUTES,
+        ],
+
         self::LOGIC_CLIENT_DATA  => [self::ATTR_LEAD_IS_OWNER],
         self::UI_FIELD_PHONE_FORM_ADD_PHONE  => [self::ATTR_LEAD_IS_OWNER],
         self::UI_FIELD_EMAIL_FORM_ADD_EMAIL  => [self::ATTR_LEAD_IS_OWNER],
         self::QUERY_SOLD_IS_EMPTY_OWNER  => [self::ATTR_LEAD_HAS_OWNER_QUERY],
         self::CMD_AUTO_REDIAL  => [],
+        self::ACT_TAKE_LEAD_FROM_CALL  => [],
     ];
 
     /**
@@ -291,12 +421,13 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     public static function getObjectAttributeList(): array
     {
         $attrStatus = self::ATTR_LEAD_STATUS;
-        $attrStatus['values'] = Lead::getStatusList();
+        $attrStatus['values'] = Lead::getAllStatuses();
 
         $attributeList = self::OBJECT_ATTRIBUTE_LIST;
         $attributeList[self::UI_BLOCK_CLIENT_INFO][] = $attrStatus;
         $attributeList[self::UI_MENU_CLIENT_INFO][] = $attrStatus;
         $attributeList[self::ACT_CLIENT_DETAILS][] = $attrStatus;
+        $attributeList[self::ACT_TAKE_LEAD][] = $attrStatus;
         $attributeList[self::ACT_CLIENT_ADD_PHONE][] = $attrStatus;
         $attributeList[self::ACT_CLIENT_ADD_EMAIL][] = $attrStatus;
         $attributeList[self::ACT_CLIENT_UPDATE][] = $attrStatus;
@@ -307,6 +438,9 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         $attributeList[self::ACT_CLIENT_EDIT_EMAIL][] = $attrStatus;
         $attributeList[self::ACT_USER_SAME_EMAIL_INFO][] = $attrStatus;
         $attributeList[self::ACT_SEARCH_LEADS_BY_IP][] = $attrStatus;
+        $attributeList[self::ACT_TAKE_LEAD_FROM_CALL][] = $attrStatus;
+        $attributeList[self::OBJ_LEAD_PREFERENCES][] = $attrStatus;
+        $attributeList[self::OBJ_LEAD][] = $attrStatus;
 
         return $attributeList;
     }

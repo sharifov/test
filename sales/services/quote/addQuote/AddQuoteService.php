@@ -105,7 +105,7 @@ class AddQuoteService
         $this->quotePriceRepository = $quotePriceRepository;
     }
 
-    public function createQuoteFromSearch(array $quoteData, Lead $lead, Employee $employee)
+    public function createQuoteFromSearch(array $quoteData, Lead $lead, ?Employee $employee)
     {
         return $this->transactionManager->wrap(function () use ($quoteData, $lead, $employee) {
             $quote = Quote::createQuoteFromSearch($quoteData, $lead, $employee);
@@ -147,16 +147,10 @@ class AddQuoteService
         });
     }
 
-    public function autoSelectQuotes(array $quotes, Lead $lead, Employee $employee): void
+    public function autoSelectQuotes(array $quotes, Lead $lead, ?Employee $employee): void
     {
-        $autoSelectQuoteCount = SettingHelper::getFlightQuoteAutoSelectCount();
-        $i = 0;
         foreach ($quotes as $quote) {
-            if ($i === $autoSelectQuoteCount) {
-                break;
-            }
             $this->createQuoteFromSearch($quote, $lead, $employee);
-            $i++;
         }
     }
 

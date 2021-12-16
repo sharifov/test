@@ -2,6 +2,7 @@
 
 namespace common\models\query;
 
+use common\models\Project;
 use common\models\Sources;
 
 /**
@@ -23,5 +24,15 @@ class SourcesQuery extends \yii\db\ActiveQuery
     public function active(): self
     {
         return $this->andWhere(['hidden' => false]);
+    }
+
+    public static function getDefaultSourceByProjectId(int $id): ?Sources
+    {
+        return (Sources::findOne(['default' => 1, 'project_id' => $id]));
+    }
+
+    public static function getFirstSourceByProjectId(int $id): ?Sources
+    {
+        return Sources::findOne(['project_id' => $id]);
     }
 }

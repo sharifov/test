@@ -14,7 +14,7 @@ use yii\db\ActiveRecord;
  *
  * @property int $pqr_parent_pq_id
  * @property int $pqr_related_pq_id
- * @property int $pqr_type_id 1 - replace, 2 - clone, 3 - alternative, 4 - reProtection
+ * @property int $pqr_type_id 1 - replace, 2 - clone, 3 - alternative, 4 - reProtection, 5 - VOLUNTARY_EXCHANGE
  * @property int|null $pqr_created_user_id
  * @property string|null $pqr_created_dt
  *
@@ -30,12 +30,14 @@ class ProductQuoteRelation extends \yii\db\ActiveRecord
     public const TYPE_CLONE = 2;
     public const TYPE_ALTERNATIVE = 3;
     public const TYPE_REPROTECTION = 4;
+    public const TYPE_VOLUNTARY_EXCHANGE = 5;
 
     public const TYPE_LIST = [
         self::TYPE_REPLACE => 'Replace',
         self::TYPE_CLONE => 'Clone',
         self::TYPE_ALTERNATIVE => 'Alternative',
         self::TYPE_REPROTECTION => 'ReProtection',
+        self::TYPE_VOLUNTARY_EXCHANGE => 'Voluntary Exchange',
     ];
 
     public static function tableName(): string
@@ -170,6 +172,16 @@ class ProductQuoteRelation extends \yii\db\ActiveRecord
         $model->pqr_related_pq_id = $relatedId;
         $model->pqr_created_user_id = $userId;
         $model->pqr_type_id = self::TYPE_REPROTECTION;
+        return $model;
+    }
+
+    public static function createVoluntaryExchange(int $parentId, int $relatedId, ?int $userId = null): self
+    {
+        $model = new self();
+        $model->pqr_parent_pq_id = $parentId;
+        $model->pqr_related_pq_id = $relatedId;
+        $model->pqr_created_user_id = $userId;
+        $model->pqr_type_id = self::TYPE_VOLUNTARY_EXCHANGE;
         return $model;
     }
 

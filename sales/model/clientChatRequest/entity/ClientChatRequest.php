@@ -13,6 +13,7 @@ use sales\model\clientChatRequest\useCase\api\create\requestEventCreator\GuestDi
 use sales\model\clientChatRequest\useCase\api\create\requestEventCreator\GuestUtteredEventCreator;
 use sales\model\clientChatRequest\useCase\api\create\requestEventCreator\RoomConnectedEventCreator;
 use sales\model\clientChatRequest\useCase\api\create\requestEventCreator\TrackEventCreator;
+use yii\base\InvalidParamException;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 
@@ -283,6 +284,14 @@ class ClientChatRequest extends \yii\db\ActiveRecord
     public function getPlatformId(): int
     {
         return ClientChatPlatform::getPlatformIdByName($this->decodedData['visitor']['platform'] ?? '');
+    }
+
+    public function getFlightSearchParameters(): array
+    {
+        if (isset($this->decodedData['parameters']) && !is_array($this->decodedData['parameters'])) {
+            throw new \InvalidArgumentException('Property "parameters" in ClientChatRequest.json_data is not array');
+        }
+        return $this->decodedData['parameters'] ?? [];
     }
 
     /**

@@ -170,9 +170,9 @@ class HybridService extends Component
         if (!$response->isOk) {
             \Yii::error([
                 'message' => 'Hybrid Webhook server error',
+                'content' => VarDumper::dumpAsString($response->content),
                 'type' => $type,
                 'data' => $data,
-                'content' => VarDumper::dumpAsString($response->content),
             ], 'Hybrid:wh');
             throw new \DomainException('Hybrid Webhook server error.');
         }
@@ -182,9 +182,9 @@ class HybridService extends Component
         if (!$data) {
             \Yii::error([
                 'message' => 'Hybrid response Data is empty',
+                'content' => VarDumper::dumpAsString($response->content),
                 'type' => $type,
                 'data' => $data,
-                'content' => VarDumper::dumpAsString($response->content),
             ], 'Hybrid:wh');
             throw new \DomainException('Hybrid response Data is empty.');
         }
@@ -192,9 +192,9 @@ class HybridService extends Component
         if (!is_array($data)) {
             \Yii::error([
                 'message' => 'Hybrid response Data type is invalid',
+                'content' => VarDumper::dumpAsString($response->content),
                 'type' => $type,
                 'data' => $data,
-                'content' => VarDumper::dumpAsString($response->content),
             ], 'Hybrid:wh');
             throw new \DomainException('Hybrid response Data type is invalid.');
         }
@@ -205,6 +205,16 @@ class HybridService extends Component
     public function whReprotection(int $projectId, array $data): ?array
     {
         return $this->wh($projectId, 'flight/schedule-change', $data);
+    }
+
+    public function whVoluntaryExchangeSuccess(int $projectId, array $data): ?array
+    {
+        return $this->wh($projectId, 'flight/voluntary-change/create/success', $data);
+    }
+
+    public function whVoluntaryExchangeFail(int $projectId, array $data): ?array
+    {
+        return $this->wh($projectId, 'flight/voluntary-change/create/fail', $data);
     }
 
     private function getProjectUrls(int $projectId): array

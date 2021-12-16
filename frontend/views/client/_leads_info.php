@@ -1,12 +1,17 @@
 <?php
 
 use common\models\Employee;
+use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\lead\src\abac\LeadAbacObject;
+use sales\auth\Auth;
 use yii\grid\GridView;
 use yii\helpers\Html;
 use common\models\Lead;
 use common\models\LeadFlow;
+use yii\helpers\Url;
 
 /* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var \common\models\Call|null $call */
 
 /** @var Employee $user */
 $user = Yii::$app->user->identity;
@@ -188,8 +193,94 @@ $user = Yii::$app->user->identity;
                     'format' => 'raw'
                 ],
 
+                [
+                    'class' => \yii\grid\ActionColumn::class,
+                    'visibleButtons' => [
+                        'linkToCall' => static function (Lead $model, $key, $index) use ($call) {
+                            $leadAbacDto = new LeadAbacDto($model, Auth::id());
+                            return $call && $call->isStatusInProgress() && $call->c_lead_id !== $model->id && Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_LINK_TO_CALL, LeadAbacObject::ACTION_ACCESS);
+                        },
+                        'take' => static function (Lead $model, $key, $index) use ($call) {
+                            $leadAbacDto = new LeadAbacDto($model, Auth::id());
+                            return $call && $call->isStatusInProgress() && Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_TAKE_LEAD_FROM_CALL, LeadAbacObject::ACTION_ACCESS);
+                        }
+                    ],
+                    'buttons' => [
+                        'linkToCall' => static function ($url, Lead $model) use ($call) {
+                            return Html::a(
+                                '<i class="glyphicon glyphicon-link"></i> Link to call',
+                                '#',
+                                [
+                                    'class' => 'btn btn-info btn-xs btn-link-lead-to-call',
+                                    'data-pjax' => 0,
+                                    'title' => 'Link to call',
+                                    'data-call-id' => $call->c_id ?? null,
+                                    'data-lead-id' => $model->id
+                                ]
+                            );
+                        },
+                        'take' => static function ($url, Lead $model) {
+                            return Html::a('Take', '#', [
+                                'class' => 'btn btn-primary btn-xs btn-lead-take',
+                                'data-pjax' => 0,
+                                'title' => 'Take',
+                                'data-url' => Url::to(['/lead/take', 'gid' => $model->gid])
+                            ]);
+                        }
+                    ],
+                    'template' => '{linkToCall} {take}',
+                ]
             ],
         ]) ?>
 
     </div>
 </div>
+
+<?php
+$linkLeadToCallUrl = Url::to(['/lead/ajax-link-to-call']);
+$urlGetClientInfo = Url::to(['/client/ajax-get-info', 'client_id' => $call->c_client_id ?? null, 'callSid' => $call->c_call_sid ?? null]);
+$js = <<<JS
+$('body').off('click', '.btn-lead-take').on('click', '.btn-lead-take', function (e) {
+    e.preventDefault();
+    let url = $(this).data('url');
+    let leadWindow = window.open(url, '_blank');
+    leadWindow.addEventListener('load', function () {
+        pjaxReload({container: '#client_leads_info', push: false, replace: false, timeout: 5000, url: '$urlGetClientInfo'});
+    });
+    leadWindow.focus();
+});
+ $('body').off('click', '.btn-link-lead-to-call').on('click', '.btn-link-lead-to-call', function (e) {
+    e.preventDefault();
+    
+    let btn = $(this);
+    let btnHtml = btn.html();
+    let leadId = btn.data('lead-id');
+    let callId = btn.data('call-id');
+    
+    $.ajax({
+        type: 'post',
+        url: '$linkLeadToCallUrl',
+        data: {leadId: leadId, callId: callId},
+        dataType: 'json',
+        beforeSend: function () {
+            btn.html('<i class="fa fa-spin fa-spinner" />').addClass('disabled');
+        },
+        success: function (data) {
+            if (data.error) {
+                createNotify('Error', data.message, 'error');
+            } else {
+                createNotify('Success', 'Lead successfully assigned to call', 'success');
+                pjaxReload({container: '#client_leads_info', push: false, replace: false, timeout: 5000, url: '$urlGetClientInfo'});
+            }
+        },
+        complete: function () {
+            btn.html(btnHtml).removeClass('disabled');
+        },
+        error: function (xhr) {
+            createNotify('Error', xhr.responseText, 'error');
+        }
+    })
+});
+JS;
+
+$this->registerJs($js);

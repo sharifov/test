@@ -115,7 +115,7 @@ class LeadCreateHandler
 
             $lead->setTripType($this->calculateTripType($form->flightsForm));
 
-            $lead->l_is_test = $this->clientManageService->checkIfPhoneIsTest([$form->clientForm->phone]);
+            $lead->l_is_test = $form->is_test ? 1 : $this->clientManageService->checkIfPhoneIsTest([$form->clientForm->phone]);
 
             $leadId = $this->leadRepository->save($lead);
 

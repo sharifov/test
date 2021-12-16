@@ -9,9 +9,12 @@ use sales\entities\cases\Cases;
 use yii\widgets\Pjax;
 use common\models\Language;
 
-/* @var $this yii\web\View */
-/* @var $searchModel sales\entities\cases\CasesQSearch */
-/* @var $dataProvider yii\data\ActiveDataProvider */
+/**
+ * @var $this yii\web\View
+ * @var $searchModel sales\entities\cases\CasesQSearch
+ * @var $dataProvider yii\data\ActiveDataProvider
+ * @var $isAgent bool
+ */
 
 $this->title = 'Pending Queue';
 $this->params['breadcrumbs'][] = $this->title;
@@ -23,12 +26,12 @@ $this->params['breadcrumbs'][] = $this->title;
 
 <div class="cases-q-pending">
 
-    <?php Pjax::begin(['id' => 'cases-q-pending-pjax-list', 'timeout' => 5000, 'enablePushState' => true]); ?>
+    <?php Pjax::begin(['id' => 'cases-q-pending-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'scrollTo' => 0]); ?>
 
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
-
     <?= GridView::widget([
+        'id' => 'pending-gv',
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [

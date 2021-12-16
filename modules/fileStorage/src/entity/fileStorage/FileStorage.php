@@ -133,7 +133,7 @@ class FileStorage extends \yii\db\ActiveRecord
             ['fs_expired_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s', 'skipOnEmpty' => true],
 
             ['fs_mime_type', 'trim'],
-            ['fs_mime_type', 'string', 'max' => 127],
+            ['fs_mime_type', 'string', 'max' => 200],
 
             ['fs_name', 'trim'],
             ['fs_name', 'string', 'max' => 100],

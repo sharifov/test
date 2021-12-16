@@ -17,6 +17,8 @@ use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
 use modules\flight\src\dto\ngs\QuoteNgsDataDto;
 use modules\flight\src\useCases\flightQuote\create\FlightQuotePaxPriceDTO;
 use modules\flight\src\useCases\flightQuote\createManually\FlightQuoteCreateForm;
+use modules\flight\src\useCases\form\ChangeQuoteCreateForm;
+use modules\flight\src\useCases\voluntaryExchangeManualCreate\form\VoluntaryQuoteCreateForm;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productQuote\ProductQuote;
 use sales\helpers\app\AppHelper;
@@ -29,8 +31,9 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Json;
 
-use function Amp\Promise\timeoutWithDefault;
-
+/**
+ * Class FlightQuoteHelper
+ */
 class FlightQuoteHelper
 {
     /**
@@ -565,6 +568,8 @@ class FlightQuoteHelper
                 $segment['cabin'] = SearchService::getCabinRealCode($segment['cabin']);
                 if (!empty($operationAirlineCode)) {
                     $segment['operatingAirline'] = $operationAirlineCode;
+                    $operatingAirline = Airline::findIdentity($operationAirlineCode);
+                    $segment['operatingAirlineName'] = $operatingAirline->name ?? $operationAirlineCode;
                 }
                 if (count($data) != 0 && isset($data[count($data) - 1])) {
                     $previewSegment = $data[count($data) - 1];
@@ -1236,14 +1241,38 @@ class FlightQuoteHelper
         return $result;
     }
 
-    /**
-     * @param DateTime $departureDateTime
-     * @param DateTime $arrivalDateTime
-     * @return int
-     */
-    private static function isMoreOneDay(DateTime $departureDateTime, DateTime $arrivalDateTime): int
+    public static function isNextTrip(array $prevSegment, array $curSegment): bool
+    {
+        if ((!$prevArrivalDateTime = $prevSegment['arrivalDateTime'] ?? null) || !($prevArrivalDateTime instanceof DateTime)) {
+            throw new \RuntimeException('ArrivalDateTime is corrupted');
+        }
+        if ((!$departureDateTime = $curSegment['departureDateTime'] ?? null) || !($departureDateTime instanceof DateTime)) {
+            throw new \RuntimeException('DepartureDateTime is corrupted');
+        }
+        if (self::isMoreOneDay($prevArrivalDateTime, $departureDateTime)) {
+            return true;
+        }
+
+        if ((!$prevArrivalAirport = $prevSegment['arrivalAirport'] ?? null) || !is_string($prevArrivalAirport)) {
+            throw new \RuntimeException('ArrivalAirport is corrupted');
+        }
+        if ((!$departureAirport = $curSegment['departureAirport'] ?? null) || !is_string($departureAirport)) {
+            throw new \RuntimeException('DepartureAirport is corrupted');
+        }
+        if (!self::isEqualLocation($prevArrivalAirport, $departureAirport)) {
+            return true;
+        }
+        return false;
+    }
+
+    private static function isEqualLocation(string $prevArrivalAirport, string $departureAirport): bool
+    {
+        return $prevArrivalAirport === $departureAirport;
+    }
+
+    private static function isMoreOneDay(DateTime $departureDateTime, DateTime $arrivalDateTime): bool
     {
         $diff = $departureDateTime->diff($arrivalDateTime);
-        return (int)sprintf('%d%d%d', $diff->y, $diff->m, $diff->d) >= 1;
+        return (int) sprintf('%d%d%d', $diff->y, $diff->m, $diff->d) >= 1;
     }
 }

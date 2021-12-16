@@ -1,8 +1,6 @@
 <?php
 
 return [
-    'serviceName' => 'sales-console',
-
     'webSocketServer' => [
         'host' => env('console.config.params.webSocketServer.host'),
         'port' => env('console.config.params.webSocketServer.port'),

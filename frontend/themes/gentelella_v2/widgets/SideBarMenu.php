@@ -68,12 +68,9 @@ class SideBarMenu extends \yii\bootstrap\Widget
         }
         $menuLItems[] = ['label' => 'Create New Lead', 'url' => ['/lead/create2'], 'icon' => 'plus', 'attributes' => ['data-ajax-link' => true, 'data-modal-title' => 'Create New Lead']];
 
-
         $menuLItems[] = ['label' => 'Search Leads', 'url' => ['/leads/index'], 'icon' => 'search'];
 
-        if (($profile = $user->userProfile) && $profile->up_auto_redial) {
-            $menuLItems[] = ['label' => 'Lead Redial <span id="badges-redial" data-type="redial" class="label-info label pull-right bginfo text"></span>', 'url' => ['/lead-redial/index'], 'icon' => 'phone'];
-        }
+        $menuLItems[] = ['label' => 'Lead Redial <span id="badges-redial" data-type="redial" class="label-info label pull-right bginfo text"></span>', 'url' => ['/lead-redial/index'], 'icon' => 'phone'];
 
         $menuLItems[] = ['label' => 'New', 'url' => ['/lead/new'], 'icon' => 'paste text-warning'];
 
@@ -199,6 +196,20 @@ class SideBarMenu extends \yii\bootstrap\Widget
         ];
 
         $menuItems[] = [
+            'label' => 'Email <span class="label-info label pull-right"></span> ',
+            'url' => 'javascript:',
+            'icon' => 'envelope',
+            'items' => [
+                ['label' => 'Emails', 'url' => ['/email/index'], 'icon' => 'envelope'],
+                ['label' => 'Review Queue All', 'url' => ['/email-review-queue/index'], 'icon' => 'list'],
+                ['label' => 'Review Queue Pending', 'url' => ['/email-review-queue/pending'], 'icon' => 'list'],
+                ['label' => 'Review Queue Completed', 'url' => ['/email-review-queue/completed'], 'icon' => 'list'],
+                ['label' => 'Email List', 'url' => ['/email-list/index'], 'icon' => 'envelope-o'],
+                ['label' => 'Email Review Queue Crud', 'url' => ['/email-review-queue-crud/index'], 'icon' => 'list'],
+            ]
+        ];
+
+        $menuItems[] = [
             'label' => 'Client Chat' . '<span id="div-cnt-client-chat"><span class="label-success label pull-right _cc_unread_messages"></span></span>',
             'url' => 'javascript:',
             'icon' => 'comments',
@@ -269,11 +280,11 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Client Chat Component Event', 'url' => ['/client-chat-component-event/index']],
                         ['label' => 'Client Chat Component Event CRUD', 'url' => ['/client-chat-component-event-crud/index']],
                         ['label' => 'Client Chat Component Rule CRUD', 'url' => ['/client-chat-component-rule-crud/index']],
+                        ['label' => 'Client Chat Data Request CRUD', 'url' => ['/client-chat-data-request-crud/index']],
                     ],
                 ],
                 ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'list'],
                 ['label' => 'SMS Distrib List', 'url' => ['/sms-distribution-list/index'], 'icon' => 'list'],
-                ['label' => 'Emails', 'url' => ['/email/index'], 'icon' => 'envelope'],
                 ['label' => 'Notification List', 'url' => ['/notifications/index'], 'icon' => 'bell-o'],
 
                 [
@@ -298,6 +309,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     'url' => 'javascript:',
                     'icon' => 'phone',
                     'items' => [
+                        ['label' => 'Redial user access', 'url' => ['/call-redial-user-access/index']],
                         ['label' => 'Lead QCall List', 'url' => ['/lead-qcall/list']],
                         ['label' => 'Lead QCall All', 'url' => ['/lead-qcall/index']],
                         ['label' => 'QCall Config', 'url' => ['/qcall-config/index']],
@@ -351,9 +363,10 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     'url' => 'javascript:',
                     'icon' => 'list',
                     'items' => [
-                        ['label' => 'Phone List', 'url' => ['/contact-phone-list-crud/index']],
+                        ['label' => 'Phone List CRUD', 'url' => ['/contact-phone-list-crud/index']],
                         ['label' => 'Phone Data', 'url' => ['/contact-phone-data-crud/index']],
                         ['label' => 'Phone service info', 'url' => ['/contact-phone-service-info-crud/index']],
+                        ['label' => 'Phone List', 'url' => ['/contact-phone-list/index']],
                     ]
                 ]
             ]
@@ -376,7 +389,26 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'Client Account Social', 'url' => ['/client-account-social-crud/index'], 'icon' => 'odnoklassniki'],
                 ['label' => 'Client Visitor', 'url' => ['/client-visitor-crud/index'], 'icon' => 'comments'],
                 ['label' => 'Visitor Subscription', 'url' => ['/visitor-subscription-crud/index'], 'icon' => 'bell'],
-            ]
+                [
+                    'label' => 'Notifications',
+                    'url' => 'javascript:',
+                    'icon' => 'list',
+                    'items' => [
+                        ['label' => 'Notifications', 'url' => ['/client-notification/index']],
+                        ['label' => 'Phone', 'url' => ['/client-notification-phone-list/index']],
+                        ['label' => 'Sms', 'url' => ['/client-notification-sms-list/index']],
+                    ]
+                ],
+                [
+                    'label' => 'Client Data',
+                    'url' => 'javascript:',
+                    'icon' => 'th-list',
+                    'items' => [
+                        ['label' => 'Client Data Key', 'url' => ['/client-data-key-crud/index'], 'icon' => 'key'],
+                        ['label' => 'Client Data', 'url' => ['/client-data-crud/index'], 'icon' => 'list'],
+                    ]
+                ],
+            ],
         ];
 
         $menuNewData = [
@@ -402,6 +434,8 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     ['label' => 'Product Quote Option Refund', 'url' => ['/product/product-quote-option-refund-crud/index']],
                     ['label' => 'Product Quote Object Refund', 'url' => ['/product/product-quote-object-refund-crud/index']],
                     ['label' => 'Product Quote Change', 'url' => ['/product/product-quote-change-crud/index']],
+                    ['label' => 'Product Quote Change Relation', 'url' => ['/product/product-quote-change-relation-crud/index']],
+                    ['label' => 'Product Quote Data', 'url' => ['/product/product-quote-data-crud/index']],
                 ], 'hasChild' => true],
 
                 ['label' => 'Orders', 'url' => 'javascript:', 'items' => [
@@ -506,9 +540,8 @@ class SideBarMenu extends \yii\bootstrap\Widget
 
 
                 ['label' => 'Phone List', 'url' => ['/phone-list/index'], 'icon' => 'phone'],
-                ['label' => 'Phone Blacklist', 'url' => ['/phone-blacklist/index'], 'icon' => 'phone'],
-                ['label' => 'Phone Blacklist Log', 'url' => ['/phone-blacklist-log-crud/index'], 'icon' => 'phone'],
-                ['label' => 'Email List', 'url' => ['/email-list/index'], 'icon' => 'envelope-o'],
+                ['label' => 'Phone BlockList', 'url' => ['/phone-blacklist/index'], 'icon' => 'phone'],
+                ['label' => 'Phone BlockList Log', 'url' => ['/phone-blacklist-log-crud/index'], 'icon' => 'phone'],
 
                 //['label' => 'Airlines', 'url' => ['/settings/airlines'], 'icon' => 'plane'],
                 ['label' => 'Airlines', 'url' => ['/airline-crud/index'], 'icon' => 'space-shuttle'],
@@ -607,6 +640,8 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     'url' => ['/user-model-setting-crud/index'],
                     'icon' => 'list',
                 ],
+                ['label' => 'User Stat Day', 'url' => ['/user-stat-day-crud/index'], 'icon' => 'list'],
+                ['label' => 'User Data', 'url' => ['/user-data-crud/index'], 'icon' => 'list'],
             ]
         ];
 
@@ -750,6 +785,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     ]
                 ],
                 ['label' => 'User Stats dashboard', 'url' => ['/user-stats/index'], 'icon' => 'users'],
+                ['label' => 'User Stats Report', 'url' => ['/user-stats/report'], 'icon' => 'users'],
             ]
         ];
 
@@ -784,6 +820,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
             'url' => 'javascript:',
             'icon' => 'cog',
             'items' => [
+                ['label' => 'Site Settings', 'url' => ['/setting/index'], 'icon' => 'cogs text-success'],
                 ['label' => 'System Logs', 'url' => ['/log/index'], 'icon' => 'bug text-warning'],
                 ['label' => 'API Logs', 'url' => ['/api-log/index'], 'icon' => 'sitemap'],
                 ['label' => 'API Report', 'url' => ['/stats/api-graph'], 'icon' => 'bar-chart'],
@@ -800,6 +837,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => Yii::t('menu', 'Check Exclude IP'), 'url' => ['/tools/check-exclude-ip']],
                         ['label' => Yii::t('menu', 'Stash Log Files'), 'url' => ['/tools/stash-log-file']],
                         ['label' => Yii::t('menu', 'DB Info'), 'url' => ['/tools/db-info']],
+                        ['label' => Yii::t('menu', 'DB View'), 'url' => ['/tools/db-view'], 'icon' => 'database'],
                         ['label' => 'Check phone', 'url' => ['/tools/check-phone'], 'icon' => 'volume-control-phone'],
                         ['label' => 'Import phones', 'url' => ['/tools/import-phone'], 'icon' => 'caret-square-o-up'],
                     ]
@@ -808,7 +846,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 $menuLanguages,
 
                 ['label' => 'Site Settings Category', 'url' => ['/setting-category/index'], 'icon' => 'list'],
-                ['label' => 'Site Settings', 'url' => ['/setting/index'], 'icon' => 'cogs'],
+
                 ['label' => 'Virtual cron', 'url' => ['/virtual-cron/cron-scheduler/index'], 'icon' => 'cogs'],
                 ['label' => 'Site ENV', 'url' => ['/setting/env'], 'icon' => 'info-circle'],
                 ['label' => 'Call Terminate Log', 'url' => ['/call-terminate-log-crud/index'], 'icon' => 'list'],

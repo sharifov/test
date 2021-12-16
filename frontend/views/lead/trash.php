@@ -9,11 +9,14 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
 use common\models\Lead;
+use sales\auth\Auth;
 
-/* @var $this yii\web\View */
-/* @var $searchModel common\models\search\LeadSearch */
-/* @var $dataProvider yii\data\ActiveDataProvider */
-/** @var common\models\Employee $user */
+/**
+ * @var common\models\Employee $user
+ * @var $this yii\web\View
+ * @var $searchModel common\models\search\LeadSearch
+ * @var $dataProvider yii\data\ActiveDataProvider
+ */
 
 $this->title = 'Trash Queue';
 
@@ -32,7 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
 </h1>
 <div class="lead-index">
 
-    <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]);?>
+    <?php Pjax::begin(['timeout' => 6000, 'scrollTo' => 0]); ?>
 
     <?php $form = ActiveForm::begin([
             'action' => ['trash'],
@@ -360,6 +363,41 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'class' => 'yii\grid\ActionColumn',
+            'template' => '{take} <br> {view}',
+            'visibleButtons' => [
+                'take' => static function (Lead $model, $key, $index) {
+                    return Auth::user()->isAgent();
+                },
+                /*'view' => static function (Lead $model, $key, $index) {
+                    return Auth::can('lead/view', ['lead' => $model]);
+                },*/
+            ],
+            'buttons' => [
+                'take' => static function ($url, Lead $model) {
+                    return Html::a('<i class="fa fa-download"></i> Take', [
+                        'lead/take',
+                        'gid' => $model->gid
+                    ], [
+                        'class' => 'btn btn-primary btn-xs take-processing-btn',
+                        'data-pjax' => 0,
+                    ]);
+                },
+                'view' => static function ($url, Lead $model) {
+                    return Html::a('<i class="glyphicon glyphicon-search"></i> View', [
+                        'lead/view',
+                        'gid' => $model->gid
+                    ], [
+                        'class' => 'btn btn-info btn-xs',
+                        'target' => '_blank',
+                        'data-pjax' => 0,
+                        'title' => 'View lead',
+                    ]);
+                }
+            ],
+        ]
+
+        /*[
+            'class' => 'yii\grid\ActionColumn',
             'template' => '{action}',
             'buttons' => [
                 'action' => function ($url, \common\models\Lead $model, $key) {
@@ -378,13 +416,14 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $buttons;
                 }
             ]
-        ]
+        ]*/
     ];
 
     ?>
     <?php
 
     echo \yii\grid\GridView::widget([
+        'id' => 'lead-trash-gv',
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => $gridColumns,

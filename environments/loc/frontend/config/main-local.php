@@ -14,11 +14,17 @@ if (!YII_ENV_TEST) {
     $config['bootstrap'][] = 'debug';
     $config['modules']['debug'] = [
         'class' => 'yii\debug\Module',
+        'allowedIPs' => ['*']
     ];
 
     $config['bootstrap'][] = 'gii';
     $config['modules']['gii'] = [
         'class' => 'yii\gii\Module',
+        'allowedIPs' => ['*'],
+        'generators' => [
+            'model' => ['class' => \common\components\gii\model\Generator::class],
+            'crud' => ['class' => \common\components\gii\crud\Generator::class],
+        ],
     ];
 }
 

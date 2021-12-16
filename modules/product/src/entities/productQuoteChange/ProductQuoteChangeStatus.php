@@ -2,46 +2,62 @@
 
 namespace modules\product\src\entities\productQuoteChange;
 
+use sales\helpers\setting\SettingHelper;
 use yii\bootstrap4\Html;
 
 class ProductQuoteChangeStatus
 {
     public const NEW = 1;
-    public const DECISION_PENDING = 2;
+    public const PENDING = 2;
+    public const CONFIRMED = 10;
     public const IN_PROGRESS = 3;
-    public const COMPLETE = 4;
+    public const PROCESSING = 8;
+    public const COMPLETED = 4;
     public const CANCELED = 5;
     public const ERROR = 6;
     public const DECLINED = 7;
-    public const DECIDED = 8;
 
     public const LIST = [
         self::NEW => 'New',
-        self::DECISION_PENDING => 'Decision pending',
+        self::PENDING => 'Pending',
         self::IN_PROGRESS => 'In progress',
-        self::COMPLETE => 'Complete',
+        self::COMPLETED => 'Completed',
         self::CANCELED => 'Canceled',
         self::ERROR => 'Error',
         self::DECLINED => 'Declined',
-        self::DECIDED => 'Decided',
+        self::PROCESSING => 'Processing',
+        self::CONFIRMED => 'Confirmed',
     ];
 
     private const CLASS_LIST = [
-        self::NEW => 'info',
-        self::DECISION_PENDING => 'warning',
+        self::NEW => 'primary',
+        self::PENDING => 'warning',
         self::IN_PROGRESS => 'info',
-        self::COMPLETE => 'success',
-        self::CANCELED => 'danger',
+        self::COMPLETED => 'success',
+        self::CANCELED => 'awake',
         self::ERROR => 'danger',
-        self::DECLINED => 'danger',
-        self::DECIDED => 'info',
+        self::DECLINED => 'awake',
+        self::PROCESSING => 'info',
+        self::CONFIRMED => 'info',
     ];
 
     public const PROCESSING_LIST = [
-        self::DECIDED,
+        self::PROCESSING,
         self::IN_PROGRESS,
-        self::NEW,
-        self::DECISION_PENDING
+        self::COMPLETED,
+        self::CANCELED,
+    ];
+
+    private const UNIQUE_KEY_LIST = [
+        self::NEW => 'new',
+        self::PENDING => 'pending',
+        self::CONFIRMED => 'confirmed',
+        self::CANCELED => 'canceled',
+        self::COMPLETED => 'completed',
+        self::ERROR => 'error',
+        self::PROCESSING => 'processing',
+        self::IN_PROGRESS => 'in_progress',
+        self::DECLINED => 'declined'
     ];
 
     public static function getList(): array
@@ -66,5 +82,26 @@ class ProductQuoteChangeStatus
     private static function getClassName(?int $value): string
     {
         return self::CLASS_LIST[$value] ?? 'secondary';
+    }
+
+    public static function getNames(array $statusIds): array
+    {
+        $result = [];
+        foreach ($statusIds as $value) {
+            $result[] = self::getName($value);
+        }
+        return $result;
+    }
+
+    public static function getKeyById(int $id): ?string
+    {
+        return self::UNIQUE_KEY_LIST[$id] ?? null;
+    }
+
+    public static function getClientKeyStatusById(int $id): string
+    {
+        $key = self::getKeyById($id);
+        $statusMap = SettingHelper::getProductQuoteChangeClientStatusMapping();
+        return $statusMap[$key] ?? '';
     }
 }

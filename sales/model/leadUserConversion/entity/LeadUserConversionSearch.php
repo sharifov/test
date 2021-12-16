@@ -3,7 +3,6 @@
 namespace sales\model\leadUserConversion\entity;
 
 use yii\data\ActiveDataProvider;
-use sales\model\leadUserConversion\entity\LeadUserConversion;
 
 class LeadUserConversionSearch extends LeadUserConversion
 {
@@ -14,6 +13,7 @@ class LeadUserConversionSearch extends LeadUserConversion
             ['luc_lead_id', 'integer'],
             ['luc_user_id', 'integer'],
             ['luc_created_dt', 'date', 'format' => 'php:Y-m-d'],
+            ['luc_created_user_id', 'integer'],
         ];
     }
 
@@ -37,6 +37,7 @@ class LeadUserConversionSearch extends LeadUserConversion
         $query->andFilterWhere([
             'luc_lead_id' => $this->luc_lead_id,
             'luc_user_id' => $this->luc_user_id,
+            'luc_created_user_id' => $this->luc_created_user_id,
             'DATE(luc_created_dt)' => $this->luc_created_dt,
         ]);
 

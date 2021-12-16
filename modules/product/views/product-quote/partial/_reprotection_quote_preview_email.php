@@ -12,6 +12,7 @@ $url = Url::to(['/product/product-quote/reprotection-quote-send-email']);
 ?>
 
   <script>
+      pjaxOffFormSubmit('#reprotection_quote_choose_cliet_pjax');
       pjaxOffFormSubmit('#reprotection_quote_preview_email_pjax');
   </script>
 <?php
@@ -23,14 +24,11 @@ $url = Url::to(['/product/product-quote/reprotection-quote-send-email']);
 ]);
 ?>
 <?php $activeForm = \yii\bootstrap\ActiveForm::begin([
-    'method' => 'post',
     'options' => [
         'data-pjax' => 1,
         'class' => 'panel-body',
     ],
-    'id' => 'reprotection_quote_preview_email_form',
-    'enableClientValidation' => false,
-    'action' => $url
+    'action' => [$url]
 ]);
 
 echo $activeForm->errorSummary($previewEmailForm);
@@ -45,6 +43,8 @@ echo $activeForm->errorSummary($previewEmailForm);
 
             <?= $activeForm->field($previewEmailForm, 'case_id')->hiddenInput()->label(false); ?>
             <?= $activeForm->field($previewEmailForm, 'productQuoteId')->hiddenInput()->label(false); ?>
+            <?= $activeForm->field($previewEmailForm, 'orderId')->hiddenInput()->label(false); ?>
+            <?= $activeForm->field($previewEmailForm, 'pqcId')->hiddenInput()->label(false); ?>
             <?= $activeForm->field($previewEmailForm, 'language_id')->hiddenInput()->label(false); ?>
             <?= $activeForm->field($previewEmailForm, 'email_tpl_id')->hiddenInput()->label(false); ?>
         </div>
@@ -95,7 +95,7 @@ echo $activeForm->errorSummary($previewEmailForm);
 
     <div class="btn-wrapper text-right">
         <?= Html::button('<i class="fa fa-close"></i> Cancel', ['class' => 'btn btn-sm btn-danger', 'data-dismiss' => 'modal']) ?>
-        <?= Html::submitButton('<i class="fa fa-envelope-o"></i> Send Email', ['class' => 'btn btn-sm btn-success', 'id' => 'reprotection-quote-send-email-btn']) ?>
+        <?= Html::button('<i class="fa fa-envelope-o"></i> Send Email', ['class' => 'btn btn-sm btn-success', 'id' => 'reprotection-quote-send-email-btn']) ?>
         <?php // Html::button('<i class="fa fa-list"></i> Show Email data (for Admins)', ['class' => 'btn btn-lg btn-warning', 'onclick' => '$("#email-data-content-div").toggle()'])?>
     </div>
 <?php \yii\bootstrap\ActiveForm::end(); ?>
@@ -105,9 +105,11 @@ echo $activeForm->errorSummary($previewEmailForm);
 <?php
 
 $js = <<<JS
-$("#reprotection_quote_preview_email_pjax").on("pjax:start", function() {
+$('body').off('click', '#reprotection-quote-send-email-btn').on('click', '#reprotection-quote-send-email-btn', function (e) {
+    e.preventDefault();
     $('#reprotection-quote-send-email-btn').find('i').replaceWith('<i class="fa fa-spin fa-spinner"></i>');
     $('#reprotection-quote-send-email-btn').addClass('disabled').prop('disabled', true);
+    $(this).closest('form').submit();
 });
 JS;
 $this->registerJs($js);

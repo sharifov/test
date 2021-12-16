@@ -3,7 +3,7 @@
 /* @var $this yii\web\View */
 /* @var $order \modules\order\src\entities\order\Order */
 /* @var $index integer */
-/* @var $caseId integer */
+/* @var $case \sales\entities\cases\Cases */
 /* @var $caseAbacDto \modules\cases\src\abac\dto\CasesAbacDto */
 
 use common\models\Currency;
@@ -207,41 +207,40 @@ $orderAbacDto = new OrderAbacDto($order);
                     <th>Product</th>
                     <th>Booking ID</th>
                     <th>Status</th>
-                    <th>Change Status / Decision</th>
-                    <th>Refund Status</th>
+                    <th title="Product Quote Options" style="width: 50px">Opt</th>
                     <th>Created</th>
                     <th>Client Price</th>
                     <th></th>
                 </tr>
                 <?php foreach ($order->nonReprotectionProductQuotes as $productQuote) :
-                    $quote = $productQuote;
-                    $ordTotalPrice += $quote->pq_price;
-                    $ordTotalFee += $quote->pq_service_fee_sum;
-                    $ordClientTotalPrice += $quote->pq_client_price;
-                    $ordOptionTotalPrice += $quote->optionAmountSum;
+//                    $ordTotalPrice += $productQuote->pq_price;
+//                    $ordTotalFee += $productQuote->pq_service_fee_sum;
+//                    $ordClientTotalPrice += $productQuote->pq_client_price;
+//                    $ordOptionTotalPrice += $productQuote->optionAmountSum;
                     ?>
                       <tr>
-                          <?= $this->render('_product_quote_item', [
-                              'quote' => $quote,
+                          <?= $this->render('_reprotection_quote_item', [
+                              'quote' => $productQuote,
                               'nr' => $nr++,
                               'order' => $order,
                               'isReprotection' => false,
-                              'caseId' => $caseId,
-                              'caseAbacDto' => $caseAbacDto
+                              'case' => $case,
+                              'caseAbacDto' => $caseAbacDto,
+                              'projectId' => $order->or_project_id
                           ]) ?>
                       </tr>
                 <?php endforeach; ?>
                 <?php
-                    $ordTotalPrice = round($ordTotalPrice, 2);
-                    $ordClientTotalPrice = round($ordClientTotalPrice, 2);
-                    $ordOptionTotalPrice = round($ordOptionTotalPrice, 2);
-                    $ordTotalFee = round($ordTotalFee, 2);
+//                    $ordTotalPrice = round($ordTotalPrice, 2);
+//                    $ordClientTotalPrice = round($ordClientTotalPrice, 2);
+//                    $ordOptionTotalPrice = round($ordOptionTotalPrice, 2);
+//                    $ordTotalFee = round($ordTotalFee, 2);
 
-                    $orderTipsAmount = $order->orderTips ? $order->orderTips->ot_amount : 0.00;
-                    $orderTipsAmountClient = $order->orderTips ? $order->orderTips->ot_client_amount : 0.00;
+//                    $orderTipsAmount = $order->orderTips->ot_amount ?? 0.00;
+                    $orderTipsAmountClient = $order->orderTips->ot_client_amount ?? 0.00;
 
-                    $calcTotalPrice = round($ordTotalPrice + $ordOptionTotalPrice + $orderTipsAmount, 2);
-                    $calcClientTotalPrice = round(($calcTotalPrice) * $order->or_client_currency_rate, 2);
+//                    $calcTotalPrice = round($ordTotalPrice + $ordOptionTotalPrice + $orderTipsAmount, 2);
+//                    $calcClientTotalPrice = round(($calcTotalPrice) * $order->or_client_currency_rate, 2);
 
                 ?>
                 <?php /*
@@ -261,9 +260,9 @@ $orderAbacDto = new OrderAbacDto($order);
                     <th></th>
                 </tr>
  */ ?>
-                <tr>
-                    <th class="text-right" colspan="7">Total (price + opt + tips): </th>
-                    <th class="text-right"><?=number_format($calcClientTotalPrice, 2)?> <?=Html::encode($order->or_client_currency)?></th>
+                <tr title="From DB">
+                    <th class="text-right" colspan="6">Total (price + opt + tips): </th>
+                    <th class="text-right"><?=number_format($order->or_client_total + $orderTipsAmountClient, 2)?> <?=Html::encode($order->or_client_currency)?></th>
                     <td></td>
                 </tr>
             <?php endif; ?>
@@ -583,6 +582,33 @@ $('body').off('click', '.has_reprotection_quotes').on('click', '.has_reprotectio
     
     tr.next(1).toggleClass('hidden');
 });
+
+$('body').off('click', '.btn_voluntary_offer_email').on('click', '.btn_voluntary_offer_email', function (e) {
+    e.preventDefault();
+    
+    let btn = $(this);
+    let btnIconHtml = btn.find('i')[0];
+    let iconSpinner = '<i class="fa fa-spin fa-spinner"></i>';
+    let url = btn.data('url');
+    
+    btn.find('i').replaceWith(iconSpinner);
+    btn.addClass('disabled');
+    
+    let modal = $('#modal-md');
+    $('#modal-md-label').html('Send Flight Voluntary Change Email');
+    modal.find('.modal-body').html('');
+    let id = $(this).attr('data-id');
+    modal.find('.modal-body').load(url, function( response, status, xhr ) {
+        if(status === 'error') {
+            createNotify('Error', xhr.responseText, 'error');
+        } else {
+          modal.modal('show');
+        }
+        btn.find('i').replaceWith(btnIconHtml);
+        btn.removeClass('disabled');
+    });
+});
+
 $('body').off('click', '.btn-send-reprotection-quote-email').on('click', '.btn-send-reprotection-quote-email', function (e) {
     e.preventDefault();
     
@@ -608,6 +634,30 @@ $('body').off('click', '.btn-send-reprotection-quote-email').on('click', '.btn-s
         btn.removeClass('disabled');
     });
 });
+$('body').off('click', '.btn-send-voluntary-refund-quote-email').on('click', '.btn-send-voluntary-refund-quote-email', function (e) {
+    e.preventDefault();
+    
+    let btn = $(this);
+    let btnIconHtml = btn.find('i')[0];
+    let iconSpinner = '<i class="fa fa-spin fa-spinner"></i>';
+    let url = btn.data('url');
+    
+    btn.find('i').replaceWith(iconSpinner);
+    btn.addClass('disabled');
+    
+    let modal = $('#modal-md');
+    $('#modal-md-label').html('Send Flight Voluntary Refund Email');
+    modal.find('.modal-body').html('');
+    modal.find('.modal-body').load(url, function( response, status, xhr ) {
+        if(status === 'error') {
+            createNotify('Error', xhr.responseText, 'error');
+        } else {
+          modal.modal('show');
+        }
+        btn.find('i').replaceWith(btnIconHtml);
+        btn.removeClass('disabled');
+    });
+});
 $('body').off('click', '.btn-origin-reprotection-quote-diff').on('click', '.btn-origin-reprotection-quote-diff', function (e) {
     e.preventDefault();
     
@@ -620,7 +670,7 @@ $('body').off('click', '.btn-origin-reprotection-quote-diff').on('click', '.btn-
     btn.addClass('disabled');
     
     let modal = $('#modal-lg');
-    $('#modal-lg-label').html('Origin And Reprotection Quotes Difference');
+    $('#modal-lg-label').html('Origin And Change Quotes Difference');
     modal.find('.modal-body').html('');
     modal.find('.modal-body').load(url, function( response, status, xhr ) {
         if(status === 'error') {
@@ -646,7 +696,10 @@ $('body').off('click', '.btn-reprotection-confirm').on('click', '.btn-reprotecti
     $.ajax({
         type: 'POST',
         data: {
-            quoteId: btn.data('reprotection-quote-id')
+            quoteId: btn.data('reprotection-quote-id'),
+            case_id: btn.data('case_id'),
+            order_id: btn.data('order_id'),
+            pqc_id: btn.data('pqc_id')
         },
         url: url     
     })
@@ -665,13 +718,17 @@ $('body').off('click', '.btn-reprotection-confirm').on('click', '.btn-reprotecti
         createNotify('Reprotection confirm', 'Server error', 'error');
     });
 });
-$('body').off('click', '.btn-reprotection-refund').on('click', '.btn-reprotection-refund', function (e) {
+$('body').off('click', '.btn-reprotection-refund, .btn-reprotection-recommended, .btn-reprotection-decline').on('click', '.btn-reprotection-refund, .btn-reprotection-recommended, .btn-reprotection-decline', function (e) {
     e.preventDefault();
-    
+    if(!confirm('Are you sure?')) {
+        return false;
+    } 
+
     let btn = $(this);
     let btnIconHtml = btn.find('i')[0];
     let iconSpinner = '<i class="fa fa-spin fa-spinner"></i>';
     let url = btn.data('url');
+    let title = btn.data('title');
     
     btn.find('i').replaceWith(iconSpinner);
     btn.addClass('disabled');
@@ -679,7 +736,10 @@ $('body').off('click', '.btn-reprotection-refund').on('click', '.btn-reprotectio
     $.ajax({
         type: 'POST',
         data: {
-            quoteId: btn.data('reprotection-quote-id')
+            quoteId: btn.data('reprotection-quote-id'),
+            case_id: btn.data('case_id'),
+            order_id: btn.data('order_id'),
+            pqc_id: btn.data('pqc_id')
         },
         url: url     
     })
@@ -687,15 +747,16 @@ $('body').off('click', '.btn-reprotection-refund').on('click', '.btn-reprotectio
         btn.find('i').replaceWith(btnIconHtml);
         btn.removeClass('disabled');
         if (data.error) {
-            createNotify('Reprotection refund', data.message, 'error');
+            createNotify(title, data.message, 'error');
         } else {
-            createNotify('Reprotection refund', 'Success', 'success');
+            $.pjax.reload({container: '#pjax-case-orders', push: false, replace: false, timeout: 10000, async: false});
+            createNotify(title, 'Success', 'success');
         }
     })
-    .fail(function () {
+    .fail(function (xhr) {
         btn.find('i').replaceWith(btnIconHtml);
         btn.removeClass('disabled');
-        createNotify('Reprotection refund', 'Server error', 'error');
+        createNotify(title, xhr.responseText, 'error');
     });
 });
 JS;

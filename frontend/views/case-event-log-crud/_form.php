@@ -1,5 +1,6 @@
 <?php
 
+use sales\entities\cases\CaseEventLog;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use sales\helpers\app\AppHelper;
@@ -17,6 +18,10 @@ use frontend\helpers\JsonHelper;
     <?= $form->field($model, 'cel_case_id')->textInput() ?>
 
     <?= $form->field($model, 'cel_description')->textInput(['maxlength' => true]) ?>
+
+    <?= $form->field($model, 'cel_type_id')->dropDownList(CaseEventLog::getEventLogList(), ['prompt' => '']) ?>
+
+    <?= $form->field($model, 'cel_category_id')->dropDownList(CaseEventLog::getCategoryList(), ['prompt' => '']) ?>
 
     <?php
     $model->cel_data_json = JsonHelper::encode($model->cel_data_json);

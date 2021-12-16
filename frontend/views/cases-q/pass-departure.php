@@ -13,9 +13,11 @@ use sales\helpers\communication\StatisticsHelper;
 use sales\auth\Auth;
 use common\components\grid\cases\CasesStatusColumn;
 
-/** @var $this yii\web\View
+/**
+ * @var $this yii\web\View
  * @var $searchModel sales\entities\cases\CasesQSearch
  * @var $dataProvider yii\data\ActiveDataProvider
+ * @var $isAgent bool
  */
 
 $this->title = 'Pass Departure Queue';
@@ -27,9 +29,10 @@ $this->params['breadcrumbs'][] = $this->title;
 </h1>
 
 <div class="cases-q-pass-departure">
-    <?php Pjax::begin(['id' => 'cases-q-pass-departure-pjax-list', 'timeout' => 5000, 'enablePushState' => true]); ?>
+    <?php Pjax::begin(['id' => 'cases-q-pass-departure-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'scrollTo' => 0]); ?>
 
     <?= GridView::widget([
+        'id' => 'pass-departure-gv',
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [

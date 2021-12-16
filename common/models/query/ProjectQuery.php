@@ -32,6 +32,11 @@ class ProjectQuery extends ActiveQuery
         return $this->andWhere(['api_key' => $key]);
     }
 
+    public function byId(int $id): self
+    {
+        return $this->andWhere(['id' => $id]);
+    }
+
     /**
      * @param null $db
      * @return Project|array|null

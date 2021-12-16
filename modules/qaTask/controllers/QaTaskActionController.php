@@ -5,6 +5,7 @@ namespace modules\qaTask\controllers;
 use modules\qaTask\src\entities\qaTaskActionReason\QaTaskActionReason;
 use modules\qaTask\src\useCases\qaTask\cancel\QaTaskCancelForm;
 use modules\qaTask\src\useCases\qaTask\cancel\QaTaskCancelService;
+use modules\qaTask\src\useCases\qaTask\cancel\QaTaskMultipleCancelFrom;
 use modules\qaTask\src\useCases\qaTask\close\QaTaskCloseForm;
 use modules\qaTask\src\useCases\qaTask\close\QaTaskCloseService;
 use modules\qaTask\src\useCases\qaTask\decide\lead\reAssign\QaTaskDecideLeadReAssignForm;
@@ -34,6 +35,8 @@ use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
+use modules\qaTask\src\abac\QaTaskAbacObject;
+use modules\qaTask\src\useCases\qaTask\cancel\QaTaskMultiCancelService;
 
 /**
  * Class QaTaskActionController
@@ -50,6 +53,7 @@ use yii\widgets\ActiveForm;
  * @property QaTaskDecideLeadReAssignService $decideLeadReAssignService
  * @property QaTaskDecideService $qaTaskDecideService
  * @property QaTaskUserAssignService $qaTaskUserAssignService
+ * @property QaTaskMultiCancelService $qaTaskMultiCancelService
  */
 class QaTaskActionController extends FController
 {
@@ -65,6 +69,7 @@ class QaTaskActionController extends FController
     private $decideLeadReAssignService;
     private $qaTaskDecideService;
     private $qaTaskUserAssignService;
+    private $qaTaskMultiCancelService;
 
     public function __construct(
         $id,
@@ -81,6 +86,7 @@ class QaTaskActionController extends FController
         QaTaskDecideLeadReAssignService $decideLeadReAssignService,
         QaTaskDecideService $qaTaskDecideService,
         QaTaskUserAssignService $qaTaskUserAssignService,
+        QaTaskMultiCancelService $qaTaskMultiCancelService,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -96,6 +102,7 @@ class QaTaskActionController extends FController
         $this->decideLeadReAssignService = $decideLeadReAssignService;
         $this->qaTaskDecideService = $qaTaskDecideService;
         $this->qaTaskUserAssignService = $qaTaskUserAssignService;
+        $this->qaTaskMultiCancelService = $qaTaskMultiCancelService;
     }
 
     public function behaviors(): array
@@ -113,7 +120,8 @@ class QaTaskActionController extends FController
                     'decide-no-action',
                     'decide-lead-send-to-redial-queue',
                     'decide-lead-re-assign',
-                    'user-assign'
+                    'user-assign',
+                    'multiple-cancel'
                 ],
             ],
         ];
@@ -438,6 +446,11 @@ class QaTaskActionController extends FController
 
     public function actionUserAssign(): string
     {
+        /** @abac null, QaTaskAbacObject::ACT_USER_ASSIGN, QaTaskAbacObject::ACTION_ACCESS, Action Assign Multiple Tasks To QA*/
+        if (!Yii::$app->abac->can(null, QaTaskAbacObject::ACT_USER_ASSIGN, QaTaskAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
         $form = new UserAssignForm();
 
         $form->gids = Yii::$app->request->get('gid', []);
@@ -448,6 +461,27 @@ class QaTaskActionController extends FController
         }
 
         return $this->renderAjax('user-assign', ['model' => $form]);
+    }
+
+    public function actionMultipleCancel(): string
+    {
+        /** @abac null, QaTaskAbacObject::ACT_MULTI_CANCEL, QaTaskAbacObject::ACTION_ACCESS, Action Assign Multiple Tasks To QA*/
+        if (!Yii::$app->abac->can(null, QaTaskAbacObject::ACT_MULTI_CANCEL, QaTaskAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
+        $form = new QaTaskMultipleCancelFrom();
+        $form->gids = Yii::$app->request->get('gid', []);
+
+        $isLoad = $form->load(Yii::$app->request->post());
+
+        if ($form->load(Yii::$app->request->post(), $isLoad ? null : '') && $form->validate()) {
+            $this->qaTaskMultiCancelService->handle($form, Auth::id());
+            \Yii::$app->session->addFlash('success', 'Success');
+            return '<script>location.reload()</script>';
+        }
+
+        return $this->renderAjax('multi-cancel', ['model' => $form]);
     }
 
     /**

@@ -25,7 +25,7 @@ class ClientChatFeedbackJob extends BaseJob implements JobInterface
      */
     public function execute($queue): void
     {
-        $this->executionTimeRegister();
+        $this->waitingTimeRegister();
         try {
             (Yii::createObject(ClientChatRequestService::class))
                 ->createOrUpdateFeedback($this->rid, $this->comment, $this->rating);

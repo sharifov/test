@@ -31,7 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
 </h1>
 <div class="lead-index">
 
-    <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
+    <?php Pjax::begin(['scrollTo' => 0]); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
 
     <?php
 
@@ -64,7 +64,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'style' => 'width:120px'
             ]
         ],
-
 
         [
             'attribute' => 'bo_flight_id',
@@ -122,8 +121,6 @@ $this->params['breadcrumbs'][] = $this->title;
             },
             'format' => 'raw'
         ],
-
-
 
         [
             'label' => 'PNR',
@@ -402,7 +399,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 $diffTime = time() - $createdTS;
                 $diffHours = (int) ($diffTime / (60 * 60));
 
-
                 $str = ($diffHours > 3 && $diffHours < 73 ) ? $diffHours . ' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
                 $str .= '<br><i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
 
@@ -456,6 +452,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php
 
     echo \yii\grid\GridView::widget([
+        'id' => 'lead-booked-gv',
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => $gridColumns,

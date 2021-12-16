@@ -18,7 +18,8 @@
             'recordingDisableUrl': '',
             'acceptPriorityCallUrl': '',
             'acceptWarmTransferCallUrl': '',
-            'addPhoneBlackListUrl': ''
+            'addPhoneBlackListUrl': '',
+            'reconnectUrl': ''
         };
 
         this.init = function (settings) {
@@ -39,8 +40,9 @@
                         call.unSetHoldUnHoldRequestState();
                     }
                 })
-                .fail(function () {
-                    createNotify('Hold', 'Server error', 'error');
+                .fail(function (jqXHR, textStatus, errorThrown) {
+                    var message = jqXHR.responseText ? jqXHR.responseText : (jqXHR.statusText ? jqXHR.statusText : 'Server error');
+                    createNotify('Hold', message, 'error');
                     call.unSetHoldUnHoldRequestState();
                 })
         };
@@ -59,8 +61,9 @@
                         call.unSetHoldUnHoldRequestState();
                     }
                 })
-                .fail(function () {
-                    createNotify('Resume', 'Server error', 'error');
+                .fail(function (jqXHR, textStatus, errorThrown) {
+                    var message = jqXHR.responseText ? jqXHR.responseText : (jqXHR.statusText ? jqXHR.statusText : 'Server error');
+                    createNotify('Resume', message, 'error');
                     call.unSetHoldUnHoldRequestState();
                 })
         };
@@ -85,8 +88,9 @@
                         PhoneWidgetCall.audio.incoming.on(call.data.callSid);
                     }
                 })
-                .fail(function () {
-                    createNotify('Accept Call', 'Server error', 'error');
+                .fail(function (jqXHR, textStatus, errorThrown) {
+                    var message = jqXHR.responseText ? jqXHR.responseText : (jqXHR.statusText ? jqXHR.statusText : 'Server error');
+                    createNotify('Accept Call', message, 'error');
                     call.unSetAcceptCallRequestState();
                     window.phoneWidget.notifier.on(call.data.callSid);
                     PhoneWidgetCall.audio.incoming.on(call.data.callSid);
@@ -112,8 +116,9 @@
                         PhoneWidgetCall.audio.incoming.on(call.data.callSid);
                     }
                 })
-                .fail(function () {
-                    createNotify('Accept Call', 'Server error', 'error');
+                .fail(function (jqXHR, textStatus, errorThrown) {
+                    var message = jqXHR.responseText ? jqXHR.responseText : (jqXHR.statusText ? jqXHR.statusText : 'Server error');
+                    createNotify('Accept Call', message, 'error');
                     call.unSetAcceptCallRequestState();
                     window.phoneWidget.notifier.on(call.data.callSid);
                     PhoneWidgetCall.audio.incoming.on(call.data.callSid);
@@ -134,8 +139,9 @@
                         call.unSetMuteUnMuteRequestState();
                     }
                 })
-                .fail(function () {
-                    createNotify('Mute', 'Server error', 'error');
+                .fail(function (jqXHR, textStatus, errorThrown) {
+                    var message = jqXHR.responseText ? jqXHR.responseText : (jqXHR.statusText ? jqXHR.statusText : 'Server error');
+                    createNotify('Mute', message, 'error');
                     call.unSetMuteUnMuteRequestState();
                 })
         };
@@ -154,8 +160,9 @@
                         call.unSetMuteUnMuteRequestState();
                     }
                 })
-                .fail(function () {
-                    createNotify('UnMute', 'Server error', 'error');
+                .fail(function (jqXHR, textStatus, errorThrown) {
+                    var message = jqXHR.responseText ? jqXHR.responseText : (jqXHR.statusText ? jqXHR.statusText : 'Server error');
+                    createNotify('UnMute', message, 'error');
                     call.unSetMuteUnMuteRequestState();
                 })
         };
@@ -179,8 +186,9 @@
                         PhoneWidgetCall.audio.incoming.on(call.data.callSid);
                     }
                 })
-                .fail(function () {
-                    createNotify('Return Hold Call', 'Server error', 'error');
+                .fail(function (jqXHR, textStatus, errorThrown) {
+                    var message = jqXHR.responseText ? jqXHR.responseText : (jqXHR.statusText ? jqXHR.statusText : 'Server error');
+                    createNotify('Return Hold Call', message, 'error');
                     call.unSetReturnHoldCallRequestState();
                     window.phoneWidget.notifier.on(call.data.callSid);
                     PhoneWidgetCall.audio.incoming.on(call.data.callSid);
@@ -201,8 +209,9 @@
                         call.unSetHangupRequestState();
                     }
                 })
-                .fail(function () {
-                    createNotify('Hangup', 'Server error', 'error');
+                .fail(function (jqXHR, textStatus, errorThrown) {
+                    var message = jqXHR.responseText ? jqXHR.responseText : (jqXHR.statusText ? jqXHR.statusText : 'Server error');
+                    createNotify('Hangup', message, 'error');
                     call.unSetHangupRequestState();
                 })
         };
@@ -226,8 +235,9 @@
                     }
                     call.unSetAddNoteRequestState();
                 })
-                .fail(function () {
-                    createNotify('Add Note', 'Server error', 'error');
+                .fail(function (jqXHR, textStatus, errorThrown) {
+                    var message = jqXHR.responseText ? jqXHR.responseText : (jqXHR.statusText ? jqXHR.statusText : 'Server error');
+                    createNotify('Add Note', message, 'error');
                     call.unSetAddNoteRequestState();
                 });
         };
@@ -247,8 +257,9 @@
                         createNotify('Send digit', data.message, 'error');
                     }
                 })
-                .fail(function () {
-                    createNotify('Send digit', 'Server error', 'error');
+                .fail(function (jqXHR, textStatus, errorThrown) {
+                    var message = jqXHR.responseText ? jqXHR.responseText : (jqXHR.statusText ? jqXHR.statusText : 'Server error');
+                    createNotify('Send digit', message, 'error');
                 });
         };
 
@@ -267,8 +278,9 @@
                         connection.accept();
                     }
                 })
-                .fail(function () {
-                    createNotify('Prepare current call', 'Server error', 'error');
+                .fail(function (jqXHR, textStatus, errorThrown) {
+                    var message = jqXHR.responseText ? jqXHR.responseText : (jqXHR.statusText ? jqXHR.statusText : 'Server error');
+                    createNotify('Prepare current call', message, 'error');
                     call.unSetAcceptCallRequestState();
                 });
         };
@@ -285,8 +297,9 @@
                 .done(function (data) {
                     $('#call-box-modal .modal-body').html(data);
                 })
-                .fail(function (xhr, textStatus, errorThrown) {
-                    createNotify('Call info', xhr.responseText, 'error');
+                .fail(function (jqXHR, textStatus, errorThrown) {
+                    var message = jqXHR.responseText ? jqXHR.responseText : (jqXHR.statusText ? jqXHR.statusText : 'Server error');
+                    createNotify('Call info', message, 'error');
                 });
         };
 
@@ -302,8 +315,9 @@
                 .done(function (data) {
                     $('#call-box-modal .modal-body').html(data);
                 })
-                .fail(function (xhr, textStatus, errorThrown) {
-                    createNotify('Call info', xhr.responseText, 'error');
+                .fail(function (jqXHR, textStatus, errorThrown) {
+                    var message = jqXHR.responseText ? jqXHR.responseText : (jqXHR.statusText ? jqXHR.statusText : 'Server error');
+                    createNotify('Call info', message, 'error');
                 });
         };
 
@@ -338,21 +352,22 @@
             }
         };
 
-        this.clientInfo = function (id, isClient) {
+        this.clientInfo = function (id, callSid, isClient) {
             $('#call-box-modal .modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"> </i> Loading ...</div>');
             let text = isClient ? 'Client details' : 'Contact info';
             $('#call-box-modal-label').html(text + ' (' + id + ')');
             $('#call-box-modal').modal();
             $.ajax({
                 type: 'post',
-                data: {client_id: id},
+                data: {client_id: id, callSid: callSid},
                 url: this.settings.clientInfoUrl
             })
                 .done(function (data) {
                     $('#call-box-modal .modal-body').html(data);
                 })
-                .fail(function (xhr, textStatus, errorThrown) {
-                    createNotify(text, xhr.responseText, 'error');
+                .fail(function (jqXHR, textStatus, errorThrown) {
+                    var message = jqXHR.responseText ? jqXHR.responseText : (jqXHR.statusText ? jqXHR.statusText : 'Server error');
+                    createNotify(text, message, 'error');
                 });
         };
 
@@ -370,8 +385,9 @@
                         call.unSetRecordingRequestState();
                     }
                 })
-                .fail(function () {
-                    createNotify('Recording enable', 'Server error', 'error');
+                .fail(function (jqXHR, textStatus, errorThrown) {
+                    var message = jqXHR.responseText ? jqXHR.responseText : (jqXHR.statusText ? jqXHR.statusText : 'Server error');
+                    createNotify('Recording enable', message, 'error');
                     call.unSetRecordingRequestState();
                 })
         };
@@ -391,7 +407,8 @@
                     }
                 })
                 .fail(function (jqXHR, textStatus, errorThrown) {
-                    createNotify('Recording disable', jqXHR.responseText, 'error');
+                    var message = jqXHR.responseText ? jqXHR.responseText : (jqXHR.statusText ? jqXHR.statusText : 'Server error');
+                    createNotify('Recording disable', message, 'error');
                     call.unSetRecordingRequestState();
                 })
         };
@@ -412,15 +429,47 @@
                     if (data.error) {
                         createNotify('Accept Call', data.message, 'error');
                     }
+                    if (data.isRedialCall) {
+                        window.phoneWidget.notifier.notifiers.phone.reset();
+                        PhoneWidgetCall.panes.queue.hide();
+                        PhoneWidgetCall.openCallTab();
+                        PhoneWidgetCall.showCallingPanel();
+                        webCallLeadRedialPriority(data.redialCall);
+                    } else {
+                        PhoneWidgetCall.audio.incoming.on(key);
+                    }
+                    PhoneWidgetCall.queues.priority.unAccept();
+                    window.phoneWidget.notifier.on(key);
+                })
+                .fail(function (jqXHR, textStatus, errorThrown) {
+                    var message = jqXHR.responseText ? jqXHR.responseText : (jqXHR.statusText ? jqXHR.statusText : 'Server error');
+                    createNotify('Accept Call', message, 'error');
                     PhoneWidgetCall.queues.priority.unAccept();
                     window.phoneWidget.notifier.on(key);
                     PhoneWidgetCall.audio.incoming.on(key);
                 })
-                .fail(function () {
-                    createNotify('Accept Call', 'Server error', 'error');
-                    PhoneWidgetCall.queues.priority.unAccept();
-                    window.phoneWidget.notifier.on(key);
-                    PhoneWidgetCall.audio.incoming.on(key);
+        };
+
+        this.reconnect = function (call) {
+            $.ajax({
+                type: 'post',
+                data: {
+                    'sid': call.data.callSid
+                },
+                url: this.settings.reconnectUrl
+            })
+                .done(function (data) {
+                    if (data.error) {
+                        call.unSetReconnectRequestState();
+                        createNotify('Reconnect', data.message, 'error');
+                        return;
+                    }
+                    PhoneWidgetCall.openHoldCallPanel();
+                })
+                .fail(function (jqXHR, textStatus, errorThrown) {
+                    var message = jqXHR.responseText ? jqXHR.responseText : (jqXHR.statusText ? jqXHR.statusText : 'Server error');
+                    createNotify('Reconnect', message, 'error');
+                    call.unSetReconnectRequestState();
                 })
         };
     }

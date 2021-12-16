@@ -36,6 +36,8 @@ use yii\bootstrap4\Modal;
     $ajaxCreateCallUrl = Url::to(['/phone/ajax-create-call']);
     $ajaxGetPhoneListIdUrl = Url::to(['/phone/ajax-get-phone-list-id']);
     $ajaxWarmTransferToUserUrl = Url::to(['/phone/ajax-warm-transfer-to-user']);
+    $redialSourceType = Call::SOURCE_REDIAL_CALL;
+    $leadViewPageShortUrl = Url::to(['/lead/view'], true);
 
     $conferenceBase = 0;
 if (isset(Yii::$app->params['settings']['voip_conference_base'])) {
@@ -68,6 +70,8 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
     const ajaxCreateCallUrl = '<?= $ajaxCreateCallUrl ?>';
     const ajaxGetPhoneListIdUrl = '<?= $ajaxGetPhoneListIdUrl ?>';
     const callOutBackendSide = parseInt('<?= $callOutBackendSide ?>');
+    const redialSourceType = parseInt('<?= $redialSourceType ?>');
+    const leadViewPageShortUrl = '<?= $leadViewPageShortUrl ?>';
 
     const clientId = '<?=$clientId?>';
 
@@ -410,7 +414,7 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
 
     // let currentConnection;
 
-    var connectCallSid = null;
+    window.connectCallSid = null;
 
     function IncomingConnections() {
         this.connections = [];
@@ -484,6 +488,16 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
                 });
 
                 device.on('error', function (error) {
+                    if (error.code === 31205) {
+                        console.log('JWT Token Expired');
+                        console.log('Requesting Capability Token...');
+                        $.getJSON('/phone/get-token')
+                            .then(function (response) {
+                                let data = response.data;
+                                device.setup(data.token, {codecPreferences: ['opus', 'pcmu'], closeProtection: true, enableIceRestart: true, enableRingingState: false, debug: false, allowIncomingWhileBusy: false});
+                            });
+                        return;
+                    }
                     freeDialButton();
                     updateAgentStatus(connection, false, 1);
                     log('Twilio.Device Error: ' + error.message);
@@ -516,7 +530,7 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
                         PhoneWidgetCall.updateConnection(conn);
                     }
 
-                    connectCallSid = connection.parameters.CallSid;
+                    window.connectCallSid = connection.parameters.CallSid;
                     setActiveConnection(conn);
                     incomingSoundOff();
                     soundConnect();
@@ -534,7 +548,7 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
                     //console.warn(conn);
                     saveDbCall(conn.parameters.CallSid, conn.message.FromAgentPhone, conn.message.To, 'completed');
 
-                    if (connectCallSid === conn.parameters.CallSid) {
+                    if (window.connectCallSid === conn.parameters.CallSid) {
                         soundDisconnect();
                     }
 
@@ -630,6 +644,13 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
 
                 device.on('offline', function (device) {
                     console.log('Phone device: status Offline');
+
+                    let call = PhoneWidgetCall.queues.active.one(window.connectCallSid);
+                    if (call !== null) {
+                        createNotify('Phone Device', 'Phone device went offline. Try reconnect', 'error');
+                        call.connectionError();
+                    }
+
                     // createNotify('Status Offline', 'Phone device: status Offline', 'error');
                     incomingSoundOff();
                 });
@@ -866,6 +887,30 @@ if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
 
     }
 
+    function webCallLeadRedialPriority(redialCallInfo) {
+        let params = {
+            'To': redialCallInfo.phoneTo,
+            'FromAgentPhone': redialCallInfo.phoneFrom,
+            'c_project_id': redialCallInfo.projectId,
+            'lead_id': redialCallInfo.leadId,
+            'c_type': 'web-call',
+            'c_user_id': userId,
+            'c_source_type_id': redialSourceType,
+            'is_conference_call': conferenceBase,
+            'user_identity': window.userIdentity,
+            'phone_list_id': redialCallInfo.phoneListId,
+            'is_redial_call': true
+        };
+        webPhoneParams = params;
+
+        console.log(params);
+        if (device) {
+            console.log('Calling ' + params.To + '...');
+            connection = device.connect(params);
+            updateAgentStatus(connection, false, 0);
+        }
+    }
+
 </script>
 
 <?php
@@ -1040,7 +1085,18 @@ $js = <<<JS
                 }, 'json');
                 
             } else {
-                alert('You have active call');
+                if (data) {
+                    if (data.is_on_call === true) {
+                        freeDialButton();
+                        if (data.phone_widget_data) {
+                            window.PhoneWidgetCall.updateCurrentCalls(data.phone_widget_data.data, data.phone_widget_data.userStatus);
+                        }
+                        new PNotify({title: "Make call", type: "error", text: data.message, hide: true});
+				    }
+                    if (data.is_offline === true) {
+                        new PNotify({title: "Make call", type: "error", text: 'You status is offline.', hide: true});
+                    }
+                }
                 return false;
             }
         }, 'json');

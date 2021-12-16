@@ -6,6 +6,7 @@ use common\models\Call;
 use common\models\ConferenceParticipant;
 use sales\model\conference\service\ConferenceDataService;
 use sales\model\conference\socket\SocketCommands;
+use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackHandler;
 use yii\helpers\VarDumper;
 use yii\queue\JobInterface;
 
@@ -32,7 +33,7 @@ class UpdateConferenceParticipantCallIdJob extends BaseJob implements JobInterfa
 
     public function execute($queue)
     {
-        $this->executionTimeRegister();
+        $this->waitingTimeRegister();
         try {
             $call = $this->getCall($this->callSid);
             if ($call->c_conference_id !== $this->conferenceId) {
@@ -95,7 +96,7 @@ class UpdateConferenceParticipantCallIdJob extends BaseJob implements JobInterfa
     {
         $call = Call::find()->andWhere(['c_call_sid' => $callSid])->one();
         if (!$call) {
-            throw new \DomainException('Call SID: ' . $callSid . ' not found.');
+            throw new \DomainException('Call SID: ' . $callSid . ' not found. Reason: Call callback not received after participant callback within ' . ConferenceStatusCallbackHandler::DELAY_JOB_FOR_UPDATE_PARTICIPANT_CALL_ID . ' seconds');
         }
         return $call;
     }

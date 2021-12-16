@@ -21,6 +21,7 @@ use Yii;
 use yii\console\Controller;
 use yii\console\Exception;
 use yii\db\Query;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Console;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
@@ -176,7 +177,7 @@ class CaseController extends Controller
 
                     $service_time_start = microtime(true);
                     $caseSale = $caseSaleRepository->getSaleByPrimaryKeys((int)$item['cs_id'], (int)$item['css_sale_id']);
-    //              $caseSale = $caseSaleService->refreshOriginalSaleData($caseSale, $case, $saleData);
+                    //              $caseSale = $caseSaleService->refreshOriginalSaleData($caseSale, $case, $saleData);
                     if (!$saleTicketService->refreshSaleTicketBySaleData((int)$item['cs_id'], $caseSale, $saleData)) {
                         $refreshSaleTicketError[] = "Sale {$item['css_sale_id']} doesnt have refund rules;";
                     }
@@ -280,28 +281,84 @@ class CaseController extends Controller
         printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
         $time_start = microtime(true);
 
+        $currentTime = (new \DateTime('now', new \DateTimeZone('UTC')))->format('Y-m-d H:i:s');
+
+        echo Console::renderColoredString('%g --- CurrentTime: %w[' . $currentTime . '] %n'), PHP_EOL;
+
         $query = Cases::find()->where(['cs_status' => CasesStatus::STATUS_AUTO_PROCESSING])->joinWith(['category as c']);
         $query->andWhere(['cs_is_automate' => true]);
-        $query->andWhere(['<', 'date_format(cs_deadline_dt, "%Y-%m-%d")',  date('Y-m-d')]);
+        $query->andWhere(['<', 'cs_deadline_dt',  $currentTime]);
         $query->andWhere(['c.cc_key' => SettingHelper::getReProtectionCaseCategory()]);
         $cases = $query->all();
 
         if ($cases) {
             foreach ($cases as $case) {
                 try {
-                    $case->pending(null, null, 'No reprotaction action from client');
+                    $case->refresh();
+                    if (!$case->isPending()) {
+                        $case->pending(null, 'Deadline expired');
+                        $case->addEventLog(
+                            CaseEventLog::CASE_STATUS_CHANGED,
+                            'Case status changed to ' . CasesStatus::STATUS_LIST[$case->cs_status] . ' By: System. Reason: Reprotection client activeless'
+                        );
+                    }
                     $case->cs_is_automate = false;
                     $this->caseRepository->save($case);
-                    $case->addEventLog(CaseEventLog::CASE_STATUS_CHANGED, 'Case status changed to ' . CasesStatus::STATUS_LIST[$case->cs_status] . ' By: System. Reason: Reprotection client activeless');
+                    echo Console::renderColoredString('%g --- CaseId: %w[' . $case->cs_id . '] %n'), PHP_EOL;
+                    echo Console::renderColoredString('%g --- Deadline: %w[' . $case->cs_deadline_dt . '] %n'), PHP_EOL;
+                    echo Console::renderColoredString('%g ' . str_repeat('=', 50) . ' %n'), PHP_EOL;
                 } catch (\Throwable $e) {
-                    Yii::error('Case: ' . $case->id . ', ' . VarDumper::dumpAsString($case->errors), 'console:CaseController:actionReprotectionClientActiveless:Case:save');
+                    $message = AppHelper::throwableLog($e);
+                    $message['caseId'] = $case->cs_id;
+                    Yii::error($message, 'console:CaseController:actionReprotectionClientActiveless:Case:save');
                 }
             }
         }
 
         $time_end = microtime(true);
         $time = number_format(round($time_end - $time_start, 2), 2);
-        printf("\nExecute Time: %s ", $this->ansiFormat($time . ' s', Console::FG_RED));
+        printf("\n --- Execute Time: %s ", $this->ansiFormat($time . ' s', Console::FG_RED));
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+    }
+
+    public function actionCaseToNeed(): void
+    {
+        $now = (new \DateTime());
+        $report = [];
+        $casesQuery = Cases::find()
+            ->andWhere(['!=', 'cs_status', CasesStatus::STATUS_PENDING])
+            ->andWhere(['!=', 'cs_is_automate', 1])
+            ->andWhere(['<', 'cs_deadline_dt', $now->format('Y-m-d H:i:s')])
+            ->groupBy('cs_id');
+        $count = $casesQuery->count();
+
+        Console::output('Cases to need action...' . PHP_EOL);
+
+        foreach ($casesQuery->batch(100) as $casesBatch) {
+            /** @var Cases $case */
+            foreach ($casesBatch as $case) {
+                try {
+                    $case->onNeedAction();
+                    $case->save();
+                    $report[$case->cs_id] = $item = 'Case: ' . $case->cs_id . ' -> To need action';
+                    echo $item . PHP_EOL;
+                } catch (\Throwable $exception) {
+                    $report[] = $item = 'Case: ' . $case->cs_id . ' not updated';
+                    echo $item . PHP_EOL;
+                    \Yii::error(
+                        AppHelper::throwableLog($exception),
+                        'Cases:CaseToNeedAction'
+                    );
+                }
+            }
+        }
+        echo $count . ' Cases -> offNeedAction' . PHP_EOL;
+        $message = '0 cases changed';
+
+        if (count($report) > 0) {
+            $message = count($report) . ' cases changed. [' . implode(', ', array_keys($report)) . ']';
+        }
+
+        Yii::info($message, 'info\CronCasesToNeedAction');
     }
 }

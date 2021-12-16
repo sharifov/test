@@ -2,6 +2,7 @@
 
 namespace modules\flight\src\useCases\flightQuote\create;
 
+use modules\flight\src\useCases\form\ChangeQuoteCreateForm;
 use modules\flight\src\useCases\reProtectionQuoteManualCreate\form\ReProtectionQuoteCreateForm;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\flight\models\Flight;
@@ -88,12 +89,12 @@ class FlightQuoteCreateDTO
         $this->requestHash = $flight->fl_request_hash_key;
     }
 
-    public static function fillReProtectionManual(
+    public static function fillChangeQuoteManual(
         Flight $flight,
         ProductQuote $productQuote,
         array $quote,
         ?int $userId,
-        ReProtectionQuoteCreateForm $form
+        ChangeQuoteCreateForm $form
     ): FlightQuoteCreateDTO {
         $model = new self($flight, $productQuote, $quote, $userId);
         $model->cabinClass = $form->cabin;

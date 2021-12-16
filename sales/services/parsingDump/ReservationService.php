@@ -6,6 +6,7 @@ use common\models\Airline;
 use common\models\Airports;
 use DateTime;
 use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
+use sales\helpers\app\AppHelper;
 use sales\services\lead\calculator\LeadTripTypeCalculator;
 use sales\services\lead\calculator\SegmentDTO;
 use sales\services\parsingDump\lib\ParsingDump;
@@ -48,6 +49,7 @@ class ReservationService
         $parserReservation = ParsingDump::initClass($this->gds, ParsingDump::PARSING_TYPE_RESERVATION);
         $string = trim($string);
         $rows = explode("\n", $string);
+        $rawData = [];
         if (!empty($itinerary) && $validation) {
             $itinerary = [];
         }
@@ -78,6 +80,8 @@ class ReservationService
                 );
                 $this->parseResult[$i]['layoverDuration'] = $this->getLayoverDuration($this->parseResult, $i);
 
+                $this->parseResult[$i]['operatingAirlineCode'] = $parseData['operated'] ?? null;
+
                 if ($airline = Airline::findIdentity($parseData['airline'])) {
                     $this->parseResult[$i]['cabin'] = $airline->getCabinByClass($parseData['booking_class']);
                 }
@@ -87,13 +91,11 @@ class ReservationService
 
                 $i++;
             } catch (\Throwable $throwable) {
-                \Yii::error(
-                    VarDumper::dumpAsString([
-                     'parseData' => $parseData,
-                     'throwable' => $throwable,
-                    ], 20),
-                    'ReservationService:parseReservation:Throwable'
-                );
+                $logData = AppHelper::throwableLog($throwable);
+                $logData['row'] = $row;
+                $logData['parseData'] = $parseData ?? null;
+                \Yii::warning($logData, 'ReservationService:parseReservation:Throwable');
+
                 $this->parseResult['failed']['segment'][] = $row;
             }
         }
@@ -154,6 +156,6 @@ class ReservationService
     private function getAirlineName(string $code, bool $onView): string
     {
         $airline = (!$onView) ? Airline::findIdentity($code) : null;
-        return $airline ? $airline->name : $code;
+        return $airline->name ?? $code;
     }
 }

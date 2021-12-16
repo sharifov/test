@@ -11,6 +11,7 @@ use common\components\jobs\CallPriceJob;
 use common\components\jobs\CreateSaleFromBOJob;
 use common\components\jobs\SendLeadInfoToGaJob;
 use common\components\jobs\SmsPriceJob;
+use common\components\jobs\WebEngageLeadRequestJob;
 use common\components\Metrics;
 use common\components\Purifier;
 use common\components\jobs\TelegramSendMessageJob;
@@ -79,12 +80,14 @@ use modules\flight\src\forms\api\PaymentApiForm;
 use modules\flight\src\services\flightQuote\FlightQuotePdfService;
 use modules\flight\src\services\flightQuote\FlightQuoteTicketIssuedService;
 use modules\flight\src\services\flightQuoteFlight\FlightQuoteFlightPdfService;
+use modules\flight\src\useCases\reprotectionCreate\service\ReprotectionCreateService;
 use modules\hotel\HotelModule;
 use modules\hotel\models\HotelList;
 use modules\hotel\models\HotelQuote;
 use modules\hotel\src\services\hotelQuote\CommunicationDataService;
 use modules\hotel\src\services\hotelQuote\HotelQuotePdfService;
 use modules\lead\src\entities\lead\LeadQuery;
+use modules\order\src\abac\OrderAbacObject;
 use modules\order\src\entities\order\Order;
 use modules\order\src\events\OrderFileGeneratedEvent;
 use modules\order\src\services\OrderPdfService;
@@ -107,6 +110,10 @@ use modules\qaTask\src\useCases\qaTask\QaTaskActions;
 use modules\qaTask\src\useCases\qaTask\takeOver\QaTaskTakeOverForm;
 use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
 use modules\rentCar\src\services\RentCarQuotePdfService;
+use modules\webEngage\form\WebEngageEventForm;
+use modules\webEngage\settings\WebEngageDictionary;
+use modules\webEngage\src\service\webEngageEventData\lead\LeadEventDataService;
+use modules\webEngage\src\service\WebEngageRequestService;
 use Mpdf\Tag\P;
 use PhpOffice\PhpSpreadsheet\Shared\TimeZone;
 use sales\access\CallAccess;
@@ -212,11 +219,13 @@ use sales\services\phone\blackList\PhoneBlackListManageService;
 use sales\services\phone\callFilterGuard\CallFilterGuardService;
 use sales\services\sms\incoming\SmsIncomingForm;
 use sales\services\sms\incoming\SmsIncomingService;
+use sales\services\system\DbViewCryptService;
 use sales\services\TransactionManager;
 use sales\temp\LeadFlowUpdate;
 use sales\widgets\PhoneSelect2Widget;
 use Twilio\TwiML\VoiceResponse;
 use webapi\models\ApiLead;
+use webapi\src\logger\StartDTO;
 use webapi\src\response\messages\DataMessage;
 use webapi\src\response\SuccessResponse;
 use Yii;
@@ -229,6 +238,7 @@ use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
+use yii\helpers\Console;
 use yii\helpers\Html;
 use yii\helpers\Inflector;
 use yii\helpers\Json;
@@ -237,7 +247,11 @@ use yii\helpers\VarDumper;
 use common\components\ReceiveEmailsJob;
 use yii\httpclient\CurlTransport;
 use yii\queue\Queue;
+use yii\web\ConflictHttpException;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
+use modules\notification\src\abac\NotificationAbacObject;
+use modules\notification\src\abac\dto\NotificationAbacDto;
 
 /**
  * Test controller
@@ -1295,6 +1309,23 @@ class TestController extends FController
         Notifications::create(Yii::$app->user->id, 'Test ' . date('H:i:s'), 'Test message <h2>asdasdasd</h2>', Notifications::TYPE_SUCCESS, true);
         //Notifications::socket(Yii::$app->user->id, null, 'openUrl', ['url' => $host . '/lead/view/b5d963c9241dd741e22b37d1fa80a9b6'], false);
     }
+    public function actionNotify3()
+    {
+        /*$notification = new Notifications();
+        $notification->n_title = 'New General Line Call';
+        $notification->n_type_id = Notifications::TYPE_SUCCESS;
+        $notification->n_user_id = 658;
+
+        $notificationAbacDto = new NotificationAbacDto($notification);
+
+        if (Yii::$app->abac->can($notificationAbacDto, NotificationAbacObject::OBJ_NOTIFICATION, NotificationAbacObject::ACTION_ACCESS)) {
+            $message = 'New General Line Call';
+            if ($ntf = Notifications::create($notification->n_user_id, 'New General Line Call', $message, Notifications::TYPE_SUCCESS, true)) {
+                $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+                Notifications::publish('getNewNotification', ['user_id' => $notification->n_user_id], $dataNotification);
+            }
+        }*/
+    }
 
     public function actionTest3()
     {
@@ -2167,14 +2198,36 @@ class TestController extends FController
 
     public function actionZ()
     {
-        $casesSaleService = Yii::createObject(CasesSaleService::class);
+        try {
+            $webEngageRequestService = new WebEngageRequestService();
 
-        $saleId = Yii::$app->request->get('sale_id', 0);
-        $saleData = $casesSaleService->detailRequestToBackOffice($saleId, 0, 120, 1);
+            $data = [
+                'anonymousId' => 'test',
+                'eventName' => 'Added to Cart1',
+                "eventTime" => date('Y-m-d\TH:i:sO'),
+                'eventData' => [
+                    "Product ID" => 1337,
+                    "Price" => 39.80,
+                    "Quantity" => 1,
+                    "Product" => "Givenchy Pour Homme Cologne",
+                    "Category" => "Fragrance",
+                    "Currency" => "USD",
+                ]
+            ];
 
-        VarDumper::dump($saleData, 20, true);
-        exit();
-        //return $this->render('z');
+            $webEngageEventForm = new WebEngageEventForm();
+            if (!$webEngageEventForm->load($data)) {
+                throw new \RuntimeException('WebEngageEventForm not loaded');
+            }
+            $x = $webEngageRequestService->addEvent($webEngageEventForm);
+
+            \yii\helpers\VarDumper::dump($x, 20, true);
+            exit();
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableLog($throwable), ':Throwable');
+        }
+
+        return $this->render('z');
     }
 
     /**
@@ -2378,5 +2431,226 @@ class TestController extends FController
         } else {
             VarDumper::dump($response['data'], 10, true);
         }
+    }
+
+    public function actionAbac()
+    {
+        if (Yii::$app->abac->can(null, OrderAbacObject::ACT_READ, OrderAbacObject::ACTION_READ)) {
+            echo 'Yes';
+        } else {
+            echo 'No';
+        }
+    }
+
+    public function actionErrorTest()
+    {
+
+        $message = [
+            'message' => 'Test message 1',
+            'trace' => ['tr1' => 'ttttttttttt1'],
+            'a1' => '1111',
+            'b2' => '222',
+            'с3' => [
+                'message' => 'Test message 21',
+                'trace' => ['tr1' => 'ttttttttttt1'],
+                'b' => '1111',
+                'b2' => '222',
+                'b3' => [
+                    'message' => 'Test message 31',
+                    'trace' => ['tr1' => 'ttttttttttt1'],
+                    'a1' => '1111',
+                    'b2' => '222',
+                    'с3' => '222',
+                ],
+            ],
+        ];
+
+
+        $message = [
+            'message' => 'Test message 1',
+            'trace' => ['tr1' => 'ttttttttttt1'],
+            'a1' => '1111',
+            'b2' => '222',
+            'с3' => [
+                'message1' => 'Test message 21',
+                'trace' => ['tr1' => 'ttttttttttt1'],
+                'b' => [
+                    'message3' => 'Test message 1',
+                    'trace' => ['tr1' => 'ttttttttttt1'],
+                    'a1' => '1111',
+                    'b2' => '222',
+                    'с3' => [
+                        'message4' => 'Test message 21',
+                        'trace' => ['tr1' => 'ttttttttttt1'],
+                        'b' => '1111',
+                        'b2' => '222',
+                        'b3' => [
+                            'message5' => 'Test message 31',
+                            'trace' => ['tr1' => 'ttttttttttt1'],
+                            'a1' => '1111',
+                            'b2' => '222',
+                            'с3' => '222',
+                        ],
+                    ],
+                ],
+                'b2' => '222',
+                'b3' => [
+                    'message2' => 'Test message 31',
+                    'trace' => ['tr1' => 'ttttttttttt1'],
+                    'a1' => '1111',
+                    'b2' => '222',
+                    'с3' => [
+                        'message3' => 'Test message 1',
+                        'trace' => ['tr1' => 'ttttttttttt1'],
+                        'a1' => '1111',
+                        'b2' => '222',
+                        'с3' => [
+                            'message4' => 'Test message 21',
+                            'trace' => ['tr1' => 'ttttttttttt1'],
+                            'b' => '1111',
+                            'b2' => '222',
+                            'b3' => [
+                                'message5' => 'Test message 31',
+                                'trace' => ['tr1' => 'ttttttttttt1'],
+                                'a1' => '1111',
+                                'b2' => '222',
+                                'с3' => '222',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+//        Yii::error($message, 'test/error');
+//        Yii::warning($message, 'test/warning');
+//        Yii::info($message, 'info\test/info');
+//        Yii::info($message, 'log\test/log');
+//
+//        $message = 'Test message 2';
+//
+//        Yii::error($message, 'test/error');
+//        Yii::warning($message, 'test/warning');
+//        Yii::info($message, 'info\test/info');
+//        Yii::info($message, 'log\test/log');
+
+//        $a = new StartDTO();
+//        $a->ip = 'asdasdasd';
+//
+//        VarDumper::dump($a);
+//        Yii::error($a, 'error:Throwable2');
+//        exit;
+
+        try {
+            $a = 3 / 0;
+        } catch (\Throwable $throwable) {
+            //VarDumper::dump(get_object_vars($throwable), 10, true);
+            //VarDumper::dump(AppHelper::throwableLog($throwable, true), 10, true);
+            Yii::error(AppHelper::throwableLog($throwable, true), 'error:Throwable');
+            //Yii::error($throwable, 'error:Throwable');
+        }
+
+        return date('Y-m-d h:i:s');
+    }
+
+    public function actionArrayTrim()
+    {
+        $message = [
+            'message' => 'Test message 1',
+            'trace' => ['tr1' => 'ttttttttttt1'],
+            'a1' => '1111',
+            'b2' => '222',
+            'с3' => [
+                'message1' => 'Test message 21',
+                'trace' => ['tr1' => 'ttttttttttt1'],
+                'b' => [
+                    'message3' => 'Test message 1',
+                    'trace' => ['tr1' => 'ttttttttttt1'],
+                    'a1' => '1111',
+                    'b2' => '222',
+                    'с3' => [
+                        'message4' => 'Test message 21',
+                        'trace' => ['tr1' => 'ttttttttttt1'],
+                        'b' => '1111',
+                        'b2' => '222',
+                        'b3' => [
+                            'message5' => 'Test message 31',
+                            'trace' => ['tr1' => 'ttttttttttt1'],
+                            'a1' => '1111',
+                            'b2' => '222',
+                            'с3' => '222',
+                        ],
+                    ],
+                ],
+                'b2' => '222',
+                'b3' => [
+                    'message2' => 'Test message 31',
+                    'trace' => ['tr1' => 'ttttttttttt1'],
+                    'a1' => '1111',
+                    'b2' => '222',
+                    'с3' => [
+                        'message3' => 'Test message 1',
+                        'trace' => ['tr1' => 'ttttttttttt1'],
+                        'a1' => '1111',
+                        'b2' => '222',
+                        'с3' => [
+                            'message4' => 'Test message 21',
+                            'trace' => ['tr1' => 'ttttttttttt1'],
+                            'b' => '1111',
+                            'b2' => '222',
+                            'b3' => [
+                                'message5' => 'Test message 31',
+                                'trace' => ['tr1' => 'ttttttttttt1'],
+                                'a1' => '1111',
+                                'b2' => '222',
+                                'с3' => '222',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+
+        VarDumper::dump($message, 10, true);
+
+
+        echo '<hr>';
+        $message = AppHelper::shotArrayData($message);
+
+        VarDumper::dump($message, 10, true);
+
+
+        exit;
+    }
+
+    public function actionAt()
+    {
+
+        $message = [
+            'message' => 'Test message 1',
+            'trace' => ['tr1' => 'ttttttttttt1'],
+            'a1' => '1111',
+            'b2' => '222',
+            'с3' => [
+                'message' => 'Test message 21',
+                'trace' => ['tr1' => 'ttttttttttt1'],
+                'b' => '1111',
+                'b2' => '222',
+                'b3' => [
+                    'message' => 'Test message 31',
+                    'trace' => ['tr1' => 'ttttttttttt1'],
+                    'a1' => '1111',
+                    'b2' => '222',
+                    'с3' => '222',
+                ],
+            ],
+        ];
+
+        Yii::info($message, 'analytics\analytics-test');
+        Yii::info($message, 'AS\AS-test');
+        Yii::info($message, 'elk\test-elk');
+
+        return date('Y-m-d H:i:s');
     }
 }

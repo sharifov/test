@@ -87,10 +87,6 @@ class LeadDataKeyCrudController extends FController
     {
         $model = $this->findModel($id);
 
-        if ($model->ldk_is_system) {
-            throw new ForbiddenHttpException('System key cannot be edited.');
-        }
-
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->ldk_id]);
         }

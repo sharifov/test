@@ -21,7 +21,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?php //= Html::a('Create Lead Qcall', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-    <?php Pjax::begin(); ?>
+    <?php Pjax::begin(['scrollTo' => 0]); ?>
     <?php echo $this->render('_filter', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([

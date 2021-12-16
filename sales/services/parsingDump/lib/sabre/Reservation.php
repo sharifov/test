@@ -32,7 +32,10 @@ class Reservation implements ParseDumpInterface, ParseReservationInterface
 
                 $result['reservation'][$parseData['index']] = $parseData;
             } catch (\Throwable $throwable) {
-                \Yii::error(AppHelper::throwableFormatter($throwable), 'Sabre:Reservation:parseDump:Throwable');
+                $logData = AppHelper::throwableLog($throwable);
+                $logData['row'] = $row;
+                $logData['rawData'] = $rawData ?? null;
+                \Yii::warning($logData, 'Sabre:Reservation:parseDump:Throwable');
             }
         }
         return $result;
@@ -58,7 +61,20 @@ class Reservation implements ParseDumpInterface, ParseReservationInterface
     {
         $row = trim($row);
         preg_match(self::getPatternRow(), $row, $matches);
-        return count($matches) > 12 ? $matches : [];
+        if ($result =  count($matches) > 12 ? $matches : null) {
+            $result['operated'] = self::getOperated($row);
+            return $result;
+        }
+        return [];
+    }
+
+    private static function getOperated(string $row): ?string
+    {
+        $position = stripos($row, "OPERATED BY");
+        $operatedBySource = trim(substr($row, $position));
+        preg_match('/^(OPERATED\s+BY\s+)([A-Z]{2})/x', $operatedBySource, $matches);
+
+        return $matches[2] ?? null;
     }
 
     /**
@@ -106,6 +122,7 @@ class Reservation implements ParseDumpInterface, ParseReservationInterface
             $result['arrival_date_day'] = $data[18];
             $result['arrival_date_month'] = $data[19];
         }
+        $result['operated'] = $data['operated'];
         return $result;
     }
 
@@ -128,6 +145,9 @@ class Reservation implements ParseDumpInterface, ParseReservationInterface
             $data['departure_am_pm'],
             $departureTimeZone
         );
+        if ($data['departure_date_time'] === false) {
+            throw new \RuntimeException('Parsing and generating Departure DT ended in failure');
+        }
 
         if (isset($data['arrival_date_day'], $data['arrival_date_month'])) {
             $arrivalDateDay = $data['arrival_date_day'];
@@ -150,6 +170,9 @@ class Reservation implements ParseDumpInterface, ParseReservationInterface
             $data['arrival_am_pm'],
             $arrivalTimeZone
         );
+        if ($data['arrival_date_time'] === false) {
+            throw new \RuntimeException('Parsing and generating Arrival DT ended in failure');
+        }
 
         return $data;
     }

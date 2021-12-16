@@ -6,13 +6,16 @@
  * @var $key string|integer
  * @var $totalProfit float
  * @var $userList []
+ * @var $ownerSplit boolean
  */
 
 use yii\widgets\ActiveForm;
 use yii\helpers\Html;
 
 $js = <<<JS
+
 var leadId = $leadId || null;
+
 function checkPercentageOfSplit () {
     var form = document.getElementById('split-form');
     var formData = new FormData(form);
@@ -55,24 +58,38 @@ function delay(callback, ms) {
 }
 
 function calcProfitByPercent(obj, total){
-    var amount;
+    var preValue = obj.defaultValue;
     var percent = parseInt($(obj).val());
-    amount = (+(total * percent / 100).toFixed(4));
+    var diffValue = preValue - percent;
+    var amount = (+(total * percent / 100).toFixed(4));
     $(obj).parents('.split-row').find('.profit-amount').html(amount);
+
+    var otherPercent = 0;
+    $('.profit-percent', '#profit-splits').not('#profitsplit-__id__-ps_percent').each(function() {
+      otherPercent = otherPercent + parseInt($(this).val());
+    })
+
+    mainAgentPercentVal = 100 - otherPercent;
+    mainAgentProfitVal = total * mainAgentPercentVal / 100;
+    
     mainAgentProfit();
 }
 JS;
 $this->registerJs($js);
 ?>
-<div class="row split-row">
+<div class="row split-row"
+    <?php if ($ownerSplit) : ?>
+        style="background-color: antiquewhite; padding-top: 10px; margin-bottom: 10px;"
+    <?php endif; ?>
+>
     <div class="col-md-4">
         <?= $form->field($split, '[' . $key . ']ps_user_id', [
             'template' => '{input}{error}{hint}'
         ])->dropDownList(
             $userList,
             [
-            'class' => 'form-control',
-            'placeholder' => 'Percent',
+                'class' => 'form-control',
+                'placeholder' => 'Percent',
             ]
         );?>
     </div>
@@ -82,26 +99,32 @@ $this->registerJs($js);
     ])->input('number', [
         'min' => 0,
         'max' => 100,
-        'class' => 'form-control',
+        'class' => "form-control" . ($ownerSplit ? " owner-percent" : " profit-percent"),
         'placeholder' => 'Percent',
         'onchange' => "calcProfitByPercent(this, $totalProfit);",
         'onkeydown' => "delay(checkPercentageOfSplit, 500)();"
     ]);?>
     </div>
     <div class="col-md-1">
-        <div class="profit-amount" style="display: flex; width: 70px; border: 1px solid #e4e9ee; justify-content: center; align-items: center; height: 30px;">
+        <div class="profit-amount
+            <?php if ($ownerSplit) : ?>
+                owner-amound
+            <?php endif;?>"
+             style="display: flex; width: 70px; border: 1px solid #e4e9ee;
+              justify-content: center; align-items: center; height: 30px;">
             <?= (!empty($split->ps_percent)) ? $totalProfit * $split->ps_percent / 100 : '0'?>
         </div>
     </div>
     <div class="col-md-3">
-        <?= Html::button('<i class="fa fa-trash"></i>', [
-            'class' => 'btn btn-danger pull-right remove-split-button' ,
-        ]); ?>
-        <?= $form->field($split, '[' . $key . ']ps_id', [
-            'options' => [
-                'tag' => false
-            ],
-        ])->hiddenInput()->label(false);
-?>
+        <?php if (!$ownerSplit) : ?>
+            <?= Html::button('<i class="fa fa-trash"></i>', [
+                'class' => 'btn btn-danger pull-right remove-split-button' ,
+            ]); ?>
+            <?= $form->field($split, '[' . $key . ']ps_id', [
+                'options' => [
+                    'tag' => false
+                ],
+            ])->hiddenInput()->label(false);?>
+        <?php endif;?>
     </div>
 </div>

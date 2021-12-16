@@ -2,6 +2,8 @@
 
 namespace sales\model\clientChatChannel\entity;
 
+use common\models\Lead;
+
 class ClientChatChannelDefaultSettings
 {
     private static array $settings = [
@@ -62,12 +64,26 @@ class ClientChatChannelDefaultSettings
                 'sortParameters' => [
                     'pastAcceptedChatsNumber' => [
                         'pastMinutes' => 180,
-                        'sortPriority' => 0
+                        'sortPriority' => 0,
+                        'enabled' => true
+                    ],
+                    'skillLevel' => [
+                        'sortDirection' => 'ASC',
+                        'sortPriority' => 0,
+                        'enabled' => false
                     ]
                 ],
                 'autoCloseRoom' => false
             ],
-        ]
+            'searchAndCacheFlightQuotesOnAcceptChat' => false
+        ],
+        'leadAutoTake' => [
+            'onChatAccept' => null,
+            'availableStatuses' => [
+                Lead::STATUS_LIST[Lead::STATUS_PENDING],
+                Lead::STATUS_LIST[Lead::STATUS_NEW],
+            ],
+        ],
     ];
 
     public static function getAll(): array
@@ -88,6 +104,11 @@ class ClientChatChannelDefaultSettings
     public static function getAccessDistributionRepeatDelaySeconds(): int
     {
         return self::$settings['system']['userAccessDistribution']['repeatDelaySeconds'] ?? 0;
+    }
+
+    public static function getAccessSortParameters(): array
+    {
+        return self::$settings['system']['userAccessDistribution']['sortParameters'] ?? [];
     }
 
     public static function getAccessDistributionPastMinutes(): int

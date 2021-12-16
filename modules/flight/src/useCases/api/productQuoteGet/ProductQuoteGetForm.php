@@ -14,9 +14,12 @@ use yii\base\Model;
  */
 class ProductQuoteGetForm extends Model
 {
-    public const WITH_REPROTECTION = 'reprotection';
+    public const QUOTE_LIST = 'quote_list';
+    public const WITH_LAST_CHANGE = 'last_change';
+
     public const WITH_LIST = [
-        self::WITH_REPROTECTION,
+        self::QUOTE_LIST,
+        self::WITH_LAST_CHANGE,
     ];
 
     public $product_quote_gid;
@@ -44,10 +47,18 @@ class ProductQuoteGetForm extends Model
         }
     }
 
-    public function withReprotection(): bool
+    public function withQuoteList(): bool
     {
         if ($this->with) {
-            return in_array(self::WITH_REPROTECTION, $this->with, true);
+            return in_array(self::QUOTE_LIST, $this->with, true);
+        }
+        return false;
+    }
+
+    public function withLastChange(): bool
+    {
+        if ($this->with) {
+            return in_array(self::WITH_LAST_CHANGE, $this->with, true);
         }
         return false;
     }

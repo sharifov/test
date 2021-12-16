@@ -42,8 +42,8 @@ class LeadRedialController extends FController
                 [
                     'allow' => true,
                     'matchCallback' => static function ($rule, $action) {
-                        /** @var Employee $user */
-                        return ($user = Yii::$app->user->identity) && ($profile = $user->userProfile) && $profile->up_auto_redial;
+                        return Yii::$app->user->can('/lead-redial/index');
+//                        return ($user = Yii::$app->user->identity) && ($profile = $user->userProfile) && $profile->up_auto_redial;
                     }
                 ]
             ]

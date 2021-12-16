@@ -14,7 +14,7 @@ use dosamigos\datepicker\DatePicker;
 /* @var $searchModel common\models\search\PhoneBlacklistSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Phone Blacklists';
+$this->title = 'Phone BlockLists';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="phone-blacklist-index">
@@ -22,10 +22,10 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a('Create Phone Blacklist', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('Create Phone BlockList', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-    <?php Pjax::begin(); ?>
+    <?php Pjax::begin(['scrollTo' => 0]); ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,

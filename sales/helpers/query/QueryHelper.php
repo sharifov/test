@@ -71,7 +71,7 @@ class QueryHelper
         $query->andWhere(['<=', $dateFieldName, $date->format('Y-m-d H:i:s')]);
     }
 
-    private static function getDateFromUserTZToUtc(string $value, ?string $userTimeZone): \DateTimeImmutable
+    public static function getDateFromUserTZToUtc(string $value, ?string $userTimeZone): \DateTimeImmutable
     {
         if (!$userTimeZone) {
             $userTimeZone = 'UTC';
@@ -111,6 +111,24 @@ class QueryHelper
             $result[$key] = $value[$column] . ' - [' . $value['cnt'] . ']';
         }
         return $result;
+    }
+
+    public static function getPartitionsByYears($from, $to)
+    {
+        $yFrom = date('y', strtotime($from));
+        $yTo = date('y', strtotime($to));
+
+        if ($yFrom == $yTo) {
+            $partitions = 'y' . ($yFrom + 1);
+        } else {
+            $formattedPartitions = array_map(function ($values) {
+                return 'y' . ($values + 1);
+            }, range($yFrom, $yTo));
+
+            $partitions = implode(', ', $formattedPartitions);
+        }
+
+        return $partitions;
     }
 
     private static function resetProperties(Model $model): void

@@ -33,7 +33,9 @@ class SendEmailOnCaseCreationBOJob extends BaseJob implements JobInterface
         try {
             (new SendEmailByCase($this->case_id, $this->contact_email));
         } catch (\Throwable $e) {
-            \Yii::error(AppHelper::throwableLog($e), 'SendEmailOnCaseCreationBOJob::Throwable');
+            $message = AppHelper::throwableLog($e);
+            $message['case_id'] = $this->case_id;
+            \Yii::error($message, 'SendEmailOnCaseCreationBOJob::Throwable');
         }
     }
 }

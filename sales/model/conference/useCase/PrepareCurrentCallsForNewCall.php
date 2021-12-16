@@ -30,13 +30,25 @@ class PrepareCurrentCallsForNewCall
         $this->communication = \Yii::$app->communication;
     }
 
-    public function prepare(): bool
+    public function prepare(?string $holdAnnounce = null): bool
     {
         foreach ($this->getCallsForActions() as $call) {
             if ($call['action'] === 'hangup') {
                 $this->hangUp($call['call_sid']);
             } elseif ($call['action'] === 'hold') {
-                $this->toHold($call['conference_id'], $call['conference_sid'], $call['call_sid']);
+                $clientParticipant = ConferenceParticipant::find()
+                    ->andWhere([
+                        'cp_cf_id' => $call['conference_id'],
+                        'cp_type_id' => ConferenceParticipant::TYPE_CLIENT,
+                    ])
+                    ->andWhere(['IS NOT', 'cp_status_id', null])
+                    ->andWhere(['<>', 'cp_status_id', ConferenceParticipant::STATUS_LEAVE])
+                    ->one();
+                if ($clientParticipant) {
+                    $this->toHold($clientParticipant, $call['conference_sid'], $call['call_sid'], $holdAnnounce);
+                } else {
+                    $this->hangUp($call['call_sid']);
+                }
             }
         }
 
@@ -72,14 +84,14 @@ class PrepareCurrentCallsForNewCall
         ->asArray()->all();
     }
 
-    public function toHold(string $conferenceId, string $conferenceSid, string $callSid): void
+    public function toHold(ConferenceParticipant $clientParticipant, string $conferenceSid, string $callSid, ?string $announce): void
     {
         try {
-            $result = $this->communication->disconnectFromConferenceCall($conferenceSid, $callSid);
+            $result = $this->communication->disconnectFromConferenceCall($conferenceSid, $callSid, $announce);
             $isError = (bool)($result['error'] ?? true);
             if (!$isError) {
                 $this->sendSocketMessageCompleteCall($callSid);
-                $this->transferClientCallToHold($conferenceId, $conferenceSid, $callSid);
+                $this->transferClientCallToHold($clientParticipant, $callSid);
             } else {
                 $this->addMessage([
                     'title' => 'To Hold',
@@ -98,40 +110,27 @@ class PrepareCurrentCallsForNewCall
         }
     }
 
-    private function transferClientCallToHold(int $conferenceId, string $conferenceSid, string $callSid): void
+    private function transferClientCallToHold(ConferenceParticipant $participantClient, string $callSid): void
     {
-        $participantClient = ConferenceParticipant::find()->andWhere([
-            'cp_cf_id' => $conferenceId,
-            'cp_type_id' => ConferenceParticipant::TYPE_CLIENT
-        ])->one();
-
-        if (!$participantClient) {
-            $this->addMessage([
-                'title' => 'Transfer client call to hold',
-                'user_id' => $this->userId,
-                'calls_sid' => $callSid,
-                'error' => 'Not found Client Participant on Conference SID: ' . $conferenceSid,
-            ]);
-            return;
-        }
-
         if (!$clientCall = $participantClient->cpCall) {
-            $this->addMessage([
-                'title' => 'Transfer client call to hold',
+            \Yii::info([
+                'message' => 'Not found relation client-participant with client-call',
+                'comment' => 'Possible participant callback received before call callback',
                 'user_id' => $this->userId,
-                'calls_sid' => $callSid,
-                'error' => 'Not found Call Relation on Client Participant ID:' . $participantClient->cp_id,
-            ]);
+                'participantId' => $participantClient->cp_id,
+                'participantCallSid' => $participantClient->cp_call_sid,
+                'agentCallSid' => $callSid,
+            ], 'log\PrepareCurrentCallsForNewCall:transferClientCallToHold');
             return;
         }
 
         if ($clientCall->isTwFinishStatus()) {
-            \Yii::info(VarDumper::dumpAsString([
-                'message' => 'Transfer client call to hold',
+            \Yii::info([
+                'message' => 'Client call is already finished. Client call will not be added to hold.',
                 'userId' => $this->userId,
-                'info' => 'Call is finished',
+                'agentCallSid' => $callSid,
                 'clientCall' => $clientCall->getAttributes(),
-            ]), 'info\PrepareCurrentCallsForNewCall:transferClientCallToHold');
+            ], 'log\PrepareCurrentCallsForNewCall:transferClientCallToHold');
             return;
         }
 
@@ -153,10 +152,10 @@ class PrepareCurrentCallsForNewCall
                     return;
                 }
             } else {
-                \Yii::error(VarDumper::dumpAsString([
+                \Yii::error([
                     'message' => 'Not found parent call',
                     'clientCall' => $clientCall->getAttributes(),
-                ]), 'PrepareCurrentCallsForNewCall:transferClientCallToHold');
+                ], 'PrepareCurrentCallsForNewCall:transferClientCallToHold');
             }
         } elseif ($clientCall->isIn()) {
             if (!$clientCall->c_group_id) {

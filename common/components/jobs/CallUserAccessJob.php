@@ -50,7 +50,7 @@ class CallUserAccessJob extends BaseJob implements JobInterface
      */
     public function execute($queue): bool
     {
-        $this->executionTimeRegister();
+        $this->waitingTimeRegister();
         try {
             $this->casesCreateService = Yii::createObject(CasesCreateService::class);
             $this->clientManageService = Yii::createObject(ClientManageService::class);

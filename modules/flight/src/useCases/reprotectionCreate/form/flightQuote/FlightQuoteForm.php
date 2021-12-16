@@ -3,6 +3,7 @@
 namespace modules\flight\src\useCases\reprotectionCreate\form\flightQuote;
 
 use common\components\validators\CheckJsonValidator;
+use common\components\validators\IsArrayValidator;
 use modules\flight\src\useCases\reprotectionCreate\form\flightQuote\tripsForm\TripForm;
 use sales\helpers\ErrorsToStringHelper;
 use yii\base\Model;
@@ -46,7 +47,7 @@ class FlightQuoteForm extends Model
             [['trips'], CheckJsonValidator::class, 'skipOnError' => true],
             [['trips'], 'checkTripForms'],
 
-            [['itineraryDump'], 'safe'],
+            [['itineraryDump'], IsArrayValidator::class, 'skipOnEmpty' => true],
         ];
     }
 

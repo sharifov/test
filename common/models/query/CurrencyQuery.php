@@ -33,4 +33,14 @@ class CurrencyQuery extends \yii\db\ActiveQuery
     {
         return parent::one($db);
     }
+
+    public function byCode(string $code): self
+    {
+        return $this->andWhere(['cur_code' => $code]);
+    }
+
+    public static function getCurrencySymbolByCode(string $code): string
+    {
+        return Currency::find()->select(['cur_symbol'])->byCode($code)->scalar();
+    }
 }

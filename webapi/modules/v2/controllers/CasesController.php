@@ -4,11 +4,13 @@ namespace webapi\modules\v2\controllers;
 
 use common\components\jobs\CreateSaleFromBOJob;
 use common\components\jobs\SendEmailOnCaseCreationBOJob;
+use sales\entities\cases\CaseCategory;
 use sales\entities\cases\Cases;
 use sales\helpers\app\AppHelper;
 use sales\model\cases\CaseCodeException;
 use sales\model\cases\useCases\cases\api\create\CreateForm;
 use sales\model\cases\useCases\cases\api\create\Handler;
+use sales\repositories\NotFoundException;
 use sales\services\cases\CasesSaleService;
 use webapi\src\ApiCodeException;
 use webapi\src\logger\ApiLogger;
@@ -67,7 +69,8 @@ class CasesController extends BaseController
      * @apiParam {string{20}}           contact_phone                    Client Phone required if contact email or chat_visitor_id or order_uid are not set
      * @apiParam {string{20}}           [contact_name]                   Client Name
      * @apiParam {string{50}}           chat_visitor_id                  Client chat_visitor_id required if contact phone or email or order_uid are not set
-     * @apiParam {int}                  category_id                      Case category id
+     * @apiParam {int}                  [category_id]                    Case category id (Required if "category_key" is empty)
+     * @apiParam {string{50}}           [category_key]                   Case category key (Required if "category_id" is empty - takes precedence over "category_id". See list in api "/v2/case-category/list")
      * @apiParam {string{5..7}}         order_uid                        Order uid (symbols and numbers only) required if contact phone or email or chat_visitor_id are not set
      * @apiParam {string{100}}          [project_key]                    Project Key (if not exist project assign API User)
      * @apiParam {string{255}}          [subject]                        Subject
@@ -78,7 +81,8 @@ class CasesController extends BaseController
      * {
      *       "contact_email": "test@test.com",
      *       "contact_phone": "+37369636690",
-     *       "category_id": 12,
+     *       "category_key": "voluntary_exchange",
+     *       "category_id": null,
      *       "order_uid": "12WS09W",
      *       "subject": "Subject text",
      *       "description": "Description text",
@@ -216,9 +220,11 @@ class CasesController extends BaseController
             );
         }
 
+        $caseCategory = $form->getCaseCategory();
+
         if (
             $form->order_uid && $case = Cases::find()
-            ->andWhere(['cs_category_id' => $form->category_id, 'cs_order_uid' => $form->order_uid])
+            ->andWhere(['cs_category_id' => $caseCategory->cc_id, 'cs_order_uid' => $form->order_uid])
             ->withNotFinishStatus()->limit(1)->one()
         ) {
             return new SuccessResponse(
@@ -231,7 +237,7 @@ class CasesController extends BaseController
         }
 
         try {
-            $result = $this->createHandler->handle($form->getDto());
+            $result = $this->createHandler->handle($form->getDto(), $caseCategory);
         } catch (\Throwable $e) {
             return new ErrorResponse(
                 new MessageMessage($e->getMessage()),

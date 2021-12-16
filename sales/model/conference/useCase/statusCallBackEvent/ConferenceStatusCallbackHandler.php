@@ -9,8 +9,11 @@ use common\models\ConferenceParticipant;
 use common\models\Notifications;
 use frontend\widgets\newWebPhone\call\socket\HoldMessage;
 use frontend\widgets\newWebPhone\call\socket\MuteMessage;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use sales\dispatchers\EventDispatcher;
+use sales\helpers\setting\SettingHelper;
 use sales\model\callLog\services\CallLogConferenceTransferService;
+use sales\model\client\notifications\ClientNotificationCanceler;
 use sales\model\conference\entity\conferenceEventLog\ConferenceEventLog;
 use sales\model\conference\entity\conferenceEventLog\ConferenceEventLogRepository;
 use sales\model\conference\entity\conferenceEventLog\events\ConferenceEnd;
@@ -33,18 +36,27 @@ use yii\helpers\VarDumper;
  * @property EventDispatcher $eventDispatcher
  * @property ConferenceEventLogRepository $eventLogRepository
  * @property Handler $saveParticipantHandler
+ * @property ClientNotificationCanceler $clientNotificationCanceler
  */
 class ConferenceStatusCallbackHandler
 {
+    public const DELAY_JOB_FOR_UPDATE_PARTICIPANT_CALL_ID = 5;
+
     private EventDispatcher $eventDispatcher;
     private ConferenceEventLogRepository $eventLogRepository;
     private Handler $saveParticipantHandler;
+    private ClientNotificationCanceler $clientNotificationCanceler;
 
-    public function __construct(EventDispatcher $eventDispatcher, ConferenceEventLogRepository $eventLogRepository, Handler $saveParticipantHandler)
-    {
+    public function __construct(
+        EventDispatcher $eventDispatcher,
+        ConferenceEventLogRepository $eventLogRepository,
+        Handler $saveParticipantHandler,
+        ClientNotificationCanceler $clientNotificationCanceler
+    ) {
         $this->eventDispatcher = $eventDispatcher;
         $this->eventLogRepository = $eventLogRepository;
         $this->saveParticipantHandler = $saveParticipantHandler;
+        $this->clientNotificationCanceler = $clientNotificationCanceler;
     }
 
     public function start(Conference $conference, ConferenceStatusCallbackForm $form): void
@@ -148,6 +160,18 @@ class ConferenceStatusCallbackHandler
                 'model' => $participant->getAttributes(),
             ]), 'ConferenceStatusCallbackHandler:leave');
             return;
+        }
+
+        if ($participant->isClient() && ($duration = $participant->getDuration()) && $duration >= SettingHelper::clientNotificationSuccessCallMinDuration()) {
+            $caseId = Call::find()->select(['c_case_id'])->andWhere(['c_id' => $participant->cp_call_id])->scalar();
+            if ($caseId) {
+                $productQuoteChanges = ProductQuoteChange::find()->select(['pqc_id'])->byCaseId($caseId)->isNotDecided()->column();
+                if ($productQuoteChanges) {
+                    foreach ($productQuoteChanges as $productQuoteChangeId) {
+                        $this->clientNotificationCanceler->cancel(\sales\model\client\notifications\client\entity\NotificationType::PRODUCT_QUOTE_CHANGE_AUTO_DECISION_PENDING_EVENT, $productQuoteChangeId);
+                    }
+                }
+            }
         }
 
         if (!$data = ConferenceDataService::getDataById($participant->cp_cf_id)) {
@@ -301,7 +325,7 @@ class ConferenceStatusCallbackHandler
         if ($call = $this->findAndUpdateCall($form->CallSid, $conference)) {
             $participant->cp_call_id = $call->c_id;
         } else {
-            $delayJob = 5;
+            $delayJob = self::DELAY_JOB_FOR_UPDATE_PARTICIPANT_CALL_ID;
             $job = new UpdateConferenceParticipantCallIdJob($participant->cp_call_sid, $participant->cp_cf_sid, $participant->cp_cf_id);
             $job->delayJob = $delayJob;
             \Yii::$app->queue_job->delay($delayJob)->push($job);

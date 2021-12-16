@@ -5,10 +5,14 @@ namespace sales\services\lead\qcall;
 use common\models\Call;
 use common\models\Department;
 use common\models\DepartmentPhoneProject;
+use common\models\PhoneBlacklist;
 use common\models\query\DepartmentPhoneProjectQuery;
 use common\models\Lead;
 use common\models\ProjectWeight;
 use common\models\StatusWeight;
+use sales\helpers\setting\SettingHelper;
+use sales\model\leadRedial\queue\ClientPhones;
+use sales\model\leadRedial\job\LeadRedialAssignToUsersJob;
 use sales\repositories\lead\LeadFlowRepository;
 use sales\repositories\lead\LeadQcallRepository;
 use Yii;
@@ -23,22 +27,22 @@ use yii\helpers\VarDumper;
  *
  * @property LeadQcallRepository $leadQcallRepository
  * @property LeadFlowRepository $leadFlowRepository
+ * @property ClientPhones $clientPhones
  */
 class QCallService
 {
     private $leadQcallRepository;
     private $leadFlowRepository;
+    private ClientPhones $clientPhones;
 
-    /**
-     * @param LeadQcallRepository $leadQcallRepository
-     * @param LeadFlowRepository $leadFlowRepository
-     */
     public function __construct(
         LeadQcallRepository $leadQcallRepository,
-        LeadFlowRepository $leadFlowRepository
+        LeadFlowRepository $leadFlowRepository,
+        ClientPhones $clientPhones
     ) {
         $this->leadQcallRepository = $leadQcallRepository;
         $this->leadFlowRepository = $leadFlowRepository;
+        $this->clientPhones = $clientPhones;
     }
 
     /**
@@ -103,6 +107,19 @@ class QCallService
             return null;
         }
 
+        $lead = Lead::findOne($leadId);
+        if ($lead) {
+            $clientPhone = $this->clientPhones->getFirstClientPhone($lead);
+            if ($clientPhone && PhoneBlacklist::find()->isExists($clientPhone->phone)) {
+                Yii::warning([
+                    'message' => 'Lead not added to Lead Redial Queue, because client phone is blocked.',
+                    'leadId' => $lead->id,
+                    'phone' => $clientPhone->phone,
+                ], 'QCallService:create');
+                return null;
+            }
+        }
+
         $weight = $this->findWeight($findWeightParams);
 
         $interval = (new CalculateDateService())->calculate(
@@ -118,6 +135,10 @@ class QCallService
         $qCall = LeadQcall::create($leadId, $weight, $interval, $phone);
 
         $this->leadQcallRepository->save($qCall);
+
+        if (SettingHelper::leadRedialEnabled()) {
+            \Yii::$app->queue_lead_redial->priority(1)->push(new LeadRedialAssignToUsersJob($qCall->lqc_lead_id));
+        }
 
         return $qCall->lqc_lead_id;
     }

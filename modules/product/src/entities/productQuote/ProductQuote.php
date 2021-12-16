@@ -6,8 +6,13 @@ use common\models\Currency;
 use common\models\Employee;
 use modules\flight\models\FlightQuote;
 use modules\hotel\models\HotelQuote;
+use modules\product\src\entities\productQuote\events\ProductQuoteBookedChangeFlowEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteReplaceEvent;
+use modules\product\src\entities\productQuote\events\ProductQuoteStatusChangeEvent;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelation;
+use modules\product\src\entities\productQuoteData\ProductQuoteData;
+use modules\product\src\entities\productQuoteData\ProductQuoteDataKey;
 use modules\product\src\entities\productQuoteLead\ProductQuoteLead;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelationQuery;
@@ -40,6 +45,7 @@ use sales\dto\product\ProductQuoteDTO;
 use sales\entities\EventTrait;
 use sales\helpers\product\ProductQuoteHelper;
 use sales\entities\serializer\Serializable;
+use sales\helpers\setting\SettingHelper;
 use sales\services\CurrencyHelper;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -100,9 +106,14 @@ use yii\db\ActiveRecord;
  * @property ProductQuote|null $relateParent
  * @property ProductQuoteChange|null $productQuoteLastChange
  * @property ProductQuoteChange[] $productQuoteChanges
+ * @property ProductQuoteChange[] $productQuoteChangesActive
  * @property ProductQuoteRefund|null $productQuoteLastRefund
  * @property ProductQuoteRefund[] $productQuoteRefunds
- * @property ProductQuote|null $originProductQuote
+ * @property ProductQuoteRefund[] $productQuoteRefundsActive
+ * @property ProductQuoteData|null $productQuoteDataRecommended
+ * @property ProductQuoteChangeRelation[]|null $productQuoteChangeRelations
+ * @property ProductQuoteChangeRelation|null $productQuoteChangeLastRelation
+ * @property ProductQuoteRelation|null $pqRelation
  *
  * @property Quotable|null $childQuote
  * @property string|null $detailsPageUrl
@@ -262,6 +273,11 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
             ->viaTable('product_quote_relation', ['pqr_related_pq_id' => 'pq_id']);
     }
 
+    public function getPqRelation(): ActiveQuery
+    {
+        return $this->hasOne(ProductQuoteRelation::class, ['pqr_related_pq_id' => 'pq_id']);
+    }
+
     public function getProductQuoteLastChange(): ActiveQuery
     {
         return $this->hasOne(ProductQuoteChange::class, ['pqc_pq_id' => 'pq_id'])->orderBy(['pqc_pq_id' => SORT_DESC]);
@@ -275,6 +291,16 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function getProductQuoteChanges(): ActiveQuery
     {
         return $this->hasMany(ProductQuoteChange::class, ['pqc_pq_id' => 'pq_id']);
+    }
+
+    /**
+     * Gets query for [[ProductQuoteChanges]].
+     *
+     * @return ActiveQuery
+     */
+    public function getProductQuoteChangesActive(): ActiveQuery
+    {
+        return $this->hasMany(ProductQuoteChange::class, ['pqc_pq_id' => 'pq_id'])->andWhere(['pqc_status_id' => SettingHelper::getActiveQuoteChangeStatuses()]);
     }
 
     public function getProductQuoteLastRefund(): ActiveQuery
@@ -291,6 +317,16 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function getProductQuoteRefunds(): ActiveQuery
     {
         return $this->hasMany(ProductQuoteRefund::class, ['pqr_product_quote_id' => 'pq_id']);
+    }
+
+    /**
+     * Gets query for [[ProductQuoteRefunds]].
+     *
+     * @return ActiveQuery
+     */
+    public function getProductQuoteRefundsActive(): ActiveQuery
+    {
+        return $this->hasMany(ProductQuoteRefund::class, ['pqr_product_quote_id' => 'pq_id'])->andWhere(['pqr_status_id' => SettingHelper::getActiveQuoteRefundStatuses()]);
     }
 
     /**
@@ -365,7 +401,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
      */
     public function getPqOrder(): ActiveQuery
     {
-        return $this->hasOne(Order::class, ['or_id' => 'pq_order_id']);
+        return $this->hasOne(Order::class, ['or_id' => 'pq_order_id'])->orderBy(['or_id' => SORT_DESC]);
     }
 
     /**
@@ -408,11 +444,6 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         return $this->hasMany(ProductQuoteOption::class, ['pqo_product_quote_id' => 'pq_id']);
     }
 
-    public function getOriginProductQuote(): ActiveQuery
-    {
-        return $this->hasOne(self::class, ['pqr_parent_pq_id' => 'pq_id'])->innerJoin(ProductQuoteRelation::tableName(), 'pq_id = pqr_related_pq_id');
-    }
-
     /**
      * @return ActiveQuery
      */
@@ -420,6 +451,16 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     {
         return $this->hasMany(ProductQuoteOption::class, ['pqo_product_quote_id' => 'pq_id'])
             ->where(['not', ['pqo_status_id' => ProductQuoteOptionStatus::CANCEL_GROUP]]);
+    }
+
+    public function getProductQuoteChangeRelations(): \yii\db\ActiveQuery
+    {
+        return $this->hasMany(ProductQuoteChangeRelation::class, ['pqcr_pq_id' => 'pq_id']);
+    }
+
+    public function getProductQuoteChangeLastRelation(): \yii\db\ActiveQuery
+    {
+        return $this->hasOne(ProductQuoteChangeRelation::class, ['pqcr_pq_id' => 'pq_id'])->orderBy(['pqcr_pqc_id' => SORT_DESC]);
     }
 
     public static function find(): Scopes
@@ -576,7 +617,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         $copy->pq_id = null;
         $copy->pq_gid = self::generateGid();
         $copy->pq_product_id = $quote->pq_product_id;
-        $copy->pq_order_id = null;
+        $copy->pq_order_id = $quote->pq_order_id;
         $copy->pq_status_id = ProductQuoteStatus::NEW;
         $copy->pq_owner_user_id = $ownerId;
         $copy->pq_created_user_id = $creatorId;
@@ -734,9 +775,26 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         $this->recordEvent(
             new ProductQuoteBookedEvent($this->pq_id, $this->pq_status_id, $description, $this->pq_owner_user_id, $creatorId)
         );
+
         if ($this->pq_status_id !== ProductQuoteStatus::BOOKED) {
             $this->setStatus(ProductQuoteStatus::BOOKED);
 //            $this->recordEvent((new OrderChangeStatusProcessingEvent($this)));
+        }
+    }
+
+    public function bookedChangeFlow(): void
+    {
+        if ($this->pq_status_id !== ProductQuoteStatus::BOOKED) {
+            $this->recordEvent(
+                new ProductQuoteBookedChangeFlowEvent(
+                    $this->pq_id,
+                    $this->pq_status_id,
+                    ProductQuoteStatus::BOOKED,
+                    'Exchange API flow',
+                    $this->pq_owner_user_id
+                )
+            );
+            $this->setStatus(ProductQuoteStatus::BOOKED);
         }
     }
 
@@ -876,6 +934,11 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function isBooked(): bool
     {
         return $this->pq_status_id === ProductQuoteStatus::BOOKED;
+    }
+
+    public function isSold(): bool
+    {
+        return $this->pq_status_id === ProductQuoteStatus::SOLD;
     }
 
     public function isInProgress(): bool
@@ -1019,5 +1082,56 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
             $bookingId = $this->flightQuote->getBookingId();
         }
         return $bookingId;
+    }
+
+    public function getLastBookingId(): ?string
+    {
+        if ($this->isFlight()) {
+            return $this->flightQuote->getLastBookingId();
+        }
+        return null;
+    }
+
+    public function getProductQuoteDataRecommended(): ActiveQuery
+    {
+        return $this->hasOne(ProductQuoteData::class, ['pqd_product_quote_id' => 'pq_id'])->andWhere(['pqd_key' => ProductQuoteDataKey::RECOMMENDED]);
+    }
+
+    public function isRecommended(): bool
+    {
+        return $this->productQuoteDataRecommended ? $this->productQuoteDataRecommended->isRecommended() : false;
+    }
+
+    public function isChangeable(): bool
+    {
+        return in_array($this->pq_status_id, SettingHelper::getProductQuoteChangeableStatuses(), false);
+    }
+
+    /**
+     * @param int|null $userId
+     * @return bool
+     */
+    public function isOwner(?int $userId): bool
+    {
+        if ($userId === null) {
+            return false;
+        }
+        return $this->pq_owner_user_id === $userId;
+    }
+
+    public function getDifferenceOriginPrice(ProductQuote $originProductQuote): ?float
+    {
+        /* TODO:: waiting formula */
+        $diffPrice = ($this->pq_origin_price - $originProductQuote->pq_origin_price) + $this->pq_agent_markup;
+        $diffPrice = $diffPrice < 0 ? 0.00 : $diffPrice;
+        return ProductQuoteHelper::roundPrice($diffPrice, 2);
+    }
+
+    /**
+     * @return int
+     */
+    public function getProductQuoteOptionsCount(): int
+    {
+        return $this->productQuoteOptions ? count($this->productQuoteOptions) : 0;
     }
 }

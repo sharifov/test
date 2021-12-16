@@ -31,8 +31,8 @@ $airportChange = $result['airportChange'];
 $technicalStopCnt = $result['technicalStopCnt'];
 $bagFilter = $result['bagFilter'];
 
-//$isQuoteAssignedToFlight = FlightQuoteHelper::isQuoteAssignedToFlight($flightQuotes, $result['key']);
-$isQuoteAssignedToFlight = false;
+$isQuoteAssignedToFlight = in_array($result['key'], $flightQuotes);
+
 ?>
 <div
     class="quote search-result__quote <?= !$isQuoteAssignedToFlight ?: 'quote--selected' ?>"
@@ -52,14 +52,16 @@ $isQuoteAssignedToFlight = false;
             <span class="quote__id"><strong># <?= $resultKey + 1 ?></strong></span>
             <span class="quote__vc">
                 <span class="quote__vc-logo">
-                    <?php $airlineLogo = '//www.gstatic.com/flights/airline_logos/70px/' . $result['validatingCarrier'] . '.png' ?>
-                    <?php if (ImageHelper::checkImageGstaticExist($airlineLogo)) : ?>
+                    <?php if ($result['validatingCarrier']) : ?>
+                        <?php $airlineLogo = '//www.gstatic.com/flights/airline_logos/70px/' . $result['validatingCarrier'] . '.png' ?>
                         <span class="quote__vc-logo">
                             <img src="<?php echo $airlineLogo ?>" alt="<?= $result['validatingCarrier']?>" class="quote__vc-img">
                         </span>
                     <?php endif ?>
                 </span>
-                <span class="quote__vc-name"><?= (!isset($airlines[$result['validatingCarrier']])) ?: $airlines[$result['validatingCarrier']];?><strong> [<?= $result['validatingCarrier']?>]</strong></span>
+                <span class="quote__vc-name">
+                    <?= (!isset($airlines[$result['validatingCarrier']])) ?: $airlines[$result['validatingCarrier']];?><strong> [<?= $result['validatingCarrier']?>]</strong>
+                </span>
             </span>
             <?php /* ?>
             <div class="quote__gds">
@@ -94,19 +96,22 @@ $isQuoteAssignedToFlight = false;
                 <div class="quote__seats">
                     <?php if (is_array($prodTypes)) : ?>
                         <?php foreach ($prodTypes as $label) : ?>
-                            <span class="fa fa-tags text-success" title="<?php echo Html::encode($label) ?>"></span> <?php echo FlightQuoteLabelList::getDescriptionByKey($label) ?>
+                            <span class="fa fa-tags text-success" title="<?php echo Html::encode($label) ?>"></span>
+                            <?php echo FlightQuoteLabelList::getDescriptionByKey($label) ?>
                         <?php endforeach ?>
                     <?php else : ?>
-                        <span class="fa fa-tags text-success" title="<?php echo Html::encode($prodTypes) ?>"></span> <?php echo FlightQuoteLabelList::getDescriptionByKey($prodTypes) ?>
+                        <span class="fa fa-tags text-success" title="<?php echo Html::encode($prodTypes) ?>"></span>
+                        <?php echo FlightQuoteLabelList::getDescriptionByKey($prodTypes) ?>
                     <?php endif ?>
                 </div>
             <?php endif;?>
 
         </div>
-        <div class="quote__heading-right text-success">
-            <strong class="quote__quote-price">$<?= $result['price'] ?></strong>
+        <div class="quote__heading-right text-success" title="Price per PAX">
+            <strong class="quote__quote-price">$<?= number_format($result['price'], 2) ?></strong> &nbsp; per ADT
         </div>
     </div>
+
     <div class="quote_search_wrapper">
         <div class="quote__trip">
             <?php $tripsInfo = [];
@@ -164,8 +169,8 @@ $isQuoteAssignedToFlight = false;
                 <div class="quote__segment">
                     <div class="quote__info">
                         <?php if (count($marketingAirlines) === 1) :?>
-                            <?php $airlineLogo = '//www.gstatic.com/flights/airline_logos/70px/' . $marketingAirlines[0] . '.png' ?>
-                            <?php if (ImageHelper::checkImageGstaticExist($airlineLogo)) : ?>
+                            <?php if ($marketingAirlines[0]) : ?>
+                                <?php $airlineLogo = '//www.gstatic.com/flights/airline_logos/70px/' . $marketingAirlines[0] . '.png' ?>
                                 <span class="quote__vc-logo">
                                     <img src="<?php echo $airlineLogo ?>" alt="<?= $marketingAirlines[0]?>" class="quote__airline-logo">
                                 </span>
@@ -262,10 +267,9 @@ $isQuoteAssignedToFlight = false;
                 <tr>
                     <th>Pax</th>
                     <th>Q</th>
-                    <th>NP, $</th>
-                    <?php if (isset($result['prices']['markup']) && $result['prices']['markup'] > 0) :
-                        ?><th>MU, $</th><?php
-                    endif;?>
+                    <th class="text-right" title="Net price">NP, $</th>
+                    <th class="text-right" title="Markup">Mkp, $</th>
+                    <th class="text-right" title="Selling price">SP, $</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -274,10 +278,9 @@ $isQuoteAssignedToFlight = false;
                     <tr><?php $paxTotal += $pax['cnt'];?>
                         <th><?= $paxCode?></th>
                         <td>x <?= $pax['cnt']?></td>
-                        <td><?= $pax['price']?></td>
-                        <?php if (isset($result['prices']['markup']) && $result['prices']['markup'] > 0) :
-                            ?><td><?= (isset($pax['markup'])) ? $pax['markup'] : ''?></td><?php
-                        endif;?>
+                        <td class="text-right"><?= number_format($pax['price'] - $pax['markup'] ?? 0, 2) ?></td>
+                        <td class="text-right"><?= isset($pax['markup']) ? number_format($pax['markup'], 2) : '-' ?></td>
+                        <td  class="text-right"><?= number_format($pax['price'], 2)?></td>
                     </tr>
                 <?php endforeach;?>
                 </tbody>
@@ -285,17 +288,17 @@ $isQuoteAssignedToFlight = false;
                 <tr>
                     <th>Total</th>
                     <td><?= $paxTotal?></td>
-                    <td><?= $result['prices']['totalPrice']?></td>
-                    <?php if (isset($result['prices']['markup']) && $result['prices']['markup'] > 0) :
-                        ?><td><?= $result['prices']['markup']?></td><?php
-                    endif;?>
+                    <td  class="text-right"><?= number_format($result['prices']['totalPrice'] - $result['prices']['markup'] ?? 0, 2) ?></td>
+                    <td  class="text-right"><?= number_format($result['prices']['markup'], 2)?></td>
+                    <td  class="text-right"><?= number_format($result['prices']['totalPrice'], 2)?></td>
                 </tr>
                 </tfoot>
             </table>
         </div>
     </div>
+
     <div class="quote__details" id="search_result_item_<?= $resultKey?>" style="display:none;">
-        <?php if (!$isQuoteAssignedToFlight) : ?>
+        <?php /* if (!$isQuoteAssignedToFlight) : ?>
         <div class="text-right">
             <?= Html::button('<i class="fa fa-check"></i>&nbsp; <span>Select</span>', [
                 'class' => 'btn btn-success search_create_quote__btn',
@@ -306,7 +309,7 @@ $isQuoteAssignedToFlight = false;
                 'data-result' => 'search-result__quote-' . $resultKey,
             ]) ?>
         </div>
-        <?php endif; ?>
+        <?php endif; */ ?>
         <div class="trip">
             <div class="trip__item">
                 <!-- Depart -->
@@ -440,7 +443,6 @@ $isQuoteAssignedToFlight = false;
             </div>
         </div>
     </div>
-
     <div class="quote__footer">
 
 
@@ -455,45 +457,45 @@ $isQuoteAssignedToFlight = false;
                 'data-title' => implode(', ', $tripsInfo),
                 'data-target' => '#search_result_item_' . $resultKey,
             ]) ?>
-            <?php if (!$isQuoteAssignedToFlight) : ?>
-                <?= Html::button('<i class="fa fa-plus"></i>&nbsp; <span>Add Quote</span>', [
-                    'class' => 'btn btn-success search_create_quote__btn',
-                    'data-title' => implode(', ', $tripsInfo),
-                    'data-key' => $result['key'],
-                    'data-gds' => $result['gds'],
-                    'data-key-cache' => $keyCache,
-                    'data-result' => 'search-result__quote-' . $resultKey,
-                    'data-project' => $lead->project_id,
+            <?= Html::button($isQuoteAssignedToFlight ? 'Quote assigned' : '<i class="fa fa-plus"></i>&nbsp; <span>' . 'Add Quote' . '</span>', [
+                'disabled' => $isQuoteAssignedToFlight,
+                'class' => 'btn btn-success search_create_quote__btn',
+                'data-title' => implode(', ', $tripsInfo),
+                'data-key' => $result['key'],
+                'data-gds' => $result['gds'],
+                'data-key-cache' => $keyCache,
+                'data-result' => 'search-result__quote-' . $resultKey,
+                'data-project' => $lead->project_id,
 
-                ]) ?>
+            ]) ?>
 
-                <?php if (Auth::can('quote/addQuote/projectRelations') && $projectRelations = $lead->project->projectRelations) : ?>
-                    <div class="btn-group js-btn-box" style="margin-left: 7px; height: 32px;">
-                        <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="fa fa-bars"></i>
-                        </button>
-                        <div class="dropdown-menu small " style="background: transparent;">
-                            <?php foreach ($projectRelations as $relatedProject) : ?>
-                                <?php echo
-                                    Html::button(
-                                        '<i class="fa fa-plus"></i>&nbsp; <span>Add Quote to ' . $relatedProject->prlRelatedProject->name . '</span>',
-                                        [
-                                            'class' => 'btn btn-success search_create_quote__btn',
-                                            'style' => 'width: 180px; margin-left: 0; margin-bottom: 2px; text-align: left;',
-                                            'data-title' => implode(', ', $tripsInfo),
-                                            'data-key' => $result['key'],
-                                            'data-gds' => $result['gds'],
-                                            'data-key-cache' => $keyCache,
-                                            'data-result' => 'search-result__quote-' . $resultKey,
-                                            'data-project' => $relatedProject->prl_related_project_id,
-                                        ]
-                                    )
-                                ?>
-                            <?php endforeach ?>
-                        </div>
+            <?php if (Auth::can('quote/addQuote/projectRelations') && $projectRelations = $lead->project->projectRelations) : ?>
+                <div class="btn-group js-btn-box" style="margin-left: 7px; height: 32px;">
+                    <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                    <div class="dropdown-menu small " style="background: transparent;">
+                        <?php foreach ($projectRelations as $relatedProject) : ?>
+                            <?php echo
+                                Html::button(
+                                    '<i class="fa fa-plus"></i>&nbsp; <span>Add Quote to ' . $relatedProject->prlRelatedProject->name . '</span>',
+                                    [
+                                        'class' => 'btn btn-success search_create_quote__btn',
+                                        'style' => 'width: 180px; margin-left: 0; margin-bottom: 2px; text-align: left;',
+                                        'data-title' => implode(', ', $tripsInfo),
+                                        'data-key' => $result['key'],
+                                        'data-gds' => $result['gds'],
+                                        'data-key-cache' => $keyCache,
+                                        'data-result' => 'search-result__quote-' . $resultKey,
+                                        'data-project' => $relatedProject->prl_related_project_id,
+                                    ]
+                                )
+                            ?>
+                        <?php endforeach ?>
                     </div>
-                <?php endif ?>
-            <?php endif; ?>
+                </div>
+            <?php endif ?>
         </div>
     </div>
+
 </div>

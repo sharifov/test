@@ -204,7 +204,7 @@ class ProductQuoteOption extends ActiveRecord implements Serializable
         int $productQuoteId,
         int $productOptionId,
         string $name,
-        string $description,
+        ?string $description,
         float $price,
         float $clientPrice,
         ?float $extraMarkup,
@@ -245,5 +245,13 @@ class ProductQuoteOption extends ActiveRecord implements Serializable
     public function canceled(): void
     {
         $this->pqo_status_id = ProductQuoteOptionStatus::CANCELED;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatusName(): string
+    {
+        return \modules\product\src\entities\productQuoteOption\ProductQuoteOptionStatus::getName($this->pqo_status_id);
     }
 }

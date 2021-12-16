@@ -54,11 +54,11 @@ $user = Yii::$app->user->identity;
         ) ?>
     <?php endif; ?>
 
-    <?php if ($user->canRoute('/user-connection/stats')) :?>
+    <?php if ($user->canRoute('/setting/index')) :?>
         <?=Html::a(
-            '<span class="fa fa-users"></span>',
-            ['/user-connection/stats'],
-            ['target' => '_blank', 'data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => 'User Stats']
+            '<span class="fa fa-cogs"></span>',
+            ['/setting/index'],
+            ['target' => '_blank', 'data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => 'Site Settings']
         ) ?>
     <?php endif; ?>
 </div>

@@ -1,5 +1,6 @@
 <?php
 
+use kartik\select2\Select2;
 use sales\auth\Auth;
 use sales\services\cleaner\form\DbCleanerParamsForm;
 use yii\helpers\Html;
@@ -22,16 +23,7 @@ $pjaxListId = 'pjax-log';
     <?php if (Auth::can('global/clean/table')) : ?>
         <div class="row">
             <div class="col-md-12" style="margin-bottom: 12px;">
-                <?php echo Html::a(
-                    '<i class="fas fa-remove"></i> Truncate Log table',
-                    ['log/clear'],
-                    [
-                        'class' => 'btn btn-danger',
-                        'data' => [
-                            'confirm' => 'Remove all records from logs?'
-                        ]
-                    ]
-                ) ?>
+                <?php echo Html::a('<i class="fas fa-remove"></i> Truncate Log table', null, ['class' => 'btn btn-danger js_truncate_btn'])?>
             </div>
 
             <div class="col-md-12" >
@@ -46,7 +38,7 @@ $pjaxListId = 'pjax-log';
         </div>
     <?php endif ?>
 
-    <?php \yii\widgets\Pjax::begin(['id' => $pjaxListId]); ?>
+    <?php \yii\widgets\Pjax::begin(['id' => $pjaxListId, 'scrollTo' => 0]); ?>
 
     <div class="row">
         <div class="col-md-12">
@@ -72,18 +64,48 @@ $pjaxListId = 'pjax-log';
                             \yii\log\Logger::LEVEL_WARNING          => 'warning',
                             \yii\log\Logger::LEVEL_INFO             => 'info',
                             \yii\log\Logger::LEVEL_TRACE            => 'trace',
-                            \yii\log\Logger::LEVEL_PROFILE_BEGIN    => 'profile begin',
-                            \yii\log\Logger::LEVEL_PROFILE_END      => 'profile end'
+                            \yii\log\Logger::LEVEL_PROFILE_BEGIN    => 'prof begin',
+                            \yii\log\Logger::LEVEL_PROFILE_END      => 'prof end'
                         ],
-                        'contentOptions' => ['style' => 'width: 120px;text-align:center;']
+                        'contentOptions' => ['style' => 'width: 100px;text-align:center;']
                     ],
 
                     //'category',
+
                     [
                         'attribute' => 'category',
-                        'filter' => \frontend\models\Log::getCategoryFilter(is_numeric($searchModel->level) ? $searchModel->level : null, Yii::$app->request->isPjax),
-                        'contentOptions' => ['style' => 'width: 200px;text-align:center;']
+                        'filter' =>  Select2::widget([
+                            'model' => $searchModel,
+                            'attribute' => 'category',
+                            'data' => \frontend\models\Log::getCategoryFilter(is_numeric($searchModel->level) ? $searchModel->level : null, Yii::$app->request->isPjax),
+                            //'value' => 'category',
+
+                            //'name' => Html::getInputName($filter, 'channelId'),
+                            'size' => Select2::SIZE_SMALL,
+
+                            'options' => [
+                                'class' => 'form-control',
+                                'placeholder' => 'Select category'
+                            ],
+                            'pluginOptions' => [
+                                'allowClear' => true,
+                                'selectOnClose' => false,
+                            ]
+                        ]),
+
+                        //'format' => 'username',
+                        'options' => [
+                            'width' => '300px'
+                        ]
                     ],
+
+
+
+//                    [
+//                        'attribute' => 'category',
+//                        'filter' => \frontend\models\Log::getCategoryFilter(is_numeric($searchModel->level) ? $searchModel->level : null, Yii::$app->request->isPjax),
+//                        'contentOptions' => ['style' => 'width: 200px;text-align:center;']
+//                    ],
                     [
                         'attribute' => 'message',
                         'format' => 'raw',
@@ -97,8 +119,10 @@ $pjaxListId = 'pjax-log';
 
                     [
                         'attribute' => 'log_time',
-                        'value' => 'log_time',
-                        'format' => 'datetime',
+                        'value' => static function (\frontend\models\Log $model) {
+                            return Yii::$app->formatter->asDatetime($model->log_time, 'php:d-M-Y [H:i:s]');
+                        },
+                        'format' => 'raw',
                         'filter' => DatePicker::widget([
                             'model' => $searchModel,
                             'attribute' => 'log_time',
@@ -134,6 +158,12 @@ $pjaxListId = 'pjax-log';
     <?php \yii\widgets\Pjax::end(); ?>
 </div>
 
+<div id="confirm_html" style="display: none;">
+    <p>Host: <b class="text-danger"><?php echo strtoupper(Yii::$app->params['appHostname'] ?? '') ?></b></p>
+    <p>Remove all records from logs?</p>
+    <?php echo Html::a('<i class="fa fa-trash-o"></i> Truncate Log table', ['log/clear'], ['class' => 'btn btn-danger']) ?>
+    <?php echo Html::a('Close', null, ['class' => 'btn btn-secondary js_close_modal']) ?>
+</div>
 
 <?php
 yii\bootstrap4\Modal::begin([
@@ -143,10 +173,35 @@ yii\bootstrap4\Modal::begin([
     ]);
 yii\bootstrap4\Modal::end();
 
+yii\bootstrap4\Modal::begin([
+        'title' => '<i class="fa fa-exclamation-triangle text-warning"></i> Are you sure?',
+        'id' => 'modal_small',
+        'size' => \yii\bootstrap4\Modal::SIZE_SMALL,
+    ]);
+yii\bootstrap4\Modal::end();
+
+
 $ajaxUrl = \yii\helpers\Url::to(['/log/ajax-category-list']);
 $categoryValue = $searchModel->category ? md5($searchModel->category) : '';
 
 $jsCode = <<<JS
+
+    $(document).on('click', '.js_close_modal', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $('#modal_small').modal('hide');
+        return false;
+    });
+
+    $(document).on('click', '.js_truncate_btn', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        let htmlData = $('#confirm_html').html();
+        $('#modal_small .modal-body').html(htmlData);
+        $('#modal_small').modal('show');
+        return false;
+    });
+
     let ajaxUrlCategoryList = '$ajaxUrl';
     let categoryValue = '$categoryValue';
 

@@ -10,6 +10,7 @@ use frontend\widgets;
 use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\entity\fileLead\FileLead;
 use modules\fileStorage\src\entity\fileLead\FileLeadQuery;
+use sales\auth\Auth;
 use Yii;
 use common\models\Lead;
 use yii\helpers\ArrayHelper;
@@ -122,10 +123,14 @@ class LeadsController extends FController
             $params['LeadSearch']['employee_id'] = $user->id;
         }
 
+        if (!isset($params['LeadSearch']['l_is_test'])) {
+            $params['LeadSearch']['l_is_test'] = '0';
+        }
+
         if ($isAgent) {
-            $dataProvider = $searchModel->searchAgent($params);
+            $dataProvider = $searchModel->searchAgent($params, Auth::user());
         } else {
-            $dataProvider = $searchModel->search($params);
+            $dataProvider = $searchModel->search($params, Auth::user());
             if (
                 FileStorageSettings::isEnabled()
                 && is_array($searchModel->show_fields)

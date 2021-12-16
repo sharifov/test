@@ -81,6 +81,8 @@ class FlightModule extends \yii\base\Module
 
             ['label' => 'Flight Request', 'url' => ['/' . $modulePath . '/flight-request-crud/index']],
             ['label' => 'Flight Request Log', 'url' => ['/' . $modulePath . '/flight-request-log-crud/index']],
+
+            ['label' => 'Flight Quote Ticket Refund', 'url' => ['/' . $modulePath . '/flight-quote-ticket-refund-crud/index']],
         ];
     }
 }

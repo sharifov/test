@@ -20,9 +20,15 @@ class QuoteSendEventListener
     public function handle(QuoteSendEvent $event): void
     {
         try {
+            $logData = [];
+            $logData['event'] = 'QuoteSendAnalyticEvent';
+            $logData['quote'] = $event->quote->attributes();
+            $logData['lead'] = $event->quote->lead->attributes();
+            Yii::info($logData, 'AS/*');
+
             if (GaHelper::checkSettings(GaHelper::TYPE_QUOTE) && $event->quote->lead->isReadyForGa()) {
                 $job = new SendQuoteInfoToGaJob();
-                $job->quote = $event->quote;
+                $job->quoteId = $event->quote->id;
                 Yii::$app->queue_job->priority(20)->push($job);
             }
         } catch (\Throwable $throwable) {

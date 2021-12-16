@@ -1,0 +1,210 @@
+version: '3.9'
+
+services:
+  php-fpm:
+    build:
+      context: ./php-fpm
+      args:
+        PHP_FPM_VERSION: ${PHP_FPM_VERSION}
+
+  swoole:
+    build:
+      context: ./swoole
+      args:
+        PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
+    depends_on:
+      - php-fpm
+
+  redis:
+    build:
+      context: ./redis
+      args:
+        REDIS_VERSION: ${REDIS_VERSION}
+    restart: always
+    networks:
+      - default
+    ports:
+      - ${REDIS_HOST_PORT}:6379
+
+  mysql:
+    build:
+      context: ./mysql
+      args:
+        MYSQL_VERSION: ${MYSQL_VERSION}
+    volumes:
+      - ${MYSQL_HOST_PATH_DB}:/var/lib/mysql
+      - ${MYSQL_HOST_PATH_DUMP}:/docker-entrypoint-initdb.d
+    ports:
+      - ${MYSQL_HOST_PORT}:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    restart: always
+    networks:
+      - default
+
+  psql:
+    build:
+      context: ./psql
+      args:
+        POSTGRES_VERSION: ${POSTGRES_VERSION}
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - ${POSTGRES_HOST_PATH_DB}:/var/lib/postgresql/data
+#      - ${POSTGRES_HOST_PATH_DUMP}:/dump
+#      - ${POSTGRES_HOST_PATH_DUMP}:/docker-entrypoint-initdb.d
+    ports:
+      - ${POSTGRES_HOST_PORT}:5432
+    restart: always
+    networks:
+      - default
+
+  centrifugo:
+    image: centrifugo/centrifugo:${CENTRIFUGO_VERSION}
+    volumes:
+      - ./../../../docker/centrifugo/config.json:/centrifugo/config.json
+    command: centrifugo -c config.json
+    ports:
+      - ${CENTRIFUGO_HOST_PORT}:8000
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
+    networks:
+      default:
+        aliases:
+          - centrifugo
+    restart: always
+
+  beanstalkd:
+    build:
+      context: ./beanstalkd
+      args:
+        version: ${BEANSTALKD_VERSION}
+    restart: always
+    ports:
+      - ${BEANSTALKD_PORT}
+    networks:
+      - default
+
+  web:
+    build:
+      context: ./web
+      args:
+        PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
+    volumes:
+      - ./../../:${APP_ROOT}/www
+    depends_on:
+     - php-fpm
+     - mysql
+     - psql
+     - redis
+     - beanstalkd
+     - centrifugo
+     - queue
+    restart: always
+    environment:
+      PHP_IDE_CONFIG: "serverName=SalesWebServer"
+    networks:
+      - default
+      - sales-communication
+
+  nginx:
+    build:
+      context: ./nginx
+      args:
+        NGINX_VERSION: ${NGINX_VERSION}
+    volumes:
+      - ./../../../logs:${APP_ROOT}/logs
+      - ./../../../logs:/var/log/nginx
+      - ./../../../ssl:${APP_ROOT}/ssl
+      - ./../../../fileStorage:${APP_ROOT}/fileStorage
+      - ./../../:${APP_ROOT}/www
+    ports:
+      - ${HOST_PORT}:443 #frontend
+      - ${HOST_API_PORT}:80 #api
+    depends_on:
+      - web
+    restart: always
+    environment:
+      - NGINX_ENVSUBST_TEMPLATE_DIR=${NGINX_TEMPLATE_PATH}
+      - APP_ROOT=${APP_ROOT}
+      - HOST=${HOST}
+      - HOST_PORT=${HOST_PORT}
+      - HOST_API=${HOST_API}
+      - SSL_CRT_PATH=${SSL_CRT_PATH}
+      - SSL_KEY_PATH=${SSL_KEY_PATH}
+      - PROJECT_NAME=${COMPOSE_PROJECT_NAME}
+      - WEB_SOCKET_SERVER_PORT=${WEB_SOCKET_SERVER_PORT}
+    networks:
+      default:
+      sales-communication:
+        aliases:
+          - ${HOST_API}
+
+  ws:
+    build:
+      context: ./ws
+      args:
+        PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
+    volumes:
+      - ./../../:${APP_ROOT}/www
+    depends_on:
+      - php-fpm
+      - mysql
+      - psql
+      - redis
+      - beanstalkd
+    restart: always
+    command: ./yii websocket-server/start
+    networks:
+      - default
+
+  queue:
+    build:
+      context: ./queue
+      args:
+        APP_ROOT: ${APP_ROOT}
+        PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
+    volumes:
+      - ./../../:${APP_ROOT}/www
+    depends_on:
+      - php-fpm
+      - mysql
+      - psql
+      - beanstalkd
+      - centrifugo
+      - redis
+    networks:
+      - default
+      - sales-communication
+    restart: always
+
+  console:
+    build:
+      context: ./console
+      args:
+        PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
+    user: ${USER_ID}:${USER_GID}
+    volumes:
+      - ./../../:${APP_ROOT}/www
+    depends_on:
+      - php-fpm
+      - mysql
+      - psql
+      - beanstalkd
+      - redis
+    networks:
+      - default
+      - sales-communication
+    restart: always
+
+networks:
+  default:
+  sales-communication:
+    name: sales-communication

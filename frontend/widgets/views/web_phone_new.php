@@ -355,20 +355,18 @@ $js = <<<JS
                 }, 'json');
 					
             } else {
-				widgetIcon.update({
-					type: 'incoming',
-					timer: true,
-					text: null,
-					currentCalls: null,
-					status: 'online',
-					timerStamp: 0
-				});
-				alert('You have active call');
-				$('.call-pane').removeClass('is_active');
-				$('.call-pane-calling').addClass('is_active');
-				$(".call-pane__call-btns").addClass("is-on-call");
-				freeDialButton();
-
+                if (data) {
+                    if (data.is_on_call === true) {
+                        freeDialButton();
+                        if (data.phone_widget_data) {
+                            window.PhoneWidgetCall.updateCurrentCalls(data.phone_widget_data.data, data.phone_widget_data.userStatus);
+                        }
+                        new PNotify({title: "Make call", type: "error", text: data.message, hide: true});
+				    }
+                    if (data.is_offline === true) {
+                        new PNotify({title: "Make call", type: "error", text: 'You status is offline.', hide: true});
+                    }
+                }
                 return false;
             }
         }, 'json');
@@ -383,23 +381,42 @@ $js = <<<JS
     
     function createInternalCall(toUserId, nickname) {
         // createNotify('Calling', 'Calling ' + nickname + ' ...', 'success');
-        $.ajax({
-                type: 'post',
-                data: {
-                    'user_id': toUserId
-                },
-                url: '{$createInternalCallUrl}'
-            })
-			.done(function (data) {
-				if (data.error) {
-					createNotify('Create Internal Call', data.message, 'error');
-					freeDialButton();
-				}
-			})
-			.fail(function () {
-				createNotify('Create Internal Call', 'Server error', 'error');
-				freeDialButton();
-			})
+         $.post('{$ajaxCheckUserForCallUrl}', {user_id: userId}, function(data) {
+            if (data && data.is_ready) {
+                $.ajax({
+                        type: 'post',
+                        data: {
+                            'user_id': toUserId
+                        },
+                        url: '{$createInternalCallUrl}'
+                    })
+                    .done(function (data) {
+                        if (data.error) {
+                            createNotify('Create Internal Call', data.message, 'error');
+                            freeDialButton();
+                        }
+                    })
+                    .fail(function () {
+                        createNotify('Create Internal Call', 'Server error', 'error');
+                        freeDialButton();
+                    });
+             } else {
+                if (data) {
+                    if (data.is_on_call === true) {
+                        freeDialButton();
+                        if (data.phone_widget_data) {
+                            window.PhoneWidgetCall.updateCurrentCalls(data.phone_widget_data.data, data.phone_widget_data.userStatus);
+                        }
+                        new PNotify({title: "Make call", type: "error", text: data.message, hide: true});
+				    }
+                    if (data.is_offline === true) {
+                        new PNotify({title: "Make call", type: "error", text: 'You status is offline.', hide: true});
+                    }
+                }
+                return false;
+            }
+         }, 'json');
+        
     }
 JS;
 $this->registerJs($js);

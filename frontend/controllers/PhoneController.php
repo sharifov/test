@@ -15,13 +15,18 @@ use common\models\Employee;
 use common\models\Notifications;
 use common\models\PhoneBlacklist;
 use common\models\Project;
+use common\models\UserCallStatus;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
 use sales\auth\Auth;
 use sales\entities\cases\Cases;
 use sales\helpers\app\AppHelper;
+use sales\helpers\setting\SettingHelper;
 use sales\helpers\UserCallIdentity;
 use sales\model\call\helper\CallHelper;
+use sales\model\call\services\currentQueueCalls\ActiveQueueCall;
+use sales\model\call\services\currentQueueCalls\CurrentQueueCallsService;
+use sales\model\call\services\currentQueueCalls\OutgoingQueueCall;
 use sales\model\call\services\FriendlyName;
 use sales\model\call\services\RecordManager;
 use sales\model\call\services\reserve\CallReserver;
@@ -363,31 +368,52 @@ class PhoneController extends FController
      */
     public function actionAjaxCheckUserForCall(): array
     {
-        $result = [];
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-        //sleep(1);
         try {
-            $userId = (int)Yii::$app->request->post('user_id');
-            $isReady = false;
-
-            if ($userId) {
-                $user = Employee::findOne($userId);
-                if ($user) {
-                    //if(!$user->isOnline() || !$user->isCallStatusReady() || !$userRedirect->isCallFree()) {
-                    if ($user->isOnline() && $user->isCallFree()) {
-                        $isReady = true;
-                    }
+            $user = Auth::user();
+            $userId = $user->id;
+            $result = [
+                'error' => false,
+                'message' => '',
+                'is_ready' => true,
+                'is_offline' => false,
+                'is_on_call' => false,
+                'phone_widget_data' => [],
+            ];
+            if (!$user->isOnline()) {
+                $result['is_offline'] = true;
+                $result['is_ready'] = false;
+            }
+            if (!$user->isCallFree()) {
+                $userStatusType = UserCallStatus::find()->select(['us_type_id'])->where(['us_user_id' => $userId])->orderBy(['us_id' => SORT_DESC])->limit(1)->asArray()->one();
+                $currentQueueCallsService = Yii::createObject(CurrentQueueCallsService::class);
+                $calls = $currentQueueCallsService->getQueuesCalls($userId, null, SettingHelper::isGeneralLinePriorityEnable());
+                if ($calls->outgoing || $calls->active) {
+                    $result['is_ready'] = false;
+                    $result['is_on_call'] = true;
+                    $result['message'] = 'You have an active call, please refresh the page or contact system administrator if the issue persist.';
+                    $result['phone_widget_data'] = [
+                        'data' => $calls->toArray(),
+                        'userStatus' => (int)($userStatusType['us_type_id'] ?? UserCallStatus::STATUS_TYPE_OCCUPIED),
+                    ];
+                    Yii::error([
+                        'message' => 'User wanted to make a call with active calls',
+                        'userId' => $userId,
+                        'calls' => $calls->toArray(),
+                    ], 'UserIsOnCall');
+                } else {
+                    Yii::error([
+                        'message' => 'Was wrong value(is_on_call = true) in DB',
+                        'userId' => $userId,
+                    ], 'UserIsOnCall');
+                    UserStatus::isOnCallOff($userId);
                 }
             }
-
-            $result['is_ready'] = $isReady;
         } catch (\Throwable $e) {
             $message = 'Error: ' . $e->getMessage() . ', Code: ' . $e->getCode() . ',   ' . $e->getFile() . ':' . $e->getLine();
-            $result = [
-                'error' => true,
-                'message' => $message,
-            ];
-
+            $result['is_ready'] = false;
+            $result['error'] = true;
+            $result['message'] = $message;
             Yii::error($message, 'PhoneController:actionAjaxCallRedirect:Throwable');
         }
 
@@ -713,7 +739,10 @@ class PhoneController extends FController
                     }
                     $userModel = \common\models\Employee::findOne($agentId);
                     if ($userModel && ($userModel->isAgent() || $userModel->isSupAgent() || $userModel->isExAgent() || $userModel->isSupervision() || $userModel->isSupSuper() || $userModel->isExSuper())) {
-                        $users[] = $userModel;
+                        $users[] = [
+                            'model' => $userModel,
+                            'isBusy' => (int)$userItem['tbl_has_lead_redial_access'] > 0,
+                        ];
                     }
                 }
             }

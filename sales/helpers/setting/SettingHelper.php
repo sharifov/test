@@ -13,6 +13,9 @@ use yii\helpers\VarDumper;
 
 class SettingHelper
 {
+    private static ?array $callSpamFilter = null;
+    private static ?array $callbackToCaller = null;
+
     public static function getCaseSaleTicketEmailData(): array
     {
         return \Yii::$app->params['settings']['case_sale_ticket_email_data'] ?? [];
@@ -326,7 +329,7 @@ class SettingHelper
         return (int)ArrayHelper::getValue(Yii::$app->params['settings'], 'lead_api_google.default_department_id', Department::DEPARTMENT_SALES);
     }
 
-    public static function getMetricJobTimeExecution(): int
+    public static function getMetricJobTimeWaiting(): int
     {
         return (int)ArrayHelper::getValue(Yii::$app->params['settings'], 'metric_job_time_execution', 60);
     }
@@ -381,6 +384,16 @@ class SettingHelper
         return (int)(Yii::$app->params['settings']['notifications_history_days'] ?? 30);
     }
 
+    public static function getClientNotificationsHistoryDays(): int
+    {
+        return (int)(Yii::$app->params['settings']['client_notifications_history_days'] ?? 30);
+    }
+
+    public static function getLeadTravelDatesPassedTrashedHours(): int
+    {
+        return (int)(Yii::$app->params['settings']['leads_travel_dates_passed_trashed_hours'] ?? 24);
+    }
+
     public static function getCallDistributionSort(): array
     {
         $sort = [
@@ -391,6 +404,8 @@ class SettingHelper
         $defaultSort = [
             'general_line_call_count' => null,
             'phone_ready_time' => $sort['ASC'],
+            'priority_level' => $sort['DESC'],
+            'gross_profit' => $sort['DESC'],
         ];
 
         $callDistributionSort = Yii::$app->params['settings']['call_distribution_sort'] ?? [
@@ -411,6 +426,14 @@ class SettingHelper
             unset($finalSort['general_line_call_count']);
         }
 
+        if (empty($finalSort['priority_level'])) {
+            unset($finalSort['priority_level']);
+        }
+
+        if (empty($finalSort['gross_profit'])) {
+            unset($finalSort['gross_profit']);
+        }
+
         return $finalSort;
     }
 
@@ -418,7 +441,6 @@ class SettingHelper
     {
         return (int)(Yii::$app->params['settings']['limit_user_connection'] ?? 10);
     }
-
 
     public static function getReProtectionCaseCategory(): ?string
     {
@@ -489,5 +511,275 @@ class SettingHelper
     public static function isEnableCallLogFilterGuard(): bool
     {
         return (bool) (Yii::$app->params['settings']['is_call_log_filter_guard'] ?? false);
+    }
+
+    public static function getLimitLeadsInContactInfoInPhoneWidget(): int
+    {
+        return (int) (Yii::$app->params['settings']['limit_leads_in_phone_widget'] ?? 3);
+    }
+
+    public static function getRedialGetLimitAgents(): int
+    {
+        return (int) (Yii::$app->params['settings']['redial_get_limit_agents'] ?? 5);
+    }
+
+    public static function getBusinessProjectIds(): array
+    {
+        $settings = Yii::$app->params['settings']['business_project_ids'] ?? null;
+        if ($settings) {
+            return JsonHelper::decode($settings);
+        }
+        return [7];
+    }
+
+    public static function getRedialBusinessFlightLeadsMinimumSkillLevel(): int
+    {
+        return (int) (Yii::$app->params['settings']['redial_business_flight_leads_minimum_skill_level'] ?? 0);
+    }
+
+    public static function getRedialUserAccessExpiredSecondsLimit(): int
+    {
+        return (int) (Yii::$app->params['settings']['redial_user_access_expired_seconds'] ?? 20);
+    }
+
+    public static function getCallSpamFilterData(): array
+    {
+        $settings = Yii::$app->params['settings']['call_spam_filter'] ?? null;
+        if (self::$callSpamFilter !== null) {
+            return self::$callSpamFilter;
+        }
+        if ($settings) {
+            self::$callSpamFilter = JsonHelper::decode($settings);
+        }
+        return self::$callSpamFilter ?? [
+                'enabled' => false,
+                'spam_rate' => 0.75,
+                'redialEnabled' => false,
+                'message' => '',
+                'trust_rate' => 0.8
+        ];
+    }
+
+    public static function callSpamFilterEnabled(): bool
+    {
+        return (bool) (self::getCallSpamFilterData()['enabled'] ?? false);
+    }
+
+    public static function getCallSpamFilterRate(): float
+    {
+        return (float) (self::getCallSpamFilterData()['spam_rate'] ?? 0.3567);
+    }
+
+    public static function getCallTrustFilterRate(): float
+    {
+        return (float) (self::getCallSpamFilterData()['trust_rate'] ?? 0.8);
+    }
+
+    public static function getCallSpamFilterMessage(): string
+    {
+        return (string) (self::getCallSpamFilterData()['message'] ?? '');
+    }
+
+    public static function getCallbackToCallerData()
+    {
+        $settings = Yii::$app->params['settings']['callback_to_caller'] ?? null;
+        if (self::$callbackToCaller !== null) {
+            return self::$callbackToCaller;
+        }
+        if ($settings) {
+            self::$callbackToCaller = JsonHelper::decode($settings);
+        }
+        return self::$callbackToCaller ?? [
+            'enabled' => false,
+            'message' => '',
+            'curlTimeout' => 30,
+            'dialCallTimeout' => 10,
+            'dialCallLimit' => 1,
+            'successStatusList' => [
+                'busy'
+            ]
+        ];
+    }
+
+    public static function isCallbackToCallerEnabled(): bool
+    {
+        return (bool) (self::getCallbackToCallerData()['enabled'] ?? false);
+    }
+
+    public static function getCallbackToCallerMessage(): string
+    {
+        return (string) (self::getCallbackToCallerData()['message'] ?? '');
+    }
+
+    public static function getCallbackToCallerCurlTimeout(): int
+    {
+        return (int) (self::getCallbackToCallerData()['curlTimeout'] ?? 30);
+    }
+
+    public static function getCallbackToCallerDialCallTimeout(): int
+    {
+        return (int) (self::getCallbackToCallerData()['dialCallTimeout'] ?? 10);
+    }
+
+    public static function getCallbackToCallerDialCallLimit(): int
+    {
+        return (int) (self::getCallbackToCallerData()['dialCallLimit'] ?? 1);
+    }
+
+    public static function getCallbackToCallerSuccessStatusList(): array
+    {
+        return (self::getCallbackToCallerData()['successStatusList'] ?? [
+            'busy'
+        ]);
+    }
+
+    public static function getCallbackToCallerExcludedProjectList(): array
+    {
+        return self::getCallbackToCallerData()['excludeProjectKeys'] ?? [
+            'priceline'
+        ];
+    }
+
+    public static function getCallbackToCallerExcludedDepartmentList(): array
+    {
+        return self::getCallbackToCallerData()['excludeDepartmentKeys'] ?? [];
+    }
+
+    public static function getCalculateGrossProfitInDays(): int
+    {
+        return (int) (Yii::$app->params['settings']['calculate_gross_profit_in_days'] ?? 14);
+    }
+
+    public static function getCalculatePriorityLevelInDays(): int
+    {
+        return (int) (Yii::$app->params['settings']['calculate_priority_level_in_days'] ?? 14);
+    }
+
+    public static function clientNotificationSuccessCallMinDuration(): int
+    {
+        return (int) (Yii::$app->params['settings']['client_notification_success_call_min_duration'] ?? 30);
+    }
+
+    public static function getVoluntaryExchangeCaseCategory(): ?string
+    {
+        return Yii::$app->params['settings']['voluntary_exchange_case_category'] ?? null;
+    }
+
+    private static function prePareStatusIds($setting): array
+    {
+        if (($statuses = $setting ?? null) && is_array($statuses)) {
+            return array_keys($statuses);
+        }
+        return [];
+    }
+
+    public static function getProductQuoteChangeableStatuses(): array
+    {
+        return self::prePareStatusIds(Yii::$app->params['settings']['product_quote_changeable_statuses']);
+    }
+
+    public static function getActiveQuoteChangeStatuses(): array
+    {
+        return self::prePareStatusIds(Yii::$app->params['settings']['active_quote_change_statuses']);
+    }
+
+    public static function getActiveQuoteRefundStatuses(): array
+    {
+        return self::prePareStatusIds(Yii::$app->params['settings']['active_quote_refund_statuses']);
+    }
+
+    public static function getFinishedQuoteChangeStatuses(): array
+    {
+        return self::prePareStatusIds(Yii::$app->params['settings']['finished_quote_change_statuses']);
+    }
+
+    public static function getFinishedQuoteRefundStatuses(): array
+    {
+        return self::prePareStatusIds(Yii::$app->params['settings']['finished_quote_refund_statuses']);
+    }
+
+    public static function getExchangeQuoteConfirmStatusList(): array
+    {
+        return self::prePareStatusIds(Yii::$app->params['settings']['exchange_quote_confirm_status_list']);
+    }
+
+    public static function getUpdatableInvoluntaryQuoteChange(): array
+    {
+        return self::prePareStatusIds(Yii::$app->params['settings']['updatable_involuntary_quote_change']);
+    }
+
+    public static function getInvoluntaryChangeActiveStatuses(): array
+    {
+        return self::prePareStatusIds(Yii::$app->params['settings']['involuntary_change_active_statuses']);
+    }
+
+    public static function getVoluntaryExchangeBoEndpoint(): ?string
+    {
+        return Yii::$app->params['settings']['voluntary_exchange_bo_endpoint'] ?? null;
+    }
+
+    public static function getVoluntaryRefundBoEndpoint(): ?string
+    {
+        return Yii::$app->params['settings']['voluntary_refund_bo_endpoint'] ?? null;
+    }
+
+    public static function getVoluntaryRefundCaseCategory(): ?string
+    {
+        return Yii::$app->params['settings']['voluntary_refund_case_category'] ?? null;
+    }
+
+    public static function getProductQuoteChangeClientStatusMapping(): array
+    {
+        return Yii::$app->params['settings']['product_quote_change_client_status_mapping'] ?? [];
+    }
+
+    public static function getProductQuoteRefundClientStatusMapping(): array
+    {
+        return Yii::$app->params['settings']['product_quote_refund_client_status_mapping'] ?? [];
+    }
+
+    public static function getRedialCheckIsOnCallTime(): int
+    {
+        return Yii::$app->params['settings']['lead_redial_is_on_call_check_time'] ?? 20;
+    }
+
+    public static function isClientChatLeadAutoTakeOnChatAccept(): bool
+    {
+        return (bool)(\Yii::$app->params['settings']['client_chat_lead_auto_take']['on_chat_accept'] ?? false);
+    }
+
+    public static function leadRedialQCallAttemptsFromTimeValidationEnabled(): bool
+    {
+        return (bool) (Yii::$app->params['settings']['lead_redial_qcall_attempts_from_time_validation_enabled'] ?? true);
+    }
+
+    public static function getDbCryptBlockEncryptionMode(): ?string
+    {
+        return \Yii::$app->params['settings']['db_crypt_block_encryption_mode'] ?? null;
+    }
+
+    public static function getDbCryptKeyStr(): ?string
+    {
+        return \Yii::$app->params['settings']['db_crypt_key_str'] ?? null;
+    }
+
+    public static function getDbCryptInitVector(): ?string
+    {
+        return \Yii::$app->params['settings']['db_crypt_init_vector'] ?? null;
+    }
+
+    public static function getUserPrickedCallDuration(): int
+    {
+        return (int)(\Yii::$app->params['settings']['user_picked_call_duration'] ?? 30);
+    }
+
+    public static function leadRedialEnabled(): bool
+    {
+        return (bool) (Yii::$app->params['settings']['lead_redial_enabled'] ?? false);
+    }
+
+    public static function getCallReconnectAnnounceMessage(): string
+    {
+        return (string) (Yii::$app->params['settings']['call_reconnect_announce'] ?? 'Connection Error. Reconnecting. Please hold');
     }
 }

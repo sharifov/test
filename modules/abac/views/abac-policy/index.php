@@ -10,6 +10,8 @@ use yii\widgets\Pjax;
 /* @var $this yii\web\View */
 /* @var $searchModel modules\abac\src\entities\search\AbacPolicySearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var $importCount int */
+/* @var $abacObjectList array */
 
 $this->title = 'Abac Policies';
 $this->params['breadcrumbs'][] = $this->title;
@@ -21,9 +23,22 @@ $this->params['breadcrumbs'][] = $this->title;
     <p>
         <?= Html::a('<i class="fa fa-plus"></i> Create Abac Policy', ['create'], ['class' => 'btn btn-success']) ?>
         <?= Html::a('<i class="fa fa-list"></i> Policy list content', ['list-content'], ['class' => 'btn btn-default']) ?>
+
+        <?= Html::a('<i class="fa fa-upload"></i> Export File', ['export'], [
+            'class' => 'btn btn-default',
+            'data' => [
+                'confirm' => 'Are you sure you want to Export all ABAC policy rules?',
+            ],
+        ]) ?>
+
+        <?php if ($importCount) : ?>
+            <?= Html::a('<i class="fa fa-download"></i> Continue Import (' . $importCount . ')', ['import'], ['class' => 'btn btn-warning']) ?>
+        <?php else : ?>
+            <?= Html::a('<i class="fa fa-download"></i> Import File', ['import'], ['class' => 'btn btn-default']) ?>
+        <?php endif; ?>
     </p>
 
-    <?php Pjax::begin(); ?>
+    <?php Pjax::begin(['scrollTo' => 0]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <?= GridView::widget([
@@ -51,11 +66,33 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'yii\grid\ActionColumn'],
 
             //'ap_object',
+            [
+                'label' => 'Status',
+                'value' => static function (AbacPolicy $model) use ($abacObjectList) {
+                    $exist = in_array($model->ap_object, $abacObjectList);
+                    if (!$exist) {
+                        return '<span class="badge badge-danger" title="Invalid object (not exists)">Error</span>';
+                    }
+                    $abacActionList = Yii::$app->abac->getActionListByObject($model->ap_object);
+                    $actionList = @json_decode($model->ap_action_json, true);
+
+                    if ($actionList) {
+                        foreach ($actionList as $actionItem) {
+                            $existAction = in_array($actionItem, $abacActionList);
+                            if (!$existAction) {
+                                return '<span class="badge badge-danger" title="Invalid action (' . Html::encode($actionItem) . ')">Error</span>';
+                            }
+                        }
+                    }
+                    return '';
+                },
+                'format' => 'raw',
+            ],
 
             [
                 'attribute' => 'ap_object',
                 'value' => static function (AbacPolicy $model) {
-                    return $model->ap_object ? '<span class="badge badge-primary">' . Html::encode($model->ap_object) . '</span>' : '-';
+                    return $model->ap_object ? '<span class="badge badge-light">' . Html::encode($model->ap_object) . '</span>' : '-';
                 },
                 'format' => 'raw',
             ],
@@ -68,7 +105,13 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
             //'ap_rule_type',
-            'ap_subject',
+            [
+                'attribute' => 'ap_subject',
+                'value' => static function (AbacPolicy $model) {
+                    return '<small>' . \yii\helpers\StringHelper::truncate(str_replace('r.sub.', '', Html::encode($model->ap_subject)), 200) . '</small>';
+                },
+                'format' => 'raw',
+            ],
             //'ap_subject_json',
 
             'ap_action',
@@ -102,10 +145,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 'placeholder' => 'Select User',
             ],
 
-            [
-                'class' => DateTimeColumn::class,
-                'attribute' => 'ap_created_dt',
-            ],
+//            [
+//                'class' => DateTimeColumn::class,
+//                'attribute' => 'ap_created_dt',
+//            ],
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'ap_updated_dt',

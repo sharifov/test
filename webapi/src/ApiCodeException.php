@@ -4,6 +4,9 @@ namespace webapi\src;
 
 use common\CodeExceptionsModule as Module;
 
+/**
+ * Class ApiCodeException
+ */
 class ApiCodeException
 {
     public const BO_ERROR = Module::API . 100;
@@ -19,6 +22,13 @@ class ApiCodeException
     public const CLIENT_CHAT_FEEDBACK_CREATE_FAILED = Module::API . 109;
     public const UNEXPECTED_ERROR = Module::API . 110;
     public const GET_DATA_NOT_LOADED = Module::API . 111;
+    public const DATA_NOT_FOUND = Module::API . 112;
+    public const REQUEST_ALREADY_PROCESSED = Module::API . 113;
+    public const REQUEST_DATA_INVALID = Module::API . 114;
 
     public const COMMUNICATION_ERROR = Module::API . 120;
+
+    public const REQUEST_TO_BACK_OFFICE_ERROR = Module::API . 130;
+
+    public const SUCCESS = Module::API . 200;
 }

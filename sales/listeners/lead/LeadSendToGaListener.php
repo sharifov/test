@@ -19,6 +19,11 @@ class LeadSendToGaListener
     public function handle(LeadableEventInterface $event): void
     {
         try {
+            $logData = [];
+            $logData['event'] = 'LeadSendAnalyticEvent';
+            $logData['lead'] = $event->getLead()->attributes();
+            Yii::info($logData, 'AS/*');
+
             if (GaHelper::checkSettings(GaHelper::TYPE_LEAD) && $event->getLead()->isReadyForGa()) {
                 $job = new SendLeadInfoToGaJob();
                 $job->lead = $event->getLead();

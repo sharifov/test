@@ -41,7 +41,7 @@ $pjaxContainerId = $isCommunicationLogEnabled ? 'pjax-case-communication-log' : 
 $pjaxContainerIdForm = $isCommunicationLogEnabled ? 'pjax-case-communication-log-form' : 'pjax-case-communication-form';
 $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communication/_list_item';
 $unsubscribedEmails =  @json_encode($unsubscribedEmails);
-$emailTemplateTypes = \common\models\EmailTemplateType::getEmailTemplateTypesList(false, $model->cs_dep_id);
+$emailTemplateTypes = \common\models\EmailTemplateType::getEmailTemplateTypesList(false, $model->cs_dep_id, $model->cs_project_id);
 ?>
 
 <div class="x_panel">
@@ -69,7 +69,7 @@ $emailTemplateTypes = \common\models\EmailTemplateType::getEmailTemplateTypesLis
             <div class="chat__list">
 
                 <div class="communication-block-scroll">
-                    <?php yii\widgets\Pjax::begin(['id' => $pjaxContainerId ,'enablePushState' => false]) ?>
+                    <?php yii\widgets\Pjax::begin(['id' => $pjaxContainerId, 'timeout' => 6000,'enablePushState' => false]) ?>
 
                     <?php $statistics = new StatisticsHelper($model->cs_id, StatisticsHelper::TYPE_CASE) ?>
                     <?php echo $this->render('/partial/_communication_statistic', ['statistics' => $statistics->setCountAll()]) ?>
@@ -107,7 +107,7 @@ $emailTemplateTypes = \common\models\EmailTemplateType::getEmailTemplateTypesLis
                     <?php yii\widgets\Pjax::end() ?>
                 </div>
 
-                <?php yii\widgets\Pjax::begin(['id' => $pjaxContainerIdForm ,'enablePushState' => false]) ?>
+                <?php yii\widgets\Pjax::begin(['id' => $pjaxContainerIdForm, 'timeout' => 6000, 'enablePushState' => false]) ?>
 
                 <?php if ($model->isProcessing() || $model->isSolved()) :?>
                      <div class="chat__form panel">
@@ -417,7 +417,7 @@ $emailTemplateTypes = \common\models\EmailTemplateType::getEmailTemplateTypesLis
 
                             <div class="col-sm-3 form-group message-field-sms" id="sms-template-group">
                                 <?php //= $form->field($comForm, 'c_sms_tpl_id')->dropDownList(\common\models\SmsTemplateType::getList(false), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_id'])?>
-                                <?= $form->field($comForm, 'c_sms_tpl_key')->dropDownList(\common\models\SmsTemplateType::getKeyList(false, $model->cs_dep_id), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_key']) ?>
+                                <?= $form->field($comForm, 'c_sms_tpl_key')->dropDownList(\common\models\SmsTemplateType::getKeyList(false, $model->cs_dep_id, $model->cs_project_id), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_key']) ?>
                             </div>
 
                             <div class="col-sm-3 form-group message-field-email" id="email-address" style="display: none;">
@@ -741,12 +741,9 @@ $js = <<<JS
     });
     
     $('body').on("change", '#c_email_tpl_key', function () {
-                
-        //var type_id = $('#c_type_id').val();
-        
-        //alert($(this).val());
-        
-        //if(type_id != 2) {
+        let type_id = $('#c_type_id').val();
+
+        if(parseInt(type_id) === 1) { // Email
             if($(this).val() == tpl_email_blank_key) {
                 $('#email-textarea-div').show();
                 $('#email-subtitle-group').show();
@@ -760,7 +757,7 @@ $js = <<<JS
                 $('#email-textarea-div').hide();
                 $('#email-subtitle-group').hide();
             }
-        //}
+        }
     });
 
     $('body').on("change", '#email', function () {
@@ -780,7 +777,7 @@ $js = <<<JS
             document.getElementById("c_email_tpl_key").innerHTML = etpOptions;
         }
     });
-    
+
     $('body').on('click', '.chat__details', function () {
         
         let id = $(this).data('id');        
@@ -797,14 +794,26 @@ $js = <<<JS
         var obj = document.getElementById('object-email-view');
         obj.data = '/email/view?id='+id+'&preview=1';
         obj.parentNode.replaceChild(obj.cloneNode(true), obj);
-        
+        $(".view-mail").replaceWith('<div id="mail_headers"><h6><div id="email_info" class="float-left">' + subject + '<br>' + from + '<br>' + to + '<br>' +  date + files + '<br><br></div>' + '</h6><button id="print_button" title="Allow popups in your browser if this doesn`t work." data-toggle="mail_tooltip" class="btn btn-warning float-right"><i class="fa fa-print"></i> Print</button><div class="clearfix"></div><hr>' + '</div>'+ $(".view-mail").html() );
         var popup = $('#modal-email-view');
-        popup.find('#modal-email-view-label').html('<h6>' + subject + '<br>' + from + '<br>' + to + '<br>' +  date + '</h6>' + files);
         //previewPopup.find('.modal-body').html(data);
         popup.modal('show');
         return false;
     });
     
+    $('body').on('click', '#print_button', function () {
+        let w = window.open();
+        $(w.document.body).html($('#object-email-view').contents()[0].body.innerHTML);
+        w.document.head.append('<style>@media print { body background-color:#FFFFFF; background-image:none; color:#000000 }  }</style>');
+        let mail_headers = document.createElement("div");
+        mail_headers.innerHTML = $('#email_info').html();
+        w.document.body.prepend(mail_headers);
+        let js_timer = document.createElement("script");
+        js_timer.innerHTML = 'setTimeout( "window.print(); window.close();", 3000);'; 
+        w.document.head.append(js_timer);
+        // window.document.addEventListener('DOMContentLoaded', function () { window.print(); window.close(); }, false);
+    });
+
     $('body').on('change', '.quotes-uid', function() {
         
         var quoteList = [];

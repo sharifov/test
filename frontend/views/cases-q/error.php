@@ -17,9 +17,11 @@ use yii\helpers\VarDumper;
 use yii\widgets\Pjax;
 use common\models\Language;
 
-/* @var $this yii\web\View */
-/* @var $searchModel sales\entities\cases\CasesQSearch */
-/* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var $this yii\web\View
+ * @var $searchModel sales\entities\cases\CasesQSearch
+ * @var $dataProvider yii\data\ActiveDataProvider
+ * @var $isAgent bool
+ */
 
 $this->title = 'Error Queue';
 $this->params['breadcrumbs'][] = $this->title;
@@ -31,11 +33,12 @@ $this->params['breadcrumbs'][] = $this->title;
 
 <div class="cases-q-error">
 
-    <?php Pjax::begin(['id' => 'cases-q-error-pjax-list', 'timeout' => 5000, 'enablePushState' => true]); ?>
+    <?php Pjax::begin(['id' => 'cases-q-error-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'scrollTo' => 0]); ?>
 
     <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <?= GridView::widget([
+        'id' => 'error-gv',
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'rowOptions' => function (CasesQSearch $model) {

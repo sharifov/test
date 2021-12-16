@@ -594,7 +594,7 @@ class QuoteController extends ApiBaseController
             $response['result'] = array_merge($response['result'], $paxPriceData);
             $response['result']['trips'] = $model->getQuoteTripsData();
 
-            if ((int)$model->status === Quote::STATUS_SEND) {
+            if ((int)$model->status === Quote::STATUS_SENT) {
                 $excludeIP = Quote::isExcludedIP($clientIP);
                 if (!$excludeIP) {
                     $model->status = Quote::STATUS_OPENED;

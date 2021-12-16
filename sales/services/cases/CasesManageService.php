@@ -171,7 +171,14 @@ class CasesManageService
         $this->guardAccessUserToCase($case, $user);
         $case->processing($user->id, $creatorId, $description);
         $this->casesRepository->save($case);
-        $case->addEventLog(CaseEventLog::CASE_STATUS_CHANGED, 'Case status changed to ' . CasesStatus::STATUS_LIST[$case->cs_status] . ' By: ' . ($user->username ?? 'System.') . ($description ? ' Reason: ' . $description : ''));
+
+        if ($creatorId) {
+            $creator = $this->finder->userFind($creatorId);
+        }
+        $eventDescription = 'Case status changed to ' . CasesStatus::STATUS_LIST[$case->cs_status];
+        $eventDescription .= ' By: ' . ($creator->username ?? 'System.');
+        $eventDescription .= ($description ? ' Reason: ' . $description : '');
+        $case->addEventLog(CaseEventLog::CASE_STATUS_CHANGED, $eventDescription);
     }
 
     /**
@@ -196,6 +203,19 @@ class CasesManageService
     {
         $case = $this->finder->caseFind($case);
         $case->awaiting($creatorId, $description);
+        $this->casesRepository->save($case);
+        $case->addEventLog(CaseEventLog::CASE_STATUS_CHANGED, 'Case status changed to ' . CasesStatus::STATUS_LIST[$case->cs_status] . ' By: ' . ($username ?? 'System.') . ($description ? ' Reason: ' . $description : ''));
+    }
+
+    /**
+     * @param int|Cases $case
+     * @param int|null $creatorId
+     * @param string|null $description
+     */
+    public function new($case, ?int $creatorId, ?string $description = '', ?string $username = null): void
+    {
+        $case = $this->finder->caseFind($case);
+        $case->new($creatorId, $description);
         $this->casesRepository->save($case);
         $case->addEventLog(CaseEventLog::CASE_STATUS_CHANGED, 'Case status changed to ' . CasesStatus::STATUS_LIST[$case->cs_status] . ' By: ' . ($username ?? 'System.') . ($description ? ' Reason: ' . $description : ''));
     }

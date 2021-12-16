@@ -8,7 +8,7 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel modules\product\src\entities\productQuoteObjectRefund\search\ProductQuoteObjectRefund */
+/* @var $searchModel modules\product\src\entities\productQuoteObjectRefund\search\ProductQuoteObjectRefundSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Product Quote Object Refunds';
@@ -22,7 +22,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('Create Product Quote Object Refund', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-    <?php Pjax::begin(); ?>
+    <?php Pjax::begin(['scrollTo' => 0]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([
@@ -31,6 +31,8 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             'pqor_id',
             'pqor_product_quote_refund_id',
+            'pqor_quote_object_id',
+            'pqor_title',
             'pqor_selling_price',
             'pqor_penalty_amount',
             'pqor_processing_fee_amount',
@@ -50,6 +52,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'pqor_client_currency_rate',
             'pqor_client_selling_price',
             'pqor_client_refund_amount',
+            'pqor_client_penalty_amount',
+            'pqor_client_processing_fee_amount',
             [
                 'class' => \common\components\grid\UserSelect2Column::class,
                 'attribute' => 'pqor_created_user_id',

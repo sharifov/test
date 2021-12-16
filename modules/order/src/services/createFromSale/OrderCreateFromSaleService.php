@@ -25,6 +25,7 @@ use modules\order\src\entities\order\OrderPayStatus;
 use modules\order\src\entities\order\OrderSourceType;
 use modules\order\src\entities\order\OrderStatus;
 use modules\order\src\entities\orderContact\OrderContact;
+use modules\order\src\entities\orderContact\OrderContactRepository;
 use modules\order\src\payment\helpers\PaymentHelper;
 use modules\order\src\payment\method\PaymentMethodRepository;
 use modules\order\src\payment\PaymentRepository;
@@ -42,6 +43,7 @@ use modules\product\src\useCases\product\create\ProductCreateService;
 use sales\helpers\ErrorsToStringHelper;
 use sales\model\caseOrder\entity\CaseOrder;
 use sales\repositories\product\ProductQuoteRepository;
+use sales\services\client\ClientManageService;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -55,6 +57,8 @@ use yii\helpers\ArrayHelper;
  * @property FlightQuoteSegmentRepository $flightQuoteSegmentRepository
  * @property ProductRepository $productRepository
  * @property OrderContactManageService $orderContactManageService
+ * @property ClientManageService $clientManageService
+ * @property OrderContactRepository $orderContactRepository
  */
 class OrderCreateFromSaleService
 {
@@ -66,6 +70,8 @@ class OrderCreateFromSaleService
     private FlightQuoteSegmentRepository $flightQuoteSegmentRepository;
     private ProductRepository $productRepository;
     private OrderContactManageService $orderContactManageService;
+    private ClientManageService $clientManageService;
+    private OrderContactRepository $orderContactRepository;
 
     /**
      * @param PaymentRepository $paymentRepository
@@ -76,6 +82,8 @@ class OrderCreateFromSaleService
      * @param FlightQuoteSegmentRepository $flightQuoteSegmentRepository
      * @param ProductRepository $productRepository
      * @param OrderContactManageService $orderContactManageService
+     * @param ClientManageService $clientManageService
+     * @param OrderContactRepository $orderContactRepository
      */
     public function __construct(
         PaymentRepository $paymentRepository,
@@ -85,7 +93,9 @@ class OrderCreateFromSaleService
         FlightQuoteTripRepository $flightQuoteTripRepository,
         FlightQuoteSegmentRepository $flightQuoteSegmentRepository,
         ProductRepository $productRepository,
-        OrderContactManageService $orderContactManageService
+        OrderContactManageService $orderContactManageService,
+        ClientManageService $clientManageService,
+        OrderContactRepository $orderContactRepository
     ) {
         $this->paymentRepository = $paymentRepository;
         $this->productCreateService = $productCreateService;
@@ -95,8 +105,15 @@ class OrderCreateFromSaleService
         $this->flightQuoteSegmentRepository = $flightQuoteSegmentRepository;
         $this->productRepository = $productRepository;
         $this->orderContactManageService = $orderContactManageService;
+        $this->clientManageService = $clientManageService;
+        $this->orderContactRepository = $orderContactRepository;
     }
 
+    /**
+     * @param OrderCreateFromSaleForm $form
+     * @param int $payStatusId
+     * @return Order
+     */
     public function orderCreate(
         OrderCreateFromSaleForm $form,
         $payStatusId = OrderPayStatus::PAID
@@ -112,33 +129,37 @@ class OrderCreateFromSaleService
             null,
             null,
             null,
-            null
+            $form->saleId
         );
         $order = (new Order())->create($dto);
         $order->or_pay_status_id = $payStatusId;
         $order->or_client_currency_rate = $form->currency === Currency::DEFAULT_CURRENCY ? Currency::DEFAULT_CURRENCY_CLIENT_RATE : null;
-
         return $order;
     }
 
     public function orderContactCreate(Order $order, OrderContactForm $orderContactForm): OrderContact
     {
-        return $this->orderContactManageService->create(
+        $orderContact = OrderContact::create(
             $order->or_id,
             $orderContactForm->first_name,
             $orderContactForm->last_name,
             null,
             $orderContactForm->email,
-            $orderContactForm->phone_number,
-            $order->or_project_id,
-            5
+            $orderContactForm->phone_number
         );
+
+        $client = $this->clientManageService->createBasedOnOrderContact($orderContact, $order->or_project_id);
+        $orderContact->oc_client_id = $client->id;
+        $this->orderContactRepository->save($orderContact);
+
+        return $orderContact;
     }
 
     public function caseOrderRelation(int $orderId, int $caseId): bool
     {
         if (!CaseOrder::findOne(['co_order_id' => $orderId, 'co_case_id' => $caseId])) {
             $caseOrder = CaseOrder::create($caseId, $orderId);
+            $caseOrder->detachBehavior('user');
             if (!$caseOrder->validate()) {
                 throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($caseOrder));
             }

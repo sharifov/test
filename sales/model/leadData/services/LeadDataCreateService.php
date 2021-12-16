@@ -2,6 +2,8 @@
 
 namespace sales\model\leadData\services;
 
+use common\models\Lead;
+use DateTime;
 use sales\helpers\ErrorsToStringHelper;
 use sales\model\leadData\entity\LeadData;
 use sales\model\leadData\repository\LeadDataRepository;
@@ -39,6 +41,30 @@ class LeadDataCreateService
                 \Yii::warning($warning, 'LeadController:actionCreate:LeadDataNotValid');
             }
         }
+    }
+
+    public function createWeEmailReplied(Lead $lead): LeadData
+    {
+        $leadDataRepository = new LeadDataRepository();
+        $leadData = LeadData::create(
+            $lead->id,
+            LeadDataDictionary::KEY_WE_EMAIL_REPLIED,
+            (string) (new DateTime())->getTimestamp()
+        );
+        if (!$leadData->validate()) {
+            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($leadData));
+        }
+
+        $leadDataRepository->save($leadData);
+        return $leadData;
+    }
+
+    public static function isExist(int $leadId, string $key): bool
+    {
+        return LeadData::find()
+            ->where(['ld_lead_id' => $leadId])
+            ->andWhere(['ld_field_key' => $key])
+            ->exists();
     }
 
     public function getInserted(): array

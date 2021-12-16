@@ -9,6 +9,7 @@ use modules\flight\models\Flight;
 use modules\flight\models\FlightQuote;
 use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
 use modules\flight\src\helpers\FlightQuoteHelper;
+use modules\flight\src\useCases\form\ChangeQuoteCreateForm;
 use yii\base\Model;
 use yii\helpers\Html;
 
@@ -27,12 +28,13 @@ use yii\helpers\Html;
  * @property $baggage_data
  * @property $segment_trip_data
  * @property $keyTripList
+ * @property $flightId
  *
  * @property ItineraryDumpDTO[] $itinerary
  * @property array $baggageFormsData
  * @property array $segmentTripFormsData
  */
-class ReProtectionQuoteCreateForm extends Model
+class ReProtectionQuoteCreateForm extends ChangeQuoteCreateForm
 {
     public $recordLocator;
     public $gds;
@@ -46,14 +48,16 @@ class ReProtectionQuoteCreateForm extends Model
     public $baggage_data;
     public $segment_trip_data;
     public $keyTripList;
+    public $flightId;
 
     private array $itinerary = [];
     private array $baggageFormsData = [];
     private array $segmentTripFormsData = [];
 
-    public function __construct(?int $creatorId = null, $config = [])
+    public function __construct(?int $creatorId = null, ?int $flightId = null, $config = [])
     {
         $this->quoteCreator = $creatorId;
+        $this->flightId = $flightId;
         parent::__construct($config);
     }
 
@@ -79,6 +83,9 @@ class ReProtectionQuoteCreateForm extends Model
             [['segment_trip_data'], 'safe'],
             [['segment_trip_data'], 'segmentTripPrepare'],
             [['keyTripList'], 'string'],
+
+            [['flightId'], 'integer'],
+            [['flightId'], 'exist', 'skipOnError' => true, 'targetClass' => Flight::class, 'targetAttribute' => ['flightId' => 'fl_id']],
         ];
     }
 
@@ -98,7 +105,7 @@ class ReProtectionQuoteCreateForm extends Model
 
     public function checkReservationDump(): void
     {
-        $dumpParser = FlightQuoteHelper::parseDump($this->reservationDump, true, $this->itinerary);
+        $dumpParser = FlightQuoteHelper::parseDump($this->reservationDump, false, $this->itinerary);
         if (empty($dumpParser)) {
             $this->addError('reservationDump', 'Incorrect reservation dump!');
         }

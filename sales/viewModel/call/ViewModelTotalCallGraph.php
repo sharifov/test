@@ -25,6 +25,7 @@ use yii\helpers\ArrayHelper;
  * @property SqlDataProvider $dataProvider
  * @property array $gridColumns
  * @property array $exportData
+ * @property int $groupsCount
  */
 class ViewModelTotalCallGraph
 {
@@ -38,7 +39,9 @@ class ViewModelTotalCallGraph
 
     public $callGraphsSearch;
 
-    public $callData;
+    public $callData = 0;
+
+    public $groupsCount;
 
     public $dataProvider;
 
@@ -411,6 +414,8 @@ class ViewModelTotalCallGraph
         if ($this->callGraphsSearch->callGraphGroupBy == CallGraphsSearch::DATE_FORMAT_WEEKDAYS) {
             $mappedData = $this->normalizeByWeekDaysOnAxisX($mappedData);
         }
+
+        $this->groupsCount = count($mappedData);
 
         return $mappedData;
     }

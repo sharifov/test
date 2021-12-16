@@ -11,6 +11,9 @@ use common\models\DepartmentPhoneProject;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\Project;
+use kartik\select2\ThemeDefaultAsset;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use sales\behaviors\metric\MetricCasesCounterBehavior;
 use sales\behaviors\metric\MetricLeadCounterBehavior;
 use sales\entities\cases\events\CasesAssignLeadEvent;
@@ -34,6 +37,8 @@ use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\Html;
 use Yii;
+
+use function Amp\Promise\timeoutWithDefault;
 
 /**
  * Class Cases
@@ -73,6 +78,8 @@ use Yii;
  * @property DepartmentPhoneProject[] $departmentPhonesByProjectAndDepartment
  * @property CaseSale[] $caseSale
  * @property CaseEventLog[] $caseEventLogs
+ * @property ProductQuoteChange|null $productQuoteChange
+ * @property ProductQuoteRefund|null $productQuoteRefund
  */
 class Cases extends ActiveRecord implements Objectable
 {
@@ -242,7 +249,45 @@ class Cases extends ActiveRecord implements Objectable
         $case->cs_source_type_id = CasesSourceType::API;
         $case->cs_is_automate = true;
         $case->cs_project_id = $projectId;
-        $case->statusToNew(null, 'Flight ReProtection Create');
+        $case->pending(null, 'Flight ReProtection Create');
+        return $case;
+    }
+
+    public static function createByApiVoluntaryExChange(
+        int $departmentId,
+        int $categoryId,
+        string $orderUid,
+        int $projectId,
+        ?bool $is_automate
+    ): self {
+        $case = self::create();
+        $case->cs_dep_id = $departmentId;
+        $case->cs_category_id = $categoryId;
+        $case->cs_order_uid = $orderUid;
+        $case->cs_subject = 'Voluntary Change';
+        $case->cs_source_type_id = CasesSourceType::API;
+        $case->cs_is_automate = $is_automate;
+        $case->cs_project_id = $projectId;
+        $case->new(null, 'Voluntary Exchange Create');
+        return $case;
+    }
+
+    public static function createByApiVoluntaryRefund(
+        int $departmentId,
+        int $categoryId,
+        string $orderUid,
+        int $projectId,
+        ?bool $is_automate
+    ): self {
+        $case = self::create();
+        $case->cs_dep_id = $departmentId;
+        $case->cs_category_id = $categoryId;
+        $case->cs_order_uid = $orderUid;
+        $case->cs_project_id = $projectId;
+        $case->cs_subject = 'Voluntary Refund';
+        $case->cs_source_type_id = CasesSourceType::API;
+        $case->cs_is_automate = $is_automate;
+        $case->new(null, 'Voluntary Refund Create');
         return $case;
     }
 
@@ -272,7 +317,7 @@ class Cases extends ActiveRecord implements Objectable
      */
     public function pending(?int $creatorId, ?string $description = ''): void
     {
-        CasesStatus::guard($this->cs_status, CasesStatus::STATUS_PENDING);
+        //CasesStatus::guard($this->cs_status, CasesStatus::STATUS_PENDING);
         $this->recordEvent(new CasesPendingStatusEvent($this, $this->cs_status, $this->cs_user_id, $creatorId, $description));
         $this->setStatus(CasesStatus::STATUS_PENDING);
     }
@@ -283,7 +328,7 @@ class Cases extends ActiveRecord implements Objectable
      */
     public function awaiting(?int $creatorId, ?string $description = ''): void
     {
-        CasesStatus::guard($this->cs_status, CasesStatus::STATUS_AWAITING);
+        //CasesStatus::guard($this->cs_status, CasesStatus::STATUS_AWAITING);
         $this->recordEvent(new CasesAwaitingStatusEvent($this, $this->cs_status, $this->cs_user_id, $creatorId, $description));
         $this->setStatus(CasesStatus::STATUS_AWAITING);
     }
@@ -292,9 +337,20 @@ class Cases extends ActiveRecord implements Objectable
      * @param int|null $creatorId
      * @param string|null $description
      */
+    public function new(?int $creatorId, ?string $description = ''): void
+    {
+        //CasesStatus::guard($this->cs_status, CasesStatus::STATUS_NEW);
+        $this->recordEvent(new CasesNewStatusEvent($this, $this->cs_status, $this->cs_user_id, $creatorId, $description));
+        $this->setStatus(CasesStatus::STATUS_NEW);
+    }
+
+    /**
+     * @param int|null $creatorId
+     * @param string|null $description
+     */
     public function autoProcessing(?int $creatorId, ?string $description = ''): void
     {
-        CasesStatus::guard($this->cs_status, CasesStatus::STATUS_AUTO_PROCESSING);
+        //CasesStatus::guard($this->cs_status, CasesStatus::STATUS_AUTO_PROCESSING);
         $this->recordEvent(new CasesAutoProcessingStatusEvent($this, $this->cs_status, $this->cs_user_id, $creatorId, $description));
         $this->setStatus(CasesStatus::STATUS_AUTO_PROCESSING);
     }
@@ -305,7 +361,7 @@ class Cases extends ActiveRecord implements Objectable
      */
     public function error(?int $creatorId, ?string $description = ''): void
     {
-        CasesStatus::guard($this->cs_status, CasesStatus::STATUS_ERROR);
+        //CasesStatus::guard($this->cs_status, CasesStatus::STATUS_ERROR);
         $this->recordEvent(new CasesErrorStatusEvent($this, $this->cs_status, $this->cs_user_id, $creatorId, $description));
         $this->setStatus(CasesStatus::STATUS_ERROR);
     }
@@ -320,7 +376,7 @@ class Cases extends ActiveRecord implements Objectable
 
     public function statusToNew(?int $creatorId, ?string $description = ''): void
     {
-        CasesStatus::guard($this->cs_status, CasesStatus::STATUS_NEW);
+        //CasesStatus::guard($this->cs_status, CasesStatus::STATUS_NEW);
         $this->recordEvent(new CasesNewStatusEvent($this, $this->cs_status, $this->cs_user_id, $creatorId, $description));
         $this->setStatus(CasesStatus::STATUS_NEW);
     }
@@ -350,7 +406,7 @@ class Cases extends ActiveRecord implements Objectable
      */
     public function processing(int $userId, ?int $creatorId, ?string $description = ''): void
     {
-        CasesStatus::guard($this->cs_status, CasesStatus::STATUS_PROCESSING);
+        //CasesStatus::guard($this->cs_status, CasesStatus::STATUS_PROCESSING);
         if ($this->isProcessing() && $this->isOwner($userId)) {
             throw new \DomainException('Case is already processing to this user');
         }
@@ -377,7 +433,7 @@ class Cases extends ActiveRecord implements Objectable
      */
     public function followUp(?int $creatorId, ?string $description = ''): void
     {
-        CasesStatus::guard($this->cs_status, CasesStatus::STATUS_FOLLOW_UP);
+        //CasesStatus::guard($this->cs_status, CasesStatus::STATUS_FOLLOW_UP);
         $this->recordEvent(new CasesFollowUpStatusEvent($this, $this->cs_status, $this->cs_user_id, $creatorId, $description));
         if (!$this->isFreedOwner()) {
             $this->freedOwner();
@@ -399,7 +455,7 @@ class Cases extends ActiveRecord implements Objectable
      */
     public function solved(?int $creatorId, ?string $description = ''): void
     {
-        CasesStatus::guard($this->cs_status, CasesStatus::STATUS_SOLVED);
+        //CasesStatus::guard($this->cs_status, CasesStatus::STATUS_SOLVED);
         $this->recordEvent(new CasesSolvedStatusEvent($this, $this->cs_status, $this->cs_user_id, $creatorId, $description));
         $this->setStatus(CasesStatus::STATUS_SOLVED);
     }
@@ -418,7 +474,7 @@ class Cases extends ActiveRecord implements Objectable
      */
     public function trash(?int $creatorId, ?string $description = ''): void
     {
-        CasesStatus::guard($this->cs_status, CasesStatus::STATUS_TRASH);
+        //CasesStatus::guard($this->cs_status, CasesStatus::STATUS_TRASH);
         $this->recordEvent(new CasesTrashStatusEvent($this, $this->cs_status, $this->cs_user_id, $creatorId, $description));
         $this->setStatus(CasesStatus::STATUS_TRASH);
     }
@@ -429,6 +485,16 @@ class Cases extends ActiveRecord implements Objectable
     public function isTrash(): bool
     {
         return $this->cs_status === CasesStatus::STATUS_TRASH;
+    }
+
+    public function isAwaiting(): bool
+    {
+        return $this->cs_status === CasesStatus::STATUS_AWAITING;
+    }
+
+    public function isError(): bool
+    {
+        return $this->cs_status === CasesStatus::STATUS_ERROR;
     }
 
     public function isActive(): bool
@@ -476,6 +542,11 @@ class Cases extends ActiveRecord implements Objectable
             return false;
         }
         return $this->cs_user_id === $userId;
+    }
+
+    public function hasOwner(): bool
+    {
+        return (bool)$this->cs_user_id;
     }
 
     /**
@@ -645,6 +716,16 @@ class Cases extends ActiveRecord implements Objectable
     public function getCaseEventLogs()
     {
         return $this->hasMany(CaseEventLog::class, ['cel_case_id' => 'cs_id']);
+    }
+
+    public function getProductQuoteChange(): ActiveQuery
+    {
+        return $this->hasOne(ProductQuoteChange::class, ['pqc_case_id' => 'cs_id'])->orderBy(['pqc_id' => SORT_DESC]);
+    }
+
+    public function getProductQuoteRefund(): ActiveQuery
+    {
+        return $this->hasOne(ProductQuoteRefund::class, ['pqr_case_id' => 'cs_id']);
     }
 
     /*
@@ -831,8 +912,8 @@ class Cases extends ActiveRecord implements Objectable
         return $this->cs_is_automate;
     }
 
-    public function addEventLog(?int $type, string $description, array $data = []): void
+    public function addEventLog(?int $type, string $description, array $data = [], ?int $categoryId = null): void
     {
-        CaseEventLog::add($this->cs_id, $type, $description, $data);
+        CaseEventLog::add($this->cs_id, $type, $description, $data, $categoryId);
     }
 }

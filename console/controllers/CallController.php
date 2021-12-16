@@ -5,19 +5,33 @@ namespace console\controllers;
 use common\components\Metrics;
 use common\models\Call;
 use common\models\Employee;
+use common\models\Project;
 use common\models\ProjectEmployeeAccess;
+use common\models\query\EmployeeQuery;
+use common\models\search\LeadQcallSearch;
 use common\models\Sources;
 use common\models\UserProfile;
 use console\helpers\OutputHelper;
+use sales\dispatchers\EventDispatcher;
 use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\helpers\UserCallIdentity;
 use sales\model\callTerminateLog\entity\CallTerminateLog;
 use sales\model\callTerminateLog\repository\CallTerminateLogRepository;
 use sales\model\callTerminateLog\service\CallTerminateLogService;
+use sales\model\contactPhoneData\service\ContactPhoneDataDictionary;
+use sales\model\contactPhoneList\service\ContactPhoneListService;
+use sales\model\leadRedial\entity\CallRedialUserAccess;
+use sales\model\leadRedial\entity\CallRedialUserAccessQuery;
+use sales\model\leadRedial\entity\CallRedialUserAccessRepository;
+use sales\model\leadRedial\job\LeadRedialAssignToUsersJob;
+use sales\services\lead\LeadRedialService;
 use sales\services\phone\blackList\PhoneBlackListManageService;
 use yii\console\Controller;
 use Yii;
+use yii\db\Expression;
+use yii\db\Query;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Console;
 use yii\helpers\VarDumper;
 
@@ -31,6 +45,7 @@ use yii\helpers\VarDumper;
  * @property int $defaultInProgressMinutes
  * @property int $defaultIvrMinutes
  * @property OutputHelper $outputHelper
+ * @property CallRedialUserAccessRepository $callRedialUserAccessRepository
  */
 class CallController extends Controller
 {
@@ -43,17 +58,25 @@ class CallController extends Controller
     private $terminatorEnable = false;
     private $terminatorParams;
     private $outputHelper;
+    private CallRedialUserAccessRepository $callRedialUserAccessRepository;
 
     /**
      * @param $id
      * @param $module
      * @param OutputHelper $outputHelper
+     * @param CallRedialUserAccessRepository $callRedialUserAccessRepository
      * @param array $config
      */
-    public function __construct($id, $module, OutputHelper $outputHelper, $config = [])
-    {
+    public function __construct(
+        $id,
+        $module,
+        OutputHelper $outputHelper,
+        CallRedialUserAccessRepository $callRedialUserAccessRepository,
+        $config = []
+    ) {
         parent::__construct($id, $module, $config);
         $this->outputHelper = $outputHelper;
+        $this->callRedialUserAccessRepository = $callRedialUserAccessRepository;
         $this->setSettings();
     }
 
@@ -194,8 +217,9 @@ class CallController extends Controller
                         $result = Yii::$app->communication->hangUp($call->c_call_sid);
 
                         if (
-                            SettingHelper::getCallTerminateBlackListByKey('enable_to_black_list') &&
-                            CallTerminateLogService::isPhoneBlackListCandidate($call->c_from)
+                            SettingHelper::getCallTerminateBlackListByKey('enable_to_black_list')
+                            && CallTerminateLogService::isPhoneBlackListCandidate($call->c_from)
+                            && !ContactPhoneListService::isProxy($call->c_from)
                         ) {
                             $addMinutes = (int) (SettingHelper::getCallTerminateBlackListByKey('black_list_expired_minutes') ?? 180);
                             PhoneBlackListManageService::createOrRenewExpiration($call->c_from, $addMinutes, new \DateTime(), 'Reason - CallTerminateLog');
@@ -325,6 +349,39 @@ class CallController extends Controller
         }
         echo "Results redirects for hold calls: " . PHP_EOL .  VarDumper::dumpAsString($results, 10, false) . PHP_EOL;
         return 0;
+    }
+
+    public function actionRedialCall()
+    {
+        if (!SettingHelper::leadRedialEnabled()) {
+            echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' . self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+            echo 'Lead redial logic disabled' . PHP_EOL;
+            echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' . self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+            return;
+        }
+
+        echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+        $processed = 0;
+        $timeStart = microtime(true);
+
+        $callRedialSearch = new LeadQcallSearch();
+        $leads = $callRedialSearch->searchRedialLeadsToBeAssign([], array_keys(Project::getList()), new \DateTimeImmutable())->all();
+
+        foreach ($leads as $lead) {
+//            $limitAgents = SettingHelper::getRedialGetLimitAgents() - $lead->agentsHasAccessToCall;
+//            $job = new LeadRedialAssignToUsersJob($lead->lqc_lead_id, $limitAgents <= 0 ? SettingHelper::getRedialGetLimitAgents() : $limitAgents, 0);
+            $job = new LeadRedialAssignToUsersJob($lead->lqc_lead_id);
+            Yii::$app->queue_lead_redial->priority(3)->push($job);
+            $processed++;
+        }
+
+        $timeEnd = microtime(true);
+        $time = number_format(round($timeEnd - $timeStart, 2), 2);
+        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time .
+            ' s] %g Processed: %w[' . $processed . '] %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
     }
 
     /**

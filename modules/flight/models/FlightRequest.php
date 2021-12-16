@@ -5,6 +5,7 @@ namespace modules\flight\models;
 use common\components\validators\CheckJsonValidator;
 use common\models\Project;
 use modules\flight\models\query\FlightRequestQuery;
+use sales\behaviors\HashFromJsonBehavior;
 use sales\behaviors\StringToJsonBehavior;
 use common\models\ApiUser;
 use Yii;
@@ -34,10 +35,18 @@ use yii\helpers\ArrayHelper;
  */
 class FlightRequest extends \yii\db\ActiveRecord
 {
-    public const TYPE_REPRODUCTION_CREATE = 1;
+    public const TYPE_RE_PROTECTION_CREATE = 1;
+    public const TYPE_VOLUNTARY_EXCHANGE_CREATE = 2;
+    public const TYPE_VOLUNTARY_EXCHANGE_CONFIRM = 3;
+    public const TYPE_VOLUNTARY_REFUND_CREATE = 4;
+    public const TYPE_VOLUNTARY_REFUND_CONFIRM = 5;
 
     public const TYPE_LIST = [
-        self::TYPE_REPRODUCTION_CREATE => 'reprotection/create',
+        self::TYPE_RE_PROTECTION_CREATE => 'reprotection/create',
+        self::TYPE_VOLUNTARY_EXCHANGE_CREATE => 'flight-quote-exchange/create',
+        self::TYPE_VOLUNTARY_EXCHANGE_CONFIRM => 'flight-quote-exchange/confirm',
+        self::TYPE_VOLUNTARY_REFUND_CREATE => 'voluntary-flight-quote-refund/create',
+        self::TYPE_VOLUNTARY_REFUND_CONFIRM => 'voluntary-flight-quote-refund/confirm'
     ];
 
     public const STATUS_NEW = 1;
@@ -50,6 +59,11 @@ class FlightRequest extends \yii\db\ActiveRecord
         self::STATUS_PENDING => 'pending',
         self::STATUS_ERROR => 'error',
         self::STATUS_DONE => 'done',
+    ];
+
+    private const ACTIVE_STATUSES_LIST = [
+        self::STATUS_NEW,
+        self::STATUS_PENDING
     ];
 
     public function rules(): array
@@ -152,12 +166,12 @@ class FlightRequest extends \yii\db\ActiveRecord
     }
 
     /**
-     * returns ApiUser full name
-     * @return string|null
+     * returns ApiUser by ID
+     * @return ActiveQuery|null
      */
-    public function getApiUsername(): ?string
+    public function getApiUser(): ActiveQuery
     {
-        return ApiUser::findOne($this->fr_created_api_user_id)->au_name ?? null;
+        return $this->hasOne(ApiUser::class, ['au_id' => 'fr_created_api_user_id']);
     }
 
     public function getProject(): ActiveQuery
@@ -238,5 +252,10 @@ class FlightRequest extends \yii\db\ActiveRecord
     public function getIsAutomateDataJson(): bool
     {
         return (bool) ArrayHelper::getValue($this, 'fr_data_json.flight_quote', false);
+    }
+
+    public static function getActiveStatusesList(): array
+    {
+        return self::ACTIVE_STATUSES_LIST;
     }
 }

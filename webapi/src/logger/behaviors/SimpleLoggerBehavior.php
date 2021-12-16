@@ -2,6 +2,7 @@
 
 namespace webapi\src\logger\behaviors;
 
+use frontend\helpers\JsonHelper;
 use sales\helpers\app\AppHelper;
 use Throwable;
 use webapi\src\logger\behaviors\filters\Filterable;
@@ -53,7 +54,11 @@ class SimpleLoggerBehavior extends LoggerBehavior
         $user = Yii::$app->user;
 
         try {
-            $data = Json::encode($this->filterData($request->post()));
+            $data = Json::encode([
+                'post' => $this->filterData($request->post()),
+                'get' => $this->filterData($request->get())
+            ]);
+
             $logger->start(
                 new StartDTO([
                     'data' => $data,
@@ -93,7 +98,7 @@ class SimpleLoggerBehavior extends LoggerBehavior
         }
 
         try {
-            if ($logger->log) {
+            if ($log = $logger->log) {
                 $encodeResponse = Json::encode($result->getResponse());
                 $logger->end(
                     new EndDTO([
@@ -103,6 +108,7 @@ class SimpleLoggerBehavior extends LoggerBehavior
                         'profiling' => Yii::getLogger()->getDbProfiling(),
                     ])
                 );
+                $log->logToElk();
             }
         } catch (\Throwable $throwable) {
             Yii::error(AppHelper::throwableLog($throwable), 'SimpleLoggerBehavior:afterAction:logger');

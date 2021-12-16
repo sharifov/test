@@ -32,7 +32,7 @@ class UpdateSaleFromBOJob extends BaseJob implements JobInterface
      */
     public function execute($queue): bool
     {
-        $this->executionTimeRegister();
+        $this->waitingTimeRegister();
         try {
             if ($this->checkParams()) {
                 /** @var CasesSaleService $casesSaleService */

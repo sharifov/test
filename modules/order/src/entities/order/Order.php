@@ -304,7 +304,7 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
      */
     public function getOrderContacts(): ActiveQuery
     {
-        return $this->hasMany(OrderContact::class, ['oc_order_id' => 'or_id']);
+        return $this->hasMany(OrderContact::class, ['oc_order_id' => 'or_id'])->orderBy(['oc_id' => SORT_DESC]);
     }
 
     public function getOrderData()
@@ -790,5 +790,17 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
     public function getOrderSourceType(): string
     {
         return OrderSourceType::LIST[$this->or_type_id] ?? 'Unknown';
+    }
+
+    /**
+     * @param int|null $userId
+     * @return bool
+     */
+    public function isOwner(?int $userId): bool
+    {
+        if ($userId === null) {
+            return false;
+        }
+        return $this->or_owner_user_id === $userId;
     }
 }

@@ -2,10 +2,17 @@
 
 namespace modules\product\src\entities\productQuoteOptionRefund;
 
+use common\components\validators\CheckJsonValidator;
 use common\models\Currency;
 use common\models\Employee;
+use frontend\helpers\JsonHelper;
+use modules\order\src\entities\orderRefund\OrderRefund;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
+use modules\product\src\entities\productQuoteOptionRefund\serializer\ProductQuoteOptionRefundSerializer;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
+use sales\behaviors\StringToJsonBehavior;
+use sales\entities\serializer\Serializable;
+use sales\traits\FieldsTrait;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -35,9 +42,14 @@ use yii\db\ActiveRecord;
  * @property Employee $createdUser
  * @property Employee $updatedUser
  * @property Currency $clientCurrency
+ * @property int $pqor_order_refund_id [int]
+ * @property bool $pqor_refund_allow [tinyint(1)]
+ * @property string $pqor_data_json [json]
  */
-class ProductQuoteOptionRefund extends \yii\db\ActiveRecord
+class ProductQuoteOptionRefund extends \yii\db\ActiveRecord implements Serializable
 {
+    use FieldsTrait;
+
     /**
      * @return array
      */
@@ -57,6 +69,10 @@ class ProductQuoteOptionRefund extends \yii\db\ActiveRecord
                 'createdByAttribute' => 'pqor_created_user_id',
                 'updatedByAttribute' => 'pqor_updated_user_id',
             ],
+            'stringToJson' => [
+                'class' => StringToJsonBehavior::class,
+                'jsonColumn' => 'pqor_data_json',
+            ],
         ];
     }
 
@@ -75,16 +91,21 @@ class ProductQuoteOptionRefund extends \yii\db\ActiveRecord
     {
         return [
             [['pqor_product_quote_refund_id'], 'required'],
-            [['pqor_product_quote_refund_id', 'pqor_product_quote_option_id', 'pqor_status_id', 'pqor_created_user_id', 'pqor_updated_user_id'], 'integer'],
+            [['pqor_product_quote_refund_id', 'pqor_product_quote_option_id', 'pqor_status_id', 'pqor_created_user_id', 'pqor_updated_user_id', 'pqor_order_refund_id'], 'integer'],
             [['pqor_selling_price', 'pqor_penalty_amount', 'pqor_processing_fee_amount', 'pqor_refund_amount', 'pqor_client_currency_rate', 'pqor_client_selling_price', 'pqor_client_refund_amount'], 'number', 'min' => 0, 'max' => 999999.99],
             [['pqor_created_dt', 'pqor_updated_dt'], 'safe'],
             [['pqor_client_currency'], 'string', 'max' => 3],
             [['pqor_client_currency'], 'default', 'value' => null],
+            [['pqor_refund_allow'], 'boolean'],
             [['pqor_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pqor_created_user_id' => 'id']],
             [['pqor_product_quote_option_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuoteOption::class, 'targetAttribute' => ['pqor_product_quote_option_id' => 'pqo_id']],
             [['pqor_product_quote_refund_id'], 'exist', 'skipOnError' => true, 'targetClass' => ProductQuoteRefund::class, 'targetAttribute' => ['pqor_product_quote_refund_id' => 'pqr_id']],
             [['pqor_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pqor_updated_user_id' => 'id']],
             [['pqor_client_currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['pqor_client_currency' => 'cur_code']],
+            [['pqor_order_refund_id'], 'exist', 'skipOnError' => true, 'targetClass' => OrderRefund::class, 'targetAttribute' => ['pqor_order_refund_id' => 'orr_id']],
+            ['pqor_data_json', 'safe'],
+            ['pqor_data_json', 'trim'],
+            ['pqor_data_json', CheckJsonValidator::class],
         ];
     }
 
@@ -110,6 +131,7 @@ class ProductQuoteOptionRefund extends \yii\db\ActiveRecord
             'pqor_updated_user_id' => 'Updated User ID',
             'pqor_created_dt' => 'Created Dt',
             'pqor_updated_dt' => 'Updated Dt',
+            'pqor_data_json' => 'Data',
         ];
     }
 
@@ -170,5 +192,79 @@ class ProductQuoteOptionRefund extends \yii\db\ActiveRecord
     public static function find()
     {
         return new Scopes(get_called_class());
+    }
+
+    public function getApiDataMapped(): array
+    {
+        return [
+            "type" => static function (self $model) {
+                return JsonHelper::decode($model->pqor_data_json)['type'] ?? '';
+            },
+            "amount" => static function (self $model) {
+                return (float)$model->pqor_client_selling_price;
+            },
+            'amountPerPax' => static function (self $model) {
+                return JsonHelper::decode($model->pqor_data_json)['amountPerPax'] ?? [];
+            },
+            "refundable" => static function (self $model) {
+                return (float)$model->pqor_client_refund_amount;
+            },
+            "details" => static function (self $model) {
+                return JsonHelper::decode($model->pqor_data_json)['details'] ?? [];
+            },
+            "status" => static function (self $model) {
+                return JsonHelper::decode($model->pqor_data_json)['status'] ?? '';
+            },
+            "refundAllow" => static function (self $model) {
+                return (bool)$model->pqor_refund_allow;
+            }
+        ];
+    }
+
+    public static function create(
+        int $orderRefundId,
+        int $productQuoteRefundId,
+        ?int $productQuoteOptionId,
+        ?float $sellingPrice,
+        ?float $penaltyAmount,
+        ?float $processingFeeAmount,
+        ?float $refundAmount,
+        string $clientCurrency,
+        float $clientCurrencyRate,
+        ?float $clientSellingPrice,
+        ?float $clientRefundAmount,
+        bool $refundAllow,
+        ?array $data
+    ): self {
+        $self = new self();
+        $self->pqor_order_refund_id = $orderRefundId;
+        $self->pqor_product_quote_refund_id = $productQuoteRefundId;
+        $self->pqor_product_quote_option_id = $productQuoteOptionId;
+        $self->pqor_selling_price = $sellingPrice;
+        $self->pqor_penalty_amount = $penaltyAmount;
+        $self->pqor_processing_fee_amount = $processingFeeAmount;
+        $self->pqor_refund_amount = $refundAmount;
+        $self->pqor_client_currency = $clientCurrency;
+        $self->pqor_client_currency_rate = $clientCurrencyRate;
+        $self->pqor_client_selling_price = $clientSellingPrice;
+        $self->pqor_client_refund_amount = $clientRefundAmount;
+        $self->pqor_refund_allow = $refundAllow;
+        $self->pqor_data_json = $data;
+        return $self;
+    }
+
+    public function pending(): void
+    {
+        $this->pqor_status_id = ProductQuoteOptionRefundStatus::PENDING;
+    }
+
+    public function new(): void
+    {
+        $this->pqor_status_id = ProductQuoteOptionRefundStatus::NEW;
+    }
+
+    public function serialize(): array
+    {
+        return (new ProductQuoteOptionRefundSerializer($this))->getData();
     }
 }

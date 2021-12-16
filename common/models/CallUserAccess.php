@@ -2,10 +2,11 @@
 
 namespace common\models;
 
-use common\components\jobs\AgentCallQueueJob;
 use common\components\purifier\Purifier;
 use common\models\query\CallUserAccessQuery;
 use frontend\widgets\newWebPhone\call\socket\RemoveIncomingRequestMessage;
+use modules\notification\src\abac\dto\NotificationAbacDto;
+use modules\notification\src\abac\NotificationAbacObject;
 use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\model\call\helper\CallHelper;
@@ -217,10 +218,19 @@ class CallUserAccess extends \yii\db\ActiveRecord
                     && ($call->c_source_type_id === Call::SOURCE_GENERAL_LINE || $call->c_source_type_id === Call::SOURCE_REDIRECT_CALL)
                 ) {
                     $message = 'New General Line Call';
-                    if ($ntf = Notifications::create($this->cua_user_id, 'New General Line Call', $message, Notifications::TYPE_SUCCESS, true)) {
-                        //Notifications::socket($this->cua_user_id, null, 'getNewNotification', [], true);
-                        $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-                        Notifications::publish('getNewNotification', ['user_id' => $this->cua_user_id], $dataNotification);
+
+                    $notification = new Notifications();
+                    $notification->n_title = 'New General Line Call';
+                    $notification->n_type_id = Notifications::TYPE_SUCCESS;
+                    $notification->n_user_id = $this->cua_user_id;
+
+                    $notificationAbacDto = new NotificationAbacDto($notification);
+
+                    if (Yii::$app->abac->can($notificationAbacDto, NotificationAbacObject::OBJ_NOTIFICATION, NotificationAbacObject::ACTION_ACCESS, $this->cuaUser)) {
+                        if ($ntf = Notifications::create($this->cua_user_id, 'New General Line Call', $message, Notifications::TYPE_SUCCESS, true)) {
+                            $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+                            Notifications::publish('getNewNotification', ['user_id' => $this->cua_user_id], $dataNotification);
+                        }
                     }
                 } else {
                     $message = 'New incoming Call' . ' (' . $this->cua_call_id . ')';

@@ -10,7 +10,7 @@ use yii\queue\JobInterface;
 
 /**
  * Class BoWebhookHandleJob
- * @package webapi\src\jobs
+ * @package webapi\src\jobss
  *
  * @property Model|null $form
  * @property int|null $requestTypeId

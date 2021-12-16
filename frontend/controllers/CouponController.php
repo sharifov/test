@@ -286,7 +286,7 @@ class CouponController extends FController
                         foreach ($selectedCoupons as $couponId) {
                             $coupon = Coupon::findOne((int)$couponId);
                             if ($coupon) {
-                                $coupon->c_status_id = CouponStatus::SEND;
+                                $coupon->c_status_id = CouponStatus::SENT;
                                 $coupon->save();
 
                                 if ($clientId = ArrayHelper::getValue($case, 'client.id')) {

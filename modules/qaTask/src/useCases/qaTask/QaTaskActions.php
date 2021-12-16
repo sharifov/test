@@ -17,6 +17,8 @@ class QaTaskActions
     public const CREATE_LEAD_PROCESSING_QUALITY = 9;
     public const CREATE_LEAD_TRASH_CHECK = 10;
     public const USER_ASSIGN = 11;
+    public const CREAT_CHAT_WITHOUT_NEW_MESSAGES = 12;
+    public const MULTIPLE_CANCEL = 13;
 
     private const LIST = [
         self::TAKE => 'Take',
@@ -30,6 +32,8 @@ class QaTaskActions
         self::CREATE_LEAD_PROCESSING_QUALITY => 'Rule: Lead Processing Quality',
         self::CREATE_LEAD_TRASH_CHECK => 'Rule: Lead Trash Check',
         self::USER_ASSIGN => 'User Assign',
+        self::CREAT_CHAT_WITHOUT_NEW_MESSAGES => 'Rule: Chat Without New Messages',
+        self::MULTIPLE_CANCEL => 'Multiple Cancel',
     ];
 
     public static function getList(): array

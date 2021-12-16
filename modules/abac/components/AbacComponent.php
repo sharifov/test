@@ -12,6 +12,7 @@ namespace modules\abac\components;
 use Casbin\CoreEnforcer;
 use common\models\Employee;
 use modules\abac\src\entities\AbacPolicy;
+use sales\auth\Auth;
 use sales\helpers\app\AppHelper;
 use stdClass;
 use Yii;
@@ -82,13 +83,12 @@ class AbacComponent extends Component
     }
 
     /**
+     * @param Employee $me
      * @return \stdClass
      */
-    private function getEnv()
+    private function getEnv(Employee $me)
     {
         /** @var Employee $me */
-        $me = Yii::$app->user->identity;
-
         $user = new \stdClass();
         $user->id = $me->id;
         $user->username = $me->username;
@@ -100,8 +100,11 @@ class AbacComponent extends Component
         $request = new \stdClass();
         $request->controller = Yii::$app->controller->uniqueId;
         $request->action = Yii::$app->controller->action->uniqueId;
-        $request->url = Yii::$app->request->url;
-        $request->ip = Yii::$app->request->getUserIP();
+
+        if (Yii::$app->request instanceof \yii\base\Request && !Yii::$app->request->isConsoleRequest) {
+            $request->url = Yii::$app->request->url ?? null;
+            $request->ip = Yii::$app->request->getUserIP() ?? null;
+        }
         // $request->get = Yii::$app->request->get();
 
         $dt = new \stdClass();
@@ -120,6 +123,7 @@ class AbacComponent extends Component
         $obj->req = $request;
         $obj->user = $user;
         $obj->dt = $dt;
+        $obj->available = true;
 
         return $obj;
     }
@@ -128,22 +132,30 @@ class AbacComponent extends Component
      * @param stdClass|null $subject
      * @param string $object
      * @param string $action
+     * @param Employee|null $user
      * @return bool|null
      */
-    final public function can(?\stdClass $subject, string $object, string $action): ?bool
+    final public function can(?\stdClass $subject, string $object, string $action, ?Employee $user = null): ?bool
     {
         if (!$subject) {
             $subject = new \stdClass();
         }
         try {
-            $subject->env = $this->getEnv();
+//            if (!$user && (Yii::$app instanceof \yii\web\Application) && Yii::$app->id === 'app-frontend') {
+//                $user = Auth::user();
+//            }
+            if (!$user) {
+                $user = Auth::user();
+            }
+
+            $subject->env = $this->getEnv($user);
             //$sub->data = $subject;
 
             if ($this->enforser->enforce($subject, $object, $action) === true) {
                 return true;
             }
         } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableLog($throwable), 'AbacComponent::can');
+            Yii::error(AppHelper::throwableLog($throwable, true), 'AbacComponent::can');
             //VarDumper::dump(AppHelper::throwableLog($throwable), 10, true);
             return null;
         }
@@ -294,6 +306,22 @@ class AbacComponent extends Component
         unset($policyModel);
         return implode(PHP_EOL, $rows);
     }
+
+    /**
+     * @param bool|null $enabled
+     * @return int
+     */
+    final public function getPolicyListCount(?bool $enabled = null): int
+    {
+        $query = AbacPolicy::find();
+        if ($enabled !== null) {
+            $query->where(['ap_enabled' => $enabled]);
+        }
+        $count = $query->count();
+
+        return $count ? (int) $count : 0;
+    }
+
 
     /**
      * @return string

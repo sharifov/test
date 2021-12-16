@@ -14,7 +14,6 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="notifications-list">
 
-
     <h1><i class="fa fa-bell-o"></i> <?= Html::encode($this->title) ?></h1>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
@@ -34,10 +33,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 'method' => 'post',
             ],
         ]) ?>
-
     </p>
+
     <?php Pjax::begin(); ?>
     <?= GridView::widget([
+        'id' => 'notifications-list-gv',
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'options' => ['class' => 'table-responsive'],
@@ -96,7 +96,6 @@ $this->params['breadcrumbs'][] = $this->title;
             //'n_deleted:boolean',
             //'n_popup:boolean',
             //'n_popup_show:boolean',
-
 
             [
                 'attribute' => 'n_read_dt',
@@ -163,4 +162,15 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ],
     ]); ?>
-    <?php Pjax::end(); ?></div>
+    <?php Pjax::end(); ?>
+</div>
+
+<?php
+$js = <<<JS
+    $(document).on('pjax:success', function() {
+        $("html, body").animate({ scrollTop: $('#notifications-list-gv').position().top }, 400);
+    })
+JS;
+
+$this->registerJs($js, $this::POS_END);
+?>

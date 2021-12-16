@@ -6,8 +6,10 @@
  * @var $leadForm LeadForm
  */
 
+use common\models\ClientEmailQuery;
 use common\models\Employee;
 use common\models\Lead;
+use common\models\query\ClientPhoneQuery;
 use yii\helpers\Html;
 use frontend\models\LeadForm;
 use yii\web\View;
@@ -154,7 +156,7 @@ $formId = sprintf('%s-form', $leadForm->getClient()->formName());
 
                     <div class="col-md-4">
                         <div id="client-manage-phone">
-                            <?php if ($phones = $lead->client->clientPhones) : ?>
+                            <?php if ($phones = ClientPhoneQuery::getWithSameClientsPhonesCount($lead->client_id)) : ?>
                                 <?php
                                 if ($leadForm->viewPermission) {
                                     echo $this->render('_client_manage_phone', [
@@ -168,7 +170,7 @@ $formId = sprintf('%s-form', $leadForm->getClient()->formName());
                             <?php endif; ?>
                         </div>
                         <div id="client-manage-email">
-                            <?php if ($emails = $lead->client->clientEmails) : ?>
+                            <?php if ($emails = ClientEmailQuery::getWithSameClientsEmailsCount($lead->client_id)) : ?>
                                 <?php
                                 if ($leadForm->viewPermission) {
                                     echo $this->render('_client_manage_email', [

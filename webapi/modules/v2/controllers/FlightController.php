@@ -3,18 +3,23 @@
 namespace webapi\modules\v2\controllers;
 
 use common\components\jobs\ReprotectionCreateJob;
+use DomainException;
 use modules\flight\models\FlightRequest;
 use modules\flight\src\repositories\flightRequest\FlightRequestRepository;
 use modules\flight\src\useCases\api\productQuoteGet\ProductQuoteGetForm;
+use modules\flight\src\useCases\flightQuote\createManually\helpers\FlightQuotePaxPriceHelper;
 use modules\flight\src\useCases\reprotectionCreate\form\ReprotectionCreateForm;
 use modules\flight\src\useCases\reprotectionCreate\form\ReprotectionGetForm;
+use modules\flight\src\useCases\reprotectionExchange\form\ReProtectionExchangeForm;
+use modules\flight\src\useCases\reprotectionExchange\service\ReProtectionExchangeService;
+use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use sales\helpers\app\AppHelper;
+use sales\helpers\setting\SettingHelper;
 use sales\repositories\NotFoundException;
 use sales\repositories\product\ProductQuoteRepository;
 use sales\services\TransactionManager;
 use webapi\src\logger\ApiLogger;
-use webapi\src\logger\behaviors\filters\creditCard\CreditCardFilter;
 use webapi\src\logger\behaviors\SimpleLoggerBehavior;
 use webapi\src\logger\behaviors\TechnicalInfoBehavior;
 use webapi\src\Messages;
@@ -27,18 +32,17 @@ use webapi\src\response\messages\ErrorsMessage;
 use webapi\src\response\messages\Message;
 use webapi\src\response\messages\MessageMessage;
 use webapi\src\response\messages\StatusCodeMessage;
-use webapi\src\response\messages\StatusFailedMessage;
 use webapi\src\response\SuccessResponse;
 use Yii;
 use yii\helpers\ArrayHelper;
 use modules\flight\src\useCases\reprotectionDecision;
-use yii\helpers\VarDumper;
 
 /**
  * Class FlightController
  *
  * @property TransactionManager $transactionManager
  * @property-read ProductQuoteRepository $productQuoteRepository
+ * @property ReProtectionExchangeService $reProtectionExchangeService
  */
 class FlightController extends BaseController
 {
@@ -47,6 +51,7 @@ class FlightController extends BaseController
      * @var ProductQuoteRepository
      */
     private ProductQuoteRepository $productQuoteRepository;
+    private ReProtectionExchangeService $reProtectionExchangeService;
 
     /**
      * @param $id
@@ -54,6 +59,7 @@ class FlightController extends BaseController
      * @param ApiLogger $logger
      * @param TransactionManager $transactionManager
      * @param ProductQuoteRepository $productQuoteRepository
+     * @param ReProtectionExchangeService $reProtectionExchangeService
      * @param array $config
      */
     public function __construct(
@@ -62,10 +68,12 @@ class FlightController extends BaseController
         ApiLogger $logger,
         TransactionManager $transactionManager,
         ProductQuoteRepository $productQuoteRepository,
+        ReProtectionExchangeService $reProtectionExchangeService,
         $config = []
     ) {
         $this->transactionManager = $transactionManager;
         $this->productQuoteRepository = $productQuoteRepository;
+        $this->reProtectionExchangeService = $reProtectionExchangeService;
         parent::__construct($id, $module, $logger, $config);
     }
 
@@ -75,7 +83,7 @@ class FlightController extends BaseController
         $behaviors['logger'] = [
             'class' => SimpleLoggerBehavior::class,
             'except' => [
-                'product-quote-get',
+//                'product-quote-get',
             ],
         ];
         $behaviors['request'] = [
@@ -111,7 +119,7 @@ class FlightController extends BaseController
     }
 
     /**
-     * @api {post} /v2/flight/reprotection-create Create flight reprotection from BO
+     * @api {post} /v2/flight/reprotection-create ReProtection Create
      * @apiVersion 0.1.0
      * @apiName ReProtection Create
      * @apiGroup Flight
@@ -454,7 +462,7 @@ class FlightController extends BaseController
         } catch (\Throwable $throwable) {
             return new ErrorResponse(
                 new StatusCodeMessage(400),
-                new MessageMessage(Messages::LOAD_DATA_ERROR),
+                new MessageMessage(Messages::POST_DATA_ERROR),
                 new ErrorsMessage($throwable->getMessage()),
             );
         }
@@ -474,6 +482,14 @@ class FlightController extends BaseController
             );
         }
 
+        $hash = FlightRequest::generateHashFromDataJson($post);
+        if (FlightRequest::find()->where(['fr_hash' => $hash])->andWhere(['fr_status_id' => FlightRequest::STATUS_NEW])->exists()) {
+            return new ErrorResponse(
+                new MessageMessage(Messages::VALIDATION_ERROR),
+                new ErrorsMessage('Flight request already exists in the "NEW" status. Hash (' . $hash . ')'),
+            );
+        }
+
         if ($reprotectionCreateForm->is_automate && empty($reprotectionCreateForm->flight_quote)) {
             $reprotectionCreateForm->is_automate = false;
             $dataMessage['warning'] = '"is_automate" parameter set to FALSE because "flight_quote" is empty';
@@ -484,7 +500,7 @@ class FlightController extends BaseController
             $resultId = $this->transactionManager->wrap(function () use ($reprotectionCreateForm, $apiUserId, $post) {
                 $flightRequest = FlightRequest::create(
                     $reprotectionCreateForm->booking_id,
-                    FlightRequest::TYPE_REPRODUCTION_CREATE,
+                    FlightRequest::TYPE_RE_PROTECTION_CREATE,
                     $post,
                     $reprotectionCreateForm->getProject()->id,
                     $apiUserId
@@ -1256,6 +1272,25 @@ class FlightController extends BaseController
      *           ...
      *        }
      * }
+     *
+     * @apiErrorExample {json} Error-Response (422) Code 101:
+     * HTTP/1.1 422 Error
+     * {
+     *        "status": 422,
+     *        "message": "Error",
+     *        "data": [
+     *              "success": false,
+     *              "error": "Product Quote Change status is not in \"pending\". Current status Canceled"
+     *        ],
+     *        "code": 101,
+     *        "errors": [],
+     *        "technical": {
+     *           ...
+     *        },
+     *        "request": {
+     *           ...
+     *        }
+     * }
      */
     public function actionReprotectionDecision()
     {
@@ -1264,7 +1299,7 @@ class FlightController extends BaseController
         } catch (\Throwable $throwable) {
             return new ErrorResponse(
                 new StatusCodeMessage(400),
-                new MessageMessage(Messages::LOAD_DATA_ERROR),
+                new MessageMessage(Messages::POST_DATA_ERROR),
                 new ErrorsMessage($throwable->getMessage()),
             );
         }
@@ -1301,13 +1336,28 @@ class FlightController extends BaseController
                     'success' => true,
                 ])
             );
+        } catch (\DomainException $e) {
+            \Yii::error([
+                'message' => 'DomainException: Reprotection decision error',
+                'error' => $e->getMessage(),
+                'request' => $form->getAttributes(),
+            ], 'FlightController:reprotectionDecision:DomainException');
+
+            return new ErrorResponse(
+                new DataMessage([
+                    'success' => false,
+                    'error' => $e->getMessage()
+                ]),
+                new CodeMessage($e->getCode())
+            );
         } catch (\Throwable $e) {
             \Yii::error([
                 'message' => 'Reprotection decision error',
                 'request' => $form->getAttributes(),
                 'error' => $e->getMessage(),
-                'exception' => AppHelper::throwableLog($e, true),
+                'exception' => AppHelper::throwableLog($e, false),
             ], 'FlightController:reprotectionDecision');
+
             return new ErrorResponse(
                 new DataMessage([
                     'success' => false,
@@ -1332,12 +1382,12 @@ class FlightController extends BaseController
      *  }
      *
      * @apiParam {string{32}}           product_quote_gid            Product Quote gid
-     * @apiParam {string[]}             [with]                       Array ("reprotection")
+     * @apiParam {string[]}             [with]                       Array ("quote_list", "last_change")
      *
      * @apiParamExample {json} Request-Example:
      *   {
      *      "product_quote_gid": "2bd12377691f282e11af12937674e3d1",
-     *      "with": ["reprotection"],
+     *      "with": ["quote_list", "last_change"],
      *  }
      *
      * @apiSuccessExample {json} Success-Response:
@@ -1571,8 +1621,11 @@ class FlightController extends BaseController
                     ]
                 }
             },
-            "reprotection_quote_list": [
+            "quote_list": [
                 {
+                    "relation_type": "Voluntary Exchange",
+                    "relation_type_id": 5, "(1-replace, 2-clone, 3-alternative, 4-reProtection, 5-voluntary exchange)"
+                    "recommended": true,
                     "pq_gid": "289ddd4b911e88d7bf1eb14be44754d7",
                     "pq_name": "test",
                     "pq_order_id": 35,
@@ -1587,6 +1640,12 @@ class FlightController extends BaseController
                     "pq_status_name": "New",
                     "pq_files": [],
                     "data": {
+                        "changePricing" : {
+                            "baseFare": 10.01,
+                            "baseTax": 10.01,
+                            "markup": 10.01,
+                            "price": 30.01
+                        },
                         "fq_flight_id": 2,
                         "fq_source_id": null,
                         "fq_product_quote_id": 191,
@@ -1677,7 +1736,8 @@ class FlightController extends BaseController
                                         "departureLocation": "Paris",
                                         "arrivalLocation": "Los Angeles",
                                         "stop": 0,
-                                        "stops": []
+                                        "stops": [],
+                                        "baggage": []
                                     },
                                     {
                                         "uid": "fqs6116010cebd9a",
@@ -1701,7 +1761,8 @@ class FlightController extends BaseController
                                         "departureLocation": "Los Angeles",
                                         "arrivalLocation": "Sacramento",
                                         "stop": 0,
-                                        "stops": []
+                                        "stops": [],
+                                        "baggage": []
                                     }
                                 ]
                             },
@@ -1756,7 +1817,8 @@ class FlightController extends BaseController
                                         "departureLocation": "Seattle",
                                         "arrivalLocation": "Minneapolis",
                                         "stop": 0,
-                                        "stops": []
+                                        "stops": [],
+                                        "baggage": []
                                     },
                                     {
                                         "uid": "fqs6116010ceccdb",
@@ -1780,7 +1842,8 @@ class FlightController extends BaseController
                                         "departureLocation": "Minneapolis",
                                         "arrivalLocation": "Paris",
                                         "stop": 0,
-                                        "stops": []
+                                        "stops": [],
+                                        "baggage": []
                                     },
                                     {
                                         "uid": "fqs6116010ced118",
@@ -1814,9 +1877,25 @@ class FlightController extends BaseController
                                                 "departureDateTime": "2021-09-11 15:20",
                                                 "arrivalDateTime": "2021-09-11 13:55"
                                             }
-                                        ]
+                                        ],
+                                        "baggage": []
                                     }
                                 ]
+                            }
+                        ],
+                        "pax_prices": [
+                            {
+                                "qpp_fare": "877.00",
+                                "qpp_tax": "464.28",
+                                "qpp_system_mark_up": "50.00",
+                                "qpp_agent_mark_up": "0.00",
+                                "qpp_origin_fare": null,
+                                "qpp_origin_currency": "USD",
+                                "qpp_origin_tax": null,
+                                "qpp_client_currency": "USD",
+                                "qpp_client_fare": null,
+                                "qpp_client_tax": null,
+                                "paxType": "ADT"
                             }
                         ],
                         "paxes": [
@@ -1828,29 +1907,23 @@ class FlightController extends BaseController
                                 "fp_last_name": null,
                                 "fp_middle_name": null,
                                 "fp_dob": null
-                            },
-                            {
-                                "fp_uid": "fp6047ae79a875c",
-                                "fp_pax_id": null,
-                                "fp_pax_type": "ADT",
-                                "fp_first_name": null,
-                                "fp_last_name": null,
-                                "fp_middle_name": null,
-                                "fp_dob": null
-                            },
-                            {
-                                "fp_uid": "fp6047ae8cdbb37",
-                                "fp_pax_id": null,
-                                "fp_pax_type": "ADT",
-                                "fp_first_name": null,
-                                "fp_last_name": null,
-                                "fp_middle_name": null,
-                                "fp_dob": null
                             }
                         ]
                     }
                 }
-            ]
+            ],
+            "last_change": {
+                "pqc_id": 1,
+                "pqc_pq_id": 645,
+                "pqc_case_id": 135814,
+                "pqc_decision_user": 464,
+                "pqc_status_id": 6,
+                "pqc_decision_type_id": 1,
+                "pqc_created_dt": "2021-08-17 11:44:34",
+                "pqc_updated_dt": "2021-08-26 10:09:03",
+                "pqc_decision_dt": "2021-08-24 14:33:39",
+                "pqc_is_automate": 0
+            }
         }
      *
      * @apiErrorExample {json} Error-Response:
@@ -1871,6 +1944,10 @@ class FlightController extends BaseController
             "errors": []
         }
      *
+     * @apiErrorExample {html} Note:
+     * [
+     *      In "quote_list" show by status restriction from settings - "exchange_quote_confirm_status_list"
+     * ]
      */
     public function actionProductQuoteGet()
     {
@@ -1898,14 +1975,41 @@ class FlightController extends BaseController
                 new Message('product_quote', $productQuote->toArray())
             );
 
-            if ($form->withReprotection()) {
-                $reprotectionQuoteList = [];
-                $reprotectionRelationQuotes = ProductQuoteRelation::find()->byParentQuoteId($productQuote->pq_id)->reprotection()->all();
-                foreach ($reprotectionRelationQuotes as $relationQuote) {
-                    $reprotectionQuoteList[] = $relationQuote->pqrRelatedPq->toArray();
+            if ($form->withQuoteList()) {
+                $quoteList = [];
+                $relationQuotes = ProductQuoteRelation::find()
+                    ->innerJoin(ProductQuote::tableName(), 'pqr_related_pq_id = pq_id')
+                    ->leftJoinRecommended()
+                    ->byParentQuoteId($productQuote->pq_id)
+                    ->byType([ProductQuoteRelation::TYPE_REPROTECTION, ProductQuoteRelation::TYPE_VOLUNTARY_EXCHANGE])
+                    ->orderByRecommendedDesc()
+                    ->andWhere(['IN', 'pq_status_id', SettingHelper::getExchangeQuoteConfirmStatusList()])
+                    ->all();
+
+                foreach ($relationQuotes as $relationQuote) {
+                    $changeProductQuote = $relationQuote->pqrRelatedPq;
+                    $data = $changeProductQuote->toArray();
+                    $data = ArrayHelper::merge([
+                        'recommended' => $changeProductQuote->isRecommended(),
+                        'relation_type' => ProductQuoteRelation::getTypeName($relationQuote->pqr_type_id),
+                        'relation_type_id' => $relationQuote->pqr_type_id,
+                    ], $data);
+
+                    $data['data']['changePricing'] = null;
+                    if ($relationQuote->pqr_type_id === ProductQuoteRelation::TYPE_VOLUNTARY_EXCHANGE) {
+                        $data['data']['changePricing'] = FlightQuotePaxPriceHelper::calculateVoluntaryPricing($changeProductQuote);
+                    }
+
+                    $quoteList[] = $data;
                 }
                 $response->addMessage(
-                    new Message('reprotection_quote_list', $reprotectionQuoteList)
+                    new Message('quote_list', $quoteList)
+                );
+            }
+
+            if ($form->withLastChange() && $lastQuoteChange = $productQuote->productQuoteLastChange) {
+                $response->addMessage(
+                    new Message('last_change', $lastQuoteChange->toArray())
                 );
             }
 
@@ -1923,6 +2027,173 @@ class FlightController extends BaseController
                 new StatusCodeMessage(500),
                 new MessageMessage('Internal Server Error'),
                 new CodeMessage($e->getCode())
+            );
+        }
+    }
+
+    /**
+     * @api {post} /v2/flight/reprotection-exchange ReProtection exchange
+     * @apiVersion 0.2.0
+     * @apiName ReProtection Exchange
+     * @apiGroup Flight
+     * @apiPermission Authorized User
+     *
+     * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParam {string{7..10}}    booking_id          Booking ID
+     * @apiParam {string{100}}      [email]             Email
+     * @apiParam {string{20}}       [phone]             Phone
+     * @apiParam {object}           [flight_request]   Flight Request
+     *
+     * @apiParamExample {json} Request-Example:
+     *  {
+     *      "booking_id": "XXXYYYZ",
+     *      "email": "example@mail.com",
+     *      "phone": "+13736911111",
+     *      "flight_request": {"exampleKey" : "exampleValue"}
+     *  }
+     *
+     * @apiSuccessExample {json} Success-Response:
+     * HTTP/1.1 200 OK
+     * {
+     *        "status": 200,
+     *        "message": "OK",
+     *        "data": {
+     *            "success" => true,
+     *            "warnings": []
+     *        },
+     *        "technical": {
+     *           ...
+     *        },
+     *        "request": {
+     *           ...
+     *        }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * HTTP/1.1 400 Bad Request
+     * {
+     *        "status": 400,
+     *        "message": "Load data error",
+     *        "errors": [
+     *           "Not found data on POST request"
+     *        ],
+     *        "technical": {
+     *           ...
+     *        },
+     *        "request": {
+     *           ...
+     *        }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response:
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+     *        "status": 422,
+     *        "message": "Validation error",
+     *        "errors": [
+     *            "type": [
+     *               "Type cannot be blank."
+     *             ]
+     *        ],
+     *        "technical": {
+     *           ...
+     *        },
+     *        "request": {
+     *           ...
+     *        }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response (422) Code 101:
+     * HTTP/1.1 422 Error
+     * {
+     *        "status": 422,
+     *        "message": "Error",
+     *        "data": [
+     *              "success": false,
+     *              "error": "Product Quote Change status is not in \"pending\". Current status Canceled"
+     *        ],
+     *        "code": 101,
+     *        "errors": [],
+     *        "technical": {
+     *           ...
+     *        },
+     *        "request": {
+     *           ...
+     *        }
+     * }
+     */
+    public function actionReprotectionExchange()
+    {
+        try {
+            $post = Yii::$app->request->post();
+        } catch (\Throwable $throwable) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage(Messages::POST_DATA_ERROR),
+                new ErrorsMessage($throwable->getMessage()),
+            );
+        }
+
+        $reProtectionExchangeForm = new ReProtectionExchangeForm();
+        if (!$reProtectionExchangeForm->load($post)) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage(Messages::LOAD_DATA_ERROR),
+                new ErrorsMessage('Not found data on POST request'),
+            );
+        }
+        if (!$reProtectionExchangeForm->validate()) {
+            return new ErrorResponse(
+                new MessageMessage(Messages::VALIDATION_ERROR),
+                new ErrorsMessage($reProtectionExchangeForm->getErrors()),
+            );
+        }
+
+        try {
+            $this->reProtectionExchangeService->handle($reProtectionExchangeForm);
+
+            return new SuccessResponse(
+                new DataMessage([
+                    'success' => true,
+                    'warnings' => $reProtectionExchangeForm->getWarnings()
+                ])
+            );
+        } catch (\DomainException $exception) {
+            \Yii::error([
+                'message' => 'DomainException: Reprotection Exchange error',
+                'error' => $exception->getMessage(),
+                'request' => $reProtectionExchangeForm->getAttributes(),
+            ], 'FlightController:reprotectionExchange:DomainException');
+
+            return new ErrorResponse(
+                new DataMessage([
+                    'success' => false,
+                    'error' => $exception->getMessage()
+                ]),
+                new CodeMessage($exception->getCode())
+            );
+        } catch (\Throwable $throwable) {
+            $message = [
+                'message' => $throwable->getMessage(),
+                'request' => $post,
+                'throwable' => AppHelper::throwableLog($throwable),
+            ];
+            if ($throwable instanceof DomainException) {
+                Yii::warning($message, 'FlightController:actionReprotectionExchange:Warning');
+            } else {
+                Yii::error($message, 'FlightController:actionReprotectionExchange:Error');
+            }
+            return new ErrorResponse(
+                new DataMessage([
+                    'success' => false,
+                    'error' => $throwable->getMessage(),
+                ])
             );
         }
     }

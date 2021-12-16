@@ -2,9 +2,13 @@
 
 namespace sales\services\lead;
 
-use sales\model\leadUserConversion\entity\LeadUserConversion;
-use sales\model\leadUserConversion\repository\LeadUserConversionRepository;
+use common\models\query\EmployeeQuery;
+use sales\dispatchers\EventDispatcher;
+use sales\helpers\app\AppHelper;
+use sales\helpers\setting\SettingHelper;
+use sales\model\leadRedial\queue\AgentPhone;
 use sales\model\leadUserConversion\service\LeadUserConversionDictionary;
+use sales\model\leadUserConversion\service\LeadUserConversionService;
 use Yii;
 use common\models\Call;
 use common\models\DepartmentPhoneProject;
@@ -22,6 +26,7 @@ use sales\services\lead\qcall\FindPhoneParams;
 use sales\services\lead\qcall\QCallService;
 use sales\services\ServiceFinder;
 use sales\services\TransactionManager;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 
 /**
@@ -32,28 +37,39 @@ use yii\helpers\VarDumper;
  * @property TransactionManager $transactionManager
  * @property TakeGuard $takeGuard
  * @property QCallService $qCallService
+ * @property AgentPhone $agentPhone
+ * @property EventDispatcher $eventDispatcher
+ * @property LeadUserConversionService $leadUserConversionService
  */
 class LeadRedialService
 {
-
     private $leadRepository;
     private $serviceFinder;
     private $transactionManager;
     private $takeGuard;
     private $qCallService;
+    private AgentPhone $agentPhone;
+    private EventDispatcher $eventDispatcher;
+    private LeadUserConversionService $leadUserConversionService;
 
     public function __construct(
         LeadRepository $leadRepository,
         ServiceFinder $serviceFinder,
         TransactionManager $transactionManager,
         TakeGuard $takeGuard,
-        QCallService $qCallService
+        QCallService $qCallService,
+        AgentPhone $agentPhone,
+        EventDispatcher $eventDispatcher,
+        LeadUserConversionService $leadUserConversionService
     ) {
         $this->leadRepository = $leadRepository;
         $this->serviceFinder = $serviceFinder;
         $this->transactionManager = $transactionManager;
         $this->takeGuard = $takeGuard;
         $this->qCallService = $qCallService;
+        $this->agentPhone = $agentPhone;
+        $this->eventDispatcher = $eventDispatcher;
+        $this->leadUserConversionService = $leadUserConversionService;
     }
 
     /**
@@ -157,16 +173,15 @@ class LeadRedialService
         $lead->answered();
         $lead->processing($user->id, $creatorId, 'Lead redial');
 
-        $leadUserConversion = LeadUserConversion::create(
-            $lead->id,
-            $user->getId(),
-            LeadUserConversionDictionary::DESCRIPTION_TAKE
-        );
-
-        $this->transactionManager->wrap(function () use ($lead, $leadUserConversion) {
+        $this->transactionManager->wrap(function () use ($lead, $user) {
             $this->qCallService->remove($lead->id);
             $this->leadRepository->save($lead);
-            (new LeadUserConversionRepository())->save($leadUserConversion);
+            $this->leadUserConversionService->addAutomate(
+                $lead->id,
+                $user->getId(),
+                LeadUserConversionDictionary::DESCRIPTION_TAKE,
+                $user->getId()
+            );
         });
     }
 
@@ -301,32 +316,11 @@ class LeadRedialService
      */
     public function findOrUpdatePhoneNumberFrom(Lead $lead): string
     {
-        if (
-            ($qCall = $lead->leadQcall)
-            && ($phoneFrom = $qCall->lqc_call_from)
-            && DepartmentPhoneProject::find()->enabled()->redial()->byPhone($phoneFrom, false)->exists()
-        ) {
-            return $phoneFrom;
-        }
+        $phone = $this->agentPhone->findOrUpdatePhone($lead);
 
-        if ($qCall) {
-            try {
-                $phoneFrom = (Yii::createObject(QCallService::class))->updateCallFrom(
-                    $qCall,
-                    new Config($lead->status, $lead->getCountOutCallsLastFlow()),
-                    new FindPhoneParams($lead->project_id, $lead->l_dep_id)
-                );
-                if ($phoneFrom) {
-                    return $phoneFrom;
-                }
-            } catch (\Throwable $e) {
-                Yii::error($e, 'LeadRedialService:findPhoneNumberFrom:QCallService:updateCallFrom');
-            }
+        if ($phone) {
+            return $phone;
         }
-
-//        if (($phone = Project::findOne($lead->project_id)) && $phone->contactInfo->phone) {
-//            return $phone->contactInfo->phone;
-//        }
 
         throw new \DomainException('Not found phoneFrom. Please, contact to administrator.');
     }

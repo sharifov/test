@@ -1,5 +1,6 @@
 <?php
 
+use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
@@ -29,13 +30,17 @@ use sales\widgets\DateTimePicker;
 
         <?= $form->field($model, 'pqc_status_id')->dropDownList(ProductQuoteChangeStatus::getList(), ['prompt' => '---']) ?>
 
-        <?= $form->field($model, 'pqc_decision_type_id')->dropDownList(ProductQuoteChangeDecisionType::getList(), ['prompt' => '---']) ?>
+        <?= $form->field($model, 'pqc_is_automate')->checkbox() ?>
+
+      <?= $form->field($model, 'pqc_decision_type_id')->dropDownList(ProductQuoteChangeDecisionType::getList(), ['prompt' => '---']) ?>
 
         <?= $form->field($model, 'pqc_created_dt')->widget(DateTimePicker::class, []) ?>
 
         <?= $form->field($model, 'pqc_updated_dt')->widget(DateTimePicker::class, []) ?>
 
         <?= $form->field($model, 'pqc_decision_dt')->widget(DateTimePicker::class, [])?>
+
+        <?= $form->field($model, 'pqc_type_id')->dropDownList(ProductQuoteChange::TYPE_LIST, ['prompt' => '---']) ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

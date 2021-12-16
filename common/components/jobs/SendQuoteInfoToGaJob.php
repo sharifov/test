@@ -17,7 +17,7 @@ use yii\queue\Queue;
  */
 class SendQuoteInfoToGaJob extends BaseJob implements JobInterface
 {
-    public Quote $quote;
+    public int $quoteId;
 
     /**
      * @param Queue $queue
@@ -25,27 +25,58 @@ class SendQuoteInfoToGaJob extends BaseJob implements JobInterface
      */
     public function execute($queue): bool
     {
-        $this->executionTimeRegister();
+        $this->waitingTimeRegister();
         try {
-            if ($this->checkParams() && $gaQuote = new GaQuote($this->quote)) {
-                $gaQuote->send();
-                Yii::info(
-                    'Quote (ID:' . $this->quote->id . ') info sent to GA',
-                    'info\SendQuoteInfoToGaJob:execute:sent'
-                );
+            if (!$quote = Quote::findOne(['id' => $this->quoteId])) {
+                throw new \DomainException('Quote not found');
+            }
+
+            if ($this->checkParams($quote) && $gaQuote = new GaQuote($quote)) {
+                $response = $gaQuote->send();
+                if (!$response) {
+                    throw new \DomainException('response is empty');
+                }
+
+                if ($response->isOk) {
+                    /*Yii::info(
+                        [
+                            'quoteId' => $this->quoteId,
+                            'message' => 'Info sent to GA',
+                            'responseContent' => VarDumper::dumpAsString($response->content),
+                            'data' => $gaQuote->getPostData()
+                        ],
+                        'info\SendQuoteInfoToGaJob:execute:sent'
+                    );*/
+                } else {
+                    Yii::warning(
+                        [
+                            'quoteId' => $this->quoteId,
+                            'message' => 'Info NOT sent to GA',
+                            'responseContent' => VarDumper::dumpAsString($response->content),
+                            'data' => $gaQuote->getPostData()
+                        ],
+                        'SendQuoteInfoToGaJob:execute:warning'
+                    );
+                }
             }
         } catch (\Throwable $throwable) {
-            AppHelper::throwableLogger($throwable, 'SendQuoteInfoToGaJob:execute:Throwable');
+            $message = AppHelper::throwableLog($throwable, true);
+            $message['quoteId'] = $this->quoteId ?? null;
+            \Yii::error(
+                $message,
+                'SendQuoteInfoToGaJob:execute:Throwable'
+            );
         }
         return false;
     }
 
     /**
+     * @param Quote $quote
      * @return bool
      */
-    protected function checkParams(): bool
+    protected function checkParams(Quote $quote): bool
     {
-        return $this->quote->lead->isReadyForGa();
+        return $quote->lead->isReadyForGa();
     }
 
     /**

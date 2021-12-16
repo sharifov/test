@@ -1,5 +1,8 @@
 <?php
 
+use common\components\logger\FilebeatTarget;
+use common\helpers\LogHelper;
+
 $commonParams = yii\helpers\ArrayHelper::merge(
     require __DIR__ . '/../../common/config/params.php',
     require __DIR__ . '/../../common/config/params-local.php',
@@ -54,6 +57,24 @@ return [
             'thousandSeparator' => ',',
             'decimalSeparator' => '.',
         ],
+        'log' => [
+            'targets' => [
+                'analytics-fb-log' => [
+                    'class' => FilebeatTarget::class,
+                    'levels' => ['info'],
+                    'categories' => ['analytics\*', 'AS\*'],
+                    'logVars' => [],
+                    'prefix' => static function () {
+                        return LogHelper::getAnalyticPrefixData();
+                    },
+                    'logFile' => '@runtime/logs/stash.log'
+                ],
+//                [
+//                    'class' => 'yii\log\DbTarget',
+//                    'levels' => ['error', 'warning'],
+//                ]
+            ],
+        ],
         'formatter_search' => [
             'class' => 'yii\i18n\Formatter',
             'dateFormat' => 'php:d-M-Y',
@@ -85,6 +106,7 @@ return [
             'class' => 'yii\caching\FileCache',
             'defaultDuration' => 10 * 60,
             'gcProbability' => 100,
+            'cachePath' => '@console/runtime/cache'
         ],
         'webApiCache' => [
             'class' => 'yii\caching\FileCache',
@@ -114,7 +136,6 @@ return [
             'class' => \common\components\HybridService::class,
             'username' => '',
             'password' => '',
-            'webHookEndpoint' => '',
         ],
         'airsearch' => [
             'class' => \common\components\AirSearchService::class,
@@ -193,6 +214,18 @@ return [
             'port' => $commonParams['queue']['port'],
             'tube' => 'queue_virtual_cron',
         ],
+        'queue_lead_redial' => [
+            'class' => \common\components\queue\beanstalk\QueueMutex::class,
+            'host' => $commonParams['queue']['host'],
+            'port' => $commonParams['queue']['port'],
+            'tube' => 'queue_lead_redial',
+            'mutex' => [
+                'class' => \yii\redis\Mutex::class,
+                'redis' => 'redis',
+                'expire' => 60,
+                'retryDelay' => 500,
+            ],
+        ],
         'telegram' => [
             'class' => \aki\telegram\Telegram::class,
             'botUsername' => '',
@@ -251,6 +284,7 @@ return [
         'queue_client_chat_job',
         'queue_system_services',
         'queue_virtual_cron',
+        'queue_lead_redial',
         \common\components\SettingsBootstrap::class,
         \common\bootstrap\SetUp::class,
         \common\bootstrap\SetUpListeners::class,
@@ -258,6 +292,8 @@ return [
         \common\bootstrap\FileStorage::class,
         \common\bootstrap\PaymentSetup::class,
         \common\bootstrap\OrderProcessManagerQueue::class,
-        \modules\order\bootstrap\Logger::class
+        \modules\order\bootstrap\Logger::class,
+        \common\bootstrap\FlightQuoteReprotectionDecisionSetup::class,
+        \common\bootstrap\LeadRedialSetUp::class,
     ],
 ];

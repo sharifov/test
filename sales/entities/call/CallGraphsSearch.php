@@ -15,6 +15,7 @@ use Yii;
 use yii\data\SqlDataProvider;
 use yii\db\ActiveRecord;
 use DateTime;
+use sales\helpers\query\QueryHelper;
 
 /**
  * Class CallGraphsSearch
@@ -282,7 +283,7 @@ class CallGraphsSearch extends CallLogSearch
             'sum(cl_duration)as `totalCallsDuration`',
             'avg(cl_duration) as `avgCallDuration`'
         ]);
-        $parentQuery->from([new \yii\db\Expression(CallLog::tableName() . ' PARTITION(' . $this->getPartitionsByYears() . ') ')]);
+        $parentQuery->from([new \yii\db\Expression(CallLog::tableName() . ' PARTITION(' . QueryHelper::getPartitionsByYears($this->createTimeStart, $this->createTimeEnd) . ') ')]);
 
         $parentQuery->andWhere([
             'between',
@@ -341,7 +342,7 @@ class CallGraphsSearch extends CallLogSearch
             'avg(cl_duration) as `avgCallDuration`'
         ]);
 
-        $childQuery->from([new \yii\db\Expression(CallLog::tableName() . ' PARTITION(' . $this->getPartitionsByYears() . ') ')]);
+        $childQuery->from([new \yii\db\Expression(CallLog::tableName() . ' PARTITION(' . QueryHelper::getPartitionsByYears($this->createTimeStart, $this->createTimeEnd) . ') ')]);
 
         $childQuery->andWhere([
             'between',
@@ -410,23 +411,6 @@ class CallGraphsSearch extends CallLogSearch
         } else {
             return "date_format(convert_tz(cl_call_created_dt, '+00:00', '" . $timeZone . "'), '$dateFormat')";
         }
-    }
-
-    private function getPartitionsByYears()
-    {
-        $yFrom = date('y', strtotime($this->createTimeStart));
-        $yTo = date('y', strtotime($this->createTimeEnd));
-        $partitions = 'y';
-        if ($yFrom == $yTo) {
-            $nextYear = (int)$yFrom + 1 ;
-            $partitions = 'y' . $nextYear ;
-        } else {
-            $nextYearFrom = (int)$yFrom + 1 ;
-            $nextYearTo = (int)$yTo + 1 ;
-            $partitions = 'y' . $nextYearFrom . ',' . 'y' . $nextYearTo ;
-        }
-
-        return $partitions;
     }
 
     /**

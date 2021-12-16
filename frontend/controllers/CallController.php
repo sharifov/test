@@ -21,6 +21,7 @@ use common\models\UserConnection;
 use common\models\UserDepartment;
 use common\models\UserGroupAssign;
 use common\models\UserOnline;
+use common\models\UserProfile;
 use common\models\UserProjectParams;
 use frontend\widgets\newWebPhone\call\socket\MissedCallMessage;
 use http\Exception\InvalidArgumentException;
@@ -31,6 +32,7 @@ use sales\guards\phone\PhoneBlackListGuard;
 use sales\helpers\app\AppHelper;
 use sales\helpers\call\CallHelper;
 use sales\helpers\setting\SettingHelper;
+use sales\model\call\abac\CallAbacObject;
 use sales\model\call\services\currentQueueCalls\CurrentQueueCallsService;
 use sales\model\call\services\reserve\CallReserver;
 use sales\model\call\services\reserve\Key;
@@ -43,6 +45,14 @@ use sales\model\conference\useCase\DisconnectFromAllActiveClientsCreatedConferen
 use sales\model\callNote\useCase\addNote\CallNoteRepository;
 use sales\model\conference\useCase\PrepareCurrentCallsForNewCall;
 use sales\model\conference\useCase\ReturnToHoldCall;
+use sales\model\contactPhoneData\entity\ContactPhoneData;
+use sales\model\contactPhoneData\service\ContactPhoneDataDictionary;
+use sales\model\contactPhoneData\service\ContactPhoneDataService;
+use sales\model\contactPhoneList\entity\ContactPhoneList;
+use sales\model\contactPhoneList\service\ContactPhoneListService;
+use sales\model\leadRedial\assign\LeadRedialAccessChecker;
+use sales\model\leadRedial\assign\LeadRedialUnAssigner;
+use sales\model\leadRedial\job\CheckUserIsOnRedialCallJob;
 use sales\model\user\entity\userStatus\UserStatus;
 use sales\repositories\call\CallRepository;
 use sales\repositories\call\CallUserAccessRepository;
@@ -1118,6 +1128,7 @@ class CallController extends FController
                                 $prepare = new PrepareCurrentCallsForNewCall($userId);
                                 if ($prepare->prepare()) {
                                     $this->callService->acceptCall($callUserAccess, $userId);
+                                    Yii::createObject(LeadRedialUnAssigner::class)->acceptCall($userId);
                                 }
                             } else {
                                 Notifications::publish('callAlreadyTaken', ['user_id' => $userId], ['callSid' => $call->c_call_sid]);
@@ -1179,6 +1190,7 @@ class CallController extends FController
                     $prepare = new PrepareCurrentCallsForNewCall($userId);
                     if ($prepare->prepare()) {
                         $this->callService->acceptWarmTransferCall($callUserAccess, $userId);
+                        Yii::createObject(LeadRedialUnAssigner::class)->acceptCall($userId);
                     }
                 } else {
                     Notifications::publish('callAlreadyTaken', ['user_id' => $userId], ['callSid' => $call->c_call_sid]);
@@ -1214,6 +1226,7 @@ class CallController extends FController
         $response = [
             'error' => false,
             'message' => '',
+            'isRedialCall' => false,
         ];
         $userId = Auth::id();
 
@@ -1255,14 +1268,41 @@ class CallController extends FController
                 $prepare = new PrepareCurrentCallsForNewCall($userId);
                 if ($prepare->prepare()) {
                     $this->callService->acceptCall($access, $userId);
+                    Yii::createObject(LeadRedialUnAssigner::class)->acceptCall($userId);
                 }
                 break;
             }
 
             if (!$isReserved) {
-                Notifications::publish('resetPriorityCall', ['user_id' => $userId], ['data' => ['command' => 'resetPriorityCall']]);
-                $response['error'] = true;
-                $response['message'] = 'Phone line queue is empty.';
+                $autoRedialIsEnabled = (bool)UserProfile::find()->select(['up_auto_redial'])->andWhere(['up_user_id' => Auth::id()])->scalar();
+                if (SettingHelper::leadRedialEnabled() && $autoRedialIsEnabled && Yii::createObject(LeadRedialAccessChecker::class)->exist($userId)) {
+                    $leadRedialQueue = Yii::createObject(\sales\model\leadRedial\queue\LeadRedialQueue::class);
+                    $redialCall = $leadRedialQueue->getCall(Auth::user());
+                    if ($redialCall) {
+                        $prepare = new PrepareCurrentCallsForNewCall($userId);
+                        if ($prepare->prepare()) {
+                            UserStatus::isOnCallOn($userId);
+                            Yii::createObject(LeadRedialUnAssigner::class)->acceptRedialCall($userId, $redialCall->leadId);
+                            $job = new CheckUserIsOnRedialCallJob($userId, $redialCall->leadId, date('Y-m-d H:i:s'));
+                            $delay = SettingHelper::getRedialCheckIsOnCallTime();
+                            $job->delayJob = $delay;
+                            \Yii::$app->queue_job->delay($delay)->push($job);
+                            $response['isRedialCall'] = true;
+                            $response['redialCall'] = $redialCall->toArray();
+                        } else {
+                            $response['error'] = true;
+                            $response['message'] = 'Processing current call error. Please try again.';
+                        }
+                    } else {
+                        Yii::createObject(LeadRedialUnAssigner::class)->emptyQueue($userId);
+                        $response['error'] = true;
+                        $response['message'] = 'Phone line queue is empty.';
+                    }
+                } else {
+                    Yii::createObject(LeadRedialUnAssigner::class)->emptyQueue($userId);
+                    $response['error'] = true;
+                    $response['message'] = 'Phone line queue is empty.';
+                }
             }
         } catch (\RuntimeException | NotFoundException $e) {
             $response['error'] = true;
@@ -1291,24 +1331,27 @@ class CallController extends FController
 
         if ($call_sid) {
             try {
+                $userId = Auth::id();
                 $call = $this->callRepository->findBySid($call_sid);
-                $callUserAccess = CallUserAccess::find()->where(['cua_user_id' => Auth::id(), 'cua_call_id' => $call->c_id, 'cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING])->one();
+                $callUserAccess = CallUserAccess::find()->where(['cua_user_id' => $userId, 'cua_call_id' => $call->c_id, 'cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING])->one();
                 if (!$callUserAccess) {
                     throw new \DomainException('Not found call user access');
                 }
-                $prepare = new PrepareCurrentCallsForNewCall(Auth::id());
+                $prepare = new PrepareCurrentCallsForNewCall($userId);
                 if (!$prepare->prepare()) {
                     throw new \DomainException('Prepare current calls error');
                 }
 
                 $return = new ReturnToHoldCall();
-                if (!$return->return($call, Auth::id())) {
+                if (!$return->return($call, $userId)) {
                     throw new \DomainException('Return Hold call error');
                 }
 
                 if (!$return->acceptHoldCall($callUserAccess)) {
                     throw new \DomainException('Accept Hold call error');
                 }
+
+                Yii::createObject(LeadRedialUnAssigner::class)->acceptCall($userId);
 
                 $response = [
                     'error' => false,
@@ -1500,6 +1543,92 @@ class CallController extends FController
             'error' => false,
             'notifier' => $enableNotifier
         ]);
+    }
+
+    public function actionAllowList(): array
+    {
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+
+            /** @abac CallAbacObject::ACT_DATA_ALLOW_LIST, CallAbacObject::ACTION_TOGGLE_DATA, Access to add/remove ContactPhoneData - key allow_list */
+            if (!Yii::$app->abac->can(null, CallAbacObject::ACT_DATA_ALLOW_LIST, CallAbacObject::ACTION_TOGGLE_DATA)) {
+                throw new ForbiddenHttpException('Access Denied');
+            }
+
+            $result = ['message' => '', 'status' => 0, 'result' => ''];
+            $callId = (int) Yii::$app->request->post('call_id');
+
+            try {
+                if (!$call = Call::findOne($callId)) {
+                    throw new \DomainException('Call not found');
+                }
+
+                $contactPhoneList = ContactPhoneListService::getOrCreate($call->c_from);
+                if (ContactPhoneListService::isAllowList($call->c_from)) {
+                    ContactPhoneDataService::removeByCplIdAndKey($contactPhoneList->cpl_id, ContactPhoneDataDictionary::KEY_ALLOW_LIST);
+                    $result['result'] = 'removed';
+                } else {
+                    ContactPhoneDataService::getOrCreate(
+                        $contactPhoneList->cpl_id,
+                        ContactPhoneDataDictionary::KEY_ALLOW_LIST,
+                        ContactPhoneDataDictionary::DEFAULT_TRUE_VALUE
+                    );
+                    $result['result'] = 'added';
+                }
+
+                $result['message'] = 'Success';
+                $result['status'] = 1;
+            } catch (\RuntimeException | \DomainException $exception) {
+                Yii::warning(AppHelper::throwableLog($exception), 'CallController:actionAllowList::exception');
+                $result['message'] = VarDumper::dumpAsString($exception->getMessage());
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableLog($throwable), 'CallController:actionAllowList:throwable');
+                $result['message'] = 'Internal Server Error';
+            }
+            return $result;
+        }
+        throw new BadRequestHttpException();
+    }
+
+    public function actionReconnect(): Response
+    {
+        $callSid = (string) \Yii::$app->request->post('sid');
+        if (!$callSid) {
+            return $this->asJson([
+                'error' => true,
+                'message' => 'Not found CallSid',
+            ]);
+        }
+
+        $response = [
+            'error' => false,
+            'message' => 'Ok',
+        ];
+
+        try {
+            $userId = Auth::id();
+            $call = $this->callRepository->findBySid($callSid);
+            if (!$call->isStatusInProgress()) {
+                throw new \DomainException('Call status is invalid.');
+            }
+            if (!$call->isOwner($userId)) {
+                throw new \DomainException('Is not your call.');
+            }
+            if (!$call->getDataCreatorType()->isAgent()) {
+                throw new \DomainException('Call creator type is invalid.');
+            }
+            $prepare = new PrepareCurrentCallsForNewCall($userId);
+            if (!$prepare->prepare(SettingHelper::getCallReconnectAnnounceMessage())) {
+                throw new \DomainException('Some errors. Please try again latter.');
+            }
+        } catch (\Throwable $e) {
+            $response = [
+                'error' => false,
+                'message' => $e->getMessage(),
+            ];
+        }
+
+        return $this->asJson($response);
     }
 
     private function addUsersForCall(Call $call, array $users): array

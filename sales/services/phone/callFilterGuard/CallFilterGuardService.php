@@ -9,6 +9,7 @@ use sales\helpers\app\AppHelper;
 use sales\model\contactPhoneData\entity\ContactPhoneData;
 use sales\model\contactPhoneData\service\ContactPhoneDataDictionary;
 use sales\model\contactPhoneList\entity\ContactPhoneList;
+use sales\model\contactPhoneList\service\ContactPhoneListService;
 use sales\services\call\CallDeclinedException;
 use sales\services\call\CallService;
 use sales\services\departmentPhoneProject\DepartmentPhoneProjectParamsService;
@@ -148,12 +149,7 @@ class CallFilterGuardService
 
     public function checkByContactPhoneData(): bool
     {
-        return ContactPhoneList::find()
-            ->innerJoin(ContactPhoneData::tableName(), 'cpl_id = cpd_cpl_id')
-            ->where(['cpl_uid' => CheckPhoneService::uidGenerator($this->phone)])
-            ->andWhere(['cpd_key' => ContactPhoneDataDictionary::KEY_IS_TRUSTED])
-            ->andWhere(['cpd_value' => '1'])
-            ->exists();
+        return ContactPhoneListService::isProxy($this->phone);
     }
 
     public static function getResponseChownData(VoiceResponse $vr, int $status = 200, int $code = 0, string $message = ''): array

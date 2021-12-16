@@ -30,7 +30,9 @@ use frontend\widgets\newWebPhone\sms\socket\Message;
 use frontend\widgets\notification\NotificationMessage;
 use sales\entities\cases\Cases;
 use sales\forms\lead\PhoneCreateForm;
+use sales\guards\call\CallRedialGuard;
 use sales\helpers\app\AppHelper;
+use sales\helpers\LogExecutionTime;
 use sales\helpers\setting\SettingHelper;
 use sales\helpers\UserCallIdentity;
 use sales\model\call\exceptions\CallFinishedException;
@@ -53,6 +55,8 @@ use sales\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
 use sales\model\contactPhoneServiceInfo\service\ContactPhoneInfoService;
 use sales\model\department\departmentPhoneProject\entity\params\QueueLongTimeNotificationParams;
 use sales\model\emailList\entity\EmailList;
+use sales\model\leadRedial\assign\LeadRedialUnAssigner;
+use sales\model\leadRedial\queue\AutoTakeJob;
 use sales\model\phoneList\entity\PhoneList;
 use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
 use sales\model\user\entity\userStatus\UserStatus;
@@ -62,6 +66,7 @@ use sales\repositories\client\ClientsQuery;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\user\UserProjectParamsRepository;
 use sales\services\call\CallDeclinedException;
+use sales\services\call\CallFromInternalNumberException;
 use sales\services\call\CallService;
 use sales\services\cases\CasesCommunicationService;
 use sales\services\client\ClientCreateForm;
@@ -96,6 +101,7 @@ class CommunicationController extends ApiBaseController
     public const TYPE_VOIP_GATHER       = 'voip_gather';
     public const TYPE_VOIP_CLIENT       = 'voip_client';
     public const TYPE_VOIP_FINISH       = 'voip_finish';
+    public const TYPE_VOIP_JOIN_TO_WRONG_CONFERENCE = 'voip_join_to_wrong_conference';
 
     public const TYPE_VOIP_CONFERENCE   = 'voip_conference';
     public const TYPE_VOIP_CONFERENCE_RECORD   = 'voip_conference_record';
@@ -304,6 +310,9 @@ class CommunicationController extends ApiBaseController
             case self::TYPE_VOIP_RECORD:
                 $response = $this->voiceRecord($post);
                 break;
+            case self::TYPE_VOIP_JOIN_TO_WRONG_CONFERENCE:
+                $response = $this->actionCallJoinedToWrongConference($post);
+                break;
             default:
                 $response = $this->voiceDefault($post);
         }
@@ -321,6 +330,7 @@ class CommunicationController extends ApiBaseController
      */
     private function voiceIncoming(array $post, string $type): array
     {
+        $logExecutionTime = new LogExecutionTime();
         $response = [];
 
         // Yii::info(VarDumper::dumpAsString($post), 'info\API:Communication:voiceIncoming');
@@ -332,6 +342,7 @@ class CommunicationController extends ApiBaseController
         // $ciscoPhoneNumber = \Yii::$app->params['global_phone'];
 
         if ($postCall) {
+            $logExecutionTime->start('voiceIncoming');
             $client_phone_number = null;
             $incoming_phone_number = null;
 
@@ -351,6 +362,26 @@ class CommunicationController extends ApiBaseController
             if (!$incoming_phone_number) {
                 $response['error'] = 'Not found Call Called (Agent phone number)';
                 $response['error_code'] = 11;
+            }
+
+            $isTrustStirCall = $type === self::TYPE_VOIP_GATHER || (empty($postCall['ForwardedFrom']) && Call::isTrustedVerstat($postCall['StirVerstat'] ?? ''));
+            if (!$isTrustStirCall && !empty($postCall['ForwardedFrom'])) {
+                $isInternal = PhoneList::find()->andWhere([
+                    'pl_phone_number' => $postCall['ForwardedFrom'],
+                    'pl_enabled' => true
+                ])->exists();
+                if ($isInternal) {
+                    $isTrustStirCall = true;
+                }
+            }
+
+            try {
+                $this->callService->guardFromInternalCall($postCall);
+            } catch (CallFromInternalNumberException $e) {
+                $vr = new VoiceResponse();
+                $vr->say('You are calling from internal phone number. Your call will be declined.', ['language' => 'en-US']);
+                $vr->reject(['reason' => 'busy']);
+                return $this->getResponseChownData($vr, 404, 404, 'Sales Communication error: ' . $e->getMessage());
             }
 
             try {
@@ -375,11 +406,15 @@ class CommunicationController extends ApiBaseController
             $departmentPhone = DepartmentPhoneProject::find()->byPhone($incoming_phone_number, false)->enabled()->limit(1)->one();
             if ($departmentPhone) {
                 try {
+                    $logExecutionTime->start('CallFilterGuardService');
                     $departmentPhoneProjectParamsService = new DepartmentPhoneProjectParamsService($departmentPhone);
                     $callFilterGuardService = new CallFilterGuardService($client_phone_number, $departmentPhoneProjectParamsService, $this->callService);
+                    $logExecutionTime->end();
 
-                    if ($callFilterGuardService->isEnable() && !$callFilterGuardService->isTrusted()) {
+                    if (!$isTrustStirCall && $callFilterGuardService->isEnable() && !$callFilterGuardService->isTrusted()) {
+                        $logExecutionTime->start('CallFilterGuardService:runRepression');
                         $callFilterGuardService->runRepression($postCall);
+                        $logExecutionTime->end();
                     }
                 } catch (CallDeclinedException $e) {
                     \Yii::warning($e->getMessage(), 'CommunicationController:voiceIncoming:callTerminate');
@@ -419,11 +454,63 @@ class CommunicationController extends ApiBaseController
                     $departmentPhone->dpp_phone_list_id
                 );
 
-                if (SettingHelper::isEnableCallLogFilterGuard()) {
+                if (!$isTrustStirCall && SettingHelper::isEnableCallLogFilterGuard()) {
                     try {
-                        (new CallLogFilterGuardService())->handler($client_phone_number, $callModel);
+                        $logExecutionTime->start('CallFilterModel');
+                        $callLogFilterGuard = (new CallLogFilterGuardService())->handler($client_phone_number, $callModel);
+                        $logExecutionTime->end();
+                        if (SettingHelper::callSpamFilterEnabled() && ($callLogFilterGuard->guardSpam(SettingHelper::getCallSpamFilterRate()) || $callLogFilterGuard->guardTrust(SettingHelper::getCallTrustFilterRate()))) {
+                            if (CallRedialGuard::guard($callModel->cProject->project_key ?? '', $callModel->cDep->dep_key ?? '')) {
+                                $logExecutionTime->start('redial');
+                                $result = Yii::$app->communication->twilioDial(
+                                    $incoming_phone_number,
+                                    $client_phone_number,
+                                    SettingHelper::getCallbackToCallerCurlTimeout(),
+                                    SettingHelper::getCallbackToCallerMessage(),
+                                    SettingHelper::getCallbackToCallerDialCallTimeout(),
+                                    SettingHelper::getCallbackToCallerDialCallLimit(),
+                                );
+                                $logExecutionTime->end();
+
+//                                Yii::info([
+//                                    'callId' => $callModel->c_id,
+//                                    'rate' => $callLogFilterGuard->clfg_sd_rate,
+//                                    'type' => $callLogFilterGuard->getTypeName(),
+//                                    'phone' => $callModel->c_from,
+//                                    'result' => $result,
+//                                ], 'info\CallSpamFilter:DepartmentCall:CallDeclinedException');
+
+                                $redialStatus = $result['data']['result']['status'] ?? null;
+                                if ($redialStatus) {
+                                    $callLogFilterGuard->setRedialStatusByTwilioStatus($redialStatus);
+                                    (new CallLogFilterGuardRepository($callLogFilterGuard))->save();
+                                }
+
+                                if (isset($result['data']['is_error']) && $result['data']['is_error'] === true) {
+                                    Yii::error([
+                                        'callId' => $callModel->c_id,
+                                        'rate' => $callLogFilterGuard->clfg_sd_rate,
+                                        'type' => $callLogFilterGuard->getTypeName(),
+                                        'phone' => $callModel->c_from,
+                                        'message' => $result['data']['message']
+                                    ], 'CallSpamFilter:DepartmentCall:CommunicationError');
+                                } elseif (
+                                    !in_array(
+                                        $redialStatus,
+                                        SettingHelper::getCallbackToCallerSuccessStatusList(),
+                                        true
+                                    )
+                                ) {
+                                    return CallFilterGuardService::getResponseChownData($this->returnTwmlAsBusy(SettingHelper::getCallSpamFilterMessage()), 404, 404, SettingHelper::getCallSpamFilterMessage());
+                                }
+                            }
+                        }
                     } catch (\Throwable $throwable) {
-                        $message = AppHelper::throwableLog($throwable);
+                        $logExecutionTime->end();
+                        $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), [
+                            'phoneFrom' => $callModel->c_from,
+                            'phoneTo' => $callModel->c_to
+                        ]);
                         $category = 'CommunicationController:CallLogFilterGuard:generalLine';
                         if ($throwable instanceof DomainException) {
                             Yii::warning($message, $category);
@@ -431,6 +518,10 @@ class CommunicationController extends ApiBaseController
                             Yii::error($message, $category);
                         }
                     }
+                }
+                if ($type !== self::TYPE_VOIP_GATHER && $logExecutionTime->getResult()) {
+                    $this->saveLogExecutionTimeToCallJson($callModel, $logExecutionTime->getResult());
+                    $callModel->save(false);
                 }
 
                 if ($departmentPhone->dugUgs) {
@@ -497,11 +588,63 @@ class CommunicationController extends ApiBaseController
                     );
                     $callModel->c_source_type_id = Call::SOURCE_DIRECT_CALL;
 
-                    if (SettingHelper::isEnableCallLogFilterGuard()) {
+                    if (!$isTrustStirCall && SettingHelper::isEnableCallLogFilterGuard()) {
                         try {
-                            (new CallLogFilterGuardService())->handler($client_phone_number, $callModel);
+                            $logExecutionTime->start('CallFilterModel');
+                            $callLogFilterGuard = (new CallLogFilterGuardService())->handler($client_phone_number, $callModel);
+                            $logExecutionTime->end();
+                            if (SettingHelper::callSpamFilterEnabled() && ($callLogFilterGuard->guardSpam(SettingHelper::getCallSpamFilterRate()) || $callLogFilterGuard->guardTrust(SettingHelper::getCallTrustFilterRate()))) {
+                                if (CallRedialGuard::guard($callModel->cProject->project_key ?? '', $callModel->cDep->dep_key ?? '')) {
+                                    $logExecutionTime->start('redial');
+                                    $result = Yii::$app->communication->twilioDial(
+                                        $incoming_phone_number,
+                                        $client_phone_number,
+                                        SettingHelper::getCallbackToCallerCurlTimeout(),
+                                        SettingHelper::getCallbackToCallerMessage(),
+                                        SettingHelper::getCallbackToCallerDialCallTimeout(),
+                                        SettingHelper::getCallbackToCallerDialCallLimit(),
+                                    );
+                                    $logExecutionTime->end();
+
+                                    Yii::info([
+                                        'callId' => $callModel->c_id,
+                                        'rate' => $callLogFilterGuard->clfg_sd_rate,
+                                        'type' => $callLogFilterGuard->getTypeName(),
+                                        'phone' => $callModel->c_from,
+                                        'result' => $result,
+                                    ], 'info\CallSpamFilter:DirectCall:CallDeclinedException');
+
+                                    $redialStatus = $result['data']['result']['status'] ?? null;
+                                    if ($redialStatus) {
+                                        $callLogFilterGuard->setRedialStatusByTwilioStatus($redialStatus);
+                                        (new CallLogFilterGuardRepository($callLogFilterGuard))->save();
+                                    }
+
+                                    if (isset($result['data']['is_error']) && $result['data']['is_error'] === true) {
+                                        Yii::error([
+                                            'callId' => $callModel->c_id,
+                                            'rate' => $callLogFilterGuard->clfg_sd_rate,
+                                            'type' => $callLogFilterGuard->getTypeName(),
+                                            'phone' => $callModel->c_from,
+                                            'message' => $result['data']['message']
+                                        ], 'CallSpamFilter:DirectCall:CommunicationError');
+                                    } elseif (
+                                        $redialStatus && !in_array(
+                                            $result['data']['result']['status'],
+                                            SettingHelper::getCallbackToCallerSuccessStatusList(),
+                                            true
+                                        )
+                                    ) {
+                                        return CallFilterGuardService::getResponseChownData($this->returnTwmlAsBusy(SettingHelper::getCallSpamFilterMessage()), 404, 404, SettingHelper::getCallSpamFilterMessage());
+                                    }
+                                }
+                            }
                         } catch (\Throwable $throwable) {
-                            $message = AppHelper::throwableLog($throwable);
+                            $logExecutionTime->end();
+                            $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), [
+                                'phoneFrom' => $callModel->c_from,
+                                'phoneTo' => $callModel->c_to
+                            ]);
                             $category = 'CommunicationController:CallLogFilterGuard:directCall';
                             if ($throwable instanceof DomainException) {
                                 Yii::warning($message, $category);
@@ -509,6 +652,11 @@ class CommunicationController extends ApiBaseController
                                 Yii::error($message, $category);
                             }
                         }
+                    }
+
+                    if ($type !== self::TYPE_VOIP_GATHER && $logExecutionTime->getResult()) {
+                        $this->saveLogExecutionTimeToCallJson($callModel, $logExecutionTime->getResult());
+                        $callModel->save(false);
                     }
 
                     // Yii::error(VarDumper::dumpAsString($callFromInternalPhone), 'CommunicationController::DebugCall');
@@ -850,6 +998,10 @@ class CommunicationController extends ApiBaseController
                             $call->c_client_id = $clientPhone->client_id;
                         }
                     }
+
+                    if ($callOriginalData['c_user_id']) {
+                        Yii::createObject(LeadRedialUnAssigner::class)->createCall((int)$callOriginalData['c_user_id']);
+                    }
                 }
 
                 if (!$upp && $call->c_project_id && $agentId) {
@@ -875,6 +1027,8 @@ class CommunicationController extends ApiBaseController
                 // Yii::warning('Not found Call: ' . $callSid, 'API:Communication:voiceClient:Call::find');
 
                 $call->c_recording_disabled = (bool) ($callOriginalData['call_recording_disabled'] ?? false);
+
+                $call->setDataCreatorType((int)($callOriginalData['creator_type_id'] ?? null));
             }
 
             if (!empty($callOriginalData['CallStatus'])) {
@@ -1080,11 +1234,11 @@ class CommunicationController extends ApiBaseController
             $response['status'] = 'Success';
             return $response;
         } catch (CallFinishedException $e) {
-            //todo change to Info level
-            Yii::error([
+            Yii::info([
                 'message' => $e->getMessage(),
+                'callSid' => $e->callSid,
                 'post' => $post,
-            ], 'CallCallBackProcessingError');
+            ], 'log\CallCallBackProcessingError');
             $response['status'] = 'Success';
             return $response;
         } catch (\Throwable $e) {
@@ -1157,7 +1311,7 @@ class CommunicationController extends ApiBaseController
 
         if (isset($calData['From']) && $calData['From']) {
             $clientPhoneNumber = $calData['From'];
-            if ($clientPhoneNumber) {
+            if ($clientPhoneNumber && !ContactPhoneListService::isInvalid($clientPhoneNumber)) {
                 $client = ClientsQuery::oneByPhoneAndProject($clientPhoneNumber, $call_project_id, null);
                 if ($client) {
                     /** @var Client $client */
@@ -1190,7 +1344,7 @@ class CommunicationController extends ApiBaseController
             $call->c_from_country = Call::getDisplayRegion($calData['FromCountry'] ?? '');
             $call->c_from_state = $calData['FromState'] ?? null;
             $call->c_from_city = $calData['FromCity'] ?? null;
-            $call->c_stir_status = $calData['StirStatus'] ?? null;
+            $call->c_stir_status = Call::getStirStatusByVerstatKey($calData['StirVerstat'] ?? '');
 
             if ($parentCall) {
                 $call->c_parent_id = $parentCall->c_id;
@@ -1200,6 +1354,7 @@ class CommunicationController extends ApiBaseController
                 $call->c_language_id = $parentCall->c_language_id;
                 $call->c_group_id = $parentCall->c_group_id;
                 $call->c_queue_start_dt = $parentCall->c_queue_start_dt;
+                $call->c_stir_status = $parentCall->c_stir_status;
 
 //                if ($parentCall->callUserGroups && !$call->callUserGroups) {
 //                    foreach ($parentCall->callUserGroups as $cugItem) {
@@ -1211,7 +1366,12 @@ class CommunicationController extends ApiBaseController
 //                        }
 //                    }
 //                }
-                    //$call->c_u_id = $parentCall->c_dep_id;
+                //$call->c_u_id = $parentCall->c_dep_id;
+
+                if (!empty($call->c_stir_status) && empty($parentCall->c_stir_status)) {
+                    $parentCall->c_stir_status = $call->c_stir_status;
+                    $parentCall->save();
+                }
             }
 
             if ($call_project_id) {
@@ -1248,6 +1408,7 @@ class CommunicationController extends ApiBaseController
             $call->setDataPriority($priority);
             $call->setDataCreatedParams($calData);
             $call->setDataPhoneListId($phoneListId);
+            $call->setDataCreatorType((int)($calData['creator_type_id'] ?? null));
 
             if (!$call->save()) {
                 \Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:findOrCreateCall:Call:save');
@@ -1311,6 +1472,7 @@ class CommunicationController extends ApiBaseController
         $call->c_call_type_id = $parentCall->c_call_type_id;
         $call->c_conference_id = $parentCall->c_conference_id;
         $call->c_conference_sid = $parentCall->c_conference_sid;
+        $call->c_stir_status = $parentCall->c_stir_status;
     }
 
     private static function copyDataFromCustomParams(Call $call, CallCustomParameters $customParameters): void
@@ -1378,6 +1540,10 @@ class CommunicationController extends ApiBaseController
         if ($customParameters->dep_id) {
             $call->c_dep_id = $customParameters->dep_id;
         }
+
+        if ($customParameters->client_id) {
+            $call->c_client_id = $customParameters->client_id;
+        }
     }
 
     private static function copyUpdatedData(Call $from, Call $to): void
@@ -1416,8 +1582,8 @@ class CommunicationController extends ApiBaseController
     {
         $call = null;
         $parentCall = null;
-
         $callSid = $callData['CallSid'] ?? '';
+        $stirStatus = $callData['StirStatus'] ?? null;
 
         if ($callSid) {
             $call = Call::find()->where(['c_call_sid' => $callSid])->limit(1)->one();
@@ -1444,8 +1610,14 @@ class CommunicationController extends ApiBaseController
             $call->c_com_call_id = $callData['c_com_call_id'] ?? null;
             $call->setTypeIn();
 
+            $call->c_stir_status = Call::getStirStatusByVerstatKey($callData['StirVerstat'] ?? '');
             if ($parentCall) {
                 self::copyDataFromParentCall($call, $parentCall);
+
+                if (!empty($stirStatus) && empty($parentCall->c_stir_status)) {
+                    $parentCall->c_stir_status = $call->c_stir_status;
+                    $parentCall->save();
+                }
             }
 
             $call->c_is_new = true;
@@ -1453,11 +1625,11 @@ class CommunicationController extends ApiBaseController
             $call->c_from = $callData['From'];
             $call->c_to = $callData['To']; //Called
             $call->c_created_user_id = null;
-            $call->c_stir_status = $callData['StirStatus'] ?? null;
 
             self::copyDataFromCustomParams($call, $customParameters);
 
             $call->setDataCreatedParams($callData);
+            $call->setDataCreatorType((int)($callData['creator_type_id'] ?? null));
         }
 
         $preCallStatus = $call->c_call_status;
@@ -1465,6 +1637,9 @@ class CommunicationController extends ApiBaseController
         if (!empty($callData['Command']) && $callData['Command'] === 'change_call_status') {
             if ($call->isStatusRinging()) {
                 $call->c_call_status = $callData['CallStatus'];
+            }
+            if (!empty($callData['IsRedialCall'])) {
+                Yii::$app->queue_job->delay(SettingHelper::getRedialAutoTakeSeconds())->push(new AutoTakeJob($call->c_id));
             }
         } else {
             $call->c_call_status = $callData['CallStatus'];
@@ -2714,8 +2889,32 @@ class CommunicationController extends ApiBaseController
                     $conference = Conference::findOne(['cf_sid' => $form->ConferenceSid]);
                 }
             } catch (\Throwable $e) {
+                $isDuplicateError = strpos($e->getMessage(), 'SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry') === 0;
+                if ($isDuplicateError) {
+                    Yii::info(
+                        array_merge(
+                            [
+                                'msg' => 'Some conference callback received in one time',
+                                'post' => $post,
+                                'form' => $form->getAttributes(),
+                            ],
+                            AppHelper::throwableLog($e, false),
+                        ),
+                        'log\API:CommunicationController:voiceConferenceCallCallback'
+                    );
+                } else {
+                    Yii::error(
+                        array_merge(
+                            [
+                                'post' => $post,
+                                'form' => $form->getAttributes(),
+                            ],
+                            AppHelper::throwableLog($e, false),
+                        ),
+                        'API:CommunicationController:voiceConferenceCallCallback'
+                    );
+                }
                 $conference = Conference::findOne(['cf_sid' => $form->ConferenceSid]);
-                Yii::error($e->getMessage(), 'API:CommunicationController:voiceConferenceCallCallback');
             }
         }
 
@@ -3188,5 +3387,34 @@ class CommunicationController extends ApiBaseController
         foreach ($usersForNotify as $userForNotify) {
             Notifications::publish('phoneWidgetSmsSocketMessage', ['user_id' => $userForNotify], Message::updateStatus($sms));
         }
+    }
+
+    private function returnTwmlAsBusy(?string $message): VoiceResponse
+    {
+        $vr = new VoiceResponse();
+        if ($message) {
+            $vr->pause(['length' => 5]);
+            $vr->say($message, [
+                'language' => 'en-US',
+                'voice' => 'alice'
+            ]);
+        }
+        $vr->reject(['reason' => 'busy']);
+        return $vr;
+    }
+
+    private function saveLogExecutionTimeToCallJson(Call $model, array $logExecutionTimeResult): void
+    {
+        $data = JsonHelper::decode($model->c_data_json);
+        $data['logExecutionTime'] = $logExecutionTimeResult;
+        $model->c_data_json = JsonHelper::encode($data);
+    }
+
+    public function actionCallJoinedToWrongConference($post)
+    {
+        $response = new VoiceResponse();
+        $response->say('Server error.');
+
+        return $this->getResponseChownData($response);
     }
 }

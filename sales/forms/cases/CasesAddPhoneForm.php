@@ -2,8 +2,6 @@
 
 namespace sales\forms\cases;
 
-use sales\services\client\InternalPhoneException;
-use sales\services\client\InternalPhoneGuard;
 use sales\services\client\InternalPhoneValidator;
 use yii\base\Model;
 use sales\entities\cases\Cases;

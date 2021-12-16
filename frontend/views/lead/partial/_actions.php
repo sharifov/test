@@ -18,6 +18,8 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use common\models\Lead;
 use yii\bootstrap4\Modal;
+use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\lead\src\abac\LeadAbacObject;
 
 $leadModel = $leadForm->getLead();
 $urlUserActions = Url::to(['lead/get-user-actions', 'id' => $leadModel->id]);
@@ -26,7 +28,7 @@ $userId = Yii::$app->user->id;
 /** @var Employee $user */
 $user = Yii::$app->user->identity;
 
-
+$leadAbacDto = new LeadAbacDto($leadModel, $userId);
 ?>
 <?php
 
@@ -98,7 +100,7 @@ $user = Yii::$app->user->identity;
     $viwModeSuperAdminCondition = ($leadForm->mode === $leadForm::VIEW_MODE && ($user->isAdmin() || $user->isSupervision()));
     $buttonsSubAction = [];
 
-    $takeConditions = ($leadForm->viewPermission && ($leadModel->isOnHold() || $leadModel->isFollowUp() || $leadModel->isBookFailed() || $leadModel->isPending() || $leadModel->isProcessing() || $leadModel->isAlternative()) && $leadModel->getAppliedAlternativeQuotes() === null);
+    $takeConditions = ($leadForm->viewPermission && ($leadModel->isOnHold() || $leadModel->isFollowUp() || $leadModel->isBookFailed() || $leadModel->isPending() || $leadModel->isProcessing() || $leadModel->isAlternative() || $leadModel->isNew()) && $leadModel->getAppliedAlternativeQuotes() === null);
     $processingConditions = $leadModel->isOwner($user->id) && $leadModel->isProcessing() && $leadModel->getAppliedAlternativeQuotes() === null;
 
     if ($processingConditions) {
@@ -111,13 +113,13 @@ $user = Yii::$app->user->identity;
             $buttonsSubAction[] = $buttonSnooze;
         }
         $buttonsSubAction[] = $buttonTrash;
-        if ($leadModel->isSold()) {
+        /*if ($leadModel->isSold()) {
             if ($user->isAdmin()) {
                 $buttonsSubAction[] = $buttonClone;
             }
         } else {
             $buttonsSubAction[] = $buttonClone;
-        }
+        }*/
     }
     if ($leadModel->isSnooze()) {
         $buttonsSubAction[] = $buttonOnWake;
@@ -125,8 +127,11 @@ $user = Yii::$app->user->identity;
     if ($leadModel->isTrash()) {
         $buttonsSubAction[] = $buttonReturnLead;
         $buttonsSubAction[] = $buttonReject;
+        if ($user->isAgent()) {
+            $buttonsSubAction[] = $buttonTake;
+        }
     }
-    if ($viwModeSuperAdminCondition) {
+    /*if ($viwModeSuperAdminCondition) {
         if ($leadModel->isSold()) {
             if ($user->isAdmin()) {
                 $buttonsSubAction[] = $buttonClone;
@@ -144,8 +149,12 @@ $user = Yii::$app->user->identity;
         } else {
             $buttonsSubAction[] = $buttonClone;
         }
-    }
+    }*/
 
+    /** @abac $leadAbacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CLONE, Btn clone lead */
+    if (Auth::can('leadSection', ['lead' => $leadModel]) && Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CLONE)) {
+        $buttonsSubAction[] = $buttonClone;
+    }
 
     $project = $leadModel->project;
     $projectStyles = '';
@@ -182,7 +191,7 @@ $user = Yii::$app->user->identity;
         <?php if ($takeConditions) {
             if (!$leadModel->isOwner($user->id) && ($leadModel->isProcessing() || $leadModel->isOnHold())) {
                 echo $buttonTakeOver;
-            } elseif ($leadModel->isPending() || $leadModel->isFollowUp() || $leadModel->isAlternative() || $leadModel->isBookFailed()) {
+            } elseif ($leadModel->isPending() || $leadModel->isFollowUp() || $leadModel->isAlternative() || $leadModel->isBookFailed() || $leadModel->isNew()) {
                 echo $buttonTake;
             }
         }?>
@@ -719,7 +728,9 @@ $js = <<<JS
                 if(data.status == true){
                     $('#modal-lg').modal('hide');
                     
-                    createQuoteBtn.remove();
+                    // createQuoteBtn.remove();
+                    createQuoteBtn.attr('disabled', true).prop('disabled', true);
+                    createQuoteBtn.html('Quote assigned');
                     
                     let btnBox = $('#'+searchResId).find('.js-btn-box:first');
                     if (btnBox.find('.search_create_quote__btn').length === 0) {
@@ -830,7 +841,9 @@ $js = <<<JS
         $('#modal-sm-label').html('Clone Lead');
         modal.find('.modal-body').html('');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
-            modal.modal('show');
+            if (xhr.status != 403) {
+                modal.modal('show');
+            }            
         });
     });
     
@@ -847,10 +860,9 @@ $js = <<<JS
             modal.modal('show');
         });
         return false;
-    });
+    });    
     
-    
-     $('.btn-reservation-dump').on('click', function(e) {
+     $('body').on('click', '.btn-reservation-dump', function (e) {
         e.preventDefault();
         let modal = $('#modal-df');
         let title = $(this).attr('title');
@@ -862,7 +874,6 @@ $js = <<<JS
         
         modal.find('.modal-body').html(content2);
         modal.modal('show');
-        //return false;
     });
     
     

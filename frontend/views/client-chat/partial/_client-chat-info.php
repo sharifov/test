@@ -3,12 +3,15 @@
 use common\components\i18n\Formatter;
 use common\models\Client;
 use frontend\widgets\clientChat\ClientChatClientInfoWidget;
+use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\lead\src\abac\LeadAbacObject;
 use modules\offer\src\entities\offer\OfferQuery;
 use sales\auth\Auth;
 use sales\entities\cases\CasesStatus;
 use sales\helpers\clientChat\ClientChatHelper;
 use sales\model\client\query\ClientChatCounter;
 use sales\model\client\query\ClientLeadCaseCounter;
+use sales\model\clientChat\entity\abac\ClientChatAbacObject;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatHold\service\ClientChatHoldService;
 use sales\model\clientChat\permissions\ClientChatActionPermission;
@@ -38,6 +41,9 @@ $chatSendQuoteListUrl = Url::toRoute('/client-chat/send-quote-list');
 $chatSendOfferListUrl = Url::toRoute('/client-chat/send-offer-list');
 $formatter = new Formatter();
 $formatter->timeZone = Auth::user()->timezone;
+
+$cases = $clientChat->cases;
+$leads = $clientChat->leads;
 ?>
 
 <div class="_rc-client-chat-info-wrapper">
@@ -286,26 +292,39 @@ $formatter->timeZone = Auth::user()->timezone;
     <div class="_rc-block-wrapper">
         <div class="x_panel">
             <div class="x_title">
-                <h2>Cases (<?= $counter->countActiveCases()?> / <?= $counter->countAllCases()?>) </h2>
-                <ul class="nav navbar-right panel_toolbox">
-                    <?php if ($actionPermissions->canLinkCase($clientChat)) : ?>
-                    <li>
-                        <a class="link link_case" data-link="<?= Url::to(['/cases/link-chat', 'chat_id' => $clientChat->cch_id]); ?>"><i class="fa fa-link"></i> Link Case</a>
-                    </li>
-                    <?php endif; ?>
+                <div class="d-flex justify-content-between align-items-center">
+                    <h2 style="margin: 0;">Cases (<?= $counter->countActiveCases()?> / <?= $counter->countAllCases()?>) </h2>
+                    <div class="dropdown">
+                        <button class="btn text-warning dropdown-toggle" type="button" id="dropdownMenuButtonCase" data-toggle="dropdown"
+                                aria-haspopup="true" aria-expanded="false"
+                                style="box-shadow: 0 0 0 0.2rem rgba(240, 184, 81, 0.25); height: 25px; margin: 0" >
+                          <i class="fa fa-bars warning"></i> <span class="text-warning">Actions</span>
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonCase">
+                            <?php if ($actionPermissions->canLinkCase($clientChat)) : ?>
+                                <?php echo Html::a('<i class="fas fa-link"> </i> Link Case', null, [
+                                    'class' => 'dropdown-item link_case',
+                                    'title' => 'Link Case',
+                                    'data-link' => Url::to(['/cases/link-chat', 'chat_id' => $clientChat->cch_id]),
+                                ]) ?>
+                            <?php endif; ?>
 
-                    <?php if ($actionPermissions->canCreateCase($clientChat)) : ?>
-                    <li>
-                        <a class="create_case" data-link="<?= Url::to(['/cases/create-by-chat', 'chat_id' => $clientChat->cch_id]); ?>"><i class="fa fa-plus"></i> Create Case</a>
-                    </li>
-                    <?php endif; ?>
-                </ul>
+                            <?php if ($actionPermissions->canCreateCase($clientChat)) : ?>
+                                <?php echo Html::a('<i class="fas fa-plus"> </i> Create Case', null, [
+                                    'class' => 'dropdown-item create_case',
+                                    'title' => 'Create Case',
+                                    'data-link' => Url::to(['/cases/create-by-chat', 'chat_id' => $clientChat->cch_id]),
+                                ]) ?>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
                 <div class="clearfix"></div>
             </div>
 
             <div class="x_content">
                 <div id="chat-info-case-info">
-                <?php if ($cases = $clientChat->cases) : ?>
+                <?php if ($cases) : ?>
                         <?php foreach ($cases as $case) : ?>
                             <div class="_cc-case-item">
                                 <span>
@@ -325,41 +344,99 @@ $formatter->timeZone = Auth::user()->timezone;
 
         <div class="x_panel">
             <div class="x_title">
-                <h2>Leads (<?= $counter->countActiveLeads()?> / <?= $counter->countAllLeads()?>) </h2>
-                <ul class="nav navbar-right panel_toolbox">
-                    <?php if ($actionPermissions->canLinkLead($clientChat)) : ?>
-                      <li>
-                        <a class="link_lead" data-link="<?= Url::to(['/lead/link-chat', 'chat_id' => $clientChat->cch_id]); ?>"><i class="fa fa-link"></i> Link Lead</a>
-                      </li>
-                    <?php endif; ?>
-                    <?php if ($actionPermissions->canCreateLead($clientChat)) : ?>
-                        <li>
-                            <a class="create_lead" data-link="<?= Url::to(['/lead/create-by-chat', 'chat_id' => $clientChat->cch_id]); ?>"><i class="fa fa-plus"></i> Create Lead</a>
-                        </li>
-                    <?php endif; ?>
-                </ul>
+                <div class="d-flex justify-content-between align-items-center">
+                    <h2 style="margin: 0;">Leads (<?= $counter->countActiveLeads()?> / <?= $counter->countAllLeads()?>) </h2>
+                    <div class="dropdown">
+                        <button class="btn text-warning dropdown-toggle" type="button" id="dropdownMenuButtonLead" data-toggle="dropdown"
+                                aria-haspopup="true" aria-expanded="false"
+                                style="box-shadow: 0 0 0 0.2rem rgba(240, 184, 81, 0.25); height: 25px; margin: 0" >
+                          <i class="fa fa-bars warning"></i> <span class="text-warning">Actions</span>
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonLead">
+                            <?php /** @abac ClientChatAbacObject::ACT_CREATE_SEND_QUOTE, ClientChatAbacObject::ACTION_CREATE, Access To search|add|send Quotes*/ ?>
+                            <?php if (!$leads && Yii::$app->abac->can(null, ClientChatAbacObject::ACT_CREATE_SEND_QUOTE, ClientChatAbacObject::ACTION_CREATE)) : ?>
+                                <?php echo Html::a('<i class="fas fa-search"> </i> Search Quotes', null, [
+                                    'class' => 'dropdown-item search_quotes',
+                                    'title' => 'Search Quotes',
+                                    'data-link' => Url::to(['/client-chat-flight-quote/ajax-search-quotes-by-chat', 'chat_id' => $clientChat->cch_id]),
+                                ]) ?>
+                            <?php endif; ?>
+
+                            <?php if ($actionPermissions->canLinkLead($clientChat)) : ?>
+                                <?php echo Html::a('<i class="fas fa-link"> </i> Link Lead', null, [
+                                    'class' => 'dropdown-item link_lead',
+                                    'title' => 'Link Lead',
+                                    'data-link' => Url::to(['/lead/link-chat', 'chat_id' => $clientChat->cch_id]),
+                                ]) ?>
+                            <?php endif; ?>
+
+                            <?php if ($actionPermissions->canCreateLead($clientChat)) : ?>
+                                <?php echo Html::a('<i class="fas fa-plus"> </i> Create Lead', null, [
+                                    'class' => 'dropdown-item create_lead',
+                                    'title' => 'Create Lead',
+                                    'data-link' => Url::to(['/lead/create-by-chat', 'chat_id' => $clientChat->cch_id]),
+                                ]) ?>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
                 <div class="clearfix"></div>
             </div>
 
             <div class="x_content">
                 <div id="chat-info-lead-info">
-                <?php if ($leads = $clientChat->leads) : ?>
+                <?php if ($leads) : ?>
                         <?php foreach ($leads as $lead) : ?>
-                        <div class="_cc-lead-item">
-                            <span>
-                                <?= Yii::$app->formatter->format($lead, 'lead'); ?>
+                        <div class="_cc-lead-item align-items-center">
+                            <span class="d-flex align-items-center">
+                                <span>
+                                  <?= Yii::$app->formatter->format($lead, 'lead'); ?>
+                                </span>
+
+                                <div class="dropdown" style="margin-left: 10px;">
+                                    <button class="btn text-warning dropdown-toggle btn-sm" type="button" id="dropdownMenuButtonLead" data-toggle="dropdown"
+                                            style="box-shadow: 0 0 0 0.2rem rgba(240, 184, 81, 0.25); margin: 0" >
+                                      <i class="fa fa-bars warning"></i>
+                                    </button>
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonLead">
+                                      <?php /** @abac ClientChatAbacObject::ACT_CREATE_SEND_QUOTE, ClientChatAbacObject::ACTION_CREATE, Access To search|add|send Quotes*/ ?>
+                                      <?php if (Yii::$app->abac->can(null, ClientChatAbacObject::ACT_CREATE_SEND_QUOTE, ClientChatAbacObject::ACTION_CREATE)) : ?>
+                                            <?php echo Html::a('<i class="fas fa-search"> </i> Search Quotes', null, [
+                                              'class' => 'dropdown-item search_quotes',
+                                              'title' => 'Search Quotes',
+                                              'data-link' => Url::to(['/client-chat-flight-quote/ajax-search-quotes-by-chat', 'chat_id' => $clientChat->cch_id, 'lead_id' => $lead->id]),
+                                            ]) ?>
+                                      <?php endif; ?>
+                                        <?php
+                                         /** @abac LeadAbacObject::ACT_TAKE_LEAD, LeadAbacObject::ACTION_ACCESS, Access To Take Lead*/
+                                        $leadAbacDto = new LeadAbacDto($lead, Auth::id());
+                                        if (Auth::can('leadSection', ['lead' => $lead]) && Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_TAKE_LEAD, LeadAbacObject::ACTION_ACCESS)) :
+                                            echo Html::a('<i class="fa fa-download"></i> Take', null, [
+                                                'class' => 'dropdown-item',
+                                                'id' => 'take_button',
+                                                'data-gid' => $lead->gid,
+                                                'data-pjax' => 0
+                                                ]);
+                                        endif;
+                                        ?>
+                                      <span data-cc-lead-info-quote="<?= $lead->id?>">
+                                      <?php if (!$clientChat->isClosed() && $lead->isExistQuotesForSend()) : ?>
+                                            <?= Html::a(
+                                                '<i class="fa fa-plane"> </i> Send Quotes',
+                                                '#',
+                                                ['class' => 'chat-offer dropdown-item', 'data-chat-id' => $clientChat->cch_id, 'data-lead-id' => $lead->id, 'data-url' => $chatSendQuoteListUrl]
+                                            ); ?>
+                                      <?php endif; ?>
+                                      </span>
+                                      <span data-cc-lead-info-offer="<?= $lead->id?>">
+                                      <?php if (!$clientChat->isClosed() && OfferQuery::existsOffersByLeadId($lead->id)) : ?>
+                                            <?= Html::a('<i class="fa fa-plane"> </i> Offer', '#', ['class' => 'chat-offer dropdown-item', 'data-chat-id' => $clientChat->cch_id, 'data-lead-id' => $lead->id, 'data-url' => $chatSendOfferListUrl]); ?>
+                                      <?php endif; ?>
+                                      </span>
+                                    </div>
+                                </div>
                             </span>
                             <span>
-                                <span data-cc-lead-info-quote="<?= $lead->id?>">
-                                <?php if (!$clientChat->isClosed() && $lead->isExistQuotesForSend()) : ?>
-                                    <?= Html::tag('span', '<i class="fa fa-plane"> </i> Quotes', ['class' => 'chat-offer', 'data-chat-id' => $clientChat->cch_id, 'data-lead-id' => $lead->id, 'data-url' => $chatSendQuoteListUrl]); ?>
-                                <?php endif; ?>
-                                </span>
-                                <span data-cc-lead-info-offer="<?= $lead->id?>">
-                                <?php if (!$clientChat->isClosed() && OfferQuery::existsOffersByLeadId($lead->id)) : ?>
-                                    <?= Html::tag('span', '<i class="fa fa-plane"> </i> Offer', ['class' => 'chat-offer', 'data-chat-id' => $clientChat->cch_id, 'data-lead-id' => $lead->id, 'data-url' => $chatSendOfferListUrl]); ?>
-                                <?php endif; ?>
-                                </span>
                                 <?= $lead->getStatusLabel($lead->status); ?>
                             </span>
                         </div>
@@ -532,7 +609,7 @@ $(document).on('click', '#btn-client-info-details', function(e) {
         );
     });
    
-   
+  
 JS;
 $this->registerJs($js);
 

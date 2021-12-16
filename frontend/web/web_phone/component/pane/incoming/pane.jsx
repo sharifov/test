@@ -33,12 +33,12 @@ class IncomingPane extends React.Component {
                 <CallInfo project={call.data.project} source={call.data.source}/>
                 <div className="contact-info-card">
                     <div className="contact-info-card__details">
-                        <AntiSpamElement call={call}/>
+                        {/*<AntiSpamElement call={call}/>*/}
                         <div className="contact-info-card__line history-details">
                             <span className="contact-info-card__label">{call.data.type}</span>
                             <div className="credential">
                                 <div className="contact-info-card__name">
-                                    <button className="call-pane__info">
+                                    <button className="call-pane__info" data-call-id={call.data.id}>
                                         <i className="user-icon fa fa-user"> </i>
                                         <i className="info-icon fa fa-info"> </i>
                                     </button>

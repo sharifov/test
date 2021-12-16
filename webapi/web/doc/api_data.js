@@ -1,5 +1,197 @@
 define({ "api": [
   {
+    "type": "post",
+    "url": "BasicAuth",
+    "title": "Authorization User (Basic)",
+    "version": "0.1.0",
+    "name": "BasicAuth",
+    "group": "App",
+    "permission": [
+      {
+        "name": "Basic Auth"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          },
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Accept-Encoding",
+            "description": "<p>Accept-Encoding: gzip, deflate</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/controllers/ApiDocData.php",
+    "groupTitle": "App"
+  },
+  {
+    "type": "get, post",
+    "url": "/health-check",
+    "title": "Get health check",
+    "version": "0.1.0",
+    "name": "HealthCheck_Sales",
+    "group": "App",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "description": "<p>If username is empty in config file then HttpBasicAuth is disabled.</p>",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "data",
+            "description": "<p>components health check passed statuses (&quot;true&quot; or &quot;false&quot;)</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n    \"mysql\": true,\n    \"postgresql\": true,\n    \"redis\": true\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "ServiceUnavailable",
+            "description": "<p>HTTP 503</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 503 Service Unavailable\n{\n    \"mysql\": true,\n    \"postgresql\": false,\n    \"redis\": true\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/controllers/HealthController.php",
+    "groupTitle": "App"
+  },
+  {
+    "type": "get, post",
+    "url": "/health-check/metrics",
+    "title": "Get health check metrics text",
+    "version": "0.1.0",
+    "name": "HealthCheck_Sales_Metrics",
+    "group": "App",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "description": "<p>If username is empty in config file then HttpBasicAuth is disabled.</p>",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "string",
+            "optional": false,
+            "field": "metrics",
+            "description": "<p>in plain text format containing components health statuses (&quot;1&quot; for OK, &quot;0&quot; for failed)</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\nhealthcheck_status{name=\"mysql\"} 1\nhealthcheck_status{name=\"postgresql\"} 1\nhealthcheck_status{name=\"redis\"} 1",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "ServiceUnavailable",
+            "description": "<p>HTTP 503</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 503 Service Unavailable\nhealthcheck_status{name=\"mysql\"} 1\nhealthcheck_status{name=\"postgresql\"} 0\nhealthcheck_status{name=\"redis\"} 1",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/controllers/HealthController.php",
+    "groupTitle": "App"
+  },
+  {
     "type": "get, post",
     "url": "/v1/app/test",
     "title": "API Test action",
@@ -98,7 +290,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "\nHTTP/1.1 200 OK\n{\n     \"status\": 200,\n     \"message\": \"OK\",\n     \"data\": {\n         \"case-category\": [\n             {\n                 \"cc_id\": 1,\n                 \"cc_key\": \"add_infant\",\n                 \"cc_name\": \"Add infant\",\n                 \"cc_dep_id\": 3,\n                 \"cc_updated_dt\": null\n             },\n             {\n                 \"cc_id\": 2,\n                 \"cc_key\": null,\n                 \"cc_name\": \"Insurance Add/Remove\",\n                 \"cc_dep_id\": 3,\n                 \"cc_updated_dt\": \"2019-09-26 15:14:01\"\n             }\n         ]\n     },\n     \"technical\": {\n         \"action\": \"v2/case-category/list\",\n         \"response_id\": 11926631,\n         \"request_dt\": \"2020-03-16 11:26:34\",\n         \"response_dt\": \"2020-03-16 11:26:34\",\n         \"execution_time\": 0.076,\n         \"memory_usage\": 506728\n     },\n     \"request\": []\n }",
+          "content": "\nHTTP/1.1 200 OK\n{\n     \"status\": 200,\n     \"message\": \"OK\",\n     \"data\": {\n         \"case-category\": [\n             {\n                 \"cc_id\": 1,\n                 \"cc_key\": \"add_infant\",\n                 \"cc_name\": \"Add infant\",\n                 \"cc_dep_id\": 3,\n                 \"cc_updated_dt\": null\n             },\n             {\n                 \"cc_id\": 2,\n                 \"cc_key\": \"insurance_add_remove\",\n                 \"cc_name\": \"Insurance Add/Remove\",\n                 \"cc_dep_id\": 3,\n                 \"cc_updated_dt\": \"2019-09-26 15:14:01\"\n             }\n         ]\n     },\n     \"technical\": {\n         \"action\": \"v2/case-category/list\",\n         \"response_id\": 11926631,\n         \"request_dt\": \"2020-03-16 11:26:34\",\n         \"response_dt\": \"2020-03-16 11:26:34\",\n         \"execution_time\": 0.076,\n         \"memory_usage\": 506728\n     },\n     \"request\": []\n }",
           "type": "json"
         },
         {
@@ -190,9 +382,17 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "int",
-            "optional": false,
+            "optional": true,
             "field": "category_id",
-            "description": "<p>Case category id</p>"
+            "description": "<p>Case category id (Required if &quot;category_key&quot; is empty)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": true,
+            "field": "category_key",
+            "description": "<p>Case category key (Required if &quot;category_id&quot; is empty - takes precedence over &quot;category_id&quot;. See list in api &quot;/v2/case-category/list&quot;)</p>"
           },
           {
             "group": "Parameter",
@@ -238,7 +438,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "{\n      \"contact_email\": \"test@test.com\",\n      \"contact_phone\": \"+37369636690\",\n      \"category_id\": 12,\n      \"order_uid\": \"12WS09W\",\n      \"subject\": \"Subject text\",\n      \"description\": \"Description text\",\n      \"project_key\": \"project_key\",\n      \"order_info\": {\n          \"Departure Date\":\"2020-03-07\",\n          \"Departure Airport\":\"LON\"\n      }\n  }",
+          "content": "{\n      \"contact_email\": \"test@test.com\",\n      \"contact_phone\": \"+37369636690\",\n      \"category_key\": \"voluntary_exchange\",\n      \"category_id\": null,\n      \"order_uid\": \"12WS09W\",\n      \"subject\": \"Subject text\",\n      \"description\": \"Description text\",\n      \"project_key\": \"project_key\",\n      \"order_info\": {\n          \"Departure Date\":\"2020-03-07\",\n          \"Departure Airport\":\"LON\"\n      }\n  }",
           "type": "json"
         }
       ]
@@ -272,6 +472,542 @@ define({ "api": [
       ]
     },
     "filename": "webapi/modules/v2/controllers/CasesController.php",
+    "groupTitle": "Cases"
+  },
+  {
+    "type": "get",
+    "url": "/v2/case/find-list-by-email",
+    "title": "Get Cases GID list by Email",
+    "version": "0.2.0",
+    "name": "findCasesListByEmail",
+    "group": "Cases",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "320",
+            "optional": false,
+            "field": "contact_email",
+            "description": "<p>Client Email required</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "size": "0..1",
+            "optional": false,
+            "field": "active_only",
+            "description": "<p>1 for requesting active cases only (depends on Department-&gt;object-&gt;case-&gt;trashActiveDaysLimit or global trash_cases_active_days_limit Site setting), 0 for all cases</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "department_key",
+            "description": "<p>Department key</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "project_key",
+            "description": "<p>Project key</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "results_limit",
+            "description": "<p>Limits number of cases in results list</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n      \"contact_email\": \"test@test.test\",\n      \"active_only\": 0,\n      \"department_key\": \"support\",\n      \"project_key\": \"ovago\",\n      \"results_limit\": 10\n  }",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n    \"data\": [\n            \"24f12d06267aaa8e8ff86c5059efdf86\",\n            \"20e1c76c70f86063ded79b6d389f490d\",\n            \"c5f3f405ea489bd6e6a1f3886086c9d9\",\n    ],\n    \"technical\": {\n        \"action\": \"v2/case/find-list-by-email\",\n        \"response_id\": 753,\n        \"request_dt\": \"2021-09-02 13:52:53\",\n        \"response_dt\": \"2021-09-02 13:52:53\",\n        \"execution_time\": 0.029,\n        \"memory_usage\": 568056\n    },\n    \"request\": []\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response(Validation error) (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n    \"status\": 422,\n    \"message\": \"Validation error\",\n    \"errors\": {\n        \"contact_email\": [\n            \"Contact Email is not a valid email address.\"\n        ]\n    },\n    \"code\": \"21303\",\n    \"technical\": {\n        \"action\": \"v2/case/find-list-by-email\",\n        \"response_id\": 754,\n        \"request_dt\": \"2021-09-02 14:01:22\",\n        \"response_dt\": \"2021-09-02 14:01:22\",\n        \"execution_time\": 0.028,\n        \"memory_usage\": 306800\n    },\n    \"request\": []\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n      \"status\": 422,\n      \"message\": \"Validation error\",\n      \"errors\": {\n          \"contact_email\": [\n              \"Client Email not found in DB.\"\n          ]\n      },\n      \"code\": 21303,\n      \"technical\": {\n          ...\n      },\n      \"request\": []\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response(Load data error) (400):",
+          "content": "\nHTTP/1.1 400 Bad Request\n{\n      \"status\": 400,\n      \"message\": \"Load data error\",\n      \"errors\": [\n          \"Not found GET request params\"\n      ],\n      \"code\": 21302,\n      \"technical\": {\n          ...\n      },\n      \"request\":  []\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/CaseController.php",
+    "groupTitle": "Cases"
+  },
+  {
+    "type": "get",
+    "url": "/v2/case/find-list-by-phone",
+    "title": "Get Cases GID list by Phone",
+    "version": "0.2.0",
+    "name": "findCasesListByPhone",
+    "group": "Cases",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "20",
+            "optional": false,
+            "field": "contact_phone",
+            "description": "<p>Client Phone required</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "size": "0..1",
+            "optional": false,
+            "field": "active_only",
+            "description": "<p>1 for requesting active cases only (depends on Department-&gt;object-&gt;case-&gt;trashActiveDaysLimit or global trash_cases_active_days_limit Site setting), 0 for all cases</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "department_key",
+            "description": "<p>Department key</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "project_key",
+            "description": "<p>Project key</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "results_limit",
+            "description": "<p>Limits number of cases in results list</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n      \"contact_phone\": \"+18888888888\",\n      \"active_only\": 1,\n      \"department_key\": \"support\",\n      \"project_key\": \"ovago\",\n      \"results_limit\": 10\n  }",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n    \"data\": [\n            \"24f12d06267aaa8e8ff86c5059efdf86\",\n            \"20e1c76c70f86063ded79b6d389f490d\",\n            \"c5f3f405ea489bd6e6a1f3886086c9d9\",\n    ],\n    \"technical\": {\n        \"action\": \"v2/case/find-list-by-phone\",\n        \"response_id\": 753,\n        \"request_dt\": \"2021-09-02 13:52:53\",\n        \"response_dt\": \"2021-09-02 13:52:53\",\n        \"execution_time\": 0.029,\n        \"memory_usage\": 568056\n    },\n    \"request\": []\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response(Validation error) (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n    \"status\": 422,\n    \"message\": \"Validation error\",\n    \"errors\": {\n        \"contact_phone\": [\n            \"The format of Contact Phone is invalid.\"\n        ]\n    },\n    \"code\": \"21303\",\n    \"technical\": {\n        \"action\": \"v2/case/find-list-by-phone\",\n        \"response_id\": 754,\n        \"request_dt\": \"2021-09-02 14:01:22\",\n        \"response_dt\": \"2021-09-02 14:01:22\",\n        \"execution_time\": 0.028,\n        \"memory_usage\": 306800\n    },\n    \"request\": []\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n      \"status\": 422,\n      \"message\": \"Validation error\",\n      \"errors\": {\n          \"contact_phone\": [\n              \"Client Phone number not found in DB.\"\n          ]\n      },\n      \"code\": 21303,\n      \"technical\": {\n          ...\n      },\n      \"request\": []\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response(Load data error) (400):",
+          "content": "\nHTTP/1.1 400 Bad Request\n{\n      \"status\": 400,\n      \"message\": \"Load data error\",\n      \"errors\": [\n          \"Not found  GET request params\"\n      ],\n      \"code\": 21302,\n      \"technical\": {\n          ...\n      },\n      \"request\":  []\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/CaseController.php",
+    "groupTitle": "Cases"
+  },
+  {
+    "type": "get",
+    "url": "/v2/case/get",
+    "title": "Get Case",
+    "version": "0.2.0",
+    "name": "getCaseDataByCaseGid",
+    "group": "Cases",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": false,
+            "field": "gid",
+            "description": "<p>Case GID required</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n      \"gid\": \"c5f3f405ea489bd6e6a1f3886086c9d9\",\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n    \"data\": {\n                \"id\": \"88473\",\n                \"gid\": \"c5f3f405ea489bd6e6a1f3886086c9d9\",\n                \"created_dt\": \"2020-02-26 15:26:25\",\n                \"updated_dt\": \"2020-02-26 17:07:18\",\n                \"last_action_dt\": \"2020-02-27 15:08:39\",\n                \"category_id\": \"16\",\n                \"order_uid\": \"P6QWNH\",\n                \"project_name\": \"ARANGRANT\",\n                \"next_flight\": \"2022-05-22\",\n                \"status_name\": \"Processing\"\n    },\n    \"technical\": {\n        \"action\": \"v2/case/get\",\n        \"response_id\": 753,\n        \"request_dt\": \"2021-09-02 13:52:53\",\n        \"response_dt\": \"2021-09-02 13:52:53\",\n        \"execution_time\": 0.029,\n        \"memory_usage\": 568056\n    },\n    \"request\": []\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response(Validation error) (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n    \"status\": 422,\n    \"message\": \"Validation error\",\n    \"errors\": [\n            \"Case with this gid not found.\"\n    ],\n    \"code\": \"21304\",\n    \"technical\": {\n        \"action\": \"v2/case/get\",\n        \"response_id\": 754,\n        \"request_dt\": \"2021-09-02 14:01:22\",\n        \"response_dt\": \"2021-09-02 14:01:22\",\n        \"execution_time\": 0.028,\n        \"memory_usage\": 306800\n    },\n    \"request\": []\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response(Validation error) (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n    \"status\": 422,\n    \"message\": \"Validation error\",\n    \"errors\": {\n        \"gid\": [\n            \"Case Gid should contain at most 50 characters.\"\n        ]\n    },\n    \"code\": \"21303\",\n    \"technical\": {\n        \"action\": \"v2/case/get\",\n        \"response_id\": 754,\n        \"request_dt\": \"2021-09-02 14:01:22\",\n        \"response_dt\": \"2021-09-02 14:01:22\",\n        \"execution_time\": 0.028,\n        \"memory_usage\": 306800\n    },\n    \"request\": []\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response(Load data error) (400):",
+          "content": "\nHTTP/1.1 400 Bad Request\n{\n      \"status\": 400,\n      \"message\": \"Load data error\",\n      \"errors\": [\n          \"Not found  GET request params\"\n      ],\n      \"code\": 21302,\n      \"technical\": {\n          ...\n      },\n      \"request\":  []\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/CaseController.php",
+    "groupTitle": "Cases"
+  },
+  {
+    "type": "get",
+    "url": "/v2/case/get-list-by-email",
+    "title": "Get Cases by Email",
+    "version": "0.2.0",
+    "name": "getCasesListByEmail",
+    "group": "Cases",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "320",
+            "optional": false,
+            "field": "contact_email",
+            "description": "<p>Client Email required</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "size": "0..1",
+            "optional": false,
+            "field": "active_only",
+            "description": "<p>1 for requesting active cases only (depends on Department-&gt;object-&gt;case-&gt;trashActiveDaysLimit or global trash_cases_active_days_limit Site setting), 0 for all cases</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "department_key",
+            "description": "<p>Department key</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "project_key",
+            "description": "<p>Project key</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "results_limit",
+            "description": "<p>Limits number of cases in results list</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n      \"contact_email\": \"test@test.test\",\n      \"active_only\": 1,\n      \"department_key\": \"support\",\n      \"project_key\": \"ovago\",\n      \"results_limit\": 10\n  }",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n    \"data\": [\n            {\n                \"id\": \"88473\",\n                \"gid\": \"c5f3f405ea489bd6e6a1f3886086c9d9\",\n                \"created_dt\": \"2020-02-26 15:26:25\",\n                \"updated_dt\": \"2020-02-26 17:07:18\",\n                \"last_action_dt\": \"2020-02-27 15:08:39\",\n                \"category_id\": \"16\",\n                \"order_uid\": \"P6QWNH\",\n                \"project_name\": \"OVAGO\",\n                \"next_flight\": \"2022-05-22\",\n                \"status_name\": \"Processing\"\n            },\n            {\n                \"id\": \"130705\",\n                \"gid\": \"37129b222479f0468d6355fcf4bd0235\",\n                \"created_dt\": \"2020-03-24 09:14:28\",\n                \"updated_dt\": \"2020-03-24 11:00:34\",\n                \"last_action_dt\": \"2020-03-24 11:00:34\",\n                \"category_id\": \"16\",\n                \"order_uid\": null,\n                \"project_name\": \"OVAGO\",\n                \"next_flight\": null,\n                \"status_name\": \"Processing\"\n            }\n    ],\n    \"technical\": {\n        \"action\": \"v2/case/get-list-by-email\",\n        \"response_id\": 753,\n        \"request_dt\": \"2021-09-02 13:52:53\",\n        \"response_dt\": \"2021-09-02 13:52:53\",\n        \"execution_time\": 0.029,\n        \"memory_usage\": 568056\n    },\n    \"request\": []\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response(Validation error) (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n    \"status\": 422,\n    \"message\": \"Validation error\",\n    \"errors\": {\n        \"contact_email\": [\n            \"Contact Email is not a valid email address.\"\n        ]\n    },\n    \"code\": \"21303\",\n    \"technical\": {\n        \"action\": \"v2/case/get-list-by-email\",\n        \"response_id\": 754,\n        \"request_dt\": \"2021-09-02 14:01:22\",\n        \"response_dt\": \"2021-09-02 14:01:22\",\n        \"execution_time\": 0.028,\n        \"memory_usage\": 306800\n    },\n    \"request\": []\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n      \"status\": 422,\n      \"message\": \"Validation error\",\n      \"errors\": {\n          \"contact_email\": [\n              \"Client Email not found in DB.\"\n          ]\n      },\n      \"code\": 21303,\n      \"technical\": {\n          ...\n      },\n      \"request\": []\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response(Load data error) (400):",
+          "content": "\nHTTP/1.1 400 Bad Request\n{\n      \"status\": 400,\n      \"message\": \"Load data error\",\n      \"errors\": [\n          \"Not found  GET request params\"\n      ],\n      \"code\": 21302,\n      \"technical\": {\n          ...\n      },\n      \"request\":  []\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/CaseController.php",
+    "groupTitle": "Cases"
+  },
+  {
+    "type": "get",
+    "url": "/v2/case/get-list-by-phone",
+    "title": "Get Cases by Phone",
+    "version": "0.2.0",
+    "name": "getCasesListByPhone",
+    "group": "Cases",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "20",
+            "optional": false,
+            "field": "contact_phone",
+            "description": "<p>Client Phone required</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "size": "0..1",
+            "optional": false,
+            "field": "active_only",
+            "description": "<p>1 for requesting active cases only (depends on Department-&gt;object-&gt;case-&gt;trashActiveDaysLimit or global trash_cases_active_days_limit Site setting), 0 for all cases</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "department_key",
+            "description": "<p>Department key</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "project_key",
+            "description": "<p>Project key</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "results_limit",
+            "description": "<p>Limits number of cases in results list</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n      \"contact_phone\": \"+18888888888\",\n      \"active_only\": 0,\n      \"department_key\": \"support\",\n      \"project_key\": \"ovago\",\n      \"results_limit\": 10\n  }",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n    \"data\": [\n            {\n                \"id\": \"88473\",\n                \"gid\": \"c5f3f405ea489bd6e6a1f3886086c9d9\",\n                \"created_dt\": \"2020-02-26 15:26:25\",\n                \"updated_dt\": \"2020-02-26 17:07:18\",\n                \"last_action_dt\": \"2020-02-27 15:08:39\",\n                \"category_id\": \"16\",\n                \"order_uid\": \"P6QWNH\",\n                \"project_name\": \"OVAGO\",\n                \"next_flight\": \"2022-05-22\",\n                \"status_name\": \"Processing\"\n            },\n            {\n                \"id\": \"130705\",\n                \"gid\": \"37129b222479f0468d6355fcf4bd0235\",\n                \"created_dt\": \"2020-03-24 09:14:28\",\n                \"updated_dt\": \"2020-03-24 11:00:34\",\n                \"last_action_dt\": \"2020-03-24 11:00:34\",\n                \"category_id\": \"16\",\n                \"order_uid\": null,\n                \"project_name\": \"OVAGO\",\n                \"next_flight\": null,\n                \"status_name\": \"Processing\"\n            }\n    ],\n    \"technical\": {\n        \"action\": \"v2/case/get-list-by-phone\",\n        \"response_id\": 753,\n        \"request_dt\": \"2021-09-02 13:52:53\",\n        \"response_dt\": \"2021-09-02 13:52:53\",\n        \"execution_time\": 0.029,\n        \"memory_usage\": 568056\n    },\n    \"request\": []\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response(Validation error) (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n    \"status\": 422,\n    \"message\": \"Validation error\",\n    \"errors\": {\n        \"contact_phone\": [\n            \"The format of Contact Phone is invalid.\"\n        ]\n    },\n    \"code\": \"21303\",\n    \"technical\": {\n        \"action\": \"v2/case/get-list-by-phone\",\n        \"response_id\": 754,\n        \"request_dt\": \"2021-09-02 14:01:22\",\n        \"response_dt\": \"2021-09-02 14:01:22\",\n        \"execution_time\": 0.028,\n        \"memory_usage\": 306800\n    },\n    \"request\": []\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n      \"status\": 422,\n      \"message\": \"Validation error\",\n      \"errors\": {\n          \"contact_phone\": [\n              \"Client Phone number not found in DB.\"\n          ]\n      },\n      \"code\": 21303,\n      \"technical\": {\n          ...\n      },\n      \"request\": []\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response(Load data error) (400):",
+          "content": "\nHTTP/1.1 400 Bad Request\n{\n      \"status\": 400,\n      \"message\": \"Load data error\",\n      \"errors\": [\n          \"Not found  GET request params\"\n      ],\n      \"code\": 21302,\n      \"technical\": {\n          ...\n      },\n      \"request\":  []\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/CaseController.php",
     "groupTitle": "Cases"
   },
   {
@@ -1084,7 +1820,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request-Example ROOM_CONNECTED:",
-          "content": "{\n            \"event\": \"ROOM_CONNECTED\",\n            \"data\": {\n                \"rid\": \"d83ef2d3-30bf-4636-a2c6-7f5b4b0e81a4\",\n                \"geo\": {\n                    \"ip\": \"92.115.180.30\",\n                    \"version\": \"IPv4\",\n                    \"city\": \"Chisinau\",\n                    \"region\": \"Chi\\u0219in\\u0103u Municipality\",\n                    \"region_code\": \"CU\",\n                    \"country\": \"MD\",\n                    \"country_name\": \"Republic of Moldova\",\n                    \"country_code\": \"MD\",\n                    \"country_code_iso3\": \"MDA\",\n                    \"country_capital\": \"Chisinau\",\n                    \"country_tld\": \".md\",\n                    \"continent_code\": \"EU\",\n                    \"in_eu\": false,\n                    \"postal\": \"MD-2000\",\n                    \"latitude\": 47.0056,\n                    \"longitude\": 28.8575,\n                    \"timezone\": \"Europe\\/Chisinau\",\n                    \"utc_offset\": \"+0300\",\n                    \"country_calling_code\": \"+373\",\n                    \"currency\": \"MDL\",\n                    \"currency_name\": \"Leu\",\n                    \"languages\": \"ro,ru,gag,tr\",\n                    \"country_area\": 33843,\n                    \"country_population\": 3545883,\n                    \"asn\": \"AS8926\",\n                    \"org\": \"Moldtelecom SA\"\n                },\n                \"visitor\": {\n                    \"conversations\": 0,\n                    \"lastAgentMessage\": null,\n                    \"lastVisitorMessage\": null,\n                    \"id\": \"fef46d63-8a30-4eec-89eb-62f1bfc0ffcd\",\n                    \"uuid\": \"54d87707-bb54-46e3-9eca-8f776c7bcacf\",\n                    \"project\": \"ovago\",\n                    \"leadIds\": [\n                        234556,\n                        357346\n                    ],\n                    \"caseIds\": [\n                        345464634,\n                        345634634\n                    ]\n                },\n                \"sources\": [],\n                \"page\": {\n                    \"url\": \"https:\\/\\/dev-ovago.travel-dev.com\\/search\\/WAS-FRA%2F2021-03-22%2F2021-03-28\",\n                    \"title\": \"Air Ticket Booking - Find Cheap Flights and Airfare Deals - Ovago.com\",\n                    \"referrer\": \"https:\\/\\/dev-ovago.travel-dev.com\\/search\\/WAS-FRA%2F2021-03-22%2F2021-03-28\"\n                },\n                \"system\": {\n                    \"user_agent\": \"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/85.0.4183.102 Safari\\/537.36\",\n                    \"language\": \"en-US\",\n                    \"resolution\": \"1920x1080\"\n                },\n                \"custom\": {\n                    \"event\": {\n                        \"eventName\": \"UPDATE\",\n                        \"eventProps\": []\n                    }\n                }\n            }\n}",
+          "content": "{\n            \"event\": \"ROOM_CONNECTED\",\n            \"data\": {\n                \"rid\": \"d83ef2d3-30bf-4636-a2c6-7f5b4b0e81a4\",\n                \"geo\": {\n                    \"ip\": \"92.115.180.30\",\n                    \"version\": \"IPv4\",\n                    \"city\": \"Chisinau\",\n                    \"region\": \"Chi\\u0219in\\u0103u Municipality\",\n                    \"region_code\": \"CU\",\n                    \"country\": \"MD\",\n                    \"country_name\": \"Republic of Moldova\",\n                    \"country_code\": \"MD\",\n                    \"country_code_iso3\": \"MDA\",\n                    \"country_capital\": \"Chisinau\",\n                    \"country_tld\": \".md\",\n                    \"continent_code\": \"EU\",\n                    \"in_eu\": false,\n                    \"postal\": \"MD-2000\",\n                    \"latitude\": 47.0056,\n                    \"longitude\": 28.8575,\n                    \"timezone\": \"Europe\\/Chisinau\",\n                    \"utc_offset\": \"+0300\",\n                    \"country_calling_code\": \"+373\",\n                    \"currency\": \"MDL\",\n                    \"currency_name\": \"Leu\",\n                    \"languages\": \"ro,ru,gag,tr\",\n                    \"country_area\": 33843,\n                    \"country_population\": 3545883,\n                    \"asn\": \"AS8926\",\n                    \"org\": \"Moldtelecom SA\"\n                },\n                \"visitor\": {\n                    \"conversations\": 0,\n                    \"lastAgentMessage\": null,\n                    \"lastVisitorMessage\": null,\n                    \"id\": \"fef46d63-8a30-4eec-89eb-62f1bfc0ffcd\",\n                    \"username\": \"Test Usrename\",\n                    \"name\": \"Test Name\",\n                    \"uuid\": \"54d87707-bb54-46e3-9eca-8f776c7bcacf\",\n                    \"project\": \"ovago\",\n                    \"channel\": \"1\",\n                    \"email\": \"test@techork.com\",\n                    \"leadIds\": [\n                        234556,\n                        357346\n                    ],\n                    \"caseIds\": [\n                        345464634,\n                        345634634\n                    ]\n                },\n                \"sources\": {\n                    \"crossSystemXp\": \"123465.1\"\n                },\n                \"page\": {\n                    \"url\": \"https:\\/\\/dev-ovago.travel-dev.com\\/search\\/WAS-FRA%2F2021-03-22%2F2021-03-28\",\n                    \"title\": \"Air Ticket Booking - Find Cheap Flights and Airfare Deals - Ovago.com\",\n                    \"referrer\": \"https:\\/\\/dev-ovago.travel-dev.com\\/search\\/WAS-FRA%2F2021-03-22%2F2021-03-28\"\n                },\n                \"system\": {\n                    \"user_agent\": \"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/85.0.4183.102 Safari\\/537.36\",\n                    \"language\": \"en-US\",\n                    \"resolution\": \"1920x1080\"\n                },\n                \"custom\": {\n                    \"event\": {\n                        \"eventName\": \"UPDATE\",\n                        \"eventProps\": []\n                    }\n                }\n            }\n}",
           "type": "json"
         }
       ]
@@ -2934,14 +3670,14 @@ define({ "api": [
             "type": "string[]",
             "optional": true,
             "field": "with",
-            "description": "<p>Array (&quot;reprotection&quot;)</p>"
+            "description": "<p>Array (&quot;quote_list&quot;, &quot;last_change&quot;)</p>"
           }
         ]
       },
       "examples": [
         {
           "title": "Request-Example:",
-          "content": " {\n    \"product_quote_gid\": \"2bd12377691f282e11af12937674e3d1\",\n    \"with\": [\"reprotection\"],\n}",
+          "content": " {\n    \"product_quote_gid\": \"2bd12377691f282e11af12937674e3d1\",\n    \"with\": [\"quote_list\", \"last_change\"],\n}",
           "type": "json"
         }
       ]
@@ -2950,7 +3686,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "\nHTTP/1.1 200 OK\n        {\n            \"status\": 200,\n            \"message\": \"OK\",\n            \"product_quote\": {\n                \"pq_gid\": \"1865ef55f3c6c01dca1f4f3128e82733\",\n                \"pq_name\": \"test\",\n                \"pq_order_id\": 35,\n                \"pq_description\": null,\n                \"pq_status_id\": 10,\n                \"pq_price\": 430.46,\n                \"pq_origin_price\": 326.9,\n                \"pq_client_price\": 430.46,\n                \"pq_service_fee_sum\": 14.56,\n                \"pq_origin_currency\": \"USD\",\n                \"pq_client_currency\": \"USD\",\n                \"pq_status_name\": \"Declined\",\n                \"pq_files\": [],\n                \"data\": {\n                    \"fq_flight_id\": 2,\n                    \"fq_source_id\": null,\n                    \"fq_product_quote_id\": 184,\n                    \"gds\": \"T\",\n                    \"pcc\": \"E9V\",\n                    \"fq_gds_offer_id\": null,\n                    \"fq_type_id\": 0,\n                    \"fq_cabin_class\": \"E\",\n                    \"fq_trip_type_id\": 1,\n                    \"validatingCarrier\": \"AF\",\n                    \"fq_fare_type_id\": 1,\n                    \"fq_last_ticket_date\": \"2021-03-25\",\n                    \"fq_origin_search_data\": \"{\\\"key\\\":\\\"2_U0FMMTAxKlkxMDAwL0tJVkxPTjIwMjEtMDMtMjUqQUZ+I0FGNjYwMiNBRjE4ODkjQUYxMzgwfmxjOmVuX3Vz\\\",\\\"routingId\\\":2,\\\"prices\\\":{\\\"lastTicketDate\\\":\\\"2021-03-25\\\",\\\"totalPrice\\\":326.9,\\\"totalTax\\\":55.9,\\\"comm\\\":0,\\\"isCk\\\":false,\\\"markupId\\\":0,\\\"markupUid\\\":\\\"\\\",\\\"markup\\\":0},\\\"passengers\\\":{\\\"ADT\\\":{\\\"codeAs\\\":\\\"ADT\\\",\\\"cnt\\\":1,\\\"baseFare\\\":271,\\\"pubBaseFare\\\":271,\\\"baseTax\\\":55.9,\\\"markup\\\":0,\\\"comm\\\":0,\\\"price\\\":326.9,\\\"tax\\\":55.9,\\\"oBaseFare\\\":{\\\"amount\\\":271,\\\"currency\\\":\\\"USD\\\"},\\\"oBaseTax\\\":{\\\"amount\\\":55.9,\\\"currency\\\":\\\"USD\\\"}}},\\\"penalties\\\":{\\\"exchange\\\":false,\\\"refund\\\":false,\\\"list\\\":[{\\\"type\\\":\\\"re\\\",\\\"applicability\\\":\\\"before\\\",\\\"permitted\\\":false},{\\\"type\\\":\\\"re\\\",\\\"applicability\\\":\\\"after\\\",\\\"permitted\\\":false}]},\\\"trips\\\":[{\\\"tripId\\\":1,\\\"segments\\\":[{\\\"segmentId\\\":1,\\\"departureTime\\\":\\\"2021-03-25 05:25\\\",\\\"arrivalTime\\\":\\\"2021-03-25 06:40\\\",\\\"stop\\\":0,\\\"stops\\\":[],\\\"flightNumber\\\":\\\"6602\\\",\\\"bookingClass\\\":\\\"E\\\",\\\"duration\\\":75,\\\"departureAirportCode\\\":\\\"KIV\\\",\\\"departureAirportTerminal\\\":\\\"\\\",\\\"arrivalAirportCode\\\":\\\"OTP\\\",\\\"arrivalAirportTerminal\\\":\\\"\\\",\\\"operatingAirline\\\":\\\"RO\\\",\\\"airEquipType\\\":\\\"AT7\\\",\\\"marketingAirline\\\":\\\"AF\\\",\\\"marriageGroup\\\":\\\"I\\\",\\\"mileage\\\":215,\\\"cabin\\\":\\\"Y\\\",\\\"brandId\\\":\\\"657936\\\",\\\"brandName\\\":\\\"Economy Standard\\\",\\\"meal\\\":\\\"\\\",\\\"fareCode\\\":\\\"ES50BBST\\\",\\\"baggage\\\":{\\\"ADT\\\":{\\\"carryOn\\\":true,\\\"allowPieces\\\":1}},\\\"recheckBaggage\\\":false},{\\\"segmentId\\\":2,\\\"departureTime\\\":\\\"2021-03-25 14:25\\\",\\\"arrivalTime\\\":\\\"2021-03-25 16:35\\\",\\\"stop\\\":0,\\\"stops\\\":[],\\\"flightNumber\\\":\\\"1889\\\",\\\"bookingClass\\\":\\\"E\\\",\\\"duration\\\":190,\\\"departureAirportCode\\\":\\\"OTP\\\",\\\"departureAirportTerminal\\\":\\\"\\\",\\\"arrivalAirportCode\\\":\\\"CDG\\\",\\\"arrivalAirportTerminal\\\":\\\"2E\\\",\\\"operatingAirline\\\":\\\"AF\\\",\\\"airEquipType\\\":\\\"319\\\",\\\"marketingAirline\\\":\\\"AF\\\",\\\"marriageGroup\\\":\\\"I\\\",\\\"mileage\\\":1147,\\\"cabin\\\":\\\"Y\\\",\\\"brandId\\\":\\\"657936\\\",\\\"brandName\\\":\\\"Economy Standard\\\",\\\"meal\\\":\\\"\\\",\\\"fareCode\\\":\\\"ES50BBST\\\",\\\"baggage\\\":{\\\"ADT\\\":{\\\"carryOn\\\":true,\\\"allowPieces\\\":1}},\\\"recheckBaggage\\\":false},{\\\"segmentId\\\":3,\\\"departureTime\\\":\\\"2021-03-25 21:20\\\",\\\"arrivalTime\\\":\\\"2021-03-25 21:45\\\",\\\"stop\\\":0,\\\"stops\\\":[],\\\"flightNumber\\\":\\\"1380\\\",\\\"bookingClass\\\":\\\"E\\\",\\\"duration\\\":85,\\\"departureAirportCode\\\":\\\"CDG\\\",\\\"departureAirportTerminal\\\":\\\"2E\\\",\\\"arrivalAirportCode\\\":\\\"LHR\\\",\\\"arrivalAirportTerminal\\\":\\\"2\\\",\\\"operatingAirline\\\":\\\"AF\\\",\\\"airEquipType\\\":\\\"318\\\",\\\"marketingAirline\\\":\\\"AF\\\",\\\"marriageGroup\\\":\\\"O\\\",\\\"mileage\\\":214,\\\"cabin\\\":\\\"Y\\\",\\\"brandId\\\":\\\"657936\\\",\\\"brandName\\\":\\\"Economy Standard\\\",\\\"meal\\\":\\\"\\\",\\\"fareCode\\\":\\\"ES50BBST\\\",\\\"baggage\\\":{\\\"ADT\\\":{\\\"carryOn\\\":true,\\\"allowPieces\\\":1}},\\\"recheckBaggage\\\":false}],\\\"duration\\\":1100}],\\\"maxSeats\\\":9,\\\"paxCnt\\\":1,\\\"validatingCarrier\\\":\\\"AF\\\",\\\"gds\\\":\\\"T\\\",\\\"pcc\\\":\\\"E9V\\\",\\\"cons\\\":\\\"GTT\\\",\\\"fareType\\\":\\\"PUB\\\",\\\"tripType\\\":\\\"OW\\\",\\\"cabin\\\":\\\"Y\\\",\\\"currency\\\":\\\"USD\\\",\\\"currencies\\\":[\\\"USD\\\"],\\\"currencyRates\\\":{\\\"USDUSD\\\":{\\\"from\\\":\\\"USD\\\",\\\"to\\\":\\\"USD\\\",\\\"rate\\\":1}},\\\"keys\\\":{\\\"travelport\\\":{\\\"traceId\\\":\\\"661f0376-d209-4216-a0d1-97c8f7cf5746\\\",\\\"availabilitySources\\\":\\\"S,S,S\\\",\\\"type\\\":\\\"T\\\"},\\\"seatHoldSeg\\\":{\\\"trip\\\":0,\\\"segment\\\":0,\\\"seats\\\":9}},\\\"ngsFeatures\\\":{\\\"stars\\\":1,\\\"name\\\":\\\"Economy Standard\\\",\\\"list\\\":[]},\\\"meta\\\":{\\\"eip\\\":0,\\\"noavail\\\":false,\\\"searchId\\\":\\\"U0FMMTAxWTEwMDB8S0lWTE9OMjAyMS0wMy0yNQ==\\\",\\\"lang\\\":\\\"en\\\",\\\"rank\\\":5.9333334,\\\"cheapest\\\":false,\\\"fastest\\\":false,\\\"best\\\":false,\\\"bags\\\":1,\\\"country\\\":\\\"us\\\"},\\\"price\\\":326.9,\\\"originRate\\\":1,\\\"stops\\\":[2],\\\"time\\\":[{\\\"departure\\\":\\\"2021-03-25 05:25\\\",\\\"arrival\\\":\\\"2021-03-25 21:45\\\"}],\\\"bagFilter\\\":1,\\\"airportChange\\\":false,\\\"technicalStopCnt\\\":0,\\\"duration\\\":[1100],\\\"totalDuration\\\":1100,\\\"topCriteria\\\":\\\"\\\",\\\"rank\\\":5.9333334}\",\n                    \"fq_json_booking\": null,\n                    \"fq_ticket_json\": null,\n                    \"itineraryDump\": [\n                        \"1  AF6602E  25MAR  KIVOTP    525A    640A  TH OPERATED BY RO\",\n                        \"2  AF1889E  25MAR  OTPCDG    225P    435P  TH\",\n                        \"3  AF1380E  25MAR  CDGLHR    920P    945P  TH\"\n                    ],\n                    \"booking_id\": \"1\",\n                    \"fq_type_name\": \"Base\",\n                    \"fq_fare_type_name\": \"Public\",\n                    \"fareType\": \"PUB\",\n                    \"flight\": {\n                        \"fl_product_id\": 44,\n                        \"fl_trip_type_id\": 1,\n                        \"fl_cabin_class\": \"E\",\n                        \"fl_adults\": 1,\n                        \"fl_children\": 0,\n                        \"fl_infants\": 0,\n                        \"fl_trip_type_name\": \"One Way\",\n                        \"fl_cabin_class_name\": \"Economy\"\n                    },\n                    \"trips\": [\n                        {\n                            \"uid\": \"fqt6047ae8cde4af\",\n                            \"key\": null,\n                            \"duration\": 1100,\n                            \"segments\": [\n                                {\n                                    \"uid\": \"fqs6047ae8cdf8d9\",\n                                    \"departureTime\": \"2021-03-25 05:25\",\n                                    \"arrivalTime\": \"2021-03-25 06:40\",\n                                    \"flightNumber\": 6602,\n                                    \"bookingClass\": \"E\",\n                                    \"duration\": 75,\n                                    \"departureAirportCode\": \"KIV\",\n                                    \"departureAirportTerminal\": \"\",\n                                    \"arrivalAirportCode\": \"OTP\",\n                                    \"arrivalAirportTerminal\": \"\",\n                                    \"operatingAirline\": \"RO\",\n                                    \"marketingAirline\": \"AF\",\n                                    \"airEquipType\": \"AT7\",\n                                    \"marriageGroup\": \"I\",\n                                    \"cabin\": \"E\",\n                                    \"meal\": \"\",\n                                    \"fareCode\": \"ES50BBST\",\n                                    \"mileage\": 215,\n                                    \"departureLocation\": \"Chisinau\",\n                                    \"arrivalLocation\": \"Bucharest\",\n                                    \"stop\": 1,\n                                    \"stops\": [\n                                        {\n                                            \"qss_quote_segment_id\": 9,\n                                            \"locationCode\": \"SCL\",\n                                            \"equipment\": \"\",\n                                            \"elapsedTime\": 120,\n                                            \"duration\": 120,\n                                            \"departureDateTime\": \"2021-09-09 00:00\",\n                                            \"arrivalDateTime\": \"2021-09-08 00:00\"\n                                        }\n                                    ],\n                                    \"baggage\": [\n                                        {\n                                            \"qsb_flight_pax_code_id\": 1,\n                                            \"qsb_flight_quote_segment_id\": 9,\n                                            \"qsb_airline_code\": null,\n                                            \"qsb_carry_one\": 1,\n                                            \"qsb_allow_pieces\": 1,\n                                            \"qsb_allow_weight\": null,\n                                            \"qsb_allow_unit\": null,\n                                            \"qsb_allow_max_weight\": null,\n                                            \"qsb_allow_max_size\": null\n                                        }\n                                    ]\n                                },\n                                {\n                                    \"uid\": \"fqs6047ae8ce16d5\",\n                                    \"departureTime\": \"2021-03-25 14:25\",\n                                    \"arrivalTime\": \"2021-03-25 16:35\",\n                                    \"flightNumber\": 1889,\n                                    \"bookingClass\": \"E\",\n                                    \"duration\": 190,\n                                    \"departureAirportCode\": \"OTP\",\n                                    \"departureAirportTerminal\": \"\",\n                                    \"arrivalAirportCode\": \"CDG\",\n                                    \"arrivalAirportTerminal\": \"2E\",\n                                    \"operatingAirline\": \"AF\",\n                                    \"marketingAirline\": \"AF\",\n                                    \"airEquipType\": \"319\",\n                                    \"marriageGroup\": \"I\",\n                                    \"cabin\": \"E\",\n                                    \"meal\": \"\",\n                                    \"fareCode\": \"ES50BBST\",\n                                    \"mileage\": 1147,\n                                    \"departureLocation\": \"Bucharest\",\n                                    \"arrivalLocation\": \"Paris\",\n                                    \"stop\": 0,\n                                    \"stops\": [],\n                                    \"baggage\": [\n                                        {\n                                            \"qsb_flight_pax_code_id\": 1,\n                                            \"qsb_flight_quote_segment_id\": 10,\n                                            \"qsb_airline_code\": null,\n                                            \"qsb_carry_one\": 1,\n                                            \"qsb_allow_pieces\": 1,\n                                            \"qsb_allow_weight\": null,\n                                            \"qsb_allow_unit\": null,\n                                            \"qsb_allow_max_weight\": null,\n                                            \"qsb_allow_max_size\": null\n                                        }\n                                    ]\n                                },\n                                {\n                                    \"uid\": \"fqs6047ae8ce248c\",\n                                    \"departureTime\": \"2021-03-25 21:20\",\n                                    \"arrivalTime\": \"2021-03-25 21:45\",\n                                    \"flightNumber\": 1380,\n                                    \"bookingClass\": \"E\",\n                                    \"duration\": 85,\n                                    \"departureAirportCode\": \"CDG\",\n                                    \"departureAirportTerminal\": \"2E\",\n                                    \"arrivalAirportCode\": \"LHR\",\n                                    \"arrivalAirportTerminal\": \"2\",\n                                    \"operatingAirline\": \"AF\",\n                                    \"marketingAirline\": \"AF\",\n                                    \"airEquipType\": \"318\",\n                                    \"marriageGroup\": \"O\",\n                                    \"cabin\": \"E\",\n                                    \"meal\": \"\",\n                                    \"fareCode\": \"ES50BBST\",\n                                    \"mileage\": 214,\n                                    \"departureLocation\": \"Paris\",\n                                    \"arrivalLocation\": \"London\",\n                                    \"stop\": 0,\n                                    \"stops\": [],\n                                    \"baggage\": [\n                                        {\n                                            \"qsb_flight_pax_code_id\": 1,\n                                            \"qsb_flight_quote_segment_id\": 11,\n                                            \"qsb_airline_code\": null,\n                                            \"qsb_carry_one\": 1,\n                                            \"qsb_allow_pieces\": 1,\n                                            \"qsb_allow_weight\": null,\n                                            \"qsb_allow_unit\": null,\n                                            \"qsb_allow_max_weight\": null,\n                                            \"qsb_allow_max_size\": null\n                                        }\n                                    ]\n                                }\n                            ]\n                        }\n                    ],\n                    \"pax_prices\": [\n                        {\n                            \"qpp_fare\": \"271.00\",\n                            \"qpp_tax\": \"55.90\",\n                            \"qpp_system_mark_up\": \"0.00\",\n                            \"qpp_agent_mark_up\": \"89.00\",\n                            \"qpp_origin_fare\": \"271.00\",\n                            \"qpp_origin_currency\": \"USD\",\n                            \"qpp_origin_tax\": \"55.90\",\n                            \"qpp_client_currency\": \"USD\",\n                            \"qpp_client_fare\": \"271.00\",\n                            \"qpp_client_tax\": \"55.90\",\n                            \"paxType\": \"ADT\"\n                        }\n                    ],\n                    \"paxes\": [\n                        {\n                            \"fp_uid\": \"fp604741cd064a1\",\n                            \"fp_pax_id\": null,\n                            \"fp_pax_type\": \"ADT\",\n                            \"fp_first_name\": null,\n                            \"fp_last_name\": null,\n                            \"fp_middle_name\": null,\n                            \"fp_dob\": null\n                        },\n                        {\n                            \"fp_uid\": \"fp6047ae79a875c\",\n                            \"fp_pax_id\": null,\n                            \"fp_pax_type\": \"ADT\",\n                            \"fp_first_name\": null,\n                            \"fp_last_name\": null,\n                            \"fp_middle_name\": null,\n                            \"fp_dob\": null\n                        },\n                        {\n                            \"fp_uid\": \"fp6047ae8cdbb37\",\n                            \"fp_pax_id\": null,\n                            \"fp_pax_type\": \"ADT\",\n                            \"fp_first_name\": null,\n                            \"fp_last_name\": null,\n                            \"fp_middle_name\": null,\n                            \"fp_dob\": null\n                        }\n                    ]\n                }\n            },\n            \"reprotection_quote_list\": [\n                {\n                    \"pq_gid\": \"289ddd4b911e88d7bf1eb14be44754d7\",\n                    \"pq_name\": \"test\",\n                    \"pq_order_id\": 35,\n                    \"pq_description\": null,\n                    \"pq_status_id\": 1,\n                    \"pq_price\": 0,\n                    \"pq_origin_price\": 0,\n                    \"pq_client_price\": 0,\n                    \"pq_service_fee_sum\": 0,\n                    \"pq_origin_currency\": null,\n                    \"pq_client_currency\": \"USD\",\n                    \"pq_status_name\": \"New\",\n                    \"pq_files\": [],\n                    \"data\": {\n                        \"fq_flight_id\": 2,\n                        \"fq_source_id\": null,\n                        \"fq_product_quote_id\": 191,\n                        \"gds\": \"S\",\n                        \"pcc\": \"8KI0\",\n                        \"fq_gds_offer_id\": null,\n                        \"fq_type_id\": 3,\n                        \"fq_cabin_class\": \"E\",\n                        \"fq_trip_type_id\": 1,\n                        \"validatingCarrier\": \"PR\",\n                        \"fq_fare_type_id\": 2,\n                        \"fq_last_ticket_date\": null,\n                        \"fq_origin_search_data\": \"{\\\"gds\\\":\\\"S\\\",\\\"pcc\\\":\\\"8KI0\\\",\\\"trips\\\":[{\\\"duration\\\":848,\\\"segments\\\":[{\\\"meal\\\":null,\\\"stop\\\":0,\\\"cabin\\\":\\\"Y\\\",\\\"stops\\\":[],\\\"baggage\\\":[],\\\"brandId\\\":null,\\\"mileage\\\":null,\\\"duration\\\":600,\\\"fareCode\\\":null,\\\"arrivalTime\\\":\\\"2021-06-11 07:30:00\\\",\\\"airEquipType\\\":null,\\\"bookingClass\\\":\\\"E\\\",\\\"flightNumber\\\":\\\"8727\\\",\\\"departureTime\\\":\\\"2021-06-10 21:30:00\\\",\\\"marriageGroup\\\":\\\"\\\",\\\"marketingAirline\\\":\\\"DL\\\",\\\"operatingAirline\\\":null,\\\"arrivalAirportCode\\\":\\\"CDG\\\",\\\"departureAirportCode\\\":\\\"ROB\\\",\\\"arrivalAirportTerminal\\\":null,\\\"departureAirportTerminal\\\":null},{\\\"meal\\\":null,\\\"stop\\\":0,\\\"cabin\\\":\\\"Y\\\",\\\"stops\\\":[],\\\"baggage\\\":[],\\\"brandId\\\":null,\\\"mileage\\\":null,\\\"duration\\\":160,\\\"fareCode\\\":null,\\\"arrivalTime\\\":\\\"2021-06-11 12:55:00\\\",\\\"airEquipType\\\":null,\\\"bookingClass\\\":\\\"E\\\",\\\"flightNumber\\\":\\\"8395\\\",\\\"departureTime\\\":\\\"2021-06-11 10:15:00\\\",\\\"marriageGroup\\\":\\\"\\\",\\\"marketingAirline\\\":\\\"DL\\\",\\\"operatingAirline\\\":null,\\\"arrivalAirportCode\\\":\\\"LAX\\\",\\\"departureAirportCode\\\":\\\"CDG\\\",\\\"arrivalAirportTerminal\\\":null,\\\"departureAirportTerminal\\\":null},{\\\"meal\\\":null,\\\"stop\\\":0,\\\"cabin\\\":\\\"Y\\\",\\\"stops\\\":[],\\\"baggage\\\":[],\\\"brandId\\\":null,\\\"mileage\\\":null,\\\"duration\\\":88,\\\"fareCode\\\":null,\\\"arrivalTime\\\":\\\"2021-06-11 19:14:00\\\",\\\"airEquipType\\\":null,\\\"bookingClass\\\":\\\"E\\\",\\\"flightNumber\\\":\\\"3580\\\",\\\"departureTime\\\":\\\"2021-06-11 17:46:00\\\",\\\"marriageGroup\\\":\\\"\\\",\\\"marketingAirline\\\":\\\"DL\\\",\\\"operatingAirline\\\":null,\\\"arrivalAirportCode\\\":\\\"SMF\\\",\\\"departureAirportCode\\\":\\\"LAX\\\",\\\"arrivalAirportTerminal\\\":null,\\\"departureAirportTerminal\\\":null}]},{\\\"duration\\\":1233,\\\"segments\\\":[{\\\"meal\\\":null,\\\"stop\\\":0,\\\"cabin\\\":\\\"Y\\\",\\\"stops\\\":[],\\\"baggage\\\":[],\\\"brandId\\\":null,\\\"mileage\\\":null,\\\"duration\\\":127,\\\"fareCode\\\":null,\\\"arrivalTime\\\":\\\"2021-09-10 12:34\\\",\\\"airEquipType\\\":\\\"E7W\\\",\\\"bookingClass\\\":\\\"E\\\",\\\"flightNumber\\\":\\\"3864\\\",\\\"departureTime\\\":\\\"2021-09-10 10:27\\\",\\\"marriageGroup\\\":\\\"\\\",\\\"marketingAirline\\\":\\\"DL\\\",\\\"operatingAirline\\\":null,\\\"arrivalAirportCode\\\":\\\"SEA\\\",\\\"departureAirportCode\\\":\\\"SMF\\\",\\\"arrivalAirportTerminal\\\":null,\\\"departureAirportTerminal\\\":null},{\\\"meal\\\":null,\\\"stop\\\":0,\\\"cabin\\\":\\\"Y\\\",\\\"stops\\\":[],\\\"baggage\\\":[],\\\"brandId\\\":null,\\\"mileage\\\":null,\\\"duration\\\":201,\\\"fareCode\\\":null,\\\"arrivalTime\\\":\\\"2021-09-10 13:34\\\",\\\"airEquipType\\\":\\\"739\\\",\\\"bookingClass\\\":\\\"E\\\",\\\"flightNumber\\\":\\\"759\\\",\\\"departureTime\\\":\\\"2021-09-10 08:13\\\",\\\"marriageGroup\\\":\\\"\\\",\\\"marketingAirline\\\":\\\"DL\\\",\\\"operatingAirline\\\":null,\\\"arrivalAirportCode\\\":\\\"MSP\\\",\\\"departureAirportCode\\\":\\\"SEA\\\",\\\"arrivalAirportTerminal\\\":null,\\\"departureAirportTerminal\\\":null},{\\\"meal\\\":null,\\\"stop\\\":0,\\\"cabin\\\":\\\"Y\\\",\\\"stops\\\":[],\\\"baggage\\\":[],\\\"brandId\\\":null,\\\"mileage\\\":null,\\\"duration\\\":510,\\\"fareCode\\\":null,\\\"arrivalTime\\\":\\\"2021-09-11 08:15\\\",\\\"airEquipType\\\":\\\"333\\\",\\\"bookingClass\\\":\\\"E\\\",\\\"flightNumber\\\":\\\"42\\\",\\\"departureTime\\\":\\\"2021-09-10 16:45\\\",\\\"marriageGroup\\\":\\\"\\\",\\\"marketingAirline\\\":\\\"DL\\\",\\\"operatingAirline\\\":null,\\\"arrivalAirportCode\\\":\\\"CDG\\\",\\\"departureAirportCode\\\":\\\"MSP\\\",\\\"arrivalAirportTerminal\\\":null,\\\"departureAirportTerminal\\\":null},{\\\"meal\\\":null,\\\"stop\\\":1,\\\"cabin\\\":\\\"Y\\\",\\\"stops\\\":[{\\\"duration\\\":85,\\\"equipment\\\":null,\\\"elapsedTime\\\":null,\\\"locationCode\\\":\\\"BKO\\\",\\\"arrivalDateTime\\\":\\\"2021-09-11 13:55\\\",\\\"departureDateTime\\\":\\\"2021-09-11 15:20\\\"}],\\\"baggage\\\":[],\\\"brandId\\\":null,\\\"mileage\\\":null,\\\"duration\\\":395,\\\"fareCode\\\":null,\\\"arrivalTime\\\":\\\"2021-09-11 16:50\\\",\\\"airEquipType\\\":\\\"359\\\",\\\"bookingClass\\\":\\\"E\\\",\\\"flightNumber\\\":\\\"7351\\\",\\\"departureTime\\\":\\\"2021-09-11 10:15\\\",\\\"marriageGroup\\\":\\\"\\\",\\\"marketingAirline\\\":\\\"DL\\\",\\\"operatingAirline\\\":null,\\\"arrivalAirportCode\\\":\\\"ROB\\\",\\\"departureAirportCode\\\":\\\"CDG\\\",\\\"arrivalAirportTerminal\\\":null,\\\"departureAirportTerminal\\\":null}]}],\\\"fareType\\\":\\\"SR\\\",\\\"itineraryDump\\\":[\\\"DL8727E 10JUN ROBCDG TK  930P  730A+ 11JUN TH\\/FR\\\",\\\"DL8395E 11JUN CDGLAX HK 1015A 1255P FR\\\",\\\"DL3580E 11JUN LAXSMF HK  546P  714P FR\\\",\\\"DL3864E 10SEP SMFSEA TK 1027A 1234P FR\\\",\\\"DL 759E 10SEP SEAMSP TK  813A  134P FR\\\",\\\"DL  42E 10SEP MSPCDG TK  445P  815A+ 11SEP FR\\/SA\\\",\\\"DL7351E 11SEP CDGROB HK 1015A  450P SA\\\",\\\"DL7351E 11SEP BKOROB HK  320P  450P SA\\\"],\\\"validatingCarrier\\\":\\\"PR\\\"}\",\n                        \"fq_json_booking\": null,\n                        \"fq_ticket_json\": null,\n                        \"itineraryDump\": [\n                            \"1  DL8727E  10JUN  ROBCDG    930P    730A+  11JUN  TH/FR\",\n                            \"2  DL8395E  11JUN  CDGLAX  1015A  1255P  FR\",\n                            \"3  DL3580E  11JUN  LAXSMF    546P    714P  FR\",\n                            \"4  DL3864E  10SEP  SMFSEA  1027A  1234P  FR\",\n                            \"5  DL  759E  10SEP  SEAMSP    813A    134P  FR\",\n                            \"6  DL    42E  10SEP  MSPCDG    445P    815A+  11SEP  FR/SA\",\n                            \"7  DL7351E  11SEP  CDGROB  1015A    450P  SA\"\n                        ],\n                        \"booking_id\": \"1\",\n                        \"fq_type_name\": \"ReProtection\",\n                        \"fq_fare_type_name\": \"Private\",\n                        \"fareType\": \"SR\",\n                        \"flight\": {\n                            \"fl_product_id\": 44,\n                            \"fl_trip_type_id\": 1,\n                            \"fl_cabin_class\": \"E\",\n                            \"fl_adults\": 1,\n                            \"fl_children\": 0,\n                            \"fl_infants\": 0,\n                            \"fl_trip_type_name\": \"One Way\",\n                            \"fl_cabin_class_name\": \"Economy\"\n                        },\n                        \"trips\": [\n                            {\n                                \"uid\": \"fqt6116010ce3d6b\",\n                                \"key\": null,\n                                \"duration\": 848,\n                                \"segments\": [\n                                    {\n                                        \"uid\": \"fqs6116010ce9306\",\n                                        \"departureTime\": \"2021-06-10 21:30\",\n                                        \"arrivalTime\": \"2021-06-11 07:30\",\n                                        \"flightNumber\": 8727,\n                                        \"bookingClass\": \"E\",\n                                        \"duration\": 600,\n                                        \"departureAirportCode\": \"ROB\",\n                                        \"departureAirportTerminal\": \"\",\n                                        \"arrivalAirportCode\": \"CDG\",\n                                        \"arrivalAirportTerminal\": \"\",\n                                        \"operatingAirline\": \"\",\n                                        \"marketingAirline\": \"DL\",\n                                        \"airEquipType\": \"\",\n                                        \"marriageGroup\": \"\",\n                                        \"cabin\": \"E\",\n                                        \"meal\": \"\",\n                                        \"fareCode\": \"\",\n                                        \"mileage\": null,\n                                        \"departureLocation\": \"Monrovia\",\n                                        \"arrivalLocation\": \"Paris\",\n                                        \"stop\": 0,\n                                        \"stops\": []\n                                    },\n                                    {\n                                        \"uid\": \"fqs6116010ceb91e\",\n                                        \"departureTime\": \"2021-06-11 10:15\",\n                                        \"arrivalTime\": \"2021-06-11 12:55\",\n                                        \"flightNumber\": 8395,\n                                        \"bookingClass\": \"E\",\n                                        \"duration\": 160,\n                                        \"departureAirportCode\": \"CDG\",\n                                        \"departureAirportTerminal\": \"\",\n                                        \"arrivalAirportCode\": \"LAX\",\n                                        \"arrivalAirportTerminal\": \"\",\n                                        \"operatingAirline\": \"\",\n                                        \"marketingAirline\": \"DL\",\n                                        \"airEquipType\": \"\",\n                                        \"marriageGroup\": \"\",\n                                        \"cabin\": \"E\",\n                                        \"meal\": \"\",\n                                        \"fareCode\": \"\",\n                                        \"mileage\": null,\n                                        \"departureLocation\": \"Paris\",\n                                        \"arrivalLocation\": \"Los Angeles\",\n                                        \"stop\": 0,\n                                        \"stops\": []\n                                    },\n                                    {\n                                        \"uid\": \"fqs6116010cebd9a\",\n                                        \"departureTime\": \"2021-06-11 17:46\",\n                                        \"arrivalTime\": \"2021-06-11 19:14\",\n                                        \"flightNumber\": 3580,\n                                        \"bookingClass\": \"E\",\n                                        \"duration\": 88,\n                                        \"departureAirportCode\": \"LAX\",\n                                        \"departureAirportTerminal\": \"\",\n                                        \"arrivalAirportCode\": \"SMF\",\n                                        \"arrivalAirportTerminal\": \"\",\n                                        \"operatingAirline\": \"\",\n                                        \"marketingAirline\": \"DL\",\n                                        \"airEquipType\": \"\",\n                                        \"marriageGroup\": \"\",\n                                        \"cabin\": \"E\",\n                                        \"meal\": \"\",\n                                        \"fareCode\": \"\",\n                                        \"mileage\": null,\n                                        \"departureLocation\": \"Los Angeles\",\n                                        \"arrivalLocation\": \"Sacramento\",\n                                        \"stop\": 0,\n                                        \"stops\": []\n                                    }\n                                ]\n                            },\n                            {\n                                \"uid\": \"fqt6116010cec0cf\",\n                                \"key\": null,\n                                \"duration\": 1233,\n                                \"segments\": [\n                                    {\n                                        \"uid\": \"fqs6116010cec45b\",\n                                        \"departureTime\": \"2021-09-10 10:27\",\n                                        \"arrivalTime\": \"2021-09-10 12:34\",\n                                        \"flightNumber\": 3864,\n                                        \"bookingClass\": \"E\",\n                                        \"duration\": 127,\n                                        \"departureAirportCode\": \"SMF\",\n                                        \"departureAirportTerminal\": \"\",\n                                        \"arrivalAirportCode\": \"SEA\",\n                                        \"arrivalAirportTerminal\": \"\",\n                                        \"operatingAirline\": \"\",\n                                        \"marketingAirline\": \"DL\",\n                                        \"airEquipType\": \"E7W\",\n                                        \"marriageGroup\": \"\",\n                                        \"cabin\": \"E\",\n                                        \"meal\": \"\",\n                                        \"fareCode\": \"\",\n                                        \"mileage\": null,\n                                        \"departureLocation\": \"Sacramento\",\n                                        \"arrivalLocation\": \"Seattle\",\n                                        \"stop\": 0,\n                                        \"stops\": []\n                                    },\n                                    {\n                                        \"uid\": \"fqs6116010cec885\",\n                                        \"departureTime\": \"2021-09-10 08:13\",\n                                        \"arrivalTime\": \"2021-09-10 13:34\",\n                                        \"flightNumber\": 759,\n                                        \"bookingClass\": \"E\",\n                                        \"duration\": 201,\n                                        \"departureAirportCode\": \"SEA\",\n                                        \"departureAirportTerminal\": \"\",\n                                        \"arrivalAirportCode\": \"MSP\",\n                                        \"arrivalAirportTerminal\": \"\",\n                                        \"operatingAirline\": \"\",\n                                        \"marketingAirline\": \"DL\",\n                                        \"airEquipType\": \"739\",\n                                        \"marriageGroup\": \"\",\n                                        \"cabin\": \"E\",\n                                        \"meal\": \"\",\n                                        \"fareCode\": \"\",\n                                        \"mileage\": null,\n                                        \"departureLocation\": \"Seattle\",\n                                        \"arrivalLocation\": \"Minneapolis\",\n                                        \"stop\": 0,\n                                        \"stops\": []\n                                    },\n                                    {\n                                        \"uid\": \"fqs6116010ceccdb\",\n                                        \"departureTime\": \"2021-09-10 16:45\",\n                                        \"arrivalTime\": \"2021-09-11 08:15\",\n                                        \"flightNumber\": 42,\n                                        \"bookingClass\": \"E\",\n                                        \"duration\": 510,\n                                        \"departureAirportCode\": \"MSP\",\n                                        \"departureAirportTerminal\": \"\",\n                                        \"arrivalAirportCode\": \"CDG\",\n                                        \"arrivalAirportTerminal\": \"\",\n                                        \"operatingAirline\": \"\",\n                                        \"marketingAirline\": \"DL\",\n                                        \"airEquipType\": \"333\",\n                                        \"marriageGroup\": \"\",\n                                        \"cabin\": \"E\",\n                                        \"meal\": \"\",\n                                        \"fareCode\": \"\",\n                                        \"mileage\": null,\n                                        \"departureLocation\": \"Minneapolis\",\n                                        \"arrivalLocation\": \"Paris\",\n                                        \"stop\": 0,\n                                        \"stops\": []\n                                    },\n                                    {\n                                        \"uid\": \"fqs6116010ced118\",\n                                        \"departureTime\": \"2021-09-11 10:15\",\n                                        \"arrivalTime\": \"2021-09-11 16:50\",\n                                        \"flightNumber\": 7351,\n                                        \"bookingClass\": \"E\",\n                                        \"duration\": 395,\n                                        \"departureAirportCode\": \"CDG\",\n                                        \"departureAirportTerminal\": \"\",\n                                        \"arrivalAirportCode\": \"ROB\",\n                                        \"arrivalAirportTerminal\": \"\",\n                                        \"operatingAirline\": \"\",\n                                        \"marketingAirline\": \"DL\",\n                                        \"airEquipType\": \"359\",\n                                        \"marriageGroup\": \"\",\n                                        \"cabin\": \"E\",\n                                        \"meal\": \"\",\n                                        \"fareCode\": \"\",\n                                        \"mileage\": null,\n                                        \"departureLocation\": \"Paris\",\n                                        \"arrivalLocation\": \"Monrovia\",\n                                        \"stop\": 1,\n                                        \"stops\": [\n                                            {\n                                                \"qss_quote_segment_id\": 26,\n                                                \"locationCode\": \"BKO\",\n                                                \"equipment\": null,\n                                                \"elapsedTime\": null,\n                                                \"duration\": 85,\n                                                \"departureDateTime\": \"2021-09-11 15:20\",\n                                                \"arrivalDateTime\": \"2021-09-11 13:55\"\n                                            }\n                                        ]\n                                    }\n                                ]\n                            }\n                        ],\n                        \"paxes\": [\n                            {\n                                \"fp_uid\": \"fp604741cd064a1\",\n                                \"fp_pax_id\": null,\n                                \"fp_pax_type\": \"ADT\",\n                                \"fp_first_name\": null,\n                                \"fp_last_name\": null,\n                                \"fp_middle_name\": null,\n                                \"fp_dob\": null\n                            },\n                            {\n                                \"fp_uid\": \"fp6047ae79a875c\",\n                                \"fp_pax_id\": null,\n                                \"fp_pax_type\": \"ADT\",\n                                \"fp_first_name\": null,\n                                \"fp_last_name\": null,\n                                \"fp_middle_name\": null,\n                                \"fp_dob\": null\n                            },\n                            {\n                                \"fp_uid\": \"fp6047ae8cdbb37\",\n                                \"fp_pax_id\": null,\n                                \"fp_pax_type\": \"ADT\",\n                                \"fp_first_name\": null,\n                                \"fp_last_name\": null,\n                                \"fp_middle_name\": null,\n                                \"fp_dob\": null\n                            }\n                        ]\n                    }\n                }\n            ]\n        }",
+          "content": "\nHTTP/1.1 200 OK\n        {\n            \"status\": 200,\n            \"message\": \"OK\",\n            \"product_quote\": {\n                \"pq_gid\": \"1865ef55f3c6c01dca1f4f3128e82733\",\n                \"pq_name\": \"test\",\n                \"pq_order_id\": 35,\n                \"pq_description\": null,\n                \"pq_status_id\": 10,\n                \"pq_price\": 430.46,\n                \"pq_origin_price\": 326.9,\n                \"pq_client_price\": 430.46,\n                \"pq_service_fee_sum\": 14.56,\n                \"pq_origin_currency\": \"USD\",\n                \"pq_client_currency\": \"USD\",\n                \"pq_status_name\": \"Declined\",\n                \"pq_files\": [],\n                \"data\": {\n                    \"fq_flight_id\": 2,\n                    \"fq_source_id\": null,\n                    \"fq_product_quote_id\": 184,\n                    \"gds\": \"T\",\n                    \"pcc\": \"E9V\",\n                    \"fq_gds_offer_id\": null,\n                    \"fq_type_id\": 0,\n                    \"fq_cabin_class\": \"E\",\n                    \"fq_trip_type_id\": 1,\n                    \"validatingCarrier\": \"AF\",\n                    \"fq_fare_type_id\": 1,\n                    \"fq_last_ticket_date\": \"2021-03-25\",\n                    \"fq_origin_search_data\": \"{\\\"key\\\":\\\"2_U0FMMTAxKlkxMDAwL0tJVkxPTjIwMjEtMDMtMjUqQUZ+I0FGNjYwMiNBRjE4ODkjQUYxMzgwfmxjOmVuX3Vz\\\",\\\"routingId\\\":2,\\\"prices\\\":{\\\"lastTicketDate\\\":\\\"2021-03-25\\\",\\\"totalPrice\\\":326.9,\\\"totalTax\\\":55.9,\\\"comm\\\":0,\\\"isCk\\\":false,\\\"markupId\\\":0,\\\"markupUid\\\":\\\"\\\",\\\"markup\\\":0},\\\"passengers\\\":{\\\"ADT\\\":{\\\"codeAs\\\":\\\"ADT\\\",\\\"cnt\\\":1,\\\"baseFare\\\":271,\\\"pubBaseFare\\\":271,\\\"baseTax\\\":55.9,\\\"markup\\\":0,\\\"comm\\\":0,\\\"price\\\":326.9,\\\"tax\\\":55.9,\\\"oBaseFare\\\":{\\\"amount\\\":271,\\\"currency\\\":\\\"USD\\\"},\\\"oBaseTax\\\":{\\\"amount\\\":55.9,\\\"currency\\\":\\\"USD\\\"}}},\\\"penalties\\\":{\\\"exchange\\\":false,\\\"refund\\\":false,\\\"list\\\":[{\\\"type\\\":\\\"re\\\",\\\"applicability\\\":\\\"before\\\",\\\"permitted\\\":false},{\\\"type\\\":\\\"re\\\",\\\"applicability\\\":\\\"after\\\",\\\"permitted\\\":false}]},\\\"trips\\\":[{\\\"tripId\\\":1,\\\"segments\\\":[{\\\"segmentId\\\":1,\\\"departureTime\\\":\\\"2021-03-25 05:25\\\",\\\"arrivalTime\\\":\\\"2021-03-25 06:40\\\",\\\"stop\\\":0,\\\"stops\\\":[],\\\"flightNumber\\\":\\\"6602\\\",\\\"bookingClass\\\":\\\"E\\\",\\\"duration\\\":75,\\\"departureAirportCode\\\":\\\"KIV\\\",\\\"departureAirportTerminal\\\":\\\"\\\",\\\"arrivalAirportCode\\\":\\\"OTP\\\",\\\"arrivalAirportTerminal\\\":\\\"\\\",\\\"operatingAirline\\\":\\\"RO\\\",\\\"airEquipType\\\":\\\"AT7\\\",\\\"marketingAirline\\\":\\\"AF\\\",\\\"marriageGroup\\\":\\\"I\\\",\\\"mileage\\\":215,\\\"cabin\\\":\\\"Y\\\",\\\"brandId\\\":\\\"657936\\\",\\\"brandName\\\":\\\"Economy Standard\\\",\\\"meal\\\":\\\"\\\",\\\"fareCode\\\":\\\"ES50BBST\\\",\\\"baggage\\\":{\\\"ADT\\\":{\\\"carryOn\\\":true,\\\"allowPieces\\\":1}},\\\"recheckBaggage\\\":false},{\\\"segmentId\\\":2,\\\"departureTime\\\":\\\"2021-03-25 14:25\\\",\\\"arrivalTime\\\":\\\"2021-03-25 16:35\\\",\\\"stop\\\":0,\\\"stops\\\":[],\\\"flightNumber\\\":\\\"1889\\\",\\\"bookingClass\\\":\\\"E\\\",\\\"duration\\\":190,\\\"departureAirportCode\\\":\\\"OTP\\\",\\\"departureAirportTerminal\\\":\\\"\\\",\\\"arrivalAirportCode\\\":\\\"CDG\\\",\\\"arrivalAirportTerminal\\\":\\\"2E\\\",\\\"operatingAirline\\\":\\\"AF\\\",\\\"airEquipType\\\":\\\"319\\\",\\\"marketingAirline\\\":\\\"AF\\\",\\\"marriageGroup\\\":\\\"I\\\",\\\"mileage\\\":1147,\\\"cabin\\\":\\\"Y\\\",\\\"brandId\\\":\\\"657936\\\",\\\"brandName\\\":\\\"Economy Standard\\\",\\\"meal\\\":\\\"\\\",\\\"fareCode\\\":\\\"ES50BBST\\\",\\\"baggage\\\":{\\\"ADT\\\":{\\\"carryOn\\\":true,\\\"allowPieces\\\":1}},\\\"recheckBaggage\\\":false},{\\\"segmentId\\\":3,\\\"departureTime\\\":\\\"2021-03-25 21:20\\\",\\\"arrivalTime\\\":\\\"2021-03-25 21:45\\\",\\\"stop\\\":0,\\\"stops\\\":[],\\\"flightNumber\\\":\\\"1380\\\",\\\"bookingClass\\\":\\\"E\\\",\\\"duration\\\":85,\\\"departureAirportCode\\\":\\\"CDG\\\",\\\"departureAirportTerminal\\\":\\\"2E\\\",\\\"arrivalAirportCode\\\":\\\"LHR\\\",\\\"arrivalAirportTerminal\\\":\\\"2\\\",\\\"operatingAirline\\\":\\\"AF\\\",\\\"airEquipType\\\":\\\"318\\\",\\\"marketingAirline\\\":\\\"AF\\\",\\\"marriageGroup\\\":\\\"O\\\",\\\"mileage\\\":214,\\\"cabin\\\":\\\"Y\\\",\\\"brandId\\\":\\\"657936\\\",\\\"brandName\\\":\\\"Economy Standard\\\",\\\"meal\\\":\\\"\\\",\\\"fareCode\\\":\\\"ES50BBST\\\",\\\"baggage\\\":{\\\"ADT\\\":{\\\"carryOn\\\":true,\\\"allowPieces\\\":1}},\\\"recheckBaggage\\\":false}],\\\"duration\\\":1100}],\\\"maxSeats\\\":9,\\\"paxCnt\\\":1,\\\"validatingCarrier\\\":\\\"AF\\\",\\\"gds\\\":\\\"T\\\",\\\"pcc\\\":\\\"E9V\\\",\\\"cons\\\":\\\"GTT\\\",\\\"fareType\\\":\\\"PUB\\\",\\\"tripType\\\":\\\"OW\\\",\\\"cabin\\\":\\\"Y\\\",\\\"currency\\\":\\\"USD\\\",\\\"currencies\\\":[\\\"USD\\\"],\\\"currencyRates\\\":{\\\"USDUSD\\\":{\\\"from\\\":\\\"USD\\\",\\\"to\\\":\\\"USD\\\",\\\"rate\\\":1}},\\\"keys\\\":{\\\"travelport\\\":{\\\"traceId\\\":\\\"661f0376-d209-4216-a0d1-97c8f7cf5746\\\",\\\"availabilitySources\\\":\\\"S,S,S\\\",\\\"type\\\":\\\"T\\\"},\\\"seatHoldSeg\\\":{\\\"trip\\\":0,\\\"segment\\\":0,\\\"seats\\\":9}},\\\"ngsFeatures\\\":{\\\"stars\\\":1,\\\"name\\\":\\\"Economy Standard\\\",\\\"list\\\":[]},\\\"meta\\\":{\\\"eip\\\":0,\\\"noavail\\\":false,\\\"searchId\\\":\\\"U0FMMTAxWTEwMDB8S0lWTE9OMjAyMS0wMy0yNQ==\\\",\\\"lang\\\":\\\"en\\\",\\\"rank\\\":5.9333334,\\\"cheapest\\\":false,\\\"fastest\\\":false,\\\"best\\\":false,\\\"bags\\\":1,\\\"country\\\":\\\"us\\\"},\\\"price\\\":326.9,\\\"originRate\\\":1,\\\"stops\\\":[2],\\\"time\\\":[{\\\"departure\\\":\\\"2021-03-25 05:25\\\",\\\"arrival\\\":\\\"2021-03-25 21:45\\\"}],\\\"bagFilter\\\":1,\\\"airportChange\\\":false,\\\"technicalStopCnt\\\":0,\\\"duration\\\":[1100],\\\"totalDuration\\\":1100,\\\"topCriteria\\\":\\\"\\\",\\\"rank\\\":5.9333334}\",\n                    \"fq_json_booking\": null,\n                    \"fq_ticket_json\": null,\n                    \"itineraryDump\": [\n                        \"1  AF6602E  25MAR  KIVOTP    525A    640A  TH OPERATED BY RO\",\n                        \"2  AF1889E  25MAR  OTPCDG    225P    435P  TH\",\n                        \"3  AF1380E  25MAR  CDGLHR    920P    945P  TH\"\n                    ],\n                    \"booking_id\": \"1\",\n                    \"fq_type_name\": \"Base\",\n                    \"fq_fare_type_name\": \"Public\",\n                    \"fareType\": \"PUB\",\n                    \"flight\": {\n                        \"fl_product_id\": 44,\n                        \"fl_trip_type_id\": 1,\n                        \"fl_cabin_class\": \"E\",\n                        \"fl_adults\": 1,\n                        \"fl_children\": 0,\n                        \"fl_infants\": 0,\n                        \"fl_trip_type_name\": \"One Way\",\n                        \"fl_cabin_class_name\": \"Economy\"\n                    },\n                    \"trips\": [\n                        {\n                            \"uid\": \"fqt6047ae8cde4af\",\n                            \"key\": null,\n                            \"duration\": 1100,\n                            \"segments\": [\n                                {\n                                    \"uid\": \"fqs6047ae8cdf8d9\",\n                                    \"departureTime\": \"2021-03-25 05:25\",\n                                    \"arrivalTime\": \"2021-03-25 06:40\",\n                                    \"flightNumber\": 6602,\n                                    \"bookingClass\": \"E\",\n                                    \"duration\": 75,\n                                    \"departureAirportCode\": \"KIV\",\n                                    \"departureAirportTerminal\": \"\",\n                                    \"arrivalAirportCode\": \"OTP\",\n                                    \"arrivalAirportTerminal\": \"\",\n                                    \"operatingAirline\": \"RO\",\n                                    \"marketingAirline\": \"AF\",\n                                    \"airEquipType\": \"AT7\",\n                                    \"marriageGroup\": \"I\",\n                                    \"cabin\": \"E\",\n                                    \"meal\": \"\",\n                                    \"fareCode\": \"ES50BBST\",\n                                    \"mileage\": 215,\n                                    \"departureLocation\": \"Chisinau\",\n                                    \"arrivalLocation\": \"Bucharest\",\n                                    \"stop\": 1,\n                                    \"stops\": [\n                                        {\n                                            \"qss_quote_segment_id\": 9,\n                                            \"locationCode\": \"SCL\",\n                                            \"equipment\": \"\",\n                                            \"elapsedTime\": 120,\n                                            \"duration\": 120,\n                                            \"departureDateTime\": \"2021-09-09 00:00\",\n                                            \"arrivalDateTime\": \"2021-09-08 00:00\"\n                                        }\n                                    ],\n                                    \"baggage\": [\n                                        {\n                                            \"qsb_flight_pax_code_id\": 1,\n                                            \"qsb_flight_quote_segment_id\": 9,\n                                            \"qsb_airline_code\": null,\n                                            \"qsb_carry_one\": 1,\n                                            \"qsb_allow_pieces\": 1,\n                                            \"qsb_allow_weight\": null,\n                                            \"qsb_allow_unit\": null,\n                                            \"qsb_allow_max_weight\": null,\n                                            \"qsb_allow_max_size\": null\n                                        }\n                                    ]\n                                },\n                                {\n                                    \"uid\": \"fqs6047ae8ce16d5\",\n                                    \"departureTime\": \"2021-03-25 14:25\",\n                                    \"arrivalTime\": \"2021-03-25 16:35\",\n                                    \"flightNumber\": 1889,\n                                    \"bookingClass\": \"E\",\n                                    \"duration\": 190,\n                                    \"departureAirportCode\": \"OTP\",\n                                    \"departureAirportTerminal\": \"\",\n                                    \"arrivalAirportCode\": \"CDG\",\n                                    \"arrivalAirportTerminal\": \"2E\",\n                                    \"operatingAirline\": \"AF\",\n                                    \"marketingAirline\": \"AF\",\n                                    \"airEquipType\": \"319\",\n                                    \"marriageGroup\": \"I\",\n                                    \"cabin\": \"E\",\n                                    \"meal\": \"\",\n                                    \"fareCode\": \"ES50BBST\",\n                                    \"mileage\": 1147,\n                                    \"departureLocation\": \"Bucharest\",\n                                    \"arrivalLocation\": \"Paris\",\n                                    \"stop\": 0,\n                                    \"stops\": [],\n                                    \"baggage\": [\n                                        {\n                                            \"qsb_flight_pax_code_id\": 1,\n                                            \"qsb_flight_quote_segment_id\": 10,\n                                            \"qsb_airline_code\": null,\n                                            \"qsb_carry_one\": 1,\n                                            \"qsb_allow_pieces\": 1,\n                                            \"qsb_allow_weight\": null,\n                                            \"qsb_allow_unit\": null,\n                                            \"qsb_allow_max_weight\": null,\n                                            \"qsb_allow_max_size\": null\n                                        }\n                                    ]\n                                },\n                                {\n                                    \"uid\": \"fqs6047ae8ce248c\",\n                                    \"departureTime\": \"2021-03-25 21:20\",\n                                    \"arrivalTime\": \"2021-03-25 21:45\",\n                                    \"flightNumber\": 1380,\n                                    \"bookingClass\": \"E\",\n                                    \"duration\": 85,\n                                    \"departureAirportCode\": \"CDG\",\n                                    \"departureAirportTerminal\": \"2E\",\n                                    \"arrivalAirportCode\": \"LHR\",\n                                    \"arrivalAirportTerminal\": \"2\",\n                                    \"operatingAirline\": \"AF\",\n                                    \"marketingAirline\": \"AF\",\n                                    \"airEquipType\": \"318\",\n                                    \"marriageGroup\": \"O\",\n                                    \"cabin\": \"E\",\n                                    \"meal\": \"\",\n                                    \"fareCode\": \"ES50BBST\",\n                                    \"mileage\": 214,\n                                    \"departureLocation\": \"Paris\",\n                                    \"arrivalLocation\": \"London\",\n                                    \"stop\": 0,\n                                    \"stops\": [],\n                                    \"baggage\": [\n                                        {\n                                            \"qsb_flight_pax_code_id\": 1,\n                                            \"qsb_flight_quote_segment_id\": 11,\n                                            \"qsb_airline_code\": null,\n                                            \"qsb_carry_one\": 1,\n                                            \"qsb_allow_pieces\": 1,\n                                            \"qsb_allow_weight\": null,\n                                            \"qsb_allow_unit\": null,\n                                            \"qsb_allow_max_weight\": null,\n                                            \"qsb_allow_max_size\": null\n                                        }\n                                    ]\n                                }\n                            ]\n                        }\n                    ],\n                    \"pax_prices\": [\n                        {\n                            \"qpp_fare\": \"271.00\",\n                            \"qpp_tax\": \"55.90\",\n                            \"qpp_system_mark_up\": \"0.00\",\n                            \"qpp_agent_mark_up\": \"89.00\",\n                            \"qpp_origin_fare\": \"271.00\",\n                            \"qpp_origin_currency\": \"USD\",\n                            \"qpp_origin_tax\": \"55.90\",\n                            \"qpp_client_currency\": \"USD\",\n                            \"qpp_client_fare\": \"271.00\",\n                            \"qpp_client_tax\": \"55.90\",\n                            \"paxType\": \"ADT\"\n                        }\n                    ],\n                    \"paxes\": [\n                        {\n                            \"fp_uid\": \"fp604741cd064a1\",\n                            \"fp_pax_id\": null,\n                            \"fp_pax_type\": \"ADT\",\n                            \"fp_first_name\": null,\n                            \"fp_last_name\": null,\n                            \"fp_middle_name\": null,\n                            \"fp_dob\": null\n                        },\n                        {\n                            \"fp_uid\": \"fp6047ae79a875c\",\n                            \"fp_pax_id\": null,\n                            \"fp_pax_type\": \"ADT\",\n                            \"fp_first_name\": null,\n                            \"fp_last_name\": null,\n                            \"fp_middle_name\": null,\n                            \"fp_dob\": null\n                        },\n                        {\n                            \"fp_uid\": \"fp6047ae8cdbb37\",\n                            \"fp_pax_id\": null,\n                            \"fp_pax_type\": \"ADT\",\n                            \"fp_first_name\": null,\n                            \"fp_last_name\": null,\n                            \"fp_middle_name\": null,\n                            \"fp_dob\": null\n                        }\n                    ]\n                }\n            },\n            \"quote_list\": [\n                {\n                    \"relation_type\": \"Voluntary Exchange\",\n                    \"relation_type_id\": 5, \"(1-replace, 2-clone, 3-alternative, 4-reProtection, 5-voluntary exchange)\"\n                    \"recommended\": true,\n                    \"pq_gid\": \"289ddd4b911e88d7bf1eb14be44754d7\",\n                    \"pq_name\": \"test\",\n                    \"pq_order_id\": 35,\n                    \"pq_description\": null,\n                    \"pq_status_id\": 1,\n                    \"pq_price\": 0,\n                    \"pq_origin_price\": 0,\n                    \"pq_client_price\": 0,\n                    \"pq_service_fee_sum\": 0,\n                    \"pq_origin_currency\": null,\n                    \"pq_client_currency\": \"USD\",\n                    \"pq_status_name\": \"New\",\n                    \"pq_files\": [],\n                    \"data\": {\n                        \"changePricing\" : {\n                            \"baseFare\": 10.01,\n                            \"baseTax\": 10.01,\n                            \"markup\": 10.01,\n                            \"price\": 30.01\n                        },\n                        \"fq_flight_id\": 2,\n                        \"fq_source_id\": null,\n                        \"fq_product_quote_id\": 191,\n                        \"gds\": \"S\",\n                        \"pcc\": \"8KI0\",\n                        \"fq_gds_offer_id\": null,\n                        \"fq_type_id\": 3,\n                        \"fq_cabin_class\": \"E\",\n                        \"fq_trip_type_id\": 1,\n                        \"validatingCarrier\": \"PR\",\n                        \"fq_fare_type_id\": 2,\n                        \"fq_last_ticket_date\": null,\n                        \"fq_origin_search_data\": \"{\\\"gds\\\":\\\"S\\\",\\\"pcc\\\":\\\"8KI0\\\",\\\"trips\\\":[{\\\"duration\\\":848,\\\"segments\\\":[{\\\"meal\\\":null,\\\"stop\\\":0,\\\"cabin\\\":\\\"Y\\\",\\\"stops\\\":[],\\\"baggage\\\":[],\\\"brandId\\\":null,\\\"mileage\\\":null,\\\"duration\\\":600,\\\"fareCode\\\":null,\\\"arrivalTime\\\":\\\"2021-06-11 07:30:00\\\",\\\"airEquipType\\\":null,\\\"bookingClass\\\":\\\"E\\\",\\\"flightNumber\\\":\\\"8727\\\",\\\"departureTime\\\":\\\"2021-06-10 21:30:00\\\",\\\"marriageGroup\\\":\\\"\\\",\\\"marketingAirline\\\":\\\"DL\\\",\\\"operatingAirline\\\":null,\\\"arrivalAirportCode\\\":\\\"CDG\\\",\\\"departureAirportCode\\\":\\\"ROB\\\",\\\"arrivalAirportTerminal\\\":null,\\\"departureAirportTerminal\\\":null},{\\\"meal\\\":null,\\\"stop\\\":0,\\\"cabin\\\":\\\"Y\\\",\\\"stops\\\":[],\\\"baggage\\\":[],\\\"brandId\\\":null,\\\"mileage\\\":null,\\\"duration\\\":160,\\\"fareCode\\\":null,\\\"arrivalTime\\\":\\\"2021-06-11 12:55:00\\\",\\\"airEquipType\\\":null,\\\"bookingClass\\\":\\\"E\\\",\\\"flightNumber\\\":\\\"8395\\\",\\\"departureTime\\\":\\\"2021-06-11 10:15:00\\\",\\\"marriageGroup\\\":\\\"\\\",\\\"marketingAirline\\\":\\\"DL\\\",\\\"operatingAirline\\\":null,\\\"arrivalAirportCode\\\":\\\"LAX\\\",\\\"departureAirportCode\\\":\\\"CDG\\\",\\\"arrivalAirportTerminal\\\":null,\\\"departureAirportTerminal\\\":null},{\\\"meal\\\":null,\\\"stop\\\":0,\\\"cabin\\\":\\\"Y\\\",\\\"stops\\\":[],\\\"baggage\\\":[],\\\"brandId\\\":null,\\\"mileage\\\":null,\\\"duration\\\":88,\\\"fareCode\\\":null,\\\"arrivalTime\\\":\\\"2021-06-11 19:14:00\\\",\\\"airEquipType\\\":null,\\\"bookingClass\\\":\\\"E\\\",\\\"flightNumber\\\":\\\"3580\\\",\\\"departureTime\\\":\\\"2021-06-11 17:46:00\\\",\\\"marriageGroup\\\":\\\"\\\",\\\"marketingAirline\\\":\\\"DL\\\",\\\"operatingAirline\\\":null,\\\"arrivalAirportCode\\\":\\\"SMF\\\",\\\"departureAirportCode\\\":\\\"LAX\\\",\\\"arrivalAirportTerminal\\\":null,\\\"departureAirportTerminal\\\":null}]},{\\\"duration\\\":1233,\\\"segments\\\":[{\\\"meal\\\":null,\\\"stop\\\":0,\\\"cabin\\\":\\\"Y\\\",\\\"stops\\\":[],\\\"baggage\\\":[],\\\"brandId\\\":null,\\\"mileage\\\":null,\\\"duration\\\":127,\\\"fareCode\\\":null,\\\"arrivalTime\\\":\\\"2021-09-10 12:34\\\",\\\"airEquipType\\\":\\\"E7W\\\",\\\"bookingClass\\\":\\\"E\\\",\\\"flightNumber\\\":\\\"3864\\\",\\\"departureTime\\\":\\\"2021-09-10 10:27\\\",\\\"marriageGroup\\\":\\\"\\\",\\\"marketingAirline\\\":\\\"DL\\\",\\\"operatingAirline\\\":null,\\\"arrivalAirportCode\\\":\\\"SEA\\\",\\\"departureAirportCode\\\":\\\"SMF\\\",\\\"arrivalAirportTerminal\\\":null,\\\"departureAirportTerminal\\\":null},{\\\"meal\\\":null,\\\"stop\\\":0,\\\"cabin\\\":\\\"Y\\\",\\\"stops\\\":[],\\\"baggage\\\":[],\\\"brandId\\\":null,\\\"mileage\\\":null,\\\"duration\\\":201,\\\"fareCode\\\":null,\\\"arrivalTime\\\":\\\"2021-09-10 13:34\\\",\\\"airEquipType\\\":\\\"739\\\",\\\"bookingClass\\\":\\\"E\\\",\\\"flightNumber\\\":\\\"759\\\",\\\"departureTime\\\":\\\"2021-09-10 08:13\\\",\\\"marriageGroup\\\":\\\"\\\",\\\"marketingAirline\\\":\\\"DL\\\",\\\"operatingAirline\\\":null,\\\"arrivalAirportCode\\\":\\\"MSP\\\",\\\"departureAirportCode\\\":\\\"SEA\\\",\\\"arrivalAirportTerminal\\\":null,\\\"departureAirportTerminal\\\":null},{\\\"meal\\\":null,\\\"stop\\\":0,\\\"cabin\\\":\\\"Y\\\",\\\"stops\\\":[],\\\"baggage\\\":[],\\\"brandId\\\":null,\\\"mileage\\\":null,\\\"duration\\\":510,\\\"fareCode\\\":null,\\\"arrivalTime\\\":\\\"2021-09-11 08:15\\\",\\\"airEquipType\\\":\\\"333\\\",\\\"bookingClass\\\":\\\"E\\\",\\\"flightNumber\\\":\\\"42\\\",\\\"departureTime\\\":\\\"2021-09-10 16:45\\\",\\\"marriageGroup\\\":\\\"\\\",\\\"marketingAirline\\\":\\\"DL\\\",\\\"operatingAirline\\\":null,\\\"arrivalAirportCode\\\":\\\"CDG\\\",\\\"departureAirportCode\\\":\\\"MSP\\\",\\\"arrivalAirportTerminal\\\":null,\\\"departureAirportTerminal\\\":null},{\\\"meal\\\":null,\\\"stop\\\":1,\\\"cabin\\\":\\\"Y\\\",\\\"stops\\\":[{\\\"duration\\\":85,\\\"equipment\\\":null,\\\"elapsedTime\\\":null,\\\"locationCode\\\":\\\"BKO\\\",\\\"arrivalDateTime\\\":\\\"2021-09-11 13:55\\\",\\\"departureDateTime\\\":\\\"2021-09-11 15:20\\\"}],\\\"baggage\\\":[],\\\"brandId\\\":null,\\\"mileage\\\":null,\\\"duration\\\":395,\\\"fareCode\\\":null,\\\"arrivalTime\\\":\\\"2021-09-11 16:50\\\",\\\"airEquipType\\\":\\\"359\\\",\\\"bookingClass\\\":\\\"E\\\",\\\"flightNumber\\\":\\\"7351\\\",\\\"departureTime\\\":\\\"2021-09-11 10:15\\\",\\\"marriageGroup\\\":\\\"\\\",\\\"marketingAirline\\\":\\\"DL\\\",\\\"operatingAirline\\\":null,\\\"arrivalAirportCode\\\":\\\"ROB\\\",\\\"departureAirportCode\\\":\\\"CDG\\\",\\\"arrivalAirportTerminal\\\":null,\\\"departureAirportTerminal\\\":null}]}],\\\"fareType\\\":\\\"SR\\\",\\\"itineraryDump\\\":[\\\"DL8727E 10JUN ROBCDG TK  930P  730A+ 11JUN TH\\/FR\\\",\\\"DL8395E 11JUN CDGLAX HK 1015A 1255P FR\\\",\\\"DL3580E 11JUN LAXSMF HK  546P  714P FR\\\",\\\"DL3864E 10SEP SMFSEA TK 1027A 1234P FR\\\",\\\"DL 759E 10SEP SEAMSP TK  813A  134P FR\\\",\\\"DL  42E 10SEP MSPCDG TK  445P  815A+ 11SEP FR\\/SA\\\",\\\"DL7351E 11SEP CDGROB HK 1015A  450P SA\\\",\\\"DL7351E 11SEP BKOROB HK  320P  450P SA\\\"],\\\"validatingCarrier\\\":\\\"PR\\\"}\",\n                        \"fq_json_booking\": null,\n                        \"fq_ticket_json\": null,\n                        \"itineraryDump\": [\n                            \"1  DL8727E  10JUN  ROBCDG    930P    730A+  11JUN  TH/FR\",\n                            \"2  DL8395E  11JUN  CDGLAX  1015A  1255P  FR\",\n                            \"3  DL3580E  11JUN  LAXSMF    546P    714P  FR\",\n                            \"4  DL3864E  10SEP  SMFSEA  1027A  1234P  FR\",\n                            \"5  DL  759E  10SEP  SEAMSP    813A    134P  FR\",\n                            \"6  DL    42E  10SEP  MSPCDG    445P    815A+  11SEP  FR/SA\",\n                            \"7  DL7351E  11SEP  CDGROB  1015A    450P  SA\"\n                        ],\n                        \"booking_id\": \"1\",\n                        \"fq_type_name\": \"ReProtection\",\n                        \"fq_fare_type_name\": \"Private\",\n                        \"fareType\": \"SR\",\n                        \"flight\": {\n                            \"fl_product_id\": 44,\n                            \"fl_trip_type_id\": 1,\n                            \"fl_cabin_class\": \"E\",\n                            \"fl_adults\": 1,\n                            \"fl_children\": 0,\n                            \"fl_infants\": 0,\n                            \"fl_trip_type_name\": \"One Way\",\n                            \"fl_cabin_class_name\": \"Economy\"\n                        },\n                        \"trips\": [\n                            {\n                                \"uid\": \"fqt6116010ce3d6b\",\n                                \"key\": null,\n                                \"duration\": 848,\n                                \"segments\": [\n                                    {\n                                        \"uid\": \"fqs6116010ce9306\",\n                                        \"departureTime\": \"2021-06-10 21:30\",\n                                        \"arrivalTime\": \"2021-06-11 07:30\",\n                                        \"flightNumber\": 8727,\n                                        \"bookingClass\": \"E\",\n                                        \"duration\": 600,\n                                        \"departureAirportCode\": \"ROB\",\n                                        \"departureAirportTerminal\": \"\",\n                                        \"arrivalAirportCode\": \"CDG\",\n                                        \"arrivalAirportTerminal\": \"\",\n                                        \"operatingAirline\": \"\",\n                                        \"marketingAirline\": \"DL\",\n                                        \"airEquipType\": \"\",\n                                        \"marriageGroup\": \"\",\n                                        \"cabin\": \"E\",\n                                        \"meal\": \"\",\n                                        \"fareCode\": \"\",\n                                        \"mileage\": null,\n                                        \"departureLocation\": \"Monrovia\",\n                                        \"arrivalLocation\": \"Paris\",\n                                        \"stop\": 0,\n                                        \"stops\": []\n                                    },\n                                    {\n                                        \"uid\": \"fqs6116010ceb91e\",\n                                        \"departureTime\": \"2021-06-11 10:15\",\n                                        \"arrivalTime\": \"2021-06-11 12:55\",\n                                        \"flightNumber\": 8395,\n                                        \"bookingClass\": \"E\",\n                                        \"duration\": 160,\n                                        \"departureAirportCode\": \"CDG\",\n                                        \"departureAirportTerminal\": \"\",\n                                        \"arrivalAirportCode\": \"LAX\",\n                                        \"arrivalAirportTerminal\": \"\",\n                                        \"operatingAirline\": \"\",\n                                        \"marketingAirline\": \"DL\",\n                                        \"airEquipType\": \"\",\n                                        \"marriageGroup\": \"\",\n                                        \"cabin\": \"E\",\n                                        \"meal\": \"\",\n                                        \"fareCode\": \"\",\n                                        \"mileage\": null,\n                                        \"departureLocation\": \"Paris\",\n                                        \"arrivalLocation\": \"Los Angeles\",\n                                        \"stop\": 0,\n                                        \"stops\": [],\n                                        \"baggage\": []\n                                    },\n                                    {\n                                        \"uid\": \"fqs6116010cebd9a\",\n                                        \"departureTime\": \"2021-06-11 17:46\",\n                                        \"arrivalTime\": \"2021-06-11 19:14\",\n                                        \"flightNumber\": 3580,\n                                        \"bookingClass\": \"E\",\n                                        \"duration\": 88,\n                                        \"departureAirportCode\": \"LAX\",\n                                        \"departureAirportTerminal\": \"\",\n                                        \"arrivalAirportCode\": \"SMF\",\n                                        \"arrivalAirportTerminal\": \"\",\n                                        \"operatingAirline\": \"\",\n                                        \"marketingAirline\": \"DL\",\n                                        \"airEquipType\": \"\",\n                                        \"marriageGroup\": \"\",\n                                        \"cabin\": \"E\",\n                                        \"meal\": \"\",\n                                        \"fareCode\": \"\",\n                                        \"mileage\": null,\n                                        \"departureLocation\": \"Los Angeles\",\n                                        \"arrivalLocation\": \"Sacramento\",\n                                        \"stop\": 0,\n                                        \"stops\": [],\n                                        \"baggage\": []\n                                    }\n                                ]\n                            },\n                            {\n                                \"uid\": \"fqt6116010cec0cf\",\n                                \"key\": null,\n                                \"duration\": 1233,\n                                \"segments\": [\n                                    {\n                                        \"uid\": \"fqs6116010cec45b\",\n                                        \"departureTime\": \"2021-09-10 10:27\",\n                                        \"arrivalTime\": \"2021-09-10 12:34\",\n                                        \"flightNumber\": 3864,\n                                        \"bookingClass\": \"E\",\n                                        \"duration\": 127,\n                                        \"departureAirportCode\": \"SMF\",\n                                        \"departureAirportTerminal\": \"\",\n                                        \"arrivalAirportCode\": \"SEA\",\n                                        \"arrivalAirportTerminal\": \"\",\n                                        \"operatingAirline\": \"\",\n                                        \"marketingAirline\": \"DL\",\n                                        \"airEquipType\": \"E7W\",\n                                        \"marriageGroup\": \"\",\n                                        \"cabin\": \"E\",\n                                        \"meal\": \"\",\n                                        \"fareCode\": \"\",\n                                        \"mileage\": null,\n                                        \"departureLocation\": \"Sacramento\",\n                                        \"arrivalLocation\": \"Seattle\",\n                                        \"stop\": 0,\n                                        \"stops\": []\n                                    },\n                                    {\n                                        \"uid\": \"fqs6116010cec885\",\n                                        \"departureTime\": \"2021-09-10 08:13\",\n                                        \"arrivalTime\": \"2021-09-10 13:34\",\n                                        \"flightNumber\": 759,\n                                        \"bookingClass\": \"E\",\n                                        \"duration\": 201,\n                                        \"departureAirportCode\": \"SEA\",\n                                        \"departureAirportTerminal\": \"\",\n                                        \"arrivalAirportCode\": \"MSP\",\n                                        \"arrivalAirportTerminal\": \"\",\n                                        \"operatingAirline\": \"\",\n                                        \"marketingAirline\": \"DL\",\n                                        \"airEquipType\": \"739\",\n                                        \"marriageGroup\": \"\",\n                                        \"cabin\": \"E\",\n                                        \"meal\": \"\",\n                                        \"fareCode\": \"\",\n                                        \"mileage\": null,\n                                        \"departureLocation\": \"Seattle\",\n                                        \"arrivalLocation\": \"Minneapolis\",\n                                        \"stop\": 0,\n                                        \"stops\": [],\n                                        \"baggage\": []\n                                    },\n                                    {\n                                        \"uid\": \"fqs6116010ceccdb\",\n                                        \"departureTime\": \"2021-09-10 16:45\",\n                                        \"arrivalTime\": \"2021-09-11 08:15\",\n                                        \"flightNumber\": 42,\n                                        \"bookingClass\": \"E\",\n                                        \"duration\": 510,\n                                        \"departureAirportCode\": \"MSP\",\n                                        \"departureAirportTerminal\": \"\",\n                                        \"arrivalAirportCode\": \"CDG\",\n                                        \"arrivalAirportTerminal\": \"\",\n                                        \"operatingAirline\": \"\",\n                                        \"marketingAirline\": \"DL\",\n                                        \"airEquipType\": \"333\",\n                                        \"marriageGroup\": \"\",\n                                        \"cabin\": \"E\",\n                                        \"meal\": \"\",\n                                        \"fareCode\": \"\",\n                                        \"mileage\": null,\n                                        \"departureLocation\": \"Minneapolis\",\n                                        \"arrivalLocation\": \"Paris\",\n                                        \"stop\": 0,\n                                        \"stops\": [],\n                                        \"baggage\": []\n                                    },\n                                    {\n                                        \"uid\": \"fqs6116010ced118\",\n                                        \"departureTime\": \"2021-09-11 10:15\",\n                                        \"arrivalTime\": \"2021-09-11 16:50\",\n                                        \"flightNumber\": 7351,\n                                        \"bookingClass\": \"E\",\n                                        \"duration\": 395,\n                                        \"departureAirportCode\": \"CDG\",\n                                        \"departureAirportTerminal\": \"\",\n                                        \"arrivalAirportCode\": \"ROB\",\n                                        \"arrivalAirportTerminal\": \"\",\n                                        \"operatingAirline\": \"\",\n                                        \"marketingAirline\": \"DL\",\n                                        \"airEquipType\": \"359\",\n                                        \"marriageGroup\": \"\",\n                                        \"cabin\": \"E\",\n                                        \"meal\": \"\",\n                                        \"fareCode\": \"\",\n                                        \"mileage\": null,\n                                        \"departureLocation\": \"Paris\",\n                                        \"arrivalLocation\": \"Monrovia\",\n                                        \"stop\": 1,\n                                        \"stops\": [\n                                            {\n                                                \"qss_quote_segment_id\": 26,\n                                                \"locationCode\": \"BKO\",\n                                                \"equipment\": null,\n                                                \"elapsedTime\": null,\n                                                \"duration\": 85,\n                                                \"departureDateTime\": \"2021-09-11 15:20\",\n                                                \"arrivalDateTime\": \"2021-09-11 13:55\"\n                                            }\n                                        ],\n                                        \"baggage\": []\n                                    }\n                                ]\n                            }\n                        ],\n                        \"pax_prices\": [\n                            {\n                                \"qpp_fare\": \"877.00\",\n                                \"qpp_tax\": \"464.28\",\n                                \"qpp_system_mark_up\": \"50.00\",\n                                \"qpp_agent_mark_up\": \"0.00\",\n                                \"qpp_origin_fare\": null,\n                                \"qpp_origin_currency\": \"USD\",\n                                \"qpp_origin_tax\": null,\n                                \"qpp_client_currency\": \"USD\",\n                                \"qpp_client_fare\": null,\n                                \"qpp_client_tax\": null,\n                                \"paxType\": \"ADT\"\n                            }\n                        ],\n                        \"paxes\": [\n                            {\n                                \"fp_uid\": \"fp604741cd064a1\",\n                                \"fp_pax_id\": null,\n                                \"fp_pax_type\": \"ADT\",\n                                \"fp_first_name\": null,\n                                \"fp_last_name\": null,\n                                \"fp_middle_name\": null,\n                                \"fp_dob\": null\n                            }\n                        ]\n                    }\n                }\n            ],\n            \"last_change\": {\n                \"pqc_id\": 1,\n                \"pqc_pq_id\": 645,\n                \"pqc_case_id\": 135814,\n                \"pqc_decision_user\": 464,\n                \"pqc_status_id\": 6,\n                \"pqc_decision_type_id\": 1,\n                \"pqc_created_dt\": \"2021-08-17 11:44:34\",\n                \"pqc_updated_dt\": \"2021-08-26 10:09:03\",\n                \"pqc_decision_dt\": \"2021-08-24 14:33:39\",\n                \"pqc_is_automate\": 0\n            }\n        }",
           "type": "json"
         }
       ]
@@ -2966,6 +3702,11 @@ define({ "api": [
           "title": "Error-Response (500):",
           "content": "HTTP/1.1 200 Ok\n{\n            \"status\": 500,\n            \"message\": \"Internal Server Error\",\n            \"errors\": []\n        }",
           "type": "json"
+        },
+        {
+          "title": "Note:",
+          "content": "[\n     In \"quote_list\" show by status restriction from settings - \"exchange_quote_confirm_status_list\"\n]",
+          "type": "html"
         }
       ]
     },
@@ -2975,7 +3716,7 @@ define({ "api": [
   {
     "type": "post",
     "url": "/v2/flight/reprotection-create",
-    "title": "Create flight reprotection from BO",
+    "title": "ReProtection Create",
     "version": "0.1.0",
     "name": "ReProtection_Create",
     "group": "Flight",
@@ -3348,6 +4089,118 @@ define({ "api": [
           "title": "Error-Response:",
           "content": "HTTP/1.1 422 Unprocessable entity\n{\n       \"status\": 422,\n       \"message\": \"Validation error\",\n       \"errors\": [\n           \"type\": [\n              \"Type cannot be blank.\"\n            ]\n       ],\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
           "type": "json"
+        },
+        {
+          "title": "Error-Response (422) Code 101:",
+          "content": "HTTP/1.1 422 Error\n{\n       \"status\": 422,\n       \"message\": \"Error\",\n       \"data\": [\n             \"success\": false,\n             \"error\": \"Product Quote Change status is not in \\\"pending\\\". Current status Canceled\"\n       ],\n       \"code\": 101,\n       \"errors\": [],\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/FlightController.php",
+    "groupTitle": "Flight"
+  },
+  {
+    "type": "post",
+    "url": "/v2/flight/reprotection-exchange",
+    "title": "ReProtection exchange",
+    "version": "0.2.0",
+    "name": "ReProtection_Exchange",
+    "group": "Flight",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "7..10",
+            "optional": false,
+            "field": "booking_id",
+            "description": "<p>Booking ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "100",
+            "optional": true,
+            "field": "email",
+            "description": "<p>Email</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "20",
+            "optional": true,
+            "field": "phone",
+            "description": "<p>Phone</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": true,
+            "field": "flight_request",
+            "description": "<p>Flight Request</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n    \"booking_id\": \"XXXYYYZ\",\n    \"email\": \"example@mail.com\",\n    \"phone\": \"+13736911111\",\n    \"flight_request\": {\"exampleKey\" : \"exampleValue\"}\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n       \"status\": 200,\n       \"message\": \"OK\",\n       \"data\": {\n           \"success\" => true,\n           \"warnings\": []\n       },\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 400 Bad Request\n{\n       \"status\": 400,\n       \"message\": \"Load data error\",\n       \"errors\": [\n          \"Not found data on POST request\"\n       ],\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 422 Unprocessable entity\n{\n       \"status\": 422,\n       \"message\": \"Validation error\",\n       \"errors\": [\n           \"type\": [\n              \"Type cannot be blank.\"\n            ]\n       ],\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (422) Code 101:",
+          "content": "HTTP/1.1 422 Error\n{\n       \"status\": 422,\n       \"message\": \"Error\",\n       \"data\": [\n             \"success\": false,\n             \"error\": \"Product Quote Change status is not in \\\"pending\\\". Current status Canceled\"\n       ],\n       \"code\": 101,\n       \"errors\": [],\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
         }
       ]
     },
@@ -3432,6 +4285,2260 @@ define({ "api": [
     },
     "filename": "webapi/modules/v2/controllers/FlightController.php",
     "groupTitle": "Flight"
+  },
+  {
+    "type": "post",
+    "url": "/v2/flight-quote-exchange/confirm",
+    "title": "Flight Voluntary Exchange Confirm",
+    "version": "0.2.0",
+    "name": "Flight_Voluntary_Exchange_Confirm",
+    "group": "Flight_Voluntary_Exchange",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "7..10",
+            "optional": false,
+            "field": "booking_id",
+            "description": "<p>Booking ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "32",
+            "optional": false,
+            "field": "quote_gid",
+            "description": "<p>Product Quote GID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": true,
+            "field": "billing",
+            "description": "<p>Billing</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": false,
+            "field": "billing.first_name",
+            "description": "<p>First name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": false,
+            "field": "billing.last_name",
+            "description": "<p>Last name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": true,
+            "field": "billing.middle_name",
+            "description": "<p>Middle name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "40",
+            "optional": true,
+            "field": "billing.company_name",
+            "description": "<p>Company</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": false,
+            "field": "billing.address_line1",
+            "description": "<p>Address line 1</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": true,
+            "field": "billing.address_line2",
+            "description": "<p>Address line 2</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": false,
+            "field": "billing.city",
+            "description": "<p>City</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "40",
+            "optional": true,
+            "field": "billing.state",
+            "description": "<p>State</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "2",
+            "optional": false,
+            "field": "billing.country_id",
+            "description": "<p>Country code (for example &quot;US&quot;)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "billing.country",
+            "description": "<p>Country name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "10",
+            "optional": true,
+            "field": "billing.zip",
+            "description": "<p>Zip</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "20",
+            "optional": false,
+            "field": "billing.contact_phone",
+            "description": "<p>Contact phone</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "160",
+            "optional": false,
+            "field": "billing.contact_email",
+            "description": "<p>Contact email</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "60",
+            "optional": true,
+            "field": "billing.contact_name",
+            "description": "<p>Contact name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": true,
+            "field": "payment_request",
+            "description": "<p>Payment request</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "payment_request.amount",
+            "description": "<p>Customer must pay for initiate refund process</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": false,
+            "field": "payment_request.currency",
+            "description": "<p>Currency code</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": false,
+            "field": "payment_request.method_key",
+            "description": "<p>Method key (for example &quot;card&quot;)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "payment_request.method_data",
+            "description": "<p>Method data</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "payment_request.method_data.card",
+            "description": "<p>Card (for credit card)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "..20",
+            "optional": false,
+            "field": "payment_request.method_data.card.number",
+            "description": "<p>Number</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "..50",
+            "optional": true,
+            "field": "payment_request.method_data.card.holder_name",
+            "description": "<p>Holder name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "payment_request.method_data.card.expiration_month",
+            "description": "<p>Month</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "payment_request.method_data.card.expiration_year",
+            "description": "<p>Year</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "..4",
+            "optional": false,
+            "field": "payment_request.method_data.card.cvv",
+            "description": "<p>CVV</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": " {\n    \"booking_id\":\"XXXYYYZ\",\n    \"quote_gid\": \"2f2887a061f8069f7ada8af9e062f0f4\",\n    \"billing\": {\n          \"first_name\": \"John\",\n          \"last_name\": \"Doe\",\n          \"middle_name\": \"\",\n          \"address_line1\": \"1013 Weda Cir\",\n          \"address_line2\": \"\",\n          \"country_id\": \"US\",\n          \"country\" : \"United States\",\n          \"city\": \"Mayfield\",\n          \"state\": \"KY\",\n          \"zip\": \"99999\",\n          \"company_name\": \"\",\n          \"contact_phone\": \"+19074861000\",\n          \"contact_email\": \"test@test.com\",\n          \"contact_name\": \"Test Name\"\n    },\n    \"payment_request\": {\n          \"method_key\": \"card\",\n          \"currency\": \"USD\",\n          \"method_data\": {\n              \"card\": {\n                  \"number\": \"4111555577778888\",\n                  \"holder_name\": \"Test test\",\n                  \"expiration_month\": 10,\n                  \"expiration_year\": 23,\n                  \"cvv\": \"123\"\n              }\n          },\n          \"amount\": 112.25\n    }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n       \"status\": 200,\n       \"message\": \"OK\",\n       \"data\": {\n                    \"resultMessage\": \"Processing was successful\",\n                    \"originQuoteGid\" : \"a1275b33cda3bbcbeea2d684475a7e8a\",\n                    \"changeQuoteGid\" : \"5c63db4e9d4d24f480088fd5e194e4f5\",\n                    \"productQuoteChangeGid\" : \"ee61d0abb62d96879e2c29ddde403650\",\n                    \"caseGid\" : \"e7dce13b4e6a5f3ccc2cec9c21fa3255\"\n               },\n       \"code\": \"13200\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 400 Bad Request\n{\n       \"status\": 400,\n       \"message\": \"Load data error\",\n       \"errors\": [\n          \"Not found data on POST request\"\n       ],\n       \"code\": \"13106\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 422 Unprocessable entity\n{\n       \"status\": 422,\n       \"message\": \"Validation error\",\n       \"errors\": [\n           \"booking_id\": [\n              \"booking_id cannot be blank.\"\n            ]\n       ],\n       \"code\": \"13107\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Codes designation",
+          "content": "[\n     13101 - Api User has no related project\n     13106 - Post has not loaded\n     13107 - Validation Failed\n\n     13113 - Product Quote not available for exchange\n     13130 - Request to Back Office is failed\n\n     150406 - Prepare Data for Request is failed; CRM processing errors\n\n     601 - BO Server Error: i.e. request timeout\n     602 - BO response body is empty\n     603 - BO response type is invalid (not array)\n     604 - BO wrong endpoint\n]",
+          "type": "html"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/FlightQuoteExchangeController.php",
+    "groupTitle": "Flight_Voluntary_Exchange"
+  },
+  {
+    "type": "post",
+    "url": "/v2/flight-quote-exchange/create",
+    "title": "Flight Voluntary Exchange Create",
+    "version": "0.2.0",
+    "name": "Flight_Voluntary_Exchange_Create",
+    "group": "Flight_Voluntary_Exchange",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "7..10",
+            "optional": false,
+            "field": "bookingId",
+            "description": "<p>Booking ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "150",
+            "optional": false,
+            "field": "apiKey",
+            "description": "<p>ApiKey (Project API Key)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "exchange",
+            "description": "<p>Exchange Data Info</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "exchange.prices",
+            "description": "<p>Prices</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "exchange.prices.totalPrice",
+            "description": "<p>Total Price (total for exchange pay)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "exchange.prices.comm",
+            "description": "<p>Comm</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "bool",
+            "optional": false,
+            "field": "exchange.prices.isCk",
+            "description": "<p>isCk</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "exchange.tickets",
+            "description": "<p>Tickets</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "exchange.tickets.numRef",
+            "description": "<p>NumRef</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "exchange.tickets.firstName",
+            "description": "<p>FirstName</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "exchange.tickets.lastName",
+            "description": "<p>LastName</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": false,
+            "field": "exchange.tickets.paxType",
+            "description": "<p>paxType</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "exchange.tickets.number",
+            "description": "<p>Number</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": true,
+            "field": "exchange.passengers",
+            "description": "<p>Passengers</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": false,
+            "field": "exchange.passengers.ADT",
+            "description": "<p>Pax Type (ADT,CHD,INF)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": false,
+            "field": "exchange.passengers.ADT.codeAs",
+            "description": "<p>Pax Type Code</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "exchange.passengers.ADT.cnt",
+            "description": "<p>Cnt</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "exchange.passengers.ADT.baseFare",
+            "description": "<p>Base Fare (diffFare)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "exchange.passengers.ADT.pubBaseFare",
+            "description": "<p>Pub Base Fare</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "exchange.passengers.ADT.baseTax",
+            "description": "<p>Base Tax (airlinePenalty)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "exchange.passengers.ADT.markup",
+            "description": "<p>Markup (processingFee)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "exchange.passengers.ADT.comm",
+            "description": "<p>Comm</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "exchange.passengers.ADT.price",
+            "description": "<p>Price (total for exchange pay)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "exchange.passengers.ADT.tax",
+            "description": "<p>Tax</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": true,
+            "field": "exchange.passengers.ADT.oBaseFare",
+            "description": "<p>oBaseFare</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "exchange.passengers.ADT.oBaseFare.amount",
+            "description": "<p>oBaseFare Amount</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": false,
+            "field": "exchange.passengers.ADT.oBaseFare.currency",
+            "description": "<p>oBaseFare Currency</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": true,
+            "field": "exchange.passengers.ADT.oBaseTax",
+            "description": "<p>oBaseTax</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "exchange.passengers.ADT.oBaseTax.amount",
+            "description": "<p>oBaseTax Amount</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": false,
+            "field": "exchange.passengers.ADT.oBaseTax.currency",
+            "description": "<p>oBaseTax Currency</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": true,
+            "field": "exchange.passengers.ADT.oExchangeFareDiff",
+            "description": "<p>oExchangeFareDiff</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "exchange.passengers.ADT.oExchangeFareDiff.amount",
+            "description": "<p>oExchangeFareDiff Amount</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": false,
+            "field": "exchange.passengers.ADT.oExchangeFareDiff.currency",
+            "description": "<p>oExchangeFareDiff Currency</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "exchange.passengers.ADT.oExchangeTaxDiff",
+            "description": "<p>oExchangeTaxDiff</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object[]",
+            "optional": false,
+            "field": "exchange.trips",
+            "description": "<p>Trips</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "exchange.trips.tripId",
+            "description": "<p>Trip Id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object[]",
+            "optional": false,
+            "field": "exchange.trips.segments",
+            "description": "<p>Segments</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "exchange.trips.segments.segmentId",
+            "description": "<p>Segment Id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "format Y-m-d H:i",
+            "optional": false,
+            "field": "exchange.trips.segments.departureTime",
+            "description": "<p>DepartureTime</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "format Y-m-d H:i",
+            "optional": false,
+            "field": "exchange.trips.segments.arrivalTime",
+            "description": "<p>ArrivalTime</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "exchange.trips.segments.stop",
+            "description": "<p>Stop</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object[]",
+            "optional": true,
+            "field": "exchange.trips.segments.stops",
+            "description": "<p>Stops</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": false,
+            "field": "exchange.trips.segments.stops.locationCode",
+            "description": "<p>Location Code</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "format Y-m-d H:i",
+            "optional": false,
+            "field": "exchange.trips.segments.stops.departureDateTime",
+            "description": "<p>Departure DateTime</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "format Y-m-d H:i",
+            "optional": false,
+            "field": "exchange.trips.segments.stops.arrivalDateTime",
+            "description": "<p>Departure DateTime</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "exchange.trips.segments.stops.duration",
+            "description": "<p>Duration</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "exchange.trips.segments.stops.elapsedTime",
+            "description": "<p>Elapsed Time</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "exchange.trips.segments.stops.equipment",
+            "description": "<p>Equipment</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": false,
+            "field": "exchange.trips.segments.departureAirportCode",
+            "description": "<p>Departure Airport Code IATA</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": false,
+            "field": "exchange.trips.segments.arrivalAirportCode",
+            "description": "<p>Arrival Airport Code IATA</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "5}",
+            "optional": false,
+            "field": "exchange.trips.segments.flightNumber",
+            "description": "<p>Flight Number</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "1",
+            "optional": false,
+            "field": "exchange.trips.segments.bookingClass",
+            "description": "<p>BookingClass</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "exchange.trips.segments.duration",
+            "description": "<p>Segment duration</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": false,
+            "field": "exchange.trips.segments.departureAirportTerminal",
+            "description": "<p>Departure Airport Terminal Code</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": true,
+            "field": "exchange.trips.segments.arrivalAirportTerminal",
+            "description": "<p>Arrival Airport Terminal Code</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "2",
+            "optional": true,
+            "field": "exchange.trips.segments.operatingAirline",
+            "description": "<p>Operating Airline</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "2",
+            "optional": true,
+            "field": "exchange.trips.segments.marketingAirline",
+            "description": "<p>Marketing Airline</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": true,
+            "field": "exchange.trips.segments.airEquipType",
+            "description": "<p>AirEquipType</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": true,
+            "field": "exchange.trips.segments.marriageGroup",
+            "description": "<p>MarriageGroup</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "exchange.trips.segments.mileage",
+            "description": "<p>Mileage</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "2",
+            "optional": true,
+            "field": "exchange.trips.segments.meal",
+            "description": "<p>Meal</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": true,
+            "field": "exchange.trips.segments.fareCode",
+            "description": "<p>Fare Code</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "bool",
+            "optional": true,
+            "field": "exchange.trips.segments.recheckBaggage",
+            "description": "<p>Recheck Baggage</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "exchange.paxCnt",
+            "description": "<p>Pax Cnt</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "2",
+            "optional": false,
+            "field": "exchange.validatingCarrier",
+            "description": "<p>ValidatingCarrier</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "2",
+            "optional": false,
+            "field": "exchange.gds",
+            "description": "<p>Gds</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "10",
+            "optional": false,
+            "field": "exchange.pcc",
+            "description": "<p>pcc</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": false,
+            "field": "exchange.fareType",
+            "description": "<p>Fare Type</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "1",
+            "optional": false,
+            "field": "exchange.cabin",
+            "description": "<p>Cabin</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": false,
+            "field": "exchange.cons",
+            "description": "<p>Consolidator</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": false,
+            "field": "exchange.currency",
+            "description": "<p>Currency</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "array[]",
+            "optional": true,
+            "field": "exchange.currencies",
+            "description": "<p>Currencies (For example [USD])</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object[]",
+            "optional": true,
+            "field": "exchange.currencyRates",
+            "description": "<p>CurrencyRates</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "6",
+            "optional": false,
+            "field": "exchange.currencyRates.USDUSD",
+            "description": "<p>Currency Codes</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": false,
+            "field": "exchange.currencyRates.USDUSD.from",
+            "description": "<p>Currency Code</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": false,
+            "field": "exchange.currencyRates.USDUSD.to",
+            "description": "<p>Currency Code</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "exchange.currencyRates.USDUSD.rate",
+            "description": "<p>Rate</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": true,
+            "field": "exchange.keys",
+            "description": "<p>Keys</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": true,
+            "field": "exchange.meta",
+            "description": "<p>Meta</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": true,
+            "field": "billing",
+            "description": "<p>Billing</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": false,
+            "field": "billing.first_name",
+            "description": "<p>First name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": false,
+            "field": "billing.last_name",
+            "description": "<p>Last name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": true,
+            "field": "billing.middle_name",
+            "description": "<p>Middle name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "40",
+            "optional": true,
+            "field": "billing.company_name",
+            "description": "<p>Company</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": false,
+            "field": "billing.address_line1",
+            "description": "<p>Address line 1</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": true,
+            "field": "billing.address_line2",
+            "description": "<p>Address line 2</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": false,
+            "field": "billing.city",
+            "description": "<p>City</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "40",
+            "optional": true,
+            "field": "billing.state",
+            "description": "<p>State</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "2",
+            "optional": false,
+            "field": "billing.country_id",
+            "description": "<p>Country code (for example &quot;US&quot;)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "billing.country",
+            "description": "<p>Country name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "10",
+            "optional": true,
+            "field": "billing.zip",
+            "description": "<p>Zip</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "20",
+            "optional": false,
+            "field": "billing.contact_phone",
+            "description": "<p>Contact phone</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "160",
+            "optional": false,
+            "field": "billing.contact_email",
+            "description": "<p>Contact email</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "60",
+            "optional": true,
+            "field": "billing.contact_name",
+            "description": "<p>Contact name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": true,
+            "field": "payment_request",
+            "description": "<p>Payment request</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "payment_request.amount",
+            "description": "<p>Customer must pay for initiate refund process</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": false,
+            "field": "payment_request.currency",
+            "description": "<p>Currency code</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": false,
+            "field": "payment_request.method_key",
+            "description": "<p>Method key (for example &quot;card&quot;)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "payment_request.method_data",
+            "description": "<p>Method data</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "payment_request.method_data.card",
+            "description": "<p>Card (for credit card)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "..20",
+            "optional": false,
+            "field": "payment_request.method_data.card.number",
+            "description": "<p>Number</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "..50",
+            "optional": true,
+            "field": "payment_request.method_data.card.holder_name",
+            "description": "<p>Holder name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "payment_request.method_data.card.expiration_month",
+            "description": "<p>Month</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "payment_request.method_data.card.expiration_year",
+            "description": "<p>Year</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "..4",
+            "optional": false,
+            "field": "payment_request.method_data.card.cvv",
+            "description": "<p>CVV</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": " {\n    \"bookingId\": \"XXXYYYZ\",\n    \"apiKey\": \"test-api-key\",\n    \"exchange\": {\n        \"trips\": [\n            {\n                \"tripId\": 1,\n                \"segments\": [\n                    {\n                        \"segmentId\": 1,\n                        \"departureTime\": \"2022-01-10 20:15\",\n                        \"arrivalTime\": \"2022-01-11 21:10\",\n                        \"stop\": 0,\n                        \"stops\": [\n                            {\n                                \"locationCode\": \"LFW\",\n                                \"departureDateTime\": \"2022-01-11 12:35\",\n                                \"arrivalDateTime\": \"2022-01-11 11:35\",\n                                \"duration\": 60,\n                                \"elapsedTime\": 620,\n                                \"equipment\": \"787\"\n                            }\n                        ],\n                        \"flightNumber\": \"513\",\n                        \"bookingClass\": \"H\",\n                        \"duration\": 1015,\n                        \"departureAirportCode\": \"JFK\",\n                        \"departureAirportTerminal\": \"8\",\n                        \"arrivalAirportCode\": \"ADD\",\n                        \"arrivalAirportTerminal\": \"2\",\n                        \"operatingAirline\": \"ET\",\n                        \"airEquipType\": \"787\",\n                        \"marketingAirline\": \"ET\",\n                        \"marriageGroup\": \"O\",\n                        \"cabin\": \"Y\",\n                        \"meal\": \"DL\",\n                        \"fareCode\": \"HLESUS\",\n                        \"recheckBaggage\": false\n                    },\n                    {\n                        \"segmentId\": 2,\n                        \"departureTime\": \"2022-01-11 23:15\",\n                        \"arrivalTime\": \"2022-01-12 01:20\",\n                        \"stop\": 0,\n                        \"stops\": null,\n                        \"flightNumber\": \"308\",\n                        \"bookingClass\": \"H\",\n                        \"duration\": 125,\n                        \"departureAirportCode\": \"ADD\",\n                        \"departureAirportTerminal\": \"2\",\n                        \"arrivalAirportCode\": \"NBO\",\n                        \"arrivalAirportTerminal\": \"1C\",\n                        \"operatingAirline\": \"ET\",\n                        \"airEquipType\": \"738\",\n                        \"marketingAirline\": \"ET\",\n                        \"marriageGroup\": \"I\",\n                        \"cabin\": \"Y\",\n                        \"meal\": \"D\",\n                        \"fareCode\": \"HLESUS\",\n                        \"recheckBaggage\": false\n                    }\n                ],\n                \"duration\": 1265\n            }\n        ],\n        \"tickets\": [\n            {\n                \"numRef\": \"1.1\",\n                \"firstName\": \"PAULA ANNE\",\n                \"lastName\": \"ALVAREZ\",\n                \"paxType\": \"ADT\",\n                \"number\": \"123456789\"\n            },\n            {\n                \"numRef\": \"2.1\",\n                \"firstName\": \"ANNE\",\n                \"lastName\": \"ALVAREZ\",\n                \"paxType\": \"ADT\",\n                \"number\": \"987654321\"\n            }\n        ],\n        \"passengers\": {\n            \"ADT\": {\n                \"codeAs\": \"JCB\",\n                \"cnt\": 1,\n                \"baseFare\": 32.12,\n                \"pubBaseFare\": 32.12,\n                \"baseTax\": 300,\n                \"markup\": 0,\n                \"comm\": 0,\n                \"price\": 332.12,\n                \"tax\": 300,\n                \"oBaseFare\": {\n                    \"amount\": 32.120003,\n                    \"currency\": \"USD\"\n                },\n                \"oBaseTax\": {\n                    \"amount\": 300,\n                    \"currency\": \"USD\"\n                },\n                \"oExchangeFareDiff\": {\n                    \"amount\": 8,\n                    \"currency\": \"USD\"\n                },\n                \"oExchangeTaxDiff\": {\n                    \"amount\": 24.12,\n                    \"currency\": \"USD\"\n                }\n            }\n        },\n        \"validatingCarrier\": \"AA\",\n        \"gds\": \"S\",\n        \"pcc\": \"G9MJ\",\n        \"cons\": \"GTT\",\n        \"fareType\": \"SR\",\n        \"cabin\": \"Y\",\n        \"currency\": \"USD\",\n        \"currencies\": [\n            \"USD\"\n        ],\n        \"currencyRates\": {\n            \"USDUSD\": {\n                \"from\": \"USD\",\n                \"to\": \"USD\",\n                \"rate\": 1\n            }\n        },\n        \"keys\": {},\n        \"meta\": {}\n    },\n    \"billing\": {\n          \"first_name\": \"John\",\n          \"last_name\": \"Doe\",\n          \"middle_name\": \"\",\n          \"address_line1\": \"1013 Weda Cir\",\n          \"address_line2\": \"\",\n          \"country_id\": \"US\",\n          \"country\" : \"United States\",\n          \"city\": \"Mayfield\",\n          \"state\": \"KY\",\n          \"zip\": \"99999\",\n          \"company_name\": \"\",\n          \"contact_phone\": \"+19074861000\",\n          \"contact_email\": \"test@test.com\",\n          \"contact_name\": \"Test Name\"\n    },\n    \"payment_request\": {\n          \"method_key\": \"card\",\n          \"currency\": \"USD\",\n          \"method_data\": {\n              \"card\": {\n                  \"number\": \"4111555577778888\",\n                  \"holder_name\": \"Test test\",\n                  \"expiration_month\": 10,\n                  \"expiration_year\": 23,\n                  \"cvv\": \"123\"\n              }\n          },\n          \"amount\": 112.25\n    }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n       \"status\": 200,\n       \"message\": \"OK\",\n       \"data\": {\n                    \"resultMessage\": \"Processing was successful\",\n                    \"originQuoteGid\" : \"a1275b33cda3bbcbeea2d684475a7e8a\",\n                    \"changeQuoteGid\" : \"5c63db4e9d4d24f480088fd5e194e4f5\",\n                    \"productQuoteChangeGid\" : \"ee61d0abb62d96879e2c29ddde403650\",\n                    \"caseGid\" : \"e7dce13b4e6a5f3ccc2cec9c21fa3255\"\n               },\n       \"code\": \"13200\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response (Bad Request):",
+          "content": "HTTP/1.1 400 Bad Request\n{\n       \"status\": 400,\n       \"message\": \"Load data error\",\n       \"errors\": [\n          \"Not found data on POST request\"\n       ],\n       \"code\": \"13106\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (Bad Request):",
+          "content": "HTTP/1.1 400 Bad Request\n{\n       \"status\": 400,\n       \"message\": \"Error\",\n       \"errors\": [\n          \"Not found Project with current user: xxx\"\n       ],\n       \"code\": \"13101\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (Unprocessable entity):",
+          "content": "HTTP/1.1 422 Unprocessable entity\n{\n       \"status\": 422,\n       \"message\": \"Validation error\",\n       \"errors\": [\n           \"bookingId\": [\n              \"bookingId cannot be blank.\"\n            ]\n       ],\n       \"code\": \"13107\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (Unprocessable entity):",
+          "content": "HTTP/1.1 422 Unprocessable entity\n{\n     \"status\": 422,\n     \"message\": \"Error\",\n     \"errors\": [\n         \"Product Quote not available for exchange\"\n     ],\n     \"code\": \"13113\",\n     \"technical\": {\n        ...\n     },\n     \"request\": {\n        ...\n     }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (Unprocessable entity):",
+          "content": "HTTP/1.1 422 Unprocessable entity\n{\n     \"status\": 422,\n     \"message\": \"Error\",\n     \"errors\": [\n         \"Case saving error\"\n     ],\n     \"code\": \"21101\",\n     \"technical\": {\n        ...\n     },\n     \"request\": {\n        ...\n     }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (Internal Server Error):",
+          "content": "HTTP/1.1 500 Internal Server Error\n{\n     \"status\": 500,\n     \"message\": \"Error\",\n     \"errors\": [\n         \"Server Error\"\n     ],\n     \"code\": 0,\n     \"technical\": {\n        ...\n     },\n     \"request\": {\n        ...\n     }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Codes designation",
+          "content": "[\n     13101 - Api User has no related project\n     13106 - Post has not loaded\n     13107 - Validation Failed\n\n     13113 - Product Quote not available for exchange\n\n     15401 - Case creation failed; CRM processing error\n     15402 - Case Sale creation failed; CRM processing error\n     15403 - Client creation failed; CRM processing error\n     15404 - Order creation failed; CRM processing error\n     15405 - Origin Product Quote creation failed; CRM processing errors\n\n     601 - BO Server Error: i.e. request timeout\n     602 - BO response body is empty\n     603 - BO response type is invalid (not array)\n     604 - BO wrong endpoint\n]",
+          "type": "html"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/FlightQuoteExchangeController.php",
+    "groupTitle": "Flight_Voluntary_Exchange"
+  },
+  {
+    "type": "post",
+    "url": "/v2/flight-quote-exchange/info",
+    "title": "Flight Voluntary Exchange Info",
+    "version": "0.2.0",
+    "name": "Flight_Voluntary_Exchange_Info",
+    "group": "Flight_Voluntary_Exchange",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "7..10",
+            "optional": false,
+            "field": "booking_id",
+            "description": "<p>Booking ID</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n    \"booking_id\": \"XXXYYYZ\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n       \"status\": 200,\n       \"message\": \"OK\",\n       \"data\": {\n                \"bookingId\": \"XXXYYYZ\",\n                \"quote_gid\" : \"48c82774ead469ad311c1e6112562726\",\n                \"key\": \"51_U1NTMTAxKlkxMDAwL0pGS05CTzIwMjItMDEtMTAvTkJPSkZLMjAyMi0wMS0zMSp+I0VUNTEzI0VUMzA4I0VUMzA5I0VUNTEyfmxjOmVuX3VzOkVYXzE3Yz123456789\",\n                \"prices\": {\n                    \"totalPrice\": 332.12,\n                    \"comm\": 0,\n                    \"isCk\": false\n                },\n                \"passengers\": {\n                    \"ADT\": {\n                        \"codeAs\": \"JCB\",\n                        \"cnt\": 1,\n                        \"baseFare\": 32.12,\n                        \"pubBaseFare\": 32.12,\n                        \"baseTax\": 300,\n                        \"markup\": 0,\n                        \"comm\": 0,\n                        \"price\": 332.12,\n                        \"tax\": 300,\n                        \"oBaseFare\": {\n                            \"amount\": 32.120003,\n                            \"currency\": \"USD\"\n                        },\n                        \"oBaseTax\": {\n                            \"amount\": 300,\n                            \"currency\": \"USD\"\n                        },\n                        \"oExchangeFareDiff\": {\n                            \"amount\": 8,\n                            \"currency\": \"USD\"\n                        },\n                        \"oExchangeTaxDiff\": {\n                            \"amount\": 24.12,\n                            \"currency\": \"USD\"\n                        }\n                    }\n                },\n                \"trips\": [\n                    {\n                        \"tripId\": 1,\n                        \"segments\": [\n                            {\n                                \"segmentId\": 1,\n                                \"departureTime\": \"2022-01-10 20:15\",\n                                \"arrivalTime\": \"2022-01-11 21:10\",\n                                \"stop\": 1,\n                                \"stops\": [\n                                    {\n                                        \"locationCode\": \"LFW\",\n                                        \"departureDateTime\": \"2022-01-11 12:35\",\n                                        \"arrivalDateTime\": \"2022-01-11 11:35\",\n                                        \"duration\": 60,\n                                        \"elapsedTime\": 620,\n                                        \"equipment\": \"787\"\n                                    }\n                                ],\n                                \"flightNumber\": \"513\",\n                                \"bookingClass\": \"H\",\n                                \"duration\": 1015,\n                                \"departureAirportCode\": \"JFK\",\n                                \"departureAirportTerminal\": \"8\",\n                                \"arrivalAirportCode\": \"ADD\",\n                                \"arrivalAirportTerminal\": \"2\",\n                                \"operatingAirline\": \"ET\",\n                                \"airEquipType\": \"787\",\n                                \"marketingAirline\": \"ET\",\n                                \"marriageGroup\": \"O\",\n                                \"cabin\": \"Y\",\n                                \"meal\": \"DL\",\n                                \"fareCode\": \"HLESUS\",\n                                \"recheckBaggage\": false\n                            },\n                            {\n                                \"segmentId\": 2,\n                                \"departureTime\": \"2022-01-11 23:15\",\n                                \"arrivalTime\": \"2022-01-12 01:20\",\n                                \"stop\": 0,\n                                \"stops\": null,\n                                \"flightNumber\": \"308\",\n                                \"bookingClass\": \"H\",\n                                \"duration\": 125,\n                                \"departureAirportCode\": \"ADD\",\n                                \"departureAirportTerminal\": \"2\",\n                                \"arrivalAirportCode\": \"NBO\",\n                                \"arrivalAirportTerminal\": \"1C\",\n                                \"operatingAirline\": \"ET\",\n                                \"airEquipType\": \"738\",\n                                \"marketingAirline\": \"ET\",\n                                \"marriageGroup\": \"I\",\n                                \"cabin\": \"Y\",\n                                \"meal\": \"D\",\n                                \"fareCode\": \"HLESUS\",\n                                \"recheckBaggage\": false\n                            }\n                        ],\n                        \"duration\": 1265\n                    },\n                    {\n                        \"tripId\": 2,\n                        \"segments\": [\n                            {\n                                \"segmentId\": 1,\n                                \"departureTime\": \"2022-01-31 05:00\",\n                                \"arrivalTime\": \"2022-01-31 07:15\",\n                                \"stop\": 0,\n                                \"stops\": null,\n                                \"flightNumber\": \"309\",\n                                \"bookingClass\": \"E\",\n                                \"duration\": 135,\n                                \"departureAirportCode\": \"NBO\",\n                                \"departureAirportTerminal\": \"1C\",\n                                \"arrivalAirportCode\": \"ADD\",\n                                \"arrivalAirportTerminal\": \"2\",\n                                \"operatingAirline\": \"ET\",\n                                \"airEquipType\": \"738\",\n                                \"marketingAirline\": \"ET\",\n                                \"marriageGroup\": \"O\",\n                                \"cabin\": \"Y\",\n                                \"meal\": \"B\",\n                                \"fareCode\": \"ELPRUS\",\n                                \"recheckBaggage\": false\n                            },\n                            {\n                                \"segmentId\": 2,\n                                \"departureTime\": \"2022-01-31 08:30\",\n                                \"arrivalTime\": \"2022-01-31 18:15\",\n                                \"stop\": 1,\n                                \"stops\": [\n                                    {\n                                        \"locationCode\": \"LFW\",\n                                        \"departureDateTime\": \"2022-01-31 12:15\",\n                                        \"arrivalDateTime\": \"2022-01-31 11:00\",\n                                        \"duration\": 75,\n                                        \"elapsedTime\": 330,\n                                        \"equipment\": \"787\"\n                                    }\n                                ],\n                                \"flightNumber\": \"512\",\n                                \"bookingClass\": \"E\",\n                                \"duration\": 1065,\n                                \"departureAirportCode\": \"ADD\",\n                                \"departureAirportTerminal\": \"2\",\n                                \"arrivalAirportCode\": \"JFK\",\n                                \"arrivalAirportTerminal\": \"8\",\n                                \"operatingAirline\": \"ET\",\n                                \"airEquipType\": \"787\",\n                                \"marketingAirline\": \"ET\",\n                                \"marriageGroup\": \"I\",\n                                \"cabin\": \"Y\",\n                                \"meal\": \"LD\",\n                                \"fareCode\": \"ELPRUS\",\n                                \"recheckBaggage\": false\n                            }\n                        ],\n                        \"duration\": 1275\n                    }\n                ],\n                \"paxCnt\": 1,\n                \"validatingCarrier\": \"\",\n                \"gds\": \"S\",\n                \"pcc\": \"G9MJ\",\n                \"cons\": \"GTT\",\n                \"fareType\": \"SR\",\n                \"cabin\": \"Y\",\n                \"currency\": \"USD\",\n                \"currencies\": [\n                    \"USD\"\n                ],\n                \"currencyRates\": {\n                    \"USDUSD\": {\n                        \"from\": \"USD\",\n                        \"to\": \"USD\",\n                        \"rate\": 1\n                    }\n                },\n                \"keys\": {},\n                \"meta\": {\n                    \"eip\": 0,\n                    \"noavail\": false,\n                    \"searchId\": \"U1NTMTAxWTEwMDB8SkZLTkJPMjAyMi0wMS0xMHxOQk9KRksyMDIyLTAxLTMx\",\n                    \"lang\": \"en\",\n                    \"rank\": 0,\n                    \"cheapest\": false,\n                    \"fastest\": false,\n                    \"best\": false,\n                    \"country\": \"us\"\n                },\n                \"billing\": {\n                      \"first_name\": \"John\",\n                      \"last_name\": \"Doe\",\n                      \"middle_name\": \"\",\n                      \"address_line1\": \"1013 Weda Cir\",\n                      \"address_line2\": \"\",\n                      \"country_id\": \"US\",\n                      \"city\": \"Mayfield\",\n                      \"state\": \"KY\",\n                      \"zip\": \"99999\",\n                      \"company_name\": \"\",\n                      \"contact_phone\": \"+19074861000\",\n                      \"contact_email\": \"test@test.com\",\n                      \"contact_name\": \"Test Name\"\n                },\n                \"payment_request\": {\n                      \"method_key\": \"cc\",\n                      \"currency\": \"USD\",\n                      \"method_data\": {\n                          \"card\": {\n                              \"number\": \"4111555577778888\",\n                              \"holder_name\": \"Test test\",\n                              \"expiration_month\": 10,\n                              \"expiration_year\": 23,\n                              \"cvv\": \"1234\"\n                          }\n                      },\n                      \"amount\": 112.25\n                }\n            },\n       \"code\": \"13200\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 400 Bad Request\n{\n       \"status\": 400,\n       \"message\": \"Load data error\",\n       \"errors\": [\n          \"Not found data on POST request\"\n       ],\n       \"code\": \"13106\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 422 Unprocessable entity\n{\n       \"status\": 422,\n       \"message\": \"Validation error\",\n       \"errors\": [\n           \"booking_id\": [\n              \"booking_id cannot be blank.\"\n            ]\n       ],\n       \"code\": \"13107\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/FlightQuoteExchangeController.php",
+    "groupTitle": "Flight_Voluntary_Exchange"
+  },
+  {
+    "type": "post",
+    "url": "/v2/flight-quote-exchange/view",
+    "title": "Flight Voluntary Exchange View",
+    "version": "0.2.0",
+    "name": "Flight_Voluntary_Exchange_View",
+    "group": "Flight_Voluntary_Exchange",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "7..10",
+            "optional": false,
+            "field": "booking_id",
+            "description": "<p>Booking ID</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n    \"booking_id\": \"XXXYYYZ\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n       \"status\": 200,\n       \"message\": \"OK\",\n       \"data\": {\n                    \"productQuoteChange\": {\n                        \"id\": 950326,\n                        \"productQuoteId\": 950326,\n                        \"productQuoteGid\": \"b1ae27497b6eaab24a39fc1370069bd4\",\n                        \"caseId\": 35618,\n                        \"caseGid\": \"e7dce13b4e6a5f3ccc2cec9c21fa3255\",\n                        \"statusId\": 4,\n                        \"statusName\": \"Complete\",\n                        \"decisionTypeId\": null,\n                        \"decisionTypeName\": \"Undefined\",\n                        \"isAutomate\": 1,\n                        \"createdDt\": \"2021-09-21 03:28:33\",\n                        \"updatedDt\": \"2021-09-28 09:11:38\"\n                    }\n               },\n       \"code\": \"13200\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 400 Bad Request\n{\n       \"status\": 400,\n       \"message\": \"Load data error\",\n       \"errors\": [\n          \"Not found data on POST request\"\n       ],\n       \"code\": \"13106\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 422 Unprocessable entity\n{\n       \"status\": 422,\n       \"message\": \"Validation error\",\n       \"errors\": [\n           \"booking_id\": [\n              \"booking_id cannot be blank.\"\n            ]\n       ],\n       \"code\": \"13107\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/FlightQuoteExchangeController.php",
+    "groupTitle": "Flight_Voluntary_Exchange"
+  },
+  {
+    "type": "post",
+    "url": "/v2/flight-quote-exchange/get-change",
+    "title": "Flight Voluntary Product Quote Change Info",
+    "version": "0.2.0",
+    "name": "Flight_Voluntary_Product_Quote_Change",
+    "group": "Flight_Voluntary_Exchange",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "32",
+            "optional": false,
+            "field": "change_gid",
+            "description": "<p>Change gid</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n    \"change_gid\": \"16b2506459becec5e038b829568de2bb\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n       \"status\": 200,\n       \"message\": \"OK\",\n       \"data\": {\n                \"bookingId\": \"XXXYYYZ\",\n                \"quote_gid\" : \"48c82774ead469ad311c1e6112562726\",\n                \"key\": \"51_U1NTMTAxKlkxMDAwL0pGS05CTzIwMjItMDEtMTAvTkJPSkZLMjAyMi0wMS0zMSp+I0VUNTEzI0VUMzA4I0VUMzA5I0VUNTEyfmxjOmVuX3VzOkVYXzE3Yz123456789\",\n                \"prices\": {\n                    \"totalPrice\": 332.12,\n                    \"comm\": 0,\n                    \"isCk\": false\n                },\n                \"passengers\": {\n                    \"ADT\": {\n                        \"codeAs\": \"JCB\",\n                        \"cnt\": 1,\n                        \"baseFare\": 32.12,\n                        \"pubBaseFare\": 32.12,\n                        \"baseTax\": 300,\n                        \"markup\": 0,\n                        \"comm\": 0,\n                        \"price\": 332.12,\n                        \"tax\": 300,\n                        \"oBaseFare\": {\n                            \"amount\": 32.120003,\n                            \"currency\": \"USD\"\n                        },\n                        \"oBaseTax\": {\n                            \"amount\": 300,\n                            \"currency\": \"USD\"\n                        },\n                        \"oExchangeFareDiff\": {\n                            \"amount\": 8,\n                            \"currency\": \"USD\"\n                        },\n                        \"oExchangeTaxDiff\": {\n                            \"amount\": 24.12,\n                            \"currency\": \"USD\"\n                        }\n                    }\n                },\n                \"trips\": [\n                    {\n                        \"tripId\": 1,\n                        \"segments\": [\n                            {\n                                \"segmentId\": 1,\n                                \"departureTime\": \"2022-01-10 20:15\",\n                                \"arrivalTime\": \"2022-01-11 21:10\",\n                                \"stop\": 1,\n                                \"stops\": [\n                                    {\n                                        \"locationCode\": \"LFW\",\n                                        \"departureDateTime\": \"2022-01-11 12:35\",\n                                        \"arrivalDateTime\": \"2022-01-11 11:35\",\n                                        \"duration\": 60,\n                                        \"elapsedTime\": 620,\n                                        \"equipment\": \"787\"\n                                    }\n                                ],\n                                \"flightNumber\": \"513\",\n                                \"bookingClass\": \"H\",\n                                \"duration\": 1015,\n                                \"departureAirportCode\": \"JFK\",\n                                \"departureAirportTerminal\": \"8\",\n                                \"arrivalAirportCode\": \"ADD\",\n                                \"arrivalAirportTerminal\": \"2\",\n                                \"operatingAirline\": \"ET\",\n                                \"airEquipType\": \"787\",\n                                \"marketingAirline\": \"ET\",\n                                \"marriageGroup\": \"O\",\n                                \"cabin\": \"Y\",\n                                \"meal\": \"DL\",\n                                \"fareCode\": \"HLESUS\",\n                                \"recheckBaggage\": false\n                            },\n                            {\n                                \"segmentId\": 2,\n                                \"departureTime\": \"2022-01-11 23:15\",\n                                \"arrivalTime\": \"2022-01-12 01:20\",\n                                \"stop\": 0,\n                                \"stops\": null,\n                                \"flightNumber\": \"308\",\n                                \"bookingClass\": \"H\",\n                                \"duration\": 125,\n                                \"departureAirportCode\": \"ADD\",\n                                \"departureAirportTerminal\": \"2\",\n                                \"arrivalAirportCode\": \"NBO\",\n                                \"arrivalAirportTerminal\": \"1C\",\n                                \"operatingAirline\": \"ET\",\n                                \"airEquipType\": \"738\",\n                                \"marketingAirline\": \"ET\",\n                                \"marriageGroup\": \"I\",\n                                \"cabin\": \"Y\",\n                                \"meal\": \"D\",\n                                \"fareCode\": \"HLESUS\",\n                                \"recheckBaggage\": false\n                            }\n                        ],\n                        \"duration\": 1265\n                    },\n                    {\n                        \"tripId\": 2,\n                        \"segments\": [\n                            {\n                                \"segmentId\": 1,\n                                \"departureTime\": \"2022-01-31 05:00\",\n                                \"arrivalTime\": \"2022-01-31 07:15\",\n                                \"stop\": 0,\n                                \"stops\": null,\n                                \"flightNumber\": \"309\",\n                                \"bookingClass\": \"E\",\n                                \"duration\": 135,\n                                \"departureAirportCode\": \"NBO\",\n                                \"departureAirportTerminal\": \"1C\",\n                                \"arrivalAirportCode\": \"ADD\",\n                                \"arrivalAirportTerminal\": \"2\",\n                                \"operatingAirline\": \"ET\",\n                                \"airEquipType\": \"738\",\n                                \"marketingAirline\": \"ET\",\n                                \"marriageGroup\": \"O\",\n                                \"cabin\": \"Y\",\n                                \"meal\": \"B\",\n                                \"fareCode\": \"ELPRUS\",\n                                \"recheckBaggage\": false\n                            },\n                            {\n                                \"segmentId\": 2,\n                                \"departureTime\": \"2022-01-31 08:30\",\n                                \"arrivalTime\": \"2022-01-31 18:15\",\n                                \"stop\": 1,\n                                \"stops\": [\n                                    {\n                                        \"locationCode\": \"LFW\",\n                                        \"departureDateTime\": \"2022-01-31 12:15\",\n                                        \"arrivalDateTime\": \"2022-01-31 11:00\",\n                                        \"duration\": 75,\n                                        \"elapsedTime\": 330,\n                                        \"equipment\": \"787\"\n                                    }\n                                ],\n                                \"flightNumber\": \"512\",\n                                \"bookingClass\": \"E\",\n                                \"duration\": 1065,\n                                \"departureAirportCode\": \"ADD\",\n                                \"departureAirportTerminal\": \"2\",\n                                \"arrivalAirportCode\": \"JFK\",\n                                \"arrivalAirportTerminal\": \"8\",\n                                \"operatingAirline\": \"ET\",\n                                \"airEquipType\": \"787\",\n                                \"marketingAirline\": \"ET\",\n                                \"marriageGroup\": \"I\",\n                                \"cabin\": \"Y\",\n                                \"meal\": \"LD\",\n                                \"fareCode\": \"ELPRUS\",\n                                \"recheckBaggage\": false\n                            }\n                        ],\n                        \"duration\": 1275\n                    }\n                ],\n                \"paxCnt\": 1,\n                \"validatingCarrier\": \"\",\n                \"gds\": \"S\",\n                \"pcc\": \"G9MJ\",\n                \"cons\": \"GTT\",\n                \"fareType\": \"SR\",\n                \"cabin\": \"Y\",\n                \"currency\": \"USD\",\n                \"currencies\": [\n                    \"USD\"\n                ],\n                \"currencyRates\": {\n                    \"USDUSD\": {\n                        \"from\": \"USD\",\n                        \"to\": \"USD\",\n                        \"rate\": 1\n                    }\n                },\n                \"keys\": {},\n                \"meta\": {\n                    \"eip\": 0,\n                    \"noavail\": false,\n                    \"searchId\": \"U1NTMTAxWTEwMDB8SkZLTkJPMjAyMi0wMS0xMHxOQk9KRksyMDIyLTAxLTMx\",\n                    \"lang\": \"en\",\n                    \"rank\": 0,\n                    \"cheapest\": false,\n                    \"fastest\": false,\n                    \"best\": false,\n                    \"country\": \"us\"\n                },\n                \"billing\": {\n                      \"first_name\": \"John\",\n                      \"last_name\": \"Doe\",\n                      \"middle_name\": \"\",\n                      \"address_line1\": \"1013 Weda Cir\",\n                      \"address_line2\": \"\",\n                      \"country_id\": \"US\",\n                      \"city\": \"Mayfield\",\n                      \"state\": \"KY\",\n                      \"zip\": \"99999\",\n                      \"company_name\": \"\",\n                      \"contact_phone\": \"+19074861000\",\n                      \"contact_email\": \"test@test.com\",\n                      \"contact_name\": \"Test Name\"\n                },\n                \"payment_request\": {\n                      \"method_key\": \"cc\",\n                      \"currency\": \"USD\",\n                      \"method_data\": {\n                          \"card\": {\n                              \"number\": \"4111555577778888\",\n                              \"holder_name\": \"Test test\",\n                              \"expiration_month\": 10,\n                              \"expiration_year\": 23,\n                              \"cvv\": \"1234\"\n                          }\n                      },\n                      \"amount\": 112.25\n                }\n            },\n       \"code\": \"13200\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 400 Bad Request\n{\n       \"status\": 400,\n       \"message\": \"Load data error\",\n       \"errors\": [\n          \"Not found data on POST request\"\n       ],\n       \"code\": \"13106\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 422 Unprocessable entity\n{\n       \"status\": 422,\n       \"message\": \"Validation error\",\n       \"errors\": [\n           \"booking_id\": [\n              \"booking_id cannot be blank.\"\n            ]\n       ],\n       \"code\": \"13107\",\n       \"technical\": {\n          ...\n       },\n       \"request\": {\n          ...\n       }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/FlightQuoteExchangeController.php",
+    "groupTitle": "Flight_Voluntary_Exchange"
+  },
+  {
+    "type": "post",
+    "url": "/v1/flight-quote-refund/confirm",
+    "title": "Flight Voluntary Refund Confirm",
+    "version": "1.0.0",
+    "name": "Flight_Voluntary_Refund_Confirm",
+    "group": "Flight_Voluntary_Refund",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "0..10",
+            "optional": false,
+            "field": "bookingId",
+            "description": "<p>Booking ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "..32",
+            "optional": false,
+            "field": "refundGid",
+            "description": "<p>Refund GID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "..32",
+            "optional": false,
+            "field": "orderId",
+            "description": "<p>OTA Refund Order Id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "billing",
+            "description": "<p>Billing</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": false,
+            "field": "billing.first_name",
+            "description": "<p>First name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": false,
+            "field": "billing.last_name",
+            "description": "<p>Last name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": true,
+            "field": "billing.middle_name",
+            "description": "<p>Middle name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "40",
+            "optional": true,
+            "field": "billing.company_name",
+            "description": "<p>Company</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": false,
+            "field": "billing.address_line1",
+            "description": "<p>Address line 1</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": true,
+            "field": "billing.address_line2",
+            "description": "<p>Address line 2</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": false,
+            "field": "billing.city",
+            "description": "<p>City</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "40",
+            "optional": true,
+            "field": "billing.state",
+            "description": "<p>State</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "2",
+            "optional": false,
+            "field": "billing.country_id",
+            "description": "<p>Country code (for example &quot;US&quot;)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "billing.country",
+            "description": "<p>Country (for example &quot;United States&quot;)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "10",
+            "optional": false,
+            "field": "billing.zip",
+            "description": "<p>Zip</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "20",
+            "optional": false,
+            "field": "billing.contact_phone",
+            "description": "<p>Contact phone</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "160",
+            "optional": false,
+            "field": "billing.contact_email",
+            "description": "<p>Contact email</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "60",
+            "optional": true,
+            "field": "billing.contact_name",
+            "description": "<p>Contact name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "payment_request",
+            "description": "<p>Payment request</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "payment_request.amount",
+            "description": "<p>Customer must pay for initiate refund process</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": false,
+            "field": "payment_request.currency",
+            "description": "<p>Currency code</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": false,
+            "field": "payment_request.method_key",
+            "description": "<p>Method key (for example &quot;card&quot;)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "payment_request.method_data",
+            "description": "<p>Method data</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "payment_request.method_data.card",
+            "description": "<p>Card (for credit card)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "..20",
+            "optional": false,
+            "field": "payment_request.method_data.card.number",
+            "description": "<p>Number</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "..50",
+            "optional": false,
+            "field": "payment_request.method_data.card.holder_name",
+            "description": "<p>Holder name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "payment_request.method_data.card.expiration_month",
+            "description": "<p>Month</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "payment_request.method_data.card.expiration_year",
+            "description": "<p>Year</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "..4",
+            "optional": false,
+            "field": "payment_request.method_data.card.cvv",
+            "description": "<p>CVV</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n    \"bookingId\": \"XXXXXXX\",\n    \"refundGid\": \"6fcb275a1cd60b3a1e93bdda093e383b\",\n    \"orderId\": \"RET-12321AD\",\n    \"billing\": {\n        \"first_name\": \"John\",\n        \"last_name\": \"Doe\",\n        \"middle_name\": \"\",\n        \"address_line1\": \"1013 Weda Cir\",\n        \"address_line2\": \"\",\n        \"country_id\": \"US\",\n        \"country\": \"United States\",\n        \"city\": \"Mayfield\",\n        \"state\": \"KY\",\n        \"zip\": \"99999\",\n        \"company_name\": \"\",\n        \"contact_phone\": \"+19074861000\",\n        \"contact_email\": \"test@test.com\",\n        \"contact_name\": \"Test Name\"\n    },\n    \"payment_request\": {\n        \"method_key\": \"card\",\n        \"currency\": \"USD\",\n        \"method_data\": {\n            \"card\": {\n                \"number\": \"4111555577778888\",\n                \"holder_name\": \"Test test\",\n                \"expiration_month\": 10,\n                \"expiration_year\": 23,\n                \"cvv\": \"1234\"\n            }\n        },\n        \"amount\": 112.25\n    }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n    \"code\": \"13200\",\n    \"saleData\": {\n         \"id\": 12345,\n         \"bookingId\": \"P12OJ12\"\n    },\n    \"refund\": {\n        \"id\": 54321,\n        \"orderId\": \"RET-12321AD\"\n    }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response Load Data:",
+          "content": "HTTP/1.1 200 OK\n {\n     \"status\": 400,\n     \"message\": \"Load data error\",\n     \"name\": \"Client Error: Bad Request\",\n     \"code\": 13106,\n     \"type\": \"app\",\n     \"errors\": []\n }",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response Validation:",
+          "content": "HTTP/1.1 200 OK\n{\n  \"status\": 422,\n  \"message\": \"Validation error\",\n  \"name\": \"Client Error: Unprocessable Entity\",\n  \"errors\": {\n     \"bookingId\": [\n         \"Booking Id should contain at most 10 characters.\"\n     ]\n  },\n  \"code\": 13107,\n  \"type\": \"app\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response Error From BO:",
+          "content": "HTTP/1.1 200 OK\n{\n     \"status\": 422,\n     \"message\": \"FlightRequest is not found.\",\n     \"name\": \"BO Request Failed\",\n     \"code\": \"15411\",\n     \"errors\": [],\n     \"type\": \"app_bo\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Codes designation",
+          "content": "[\n     13101 - Api User has no related project\n     13104 - Request is not POST\n     13106 - Post has not loaded\n     13107 - Validation Failed\n     13112 - Not found refund in pending status by booking and gid\n     13113 - Flight Request already processing; This feature helps to handle duplicate requests\n     15411 - Request to BO failed; See tab \"Error From BO\"\n     15412 - BO endpoint is not set; This is system crm error\n     150001 - Flight Request saving failed; This is system crm error\n     601 - BO Server Error: i.e. request timeout\n     602 - BO response body is empty\n     603 - BO response type is invalid (not array)\n]",
+          "type": "html"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v1/controllers/FlightQuoteRefundController.php",
+    "groupTitle": "Flight_Voluntary_Refund"
+  },
+  {
+    "type": "post",
+    "url": "/v1/flight-quote-refund/create",
+    "title": "Flight Voluntary Refund Create",
+    "version": "1.0.0",
+    "name": "Flight_Voluntary_Refund_Create",
+    "group": "Flight_Voluntary_Refund",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "0..50",
+            "optional": false,
+            "field": "bookingId",
+            "description": "<p>Booking ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "refund",
+            "description": "<p>Refund Data</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "..3",
+            "optional": false,
+            "field": "refund.currency",
+            "description": "<p>Currency</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "..32",
+            "optional": false,
+            "field": "refund.orderId",
+            "description": "<p>OTA Order Id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "refund.processingFee",
+            "description": "<p>Processing fee</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "refund.penaltyAmount",
+            "description": "<p>Airline penalty amount</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "refund.totalRefundAmount",
+            "description": "<p>Total refund amount</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "refund.totalPaid",
+            "description": "<p>Total booking amount</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "refund.tickets",
+            "description": "<p>Refund Tickets Array</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "refund.tickets.number",
+            "description": "<p>Ticket Number</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "refund.tickets.airlinePenalty",
+            "description": "<p>Airline penalty</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "refund.tickets.processingFee",
+            "description": "<p>Processing fee</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "refund.tickets.refundable",
+            "description": "<p>Refund amount</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "refund.tickets.selling",
+            "description": "<p>Selling price</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "refund.tickets.status",
+            "description": "<p>Status For BO</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "bool",
+            "optional": true,
+            "field": "refund.tickets.refundAllowed",
+            "description": "<p>Refund Allowed</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "refund.auxiliaryOptions",
+            "description": "<p>Auxiliary Options Array</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "refund.auxiliaryOptions.type",
+            "description": "<p>Auxiliary Options Type</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "refund.auxiliaryOptions.amount",
+            "description": "<p>Selling price</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "refund.auxiliaryOptions.refundable",
+            "description": "<p>Refundable price</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "refund.auxiliaryOptions.status",
+            "description": "<p>Status For BO</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "bool",
+            "optional": false,
+            "field": "refund.auxiliaryOptions.refundAllow",
+            "description": "<p>Refund Allowed</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": true,
+            "field": "refund.auxiliaryOptions.details",
+            "description": "<p>Details</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": true,
+            "field": "refund.auxiliaryOptions.amountPerPax",
+            "description": "<p>Amount Per Pax</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "billing",
+            "description": "<p>Billing</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": false,
+            "field": "billing.first_name",
+            "description": "<p>First name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": false,
+            "field": "billing.last_name",
+            "description": "<p>Last name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": true,
+            "field": "billing.middle_name",
+            "description": "<p>Middle name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "40",
+            "optional": true,
+            "field": "billing.company_name",
+            "description": "<p>Company</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": false,
+            "field": "billing.address_line1",
+            "description": "<p>Address line 1</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": true,
+            "field": "billing.address_line2",
+            "description": "<p>Address line 2</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": false,
+            "field": "billing.city",
+            "description": "<p>City</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "40",
+            "optional": true,
+            "field": "billing.state",
+            "description": "<p>State</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "2",
+            "optional": false,
+            "field": "billing.country_id",
+            "description": "<p>Country code (for example &quot;US&quot;)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "billing.country",
+            "description": "<p>Country (for example &quot;United States&quot;)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "10",
+            "optional": false,
+            "field": "billing.zip",
+            "description": "<p>Zip</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "20",
+            "optional": false,
+            "field": "billing.contact_phone",
+            "description": "<p>Contact phone</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "160",
+            "optional": false,
+            "field": "billing.contact_email",
+            "description": "<p>Contact email</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "60",
+            "optional": true,
+            "field": "billing.contact_name",
+            "description": "<p>Contact name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "payment_request",
+            "description": "<p>Payment request</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "number",
+            "optional": false,
+            "field": "payment_request.amount",
+            "description": "<p>Customer must pay for initiate refund process</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "3",
+            "optional": false,
+            "field": "payment_request.currency",
+            "description": "<p>Currency code</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": false,
+            "field": "payment_request.method_key",
+            "description": "<p>Method key (for example &quot;card&quot;)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "payment_request.method_data",
+            "description": "<p>Method data</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "payment_request.method_data.card",
+            "description": "<p>Card (for credit card)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "..20",
+            "optional": false,
+            "field": "payment_request.method_data.card.number",
+            "description": "<p>Number</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "..50",
+            "optional": false,
+            "field": "payment_request.method_data.card.holder_name",
+            "description": "<p>Holder name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "payment_request.method_data.card.expiration_month",
+            "description": "<p>Month</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "payment_request.method_data.card.expiration_year",
+            "description": "<p>Year</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "..4",
+            "optional": false,
+            "field": "payment_request.method_data.card.cvv",
+            "description": "<p>CVV</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n    \"bookingId\": \"XXXXXXX\",\n    \"refund\": {\n        \"orderId\": \"RET-12321AD\",\n        \"processingFee\": 12.5,\n        \"penaltyAmount\": 100.00,\n        \"totalRefundAmount\": 112.5,\n        \"totalPaid\": 305.50,\n        \"currency\": \"USD\",\n        \"tickets\": [\n            {\n                \"number\": \"465723459\",\n                \"airlinePenalty\": 25.36,\n                \"processingFee\": 25,\n                \"refundable\": 52.65,\n                \"selling\": 150,\n                \"status\": \"issued\",\n                \"refundAllowed\": true\n            }\n        ],\n        \"auxiliaryOptions\": [\n            {\n                \"type\": \"package\",\n                \"amount\": 25.00,\n                \"refundable\": 15.00,\n                \"status\": \"paid\",\n                \"refundAllow\": true,\n                \"details\": {},\n                \"amountPerPax\": {\n                    \"1111111111\": 5.45\n                }\n            }\n        ]\n    },\n    \"billing\": {\n        \"first_name\": \"John\",\n        \"last_name\": \"Doe\",\n        \"middle_name\": \"\",\n        \"address_line1\": \"1013 Weda Cir\",\n        \"address_line2\": \"\",\n        \"country_id\": \"US\",\n        \"country\": \"United States\",\n        \"city\": \"Mayfield\",\n        \"state\": \"KY\",\n        \"zip\": \"99999\",\n        \"company_name\": \"\",\n        \"contact_phone\": \"+19074861000\",\n        \"contact_email\": \"test@test.com\",\n        \"contact_name\": \"Test Name\"\n    },\n    \"payment_request\": {\n        \"method_key\": \"card\",\n        \"currency\": \"USD\",\n        \"method_data\": {\n            \"card\": {\n                \"number\": \"4111555577778888\",\n                \"holder_name\": \"Test test\",\n                \"expiration_month\": 10,\n                \"expiration_year\": 23,\n                \"cvv\": \"1234\"\n            }\n        },\n        \"amount\": 112.25\n    }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n    \"code\": \"13200\",\n    \"saleData\": {\n         \"id\": 12345,\n         \"bookingId\": \"P12OJ12\"\n    },\n    \"refund\": {\n        \"id\": 54321,\n        \"orderId\": \"RET-12321AD\"\n    }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response Load Data:",
+          "content": "HTTP/1.1 200 OK\n {\n     \"status\": 400,\n     \"message\": \"Load data error\",\n     \"name\": \"Client Error: Bad Request\",\n     \"code\": 13106,\n     \"type\": \"app\",\n     \"errors\": []\n }",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response Validation:",
+          "content": "HTTP/1.1 200 OK\n{\n  \"status\": 422,\n  \"message\": \"Validation error\",\n  \"name\": \"Client Error: Unprocessable Entity\",\n  \"errors\": {\n     \"bookingId\": [\n         \"Booking Id should contain at most 10 characters.\"\n     ]\n  },\n  \"code\": 13107,\n  \"type\": \"app\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response Error From BO:",
+          "content": "HTTP/1.1 200 OK\n{\n     \"status\": 422,\n     \"message\": \"FlightRequest is not found.\",\n     \"name\": \"BO Request Failed\",\n     \"code\": \"15411\",\n     \"errors\": [],\n     \"type\": \"app_bo\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Codes designation",
+          "content": "[\n     13101 - Api User has no related project\n     13104 - Request is not POST\n     13106 - Post has not loaded\n     13107 - Validation Failed\n     13113 - Flight Request already processing; This feature helps to handle duplicate requests\n\n     15401 - Case creation failed; This is system crm error\n     15402 - Case Sale creation failed; This is system crm error\n     15403 - Client creation failed; This is system crm error\n     15404 - Order creation failed; This is system crm error\n     15405 - Origin Product Quote creation failed; This is system crm error\n     15409 - Quote not available for refund due to exists active refund or change\n     15410 - Quote not available for refund due to status of product quote not in changeable list\n     15411 - Request to BO failed; See tab \"Error From BO\"\n     15412 - BO endpoint is not set; This is system crm error\n     150001 - Flight Request saving failed; This is system crm error\n\n     601 - BO Server Error: i.e. request timeout\n     602 - BO response body is empty\n     603 - BO response type is invalid (not array)\n]",
+          "type": "html"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v1/controllers/FlightQuoteRefundController.php",
+    "groupTitle": "Flight_Voluntary_Refund"
+  },
+  {
+    "type": "post",
+    "url": "/v1/flight-quote-refund/info",
+    "title": "Voluntary Refund Info",
+    "version": "1.0.0",
+    "name": "Flight_Voluntary_Refund_Info",
+    "group": "Flight_Voluntary_Refund",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "0..10",
+            "optional": false,
+            "field": "bookingId",
+            "description": "<p>Booking ID</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n    \"bookingId\": \"XXXXXXX\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n {\n      \"status\": 200,\n      \"message\": \"OK\",\n      \"data\": {\n          \"refund\": {\n              \"totalPaid\": 300,\n              \"totalAirlinePenalty\": 150,\n              \"totalProcessingFee\": 30,\n              \"totalRefundable\": 150,\n              \"refundCost\": 0,\n              \"currency\": \"USD\",\n              \"tickets\": [\n                  {\n                      \"number\": \"fake-22222\",\n                      \"airlinePenalty\": 345.47,\n                      \"processingFee\": 0,\n                      \"refundable\": 128,\n                      \"selling\": 473.47,\n                      \"currency\": \"USD\",\n                      \"status\": \"refunded\",\n                      \"refundAllowed\": false\n                  }\n              ],\n              \"auxiliaryOptions\": [\n                  {\n                      \"type\": \"auto_check_in\",\n                      \"amount\": 21.9,\n                      \"amountPerPax\": [],\n                      \"refundable\": 21.9,\n                      \"details\": [],\n                      \"status\": \"paid\",\n                      \"refundAllow\": true\n                  },\n                  {\n                      \"type\": \"flexible_ticket\",\n                      \"amount\": 106.06,\n                      \"amountPerPax\": [],\n                      \"refundable\": 0,\n                      \"details\": [],\n                      \"status\": \"paid\",\n                      \"refundAllow\": false\n                  }\n              ]\n          }\n      },\n      \"code\": \"13200\"\n  }",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response Load Data:",
+          "content": "HTTP/1.1 200 OK\n{\n    \"status\": 400,\n    \"message\": \"Load data error\",\n    \"name\": \"Client Error: Bad Request\",\n    \"code\": 13106,\n    \"type\": \"app\",\n    \"errors\": []\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response Validation:",
+          "content": "HTTP/1.1 200 OK\n{\n  \"status\": 422,\n  \"message\": \"Validation error\",\n  \"name\": \"Client Error: Unprocessable Entity\",\n  \"errors\": {\n  \"bookingId\": [\n         \"Booking Id should contain at most 10 characters.\"\n     ]\n  },\n  \"code\": 13107,\n  \"type\": \"app\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Codes designation",
+          "content": "[\n     13104 - Request is not POST\n     13106 - Post has not loaded\n     13107 - Validation Failed\n     13112 - ProductQuoteRefund not found by BookingId\n]",
+          "type": "html"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v1/controllers/FlightQuoteRefundController.php",
+    "groupTitle": "Flight_Voluntary_Refund"
   },
   {
     "type": "post",
@@ -3696,6 +6803,13 @@ define({ "api": [
           },
           {
             "group": "Parameter",
+            "type": "bool",
+            "optional": true,
+            "field": "lead.is_test",
+            "description": "<p>Is test lead (default false)</p>"
+          },
+          {
+            "group": "Parameter",
             "type": "datetime",
             "size": "YYYY-MM-DD HH:mm:ss",
             "optional": true,
@@ -3906,7 +7020,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "{\n   \"apiKey\": \"d190c378e131ccfd8a889c8ee8994cb55f22fbeeb93f9b99007e8e7ecc24d0dd\",\n   \"lead\": {\n       \"flights\": [\n           {\n               \"origin\": \"KIV\",\n               \"destination\": \"DME\",\n               \"departure\": \"2018-10-13 13:50:00\",\n           },\n           {\n               \"origin\": \"DME\",\n               \"destination\": \"KIV\",\n               \"departure\": \"2018-10-18 10:54:00\",\n           }\n       ],\n       \"emails\": [\n         \"email1@gmail.com\",\n         \"email2@gmail.com\",\n       ],\n       \"phones\": [\n         \"+373-69-487523\",\n         \"022-45-7895-89\",\n       ],\n       \"source_id\": 38,\n       \"sub_sources_code\": \"BBM101\",\n       \"adults\": 1,\n       \"client_first_name\": \"Alexandr\",\n       \"client_last_name\": \"Freeman\",\n       \"user_language\": \"en-GB\",\n       \"expire_at\": \"2020-01-20 12:12:12\",\n       \"lead_data\": [\n              {\n                 \"field_key\": \"example_key\",\n                 \"field_value\": \"example_value\"\n             }\n       ],\n       \"visitor_log\": [\n              {\n                  \"vl_source_cid\": \"string_abc\",\n                  \"vl_ga_client_id\": \"35009a79-1a05-49d7-b876-2b884d0f825b\",\n                  \"vl_ga_user_id\": \"35009a79-1a05-49d7-b876-2b884d0f825b\",\n                  \"vl_customer_id\": \"3\",\n                  \"vl_gclid\": \"gclid=TeSter-123#bookmark\",\n                  \"vl_dclid\": \"CJKu8LrQxd4CFQ1qwQodmJIElw\",\n                  \"vl_utm_source\": \"newsletter4\",\n                  \"vl_utm_medium\": \"string_abc\",\n                  \"vl_utm_campaign\": \"string_abc\",\n                  \"vl_utm_term\": \"string_abc\",\n                  \"vl_utm_content\": \"string_abc\",\n                  \"vl_referral_url\": \"string_abc\",\n                  \"vl_location_url\": \"string_abc\",\n                  \"vl_user_agent\": \"string_abc\",\n                  \"vl_ip_address\": \"127.0.0.1\",\n                  \"vl_visit_dt\": \"2020-02-14 12:00:00\"\n              },\n              {\n                  \"vl_source_cid\": \"string_abc\",\n                  \"vl_ga_client_id\": \"35009a79-1a05-49d7-b876-2b884d0f825b\",\n                  \"vl_ga_user_id\": \"35009a79-1a05-49d7-b876-2b884d0f825b\",\n                  \"vl_customer_id\": \"3\",\n                  \"vl_gclid\": \"gclid=TeSter-123#bookmark\",\n                  \"vl_dclid\": \"CJKu8LrQxd4CFQ1qwQodmJIElw\",\n                  \"vl_utm_source\": \"newsletter4\",\n                  \"vl_utm_medium\": \"string_abc\",\n                  \"vl_utm_campaign\": \"string_abc\",\n                  \"vl_utm_term\": \"string_abc\",\n                  \"vl_utm_content\": \"string_abc\",\n                  \"vl_referral_url\": \"string_abc\",\n                  \"vl_location_url\": \"string_abc\",\n                  \"vl_user_agent\": \"string_abc\",\n                  \"vl_ip_address\": \"127.0.0.1\",\n                  \"vl_visit_dt\": \"2020-02-14 12:00:00\"\n              }\n       ]\n   },\n   \"Client\": {\n       \"name\": \"Alexandr\",\n       \"phone\": \"+373-69-487523\",\n       \"email\": \"email1@gmail.com\",\n       \"client_ip\": \"127.0.0.1\",\n       \"uuid\": \"35009a79-1a05-49d7-b876-2b884d0f825b\"\n   }\n}",
+          "content": "{\n   \"apiKey\": \"d190c378e131ccfd8a889c8ee8994cb55f22fbeeb93f9b99007e8e7ecc24d0dd\",\n   \"lead\": {\n       \"flights\": [\n           {\n               \"origin\": \"KIV\",\n               \"destination\": \"DME\",\n               \"departure\": \"2018-10-13 13:50:00\",\n           },\n           {\n               \"origin\": \"DME\",\n               \"destination\": \"KIV\",\n               \"departure\": \"2018-10-18 10:54:00\",\n           }\n       ],\n       \"emails\": [\n         \"email1@gmail.com\",\n         \"email2@gmail.com\",\n       ],\n       \"phones\": [\n         \"+373-69-487523\",\n         \"022-45-7895-89\",\n       ],\n       \"source_id\": 38,\n       \"sub_sources_code\": \"BBM101\",\n       \"adults\": 1,\n       \"client_first_name\": \"Alexandr\",\n       \"client_last_name\": \"Freeman\",\n       \"user_language\": \"en-GB\",\n       \"is_test\": true,\n       \"expire_at\": \"2020-01-20 12:12:12\",\n       \"lead_data\": [\n              {\n                 \"field_key\": \"example_key\",\n                 \"field_value\": \"example_value\"\n             }\n       ],\n       \"visitor_log\": [\n              {\n                  \"vl_source_cid\": \"string_abc\",\n                  \"vl_ga_client_id\": \"35009a79-1a05-49d7-b876-2b884d0f825b\",\n                  \"vl_ga_user_id\": \"35009a79-1a05-49d7-b876-2b884d0f825b\",\n                  \"vl_customer_id\": \"3\",\n                  \"vl_gclid\": \"gclid=TeSter-123#bookmark\",\n                  \"vl_dclid\": \"CJKu8LrQxd4CFQ1qwQodmJIElw\",\n                  \"vl_utm_source\": \"newsletter4\",\n                  \"vl_utm_medium\": \"string_abc\",\n                  \"vl_utm_campaign\": \"string_abc\",\n                  \"vl_utm_term\": \"string_abc\",\n                  \"vl_utm_content\": \"string_abc\",\n                  \"vl_referral_url\": \"string_abc\",\n                  \"vl_location_url\": \"string_abc\",\n                  \"vl_user_agent\": \"string_abc\",\n                  \"vl_ip_address\": \"127.0.0.1\",\n                  \"vl_visit_dt\": \"2020-02-14 12:00:00\"\n              },\n              {\n                  \"vl_source_cid\": \"string_abc\",\n                  \"vl_ga_client_id\": \"35009a79-1a05-49d7-b876-2b884d0f825b\",\n                  \"vl_ga_user_id\": \"35009a79-1a05-49d7-b876-2b884d0f825b\",\n                  \"vl_customer_id\": \"3\",\n                  \"vl_gclid\": \"gclid=TeSter-123#bookmark\",\n                  \"vl_dclid\": \"CJKu8LrQxd4CFQ1qwQodmJIElw\",\n                  \"vl_utm_source\": \"newsletter4\",\n                  \"vl_utm_medium\": \"string_abc\",\n                  \"vl_utm_campaign\": \"string_abc\",\n                  \"vl_utm_term\": \"string_abc\",\n                  \"vl_utm_content\": \"string_abc\",\n                  \"vl_referral_url\": \"string_abc\",\n                  \"vl_location_url\": \"string_abc\",\n                  \"vl_user_agent\": \"string_abc\",\n                  \"vl_ip_address\": \"127.0.0.1\",\n                  \"vl_visit_dt\": \"2020-02-14 12:00:00\"\n              }\n       ]\n   },\n   \"Client\": {\n       \"name\": \"Alexandr\",\n       \"phone\": \"+373-69-487523\",\n       \"email\": \"email1@gmail.com\",\n       \"client_ip\": \"127.0.0.1\",\n       \"uuid\": \"35009a79-1a05-49d7-b876-2b884d0f825b\"\n   }\n}",
           "type": "json"
         }
       ]
@@ -4208,6 +7322,13 @@ define({ "api": [
           },
           {
             "group": "Parameter",
+            "type": "bool",
+            "optional": true,
+            "field": "lead.is_test",
+            "description": "<p>Is test lead (default false)</p>"
+          },
+          {
+            "group": "Parameter",
             "type": "datetime",
             "size": "YYYY-MM-DD HH:mm:ss",
             "optional": true,
@@ -4242,7 +7363,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "\n{\n     \"lead\": {\n          \"client\": {\n              \"phone\": \"+37369333333\",\n              \"email\": \"email@email.com\",\n              \"uuid\" : \"af5246f1-094f-4fde-ada3-bd7298621613\",\n              \"chat_visitor_id\" : \"6b811a3e-41c4-4d49-a99a-afw3e4rtf3tfregf\"\n          },\n          \"uid\": \"WD6q53PO3b\",\n          \"status\": 14,\n          \"source_code\": \"JIVOCH\",\n          \"project_key\": \"ovago\",\n          \"department_key\": \"exchange\",\n          \"cabin\": \"E\",\n          \"adults\": 2,\n          \"children\": 2,\n          \"infants\": 2,\n          \"request_ip\": \"12.12.12.12\",\n          \"discount_id\": \"123123\",\n          \"user_agent\": \"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36\",\n          \"flight_id\": 12457,\n          \"user_language\": \"en-GB\",\n          \"expire_at\": \"2020-01-20 12:12:12\",\n          \"flights\": [\n              {\n                  \"origin\": \"NYC\",\n                  \"destination\": \"LON\",\n                  \"departure\": \"2019-12-16\"\n              },\n              {\n                  \"origin\": \"LON\",\n                  \"destination\": \"NYC\",\n                  \"departure\": \"2019-12-17\"\n              },\n              {\n                  \"origin\": \"LON\",\n                  \"destination\": \"NYC\",\n                  \"departure\": \"2019-12-18\"\n              }\n          ],\n         \"lead_data\": [\n              {\n                 \"field_key\": \"example_key\",\n                 \"field_value\": \"example_value\"\n             }\n         ]\n      }\n}",
+          "content": "\n{\n     \"lead\": {\n          \"client\": {\n              \"phone\": \"+37369333333\",\n              \"email\": \"email@email.com\",\n              \"uuid\" : \"af5246f1-094f-4fde-ada3-bd7298621613\",\n              \"chat_visitor_id\" : \"6b811a3e-41c4-4d49-a99a-afw3e4rtf3tfregf\"\n          },\n          \"uid\": \"WD6q53PO3b\",\n          \"status\": 14,\n          \"source_code\": \"JIVOCH\",\n          \"project_key\": \"ovago\",\n          \"department_key\": \"exchange\",\n          \"cabin\": \"E\",\n          \"adults\": 2,\n          \"children\": 2,\n          \"infants\": 2,\n          \"request_ip\": \"12.12.12.12\",\n          \"discount_id\": \"123123\",\n          \"user_agent\": \"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36\",\n          \"flight_id\": 12457,\n          \"user_language\": \"en-GB\",\n          \"is_test\": true,\n          \"expire_at\": \"2020-01-20 12:12:12\",\n          \"flights\": [\n              {\n                  \"origin\": \"NYC\",\n                  \"destination\": \"LON\",\n                  \"departure\": \"2019-12-16\"\n              },\n              {\n                  \"origin\": \"LON\",\n                  \"destination\": \"NYC\",\n                  \"departure\": \"2019-12-17\"\n              },\n              {\n                  \"origin\": \"LON\",\n                  \"destination\": \"NYC\",\n                  \"departure\": \"2019-12-18\"\n              }\n          ],\n         \"lead_data\": [\n              {\n                 \"field_key\": \"example_key\",\n                 \"field_value\": \"example_value\"\n             }\n         ]\n      }\n}",
           "type": "json"
         }
       ]
@@ -4251,7 +7372,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "\nHTTP/1.1 200 OK\n{\n      \"status\": 200,\n      \"message\": \"OK\",\n      \"data\": {\n         \"lead\": {\n              \"id\": 370949,\n              \"uid\": \"WD6q53PO3b\",\n              \"gid\": \"63e1505f4a8a87e6651048e3e3eae4e1\",\n              \"client_id\": 1034,\n              \"client\": {\n                 \"uuid\": \"35009a79-1a05-49d7-b876-2b884d0f825b\"\n                 \"client_id\": 331968,\n                 \"first_name\": \"Johann\",\n                 \"middle_name\": \"Sebastian\",\n                 \"last_name\": \"Bach\",\n                 \"phones\": [\n                     \"+13152572166\"\n                 ],\n                 \"emails\": [\n                     \"example@test.com\",\n                     \"bah@gmail.com\"\n                 ]\n             },\n             \"leadDataInserted\": [\n                 {\n                     \"ld_field_key\": \"kayakclickid\",\n                     \"ld_field_value\": \"example_value\",\n                     \"ld_id\": 3\n                 }\n             ],\n             \"warnings\": []\n         }\n      }\n      \"request\": {\n          \"lead\": {\n             \"client\": {\n                  \"phone\": \"+37369636963\",\n                  \"email\": \"example@test.com\",\n                  \"uuid\" : \"af5246f1-094f-4fde-ada3-bd7298621613\"\n              },\n              \"uid\": \"WD6q53PO3b\",\n              \"status\": 14,\n              \"source_code\": \"JIVOCH\",\n              \"cabin\": \"E\",\n              \"adults\": 2,\n              \"children\": 2,\n              \"infants\": 2,\n              \"request_ip\": \"12.12.12.12\",\n              \"discount_id\": \"123123\",\n              \"user_agent\": \"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36\",\n              \"flight_id\": 12457,\n              \"user_language\": \"en-GB\",\n              \"expire_at\": \"2020-01-20 12:12:12\",\n              \"flights\": [\n                  {\n                      \"origin\": \"NYC\",\n                      \"destination\": \"LON\",\n                      \"departure\": \"2019-12-16\"\n                  },\n                  {\n                      \"origin\": \"LON\",\n                      \"destination\": \"NYC\",\n                      \"departure\": \"2019-12-17\"\n                  },\n                  {\n                      \"origin\": \"LON\",\n                      \"destination\": \"NYC\",\n                      \"departure\": \"2019-12-18\"\n                  }\n              ]\n          }\n      },\n      \"technical\": {\n          \"action\": \"v2/lead/create\",\n          \"response_id\": 11930215,\n          \"request_dt\": \"2019-12-30 12:22:20\",\n          \"response_dt\": \"2019-12-30 12:22:21\",\n          \"execution_time\": 0.055,\n          \"memory_usage\": 1394416\n      }\n}",
+          "content": "\nHTTP/1.1 200 OK\n{\n      \"status\": 200,\n      \"message\": \"OK\",\n      \"data\": {\n         \"lead\": {\n              \"id\": 370949,\n              \"uid\": \"WD6q53PO3b\",\n              \"gid\": \"63e1505f4a8a87e6651048e3e3eae4e1\",\n              \"client_id\": 1034,\n              \"client\": {\n                 \"uuid\": \"35009a79-1a05-49d7-b876-2b884d0f825b\"\n                 \"client_id\": 331968,\n                 \"first_name\": \"Johann\",\n                 \"middle_name\": \"Sebastian\",\n                 \"last_name\": \"Bach\",\n                 \"phones\": [\n                     \"+13152572166\"\n                 ],\n                 \"emails\": [\n                     \"example@test.com\",\n                     \"bah@gmail.com\"\n                 ]\n             },\n             \"leadDataInserted\": [\n                 {\n                     \"ld_field_key\": \"kayakclickid\",\n                     \"ld_field_value\": \"example_value\",\n                     \"ld_id\": 3\n                 }\n             ],\n             \"warnings\": []\n         }\n      }\n      \"request\": {\n          \"lead\": {\n             \"client\": {\n                  \"phone\": \"+37369636963\",\n                  \"email\": \"example@test.com\",\n                  \"uuid\" : \"af5246f1-094f-4fde-ada3-bd7298621613\"\n              },\n              \"uid\": \"WD6q53PO3b\",\n              \"status\": 14,\n              \"source_code\": \"JIVOCH\",\n              \"cabin\": \"E\",\n              \"adults\": 2,\n              \"children\": 2,\n              \"infants\": 2,\n              \"request_ip\": \"12.12.12.12\",\n              \"discount_id\": \"123123\",\n              \"user_agent\": \"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36\",\n              \"flight_id\": 12457,\n              \"user_language\": \"en-GB\",\n              \"is_test\": true,\n              \"expire_at\": \"2020-01-20 12:12:12\",\n              \"flights\": [\n                  {\n                      \"origin\": \"NYC\",\n                      \"destination\": \"LON\",\n                      \"departure\": \"2019-12-16\"\n                  },\n                  {\n                      \"origin\": \"LON\",\n                      \"destination\": \"NYC\",\n                      \"departure\": \"2019-12-17\"\n                  },\n                  {\n                      \"origin\": \"LON\",\n                      \"destination\": \"NYC\",\n                      \"departure\": \"2019-12-18\"\n                  }\n              ]\n          }\n      },\n      \"technical\": {\n          \"action\": \"v2/lead/create\",\n          \"response_id\": 11930215,\n          \"request_dt\": \"2019-12-30 12:22:20\",\n          \"response_dt\": \"2019-12-30 12:22:21\",\n          \"execution_time\": 0.055,\n          \"memory_usage\": 1394416\n      }\n}",
           "type": "json"
         }
       ]
@@ -8340,10 +11461,10 @@ define({ "api": [
   {
     "type": "post",
     "url": "/v2/bo/wh",
-    "title": "BO Webhook",
+    "title": "WebHook Flight Refund (BackOffice)",
     "version": "0.1.0",
-    "name": "BO_Webhook",
-    "group": "Webhook",
+    "name": "BackOffice_WebHook_Flight_Refund",
+    "group": "WebHooks_Incoming",
     "permission": [
       {
         "name": "Authorized User"
@@ -8377,49 +11498,30 @@ define({ "api": [
             "type": "string",
             "size": "30",
             "allowedValues": [
-              "reprotection_update",
               "flight_refund"
             ],
             "optional": false,
             "field": "type",
-            "description": "<p>Type of action on reprotection</p>"
+            "description": "<p>Message Type action</p>"
           },
           {
             "group": "Parameter",
             "type": "array[]",
             "optional": false,
             "field": "data",
-            "description": "<p>Any Data from BO</p>"
+            "description": "<p>Any Data</p>"
           },
           {
             "group": "Parameter",
             "type": "string",
+            "size": "8",
             "optional": false,
             "field": "data.booking_id",
             "description": "<p>Booking Id</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "optional": true,
-            "field": "data.project_key",
-            "description": "<p>Project Key Ex: (ovago, hop2)</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "optional": false,
-            "field": "data.reprotection_quote_gid",
-            "description": "<p>Reprotection quote gid</p>"
           }
         ]
       },
       "examples": [
-        {
-          "title": "Request-Example Reprotection Update:",
-          "content": "{\n    \"type\": \"reprotection_update\",\n    \"data\": {\n        \"booking_id\": \"C4RB44\",\n        \"project_key\": \"ovago\",\n        \"reprotection_quote_gid\": \"4569a42c916c811e2033142d8ae54179\"\n    }\n}",
-          "type": "json"
-        },
         {
           "title": "Request-Example Flight Refund:",
           "content": "{\n    \"type\": \"flight_refund\",\n    \"data\": {\n        \"booking_id\": \"C4RB44\",\n    }\n}",
@@ -8446,6 +11548,592 @@ define({ "api": [
       ]
     },
     "filename": "webapi/modules/v2/controllers/BoController.php",
-    "groupTitle": "Webhook"
+    "groupTitle": "WebHooks_Incoming"
+  },
+  {
+    "type": "post",
+    "url": "/v2/bo/wh",
+    "title": "WebHook Reprotection Update (BackOffice)",
+    "version": "0.1.0",
+    "name": "BackOffice_WebHook_Reprotection_Update",
+    "group": "WebHooks_Incoming",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "allowedValues": [
+              "reprotection_update"
+            ],
+            "optional": false,
+            "field": "type",
+            "description": "<p>Message Type action</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "array[]",
+            "optional": false,
+            "field": "data",
+            "description": "<p>Any Data</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "8",
+            "optional": false,
+            "field": "data.booking_id",
+            "description": "<p>Booking Id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "20",
+            "optional": false,
+            "field": "data.project_key",
+            "description": "<p>Project Key (&quot;ovago&quot;, &quot;hop2&quot;)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "32",
+            "optional": false,
+            "field": "data.reprotection_quote_gid",
+            "description": "<p>Reprotection quote GID</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example Reprotection Update:",
+          "content": "{\n    \"type\": \"reprotection_update\",\n    \"data\": {\n        \"booking_id\": \"C4RB44\",\n        \"project_key\": \"ovago\",\n        \"reprotection_quote_gid\": \"4569a42c916c811e2033142d8ae54179\"\n    }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n     \"data\": {\n         \"success\": true\n     }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 400 Bad Request\n{\n     \"status\": 400,\n     \"message\": \"Load data error\",\n     \"errors\": [\n         \"Not found data on POST request\"\n      ]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/BoController.php",
+    "groupTitle": "WebHooks_Incoming"
+  },
+  {
+    "type": "post",
+    "url": "/v2/bo/wh",
+    "title": "WebHook Voluntary Flight Exchange (BackOffice)",
+    "version": "0.1.0",
+    "name": "BackOffice_WebHook_Voluntary_Flight_Exchange",
+    "group": "WebHooks_Incoming",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "allowedValues": [
+              "flight_exchange"
+            ],
+            "optional": false,
+            "field": "type",
+            "description": "<p>Type action</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "array[]",
+            "optional": false,
+            "field": "data",
+            "description": "<p>Any Data</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "8",
+            "optional": false,
+            "field": "data.booking_id",
+            "description": "<p>Booking Id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "20",
+            "optional": false,
+            "field": "data.project_key",
+            "description": "<p>Project Key (ovago, hop2)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "20",
+            "allowedValues": [
+              "Processing",
+              "Exchanged",
+              "Canceled"
+            ],
+            "optional": false,
+            "field": "data.status",
+            "description": "<p>Exchange status</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example Voluntary Flight Exchange:",
+          "content": "{\n    \"type\": \"flight_exchange\",\n    \"data\": {\n        \"booking_id\": \"C4RB44\",\n        \"project_key\": \"ovago\",\n        \"status\": \"Exchanged\", // allowed values Pending, Processing, Exchanged, Canceled\n    }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n     \"data\": {\n         \"success\": true\n     }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 400 Bad Request\n{\n     \"status\": 400,\n     \"message\": \"Load data error\",\n     \"errors\": [\n         \"Not found data on POST request\"\n      ]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/BoController.php",
+    "groupTitle": "WebHooks_Incoming"
+  },
+  {
+    "type": "post",
+    "url": "/v2/bo/wh",
+    "title": "WebHook Voluntary Flight Refund (BackOffice)",
+    "version": "0.1.0",
+    "name": "BackOffice_WebHook_Voluntary_Flight_Refund",
+    "group": "WebHooks_Incoming",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "allowedValues": [
+              "voluntary_flight_refund"
+            ],
+            "optional": false,
+            "field": "type",
+            "description": "<p>Message Type action</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "array[]",
+            "optional": false,
+            "field": "data",
+            "description": "<p>Any Data</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "8",
+            "optional": false,
+            "field": "data.booking_id",
+            "description": "<p>Booking Id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "20",
+            "optional": false,
+            "field": "data.project_key",
+            "description": "<p>Project Key (&quot;ovago&quot;, &quot;hop2&quot;)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "20",
+            "allowedValues": [
+              "Processing",
+              "Refunded",
+              "Canceled"
+            ],
+            "optional": false,
+            "field": "data.status",
+            "description": "<p>Refund status</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "32",
+            "optional": false,
+            "field": "data.orderId",
+            "description": "<p>Refund Order Id</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example Voluntary Flight Refund:",
+          "content": "{\n    \"type\": \"voluntary_flight_refund\",\n    \"data\": {\n        \"booking_id\": \"C4RB44\",\n        \"project_key\": \"ovago\",\n        \"status\": \"Refunded\", // allowed values Processing, Refunded, Canceled\n        \"orderId\": \"RT-SHCN37D\" // OTA Refund order id\n    }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n{\n    \"status\": 200,\n    \"message\": \"OK\",\n     \"data\": {\n         \"success\": true\n     }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 400 Bad Request\n{\n     \"status\": 400,\n     \"message\": \"Load data error\",\n     \"errors\": [\n         \"Not found data on POST request\"\n      ]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/BoController.php",
+    "groupTitle": "WebHooks_Incoming"
+  },
+  {
+    "type": "post",
+    "url": "flight/schedule-change",
+    "title": "WebHook Hybrid OTA ( flight/schedule-change )",
+    "version": "0.1.0",
+    "name": "Flight_schedule-change",
+    "group": "WebHooks_Outgoing",
+    "permission": [
+      {
+        "name": "Basic Auth (#App:BasicAuth)"
+      }
+    ],
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": false,
+            "field": "type",
+            "description": "<p>Type of message</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "array[]",
+            "optional": false,
+            "field": "data",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "8",
+            "optional": false,
+            "field": "data.booking_id",
+            "description": "<p>Booking Id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "32",
+            "optional": false,
+            "field": "data.reprotection_quote_gid",
+            "description": "<p>Reprotection quote GID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "32",
+            "optional": false,
+            "field": "data.case_gid",
+            "description": "<p>Case GID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "32",
+            "optional": false,
+            "field": "data.product_quote_gid",
+            "description": "<p>Product quote GID</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request message Example:",
+          "content": "{\n    \"type\": \"flight/schedule-change\",\n    \"data\": {\n        \"booking_id\": \"C4RB44\",\n        \"reprotection_quote_gid\": \"4569a42c916c811e2033142d8ae54179\"\n        \"case_gid\": \"1569a42c916c811e2033142d8ae54176\"\n        \"product_quote_gid\": \"5569a42c916c811e2033142d8ae54170\"\n    }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/controllers/ApiDocData.php",
+    "groupTitle": "WebHooks_Outgoing"
+  },
+  {
+    "type": "post",
+    "url": "flight/voluntary-exchange/update",
+    "title": "WebHook Hybrid OTA ( flight/voluntary-exchange/update )",
+    "version": "0.1.0",
+    "name": "Flight_voluntary-exchange_update",
+    "group": "WebHooks_Outgoing",
+    "permission": [
+      {
+        "name": "Basic Auth"
+      }
+    ],
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": false,
+            "field": "type",
+            "description": "<p>Type of message</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "array[]",
+            "optional": false,
+            "field": "data",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "8",
+            "optional": false,
+            "field": "data.booking_id",
+            "description": "<p>Booking Id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "32",
+            "optional": false,
+            "field": "data.product_quote_gid",
+            "description": "<p>Product quote GID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "32",
+            "optional": false,
+            "field": "data.exchange_gid",
+            "description": "<p>Exchange GID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "32",
+            "allowedValues": [
+              "Pending",
+              "Exchanged",
+              "Canceled"
+            ],
+            "optional": false,
+            "field": "data.exchange_status",
+            "description": "<p>Exchange Client status</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request message Example:",
+          "content": "{\n    \"type\": \"flight/voluntary-exchange/update\",\n    \"data\": {\n        \"booking_id\": \"C4RB44\",\n        \"product_quote_gid\": \"4569a42c916c811e2033142d8ae54179\"\n        \"exchange_gid\": \"1569a42c916c811e2033142d8ae54176\"\n        \"exchange_status\": \"Exchanged\"\n    }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/controllers/ApiDocData.php",
+    "groupTitle": "WebHooks_Outgoing"
+  },
+  {
+    "type": "post",
+    "url": "flight/voluntary-refund/update",
+    "title": "WebHook Hybrid OTA ( flight/voluntary-refund/update )",
+    "version": "0.1.0",
+    "name": "Flight_voluntary-refund_update",
+    "group": "WebHooks_Outgoing",
+    "permission": [
+      {
+        "name": "Basic Auth"
+      }
+    ],
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "30",
+            "optional": false,
+            "field": "type",
+            "description": "<p>Type of message</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "array[]",
+            "optional": false,
+            "field": "data",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "8",
+            "optional": false,
+            "field": "data.booking_id",
+            "description": "<p>Booking Id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "32",
+            "optional": false,
+            "field": "data.product_quote_gid",
+            "description": "<p>Product quote GID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "32",
+            "optional": false,
+            "field": "data.refund_gid",
+            "description": "<p>Refund GID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "32",
+            "optional": false,
+            "field": "data.refund_order_id",
+            "description": "<p>Refund Client status</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "32",
+            "allowedValues": [
+              "Pending",
+              "Processing",
+              "Refunded",
+              "Canceled"
+            ],
+            "optional": false,
+            "field": "data.refund_status",
+            "description": "<p>Refund Client status</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request message Example:",
+          "content": "{\n    \"type\": \"flight/voluntary-refund/update\",\n    \"data\": {\n        \"booking_id\": \"C4RB44\",\n        \"product_quote_gid\": \"4569a42c916c811e2033142d8ae54179\"\n        \"refund_gid\": \"1569a42c916c811e2033142d8ae54176\"\n        \"refund_order_id\": \"XXXXXXXXX\"\n        \"refund_status\": \"Processing\"\n    }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/controllers/ApiDocData.php",
+    "groupTitle": "WebHooks_Outgoing"
   }
 ] });

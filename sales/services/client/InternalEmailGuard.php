@@ -2,8 +2,7 @@
 
 namespace sales\services\client;
 
-use common\models\DepartmentEmailProject;
-use common\models\UserProjectParams;
+use sales\model\emailList\entity\EmailList;
 
 /**
  * Class InternalEmailGuard
@@ -12,7 +11,7 @@ use common\models\UserProjectParams;
  */
 class InternalEmailGuard
 {
-    public $internalEamils;
+    private array $internalEmails = [];
 
     /**
      * @param string $email
@@ -24,28 +23,12 @@ class InternalEmailGuard
         }
     }
 
-    private function getInternalEmails(): array
+    public function getInternalEmails(): array
     {
-        if ($this->internalEamils !== null) {
+        if (!empty($this->internalEmails)) {
             return $this->internalEmails;
         }
-        $this->internalEmails = array_merge([], $this->getDepartmentEmails(), $this->getUserProjectParams());
+        $this->internalEmails = EmailList::find()->select(['el_email'])->column();
         return $this->internalEmails;
-    }
-
-    /**
-     * @return array
-     */
-    private function getDepartmentEmails(): array
-    {
-        return DepartmentEmailProject::find()->select(['el_email'])->innerJoinWith('emailList', false)->column();
-    }
-
-    /**
-     * @return array
-     */
-    private function getUserProjectParams(): array
-    {
-        return UserProjectParams::find()->select(['el_email'])->innerJoinWith('emailList', false)->column();
     }
 }

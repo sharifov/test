@@ -487,7 +487,7 @@ class QuoteController extends ApiBaseController
                 );
             }
 
-            if ((int)$model->status === Quote::STATUS_SEND) {
+            if ((int)$model->status === Quote::STATUS_SENT) {
                 $excludeIP = Quote::isExcludedIP($clientIP);
                 if (!$excludeIP) {
                     $model->status = Quote::STATUS_OPENED;
@@ -1046,6 +1046,13 @@ class QuoteController extends ApiBaseController
             $type = $quoteAttributes['type_id'] ?? null;
             $this->setTypeQuoteInsert($type, $quote, $lead);
 
+            $randomProjectProviderIdEnabled = $lead->project->params->object->quote->enableRandomProjectProviderId;
+            if ($randomProjectProviderIdEnabled && $projectRelationsIds = ProjectRelationQuery::getRelatedProjectIds($lead->project_id)) {
+                $projectRelationsCount = count($projectRelationsIds);
+                $randomProjectIndex = $projectRelationsCount > 1 ? random_int(0, $projectRelationsCount - 1) : 0;
+                $quote->provider_project_id = $projectRelationsIds[$randomProjectIndex] ?? null;
+            }
+
             $quote->save();
             if ($quote->hasErrors()) {
                 throw new \RuntimeException($quote->getErrorSummary(false)[0]);
@@ -1312,6 +1319,13 @@ class QuoteController extends ApiBaseController
                 $projectProviderId = $projectRelation->prl_related_project_id;
             }
 
+            $randomProjectProviderIdEnabled = $lead->project->params->object->quote->enableRandomProjectProviderId;
+            if (!$projectProviderId && $randomProjectProviderIdEnabled && $projectRelationsIds = ProjectRelationQuery::getRelatedProjectIds($lead->project_id)) {
+                $projectRelationsCount = count($projectRelationsIds);
+                $randomProjectIndex = $projectRelationsCount > 1 ? random_int(0, $projectRelationsCount - 1) : 0;
+                $projectProviderId = $projectRelationsIds[$randomProjectIndex] ?? null;
+            }
+
             $preparedQuoteData = QuoteHelper::formatQuoteData(['results' => [JsonHelper::decode($form->origin_search_data)]]);
             $quoteUid = $this->addQuoteService->createByData($preparedQuoteData['results'][0], $lead, $projectProviderId);
         } catch (\DomainException | \RuntimeException $e) {
@@ -1479,6 +1493,13 @@ class QuoteController extends ApiBaseController
             if ($form->provider_project_key) {
                 $projectRelation = $this->projectRelationRepository->findByRelatedProjectKey($this->apiProject->id, $form->provider_project_key);
                 $projectProviderId = $projectRelation->prl_related_project_id;
+            }
+
+            $randomProjectProviderIdEnabled = $lead->project->params->object->quote->enableRandomProjectProviderId;
+            if (!$projectProviderId && $randomProjectProviderIdEnabled && $projectRelationsIds = ProjectRelationQuery::getRelatedProjectIds($lead->project_id)) {
+                $projectRelationsCount = count($projectRelationsIds);
+                $randomProjectIndex = $projectRelationsCount > 1 ? random_int(0, $projectRelationsCount - 1) : 0;
+                $projectProviderId = $projectRelationsIds[$randomProjectIndex] ?? null;
             }
 
             $searchQuoteRequest = SearchService::getOnlineQuoteByKey($form->offer_search_key);

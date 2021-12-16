@@ -2,9 +2,11 @@
 
 namespace modules\flight\src\useCases\reProtectionQuoteManualCreate\service;
 
+use common\components\SearchService;
 use common\models\QuoteSegment;
 use common\models\QuoteSegmentBaggage;
 use common\models\QuoteSegmentBaggageCharge;
+use DateTime;
 use modules\flight\models\Flight;
 use modules\flight\models\FlightPax;
 use modules\flight\models\FlightQuote;
@@ -31,11 +33,16 @@ use modules\flight\src\repositories\flightSegment\FlightSegmentRepository;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteCreateDTO;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentDTOItinerary;
 use modules\flight\src\useCases\flightQuote\FlightQuoteManageService;
+use modules\flight\src\useCases\form\ChangeQuoteCreateForm;
 use modules\flight\src\useCases\reProtectionQuoteManualCreate\form\ReProtectionQuoteCreateForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
+use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelation;
+use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelationRepository;
+use modules\product\src\entities\productQuoteData\service\ProductQuoteDataManageService;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionRepository;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
@@ -68,6 +75,7 @@ use yii\helpers\VarDumper;
  * @property FlightQuoteManageService $flightQuoteManageService
  * @property ProductQuoteRelationRepository $productQuoteRelationRepository
  * @property ProductQuoteOptionRepository $productQuoteOptionRepository
+ * @property ProductQuoteDataManageService $productQuoteDataManageService
  */
 class ReProtectionQuoteManualCreateService
 {
@@ -85,6 +93,7 @@ class ReProtectionQuoteManualCreateService
     private FlightQuoteManageService $flightQuoteManageService;
     private ProductQuoteRelationRepository $productQuoteRelationRepository;
     private ProductQuoteOptionRepository $productQuoteOptionRepository;
+    private ProductQuoteDataManageService $productQuoteDataManageService;
 
     public function __construct(
         FlightQuoteFlightRepository $flightQuoteFlightRepository,
@@ -101,7 +110,8 @@ class ReProtectionQuoteManualCreateService
         FlightQuoteSegmentPaxBaggageChargeRepository $flightQuoteSegmentPaxBaggageChargeRepository,
         FlightQuoteManageService $flightQuoteManageService,
         ProductQuoteRelationRepository $productQuoteRelationRepository,
-        ProductQuoteOptionRepository $productQuoteOptionRepository
+        ProductQuoteOptionRepository $productQuoteOptionRepository,
+        ProductQuoteDataManageService $productQuoteDataManageService
     ) {
         $this->flightQuoteFlightRepository = $flightQuoteFlightRepository;
         $this->flightQuoteBookingRepository = $flightQuoteBookingRepository;
@@ -118,16 +128,22 @@ class ReProtectionQuoteManualCreateService
         $this->flightQuoteManageService = $flightQuoteManageService;
         $this->productQuoteRelationRepository = $productQuoteRelationRepository;
         $this->productQuoteOptionRepository = $productQuoteOptionRepository;
+        $this->productQuoteDataManageService = $productQuoteDataManageService;
     }
 
-    public function createReProtectionManual(Flight $flight, ProductQuote $originProductQuote, ReProtectionQuoteCreateForm $form, ?int $userId): FlightQuote
-    {
-        if ($flight->flightQuotes) {
-            foreach ($flight->flightQuotes as $flightQuote) {
-                $oldProductQuote = $flightQuote->fqProductQuote;
-                if (!$oldProductQuote->isCanceled() || $oldProductQuote->isDeclined()) {
-                    $oldProductQuote->cancelled($userId, 'Create ReProtection Quote');
-                    $this->productQuoteRepository->save($oldProductQuote);
+    public function createReProtectionManual(
+        Flight $flight,
+        ProductQuote $originProductQuote,
+        ChangeQuoteCreateForm $form,
+        ?int $userId,
+        array $segments,
+        int $changeId
+    ): FlightQuote {
+        if ($reprotectionQuotes = ProductQuoteQuery::getReprotectionQuotesByOriginQuote($originProductQuote->pq_id)) {
+            foreach ($reprotectionQuotes as $reprotectionQuote) {
+                if ($reprotectionQuote->pq_owner_user_id === null && (!$reprotectionQuote->isCanceled() || $reprotectionQuote->isDeclined() || !$reprotectionQuote->isError())) {
+                    $reprotectionQuote->declined($userId, 'Create ReProtection Quote');
+                    $this->productQuoteRepository->save($reprotectionQuote);
                 }
             }
         }
@@ -136,7 +152,7 @@ class ReProtectionQuoteManualCreateService
         $productQuote = $this->copyOriginalProductQuote($originProductQuote, $form->quoteCreator, $form->quoteCreator);
 
         $quoteData = self::prepareFlightQuoteData($form);
-        $flightQuoteCreateDTO = FlightQuoteCreateDTO::fillReProtectionManual($flight, $productQuote, $quoteData, Auth::id(), $form);
+        $flightQuoteCreateDTO = FlightQuoteCreateDTO::fillChangeQuoteManual($flight, $productQuote, $quoteData, Auth::id(), $form);
         $flightQuote = FlightQuote::createReProtectionManual($flightQuoteCreateDTO);
         $this->flightQuoteRepository->save($flightQuote);
 
@@ -183,11 +199,16 @@ class ReProtectionQuoteManualCreateService
             $flightQuoteTripId = $flightQuoteTrip->fqt_id;
             $segmentDto = new FlightQuoteSegmentDTOItinerary($flightQuote->getId(), $flightQuoteTripId, $itinerary);
             $flightQuoteSegment = FlightQuoteSegment::create($segmentDto);
+
+            if (in_array($form->gds, [SearchService::GDS_WORLDSPAN, SearchService::GDS_TRAVELPORT], false)) {
+                $flightQuoteSegment = self::postProcessingWordspan($flightQuoteSegment, $segments);
+            }
+
             $this->flightQuoteSegmentRepository->save($flightQuoteSegment);
             $keyIata = $flightQuoteSegment->fqs_departure_airport_iata . $flightQuoteSegment->fqs_arrival_airport_iata;
             $flightQuoteSegments[$keyIata] = $flightQuoteSegment;
 
-            $flightQuoteTrip->fqt_duration += $itinerary->duration;
+            $flightQuoteTrip->fqt_duration += $flightQuoteSegment->fqs_duration;
             $flightQuoteTrip->update(false, ['fqt_duration']);
         }
 
@@ -254,7 +275,33 @@ class ReProtectionQuoteManualCreateService
             }
         }
 
+        $this->productQuoteDataManageService->updateRecommendedChangeQuote($originProductQuote->pq_id, $flightQuote->fq_product_quote_id);
+
+        if (!ProductQuoteChangeRelationRepository::exist($changeId, $productQuote->pq_id)) {
+            $productQuoteChangeRelation = ProductQuoteChangeRelation::create(
+                $changeId,
+                $productQuote->pq_id
+            );
+            (new ProductQuoteChangeRelationRepository($productQuoteChangeRelation))->save();
+        }
+
         return $flightQuote;
+    }
+
+    private static function postProcessingWordspan(FlightQuoteSegment $flightQuoteSegment, array $segments): FlightQuoteSegment /* TODO:: tmp solution */
+    {
+        $keyIata = $flightQuoteSegment->fqs_departure_airport_iata . $flightQuoteSegment->fqs_arrival_airport_iata;
+        $keySegment = array_search($keyIata, array_column($segments, 'segmentIata'), false);
+
+        if ($keySegment !== false) {
+            $departure = $segments[$keySegment]['departureDateTime'];
+            $arrival = $segments[$keySegment]['arrivalDateTime'];
+
+            $flightQuoteSegment->fqs_departure_dt = $departure->format('Y-m-d H:i:s');
+            $flightQuoteSegment->fqs_arrival_dt = $arrival->format('Y-m-d H:i:s');
+            $flightQuoteSegment->fqs_duration = ($arrival->getTimestamp() - $departure->getTimestamp()) / 60;
+        }
+        return $flightQuoteSegment;
     }
 
     public static function isMoreOneDay(\DateTime $departureDateTime, \DateTime $arrivalDateTime): bool
@@ -303,7 +350,7 @@ class ReProtectionQuoteManualCreateService
             ->one();
     }
 
-    private static function prepareFlightQuoteData(ReProtectionQuoteCreateForm $form): array
+    private static function prepareFlightQuoteData(ChangeQuoteCreateForm $form): array
     {
         return [
             'recordLocator' => $form->recordLocator,

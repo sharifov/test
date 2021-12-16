@@ -13,10 +13,12 @@ use sales\helpers\communication\StatisticsHelper;
 use sales\auth\Auth;
 use common\components\grid\cases\CasesStatusColumn;
 
-/** @var $this yii\web\View
-* @var $searchModel sales\entities\cases\CasesQSearch
-* @var $dataProvider yii\data\ActiveDataProvider
-*/
+/**
+ * @var $this yii\web\View
+ * @var $searchModel sales\entities\cases\CasesQSearch
+ * @var $dataProvider yii\data\ActiveDataProvider
+ * @var $isAgent bool
+ */
 
 $this->title = 'Unidentified Queue';
 $this->params['breadcrumbs'][] = $this->title;
@@ -27,9 +29,10 @@ $this->params['breadcrumbs'][] = $this->title;
 </h1>
 
 <div class="cases-q-unidentified">
-    <?php Pjax::begin(['id' => 'cases-q-unidentified-pjax-list', 'timeout' => 5000, 'enablePushState' => true]); ?>
+    <?php Pjax::begin(['id' => 'cases-q-unidentified-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'scrollTo' => 0]); ?>
 
     <?= GridView::widget([
+        'id' => 'unidentified-gv',
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [

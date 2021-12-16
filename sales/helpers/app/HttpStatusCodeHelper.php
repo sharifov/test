@@ -2,8 +2,15 @@
 
 namespace sales\helpers\app;
 
+/**
+ * Class HttpStatusCodeHelper
+ */
 class HttpStatusCodeHelper
 {
+    public const BAD_REQUEST = 400;
+    public const UNPROCESSABLE_ENTITY = 422;
+    public const INTERNAL_SERVER_ERROR = 500;
+
     public const LIST = [
         100 => 'Informational: Continue',
         101 => 'Informational: Switching Protocols',
@@ -27,7 +34,7 @@ class HttpStatusCodeHelper
         306 => 'Redirection: Switch Proxy',
         307 => 'Redirection: Temporary Redirect',
         308 => 'Redirection: Permanent Redirect',
-        400 => 'Client Error: Bad Request',
+        self::BAD_REQUEST => 'Client Error: Bad Request',
         401 => 'Client Error: Unauthorized',
         402 => 'Client Error: Payment Required',
         403 => 'Client Error: Forbidden',
@@ -48,7 +55,7 @@ class HttpStatusCodeHelper
         418 => 'Client Error: Im a teapot',
         419 => 'Client Error: Authentication Timeout',
         420 => 'Client Error: Method Failure',
-        422 => 'Client Error: Unprocessable Entity',
+        self::UNPROCESSABLE_ENTITY => 'Client Error: Unprocessable Entity',
         423 => 'Client Error: Locked',
         424 => 'Client Error: Failed Dependency',
         425 => 'Client Error: Unordered Collection',
@@ -65,7 +72,7 @@ class HttpStatusCodeHelper
         496 => 'Client Error: No Cert',
         497 => 'Client Error: HTTP to HTTPS',
         499 => 'Client Error: Client Closed Request',
-        500 => 'Server Error: Internal Server Error',
+        self::INTERNAL_SERVER_ERROR => 'Server Error: Internal Server Error',
         501 => 'Server Error: Not Implemented',
         502 => 'Server Error: Bad Gateway',
         503 => 'Server Error: Service Unavailable',

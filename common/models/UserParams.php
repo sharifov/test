@@ -28,6 +28,7 @@ use yii\db\ActiveRecord;
  *
  * @property Employee $upUpdatedUser
  * @property Employee $upUser
+ * @property bool $up_call_user_level [tinyint]
  */
 class UserParams extends \yii\db\ActiveRecord
 {
@@ -53,6 +54,9 @@ class UserParams extends \yii\db\ActiveRecord
             [['up_user_id'], 'unique'],
             [['up_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['up_updated_user_id' => 'id']],
             [['up_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['up_user_id' => 'id']],
+
+            ['up_call_user_level', 'default', 'value' => 0],
+            ['up_call_user_level', 'integer', 'min' => -128, 'max' => 127],
         ];
     }
 
@@ -76,7 +80,8 @@ class UserParams extends \yii\db\ActiveRecord
             'up_min_percent_for_take_leads' => 'Min percent for take leads',
             'up_frequency_minutes' => 'Take Frequency Minutes',
             'up_call_expert_limit'  => 'Call Expert limit',
-            'up_leaderboard_enabled'  => 'Leader Board Enabled'
+            'up_leaderboard_enabled'  => 'Leader Board Enabled',
+            'up_call_user_level' => 'Call Priority Level'
         ];
     }
 

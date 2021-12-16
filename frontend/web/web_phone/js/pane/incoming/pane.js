@@ -11,7 +11,7 @@ var PhoneWidgetPaneIncoming = function () {
 
     // call => window.phoneWidget.call.Call
     function load(call) {
-        contactInfo.load(call.data.contact);
+        // contactInfo.load(call.data.contact);
 
         ReactDOM.unmountComponentAtNode($reactContainer);
         ReactDOM.render(React.createElement(IncomingPane, {call: call}), $reactContainer);

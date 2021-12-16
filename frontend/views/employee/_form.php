@@ -1,6 +1,7 @@
 <?php
 
 use common\components\grid\DateTimeColumn;
+use common\models\UserParams;
 use common\models\UserProductType;
 use common\models\UserProjectParams;
 use frontend\models\UserFailedLogin;
@@ -14,7 +15,7 @@ use yii\web\View;
 use yii\grid\ActionColumn;
 /**
  * @var $this \yii\web\View
- * @var $modelUserParams \common\models\UserParams
+ * @var $modelUserParams UserParams
  * @var $modelProfile \common\models\UserProfile
  */
 /* @var $searchModel common\models\search\UserProjectParamsSearch */
@@ -309,6 +310,9 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                             <div class="col-md-3">
                                 <?= $form->field($modelUserParams, 'up_call_expert_limit')->input('number', ['step' => 1, 'min' => -1, 'max' => 1000]) ?>
                             </div>
+                            <div class="col-md-3">
+                                <?= $form->field($modelUserParams, 'up_call_user_level')->input('number', ['step' => 1, 'min' => -128, 'max' => 127]) ?>
+                            </div>
                         </div>
                     <?php endif; ?>
                 <?php endif; ?>
@@ -405,6 +409,7 @@ JS;
                 </div>
             <?php endif; ?>
 
+    <?php if ($user->isAdmin()) : ?>
     <h5>Profile Settings</h5>
     <div class="well">
         <div class="form-group">
@@ -447,6 +452,7 @@ JS;
             </div>
         </div>
     </div>
+    <?php endif; ?>
 
             <div class="form-group text-center">
                 <?= Html::submitButton(($model->isNewRecord ? '<i class="fa fa-plus"></i> Create User' : '<i class="fa fa-save"></i> Update & Save User data'), ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-warning']) ?>

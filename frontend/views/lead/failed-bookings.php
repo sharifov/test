@@ -41,7 +41,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <div class="lead-failed-bookings">
 
-        <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
+        <?php Pjax::begin(['scrollTo' => 0]); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
 
         <div class="row">
             <?php if (!$checkShiftTime) : ?>
@@ -286,7 +286,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 ]
             ],
 
-
             [
                 'attribute' => 'cabin',
                 'value' => static function (\common\models\Lead $model) {
@@ -294,7 +293,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'filter' => \common\models\Lead::CABIN_LIST
             ],
-
 
             /*[
                 'header' => 'Client time',
@@ -307,7 +305,6 @@ $this->params['breadcrumbs'][] = $this->title;
 
             ],*/
 
-
             [
                 'header' => 'Client time',
                 'format' => 'raw',
@@ -317,7 +314,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 //'options' => ['style' => 'width:80px'],
                 //'filter' => \common\models\Employee::getList()
             ],
-
 
             [
                 'header' => 'Project',
@@ -377,7 +373,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ?>
         <?php
         echo '<div class="table-responsive">' . GridView::widget([
-
+                'id' => 'lead-failed-bookings-gv',
                 'dataProvider' => $dataProvider,
                 'filterModel' => $searchModel,
                 'columns' => $gridColumns,
@@ -395,7 +391,6 @@ $this->params['breadcrumbs'][] = $this->title;
         ?>
         <?php Pjax::end(); ?>
     </div>
-
 
 <?php
 $js = '

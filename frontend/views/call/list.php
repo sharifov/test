@@ -195,7 +195,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'c_lead_id',
                 'value' => static function (\common\models\Call $model) {
-                    return  $model->c_lead_id && $model->cLead->employee_id == Yii::$app->user->id ? Html::a($model->c_lead_id, ['lead/view', 'gid' => $model->cLead->gid], ['target' => '_blank', 'data-pjax' => 0]) : $model->c_lead_id ?: '-';
+                    return  $model->c_lead_id && $model->cLead->employee_id == Yii::$app->user->id ? Html::a($model->c_lead_id, ['lead/view', 'gid' => $model->cLead->gid], ['target' => '_blank', 'data-pjax' => 0]) : ($model->c_lead_id ?: '-');
                 },
                 'format' => 'raw'
             ],
@@ -203,7 +203,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'c_case_id',
                 'value' => static function (\common\models\Call $model) {
-                    return  $model->c_case_id && $model->cCase->cs_user_id == Yii::$app->user->id ? Html::a($model->c_lead_id, ['cases/view', 'gid' => $model->cCase->cs_gid], ['target' => '_blank', 'data-pjax' => 0]) : $model->c_case_id ?: '-';
+                    return  $model->c_case_id && $model->cCase->cs_user_id == Yii::$app->user->id ? Html::a($model->c_lead_id, ['cases/view', 'gid' => $model->cCase->cs_gid], ['target' => '_blank', 'data-pjax' => 0]) : ($model->c_case_id ?: '-');
                 },
                 'format' => 'raw'
             ],

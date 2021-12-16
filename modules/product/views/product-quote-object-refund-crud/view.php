@@ -1,8 +1,10 @@
 <?php
 
+use frontend\helpers\JsonHelper;
 use modules\product\src\entities\productQuoteObjectRefund\ProductQuoteObjectRefund;
 use modules\product\src\entities\productQuoteObjectRefund\ProductQuoteObjectRefundStatus;
 use yii\helpers\Html;
+use yii\helpers\VarDumper;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
@@ -33,6 +35,8 @@ $this->params['breadcrumbs'][] = $this->title;
         'attributes' => [
             'pqor_id',
             'pqor_product_quote_refund_id',
+            'pqor_quote_object_id',
+            'pqor_title',
             'pqor_selling_price',
             'pqor_penalty_amount',
             'pqor_processing_fee_amount',
@@ -48,11 +52,20 @@ $this->params['breadcrumbs'][] = $this->title;
             'pqor_client_currency',
             'pqor_client_currency_rate',
             'pqor_client_selling_price',
+            'pqor_client_penalty_amount',
+            'pqor_client_processing_fee_amount',
             'pqor_client_refund_amount',
             'pqor_created_user_id:username',
             'pqor_updated_user_id:username',
             'pqor_created_dt:byUserDateTime',
             'pqor_updated_dt:byUserDateTime',
+            [
+                'attribute' => 'pqor_data_json',
+                'value' => static function (ProductQuoteObjectRefund $model) {
+                    return '<pre>' . VarDumper::dumpAsString(JsonHelper::decode($model->pqor_data_json), 10, true) . '</pre>';
+                },
+                'format' => 'raw',
+            ],
         ],
     ]) ?>
 

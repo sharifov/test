@@ -2,6 +2,12 @@
 
 namespace console\controllers;
 
+use common\models\Department;
+use common\models\Project;
+use common\models\UserGroup;
+use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeCreatedEvent;
+use sales\helpers\setting\SettingHelper;
+use sales\model\client\notifications\client\entity\NotificationType;
 use common\components\purifier\Purifier;
 use common\models\CallUserAccess;
 use common\models\Employee;
@@ -33,6 +39,7 @@ use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\twilio\src\entities\conferenceLog\ConferenceLog;
 use sales\dispatchers\EventDispatcher;
+use sales\helpers\LogExecutionTime;
 use sales\model\cases\useCases\cases\api\create\Command;
 use sales\model\cases\useCases\cases\api\create\Handler;
 use sales\model\client\useCase\excludeInfo\ClientExcludeIpChecker;
@@ -58,21 +65,122 @@ use sales\model\conference\entity\conferenceEventLog\EventFactory;
 use sales\model\conference\entity\conferenceEventLog\events\ParticipantJoin;
 use sales\model\conference\useCase\PrepareCurrentCallsForNewCall;
 use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackForm;
+use sales\model\leadRedial\assign\LeadRedialAccessChecker;
+use sales\model\leadRedial\assign\Users;
+use sales\model\leadRedial\entity\CallRedialUserAccess;
+use sales\model\leadRedial\entity\CallRedialUserAccessRepository;
+use sales\model\leadRedial\priorityLevel\ConversionFetcher;
+use sales\model\leadRedial\queue\CallNextLeads;
 use sales\model\project\entity\params\Params;
+use sales\model\user\reports\stats\UserStatsReport;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
 use sales\services\sms\incoming\SmsIncomingForm;
 use sales\services\sms\incoming\SmsIncomingService;
 use yii\console\Controller;
+use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Console;
 use yii\console\ExitCode;
 use yii\helpers\Html;
 use yii\helpers\Json;
 use yii\helpers\VarDumper;
+use yii\rbac\Role;
 
 class TestController extends Controller
 {
+    public function actionMmm()
+    {
+        $user = Employee::findOne(295);
+        $report = new UserStatsReport(
+            $user->timezone,
+            date('Y-m') . '-01 00:00 - ' . date('Y-m-d') . ' 23:59',
+            Department::getList(),
+            array_map(fn (Role $item) => $item->description, \Yii::$app->authManager->getRoles()),
+            UserGroup::getList(),
+            Employee::getActiveUsersList()
+        );
+        $params['UserStatsReport']['departments'] = [
+            1, 2, 3
+        ];
+        $params['UserStatsReport']['groups'] = [
+            1
+        ];
+        $params['UserStatsReport']['users'] = [
+            295, 294
+        ];
+
+        $report->search($params);
+        VarDumper::dump($report->getErrors());
+        die;
+        $users = \Yii::createObject(Users::class);
+        $lead = Lead::findOne(513195);
+        $r = $users->getUsers($lead, 4, false);
+        VarDumper::dump($r);
+    }
+
+    public function actionNnn()
+    {
+        $call = Call::findOne(3385614);
+        $r = Employee::getUsersForCallQueue($call, 10);
+        VarDumper::dump($r);
+    }
+
+    public function actionR()
+    {
+        $access = CallRedialUserAccess::find()->andWhere(['crua_lead_id' => 513195, 'crua_user_id' => 295])->one();
+        $repo = \Yii::createObject(CallRedialUserAccessRepository::class);
+        $repo->remove($access);
+        die;
+    }
+
+    public function actionA()
+    {
+        $repo = \Yii::createObject(CallRedialUserAccessRepository::class);
+        $access = CallRedialUserAccess::create(513195, 295, new \DateTimeImmutable());
+        $repo->save($access);
+        die;
+
+
+//        \Yii::createObject(\sales\model\client\notifications\listeners\productQuoteChangeDecided\ClientNotificationCancelerListener::class)->handle(new ProductQuoteChangeDecisionModifyEvent(113, 192));
+//        die;
+
+//        \Yii::createObject(ClientNotificationExecutor::class)->execute(2);
+//        die;
+        $repo = \Yii::createObject(ProductQuoteChangeRepository::class);
+        $change = ProductQuoteChange::createNew(
+            193,
+            135988
+        );
+        $repo->save($change);
+
+
+//        $repo = \Yii::createObject(ProductQuoteChangeRepository::class);
+//        $change = ProductQuoteChange::createNew(
+//            192,
+//            135987
+//        );
+//        $repo->save($change);
+    }
+
+    public function actionQ()
+    {
+        echo \Yii::$app->communication->makeCallClientNotification(
+            '+14157693509',
+            '+37369305726',
+            'Hello world',
+            'woman',
+            null,
+            null,
+            [
+                'project_id' => 2,
+                'client_id' => 472969,
+                'case_id' => 135981,
+                'phone_list_id' => 1468,
+            ]
+        );
+    }
+
     public function actionX()
     {
 
@@ -496,5 +604,24 @@ class TestController extends Controller
         $command = new Command(null, null, 1, '', [], 1, '', '', '', '');
         $handler = \Yii::createObject(Handler::class);
         $handler->handle($command);
+    }
+
+    public function actionTestLogExecutionTime()
+    {
+        $logExecutionTime = new LogExecutionTime();
+        $logExecutionTime->start('step1');
+        sleep(2);
+        $logExecutionTime->end()->start('step2');
+        sleep(3);
+        $logExecutionTime->end();
+        $logExecutionTime->start('step3');
+        $logExecutionTime->end();
+        $logExecutionTime->start('step4');
+        sleep(1);
+        $logExecutionTime->end()->start('step5');
+        sleep(5);
+        $logExecutionTime->end();
+
+        var_dump($logExecutionTime->getResult());
     }
 }

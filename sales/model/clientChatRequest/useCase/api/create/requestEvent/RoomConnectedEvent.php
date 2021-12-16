@@ -121,7 +121,7 @@ class RoomConnectedEvent implements ChatRequestEvent
         try {
             $clientChat = $this->clientChatRepository->getOrCreateByRequest($clientChatRequest, ClientChat::SOURCE_TYPE_CLIENT);
 
-            $clientChatCreated = $clientChat->cch_id ? false : true;
+            $chatAlreadyCreated = $clientChat->cch_id ? true : false;
 
             $client = null;
             if (!$clientChat->cch_client_id) {
@@ -133,11 +133,12 @@ class RoomConnectedEvent implements ChatRequestEvent
                 );
             }
 
-            if ($clientChatCreated) {
+            if (!$chatAlreadyCreated) {
                 $dto = (new ComponentDTO())
                     ->setChannelId($clientChatRequest->getChannelIdFromData())
                     ->setClientChatEntity($clientChat)
                     ->setVisitorId($clientChatRequest->getClientRcId())
+                    ->setClientChatRequest($clientChatRequest)
                     ->setIsChatNew(true);
                 $this->componentEventsTypeService->beforeChatCreation($dto);
             }
@@ -184,7 +185,7 @@ class RoomConnectedEvent implements ChatRequestEvent
                 ]);
             }
 
-            if ($clientChatCreated) {
+            if (!$chatAlreadyCreated) {
                 $this->clientChatMessageService->assignMessagesToChat($clientChat);
                 \Yii::$app->snowplow->trackAction('chat', 'create', $clientChat->toArray());
 

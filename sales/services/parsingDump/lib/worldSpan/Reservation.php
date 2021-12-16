@@ -32,7 +32,10 @@ class Reservation implements ParseDumpInterface, ParseReservationInterface
 
                 $result['reservation'][$parseData['index']] = $parseData;
             } catch (\Throwable $throwable) {
-                \Yii::error(AppHelper::throwableFormatter($throwable), 'WorldSpan:Reservation:parseDump:Throwable');
+                $logData = AppHelper::throwableLog($throwable);
+                $logData['row'] = $row;
+                $logData['rawData'] = $rawData ?? null;
+                \Yii::warning($logData, 'WorldSpan:Reservation:parseDump:Throwable');
             }
         }
         return $result;
@@ -133,6 +136,9 @@ class Reservation implements ParseDumpInterface, ParseReservationInterface
             $data['departure_time_mm'],
             $departureTimeZone
         );
+        if ($data['departure_date_time'] === false) {
+            throw new \RuntimeException('Parsing and generating Departure DT ended in failure');
+        }
 
         $arrivalTimeZone = null;
         if ($arrivalAirport = Airports::findByIata($data['arrival_airport_iata'])) {
@@ -140,34 +146,29 @@ class Reservation implements ParseDumpInterface, ParseReservationInterface
         }
 
         $data['arrival_date_time'] = $this->getArrivalDateTime(
-            $data['departure_date_time'],
+            $data['departure_date_day'],
+            $data['departure_date_month'],
             $data['arrival_time_hh'],
             $data['arrival_time_mm'],
             $data['arrival_offset'],
             $arrivalTimeZone
         );
+        if ($data['arrival_date_time'] === false) {
+            throw new \RuntimeException('Parsing and generating Arrival DT ended in failure');
+        }
+
         return $data;
     }
 
-    /**
-     * @param DateTime $departureDateTime
-     * @param string $arrivalHour
-     * @param string $arrivalMinute
-     * @param string $arrivalOffset
-     * @param DateTimeZone|null $timezone
-     * @return DateTime|false|null
-     */
     public function getArrivalDateTime(
-        ?DateTime $departureDateTime,
+        string $day,
+        string $month,
         string $arrivalHour,
         string $arrivalMinute,
         string $arrivalOffset,
         DateTimeZone $timezone = null
-    ) {
-        if (!$departureDateTime) {
-            return null;
-        }
-        $sourceDate = clone $departureDateTime;
+    ): DateTime {
+        $sourceDate = $this->createDateTime($day, $month, $arrivalHour, $arrivalMinute, $timezone);
         $arrivalOffset = $this->prepareArrivalOffset($arrivalOffset);
         if ($arrivalOffset === 0) {
             $result = $sourceDate->setTime($arrivalHour, $arrivalMinute);

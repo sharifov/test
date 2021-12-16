@@ -3,7 +3,7 @@
 namespace modules\product\controllers;
 
 use modules\product\src\entities\productQuoteOptionRefund\ProductQuoteOptionRefund;
-use modules\product\src\entities\productQuoteOptionRefund\search\ProductQuoteOptionRefund as ProductQuoteOptionRefundSearch;
+use modules\product\src\entities\productQuoteOptionRefund\search\ProductQuoteOptionRefundSearch;
 use frontend\controllers\FController;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

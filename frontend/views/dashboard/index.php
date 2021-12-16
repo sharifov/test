@@ -497,7 +497,7 @@ JS;
                         <?php Pjax::end(); ?>
                     </div>
 
-                    <div id="tab-2" class="tab-pane fade in active">
+                    <div id="tab-2" class="tab-pane fade in active show">
                         <?php Pjax::begin(); ?>
                         <h4>To Do Task List <span class="label label-success">current</span> (<?=Yii::$app->formatter->asDate(time())?>):</h4>
                         <?= GridView::widget([

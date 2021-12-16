@@ -42,6 +42,7 @@ class AbacBaseModel
     protected const OPTGROUP_ENV_DT    = 'ENV - DATE & TIME';
     protected const OPTGROUP_ENV_REQUEST = 'ENV - REQUEST';
     protected const OPTGROUP_ENV_PROJECT = 'ENV - PROJECT';
+    protected const OPTGROUP_ENV_DATA = 'ENV - DATA';
 
 
     public const OP_EQUAL               = 'equal';
@@ -72,6 +73,22 @@ class AbacBaseModel
     public const OP_NOT_EQUAL2          = '!=';
 
 
+
+    protected const ATTR_OBJ_AVAILABLE = [
+        'optgroup' => self::OPTGROUP_ENV_DATA,
+        'id' => 'env_available',
+        'field' => 'env.available',
+        'label' => 'Available for all',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'default_value' => true,
+        'vertical' => true,
+        //'validation' => ['allow_empty_value' => true],
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
     protected const ATTR_USER_USERNAME = [
         'optgroup' => self::OPTGROUP_ENV_USER,
         'id' => 'env_username',
@@ -92,6 +109,18 @@ class AbacBaseModel
         'values' => [],
         'multiple' => false,
         'operators' =>  [self::OP_IN_ARRAY, self::OP_NOT_IN_ARRAY]
+    ];
+
+    protected const ATTR_USER_MULTI_ROLES = [
+        'optgroup' => self::OPTGROUP_ENV_USER,
+        'id' => 'env_user_multi_roles',
+        'field' => 'env.user.roles',
+        'label' => 'User Multi Roles',
+        'type' => self::ATTR_TYPE_STRING,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
+        'multiple' => true,
+        'operators' =>  [self::OP_CONTAINS]
     ];
 
     protected const ATTR_USER_PROJECTS = [
@@ -331,6 +360,7 @@ class AbacBaseModel
     ];
 
     protected const ATTRIBUTE_LIST = [
+        self::ATTR_OBJ_AVAILABLE,
         self::ATTR_USER_USERNAME,
         // self::ATTR_USER_ROLES,
         // self::ATTR_USER_PROJECTS,
@@ -363,16 +393,19 @@ class AbacBaseModel
         $attributeList = self::ATTRIBUTE_LIST;
 
         $ur = self::ATTR_USER_ROLES;
+        $mur = self::ATTR_USER_MULTI_ROLES;
         $ug = self::ATTR_USER_GROUPS;
         $up = self::ATTR_USER_PROJECTS;
         $ud = self::ATTR_USER_DEPARTMENTS;
 
         $ur['values'] = self::getUserRoleList();
+        $mur['values'] = $ur['values'];
         $ug['values'] = self::getUserGroupList();
         $up['values'] = self::getProjectList();
         $ud['values'] = self::getDepartmentList();
 
         $attributeList[] = $ur;
+        $attributeList[] = $mur;
         $attributeList[] = $ug;
         $attributeList[] = $up;
         $attributeList[] = $ud;
@@ -433,7 +466,7 @@ class AbacBaseModel
 
             self::OP_BEGINS_WITH,
             self::OP_NOT_BEGINS_WITH,
-            self::OP_CONTAINS,
+            //self::OP_CONTAINS,
             self::OP_NOT_CONTAINS,
 
             self::OP_ENDS_WITH,
@@ -455,6 +488,7 @@ class AbacBaseModel
         $operators[] = ['type' => self::OP_MATCH, 'optgroup' => 'custom', 'nb_inputs' => 1, 'multiple' => false, 'apply_to' => "['number', 'string']"];
         $operators[] = ['type' => self::OP_IN_ARRAY, 'optgroup' => 'Array', 'nb_inputs' => 1, 'multiple' => false, 'apply_to' => "['number', 'string']"];
         $operators[] = ['type' => self::OP_NOT_IN_ARRAY, 'optgroup' => 'Array', 'nb_inputs' => 1, 'multiple' => false, 'apply_to' => "['number', 'string']"];
+        $operators[] = ['type' => self::OP_CONTAINS, 'optgroup' => 'Array', 'nb_inputs' => 1, 'multiple' => true, 'apply_to' => "['number', 'string']"];
 
         return $operators;
     }

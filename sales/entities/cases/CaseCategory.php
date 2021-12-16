@@ -5,6 +5,7 @@ namespace sales\entities\cases;
 use common\models\Department;
 use common\models\Employee;
 use kartik\daterange\DateRangeBehavior;
+use sales\behaviors\SlugBehavior;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -15,7 +16,7 @@ use yii\helpers\ArrayHelper;
  * Class CaseCategory
  *
  * @property int $cc_id
- * @property int $cc_key
+ * @property string $cc_key
  * @property string $cc_name
  * @property int $cc_dep_id
  * @property int $cc_system
@@ -50,14 +51,11 @@ class CaseCategory extends ActiveRecord
                 'updatedByAttribute' => 'cc_updated_user_id',
                 'createdByAttribute' => 'cc_updated_user_id',
             ],
-            /*
-            'datePickerRange' =>[
-                'class' => DateRangeBehavior::class,
-                'attribute' => 'createTimeRange',
-                'dateStartAttribute' => 'createTimeStart',
-                'dateEndAttribute' => 'createTimeEnd',
-            ]
-            */
+            'slugBehavior' => [
+                'class' => SlugBehavior::class,
+                'donorColumn' => 'cc_name',
+                'targetColumn' => 'cc_key',
+            ],
         ];
     }
 
@@ -69,7 +67,8 @@ class CaseCategory extends ActiveRecord
         return [
             ['cc_key', 'default', 'value' => null],
             ['cc_key', 'string', 'max' => 50],
-            ['cc_key', 'match', 'pattern' => '/^[a-zA-Z0-9_-]+$/', 'message' =>  'Key can only contain alphanumeric characters, underscores and dashes.'],
+            ['cc_key', 'filter', 'filter' => 'strtolower', 'skipOnEmpty' => true],
+            ['cc_key', 'match', 'pattern' => '/^[a-z0-9_]+$/', 'message' =>  'Key can only contain alphanumeric characters, underscores.'],
             ['cc_key', 'unique'],
 
             ['cc_name', 'required'],
@@ -164,5 +163,14 @@ class CaseCategory extends ActiveRecord
     public static function find()
     {
         return new CasesCategoryQuery(static::class);
+    }
+
+    /**
+     * @param int|null $categoryId
+     * @return false|int|string|null
+     */
+    public static function getKey(?int $categoryId)
+    {
+        return self::find()->select(['cc_key'])->where(['cc_id' => $categoryId])->limit(1)->scalar();
     }
 }

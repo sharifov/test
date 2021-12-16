@@ -382,6 +382,10 @@ class CallLogTransferService
             $log->cl_status_id = $this->map('cl_status_id', 'c_status_id');
             $log->cl_stir_status = $this->map('cl_stir_status', 'c_stir_status');
 
+            if (!$log->cl_stir_status && $childStirStatus = self::getChildStirStatus((int) $log->cl_id)) {
+                $log->cl_stir_status = $childStirStatus;
+            }
+
             /*
             if ($this->call['c_from'] && $this->call['c_call_type_id'] == Call::CALL_TYPE_OUT) {
                 if ($phoneList = PhoneList::find()->select(['pl_id'])->andWhere(['pl_phone_number' => $this->call['c_from']])->asArray()->one()) {
@@ -568,5 +572,24 @@ class CallLogTransferService
     private function map(string $callLogAttr, string $callAttr): ?string
     {
         return (array_key_exists($callLogAttr, $this->callLog)) ? $this->callLog[$callLogAttr] : $this->call[$callAttr];
+    }
+
+    /**
+     * @param int $parentId
+     * @return false|string
+     */
+    public static function getChildStirStatus(int $parentId)
+    {
+        return Call::find()
+            ->select('c_stir_status')
+            ->where(['c_parent_id' => $parentId])
+            ->andWhere([
+                'AND',
+                    ['IS NOT', 'c_stir_status', null],
+                    ['!=', 'c_stir_status', '']
+                ])
+            ->orderBy(['c_id' => SORT_DESC])
+            ->limit(1)
+            ->scalar();
     }
 }

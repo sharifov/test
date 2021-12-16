@@ -2,6 +2,7 @@
 
 namespace modules\product\src\entities\productQuote;
 
+use sales\helpers\setting\SettingHelper;
 use yii\bootstrap4\Html;
 
 class ProductQuoteStatus
@@ -120,6 +121,13 @@ class ProductQuoteStatus
         self::CANCELED,
     ];
 
+    public const PROCESSING_LIST = [
+        self::NEW,
+        self::PENDING,
+        self::APPLIED,
+        self::IN_PROGRESS
+    ];
+
     public static function getList(): array
     {
         return self::LIST;
@@ -134,9 +142,23 @@ class ProductQuoteStatus
         );
     }
 
+    public static function getChangeableStatusList(): array
+    {
+        return SettingHelper::getProductQuoteChangeableStatuses();
+    }
+
     public static function getName(?int $value)
     {
         return self::LIST[$value] ?? 'Undefined';
+    }
+
+    public static function getNames(array $statusIds): array
+    {
+        $result = [];
+        foreach ($statusIds as $value) {
+            $result[] = self::getName($value);
+        }
+        return $result;
     }
 
     private static function getClassName(?int $value): string

@@ -4,6 +4,7 @@ namespace sales\dto\searchService;
 
 use common\components\SearchService;
 use common\models\Lead;
+use common\models\LeadFlightSegment;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -24,7 +25,7 @@ use yii\helpers\ArrayHelper;
  */
 class SearchServiceQuoteDTO
 {
-    private Lead $lead;
+    private ?Lead $lead = null;
 
     public array $fl = [];
 
@@ -46,19 +47,10 @@ class SearchServiceQuoteDTO
 
     public $ppn;
 
-    public function __construct(Lead $lead, int $limit = 600, $gdsCode = null, bool $group = true)
+    public function __construct(?Lead $lead, int $limit = 600, $gdsCode = null, bool $group = true)
     {
-        $this->lead = $lead;
-
-        $this->cabin = SearchService::getCabinRealCode($lead->cabin);
-
-        $sid = $lead->project->airSearchCid ?? null;
-        $this->cid = $sid ?: \Yii::$app->params['search']['sid'];
-        $this->adt = $lead->adults;
-        $this->chd = $lead->children;
-        $this->inf = $lead->infants;
         $this->group = $group;
-
+        $this->cid = \Yii::$app->params['search']['sid'];
         if ($limit) {
             $this->limit = $limit;
         }
@@ -67,26 +59,41 @@ class SearchServiceQuoteDTO
             $this->gdsCode = $gdsCode;
         }
 
-        foreach ($lead->leadFlightSegments as $flightSegment) {
-            $segment = [
-                'o' => $flightSegment->origin,
-                'd' => $flightSegment->destination,
-                'dt' => $flightSegment->departure
-            ];
+        if ($lead) {
+            $this->lead = $lead;
 
-            if ($flightSegment->flexibility > 0) {
-                $segment['flex'] = $flightSegment->flexibility;
+            $this->cabin = SearchService::getCabinRealCode($lead->cabin);
 
-                if ($flightSegment->flexibility_type && $flexType = SearchService::getSearchFlexType($flightSegment->flexibility_type)) {
-                    $segment['ft'] = $flexType;
+            $sid = $lead->project->airSearchCid ?? null;
+            $this->cid = $sid ?: $this->cid;
+            $this->adt = $lead->adults;
+            $this->chd = $lead->children;
+            $this->inf = $lead->infants;
+
+
+            $flightSegments = $lead->getleadFlightSegments()->orderBy(['departure' => SORT_ASC])->all();
+            /** @var LeadFlightSegment $flightSegment */
+            foreach ($flightSegments as $flightSegment) {
+                $segment = [
+                    'o' => $flightSegment->origin,
+                    'd' => $flightSegment->destination,
+                    'dt' => $flightSegment->departure
+                ];
+
+                if ($flightSegment->flexibility > 0) {
+                    $segment['flex'] = $flightSegment->flexibility;
+
+                    if ($flightSegment->flexibility_type && $flexType = SearchService::getSearchFlexType($flightSegment->flexibility_type)) {
+                        $segment['ft'] = $flexType;
+                    }
                 }
+
+                $this->fl[] = $segment;
             }
 
-            $this->fl[] = $segment;
-        }
-
-        if ($lead->client->isExcluded()) {
-            $this->ppn = $lead->client->cl_ppn;
+            if ($lead->client->isExcluded()) {
+                $this->ppn = $lead->client->cl_ppn;
+            }
         }
     }
 
@@ -97,6 +104,6 @@ class SearchServiceQuoteDTO
 
     public function getLeadId(): int
     {
-        return $this->lead->id;
+        return $this->lead->id ?? 0;
     }
 }

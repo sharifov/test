@@ -7,14 +7,24 @@ use common\models\CaseSale;
 use Exception;
 use frontend\helpers\JsonHelper;
 use frontend\models\form\CreditCardForm;
-use http\Exception\RuntimeException;
+use modules\flight\src\useCases\sale\FlightFromSaleService;
+use modules\flight\src\useCases\sale\form\OrderContactForm;
+use modules\order\src\entities\order\Order;
+use modules\order\src\entities\order\OrderRepository;
+use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
+use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
+use modules\order\src\services\OrderManageService;
 use sales\entities\cases\Cases;
 use sales\exception\BoResponseException;
 use sales\forms\caseSale\CaseSaleRequestBoForm;
 use sales\helpers\app\AppHelper;
+use sales\helpers\ErrorsToStringHelper;
+use sales\helpers\setting\SettingHelper;
 use sales\model\saleTicket\useCase\create\SaleTicketService;
 use sales\repositories\cases\CasesSaleRepository;
 use Yii;
+use yii\db\Transaction;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
@@ -22,7 +32,11 @@ use yii\web\BadRequestHttpException;
 /**
  * Class CasesSaleService
  *
- * CasesSaleRepository $casesSaleRepository
+ * @property CasesSaleRepository $casesSaleRepository
+ * @property SaleTicketService $saleTicketService
+ * @property OrderCreateFromSaleService $orderCreateFromSaleService
+ * @property OrderRepository $orderRepository
+ * @property FlightFromSaleService $flightFromSaleService
  */
 class CasesSaleService
 {
@@ -52,20 +66,24 @@ class CasesSaleService
      * @var array
      */
     private $namref = [];
-    /**
-     * @var SaleTicketService
-     */
-    private $saleTicketService;
 
-    /**
-     * CasesSaleService constructor.
-     * @param CasesSaleRepository $casesSaleRepository
-     * @param SaleTicketService $saleTicketService
-     */
-    public function __construct(CasesSaleRepository $casesSaleRepository, SaleTicketService $saleTicketService)
-    {
+    private SaleTicketService $saleTicketService;
+    private OrderCreateFromSaleService $orderCreateFromSaleService;
+    private OrderRepository $orderRepository;
+    private FlightFromSaleService $flightFromSaleService;
+
+    public function __construct(
+        CasesSaleRepository $casesSaleRepository,
+        SaleTicketService $saleTicketService,
+        OrderCreateFromSaleService $orderCreateFromSaleService,
+        OrderRepository $orderRepository,
+        FlightFromSaleService $flightFromSaleService
+    ) {
         $this->casesSaleRepository = $casesSaleRepository;
         $this->saleTicketService = $saleTicketService;
+        $this->orderCreateFromSaleService = $orderCreateFromSaleService;
+        $this->orderRepository = $orderRepository;
+        $this->flightFromSaleService = $flightFromSaleService;
     }
 
     /**
@@ -595,6 +613,7 @@ class CasesSaleService
                     $caseSale = new CaseSale();
                     $caseSale->css_cs_id = $csId;
                     $caseSale->css_sale_id = $saleId;
+                    $caseSale->css_sale_book_id = $saleData['bookingId'] ?? $saleData['confirmationNumber'] ?? null;
 
                     $caseSale = $this->saveAdditionalData($caseSale, $case, $refreshSaleData);
 
@@ -604,6 +623,43 @@ class CasesSaleService
                             'errors' => $caseSale->errors,
                             'saleData' => $refreshSaleData
                         ]));
+                    }
+
+                    if ($caseSale && SettingHelper::isEnableOrderFromSale()) {
+                        $transaction = new Transaction(['db' => Yii::$app->db]);
+                        try {
+                            if (!$order = OrderManageService::getBySaleIdOrBookingId($saleId, (string) $refreshSaleData['bookingId'])) {
+                                $orderCreateFromSaleForm = new OrderCreateFromSaleForm();
+                                if (!$orderCreateFromSaleForm->load($refreshSaleData)) {
+                                    throw new \RuntimeException('OrderCreateFromSaleForm not loaded');
+                                }
+                                if (!$orderCreateFromSaleForm->validate()) {
+                                    throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($orderCreateFromSaleForm));
+                                }
+                                $order = $this->orderCreateFromSaleService->orderCreate($orderCreateFromSaleForm);
+
+                                $transaction->begin();
+                                $orderId = $this->orderRepository->save($order);
+
+                                $this->orderCreateFromSaleService->caseOrderRelation($orderId, $caseSale->css_cs_id);
+                                $this->orderCreateFromSaleService->orderContactCreate($order, OrderContactForm::fillForm($refreshSaleData));
+
+                                $currency = $orderCreateFromSaleForm->currency;
+                                $this->flightFromSaleService->createHandler($order, $orderCreateFromSaleForm, $refreshSaleData);
+
+                                if ($authList = ArrayHelper::getValue($refreshSaleData, 'authList')) {
+                                    $this->orderCreateFromSaleService->paymentCreate($authList, $orderId, $currency);
+                                }
+                                $transaction->commit();
+                            } else {
+                                $this->orderCreateFromSaleService->caseOrderRelation($order->getId(), $caseSale->css_cs_id);
+                            }
+                        } catch (\Throwable $throwable) {
+                            $transaction->rollBack();
+                            $message = AppHelper::throwableLog($throwable, true);
+                            $message['saleData'] = $refreshSaleData;
+                            Yii::error($message, 'CasesSaleService:createOrderStructureFromSale:Throwable');
+                        }
                     }
                 } else {
                     throw new \RuntimeException('Error. Broken response from detailRequestToBackOffice. CaseSale not updated.');
@@ -678,5 +734,14 @@ class CasesSaleService
         $result['message'] = Json::decode($response->content)['message'] ?? 'Unknown error message from B/O';
 
         return $result;
+    }
+
+    public function getSaleData(string $bookingId): array
+    {
+        $saleSearch = $this->getSaleFromBo($bookingId);
+        if (empty($saleSearch['saleId'])) {
+            throw new BoResponseException('Sale not found by Booking ID(' . $bookingId . ') from "cs/search"');
+        }
+        return $this->detailRequestToBackOffice($saleSearch['saleId'], 0, 120, 1);
     }
 }

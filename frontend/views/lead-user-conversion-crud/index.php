@@ -24,14 +24,12 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('Create Lead User Conversion', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-    <?php Pjax::begin(['id' => 'pjax-lead-user-conversion']); ?>
+    <?php Pjax::begin(['id' => 'pjax-lead-user-conversion', 'scrollTo' => 0]); ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            ['class' => SerialColumn::class],
-
             [
                 'attribute' => 'luc_lead_id',
                 'value' => static function (LeadUserConversion $model) {
@@ -46,11 +44,15 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'luc_description',
             [
+                'attribute' => 'luc_created_user_id',
+                'class' => UserColumn::class,
+                'relation' => 'createdUser',
+            ],
+            [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'luc_created_dt',
                 'format' => 'byUserDateTime'
             ],
-
             ['class' => ActionColumn::class],
         ],
     ]); ?>

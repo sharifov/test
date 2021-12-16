@@ -7,7 +7,9 @@ use common\models\Employee;
 use common\models\query\CurrencyQuery;
 use common\models\query\EmployeeQuery;
 use modules\order\src\entities\order\Order;
+use modules\order\src\entities\orderRefund\serializer\OrderRefundSerializer;
 use sales\entities\cases\Cases;
+use sales\entities\serializer\Serializable;
 use sales\services\CurrencyHelper;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -43,8 +45,10 @@ use yii\db\ActiveRecord;
  * @property Employee $createdUser
  * @property Order $order
  * @property Employee $updatedUser
+ * @property string $orr_client_penalty_amount [decimal(8,2)]
+ * @property string $orr_client_processing_fee_amount [decimal(8,2)]
  */
-class OrderRefund extends \yii\db\ActiveRecord
+class OrderRefund extends \yii\db\ActiveRecord implements Serializable
 {
     public static function createByScheduleChange(
         $uuid,
@@ -67,6 +71,43 @@ class OrderRefund extends \yii\db\ActiveRecord
         $refund->orr_client_status_id = OrderRefundClientStatus::PROCESSING;
         $refund->orr_status_id = OrderRefundStatus::PENDING;
         $refund->orr_description = 'Schedule change refund request';
+        $refund->detachBehavior('user');
+        return $refund;
+    }
+
+    public static function createByVoluntaryRefund(
+        $uuid,
+        $orderId,
+        $sellingPrice,
+        $penaltyAmount,
+        $processingFeeAmount,
+        $refundAmount,
+        $clientCurrency,
+        $clientCurrencyRate,
+        $clientSellingPrice,
+        $clientPenaltyAmount,
+        $clientProcessingFeeAmount,
+        $clientRefundAmount,
+        $caseId
+    ): self {
+        $refund = self::create(
+            $uuid,
+            $orderId,
+            $sellingPrice,
+            $clientCurrency,
+            $clientCurrencyRate,
+            $clientSellingPrice,
+            $caseId
+        );
+        $refund->orr_penalty_amount = $penaltyAmount;
+        $refund->orr_processing_fee_amount = $processingFeeAmount;
+        $refund->orr_refund_amount = $refundAmount;
+        $refund->orr_client_status_id = OrderRefundClientStatus::PROCESSING;
+        $refund->orr_status_id = OrderRefundStatus::PENDING;
+        $refund->orr_description = 'Voluntary refund request';
+        $refund->orr_client_refund_amount = $clientRefundAmount;
+        $refund->orr_client_penalty_amount = $clientPenaltyAmount;
+        $refund->orr_client_processing_fee_amount = $clientProcessingFeeAmount;
         $refund->detachBehavior('user');
         return $refund;
     }
@@ -144,7 +185,7 @@ class OrderRefund extends \yii\db\ActiveRecord
         return [
             [['orr_order_id', 'orr_uid'], 'required'],
             [['orr_order_id', 'orr_client_status_id', 'orr_status_id', 'orr_created_user_id', 'orr_updated_user_id'], 'integer'],
-            [['orr_selling_price', 'orr_penalty_amount', 'orr_processing_fee_amount', 'orr_charge_amount', 'orr_refund_amount', 'orr_client_currency_rate', 'orr_client_selling_price', 'orr_client_charge_amount', 'orr_client_refund_amount'], 'number', 'min' => 0, 'max' => 999999.99],
+            [['orr_selling_price', 'orr_penalty_amount', 'orr_processing_fee_amount', 'orr_charge_amount', 'orr_refund_amount', 'orr_client_currency_rate', 'orr_client_selling_price', 'orr_client_charge_amount', 'orr_client_refund_amount', 'orr_client_penalty_amount', 'orr_client_processing_fee_amount'], 'number', 'min' => 0, 'max' => 999999.99],
             [['orr_description'], 'string'],
             [['orr_expiration_dt', 'orr_created_dt', 'orr_updated_dt'], 'safe'],
 
@@ -190,6 +231,8 @@ class OrderRefund extends \yii\db\ActiveRecord
             'orr_created_dt' => 'Created Dt',
             'orr_updated_dt' => 'Updated Dt',
             'orr_case_id' => 'Case ID',
+            'orr_client_penalty_amount' => 'Client Penalty Amount',
+            'orr_client_processing_fee_amount' => 'Client Processing Fee'
         ];
     }
 
@@ -263,5 +306,15 @@ class OrderRefund extends \yii\db\ActiveRecord
     public function clientDone(): void
     {
         $this->orr_client_status_id = OrderRefundClientStatus::DONE;
+    }
+
+    public function new(): void
+    {
+        $this->orr_status_id = OrderRefundStatus::NEW;
+    }
+
+    public function serialize(): array
+    {
+        return (new OrderRefundSerializer($this))->getData();
     }
 }

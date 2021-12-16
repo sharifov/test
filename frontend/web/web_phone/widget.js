@@ -710,7 +710,7 @@ window.phoneWidget.events = {
       });
     };
 
-    this.clientInfo = function (id, isClient) {
+    this.clientInfo = function (id, callSid, isClient) {
       $('#call-box-modal .modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"> </i> Loading ...</div>');
       let text = isClient ? 'Client details' : 'Contact info';
       $('#call-box-modal-label').html(text + ' (' + id + ')');
@@ -718,7 +718,8 @@ window.phoneWidget.events = {
       $.ajax({
         type: 'post',
         data: {
-          client_id: id
+          client_id: id,
+            callSid: callSid
         },
         url: this.settings.clientInfoUrl
       }).done(function (data) {
@@ -2422,7 +2423,7 @@ var PhoneWidgetPaneActive = function () {
     }), $addNoteContainer);
     $(".dialpad_btn_active").attr('data-conference-sid', call.data.conferenceSid);
     $("#call-pane__dial-number_active_dialpad").val('');
-    contactInfo.load(call.data.contact);
+    // contactInfo.load(call.data.contact);
     setCallSid(call.data.callSid);
     initControls();
   }
@@ -2539,7 +2540,7 @@ var PhoneWidgetPaneIncoming = function () {
   let dialpad = PhoneWidgetDialpad; // call => window.phoneWidget.call.Call
 
   function load(call) {
-    contactInfo.load(call.data.contact);
+    // contactInfo.load(call.data.contact);
     ReactDOM.unmountComponentAtNode($reactContainer);
     ReactDOM.render(React.createElement(IncomingPane, {
       call: call
@@ -2622,7 +2623,7 @@ var PhoneWidgetPaneOutgoing = function () {
   let dialpad = PhoneWidgetDialpad; // call => window.phoneWidget.call.Call
 
   function load(call) {
-    contactInfo.load(call.data.contact);
+    // contactInfo.load(call.data.contact);
     ReactDOM.unmountComponentAtNode($reactContainer);
     ReactDOM.render(React.createElement(OutgoingPane, {
       call: call
@@ -6011,13 +6012,14 @@ var PhoneWidgetCall = function () {
       e.preventDefault();
       let clientId = $(this).attr('data-client-id');
       let isClient = $(this).attr('data-is-client');
+      let callSid = $(this).attr('data-call-sid');
 
       if (typeof clientId === 'undefined') {
         createNotify('Client Info', 'Not found Client ID', 'error');
         return false;
       }
 
-      callRequester.clientInfo(clientId, isClient === 'true');
+      callRequester.clientInfo(clientId, callSid,isClient === 'true');
     });
   }
 
@@ -6679,7 +6681,7 @@ let PhoneWidgetSms = function () {
   }
 
   function getBackToContacts() {
-    return '<a href="#" class="widget-modal__close"><i class="fa fa-arrow-left"></i>Back to contacts</i></a>';
+    return '<a class="widget-modal__close"><i class="fa fa-arrow-left"></i>Back to contacts</i></a>';
   }
 
   function sendStart() {
@@ -6974,7 +6976,7 @@ let PhoneWidgetContacts = function () {
   }
 
   function viewContact(contact) {
-    let content = '<div class="widget-phone__contact-info-modal widget-modal contact-modal-info">' + '<a href="#" class="widget-modal__close">' + '<i class="fa fa-arrow-left"></i>' + 'Back to contacts</i>' + '</a>' + '<div class="contact-modal-info__user">' + '<div class="agent-text-avatar">' + '<span>' + contact['avatar'] + '</span>' + '</div>' + '<h3 class="contact-modal-info__name">' + contact['name'] + '</h3>' + //                '<div class="contact-modal-info__actions">' +
+    let content = '<div class="widget-phone__contact-info-modal widget-modal contact-modal-info">' + '<a class="widget-modal__close">' + '<i class="fa fa-arrow-left"></i>' + 'Back to contacts</i>' + '</a>' + '<div class="contact-modal-info__user">' + '<div class="agent-text-avatar">' + '<span>' + contact['avatar'] + '</span>' + '</div>' + '<h3 class="contact-modal-info__name">' + contact['name'] + '</h3>' + //                '<div class="contact-modal-info__actions">' +
     //                    '<ul class="contact-options-list">' +
     //                        '<li class="contact-options-list__option js-edit-mode">' +
     //                            '<i class="fa fa-user"></i>' +
@@ -7375,7 +7377,7 @@ let PhoneWidgetEmail = function () {
   }
 
   function getBackToContacts() {
-    return '<a href="#" class="widget-modal__close"><i class="fa fa-arrow-left"></i>Back to contacts</i></a>';
+    return '<a class="widget-modal__close"><i class="fa fa-arrow-left"></i>Back to contacts</i></a>';
   }
 
   function show(contact, contactEmail, user) {

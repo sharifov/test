@@ -91,20 +91,29 @@ class SendEmailByCase
         throw new \RuntimeException('Project(' . $case->cs_project_id . ') or CaseCategory(' . $case->cs_category_id . ') not found');
     }
 
+    /**
+     * @param Project $project
+     * @param CaseCategory $caseCategory
+     * @return EmailConfigsDTO
+     */
     private function getEmailConfigsDto(Project $project, CaseCategory $caseCategory): EmailConfigsDTO
     {
         $emailConfigs = $project->getEmailConfigOnApiCaseCreate()[$caseCategory->cc_key] ?? null;
         if (!$emailConfigs) {
-            \Yii::error(VarDumper::dumpAsString([
-                'projectParams' => $project->p_params_json,
-                'categoryKey' => $caseCategory->cc_key,
-                'emailConfigs' => $emailConfigs
-            ]), 'SendEmailOnCaseCreationBOJob::getEmailConfigsDto');
-            throw new \RuntimeException('Not Found email configs in project(' . $project->name . ' - ' . $project->id . ') params by case category key (' . $caseCategory->cc_key . ')');
+//            \Yii::error([
+//                'message' => 'Not found email config',
+//                'projectId' => $project->id,
+//                'categoryKey' => $caseCategory->cc_key,
+//            ], 'SendEmailOnCaseCreationBOJob::getEmailConfigsDto');
+            throw new \RuntimeException('Not Found email configs in project (' . $project->name . ' - ' . $project->id . ') params by case category key (' . $caseCategory->cc_key . ')');
         }
         return new EmailConfigsDTO($emailConfigs);
     }
 
+    /**
+     * @param string $templateTypeKey
+     * @return EmailTemplateType
+     */
     private function getEmailTemplate(string $templateTypeKey): EmailTemplateType
     {
         if (!$emailTemplate = EmailTemplateType::findOne(['etp_key' => $templateTypeKey])) {
@@ -113,6 +122,9 @@ class SendEmailByCase
         return $emailTemplate;
     }
 
+    /**
+     * @return int|null
+     */
     public function getResultStatus(): ?int
     {
         return $this->resultStatus;

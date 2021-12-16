@@ -19,12 +19,15 @@ use common\models\Quote;
 use common\models\UserProjectParams;
 use frontend\models\UserSiteActivity;
 use sales\entities\cases\Cases;
+use sales\helpers\app\AppHelper;
 use sales\helpers\email\TextConvertingHelper;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
 use sales\model\project\entity\projectLocale\ProjectLocale;
 use sales\services\lead\qcall\CalculateDateService;
 use sales\services\log\GlobalEntityAttributeFormatServiceService;
+use sales\services\system\DbViewCryptDictionary;
+use sales\services\system\DbViewCryptService;
 use yii\base\InvalidConfigException;
 use yii\console\Controller;
 use Yii;
@@ -1435,6 +1438,65 @@ ORDER BY lf.lead_id, id';
         $resultInfo = 'Processed: ' . $processed .
             ', Execute Time: ' . number_format(round(microtime(true) - $timeStart, 2), 2);
 
+        $this->printInfo($resultInfo, $this->action->id);
+    }
+
+    public function actionInitView()
+    {
+        $this->printInfo('Start', $this->action->id);
+        $timeStart = microtime(true);
+
+        $db = Yii::$app->getDb();
+        $data = DbViewCryptDictionary::getSources();
+
+        foreach ($data as $tableName => $columns) {
+            try {
+                $dbViewCryptService = new DbViewCryptService($db, $tableName, $columns);
+                $db->createCommand($dbViewCryptService->getReInitSql())->execute();
+
+                if (!$db->createCommand("SELECT 1 FROM {$dbViewCryptService->getViewName()}")->execute()) {
+                    throw new \RuntimeException('View created, but is empty');
+                }
+
+                echo Console::renderColoredString('%g --- Created : %w[' . $dbViewCryptService->getViewName() . ']%n'), PHP_EOL;
+            } catch (\RuntimeException | \DomainException $throwable) {
+                echo Console::renderColoredString('%y --- Warning : %c[' . $tableName . ']: ' . $throwable->getMessage() . ' %n'), PHP_EOL;
+            } catch (\Throwable $throwable) {
+                $message = AppHelper::throwableLog($throwable);
+                $message['tableName'] = $tableName;
+                Yii::error($message, 'DbController:actionInitView:Throwable');
+                echo Console::renderColoredString('%r --- Error : %p[' . $tableName . ']: ' . $throwable->getMessage() . ' %n'), PHP_EOL;
+            }
+        }
+
+        $resultInfo = 'Execute Time: ' . number_format(round(microtime(true) - $timeStart, 2), 2);
+        $this->printInfo($resultInfo, $this->action->id);
+    }
+
+    public function actionDropView(string $viewName)
+    {
+        $this->printInfo('Start', $this->action->id);
+        $timeStart = microtime(true);
+
+        if (empty($viewName)) {
+            echo Console::renderColoredString('%r --- Error : %p "viewName" is required %n'), PHP_EOL;
+            exit();
+        }
+
+        $db = Yii::$app->getDb();
+        $tableName = str_replace(DbViewCryptDictionary::VIEW_POST_FIX, '', $viewName);
+
+        try {
+            $dbViewCryptService = new DbViewCryptService($db, $tableName, []);
+            $db->createCommand($dbViewCryptService->getDropSql())->execute();
+        } catch (\Throwable $throwable) {
+            $message = AppHelper::throwableLog($throwable);
+            $message['viewName'] = $viewName;
+            Yii::error($message, 'DbController:actionDropView:Throwable');
+            echo Console::renderColoredString('%r --- Error : %p[' . $tableName . ']: ' . $throwable->getMessage() . ' %n'), PHP_EOL;
+        }
+
+        $resultInfo = 'Execute Time: ' . number_format(round(microtime(true) - $timeStart, 2), 2);
         $this->printInfo($resultInfo, $this->action->id);
     }
 }

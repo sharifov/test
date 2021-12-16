@@ -18,6 +18,7 @@ use common\models\LeadCallExpert;
 use common\models\LeadChecklist;
 use common\models\LeadFlow;
 //use common\models\LeadLog;
+use common\models\LeadQcall;
 use common\models\LeadTask;
 use common\models\local\LeadAdditionalInformation;
 use common\models\Note;
@@ -27,6 +28,8 @@ use common\models\search\LeadChecklistSearch;
 use kivork\rbacExportImport\src\formatters\FileSizeFormatter;
 use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\services\url\UrlGenerator;
+use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\lead\src\abac\LeadAbacObject;
 use modules\offer\src\entities\offer\search\OfferSearch;
 use modules\offer\src\entities\offerSendLog\CreateDto;
 use modules\offer\src\entities\offerSendLog\OfferSendLogType;
@@ -43,6 +46,7 @@ use frontend\models\SendEmailForm;
 use modules\order\src\entities\order\search\OrderSearch;
 use modules\twilio\components\TwilioCommunicationService;
 use PHPUnit\Framework\Warning;
+use sales\access\EmployeeAccess;
 use sales\auth\Auth;
 use sales\entities\cases\Cases;
 use sales\forms\CompositeFormHelper;
@@ -56,22 +60,26 @@ use sales\helpers\setting\SettingHelper;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
 use sales\model\airportLang\helpers\AirportLangHelper;
+use sales\model\call\socket\CallUpdateMessage;
 use sales\model\callLog\entity\callLog\CallLogType;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\permissions\ClientChatActionPermission;
 use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\model\clientChatLead\entity\ClientChatLeadRepository;
+use sales\model\contactPhoneData\entity\ContactPhoneData;
+use sales\model\contactPhoneList\service\ContactPhoneListService;
 use sales\model\department\department\DefaultPhoneType;
+use sales\model\lead\useCases\lead\create\CreateLeadByChatDTO;
 use sales\model\lead\useCases\lead\create\LeadCreateByChatForm;
 use sales\model\lead\useCases\lead\create\LeadManageForm;
+use sales\model\lead\useCases\lead\create\LeadManageService as UseCaseLeadManageService;
 use sales\model\lead\useCases\lead\import\LeadImportForm;
 use sales\model\lead\useCases\lead\import\LeadImportParseService;
 use sales\model\lead\useCases\lead\import\LeadImportService;
 use sales\model\lead\useCases\lead\import\LeadImportUploadForm;
 use sales\model\lead\useCases\lead\link\LeadLinkChatForm;
-use sales\model\leadUserConversion\entity\LeadUserConversion;
-use sales\model\leadUserConversion\repository\LeadUserConversionRepository;
 use sales\model\leadUserConversion\service\LeadUserConversionDictionary;
+use sales\model\leadUserConversion\service\LeadUserConversionService;
 use sales\model\phone\AvailablePhoneList;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
@@ -91,7 +99,9 @@ use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Json;
+use yii\helpers\Url;
 use yii\helpers\VarDumper;
+use yii\validators\StringValidator;
 use yii\web\BadRequestHttpException;
 use yii\web\Cookie;
 use yii\web\ForbiddenHttpException;
@@ -121,6 +131,7 @@ use common\models\local\LeadLogMessage;
  * @property TransactionManager $transaction
  * @property ClientChatActionPermission $chatActionPermission
  * @property UrlGenerator $fileStorageUrlGenerator
+ * @property UseCaseLeadManageService $useCaseLeadManageService
  */
 class LeadController extends FController
 {
@@ -135,6 +146,7 @@ class LeadController extends FController
     private $transaction;
     private $chatActionPermission;
     private UrlGenerator $fileStorageUrlGenerator;
+    private UseCaseLeadManageService $useCaseLeadManageService;
 
     public function __construct(
         $id,
@@ -150,6 +162,7 @@ class LeadController extends FController
         TransactionManager $transaction,
         ClientChatActionPermission $chatActionPermission,
         UrlGenerator $fileStorageUrlGenerator,
+        UseCaseLeadManageService $useCaseLeadManageService,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -164,6 +177,7 @@ class LeadController extends FController
         $this->transaction = $transaction;
         $this->chatActionPermission = $chatActionPermission;
         $this->fileStorageUrlGenerator = $fileStorageUrlGenerator;
+        $this->useCaseLeadManageService = $useCaseLeadManageService;
     }
 
     public function behaviors(): array
@@ -173,7 +187,11 @@ class LeadController extends FController
                 'allowActions' => [
                     'view',
                     'take',
+                    'ajax-take',
                     'create-by-chat',
+                    'ajax-create-from-phone-widget',
+                    'ajax-create-from-phone-widget-with-invalid-client',
+                    'ajax-link-to-call'
                 ],
             ],
         ];
@@ -1054,21 +1072,6 @@ class LeadController extends FController
             ->from('{{%client_chat_lead}}')
             ->where(['ccl_lead_id' => $lead->id]);
 
-
-//        $query3 = (new \yii\db\Query())
-//            ->select(['c_id AS id', new Expression('"voice" AS type'), 'c_lead_id AS lead_id', 'c_created_dt AS created_dt'])
-//            ->from('call')
-//            ->where(['c_lead_id' => $lead->id, 'c_parent_id' => null]);
-
-        $queryCall = (new \yii\db\Query())
-            ->select(['id' => new Expression('if (c_parent_id IS NULL, c_id, c_parent_id)')])
-            ->addSelect(['type' => new Expression('"voice"')])
-            ->addSelect(['lead_id' => 'c_lead_id', 'created_dt' => 'MAX(c_created_dt)'])
-            ->from('call')
-            ->where(['c_lead_id' => $lead->id])
-//            ->addGroupBy(['id', 'c_lead_id', 'c_created_dt']);
-            ->addGroupBy(['id']);
-
         $queryCallLog = (new Query())
             ->select(['id' => new Expression('cl_group_id')])
             ->addSelect(['type' => new Expression('"voice"')])
@@ -1080,27 +1083,11 @@ class LeadController extends FController
             ->orderBy(['created_dt' => SORT_ASC])
             ->groupBy(['id', 'type', 'lead_id']);
 
-        $queryUnion = $queryEmail->union($querySms)->union($queryChats);
-        $queryUnionLog = clone $queryUnion;
+        $queryUnionLog = $queryEmail->union($querySms)->union($queryChats);
 
         $unionQueryLog = (new Query())
             ->from(['union_table' => $queryUnionLog->union($queryCallLog)])
             ->orderBy(['created_dt' => SORT_ASC]);
-
-        $unionQuery = (new \yii\db\Query())
-            ->from(['union_table' => $queryUnion->union($queryCall)])
-            ->orderBy(['created_dt' => SORT_ASC]);
-
-//        echo '<pre>';print_r($unionQueryLog->createCommand()->rawSql);die;
-        //echo $query3->createCommand()->getRawSql(); exit;
-
-        $dataProviderCommunication = new ActiveDataProvider([
-            'query' => $unionQuery,
-            'pagination' => [
-                'pageSize' => 10,
-                //'page' => 0
-            ],
-        ]);
 
         $dataProviderCommunicationLog = new ActiveDataProvider([
             'query' => $unionQueryLog,
@@ -1109,46 +1096,13 @@ class LeadController extends FController
             ]
         ]);
 
-
         if (!Yii::$app->request->isAjax || !Yii::$app->request->get('page')) {
-            $pageCount = ceil($dataProviderCommunication->totalCount / $dataProviderCommunication->pagination->pageSize) - 1;
-            if ($pageCount < 0) {
-                $pageCount = 0;
-            }
-            $dataProviderCommunication->pagination->page = $pageCount;
-
             $pageCountLog = ceil($dataProviderCommunicationLog->totalCount / $dataProviderCommunicationLog->pagination->pageSize) - 1;
             if ($pageCountLog < 0) {
                 $pageCountLog = 0;
             }
             $dataProviderCommunicationLog->pagination->page = $pageCountLog;
         }
-        //      $query = (new Query())->select(['cl.*'])->from('call_log_lead')->leftJoin('call_log cl', 'cl.cl_id = cll_cl_id')->where(['cll_lead_id' => $lead->id])->all();
-
-//        $enableCommunication = false;
-//
-//        if (!$leadForm->getLead()->isNewRecord) {
-//
-//            //$leadForm->mode === $leadForm::VIEW_MODE
-//
-//            if ($is_admin || $isQA) {
-//                $enableCommunication = true;
-//            } elseif ($is_supervision) {
-//                if ($leadFormEmployee_id = $leadForm->getLead()->employee_id) {
-//                    $enableCommunication = Employee::isSupervisionAgent($leadFormEmployee_id);
-//                }
-//                if (!$leadForm->getLead()->hasOwner()) {
-//                    $enableCommunication = true;
-//                }
-//            } elseif ($is_agent) {
-//                if ($leadForm->getLead()->employee_id == Yii::$app->user->id) {
-//                    $enableCommunication = true;
-//                }
-//            }
-//
-//        }
-
-        //$dataProviderCommunication
 
         $modelLeadCallExpert = new LeadCallExpert();
 
@@ -1162,10 +1116,7 @@ class LeadController extends FController
 
                 if ($modelLeadCallExpert->save()) {
                     $modelLeadCallExpert->lce_request_text = '';
-                    //Yii::info(VarDumper::dumpAsString($modelLeadCallExpert->attributes), 'info\LeadController:view:LeadCallExpert');
                 }
-                //$modelLeadCallExpert =
-                //return $this->redirect(['view', 'id' => $model->lce_id]);
             }
         }
 
@@ -1195,8 +1146,6 @@ class LeadController extends FController
             } else {
                 Yii::error('Lead id: ' . $lead->id . ', ' . VarDumper::dumpAsString($modelLeadCallExpert->errors), 'Lead:view:LeadChecklist:save');
             }
-
-            //return $this->redirect(['view', 'id' => $model->lce_id]);
         }
 
         $searchModelLeadChecklist = new LeadChecklistSearch();
@@ -1226,10 +1175,6 @@ class LeadController extends FController
             ],
         ]);
 
-        //VarDumper::dump(enableCommunication); exit;
-
-        //$dataProviderCommunication = $lead->getQuotesProvider([]);
-
 //        $tmpl = $isQA ? 'view_qa' : 'view';
         $tmpl = 'view';
 
@@ -1250,9 +1195,7 @@ class LeadController extends FController
             'previewSmsForm' => $previewSmsForm,
             'comForm' => $comForm,
             'quotesProvider' => $quotesProvider,
-            'dataProviderCommunication' => $dataProviderCommunication,
             'dataProviderCommunicationLog' => $dataProviderCommunicationLog,
-//            'enableCommunication' => $enableCommunication,
             'dataProviderCallExpert' => $dataProviderCallExpert,
             'modelLeadCallExpert' => $modelLeadCallExpert,
             'dataProviderChecklist' => $dataProviderChecklist,
@@ -1370,6 +1313,65 @@ class LeadController extends FController
     }
 
     /**
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws NotFoundHttpException
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
+    public function actionAjaxTake(): array
+    {
+        $result = ['success' => false, 'error' => 'GID parameter not found'];
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $gid = Yii::$app->request->get('gid');
+        if (Yii::$app->request->isAjax && $gid) {
+            try {
+                $lead = $this->findLeadByGid($gid);
+                $oldStatus = $lead->status;
+                $allowRbac = Auth::can('leadSection', ['lead' => $lead]);
+                if ($allowRbac) {
+                    $user = Auth::user();
+                    $leadAbacDto = new LeadAbacDto($lead, $user->getId());
+                    if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_TAKE_LEAD, LeadAbacObject::ACTION_ACCESS)) {
+                        $lead->processing($user->getId(), Yii::$app->user->getId(), 'Take');
+
+                        $this->transaction->wrap(function () use ($lead) {
+                            if ($qCall = LeadQcall::find()->andWhere(['lqc_lead_id' => $lead->id])->one()) {
+                                $qCall->delete();
+                            }
+                            $this->leadRepository->save($lead);
+                        });
+
+                        if ($oldStatus === Lead::STATUS_PENDING) {
+                            $leadUserConversionService = Yii::createObject(LeadUserConversionService::class);
+                            $leadUserConversionService->addAutomate(
+                                $lead->id,
+                                $user->getId(),
+                                LeadUserConversionDictionary::DESCRIPTION_TAKE,
+                                $user->getId()
+                            );
+                        }
+                        $result['success'] = true;
+                        $result['error'] = '';
+                    } else {
+                        $result ['error'] = 'Access Denied (ABAC)!';
+                    }
+                } else {
+                    $result ['error'] = 'Access Denied (RBAC)!';
+                }
+            } catch (\RuntimeException | \DomainException $exception) {
+                Yii::warning(AppHelper::throwableLog($exception, true), 'LeadController:actionAjaxTake::DomainException');
+                $result['error'] = $exception->getMessage();
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableLog($throwable), 'LeadController:actionAjaxTake:Throwable');
+                $result['error'] = $throwable->getMessage();
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * @param string $gid
      * @return string|Response
      * @throws ForbiddenHttpException
@@ -1380,7 +1382,7 @@ class LeadController extends FController
     {
         $lead = $this->findLeadByGid($gid);
 
-        if (!Auth::can('lead/view', ['lead' => $lead])) {
+        if (!Auth::can('leadSection', ['lead' => $lead])) {
             throw new ForbiddenHttpException('Access Denied.');
         }
 
@@ -1403,12 +1405,13 @@ class LeadController extends FController
             $this->leadAssignService->take($lead, $user, Yii::$app->user->id, 'Take');
 
             if ($oldStatus === Lead::STATUS_PENDING) {
-                $leadUserConversion = LeadUserConversion::create(
+                $leadUserConversionService = Yii::createObject(LeadUserConversionService::class);
+                $leadUserConversionService->addAutomate(
                     $lead->id,
                     $user->getId(),
-                    LeadUserConversionDictionary::DESCRIPTION_TAKE
+                    LeadUserConversionDictionary::DESCRIPTION_TAKE,
+                    $user->getId()
                 );
-                (new LeadUserConversionRepository())->save($leadUserConversion);
             }
 
             Yii::$app->getSession()->setFlash('success', 'Lead taken!');
@@ -2134,12 +2137,13 @@ class LeadController extends FController
                     $clientManageService->checkIpChanged($lead->client, $form->requestIp);
                 }
 
-                $leadUserConversion = LeadUserConversion::create(
+                $leadUserConversionService = Yii::createObject(LeadUserConversionService::class);
+                $leadUserConversionService->addAutomate(
                     $lead->id,
                     Yii::$app->user->id,
-                    LeadUserConversionDictionary::DESCRIPTION_MANUAL
+                    LeadUserConversionDictionary::DESCRIPTION_MANUAL,
+                    Yii::$app->user->id
                 );
-                (new LeadUserConversionRepository())->save($leadUserConversion);
 
                 Yii::$app->session->setFlash('success', 'Lead save');
                 return $this->redirect(['/lead/view', 'gid' => $lead->gid]);
@@ -2167,17 +2171,18 @@ class LeadController extends FController
             $form->assignDep(Department::DEPARTMENT_SALES);
             if (Yii::$app->request->isPjax && $form->load($data['post']) && $form->validate()) {
                 try {
-                    $leadManageService = Yii::createObject(\sales\model\lead\useCases\lead\create\LeadManageService::class);
+                    $leadManageService = Yii::createObject(UseCaseLeadManageService::class);
                     $form->client->projectId = $form->projectId;
                     $form->client->typeCreate = Client::TYPE_CREATE_LEAD;
                     $lead = $leadManageService->createManuallyByDefault($form, Yii::$app->user->id, Yii::$app->user->id, LeadFlow::DESCRIPTION_MANUAL_CREATE);
 
-                    $leadUserConversion = LeadUserConversion::create(
+                    $leadUserConversionService = Yii::createObject(LeadUserConversionService::class);
+                    $leadUserConversionService->addAutomate(
                         $lead->id,
                         Yii::$app->user->id,
-                        LeadUserConversionDictionary::DESCRIPTION_MANUAL
+                        LeadUserConversionDictionary::DESCRIPTION_MANUAL,
+                        Yii::$app->user->id
                     );
-                    (new LeadUserConversionRepository())->save($leadUserConversion);
 
                     Yii::$app->session->setFlash('success', 'Lead save');
                     return $this->redirect(['/lead/view', 'gid' => $lead->gid]);
@@ -2213,7 +2218,7 @@ class LeadController extends FController
         }
 
         $userId = Auth::id();
-        $form = new LeadCreateByChatForm($userId, $chat);
+        $form = new LeadCreateByChatForm($chat);
 
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             if (empty($form->source)) {
@@ -2224,15 +2229,16 @@ class LeadController extends FController
             }
 
             try {
-                $leadManageService = Yii::createObject(\sales\model\lead\useCases\lead\create\LeadManageService::class);
-                $lead = $leadManageService->createByClientChat($form, $chat, $userId);
+                $leadManageService = Yii::createObject(UseCaseLeadManageService::class);
+                $lead = $leadManageService->createByClientChat((new CreateLeadByChatDTO($form, $chat, $userId))->leadInProgressDataPrepare());
 
-                $leadUserConversion = LeadUserConversion::create(
+                $leadUserConversionService = Yii::createObject(LeadUserConversionService::class);
+                $leadUserConversionService->addAutomate(
                     $lead->id,
                     $userId,
-                    LeadUserConversionDictionary::DESCRIPTION_CLIENT_CHAT_MANUAL
+                    LeadUserConversionDictionary::DESCRIPTION_CLIENT_CHAT_MANUAL,
+                    $userId
                 );
-                (new LeadUserConversionRepository())->save($leadUserConversion);
 
                 return "<script> $('#modal-md').modal('hide');refreshChatInfo('" . $chat->cch_id . "')</script>";
             } catch (\Throwable $e) {
@@ -2242,6 +2248,118 @@ class LeadController extends FController
         }
 
         return $this->renderAjax('partial/_lead_create_by_chat', ['chat' => $chat, 'form' => $form]);
+    }
+
+    public function actionAjaxCreateFromPhoneWidget()
+    {
+        $callSid = Yii::$app->request->post('callSid');
+
+        if (!$call = Call::findOne(['c_call_sid' => $callSid])) {
+            throw new NotFoundHttpException('Call not found');
+        }
+
+        if ($this->clientOnCallIsInvalid($call)) {
+            return $this->asJson([
+                'error' => false,
+                'message' => 'client is invalid',
+            ]);
+        }
+
+        $leadAbacDto = new LeadAbacDto(null, $call->c_created_user_id);
+        /** @abac new LeadAbacDto(null, $call->c_created_user_id), LeadAbacObject::ACT_CREATE_FROM_PHONE_WIDGET, LeadAbacObject::ACTION_CREATE, Restrict access to create lead in phone widget in contact info block */
+        if (!(bool)\Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_CREATE_FROM_PHONE_WIDGET, LeadAbacObject::ACTION_CREATE, $call->cCreatedUser)) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
+        $result = [
+            'error' => false,
+            'message' => '',
+            'warning' => false
+        ];
+
+        try {
+            $lead = $this->useCaseLeadManageService->createFromPhoneWidget($call, Auth::user());
+            $result['url'] = Url::to('/lead/view/' . $lead->gid);
+            $result['contactData'] = (new CallUpdateMessage())->getContactData($call, Auth::id());
+        } catch (\RuntimeException | \DomainException $e) {
+            $result['error'] = true;
+            $result['message'] = $e->getMessage();
+        } catch (\Throwable $e) {
+            $result['error'] = true;
+            $result['message'] = 'Internal server Error';
+            Yii::error(AppHelper::throwableFormatter($e), 'LeadController:actionAjaxCreateFromPhoneWidget:Throwable');
+        }
+
+        return $this->asJson($result);
+    }
+
+    public function actionAjaxCreateFromPhoneWidgetWithInvalidClient()
+    {
+        if (!Yii::$app->request->isAjax && !Yii::$app->request->isPjax) {
+            throw new BadRequestHttpException();
+        }
+
+        $callSid = (string)Yii::$app->request->get('callSid');
+        if (!$callSid) {
+            throw new BadRequestHttpException('Not found CallSid');
+        }
+
+        if (!$call = Call::findOne(['c_call_sid' => $callSid])) {
+            throw new NotFoundHttpException('Call not found');
+        }
+
+        if ($call->isInternal()) {
+            return 'Call is internal.';
+        }
+
+        if (!$this->clientOnCallIsInvalid($call)) {
+            return 'Client already is Valid.';
+        }
+
+        $leadAbacDto = new LeadAbacDto(null, $call->c_created_user_id);
+        /** @abac new LeadAbacDto(null, $call->c_created_user_id), LeadAbacObject::ACT_CREATE_FROM_PHONE_WIDGET, LeadAbacObject::ACTION_CREATE, Restrict access to create lead in phone widget in contact info block */
+        if (!(bool)\Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_CREATE_FROM_PHONE_WIDGET, LeadAbacObject::ACTION_CREATE, $call->cCreatedUser)) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
+        $userId = Auth::id();
+
+        try {
+            $form = new \sales\model\lead\useCases\lead\create\fromPhoneWidgetWithInvalidClient\Form($call, $userId);
+
+            if (Yii::$app->request->isPjax && $form->load(Yii::$app->request->post()) && $form->validate()) {
+                try {
+                    $leadManageService = Yii::createObject(UseCaseLeadManageService::class);
+                    $lead = $leadManageService->createFromPhoneWidgetWithInvalidClient($form, $call);
+                    $data = json_encode((new CallUpdateMessage())->getContactData($call, Auth::id()));
+                    $leadUrl = Url::to('/lead/view/' . $lead->gid);
+                    return "<script> $('#modal-md').modal('hide');createNotify('Create Lead', 'Lead saved', 'success');PhoneWidgetContactInfo.load(" . $data . ");window.open('" . $leadUrl . "', '_blank').focus();</script>";
+                } catch (\Throwable $e) {
+                    Yii::error([
+                        'message' => 'Create lead from phone widget error',
+                        'error' => $e->getMessage(),
+                        'callId' => $call->c_id,
+                        'userId' => $userId,
+                    ], 'LeadController:actionAjaxCreateFromPhoneWidgetWithInvalidClient:1');
+                    Yii::$app->session->setFlash('error', $e->getMessage());
+                }
+            }
+
+            return $this->renderAjax('partial/_lead_create_from_phone_widget_with_invalid_client', ['leadForm' => $form]);
+        } catch (\Throwable $t) {
+            Yii::error([
+                'message' => 'Create lead from phone widget error',
+                'error' => $t->getMessage(),
+                'callId' => $call->c_id,
+                'userId' => $userId,
+            ], 'LeadController:actionAjaxCreateFromPhoneWidgetWithInvalidClient:2');
+            return 'Server error. Please try again later.';
+        }
+    }
+
+    private function clientOnCallIsInvalid(Call $call): bool
+    {
+        return $call->c_client_id === null || ContactPhoneListService::isInvalid($call->getClientPhoneNumber());
     }
 
     public function actionLinkChat()
@@ -2399,8 +2517,14 @@ class LeadController extends FController
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
 
-        if ($lead->isSold() && !$user->isAdmin()) {
+        /*if ($lead->isSold() && !$user->isAdmin()) {
             throw new ForbiddenHttpException('Access denied! Lead is sold.');
+        }*/
+
+        $leadAbacDto = new LeadAbacDto($lead, $user->id);
+        /** @abac $leadAbacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CLONE, Act clone lead */
+        if (!(Auth::can('leadSection', ['lead' => $lead]) && Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CLONE))) {
+            throw new ForbiddenHttpException('Access denied');
         }
 
         $form = new CloneReasonForm($lead);
@@ -2415,12 +2539,13 @@ class LeadController extends FController
                 Yii::$app->session->setFlash('success', 'Success');
 
                 if ((int) $lead->employee_id !== $user->getId()) {
-                    $leadUserConversion = LeadUserConversion::create(
+                    $leadUserConversionService = Yii::createObject(LeadUserConversionService::class);
+                    $leadUserConversionService->addAutomate(
                         $clone->id,
                         $user->getId(),
-                        LeadUserConversionDictionary::DESCRIPTION_CLONE
+                        LeadUserConversionDictionary::DESCRIPTION_CLONE,
+                        $user->getId()
                     );
-                    (new LeadUserConversionRepository())->save($leadUserConversion);
                 }
 
                 return $this->redirect(['lead/view', 'gid' => $clone->gid]);
@@ -2517,8 +2642,16 @@ class LeadController extends FController
             //$totalProfit = $lead->getFinalProfit() ?: $lead->getBookedQuote()->getEstimationProfit();
             $totalProfit = $lead->getFinalProfit() ?: 0;
             $splitForm = new ProfitSplitForm($lead);
+            $splitForm->setZeroPercent(true);
+            $mainAgentPercent = 0;
 
-            $mainAgentProfit = $totalProfit;
+            foreach ($lead->profitSplits as $split) {
+                if ($split->ps_user_id === $lead->employee_id) {
+                    $mainAgentPercent = $split->ps_percent;
+                }
+            }
+
+            $mainAgentProfit = $totalProfit * $mainAgentPercent / 100;
 
             if (Yii::$app->request->isPost) {
                 $data = Yii::$app->request->post();
@@ -2540,6 +2673,9 @@ class LeadController extends FController
                 if (!empty($splitProfit)) {
                     $percentSum = 0;
                     foreach ($splitProfit as $entry) {
+                        if ($entry->ps_user_id === $lead->employee_id) {
+                            $mainAgentPercent = $entry->ps_percent;
+                        }
                         if (!empty($entry->ps_percent)) {
                             $percentSum += $entry->ps_percent;
                         }
@@ -2553,6 +2689,7 @@ class LeadController extends FController
                         'splitForm' => $splitForm,
                         'totalProfit' => $totalProfit,
                         'mainAgentProfit' => $mainAgentProfit,
+                        'mainAgentPercent' => $mainAgentPercent,
                         'errors' => $errors,
                     ]);
                 }
@@ -2562,6 +2699,7 @@ class LeadController extends FController
                     'splitForm' => $splitForm,
                     'totalProfit' => $totalProfit,
                     'mainAgentProfit' => $mainAgentProfit,
+                    'mainAgentPercent' => $mainAgentPercent,
                     'errors' => $errors,
                 ]);
             }
@@ -2694,6 +2832,37 @@ class LeadController extends FController
     {
         $keyCache = Yii::$app->request->get('key_cache');
         return Yii::$app->cacheFile->get($keyCache);
+    }
+
+    public function actionAjaxLinkToCall(): Response
+    {
+        $leadId = Yii::$app->request->post('leadId');
+        $callId = Yii::$app->request->post('callId');
+
+        if (!$lead = Lead::findOne($leadId)) {
+            throw new BadRequestHttpException('Lead not found');
+        }
+
+        if (!$call = Call::findOne($callId)) {
+            throw new BadRequestHttpException('Call not found');
+        }
+
+        $leadAbacDto = new LeadAbacDto($lead, Auth::id());
+        if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_LINK_TO_CALL, LeadAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
+        $result = [
+            'error' => false,
+            'message' => ''
+        ];
+
+        $call->c_lead_id = $lead->id;
+        if (!$call->save()) {
+            $result['error'] = true;
+            $result['message'] = $call->getErrorSummary(true)[0];
+        }
+        return $this->asJson($result);
     }
 
     /**

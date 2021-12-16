@@ -111,4 +111,21 @@ class ProductQuoteHelper
 
         return '';
     }
+
+    public static function resetPrices(ProductQuote $productQuote): ProductQuote
+    {
+        $productQuote->pq_price = null;
+        $productQuote->pq_origin_price = null;
+        $productQuote->pq_client_price = null;
+        $productQuote->pq_service_fee_sum = null;
+        $productQuote->pq_origin_currency = null;
+        $productQuote->pq_client_currency = null;
+        $productQuote->pq_origin_currency_rate = null;
+        $productQuote->pq_client_currency_rate = null;
+        $productQuote->pq_service_fee_percent = null;
+        $productQuote->pq_profit_amount = null;
+        $productQuote->pq_app_markup = null;
+        $productQuote->pq_agent_markup = null;
+        return $productQuote;
+    }
 }

@@ -2,6 +2,8 @@
 
 use common\components\grid\DateTimeColumn;
 use modules\flight\models\FlightRequest;
+use common\components\grid\ApiUserColumn;
+use common\components\grid\project\ProjectColumn;
 use yii\grid\ActionColumn;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
@@ -22,7 +24,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?php // echo Html::a('Create Flight Request', ['create'], ['class' => 'btn btn-success'])?>
     </p>
 
-    <?php Pjax::begin(['id' => 'pjax-flight-request']); ?>
+    <?php Pjax::begin(['id' => 'pjax-flight-request', 'scrollTo' => 0]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <?= GridView::widget([
@@ -49,13 +51,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => FlightRequest::STATUS_LIST
             ],
             [
-                'class' => \common\components\grid\project\ProjectColumn::class,
+                'class' => ProjectColumn::class,
                 'attribute' => 'fr_project_id',
                 'relation' => 'project',
             ],
             [
+                'class' => ApiUserColumn::class,
                 'attribute' => 'fr_created_api_user_id',
-                'class' => common\components\grid\ApiUserColumn::class,
+                'relation' => 'apiUser',
             ],
             'fr_job_id',
             ['class' => DateTimeColumn::class, 'attribute' => 'fr_created_dt'],

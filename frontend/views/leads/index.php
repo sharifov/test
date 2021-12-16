@@ -74,7 +74,7 @@ $this->registerJs($js);
 ?>
 
 
-    <?php Pjax::begin(['id' => 'lead-pjax-list', 'timeout' => 7000, 'enablePushState' => true]); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]);?>
+    <?php Pjax::begin(['id' => 'lead-pjax-list', 'timeout' => 7000, 'enablePushState' => true, 'scrollTo' => 0]); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]);?>
 
     <div class="x_panel">
         <div class="x_title">
@@ -186,6 +186,12 @@ $this->registerJs($js);
             'relation' => 'project',
             'onlyUserProjects' => $showFilter,
             'filter' => $showFilter ? null : false,
+        ],
+        [
+            'class' => \common\components\grid\department\DepartmentColumn::class,
+            'label' => 'Department',
+            'attribute' => 'l_dep_id',
+            'relation' => 'lDep',
         ],
         [
             'attribute' => 'client_id',
@@ -623,8 +629,8 @@ $js = <<<JS
          $('[data-toggle="tooltip"]').tooltip({html:true});
     });
 
-   $('[data-toggle="tooltip"]').tooltip({html:true});
-
+    $('[data-toggle="tooltip"]').tooltip({html:true});
+   
 JS;
     $this->registerJs($js, View::POS_READY);
 ?>

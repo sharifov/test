@@ -3,6 +3,8 @@
 namespace sales\services\lead\qcall;
 
 /**
+ * @deprecated
+ *
  * Class DayTimeHours
  *
  * @property $startHour

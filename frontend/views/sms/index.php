@@ -43,7 +43,7 @@ $user = Yii::$app->user->identity;
     </div>
     --><?php /*endif; */?>
 
-    <?php Pjax::begin(); ?>
+    <?php Pjax::begin(['scrollTo' => 0]); ?>
     <div class="row">
         <?php $form = ActiveForm::begin([
             'action' => ['index'],

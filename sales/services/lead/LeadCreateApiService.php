@@ -2,8 +2,10 @@
 
 namespace sales\services\lead;
 
+use common\components\jobs\WebEngageLeadRequestJob;
 use common\models\LeadFlow;
 use common\models\VisitorLog;
+use modules\webEngage\settings\WebEngageDictionary;
 use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
 use sales\repositories\client\ClientsCollection;
@@ -25,6 +27,8 @@ use webapi\models\ApiLead;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\web\UnprocessableEntityHttpException;
+
+use function Amp\Promise\timeoutWithDefault;
 
 /**
  * Class LeadCreateApiService
@@ -147,7 +151,7 @@ class LeadCreateApiService
 
             $this->calculateTripType($modelLead->flights, $lead);
 
-            $lead->l_is_test = $this->clientManageService->checkIfPhoneIsTest($modelLead->phones);
+            $lead->l_is_test =  $modelLead->is_test ? 1 : $this->clientManageService->checkIfPhoneIsTest($modelLead->phones);
 
             if (!$lead->validate()) {
                 if ($errors = $lead->getErrors()) {

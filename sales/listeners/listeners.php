@@ -33,6 +33,11 @@ use sales\model\clientChatUserAccess\event\ResetChatUserAccessWidgetEvent;
 use sales\model\clientChatUserAccess\event\ResetChatUserAccessWidgetListener;
 use sales\model\clientChatUserAccess\event\UpdateChatUserAccessWidgetEvent;
 use sales\model\clientChatUserAccess\event\UpdateChatUserAccessWidgetListener;
+use sales\model\leadRedial\entity\events\CallRedialAccessCreatedEvent;
+use sales\model\leadRedial\entity\events\CallRedialAccessRemovedEvent;
+use sales\model\leadRedial\listeners\RedialCallAccessCreatedPhoneWidgetNotificationListener;
+use sales\model\leadRedial\listeners\RedialCallAccessCreatedUserNotificationListener;
+use sales\model\leadRedial\listeners\RemoveRedialCallUserNotificationListener;
 use sales\model\user\entity\profit\event\UserProfitCalculateByOrderTipsUserProfitsEvent;
 use sales\model\user\entity\profit\listener\UserProfitCalculateByOrderTipsUserProfitsEventListener;
 use sales\model\visitorSubscription\event\VisitorSubscriptionEnabled;
@@ -89,7 +94,16 @@ return [
 
     VisitorSubscriptionEnabled::class => [
         FindChatsAndRunDistributionLogic::class
-    ]
+    ],
 
 //    ClientChatOwnerAssignedEvent::class => [ClientChatRemoveOldOwnerUnreadMessagesListener::class],
+
+    CallRedialAccessCreatedEvent::class => [
+        RedialCallAccessCreatedPhoneWidgetNotificationListener::class,
+        RedialCallAccessCreatedUserNotificationListener::class,
+    ],
+
+    CallRedialAccessRemovedEvent::class => [
+        RemoveRedialCallUserNotificationListener::class,
+    ],
 ];

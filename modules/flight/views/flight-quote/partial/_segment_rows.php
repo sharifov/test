@@ -6,11 +6,13 @@
  * @var $sourceHeight []
  * @var $sourceWeight []
  * @var array|null $defaultBaggage
+ * @var bool $withBaggageForm
  */
 
 use common\models\Airports;
 use sales\forms\segment\SegmentBaggageForm;
 use sales\forms\segment\SegmentTripForm;
+use sales\helpers\quote\ImageHelper;
 use sales\services\parsingDump\BaggageService;
 use unclead\multipleinput\components\BaseColumn;
 use unclead\multipleinput\MultipleInput;
@@ -24,7 +26,7 @@ $keyTripList = array_combine(array_keys($trips), array_keys($trips));
 ?>
 
 <?php foreach ($trips as $keyTrip => $trip) : ?>
-    <h6 >Trip: <?php echo $keyTrip ?></h6>
+    <br /><h6 >Trip: <?php echo $keyTrip ?></h6>
     <?php foreach ($trip['segments'] as $key => $segment) : ?>
         <div class="row">
             <div class="col- border p-1">
@@ -59,6 +61,12 @@ $keyTripList = array_combine(array_keys($trips), array_keys($trips));
                 <?php echo $segment['airlineName'] ?>
             </div>
             <div class="col-1 border p-1">
+                <?php $airlineLogo = '//www.gstatic.com/flights/airline_logos/70px/' . $segment['carrier'] . '.png' ?>
+                <?php if (ImageHelper::checkImageGstaticExist($airlineLogo)) : ?>
+                    <span class="quote__vc-logo" style="margin-right: 2px;">
+                        <img src="<?php echo $airlineLogo ?>" alt="<?= $segment['airlineName']?>" class="quote__airline-logo">
+                    </span>
+                <?php endif ?>
                 <?php echo $segment['carrier'] ?>&nbsp;
                 <?php echo $segment['flightNumber'] ?>
             </div>
@@ -66,16 +74,17 @@ $keyTripList = array_combine(array_keys($trips), array_keys($trips));
                 <?php echo $segment['departureDateTime']->format('g:i A M d') ?>&nbsp;
                 <?php echo ($departureAirport = Airports::findOne($segment['departureAirport'])) ?
                     $departureAirport->getCityName() : $segment['departureAirport'] ?>&nbsp;
-                <?php echo $segment['departureAirport'] ?>
+                <b><?php echo $segment['departureAirport'] ?></b>
             </div>
             <div class="col-3 border p-1">
                 <?php echo $segment['arrivalDateTime']->format('g:i A M d') ?>&nbsp;
                 <?php echo ($arrivalAirport = Airports::findOne($segment['arrivalAirport'])) ?
                     $arrivalAirport->getCityName() : $segment['arrivalAirport'] ?>&nbsp;
-                <?php echo $segment['arrivalAirport'] ?>
+                <b><?php echo $segment['arrivalAirport'] ?></b>
             </div>
         </div>
 
+        <?php if ($withBaggageForm) : ?>
         <div class="row">
             <div class="col-8">
                 <?php
@@ -186,39 +195,39 @@ $keyTripList = array_combine(array_keys($trips), array_keys($trips));
         </div>
         <br />
 
-        <?php
-        $js = <<<JS
-        var formBaggage = $('#{$formName}');
-        
-        formBaggage.on('ajaxBeforeSend', function(event, jqXHR, settings) {        
-            $('#$formName .form-control').removeClass('border-danger').prop('title', '');       
-        }); 
-        
-        formBaggage.on('ajaxComplete', function(event, jqXHR, textStatus) {        
-            $.each(jqXHR.responseJSON, function(keyEl, msgs) {
-                
-                var splitKeyEl = keyEl.split('-'); 
-                splitKeyEl[0] = splitKeyEl[0] + '-baggagedata';
-                var elementId = splitKeyEl.join('-');
-                
-                if (msgs.length) {
-                    var message = msgs.join(',');
-                    $('#' + elementId).addClass('border-danger').prop('title', message);
-                }           
+            <?php
+            $js = <<<JS
+            var formBaggage = $('#{$formName}');
+            
+            formBaggage.on('ajaxBeforeSend', function(event, jqXHR, settings) {        
+                $('#$formName .form-control').removeClass('border-danger').prop('title', '');       
+            }); 
+            
+            formBaggage.on('ajaxComplete', function(event, jqXHR, textStatus) {        
+                $.each(jqXHR.responseJSON, function(keyEl, msgs) {
+                    
+                    var splitKeyEl = keyEl.split('-'); 
+                    splitKeyEl[0] = splitKeyEl[0] + '-baggagedata';
+                    var elementId = splitKeyEl.join('-');
+                    
+                    if (msgs.length) {
+                        var message = msgs.join(',');
+                        $('#' + elementId).addClass('border-danger').prop('title', message);
+                    }           
+                });      
+            });  
+            
+            $('#$multipleInputId').on('afterAddRow', function() {
+                $('.ui-autocomplete-input')
+                    .addClass('form-control')
+                    .focus(function () {
+                        $(this).autocomplete("search");
+                    }); 
             });      
-        });  
-        
-        $('#$multipleInputId').on('afterAddRow', function() {
-            $('.ui-autocomplete-input')
-                .addClass('form-control')
-                .focus(function () {
-                    $(this).autocomplete("search");
-                }); 
-        });      
 JS;
-        $this->registerJs($js);
-        ?>
-
+            $this->registerJs($js);
+            ?>
+        <?php endif ?>
     <?php endforeach; ?>
 <?php endforeach; ?>
 

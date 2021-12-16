@@ -9,8 +9,10 @@
 
 namespace common\components;
 
+use common\models\Call;
 use common\models\Project;
 use sales\helpers\setting\SettingHelper;
+use sales\model\call\entity\call\data\CreatorType;
 use sales\model\call\useCase\conference\create\CreateCallForm;
 use sales\model\project\entity\projectLocale\ProjectLocale;
 use thamtech\uuid\helpers\UuidHelper;
@@ -168,6 +170,36 @@ class CommunicationService extends Component implements CommunicationServiceInte
         } else {
             $out['error'] = $response->content;
             \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::mailPreview');
+        }
+
+        return $out;
+    }
+
+    public function twilioDial(string $phoneFrom, string $phoneTo, int $requestTimeout, string $message, int $dialCallTimeout, int $dialCallLimit, array $options = []): array
+    {
+        $out = ['error' => false, 'data' => []];
+        $options = array_merge($options, [
+            "twiml" => "<Response><Say>$message</Say></Response>",
+            'statusCallbackEvent' => ['answered', 'completed'],
+            'timeout' => $dialCallTimeout,
+            'timeLimit' => $dialCallLimit
+        ]);
+
+        $response = $this->sendRequest('twilio/get-status-by-dial', [
+            'phone_from' => $phoneFrom,
+            'phone_to' => $phoneTo,
+            'options' => $options
+        ], 'POST', [], [CURLOPT_TIMEOUT => $requestTimeout]);
+
+        if ($response->isOk) {
+            if (isset($response->data['data'])) {
+                $out['data'] = $response->data['data'];
+            } else {
+                $out['error'] = 'Not found in response array data key [data]';
+            }
+        } else {
+            $out['error'] = $response->content;
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::twilioMakeCall');
         }
 
         return $out;
@@ -801,7 +833,8 @@ class CommunicationService extends Component implements CommunicationServiceInte
             'from' => $from,
             'to' => $to,
             'call_recording_disabled' => $callRecordingDisabled,
-            'phone_list_id' => $phoneListId
+            'phone_list_id' => $phoneListId,
+            'voipApiUsername' => $this->voipApiUsername,
         ];
 
         $response = $this->sendRequest('twilio-conference/forward', $data);
@@ -830,6 +863,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
             'phone_list_id' => $phoneListId,
             'to_number' => $toNumber,
             'friendly_name' => $friendlyName,
+            'voipApiUsername' => $this->voipApiUsername,
         ];
 
         $response = $this->sendRequest('twilio-conference/accept-call', $data);
@@ -864,6 +898,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
             'dep_id' => $dep_id,
             'old_call_owner_id' => $oldCallOwnerId,
             'call_group_id' => $callGroupId,
+            'voipApiUsername' => $this->voipApiUsername,
         ];
 
         $response = $this->sendRequest('twilio-conference/accept-warm-transfer-call', $data);
@@ -918,11 +953,12 @@ class CommunicationService extends Component implements CommunicationServiceInte
         return $this->processConferenceResponse($response);
     }
 
-    public function disconnectFromConferenceCall(string $conferenceSid, string $keeperSid): array
+    public function disconnectFromConferenceCall(string $conferenceSid, string $keeperSid, ?string $announce): array
     {
         $data = [
             'conferenceSid' => $conferenceSid,
             'keeperSid' => $keeperSid,
+            'announce' => $announce
         ];
 
         $response = $this->sendRequest('twilio-conference/disconnect-from-conference-call', $data);
@@ -1018,7 +1054,8 @@ class CommunicationService extends Component implements CommunicationServiceInte
             'user_id' => $user_id,
             'call_recording_disabled' => $callRecordingDisabled,
             'phone_list_id' => $phoneListId,
-            'to_number' => $toNumber
+            'to_number' => $toNumber,
+            'voipApiUsername' => $this->voipApiUsername,
         ];
 
         $response = $this->sendRequest('twilio-conference/join-to-conference', $data);
@@ -1357,5 +1394,39 @@ class CommunicationService extends Component implements CommunicationServiceInte
             \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'CommunicationService::lookup');
         }
         return $out;
+    }
+
+    public function makeCallClientNotification($from, $to, $say, $sayVoice, $sayLanguage, $play, array $callCustomParameters): string
+    {
+        $data = [
+            'from' => $from,
+            'to' => $to,
+            'say' => $say,
+            'say_voice' => $sayVoice,
+            'say_language' => $sayLanguage,
+            'play' => $play,
+            'call_custom_parameters' =>  array_merge(
+                [
+                    'type_id' => Call::CALL_TYPE_OUT,
+                    'voip_api_username' => $this->voipApiUsername,
+                    'source_type_id' => Call::SOURCE_CLIENT_NOTIFICATION,
+                    'creator_type_id' => CreatorType::CLIENT,
+                ],
+                $callCustomParameters
+            ),
+        ];
+
+        $response = $this->sendRequest('twilio/make-call-client-notification', $data);
+
+        if ($response->isOk) {
+            if (isset($response->data['data']['result']['callSid'])) {
+                return $response->data['data']['result']['callSid'];
+            }
+        }
+
+        $out['error'] = $response->content;
+        \Yii::error(VarDumper::dumpAsString($out['error']), 'Component:CommunicationService::makeCallClientNotification');
+
+        throw new \DomainException('Make Call Client Notification error.');
     }
 }

@@ -6,6 +6,9 @@ use common\models\Currency;
 use modules\flight\src\dto\flightQuotePaxPrice\FlightQuotePaxPriceApiBoDto;
 use modules\flight\src\entities\flightQuotePaxPrice\serializer\FlightQuotePaxPriceSerializer;
 use modules\flight\src\useCases\flightQuote\create\FlightQuotePaxPriceDTO;
+use modules\flight\src\useCases\flightQuote\createManually\FlightQuotePaxPriceForm;
+use modules\flight\src\useCases\flightQuote\createManually\VoluntaryQuotePaxPriceForm;
+use modules\flight\src\useCases\voluntaryExchangeCreate\form\exchange\ExchangePassengerForm;
 use Yii;
 use yii\db\ActiveQuery;
 
@@ -184,7 +187,6 @@ class FlightQuotePaxPrice extends \yii\db\ActiveRecord
     public static function createWithDefaultValues(int $paxCodeId): self
     {
         $paxPrice = new self();
-
         $paxPrice->qpp_fare = 0;
         $paxPrice->qpp_tax = 0;
         $paxPrice->qpp_system_mark_up = 0;
@@ -194,6 +196,8 @@ class FlightQuotePaxPrice extends \yii\db\ActiveRecord
         $paxPrice->qpp_client_fare = 0;
         $paxPrice->qpp_client_tax = 0;
         $paxPrice->qpp_flight_pax_code_id = $paxCodeId;
+        $paxPrice->qpp_created_dt = date('Y-m-d H:i:s');
+        $paxPrice->qpp_updated_dt = date('Y-m-d H:i:s');
 
         return $paxPrice;
     }
@@ -237,10 +241,103 @@ class FlightQuotePaxPrice extends \yii\db\ActiveRecord
             'qpp_client_currency',
             'qpp_client_fare',
             'qpp_client_tax',
+            'qpp_cnt',
         ];
         $fields['paxType'] = function () {
             return FlightPax::getPaxTypeById($this->qpp_flight_pax_code_id);
         };
         return $fields;
+    }
+
+    public static function createByFlightQuotePaxPriceForm(
+        FlightQuotePaxPriceForm $form,
+        int $flightQuoteId,
+        string $currency
+    ): self {
+        $model = new self();
+        $model->qpp_flight_quote_id = $flightQuoteId;
+        $model->qpp_flight_pax_code_id = $form->paxCodeId;
+        $model->qpp_cnt = $form->cnt;
+        $model->qpp_fare = $form->fare;
+        $model->qpp_tax = $form->taxes;
+        $model->qpp_system_mark_up = $form->systemMarkUp;
+        $model->qpp_agent_mark_up = $form->markup;
+        $model->qpp_origin_fare = $form->fare;
+        $model->qpp_origin_currency = $currency;
+        $model->qpp_origin_tax = $form->taxes;
+
+        return $model;
+    }
+
+    public static function createByVoluntaryQuotePaxPriceForm(
+        VoluntaryQuotePaxPriceForm $form,
+        int $flightQuoteId,
+        string $currency
+    ): self {
+        $model = new self();
+        $model->qpp_flight_quote_id = $flightQuoteId;
+        $model->qpp_flight_pax_code_id = $form->paxCodeId;
+        $model->qpp_cnt = $form->cnt;
+        $model->qpp_fare = $form->fare;
+        $model->qpp_tax = $form->taxes;
+        $model->qpp_system_mark_up = $form->systemMarkUp;
+        $model->qpp_agent_mark_up = $form->markup;
+        $model->qpp_origin_fare = $form->fare;
+        $model->qpp_origin_currency = $currency;
+        $model->qpp_origin_tax = $form->taxes;
+
+        return $model;
+    }
+
+    public static function createByExchangePassengerForm(
+        ExchangePassengerForm $form,
+        int $flightQuoteId,
+        string $currency
+    ): self {
+        $model = self::createWithDefaultValues($form->paxCodeId);
+        $model->qpp_flight_quote_id = $flightQuoteId;
+        $model->qpp_cnt = $form->cnt;
+        $model->qpp_fare = $form->baseFare;
+        $model->qpp_tax = $form->baseTax;
+        $model->qpp_system_mark_up = $form->markup;
+        $model->qpp_origin_fare = $form->baseFare;
+        $model->qpp_origin_tax = $form->baseTax;
+        $model->qpp_origin_currency = $currency;
+
+        return $model;
+    }
+
+    /**
+     * @return float
+     */
+    public function getTotalPrice(): float
+    {
+        return (float)$this->qpp_fare + $this->qpp_tax + $this->qpp_system_mark_up + $this->qpp_agent_mark_up;
+    }
+
+    /**
+     * @return float
+     */
+    public function getCurrencyRate(): float
+    {
+        $rate = 1.0;
+        if (
+            $this->qppFlightQuote
+            && $this->qppFlightQuote->fqProductQuote
+            && $this->qppFlightQuote->fqProductQuote->pq_client_currency_rate
+        ) {
+            $rate = (float) $this->qppFlightQuote->fqProductQuote->pq_client_currency_rate;
+        }
+        return $rate;
+    }
+
+    /**
+     * @return float
+     */
+    public function getClientTotalPrice(): float
+    {
+        return (float)$this->qpp_client_fare + $this->qpp_client_tax +
+            ($this->qpp_system_mark_up + $this->qpp_agent_mark_up)
+            * $this->qppFlightQuote->fqProductQuote->pq_client_currency_rate;
     }
 }

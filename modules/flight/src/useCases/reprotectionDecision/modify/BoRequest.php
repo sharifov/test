@@ -4,6 +4,7 @@ namespace modules\flight\src\useCases\reprotectionDecision\modify;
 
 use common\components\BackOffice;
 use modules\flight\models\FlightQuoteFlight;
+use modules\flight\src\useCases\reprotectionDecision\CustomerDecisionService;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
@@ -19,6 +20,7 @@ use sales\services\TransactionManager;
  * @property CasesRepository $casesRepository
  * @property ProductQuoteChangeRepository $productQuoteChangeRepository
  * @property TransactionManager $transactionManager
+ * @property CustomerDecisionService $customerDecisionService
  */
 class BoRequest
 {
@@ -26,17 +28,20 @@ class BoRequest
     private CasesRepository $casesRepository;
     private ProductQuoteChangeRepository $productQuoteChangeRepository;
     private TransactionManager $transactionManager;
+    private CustomerDecisionService $customerDecisionService;
 
     public function __construct(
         ProductQuoteRepository $productQuoteRepository,
         CasesRepository $casesRepository,
         ProductQuoteChangeRepository $productQuoteChangeRepository,
-        TransactionManager $transactionManager
+        TransactionManager $transactionManager,
+        CustomerDecisionService $customerDecisionService
     ) {
         $this->productQuoteRepository = $productQuoteRepository;
         $this->casesRepository = $casesRepository;
         $this->productQuoteChangeRepository = $productQuoteChangeRepository;
         $this->transactionManager = $transactionManager;
+        $this->customerDecisionService = $customerDecisionService;
     }
 
     public function appliedQuote(string $quoteGid, ?int $userId): void
@@ -49,12 +54,12 @@ class BoRequest
             throw new \DomainException('Quote is not applied. ID: ' . $quote->pq_id);
         }
 
-        $productQuoteChange = $this->productQuoteChangeRepository->findParentRelated($quote);
+        $productQuoteChange = $this->productQuoteChangeRepository->findParentRelated($quote, ProductQuoteChange::TYPE_RE_PROTECTION);
         if (!$productQuoteChange->isCustomerDecisionModify()) {
             throw new \DomainException('Product Quote Change customer decision status is invalid.');
         }
 
-        $responseBO = BackOffice::reprotectionCustomerDecisionModify(
+        $responseBO = $this->customerDecisionService->reprotectionCustomerDecisionModify(
             $quote->pqProduct->pr_project_id,
             $this->getBookingId($productQuoteChange),
             $this->prepareQuoteToRequestData($quote),

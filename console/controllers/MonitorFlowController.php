@@ -76,7 +76,7 @@ class MonitorFlowController extends Controller
                 ':statusLeadPending' => Lead::STATUS_PENDING,
                 ':statusAppliedQuote' => Quote::STATUS_APPLIED,
                 ':statusQuoteCreated' => Quote::STATUS_CREATED,
-                ':statusQuoteSend' => Quote::STATUS_SEND,
+                ':statusQuoteSend' => Quote::STATUS_SENT,
                 ':statusQuoteOpen' => Quote::STATUS_OPENED,
                 ':createdQuote' => date('Y-m-d H:i:s', strtotime('-1 day'))
             ]
@@ -97,7 +97,7 @@ class MonitorFlowController extends Controller
                     ) . PHP_EOL;
                 }
             } catch (\Throwable $throwable) {
-                $message['throwable'] = AppHelper::throwableLog($throwable);
+                $message = AppHelper::throwableLog($throwable);
                 $message['data'] = $quoteData;
                 Yii::error($message, 'console:MonitorFlowController:actionWatchDogDeclineQuote:Quote:save');
                 echo 'Quote: ' . $quoteData['id'] . ' ' . VarDumper::dumpAsString($throwable->getMessage()) . PHP_EOL;

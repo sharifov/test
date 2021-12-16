@@ -15,6 +15,8 @@ use common\models\UserGroup;
 use common\models\UserGroupAssign;
 use frontend\helpers\JsonHelper;
 use modules\fileStorage\src\entity\fileCase\FileCase;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\helpers\setting\SettingHelper;
@@ -78,6 +80,12 @@ use yii\helpers\ArrayHelper;
  * @property int|null $includedFiles
  * @property $count_files
  * @property bool $isAutomate
+ * @property string $nextFlight
+ * @property string $nextFlightForm
+ * @property bool|null $hasSale
+ * @property bool|null $hasChange
+ * @property bool|null $hasRefund
+ * @property bool|null $hasOrder
  */
 class CasesSearch extends Cases
 {
@@ -126,6 +134,9 @@ class CasesSearch extends Cases
     public $datetime_end;
     public $date_range;
 
+    public $createdRange;
+    public $statusRange;
+
     public $locales = [];
     public $client_locale;
 
@@ -137,6 +148,13 @@ class CasesSearch extends Cases
     public $includedFiles;
     public $isAutomate;
     public $count_files;
+
+    public $nextFlight;
+    public $nextFlightForm;
+    public $hasSale;
+    public $hasChange;
+    public $hasRefund;
+    public $hasOrder;
 
     /**
      * @return array
@@ -188,7 +206,7 @@ class CasesSearch extends Cases
                 'integer', 'min' => 0, 'max' => 1000
             ],
             [['datetime_start', 'datetime_end', 'locales'], 'safe'],
-            [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
+            [['date_range', 'createdRange', 'statusRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
 
             ['showFields', 'filter', 'filter' => static function ($value) {
                 return is_array($value) ? $value : [];
@@ -196,6 +214,8 @@ class CasesSearch extends Cases
             ['client_locale', 'safe'],
             ['includedFiles', 'in', 'range' => [0, 1]],
             ['isAutomate', 'boolean'],
+            [['nextFlight', 'nextFlightForm'], 'string'],
+            [['hasSale', 'hasChange', 'hasRefund', 'hasOrder'], 'safe'],
         ];
     }
 
@@ -511,8 +531,43 @@ class CasesSearch extends Cases
         $query = self::find()->with(['project', 'department', 'category']);
         $query->joinWith(['client']);
 
+        $query->addSelect('*');
+        $query->addSelect(new Expression('
+             DATE(if(last_out_date IS NULL, last_in_date, IF(last_in_date is NULL, last_out_date, LEAST(last_in_date, last_out_date)))) AS nextFlight'));
+
 //        $query->andWhere(['cs_dep_id' => array_keys(EmployeeDepartmentAccess::getDepartments())]);
         $query->andWhere(['cs_project_id' => array_keys(EmployeeProjectAccess::getProjects())]);
+
+        $query->leftJoin([
+            'sale_out' => CaseSale::find()
+                ->select([
+                    'css_cs_id',
+                    new Expression('
+                    MIN(css_out_date) AS last_out_date'),
+                ])
+                ->innerJoin(
+                    Cases::tableName() . ' AS cases',
+                    'case_sale.css_cs_id = cases.cs_id'
+                )
+                ->where('css_out_date >= SUBDATE(CURDATE(), 1)')
+                ->groupBy('css_cs_id')
+        ], 'cases.cs_id = sale_out.css_cs_id');
+
+        $query->leftJoin([
+            'sale_in' => CaseSale::find()
+                ->select([
+                    'css_cs_id',
+                    new Expression('
+                    MIN(css_in_date) AS last_in_date'),
+                ])
+                ->innerJoin(
+                    Cases::tableName() . ' AS cases',
+                    'case_sale.css_cs_id = cases.cs_id'
+                )
+                ->where('css_in_date >= SUBDATE(CURDATE(), 1)')
+                ->groupBy('css_cs_id')
+        ], 'cases.cs_id = sale_in.css_cs_id');
+
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -528,10 +583,19 @@ class CasesSearch extends Cases
 
         unset($dataProvider->sort->attributes['cs_lead_id']);
 
-        $dataProvider->sort->attributes['client_locale'] = [
-            'asc' => ['cl_locale' => SORT_ASC],
-            'desc' => ['cl_locale' => SORT_DESC],
-        ];
+        $sorting = $dataProvider->getSort();
+        $sorting->attributes = array_merge($sorting->attributes, [
+            'nextFlight' => [
+                'asc' => ['nextFlight' => SORT_ASC],
+                'desc' => ['nextFlight' => SORT_DESC],
+            ],
+
+            'client_locale' => [
+                'asc' => ['cl_locale' => SORT_ASC],
+                'desc' => ['cl_locale' => SORT_DESC],
+            ],
+        ]);
+        $dataProvider->setSort($sorting);
 
         $this->load($params);
 
@@ -557,6 +621,121 @@ class CasesSearch extends Cases
         $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
         $query->andFilterWhere(['like', 'cs_order_uid', $this->cs_order_uid]);
         $query->andFilterWhere(['like', 'cl_locale', $this->client_locale]);
+
+        if ($this->hasSale != null) {
+            $query->leftJoin([
+                'se' => CaseSale::find()
+                    ->select([
+                        'css_cs_id',
+                    ])
+                    ->innerJoin(
+                        Cases::tableName() . ' AS cases',
+                        CaseSale::tableName() . '.css_cs_id = cases.cs_id'
+                    )
+                    ->groupBy('css_cs_id')
+            ], 'cases.cs_id = se.css_cs_id');
+
+            if ($this->hasSale) {
+                $query->andWhere(['IS NOT','se.css_cs_id', null]);
+            } else {
+                $query->andWhere(['IS','se.css_cs_id', null]);
+            }
+        }
+
+        if ($this->hasChange != null) {
+            $query->leftJoin([
+                'ch' => ProductQuoteChange::find()
+                    ->select([
+                        'pqc_case_id',
+                    ])
+                    ->innerJoin(
+                        Cases::tableName() . ' AS cases',
+                        ProductQuoteChange::tableName() . '.pqc_case_id = cases.cs_id'
+                    )
+                    ->groupBy('pqc_case_id')
+            ], 'cases.cs_id = ch.pqc_case_id');
+
+            if ($this->hasChange) {
+                $query->andWhere(['IS NOT','ch.pqc_case_id', null]);
+            } else {
+                $query->andWhere(['IS','ch.pqc_case_id', null]);
+            }
+        }
+
+        if ($this->hasRefund != null) {
+            $query->leftJoin([
+                're' => ProductQuoteRefund::find()
+                    ->select([
+                        'pqr_case_id',
+                    ])
+                    ->innerJoin(
+                        Cases::tableName() . ' AS cases',
+                        ProductQuoteRefund::tableName() . '.pqr_case_id = cases.cs_id'
+                    )
+                    ->groupBy('pqr_case_id')
+            ], 'cases.cs_id = re.pqr_case_id');
+
+            if ($this->hasRefund) {
+                $query->andWhere(['IS NOT','re.pqr_case_id', null]);
+            } else {
+                $query->andWhere(['IS','re.pqr_case_id', null]);
+            }
+        }
+
+        if ($this->hasOrder != null) {
+            if ($this->hasOrder) {
+                $query->andWhere(['IS NOT','cs_order_uid', null]);
+            } else {
+                $query->andWhere(['IS','cs_order_uid', null]);
+            }
+        }
+
+        if ($this->statusRange) {
+            $query->leftJoin([
+                'csl' => CaseStatusLog::find()
+                    ->select([
+                        'csl_case_id',
+                        'max(csl_start_dt) as csl_status_dt',
+                    ])
+                    ->innerJoin(
+                        Cases::tableName() . ' AS cases',
+                        CaseStatusLog::tableName() . '.csl_case_id = cases.cs_id'
+                    )
+                    ->groupBy('csl_case_id')
+            ], 'cases.cs_id = csl.csl_case_id');
+
+            $date = explode(' - ', $this->statusRange);
+            $fromDate = date('Y-m-d', strtotime($date[0]));
+            $toDate = date('Y-m-d', strtotime($date[1]));
+
+            $query->andWhere([
+                'between',
+                'csl_status_dt',
+                $fromDate, $toDate
+            ]);
+        };
+
+        if ($this->nextFlight) {
+            $query->andWhere(['=','DATE(if(last_out_date IS NULL, last_in_date, IF(last_in_date is NULL, last_out_date, LEAST(last_in_date, last_out_date))))', $this->nextFlight]);
+        }
+
+        if ($this->nextFlightForm) {
+            $date = explode(' - ', $this->nextFlightForm);
+            $fromDate = date('Y-m-d', strtotime($date[0]));
+            $toDate = date('Y-m-d', strtotime($date[1]));
+            $query->andWhere([
+                'between',
+                'DATE(if(last_out_date IS NULL, last_in_date, IF(last_in_date is NULL, last_out_date, LEAST(last_in_date, last_out_date))))',
+                $fromDate, $toDate
+            ]);
+        }
+
+        if ($this->createdRange) {
+            $date = explode(' - ', $this->createdRange);
+            $fromDate = date('Y-m-d', strtotime($date[0]));
+            $toDate = date('Y-m-d', strtotime($date[1]));
+            $query->andWhere(['between', 'DATE(cs_created_dt)', $fromDate, $toDate]);
+        }
 
         if (!empty($this->locales)) {
             $query->andWhere(['cl_locale' => $this->locales]);
@@ -845,29 +1024,16 @@ class CasesSearch extends Cases
         }
 
         if (!empty($this->callsQtyFrom) || !empty($this->callsQtyTo)) {
-            if ((bool) Yii::$app->params['settings']['new_communication_block_lead']) {
-                $query->leftJoin([
-                    'calls' => CallLogCase::find()
-                        ->select([
-                            'clc_case_id AS c_case_id',
-                            new Expression('COUNT(clc_case_id) AS cnt')
-                        ])
-                        ->innerJoin(CallLog::tableName(), 'call_log.cl_id = call_log_case.clc_cl_id')
-                        ->where(['IN', 'cl_type_id', [CallLogType::IN, CallLogType::OUT]])
-                        ->groupBy(['clc_case_id'])
-                ], 'cases.cs_id = calls.c_case_id');
-            } else {
-                $query->leftJoin([
-                    'calls' => Call::find()
-                        ->select([
-                            'c_case_id',
-                            new Expression('COUNT(c_case_id) AS cnt')
-                        ])
-                        ->where(['c_parent_id' => null])
-                        ->andWhere(['IN', 'c_call_type_id', [Call::CALL_TYPE_IN, Call::CALL_TYPE_OUT]])
-                        ->groupBy(['c_case_id'])
-                ], 'cases.cs_id = calls.c_case_id');
-            }
+            $query->leftJoin([
+                'calls' => CallLogCase::find()
+                    ->select([
+                        'clc_case_id AS c_case_id',
+                        new Expression('COUNT(clc_case_id) AS cnt')
+                    ])
+                    ->innerJoin(CallLog::tableName(), 'call_log.cl_id = call_log_case.clc_cl_id')
+                    ->where(['IN', 'cl_type_id', [CallLogType::IN, CallLogType::OUT]])
+                    ->groupBy(['clc_case_id'])
+            ], 'cases.cs_id = calls.c_case_id');
 
             if (!empty($this->callsQtyFrom)) {
                 if ((int) $this->callsQtyFrom === 0) {

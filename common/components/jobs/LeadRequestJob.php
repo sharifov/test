@@ -17,7 +17,7 @@ class LeadRequestJob extends BaseJob implements RetryableJobInterface
 
     public function execute($queue)
     {
-        $this->executionTimeRegister();
+        $this->waitingTimeRegister();
         try {
             if ($this->leadRequestId && $leadRequest = LeadRequest::findOne($this->leadRequestId)) {
                 $leadCreateGoogleRequest = \Yii::$container->get(LeadCreateGoogleRequest::class);

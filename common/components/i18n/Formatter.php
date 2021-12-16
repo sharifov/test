@@ -51,6 +51,8 @@ use sales\helpers\PhoneFormatter;
 use sales\model\callLog\entity\callLog\CallLogCategory;
 use sales\model\callLog\entity\callLog\CallLogStatus;
 use sales\model\callLog\entity\callLog\CallLogType;
+use sales\model\client\notifications\client\ClientNotificationCommunicationType;
+use sales\model\client\notifications\client\ClientNotificationType;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\coupon\entity\coupon\CouponStatus;
 use sales\model\coupon\entity\coupon\CouponType;
@@ -585,6 +587,33 @@ class Formatter extends \yii\i18n\Formatter
     }
 
     /**
+     * @param Employee|int|string|null $value
+     * @return string
+     */
+    public function asUserNameWithId($value): string
+    {
+        if (!$value) {
+            return $this->nullDisplay;
+        }
+
+        if (is_string($value)) {
+            $name = $value;
+        } elseif ($value instanceof Employee) {
+            $name = $value->username . ' (' . $value->id . ')';
+        } elseif (is_int($value)) {
+            if ($entity = Employee::find()->select(['username', 'id'])->where(['id' => $value])->cache(3600)->one()) {
+                $name = $entity->username . ' (' . $entity->id . ')';
+            } else {
+                return 'not found';
+            }
+        } else {
+            throw new \InvalidArgumentException('user must be Employee|int|string|null');
+        }
+
+        return Html::tag('i', '', ['class' => 'fa fa-user']) . ' ' . Html::encode($name);
+    }
+
+    /**
      * @param $numberOfMonth
      * @return string
      */
@@ -912,5 +941,58 @@ class Formatter extends \yii\i18n\Formatter
         }
 
         return ProductQuoteChangeDecisionType::asFormat($value);
+    }
+
+    public function asClientNotificationType($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return \sales\model\client\notifications\client\entity\NotificationType::asFormat($value);
+    }
+
+    public function asClientNotificationCommunicationType($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return \sales\model\client\notifications\client\entity\CommunicationType::asFormat($value);
+    }
+
+    public function asClientNotificationPhoneListStatus($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return \sales\model\client\notifications\phone\entity\Status::asFormat($value);
+    }
+
+    public function asClientNotificationSmsListStatus($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return \sales\model\client\notifications\sms\entity\Status::asFormat($value);
+    }
+
+    public function asUserDataKey($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return \sales\model\userData\entity\UserDataKey::asFormat($value);
+    }
+
+    public function asLabel($value, string $class = 'label label-default'): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+        return Html::tag('span', $value, ['class' => $class]);
     }
 }

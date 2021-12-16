@@ -58,7 +58,7 @@ class ReprotectionCreateForm extends Model
             if (!$flightQuoteForm->load($this->flight_quote)) {
                 $this->addError($attribute, 'FlightQuoteForm not loaded');
             } elseif (!$flightQuoteForm->validate()) {
-                $this->addError($attribute, ErrorsToStringHelper::extractFromModel($flightQuoteForm, ' '));
+                $this->addError($attribute, 'FlightQuoteForm: ' . ErrorsToStringHelper::extractFromModel($flightQuoteForm, ' '));
             } else {
                 $this->flightQuoteForm = $flightQuoteForm;
             }
@@ -69,7 +69,7 @@ class ReprotectionCreateForm extends Model
     {
         $hash = FlightRequest::generateHashFromDataJson($this->getAttributes());
         if (FlightRequest::findOne(['fr_hash' => $hash])) {
-            $this->addError($attribute, 'FlightRequest already exist. Hash(' . $hash . ')');
+            $this->addError($attribute, 'Flight Request already exist. Hash (' . $hash . ')');
         }
     }
 
@@ -92,7 +92,7 @@ class ReprotectionCreateForm extends Model
         return $this->project;
     }
 
-    public function getFlightQuoteForm(): ?ReProtectionFlightQuoteForm
+    public function getFlightQuoteForm(): ?FlightQuoteForm
     {
         return $this->flightQuoteForm;
     }

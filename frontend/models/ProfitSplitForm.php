@@ -16,6 +16,9 @@ class ProfitSplitForm extends Model
     const
     VIEW_MODE = 'view',
     EDIT_MODE = 'edit';
+
+    public const SCENARIO_CHECK_PERCENTAGE = 'checkPercentageOfSplit';
+
     /**
      * @var $mode string
      */
@@ -30,8 +33,7 @@ class ProfitSplitForm extends Model
      */
     private $_profitSplit;
 
-    public const SCENARIO_CHECK_PERCENTAGE = 'checkPercentageOfSplit';
-
+    private $zeroPercent = false;
 
     /**
      * {@inheritdoc}
@@ -41,7 +43,6 @@ class ProfitSplitForm extends Model
         return [
             [['Lead'], 'required'],
             [['ProfitSplit'], 'checkSumPercentage'],
-            [['ProfitSplit'], 'checkMainAgent'],
             [['ProfitSplit'], 'safe'],
             [['ProfitSplit'], 'checkSumPercent', 'on' => self::SCENARIO_CHECK_PERCENTAGE]
         ];
@@ -65,13 +66,17 @@ class ProfitSplitForm extends Model
     public function checkSumPercent($attribute, $params): bool
     {
         $sum = $this->getSumProfitSplit();
-        if ($sum === 100) {
-            NotificationsFormHelper::addNotification('sumPercent', \Yii::t('user', 'Sum of percent is 100. The main agent was left without profit.'));
+
+        if ($sum > 100) {
+            NotificationsFormHelper::addNotification('sumPercent', \Yii::t('user', 'Sum of percent should be maximum 100.'));
             return false;
         }
         return true;
     }
 
+    /**
+     * @deprecated
+     */
     public function checkMainAgent($attribute, $params)
     {
         //var_dump($attribute);die;
@@ -116,6 +121,9 @@ class ProfitSplitForm extends Model
             } else {
                 $errors = [];
                 foreach ($model as $key => $item) {
+                    if ($item instanceof ProfitSplit) {
+                        $item->scenario = ProfitSplit::SCENARIO_ADD_OWNER;
+                    }
                     if (!$item->validate()) {
                         $errors[$key] = $item->getErrors();
                     }
@@ -205,6 +213,10 @@ class ProfitSplitForm extends Model
             if (!empty($this->getProfitSplit())) {
                 foreach ($this->getProfitSplit() as $key => $split) {
                     $split->ps_lead_id = $lead->id;
+                    if ($this->isZeroPercent()) {
+                        $split->scenario = ProfitSplit::SCENARIO_ADD_OWNER;
+                    }
+
                     if (!$split->save()) {
                         $hasErrors = true;
                         $errors['ProfitSplit'][$key] = $split->getErrors();
@@ -249,6 +261,7 @@ class ProfitSplitForm extends Model
                         if ($key == '__id__') {
                             continue;
                         }
+                        $item['ps_percent'] = array_get($item, 'ps_percent', 0);
                         $m = $this->getModelClass($modelName, $key);
                         if (!empty($item) && $m->load($item, '')) {
                             $success = true;
@@ -317,5 +330,21 @@ class ProfitSplitForm extends Model
             }
         }
         return $sum;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isZeroPercent(): bool
+    {
+        return $this->zeroPercent;
+    }
+
+    /**
+     * @param bool $zeroPercent
+     */
+    public function setZeroPercent(bool $zeroPercent): void
+    {
+        $this->zeroPercent = $zeroPercent;
     }
 }

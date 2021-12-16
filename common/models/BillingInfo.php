@@ -4,6 +4,7 @@ namespace common\models;
 
 use modules\invoice\src\entities\invoice\Invoice;
 use modules\order\src\entities\order\Order;
+use sales\dto\billingInfo\BillingInfoDTO;
 use sales\entities\serializer\Serializable;
 use sales\model\billingInfo\entity\serializer\BillingInfoSerializer;
 use Yii;
@@ -37,6 +38,7 @@ use yii\db\ActiveRecord;
  * @property int|null $bi_updated_user_id
  * @property string|null $bi_created_dt
  * @property string|null $bi_updated_dt
+ * @property string|null $bi_hash
  *
  * @property CreditCard $biCc
  * @property Employee $biCreatedUser
@@ -54,6 +56,18 @@ class BillingInfo extends \yii\db\ActiveRecord implements Serializable
     public static function tableName()
     {
         return 'billing_info';
+    }
+
+    public function beforeSave($insert): bool
+    {
+        if (parent::beforeSave($insert)) {
+            $billing_hash_key = $this->generateHashKey();
+            if ($this->bi_hash !== $billing_hash_key) {
+                $this->bi_hash = $billing_hash_key;
+            }
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -78,6 +92,7 @@ class BillingInfo extends \yii\db\ActiveRecord implements Serializable
             [['bi_order_id'], 'exist', 'skipOnError' => true, 'targetClass' => Order::class, 'targetAttribute' => ['bi_order_id' => 'or_id']],
             [['bi_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['bi_updated_user_id' => 'id']],
             [['bi_payment_method_id'], 'exist', 'skipOnError' => true, 'targetClass' => PaymentMethod::class, 'targetAttribute' => ['bi_payment_method_id' => 'pm_id']],
+            ['bi_hash', 'string', 'max' => 32],
         ];
     }
 
@@ -109,6 +124,7 @@ class BillingInfo extends \yii\db\ActiveRecord implements Serializable
             'bi_updated_user_id' => 'Updated User ID',
             'bi_created_dt' => 'Created Dt',
             'bi_updated_dt' => 'Updated Dt',
+            'bi_hash' => 'Hash key'
         ];
     }
 
@@ -207,8 +223,48 @@ class BillingInfo extends \yii\db\ActiveRecord implements Serializable
         return $billing;
     }
 
+    public static function createByDto(BillingInfoDTO $dto): self
+    {
+        $billing = new self();
+        $billing->bi_first_name = $dto->first_name;
+        $billing->bi_last_name = $dto->last_name;
+        $billing->bi_middle_name = $dto->middle_name;
+        $billing->bi_address_line1 = $dto->address_line1;
+        $billing->bi_address_line2 = $dto->address_line2;
+        $billing->bi_city = $dto->city;
+        $billing->bi_state = $dto->state;
+        $billing->bi_country = $dto->country_id;
+        $billing->bi_zip = $dto->zip;
+        $billing->bi_contact_phone = $dto->contact_phone;
+        $billing->bi_contact_email = $dto->contact_email;
+        $billing->bi_payment_method_id = $dto->paymentMethodId;
+        $billing->bi_cc_id = $dto->creditCardId;
+        $billing->bi_order_id = $dto->orderId;
+        $billing->bi_contact_name = $dto->contact_name;
+        return $billing;
+    }
+
     public function serialize(): array
     {
         return (new BillingInfoSerializer($this))->getData();
+    }
+
+    public function generateHashKey(): string
+    {
+        $sourceKey = $this->bi_first_name . '|' .
+            $this->bi_last_name . '|' .
+            $this->bi_middle_name . '|' .
+            $this->bi_address_line1 . '|' .
+            $this->bi_address_line2 . '|' .
+            $this->bi_city . '|' .
+            $this->bi_state . '|' .
+            $this->bi_country . '|' .
+            $this->bi_zip . '|' .
+            $this->bi_contact_phone . '|' .
+            $this->bi_contact_email . '|' .
+            $this->bi_order_id . '|' .
+            $this->bi_cc_id;
+
+        return md5($sourceKey);
     }
 }

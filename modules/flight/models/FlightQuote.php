@@ -151,12 +151,14 @@ class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
     public const TYPE_ORIGINAL = 1;
     public const TYPE_ALTERNATIVE = 2;
     public const TYPE_REPROTECTION = 3;
+    public const TYPE_VOLUNTARY_EXCHANGE = 4;
 
     public const TYPE_LIST = [
         self::TYPE_BASE => 'Base',
         self::TYPE_ORIGINAL => 'Original',
         self::TYPE_ALTERNATIVE => 'Alternative',
         self::TYPE_REPROTECTION => 'ReProtection',
+        self::TYPE_VOLUNTARY_EXCHANGE => 'Voluntary Exchange',
     ];
 
     public const SERVICE_FEE = 0.035;
@@ -478,6 +480,22 @@ class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
         return self::create($dto);
     }
 
+    public static function createVoluntaryChangeManual(FlightQuoteCreateDTO $dto): FlightQuote
+    {
+        $model = self::create($dto);
+        $model->fq_type_id = self::TYPE_VOLUNTARY_EXCHANGE;
+        $model->fq_service_fee_percent = 0;
+        return $model;
+    }
+
+    public static function createVoluntaryExchangeApi(FlightQuoteCreateDTO $dto): FlightQuote
+    {
+        $model = self::create($dto);
+        $model->fq_type_id = self::TYPE_VOLUNTARY_EXCHANGE;
+        $model->fq_service_fee_percent = 0;
+        return $model;
+    }
+
     public static function clone(FlightQuote $quote, int $flightId, int $productQuoteId): self
     {
         $clone = new self();
@@ -540,6 +558,11 @@ class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
     public function setTypeReProtection(): void
     {
         $this->fq_type_id = self::TYPE_REPROTECTION;
+    }
+
+    public function isTypeVoluntary(): bool
+    {
+        return $this->fq_type_id === self::TYPE_VOLUNTARY_EXCHANGE;
     }
 
     /**
@@ -720,11 +743,7 @@ class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
             return explode("\n", str_replace('&nbsp;', ' ', $this->fq_reservation_dump));
         };
         $fields['booking_id'] = function () {
-            $lastFlightQuoteFlight = FlightQuoteFlight::find()->select(['fqf_booking_id'])->andWhere(['fqf_fq_id' => $this->fq_id])->orderBy(['fqf_id' => SORT_DESC])->scalar();
-            if ($lastFlightQuoteFlight) {
-                return $lastFlightQuoteFlight;
-            }
-            return null;
+            return $this->getLastBookingId();
         };
         $fields['fq_type_name'] = function () {
             return FlightQuote::getTypeName($this->fq_type_id);
@@ -789,5 +808,14 @@ class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
             }
         }
         return implode(', ', $bookingData);
+    }
+
+    public function getLastBookingId(): ?string
+    {
+        $bookingId = FlightQuoteFlight::find()->select(['fqf_booking_id'])->andWhere(['fqf_fq_id' => $this->fq_id])->orderBy(['fqf_id' => SORT_DESC])->scalar();
+        if ($bookingId) {
+            return $bookingId;
+        }
+        return null;
     }
 }

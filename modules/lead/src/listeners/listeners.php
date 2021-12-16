@@ -58,8 +58,12 @@ use sales\listeners\lead\LeadSnoozeEventLogListener;
 use sales\listeners\lead\LeadSnoozeNotificationsListener;
 use sales\listeners\lead\LeadSoldEventLogListener;
 use sales\listeners\lead\LeadSoldNotificationsListener;
+use sales\listeners\lead\LeadSoldSplitListener;
 use sales\listeners\lead\LeadTaskEventListener;
 use sales\listeners\lead\LeadTrashEventLogListener;
+use sales\listeners\lead\leadWebEngage\LeadBookedWebEngageListener;
+use sales\listeners\lead\leadWebEngage\LeadSoldWebEngageListener;
+use sales\listeners\lead\leadWebEngage\LeadTrashedWebEngageListener;
 
 return [
     LeadCreatedEvent::class => [LeadCreatedEventListener::class],
@@ -89,7 +93,7 @@ return [
         LeadCreatedNewEventLogListener::class,
         LeadSendToGaListener::class,
     ],
-     LeadCreatedClientChatEvent::class => [],
+    LeadCreatedClientChatEvent::class => [],
 
     LeadDuplicateDetectedEvent::class => [LeadDuplicateDetectedEventListener::class],
     LeadOwnerChangedEvent::class => [LeadOwnerChangedNotificationsListener::class],
@@ -116,13 +120,19 @@ return [
     LeadSoldEvent::class => [
         LeadSoldEventLogListener::class,
         LeadSoldNotificationsListener::class,
+        LeadSoldSplitListener::class,
         LeadPhoneTrustListener::class,
+        LeadSoldWebEngageListener::class,
     ],
-    LeadTrashEvent::class => [LeadTrashEventLogListener::class],
+    LeadTrashEvent::class => [
+        LeadTrashEventLogListener::class,
+        LeadTrashedWebEngageListener::class,
+    ],
     LeadBookedEvent::class => [
         LeadBookedEventLogListener::class,
         LeadBookedNotificationsListener::class,
         LeadPhoneTrustListener::class,
+        LeadBookedWebEngageListener::class,
     ],
     LeadSnoozeEvent::class => [
         LeadSnoozeEventLogListener::class,

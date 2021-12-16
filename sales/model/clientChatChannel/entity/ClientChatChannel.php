@@ -355,6 +355,11 @@ class ClientChatChannel extends \yii\db\ActiveRecord
         return ClientChatChannelDefaultSettings::getAccessDistributionRepeatDelaySeconds();
     }
 
+    public function getSortParameters(): array
+    {
+        return $this->settings['system']['userAccessDistribution']['sortParameters'] ?? ClientChatChannelDefaultSettings::getAccessSortParameters();
+    }
+
     public function getSystemPastMinutes(): int
     {
         if (isset($this->settings['system']['userAccessDistribution']['sortParameters']['pastAcceptedChatsNumber']['pastMinutes'])) {
@@ -368,6 +373,14 @@ class ClientChatChannel extends \yii\db\ActiveRecord
     {
         if (isset($this->settings['system']['autoCloseRoom'])) {
             return (bool) $this->settings['system']['autoCloseRoom'];
+        }
+        return false;
+    }
+
+    public function isSearchAndCacheFlightQuotesEnabled(): bool
+    {
+        if (isset($this->settings['system']['searchAndCacheFlightQuotesOnAcceptChat'])) {
+            return (bool)$this->settings['system']['searchAndCacheFlightQuotesOnAcceptChat'];
         }
         return false;
     }

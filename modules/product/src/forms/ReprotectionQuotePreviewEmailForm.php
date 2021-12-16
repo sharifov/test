@@ -21,6 +21,8 @@ class ReprotectionQuotePreviewEmailForm extends \yii\base\Model
     public $user_id;
     public $language_id;
     public $content_data = [];
+    public $orderId;
+    public $pqcId;
 
     public $is_send;
 
@@ -47,10 +49,10 @@ class ReprotectionQuotePreviewEmailForm extends \yii\base\Model
     public function rules(): array
     {
         return [
-            [['case_id', 'productQuoteId', 'email_from', 'email_to', 'email_message', 'email_subject'], 'required'],
+            [['case_id', 'productQuoteId', 'email_from', 'email_to', 'email_message', 'email_subject', 'orderId', 'pqcId'], 'required'],
             [['email_subject', 'email_message'], 'trim'],
             [['email_to', 'email_from'], 'email'],
-            [['email_tpl_id', 'case_id', 'productQuoteId'], 'integer'],
+            [['email_tpl_id', 'case_id', 'productQuoteId', 'orderId', 'pqcId'], 'integer'],
             [['email_message'], 'string'],
             [['email_subject'], 'string', 'max' => 200, 'min' => 5],
             [['email_from_name', 'email_to_name'], 'string', 'max' => 50],

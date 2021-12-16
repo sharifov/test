@@ -10,6 +10,7 @@ use common\components\purifier\Purifier;
 use common\models\local\LeadAdditionalInformation;
 use common\models\local\LeadLogMessage;
 use common\models\query\LeadQuery;
+use common\models\query\SourcesQuery;
 use DateTime;
 use frontend\helpers\JsonHelper;
 use frontend\widgets\notification\NotificationMessage;
@@ -218,7 +219,7 @@ use yii\helpers\VarDumper;
  * @property null|Quote $appliedAlternativeQuotes
  * @property mixed $flowTransition
  * @property mixed $sumPercentTipsSplit
- * @property ActiveQuery $appliedQuote
+ * @property null|Quote $appliedQuote
  * @property ActiveQuery $psUsers
  * @property mixed $allProfitSplits
  * @property null|string $lastReasonFromLeadFlow
@@ -277,6 +278,13 @@ class Lead extends ActiveRecord implements Objectable
         self::STATUS_BOOK_FAILED    => 'Book failed',
         self::STATUS_ALTERNATIVE    => 'Alternative',
         self::STATUS_NEW            => 'New',
+    ];
+
+    public const TRAVEL_DATE_PASSED_STATUS_LIST = [
+        self::STATUS_PENDING,
+        self::STATUS_PROCESSING,
+        self::STATUS_FOLLOW_UP,
+        self::STATUS_NEW,
     ];
 
     public const STATUS_MULTIPLE_UPDATE_LIST = [
@@ -346,6 +354,7 @@ class Lead extends ActiveRecord implements Objectable
     public const TYPE_CREATE_CLONE = 6;
     public const TYPE_CREATE_IMPORT = 7;
     public const TYPE_CREATE_CLIENT_CHAT = 8;
+    public const TYPE_CREATE_MANUALLY_FROM_CALL = 9;
 
     public const TYPE_CREATE_LIST = [
         self::TYPE_CREATE_MANUALLY => 'Manually',
@@ -356,6 +365,7 @@ class Lead extends ActiveRecord implements Objectable
         self::TYPE_CREATE_CLONE => 'Clone',
         self::TYPE_CREATE_IMPORT => 'Import',
         self::TYPE_CREATE_CLIENT_CHAT => 'Client Chat',
+        self::TYPE_CREATE_MANUALLY_FROM_CALL => 'Manually from call',
     ];
 
     public const TYPE_BASIC = 1;
@@ -633,6 +643,7 @@ class Lead extends ActiveRecord implements Objectable
      * @param $clientEmail
      * @param $depId
      * @param $delayedCharge
+     * @param $typeCreate
      * @return Lead
      */
     public static function createManually(
@@ -650,7 +661,8 @@ class Lead extends ActiveRecord implements Objectable
         $clientPhone,
         $clientEmail,
         $depId,
-        $delayedCharge
+        $delayedCharge,
+        $typeCreate
     ): self {
         $lead = self::create();
         $lead->client_id = $clientId;
@@ -669,7 +681,7 @@ class Lead extends ActiveRecord implements Objectable
         $lead->l_dep_id = $depId;
         $lead->l_delayed_charge = $delayedCharge;
         $lead->status = null;
-        $lead->l_type_create = self::TYPE_CREATE_MANUALLY;
+        $lead->l_type_create = $typeCreate;
         $lead->recordEvent(new LeadCreatedManuallyEvent($lead));
         return $lead;
     }
@@ -805,6 +817,7 @@ class Lead extends ActiveRecord implements Objectable
         $lead->l_client_first_name = $client->first_name;
         $lead->l_client_last_name = $client->last_name;
         $lead->l_client_phone = $form->clientForm->phone;
+        $lead->l_client_email = $form->clientForm->email;
         $lead->l_client_ua = $form->user_agent;
         $lead->project_id = $form->project_id;
         $lead->source_id = $form->source_id;
@@ -859,7 +872,7 @@ class Lead extends ActiveRecord implements Objectable
         $projectId,
         $depId,
         ?int $creatorId,
-        int $visitorLogId,
+        ?int $visitorLogId,
         ?string $ip,
         ?string $gmtOffset
     ): self {
@@ -2531,6 +2544,7 @@ class Lead extends ActiveRecord implements Objectable
             case self::STATUS_REJECT:
                 $label = '<span class="label status-label bg-red">' . self::getStatus($status) . '</span>';
                 break;
+            case self::STATUS_NEW:
             case self::STATUS_BOOK_FAILED:
             case self::STATUS_ALTERNATIVE:
                 $label = '<span class="label label-default">' . self::getStatus($status) . '</span>';
@@ -3429,7 +3443,7 @@ Reason: {reason}',
     {
         $data = Quote::find()
             ->where(['lead_id' => $this->id, 'status' => [
-                Quote::STATUS_SEND,
+                Quote::STATUS_SENT,
                 Quote::STATUS_OPENED,
                 Quote::STATUS_APPLIED]
             ])->all();
@@ -3457,6 +3471,11 @@ Reason: {reason}',
         );
     }
 
+    public function hasAppliedQuote(): bool
+    {
+        return Quote::find()->where(['lead_id' => $this->id, 'status' => Quote::STATUS_APPLIED])->exists();
+    }
+
     public function getFirstFlightSegment()
     {
         return LeadFlightSegment::find()->where(['lead_id' => $this->id])->orderBy(['departure' => 'ASC'])->one();
@@ -3473,13 +3492,20 @@ Reason: {reason}',
     public function beforeSave($insert): bool
     {
         if (parent::beforeSave($insert)) {
+            if (!$this->gid) {
+                $this->gid = self::generateGid();
+            }
+
             if ($insert) {
                 //$this->created = date('Y-m-d H:i:s');
-                if (!empty($this->project_id) && empty($this->source_id) && $this->l_type_create !== self::TYPE_CREATE_CLIENT_CHAT) {
-                    $project = Project::findOne(['id' => $this->project_id]);
-                    if ($project !== null) {
-                        $this->source_id = $project->sources[0]->id;
-                    }
+                if (!empty($this->project_id) && empty($this->source_id)) {
+                    Yii::info([
+                        'gid' => $this->gid,
+                        'projectId' => $this->project_id,
+                        'typeCreate' => $this->getTypeCreateName()
+                    ], 'info\Lead:beforeSave:emptySourceIdOnLeadCreation');
+                    $source = SourcesQuery::getDefaultSourceByProjectId($this->project_id) ?? SourcesQuery::getFirstSourceByProjectId($this->project_id);
+                    $this->source_id = $source->id ?? null;
                 }
 
                 $leadExistByUID = Lead::findOne([
@@ -3499,9 +3525,6 @@ Reason: {reason}',
 
             if (!$this->uid) {
                 $this->uid = self::generateUid();
-            }
-            if (!$this->gid) {
-                $this->gid = self::generateGid();
             }
 
             $this->adults = (int) $this->adults;
@@ -4282,8 +4305,16 @@ Reason: {reason}',
         return $out;
     }
 
-
     /**
+     * @param Employee $user
+     * @return array
+     */
+    public static function getAllStatuses(): array
+    {
+        return self::STATUS_LIST;
+    }
+
+        /**
      * @param Employee $user
      * @return array
      */
@@ -4602,32 +4633,15 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
      */
     public function getCountCalls(int $type_id = 0, ?bool $onlyParent = true): int
     {
-        if ((bool) Yii::$app->params['settings']['new_communication_block_lead']) {
-            $query = CallLogLead::find()
-                ->innerJoin(CallLog::tableName(), 'call_log.cl_id = call_log_lead.cll_cl_id')
-                ->where(['cll_lead_id' => $this->id]);
-
-            if ($type_id !== 0) {
-                $query->andWhere(['cl_type_id' => $type_id]);
-            }
-            return (int) $query->count();
-        }
-
-        $query = Call::find();
-        $query->where(['c_lead_id' => $this->id]);
+        $query = CallLogLead::find()
+            ->innerJoin(CallLog::tableName(), 'call_log.cl_id = call_log_lead.cll_cl_id')
+            ->where(['cll_lead_id' => $this->id]);
 
         if ($type_id !== 0) {
-            $query->andWhere(['c_call_type_id' => $type_id]);
+            $query->andWhere(['cl_type_id' => $type_id]);
         }
-
-        if ($onlyParent) {
-            $query->andWhere(['c_parent_id' => null]);
-        }
-        $count = $query->count();
-
-        return (int) $count;
+        return (int) $query->count();
     }
-
 
     /**
      * @param int $type_id
@@ -4746,10 +4760,14 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     /**
      * @param int $delayedCharged
      * @param string $notesForExperts
+     * @param bool $delayChargeAccess
      */
-    public function editDelayedChargeAndNote(int $delayedCharged, string $notesForExperts): void
+    public function editDelayedChargeAndNote(int $delayedCharged, string $notesForExperts, bool $delayChargeAccess): void
     {
-        $this->l_delayed_charge = $delayedCharged;
+        if ($delayChargeAccess) {
+            $this->l_delayed_charge = $delayedCharged;
+        }
+
         $this->notes_for_experts = strip_tags($notesForExperts);
     }
 
@@ -4858,12 +4876,19 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     {
         return Quote::find()
             ->andWhere(['lead_id' => $this->id])
-            ->andWhere(['status' => [Quote::STATUS_CREATED, Quote::STATUS_SEND, Quote::STATUS_OPENED]])
+            ->andWhere(['status' => [Quote::STATUS_CREATED, Quote::STATUS_SENT, Quote::STATUS_OPENED]])
             ->exists();
     }
 
     public function getTypeCreateName(): string
     {
         return self::TYPE_CREATE_LIST[$this->l_type_create] ?? 'Undefined';
+    }
+
+    public function isBusiness(): bool
+    {
+        return in_array($this->project_id, SettingHelper::getBusinessProjectIds(), true)
+            || $this->cabin === self::CABIN_BUSINESS
+            || $this->cabin === self::CABIN_FIRST;
     }
 }

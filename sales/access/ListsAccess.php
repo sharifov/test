@@ -97,7 +97,8 @@ class ListsAccess
         if ($this->employees !== null) {
             return $this->employees;
         }
-        if ($this->user->isAdmin()) {
+
+        /*if ($this->user->isAdmin()) {
             if ($withRoles) {
                 $this->employees = Employee::getActiveUsersListWithRoles();
             } else {
@@ -109,7 +110,14 @@ class ListsAccess
             $this->employees = Employee::getActiveUsersList();
         } else {
             $this->employees = [];
+        }*/
+
+        if ($withRoles) {
+            $this->employees = Employee::getActiveUsersListWithRoles();
+        } else {
+            $this->employees = Employee::getActiveUsersList();
         }
+
         return $this->employees;
     }
 }

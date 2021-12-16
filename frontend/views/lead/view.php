@@ -6,11 +6,9 @@
  * @var $previewEmailForm LeadPreviewEmailForm
  * @var $previewSmsForm LeadPreviewSmsForm
  * @var $quotesProvider ActiveDataProvider
- * @var $dataProviderCommunication ActiveDataProvider
  * @var $dataProviderCommunicationLog ActiveDataProvider
  * @var $dataProviderCallExpert ActiveDataProvider
  * @var $dataProviderNotes ActiveDataProvider
- * @var $enableCommunication boolean
  * @var $modelLeadCallExpert LeadCallExpert
  * @var $modelNote Note
  * @var $modelLeadChecklist LeadChecklist
@@ -184,7 +182,7 @@ $disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIEN
                     'modelNote'  => $modelNote,
                 ]) ?>
             <?php endif;?>
-            
+
             <?php if (Yii::$app->user->can('lead-view/communication-block/view', ['lead' => $lead])) : ?>
                 <?= $this->render('communication/lead_communication', [
                     'leadForm'      => $leadForm,
@@ -192,9 +190,8 @@ $disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIEN
                     'previewSmsForm' => $previewSmsForm,
                     'comForm'       => $comForm,
                     'leadId'        => $lead->id,
-                    'dataProvider'  => (bool)Yii::$app->params['settings']['new_communication_block_lead'] ? $dataProviderCommunicationLog : $dataProviderCommunication,
+                    'dataProvider'  => $dataProviderCommunicationLog,
                     'isAdmin'       => $is_admin,
-                    'isCommunicationLogEnabled' => Yii::$app->params['settings']['new_communication_block_lead'],
                     'lead' => $lead,
                     'fromPhoneNumbers' => $fromPhoneNumbers,
                     'unsubscribe' => $unsubscribe,
@@ -301,7 +298,72 @@ if (!$lead->isNewRecord) {
         'leadId' => $lead->id
     ]);
 
+    $removeConversationUrl = Url::to(['/lead-user-conversion/delete']);
+    $addConversationUrl = Url::to(['/lead-user-conversion/add', 'lead_id' => $lead->id]);
+
     $js = <<<JS
+
+    $(document).on('click', '.js-add-conversation-btn', function (e) {
+        e.preventDefault();
+        let leadId = $(this).attr('data-lead-id');
+        let modal = $('#modal-sm');
+        
+        $('#modal-sm-label').html('Add conversion');
+        modal.find('.modal-body').html('');
+        modal.find('.modal-body').load('{$addConversationUrl}', function(response, status, xhr) {
+            $('#preloader').addClass('d-none');
+
+            if (status === 'error') {
+                alert(response);
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            } 
+        });
+    });
+
+    $(document).on('click', '.js-remove-conversation-btn', function (e) {
+        e.preventDefault();
+    
+        let leadId = $(this).attr('data-lead-id');
+        let userId = $(this).attr('data-user-id');
+        let btnSubmit = $(this);
+        let btnContent = btnSubmit.html();
+    
+        btnSubmit.html('<i class="fa fa-cog fa-spin"></i> Loading...').prop('disabled', true);
+    
+        $.ajax({
+            url: '{$removeConversationUrl}',
+            type: 'POST',
+            data: {lead_id: leadId, user_id: userId},
+            dataType: 'json'
+        })
+        .done(function(dataResponse) {
+            if (dataResponse.status > 0) {
+                createNotify('Success', dataResponse.message, 'success');
+
+                if ($("#pjax-user-conversation-list").length) {
+                    pjaxReload({container:"#pjax-user-conversation-list"});
+                }
+            } else if (dataResponse.message.length) {
+                createNotify('Error', dataResponse.message, 'error');
+            } else {
+                createNotify('Error', 'Error, please check logs', 'error');
+            }
+            btnSubmit.html(btnContent).removeClass('btn-default').prop('disabled', false);
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            createNotify('Error', jqXHR.responseText, 'error');
+            btnSubmit.html(btnContent).removeClass('btn-default').prop('disabled', false);
+        })
+        .always(function(jqXHR, textStatus, errorThrown) {
+            setTimeout(function () {
+                btnSubmit.html(btnContent).removeClass('btn-default').prop('disabled', false);
+            }, 5000);
+        });
+    });
 
     $('#view-flow-transition').on('click', function() {
         $('#preloader').removeClass('hidden');

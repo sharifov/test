@@ -2,12 +2,17 @@
 
 namespace frontend\controllers;
 
+use common\models\Employee;
 use common\models\Lead;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
+use sales\auth\Auth;
 use sales\helpers\app\AppHelper;
 use sales\model\lead\LeadCodeException;
+use sales\model\leadUserConversion\form\LeadUserConversionAddForm;
 use sales\model\leadUserConversion\repository\LeadUserConversionRepository;
+use sales\model\leadUserConversion\service\LeadUserConversionDictionary;
+use sales\model\leadUserConversion\service\LeadUserConversionService;
 use Yii;
 use sales\model\leadUserConversion\entity\LeadUserConversion;
 use yii\helpers\VarDumper;
@@ -17,6 +22,7 @@ use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\helpers\ArrayHelper;
+use common\components\bootstrap4\activeForm\ActiveForm;
 
 /**
  * Class LeadUserConversionController
@@ -40,11 +46,69 @@ class LeadUserConversionController extends FController
             ],
             'access' => [
                 'allowActions' => [
-                    'delete',
+                    'delete', 'add'
                 ],
             ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
+
+    /**
+     * @return string|Response
+     * @throws BadRequestHttpException
+     */
+    public function actionAdd()
+    {
+        if (!Yii::$app->request->isAjax) {
+            throw new BadRequestHttpException();
+        }
+        if (!$leadId = (int) Yii::$app->request->get('lead_id')) {
+            throw new BadRequestHttpException('Invalid parameters');
+        }
+        $leadAbacDto = new LeadAbacDto(Lead::findOne($leadId), Auth::id());
+        if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_USER_CONVERSION, LeadAbacObject::ACTION_CREATE)) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
+        $form = new LeadUserConversionAddForm($leadId);
+        if ($form->load(Yii::$app->request->post())) {
+            if ($form->validate()) {
+                $leadUserConversionRepository = new LeadUserConversionRepository();
+                try {
+                    if ($leadUserConversionRepository->exist($form->leadId, $form->userId)) {
+                        return $this->asJson(['success' => false, 'message' => 'User conversion for this lead and user is already exist.']);
+                    }
+                    $leadUserConversionService = Yii::createObject(LeadUserConversionService::class);
+                    $isAdded = $leadUserConversionService->addManual(
+                        $form->leadId,
+                        $form->userId,
+                        LeadUserConversionDictionary::DESCRIPTION_QA,
+                        Auth::id()
+                    );
+                    if ($isAdded) {
+                        return $this->asJson(['success' => true]);
+                    }
+                    return $this->asJson(['success' => false, 'message' => 'Not possible to add user conversion.']);
+                } catch (\DomainException $e) {
+                    return $this->asJson(['success' => false, 'message' => $e->getMessage()]);
+                } catch (\Throwable $e) {
+                    Yii::error($e, 'LeadUserConversionController:actionAdd');
+                    return $this->asJson(['success' => false, 'message' => 'Server error']);
+                }
+            }
+            return $this->asJson(ActiveForm::formatError($form));
+        }
+
+        $userList = Employee::getActiveUsersList();
+//        $userList = Employee::getActiveUsersListFromCommonGroups(Auth::id());
+//        $usersExist = LeadUserConversionService::getUserIdsByLead($leadId);
+//        $userList = array_diff_key($userList, $usersExist);
+
+        return $this->renderAjax('add', [
+            'leadUserConversionAddForm' => $form,
+            'leadId' => $leadId,
+            'userList' => $userList,
+        ]);
     }
 
     public function actionDelete(): array
@@ -58,7 +122,7 @@ class LeadUserConversionController extends FController
                     throw new BadRequestHttpException('Invalid parameters', -LeadCodeException::LEAD_USER_CONVERSATION_NOT_PARAM);
                 }
 
-                $leadAbacDto = new LeadAbacDto(Lead::findOne($leadId), $userId);
+                $leadAbacDto = new LeadAbacDto(Lead::findOne($leadId), Auth::id());
                 if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_USER_CONVERSION, LeadAbacObject::ACTION_DELETE)) {
                     throw new ForbiddenHttpException('Access denied.', -LeadCodeException::LEAD_ACCESS_DENIED);
                 }

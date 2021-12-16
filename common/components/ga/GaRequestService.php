@@ -82,7 +82,7 @@ class GaRequestService extends Component
         if (isset(Yii::$app->params['additionalCurlOptions'])) {
             $this->curlRequest->addOptions(Yii::$app->params['additionalCurlOptions']);
         }
-        if ($format) {
+        if (!empty($format)) {
             $this->curlRequest->setFormat($format);
         }
         if ($this->debugMod) {

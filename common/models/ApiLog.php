@@ -4,6 +4,7 @@ namespace common\models;
 
 use common\models\query\ApiLogQuery;
 use DateTime;
+use frontend\helpers\JsonHelper;
 use webapi\src\logger\EndDTO;
 use webapi\src\logger\StartDTO;
 use Yii;
@@ -251,8 +252,7 @@ class ApiLog extends \yii\db\ActiveRecord
             }
         }
 
-
-        //VarDumper::dump($profiling);exit;
+        $this->logToElk();
 
         if ($this->save()) {
             $responseData['action']             = $this->al_action;
@@ -389,5 +389,31 @@ class ApiLog extends \yii\db\ActiveRecord
             " FOR VALUES FROM ('" . date_format($partFromDateTime, "Y-m-d") . "') TO ('" . date_format($partToDateTime, "Y-m-d") . "')");
         $cmd->execute();
         return $partTableName;
+    }
+
+    public function logToElk(string $type = 'apilog', string $prefix = 'elk'): void
+    {
+        $logData['type']                = $type;
+        $reqData['request_data']        = JsonHelper::decode($this->al_request_data);
+        $reqData['request_dt']          = $this->al_request_dt;
+        $reqData['ip_address']          = $this->al_ip_address;
+        $reqData['user_id']             = $this->al_user_id;
+        $reqData['action']              = $this->al_action;
+
+        $logData['request']             = $reqData;
+
+        $respData['response_data']      = JsonHelper::decode($this->al_response_data);
+        $respData['response_id']        = $this->al_id;
+        $respData['response_dt']        = $this->al_response_dt;
+
+        $logData['response']            = $respData;
+
+        $logData['execution_time']      = $this->al_execution_time;
+        $logData['memory_usage']        = $this->al_memory_usage;
+        $logData['db_execution_time']   = $this->al_db_execution_time;
+        $logData['db_query_count']      = $this->al_db_query_count;
+
+        Yii::info($logData, $prefix . '/' . $this->al_action);
+        unset($logData, $reqData, $respData);
     }
 }

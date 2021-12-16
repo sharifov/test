@@ -37,7 +37,7 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
         <div class="quote__heading-left">
             <?php if ($model->isOriginal()) : ?>
                 <span class="label label-primary"><?= Quote::getTypeName($model->type_id) ?></span>
-            <?php elseif (($leadForm->mode !== $leadForm::VIEW_MODE || $isManager) && in_array($model->status, [Quote::STATUS_CREATED, Quote::STATUS_SEND, Quote::STATUS_OPENED])) : ?>
+            <?php elseif (($leadForm->mode !== $leadForm::VIEW_MODE || $isManager) && in_array($model->status, [Quote::STATUS_CREATED, Quote::STATUS_SENT, Quote::STATUS_OPENED])) : ?>
             <div class="custom-checkbox">
                 <input class="quotes-uid" id="q<?= $model->uid ?>" value="<?= $model->uid ?>" data-id="<?=$model->id?>" type="checkbox" name="quote[<?= $model->uid ?>]">
                 <label for="q<?= $model->uid ?>"></label>
@@ -96,16 +96,18 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
                 <?php $priceData = $model->getPricesData(); ?>
 
                 <?php if ($model->isApplied() && $model->lead->final_profit !== null) :?>
-                    <button id="quote_profit_<?= $model->id?>" data-toggle="popover" data-html="true" data-trigger="click" data-placement="top" data-container="body" title="Final Profit" class="popover-class quote__profit btn btn-info"
+                    <a id="quote_profit_<?= $model->id?>" data-toggle="popover" data-html="true" data-trigger="hover" data-placement="top" data-container="body" title="Final Profit" class="popover-class quote__profit "
                      data-content='<?= $model->getEstimationProfitText();?>'>
                         <?= '$' . $model->lead->getFinalProfit();?>
-                    </button>
+                        <i class="fas fa-info-circle"></i>
+                    </a>
                 <?php else :?>
-                    <a id="quote_profit_<?= $model->id?>" data-toggle="popover" data-html="true" data-trigger="click" data-placement="top" data-container="body" title="Estimation Profit" class="popover-class quote__profit"
+                    <a id="quote_profit_<?= $model->id?>" data-toggle="popover" data-html="true" data-trigger="hover" data-placement="top" data-container="body" title="Estimation Profit" class="popover-class quote__profit"
                  data-content='<?= $model->getEstimationProfitText();?>'>
                         <?php if (isset($priceData['total'])) :?>
                             <?=number_format($model->getEstimationProfit(), 2);?>$
                         <?php endif;?>
+                        <i class="fas fa-info-circle"></i>
                     </a>
                 <?php endif;?>
 

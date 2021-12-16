@@ -7,6 +7,7 @@ use common\models\ApiUser;
 use common\models\Project;
 use PhpOffice\PhpSpreadsheet\Shared\StringHelper;
 use webapi\src\behaviors\ApiUserProjectAccessBehavior;
+use webapi\src\logger\behaviors\filters\creditCard\CreditCardFilter;
 use Yii;
 use yii\filters\auth\CompositeAuth;
 use yii\filters\auth\HttpBasicAuth;
@@ -164,11 +165,17 @@ class ApiBaseController extends Controller
 
     /**
      * @param string $action
+     * @param bool $filterPostData
      * @return void
+     * @throws \yii\base\InvalidConfigException
      */
-    public function startApiLog(string $action = ''): void
+    public function startApiLog(string $action = '', bool $filterPostData = false): void
     {
         $data = Yii::$app->request->post();
+        if ($filterPostData) {
+            $filter = Yii::createObject(CreditCardFilter::class);
+            $data = $filter->filterData($data);
+        }
         $data['received_microtime'] = microtime(true);
 
         $apiLog = new ApiLog();

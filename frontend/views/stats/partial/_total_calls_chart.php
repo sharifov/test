@@ -55,6 +55,7 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
 
     <?= $this->render('_total_calls_chart_summary', [
         'totalCallsDbData' => $viewModel->callData,
+        'groupsCount' => $viewModel->groupsCount
     ]) ?>
 
     <script type="text/javascript">
@@ -139,12 +140,6 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
                 var arr = [0];
                 var c = [];
 
-                /*var indexes = {
-                    1: [1, 2],
-                    2: [3, 4],
-                    3: [5, 6]
-                };*/
-
                 var indexes = {
                     0: [1, 2],
                     1: [3, 4],
@@ -167,11 +162,11 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
                     }
                 });
                 totalCallsChart.draw(data, options);
-                setTimeout(function () {
+               /* setTimeout(function () {
                     options.colors = c;
                     view.setColumns(arr);
                     totalCallsChart.draw(view, options);
-                }, 1);
+                }, 1);*/
                 $(window).resize(function () {
                     totalCallsChart.draw(data, options);
                 });
@@ -357,7 +352,7 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
 
                     view.setColumns(arr);
                     totalCallsChart.draw(data, options);
-                    totalCallsChart.draw(view, options);
+                    //totalCallsChart.draw(view, options);
                 });
 
                 $("#columnType").on('click', function () {
@@ -408,7 +403,7 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
 
                     view.setColumns(arr);
                     totalCallsChart.draw(data, options);
-                    totalCallsChart.draw(view, options);
+                    //totalCallsChart.draw(view, options);
                 });
             });
         });

@@ -25,7 +25,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
 
-    <?php Pjax::begin(['id' => 'client_chat_search_pjax', 'timeout' => 5000, 'enablePushState' => true]); ?>
+    <?php Pjax::begin(['id' => 'client_chat_search_pjax', 'timeout' => 5000, 'enablePushState' => true, 'scrollTo' => 0]); ?>
 
     <?php echo $this->render('_search', ['model' => $searchModel]); ?>
 
@@ -35,7 +35,15 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             [
                 'attribute' => 'cch_id',
-                'options' => ['style' => 'width:100px']
+                'value' => static function (ClientChat $model) {
+                    return Html::a(
+                        $model->cch_id . ' <span class="glyphicon glyphicon-eye-open"></span>',
+                        ['/client-chat-qa/view', 'id' => $model->cch_id],
+                        ['target' => '_blank', 'data-pjax' => 0, 'title' => 'View']
+                    );
+                },
+                'format' => 'raw',
+                'options' => ['style' => 'width:100px'],
             ],
             [
                 'attribute' => 'cch_parent_id',

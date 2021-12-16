@@ -54,6 +54,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'up_min_percent_for_take_leads',
             'up_call_expert_limit',
             'up_leaderboard_enabled:boolean',
+            'up_call_user_level',
             [
                 'attribute' => 'up_updated_dt',
                 'value' => function (\common\models\UserParams $model) {

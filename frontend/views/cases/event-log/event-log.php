@@ -28,6 +28,7 @@ use modules\cases\src\abac\dto\CasesAbacDto;
         <?php Pjax::begin([
             'id' => 'case-event-grid-pjax',
             'enablePushState' => false,
+            'timeout' => 4000,
             'clientOptions' => ['method' => 'GET']
         ]) ?>
         <?php echo GridView::widget([
@@ -37,6 +38,14 @@ use modules\cases\src\abac\dto\CasesAbacDto;
             //'filterUrl' => ['/cases/ajax-case-event-log'],
             'columns' => [
                 ['class' => 'yii\grid\SerialColumn'],
+                [
+                    'attribute' => 'cel_category_id',
+                    'value' => static function (CaseEventLog $model) {
+                        return $model->getCategoryNameFormat();
+                    },
+                    'format' => 'raw',
+                    'enableSorting' => false
+                ],
                 //'cel_id',
                 /*[
                     'attribute' => 'cel_case_id',
@@ -55,10 +64,10 @@ use modules\cases\src\abac\dto\CasesAbacDto;
                 [
                     'attribute' => 'cel_created_dt',
                     'class' => \common\components\grid\DateTimeColumn::class,
-                    'options' => [
-                        'style' => 'width:180px'
+                    'enableSorting' => false,
+                    'contentOptions' => [
+                        'style' => 'font-size: 80%; font-weight: 400;'
                     ],
-                    'enableSorting' => false
                 ],
                 [
                     'class' => 'yii\grid\ActionColumn',
@@ -86,6 +95,9 @@ use modules\cases\src\abac\dto\CasesAbacDto;
                 ]
             ],
         ]) ?>
+        <script>
+            $('[data-toggle="tooltip"]').tooltip();
+        </script>
         <?php Pjax::end() ?>
     </div>
 </div>

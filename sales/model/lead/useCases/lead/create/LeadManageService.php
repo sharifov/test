@@ -2,14 +2,22 @@
 
 namespace sales\model\lead\useCases\lead\create;
 
+use common\models\Call;
 use common\models\Client;
+use common\models\ClientEmail;
+use common\models\ClientPhone;
+use common\models\DepartmentPhoneProject;
+use common\models\Employee;
 use common\models\Lead;
 use common\models\LeadFlow;
 use common\models\LeadPreferences;
 use common\models\Sources;
 use common\models\VisitorLog;
+use sales\forms\lead\EmailCreateForm;
+use sales\forms\lead\PhoneCreateForm;
 use sales\forms\lead\PreferencesCreateForm;
 use sales\helpers\clientChat\ClientChatHelper;
+use sales\helpers\ErrorsToStringHelper;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\model\clientChatLead\entity\ClientChatLeadRepository;
@@ -21,8 +29,9 @@ use sales\model\clientChatVisitorData\repository\ClientChatVisitorDataRepository
 use sales\model\leadData\entity\LeadData;
 use sales\model\leadData\repository\LeadDataRepository;
 use sales\model\leadDataKey\entity\LeadDataKey;
-use sales\model\leadUserConversion\entity\LeadUserConversion;
-use sales\model\leadUserConversion\repository\LeadUserConversionRepository;
+use sales\model\leadUserConversion\service\LeadUserConversionDictionary;
+use sales\model\leadUserConversion\service\LeadUserConversionService;
+use sales\model\phoneList\entity\PhoneList;
 use sales\model\visitorLog\useCase\CreateVisitorLog;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadPreferencesRepository;
@@ -30,10 +39,12 @@ use sales\repositories\lead\LeadRepository;
 use sales\repositories\NotFoundException;
 use sales\repositories\visitorLog\VisitorLogRepository;
 use sales\services\cases\CasesManageService;
+use sales\services\client\ClientCreateForm;
 use sales\services\client\ClientManageService;
 use sales\services\lead\LeadHashGenerator;
 use sales\services\TransactionManager;
 use thamtech\uuid\helpers\UuidHelper;
+use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 
@@ -52,6 +63,7 @@ use yii\helpers\Json;
  * @property ClientChatVisitorDataRepository $clientChatVisitorDataRepository
  * @property VisitorLogRepository $visitorLogRepository
  * @property LeadDataRepository $leadDataRepository
+ * @property LeadUserConversionService $leadUserConversionService
  */
 class LeadManageService
 {
@@ -99,21 +111,11 @@ class LeadManageService
      * @var LeadDataRepository
      */
     private LeadDataRepository $leadDataRepository;
-
     /**
-     * LeadManageService constructor.
-     * @param TransactionManager $transactionManager
-     * @param CasesManageService $casesManageService
-     * @param CasesRepository $casesRepository
-     * @param ClientManageService $clientManageService
-     * @param LeadHashGenerator $leadHashGenerator
-     * @param LeadRepository $leadRepository
-     * @param LeadPreferencesRepository $leadPreferencesRepository
-     * @param ClientChatLeadRepository $clientChatLeadRepository
-     * @param ClientChatVisitorDataRepository $clientChatVisitorDataRepository
-     * @param VisitorLogRepository $visitorLogRepository
-     * @param LeadDataRepository $leadDataRepository
+     * @var LeadUserConversionService
      */
+    private LeadUserConversionService $leadUserConversionService;
+
     public function __construct(
         TransactionManager $transactionManager,
         CasesManageService $casesManageService,
@@ -125,7 +127,8 @@ class LeadManageService
         ClientChatLeadRepository $clientChatLeadRepository,
         ClientChatVisitorDataRepository $clientChatVisitorDataRepository,
         VisitorLogRepository $visitorLogRepository,
-        LeadDataRepository $leadDataRepository
+        LeadDataRepository $leadDataRepository,
+        LeadUserConversionService $leadUserConversionService
     ) {
         $this->transactionManager = $transactionManager;
         $this->casesManageService = $casesManageService;
@@ -138,6 +141,7 @@ class LeadManageService
         $this->clientChatVisitorDataRepository = $clientChatVisitorDataRepository;
         $this->visitorLogRepository = $visitorLogRepository;
         $this->leadDataRepository = $leadDataRepository;
+        $this->leadUserConversionService = $leadUserConversionService;
     }
 
     /**
@@ -187,7 +191,8 @@ class LeadManageService
             $form->clientPhone,
             $form->clientEmail,
             $form->depId,
-            null
+            null,
+            Lead::TYPE_CREATE_MANUALLY
         );
 
         $lead->processing($employeeId, $creatorId, $reason);
@@ -235,95 +240,237 @@ class LeadManageService
         $this->leadPreferencesRepository->save($preferences);
     }
 
-    public function createByClientChat(LeadCreateByChatForm $form, ClientChat $chat, int $userId): Lead
+    public function createByClientChat(CreateLeadByChatDTO $dto): Lead
     {
-        $lead = $this->transactionManager->wrap(function () use ($form, $chat, $userId) {
-            if (!$client = $chat->cchClient) {
-                throw new \DomainException('Client Chat not assigned with Client');
-            }
+        return $this->transactionManager->wrap(function () use ($dto) {
+            $this->visitorLogRepository->save($dto->visitorLog);
+            $dto->lead->l_visitor_log_id = $dto->visitorLog->vl_id;
 
-            $chatVisitorData = $this->clientChatVisitorDataRepository->getOneByChatId($chat->cch_id);
+            $leadId = $this->leadRepository->save($dto->lead);
 
-            if ($chatVisitorData->getSourceCid()) {
-                $visitorLog = VisitorLog::createByClientChatRequest($chatVisitorData->cvd_id, $chatVisitorData->decodedData);
-                $visitorLog->vl_ga_client_id = $visitorLog->vl_ga_client_id ?? UuidHelper::uuid();
-                $visitorLog->vl_ga_user_id = $visitorLog->vl_ga_user_id ?? $client->uuid;
-            } else {
-                try {
-                    $lastVisitorLog = $this->visitorLogRepository->findLastByClientAndProject($chat->cch_client_id, $chat->cch_project_id);
-                    $visitorLog = new VisitorLog();
-                    $visitorLog->fillInByChatOrLogData($chatVisitorData->decodedData, $lastVisitorLog);
-                    $visitorLog->vl_ga_user_id = $client->uuid;
-                } catch (NotFoundException $e) {
-                    $visitorLog = VisitorLog::createByClientChatRequest($chatVisitorData->cvd_id, $chatVisitorData->decodedData);
-                    $visitorLog->vl_ga_client_id = UuidHelper::uuid();
-                    $visitorLog->vl_ga_user_id = $client->uuid;
-                }
-            }
-            $visitorLog->vl_client_id = $client->id;
-            if (!$visitorLog->vl_project_id) {
-                $visitorLog->vl_project_id = $chat->cch_project_id;
-            }
-            $this->visitorLogRepository->save($visitorLog);
-
-            $source = Sources::find()->select(['id'])->where(['cid' => $visitorLog->vl_source_cid])->one();
-            $ip = null;
-            $gmtOffset = null;
-            if ($chatVisitorData) {
-                $ip = $chatVisitorData->getRequestIp();
-                $gmtOffset = ClientChatHelper::formatOffsetUtcToLeadOffsetGmt($chatVisitorData->getOffsetUtc());
-            }
-
-            $lead = Lead::createByClientChat(
-                $client->id,
-                $client->first_name,
-                $client->last_name,
-                $chat->cch_ip,
-                $source['id'] ?? null,
-                $form->projectId,
-                $chat->cchChannel->ccc_dep_id,
-                $userId,
-                $visitorLog->vl_id,
-                $ip,
-                $gmtOffset
-            );
-
-            $lead->processing($userId, $userId, LeadFlow::DESCRIPTION_CLIENT_CHAT_CREATE);
-
-            $clientPhones = ArrayHelper::getColumn($client->clientPhones, 'phone');
-
-            $hash = $this->leadHashGenerator->generate(
-                null,
-                $form->projectId,
-                null,
-                null,
-                null,
-                null,
-                $clientPhones,
-                null
-            );
-
-            $lead->setRequestHash($hash);
-
-            $leadId = $this->leadRepository->save($lead);
-
-            $visitorLog->vl_lead_id = $leadId;
-            $this->visitorLogRepository->save($visitorLog);
+            $dto->visitorLog->vl_lead_id = $leadId;
+            $this->visitorLogRepository->save($dto->visitorLog);
 
             $this->createLeadPreferences($leadId, new PreferencesCreateForm());
 
-            $clientChatLead = ClientChatLead::create($chat->cch_id, $lead->id, new \DateTimeImmutable('now'));
+            $clientChatLead = ClientChatLead::create($dto->chat->cch_id, $leadId, new \DateTimeImmutable('now'));
 
             $this->clientChatLeadRepository->save($clientChatLead);
-
-            if ($crossSystemXp = $chatVisitorData->getCrossSystemXp()) {
-                $leadData = LeadData::create($lead->id, LeadDataKey::KEY_CROSS_SYSTEM_XP, $chatVisitorData->getCrossSystemXp());
+            if ($crossSystemXp = $dto->chatVisitorData->getCrossSystemXp()) {
+                $leadData = LeadData::create($leadId, LeadDataKey::KEY_CROSS_SYSTEM_XP, $dto->chatVisitorData->getCrossSystemXp());
                 $this->leadDataRepository->save($leadData);
             }
+            return $dto->lead;
+        });
+    }
+
+    public function createFromPhoneWidget(Call $call, Employee $user): Lead
+    {
+        $internalPhoneNumber = $call->getInternalPhoneNumber();
+        $clientPhoneNumber = $call->getClientPhoneNumber();
+
+        $sourceId = null;
+
+        if ($internalPhoneNumber) {
+            $source = (new Query())
+                ->select(['dpp_source_id'])
+                ->from(PhoneList::tableName())
+                ->innerJoin(DepartmentPhoneProject::tableName(), 'dpp_phone_list_id = pl_id')
+                ->andWhere(['pl_phone_number' => $internalPhoneNumber, 'pl_enabled' => true])
+                ->andWhere(['dpp_project_id' => $call->c_project_id, 'dpp_enable' => true])
+                ->one();
+            if ($source && $source['dpp_source_id']) {
+                $sourceId = (int)$source['dpp_source_id'];
+            }
+        }
+
+        if (!$sourceId && $call->c_project_id) {
+            $source = Sources::getByProjectId($call->c_project_id);
+            if ($source) {
+                $sourceId = $source->id;
+            }
+        }
+
+        $lead = Lead::createManually(
+            $call->c_client_id,
+            $call->cClient->first_name,
+            $call->cClient->last_name,
+            null,
+            null,
+            null,
+            null,
+            null,
+            $sourceId,
+            $call->c_project_id,
+            null,
+            $clientPhoneNumber,
+            null,
+            $call->c_dep_id,
+            null,
+            Lead::TYPE_CREATE_MANUALLY_FROM_CALL
+        );
+        $lead->processing($user->id, $user->id, LeadFlow::DESCRIPTION_MANUAL_FROM_CALL);
+
+        $hash = $this->leadHashGenerator->generate(
+            null,
+            $call->c_project_id,
+            null,
+            null,
+            null,
+            null,
+            [$clientPhoneNumber],
+            null
+        );
+        $lead->setRequestHash($hash);
+        $lead->l_is_test = $this->clientManageService->checkIfPhoneIsTest([$clientPhoneNumber]);
+
+        return $this->transactionManager->wrap(function () use ($lead, $call, $user) {
+            $leadId = $this->leadRepository->save($lead);
+
+            $this->createLeadPreferences($leadId, new PreferencesCreateForm());
+
+            if ($logId = (new CreateVisitorLog())->create($call->cClient, $lead)) {
+                $lead->setVisitorLog($logId);
+                $this->leadRepository->save($lead);
+            }
+
+            $this->leadUserConversionService->addAutomate(
+                $leadId,
+                $user->id,
+                LeadUserConversionDictionary::DESCRIPTION_MANUAL,
+                $user->id
+            );
+
+            $this->updateLeadOnRelationActiveCalls($lead, $call);
 
             return $lead;
         });
+    }
 
-        return $lead;
+    public function createFromPhoneWidgetWithInvalidClient(fromPhoneWidgetWithInvalidClient\Form $form, Call $call): Lead
+    {
+        return $this->transactionManager->wrap(function () use ($call, $form) {
+            $phones = [];
+            if ($form->phone) {
+                $phones[] = new PhoneCreateForm([
+                    'phone' => $form->phone,
+                    'type' => ClientPhone::PHONE_NOT_SET,
+                ]);
+            }
+            $emails = [];
+            if ($form->email) {
+                $emails[] = new EmailCreateForm([
+                    'email' => $form->email,
+                    'type' => ClientEmail::EMAIL_NOT_SET,
+                ]);
+            }
+            $client = $this->clientManageService->getOrCreate(
+                $phones,
+                $emails,
+                new ClientCreateForm([
+                    'firstName' => $form->firstName,
+                    'middleName' => $form->middleName,
+                    'lastName' => $form->lastName,
+                    'projectId' => $form->getProjectId(),
+                    'typeCreate' => Client::TYPE_CREATE_LEAD,
+                ])
+            );
+
+            $lead = Lead::createManually(
+                $client->id,
+                $client->first_name,
+                $client->last_name,
+                null,
+                null,
+                null,
+                null,
+                null,
+                $form->getSourceId(),
+                $form->getProjectId(),
+                null,
+                $form->phone,
+                $form->email,
+                $form->getDepartmentId(),
+                null,
+                Lead::TYPE_CREATE_MANUALLY_FROM_CALL
+            );
+            $lead->processing($form->getUserId(), $form->getUserId(), LeadFlow::DESCRIPTION_MANUAL_FROM_CALL);
+
+            $hash = $this->leadHashGenerator->generate(
+                null,
+                $form->getProjectId(),
+                null,
+                null,
+                null,
+                null,
+                [$form->phone],
+                null
+            );
+            $lead->setRequestHash($hash);
+            if ($form->phone) {
+                $lead->l_is_test = $this->clientManageService->checkIfPhoneIsTest([$form->phone]);
+            }
+
+            $this->leadRepository->save($lead);
+
+            $this->createLeadPreferences($lead->id, new PreferencesCreateForm());
+
+            if ($logId = (new CreateVisitorLog())->create($client, $lead)) {
+                $lead->setVisitorLog($logId);
+                $this->leadRepository->save($lead);
+            }
+
+            $this->leadUserConversionService->addAutomate(
+                $lead->id,
+                $form->getUserId(),
+                LeadUserConversionDictionary::DESCRIPTION_MANUAL,
+                $form->getUserId()
+            );
+
+            $this->updateLeadOnRelationActiveCalls($lead, $call);
+
+            return $lead;
+        });
+    }
+
+    private function updateLeadOnRelationActiveCalls(Lead $lead, Call $call): void
+    {
+        $call->c_lead_id = $lead->id;
+        $call->c_client_id = $lead->client_id;
+        if (!$call->save()) {
+            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($call));
+        }
+
+        $parentId = null;
+
+        if ($call->c_parent_id) {
+            $parent = Call::find()->byId($call->c_parent_id)->active()->one();
+            if ($parent) {
+                $parentId = $parent->c_id;
+                $parent->c_lead_id = $lead->id;
+                $parent->c_client_id = $lead->client_id;
+                if (!$parent->save()) {
+                    throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($parent));
+                }
+            }
+        } else {
+            $parentId = $call->c_id;
+        }
+
+        if (!$parentId) {
+            return;
+        }
+
+        $children = Call::find()->byParentId($parentId)->active()->all();
+        foreach ($children as $child) {
+            if ($child->c_id === $call->c_id) {
+                continue;
+            }
+            $child->c_lead_id = $lead->id;
+            $child->c_client_id = $lead->client_id;
+            if (!$child->save(false)) {
+                throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($child));
+            }
+        }
     }
 }

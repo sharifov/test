@@ -201,11 +201,14 @@ class FlightFromSaleService
         $flightQuote->fq_service_fee_percent = 0;
         $this->flightQuoteRepository->save($flightQuote);
 
+        $segmentCabin = null;
+
         if ($itinerary = ArrayHelper::getValue($saleData, 'itinerary')) {
             foreach ($trips = self::prepareTrips($itinerary) as $keyTrip => $trip) {
                 $flightQuoteTrip = FlightQuoteTrip::create($flightQuote, (int) $trip['duration']);
 
                 $this->flightQuoteTripRepository->save($flightQuoteTrip);
+                $durationSegments = 0;
 
                 if ($tripSegments = ArrayHelper::getValue($itinerary, "{$keyTrip}.segments")) {
                     foreach ($tripSegments as $segment) {
@@ -236,7 +239,15 @@ class FlightFromSaleService
                             $segmentApiForm->baggage
                         );
                         $this->flightQuoteSegmentPaxBaggageRepository->save($flightQuoteSegmentPaxBaggage);
+
+                        $durationSegments += (int) $segmentApiForm->flightDuration;
+
+                        $segmentCabin = $segment['cabin'];
                     }
+                }
+                if ((int) $flightQuoteTrip->fqt_duration === 0) {
+                    $flightQuoteTrip->fqt_duration = $durationSegments;
+                    $this->flightQuoteTripRepository->save($flightQuoteTrip);
                 }
             }
         }
@@ -307,6 +318,9 @@ class FlightFromSaleService
             }
         }
 
+        if (empty($flightProduct->fl_cabin_class) && !empty($segmentCabin)) {
+            $flightProduct->fl_cabin_class = $segmentCabin;
+        }
         $flightProduct->fl_adults = $paxTypeCount[FlightPax::PAX_ADULT] ?? 0;
         $flightProduct->fl_children = $paxTypeCount[FlightPax::PAX_CHILD] ?? 0;
         $flightProduct->fl_infants = $paxTypeCount[FlightPax::PAX_INFANT] ?? 0;
@@ -354,8 +368,11 @@ class FlightFromSaleService
         return (array_key_exists($optionKey, $saleData) && is_array($saleData[$optionKey]) && !empty($saleData[$optionKey]));
     }
 
-    public function createOption(string $optionKey, array $data, FlightQuote $flightQuote): ?ProductQuoteOption
-    {
+    public function createOption(
+        string $optionKey,
+        array $data,
+        FlightQuote $flightQuote
+    ): ?ProductQuoteOption {
         if (ArrayHelper::getValue($data, 'isActivated', false) !== true) {
             return null;
         }
@@ -364,7 +381,7 @@ class FlightFromSaleService
         $optionApiForm->pqo_name = $data['title'] ?? $optionKey;
         $optionApiForm->pqo_price = $data['amount'] ?? null;
         $optionApiForm->pqo_markup = 0.00;
-        $optionApiForm->pqo_description = 'from ReProtection request';
+        $optionApiForm->pqo_description = null;
         $optionApiForm->pqo_request_data = $data;
 
         if (!$optionApiForm->validate()) {

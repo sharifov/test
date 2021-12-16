@@ -85,6 +85,10 @@ class CallLogConferenceTransferService
             $log->cl_user_id = $call->c_created_user_id;
             $log->cl_stir_status = $call->c_stir_status;
 
+            if (!$log->cl_stir_status && $childStirStatus = CallLogTransferService::getChildStirStatus((int) $log->cl_id)) {
+                $log->cl_stir_status = $childStirStatus;
+            }
+
             if (!$log->save()) {
                 Yii::error($log->getErrors());
                 throw new \RuntimeException(VarDumper::dumpAsString(['model' => $log->toArray(), 'message' => $log->getErrors()]));

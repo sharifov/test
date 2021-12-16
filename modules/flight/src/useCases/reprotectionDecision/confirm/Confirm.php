@@ -4,11 +4,13 @@ namespace modules\flight\src\useCases\reprotectionDecision\confirm;
 
 use modules\flight\src\useCases\reprotectionDecision\CancelOtherReprotectionQuotes;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeDecisionType;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use sales\entities\cases\CaseEventLog;
+use sales\helpers\setting\SettingHelper;
 use sales\repositories\product\ProductQuoteRepository;
 use sales\services\TransactionManager;
 
@@ -45,29 +47,59 @@ class Confirm
         if (!$reprotectionQuote->flightQuote->isTypeReProtection()) {
             throw new \DomainException('Quote is not reprotection quote.');
         }
-        if ($reprotectionQuote->isApplied()) {
-            throw new \DomainException('Quote is already applied.');
+        if (!in_array($reprotectionQuote->pq_status_id, SettingHelper::getExchangeQuoteConfirmStatusList(), false)) {
+            $processingList = ProductQuoteStatus::getNames(SettingHelper::getExchangeQuoteConfirmStatusList());
+            throw new \DomainException('Quote not in confirmation statuses(' . implode(',', $processingList) . '). ' .
+                'Current status(' . ProductQuoteStatus::getName($reprotectionQuote->pq_status_id) . ')');
         }
 
-        $productQuoteChange = $this->productQuoteChangeRepository->findParentRelated($reprotectionQuote);
-        if (!$productQuoteChange->isDecisionPending()) {
-            throw new \DomainException('Product Quote Change status is not in "Decision pending". Current status "' . ProductQuoteChangeStatus::getName($productQuoteChange->pqc_status_id) . '"');
+        $productQuoteChange = $this->productQuoteChangeRepository->findParentRelated($reprotectionQuote, ProductQuoteChange::TYPE_RE_PROTECTION);
+        if (!$productQuoteChange->isPending() || !$productQuoteChange->isTypeReProtection()) {
+            throw new \DomainException('Product Quote Change status is not in "pending" or is not Schedule Change. Current status "' . ProductQuoteChangeStatus::getName($productQuoteChange->pqc_status_id) . '"; Current Type: "' . $productQuoteChange->getTypeName() . '"', 101);
         }
 
         $this->transactionManager->wrap(function () use ($reprotectionQuote, $productQuoteChange, $userId) {
+            $this->confirmProductQuoteChange($productQuoteChange);
+            $this->inProgressProductQuoteChange($productQuoteChange);
             $this->markQuoteToApplied($reprotectionQuote);
-            $this->cancelOtherReprotectionQuotes->cancel($reprotectionQuote, $userId);
-            $this->confirmProductQuoteChange($productQuoteChange, $userId);
+            $this->cancelOtherReprotectionQuotes->cancelByQuoteChange($productQuoteChange, $reprotectionQuote, $userId);
+            $this->processingProductQuoteChange($productQuoteChange, $userId);
         });
 
         $this->createBoRequestJob($reprotectionQuote, $userId);
     }
 
-    private function confirmProductQuoteChange(ProductQuoteChange $change, ?int $userId): void
+    private function processingProductQuoteChange(ProductQuoteChange $change, ?int $userId): void
     {
         $change->customerDecisionConfirm($userId, new \DateTimeImmutable());
         $this->productQuoteChangeRepository->save($change);
         CaseEventLog::add($change->pqc_case_id, CaseEventLog::REPROTECTION_DECISION, 'Flight reprotection decided: ' . ProductQuoteChangeDecisionType::LIST[ProductQuoteChangeDecisionType::CONFIRM]);
+    }
+
+    private function confirmProductQuoteChange(ProductQuoteChange $change): void
+    {
+        $fromStatus = $change->getSystemStatusName();
+        $change->statusToComplete();
+        $this->productQuoteChangeRepository->save($change);
+        CaseEventLog::add($change->pqc_case_id, CaseEventLog::REPROTECTION_DECISION, 'Product Quote Change updated status', [
+            'gid' => $change->pqc_gid,
+            'fromStatus' => $fromStatus,
+            'toStatus' => $change->getSystemStatusName(),
+            'decided' => ProductQuoteChangeDecisionType::LIST[ProductQuoteChangeDecisionType::CONFIRM]
+        ], CaseEventLog::CATEGORY_DEBUG);
+    }
+
+    private function inProgressProductQuoteChange(ProductQuoteChange $change): void
+    {
+        $fromStatus = $change->getSystemStatusName();
+        $change->inProgress();
+        $this->productQuoteChangeRepository->save($change);
+        CaseEventLog::add($change->pqc_case_id, CaseEventLog::REPROTECTION_DECISION, 'Product Quote Change updated status', [
+            'gid' => $change->pqc_gid,
+            'fromStatus' => $fromStatus,
+            'toStatus' => $change->getSystemStatusName(),
+            'decided' => ProductQuoteChangeDecisionType::LIST[ProductQuoteChangeDecisionType::CONFIRM]
+        ], CaseEventLog::CATEGORY_DEBUG);
     }
 
     private function createBoRequestJob(ProductQuote $quote, ?int $userId): void

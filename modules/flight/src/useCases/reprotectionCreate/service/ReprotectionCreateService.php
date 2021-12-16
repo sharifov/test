@@ -2,9 +2,12 @@
 
 namespace modules\flight\src\useCases\reprotectionCreate\service;
 
+use common\components\purifier\Purifier;
+use common\models\CaseNote;
+use common\models\CaseSale;
 use common\models\Client;
-use common\models\ClientEmail;
-use common\models\Project;
+use common\models\Notifications;
+use DomainException;
 use modules\flight\models\Flight;
 use modules\flight\models\FlightQuote;
 use modules\flight\models\FlightQuoteFlight;
@@ -21,20 +24,30 @@ use modules\order\src\entities\orderContact\OrderContact;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
 use modules\product\src\entities\productQuote\ProductQuote;
-use sales\entities\cases\CaseCategory;
+use modules\product\src\entities\productQuote\ProductQuoteQuery;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
+use modules\product\src\entities\productQuoteData\ProductQuoteData;
+use modules\product\src\entities\productQuoteData\service\ProductQuoteDataManageService;
+use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
+use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundStatus;
 use sales\entities\cases\CaseEventLog;
 use sales\entities\cases\Cases;
-use sales\exception\CheckRestrictionException;
 use sales\exception\ValidationException;
 use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
+use sales\helpers\app\AppHelper;
 use sales\helpers\ErrorsToStringHelper;
 use sales\helpers\setting\SettingHelper;
+use sales\model\caseOrder\entity\CaseOrder;
 use sales\repositories\cases\CasesRepository;
 use sales\services\cases\CasesSaleService;
 use sales\services\client\ClientCreateForm;
 use sales\services\client\ClientManageService;
 use sales\services\TransactionManager;
+use Throwable;
+use Yii;
 use yii\helpers\ArrayHelper;
 use sales\repositories\product\ProductQuoteRepository;
 use yii\helpers\VarDumper;
@@ -51,6 +64,8 @@ use yii\helpers\VarDumper;
  * @property FlightFromSaleService $flightFromSaleService
  * @property ProductQuoteRepository $productQuoteRepository
  * @property FlightQuoteManageService $flightQuoteManageService
+ * @property ProductQuoteChangeRepository $productQuoteChangeRepository
+ * @property ProductQuoteDataManageService $productQuoteDataManageService
  */
 class ReprotectionCreateService
 {
@@ -71,6 +86,8 @@ class ReprotectionCreateService
     private FlightFromSaleService $flightFromSaleService;
     private ProductQuoteRepository $productQuoteRepository;
     private FlightQuoteManageService $flightQuoteManageService;
+    private ProductQuoteChangeRepository $productQuoteChangeRepository;
+    private ProductQuoteDataManageService $productQuoteDataManageService;
 
     /**
      * @param CasesSaleService $casesSaleService
@@ -82,6 +99,7 @@ class ReprotectionCreateService
      * @param FlightFromSaleService $flightFromSaleService
      * @param ProductQuoteRepository $productQuoteRepository
      * @param FlightQuoteManageService $flightQuoteManageService
+     * @param ProductQuoteChangeRepository $productQuoteChangeRepository
      */
     public function __construct(
         CasesSaleService $casesSaleService,
@@ -92,7 +110,9 @@ class ReprotectionCreateService
         OrderRepository $orderRepository,
         FlightFromSaleService $flightFromSaleService,
         ProductQuoteRepository $productQuoteRepository,
-        FlightQuoteManageService $flightQuoteManageService
+        FlightQuoteManageService $flightQuoteManageService,
+        ProductQuoteChangeRepository $productQuoteChangeRepository,
+        ProductQuoteDataManageService $productQuoteDataManageService
     ) {
         $this->casesSaleService = $casesSaleService;
         $this->clientManageService = $clientManageService;
@@ -103,6 +123,8 @@ class ReprotectionCreateService
         $this->flightFromSaleService = $flightFromSaleService;
         $this->productQuoteRepository = $productQuoteRepository;
         $this->flightQuoteManageService = $flightQuoteManageService;
+        $this->productQuoteChangeRepository = $productQuoteChangeRepository;
+        $this->productQuoteDataManageService = $productQuoteDataManageService;
     }
 
     public function getOrCreateClient(int $projectId, OrderContactForm $orderContactForm): Client
@@ -118,75 +140,6 @@ class ReprotectionCreateService
             [new EmailCreateForm(['email' => $orderContactForm->email])],
             $clientForm
         );
-    }
-
-    public function createCase(FlightRequest $flightRequest): Cases
-    {
-        if (!$caseCategoryKey = SettingHelper::getReProtectionCaseCategory()) {
-            throw new CheckRestrictionException('Setting "reprotection_case_category" is empty');
-        }
-        if (!$caseCategory = CaseCategory::findOne(['cc_key' => $caseCategoryKey])) {
-            throw new CheckRestrictionException('CaseCategory (' . $caseCategoryKey . ') not found');
-        }
-
-        $case = Cases::createByApiReProtection(
-            $caseCategory->cc_dep_id,
-            $caseCategory->cc_id,
-            $flightRequest->fr_booking_id,
-            $flightRequest->fr_project_id
-        );
-        $this->casesRepository->save($case);
-        return $case;
-    }
-
-    public function additionalFillingCase(Cases $case, ?int $clientId, ?int $projectId): Cases
-    {
-        $case->cs_client_id = $clientId;
-        $case->cs_project_id = $projectId;
-        $this->casesRepository->save($case);
-        return $case;
-    }
-
-    public function caseToManual(Cases $case, string $description): Cases
-    {
-        $case->offIsAutomate();
-        if (!$case->isPending()) {
-            $case->pending(null, $description);
-        }
-        $this->casesRepository->save($case);
-        $case->addEventLog(CaseEventLog::CASE_AUTO_PROCESSING_MARK, 'Case auto processing: disabled');
-        return $case;
-    }
-
-    public function caseToAutoProcessing(Cases $case, ?string $description = null): Cases
-    {
-        $case->onIsAutomate();
-        if (!$case->isStatusAutoProcessing()) {
-            $case->autoProcessing(null, $description);
-        }
-        $this->casesRepository->save($case);
-        $case->addEventLog(CaseEventLog::CASE_AUTO_PROCESSING_MARK, 'Case auto processing: enabled');
-        return $case;
-    }
-
-    public function createCaseOld(OrderCreateFromSaleForm $orderCreateFromSaleForm, Client $client)
-    {
-        if (!$caseCategory = CaseCategory::findOne(['cc_key' => self::CASE_CATEGORY_SCHEDULE_CHANGE])) {
-            throw new \RuntimeException('CaseCategory (' . self::CASE_CATEGORY_SCHEDULE_CHANGE . ') is required');
-        }
-
-        $case = Cases::createByApi(
-            $client->id,
-            $orderCreateFromSaleForm->projectId,
-            $caseCategory->cc_dep_id,
-            $orderCreateFromSaleForm->bookingId,
-            'Flight Schedule Change',
-            null,
-            $caseCategory->cc_id
-        );
-        $this->casesRepository->save($case);
-
-        return $case;
     }
 
     public function createOrder(
@@ -205,12 +158,59 @@ class ReprotectionCreateService
         $this->orderCreateFromSaleService->caseOrderRelation($orderId, $case->cs_id);
         $this->orderCreateFromSaleService->orderContactCreate($order, $orderContactForm);
 
+        $case->addEventLog(
+            CaseEventLog::RE_PROTECTION_CREATE,
+            'Order created GID: ' . $order->or_gid,
+            ['order_gid' => $order->or_gid]
+        );
+
         return $order;
     }
 
-    public function createFlightInfrastructure(OrderCreateFromSaleForm $orderCreateFromSaleForm, array $saleData, Order $order): ProductQuote
+    public function createOriginProductQuoteInfrastructure(
+        OrderCreateFromSaleForm $orderCreateFromSaleForm,
+        array $saleData,
+        Order $order,
+        Cases $case,
+        bool $productQuoteChangeIsAutomate
+    ): ProductQuote {
+        $originProductQuote = $this->flightFromSaleService->createHandler($order, $orderCreateFromSaleForm, $saleData);
+        $case->addEventLog(
+            CaseEventLog::RE_PROTECTION_CREATE,
+            'Origin ProductQuote created GID: ' . $originProductQuote->pq_gid,
+            ['pq_gid' => $originProductQuote->pq_gid]
+        );
+        return $originProductQuote;
+    }
+
+    public function createCaseSale(array $saleData, Cases $case): ?CaseSale
     {
-        return $this->flightFromSaleService->createHandler($order, $orderCreateFromSaleForm, $saleData);
+        $caseSale = $this->casesSaleService->createSaleByData($case->cs_id, $saleData);
+        $case->addEventLog(
+            CaseEventLog::RE_PROTECTION_CREATE,
+            'Case Sale created by Data',
+            ['case_id' => $case->cs_id]
+        );
+        return $caseSale;
+    }
+
+    public function recommendedReProtection(int $originProductQuoteId, int $reProtectionQuoteId): ProductQuoteData
+    {
+        return $this->productQuoteDataManageService->updateRecommendedChangeQuote($originProductQuoteId, $reProtectionQuoteId);
+    }
+
+    public function originProductQuoteDecline(ProductQuote $originProductQuote, Cases $case): ProductQuote
+    {
+        if (!$originProductQuote->isDeclined()) {
+            $originProductQuote->declined();
+            $this->productQuoteRepository->save($originProductQuote);
+            $case->addEventLog(
+                CaseEventLog::RE_PROTECTION_CREATE,
+                'Origin ProductQuote declined',
+                ['pq_gid' => $originProductQuote->pq_gid]
+            );
+        }
+        return $originProductQuote;
     }
 
     public function createPayment(OrderCreateFromSaleForm $orderCreateFromSaleForm, array $saleData, Order $order): ?array
@@ -237,44 +237,39 @@ class ReprotectionCreateService
         return null;
     }
 
-    public function getFlight(Order $order): ?Flight
+    public function getFlightByOriginQuote(ProductQuote $originProductQuote): Flight
     {
-        if ($productQuotes = $order->productQuotes) {
-            foreach ($productQuotes as $productQuote) {
-                if ($productQuote->isFlight() && ($flightQuote = $productQuote->flightQuote) && $flightQuote->fqFlight) {
-                    return $flightQuote->fqFlight;
-                }
-            }
+        if ($flight = $originProductQuote->flightQuote->fqFlight ?? null) {
+            return $flight;
         }
-        return null;
+        throw new DomainException('Flight by OriginQuote not found');
     }
 
-    public function declineOldProductQuote(Order $order): void
+    public function declineReProtectionQuotes(int $originProductQuoteId, string $originProductQuoteGid, Cases $case, ?int $userId = null): array
     {
-        if ($productQuotes = $order->productQuotes) {
-            foreach ($productQuotes as $productQuote) {
-                if ($productQuote->isFlight() && !$productQuote->isDeclined()) {
-                    $productQuote->declined(null, 'Declined from reProtection');
-                    $this->productQuoteRepository->save($productQuote);
+        $declinedIds = [];
+        if ($reProtectionQuotes = ProductQuoteQuery::getReprotectionQuotesByOriginQuote($originProductQuoteId)) {
+            foreach ($reProtectionQuotes as $reProtectionQuote) {
+                if (!$reProtectionQuote->isDeclined() && self::isReProtectionQuote($reProtectionQuote)) {
+                    $reProtectionQuote->declined($userId, 'Declined from reProtection');
+                    $this->productQuoteRepository->save($reProtectionQuote);
+                    $declinedIds[] = $reProtectionQuote->pq_id;
                 }
             }
+            if ($declinedIds) {
+                $case->addEventLog(
+                    CaseEventLog::RE_PROTECTION_CREATE,
+                    'Old ReProtectionQuotes declined',
+                    ['originProductQuoteGid' => $originProductQuoteGid]
+                );
+            }
         }
+        return $declinedIds;
     }
 
-    public function setCaseDeadline(Cases $case, FlightQuote $flightQuote): Cases
+    private static function isReProtectionQuote(ProductQuote $reProtectionQuote): bool
     {
-        if (!(($firstSegment = $flightQuote->flightQuoteSegments[0]) && $firstSegment->fqs_departure_dt)) {
-            throw new \RuntimeException('Deadline not created. Reason - Segments departure not correct');
-        }
-        $schdCaseDeadlineHours = SettingHelper::getSchdCaseDeadlineHours();
-        $deadline = date('Y-m-d H:i:s', strtotime($firstSegment->fqs_departure_dt . ' -' . $schdCaseDeadlineHours . ' hours'));
-
-        if ($deadline === false) {
-            throw new \RuntimeException('Deadline not created');
-        }
-        $case->cs_deadline_dt = $deadline;
-        $this->casesRepository->save($case);
-        return $case;
+        return $reProtectionQuote->isFlight() && $reProtectionQuote->flightQuote->isTypeReProtection();
     }
 
     public function flightRequestChangeStatus(FlightRequest $flightRequest, int $newStatus, $description): FlightRequest
@@ -318,5 +313,208 @@ class ReprotectionCreateService
         $clientForm->projectId = $projectId;
         $clientForm->typeCreate = Client::TYPE_CREATE_CASE;
         return $this->clientManageService->create($clientForm, null);
+    }
+
+    public function setProductQuoteChangeIsAutomate(ProductQuoteChange $productQuoteChange, bool $isAutomate): ProductQuoteChange
+    {
+        if ($isAutomate) {
+            $productQuoteChange->onIsAutomate();
+        } else {
+            $productQuoteChange->offIsAutomate();
+        }
+        $this->productQuoteChangeRepository->save($productQuoteChange);
+        return $productQuoteChange;
+    }
+
+    public static function writeLog(Throwable $throwable, array $data = [], string $category = 'ReprotectionCreateJob:throwable'): void
+    {
+        $message = AppHelper::throwableLog($throwable);
+        if ($data) {
+            $message = ArrayHelper::merge($message, $data);
+        }
+        if ($throwable instanceof DomainException) {
+            Yii::warning($message, $category);
+        } else {
+            Yii::error($message, $category);
+        }
+    }
+
+    public static function isChangeExist(ProductQuote $originProductQuote): bool
+    {
+        return ProductQuote::find()
+            ->leftJoin([
+                'change' => ProductQuoteChange::find()
+                    ->select(['pqc_pq_id'])
+                    ->where(['IN', 'pqc_status_id', SettingHelper::getActiveQuoteChangeStatuses()])
+                    ->andWhere(['pqc_type_id' => ProductQuoteChange::TYPE_VOLUNTARY_EXCHANGE])
+                    ->groupBy(['pqc_pq_id'])
+            ], 'change.pqc_pq_id = pq_id')
+            ->leftJoin([
+                'refund' => ProductQuoteRefund::find()
+                    ->select(['pqr_product_quote_id'])
+                    ->where(['IN', 'pqr_status_id', SettingHelper::getActiveQuoteRefundStatuses()])
+                    ->groupBy(['pqr_product_quote_id'])
+            ], 'refund.pqr_product_quote_id = pq_id')
+            ->where(['pq_id' => $originProductQuote->pq_id])
+            ->andWhere([
+                'OR',
+                ['IS NOT', 'change.pqc_pq_id', null],
+                ['IS NOT', 'refund.pqr_product_quote_id', null],
+            ])
+            ->exists();
+    }
+
+    public static function isScheduleChangeActiveExist(ProductQuote $originProductQuote): bool
+    {
+        return ProductQuoteChange::find()
+            ->where(['pqc_pq_id' => $originProductQuote->pq_id])
+            ->andWhere(['IN', 'pqc_status_id', SettingHelper::getInvoluntaryChangeActiveStatuses()])
+            ->andWhere(['pqc_type_id' => ProductQuoteChange::TYPE_RE_PROTECTION])
+            ->exists();
+    }
+
+    public static function isNotScheduleChangeUpdatableExist(ProductQuote $originProductQuote): bool
+    {
+        return ProductQuoteChange::find()
+            ->where(['pqc_pq_id' => $originProductQuote->pq_id])
+            ->andWhere(['NOT IN', 'pqc_status_id', SettingHelper::getUpdatableInvoluntaryQuoteChange()])
+            ->andWhere(['pqc_type_id' => ProductQuoteChange::TYPE_RE_PROTECTION])
+            ->exists();
+    }
+
+    public static function isScheduleChangeUpdatableExist(?ProductQuote $originProductQuote): bool
+    {
+        if (!$originProductQuote) {
+            return false;
+        }
+        return ProductQuoteChange::find()
+            ->where(['pqc_pq_id' => $originProductQuote->pq_id])
+            ->andWhere(['IN', 'pqc_status_id', SettingHelper::getUpdatableInvoluntaryQuoteChange()])
+            ->andWhere(['pqc_type_id' => ProductQuoteChange::TYPE_RE_PROTECTION])
+            ->exists();
+    }
+
+    /**
+     * @param ProductQuote $originProductQuote
+     * @return ProductQuoteChange[]|null
+     */
+    public static function getUpdatableScheduleChanges(ProductQuote $originProductQuote): ?array
+    {
+        return ProductQuoteChange::find()
+            ->where(['pqc_pq_id' => $originProductQuote->pq_id])
+            ->andWhere(['IN', 'pqc_status_id', SettingHelper::getUpdatableInvoluntaryQuoteChange()])
+            ->andWhere(['pqc_type_id' => ProductQuoteChange::TYPE_RE_PROTECTION])
+            ->all();
+    }
+
+    /**
+     * @param string $bookingId
+     * @param int $caseID
+     * @return Cases[]|null
+     */
+    public static function getCasesVoluntaryChanges(string $bookingId, int $caseID): array
+    {
+        return Cases::find()
+            ->select(Cases::tableName() . '.*')
+            ->innerJoin(ProductQuoteChange::tableName(), 'cs_id = pqc_case_id')
+            ->innerJoin(FlightQuote::tableName(), 'fq_product_quote_id = pqc_pq_id')
+            ->innerJoin(FlightQuoteFlight::tableName(), 'fq_id = fqf_fq_id')
+            ->where(['fqf_booking_id' => $bookingId])
+            ->andWhere(['!=', 'cs_id', $caseID])
+            ->andWhere(['pqc_type_id' => ProductQuoteChange::TYPE_VOLUNTARY_EXCHANGE])
+            ->andWhere(['NOT IN', 'pqc_status_id', SettingHelper::getActiveQuoteChangeStatuses()])
+            ->andWhere(['NOT IN', 'pqc_status_id', SettingHelper::getFinishedQuoteChangeStatuses()])
+            ->distinct()
+            ->all();
+    }
+
+    public static function casesVoluntaryChangesProcessing(string $bookingId, Cases $case): void
+    {
+        if ($casesVoluntaryChanges = self::getCasesVoluntaryChanges($bookingId, $case->cs_id)) {
+            foreach ($casesVoluntaryChanges as $caseVoluntaryChange) {
+                if (!empty($caseVoluntaryChange->cs_user_id)) {
+                    $linkToCase = Purifier::createCaseShortLink($caseVoluntaryChange);
+                    Notifications::createAndPublish(
+                        $caseVoluntaryChange->cs_user_id,
+                        'Exchange Case (' . $case->cs_id . ') update',
+                        'New Schedule Change happened: (' . $linkToCase . '). Voluntary Exchange disabled.',
+                        Notifications::TYPE_WARNING,
+                        true
+                    );
+                }
+                $caseNote = CaseNote::create(
+                    $caseVoluntaryChange->cs_id,
+                    'New Schedule Change happened: (' . $case->cs_id . '). Voluntary Exchange disabled.',
+                    null
+                );
+                $caseNote->detachBehavior('user');
+                if ($caseNote->validate()) {
+                    $caseNote->save();
+                } else {
+                    Yii::warning(
+                        [
+                            'message' => ErrorsToStringHelper::extractFromModel($caseNote),
+                            'data' => $caseNote->getAttributes(),
+                        ],
+                        'ReProtectionExchangeService:CasesVoluntaryChangesProcessing:ExchangeCaseNote'
+                    );
+                }
+            }
+        }
+    }
+
+    /**
+     * @param string $bookingId
+     * @param int $caseID
+     * @return Cases[]|null
+     */
+    public static function getCasesRefund(string $bookingId, int $caseID): array
+    {
+        return Cases::find()
+            ->select(Cases::tableName() . '.*')
+            ->innerJoin(ProductQuoteRefund::tableName(), 'cs_id = pqr_case_id')
+            ->innerJoin(FlightQuote::tableName(), 'fq_product_quote_id = pqr_product_quote_id')
+            ->innerJoin(FlightQuoteFlight::tableName(), 'fq_id = fqf_fq_id')
+            ->where(['fqf_booking_id' => $bookingId])
+            ->andWhere(['!=', 'cs_id', $caseID])
+            ->andWhere(['NOT IN', 'pqr_status_id', SettingHelper::getActiveQuoteRefundStatuses()])
+            ->andWhere(['NOT IN', 'pqr_status_id', SettingHelper::getFinishedQuoteRefundStatuses()])
+            ->distinct()
+            ->all();
+    }
+
+    public static function casesRefundProcessing(string $bookingId, Cases $case): void
+    {
+        if ($casesRefund = self::getCasesRefund($bookingId, $case->cs_id)) {
+            foreach ($casesRefund as $caseRefund) {
+                if (!empty($caseRefund->cs_user_id)) {
+                    $linkToCase = Purifier::createCaseShortLink($caseRefund);
+                    Notifications::createAndPublish(
+                        $caseRefund->cs_user_id,
+                        'Refund Case (' . $case->cs_id . ') update',
+                        'New Schedule Change happened: (' . $linkToCase . '). Refund disabled.',
+                        Notifications::TYPE_WARNING,
+                        true
+                    );
+                }
+                $caseNote = CaseNote::create(
+                    $caseRefund->cs_id,
+                    'New Schedule Change happened: (' . $case->cs_id . '). Refund disabled.',
+                    null
+                );
+                $caseNote->detachBehavior('user');
+                if ($caseNote->validate()) {
+                    $caseNote->save();
+                } else {
+                    Yii::warning(
+                        [
+                            'message' => ErrorsToStringHelper::extractFromModel($caseNote),
+                            'data' => $caseNote->getAttributes(),
+                        ],
+                        'ReProtectionExchangeService:CasesRefundProcessing:ExchangeCaseNote'
+                    );
+                }
+            }
+        }
     }
 }

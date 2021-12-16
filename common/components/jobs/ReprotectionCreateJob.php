@@ -3,21 +3,37 @@
 namespace common\components\jobs;
 
 use common\components\HybridService;
+use common\components\purifier\Purifier;
+use common\models\CaseNote;
+use common\models\CaseSale;
 use common\models\ClientEmail;
+use common\models\Notifications;
 use DomainException;
 use modules\flight\models\FlightRequest;
 use modules\flight\src\useCases\flightQuote\FlightQuoteManageService;
+use modules\flight\src\useCases\reprotectionCreate\service\BoRequestReProtectionService;
+use modules\flight\src\useCases\reprotectionCreate\service\CaseReProtectionService;
+use modules\flight\src\useCases\reprotectionCreate\service\FlightRequestService;
+use modules\flight\src\useCases\reprotectionCreate\service\OtaRequestReProtectionService;
 use modules\flight\src\useCases\reprotectionCreate\service\ReprotectionCreateService;
+use modules\flight\src\useCases\reprotectionCreate\service\SendEmailReProtectionService;
 use modules\flight\src\useCases\sale\form\OrderContactForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
+use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeAutoDecisionPendingEvent;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeQuery;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
+use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelation;
+use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelationQueryScopes;
+use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelationRepository;
+use modules\product\src\entities\productQuoteChangeRelation\service\ProductQuoteChangeRelationService;
+use modules\product\src\entities\productQuoteData\service\ProductQuoteDataManageService;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\repositories\ProductQuoteRelationRepository;
+use sales\dispatchers\EventDispatcher;
 use sales\entities\cases\CaseCategory;
 use sales\entities\cases\CaseEventLog;
 use sales\entities\cases\Cases;
@@ -28,10 +44,15 @@ use sales\exception\ValidationException;
 use sales\helpers\app\AppHelper;
 use sales\helpers\ErrorsToStringHelper;
 use sales\helpers\setting\SettingHelper;
+use sales\model\caseOrder\entity\CaseOrder;
+use sales\model\caseOrder\entity\CaseOrderQuery;
 use sales\services\cases\CasesCommunicationService;
 use sales\services\cases\CasesSaleService;
 use sales\services\email\SendEmailByCase;
+use Throwable;
 use Yii;
+use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\queue\JobInterface;
 use yii\queue\Queue;
 use sales\repositories\product\ProductQuoteRepository;
@@ -51,15 +72,17 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
      */
     public function execute($queue): void
     {
-        $this->executionTimeRegister();
+        $this->waitingTimeRegister();
 
         $reProtectionCreateService = Yii::createObject(ReprotectionCreateService::class);
-        $casesSaleService = Yii::createObject(CasesSaleService::class);
         $flightQuoteManageService = Yii::createObject(FlightQuoteManageService::class);
-        $productQuoteRelationRepository = Yii::createObject(ProductQuoteRelationRepository::class);
-        $productQuoteRepository = Yii::createObject(ProductQuoteRepository::class);
-        $orderCreateFromSaleService = Yii::createObject(OrderCreateFromSaleService::class);
-        $casesCommunicationService = Yii::createObject(CasesCommunicationService::class);
+        $caseReProtectionService = Yii::createObject(CaseReProtectionService::class);
+        $boRequestReProtectionService = Yii::createObject(BoRequestReProtectionService::class);
+        $sendEmailReProtectionService = Yii::createObject(SendEmailReProtectionService::class);
+        $productQuoteChangeRepository = Yii::createObject(ProductQuoteChangeRepository::class);
+        $flightRequestService = Yii::createObject(FlightRequestService::class);
+        $eventDispatcher = Yii::createObject(EventDispatcher::class);
+        $productQuoteDataManageService = Yii::createObject(ProductQuoteDataManageService::class);
 
         $client = null;
 
@@ -67,368 +90,307 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
             if (!$flightRequest = FlightRequest::findOne($this->flight_request_id)) {
                 throw new DomainException('FlightRequest not found, ID (' . $this->flight_request_id . ')');
             }
+            $flightRequestService->setFlightRequest($flightRequest);
 
-            $caseExist = Cases::find()->where(['cs_order_uid' => $flightRequest->fr_booking_id])
-                ->andWhere(['NOT IN', 'cs_status', [CasesStatus::STATUS_SOLVED, CasesStatus::STATUS_TRASH]])
-                ->innerJoin(CaseCategory::tableName(), 'cs_category_id = cc_id and cc_key = :categoryKey', [
-                    'categoryKey' => SettingHelper::getReProtectionCaseCategory()
-                ])->exists();
+            $originProductQuote = ProductQuoteQuery::getProductQuoteByBookingId($flightRequest->fr_booking_id);
 
-            $oldProductQuote = ProductQuoteQuery::getProductQuoteByBookingId($flightRequest->fr_booking_id);
-            if ($caseExist || ($oldProductQuote && ProductQuoteChangeQuery::existsByQuoteIdAndStatuses($oldProductQuote->pq_id, ProductQuoteChangeStatus::PROCESSING_LIST))) {
-                $flightRequest->statusToError();
-                $reProtectionCreateService->flightRequestChangeStatus(
-                    $flightRequest,
-                    FlightRequest::STATUS_ERROR,
-                    'Reason: Product Quote Change exist in status id: ' . implode(', ', ProductQuoteChangeStatus::PROCESSING_LIST)
-                );
+            if ($originProductQuote && $reProtectionCreateService::isChangeExist($originProductQuote)) {
+                if ($lastCase = $caseReProtectionService::getLastCaseByBookingId($flightRequest->fr_booking_id, null)) {
+                    $lastCase->addEventLog(
+                        CaseEventLog::RE_PROTECTION_CREATE,
+                        'ReProtection request is declined. Change processing already exist',
+                        ['booking_id' => $flightRequest->fr_booking_id],
+                        CaseEventLog::CATEGORY_WARNING
+                    );
+                }
+                $flightRequestService->error('Reason: Change processing already exist. Origin Product Quote(' .
+                    $originProductQuote->pq_gid . ')');
                 return;
             }
 
-            $case = $reProtectionCreateService->createCase($flightRequest);
-            $case->addEventLog(
-                CaseEventLog::CASE_CREATED,
-                'Created Schedule Change case, BookingID: ' . $flightRequest->fr_booking_id,
-                ['case_gid' => $case->cs_gid, 'fr_booking_id' => $flightRequest->fr_booking_id]
-            );
+            if ($originProductQuote && $reProtectionCreateService::isScheduleChangeActiveExist($originProductQuote)) {
+                $flightRequestService->error('Reason: Product Quote Schedule Change Active exist. Origin Product Quote(' .
+                    $originProductQuote->pq_gid . ')');
+                return;
+            }
 
-            if ($order = $reProtectionCreateService->getOrderByBookingId($flightRequest->fr_booking_id)) {
+            if (!$case = $caseReProtectionService::getLastActiveCaseByBookingId($flightRequest->fr_booking_id)) {
+                $case = $caseReProtectionService->createCase($flightRequest);
+
+                if ($clientId = $originProductQuote->productQuoteLastChange->pqcCase->cs_client_id ?? null) {
+                    $caseReProtectionService->additionalFillingCase($clientId, $flightRequest->fr_project_id);
+                }
+            }
+            $caseReProtectionService->setCase($case);
+
+            if ($originProductQuote && $updatableScheduleChanges = $reProtectionCreateService::getUpdatableScheduleChanges($originProductQuote)) {
+                foreach ($updatableScheduleChanges as $oldScheduleChange) {
+                    $oldScheduleChange->declined();
+                    $productQuoteChangeRepository->save($oldScheduleChange);
+                }
+
+                $productQuoteChange = ProductQuoteChange::createReProtection($originProductQuote->pq_id, $case->cs_id, $this->flight_request_is_automate);
+                $productQuoteChangeRepository->save($productQuoteChange);
+
                 $case->addEventLog(
                     CaseEventLog::RE_PROTECTION_CREATE,
-                    'Found Order GID: (' . $order->or_gid . ')',
-                    ['order_gid' => $order->or_gid, 'order_id' => $order->or_id]
+                    'New schedule change happened',
+                    ['change' => $productQuoteChange->pqc_gid],
+                    CaseEventLog::CATEGORY_INFO
                 );
-                if (!$oldProductQuote) {
-                    $case->addEventLog(
-                        CaseEventLog::RE_PROTECTION_CREATE,
-                        'Origin ProductQuote not found',
-                        ['fr_booking_id' => $flightRequest->fr_booking_id]
-                    );
-                    $reProtectionCreateService->caseToManual($case, 'Flight quote not updated');
-                    $reProtectionCreateService->flightRequestChangeStatus(
-                        $flightRequest,
-                        FlightRequest::STATUS_PENDING,
-                        'Original quote not declined'
-                    );
-                } else {
-                    $case->addEventLog(
-                        CaseEventLog::RE_PROTECTION_CREATE,
-                        'Origin ProductQuote found (' . $oldProductQuote->pq_gid . ')',
-                        ['pq_gid' => $oldProductQuote->pq_gid]
-                    );
-                    $reProtectionCreateService->declineOldProductQuote($order);
-                    $case->addEventLog(
-                        CaseEventLog::RE_PROTECTION_CREATE,
-                        'Old ProductQuotes declined',
-                        ['order_id' => $order->or_id, 'order_gid' => $order->or_gid]
-                    );
-                }
+            }
 
-                if (
-                    !$client = $reProtectionCreateService->getClientByOrderProject(
-                        $order->getId(),
-                        $flightRequest->fr_project_id
-                    )
-                ) {
-                    $case->addEventLog(
-                        CaseEventLog::RE_PROTECTION_CREATE,
-                        'Client not found',
-                        ['order_gid' => $order->or_gid, 'order_id' => $order->or_id]
-                    );
-                    $reProtectionCreateService->caseToManual(
-                        $case,
-                        'Client not found in OrderContact. Created default client.'
-                    );
-                    $client = $reProtectionCreateService->createSimpleClient($flightRequest->fr_project_id);
-                    $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Created default client');
-                }
-                $reProtectionCreateService->additionalFillingCase($case, $client->id, $flightRequest->fr_project_id);
-                $orderCreateFromSaleService->caseOrderRelation($order->getId(), $case->cs_id);
-                $case->addEventLog(
-                    CaseEventLog::RE_PROTECTION_CREATE,
-                    'Case related to order',
-                    ['order_gid' => $order->or_gid, 'case_gid' => $case->cs_gid]
-                );
-
+            if (!$originProductQuote || !$reProtectionCreateService::isScheduleChangeUpdatableExist($originProductQuote)) {
                 try {
-                    if (
-                        empty($flightRequest->getFlightQuoteData()) ||
-                        !is_array($flightRequest->getFlightQuoteData())
-                    ) {
-                        throw new CheckRestrictionException('FlightQuote is empty/wrong data in FlightRequest/data_json');
-                    }
-                    if (!$flight = $reProtectionCreateService->getFlight($order)) {
-                        throw new CheckRestrictionException('Flight not found');
-                    }
-
-                    $flightQuote = $flightQuoteManageService->createReProtection(
-                        $flight,
-                        $flightRequest->getFlightQuoteData(),
-                        $order->getId(),
-                        null,
-                        $case->cs_id,
-                        null,
-                        null,
-                        $oldProductQuote ?? null
-                    );
-                    $case->addEventLog(
-                        CaseEventLog::RE_PROTECTION_CREATE,
-                        'FlightQuote created GID: ' . ($flightQuote->fqProductQuote->pq_gid ?? '-'),
-                        ['pq_gid' => $flightQuote->fqProductQuote->pq_gid ?? null]
-                    );
-                    if ($oldProductQuote) {
-                        $relation = ProductQuoteRelation::createReProtection(
-                            $oldProductQuote->pq_id,
-                            $flightQuote->fq_product_quote_id
-                        );
-                        $productQuoteRelationRepository->save($relation);
-                        $productQuoteChange = ProductQuoteChange::createNew($oldProductQuote->pq_id, $case->cs_id);
-                        (new ProductQuoteChangeRepository())->save($productQuoteChange);
-                        $case->addEventLog(
-                            CaseEventLog::RE_PROTECTION_CREATE,
-                            'ProductQuote related to origin Product Quote (ReProtection Type)',
-                            ['pq_id' => $oldProductQuote->pq_id, 'case_id' => $case->cs_id]
-                        );
-                    }
-                } catch (\Throwable $throwable) {
-                    $case->addEventLog(
-                        CaseEventLog::RE_PROTECTION_CREATE,
-                        'FlightQuote not created',
-                        ['order_id' => $order->getId(), 'case_id' => $case->cs_id]
-                    );
-                    $reProtectionCreateService->caseToManual($case, 'New quote not created');
-                    throw new CheckRestrictionException($throwable->getMessage());
-                }
-            } else {
-                try {
-                    $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Order not found');
-                    $case->addEventLog(
-                        CaseEventLog::RE_PROTECTION_CREATE,
-                        'START: Request getSaleFrom BackOffice, BookingID: ' . $flightRequest->fr_booking_id,
-                        ['fr_booking_id' => $flightRequest->fr_booking_id]
-                    );
-                    $saleSearch = $casesSaleService->getSaleFromBo($flightRequest->fr_booking_id);
-
-                    if (empty($saleSearch['saleId'])) {
-                        throw new BoResponseException('Sale not found by Booking ID(' . $flightRequest->fr_booking_id . ') from "cs/search"');
-                    }
-                    $case->addEventLog(
-                        CaseEventLog::RE_PROTECTION_CREATE,
-                        'START: Request DetailRequestToBackOffice SaleID: ' . $saleSearch['saleId'],
-                        ['sale_id' => $saleSearch['saleId']]
-                    );
-                    $saleData = $casesSaleService->detailRequestToBackOffice($saleSearch['saleId'], 0, 120, 1);
-
-                    $orderCreateFromSaleForm = new OrderCreateFromSaleForm();
-                    if (!$orderCreateFromSaleForm->load($saleData)) {
-                        throw new \DomainException('OrderCreateFromSaleForm not loaded');
-                    }
-                    if (!$orderCreateFromSaleForm->validate()) {
-                        throw new ValidationException(ErrorsToStringHelper::extractFromModel($orderCreateFromSaleForm));
-                    }
-                    $orderContactForm = OrderContactForm::fillForm($saleData);
-                    if (!$orderContactForm->validate()) {
-                        throw new ValidationException(ErrorsToStringHelper::extractFromModel($orderContactForm));
-                    }
-                    $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Responses accepted successfully');
+                    $saleData = $boRequestReProtectionService->getSaleData($flightRequest->fr_booking_id, $case);
 
                     $client = $reProtectionCreateService->getOrCreateClient(
                         $flightRequest->fr_project_id,
-                        $orderContactForm
-                    );
-                    $reProtectionCreateService->additionalFillingCase(
-                        $case,
-                        $client->id,
-                        $flightRequest->fr_project_id
+                        $boRequestReProtectionService->getOrderContactForm()
                     );
 
-                    $casesSaleService->createSaleByData($case->cs_id, $saleData);
-                    $case->addEventLog(
-                        CaseEventLog::RE_PROTECTION_CREATE,
-                        'Case Sale created by Data',
-                        ['case_id' => $case->cs_id]
-                    );
-                    $order = $reProtectionCreateService->createOrder(
-                        $orderCreateFromSaleForm,
-                        $orderContactForm,
-                        $case,
-                        $flightRequest->fr_project_id
-                    );
-                    $case->addEventLog(
-                        CaseEventLog::RE_PROTECTION_CREATE,
-                        'Order created GID: ' . $order->or_gid,
-                        ['order_gid' => $order->or_gid]
-                    );
-
-                    $oldProductQuote = $reProtectionCreateService->createFlightInfrastructure(
-                        $orderCreateFromSaleForm,
-                        $saleData,
-                        $order
-                    );
-                    $case->addEventLog(
-                        CaseEventLog::RE_PROTECTION_CREATE,
-                        'Origin ProductQuote created GID: ' . $oldProductQuote->pq_gid,
-                        ['pq_gid' => $oldProductQuote->pq_gid]
-                    );
-                    $oldProductQuote->declined();
-                    $productQuoteRepository->save($oldProductQuote);
-                    $case->addEventLog(
-                        CaseEventLog::RE_PROTECTION_CREATE,
-                        'Origin ProductQuote declined',
-                        ['pq_gid' => $oldProductQuote->pq_gid]
-                    );
-                    $productQuoteChange = ProductQuoteChange::createNew($oldProductQuote->pq_id, $case->cs_id);
-                    (new ProductQuoteChangeRepository())->save($productQuoteChange);
-
-                    $reProtectionCreateService->createPayment($orderCreateFromSaleForm, $saleData, $order);
-                } catch (\Throwable $throwable) {
-                    $reProtectionCreateService->caseToManual($case, 'Order not created');
-                    throw new CheckRestrictionException($throwable->getMessage());
+                    $caseReProtectionService->additionalFillingCase($client->id, $flightRequest->fr_project_id);
+                    if ($caseSale = CaseSale::findOne(['css_cs_id' => $case->cs_id, 'css_sale_id' => $saleData['saleId']])) {
+                        $caseSale->delete();
+                    }
+                    $reProtectionCreateService->createCaseSale($saleData, $case);
+                } catch (Throwable $throwable) {
+                    $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Case sale not created');
+                    $caseReProtectionService->caseToManual('Case sale not created');
+                    if (isset($flightRequest) && $client === null) {
+                        $client = $reProtectionCreateService->createSimpleClient($flightRequest->fr_project_id);
+                        $caseReProtectionService->additionalFillingCase($client->id, $flightRequest->fr_project_id);
+                    }
+                    $flightRequestService->error(VarDumper::dumpAsString($throwable->getMessage()));
+                    $reProtectionCreateService::writeLog($throwable);
+                    return;
                 }
 
-                try {
-                    if (empty($flightRequest->getFlightQuoteData()) || !is_array($flightRequest->getFlightQuoteData())) {
-                        throw new CheckRestrictionException('FlightQuote empty/wrong data in FlightRequest/data_json');
-                    }
-                    if (!$flight = $reProtectionCreateService->getFlightByBookingId($flightRequest->fr_booking_id)) {
-                        throw new CheckRestrictionException('Flight by BookingId not found');
-                    }
-
-                    $flightQuote = $flightQuoteManageService->createReProtection(
-                        $flight,
-                        $flightRequest->getFlightQuoteData(),
-                        $order->getId(),
-                        null,
-                        $case->cs_id,
-                        null,
-                        null,
-                        $oldProductQuote ?? null
-                    );
-
-                    $case->addEventLog(
-                        CaseEventLog::RE_PROTECTION_CREATE,
-                        'FlightQuote created GID: ' . ($flightQuote->fqProductQuote->pq_gid ?? '-'),
-                        ['pq_gid' => $flightQuote->fqProductQuote->pq_gid ?? null]
-                    );
-
-                    if ($oldProductQuote) {
-                        $relation = ProductQuoteRelation::createReProtection(
-                            $oldProductQuote->pq_id,
-                            $flightQuote->fq_product_quote_id
-                        );
-                        $productQuoteRelationRepository->save($relation);
-                        $case->addEventLog(
-                            CaseEventLog::RE_PROTECTION_CREATE,
-                            'ProductQuote related to origin Product Quote (ReProtection Type)',
-                            ['old_pq_id' => $oldProductQuote->pq_id, 'new_pq_id' => $flightQuote->fq_product_quote_id]
-                        );
-                    }
-                } catch (\Throwable $throwable) {
-                    $reProtectionCreateService->caseToManual($case, 'New quote not created');
-                    throw new CheckRestrictionException($throwable->getMessage());
-                }
-            }
-
-            if (!$this->flight_request_is_automate && $case->isAutomate()) {
-                $reProtectionCreateService->caseToManual($case, 'Manual processing requested');
-                $reProtectionCreateService->flightRequestChangeStatus(
-                    $flightRequest,
-                    FlightRequest::STATUS_PENDING,
-                    'Manual processing requested'
-                );
-            }
-
-            $reProtectionCreateService->setCaseDeadline($case, $flightQuote);
-
-            if ($case->isAutomate()) {
-                if (SettingHelper::isEnableSendHookToOtaReProtectionCreate()) {
+                if (!$originProductQuote) {
                     try {
-                        $hybridService = Yii::createObject(HybridService::class);
-                        $data = [
-                            'data' => [
-                                'booking_id' => $flightRequest->fr_booking_id,
-                                'reprotection_quote_gid' => $flightQuote->fqProductQuote->pq_gid,
-                                'case_gid' => $case->cs_gid,
-                            ]
-                        ];
-                        if (!$hybridService->whReprotection($flightRequest->fr_project_id, $data)) {
-                            throw new CheckRestrictionException(
-                                'Not found webHookEndpoint in project (' . $flightRequest->fr_project_id . ')'
-                            );
+                        $order = $reProtectionCreateService->createOrder(
+                            $boRequestReProtectionService->getOrderCreateFromSaleForm(),
+                            $boRequestReProtectionService->getOrderContactForm(),
+                            $case,
+                            $flightRequest->fr_project_id
+                        );
+
+                        $originProductQuote = $reProtectionCreateService->createOriginProductQuoteInfrastructure(
+                            $boRequestReProtectionService->getOrderCreateFromSaleForm(),
+                            $saleData,
+                            $order,
+                            $case,
+                            $this->flight_request_is_automate
+                        );
+                        $productQuoteChange = ProductQuoteChange::createReProtection($originProductQuote->pq_id, $case->cs_id, $this->flight_request_is_automate);
+                        $productQuoteChangeRepository->save($productQuoteChange);
+                        $caseReProtectionService->setCaseDeadline($originProductQuote->flightQuote);
+                    } catch (Throwable $throwable) {
+                        $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Order not created');
+                        $caseReProtectionService->caseToManual('Order not created');
+
+                        if (isset($case, $flightRequest) && $client === null) {
+                            $client = $reProtectionCreateService->createSimpleClient($flightRequest->fr_project_id);
+                            $caseReProtectionService->additionalFillingCase($client->id, $flightRequest->fr_project_id);
                         }
-                        $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Request HybridService sent successfully');
+                        $flightRequestService->error(VarDumper::dumpAsString($throwable->getMessage()));
+                        $reProtectionCreateService::writeLog($throwable);
+                        return;
+                    }
+                }
+            }
+
+            if (!isset($order) && !$order = $originProductQuote->pqOrder) {
+                throw new DomainException('Order not found');
+            }
+
+            if (!CaseOrder::find()->where(['co_order_id' => $order->or_id, 'co_case_id' => $case->cs_id])->exists()) {
+                $caseOrder = CaseOrder::create($case->cs_id, $order->or_id);
+                $caseOrder->detachBehavior('user');
+                if (!$caseOrder->save()) {
+                    throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($caseOrder));
+                }
+            }
+
+            try {
+                $reProtectionCreateService::casesRefundProcessing($flightRequest->fr_booking_id, $case);
+            } catch (\Throwable $throwable) {
+                Yii::warning(AppHelper::throwableLog($throwable), 'ReprotectionCreateJob:CasesRefundProcessing');
+            }
+
+            try {
+                $reProtectionCreateService::casesVoluntaryChangesProcessing($flightRequest->fr_booking_id, $case);
+            } catch (\Throwable $throwable) {
+                Yii::warning(AppHelper::throwableLog($throwable), 'ReprotectionCreateJob:CasesVoluntaryChangesProcessing');
+            }
+
+            try {
+                $reProtectionCreateService->originProductQuoteDecline($originProductQuote, $case);
+            } catch (Throwable $throwable) {
+                $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Flight quote not updated');
+                $caseReProtectionService->caseToManual('Flight quote not updated');
+                throw new DomainException('OriginProductQuote not declined');
+            }
+
+            $reProtectionCreateService->declineReProtectionQuotes($originProductQuote->pq_id, $originProductQuote->pq_gid, $case);
+
+            if (empty($flightRequest->getFlightQuoteData())) {
+                $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'New schedule change happened, no quote provided');
+                $caseReProtectionService->caseToManual('New schedule change happened, no quote provided');
+                throw new DomainException('New schedule change happened, no quote provided');
+            }
+
+            try {
+                $flight = $reProtectionCreateService->getFlightByOriginQuote($originProductQuote);
+                $flightQuote = $flightQuoteManageService->createReProtection(
+                    $flight,
+                    $flightRequest->getFlightQuoteData(),
+                    $originProductQuote->pq_order_id,
+                    null,
+                    $case,
+                    null,
+                    null,
+                    $originProductQuote ?? null
+                );
+                $caseReProtectionService->setCaseDeadline($flightQuote);
+                $reProtectionQuote = $flightQuote->fqProductQuote;
+                $reProtectionCreateService->recommendedReProtection($originProductQuote->pq_id, $reProtectionQuote->pq_id);
+            } catch (\Throwable $throwable) {
+                $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Could not create new reProtection quote');
+                $caseReProtectionService->caseToManual('Could not create new reProtection quote');
+                $flightRequestService->error(VarDumper::dumpAsString($throwable->getMessage()));
+                $reProtectionCreateService::writeLog($throwable);
+                return;
+            }
+
+            if (!isset($productQuoteChange)) {
+                $productQuoteChange = ProductQuoteChange::createReProtection($originProductQuote->pq_id, $case->cs_id, $this->flight_request_is_automate);
+                $productQuoteChangeRepository->save($productQuoteChange);
+            }
+
+            try {
+                ProductQuoteChangeRelationService::getOrCreate($productQuoteChange->pqc_id, $reProtectionQuote->pq_id);
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableLog($throwable), 'ReprotectionCreateJob:ProductQuoteChangeRelation');
+            }
+
+            $reProtectionCreateService->setProductQuoteChangeIsAutomate($productQuoteChange, (bool) $this->flight_request_is_automate);
+
+            if ($productQuoteChange->isStatusNew() || $productQuoteChange->isPending()) {
+                if ($case->isError() || $case->isTrash() || $case->isAwaiting() || $case->isSolved()) {
+                    if (!$case->cs_user_id) {
+                        $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'New reprotection request');
+                        $caseReProtectionService->caseToManual('New reprotection request');
+                    } else {
+                        $caseReProtectionService->caseNeedAction();
+                        $linkToCase = Purifier::createCaseShortLink($case);
+                        Notifications::createAndPublish(
+                            $case->cs_user_id,
+                            'New reProtection quote has been added',
+                            'New reProtection quote has been added for Case: (' . $linkToCase . '). Manual action required',
+                            Notifications::TYPE_INFO,
+                            true
+                        );
+                    }
+                    return;
+                }
+
+                if ($this->flight_request_is_automate) {
+                    if ($case->isPending() || $case->isStatusAutoProcessing() || $case->isFollowUp()) {
+                        $caseReProtectionService->caseToAutoProcessing('Automatic processing requested');
+                    }
+
+                    if ($case->cs_user_id && $case->isProcessing()) {
+                        $caseReProtectionService->caseNeedAction();
+                        $linkToCase = Purifier::createCaseShortLink($case);
+                        Notifications::createAndPublish(
+                            $case->cs_user_id,
+                            'New reProtection quote has been added',
+                            'New reProtection quote has been added for Case: (' . $linkToCase . ') ',
+                            Notifications::TYPE_INFO,
+                            true
+                        );
+                    }
+
+                    try {
+                        (new OtaRequestReProtectionService($flightRequest, $reProtectionQuote, $originProductQuote, $case))->send();
                     } catch (\Throwable $throwable) {
                         $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Request HybridService is failed');
-                        $reProtectionCreateService->caseToManual($case, 'OTA site is not informed');
-                        throw new CheckRestrictionException($throwable->getMessage());
+                        $caseReProtectionService->caseToManual('OTA site is not informed');
+                        $flightRequestService->pending('OTA site is not informed');
+                        return;
                     }
+
+                    try {
+                        $sendEmailReProtectionService->processing(
+                            $case,
+                            $order ?? null,
+                            $reProtectionQuote,
+                            $originProductQuote,
+                            $productQuoteChange
+                        );
+
+                        $productQuoteChange->statusToPending();
+                        $productQuoteChangeRepository->save($productQuoteChange);
+                        $eventDispatcher->dispatch(new ProductQuoteChangeAutoDecisionPendingEvent($productQuoteChange->pqc_id));
+                        $flightRequestService->done('Client Email send');
+                    } catch (\Throwable $throwable) {
+                        $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Auto SCHD Email not sent');
+                        $caseReProtectionService->caseToManual('Auto SCHD Email not sent');
+                        $flightRequestService->pending(VarDumper::dumpAsString($throwable->getMessage()));
+                    }
+
+                    try {
+                        $productQuoteDataManageService->updateRecommendedChangeQuote($originProductQuote->pq_id, $reProtectionQuote->pq_id);
+                        $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Set recommended quote(' . $reProtectionQuote->pq_gid . ')');
+                    } catch (\Throwable $throwable) {
+                        $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Quote(' . $reProtectionQuote->pq_gid . ') not set recommended');
+                    }
+                    return;
                 }
 
-                try {
-                    if (!$clientId = $case->cs_client_id) {
-                        throw new CheckRestrictionException('Client not found in Case');
-                    }
-                    $clientEmail = '';
-                    if ($order && $order->orderContacts) {
-                        $clientEmail = $order->orderContacts[0]->oc_email;
-                    }
-                    if (!$clientEmail && !$clientEmail = ClientEmail::getGeneralEmail($clientId)) {
-                        throw new CheckRestrictionException('ClientEmail not found');
-                    }
-
-                    $emailData = $casesCommunicationService->getEmailDataWithoutAgentData($case);
-                    $emailData['reprotection_quote'] = $flightQuote->fqProductQuote->serialize();
-                    if ($oldProductQuote) {
-                        $emailData['original_quote'] = $oldProductQuote->serialize();
+                if (!$this->flight_request_is_automate) {
+                    if ($case->cs_user_id && $case->isProcessing()) {
+                        $caseReProtectionService->caseNeedAction();
+                        $linkToCase = Purifier::createCaseShortLink($case);
+                        Notifications::createAndPublish(
+                            $case->cs_user_id,
+                            'New reProtection quote has been added',
+                            'New reProtection quote has been added for Case: (' . $linkToCase . '). Manual action required',
+                            Notifications::TYPE_INFO,
+                            true
+                        );
+                        return;
                     }
 
-                    $resultStatus = (new SendEmailByCase($case->cs_id, $clientEmail, $emailData))->getResultStatus();
-                    if ($resultStatus === SendEmailByCase::RESULT_NOT_ENABLE) {
-                        throw new CheckRestrictionException('ClientEmail not send. EmailConfigs not enabled.');
+                    if ($case->isPending() || $case->isStatusAutoProcessing() || $case->isFollowUp() || $case->isStatusNew()) {
+                        $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Manual processing requested');
+                        $caseReProtectionService->caseToManual('Manual processing requested');
+                        return;
                     }
-                    if ($resultStatus !== SendEmailByCase::RESULT_SEND) {
-                        throw new CheckRestrictionException('ClientEmail not send');
-                    }
-
-                    if ($oldProductQuote && isset($productQuoteChange)) {
-                        $productQuoteChange->decisionPending();
-                        (new ProductQuoteChangeRepository())->save($productQuoteChange);
-                    }
-                    $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Email sent successfully');
-                    $reProtectionCreateService->caseToAutoProcessing($case);
-                    $reProtectionCreateService->flightRequestChangeStatus(
-                        $flightRequest,
-                        FlightRequest::STATUS_DONE,
-                        'Client Email send'
-                    );
-                } catch (\Throwable $throwable) {
-                    $reProtectionCreateService->caseToManual($case, 'Auto SCHD Email not sent');
-                    $reProtectionCreateService->flightRequestChangeStatus(
-                        $flightRequest,
-                        FlightRequest::STATUS_PENDING,
-                        $throwable->getMessage()
-                    );
                 }
             }
-        } catch (\Throwable $throwable) {
-            $message['throwable'] = AppHelper::throwableLog($throwable);
-            $message['flightRequestID'] = $this->flight_request_id;
-            if ($throwable instanceof DomainException) {
-                \Yii::warning($message, 'ReprotectionCreateJob:throwable');
-            } else {
-                \Yii::error($message, 'ReprotectionCreateJob:throwable');
-            }
+            \Yii::info(
+                [
+                    'case' => ArrayHelper::merge($case->toArray(), ['status' => CasesStatus::getName($case->cs_status)]),
+                    'productQuoteChange' => ArrayHelper::merge($productQuoteChange->toArray(), ['status' => ProductQuoteChangeStatus::getName($productQuoteChange->pqc_status_id)]),
+                ],
+                'info\ReprotectionCreateJob:UnknownProcessException'
+            );
 
+            throw new DomainException('Unknown process exception');
+        } catch (Throwable $throwable) {
             if (isset($flightRequest)) {
-                $reProtectionCreateService->flightRequestChangeStatus(
-                    $flightRequest,
-                    FlightRequest::STATUS_ERROR,
-                    $throwable->getMessage()
-                );
+                $data['flightRequest'] = $flightRequest->toArray();
             }
+            $reProtectionCreateService::writeLog($throwable, $data ?? []);
+            if ($flightRequestService->getFlightRequest()) {
+                $flightRequestService->error(VarDumper::dumpAsString($throwable->getMessage()));
+            }
+
             if (isset($case, $flightRequest) && $client === null) {
                 $client = $reProtectionCreateService->createSimpleClient($flightRequest->fr_project_id);
-                $reProtectionCreateService->additionalFillingCase($case, $client->id, $flightRequest->fr_project_id);
+                $caseReProtectionService->additionalFillingCase($client->id, $flightRequest->fr_project_id);
             }
         }
     }

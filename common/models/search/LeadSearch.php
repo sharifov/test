@@ -11,6 +11,7 @@ use common\models\ClientPhone;
 use common\models\Email;
 use common\models\Employee;
 use common\models\Project;
+use common\models\ProjectEmployeeAccess;
 use common\models\QuotePrice;
 use common\models\Sms;
 use common\models\Sources;
@@ -19,6 +20,7 @@ use common\models\UserGroupAssign;
 use common\models\UserProfile;
 use Faker\Provider\DateTime;
 use modules\fileStorage\src\entity\fileLead\FileLead;
+use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeGroupAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\model\callLog\entity\callLog\CallLog;
@@ -364,13 +366,36 @@ class LeadSearch extends Lead
      *
      * @return ActiveDataProvider
      */
-    public function search($params)
+    public function search($params, Employee $user)
     {
-        $query = static::find()->with('project', 'source', 'employee', 'client');
+        $query = static::find()->with('project', 'lDep', 'source', 'employee', 'client');
         $query->select([
             Lead::tableName() . '.*',
             'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")
         ]);
+
+        if (!$user->isOnlyAdmin() && !$user->isSuperAdmin()) {
+            /*$query->andWhere([
+                Lead::tableName() . '.project_id' => ProjectEmployeeAccess::find()
+                    ->select(ProjectEmployeeAccess::tableName() . '.project_id')
+                    ->andWhere([ProjectEmployeeAccess::tableName() . '.employee_id' => $user->id])
+            ]);*/
+            $query->andWhere([
+                Lead::tableName() . '.project_id' => ProjectEmployeeAccess::find()
+                    ->select(ProjectEmployeeAccess::tableName() . '.project_id')
+                    ->andWhere([ProjectEmployeeAccess::tableName() . '.employee_id' => $user->id])->asArray()->column()
+            ]);
+            /*$query->andWhere([
+                Lead::tableName() . '.l_dep_id' => UserDepartment::find()
+                    ->select(UserDepartment::tableName() . '.ud_dep_id')
+                    ->andWhere([UserDepartment::tableName() . '.ud_user_id' => $user->id])
+            ]);*/
+            $query->andWhere([
+                Lead::tableName() . '.l_dep_id' => UserDepartment::find()
+                    ->select(UserDepartment::tableName() . '.ud_dep_id')
+                    ->andWhere([UserDepartment::tableName() . '.ud_user_id' => $user->id])->asArray()->column()
+            ]);
+        }
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -520,7 +545,7 @@ class LeadSearch extends Lead
 
         if ($this->client_phone) {
             $this->client_phone = (strpos($this->client_phone, '+') === 0 ? '+' : '') . str_replace('+', '', $this->client_phone);
-            $subQuery = ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['like', 'phone', $this->client_phone]);
+            $subQuery = ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['like', 'phone', $this->client_phone])->asArray()->column();
             $query->andWhere(['IN', 'client_id', $subQuery]);
         }
 
@@ -791,33 +816,19 @@ class LeadSearch extends Lead
         }
 
         if (!empty($this->callsQtyFrom) || !empty($this->callsQtyTo)) {
-            if ((bool) Yii::$app->params['settings']['new_communication_block_lead']) {
-                $query->leftJoin([
-                    'calls' => CallLogLead::find()
-                        ->select([
-                            'cll_lead_id AS c_lead_id',
-                            new Expression('COUNT(cll_lead_id) AS cnt')
-                        ])
-                        ->innerJoin(
-                            CallLog::tableName(),
-                            CallLog::tableName() . '.cl_id = ' . CallLogLead::tableName() . '.cll_cl_id'
-                        )
-                        ->where(['IN', 'cl_type_id', [CallLogType::IN, CallLogType::OUT]])
-                        ->groupBy(['cll_lead_id'])
-                ], Lead::tableName() . '.id = calls.c_lead_id');
-            } else {
-                $query->leftJoin([
-                    'calls' => Call::find()
-                        ->select([
-                            'c_lead_id',
-                            new Expression('COUNT(c_lead_id) AS cnt')
-                        ])
-                        ->where(['c_parent_id' => null])
-                        ->andWhere(['IN', 'c_call_type_id', [Call::CALL_TYPE_IN, Call::CALL_TYPE_OUT]])
-                        ->groupBy(['c_lead_id'])
-                ], 'leads.id = calls.c_lead_id');
-            }
-
+            $query->leftJoin([
+                'calls' => CallLogLead::find()
+                    ->select([
+                        'cll_lead_id AS c_lead_id',
+                        new Expression('COUNT(cll_lead_id) AS cnt')
+                    ])
+                    ->innerJoin(
+                        CallLog::tableName(),
+                        CallLog::tableName() . '.cl_id = ' . CallLogLead::tableName() . '.cll_cl_id'
+                    )
+                    ->where(['IN', 'cl_type_id', [CallLogType::IN, CallLogType::OUT]])
+                    ->groupBy(['cll_lead_id'])
+            ], Lead::tableName() . '.id = calls.c_lead_id');
             if (!empty($this->callsQtyFrom)) {
                 if ((int) $this->callsQtyFrom === 0) {
                     $query->andWhere(
@@ -1447,7 +1458,7 @@ class LeadSearch extends Lead
                         ->where(QuotePrice::tableName() . '.quote_id = ' . Quote::tableName() . '.id') ])
                 ->from(Quote::tableName())
                 ->where(Quote::tableName() . '.lead_id = ' . Lead::tableName() . '.id')
-                ->andWhere(['=', Quote::tableName() . '.status', [Quote::STATUS_APPLIED, Quote::STATUS_SEND]])
+                ->andWhere(['=', Quote::tableName() . '.status', [Quote::STATUS_APPLIED, Quote::STATUS_SENT]])
                 ->andWhere(Lead::tableName() . '.status=' . Lead::STATUS_SOLD)
         ]);
 
@@ -1597,12 +1608,22 @@ class LeadSearch extends Lead
         return $command->queryAll();
     }
 
-    public function searchAgent($params)
+    public function searchAgent($params, Employee $user)
     {
-        $projectIds = array_keys(EmployeeProjectAccess::getProjects());
         $query = Lead::find();
-        $query->with(['project', 'source', 'employee', 'client', 'client.clientEmails', 'client.clientPhones', 'leadFlightSegments']);
+        $query->with(['project', 'lDep', 'source', 'employee', 'client', 'client.clientEmails', 'client.clientPhones', 'leadFlightSegments']);
         $query->select([Lead::tableName() . '.*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
+
+        $query->andWhere([
+            Lead::tableName() . '.project_id' => ProjectEmployeeAccess::find()
+                ->select(ProjectEmployeeAccess::tableName() . '.project_id')
+                ->andWhere([ProjectEmployeeAccess::tableName() . '.employee_id' => $user->id])
+        ]);
+        $query->andWhere([
+            Lead::tableName() . '.l_dep_id' => UserDepartment::find()
+                ->select(UserDepartment::tableName() . '.ud_dep_id')
+                ->andWhere([UserDepartment::tableName() . '.ud_user_id' => $user->id])
+        ]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -1636,7 +1657,7 @@ class LeadSearch extends Lead
 
         if (!$additionalRestriction) {
             $query->andWhere(['<>', 'status', Lead::STATUS_PENDING]);
-            $query->andWhere(['IN', Lead::tableName() . '.project_id', $projectIds]);
+//            $query->andWhere(['IN', Lead::tableName() . '.project_id', $projectIds]);
             $this->employee_id = Yii::$app->user->id;
         }
 
@@ -2231,7 +2252,7 @@ class LeadSearch extends Lead
         }
 
         if ($this->quote_status > 0) {
-            $subQuery = Quote::find()->select(['COUNT(*)'])->where('quotes.lead_id = leads.id')->andWhere(['status' => [Quote::STATUS_APPLIED, Quote::STATUS_SEND, Quote::STATUS_OPENED] ]);
+            $subQuery = Quote::find()->select(['COUNT(*)'])->where('quotes.lead_id = leads.id')->andWhere(['status' => [Quote::STATUS_APPLIED, Quote::STATUS_SENT, Quote::STATUS_OPENED] ]);
             if ($this->quote_status == 2) {
                 //echo $subQuery->createCommand()->getRawSql(); exit;
                 $query->andWhere(new Expression('(' . $subQuery->createCommand()->getRawSql() . ') > 0'));
@@ -2428,7 +2449,7 @@ class LeadSearch extends Lead
         }
 
         if ($this->quote_status > 0) {
-            $subQuery = Quote::find()->select(['COUNT(*)'])->where('quotes.lead_id = leads.id')->andWhere(['status' => [Quote::STATUS_APPLIED, Quote::STATUS_SEND, Quote::STATUS_OPENED] ]);
+            $subQuery = Quote::find()->select(['COUNT(*)'])->where('quotes.lead_id = leads.id')->andWhere(['status' => [Quote::STATUS_APPLIED, Quote::STATUS_SENT, Quote::STATUS_OPENED] ]);
             if ($this->quote_status == 2) {
                 //echo $subQuery->createCommand()->getRawSql(); exit;
                 $query->andWhere(new Expression('(' . $subQuery->createCommand()->getRawSql() . ') > 0'));
@@ -2571,7 +2592,7 @@ class LeadSearch extends Lead
         }
 
         if ($this->quote_status > 0) {
-            $subQuery = Quote::find()->select(['COUNT(*)'])->where('quotes.lead_id = leads.id')->andWhere(['status' => [Quote::STATUS_APPLIED, Quote::STATUS_SEND, Quote::STATUS_OPENED] ]);
+            $subQuery = Quote::find()->select(['COUNT(*)'])->where('quotes.lead_id = leads.id')->andWhere(['status' => [Quote::STATUS_APPLIED, Quote::STATUS_SENT, Quote::STATUS_OPENED] ]);
             if ($this->quote_status == 2) {
                 //echo $subQuery->createCommand()->getRawSql(); exit;
                 $query->andWhere(new Expression('(' . $subQuery->createCommand()->getRawSql() . ') > 0'));
@@ -2680,7 +2701,7 @@ class LeadSearch extends Lead
 //        }
 //
 //        if($this->quote_status > 0) {
-//            $subQuery = Quote::find()->select(['COUNT(*)'])->where('quotes.lead_id = leads.id')->andWhere(['status' => [Quote::STATUS_APPLIED, Quote::STATUS_SEND, Quote::STATUS_OPENED] ]);
+//            $subQuery = Quote::find()->select(['COUNT(*)'])->where('quotes.lead_id = leads.id')->andWhere(['status' => [Quote::STATUS_APPLIED, Quote::STATUS_SENT, Quote::STATUS_OPENED] ]);
 //            if($this->quote_status == 2) {
 //                //echo $subQuery->createCommand()->getRawSql(); exit;
 //                $query->andWhere(new Expression('('.$subQuery->createCommand()->getRawSql().') > 0'));

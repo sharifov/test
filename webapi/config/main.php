@@ -1,5 +1,7 @@
 <?php
 
+use common\components\logger\FilebeatTarget;
+use common\helpers\LogHelper;
 use modules\hotel\HotelModule;
 use yii\log\FileTarget;
 use yii\log\DbTarget;
@@ -94,12 +96,12 @@ return [
         'log' => [
             'traceLevel' => 0,
             'targets' => [
-                [
+                'file' => [
                     'class' => FileTarget::class,
                     'levels' => ['error', 'warning'],
                     //'logVars' => [],
                 ],
-                [
+                'db-error' => [
                     'class' => DbTarget::class,
                     'levels' => ['error', 'warning'],
                     'except' => [
@@ -109,40 +111,57 @@ return [
                     'logVars' => [],
 //                    'logVars' => ['_POST', '_GET'],
                     'prefix' => static function () {
-                        $userID = Yii::$app->user->isGuest ? '-' : Yii::$app->user->id;
-                        $ip = $_SERVER['REMOTE_ADDR'];
-                        $hostname = php_uname('n');
-                        return "[$hostname][webapi][$ip][$userID]";
+                        return LogHelper::getWebapiPrefixDB();
                     },
                     'db' => 'db_postgres'
                 ],
-                [
-                    'class' => \yii\log\DbTarget::class,
+                'db-info' => [
+                    'class' => DbTarget::class,
                     'levels' => ['info'],
                     'except' => [
                         'yii\web\HttpException:404',
                     ],
                     'logVars' => [],
-                    'categories' => ['info\*'],
+                    'categories' => ['info\*', 'log\*'],
                     'prefix' => static function () {
-                        $userID = Yii::$app->user->isGuest ? '-' : Yii::$app->user->id;
-                        $ip = $_SERVER['REMOTE_ADDR'];
-                        $hostname = php_uname('n');
-                        return "[$hostname][webapi][$ip][$userID]";
+                        return LogHelper::getWebapiPrefixDB();
                     },
                     'db' => 'db_postgres'
                 ],
-                [
-                    'class' => \common\components\logger\AirFileTarget::class,
+                'file-fb-error' => [
+                    'class' => FilebeatTarget::class,
                     'levels' => ['error', 'warning'],
                     'except' => [
                         'yii\web\HttpException:404',
                         'yii\web\HttpException:401'
                     ],
+                    'prefix' => static function () {
+                        return LogHelper::getWebapiPrefixData();
+                    },
                     //'logVars' => YII_DEBUG ? ['_GET', '_POST', '_FILES', '_COOKIE', '_SESSION', '_SERVER'] : [],
                     'logVars' => [],
                     'logFile' => '@runtime/logs/stash.log'
                 ],
+                'file-fb-log' => [
+                    'class' => FilebeatTarget::class,
+                    'levels' => ['info'],
+                    'categories' => ['log\*', 'elk\*'],
+                    'logVars' => [],
+                    'prefix' => static function () {
+                        return LogHelper::getWebapiPrefixData();
+                    },
+                    'logFile' => '@runtime/logs/stash.log'
+                ],
+//                'analytics-fb-log' => [
+//                    'class' => FilebeatTarget::class,
+//                    'levels' => ['info'],
+//                    'categories' => ['analytics\*', 'AS\*'],
+//                    'logVars' => [],
+//                    'prefix' => static function () {
+//                        return LogHelper::getAnalyticPrefixData();
+//                    },
+//                    'logFile' => '@runtime/logs/stash.log'
+//                ],
                 /*[
                     'class'         => \primipilus\log\TelegramTarget::class,
                     'levels'        => ['error'],

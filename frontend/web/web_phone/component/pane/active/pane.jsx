@@ -28,6 +28,10 @@ class ActivePane extends React.Component {
 
     render() {
         let call = this.state.call;
+        let controls = this.props.controls;
+        if (call.data.connectionError) {
+            controls.reconnect.active = true;
+        }
         return (
             <React.Fragment>
                 <CallInfo project={call.data.project} source={call.data.source}/>
@@ -38,7 +42,7 @@ class ActivePane extends React.Component {
                     <RecordIndicator call={call} canRecordingDisabled={this.props.controls.canRecordingDisabled}/>
                     <AddInBlacklist call={call} canAddBlackList={this.props.controls.canAddBlackList}/>
                 </div>
-                <ActivePaneControls call={call} controls={this.props.controls}/>
+                <ActivePaneControls call={call} controls={controls}/>
             </React.Fragment>
         );
     }
@@ -49,14 +53,14 @@ function ActiveContactInfo(props) {
     return (
         <div className="contact-info-card">
             <div className="contact-info-card__details">
-                <AntiSpamElement call={call}/>
+                {/*<AntiSpamElement call={call}/>*/}
                 <div className="contact-info-card__line history-details">
                     {call.data.typeId !== 3
                         ? <span className="contact-info-card__label">{call.data.type}</span>
                         : ''
                     }
                     <div className="contact-info-card__name">
-                        <button className="call-pane__info">
+                        <button className="call-pane__info" data-call-id={call.data.id}>
                             <i className="user-icon fa fa-user"> </i>
                             <i className="info-icon fa fa-info"> </i>
                         </button>
