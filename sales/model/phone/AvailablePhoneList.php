@@ -27,7 +27,7 @@ class AvailablePhoneList
     public const GENERAL_ID = 1;
 
     /** @var AvailablePhone[] */
-    private array $list;
+    private array $list = [];
 
     public function __construct(int $userId, int $projectId, int $departmentId, DefaultPhoneType $defaultPhoneType)
     {
