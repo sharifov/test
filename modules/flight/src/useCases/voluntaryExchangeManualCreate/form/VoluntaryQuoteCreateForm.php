@@ -16,6 +16,8 @@ use modules\flight\src\useCases\form\ChangeQuoteCreateForm;
 use modules\product\src\entities\productTypePaymentMethod\ProductTypePaymentMethodQuery;
 use sales\helpers\ErrorsToStringHelper;
 use sales\helpers\product\ProductQuoteHelper;
+use sales\services\parsingDump\lib\ParsingDump;
+use sales\services\parsingDump\ReservationService;
 use yii\base\Model;
 use yii\helpers\ArrayHelper;
 
@@ -123,7 +125,7 @@ class VoluntaryQuoteCreateForm extends ChangeQuoteCreateForm
             ['recordLocator', 'string', 'max' => 8],
             ['pcc', 'string', 'max' => 10],
             [['quoteCreator'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['quoteCreator' => 'id']],
-            ['gds', 'in',  'range' => array_keys(FlightQuote::getGdsList())],
+            ['gds', 'in',  'range' => array_keys(ParsingDump::QUOTE_GDS_TYPE_MAP)],
             ['tripType', 'in',  'range' => array_keys(Flight::getTripTypeList())],
             ['validatingCarrier', 'in',  'range' => array_keys(Airline::getAirlinesMapping(true))],
             ['fareType', 'in',  'range' => array_keys(FlightQuote::getFareTypeList())],
@@ -180,9 +182,14 @@ class VoluntaryQuoteCreateForm extends ChangeQuoteCreateForm
 
     public function checkReservationDump(): void
     {
-        $dumpParser = FlightQuoteHelper::parseDump($this->reservationDump, false, $this->itinerary);
-        if (empty($dumpParser)) {
-            $this->addError('reservationDump', 'Incorrect reservation dump!');
+        try {
+            $reservationService = new ReservationService($this->gds);
+            $reservationService->parseReservation($this->reservationDump, false, $this->itinerary);
+        } catch (\Throwable $throwable) {
+            $this->addError('reservationDump', $throwable->getMessage());
+        }
+        if (!$reservationService->parseStatus || empty($this->itinerary)) {
+            $this->addError('reservationDump', 'Incorrect reservation dump');
         }
     }
 

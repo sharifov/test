@@ -62,7 +62,8 @@ class ReservationService
                 $parseData = $parserReservation->processingRow($rawData);
 
                 $this->parseResult[$i]['carrier'] = $parseData['airline'];
-                $this->parseResult[$i]['airlineName'] = $this->getAirlineName($parseData['airline'], $onView);
+                $this->parseResult[$i]['airlineObj'] = $airline = Airline::findIdentity($parseData['airline']);
+                $this->parseResult[$i]['airlineName'] = $airline->name ?? $parseData['airline'];
                 $this->parseResult[$i]['departureAirport'] = $parseData['departure_airport_iata'];
                 $this->parseResult[$i]['arrivalAirport'] = $parseData['arrival_airport_iata'];
                 $this->parseResult[$i]['segmentIata'] = $parseData['departure_airport_iata'] . $parseData['arrival_airport_iata'];
@@ -80,9 +81,11 @@ class ReservationService
                 );
                 $this->parseResult[$i]['layoverDuration'] = $this->getLayoverDuration($this->parseResult, $i);
 
-                $this->parseResult[$i]['operatingAirlineCode'] = $parseData['operated'] ?? null;
+                $this->parseResult[$i]['operatingAirline'] = $operatedCode = $parseData['operated'] ?? null;
+                $this->parseResult[$i]['operatingAirlineObj'] = $operatingAirlineObj = ($operatedCode) ? $operatingAirline = Airline::findIdentity($operatedCode) : null;
+                $this->parseResult[$i]['operatingAirlineName'] = $operatingAirlineObj->name ?? $operatedCode;
 
-                if ($airline = Airline::findIdentity($parseData['airline'])) {
+                if ($airline) {
                     $this->parseResult[$i]['cabin'] = $airline->getCabinByClass($parseData['booking_class']);
                 }
 
