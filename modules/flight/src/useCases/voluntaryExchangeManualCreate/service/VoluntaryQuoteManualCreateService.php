@@ -143,10 +143,6 @@ class VoluntaryQuoteManualCreateService
             $segmentDto = new FlightQuoteSegmentDTOItinerary($flightQuote->getId(), $flightQuoteTripId, $itinerary);
             $flightQuoteSegment = FlightQuoteSegment::create($segmentDto);
 
-            if (in_array($form->gds, [SearchService::GDS_WORLDSPAN, SearchService::GDS_TRAVELPORT], false)) {
-                $flightQuoteSegment = self::postProcessingWordspan($flightQuoteSegment, $segments);
-            }
-
             $this->objectCollection->getFlightQuoteSegmentRepository()->save($flightQuoteSegment);
             $keyIata = $flightQuoteSegment->fqs_departure_airport_iata . $flightQuoteSegment->fqs_arrival_airport_iata;
             $flightQuoteSegments[$keyIata] = $flightQuoteSegment;
@@ -230,22 +226,6 @@ class VoluntaryQuoteManualCreateService
         }
 
         return $flightQuote;
-    }
-
-    private static function postProcessingWordspan(FlightQuoteSegment $flightQuoteSegment, array $segments): FlightQuoteSegment /* TODO:: tmp solution */
-    {
-        $keyIata = $flightQuoteSegment->fqs_departure_airport_iata . $flightQuoteSegment->fqs_arrival_airport_iata;
-        $keySegment = array_search($keyIata, array_column($segments, 'segmentIata'), false);
-
-        if ($keySegment !== false) {
-            $departure = $segments[$keySegment]['departureDateTime'];
-            $arrival = $segments[$keySegment]['arrivalDateTime'];
-
-            $flightQuoteSegment->fqs_departure_dt = $departure->format('Y-m-d H:i:s');
-            $flightQuoteSegment->fqs_arrival_dt = $arrival->format('Y-m-d H:i:s');
-            $flightQuoteSegment->fqs_duration = ($arrival->getTimestamp() - $departure->getTimestamp()) / 60;
-        }
-        return $flightQuoteSegment;
     }
 
     public static function isMoreOneDay(\DateTime $departureDateTime, \DateTime $arrivalDateTime): bool

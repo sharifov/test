@@ -59,15 +59,16 @@ $keyTripList = array_combine(array_keys($trips), array_keys($trips));
             </div>
             <div class="col-1 border p-1">
                 <?php echo $segment['airlineName'] ?>
+                <?php if ($segment['operatingAirline']) : ?>
+                    <p>Operated by: <b><?php echo $segment['operatingAirline'] ?></b></p>
+                <?php endif ?>
             </div>
             <div class="col-1 border p-1">
                 <?php $airlineLogo = '//www.gstatic.com/flights/airline_logos/70px/' . $segment['carrier'] . '.png' ?>
                 <?php if (ImageHelper::checkImageGstaticExist($airlineLogo)) : ?>
-                    <span class="quote__vc-logo" style="margin-right: 2px;">
-                        <img src="<?php echo $airlineLogo ?>" alt="<?= $segment['airlineName']?>" class="quote__airline-logo">
-                    </span>
+                    <img style="height: 16px;" height="16" src="<?php echo $airlineLogo ?>" alt="<?= $segment['airlineName']?>" />
                 <?php endif ?>
-                <?php echo $segment['carrier'] ?>&nbsp;
+                <b><?php echo $segment['carrier'] ?></b>&nbsp;
                 <?php echo $segment['flightNumber'] ?>
             </div>
             <div class="col-3 border p-1">
