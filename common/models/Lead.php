@@ -819,6 +819,7 @@ class Lead extends ActiveRecord implements Objectable
         $lead->l_client_first_name = $client->first_name;
         $lead->l_client_last_name = $client->last_name;
         $lead->l_client_phone = $form->clientForm->phone;
+        $lead->l_client_email = $form->clientForm->email;
         $lead->l_client_ua = $form->user_agent;
         $lead->project_id = $form->project_id;
         $lead->source_id = $form->source_id;

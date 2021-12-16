@@ -4,6 +4,7 @@ namespace modules\webEngage\src\service;
 
 use common\components\EmailService;
 use common\components\Metrics;
+use common\helpers\LogHelper;
 use modules\webEngage\form\WebEngageEventForm;
 use modules\webEngage\form\WebEngageUserForm;
 use modules\webEngage\settings\WebEngageDictionary;
@@ -113,7 +114,11 @@ class WebEngageRequestService
             \Yii::info(
                 [
                     'apiEndpoint' => $apiEndpoint,
-                    'requestData' => $data,
+                    'requestData' => LogHelper::hidePersonalData(
+                        $data,
+                        WebEngageDictionary::KEY_PERSONAL_DATA_LIST,
+                        2
+                    ),
                     'responseData' => $response->getData(),
                 ],
                 'info\WebEngageRequestService:sendRequest'

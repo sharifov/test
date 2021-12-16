@@ -8,7 +8,6 @@ use sales\model\clientData\entity\ClientData;
 use sales\model\clientData\repository\ClientDataRepository;
 use sales\model\clientDataKey\service\ClientDataKeyService;
 use Yii;
-use yii\helpers\ArrayHelper;
 
 /**
  * Class ClientDataService

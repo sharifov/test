@@ -176,7 +176,7 @@ class LeadRedialService
         $this->transactionManager->wrap(function () use ($lead, $user) {
             $this->qCallService->remove($lead->id);
             $this->leadRepository->save($lead);
-            $this->leadUserConversionService->add(
+            $this->leadUserConversionService->addAutomate(
                 $lead->id,
                 $user->getId(),
                 LeadUserConversionDictionary::DESCRIPTION_TAKE,

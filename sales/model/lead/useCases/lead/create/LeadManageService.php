@@ -334,7 +334,7 @@ class LeadManageService
                 $this->leadRepository->save($lead);
             }
 
-            $this->leadUserConversionService->add(
+            $this->leadUserConversionService->addAutomate(
                 $leadId,
                 $user->id,
                 LeadUserConversionDictionary::DESCRIPTION_MANUAL,
@@ -420,7 +420,7 @@ class LeadManageService
                 $this->leadRepository->save($lead);
             }
 
-            $this->leadUserConversionService->add(
+            $this->leadUserConversionService->addAutomate(
                 $lead->id,
                 $form->getUserId(),
                 LeadUserConversionDictionary::DESCRIPTION_MANUAL,

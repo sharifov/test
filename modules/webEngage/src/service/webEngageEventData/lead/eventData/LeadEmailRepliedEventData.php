@@ -16,7 +16,7 @@ class LeadEmailRepliedEventData extends AbstractLeadEventData
         $result['datetime'] = date('Y-m-d H:i:s');
         $result['project_key'] = $this->getLead()->project->project_key ?? null;
         $result['department_key'] = $this->getLead()->lDep->dep_key ?? null;
-
+        $result['sourceCID'] = $this->getLead()->source->cid ?? null;
         return $result;
     }
 }
