@@ -7,7 +7,7 @@ use yii\web\View;
 
 /** @var $this View */
 
-\frontend\widgets\newWebPhone\TwilioAsset::register($this);
+\frontend\widgets\newWebPhone\DeviceAsset::register($this);
 $phoneDeviceRemoteLogsEnabled = SettingHelper::phoneDeviceLogsEnabled() ? 'true' : 'false';
 
 $phoneDeviceIdStorageKey = DeviceStorageKey::getphoneDeviceIdStorageKey(Auth::id());

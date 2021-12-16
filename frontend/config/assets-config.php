@@ -40,7 +40,7 @@ use frontend\themes\gentelella_v2\assets\SwitcheryAsset;
 use frontend\widgets\clientChat\ClientChatWidgetAsset;
 use frontend\widgets\cronExpression\CronExpressionAssets;
 use frontend\widgets\frontendWidgetList\userflow\assets\UserFlowWidgetAsset;
-use frontend\widgets\newWebPhone\NewWebPhoneGroupAsset;
+use frontend\widgets\newWebPhone\NewWebPhoneAsset;
 use frontend\widgets\notification\NotificationSocketAsset;
 use kartik\base\WidgetAsset;
 use kartik\bs4dropdown\DropdownAsset;
@@ -117,7 +117,7 @@ return [
         CallBoxAsset::class,
         EditToolAsset::class,
 
-        NewWebPhoneGroupAsset::class,
+        NewWebPhoneAsset::class,
 
         ActiveFormAsset::class,
         ValidationAsset::class,
@@ -309,13 +309,13 @@ return [
             'css' => 'edit_tool.min.css',
             'depends' => [ EditToolAsset::class ]
         ],
-        'NewWebPhoneGroupAsset' => [
-            'class' => NewWebPhoneGroupAsset::class,
+        'NewWebPhoneAsset' => [
+            'class' => NewWebPhoneAsset::class,
             'basePath' => '@webroot/web_phone/build',
             'baseUrl' => '@web/web_phone/build',
-            'js' => 'web_phone.min.js',
-            'css' => 'web_phone.min.css',
-            'depends' => [ NewWebPhoneGroupAsset::class ]
+            'js' => 'web_phone.min.' . $params['release']['version'] . '.js',
+            'css' => 'web_phone.min.' . $params['release']['version'] . '.css',
+            'depends' => [ NewWebPhoneAsset::class ]
         ],
         'ActiveFormAsset' => [
             'class' => ActiveFormAsset::class,
