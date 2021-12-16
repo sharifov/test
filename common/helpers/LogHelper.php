@@ -8,6 +8,7 @@
 namespace common\helpers;
 
 use Yii;
+use yii\helpers\ArrayHelper;
 
 class LogHelper
 {
@@ -192,5 +193,51 @@ class LogHelper
     {
         $session = Yii::$app->has('session', true) ? Yii::$app->get('session') : null;
         return $session && $session->getIsActive() ? $session->getId() : '';
+    }
+
+    public static function hidePersonalData(
+        array $data,
+        array $personalDataKeys,
+        int $showLen = 1,
+        int $maxLen = 3,
+        string $substitute = '*'
+    ): array {
+        foreach ($data as $key => $value) {
+            if (ArrayHelper::isAssociative($value)) {
+                $data[$key] = self::hidePersonalData($value, $personalDataKeys, $showLen, $maxLen, $substitute);
+            }
+            if (array_key_exists($key, $personalDataKeys)) {
+                $data[$key] = self::replaceSource($value, $showLen, $maxLen, $substitute);
+            }
+        }
+        return $data;
+    }
+
+    /**
+     * @param $source
+     * @param int $showLen
+     * @param int $maxLen
+     * @param string $substitute
+     * @return mixed|string
+     */
+    public static function replaceSource($source, int $showLen = 1, int $maxLen = 3, string $substitute = '*')
+    {
+        if (is_numeric($source)) {
+            $source = (string) $source;
+        }
+        if (!is_string($source)) {
+            return $source;
+        }
+
+        $length = strlen($source);
+        if ($length <= $maxLen || $length <= $showLen * 2) {
+            return str_repeat($substitute, $length);
+        }
+
+        $middle = str_repeat($substitute, $length - ($showLen * 2));
+        $first = substr($source, 0, $showLen);
+        $last = substr($source, -$showLen);
+
+        return $first . $middle . $last;
     }
 }
