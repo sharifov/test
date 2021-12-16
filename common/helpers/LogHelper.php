@@ -206,7 +206,7 @@ class LogHelper
             if (ArrayHelper::isAssociative($value)) {
                 $data[$key] = self::hidePersonalData($value, $personalDataKeys, $showLen, $maxLen, $substitute);
             }
-            if (array_key_exists($key, $personalDataKeys)) {
+            if (array_key_exists($key, $personalDataKeys) || in_array($key, $personalDataKeys, true)) {
                 $data[$key] = self::replaceSource($value, $showLen, $maxLen, $substitute);
             }
         }
