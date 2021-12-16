@@ -8,6 +8,7 @@ use common\models\search\EmailSearch;
 use common\models\search\LeadSearch;
 use common\models\search\SmsSearch;
 use frontend\models\search\UserSiteActivitySearch;
+use sales\model\userData\entity\search\UserDataSearch;
 use sales\auth\Auth;
 use sales\entities\cases\CasesSearch;
 use sales\model\callLog\entity\callLog\search\CallLogSearch;
@@ -216,6 +217,9 @@ class UserController extends FController
         $startDateTime = date('Y-m-d H:i', strtotime('-1 day'));
         $endDateTime = date('Y-m-d H:i', strtotime('+10 hours'));
         $data = $searchModel->searchStats(['UserMonitorSearch' => ['um_user_id' => $id]], $startDateTime);*/
+        $userDataModel = new UserDataSearch();
+        $userDataProvider = $userDataModel->search($params, Auth::user());
+
 
         $userSiteActivityModel = new UserSiteActivitySearch();
         $userSiteActivityModel->createTimeStart = strtotime($datePickerModel->dateStart);
@@ -273,6 +277,7 @@ class UserController extends FController
             /*'data' => $data,
             'startDateTime' => $startDateTime,
             'endDateTime' => $endDateTime,*/
+            'userDataProvider' => $userDataProvider,
             'userActivity' => $userActivity,
             'callLogDataProvider' => $callLogDataProvider,
             'callLogSearchModel' => $callLogSearchModel,
