@@ -39,7 +39,7 @@ class DbViewCryptService
         $this->cryptColumns = $cryptColumns;
         $this->viewName = $this->tableName . DbViewCryptDictionary::VIEW_POST_FIX;
         $this->settingBlockEncryptionMode = SettingHelper::getDbCryptBlockEncryptionMode();
-        $this->settingKeyStr = SettingHelper::getDbCryptKeyStr();
+        $this->settingKeyStr = hash('sha256', SettingHelper::getDbCryptKeyStr());
         $this->settingInitVector = SettingHelper::getDbCryptInitVector();
     }
 

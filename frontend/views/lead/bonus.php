@@ -1,5 +1,6 @@
 <?php
 
+use common\components\grid\project\ProjectColumn;
 use common\models\Employee;
 use dosamigos\datepicker\DatePicker;
 use sales\access\ListsAccess;
@@ -51,6 +52,11 @@ $this->params['breadcrumbs'][] = $this->title;
             'options' => [
                 'style' => 'width:80px'
             ]
+        ],
+        [
+            'class' => ProjectColumn::class,
+            'attribute' => 'project_id',
+            'relation' => 'project'
         ],
         [
             'attribute' => 'l_type',
@@ -105,28 +111,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'header' => 'Client',
             'format' => 'raw',
             'value' => static function (Lead $lead) {
-                if ($lead->client) {
-                    $clientName = $lead->client->first_name . ' ' . $lead->client->last_name;
-                    if ($clientName === 'Client Name') {
-                        $clientName = '- - - ';
-                    } else {
-                        $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName);
-                    }
-
-                    if ($lead->client->isExcluded()) {
-                        $clientName = ClientFormatter::formatExclude($lead->client)  . $clientName;
-                    }
-
-                    $str = '';
-                    //$str = $lead->client && $lead->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($lead->client->clientEmails, 'email', 'email')) . '' : '';
-                    //$str .= $lead->client && $lead->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($lead->client->clientPhones, 'phone', 'phone')) . '' : '';
-
-                    $clientName .= /*'<br>' .*/ $str;
-                } else {
-                    $clientName = '-';
-                }
-
-                return $clientName . '<br/>' . ClientTimeFormatter::format($lead->getClientTime2(), $lead->offset_gmt);
+                return $lead->getClientFormatted();
             },
             'options' => [
                 'style' => 'width:160px'
@@ -166,26 +151,20 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'attribute' => 'Request Details',
-            'content' => static function (Lead $lead) {
-                $content = '';
-                $content .= $lead->getFlightDetails();
-                $pax = '<span title="adult"><i class="fa fa-male"></i> ' . $lead->adults . '</span> / <span title="child"><i class="fa fa-child"></i> ' . $lead->children . '</span> / <span title="infant"><i class="fa fa-info"></i> ' . $lead->infants . '</span>';
-
-                $content .= '<br/>' . $pax . '<br/>';
-
-                $content .= sprintf('<strong>Cabin:</strong> %s', $lead->getCabinClassName());
-
-                return $content;
+            'value' => static function (Lead $lead) {
+                return $lead->getFlightDetailsPaxFormatted();
             },
             'format' => 'raw'
         ],
         [
-            'attribute' => 'Quotes ',
-            'value' => static function (Lead $lead) {
-                $quotes = $lead->getQuoteSendInfo();
-                return sprintf('Total: <strong>%d</strong> <br> Sent: <strong>%d</strong>', ($quotes['send_q'] + $quotes['not_send_q']), $quotes['send_q']);
+            'attribute' => 'Quotes',
+            'value' => static function (Lead $model) {
+                return $model->getQuoteInfoFormatted();
             },
-            'format' => 'raw'
+            'format' => 'raw',
+            'contentOptions' => [
+                'class' => 'text-center'
+            ]
         ],
         /*[
             'attribute' => 'last_activity',
@@ -284,11 +263,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'format' => 'raw'
         ],
 
-        [
-            'class' => \common\components\grid\project\ProjectColumn::class,
-            'attribute' => 'project_id',
-            'relation' => 'project'
-        ],
 
         [
             'class' => 'yii\grid\ActionColumn',

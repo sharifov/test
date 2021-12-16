@@ -16,9 +16,9 @@ use yii\widgets\ActiveForm;
 
         <?php if (!$model->ldk_is_system) : ?>
             <?= $form->field($model, 'ldk_key')->textInput(['maxlength' => true]) ?>
-
-            <?= $form->field($model, 'ldk_name')->textInput(['maxlength' => true]) ?>
         <?php endif ?>
+
+        <?= $form->field($model, 'ldk_name')->textInput(['maxlength' => true]) ?>
 
         <?= $form->field($model, 'ldk_enable')->dropDownList([1 => 'Yes', 0 => 'No']) ?>
 

@@ -89,6 +89,9 @@ class LeadController extends BaseController
      * @apiParam {object[]}             [lead.lead_data]                            Array of Lead Data
      * @apiParam {string{50}}           [lead.lead_data.field_key]                  Lead Data Key
      * @apiParam {string{500}}          [lead.lead_data.field_value]                Lead Data Value
+     * @apiParam {object[]}             [lead.client_data]                          Array of Client Data
+     * @apiParam {string{50}}           [lead.client_data.field_key]                Client Data Key
+     * @apiParam {string{500}}          [lead.client_data.field_value]              Client Data Value
      *
      * @apiParamExample {json} Request-Example:
      *
@@ -138,6 +141,12 @@ class LeadController extends BaseController
      *                  "field_key": "example_key",
      *                  "field_value": "example_value"
      *              }
+     *          ],
+     *          "client_data": [
+     *               {
+     *                  "field_key": "example_key",
+     *                  "field_value": "example_value"
+     *              }
      *          ]
      *       }
      * }
@@ -173,6 +182,12 @@ class LeadController extends BaseController
      *                      "ld_field_key": "kayakclickid",
      *                      "ld_field_value": "example_value",
      *                      "ld_id": 3
+     *                  }
+     *              ],
+     *              "clientDataInserted": [
+     *                  {
+     *                      "cd_field_key": "example_key",
+     *                      "cd_field_value": "example_value",
      *                  }
      *              ],
      *              "warnings": []
@@ -366,6 +381,7 @@ class LeadController extends BaseController
                             ),
                         ],
                         'leadDataInserted' => $this->leadCreateHandler->getLeadDataInserted(),
+                        'clientDataInserted' => $this->leadCreateHandler->getClientDataInserted(),
                         'warnings' => $this->leadCreateHandler->getWarnings(),
                     ])
                 )

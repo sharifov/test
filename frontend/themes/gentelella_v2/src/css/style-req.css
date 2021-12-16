@@ -2927,6 +2927,7 @@ input[disabled] + .radio-tab__text {
   position: relative;
 }
 
+
 .custom-checkbox input[type="checkbox"]:checked + label:after {
   content: '';
   background-color: #60afd7;
@@ -5177,6 +5178,9 @@ input[disabled] + .radio-tab__text {
 
 .chat__status--success {
   color: #63d400;
+}
+.chat__status.warning {
+    background-color: transparent;
 }
 
 .chat__details, .comm-chat-room-view-details {

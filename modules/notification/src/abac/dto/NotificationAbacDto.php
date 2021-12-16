@@ -2,7 +2,6 @@
 
 namespace modules\notification\src\abac\dto;
 
-use common\models\Employee;
 use stdClass;
 use common\models\Notifications;
 

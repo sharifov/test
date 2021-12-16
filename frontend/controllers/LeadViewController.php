@@ -92,6 +92,18 @@ class LeadViewController extends FController
         parent::__construct($id, $module, $config);
     }
 
+    public function behaviors(): array
+    {
+        $behaviors = [
+            'access' => [
+                'allowActions' => [
+                    'ajax-get-info',
+                ],
+            ],
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
+
     /**
      * @return string
      * @throws NotFoundHttpException

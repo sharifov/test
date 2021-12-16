@@ -34,7 +34,7 @@ $fromType = 'client';
 
 ?>
 
-<?php //php \yii\helpers\VarDumper::dump($model, 10, true) ?>
+<?php //php \yii\helpers\VarDumper::dump($model, 10, true)?>
 
 <?php if ($model['type'] === 'voice') :
     $call = Call::findOne($model['id']);
@@ -102,22 +102,10 @@ $fromType = 'client';
 
 <?php if ($model['type'] === 'email') :
         $mail = Email::findOne($model['id']);
-    if ($mail) :
-        if ($mail->e_status_id == Email::STATUS_DONE) {
-            $statusClass = 'success';
-            $statusTitle = 'DONE - ' . ($mail->e_status_done_dt ? Yii::$app->formatter->asDatetime(strtotime($mail->e_status_done_dt)) : Yii::$app->formatter->asDatetime(strtotime($mail->e_updated_dt)));
-        } elseif ($mail->e_status_id == Email::STATUS_ERROR || $mail->e_status_id == Email::STATUS_CANCEL) {
-            $statusClass = 'error';
-            $statusTitle = 'ERROR - ' . $mail->e_error_message;
-        } else {
-            $statusClass = 'sent';
-            $statusTitle = 'SENT - ComID: ' . $mail->e_communication_id;
-        }
-        ?>
-
+    if ($mail) : ?>
         <div class="chat__message chat__message--<?=($mail->e_type_id == Email::TYPE_INBOX ? 'client' : 'system')?> chat__message--email">
             <div class="chat__icn"><i class="fa fa-envelope-o"></i></div>
-            <i class="chat__status chat__status--<?=$statusClass?> fa fa-circle" data-toggle="tooltip" title="<?=Html::encode($statusTitle)?>" data-placement="right" data-original-title="<?=Html::encode($statusTitle)?>"></i>
+            <?= EmailHelper::getIconForCommunicationBlock($mail) ?>
             <div class="chat__message-heading">
             <?php if ($mail->e_type_id == Email::TYPE_INBOX) :?>
                     <div class="chat__sender">Email from (<?=Html::encode($mail->e_email_from_name)?> <<strong><?=Html::encode(MaskEmailHelper::masking($mail->e_email_from, $disableMasking))?>> )</strong>

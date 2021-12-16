@@ -28,7 +28,7 @@ use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
 use sales\model\clientChatVisitorData\repository\ClientChatVisitorDataRepository;
 use sales\model\leadData\entity\LeadData;
 use sales\model\leadData\repository\LeadDataRepository;
-use sales\model\leadDataKey\entity\LeadDataKey;
+use sales\model\leadDataKey\services\LeadDataKeyDictionary;
 use sales\model\leadUserConversion\service\LeadUserConversionDictionary;
 use sales\model\leadUserConversion\service\LeadUserConversionService;
 use sales\model\phoneList\entity\PhoneList;
@@ -257,7 +257,7 @@ class LeadManageService
 
             $this->clientChatLeadRepository->save($clientChatLead);
             if ($crossSystemXp = $dto->chatVisitorData->getCrossSystemXp()) {
-                $leadData = LeadData::create($leadId, LeadDataKey::KEY_CROSS_SYSTEM_XP, $dto->chatVisitorData->getCrossSystemXp());
+                $leadData = LeadData::create($leadId, LeadDataKeyDictionary::KEY_CROSS_SYSTEM_XP, $dto->chatVisitorData->getCrossSystemXp());
                 $this->leadDataRepository->save($leadData);
             }
             return $dto->lead;
@@ -334,7 +334,7 @@ class LeadManageService
                 $this->leadRepository->save($lead);
             }
 
-            $this->leadUserConversionService->add(
+            $this->leadUserConversionService->addAutomate(
                 $leadId,
                 $user->id,
                 LeadUserConversionDictionary::DESCRIPTION_MANUAL,
@@ -420,7 +420,7 @@ class LeadManageService
                 $this->leadRepository->save($lead);
             }
 
-            $this->leadUserConversionService->add(
+            $this->leadUserConversionService->addAutomate(
                 $lead->id,
                 $form->getUserId(),
                 LeadUserConversionDictionary::DESCRIPTION_MANUAL,

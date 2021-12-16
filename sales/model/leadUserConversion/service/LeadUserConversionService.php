@@ -30,17 +30,15 @@ class LeadUserConversionService
             ->column();
     }
 
-    public function add(
-        int $leadId,
-        int $userId,
-        ?string $description = null,
-        ?int $createdUserId = null,
-        bool $validateUsers = true
-    ): bool {
-        if ($validateUsers && $createdUserId !== null && $createdUserId !== $userId) {
-            return false;
-        }
+    public function addManual(int $leadId, int $userId, ?string $description = null, ?int $createdUserId = null): bool
+    {
+        $leadUserConversion = LeadUserConversion::create($leadId, $userId, $description, $createdUserId);
+        $this->leadUserConversionRepository->save($leadUserConversion);
+        return true;
+    }
 
+    public function addAutomate(int $leadId, int $userId, ?string $description = null, ?int $createdUserId = null): bool
+    {
         $leadWasFollowUp = LeadFlow::find()
             ->andWhere(['lead_id' => $leadId])
             ->andWhere([

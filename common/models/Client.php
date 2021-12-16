@@ -65,6 +65,7 @@ use yii\helpers\ArrayHelper;
  * @property ClientAccount|null $clientAccount
  * @property ClientVisitor|null $clientVisitor
  * @property CouponClient[] $couponClient
+ * @property ClientData[] $clientData
  *
  * @method clientPhonesByType(array $array)
  */
@@ -336,6 +337,11 @@ class Client extends ActiveRecord
     public function getCouponClient(): ActiveQuery
     {
         return $this->hasMany(CouponClient::class, ['cuc_client_id' => 'id']);
+    }
+
+    public function getClientData(): ActiveQuery
+    {
+        return $this->hasMany(ClientData::class, ['cd_client_id' => 'id']);
     }
 
     public function beforeSave($insert): bool

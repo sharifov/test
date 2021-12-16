@@ -12,8 +12,17 @@ class MaskPhoneHelper
             return null;
         }
         if (SettingHelper::clientDataPrivacyEnable()  && !$forceShow && strlen($number) > 8) {
-            return substr($number, 0, 5) . str_repeat("*", strlen($number) - 8) . substr($number, - 3);
+            return self::maskingPartial($number);
         }
         return $number;
+    }
+
+    /**
+     * @param string $number
+     * @return string
+     */
+    public static function maskingPartial(string $number): string
+    {
+        return substr($number, 0, 5) . str_repeat("*", strlen($number) - 8) . substr($number, - 3);
     }
 }

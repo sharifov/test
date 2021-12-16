@@ -49,17 +49,11 @@ $this->params['breadcrumbs'][] = $this->title;
             'cua_priority',
             [
                 'attribute' => 'cua_created_dt',
-                'value' => static function (\common\models\CallUserAccess $model) {
-                    return $model->cua_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->cua_created_dt)) : '-';
-                },
-                'format' => 'raw'
+                'format' => 'byUserDatetimeWithSeconds',
             ],
             [
                 'attribute' => 'cua_updated_dt',
-                'value' => static function (\common\models\CallUserAccess $model) {
-                    return $model->cua_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->cua_updated_dt)) : '-';
-                },
-                'format' => 'raw'
+                'format' => 'byUserDatetimeWithSeconds',
             ],
         ],
     ]) ?>

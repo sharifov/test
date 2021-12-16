@@ -11,6 +11,8 @@ namespace common\components;
 
 use common\models\Call;
 use common\models\Project;
+use sales\helpers\email\MaskEmailHelper;
+use sales\helpers\phone\MaskPhoneHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\model\call\entity\call\data\CreatorType;
 use sales\model\call\useCase\conference\create\CreateCallForm;
@@ -20,6 +22,7 @@ use Yii;
 use yii\base\Component;
 use yii\caching\TagDependency;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Json;
 use yii\helpers\Url;
 use yii\helpers\VarDumper;
 use yii\httpclient\Client;
@@ -170,7 +173,11 @@ class CommunicationService extends Component implements CommunicationServiceInte
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::mailPreview');
+            \Yii::warning([
+                'error'  => $out['error'],
+                'email_from' => MaskEmailHelper::maskingPartial($data['mail']['email_from']),
+                'email_to' => MaskEmailHelper::maskingPartial($data['mail']['email_to'])
+            ], 'Component:CommunicationService::mailPreview');
         }
 
         return $out;
@@ -407,7 +414,25 @@ class CommunicationService extends Component implements CommunicationServiceInte
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error('filter: ' . VarDumper::dumpAsString($filter) . "\r\n" . VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::mailGetMessages');
+
+            if (!empty($filter['email_list'])) {
+                $email_list = [];
+                if (is_object(json_decode($filter['email_list']))) {
+                    $email_list_raw = Json::decode($filter['email_list']);
+                    if (!empty($email_list_raw['list'])) {
+                        foreach ($email_list_raw['list'] as $key => $email) {
+                            $email_list[$key] = MaskEmailHelper::maskingPartial($email);
+                        }
+                    }
+                }
+                if (!empty($email_list)) {
+                    $filter['email_list'] = Json::encode(['list' => $email_list]);
+                }
+            }
+            \Yii::error([
+                'message' => VarDumper::dumpAsString($out['error'], 10),
+                'filter' => VarDumper::dumpAsString($filter, 10),
+            ], 'Component:CommunicationService::mailGetMessages');
         }
 
         return $out;
@@ -445,7 +470,11 @@ class CommunicationService extends Component implements CommunicationServiceInte
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::smsPreview');
+            \Yii::error([
+                'error' => $out['error'],
+                'phone_from' => MaskPhoneHelper::maskingPartial($data['sms']['phone_from']),
+                'phone_to' => MaskPhoneHelper::maskingPartial($data['sms']['phone_to']),
+            ], 'Component:CommunicationService::smsPreview');
         }
 
         return $out;

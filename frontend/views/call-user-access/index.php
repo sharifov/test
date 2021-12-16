@@ -69,7 +69,8 @@ $this->params['breadcrumbs'][] = $this->title;
             ],*/
             [
                 'class' => DateTimeColumn::class,
-                'attribute' => 'cua_created_dt'
+                'attribute' => 'cua_created_dt',
+                'format' => 'byUserDatetimeWithSeconds',
             ],
 
             /*[
@@ -94,7 +95,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'class' => DateTimeColumn::class,
-                'attribute' => 'cua_updated_dt'
+                'attribute' => 'cua_updated_dt',
+                'format' => 'byUserDatetimeWithSeconds',
             ],
 
             ['class' => 'yii\grid\ActionColumn'],

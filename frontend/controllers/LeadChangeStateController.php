@@ -107,7 +107,7 @@ class LeadChangeStateController extends FController
                 $this->assignService->takeOver($lead, $user, Yii::$app->user->id, $form->description);
 
                 $leadUserConversionService = Yii::createObject(LeadUserConversionService::class);
-                $leadUserConversionService->add(
+                $leadUserConversionService->addAutomate(
                     $lead->id,
                     $user->getId(),
                     LeadUserConversionDictionary::DESCRIPTION_TAKE_OVER,

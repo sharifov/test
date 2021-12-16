@@ -10,6 +10,7 @@ use common\models\query\CallQuery;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use sales\behaviors\metric\MetricCallCounterBehavior;
 use sales\helpers\app\AppHelper;
+use sales\helpers\DuplicateExceptionChecker;
 use sales\helpers\PhoneFormatter;
 use sales\helpers\setting\SettingHelper;
 use sales\model\call\entity\call\data\CreatorType;
@@ -1000,12 +1001,12 @@ class Call extends \yii\db\ActiveRecord
                         'lqc_dt_from_to_time' => strtotime($lqc->lqc_dt_from),
                     ], 'LeadRedial');
                 }
-            } elseif ($this->isRedialCall()) {
-                Yii::error([
-                    'message' => 'Detected Redial Call finished without LeadQCall record.',
-                    'leadId' => $this->c_lead_id,
-                    'callId' => $this->c_id,
-                ], 'LeadRedial');
+//            } elseif ($this->isRedialCall()) {
+//                Yii::error([
+//                    'message' => 'Detected Redial Call finished without LeadQCall record.',
+//                    'leadId' => $this->c_lead_id,
+//                    'callId' => $this->c_id,
+//                ], 'LeadRedial');
             }
 
             if ($lead->leadQcall) {
@@ -1157,7 +1158,7 @@ class Call extends \yii\db\ActiveRecord
                             $leadRepository->save($lead);
 
                             $leadUserConversionService = Yii::createObject(LeadUserConversionService::class);
-                            $leadUserConversionService->add(
+                            $leadUserConversionService->addAutomate(
                                 $lead->id,
                                 $this->c_created_user_id,
                                 LeadUserConversionDictionary::DESCRIPTION_CALL_AUTO_TAKE,
@@ -1839,15 +1840,21 @@ class Call extends \yii\db\ActiveRecord
                 $callUserAccess->cua_created_dt = date("Y-m-d H:i:s");
                 $callUserAccess->cua_priority = $call->getDataPriority();
             }
-
-            if (!$callUserAccess->save()) {
-                Yii::error(VarDumper::dumpAsString($callUserAccess->errors), 'CallQueueJob:execute:CallUserAccess:save');
-            } else {
+            if ($callUserAccess->save()) {
                 return true;
             }
+            $errors = $callUserAccess->getErrors();
+            foreach ($errors as $error) {
+                if (strpos($error[0], 'has already been taken') !== false) {
+                    return true;
+                }
+            }
+            Yii::error(VarDumper::dumpAsString($errors), 'Call:applyCallToAgentAccess:callUserAccess:save');
         } catch (\Throwable $e) {
+            if (DuplicateExceptionChecker::isDuplicate($e->getMessage())) {
+                return true;
+            }
             \Yii::error($e, 'Call:applyCallToAgentAccess');
-//            \Yii::error(VarDumper::dumpAsString([$e->getMessage(), $e->getFile(), $e->getLine()]), 'Call:applyCallToAgentAccess');
         }
         return false;
     }

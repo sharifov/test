@@ -23,6 +23,7 @@ class CallAbacObject extends AbacBaseModel implements AbacInterface
     public const ACT_DATA_AUTO_CREATE_CASE_OFF  = self::NS . 'act/data-auto-create-case-off';
     public const ACT_DATA_AUTO_CREATE_LEAD_OFF  = self::NS . 'act/data-auto-create-lead-off';
     public const ACT_DATA_INVALID               = self::NS . 'act/data-invalid';
+    public const OBJ_CALL_LOG                   = self::NS . 'obj/call-log';
 
     /** --------------- OBJECT LIST --------------------------- */
     public const OBJECT_LIST = [
@@ -32,10 +33,12 @@ class CallAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_DATA_AUTO_CREATE_CASE_OFF => self::ACT_DATA_AUTO_CREATE_CASE_OFF,
         self::ACT_DATA_AUTO_CREATE_LEAD_OFF => self::ACT_DATA_AUTO_CREATE_LEAD_OFF,
         self::ACT_DATA_INVALID              => self::ACT_DATA_INVALID,
+        self::OBJ_CALL_LOG                  => self::OBJ_CALL_LOG,
     ];
 
     /** --------------- ACTIONS --------------------------- */
     public const ACTION_UPDATE  = 'update';
+    public const ACTION_DELETE  = 'delete';
     public const ACTION_TOGGLE_DATA  = 'toggle_data';
 
     /** --------------- ACTION LIST --------------------------- */
@@ -46,6 +49,7 @@ class CallAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_DATA_AUTO_CREATE_CASE_OFF => [self::ACTION_TOGGLE_DATA],
         self::ACT_DATA_AUTO_CREATE_LEAD_OFF => [self::ACTION_TOGGLE_DATA],
         self::ACT_DATA_INVALID              => [self::ACTION_TOGGLE_DATA],
+        self::OBJ_CALL_LOG                  => [self::ACTION_UPDATE, self:: ACTION_DELETE]
     ];
 
     public const OBJECT_ATTRIBUTE_LIST = [];

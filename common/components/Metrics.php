@@ -44,7 +44,11 @@ class Metrics extends Component
             try {
                 $this->registry = \Yii::$app->prometheus->registry;
             } catch (\Throwable $throwable) {
-                \Yii::error(AppHelper::throwableLog($throwable), 'Metrics:init:Throwable');
+                if (strpos($throwable->getMessage(), 'must be an instance of Prometheus')) {
+                    $this->reInitRegistry();
+                } else {
+                    \Yii::error(AppHelper::throwableLog($throwable), 'Metrics:init:Throwable');
+                }
             }
         }
     }

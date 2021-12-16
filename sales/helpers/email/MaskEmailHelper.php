@@ -8,7 +8,16 @@ class MaskEmailHelper
 {
     public static function masking(?string $email, $forceShow = false): ?string
     {
-        if (filter_var($email, FILTER_VALIDATE_EMAIL) && SettingHelper::clientDataPrivacyEnable() && !$forceShow) {
+        if (SettingHelper::clientDataPrivacyEnable() && !$forceShow) {
+            return self::maskingPartial($email);
+        }
+
+        return $email;
+    }
+
+    public static function maskingPartial(?string $email): ?string
+    {
+        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
             list($user, $domains) = explode('@', $email);
 
             $domains = explode('.', $domains);
@@ -16,8 +25,8 @@ class MaskEmailHelper
             $domainName = substr($domains['0'], -2);
 
             return $user . str_repeat('*', 5) . '@' . str_repeat('*', 2) . $domainName . '.' . $domains['1'];
+        } else {
+            return $email;
         }
-
-        return $email;
     }
 }

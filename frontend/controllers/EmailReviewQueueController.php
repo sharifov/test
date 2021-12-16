@@ -162,6 +162,9 @@ class EmailReviewQueueController extends FController
             if ($emailReviewQueue->save()) {
                 $email = $emailReviewQueue->erqEmail;
                 $message = 'Email(' . $emailReviewQueue->erq_email_id . ') was rejected by (' . $emailReviewQueue->erqUserReviewer->username . ')';
+                $email->statusToCancel();
+                $email->e_error_message = $message;
+                $email->update();
                 if ($email->e_lead_id && ($lead = $email->eLead)) {
                     $message .= '<br> Lead (Id: ' . Purifier::createLeadShortLink($lead) . ')';
                 }

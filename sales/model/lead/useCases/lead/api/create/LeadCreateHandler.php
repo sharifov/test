@@ -7,6 +7,7 @@ use common\models\Lead;
 use common\models\LeadFlightSegment;
 use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
+use sales\model\clientData\service\ClientDataService;
 use sales\model\leadData\services\LeadDataCreateService;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\lead\LeadSegmentRepository;
@@ -28,11 +29,13 @@ use yii\helpers\ArrayHelper;
  * @property LeadSegmentRepository $segmentRepository
  *
  * @property array $leadDataInserted
+ * @property array $clientDataInserted
  * @property array $warnings
  */
 class LeadCreateHandler
 {
     private array $leadDataInserted = [];
+    private array $clientDataInserted = [];
     private array $warnings = [];
 
     private $clientManageService;
@@ -124,8 +127,16 @@ class LeadCreateHandler
             if (!empty($form->lead_data)) {
                 $leadDataService = new LeadDataCreateService();
                 $leadDataService->createFromApi($form->lead_data, $leadId);
-                $this->warnings = ArrayHelper::merge($this->warnings, $leadDataService->getErrors());
+                if ($leadDataService->getErrors()) {
+                    $this->warnings[] = $leadDataService->getErrors();
+                }
                 $this->leadDataInserted = $leadDataService->getInserted();
+            }
+            if (!empty($form->client_data) && ($clientId = $lead->client->id ?? null)) {
+                [$this->clientDataInserted, $clientDataWarnings] = ClientDataService::createFromApi($form->client_data, $clientId);
+                if ($clientDataWarnings) {
+                    $this->warnings[] = $clientDataWarnings;
+                }
             }
 
             return $lead;
@@ -192,5 +203,10 @@ class LeadCreateHandler
     public function getWarnings(): array
     {
         return $this->warnings;
+    }
+
+    public function getClientDataInserted(): array
+    {
+        return $this->clientDataInserted;
     }
 }
