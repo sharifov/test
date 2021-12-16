@@ -85,7 +85,7 @@ class EmailIncomingService
                 $projectParams = $project->getParams();
 
                 if ($departmentParams->object->type->isLead()) {
-                    $createLeadOnEmail = ($projectParams->object->lead->allow_auto_lead_create && $departmentParams->object->lead->createOnEmail);
+                    $createLeadOnEmail = ($projectParams->object->lead->allow_auto_lead_create && $departmentParams->object->lead->isIncludeEmail($internalEmail));
                     $leadId = $this->getOrCreateLead(
                         $client->id,
                         $clientEmail,
@@ -100,7 +100,7 @@ class EmailIncomingService
                 }
 
                 if ($departmentParams->object->type->isCase()) {
-                    $createCaseOnEmail = ($projectParams->object->case->allow_auto_case_create && $departmentParams->object->case->createOnEmail);
+                    $createCaseOnEmail = ($projectParams->object->case->allow_auto_case_create && $departmentParams->object->case->isIncludeEmail($internalEmail));
                     $caseId = $this->getOrCreateCase(
                         $client->id,
                         $contact->projectId,
