@@ -1003,12 +1003,12 @@ class Call extends \yii\db\ActiveRecord
                         'lqc_dt_from_to_time' => strtotime($lqc->lqc_dt_from),
                     ], 'LeadRedial');
                 }
-            } elseif ($this->isRedialCall()) {
-                Yii::error([
-                    'message' => 'Detected Redial Call finished without LeadQCall record.',
-                    'leadId' => $this->c_lead_id,
-                    'callId' => $this->c_id,
-                ], 'LeadRedial');
+//            } elseif ($this->isRedialCall()) {
+//                Yii::error([
+//                    'message' => 'Detected Redial Call finished without LeadQCall record.',
+//                    'leadId' => $this->c_lead_id,
+//                    'callId' => $this->c_id,
+//                ], 'LeadRedial');
             }
 
             if ($lead->leadQcall) {
