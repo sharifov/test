@@ -47,10 +47,12 @@ use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionRepository;
 use modules\product\src\entities\productType\ProductType;
 use modules\product\src\useCases\product\create\ProductCreateService;
+use sales\helpers\app\AppHelper;
 use sales\helpers\ErrorsToStringHelper;
 use sales\repositories\product\ProductQuoteRepository;
 use webapi\src\forms\flight\flights\trips\SegmentApiForm;
 use webapi\src\forms\flight\options\OptionApiForm;
+use Yii;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -422,7 +424,19 @@ class FlightFromSaleService
 
     private static function detectProductQuoteStatus(array $saleData): int
     {
-        return (ArrayHelper::getValue($saleData, 'passengers.0.ticket_number')) ? ProductQuoteStatus::SOLD : ProductQuoteStatus::BOOKED;
+        try {
+            if ((!$boStatus = $saleData['saleStatus'] ?? null) || !is_string($boStatus)) {
+                throw new \RuntimeException('"saleStatus" not found in "saleData"');
+            }
+            $boStatus = strtolower($boStatus);
+            if (!$productQuoteStatus = ProductQuoteStatus::STATUS_BO_MAP[$boStatus] ?? null) {
+                throw new \RuntimeException('"saleStatus"(' . $boStatus . ') not mapped in ProductQuoteStatus');
+            }
+            return $productQuoteStatus;
+        } catch (\Throwable $throwable) {
+            Yii::warning(AppHelper::throwableLog($throwable), 'FlightFromSaleService:detectProductQuoteStatus');
+            return ProductQuoteStatus::NEW;
+        }
     }
 
     private static function prepareTrips(array $itinerary)
