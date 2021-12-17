@@ -2,7 +2,7 @@
 
 namespace frontend\widgets\newWebPhone;
 
-class TwilioAsset extends \yii\web\AssetBundle
+class DeviceAsset extends \yii\web\AssetBundle
 {
     public $basePath = '@webroot';
     public $baseUrl = '@web';

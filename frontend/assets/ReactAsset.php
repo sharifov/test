@@ -12,33 +12,13 @@ use yii\web\AssetBundle;
  */
 class ReactAsset extends AssetBundle
 {
-    public $basePath = '@webroot';
+    public $basePath = null;
+    public $sourcePath = null;
     public $baseUrl = '@web';
 
-    /*public $css = [
-        'css/site.css',
-    ];*/
-
-    /*public $js = [
-        ['https://cdn.jsdelivr.net/npm/vue/dist/vue.js', 'position' => \yii\web\View::POS_HEAD],
-    ];*/
-
-    public function init()
-    {
-        parent::init();
-
-        if (YII_ENV === 'prod' || YII_ENV === 'stage') {
-            $this->js[] = ['https://unpkg.com/react@16/umd/react.production.min.js', 'position' => \yii\web\View::POS_HEAD, 'crossorigin' => true];
-            $this->js[] = ['https://unpkg.com/react-dom@16/umd/react-dom.production.min.js', 'position' => \yii\web\View::POS_HEAD, 'crossorigin' => true];
-        } else {
-            $this->js[] = ['https://unpkg.com/react@16/umd/react.development.js', 'position' => \yii\web\View::POS_HEAD, 'crossorigin' => true];
-            $this->js[] = ['https://unpkg.com/react-dom@16/umd/react-dom.development.js', 'position' => \yii\web\View::POS_HEAD, 'crossorigin' => true];
-        }
-
-        $this->js[] = ['https://unpkg.com/babel-standalone@6/babel.min.js'];
-
-    }
-
-//    public $depends = [
-//    ];
+    public $js = [
+        ['https://unpkg.com/react@16.14.0/umd/react.development.js', 'position' => \yii\web\View::POS_HEAD, 'crossorigin' => true],
+        ['https://unpkg.com/react-dom@16.14.0/umd/react-dom.development.js', 'position' => \yii\web\View::POS_HEAD, 'crossorigin' => true],
+        ['https://unpkg.com/babel-standalone@6.26.0/babel.min.js'],
+    ];
 }
