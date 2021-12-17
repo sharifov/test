@@ -595,7 +595,7 @@ class CasesController extends FController
                                 Yii::$app->cacheFile->set($keyCache, $emailBodyHtml, 60 * 60);
                                 $previewEmailForm->keyCache = $keyCache;
                                 $previewEmailForm->e_email_message = $emailBodyHtml;
-                                $previewEmailForm->e_email_message_origin = $emailBodyHtml;
+                                $previewEmailForm->e_email_message_edited = false;
 
                                 if (isset($mailPreview['data']['email_subject']) && $mailPreview['data']['email_subject']) {
                                     $previewEmailForm->e_email_subject = $mailPreview['data']['email_subject'];
@@ -612,7 +612,7 @@ class CasesController extends FController
                         //VarDumper::dump($mailPreview, 10, true);// exit;
                     } else {
                         $previewEmailForm->e_email_message = $comForm->c_email_message;
-                        $previewEmailForm->e_email_message_origin = $comForm->c_email_message;
+                        $previewEmailForm->e_email_message_edited = false;
                         $previewEmailForm->e_email_subject = $comForm->c_email_subject;
                         $previewEmailForm->e_email_subject_origin = $comForm->c_email_subject;
                         $previewEmailForm->e_email_from = $mailFrom;
