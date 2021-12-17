@@ -100,14 +100,14 @@ function stopAutoLogout() {
     return false;
 }
 
-window.autoLogout = function () {
-    if (isAutoLogoutTimerSec > 0) {
-        $('#autologout-timer').timer('remove').timer({countdown: true, format: '%M:%S', seconds: 0, duration: isAutoLogoutTimerSec + 's', callback: function() {
+window.autoLogout = function (timerSec = isAutoLogoutTimerSec, isShowMessage = isAutoLogoutShowMessage) {
+    if (timerSec > 0) {
+        $('#autologout-timer').timer('remove').timer({countdown: true, format: '%M:%S', seconds: 0, duration: timerSec + 's', callback: function() {
             logout();
         }}).timer('start');
     }
 
-    if (isAutoLogoutShowMessage) {
+    if (isShowMessage || (isShowMessage === 'true')) {
         $('#modal-autologout').modal({show: true});
     }
 }

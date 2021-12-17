@@ -378,7 +378,7 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
 
                     if (obj.cmd === 'logout') {
                         if (typeof window.autoLogout === "function") {
-                            window.autoLogout(obj);
+                            window.autoLogout(obj.timerSec, obj.isShowMessage);
                         }
                     }
 
