@@ -210,6 +210,8 @@ class FlightQuoteSearchForm extends Model
         if ($this->topCriteria) {
             if (is_array($this->topCriteria)) {
                 $quotes['results'] = AppHelper::filterByArrayContainValues($quotes['results'], 'topCriteria', $this->topCriteria);
+            } else {
+                $quotes['results'] = AppHelper::filterBySearchInValue($quotes['results'], 'topCriteria', $this->topCriteria);
             }
         }
 
