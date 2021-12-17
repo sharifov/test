@@ -40,6 +40,7 @@ use frontend\themes\gentelella_v2\assets\SwitcheryAsset;
 use frontend\widgets\clientChat\ClientChatWidgetAsset;
 use frontend\widgets\cronExpression\CronExpressionAssets;
 use frontend\widgets\frontendWidgetList\userflow\assets\UserFlowWidgetAsset;
+use frontend\widgets\newWebPhone\DeviceAsset;
 use frontend\widgets\newWebPhone\NewWebPhoneAsset;
 use frontend\widgets\notification\NotificationSocketAsset;
 use kartik\base\WidgetAsset;
@@ -118,6 +119,7 @@ return [
         EditToolAsset::class,
 
         NewWebPhoneAsset::class,
+        DeviceAsset::class,
 
         ActiveFormAsset::class,
         ValidationAsset::class,
@@ -316,6 +318,13 @@ return [
             'js' => 'web_phone.min.' . $params['release']['version'] . '.js',
             'css' => 'web_phone.min.' . $params['release']['version'] . '.css',
             'depends' => [ NewWebPhoneAsset::class ]
+        ],
+        'DeviceAsset' => [
+            'class' => DeviceAsset::class,
+            'basePath' => '@webroot/web_phone/build',
+            'baseUrl' => '@web/web_phone/build',
+            'js' => 'device.min.' . $params['release']['version'] . '.js',
+            'depends' => [ DeviceAsset::class ]
         ],
         'ActiveFormAsset' => [
             'class' => ActiveFormAsset::class,
@@ -1011,7 +1020,18 @@ return [
                 'depends' => [
                     JqueryAsset::class
                 ]
-            ]
+            ],
+            \frontend\assets\ReactAsset::class => [
+                'css' => [],
+                'js' => [
+                    ['https://unpkg.com/react@16.14.0/umd/react.production.min.js', 'position' => \yii\web\View::POS_HEAD, 'crossorigin' => true],
+                    ['https://unpkg.com/react-dom@16.14.0/umd/react-dom.production.min.js', 'position' => \yii\web\View::POS_HEAD, 'crossorigin' => true],
+                    ['https://unpkg.com/babel-standalone@6.26.0/babel.min.js'],
+                ],
+                'basePath' => null,
+                'sourcePath' => null,
+                'depends' => [],
+            ],
         ],
         'hashCallback' => static function ($path) {
             return hash('md4', $path);
