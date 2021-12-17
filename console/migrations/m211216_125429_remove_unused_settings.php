@@ -17,6 +17,7 @@ class m211216_125429_remove_unused_settings extends Migration
             'create_new_exchange_case_email',
             'create_new_support_case_email',
             'create_new_lead_email',
+            'create_case_only_department_email',
         ]]);
 
         if (Yii::$app->cache) {

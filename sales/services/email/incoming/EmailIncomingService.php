@@ -214,7 +214,7 @@ class EmailIncomingService
                 ) {
                     $caseId = $case->cs_id;
                 } else {
-                    if ((bool)Yii::$app->params['settings']['create_case_only_department_email'] === false) {
+                    if (isset($departmentParams) && $departmentParams->object->case->isIncludeEmail($internalEmail)) {
                         $case = $this->casesCreateService->createByDepartmentIncomingEmail(Department::DEPARTMENT_SUPPORT, $clientId, $projectId);
                         return new Process($leadId, $case->cs_id);
                     }
