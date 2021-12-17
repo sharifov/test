@@ -836,7 +836,7 @@ $js = <<<JS
         var obj = document.getElementById('object-email-view');
         obj.data = '/email/view?id='+id+'&preview=1';
         obj.parentNode.replaceChild(obj.cloneNode(true), obj);
-        $(".view-mail").replaceWith('<div id="mail_headers"><h6><div id="email_info" class="float-left">' + subject + '<br>' + from + '<br>' + to + '<br>' +  date + files + '<br><br></div>' + '</h6><button id="print_button" title="Allow popups in your browser if this doesn`t work." data-toggle="mail_tooltip" class="btn btn-warning float-right"><i class="fa fa-print"></i> Print</button><div class="clearfix"></div><hr>' + '</div>'+ $(".view-mail").html() );
+        $(".view-mail").replaceWith('<div id="mail_headers"><h6><div id="email_info" class="float-left" style="word-break: break-all; max-width: 100%;">' + subject + '<br>' + from + '<br>' + to + '<br>' +  date + files + '<br><br></div>' + '</h6><button id="print_button" title="Allow popups in your browser if this doesn`t work." data-toggle="mail_tooltip" class="btn btn-warning float-right"><i class="fa fa-print"></i> Print</button><div class="clearfix"></div><hr>' + '</div>'+ $(".view-mail").html() );
         var popup = $('#modal-email-view');
         //previewPopup.find('.modal-body').html(data);
         popup.modal('show');
@@ -850,6 +850,8 @@ $js = <<<JS
         let mail_headers = document.createElement("div");
         mail_headers.innerHTML = $('#email_info').html();
         w.document.body.prepend(mail_headers);
+        w.document.body.style.maxWidth = "100%";
+        w.document.body.style.wordBreak = "break-all";
         let js_timer = document.createElement("script");
         js_timer.innerHTML = 'setTimeout( "window.print(); window.close();", 3000);'; 
         w.document.head.append(js_timer);
