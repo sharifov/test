@@ -9,8 +9,6 @@ use sales\model\flightQuoteLabelList\entity\FlightQuoteLabelList;
 use yii\bootstrap\Html;
 use yii\helpers\ArrayHelper;
 
-
-
 /**
  * @var $resultKey int
  * @var $result []
