@@ -3,6 +3,7 @@
 namespace sales\forms\lead;
 
 use common\models\LeadFlightSegment;
+use sales\helpers\app\AppHelper;
 use sales\repositories\airport\AirportRepository;
 use Yii;
 
@@ -44,12 +45,13 @@ class SegmentEditForm extends SegmentForm
     {
         try {
             return (new AirportRepository())->findByIata($iata)->getSelection();
-        } catch (\Exception $e) {
+        } catch (\Throwable $throwable) {
+            $logMessage = AppHelper::throwableLog($throwable);
+            $logMessage['airport_iata'] = $iata;
             \Yii::warning(
-                ['message' => 'Airport not found by code', 'airport_iata' => $iata],
-                'SegmentEditForm:loadAirportLabel:AirportRepository:findByIata:getSelection:IataNotFound'
+                $logMessage,
+                'SegmentEditForm:loadAirportLabel:AirportRepository:findByIata'
             );
-            //Yii::$app->errorHandler->logException($e);
             return '';
         }
     }
@@ -62,12 +64,13 @@ class SegmentEditForm extends SegmentForm
     {
         try {
             return (new AirportRepository())->findByIata($iata)->getCityName();
-        } catch (\Exception $e) {
+        } catch (\Throwable $throwable) {
+            $logMessage = AppHelper::throwableLog($throwable);
+            $logMessage['airport_iata'] = $iata;
             \Yii::warning(
-                ['message' => 'Airport not found by code', 'airport_iata' => $iata],
-                'SegmentEditForm:loadCityName:AirportRepository:findByIata:IataNotFound'
+                $logMessage,
+                'SegmentEditForm:loadAirportLabel:AirportRepository:findByIata'
             );
-            //Yii::$app->errorHandler->logException($e);
             return '';
         }
     }
