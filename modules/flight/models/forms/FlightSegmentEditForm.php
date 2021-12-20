@@ -37,7 +37,11 @@ class FlightSegmentEditForm extends FlightSegmentForm
         try {
             return (new AirportRepository())->findByIata($iata)->getSelection();
         } catch (\Exception $e) {
-            Yii::$app->errorHandler->logException($e);
+            \Yii::warning(
+                ['message' => 'Airport not found by code', 'airport_iata' => $iata],
+                'FlightSegmentEditForm:loadAirportLabel:AirportRepository:findByIata:IataNotFound'
+            );
+            //Yii::$app->errorHandler->logException($e);
             return '';
         }
     }
