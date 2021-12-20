@@ -50,7 +50,7 @@ use sales\entities\cases\CaseEventLogSearch;
 use sales\entities\cases\CasesSourceType;
 use sales\entities\cases\CasesStatus;
 use sales\entities\cases\CaseStatusLogSearch;
-use sales\exception\AccessDenied;
+use sales\exception\AccessDeniedException;
 use sales\exception\BoResponseException;
 use sales\forms\cases\CasesAddEmailForm;
 use sales\forms\cases\CasesAddPhoneForm;
@@ -1845,7 +1845,7 @@ class CasesController extends FController
                     $out['message'] = implode("; ", $form->getErrorSummary(false));
                 }
             }
-        } catch (\RuntimeException | AccessDenied $exception) {
+        } catch (\RuntimeException | AccessDeniedException $exception) {
             $out['message'] = $exception->getMessage();
         } catch (\Throwable $exception) {
             $out['message'] = $exception->getMessage();
@@ -1914,19 +1914,16 @@ class CasesController extends FController
                 $out['error'] = 1;
                 $out['message'] = 'BO request Error: ' . (json_decode($response->content, true)['message'] ?? '');
             }
-        } catch (AccessDenied $e) {
+        } catch (AccessDeniedException $e) {
             $out['error'] = 1;
-            $out['message'] = $throwable->getMessage();
-        } catch (\Throwable $throwable) {
+            $out['message'] = $e->getMessage();
+        } catch (\Throwable $e) {
             $out['error'] = 1;
             $out['message'] = 'An internal Sales error has occurred; Check system logs;';
-            if ($throwable->getCode() < 0 && $throwable->getCode() > -4) {
-                $out['message'] = $throwable->getMessage();
+            if ($e->getCode() < 0 && $e->getCode() > -4) {
+                $out['message'] = $e->getMessage();
             }
-            Yii::error(
-                \yii\helpers\VarDumper::dumpAsString($throwable),
-                'CaseController:actionAjaxSyncWithBackOffice:catch:Throwable'
-            );
+            \Yii::error(AppHelper::throwableLog($e), 'CaseController:actionAjaxSyncWithBackOffice:catch:Throwable');
         }
 
         return $out;
@@ -1949,7 +1946,7 @@ class CasesController extends FController
         );
 
         if ($canManageSaleInfo) {
-            throw new AccessDenied($canManageSaleInfo, -3);
+            throw new AccessDeniedException($canManageSaleInfo, -3);
         }
 
         return true;
@@ -1991,7 +1988,7 @@ class CasesController extends FController
             }
 
             $out['message'] = 'Sale info: ' . $caseSale->css_sale_id . ' successfully refreshed';
-        } catch (AccessDenied | NotFoundException $e) {
+        } catch (AccessDeniedException | NotFoundException $e) {
             $out['error'] = 1;
             $out['message'] = $e->getMessage();
         } catch (\DomainException | \RuntimeException | BoResponseException $e) {
