@@ -35,4 +35,9 @@ class SourcesQuery extends \yii\db\ActiveQuery
     {
         return Sources::findOne(['project_id' => $id]);
     }
+
+    public static function getByCidOrDefaultByProject(string $cid, int $projectId): ?Sources
+    {
+        return Sources::find()->byCid($cid)->orWhere(['project_id' => $projectId, 'default' => 1])->one();
+    }
 }
