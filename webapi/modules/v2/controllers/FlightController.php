@@ -1337,7 +1337,7 @@ class FlightController extends BaseController
                 ])
             );
         } catch (\DomainException $e) {
-            \Yii::error([
+            \Yii::warning([
                 'message' => 'DomainException: Reprotection decision error',
                 'error' => $e->getMessage(),
                 'request' => $form->getAttributes(),
