@@ -3,6 +3,9 @@
 namespace modules\qaTask\src\grid\columns;
 
 use modules\qaTask\src\entities\qaTask\QaTask;
+use modules\qaTask\src\useCases\qaTask\take\QaTaskTakeService;
+use sales\auth\Auth;
+use Yii;
 use yii\bootstrap4\Html;
 
 class QaTaskQueuePendingActionColumn extends QaTaskQueueActionColumn
@@ -11,9 +14,9 @@ class QaTaskQueuePendingActionColumn extends QaTaskQueueActionColumn
     {
         $template = ' {take}';
         $visibleButtons = [
-//            'take' => static function ($model, $key, $index) {
-//                return true;
-//            },
+            'take' => static function ($model, $key, $index) {
+                return Yii::createObject(QaTaskTakeService::class)->checkAccessTake(Auth::id(), $model);
+            },
         ];
         $buttons = [
             'take' => static function ($url, QaTask $model) {

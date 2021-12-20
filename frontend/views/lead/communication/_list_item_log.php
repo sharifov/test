@@ -104,22 +104,11 @@ $fromType = 'client';
     $mail = Email::findOne($model['id']);
     if ($mail) :
         $unsubscribedEmails = array_column($mail->eProject ? $mail->eProject->emailUnsubscribes : [], 'eu_email');
-
-        if ($mail->e_status_id == Email::STATUS_DONE) {
-            $statusClass = 'success';
-            $statusTitle = 'DONE - ' . ($mail->e_status_done_dt ? Yii::$app->formatter->asDatetime(strtotime($mail->e_status_done_dt)) : Yii::$app->formatter->asDatetime(strtotime($mail->e_updated_dt)));
-        } elseif ($mail->e_status_id == Email::STATUS_ERROR || $mail->e_status_id == Email::STATUS_CANCEL) {
-            $statusClass = 'error';
-            $statusTitle = 'ERROR - ' . $mail->e_error_message;
-        } else {
-            $statusClass = 'sent';
-            $statusTitle = 'SENT - ComID: ' . $mail->e_communication_id;
-        }
         ?>
 
         <div class="chat__message chat__message--<?=($mail->e_type_id == Email::TYPE_INBOX ? 'client' : 'system')?> chat__message--email">
             <div class="chat__icn"><i class="fa fa-envelope-o"></i></div>
-            <i class="chat__status chat__status--<?=$statusClass?> fa fa-circle" data-toggle="tooltip" title="<?=Html::encode($statusTitle)?>" data-placement="right" data-original-title="<?=Html::encode($statusTitle)?>"></i>
+            <?= EmailHelper::getIconForCommunicationBlock($mail) ?>
             <div class="chat__message-heading">
                 <?php if ($mail->e_type_id == Email::TYPE_INBOX) :?>
                     <div class="chat__sender">Email from (<?=Html::encode($mail->e_email_from_name)?> <<strong><?=Html::encode(MaskEmailHelper::masking($mail->e_email_from, $disableMasking))?>> )</strong>
@@ -131,7 +120,7 @@ $fromType = 'client';
                 <div class="chat__date"><?=Yii::$app->formatter->asDatetime(strtotime($mail->e_created_dt))?> <?=$mail->e_language_id ? '(' . $mail->e_language_id . ')' : ''?></div> <?php //11:01AM | June 9?>
             </div>
             <div class="card-body">
-                <h5 class="chat__subtitle"><?= wordwrap(Html::encode($mail->e_email_subject), 60, '<br />', true)?></h5>
+                <h5 class="chat__subtitle" style="word-break: break-all;"><?= wordwrap(Html::encode($mail->e_email_subject), 60, '<br />', true)?></h5>
                 <div class="">
                     <?php echo \yii\helpers\StringHelper::truncate(Email::stripHtmlTags($mail->getEmailBodyHtml()), 300, '...', null, true)?>
                 </div>

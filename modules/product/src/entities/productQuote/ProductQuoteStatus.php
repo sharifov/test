@@ -128,6 +128,14 @@ class ProductQuoteStatus
         self::IN_PROGRESS
     ];
 
+    public const STATUS_BO_MAP = [
+        'pending' => self::IN_PROGRESS,
+        'processing' => self::IN_PROGRESS,
+        'close' => self::SOLD,
+        'rejected' => self::DECLINED,
+        'void' => self::CANCELED,
+    ];
+
     public static function getList(): array
     {
         return self::LIST;

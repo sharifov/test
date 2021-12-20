@@ -85,7 +85,7 @@ class EmailIncomingService
                 $projectParams = $project->getParams();
 
                 if ($departmentParams->object->type->isLead()) {
-                    $createLeadOnEmail = ($projectParams->object->lead->allow_auto_lead_create && $departmentParams->object->lead->createOnEmail);
+                    $createLeadOnEmail = ($projectParams->object->lead->allow_auto_lead_create && $departmentParams->object->lead->isIncludeEmail($internalEmail));
                     $leadId = $this->getOrCreateLead(
                         $client->id,
                         $clientEmail,
@@ -100,7 +100,7 @@ class EmailIncomingService
                 }
 
                 if ($departmentParams->object->type->isCase()) {
-                    $createCaseOnEmail = ($projectParams->object->case->allow_auto_case_create && $departmentParams->object->case->createOnEmail);
+                    $createCaseOnEmail = ($projectParams->object->case->allow_auto_case_create && $departmentParams->object->case->isIncludeEmail($internalEmail));
                     $caseId = $this->getOrCreateCase(
                         $client->id,
                         $contact->projectId,
@@ -214,7 +214,7 @@ class EmailIncomingService
                 ) {
                     $caseId = $case->cs_id;
                 } else {
-                    if ((bool)Yii::$app->params['settings']['create_case_only_department_email'] === false) {
+                    if (isset($departmentParams) && $departmentParams->object->case->isIncludeEmail($internalEmail)) {
                         $case = $this->casesCreateService->createByDepartmentIncomingEmail(Department::DEPARTMENT_SUPPORT, $clientId, $projectId);
                         return new Process($leadId, $case->cs_id);
                     }

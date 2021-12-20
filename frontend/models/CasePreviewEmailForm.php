@@ -24,7 +24,7 @@ use yii\helpers\ArrayHelper;
  * @property string $e_email_subject
  * @property string $e_email_subject_origin
  * @property string $e_email_message
- * @property string $e_email_message_origin
+ * @property bool $e_email_message_edited
  * @property integer $e_email_tpl_id
  * @property integer $e_user_id
  * @property string $e_language_id
@@ -49,7 +49,7 @@ class CasePreviewEmailForm extends Model
     public $e_email_subject;
     public $e_email_subject_origin;
     public $e_email_message;
-    public $e_email_message_origin;
+    public $e_email_message_edited;
     public $e_email_tpl_id;
     public $e_user_id;
     public $e_language_id;
@@ -92,7 +92,9 @@ class CasePreviewEmailForm extends Model
             //[['e_type_id'], 'validateType'],
             [['e_email_to', 'e_email_from'], 'email'],
             [['e_email_tpl_id', 'e_case_id'], 'integer'],
-            [['e_email_message', 'e_email_message_origin', 'e_email_subject_origin', 'e_quote_list', 'coupon_list'], 'string'],
+            [['e_email_message', 'e_email_subject_origin', 'e_quote_list', 'coupon_list'], 'string'],
+            [['e_email_message_edited'], 'boolean'],
+            [['e_email_message_edited'], 'default', 'value' => false],
             [['e_email_subject'], 'string', 'max' => 200, 'min' => 5],
             [['e_email_from_name', 'e_email_to_name'], 'string', 'max' => 50],
             [['e_language_id'], 'string', 'max' => 5],
@@ -166,7 +168,7 @@ class CasePreviewEmailForm extends Model
 
     public function isMessageEdited(): bool
     {
-        return strcmp($this->e_email_message_origin, $this->e_email_message) !== 0;
+        return (bool)$this->e_email_message_edited;
     }
 
     public function isSubjectEdited(): bool

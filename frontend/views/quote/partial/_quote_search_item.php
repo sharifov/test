@@ -76,7 +76,7 @@ $isQuoteAssignedToFlight = in_array($result['key'], $flightQuotes);
             </div>
             <?php if ($showGdsOfferId && !empty($result['gdsOfferId'])) : ?>
                 <div class="quote__seats">
-                    <strong class="text-success" data-toggle="tooltip" title="GDS Offer ID <?= \yii\helpers\Html::encode($result['gdsOfferId']) ?>"><i class="fas fa-passport"></i></strong>
+                    <strong class="text-success" data-toggle="tooltip" title="GDS Offer ID <?= Html::encode($result['gdsOfferId']) ?>"><i class="fas fa-passport"></i></strong>
                 </div>
             <?php endif; ?>
 
@@ -122,7 +122,7 @@ $isQuoteAssignedToFlight = in_array($result['key'], $flightQuotes);
                 $stopCnt = $segmentsCnt - 1;
                 $firstSegment = $trip['segments'][0];
                 $lastSegment = $trip['segments'][$segmentsCnt - 1];
-                $tripsInfo[] = ((!isset($locations[$firstSegment['departureAirportCode']])) ?: $locations[$firstSegment['departureAirportCode']]['city']) . ' → ' . ((!isset($locations[$lastSegment['arrivalAirportCode']])) ?: $locations[$lastSegment['arrivalAirportCode']]['city']);
+                $tripsInfo[] = ((empty($locations[$firstSegment['departureAirportCode']])) ? $firstSegment['departureAirportCode'] : $locations[$firstSegment['departureAirportCode']]['city']) . ' → ' . ((empty($locations[$lastSegment['arrivalAirportCode']])) ? $lastSegment['arrivalAirportCode'] : $locations[$lastSegment['arrivalAirportCode']]['city']);
                 $cabins = [];
                 $hasFreeBaggage = false;
                 $freeBaggageInfo = '';
@@ -191,7 +191,7 @@ $isQuoteAssignedToFlight = in_array($result['key'], $flightQuotes);
                             </div>
                             <div class="quote__location">
                                 <div class="quote__airport">
-                                    <span class="quote__city"><?= (!isset($locations[$firstSegment['departureAirportCode']])) ?: $locations[$firstSegment['departureAirportCode']]['city'];?></span>
+                                    <span class="quote__city"><?= empty($locations[$firstSegment['departureAirportCode']]) ? '' : $locations[$firstSegment['departureAirportCode']]['city'];?></span>
                                     <span class="quote__iata"><?= $firstSegment['departureAirportCode']?></span>
                                 </div>
                             </div>
@@ -203,7 +203,7 @@ $isQuoteAssignedToFlight = in_array($result['key'], $flightQuotes);
                             </div>
                             <div class="quote__location">
                                 <div class="quote__airport">
-                                    <span class="quote__city"><?= (!isset($locations[$lastSegment['arrivalAirportCode']])) ?: $locations[$lastSegment['arrivalAirportCode']]['city'];?></span>
+                                    <span class="quote__city"><?= empty($locations[$lastSegment['arrivalAirportCode']]) ? '' : $locations[$lastSegment['arrivalAirportCode']]['city'];?></span>
                                     <span class="quote__iata"><?= $lastSegment['arrivalAirportCode']?></span>
                                 </div>
                             </div>
@@ -331,14 +331,14 @@ $isQuoteAssignedToFlight = in_array($result['key'], $flightQuotes);
                                 <?php foreach ($trip['segments'] as $key => $segment) :?>
                                     <?php
                                     $projectName = '';
-                                    $departCountryName =  $locations[$segment['departureAirportCode']]['city'] ?? $segment['departureAirportCode'];
-                                    $arrivalCountryName =  $locations[$segment['arrivalAirportCode']]['city'] ?? $segment['arrivalAirportCode'];
+                                    $departCountryName =  empty($locations[$segment['departureAirportCode']]['city']) ? '' : $segment['departureAirportCode'];
+                                    $arrivalCountryName =  empty($locations[$segment['arrivalAirportCode']]['city']) ? '' : $segment['arrivalAirportCode'];
                                     ?>
 
                                     <?php if ($key > 0) :?>
                                         <?php $prevSegment = $trip['segments'][$key - 1];?>
                                         <div class="trip-detailed__layover">
-                                            <span class="trip-detailed__layover-location">Layover in <?= (!isset($locations[$segment['departureAirportCode']])) ?: $locations[$segment['departureAirportCode']]['city'];?> (<?= $segment['departureAirportCode']?>)</span>
+                                            <span class="trip-detailed__layover-location">Layover in <?= (empty($locations[$segment['departureAirportCode']])) ? $segment['departureAirportCode'] : $locations[$segment['departureAirportCode']]['city'];?> (<?= $segment['departureAirportCode']?>)</span>
                                             <span class="trip-detailed__layover-duration"><?= SearchService::getLayoverDuration($prevSegment['arrivalTime'], $segment['departureTime'])?></span>
                                         </div>
                                     <?php endif;?>
@@ -404,7 +404,7 @@ $isQuoteAssignedToFlight = in_array($result['key'], $flightQuotes);
                                                 ?><span class="badge badge-light" title="<?= $segment['meal']?>"><i class="fa fa-cutlery"></i></span><?php
                                             endif;?>
                                             <?php if ($segment['recheckBaggage']) :
-                                                ?> <h5 class="danger" title="<?=\yii\helpers\Html::encode(SearchService::getRecheckBaggageText($departCountryName))?>"><i class="fa fa-warning"></i> Bag re-check may be required</h5> <?php
+                                                ?> <h5 class="danger" title="<?= Html::encode(SearchService::getRecheckBaggageText($departCountryName))?>"><i class="fa fa-warning"></i> Bag re-check may be required</h5> <?php
                                             endif;?>
                                             <?php if (isset($segment['stop']) && $segment['stop'] > 0) :?>
                                                 <h5 class="danger"><i class="fa fa-warning"></i> <?= \Yii::t('search', '{n, plural, =0{no technical stops} one{# technical stop} other{# technical stops}}', ['n' => $segment['stop']])?></h5>
@@ -421,12 +421,12 @@ $isQuoteAssignedToFlight = in_array($result['key'], $flightQuotes);
                                                         </tr>
                                                         <?php foreach ($segment['stops'] as $stop) :?>
                                                             <tr>
-                                                                <td><?=isset($stop['locationCode'], $locations[$stop['locationCode']]) ? \yii\helpers\Html::encode('(' . $stop['locationCode'] . ') ' . $locations[$stop['locationCode']]['city'] . ', ' . $locations[$stop['locationCode']]['country']) : ($stop['locationCode'] ?? '-')?></td>
+                                                                <td><?=isset($stop['locationCode'], $locations[$stop['locationCode']]) ? Html::encode('(' . $stop['locationCode'] . ') ' . $locations[$stop['locationCode']]['city'] . ', ' . $locations[$stop['locationCode']]['country']) : ($stop['locationCode'] ?? '-')?></td>
                                                                 <td><?=$stop['departureDateTime'] ? Yii::$app->formatter_search->asDatetime(strtotime($stop['departureDateTime']), 'EEEE, MMM d [h:mm a]') : '-'?></td>
                                                                 <td><?=$stop['arrivalDateTime'] ? Yii::$app->formatter_search->asDatetime(strtotime($stop['arrivalDateTime']), 'EEEE, MMM d [h:mm a]') : '-'?></td>
                                                                 <td><?=isset($stop['duration']) ? SearchService::durationInMinutes($stop['duration']) : '-'?></td>
                                                                 <td><?=(isset($stop['elapsedTime']) && $stop['elapsedTime']) ? SearchService::durationInMinutes($stop['elapsedTime']) : '-'?></td>
-                                                                <td><?=isset($stop['equipment']) ? \yii\helpers\Html::encode($stop['equipment']) : '-'?></td>
+                                                                <td><?=isset($stop['equipment']) ? Html::encode($stop['equipment']) : '-'?></td>
                                                             </tr>
                                                         <?php endforeach; ?>
                                                     <?php endif;?>
