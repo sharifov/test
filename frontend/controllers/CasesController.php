@@ -50,6 +50,8 @@ use sales\entities\cases\CaseEventLogSearch;
 use sales\entities\cases\CasesSourceType;
 use sales\entities\cases\CasesStatus;
 use sales\entities\cases\CaseStatusLogSearch;
+use sales\exception\AccessDenied;
+use sales\exception\BoResponseException;
 use sales\forms\cases\CasesAddEmailForm;
 use sales\forms\cases\CasesAddPhoneForm;
 use sales\forms\cases\CasesChangeStatusForm;
@@ -1843,7 +1845,7 @@ class CasesController extends FController
                     $out['message'] = implode("; ", $form->getErrorSummary(false));
                 }
             }
-        } catch (\RuntimeException $exception) {
+        } catch (\RuntimeException | AccessDenied $exception) {
             $out['message'] = $exception->getMessage();
         } catch (\Throwable $exception) {
             $out['message'] = $exception->getMessage();
@@ -1912,6 +1914,9 @@ class CasesController extends FController
                 $out['error'] = 1;
                 $out['message'] = 'BO request Error: ' . (json_decode($response->content, true)['message'] ?? '');
             }
+        } catch (AccessDenied $e) {
+            $out['error'] = 1;
+            $out['message'] = $throwable->getMessage();
         } catch (\Throwable $throwable) {
             $out['error'] = 1;
             $out['message'] = 'An internal Sales error has occurred; Check system logs;';
@@ -1944,7 +1949,7 @@ class CasesController extends FController
         );
 
         if ($canManageSaleInfo) {
-            throw new \DomainException($canManageSaleInfo, -3);
+            throw new AccessDenied($canManageSaleInfo, -3);
         }
 
         return true;
@@ -1986,16 +1991,17 @@ class CasesController extends FController
             }
 
             $out['message'] = 'Sale info: ' . $caseSale->css_sale_id . ' successfully refreshed';
-        } catch (\Throwable $throwable) {
+        } catch (AccessDenied | NotFoundException $e) {
+            $out['error'] = 1;
+            $out['message'] = $e->getMessage();
+        } catch (\DomainException | \RuntimeException | BoResponseException $e) {
+            $out['error'] = 1;
+            $out['message'] = $e->getMessage();
+            \Yii::warning(AppHelper::throwableLog($e), 'CaseController:actionAjaxRefreshSaleInfo:DomainException|RuntimeException|BoResponseException');
+        } catch (\Throwable $e) {
             $out['error'] = 1;
             $out['message'] = 'An internal Sales error has occurred; Check system logs;';
-            if ($throwable->getCode() <= 0 && $throwable->getCode() > -4) {
-                $out['message'] = $throwable->getMessage();
-            }
-            Yii::error(
-                \yii\helpers\VarDumper::dumpAsString($throwable->getMessage(), 20),
-                'CaseController:actionAjaxRefreshSaleInfo:Throwable'
-            );
+            \Yii::error(AppHelper::throwableLog($e), 'CaseController:actionAjaxRefreshSaleInfo:Throwable');
         }
 
         return $this->asJson($out);

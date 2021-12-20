@@ -1373,12 +1373,11 @@ class ClientChatController extends FController
                 $result['message'] = 'ClientChat returned to InProgress';
                 $result['status'] = 1;
                 $result['goToClientChatId'] = $clientChat->cch_id;
-            } catch (\Throwable $throwable) {
-                AppHelper::throwableLogger(
-                    $throwable,
-                    'ClientChatController:actionAjaxReturn:throwable'
-                );
-                $result['message'] = VarDumper::dumpAsString($throwable->getMessage());
+            } catch (\RuntimeException | NotFoundException | ForbiddenHttpException $e) {
+                $result['message'] = VarDumper::dumpAsString($e->getMessage());
+            } catch (\Throwable $e) {
+                AppHelper::throwableLogger($e, 'ClientChatController:actionAjaxReturn:throwable');
+                $result['message'] = VarDumper::dumpAsString($e->getMessage());
             }
             return $result;
         }

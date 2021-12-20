@@ -320,10 +320,12 @@ class CasesSaleService
             $caseSale = $this->prepareAdditionalData($caseSale, $saleData);
 
             if (!$caseSale->save()) {
-                \Yii::error(
-                    VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $saleData]),
-                    'CasesController:actionAddSale:CaseSale:save'
-                );
+                \Yii::error([
+                    'message' => 'An error occurred while trying to refresh original sale info;',
+                    'caseGid' => $case->cs_gid,
+                    'saleId' => $caseSale->css_sale_id,
+                    'errors' => VarDumper::dumpAsString($caseSale->errors)
+                ], 'CaseSaleService:refreshOriginalSaleData:CaseSale:save');
                 throw new \RuntimeException('An error occurred while trying to refresh original sale info;');
             }
 
