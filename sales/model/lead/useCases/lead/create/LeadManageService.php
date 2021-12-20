@@ -11,6 +11,7 @@ use common\models\Employee;
 use common\models\Lead;
 use common\models\LeadFlow;
 use common\models\LeadPreferences;
+use common\models\query\SourcesQuery;
 use common\models\Sources;
 use common\models\VisitorLog;
 use sales\forms\lead\EmailCreateForm;
@@ -272,15 +273,32 @@ class LeadManageService
         $sourceId = null;
 
         if ($internalPhoneNumber) {
-            $source = (new Query())
-                ->select(['dpp_source_id'])
-                ->from(PhoneList::tableName())
-                ->innerJoin(DepartmentPhoneProject::tableName(), 'dpp_phone_list_id = pl_id')
-                ->andWhere(['pl_phone_number' => $internalPhoneNumber, 'pl_enabled' => true])
-                ->andWhere(['dpp_project_id' => $call->c_project_id, 'dpp_enable' => true])
-                ->one();
-            if ($source && $source['dpp_source_id']) {
-                $sourceId = (int)$source['dpp_source_id'];
+            if ($call->isDirect()) {
+                $project = $call->cProject;
+                $projectParams = $project ? $project->getParams() : null;
+                if ($projectParams && $source = SourcesQuery::getByCidOrDefaultByProject($projectParams->object->lead->default_cid_on_direct_call, $call->c_project_id)) {
+                    $sourceId = $source->id;
+                } else if ($source = SourcesQuery::getFirstSourceByProjectId($call->c_project_id)) {
+                    $sourceId = $source->id;
+                    \Yii::warning([
+                        'message' => 'Lead creation from phone widget: Not found source by CID and not found default by project for Direct Call',
+                        'callId' => $call->c_id,
+                        'sourceCidFromSettings' => $projectParams->object->lead->default_cid_on_direct_call,
+                        'projectId' => $call->c_project_id,
+                        'currentCid' => $source->cid
+                    ], 'LeadManageService:createFromPhoneWidget:defaultSourceCidDetecting');
+                }
+            } else {
+                $source = (new Query())
+                    ->select(['dpp_source_id'])
+                    ->from(PhoneList::tableName())
+                    ->innerJoin(DepartmentPhoneProject::tableName(), 'dpp_phone_list_id = pl_id')
+                    ->andWhere(['pl_phone_number' => $internalPhoneNumber, 'pl_enabled' => true])
+                    ->andWhere(['dpp_project_id' => $call->c_project_id, 'dpp_enable' => true])
+                    ->one();
+                if ($source && $source['dpp_source_id']) {
+                    $sourceId = (int)$source['dpp_source_id'];
+                }
             }
         }
 
