@@ -1,6 +1,6 @@
 <?php
 
-use common\models\Employee;
+use sales\helpers\lead\LeadHelper;
 use sales\helpers\lead\LeadPreferencesHelper;
 use yii\widgets\ActiveForm;
 
@@ -30,6 +30,10 @@ use yii\widgets\ActiveForm;
         </div>
         <div class="col-md-2">
             <?= $form->field($leadForm->preferences, 'numberStops')->dropDownList(LeadPreferencesHelper::listNumberStops(), ['prompt' => '-']) ?>
+        </div>
+        <div class="col-md-2 col-sm-12">
+            <?= $form->field($leadForm, 'depId', [
+            ])->dropDownList(LeadHelper::getDepartments(Yii::$app->user)) ?>
         </div>
         <div class="col-md-3">
             <div class="d-flex flex-direction-column align-content-end align-items-end" style="height: 100%;">

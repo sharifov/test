@@ -2167,6 +2167,9 @@ class LeadController extends FController
         $form->assignDep(Department::DEPARTMENT_SALES);
         if ($form->load($data['post']) && $form->validate()) {
             try {
+                if ($form->depId === 0) {
+                    $form->depId = null;
+                }
                 $form->client->projectId = $form->projectId;
                 $form->client->typeCreate = Client::TYPE_CREATE_LEAD;
                 $lead = $this->leadManageService->createManuallyByDefault($form, Yii::$app->user->id, Yii::$app->user->id, LeadFlow::DESCRIPTION_MANUAL_CREATE);
@@ -2207,9 +2210,11 @@ class LeadController extends FController
                 []
             );
             $form = new LeadManageForm(0);
-            $form->assignDep(Department::DEPARTMENT_SALES);
             if (Yii::$app->request->isPjax && $form->load($data['post']) && $form->validate()) {
                 try {
+                    if ($form->depId === 0) {
+                        $form->depId = null;
+                    }
                     $leadManageService = Yii::createObject(UseCaseLeadManageService::class);
                     $form->client->projectId = $form->projectId;
                     $form->client->typeCreate = Client::TYPE_CREATE_LEAD;
