@@ -45,7 +45,11 @@ class SegmentEditForm extends SegmentForm
         try {
             return (new AirportRepository())->findByIata($iata)->getSelection();
         } catch (\Exception $e) {
-            Yii::$app->errorHandler->logException($e);
+            \Yii::warning(
+                ['message' => 'Airport not found by code', 'airport_iata' => $iata],
+                'SegmentEditForm:loadAirportLabel:AirportRepository:findByIata:IataNotFound'
+            );
+            //Yii::$app->errorHandler->logException($e);
             return '';
         }
     }
@@ -59,7 +63,11 @@ class SegmentEditForm extends SegmentForm
         try {
             return (new AirportRepository())->findByIata($iata)->getCityName();
         } catch (\Exception $e) {
-            Yii::$app->errorHandler->logException($e);
+            \Yii::warning(
+                ['message' => 'Airport not found by code', 'airport_iata' => $iata],
+                'SegmentEditForm:loadAirportLabel:AirportRepository:findByIata:IataNotFound'
+            );
+            //Yii::$app->errorHandler->logException($e);
             return '';
         }
     }
