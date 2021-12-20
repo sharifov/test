@@ -69,7 +69,7 @@ class SegmentEditForm extends SegmentForm
             $logMessage['airport_iata'] = $iata;
             \Yii::warning(
                 $logMessage,
-                'SegmentEditForm:loadAirportLabel:AirportRepository:findByIata'
+                'SegmentEditForm:loadCityName:AirportRepository:findByIata'
             );
             return '';
         }

@@ -28,7 +28,7 @@ class AirportRepository
         if ($airport = Airports::findOne(['iata' => $iata])) {
             return $airport;
         }
-        throw new NotFoundException('Airport by IATA not found: '. $iata);
+        throw new NotFoundException('Airport by IATA not found: ' . $iata);
     }
 
     public function getByIata($iata): ?Airports
