@@ -6,11 +6,12 @@ use common\models\Department;
 use common\models\Employee;
 use common\models\Lead;
 use DateTime;
+use sales\access\EmployeeDepartmentAccess;
 use yii\helpers\ArrayHelper;
 
 class LeadHelper
 {
-    private static array $cacheDepartments = [];
+    private static array $departments = [];
 
     /**
      * @return array
@@ -150,25 +151,17 @@ class LeadHelper
 
     public static function getDepartments(\frontend\components\User $user): array
     {
-        /** @var Employee $employee */
-        $employee = $user->identity;
-
-        if (self::$cacheDepartments) {
-            return self::$cacheDepartments;
+        if (self::$departments) {
+            return self::$departments;
         }
 
-        self::$cacheDepartments = [0 => '-'];
-
-        if ($employee->isAdmin()) {
-            self::$cacheDepartments = array_merge(self::$cacheDepartments, Department::getList());
-            return self::$cacheDepartments;
-        }
-
-        self::$cacheDepartments = array_merge(
-            self::$cacheDepartments,
-            ArrayHelper::map($employee->udDeps, 'dep_id', 'dep_name'),
+        self::$departments = EmployeeDepartmentAccess::getDepartments($user->identity);
+        ksort(self::$departments);
+        self::$departments = array_merge(
+            [0 => '-'],
+            self::$departments,
         );
 
-        return self::$cacheDepartments;
+        return self::$departments;
     }
 }
