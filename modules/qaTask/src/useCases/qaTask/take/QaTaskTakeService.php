@@ -58,9 +58,14 @@ class QaTaskTakeService extends QaTaskActionsService
         }
     }
 
+    public function checkAccessTake($userId, QaTask $task): bool
+    {
+        return $this->accessChecker->checkAccess($userId, 'qa-task/qa-task-action/take', ['task' => $task]);
+    }
+
     public function permissionGuard($userId, QaTask $task): void
     {
-        if (!$this->accessChecker->checkAccess($userId, 'qa-task/qa-task-action/take', ['task' => $task])) {
+        if (!$this->checkAccessTake($userId, $task)) {
             throw new ForbiddenHttpException('Access denied.');
         }
     }
