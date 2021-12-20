@@ -718,6 +718,11 @@ class LeadController extends FController
 
                         $content_data['content'] = $comForm->c_email_message;
                         $content_data['subject'] = $comForm->c_email_subject;
+                        $content_data['department'] = [];
+                        if ($department = $lead->lDep) {
+                            $content_data['department']['key'] = $department->dep_key;
+                            $content_data['department']['name'] = $department->dep_name;
+                        }
 
                         $previewEmailForm->e_email_subject = $comForm->c_email_subject;
                         $previewEmailForm->e_content_data = $content_data;
