@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\model\leadDataKey\service;
+namespace sales\model\leadDataKey\services;
 
 /**
  * Class LeadDataKeyService
