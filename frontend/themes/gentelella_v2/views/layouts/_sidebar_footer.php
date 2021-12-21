@@ -33,17 +33,25 @@ $user = Yii::$app->user->identity;
 
 
     <?=Html::a(
-        '<span class="fa fa-search"></span>',
-        null,
-        ['data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => 'Search menu', 'id' => 'btn-search-menu-toggle']
-    ) ?>
+    '<span class="fa fa-search"></span>',
+    null,
+    ['data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => 'Search menu', 'id' => 'btn-search-menu-toggle']
+) ?>
 
-    <?php if ($user->canRoute('/user-connection/index')) :?>
+    <?php /*if ($user->canRoute('/user-connection/index')) :?>
         <?=Html::a(
             '<span class="fa fa-plug"></span>',
             ['/user-connection/index'],
             ['data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => 'User Connections']
         ) ?>
+    <?php endif;*/ ?>
+
+    <?php if ($user->canRoute('/voip/index') && Yii::$app->user->can('PhoneWidget')) :?>
+        <?=Html::a(
+        '<span class="fa fa-phone-square"></span>',
+        ['/voip/index'],
+        ['data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => 'VoIP - Phone Device', 'target' => '_blank']
+    ) ?>
     <?php endif; ?>
 
     <?php if ($user->canRoute('/call/realtime-map')) :?>

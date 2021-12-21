@@ -94,7 +94,9 @@ class VoipController extends FController
             throw new ForbiddenHttpException('Access denied.');
         }
 
-        return $this->render('index');
+        $user = \Yii::$app->user->identity;
+
+        return $this->render('index', ['user' => $user]);
     }
 
     public function actionCreateCall()
