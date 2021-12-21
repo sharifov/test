@@ -40,6 +40,7 @@ use modules\product\src\entities\productType\ProductType;
 use modules\product\src\entities\productType\ProductTypeRepository;
 use modules\product\src\useCases\product\create\ProductCreateForm;
 use modules\product\src\useCases\product\create\ProductCreateService;
+use sales\helpers\app\AppHelper;
 use sales\helpers\ErrorsToStringHelper;
 use sales\model\caseOrder\entity\CaseOrder;
 use sales\repositories\product\ProductQuoteRepository;
@@ -137,22 +138,41 @@ class OrderCreateFromSaleService
         return $order;
     }
 
-    public function orderContactCreate(Order $order, OrderContactForm $orderContactForm): OrderContact
+    public function orderContactCreate(Order $order, OrderContactForm $orderContactForm): ?OrderContact
     {
-        $orderContact = OrderContact::create(
-            $order->or_id,
-            $orderContactForm->first_name,
-            $orderContactForm->last_name,
-            null,
-            $orderContactForm->email,
-            $orderContactForm->phone_number
-        );
+        try {
+            if (!$orderContactForm->validate()) {
+                throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($orderContactForm));
+            }
 
-        $client = $this->clientManageService->createBasedOnOrderContact($orderContact, $order->or_project_id);
-        $orderContact->oc_client_id = $client->id;
-        $this->orderContactRepository->save($orderContact);
+            $orderContact = OrderContact::create(
+                $order->or_id,
+                $orderContactForm->first_name,
+                $orderContactForm->last_name,
+                null,
+                $orderContactForm->email,
+                $orderContactForm->phone_number
+            );
 
-        return $orderContact;
+            $client = $this->clientManageService->createBasedOnOrderContact($orderContact, $order->or_project_id);
+            $orderContact->oc_client_id = $client->id;
+            $this->orderContactRepository->save($orderContact);
+
+            return $orderContact;
+        } catch (\RuntimeException | \DomainException $throwable) {
+            $message = AppHelper::throwableLog($throwable, true);
+            $message['orderContactForm'] = $orderContactForm->toArray();
+            \Yii::warning(
+                $message,
+                'OrderCreateFromSaleService:orderContactCreate:Exception'
+            );
+        } catch (\Throwable $throwable) {
+            \Yii::error(
+                AppHelper::throwableLog($throwable, true),
+                'OrderCreateFromSaleService:orderContactCreate:Throwable'
+            );
+        }
+        return null;
     }
 
     public function caseOrderRelation(int $orderId, int $caseId): bool
