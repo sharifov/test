@@ -237,8 +237,8 @@ $leadAbacDto = new LeadAbacDto($leadModel, $userId);
             ])?>
 
             <?php Modal::begin(['id' => 'split-tips-modal',
-                'title' => 'Split tips',
-                'size' => Modal::SIZE_LARGE
+                'title' => 'Split tips for Lead(' . $leadModel->id . ')',
+                'size' => Modal::SIZE_DEFAULT
             ])?>
             <?php Modal::end()?>
         <?php endif;?>

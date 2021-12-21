@@ -60,6 +60,7 @@ use sales\listeners\lead\LeadSoldEventLogListener;
 use sales\listeners\lead\LeadSoldNotificationsListener;
 use sales\listeners\lead\LeadSoldSplitListener;
 use sales\listeners\lead\LeadTaskEventListener;
+use sales\listeners\lead\LeadTipsSplitListener;
 use sales\listeners\lead\LeadTrashEventLogListener;
 use sales\listeners\lead\leadWebEngage\LeadBookedWebEngageListener;
 use sales\listeners\lead\leadWebEngage\LeadSoldWebEngageListener;
@@ -121,6 +122,7 @@ return [
         LeadSoldEventLogListener::class,
         LeadSoldNotificationsListener::class,
         LeadSoldSplitListener::class,
+        LeadTipsSplitListener::class,
         LeadPhoneTrustListener::class,
         LeadSoldWebEngageListener::class,
     ],

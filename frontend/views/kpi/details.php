@@ -151,14 +151,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     $splitTipsTxt = implode('<br/>', $return);
                 }
 
-                $mainAgentPercent = 100;
-                if ($model->splitTipsPercentSum > 0) {
-                    $mainAgentPercent -= $model->splitTipsPercentSum;
-                }
-                $mainAgentTipsTxt = "<strong>$" . number_format($model->getTotalTips() * $mainAgentPercent / 100, 2) . "</strong>";
+//                $mainAgentPercent = 100;
+//                if ($model->splitTipsPercentSum > 0) {
+//                    $mainAgentPercent -= $model->splitTipsPercentSum;
+//                }
+//                $mainAgentTipsTxt = "<strong>$" . number_format($model->getTotalTips() * $mainAgentPercent / 100, 2) . "</strong>";
 
-                return 'Tips: ' . $totalTipsTxt . ($splitTipsTxt ? '<hr/>Split tips:<br/>' . $splitTipsTxt : '') . '<hr/> ' .
-                    ($model->employee ? $model->employee->username : 'Main agent') . ' tips: ' . $mainAgentTipsTxt;
+                return 'Tips: ' . $totalTipsTxt . ($splitTipsTxt ? '<hr/>Split tips:<br/>' . $splitTipsTxt : '');
             },
             'format' => 'raw'
         ],
