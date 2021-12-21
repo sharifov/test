@@ -114,6 +114,7 @@ class CallOutEndedJob extends BaseJob implements JobInterface
 
             try {
                 if (
+                    $call->isStatusNoAnswer() &&
                     ($lead = CallEventService::getLead($this->callId, $this->clientId)) &&
                     !LeadDataCreateService::isExist($lead->id, LeadDataKeyDictionary::KEY_WE_FIRST_CALL_NOT_PICKED)
                 ) {
