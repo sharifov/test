@@ -33,7 +33,6 @@ abstract class AbstractLeadEventData
         $result['phone'] = $this->lead->l_client_phone;
         $result['name'] = $this->lead->client->getFullName();
         $result['email'] = $this->lead->l_client_email;
-        $result['lead_from_lp'] = null; /* TODO::  */
         $result['lead_id'] = $this->lead->id;
         $result['origin'] = $this->leadService->getOrigin();
         $result['destination'] =  $this->leadService->getDestination();
@@ -45,7 +44,7 @@ abstract class AbstractLeadEventData
         $result['adult'] = $this->lead->adults;
         $result['child'] = $this->lead->children;
         $result['infant'] = $this->lead->infants;
-        $result['price'] = null; /* TODO::  */
+        $result['price'] = null;
         $result['isTest'] = $this->settings->isTest();
         $result['sourceCID'] = $this->lead->source->cid ?? null;
 
