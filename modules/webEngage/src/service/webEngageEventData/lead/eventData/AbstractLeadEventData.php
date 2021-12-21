@@ -30,25 +30,27 @@ abstract class AbstractLeadEventData
 
     public function getEventData(): array
     {
-        $result['phone'] = $this->lead->l_client_phone;
-        $result['name'] = $this->lead->client->getFullName();
-        $result['email'] = $this->lead->l_client_email;
-        $result['lead_id'] = $this->lead->id;
-        $result['origin'] = $this->leadService->getOrigin();
-        $result['destination'] =  $this->leadService->getDestination();
-        $result['departure-date'] = $this->leadService->getDepartureDate();
-        $result['return-date'] = $this->leadService->getReturnDate();
-        $result['cabin'] = $this->lead->cabin;
-        $result['route'] = $this->leadService->getRoute();
-        $result['flight-type'] = $this->lead->trip_type;
-        $result['adult'] = $this->lead->adults;
-        $result['child'] = $this->lead->children;
-        $result['infant'] = $this->lead->infants;
-        $result['price'] = null;
-        $result['isTest'] = $this->settings->isTest();
-        $result['sourceCID'] = $this->lead->source->cid ?? null;
-
-        return $result;
+        return [
+            'phone' => $this->lead->l_client_phone,
+            'name' => $this->lead->client->getFullName(),
+            'email' => $this->lead->l_client_email,
+            'lead_id' => $this->lead->id,
+            'origin' => $this->leadService->getOrigin(),
+            'destination' =>  $this->leadService->getDestination(),
+            'departure-date' => $this->leadService->getDepartureDate(),
+            'return-date' => $this->leadService->getReturnDate(),
+            'cabin' => $this->lead->getCabinClassName(),
+            'route' => $this->leadService->getRoute(),
+            'flight-type' => $this->lead->getFlightTypeName(),
+            'adult' => $this->lead->adults,
+            'child' => $this->lead->children,
+            'infant' => $this->lead->infants,
+            'price' => null,
+            'isTest' => $this->settings->isTest(),
+            'sourceCID' => $this->lead->source->cid ?? null,
+            'originCity' => $this->leadService->getOriginCity(),
+            'destinationCity' => $this->leadService->getDestinationCity(),
+        ];
     }
 
     public function getLead(): Lead
