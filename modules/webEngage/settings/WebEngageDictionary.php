@@ -22,6 +22,7 @@ class WebEngageDictionary
     public const EVENT_CALL_FIRST_CALL_NOT_PICKED = 'FirstCallNotPicked';
     public const EVENT_CALL_USER_PICKED_CALL = 'UserPickedCall';
     public const EVENT_LEAD_EMAIL_REPLIED = 'LeadEmailReplied';
+    public const EVENT_LEAD_FIRST_CALL_NOT_PICKED = 'LeadFirstCallNotPicked';
 
     public const EVENT_LIST = [
         self::EVENT_LEAD_CREATED => self::EVENT_LEAD_CREATED,
