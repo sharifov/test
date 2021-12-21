@@ -46,7 +46,7 @@ $user = Yii::$app->user->identity;
         ) ?>
     <?php endif;*/ ?>
 
-    <?php if ($user->canRoute('/voip/index') && Yii::$app->user->can('PhoneWidget')) :?>
+    <?php if (Yii::$app->user->can('PhoneWidget')) :?>
         <?=Html::a(
             '<span class="fa fa-phone-square"></span>',
             ['/voip/index'],
