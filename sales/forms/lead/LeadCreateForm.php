@@ -179,8 +179,8 @@ class LeadCreateForm extends CompositeForm
                 }
             }],
 
-            ['depId', 'required'],
-            ['depId', 'in', 'range' => [Department::DEPARTMENT_SALES, Department::DEPARTMENT_EXCHANGE]],
+            ['depId', 'integer'],
+            ['depId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
 
             ['delayedCharge', 'boolean'],
             ['delayedCharge', 'default', 'value' => false],
@@ -392,6 +392,7 @@ class LeadCreateForm extends CompositeForm
         return [
             'requestIp' => 'Client IP',
             'sourceId' => 'Marketing Info:',
+            'depId' => 'Department:',
         ];
     }
 }

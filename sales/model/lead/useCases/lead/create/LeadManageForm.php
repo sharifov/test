@@ -118,8 +118,8 @@ class LeadManageForm extends CompositeForm
                 }
             }],
 
-            ['depId', 'required'],
-            ['depId', 'in', 'range' => [Department::DEPARTMENT_SALES, Department::DEPARTMENT_EXCHANGE]],
+            ['depId', 'integer'],
+            ['depId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
         ];
     }
 
@@ -277,6 +277,7 @@ class LeadManageForm extends CompositeForm
         return [
             'requestIp' => 'Client IP',
             'source' => 'Marketing Info:',
+            'depId' => 'Department:',
         ];
     }
 }

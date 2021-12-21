@@ -2,13 +2,17 @@
 
 namespace sales\helpers\lead;
 
+use common\models\Department;
+use common\models\Employee;
 use common\models\Lead;
-use common\models\LeadFlightSegment;
 use DateTime;
+use sales\access\EmployeeDepartmentAccess;
 use yii\helpers\ArrayHelper;
 
 class LeadHelper
 {
+    private static array $departments = [];
+
     /**
      * @return array
      */
@@ -143,5 +147,21 @@ class LeadHelper
     public static function expiredLead(Lead $lead)
     {
         return (self::expirationNowDiffInSeconds($lead) <= 0);
+    }
+
+    public static function getDepartments(\frontend\components\User $user): array
+    {
+        if (self::$departments) {
+            return self::$departments;
+        }
+
+        self::$departments = EmployeeDepartmentAccess::getDepartments($user->identity);
+        ksort(self::$departments);
+        self::$departments = array_merge(
+            [0 => '-'],
+            self::$departments,
+        );
+
+        return self::$departments;
     }
 }
