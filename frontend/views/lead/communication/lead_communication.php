@@ -178,7 +178,7 @@ $canShowEmailData = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_
                                     <?= $form2->field($previewEmailForm, 'e_email_tpl_id')->hiddenInput()->label(false); ?>
                                     <?= $form2->field($previewEmailForm, 'e_quote_list')->hiddenInput()->label(false); ?>
                                     <?= $form2->field($previewEmailForm, 'e_offer_list')->hiddenInput()->label(false); ?>
-                                    <?= $form2->field($previewEmailForm, 'e_email_message_origin')->hiddenInput()->label(false); ?>
+                                    <?= $form2->field($previewEmailForm, 'e_email_message_edited')->hiddenInput(['id' => 'e_email_message_edited'])->label(false); ?>
                                     <?= $form2->field($previewEmailForm, 'e_email_subject_origin')->hiddenInput()->label(false); ?>
                                 </div>
                                 <div class="col-sm-4 form-group">
@@ -562,14 +562,25 @@ $canShowEmailData = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_
     $('#modal-email-preview').modal('show');
     
     var isProcessing = false;
+    var originContentSize = 0;
     
     if ('$emailMessageReadonly' == true) {
         function updateMessageInputVal() {
             let iframeEmail = document.getElementById('email_view');
             let contentEmail = iframeEmail.contentWindow.document.documentElement.outerHTML;
+            if (originContentSize !== new Blob([iframeEmail.contentWindow.document.documentElement.outerHTML]).size) {
+                $('#e_email_message_edited').attr('value', 1);
+            } else {
+                $('#e_email_message_edited').attr('value', 0);
+            }
             $('#e_email_message').val(contentEmail);
         }
     }
+    
+    $('#email_view').on('load', function (e) {
+        let iframeEmail = document.getElementById('email_view');
+        originContentSize = new Blob([iframeEmail.contentWindow.document.documentElement.outerHTML]).size;
+    });
     
     $(document).on('click', '#send_email_btn', function(e) {
         if (isProcessing) {

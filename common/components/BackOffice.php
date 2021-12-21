@@ -17,12 +17,15 @@ use yii\httpclient\CurlTransport;
 
 class BackOffice
 {
+    /**
+     * @throws \JsonException
+     */
     public static function sendRequest($endpoint, $type = 'GET', $fields = null)
     {
         $url = sprintf('%s/%s', Yii::$app->params['backOffice']['serverUrl'], $endpoint);
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
-        if ($type == 'POST') {
+        if ($type === 'POST') {
             curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
             curl_setopt($ch, CURLOPT_POST, true);
         }
@@ -35,13 +38,7 @@ class BackOffice
         ]);
         $result = curl_exec($ch);
 
-        /*Yii::warning(sprintf("Request:\n%s\n\nDump:\n%s\n\nResponse:\n%s",
-            print_r($fields, true),
-            print_r(curl_getinfo($ch), true),
-            print_r($result, true)
-        ), 'BackOffice component');*/
-
-        return json_decode($result, true);
+        return json_decode($result, true, 512, JSON_THROW_ON_ERROR);
     }
 
 

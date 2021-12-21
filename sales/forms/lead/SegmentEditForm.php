@@ -2,7 +2,9 @@
 
 namespace sales\forms\lead;
 
+use common\models\Airports;
 use common\models\LeadFlightSegment;
+use sales\helpers\app\AppHelper;
 use sales\repositories\airport\AirportRepository;
 use Yii;
 
@@ -19,17 +21,20 @@ class SegmentEditForm extends SegmentForm
      * @param LeadFlightSegment $segment
      * @param array $config
      */
-    public function __construct(LeadFlightSegment $segment, $config = [])
+    public function __construct(LeadFlightSegment $segment, array $config = [])
     {
         if (!$segment->getIsNewRecord()) {
-            $this->segmentId = $segment->id;
-            $this->origin = $segment->origin;
-            $this->originLabel = $this->loadAirportLabel($this->origin);
-            $this->originCity = $this->loadCityName($this->origin);
-            $this->destination = $segment->destination;
-            $this->destinationLabel = $this->loadAirportLabel($this->destination);
-            $this->destinationCity = $this->loadCityName($this->destination);
             $this->departure = $segment->departure;
+            $this->destination = $segment->destination;
+            $this->origin = $segment->origin;
+            $destAirport = $this->loadAirport($this->destination);
+            $originAirport = $this->loadAirport($this->origin);
+
+            $this->segmentId = $segment->id;
+            $this->originLabel = $originAirport ? $this->loadAirportLabel($originAirport) : '';
+            $this->originCity = $originAirport ? $this->loadCityName($originAirport) : '';
+            $this->destinationLabel = $destAirport ? $this->loadAirportLabel($destAirport) : '';
+            $this->destinationCity = $destAirport ? $this->loadCityName($destAirport) : '';
             $this->flexibility = $segment->flexibility;
             $this->flexibilityType = $segment->flexibility_type;
         }
@@ -38,28 +43,57 @@ class SegmentEditForm extends SegmentForm
 
     /**
      * @param string $iata
-     * @return string
+     * @return Airports|null
      */
-    private function loadAirportLabel(string $iata): string
+    private function loadAirport(string $iata): ?Airports
     {
         try {
-            return (new AirportRepository())->findByIata($iata)->getSelection();
-        } catch (\Exception $e) {
-            Yii::$app->errorHandler->logException($e);
+            return (new AirportRepository())->findByIata($iata);
+        } catch (\Throwable $throwable) {
+            $logMessage = AppHelper::throwableLog($throwable);
+            $logMessage['airport_iata'] = $iata;
+            \Yii::warning(
+                $logMessage,
+                'SegmentEditForm:loadAirport'
+            );
+            return null;
+        }
+    }
+
+    /**
+     * @param Airports $airportModel
+     * @return string
+     */
+    private function loadAirportLabel(Airports $airportModel): string
+    {
+        try {
+            return $airportModel->getSelection();
+        } catch (\Throwable $throwable) {
+            $logMessage = AppHelper::throwableLog($throwable);
+            $logMessage['airport_iata'] = $iata;
+            \Yii::warning(
+                $logMessage,
+                'SegmentEditForm:loadAirportLabel'
+            );
             return '';
         }
     }
 
     /**
-     * @param string $iata
+     * @param Airports $airportModel
      * @return string
      */
-    private function loadCityName(string $iata): string
+    private function loadCityName(Airports $airportModel): string
     {
         try {
-            return (new AirportRepository())->findByIata($iata)->getCityName();
-        } catch (\Exception $e) {
-            Yii::$app->errorHandler->logException($e);
+            return $airportModel->getCityName();
+        } catch (\Throwable $throwable) {
+            $logMessage = AppHelper::throwableLog($throwable);
+            $logMessage['airport_iata'] = $iata;
+            \Yii::warning(
+                $logMessage,
+                'SegmentEditForm:loadCityName'
+            );
             return '';
         }
     }
