@@ -2198,6 +2198,7 @@ class TestController extends FController
 
     public function actionZ()
     {
+        exit('test');
         try {
             $webEngageRequestService = new WebEngageRequestService();
 
