@@ -11,6 +11,7 @@ use sales\model\contactPhoneServiceInfo\service\ContactPhoneInfoService;
 use sales\services\phone\checkPhone\CheckPhoneNeutrinoService;
 use sales\services\phone\checkPhone\CheckPhoneService;
 use common\models\ClientPhone;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class CheckPhoneNumberJob
@@ -22,24 +23,20 @@ class CheckPhoneNumberJob extends BaseJob implements \yii\queue\JobInterface
     public $client_id = 0;
     public $client_phone_id = 0;
 
-    /**
-     * @param \yii\queue\Queue $queue
-     * @return bool
-     */
-    public function execute($queue): bool
+    public function execute($queue)
     {
         $this->waitingTimeRegister();
 
         try {
             if (!$this->client_id || !$this->client_phone_id) {
-                throw new \Exception('Error CheckPhoneNumberJob: (client_id < 1 || client_phone_id < 1)');
+                throw new \RuntimeException('Error CheckPhoneNumberJob: (client_id < 1 || client_phone_id < 1)');
             }
             $clientPhone = ClientPhone::findOne(['id' => $this->client_phone_id]);
             if (!$clientPhone) {
-                throw new \Exception('Error CheckPhoneNumberJob: ClientPhone not found in db (id: ' . $this->client_phone_id . ')');
+                throw new \RuntimeException('Error CheckPhoneNumberJob: ClientPhone not found in db (id: ' . $this->client_phone_id . ')');
             }
             if (strlen($clientPhone->phone) < 8) {
-                throw new \Exception('Error CheckPhoneNumberJob: ClientPhone is < 8 (' . $clientPhone->phone . ', clientId: ' . $clientPhone->client_id . ')');
+                throw new \RuntimeException('Error CheckPhoneNumberJob: ClientPhone is < 8 (' . $clientPhone->phone . ', clientId: ' . $clientPhone->client_id . ')');
             }
 
             $checkPhoneNeutrinoService = new CheckPhoneNeutrinoService($clientPhone->phone);
@@ -67,11 +64,14 @@ class CheckPhoneNumberJob extends BaseJob implements \yii\queue\JobInterface
                     );
                 }
             }
-
-            return true;
-        } catch (\Throwable $e) {
-            \Yii::error(AppHelper::throwableLog($e), 'CheckPhoneNumberJob:execute');
+        } catch (\RuntimeException | \DomainException $throwable) {
+            $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), [
+                'clientPhoneId' => $this->client_phone_id,
+                'clientId' => $this->client_id,
+            ]);
+            \Yii::warning($message, 'CheckPhoneNumberJob:Exception');
+        } catch (\Throwable $throwable) {
+            \Yii::error(AppHelper::throwableLog($throwable), 'CheckPhoneNumberJob:Throwable');
         }
-        return true;
     }
 }
