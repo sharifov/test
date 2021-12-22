@@ -24,12 +24,8 @@ $user = Yii::$app->user->identity;
 
     <?= GridView::widget([
         'dataProvider' => $userDataProvider,
+        'summary' => '',
         'columns' => [
-            [
-                'class' => \common\components\grid\UserSelect2Column::class,
-                'attribute' => 'ud_user_id',
-                'relation' => 'user',
-            ],
             [
                 'attribute' => 'ud_key',
                 'format' => 'userDataKey',
@@ -38,8 +34,7 @@ $user = Yii::$app->user->identity;
             [
                 'class' => \common\components\grid\DateTimeColumn::class,
                 'attribute' => 'ud_updated_dt',
-            ],
-            ['class' => 'yii\grid\ActionColumn'],
+            ]
         ],
     ]); ?>
 

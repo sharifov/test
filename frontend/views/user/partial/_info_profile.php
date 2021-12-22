@@ -59,7 +59,8 @@ use yii\widgets\Pjax;
                     'up_work_minutes',
                     //'up_inbox_show_limit_leads',
                     'up_default_take_limit_leads',
-                    'up_min_percent_for_take_leads'
+                    'up_min_percent_for_take_leads',
+                    'up_call_user_level'
                     /*[
                         'attribute' => 'up_updated_dt',
                         'value' => function(\common\models\UserParams $model) {
