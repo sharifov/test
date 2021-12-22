@@ -660,7 +660,7 @@ class CasesSaleService
                             $transaction->rollBack();
                             $message = AppHelper::throwableLog($throwable, true);
                             $message['saleData'] = $refreshSaleData;
-                            Yii::error($message, 'CasesSaleService:createOrderStructureFromSale:Throwable');
+                            Yii::error($message, 'CasesSaleService:createSale:Throwable');
                         }
                     }
                 } else {
