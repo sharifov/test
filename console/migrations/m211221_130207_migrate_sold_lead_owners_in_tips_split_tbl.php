@@ -26,6 +26,7 @@ class m211221_130207_migrate_sold_lead_owners_in_tips_split_tbl extends Migratio
             ->from('{{%tips_split}}')
             ->join('right join', ['a' => $subQuery], new Expression('a.id = tips_split.ts_lead_id'))
             ->groupBy('lead_id, a.tips, a.employee_id')
+            ->andWhere(new Expression('a.employee_id is not null'))
             ->having('total_percent < 100 or total_percent is null')
             ->all();
 
