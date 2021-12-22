@@ -33,7 +33,7 @@ $(function(){
         e.preventDefault();
         $('#split-tips-modal').modal('hide');
     });
-    mainAgentTips();
+    // mainAgentTips();
 });
 function mainAgentTips(){
     var total = $totalTips;
@@ -61,16 +61,9 @@ $this->registerJs($js);?>
      'options' => ['data-pjax' => true, 'id' => 'split-form'],
      'enableClientValidation' => false,
 ]); ?>
-<div class="row">
-    <div class="col-md-4">Total tips: $<?= number_format($totalTips, 2)?></div>
-    <div class="col-md-4">
-        <?php if ($lead->employee) : ?>
-            Tips for main agent (<b><?= $lead->employee->username?></b>): $<span id="main-agent-tips"><?= $mainAgentTips?></span>
-        <?php else : ?>
-            <i class="fa fa-exclamation-triangle"></i> Main agent not found.
-        <?php endif; ?>
-    </div>
-    <div class="col-md-4">
+<div class="d-flex justify-content-between align-items-center">
+    <div><h6><b>Total tips: $<?= number_format($totalTips, 2)?></b></h6></div>
+    <div>
     <?= Html::button('<i class="fa fa-plus"></i> Add Agent', [
             'id' => 'new-split-tips-button',
             'class' => 'btn btn-success pull-right' ,
@@ -126,7 +119,7 @@ $this->registerJs($js);?>
     });
 </script>
 <?php $this->registerJs(str_replace(['<script>', '</script>'], '', ob_get_clean())); ?>
-<div class="btn-wrapper">
+<div class="btn-wrapper text-center">
     <?=Html::button('<i class="glyphicon glyphicon-remove-circle"></i> Cancel', ['id' => 'cancel-btn','class' => 'btn btn-danger'])?>
     <?=Html::submitButton('<i class="fa fa-save"></i> Confirm', ['id' => 'save-btn','class' => 'btn btn-primary'])?>
 </div>
