@@ -5,6 +5,7 @@ namespace webapi\modules\v1\controllers;
 use common\components\antispam\CallAntiSpamDto;
 use common\components\jobs\CallQueueJob;
 use common\components\purifier\Purifier;
+use common\helpers\LogHelper;
 use common\models\ApiLog;
 use common\models\Call;
 use common\models\CallUserGroup;
@@ -76,6 +77,7 @@ use sales\services\departmentPhoneProject\DepartmentPhoneProjectParamsService;
 use sales\services\phone\blackList\PhoneBlackListManageService;
 use sales\services\phone\callFilterGuard\TwilioCallFilterGuard;
 use sales\services\phone\callFilterGuard\CallFilterGuardService;
+use sales\services\phone\checkPhone\CheckPhoneService;
 use sales\services\sms\incoming\SmsIncomingForm;
 use sales\services\sms\incoming\SmsIncomingService;
 use Twilio\TwiML\VoiceResponse;
@@ -509,11 +511,12 @@ class CommunicationController extends ApiBaseController
                     } catch (\Throwable $throwable) {
                         $logExecutionTime->end();
                         $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), [
-                            'phoneFrom' => $callModel->c_from,
+                            'phoneFrom' => LogHelper::replaceSource($callModel->c_from, 3),
+                            'phoneUid' => CheckPhoneService::uidGenerator($callModel->c_from),
                             'phoneTo' => $callModel->c_to
                         ]);
                         $category = 'CommunicationController:CallLogFilterGuard:generalLine';
-                        if ($throwable instanceof DomainException) {
+                        if ($throwable instanceof DomainException || strpos($throwable->getMessage(), 'Operation timed out')) {
                             Yii::warning($message, $category);
                         } else {
                             Yii::error($message, $category);
@@ -643,11 +646,12 @@ class CommunicationController extends ApiBaseController
                         } catch (\Throwable $throwable) {
                             $logExecutionTime->end();
                             $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), [
-                                'phoneFrom' => $callModel->c_from,
+                                'phoneFrom' => LogHelper::replaceSource($callModel->c_from, 3),
+                                'phoneUid' => CheckPhoneService::uidGenerator($callModel->c_from),
                                 'phoneTo' => $callModel->c_to
                             ]);
                             $category = 'CommunicationController:CallLogFilterGuard:directCall';
-                            if ($throwable instanceof DomainException) {
+                            if ($throwable instanceof DomainException || strpos($throwable->getMessage(), 'Operation timed out')) {
                                 Yii::warning($message, $category);
                             } else {
                                 Yii::error($message, $category);
