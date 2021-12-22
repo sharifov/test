@@ -368,7 +368,7 @@ class LeadController extends Controller
         Yii::info($message, 'info\CronLeadToTrash');
     }
 
-    public function actionUpdateHybridUid(string $dateFrom, string $dateTo)
+    public function actionUpdateHybridUid(int $limit = 100, int $offset = 0, ?string $dateFrom = null, ?string $dateTo = null)
     {
         $time_start = microtime(true);
 
@@ -377,24 +377,38 @@ class LeadController extends Controller
 
         try {
             $format = 'Y-m-d H:i:s';
-
-            $from = \DateTime::createFromFormat($format, $dateFrom);
-            if (!$from || !$this->validateDate($from, $dateFrom, $format)) {
-                throw new InvalidArgumentException('DateFrom: ' . $dateFrom . ' invalid format; Expected format: ' . $format);
+            if ($dateFrom) {
+                $from = \DateTime::createFromFormat($format, $dateFrom);
+                if (!$from || !$this->validateDate($from, $dateFrom, $format)) {
+                    throw new InvalidArgumentException('DateFrom: ' . $dateFrom . ' invalid format; Expected format: ' . $format);
+                }
             }
-            $to = \DateTime::createFromFormat($format, $dateTo);
-            if (!$to || !$this->validateDate($to, $dateTo, $format)) {
-                throw new InvalidArgumentException('DateTo: ' . $dateTo . ' invalid format; Expected format: ' . $format);
+            if ($dateTo) {
+                $to = \DateTime::createFromFormat($format, $dateTo);
+                if (!$to || !$this->validateDate($to, $dateTo, $format)) {
+                    throw new InvalidArgumentException('DateTo: ' . $dateTo . ' invalid format; Expected format: ' . $format);
+                }
             }
 
-            $rows = Lead::find()
+            $query = Lead::find()
                 ->select(['id', 'bo_flight_id'])
                 ->where(new Expression("(hybrid_uid is null or hybrid_uid = '')"))
                 ->andWhere(new Expression("(bo_flight_id is not null and bo_flight_id <> 0)"))
-                ->andWhere(['between', 'created', $from->format($format), $to->format($format)])
                 ->andWhere(['status' => Lead::STATUS_SOLD])
-                ->all();
+                ->orderBy(['id' => SORT_ASC]);
+            if ($limit) {
+                $query->limit($limit);
+            }
+            if ($offset) {
+                $query->offset($offset);
+            }
+            if ($dateFrom && $dateTo) {
+                $query->andWhere(['between', 'created', $from->format($format), $to->format($format)]);
+            }
+
+            $rows = $query->all();
         } catch (\Throwable $e) {
+            Yii::error(AppHelper::throwableLog($e), 'console::LeadController::actionUpdateHybridUid::Throwable');
             echo Console::renderColoredString('%r --- Error %n ' . $e->getMessage()), PHP_EOL;
             die;
         }
@@ -403,6 +417,8 @@ class LeadController extends Controller
 
         $errors = [];
         $n = 0;
+        $updatedRows = 0;
+        $updatedData = [];
         $total = count($rows);
         echo Console::renderColoredString('%y --- Total rows: %n' . $total), PHP_EOL;
         Console::startProgress(0, $total, 'Counting objects: ', false);
@@ -419,6 +435,13 @@ class LeadController extends Controller
                     if (!$resultUpdate) {
                         throw new \RuntimeException('Update failed: ' . $row->getErrorSummary(true)[0] . '; LeadId: ' . $row->id . '; BoFlightId: ' . $row->bo_flight_id . '; ');
                     }
+
+                    $updatedRows++;
+                    $updatedData[] = [
+                        'lead' => $row->id,
+                        'boFlightId' => $row->bo_flight_id,
+                        'hybridUid' => $row->hybrid_uid
+                    ];
                 } else {
                     throw new \RuntimeException('BookingId is empty in result from BO'  . '; LeadId: ' . $row->id . '; BoFlightId: ' . $row->bo_flight_id . '; ');
                 }
@@ -429,6 +452,14 @@ class LeadController extends Controller
             $n++;
         }
         Console::endProgress("done." . PHP_EOL);
+
+        Yii::info([
+            'totalRowsFromSelect' => $total,
+            'updatedRows' => $updatedRows,
+            'updatedData' => $updatedData,
+            'errorsCount' => count($errors),
+            'errors' => $errors
+        ], 'info\console::LeadController::actionUpdateHybridUid');
 
         $time_end = microtime(true);
         $time = number_format(round($time_end - $time_start, 2), 2);
