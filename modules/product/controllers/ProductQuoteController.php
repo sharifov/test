@@ -266,7 +266,7 @@ class ProductQuoteController extends FController
                 if ($case->cs_project_id) {
                     $project = $case->project;
                     if ($project && $emailConfig = $project->getVoluntaryChangeEmailConfig()) {
-                        $emailFrom = $emailConfig['emailFrom'] ?? '';
+                        $emailFrom = $emailConfig['emailFrom'] ?? $emailFrom;
                         $emailTemplateType = $emailConfig['templateTypeKey'] ?? '';
                         $emailFromName = $emailConfig['emailFromName'] ?? $emailFromName;
                     }
