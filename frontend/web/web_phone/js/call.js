@@ -131,6 +131,8 @@ var PhoneWidget = function () {
         btnTransferNumberEvent();
         btnMakeCallEvent();
 
+        $('.phone-widget-heading__warning').popover();
+
         initiated = true;
     }
 
@@ -2218,5 +2220,4 @@ var PhoneWidget = function () {
             '</li>';
         return content;
     }
-
 })();

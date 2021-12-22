@@ -391,10 +391,15 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                                     PhoneWidget.getDeviceState().removeDeviceId();
                                 }
                             }
-                            if (!PhoneWidget.isInitiated()) {
-                                createNotify('Phone Widget', obj.msg, 'error');
+                            if (obj.errorType === 'voipPageAlreadyOpened') {
+                                alert('Voip page is already opened. You will be redirected to Home page!');
+                                window.location.href = '/';
+                            } else {
+                                if (!PhoneWidget.isInitiated()) {
+                                    createNotify('Phone Widget', obj.msg, 'error');
+                                }
+                                PhoneWidget.addLog(obj.msg);
                             }
-                            PhoneWidget.addLog(obj.msg);
                         } else {
                             if (!PhoneWidget.isInitiated()) {
                                 PhoneWidget.init(window.phoneWidget.initParams);

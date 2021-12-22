@@ -98,7 +98,7 @@ class PhoneDeviceRegisterController
             return [
                 'cmd' => 'PhoneDeviceRegister',
                 'error' => true,
-                'msg' => 'Voip page is already opened. Please close this page!',
+                'errorType' => 'voipPageAlreadyOpened',
             ];
         }
 
