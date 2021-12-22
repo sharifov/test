@@ -8,14 +8,19 @@ use common\models\LeadFlightSegment;
 use common\models\LeadFlow;
 use common\models\LeadQcall;
 use common\models\Task;
+use sales\exception\BoResponseException;
 use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\repositories\lead\LeadRepository;
+use sales\services\cases\CasesSaleService;
+use yii\base\InvalidArgumentException;
 use yii\console\Controller;
+use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\Console;
 use yii\helpers\VarDumper;
 use Yii;
+use yii\validators\Validator;
 
 /**
  * Class LeadController
@@ -361,5 +366,81 @@ class LeadController extends Controller
         }
 
         Yii::info($message, 'info\CronLeadToTrash');
+    }
+
+    public function actionUpdateHybridUid(string $dateFrom, string $dateTo)
+    {
+        $time_start = microtime(true);
+
+        echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+
+        try {
+            $format = 'Y-m-d H:i:s';
+
+            $from = \DateTime::createFromFormat($format, $dateFrom);
+            if (!$from || !$this->validateDate($from, $dateFrom, $format)) {
+                throw new InvalidArgumentException('DateFrom: ' . $dateFrom . ' invalid format; Expected format: ' . $format);
+            }
+            $to = \DateTime::createFromFormat($format, $dateTo);
+            if (!$to || !$this->validateDate($to, $dateTo, $format)) {
+                throw new InvalidArgumentException('DateTo: ' . $dateTo . ' invalid format; Expected format: ' . $format);
+            }
+
+            $rows = Lead::find()
+                ->select(['id', 'bo_flight_id'])
+                ->where(new Expression("(hybrid_uid is null or hybrid_uid = '')"))
+                ->andWhere(new Expression("(bo_flight_id is not null and bo_flight_id <> 0)"))
+                ->andWhere(['between', 'created', $from->format($format), $to->format($format)])
+                ->andWhere(['status' => Lead::STATUS_SOLD])
+                ->all();
+        } catch (\Throwable $e) {
+            echo Console::renderColoredString('%r --- Error %n ' . $e->getMessage()), PHP_EOL;
+            die;
+        }
+
+        $caseSaleService = Yii::createObject(CasesSaleService::class);
+
+        $errors = [];
+        $n = 0;
+        $total = count($rows);
+        echo Console::renderColoredString('%y --- Total rows: %n' . $total), PHP_EOL;
+        Console::startProgress(0, $total, 'Counting objects: ', false);
+        foreach ($rows as $row) {
+            try {
+                $saleData = $caseSaleService->detailRequestToBackOffice($row->bo_flight_id, 0, 120, 1);
+                if (!empty($saleData['bookingId'])) {
+                    $resultUpdate = (new Query())->createCommand()->update(Lead::tableName(), [
+                        'hybrid_uid' => $saleData['bookingId']
+                    ], [
+                        'id' => $row->id
+                    ])->execute();
+
+                    if (!$resultUpdate) {
+                        throw new \RuntimeException('Update failed: ' . $row->getErrorSummary(true)[0] . '; LeadId: ' . $row->id . '; BoFlightId: ' . $row->bo_flight_id . '; ');
+                    }
+                } else {
+                    throw new \RuntimeException('BookingId is empty in result from BO'  . '; LeadId: ' . $row->id . '; BoFlightId: ' . $row->bo_flight_id . '; ');
+                }
+            } catch (BoResponseException | \RuntimeException $e) {
+                $errors[] = $e->getMessage() . '; LeadId: ' . $row->id . '; BoFlightId: ' . $row->bo_flight_id;
+            }
+            Console::updateProgress($n, $total);
+            $n++;
+        }
+        Console::endProgress("done." . PHP_EOL);
+
+        $time_end = microtime(true);
+        $time = number_format(round($time_end - $time_start, 2), 2);
+        foreach ($errors as $error) {
+            echo Console::renderColoredString('%r --- Errors %n ' . $error), PHP_EOL;
+        }
+        printf(PHP_EOL . 'Execute Time: %s' . PHP_EOL, $this->ansiFormat($time . ' s', Console::FG_RED));
+        printf(PHP_EOL . ' --- End [' . date('Y-m-d H:i:s') . '] %s ---' . PHP_EOL . PHP_EOL, $this->ansiFormat(self::class . '\\' . $this->action->id, Console::FG_YELLOW));
+    }
+
+    private function validateDate(\DateTime $dateObject, string $date, string $format = 'Y-m-d H:i:s'): bool
+    {
+        return $dateObject->format($format) === $date;
     }
 }
