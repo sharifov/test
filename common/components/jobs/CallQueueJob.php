@@ -117,13 +117,6 @@ class CallQueueJob extends BaseJob implements JobInterface
                                     if ($call->isDirect()) {
                                         if ($source = SourcesQuery::getByCidOrDefaultByProject($projectParams->object->lead->default_cid_on_direct_call, $call->c_project_id)) {
                                             $this->source_id = $source->id;
-                                            Yii::info([
-                                                'default_cid_on_direct_call' => $projectParams->object->lead->default_cid_on_direct_call,
-                                                'call_c_project_id' => $call->c_project_id,
-                                                'call_department_id' => $call->c_dep_id,
-                                                'detected_source_id' => $source->id,
-                                                'detected_source_cid' => $source->cid
-                                            ], 'info\CallQueueJob::getByCidOrDefaultByProject');
                                         } else if ($source = SourcesQuery::getFirstSourceByProjectId($call->c_project_id)) {
                                             $this->source_id = $source->id;
                                             Yii::warning([
