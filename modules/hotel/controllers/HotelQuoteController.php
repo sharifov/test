@@ -646,10 +646,6 @@ class HotelQuoteController extends FController
     {
         $productQuoteId = Yii::$app->request->get('id');
 
-        if (!Yii::$app->abac->can(null, CasesAbacObject::ACT_PRODUCT_QUOTE_VIEW_DETAILS, CasesAbacObject::ACTION_ACCESS)) {
-            throw new ForbiddenHttpException('Access denied');
-        }
-
         $productQuote = $this->productQuoteRepository->find($productQuoteId);
 
         return $this->renderAjax('partial/_quote_view_details', [
