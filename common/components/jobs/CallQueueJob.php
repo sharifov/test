@@ -127,8 +127,6 @@ class CallQueueJob extends BaseJob implements JobInterface
                                                 'currentCid' => $source->cid
                                             ], 'CallQueueJob:defaultSourceCidDetecting');
                                         }
-                                    } else {
-                                        Yii::info('call is not direct', 'info\CallQueueJob::callIsNotDirect');
                                     }
 
                                     $lead = (Yii::createObject(LeadManageService::class))
