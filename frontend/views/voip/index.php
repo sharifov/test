@@ -47,7 +47,7 @@ $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon',
     </div>
 
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-6">
         <?php if ($user->userProjectParams) : ?>
             <div class="x_panel">
                 <div class="x_title" >
@@ -75,6 +75,28 @@ $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon',
             </div>
         <?php endif; ?>
         </div>
+        <div class="col-md-6">
+            <div class="x_panel">
+                <div class="x_title" >
+                    <h2><i class="fa fa-sticky-note-o"></i> Device status</h2>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <table class="table table-bordered table-hover">
+                        <tr>
+                            <th>Twilio</th>
+                            <th>Speaker</th>
+                            <th>Microphone</th>
+                        </tr>
+                        <tr>
+                            <td><i class="fa fa-square-o phone-device-twilio-status"> </i></span></td>
+                            <td><i class="fa fa-square-o phone-device-speaker-status"> </i></span></td>
+                            <td><i class="fa fa-square-o phone-device-microphone-status"> </i></span></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
 </div>
@@ -82,7 +104,7 @@ $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon',
 
 <?php
 $phoneDeviceRemoteLogsEnabled = SettingHelper::phoneDeviceLogsEnabled() ? 'true' : 'false';
-$phoneDeviceIdStorageKey = DeviceStorageKey::getphoneDeviceIdStorageKey(Auth::id());
+$phoneDeviceIdStorageKey = DeviceStorageKey::getPhoneDeviceIdStorageKey(Auth::id());
 
 $js = <<<JS
 window.isTwilioDevicePage = true;

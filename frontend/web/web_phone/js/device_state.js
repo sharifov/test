@@ -34,26 +34,32 @@
     function Panel() {
         this.twilioOk = function () {
             $('.tab-device-status-twilio').html('Twilio: <span style="color: #00a35b">OK');
+            $('.phone-device-twilio-status').removeClass('fa-square-o').addClass('fa-check-square-o');
         };
 
         this.twilioError = function () {
             $('.tab-device-status-twilio').html('Twilio: <span style="color: #761c19">Error');
+            $('.phone-device-twilio-status').addClass('fa-square-o').removeClass('fa-check-square-o');
         };
 
         this.speakerOk = function () {
             $('.tab-device-status-speaker').html('Speaker: <span style="color: #00a35b">OK');
+            $('.phone-device-speaker-status').removeClass('fa-square-o').addClass('fa-check-square-o');
         };
 
         this.speakerError = function () {
             $('.tab-device-status-speaker').html('Speaker: <span style="color: #761c19">Error');
+            $('.phone-device-speaker-status').addClass('fa-square-o').removeClass('fa-check-square-o');
         };
 
         this.microphoneOk = function () {
             $('.tab-device-status-microphone').html('Microphone: <span style="color: #00a35b">OK');
+            $('.phone-device-microphone-status').removeClass('fa-square-o').addClass('fa-check-square-o');
         };
 
         this.microphoneError = function () {
             $('.tab-device-status-microphone').html('Microphone: <span style="color: #761c19">Error');
+            $('.phone-device-microphone-status').addClass('fa-square-o').removeClass('fa-check-square-o');
         };
     }
 
