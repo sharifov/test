@@ -21,6 +21,7 @@ return [
         'related-product-quote' => \modules\product\src\abac\RelatedProductQuoteAbacObject::class,
         'notification' => \modules\notification\src\abac\NotificationAbacObject::class,
         'leadData' => \sales\model\leadData\abac\LeadDataAbacObject::class,
+        'user' => \modules\user\src\abac\UserAbacObject::class
     ],
     'scanDirs' => [
         '/modules/',
