@@ -84,11 +84,13 @@ $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon',
                 <div class="x_content">
                     <table class="table table-bordered table-hover">
                         <tr>
+                            <th>Phone</th>
                             <th>Twilio</th>
                             <th>Speaker</th>
                             <th>Microphone</th>
                         </tr>
                         <tr>
+                            <td><i class="fa fa-square-o phone-device-status"> </i></span></td>
                             <td><i class="fa fa-square-o phone-device-twilio-status"> </i></span></td>
                             <td><i class="fa fa-square-o phone-device-speaker-status"> </i></span></td>
                             <td><i class="fa fa-square-o phone-device-microphone-status"> </i></span></td>

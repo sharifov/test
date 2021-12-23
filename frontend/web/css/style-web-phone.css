@@ -321,3 +321,149 @@ div#call-controls input {
   top: 8px;
   right: 10px;
 }
+
+
+.phone-widget .call-pane
+{
+  height: 100%!important;
+}
+
+.phone-widget__start,
+.phone-widget__start-content
+{
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.phone-widget__start
+{
+  padding: 20px 20px 80px;
+  position: absolute;
+}
+
+.phone-widget__start-title
+{
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 2px;
+  color: #fff;
+}
+
+.phone-widget__start-subtitle
+{
+  font-size: 14px;
+  margin-bottom: 24px;
+  color: rgba(255,255,255, 0.6);
+}
+
+.phone-widget__start-icn
+{
+  font-size: 44px!important;
+  display: block;
+  color: #fff;
+  opacity: 0.4;
+  margin-bottom: 20px;
+}
+
+.phone-widget .btn
+{
+  text-align: center;
+  padding: 8px 16px;
+  background: #4494e3;
+  border-radius: 4px;
+  border: 0 none;
+  margin-bottom: 8px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  position: relative;
+}
+
+.phone-widget .btn:before
+{
+  content: '';
+  background: rgba(0,0,0,0.2);
+  opacity: 0;
+  transition: opacity 0.15s ease-out;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  left: 0;
+  top: 0;
+}
+
+.phone-widget .btn:hover:before
+{
+  opacity: 0.5;
+}
+
+.phone-widget .btn:active:before
+{
+  opacity: 1;
+}
+
+.phone-widget .btn:hover, .phone-widget .btn:active
+{
+  color: #fff;
+}
+
+.phone-widget .phone-widget__start-btn
+{
+  padding: 8px 36px;
+}
+
+
+.phone-widget .call-pane-initial.pw-start
+{
+  padding: 0;
+  background: linear-gradient(
+          45deg, #4777aa 0, #0f2439 100%);
+  background-size: 200% 200%;
+}
+
+.phone-widget .call-pane-initial.pw-connecting
+{
+  animation: gradient 3s ease infinite;
+}
+
+/*.phone-widget .call-pane-initial.pw-connecting .phone-widget__start-btn:before
+{
+  opacity: 0.9;
+  background: #92A4B5;
+}*/
+
+.phone-widget .call-pane-initial.pw-connecting .phone-widget__start-btn:after
+{
+  /*content: "\f110";*/
+  position: absolute;
+  display: block;
+  font: unset;
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  font-size: 18px;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fa-spin 2s ease-in-out infinite;
+}
+
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}

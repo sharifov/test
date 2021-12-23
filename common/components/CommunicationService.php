@@ -809,7 +809,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
             }
         }
 
-        $out['data']['refreshTime'] = $this->calculateJwtExpiredSeconds($out['data']['expire']);
+        $out['data']['refreshTime'] = $this->calculateJwtExpiredSeconds($out['data']['expire']) + 1;
 
         return $out;
     }

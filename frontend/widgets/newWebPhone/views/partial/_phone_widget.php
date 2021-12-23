@@ -481,6 +481,7 @@ use yii\web\View;
                 </div>
             </li>
             <li class="tabs__item" id="tab-device-status">
+                <span class="tab-device-status"></span><br>
                 <span class="tab-device-status-twilio"></span><br>
                 <span class="tab-device-status-speaker"></span><br>
                 <span class="tab-device-status-microphone"></span><br>

@@ -2,6 +2,10 @@
     function Init(deviceId, phoneDeviceRemoteLogsEnabled) {
         twilioTokenUrl = '/phone/get-token?deviceId=' + deviceId;
         PhoneWidget.getDeviceState().setDeviceId(deviceId);
+        PhoneWidget.getDeviceState().phoneConnected();
+
+        window.removeEventListener("beforeunload", phoneDisconnected);
+        window.addEventListener("beforeunload", phoneDisconnected);
 
         if (device === null) {
             if (phoneDeviceRemoteLogsEnabled) {
@@ -15,12 +19,8 @@
                 PhoneWidget.addLogError('Refresh Voip page!');
                 return;
             }
-            if (device.audio.speakerDevices.get().size > 0) {
-                PhoneWidget.getDeviceState().speakerSelected();
-            } else {
-                PhoneWidget.getDeviceState().speakerUnselected();
-            }
-            updateInputDevice();
+            initSpeakerDevices();
+            updateMicrophoneDevice();
             updateToken();
             return;
         }
@@ -51,7 +51,7 @@
             device.on("registered", deviceRegisteredHandler);
             device.on('unregistered', deviceUnregisteredHandler);
             device.on('error', deviceErrorHandler);
-            device.audio.on("deviceChange", updateAllAudioDevices);
+            device.audio.on("deviceChange", updateSpeakerDevices);
 
             if (device.audio.isOutputSelectionSupported) {
                 $('#output-selection').show();
@@ -118,13 +118,17 @@
     const speakerDevices = document.getElementById("speaker-devices");
     const microphoneDevices = document.getElementById("microphone-devices");
 
-    speakerDevices.addEventListener("change", updateOutputDevice);
+    speakerDevices.addEventListener("change", updateSpeakerDevice);
 
-    const updateAllAudioDevices = () => {
-        updateOutputDevices(speakerDevices, device.audio.speakerDevices.get());
+    function updateSpeakerDevice() {
+        const selectedDevices = Array.from(speakerDevices.children)
+            .filter((node) => node.selected)
+            .map((node) => node.getAttribute("data-id"));
+
+        device.audio.speakerDevices.set(selectedDevices);
     }
 
-    const updateInputDevice = () => {
+    const updateMicrophoneDevice = () => {
         microphoneDevices.innerHTML = '';
 
         if (device.audio.availableInputDevices.size < 1) {
@@ -152,16 +156,9 @@
         PhoneWidget.getDeviceState().microphoneSelected();
     }
 
-    function updateOutputDevice() {
-        const selectedDevices = Array.from(speakerDevices.children)
-            .filter((node) => node.selected)
-            .map((node) => node.getAttribute("data-id"));
-
-        device.audio.speakerDevices.set(selectedDevices);
-    }
-
-    function updateOutputDevices(selectEl, selectedDevices) {
-        selectEl.innerHTML = '';
+    const updateSpeakerDevices = () => {
+        let selectedDevices = device.audio.speakerDevices.get();
+        speakerDevices.innerHTML = '';
         device.audio.availableOutputDevices.forEach(function (device, id) {
             let isActive = (selectedDevices.size === 0 && id === 'default');
             selectedDevices.forEach(function (device) {
@@ -175,7 +172,7 @@
             if (isActive) {
                 option.setAttribute('selected', 'selected');
             }
-            selectEl.appendChild(option);
+            speakerDevices.appendChild(option);
         });
     }
 
@@ -283,24 +280,28 @@
     const deviceRegisteredHandler = () => {
         PhoneWidget.getDeviceState().twilioRegister();
 
-        if (device.audio.speakerDevices.get().size > 0) {
-            PhoneWidget.getDeviceState().speakerSelected();
-        } else {
-            PhoneWidget.getDeviceState().speakerUnselected();
-        }
+        initSpeakerDevices();
 
-        device.audio.addListener('deviceChange', updateInputDevice);
+        device.audio.addListener('deviceChange', updateMicrophoneDevice);
         navigator.mediaDevices.getUserMedia({ audio: true })
             .then((stream) => {
-                updateInputDevice();
+                updateMicrophoneDevice();
                 stream.getTracks().forEach(track => track.stop());
             }).catch(error => {
-            let err = createError(error, 'Microphone error');
-            twilioLogger.error('%j', err);
-            PhoneWidget.addLog(error);
-            PhoneWidget.getDeviceState().microphoneUnselected();
-        });
+                let err = createError(error, 'Microphone error');
+                twilioLogger.error('%j', err);
+                PhoneWidget.addLog(error);
+                PhoneWidget.getDeviceState().microphoneUnselected();
+            });
         device.addListener("incoming", incomingCallHandler);
+    };
+
+    const initSpeakerDevices = () => {
+        if (!device.audio.isOutputSelectionSupported || device.audio.speakerDevices.get().size > 0) {
+            PhoneWidget.getDeviceState().speakerSelected();
+            return;
+        }
+        PhoneWidget.getDeviceState().speakerUnselected();
     };
 
     const deviceErrorHandler = (error, call) => {
@@ -344,6 +345,8 @@
         solutions: error.solutions,
         originalError: error.originalError
     })
+
+    const phoneDisconnected = () => PhoneWidget.getDeviceState().phoneDisconnected('Voip page is closed.');
 
     window.phoneWidget.device.initialize = {
         Init: Init

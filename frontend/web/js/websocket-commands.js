@@ -593,10 +593,9 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
             onlineObj.attr('title', 'Disconnect').find('i').removeClass('success').addClass('danger');
             window.socketConnectionId = null;
 
-            if (window.isTwilioDevicePage) {
-                if (PhoneWidget.isInitiated()) {
-                    PhoneWidget.getDeviceState().reset('WS connection closed.');
-                }
+            if (window.isTwilioDevicePage && PhoneWidget.isInitiated()) {
+                PhoneWidget.getDeviceState().reset('WS connection closed.');
+                PhoneWidget.getDeviceState().phoneDisconnected('WS connection closed.');
             }
 
             // setTimeout(function() {
@@ -612,6 +611,10 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
             onlineObj.attr('title', 'Online Connection: false').find('i').removeClass('success').addClass('danger');
             window.socketConnectionId = null;
 
+            if (window.isTwilioDevicePage && PhoneWidget.isInitiated()) {
+                PhoneWidget.getDeviceState().reset('WS connection error.');
+                PhoneWidget.getDeviceState().phoneDisconnected('WS connection error.');
+            }
         };
     } catch (error) {
         console.error(error);

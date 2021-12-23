@@ -17,15 +17,15 @@ if (!Auth::can('PhoneWidget_Dialpad')) {
 ?>
 <div class="phone-widget__tab is_active" id="tab-phone">
 
-  <div class="call-pane call-pane-initial is_active">
+  <div class="call-pane call-pane-initial is_active pw-start pw-connecting">
     <?php if ($canDialpad) : ?>
-        <div class="calling-from-info">
+        <div class="calling-from-info" style="display: none">
           <div class="current-number">
             <div class="custom-phone-select"></div>
           </div>
         </div>
     <?php endif;?>
-    <div class="call-pane__number">
+    <div class="call-pane__number" style="display: none">
 
             <ul class="phone-widget__list-item calls-history suggested-contacts"> </ul>
 
@@ -98,7 +98,7 @@ if (!Auth::can('PhoneWidget_Dialpad')) {
             $dialPadButtonDisabledClass = ' disabled="disabled"';
         }
         ?>
-    <div class="call-pane__dial-block">
+    <div class="call-pane__dial-block" style="display: none">
       <ul class="call-pane__dial dial">
         <li class="dial__item"><button class="dial__btn dialpad_btn_init" value="1"<?= $dialPadButtonDisabledClass?>>1</button></li>
         <li class="dial__item"><button class="dial__btn dialpad_btn_init" value="2"<?= $dialPadButtonDisabledClass?>>2</button></li>
@@ -147,7 +147,18 @@ if (!Auth::can('PhoneWidget_Dialpad')) {
     <!--                </svg>-->
     <!--            </button>-->
     <!--        </div>-->
-  </div>
+
+    <div class="phone-widget__start">
+        <div class="phone-widget__start-content">
+            <i class="far fa-handshake phone-widget__start-icn"></i>
+            <h4 class="phone-widget__start-title">Welcome!</h4>
+            <p class="phone-widget__start-subtitle">Connecting...</p>
+            <button class="btn phone-widget__start-btn" type="button" style="display: none">
+                START
+                <i class="fa fa-play ml-2"></i>
+            </button>
+        </div>
+    </div>
 
   <div class="call-pane-calling call-pane-initial" id="call-pane-calling"> </div>
 
@@ -192,6 +203,8 @@ if (!Auth::can('PhoneWidget_Dialpad')) {
   <div class="additional-info add-note" id="add-note"></div>
 
   <div class="additional-info contact-info" id="contact-info"></div>
+
+  </div>
 
 </div>
 

@@ -85,6 +85,7 @@ var PhoneWidget = function () {
     {
         if (!options.isDevicePage) {
             hideDeviceSettingsTab();
+            openVoipPageEvent();
         }
 
         callRequester.init(options);
@@ -134,6 +135,12 @@ var PhoneWidget = function () {
         $('.phone-widget-heading__warning').popover();
 
         initiated = true;
+    }
+
+    function openVoipPageEvent() {
+        $('.phone-widget__start-btn').on('click', function () {
+            window.open('/voip/index', '_blank').focus();
+        });
     }
 
     function hideDeviceSettingsTab() {
