@@ -25,6 +25,7 @@ use sales\auth\Auth;
  * @property bool $isOwner
  * @property bool $hasPqrActive
  * @property bool $hasPqcActive
+ * @property bool $hasPqcInvoluntaryActive
  * @property int $prTypeId
  * @property int|null $prProjectId
  * @property int|null $orProjectId
@@ -52,7 +53,7 @@ class ProductQuoteChangeAbacDto extends \stdClass
     public bool $isOwner;
     public bool $hasPqrActive;
     public bool $hasPqcActive;
-
+    public bool $hasPqcInvoluntaryActive;
     public int $prTypeId;
     public ?int $prProjectId;
 
@@ -88,6 +89,7 @@ class ProductQuoteChangeAbacDto extends \stdClass
             $this->isOwner = $productQuoteChange->pqcPq->isOwner($userId);
             $this->hasPqrActive = (bool)$productQuoteChange->pqcPq->productQuoteRefundsActive;
             $this->hasPqcActive = (bool)$productQuoteChange->pqcPq->productQuoteChangesActive;
+            $this->hasPqcInvoluntaryActive = (bool)$productQuoteChange->pqcPq->productQuoteInvoluntaryChangesActive;
 
             $this->prTypeId = $productQuoteChange->pqcPq->pqProduct->pr_type_id;
             $this->prProjectId = $productQuoteChange->pqcPq->pqProduct->pr_project_id;

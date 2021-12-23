@@ -18,6 +18,7 @@ use sales\entities\cases\Cases;
  * @property bool $isOwner
  * @property bool $hasPqrActive
  * @property bool $hasPqcActive
+ * @property bool $hasPqcInvoluntaryActive
  * @property int $prTypeId
  * @property int|null $prProjectId
  * @property int|null $orProjectId
@@ -40,6 +41,7 @@ class ProductQuoteAbacDto extends \stdClass
     public bool $isOwner;
     public bool $hasPqrActive;
     public bool $hasPqcActive;
+    public bool $hasPqcInvoluntaryActive;
     public int $prTypeId;
     public ?int $prProjectId;
     public ?int $orProjectId = null;
@@ -66,6 +68,7 @@ class ProductQuoteAbacDto extends \stdClass
             $this->isOwner = $productQuote->isOwner($this->userId);
             $this->hasPqrActive = (bool)$productQuote->productQuoteRefundsActive;
             $this->hasPqcActive = (bool)$productQuote->productQuoteChangesActive;
+            $this->hasPqcInvoluntaryActive = (bool)$productQuote->productQuoteInvoluntaryChangesActive;
 
             $this->prTypeId = $productQuote->pqProduct->pr_type_id;
             $this->prProjectId = $productQuote->pqProduct->pr_project_id;

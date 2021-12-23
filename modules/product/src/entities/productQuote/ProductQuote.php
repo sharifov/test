@@ -107,6 +107,7 @@ use yii\db\ActiveRecord;
  * @property ProductQuoteChange|null $productQuoteLastChange
  * @property ProductQuoteChange[] $productQuoteChanges
  * @property ProductQuoteChange[] $productQuoteChangesActive
+ * @property ProductQuoteChange[] $productQuoteInvoluntaryChangesActive
  * @property ProductQuoteRefund|null $productQuoteLastRefund
  * @property ProductQuoteRefund[] $productQuoteRefunds
  * @property ProductQuoteRefund[] $productQuoteRefundsActive
@@ -301,6 +302,16 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function getProductQuoteChangesActive(): ActiveQuery
     {
         return $this->hasMany(ProductQuoteChange::class, ['pqc_pq_id' => 'pq_id'])->andWhere(['pqc_status_id' => SettingHelper::getActiveQuoteChangeStatuses()]);
+    }
+
+    /**
+     * Gets query for [[ProductQuoteChanges]].
+     *
+     * @return ActiveQuery
+     */
+    public function getProductQuoteInvoluntaryChangesActive(): ActiveQuery
+    {
+        return $this->hasMany(ProductQuoteChange::class, ['pqc_pq_id' => 'pq_id'])->andWhere(['pqc_status_id' => SettingHelper::getInvoluntaryChangeActiveStatuses()])->andWhere(['pqc_type_id' => ProductQuoteChange::TYPE_RE_PROTECTION]);
     }
 
     public function getProductQuoteLastRefund(): ActiveQuery

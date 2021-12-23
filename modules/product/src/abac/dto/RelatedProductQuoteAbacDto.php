@@ -46,6 +46,7 @@ class RelatedProductQuoteAbacDto extends stdClass
     public bool $parPqIsChangeable;
     public bool $parPqHasPqrActive;
     public bool $parPqHasPqcActive;
+    public bool $parHasPqcInvoluntaryActive;
     public int $parPrTypeId;
     public ?int $parPrProjectId;
     public ?int $orProjectId = null;
@@ -85,6 +86,7 @@ class RelatedProductQuoteAbacDto extends stdClass
             $this->parPqIsChangeable = $parentPrQt->isChangeable();
             $this->parPqHasPqrActive = (bool)$parentPrQt->productQuoteRefundsActive;
             $this->parPqHasPqcActive = (bool)$parentPrQt->productQuoteChangesActive;
+            $this->parHasPqcInvoluntaryActive = (bool)$parentPrQt->productQuoteInvoluntaryChangesActive;
 
             $this->parPrTypeId = $parentPrQt->pqProduct->pr_type_id;
             $this->parPrProjectId = $parentPrQt->pqProduct->pr_project_id;

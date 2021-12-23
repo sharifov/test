@@ -19,6 +19,7 @@ use stdClass;
  * @property int|null $csStatusId
  * @property bool $isAutomateCase
  * @property int|null $csProjectId
+ * @property bool $hasPqcInvoluntaryActive
  */
 class ProductQuoteRefundAbacDto extends stdClass
 {
@@ -37,6 +38,7 @@ class ProductQuoteRefundAbacDto extends stdClass
     public bool $isOwner;
     public bool $hasPqrActive;
     public bool $hasPqcActive;
+    public bool $hasPqcInvoluntaryActive;
 
     public int $prTypeId;
     public ?int $prProjectId;
@@ -69,6 +71,7 @@ class ProductQuoteRefundAbacDto extends stdClass
             $this->isOwner = $productQuoteRefund->productQuote->isOwner($userId);
             $this->hasPqrActive = (bool)$productQuoteRefund->productQuote->productQuoteRefundsActive;
             $this->hasPqcActive = (bool)$productQuoteRefund->productQuote->productQuoteChangesActive;
+            $this->hasPqcInvoluntaryActive = (bool)$productQuoteRefund->productQuote->productQuoteInvoluntaryChangesActive;
 
             $this->prTypeId = $productQuoteRefund->productQuote->pqProduct->pr_type_id;
             $this->prProjectId = $productQuoteRefund->productQuote->pqProduct->pr_project_id;
