@@ -7,11 +7,13 @@ use kartik\select2\Select2;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\entities\cases\CaseCategory;
+use sales\entities\cases\CasesSearch;
 use sales\entities\cases\CasesSourceType;
 use sales\entities\cases\CasesStatus;
 use sales\model\saleTicket\entity\SaleTicket;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
+use yii\web\JsExpression;
 use yii\widgets\ActiveForm;
 use common\models\Language;
 
@@ -19,6 +21,29 @@ use common\models\Language;
 /* @var $model sales\entities\cases\CasesSearch */
 /* @var $form yii\widgets\ActiveForm */
 /* @var $dataProvider yii\data\ActiveDataProvider */
+
+$select2Properties = [
+    'size' => Select2::SIZE_SMALL,
+    'options' => [
+        'placeholder' => 'Select location ...',
+        'multiple' => true,
+    ],
+    'pluginOptions' => [
+        'allowClear' => true,
+        'minimumInputLength' => 1,
+        'language' => [
+            'errorLoading' => new JsExpression("function () { return 'Waiting for results...'; }"),
+        ],
+        'ajax' => [
+            'url' => ['/airport/get-list'],
+            'dataType' => 'json',
+            'data' => new JsExpression('function(params) { return {term:params.term}; }'),
+        ],
+        'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+        'templateResult' => new JsExpression('formatRepo'),
+        'templateSelection' => new JsExpression('function (data) { return data.selection || data.text;}'),
+    ]
+];
 ?>
 
 <div class="cases-search">
@@ -105,23 +130,34 @@ use common\models\Language;
     <div class="row">
         <div class="col-md-1">
             <?php
-                echo $form->field($model, 'departureAirport')->widget(Select2::class, [
+                /* echo $form->field($model, 'departureAirport')->widget(Select2::class, [
                     'data' => Airports::getIataList(),
                     'size' => Select2::SMALL,
                     'options' => ['multiple' => true],
                     'pluginOptions' => ['allowClear' => true],
-                ]);
-                ?>
+                ]); */
+            ?>
+
+            <?= $form->field($model, 'departureAirport')->widget(Select2::class, ArrayHelper::merge($select2Properties, [
+                'value' => static function (CasesSearch $model) {
+                    return array_values($model->departureAirport);
+                },
+            ])) ?>
         </div>
         <div class="col-md-1">
             <?php
-                echo $form->field($model, 'arrivalAirport')->widget(Select2::class, [
+                 /*echo $form->field($model, 'arrivalAirport')->widget(Select2::class, [
                     'data' => Airports::getIataList(),
                     'size' => Select2::SMALL,
                     'options' => ['multiple' => true],
                     'pluginOptions' => ['allowClear' => true],
-                ]);
-                ?>
+                ]);*/
+            ?>
+            <?= $form->field($model, 'arrivalAirport')->widget(Select2::class, ArrayHelper::merge($select2Properties, [
+                'value' => static function (CasesSearch $model) {
+                    return array_values($model->arrivalAirport);
+                },
+            ])) ?>
         </div>
         <div class="col-md-1">
             <?php
@@ -275,3 +311,17 @@ use common\models\Language;
     <?php ActiveForm::end(); ?>
 
 </div>
+
+<?php
+$js = <<<JS
+function formatRepo( repo ) {
+    if (repo.loading) return repo.text;
+    var markup = "<div class='select2-result-repository clearfix'>" +
+        "<div class='select2-result-repository__meta'>" +
+            "<div class='select2-result-repository__title'>" + repo.text + "</div>";
+    markup +=	"</div></div>";
+
+    return markup;
+}
+JS;
+$this->registerJs($js, \yii\web\View::POS_HEAD);
