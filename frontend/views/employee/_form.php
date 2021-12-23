@@ -30,7 +30,9 @@ use yii\bootstrap\Html;
 use yii\bootstrap\ActiveForm;
 use common\models\Employee;
 use common\models\EmployeeAcl;
-use yii\widgets\MaskedInput;
+use modules\user\src\abac\UserAbacObject;
+use modules\user\src\abac\dto\UserAbacDto;
+use kartik\select2\Select2;
 
 $data = [];
 $dataProjects = [];
@@ -83,59 +85,181 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 <?php endif ?>
 
                 <div class="row">
-                    <div class="col-sm-6">
-                        <?= $form->field($model, 'username')->textInput(['autocomplete' => "new-user"]) ?>
+                    <?php
+                    $userAbacDto = new UserAbacDto('username');
+                    $userAbacDto->isNewRecord = $model->isNewRecord;
+                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Username field view*/
+                    $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
+                    if ($view) {
+                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Username field edit*/
+                        $edit = !Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
+                    } else {
+                        $edit = false;
+                    }
+                    ?>
+
+                    <?php if ($view) :?>
+                    <div class="col-md-6">
+                    <?php endif; ?>
+                        <?= $form->field($model, 'username', ['options' => ['hidden' => !$view, 'class' => 'form-group']])->textInput(['autocomplete' => "new-user", 'readonly' => $edit])?>
+                    <?php if ($view) :?>
                     </div>
-                    <div class="col-sm-6">
-                        <?= $form->field($model, 'email')->input('email') ?>
+                    <?php endif; ?>
+
+                    <?php
+                    $userAbacDto = new UserAbacDto('email');
+                    $userAbacDto->isNewRecord = $model->isNewRecord;
+                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Email field view*/
+                    $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
+                    if ($view) {
+                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Email field edit*/
+                        $edit = !Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
+                    } else {
+                        $edit = false;
+                    }
+                    ?>
+
+                    <?php if ($view) :?>
+                    <div class="col-md-6">
+                    <?php endif; ?>
+                        <?= $form->field($model, 'email', ['options' => ['hidden' => !$view, 'class' => 'form-group']])->input('email', ['readonly' => $edit])?>
+                    <?php if ($view) :?>
                     </div>
+                    <?php endif; ?>
                 </div>
                 <div class="row">
-                    <div class="col-sm-6">
-                        <?= $form->field($model, 'full_name')->textInput() ?>
+                    <?php
+                    $userAbacDto = new UserAbacDto('full_name');
+                    $userAbacDto->isNewRecord = $model->isNewRecord;
+                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Full Name field view*/
+                    $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
+                    if ($view) {
+                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Full Name field edit*/
+                        $edit = !Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
+                    } else {
+                        $edit = false;
+                    }
+                    ?>
+
+                    <?php if ($view) :?>
+                    <div class="col-md-6">
+                    <?php endif; ?>
+                        <?= $form->field($model, 'full_name', ['options' => ['hidden' => !$view, 'class' => 'form-group']])->textInput(['readonly' => $edit])?>
+                    <?php if ($view) :?>
                     </div>
-                    <div class="col-sm-6">
-                        <?= $form->field($model, 'password')->passwordInput(['autocomplete' => 'new-password']) ?>
+                    <?php endif; ?>
+
+                    <?php
+                    $userAbacDto = new UserAbacDto('password');
+                    $userAbacDto->isNewRecord = $model->isNewRecord;
+                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Pass field view*/
+                    $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
+                    if ($view) {
+                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Pass field edit*/
+                        $edit = !Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
+                    } else {
+                        $edit = false;
+                    }
+                    ?>
+
+                    <?php if ($view) :?>
+                    <div class="col-md-6">
+                    <?php endif; ?>
+                        <?= $form->field($model, 'password', ['options' => ['hidden' => !$view, 'class' => 'form-group']])->passwordInput(['autocomplete' => 'new-password', 'readonly' => $edit])?>
+                    <?php if ($view) :?>
                     </div>
+                    <?php endif; ?>
                 </div>
 
                 <div class="row">
-                    <div class="col-sm-6">
-                        <?= $form->field($model, 'nickname')->textInput() ?>
+                    <?php
+                    $userAbacDto = new UserAbacDto('nickname');
+                    $userAbacDto->isNewRecord = $model->isNewRecord;
+                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Nickname field view*/
+                    $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
+                    if ($view) {
+                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Nickname field edit*/
+                        $edit = !Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
+                    } else {
+                        $edit = false;
+                    }
+                    ?>
+
+                    <?php if ($view) :?>
+                    <div class="col-md-6">
+                    <?php endif; ?>
+                        <?= $form->field($model, 'nickname', ['options' => ['hidden' => !$view, 'class' => 'form-group']])->textInput(['readonly' => $edit])?>
+                    <?php if ($view) :?>
                     </div>
+                    <?php endif; ?>
                 </div>
 
                 <div class="row">
-                    <div class="col-sm-6">
-                        <?php if ($model->isNewRecord || $user->isAdmin() || $user->isSuperAdmin() || $user->isSupervision() || $user->isUserManager()) : ?>
-                            <?php //= $form->field($model, 'roles')->dropDownList($model::getAllRoles(), ['prompt' => '']) ?>
+                    <?php
+                    $optionsS2 = ['class' => 'd-none'];
+                    $userAbacDto = new UserAbacDto('form_roles');
+                    $userAbacDto->isNewRecord = $model->isNewRecord;
+                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, User Roles field view*/
+                    $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
+                    if ($view) {
+                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, User Roles field edit*/
+                        $edit = !Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
+                    } else {
+                        $edit = false;
+                    }
+                    ?>
 
-                            <?php
-                                echo $form->field($model, 'form_roles')->widget(\kartik\select2\Select2::class, [
-                                    'data' => $model::getAllRoles(),
-                                    'size' => \kartik\select2\Select2::SMALL,
-                                    'options' => ['placeholder' => 'Select user roles', 'multiple' => true],
-                                    'pluginOptions' => ['allowClear' => true],
-                                ]);
-                            ?>
+                    <?php if ($view) :?>
+                    <div class="col-md-6">
+                    <?php endif; ?>
 
-                        <?php else : ?>
-                            <div>
-                            <label class="control-label">Role</label>:
-                                <b><?=implode(', ', $model->getRoles())?></b>
-                            </div>
-                        <?php endif; ?>
+                    <?= $form->field($model, 'form_roles', ['options' => $view ? ['class' => 'form-group'] : $optionsS2])->widget(Select2::class, [
+                        'data' => Employee::getAllRoles(),
+                        'size' => Select2::SMALL,
+                        'options' => ['placeholder' => 'Select user roles', 'multiple' => true],
+                        'pluginOptions' => ['allowClear' => true, 'disabled' => $edit],
+                    ]) ?>
+
+                    <?php if ($view) :?>
                     </div>
-                    <?php if (!$model->isNewRecord) : ?>
-                        <div class="col-sm-6">
-                            <?= $form->field($model, 'status')->dropDownList($model::getStatusList()) ?>
-                        </div>
+                    <?php endif; ?>
+
+                    <?php
+                    if ($view && $edit) {
+                        echo $form->field($model, 'form_roles', ['options' => $optionsS2])->widget(Select2::class, [
+                            'data' => Employee::getAllRoles(),
+                            'size' => Select2::SMALL,
+                            'options' => ['placeholder' => 'Select user roles', 'multiple' => true],
+                            'pluginOptions' => ['allowClear' => true],
+                        ]);
+                    }
+                    ?>
+
+                    <?php
+                    $userAbacDto = new UserAbacDto('status');
+                    $userAbacDto->isNewRecord = $model->isNewRecord;
+                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Status field view*/
+                    $view = !$model->isNewRecord && Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
+                    if ($view) {
+                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Status field edit*/
+                        $edit = !Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
+                    } else {
+                        $edit = false;
+                    }
+                    ?>
+
+                    <?php if ($view) :?>
+                    <div class="col-md-6">
+                    <?php endif; ?>
+                        <?= $form->field($model, 'status', ['options' => ['hidden' => !$view, 'class' => 'form-group']])->dropDownList($model::getStatusList(), ['disabled' => $edit]) ?>
+                    <?php if ($view) :?>
+                    </div>
                     <?php endif; ?>
                 </div>
 
                 <div class="row">
                     <div class="col-sm-12">
-                        <?php if ($model->isNewRecord || $user->isAdmin() || $user->isSuperAdmin() || $user->isSupervision() || $user->isUserManager() || $user->isAgent()) :
+                        <?php /*if ($model->isNewRecord || $user->isAdmin() || $user->isSuperAdmin() || $user->isSupervision() || $user->isUserManager() || $user->isAgent()) :
                             if ($user->isAdmin() || $user->isSuperAdmin() || $user->isUserManager()) {
                                 $data = \common\models\UserGroup::getList();
                                 $dataProjects = \common\models\Project::getList();
@@ -148,56 +272,56 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                             }
 
 
-                            ?>
+                            */?><!--
 
                             <?php
-                                echo $form->field($model, 'user_groups')->widget(\kartik\select2\Select2::class, [
+/*                                echo $form->field($model, 'user_groups')->widget(\kartik\select2\Select2::class, [
                                     'data' => $data,
                                     'size' => \kartik\select2\Select2::SMALL,
                                     'options' => ['placeholder' => 'Select user groups', 'multiple' => true],
                                     'pluginOptions' => ['allowClear' => true],
                                 ]);
-                            ?>
+                            */?>
 
 
                             <?php
-                            echo $form->field($model, 'user_projects')->widget(\kartik\select2\Select2::class, [
+/*                            echo $form->field($model, 'user_projects')->widget(\kartik\select2\Select2::class, [
                                 'data' => $dataProjects,
                                 'size' => \kartik\select2\Select2::SMALL,
                                 'options' => ['placeholder' => 'Select user projects', 'multiple' => true],
                                 'pluginOptions' => ['allowClear' => true],
                             ]);
-                            ?>
+                            */?>
 
                             <?php
-                            if ($model->isNewRecord) {
+/*                            if ($model->isNewRecord) {
                                 echo $form->field($model, 'make_user_project_params')->checkbox();
                             }
-                            ?>
+                            */?>
 
                             <?php
-                                echo $form->field($model, 'user_departments')->widget(\kartik\select2\Select2::class, [
+/*                                echo $form->field($model, 'user_departments')->widget(\kartik\select2\Select2::class, [
                                     'data' => \common\models\Department::getList(),
                                     'size' => \kartik\select2\Select2::SMALL,
                                     'options' => ['placeholder' => 'Select departments', 'multiple' => true],
                                     'pluginOptions' => ['allowClear' => true],
                                 ]);
-                            ?>
+                            */?>
 
                             <?php
-                                echo $form->field($model, 'client_chat_user_channel')->widget(\kartik\select2\Select2::class, [
+/*                                echo $form->field($model, 'client_chat_user_channel')->widget(\kartik\select2\Select2::class, [
                                     'data' => ClientChatChannel::getList(),
                                     'size' => \kartik\select2\Select2::SMALL,
                                     'options' => ['placeholder' => 'Select Client Chat Chanel', 'multiple' => true],
                                     'pluginOptions' => ['allowClear' => true],
                                 ]);
-                            ?>
+                            */?>
 
-                        <?php else : ?>
+                        <?php /*else : */?>
                             <div class="col-md-12">
                                 <label class="control-label">User Groups</label>:
                                 <?php
-                                    $groupsValue = '';
+/*                                    $groupsValue = '';
                                 if ($groupsModel =  $model->ugsGroups) {
                                     $groups = \yii\helpers\ArrayHelper::map($groupsModel, 'ug_id', 'ug_name');
 
@@ -208,13 +332,13 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                                     $groupsValue = implode(' ', $groupsValueArr);
                                 }
                                     echo $groupsValue;
-                                ?>
+                                */?>
                             </div>
 
                             <div class="col-md-12">
                                 <label class="control-label">Projects access</label>:
                                 <?php
-                                    $projectsValueArr = [];
+/*                                    $projectsValueArr = [];
 
                                 if ($projects = $model->projects) {
                                     foreach ($projects as $project) {
@@ -224,15 +348,135 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
 
                                     $projectsValue = implode(' ', $projectsValueArr);
                                     echo $projectsValue;
-                                ?>
+                                */?>
                             </div>
 
-                        <?php endif; ?>
-                    </div>
+                        --><?php /*endif; */?>
 
+                        <?php
+                        if ($user->isAdmin() || $user->isSuperAdmin() || $user->isUserManager()) {
+                            $data = \common\models\UserGroup::getList();
+                            $dataProjects = \common\models\Project::getList();
+                        }
+
+                        if ($user->isSupervision()) {
+                            $data = $user->getUserGroupList();
+                            $dataProjects = \yii\helpers\ArrayHelper::map($user->projects, 'id', 'name');
+                        }
+
+                        $userAbacDto = new UserAbacDto('user_groups');
+                        $userAbacDto->isNewRecord = $model->isNewRecord;
+                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, User Groups field view*/
+                        $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
+                        if ($view) {
+                            /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, User Groups field edit*/
+                            $edit = !Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
+                        } else {
+                            $edit = false;
+                        }
+
+                        echo $form->field($model, 'user_groups', ['options' => $view ? [] : $optionsS2])->widget(Select2::class, [
+                            'data' => $data,
+                            'size' => Select2::SMALL,
+                            'options' => ['placeholder' => 'Select user groups', 'multiple' => true],
+                            'pluginOptions' => ['allowClear' => true, 'disabled' => $edit],
+                        ]);
+
+                        if ($view && $edit) {
+                            echo $form->field($model, 'user_groups', ['options' => $optionsS2])->widget(Select2::class, [
+                                'data' => $data,
+                                'size' => Select2::SMALL,
+                                'options' => ['placeholder' => 'Select user groups', 'multiple' => true],
+                                'pluginOptions' => ['allowClear' => true],
+                            ]);
+                        }
+
+                        $userAbacDto = new UserAbacDto('user_projects');
+                        $userAbacDto->isNewRecord = $model->isNewRecord;
+                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, User Projects field view*/
+                        $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
+                        if ($view) {
+                            /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, User Projects field edit*/
+                            $edit = !Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
+                        } else {
+                            $edit = false;
+                        }
+
+                        echo $form->field($model, 'user_projects', ['options' => $view ? [] : $optionsS2])->widget(Select2::class, [
+                            'data' => $dataProjects,
+                            'size' => Select2::SMALL,
+                            'options' => ['placeholder' => 'Select user projects', 'multiple' => true],
+                            'pluginOptions' => ['allowClear' => true, 'disabled' => $edit],
+                        ]);
+
+                        if ($view && $edit) {
+                            echo $form->field($model, 'user_projects', ['options' => $optionsS2])->widget(Select2::class, [
+                                'data' => $dataProjects,
+                                'size' => Select2::SMALL,
+                                'options' => ['placeholder' => 'Select user projects', 'multiple' => true],
+                                'pluginOptions' => ['allowClear' => true],
+                            ]);
+                        }
+
+                        if ($model->isNewRecord) {
+                            echo $form->field($model, 'make_user_project_params')->checkbox();
+                        }
+
+                        $userAbacDto = new UserAbacDto('user_departments');
+                        $userAbacDto->isNewRecord = $model->isNewRecord;
+                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, User Projects field view*/
+                        $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
+                        if ($view) {
+                            /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, User Projects field edit*/
+                            $edit = !Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
+                        }
+
+                        echo $form->field($model, 'user_departments', ['options' => $view ? [] : $optionsS2])->widget(Select2::class, [
+                            'data' => \common\models\Department::getList(),
+                            'size' => Select2::SMALL,
+                            'options' => ['placeholder' => 'Select departments', 'multiple' => true],
+                            'pluginOptions' => ['allowClear' => true, 'disabled' => $edit],
+                        ]);
+
+                        if ($view && $edit) {
+                            echo $form->field($model, 'user_departments', ['options' => $optionsS2])->widget(Select2::class, [
+                                'data' => \common\models\Department::getList(),
+                                'size' => Select2::SMALL,
+                                'options' => ['placeholder' => 'Select departments', 'multiple' => true],
+                                'pluginOptions' => ['allowClear' => true],
+                            ]);
+                        }
+
+                        $userAbacDto = new UserAbacDto('client_chat_user_channel');
+                        $userAbacDto->isNewRecord = $model->isNewRecord;
+                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, User Projects field view*/
+                        $view =  Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
+                        if ($view) {
+                            /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, User Projects field edit*/
+                            $edit = !Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
+                        }
+
+                        echo $form->field($model, 'client_chat_user_channel', ['options' => $view ? [] : $optionsS2])->widget(Select2::class, [
+                            'data' => ClientChatChannel::getList(),
+                            'size' => Select2::SMALL,
+                            'options' => ['placeholder' => 'Select Client Chat Chanel', 'multiple' => true],
+                            'pluginOptions' => ['allowClear' => true, 'disabled' => $edit],
+                        ]);
+
+                        if ($view && $edit) {
+                            echo $form->field($model, 'client_chat_user_channel', ['options' => $optionsS2])->widget(Select2::class, [
+                                'data' => ClientChatChannel::getList(),
+                                'size' => Select2::SMALL,
+                                'options' => ['placeholder' => 'Select Client Chat Chanel', 'multiple' => true],
+                                'pluginOptions' => ['allowClear' => true],
+                            ]);
+                        }
+                        ?>
+
+                    </div>
                 </div>
 
-                <?php if ($user->isAdmin() || $user->isSuperAdmin() || $user->isSupervision() || $user->isUserManager()) : ?>
+                <?php //if ($user->isAdmin() || $user->isSuperAdmin() || $user->isSupervision() || $user->isUserManager()) : ?>
                     <div class="row">
                         <div class="col-md-12">
                             <?php  echo Html::errorSummary($modelUserParams) ?>
@@ -240,48 +484,156 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                     </div>
 
                     <div class="row">
-                        <div class="col-md-3">
-                            <?= $form->field($modelUserParams, 'up_work_start_tm')->widget(
+                        <?php
+                        $userAbacDto = new UserAbacDto('up_work_start_tm');
+                        $userAbacDto->isNewRecord = $model->isNewRecord;
+                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Work Start Time field view*/
+                        $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
+                        if ($view) {
+                            /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Work Start Time field edit*/
+                            $edit = !Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
+                        }
+                        ?>
+                        <?php if ($view) :?>
+                            <div class="col-md-3">
+                        <?php endif; ?>
+                            <?= $form->field($modelUserParams, 'up_work_start_tm', ['options' => ['hidden' => !$view, 'class' => 'form-group']])->widget(
                                 \kartik\time\TimePicker::class,
                                 [
-                                'pluginOptions' => [
-                                    'showSeconds' => false,
-                                    'showMeridian' => false,
-                                ]]
+                                    'pluginOptions' => [
+                                        'showSeconds' => false,
+                                        'showMeridian' => false,
+                                    ],
+                                    'disabled' => $edit
+                                ]
                             )?>
-                        </div>
+                        <?php if ($view) :?>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php
+                        $userAbacDto = new UserAbacDto('up_work_minutes');
+                        $userAbacDto->isNewRecord = $model->isNewRecord;
+                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Work Minute's field view*/
+                        $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
+                        if ($view) {
+                            /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Work Minute's field edit*/
+                            $edit = !Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
+                        }
+                        ?>
+
+                        <?php if ($view) :?>
                         <div class="col-md-3">
-                            <?= $form->field($modelUserParams, 'up_work_minutes')->input('number', ['step' => 10, 'min' => 0])?>
+                        <?php endif; ?>
+                            <?= $form->field($modelUserParams, 'up_work_minutes', ['options' => ['hidden' => !$view, 'class' => 'form-group']])->input('number', ['step' => 10, 'min' => 0, 'readonly' => $edit])?>
+                        <?php if ($view) :?>
                         </div>
+                        <?php endif; ?>
+
+                        <?php
+                        $userAbacDto = new UserAbacDto('up_timezone');
+                        $userAbacDto->isNewRecord = $model->isNewRecord;
+                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Timezone field view*/
+                        $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
+                        if ($view) {
+                            /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Timezone field edit*/
+                            $edit = !Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
+                        }
+                        ?>
+
+                        <?php if ($view) :?>
                         <div class="col-md-6">
-                            <?php //= $form->field($modelUserParams, 'up_timezone')->dropDownList(Employee::timezoneList(),['prompt' =>'-'])?>
+                        <?php endif; ?>
                             <?php
-                            echo $form->field($modelUserParams, 'up_timezone')->widget(\kartik\select2\Select2::class, [
+                            echo $form->field($modelUserParams, 'up_timezone', ['options' => ['hidden' => !$view, 'class' => 'form-group']])->widget(Select2::class, [
                                 'data' => Employee::timezoneList(true),
-                                'size' => \kartik\select2\Select2::SMALL,
+                                'size' => Select2::SMALL,
                                 'options' => ['placeholder' => 'Select TimeZone', 'multiple' => false],
-                                'pluginOptions' => ['allowClear' => true],
+                                'pluginOptions' => ['allowClear' => true, 'disabled' => $edit],
                             ]);
                             ?>
+                        <?php if ($view) :?>
                         </div>
+                        <?php endif; ?>
                     </div>
 
-                <?php endif;?>
+                <?php //endif;?>
 
-                <?php if ($user->isAdmin() || $user->isSuperAdmin() || $user->isSupervision()) : ?>
+                <?php //if ($user->isAdmin() || $user->isSuperAdmin() || $user->isSupervision()) : ?>
                     <div class="row">
+                        <?php
+                        $userAbacDto = new UserAbacDto('up_base_amount');
+                        $userAbacDto->isNewRecord = $model->isNewRecord;
+                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Base Amount field view*/
+                        $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
+                        if ($view) {
+                            /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Base Amount field edit*/
+                            $edit = !Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
+                        }
+                        ?>
+
+                        <?php if ($view) :?>
                         <div class="col-md-3">
-                            <?= $form->field($modelUserParams, 'up_base_amount')->input('number', ['step' => 0.01, 'min' => 0, 'max' => 1000]) ?>
+                        <?php endif; ?>
+                            <?= $form->field($modelUserParams, 'up_base_amount', ['options' => ['hidden' => !$view, 'class' => 'form-group']])->input('number', ['step' => 0.01, 'min' => 0, 'max' => 1000, 'readonly' => $edit]) ?>
+                        <?php if ($view) :?>
                         </div>
+                        <?php endif; ?>
+
+                        <?php
+                        $userAbacDto = new UserAbacDto('up_commission_percent');
+                        $userAbacDto->isNewRecord = $model->isNewRecord;
+                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Commission Percent field view*/
+                        $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
+                        if ($view) {
+                            /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Commission Percent field edit*/
+                            $edit = !Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
+                        }
+                        ?>
+
+                        <?php if ($view) :?>
                         <div class="col-md-3">
-                            <?= $form->field($modelUserParams, 'up_commission_percent')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
+                        <?php endif; ?>
+                            <?= $form->field($modelUserParams, 'up_commission_percent', ['options' => ['hidden' => !$view, 'class' => 'form-group']])->input('number', ['step' => 1, 'max' => 100, 'min' => 0, 'readonly' => $edit]) ?>
+                        <?php if ($view) :?>
                         </div>
+                        <?php endif; ?>
+
+                        <?php
+                        $userAbacDto = new UserAbacDto('up_bonus_active');
+                        $userAbacDto->isNewRecord = $model->isNewRecord;
+                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Bonus Is Active field view*/
+                        $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
+                        if ($view) {
+                            /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Bonus Is Active field edit*/
+                            $edit = !Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
+                        }
+                        ?>
+                        <?php if ($view) :?>
                         <div class="col-md-3">
-                            <?= $form->field($modelUserParams, 'up_bonus_active')->checkbox() ?>
+                        <?php endif; ?>
+                            <?= $form->field($modelUserParams, 'up_bonus_active', ['options' => ['hidden' => !$view, 'class' => 'form-group']])->checkbox(['disabled' => $edit]) ?>
+                        <?php if ($view) :?>
                         </div>
+                        <?php endif; ?>
+
+                        <?php
+                        $userAbacDto = new UserAbacDto('up_leaderboard_enabled');
+                        $userAbacDto->isNewRecord = $model->isNewRecord;
+                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Leader Board Enabled field view*/
+                        $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
+                        if ($view) {
+                            /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Leader Board Enabled field edit*/
+                            $edit = !Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
+                        }
+                        ?>
+                        <?php if ($view) :?>
                         <div class="col-md-3">
-                            <?= $form->field($modelUserParams, 'up_leaderboard_enabled')->checkbox() ?>
+                        <?php endif; ?>
+                            <?= $form->field($modelUserParams, 'up_leaderboard_enabled', ['options' => ['hidden' => !$view, 'class' => 'form-group']])->checkbox(['disabled' => $edit]) ?>
+                        <?php if ($view) :?>
                         </div>
+                        <?php endif; ?>
                     </div>
 
                     <?php if (!Yii::$app->user->identity->canRole('supervision')) : ?>
@@ -302,7 +654,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                         </div>
                     <?php endif; ?>
 
-                <?php endif; ?>
+                <?php //endif; ?>
 
                 <?php if ($user->isAdmin() || $user->isSuperAdmin() || $user->isSupervision() || $user->isUserManager()) : ?>
                     <?php if (!Yii::$app->user->identity->canRole('supervision')) : ?>
