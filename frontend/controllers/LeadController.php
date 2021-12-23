@@ -501,7 +501,7 @@ class LeadController extends FController
                     $mail->e_created_user_id = Yii::$app->user->id;
                     $attachments = [];
                     /** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_ATTACH_FILES, Restrict access to attach files in lead communication block*/
-                    $canAttachFiles = !Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_ATTACH_FILES);
+                    $canAttachFiles = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_ATTACH_FILES);
                     if ($canAttachFiles && FileStorageSettings::canEmailAttach() && $previewEmailForm->files) {
                         $attachments['files'] = $this->fileStorageUrlGenerator->generateForExternal($previewEmailForm->getFilesPath());
                     }
