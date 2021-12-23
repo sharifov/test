@@ -21,17 +21,6 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
     /** LOGIC PERMISSION */
     public const LOGIC_CLIENT_DATA   = self::NS . 'logic/client_data';
 
-    /** ACTION PERMISSION */
-    public const ACT_FLIGHT_REPROTECTION_CONFIRM  = self::NS . 'act/flight-reprotection-confirm'; /* TODO:: candidate to remove  was create new in RelatedProductQuoteAbacObject.php  */
-    public const ACT_FLIGHT_REPROTECTION_REFUND  = self::NS . 'act/flight-reprotection-refund'; /* TODO:: candidate to remove  was create new in RelatedProductQuoteAbacObject.php  */
-    public const ACT_FLIGHT_REPROTECTION_QUOTE  = self::NS . 'act/flight-reprotection-quote'; /* TODO:: candidate to remove  was create new in ProductQuoteChangeAbacObject.php */
-    public const ACT_FLIGHT_VOLUNTARY_QUOTE  = self::NS . 'act/flight-voluntary-quote';
-    public const ACT_PRODUCT_QUOTE_REMOVE = self::NS . 'act/product_quote/remove'; /* TODO:: candidate to remove  was create new in ProductQuoteAbacObject.php */
-    public const ACT_PRODUCT_QUOTE_VIEW_DETAILS = self::NS . 'act/product_quote/view_details'; /* TODO:: candidate to remove  was create new in ProductQuoteAbacObject.php  */
-    public const ACT_REPROTECTION_QUOTE_SEND_EMAIL = self::NS . 'act/reprotection_quote/send_email'; /* TODO:: candidate to remove  was create new in RelatedProductQuoteAbacObject.php  */
-    public const ACT_VIEW_QUOTES_DIFF = self::NS . 'act/reprotection_quote/original_quote_diff';    /* TODO:: candidate to remove  was create new in RelatedProductQuoteAbacObject.php  */
-    public const ACT_VIEW_SET_RECOMMENDED_REPROTECTION_QUOTE = self::NS . 'act/reprotection_quote/set_recommended'; /* TODO:: candidate to remove  was create new in RelatedProductQuoteAbacObject.php  */
-
     /** QUERY PERMISSIONS */
     public const SQL_CASE_QUEUES = self::NS . 'sql/queue';
 
@@ -43,25 +32,14 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
     public const OBJ_CASE_STATUS_ROUTE_RULES = self::NS . 'obj/status_rules';
 
     public const OBJECT_LIST = [
-        self::LOGIC_CLIENT_DATA                             => self::LOGIC_CLIENT_DATA,
-        self::UI_BLOCK_EVENT_LOG_LIST                       => self::UI_BLOCK_EVENT_LOG_LIST,
-        self::UI_BTN_EVENT_LOG_VIEW                         => self::UI_BTN_EVENT_LOG_VIEW,
-        self::ACT_REPROTECTION_QUOTE_SEND_EMAIL             => self::ACT_REPROTECTION_QUOTE_SEND_EMAIL,
-        self::ACT_PRODUCT_QUOTE_REMOVE                      => self::ACT_PRODUCT_QUOTE_REMOVE,
-        self::ACT_PRODUCT_QUOTE_VIEW_DETAILS                => self::ACT_PRODUCT_QUOTE_VIEW_DETAILS,
-        self::ACT_FLIGHT_REPROTECTION_CONFIRM               => self::ACT_FLIGHT_REPROTECTION_CONFIRM,
-        self::ACT_FLIGHT_REPROTECTION_REFUND                => self::ACT_FLIGHT_REPROTECTION_REFUND,
-        self::ACT_FLIGHT_REPROTECTION_QUOTE                 => self::ACT_FLIGHT_REPROTECTION_QUOTE,
-        self::ACT_FLIGHT_VOLUNTARY_QUOTE                    => self::ACT_FLIGHT_VOLUNTARY_QUOTE,
-        self::ACT_VIEW_QUOTES_DIFF                          => self::ACT_VIEW_QUOTES_DIFF,
-        self::ACT_VIEW_SET_RECOMMENDED_REPROTECTION_QUOTE   => self::ACT_VIEW_SET_RECOMMENDED_REPROTECTION_QUOTE,
-
-        self::OBJ_CASE_STATUS_ROUTE_RULES                   => self::OBJ_CASE_STATUS_ROUTE_RULES,
-        self::SQL_CASE_QUEUES                           => self::SQL_CASE_QUEUES,
+        self::LOGIC_CLIENT_DATA             => self::LOGIC_CLIENT_DATA,
+        self::UI_BLOCK_EVENT_LOG_LIST       => self::UI_BLOCK_EVENT_LOG_LIST,
+        self::UI_BTN_EVENT_LOG_VIEW         => self::UI_BTN_EVENT_LOG_VIEW,
+        self::OBJ_CASE_STATUS_ROUTE_RULES   => self::OBJ_CASE_STATUS_ROUTE_RULES,
+        self::SQL_CASE_QUEUES               => self::SQL_CASE_QUEUES,
     ];
 
     /** --------------- ACTIONS --------------------------- */
-    public const ACTION_MASK    = 'mask';
     public const ACTION_UNMASK  = 'unmask';
     public const ACTION_ACCESS  = 'access';
     public const ACTION_ALL_ACCESS  = 'allAccess';
@@ -77,16 +55,6 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         self::LOGIC_CLIENT_DATA                 => [self::ACTION_UNMASK],
         self::UI_BLOCK_EVENT_LOG_LIST           => [self::ACTION_ACCESS],
         self::UI_BTN_EVENT_LOG_VIEW             => [self::ACTION_READ],
-        self::ACT_REPROTECTION_QUOTE_SEND_EMAIL => [self::ACTION_ACCESS],
-        self::ACT_PRODUCT_QUOTE_REMOVE          => [self::ACTION_ACCESS],
-        self::ACT_PRODUCT_QUOTE_VIEW_DETAILS    => [self::ACTION_ACCESS],
-        self::ACT_FLIGHT_REPROTECTION_CONFIRM   => [self::ACTION_ACCESS],
-        self::ACT_FLIGHT_REPROTECTION_REFUND    => [self::ACTION_ACCESS],
-        self::ACT_FLIGHT_REPROTECTION_QUOTE     => [self::ACTION_CREATE],
-        self::ACT_FLIGHT_VOLUNTARY_QUOTE        => [self::ACTION_CREATE],
-        self::ACT_VIEW_QUOTES_DIFF              => [self::ACTION_ACCESS],
-        self::ACT_VIEW_SET_RECOMMENDED_REPROTECTION_QUOTE => [self::ACTION_ACCESS],
-
         self::OBJ_CASE_STATUS_ROUTE_RULES   => [self::ACTION_TRANSFER],
         self::SQL_CASE_QUEUES           => [self::ACTION_OWNER_ACCESS, self::ACTION_EMPTY_OWNER_ACCESS, self::ACTION_GROUP_ACCESS, self::ACTION_ALL_ACCESS],
     ];
@@ -185,20 +153,10 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
     /** --------------- ATTRIBUTE LIST --------------------------- */
     public const OBJECT_ATTRIBUTE_LIST = [
         self::LOGIC_CLIENT_DATA    => [self::ATTR_CASE_IS_OWNER, self::ATTR_IS_COMMON_GROUP],
-        self::ACT_REPROTECTION_QUOTE_SEND_EMAIL => [
-            self::ATTR_CASE_IS_OWNER,
-            self::ATTR_IS_COMMON_GROUP
-        ],
-        self::ACT_FLIGHT_REPROTECTION_CONFIRM => [self::ATTR_CASE_IS_OWNER, self::ATTR_IS_COMMON_GROUP],
-        self::ACT_FLIGHT_REPROTECTION_REFUND => [self::ATTR_CASE_IS_OWNER, self::ATTR_IS_COMMON_GROUP],
-        self::ACT_FLIGHT_REPROTECTION_QUOTE => [self::ATTR_CASE_IS_OWNER, self::ATTR_IS_COMMON_GROUP],
-
         self::OBJ_CASE_STATUS_ROUTE_RULES => [
             self::ATTR_CASE_IS_OWNER,
             self::ATTR_IS_COMMON_GROUP
         ],
-
-        self::ACT_FLIGHT_VOLUNTARY_QUOTE => [self::ATTR_CASE_IS_OWNER, self::ATTR_IS_COMMON_GROUP],
         self::SQL_CASE_QUEUES => [],
     ];
 
@@ -240,10 +198,6 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         $attributeList[self::OBJ_CASE_STATUS_ROUTE_RULES][] = $attrStatusList;
         $attributeList[self::OBJ_CASE_STATUS_ROUTE_RULES][] = $attrCategoryList;
         $attributeList[self::OBJ_CASE_STATUS_ROUTE_RULES][] = $attrStatusRuleList;
-
-        $attributeList[self::ACT_REPROTECTION_QUOTE_SEND_EMAIL][] = $attrStatusList;
-        $attributeList[self::ACT_REPROTECTION_QUOTE_SEND_EMAIL][] = $attrCategoryList;
-        $attributeList[self::ACT_REPROTECTION_QUOTE_SEND_EMAIL][] = $attrPqcStatusList;
         $attributeList[self::OBJ_CASE_STATUS_ROUTE_RULES][] = $attrPqcStatusList;
         $attributeList[self::OBJ_CASE_STATUS_ROUTE_RULES][] = $attrPqrStatusList;
 
