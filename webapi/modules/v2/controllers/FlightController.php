@@ -1338,7 +1338,7 @@ class FlightController extends BaseController
             );
         } catch (\DomainException $e) {
             \Yii::warning([
-                'message' => 'Reprotection decision failed (DomainException). Reason: Product Quote Change status does not meet requirements.',
+                'message' => 'Reprotection decision failed (DomainException). Reason: ' . $e->getMessage(),
                 'error' => $e->getMessage(),
                 'request' => $form->getAttributes(),
             ], 'FlightController:reprotectionDecision:DomainException');
@@ -1352,7 +1352,7 @@ class FlightController extends BaseController
             );
         } catch (\Throwable $e) {
             \Yii::warning([
-                'message' => 'Reprotection decision failed (Throwable). Reason: Product Quote Change status does not meet requirements.',
+                'message' => 'Reprotection decision failed (Throwable). Reason: ' . $e->getMessage(),
                 'request' => $form->getAttributes(),
                 'error' => $e->getMessage(),
                 'exception' => AppHelper::throwableLog($e, false),
