@@ -21,6 +21,7 @@ use modules\product\ProductModule;
 use modules\qaTask\QaTaskModule;
 use common\components\i18n\Formatter;
 use modules\rentCar\RentCarModule;
+use yii\authclient\clients\Google;
 use yii\log\DbTarget;
 use yii\log\FileTarget;
 use yii\web\JqueryAsset;
@@ -233,6 +234,16 @@ return [
 //                ]
             ]),
         ],
+        'authClientCollection' => [
+            'class' => 'yii\authclient\Collection',
+            'clients' => [
+                'google' => [
+                    'class' => Google::class,
+                    'clientId' => '',
+                    'clientSecret' => ''
+                ],
+            ],
+        ]
     ],
     'modules' => [
         'gridview' =>  [
@@ -395,7 +406,7 @@ return [
     ],
     'as access' => [
         'class' => 'yii\filters\AccessControl',
-        'except' => ['site/login', 'site/step-two', 'site/captcha', 'site/error'],
+        'except' => ['site/login', 'site/step-two', 'site/captcha', 'site/error', 'site/auth'],
         'rules' => [
             [
                 'allow' => true,

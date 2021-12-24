@@ -44,8 +44,14 @@ use yii\helpers\Url;
                 <div class="form-group">
                     <div class="text-left"><?= $form->field($model, 'rememberMe')->checkbox() ?></div>
                     <?= Html::submitButton('Login', ['class' => 'btn btn-default', 'name' => 'login-button']) ?>
-
                 </div>
+
+                or
+
+                <?= yii\authclient\widgets\AuthChoice::widget([
+                    'baseAuthUrl' => ['site/auth'],
+                    'popupMode' => true,
+                ]) ?>
 
                 <?php /*<div>
                     <a class="btn btn-default submit" href="index.html">Log in</a>

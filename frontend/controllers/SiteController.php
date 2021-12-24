@@ -17,6 +17,8 @@ use frontend\themes\gentelella_v2\widgets\SideBarMenu;
 use sales\helpers\app\AppHelper;
 use sales\model\user\entity\monitor\UserMonitor;
 use Yii;
+use yii\authclient\AuthAction;
+use yii\authclient\clients\Google;
 use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
@@ -45,7 +47,7 @@ class SiteController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['login', 'error', 'step-two', 'captcha'],
+                        'actions' => ['login', 'error', 'step-two', 'captcha', 'auth'],
                         'allow' => true,
                     ],
                     [
@@ -83,6 +85,10 @@ class SiteController extends FController
                 'offset' => 3,
                 'foreColor' => '596b7d',
             ],
+            'auth' => [
+                'class' => AuthAction::class,
+                'successCallback' => [$this, 'onAuthSuccess'],
+            ]
         ];
     }
 
@@ -375,5 +381,9 @@ class SiteController extends FController
         //VarDumper::dump($data); exit;
 
         return $box->run();
+    }
+
+    public function onAuthSuccess($client): void
+    {
     }
 }
