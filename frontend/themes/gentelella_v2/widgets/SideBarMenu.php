@@ -307,10 +307,17 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Client Chat Data Request CRUD', 'url' => ['/client-chat-data-request-crud/index']],
                     ],
                 ],
-                ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'list'],
-                ['label' => 'SMS Distrib List', 'url' => ['/sms-distribution-list/index'], 'icon' => 'list'],
+                [
+                    'label' => 'SMS',
+                    'url' => 'javascript:',
+                    'icon' => 'commenting',
+                    'items' => [
+                        ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'list'],
+                        ['label' => 'SMS Distrib List', 'url' => ['/sms-distribution-list/index'], 'icon' => 'list'],
+                        ['label' => 'Sms Subscribe Crud', 'url' => ['/sms-subscribe-crud/index']],
+                    ]
+                ],
                 ['label' => 'Notification List', 'url' => ['/notifications/index'], 'icon' => 'bell-o'],
-
                 [
                     'label' => 'Conferences',
                     'url' => 'javascript:',
