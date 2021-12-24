@@ -1538,14 +1538,12 @@ class OneTimeController extends Controller
         echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
 
+        ClientPhone::updateAll(
+            ['cp_cpl_uid' => null, 'cp_cpl_id' => null],
+        );
+
         $query = ClientPhone::find()
             ->select([ClientPhone::tableName() . '.phone'])
-            ->leftJoin([
-                'exist_phone_list' => ContactPhoneList::find()
-                    ->select(['cpl_uid'])
-            ], ClientPhone::tableName() . '.cp_cpl_uid = exist_phone_list.cpl_uid')
-            ->orWhere('cp_cpl_uid IS NULL')
-            ->orWhere('exist_phone_list.cpl_uid IS NULL')
             ->groupBy([ClientPhone::tableName() . '.phone'])
             ->orderBy([ClientPhone::tableName() . '.phone' => SORT_ASC]);
 
