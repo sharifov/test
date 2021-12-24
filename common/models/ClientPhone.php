@@ -5,9 +5,11 @@ namespace common\models;
 use borales\extensions\phoneInput\PhoneInputValidator;
 use common\models\query\ClientPhoneQuery;
 use sales\behaviors\CheckPhoneJobBehavior;
+use sales\behaviors\clientPhone\ContactPhoneListBehavior;
 use sales\behaviors\PhoneCleanerBehavior;
 use sales\behaviors\UidPhoneGeneratorBehavior;
 use sales\entities\EventTrait;
+use sales\model\contactPhoneList\entity\ContactPhoneList;
 use Yii;
 use yii\behaviors\AttributeBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -31,7 +33,7 @@ use yii\queue\Queue;
  * @property string $type
  * @property string $cp_title
  * @property string|null $cp_cpl_uid
- *
+ * @property int|null $cp_cpl_id
  *
  * @property Client $client
  */
@@ -140,6 +142,9 @@ class ClientPhone extends \yii\db\ActiveRecord
             [['cp_title'], 'string', 'max' => 150],
 
             [['cp_cpl_uid'], 'string', 'max' => 36],
+
+            [['cp_cpl_id'], 'integer'],
+            [['cp_cpl_id'], 'exist', 'skipOnError' => true, 'targetClass' => ContactPhoneList::class, 'targetAttribute' => ['cp_cpl_id' => 'cpl_id']],
         ];
     }
 
@@ -171,6 +176,7 @@ class ClientPhone extends \yii\db\ActiveRecord
             'type' => 'Phone Type',
             'cp_title' => 'Title',
             'cp_cpl_uid' => 'Cpl uid',
+            'cpl_id' => 'CplID',
         ];
     }
 
@@ -194,7 +200,10 @@ class ClientPhone extends \yii\db\ActiveRecord
                 'donorColumn' => 'phone',
                 'targetColumn' => 'cp_cpl_uid',
             ],
-            'CheckPhoneJobBehavior' => CheckPhoneJobBehavior::class,
+            'contactPhoneList' => [
+                'class' => ContactPhoneListBehavior::class,
+            ],
+            'checkPhoneJobBehavior' => CheckPhoneJobBehavior::class,
         ];
     }
 

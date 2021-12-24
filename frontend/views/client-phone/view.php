@@ -64,6 +64,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'comments:ntext',
             'is_sms:boolean',
             'cp_cpl_uid',
+            'cp_cpl_id',
             [
                 'attribute' => 'validate_dt',
                 'value' => static function (\common\models\ClientPhone $model) {

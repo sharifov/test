@@ -39,7 +39,9 @@ use sales\model\contactPhoneData\entity\ContactPhoneData;
 use sales\model\contactPhoneData\repository\ContactPhoneDataRepository;
 use sales\model\contactPhoneData\service\ContactPhoneDataService;
 use sales\model\contactPhoneList\entity\ContactPhoneList;
+use sales\model\contactPhoneList\repository\ContactPhoneListRepository;
 use sales\model\contactPhoneList\service\ContactPhoneListService;
+use sales\model\contactPhoneList\service\PhoneNumberService;
 use sales\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
 use sales\model\contactPhoneServiceInfo\repository\ContactPhoneServiceInfoRepository;
 use sales\model\emailList\entity\EmailList;
@@ -1509,6 +1511,203 @@ class OneTimeController extends Controller
         $time_end = microtime(true);
         $time = number_format(round($time_end - $time_start, 2), 2);
         echo Console::renderColoredString('%g --- Execute Time: %w[' . $time . ' s] %g Processed: %w[' . $processed . '] %g %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+    }
+
+    public function actionFillContactPhoneList(): void
+    {
+        $offset = BaseConsole::input('Offset (if "0" - w/o): ');
+        $limit = BaseConsole::input('Limit (if "0" - w/o): ');
+
+        $offset = (int) $offset;
+        $limit = (int) $limit;
+
+        if ($offset < 0) {
+            echo 'Start must be >= 0' . PHP_EOL;
+            return;
+        }
+        if ($limit < 0) {
+            echo 'Limit must be >= 0' . PHP_EOL;
+            return;
+        }
+
+        $offset--;
+        $time_start = microtime(true);
+
+        echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+
+        $query = ClientPhone::find()
+            ->select([ClientPhone::tableName() . '.phone'])
+            ->leftJoin([
+                'exist_phone_list' => ContactPhoneList::find()
+                    ->select(['cpl_uid'])
+            ], ClientPhone::tableName() . '.cp_cpl_uid = exist_phone_list.cpl_uid')
+            ->orWhere('cp_cpl_uid IS NULL')
+            ->orWhere('exist_phone_list.cpl_uid IS NULL')
+            ->groupBy([ClientPhone::tableName() . '.phone'])
+            ->orderBy([ClientPhone::tableName() . '.phone' => SORT_ASC]);
+
+        if ($offset !== 0) {
+            $query->offset($offset);
+        }
+        if ($limit !== 0) {
+            $query->limit($limit);
+        }
+
+        $count = $query->count();
+        $validator = new PhoneInputValidator();
+        $processed = 0;
+        $errors = $warnings = $notValidPhones = [];
+        $batchSize = max($limit, 100);
+
+        Console::startProgress(0, $count);
+
+        foreach ($query->each($batchSize) as $clientPhone) {
+            $phoneNumberService = new PhoneNumberService((string) $clientPhone['phone']);
+            if (!$validator->validate($phoneNumberService->getCleanedPhoneNumber())) {
+                $notValidPhones[] = $phoneNumberService->getCleanedPhoneNumber();
+                continue;
+            }
+
+            try {
+                if (!$contactPhoneList = ContactPhoneListService::getByPhone($phoneNumberService->getCleanedPhoneNumber())) {
+                    $contactPhoneList = ContactPhoneList::create($clientPhone['phone']);
+                    if (!$contactPhoneList->validate()) {
+                        throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($contactPhoneList));
+                    }
+                    (new ContactPhoneListRepository())->save($contactPhoneList);
+                }
+
+                ClientPhone::updateAll(
+                    ['cp_cpl_uid' => $contactPhoneList->cpl_uid, 'cp_cpl_id' => $contactPhoneList->cpl_id],
+                    ['phone' => $clientPhone['phone']]
+                );
+
+                $processed++;
+                Console::updateProgress($processed, $count);
+            } catch (\RuntimeException | \DomainException $throwable) {
+                $warnings[] = [
+                    'message' => $throwable->getMessage(),
+                    'phone' => $clientPhone['phone'],
+                    'cleanedPhone' => $phoneNumberService->getCleanedPhoneNumber(),
+                    'uid' => $phoneNumberService->getUid(),
+                ];
+            } catch (\Throwable $throwable) {
+                $errors[] = [
+                    'message' => $throwable->getMessage(),
+                    'phone' => $clientPhone['phone'],
+                    'cleanedPhone' => $phoneNumberService->getCleanedPhoneNumber(),
+                    'uid' => $phoneNumberService->getUid(),
+                ];
+            }
+        }
+
+        Console::endProgress(false);
+
+        if ($notValidPhones) {
+            echo Console::renderColoredString('%r --- NotValidPhones count(' . count($notValidPhones) . '). %n'), PHP_EOL;
+        }
+        if ($warnings) {
+            \Yii::info($warnings, 'info\OneTimeController:actionFillContactPhoneList:Warnings');
+            echo Console::renderColoredString('%r --- Warnings count(' . count($warnings) . '). Please see logs. %n'), PHP_EOL;
+        }
+        if ($errors) {
+            \Yii::info($errors, 'info\OneTimeController:actionFillContactPhoneList:Errors');
+            echo Console::renderColoredString('%r --- Errors count(' . count($errors) . '). Please see logs. %n'), PHP_EOL;
+        }
+
+        $time_end = microtime(true);
+        $time = number_format(round($time_end - $time_start, 2), 2);
+        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time . ' s] %g %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- Processed: %w[' . $processed . '/' . $count . '] %g %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+    }
+
+    public function actionCleanContactPhoneList(): void
+    {
+        $time_start = microtime(true);
+
+        echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+
+        $query = ContactPhoneList::find()
+            ->orWhere(['LIKE', 'cpl_phone_number', '++'])
+            ->orWhere(['LIKE', 'cpl_phone_number', ' '])
+            ->orWhere(['LIKE', 'cpl_phone_number', '-']);
+
+        $count = $query->count();
+        $processed = $duplicates = 0;
+        $errors = $warnings = [];
+
+        Console::startProgress(0, $count);
+
+        foreach ($query->all() as $contactPhoneList) {
+            $phoneNumberService = new PhoneNumberService($contactPhoneList->cpl_phone_number);
+
+            try {
+                $duplicate = ContactPhoneList::find()
+                    ->orWhere(['cpl_phone_number' => $phoneNumberService->getCleanedPhoneNumber()])
+                    ->orWhere(['cpl_uid' => $phoneNumberService->getUid()])
+                    ->limit(1)
+                    ->one();
+
+                if ($duplicate) {
+                    $duplicate->delete();
+                    $duplicates++;
+                    continue;
+                }
+
+                $contactPhoneList->cpl_phone_number = $phoneNumberService->getCleanedPhoneNumber();
+                $contactPhoneList->cpl_uid = $phoneNumberService->getUid();
+
+                if (!$contactPhoneList->validate()) {
+                    throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($contactPhoneList));
+                }
+
+                ContactPhoneList::updateAll(
+                    [
+                        'cpl_phone_number' => $phoneNumberService->getCleanedPhoneNumber(),
+                        'cpl_uid' => $phoneNumberService->getUid()
+                    ],
+                    ['cpl_id' => $contactPhoneList->cpl_id]
+                );
+
+                $processed++;
+                Console::updateProgress($processed, $count);
+            } catch (\RuntimeException | \DomainException $throwable) {
+                $warnings[] = [
+                    'message' => $throwable->getMessage(),
+                    'phone' => $contactPhoneList->cpl_phone_number,
+                    'cleanedPhone' => $phoneNumberService->getCleanedPhoneNumber(),
+                ];
+            } catch (\Throwable $throwable) {
+                $errors[] = [
+                    'message' => $throwable->getMessage(),
+                    'phone' => $contactPhoneList->cpl_phone_number,
+                    'cleanedPhone' => $phoneNumberService->getCleanedPhoneNumber(),
+                ];
+            }
+        }
+
+        Console::endProgress(false);
+
+        if ($warnings) {
+            \Yii::info($warnings, 'info\OneTimeController:actionCleanContactPhoneList:Warnings');
+            echo Console::renderColoredString('%r --- Warnings count(' . count($warnings) . '). Please see logs. %n'), PHP_EOL;
+        }
+        if ($errors) {
+            \Yii::info($errors, 'info\OneTimeController:actionCleanContactPhoneList:Errors');
+            echo Console::renderColoredString('%r --- Errors count(' . count($errors) . '). Please see logs. %n'), PHP_EOL;
+        }
+
+        $time_end = microtime(true);
+        $time = number_format(round($time_end - $time_start, 2), 2);
+        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time . ' s] %g %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- Processed: %w[' . $processed . '/' . $count . '] %g %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- Duplicates: %w[' . $duplicates . '] %g %n'), PHP_EOL;
         echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
     }

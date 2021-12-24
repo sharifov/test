@@ -90,7 +90,6 @@ $this->params['breadcrumbs'][] = $this->title;
 
             //'comments:ntext',
             'is_sms:boolean',
-
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'validate_dt'
