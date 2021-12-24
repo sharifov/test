@@ -159,6 +159,7 @@ if (!Auth::can('PhoneWidget_Dialpad')) {
             </button>
         </div>
     </div>
+  </div>
 
   <div class="call-pane-calling call-pane-initial" id="call-pane-calling"> </div>
 
@@ -203,8 +204,6 @@ if (!Auth::can('PhoneWidget_Dialpad')) {
   <div class="additional-info add-note" id="add-note"></div>
 
   <div class="additional-info contact-info" id="contact-info"></div>
-
-  </div>
 
 </div>
 
