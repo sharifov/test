@@ -148,10 +148,12 @@ class SearchService
 
         if (!$result['data'] = $response['data']) {
             $result['error'] = $response['error'];
-            \Yii::error(
-                ['lead_id' => $dto->getLeadId(),
-                'params' => $params,
-                'message' => $response['error']],
+            \Yii::warning(
+                [
+                    'message' => $response['error'],
+                    'lead_id' => $dto->getLeadId(),
+                    'params' => $params
+                ],
                 'SearchService::getOnlineQuotes'
             );
         }
