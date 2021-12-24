@@ -90,19 +90,20 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                     $userAbacDto->isNewRecord = $model->isNewRecord;
                     /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Username field view*/
                     $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                    if ($view) {
-                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Username field edit*/
-                        $edit = !Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                    } else {
-                        $edit = false;
-                    }
+                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Username field edit*/
+                    $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
                     ?>
 
-                    <?php if ($view) :?>
+                    <?php if ($view || $edit) :?>
                     <div class="col-md-6">
                     <?php endif; ?>
-                        <?= $form->field($model, 'username', ['options' => ['hidden' => !$view, 'class' => 'form-group']])->textInput(['autocomplete' => "new-user", 'readonly' => $edit])?>
-                    <?php if ($view) :?>
+                        <?= $form->field($model, 'username', [
+                                'options' => [
+                                    'hidden' => ($edit ? !$edit : !$view),
+                                    'class' => 'form-group'
+                                ]
+                            ])->textInput(['autocomplete' => "new-user", 'readonly' => !$edit])?>
+                    <?php if ($view || $edit) :?>
                     </div>
                     <?php endif; ?>
 
@@ -111,19 +112,15 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                     $userAbacDto->isNewRecord = $model->isNewRecord;
                     /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Email field view*/
                     $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                    if ($view) {
-                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Email field edit*/
-                        $edit = !Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                    } else {
-                        $edit = false;
-                    }
+                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Email field edit*/
+                    $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
                     ?>
 
-                    <?php if ($view) :?>
+                    <?php if ($view || $edit) :?>
                     <div class="col-md-6">
                     <?php endif; ?>
-                        <?= $form->field($model, 'email', ['options' => ['hidden' => !$view, 'class' => 'form-group']])->input('email', ['readonly' => $edit])?>
-                    <?php if ($view) :?>
+                        <?= $form->field($model, 'email', ['options' => ['hidden' => ($edit ? !$edit : !$view), 'class' => 'form-group']])->input('email', ['readonly' => !$edit])?>
+                    <?php if ($view || $edit) :?>
                     </div>
                     <?php endif; ?>
                 </div>
@@ -133,19 +130,15 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                     $userAbacDto->isNewRecord = $model->isNewRecord;
                     /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Full Name field view*/
                     $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                    if ($view) {
-                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Full Name field edit*/
-                        $edit = !Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                    } else {
-                        $edit = false;
-                    }
+                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Full Name field edit*/
+                    $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
                     ?>
 
-                    <?php if ($view) :?>
+                    <?php if ($view || $edit) :?>
                     <div class="col-md-6">
                     <?php endif; ?>
-                        <?= $form->field($model, 'full_name', ['options' => ['hidden' => !$view, 'class' => 'form-group']])->textInput(['readonly' => $edit])?>
-                    <?php if ($view) :?>
+                        <?= $form->field($model, 'full_name', ['options' => ['hidden' => ($edit ? !$edit : !$view), 'class' => 'form-group']])->textInput(['readonly' => !$edit])?>
+                    <?php if ($view || $edit) :?>
                     </div>
                     <?php endif; ?>
 
@@ -154,19 +147,20 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                     $userAbacDto->isNewRecord = $model->isNewRecord;
                     /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Pass field view*/
                     $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                    if ($view) {
-                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Pass field edit*/
-                        $edit = !Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                    } else {
-                        $edit = false;
-                    }
+                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Pass field edit*/
+                    $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
                     ?>
 
-                    <?php if ($view) :?>
+                    <?php if ($view || $edit) :?>
                     <div class="col-md-6">
                     <?php endif; ?>
-                        <?= $form->field($model, 'password', ['options' => ['hidden' => !$view, 'class' => 'form-group']])->passwordInput(['autocomplete' => 'new-password', 'readonly' => $edit])?>
-                    <?php if ($view) :?>
+                        <?= $form->field($model, 'password', [
+                                'options' => [
+                                    'hidden' => ($edit ? !$edit : !$view),
+                                    'class' => 'form-group'
+                                ]
+                            ])->passwordInput(['autocomplete' => 'new-password', 'readonly' => !$edit])?>
+                    <?php if ($view || $edit) :?>
                     </div>
                     <?php endif; ?>
                 </div>
@@ -177,19 +171,15 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                     $userAbacDto->isNewRecord = $model->isNewRecord;
                     /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Nickname field view*/
                     $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                    if ($view) {
-                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Nickname field edit*/
-                        $edit = !Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                    } else {
-                        $edit = false;
-                    }
+                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Nickname field edit*/
+                    $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
                     ?>
 
-                    <?php if ($view) :?>
+                    <?php if ($view || $edit) :?>
                     <div class="col-md-6">
                     <?php endif; ?>
-                        <?= $form->field($model, 'nickname', ['options' => ['hidden' => !$view, 'class' => 'form-group']])->textInput(['readonly' => $edit])?>
-                    <?php if ($view) :?>
+                        <?= $form->field($model, 'nickname', ['options' => ['hidden' => ($edit ? !$edit : !$view), 'class' => 'form-group']])->textInput(['readonly' => !$edit])?>
+                    <?php if ($view || $edit) :?>
                     </div>
                     <?php endif; ?>
                 </div>
@@ -201,31 +191,27 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                     $userAbacDto->isNewRecord = $model->isNewRecord;
                     /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, User Roles field view*/
                     $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                    if ($view) {
-                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, User Roles field edit*/
-                        $edit = !Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                    } else {
-                        $edit = false;
-                    }
+                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, User Roles field edit*/
+                    $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
                     ?>
 
-                    <?php if ($view) :?>
+                    <?php if ($view || $edit) :?>
                     <div class="col-md-6">
                     <?php endif; ?>
 
-                    <?= $form->field($model, 'form_roles', ['options' => $view ? ['class' => 'form-group'] : $optionsS2])->widget(Select2::class, [
+                    <?= $form->field($model, 'form_roles', ['options' => ($edit ?: $view) ? ['class' => 'form-group'] : $optionsS2])->widget(Select2::class, [
                         'data' => Employee::getAllRoles(),
                         'size' => Select2::SMALL,
                         'options' => ['placeholder' => 'Select user roles', 'multiple' => true],
-                        'pluginOptions' => ['allowClear' => true, 'disabled' => $edit],
+                        'pluginOptions' => ['allowClear' => true, 'disabled' => !$edit],
                     ]) ?>
 
-                    <?php if ($view) :?>
+                    <?php if ($view || $edit) :?>
                     </div>
                     <?php endif; ?>
 
                     <?php
-                    if ($view && $edit) {
+                    if (!$edit) {
                         echo $form->field($model, 'form_roles', ['options' => $optionsS2])->widget(Select2::class, [
                             'data' => Employee::getAllRoles(),
                             'size' => Select2::SMALL,
@@ -240,119 +226,21 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                     $userAbacDto->isNewRecord = $model->isNewRecord;
                     /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Status field view*/
                     $view = !$model->isNewRecord && Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                    if ($view) {
-                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Status field edit*/
-                        $edit = !Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                    } else {
-                        $edit = false;
-                    }
+                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Status field edit*/
+                    $edit = !$model->isNewRecord && Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
                     ?>
 
-                    <?php if ($view) :?>
+                    <?php if ($view || $edit) :?>
                     <div class="col-md-6">
                     <?php endif; ?>
-                        <?= $form->field($model, 'status', ['options' => ['hidden' => !$view, 'class' => 'form-group']])->dropDownList($model::getStatusList(), ['disabled' => $edit]) ?>
-                    <?php if ($view) :?>
+                        <?= $form->field($model, 'status', ['options' => ['hidden' => ($edit ? !$edit : !$view), 'class' => 'form-group']])->dropDownList($model::getStatusList(), ['disabled' => !$edit]) ?>
+                    <?php if ($view || $edit) :?>
                     </div>
                     <?php endif; ?>
                 </div>
 
                 <div class="row">
                     <div class="col-sm-12">
-                        <?php /*if ($model->isNewRecord || $user->isAdmin() || $user->isSuperAdmin() || $user->isSupervision() || $user->isUserManager() || $user->isAgent()) :
-                            if ($user->isAdmin() || $user->isSuperAdmin() || $user->isUserManager()) {
-                                $data = \common\models\UserGroup::getList();
-                                $dataProjects = \common\models\Project::getList();
-                            }
-
-                            if ($user->isSupervision()) {
-                                $data = $user->getUserGroupList();
-                                $dataProjects = \yii\helpers\ArrayHelper::map($user->projects, 'id', 'name');
-                                //\yii\helpers\VarDumper::dump($dataProjects, 10, true);                             //exit;
-                            }
-
-
-                            */?><!--
-
-                            <?php
-/*                                echo $form->field($model, 'user_groups')->widget(\kartik\select2\Select2::class, [
-                                    'data' => $data,
-                                    'size' => \kartik\select2\Select2::SMALL,
-                                    'options' => ['placeholder' => 'Select user groups', 'multiple' => true],
-                                    'pluginOptions' => ['allowClear' => true],
-                                ]);
-                            */?>
-
-
-                            <?php
-/*                            echo $form->field($model, 'user_projects')->widget(\kartik\select2\Select2::class, [
-                                'data' => $dataProjects,
-                                'size' => \kartik\select2\Select2::SMALL,
-                                'options' => ['placeholder' => 'Select user projects', 'multiple' => true],
-                                'pluginOptions' => ['allowClear' => true],
-                            ]);
-                            */?>
-
-                            <?php
-/*                            if ($model->isNewRecord) {
-                                echo $form->field($model, 'make_user_project_params')->checkbox();
-                            }
-                            */?>
-
-                            <?php
-/*                                echo $form->field($model, 'user_departments')->widget(\kartik\select2\Select2::class, [
-                                    'data' => \common\models\Department::getList(),
-                                    'size' => \kartik\select2\Select2::SMALL,
-                                    'options' => ['placeholder' => 'Select departments', 'multiple' => true],
-                                    'pluginOptions' => ['allowClear' => true],
-                                ]);
-                            */?>
-
-                            <?php
-/*                                echo $form->field($model, 'client_chat_user_channel')->widget(\kartik\select2\Select2::class, [
-                                    'data' => ClientChatChannel::getList(),
-                                    'size' => \kartik\select2\Select2::SMALL,
-                                    'options' => ['placeholder' => 'Select Client Chat Chanel', 'multiple' => true],
-                                    'pluginOptions' => ['allowClear' => true],
-                                ]);
-                            */?>
-
-                        <?php /*else : */?>
-                            <div class="col-md-12">
-                                <label class="control-label">User Groups</label>:
-                                <?php
-/*                                    $groupsValue = '';
-                                if ($groupsModel =  $model->ugsGroups) {
-                                    $groups = \yii\helpers\ArrayHelper::map($groupsModel, 'ug_id', 'ug_name');
-
-                                    $groupsValueArr = [];
-                                    foreach ($groups as $group) {
-                                        $groupsValueArr[] = Html::tag('span', Html::encode($group), ['class' => 'label label-default']);
-                                    }
-                                    $groupsValue = implode(' ', $groupsValueArr);
-                                }
-                                    echo $groupsValue;
-                                */?>
-                            </div>
-
-                            <div class="col-md-12">
-                                <label class="control-label">Projects access</label>:
-                                <?php
-/*                                    $projectsValueArr = [];
-
-                                if ($projects = $model->projects) {
-                                    foreach ($projects as $project) {
-                                        $projectsValueArr[] = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-list']) . ' ' . Html::encode($project->name), ['class' => 'label label-info']);
-                                    }
-                                }
-
-                                    $projectsValue = implode(' ', $projectsValueArr);
-                                    echo $projectsValue;
-                                */?>
-                            </div>
-
-                        --><?php /*endif; */?>
-
                         <?php
                         if ($user->isAdmin() || $user->isSuperAdmin() || $user->isUserManager()) {
                             $data = \common\models\UserGroup::getList();
@@ -368,21 +256,17 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                         $userAbacDto->isNewRecord = $model->isNewRecord;
                         /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, User Groups field view*/
                         $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                        if ($view) {
-                            /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, User Groups field edit*/
-                            $edit = !Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                        } else {
-                            $edit = false;
-                        }
+                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, User Groups field edit*/
+                        $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
 
-                        echo $form->field($model, 'user_groups', ['options' => $view ? [] : $optionsS2])->widget(Select2::class, [
+                        echo $form->field($model, 'user_groups', ['options' => ($edit ?: $view) ? ['class' => 'form-group'] : $optionsS2])->widget(Select2::class, [
                             'data' => $data,
                             'size' => Select2::SMALL,
                             'options' => ['placeholder' => 'Select user groups', 'multiple' => true],
-                            'pluginOptions' => ['allowClear' => true, 'disabled' => $edit],
+                            'pluginOptions' => ['allowClear' => true, 'disabled' => !$edit],
                         ]);
 
-                        if ($view && $edit) {
+                        if (!$edit) {
                             echo $form->field($model, 'user_groups', ['options' => $optionsS2])->widget(Select2::class, [
                                 'data' => $data,
                                 'size' => Select2::SMALL,
@@ -395,21 +279,17 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                         $userAbacDto->isNewRecord = $model->isNewRecord;
                         /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, User Projects field view*/
                         $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                        if ($view) {
-                            /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, User Projects field edit*/
-                            $edit = !Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                        } else {
-                            $edit = false;
-                        }
+                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, User Projects field edit*/
+                        $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
 
-                        echo $form->field($model, 'user_projects', ['options' => $view ? [] : $optionsS2])->widget(Select2::class, [
+                        echo $form->field($model, 'user_projects', ['options' => ($edit ?: $view) ? [] : $optionsS2])->widget(Select2::class, [
                             'data' => $dataProjects,
                             'size' => Select2::SMALL,
                             'options' => ['placeholder' => 'Select user projects', 'multiple' => true],
-                            'pluginOptions' => ['allowClear' => true, 'disabled' => $edit],
+                            'pluginOptions' => ['allowClear' => true, 'disabled' => !$edit],
                         ]);
 
-                        if ($view && $edit) {
+                        if (!$edit) {
                             echo $form->field($model, 'user_projects', ['options' => $optionsS2])->widget(Select2::class, [
                                 'data' => $dataProjects,
                                 'size' => Select2::SMALL,
@@ -426,19 +306,17 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                         $userAbacDto->isNewRecord = $model->isNewRecord;
                         /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, User Projects field view*/
                         $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                        if ($view) {
-                            /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, User Projects field edit*/
-                            $edit = !Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                        }
+                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, User Projects field edit*/
+                        $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
 
-                        echo $form->field($model, 'user_departments', ['options' => $view ? [] : $optionsS2])->widget(Select2::class, [
+                        echo $form->field($model, 'user_departments', ['options' => ($edit ?: $view) ? [] : $optionsS2])->widget(Select2::class, [
                             'data' => \common\models\Department::getList(),
                             'size' => Select2::SMALL,
                             'options' => ['placeholder' => 'Select departments', 'multiple' => true],
-                            'pluginOptions' => ['allowClear' => true, 'disabled' => $edit],
+                            'pluginOptions' => ['allowClear' => true, 'disabled' => !$edit],
                         ]);
 
-                        if ($view && $edit) {
+                        if (!$edit) {
                             echo $form->field($model, 'user_departments', ['options' => $optionsS2])->widget(Select2::class, [
                                 'data' => \common\models\Department::getList(),
                                 'size' => Select2::SMALL,
@@ -450,20 +328,18 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                         $userAbacDto = new UserAbacDto('client_chat_user_channel');
                         $userAbacDto->isNewRecord = $model->isNewRecord;
                         /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, User Projects field view*/
-                        $view =  Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                        if ($view) {
-                            /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, User Projects field edit*/
-                            $edit = !Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                        }
+                        $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
+                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, User Projects field edit*/
+                        $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
 
-                        echo $form->field($model, 'client_chat_user_channel', ['options' => $view ? [] : $optionsS2])->widget(Select2::class, [
+                        echo $form->field($model, 'client_chat_user_channel', ['options' => ($edit ?: $view) ? [] : $optionsS2])->widget(Select2::class, [
                             'data' => ClientChatChannel::getList(),
                             'size' => Select2::SMALL,
                             'options' => ['placeholder' => 'Select Client Chat Chanel', 'multiple' => true],
-                            'pluginOptions' => ['allowClear' => true, 'disabled' => $edit],
+                            'pluginOptions' => ['allowClear' => true, 'disabled' => !$edit],
                         ]);
 
-                        if ($view && $edit) {
+                        if (!$edit) {
                             echo $form->field($model, 'client_chat_user_channel', ['options' => $optionsS2])->widget(Select2::class, [
                                 'data' => ClientChatChannel::getList(),
                                 'size' => Select2::SMALL,
@@ -476,7 +352,6 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                     </div>
                 </div>
 
-                <?php //if ($user->isAdmin() || $user->isSuperAdmin() || $user->isSupervision() || $user->isUserManager()) : ?>
                     <div class="row">
                         <div class="col-md-12">
                             <?php  echo Html::errorSummary($modelUserParams) ?>
@@ -489,25 +364,24 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                         $userAbacDto->isNewRecord = $model->isNewRecord;
                         /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Work Start Time field view*/
                         $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                        if ($view) {
-                            /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Work Start Time field edit*/
-                            $edit = !Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                        }
+                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Work Start Time field edit*/
+                        $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
                         ?>
-                        <?php if ($view) :?>
+
+                        <?php if ($view || $edit) :?>
                             <div class="col-md-3">
                         <?php endif; ?>
-                            <?= $form->field($modelUserParams, 'up_work_start_tm', ['options' => ['hidden' => !$view, 'class' => 'form-group']])->widget(
+                            <?= $form->field($modelUserParams, 'up_work_start_tm', ['options' => ['hidden' => ($edit ? !$edit : !$view), 'class' => 'form-group']])->widget(
                                 \kartik\time\TimePicker::class,
                                 [
                                     'pluginOptions' => [
                                         'showSeconds' => false,
                                         'showMeridian' => false,
                                     ],
-                                    'disabled' => $edit
+                                    'disabled' => !$edit
                                 ]
                             )?>
-                        <?php if ($view) :?>
+                        <?php if ($view || $edit) :?>
                             </div>
                         <?php endif; ?>
 
@@ -516,17 +390,20 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                         $userAbacDto->isNewRecord = $model->isNewRecord;
                         /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Work Minute's field view*/
                         $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                        if ($view) {
-                            /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Work Minute's field edit*/
-                            $edit = !Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                        }
+                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Work Minute's field edit*/
+                        $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
                         ?>
 
-                        <?php if ($view) :?>
+                        <?php if ($view || $edit) :?>
                         <div class="col-md-3">
                         <?php endif; ?>
-                            <?= $form->field($modelUserParams, 'up_work_minutes', ['options' => ['hidden' => !$view, 'class' => 'form-group']])->input('number', ['step' => 10, 'min' => 0, 'readonly' => $edit])?>
-                        <?php if ($view) :?>
+                            <?= $form->field($modelUserParams, 'up_work_minutes', [
+                                    'options' => [
+                                        'hidden' => ($edit ? !$edit : !$view),
+                                        'class' => 'form-group'
+                                    ]
+                                ])->input('number', ['step' => 10, 'min' => 0, 'readonly' => !$edit])?>
+                        <?php if ($view || $edit) :?>
                         </div>
                         <?php endif; ?>
 
@@ -535,29 +412,25 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                         $userAbacDto->isNewRecord = $model->isNewRecord;
                         /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Timezone field view*/
                         $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                        if ($view) {
-                            /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Timezone field edit*/
-                            $edit = !Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                        }
+                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Timezone field edit*/
+                        $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
                         ?>
 
-                        <?php if ($view) :?>
+                        <?php if ($view || $edit) :?>
                         <div class="col-md-6">
                         <?php endif; ?>
                             <?php
-                            echo $form->field($modelUserParams, 'up_timezone', ['options' => ['hidden' => !$view, 'class' => 'form-group']])->widget(Select2::class, [
+                            echo $form->field($modelUserParams, 'up_timezone', ['options' => ['hidden' => ($edit ? !$edit : !$view), 'class' => 'form-group']])->widget(Select2::class, [
                                 'data' => Employee::timezoneList(true),
                                 'size' => Select2::SMALL,
                                 'options' => ['placeholder' => 'Select TimeZone', 'multiple' => false],
-                                'pluginOptions' => ['allowClear' => true, 'disabled' => $edit],
+                                'pluginOptions' => ['allowClear' => true, 'disabled' => !$edit],
                             ]);
                             ?>
-                        <?php if ($view) :?>
+                        <?php if ($view || $edit) :?>
                         </div>
                         <?php endif; ?>
                     </div>
-
-                <?php //endif;?>
 
                 <?php //if ($user->isAdmin() || $user->isSuperAdmin() || $user->isSupervision()) : ?>
                     <div class="row">
@@ -566,17 +439,20 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                         $userAbacDto->isNewRecord = $model->isNewRecord;
                         /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Base Amount field view*/
                         $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                        if ($view) {
-                            /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Base Amount field edit*/
-                            $edit = !Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                        }
+                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Base Amount field edit*/
+                        $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
                         ?>
 
-                        <?php if ($view) :?>
+                        <?php if ($view || $edit) :?>
                         <div class="col-md-3">
                         <?php endif; ?>
-                            <?= $form->field($modelUserParams, 'up_base_amount', ['options' => ['hidden' => !$view, 'class' => 'form-group']])->input('number', ['step' => 0.01, 'min' => 0, 'max' => 1000, 'readonly' => $edit]) ?>
-                        <?php if ($view) :?>
+                            <?= $form->field($modelUserParams, 'up_base_amount', [
+                                    'options' => [
+                                        'hidden' => ($edit ? !$edit : !$view),
+                                        'class' => 'form-group'
+                                    ]
+                                ])->input('number', ['step' => 0.01, 'min' => 0, 'max' => 1000, 'readonly' => !$edit]) ?>
+                        <?php if ($view || $edit) :?>
                         </div>
                         <?php endif; ?>
 
@@ -585,17 +461,20 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                         $userAbacDto->isNewRecord = $model->isNewRecord;
                         /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Commission Percent field view*/
                         $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                        if ($view) {
-                            /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Commission Percent field edit*/
-                            $edit = !Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                        }
+                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Commission Percent field edit*/
+                        $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
                         ?>
 
-                        <?php if ($view) :?>
+                        <?php if ($view || $edit) :?>
                         <div class="col-md-3">
                         <?php endif; ?>
-                            <?= $form->field($modelUserParams, 'up_commission_percent', ['options' => ['hidden' => !$view, 'class' => 'form-group']])->input('number', ['step' => 1, 'max' => 100, 'min' => 0, 'readonly' => $edit]) ?>
-                        <?php if ($view) :?>
+                            <?= $form->field($modelUserParams, 'up_commission_percent', [
+                                    'options' => [
+                                        'hidden' => ($edit ? !$edit : !$view),
+                                        'class' => 'form-group'
+                                    ]
+                                ])->input('number', ['step' => 1, 'max' => 100, 'min' => 0, 'readonly' => !$edit]) ?>
+                        <?php if ($view || $edit) :?>
                         </div>
                         <?php endif; ?>
 
@@ -604,16 +483,19 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                         $userAbacDto->isNewRecord = $model->isNewRecord;
                         /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Bonus Is Active field view*/
                         $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                        if ($view) {
-                            /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Bonus Is Active field edit*/
-                            $edit = !Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                        }
+                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Bonus Is Active field edit*/
+                        $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
                         ?>
-                        <?php if ($view) :?>
+                        <?php if ($view || $edit) :?>
                         <div class="col-md-3">
                         <?php endif; ?>
-                            <?= $form->field($modelUserParams, 'up_bonus_active', ['options' => ['hidden' => !$view, 'class' => 'form-group']])->checkbox(['disabled' => $edit]) ?>
-                        <?php if ($view) :?>
+                            <?= $form->field($modelUserParams, 'up_bonus_active', [
+                                    'options' => [
+                                        'hidden' => ($edit ? !$edit : !$view),
+                                        'class' => 'form-group'
+                                    ]
+                                ])->checkbox(['disabled' => !$edit]) ?>
+                        <?php if ($view || $edit) :?>
                         </div>
                         <?php endif; ?>
 
@@ -622,15 +504,18 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                         $userAbacDto->isNewRecord = $model->isNewRecord;
                         /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Leader Board Enabled field view*/
                         $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                        if ($view) {
-                            /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Leader Board Enabled field edit*/
-                            $edit = !Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                        }
+                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Leader Board Enabled field edit*/
+                        $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
                         ?>
                         <?php if ($view) :?>
                         <div class="col-md-3">
                         <?php endif; ?>
-                            <?= $form->field($modelUserParams, 'up_leaderboard_enabled', ['options' => ['hidden' => !$view, 'class' => 'form-group']])->checkbox(['disabled' => $edit]) ?>
+                            <?= $form->field($modelUserParams, 'up_leaderboard_enabled', [
+                                    'options' => [
+                                        'hidden' => ($edit ? !$edit : !$view),
+                                        'class' => 'form-group'
+                                    ]
+                                ])->checkbox(['disabled' => !$edit]) ?>
                         <?php if ($view) :?>
                         </div>
                         <?php endif; ?>
