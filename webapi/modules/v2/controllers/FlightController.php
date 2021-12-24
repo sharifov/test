@@ -1338,7 +1338,7 @@ class FlightController extends BaseController
             );
         } catch (\DomainException $e) {
             \Yii::warning([
-                'message' => 'DomainException: Reprotection decision error',
+                'message' => 'Reprotection decision failed (DomainException). Reason: ' . $e->getMessage(),
                 'error' => $e->getMessage(),
                 'request' => $form->getAttributes(),
             ], 'FlightController:reprotectionDecision:DomainException');
@@ -1351,12 +1351,12 @@ class FlightController extends BaseController
                 new CodeMessage($e->getCode())
             );
         } catch (\Throwable $e) {
-            \Yii::error([
-                'message' => 'Reprotection decision error',
+            \Yii::warning([
+                'message' => 'Reprotection decision failed (Throwable). Reason: ' . $e->getMessage(),
                 'request' => $form->getAttributes(),
                 'error' => $e->getMessage(),
                 'exception' => AppHelper::throwableLog($e, false),
-            ], 'FlightController:reprotectionDecision');
+            ], 'FlightController:reprotectionDecision:Throwable');
 
             return new ErrorResponse(
                 new DataMessage([
