@@ -967,6 +967,9 @@ function toSelect(elem, obj, cb) {
 }
 
 function handleWidgetIcon() {
+    let lastType = 'default';
+    let connected = false;
+
     var $parent = $('.phone-widget-icon'),
         $inner = '.widget-icon-inner',
         animationClass = 'animate',
@@ -985,11 +988,16 @@ function handleWidgetIcon() {
             '<span class="phone-widget-icon__time"></span>'+
             '</div>'+
             '<i class="fa fa-phone icon-phone"></i>'+
-            
+            '<div class="standby-phone__disabled-overlay">'+
+                '<i class="fa fa-phone-slash standby-phone__disabled-icn"></i>'+
+                '<span class="standby-phone__disabled-text"></span>'+
+            '</div>'+
             '</div>'+
             '</div>';
 
         $($parent).append(initialNode)
+
+        lastType = type;
     }
 
     function stateTimer(el, timerStamp) {
@@ -1040,8 +1048,14 @@ function handleWidgetIcon() {
 
         clearInterval(interval);
 
+        if (props.type) {
+            lastType = props.type;
+        }
+        if (connected) {
+            $(inner).attr('data-wi-type', props.type);
+        }
+
         $(inner).attr('data-wi-status', props.status);
-        $(inner).attr('data-wi-type', props.type);
         $(ongoing).html(props.currentCalls);
         $(text).html(props.text);
 
@@ -1055,9 +1069,27 @@ function handleWidgetIcon() {
         $($inner).addClass(animationClass);
     }
 
+    function disconnect() {
+        connected = false;
+        $($inner).attr('data-wi-type', 'disabled');
+        $('.standby-phone__disabled-text').html('DISCONNECTED');
+    }
+
+    function connect() {
+        connected = true;
+        $($inner).attr('data-wi-type', lastType);
+        $('.standby-phone__disabled-text').html('');
+    }
+
     return {
+        connect: function() {
+            connect()
+        },
+        disconnect: function() {
+            disconnect()
+        },
         init: function() {
-            createInitialIcon('default', false) 
+            createInitialIcon('disabled', false)
         },
         update: function(props) {
             updateIcon(props)

@@ -319,7 +319,7 @@
     };
 
     const deviceUnregisteredHandler = () => {
-        PhoneWidget.getDeviceState().reset('Twilio Device unregistered.');
+        PhoneWidget.getDeviceState().reset('Twilio Device unregistered');
         PhoneWidget.incomingSoundOff();
 
         // let activeCallSid = PhoneWidget.getActiveCallSid();
@@ -346,7 +346,7 @@
         originalError: error.originalError
     })
 
-    const phoneDisconnected = () => PhoneWidget.getDeviceState().phoneDisconnected('Voip page is closed.');
+    const phoneDisconnected = () => PhoneWidget.getDeviceState().phoneDisconnected('Voip page is closed');
 
     window.phoneWidget.device.initialize = {
         Init: Init

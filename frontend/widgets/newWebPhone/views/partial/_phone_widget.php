@@ -22,7 +22,7 @@ use yii\web\View;
         <label for="number-status3" id="pw_status_name"><?= ($userCallStatus && $userCallStatus->isReady() ? 'ON' : 'OFF') ?></label>
         <div class="status-confirmation"></div>
       </div>
-        <i class="fa fa-exclamation-triangle phone-widget-heading__warning" style="display: none" data-toggle="popover" data-content="" data-placement="bottom"></i>
+        <i class="fa fa-exclamation-triangle phone-widget-heading__warning" data-toggle="popover" data-content="" data-placement="bottom"></i>
         <ul class="call-filter">
             <li class="call-filter__alert is-visible"><a class="call-filter__toggle call-filter__toggle--line-active" title="Active Calls" data-call-filter="active">0</a></li>
             <li class="call-filter__alert is-visible"><a class="call-filter__toggle call-filter__toggle--line-direct" title="Direct Line" data-call-filter="direct">0</a></li>

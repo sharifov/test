@@ -132,8 +132,6 @@ var PhoneWidget = function () {
         btnTransferNumberEvent();
         btnMakeCallEvent();
 
-        $('.phone-widget-heading__warning').popover();
-
         initiated = true;
     }
 

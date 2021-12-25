@@ -15,14 +15,24 @@
         return 'PhoneDeviceMicrophoneStatus' + userId;
     }
 
-    function Switcher() {
+    const WarningMessages = {
+        phoneDisconnected: 'Phone disconnected',
+        twilioError: 'Twilio error',
+        speakerError: 'Speaker error',
+        microphoneError: 'Microphone error'
+    };
+
+    function WarningIndicator() {
         this.icon = '.phone-widget-icon__warning';
         this.heading = '.phone-widget-heading__warning';
+        this.reasons = [];
 
         this.ready = function () {
+            this.reasons = [];
             $(this.icon).css('display', 'none');
             $(this.heading).css('display', 'none');
             $(this.heading).attr('data-content', '');
+            $(this.heading).popover('hide');
         }
 
         this.notReady = function (reason) {
@@ -30,49 +40,85 @@
             if (!reason) {
                 reason = '';
             }
-            $(this.heading).attr('data-content', reason);
             $(this.heading).css('display', 'block');
+            this.reasons.push(reason);
+            $(this.heading).popover('dispose');
+            let reasons = '';
+            if (this.reasons.includes(WarningMessages.phoneDisconnected)) {
+                reasons = WarningMessages.phoneDisconnected;
+            } else if (this.reasons.includes(WarningMessages.twilioError)) {
+                reasons = WarningMessages.twilioError;
+            } else {
+                reasons = this.reasons.join("<br>");
+            }
+            $(this.heading).popover({
+                content: reasons,
+                html: true
+            });
         }
     }
 
-    function Panel(isDevicePage) {
-        this.isDevicePage = isDevicePage;
-        this.isPhoneConnected = false;
-        this.isTwilioOk = false;
+    function VoipPage() {
+        this.phone = $('.phone-device-status');
+        this.twilio = $('.phone-device-twilio-status');
+        this.speaker = $('.phone-device-speaker-status');
+        this.microphone = $('.phone-device-microphone-status');
 
         this.phoneConnected = function () {
-            this.isPhoneConnected = true;
-            this.twilioStatusShow();
-            $('.tab-device-status').html('Phone: <span style="color: #00a35b">Connected');
-            $('.call-pane').removeClass('pw-start').removeClass('pw-connecting');
-            $('.phone-widget').removeClass('start');
-            $('.phone-widget__start').css('display', 'none');
-            $('.phone-device-status').removeClass('fa-square-o').addClass('fa-check-square-o');
-            $('.calling-from-info').css('display', 'flex');
-            $('.call-pane__number').css('display', 'block');
-            $('.call-pane__dial-block').css('display', 'block');
-            PhoneWidget.openCallTab();
+            this.phone.removeClass('fa-square-o').addClass('fa-check-square-o');
         };
 
         this.phoneDisconnected = function () {
-           this.isPhoneConnected = false;
-           this.twilioStatusHide();
-           $('.tab-device-status').html('Phone: <span style="color: #761c19">Disconnected');
-           $('.call-pane').addClass('pw-start').addClass('pw-connecting');
-           $('.phone-widget').addClass('start');
-           $('.phone-widget__start').css('display', 'flex');
-           $('.phone-device-status').addClass('fa-square-o').removeClass('fa-check-square-o');
-           $('.calling-from-info').css('display', 'none');
-           $('.call-pane__number').css('display', 'none');
-           $('.call-pane__dial-block').css('display', 'none');
-           if (!this.isDevicePage) {
-               $('.phone-widget__start-btn').css('display', 'block');
-               $('.phone-widget__start-subtitle').html('Connect to start call session');
-           }
+            this.phone.addClass('fa-square-o').removeClass('fa-check-square-o');
+        };
+
+        this.twilioOk = function () {
+            this.twilio.removeClass('fa-square-o').addClass('fa-check-square-o');
+        };
+
+        this.twilioError = function () {
+            this.twilio.addClass('fa-square-o').removeClass('fa-check-square-o');
+        };
+
+        this.speakerOk = function () {
+            this.speaker.removeClass('fa-square-o').addClass('fa-check-square-o');
+        };
+
+        this.speakerError = function () {
+            this.speaker.addClass('fa-square-o').removeClass('fa-check-square-o');
+        };
+
+        this.microphoneOk = function () {
+            this.microphone.removeClass('fa-square-o').addClass('fa-check-square-o');
+        };
+
+        this.microphoneError = function () {
+            this.microphone.addClass('fa-square-o').removeClass('fa-check-square-o');
+        };
+    }
+
+    function StatusPanel() {
+        this.isPhoneConnected = false;
+        this.isTwilioOk = false;
+        this.phone = $('.tab-device-status');
+        this.twilio = $('.tab-device-status-twilio');
+        this.speaker = $('.tab-device-status-speaker');
+        this.microphone = $('.tab-device-status-microphone');
+
+        this.phoneConnected = function () {
+            this.isPhoneConnected = true;
+            this.phone.html('Phone: <span style="color: #00a35b">Connected');
+            this.twilioStatusShow();
+        };
+
+        this.phoneDisconnected = function () {
+            this.isPhoneConnected = false;
+            this.phone.html('Phone: <span style="color: #761c19">Disconnected');
+            this.twilioStatusHide();
         };
 
         this.twilioStatusShow = function () {
-            $('.tab-device-status-twilio').css('display', 'inline');
+            this.twilio.css('display', 'inline');
             if (this.isTwilioOk) {
                 this.microphoneStatusShow();
                 this.speakerStatusShow();
@@ -80,15 +126,14 @@
         };
 
         this.twilioStatusHide = function () {
-            $('.tab-device-status-twilio').css('display', 'none');
+            this.twilio.css('display', 'none');
             this.microphoneStatusHide();
             this.speakerStatusHide();
         };
 
         this.twilioOk = function () {
             this.isTwilioOk = true;
-            $('.tab-device-status-twilio').html('Twilio: <span style="color: #00a35b">OK');
-            $('.phone-device-twilio-status').removeClass('fa-square-o').addClass('fa-check-square-o');
+            this.twilio.html('Twilio: <span style="color: #00a35b">OK');
             if (this.isPhoneConnected) {
                 this.twilioStatusShow();
             }
@@ -96,46 +141,120 @@
 
         this.twilioError = function () {
             this.isTwilioOk = false;
-            $('.tab-device-status-twilio').html('Twilio: <span style="color: #761c19">Error');
-            $('.phone-device-twilio-status').addClass('fa-square-o').removeClass('fa-check-square-o');
+            this.twilio.html('Twilio: <span style="color: #761c19">Error');
             this.microphoneStatusHide();
             this.speakerStatusHide();
         };
 
         this.speakerStatusShow = function () {
-            $('.tab-device-status-speaker').css('display', 'inline');
+            this.speaker.css('display', 'inline');
         };
 
         this.speakerStatusHide = function () {
-            $('.tab-device-status-speaker').css('display', 'none');
+            this.speaker.css('display', 'none');
         };
 
         this.speakerOk = function () {
-            $('.tab-device-status-speaker').html('Speaker: <span style="color: #00a35b">OK');
-            $('.phone-device-speaker-status').removeClass('fa-square-o').addClass('fa-check-square-o');
+            this.speaker.html('Speaker: <span style="color: #00a35b">OK');
         };
 
         this.speakerError = function () {
-            $('.tab-device-status-speaker').html('Speaker: <span style="color: #761c19">Error');
-            $('.phone-device-speaker-status').addClass('fa-square-o').removeClass('fa-check-square-o');
+            this.speaker.html('Speaker: <span style="color: #761c19">Error');
         };
 
         this.microphoneStatusShow = function () {
-            $('.tab-device-status-microphone').css('display', 'inline');
+            this.microphone.css('display', 'inline');
         };
 
         this.microphoneStatusHide = function () {
-            $('.tab-device-status-microphone').css('display', 'none');
+            this.microphone.css('display', 'none');
         };
 
         this.microphoneOk = function () {
-            $('.tab-device-status-microphone').html('Microphone: <span style="color: #00a35b">OK');
-            $('.phone-device-microphone-status').removeClass('fa-square-o').addClass('fa-check-square-o');
+            this.microphone.html('Microphone: <span style="color: #00a35b">OK');
         };
 
         this.microphoneError = function () {
-            $('.tab-device-status-microphone').html('Microphone: <span style="color: #761c19">Error');
-            $('.phone-device-microphone-status').addClass('fa-square-o').removeClass('fa-check-square-o');
+            this.microphone.html('Microphone: <span style="color: #761c19">Error');
+        };
+    }
+
+    function ConnectingPanel() {
+        this.show = function(isDevicePage) {
+            $('.call-pane').addClass('pw-start').addClass('pw-connecting');
+            $('.phone-widget').addClass('start');
+            $('.phone-widget__start').css('display', 'flex');
+            $('.calling-from-info').css('display', 'none');
+            $('.call-pane__number').css('display', 'none');
+            $('.call-pane__dial-block').css('display', 'none');
+            if (!isDevicePage) {
+                $('.phone-widget__start-btn').css('display', 'block');
+                $('.phone-widget__start-subtitle').html('Connect to start call session');
+            }
+        };
+
+        this.hide = function () {
+            $('.call-pane').removeClass('pw-start').removeClass('pw-connecting');
+            $('.phone-widget').removeClass('start');
+            $('.phone-widget__start').css('display', 'none');
+            $('.calling-from-info').css('display', 'flex');
+            $('.call-pane__number').css('display', 'block');
+            $('.call-pane__dial-block').css('display', 'block');
+        };
+    }
+
+    function View(isDevicePage, warningIndicator) {
+        this.isDevicePage = isDevicePage;
+        this.warningIndicator = warningIndicator;
+        this.voipPage = new VoipPage();
+        this.statusPanel = new StatusPanel();
+        this.connectingPanel = new ConnectingPanel();
+
+        this.phoneConnected = function () {
+            this.statusPanel.phoneConnected();
+            this.voipPage.phoneConnected();
+            this.connectingPanel.hide();
+            PhoneWidget.openCallTab();
+        };
+
+        this.phoneDisconnected = function () {
+            this.statusPanel.phoneDisconnected();
+            this.voipPage.phoneDisconnected();
+            this.connectingPanel.show(this.isDevicePage);
+            this.warningIndicator.notReady(WarningMessages.phoneDisconnected);
+        };
+
+        this.twilioOk = function () {
+            this.statusPanel.twilioOk();
+            this.voipPage.twilioOk();
+        };
+
+        this.twilioError = function () {
+            this.statusPanel.twilioError();
+            this.voipPage.twilioError();
+            this.warningIndicator.notReady(WarningMessages.twilioError);
+        };
+
+        this.speakerOk = function () {
+            this.statusPanel.speakerOk();
+            this.voipPage.speakerOk();
+        };
+
+        this.speakerError = function () {
+            this.statusPanel.speakerError();
+            this.voipPage.speakerError();
+            this.warningIndicator.notReady(WarningMessages.speakerError);
+        };
+
+        this.microphoneOk = function () {
+            this.statusPanel.microphoneOk();
+            this.voipPage.microphoneOk();
+        };
+
+        this.microphoneError = function () {
+            this.statusPanel.speakerError();
+            this.voipPage.microphoneError();
+            this.warningIndicator.notReady(WarningMessages.microphoneError);
         };
     }
 
@@ -227,7 +346,7 @@
         this.microphoneNotReady = function () {}
     }
 
-    function State(userId, register, phoneDeviceIdStorageKey, panel, phoneConnected, twilioIsReady, speakerIsReady, microphoneIsReady, logger) {
+    function State(userId, register, phoneDeviceIdStorageKey, view, warningIndicator, phoneConnected, twilioIsReady, speakerIsReady, microphoneIsReady, logger) {
         this.userId = userId;
         this.isPhoneConnected = false;
         this.isTwilioRegistered = false;
@@ -235,35 +354,22 @@
         this.isMicrophoneSelected = false;
         this.register = register;
         this.logger = logger;
-        this.switcher = new Switcher()
-        this.panel = panel;
-        this.statusReady = true;
+        this.view = view;
+        this.warningIndicator = warningIndicator;
         this.phoneDeviceIdStorageKey = phoneDeviceIdStorageKey;
         this.isInitiated = true;
 
         this.reset = function (reason) {
-            this.switcher.notReady('Reset devices. ' + reason);
-            this.logger.error('Reset devices! ' + reason);
-
+            this.logger.error('Reset devices. (' + reason + ')');
+            this.twilioUnregister();
             this.microphoneUnselected();
             this.speakerUnselected();
-            this.twilioUnregister();
         };
 
         this.ready = function () {
-            this.statusReady = true;
-            this.switcher.ready();
-            this.logger.success('Phone Device Ready!');
-            console.log('Phone Device Ready!');
-        };
-
-        this.notReady = function (reason) {
-            this.switcher.notReady(reason);
-            if (this.statusReady === true) {
-                this.logger.error('Phone Device Not Ready! ' + reason);
-                console.log('Phone Device Not Ready! ' + reason);
-            }
-            this.statusReady = false;
+            this.warningIndicator.ready();
+            this.logger.success('Phone Device Ready.');
+            console.log('Phone Device Ready.');
         };
 
         this.isReady = function () {
@@ -273,26 +379,27 @@
         this.phoneConnected = function () {
             this.isPhoneConnected = true;
             this.register.phoneConnected();
-            this.panel.phoneConnected();
-            this.logger.success('Phone Device connected!');
+            this.view.phoneConnected();
+            this.logger.success('Phone Device connected.');
             if (this.isReady()) {
                 this.ready();
             }
+            widgetIcon.connect();
         }
 
         this.phoneDisconnected = function (reason) {
             this.isPhoneConnected = false;
             this.register.phoneDisconnected();
-            this.panel.phoneDisconnected();
-            this.logger.error('Phone Device disconnected! ' + reason);
-            this.notReady('Phone Device: disconnected');
+            this.view.phoneDisconnected();
+            this.logger.error('Phone Device disconnected. (' + reason + ')');
+            widgetIcon.disconnect();
         }
 
         this.twilioRegister = function () {
             this.isTwilioRegistered = true;
             this.register.twilioReady();
-            this.panel.twilioOk();
-            this.logger.success('Twilio Device registered!');
+            this.view.twilioOk();
+            this.logger.success('Twilio Device registered.');
             if (this.isReady()) {
                 this.ready();
             }
@@ -301,16 +408,15 @@
         this.twilioUnregister = function () {
             this.isTwilioRegistered = false;
             this.register.twilioNotReady();
-            this.panel.twilioError();
-            this.logger.error('Twilio Device unregistered!');
-            this.notReady('Twilio Device: unregistered');
+            this.view.twilioError();
+            this.logger.error('Twilio Device unregistered.');
         }
 
         this.speakerSelected = function () {
             this.isSpeakerSelected = true;
             this.register.speakerReady()
-            this.panel.speakerOk();
-            this.logger.success('Speaker Selected!');
+            this.view.speakerOk();
+            this.logger.success('Speaker Selected.');
             if (this.isReady()) {
                 this.ready();
             }
@@ -319,16 +425,15 @@
         this.speakerUnselected = function () {
             this.isSpeakerSelected = false;
             this.register.speakerNotReady()
-            this.panel.speakerError();
-            this.logger.error('Speaker UnSelected!');
-            this.notReady('Speaker: unselected');
+            this.view.speakerError();
+            this.logger.error('Speaker UnSelected.');
         }
 
         this.microphoneSelected = function () {
             this.isMicrophoneSelected = true;
             this.register.microphoneReady();
-            this.panel.microphoneOk();
-            this.logger.success('Microphone Selected!');
+            this.view.microphoneOk();
+            this.logger.success('Microphone Selected.');
             if (this.isReady()) {
                 this.ready();
             }
@@ -337,9 +442,8 @@
         this.microphoneUnselected = function () {
             this.isMicrophoneSelected = false;
             this.register.microphoneNotReady();
-            this.panel.microphoneError();
-            this.logger.error('Microphone UnSelected!');
-            this.notReady('Microphone unselected');
+            this.view.microphoneError();
+            this.logger.error('Microphone UnSelected.');
         }
 
         this.setDeviceId = function (deviceId) {
@@ -356,40 +460,40 @@
             this.logger.error('Device ID was removed.');
         };
 
-        this.notReady('Init devices');
-
-        if (microphoneIsReady === true) {
-            this.microphoneSelected();
-        } else {
-            this.microphoneUnselected();
-        }
-
-        if (speakerIsReady === true) {
-            this.speakerSelected();
-        } else {
-            this.speakerUnselected();
-        }
-
-        if (twilioIsReady === true) {
-            this.twilioRegister();
-        } else {
-            this.twilioUnregister();
-        }
-
         if (phoneConnected === true) {
             this.phoneConnected();
+            if (twilioIsReady === true) {
+                this.twilioRegister();
+                if (microphoneIsReady === true) {
+                    this.microphoneSelected();
+                } else {
+                    this.microphoneUnselected();
+                }
+                if (speakerIsReady === true) {
+                    this.speakerSelected();
+                } else {
+                    this.speakerUnselected();
+                }
+            } else {
+                this.twilioUnregister();
+            }
         } else {
-            this.phoneDisconnected('Init.');
+            this.register.phoneDisconnected();
+            this.view.phoneDisconnected();
+            this.logger.add('Waiting to install Phone Device ID.');
+            widgetIcon.disconnect();
         }
     }
 
     function Init(userId, isDevicePage, phoneDeviceIdStorageKey, logger) {
+        const warningIndicator = new WarningIndicator();
         if (isDevicePage) {
             return new State(
                 userId,
                 new Register(userId, logger),
                 phoneDeviceIdStorageKey,
-                new Panel(true),
+                new View(true, warningIndicator),
+                warningIndicator,
                 false,
                 false,
                 false,
@@ -443,7 +547,8 @@
             userId,
             new DummyRegister(),
             phoneDeviceIdStorageKey,
-            new Panel(false),
+            new View(false, warningIndicator),
+            warningIndicator,
             localStorage.getItem(getStorageNamePhoneStatus(userId)) === 'connected',
             localStorage.getItem(getStorageNameTwilioStatus(userId)) === 'ready',
             localStorage.getItem(getStorageNameSpeakerStatus(userId)) === 'ready',
