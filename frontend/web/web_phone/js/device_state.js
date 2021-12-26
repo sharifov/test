@@ -1,4 +1,27 @@
 (function () {
+    const PhoneStatus = {
+        connected: 'Connected',
+        disconnected: 'Disconnected'
+    }
+
+    const TwilioStatus = {
+        unknown: 'Unknown',
+        registered: 'Registered',
+        error: 'Error'
+    }
+
+    const SpeakerStatus = {
+        unknown: 'Unknown',
+        selected: 'Selected',
+        error: 'Error'
+    }
+
+    const MicrophoneStatus = {
+        unknown: 'Unknown',
+        selected: 'Selected',
+        error: 'Error'
+    }
+
     function getStorageNamePhoneStatus(userId) {
         return 'PhoneDeviceStatus' + userId;
     }
@@ -25,37 +48,53 @@
     function WarningIndicator() {
         this.icon = '.phone-widget-icon__warning';
         this.heading = '.phone-widget-heading__warning';
-        this.reasons = [];
+        this.warnings = [];
 
         this.ready = function () {
-            this.reasons = [];
-            $(this.icon).css('display', 'none');
-            $(this.heading).css('display', 'none');
-            $(this.heading).attr('data-content', '');
-            $(this.heading).popover('hide');
-        }
+            this.warnings = [];
+            this.refresh();
+        };
 
-        this.notReady = function (reason) {
-            $(this.icon).css('display', 'block');
-            if (!reason) {
-                reason = '';
+        this.notReady = function (warning) {
+            if (!this.warnings.includes(warning)) {
+                this.warnings.push(warning || '');
             }
+            this.refresh();
+        };
+
+        this.refresh = function () {
+            if (this.warnings.length === 0) {
+                $(this.icon).css('display', 'none');
+                $(this.heading).css('display', 'none');
+                $(this.heading).attr('data-content', '');
+                $(this.heading).popover('hide');
+                return;
+            }
+
+            $(this.icon).css('display', 'block');
             $(this.heading).css('display', 'block');
-            this.reasons.push(reason);
             $(this.heading).popover('dispose');
-            let reasons = '';
-            if (this.reasons.includes(WarningMessages.phoneDisconnected)) {
-                reasons = WarningMessages.phoneDisconnected;
-            } else if (this.reasons.includes(WarningMessages.twilioError)) {
-                reasons = WarningMessages.twilioError;
+            let warnings = '';
+            if (this.warnings.includes(WarningMessages.phoneDisconnected)) {
+                warnings = WarningMessages.phoneDisconnected;
+            } else if (this.warnings.includes(WarningMessages.twilioError)) {
+                warnings = WarningMessages.twilioError;
             } else {
-                reasons = this.reasons.join("<br>");
+                warnings = this.warnings.join("<br>");
             }
             $(this.heading).popover({
-                content: reasons,
+                content: warnings,
                 html: true
             });
-        }
+        };
+
+        this.remove = function (warning) {
+            const index = this.warnings.indexOf(warning);
+            if (index > -1) {
+                this.warnings.splice(index, 1);
+                this.refresh();
+            }
+        };
     }
 
     function VoipPage() {
@@ -72,34 +111,34 @@
             this.phone.addClass('fa-square-o').removeClass('fa-check-square-o');
         };
 
-        this.twilioOk = function () {
+        this.twilioReady = function () {
             this.twilio.removeClass('fa-square-o').addClass('fa-check-square-o');
         };
 
-        this.twilioError = function () {
+        this.twilioNotReady = function () {
             this.twilio.addClass('fa-square-o').removeClass('fa-check-square-o');
         };
 
-        this.speakerOk = function () {
+        this.speakerReady = function () {
             this.speaker.removeClass('fa-square-o').addClass('fa-check-square-o');
         };
 
-        this.speakerError = function () {
+        this.speakerNotReady = function () {
             this.speaker.addClass('fa-square-o').removeClass('fa-check-square-o');
         };
 
-        this.microphoneOk = function () {
+        this.microphoneReady = function () {
             this.microphone.removeClass('fa-square-o').addClass('fa-check-square-o');
         };
 
-        this.microphoneError = function () {
+        this.microphoneNotReady = function () {
             this.microphone.addClass('fa-square-o').removeClass('fa-check-square-o');
         };
     }
 
     function StatusPanel() {
         this.isPhoneConnected = false;
-        this.isTwilioOk = false;
+        this.isTwilioRegistered = false;
         this.phone = $('.tab-device-status');
         this.twilio = $('.tab-device-status-twilio');
         this.speaker = $('.tab-device-status-speaker');
@@ -119,7 +158,7 @@
 
         this.twilioStatusShow = function () {
             this.twilio.css('display', 'inline');
-            if (this.isTwilioOk) {
+            if (this.isTwilioRegistered) {
                 this.microphoneStatusShow();
                 this.speakerStatusShow();
             }
@@ -131,16 +170,23 @@
             this.speakerStatusHide();
         };
 
-        this.twilioOk = function () {
-            this.isTwilioOk = true;
-            this.twilio.html('Twilio: <span style="color: #00a35b">OK');
+        this.twilioUnknown = function () {
+            this.isTwilioRegistered = false;
+            this.twilio.html('Twilio: <span style="color: #eee">Unknown');
+            this.microphoneStatusHide();
+            this.speakerStatusHide();
+        };
+
+        this.twilioRegistered = function () {
+            this.isTwilioRegistered = true;
+            this.twilio.html('Twilio: <span style="color: #00a35b">Registered');
             if (this.isPhoneConnected) {
                 this.twilioStatusShow();
             }
         };
 
         this.twilioError = function () {
-            this.isTwilioOk = false;
+            this.isTwilioRegistered = false;
             this.twilio.html('Twilio: <span style="color: #761c19">Error');
             this.microphoneStatusHide();
             this.speakerStatusHide();
@@ -154,8 +200,12 @@
             this.speaker.css('display', 'none');
         };
 
-        this.speakerOk = function () {
-            this.speaker.html('Speaker: <span style="color: #00a35b">OK');
+        this.speakerUnknown = function () {
+            this.speaker.html('Speaker: <span style="color: #eee">Unknown');
+        };
+
+        this.speakerSelected = function () {
+            this.speaker.html('Speaker: <span style="color: #00a35b">Selected');
         };
 
         this.speakerError = function () {
@@ -170,8 +220,12 @@
             this.microphone.css('display', 'none');
         };
 
-        this.microphoneOk = function () {
-            this.microphone.html('Microphone: <span style="color: #00a35b">OK');
+        this.microphoneUnknown = function () {
+            this.microphone.html('Microphone: <span style="color: #eee">Unknown');
+        };
+
+        this.microphoneSelected = function () {
+            this.microphone.html('Microphone: <span style="color: #00a35b">Selected');
         };
 
         this.microphoneError = function () {
@@ -214,6 +268,7 @@
             this.statusPanel.phoneConnected();
             this.voipPage.phoneConnected();
             this.connectingPanel.hide();
+            this.warningIndicator.remove(WarningMessages.phoneDisconnected);
             PhoneWidget.openCallTab();
         };
 
@@ -224,41 +279,62 @@
             this.warningIndicator.notReady(WarningMessages.phoneDisconnected);
         };
 
-        this.twilioOk = function () {
-            this.statusPanel.twilioOk();
-            this.voipPage.twilioOk();
+        this.twilioUnknown = function () {
+            this.statusPanel.twilioUnknown();
+            this.voipPage.twilioNotReady();
+            this.warningIndicator.notReady(WarningMessages.twilioError);
+        };
+
+        this.twilioRegistered = function () {
+            this.statusPanel.twilioRegistered();
+            this.voipPage.twilioReady();
+            this.warningIndicator.remove(WarningMessages.twilioError);
         };
 
         this.twilioError = function () {
             this.statusPanel.twilioError();
-            this.voipPage.twilioError();
+            this.voipPage.twilioNotReady();
             this.warningIndicator.notReady(WarningMessages.twilioError);
         };
 
-        this.speakerOk = function () {
-            this.statusPanel.speakerOk();
-            this.voipPage.speakerOk();
+        this.speakerUnknown = function () {
+            this.statusPanel.speakerUnknown();
+            this.voipPage.speakerNotReady();
+            this.warningIndicator.notReady(WarningMessages.speakerError);
+        };
+
+        this.speakerSelected = function () {
+            this.statusPanel.speakerSelected();
+            this.voipPage.speakerReady();
+            this.warningIndicator.remove(WarningMessages.speakerError);
         };
 
         this.speakerError = function () {
             this.statusPanel.speakerError();
-            this.voipPage.speakerError();
+            this.voipPage.speakerNotReady();
             this.warningIndicator.notReady(WarningMessages.speakerError);
         };
 
-        this.microphoneOk = function () {
-            this.statusPanel.microphoneOk();
-            this.voipPage.microphoneOk();
+        this.microphoneUnknown = function () {
+            this.statusPanel.microphoneUnknown();
+            this.voipPage.microphoneNotReady();
+            this.warningIndicator.notReady(WarningMessages.microphoneError);
+        };
+
+        this.microphoneSelected = function () {
+            this.statusPanel.microphoneSelected();
+            this.voipPage.microphoneReady();
+            this.warningIndicator.remove(WarningMessages.microphoneError);
         };
 
         this.microphoneError = function () {
-            this.statusPanel.speakerError();
-            this.voipPage.microphoneError();
+            this.statusPanel.microphoneError();
+            this.voipPage.microphoneNotReady();
             this.warningIndicator.notReady(WarningMessages.microphoneError);
         };
     }
 
-    function Register(initUserId, initLogger) {
+    function Storage(initUserId, initLogger) {
         const userId = initUserId;
         const logger = initLogger;
 
@@ -296,74 +372,199 @@
             });
         }, 200);
 
-        this.phoneConnected = function () {
-            localStorage.setItem(getStorageNamePhoneStatus(userId), 'connected');
-        }
+        this.phoneConnected = function (status) {
+            localStorage.setItem(getStorageNamePhoneStatus(userId), status);
+        };
 
-        this.phoneDisconnected = function () {
-            localStorage.setItem(getStorageNamePhoneStatus(userId), 'disconnected');
-        }
+        this.phoneDisconnected = function (status) {
+            localStorage.setItem(getStorageNamePhoneStatus(userId), status);
+        };
 
-        this.twilioReady = function () {
-            localStorage.setItem(getStorageNameTwilioStatus(userId), 'ready');
-            queue.enqueue('TwilioReady');
-        }
-
-        this.twilioNotReady = function () {
-            localStorage.setItem(getStorageNameTwilioStatus(userId), 'not-ready');
+        this.twilioUnknown = function (status) {
+            localStorage.setItem(getStorageNameTwilioStatus(userId), status);
             queue.enqueue('TwilioNotReady');
-        }
+        };
 
-        this.speakerReady = function () {
-            localStorage.setItem(getStorageNameSpeakerStatus(userId), 'ready');
-            queue.enqueue('SpeakerReady');
-        }
+        this.twilioRegistered = function (status) {
+            localStorage.setItem(getStorageNameTwilioStatus(userId), status);
+            queue.enqueue('TwilioReady');
+        };
 
-        this.speakerNotReady = function () {
-            localStorage.setItem(getStorageNameSpeakerStatus(userId), 'not-ready');
+        this.twilioError = function (status) {
+            localStorage.setItem(getStorageNameTwilioStatus(userId), status);
+            queue.enqueue('TwilioNotReady');
+        };
+
+        this.speakerUnknown = function (status) {
+            localStorage.setItem(getStorageNameSpeakerStatus(userId), status);
             queue.enqueue('SpeakerNotReady');
-        }
+        };
 
-        this.microphoneReady = function () {
-            localStorage.setItem(getStorageNameMicrophoneStatus(userId), 'ready');
-            queue.enqueue('MicrophoneReady');
-        }
+        this.speakerSelected = function (status) {
+            localStorage.setItem(getStorageNameSpeakerStatus(userId), status);
+            queue.enqueue('SpeakerReady');
+        };
 
-        this.microphoneNotReady = function () {
-            localStorage.setItem(getStorageNameMicrophoneStatus(userId), 'not-ready');
+        this.speakerError = function (status) {
+            localStorage.setItem(getStorageNameSpeakerStatus(userId), status);
+            queue.enqueue('SpeakerNotReady');
+        };
+
+        this.microphoneUnknown = function (status) {
+            localStorage.setItem(getStorageNameMicrophoneStatus(userId), status);
             queue.enqueue('MicrophoneNotReady');
-        }
+        };
+
+        this.microphoneSelected = function (status) {
+            localStorage.setItem(getStorageNameMicrophoneStatus(userId), status);
+            queue.enqueue('MicrophoneReady');
+        };
+
+        this.microphoneError = function (status) {
+            localStorage.setItem(getStorageNameMicrophoneStatus(userId), status);
+            queue.enqueue('MicrophoneNotReady');
+        };
     }
 
-    function DummyRegister() {
+    function DummyStorage() {
         this.phoneConnected = function () {}
         this.phoneDisconnected = function () {}
-        this.twilioReady = function () {}
-        this.twilioNotReady = function () {}
-        this.speakerReady = function () {}
-        this.speakerNotReady = function () {}
-        this.microphoneReady = function () {}
-        this.microphoneNotReady = function () {}
+        this.twilioUnknown = function (status) {}
+        this.twilioRegistered = function (status) {}
+        this.twilioError = function (status) {}
+        this.speakerUnknown = function (status) {}
+        this.speakerSelected = function (status) {}
+        this.speakerError = function (status) {}
+        this.microphoneUnknown = function (status) {}
+        this.microphoneSelected = function (status) {}
+        this.microphoneError = function (status) {}
     }
 
-    function State(userId, register, phoneDeviceIdStorageKey, view, warningIndicator, phoneConnected, twilioIsReady, speakerIsReady, microphoneIsReady, logger) {
+    function Phone(storage) {
+        this.status = PhoneStatus.disconnected;
+        this.storage = storage;
+
+        this.isReady = function () {
+            return this.status === PhoneStatus.connected;
+        };
+
+        this.connected = function () {
+            this.status = PhoneStatus.connected;
+            this.storage.phoneConnected(this.status);
+        };
+
+        this.disconnected = function () {
+            this.status = PhoneStatus.disconnected;
+            this.storage.phoneDisconnected(this.status);
+        };
+
+        this.reset = function () {
+            this.disconnected();
+        };
+    }
+
+    function Twilio(storage) {
+        this.status = TwilioStatus.unknown;
+        this.storage = storage;
+
+        this.isReady = function () {
+            return this.status === TwilioStatus.registered;
+        };
+
+        this.unknown = function () {
+            this.status = TwilioStatus.unknown;
+            this.storage.twilioUnknown(this.status);
+        };
+
+        this.registered = function () {
+            this.status = TwilioStatus.registered;
+            this.storage.twilioRegistered(this.status);
+        };
+
+        this.error = function () {
+            this.status = TwilioStatus.error;
+            this.storage.twilioError(this.status);
+        };
+
+        this.reset = function () {
+            this.unknown();
+        };
+    }
+
+    function Speaker(storage) {
+        this.status = SpeakerStatus.unknown;
+        this.storage = storage;
+
+        this.isReady = function () {
+            return this.status === SpeakerStatus.selected;
+        };
+
+        this.unknown = function () {
+            this.status = SpeakerStatus.unknown;
+            this.storage.speakerUnknown(this.status);
+        };
+
+        this.selected = function () {
+            this.status = SpeakerStatus.selected;
+            this.storage.speakerSelected(this.status);
+        };
+
+        this.error = function () {
+            this.status = SpeakerStatus.error;
+            this.storage.speakerError(this.status);
+        };
+
+        this.reset = function () {
+            this.unknown();
+        };
+    }
+
+    function Microphone(storage) {
+        this.status = MicrophoneStatus.unknown;
+        this.storage = storage;
+
+        this.isReady = function () {
+            return this.status === MicrophoneStatus.selected;
+        };
+
+        this.unknown = function () {
+            this.status = MicrophoneStatus.unknown;
+            this.storage.microphoneUnknown(this.status);
+        };
+
+        this.selected = function () {
+            this.status = MicrophoneStatus.selected;
+            this.storage.microphoneSelected(this.status);
+        };
+
+        this.error = function () {
+            this.status = MicrophoneStatus.error;
+            this.storage.microphoneError(this.status);
+        };
+
+        this.reset = function () {
+            this.unknown();
+        };
+    }
+
+    function State(userId, storage, phoneDeviceIdStorageKey, view, warningIndicator, phoneStatus, twilioStatus, speakerStatus, microphoneStatus, logger) {
         this.userId = userId;
-        this.isPhoneConnected = false;
-        this.isTwilioRegistered = false;
-        this.isSpeakerSelected = false;
-        this.isMicrophoneSelected = false;
-        this.register = register;
+        this.phone = new Phone(storage);
+        this.twilio = new Twilio(storage);
+        this.speaker = new Speaker(storage);
+        this.microphone = new Microphone(storage);
+        this.storage = storage;
         this.logger = logger;
         this.view = view;
         this.warningIndicator = warningIndicator;
         this.phoneDeviceIdStorageKey = phoneDeviceIdStorageKey;
         this.isInitiated = true;
 
-        this.reset = function (reason) {
+        this.resetDevices = function (reason) {
             this.logger.error('Reset devices. (' + reason + ')');
-            this.twilioUnregister();
-            this.microphoneUnselected();
-            this.speakerUnselected();
+            this.twilioUnknown();
+            this.speakerUnknown();
+            this.microphoneUnknown();
         };
 
         this.ready = function () {
@@ -373,12 +574,11 @@
         };
 
         this.isReady = function () {
-            return this.isPhoneConnected && this.isTwilioRegistered && this.isSpeakerSelected && this.isMicrophoneSelected;
+            return this.phone.isReady() && this.twilio.isReady() && this.speaker.isReady() && this.microphone.isReady();
         };
 
         this.phoneConnected = function () {
-            this.isPhoneConnected = true;
-            this.register.phoneConnected();
+            this.phone.connected();
             this.view.phoneConnected();
             this.logger.success('Phone Device connected.');
             if (this.isReady()) {
@@ -388,62 +588,73 @@
         }
 
         this.phoneDisconnected = function (reason) {
-            this.isPhoneConnected = false;
-            this.register.phoneDisconnected();
+            this.phone.disconnected();
             this.view.phoneDisconnected();
             this.logger.error('Phone Device disconnected. (' + reason + ')');
             widgetIcon.disconnect();
         }
 
-        this.twilioRegister = function () {
-            this.isTwilioRegistered = true;
-            this.register.twilioReady();
-            this.view.twilioOk();
+        this.twilioUnknown = function () {
+            this.twilio.unknown();
+            this.view.twilioUnknown();
+            this.logger.error('Twilio Device unknown.');
+        }
+
+        this.twilioRegistered = function () {
+            this.twilio.registered();
+            this.view.twilioRegistered();
             this.logger.success('Twilio Device registered.');
             if (this.isReady()) {
                 this.ready();
             }
         }
 
-        this.twilioUnregister = function () {
-            this.isTwilioRegistered = false;
-            this.register.twilioNotReady();
+        this.twilioError = function () {
+            this.twilio.error();
             this.view.twilioError();
-            this.logger.error('Twilio Device unregistered.');
+            this.logger.error('Twilio Device error.');
+        }
+
+        this.speakerUnknown = function () {
+            this.speaker.unknown();
+            this.view.speakerUnknown();
+            this.logger.error('Speaker Unknown.');
         }
 
         this.speakerSelected = function () {
-            this.isSpeakerSelected = true;
-            this.register.speakerReady()
-            this.view.speakerOk();
+            this.speaker.selected();
+            this.view.speakerSelected();
             this.logger.success('Speaker Selected.');
             if (this.isReady()) {
                 this.ready();
             }
         }
 
-        this.speakerUnselected = function () {
-            this.isSpeakerSelected = false;
-            this.register.speakerNotReady()
+        this.speakerError = function () {
+            this.speaker.error();
             this.view.speakerError();
-            this.logger.error('Speaker UnSelected.');
+            this.logger.error('Speaker Error.');
+        }
+
+        this.microphoneUnknown = function () {
+            this.microphone.unknown();
+            this.view.microphoneUnknown();
+            this.logger.error('Microphone Unknown.');
         }
 
         this.microphoneSelected = function () {
-            this.isMicrophoneSelected = true;
-            this.register.microphoneReady();
-            this.view.microphoneOk();
+            this.microphone.selected();
+            this.view.microphoneSelected();
             this.logger.success('Microphone Selected.');
             if (this.isReady()) {
                 this.ready();
             }
         }
 
-        this.microphoneUnselected = function () {
-            this.isMicrophoneSelected = false;
-            this.register.microphoneNotReady();
+        this.microphoneError = function () {
+            this.microphone.error();
             this.view.microphoneError();
-            this.logger.error('Microphone UnSelected.');
+            this.logger.error('Microphone Error.');
         }
 
         this.setDeviceId = function (deviceId) {
@@ -460,29 +671,38 @@
             this.logger.error('Device ID was removed.');
         };
 
-        if (phoneConnected === true) {
+        if (phoneStatus === PhoneStatus.connected) {
             this.phoneConnected();
-            if (twilioIsReady === true) {
-                this.twilioRegister();
-                if (microphoneIsReady === true) {
-                    this.microphoneSelected();
-                } else {
-                    this.microphoneUnselected();
-                }
-                if (speakerIsReady === true) {
+            if (twilioStatus === TwilioStatus.registered) {
+                this.twilioRegistered();
+                if (speakerStatus === SpeakerStatus.selected) {
                     this.speakerSelected();
+                } else if (speakerStatus === SpeakerStatus.error) {
+                    this.speakerError();
                 } else {
-                    this.speakerUnselected();
+                    this.speakerUnknown();
                 }
-            } else {
-                this.twilioUnregister();
+                if (microphoneStatus === MicrophoneStatus.selected) {
+                    this.microphoneSelected();
+                } else  if (microphoneStatus === MicrophoneStatus.error) {
+                    this.microphoneError();
+                } else {
+                    this.microphoneUnknown();
+                }
+                return;
             }
-        } else {
-            this.register.phoneDisconnected();
-            this.view.phoneDisconnected();
-            this.logger.add('Waiting to install Phone Device ID.');
-            widgetIcon.disconnect();
+            if (twilioStatus === TwilioStatus.error) {
+                this.twilioError();
+                return;
+            }
+            this.twilioUnknown();
+            return;
         }
+
+        this.phone.disconnected();
+        this.view.phoneDisconnected();
+        this.logger.add('Waiting to install Phone Device ID.');
+        widgetIcon.disconnect();
     }
 
     function Init(userId, isDevicePage, phoneDeviceIdStorageKey, logger) {
@@ -490,14 +710,14 @@
         if (isDevicePage) {
             return new State(
                 userId,
-                new Register(userId, logger),
+                new Storage(userId, logger),
                 phoneDeviceIdStorageKey,
                 new View(true, warningIndicator),
                 warningIndicator,
-                false,
-                false,
-                false,
-                false,
+                PhoneStatus.disconnected,
+                TwilioStatus.unknown,
+                SpeakerStatus.unknown,
+                MicrophoneStatus.unknown,
                 logger
             );
         }
@@ -511,7 +731,7 @@
 
         window.addEventListener('storage', function (event) {
             if (event.key === getStorageNamePhoneStatus(userId)) {
-                if (event.newValue === 'connected') {
+                if (event.newValue === PhoneStatus.connected) {
                     PhoneWidget.getDeviceState().phoneConnected();
                     return;
                 }
@@ -519,40 +739,53 @@
                 return;
             }
             if (event.key === getStorageNameTwilioStatus(userId)) {
-                if (event.newValue === 'ready') {
-                    PhoneWidget.getDeviceState().twilioRegister();
+                if (event.newValue === TwilioStatus.registered) {
+                    PhoneWidget.getDeviceState().twilioRegistered();
                     return;
                 }
-                PhoneWidget.getDeviceState().twilioUnregister();
+                if (event.newValue === TwilioStatus.error) {
+                    PhoneWidget.getDeviceState().twilioError();
+                    return;
+                }
+                PhoneWidget.getDeviceState().twilioUnknown();
                 return;
             }
             if (event.key === getStorageNameSpeakerStatus(userId)) {
-                if (event.newValue === 'ready') {
+                if (event.newValue === SpeakerStatus.selected) {
                     PhoneWidget.getDeviceState().speakerSelected();
                     return;
                 }
-                PhoneWidget.getDeviceState().speakerUnselected();
+                if (event.newValue === SpeakerStatus.error) {
+                    PhoneWidget.getDeviceState().speakerError();
+                    return;
+                }
+                PhoneWidget.getDeviceState().speakerUnknown();
                 return;
             }
             if (event.key === getStorageNameMicrophoneStatus(userId)) {
-                if (event.newValue === 'ready') {
+                if (event.newValue === MicrophoneStatus.selected) {
                     PhoneWidget.getDeviceState().microphoneSelected();
                     return;
                 }
-                PhoneWidget.getDeviceState().microphoneUnselected();
+                if (event.newValue === MicrophoneStatus.error) {
+                    PhoneWidget.getDeviceState().microphoneError();
+                    return;
+                }
+                PhoneWidget.getDeviceState().microphoneUnknown();
+                return;
             }
         });
 
         return new State(
             userId,
-            new DummyRegister(),
+            new DummyStorage(),
             phoneDeviceIdStorageKey,
             new View(false, warningIndicator),
             warningIndicator,
-            localStorage.getItem(getStorageNamePhoneStatus(userId)) === 'connected',
-            localStorage.getItem(getStorageNameTwilioStatus(userId)) === 'ready',
-            localStorage.getItem(getStorageNameSpeakerStatus(userId)) === 'ready',
-            localStorage.getItem(getStorageNameMicrophoneStatus(userId)) === 'ready',
+            localStorage.getItem(getStorageNamePhoneStatus(userId)),
+            localStorage.getItem(getStorageNameTwilioStatus(userId)),
+            localStorage.getItem(getStorageNameSpeakerStatus(userId)),
+            localStorage.getItem(getStorageNameMicrophoneStatus(userId)),
             new window.phoneWidget.logger.DummyLogger()
         );
     }

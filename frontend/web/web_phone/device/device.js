@@ -13,9 +13,9 @@
             }
         } else {
             if (device.state === "registered") {
-                PhoneWidget.getDeviceState().twilioRegister();
+                PhoneWidget.getDeviceState().twilioRegistered();
             } else {
-                PhoneWidget.getDeviceState().twilioUnregister();
+                PhoneWidget.getDeviceState().twilioUnknown();
                 PhoneWidget.addLogError('Refresh Voip page!');
                 return;
             }
@@ -137,7 +137,7 @@
                 message: 'Not found Microphone device'
             }));
             PhoneWidget.addLogError('Not found Microphone device');
-            PhoneWidget.getDeviceState().microphoneUnselected();
+            PhoneWidget.getDeviceState().microphoneError();
             return;
         }
 
@@ -278,7 +278,7 @@
     };
 
     const deviceRegisteredHandler = () => {
-        PhoneWidget.getDeviceState().twilioRegister();
+        PhoneWidget.getDeviceState().twilioRegistered();
 
         initSpeakerDevices();
 
@@ -291,7 +291,7 @@
                 let err = createError(error, 'Microphone error');
                 twilioLogger.error('%j', err);
                 PhoneWidget.addLog(error);
-                PhoneWidget.getDeviceState().microphoneUnselected();
+                PhoneWidget.getDeviceState().microphoneError();
             });
         device.addListener("incoming", incomingCallHandler);
     };
@@ -301,7 +301,7 @@
             PhoneWidget.getDeviceState().speakerSelected();
             return;
         }
-        PhoneWidget.getDeviceState().speakerUnselected();
+        PhoneWidget.getDeviceState().speakerError();
     };
 
     const deviceErrorHandler = (error, call) => {
@@ -319,7 +319,7 @@
     };
 
     const deviceUnregisteredHandler = () => {
-        PhoneWidget.getDeviceState().reset('Twilio Device unregistered');
+        PhoneWidget.getDeviceState().resetDevices('Twilio Device unregistered');
         PhoneWidget.incomingSoundOff();
 
         // let activeCallSid = PhoneWidget.getActiveCallSid();

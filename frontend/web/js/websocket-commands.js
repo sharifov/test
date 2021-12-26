@@ -385,25 +385,21 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                     }
 
                     if (obj.cmd === 'PhoneDeviceRegister') {
+                        if (!PhoneWidget.isInitiated()) {
+                            PhoneWidget.init(window.phoneWidget.initParams);
+                        }
                         if (obj.error) {
                             if (obj.deviceIsInvalid) {
-                                if (PhoneWidget.isInitiated()) {
-                                    PhoneWidget.getDeviceState().removeDeviceId();
-                                }
+                                PhoneWidget.getDeviceState().removeDeviceId();
                             }
                             if (obj.errorType === 'voipPageAlreadyOpened') {
                                 alert('Voip page is already opened. You will be redirected to Home page!');
                                 window.location.href = '/';
                             } else {
-                                if (!PhoneWidget.isInitiated()) {
-                                    createNotify('Phone Widget', obj.msg, 'error');
-                                }
+                                createNotify('Phone Widget', obj.msg, 'error');
                                 PhoneWidget.addLog(obj.msg);
                             }
                         } else {
-                            if (!PhoneWidget.isInitiated()) {
-                                PhoneWidget.init(window.phoneWidget.initParams);
-                            }
                            window.phoneWidget.device.initialize.Init(obj.deviceId, window.phoneDeviceRemoteLogsEnabled);
                            window.sendCommandUpdatePhoneWidgetCurrentCalls('', userId, window.generalLinePriorityIsEnabled);
                         }
@@ -594,8 +590,8 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
             window.socketConnectionId = null;
 
             if (window.isTwilioDevicePage && PhoneWidget.isInitiated()) {
-                PhoneWidget.getDeviceState().reset('WS connection closed');
                 PhoneWidget.getDeviceState().phoneDisconnected('WS connection closed');
+                PhoneWidget.getDeviceState().resetDevices('WS connection closed');
             }
 
             // setTimeout(function() {
@@ -612,8 +608,8 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
             window.socketConnectionId = null;
 
             if (window.isTwilioDevicePage && PhoneWidget.isInitiated()) {
-                PhoneWidget.getDeviceState().reset('WS connection error');
                 PhoneWidget.getDeviceState().phoneDisconnected('WS connection error');
+                PhoneWidget.getDeviceState().resetDevices('WS connection error');
             }
         };
     } catch (error) {
