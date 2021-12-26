@@ -4,10 +4,61 @@
         disconnected: 'Disconnected'
     }
 
+    function Phone(storage) {
+        this.status = PhoneStatus.disconnected;
+        this.storage = storage;
+
+        this.isReady = function () {
+            return this.status === PhoneStatus.connected;
+        };
+
+        this.connected = function () {
+            this.status = PhoneStatus.connected;
+            this.storage.phoneConnected(this.status);
+        };
+
+        this.disconnected = function () {
+            this.status = PhoneStatus.disconnected;
+            this.storage.phoneDisconnected(this.status);
+        };
+
+        this.reset = function () {
+            this.disconnected();
+        };
+    }
+
     const TwilioStatus = {
         unknown: 'Unknown',
         registered: 'Registered',
         error: 'Error'
+    }
+
+    function Twilio(storage) {
+        this.status = TwilioStatus.unknown;
+        this.storage = storage;
+
+        this.isReady = function () {
+            return this.status === TwilioStatus.registered;
+        };
+
+        this.unknown = function () {
+            this.status = TwilioStatus.unknown;
+            this.storage.twilioUnknown(this.status);
+        };
+
+        this.registered = function () {
+            this.status = TwilioStatus.registered;
+            this.storage.twilioRegistered(this.status);
+        };
+
+        this.error = function () {
+            this.status = TwilioStatus.error;
+            this.storage.twilioError(this.status);
+        };
+
+        this.reset = function () {
+            this.unknown();
+        };
     }
 
     const SpeakerStatus = {
@@ -16,10 +67,66 @@
         error: 'Error'
     }
 
+    function Speaker(storage) {
+        this.status = SpeakerStatus.unknown;
+        this.storage = storage;
+
+        this.isReady = function () {
+            return this.status === SpeakerStatus.selected;
+        };
+
+        this.unknown = function () {
+            this.status = SpeakerStatus.unknown;
+            this.storage.speakerUnknown(this.status);
+        };
+
+        this.selected = function () {
+            this.status = SpeakerStatus.selected;
+            this.storage.speakerSelected(this.status);
+        };
+
+        this.error = function () {
+            this.status = SpeakerStatus.error;
+            this.storage.speakerError(this.status);
+        };
+
+        this.reset = function () {
+            this.unknown();
+        };
+    }
+
     const MicrophoneStatus = {
         unknown: 'Unknown',
         selected: 'Selected',
         error: 'Error'
+    }
+
+    function Microphone(storage) {
+        this.status = MicrophoneStatus.unknown;
+        this.storage = storage;
+
+        this.isReady = function () {
+            return this.status === MicrophoneStatus.selected;
+        };
+
+        this.unknown = function () {
+            this.status = MicrophoneStatus.unknown;
+            this.storage.microphoneUnknown(this.status);
+        };
+
+        this.selected = function () {
+            this.status = MicrophoneStatus.selected;
+            this.storage.microphoneSelected(this.status);
+        };
+
+        this.error = function () {
+            this.status = MicrophoneStatus.error;
+            this.storage.microphoneError(this.status);
+        };
+
+        this.reset = function () {
+            this.unknown();
+        };
     }
 
     function getStorageNamePhoneStatus(userId) {
@@ -172,7 +279,7 @@
 
         this.twilioUnknown = function () {
             this.isTwilioRegistered = false;
-            this.twilio.html('Twilio: <span style="color: #eee">Unknown');
+            this.twilio.html('Twilio: <span style="color: #000">Unknown');
             this.microphoneStatusHide();
             this.speakerStatusHide();
         };
@@ -201,7 +308,7 @@
         };
 
         this.speakerUnknown = function () {
-            this.speaker.html('Speaker: <span style="color: #eee">Unknown');
+            this.speaker.html('Speaker: <span style="color: #000">Unknown');
         };
 
         this.speakerSelected = function () {
@@ -221,7 +328,7 @@
         };
 
         this.microphoneUnknown = function () {
-            this.microphone.html('Microphone: <span style="color: #eee">Unknown');
+            this.microphone.html('Microphone: <span style="color: #000">Unknown');
         };
 
         this.microphoneSelected = function () {
@@ -440,120 +547,12 @@
         this.microphoneError = function (status) {}
     }
 
-    function Phone(storage) {
-        this.status = PhoneStatus.disconnected;
-        this.storage = storage;
-
-        this.isReady = function () {
-            return this.status === PhoneStatus.connected;
-        };
-
-        this.connected = function () {
-            this.status = PhoneStatus.connected;
-            this.storage.phoneConnected(this.status);
-        };
-
-        this.disconnected = function () {
-            this.status = PhoneStatus.disconnected;
-            this.storage.phoneDisconnected(this.status);
-        };
-
-        this.reset = function () {
-            this.disconnected();
-        };
-    }
-
-    function Twilio(storage) {
-        this.status = TwilioStatus.unknown;
-        this.storage = storage;
-
-        this.isReady = function () {
-            return this.status === TwilioStatus.registered;
-        };
-
-        this.unknown = function () {
-            this.status = TwilioStatus.unknown;
-            this.storage.twilioUnknown(this.status);
-        };
-
-        this.registered = function () {
-            this.status = TwilioStatus.registered;
-            this.storage.twilioRegistered(this.status);
-        };
-
-        this.error = function () {
-            this.status = TwilioStatus.error;
-            this.storage.twilioError(this.status);
-        };
-
-        this.reset = function () {
-            this.unknown();
-        };
-    }
-
-    function Speaker(storage) {
-        this.status = SpeakerStatus.unknown;
-        this.storage = storage;
-
-        this.isReady = function () {
-            return this.status === SpeakerStatus.selected;
-        };
-
-        this.unknown = function () {
-            this.status = SpeakerStatus.unknown;
-            this.storage.speakerUnknown(this.status);
-        };
-
-        this.selected = function () {
-            this.status = SpeakerStatus.selected;
-            this.storage.speakerSelected(this.status);
-        };
-
-        this.error = function () {
-            this.status = SpeakerStatus.error;
-            this.storage.speakerError(this.status);
-        };
-
-        this.reset = function () {
-            this.unknown();
-        };
-    }
-
-    function Microphone(storage) {
-        this.status = MicrophoneStatus.unknown;
-        this.storage = storage;
-
-        this.isReady = function () {
-            return this.status === MicrophoneStatus.selected;
-        };
-
-        this.unknown = function () {
-            this.status = MicrophoneStatus.unknown;
-            this.storage.microphoneUnknown(this.status);
-        };
-
-        this.selected = function () {
-            this.status = MicrophoneStatus.selected;
-            this.storage.microphoneSelected(this.status);
-        };
-
-        this.error = function () {
-            this.status = MicrophoneStatus.error;
-            this.storage.microphoneError(this.status);
-        };
-
-        this.reset = function () {
-            this.unknown();
-        };
-    }
-
     function State(userId, storage, phoneDeviceIdStorageKey, view, warningIndicator, phoneStatus, twilioStatus, speakerStatus, microphoneStatus, logger) {
         this.userId = userId;
         this.phone = new Phone(storage);
         this.twilio = new Twilio(storage);
         this.speaker = new Speaker(storage);
         this.microphone = new Microphone(storage);
-        this.storage = storage;
         this.logger = logger;
         this.view = view;
         this.warningIndicator = warningIndicator;
@@ -585,20 +584,20 @@
                 this.ready();
             }
             widgetIcon.connect();
-        }
+        };
 
         this.phoneDisconnected = function (reason) {
             this.phone.disconnected();
             this.view.phoneDisconnected();
             this.logger.error('Phone Device disconnected. (' + reason + ')');
             widgetIcon.disconnect();
-        }
+        };
 
         this.twilioUnknown = function () {
             this.twilio.unknown();
             this.view.twilioUnknown();
             this.logger.error('Twilio Device unknown.');
-        }
+        };
 
         this.twilioRegistered = function () {
             this.twilio.registered();
@@ -607,19 +606,19 @@
             if (this.isReady()) {
                 this.ready();
             }
-        }
+        };
 
         this.twilioError = function () {
             this.twilio.error();
             this.view.twilioError();
             this.logger.error('Twilio Device error.');
-        }
+        };
 
         this.speakerUnknown = function () {
             this.speaker.unknown();
             this.view.speakerUnknown();
             this.logger.error('Speaker Unknown.');
-        }
+        };
 
         this.speakerSelected = function () {
             this.speaker.selected();
@@ -628,19 +627,19 @@
             if (this.isReady()) {
                 this.ready();
             }
-        }
+        };
 
         this.speakerError = function () {
             this.speaker.error();
             this.view.speakerError();
             this.logger.error('Speaker Error.');
-        }
+        };
 
         this.microphoneUnknown = function () {
             this.microphone.unknown();
             this.view.microphoneUnknown();
             this.logger.error('Microphone Unknown.');
-        }
+        };
 
         this.microphoneSelected = function () {
             this.microphone.selected();
@@ -649,13 +648,13 @@
             if (this.isReady()) {
                 this.ready();
             }
-        }
+        };
 
         this.microphoneError = function () {
             this.microphone.error();
             this.view.microphoneError();
             this.logger.error('Microphone Error.');
-        }
+        };
 
         this.setDeviceId = function (deviceId) {
             localStorage.setItem(this.phoneDeviceIdStorageKey, deviceId);
