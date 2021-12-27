@@ -275,7 +275,6 @@ class UserStatsSearch extends Model
         }
         if (
             $this->isFieldShow(UserModelSettingDictionary::FIELD_SALES_CONVERSION) ||
-            $this->isFieldShow(UserModelSettingDictionary::FIELD_SALES_CONVERSION_CALL_PRIORITY) ||
             $this->isFieldShow(UserModelSettingDictionary::FIELD_LEADS_QUALIFIED_COUNT) ||
             $this->isFieldShow(UserModelSettingDictionary::FIELD_SPLIT_SHARE)
         ) {
