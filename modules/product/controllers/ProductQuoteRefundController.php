@@ -158,7 +158,7 @@ class ProductQuoteRefundController extends \frontend\controllers\FController
                     ->withEmailList()
                     ->one();
 
-                $emailFrom = ($userProjectParams) ? ($userProjectParams)->getEmail() : null;
+                $emailFrom = ($userProjectParams) ? ($userProjectParams)->getEmail(true) : null;
                 $emailTemplateType = null;
                 $emailFromName = Auth::user()->nickname;
 

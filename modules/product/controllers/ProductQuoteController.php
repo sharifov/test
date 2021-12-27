@@ -265,7 +265,7 @@ class ProductQuoteController extends FController
                     ->withEmailList()
                     ->one();
 
-                $emailFrom = ($userProjectParams) ? ($userProjectParams)->getEmail() : null;
+                $emailFrom = ($userProjectParams) ? ($userProjectParams)->getEmail(true) : null;
                 $emailTemplateType = null;
                 $emailFromName = Auth::user()->nickname;
 
