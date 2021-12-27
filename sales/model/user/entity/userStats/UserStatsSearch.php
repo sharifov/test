@@ -17,6 +17,8 @@ use sales\model\clientChat\entity\ClientChat;
 use sales\model\leadUserConversion\entity\LeadUserConversion;
 use sales\model\user\entity\ShiftTime;
 use sales\model\user\entity\userStatus\UserStatus;
+use sales\model\userData\entity\UserData;
+use sales\model\userData\entity\UserDataKey;
 use sales\model\userModelSetting\service\UserModelSettingDictionary;
 use sales\traits\UserModelSettingTrait;
 use yii\base\Model;
@@ -273,6 +275,7 @@ class UserStatsSearch extends Model
         }
         if (
             $this->isFieldShow(UserModelSettingDictionary::FIELD_SALES_CONVERSION) ||
+            $this->isFieldShow(UserModelSettingDictionary::FIELD_SALES_CONVERSION_CALL_PRIORITY) ||
             $this->isFieldShow(UserModelSettingDictionary::FIELD_LEADS_QUALIFIED_COUNT) ||
             $this->isFieldShow(UserModelSettingDictionary::FIELD_SPLIT_SHARE)
         ) {
@@ -283,6 +286,16 @@ class UserStatsSearch extends Model
                     ->leftJoin('profit_split', 'ps_lead_id = id and ps_user_id = ' . Employee::tableName() . '.id')
                     ->where(['status' => Lead::STATUS_SOLD])
                     ->andWhere(['BETWEEN', 'DATE(l_status_dt)', $from, $to])
+            ]);
+
+            $query->addSelect([
+                UserModelSettingDictionary::FIELD_LEADS_QUALIFIED_COUNT => (new Query())
+                    ->select(['COUNT(luc_lead_id)'])
+                    ->from(LeadUserConversion::tableName())
+                    ->where('luc_user_id = ' . Employee::tableName() . '.id')
+                    ->andWhere('luc_created_dt BETWEEN :startDt AND :endDt', [
+                        ':startDt' => $from, ':endDt' => $to,
+                    ])
             ]);
 
             $query->addSelect([
@@ -320,6 +333,41 @@ class UserStatsSearch extends Model
                     ->leftJoin('profit_split', 'ps_lead_id = id and ps_user_id = ' . Employee::tableName() . '.id')
                     ->where(['status' => Lead::STATUS_SOLD])
                     ->andWhere(['BETWEEN', 'DATE(l_status_dt)', $from, $to])
+            ]);
+        }
+        if ($this->isFieldShow(UserModelSettingDictionary::FIELD_GROSS_PROFIT_CALL_PRIORITY)) {
+            $query->addSelect([
+                UserModelSettingDictionary::FIELD_GROSS_PROFIT_CALL_PRIORITY => (new Query())
+                    ->select([
+                        'ud_value'
+                    ])
+                    ->from(UserData::tableName())
+                    ->where(['ud_key' => UserDataKey::GROSS_PROFIT])
+                    ->andWhere('ud_user_id = ' . Employee::tableName() . '.id')
+                    ->andWhere(['BETWEEN', 'DATE(ud_updated_dt)', $from, $to])
+            ]);
+        }
+        if ($this->isFieldShow(UserModelSettingDictionary::FIELD_SALES_CONVERSION_CALL_PRIORITY)) {
+            $query->addSelect([
+                UserModelSettingDictionary::FIELD_SALES_CONVERSION_CALL_PRIORITY => (new Query())
+                    ->select([
+                        'ud_value'
+                    ])
+                    ->from(UserData::tableName())
+                    ->where(['ud_key' => UserDataKey::CONVERSION_PERCENT])
+                    ->andWhere('ud_user_id = ' . Employee::tableName() . '.id')
+                    ->andWhere(['BETWEEN', 'DATE(ud_updated_dt)', $from, $to])
+            ]);
+        }
+        if ($this->isFieldShow(UserModelSettingDictionary::FIELD_CALL_PRIORITY_CURRENT)) {
+            $query->addSelect([
+                UserModelSettingDictionary::FIELD_CALL_PRIORITY_CURRENT => (new Query())
+                    ->select([
+                        'up_call_user_level'
+                    ])
+                    ->from(UserParams::tableName())
+                    ->where('up_user_id = ' . Employee::tableName() . '.id')
+                    ->andWhere(['BETWEEN', 'DATE(up_updated_dt)', $from, $to])
             ]);
         }
         if ($this->isFieldShow(UserModelSettingDictionary::FIELD_LEADS_QUALIFIED_TAKEN_COUNT)) {
