@@ -29,8 +29,11 @@ class UserModelSettingDictionary
     public const FIELD_SHIFT_HOURS = 'shift_hours';
     public const FIELD_SHIFT_TIME = 'shift_time';
     public const FIELD_SALES_CONVERSION = 'sales_conversion';
+    public const FIELD_SALES_CONVERSION_CALL_PRIORITY = 'sales_conversion_call_priority';
     public const FIELD_SUM_GROSS_PROFIT = 'sum_gross_profit';
+    public const FIELD_GROSS_PROFIT_CALL_PRIORITY = 'gross_profit_call_priority';
     public const FIELD_SPLIT_SHARE = 'split_share';
+    public const FIELD_CALL_PRIORITY_CURRENT = 'call_priority_current';
     public const FIELD_LEADS_QUALIFIED_COUNT = 'leads_qualified_count';
     public const FIELD_LEADS_QUALIFIED_TAKEN_COUNT = 'leads_qualified_taken_count';
     public const FIELD_LEADS_SOLD_COUNT = 'leads_sold_count';
@@ -53,10 +56,13 @@ class UserModelSettingDictionary
         self::FIELD_SHIFT_TIME => 'Shift Time',
         self::FIELD_SALES_CONVERSION => 'Sales Conversion (Current Month)',
         self::FIELD_SUM_GROSS_PROFIT => 'Gross Profit',
+        self::FIELD_GROSS_PROFIT_CALL_PRIORITY => 'Gross Profit (Call Priority)',
+        self::FIELD_SALES_CONVERSION_CALL_PRIORITY => 'Sales Conversion (Call Priority)',
         self::FIELD_LEADS_SOLD_COUNT => 'Sold Leads (Current Month)',
         self::FIELD_LEADS_QUALIFIED_COUNT => 'Qualified Leads (Current Month)',
         self::FIELD_LEADS_QUALIFIED_TAKEN_COUNT => 'Qualified Leads Taken',
         self::FIELD_SPLIT_SHARE => 'Split Share (Current Month)',
+        self::FIELD_CALL_PRIORITY_CURRENT => 'Call Priority (Current)',
         self::FIELD_CLIENT_PHONE => 'Phone Status',
         self::FIELD_NICKNAME => 'Nickname',
         self::FIELD_LEAD_PROCESSING => 'Lead Processing',

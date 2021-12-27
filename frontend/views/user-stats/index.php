@@ -152,10 +152,37 @@ $this->params['breadcrumbs'][] = $this->title;
     }
     ?>
     <?php
+    if ($searchModel->isFieldShow(UserModelSettingDictionary::FIELD_SALES_CONVERSION_CALL_PRIORITY)) {
+        $rowField = UserModelSettingHelper::getGridDefaultColumn(UserModelSettingDictionary::FIELD_SALES_CONVERSION_CALL_PRIORITY);
+        $rowField['value'] = static function ($model) {
+            return Html::encode($model[UserModelSettingDictionary::FIELD_SALES_CONVERSION_CALL_PRIORITY]);
+        };
+        $columns[] = $rowField;
+    }
+    ?>
+    <?php
+    if ($searchModel->isFieldShow(UserModelSettingDictionary::FIELD_CALL_PRIORITY_CURRENT)) {
+        $rowField = UserModelSettingHelper::getGridDefaultColumn(UserModelSettingDictionary::FIELD_CALL_PRIORITY_CURRENT);
+        $rowField['value'] = static function ($model) {
+            return Html::encode($model[UserModelSettingDictionary::FIELD_CALL_PRIORITY_CURRENT]);
+        };
+        $columns[] = $rowField;
+    }
+    ?>
+    <?php
     if ($searchModel->isFieldShow(UserModelSettingDictionary::FIELD_SUM_GROSS_PROFIT)) {
         $rowField = UserModelSettingHelper::getGridDefaultColumn(UserModelSettingDictionary::FIELD_SUM_GROSS_PROFIT);
         $rowField['value'] = static function ($model) {
             return Html::encode($model[UserModelSettingDictionary::FIELD_SUM_GROSS_PROFIT]);
+        };
+        $columns[] = $rowField;
+    }
+    ?>
+    <?php
+    if ($searchModel->isFieldShow(UserModelSettingDictionary::FIELD_GROSS_PROFIT_CALL_PRIORITY)) {
+        $rowField = UserModelSettingHelper::getGridDefaultColumn(UserModelSettingDictionary::FIELD_GROSS_PROFIT_CALL_PRIORITY);
+        $rowField['value'] = static function ($model) {
+            return Html::encode($model[UserModelSettingDictionary::FIELD_GROSS_PROFIT_CALL_PRIORITY]);
         };
         $columns[] = $rowField;
     }

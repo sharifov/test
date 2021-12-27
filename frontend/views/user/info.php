@@ -231,6 +231,10 @@ $this->params['breadcrumbs'][] = $this->title;
                             </li>
                             <!-- <li role="presentation" class=""><a href="#tab_content2" role="tab" id="profile-tab" data-toggle="tab" aria-expanded="false" class="" aria-selected="false">Projects Worked on</a>-->
                             <!-- </li>-->
+                            <li role="presentation" class=""><a href="#tab_content2" id="home-tab" role="tab"
+                                                                data-toggle="tab" aria-expanded="true" class=""
+                                                                aria-selected="true">User data</a>
+                            </li>
                             <li role="presentation" class=""><a href="#tab_content1" id="home-tab" role="tab"
                                                                 data-toggle="tab" aria-expanded="true" class=""
                                                                 aria-selected="true">Recent Activity</a>
@@ -285,6 +289,12 @@ $this->params['breadcrumbs'][] = $this->title;
                                 <?= $this->render('partial/_info_activity', [
                                     'model' => $model,
                                     'userActivity' => $userActivity,
+                                ]) ?>
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade" id="tab_content2" aria-labelledby="home-tab">
+                                <?= $this->render('partial/_info_user_data', [
+                                    'model' => $model,
+                                    'userDataProvider' => $userDataProvider,
                                 ]) ?>
                             </div>
                             <!--                            <div role="tabpanel" class="tab-pane fade" id="tab_content2" aria-labelledby="profile-tab">-->
