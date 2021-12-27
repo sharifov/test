@@ -158,9 +158,9 @@ class ProductQuoteRefundController extends \frontend\controllers\FController
                 if ($case->cs_project_id) {
                     $project = $case->project;
                     if ($project && $emailConfig = $project->getVoluntaryRefundEmailConfig()) {
-                        $emailFrom = $emailConfig['emailFrom'] ?? '';
+                        $emailFrom = !empty($emailConfig['emailFrom'] ?? null) ? $emailConfig['emailFrom'] : $emailFrom;
                         $emailTemplateType = $emailConfig['templateTypeKey'] ?? '';
-                        $emailFromName = $emailConfig['emailFromName'] ?? $emailFromName;
+                        $emailFromName = !empty($emailConfig['emailFromName'] ?? null) ? $emailConfig['emailFromName'] : $emailFromName;
                     }
                 }
 
