@@ -967,11 +967,6 @@ class QuoteController extends ApiBaseController
      * @apiParam {object}           Quote                       Quote data array
      * @apiParam {string}           [Quote.uid]                 uid
      * @apiParam {bool}             [Quote.needSync]            needSync
-     * @apiParam {string}           [Quote.record_locator]      record_locator
-     * @apiParam {string}           [Quote.pcc]                 pcc
-     * @apiParam {string}           [Quote.cabin]               cabin
-     * @apiParam {string{1}}        Quote.gds                   gds
-     * @apiParam {string}           [Quote.trip_type]           trip_type
      * @apiParam {string}           [Quote.main_airline_code]   main_airline_code
      * @apiParam {string}           [Quote.reservation_dump]    reservation_dump
      * @apiParam {int}              [Quote.status]              status
@@ -982,7 +977,23 @@ class QuoteController extends ApiBaseController
      * @apiParam {int}              [Quote.type_id]             type_id
      * @apiParam {object}           [Quote.prod_types[]]        Quote labels
      * @apiParam {object}           [Quote.baggage[]]           Quote baggage
-     * @apiParam {object}           QuotePrice[]                QuotePrice data array
+     * @apiParam {object}           [Quote.baggage.segment[]]      Quote baggage segment
+     * @apiParam {object}           [Quote.baggage.free_baggage[]] Quote baggage segment
+     * @apiParam {int}              [Quote.baggage.free_baggage.piece] Quote free baggage piece number
+     * @apiParam {string}           [Quote.baggage.free_baggage.weight] Quote free baggage weight
+     * @apiParam {string}           [Quote.baggage.free_baggage.height] Quote free baggage height
+     * @apiParam {object}           [Quote.baggage.paid_baggage[]] Quote paid baggage
+     * @apiParam {int}               [Quote.baggage.paid_baggage.piece] Quote paid baggage piece number
+     * @apiParam {string}           [Quote.baggage.paid_baggage.weight] Quote paid baggage weight
+     * @apiParam {string}           [Quote.baggage.paid_baggage.height] Quote paid baggage height
+     * @apiParam {string}           [Quote.baggage.paid_baggage.price] Quote paid baggage price
+     * @apiParam {object}           [Lead[]]                    Lead data array
+     * @apiParam {string}           [Lead.uid]                  uid
+     * @apiParam {int}              [Lead.market_info_id]       market_info_id
+     * @apiParam {int}              [Lead.bo_flight_id]         bo_flight_id
+     * @apiParam {float}            [Lead.final_profit]         final_profit
+     * @apiParam {array}            [Lead.additional_information[]]  additional information array
+     * @apiParam {object}           [QuotePrice[]]                QuotePrice data array
      * @apiParam {string}           [QuotePrice.uid]            uid
      * @apiParam {string}           [QuotePrice.passenger_type] passenger_type
      * @apiParam {float}            [QuotePrice.selling]        selling
@@ -996,9 +1007,6 @@ class QuoteController extends ApiBaseController
      * @apiParamExample {json} Request-Example:
      * {
      *      "apiKey": "d190c378e131ccfd8a889c8ee8994cb55f22fbeeb93f9b99007e8e7ecc24d0dd",
-     *      "Lead": {
-     *          "uid": "5de486f15f095",
-     *      },
      *      "Quote": {
      *          "uid": "5f207ec201b99",
      *          "record_locator": null,
@@ -1017,6 +1025,12 @@ class QuoteController extends ApiBaseController
      *          "baggage" : [],
      *          "prod_types" : ["SEP", "TOUR"]
      *      },
+     *      "Lead": {
+     *          "uid": "5de486f15f095",
+     *          "market_info_id": 52,
+     *          "bo_flight_id": 0,
+     *          "final_profit": 0
+     *      },
      *      "QuotePrice": [
      *          {
      *              "uid": "expert.5f207ec222c86",
@@ -1034,6 +1048,7 @@ class QuoteController extends ApiBaseController
      *
      * @apiSuccess {string} status    Status
      *
+     * @apiSuccess {array} errors     Errors
      * @apiSuccess {string} action    Action
      * @apiSuccess {integer} response_id    Response Id
      * @apiSuccess {DateTime} request_dt    Request Date & Time
@@ -1043,6 +1058,7 @@ class QuoteController extends ApiBaseController
      * HTTP/1.1 200 OK
      *  {
      *      "status": "Success",
+     *      "errors":[],
      *      "action": "v1/quote/update",
      *      "response_id": 11926893,
      *      "request_dt": "2020-09-22 05:05:54",
