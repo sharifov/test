@@ -43,22 +43,29 @@ class AvailablePhones
 
     public function formatPhonesForSelectList(): array
     {
-        $result = [
-            'selected' => [],
-            'options' => []
-        ];
-
         $phones = $this->getPhones();
 
         if (!$phones) {
-            return $result;
+            return [
+                'selected' => [
+                    'value' => '',
+                    'project' => 'no number',
+                    'projectId' => '',
+                ],
+                'options' => [],
+            ];
         }
+
+        $result = [
+            'selected' => [],
+            'options' => [],
+        ];
 
         foreach ($phones as $phone) {
             $result['options'][] = [
                 'value' => $phone->number,
                 'project' => $phone->title,
-                'projectId' => $phone->projectId
+                'projectId' => $phone->projectId,
             ];
         }
 
