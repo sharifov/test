@@ -516,3 +516,13 @@ div#call-controls input {
   word-break: break-all;
   text-align: center;
 }
+
+.phone-widget-icon .widget-icon-inner .phone-widget-icon__warning.phone-widget-icon__warning-show
+{
+  display: block;
+}
+
+.phone-widget-icon .widget-icon-inner[data-wi-type=disabled] .phone-widget-icon__warning
+{
+  display: none;
+}

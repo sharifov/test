@@ -171,14 +171,14 @@
 
         this.refresh = function () {
             if (this.warnings.length === 0) {
-                $(this.icon).css('display', 'none');
+                $(this.icon).removeClass('phone-widget-icon__warning-show');
                 $(this.heading).css('display', 'none');
                 $(this.heading).attr('data-content', '');
                 $(this.heading).popover('hide');
                 return;
             }
 
-            $(this.icon).css('display', 'block');
+            $(this.icon).addClass('phone-widget-icon__warning-show');
             $(this.heading).css('display', 'block');
             $(this.heading).popover('dispose');
             let warnings = '';

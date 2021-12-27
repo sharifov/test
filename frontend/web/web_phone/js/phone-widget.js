@@ -989,7 +989,7 @@ function handleWidgetIcon() {
             '</div>'+
             '<i class="fa fa-phone icon-phone"></i>'+
             '<div class="standby-phone__disabled-overlay">'+
-                '<i class="fa fa-phone-slash standby-phone__disabled-icn"></i>'+
+                '<i class="fas fa-phone-slash standby-phone__disabled-icn"></i>'+
                 '<span class="standby-phone__disabled-text"></span>'+
             '</div>'+
             '</div>'+
