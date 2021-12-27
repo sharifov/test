@@ -261,16 +261,20 @@
                 PhoneWidget.refreshCallStatus(callObj);
             }
         } else {
-            device.audio.setInputDevice(microphoneDevices.value)
-                .then(() => {
-                    call.accept();
-                })
-                .catch(error => {
-                    let err = createError(error, 'Microphone error');
-                    twilioLogger.error('%j', err);
-                    PhoneWidget.addLog(error);
-                    createNotify('Accept incoming connection', error.message, 'error')
-                });
+            if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {
+                call.accept();
+            } else {
+                device.audio.setInputDevice(microphoneDevices.value)
+                    .then(() => {
+                        call.accept();
+                    })
+                    .catch(error => {
+                        let err = createError(error, 'Microphone error');
+                        twilioLogger.error('%j', err);
+                        PhoneWidget.addLog(error);
+                        createNotify('Accept incoming connection', error.message, 'error')
+                    });
+            }
         }
     };
 
