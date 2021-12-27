@@ -259,7 +259,13 @@ class ProductQuoteController extends FController
                 if (!empty($emailData['original_quote']['data'])) {
                     ArrayHelper::remove($emailData['original_quote']['data'], 'fq_origin_search_data');
                 }
-                $emailFrom = Auth::user()->email;
+
+                $userProjectParams = UserProjectParams::find()
+                    ->andWhere(['upp_user_id' => Auth::id(), 'upp_project_id' => $case->cs_project_id])
+                    ->withEmailList()
+                    ->one();
+
+                $emailFrom = ($userProjectParams) ? ($userProjectParams)->getEmail() : null;
                 $emailTemplateType = null;
                 $emailFromName = Auth::user()->nickname;
 
