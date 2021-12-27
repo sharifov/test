@@ -703,7 +703,9 @@ class CommunicationService extends Component implements CommunicationServiceInte
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error']), 'Component:CommunicationService::updateCallTunnel');
+            if (strpos($response->content, 'Unable to update record: Call is not in-progress. Cannot redirect') === false) {
+                \Yii::error(VarDumper::dumpAsString($out['error']), 'Component:CommunicationService::updateCallTunnel');
+            }
         }
 
         return $out;
