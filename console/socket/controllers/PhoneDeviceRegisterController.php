@@ -58,7 +58,7 @@ class PhoneDeviceRegisterController
                 'cmd' => 'PhoneDeviceRegister',
                 'error' => true,
                 'deviceIsInvalid' => true,
-                'msg' => 'Device created error. Please refresh page!',
+                'msg' => 'Device created error.',
             ];
         }
 
@@ -77,7 +77,7 @@ class PhoneDeviceRegisterController
                 'cmd' => 'PhoneDeviceRegister',
                 'error' => true,
                 'deviceIsInvalid' => true,
-                'msg' => 'Device not found. Please refresh page!',
+                'msg' => 'Device not found.',
             ];
         }
         if (!$device->isEqualUser((int)$userConnection['uc_user_id'])) {
@@ -85,7 +85,7 @@ class PhoneDeviceRegisterController
                 'cmd' => 'PhoneDeviceRegister',
                 'error' => true,
                 'deviceIsInvalid' => true,
-                'msg' => 'User is not owner of device. Please refresh page!',
+                'msg' => 'User is not owner of device.',
             ];
         }
 

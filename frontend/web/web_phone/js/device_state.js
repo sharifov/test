@@ -129,22 +129,6 @@
         };
     }
 
-    function getStorageNamePhoneStatus(userId) {
-        return 'PhoneDeviceStatus' + userId;
-    }
-
-    function getStorageNameTwilioStatus(userId) {
-        return 'PhoneDeviceTwilioStatus' + userId;
-    }
-
-    function getStorageNameSpeakerStatus(userId) {
-        return 'PhoneDeviceSpeakerStatus' + userId;
-    }
-
-    function getStorageNameMicrophoneStatus(userId) {
-        return 'PhoneDeviceMicrophoneStatus' + userId;
-    }
-
     const WarningMessages = {
         phoneDisconnected: 'Phone disconnected',
         twilioError: 'Twilio error',
@@ -480,55 +464,55 @@
         }, 200);
 
         this.phoneConnected = function (status) {
-            localStorage.setItem(getStorageNamePhoneStatus(userId), status);
+            localStorage.setItem(window.phoneWidget.device.state.localNames.phone(userId), status);
         };
 
         this.phoneDisconnected = function (status) {
-            localStorage.setItem(getStorageNamePhoneStatus(userId), status);
+            localStorage.setItem(window.phoneWidget.device.state.localNames.phone(userId), status);
         };
 
         this.twilioUnknown = function (status) {
-            localStorage.setItem(getStorageNameTwilioStatus(userId), status);
+            localStorage.setItem(window.phoneWidget.device.state.localNames.twilio(userId), status);
             queue.enqueue('TwilioNotReady');
         };
 
         this.twilioRegistered = function (status) {
-            localStorage.setItem(getStorageNameTwilioStatus(userId), status);
+            localStorage.setItem(window.phoneWidget.device.state.localNames.twilio(userId), status);
             queue.enqueue('TwilioReady');
         };
 
         this.twilioError = function (status) {
-            localStorage.setItem(getStorageNameTwilioStatus(userId), status);
+            localStorage.setItem(window.phoneWidget.device.state.localNames.twilio(userId), status);
             queue.enqueue('TwilioNotReady');
         };
 
         this.speakerUnknown = function (status) {
-            localStorage.setItem(getStorageNameSpeakerStatus(userId), status);
+            localStorage.setItem(window.phoneWidget.device.state.localNames.speaker(userId), status);
             queue.enqueue('SpeakerNotReady');
         };
 
         this.speakerSelected = function (status) {
-            localStorage.setItem(getStorageNameSpeakerStatus(userId), status);
+            localStorage.setItem(window.phoneWidget.device.state.localNames.speaker(userId), status);
             queue.enqueue('SpeakerReady');
         };
 
         this.speakerError = function (status) {
-            localStorage.setItem(getStorageNameSpeakerStatus(userId), status);
+            localStorage.setItem(window.phoneWidget.device.state.localNames.speaker(userId), status);
             queue.enqueue('SpeakerNotReady');
         };
 
         this.microphoneUnknown = function (status) {
-            localStorage.setItem(getStorageNameMicrophoneStatus(userId), status);
+            localStorage.setItem(window.phoneWidget.device.state.localNames.microphone(userId), status);
             queue.enqueue('MicrophoneNotReady');
         };
 
         this.microphoneSelected = function (status) {
-            localStorage.setItem(getStorageNameMicrophoneStatus(userId), status);
+            localStorage.setItem(window.phoneWidget.device.state.localNames.microphone(userId), status);
             queue.enqueue('MicrophoneReady');
         };
 
         this.microphoneError = function (status) {
-            localStorage.setItem(getStorageNameMicrophoneStatus(userId), status);
+            localStorage.setItem(window.phoneWidget.device.state.localNames.microphone(userId), status);
             queue.enqueue('MicrophoneNotReady');
         };
     }
@@ -729,7 +713,7 @@
         });
 
         window.addEventListener('storage', function (event) {
-            if (event.key === getStorageNamePhoneStatus(userId)) {
+            if (event.key === window.phoneWidget.device.state.localNames.phone(userId)) {
                 if (event.newValue === PhoneStatus.connected) {
                     PhoneWidget.getDeviceState().phoneConnected();
                     return;
@@ -737,7 +721,7 @@
                 PhoneWidget.getDeviceState().phoneDisconnected('');
                 return;
             }
-            if (event.key === getStorageNameTwilioStatus(userId)) {
+            if (event.key === window.phoneWidget.device.state.localNames.twilio(userId)) {
                 if (event.newValue === TwilioStatus.registered) {
                     PhoneWidget.getDeviceState().twilioRegistered();
                     return;
@@ -749,7 +733,7 @@
                 PhoneWidget.getDeviceState().twilioUnknown();
                 return;
             }
-            if (event.key === getStorageNameSpeakerStatus(userId)) {
+            if (event.key === window.phoneWidget.device.state.localNames.speaker(userId)) {
                 if (event.newValue === SpeakerStatus.selected) {
                     PhoneWidget.getDeviceState().speakerSelected();
                     return;
@@ -761,7 +745,7 @@
                 PhoneWidget.getDeviceState().speakerUnknown();
                 return;
             }
-            if (event.key === getStorageNameMicrophoneStatus(userId)) {
+            if (event.key === window.phoneWidget.device.state.localNames.microphone(userId)) {
                 if (event.newValue === MicrophoneStatus.selected) {
                     PhoneWidget.getDeviceState().microphoneSelected();
                     return;
@@ -781,15 +765,15 @@
             phoneDeviceIdStorageKey,
             new View(false, warningIndicator),
             warningIndicator,
-            localStorage.getItem(getStorageNamePhoneStatus(userId)),
-            localStorage.getItem(getStorageNameTwilioStatus(userId)),
-            localStorage.getItem(getStorageNameSpeakerStatus(userId)),
-            localStorage.getItem(getStorageNameMicrophoneStatus(userId)),
+            localStorage.getItem(window.phoneWidget.device.state.localNames.phone(userId)),
+            localStorage.getItem(window.phoneWidget.device.state.localNames.twilio(userId)),
+            localStorage.getItem(window.phoneWidget.device.state.localNames.speaker(userId)),
+            localStorage.getItem(window.phoneWidget.device.state.localNames.microphone(userId)),
             new window.phoneWidget.logger.DummyLogger()
         );
     }
 
-    window.phoneWidget.device.state = {
+    window.phoneWidget.device.state.initialize = {
         Init: Init
     }
 })();

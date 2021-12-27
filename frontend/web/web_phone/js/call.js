@@ -93,7 +93,7 @@ var PhoneWidget = function () {
         isDevicePage = options.isDevicePage;
 
         audio.incoming = new window.phoneWidget.audio.Incoming(isDevicePage, queues, window.phoneWidget.notifier, panes.incoming, panes.outgoing);
-        deviceState = new window.phoneWidget.device.state.Init(options.userId, isDevicePage, options.phoneDeviceIdStorageKey, logger);
+        deviceState = new window.phoneWidget.device.state.initialize.Init(options.userId, isDevicePage, options.phoneDeviceIdStorageKey, logger);
 
         Object.assign(settings, options);
 
@@ -146,6 +146,7 @@ var PhoneWidget = function () {
         $(document).find('.phone-widget__additional-bar .wp-devices-tab-log').addClass('active-tab');
         $(document).find('.phone-widget__additional-bar #tab-device').hide();
         $(document).find('.phone-widget__additional-bar #tab-logs').show();
+        $(document).find('.phone-widget__additional-bar #tab-tools').show();
     }
 
     function addLogSuccess(message) {
@@ -2129,6 +2130,20 @@ var PhoneWidget = function () {
 }();
 
 (function() {
+
+    $('#wp-btn-reset-local-data').on('click', function (e) {
+        e.preventDefault();
+        if (confirm('Remove all local data?')) {
+            localStorage.removeItem(window.phoneWidget.initParams.phoneDeviceIdStorageKey);
+            localStorage.removeItem(window.phoneWidget.device.state.localNames.phone(window.userId));
+            localStorage.removeItem(window.phoneWidget.device.state.localNames.twilio(window.userId));
+            localStorage.removeItem(window.phoneWidget.device.state.localNames.speaker(window.userId));
+            localStorage.removeItem(window.phoneWidget.device.state.localNames.microphone(window.userId));
+            alert('You will be redirected to Home Page.');
+            window.location.href = '/';
+        }
+        return false;
+    });
 
     function delay(callback, ms) {
         var timer = 0;

@@ -106,11 +106,9 @@ $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon',
 
 <?php
 $phoneDeviceRemoteLogsEnabled = SettingHelper::phoneDeviceLogsEnabled() ? 'true' : 'false';
-$phoneDeviceIdStorageKey = DeviceStorageKey::getPhoneDeviceIdStorageKey(Auth::id());
 
 $js = <<<JS
 window.isTwilioDevicePage = true;
-window.phoneDeviceIdStorageKey = '$phoneDeviceIdStorageKey';
 window.phoneDeviceRemoteLogsEnabled = $phoneDeviceRemoteLogsEnabled;
 JS;
 $this->registerJs($js, View::POS_READY);

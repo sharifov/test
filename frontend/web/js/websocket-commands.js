@@ -61,7 +61,7 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
             if (typeof PhoneWidget === 'object') {
                 if (window.isTwilioDevicePage) {
                     socketSend('PhoneDeviceRegister', 'Register', {
-                        'deviceId': localStorage.getItem(window.phoneDeviceIdStorageKey)
+                        'deviceId': localStorage.getItem(window.phoneWidget.initParams.phoneDeviceIdStorageKey)
                     });
                 } else {
                     window.sendCommandUpdatePhoneWidgetCurrentCalls('', userId, window.generalLinePriorityIsEnabled);
@@ -385,12 +385,13 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                     }
 
                     if (obj.cmd === 'PhoneDeviceRegister') {
-                        if (!PhoneWidget.isInitiated()) {
-                            PhoneWidget.init(window.phoneWidget.initParams);
-                        }
                         if (obj.error) {
                             if (obj.deviceIsInvalid) {
-                                PhoneWidget.getDeviceState().removeDeviceId();
+                                // todo move to phone widget
+                                localStorage.removeItem(window.phoneWidget.initParams.phoneDeviceIdStorageKey);
+                                //PhoneWidget.getDeviceState().removeDeviceId();
+                                alert(obj.msg + ' You will be redirected to Home page!');
+                                window.location.href = '/';
                             }
                             if (obj.errorType === 'voipPageAlreadyOpened') {
                                 alert('Voip page is already opened. You will be redirected to Home page!');
@@ -400,8 +401,11 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                                 PhoneWidget.addLog(obj.msg);
                             }
                         } else {
-                           window.phoneWidget.device.initialize.Init(obj.deviceId, window.phoneDeviceRemoteLogsEnabled);
-                           window.sendCommandUpdatePhoneWidgetCurrentCalls('', userId, window.generalLinePriorityIsEnabled);
+                            if (!PhoneWidget.isInitiated()) {
+                                PhoneWidget.init(window.phoneWidget.initParams);
+                            }
+                            window.phoneWidget.device.initialize.Init(obj.deviceId, window.phoneDeviceRemoteLogsEnabled);
+                            window.sendCommandUpdatePhoneWidgetCurrentCalls('', userId, window.generalLinePriorityIsEnabled);
                         }
                     }
 

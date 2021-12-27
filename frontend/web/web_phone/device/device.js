@@ -60,6 +60,7 @@
                 $(document).find('.phone-widget__additional-bar .wp-devices-tab-log').addClass('active-tab');
                 $(document).find('.phone-widget__additional-bar #tab-device').hide();
                 $(document).find('.phone-widget__additional-bar #tab-logs').show();
+                $(document).find('.phone-widget__additional-bar #tab-tools').show();
             }
 
             device.register();
