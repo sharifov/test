@@ -717,8 +717,28 @@ class ClientChatService
 
     public function takeClientChat(ClientChat $clientChat, Employee $owner, int $action = ClientChatStatusLog::ACTION_TAKE): ClientChat
     {
-        $lastMessage = $this->clientChatLastMessageRepository->getByChatId($clientChat->cch_id);
+        if (empty($clientChat->cch_owner_user_id)) {
+            return $this->transactionManager->wrap(function () use ($clientChat, $owner, $action) {
+                $clientChat->assignOwner($owner->id);
+                $clientChat->inProgress($owner->id, $action);
+                $this->clientChatRepository->save($clientChat);
+                $this->clientChatMessageService->touchUnreadMessage($clientChat->cch_id);
+                $this->assignAgentToRcChannel($clientChat->cch_rid, $owner->userClientChatData->getRcUserId() ?? '');
+                Notifications::publish('refreshChatPage', ['user_id' => $clientChat->cch_owner_user_id], ['data' => ClientChatAccessMessage::chatTaken($clientChat, $owner->username)]);
+                return $clientChat;
+            });
+        }
 
+        if ($clientChat->isOwner($owner->id)) {
+            return $this->transactionManager->wrap(function () use ($clientChat, $owner, $action) {
+                $clientChat->inProgress($owner->id, $action);
+                $this->clientChatRepository->save($clientChat);
+                $this->clientChatMessageService->touchUnreadMessage($clientChat->cch_id);
+                Notifications::publish('refreshChatPage', ['user_id' => $clientChat->cch_owner_user_id], ['data' => ClientChatAccessMessage::chatTaken($clientChat, $owner->username)]);
+                return $clientChat;
+            });
+        }
+        $lastMessage = $this->clientChatLastMessageRepository->getByChatId($clientChat->cch_id);
         return $this->transactionManager->wrap(function () use ($clientChat, $owner, $lastMessage, $action) {
             $clientChat->archive($owner->id, $action, null, null, true);
             $this->clientChatRepository->save($clientChat);
