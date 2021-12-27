@@ -46,26 +46,39 @@ use yii\bootstrap4\Html;
                 ]) ?>
 
                 <div class="row">
-                    <div class="col-md-3">
+
+                    <div class="col-md-4">
                         <?= $form->field($searchFrom, 'fareType')->widget(Select2::class, [
                             'options' => [
                                 'placeholder' => '--', //$searchFrom->getAttributeLabel('fareType'),
                                 'multiple' => true,
-                                'id' => 'search-quote-fare-type'
+                                'id' => 'search-quote-fare-type',
                             ],
                             'data' => Quote::getFareTypeList(),
                             'size' => Select2::SIZE_SMALL
                         ]) ?>
                     </div>
 
-                    <div class="col-md-9">
-                        <?= $form->field($searchFrom, 'airlines')->widget(Select2::class, [
+                    <div class="col-md-4">
+                        <?= $form->field($searchFrom, 'excludeConnectionAirports')->widget(Select2::class, [
                             'options' => [
-                                'placeholder' => '--', //$searchFrom->getAttributeLabel('airlines'),
+                                'placeholder' => '--',
                                 'multiple' => true,
-                                'id' => 'search-quote-airlines'
+                                'id' => 'search-quote-exclude-connection-airports'
                             ],
-                            'data' => $airlines,
+                            'data' => $connectionAirports,
+                            'size' => Select2::SIZE_SMALL
+                        ]) ?>
+                    </div>
+
+                    <div class="col-md-4">
+                        <?= $form->field($searchFrom, 'includeAirports')->widget(Select2::class, [
+                            'options' => [
+                                'placeholder' => '--',
+                                'multiple' => true,
+                                'id' => 'search-quote-include-airports'
+                            ],
+                            'data' => $connectionAirports,
                             'size' => Select2::SIZE_SMALL
                         ]) ?>
                     </div>
@@ -180,13 +193,13 @@ use yii\bootstrap4\Html;
                     </div>
 
                     <div class="col-md-5">
-                        <?= $form->field($searchFrom, 'excludeConnectionAirports')->widget(Select2::class, [
+                        <?= $form->field($searchFrom, 'airlines')->widget(Select2::class, [
                             'options' => [
-                                'placeholder' => '--',
+                                'placeholder' => '--', //$searchFrom->getAttributeLabel('airlines'),
                                 'multiple' => true,
-                                'id' => 'search-quote-exclude-connection-airports'
+                                'id' => 'search-quote-airlines'
                             ],
-                            'data' => $connectionAirports,
+                            'data' => $airlines,
                             'size' => Select2::SIZE_SMALL
                         ]) ?>
                     </div>

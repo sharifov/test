@@ -6,6 +6,7 @@ use common\models\Quote;
 use sales\helpers\app\AppHelper;
 use yii\base\Model;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 
 /**
  * Class FlightQuoteSearchForm
@@ -52,6 +53,8 @@ class FlightQuoteSearchForm extends Model
 
     public $excludeConnectionAirports;
 
+    public $includeAirports;
+
     public $sortBy;
 
     public $topCriteria;
@@ -77,9 +80,9 @@ class FlightQuoteSearchForm extends Model
             [
                 [
                     'fareType', 'airlines', 'tripMaxDurationHours', 'tripMaxDurationMinutes', 'stops',
-                    'baggage', 'airportChange', 'airportExactMatch', 'excludeConnectionAirports', 'sortBy',
-                    'topCriteria', 'rank', 'departureStartTimeList','departureEndTimeList', 'arrivalStartTimeList',
-                    'arrivalEndTimeList', 'filterIsShown'
+                    'baggage', 'airportChange', 'airportExactMatch', 'excludeConnectionAirports',
+                    'includeAirports', 'sortBy', 'topCriteria', 'rank', 'departureStartTimeList',
+                    'departureEndTimeList', 'arrivalStartTimeList', 'arrivalEndTimeList', 'filterIsShown'
                 ], 'safe'],
             ['price', 'filter', 'filter' => 'intval'],
         ];
@@ -183,6 +186,23 @@ class FlightQuoteSearchForm extends Model
             }, ARRAY_FILTER_USE_BOTH);
         }
 
+        if (!empty($this->includeAirports)) {
+            $quotes['results'] = array_filter($quotes['results'], function ($item) {
+                $item['showed'] = true;
+                if (!empty($item['trips'])) {
+                    foreach ($item['trips'] as $trip) {
+                        if (!empty($trip['segments'])) {
+                            foreach ($trip['segments'] as $segment) {
+                                if (!in_array($segment['departureAirportCode'], $this->includeAirports) && !in_array($segment['arrivalAirportCode'], $this->includeAirports)) {
+                                    $item['showed'] = false;
+                                }
+                            }
+                        }
+                    }
+                }
+                return $item['showed'];
+            }, ARRAY_FILTER_USE_BOTH);
+        }
         if ($this->topCriteria) {
             $quotes['results'] = AppHelper::filterByArrayContainValues($quotes['results'], 'topCriteria', $this->topCriteria);
         }
