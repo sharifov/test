@@ -3,6 +3,7 @@
 namespace console\controllers;
 
 use common\components\BackOffice;
+use common\helpers\LogHelper;
 use common\models\Airline;
 use common\models\Airports;
 use common\models\Client;
@@ -592,7 +593,7 @@ class SyncController extends Controller
             } catch (\Throwable $throwable) {
                 $transactionOrder->rollBack();
                 $message = AppHelper::throwableLog($throwable, true);
-                $message['saleData'] = $saleData;
+                $message['saleData'] = LogHelper::hidePersonalData($saleData, CasesSaleService::SENSITIVE_KEYS);
                 Yii::warning($message, 'SyncController:actionSales::CreateFromSale');
                 self::showMessage($throwable->getMessage());
             }

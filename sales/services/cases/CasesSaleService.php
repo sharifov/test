@@ -3,6 +3,7 @@
 namespace sales\services\cases;
 
 use common\components\BackOffice;
+use common\helpers\LogHelper;
 use common\models\CaseSale;
 use Exception;
 use frontend\helpers\JsonHelper;
@@ -40,6 +41,12 @@ use yii\web\BadRequestHttpException;
  */
 class CasesSaleService
 {
+    public const SENSITIVE_KEYS = [
+        'firstName' => 'firstName', 'lastName' => 'lastName', 'phoneNumber' => 'phoneNumber',
+        'first_name' => 'first_name', 'middle_name' => 'middle_name', 'last_name' => 'last_name',
+        'phone' => 'phone', 'email' => 'email', 'projectApiKey' => 'projectApiKey', 'ticket_number' => 'ticket_number',
+    ];
+
     private const FORMAT_PASSENGERS_DATA = [
         'meal' => 'formatByCountSegments',
         'wheelchair' => 'formatByCountSegments',
@@ -357,7 +364,7 @@ class CasesSaleService
                 throw new \RuntimeException(VarDumper::dumpAsString([
                     'message' => 'Additional data not saved',
                     'errors' => $caseSale->errors,
-                    'saleData' => $saleData
+                    'saleData' => LogHelper::hidePersonalData($saleData, self::SENSITIVE_KEYS)
                 ]), -1);
             }
             $case->updateLastAction();
@@ -623,7 +630,7 @@ class CasesSaleService
                         throw new \RuntimeException(VarDumper::dumpAsString([
                             'message' => 'CaseSale not saved from detailRequestToBackOffice',
                             'errors' => $caseSale->errors,
-                            'saleData' => $refreshSaleData
+                            'saleData' => LogHelper::hidePersonalData($refreshSaleData, self::SENSITIVE_KEYS)
                         ]));
                     }
 
@@ -659,7 +666,7 @@ class CasesSaleService
                         } catch (\Throwable $throwable) {
                             $transaction->rollBack();
                             $message = AppHelper::throwableLog($throwable, true);
-                            $message['saleData'] = $refreshSaleData;
+                            $message['saleData'] = LogHelper::hidePersonalData($refreshSaleData, self::SENSITIVE_KEYS);
                             Yii::error($message, 'CasesSaleService:createSale:OrderManageService:Throwable');
                         }
                     }

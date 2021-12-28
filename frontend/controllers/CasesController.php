@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use _HumbugBox985cd1594210\Symfony\Component\Console\Exception\RuntimeException;
 use common\components\BackOffice;
 use common\components\CommunicationService;
+use common\helpers\LogHelper;
 use common\models\CaseNote;
 use common\models\CaseSale;
 use common\models\ClientEmail;
@@ -1055,7 +1056,7 @@ class CasesController extends FController
             } catch (\Throwable $throwable) {
                 $transactionOrder->rollBack();
                 $message = AppHelper::throwableLog($throwable, true);
-                $message['saleData'] = $saleData;
+                $message['saleData'] = LogHelper::hidePersonalData($saleData, CasesSaleService::SENSITIVE_KEYS);
                 Yii::error($message, 'CasesController:actionAddSale:Order');
             }
         }
