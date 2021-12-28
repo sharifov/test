@@ -667,7 +667,7 @@ class CasesSaleService
                             $transaction->rollBack();
                             $message = AppHelper::throwableLog($throwable, true);
                             $message['saleData'] = LogHelper::hidePersonalData($refreshSaleData, self::SENSITIVE_KEYS);
-                            Yii::error($message, 'CasesSaleService:createSale:OrderManageService:Throwable');
+                            Yii::error($message, 'CasesSaleService:createOrderStructureFromSale:Throwable');
                         }
                     }
                 } else {
