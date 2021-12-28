@@ -62,8 +62,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 'relation' => 'ssUpdatedUser',
                 'attribute' => 'ss_updated_user_id',
             ],
-
-            ['class' => DateTimeColumn::class, 'attribute' => 'ss_deadline_dt'],
+            [
+                'class' => \common\components\grid\DateTimeColumn::class,
+                'attribute' => 'ss_deadline_dt',
+                'limitEndDay' => false,
+            ],
 
             ['class' => ActionColumn::class],
         ],
