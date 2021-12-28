@@ -1,6 +1,7 @@
 <?php
 
 use common\models\Call;
+use frontend\widgets\newWebPhone\DeviceAsset;
 use frontend\widgets\newWebPhone\DeviceStorageKey;
 use sales\auth\Auth;
 
@@ -35,6 +36,7 @@ if (!Auth::can('PhoneWidget_Dialpad')) {
 
                 use common\models\UserCallStatus;
                 use sales\guards\phone\PhoneBlackListGuard;
+                use sales\helpers\setting\SettingHelper;
                 use yii\bootstrap4\Html;
                 use yii\helpers\Url;
                 use yii\web\View;
@@ -278,7 +280,12 @@ $csrf_token = Yii::$app->request->csrfToken;
 
 $phoneDeviceIdStorageKey = DeviceStorageKey::getPhoneDeviceIdStorageKey($userId);
 
+DeviceAsset::register($this);
+$phoneDeviceRemoteLogsEnabled = SettingHelper::phoneDeviceLogsEnabled() ? 'true' : 'false';
+
 $js = <<<JS
+
+window.phoneDeviceRemoteLogsEnabled = $phoneDeviceRemoteLogsEnabled;
 window.phoneWidget.initParams = {
     'ajaxCallRedirectGetAgents': '$ajaxCallRedirectGetAgents',
     'acceptCallUrl': '$ajaxAcceptIncomingCall',
@@ -334,5 +341,6 @@ window.phoneWidget.initParams = {
     'phoneDeviceIdStorageKey': '$phoneDeviceIdStorageKey',
     'userId': $userId
 };
+PhoneWidget.init(window.phoneWidget.initParams);
 JS;
 $this->registerJs($js);

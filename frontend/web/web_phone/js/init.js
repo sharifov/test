@@ -7,6 +7,6 @@ window.phoneWidget.device.state.localNames = {};
 window.phoneWidget.device.initialize = {};
 window.phoneWidget.storage = {};
 window.phoneWidget.emptyFunc = function (param) {};
-window.isTwilioDevicePage = false;
+window.isTwilioDevicePage = true;
 window.phoneDeviceRemoteLogsEnabled = false;
 window.phoneDeviceIdStorageKey = null;

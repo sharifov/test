@@ -290,7 +290,7 @@ class PhoneDeviceReadyController
                     'deviceIsInvalid' => true,
                     'msg' => [
                         'name' => 'PhoneDeviceReady. Action: ' . $action,
-                        'message' => 'Not found Device. ID: (' . $deviceId . '). Please, refresh Voip page!',
+                        'message' => 'Not found Device. ID: (' . $deviceId . '). Please, refresh page!',
                     ],
                 ],
             ];
@@ -304,7 +304,7 @@ class PhoneDeviceReadyController
                     'deviceIsInvalid' => true,
                     'msg' => [
                         'name' => 'PhoneDeviceReady. Action: ' . $action,
-                        'message' => 'User is not owner of device. Please, refresh Voip page!',
+                        'message' => 'User is not owner of device. Please, refresh page!',
                     ],
                 ],
             ];

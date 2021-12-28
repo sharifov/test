@@ -464,55 +464,55 @@
         }, 200);
 
         this.phoneConnected = function (status) {
-            localStorage.setItem(window.phoneWidget.device.state.localNames.phone(userId), status);
+            // localStorage.setItem(window.phoneWidget.device.state.localNames.phone(userId), status);
         };
 
         this.phoneDisconnected = function (status) {
-            localStorage.setItem(window.phoneWidget.device.state.localNames.phone(userId), status);
+            // localStorage.setItem(window.phoneWidget.device.state.localNames.phone(userId), status);
         };
 
         this.twilioUnknown = function (status) {
-            localStorage.setItem(window.phoneWidget.device.state.localNames.twilio(userId), status);
+            // localStorage.setItem(window.phoneWidget.device.state.localNames.twilio(userId), status);
             queue.enqueue('TwilioNotReady');
         };
 
         this.twilioRegistered = function (status) {
-            localStorage.setItem(window.phoneWidget.device.state.localNames.twilio(userId), status);
+            // localStorage.setItem(window.phoneWidget.device.state.localNames.twilio(userId), status);
             queue.enqueue('TwilioReady');
         };
 
         this.twilioError = function (status) {
-            localStorage.setItem(window.phoneWidget.device.state.localNames.twilio(userId), status);
+            // localStorage.setItem(window.phoneWidget.device.state.localNames.twilio(userId), status);
             queue.enqueue('TwilioNotReady');
         };
 
         this.speakerUnknown = function (status) {
-            localStorage.setItem(window.phoneWidget.device.state.localNames.speaker(userId), status);
+            // localStorage.setItem(window.phoneWidget.device.state.localNames.speaker(userId), status);
             queue.enqueue('SpeakerNotReady');
         };
 
         this.speakerSelected = function (status) {
-            localStorage.setItem(window.phoneWidget.device.state.localNames.speaker(userId), status);
+            // localStorage.setItem(window.phoneWidget.device.state.localNames.speaker(userId), status);
             queue.enqueue('SpeakerReady');
         };
 
         this.speakerError = function (status) {
-            localStorage.setItem(window.phoneWidget.device.state.localNames.speaker(userId), status);
+            // localStorage.setItem(window.phoneWidget.device.state.localNames.speaker(userId), status);
             queue.enqueue('SpeakerNotReady');
         };
 
         this.microphoneUnknown = function (status) {
-            localStorage.setItem(window.phoneWidget.device.state.localNames.microphone(userId), status);
+            // localStorage.setItem(window.phoneWidget.device.state.localNames.microphone(userId), status);
             queue.enqueue('MicrophoneNotReady');
         };
 
         this.microphoneSelected = function (status) {
-            localStorage.setItem(window.phoneWidget.device.state.localNames.microphone(userId), status);
+            // localStorage.setItem(window.phoneWidget.device.state.localNames.microphone(userId), status);
             queue.enqueue('MicrophoneReady');
         };
 
         this.microphoneError = function (status) {
-            localStorage.setItem(window.phoneWidget.device.state.localNames.microphone(userId), status);
+            // localStorage.setItem(window.phoneWidget.device.state.localNames.microphone(userId), status);
             queue.enqueue('MicrophoneNotReady');
         };
     }
@@ -542,6 +542,7 @@
         this.warningIndicator = warningIndicator;
         this.phoneDeviceIdStorageKey = phoneDeviceIdStorageKey;
         this.isInitiated = true;
+        this.deviceId = null;
 
         this.resetDevices = function (reason) {
             this.logger.error('Reset devices. (' + reason + ')');
@@ -641,16 +642,19 @@
         };
 
         this.setDeviceId = function (deviceId) {
-            localStorage.setItem(this.phoneDeviceIdStorageKey, deviceId);
+            // localStorage.setItem(this.phoneDeviceIdStorageKey, deviceId);
+            this.deviceId = deviceId;
             this.logger.success('Device ID was installed.');
         };
 
         this.getDeviceId = function () {
-            return localStorage.getItem(this.phoneDeviceIdStorageKey) || null;
+            return this.deviceId;
+            // return localStorage.getItem(this.phoneDeviceIdStorageKey) || null;
         };
 
         this.removeDeviceId = function () {
-            localStorage.removeItem(this.phoneDeviceIdStorageKey);
+            this.deviceId = null;
+            // localStorage.removeItem(this.phoneDeviceIdStorageKey);
             this.logger.error('Device ID was removed.');
         };
 

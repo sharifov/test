@@ -146,7 +146,7 @@ var PhoneWidget = function () {
         $(document).find('.phone-widget__additional-bar .wp-devices-tab-log').addClass('active-tab');
         $(document).find('.phone-widget__additional-bar #tab-device').hide();
         $(document).find('.phone-widget__additional-bar #tab-logs').show();
-        $(document).find('.phone-widget__additional-bar #tab-tools').show();
+        // $(document).find('.phone-widget__additional-bar #tab-tools').show();
     }
 
     function addLogSuccess(message) {
@@ -172,7 +172,7 @@ var PhoneWidget = function () {
     function getDeviceId() {
         let state = getDeviceState();
         if (state.isInitiated !== true) {
-            createNotify('Phone Device', 'Device is not initiated. Please refresh Voip page or try again later.', 'error');
+            createNotify('Phone Device', 'Device is not initiated. Please refresh page or try again later.', 'error');
             return;
         }
         return state.getDeviceId();
@@ -782,7 +782,7 @@ var PhoneWidget = function () {
     function checkDevice(title) {
         let deviceId = getDeviceId();
         if (!deviceId) {
-            createNotify(title, 'Not found Device ID. Possibly Voip page is closed. Please open Voip page and refresh current page!', 'error');
+            createNotify(title, 'Not found Device ID. Please refresh current page!', 'error');
             return false;
         }
         if (deviceState.isReady()) {

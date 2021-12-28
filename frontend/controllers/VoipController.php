@@ -56,7 +56,7 @@ class VoipController extends FController
         $behaviors = [
             'access' => [
                 'allowActions' => [
-                    'index',
+//                    'index',
                     'create-call',
                     'log',
                 ],
@@ -88,16 +88,16 @@ class VoipController extends FController
         return $this->asJson(['message' => 'ok']);
     }
 
-    public function actionIndex()
-    {
-        if (!Auth::can('PhoneWidget')) {
-            throw new ForbiddenHttpException('Access denied.');
-        }
-
-        $user = \Yii::$app->user->identity;
-
-        return $this->render('index', ['user' => $user]);
-    }
+//    public function actionIndex()
+//    {
+//        if (!Auth::can('PhoneWidget')) {
+//            throw new ForbiddenHttpException('Access denied.');
+//        }
+//
+//        $user = \Yii::$app->user->identity;
+//
+//        return $this->render('index', ['user' => $user]);
+//    }
 
     public function actionCreateCall()
     {

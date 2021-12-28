@@ -14,7 +14,11 @@
         this.offKey = null;
 
         this.play = function () {
-            this.audio.play();
+            if (document.visibilityState === 'visible') {
+                this.audio.play();
+                return;
+            }
+            this.stop();
         };
 
         this.stop = function () {
@@ -37,6 +41,10 @@
         };
 
         this.refresh = function () {
+            if (document.visibilityState !== 'visible') {
+                this.stop();
+                return;
+            }
             if (!this.isOn) {
                 this.stop();
                 return;

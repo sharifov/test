@@ -42,6 +42,7 @@ class PhoneDeviceSearch extends PhoneDevice
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => ['defaultOrder' => ['pd_id' => SORT_DESC]],
         ]);
 
         $this->load($params);
