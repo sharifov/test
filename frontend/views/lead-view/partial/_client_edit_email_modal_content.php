@@ -34,22 +34,28 @@ $leadAbacDto = new LeadAbacDto($lead, Auth::id())
 
     <?= $form->errorSummary($editEmail) ?>
 
-    <?php /*if ($user->isAdmin() || $user->isSuperAdmin()) : */?>
-    <?php /** @abac $leadAbacDto, LeadAbacObject::UI_FIELD_EMAIL_FROM_ADD_EMAIL, LeadAbacObject::ACTION_ACCESS, Access Field Email in form Edit Email*/ ?>
-    <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_FIELD_EMAIL_FORM_ADD_EMAIL, LeadAbacObject::ACTION_UPDATE)) : ?>
-        <?=
+    <?php
+    $leadAbacDto->formAttribute = 'email';
+    $leadAbacDto->isNewRecord = false;
+    /** @abac $leadAbacDto, LeadAbacObject::EMAIL_CREATE_FORM, LeadAbacObject::ACTION_VIEW, Email field view*/
+    $view = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::EMAIL_CREATE_FORM, LeadAbacObject::ACTION_VIEW);
+    /** @abac $leadAbacDto, LeadAbacObject::EMAIL_CREATE_FORM, LeadAbacObject::ACTION_EDIT, Email field edit*/
+    $edit = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::EMAIL_CREATE_FORM, LeadAbacObject::ACTION_EDIT);
+    ?>
+    <?=
         $form->field($editEmail, 'email', [
             'template' => '<div class="input-group"><span class="input-group-addon">@</span>{input}</div>{error}',
             'options' => [
-                'class' => 'form-group'
+                'class' => 'form-group',
+                'hidden' => ($edit ? !$edit : !$view),
             ]
         ])->textInput([
             'class' => 'form-control email lead-form-input-element',
             'type' => 'email',
-            'required' => true
+            'required' => true,
+            'readonly' => !$edit
         ])
         ?>
-    <?php endif; ?>
 
     <?=
     $form->field($editEmail, 'type')->dropDownList(ClientEmail::EMAIL_TYPE)

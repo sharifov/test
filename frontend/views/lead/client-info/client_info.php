@@ -39,10 +39,10 @@ $formId = sprintf('%s-form', $leadForm->getClient()->formName());
             <ul class="nav navbar-right panel_toolbox">
                 <?php /*if ($leadForm->mode !== $leadForm::VIEW_MODE || $manageClientInfoAccess) : */?>
 
-                <?php /** @abac $leadAbacDto, LeadAbacObject::UI_MENU_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS, Access to Menu in Client Info block on lead */ ?>
-                <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_MENU_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS)) : ?>
-                    <?php /** @abac $leadAbacDto, LeadAbacObject::ACT_CLIENT_DETAILS, LeadAbacObject::ACTION_ACCESS, Access to button client details on lead */ ?>
-                    <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_CLIENT_DETAILS, LeadAbacObject::ACTION_ACCESS)) : ?>
+                <?php //TODO: Remove /** @abac $leadAbacDto, LeadAbacObject::UI_MENU_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS, Access to Menu in Client Info block on lead */ ?>
+                <?php //if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_MENU_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS_DETAILS)) : ?>
+                    <?php /** @abac $leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS_DETAILS, Access to button client details on lead */ ?>
+                    <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS_DETAILS)) : ?>
                         <li>
                             <?=Html::a('<i class="fas fa-info-circle"></i> Details', '#', [
                                 'id' => 'btn-client-info-details',
@@ -53,8 +53,8 @@ $formId = sprintf('%s-form', $leadForm->getClient()->formName());
                         </li>
                     <?php endif; ?>
 
-                    <?php /** @abac $leadAbacDto, LeadAbacObject::ACT_CLIENT_ADD_PHONE, LeadAbacObject::ACTION_ACCESS, Access to button client add phone on lead*/ ?>
-                    <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_CLIENT_ADD_PHONE, LeadAbacObject::ACTION_ACCESS)) : ?>
+                    <?php /** @abac $leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS_ADD_PHONE, Access to button client add phone on lead*/ ?>
+                    <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS_ADD_PHONE)) : ?>
                         <li>
                             <?=Html::a('<i class="fas fa-plus-circle success"></i> Add Phone', '#', [
                                 'id' => 'client-new-phone-button',
@@ -66,8 +66,8 @@ $formId = sprintf('%s-form', $leadForm->getClient()->formName());
                         </li>
                     <?php endif; ?>
 
-                    <?php /** @abac $leadAbacDto, LeadAbacObject::ACT_CLIENT_ADD_EMAIL, LeadAbacObject::ACTION_ACCESS, Access to button client add email on lead*/ ?>
-                    <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_CLIENT_ADD_EMAIL, LeadAbacObject::ACTION_ACCESS)) : ?>
+                    <?php /** @abac $leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS_ADD_EMAIL, Access to button client add email on lead*/ ?>
+                    <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS_ADD_EMAIL)) : ?>
                         <li>
                             <?=Html::a('<i class="fas fa-plus-circle success"></i> Add Email', '#', [
                                 'id' => 'client-new-email-button',
@@ -79,8 +79,8 @@ $formId = sprintf('%s-form', $leadForm->getClient()->formName());
                         </li>
                     <?php endif; ?>
 
-                    <?php /** @abac $leadAbacDto, LeadAbacObject::ACT_CLIENT_UPDATE, LeadAbacObject::ACTION_ACCESS, Access to button client add email on lead*/ ?>
-                    <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_CLIENT_UPDATE, LeadAbacObject::ACTION_ACCESS)) : ?>
+                    <?php /** @abac $leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS_UPDATE_CLIENT, Access to button client add email on lead*/ ?>
+                    <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS_UPDATE_CLIENT)) : ?>
                         <li>
                             <?=Html::a('<i class="fas fa-edit warning"></i> Update Client', '#', [
                                 'id' => 'client-edit-user-name-button',
@@ -93,8 +93,8 @@ $formId = sprintf('%s-form', $leadForm->getClient()->formName());
                     <?php endif; ?>
 
                     <?php if ($unsubscribe) : ?>
-                        <?php /** @abac $leadAbacDto, LeadAbacObject::ACT_CLIENT_SUBSCRIBE, LeadAbacObject::ACTION_ACCESS, Access to button client subscribe on lead*/ ?>
-                        <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_CLIENT_SUBSCRIBE, LeadAbacObject::ACTION_ACCESS)) : ?>
+                        <?php /** @abac $leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_SUBSCRIBE, Access to button client subscribe on lead*/ ?>
+                        <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_SUBSCRIBE)) : ?>
                             <li>
                                 <?=Html::a('<i class="far fa-bell-slash info"></i> Subscribe', '#', [
                                     'id' => 'client-unsubscribe-button',
@@ -109,8 +109,8 @@ $formId = sprintf('%s-form', $leadForm->getClient()->formName());
                             </li>
                         <?php endif; ?>
                     <?php else : ?>
-                        <?php /** @abac $leadAbacDto, LeadAbacObject::ACT_CLIENT_SUBSCRIBE, LeadAbacObject::ACTION_ACCESS, Access to button client subscribe on lead*/ ?>
-                        <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_CLIENT_UNSUBSCRIBE, LeadAbacObject::ACTION_ACCESS)) : ?>
+                        <?php /** @abac $leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS, Access to button client unsubscribe on lead*/ ?>
+                        <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_UNSUBSCRIBE)) : ?>
                             <li>
                                 <?=Html::a('<i class="far fa-bell-slash info"></i> Unsubscribe', '#', [
                                     'id' => 'client-unsubscribe-button',
@@ -125,7 +125,7 @@ $formId = sprintf('%s-form', $leadForm->getClient()->formName());
                             </li>
                         <?php endif; ?>
                     <?php endif; ?>
-                <?php endif; ?>
+                <?php //endif; ?>
 
                 <li>
                     <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
@@ -192,8 +192,8 @@ $formId = sprintf('%s-form', $leadForm->getClient()->formName());
                             'userId' => $user->id
                         ]) ?>
 
-                        <?php /** @abac $leadAbacDto, LeadAbacObject::ACT_SEARCH_LEADS_BY_IP, LeadAbacObject::ACTION_ACCESS, Access to btn search leads by ip on lead*/ ?>
-                        <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_SEARCH_LEADS_BY_IP, LeadAbacObject::ACTION_ACCESS)) : ?>
+                        <?php /** @abac $leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_SHOW_LEADS_BY_IP, Access to btn search leads by ip on lead*/ ?>
+                        <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_SHOW_LEADS_BY_IP)) : ?>
                             <?php if (!empty($leadForm->getLead()->request_ip)) : ?>
                                 <?= $this->render('_client_ip_info', ['lead' => $leadForm->getLead()]) ?>
                             <?php endif; ?>
