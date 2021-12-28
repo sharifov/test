@@ -1,143 +1,30 @@
 <?php
 
-namespace frontend\controllers;
+namespace sales\services\badges\objects;
 
 use common\models\Employee;
-use common\models\Lead;
 use common\models\search\LeadQcallSearch;
-use sales\helpers\app\AppHelper;
-use sales\helpers\ErrorsToStringHelper;
 use sales\repositories\lead\LeadBadgesRepository;
-use sales\services\badges\BadgesObjectFactory;
-use sales\services\badges\form\BadgeForm;
-use yii\filters\ContentNegotiator;
-use yii\helpers\ArrayHelper;
-use yii\helpers\VarDumper;
-use yii\web\BadRequestHttpException;
-use yii\web\ForbiddenHttpException;
-use yii\web\NotFoundHttpException;
-use yii\web\Response;
+use sales\services\badges\BadgeCounterInterface;
 use Yii;
 
 /**
- * Class BadgesController
+ * Class LeadBadgeCounter
+ *
  * @param LeadBadgesRepository $leadBadgesRepository
  */
-class BadgesController extends FController
+class LeadBadgeCounter implements BadgeCounterInterface
 {
-    private $leadBadgesRepository;
+    private LeadBadgesRepository $leadBadgesRepository;
 
-    public $enableCsrfValidation = false;
-
-    public function __construct($id, $module, LeadBadgesRepository $leadBadgesRepository, $config = [])
+    public function __construct(LeadBadgesRepository $leadBadgesRepository)
     {
-        parent::__construct($id, $module, $config);
         $this->leadBadgesRepository = $leadBadgesRepository;
     }
 
-    /**
-     * @return array
-     */
-    public function behaviors(): array
+    public function countTypes(array $types): array
     {
-        $behaviors = [
-            'access' => [
-                'rules' => [
-                    [
-                        'allow' => true,
-                        'roles' => [
-                            Employee::ROLE_ADMIN,
-                            Employee::ROLE_SALES_SENIOR,
-                            Employee::ROLE_EXCHANGE_SENIOR,
-                            Employee::ROLE_SUPPORT_SENIOR,
-                            Employee::ROLE_SUPERVISION,
-                            Employee::ROLE_AGENT,
-                            Employee::ROLE_QA,
-                            Employee::ROLE_EX_AGENT,
-                            Employee::ROLE_EX_SUPER,
-                        ]
-                    ]
-                ]
-            ],
-            [
-                'class' => ContentNegotiator::class,
-                'formats' => [
-                    'application/json' => Response::FORMAT_JSON,
-                ]
-            ],
-        ];
-        return ArrayHelper::merge(parent::behaviors(), $behaviors);
-    }
-
-    public function actionBadgesCount(): array
-    {
-        if (Yii::$app->request->isAjax) {
-            Yii::$app->response->format = Response::FORMAT_JSON;
-
-            $result = ['message' => '', 'status' => 0, 'data' => []];
-
-            try {
-                if (!$badgesCollection = Yii::$app->request->post('badgesCollection')) {
-                    throw new \RuntimeException('Param badgesCollection is required');
-                }
-                if (!is_array($badgesCollection)) {
-                    throw new \RuntimeException('Param badgesCollection not is array');
-                }
-
-                foreach ($badgesCollection as $badge) {
-                    try {
-                        $badgeForm = new BadgeForm();
-                        if (!$badgeForm->load($badge)) {
-                            throw new \RuntimeException('BadgeForm not loaded');
-                        }
-                        if (!$badgeForm->validate()) {
-                            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($badgeForm));
-                        }
-
-                        $badgeCounter = (new BadgesObjectFactory($badgeForm->objectKey))->create();
-                        $result['data'][$badgeForm->idName] = $badgeCounter->countTypes($badgeForm->types);
-                    } catch (\RuntimeException | \DomainException $throwable) {
-                        $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['data' => $badge]);
-                        \Yii::warning($message, 'BadgesController:actionBadgesCount:badgesCollection:Exception');
-                    } catch (\Throwable $throwable) {
-                        \Yii::error(
-                            AppHelper::throwableLog($throwable),
-                            'BadgesController:actionBadgesCount:badgesCollection:Throwable'
-                        );
-                    }
-                }
-                if (empty($result['data'])) {
-                    throw new \RuntimeException('Data is empty');
-                }
-
-                $result['message'] = 'Success';
-                $result['status'] = 1;
-            } catch (\RuntimeException | \DomainException $exception) {
-                Yii::warning(AppHelper::throwableLog($exception), 'BadgesController:actionBadgesCount::Exception');
-                $result['message'] = VarDumper::dumpAsString($exception->getMessage());
-            } catch (\Throwable $throwable) {
-                Yii::error(AppHelper::throwableLog($throwable), 'BadgesController:actionBadgesCount:Throwable');
-                $result['message'] = 'Internal Server Error';
-            }
-            return $result;
-        }
-        throw new BadRequestHttpException();
-    }
-
-    /**
-     * @return array
-     */
-    public function actionGetBadgesCount(): array
-    {
-
-        $types = Yii::$app->request->post('types');
-
-        if (!is_array($types)) {
-            return [];
-        }
-
         $result = [];
-
         foreach ($types as $type) {
             switch ($type) {
                 case 'pending':
@@ -165,26 +52,11 @@ class BadgesController extends FController
                         $result['booked'] = $count;
                     }
                     break;
-                /*case 'sold':
-                    if ($count = $this->getSold()) {
-                        $result['sold'] = $count;
-                    }
-                    break;
-                case 'duplicate':
-                    if ($count = $this->getDuplicate()) {
-                        $result['duplicate'] = $count;
-                    }
-                    break;*/
                 case 'redial':
                     if ($count = $this->getRedial()) {
                         $result['redial'] = $count;
                     }
                     break;
-                /*case 'trash':
-                    if ($count = $this->getTrash()) {
-                        $result['trash'] = $count;
-                    }
-                    break;*/
                 case 'bonus':
                     if ($count = $this->getBonus()) {
                         $result['bonus'] = $count;
@@ -210,9 +82,6 @@ class BadgesController extends FController
         return $result;
     }
 
-    /**
-     * @return int|null
-     */
     private function getPending(): ?int
     {
         if (!Yii::$app->user->can('/lead/pending')) {

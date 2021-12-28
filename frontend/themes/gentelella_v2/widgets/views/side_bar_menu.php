@@ -4,6 +4,7 @@
 /* @var $search_text string */
 /* @var $user \common\models\Employee  */
 
+use sales\services\badges\BadgesDictionary;
 use yii\helpers\Url;
 use yii\widgets\Pjax;
 
@@ -50,65 +51,89 @@ use yii\widgets\Pjax;
 <?php
 
 $js = <<<JS
-function updateCounters(url, className, idName) {
-    var types = [];
-    $("." + className).each(function(i) {
-        types.push($(this).data('type'));
-    });
-    
-    $.ajax({
-        type: "POST",
-        url: url,
-        data: {types: types}, 
-        dataType: 'json',
-        success: function(data){
-            if (typeof (data) != "undefined" && data != null) {
-                $.each( data, function( key, val ) {
-                    if (val != 0) {
-                        $("#" + idName + "-" + key).html(val);
-                    } else if (val == 0) {
-                        $("#" + idName + "-" + key).html('');
-                    }
-                });
-            }
-        },
-        error: function(data){
-            console.log(data);
-        }, 
-    });    
-    
-}
+    let badgesCollection = [];
 JS;
 $this->registerJs($js, $this::POS_LOAD);
 
 if (Yii::$app->user->can('leadSection')) {
-    $urlBadgesCount = Url::to(['/badges/get-badges-count']);
-    $this->registerJs("updateCounters('$urlBadgesCount', 'bginfo', 'badges');", $this::POS_LOAD);
+    $this->registerJs("let leadTypes = [];
+        $('.bginfo').each(function(i) {
+            leadTypes.push($(this).data('type'));
+        });
+        badgesCollection.push({objectKey:'" . BadgesDictionary::KEY_OBJECT_LEAD . "', idName:'badges', types: leadTypes});", $this::POS_LOAD);
 }
 if (Yii::$app->user->can('caseSection')) {
-    $urlCasesQCount = Url::to(['/cases-q-counters/get-q-count']);
-    $this->registerJs("updateCounters('$urlCasesQCount', 'cases-q-info', 'cases-q');", $this::POS_LOAD);
+    $this->registerJs("
+        let casesTypes = [];
+        $('.cases-q-info').each(function(i) {
+            casesTypes.push($(this).data('type'));
+        });
+        badgesCollection.push({objectKey:'" . BadgesDictionary::KEY_OBJECT_CASES . "', idName:'cases-q', types: casesTypes});", $this::POS_LOAD);
 }
-
 if (Yii::$app->user->can('/order/order-q/get-badges-count')) {
-    $urlOrderCount = Url::to(['/order/order-q/get-badges-count']);
-    $this->registerJs("updateCounters('$urlOrderCount', 'order-q-info', 'order-q');", $this::POS_LOAD);
+    $this->registerJs("
+        let orderTypes = [];
+        $('.order-q-info').each(function(i) {
+            orderTypes.push($(this).data('type'));
+        });
+        badgesCollection.push({objectKey:'" . BadgesDictionary::KEY_OBJECT_ORDER . "', idName:'order-q', types: orderTypes});", $this::POS_LOAD);
 }
-
 if (Yii::$app->user->can('/qa-task/qa-task-queue/count')) {
-    $urlQaTaskCount = Url::to(['/qa-task/qa-task-queue/count']);
-    $this->registerJs("updateCounters('$urlQaTaskCount', 'qa-task-info', 'qa-task-q');", $this::POS_LOAD);
+    $this->registerJs("
+        let qaTaskTypes = [];
+        $('.qa-task-info').each(function(i) {
+            qaTaskTypes.push($(this).data('type'));
+        });
+        badgesCollection.push({objectKey:'" . BadgesDictionary::KEY_OBJECT_QA_TASK . "', idName:'qa-task-q', types: qaTaskTypes});", $this::POS_LOAD);
 }
 if ($user->canCall()) {
-    $urlVoiceMailRecordCount = Url::to(['/voice-mail-record/count']);
     $this->registerJs("
-    function updateVoiceRecordCounters() {
-        updateCounters('$urlVoiceMailRecordCount', 'voice-mail-record', 'voice-mail-record');
-    }
-    window.updateVoiceRecordCounters = updateVoiceRecordCounters;
-    window.updateVoiceRecordCounters();
-    ", $this::POS_LOAD);
+        let voiceMailTypes = [];
+        $('.voice-mail-record').each(function(i) {
+            voiceMailTypes.push($(this).data('type'));
+        });
+        badgesCollection.push({objectKey:'" . BadgesDictionary::KEY_OBJECT_VOICE_MAIL . "', idName:'voice-mail-record', types:voiceMailTypes});", $this::POS_LOAD);
 }
+
+$urlBadgesCount = Url::to(['/badges/badges-count']);
+$js = <<<JS
+    if (badgesCollection.length) {
+        setTimeout(function() {
+            $.ajax({
+                url: "{$urlBadgesCount}",
+                type: 'POST',
+                data: {badgesCollection: badgesCollection},
+                dataType: 'json'
+            })
+            .done(function(dataResponse) {
+                if (dataResponse.status === 1) {
+                    $.each(dataResponse.data, function(idName, badgets) {
+                        $.each(badgets, function(key, val) {
+                            if (val !== 0) {
+                                $("#" + idName + "-" + key).html(val);
+                            } else if (val === 0) {
+                                $("#" + idName + "-" + key).html('');
+                            }
+                        });
+                    });
+                } else if (dataResponse.message.length) {
+                    console.error('Badges Count Error. Message: ' + Response.message);
+                } else {
+                    console.error('Badges Count Error.');
+                }
+            })
+            .fail(function(jqXHR, textStatus, errorThrown) {
+                console.log({
+                    jqXHR : jqXHR,
+                    textStatus : textStatus,
+                    errorThrown : errorThrown
+                });
+            })
+            .always(function(jqXHR, textStatus, errorThrown) {});
+        }, 200);
+    }
+JS;
+$this->registerJs($js, $this::POS_LOAD);
 
 $js = <<<JS
 $('.nav.side-menu [data-ajax-link]').on('click', function (e) {
