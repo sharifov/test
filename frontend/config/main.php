@@ -406,7 +406,7 @@ return [
     ],
     'as access' => [
         'class' => 'yii\filters\AccessControl',
-        'except' => ['site/login', 'site/step-two', 'site/captcha', 'site/error', 'site/auth'],
+        'except' => ['site/login', 'site/step-two', 'site/captcha', 'site/error', 'site/auth', 'site/auth-step-two'],
         'rules' => [
             [
                 'allow' => true,

@@ -206,4 +206,14 @@ class LoginForm extends Model
         }
         parent::afterValidate();
     }
+
+    public function setUser(Employee $user): void
+    {
+        $this->_user = $user;
+    }
+
+    public function setUserChecked(bool $userChecked): void
+    {
+        $this->userChecked = $userChecked;
+    }
 }

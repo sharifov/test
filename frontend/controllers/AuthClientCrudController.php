@@ -48,14 +48,14 @@ class AuthClientCrudController extends FController
 
     /**
      * Displays a single AuthClient model.
-     * @param int $id Ac ID
+     * @param int $ac_id Ac ID
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($id)
+    public function actionView($ac_id)
     {
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $this->findModel($ac_id),
         ]);
     }
 
@@ -84,13 +84,13 @@ class AuthClientCrudController extends FController
     /**
      * Updates an existing AuthClient model.
      * If update is successful, the browser will be redirected to the 'view' page.
-     * @param int $id Ac ID
+     * @param int $ac_id Ac ID
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($id)
+    public function actionUpdate($ac_id)
     {
-        $model = $this->findModel($id);
+        $model = $this->findModel($ac_id);
 
         if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
             return $this->redirect(['view', 'ac_id' => $model->ac_id]);
@@ -104,13 +104,13 @@ class AuthClientCrudController extends FController
     /**
      * Deletes an existing AuthClient model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param int $id Ac ID
+     * @param int $ac_id Ac ID
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete($id)
+    public function actionDelete($ac_id)
     {
-        $this->findModel($id)->delete();
+        $this->findModel($ac_id)->delete();
 
         return $this->redirect(['index']);
     }
@@ -118,13 +118,13 @@ class AuthClientCrudController extends FController
     /**
      * Finds the AuthClient model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param int $id Ac ID
+     * @param int $ac_id Ac ID
      * @return AuthClient the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($id)
+    protected function findModel($ac_id)
     {
-        if (($model = AuthClient::findOne($id)) !== null) {
+        if (($model = AuthClient::findOne($ac_id)) !== null) {
             return $model;
         }
 

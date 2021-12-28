@@ -15,9 +15,12 @@ use common\models\UserParams;
 use frontend\models\form\UserProfileForm;
 use frontend\themes\gentelella_v2\widgets\SideBarMenu;
 use sales\helpers\app\AppHelper;
+use sales\model\authClient\entity\AuthClientQuery;
+use sales\model\authClient\entity\AuthClientSources;
 use sales\model\user\entity\monitor\UserMonitor;
 use Yii;
 use yii\authclient\AuthAction;
+use yii\authclient\ClientInterface;
 use yii\authclient\clients\Google;
 use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
@@ -47,7 +50,7 @@ class SiteController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['login', 'error', 'step-two', 'captcha', 'auth'],
+                        'actions' => ['login', 'error', 'step-two', 'captcha', 'auth', 'auth-step-two'],
                         'allow' => true,
                     ],
                     [
@@ -383,7 +386,49 @@ class SiteController extends FController
         return $box->run();
     }
 
-    public function onAuthSuccess($client): void
+    public function actionAuthStepTwo()
     {
+        $this->layout = '@frontend/themes/gentelella_v2/views/layouts/login';
+        $session = Yii::$app->session;
+
+        $source = (int)$session->get('auth_client_source');
+        $sourceId = (string)$session->get('auth_client_source_id');
+
+        if (!empty($source) && !empty($sourceId)) {
+            $userId = Yii::$app->request->get('user-id');
+            if ($userId && $authClient = AuthClientQuery::findByUserAndSource((int)$userId, $source, $sourceId)) {
+                $form = new LoginForm();
+                $form->setUser($authClient->user);
+                $form->setUserChecked(true);
+                if ($form->login()) {
+                    if (UserConnection::isIdleMonitorEnabled()) {
+                        UserMonitor::addEvent($userId, UserMonitor::TYPE_LOGIN);
+                    }
+                }
+                $session->remove('auth_client_source');
+                $session->remove('auth_client_source_id');
+                return $this->goBack();
+            }
+
+
+            if ($authClients = AuthClientQuery::findAllBySourceData($source, $sourceId)) {
+                return $this->render('auth_step_two', [
+                    'authClients' => $authClients
+                ]);
+            }
+            Yii::$app->session->setFlash('error', 'Not found any user assigned with this auth client: ' . AuthClientSources::getName($source));
+        }
+        return $this->redirect('/site/login');
+    }
+
+    /**
+     * @param ClientInterface $client
+     * @return void
+     */
+    public function onAuthSuccess(ClientInterface $client)
+    {
+        $source = AuthClientSources::clientSourceFactory($client->getId());
+        $source->handle($this->action, $client);
+        return $this->action->redirect($source->getRedirectUrl());
     }
 }

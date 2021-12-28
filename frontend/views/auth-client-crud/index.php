@@ -1,5 +1,7 @@
 <?php
 
+use sales\model\authClient\entity\AuthClient;
+use sales\model\authClient\entity\AuthClientSources;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -37,14 +39,22 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'ac_user_id',
                 'relation' => 'user',
             ],
-            'ac_source',
+            [
+                'attribute' => 'ac_source',
+                'value' => static function (AuthClient $model) {
+                    return AuthClientSources::getName($model->ac_source);
+                },
+                'filter' => AuthClientSources::getList()
+            ],
             'ac_source_id',
             'ac_email:email',
             'ac_ip',
             'ac_useragent',
             'ac_created_dt:byUserDateTime',
 
-            ['class' => 'yii\grid\ActionColumn'],
+            ['class' => 'yii\grid\ActionColumn', 'urlCreator' => static function (string $action, $model, $key, $index) {
+                return \yii\helpers\Url::to([$action, 'ac_id' => $model->ac_id]);
+            }],
         ],
     ]); ?>
 
