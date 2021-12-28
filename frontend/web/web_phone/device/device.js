@@ -199,6 +199,7 @@
         PhoneWidget.incomingSoundOff();
 
         call.on('accept', call => {
+            window.phoneWidget.device.activeCallSid = call.parameters.CallSid;
             PhoneWidget.removeTwilioInternalIncomingConnection();
             PhoneWidget.freeDialButton();
             PhoneWidget.setActiveCall(call);

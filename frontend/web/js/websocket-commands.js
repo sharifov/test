@@ -564,9 +564,8 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                         $('.btn-delete-product[data-product-id="' + obj.data.productId + '"]').hide();
                     }
 
-                    // todo voip: check case when device is every tabs
                     if (obj.cmd === 'leadRedialAutoTake') {
-                        if (typeof PhoneWidget === 'object' && window.isTwilioDevicePage) {
+                        if (typeof PhoneWidget === 'object' && obj.data.callSid === window.phoneWidget.device.activeCallSid) {
                             //var strWindowFeatures = "menubar=no,location=no,resizable=yes,scrollbars=yes,status=no";
                             let windowObjectReference = window.open(PhoneWidget.getLeadViewPageShortUrl() + '/' + obj.data.leadGid, 'window' + obj.data.leadId); //, strWindowFeatures);
                             windowObjectReference.focus();
