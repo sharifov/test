@@ -21,6 +21,7 @@ use yii\helpers\VarDumper;
  * @property bool $isInDepartment
  * @property bool $canTakeByFrequencyMinutes
  * @property int|null $status_id
+ * @property string $formAttribute
  */
 class LeadAbacDto extends \stdClass
 {
@@ -35,6 +36,9 @@ class LeadAbacDto extends \stdClass
     public bool $isInProject = false;
     public bool $isInDepartment = false;
     public bool $canTakeByFrequencyMinutes;
+    public string $formAttribute = '';
+    public ?bool $isNewRecord = null;
+    public array $formMultiAttribute = [];
 
 
     /**

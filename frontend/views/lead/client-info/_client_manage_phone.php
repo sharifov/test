@@ -25,8 +25,8 @@ use modules\lead\src\abac\LeadAbacObject;
             <td> <span style="line-height: 0;" class="<?= ClientPhone::getPhoneTypeTextDecoration($phone['type']) ?>"><?= \yii\helpers\Html::encode(MaskPhoneHelper::masking($phone['phone'], $disableMasking)) ?></span></td>
 
             <td class="text-right" style="width: 70px">
-                <?php /** @abac $leadAbacDto, LeadAbacObject::ACT_USER_SAME_PHONE_INFO, LeadAbacObject::ACTION_ACCESS, Access to btn The same user by phone on lead*/ ?>
-                <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_USER_SAME_PHONE_INFO, LeadAbacObject::ACTION_ACCESS)) : ?>
+                <?php /** @abac $leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS_USER_SAME_PHONE, Access to btn The same user by phone on lead*/ ?>
+                <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS_USER_SAME_PHONE)) : ?>
                     <?php if ($count = $phone['countUsersSamePhone']) : ?>
                         <a class="showModalButton" data-modal_id="client-large" title="The Same users by phone" data-content-url="<?= Url::to([
                             'lead-view/ajax-get-users-same-phone-info',
@@ -36,8 +36,8 @@ use modules\lead\src\abac\LeadAbacObject;
                     <?php endif; ?>
                 <?php endif; ?>
 
-                <?php /** @abac $leadAbacDto, LeadAbacObject::ACT_CLIENT_SUBSCRIBE, LeadAbacObject::ACTION_ACCESS, Access to button client edit phone on lead*/ ?>
-                <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_CLIENT_EDIT_PHONE, LeadAbacObject::ACTION_ACCESS)) : ?>
+                <?php /** @abac $leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS_EDIT_PHONE, Access to button client edit phone on lead*/ ?>
+                <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS_EDIT_PHONE)) : ?>
                     <a class="showModalButton" title="Edit Phone" data-content-url="<?= Url::to([
                         'lead-view/ajax-edit-client-phone-modal-content',
                         'gid' => $lead->gid, 'pid' => $phone['id']]) ?>" data-modal_id="client-manage-info">
