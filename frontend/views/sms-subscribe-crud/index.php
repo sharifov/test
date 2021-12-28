@@ -35,7 +35,11 @@ $this->params['breadcrumbs'][] = $this->title;
             'ss_id',
             'ss_cpl_id',
             'ss_sms_id',
-            'ss_project_id:projectName',
+            [
+                'class' => \common\components\grid\project\ProjectColumn::class,
+                'attribute' => 'ss_project_id',
+                'relation' => 'ssProject'
+            ],
             [
                 'attribute' => 'ss_status_id',
                 'value' => static function (SmsSubscribe $model) {
