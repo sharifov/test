@@ -14,7 +14,11 @@
         this.offKey = null;
 
         this.play = function () {
-            this.audio.play();
+            if (document.visibilityState === 'visible') {
+                this.audio.play();
+                return;
+            }
+            this.stop();
         };
 
         this.stop = function () {
@@ -109,10 +113,6 @@
         }
         return new EmptyIncoming(queues, notifier, incomingPane, outgoingPane);
     }
-
-    document.addEventListener("visibilitychange", function() {
-        PhoneWidget.audio.incoming.refresh();
-    });
 
     window.phoneWidget.audio = {
         Incoming: Incoming
