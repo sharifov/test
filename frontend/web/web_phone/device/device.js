@@ -16,7 +16,7 @@
                 PhoneWidget.getDeviceState().twilioRegistered();
             } else {
                 PhoneWidget.getDeviceState().twilioUnknown();
-                PhoneWidget.addLogError('Refresh Voip page!');
+                PhoneWidget.addLogError('Refresh page!');
                 return;
             }
             initSpeakerDevices();
@@ -60,7 +60,7 @@
                 $(document).find('.phone-widget__additional-bar .wp-devices-tab-log').addClass('active-tab');
                 $(document).find('.phone-widget__additional-bar #tab-device').hide();
                 $(document).find('.phone-widget__additional-bar #tab-logs').show();
-                $(document).find('.phone-widget__additional-bar #tab-tools').show();
+                // $(document).find('.phone-widget__additional-bar #tab-tools').show();
             }
 
             device.register();
@@ -351,7 +351,7 @@
         originalError: error.originalError
     })
 
-    const phoneDisconnected = () => PhoneWidget.getDeviceState().phoneDisconnected('Voip page is closed');
+    const phoneDisconnected = () => PhoneWidget.getDeviceState().phoneDisconnected('Phone connection is closed');
 
     window.phoneWidget.device.initialize = {
         Init: Init

@@ -59,13 +59,11 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
             // console.log(e);
 
             if (typeof PhoneWidget === 'object') {
-                if (window.isTwilioDevicePage) {
-                    socketSend('PhoneDeviceRegister', 'Register', {
-                        'deviceId': localStorage.getItem(window.phoneWidget.initParams.phoneDeviceIdStorageKey)
-                    });
-                } else {
-                    window.sendCommandUpdatePhoneWidgetCurrentCalls('', userId, window.generalLinePriorityIsEnabled);
-                }
+                // if (window.isTwilioDevicePage) {
+                    socketSend('PhoneDeviceRegister', 'Register', {default: 'default'});
+                // } else {
+                //     window.sendCommandUpdatePhoneWidgetCurrentCalls('', userId, window.generalLinePriorityIsEnabled);
+                // }
             }
         };
 
@@ -388,22 +386,22 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                         if (obj.error) {
                             if (obj.deviceIsInvalid) {
                                 // todo move to phone widget
-                                localStorage.removeItem(window.phoneWidget.initParams.phoneDeviceIdStorageKey);
+                                //localStorage.removeItem(window.phoneWidget.initParams.phoneDeviceIdStorageKey);
                                 //PhoneWidget.getDeviceState().removeDeviceId();
                                 alert(obj.msg + ' You will be redirected to Home page!');
                                 window.location.href = '/';
                             }
-                            if (obj.errorType === 'voipPageAlreadyOpened') {
-                                alert('Voip page is already opened. You will be redirected to Home page!');
-                                window.location.href = '/';
-                            } else {
+                            // if (obj.errorType === 'voipPageAlreadyOpened') {
+                            //     alert('Voip page is already opened. You will be redirected to Home page!');
+                            //     window.location.href = '/';
+                            // } else {
                                 createNotify('Phone Widget', obj.msg, 'error');
                                 PhoneWidget.addLog(obj.msg);
-                            }
+                            // }
                         } else {
-                            if (!PhoneWidget.isInitiated()) {
-                                PhoneWidget.init(window.phoneWidget.initParams);
-                            }
+                            // if (!PhoneWidget.isInitiated()) {
+                            //     PhoneWidget.init(window.phoneWidget.initParams);
+                            // }
                             window.phoneWidget.device.initialize.Init(obj.deviceId, window.phoneDeviceRemoteLogsEnabled);
                             window.sendCommandUpdatePhoneWidgetCurrentCalls('', userId, window.generalLinePriorityIsEnabled);
                         }
@@ -415,14 +413,15 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                                 PhoneWidget.getDeviceState().removeDeviceId();
                             }
                             PhoneWidget.addLog(obj.msg);
+                            createNotify('Phone Widget', obj.msg.message, 'error');
                         }
                     }
 
                     if (obj.cmd === 'updateCurrentCalls') {
                         if (typeof PhoneWidget === "object") {
-                            if (!PhoneWidget.isInitiated()) {
-                                PhoneWidget.init(window.phoneWidget.initParams);
-                            }
+                            // if (!PhoneWidget.isInitiated()) {
+                            //     PhoneWidget.init(window.phoneWidget.initParams);
+                            // }
                             PhoneWidget.updateCurrentCalls(obj.data, obj.userStatus);
                         }
                     }
@@ -565,6 +564,7 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                         $('.btn-delete-product[data-product-id="' + obj.data.productId + '"]').hide();
                     }
 
+                    // todo voip: check case when device is every tabs
                     if (obj.cmd === 'leadRedialAutoTake') {
                         if (typeof PhoneWidget === 'object' && window.isTwilioDevicePage) {
                             //var strWindowFeatures = "menubar=no,location=no,resizable=yes,scrollbars=yes,status=no";

@@ -37,6 +37,10 @@
         };
 
         this.refresh = function () {
+            if (document.visibilityState !== 'visible') {
+                this.stop();
+                return;
+            }
             if (!this.isOn) {
                 this.stop();
                 return;
@@ -105,6 +109,10 @@
         }
         return new EmptyIncoming(queues, notifier, incomingPane, outgoingPane);
     }
+
+    document.addEventListener("visibilitychange", function() {
+        PhoneWidget.audio.incoming.refresh();
+    });
 
     window.phoneWidget.audio = {
         Incoming: Incoming

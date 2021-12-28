@@ -69,12 +69,12 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 'url' => 'javascript:',
                 'icon' => 'phone',
                 'items' => [
-                    ['label' => 'VoIP / Phone Device',
-                        'url' => ['/voip/index'],
-                        'icon' => 'phone-square',
-                        'visible' => Yii::$app->user->can('PhoneWidget'),
-                        'title' => 'VoIP Phone Device'
-                    ],
+//                    ['label' => 'VoIP / Phone Device',
+//                        'url' => ['/voip/index'],
+//                        'icon' => 'phone-square',
+//                        'visible' => Yii::$app->user->can('PhoneWidget'),
+//                        'title' => 'VoIP Phone Device'
+//                    ],
                     ['label' => 'Device List',
                         'url' => ['/phone-device-crud/index'],
                         'icon' => 'list',
@@ -85,15 +85,16 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         'title' => 'VoIP Phone Devices Log']
                 ],
             ];
-        } else {
-            $menuItems[] = [
-                'label' => 'VoIP / Phone Device',
-                'title' => 'VoIP Phone Device',
-                'url' => ['/voip/index'],
-                'icon' => 'phone-square',
-                'visible' => Yii::$app->user->can('PhoneWidget')
-            ];
         }
+//        else {
+//            $menuItems[] = [
+//                'label' => 'VoIP / Phone Device',
+//                'title' => 'VoIP Phone Device',
+//                'url' => ['/voip/index'],
+//                'icon' => 'phone-square',
+//                'visible' => Yii::$app->user->can('PhoneWidget')
+//            ];
+//        }
 
         if (Auth::can('createLead')) {
             $menuLItems[] = ['label' => 'Create Lead', 'url' => ['/lead/create'], 'icon' => 'plus'];
