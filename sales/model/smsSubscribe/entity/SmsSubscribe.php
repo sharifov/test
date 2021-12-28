@@ -4,6 +4,7 @@ namespace sales\model\smsSubscribe\entity;
 
 use common\models\Employee;
 use common\models\Project;
+use common\models\Sms;
 use sales\model\contactPhoneList\entity\ContactPhoneList;
 use Yii;
 use yii\behaviors\BlameableBehavior;
@@ -23,6 +24,7 @@ use yii\helpers\ArrayHelper;
  * @property string|null $ss_deadline_dt
  * @property int|null $ss_created_user_id
  * @property int|null $ss_updated_user_id
+ * @property int|null $ss_sms_id
  *
  * @property ContactPhoneList $ssCpl
  * @property Employee $ssCreatedUser
@@ -52,6 +54,9 @@ class SmsSubscribe extends \yii\db\ActiveRecord
             ['ss_updated_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['ss_updated_user_id' => 'id']],
 
             [['ss_created_dt', 'ss_updated_dt', 'ss_deadline_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s', 'skipOnEmpty' => true],
+
+            ['ss_sms_id', 'integer'],
+            ['ss_sms_id', 'exist', 'skipOnError' => true, 'targetClass' => Sms::class, 'targetAttribute' => ['ss_sms_id' => 's_id']],
         ];
     }
 
@@ -110,6 +115,7 @@ class SmsSubscribe extends \yii\db\ActiveRecord
             'ss_deadline_dt' => 'Deadline Dt',
             'ss_created_user_id' => 'Created User',
             'ss_updated_user_id' => 'Updated User',
+            'ss_sms_id' => 'SMS ID',
         ];
     }
 

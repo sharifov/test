@@ -34,6 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             'ss_id',
             'ss_cpl_id',
+            'ss_sms_id',
             'ss_project_id:projectName',
             [
                 'attribute' => 'ss_status_id',

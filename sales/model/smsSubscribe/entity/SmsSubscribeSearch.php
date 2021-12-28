@@ -16,6 +16,7 @@ class SmsSubscribeSearch extends SmsSubscribe
             ['ss_project_id', 'integer'],
             ['ss_status_id', 'integer'],
             ['ss_updated_user_id', 'integer'],
+            ['ss_sms_id', 'integer'],
 
             [['ss_created_dt', 'ss_updated_dt', 'ss_deadline_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
@@ -39,6 +40,7 @@ class SmsSubscribeSearch extends SmsSubscribe
         $query->andFilterWhere([
             'ss_id' => $this->ss_id,
             'ss_cpl_id' => $this->ss_cpl_id,
+            'ss_sms_id' => $this->ss_sms_id,
             'ss_project_id' => $this->ss_project_id,
             'ss_status_id' => $this->ss_status_id,
             'DATE(ss_created_dt)' => $this->ss_created_dt,

@@ -18,6 +18,8 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'ss_cpl_id')->textInput() ?>
 
+        <?= $form->field($model, 'ss_sms_id')->textInput() ?>
+
         <?= $form->field($model, 'ss_project_id')->dropDownList(\common\models\Project::getList()) ?>
 
         <?= $form->field($model, 'ss_status_id')->dropDownList(SmsSubscribeStatus::STATUS_LIST) ?>
