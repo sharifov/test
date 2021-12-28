@@ -2846,7 +2846,7 @@ class CommunicationController extends ApiBaseController
 
         if (empty($post['conferenceData'])) {
             $response['error'] = 'Not found POST[conferenceData]';
-            Yii::error($response['error'] . ' - ' . VarDumper::dumpAsString($post), 'API:Communication:voiceConferenceCallCallback');
+            Yii::error($response['error'] . ' - ' . VarDumper::dumpAsString($post), 'API:Communication:voiceConferenceCallCallback:emptyConferenceData');
             return $response;
         }
 
@@ -2857,7 +2857,7 @@ class CommunicationController extends ApiBaseController
             Yii::error(VarDumper::dumpAsString([
                 'message' => $response['error'],
                 'post' => $post,
-            ]), 'API:Communication:voiceConferenceCallCallback');
+            ]), 'API:Communication:voiceConferenceCallCallback:cantLoadData');
             return $response;
         }
 
@@ -2868,7 +2868,7 @@ class CommunicationController extends ApiBaseController
                 'errors' => $form->getErrors(),
                 'form' => $form->getAttributes(),
                 'post' => $post,
-            ]), 'API:Communication:voiceConferenceCallCallback');
+            ]), 'API:Communication:voiceConferenceCallCallback:validate');
             return $response;
         }
 
@@ -2885,12 +2885,22 @@ class CommunicationController extends ApiBaseController
 
             try {
                 if (!$conference->save()) {
-                    Yii::error(VarDumper::dumpAsString([
-                        'errors' => $conference->getErrors(),
-                        'model' => $conference->getAttributes(),
-                        'post' => $post,
-                        'form' => $form->getAttributes(),
-                    ]), 'API:Communication:voiceConferenceCallCallback');
+                    $errors = $conference->getErrors();
+                    if (
+                        count($errors) === 1
+                        && array_key_exists('cf_sid', $errors)
+                        && count($errors['cf_sid']) === 1
+                        && strpos($errors['cf_sid'][0], 'has already been taken') !== false
+                    ) {
+                        // 2 callback received in one time
+                    } else {
+                        Yii::error(VarDumper::dumpAsString([
+                            'errors' => $errors,
+                            'model' => $conference->getAttributes(),
+                            'post' => $post,
+                            'form' => $form->getAttributes(),
+                        ]), 'API:Communication:voiceConferenceCallCallback:save');
+                    }
                     $conference = Conference::findOne(['cf_sid' => $form->ConferenceSid]);
                 }
             } catch (\Throwable $e) {
