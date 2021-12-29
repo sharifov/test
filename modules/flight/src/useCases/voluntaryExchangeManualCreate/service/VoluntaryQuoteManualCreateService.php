@@ -142,6 +142,7 @@ class VoluntaryQuoteManualCreateService
             $flightQuoteTripId = $flightQuoteTrip->fqt_id;
             $segmentDto = new FlightQuoteSegmentDTOItinerary($flightQuote->getId(), $flightQuoteTripId, $itinerary);
             $flightQuoteSegment = FlightQuoteSegment::create($segmentDto);
+            $flightQuoteSegment->setCabin($flight->fl_cabin_class);
 
             $this->objectCollection->getFlightQuoteSegmentRepository()->save($flightQuoteSegment);
             $keyIata = $flightQuoteSegment->fqs_departure_airport_iata . $flightQuoteSegment->fqs_arrival_airport_iata;
