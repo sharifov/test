@@ -10,6 +10,7 @@ use modules\flight\models\FlightQuote;
 use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
 use modules\flight\src\helpers\FlightQuoteHelper;
 use modules\flight\src\useCases\form\ChangeQuoteCreateForm;
+use sales\services\parsingDump\ReservationService;
 use yii\base\Model;
 use yii\helpers\Html;
 
@@ -105,9 +106,14 @@ class ReProtectionQuoteCreateForm extends ChangeQuoteCreateForm
 
     public function checkReservationDump(): void
     {
-        $dumpParser = FlightQuoteHelper::parseDump($this->reservationDump, false, $this->itinerary);
-        if (empty($dumpParser)) {
-            $this->addError('reservationDump', 'Incorrect reservation dump!');
+        try {
+            $reservationService = new ReservationService($this->gds);
+            $reservationService->parseReservation($this->reservationDump, false, $this->itinerary);
+        } catch (\Throwable $throwable) {
+            $this->addError('reservationDump', $throwable->getMessage());
+        }
+        if (!($reservationService->parseStatus ?? null) || empty($this->itinerary)) {
+            $this->addError('reservationDump', 'Incorrect reservation dump');
         }
     }
 

@@ -1255,10 +1255,10 @@ class FlightQuoteController extends FController
                 $response['message'] = 'Success. FlightQuote ID(' . $flightQuote->getId() . ') created';
                 $response['status'] = 1;
             } catch (\RuntimeException | \DomainException $exception) {
-                Yii::info(AppHelper::throwableLog($exception), 'FlightQuoteController:actionAjaxPrepareDump:Exception');
+                Yii::warning(AppHelper::throwableLog($exception, true), 'FlightQuoteController:actionAjaxSaveReProtection:Exception');
                 $response['message'] = VarDumper::dumpAsString($exception->getMessage());
             } catch (\Throwable $throwable) {
-                Yii::error(AppHelper::throwableLog($throwable), 'FlightQuoteController:actionAjaxPrepareDump:throwable');
+                Yii::error(AppHelper::throwableLog($throwable, true), 'FlightQuoteController:actionAjaxSaveReProtection:throwable');
                 $response['message'] = 'Internal Server Error';
             }
             return $response;

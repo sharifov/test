@@ -200,10 +200,6 @@ class ReProtectionQuoteManualCreateService
             $segmentDto = new FlightQuoteSegmentDTOItinerary($flightQuote->getId(), $flightQuoteTripId, $itinerary);
             $flightQuoteSegment = FlightQuoteSegment::create($segmentDto);
 
-            if (in_array($form->gds, [SearchService::GDS_WORLDSPAN, SearchService::GDS_TRAVELPORT], false)) {
-                $flightQuoteSegment = self::postProcessingWordspan($flightQuoteSegment, $segments);
-            }
-
             $this->flightQuoteSegmentRepository->save($flightQuoteSegment);
             $keyIata = $flightQuoteSegment->fqs_departure_airport_iata . $flightQuoteSegment->fqs_arrival_airport_iata;
             $flightQuoteSegments[$keyIata] = $flightQuoteSegment;
