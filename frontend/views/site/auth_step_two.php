@@ -5,6 +5,7 @@
  * @var \sales\model\authClient\entity\AuthClient[] $authClients
  */
 
+use yii\helpers\StringHelper;
 use yii\helpers\Url;
 
 ?>
@@ -17,6 +18,7 @@ use yii\helpers\Url;
                 <h1>Choose profile</h1>
                 <ul class="list-unstyled">
                     <?php foreach ($authClients as $authClient) : ?>
+                        <?php $userRoles = implode(', ', $authClient->user->getRoles(true)); ?>
                         <li>
                             <a class="profile_link" href="<?= Url::to(['/site/auth-step-two', 'user-id' => $authClient->ac_user_id])?>">
                                 <span class="avatar_wrapper">
@@ -24,7 +26,7 @@ use yii\helpers\Url;
                                 </span>
                                 <div class="d-flex align-items-start" style="flex-direction: column;">
                                     <span>
-                                        <h6><b><?= $authClient->user->nickname ?></b> (<?= implode(', ', $authClient->user->getRoles(true)) ?>)</h6>
+                                        <h6><b><?= $authClient->user->nickname ?></b> <span title="<?= $userRoles ?>">(<?= StringHelper::truncate($userRoles, 20, '...') ?>)</span></h6>
                                     </span>
                                     <span>
                                         <?= $authClient->user->email ?>
