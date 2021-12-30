@@ -2,9 +2,15 @@
 
 namespace sales\forms\emailReviewQueue;
 
+use common\components\validators\IsArrayValidator;
 use common\models\Email;
+use frontend\helpers\JsonHelper;
+use modules\fileStorage\src\entity\fileLead\FileLeadQuery;
+use modules\fileStorage\src\entity\fileStorage\FileStorage;
+use modules\fileStorage\src\services\url\FileInfo;
 use sales\model\emailReviewQueue\entity\EmailReviewQueue;
 use yii\base\Model;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class EmailReviewQueueForm
@@ -29,6 +35,12 @@ class EmailReviewQueueForm extends Model
     public $emailSubject;
     public $emailMessage;
     public $emailQueueId;
+    public $files;
+    private $fileList;
+    private $selectedFiles = [];
+
+    public $leadId;
+    public $caseId;
 
     public const SCENARIO_SEND_EMAIL = 'sendEmail';
     public const SCENARIO_REJECT = 'reject';
@@ -44,6 +56,9 @@ class EmailReviewQueueForm extends Model
             $this->emailToName = $email->e_email_to_name;
             $this->emailSubject = $email->e_email_subject;
             $this->emailMessage = $email->getEmailBodyHtml();
+            $this->leadId = $email->e_lead_id;
+            $this->caseId = $email->e_case_id;
+            $this->selectedFiles = $this->parseSelectedFiles($email->e_email_data);
         }
         $this->emailQueueId = $emailQueueId;
     }
@@ -58,12 +73,15 @@ class EmailReviewQueueForm extends Model
             [['emailQueueId', 'emailId'], 'required', 'on' => self::SCENARIO_REJECT],
             [['emailSubject', 'emailMessage'], 'trim'],
             [['emailTo', 'emailFrom'], 'email'],
-            [['emailId', 'emailQueueId'], 'integer'],
+            [['emailId', 'emailQueueId', 'leadId', 'caseId'], 'integer'],
             [['emailMessage'], 'string'],
             [['emailSubject'], 'string', 'max' => 200, 'min' => 5],
             [['emailFromName', 'emailToName'], 'string', 'max' => 50],
             [['emailId'], 'exist', 'skipOnError' => true, 'targetClass' => Email::class, 'targetAttribute' => ['emailId' => 'e_id']],
             [['emailQueueId'], 'exist', 'skipOnError' => true, 'targetClass' => EmailReviewQueue::class, 'targetAttribute' => ['emailQueueId' => 'erq_id']],
+
+            ['files', IsArrayValidator::class],
+            ['files', 'each', 'rule' => ['string'], 'skipOnError' => true, 'skipOnEmpty' => true],
         ];
     }
 
@@ -75,5 +93,57 @@ class EmailReviewQueueForm extends Model
     public function rejectEmailScenario(): void
     {
         $this->scenario = self::SCENARIO_REJECT;
+    }
+
+    public function getFileList(): array
+    {
+        if ($this->fileList !== null) {
+            return $this->fileList;
+        }
+        $fileLeadQuery = [];
+        if ($this->leadId) {
+            $fileLeadQuery = FileLeadQuery::getListByLead($this->leadId);
+        } else if ($this->caseId) {
+            $fileLeadQuery = FileLeadQuery::getListByLead($this->caseId);
+        }
+        $this->fileList = ArrayHelper::map($fileLeadQuery, 'uid', 'name');
+        return $this->fileList = ArrayHelper::map($fileLeadQuery, 'uid', 'name');
+    }
+
+    public function getFilesPath(): array
+    {
+        $files = [];
+        if (!$this->files) {
+            return $files;
+        }
+        foreach ($this->files as $fileUid) {
+            if ($fileStorage = FileStorage::findOne(['fs_uid' => $fileUid])) {
+                $files[] = new FileInfo(
+                    $fileStorage->fs_name,
+                    $fileStorage->fs_path,
+                    $fileStorage->fs_uid,
+                    $fileStorage->fs_title,
+                    null
+                );
+            }
+        }
+        return $files;
+    }
+
+    public function parseSelectedFiles(?string $emailData): array
+    {
+        $data = JsonHelper::decode($emailData);
+        $selectedFiles = [];
+        if (!empty($data['files'])) {
+            foreach ($data['files'] as $file) {
+                $selectedFiles[] = $file['uid'];
+            }
+        }
+        return $selectedFiles;
+    }
+
+    public function getSelectedFiles(): array
+    {
+        return $this->selectedFiles;
     }
 }

@@ -49,6 +49,7 @@ class AwsS3UrlGenerator implements UrlGenerator
                     'name' => $file->name,
                     'title' => $file->title,
                     'type_id' => UrlGenerator::TYPE_PRIVATE,
+                    'uid' => $file->uid
                 ];
             } else {
                 $links[] = [
@@ -56,6 +57,7 @@ class AwsS3UrlGenerator implements UrlGenerator
                     'name' => $file->name,
                     'title' => $file->title,
                     'type_id' => UrlGenerator::TYPE_PUBLIC,
+                    'uid' => $file->uid
                 ];
             }
         }
