@@ -6,6 +6,8 @@ use common\components\purifier\Purifier;
 use common\models\Email;
 use common\models\Notifications;
 use frontend\widgets\notification\NotificationMessage;
+use modules\fileStorage\FileStorageSettings;
+use modules\fileStorage\src\services\url\UrlGenerator;
 use sales\auth\Auth;
 use sales\entities\cases\CaseEventLog;
 use sales\forms\emailReviewQueue\EmailReviewQueueForm;
@@ -18,6 +20,14 @@ use yii\web\NotFoundHttpException;
 
 class EmailReviewQueueController extends FController
 {
+    private UrlGenerator $fileStorageUrlGenerator;
+
+    public function __construct($id, $module, UrlGenerator $fileStorageUrlGenerator, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->fileStorageUrlGenerator = $fileStorageUrlGenerator;
+    }
+
     /**
      * @inheritDoc
      */
@@ -123,6 +133,11 @@ class EmailReviewQueueController extends FController
                 $email->e_email_subject = $form->emailSubject;
                 $email->e_status_id = Email::STATUS_PENDING;
                 $email->body_html = $form->emailMessage;
+                $attachments = [];
+                if ($form->files && FileStorageSettings::canEmailAttach()) {
+                    $attachments['files'] = $this->fileStorageUrlGenerator->generateForExternal($form->getFilesPath());
+                }
+                $email->e_email_data = json_encode($attachments);
                 if ($email->save()) {
                     $mailResponse = $email->sendMail();
 

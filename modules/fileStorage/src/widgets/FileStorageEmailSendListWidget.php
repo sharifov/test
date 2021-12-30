@@ -13,12 +13,14 @@ class FileStorageEmailSendListWidget extends Widget
 {
     public array $files = [];
     public string $checkBoxName;
+    public array $selectedFiles = [];
 
     public function run(): string
     {
         return $this->render('email_list', [
             'files' => $this->files,
-            'checkBoxName' => $this->checkBoxName
+            'checkBoxName' => $this->checkBoxName,
+            'selectedFiles' => $this->selectedFiles
         ]);
     }
 
@@ -35,6 +37,15 @@ class FileStorageEmailSendListWidget extends Widget
         return self::widget([
             'files' => $files,
             'checkBoxName' => (new CasePreviewEmailForm())->formName()
+        ]);
+    }
+
+    public static function byReview(array $files, string $formName, array $selectedFiles): string
+    {
+        return self::widget([
+            'files' => $files,
+            'checkBoxName' => $formName,
+            'selectedFiles' => $selectedFiles
         ]);
     }
 }

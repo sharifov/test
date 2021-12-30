@@ -5,6 +5,7 @@ use kartik\select2\Select2;
 
 /** @var View $this */
 /** @var array $files */
+/** @var array $selectedFiles */
 /** @var string $checkBoxName */
 ?>
 
@@ -23,5 +24,6 @@ use kartik\select2\Select2;
             'id' => 'leadFileList',
             'multiple' => true,
         ],
+        'value' => $selectedFiles
     ]) ?>
 </div>
