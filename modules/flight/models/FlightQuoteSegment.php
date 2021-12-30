@@ -477,7 +477,7 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
         return ($this->fqs_operating_airline && $this->operatingAirline) ? $this->operatingAirline->name : '';
     }
 
-    public function setCabin(string $cabin): void
+    public function setCabin(?string $cabin): void
     {
         $this->fqs_cabin_class = $cabin;
     }
