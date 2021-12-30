@@ -227,9 +227,9 @@ use yii\bootstrap4\Html;
                     <div class="row mt-2 mb-2 ml-1 font-weight-bold">
                     Trip <?= $key + 1 ?>. <?php
                         $airport = Airports::findByIata($segment->origin);
-                        echo ($airport ? $airport->cityName . ' '  : '') . $segment->origin . ' - ';
+                        echo $segment->origin . ($airport ? ' (' . $airport->cityName . ') - '  : '');
                         $airport = Airports::findByIata($segment->destination);
-                        echo ($airport ? $airport->cityName . ' '  : '') . $segment->destination; ?>
+                        echo $segment->destination . ($airport ? ' (' . $airport->cityName . ')'  : ''); ?>
                     </div>
                     <div class="row">
                         <?php if (isset($tripsMinDurationsInMinutes[$key]) && isset($tripsMaxDurationsInMinutes[$key]) && $tripsMinDurationsInMinutes[$key] > 0 && $tripsMaxDurationsInMinutes[$key] > 0) : ?>
