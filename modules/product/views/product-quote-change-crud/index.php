@@ -68,6 +68,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
             ],
             'pqc_is_automate:boolean',
+            'pqc_refund_allowed:boolean',
             [
                 'label' => 'ProductQuote Relations',
                 'value' => static function (ProductQuoteChange $model) {

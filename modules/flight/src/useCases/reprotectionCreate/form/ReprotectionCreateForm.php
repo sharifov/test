@@ -17,6 +17,7 @@ use yii\base\Model;
  * @property $is_automate
  * @property $flight_quote
  * @property $project_key
+ * @property $refundAllowed
  *
  * @property Project|null $project
  * @property FlightQuoteForm|null $flightQuoteForm
@@ -27,6 +28,7 @@ class ReprotectionCreateForm extends Model
     public $is_automate;
     public $flight_quote;
     public $project_key;
+    public $refundAllowed;
 
     private ?Project $project;
     private ?FlightQuoteForm $flightQuoteForm;
@@ -43,6 +45,9 @@ class ReprotectionCreateForm extends Model
 
             [['is_automate'], 'boolean', 'strict' => true, 'trueValue' => true, 'falseValue' => false, 'skipOnEmpty' => true],
             [['is_automate'], 'default', 'value' => false],
+
+            [['refundAllowed'], 'boolean', 'strict' => true, 'trueValue' => true, 'falseValue' => false, 'skipOnEmpty' => true],
+            [['refundAllowed'], 'default', 'value' => true],
 
             [['flight_quote'], CheckJsonValidator::class, 'skipOnEmpty' => true],
             [['flight_quote'], 'checkFlightQuoteForm'],

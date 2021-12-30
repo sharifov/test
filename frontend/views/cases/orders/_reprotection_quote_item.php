@@ -177,7 +177,7 @@ $productQuoteAbacDto->mapOrderAttributes($order);
                         <th>Status</th>
                         <th title="Client Status mapping from SiteSettings for OTA" data-toggle="tooltip">Client Status</th>
                         <th style="width: 140px">Created</th>
-                        <th style="width: 60px" title="is Automate">Auto</th>
+                        <th style="width: 76px">Info</th>
                         <th>Decision</th>
                         <th style="width: 60px">Action</th>
                     </tr>
@@ -208,8 +208,14 @@ $productQuoteAbacDto->mapOrderAttributes($order);
                             <td><?= $changeItem->getStatusLabel()?></td>
                             <td><?= Html::encode($changeItem->getClientStatusName()) ?></td>
                             <td><small><?=$changeItem->pqc_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($changeItem->pqc_created_dt)) : '-'?></small></td>
-
-                            <td><?= $changeItem->pqc_is_automate ? '<i class="fa fa-check" title="Automate"></i>' : '-' ?></td>
+                            <td>
+                                <?php if ($changeItem->pqc_is_automate) : ?>
+                                    <?php echo Html::tag('span', 'A', ['class' => 'badge badge-pill badge-success', 'title' => 'Automatic']) ?>
+                                <?php endif ?>
+                                <?php if ($changeItem->isTypeReProtection() && !$changeItem->pqc_refund_allowed) : ?>
+                                    <?php echo Html::tag('span', 'R', ['class' => 'badge badge-pill badge-danger', 'title' => 'Not Refundable']) ?>
+                                <?php endif ?>
+                            </td>
                             <td>
                                 <?= $changeItem->getDecisionTypeLabel()?><br />
                                 <small><?=$changeItem->pqc_decision_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($changeItem->pqc_decision_dt)) : '-'?></small>

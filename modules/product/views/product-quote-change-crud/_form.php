@@ -32,6 +32,8 @@ use sales\widgets\DateTimePicker;
 
         <?= $form->field($model, 'pqc_is_automate')->checkbox() ?>
 
+        <?= $form->field($model, 'pqc_refund_allowed')->checkbox() ?>
+
       <?= $form->field($model, 'pqc_decision_type_id')->dropDownList(ProductQuoteChangeDecisionType::getList(), ['prompt' => '---']) ?>
 
         <?= $form->field($model, 'pqc_created_dt')->widget(DateTimePicker::class, []) ?>

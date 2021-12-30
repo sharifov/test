@@ -7,6 +7,7 @@ use modules\flight\models\FlightRequest;
 use modules\flight\models\FlightRequestLog;
 use modules\flight\src\repositories\flightRequest\FlightRequestRepository;
 use modules\flight\src\repositories\flightRequestLog\FlightRequestLogRepository;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 
 /**
@@ -85,5 +86,10 @@ class FlightRequestService
     public function setFlightRequest(FlightRequest $flightRequest): void
     {
         $this->flightRequest = $flightRequest;
+    }
+
+    public function getIsRefundAllowed(): bool
+    {
+        return (bool) ArrayHelper::getValue($this->flightRequest, 'fr_data_json.refundAllowed', true);
     }
 }

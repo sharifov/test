@@ -715,6 +715,19 @@ class Formatter extends \yii\i18n\Formatter
         return Html::tag('span', 'No', ['class' => 'badge badge-danger']);
     }
 
+    public function asBooleanBySquare($value, bool $color = true): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+        if ($value) {
+            $classColor = $color ? 'text-success' : '';
+            return Html::tag('i', '', ['class' => 'fa fa-check-square ' . $classColor]);
+        }
+        $classColor = $color ? 'text-danger' : '';
+        return Html::tag('i', '', ['class' => 'fa fa-minus-square ' . $classColor]);
+    }
+
     /**
      * @param $value
      * @return string

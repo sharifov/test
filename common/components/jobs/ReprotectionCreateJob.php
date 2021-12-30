@@ -129,7 +129,12 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                     $productQuoteChangeRepository->save($oldScheduleChange);
                 }
 
-                $productQuoteChange = ProductQuoteChange::createReProtection($originProductQuote->pq_id, $case->cs_id, $this->flight_request_is_automate);
+                $productQuoteChange = ProductQuoteChange::createReProtection(
+                    $originProductQuote->pq_id,
+                    $case->cs_id,
+                    $this->flight_request_is_automate,
+                    $flightRequestService->getIsRefundAllowed()
+                );
                 $productQuoteChangeRepository->save($productQuoteChange);
 
                 $case->addEventLog(
@@ -182,7 +187,12 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                             $case,
                             $this->flight_request_is_automate
                         );
-                        $productQuoteChange = ProductQuoteChange::createReProtection($originProductQuote->pq_id, $case->cs_id, $this->flight_request_is_automate);
+                        $productQuoteChange = ProductQuoteChange::createReProtection(
+                            $originProductQuote->pq_id,
+                            $case->cs_id,
+                            $this->flight_request_is_automate,
+                            $flightRequestService->getIsRefundAllowed()
+                        );
                         $productQuoteChangeRepository->save($productQuoteChange);
                         $caseReProtectionService->setCaseDeadline($originProductQuote->flightQuote);
                     } catch (Throwable $throwable) {
@@ -264,7 +274,12 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
             }
 
             if (!isset($productQuoteChange)) {
-                $productQuoteChange = ProductQuoteChange::createReProtection($originProductQuote->pq_id, $case->cs_id, $this->flight_request_is_automate);
+                $productQuoteChange = ProductQuoteChange::createReProtection(
+                    $originProductQuote->pq_id,
+                    $case->cs_id,
+                    $this->flight_request_is_automate,
+                    $flightRequestService->getIsRefundAllowed()
+                );
                 $productQuoteChangeRepository->save($productQuoteChange);
             }
 

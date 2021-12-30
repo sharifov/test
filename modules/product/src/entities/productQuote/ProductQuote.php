@@ -311,7 +311,9 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
      */
     public function getProductQuoteInvoluntaryChangesActive(): ActiveQuery
     {
-        return $this->hasMany(ProductQuoteChange::class, ['pqc_pq_id' => 'pq_id'])->andWhere(['pqc_status_id' => SettingHelper::getInvoluntaryChangeActiveStatuses()])->andWhere(['pqc_type_id' => ProductQuoteChange::TYPE_RE_PROTECTION]);
+        return $this->hasMany(ProductQuoteChange::class, ['pqc_pq_id' => 'pq_id'])
+            ->andWhere(['pqc_status_id' => SettingHelper::getInvoluntaryChangeActiveStatuses()])
+            ->andWhere(['pqc_type_id' => ProductQuoteChange::TYPE_RE_PROTECTION]);
     }
 
     public function getProductQuoteLastRefund(): ActiveQuery

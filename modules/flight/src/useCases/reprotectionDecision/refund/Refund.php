@@ -12,11 +12,13 @@ use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeDecisionType;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
+use modules\product\src\entities\productQuoteChange\service\ProductQuoteChangeService;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundRepository;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use sales\entities\cases\CaseEventLog;
 use sales\entities\cases\Cases;
+use sales\helpers\setting\SettingHelper;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\product\ProductQuoteRepository;
 use sales\services\TransactionManager;
@@ -74,6 +76,10 @@ class Refund
         $productQuoteChange = $this->productQuoteChangeRepository->findByProductIdAndType($productQuote->pq_id, ProductQuoteChange::TYPE_RE_PROTECTION);
         if (!$productQuoteChange->isPending() || !$productQuoteChange->isTypeReProtection()) {
             throw new \DomainException('Product Quote Change status is not in "pending" or is not Schedule Change. Current status "' . ProductQuoteChangeStatus::getName($productQuoteChange->pqc_status_id) . '"; Current Type: "' . $productQuoteChange->getTypeName() . '"', 101);
+        }
+
+        if (ProductQuoteChangeService::notRefundableReProtection($productQuote->pq_id)) {
+            throw new \DomainException('Product Quote Change not refundable.');
         }
 
         try {
