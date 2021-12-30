@@ -7,6 +7,8 @@
  */
 
 use dosamigos\ckeditor\CKEditor;
+use modules\fileStorage\FileStorageSettings;
+use modules\fileStorage\src\widgets\FileStorageEmailSendListWidget;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
@@ -50,6 +52,8 @@ use yii\widgets\Pjax;
 
                         <?= $form->field($previewForm, 'emailId')->hiddenInput()->label(false); ?>
                         <?= $form->field($previewForm, 'emailQueueId')->hiddenInput()->label(false); ?>
+                        <?= $form->field($previewForm, 'leadId')->hiddenInput()->label(false); ?>
+                        <?= $form->field($previewForm, 'caseId')->hiddenInput()->label(false); ?>
                     </div>
                     <div class="col-sm-6 form-group">
                         <?= $form->field($previewForm, 'emailTo')->textInput(['class' => 'form-control', 'maxlength' => true, ]) ?>
@@ -59,6 +63,15 @@ use yii\widgets\Pjax;
                 <div class="row">
                     <div class="col-sm-12 form-group">
                         <?= $form->field($previewForm, 'emailSubject')->textInput(['class' => 'form-control', 'maxlength' => true]) ?>
+                    </div>
+                    <div class="col-md-12 form-group">
+                        <?php if (FileStorageSettings::canEmailAttach()) : ?>
+                            <div class="row">
+                                <div class="col-sm-6 form-group">
+                                    <?= FileStorageEmailSendListWidget::byReview($previewForm->getFileList(), $previewForm->formName(), $previewForm->getSelectedFiles()) ?>
+                                </div>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
                 <div class="form-group">
@@ -100,13 +113,21 @@ use yii\widgets\Pjax;
 
 <?php
 $js = <<<JS
+let clickedBtn = '';
+let clickedBtnHtml = '';
 $(document).on('click', '.btn-submit', function (e) {
     e.preventDefault();
     let url = $(this).attr('data-url');
+    clickedBtn = $(this);
+    clickedBtnHtml = clickedBtn.html();
     $(".btn-submit").attr("disabled", true).prop("disabled", true).addClass("disabled");
     $(this).find('i').attr("class", "fa fa-spinner fa-pulse fa-fw");
     $('#form-email-review-queue').attr('action', url).submit();
-})
+});
+$('#pjax-email-review-queue').on('pjax:success', function () {
+    $(".btn-submit").attr("disabled", false).prop("disabled", false).removeClass("disabled");
+    clickedBtn.html(clickedBtnHtml);
+});
 JS;
 $this->registerJs($js);
 ?>
