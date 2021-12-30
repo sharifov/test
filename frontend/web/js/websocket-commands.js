@@ -159,9 +159,6 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                     }
 
                     if (obj.cmd === 'updateIncomingCall') {
-                        if (typeof refreshInboxCallWidget === "function") {
-                            refreshInboxCallWidget(obj);
-                        }
                         if (typeof PhoneWidget === 'object') {
                             if (typeof obj.status !== 'undefined') {
                                 PhoneWidget.requestIncomingCall(obj);

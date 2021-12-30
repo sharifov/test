@@ -27,12 +27,23 @@ class ReadyVoipDevice
 
     public function findAny(Employee $user): string
     {
-        $device = PhoneDevice::find()->byUserId($user->id)->ready()->one();
+        $device = PhoneDevice::find()->byUserId($user->id)->ready()->limit(1)->one();
 
         if (!$device) {
             throw new \DomainException('User ' . ($user->nickname ?: $user->full_name) . ' is not ready');
         }
 
         return $device->getVoipDevice();
+    }
+
+    public function findAnyId(int $userId): ?int
+    {
+        $device = PhoneDevice::find()->select(['pd_id'])->byUserId($userId)->ready()->asArray()->limit(1)->one();
+
+        if ($device) {
+            return (int)$device['pd_id'];
+        }
+
+        return null;
     }
 }

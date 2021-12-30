@@ -311,7 +311,11 @@ var PhoneWidget = function () {
             panes.incoming.init(call, (queues.direct.count() + queues.general.count()), (queues.active.count() + queues.hold.count()));
         }
 
-        audio.incoming.refresh();
+        if (data.readyDeviceId && data.readyDeviceId === deviceState.getDeviceId()) {
+            audio.incoming.simpleRefresh();
+        } else {
+            audio.incoming.refresh();
+        }
         iconUpdate();
         openWidget();
         // openCallTab();
@@ -1669,7 +1673,11 @@ var PhoneWidget = function () {
         // }
 
         panes.queue.refresh();
-        audio.incoming.refresh();
+        if (data.readyDeviceId && data.readyDeviceId === deviceState.getDeviceId()) {
+            audio.incoming.simpleRefresh();
+        } else {
+            audio.incoming.refresh();
+        }
         //iconUpdate();
         openWidget();
     }

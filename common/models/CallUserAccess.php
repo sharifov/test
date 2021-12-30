@@ -14,6 +14,7 @@ use frontend\widgets\notification\NotificationMessage;
 use sales\dispatchers\NativeEventDispatcher;
 use sales\model\call\entity\callUserAccess\events\CallUserAccessEvents;
 use sales\model\phoneList\entity\PhoneList;
+use sales\model\voip\phoneDevice\device\ReadyVoipDevice;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -270,6 +271,7 @@ class CallUserAccess extends \yii\db\ActiveRecord
                         [
                             'data' =>
                                 array_merge($this->attributes, [
+                                    'readyDeviceId' => (new ReadyVoipDevice())->findAnyId($this->cua_user_id),
                                     'command' => 'addPriorityCall',
                                     'project' => $call->c_project_id ? $call->cProject->name : '',
                                     'department' => $call->c_dep_id ? Department::getName($call->c_dep_id) : '',
@@ -368,7 +370,7 @@ class CallUserAccess extends \yii\db\ActiveRecord
                 Notifications::publish(
                     'updateIncomingCall',
                     ['user_id' => $this->cua_user_id],
-                    array_merge($this->attributes, $callInfo ?? ['callSid' => $call->c_call_sid])
+                    array_merge($this->attributes, $callInfo ?? ['callSid' => $call->c_call_sid], ['readyDeviceId' => (new ReadyVoipDevice())->findAnyId($this->cua_user_id)])
                 );
             }
         }
