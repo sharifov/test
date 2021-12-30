@@ -218,6 +218,7 @@ class UserController extends FController
         $endDateTime = date('Y-m-d H:i', strtotime('+10 hours'));
         $data = $searchModel->searchStats(['UserMonitorSearch' => ['um_user_id' => $id]], $startDateTime);*/
         $userDataModel = new UserDataSearch();
+        $userDataModel->ud_user_id = $id;
         $userDataProvider = $userDataModel->search($params, Auth::user());
 
 
