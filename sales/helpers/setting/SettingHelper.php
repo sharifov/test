@@ -782,4 +782,14 @@ class SettingHelper
     {
         return (string) (Yii::$app->params['settings']['call_reconnect_announce'] ?? 'Connection Error. Reconnecting. Please hold');
     }
+
+    public static function isTwoFactorAuthEnabled(): bool
+    {
+        return (bool) (Yii::$app->params['settings']['two_factor_authentication_enable'] ?? false);
+    }
+
+    public static function getTwoFactorAuthCounter(): int
+    {
+        return (int) (Yii::$app->params['settings']['two_factor_counter'] ?? 60);
+    }
 }

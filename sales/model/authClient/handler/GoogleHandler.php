@@ -5,7 +5,9 @@ namespace sales\model\authClient\handler;
 use common\models\Employee;
 use common\models\LoginForm;
 use common\models\UserConnection;
+use Da\TwoFA\Manager;
 use sales\helpers\app\AppHelper;
+use sales\helpers\setting\SettingHelper;
 use sales\model\authClient\entity\AuthClient;
 use sales\model\authClient\entity\AuthClientRepository;
 use sales\model\authClient\entity\AuthClientSources;
@@ -89,7 +91,9 @@ class GoogleHandler implements ClientHandler
         $form = new LoginForm();
         $form->setUser($user);
         $form->setUserChecked(true);
-        if ($form->login()) {
+        if (SettingHelper::isTwoFactorAuthEnabled() && $user->userProfile && $user->userProfile->is2faEnable()) {
+            $this->redirectToTwoFactorAuth($user, $form);
+        } elseif ($form->login()) {
             if (UserConnection::isIdleMonitorEnabled()) {
                 UserMonitor::addEvent($user->id, UserMonitor::TYPE_LOGIN);
             }
@@ -104,5 +108,21 @@ class GoogleHandler implements ClientHandler
     public function getRedirectUrl(): string
     {
         return $this->redirectUrl;
+    }
+
+    protected function redirectToTwoFactorAuth(Employee $user, LoginForm $model): void
+    {
+        $twoFaManager = new Manager();
+        $twoFaManager->setCounter(SettingHelper::getTwoFactorAuthCounter());
+        $twoFactorAuthSecretKey = empty($user->userProfile->up_2fa_secret) ?
+            $twoFaManager->generateSecretKey() : $user->userProfile->up_2fa_secret;
+
+        $session = \Yii::$app->session;
+        $session->set('two_factor_email', $user->email);
+        $session->set('two_factor_username', $user->username);
+        $session->set('two_factor_key_exist', !empty($user->userProfile->up_2fa_secret));
+        $session->set('two_factor_key', $twoFactorAuthSecretKey);
+        $session->set('two_factor_remember_me', $model->rememberMe);
+        $this->setRedirectUrl('/site/step-two');
     }
 }
