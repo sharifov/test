@@ -11,6 +11,7 @@ use modules\webEngage\src\service\webEngageEventData\call\eventData\FirstCallNot
 use modules\webEngage\src\service\webEngageEventData\call\eventData\LeadFirstCallNotPickedEventData;
 use modules\webEngage\src\service\webEngageEventData\call\eventData\UserPickedCallEventData;
 use modules\webEngage\src\service\WebEngageRequestService;
+use modules\webEngage\src\service\webEngageUserData\WebEngageUserService;
 use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\model\clientData\entity\ClientData;
@@ -62,8 +63,8 @@ class CallOutEndedJob extends BaseJob implements JobInterface
 
             try {
                 $clientData = ClientData::findOne(['cd_key_id' => $keyId, 'cd_client_id' => $this->clientId]);
-
-                if ($clientData && $clientData->cd_field_value <= 1 && $call->isStatusNoAnswer()) {
+                $webEngageUserService = new WebEngageUserService(WebEngageDictionary::EVENT_CALL_FIRST_CALL_NOT_PICKED, $client);
+                if ($clientData && $clientData->cd_field_value <= 1 && $call->isStatusNoAnswer() && $webEngageUserService->isSendUserCreateRequest()) {
                     $data = [
                         'userId' => $client->uuid,
                         'eventName' => WebEngageDictionary::EVENT_CALL_FIRST_CALL_NOT_PICKED,
@@ -88,7 +89,8 @@ class CallOutEndedJob extends BaseJob implements JobInterface
             }
 
             try {
-                if ($call->c_call_duration >= SettingHelper::getUserPrickedCallDuration() && $call->isStatusCompleted()) {
+                $webEngageUserService = new WebEngageUserService(WebEngageDictionary::EVENT_CALL_FIRST_CALL_NOT_PICKED, $client);
+                if ($call->c_call_duration >= SettingHelper::getUserPrickedCallDuration() && $call->isStatusCompleted() && $webEngageUserService->isSendUserCreateRequest()) {
                     $data = [
                         'userId' => $client->uuid,
                         'eventName' => WebEngageDictionary::EVENT_CALL_USER_PICKED_CALL,
