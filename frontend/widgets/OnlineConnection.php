@@ -42,7 +42,7 @@ class OnlineConnection extends \yii\bootstrap\Widget
         $this->subscribeToClientChatChannel($userId, $subList);
         $pageUrl = urlencode(\yii\helpers\Url::current());
         $wsHost = (Yii::$app->request->isSecureConnection ? 'wss' : 'ws') .
-            '://' . Yii::$app->request->serverName . '/ws';
+            '://' . Yii::$app->request->hostName . '/ws';
 
         $urlParams = [
             'user_id' => $userId,

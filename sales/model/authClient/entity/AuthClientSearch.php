@@ -61,10 +61,10 @@ class AuthClientSearch extends AuthClient
             'ac_id' => $this->ac_id,
             'ac_user_id' => $this->ac_user_id,
             'ac_created_dt' => $this->ac_created_dt,
+            'ac_source' => $this->ac_source
         ]);
 
-        $query->andFilterWhere(['like', 'ac_source', $this->ac_source])
-            ->andFilterWhere(['like', 'ac_source_id', $this->ac_source_id])
+        $query->andFilterWhere(['like', 'ac_source_id', $this->ac_source_id])
             ->andFilterWhere(['like', 'ac_email', $this->ac_email])
             ->andFilterWhere(['like', 'ac_ip', $this->ac_ip])
             ->andFilterWhere(['like', 'ac_useragent', $this->ac_useragent]);

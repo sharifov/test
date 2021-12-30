@@ -1,5 +1,6 @@
 <?php
 
+use sales\model\authClient\entity\AuthClientSources;
 use sales\widgets\UserSelect2Widget;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
@@ -16,7 +17,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'ac_user_id')->widget(UserSelect2Widget::class) ?>
 
-        <?= $form->field($model, 'ac_source')->textInput(['maxlength' => true]) ?>
+        <?= $form->field($model, 'ac_source')->dropDownList(AuthClientSources::getList(), ['prompt' => '---']) ?>
 
         <?= $form->field($model, 'ac_source_id')->textInput(['maxlength' => true]) ?>
 
