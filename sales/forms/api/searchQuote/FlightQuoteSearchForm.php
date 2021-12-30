@@ -188,13 +188,13 @@ class FlightQuoteSearchForm extends Model
 
         if (!empty($this->includeAirports)) {
             $quotes['results'] = array_filter($quotes['results'], function ($item) {
-                $item['showed'] = true;
+                $item['showed'] = false;
                 if (!empty($item['trips'])) {
                     foreach ($item['trips'] as $trip) {
                         if (!empty($trip['segments'])) {
                             foreach ($trip['segments'] as $segment) {
-                                if (!in_array($segment['departureAirportCode'], $this->includeAirports) && !in_array($segment['arrivalAirportCode'], $this->includeAirports)) {
-                                    $item['showed'] = false;
+                                if (in_array($segment['departureAirportCode'], $this->includeAirports) || in_array($segment['arrivalAirportCode'], $this->includeAirports)) {
+                                    $item['showed'] = true;
                                 }
                             }
                         }
