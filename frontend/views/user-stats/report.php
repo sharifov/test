@@ -4,6 +4,7 @@ use kartik\export\ExportMenu;
 use kartik\grid\GridView;
 use sales\model\user\reports\stats\Metrics;
 use sales\model\user\reports\stats\UserStatsReport;
+use sales\model\userModelSetting\service\UserModelSettingHelper;
 use yii\bootstrap4\Html;
 use yii\web\View;
 
@@ -113,9 +114,33 @@ if ($showReport) {
             'format' => 'raw',
         ];
     }
+    if ($searchModel->isFieldShow('sales_conversion_call_priority')) {
+        $rowField = UserModelSettingHelper::getGridDefaultColumn('sales_conversion_call_priority');
+        $rowField['value'] = static function ($model) {
+//            \yii\helpers\VarDumper::dump();
+            return ''; //Html::encode($model['sales_conversion_call_priority']);
+        };
+        $columns[] = $rowField;
+    }
+    if ($searchModel->isFieldShow('gross_profit_call_priority')) {
+        $rowField = UserModelSettingHelper::getGridDefaultColumn('gross_profit_call_priority');
+        $rowField['value'] = static function ($model) {
+//            \yii\helpers\VarDumper::dump();
+            return ''; //Html::encode($model['sales_conversion_call_priority']);
+        };
+        $columns[] = $rowField;
+    }
+    if ($searchModel->isFieldShow('call_priority_current')) {
+        $rowField = UserModelSettingHelper::getGridDefaultColumn('call_priority_current');
+        $rowField['value'] = static function ($model) {
+//            \yii\helpers\VarDumper::dump();
+            return ''; //Html::encode($model['sales_conversion_call_priority']);
+        };
+        $columns[] = $rowField;
+    }
 }
-
 ?>
+
 <div class="user-stats-index">
 
     <h1><?= Html::encode($this->title) ?></h1>

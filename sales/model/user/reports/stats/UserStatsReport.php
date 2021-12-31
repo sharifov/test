@@ -11,8 +11,10 @@ use common\models\TipsSplit;
 use common\models\UserDepartment;
 use common\models\UserGroup;
 use common\models\UserGroupAssign;
+use sales\behaviors\userModelSetting\UserModelSettingSearchBehavior;
 use sales\helpers\query\QueryHelper;
 use sales\model\leadUserConversion\entity\LeadUserConversion;
+use sales\traits\UserModelSettingTrait;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use yii\db\Expression;
@@ -39,6 +41,8 @@ use yii\validators\DateValidator;
  */
 class UserStatsReport extends Model
 {
+    use UserModelSettingTrait;
+
     public const GROUP_BY_USER_NAME = 1;
     public const GROUP_BY_USER_GROUP = 2;
     public const GROUP_BY_USER_ROLE = 3;
@@ -53,6 +57,8 @@ class UserStatsReport extends Model
     public $dateRange;
     public $dateFrom;
     public $dateTo;
+    public $defaultFields;
+    public $fields = [];
 
     public $departments;
     public $roles;
@@ -96,6 +102,13 @@ class UserStatsReport extends Model
             ['metrics', 'required'],
             ['metrics', IsArrayValidator::class],
             ['metrics', 'each', 'rule' => ['in', 'range' => array_keys($this->getMetricsList())], 'skipOnError' => true, 'skipOnEmpty' => true],
+            ['fields', 'filter', 'filter' => static function ($value) {
+                if (empty($value)) {
+                    return [];
+                }
+                return is_array($value) ? $value : [];
+            }, 'skipOnEmpty' => false],
+            ['fields', IsArrayValidator::class],
         ];
     }
 
@@ -106,9 +119,22 @@ class UserStatsReport extends Model
         $config = []
     ) {
         parent::__construct($config);
+        $this->fields = [];
         $this->timeZone = $defaultTimeZone;
         $this->dateRange = $defaultDateRange;
         $this->access = $access;
+    }
+
+
+    public function behaviors(): array
+    {
+        $behaviors = [
+            'fieldsUpdate' => [
+                'class' => 'sales\behaviors\userModelSetting\UserModelSettingSearchBehavior',
+                'targetClassName' => self::class
+            ],
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     public function search(array $params)
