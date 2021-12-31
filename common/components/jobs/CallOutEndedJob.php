@@ -89,7 +89,7 @@ class CallOutEndedJob extends BaseJob implements JobInterface
             }
 
             try {
-                $webEngageUserService = new WebEngageUserService(WebEngageDictionary::EVENT_CALL_FIRST_CALL_NOT_PICKED, $client);
+                $webEngageUserService = new WebEngageUserService(WebEngageDictionary::EVENT_CALL_USER_PICKED_CALL, $client);
                 if ($call->c_call_duration >= SettingHelper::getUserPrickedCallDuration() && $call->isStatusCompleted() && $webEngageUserService->isSendUserCreateRequest()) {
                     $data = [
                         'userId' => $client->uuid,
