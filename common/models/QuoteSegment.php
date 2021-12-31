@@ -44,14 +44,20 @@ use yii\db\ActiveRecord;
  * @property Airports $arrivalAirport
  * @property Airports $departureAirport
  * @property Airline $marketingAirline
+ * @property-read string $ticketColor
+ * @property-read bool $isOVernight
  * @property Airline $operatingAirline
  */
 class QuoteSegment extends \yii\db\ActiveRecord
 {
     public const SCENARIO_MANUALLY = 'manually';
 
-    const CABIN_ECONOMY = 'Y', CABIN_PREMIUM_ECONOMY = 'S', CABIN_BUSINESS = 'C',
-    CABIN_PREMIUM_BUSINESS = 'J', CABIN_FIRST = 'F', CABIN_PREMIUM_FIRST = 'P';
+    public const CABIN_ECONOMY              = 'Y';
+    public const CABIN_PREMIUM_ECONOMY      = 'S';
+    public const CABIN_BUSINESS             = 'C';
+    public const CABIN_PREMIUM_BUSINESS     = 'J';
+    public const CABIN_FIRST                = 'F';
+    public const CABIN_PREMIUM_FIRST        = 'P';
 
     public $isOvernight = false;
 

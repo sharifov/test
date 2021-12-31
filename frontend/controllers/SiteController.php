@@ -253,7 +253,9 @@ class SiteController extends FController
                         $updated++;
                     }
                 } catch (\Throwable $throwable) {
-                    Yii::error(AppHelper::throwableFormatter($throwable), 'SiteController:actionProfile:updProfile');
+                    $logData = AppHelper::throwableLog($throwable);
+                    $logData['userId'] = (int) $model->id;
+                    Yii::error($logData, 'SiteController:actionProfile:updProfile');
                 }
             }
 
