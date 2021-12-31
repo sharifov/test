@@ -11,16 +11,16 @@ use common\models\TipsSplit;
 use common\models\UserDepartment;
 use common\models\UserGroup;
 use common\models\UserGroupAssign;
-use sales\behaviors\userModelSetting\UserModelSettingSearchBehavior;
+use common\models\UserParams;
 use sales\helpers\query\QueryHelper;
 use sales\model\leadUserConversion\entity\LeadUserConversion;
-use sales\traits\UserModelSettingTrait;
+use sales\model\userData\entity\UserData;
+use sales\model\userData\entity\UserDataKey;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
-use yii\helpers\VarDumper;
 use yii\validators\DateValidator;
 
 /**
@@ -41,8 +41,6 @@ use yii\validators\DateValidator;
  */
 class UserStatsReport extends Model
 {
-    use UserModelSettingTrait;
-
     public const GROUP_BY_USER_NAME = 1;
     public const GROUP_BY_USER_GROUP = 2;
     public const GROUP_BY_USER_ROLE = 3;
@@ -57,8 +55,6 @@ class UserStatsReport extends Model
     public $dateRange;
     public $dateFrom;
     public $dateTo;
-    public $defaultFields;
-    public $fields = [];
 
     public $departments;
     public $roles;
@@ -102,13 +98,6 @@ class UserStatsReport extends Model
             ['metrics', 'required'],
             ['metrics', IsArrayValidator::class],
             ['metrics', 'each', 'rule' => ['in', 'range' => array_keys($this->getMetricsList())], 'skipOnError' => true, 'skipOnEmpty' => true],
-            ['fields', 'filter', 'filter' => static function ($value) {
-                if (empty($value)) {
-                    return [];
-                }
-                return is_array($value) ? $value : [];
-            }, 'skipOnEmpty' => false],
-            ['fields', IsArrayValidator::class],
         ];
     }
 
@@ -119,22 +108,9 @@ class UserStatsReport extends Model
         $config = []
     ) {
         parent::__construct($config);
-        $this->fields = [];
         $this->timeZone = $defaultTimeZone;
         $this->dateRange = $defaultDateRange;
         $this->access = $access;
-    }
-
-
-    public function behaviors(): array
-    {
-        $behaviors = [
-            'fieldsUpdate' => [
-                'class' => 'sales\behaviors\userModelSetting\UserModelSettingSearchBehavior',
-                'targetClassName' => self::class
-            ],
-        ];
-        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     public function search(array $params)
@@ -243,6 +219,21 @@ class UserStatsReport extends Model
 
         $from = QueryHelper::getDateFromUserTZToUtc($this->dateFrom, $this->timeZone)->format('Y-m-d H:i');
         $to = QueryHelper::getDateFromUserTZToUtc($this->dateTo, $this->timeZone)->format('Y-m-d H:i');
+
+        if (Metrics::isSalesConversionCallPriority($this->metrics)) {
+            $query->addSelect(UserParams::tableName() . '.up_call_user_level AS sales_conversion_call_priority');
+            $query->leftJoin(UserParams::tableName(), 'users.id = up_user_id');
+        }
+
+        if (Metrics::isCallPriorityCurrent($this->metrics)) {
+            $query->addSelect('user_data1.ud_value AS call_priority_current');
+            $query->leftJoin(['user_data1' => UserData::tableName()], "users.id = user_data1.ud_user_id AND user_data1.ud_key = '" . UserDataKey::CONVERSION_PERCENT . "'");
+        }
+
+        if (Metrics::isGrossProfitCallPriority($this->metrics)) {
+            $query->addSelect('user_data2.ud_value AS gross_profit_call_priority');
+            $query->leftJoin(['user_data2' => UserData::tableName()], "users.id = user_data2.ud_user_id AND user_data2.ud_key = '" . UserDataKey::GROSS_PROFIT . "'");
+        }
 
         if (Metrics::isSalesConversion($this->metrics)) {
             $query->addSelect([

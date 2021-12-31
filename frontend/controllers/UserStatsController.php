@@ -64,7 +64,6 @@ class UserStatsController extends FController
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'showReport' => $searchModel->isValid && !$needResetFilters && Yii::$app->request->queryParams,
-            'sales_conversion_call_priority' => 'wer'
         ]);
     }
 }
