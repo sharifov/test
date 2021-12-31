@@ -3,6 +3,7 @@
 use common\models\Employee;
 use kartik\select2\Select2;
 use sales\model\user\reports\stats\UserStatsReport;
+use sales\model\userModelSetting\service\UserModelSettingDictionary;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -129,7 +130,28 @@ use yii\widgets\ActiveForm;
                 'pluginOptions' => ['allowClear' => true],
             ])->label('Users') ?>
         </div>
-
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <?php echo
+                $form->field($model, 'fields')->widget(Select2::class, [
+                    'data' => [
+                        'call_priority_current' => 'Call Priority (Current)',
+                        'gross_profit_call_priority' => 'Gross Profit (Call Priority)',
+                        'sales_conversion_call_priority' => 'Sales Conversion (Call Priority)',
+                        ],
+                    'size' => Select2::SIZE_SMALL,
+                    'pluginOptions' => [
+                        'closeOnSelect' => false,
+                        'allowClear' => true,
+                    ],
+                    'options' => [
+                        'placeholder' => 'Choose additional fields...',
+                        'multiple' => true,
+                        'id' => 'selectFields',
+                    ],
+                ])->label(false) ?>
+            </div>
     </div>
     <br>
     <div class="row">
