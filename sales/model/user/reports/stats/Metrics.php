@@ -15,13 +15,19 @@ class Metrics
     public const LEADS_TRASHED = 9;
     public const LEADS_CLONED = 10;
     public const LEADS_TO_FOLLOW_UP = 11;
+    public const SALES_CONVERSION_CALL_PRIORITY = 12;
+    public const GROSS_PROFIT_CALL_PRIORITY = 13;
+    public const CALL_PRIORITY_CURRENT = 14;
 
     public const LIST = [
         self::SALES_CONVERSION => 'Sales Conversion',
+        self::SALES_CONVERSION_CALL_PRIORITY => 'Sales Conversion (Call Priority)',
         self::SOLD_LEADS => 'Sold Leads',
         self::SPLIT_SHARE => 'Split Share',
         self::QUALIFIED_LEADS_TAKEN => 'Qualified leads taken',
         self::GROSS_PROFIT => 'Gross Profit',
+        self::GROSS_PROFIT_CALL_PRIORITY => 'Gross Profit (Call Priority)',
+        self::CALL_PRIORITY_CURRENT => 'Call Priority (Current)',
         self::TIPS => 'Tips',
         self::LEADS_CREATED => 'Leads Created',
         self::LEADS_PROCESSED => 'Leads Processed',
@@ -31,6 +37,11 @@ class Metrics
     ];
 
     public static function isSalesConversion(array $metrics): bool
+    {
+        return in_array(self::SALES_CONVERSION, $metrics, false);
+    }
+
+    public static function isSalesConversionCallPriority(array $metrics): bool
     {
         return in_array(self::SALES_CONVERSION, $metrics, false);
     }
@@ -53,6 +64,11 @@ class Metrics
     public static function isGrossProfit(array $metrics): bool
     {
         return in_array(self::GROSS_PROFIT, $metrics, false);
+    }
+
+    public static function isGrossProfitCallPriority(array $metrics): bool
+    {
+        return in_array(self::GROSS_PROFIT_CALL_PRIORITY, $metrics, false);
     }
 
     public static function isTips(array $metrics): bool
@@ -83,5 +99,10 @@ class Metrics
     public static function isLeadsToFollowUp(array $metrics): bool
     {
         return in_array(self::LEADS_TO_FOLLOW_UP, $metrics, false);
+    }
+
+    public static function isCallPriorityCurrent(array $metrics): bool
+    {
+        return in_array(self::CALL_PRIORITY_CURRENT, $metrics, false);
     }
 }

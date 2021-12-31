@@ -51,7 +51,7 @@ use yii\widgets\ActiveForm;
         <div class="col-md-12">
             <?php echo
             $form->field($model, 'fields')->widget(Select2::class, [
-
+                'data' => UserModelSettingDictionary::FIELD_LIST,
                 'size' => Select2::SIZE_SMALL,
                 'pluginOptions' => [
                     'closeOnSelect' => false,
@@ -60,6 +60,7 @@ use yii\widgets\ActiveForm;
                 'options' => [
                     'placeholder' => 'Choose additional fields...',
                     'multiple' => true,
+                    'id' => 'selectFields',
                 ],
             ])->label(false) ?>
         </div>

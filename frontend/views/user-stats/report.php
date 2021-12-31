@@ -114,29 +114,23 @@ if ($showReport) {
             'format' => 'raw',
         ];
     }
-    if ($searchModel->isFieldShow('sales_conversion_call_priority')) {
-        $rowField = UserModelSettingHelper::getGridDefaultColumn('sales_conversion_call_priority');
-        $rowField['value'] = static function ($model) {
-//            \yii\helpers\VarDumper::dump();
-            return ''; //Html::encode($model['sales_conversion_call_priority']);
-        };
-        $columns[] = $rowField;
+    if (Metrics::isCallPriorityCurrent($searchModel->metrics)) {
+        $columns[] = [
+            'attribute' => 'call_priority_current',
+            'format' => 'raw',
+        ];
     }
-    if ($searchModel->isFieldShow('gross_profit_call_priority')) {
-        $rowField = UserModelSettingHelper::getGridDefaultColumn('gross_profit_call_priority');
-        $rowField['value'] = static function ($model) {
-//            \yii\helpers\VarDumper::dump();
-            return ''; //Html::encode($model['sales_conversion_call_priority']);
-        };
-        $columns[] = $rowField;
+    if (Metrics::isSalesConversionCallPriority($searchModel->metrics)) {
+        $columns[] = [
+            'attribute' => 'sales_conversion_call_priority',
+            'format' => 'raw',
+        ];
     }
-    if ($searchModel->isFieldShow('call_priority_current')) {
-        $rowField = UserModelSettingHelper::getGridDefaultColumn('call_priority_current');
-        $rowField['value'] = static function ($model) {
-//            \yii\helpers\VarDumper::dump();
-            return ''; //Html::encode($model['sales_conversion_call_priority']);
-        };
-        $columns[] = $rowField;
+    if (Metrics::isGrossProfitCallPriority($searchModel->metrics)) {
+        $columns[] = [
+            'attribute' => 'gross_profit_call_priority',
+            'format' => 'raw',
+        ];
     }
 }
 ?>
