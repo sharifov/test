@@ -20,6 +20,7 @@ use sales\model\project\entity\projectLocale\ProjectLocale;
 use thamtech\uuid\helpers\UuidHelper;
 use Yii;
 use yii\base\Component;
+use yii\caching\TagDependency;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 use yii\helpers\Url;
@@ -792,7 +793,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @return mixed
      * @throws Exception
      */
-    public function getJwtTokenCache($username = '', $deleteCache = false)
+    public function getJwtTokenCache($username = '', $deleteCache = true)
     {
         $cacheKey = 'jwt_token_' . $username;
         if ($deleteCache) {
@@ -802,17 +803,24 @@ class CommunicationService extends Component implements CommunicationServiceInte
 
         if ($out === false) {
             $out = $this->getJwtToken($username);
-
             if ($out && !empty($out['data']['token'])) {
-                $expired = 60 * 5;
-                if (!empty($out['data']['expire'])) {
-                    $expired = strtotime($out['data']['expire']) - time() - 60;
-                }
-                \Yii::$app->cache->set($cacheKey, $out, $expired);
+                $expired = $this->calculateJwtExpiredSeconds($out['data']['expire']);
+                \Yii::$app->cache->set($cacheKey, $out, $expired, new TagDependency(['tags' => 'twilio_jwt_token']));
             }
         }
 
+        $out['data']['refreshTime'] = $this->calculateJwtExpiredSeconds($out['data']['expire']) + 1;
+
         return $out;
+    }
+
+    private function calculateJwtExpiredSeconds(string $expiredDt): int
+    {
+        $expired = strtotime($expiredDt) - time();
+        if ($expired < 1) {
+            return 1;
+        }
+        return $expired;
     }
 
     /**
