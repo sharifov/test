@@ -793,7 +793,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @return mixed
      * @throws Exception
      */
-    public function getJwtTokenCache($username = '', $deleteCache = true)
+    public function getJwtTokenCache($username = '', $deleteCache = false)
     {
         $cacheKey = 'jwt_token_' . $username;
         if ($deleteCache) {
