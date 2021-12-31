@@ -139,7 +139,7 @@ class EmailReviewQueueController extends FController
                 }
                 $email->e_email_data = json_encode($attachments);
                 if ($email->save()) {
-                    $mailResponse = $email->sendMail();
+                    $mailResponse = $email->sendMail($attachments);
 
                     if (empty($mailResponse['error'])) {
                         $emailQueue->statusToReviewed();
