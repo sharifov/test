@@ -188,45 +188,6 @@
         };
     }
 
-    function VoipPage() {
-        this.phone = $('.phone-device-status');
-        this.twilio = $('.phone-device-twilio-status');
-        this.speaker = $('.phone-device-speaker-status');
-        this.microphone = $('.phone-device-microphone-status');
-
-        this.phoneConnected = function () {
-            this.phone.removeClass('fa-square-o').addClass('fa-check-square-o');
-        };
-
-        this.phoneDisconnected = function () {
-            this.phone.addClass('fa-square-o').removeClass('fa-check-square-o');
-        };
-
-        this.twilioReady = function () {
-            this.twilio.removeClass('fa-square-o').addClass('fa-check-square-o');
-        };
-
-        this.twilioNotReady = function () {
-            this.twilio.addClass('fa-square-o').removeClass('fa-check-square-o');
-        };
-
-        this.speakerReady = function () {
-            this.speaker.removeClass('fa-square-o').addClass('fa-check-square-o');
-        };
-
-        this.speakerNotReady = function () {
-            this.speaker.addClass('fa-square-o').removeClass('fa-check-square-o');
-        };
-
-        this.microphoneReady = function () {
-            this.microphone.removeClass('fa-square-o').addClass('fa-check-square-o');
-        };
-
-        this.microphoneNotReady = function () {
-            this.microphone.addClass('fa-square-o').removeClass('fa-check-square-o');
-        };
-    }
-
     function StatusPanel() {
         this.isPhoneConnected = false;
         this.isTwilioRegistered = false;
@@ -346,13 +307,11 @@
 
     function View(warningIndicator) {
         this.warningIndicator = warningIndicator;
-        this.voipPage = new VoipPage();
         this.statusPanel = new StatusPanel();
         this.connectingPanel = new ConnectingPanel();
 
         this.phoneConnected = function () {
             this.statusPanel.phoneConnected();
-            this.voipPage.phoneConnected();
             this.connectingPanel.hide();
             this.warningIndicator.remove(WarningMessages.phoneDisconnected);
             PhoneWidget.openCallTab();
@@ -360,62 +319,52 @@
 
         this.phoneDisconnected = function () {
             this.statusPanel.phoneDisconnected();
-            this.voipPage.phoneDisconnected();
             this.connectingPanel.show();
             this.warningIndicator.notReady(WarningMessages.phoneDisconnected);
         };
 
         this.twilioUnknown = function () {
             this.statusPanel.twilioUnknown();
-            this.voipPage.twilioNotReady();
             this.warningIndicator.notReady(WarningMessages.twilioError);
         };
 
         this.twilioRegistered = function () {
             this.statusPanel.twilioRegistered();
-            this.voipPage.twilioReady();
             this.warningIndicator.remove(WarningMessages.twilioError);
         };
 
         this.twilioError = function () {
             this.statusPanel.twilioError();
-            this.voipPage.twilioNotReady();
             this.warningIndicator.notReady(WarningMessages.twilioError);
         };
 
         this.speakerUnknown = function () {
             this.statusPanel.speakerUnknown();
-            this.voipPage.speakerNotReady();
             this.warningIndicator.notReady(WarningMessages.speakerError);
         };
 
         this.speakerSelected = function () {
             this.statusPanel.speakerSelected();
-            this.voipPage.speakerReady();
             this.warningIndicator.remove(WarningMessages.speakerError);
         };
 
         this.speakerError = function () {
             this.statusPanel.speakerError();
-            this.voipPage.speakerNotReady();
             this.warningIndicator.notReady(WarningMessages.speakerError);
         };
 
         this.microphoneUnknown = function () {
             this.statusPanel.microphoneUnknown();
-            this.voipPage.microphoneNotReady();
             this.warningIndicator.notReady(WarningMessages.microphoneError);
         };
 
         this.microphoneSelected = function () {
             this.statusPanel.microphoneSelected();
-            this.voipPage.microphoneReady();
             this.warningIndicator.remove(WarningMessages.microphoneError);
         };
 
         this.microphoneError = function () {
             this.statusPanel.microphoneError();
-            this.voipPage.microphoneNotReady();
             this.warningIndicator.notReady(WarningMessages.microphoneError);
         };
     }

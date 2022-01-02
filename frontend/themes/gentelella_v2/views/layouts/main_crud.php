@@ -125,9 +125,6 @@ $bundle = \frontend\assets\AppCrudAsset::register($this);
                         }
                         ?>
 
-                        <li class="nav-item">
-                            <a href="javascript:;" class="info-number" data-status="1" title="Incoming Call - Volume ON" id="incoming-sound-indicator"><i class="fa fa-volume-up text-success"> </i></a>
-                        </li>
                     </ul>
                 </nav>
             </div>

@@ -283,6 +283,8 @@
     };
 
     const deviceRegisteredHandler = () => {
+        PhoneWidget.getDeviceState().speakerUnknown();
+        PhoneWidget.getDeviceState().microphoneUnknown();
         PhoneWidget.getDeviceState().twilioRegistered();
 
         initSpeakerDevices();

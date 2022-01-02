@@ -571,7 +571,7 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
             onlineObj.attr('title', 'Disconnect').find('i').removeClass('success').addClass('danger');
             window.socketConnectionId = null;
 
-            if (PhoneWidget.isInitiated()) {
+            if (typeof PhoneWidget === 'object' && PhoneWidget.isInitiated()) {
                 PhoneWidget.getDeviceState().phoneDisconnected('WS connection closed');
                 PhoneWidget.getDeviceState().resetDevices('WS connection closed');
             }
@@ -589,7 +589,7 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
             onlineObj.attr('title', 'Online Connection: false').find('i').removeClass('success').addClass('danger');
             window.socketConnectionId = null;
 
-            if (PhoneWidget.isInitiated()) {
+            if (typeof PhoneWidget === 'object' && PhoneWidget.isInitiated()) {
                 PhoneWidget.getDeviceState().phoneDisconnected('WS connection error');
                 PhoneWidget.getDeviceState().resetDevices('WS connection error');
             }

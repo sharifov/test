@@ -5,7 +5,7 @@
         audioDevicesActiveChanged: 'audio_devices_active_changed',
     };
 
-    function Collection() {
+    function Devices() {
         this.isActive = function (id) {
             let collection = this.load();
             return parseInt(collection.activeDeviceId) === parseInt(id);
@@ -48,15 +48,10 @@
             let oldActiveDeviceId = collection.activeDeviceId;
             collection.activeDeviceId = Math.min(...collection.devices);
             localStorage.setItem(storageKeys.audioDevices, JSON.stringify(collection));
-            if (oldActiveDeviceId === collection.activeDeviceId) {
-                return;
+            if (oldActiveDeviceId !== collection.activeDeviceId) {
+                localStorage.setItem(storageKeys.audioDevicesActiveChanged, localStorage.getItem(storageKeys.audioDevicesActiveChanged) === '0' ? '1' : '0');
             }
-            let oldChangedValue = localStorage.getItem(storageKeys.audioDevicesActiveChanged);
-            let newChangedValue = '0';
-            if (oldChangedValue === '0') {
-                newChangedValue = '1';
-            }
-            localStorage.setItem(storageKeys.audioDevicesActiveChanged, newChangedValue);
+            PhoneWidget.audio.incoming.refresh();
         };
     }
 
@@ -65,7 +60,7 @@
         this.notifier = notifier;
         this.incomingPane = incomingPane;
         this.outgoingPane = outgoingPane;
-        this.devices = new Collection();
+        this.devices = new Devices();
 
         this.audio = new Audio('/js/sounds/incoming_call.mp3');
         this.audio.volume = 0.3;
@@ -73,8 +68,6 @@
 
         this.isOn = true;
         this.offKey = null;
-
-        this.playing = false;
 
         this.addDevice = function (deviceId, devices) {
             this.devices.add(deviceId, devices);
@@ -85,17 +78,12 @@
         };
 
         this.play = function () {
-            if (!this.devices.isActive(PhoneWidget.getDeviceState().getDeviceId())) {
-                return;
-            }
             this.audio.play();
-            this.playing = true;
         };
 
         this.stop = function () {
             this.audio.pause();
             this.audio.currentTime = 0;
-            this.playing = false;
         };
 
         this.muted = function (withOutSave) {
@@ -121,6 +109,10 @@
         };
 
         this.refresh = function () {
+            if (!this.devices.isActive(PhoneWidget.getDeviceState().getDeviceId())) {
+                this.stop();
+                return;
+            }
             if (!this.isOn) {
                 this.stop();
                 return;
@@ -176,13 +168,6 @@
     function Init(queues, notifier, incomingPane, outgoingPane) {
         return new Incoming(queues, notifier, incomingPane, outgoingPane, localStorage.getItem(storageKeys.audioDevicesIsMuted) === '1');
     }
-
-    window.addEventListener("beforeunload", function (e) {
-        let deviceId = PhoneWidget.getDeviceState().getDeviceId();
-        if (deviceId) {
-            PhoneWidget.audio.incoming.removeDevice(deviceId);
-        }
-    });
 
     window.addEventListener("storage", function (e) {
         if (e.key === storageKeys.audioDevicesIsMuted) {
