@@ -271,7 +271,6 @@ class CallUserAccess extends \yii\db\ActiveRecord
                         [
                             'data' =>
                                 array_merge($this->attributes, [
-                                    'readyDeviceId' => (new ReadyVoipDevice())->findAnyId($this->cua_user_id),
                                     'command' => 'addPriorityCall',
                                     'project' => $call->c_project_id ? $call->cProject->name : '',
                                     'department' => $call->c_dep_id ? Department::getName($call->c_dep_id) : '',
@@ -370,7 +369,7 @@ class CallUserAccess extends \yii\db\ActiveRecord
                 Notifications::publish(
                     'updateIncomingCall',
                     ['user_id' => $this->cua_user_id],
-                    array_merge($this->attributes, $callInfo ?? ['callSid' => $call->c_call_sid], ['readyDeviceId' => (new ReadyVoipDevice())->findAnyId($this->cua_user_id)])
+                    array_merge($this->attributes, $callInfo ?? ['callSid' => $call->c_call_sid])
                 );
             }
         }

@@ -278,8 +278,6 @@ $conferenceSources = json_encode([
 $csrf_param = Yii::$app->request->csrfParam;
 $csrf_token = Yii::$app->request->csrfToken;
 
-$phoneDeviceIdStorageKey = DeviceStorageKey::getPhoneDeviceIdStorageKey($userId);
-
 DeviceAsset::register($this);
 $phoneDeviceRemoteLogsEnabled = SettingHelper::phoneDeviceLogsEnabled() ? 'true' : 'false';
 
@@ -337,8 +335,6 @@ window.phoneWidget.initParams = {
     'ajaxCheckUserForCallUrl': '$ajaxCheckUserForCallUrl',
     'phoneNumbers': toSelect($('.custom-phone-select'),  JSON.parse('{$formattedPhoneProject}')),
     'createCallUrl': '$createCallUrl',
-    'isDevicePage': window.isTwilioDevicePage,
-    'phoneDeviceIdStorageKey': '$phoneDeviceIdStorageKey',
     'userId': $userId
 };
 PhoneWidget.init(window.phoneWidget.initParams);

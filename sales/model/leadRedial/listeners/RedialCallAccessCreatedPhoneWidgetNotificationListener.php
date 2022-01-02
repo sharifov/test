@@ -21,7 +21,6 @@ class RedialCallAccessCreatedPhoneWidgetNotificationListener
             ['user_id' => $event->userId],
             [
                 'data' => [
-                    'readyDeviceId' => (new ReadyVoipDevice())->findAnyId($event->userId),
                     'command' => 'addPriorityCall',
                     'project' => $lead->project_id ? $lead->project->name : '',
                     'department' => $lead->l_dep_id ? Department::getName($lead->l_dep_id) : '',

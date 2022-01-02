@@ -1,8 +1,7 @@
 (function () {
-    function Init(deviceId, phoneDeviceRemoteLogsEnabled) {
+    function Init(deviceId, devices, phoneDeviceRemoteLogsEnabled) {
         twilioTokenUrl = '/phone/get-token?deviceId=' + deviceId;
-        PhoneWidget.getDeviceState().setDeviceId(deviceId);
-        PhoneWidget.getDeviceState().phoneConnected();
+        PhoneWidget.getDeviceState().phoneConnected(deviceId, devices);
 
         window.removeEventListener("beforeunload", phoneDisconnected);
         window.addEventListener("beforeunload", phoneDisconnected);

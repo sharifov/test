@@ -46,4 +46,9 @@ class ReadyVoipDevice
 
         return null;
     }
+
+    public function findBrowserGroupIds(int $userId): array
+    {
+        return array_map('intval', PhoneDevice::find()->select(['min(pd_id)'])->byUserId($userId)->ready()->groupBy(['pd_user_agent'])->asArray()->column());
+    }
 }

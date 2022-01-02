@@ -20,7 +20,6 @@ use sales\model\user\entity\userStatus\UserStatus;
 use sales\model\voip\phoneDevice\log\PhoneDeviceLogger;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
-use yii\web\ForbiddenHttpException;
 
 /**
  * Class VoipController
@@ -56,7 +55,6 @@ class VoipController extends FController
         $behaviors = [
             'access' => [
                 'allowActions' => [
-//                    'index',
                     'create-call',
                     'log',
                 ],
@@ -87,17 +85,6 @@ class VoipController extends FController
 
         return $this->asJson(['message' => 'ok']);
     }
-
-//    public function actionIndex()
-//    {
-//        if (!Auth::can('PhoneWidget')) {
-//            throw new ForbiddenHttpException('Access denied.');
-//        }
-//
-//        $user = \Yii::$app->user->identity;
-//
-//        return $this->render('index', ['user' => $user]);
-//    }
 
     public function actionCreateCall()
     {

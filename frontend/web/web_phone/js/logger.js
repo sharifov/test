@@ -11,16 +11,6 @@
         };
 
         this.add = function (message, color) {
-            // if (window.isTwilioDevicePage) {
-            //     localStorage.setItem(
-            //         'PhoneWidgetLog' + window.userId,// todo removed global user Id
-            //         JSON.stringify({
-            //             "message": message,
-            //             "color": color,
-            //             "time": Date.now()
-            //         })
-            //     );
-            // }
             if (typeof message === 'string') {
                 let msg = '';
                 if (color) {

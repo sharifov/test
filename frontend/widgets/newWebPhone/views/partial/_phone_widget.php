@@ -470,7 +470,6 @@ use yii\web\View;
             <li class="wp-tab-device"><a href="#tab-device" class="tab-trigger active-tab">Devices</a></li>
             <li><a href="#tab-device-status" class="tab-trigger">Statuses</a></li>
             <li><a href="#tab-logs" class="tab-trigger wp-devices-tab-log">Logs</a></li>
-<!--            <li><a href="#tab-tools" class="tab-trigger">Tools</a></li>-->
         </ul>
         <ul class="tabs__container tab-container">
             <li class="tabs__item" id="tab-device">
@@ -491,9 +490,6 @@ use yii\web\View;
                 <pre class="logs-block">
                 </pre>
             </li>
-<!--            <li class="tabs__item" id="tab-tools">-->
-<!--                <a id="wp-btn-reset-local-data" style="text-decoration: underline; color: #490303" href="#">Reset local data</a>-->
-<!--            </li>-->
         </ul>
        
 

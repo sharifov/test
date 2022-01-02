@@ -28,25 +28,13 @@ class PhoneDeviceRegisterController
             ];
         }
 
-        $now = date('Y-m-d H:i:s');
-
-        $requestedDeviceId = empty($params['deviceId']) ? null : (int)$params['deviceId'];
-        if ($requestedDeviceId) {
-            return $this->withRequestedDeviceId($requestedDeviceId, $userConnection, $now);
-        }
-
-        return $this->withNewDevice($userConnection, $now);
-    }
-
-    private function withNewDevice(array $userConnection, string $now): array
-    {
         try {
             $device = PhoneDevice::new(
                 $userConnection['uc_id'],
                 $userConnection['uc_user_id'],
                 $userConnection['uc_ip'],
                 $userConnection['uc_user_agent'],
-                $now
+                date('Y-m-d H:i:s')
             );
             $device->save(false);
         } catch (\Throwable $e) {
@@ -66,46 +54,13 @@ class PhoneDeviceRegisterController
             'cmd' => 'PhoneDeviceRegister',
             'userId' => $device->pd_user_id,
             'deviceId' => $device->pd_id,
-        ];
-    }
-
-    private function withRequestedDeviceId(int $requestedDeviceId, array $userConnection, string $now): array
-    {
-        $device = PhoneDevice::find()->byId($requestedDeviceId)->one();
-        if (!$device) {
-            return [
-                'cmd' => 'PhoneDeviceRegister',
-                'error' => true,
-                'deviceIsInvalid' => true,
-                'msg' => 'Device not found.',
-            ];
-        }
-        if (!$device->isEqualUser((int)$userConnection['uc_user_id'])) {
-            return [
-                'cmd' => 'PhoneDeviceRegister',
-                'error' => true,
-                'deviceIsInvalid' => true,
-                'msg' => 'User is not owner of device.',
-            ];
-        }
-
-        if (!$device->pd_connection_id) {
-            $device->updateConnection($userConnection['uc_id'], $userConnection['uc_ip'], $now);
-            $device->save(false);
-        }
-
-        if (!$device->isEqualConnection((int)$userConnection['uc_id'])) {
-            return [
-                'cmd' => 'PhoneDeviceRegister',
-                'error' => true,
-                'errorType' => 'voipPageAlreadyOpened',
-            ];
-        }
-
-        return [
-            'cmd' => 'PhoneDeviceRegister',
-            'userId' => $device->pd_user_id,
-            'deviceId' => $device->pd_id,
+            'devices' => PhoneDevice::find()->select(['pd_id'])
+                ->byUserId($device->pd_user_id)
+                ->andWhere(['!=', 'pd_id', $device->pd_id])
+                ->andWhere(['IS NOT', 'pd_connection_id', null])
+                ->andWhere(['pd_user_agent' => $device->pd_user_agent])
+                ->orderBy(['pd_id' => SORT_ASC])
+                ->column(),
         ];
     }
 }

@@ -59,11 +59,7 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
             // console.log(e);
 
             if (typeof PhoneWidget === 'object') {
-                // if (window.isTwilioDevicePage) {
-                    socketSend('PhoneDeviceRegister', 'Register', {default: 'default'});
-                // } else {
-                //     window.sendCommandUpdatePhoneWidgetCurrentCalls('', userId, window.generalLinePriorityIsEnabled);
-                // }
+                socketSend('PhoneDeviceRegister', 'Register', {default: 'default'});
             }
         };
 
@@ -382,24 +378,13 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                     if (obj.cmd === 'PhoneDeviceRegister') {
                         if (obj.error) {
                             if (obj.deviceIsInvalid) {
-                                // todo move to phone widget
-                                //localStorage.removeItem(window.phoneWidget.initParams.phoneDeviceIdStorageKey);
-                                //PhoneWidget.getDeviceState().removeDeviceId();
                                 alert(obj.msg + ' You will be redirected to Home page!');
                                 window.location.href = '/';
                             }
-                            // if (obj.errorType === 'voipPageAlreadyOpened') {
-                            //     alert('Voip page is already opened. You will be redirected to Home page!');
-                            //     window.location.href = '/';
-                            // } else {
-                                createNotify('Phone Widget', obj.msg, 'error');
-                                PhoneWidget.addLog(obj.msg);
-                            // }
+                            createNotify('Phone Widget', obj.msg, 'error');
+                            PhoneWidget.addLog(obj.msg);
                         } else {
-                            // if (!PhoneWidget.isInitiated()) {
-                            //     PhoneWidget.init(window.phoneWidget.initParams);
-                            // }
-                            window.phoneWidget.device.initialize.Init(obj.deviceId, window.phoneDeviceRemoteLogsEnabled);
+                            window.phoneWidget.device.initialize.Init(obj.deviceId, obj.devices, window.phoneDeviceRemoteLogsEnabled);
                             window.sendCommandUpdatePhoneWidgetCurrentCalls('', userId, window.generalLinePriorityIsEnabled);
                         }
                     }
@@ -416,9 +401,6 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
 
                     if (obj.cmd === 'updateCurrentCalls') {
                         if (typeof PhoneWidget === "object") {
-                            // if (!PhoneWidget.isInitiated()) {
-                            //     PhoneWidget.init(window.phoneWidget.initParams);
-                            // }
                             PhoneWidget.updateCurrentCalls(obj.data, obj.userStatus);
                         }
                     }
@@ -589,7 +571,7 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
             onlineObj.attr('title', 'Disconnect').find('i').removeClass('success').addClass('danger');
             window.socketConnectionId = null;
 
-            if (window.isTwilioDevicePage && PhoneWidget.isInitiated()) {
+            if (PhoneWidget.isInitiated()) {
                 PhoneWidget.getDeviceState().phoneDisconnected('WS connection closed');
                 PhoneWidget.getDeviceState().resetDevices('WS connection closed');
             }
@@ -607,7 +589,7 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
             onlineObj.attr('title', 'Online Connection: false').find('i').removeClass('success').addClass('danger');
             window.socketConnectionId = null;
 
-            if (window.isTwilioDevicePage && PhoneWidget.isInitiated()) {
+            if (PhoneWidget.isInitiated()) {
                 PhoneWidget.getDeviceState().phoneDisconnected('WS connection error');
                 PhoneWidget.getDeviceState().resetDevices('WS connection error');
             }

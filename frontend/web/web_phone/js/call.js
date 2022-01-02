@@ -69,8 +69,6 @@ var PhoneWidget = function () {
     incomingAudio.volume = 0.3;
     incomingAudio.loop = true;
 
-    let isDevicePage = false;
-
     let deviceState = {
         isInitiated: false
     };
@@ -83,17 +81,10 @@ var PhoneWidget = function () {
 
     function init(options)
     {
-        if (!options.isDevicePage) {
-            hideDeviceSettingsTab();
-            openVoipPageEvent();
-        }
-
         callRequester.init(options);
 
-        isDevicePage = options.isDevicePage;
-
-        audio.incoming = new window.phoneWidget.audio.Incoming(isDevicePage, queues, window.phoneWidget.notifier, panes.incoming, panes.outgoing);
-        deviceState = new window.phoneWidget.device.state.initialize.Init(options.userId, isDevicePage, options.phoneDeviceIdStorageKey, logger);
+        audio.incoming = new window.phoneWidget.audio.Incoming(queues, window.phoneWidget.notifier, panes.incoming, panes.outgoing);
+        deviceState = new window.phoneWidget.device.state.initialize.Init(options.userId, logger);
 
         Object.assign(settings, options);
 
@@ -311,11 +302,7 @@ var PhoneWidget = function () {
             panes.incoming.init(call, (queues.direct.count() + queues.general.count()), (queues.active.count() + queues.hold.count()));
         }
 
-        if (data.readyDeviceId && data.readyDeviceId === deviceState.getDeviceId()) {
-            audio.incoming.simpleRefresh();
-        } else {
-            audio.incoming.refresh();
-        }
+        audio.incoming.refresh();
         iconUpdate();
         openWidget();
         // openCallTab();
@@ -1673,11 +1660,7 @@ var PhoneWidget = function () {
         // }
 
         panes.queue.refresh();
-        if (data.readyDeviceId && data.readyDeviceId === deviceState.getDeviceId()) {
-            audio.incoming.simpleRefresh();
-        } else {
-            audio.incoming.refresh();
-        }
+        audio.incoming.refresh();
         //iconUpdate();
         openWidget();
     }
@@ -2138,21 +2121,6 @@ var PhoneWidget = function () {
 }();
 
 (function() {
-
-    $('#wp-btn-reset-local-data').on('click', function (e) {
-        e.preventDefault();
-        if (confirm('Remove all local data?')) {
-            localStorage.removeItem(window.phoneWidget.initParams.phoneDeviceIdStorageKey);
-            localStorage.removeItem(window.phoneWidget.device.state.localNames.phone(window.userId));
-            localStorage.removeItem(window.phoneWidget.device.state.localNames.twilio(window.userId));
-            localStorage.removeItem(window.phoneWidget.device.state.localNames.speaker(window.userId));
-            localStorage.removeItem(window.phoneWidget.device.state.localNames.microphone(window.userId));
-            alert('You will be redirected to Home Page.');
-            window.location.href = '/';
-        }
-        return false;
-    });
-
     function delay(callback, ms) {
         var timer = 0;
         return function() {

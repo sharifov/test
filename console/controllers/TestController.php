@@ -81,6 +81,7 @@ use sales\model\leadRedial\queue\RedialCall;
 use sales\model\phone\AvailablePhoneList;
 use sales\model\project\entity\params\Params;
 use sales\model\user\reports\stats\UserStatsReport;
+use sales\model\voip\phoneDevice\device\ReadyVoipDevice;
 use sales\model\voip\phoneDevice\PhoneDeviceLogForm;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
@@ -98,8 +99,25 @@ use yii\rbac\Role;
 
 class TestController extends Controller
 {
+
+    public function actionPending()
+    {
+        $access = CallUserAccess::find()->andWhere(['cua_call_id' => 3386771, 'cua_user_id' => 295])->one();
+        $access->acceptPending();
+        $access->save();
+    }
+
+    public function actionAccept()
+    {
+        $access = CallUserAccess::find()->andWhere(['cua_call_id' => 3386771, 'cua_user_id' => 295])->one();
+        $access->acceptCall();
+        $access->save();
+    }
+
     public function actionVoip()
     {
+        $ids = (new ReadyVoipDevice())->findBrowserGroupIds(295);
+        VarDumper::dump($ids);
 
         die;
 //        $f = new PhoneDeviceLogForm();
