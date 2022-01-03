@@ -46,6 +46,7 @@ class EmailAbacObject extends AbacBaseModel implements AbacInterface
     public const ACTION_MANAGE_REVIEW_FORM = 'manageReviewForm';
     public const ACTION_VIEW_REVIEW_DATA = 'viewReviewData';
     public const ACTION_VIEW_REVIEW_EMAIL_DATA = 'viewReviewEmailData';
+    public const ACTION_VIEW_REVIEW_EMAIL_ATTACHED_FILES = 'viewReviewEmailAttachedFiles';
 
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
@@ -66,6 +67,7 @@ class EmailAbacObject extends AbacBaseModel implements AbacInterface
             self::ACTION_MANAGE_REVIEW_FORM,
             self::ACTION_VIEW_REVIEW_DATA,
             self::ACTION_VIEW_REVIEW_EMAIL_DATA,
+            self::ACTION_VIEW_REVIEW_EMAIL_ATTACHED_FILES
         ]
     ];
 

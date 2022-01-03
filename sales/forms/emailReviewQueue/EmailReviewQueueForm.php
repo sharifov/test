@@ -58,7 +58,7 @@ class EmailReviewQueueForm extends Model
             $this->emailMessage = $email->getEmailBodyHtml();
             $this->leadId = $email->e_lead_id;
             $this->caseId = $email->e_case_id;
-            $this->selectedFiles = $this->parseSelectedFiles($email->e_email_data);
+//            $this->selectedFiles = $this->parseSelectedFiles($email->e_email_data);
         }
         $this->emailQueueId = $emailQueueId;
     }
