@@ -5,6 +5,7 @@
 /* @var $model LoginForm */
 
 use frontend\themes\gentelella_v2\widgets\FlashAlert;
+use sales\helpers\setting\SettingHelper;
 use sales\services\authentication\AntiBruteForceService;
 use yii\authclient\widgets\AuthChoice;
 use yii\captcha\Captcha;
@@ -49,8 +50,9 @@ use yii\helpers\Url;
                     <?= Html::submitButton('Login', ['class' => 'btn btn-default', 'name' => 'login-button']) ?>
                 </div>
 
+                <?php if (SettingHelper::isEnabledAuthClients()) : ?>
                 <div style="position: relative; margin-top: 20px;">
-                    <h1 style="font-size: 20px;">Or Sign In With</h1>
+                    <h1 style="font-size: 20px;">Or</h1>
                 </div>
 
                     <?php $authChoice = AuthChoice::begin([
@@ -64,12 +66,19 @@ use yii\helpers\Url;
                             ],
                         ],
                     ]) ?>
-                        <div class="d-flex justify-content-center">
+                        <div class="d-flex justify-content-center" style>
                             <?php foreach ($authChoice->getClients() as $client) : ?>
-                                <?= $authChoice->clientLink($client, null, ['style' => 'margin: 0']) ?>
+                                <?= $authChoice->clientLink(
+                                    $client,
+                                    '<button type="button" class="login-with-btn login-with-' . $client->getName() . '-btn">Sign in with ' . $client->getTitle() . '</button>',
+                                    [
+                                        'style' => 'margin: 0'
+                                    ]
+                                ) ?>
                             <?php endforeach; ?>
                         </div>
                     <?php AuthChoice::end() ?>
+                <?php endif; ?>
 
                 <?php /*<div>
                     <a class="btn btn-default submit" href="index.html">Log in</a>
