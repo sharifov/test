@@ -50,7 +50,7 @@ use yii\helpers\Url;
                 </div>
 
                 <div style="position: relative; margin-top: 20px;">
-                    <h1 style="font-size: 20px;">Or Sign In With</h1>
+                    <h1 style="font-size: 20px;">Or</h1>
                 </div>
 
                     <?php $authChoice = AuthChoice::begin([
@@ -64,9 +64,15 @@ use yii\helpers\Url;
                             ],
                         ],
                     ]) ?>
-                        <div class="d-flex justify-content-center">
+                        <div class="d-flex justify-content-center" style>
                             <?php foreach ($authChoice->getClients() as $client) : ?>
-                                <?= $authChoice->clientLink($client, null, ['style' => 'margin: 0']) ?>
+                                <?= $authChoice->clientLink(
+                                    $client,
+                                    '<button type="button" class="login-with-btn login-with-' . $client->getName() . '-btn">Sign in with ' . $client->getTitle() . '</button>',
+                                    [
+                                        'style' => 'margin: 0'
+                                    ]
+                                ) ?>
                             <?php endforeach; ?>
                         </div>
                     <?php AuthChoice::end() ?>

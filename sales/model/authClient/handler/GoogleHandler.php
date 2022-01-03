@@ -97,6 +97,7 @@ class GoogleHandler implements ClientHandler
             if (UserConnection::isIdleMonitorEnabled()) {
                 UserMonitor::addEvent($user->id, UserMonitor::TYPE_LOGIN);
             }
+            $this->setRedirectUrl(\Yii::$app->getUser()->getReturnUrl());
         }
     }
 
