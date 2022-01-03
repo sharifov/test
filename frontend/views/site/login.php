@@ -5,6 +5,7 @@
 /* @var $model LoginForm */
 
 use frontend\themes\gentelella_v2\widgets\FlashAlert;
+use sales\helpers\setting\SettingHelper;
 use sales\services\authentication\AntiBruteForceService;
 use yii\authclient\widgets\AuthChoice;
 use yii\captcha\Captcha;
@@ -49,6 +50,7 @@ use yii\helpers\Url;
                     <?= Html::submitButton('Login', ['class' => 'btn btn-default', 'name' => 'login-button']) ?>
                 </div>
 
+                <?php if (SettingHelper::isEnabledAuthClients()) : ?>
                 <div style="position: relative; margin-top: 20px;">
                     <h1 style="font-size: 20px;">Or</h1>
                 </div>
@@ -76,6 +78,7 @@ use yii\helpers\Url;
                             <?php endforeach; ?>
                         </div>
                     <?php AuthChoice::end() ?>
+                <?php endif; ?>
 
                 <?php /*<div>
                     <a class="btn btn-default submit" href="index.html">Log in</a>

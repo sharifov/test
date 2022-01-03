@@ -792,4 +792,9 @@ class SettingHelper
     {
         return (int) (Yii::$app->params['settings']['two_factor_counter'] ?? 60);
     }
+
+    public static function isEnabledAuthClients(): bool
+    {
+        return (bool) (Yii::$app->params['settings']['enable_auth_clients'] ?? false);
+    }
 }
