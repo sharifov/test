@@ -1378,7 +1378,7 @@ class Call extends \yii\db\ActiveRecord
         if ($this->cCase) {
             $this->cCase->updateLastAction();
             if ($this->c_parent_id && $this->isOut() && $this->isEnded() && $isChangedStatus) {
-                $this->cCase->addEventLog(null, $this->getCallTypeName() . ' call finished in status: ' . $this->getStatusName() . '. By: ' . $this->cCreatedUser->username);
+                $this->cCase->addEventLog(null, $this->getCallTypeName() . ' call finished in status: ' . $this->getStatusName() . '.' . ($this->c_created_user_id ?  (' By: ' . $this->cCreatedUser->username) : ''));
             }
         }
 
