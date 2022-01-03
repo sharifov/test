@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use common\components\purifier\Purifier;
 use common\models\Email;
 use common\models\Notifications;
+use frontend\helpers\JsonHelper;
 use frontend\widgets\notification\NotificationMessage;
 use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\services\url\UrlGenerator;
@@ -133,11 +134,11 @@ class EmailReviewQueueController extends FController
                 $email->e_email_subject = $form->emailSubject;
                 $email->e_status_id = Email::STATUS_PENDING;
                 $email->body_html = $form->emailMessage;
-                $attachments = [];
-                if ($form->files && FileStorageSettings::canEmailAttach()) {
-                    $attachments['files'] = $this->fileStorageUrlGenerator->generateForExternal($form->getFilesPath());
-                }
-                $email->e_email_data = json_encode($attachments);
+                $attachments = JsonHelper::decode($email->e_email_data);
+//                if ($form->files && FileStorageSettings::canEmailAttach()) {
+//                    $attachments['files'] = $this->fileStorageUrlGenerator->generateForExternal($form->getFilesPath());
+//                }
+//                $email->e_email_data = json_encode($attachments);
                 if ($email->save()) {
                     $mailResponse = $email->sendMail($attachments);
 

@@ -4,6 +4,7 @@
  * @var \sales\forms\emailReviewQueue\EmailReviewQueueForm $previewForm
  * @var $this yii\web\View
  * @var $displayActionBtns bool
+ * @var $files array
  */
 
 use dosamigos\ckeditor\CKEditor;
@@ -64,15 +65,23 @@ use yii\widgets\Pjax;
                     <div class="col-sm-12 form-group">
                         <?= $form->field($previewForm, 'emailSubject')->textInput(['class' => 'form-control', 'maxlength' => true]) ?>
                     </div>
+                    <?php if ($files) : ?>
                     <div class="col-md-12 form-group">
-                        <?php if (FileStorageSettings::canEmailAttach()) : ?>
+                        <label class="control-label">Attached files</label>
+                        <div class="form-group">
+                            <?= implode(', ', array_map(static function ($file) {
+                                return $file['name'];
+                            }, $files)) ?>
+                        </div>
+                        <?php /* if (FileStorageSettings::canEmailAttach()) : ?>
                             <div class="row">
                                 <div class="col-sm-6 form-group">
                                     <?= FileStorageEmailSendListWidget::byReview($previewForm->getFileList(), $previewForm->formName(), $previewForm->getSelectedFiles()) ?>
                                 </div>
                             </div>
-                        <?php endif; ?>
+                        <?php endif; */ ?>
                     </div>
+                    <?php endif; ?>
                 </div>
                 <div class="form-group">
                     <?= $form->field($previewForm, 'emailMessage')->widget(CKEditor::class, [
