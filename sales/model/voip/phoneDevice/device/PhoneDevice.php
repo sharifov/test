@@ -21,13 +21,14 @@ use sales\model\voip\phoneDevice\log\PhoneDeviceLog;
  * @property string|null $pd_user_agent
  * @property string $pd_created_dt
  * @property string $pd_updated_dt
+ * @property string $pd_buid
  *
  * @property Employee $user
  * @property PhoneDeviceLog[] $logs
  */
 class PhoneDevice extends \yii\db\ActiveRecord
 {
-    public static function new(int $connectionId, int $userId, ?string $ip, ?string $userAgent, string $createdDt): self
+    public static function new(int $connectionId, int $userId, ?string $ip, ?string $userAgent, string $createdDt, string $buid): self
     {
         $devicePostfix = (new RandomStringGenerator())->generate(10);
         $device = new self();
@@ -42,6 +43,7 @@ class PhoneDevice extends \yii\db\ActiveRecord
         $device->pd_user_agent = $userAgent;
         $device->pd_created_dt = $createdDt;
         $device->pd_updated_dt = $createdDt;
+        $device->pd_buid = $buid;
         return $device;
     }
 
@@ -153,6 +155,9 @@ class PhoneDevice extends \yii\db\ActiveRecord
 
             ['pd_connection_id', 'integer'],
             ['pd_connection_id', 'exist', 'skipOnError' => true, 'targetClass' => UserConnection::class, 'targetAttribute' => ['pd_connection_id' => 'uc_id']],
+
+            ['pd_buid', 'required'],
+            ['pd_buid', BuidValidator::class],
         ];
     }
 
@@ -181,6 +186,7 @@ class PhoneDevice extends \yii\db\ActiveRecord
             'pd_user_agent' => 'User agent',
             'pd_created_dt' => 'Created',
             'pd_updated_dt' => 'Updated',
+            'pd_buid' => 'Browser Uid',
         ];
     }
 

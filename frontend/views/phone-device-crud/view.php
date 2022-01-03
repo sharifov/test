@@ -39,6 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'pd_status_device:booleanByLabel',
                 'pd_status_speaker:booleanByLabel',
                 'pd_status_microphone:booleanByLabel',
+                'pd_buid',
                 'pd_user_agent',
                 'pd_ip_address',
                 'pd_created_dt:byUserDatetimeWithSeconds',

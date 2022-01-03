@@ -33,6 +33,8 @@ class PhoneDeviceSearch extends PhoneDevice
             ['pd_status_speaker', 'boolean'],
 
             ['pd_user_id', 'integer'],
+
+            ['pd_buid', 'string'],
         ];
     }
 
@@ -67,6 +69,7 @@ class PhoneDeviceSearch extends PhoneDevice
             'pd_status_device' => $this->pd_status_device,
             'pd_status_speaker' => $this->pd_status_speaker,
             'pd_status_microphone' => $this->pd_status_microphone,
+            'pd_buid' => $this->pd_buid,
         ]);
 
         $query->andFilterWhere(['like', 'pd_name', $this->pd_name])

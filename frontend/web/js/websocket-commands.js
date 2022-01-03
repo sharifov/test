@@ -45,9 +45,26 @@ window.sendCommandUpdatePhoneWidgetCurrentCalls = function (finishedCallSid, use
     });
 };
 
+function Buid (userId) {
+    this.key = 'buid' + userId;
+
+    this.get = function () {
+        return localStorage.getItem(this.key) || null;
+    }
+
+    this.set = function (buid) {
+        localStorage.setItem(this.key, buid);
+    }
+
+    this.reset = function () {
+        localStorage.removeItem(this.key);
+    }
+}
+
 function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificationUpdateUrl, discardUnreadMessageUrl)
 {
     try {
+        let buid = new Buid(userId);
         //const socket = new WebSocket(wsUrl);
         var socket = new ReconnectingWebSocket(wsUrl, null, {debug: false, reconnectInterval: reconnectInterval});
         window.socket = socket;
@@ -59,7 +76,7 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
             // console.log(e);
 
             if (typeof PhoneWidget === 'object') {
-                socketSend('PhoneDeviceRegister', 'Register', {default: 'default'});
+                socketSend('PhoneDeviceRegister', 'Register', {buid: buid.get()});
             }
         };
 
@@ -377,13 +394,19 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
 
                     if (obj.cmd === 'PhoneDeviceRegister') {
                         if (obj.error) {
+                            if (obj.buidIsInvalid) {
+                                buid.reset();
+                                alert(obj.msg);
+                            }
                             if (obj.deviceIsInvalid) {
-                                alert(obj.msg + ' You will be redirected to Home page!');
-                                window.location.href = '/';
+                                alert(obj.msg);
                             }
                             createNotify('Phone Widget', obj.msg, 'error');
                             PhoneWidget.addLog(obj.msg);
                         } else {
+                            if (obj.buid) {
+                                buid.set(obj.buid);
+                            }
                             window.phoneWidget.device.initialize.Init(obj.deviceId, obj.devices, window.phoneDeviceRemoteLogsEnabled);
                             window.sendCommandUpdatePhoneWidgetCurrentCalls('', userId, window.generalLinePriorityIsEnabled);
                         }
