@@ -104,7 +104,15 @@ class PhoneController extends FController
         if (!$device->isEqualUser($userId)) {
             throw new NotFoundHttpException('Not found device Id (' . $deviceId . ') relation with user.');
         }
-        $data = Yii::$app->communication->getJwtTokenCache($device->pd_device_identity);
+        try {
+            $data = Yii::$app->communication->generateJwtToken($device->pd_device_identity);
+        } catch (\Throwable $e) {
+            Yii::error([
+                'message' => $e->getMessage(),
+                'userId' => $userId,
+            ], 'PhoneController:actionGetToken');
+            throw new BadRequestHttpException('Server error. Try again.');
+        }
         return $data;
     }
 

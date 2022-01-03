@@ -824,6 +824,20 @@ class CommunicationService extends Component implements CommunicationServiceInte
     }
 
     /**
+     * @param string $deviceName
+     * @return mixed
+     * @throws Exception
+     */
+    public function generateJwtToken($deviceName = ''): array
+    {
+        $out = $this->getJwtToken($deviceName);
+
+        $out['data']['refreshTime'] = $this->calculateJwtExpiredSeconds($out['data']['expire']) + 1;
+
+        return $out;
+    }
+
+    /**
      * @param $cid
      * @param $type
      * @param $from
