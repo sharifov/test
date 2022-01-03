@@ -12,6 +12,7 @@ use common\models\Email;
 use frontend\helpers\JsonHelper;
 use modules\email\src\abac\EmailAbacObject;
 use modules\fileStorage\src\entity\fileStorage\FileStorageQuery;
+use modules\fileStorage\src\services\url\QueryParams;
 use modules\fileStorage\src\services\url\UrlGenerator;
 use sales\helpers\email\MaskEmailHelper;
 use sales\model\emailReviewQueue\entity\EmailReviewQueue;
@@ -103,10 +104,16 @@ $files = JsonHelper::decode($email->e_email_data);
                     [
                         'class' => 'yii\grid\ActionColumn',
                         'buttons' => [
-                            'view' => static function ($url, $model, $key) use ($urlGenerator) {
+                            'view' => static function ($url, $model, $key) use ($urlGenerator, $email) {
                                 $file = FileStorageQuery::getByUid($model['uid'] ?? '');
                                 if ($file) {
-                                    $linkView = $urlGenerator->generate(new \modules\fileStorage\src\services\url\FileInfo($file->fs_name, $file->fs_path, $file->fs_uid, $file->fs_title, null));
+                                    $queryParams = QueryParams::byEmpty();
+                                    if ($email->e_lead_id) {
+                                        $queryParams = QueryParams::byLead();
+                                    } else if ($email->e_case_id) {
+                                        $queryParams = QueryParams::byCase();
+                                    }
+                                    $linkView = $urlGenerator->generate(new \modules\fileStorage\src\services\url\FileInfo($file->fs_name, $file->fs_path, $file->fs_uid, $file->fs_title, $queryParams));
                                     return Html::a('<i class="fa fa-eye"></i>', $linkView, ['target' => '_blank']);
                                 }
                                 return '';
