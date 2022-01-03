@@ -909,9 +909,9 @@ class FlightQuoteController extends FController
                         }
                         $boPrepareService = new VoluntaryExchangeBOPrepareService($case->project, $originProductQuote);
                         $voluntaryExchangeBOService = new VoluntaryExchangeBOService($boPrepareService);
-                        if (!$voluntaryExchangeBOService->isAllow()) {
-                            throw new \RuntimeException('Exchange is not allowed');
-                        }
+//                        if (!$voluntaryExchangeBOService->isAllow()) {
+//                            throw new \RuntimeException('Exchange is not allowed');
+//                        }
 
                         $productQuoteChange = ProductQuoteChange::createVoluntaryExchange(
                             $addChangeForm->origin_quote_id,
@@ -990,9 +990,9 @@ class FlightQuoteController extends FController
 
             $boPrepareService = new VoluntaryExchangeBOPrepareService($case->project, $originProductQuote);
             $voluntaryExchangeBOService = new VoluntaryExchangeBOService($boPrepareService);
-            if (!$voluntaryExchangeBOService->isAllow()) {
-                throw new \RuntimeException('Exchange is not allowed');
-            }
+//            if (!$voluntaryExchangeBOService->isAllow()) {
+//                throw new \RuntimeException('Exchange is not allowed');
+//            }
 
             $form = new VoluntaryQuoteCreateForm(Auth::id(), $flight, true, $voluntaryExchangeBOService->getServiceFeeAmount());
             $form->setCustomerPackage($voluntaryExchangeBOService->getCustomerPackage());
@@ -1475,9 +1475,9 @@ class FlightQuoteController extends FController
                 $form->caseId = $caseId;
                 $form->originData = $result;
 
-                if (!$form->airlineAllow) {
-                    throw new \RuntimeException('Refund not allowed by Airline');
-                }
+//                if (!$form->airlineAllow) {
+//                    throw new \RuntimeException('Refund not allowed by Airline');
+//                }
 
                 $refundForm = $form->getRefundForm();
 
