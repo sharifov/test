@@ -6,6 +6,7 @@ use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $user Employee */
+/* @var $sourcesDataProvider \yii\data\ActiveDataProvider */
 
 
 $this->title = 'Home Page'; // . $user->username;
@@ -171,6 +172,36 @@ $this->title = 'Home Page'; // . $user->username;
                     </table>
                 </div>
             </div>
+            <?php endif; ?>
+
+            <?php if (\sales\helpers\setting\SettingHelper::isEnabledAuthClients()) : ?>
+                <div class="x_panel">
+                    <div class="x_title" >
+                        <h2><i class="fa fa-sticky-note-o"></i> Auth clients</h2>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_content">
+                        <?= \yii\grid\GridView::widget([
+                            'dataProvider' => $sourcesDataProvider,
+                            'columns' => [
+                                'ac_id',
+                                [
+                                    'attribute' => 'ac_source',
+                                    'value' => static function (\sales\model\authClient\entity\AuthClient $model) {
+                                        return \yii\helpers\Html::encode(\sales\model\authClient\entity\AuthClientSources::getName($model->ac_source));
+                                    }
+                                ],
+                                'ac_email',
+                                [
+                                    'attribute' => 'ac_created_dt',
+                                    'format' => 'byUserDateTime',
+                                    'label' => 'When assigned'
+                                ],
+                            ],
+                            'layout' => "{items}",
+                        ]) ?>
+                    </div>
+                </div>
             <?php endif; ?>
         </div>
     </div>

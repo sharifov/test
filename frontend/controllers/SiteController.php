@@ -107,7 +107,13 @@ class SiteController extends FController
     public function actionIndex(): string
     {
         $user = Yii::$app->user->identity;
-        return $this->render('index', ['user' => $user]);
+        $sourcesDataProvider = new ActiveDataProvider();
+        if (SettingHelper::isEnabledAuthClients()) {
+            $authClients = AuthClientQuery::findAllByUserId(Auth::id());
+            $sourcesDataProvider->setModels($authClients);
+            $sourcesDataProvider->pagination = false;
+        }
+        return $this->render('index', ['user' => $user, 'sourcesDataProvider' => $sourcesDataProvider]);
     }
 
 
