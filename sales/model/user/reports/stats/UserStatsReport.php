@@ -221,13 +221,13 @@ class UserStatsReport extends Model
         $to = QueryHelper::getDateFromUserTZToUtc($this->dateTo, $this->timeZone)->format('Y-m-d H:i');
 
         if (Metrics::isSalesConversionCallPriority($this->metrics)) {
-            $query->addSelect(UserParams::tableName() . '.up_call_user_level AS sales_conversion_call_priority');
-            $query->leftJoin(UserParams::tableName(), 'users.id = up_user_id');
+            $query->addSelect('user_data1.ud_value AS sales_conversion_call_priority');
+            $query->leftJoin(['user_data1' => UserData::tableName()], "users.id = user_data1.ud_user_id AND user_data1.ud_key = '" . UserDataKey::CONVERSION_PERCENT . "'");
         }
 
         if (Metrics::isCallPriorityCurrent($this->metrics)) {
-            $query->addSelect('user_data1.ud_value AS call_priority_current');
-            $query->leftJoin(['user_data1' => UserData::tableName()], "users.id = user_data1.ud_user_id AND user_data1.ud_key = '" . UserDataKey::CONVERSION_PERCENT . "'");
+            $query->addSelect(UserParams::tableName() . '.up_call_user_level AS call_priority_current');
+            $query->leftJoin(UserParams::tableName(), 'users.id = up_user_id');
         }
 
         if (Metrics::isGrossProfitCallPriority($this->metrics)) {
