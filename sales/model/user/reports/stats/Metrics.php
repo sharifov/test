@@ -43,7 +43,7 @@ class Metrics
 
     public static function isSalesConversionCallPriority(array $metrics): bool
     {
-        return in_array(self::SALES_CONVERSION, $metrics, false);
+        return in_array(self::SALES_CONVERSION_CALL_PRIORITY, $metrics, false);
     }
 
     public static function isSoldLeads(array $metrics): bool
