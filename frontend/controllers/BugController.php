@@ -21,7 +21,6 @@ use yii\web\Response;
  */
 class BugController extends FController
 {
-
     public function behaviors()
     {
         $behaviors = [
