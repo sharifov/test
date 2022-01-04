@@ -29,7 +29,7 @@ $modalId = 'file-input-modal';
         'id' => $idForm,
         'action' => $url,
         'options' => ['enctype' => 'multipart/form-data'],
-        'enableClientValidation' => false,
+        'validateOnBlur' => false,
     ]) ?>
         <?php echo $activeForm->field($form, 'files[]')->widget(FileInput::class, [
             'options' => [
