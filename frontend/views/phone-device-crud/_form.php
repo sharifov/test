@@ -21,6 +21,8 @@ use yii\widgets\ActiveForm;
             ] : [],
         ]) ?>
 
+        <?= $form->field($model, 'pd_buid')->textInput(['maxlength' => true]) ?>
+
         <?= $form->field($model, 'pd_name')->textInput(['maxlength' => true]) ?>
 
         <?= $form->field($model, 'pd_connection_id')->textInput(['maxlength' => true]) ?>

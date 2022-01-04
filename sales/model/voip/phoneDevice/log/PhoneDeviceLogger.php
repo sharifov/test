@@ -6,9 +6,9 @@ use yii\helpers\VarDumper;
 
 class PhoneDeviceLogger
 {
-    public function log(int $userId, array $logs, \DateTimeImmutable $nowDt): void
+    public function log(int $userId, array $logs, \DateTimeImmutable $createdDt): void
     {
-        $now = $nowDt->format('Y-m-d H:i:s');
+        $created = $createdDt->format('Y-m-d H:i:s');
         foreach ($logs as $key => $log) {
             try {
                 $form = new PhoneDeviceLogForm();
@@ -23,7 +23,7 @@ class PhoneDeviceLogger
                 }
                 if (!$form->validate()) {
                     \Yii::error([
-                        'message' => 'Log is invalid',
+                        'message' => 'Validation error.',
                         'logs' => $logs,
                         'key' => $key,
                         'log' => VarDumper::dumpAsString($log),
@@ -43,13 +43,13 @@ class PhoneDeviceLogger
                         ':error' => $form->getErrorObject(),
                         ':stacktrace' => $form->stacktrace,
                         ':timestamp' => $form->timestamp,
-                        ':created' => $now
+                        ':created' => $created
                     ]
                 )->execute();
             } catch (\Throwable $e) {
                 \Yii::error([
                     'e' => $e->getMessage(),
-                    'message' => 'Log is invalid',
+                    'message' => 'Saved log error.',
                     'logs' => $logs,
                     'key' => $key
                 ], 'PhoneDeviceLogger');

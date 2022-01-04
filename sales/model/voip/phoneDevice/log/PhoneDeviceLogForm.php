@@ -28,7 +28,7 @@ class PhoneDeviceLogForm extends Model
     public function rules(): array
     {
         return [
-            ['deviceId', 'required'],
+            ['deviceId', 'default', 'value' => null],
             ['deviceId', 'integer'],
             ['deviceId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
             ['deviceId', 'exist', 'targetClass' => PhoneDevice::class, 'targetAttribute' => ['deviceId' => 'pd_id'], 'skipOnEmpty' => true, 'skipOnError' => true],
