@@ -38,13 +38,15 @@ $user = Yii::$app->user->identity;
         ['data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => 'Search menu', 'id' => 'btn-search-menu-toggle']
 ) ?>
 
-    <?php if ($user->canRoute('/user-connection/index')) :?>
+    <?php /* if ($user->canRoute('/user-connection/index')) :?>
         <?=Html::a(
             '<span class="fa fa-plug"></span>',
             ['/user-connection/index'],
             ['data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => 'User Connections']
         ) ?>
-    <?php endif; ?>
+    <?php endif;*/ ?>
+
+
 
     <?php /* if (Yii::$app->user->can('PhoneWidget')) :?>
         <?=Html::a(
@@ -69,6 +71,15 @@ $user = Yii::$app->user->identity;
             ['target' => '_blank', 'data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => 'Site Settings']
         ) ?>
     <?php endif; ?>
+
+    <?php /*if ($user->canRoute('/user-connection/index')) :*/?>
+    <?=Html::a(
+        '<span class="fa fa-bug warning"></span>',
+        ['/bug/create'],
+        ['data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => 'Bug Report', 'id' => 'btn-bug-create']
+    ) ?>
+    <?php /*endif;*/ ?>
+
 </div>
 <?php
 $sideBarMenuUrl = \yii\helpers\Url::to(['/site/side-bar-menu']);
@@ -80,6 +91,75 @@ $('#btn-search-menu-toggle').on('click', function (e) {
     e.preventDefault();
     $('#search-menu-div').toggle();
 });
+
+
+
+    
+function canvasEditor() {
+    // Create image editor
+    var imageEditor = new tui.component.ImageEditor('#my-image-editor canvas', {
+      cssMaxWidth: 1000, // Component default value: 1000
+      cssMaxHeight: 800, // Component default value: 800
+    });
+}
+
+
+$('body').off('click', '#btn-bug-create').on('click', '#btn-bug-create', function (e) {
+    e.preventDefault();
+    
+    let btn = $(this);
+    let url = btn.attr('href');
+    
+    /*let btnIconHtml = btn.find('i')[0];
+    let iconSpinner = '<i class="fa fa-spin fa-spinner"></i>';
+    
+    
+    btn.find('i').replaceWith(iconSpinner);
+    btn.addClass('disabled');*/
+    
+    let modal = $('#modal-lg');
+    modal.find('.modal-body').html('');
+    modal.find('.modal-title').html('Create Bug issue');
+    
+    
+    //$('#modal-label').html('Create Bug issue');
+    
+    let id = $(this).attr('data-id');
+    modal.find('.modal-body').load(url, function( response, status, xhr ) {
+        if(status === 'error') {
+            createNotify('Error', xhr.responseText, 'error');
+        } else {
+          modal.modal('show');
+          
+          const screenshotTarget = document.body;
+
+            html2canvas(screenshotTarget).then((canvas) => {
+               const base64image = canvas.toDataURL("image/png");
+               
+               let str = '<h3 class=text-center>DrawerJs Demonstration</h3> <div id="tui-image-editor"></div>';
+               modal.find('.modal-body').html('<img src="' + base64image + '" style="width:50%"/>' + str);
+               canvasEditor();
+               //window.location.href = base64image;
+            });
+                      
+        }
+        //btn.find('i').replaceWith(btnIconHtml);
+        //btn.removeClass('disabled');
+    });
+});
+
+
+// $('#btn-bug-create').on('click', function (e) {
+//     e.preventDefault();
+//     // $('#input-search-menu').val('');
+//     // $('#input-search-menu').trigger('keyup');
+//    
+//    
+//    
+//    
+//     return false;
+// });
+
 
 $('body').on('click', '#btn-remove-search-menu', function (e) {
     e.preventDefault();
