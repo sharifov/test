@@ -595,6 +595,9 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
             window.socketConnectionId = null;
 
             if (typeof PhoneWidget === 'object' && PhoneWidget.isInitiated()) {
+                if (typeof twilioLogger === 'object') {
+                    twilioLogger.error('%s', 'WS connection close');
+                }
                 PhoneWidget.getDeviceState().phoneDisconnected('WS connection closed');
                 PhoneWidget.getDeviceState().resetDevices('WS connection closed');
             }
@@ -613,6 +616,9 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
             window.socketConnectionId = null;
 
             if (typeof PhoneWidget === 'object' && PhoneWidget.isInitiated()) {
+                if (typeof twilioLogger === 'object') {
+                    twilioLogger.error('%s', 'WS connection error');
+                }
                 PhoneWidget.getDeviceState().phoneDisconnected('WS connection error');
                 PhoneWidget.getDeviceState().resetDevices('WS connection error');
             }

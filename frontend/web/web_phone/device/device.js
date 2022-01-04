@@ -69,7 +69,7 @@
     let device = null;
     let twilioTokenUrl = '';
 
-    const twilioLogger = Twilio.Logger;
+    window.twilioLogger = Twilio.Logger;
     twilioLogger.setLevel('ERROR');
     twilioLogger.getLogger = function () {}; // fix for remote logger
 
@@ -88,7 +88,7 @@
             twilioLogger,
             {
                 url: '/voip/log',
-                interval: 30000,
+                interval: 10000,
                 stacktrace: {
                     levels: ['error'],
                     depth: 10,
@@ -132,7 +132,7 @@
         microphoneDevices.innerHTML = '';
 
         if (device.audio.availableInputDevices.size < 1) {
-            twilioLogger.error('%j', createError({
+            twilioLogger.error('%j', window.twilioLoggerCreateError({
                 name: 'Update input device',
                 message: 'Not found Microphone device'
             }));
@@ -269,7 +269,7 @@
                         call.accept();
                     })
                     .catch(error => {
-                        let err = createError(error, 'Microphone error');
+                        let err = window.twilioLoggerCreateError(error, 'Microphone error');
                         twilioLogger.error('%j', err);
                         PhoneWidget.addLog(error);
                         createNotify('Accept incoming connection', error.message, 'error')
@@ -295,7 +295,7 @@
                 updateMicrophoneDevice();
                 stream.getTracks().forEach(track => track.stop());
             }).catch(error => {
-                let err = createError(error, 'Microphone error');
+                let err = window.twilioLoggerCreateError(error, 'Microphone error');
                 twilioLogger.error('%j', err);
                 PhoneWidget.addLog(error);
                 PhoneWidget.getDeviceState().microphoneError();
@@ -341,7 +341,7 @@
         setTimeout(() => device.register(), 5000);
     }
 
-    const createError = (error, defaultMessage) => ({
+    window.twilioLoggerCreateError = (error, defaultMessage) => ({
         name: error.name || defaultMessage,
         code: error.code,
         message: error.message || defaultMessage,
