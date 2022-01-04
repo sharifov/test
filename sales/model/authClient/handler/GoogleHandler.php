@@ -89,7 +89,6 @@ class GoogleHandler implements ClientHandler
             'ac_source_id' => $sourceId
         ])->one();
         $email = ArrayHelper::getValue($client->getUserAttributes(), 'email');
-        \Yii::info('test', 'info\test');
         if (!$authClients) {
             $authClient = AuthClient::create(
                 $userId,
