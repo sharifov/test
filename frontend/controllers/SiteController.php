@@ -404,6 +404,10 @@ class SiteController extends FController
         $source = (int)$session->get('auth_client_source');
         $sourceId = (string)$session->get('auth_client_source_id');
 
+        if (!Yii::$app->user->isGuest) {
+            return $this->goHome();
+        }
+
         if (!empty($source) && !empty($sourceId)) {
             $userId = Yii::$app->request->get('user-id');
             if ($userId && $authClient = AuthClientQuery::findByUserAndSource((int)$userId, $source, $sourceId)) {
