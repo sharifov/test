@@ -6,9 +6,9 @@ use common\models\Call;
 use common\models\Conference;
 use common\models\Department;
 use common\models\Employee;
-use sales\helpers\UserCallIdentity;
 use sales\model\call\helper\CallHelper;
 use sales\model\phoneList\entity\PhoneList;
+use sales\model\voip\phoneDevice\device\VoipDevice;
 use yii\base\Model;
 
 class ActiveQueueCall extends Model
@@ -106,12 +106,12 @@ class ActiveQueueCall extends Model
 
         if ($call->currentParticipant && $call->currentParticipant->isUser()) {
             if ($call->isIn()) {
-                if (($fromUserId = UserCallIdentity::parseUserId($call->c_from)) && $fromUser = Employee::findOne($fromUserId)) {
+                if (($fromUserId = VoipDevice::getUserId($call->c_from)) && $fromUser = Employee::findOne($fromUserId)) {
                     $name = $fromUser->nickname ?: $fromUser->username;
                     $phone = '';
                 }
             } elseif ($call->isOut()) {
-                if (($toUserId = UserCallIdentity::parseUserId($call->c_to)) && $toUser = Employee::findOne($toUserId)) {
+                if (($toUserId = VoipDevice::getUserId($call->c_to)) && $toUser = Employee::findOne($toUserId)) {
                     $name = $toUser->nickname ?: $toUser->username;
                     $phone = '';
                 }

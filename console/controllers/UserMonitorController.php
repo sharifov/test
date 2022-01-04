@@ -129,6 +129,9 @@ class UserMonitorController extends Controller
                 $idleTimeMinutes = UserMonitor::autologoutIdlePeriodMin();
             }
 
+            $timerSec = UserMonitor::autoLogoutTimerSec();
+            $isShowMessage = UserMonitor::isAutologoutShowMessage() ? 'true' : 'false';
+
             $timeStart = microtime(true);
             $users = UserOnline::find()->where(['uo_idle_state' => true])->andWhere(['<=', 'uo_idle_state_dt', date('Y-m-d H:i:s', strtotime('-' . $idleTimeMinutes . ' minutes'))])->all();
 
@@ -136,7 +139,7 @@ class UserMonitorController extends Controller
                 /** @var UserOnline $userOnline */
                 foreach ($users as $userOnline) {
                     $pubChannel = UserConnection::getUserChannel($userOnline->uo_user_id);
-                    if (Notifications::pub([$pubChannel], 'logout', ['timer' => 10])) {
+                    if (Notifications::pub([$pubChannel], 'logout', ['timerSec' => $timerSec, 'isShowMessage' => $isShowMessage])) {
                         echo ' - user ' . $userOnline->uo_user_id . PHP_EOL;
                     }
                 }

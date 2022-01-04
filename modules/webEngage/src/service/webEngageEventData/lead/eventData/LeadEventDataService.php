@@ -2,6 +2,7 @@
 
 namespace modules\webEngage\src\service\webEngageEventData\lead\eventData;
 
+use common\models\Airports;
 use common\models\Lead;
 use common\models\LeadFlightSegment;
 use common\models\QuoteSegment;
@@ -10,7 +11,9 @@ use common\models\QuoteSegment;
  * Class LeadEventDataService
  *
  * @property string|null $origin
+ * @property string|null $originCity
  * @property string|null $destination
+ * @property string|null $destinationCity
  * @property string|null $departureDate
  * @property string|null $returnDate
  * @property string|null $route
@@ -22,7 +25,9 @@ use common\models\QuoteSegment;
 class LeadEventDataService
 {
     private ?string $origin = null;
+    private ?string $originCity = null;
     private ?string $destination = null;
+    private ?string $destinationCity = null;
     private ?string $departureDate = null;
     private ?string $returnDate = null;
     private ?string $route = null;
@@ -68,14 +73,17 @@ class LeadEventDataService
 
     private function prepareEventData(): LeadEventDataService
     {
-        $this->origin = $this->firstSegment->origin ?? null;
-        $this->destination = $this->firstSegment->destination ?? null;
+        if ($this->origin = $this->firstSegment->origin ?? null) {
+            $this->originCity = Airports::getCityByIata($this->origin);
+        }
+        if ($this->destination = $this->firstSegment->destination ?? null) {
+            $this->destinationCity = Airports::getCityByIata($this->destination);
+        }
         $this->departureDate = $this->firstSegment->departure ?? null;
         $this->returnDate = null;
         if ($this->lead->trip_type === Lead::TRIP_TYPE_ROUND_TRIP) {
             $this->returnDate = $this->lastSegment->departure ?? null;
         }
-
         return $this;
     }
 
@@ -102,5 +110,15 @@ class LeadEventDataService
     public function getDepartureDate(): ?string
     {
         return $this->departureDate;
+    }
+
+    public function getOriginCity(): ?string
+    {
+        return $this->originCity;
+    }
+
+    public function getDestinationCity(): ?string
+    {
+        return $this->destinationCity;
     }
 }

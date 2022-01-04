@@ -212,7 +212,11 @@ use yii\bootstrap4\Html;
                 <?php foreach ($lead->leadFlightSegments as $key => $segment) : ?>
                 <div class="quote pl-3">
                     <div class="row mt-2 mb-2 ml-1 font-weight-bold">
-                    Trip <?= $key + 1 ?>. <?= Airports::findByIata($segment->origin)->cityName . ' ' . $segment->origin . ' - ' . Airports::findByIata($segment->destination)->cityName . ' ' . $segment->destination ?>
+                    Trip <?= $key + 1 ?>. <?php
+                        $airport = Airports::findByIata($segment->origin);
+                        echo ($airport ? $airport->cityName . ' '  : '') . $segment->origin . ' - ';
+                        $airport = Airports::findByIata($segment->destination);
+                        echo ($airport ? $airport->cityName . ' '  : '') . $segment->destination; ?>
                     </div>
                     <div class="row">
                         <?php if (isset($tripsMinDurationsInMinutes[$key]) && isset($tripsMaxDurationsInMinutes[$key]) && $tripsMinDurationsInMinutes[$key] > 0 && $tripsMaxDurationsInMinutes[$key] > 0) : ?>
@@ -237,11 +241,11 @@ use yii\bootstrap4\Html;
                             <div class="row">
                                 <div class="col-sm-6">
                                     <label class="mb-0" for="">Departure From</label>
-                                    <?= $form->field($searchFrom, 'departureStartTimeList[' . $key . ']')->textInput(['type' => 'time', 'pattern' => '[0-9]{2}:[0-9]{2}', 'list' => 'calltimeslist'])->label(false) ?>
+                                    <?= $form->field($searchFrom, 'departureStartTimeList[' . $key . ']')->textInput(['type' => 'time', 'pattern' => '[0-9]{2}:[0-9]{2}', 'list' => 'predefinedTimeList'])->label(false) ?>
                                 </div>
                                 <div class="col-sm-6">
                                     <label class="mb-0" for="">Departure To</label>
-                                    <?= $form->field($searchFrom, 'departureEndTimeList[' . $key . ']')->textInput(['type' => 'time', 'pattern' => '[0-9]{2}:[0-9]{2}', 'list' => 'calltimeslist'])->label(false) ?>
+                                    <?= $form->field($searchFrom, 'departureEndTimeList[' . $key . ']')->textInput(['type' => 'time', 'pattern' => '[0-9]{2}:[0-9]{2}', 'list' => 'predefinedTimeList'])->label(false) ?>
                                 </div>
                             </div>
                         </div>
@@ -251,11 +255,11 @@ use yii\bootstrap4\Html;
                             <div class="row">
                                 <div class="col-sm-6">
                                      <label class="mb-0" for="">Arrival From</label>
-                                    <?= $form->field($searchFrom, 'arrivalStartTimeList[' . $key . ']')->textInput(['type' => 'time', 'pattern' => '[0-9]{2}:[0-9]{2}', 'list' => 'calltimeslist'])->label(false) ?>
+                                    <?= $form->field($searchFrom, 'arrivalStartTimeList[' . $key . ']')->textInput(['type' => 'time', 'pattern' => '[0-9]{2}:[0-9]{2}', 'list' => 'predefinedTimeList'])->label(false) ?>
                                 </div>
                                 <div class="col-sm-6">
                                     <label class="mb-0" for="">Arrival To</label>
-                                    <?= $form->field($searchFrom, 'arrivalEndTimeList[' . $key . ']')->textInput(['type' => 'time', 'pattern' => '[0-9]{2}:[0-9]{2}', 'list' => 'calltimeslist'])->label(false) ?>
+                                    <?= $form->field($searchFrom, 'arrivalEndTimeList[' . $key . ']')->textInput(['type' => 'time', 'pattern' => '[0-9]{2}:[0-9]{2}', 'list' => 'predefinedTimeList'])->label(false) ?>
                                 </div>
                             </div>
                         </div>
@@ -284,7 +288,7 @@ use yii\bootstrap4\Html;
     </div>
 </div>
 <br>
-    <datalist id="calltimeslist">
+    <datalist id="predefinedTimeList">
 <?php for ($i = 8; $i < 23; $i++) {
     echo '<option value="' . sprintf('%02d', $i) . ':00">';
 }

@@ -213,6 +213,10 @@ If app config param "apiHealthCheck" username is not empty base auth then API ca
 Generate API Documentation (apiDoc):
 
  ```
+composer apidoc-gen
+ ```
+it runs these commands:
+ ```
  sudo apidoc -c ./apidoc.json -i "./webapi/modules/" -i "./webapi/controllers/" -o "./webapi/web/doc" -f ".*\\.php$"
  sudo apidoc -c ./apidoc.json -i "./webapi/modules/" -i "./webapi/controllers/" -o "./webapi/web/doc2/" -t ./webapi/web/apidoc/template2 -f ".*\\.php$"
  ```

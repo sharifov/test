@@ -12,6 +12,7 @@ use webapi\src\response\messages\MessageValue;
  * @property $gid
  * @property $client_id
  * @property $leadDataInserted
+ * @property $clientDataInserted
  * @property $warnings
  */
 class LeadCreateValue extends MessageValue
@@ -22,5 +23,6 @@ class LeadCreateValue extends MessageValue
     public $client_id;
     public $client;
     public $leadDataInserted = [];
+    public $clientDataInserted = [];
     public $warnings = [];
 }

@@ -11,10 +11,10 @@ use common\models\UserConnection;
  */
 class UserConnectionQuery extends \yii\db\ActiveQuery
 {
-    /*public function active()
+    public function byId(int $id): self
     {
-        return $this->andWhere('[[status]]=1');
-    }*/
+        return $this->andWhere(['uc_id' => $id]);
+    }
 
     /**
      * {@inheritdoc}

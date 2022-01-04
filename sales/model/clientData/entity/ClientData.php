@@ -4,6 +4,7 @@ namespace sales\model\clientData\entity;
 
 use common\models\Client;
 use sales\model\clientDataKey\entity\ClientDataKey;
+use sales\traits\FieldsTrait;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -23,6 +24,8 @@ use yii\helpers\ArrayHelper;
  */
 class ClientData extends \yii\db\ActiveRecord
 {
+    use FieldsTrait;
+
     public function rules(): array
     {
         return [

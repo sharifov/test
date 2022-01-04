@@ -49,6 +49,7 @@ use sales\events\lead\LeadSoldEvent;
 use sales\events\lead\LeadStatusChangedEvent;
 use sales\events\lead\LeadTaskEvent;
 use sales\events\lead\LeadTrashEvent;
+use sales\formatters\client\ClientTimeFormatter;
 use sales\helpers\lead\LeadHelper;
 use sales\helpers\quote\QuoteProviderProjectHelper;
 use sales\helpers\setting\SettingHelper;
@@ -57,6 +58,7 @@ use sales\model\airportLang\service\AirportLangService;
 use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\callLog\entity\callLog\CallLogType;
 use sales\model\callLog\entity\callLogLead\CallLogLead;
+use sales\model\client\helpers\ClientFormatter;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\model\lead\useCases\lead\api\create\LeadCreateForm;
@@ -4314,7 +4316,7 @@ Reason: {reason}',
         return self::STATUS_LIST;
     }
 
-        /**
+    /**
      * @param Employee $user
      * @return array
      */
@@ -4783,60 +4785,153 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
      * @param bool $linkMode
      * @return string
      */
-    public function getCommunicationInfo(bool $linkMode = true): string
+    public function getCommunicationInfo(bool $details = false, bool $linkMode = true): string
     {
-        $str = '';
+        $str = [];
         $linkAttributes = ['target' => '_blank', 'data-pjax' => '0'];
 
-        if ($linkMode) {
-            $callsText = '<span title="Calls Out / In"><i class="fa fa-phone success"></i> ' . $this->getCountCalls(Call::CALL_TYPE_OUT) . '/' .
-                $this->getCountCalls(Call::CALL_TYPE_IN) . '</span> | ';
-            if (Auth::can('/call/index')) {
-                $str .= Html::a($callsText, Url::to(['/call-log/index', 'CallLogSearch[lead_id]' => $this->id]), $linkAttributes);
-            } else {
-                $str .= $callsText;
-            }
+        $countCalls = $countCallsOut = $countCallsIn = 0;
+        $countSms = $countSmsIn = $countSmsOut = 0;
+        $countEmail = $countEmailIn = $countEmailOut = 0;
 
-            $smsText = '<span title="SMS Out / In"><i class="fa fa-comments info"></i> ' .
-                $this->getCountSms(Sms::TYPE_OUTBOX) . '/' .  $this->getCountSms(Sms::TYPE_INBOX) . '</span> | ';
+        if ($details) {
+            $countCallsOut = $this->getCountCalls(Call::CALL_TYPE_OUT);
+            $countCallsIn = $this->getCountCalls(Call::CALL_TYPE_IN);
 
-            if (Auth::can('/sms/index')) {
-                $str .= Html::a($smsText, Url::to(['/sms/index', 'SmsSearch[s_lead_id]' => $this->id]), $linkAttributes);
-            } else {
-                $str .= $smsText;
-            }
+            $countSmsIn = $this->getCountSms(Sms::TYPE_INBOX);
+            $countSmsOut = $this->getCountSms(Sms::TYPE_OUTBOX);
 
-            $emilText = '<span title="Email Out / In"><i class="fa fa-envelope danger"></i> ' .
-                $this->getCountEmails(Email::TYPE_OUTBOX) . '/' .  $this->getCountEmails(Email::TYPE_INBOX) . '</span> | ';
-            if (Auth::can('/email/index')) {
-                $str .= Html::a(
-                    $emilText,
-                    Url::to(['/email/index', 'EmailSearch[e_lead_id]'  => $this->id]),
-                    $linkAttributes
-                );
-            } else {
-                $str .= $emilText;
-            }
-
-            $chatText = '<span title="Client Chat"><i class="fa fa-weixin warning"></i> ' .
-                $this->getCountClientChat() . '</span>';
-            if (Auth::can('/client-chat-crud/index')) {
-                $str .= Html::a(
-                    $chatText,
-                    Url::to(['/client-chat-crud/index', 'ClientChatQaSearch[leadId]'  => $this->id]),
-                    $linkAttributes
-                );
-            } else {
-                $str .= $chatText;
-            }
+            $countEmailIn = $this->getCountEmails(Email::TYPE_INBOX);
+            $countEmailOut = $this->getCountEmails(Email::TYPE_OUTBOX);
         } else {
-            $str .= '<span title="Calls Out / In / Join"><i class="fa fa-phone success"></i> ' . $this->getCountCalls(\common\models\Call::CALL_TYPE_OUT) . '/' .  $this->getCountCalls(\common\models\Call::CALL_TYPE_IN) . '/' .  $this->getCountCalls(\common\models\Call::CALL_TYPE_JOIN) . '</span> | ';
-            $str .= '<span title="SMS Out / In"><i class="fa fa-comments info"></i> ' . $this->getCountSms(\common\models\Sms::TYPE_OUTBOX) . '/' .  $this->getCountSms(\common\models\Sms::TYPE_INBOX) . '</span> | ';
-            $str .= '<span title="Email Out / In"><i class="fa fa-envelope danger"></i> ' . $this->getCountEmails(\common\models\Email::TYPE_OUTBOX) . '/' .  $this->getCountEmails(\common\models\Email::TYPE_INBOX) . '</span> | ';
-            $str .= '<span title="Client Chat"><i class="fa fa-weixin warning"></i> ' . $this->getCountClientChat() . '</span>';
+            $countCalls = $this->getCountCalls();
+            $countSms = $this->getCountSms();
+            $countEmail = $this->getCountEmails();
         }
 
-        return $str;
+        $countClientChat = $this->getCountClientChat();
+
+        if ($linkMode) {
+            if ($countCalls || $countCallsOut || $countCallsIn) {
+                if ($details) {
+                    $callsText = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-phone success']) .
+                        ' ' . $countCallsOut . '/' .
+                        $countCallsIn, ['title' => 'Calls Out / In']);
+                } else {
+                    $callsText = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-phone success']) .
+                        ' ' . $countCalls, ['title' => 'Calls']);
+                }
+
+                if (Auth::can('/call/index')) {
+                    $str[] = Html::a(
+                        $callsText,
+                        Url::to(['/call-log/index', 'CallLogSearch[lead_id]' => $this->id]),
+                        $linkAttributes
+                    );
+                } else {
+                    $str[] = $callsText;
+                }
+            }
+
+            if ($countSms || $countSmsIn || $countSmsOut) {
+                if ($details) {
+                    $smsText = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-comments info']) .
+                        ' ' . $countSmsOut . '/' .
+                        $countSmsIn, ['title' => 'SMS Out / In']);
+                } else {
+                    $smsText = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-comments info']) .
+                        ' ' . $countSms, ['title' => 'SMS']);
+                }
+
+                if (Auth::can('/sms/index')) {
+                    $str[] = Html::a(
+                        $smsText,
+                        Url::to(['/sms/index', 'SmsSearch[s_lead_id]' => $this->id]),
+                        $linkAttributes
+                    );
+                } else {
+                    $str[] = $smsText;
+                }
+            }
+
+            if ($countEmail || $countEmailIn || $countEmailOut) {
+                if ($details) {
+                    $emilText = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-envelope danger']) .
+                        ' ' . $countEmailOut . '/' .
+                        $countEmailIn, ['title' => 'Email Out / In']);
+                } else {
+                    $emilText = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-envelope danger']) .
+                        ' ' . $countEmail, ['title' => 'Email']);
+                }
+
+                if (Auth::can('/email/index')) {
+                    $str[] = Html::a(
+                        $emilText,
+                        Url::to(['/email/index', 'EmailSearch[e_lead_id]' => $this->id]),
+                        $linkAttributes
+                    );
+                } else {
+                    $str[] = $emilText;
+                }
+            }
+
+
+            if ($countClientChat) {
+                $chatText = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-weixin warning']) .
+                    ' ' . $countClientChat, ['title' => 'Client Chat']);
+                if (Auth::can('/client-chat-crud/index')) {
+                    $str[] = Html::a(
+                        $chatText,
+                        Url::to(['/client-chat-crud/index', 'ClientChatQaSearch[leadId]' => $this->id]),
+                        $linkAttributes
+                    );
+                } else {
+                    $str[] = $chatText;
+                }
+            }
+        } else {
+            if ($details) {
+                if ($countCallsOut || $countCallsIn) {
+                    $str[] = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-phone success']) .
+                        ' ' . $countCallsOut . '/' .
+                        $countCallsIn, ['title' => 'Calls Out / In']);
+                }
+
+                if ($countSmsOut || $countSmsIn) {
+                    $str[] = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-comments info']) .
+                        ' ' . $countSmsOut . '/' .
+                        $countSmsIn, ['title' => 'SMS Out / In']);
+                }
+
+                if ($countEmailOut || $countEmailIn) {
+                    $str[] = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-envelope danger']) .
+                        ' ' . $countEmailOut . '/' .
+                        $countEmailIn, ['title' => 'Email Out / In']);
+                }
+            } else {
+                if ($countCalls) {
+                    $str[] = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-phone success']) .
+                        ' ' . $countCalls, ['title' => 'Calls']);
+                }
+
+                if ($countSms) {
+                    $str[] = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-comments info']) .
+                        ' ' . $countSms, ['title' => 'SMS']);
+                }
+
+                if ($countEmail) {
+                    $str[] = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-envelope danger']) .
+                        ' ' . $countEmail, ['title' => 'Email']);
+                }
+            }
+
+            if ($countClientChat) {
+                $str[] = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-weixin warning']) .
+                    ' ' . $countClientChat, ['title' => 'Client Chat']);
+            }
+        }
+
+        return implode(' | ', $str);
     }
 
     /**
@@ -4890,5 +4985,109 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         return in_array($this->project_id, SettingHelper::getBusinessProjectIds(), true)
             || $this->cabin === self::CABIN_BUSINESS
             || $this->cabin === self::CABIN_FIRST;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFlightDetailsPaxFormatted(): string
+    {
+        $content = [];
+
+        $fdData = $this->getFlightDetails();
+
+
+        $paxData = [];
+        $paxStr = '';
+
+        if ($this->adults) {
+            $paxData[] = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-male']) .
+                ' ' . $this->adults, ['title' => 'adult']);
+        }
+
+        if ($this->children) {
+            $paxData[] = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-child']) .
+                ' ' . $this->children, ['title' => 'child']);
+        }
+
+        if ($this->infants) {
+            $paxData[] = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-info']) .
+                ' ' . $this->infants, ['title' => 'infant']);
+        }
+
+        if ($fdData) {
+            $content[] = $fdData;
+        }
+
+        if ($paxData) {
+            $paxStr = implode(' / ', $paxData);
+        }
+
+        $content[] = ($paxStr ? $paxStr . ', ' : '') . Html::tag(
+            'span',
+            $this->getCabinClassName(),
+            ['title' => 'Cabin']
+        );
+
+        return !empty($content) ? implode('<br/>', $content) : '-';
+    }
+
+    /**
+     * @return string
+     * @throws \Exception
+     */
+    public function getClientFormatted(): string
+    {
+        $client = $this->client;
+        if ($client) {
+            $clientName = $client->getFullName(); //first_name . ' ' . $client->last_name;
+            if ($clientName === 'ClientName') {
+                $clientName = '-';
+            } else {
+                $clientName = Html::tag('i', '', ['class' => 'fa fa-user']) . ' ' . Html::encode($clientName);
+            }
+
+            if ($client->isExcluded()) {
+                $clientName = ClientFormatter::formatExclude($client)  . $clientName;
+            }
+
+            $str = '';
+            //$str = $lead->client && $lead->client->clientEmails ? '<i class="fa fa-envelope"></i> ' .
+            // implode(' <br><i class="fa fa-envelope"></i> ',
+            // \yii\helpers\ArrayHelper::map($lead->client->clientEmails, 'email', 'email')) . '' : '';
+            //$str .= $lead->client && $lead->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' .
+            // implode(' <br><i class="fa fa-phone"></i> ',
+            // \yii\helpers\ArrayHelper::map($lead->client->clientPhones, 'phone', 'phone')) . '' : '';
+
+            $clientName .= /*'<br>' .*/ $str;
+        } else {
+            $clientName = '-';
+        }
+
+        return $clientName . '<br/>' . ClientTimeFormatter::format($this->getClientTime2(), $this->offset_gmt);
+    }
+
+    /**
+     * @return string
+     */
+    public function getQuoteInfoFormatted(): string
+    {
+        $quotes = $this->getQuoteSendInfo();
+        //return sprintf('Total: <strong>%d</strong> <br> Sent: <strong>%d</strong>',
+        // ($quotes['send_q'] + $quotes['not_send_q']), $quotes['send_q']);
+//        return '<span title="Send:' . ((int) $quotes['send_q']) .
+//            ' / Total:' . ($quotes['send_q'] + $quotes['not_send_q']) . '">' .
+//            ($quotes['send_q'] ?: '-') . ' / ' . ($quotes['send_q'] + $quotes['not_send_q']) . '</span>';
+
+        if (empty($quotes['send_q']) && empty($quotes['not_send_q'])) {
+            return '-';
+        }
+
+        return Html::tag(
+            'span',
+            ($quotes['send_q'] ?: '-') . ' / ' . ($quotes['send_q'] + $quotes['not_send_q']),
+            ['title' => 'Send:' . ((int) $quotes['send_q']) .
+            ' / Total:' . ($quotes['send_q'] + $quotes['not_send_q'])]
+        );
     }
 }

@@ -37,6 +37,7 @@ use yii\base\Model;
  * @property string|null $expire_at
  * @property int $type
  * @property array|null $lead_data
+ * @property array|null $client_data
  *
  * @property FlightForm[] $flightsForm
  * @property ClientForm $clientForm
@@ -70,6 +71,7 @@ class LeadCreateForm extends Model
     public $expire_at;
     public $type;
     public $lead_data;
+    public $client_data;
 
     public $flightsForm;
     public $clientForm;
@@ -146,7 +148,7 @@ class LeadCreateForm extends Model
 
             [['expire_at'], 'datetime', 'format' => 'php:Y-m-d H:i:s', 'skipOnEmpty' => true],
 
-            [['lead_data'], IsArrayValidator::class, 'skipOnEmpty' => true, 'skipOnError' => true],
+            [['lead_data', 'client_data'], IsArrayValidator::class, 'skipOnEmpty' => true, 'skipOnError' => true],
 
             ['department_key', 'string'],
             ['department_key', 'validateDepartment', 'skipOnEmpty' => true, 'skipOnError' => true],

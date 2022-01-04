@@ -93,8 +93,7 @@ $pjaxListId = 'pjax-call-index';
                     },
                     'join' => static function (Call $model, $key, $index) use ($user) {
                         return
-                            ((bool)(Yii::$app->params['settings']['voip_conference_base'] ?? false)
-                            && Auth::can('/phone/ajax-join-to-conference'))
+                            Auth::can('/phone/ajax-join-to-conference')
                             && (int)$model['cp_type_id'] === ConferenceParticipant::TYPE_AGENT
                             && ($model->isIn() || $model->isOut() || $model->isReturn())
                             && $model->isStatusInProgress();
@@ -123,9 +122,9 @@ $pjaxListId = 'pjax-call-index';
                                 <i class="fa fa-phone"></i>
                               </button>
                               <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                <a class="dropdown-item conference-coach" href="#" onclick="joinListen(\'' . $model->c_call_sid . '\');">Listen</a>
-                                <a class="dropdown-item conference-coach" href="#" onclick="joinCoach(\'' . $model->c_call_sid . '\');">Coach</a>
-                                <a class="dropdown-item conference-coach" href="#" onclick="joinBarge(\'' . $model->c_call_sid . '\');">Barge</a>
+                                <a class="dropdown-item conference-coach" href="#" onclick="PhoneWidget.joinListen(\'' . $model->c_call_sid . '\');">Listen</a>
+                                <a class="dropdown-item conference-coach" href="#" onclick="PhoneWidget.joinCoach(\'' . $model->c_call_sid . '\');">Coach</a>
+                                <a class="dropdown-item conference-coach" href="#" onclick="PhoneWidget.joinBarge(\'' . $model->c_call_sid . '\');">Barge</a>
                               </div>
                             </div>';
                     },

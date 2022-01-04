@@ -1,13 +1,10 @@
 <?php
 
+use common\components\grid\project\ProjectColumn;
 use dosamigos\datepicker\DatePicker;
-use sales\access\EmployeeProjectAccess;
 use sales\access\ListsAccess;
-use sales\formatters\client\ClientTimeFormatter;
-use sales\model\client\helpers\ClientFormatter;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
-use kartik\grid\GridView;
 use common\models\Lead;
 
 /* @var $this yii\web\View */
@@ -28,10 +25,10 @@ $this->params['breadcrumbs'][] = $this->title;
     z-index: 1010 !important;
 }
 </style>
-<h1><i class="fa fa-spinner"></i> <?=\yii\helpers\Html::encode($this->title)?></h1>
+<h1><i class="fa fa-spinner"></i> <?= Html::encode($this->title)?></h1>
 <div class="lead-index">
 
-    <?php Pjax::begin(['timeout' => 5000, 'clientOptions' => ['method' => 'GET'], 'scrollTo' => 0]); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
+    <?php Pjax::begin(['timeout' => 5000]); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]);?>
     <?= $this->render('_search_processing', ['model' => $searchModel]); ?>
 
     <?php
@@ -40,24 +37,16 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'id',
             'label' => 'Lead ID',
-            'value' => static function (\common\models\Lead $model) {
+            'value' => static function (Lead $model) {
                 return $model->id;
             },
             'options' => [
                 'style' => 'width:80px'
             ]
         ],
-        [
-            'attribute' => 'l_type',
-            'value' => static function (Lead $model) {
-                return $model->l_type ? '<span class="label label-default" style="font-size: 13px">' . $model::TYPE_LIST[$model->l_type] . '</span>' : ' - ';
-            },
-            'format' => 'raw',
-            'filter' => Lead::TYPE_LIST,
-        ],
 
         [
-            'class' => \common\components\grid\project\ProjectColumn::class,
+            'class' => ProjectColumn::class,
             'attribute' => 'project_id',
             'relation' => 'project'
         ],
@@ -65,11 +54,11 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'created',
             'label' => 'Pending Time',
-            'value' => static function (\common\models\Lead $model) {
+            'value' => static function (Lead $model) {
                 return Yii::$app->formatter->asRelativeDt($model->created);
             },
             'options' => [
-                'style' => 'width:160px'
+                'style' => 'width:180px'
             ],
             'format' => 'raw',
             'contentOptions' => [
@@ -88,139 +77,30 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
             ]),
         ],
+
         [
-            'attribute' => 'expiration_dt',
+            'attribute' => 'l_type',
             'value' => static function (Lead $model) {
-                return Yii::$app->formatter->asExpirationDt($model->l_expiration_dt);
+                return $model->l_type ? '<span class="label label-default" style="font-size: 13px">' . $model::TYPE_LIST[$model->l_type] . '</span>' : ' - ';
             },
-            'filter' => DatePicker::widget([
-                'model' => $searchModel,
-                'attribute' => 'expiration_dt',
-                'clientOptions' => [
-                    'autoclose' => true,
-                    'format' => 'yyyy-mm-dd',
-                    'clearBtn' => true,
-                ],
-                'options' => [
-                    'autocomplete' => 'off',
-                    'placeholder' => 'Choose Date',
-                    'readonly' => '1',
-                ],
-                'clientEvents' => [
-                    'clearDate' => 'function (e) {$(e.target).find("input").change();}',
-                ],
-            ]),
-            'options' => [
-                'style' => 'width:180px'
-            ],
             'format' => 'raw',
-        ],
-        [
-            // 'attribute' => 'client_id',
-            'header' => 'Client',
-            'format' => 'raw',
-            'value' => static function (\common\models\Lead $model) {
-
-                if ($model->client) {
-                    $clientName = $model->client->first_name . ' ' . $model->client->last_name;
-                    if ($clientName === 'Client Name') {
-                        $clientName = '- - - ';
-                    } else {
-                        $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName);
-                    }
-
-                    if ($model->client->isExcluded()) {
-                        $clientName = ClientFormatter::formatExclude($model->client)  . $clientName;
-                    }
-                    $str = '';
-                    //$str = $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
-                    //$str .= $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
-
-
-                    $clientName .= /*'<br>' .*/ $str;
-                } else {
-                    $clientName = '-';
-                }
-
-                $str = '<br><br>';
-                $str .= $model->getCommunicationInfo();
-
-                return $clientName . $str;
-            },
-            'contentOptions' => [
-                'style' => 'width:210px',
-            ],
-        ],
-        /*[
-            'attribute' => 'clientTime',
-            'label' => 'Client Time',
-            'value' => static function ($model) {
-                return Lead::getClientTime($model['id']);
-            },
-            'format' => 'raw'
-        ],*/
-
-        [
-            //'attribute' => 'clientTime',
-            'header' => 'Client time',
-            'format' => 'raw',
-            'value' => function (\common\models\Lead $model) {
-                return ClientTimeFormatter::format($model->getClientTime2(), $model->offset_gmt);
-            },
-            //'options' => ['style' => 'width:80px'],
-            //'filter' => \common\models\Employee::getList()
+            'filter' => Lead::TYPE_LIST,
         ],
 
-        [
-            'attribute' => 'Request Details',
-            'content' => function (\common\models\Lead $model) {
-                $content = '';
-                $content .= $model->getFlightDetails();
-
-                if ($model->adults || $model->children || $model->infants) {
-                    $content .= ' (<i class="fa fa-male"></i> x' . ($model->adults . '/' . $model->children . '/' . $model->infants) . ')<br/>';
-                }
-
-                if ($cabinClassName = $model->getCabinClassName()) {
-                    $content .= '<strong>Cabin:</strong> ' . $cabinClassName;
-                }
-
-                return $content;
-            },
-            'format' => 'raw'
-        ],
-        [
-            'attribute' => 'Quotes',
-            'value' => static function (\common\models\Lead $model) {
-                $quotes = $model->getQuoteSendInfo();
-                return sprintf('Total: <strong>%d</strong> <br> Sent: <strong>%d</strong>', ($quotes['send_q'] + $quotes['not_send_q']), $quotes['send_q']);
-            },
-            'format' => 'raw'
-        ],
-        [
-            'header' => 'Agent',
-            'attribute' => 'employee_id',
-            'format' => 'raw',
-            'value' => static function (\common\models\Lead $model) {
-                return $model->employee ? '<i class="fa fa-user"></i> ' . $model->employee->username : '-';
-            },
-            'filter' => $lists->getEmployees(),
-            'visible' => $lists->getEmployees()
-        ],
         [
             'attribute' => 'status',
-            'value' => static function (\common\models\Lead $model) {
+            'value' => static function (Lead $model) {
                 $statusValue = $model->getStatusName(true);
                 $reasonValue =  $model->getLastReasonFromLeadFlow();
 
                 if ($reasonValue) {
-                    $reasonValue = '<br><pre>' . $reasonValue . '</pre>';
+                    $reasonValue = '<span>' . $reasonValue . '</span>';
                 }
 
                 return $statusValue . '<br>' . $reasonValue;
             },
             'format' => 'raw',
-            'filter' => \common\models\Lead::getProcessingStatuses(),
+            'filter' => Lead::getProcessingStatuses(),
             'options' => [
                 'style' => 'width:200px'
             ],
@@ -229,31 +109,69 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
         ],
-        /*[
-            'attribute' => 'last_activity',
-            'label' => 'Last Activity',
-            'value' => static function (\common\models\Lead $model) {
-                return Lead::getLastActivity($model->getLastActivityByNote());
-            },
-            'format' => 'raw'
-        ],*/
 
-        /*[
-            'attribute' => 'updated',
-            'label' => 'Last Update',
-            'value' => static function (\common\models\Lead $model) {
-                return '<span title="'.Yii::$app->formatter->asDatetime(strtotime($model->updated)).'">'.Yii::$app->formatter->asRelativeTime(strtotime($model->updated)).'</span>';
+        [
+            'header' => 'Client',
+            'format' => 'raw',
+            'value' => static function (Lead $lead) {
+                return $lead->getClientFormatted();
+            },
+            'options' => [
+                'style' => 'width:160px'
+            ]
+        ],
+
+        [
+            'label' => 'Comm',
+            'value' => static function (Lead $lead) {
+                return $lead->getCommunicationInfo(false, false);
+            },
+            'format' => 'raw',
+            'contentOptions' => [
+                'class' => 'text-center'
+            ]
+        ],
+
+        [
+            'attribute' => 'Request Details',
+            'value' => static function (Lead $lead) {
+                return $lead->getFlightDetailsPaxFormatted();
             },
             'format' => 'raw'
-        ],*/
+        ],
+
+
+        [
+            'attribute' => 'Quotes',
+            'value' => static function (Lead $model) {
+                return $model->getQuoteInfoFormatted();
+            },
+            'format' => 'raw',
+            'contentOptions' => [
+                'class' => 'text-center'
+            ]
+        ],
+        [
+            'header' => 'Agent',
+            'attribute' => 'employee_id',
+            'format' => 'raw',
+            'value' => static function (Lead $model) {
+                return $model->employee ? '<i class="fa fa-user"></i> ' . $model->employee->username : '-';
+            },
+            'filter' => $lists->getEmployees(),
+            'visible' => $lists->getEmployees()
+        ],
+
 
         [
             'attribute' => 'l_last_action_dt',
-            //'label' => 'Last Update',
-            'value' => static function (\common\models\Lead $model) {
-                return $model->l_last_action_dt ? '<b>' . Yii::$app->formatter->asRelativeTime(strtotime($model->l_last_action_dt)) . '</b><br>' .
-                    Yii::$app->formatter->asDatetime(strtotime($model->l_last_action_dt)) : $model->l_last_action_dt;
+            'value' => static function (Lead $model) {
+                return Yii::$app->formatter->asRelativeDt($model->l_last_action_dt);
             },
+            'options' => [
+                'style' => 'width:180px'
+            ],
+
             'format' => 'raw',
             'contentOptions' => [
                 'class' => 'text-center'
@@ -272,22 +190,51 @@ $this->params['breadcrumbs'][] = $this->title;
             ]),
         ],
 
+        'l_answered:boolean',
+//        [
+////            'header' => 'Answered',
+//            'attribute' => 'l_answered',
+////            'value' => static function (Lead $model) {
+////                return $model->l_answered ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
+////            },
+//            'contentOptions' => [
+//                'class' => 'text-center'
+//            ],
+//            'filter' => [1 => 'Yes', 0 => 'No'],
+//            'format' => 'raw'
+//        ],
+
         [
-            'header' => 'Answered',
-            'attribute' => 'l_answered',
-            'value' => static function (\common\models\Lead $model) {
-                return $model->l_answered ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
+            'attribute' => 'expiration_dt',
+            'value' => static function (Lead $model) {
+                return Yii::$app->formatter->asExpirationDt($model->l_expiration_dt);
             },
-            'contentOptions' => [
-                'class' => 'text-center'
+            'options' => [
+                'style' => 'width:180px'
             ],
-            'filter' => [1 => 'Yes', 0 => 'No'],
-            'format' => 'raw'
+            'filter' => DatePicker::widget([
+                'model' => $searchModel,
+                'attribute' => 'expiration_dt',
+                'clientOptions' => [
+                    'autoclose' => true,
+                    'format' => 'yyyy-mm-dd',
+                    'clearBtn' => true,
+                ],
+                'options' => [
+                    'autocomplete' => 'off',
+                    'placeholder' => 'Choose Date',
+                    'readonly' => '1',
+                ],
+                'clientEvents' => [
+                    'clearDate' => 'function (e) {$(e.target).find("input").change();}',
+                ],
+            ]),
+            'format' => 'raw',
         ],
 
         [
             'header' => 'Task Info',
-            'value' => static function (\common\models\Lead $model) {
+            'value' => static function (Lead $model) {
                 return '<small style="font-size: 10px">' . Lead::getTaskInfo2($model->id) . '</small>';
             },
             'format' => 'raw',
@@ -300,20 +247,20 @@ $this->params['breadcrumbs'][] = $this->title;
             ]
         ],
 
-        [
-            'header' => 'Checklist',
-            'value' => static function (\common\models\Lead $model) {
-                return '<small style="font-size: 10px">' . $model->getChecklistInfo($model->employee_id) . '</small>';
-            },
-            'format' => 'raw',
-            'contentOptions' => [
-                'class' => 'text-left'
-            ],
-            //'visible' => ! $isAgent,
-            'options' => [
-                'style' => 'width:170px'
-            ]
-        ],
+//        [
+//            'header' => 'Checklist',
+//            'value' => static function (\common\models\Lead $model) {
+//                return '<small style="font-size: 10px">' . $model->getChecklistInfo($model->employee_id) . '</small>';
+//            },
+//            'format' => 'raw',
+//            'contentOptions' => [
+//                'class' => 'text-left'
+//            ],
+//            //'visible' => ! $isAgent,
+//            'options' => [
+//                'style' => 'width:170px'
+//            ]
+//        ],
 
         /*[
             'label' => 'Countdown',
@@ -325,66 +272,33 @@ $this->params['breadcrumbs'][] = $this->title;
             },
             'format' => 'raw'
         ],*/
-        [
-            'label' => 'Rating',
-            'contentOptions' => [
-                'style' => 'width: 90px;',
-                'class' => 'text-center'
-            ],
-            'options' => [
-                'class' => 'text-right'
-            ],
-            'value' => static function (\common\models\Lead $model) {
-                return Lead::getRating2($model->rating);
-            },
-            'format' => 'raw'
-        ],
+//        [
+//            'label' => 'Rating',
+//            'contentOptions' => [
+//                'style' => 'width: 90px;',
+//                'class' => 'text-center'
+//            ],
+//            'options' => [
+//                'class' => 'text-right'
+//            ],
+//            'value' => static function (\common\models\Lead $model) {
+//                return Lead::getRating2($model->rating);
+//            },
+//            'format' => 'raw'
+//        ],
 
-        [
-            'attribute' => 'l_init_price',
-            //'format' => 'raw',
-            'value' => function (\common\models\Lead $model) {
-                return $model->l_init_price ? number_format($model->l_init_price, 2) . ' $' : '-';
-            },
-            'contentOptions' => [
-                'class' => 'text-right'
-            ],
-            'visible' => ! $isAgent
-        ],
+//        [
+//            'attribute' => 'l_init_price',
+//            //'format' => 'raw',
+//            'value' => function (\common\models\Lead $model) {
+//                return $model->l_init_price ? number_format($model->l_init_price, 2) . ' $' : '-';
+//            },
+//            'contentOptions' => [
+//                'class' => 'text-right'
+//            ],
+//            'visible' => ! $isAgent
+//        ],
 
-        /*[
-            'class' => 'yii\grid\ActionColumn',
-            'template' => '{action}',
-            'buttons' => [
-                'action' => function ($url, \common\models\Lead $model, $key) {
-
-                    $buttons = '';
-
-                    $buttons .= Html::a('<i class="fa fa-search"></i> View', ['lead/view', 'gid' => $model->gid], [
-                        'class' => 'btn btn-info btn-xs',
-                        'target' => '_blank',
-                        'data-pjax' => 0,
-                        'title' => 'View lead'
-                    ]);
-
-                    if (Yii::$app->user->id === $model->employee_id && $model->status === Lead::STATUS_ON_HOLD) {
-
-                        $buttons .= Html::a('Take', ['lead/take', 'gid' => $model->gid], ['class' => 'btn btn-primary btn-xs take-btn', 'data-pjax' => 0]);
-                    }
-
-                    if (Yii::$app->user->id != $model->employee_id && in_array($model->status, [Lead::STATUS_ON_HOLD, Lead::STATUS_PROCESSING])) {
-
-                        $buttons .= ' ' . Html::a('Take Over', ['lead/take', 'gid' => $model->gid, 'over' => true], [
-                            'class' => 'btn btn-primary btn-xs take-processing-btn',
-                            'data-pjax' => 0,
-                            'data-status' => $model->status
-                        ]);
-                    }
-
-                    return $buttons;
-                }
-            ]
-        ]*/
 
         [
             'class' => 'yii\grid\ActionColumn',
@@ -438,35 +352,6 @@ $this->params['breadcrumbs'][] = $this->title;
 
     ?>
 <?php
-
-/*echo GridView::widget([
-    'dataProvider' => $dataProvider,
-    'filterModel' => $searchModel,
-    'columns' => $gridColumns,
-    'toolbar' => false,
-    'pjax' => false,
-    'striped' => true,
-    'condensed' => false,
-    'responsive' => true,
-    'hover' => true,
-    'floatHeader' => true,
-    'floatHeaderOptions' => [
-        'scrollingTop' => 20
-    ],
-    //'panel' => [
-    //    'type' => GridView::TYPE_PRIMARY,
-    //    'heading' => '<h3 class="panel-title"><i class="glyphicon glyphicon-list"></i> Processing</h3>'
-    //],
-
-    'rowOptions' => function (Lead $model) {
-        if ($model->status === Lead::STATUS_PROCESSING && Yii::$app->user->id == $model->employee_id) {
-            return [
-                'class' => 'highlighted'
-            ];
-        }
-    }
-
-]);*/
 
     echo \yii\grid\GridView::widget([
         'id' => 'lead-processing-gv',

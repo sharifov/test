@@ -76,7 +76,7 @@ function PhoneWidgetPaneQueue(initQueues) {
     }
 
     function generalShow() {
-        let countPriority = PhoneWidgetCall.queues.priority.count();
+        let countPriority = PhoneWidget.queues.priority.count();
         ReactDOM.render(
             React.createElement(QueueItem, {groups: queues.general.all(), type: 'general', name: '', 'countPriority': countPriority}),
             document.getElementById('queue-separator')
@@ -85,7 +85,7 @@ function PhoneWidgetPaneQueue(initQueues) {
     }
 
     function allShow() {
-        let countPriority = PhoneWidgetCall.queues.priority.count();
+        let countPriority = PhoneWidget.queues.priority.count();
         ReactDOM.render(
             React.createElement(AllQueues, {
                 active: mergeActiveCalls(),

@@ -5,6 +5,7 @@ namespace modules\product\controllers;
 use common\components\hybrid\HybridWhData;
 use common\models\Email;
 use common\models\EmailTemplateType;
+use common\models\UserProjectParams;
 use modules\flight\src\useCases\voluntaryRefund\manualUpdate\VoluntaryRefundUpdateForm;
 use modules\flight\src\useCases\voluntaryRefund\VoluntaryRefundService;
 use modules\order\src\entities\order\Order;
@@ -151,21 +152,28 @@ class ProductQuoteRefundController extends \frontend\controllers\FController
                 if (!empty($emailData['original_quote']['data'])) {
                     ArrayHelper::remove($emailData['original_quote']['data'], 'fq_origin_search_data');
                 }
-                $emailFrom = Auth::user()->email;
+
+                $userProjectParams = UserProjectParams::find()
+                    ->andWhere(['upp_user_id' => Auth::id(), 'upp_project_id' => $case->cs_project_id])
+                    ->withEmailList()
+                    ->one();
+
+                $emailFrom = ($userProjectParams) ? ($userProjectParams)->getEmail(true) : null;
                 $emailTemplateType = null;
                 $emailFromName = Auth::user()->nickname;
+
 
                 if ($case->cs_project_id) {
                     $project = $case->project;
                     if ($project && $emailConfig = $project->getVoluntaryRefundEmailConfig()) {
-                        $emailFrom = $emailConfig['emailFrom'] ?? '';
+                        $emailFrom = !empty($emailConfig['emailFrom'] ?? null) ? $emailConfig['emailFrom'] : $emailFrom;
                         $emailTemplateType = $emailConfig['templateTypeKey'] ?? '';
-                        $emailFromName = $emailConfig['emailFromName'] ?? $emailFromName;
+                        $emailFromName = !empty($emailConfig['emailFromName'] ?? null) ? $emailConfig['emailFromName'] : $emailFromName;
                     }
                 }
 
                 if (!$emailFrom) {
-                    throw new \RuntimeException('Agent not has assigned email; Setup in project settings object.case.voluntary_refund.emailFrom;');
+                    throw new \RuntimeException('No "email from" address available, please contact administrator.');
                 }
 
                 if (!$emailTemplateType) {

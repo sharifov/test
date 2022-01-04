@@ -10,9 +10,9 @@ use common\models\query\CallQuery;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use sales\behaviors\metric\MetricCallCounterBehavior;
 use sales\helpers\app\AppHelper;
+use sales\helpers\DuplicateExceptionChecker;
 use sales\helpers\PhoneFormatter;
 use sales\helpers\setting\SettingHelper;
-use sales\helpers\UserCallIdentity;
 use sales\model\call\entity\call\data\CreatorType;
 use sales\model\call\entity\call\data\Data;
 use sales\model\call\entity\call\data\QueueLongTime;
@@ -902,7 +902,6 @@ class Call extends \yii\db\ActiveRecord
 
         $leadRepository = Yii::createObject(LeadRepository::class);
         $qCallService = Yii::createObject(QCallService::class);
-        $conferenceBase = (bool)(\Yii::$app->params['settings']['voip_conference_base'] ?? false);
 
 //        $userListSocketNotification = [];
 //        $isChangedStatus = isset($changedAttributes['c_status_id']);
@@ -1002,12 +1001,12 @@ class Call extends \yii\db\ActiveRecord
                         'lqc_dt_from_to_time' => strtotime($lqc->lqc_dt_from),
                     ], 'LeadRedial');
                 }
-            } elseif ($this->isRedialCall()) {
-                Yii::error([
-                    'message' => 'Detected Redial Call finished without LeadQCall record.',
-                    'leadId' => $this->c_lead_id,
-                    'callId' => $this->c_id,
-                ], 'LeadRedial');
+//            } elseif ($this->isRedialCall()) {
+//                Yii::error([
+//                    'message' => 'Detected Redial Call finished without LeadQCall record.',
+//                    'leadId' => $this->c_lead_id,
+//                    'callId' => $this->c_id,
+//                ], 'LeadRedial');
             }
 
             if ($lead->leadQcall) {
@@ -1407,7 +1406,7 @@ class Call extends \yii\db\ActiveRecord
 //            }
 //        }
 
-        if ($this->c_created_user_id && ($insert || $isChangedStatusFromEmptyInclude) && $this->getDataCreatorType()->isAgent()) {
+        if ($this->c_created_user_id && ($insert || $isChangedStatusFromEmptyInclude) && $this->creatorTypeIsAgent()) {
             if ($this->isStatusRinging() && !$this->isOut()) {
             } else {
                 $message = (new CallUpdateMessage())->create($this, $isChangedStatus, $this->c_created_user_id);
@@ -1422,8 +1421,6 @@ class Call extends \yii\db\ActiveRecord
         }
 
         if ($this->c_created_user_id && $this->getDataCreatorType()->isUser()) {
-            $isChangedStatus = array_key_exists('c_status_id', $changedAttributes);
-
             if ($this->isOut() && ($insert || $isChangedStatus) && $this->isStatusRinging()) {
                 $message = (new CallUpdateMessage())->create($this, $isChangedStatus, $this->c_created_user_id);
                 Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id], $message);
@@ -1500,7 +1497,6 @@ class Call extends \yii\db\ActiveRecord
                 Yii::$app->id === 'app-webapi'
                 && $this->isTwFinishStatus()
                 && ($insert || $isChangedTwStatus || $isChangedDuration)
-//                && (!$conferenceBase || ($conferenceBase && !$this->c_conference_id))
             ) {
                 (Yii::createObject(CallLogTransferService::class))->transfer($this);
                 if ($this->c_client_id && $this->isOut() && $this->getDataCreatorType()->isClient()) {
@@ -1557,35 +1553,20 @@ class Call extends \yii\db\ActiveRecord
     /**
      * @param Call $call
      * @param int $user_id
+     * @param string $deviceIdentity
      * @return bool
      */
-    public static function applyCallToAgent(Call $call, int $user_id): bool
+    public static function applyCallToAgent(Call $call, int $user_id, string $deviceIdentity): bool
     {
         try {
-            $conferenceBase = (bool)(Yii::$app->params['settings']['voip_conference_base'] ?? false);
-
             if ($call) {
-                // \Yii::info('INFO: Call ('.$call->getStatusName().', '.$call->c_call_status.') CallId: ' . $call->c_id. ',  User: ' . $user_id, 'info\Call:applyCallToAgent:callRedirect');
-
-                /*if ($call->c_created_user_id) {
-                    return false;
-                }*/
-
-//              $callFromInternalPhone = PhoneList::find()->byPhone($call->c_from)->exists();
-
                 if ($call->isStatusQueue()) {
                 } else {
                     \Yii::warning('Error: Call (' . $call->getStatusName() . ', ' . $call->c_call_status . ') not in status QUEUE: ' . $call->c_id . ',  User: ' . $user_id, 'Call:applyCallToAgent:callRedirect');
                     return false;
                 }
 
-                //$call->c_call_status = self::CALL_STATUS_IN_PROGRESS;
-//                if ($parentCall = $call->cParent) {
-//                    //$parentCall->setStatusDelay();
-//                    //$parentCall->update();
-//                } else {
                 $call->setStatusDelay();
-                //}
 
                 if ($call->c_created_user_id && (int) $call->c_created_user_id !== $user_id) {
                     $call->c_source_type_id = self::SOURCE_REDIRECT_CALL;
@@ -1621,12 +1602,6 @@ class Call extends \yii\db\ActiveRecord
                         $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
                         Notifications::publish('getNewNotification', ['user_id' => $call->c_created_user_id], $dataNotification);
                     }
-
-
-
-
-                    //Notifications::create($call->c_source_type_id, 'New incoming Call (' . $this->cua_call_id . ')', 'New incoming Call (' . $this->cua_call_id . ')', Notifications::TYPE_SUCCESS, true);
-                    //Notifications::socket($this->cua_user_id, null, 'getNewNotification', [], true);
                 }
 
                 $call->c_created_user_id = $user_id;
@@ -1659,79 +1634,53 @@ class Call extends \yii\db\ActiveRecord
                 if ($call->update() === false) {
                     Yii::error(VarDumper::dumpAsString(['call' => $call->getAttributes(), 'error' => $call->getErrors()]), 'Call:applyCallToAgent:call:update');
                 } else {
-                    if ($conferenceBase) {
-                        $delay = abs((int)(Yii::$app->params['settings']['call_accept_check_conference_status_seconds'] ?? 0));
-                        if ($delay) {
-                            $checkJob = new CheckClientCallJoinToConferenceJob();
-                            $checkJob->callId = $call->c_id;
-                            $checkJob->dateTime = date('Y-m-d H:i:s');
-                            $checkJob->delayJob = $delay;
-                            Yii::$app->queue_job->delay($delay)->push($checkJob);
-                        }
+                    $delay = abs((int)(Yii::$app->params['settings']['call_accept_check_conference_status_seconds'] ?? 0));
+                    if ($delay) {
+                        $checkJob = new CheckClientCallJoinToConferenceJob();
+                        $checkJob->callId = $call->c_id;
+                        $checkJob->dateTime = date('Y-m-d H:i:s');
+                        $checkJob->delayJob = $delay;
+                        Yii::$app->queue_job->delay($delay)->push($checkJob);
                     }
                 }
 
-                if ($conferenceBase) {
-                    if (!$call->isConferenceType()) {
-                        $call->setConferenceType();
+                if (!$call->isConferenceType()) {
+                    $call->setConferenceType();
+                    $call->update();
+                }
+                $res = \Yii::$app->communication->acceptConferenceCall(
+                    $call->c_id,
+                    $call->c_call_sid,
+                    $deviceIdentity,
+                    $call->c_from,
+                    $user_id,
+                    $call->isRecordingDisable(),
+                    $call->getDataPhoneListId(),
+                    $call->c_to,
+                    FriendlyName::nextWithSid($call->c_call_sid)
+                );
+
+                if ($res) {
+                    $isError = (bool)($res['error'] ?? true);
+                    if ($isError) {
+                        $call->c_call_status = self::TW_STATUS_CANCELED;
+                        $call->setStatusByTwilioStatus($call->c_call_status);
+                        $call->c_created_user_id = null;
                         $call->update();
-                    }
-                    $res = \Yii::$app->communication->acceptConferenceCall(
-                        $call->c_id,
-                        $call->c_call_sid,
-                        UserCallIdentity::getClientId($user_id),
-                        $call->c_from,
-                        $user_id,
-                        $call->isRecordingDisable(),
-                        $call->getDataPhoneListId(),
-                        $call->c_to,
-                        FriendlyName::nextWithSid($call->c_call_sid)
-                    );
 
-                    if ($res) {
-                        $isError = (bool)($res['error'] ?? true);
-                        if ($isError) {
-                            $call->c_call_status = self::TW_STATUS_CANCELED;
-                            $call->setStatusByTwilioStatus($call->c_call_status);
-                            $call->c_created_user_id = null;
-                            $call->update();
-
-                            if (!empty($res['message']) && $res['message'] === 'Call status is Completed') {
-                                Notifications::publish('showNotification', ['user_id' => $user_id], [
-                                    'data' => [
-                                        'title' => 'Accept call',
-                                        'message' => 'The other side hung up',
-                                        'type' => 'warning',
-                                    ]
-                                ]);
-                            }
-
-                            return false;
-                        }
-                        return true;
-                    }
-                } else {
-                    $agent = UserCallIdentity::getId($user_id);
-                    $res = \Yii::$app->communication->callRedirect($call->c_call_sid, 'client', $call->c_from, $agent);
-
-                    Notifications::publish(RemoveIncomingRequestMessage::COMMAND, ['user_id' => $user_id], RemoveIncomingRequestMessage::create($call->c_call_sid));
-
-                    if ($res && isset($res['error']) && $res['error'] === false) {
-                        if (isset($res['data']['is_error']) && $res['data']['is_error'] === true) {
-                            $call->c_call_status = self::TW_STATUS_CANCELED;
-                            $call->setStatusByTwilioStatus($call->c_call_status);
-                            $call->c_created_user_id = null;
-                            $call->update();
-                            return false;
+                        if (!empty($res['message']) && $res['message'] === 'Call status is Completed') {
+                            Notifications::publish('showNotification', ['user_id' => $user_id], [
+                                'data' => [
+                                    'title' => 'Accept call',
+                                    'message' => 'The other side hung up',
+                                    'type' => 'warning',
+                                ]
+                            ]);
                         }
 
-                        /*$call->c_call_status = self::CALL_STATUS_RINGING;
-                        $call->c_created_user_id = $user_id;
-                        $call->update();*/
-
-                        // \Yii::info(VarDumper::dumpAsString($res), 'info\Call:applyCallToAgent:callRedirect');
-                        return true;
+                        return false;
                     }
+                    return true;
                 }
 
                 \Yii::warning('Error: ' . VarDumper::dumpAsString($res), 'Call:applyCallToAgent:callRedirect');
@@ -1747,9 +1696,10 @@ class Call extends \yii\db\ActiveRecord
     /**
      * @param Call $call
      * @param int $user_id
+     * @param string $deviceIdentity
      * @return bool
      */
-    public static function applyWarmTransferCallToAgent(Call $call, int $user_id): bool
+    public static function applyWarmTransferCallToAgent(Call $call, int $user_id, string $deviceIdentity): bool
     {
         try {
             if (!$call->isStatusDelay() && !$call->isStatusInProgress() && !$call->isHold()) {
@@ -1831,7 +1781,7 @@ class Call extends \yii\db\ActiveRecord
             $res = \Yii::$app->communication->acceptWarmTransferCall(
                 $call->c_id,
                 $call->c_call_sid,
-                UserCallIdentity::getClientId($user_id),
+                $deviceIdentity,
                 $call->c_from,
                 $user_id,
                 $call->isRecordingDisable(),
@@ -1890,15 +1840,21 @@ class Call extends \yii\db\ActiveRecord
                 $callUserAccess->cua_created_dt = date("Y-m-d H:i:s");
                 $callUserAccess->cua_priority = $call->getDataPriority();
             }
-
-            if (!$callUserAccess->save()) {
-                Yii::error(VarDumper::dumpAsString($callUserAccess->errors), 'CallQueueJob:execute:CallUserAccess:save');
-            } else {
+            if ($callUserAccess->save()) {
                 return true;
             }
+            $errors = $callUserAccess->getErrors();
+            foreach ($errors as $error) {
+                if (strpos($error[0], 'has already been taken') !== false) {
+                    return true;
+                }
+            }
+            Yii::error(VarDumper::dumpAsString($errors), 'Call:applyCallToAgentAccess:callUserAccess:save');
         } catch (\Throwable $e) {
+            if (DuplicateExceptionChecker::isDuplicate($e->getMessage())) {
+                return true;
+            }
             \Yii::error($e, 'Call:applyCallToAgentAccess');
-//            \Yii::error(VarDumper::dumpAsString([$e->getMessage(), $e->getFile(), $e->getLine()]), 'Call:applyCallToAgentAccess');
         }
         return false;
     }
@@ -2238,6 +2194,11 @@ class Call extends \yii\db\ActiveRecord
         $this->c_call_type_id = self::CALL_TYPE_JOIN;
     }
 
+    public function setType(int $type): void
+    {
+        $this->c_call_type_id = $type;
+    }
+
     public function isJoin(): bool
     {
         return (int) $this->c_call_type_id === self::CALL_TYPE_JOIN;
@@ -2378,6 +2339,14 @@ class Call extends \yii\db\ActiveRecord
     public function setStatusCanceled(): int
     {
         return $this->c_status_id = self::STATUS_CANCELED;
+    }
+
+    /**
+     * @return int
+     */
+    public function setStatusRinging(): int
+    {
+        return $this->c_status_id = self::STATUS_RINGING;
     }
 
     /**
@@ -2782,6 +2751,11 @@ class Call extends \yii\db\ActiveRecord
     public function getDataCreatorType(): CreatorType
     {
         return $this->getData()->creatorType;
+    }
+
+    public function creatorTypeIsAgent(): bool
+    {
+        return $this->getDataCreatorType()->isAgent();
     }
 
     /**

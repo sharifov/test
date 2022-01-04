@@ -21,7 +21,6 @@ var PhoneWidgetPaneActive = function () {
     let canRecordingDisabled = false;
     let canAddBlockList = false;
 
-
     function setup(btnHoldShowInit, btnTransferShowInit, canRecordingDisabledInit, canAddBlockListInit, btnReconnectShowInit) {
         btnHoldShow = btnHoldShowInit;
         btnTransferShow = btnTransferShowInit;
@@ -74,7 +73,7 @@ var PhoneWidgetPaneActive = function () {
             canRecordingDisabled: canRecordingDisabled,
             canAddBlackList: canAddBlockList,
             reconnect: {
-                active: false,
+                active: true,
                 show: btnReconnectShow
             },
         };
@@ -89,13 +88,7 @@ var PhoneWidgetPaneActive = function () {
             controls.transfer.active = false;
             controls.addPerson.active = false;
             controls.dialpad.active = false;
-        }
-
-        if (!conferenceBase) {
-            controls.hold.active = false;
-            controls.transfer.active = true;
-            controls.addPerson.active = false;
-            controls.dialpad.active = false;
+            controls.reconnect.active = false;
         }
         return controls;
     }
@@ -141,7 +134,7 @@ var PhoneWidgetPaneActive = function () {
     function init(call, conference) {
         load(call, conference);
         show();
-        PhoneWidgetCall.iconUpdate();
+        PhoneWidget.iconUpdate();
         // if (call.getHoldDuration()) {
         //     widgetIcon.update({type: 'hold', timer: true, 'timerStamp': call.getHoldDuration(), text: 'on hold', currentCalls: null, status: 'online'});
         //     return;

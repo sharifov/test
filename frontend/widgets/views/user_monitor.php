@@ -100,19 +100,14 @@ function stopAutoLogout() {
     return false;
 }
 
-function autoLogout() {
-    // let objDiv = $('#user-monitor-indicator div');
-    // objDiv.attr('class', 'text-danger');
-    // objDiv.find('i').attr('class', 'fa fa-power-off');
-    
-    if (isAutoLogoutTimerSec > 0) {
-        $('#autologout-timer').timer('remove').timer({countdown: true, format: '%M:%S', seconds: 0, duration: isAutoLogoutTimerSec + 's', callback: function() {
+window.autoLogout = function (timerSec = isAutoLogoutTimerSec, isShowMessage = isAutoLogoutShowMessage) {
+    if (timerSec > 0) {
+        $('#autologout-timer').timer('remove').timer({countdown: true, format: '%M:%S', seconds: 0, duration: timerSec + 's', callback: function() {
             logout();
         }}).timer('start');
     }
-    
-    // console.log('autoLogout');
-    if (isAutoLogoutShowMessage) {
+
+    if (isShowMessage || (isShowMessage === 'true')) {
         $('#modal-autologout').modal({show: true});
     }
 }

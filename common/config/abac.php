@@ -19,7 +19,8 @@ return [
         'product-quote-change' => \modules\product\src\abac\ProductQuoteChangeAbacObject::class,
         'product-quote-refund' => \modules\product\src\abac\ProductQuoteRefundAbacObject::class,
         'related-product-quote' => \modules\product\src\abac\RelatedProductQuoteAbacObject::class,
-        'notification' => \modules\notification\src\abac\NotificationAbacObject::class
+        'notification' => \modules\notification\src\abac\NotificationAbacObject::class,
+        'leadData' => \sales\model\leadData\abac\LeadDataAbacObject::class,
     ],
     'scanDirs' => [
         '/modules/',

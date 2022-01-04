@@ -28,7 +28,7 @@ use sales\entities\cases\CaseEventLog;
 use sales\entities\cases\Cases;
 use sales\helpers\app\AppHelper;
 use sales\model\leadData\services\LeadDataCreateService;
-use sales\model\leadData\services\LeadDataDictionary;
+use sales\model\leadDataKey\services\LeadDataKeyDictionary;
 use sales\services\cases\CasesManageService;
 use sales\services\cases\CasesSaleService;
 use sales\services\email\EmailService;
@@ -266,7 +266,7 @@ class DownloadEmails
                             }
 
                             try {
-                                if (!LeadDataCreateService::isExist($lead->id, LeadDataDictionary::KEY_WE_EMAIL_REPLIED)) {
+                                if (!LeadDataCreateService::isExist($lead->id, LeadDataKeyDictionary::KEY_WE_EMAIL_REPLIED)) {
                                     (new LeadDataCreateService())->createWeEmailReplied($lead);
                                     $job = new WebEngageLeadRequestJob($lead->id, WebEngageDictionary::EVENT_LEAD_EMAIL_REPLIED);
                                     Yii::$app->queue_job->priority(100)->push($job);

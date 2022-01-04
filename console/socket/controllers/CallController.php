@@ -19,8 +19,16 @@ class CallController
         $this->currentQueueCallsService = $currentQueueCallsService;
     }
 
-    public function actionGetCurrentQueueCalls($params): array
+    public function actionGetCurrentQueueCalls($connectionIdentity, $params): array
     {
+        if (!$connectionIdentity) {
+            return [
+                'errors' => [
+                    'Connection Identity is empty. Refresh page.'
+                ]
+            ];
+        }
+
         if (!isset($params['userId'])) {
             return [
                 'errors' => [
@@ -29,6 +37,7 @@ class CallController
             ];
         }
         $userId = (int)$params['userId'];
+
         $generalLinePriorityIsEnabled = (bool)($params['generalLinePriorityIsEnabled'] ?? false);
         $finishedCallSid = null;
         if (isset($params['finishedCallSid'])) {

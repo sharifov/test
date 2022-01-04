@@ -28,4 +28,9 @@ class FileStorageQuery
             ->orderBy(['fs_id' => SORT_DESC])
             ->all();
     }
+
+    public static function getByUid(string $uid): ?FileStorage
+    {
+        return FileStorage::find()->byUid($uid)->one();
+    }
 }

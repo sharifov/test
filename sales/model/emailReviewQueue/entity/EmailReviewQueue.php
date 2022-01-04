@@ -185,4 +185,23 @@ class EmailReviewQueue extends \yii\db\ActiveRecord
     {
         return $this->isInProgress() && $this->erq_user_reviewer_id === $userId;
     }
+
+    public function statusToPending(): void
+    {
+        $this->erq_status_id = EmailReviewQueueStatus::PENDING;
+    }
+
+    public static function create(
+        int $emailId,
+        ?int $projectId,
+        ?int $departmentId,
+        ?int $emailCreatorId
+    ): self {
+        $self = new self();
+        $self->erq_email_id = $emailId;
+        $self->erq_project_id = $projectId;
+        $self->erq_department_id = $departmentId;
+        $self->erq_owner_id = $emailCreatorId;
+        return $self;
+    }
 }

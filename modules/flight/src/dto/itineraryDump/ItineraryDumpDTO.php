@@ -47,7 +47,7 @@ class ItineraryDumpDTO
         }
     }
 
-    public function feelByParsedReservationDump($segment): self
+    public function feelByParsedReservationDump(array $segment): self
     {
         $this->airlineCode = $segment['carrier'] ?? null;
         $this->bookingClass = $segment['bookingClass'] ?? null;

@@ -72,14 +72,14 @@ function IncomingActions(props) {
                         <i className="fa fa-angle-double-right"> </i>
                     </button>
                     <button className="call-pane__start-call calling-state-block"
-                            data-call-sid={call.data.callSid} onClick={() => acceptInternalCall(call)}>
+                            data-call-sid={call.data.callSid} onClick={() => PhoneWidget.acceptInternalCall(call)}>
                         {call.isSentAcceptCallRequestState()
                             ? <i className="fa fa-spinner fa-spin"> </i>
                             : <i className="fas fa-phone"> </i>
                         }
                     </button>
                     <button className="call-pane__end-call"
-                            data-call-sid={call.data.callSid} onClick={() => rejectInternalCall(call)}>
+                            data-call-sid={call.data.callSid} onClick={() => PhoneWidget.rejectInternalCall(call)}>
                         {call.isSentRejectInternalRequest()
                             ? <i className="fa fa-spinner fa-spin"> </i>
                             : <i className="fa fa-phone-slash"> </i>

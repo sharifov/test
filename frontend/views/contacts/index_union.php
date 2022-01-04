@@ -175,7 +175,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                             title="' . Html::encode($phone->cp_title) . '"
                                             data-original-title="' . Html::encode($phone->cp_title) . '">';
 
-                                $out .= CallHelper::callNumber($phone->phone, $access, '', ['data-title' => $model->getNameByType(), 'disable-icon' => $access ? false : true], 'span');
+                                $out .= CallHelper::callNumber($phone->phone, $access, '', ['data-contact-id' => $model->id, 'data-title' => $model->getNameByType(), 'disable-icon' => $access ? false : true], 'span');
                                 $out .= '</span>';
 
                                 $data[] = $out;

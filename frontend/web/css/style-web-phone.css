@@ -143,3 +143,386 @@ div#call-controls input {
   max-width: 200px;
   padding: 5px;
 }
+
+.phone-widget__header {
+  padding: 0;
+}
+
+.phone-widget__heading
+{
+  padding: 12px 16px;
+  margin-bottom: 0;
+}
+
+.phone-widget__header-actions
+{
+  padding: 8px;
+}
+
+.phone-widget__header-actions li
+{
+  flex-basis: 33.3%;
+  width: 33.3%;
+}
+
+.phone-widget__header-actions li a
+{
+  padding: 2px 4px;
+  display: inline-block;
+}
+
+.phone-widget .phone-widget__settings
+{
+  top: 11px;
+  right: 37px;
+}
+
+.phone-widget .phone-widget__close
+{
+  top: 8px;
+  right: 10px;
+}
+
+.phone-widget-icon__warning
+{
+  position: absolute;
+  top: 37px;
+  left: -3px;
+  color: #FFE600;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+  animation: shake 3s cubic-bezier(.36,.07,.19,.97) infinite;
+  transform-origin: 50% 50%;
+}
+
+.phone-widget-icon__warning:after
+{
+  content: "\f071";
+  font-size: 18px;
+  color: inherit;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+}
+
+.phone-widget-icon__warning:before
+{
+  font-size: 23px;
+  color: rgba(0,0,0,0.2);
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+@keyframes shake {
+  1%, 18% {
+    transform: translate3d(-1px, 0, 0);
+  }
+
+  4%, 16% {
+    transform: translate3d(2px, 0, 0);
+  }
+
+  6%, 10%, 14% {
+    transform: translate3d(-4px, 0, 0);
+  }
+
+  8%, 12% {
+    transform: translate3d(4px, 0, 0);
+  }
+
+  12% {
+    transform: translate3d(-1px, 0, 0);
+  }
+
+  100% {
+    transform: translate3d(-1px, 0, 0);
+  }
+}
+
+.phone-widget-heading__warning
+{
+  position: absolute;
+  left: 88px;
+  width: 30px;
+  height: 30px;
+  display: none;
+}
+
+.phone-widget-heading__warning:before
+{
+  font-size: 26px;
+  color: rgba(0,0,0,0.15);
+  position: absolute;
+  top: 0 -2px;
+  left: 0;
+}
+
+.phone-widget-heading__warning:after
+{
+  content: "\f071";
+  position: absolute;
+  color: #FFE81B;
+  font-size: 22px;
+  top: 0;
+  left: 2px;
+}
+
+.bs-popover-bottom>.arrow::after
+{
+  border-bottom-color: #8f97a4!important;
+}
+
+.popover .popover-body
+{
+  background-color: #8f97a4;
+  border-radius: 3px;
+  font-size: 13px;
+  color: #fff;
+  width: 100%;
+}
+
+.phone-widget__header {
+  padding: 0;
+}
+
+.phone-widget__heading
+{
+  padding: 12px 16px;
+  margin-bottom: 0;
+}
+
+.phone-widget__header-actions
+{
+  padding: 8px;
+}
+
+.phone-widget__header-actions li
+{
+  flex-basis: 33.3%;
+  width: 33.3%;
+}
+
+.phone-widget__header-actions li a
+{
+  padding: 2px 4px;
+  display: inline-block;
+}
+
+.phone-widget .phone-widget__settings
+{
+  top: 11px;
+  right: 37px;
+}
+
+.phone-widget .phone-widget__close
+{
+  top: 8px;
+  right: 10px;
+}
+
+
+.phone-widget .call-pane
+{
+  height: 100%!important;
+}
+
+.phone-widget__start,
+.phone-widget__start-content
+{
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.phone-widget__start
+{
+  padding: 20px 20px 80px;
+  position: absolute;
+}
+
+.phone-widget__start-title
+{
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 2px;
+  color: #fff;
+}
+
+.phone-widget__start-subtitle
+{
+  font-size: 14px;
+  margin-bottom: 24px;
+  color: rgba(255,255,255, 0.6);
+}
+
+.phone-widget__start-icn
+{
+  font-size: 44px!important;
+  display: block;
+  color: #fff;
+  opacity: 0.4;
+  margin-bottom: 20px;
+}
+
+.phone-widget .btn
+{
+  text-align: center;
+  padding: 8px 16px;
+  background: #4494e3;
+  border-radius: 4px;
+  border: 0 none;
+  margin-bottom: 8px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  position: relative;
+}
+
+.phone-widget .btn:before
+{
+  content: '';
+  background: rgba(0,0,0,0.2);
+  opacity: 0;
+  transition: opacity 0.15s ease-out;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  left: 0;
+  top: 0;
+}
+
+.phone-widget .btn:hover:before
+{
+  opacity: 0.5;
+}
+
+.phone-widget .btn:active:before
+{
+  opacity: 1;
+}
+
+.phone-widget .btn:hover, .phone-widget .btn:active
+{
+  color: #fff;
+}
+
+.phone-widget .phone-widget__start-btn
+{
+  padding: 8px 36px;
+}
+
+
+.phone-widget .call-pane-initial.pw-start
+{
+  padding: 0;
+  background: linear-gradient(
+          45deg, #4777aa 0, #0f2439 100%);
+  background-size: 200% 200%;
+}
+
+.phone-widget .call-pane-initial.pw-connecting
+{
+  animation: gradient 3s ease infinite;
+}
+
+/*.phone-widget .call-pane-initial.pw-connecting .phone-widget__start-btn:before
+{
+  opacity: 0.9;
+  background: #92A4B5;
+}*/
+
+.phone-widget .call-pane-initial.pw-connecting .phone-widget__start-btn:after
+{
+  /*content: "\f110";*/
+  position: absolute;
+  display: block;
+  font: unset;
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  font-size: 18px;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fa-spin 2s ease-in-out infinite;
+}
+
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/*For disabled button*/
+
+.phone-widget-icon .widget-icon-inner[data-wi-type=disabled] .standby-phone__disabled-overlay
+{
+  display: flex;
+  background-color: #9eafb5;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  z-index: 99;
+  border-radius: 50%;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.phone-widget-icon .widget-icon-inner:not([data-wi-type=disabled]) .standby-phone__disabled-overlay
+{
+  display: none;
+}
+
+.phone-widget-icon .widget-icon-inner[data-wi-type=disabled]:before
+{
+  display: none;
+}
+
+.phone-widget-icon .phone-widget-icon__warning
+{
+  z-index: 100;
+}
+
+.phone-widget-icon .standby-phone .standby-phone__disabled-icn
+{
+  display: block;
+  color: #fff;
+  opacity: 0.7;
+  font-size: 16px;
+  margin-bottom: 6px;
+}
+
+.standby-phone__disabled-text
+{
+  max-width: 40px;
+  font-size: 9px;
+  font-weight: bold;
+  word-break: break-all;
+  text-align: center;
+}
+
+.phone-widget-icon .widget-icon-inner .phone-widget-icon__warning.phone-widget-icon__warning-show
+{
+  display: block;
+}
+
+.phone-widget-icon .widget-icon-inner[data-wi-type=disabled] .phone-widget-icon__warning
+{
+  display: none;
+}

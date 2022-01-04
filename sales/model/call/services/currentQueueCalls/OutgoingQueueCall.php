@@ -5,8 +5,8 @@ namespace sales\model\call\services\currentQueueCalls;
 use common\models\Call;
 use common\models\Department;
 use common\models\Employee;
-use sales\helpers\UserCallIdentity;
 use sales\model\call\helper\CallHelper;
+use sales\model\voip\phoneDevice\device\VoipDevice;
 use yii\base\Model;
 
 class OutgoingQueueCall extends Model
@@ -68,7 +68,7 @@ class OutgoingQueueCall extends Model
     {
         if ($call->getDataCreatorType()->isUser()) {
             $participantName = 'Unknown username';
-            $toUserId = UserCallIdentity::parseUserId($call->c_to);
+            $toUserId = VoipDevice::getUserId($call->c_to);
             if ($toUserId) {
                 $user = Employee::find()->select(['username', 'nickname'])->andWhere(['id' => $toUserId])->asArray()->one();
                 if ($user) {

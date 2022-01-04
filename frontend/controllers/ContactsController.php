@@ -72,22 +72,6 @@ class ContactsController extends FController
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
-//    /**
-//     * Lists all Client models.
-//     * @return mixed
-//     */
-//    public function actionIndex()
-//    {
-//        $searchModel = new ContactsSearch(Auth::id());
-//
-//        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-//
-//        return $this->render('index', [
-//            'searchModel' => $searchModel,
-//            'dataProvider' => $dataProvider,
-//        ]);
-//    }
-
     /**
      * Lists all Client models.
      * @return mixed

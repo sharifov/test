@@ -11,7 +11,6 @@ use common\models\Employee;
 use common\models\Lead;
 use common\models\Project;
 use sales\entities\cases\Cases;
-use sales\helpers\UserCallIdentity;
 use sales\model\callLog\entity\callLogCase\CallLogCase;
 use sales\model\callLog\entity\callLogLead\CallLogLead;
 use sales\model\callLog\entity\callLogQueue\CallLogQueue;

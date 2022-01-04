@@ -4,7 +4,6 @@ namespace frontend\widgets;
 
 use common\models\Lead;
 use sales\entities\cases\Cases;
-use sales\helpers\UserCallIdentity;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use Yii;
@@ -60,7 +59,6 @@ class OnlineConnection extends \yii\bootstrap\Widget
         return $this->render('online_connection', [
             'userId' =>  $userId,
             'wsUrl' =>  $wsUrl,
-            'userIdentity' =>  UserCallIdentity::getClientId($userId)
         ]);
     }
 

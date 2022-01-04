@@ -30,7 +30,8 @@ class CallHelper
             'data-phone-number' => $phone,
             'data-confirm' => isset($dataParams['confirm']) ? 1 : 0,
             'data-call' => isset($dataParams['call']) ? 1 : 0,
-            'class' => $access ? 'wg-call badge badge-pill badge-light' : ''
+            'class' => $access ? 'btn-contacts-call badge badge-pill badge-light' : '',
+            'data-contact-id' => $dataParams['data-contact-id'] ?? null,
         ];
 
         if (!empty($dataParams['data-title'])) {
@@ -171,31 +172,7 @@ class CallHelper
                                 data-call-sid="' . $call['cl_call_sid'] . '"
                                 data-title="' .  $title  . '"
                                 data-user-id="' . $call['user_id'] . '"
-                                data-phone="' . Html::encode($phone) . '"
-                                data-project-id="' . Html::encode($call['cl_project_id']) . '"
-                                data-department-id="' . Html::encode($call['cl_department_id']) . '"
-                                data-client-id="' . Html::encode($call['cl_client_id']) . '"';
-        if ((int)$call['cl_type_id'] === Call::CALL_TYPE_OUT) {
-            $tpl .= ' data-source-type-id="' . $call['cl_category_id'] . '"';
-            $tpl .= ' data-lead-id="' . $call['lead_id'] . '"';
-            $tpl .= ' data-case-id="' . $call['case_id'] . '"';
-        } elseif ((int)$call['cl_type_id'] === Call::CALL_TYPE_IN) {
-            $department = (int)$call['cl_department_id'];
-            $dep = Department::findOne($department);
-            if ($dep && ($departmentParams = $dep->getParams())) {
-                if ($departmentParams->object->type->isLead()) {
-                    if ($call['lead_id']) {
-                        $tpl .= ' data-source-type-id="' . Call::SOURCE_LEAD . '"';
-                        $tpl .= ' data-lead-id="' . $call['lead_id'] . '"';
-                    }
-                } elseif ($departmentParams->object->type->isCase()) {
-                    if ($call['case_id']) {
-                        $tpl .= ' data-source-type-id="' . Call::SOURCE_CASE . '"';
-                        $tpl .= ' data-case-id="' . $call['case_id'] . '"';
-                    }
-                }
-            }
-        }
+                                data-phone="' . Html::encode($phone) . '"';
 
         $tpl .= '>';
         $tpl .= Html::encode($call['formatted']);

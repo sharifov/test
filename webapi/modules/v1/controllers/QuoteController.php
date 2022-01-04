@@ -658,23 +658,35 @@ class QuoteController extends ApiBaseController
             }
         }
 
-        if (isset($quoteAttributes['needSync']) && $quoteAttributes['needSync'] == true) {
-            $data = $model->lead->getLeadInformationForExpert();
-            $result = BackOffice::sendRequest('lead/update-lead', 'POST', json_encode($data));
+        if (isset($quoteAttributes['needSync']) && (bool) $quoteAttributes['needSync'] === true) {
+            try {
+                $data = $model->lead->getLeadInformationForExpert();
+                $result = BackOffice::sendRequest('lead/update-lead', 'POST', json_encode($data));
 
-            if (!array_key_exists('status', $result)) {
-                $response['errors'] = 'Not found status key from response (BackOffice - lead/update-lead)';
-                Yii::error(
-                    [
-                        'result' => VarDumper::dumpAsString($result),
-                        'data' => $data,
-                    ],
-                    'QuoteController:actionUpdate:update-lead'
-                );
-            } elseif ($result['status'] === 'Success' && empty($result['errors'])) {
-                $response['status'] = 'Success';
-            } else {
-                $response['errors'] = $result['errors'];
+                if (empty($result)) {
+                    throw new \RuntimeException('Request to BackOffice(lead/update-lead) is failed. Result is empty');
+                }
+                if (!is_array($result)) {
+                    throw new \RuntimeException('Request to BackOffice(lead/update-lead) is failed. Result is not array');
+                }
+
+                if (!array_key_exists('status', $result)) {
+                    $response['errors'][] = 'Not found status key from response (BackOffice - lead/update-lead)';
+                    Yii::error(
+                        [
+                            'result' => VarDumper::dumpAsString($result),
+                            'data' => $data,
+                        ],
+                        'QuoteController:actionUpdate:update-lead'
+                    );
+                } elseif ($result['status'] === 'Success' && empty($result['errors'])) {
+                    $response['status'] = 'Success';
+                } else {
+                    $response['errors'][] = $result['errors'] ?? 'Not found "errors" key from response';
+                }
+            } catch (\Throwable $throwable) {
+                $response['errors'][] = $throwable->getMessage();
+                Yii::warning(AppHelper::throwableLog($throwable), 'QuoteController:BackOffice:updateLead');
             }
         } else {
             $changedAttributes = $model->attributes;
@@ -716,6 +728,9 @@ class QuoteController extends ApiBaseController
                 if (!$model->hasErrors()) {
                     if (!empty($leadAttributes)) {
                         $model->lead->attributes = $leadAttributes;
+                        if (!$model->lead->hybrid_uid) {
+                            $model->lead->hybrid_uid = $leadAttributes['additional_information'][0]['bookingId'] ?? null;
+                        }
                         if (!$model->lead->save()) {
                             $response['errors'][] = $model->lead->getErrors();
                         }

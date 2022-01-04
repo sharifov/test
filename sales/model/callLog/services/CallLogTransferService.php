@@ -13,7 +13,6 @@ use common\models\UserParams;
 use sales\entities\cases\Cases;
 use sales\guards\phone\PhoneBlackListGuard;
 use sales\helpers\call\CallHelper;
-use sales\helpers\UserCallIdentity;
 use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\callLog\entity\callLog\CallLogStatus;
 use sales\model\callLog\entity\callLog\CallLogType;
@@ -27,6 +26,7 @@ use sales\model\callLogFilterGuard\repository\CallLogFilterGuardRepository;
 use sales\model\callLogFilterGuard\service\CallLogFilterGuardService;
 use sales\model\callNote\entity\CallNote;
 use sales\model\phoneList\entity\PhoneList;
+use sales\model\voip\phoneDevice\device\VoipDevice;
 use Yii;
 use yii\db\Expression;
 use yii\helpers\VarDumper;
@@ -495,25 +495,16 @@ class CallLogTransferService
         $callNote  = CallNote::find()->select(['cn_note'])->andWhere(['cn_call_id' => $call['cl_id']])->orderBy(['cn_created_dt' => SORT_DESC])->asArray()->limit(1)->one();
         $call['callNote'] = $callNote['cn_note'] ?? '';
 
-        $clientPrefix  = UserCallIdentity::getFullPrefix();
-        $length = strlen($clientPrefix);
-        $oldClientPrefix = 'client:seller';
-        $lengthOld = strlen($oldClientPrefix);
-
         $call['user_id'] = null;
         if ((int)$call['cl_type_id'] === Call::CALL_TYPE_OUT) {
-            if (strpos($call['cl_phone_to'], $clientPrefix, 0) === 0) {
-                $call['user_id'] = (int)substr($call['cl_phone_to'], $length);
-            } elseif (strpos($call['cl_phone_to'], $oldClientPrefix, 0) === 0) {
-                $call['user_id'] = (int)substr($call['cl_phone_to'], $lengthOld);
+            if (VoipDevice::isValid($call['cl_phone_to'])) {
+                $call['user_id'] = VoipDevice::getUserId($call['cl_phone_to']);
             }
             $isPhoneInBlackList = PhoneBlacklist::find()->andWhere(['pbl_phone' => $call['cl_phone_to'], 'pbl_enabled' => true])->exists();
             $call['phone_to_blacklist'] = $call['cl_phone_to'];
         } else {
-            if (strpos($call['cl_phone_from'], $clientPrefix, 0) === 0) {
-                $call['user_id'] = (int)substr($call['cl_phone_from'], $length);
-            } elseif (strpos($call['cl_phone_from'], $oldClientPrefix, 0) === 0) {
-                $call['user_id'] = (int)substr($call['cl_phone_from'], $lengthOld);
+            if (VoipDevice::isValid($call['cl_phone_from'])) {
+                $call['user_id'] = VoipDevice::getUserId($call['cl_phone_from']);
             }
             $isPhoneInBlackList = PhoneBlacklist::find()->andWhere(['pbl_phone' => $call['cl_phone_from'], 'pbl_enabled' => true])->exists();
             $call['phone_to_blacklist'] = $call['cl_phone_from'];

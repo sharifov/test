@@ -7,6 +7,7 @@ use DateTime;
 use sales\helpers\ErrorsToStringHelper;
 use sales\model\leadData\entity\LeadData;
 use sales\model\leadData\repository\LeadDataRepository;
+use sales\model\leadDataKey\services\LeadDataKeyDictionary;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -43,12 +44,12 @@ class LeadDataCreateService
         }
     }
 
-    public function createWeEmailReplied(Lead $lead): LeadData
+    public static function createValueTimestamp(int $leadId, string $key): LeadData
     {
         $leadDataRepository = new LeadDataRepository();
         $leadData = LeadData::create(
-            $lead->id,
-            LeadDataDictionary::KEY_WE_EMAIL_REPLIED,
+            $leadId,
+            $key,
             (string) (new DateTime())->getTimestamp()
         );
         if (!$leadData->validate()) {
@@ -57,6 +58,16 @@ class LeadDataCreateService
 
         $leadDataRepository->save($leadData);
         return $leadData;
+    }
+
+    public function createWeEmailReplied(Lead $lead): LeadData
+    {
+        return self::createValueTimestamp($lead->id, LeadDataKeyDictionary::KEY_WE_EMAIL_REPLIED);
+    }
+
+    public function createWeFirstCallNotPicked(Lead $lead): LeadData
+    {
+        return self::createValueTimestamp($lead->id, LeadDataKeyDictionary::KEY_WE_FIRST_CALL_NOT_PICKED);
     }
 
     public static function isExist(int $leadId, string $key): bool

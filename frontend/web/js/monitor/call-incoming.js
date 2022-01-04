@@ -140,13 +140,13 @@ const callJoinUserComponent = {
     },
     methods: {
         joinListen() {
-            joinConference('Listen', this.joinListenSource, this.callSid);
+            PhoneWidget.joinListen(this.callSid);
         },
         joinCoach() {
-            joinConference('Coach', this.joinCoachSource, this.callSid);
+            PhoneWidget.joinCoach(this.callSid);
         },
         joinBarge() {
-            joinConference('Barge', this.joinBargeSource, this.callSid);
+            PhoneWidget.joinBarge(this.callSid);
         }
     }
 };

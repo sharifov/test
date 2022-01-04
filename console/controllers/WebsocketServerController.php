@@ -642,7 +642,12 @@ class WebsocketServerController extends Controller
 
         if ($controller = $this->resolveController($controller, $action)) {
             try {
-                $out = $controller($params);
+                $row = $server->tblConnections->get($frame->fd);
+                $connectionIdentity = null;
+                if (!empty($row['uc_id'])) {
+                    $connectionIdentity = (int)$row['uc_id'];
+                }
+                $out = $controller($connectionIdentity, $params);
             } catch (\Throwable $e) {
                 $out ['errors'][] = $e->getMessage();
                 \Yii::error($e->getMessage(), 'ws:dataProcessing:resolveController');

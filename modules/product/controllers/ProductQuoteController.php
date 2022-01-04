@@ -241,26 +241,45 @@ class ProductQuoteController extends FController
                 $emailData['change_gid'] = $productQuoteChange->pqc_gid;
                 $emailData['original_quote'] = $originalQuote->serialize();
 
-                $bookingId = $case->cs_order_uid;
+                $bookingId = $originalQuote->getBookingId();
+                if (!$bookingId) {
+                    Yii::warning([
+                        'message' => 'ProjectHashGenerator::getHashByProjectId problem. Reason: BookingId is empty',
+                        'data' => [
+                            'data' => [
+                                'booking_id' => $bookingId,
+                                'product_quote_change_gid' => $productQuoteChange->pqc_gid,
+                                'case_gid' => $case->cs_gid,
+                                'product_quote_gid' => $originalQuote->pq_gid,
+                            ]
+                        ]
+                    ], 'ProductQuoteController:actionPreviewVoluntaryOfferEmail:ProjectHashGenerator:getHashByProjectId');
+                }
                 $emailData['booking_hash_code'] = ProjectHashGenerator::getHashByProjectId($case->cs_project_id, $bookingId);
                 if (!empty($emailData['original_quote']['data'])) {
                     ArrayHelper::remove($emailData['original_quote']['data'], 'fq_origin_search_data');
                 }
-                $emailFrom = Auth::user()->email;
+
+                $userProjectParams = UserProjectParams::find()
+                    ->andWhere(['upp_user_id' => Auth::id(), 'upp_project_id' => $case->cs_project_id])
+                    ->withEmailList()
+                    ->one();
+
+                $emailFrom = ($userProjectParams) ? ($userProjectParams)->getEmail(true) : null;
                 $emailTemplateType = null;
                 $emailFromName = Auth::user()->nickname;
 
                 if ($case->cs_project_id) {
                     $project = $case->project;
                     if ($project && $emailConfig = $project->getVoluntaryChangeEmailConfig()) {
-                        $emailFrom = $emailConfig['emailFrom'] ?? '';
+                        $emailFrom = !empty($emailConfig['emailFrom'] ?? null) ? $emailConfig['emailFrom'] : $emailFrom;
                         $emailTemplateType = $emailConfig['templateTypeKey'] ?? '';
-                        $emailFromName = $emailConfig['emailFromName'] ?? $emailFromName;
+                        $emailFromName = !empty($emailConfig['emailFromName'] ?? null) ? $emailConfig['emailFromName'] : $emailFromName;
                     }
                 }
 
                 if (!$emailFrom) {
-                    throw new \RuntimeException('Agent not has assigned email; Setup in project settings object.case.voluntary_exchange.emailFrom;');
+                    throw new \RuntimeException('No "email from" address available, please contact administrator.');
                 }
 
                 if (!$emailTemplateType) {
@@ -385,7 +404,7 @@ class ProductQuoteController extends FController
                             $whData = (new HybridWhData())->fillCollectedData(
                                 HybridWhData::WH_TYPE_VOLUNTARY_CHANGE_UPDATE,
                                 [
-                                    'booking_id' => $case->cs_order_uid,
+                                    'booking_id' => $originQuote->getBookingId(),
                                     'product_quote_gid' => $originQuote->pq_gid,
                                     'exchange_gid' => $productQuoteChange->pqc_gid,
                                     'exchange_status' => ucfirst(ProductQuoteChangeStatus::getClientKeyStatusById($productQuoteChange->pqc_status_id)),
@@ -645,28 +664,35 @@ class ProductQuoteController extends FController
                             }
                         }
 
-                        try {
-                            $hybridService = Yii::createObject(HybridService::class);
-                            $data = [
-                                'data' => [
-                                    'booking_id' => $case->cs_order_uid,
-                                    'reprotection_quote_gid' => $reprotectionQuote->pq_gid,
-                                    'case_gid' => $case->cs_gid,
-                                    'product_quote_gid' => $originQuote->pq_gid,
-                                ]
-                            ];
-                            $hybridService->whReprotection($case->cs_project_id, $data);
-                            $case->addEventLog(null, 'Request HybridService sent successfully');
-                        } catch (\Throwable $throwable) {
-                            $errorData = AppHelper::throwableLog($throwable);
-                            $errorData['submessage'] = 'OTA site is not informed (hybridService->whReprotection)';
-                            $errorData['project_id'] = $case->cs_project_id;
-                            $errorData['case_id'] = $case->cs_id;
+                        $bookingId = $originQuote->getBookingId();
+                        $data = [
+                            'data' => [
+                                'booking_id' => $bookingId,
+                                'reprotection_quote_gid' => $reprotectionQuote->pq_gid,
+                                'case_gid' => $case->cs_gid,
+                                'product_quote_gid' => $originQuote->pq_gid,
+                            ]
+                        ];
 
+                        if ($bookingId) {
+                            try {
+                                $hybridService = Yii::createObject(HybridService::class);
+                                $hybridService->whReprotection($case->cs_project_id, $data);
+                                $case->addEventLog(null, 'Request HybridService sent successfully');
+                            } catch (\Throwable $throwable) {
+                                $errorData = AppHelper::throwableLog($throwable);
+                                $errorData['submessage'] = 'OTA site is not informed (hybridService->whReprotection)';
+                                $errorData['project_id'] = $case->cs_project_id;
+                                $errorData['case_id'] = $case->cs_id;
 
-                            Yii::warning($errorData, 'ProductQuoteController:actionReprotectionQuoteSendEmail:Throwable');
+                                Yii::warning($errorData, 'ProductQuoteController:actionReprotectionQuoteSendEmail:Throwable');
+                            }
+                        } else {
+                            Yii::warning([
+                                    'message' => 'Error: WebHook hybridService "whReprotection" not sent. Reason: BookingId is empty',
+                                    'data' => $data
+                                ], 'ProductQuoteController:actionReprotectionQuoteSendEmail:HybridService:whReprotection');
                         }
-
                         return '<script>$("#modal-md").modal("hide"); createNotify("Success", "Success: <strong>Email Message</strong> is sent to <strong>' . $mail->e_email_to . '</strong>", "success")</script>';
                     }
 

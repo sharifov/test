@@ -1,10 +1,66 @@
 (function () {
+    const storageKeys = {
+        audioDevices: 'audio_devices',
+        audioDevicesIsMuted: 'audio_devices_is_muted',
+        audioDevicesActiveChanged: 'audio_devices_active_changed',
+    };
 
-    function Incoming(queues, notifier, incomingPane, outgoingPane) {
+    function Devices() {
+        this.isActive = function (id) {
+            let collection = this.load();
+            return parseInt(collection.activeDeviceId) === parseInt(id);
+        };
+
+        this.remove = function (id) {
+            let collection = this.load();
+            if (collection.devices.length === 0) {
+                return;
+            }
+            let index = collection.devices.findIndex((el) => el === id);
+            if (index < 0) {
+                return;
+            }
+            collection.devices.splice(index, 1);
+            this.save(collection);
+        };
+
+        this.add = function (deviceId, devices) {
+            let collection = this.load();
+            collection.devices = devices.map((v) => parseInt(v));
+            if (!collection.devices.includes(deviceId)) {
+                collection.devices.push(deviceId);
+            }
+            this.save(collection);
+        };
+
+        this.load = function () {
+            let collection = localStorage.getItem(storageKeys.audioDevices);
+            if (collection) {
+                return JSON.parse(collection);
+            }
+            return {
+                devices: [],
+                activeDeviceId: null
+            };
+        };
+
+        this.save = function (collection) {
+            let oldActiveDeviceId = collection.activeDeviceId;
+            collection.activeDeviceId = Math.min(...collection.devices);
+            localStorage.setItem(storageKeys.audioDevices, JSON.stringify(collection));
+            if (oldActiveDeviceId !== collection.activeDeviceId) {
+                localStorage.setItem(storageKeys.audioDevicesActiveChanged, localStorage.getItem(storageKeys.audioDevicesActiveChanged) === '0' ? '1' : '0');
+            }
+            PhoneWidget.audio.incoming.refresh();
+        };
+    }
+
+    function Incoming(queues, notifier, incomingPane, outgoingPane, isMuted) {
         this.queues = queues;
         this.notifier = notifier;
         this.incomingPane = incomingPane;
         this.outgoingPane = outgoingPane;
+        this.devices = new Devices();
 
         this.audio = new Audio('/js/sounds/incoming_call.mp3');
         this.audio.volume = 0.3;
@@ -13,12 +69,16 @@
         this.isOn = true;
         this.offKey = null;
 
+        this.addDevice = function (deviceId, devices) {
+            this.devices.add(deviceId, devices);
+        };
+
+        this.removeDevice = function (deviceId) {
+            this.devices.remove(deviceId);
+        };
+
         this.play = function () {
-            if (document.visibilityState === 'visible') {
-                this.audio.play();
-                return;
-            }
-            this.stop();
+            this.audio.play();
         };
 
         this.stop = function () {
@@ -26,14 +86,22 @@
             this.audio.currentTime = 0;
         };
 
-        this.muted = function () {
+        this.muted = function (withOutSave) {
             this.audio.muted = true;
             this.indicatorMuted();
+            if (withOutSave) {
+                return;
+            }
+            localStorage.setItem(storageKeys.audioDevicesIsMuted, '1');
         };
 
-        this.unMuted = function () {
+        this.unMuted = function (withOutSave) {
             this.audio.muted = false;
             this.indicatorUnMuted();
+            if (withOutSave) {
+                return;
+            }
+            localStorage.setItem(storageKeys.audioDevicesIsMuted, '0');
         };
 
         this.isMuted = function () {
@@ -41,6 +109,10 @@
         };
 
         this.refresh = function () {
+            if (!this.devices.isActive(PhoneWidget.getDeviceState().getDeviceId())) {
+                this.stop();
+                return;
+            }
             if (!this.isOn) {
                 this.stop();
                 return;
@@ -87,9 +159,33 @@
         this.isOff = function () {
             return this.isOn === false;
         };
+
+        if (isMuted) {
+            this.muted(true);
+        }
     }
 
+    function Init(queues, notifier, incomingPane, outgoingPane) {
+        return new Incoming(queues, notifier, incomingPane, outgoingPane, localStorage.getItem(storageKeys.audioDevicesIsMuted) === '1');
+    }
+
+    window.addEventListener("storage", function (e) {
+        if (e.key === storageKeys.audioDevicesIsMuted) {
+            if (e.newValue === '1') {
+                PhoneWidget.audio.incoming.muted(true);
+                return;
+            }
+            PhoneWidget.audio.incoming.unMuted(true);
+        }
+    });
+
+    window.addEventListener("storage", function (e) {
+        if (e.key === storageKeys.audioDevicesActiveChanged) {
+            PhoneWidget.audio.incoming.refresh();
+        }
+    });
+
     window.phoneWidget.audio = {
-        Incoming: Incoming
+        Incoming: Init
     }
 })();

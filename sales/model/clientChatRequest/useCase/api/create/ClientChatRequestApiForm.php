@@ -53,10 +53,18 @@ class ClientChatRequestApiForm extends Model
     {
         $this->event = $event;
         $this->data = $data;
+        $this->checkAttachment();
         $this->eventId = ClientChatRequest::getEventIdByName($event);
         $this->rid = $data['rid'] ?? null;
         $this->scenario = in_array($this->event, self::SCENARIO_LIST) ? $this->event : 'default';
         return $this;
+    }
+
+    protected function checkAttachment()
+    {
+        if (empty($this->data['msg']) && !empty($this->data['attachments'])) {
+            $this->data['msg'] = 'Sent an attachment';
+        }
     }
 
     public function validateTsParam($attributes): void

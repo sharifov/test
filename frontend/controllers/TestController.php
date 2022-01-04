@@ -163,7 +163,6 @@ use sales\helpers\lead\LeadUrlHelper;
 use sales\helpers\payment\CreditCardHelper;
 use sales\helpers\query\QueryHelper;
 use sales\helpers\user\UserFinder;
-use sales\helpers\UserCallIdentity;
 use sales\model\call\entity\callCommand\CallCommand;
 use sales\model\call\useCase\UpdateCallPrice;
 use sales\model\callLog\entity\callLog\CallLog;
@@ -429,36 +428,6 @@ class TestController extends FController
 //        VarDumper::dump($calls);
 //        die;
 
-        $r = Yii::$app->communication->callToUser(UserCallIdentity::getClientId(167), UserCallIdentity::getClientId(295), 167, [
-
-            'status' => 'Ringing',
-            'duration' => 0,
-            'typeId' => Call::CALL_TYPE_IN,
-            'type' => 'Incoming',
-            'source_type_id' => Call::SOURCE_INTERNAL,
-            'fromInternal' => 'false',
-            'isInternal' => 'true',
-            'isHold' => 'false',
-            'holdDuration' => 0,
-            'isListen' => 'false',
-            'isCoach' => 'false',
-            'isMute' => 'false',
-            'isBarge' => 'false',
-            'project' => '',
-            'source' => Call::SOURCE_LIST[Call::SOURCE_INTERNAL],
-            'isEnded' => 'false',
-            'contact' => [
-                'name' => 'Serj 2',
-                'phone' => '',
-                'company' => '',
-            ],
-            'department' => '',
-            'queue' => Call::QUEUE_DIRECT,
-            'conference' => [],
-            'isConferenceCreator' => 'true',
-        ]);
-        VarDumper::dump($r);
-//        $r2 = Yii::$app->communication->callToUser(UserCallIdentity::getClientId(294), UserCallIdentity::getClientId(295), 294);
 //        VarDumper::dump($r2);
 //
         die;
@@ -808,10 +777,6 @@ class TestController extends FController
         ];
         Notifications::publish('removeIncomingRequest', ['user_id' => 295], $callInfo);
 
-
-
-//        $service = Yii::$app->communication;;
-//        $service->createCall('client:seller295', '+37369305726', '+14157693509', 295, 2);
 //        die;
 //
 //
@@ -829,8 +794,7 @@ class TestController extends FController
         ////
         ////        $service->disconnectFromConferenceCall($call->c_conference_sid, $call->c_call_sid);
         ////
-//        $conference = Conference::findOne(['cf_sid' => $call->c_conference_sid]);
-//        $service->returnToConferenceCall($call->c_call_sid,$conference->cf_friendly_name,$conference->cf_sid,'client:seller295');
+
         ////
         ////        $search = new ContactsSearch(295);
         ////        $search->searchContactsByWidget('373');

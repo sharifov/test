@@ -46,7 +46,7 @@ if ($case) {
                 ],
                 'middle_name',
                 'last_name',
-                'locale',
+                'cl_locale',
             ],
         ]) ?>
     </div>

@@ -13,6 +13,7 @@ use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
+use sales\model\call\abac\CallAbacObject;
 
 class CallLogController extends FController
 {
@@ -82,6 +83,11 @@ class CallLogController extends FController
      */
     public function actionUpdate($id)
     {
+        /** @abac $callLogAbacDto, CallLogAbacObject::OBJ_CALL_LOG, CallLogAbacObject::ACTION_UPDATE, Call log act update */
+        if (!Yii::$app->abac->can(null, CallAbacObject::OBJ_CALL_LOG, CallAbacObject::ACTION_UPDATE)) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
@@ -131,6 +137,11 @@ class CallLogController extends FController
      */
     public function actionDelete($id): Response
     {
+        /** @abac $callLogAbacDto, CallLogAbacObject::OBJ_CALL_LOG, CallLogAbacObject::ACTION_UPDATE, Call log act update */
+        if (!Yii::$app->abac->can(null, CallAbacObject::OBJ_CALL_LOG, CallAbacObject::ACTION_DELETE)) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
         $this->findModel($id)->delete();
 
         return $this->redirect(['index']);

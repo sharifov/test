@@ -11,6 +11,8 @@ use sales\model\client\notifications\phone\entity\ClientNotificationPhoneList;
 use sales\model\client\notifications\phone\entity\Status as PhoneStatus;
 use sales\model\client\notifications\sms\entity\ClientNotificationSmsList;
 use sales\model\client\notifications\sms\entity\Status as SmsStatus;
+use sales\model\voip\phoneDevice\device\PhoneDeviceCleaner;
+use sales\model\voip\phoneDevice\log\PhoneDeviceLogCleaner;
 use sales\services\cleaner\cleaners\ApiLogCleaner;
 use sales\services\cleaner\cleaners\CallCleaner;
 use sales\services\cleaner\cleaners\ClientChatUserAccessCleaner;
@@ -135,6 +137,16 @@ class CleanController extends Controller
             \Yii::$app->runAction('clean/client-notifications');
         } catch (\Throwable $throwable) {
             self::throwableHandler($throwable, 'actionOnceDay:ClientNotifications');
+        }
+        try {
+            \Yii::$app->runAction('clean/phone-device');
+        } catch (\Throwable $throwable) {
+            self::throwableHandler($throwable, 'actionOnceDay:PhoneDevice');
+        }
+        try {
+            \Yii::$app->runAction('clean/phone-device-log');
+        } catch (\Throwable $throwable) {
+            self::throwableHandler($throwable, 'actionOnceDay:PhoneDeviceLog');
         }
 
         $timeEnd = microtime(true);
@@ -471,6 +483,36 @@ class CleanController extends Controller
         $timeEnd = microtime(true);
         $time = number_format(round($timeEnd - $timeStart, 2), 2);
         self::outputResult($processed, $time, 'actionClientNotifications:result');
+        return ExitCode::OK;
+    }
+
+    public function actionPhoneDevice()
+    {
+        echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+
+        $timeStart = microtime(true);
+
+        $processed = Yii::createObject(PhoneDeviceCleaner::class)->clean(new \DateTimeImmutable('-3 day'));
+
+        $timeEnd = microtime(true);
+        $time = number_format(round($timeEnd - $timeStart, 2), 2);
+        self::outputResult($processed, $time, 'actionPhoneDevice:result');
+        return ExitCode::OK;
+    }
+
+    public function actionPhoneDeviceLog()
+    {
+        echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+
+        $timeStart = microtime(true);
+
+        $processed = Yii::createObject(PhoneDeviceLogCleaner::class)->clean(new \DateTimeImmutable('-3 day'));
+
+        $timeEnd = microtime(true);
+        $time = number_format(round($timeEnd - $timeStart, 2), 2);
+        self::outputResult($processed, $time, 'actionPhoneDeviceLog:result');
         return ExitCode::OK;
     }
 

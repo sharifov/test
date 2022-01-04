@@ -357,7 +357,7 @@ let PhoneWidgetContacts = function () {
 
         let dataUserId = contact.isInternal ? contact.id : '';
 
-        content += '<i class="fa fa-phone phone-dial-contacts" data-user-id="' + dataUserId + '" data-phone="' + (dataUserId ? contact['name'] : phone) + '" data-title="' + contact['name'] + '"></i>';
+        content += '<i class="fa fa-phone phone-dial-contacts" data-contact-id="' + contact['id'] + '"  data-user-id="' + dataUserId + '" data-phone="' + (dataUserId ? contact['name'] : phone) + '" data-title="' + contact['name'] + '"></i>';
 
         content += '</li>' +
             '<li title="' + titleAccessGetMessages + '" class="actions-list__option js-trigger-messages-modal' + disabledClass + '" ' +
@@ -476,7 +476,7 @@ let PhoneWidgetContacts = function () {
                 $.ajax({
                     url: getUrlFullList(),
                     type: 'post',
-                    data: {page: page, uid: userId},
+                    data: {page: page},
                     dataType: 'json',
                     beforeSend: function () {
                         showPreloader();
@@ -574,19 +574,6 @@ $(document).on('click', ".js-toggle-contact-info", function () {
     let data = PhoneWidgetContacts.viewContact(contact);
     $(".widget-phone__contact-info-modal").html(data);
     $(".widget-phone__contact-info-modal").show();
-});
-
-$(document).on('click', ".contact-dial-to-user", function () {
-    let contact = PhoneWidgetContacts.decodeContact($(this).data('contact'));
-    insertPhoneNumber({
-        'formatted': contact.name,
-        'title': '',
-        'user_id': contact.id
-    });
-    $('.phone-widget__header-actions a[data-toggle-tab]').removeClass('is_active');
-    $('.phone-widget__tab').removeClass('is_active');
-    $('.phone-widget__header-actions a[data-toggle-tab="tab-phone"]').addClass('is_active');
-    $('#tab-phone').addClass('is_active');
 });
 
 // $('.js-add-to-conference').on('click', function() {

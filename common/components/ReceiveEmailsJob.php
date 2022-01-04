@@ -26,7 +26,7 @@ use sales\entities\cases\Cases;
 use sales\forms\lead\EmailCreateForm;
 use sales\helpers\app\AppHelper;
 use sales\model\leadData\services\LeadDataCreateService;
-use sales\model\leadData\services\LeadDataDictionary;
+use sales\model\leadDataKey\services\LeadDataKeyDictionary;
 use sales\repositories\cases\CasesRepository;
 use sales\services\cases\CasesCommunicationService;
 use sales\services\cases\CasesManageService;
@@ -279,7 +279,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                             }
 
                             try {
-                                if (!LeadDataCreateService::isExist($lead->id, LeadDataDictionary::KEY_WE_EMAIL_REPLIED)) {
+                                if (!LeadDataCreateService::isExist($lead->id, LeadDataKeyDictionary::KEY_WE_EMAIL_REPLIED)) {
                                     (new LeadDataCreateService())->createWeEmailReplied($lead);
                                     $job = new WebEngageLeadRequestJob($lead->id, WebEngageDictionary::EVENT_LEAD_EMAIL_REPLIED);
                                     Yii::$app->queue_job->priority(100)->push($job);

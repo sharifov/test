@@ -37,6 +37,7 @@ class LocalUrlGenerator implements UrlGenerator
                 'name' => $file->name,
                 'title' => $file->title,
                 'type_id' => UrlGenerator::TYPE_PUBLIC,
+                'uid' => $file->uid
             ];
         }
         return $links;

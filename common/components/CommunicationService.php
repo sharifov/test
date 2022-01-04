@@ -11,6 +11,8 @@ namespace common\components;
 
 use common\models\Call;
 use common\models\Project;
+use sales\helpers\email\MaskEmailHelper;
+use sales\helpers\phone\MaskPhoneHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\model\call\entity\call\data\CreatorType;
 use sales\model\call\useCase\conference\create\CreateCallForm;
@@ -18,7 +20,9 @@ use sales\model\project\entity\projectLocale\ProjectLocale;
 use thamtech\uuid\helpers\UuidHelper;
 use Yii;
 use yii\base\Component;
+use yii\caching\TagDependency;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Json;
 use yii\helpers\Url;
 use yii\helpers\VarDumper;
 use yii\httpclient\Client;
@@ -169,7 +173,11 @@ class CommunicationService extends Component implements CommunicationServiceInte
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::mailPreview');
+            \Yii::warning([
+                'error'  => $out['error'],
+                'email_from' => MaskEmailHelper::maskingPartial($data['mail']['email_from']),
+                'email_to' => MaskEmailHelper::maskingPartial($data['mail']['email_to'])
+            ], 'Component:CommunicationService::mailPreview');
         }
 
         return $out;
@@ -406,7 +414,25 @@ class CommunicationService extends Component implements CommunicationServiceInte
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error('filter: ' . VarDumper::dumpAsString($filter) . "\r\n" . VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::mailGetMessages');
+
+            if (!empty($filter['email_list'])) {
+                $email_list = [];
+                if (is_object(json_decode($filter['email_list']))) {
+                    $email_list_raw = Json::decode($filter['email_list']);
+                    if (!empty($email_list_raw['list'])) {
+                        foreach ($email_list_raw['list'] as $key => $email) {
+                            $email_list[$key] = MaskEmailHelper::maskingPartial($email);
+                        }
+                    }
+                }
+                if (!empty($email_list)) {
+                    $filter['email_list'] = Json::encode(['list' => $email_list]);
+                }
+            }
+            \Yii::error([
+                'message' => VarDumper::dumpAsString($out['error'], 10),
+                'filter' => VarDumper::dumpAsString($filter, 10),
+            ], 'Component:CommunicationService::mailGetMessages');
         }
 
         return $out;
@@ -444,7 +470,11 @@ class CommunicationService extends Component implements CommunicationServiceInte
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::smsPreview');
+            \Yii::error([
+                'error' => $out['error'],
+                'phone_from' => MaskPhoneHelper::maskingPartial($data['sms']['phone_from']),
+                'phone_to' => MaskPhoneHelper::maskingPartial($data['sms']['phone_to']),
+            ], 'Component:CommunicationService::smsPreview');
         }
 
         return $out;
@@ -758,30 +788,51 @@ class CommunicationService extends Component implements CommunicationServiceInte
 
 
     /**
-     * @param string $username
+     * @param string $deviceName
      * @param bool $deleteCache
      * @return mixed
      * @throws Exception
      */
-    public function getJwtTokenCache($username = '', $deleteCache = false)
+    public function getJwtTokenCache($deviceName = '', $deleteCache = false)
     {
-        $cacheKey = 'jwt_token_' . $username;
+        $cacheKey = 'jwt_token_' . $deviceName;
         if ($deleteCache) {
             \Yii::$app->cache->delete($cacheKey);
         }
         $out = \Yii::$app->cache->get($cacheKey);
 
         if ($out === false) {
-            $out = $this->getJwtToken($username);
-
+            $out = $this->getJwtToken($deviceName);
             if ($out && !empty($out['data']['token'])) {
-                $expired = 60 * 5;
-                if (!empty($out['data']['expire'])) {
-                    $expired = strtotime($out['data']['expire']) - time() - 60;
-                }
-                \Yii::$app->cache->set($cacheKey, $out, $expired);
+                $expired = $this->calculateJwtExpiredSeconds($out['data']['expire']);
+                \Yii::$app->cache->set($cacheKey, $out, $expired, new TagDependency(['tags' => 'twilio_jwt_token']));
             }
         }
+
+        $out['data']['refreshTime'] = $this->calculateJwtExpiredSeconds($out['data']['expire']) + 1;
+
+        return $out;
+    }
+
+    private function calculateJwtExpiredSeconds(string $expiredDt): int
+    {
+        $expired = strtotime($expiredDt) - time();
+        if ($expired < 1) {
+            return 1;
+        }
+        return $expired;
+    }
+
+    /**
+     * @param string $deviceName
+     * @return mixed
+     * @throws Exception
+     */
+    public function generateJwtToken($deviceName = ''): array
+    {
+        $out = $this->getJwtToken($deviceName);
+
+        $out['data']['refreshTime'] = $this->calculateJwtExpiredSeconds($out['data']['expire']) + 1;
 
         return $out;
     }
@@ -826,11 +877,10 @@ class CommunicationService extends Component implements CommunicationServiceInte
         return $out;
     }
 
-    public function callForward($sid, $from, $to, $callRecordingDisabled, $phoneListId): array
+    public function callForward($sid, $to, $callRecordingDisabled, $phoneListId): array
     {
         $data = [
             'sid' => $sid,
-            'from' => $from,
             'to' => $to,
             'call_recording_disabled' => $callRecordingDisabled,
             'phone_list_id' => $phoneListId,
@@ -1065,7 +1115,13 @@ class CommunicationService extends Component implements CommunicationServiceInte
 
     public function createCall(CreateCallForm $form): array
     {
-        $response = $this->sendRequest('twilio-conference/create-call', $form->getAttributes());
+        $response = $this->sendRequest(
+            'twilio-conference/create-call',
+            array_merge(
+                $form->getAttributes(),
+                ['voipApiUsername' => $this->voipApiUsername]
+            )
+        );
 
         return $this->processConferenceResponse($response);
     }
@@ -1405,6 +1461,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
             'say_voice' => $sayVoice,
             'say_language' => $sayLanguage,
             'play' => $play,
+            'voip_api_username' => $this->voipApiUsername,
             'call_custom_parameters' =>  array_merge(
                 [
                     'type_id' => Call::CALL_TYPE_OUT,

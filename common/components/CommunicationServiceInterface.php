@@ -24,6 +24,8 @@ interface CommunicationServiceInterface
 
     public function getJwtToken($username = ''): array;
 
+    public function generateJwtToken($deviceName = ''): array;
+
     public function getJwtTokenCache($username = '', $deleteCache = false);
 
     public function callRedirect($cid, $type, $from, $to, $firstTransferToNumber = false);

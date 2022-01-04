@@ -5,7 +5,10 @@ namespace frontend\controllers;
 use common\components\purifier\Purifier;
 use common\models\Email;
 use common\models\Notifications;
+use frontend\helpers\JsonHelper;
 use frontend\widgets\notification\NotificationMessage;
+use modules\fileStorage\FileStorageSettings;
+use modules\fileStorage\src\services\url\UrlGenerator;
 use sales\auth\Auth;
 use sales\entities\cases\CaseEventLog;
 use sales\forms\emailReviewQueue\EmailReviewQueueForm;
@@ -18,6 +21,14 @@ use yii\web\NotFoundHttpException;
 
 class EmailReviewQueueController extends FController
 {
+    private UrlGenerator $fileStorageUrlGenerator;
+
+    public function __construct($id, $module, UrlGenerator $fileStorageUrlGenerator, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->fileStorageUrlGenerator = $fileStorageUrlGenerator;
+    }
+
     /**
      * @inheritDoc
      */
@@ -123,8 +134,13 @@ class EmailReviewQueueController extends FController
                 $email->e_email_subject = $form->emailSubject;
                 $email->e_status_id = Email::STATUS_PENDING;
                 $email->body_html = $form->emailMessage;
+                $attachments = JsonHelper::decode($email->e_email_data);
+//                if ($form->files && FileStorageSettings::canEmailAttach()) {
+//                    $attachments['files'] = $this->fileStorageUrlGenerator->generateForExternal($form->getFilesPath());
+//                }
+//                $email->e_email_data = json_encode($attachments);
                 if ($email->save()) {
-                    $mailResponse = $email->sendMail();
+                    $mailResponse = $email->sendMail($attachments);
 
                     if (empty($mailResponse['error'])) {
                         $emailQueue->statusToReviewed();
@@ -162,6 +178,9 @@ class EmailReviewQueueController extends FController
             if ($emailReviewQueue->save()) {
                 $email = $emailReviewQueue->erqEmail;
                 $message = 'Email(' . $emailReviewQueue->erq_email_id . ') was rejected by (' . $emailReviewQueue->erqUserReviewer->username . ')';
+                $email->statusToCancel();
+                $email->e_error_message = $message;
+                $email->update();
                 if ($email->e_lead_id && ($lead = $email->eLead)) {
                     $message .= '<br> Lead (Id: ' . Purifier::createLeadShortLink($lead) . ')';
                 }
