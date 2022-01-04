@@ -1,5 +1,7 @@
 <?php
 
+use yii\authclient\clients\Google;
+use yii\authclient\Collection;
 use common\components\logger\FilebeatTarget;
 use common\helpers\LogHelper;
 use frontend\assets\groups\BootstrapGroupAsset;
@@ -21,7 +23,6 @@ use modules\product\ProductModule;
 use modules\qaTask\QaTaskModule;
 use common\components\i18n\Formatter;
 use modules\rentCar\RentCarModule;
-use yii\authclient\clients\Google;
 use yii\log\DbTarget;
 use yii\log\FileTarget;
 use yii\web\JqueryAsset;
@@ -235,12 +236,12 @@ return [
             ]),
         ],
         'authClientCollection' => [
-            'class' => 'yii\authclient\Collection',
+            'class' => Collection::class,
             'clients' => [
                 'google' => [
                     'class' => Google::class,
-                    'clientId' => '',
-                    'clientSecret' => ''
+                    'clientId' => env('frontend.config.main.components.authClientCollection.clients.google.clientId'),
+                    'clientSecret' => env('frontend.config.main.components.authClientCollection.clients.google.clientSecret')
                 ],
             ],
         ]
@@ -400,11 +401,11 @@ return [
             'class' => CruiseModule::class,
             'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
         ],
-    ],
-    'as beforeRequest' => [
+        ],
+        'as beforeRequest' => [
         'class' => \frontend\components\UserSiteActivityLog::class,
-    ],
-    'as access' => [
+        ],
+        'as access' => [
         'class' => 'yii\filters\AccessControl',
         'except' => ['site/login', 'site/step-two', 'site/captcha', 'site/error', 'site/auth', 'site/auth-step-two'],
         'rules' => [
@@ -413,8 +414,8 @@ return [
                 'roles' => ['@'],
             ],
         ],
-    ],
-    'container' => [
+        ],
+        'container' => [
         'definitions' => [
             yii\grid\GridView::class => [
                 'options' => ['class' => 'table-responsive'],
@@ -422,7 +423,7 @@ return [
             ],
             \yii\widgets\LinkPager::class => \yii\bootstrap4\LinkPager::class,
         ],
-    ],
+        ],
 
     /*'view' => [
         'theme' => [
@@ -434,5 +435,5 @@ return [
         ],
     ],*/
 
-    'params' => $params,
-];
+        'params' => $params,
+        ];

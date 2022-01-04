@@ -14,6 +14,7 @@ use common\models\UserConnection;
 use common\models\UserParams;
 use frontend\models\form\UserProfileForm;
 use frontend\themes\gentelella_v2\widgets\SideBarMenu;
+use sales\auth\Auth;
 use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\model\authClient\entity\AuthClientQuery;
@@ -22,7 +23,7 @@ use sales\model\user\entity\monitor\UserMonitor;
 use Yii;
 use yii\authclient\AuthAction;
 use yii\authclient\ClientInterface;
-use yii\authclient\clients\Google;
+use yii\data\ActiveDataProvider;
 use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
@@ -55,7 +56,7 @@ class SiteController extends FController
                         'allow' => true,
                     ],
                     [
-                        'actions' => ['index', 'logout', 'profile', 'get-airport', 'blank', 'side-bar-menu'],
+                        'actions' => ['index', 'logout', 'profile', 'get-airport', 'blank', 'side-bar-menu', 'auth-assign'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -92,6 +93,10 @@ class SiteController extends FController
             'auth' => [
                 'class' => AuthAction::class,
                 'successCallback' => [$this, 'onAuthSuccess'],
+            ],
+            'auth-assign' => [
+                'class' => AuthAction::class,
+                'successCallback' => [$this, 'onAuthAssignSuccess']
             ]
         ];
     }
@@ -102,7 +107,13 @@ class SiteController extends FController
     public function actionIndex(): string
     {
         $user = Yii::$app->user->identity;
-        return $this->render('index', ['user' => $user]);
+        $sourcesDataProvider = new ActiveDataProvider();
+        if (SettingHelper::isEnabledAuthClients()) {
+            $authClients = AuthClientQuery::findAllByUserId(Auth::id());
+            $sourcesDataProvider->setModels($authClients);
+            $sourcesDataProvider->pagination = false;
+        }
+        return $this->render('index', ['user' => $user, 'sourcesDataProvider' => $sourcesDataProvider]);
     }
 
 
@@ -321,6 +332,12 @@ class SiteController extends FController
         //echo $qrCode->writeDataUri();
         //exit;
 
+        $sourcesDataProvider = new ActiveDataProvider();
+        if (SettingHelper::isEnabledAuthClients()) {
+            $sources = AuthClientQuery::findAllByUserId(Auth::id());
+            $sourcesDataProvider->setModels($sources);
+            $sourcesDataProvider->pagination = false;
+        }
 
         return $this->render('/employee/update_profile', [
             'model' => $model,
@@ -329,6 +346,7 @@ class SiteController extends FController
             'userCommissionRuleValue' => $userCommissionRulesValue,
             'userBonusRuleValue' => $userBonusRulesValue,
             'userProfileForm' => $userProfileForm,
+            'sourcesDataProvider' => $sourcesDataProvider
         ]);
     }
 
@@ -424,6 +442,17 @@ class SiteController extends FController
     {
         $source = AuthClientSources::clientSourceFactory($client->getId());
         $source->handle($this->action, $client);
+        return $this->action->redirect($source->getRedirectUrl());
+    }
+
+    public function onAuthAssignSuccess(ClientInterface $client)
+    {
+        if (!SettingHelper::isEnabledAuthClients()) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
+        $source = AuthClientSources::clientSourceFactory($client->getId());
+        $source->handleAssign(Auth::id(), $this->action, $client);
         return $this->action->redirect($source->getRedirectUrl());
     }
 

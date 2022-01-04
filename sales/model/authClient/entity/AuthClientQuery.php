@@ -18,4 +18,13 @@ class AuthClientQuery
     {
         return AuthClient::find()->with('user')->where(['ac_source' => $source, 'ac_source_id' => $sourceId])->all();
     }
+
+    /**
+     * @param int $userid
+     * @return array|AuthClient[]
+     */
+    public static function findAllByUserId(int $userid): array
+    {
+        return AuthClient::find()->byUserid($userid)->all();
+    }
 }
