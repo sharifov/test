@@ -366,7 +366,7 @@ class UserStatsSearch extends Model
                     ])
                     ->from(UserParams::tableName())
                     ->where('up_user_id = ' . Employee::tableName() . '.id')
-                    ->andWhere(['BETWEEN', 'DATE(up_updated_dt)', $from, $to])
+                    //->andWhere(['BETWEEN', 'DATE(up_updated_dt)', $from, $to])
             ]);
         }
         if ($this->isFieldShow(UserModelSettingDictionary::FIELD_LEADS_QUALIFIED_TAKEN_COUNT)) {
