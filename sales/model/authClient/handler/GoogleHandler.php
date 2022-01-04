@@ -69,13 +69,47 @@ class GoogleHandler implements ClientHandler
                     $this->repository->save($authClient);
                     $this->login($user);
                 } catch (\RuntimeException $e) {
-                    \Yii::warning(AppHelper::throwableLog($e), 'auth:GoogleHandler:RuntimeException');
+                    \Yii::warning(AppHelper::throwableLog($e), 'auth:GoogleHandler:handle:RuntimeException');
                     \Yii::$app->session->setFlash('error', 'Login failed');
                 }
             } else {
                 \Yii::$app->session->setFlash('error', 'User with email: ' . $email . ' is not registered');
             }
         }
+    }
+
+    public function handleAssign(int $userId, AuthAction $authAction, ClientInterface $client): void
+    {
+        $userAttributes = $client->getUserAttributes();
+        $sourceId = ArrayHelper::getValue($userAttributes, 'id');
+        $source = AuthClientSources::getIdByValue($client->getId());
+        $authClients = AuthClient::find()->with('user')->where([
+            'ac_user_id' => $userId,
+            'ac_source' => $source,
+            'ac_source_id' => $sourceId
+        ])->one();
+        $email = ArrayHelper::getValue($client->getUserAttributes(), 'email');
+        \Yii::info('test', 'info\test');
+        if (!$authClients) {
+            $authClient = AuthClient::create(
+                $userId,
+                $sourceId,
+                $email,
+                \Yii::$app->request->remoteIP,
+                \Yii::$app->request->userAgent
+            );
+            $authClient->setGoogleSource();
+            try {
+                $this->repository->save($authClient);
+                \Yii::$app->session->setFlash('success', 'User with email: ' . $email . ' successfully assigned to your profile');
+            } catch (\RuntimeException $e) {
+                \Yii::warning(AppHelper::throwableLog($e), 'auth:GoogleHandler:handleAssign:RuntimeException');
+                \Yii::$app->session->setFlash('error', 'Assigning client failed');
+            }
+        } else {
+            \Yii::$app->session->setFlash('warning', 'User with email: ' . $email . ' already assigned to your profile');
+        }
+        $this->setRedirectUrl('/site/profile');
     }
 
     protected function redirectToStepTwo(AuthAction $authAction, int $source, string $sourceId): void
