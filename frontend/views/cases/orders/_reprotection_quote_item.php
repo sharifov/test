@@ -177,7 +177,7 @@ $productQuoteAbacDto->mapOrderAttributes($order);
                         <th>Status</th>
                         <th title="Client Status mapping from SiteSettings for OTA" data-toggle="tooltip">Client Status</th>
                         <th style="width: 140px">Created</th>
-                        <th style="width: 76px">Info</th>
+                        <th style="width: 84px">Info</th>
                         <th>Decision</th>
                         <th style="width: 60px">Action</th>
                     </tr>
