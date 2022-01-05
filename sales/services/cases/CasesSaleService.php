@@ -634,7 +634,7 @@ class CasesSaleService
                         ]));
                     }
 
-                    if ($caseSale && SettingHelper::isEnableOrderFromSale()) {
+                    if ($caseSale->css_cs_id && SettingHelper::isEnableOrderFromSale()) {
                         $transaction = new Transaction(['db' => Yii::$app->db]);
                         try {
                             if (!$order = OrderManageService::getBySaleIdOrBookingId($saleId, (string) $refreshSaleData['bookingId'])) {

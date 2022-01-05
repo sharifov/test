@@ -256,8 +256,8 @@ class CasesController extends BaseController
                 Yii::$app->queue_job->priority(100)->push($job);
             } catch (\Throwable $throwable) {
                 Yii::error(
-                    AppHelper::throwableFormatter($throwable),
-                    'API:CasesController:' . __FUNCTION__ . ':addToJobFailed'
+                    AppHelper::throwableLog($throwable),
+                    'API:CasesController:actionCreate:CreateSaleFromBOJob'
                 );
             }
         }
@@ -268,10 +268,10 @@ class CasesController extends BaseController
                 $job->case_id = $result->csId;
                 $job->contact_email = $form->contact_email;
                 Yii::$app->queue_email_job->priority(10)->push($job);
-            } catch (\Throwable $e) {
+            } catch (\Throwable $throwable) {
                 Yii::error(
-                    AppHelper::throwableFormatter($throwable),
-                    'API:CasesController:' . __FUNCTION__ . ':addToJobFailed'
+                    AppHelper::throwableLog($throwable),
+                    'API:CasesController:actionCreate:SendEmailOnCaseCreationBOJob'
                 );
             }
         }
