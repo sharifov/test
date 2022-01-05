@@ -646,6 +646,9 @@ class CasesSaleService
                                     throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($orderCreateFromSaleForm));
                                 }
                                 $order = $this->orderCreateFromSaleService->orderCreate($orderCreateFromSaleForm);
+                                if (!$order->validate()) {
+                                    throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($order));
+                                }
 
                                 $transaction->begin();
                                 $orderId = $this->orderRepository->save($order);
