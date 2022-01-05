@@ -52,7 +52,7 @@ class OnlineConnection extends \yii\bootstrap\Widget
             'sub_list' => $subList,
         ];
 
-        $wsUrl = Yii::$app->params['webSocketServer']['connectionUrl'] . '/?' . http_build_query($urlParams);
+        $wsUrl = (Yii::$app->request->isSecureConnection ? 'wss' : 'ws') . '://' . Yii::$app->params['webSocketServer']['connectionUrl'] . '/?' . http_build_query($urlParams);
 
         return $this->render('online_connection', [
             'userId' =>  $userId,
