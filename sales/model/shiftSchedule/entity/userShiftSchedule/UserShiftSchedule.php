@@ -89,7 +89,7 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
             ['uss_user_id', 'integer', 'max' => self::MAX_VALUE_INT],
             ['uss_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['uss_user_id' => 'id']],
 
-            ['uss_shift_id', 'required'],
+//            ['uss_shift_id', 'required'],
             ['uss_shift_id', 'integer', 'max' => self::MAX_VALUE_INT],
             ['uss_shift_id', 'exist', 'skipOnError' => true, 'targetClass' => Shift::class, 'targetAttribute' => ['uss_shift_id' => 'sh_id']],
 
