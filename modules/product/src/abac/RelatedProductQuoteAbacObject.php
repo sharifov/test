@@ -361,6 +361,18 @@ class RelatedProductQuoteAbacObject extends AbacBaseModel implements AbacInterfa
             self::OP_IN, self::OP_NOT_IN, '<', '>', '<=', '>=']
     ];
 
+    protected const ATTR_PQC_REFUND_ALLOWED = [
+        'optgroup' => 'PRODUCT QUOTE CHANGE',
+        'id' => self::NS . 'pqcRefundAllowed',
+        'field' => 'pqcRefundAllowed',
+        'label' => 'Refund Allowed',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
     protected const ATTR_CASE_CATEGORY = [
         'optgroup' => 'CASE',
         'id' => self::NS . 'csCategoryId',
@@ -486,6 +498,7 @@ class RelatedProductQuoteAbacObject extends AbacBaseModel implements AbacInterfa
         $attrPqcTypeList = self::ATTR_PQC_TYPE;
         $attrPqcStatusList = self::ATTR_PQC_STATUS;
         $attrPqcDecisionList = self::ATTR_PQC_DECISION;
+        $attrPqcRefundAllowedList = self::ATTR_PQC_REFUND_ALLOWED;
         $attrCaseCategoryList = self::ATTR_CASE_CATEGORY;
         $attrCaseProjectList = self::ATTR_CASE_PROJECT;
         $attrCaseStatusList = self::ATTR_CASE_STATUS;
@@ -523,6 +536,7 @@ class RelatedProductQuoteAbacObject extends AbacBaseModel implements AbacInterfa
         $attributeList[self::OBJ_RELATED_PRODUCT_QUOTE][] = $attrCaseCategoryList;
         $attributeList[self::OBJ_RELATED_PRODUCT_QUOTE][] = $attrCaseProjectList;
         $attributeList[self::OBJ_RELATED_PRODUCT_QUOTE][] = $attrCaseStatusList;
+        $attributeList[self::OBJ_RELATED_PRODUCT_QUOTE][] = $attrPqcRefundAllowedList;
 
         return $attributeList;
     }

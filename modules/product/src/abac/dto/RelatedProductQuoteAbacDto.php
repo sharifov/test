@@ -65,6 +65,7 @@ class RelatedProductQuoteAbacDto extends stdClass
     public ?int $csStatusId = null;
     public bool $isAutomateCase;
     public ?int $csProjectId = null;
+    public ?bool $pqcRefundAllowed = true;
 
     public function __construct(?ProductQuote $relatedPrQt)
     {
@@ -111,6 +112,7 @@ class RelatedProductQuoteAbacDto extends stdClass
             $this->pqcStatusId = $productQuoteChange->pqc_status_id;
             $this->isAutomatePqc = $productQuoteChange->isAutomate();
             $this->pqcDecisionId = $productQuoteChange->pqc_decision_type_id;
+            $this->pqcRefundAllowed = $productQuoteChange->pqc_refund_allowed;
         }
     }
 

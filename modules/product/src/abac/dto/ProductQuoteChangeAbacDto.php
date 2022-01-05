@@ -33,6 +33,7 @@ use sales\auth\Auth;
  * @property int|null $orPayStatusId
  * @property bool $isOrderOwner
  * @property int|null $orTypeId
+ * @property bool|null $refundAllowed
  */
 class ProductQuoteChangeAbacDto extends \stdClass
 {
@@ -63,6 +64,7 @@ class ProductQuoteChangeAbacDto extends \stdClass
     public bool $isOrderOwner;
     public ?int $orTypeId = null;
     public ?int $maxConfirmableQuotesCnt = null;
+    public ?bool $refundAllowed = true;
 
     public function __construct(?ProductQuoteChange $productQuoteChange)
     {
@@ -99,6 +101,7 @@ class ProductQuoteChangeAbacDto extends \stdClass
             $this->orPayStatusId = $productQuoteChange->pqcPq->pqOrder->or_pay_status_id;
             $this->isOrderOwner = $productQuoteChange->pqcPq->pqOrder->isOwner($userId);
             $this->orTypeId  = $productQuoteChange->pqcPq->pqOrder->or_type_id;
+            $this->refundAllowed = $productQuoteChange->pqc_refund_allowed;
         }
     }
 }

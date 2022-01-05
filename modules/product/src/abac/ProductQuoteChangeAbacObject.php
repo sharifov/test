@@ -101,6 +101,18 @@ class ProductQuoteChangeAbacObject extends AbacBaseModel implements AbacInterfac
             self::OP_IN, self::OP_NOT_IN, '<', '>', '<=', '>=']
     ];
 
+    protected const ATTR_REFUND_ALLOWED = [
+        'optgroup' => 'PRODUCT QUOTE CHANGE',
+        'id' => self::NS . 'refundAllowed',
+        'field' => 'refundAllowed',
+        'label' => 'Refund Allowed',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
     protected const ATTR_CASE_CATEGORY = [
         'optgroup' => 'CASE',
         'id' => self::NS . 'csCategoryId',
@@ -363,7 +375,8 @@ class ProductQuoteChangeAbacObject extends AbacBaseModel implements AbacInterfac
             self::ATTR_HAS_PQC_ACTIVE,
             self::ATTR_ORDER_OWNER,
             self::ATTR_MAX_CONFIRMABLE_QUOTES_CNT,
-            self::ATTR_HAS_PQC_INVOLUNTARY_ACTIVE
+            self::ATTR_HAS_PQC_INVOLUNTARY_ACTIVE,
+            self::ATTR_REFUND_ALLOWED,
         ],
     ];
 

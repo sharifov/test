@@ -57,7 +57,6 @@ class ProductQuoteAbacDto extends \stdClass
     public bool $isAutomateCase;
     public ?int $csProjectId = null;
     public int $userId;
-    public bool $isRefundAllowed = true;
 
     public function __construct(?ProductQuote $productQuote)
     {
@@ -74,7 +73,6 @@ class ProductQuoteAbacDto extends \stdClass
 
             $this->prTypeId = $productQuote->pqProduct->pr_type_id;
             $this->prProjectId = $productQuote->pqProduct->pr_project_id;
-            $this->isRefundAllowed = !ProductQuoteChangeService::notRefundableReProtection($productQuote->pq_id);
         }
     }
 
