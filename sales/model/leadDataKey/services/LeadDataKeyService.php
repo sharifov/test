@@ -7,5 +7,4 @@ namespace sales\model\leadDataKey\services;
  */
 class LeadDataKeyService
 {
-
 }

@@ -15,7 +15,6 @@ use yii\helpers\VarDumper;
 
 class AppHelper
 {
-
     /**
      * @param \Throwable $throwable
      * @return string

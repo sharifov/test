@@ -99,7 +99,6 @@ use yii\rbac\Role;
 
 class TestController extends Controller
 {
-
     public function actionPending()
     {
         $access = CallUserAccess::find()->andWhere(['cua_call_id' => 3386771, 'cua_user_id' => 295])->one();
