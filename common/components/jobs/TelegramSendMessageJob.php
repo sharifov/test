@@ -3,7 +3,9 @@
 namespace common\components\jobs;
 
 use common\models\UserProfile;
+use sales\helpers\app\AppHelper;
 use sales\services\telegram\TelegramService;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use Yii;
 use yii\queue\Queue;
@@ -29,12 +31,16 @@ class TelegramSendMessageJob extends BaseJob implements RetryableJobInterface
     {
         $this->waitingTimeRegister();
         try {
+            if (!is_string($this->text)) {
+                throw new \RuntimeException('Text is not string');
+            }
+
             if ($this->user_id && $telegramChatId = TelegramService::getTelegramChatIdByUserId($this->user_id)) {
                 $tgm = Yii::$app->telegram;
                 $tgm->sendMessage([
                     'chat_id' => $telegramChatId,
-                    'text' => strip_tags($this->text . PHP_EOL . '_Environment: ' . strtoupper(YII_ENV) . '_'),
-                    'parse_mode' => 'markdown'
+                    'text' => TelegramService::prepareText($this->text),
+                    'parse_mode' => 'markdown',
                 ]);
                 unset($tgm);
                 return true;
@@ -46,7 +52,7 @@ class TelegramSendMessageJob extends BaseJob implements RetryableJobInterface
                 Yii::info(VarDumper::dumpAsString([
                     'message' => $errorMessage,
                     'userId' => $this->user_id,
-                ]), 'info\TelegramJob:execute:catch');
+                ]), 'info\TelegramJob:execute');
 
                 UserProfile::disableTelegramByUserId((int) $this->user_id);
 
@@ -59,10 +65,12 @@ class TelegramSendMessageJob extends BaseJob implements RetryableJobInterface
                     );
                 }
             } else {
-                Yii::error(VarDumper::dumpAsString([
-                    'message' => $errorMessage,
+                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), [
                     'userId' => $this->user_id,
-                ]), 'TelegramJob:execute:catch');
+                    'text' => $this->text,
+                    'textPrepared' => TelegramService::prepareText($this->text),
+                ]);
+                \Yii::error($message, 'TelegramJob:execute:catch');
             }
         }
         return false;

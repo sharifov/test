@@ -40,6 +40,10 @@ class TelegramService
         ],
     ];
 
+    public const FILTER_SYMBOL_LIST = [
+        '_', '@', '*', '`',
+    ];
+
     /**
      * @param string $responseBody
      * @return array|null
@@ -94,5 +98,15 @@ class TelegramService
             return $profile->up_telegram;
         }
         return null;
+    }
+
+    public static function cleanText(string $text): string
+    {
+        return str_replace(self::FILTER_SYMBOL_LIST, '', strip_tags($text));
+    }
+
+    public static function prepareText(string $text): string
+    {
+        return self::cleanText($text) . PHP_EOL . ' Environment: ' . strtoupper(YII_ENV);
     }
 }
