@@ -3,6 +3,7 @@
 namespace sales\model\shiftSchedule\entity\shift;
 
 use common\models\Employee;
+use sales\model\shiftSchedule\entity\shiftCategory\ShiftCategory;
 use sales\model\shiftSchedule\entity\shiftScheduleRule\ShiftScheduleRule;
 use sales\model\shiftSchedule\entity\userShiftSchedule\UserShiftSchedule;
 use yii\behaviors\BlameableBehavior;
@@ -27,6 +28,9 @@ use yii\db\ActiveRecord;
  * @property UserShiftSchedule[] $userShiftSchedules
  * @property Employee $createdUser
  * @property Employee $updatedUser
+ * @property string $sh_title [varchar(255)]
+ * @property int $sh_category_id [int]
+ * @property ShiftCategory $category
  */
 class Shift extends ActiveRecord
 {
@@ -64,6 +68,7 @@ class Shift extends ActiveRecord
 
             ['sh_name', 'required'],
             ['sh_name', 'string', 'max' => 100],
+            ['sh_title', 'string', 'max' => 255],
 
             ['sh_sort_order', 'integer', 'max' => self::MAX_VALUE_INT],
 
@@ -72,6 +77,9 @@ class Shift extends ActiveRecord
 
             ['sh_created_user_id', 'integer', 'max' => self::MAX_VALUE_INT],
             ['sh_updated_user_id', 'integer', 'max' => self::MAX_VALUE_INT],
+
+            ['sh_category_id', 'integer', 'max' => self::MAX_VALUE_INT],
+            [['sh_category_id'], 'exist', 'skipOnError' => true, 'targetClass' => ShiftCategory::class, 'targetAttribute' => ['sh_category_id' => 'sc_id']],
         ];
     }
 
@@ -95,12 +103,19 @@ class Shift extends ActiveRecord
         return $this->hasOne(Employee::class, ['id' => 'sh_updated_user_id']);
     }
 
+    public function getCategory(): ActiveQuery
+    {
+        return $this->hasOne(ShiftCategory::class, ['sc_id' => 'sh_category_id']);
+    }
+
     public function attributeLabels(): array
     {
         return [
             'sh_id' => 'ID',
             'sh_name' => 'Name',
             'sh_enabled' => 'Enabled',
+            'sh_title' => 'Title',
+            'sh_category_id' => 'Category',
             'sh_color' => 'Color',
             'sh_sort_order' => 'Sort Order',
             'sh_created_dt' => 'Created Dt',

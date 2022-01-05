@@ -26,8 +26,8 @@ class m220105_110411_create_tbl_shift_category extends Migration
             'sc_updated_dt' => $this->dateTime()
         ], $tableOptions);
 
-        $this->addForeignKey('FK-shift_category-sc_created_user_id', '{{%shift_category}}', 'sc_created_user_id', '{{%employees}}', 'id', 'SET NULL', 'SET NULL');
-        $this->addForeignKey('FK-shift_category-sc_updated_user_id', '{{%shift_category}}', 'sc_updated_user_id', '{{%employees}}', 'id', 'SET NULL', 'SET NULL');
+        $this->addForeignKey('FK-shift_category-sc_created_user_id', '{{%shift_category}}', 'sc_created_user_id', '{{%employees}}', 'id', 'SET NULL', 'CASCADE');
+        $this->addForeignKey('FK-shift_category-sc_updated_user_id', '{{%shift_category}}', 'sc_updated_user_id', '{{%employees}}', 'id', 'SET NULL', 'CASCADE');
 
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();

@@ -31,4 +31,9 @@ class ShiftCategoryQuery extends \yii\db\ActiveQuery
     {
         return parent::one($db);
     }
+
+    public static function getList(): array
+    {
+        return ShiftCategory::find()->select(['sc_name', 'sc_id'])->indexBy('sc_id')->asArray()->column();
+    }
 }

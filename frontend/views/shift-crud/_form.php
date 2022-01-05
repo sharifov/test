@@ -1,5 +1,6 @@
 <?php
 
+use sales\model\shiftSchedule\entity\shiftCategory\ShiftCategoryQuery;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
@@ -15,6 +16,12 @@ use yii\widgets\ActiveForm;
         <?php $form = ActiveForm::begin(); ?>
 
         <?= $form->field($model, 'sh_name')->textInput(['maxlength' => true]) ?>
+
+        <?= $form->field($model, 'sh_title')->textInput(['maxlength' => true]) ?>
+
+        <?= $form->field($model, 'sh_category_id')->dropDownList(ShiftCategoryQuery::getList(), [
+            'prompt' => '--'
+        ]) ?>
 
         <?= $form->field($model, 'sh_enabled')->checkbox() ?>
 
