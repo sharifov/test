@@ -35,7 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'relation' => 'user',
                 'attribute' => 'usa_user_id'
             ],
-            'usa_ssr_id',
+            'usa_sh_id',
             //'usa_created_dt',
             [
                 'class' => DateTimeColumn::class,

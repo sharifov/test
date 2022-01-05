@@ -2,6 +2,8 @@
 
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
+use sales\model\shiftSchedule\entity\shift\Shift;
+use sales\model\shiftSchedule\entity\shiftCategory\ShiftCategoryQuery;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -30,6 +32,14 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             'sh_id',
             'sh_name',
+            'sh_title',
+            [
+                'attribute' => 'sh_category_id',
+                'value' => static function (Shift $model) {
+                    return $model->category ? Html::encode($model->category->sc_name ?? '') : null;
+                },
+                'filter' => ShiftCategoryQuery::getList()
+            ],
             ['class' => \common\components\grid\BooleanColumn::class, 'attribute' => 'sh_enabled'],
             'sh_color',
             'sh_sort_order',

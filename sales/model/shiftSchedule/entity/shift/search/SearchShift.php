@@ -27,6 +27,8 @@ class SearchShift extends Shift
             ['sh_updated_dt', 'safe'],
 
             ['sh_updated_user_id', 'integer'],
+            ['sh_category_id', 'integer'],
+            ['sh_title', 'string'],
         ];
     }
 
@@ -53,9 +55,11 @@ class SearchShift extends Shift
             'date(sh_updated_dt)' => $this->sh_updated_dt,
             'sh_created_user_id' => $this->sh_created_user_id,
             'sh_updated_user_id' => $this->sh_updated_user_id,
+            'sh_category_id' => $this->sh_category_id,
         ]);
 
         $query->andFilterWhere(['like', 'sh_name', $this->sh_name])
+            ->andFilterWhere(['like', 'sh_title', $this->sh_title])
             ->andFilterWhere(['like', 'sh_color', $this->sh_color]);
 
         return $dataProvider;
