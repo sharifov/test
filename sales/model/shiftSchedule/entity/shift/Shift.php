@@ -5,6 +5,7 @@ namespace sales\model\shiftSchedule\entity\shift;
 use common\models\Employee;
 use sales\model\shiftSchedule\entity\shiftCategory\ShiftCategory;
 use sales\model\shiftSchedule\entity\shiftScheduleRule\ShiftScheduleRule;
+use sales\model\shiftSchedule\entity\userShiftAssign\UserShiftAssign;
 use sales\model\shiftSchedule\entity\userShiftSchedule\UserShiftSchedule;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -31,6 +32,7 @@ use yii\db\ActiveRecord;
  * @property string $sh_title [varchar(255)]
  * @property int $sh_category_id [int]
  * @property ShiftCategory $category
+ * @property UserShiftAssign[] $userShiftAssigns
  */
 class Shift extends ActiveRecord
 {
@@ -106,6 +108,11 @@ class Shift extends ActiveRecord
     public function getCategory(): ActiveQuery
     {
         return $this->hasOne(ShiftCategory::class, ['sc_id' => 'sh_category_id']);
+    }
+
+    public function getUserShiftAssigns(): \yii\db\ActiveQuery
+    {
+        return $this->hasMany(UserShiftAssign::class, ['usa_sh_id' => 'sh_id']);
     }
 
     public function attributeLabels(): array

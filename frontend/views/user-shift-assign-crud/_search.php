@@ -20,7 +20,7 @@ use common\components\bootstrap4\activeForm\ActiveForm;
 
     <?= $form->field($model, 'usa_user_id') ?>
 
-    <?= $form->field($model, 'usa_ssr_id') ?>
+    <?= $form->field($model, 'usa_sh_id') ?>
 
     <?= $form->field($model, 'usa_created_dt') ?>
 

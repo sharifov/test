@@ -3,6 +3,7 @@
 namespace sales\model\shiftSchedule\entity\userShiftAssign;
 
 use common\models\Employee;
+use sales\model\shiftSchedule\entity\shift\Shift;
 use sales\model\shiftSchedule\entity\shiftScheduleRule\ShiftScheduleRule;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -12,7 +13,7 @@ use yii\db\ActiveRecord;
  * This is the model class for table "user_shift_assign".
  *
  * @property int $usa_user_id
- * @property int $usa_ssr_id
+ * @property int $usa_sh_id [int]
  * @property string|null $usa_created_dt
  * @property int|null $usa_created_user_id
  *
@@ -46,11 +47,11 @@ class UserShiftAssign extends \yii\db\ActiveRecord
     public function rules(): array
     {
         return [
-            [['usa_user_id', 'usa_ssr_id'], 'unique', 'targetAttribute' => ['usa_user_id', 'usa_ssr_id']],
+            [['usa_user_id', 'usa_sh_id'], 'unique', 'targetAttribute' => ['usa_user_id', 'usa_sh_id']],
 
-            ['usa_ssr_id', 'required'],
-            ['usa_ssr_id', 'integer'],
-            ['usa_ssr_id', 'exist', 'skipOnError' => true, 'targetClass' => ShiftScheduleRule::class, 'targetAttribute' => ['usa_ssr_id' => 'ssr_id']],
+            ['usa_sh_id', 'required'],
+            ['usa_sh_id', 'integer'],
+            ['usa_sh_id', 'exist', 'skipOnError' => true, 'targetClass' => Shift::class, 'targetAttribute' => ['usa_sh_id' => 'sh_id']],
 
             ['usa_user_id', 'required'],
             ['usa_user_id', 'integer'],
@@ -63,7 +64,7 @@ class UserShiftAssign extends \yii\db\ActiveRecord
 
     public function getShiftScheduleRule(): \yii\db\ActiveQuery
     {
-        return $this->hasOne(ShiftScheduleRule::class, ['ssr_id' => 'usa_ssr_id']);
+        return $this->hasOne(ShiftScheduleRule::class, ['ssr_id' => 'usa_sh_id']);
     }
 
     public function getUser(): \yii\db\ActiveQuery
@@ -80,7 +81,7 @@ class UserShiftAssign extends \yii\db\ActiveRecord
     {
         return [
             'usa_user_id' => 'User ID',
-            'usa_ssr_id' => 'Ssr ID',
+            'usa_sh_id' => 'Shift ID',
             'usa_created_dt' => 'Created Dt',
             'usa_created_user_id' => 'Created User ID',
         ];

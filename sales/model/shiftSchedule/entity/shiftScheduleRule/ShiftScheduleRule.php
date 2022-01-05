@@ -35,7 +35,6 @@ use yii\db\ActiveRecord;
  * @property Employee $user
  * @property Employee $createdUser
  * @property Employee $updatedUser
- * @property UserShiftAssign[] $userShiftAssigns
  * @property UserShiftSchedule[] $userShiftSchedules
  */
 class ShiftScheduleRule extends \yii\db\ActiveRecord
@@ -111,11 +110,6 @@ class ShiftScheduleRule extends \yii\db\ActiveRecord
     public function getUser(): \yii\db\ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'usa_user_id']);
-    }
-
-    public function getUserShiftAssigns(): \yii\db\ActiveQuery
-    {
-        return $this->hasMany(UserShiftAssign::class, ['usa_ssr_id' => 'ssr_id']);
     }
 
     public function getUserShiftSchedules(): \yii\db\ActiveQuery

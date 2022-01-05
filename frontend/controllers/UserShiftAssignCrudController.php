@@ -49,14 +49,14 @@ class UserShiftAssignCrudController extends FController
 
     /**
      * @param integer $usa_user_id
-     * @param integer $usa_ssr_id
+     * @param integer $usa_sh_id
      * @return string
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($usa_user_id, $usa_ssr_id): string
+    public function actionView($usa_user_id, $usa_sh_id): string
     {
         return $this->render('view', [
-            'model' => $this->findModel($usa_user_id, $usa_ssr_id),
+            'model' => $this->findModel($usa_user_id, $usa_sh_id),
         ]);
     }
 
@@ -68,7 +68,7 @@ class UserShiftAssignCrudController extends FController
         $model = new UserShiftAssign();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'usa_user_id' => $model->usa_user_id, 'usa_ssr_id' => $model->usa_ssr_id]);
+            return $this->redirect(['view', 'usa_user_id' => $model->usa_user_id, 'usa_sh_id' => $model->usa_sh_id]);
         }
 
         return $this->render('create', [
@@ -78,16 +78,16 @@ class UserShiftAssignCrudController extends FController
 
     /**
      * @param integer $usa_user_id
-     * @param integer $usa_ssr_id
+     * @param integer $usa_sh_id
      * @return string|Response
      * @throws NotFoundHttpException
      */
-    public function actionUpdate($usa_user_id, $usa_ssr_id)
+    public function actionUpdate($usa_user_id, $usa_sh_id)
     {
-        $model = $this->findModel($usa_user_id, $usa_ssr_id);
+        $model = $this->findModel($usa_user_id, $usa_sh_id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'usa_user_id' => $model->usa_user_id, 'usa_ssr_id' => $model->usa_ssr_id]);
+            return $this->redirect(['view', 'usa_user_id' => $model->usa_user_id, 'usa_sh_id' => $model->usa_sh_id]);
         }
 
         return $this->render('update', [
@@ -97,28 +97,28 @@ class UserShiftAssignCrudController extends FController
 
     /**
      * @param integer $usa_user_id
-     * @param integer $usa_ssr_id
+     * @param integer $usa_sh_id
      * @return Response
      * @throws NotFoundHttpException
      * @throws \Throwable
      * @throws StaleObjectException
      */
-    public function actionDelete($usa_user_id, $usa_ssr_id): Response
+    public function actionDelete($usa_user_id, $usa_sh_id): Response
     {
-        $this->findModel($usa_user_id, $usa_ssr_id)->delete();
+        $this->findModel($usa_user_id, $usa_sh_id)->delete();
 
         return $this->redirect(['index']);
     }
 
     /**
      * @param integer $usa_user_id
-     * @param integer $usa_ssr_id
+     * @param integer $usa_sh_id
      * @return UserShiftAssign
      * @throws NotFoundHttpException
      */
-    protected function findModel($usa_user_id, $usa_ssr_id): UserShiftAssign
+    protected function findModel($usa_user_id, $usa_sh_id): UserShiftAssign
     {
-        if (($model = UserShiftAssign::findOne(['usa_user_id' => $usa_user_id, 'usa_ssr_id' => $usa_ssr_id])) !== null) {
+        if (($model = UserShiftAssign::findOne(['usa_user_id' => $usa_user_id, 'usa_sh_id' => $usa_sh_id])) !== null) {
             return $model;
         }
 

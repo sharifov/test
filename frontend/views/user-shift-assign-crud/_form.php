@@ -17,7 +17,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'usa_user_id')->widget(UserSelect2Widget::class) ?>
 
-        <?= $form->field($model, 'usa_ssr_id')->textInput() ?>
+        <?= $form->field($model, 'usa_sh_id')->textInput() ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

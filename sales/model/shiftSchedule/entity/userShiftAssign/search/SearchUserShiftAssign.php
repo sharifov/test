@@ -14,7 +14,7 @@ class SearchUserShiftAssign extends UserShiftAssign
 
             ['usa_created_user_id', 'integer'],
 
-            ['usa_ssr_id', 'integer'],
+            ['usa_sh_id', 'integer'],
 
             ['usa_user_id', 'integer'],
         ];
@@ -37,7 +37,7 @@ class SearchUserShiftAssign extends UserShiftAssign
 
         $query->andFilterWhere([
             'usa_user_id' => $this->usa_user_id,
-            'usa_ssr_id' => $this->usa_ssr_id,
+            'usa_sh_id' => $this->usa_sh_id,
             'date(usa_created_dt)' => $this->usa_created_dt,
             'usa_created_user_id' => $this->usa_created_user_id,
         ]);
