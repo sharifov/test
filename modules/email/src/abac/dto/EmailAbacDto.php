@@ -13,7 +13,7 @@ class EmailAbacDto extends \stdClass
     public bool $has_creator;
     public bool $is_case_owner = false;
     public bool $is_lead_owner = false;
-    public bool $is_address_owner;
+    public bool $is_address_owner = false;
     public bool $is_common_group = false;
 
     public function __construct(?Email $email)
@@ -29,7 +29,7 @@ class EmailAbacDto extends \stdClass
                 $this->is_lead_owner = $email->eLead->isOwner(Auth::id());
             }
 
-            $this->is_address_owner = self::isUserEmailAdressOwner($email);
+            $this->is_address_owner = self::isUserEmailAddressOwner($email);
 
             if ($email->hasCreatedUser()) {
                 $this->is_common_group = EmployeeGroupAccess::isUserInCommonGroup(Auth::id(), $email->e_created_user_id);
@@ -37,7 +37,7 @@ class EmailAbacDto extends \stdClass
         }
     }
 
-    private function isUserEmailAdressOwner(?Email $email)
+    private static function isUserEmailAddressOwner(Email $email): bool
     {
         return UserProjectParams::find()
             ->byUserId(Auth::id())
