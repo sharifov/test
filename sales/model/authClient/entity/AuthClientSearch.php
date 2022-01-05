@@ -60,7 +60,7 @@ class AuthClientSearch extends AuthClient
         $query->andFilterWhere([
             'ac_id' => $this->ac_id,
             'ac_user_id' => $this->ac_user_id,
-            'ac_created_dt' => $this->ac_created_dt,
+            'date(ac_created_dt)' => $this->ac_created_dt,
             'ac_source' => $this->ac_source
         ]);
 
