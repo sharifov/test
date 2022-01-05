@@ -36,7 +36,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'ac_email:email',
             'ac_ip',
             'ac_useragent',
-            'ac_created_dt',
+            'ac_created_dt:byUserDateTime',
         ],
     ]) ?>
 
