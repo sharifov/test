@@ -107,7 +107,7 @@ window.autoLogout = function (timerSec = isAutoLogoutTimerSec, isShowMessage = i
         }}).timer('start');
     }
 
-    if (isShowMessage || (isShowMessage === 'true')) {
+    if (isShowMessage === 'true') {
         $('#modal-autologout').modal({show: true});
     }
 }

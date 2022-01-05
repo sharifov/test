@@ -129,9 +129,11 @@ class UserMonitorController extends Controller
 
             $timerSec = UserMonitor::autoLogoutTimerSec();
             $isShowMessage = UserMonitor::isAutologoutShowMessage() ? 'true' : 'false';
-
             $timeStart = microtime(true);
-            $users = UserOnline::find()->where(['uo_idle_state' => true])->andWhere(['<=', 'uo_idle_state_dt', date('Y-m-d H:i:s', strtotime('-' . $idleTimeMinutes . ' minutes'))])->all();
+            $users = UserOnline::find()
+                ->where(['uo_idle_state' => true])
+                ->andWhere(['<=', 'uo_idle_state_dt', date('Y-m-d H:i:s', strtotime('-' . $idleTimeMinutes . ' minutes'))])
+                ->all();
 
             if ($users) {
                 /** @var UserOnline $userOnline */
