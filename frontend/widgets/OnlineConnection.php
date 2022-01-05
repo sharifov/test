@@ -40,8 +40,6 @@ class OnlineConnection extends \yii\bootstrap\Widget
         $this->subscribeToCaseChannel($caseId, $subList);
         $this->subscribeToClientChatChannel($userId, $subList);
         $pageUrl = urlencode(\yii\helpers\Url::current());
-        $wsHost = (Yii::$app->request->isSecureConnection ? 'wss' : 'ws') .
-            '://' . Yii::$app->request->hostName . '/ws';
 
         $urlParams = [
             'user_id' => $userId,
@@ -54,7 +52,7 @@ class OnlineConnection extends \yii\bootstrap\Widget
             'sub_list' => $subList,
         ];
 
-        $wsUrl = $wsHost . '/?' . http_build_query($urlParams);
+        $wsUrl = Yii::$app->params['webSocketServer']['connectionUrl'] . '/?' . http_build_query($urlParams);
 
         return $this->render('online_connection', [
             'userId' =>  $userId,

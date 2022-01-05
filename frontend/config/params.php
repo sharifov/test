@@ -28,5 +28,8 @@ return [
                     "All time" => ["moment('2019-02-01')", "moment().endOf('day')"],
             ]
         ]
-    ]
+    ],
+    'webSocketServer' => [
+        'connectionUrl' => '',
+    ],
 ];
