@@ -31,7 +31,6 @@ use yii\helpers\ArrayHelper;
  */
 class CaseCategory extends ActiveRecord
 {
-
     /**
      * @return array
      */

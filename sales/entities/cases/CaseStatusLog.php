@@ -26,7 +26,6 @@ use yii\db\ActiveRecord;
  */
 class CaseStatusLog extends ActiveRecord
 {
-
     /**
      * @param int $caseId
      * @param int $toStatus

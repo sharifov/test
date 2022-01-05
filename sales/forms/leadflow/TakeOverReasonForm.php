@@ -19,7 +19,6 @@ use yii\helpers\Html;
  */
 class TakeOverReasonForm extends Model
 {
-
     public const REASON_CLIENT_ASKED_FOR_ASSISTANCE = 'Client asked for assistance';
     public const REASON_DUPLICATE = 'Duplicate';
     public const REASON_I_AM_ORIGINAL_AGENT = 'I am original agent';

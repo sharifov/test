@@ -131,13 +131,14 @@ class CallService
     /**
      * @param CallUserAccess $callUserAccess
      * @param int $userId
+     * @param string $deviceIdentity
      * @return bool
      */
-    public function acceptCall(CallUserAccess $callUserAccess, int $userId): bool
+    public function acceptCall(CallUserAccess $callUserAccess, int $userId, string $deviceIdentity): bool
     {
         $callUserAccess->acceptCall();
         $this->callUserAccessRepository->save($callUserAccess);
-        if (($call = $callUserAccess->cuaCall) && Call::applyCallToAgent($call, $userId)) {
+        if (($call = $callUserAccess->cuaCall) && Call::applyCallToAgent($call, $userId, $deviceIdentity)) {
             Notifications::pingUserMap();
             return true;
         }
@@ -147,15 +148,16 @@ class CallService
     /**
      * @param CallUserAccess $callUserAccess
      * @param int $userId
+     * @param string $deviceIdentity
      * @return bool
      */
-    public function acceptWarmTransferCall(CallUserAccess $callUserAccess, int $userId): bool
+    public function acceptWarmTransferCall(CallUserAccess $callUserAccess, int $userId, string $deviceIdentity): bool
     {
         $callUserAccess->acceptCall();
         $this->callUserAccessRepository->save($callUserAccess);
         $call = $callUserAccess->cuaCall;
         if ($call) {
-            if (Call::applyWarmTransferCallToAgent($call, $userId)) {
+            if (Call::applyWarmTransferCallToAgent($call, $userId, $deviceIdentity)) {
                 Notifications::pingUserMap();
                 return true;
             }

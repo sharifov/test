@@ -19,7 +19,6 @@ use yii\db\ActiveQuery;
  */
 class UserDepartment extends ActiveRecord
 {
-
     /**
      * @return string
      */

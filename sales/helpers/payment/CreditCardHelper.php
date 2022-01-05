@@ -4,7 +4,6 @@ namespace sales\helpers\payment;
 
 class CreditCardHelper
 {
-
     /**
      * Replaces all but the last for digits with x's in the given credit card number
      * @param string $cc The credit card number to mask

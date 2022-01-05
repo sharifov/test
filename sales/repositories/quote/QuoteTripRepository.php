@@ -9,7 +9,6 @@ use common\models\QuoteTrip;
  */
 class QuoteTripRepository
 {
-
     /**
      * @param QuoteTrip $quoteTrip
      * @return int

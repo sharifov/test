@@ -37,7 +37,6 @@ use yii\db\ActiveRecord;
  */
 class Conference extends \yii\db\ActiveRecord
 {
-
     public const COMPLETED = 'completed';
 
     public const EVENT_CONFERENCE_END = 'conference-end';

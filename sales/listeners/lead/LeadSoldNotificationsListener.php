@@ -20,7 +20,6 @@ use Yii;
  */
 class LeadSoldNotificationsListener
 {
-
     private $userRepository;
 
     /**

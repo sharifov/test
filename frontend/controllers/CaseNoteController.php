@@ -15,7 +15,6 @@ use yii\filters\VerbFilter;
  */
 class CaseNoteController extends FController
 {
-
     public function behaviors()
     {
         $behaviors = [

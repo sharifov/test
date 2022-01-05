@@ -21,7 +21,6 @@ use yii\db\Query;
  */
 class EmailSearch extends Email
 {
-
     public $email_type_id;
     public $supervision_id;
     public $e_template_type_name;

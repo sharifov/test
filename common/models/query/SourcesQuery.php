@@ -12,7 +12,6 @@ use common\models\Sources;
  */
 class SourcesQuery extends \yii\db\ActiveQuery
 {
-
     public function byCid(string $cid): self
     {
         return $this->andWhere(['cid' => $cid]);

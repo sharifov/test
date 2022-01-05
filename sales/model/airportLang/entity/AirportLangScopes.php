@@ -7,5 +7,4 @@ namespace sales\model\airportLang\entity;
  */
 class AirportLangScopes extends \yii\db\ActiveQuery
 {
-
 }

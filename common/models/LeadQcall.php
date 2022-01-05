@@ -25,7 +25,6 @@ use yii\db\ActiveQuery;
  */
 class LeadQcall extends \yii\db\ActiveRecord
 {
-
     /**
      * @param int $leadId
      * @param int $weight

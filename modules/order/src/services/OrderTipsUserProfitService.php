@@ -25,7 +25,6 @@ use yii\helpers\ArrayHelper;
  */
 class OrderTipsUserProfitService
 {
-
     /**
      * @var UserProfitRepository
      */

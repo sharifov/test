@@ -7,5 +7,4 @@ namespace sales\model\airline\entity;
  */
 class AirlineScopes extends \yii\db\ActiveQuery
 {
-
 }

@@ -15,7 +15,6 @@ use sales\repositories\NotFoundException;
  */
 class FlightSegmentRepository
 {
-
     public function __construct(EventDispatcher $eventDispatcher)
     {
         $this->eventDispatcher = $eventDispatcher;

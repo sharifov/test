@@ -7,5 +7,4 @@ namespace sales\model\voiceMailRecord\entity;
  */
 class Scopes extends \yii\db\ActiveQuery
 {
-
 }

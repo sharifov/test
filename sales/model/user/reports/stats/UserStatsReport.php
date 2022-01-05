@@ -238,7 +238,9 @@ class UserStatsReport extends Model
         if (Metrics::isSalesConversion($this->metrics)) {
             $query->addSelect([
                 'conversion_percent' =>
-                    new Expression('if ((conversion_conversion_cnt is null or conversion_conversion_cnt = 0 or conversion_share is null or conversion_share = 0), 0, round((conversion_share / conversion_conversion_cnt), 2))')
+                    new Expression('if ((conversion_conversion_cnt is null or conversion_conversion_cnt = 0 or conversion_share is null or conversion_share = 0), 0, round((conversion_share / conversion_conversion_cnt), 2))'),
+                'c_share' => 'conversion_share',
+                'cc_cnt' => 'conversion_conversion_cnt'
             ]);
             $query->leftJoin([
                 'conversion' => (new Query())
@@ -560,7 +562,8 @@ class UserStatsReport extends Model
             $query->addSelect(['sum(leads_created) as leads_created']);
         }
         if (Metrics::isSalesConversion($metrics)) {
-            $query->addSelect(['round(sum(conversion_percent)/(count(*)), 2) as conversion_percent']);
+            //$query->addSelect(['round(sum(conversion_percent)/(count(*)), 2) as conversion_percent']);
+            $query->addSelect(['if ((round(sum(c_share) / sum(cc_cnt), 2) IS NULL OR round(sum(c_share) / sum(cc_cnt), 2) = 0), 0, round(sum(c_share) / sum(cc_cnt), 2)) as conversion_percent']);
         }
         if (Metrics::isSoldLeads($metrics)) {
             $query->addSelect(['sum(sold_leads) as sold_leads']);

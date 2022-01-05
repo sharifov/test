@@ -7,5 +7,4 @@ namespace sales\model\clientAccountSocial\entity;
  */
 class ClientAccountSocialScopes extends \yii\db\ActiveQuery
 {
-
 }

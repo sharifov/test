@@ -19,7 +19,6 @@ use yii\filters\VerbFilter;
  */
 class NotificationsController extends FController
 {
-
     public function behaviors()
     {
         $behaviors = [

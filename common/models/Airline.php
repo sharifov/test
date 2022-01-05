@@ -27,7 +27,6 @@ use yii\behaviors\AttributeBehavior;
  */
 class Airline extends ActiveRecord
 {
-
     /**
      * @inheritdoc
      */

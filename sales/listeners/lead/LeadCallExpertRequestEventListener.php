@@ -11,7 +11,6 @@ use Yii;
  */
 class LeadCallExpertRequestEventListener
 {
-
     /**
      * @param LeadCallExpertRequestEvent $event
      */

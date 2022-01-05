@@ -7,5 +7,4 @@ namespace sales\model\conference\entity\conferenceRecordingLog;
  */
 class Scopes extends \yii\db\ActiveQuery
 {
-
 }

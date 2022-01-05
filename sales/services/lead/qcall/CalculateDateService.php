@@ -6,7 +6,6 @@ use Yii;
 
 class CalculateDateService
 {
-
     public function calculate(
         int $from,
         int $to,

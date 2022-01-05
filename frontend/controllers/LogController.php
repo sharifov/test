@@ -30,7 +30,6 @@ use yii\web\Response;
  */
 class LogController extends FController
 {
-
     public function behaviors()
     {
         $behaviors = [

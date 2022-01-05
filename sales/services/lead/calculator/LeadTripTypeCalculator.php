@@ -10,7 +10,6 @@ use sales\repositories\airport\AirportRepository;
  */
 class LeadTripTypeCalculator
 {
-
     public static function calculate(SegmentDTO ...$segments): string
     {
         $countSegments = count($segments);

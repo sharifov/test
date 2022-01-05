@@ -19,7 +19,6 @@ use yii\helpers\Html;
  */
 class RejectReasonForm extends Model
 {
-
     public const REASON_PURCHASED_ELSEWHERE = 'Purchased elsewhere';
     public const REASON_DUPLICATE = 'Duplicate';
     public const REASON_TRAVEL_DATES_PASSED = 'Travel dates passed';

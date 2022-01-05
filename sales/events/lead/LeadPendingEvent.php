@@ -17,7 +17,6 @@ use common\models\Lead;
  */
 class LeadPendingEvent
 {
-
     public $lead;
     public $oldStatus;
     public $oldOwnerId;

@@ -7,5 +7,4 @@ namespace sales\model\callNote\entity;
  */
 class Scopes extends \yii\db\ActiveQuery
 {
-
 }

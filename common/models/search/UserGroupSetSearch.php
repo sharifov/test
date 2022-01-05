@@ -12,7 +12,6 @@ use common\models\UserGroupSet;
  */
 class UserGroupSetSearch extends UserGroupSet
 {
-
     /**
      * @return array
      */

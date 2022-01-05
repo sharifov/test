@@ -18,7 +18,6 @@ use yii\filters\VerbFilter;
  */
 class DepartmentController extends FController
 {
-
     public function behaviors()
     {
         $behaviors = [

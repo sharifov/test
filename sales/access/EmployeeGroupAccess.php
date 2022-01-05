@@ -8,7 +8,6 @@ use yii\helpers\ArrayHelper;
 
 class EmployeeGroupAccess
 {
-
     /**
      * @param int $userId
      * @param int $cacheDuration // Cache disable = "-1"

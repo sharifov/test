@@ -10,7 +10,6 @@ use common\models\ProjectWeight;
  */
 class ProjectWeightSearch extends ProjectWeight
 {
-
     /**
      * @return array
      */

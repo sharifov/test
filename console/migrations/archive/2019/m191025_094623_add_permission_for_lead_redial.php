@@ -8,7 +8,6 @@ use yii\db\Migration;
  */
 class m191025_094623_add_permission_for_lead_redial extends Migration
 {
-
     public $routes = [
         '/lead-redial/reservation',
     ];

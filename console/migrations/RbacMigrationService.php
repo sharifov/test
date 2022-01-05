@@ -16,7 +16,6 @@ use yii2mod\rbac\models\RouteModel;
  */
 class RbacMigrationService
 {
-
     private $allRoutes;
     private $auth;
 

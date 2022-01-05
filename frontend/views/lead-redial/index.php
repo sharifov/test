@@ -33,9 +33,9 @@ $list = new ListsAccess($user->id);
             <?= UserInfoProgress::widget(['user' => $user])?>
         </div>
 
-        <?= Html::button('<i class="fa fa-phone"></i> Call Next', [
+        <?php /*= Html::button('<i class="fa fa-phone"></i> Call Next', [
             'class' => 'btn btn-success btn-lg lead-next-btn', 'style' => 'font-size: 18px'
-        ])?>
+        ]) */ ?>
 
         <div class="row">
             <div class="col-md-12">

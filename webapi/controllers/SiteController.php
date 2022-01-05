@@ -11,8 +11,6 @@ use yii\web\HttpException;
  */
 class SiteController extends Controller
 {
-
-
     /**
      * Displays homepage.
      *

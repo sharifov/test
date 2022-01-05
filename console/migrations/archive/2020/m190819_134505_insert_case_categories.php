@@ -7,7 +7,6 @@ use yii\db\Migration;
  */
 class m190819_134505_insert_case_categories extends Migration
 {
-
     public $categoryList = [
         ['cc_key' => 'exchange', 'cc_name' => 'Exchange', 'cc_dep_id' =>  2, 'cc_system' => false],
         ['cc_key' => 'refund', 'cc_name' => 'Refund', 'cc_dep_id' =>  2, 'cc_system' => false],

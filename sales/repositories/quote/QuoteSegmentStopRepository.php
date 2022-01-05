@@ -9,7 +9,6 @@ use common\models\QuoteSegmentStop;
  */
 class QuoteSegmentStopRepository
 {
-
     /**
      * @param QuoteSegmentStop $quoteSegmentStop
      * @return int

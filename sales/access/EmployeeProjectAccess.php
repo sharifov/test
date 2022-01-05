@@ -10,7 +10,6 @@ use sales\helpers\user\UserFinder;
 
 class EmployeeProjectAccess
 {
-
     /** fot this roles return all projects */
     private static $defaultRolesForViewAllProjects = [
         Employee::ROLE_SUPER_ADMIN,

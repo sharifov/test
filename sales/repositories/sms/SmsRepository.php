@@ -11,7 +11,6 @@ use sales\repositories\NotFoundException;
  */
 class SmsRepository
 {
-
     private $eventDispatcher;
 
     /**

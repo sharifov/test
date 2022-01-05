@@ -8,8 +8,6 @@ use common\models\EmailTemplateType;
  */
 class m210204_153541_add_column_etp_params_json_to_email_template_type_tbl extends Migration
 {
-
-
     /**
      * {@inheritdoc}
      */

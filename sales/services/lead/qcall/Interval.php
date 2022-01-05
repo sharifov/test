@@ -10,7 +10,6 @@ namespace sales\services\lead\qcall;
  */
 class Interval
 {
-
     private $from;
     private $to;
 

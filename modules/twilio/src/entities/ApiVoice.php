@@ -18,7 +18,6 @@ use yii\base\Model;
  */
 class ApiVoice extends Model
 {
-
     public $project_id;
     public $from;
     public $from_number;

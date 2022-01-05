@@ -7,7 +7,6 @@ use yii\db\Migration;
  */
 class m191226_091456_create_billing_address_fields extends Migration
 {
-
     public $routes = [
         '/credit-card/*',
         '/billing-info/*',

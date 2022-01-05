@@ -6,5 +6,4 @@ use yii\base\Model;
 
 class UpdateForm extends Model
 {
-
 }

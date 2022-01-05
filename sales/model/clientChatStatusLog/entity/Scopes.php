@@ -7,5 +7,4 @@ namespace sales\model\clientChatStatusLog\entity;
  */
 class Scopes extends \yii\db\ActiveQuery
 {
-
 }

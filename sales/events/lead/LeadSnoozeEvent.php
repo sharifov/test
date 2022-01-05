@@ -18,7 +18,6 @@ use common\models\Lead;
  */
 class LeadSnoozeEvent
 {
-
     public $lead;
     public $oldStatus;
     public $oldOwnerId;

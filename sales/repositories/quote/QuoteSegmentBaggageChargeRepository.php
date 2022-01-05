@@ -9,7 +9,6 @@ use common\models\QuoteSegmentBaggageCharge;
  */
 class QuoteSegmentBaggageChargeRepository
 {
-
     /**
      * @param QuoteSegmentBaggageCharge $quoteSegmentBaggageCharge
      * @return int

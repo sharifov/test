@@ -9,7 +9,6 @@ use yii\db\Migration;
  */
 class m201110_103658_create_tbl_client_chat_forms extends Migration
 {
-
     private $routes = [
         '/client-chat-forms-crud/view',
         '/client-chat-forms-crud/index',

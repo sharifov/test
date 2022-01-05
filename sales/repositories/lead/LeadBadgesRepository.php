@@ -18,7 +18,6 @@ use modules\lead\src\abac\LeadAbacObject;
 
 class LeadBadgesRepository
 {
-
     /**
      * @param Employee $user
      * @return int

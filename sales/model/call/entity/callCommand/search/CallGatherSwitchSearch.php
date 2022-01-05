@@ -11,7 +11,6 @@ use sales\model\call\entity\callCommand\CallGatherSwitch;
  */
 class CallGatherSwitchSearch extends CallGatherSwitch
 {
-
     public function rules(): array
     {
         return [

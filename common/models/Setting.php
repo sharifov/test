@@ -30,7 +30,6 @@ use yii\helpers\Url;
  */
 class Setting extends \yii\db\ActiveRecord
 {
-
     public const TYPE_BOOL      = 'bool';
     public const TYPE_INT       = 'int';
     public const TYPE_DOUBLE    = 'double';

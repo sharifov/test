@@ -14,7 +14,6 @@ use yii\db\StaleObjectException;
 
 class ClientChatCouchNoteCrudController extends FController
 {
-
     public function init(): void
     {
         parent::init();

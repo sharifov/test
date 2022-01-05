@@ -15,7 +15,6 @@ use sales\model\clientChatCase\entity\ClientChatCaseRepository;
  */
 class ClientChatCaseManageService
 {
-
     /**
      * @var ClientChatCaseRepository
      */

@@ -8,7 +8,6 @@ use yii\db\Migration;
  */
 class m200211_083450_create_tbl_user_payment_category extends Migration
 {
-
     public $categories = [
         'Bonus',
         'Penalty',

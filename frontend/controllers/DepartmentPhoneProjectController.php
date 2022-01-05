@@ -19,7 +19,6 @@ use yii\web\UploadedFile;
  */
 class DepartmentPhoneProjectController extends FController
 {
-
     public function behaviors()
     {
         $behaviors = [

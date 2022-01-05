@@ -7,5 +7,4 @@ namespace modules\invoice\src\entities\invoice;
  */
 class Scopes extends \yii\db\ActiveQuery
 {
-
 }

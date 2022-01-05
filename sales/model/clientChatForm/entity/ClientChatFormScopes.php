@@ -7,5 +7,4 @@ namespace sales\model\clientChatForm\entity;
  */
 class ClientChatFormScopes extends \yii\db\ActiveQuery
 {
-
 }

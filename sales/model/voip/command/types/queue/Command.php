@@ -6,7 +6,6 @@ use sales\model\voip\command\types\Executable;
 
 class Command implements Executable
 {
-
     private function __construct()
     {
     }

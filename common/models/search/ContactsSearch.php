@@ -403,6 +403,68 @@ class ContactsSearch extends Client
         return $query->all();
     }
 
+    public function getClientsContactByPhone(string $phone): array
+    {
+        $queryClient = Client::find()->alias('c')->select([
+            'c.id as id',
+            'concat(IFNULL(c.first_name, \'\'), \' \', IFNULL(c.middle_name, \'\'), \' \', IFNULL(c.last_name, \'\')) as full_name',
+            'c.company_name as company_name',
+            'c.cl_type_id as type',
+            'cp.phone as phone',
+            'c.is_company as is_company',
+            'c.cl_project_id as project_id',
+        ]);
+
+        $queryClient->andWhere(['c.cl_type_id' => Client::TYPE_CONTACT]);
+        $queryClient->innerJoin(UserContactList::tableName(), 'ucl_client_id = c.id');
+        $queryClient->innerJoin(ClientPhone::tableName() . ' as cp', 'cp.client_id = c.id');
+
+        if (!$this->isRoleAdmin()) {
+            $queryClient->andWhere(['ucl_user_id' => $this->userId]);
+            $queryClient->orWhere(['AND',
+                ['!=', 'ucl_user_id', $this->userId],
+                ['c.disabled' => $this->isDisabled],
+                ['c.is_public' => $this->isPublic],
+            ]);
+        }
+
+        $queryClient->andWhere(['phone' => $phone]);
+        $queryClient->orderBy(['full_name' => SORT_ASC, 'company_name' => SORT_ASC]);
+
+        return $queryClient->createCommand()->queryAll();
+    }
+
+    public function getClientContactsById(int $contactId): array
+    {
+        $queryClient = Client::find()->alias('c')->select([
+            'c.id as id',
+            'concat(IFNULL(c.first_name, \'\'), \' \', IFNULL(c.middle_name, \'\'), \' \', IFNULL(c.last_name, \'\')) as full_name',
+            'c.company_name as company_name',
+            'c.cl_type_id as type',
+            'cp.phone as phone',
+            'c.is_company as is_company',
+            'c.cl_project_id as project_id',
+        ]);
+
+        $queryClient->andWhere(['c.cl_type_id' => Client::TYPE_CONTACT]);
+        $queryClient->innerJoin(UserContactList::tableName(), 'ucl_client_id = c.id');
+        $queryClient->innerJoin(ClientPhone::tableName() . ' as cp', 'cp.client_id = c.id');
+
+        if (!$this->isRoleAdmin()) {
+            $queryClient->andWhere(['ucl_user_id' => $this->userId]);
+            $queryClient->orWhere(['AND',
+                ['!=', 'ucl_user_id', $this->userId],
+                ['c.disabled' => $this->isDisabled],
+                ['c.is_public' => $this->isPublic],
+            ]);
+        }
+
+        $queryClient->andWhere(['c.id' => $contactId]);
+        $queryClient->orderBy(['full_name' => SORT_ASC, 'company_name' => SORT_ASC]);
+
+        return $queryClient->createCommand()->queryAll();
+    }
+
     public function searchUnion($params): ActiveDataProvider
     {
         $queryClient = Client::find()->alias('c')->select([

@@ -16,7 +16,6 @@ use yii\base\Model;
  */
 class LeadLogMessage extends Model
 {
-
     public $title;
     public $message;
     public $model = null;

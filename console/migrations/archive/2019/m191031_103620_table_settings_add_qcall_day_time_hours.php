@@ -7,7 +7,6 @@ use yii\db\Migration;
  */
 class m191031_103620_table_settings_add_qcall_day_time_hours extends Migration
 {
-
     public function safeUp()
     {
         $this->insert('{{%setting}}', [

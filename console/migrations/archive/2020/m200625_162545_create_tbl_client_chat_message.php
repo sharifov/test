@@ -10,7 +10,6 @@ use yii\db\Migration;
  */
 class m200625_162545_create_tbl_client_chat_message extends Migration
 {
-
     private $routes = [
         '/client-chat-message-crud/create',
         '/client-chat-message-crud/update',

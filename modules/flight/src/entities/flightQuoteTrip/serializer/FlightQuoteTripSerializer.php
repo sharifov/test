@@ -6,7 +6,6 @@ use sales\entities\serializer\Serializer;
 
 class FlightQuoteTripSerializer extends Serializer
 {
-
     /**
      * @inheritDoc
      */

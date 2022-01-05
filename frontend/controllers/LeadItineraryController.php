@@ -16,7 +16,6 @@ use yii\web\Response;
 
 class LeadItineraryController extends FController
 {
-
     /** @var LeadManageService */
     private $service;
 

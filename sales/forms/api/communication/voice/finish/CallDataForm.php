@@ -29,7 +29,6 @@ use yii\base\Model;
  */
 class CallDataForm extends Model
 {
-
     public $sid;
     public $date_created;
     public $date_updated;

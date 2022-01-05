@@ -2,65 +2,82 @@
 
 namespace sales\model\call\useCase\conference\create;
 
-use common\models\Call;
-use common\models\Lead;
-use sales\entities\cases\Cases;
 use yii\base\Model;
 
 /**
  * Class CreateCallForm
  *
- * @property string $caller
- * @property string $called
- * @property string $from
+ * @property string $device
  * @property int $user_id
+ * @property string $to_number
+ * @property string $from_number
+ * @property int $phone_list_id
  * @property int $project_id
+ * @property int $department_id
  * @property int $lead_id
  * @property int $case_id
+ * @property int $client_id
  * @property int $source_type_id
+ * @property bool $call_recording_disabled
+ * @property string $friendly_name
+ * @property bool $is_redial_call
  */
 class CreateCallForm extends Model
 {
-    public $caller;
-    public $called;
-    public $from;
+    public $device;
     public $user_id;
+    public $to_number;
+    public $from_number;
+    public $phone_list_id;
     public $project_id;
+    public $department_id;
     public $lead_id;
     public $case_id;
+    public $client_id;
     public $source_type_id;
+    public $call_recording_disabled;
+    public $friendly_name;
+    public $is_redial_call;
 
     public function rules(): array
     {
         return [
-            ['caller', 'required'],
-            ['caller', 'string'],
-
-            ['called', 'required'],
-            ['called', 'string'],
-
-            ['from', 'required'],
-            ['from', 'string'],
+            ['device', 'required'],
+            ['device', 'string'],
 
             ['user_id', 'required'],
             ['user_id', 'integer'],
-            ['user_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
 
-//            ['project_id', 'required'],
+            ['to_number', 'required'],
+            ['to_number', 'string'],
+
+            ['from_number', 'required'],
+            ['from_number', 'string'],
+
+            ['phone_list_id', 'required'],
+            ['phone_list_id', 'integer'],
+
+            ['project_id', 'required'],
             ['project_id', 'integer'],
-            ['project_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+
+            ['department_id', 'integer'],
 
             ['lead_id', 'integer'],
-            ['lead_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-            ['lead_id', 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['lead_id' => 'id']],
 
             ['case_id', 'integer'],
-            ['case_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-            ['case_id', 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['case_id' => 'cs_id']],
+
+            ['client_id', 'integer'],
 
             ['source_type_id', 'integer'],
-            ['source_type_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-            ['source_type_id', 'in', 'range' => array_keys(Call::SOURCE_LIST)],
+
+            ['call_recording_disabled', 'required'],
+            ['call_recording_disabled', 'boolean'],
+
+            ['friendly_name', 'required'],
+            ['friendly_name', 'string'],
+
+            ['is_redial_call', 'default', 'value' => false],
+            ['is_redial_call', 'boolean'],
         ];
     }
 

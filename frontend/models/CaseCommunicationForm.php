@@ -47,7 +47,6 @@ use yii\base\Model;
 
 class CaseCommunicationForm extends Model
 {
-
     public const TYPE_EMAIL = 1;
     public const TYPE_SMS   = 2;
     public const TYPE_VOICE = 3;

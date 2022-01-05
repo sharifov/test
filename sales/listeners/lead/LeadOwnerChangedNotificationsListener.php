@@ -17,7 +17,6 @@ use Yii;
  */
 class LeadOwnerChangedNotificationsListener
 {
-
     private $userRepository;
 
     /**

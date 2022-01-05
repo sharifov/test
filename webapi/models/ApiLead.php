@@ -58,7 +58,6 @@ use yii\base\Model;
  */
 class ApiLead extends Model
 {
-
     const SCENARIO_CREATE = 'create';
     const SCENARIO_UPDATE = 'update';
     const SCENARIO_GET = 'get';

@@ -10,7 +10,6 @@ use common\models\Lead;
 
 class LeadPreferencesForm extends Model
 {
-
     /**
      * @var int
      */

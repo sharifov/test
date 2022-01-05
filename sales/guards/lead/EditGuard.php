@@ -8,7 +8,6 @@ use sales\access\EmployeeGroupAccess;
 
 class EditGuard
 {
-
     /**
      * @param Lead $lead
      * @param Employee $user

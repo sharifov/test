@@ -46,7 +46,6 @@ use yii\helpers\VarDumper;
  */
 class LeadCloneQuoteService
 {
-
     private $leadRepository;
     private $quoteRepository;
     private $quotePriceRepository;

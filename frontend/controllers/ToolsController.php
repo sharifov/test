@@ -36,7 +36,6 @@ use yii\web\UploadedFile;
  */
 class ToolsController extends FController
 {
-
     /**
      * @return array
      */

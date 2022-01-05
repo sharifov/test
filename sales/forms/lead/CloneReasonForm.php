@@ -16,7 +16,6 @@ use yii\base\Model;
  */
 class CloneReasonForm extends Model
 {
-
     public const REASON_GROUP_TRAVEL = 'Group travel';
     public const REASON_ALTERNATIVE_CREDIT_CARD = 'Alternative credit card';
     public const REASON_DIFFERENT_FLIGHT = 'Different flight';

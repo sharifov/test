@@ -18,7 +18,6 @@ use yii\web\Response;
  */
 class SmsTemplateTypeController extends FController
 {
-
     public function behaviors()
     {
         $behaviors = [

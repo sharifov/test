@@ -23,7 +23,6 @@ use yii\db\ActiveRecord;
  */
 class UserStatDay extends \yii\db\ActiveRecord
 {
-
     public function behaviors(): array
     {
         return [

@@ -26,7 +26,6 @@ use Yii;
  */
 class ClientEmailController extends BaseController
 {
-
     /**
      * @api {post} /v2/client-email/subscribe Client Email Subscribe
      * @apiVersion 0.2.0

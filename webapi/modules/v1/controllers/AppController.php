@@ -7,7 +7,6 @@ use yii\helpers\VarDumper;
 
 class AppController extends ApiBaseController
 {
-
     /**
      * @api {get, post} /v1/app/test API Test action
      * @apiVersion 0.1.0

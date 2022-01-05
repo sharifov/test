@@ -53,7 +53,6 @@ use yii\widgets\ActiveForm;
  */
 class LeadViewController extends FController
 {
-
     /**
      * @var ClientManageService
      */

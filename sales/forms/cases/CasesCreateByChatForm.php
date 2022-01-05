@@ -26,7 +26,6 @@ use yii\helpers\ArrayHelper;
  */
 class CasesCreateByChatForm extends Model
 {
-
     public $projectId;
     public $subject;
     public $description;

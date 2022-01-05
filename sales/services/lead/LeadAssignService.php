@@ -23,7 +23,6 @@ use sales\services\TransactionManager;
  */
 class LeadAssignService
 {
-
     private $leadRepository;
     private $userRepository;
     private $serviceFinder;

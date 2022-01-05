@@ -15,7 +15,6 @@ use Yii;
  */
 class CasesQCountersController extends FController
 {
-
     private $casesQRepository;
 
     public $enableCsrfValidation = false;

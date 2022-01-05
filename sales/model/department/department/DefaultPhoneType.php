@@ -2,6 +2,11 @@
 
 namespace sales\model\department\department;
 
+/**
+ * Class DefaultPhoneType
+ *
+ * @property string $value
+ */
 class DefaultPhoneType
 {
     public const ONLY_GENERAL = 'Only general';
@@ -11,9 +16,34 @@ class DefaultPhoneType
 
     public string $value;
 
-    public function __construct(string $value)
+    private function __construct(string $value)
     {
         $this->value = $value;
+    }
+
+    public static function createFromString(string $value): self
+    {
+        return new self($value);
+    }
+
+    public static function createOnlyGeneral(): self
+    {
+        return self::createFromString(self::ONLY_GENERAL);
+    }
+
+    public static function createOnlyPersonal(): self
+    {
+        return self::createFromString(self::ONLY_PERSONAL);
+    }
+
+    public static function createGeneralFirst(): self
+    {
+        return self::createFromString(self::GENERAL_FIRST);
+    }
+
+    public static function createPersonalFirst(): self
+    {
+        return self::createFromString(self::PERSONAL_FIRST);
     }
 
     public function isOnlyGeneral(): bool

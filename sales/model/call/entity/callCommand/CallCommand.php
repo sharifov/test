@@ -39,7 +39,6 @@ use yii\helpers\ArrayHelper;
  */
 class CallCommand extends \yii\db\ActiveRecord
 {
-
     public const TYPE_SAY           = 1;
     public const TYPE_PLAY          = 2;
     public const TYPE_PAUSE         = 3;

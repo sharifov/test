@@ -18,7 +18,6 @@ use sales\repositories\lead\LeadFlowRepository;
  */
 class LeadFlowLogService
 {
-
     private $leadFlowRepository;
     private $leadChecklistRepository;
     private $leadFlowChecklistRepository;

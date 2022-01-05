@@ -20,6 +20,7 @@ use sales\model\project\entity\projectLocale\ProjectLocale;
 use thamtech\uuid\helpers\UuidHelper;
 use Yii;
 use yii\base\Component;
+use yii\caching\TagDependency;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 use yii\helpers\Url;
@@ -789,30 +790,51 @@ class CommunicationService extends Component implements CommunicationServiceInte
 
 
     /**
-     * @param string $username
+     * @param string $deviceName
      * @param bool $deleteCache
      * @return mixed
      * @throws Exception
      */
-    public function getJwtTokenCache($username = '', $deleteCache = false)
+    public function getJwtTokenCache($deviceName = '', $deleteCache = false)
     {
-        $cacheKey = 'jwt_token_' . $username;
+        $cacheKey = 'jwt_token_' . $deviceName;
         if ($deleteCache) {
             \Yii::$app->cache->delete($cacheKey);
         }
         $out = \Yii::$app->cache->get($cacheKey);
 
         if ($out === false) {
-            $out = $this->getJwtToken($username);
-
+            $out = $this->getJwtToken($deviceName);
             if ($out && !empty($out['data']['token'])) {
-                $expired = 60 * 5;
-                if (!empty($out['data']['expire'])) {
-                    $expired = strtotime($out['data']['expire']) - time() - 60;
-                }
-                \Yii::$app->cache->set($cacheKey, $out, $expired);
+                $expired = $this->calculateJwtExpiredSeconds($out['data']['expire']);
+                \Yii::$app->cache->set($cacheKey, $out, $expired, new TagDependency(['tags' => 'twilio_jwt_token']));
             }
         }
+
+        $out['data']['refreshTime'] = $this->calculateJwtExpiredSeconds($out['data']['expire']) + 1;
+
+        return $out;
+    }
+
+    private function calculateJwtExpiredSeconds(string $expiredDt): int
+    {
+        $expired = strtotime($expiredDt) - time();
+        if ($expired < 1) {
+            return 1;
+        }
+        return $expired;
+    }
+
+    /**
+     * @param string $deviceName
+     * @return mixed
+     * @throws Exception
+     */
+    public function generateJwtToken($deviceName = ''): array
+    {
+        $out = $this->getJwtToken($deviceName);
+
+        $out['data']['refreshTime'] = $this->calculateJwtExpiredSeconds($out['data']['expire']) + 1;
 
         return $out;
     }
@@ -857,11 +879,10 @@ class CommunicationService extends Component implements CommunicationServiceInte
         return $out;
     }
 
-    public function callForward($sid, $from, $to, $callRecordingDisabled, $phoneListId): array
+    public function callForward($sid, $to, $callRecordingDisabled, $phoneListId): array
     {
         $data = [
             'sid' => $sid,
-            'from' => $from,
             'to' => $to,
             'call_recording_disabled' => $callRecordingDisabled,
             'phone_list_id' => $phoneListId,
@@ -1096,7 +1117,13 @@ class CommunicationService extends Component implements CommunicationServiceInte
 
     public function createCall(CreateCallForm $form): array
     {
-        $response = $this->sendRequest('twilio-conference/create-call', $form->getAttributes());
+        $response = $this->sendRequest(
+            'twilio-conference/create-call',
+            array_merge(
+                $form->getAttributes(),
+                ['voipApiUsername' => $this->voipApiUsername]
+            )
+        );
 
         return $this->processConferenceResponse($response);
     }
@@ -1436,6 +1463,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
             'say_voice' => $sayVoice,
             'say_language' => $sayLanguage,
             'play' => $play,
+            'voip_api_username' => $this->voipApiUsername,
             'call_custom_parameters' =>  array_merge(
                 [
                     'type_id' => Call::CALL_TYPE_OUT,

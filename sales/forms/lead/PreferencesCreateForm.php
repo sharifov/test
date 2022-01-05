@@ -15,7 +15,6 @@ use yii\base\Model;
  */
 class PreferencesCreateForm extends Model
 {
-
     public $marketPrice;
     public $clientsBudget;
     public $numberStops;

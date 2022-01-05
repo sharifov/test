@@ -11,7 +11,7 @@ use yii\redis\Connection;
  */
 class CallReserver
 {
-    private const EXPIRE_SECONDS = 20;
+    private const EXPIRE_SECONDS = 10;
 
     private $redis;
 

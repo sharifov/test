@@ -21,7 +21,6 @@ use yii\web\Response;
  */
 class ProjectController extends FController
 {
-
     public function behaviors()
     {
         $behaviors = [

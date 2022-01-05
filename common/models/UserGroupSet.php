@@ -22,7 +22,6 @@ use yii\db\ActiveRecord;
  */
 class UserGroupSet extends \yii\db\ActiveRecord
 {
-
     public static function tableName(): string
     {
         return 'user_group_set';

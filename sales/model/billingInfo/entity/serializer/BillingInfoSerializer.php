@@ -15,7 +15,6 @@ use yii\helpers\ArrayHelper;
  */
 class BillingInfoSerializer extends Serializer
 {
-
     /**
      * @inheritDoc
      */

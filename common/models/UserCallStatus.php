@@ -21,7 +21,6 @@ use Yii;
  */
 class UserCallStatus extends \yii\db\ActiveRecord
 {
-
     public const STATUS_TYPE_READY = 1;
     public const STATUS_TYPE_OCCUPIED = 2;
 

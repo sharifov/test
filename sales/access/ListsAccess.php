@@ -18,7 +18,6 @@ use sales\helpers\user\UserFinder;
  */
 class ListsAccess
 {
-
     private $user;
 
     private $projects;

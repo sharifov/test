@@ -7,7 +7,6 @@ use common\models\Lead;
 
 class EmployeeAccess
 {
-
     /**
      * @param Lead $lead
      * @param Employee $user

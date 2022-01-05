@@ -21,7 +21,6 @@ use yii\helpers\VarDumper;
  */
 class KpiController extends FController
 {
-
     /**
      * @return mixed
      */

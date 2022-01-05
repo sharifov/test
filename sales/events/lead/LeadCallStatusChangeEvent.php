@@ -14,7 +14,6 @@ use common\models\Lead;
  */
 class LeadCallStatusChangeEvent
 {
-
     public $lead;
     public $oldCallStatus;
     public $newCallStatus;

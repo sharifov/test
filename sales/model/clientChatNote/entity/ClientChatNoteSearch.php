@@ -11,7 +11,6 @@ use sales\model\clientChatNote\entity\ClientChatNote;
  */
 class ClientChatNoteSearch extends ClientChatNote
 {
-
     public function rules(): array
     {
         return [

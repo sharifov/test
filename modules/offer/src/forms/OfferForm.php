@@ -26,7 +26,6 @@ use yii\base\Model;
  */
 class OfferForm extends Model
 {
-
     public $of_id;
 //    public $of_gid;
 //    public $of_uid;

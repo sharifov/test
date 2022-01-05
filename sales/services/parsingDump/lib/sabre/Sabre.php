@@ -7,5 +7,4 @@ namespace sales\services\parsingDump\lib\sabre;
  */
 class Sabre
 {
-
 }

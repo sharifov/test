@@ -17,7 +17,6 @@ use yii\base\Model;
  */
 class SnoozeReasonForm extends Model
 {
-
     public const REASON_TRAVELLING_DATES_MORE_12_MONTHS = 'Travelling dates > 12 months';
     public const REASON_NOT_READY_TO_BUY_NOW = 'Not ready to buy now';
     public const REASON_OTHER = 'Other';

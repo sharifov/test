@@ -12,7 +12,6 @@ use yii\db\ActiveQuery;
 
 class CallSearchRepository
 {
-
     /**
      * @param Employee $user
      * @return ActiveQuery

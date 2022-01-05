@@ -15,7 +15,6 @@ use yii2mod\rbac\filters\AccessControl;
  */
 class FController extends Controller
 {
-
     /**
      * @return array
      */

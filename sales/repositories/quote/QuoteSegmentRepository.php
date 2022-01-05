@@ -9,7 +9,6 @@ use common\models\QuoteSegment;
  */
 class QuoteSegmentRepository
 {
-
     /**
      * @param QuoteSegment $quoteSegment
      * @return int

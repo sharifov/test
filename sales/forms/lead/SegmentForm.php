@@ -21,7 +21,6 @@ use yii\base\Model;
  */
 class SegmentForm extends Model
 {
-
     public $origin;
     public $originLabel;
     public $destination;

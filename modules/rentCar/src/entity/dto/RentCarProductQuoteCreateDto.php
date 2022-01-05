@@ -6,5 +6,4 @@ use sales\dto\product\ProductQuoteDTO;
 
 class RentCarProductQuoteCreateDto extends ProductQuoteDTO
 {
-
 }

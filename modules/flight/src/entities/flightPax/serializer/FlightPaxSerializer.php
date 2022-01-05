@@ -6,7 +6,6 @@ use sales\entities\serializer\Serializer;
 
 class FlightPaxSerializer extends Serializer
 {
-
     /**
      * @inheritDoc
      */

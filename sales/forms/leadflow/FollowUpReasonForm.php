@@ -17,7 +17,6 @@ use yii\base\Model;
  */
 class FollowUpReasonForm extends Model
 {
-
     public const REASON_PROPER_FOLLOW_UP_DONE = 'Proper Follow Up Done';
     public const REASON_DIDNT_GET_IN_TOUCH = 'Didnt get in touch';
     public const REASON_OTHER = 'Other';

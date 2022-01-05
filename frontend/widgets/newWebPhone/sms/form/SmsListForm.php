@@ -7,5 +7,4 @@ namespace frontend\widgets\newWebPhone\sms\form;
  */
 class SmsListForm extends SmsAuthorizationForm
 {
-
 }

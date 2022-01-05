@@ -9,7 +9,6 @@ use sales\entities\cases\CaseStatusLog;
  */
 class CaseStatusLogRepository
 {
-
     /**
      * @param int $caseId
      * @return CaseStatusLog|null

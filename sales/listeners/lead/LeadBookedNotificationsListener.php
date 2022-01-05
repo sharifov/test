@@ -18,7 +18,6 @@ use Yii;
  */
 class LeadBookedNotificationsListener
 {
-
     private $userRepository;
 
     /**

@@ -20,7 +20,6 @@ use yii\base\Model;
  */
 class ReturnReasonForm extends Model
 {
-
     public const REASON_OTHER = 'Other';
 
     public const REASON_LIST = [

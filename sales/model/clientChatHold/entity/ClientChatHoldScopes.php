@@ -9,7 +9,6 @@ namespace sales\model\clientChatHold\entity;
  */
 class ClientChatHoldScopes extends \yii\db\ActiveQuery
 {
-
     /**
      * {@inheritdoc}
      * @return ClientChatHold[]|array

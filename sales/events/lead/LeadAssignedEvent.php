@@ -16,7 +16,6 @@ use common\models\Lead;
  */
 class LeadAssignedEvent
 {
-
     public $lead;
     public $oldEmployeeId;
     public $newEmployeeId;

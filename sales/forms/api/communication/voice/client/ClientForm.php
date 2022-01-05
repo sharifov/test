@@ -19,7 +19,6 @@ use sales\forms\CompositeForm;
  */
 class ClientForm extends CompositeForm
 {
-
     public $c_id;
     public $api_user_id;
     public $c_call_status;

@@ -28,7 +28,6 @@ use yii\web\Response;
  */
 class SettingsController extends FController
 {
-
     /**
      * {@inheritdoc}
      */

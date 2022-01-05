@@ -18,7 +18,6 @@ use yii\filters\VerbFilter;
  */
 class SmsDistributionListController extends FController
 {
-
     /**
      * @return array
      */

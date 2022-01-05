@@ -335,7 +335,7 @@
     right: 22px; }
   .phone-widget__close {
     right: 0;
-    top: -6px !important; }
+    top: 8px; }
     .phone-widget__close .fa {
       font-size: 18px !important; }
   .phone-widget__body {

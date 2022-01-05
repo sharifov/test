@@ -11,7 +11,6 @@ use sales\entities\cases\Cases;
  */
 class CasesOwnerFreedEvent
 {
-
     public $cases;
     public $oldOwner;
 

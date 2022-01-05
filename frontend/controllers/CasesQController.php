@@ -11,7 +11,6 @@ use Yii;
  */
 class CasesQController extends FController
 {
-
     public function actionPending()
     {
         $searchModel = new CasesQSearch();

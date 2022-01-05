@@ -7,7 +7,6 @@ use yii\db\Migration;
  */
 class m180928_092823_quote_status_log extends Migration
 {
-
     /**
      *
      * {@inheritdoc}

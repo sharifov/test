@@ -32,7 +32,6 @@ use yii\helpers\ArrayHelper;
  */
 class CasesCreateByWebForm extends Model
 {
-
     public $projectId;
     public $subject;
     public $description;

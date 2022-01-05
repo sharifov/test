@@ -45,8 +45,6 @@ use yii\helpers\VarDumper;
  */
 class UserMonitorController extends Controller
 {
-
-
     public function actionLogout2()
     {
         printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));

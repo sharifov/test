@@ -26,7 +26,6 @@ use sales\services\ServiceFinder;
  */
 class CasesManageService
 {
-
     private $casesRepository;
     private $userRepository;
     private $leadRepository;

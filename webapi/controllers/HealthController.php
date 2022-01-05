@@ -17,7 +17,6 @@ use yii\web\NotFoundHttpException;
 
 class HealthController extends Controller
 {
-
     public function init()
     {
         parent::init();

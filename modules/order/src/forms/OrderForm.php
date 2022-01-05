@@ -36,7 +36,6 @@ use yii\db\ActiveRecord;
  */
 class OrderForm extends Model
 {
-
     public $or_id;
     public $or_gid;
     public $or_uid;

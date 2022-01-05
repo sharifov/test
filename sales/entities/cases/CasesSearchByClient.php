@@ -13,7 +13,6 @@ use yii\data\ActiveDataProvider;
  */
 class CasesSearchByClient extends Model
 {
-
     public $clientId;
 
     /**

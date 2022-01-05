@@ -81,7 +81,6 @@ use common\components\validators\IsArrayValidator;
  */
 class Project extends \yii\db\ActiveRecord
 {
-
     public const CACHE_KEY = 'projects';
     public const CACHE_TAG_DEPENDENCY = 'projects-tag-dependency';
 

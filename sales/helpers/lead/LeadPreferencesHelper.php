@@ -4,7 +4,6 @@ namespace sales\helpers\lead;
 
 class LeadPreferencesHelper
 {
-
     /**
      * @return array
      */

@@ -17,7 +17,6 @@ use sales\forms\CompositeForm;
  */
 class FinishForm extends CompositeForm
 {
-
     public $c_id;
     public $c_call_status;
     public $c_endpoint;

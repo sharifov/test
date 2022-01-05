@@ -26,7 +26,6 @@ use yii\filters\VerbFilter;
  */
 class QuotesController extends FController
 {
-
     public function behaviors()
     {
         $behaviors = [

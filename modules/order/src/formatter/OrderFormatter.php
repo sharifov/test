@@ -12,7 +12,6 @@ use sales\logger\formatter\Formatter;
  */
 class OrderFormatter implements Formatter
 {
-
     /**
      * @var Order
      */

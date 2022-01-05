@@ -17,7 +17,6 @@ use common\models\Notifications;
  */
 class LeadFollowUpNotificationsListener
 {
-
     private $userRepository;
 
     public function __construct(UserRepository $userRepository)

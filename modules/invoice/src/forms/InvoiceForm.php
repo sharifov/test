@@ -23,7 +23,6 @@ use yii\base\Model;
  */
 class InvoiceForm extends Model
 {
-
     public $inv_id;
     public $inv_gid;
     public $inv_uid;

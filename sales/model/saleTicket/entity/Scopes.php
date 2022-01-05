@@ -7,5 +7,4 @@ namespace sales\model\saleTicket\entity;
  */
 class Scopes extends \yii\db\ActiveQuery
 {
-
 }

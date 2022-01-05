@@ -13,7 +13,6 @@ use common\models\Lead;
  */
 class LeadOwnerChangedEvent
 {
-
     public $lead;
     public $oldOwnerId;
     public $newOwnerId;

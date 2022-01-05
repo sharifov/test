@@ -11,7 +11,6 @@ use Yii;
  */
 class LeadCreatedEventListener
 {
-
     /**
      * @param LeadCreatedEvent $event
      */

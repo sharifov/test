@@ -1,3 +1,10 @@
 window.phoneWidget = {};
+window.phoneWidget.initParams = {};
+window.phoneWidget.device = {};
+window.phoneWidget.device.activeCallSid = null;
+window.phoneWidget.device.state = {};
+window.phoneWidget.device.state.initialize = {};
+window.phoneWidget.device.initialize = {};
 window.phoneWidget.storage = {};
 window.phoneWidget.emptyFunc = function (param) {};
+window.phoneDeviceRemoteLogsEnabled = false;

@@ -12,7 +12,6 @@ use yii\base\Widget;
  */
 class LeadRedialViewWidget extends Widget
 {
-
     public $lead;
 
     public function init(): void

@@ -17,7 +17,6 @@ use common\models\Lead;
  */
 class LeadFollowUpEvent
 {
-
     public $lead;
     public $oldStatus;
     public $oldOwnerId;

@@ -7,7 +7,6 @@ use yii\helpers\Html;
 
 class CompositeFormHelper
 {
-
     /**
      * @param array $post ex.: Yii::$app->request->post(),
      * @param string $compositeFormName ex.: formName

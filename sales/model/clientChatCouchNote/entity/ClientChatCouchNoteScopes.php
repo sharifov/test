@@ -7,5 +7,4 @@ namespace sales\model\clientChatCouchNote\entity;
  */
 class ClientChatCouchNoteScopes extends \yii\db\ActiveQuery
 {
-
 }

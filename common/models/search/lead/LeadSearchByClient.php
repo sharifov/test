@@ -15,7 +15,6 @@ use yii\data\ActiveDataProvider;
  */
 class LeadSearchByClient extends Model
 {
-
     public $clientId;
 
     /**

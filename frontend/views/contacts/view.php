@@ -84,13 +84,22 @@ $this->params['breadcrumbs'][] = $this->title;
                             $data = [];
                             if ($phones) {
                                 foreach ($phones as $k => $phone) {
-                                    $title = $phone->cp_title ? ' <em>(' . $phone->cp_title . ')</em>' : '' ;
+                                    $title = $phone->cp_title ? ' <em>(' . $phone->cp_title . ')</em>' : '';
                                     $data[] =
-                                        CallHelper::callNumber($phone->phone, CallAccess::isUserCanDial(
-                                            Auth::id(),
-                                            UserProfile::CALL_TYPE_WEB
-                                        ), '', ['data-title' => $model->getNameByType(), 'disable-icon' => true], 'code') .
-                                        $title;
+                                        CallHelper::callNumber(
+                                            $phone->phone,
+                                            CallAccess::isUserCanDial(
+                                                Auth::id(),
+                                                UserProfile::CALL_TYPE_WEB
+                                            ),
+                                            '',
+                                            [
+                                                'data-contact-id' => $model->id,
+                                                'data-title' => $model->getNameByType(),
+                                                'disable-icon' => true
+                                            ],
+                                            'code'
+                                        ) . $title;
                                 }
                             }
 

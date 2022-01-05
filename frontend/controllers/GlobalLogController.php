@@ -17,7 +17,6 @@ use yii\filters\VerbFilter;
  */
 class GlobalLogController extends FController
 {
-
     /**
      * @return array
      */

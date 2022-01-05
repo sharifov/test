@@ -13,7 +13,6 @@ use yii\web\Response;
  */
 class CaseCategoryController extends FController
 {
-
     /**
      * @return string
      */

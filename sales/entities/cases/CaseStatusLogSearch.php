@@ -14,7 +14,6 @@ use yii\data\ActiveDataProvider;
  */
 class CaseStatusLogSearch extends CaseStatusLog
 {
-
     public $statuses = [];
 
     public $created_date_from;

@@ -7,7 +7,6 @@ use yii\db\Migration;
  */
 class m181106_152320_alter_airport_table extends Migration
 {
-
     /**
      *
      * {@inheritdoc}

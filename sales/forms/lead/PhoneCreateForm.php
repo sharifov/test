@@ -19,7 +19,6 @@ use yii\base\Model;
  */
 class PhoneCreateForm extends Model
 {
-
     /**
      * @var string
      */

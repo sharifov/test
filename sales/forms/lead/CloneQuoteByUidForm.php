@@ -17,7 +17,6 @@ use yii\base\Model;
  */
 class CloneQuoteByUidForm extends Model
 {
-
     public $uid;
 
     public $leadGid;

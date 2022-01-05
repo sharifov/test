@@ -7,5 +7,4 @@ namespace modules\fileStorage\src\entity\fileOrder;
  */
 class FileOrderQuery
 {
-
 }

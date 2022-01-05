@@ -7,7 +7,6 @@ use yii\db\Migration;
  */
 class m190823_055939_create_tbl_call_user_access extends Migration
 {
-
     public $routes = [
         '/call-user-access/*'
     ];

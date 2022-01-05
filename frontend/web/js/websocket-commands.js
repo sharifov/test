@@ -45,11 +45,26 @@ window.sendCommandUpdatePhoneWidgetCurrentCalls = function (finishedCallSid, use
     });
 };
 
+function Buid (userId) {
+    this.key = 'buid' + userId;
+
+    this.get = function () {
+        return localStorage.getItem(this.key) || null;
+    }
+
+    this.set = function (buid) {
+        localStorage.setItem(this.key, buid);
+    }
+
+    this.reset = function () {
+        localStorage.removeItem(this.key);
+    }
+}
+
 function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificationUpdateUrl, discardUnreadMessageUrl)
 {
-
-
     try {
+        let buid = new Buid(userId);
         //const socket = new WebSocket(wsUrl);
         var socket = new ReconnectingWebSocket(wsUrl, null, {debug: false, reconnectInterval: reconnectInterval});
         window.socket = socket;
@@ -60,8 +75,9 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
             onlineObj.attr('title', 'Online Connection: opened').find('i').removeClass('danger').addClass('warning');
             // console.log(e);
 
-            window.sendCommandUpdatePhoneWidgetCurrentCalls('', userId, window.generalLinePriorityIsEnabled);
-
+            if (typeof PhoneWidget === 'object') {
+                socketSend('PhoneDeviceRegister', 'Register', {buid: buid.get()});
+            }
         };
 
         socket.onmessage = function (e) {
@@ -119,8 +135,8 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                     }
 
                     if (obj.cmd === 'callUpdate') {
-                        if (typeof PhoneWidgetCall === 'object') {
-                            PhoneWidgetCall.refreshCallStatus(obj);
+                        if (typeof PhoneWidget === 'object') {
+                            PhoneWidget.refreshCallStatus(obj);
                         }
 
                         if (typeof webCallLeadRedialUpdate === "function") {
@@ -146,49 +162,43 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                     }
 
                     if (obj.cmd === 'updateUserCallStatus') {
-                        if (typeof PhoneWidgetCall === 'object') {
-                            PhoneWidgetCall.changeStatus(obj.type_id);
+                        if (typeof PhoneWidget === 'object') {
+                            PhoneWidget.changeStatus(obj.type_id);
                         }
 
-                        if (typeof PhoneWidgetCall === 'object') {
-                            PhoneWidgetCall.refreshCallStatus(obj);
+                        if (typeof PhoneWidget === 'object') {
+                            PhoneWidget.refreshCallStatus(obj);
                         }
                     }
 
                     if (obj.cmd === 'updateIncomingCall') {
-                        if (typeof refreshInboxCallWidget === "function") {
-                            refreshInboxCallWidget(obj);
-                        }
-                        if (typeof PhoneWidgetCall === 'object') {
+                        if (typeof PhoneWidget === 'object') {
                             if (typeof obj.status !== 'undefined') {
-                                PhoneWidgetCall.requestIncomingCall(obj);
+                                PhoneWidget.requestIncomingCall(obj);
                             }
-                            // if (obj.cua_status_id === 2) {
-                            // PhoneWidgetCall.removeIncomingRequest(obj.callSid);
-                            // }
                         }
                     }
 
                     if (obj.cmd === 'addPriorityCall') {
-                        if (typeof PhoneWidgetCall === 'object') {
+                        if (typeof PhoneWidget === 'object') {
                             if (typeof obj.data !== 'undefined') {
-                                PhoneWidgetCall.socket(obj.data);
+                                PhoneWidget.socket(obj.data);
                             }
                         }
                     }
 
                     if (obj.cmd === 'removePriorityCall') {
-                        if (typeof PhoneWidgetCall === 'object') {
+                        if (typeof PhoneWidget === 'object') {
                             if (typeof obj.data !== 'undefined') {
-                                PhoneWidgetCall.socket(obj.data);
+                                PhoneWidget.socket(obj.data);
                             }
                         }
                     }
 
                     if (obj.cmd === 'resetPriorityCall') {
-                        if (typeof PhoneWidgetCall === 'object') {
+                        if (typeof PhoneWidget === 'object') {
                             if (typeof obj.data !== 'undefined') {
-                                PhoneWidgetCall.socket(obj.data);
+                                PhoneWidget.socket(obj.data);
                             }
                         }
                     }
@@ -227,59 +237,59 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
 
                     if (obj.cmd === 'holdCall') {
                         if (typeof obj.data !== 'undefined') {
-                            if (typeof PhoneWidgetCall === 'object') {
-                                PhoneWidgetCall.socket(obj.data);
+                            if (typeof PhoneWidget === 'object') {
+                                PhoneWidget.socket(obj.data);
                             }
                         }
                     }
 
                     if (obj.cmd === 'muteCall') {
                         if (typeof obj.data !== 'undefined') {
-                            muteEvent(obj.data);
+                            PhoneWidget.socket(obj.data);
                         }
                     }
 
                     if (obj.cmd === 'missedCall') {
                         if (typeof obj.data !== 'undefined') {
-                            if (typeof PhoneWidgetCall === 'object') {
-                                PhoneWidgetCall.socket(obj.data);
+                            if (typeof PhoneWidget === 'object') {
+                                PhoneWidget.socket(obj.data);
                             }
                         }
                     }
 
                     if (obj.cmd === 'hidePhoneNotifications') {
-                        if (typeof PhoneWidgetCall === 'object') {
-                            PhoneWidgetCall.hidePhoneNotifications();
+                        if (typeof PhoneWidget === 'object') {
+                            PhoneWidget.hidePhoneNotifications();
                         }
                     }
 
                     if (obj.cmd === 'removeIncomingRequest') {
                         if (typeof obj.data !== 'undefined') {
-                            if (typeof PhoneWidgetCall === 'object') {
-                                PhoneWidgetCall.removeIncomingRequest(obj.data.call.sid);
+                            if (typeof PhoneWidget === 'object') {
+                                PhoneWidget.removeIncomingRequest(obj.data.call.sid);
                             }
                         }
                     }
 
                     if (obj.cmd === 'completeCall') {
                         if (typeof obj.data !== 'undefined') {
-                            if (typeof PhoneWidgetCall === 'object') {
-                                PhoneWidgetCall.completeCall(obj.data.call.sid);
+                            if (typeof PhoneWidget === 'object') {
+                                PhoneWidget.completeCall(obj.data.call.sid);
                             }
                         }
                     }
 
                     if (obj.cmd === 'callAlreadyTaken') {
                         createNotify('Accept Call', 'The call has already been taken by another agent', 'warning');
-                        if (typeof PhoneWidgetCall === 'object') {
-                            PhoneWidgetCall.removeIncomingRequest(obj.callSid);
+                        if (typeof PhoneWidget === 'object') {
+                            PhoneWidget.removeIncomingRequest(obj.callSid);
                         }
                     }
 
                     if (obj.cmd === 'conferenceUpdate') {
                         if (typeof obj.data !== 'undefined') {
-                            if (typeof PhoneWidgetCall === 'object') {
-                                PhoneWidgetCall.socket(obj.data);
+                            if (typeof PhoneWidget === 'object') {
+                                PhoneWidget.socket(obj.data);
                             }
                         }
                     }
@@ -382,16 +392,46 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                         }
                     }
 
+                    if (obj.cmd === 'PhoneDeviceRegister') {
+                        if (obj.error) {
+                            if (obj.buidIsInvalid) {
+                                buid.reset();
+                                alert(obj.msg);
+                            }
+                            if (obj.deviceIsInvalid) {
+                                alert(obj.msg);
+                            }
+                            createNotify('Phone Widget', obj.msg, 'error');
+                            PhoneWidget.addLog(obj.msg);
+                        } else {
+                            if (obj.buid) {
+                                buid.set(obj.buid);
+                            }
+                            window.phoneWidget.device.initialize.Init(obj.deviceId, obj.devices, window.phoneDeviceRemoteLogsEnabled);
+                            window.sendCommandUpdatePhoneWidgetCurrentCalls('', userId, window.generalLinePriorityIsEnabled);
+                        }
+                    }
+
+                    if (obj.cmd === 'PhoneDeviceReady') {
+                        if (obj.error) {
+                            if (obj.deviceIsInvalid) {
+                                PhoneWidget.getDeviceState().removeDeviceId();
+                            }
+                            PhoneWidget.addLog(obj.msg);
+                            createNotify('Phone Widget', obj.msg.message, 'error');
+                        }
+                    }
+
                     if (obj.cmd === 'updateCurrentCalls') {
-                        if (typeof PhoneWidgetCall === "object") {
-                            PhoneWidgetCall.updateCurrentCalls(obj.data, obj.userStatus);
+                        if (typeof PhoneWidget === "object") {
+                            PhoneWidget.updateCurrentCalls(obj.data, obj.userStatus);
                         }
                     }
 
                     if (obj.cmd === 'addCallToHistory') {
                         if (window.tabHistoryLoaded) {
-                            if (typeof PhoneWidgetCall === "object") {
-                                PhoneWidgetCall.socket(obj.data);
+                            if (typeof PhoneWidget === "object") {
+                                PhoneWidget.socket(obj.data);
                             }
                         } else {
                             console.log('History not loaded.');
@@ -468,16 +508,16 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
 
                     if (obj.cmd === 'recordingEnable') {
                         if (typeof obj.data !== 'undefined') {
-                            if (typeof PhoneWidgetCall === 'object') {
-                                PhoneWidgetCall.socket(obj.data);
+                            if (typeof PhoneWidget === 'object') {
+                                PhoneWidget.socket(obj.data);
                             }
                         }
                     }
 
                     if (obj.cmd === 'recordingDisable') {
                         if (typeof obj.data !== 'undefined') {
-                            if (typeof PhoneWidgetCall === 'object') {
-                                PhoneWidgetCall.socket(obj.data);
+                            if (typeof PhoneWidget === 'object') {
+                                PhoneWidget.socket(obj.data);
                             }
                         }
                     }
@@ -527,9 +567,9 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                     }
 
                     if (obj.cmd === 'leadRedialAutoTake') {
-                        if (obj.data.callSid === window.connectCallSid) {
+                        if (typeof PhoneWidget === 'object' && obj.data.callSid === window.phoneWidget.device.activeCallSid) {
                             //var strWindowFeatures = "menubar=no,location=no,resizable=yes,scrollbars=yes,status=no";
-                            let windowObjectReference = window.open(leadViewPageShortUrl + '/' + obj.data.leadGid, 'window' + obj.data.leadId); //, strWindowFeatures);
+                            let windowObjectReference = window.open(PhoneWidget.getLeadViewPageShortUrl() + '/' + obj.data.leadGid, 'window' + obj.data.leadId); //, strWindowFeatures);
                             windowObjectReference.focus();
                         }
                     }
@@ -553,6 +593,15 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
 
             onlineObj.attr('title', 'Disconnect').find('i').removeClass('success').addClass('danger');
             window.socketConnectionId = null;
+
+            if (typeof PhoneWidget === 'object' && PhoneWidget.isInitiated()) {
+                if (typeof twilioLogger === 'object') {
+                    twilioLogger.error('%s', 'WS connection close');
+                }
+                PhoneWidget.getDeviceState().phoneDisconnected('WS connection closed');
+                PhoneWidget.getDeviceState().resetDevices('WS connection closed');
+            }
+
             // setTimeout(function() {
             //   wsInitConnect();
             // }, 5000);
@@ -566,6 +615,13 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
             onlineObj.attr('title', 'Online Connection: false').find('i').removeClass('success').addClass('danger');
             window.socketConnectionId = null;
 
+            if (typeof PhoneWidget === 'object' && PhoneWidget.isInitiated()) {
+                if (typeof twilioLogger === 'object') {
+                    twilioLogger.error('%s', 'WS connection error');
+                }
+                PhoneWidget.getDeviceState().phoneDisconnected('WS connection error');
+                PhoneWidget.getDeviceState().resetDevices('WS connection error');
+            }
         };
     } catch (error) {
         console.error(error);

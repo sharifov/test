@@ -29,7 +29,6 @@ use yii\db\StaleObjectException;
  */
 class ClientChatUserChannelCrudController extends FController
 {
-
     /**
      * @var ClientChatService
      */

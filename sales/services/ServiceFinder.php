@@ -27,7 +27,6 @@ use sales\repositories\user\UserRepository;
  */
 class ServiceFinder
 {
-
     private $leadRepository;
     private $userRepository;
     private $casesRepository;

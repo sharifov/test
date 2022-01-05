@@ -1008,4 +1008,13 @@ class Formatter extends \yii\i18n\Formatter
         }
         return Html::tag('span', $value, ['class' => $class]);
     }
+
+    public function asPhoneDeviceLogLevel($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return \sales\model\voip\phoneDevice\log\PhoneDeviceLogLevel::asFormat($value);
+    }
 }

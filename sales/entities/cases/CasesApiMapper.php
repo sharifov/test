@@ -4,7 +4,6 @@ namespace sales\entities\cases;
 
 class CasesApiMapper extends Cases
 {
-
     public $next_flight;
 
     public function fields(): array

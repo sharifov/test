@@ -27,7 +27,6 @@ use yii\db\ActiveRecord;
  */
 class PaymentMethod extends \yii\db\ActiveRecord
 {
-
     public const CAT_CREDIT_CARD        = 1;
     public const CAT_DIRECT_DEBIT       = 2;
     public const CAT_EWALLET            = 3;

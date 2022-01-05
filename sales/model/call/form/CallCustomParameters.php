@@ -3,6 +3,7 @@
 namespace sales\model\call\form;
 
 use common\models\Call;
+use sales\model\call\entity\call\data\CreatorType;
 use yii\base\Model;
 
 /**
@@ -24,6 +25,7 @@ use yii\base\Model;
  * @property bool $is_warm_transfer
  * @property int|null $dep_id
  * @property int|null $client_id
+ * @property int|null $creator_type_id
  */
 class CallCustomParameters extends Model
 {
@@ -43,6 +45,7 @@ class CallCustomParameters extends Model
     public $is_warm_transfer;
     public $dep_id;
     public $client_id;
+    public $creator_type_id;
 
     public function rules(): array
     {
@@ -89,6 +92,11 @@ class CallCustomParameters extends Model
 
             ['client_id', 'default', 'value' => null],
             ['client_id', 'integer'],
+
+            ['creator_type_id', 'default', 'value' => null],
+            ['creator_type_id', 'integer'],
+            ['creator_type_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
+            ['creator_type_id', 'in', 'range' => [CreatorType::AGENT, CreatorType::CLIENT, CreatorType::USER], 'skipOnEmpty' => true, 'skipOnError' => true],
         ];
     }
 

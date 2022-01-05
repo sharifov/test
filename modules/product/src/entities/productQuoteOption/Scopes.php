@@ -7,5 +7,4 @@ namespace modules\product\src\entities\productQuoteOption;
  */
 class Scopes extends \yii\db\ActiveQuery
 {
-
 }

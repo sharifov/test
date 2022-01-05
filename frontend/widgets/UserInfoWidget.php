@@ -18,7 +18,6 @@ use yii\helpers\ArrayHelper;
  */
 class UserInfoWidget extends \yii\bootstrap\Widget
 {
-
     public function init()
     {
         parent::init();

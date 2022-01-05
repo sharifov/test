@@ -21,7 +21,6 @@ use yii\base\Model;
  */
 class SmsDistributionListAddMultipleForm extends Model
 {
-
     public $sdl_project_id;
     public $sdl_phone_from;
     public $sdl_phone_to_list;

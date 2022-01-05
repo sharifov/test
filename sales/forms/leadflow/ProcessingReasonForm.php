@@ -20,7 +20,6 @@ use yii\base\Model;
  */
 class ProcessingReasonForm extends Model
 {
-
     public const REASON_NA = 'N/A';
     public const REASON_NO_AVAILABLE = 'No Available';
     public const REASON_VOICE_MAIL_SEND = 'Voice Mail Send';

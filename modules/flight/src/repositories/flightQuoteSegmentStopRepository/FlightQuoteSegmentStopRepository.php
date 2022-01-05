@@ -10,7 +10,6 @@ use modules\flight\models\FlightQuoteSegmentStop;
  */
 class FlightQuoteSegmentStopRepository
 {
-
     /**
      * @param FlightQuoteSegmentStop $flightQuoteSegmentStop
      * @return int

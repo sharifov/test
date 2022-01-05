@@ -8,10 +8,6 @@ namespace webapi\controllers;
  */
 class ApiDocData
 {
-
-
-
-
     // ==================================== Authorization =================================================
     /**
      * @api {post} BasicAuth Authorization User (Basic)

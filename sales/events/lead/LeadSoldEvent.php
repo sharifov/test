@@ -17,7 +17,6 @@ use common\models\Lead;
  */
 class LeadSoldEvent implements LeadableEventInterface
 {
-
     public $lead;
     public $oldStatus;
     public $oldOwnerId;

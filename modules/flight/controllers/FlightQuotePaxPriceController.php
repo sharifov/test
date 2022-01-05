@@ -20,7 +20,6 @@ use yii\filters\VerbFilter;
  */
 class FlightQuotePaxPriceController extends FController
 {
-
     private $eventDispatcher;
 
     /**

@@ -22,7 +22,6 @@ use sales\auth\Auth;
 use sales\entities\cases\Cases;
 use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
-use sales\helpers\UserCallIdentity;
 use sales\model\call\helper\CallHelper;
 use sales\model\call\services\currentQueueCalls\ActiveQueueCall;
 use sales\model\call\services\currentQueueCalls\CurrentQueueCallsService;
@@ -38,6 +37,9 @@ use sales\model\conference\useCase\PrepareCurrentCallsForNewCall;
 use sales\model\phone\AvailablePhoneList;
 use sales\model\phoneList\entity\PhoneList;
 use sales\model\user\entity\userStatus\UserStatus;
+use sales\model\voip\phoneDevice\device\PhoneDevice;
+use sales\model\voip\phoneDevice\device\ReadyVoipDevice;
+use sales\model\voip\phoneDevice\device\VoipDevice;
 use sales\services\client\ClientManageService;
 use thamtech\uuid\helpers\UuidHelper;
 use yii\base\Exception;
@@ -45,6 +47,7 @@ use yii\helpers\Html;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotAcceptableHttpException;
+use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
@@ -82,31 +85,6 @@ class PhoneController extends FController
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
-    public function actionIndex()
-    {
-        $this->layout = false;
-
-        $user = \Yii::$app->user->identity;
-        /*$params = UserProjectParams::find(['upp_user_id' => $user->id])->all();
-        $tw_number = '';
-        if(count($params)) {
-            foreach ($params AS $param) {
-                if(strlen($param->upp_tw_phone_number) > 7) {
-                    $tw_number = $param->upp_tw_phone_number;
-                    break;
-                }
-            }
-        }*/
-
-        $tw_number = '+15596489977';
-        $client = UserCallIdentity::getId($user->id);
-        return $this->render('index', [
-            'client' => $client,
-            'fromAgentPhone' => $tw_number,
-        ]);
-    }
-
-
     public function actionTest()
     {
         //$this->layout = false;
@@ -114,96 +92,27 @@ class PhoneController extends FController
         ]);
     }
 
-
-    public function actionAjaxPhoneDial()
-    {
-        $phone_number = Yii::$app->request->post('phone_number');
-        $project_id = Yii::$app->request->post('project_id');
-        $lead_id = Yii::$app->request->post('lead_id');
-        $case_id = Yii::$app->request->post('case_id');
-        $source_type_id = Yii::$app->request->post('source_type_id');
-
-
-        $selectProjectPhone = null;
-
-        $project = Project::findOne($project_id);
-
-        $userId = \Yii::$app->user->id; //identity;
-        $case = Cases::findOne(['cs_id' => $case_id]);
-
-        $fromPhoneNumbers = [];
-        if ($case && $case->isDepartmentSupport()) {
-            $departmentPhones = DepartmentPhoneProject::find()->where(['dpp_project_id' => $project_id, 'dpp_dep_id' => $case->cs_dep_id, 'dpp_default' => DepartmentPhoneProject::DPP_DEFAULT_TRUE])->withPhoneList()->all();
-            foreach ($departmentPhones as $departmentPhone) {
-//              $fromPhoneNumbers[$departmentPhone->dpp_phone_number] = $departmentPhone->dppProject->name . ' (' . $departmentPhone->dpp_phone_number . ')';
-                $fromPhoneNumbers[$departmentPhone->getPhone()] = $departmentPhone->dppProject->name . ' (' . $departmentPhone->getPhone() . ')';
-            }
-        } else if ($userParams = UserProjectParams::find()->where(['upp_user_id' => $userId])->withPhoneList()->all()) {
-            foreach ($userParams as $param) {
-//                if(!$param->upp_tw_phone_number) {
-                if (!$param->getPhone()) {
-                    continue;
-                }
-//                $fromPhoneNumbers[$param->upp_tw_phone_number] = $param->uppProject->name . ' (' . $param->upp_tw_phone_number . ')';
-                $fromPhoneNumbers[$param->getPhone()] = $param->uppProject->name . ' (' . $param->getPhone() . ')';
-
-                if ($project_id && $project_id == $param->upp_project_id) {
-//                    $selectProjectPhone = $param->upp_tw_phone_number;
-                    $selectProjectPhone = $param->getPhone();
-                }
-            }
-        }
-
-
-        $model = null;
-
-        $userPhone = ClientPhone::find()->where(['phone' => $phone_number])->orderBy(['id' => SORT_DESC])->limit(1)->one();
-        if ($userPhone) {
-            $model = $userPhone->client;
-        }
-
-
-//        if(Auth::user()->isAgent()) {
-//            $isAgent = true;
-//        } else {
-//            $isAgent = false;
-//        }
-
-        /*$searchModel = new LeadSearch();
-        $params = Yii::$app->request->queryParams;
-        $params['LeadSearch']['client_id'] = $model->id;
-        if($isAgent) {
-            $dataProvider = $searchModel->searchAgent($params);
-        } else {
-            $dataProvider = $searchModel->search($params);
-        }
-
-        $dataProvider->sort = false;*/
-
-        $currentCall = Call::find()->where(['c_created_user_id' => Yii::$app->user->id, 'c_status_id' => [Call::STATUS_RINGING, Call::STATUS_IN_PROGRESS]])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
-        //$currentCall = Call::find()->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
-
-
-        return $this->renderPartial('ajax-phone-dial', [
-            'phone_number' => $phone_number,
-            'project' => $project,
-            'model' => $model,
-            'lead_id' => $lead_id,
-            'case_id' => $case_id,
-            //'dataProvider' => $dataProvider,
-            'fromPhoneNumbers' => $fromPhoneNumbers,
-            'selectProjectPhone' => $selectProjectPhone,
-            'currentCall' => $currentCall,
-            'source_type_id' => $source_type_id,
-        ]);
-    }
-
     public function actionGetToken()
     {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-        $username = UserCallIdentity::getId(Auth::id());
-        //VarDumper::dump($username, 10, true); exit;
-        $data = Yii::$app->communication->getJwtTokenCache($username);
+        $userId = Auth::id();
+        $deviceId = (int)Yii::$app->request->get('deviceId');
+        $device = PhoneDevice::find()->byId($deviceId)->one();
+        if (!$device) {
+            throw new NotFoundHttpException('Not found device with Id: ' . $deviceId);
+        }
+        if (!$device->isEqualUser($userId)) {
+            throw new NotFoundHttpException('Not found device Id (' . $deviceId . ') relation with user.');
+        }
+        try {
+            $data = Yii::$app->communication->generateJwtToken($device->pd_device_identity);
+        } catch (\Throwable $e) {
+            Yii::error([
+                'message' => $e->getMessage(),
+                'userId' => $userId,
+            ], 'PhoneController:actionGetToken');
+            throw new BadRequestHttpException('Server error. Try again.');
+        }
         return $data;
     }
 
@@ -540,10 +449,6 @@ class PhoneController extends FController
                 Yii::error(VarDumper::dumpAsString(['message' => 'Cant save last child call', 'errors' => $lastChild->getErrors()]), 'PhoneController:actionAjaxCallRedirect');
             }
 
-            if (!$from) {
-                $from = UserCallIdentity::getClientId(Auth::id());
-            }
-
             $communication = \Yii::$app->communication;
 
 //            Yii::error(VarDumper::dumpAsString([$sid, $type, $from, $to, $firstTransferToNumber]));
@@ -584,7 +489,6 @@ class PhoneController extends FController
                 }
                 $resultApi = $communication->callForward(
                     $sid,
-                    $from,
                     $to,
                     $originalCall->isRecordingDisable(),
                     $call->getDataPhoneListId()
@@ -977,51 +881,6 @@ class PhoneController extends FController
             if (!isset($result['error'])) {
                 $result['error'] = false;
             }
-
-            // \Yii::info(VarDumper::dumpAsString([$result, \Yii::$app->request->post()]), 'PhoneController:actionAjaxCallRedirectToAgent');
-
-
-            //$call = Call::findOne(['c_id' => $sid]);
-//                if ($result && isset($result['data'], $result['data']['call'], $result['data']['call']['sid'])) {
-//
-//                    $dataCall = $result['data']['call'];
-//
-//                    $call = Call::findOne(['c_call_sid' => $dataCall['sid']/*, 'c_created_user_id' => $userId*/]);
-//
-//                    if (!$call) {
-//                        $call = new Call();
-//                    }
-//
-//                    $call->c_call_sid = $dataCall['sid'];
-//                    $call->c_call_type_id = Call::CALL_TYPE_IN;
-//                    $call->c_call_status = Call::CALL_STATUS_IVR;
-//                    $call->c_status_id = $call->setStatusByTwilioStatus($call->c_call_status);
-//                    // $call->c_com_call_id = null;
-//                    // $call->c_parent_call_sid = $result['data']['result']['sid']; // $call_parent->c_parent_call_sid;
-//                    // $call->c_project_id = $projectid;
-//
-//                    $call->c_project_id = $originCall->c_project_id;
-//                    $call->c_dep_id = $originCall->c_dep_id;
-//
-//                    $call->c_is_new = true;
-//                    $call->c_created_dt = date('Y-m-d H:i:s');
-//                    $call->c_from = $dataCall['from']; //$from;
-//                    $call->c_to = UserCallIdentity::getClientId($userId);//$result['data']['result']['forwardedFrom'] ?? null;
-//                    $call->c_created_user_id = $userId;
-//                    // $call->c_lead_id = ($lead_id > 0) ? $lead_id : null;
-//                    // $call->c_case_id = ($case_id > 0) ? $case_id : null;
-//                    if (!$call->save()) {
-//                        Yii::error(VarDumper::dumpAsString($call->errors), 'PhoneController:actionAjaxCallRedirectToAgent');
-//                    }
-//
-//                }
-
-            /*if($call) {
-                Notifications::socket(null, $call->c_lead_id, 'incomingCall', ['status' => $call->c_call_status, 'duration' => $call->c_call_duration, 'snr' => $call->c_sequence_number], true);
-            }*/
-
-
-            // \Yii::info(VarDumper::dumpAsString(['call' => $call ? $call->attributes  : null, 'sid' => $sid, 'updateData' => $updateData, 'result' => $result, 'post' => \Yii::$app->request->post()]), 'info\PhoneController:actionAjaxCallRedirectToAgent');
         } catch (\Throwable $e) {
             $result = [
                 'error' => true,
@@ -1532,6 +1391,17 @@ class PhoneController extends FController
 
     public function actionAjaxJoinToConference(): Response
     {
+        $deviceId = (int)\Yii::$app->request->post('deviceId');
+
+        try {
+            $voipDevice = (new ReadyVoipDevice())->find($deviceId, Auth::id());
+        } catch (\Throwable $e) {
+            return $this->asJson([
+                'error' => true,
+                'message' => $e->getMessage(),
+            ]);
+        }
+
         try {
             $isOnCall = UserStatus::findOne(['us_user_id' => Auth::id(), 'us_is_on_call' => true]);
             if ($isOnCall) {
@@ -1563,7 +1433,7 @@ class PhoneController extends FController
                 $call->c_conference_sid,
                 $call->c_project_id,
                 $call->c_from, //$from
-                UserCallIdentity::getClientId(Auth::id()),
+                $voipDevice,
                 $source_type_id,
                 Auth::id(),
                 $conference->isRecordingDisabled(),
@@ -1571,37 +1441,6 @@ class PhoneController extends FController
                 $call->c_to
             );
             Yii::$app->session->set($key, time());
-        } catch (\Throwable $e) {
-            $result = [
-                'error' => true,
-                'message' => $e->getMessage(),
-            ];
-        }
-        return $this->asJson($result);
-    }
-
-    public function actionAjaxCreateCall()
-    {
-        try {
-            $isOnCall = UserStatus::findOne(['us_user_id' => Auth::id(), 'us_is_on_call' => true]);
-            if ($isOnCall) {
-                throw new BadRequestHttpException('Already exist active call');
-            }
-
-            $form = new CreateCallForm();
-
-            if (!$form->load(Yii::$app->request->post())) {
-                throw new BadRequestHttpException('Cant load data');
-            }
-
-            $form->user_id = Auth::id();
-            $form->caller = UserCallIdentity::getClientId(Auth::id());
-
-            if (!$form->validate()) {
-                throw new BadRequestHttpException('Request error: ' . VarDumper::dumpAsString($form->getErrors()));
-            }
-
-            $result = Yii::$app->communication->createCall($form);
         } catch (\Throwable $e) {
             $result = [
                 'error' => true,
@@ -2039,68 +1878,6 @@ class PhoneController extends FController
         return $this->asJson($result);
     }
 
-    public function actionCreateInternalCall()
-    {
-        try {
-            $createdUser = Auth::user();
-            $key = 'call_user_to_user_' . $createdUser->id;
-            $this->guardFromUserIsFree($createdUser->id, $key);
-
-            $user_id = (int)Yii::$app->request->post('user_id');
-            $this->guardValidToUser($user_id);
-
-            $this->guardPermissionUserToUserCall($createdUser->id, $user_id);
-
-            Yii::$app->cache->set($key, (time() + 10), 10);
-
-            $recordingManager = RecordManager::toUser($createdUser->id);
-
-            $result = Yii::$app->communication->callToUser(
-                UserCallIdentity::getClientId($createdUser->id),
-                UserCallIdentity::getClientId($user_id),
-                $user_id,
-                $createdUser->id,
-                [
-                    'status' => 'Ringing',
-                    'duration' => 0,
-                    'typeId' => Call::CALL_TYPE_IN,
-                    'type' => 'Incoming',
-                    'source_type_id' => Call::SOURCE_INTERNAL,
-                    'fromInternal' => 'false',
-                    'isInternal' => 'true',
-                    'isHold' => 'false',
-                    'holdDuration' => 0,
-                    'isListen' => 'false',
-                    'isCoach' => 'false',
-                    'isMute' => 'false',
-                    'isBarge' => 'false',
-                    'project' => '',
-                    'source' => Call::SOURCE_LIST[Call::SOURCE_INTERNAL],
-                    'isEnded' => 'false',
-                    'contact' => [
-                        'name' => $createdUser->nickname ?: $createdUser->username,
-                        'phone' => '',
-                        'company' => '',
-                    ],
-                    'department' => '',
-                    'queue' => Call::QUEUE_DIRECT,
-                    'conference' => [],
-                    'isConferenceCreator' => 'false',
-                    'recordingDisabled' => $recordingManager->isDisabledRecord(),
-                ],
-                FriendlyName::next(),
-                $recordingManager->isDisabledRecord()
-            );
-        } catch (\Throwable $e) {
-            $result = [
-                'error' => true,
-                'message' => $e->getMessage(),
-            ];
-        }
-
-        return $this->asJson($result);
-    }
-
     private function guardPermissionUserToUserCall(int $fromUserId, int $toUserId): void
     {
         if ($fromUserId === $toUserId) {
@@ -2178,15 +1955,15 @@ class PhoneController extends FController
             $phone = null;
 
             if ($call->isOut()) {
-                if (UserCallIdentity::canParse($call->cl_phone_from)) {
+                if (VoipDevice::isValid($call->cl_phone_from)) {
                     $list = new AvailablePhoneList(Auth::id(), $call->cl_project_id, $call->cl_department_id, $params->defaultPhoneType);
-                    $phone = $list->getFirst();
+                    $phone = $list->getFirst()->phone ?? null;
                 } else {
                     $phone = $call->cl_phone_from;
                 }
             } elseif ($call->isIn()) {
                 $list = new AvailablePhoneList(Auth::id(), $call->cl_project_id, $call->cl_department_id, $params->defaultPhoneType);
-                $phone = $list->getFirst();
+                $phone = $list->getFirst()->phone ?? null;
             }
 
             if ($phone) {

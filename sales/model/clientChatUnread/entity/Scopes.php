@@ -7,5 +7,4 @@ namespace sales\model\clientChatUnread\entity;
  */
 class Scopes extends \yii\db\ActiveQuery
 {
-
 }

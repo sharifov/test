@@ -12,18 +12,17 @@ use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
 use sales\guards\phone\PhoneBlackListGuard;
 use sales\helpers\setting\SettingHelper;
-use sales\helpers\UserCallIdentity;
 use sales\model\call\helper\CallHelper;
 use sales\model\call\services\currentQueueCalls\ActiveConference;
 use sales\model\client\query\ClientLeadCaseCounter;
 use sales\model\conference\service\ConferenceDataService;
 use sales\model\phoneList\entity\PhoneList;
+use sales\model\voip\phoneDevice\device\VoipDevice;
 
 class CallUpdateMessage
 {
     public function create(Call $call, bool $isChangedStatus, int $userId): array
     {
-        $conferenceBase = (bool)(\Yii::$app->params['settings']['voip_conference_base'] ?? false);
         $fromInternal = PhoneList::find()->byPhone($call->c_from)->enabled()->exists();
         $name = '';
         $phone = '';
@@ -65,12 +64,12 @@ class CallUpdateMessage
 
         if ($call->isInternal() || ($call->currentParticipant && $call->currentParticipant->isUser())) {
             if ($call->isIn()) {
-                if (($fromUserId = UserCallIdentity::parseUserId($call->c_from)) && $fromUser = Employee::findOne($fromUserId)) {
+                if (($fromUserId = VoipDevice::getUserId($call->c_from)) && $fromUser = Employee::findOne($fromUserId)) {
                     $name = $fromUser->nickname ?: $fromUser->username;
                     $phone = '';
                 }
             } elseif ($call->isOut()) {
-                if (($toUserId = UserCallIdentity::parseUserId($call->c_to)) && $toUser = Employee::findOne($toUserId)) {
+                if (($toUserId = VoipDevice::getUserId($call->c_to)) && $toUser = Employee::findOne($toUserId)) {
                     $name = $toUser->nickname ?: $toUser->username;
                     $phone = '';
                 }
@@ -108,13 +107,6 @@ class CallUpdateMessage
 
         $callSid = $call->c_call_sid;
         $callId = $call->c_id;
-
-        if (!$conferenceBase) {
-            if ($isChangedStatus && $call->isStatusInProgress() && $call->isOut() && $call->c_parent_id) {
-                $callSid = $call->c_parent_call_sid ?: $call->cParent->c_call_sid;
-                $callId = $call->c_parent_call_sid ?: $call->cParent->c_id;
-            }
-        }
 
         if ($call->isJoin()) {
             $source = $call->c_parent_call_sid ? $call->cParent->getSourceName() : '';
@@ -214,15 +206,9 @@ class CallUpdateMessage
 
     public function getContactData(Call $call, int $userId): array
     {
-        $conferenceBase = (bool)(\Yii::$app->params['settings']['voip_conference_base'] ?? false);
         $name = '';
 
         $callSid = $call->c_call_sid;
-        if (!$conferenceBase) {
-            if ($call->isStatusInProgress() && $call->isOut() && $call->c_parent_id) {
-                $callSid = $call->c_parent_call_sid ?: $call->cParent->c_call_sid;
-            }
-        }
 
         if ($call->isJoin()) {
             if ($call->cParent && $call->cParent->cCreatedUser) {
@@ -235,11 +221,11 @@ class CallUpdateMessage
 
         if ($call->isInternal() || ($call->currentParticipant && $call->currentParticipant->isUser())) {
             if ($call->isIn()) {
-                if (($fromUserId = UserCallIdentity::parseUserId($call->c_from)) && $fromUser = Employee::findOne($fromUserId)) {
+                if (($fromUserId = VoipDevice::getUserId($call->c_from)) && $fromUser = Employee::findOne($fromUserId)) {
                     $name = $fromUser->nickname ?: $fromUser->username;
                 }
             } elseif ($call->isOut()) {
-                if (($toUserId = UserCallIdentity::parseUserId($call->c_to)) && $toUser = Employee::findOne($toUserId)) {
+                if (($toUserId = VoipDevice::getUserId($call->c_to)) && $toUser = Employee::findOne($toUserId)) {
                     $name = $toUser->nickname ?: $toUser->username;
                 }
             }

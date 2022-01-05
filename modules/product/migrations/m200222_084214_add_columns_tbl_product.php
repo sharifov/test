@@ -10,7 +10,6 @@ use yii\db\Migration;
  */
 class m200222_084214_add_columns_tbl_product extends Migration
 {
-
     public function safeUp()
     {
         $this->addColumn('{{%product}}', 'pr_market_price', $this->decimal(8, 2)->null()->defaultValue(null));

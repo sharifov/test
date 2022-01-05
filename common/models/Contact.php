@@ -7,9 +7,4 @@ namespace common\models;
 */
 class Contact extends Client
 {
-
-
-
-
-
 }

@@ -31,7 +31,6 @@ use yii\base\Widget;
  */
 class LeadRedialWidget extends Widget
 {
-
     public $lead;
 
     public $viewUrl;

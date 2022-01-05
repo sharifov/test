@@ -19,7 +19,6 @@ use yii\validators\RequiredValidator;
  */
 class HotelRoomForm extends Model
 {
-
     public $hr_id;
     public $hr_hotel_id;
     public $hr_room_name;

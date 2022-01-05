@@ -11,7 +11,6 @@ namespace sales\services\lead\calculator;
  */
 class SegmentDTO
 {
-
     public $origin;
 
     public $destination;

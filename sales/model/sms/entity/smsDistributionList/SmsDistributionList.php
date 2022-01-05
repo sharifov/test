@@ -44,7 +44,6 @@ use yii\helpers\VarDumper;
  */
 class SmsDistributionList extends ActiveRecord
 {
-
     public const STATUS_NEW     = 1;
     public const STATUS_PENDING = 2;
     public const STATUS_PROCESS = 3;

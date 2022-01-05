@@ -7,7 +7,6 @@ use yii\console\Controller;
 
 class UpdateClientPhonesController extends Controller
 {
-
     /**
      * Remove spaces from phones
      */

@@ -22,7 +22,6 @@ use yii\base\Model;
  */
 class CallForm extends Model
 {
-
     public $c_id;
     public $c_call_sid;
     public $c_project_id;

@@ -18,7 +18,6 @@ use yii\filters\VerbFilter;
  */
 class OrderTipsCrudController extends FController
 {
-
     /**
      * @var OrderTipsManageService
      */

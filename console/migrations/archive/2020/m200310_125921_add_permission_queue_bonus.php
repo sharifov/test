@@ -8,7 +8,6 @@ use yii\db\Migration;
  */
 class m200310_125921_add_permission_queue_bonus extends Migration
 {
-
     /**
      * {@inheritdoc}
      */

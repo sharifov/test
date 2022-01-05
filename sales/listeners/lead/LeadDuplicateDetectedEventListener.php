@@ -10,7 +10,6 @@ use Yii;
  */
 class LeadDuplicateDetectedEventListener
 {
-
     /**
      * @param LeadDuplicateDetectedEvent $event
      */

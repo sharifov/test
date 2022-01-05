@@ -6,6 +6,7 @@ use common\models\Department;
 use common\models\Lead;
 use common\models\Notifications;
 use sales\model\leadRedial\entity\events\CallRedialAccessCreatedEvent;
+use sales\model\voip\phoneDevice\device\ReadyVoipDevice;
 
 class RedialCallAccessCreatedPhoneWidgetNotificationListener
 {

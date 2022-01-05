@@ -26,7 +26,6 @@ use yii\db\ActiveRecord;
  */
 class CallNote extends \yii\db\ActiveRecord
 {
-
     public function behaviors(): array
     {
         return [

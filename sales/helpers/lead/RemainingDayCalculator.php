@@ -6,7 +6,6 @@ use common\models\Airports;
 
 class RemainingDayCalculator
 {
-
     /**
      * @param Airports $airport
      * @param $departure

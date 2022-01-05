@@ -4,9 +4,14 @@ namespace console\controllers;
 
 use common\models\Department;
 use common\models\Project;
+use common\models\search\ContactsSearch;
 use common\models\UserGroup;
+use frontend\helpers\JsonHelper;
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeCreatedEvent;
+use sales\auth\Auth;
 use sales\helpers\setting\SettingHelper;
+use sales\model\call\useCase\createCall\CreateCallForm;
+use sales\model\call\useCase\createCall\CreateRedialCall;
 use sales\model\client\notifications\client\entity\NotificationType;
 use common\components\purifier\Purifier;
 use common\models\CallUserAccess;
@@ -65,14 +70,19 @@ use sales\model\conference\entity\conferenceEventLog\EventFactory;
 use sales\model\conference\entity\conferenceEventLog\events\ParticipantJoin;
 use sales\model\conference\useCase\PrepareCurrentCallsForNewCall;
 use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackForm;
+use sales\model\department\department\DefaultPhoneType;
 use sales\model\leadRedial\assign\LeadRedialAccessChecker;
 use sales\model\leadRedial\assign\Users;
 use sales\model\leadRedial\entity\CallRedialUserAccess;
 use sales\model\leadRedial\entity\CallRedialUserAccessRepository;
 use sales\model\leadRedial\priorityLevel\ConversionFetcher;
 use sales\model\leadRedial\queue\CallNextLeads;
+use sales\model\leadRedial\queue\RedialCall;
+use sales\model\phone\AvailablePhoneList;
 use sales\model\project\entity\params\Params;
 use sales\model\user\reports\stats\UserStatsReport;
+use sales\model\voip\phoneDevice\device\ReadyVoipDevice;
+use sales\model\voip\phoneDevice\PhoneDeviceLogForm;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
 use sales\services\sms\incoming\SmsIncomingForm;
@@ -89,6 +99,70 @@ use yii\rbac\Role;
 
 class TestController extends Controller
 {
+
+    public function actionPending()
+    {
+        $access = CallUserAccess::find()->andWhere(['cua_call_id' => 3386771, 'cua_user_id' => 295])->one();
+        $access->acceptPending();
+        $access->save();
+    }
+
+    public function actionAccept()
+    {
+        $access = CallUserAccess::find()->andWhere(['cua_call_id' => 3386771, 'cua_user_id' => 295])->one();
+        $access->acceptCall();
+        $access->save();
+    }
+
+    public function actionVoip()
+    {
+        $ids = (new ReadyVoipDevice())->findBrowserGroupIds(295);
+        VarDumper::dump($ids);
+
+        die;
+//        $f = new PhoneDeviceLogForm();
+//        $f->load([
+//            'level' => 4,
+//            'message' => 'Received transportClose from pstream',
+//            'timestamp' => 1638639604649,
+//            'stacktrace' => '    at Log.error (https://sales.local:444/twilio/twilio-2.0.1.js:4231:32)n    at PStream.Call._this._onTransportClose (https://sales.local:444/twilio/twilio-2.0.1.js:1127:24)n    at emitNone (https://sales.local:444/twilio/twilio-2.0.1.js:10547:13)n    at PStream.emit (https://sales.local:444/twilio/twilio-2.0.1.js:10632:7)n    at PStream._handleTransportClose (https://sales.local:444/twilio/twilio-2.0.1.js:5100:8)n    at emitNone (https://sales.local:444/twilio/twilio-2.0.1.js:10547:13)n    at WSTransport.emit (https://sales.local:444/twilio/twilio-2.0.1.js:10632:7)n    at WSTransport._closeSocket (https://sales.local:444/twilio/twilio-2.0.1.js:9342:14)',
+//        ]);
+//        $f->validate();
+//        VarDumper::dump($f->getErrors());
+//        die;
+
+        $m = <<<JSON
+{\"message\":\"ConnectionError (31005): Error sent from gateway in HANGUP\",\"causes\":[],\"code\":31005,\"description\":\"Connection error\",\"explanation\":\"A connection error occurred during the call\",\"name\":\"ConnectionError\",\"solutions\":[]}            
+JSON;
+//        $m = preg_replace("/\n/", "", $m);
+        $m = preg_replace('/\\\"/', "\"", $m);
+//        VarDumper::dump($m);die;
+
+
+//        $m = str_replace('\"', '"', $m);
+//        VarDumper::dump($m);die;
+        $a = json_decode((($m)), true, 512, JSON_THROW_ON_ERROR);
+
+        VarDumper::dump($a);
+        die;
+
+//        die;
+        $contacts = (new ContactsSearch(295))->getClientsContactByPhone('+37368852225');
+        VarDumper::dump($contacts);
+
+
+        die;
+        $form = new CreateCallForm(295);
+        $form->load([
+            //'toUserId' => '1',
+            'to' => '+14155769359',
+            'fromLead' => '1'
+        ]);
+        $form->validate();
+        VarDumper::dump($form->getErrors());
+        VarDumper::dump($form->getAttributes());
+    }
+
     public function actionMmm()
     {
         $user = Employee::findOne(295);

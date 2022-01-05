@@ -15,7 +15,6 @@ use sales\services\lead\LeadFlowLogService;
  */
 class LeadFollowUpEventLogListener
 {
-
     private $leadFlowLogService;
 
     /**

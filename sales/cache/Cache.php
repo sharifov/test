@@ -4,5 +4,4 @@ namespace sales\cache;
 
 class Cache
 {
-
 }

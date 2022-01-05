@@ -11,7 +11,6 @@ use common\models\Lead;
  */
 class LeadTaskEvent
 {
-
     public $lead;
 
     /**

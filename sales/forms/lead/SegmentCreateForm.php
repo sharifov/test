@@ -7,5 +7,4 @@ namespace sales\forms\lead;
  */
 class SegmentCreateForm extends SegmentForm
 {
-
 }

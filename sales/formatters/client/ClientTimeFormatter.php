@@ -8,7 +8,6 @@ use yii\helpers\Html;
 
 class ClientTimeFormatter
 {
-
     /**
      * @param \DateTime|null $dt
      * @param bool $offsetGmt

@@ -7,5 +7,4 @@ namespace sales\model\phoneLine\phoneLineUserGroup\entity;
  */
 class Scopes extends \yii\db\ActiveQuery
 {
-
 }

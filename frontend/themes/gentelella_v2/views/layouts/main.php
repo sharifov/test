@@ -40,12 +40,14 @@ $bundle = \frontend\assets\AppAsset::register($this);
         $this->metaTags[] = Html::csrfMetaTags();
         $this->registerMetaTag(['name' => 'robots', 'content' => 'noindex, nofollow']);
         $this->registerMetaTag(['name' => 'msapplication-TileColor', 'content' => '#a9e04b']);
-        //$this->registerLinkTag(['rel' => 'icon', 'type' => 'image/png', 'href' => Helper::publishStatic('images/favicons/16x16.png'), 'sizes' => '16x16']);
-        $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon', 'href' => Yii::$app->request->baseUrl . '/favicon.ico']);
+        //$this->registerLinkTag(['rel' => 'icon', 'type' => 'image/png',
+        // 'href' => Helper::publishStatic('images/favicons/16x16.png'), 'sizes' => '16x16']);
+
+    if (empty($this->linkTags)) {
+        $this->registerLinkTag(['rel' => 'shortcut icon', 'type' => 'image/x-icon',
+            'href' => Yii::$app->request->baseUrl . '/favicon.ico']);
+    }
         $this->head();
-
-        //$this->head();
-
         $host = 'CRM';
         echo Html::tag('title', ucfirst($host) . ' - ' . Html::encode($this->title));
     ?>
@@ -318,9 +320,9 @@ $bundle = \frontend\assets\AppAsset::register($this);
         <div class="preloader__text">Loading...</div>
     </div>
 </div>
-<?= frontend\widgets\WebPhone::widget() ?>
+
 <?php if (Auth::can('PhoneWidget')) : ?>
-    <?= frontend\widgets\NewWebPhoneWidget::widget(['userId' => Auth::id()]) ?>
+    <?= frontend\widgets\newWebPhone\NewWebPhoneWidget::widget(['userId' => Auth::id()]) ?>
 <?php endif; ?>
 
 <div id="_client_chat_access_widget">

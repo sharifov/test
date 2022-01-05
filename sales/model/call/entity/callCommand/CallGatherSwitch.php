@@ -19,8 +19,6 @@ use yii\db\ActiveRecord;
  */
 class CallGatherSwitch extends ActiveRecord
 {
-
-
     public static function tableName(): string
     {
         return '{{%call_gather_switch}}';

@@ -7,7 +7,6 @@ use yii\helpers\ArrayHelper;
 
 class LeadFlightSegmentHelper
 {
-
     /**
      * @return array
      */

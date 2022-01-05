@@ -11,7 +11,6 @@ use Yii;
 
 class CommunicationHelper
 {
-
     /**
      * @param Call[]|null $callList
      */

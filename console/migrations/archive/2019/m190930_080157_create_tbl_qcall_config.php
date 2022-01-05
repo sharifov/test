@@ -8,7 +8,6 @@ use common\models\Employee;
  */
 class m190930_080157_create_tbl_qcall_config extends Migration
 {
-
 //    public $roles = [
 //        Employee::ROLE_ADMIN,
 //        Employee::ROLE_SUPER_ADMIN,

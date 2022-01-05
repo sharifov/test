@@ -12,7 +12,6 @@ use sales\repositories\quote\QuoteRepository;
  */
 class LeadCountPassengersChangedEventListener
 {
-
     private $quoteRepository;
 
     /**

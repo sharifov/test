@@ -33,7 +33,6 @@ use yii\web\Response;
  */
 class ClientController extends FController
 {
-
     /**
      * @return array
      */

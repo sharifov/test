@@ -17,7 +17,6 @@ use common\models\Lead;
  */
 class LeadTrashEvent implements LeadableEventInterface
 {
-
     public $lead;
     public $oldStatus;
     public $oldOwnerId;

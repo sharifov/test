@@ -7,5 +7,4 @@ namespace sales\model\conference\entity\conferenceParticipantStats;
  */
 class Scopes extends \yii\db\ActiveQuery
 {
-
 }

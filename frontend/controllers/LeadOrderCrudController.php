@@ -14,7 +14,6 @@ use yii\helpers\ArrayHelper;
 
 class LeadOrderCrudController extends FController
 {
-
     public function behaviors(): array
     {
         $behaviors = [

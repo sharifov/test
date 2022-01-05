@@ -12,7 +12,6 @@ use sales\model\call\entity\callCommand\PhoneLineCommand;
  */
 class PhoneLineCommandSearch extends PhoneLineCommand
 {
-
     public function rules(): array
     {
         return [

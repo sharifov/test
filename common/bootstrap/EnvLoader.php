@@ -22,7 +22,6 @@ use Dotenv\Repository\RepositoryBuilder;
  */
 class EnvLoader
 {
-
     /**
      * @var string Environment variable file directory
      */

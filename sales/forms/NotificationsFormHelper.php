@@ -7,7 +7,6 @@ use yii\bootstrap\Alert;
 
 class NotificationsFormHelper
 {
-
     /**
      * @var array
      */

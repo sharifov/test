@@ -23,7 +23,6 @@ use yii\helpers\VarDumper;
  */
 class ServiceController extends Controller
 {
-
     /**
      *  Run update currency list & rates
      */

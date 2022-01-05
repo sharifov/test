@@ -8,7 +8,6 @@ use yii\db\ActiveQuery;
 
 class LeadFlowQuery extends ActiveQuery
 {
-
     /**
      * @param $userId
      * @param array $flowDescriptions ['Manual create', 'Call AutoCreated Lead']

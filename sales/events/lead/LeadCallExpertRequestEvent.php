@@ -11,7 +11,6 @@ use common\models\Lead;
  */
 class LeadCallExpertRequestEvent
 {
-
     public $lead;
 
     /**

@@ -57,7 +57,7 @@ $(document).ready(function() {
             }
             let countMissedCalls = parseInt($(this).attr('data-missed-calls'));
             if (countMissedCalls > 0) {
-                PhoneWidgetCall.requestClearMissedCalls();
+                PhoneWidget.requestClearMissedCalls();
             }
         }
 
@@ -93,7 +93,7 @@ $(document).ready(function() {
                 $.ajax({
                     url: '/call-log/ajax-get-call-history',
                     type: 'post',
-                    data: {page: page, uid: userId},
+                    data: {page: page},
                     dataType: 'json',
                     beforeSend: function() {
                         $($current).append('<div class="wg-history-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
@@ -130,10 +130,6 @@ $(document).ready(function() {
            PhoneWidgetContacts.initLazyLoadFullList(simpleBar);
         }
     });
-
-    
-
-
 
 
     $('.js-toggle-contact-info').on('click', function() {
@@ -357,7 +353,7 @@ $(document).ready(function() {
         $('.call-pane__dial-clear-all').addClass('is-shown');
         $('#call-pane__dial-number_active_dialpad').focus();
 
-        PhoneWidgetCall.callRequester.sendDigit(conferenceSid, keyPressed);
+        PhoneWidget.callRequester.sendDigit(conferenceSid, keyPressed);
     });
 
     $(window).on("mouseup touchend", function(){
@@ -376,7 +372,7 @@ $(document).ready(function() {
     $('.call_pane_dialpad_clear_number').on('click', function(e) {
         e.preventDefault();
         $('#call-pane__dial-number').val('').attr('readonly', false).prop('readonly', false);
-        resetDialNumberData();
+        PhoneWidget.resetDialNumberData();
         $('#call-to-label').text('');
         $('.suggested-contacts').removeClass('is_active');
 
@@ -389,7 +385,7 @@ $(document).ready(function() {
         $('.call-pane__dial-number').val('').attr('readonly', true).prop('readonly', true);
         $('#call-to-label').text('');
         $('.suggested-contacts').removeClass('is_active');
-        resetDialNumberData();
+        PhoneWidget.resetDialNumberData();
     });
 
     $('.call-pane__correction').on('click', function(e) {
@@ -871,12 +867,6 @@ function toSelect(elem, obj, cb) {
         projectId: obj.selected.projectId
     }
 
-    this.primaryData = {
-        value: obj.primary ? obj.primary.value || null : null,
-        project: obj.primary ? obj.primary.project || null : null,
-        projectId: obj.primary ? obj.primary.projectId || null : null
-    };
-
     // nodes
     function selectedNode(value, project, id, projectId, length) {
         let chevronDown = '';
@@ -947,28 +937,6 @@ function toSelect(elem, obj, cb) {
         }.bind(this);
     }
 
-    this.setPrimaryData = function () {
-        return function (obj) {
-            console.log(obj);
-            this.primaryData.value = obj.value;
-            this.primaryData.project = obj.project;
-            this.primaryData.projectId = obj.projectId;
-        }.bind(this);
-    }
-
-    this.getPrimaryData = function () {
-        return this.primaryData;
-    }
-
-    this.clearPrimaryData = function () {
-        return function () {
-            this.primaryData.value = null;
-            this.primaryData.project = null;
-            this.primaryData.projectId = null;
-            return this;
-        }.bind(this);
-    }
-
     generateSelect(obj)
 
     $($element).on(selected, $($toggle), function(e) {
@@ -993,15 +961,15 @@ function toSelect(elem, obj, cb) {
 
     return {
         getData: this.getData(),
-        setData: this.setData(),
-        setPrimaryData: this.setPrimaryData(),
-        getPrimaryData: this.getPrimaryData(),
-        clearPrimaryData: this.clearPrimaryData()
+        setData: this.setData()
     }
 
 }
 
 function handleWidgetIcon() {
+    let lastType = 'default';
+    let connected = false;
+
     var $parent = $('.phone-widget-icon'),
         $inner = '.widget-icon-inner',
         animationClass = 'animate',
@@ -1012,6 +980,7 @@ function handleWidgetIcon() {
     function createInitialIcon(type,status) {
         initialNode = '<div class="widget-icon-inner" data-wi-type="'+ type +'" data-wi-status="'+ status +'">'+
             '<div class="standby-phone">'+
+            '<i class="fa fa-exclamation-triangle phone-widget-icon__warning"></i>' +
             '<i class="fa fa-phone-volume icon-phone-answer"></i>' +
             '<div class="phone-widget-icon__state">'+
             '<span class="phone-widget-icon__ongoing"></span>'+
@@ -1019,11 +988,16 @@ function handleWidgetIcon() {
             '<span class="phone-widget-icon__time"></span>'+
             '</div>'+
             '<i class="fa fa-phone icon-phone"></i>'+
-            
+            '<div class="standby-phone__disabled-overlay">'+
+                '<i class="fas fa-phone-slash standby-phone__disabled-icn"></i>'+
+                '<span class="standby-phone__disabled-text"></span>'+
+            '</div>'+
             '</div>'+
             '</div>';
 
         $($parent).append(initialNode)
+
+        lastType = type;
     }
 
     function stateTimer(el, timerStamp) {
@@ -1074,8 +1048,14 @@ function handleWidgetIcon() {
 
         clearInterval(interval);
 
+        if (props.type) {
+            lastType = props.type;
+        }
+        if (connected) {
+            $(inner).attr('data-wi-type', props.type);
+        }
+
         $(inner).attr('data-wi-status', props.status);
-        $(inner).attr('data-wi-type', props.type);
         $(ongoing).html(props.currentCalls);
         $(text).html(props.text);
 
@@ -1089,9 +1069,27 @@ function handleWidgetIcon() {
         $($inner).addClass(animationClass);
     }
 
+    function disconnect() {
+        connected = false;
+        $($inner).attr('data-wi-type', 'disabled');
+        $('.standby-phone__disabled-text').html('DISCONNECTED');
+    }
+
+    function connect() {
+        connected = true;
+        $($inner).attr('data-wi-type', lastType);
+        $('.standby-phone__disabled-text').html('');
+    }
+
     return {
+        connect: function() {
+            connect()
+        },
+        disconnect: function() {
+            disconnect()
+        },
         init: function() {
-            createInitialIcon('default', false) 
+            createInitialIcon('disabled', false)
         },
         update: function(props) {
             updateIcon(props)

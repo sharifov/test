@@ -6,7 +6,6 @@ use common\models\Employee;
 
 class TakeGuard
 {
-
     public function frequencyMinutesGuard(Employee $user, array $flowDescriptions = [], array $fromStatuses = []): void
     {
         $isAccessNewLeadByFrequency = $user->accessTakeLeadByFrequencyMinutes($flowDescriptions, $fromStatuses);

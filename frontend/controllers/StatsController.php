@@ -26,7 +26,6 @@ use yii\widgets\ActiveForm;
  */
 class StatsController extends FController
 {
-
     /**
      * {@inheritdoc}
      */

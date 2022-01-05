@@ -26,7 +26,6 @@ use yii\db\ActiveRecord;
  */
 class PhoneLineCommand extends ActiveRecord
 {
-
     public static function tableName(): string
     {
         return '{{%phone_line_command}}';

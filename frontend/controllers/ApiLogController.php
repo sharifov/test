@@ -19,7 +19,6 @@ use yii\web\Response;
  */
 class ApiLogController extends FController
 {
-
     public function behaviors()
     {
         $behaviors = [

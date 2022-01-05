@@ -47,7 +47,6 @@ use yii\base\Model;
  */
 class CallDataForm extends Model
 {
-
     public $Called;
     public $ParentCallSid;
     public $RecordingUrl;

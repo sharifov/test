@@ -6,7 +6,6 @@ use common\models\LeadChecklist;
 
 class LeadChecklistRepository
 {
-
     /**
      * @param $userId
      * @param $leadId

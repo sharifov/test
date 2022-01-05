@@ -11,7 +11,6 @@ use yii\db\ActiveQuery;
 
 class EmployeeDepartmentAccess
 {
-
     /** fot this roles return all departments */
     private static $defaultRolesForViewAllDepartments = [
         Employee::ROLE_SUPER_ADMIN,

@@ -8,5 +8,4 @@ namespace sales\model\callLog\entity\callLogCase;
  */
 class Scopes extends \yii\db\ActiveQuery
 {
-
 }

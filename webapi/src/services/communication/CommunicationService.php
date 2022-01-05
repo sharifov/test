@@ -22,9 +22,9 @@ use frontend\widgets\notification\NotificationMessage;
 use sales\entities\cases\Cases;
 use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
-use sales\helpers\UserCallIdentity;
 use sales\model\callTerminateLog\service\CallTerminateLogService;
 use sales\model\phoneList\entity\PhoneList;
+use sales\model\voip\phoneDevice\device\VoipDevice;
 use sales\repositories\lead\LeadRepository;
 use sales\services\call\CallDeclinedException;
 use sales\services\call\CallService;
@@ -36,6 +36,9 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 
 /**
+ *
+ * @deprecated
+ * Not used
  * Class CommunicationService
  * @package webapi\src\services\communication
  *
@@ -660,8 +663,8 @@ class CommunicationService
         $agentId = null;
 
         if (!empty($requestDataDTO->Called)) {
-            if (UserCallIdentity::canParse($requestDataDTO->Called)) {
-                $agentId = UserCallIdentity::parseUserId($requestDataDTO->Called);
+            if (VoipDevice::isValid($requestDataDTO->Called)) {
+                $agentId = VoipDevice::getUserId($requestDataDTO->Called);
             }
         }
 
@@ -991,8 +994,8 @@ class CommunicationService
                 $call->c_from = $callOriginalData['From'] ?? null;
                 $call->c_to = $callOriginalData['To'] ?? null;
                 $call->c_caller_name = $callOriginalData['Caller'] ?? null;
-                if (UserCallIdentity::canParse($call->c_from)) {
-                    $agentId = UserCallIdentity::parseUserId($call->c_from);
+                if (VoipDevice::isValid($call->c_from)) {
+                    $agentId = VoipDevice::getUserId($call->c_from);
                 } else {
                     $agentId = null;
                 }

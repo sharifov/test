@@ -8,7 +8,6 @@ use yii\db\Migration;
  */
 class m191220_140714_add_permissions_phone_black_list extends Migration
 {
-
     public $routes = [
         '/phone/check-black-phone',
     ];

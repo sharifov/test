@@ -27,7 +27,6 @@ use yii\db\Query;
  */
 class EmployeeQuery extends \yii\db\ActiveQuery
 {
-
     /**
      * @return $this
      */

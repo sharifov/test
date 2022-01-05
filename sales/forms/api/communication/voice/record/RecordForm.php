@@ -19,7 +19,6 @@ use sales\forms\CompositeForm;
  */
 class RecordForm extends CompositeForm
 {
-
     public $type;
     public $action;
     public $c_id;

@@ -238,19 +238,19 @@ use yii\helpers\Url;
             },
             'visible' => !$user->isAgent(),
         ],
-        [
-            'class' => 'yii\grid\ActionColumn',
-            'template' => '{call}',
-            'buttons' => [
-                'call' => static function ($url, LeadQcall $model) use ($userIsFreeForCall) {
-                    return Html::button('<i class="fa fa-phone"></i> Call', [
-                        'class' => 'btn btn-primary btn-xs lead-redial-btn',
-                        'disabled' => ($model->lqcLead->isCallProcessing() || !$userIsFreeForCall) ? 'disabled' : false,
-                        'data-url' => Url::to(['lead-redial/redial-from-last-calls']),
-                        'data-gid' => $model->lqcLead->gid,
-                    ]);
-                }
-            ]
-        ],
+//        [
+//            'class' => 'yii\grid\ActionColumn',
+//            'template' => '{call}',
+//            'buttons' => [
+//                'call' => static function ($url, LeadQcall $model) use ($userIsFreeForCall) {
+//                    return Html::button('<i class="fa fa-phone"></i> Call', [
+//                        'class' => 'btn btn-primary btn-xs lead-redial-btn',
+//                        'disabled' => ($model->lqcLead->isCallProcessing() || !$userIsFreeForCall) ? 'disabled' : false,
+//                        'data-url' => Url::to(['lead-redial/redial-from-last-calls']),
+//                        'data-gid' => $model->lqcLead->gid,
+//                    ]);
+//                }
+//            ]
+//        ],
     ],
 ]);

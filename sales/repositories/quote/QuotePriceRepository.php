@@ -9,7 +9,6 @@ use common\models\QuotePrice;
  */
 class QuotePriceRepository
 {
-
     /**
      * @param QuotePrice $quotePrice
      * @return int

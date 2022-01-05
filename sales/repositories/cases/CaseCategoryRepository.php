@@ -7,7 +7,6 @@ use sales\repositories\NotFoundException;
 
 class CaseCategoryRepository
 {
-
     /**
      * @param int $depId
      * @return CaseCategory[]

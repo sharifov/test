@@ -16,7 +16,6 @@ use sales\services\ServiceFinder;
  */
 class LeadStateService
 {
-
     private $serviceFinder;
     private $leadRepository;
 

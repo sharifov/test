@@ -12,7 +12,6 @@ use sales\entities\cases\Cases;
  */
 class CasesOwnerChangeEvent
 {
-
     public $cases;
     public $oldOwner;
     public $newOwner;

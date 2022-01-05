@@ -27,7 +27,6 @@ use yii\helpers\ArrayHelper;
  */
 class Language extends ActiveRecord
 {
-
     /**
      * Status of inactive language.
      */

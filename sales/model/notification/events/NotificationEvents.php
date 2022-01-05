@@ -14,7 +14,6 @@ use yii\helpers\VarDumper;
 
 class NotificationEvents extends Component
 {
-
     public const NOTIFY_ALL = 'notification.*';
 
     public const NOTIFY_SENT = 'notification.sent';

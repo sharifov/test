@@ -17,7 +17,6 @@ use yii\helpers\ArrayHelper;
  */
 class ClientChatChannelTransferSearch extends ClientChatChannelTransfer
 {
-
     public $channelProjectId;
 
     public function rules(): array

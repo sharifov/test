@@ -28,7 +28,6 @@ use yii\base\Model;
  */
 class CallDataForm extends Model
 {
-
     public $ApiVersion;
     public $Called;
     public $CallStatus;

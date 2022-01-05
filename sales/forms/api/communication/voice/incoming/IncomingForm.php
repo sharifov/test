@@ -13,7 +13,6 @@ use sales\forms\CompositeForm;
  */
 class IncomingForm extends CompositeForm
 {
-
     public $type;
     public $call_id;
 

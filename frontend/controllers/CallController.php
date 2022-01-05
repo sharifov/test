@@ -37,6 +37,7 @@ use sales\model\call\services\currentQueueCalls\CurrentQueueCallsService;
 use sales\model\call\services\reserve\CallReserver;
 use sales\model\call\services\reserve\Key;
 use sales\model\call\useCase\assignUsers\UsersForm;
+use sales\model\call\useCase\createCall\CreateRedialCall;
 use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\callLog\entity\callLog\CallLogQuery;
 use sales\model\callLog\entity\callLogRecord\CallLogRecord;
@@ -54,6 +55,7 @@ use sales\model\leadRedial\assign\LeadRedialAccessChecker;
 use sales\model\leadRedial\assign\LeadRedialUnAssigner;
 use sales\model\leadRedial\job\CheckUserIsOnRedialCallJob;
 use sales\model\user\entity\userStatus\UserStatus;
+use sales\model\voip\phoneDevice\device\ReadyVoipDevice;
 use sales\repositories\call\CallRepository;
 use sales\repositories\call\CallUserAccessRepository;
 use sales\repositories\NotFoundException;
@@ -719,240 +721,6 @@ class CallController extends FController
         ]);
     }
 
-
-    /**
-     * @return string
-     * @throws \Exception
-     */
-    public function actionAutoRedial()
-    {
-
-        /** @var Employee $user */
-        $user = Yii::$app->user->identity;
-
-
-
-        /*if(Yii::$app->request->get('act')) {
-            $profile = $user->userProfile;
-            if($profile) {
-                $profile->up_updated_dt = date('Y-m-d H:i:s');
-
-                if (Yii::$app->request->get('act') == 'start') {
-                    $profile->up_auto_redial = true;
-                    $profile->save();
-                }
-                if (Yii::$app->request->get('act') == 'stop') {
-                    $profile->up_auto_redial = false;
-                    $profile->save();
-                }
-            }
-        }*/
-
-
-        //$callModel = null;
-        $leadModel = null;
-        $callData = [];
-
-
-        $query = Lead::getPendingQuery();
-        $allPendingLeadsCount = $query->count();
-
-        $query = Lead::getPendingQuery($user->id);
-        $myPendingLeadsCount = $query->count();
-
-
-        $callModel = Call::find()->where(['c_status_id' => [Call::STATUS_RINGING, Call::STATUS_IN_PROGRESS]])->andWhere(['c_created_user_id' => $user->id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
-
-        //echo Call::find()->where(['c_call_status' => [Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS]])->andWhere(['c_created_user_id' => Yii::$app->user->id])->orderBy(['c_id' => SORT_DESC])->limit(1)->createCommand()->getRawSql(); exit;
-
-        if (Yii::$app->request->get('act') === 'find') {
-            $query = Lead::getPendingQuery($user->id);
-            $query->limit(1);
-
-            //echo $query->createCommand()->getRawSql(); exit;
-
-            //$leadModel = $query->one();
-
-            if (!$callModel) {
-                $leadModel = $query->one();
-            }
-
-            if ($leadModel) {
-                $callData['error'] = null;
-                $callData['project_id'] = $leadModel->project_id;
-                $callData['lead_id'] = $leadModel->id;
-                $callData['phone_to'] = null;
-                $callData['phone_from'] = null;
-
-                if ($leadModel->client && $leadModel->client->clientPhones) {
-                    foreach ($leadModel->client->clientPhones as $phone) {
-                        if (!$phone->phone) {
-                            continue;
-                        }
-                        $callData['phone_to'] = trim($phone->phone);
-                        break;
-                    }
-                }
-
-                $upp = UserProjectParams::find()->where(['upp_project_id' => $leadModel->project_id, 'upp_user_id' => $user->id])->withPhoneList()->one();
-//                if($upp && $upp->upp_tw_phone_number) {
-                if ($upp && $upp->getPhone()) {
-                    //$callData['phone_from'] = $upp->upp_tw_phone_number;
-                    //$callData['phone_from'] = $upp->$upp->getPhone();
-
-//                    $dpp = DepartmentPhoneProject::find()->where(['dpp_project_id' => $leadModel->project_id])->limit(1)->one();
-                    $dpp = DepartmentPhoneProject::find()->where(['dpp_project_id' => $leadModel->project_id])->withPhoneList()->limit(1)->one();
-//                    if($dpp && $dpp->dpp_phone_number) {
-                    if ($dpp && $dpp->getPhone()) {
-//                        $callData['phone_from'] = $dpp->dpp_phone_number;
-                        $callData['phone_from'] = $dpp->getPhone();
-                    } else {
-                        Yii::error('Not found Project Source, Project Id: ' . $leadModel->project_id, 'CallController:actionAutoRedial:DepartmentPhoneProject');
-                    }
-
-                    if (!$callData['phone_from']) {
-                        $callData['error'] = 'Not found source phone number for project (' . $leadModel->project->name . ')';
-                    }
-                } else {
-                    $callData['error'] = 'Not found agent phone number for project (' . $leadModel->project->name . ')';
-                }
-
-
-
-                if (!$callData['phone_to']) {
-                    $callData['error'] = 'Not found client number';
-                }
-                //$callData['error'] = 'Not found client number';
-
-                //$callData['phone_to'] = '+37369594567';
-            }
-
-
-            $isActionFind = true;
-        } else {
-            $isActionFind = false;
-        }
-
-
-        $searchModel = new LeadSearch();
-
-        $params = Yii::$app->request->queryParams;
-        //$params2 = Yii::$app->request->post();
-        //$params = array_merge($params, $params2);
-
-        if ($user->isAgent()) {
-            $isAgent = true;
-        } else {
-            $isAgent = false;
-        }
-
-
-        $checkShiftTime = true;
-
-        if ($isAgent) {
-            $checkShiftTime = $user->checkShiftTime();
-            /*$userParams = $user->userParams;
-
-            if($userParams) {
-                if($userParams->up_inbox_show_limit_leads > 0) {
-                    $params['LeadSearch']['limit'] = $userParams->up_inbox_show_limit_leads;
-                }
-            }*/
-
-
-            /*if($checkShiftTime = !$user->checkShiftTime()) {
-                throw new ForbiddenHttpException('Access denied! Invalid Agent shift time');
-            }*/
-        }
-
-        //$checkShiftTime = true;
-
-
-
-        //$leadModel = new Lead();
-
-
-        /*if(Yii::$app->request->isPjax) {
-            $leadModel = Lead::find()->orderBy(['id' => SORT_DESC])->limit(1)->one();
-        } else {
-            $leadModel = null; //Lead::findOne(22);
-        }*/
-
-//
-//        if(Yii::$app->user->identity->canRole('supervision')) {
-//            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
-//        }
-
-
-        if ($user->isAdmin()) {
-            $dataProvider = $searchModel->searchInbox($params, $user);
-        } else {
-            $dataProvider = null;
-        }
-
-
-
-        $isAccessNewLead = $user->accessTakeNewLead();
-        $accessLeadByFrequency = [];
-
-        if ($isAccessNewLead) {
-            $accessLeadByFrequency = $user->accessTakeLeadByFrequencyMinutes();
-            if (!$accessLeadByFrequency['access']) {
-                $isAccessNewLead = $accessLeadByFrequency['access'];
-            }
-        }
-
-        /*$dataProviderSegments = null;
-
-        if($leadModel) {
-            $searchModelSegments = new LeadFlightSegmentSearch();
-
-            $params = Yii::$app->request->queryParams;
-            //if($leadModel) {
-            $params['LeadFlightSegmentSearch']['lead_id'] = $leadModel ? $leadModel->id : 0;
-            //}
-            $dataProviderSegments = $searchModelSegments->search($params);
-        }*/
-
-
-        //echo $callModel->c_id; exit;
-
-
-        $searchModelCall = new CallSearch();
-
-        $params = Yii::$app->request->queryParams;
-        $params['CallSearch']['c_created_user_id'] = $user->id;
-        $params['CallSearch']['c_call_type_id'] = Call::CALL_TYPE_OUT;
-        $params['CallSearch']['limit'] = 10;
-
-        $dataProviderCall = $searchModelCall->searchAgent($params);
-        $projectList = Project::getListByUser($user->id);
-
-
-        return $this->render('auto-redial', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-            'checkShiftTime' => $checkShiftTime,
-            'isAgent' => $isAgent,
-            'isAccessNewLead' => $isAccessNewLead,
-            'accessLeadByFrequency' => $accessLeadByFrequency,
-            'user' => $user,
-
-            'leadModel' => $leadModel,
-            'callModel' => $callModel,
-            //'searchModelSegments' => $searchModelSegments,
-            //'dataProviderSegments' => $dataProviderSegments,
-            'isActionFind' => $isActionFind,
-            'callData' => $callData,
-            'myPendingLeadsCount' => $myPendingLeadsCount,
-            'allPendingLeadsCount' => $allPendingLeadsCount,
-
-            //'searchModelCall' => $searchModelCall,
-            'dataProviderCall' => $dataProviderCall,
-            'projectList'       => $projectList,
-        ]);
-    }
-
     /**
      * @return string
      * @throws \yii\base\InvalidConfigException
@@ -1101,6 +869,16 @@ class CallController extends FController
     {
         $action = \Yii::$app->request->post('act');
         $call_sid = \Yii::$app->request->post('call_sid');
+        $deviceId = (int)\Yii::$app->request->post('deviceId');
+
+        try {
+            $voipDevice = (new ReadyVoipDevice())->find($deviceId, Auth::id());
+        } catch (\Throwable $e) {
+            return $this->asJson([
+                'error' => true,
+                'message' => $e->getMessage(),
+            ]);
+        }
 
         $response = [
             'error' => true,
@@ -1127,7 +905,7 @@ class CallController extends FController
                             if ($isReserved) {
                                 $prepare = new PrepareCurrentCallsForNewCall($userId);
                                 if ($prepare->prepare()) {
-                                    $this->callService->acceptCall($callUserAccess, $userId);
+                                    $this->callService->acceptCall($callUserAccess, $userId, $voipDevice);
                                     Yii::createObject(LeadRedialUnAssigner::class)->acceptCall($userId);
                                 }
                             } else {
@@ -1167,6 +945,17 @@ class CallController extends FController
     {
         $call_sid = (string)\Yii::$app->request->post('call_sid');
 
+        $deviceId = (int)\Yii::$app->request->post('deviceId');
+
+        try {
+            $voipDevice = (new ReadyVoipDevice())->find($deviceId, Auth::id());
+        } catch (\Throwable $e) {
+            return $this->asJson([
+                'error' => true,
+                'message' => $e->getMessage(),
+            ]);
+        }
+
         $response = [
             'error' => true,
             'message' => 'Internal Server Error'
@@ -1189,7 +978,7 @@ class CallController extends FController
                 if ($isReserved) {
                     $prepare = new PrepareCurrentCallsForNewCall($userId);
                     if ($prepare->prepare()) {
-                        $this->callService->acceptWarmTransferCall($callUserAccess, $userId);
+                        $this->callService->acceptWarmTransferCall($callUserAccess, $userId, $voipDevice);
                         Yii::createObject(LeadRedialUnAssigner::class)->acceptCall($userId);
                     }
                 } else {
@@ -1221,6 +1010,17 @@ class CallController extends FController
     {
         if (!SettingHelper::isGeneralLinePriorityEnable()) {
             throw new NotFoundHttpException();
+        }
+
+        $deviceId = (int)\Yii::$app->request->post('deviceId');
+
+        try {
+            $voipDevice = (new ReadyVoipDevice())->find($deviceId, Auth::id());
+        } catch (\Throwable $e) {
+            return $this->asJson([
+                'error' => true,
+                'message' => $e->getMessage(),
+            ]);
         }
 
         $response = [
@@ -1267,7 +1067,7 @@ class CallController extends FController
                 }
                 $prepare = new PrepareCurrentCallsForNewCall($userId);
                 if ($prepare->prepare()) {
-                    $this->callService->acceptCall($access, $userId);
+                    $this->callService->acceptCall($access, $userId, $voipDevice);
                     Yii::createObject(LeadRedialUnAssigner::class)->acceptCall($userId);
                 }
                 break;
@@ -1288,7 +1088,16 @@ class CallController extends FController
                             $job->delayJob = $delay;
                             \Yii::$app->queue_job->delay($delay)->push($job);
                             $response['isRedialCall'] = true;
-                            $response['redialCall'] = $redialCall->toArray();
+                            try {
+                                $result = (new CreateRedialCall())($redialCall, $voipDevice);
+                                if ($result['error']) {
+                                    $response['redialError'] = $result['message'];
+                                }
+                            } catch (\Throwable $t) {
+                                $response['redialError'] = $t->getMessage();
+                                UserStatus::isOnCallOff($userId);
+                                Yii::error(AppHelper::mergeThrowableWithData($t, ['userId' => $redialCall->userId, 'leadId' => $redialCall->leadId]), 'RedialCallAccepted');
+                            }
                         } else {
                             $response['error'] = true;
                             $response['message'] = 'Processing current call error. Please try again.';
@@ -1324,6 +1133,17 @@ class CallController extends FController
     {
         $call_sid = \Yii::$app->request->post('call_sid');
 
+        $deviceId = (int)\Yii::$app->request->post('deviceId');
+
+        try {
+            $voipDevice = (new ReadyVoipDevice())->find($deviceId, Auth::id());
+        } catch (\Throwable $e) {
+            return $this->asJson([
+                'error' => true,
+                'message' => $e->getMessage(),
+            ]);
+        }
+
         $response = [
             'error' => true,
             'message' => 'Internal Server Error'
@@ -1343,7 +1163,7 @@ class CallController extends FController
                 }
 
                 $return = new ReturnToHoldCall();
-                if (!$return->return($call, $userId)) {
+                if (!$return->return($call, $userId, $voipDevice)) {
                     throw new \DomainException('Return Hold call error');
                 }
 
@@ -1623,7 +1443,7 @@ class CallController extends FController
             }
         } catch (\Throwable $e) {
             $response = [
-                'error' => false,
+                'error' => true,
                 'message' => $e->getMessage(),
             ];
         }

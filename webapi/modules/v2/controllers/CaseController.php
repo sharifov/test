@@ -25,7 +25,6 @@ use yii\base\Model;
  */
 class CaseController extends BaseController
 {
-
     protected function verbs(): array
     {
         $verbs = parent::verbs();

@@ -8,7 +8,6 @@ use common\models\Employee;
 
 class UserFinder
 {
-
     /**
      * Search only active user
      *

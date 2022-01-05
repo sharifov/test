@@ -7,7 +7,6 @@ use yii\db\Migration;
  */
 class m190811_102235_add__role_access extends Migration
 {
-
     public $routes = [
         '/department/*',
         '/department-phone-project/*',

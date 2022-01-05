@@ -9,7 +9,6 @@ use common\models\Lead;
 
 class FollowUpGuard
 {
-
     /**
      * @param Employee $user
      * @param Lead $lead

@@ -20,7 +20,6 @@ use Yii;
  */
 class ApiLeadFlightSegment extends \yii\db\ActiveRecord
 {
-
     public $origin;
     public $destination;
     public $departure;

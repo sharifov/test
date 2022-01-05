@@ -21,7 +21,6 @@ use yii\base\Model;
  */
 class ClientCreateForm extends Model
 {
-
     public $id;
     public $firstName;
     public $middleName;

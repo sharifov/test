@@ -9,7 +9,6 @@ use yii\db\Migration;
  */
 class m200309_073943_create_tbl_user_online extends Migration
 {
-
     public $roles = [
         Employee::ROLE_ADMIN,
         Employee::ROLE_SUPER_ADMIN,

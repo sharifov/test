@@ -18,7 +18,6 @@ use yii\db\ActiveQuery;
  */
 class LeadFlowChecklist extends ActiveRecord
 {
-
     /**
      * @param $leadFlowId
      * @param $leadChecklistTypeId

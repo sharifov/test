@@ -14,6 +14,7 @@ use frontend\widgets\notification\NotificationMessage;
 use sales\dispatchers\NativeEventDispatcher;
 use sales\model\call\entity\callUserAccess\events\CallUserAccessEvents;
 use sales\model\phoneList\entity\PhoneList;
+use sales\model\voip\phoneDevice\device\ReadyVoipDevice;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;

@@ -28,7 +28,6 @@ use yii\db\StaleObjectException;
  */
 class SaleTicketController extends FController
 {
-
     /**
      * @var SaleTicketRepository
      */

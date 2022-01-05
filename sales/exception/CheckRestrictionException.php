@@ -7,5 +7,4 @@ namespace sales\exception;
  */
 class CheckRestrictionException extends \DomainException
 {
-
 }

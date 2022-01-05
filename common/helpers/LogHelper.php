@@ -12,7 +12,6 @@ use yii\helpers\ArrayHelper;
 
 class LogHelper
 {
-
     /**
      * @return array
      */

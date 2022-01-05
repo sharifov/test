@@ -26,7 +26,6 @@ use yii\helpers\ArrayHelper;
  */
 class ClientChatNote extends ActiveRecord
 {
-
     public static function tableName(): string
     {
         return '{{%client_chat_note}}';

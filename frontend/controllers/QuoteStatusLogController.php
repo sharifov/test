@@ -15,7 +15,6 @@ use yii\helpers\ArrayHelper;
  */
 class QuoteStatusLogController extends FController
 {
-
     public function behaviors()
     {
         $behaviors = [

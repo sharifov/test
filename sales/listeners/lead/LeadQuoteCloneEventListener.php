@@ -11,7 +11,6 @@ use Yii;
  */
 class LeadQuoteCloneEventListener
 {
-
     /**
      * @param LeadQuoteCloneEvent $event
      */
