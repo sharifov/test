@@ -1,5 +1,6 @@
 <?php
 
+use common\components\grid\DateTimeColumn;
 use sales\model\authClient\entity\AuthClient;
 use sales\model\authClient\entity\AuthClientSources;
 use yii\helpers\Html;
@@ -50,7 +51,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'ac_email:email',
             'ac_ip',
             'ac_useragent',
-            'ac_created_dt:byUserDateTime',
+            ['class' => DateTimeColumn::class, 'attribute' => 'ac_created_dt'],
 
             ['class' => 'yii\grid\ActionColumn', 'urlCreator' => static function (string $action, $model, $key, $index) {
                 return \yii\helpers\Url::to([$action, 'ac_id' => $model->ac_id]);

@@ -19,6 +19,7 @@ class AuthClientSearch extends AuthClient
         return [
             [['ac_id', 'ac_user_id'], 'integer'],
             [['ac_source', 'ac_source_id', 'ac_email', 'ac_ip', 'ac_useragent', 'ac_created_dt'], 'safe'],
+            [['ac_created_dt'], 'date', 'format' => 'Y-m-d'],
         ];
     }
 
