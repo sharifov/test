@@ -23,6 +23,7 @@ use frontend\widgets\notification\NotificationMessage;
 use modules\invoice\src\exceptions\InvoiceCodeException;
 use modules\lead\src\entities\lead\LeadQuery;
 use sales\auth\Auth;
+use sales\exception\AdditionalDataException;
 use sales\forms\quote\QuoteCreateDataForm;
 use sales\forms\quote\QuoteCreateKeyForm;
 use sales\helpers\app\AppHelper;
@@ -920,10 +921,14 @@ class QuoteController extends ApiBaseController
         } catch (\Throwable $throwable) {
             $transaction->rollBack();
 
+            $errorMessage = ($throwable instanceof AdditionalDataException) ?
+                ArrayHelper::merge(AppHelper::throwableLog($throwable), $throwable->getAdditionalData()) :
+                AppHelper::throwableLog($throwable);
+
             if ($throwable->getCode() < 0) {
-                Yii::warning(AppHelper::throwableFormatter($throwable), 'API:Quote:create:warning:try');
+                Yii::warning($errorMessage, 'API:Quote:create:warning:try');
             } else {
-                Yii::error(VarDumper::dumpAsString($throwable), 'API:Quote:create:try');
+                Yii::error($errorMessage, 'API:Quote:create:try');
             }
 
             if (Yii::$app->request->get('debug')) {

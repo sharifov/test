@@ -6,6 +6,8 @@ use common\models\Log;
 use common\models\Quote;
 use common\models\QuoteSegment;
 use common\models\QuoteTrip;
+use sales\exception\AdditionalDataException;
+use sales\helpers\ErrorsToStringHelper;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 
@@ -34,11 +36,14 @@ class TripService
         $result = [];
 
         if (empty($parsedData)) {
-            $message = 'Parsed "reservation_dump" cannot be empty.';
-                $message .= ' ' . Log::ADDITIONAL_DATA_DELIMITER .
-                    '. Dump: ' . $this->quote->reservation_dump .
-                    '. QuoteUid: ' . $this->quote->uid;
-            throw new \DomainException($message, -1);
+            throw new AdditionalDataException(
+                [
+                    'quoteUid' => $this->quote->uid,
+                    'reservationDump' => $this->quote->reservation_dump,
+                ],
+                'Parsed "reservation_dump" cannot be empty.',
+                -1
+            );
         }
 
         foreach ($parsedData as $tripEntry) {
@@ -49,12 +54,15 @@ class TripService
             $trip->qt_key = $tripEntry['qt_key'];
 
             if (!$trip->validate()) {
-                $message = 'QuoteTrip not created. Error: ' . $trip->getErrorSummary(false)[0];
-                $message .= ' ' . Log::ADDITIONAL_DATA_DELIMITER .
-                    '. Dump: ' . $this->quote->reservation_dump .
-                    '. QuoteUid: ' . $this->quote->uid;
-
-                throw new \DomainException($message);
+                throw new AdditionalDataException(
+                    [
+                        'quoteUid' => $this->quote->uid,
+                        'reservationDump' => $this->quote->reservation_dump,
+                        'tripEntry' => $tripEntry,
+                    ],
+                    'QuoteTrip not created. ' . ErrorsToStringHelper::extractFromModel($trip),
+                    -1
+                );
             }
             $this->quote->link('quoteTrips', $trip);
 
@@ -64,13 +72,15 @@ class TripService
                 $segment = new QuoteSegment();
                 $segment->attributes = $segmentEntry;
                 if (!$segment->validate()) {
-                    $message = 'QuoteSegment not created.' .
-                        '. Error: ' . $segment->getErrorSummary(false)[0];
-                    $message .= ' ' . Log::ADDITIONAL_DATA_DELIMITER .
-                        '. SegmentDump: ' . VarDumper::dumpAsString($segmentEntry) .
-                        '. QuoteDump: ' . $this->quote->reservation_dump;
-
-                    throw new \DomainException($message, -1);
+                    throw new AdditionalDataException(
+                        [
+                            'quoteUid' => $this->quote->uid,
+                            'reservationDump' => $this->quote->reservation_dump,
+                            'segmentDump' => VarDumper::dumpAsString($segmentEntry),
+                        ],
+                        'QuoteSegment not created. ' . ErrorsToStringHelper::extractFromModel($segment),
+                        -1
+                    );
                 }
                 $trip->link('quoteSegments', $segment);
                 $result[$trip->qt_id]['segments'] = $segment;
@@ -85,13 +95,15 @@ class TripService
             return true;
         }
 
-        $message = 'Keys "qt_duration", "qt_key" and "segments" must be in an "TripEntry".';
-        $message .= ' ' . Log::ADDITIONAL_DATA_DELIMITER .
-            '. TripEntry: . ' . VarDumper::dumpAsString($tripEntry) .
-            '. Dump: ' . $this->quote->reservation_dump .
-            '. QuoteUid' . $this->quote->uid;
-
-        throw new \DomainException($message, -1);
+        throw new AdditionalDataException(
+            [
+                'quoteUid' => $this->quote->uid,
+                'reservationDump' => $this->quote->reservation_dump,
+                'TripEntry' => VarDumper::dumpAsString($tripEntry),
+            ],
+            'Keys "qt_duration", "qt_key" and "segments" must be in an "TripEntry"',
+            -1
+        );
     }
 
     public function getQuote(): Quote
