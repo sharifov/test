@@ -1,5 +1,7 @@
 <?php
 
+use sales\model\userAuthClient\entity\UserAuthClient;
+use sales\model\userAuthClient\entity\UserAuthClientSources;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -31,7 +33,13 @@ $this->params['breadcrumbs'][] = $this->title;
         'attributes' => [
             'uac_id',
             'uac_user_id:username',
-            'uac_source',
+            [
+                'attribute' => 'uac_source',
+                'value' => static function (UserAuthClient $model) {
+                    return UserAuthClientSources::getName($model->uac_source);
+                },
+                'filter' => UserAuthClientSources::getList()
+            ],
             'uac_source_id',
             'uac_email:email',
             'uac_ip',

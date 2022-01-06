@@ -11,7 +11,7 @@ use yii\widgets\Pjax;
 /* @var $searchModel sales\model\userAuthClient\entity\UserAuthClientSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Auth Clients';
+$this->title = 'User Auth Clients';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="auth-client-index">

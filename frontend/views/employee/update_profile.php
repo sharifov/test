@@ -203,7 +203,7 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>
 </div>
     <?php
-    $detachUrl = \yii\helpers\Url::to('/auth-client/detach');
+    $detachUrl = \yii\helpers\Url::to('/user-auth-client/detach');
     $js = <<<JS
 $(document).on('click', '.detach-btn', function (e) {
     e.preventDefault();

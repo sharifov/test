@@ -52,6 +52,7 @@ class UserAuthClient extends \yii\db\ActiveRecord
     {
         return [
             [['uac_user_id', 'uac_source', 'uac_source_id'], 'required'],
+            [['uac_user_id', 'uac_source', 'uac_source_id'], 'unique', 'targetAttribute' => ['uac_user_id', 'uac_source', 'uac_source_id']],
             [['uac_user_id', 'uac_source'], 'integer'],
             [['uac_source'], 'in', 'range' => array_keys(UserAuthClientSources::getList())],
             [['uac_created_dt'], 'safe'],
