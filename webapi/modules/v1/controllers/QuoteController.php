@@ -135,19 +135,11 @@ class QuoteController extends ApiBaseController
      * @apiSuccess {string} agentName    Agent Name
      * @apiSuccess {string} agentEmail    Agent Email
      * @apiSuccess {string} agentDirectLine    Agent DirectLine
-     *
      * @apiSuccess {string} action    Action
      * @apiSuccess {integer} response_id    Response Id
      * @apiSuccess {DateTime} request_dt    Request Date & Time
      * @apiSuccess {DateTime} response_dt   Response Date & Time
-     *
-     * "errors": [],
-     * "uid": "5b7424e858e91",
-     * "agentName": "admin",
-     * "agentEmail": "assistant@wowfare.com",
-     * "agentDirectLine": "+1 888 946 3882",
-     * "action": "v1/quote/get-info",
-     *
+     * @apiSuccess {object} lead Lead
      *
      * @apiSuccessExample Success-Response:
      * HTTP/1.1 200 OK
@@ -336,7 +328,7 @@ class QuoteController extends ApiBaseController
      *       "additionalInformation": [
      *           {
      *              "pnr": "example_pnr",
-     *               "bo_sale_id": "example_sale_id",
+     *              "bo_sale_id": "example_sale_id",
      *              "vtf_processed": null,
      *              "tkt_processed": null,
      *              "exp_processed": null,
@@ -349,7 +341,8 @@ class QuoteController extends ApiBaseController
      *              "ld_field_key": "kayakclickid",
      *              "ld_field_value": "example_value132"
      *          }
-     *      ]
+     *      ],
+     *      "departmentKey": "sales"
      *  },
      *   "action": "v1/quote/get-info",
      *   "response_id": 173,
@@ -485,6 +478,11 @@ class QuoteController extends ApiBaseController
                     $response,
                     'lead.lead_data',
                     LeadDataService::getByLeadForApi($model->lead)
+                );
+                ArrayHelper::setValue(
+                    $response,
+                    'lead.departmentKey',
+                    $model->lead->lDep->dep_key
                 );
             }
 
