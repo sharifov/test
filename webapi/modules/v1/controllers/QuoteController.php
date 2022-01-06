@@ -342,7 +342,9 @@ class QuoteController extends ApiBaseController
      *              "ld_field_value": "example_value132"
      *          }
      *      ],
-     *      "departmentKey": "sales"
+     *      "department_key": "chat",
+     *      "type_create_id": 8,
+     *      "type_create_name": "Client Chat"
      *  },
      *   "action": "v1/quote/get-info",
      *   "response_id": 173,
@@ -469,6 +471,10 @@ class QuoteController extends ApiBaseController
             }
 
             if ($model->lead) {
+                $response['lead']['department_key'] = $model->lead->lDep->dep_key ?? null;
+                $response['lead']['type_create_id'] = $model->lead->l_type_create ?? null;
+                $response['lead']['type_create_name'] = $model->lead->getTypeCreateName();
+
                 ArrayHelper::setValue(
                     $response,
                     'lead.additionalInformation',
@@ -478,11 +484,6 @@ class QuoteController extends ApiBaseController
                     $response,
                     'lead.lead_data',
                     LeadDataService::getByLeadForApi($model->lead)
-                );
-                ArrayHelper::setValue(
-                    $response,
-                    'lead.departmentKey',
-                    $model->lead->lDep->dep_key
                 );
             }
 
