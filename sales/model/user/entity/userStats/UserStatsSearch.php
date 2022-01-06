@@ -142,15 +142,15 @@ class UserStatsSearch extends Model
             ],
         ]);
 
-        $to = date("Y-m-d 23:59:59");
-        $from = date("Y-m-01 00:00:00");
-
         $this->load($params);
 
         if (!$this->validate()) {
             $query->where('0=1');
             return $dataProvider;
         }
+
+        $fromCurrentMonthDt = date("Y-m-01 00:00:00");
+        $toCurrentMonthDt = date("Y-m-d 23:59:59");
 
         if ($this->isFieldShow(UserModelSettingDictionary::FIELD_LEAD_CREATED)) {
             $query->addSelect([
@@ -159,9 +159,7 @@ class UserStatsSearch extends Model
                     ->from(LeadFlow::tableName())
                     ->where(LeadFlow::tableName() . '.employee_id = ' . Employee::tableName() . '.id')
                     ->andWhere(['IN', 'lf_description', [LeadFlow::DESCRIPTION_MANUAL_CREATE, LeadFlow::DESCRIPTION_CLIENT_CHAT_CREATE]])
-                    ->andWhere(LeadFlow::tableName() . '.created BETWEEN :startDt AND :endDt', [
-                        ':startDt' => $this->startDt, ':endDt' => $this->endDt,
-                    ])
+                    ->andWhere(['BETWEEN', LeadFlow::tableName() . '.created', $this->startDt,  $this->endDt])
             ]);
         }
         if ($this->isFieldShow(UserModelSettingDictionary::FIELD_LEAD_PROCESSING)) {
@@ -171,21 +169,17 @@ class UserStatsSearch extends Model
                     ->from(Lead::tableName())
                     ->where(Lead::tableName() . '.employee_id = ' . Employee::tableName() . '.id')
                     ->andWhere([Lead::tableName() . '.status' => Lead::STATUS_PROCESSING])
-                    ->andWhere(Lead::tableName() . '.created BETWEEN :startDt AND :endDt', [
-                        ':startDt' => $this->startDt, ':endDt' => $this->endDt,
-                    ])
+                    ->andWhere(['BETWEEN', Lead::tableName() . '.created', $this->startDt, $this->endDt])
             ]);
         }
         if ($this->isFieldShow(UserModelSettingDictionary::FIELD_LEAD_SOLD)) {
             $query->addSelect([
                 UserModelSettingDictionary::FIELD_LEAD_SOLD => (new Query())
-                    ->select(['COUNT(' . Lead::tableName() . '.id)'])
-                    ->from(Lead::tableName())
-                    ->where(Lead::tableName() . '.employee_id = ' . Employee::tableName() . '.id')
-                    ->andWhere([Lead::tableName() . '.status' => Lead::STATUS_SOLD])
-                    ->andWhere(Lead::tableName() . '.created BETWEEN :startDt AND :endDt', [
-                        ':startDt' => $this->startDt, ':endDt' => $this->endDt,
-                    ])
+                    ->select(['COUNT(lead_sold.id)'])
+                    ->from(Lead::tableName() . ' AS lead_sold')
+                    ->where('lead_sold.employee_id = ' . Employee::tableName() . '.id')
+                    ->andWhere(['lead_sold.status' => Lead::STATUS_SOLD])
+                    ->andWhere(['BETWEEN', 'lead_sold.created', $this->startDt, $this->endDt])
             ]);
         }
         if ($this->isFieldShow(UserModelSettingDictionary::FIELD_LEAD_TRASHED)) {
@@ -195,9 +189,7 @@ class UserStatsSearch extends Model
                     ->from(Lead::tableName())
                     ->where(Lead::tableName() . '.employee_id = ' . Employee::tableName() . '.id')
                     ->andWhere([Lead::tableName() . '.status' => Lead::STATUS_TRASH])
-                    ->andWhere(Lead::tableName() . '.created BETWEEN :startDt AND :endDt', [
-                        ':startDt' => $this->startDt, ':endDt' => $this->endDt,
-                    ])
+                    ->andWhere(['BETWEEN', Lead::tableName() . '.created', $this->startDt, $this->endDt])
             ]);
         }
         if ($this->isFieldShow(UserModelSettingDictionary::FIELD_LEAD_TAKEN)) {
@@ -208,9 +200,7 @@ class UserStatsSearch extends Model
                     ->where(LeadFlow::tableName() . '.lf_owner_id = ' . Employee::tableName() . '.id')
                     ->andWhere(['status' => Lead::STATUS_PROCESSING])
                     ->andWhere(['NOT', ['lf_from_status_id' => null]])
-                    ->andWhere(LeadFlow::tableName() . '.created BETWEEN :startDt AND :endDt', [
-                        ':startDt' => $this->startDt, ':endDt' => $this->endDt,
-                    ])
+                    ->andWhere(['BETWEEN', LeadFlow::tableName() . '.created', $this->startDt, $this->endDt])
             ]);
         }
         if ($this->isFieldShow(UserModelSettingDictionary::FIELD_CLIENT_CHAT_ACTIVE)) {
@@ -232,9 +222,7 @@ class UserStatsSearch extends Model
                     ->from(ClientChat::tableName())
                     ->where(ClientChat::tableName() . '.cch_owner_user_id = ' . Employee::tableName() . '.id')
                     ->andWhere([ClientChat::tableName() . '.cch_status_id' => ClientChat::STATUS_IDLE])
-                    ->andWhere(ClientChat::tableName() . '.cch_created_dt BETWEEN :startDt AND :endDt', [
-                        ':startDt' => $this->startDt, ':endDt' => $this->endDt,
-                    ])
+                    ->andWhere(['BETWEEN', ClientChat::tableName() . '.cch_created_dt', $this->startDt, $this->endDt])
             ]);
         }
         if ($this->isFieldShow(UserModelSettingDictionary::FIELD_CLIENT_CHAT_PROGRESS)) {
@@ -244,9 +232,7 @@ class UserStatsSearch extends Model
                     ->from(ClientChat::tableName())
                     ->where(ClientChat::tableName() . '.cch_owner_user_id = ' . Employee::tableName() . '.id')
                     ->andWhere([ClientChat::tableName() . '.cch_status_id' => ClientChat::STATUS_IN_PROGRESS])
-                    ->andWhere(ClientChat::tableName() . '.cch_created_dt BETWEEN :startDt AND :endDt', [
-                        ':startDt' => $this->startDt, ':endDt' => $this->endDt,
-                    ])
+                    ->andWhere(['BETWEEN', ClientChat::tableName() . '.cch_created_dt', $this->startDt, $this->endDt])
             ]);
         }
         if ($this->isFieldShow(UserModelSettingDictionary::FIELD_CLIENT_CHAT_CLOSED)) {
@@ -256,9 +242,7 @@ class UserStatsSearch extends Model
                     ->from(ClientChat::tableName())
                     ->where(ClientChat::tableName() . '.cch_owner_user_id = ' . Employee::tableName() . '.id')
                     ->andWhere(['IN', 'cch_status_id', ClientChat::CLOSED_STATUS_GROUP])
-                    ->andWhere(ClientChat::tableName() . '.cch_created_dt BETWEEN :startDt AND :endDt', [
-                        ':startDt' => $this->startDt, ':endDt' => $this->endDt,
-                    ])
+                    ->andWhere(['BETWEEN', ClientChat::tableName() . '.cch_created_dt', $this->startDt, $this->endDt])
             ]);
         }
         if ($this->isFieldShow(UserModelSettingDictionary::FIELD_CLIENT_CHAT_TRANSFER)) {
@@ -268,9 +252,7 @@ class UserStatsSearch extends Model
                     ->from(ClientChat::tableName())
                     ->where(ClientChat::tableName() . '.cch_owner_user_id = ' . Employee::tableName() . '.id')
                     ->andWhere([ClientChat::tableName() . '.cch_status_id' => ClientChat::STATUS_TRANSFER])
-                    ->andWhere(ClientChat::tableName() . '.cch_created_dt BETWEEN :startDt AND :endDt', [
-                        ':startDt' => $this->startDt, ':endDt' => $this->endDt,
-                    ])
+                    ->andWhere(['BETWEEN', ClientChat::tableName() . '.cch_created_dt', $this->startDt, $this->endDt])
             ]);
         }
         if (
@@ -284,7 +266,7 @@ class UserStatsSearch extends Model
                     ->from(Lead::tableName())
                     ->leftJoin('profit_split', 'ps_lead_id = id and ps_user_id = ' . Employee::tableName() . '.id')
                     ->where(['status' => Lead::STATUS_SOLD])
-                    ->andWhere(['BETWEEN', 'DATE(l_status_dt)', $from, $to])
+                    ->andWhere(['BETWEEN', 'DATE(l_status_dt)', $fromCurrentMonthDt, $toCurrentMonthDt])
             ]);
 
             $query->addSelect([
@@ -292,33 +274,19 @@ class UserStatsSearch extends Model
                     ->select(['COUNT(luc_lead_id)'])
                     ->from(LeadUserConversion::tableName())
                     ->where('luc_user_id = ' . Employee::tableName() . '.id')
-                    ->andWhere('luc_created_dt BETWEEN :startDt AND :endDt', [
-                        ':startDt' => $from, ':endDt' => $to,
-                    ])
-            ]);
-
-            $query->addSelect([
-                UserModelSettingDictionary::FIELD_LEADS_QUALIFIED_COUNT => (new Query())
-                    ->select(['COUNT(luc_lead_id)'])
-                    ->from(LeadUserConversion::tableName())
-                    ->where('luc_user_id = ' . Employee::tableName() . '.id')
-                    ->andWhere('luc_created_dt BETWEEN :startDt AND :endDt', [
-                        ':startDt' => $from, ':endDt' => $to,
-                    ])
+                    ->andWhere(['BETWEEN', 'luc_created_dt', $fromCurrentMonthDt, $toCurrentMonthDt])
             ]);
         }
 
         if ($this->isFieldShow(UserModelSettingDictionary::FIELD_LEADS_SOLD_COUNT)) {
             $query->addSelect([
                 UserModelSettingDictionary::FIELD_LEADS_SOLD_COUNT => (new Query())
-                    ->select(['COUNT(' . Lead::tableName() . '.id)'])
-                    ->from(Lead::tableName())
-                    ->innerJoin(ProfitSplit::tableName(), ProfitSplit::tableName() . '.ps_lead_id = ' . Lead::tableName() . '.id')
+                    ->select(['COUNT(leads_sold_count.id)'])
+                    ->from(Lead::tableName() . ' AS leads_sold_count')
+                    ->innerJoin(ProfitSplit::tableName(), ProfitSplit::tableName() . '.ps_lead_id = leads_sold_count.id')
                     ->where(ProfitSplit::tableName() . '.ps_user_id = ' . Employee::tableName() . '.id')
-                    ->andWhere([Lead::tableName() . '.status' => Lead::STATUS_SOLD])
-                    ->andWhere(Lead::tableName() . '.l_status_dt BETWEEN :startDt AND :endDt', [
-                        ':startDt' => $from, ':endDt' => $to,
-                    ])
+                    ->andWhere(['leads_sold_count.status' => Lead::STATUS_SOLD])
+                    ->andWhere(['BETWEEN', 'leads_sold_count.l_status_dt', $fromCurrentMonthDt, $toCurrentMonthDt])
             ]);
         }
 
@@ -331,7 +299,7 @@ class UserStatsSearch extends Model
                     ->from(Lead::tableName())
                     ->leftJoin('profit_split', 'ps_lead_id = id and ps_user_id = ' . Employee::tableName() . '.id')
                     ->where(['status' => Lead::STATUS_SOLD])
-                    ->andWhere(['BETWEEN', 'DATE(l_status_dt)', $from, $to])
+                    ->andWhere(['BETWEEN', 'DATE(l_status_dt)', $fromCurrentMonthDt, $toCurrentMonthDt])
             ]);
         }
         if ($this->isFieldShow(UserModelSettingDictionary::FIELD_GROSS_PROFIT_CALL_PRIORITY)) {
@@ -343,7 +311,7 @@ class UserStatsSearch extends Model
                     ->from(UserData::tableName())
                     ->where(['ud_key' => UserDataKey::GROSS_PROFIT])
                     ->andWhere('ud_user_id = ' . Employee::tableName() . '.id')
-                    ->andWhere(['BETWEEN', 'DATE(ud_updated_dt)', $from, $to])
+                    ->andWhere(['BETWEEN', 'DATE(ud_updated_dt)', $fromCurrentMonthDt, $toCurrentMonthDt])
             ]);
         }
         if ($this->isFieldShow(UserModelSettingDictionary::FIELD_SALES_CONVERSION_CALL_PRIORITY)) {
@@ -355,7 +323,7 @@ class UserStatsSearch extends Model
                     ->from(UserData::tableName())
                     ->where(['ud_key' => UserDataKey::CONVERSION_PERCENT])
                     ->andWhere('ud_user_id = ' . Employee::tableName() . '.id')
-                    ->andWhere(['BETWEEN', 'DATE(ud_updated_dt)', $from, $to])
+                    ->andWhere(['BETWEEN', 'DATE(ud_updated_dt)', $fromCurrentMonthDt, $toCurrentMonthDt])
             ]);
         }
         if ($this->isFieldShow(UserModelSettingDictionary::FIELD_CALL_PRIORITY_CURRENT)) {
@@ -366,7 +334,6 @@ class UserStatsSearch extends Model
                     ])
                     ->from(UserParams::tableName())
                     ->where('up_user_id = ' . Employee::tableName() . '.id')
-                    //->andWhere(['BETWEEN', 'DATE(up_updated_dt)', $from, $to])
             ]);
         }
         if ($this->isFieldShow(UserModelSettingDictionary::FIELD_LEADS_QUALIFIED_TAKEN_COUNT)) {
@@ -396,7 +363,7 @@ class UserStatsSearch extends Model
             Employee::tableName() . '.id' => $this->id,
         ]);
 
-        $query->andWhere(['id' => EmployeeGroupAccess::usersIdsInCommonGroupsSubQuery($this->currentUser->getId())]);
+        $query->andWhere([Employee::tableName() . '.id' => EmployeeGroupAccess::usersIdsInCommonGroupsSubQuery($this->currentUser->getId())]);
 
         return $dataProvider;
     }

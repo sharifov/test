@@ -277,7 +277,6 @@ $isAgent = Auth::user()->isAgent();
                             },
                             'format' => 'raw',
                         ],
-
                         [
                             'attribute' => 'updated',
                             'value' => function (\common\models\Lead $model) {
@@ -285,7 +284,6 @@ $isAgent = Auth::user()->isAgent();
                             },
                             'format' => 'raw',
                         ],
-
                         [
                             'attribute' => 'l_last_action_dt',
                             'value' => function (\common\models\Lead $model) {
@@ -293,10 +291,17 @@ $isAgent = Auth::user()->isAgent();
                             },
                             'format' => 'raw',
                         ],
+                        [
+                            'attribute' => 'l_status_dt',
+                            'value' => static function (\common\models\Lead $model) {
+                                return $model->l_status_dt ?
+                                    '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->l_status_dt)) :
+                                    Yii::$app->formatter->nullDisplay;
+                            },
+                            'format' => 'raw',
+                        ],
                         'additional_information',
                         'l_visitor_log_id',
-
-
                     ],
                 ]) ?>
             </div>
