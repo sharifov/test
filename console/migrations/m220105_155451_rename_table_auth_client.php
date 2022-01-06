@@ -12,7 +12,7 @@ class m220105_155451_rename_table_auth_client extends Migration
      */
     public function safeUp()
     {
-        $this->dropForeignKey('FK-auth_client-uac_user_id', '{{%auth_client}}');
+        $this->dropForeignKey('FK-auth_client-ac_user_id', '{{%auth_client}}');
         $this->renameTable('auth_client', '{{%user_auth_client}}');
         $this->renameColumn('{{%user_auth_client}}', 'ac_id', 'uac_id');
         $this->renameColumn('{{%user_auth_client}}', 'ac_user_id', 'uac_user_id');
@@ -40,6 +40,6 @@ class m220105_155451_rename_table_auth_client extends Migration
         $this->renameColumn('{{%auth_client}}', 'uac_ip', 'ac_ip');
         $this->renameColumn('{{%auth_client}}', 'uac_useragent', 'ac_useragent');
         $this->renameColumn('{{%auth_client}}', 'uac_created_dt', 'ac_created_dt');
-        $this->addForeignKey('FK-auth_client-uac_user_id', '{{%auth_client}}', 'ac_user_id', '{{%employees}}', 'id', 'CASCADE', 'CASCADE');
+        $this->addForeignKey('FK-auth_client-ac_user_id', '{{%auth_client}}', 'ac_user_id', '{{%employees}}', 'id', 'CASCADE', 'CASCADE');
     }
 }
