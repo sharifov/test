@@ -60,10 +60,24 @@ class ComponentEventsTypeService
                 $result = $componentEvent->getComponentClassObject()->run($dto);
                 $this->runnableComponentService->executeRunnableComponents($result, $componentEvent->ccce_id, $dto);
             } catch (\RuntimeException $e) {
-                \Yii::error(AppHelper::throwableLog($e, true), 'ComponentEventsTypeService::executeComponentEvents::RuntimeException');
+                \Yii::warning([
+                    'message' => $e->getMessage(),
+                    'chatId' => $dto->getClientChatEntity()->cch_id ?? null,
+                    'channelId' => $dto->getClientChatEntity()->cch_channel_id ?? null,
+                    'chatRoomId' => $dto->getClientChatEntity()->cch_rid ?? null,
+                    'clientId' => $dto->getClientChatEntity()->cch_client_id ?? null,
+                    'trace' => $e->getTrace()
+                ], 'ComponentEventsTypeService::executeComponentEvents::RuntimeException');
                 $this->runnableComponentService->executeRunnableComponents('null', $componentEvent->ccce_id, $dto);
             } catch (\Throwable $e) {
-                \Yii::error(AppHelper::throwableLog($e, true), 'ComponentEventsTypeService::executeComponentEvents::Throwable');
+                \Yii::error([
+                    'message' => $e->getMessage(),
+                    'chatId' => $dto->getClientChatEntity()->cch_id ?? null,
+                    'channelId' => $dto->getClientChatEntity()->cch_channel_id ?? null,
+                    'chatRoomId' => $dto->getClientChatEntity()->cch_rid ?? null,
+                    'clientId' => $dto->getClientChatEntity()->cch_client_id ?? null,
+                    'trace' => $e->getTrace()
+                ], 'ComponentEventsTypeService::executeComponentEvents::Throwable');
             }
         }
     }
