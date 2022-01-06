@@ -2,12 +2,18 @@
 
 namespace frontend\controllers;
 
+use AdvancedJsonRpc\Notification;
+use common\models\Employee;
+use common\models\Notifications;
+use common\models\UserConnection;
 use Yii;
 use common\models\UserOnline;
 use common\models\search\UserOnlineSearch;
 use yii\helpers\ArrayHelper;
+use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
 
 /**
  * UserOnlineController implements the CRUD actions for UserOnline model.
@@ -34,6 +40,62 @@ class UserOnlineController extends FController
     {
         parent::init();
         $this->layoutCrud();
+    }
+
+    public function actionLogout()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $userId = (int)Yii::$app->request->post('userId');
+
+        if (!$userId) {
+            return [
+                'error' => true,
+                'message' => 'User ID is empty',
+            ];
+        }
+
+        if (!UserOnline::find()->andWhere(['uo_user_id' => $userId])->one()) {
+            return [
+                'error' => true,
+                'message' => 'User is already offline',
+            ];
+        }
+
+        $pubChannel = UserConnection::getUserChannel($userId);
+        Notifications::pub([$pubChannel], 'forceLogout', []);
+
+        return [
+            'error' => false,
+        ];
+    }
+
+    public function actionRefresh()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $userId = (int)Yii::$app->request->post('userId');
+
+        if (!$userId) {
+            return [
+                'error' => true,
+                'message' => 'User ID is empty',
+            ];
+        }
+
+        if (!UserOnline::find()->andWhere(['uo_user_id' => $userId])->one()) {
+            return [
+                'error' => true,
+                'message' => 'User is offline',
+            ];
+        }
+
+        $pubChannel = UserConnection::getUserChannel($userId);
+        Notifications::pub([$pubChannel], 'forceRefresh', []);
+
+        return [
+            'error' => false,
+        ];
     }
 
     /**

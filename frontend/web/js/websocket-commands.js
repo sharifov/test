@@ -392,6 +392,14 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                         }
                     }
 
+                    if (obj.cmd === 'forceLogout') {
+                        window.location.href = '/site/logout?type=autologout';
+                    }
+
+                    if (obj.cmd === 'forceRefresh') {
+                        window.location.reload();
+                    }
+
                     if (obj.cmd === 'PhoneDeviceRegister') {
                         if (obj.error) {
                             if (obj.buidIsInvalid) {
