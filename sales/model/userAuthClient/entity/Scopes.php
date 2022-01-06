@@ -1,11 +1,11 @@
 <?php
 
-namespace sales\model\authClient\entity;
+namespace sales\model\userAuthClient\entity;
 
 /**
- * This is the ActiveQuery class for [[AuthClient]].
+ * This is the ActiveQuery class for [[UserAuthClient]].
  *
- * @see AuthClient
+ * @see UserAuthClient
  */
 class Scopes extends \yii\db\ActiveQuery
 {
@@ -16,7 +16,7 @@ class Scopes extends \yii\db\ActiveQuery
 
     /**
      * {@inheritdoc}
-     * @return AuthClient[]|array
+     * @return UserAuthClient[]|array
      */
     public function all($db = null)
     {
@@ -25,7 +25,7 @@ class Scopes extends \yii\db\ActiveQuery
 
     /**
      * {@inheritdoc}
-     * @return AuthClient|array|null
+     * @return UserAuthClient|array|null
      */
     public function one($db = null)
     {
@@ -34,6 +34,6 @@ class Scopes extends \yii\db\ActiveQuery
 
     public function byUserId(int $userId): self
     {
-        return $this->andWhere(['ac_user_id' => $userId]);
+        return $this->andWhere(['uac_user_id' => $userId]);
     }
 }

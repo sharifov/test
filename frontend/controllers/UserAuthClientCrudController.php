@@ -2,16 +2,16 @@
 
 namespace frontend\controllers;
 
-use sales\model\authClient\entity\AuthClient;
-use sales\model\authClient\entity\AuthClientSearch;
+use sales\model\userAuthClient\entity\UserAuthClient;
+use sales\model\userAuthClient\entity\UserAuthClientSearch;
 use frontend\controllers\FController;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
- * AuthClientCrudController implements the CRUD actions for AuthClient model.
+ * UserAuthClientCrudController implements the CRUD actions for UserAuthClient model.
  */
-class AuthClientCrudController extends FController
+class UserAuthClientCrudController extends FController
 {
     /**
      * @inheritDoc
@@ -32,12 +32,12 @@ class AuthClientCrudController extends FController
     }
 
     /**
-     * Lists all AuthClient models.
+     * Lists all UserAuthClient models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new AuthClientSearch();
+        $searchModel = new UserAuthClientSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
 
         return $this->render('index', [
@@ -47,30 +47,30 @@ class AuthClientCrudController extends FController
     }
 
     /**
-     * Displays a single AuthClient model.
-     * @param int $ac_id Ac ID
+     * Displays a single UserAuthClient model.
+     * @param int $uac_id Ac ID
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($ac_id)
+    public function actionView($uac_id)
     {
         return $this->render('view', [
-            'model' => $this->findModel($ac_id),
+            'model' => $this->findModel($uac_id),
         ]);
     }
 
     /**
-     * Creates a new AuthClient model.
+     * Creates a new UserAuthClient model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new AuthClient();
+        $model = new UserAuthClient();
 
         if ($this->request->isPost) {
             if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'ac_id' => $model->ac_id]);
+                return $this->redirect(['view', 'uac_id' => $model->uac_id]);
             }
         } else {
             $model->loadDefaultValues();
@@ -82,18 +82,18 @@ class AuthClientCrudController extends FController
     }
 
     /**
-     * Updates an existing AuthClient model.
+     * Updates an existing UserAuthClient model.
      * If update is successful, the browser will be redirected to the 'view' page.
-     * @param int $ac_id Ac ID
+     * @param int $uac_id Ac ID
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($ac_id)
+    public function actionUpdate($uac_id)
     {
-        $model = $this->findModel($ac_id);
+        $model = $this->findModel($uac_id);
 
         if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'ac_id' => $model->ac_id]);
+            return $this->redirect(['view', 'uac_id' => $model->uac_id]);
         }
 
         return $this->render('update', [
@@ -102,29 +102,29 @@ class AuthClientCrudController extends FController
     }
 
     /**
-     * Deletes an existing AuthClient model.
+     * Deletes an existing UserAuthClient model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param int $ac_id Ac ID
+     * @param int $uac_id Ac ID
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete($ac_id)
+    public function actionDelete($uac_id)
     {
-        $this->findModel($ac_id)->delete();
+        $this->findModel($uac_id)->delete();
 
         return $this->redirect(['index']);
     }
 
     /**
-     * Finds the AuthClient model based on its primary key value.
+     * Finds the UserAuthClient model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param int $ac_id Ac ID
-     * @return AuthClient the loaded model
+     * @param int $uac_id Ac ID
+     * @return UserAuthClient the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($ac_id)
+    protected function findModel($uac_id)
     {
-        if (($model = AuthClient::findOne($ac_id)) !== null) {
+        if (($model = UserAuthClient::findOne($uac_id)) !== null) {
             return $model;
         }
 

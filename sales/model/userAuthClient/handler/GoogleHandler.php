@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\model\authClient\handler;
+namespace sales\model\userAuthClient\handler;
 
 use common\models\Employee;
 use common\models\LoginForm;
@@ -8,24 +8,24 @@ use common\models\UserConnection;
 use Da\TwoFA\Manager;
 use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
-use sales\model\authClient\entity\AuthClient;
-use sales\model\authClient\entity\AuthClientRepository;
-use sales\model\authClient\entity\AuthClientSources;
+use sales\model\userAuthClient\entity\UserAuthClient;
+use sales\model\userAuthClient\entity\UserAuthClientRepository;
+use sales\model\userAuthClient\entity\UserAuthClientSources;
 use sales\model\user\entity\monitor\UserMonitor;
 use yii\authclient\AuthAction;
 use yii\authclient\ClientInterface;
 use yii\helpers\ArrayHelper;
 
 /**
- * @property-read AuthClientRepository $repository
+ * @property-read UserAuthClientRepository $repository
  */
 class GoogleHandler implements ClientHandler
 {
-    private AuthClientRepository $repository;
+    private UserAuthClientRepository $repository;
 
     private string $redirectUrl = '/site/login';
 
-    public function __construct(AuthClientRepository $repository)
+    public function __construct(UserAuthClientRepository $repository)
     {
         $this->repository = $repository;
     }
@@ -40,10 +40,10 @@ class GoogleHandler implements ClientHandler
     {
         $userAttributes = $client->getUserAttributes();
         $sourceId = ArrayHelper::getValue($userAttributes, 'id');
-        $source = AuthClientSources::getIdByValue($client->getId());
-        $authClients = AuthClient::find()->with('user')->where([
-            'ac_source' => $source,
-            'ac_source_id' => $sourceId
+        $source = UserAuthClientSources::getIdByValue($client->getId());
+        $authClients = UserAuthClient::find()->with('user')->where([
+            'uac_source' => $source,
+            'uac_source_id' => $sourceId
         ])->all();
 
         $countAuthClients = count($authClients);
@@ -57,7 +57,7 @@ class GoogleHandler implements ClientHandler
 
             $user = Employee::findOne(['email' => $email]);
             if ($user) {
-                $authClient = AuthClient::create(
+                $authClient = UserAuthClient::create(
                     $user->id,
                     $sourceId,
                     $email,
@@ -82,15 +82,15 @@ class GoogleHandler implements ClientHandler
     {
         $userAttributes = $client->getUserAttributes();
         $sourceId = ArrayHelper::getValue($userAttributes, 'id');
-        $source = AuthClientSources::getIdByValue($client->getId());
-        $authClients = AuthClient::find()->with('user')->where([
-            'ac_user_id' => $userId,
-            'ac_source' => $source,
-            'ac_source_id' => $sourceId
+        $source = UserAuthClientSources::getIdByValue($client->getId());
+        $authClients = UserAuthClient::find()->with('user')->where([
+            'uac_user_id' => $userId,
+            'uac_source' => $source,
+            'uac_source_id' => $sourceId
         ])->one();
         $email = ArrayHelper::getValue($client->getUserAttributes(), 'email');
         if (!$authClients) {
-            $authClient = AuthClient::create(
+            $authClient = UserAuthClient::create(
                 $userId,
                 $sourceId,
                 $email,

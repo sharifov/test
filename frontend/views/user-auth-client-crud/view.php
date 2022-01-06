@@ -4,9 +4,9 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\authClient\entity\AuthClient */
+/* @var $model sales\model\userAuthClient\entity\UserAuthClient */
 
-$this->title = $model->ac_id;
+$this->title = $model->uac_id;
 $this->params['breadcrumbs'][] = ['label' => 'Auth Clients', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
@@ -16,8 +16,8 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a('Update', ['update', 'ac_id' => $model->ac_id], ['class' => 'btn btn-primary']) ?>
-        <?= Html::a('Delete', ['delete', 'ac_id' => $model->ac_id], [
+        <?= Html::a('Update', ['update', 'uac_id' => $model->uac_id], ['class' => 'btn btn-primary']) ?>
+        <?= Html::a('Delete', ['delete', 'uac_id' => $model->uac_id], [
             'class' => 'btn btn-danger',
             'data' => [
                 'confirm' => 'Are you sure you want to delete this item?',
@@ -29,14 +29,14 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
-            'ac_id',
-            'ac_user_id:username',
-            'ac_source',
-            'ac_source_id',
-            'ac_email:email',
-            'ac_ip',
-            'ac_useragent',
-            'ac_created_dt:byUserDateTime',
+            'uac_id',
+            'uac_user_id:username',
+            'uac_source',
+            'uac_source_id',
+            'uac_email:email',
+            'uac_ip',
+            'uac_useragent',
+            'uac_created_dt:byUserDateTime',
         ],
     ]) ?>
 

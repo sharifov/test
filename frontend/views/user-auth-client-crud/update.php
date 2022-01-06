@@ -3,11 +3,11 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\authClient\entity\AuthClient */
+/* @var $model sales\model\userAuthClient\entity\UserAuthClient */
 
-$this->title = 'Update Auth Client: ' . $model->ac_id;
+$this->title = 'Update Auth Client: ' . $model->uac_id;
 $this->params['breadcrumbs'][] = ['label' => 'Auth Clients', 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $model->ac_id, 'url' => ['view', 'ac_id' => $model->ac_id]];
+$this->params['breadcrumbs'][] = ['label' => $model->uac_id, 'url' => ['view', 'uac_id' => $model->uac_id]];
 $this->params['breadcrumbs'][] = 'Update';
 ?>
 <div class="auth-client-update">

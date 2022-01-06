@@ -16,8 +16,8 @@ use yii\grid\ActionColumn;
 use common\models\UserParams;
 use frontend\models\form\UserProfileForm;
 use frontend\themes\gentelella_v2\widgets\FlashAlert;
-use sales\model\authClient\entity\AuthClient;
-use sales\model\authClient\entity\AuthClientSources;
+use sales\model\userAuthClient\entity\UserAuthClient;
+use sales\model\userAuthClient\entity\UserAuthClientSources;
 use yii\authclient\widgets\AuthChoice;
 use yii\bootstrap\Html;
 use yii\bootstrap\ActiveForm;
@@ -171,16 +171,16 @@ $this->params['breadcrumbs'][] = $this->title;
             <?= \yii\grid\GridView::widget([
                 'dataProvider' => $sourcesDataProvider,
                 'columns' => [
-                    'ac_id',
+                    'uac_id',
                     [
-                        'attribute' => 'ac_source',
-                        'value' => static function (AuthClient $model) {
-                            return \yii\helpers\Html::encode(AuthClientSources::getName($model->ac_source));
+                        'attribute' => 'uac_source',
+                        'value' => static function (UserAuthClient $model) {
+                            return \yii\helpers\Html::encode(UserAuthClientSources::getName($model->uac_source));
                         }
                     ],
-                    'ac_email',
+                    'uac_email',
                     [
-                        'attribute' => 'ac_created_dt',
+                        'attribute' => 'uac_created_dt',
                         'format' => 'byUserDateTime',
                         'label' => 'When assigned'
                     ],
@@ -188,10 +188,10 @@ $this->params['breadcrumbs'][] = $this->title;
                         'class' => ActionColumn::class,
                         'template' => '{detach}',
                         'buttons' => [
-                            'detach' => static function ($url, AuthClient $model) {
+                            'detach' => static function ($url, UserAuthClient $model) {
                                 return Html::a('<i class="fas fa-unlink"></i> Detach', '#', [
                                     'class' => 'detach-btn',
-                                    'data-auth-client-id' => $model->ac_id
+                                    'data-auth-client-id' => $model->uac_id
                                 ]);
                             }
                         ]

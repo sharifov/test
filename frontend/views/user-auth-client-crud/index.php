@@ -1,14 +1,14 @@
 <?php
 
 use common\components\grid\DateTimeColumn;
-use sales\model\authClient\entity\AuthClient;
-use sales\model\authClient\entity\AuthClientSources;
+use sales\model\userAuthClient\entity\UserAuthClient;
+use sales\model\userAuthClient\entity\UserAuthClientSources;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\authClient\entity\AuthClientSearch */
+/* @var $searchModel sales\model\userAuthClient\entity\UserAuthClientSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Auth Clients';
@@ -30,31 +30,31 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             [
-                'attribute' => 'ac_id',
+                'attribute' => 'uac_id',
                 'options' => [
                     'width' => '100px;'
                 ]
             ],
             [
                 'class' => \common\components\grid\UserSelect2Column::class,
-                'attribute' => 'ac_user_id',
+                'attribute' => 'uac_user_id',
                 'relation' => 'user',
             ],
             [
-                'attribute' => 'ac_source',
-                'value' => static function (AuthClient $model) {
-                    return AuthClientSources::getName($model->ac_source);
+                'attribute' => 'uac_source',
+                'value' => static function (UserAuthClient $model) {
+                    return UserAuthClientSources::getName($model->uac_source);
                 },
-                'filter' => AuthClientSources::getList()
+                'filter' => UserAuthClientSources::getList()
             ],
-            'ac_source_id',
-            'ac_email:email',
-            'ac_ip',
-            'ac_useragent',
-            ['class' => DateTimeColumn::class, 'attribute' => 'ac_created_dt'],
+            'uac_source_id',
+            'uac_email:email',
+            'uac_ip',
+            'uac_useragent',
+            ['class' => DateTimeColumn::class, 'attribute' => 'uac_created_dt'],
 
             ['class' => 'yii\grid\ActionColumn', 'urlCreator' => static function (string $action, $model, $key, $index) {
-                return \yii\helpers\Url::to([$action, 'ac_id' => $model->ac_id]);
+                return \yii\helpers\Url::to([$action, 'uac_id' => $model->uac_id]);
             }],
         ],
     ]); ?>

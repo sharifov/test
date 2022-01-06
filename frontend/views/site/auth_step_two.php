@@ -2,7 +2,7 @@
 
 /**
  * @var \yii\web\View $this
- * @var \sales\model\authClient\entity\AuthClient[] $authClients
+ * @var \sales\model\userAuthClient\entity\UserAuthClient[] $authClients
  */
 
 use yii\helpers\StringHelper;
@@ -20,7 +20,7 @@ use yii\helpers\Url;
                     <?php foreach ($authClients as $authClient) : ?>
                         <?php $userRoles = implode(', ', $authClient->user->getRoles(true)); ?>
                         <li>
-                            <a class="profile_link" href="<?= Url::to(['/site/auth-step-two', 'user-id' => $authClient->ac_user_id])?>">
+                            <a class="profile_link" href="<?= Url::to(['/site/auth-step-two', 'user-id' => $authClient->uac_user_id])?>">
                                 <span class="avatar_wrapper">
                                     <img src="<?= $authClient->user->getGravatarUrl() ?>" alt="avatar" class="user_avatar">
                                 </span>

@@ -1,15 +1,15 @@
 <?php
 
-namespace sales\model\authClient\entity;
+namespace sales\model\userAuthClient\entity;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use sales\model\authClient\entity\AuthClient;
+use sales\model\userAuthClient\entity\UserAuthClient;
 
 /**
- * AuthClientSearch represents the model behind the search form of `sales\model\authClient\entity\AuthClient`.
+ * UserAuthClientSearch represents the model behind the search form of `sales\model\userAuthClient\entity\UserAuthClient`.
  */
-class AuthClientSearch extends AuthClient
+class UserAuthClientSearch extends UserAuthClient
 {
     /**
      * {@inheritdoc}
@@ -17,9 +17,9 @@ class AuthClientSearch extends AuthClient
     public function rules()
     {
         return [
-            [['ac_id', 'ac_user_id'], 'integer'],
-            [['ac_source', 'ac_source_id', 'ac_email', 'ac_ip', 'ac_useragent', 'ac_created_dt'], 'safe'],
-            [['ac_created_dt'], 'date', 'format' => 'Y-m-d'],
+            [['uac_id', 'uac_user_id'], 'integer'],
+            [['uac_source', 'uac_source_id', 'uac_email', 'uac_ip', 'uac_useragent', 'uac_created_dt'], 'safe'],
+            [['uac_created_dt'], 'date', 'format' => 'Y-m-d'],
         ];
     }
 
@@ -41,7 +41,7 @@ class AuthClientSearch extends AuthClient
      */
     public function search($params)
     {
-        $query = AuthClient::find();
+        $query = UserAuthClient::find();
 
         // add conditions that should always apply here
 
@@ -59,16 +59,16 @@ class AuthClientSearch extends AuthClient
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'ac_id' => $this->ac_id,
-            'ac_user_id' => $this->ac_user_id,
-            'date(ac_created_dt)' => $this->ac_created_dt,
-            'ac_source' => $this->ac_source
+            'uac_id' => $this->uac_id,
+            'uac_user_id' => $this->uac_user_id,
+            'date(uac_created_dt)' => $this->uac_created_dt,
+            'uac_source' => $this->uac_source
         ]);
 
-        $query->andFilterWhere(['like', 'ac_source_id', $this->ac_source_id])
-            ->andFilterWhere(['like', 'ac_email', $this->ac_email])
-            ->andFilterWhere(['like', 'ac_ip', $this->ac_ip])
-            ->andFilterWhere(['like', 'ac_useragent', $this->ac_useragent]);
+        $query->andFilterWhere(['like', 'uac_source_id', $this->uac_source_id])
+            ->andFilterWhere(['like', 'uac_email', $this->uac_email])
+            ->andFilterWhere(['like', 'uac_ip', $this->uac_ip])
+            ->andFilterWhere(['like', 'uac_useragent', $this->uac_useragent]);
 
         return $dataProvider;
     }

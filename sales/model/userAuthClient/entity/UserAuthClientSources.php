@@ -1,11 +1,11 @@
 <?php
 
-namespace sales\model\authClient\entity;
+namespace sales\model\userAuthClient\entity;
 
-use sales\model\authClient\handler\ClientHandler;
-use sales\model\authClient\handler\GoogleHandler;
+use sales\model\userAuthClient\handler\ClientHandler;
+use sales\model\userAuthClient\handler\GoogleHandler;
 
-class AuthClientSources
+class UserAuthClientSources
 {
     public const GOOGLE = 1;
 

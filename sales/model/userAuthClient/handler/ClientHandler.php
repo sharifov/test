@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\model\authClient\handler;
+namespace sales\model\userAuthClient\handler;
 
 use yii\authclient\AuthAction;
 use yii\authclient\ClientInterface;
