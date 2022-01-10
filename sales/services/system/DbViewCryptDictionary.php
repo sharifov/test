@@ -33,6 +33,7 @@ class DbViewCryptDictionary
                 'l_client_last_name',
                 'l_client_phone',
                 'l_client_email',
+                'additional_information',
             ],
             'sms' => [
                 's_phone_from',
