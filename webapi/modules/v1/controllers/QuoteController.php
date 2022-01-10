@@ -139,7 +139,12 @@ class QuoteController extends ApiBaseController
      * @apiSuccess {integer} response_id    Response Id
      * @apiSuccess {DateTime} request_dt    Request Date & Time
      * @apiSuccess {DateTime} response_dt   Response Date & Time
-     * @apiSuccess {object} lead Lead
+     * @apiSuccess {object}     lead Lead
+     * @apiSuccess {string}     [lead.department_key]           Department key (For example: <code>sales,exchange,support,schedule_change,fraud_prevention,chat</code>)
+     * @apiSuccess {integer}    [lead.type_create_id]           Type create id
+     * @apiSuccess {string}     [lead.type_create_name]         Type Name
+     * @apiSuccess {object}     [lead.lead_data]                Lead data
+     * @apiSuccess {object}     [lead.additionalInformation]    Additional Information
      *
      * @apiSuccessExample Success-Response:
      * HTTP/1.1 200 OK
