@@ -67,6 +67,12 @@ class QuoteController extends ApiBaseController
      * @apiSuccess {string} agentName    Agent Name
      * @apiSuccess {string} agentEmail    Agent Email
      * @apiSuccess {string} agentDirectLine    Agent DirectLine
+     * @apiSuccess {object}     [lead]                          Lead
+     * @apiSuccess {string}     [lead.department_key]           Department key (For example: <code>sales,exchange,support,schedule_change,fraud_prevention,chat</code>)
+     * @apiSuccess {integer}    [lead.type_create_id]           Type create id
+     * @apiSuccess {string}     [lead.type_create_name]         Type Name
+     * @apiSuccess {object}     [lead.lead_data]                Lead data
+     * @apiSuccess {object}     [lead.additionalInformation]    Additional Information
      *
      * @apiSuccess {string} action    Action
      * @apiSuccess {integer} response_id    Response Id
@@ -427,7 +433,10 @@ class QuoteController extends ApiBaseController
      *              "ld_field_key": "kayakclickid",
      *              "ld_field_value": "example_value132"
      *          }
-     *      ]
+     *      ],
+     *      "department_key": "chat",
+     *      "type_create_id": 8,
+     *      "type_create_name": "Client Chat"
      *   },
      *   "action": "v2/quote/get-info",
      *   "response_id": 298939,
@@ -447,10 +456,7 @@ class QuoteController extends ApiBaseController
      *       "status": 404,
      *       "type": "yii\\web\\NotFoundHttpException"
      *   }
-     *
-     *
      */
-
 
     public function actionGetInfo(): array
     {
@@ -566,6 +572,10 @@ class QuoteController extends ApiBaseController
             }
 
             if ($lead) {
+                $response['lead']['department_key'] = $lead->lDep->dep_key ?? null;
+                $response['lead']['type_create_id'] = $lead->l_type_create ?? null;
+                $response['lead']['type_create_name'] = $lead->getTypeCreateName();
+
                 ArrayHelper::setValue(
                     $response,
                     'lead.additionalInformation',
