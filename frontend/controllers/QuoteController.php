@@ -165,7 +165,9 @@ class QuoteController extends FController
 
                 $viewData = SearchService::getAirlineLocationInfo($quotes);
 
-                $quotes = $form->applyFilters($quotes, $lead->leadFlightSegments);
+                if (!empty($quotes['results'])) {
+                    $quotes = $form->applyFilters($quotes, $lead->leadFlightSegments);
+                }
 
                 $dataProvider = new ArrayDataProvider([
                     'allModels' => $quotes['results'] ?? [],
