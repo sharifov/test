@@ -10934,6 +10934,41 @@ define({ "api": [
             "optional": false,
             "field": "lead",
             "description": "<p>Lead</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "string",
+            "optional": true,
+            "field": "lead.department_key",
+            "description": "<p>Department key (For example: <code>sales,exchange,support,schedule_change,fraud_prevention,chat</code>)</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "integer",
+            "optional": true,
+            "field": "lead.type_create_id",
+            "description": "<p>Type create id</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "string",
+            "optional": true,
+            "field": "lead.type_create_name",
+            "description": "<p>Type Name</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "object",
+            "optional": true,
+            "field": "lead.lead_data",
+            "description": "<p>Lead data</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "object",
+            "optional": true,
+            "field": "lead.additionalInformation",
+            "description": "<p>Additional Information</p>"
           }
         ]
       },
