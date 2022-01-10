@@ -1,7 +1,5 @@
 <?php
 
-use common\models\Employee;
-use console\migrations\RbacMigrationService;
 use yii\db\Migration;
 
 /**

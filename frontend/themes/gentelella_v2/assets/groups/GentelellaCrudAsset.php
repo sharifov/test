@@ -4,7 +4,7 @@
 namespace frontend\themes\gentelella_v2\assets\groups;
 
 use frontend\assets\CentrifugeAsset;
-use frontend\assets\DrawerJsAsset;
+use frontend\assets\ImageEditorAsset;
 use frontend\assets\groups\AllSharedDependenciesAsset;
 use frontend\assets\groups\AllSharedGroupAsset;
 use frontend\assets\Html2CanvasAsset;
@@ -21,6 +21,6 @@ class GentelellaCrudAsset extends \yii\web\AssetBundle
         NotificationSocketAsset::class,
         GentelellaCrudGroupAsset::class,
         Html2CanvasAsset::class,
-        DrawerJsAsset::class
+        //ImageEditorAsset::class
     ];
 }

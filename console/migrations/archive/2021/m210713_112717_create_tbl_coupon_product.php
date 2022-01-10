@@ -1,8 +1,8 @@
 <?php
 
-use yii\db\Migration;
 use common\models\Employee;
 use console\migrations\RbacMigrationService;
+use yii\db\Migration;
 
 /**
  * Class m210713_112717_create_tbl_coupon_product

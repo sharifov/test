@@ -7,8 +7,6 @@ use yii\helpers\Html;
 /** @var \common\models\Employee $user */
 $user = Yii::$app->user->identity;
 ?>
-
-
 <div class="sidebar-footer hidden-small">
     <div class="col-md-12 form-group" id="search-menu-div" style="display: none">
         <div class="input-group mb-2">
@@ -96,11 +94,42 @@ $('#btn-search-menu-toggle').on('click', function (e) {
 
     
 function canvasEditor() {
-    // Create image editor
-    var imageEditor = new tui.component.ImageEditor('#my-image-editor canvas', {
-      cssMaxWidth: 1000, // Component default value: 1000
-      cssMaxHeight: 800, // Component default value: 800
-    });
+   
+      const props = {
+          usageStatistics: false,
+    includeUI: {
+      loadImage: {
+        path: "https://i1.wp.com/www.tor.com/wp-content/uploads/2018/10/Malazan-Kotaki.jpg?fit=740%2C386&type=vertical&quality=100&ssl=1",
+        name: "SampleImage"
+      },
+      uiSize: {
+        width: "100%",
+        height: "600px"
+      },
+      menu: [
+        "crop",
+        //"flip",
+        "rotate",
+        "draw",
+        "shape",
+        "icon",
+        "text",
+        //"filter"
+      ],
+      menuBarPosition: "bottom"
+      // theme: whiteTheme,
+    },
+    cssMaxWidth: 1200,
+    cssMaxHeight: 800,
+    selectionStyle: {
+      cornerSize: 20,
+      rotatingPointOffset: 70
+    }
+  };
+  
+    const imageEditor = new tui.ImageEditor('#tui-image-editor', props);
+    //imageEditor.loadImageFromURL('https://cdn.rawgit.com/nhnent/tui.component.image-editor/1.3.0/samples/img/sampleImage.jpg', 'SampleImage');
+    
 }
 
 
@@ -136,9 +165,9 @@ $('body').off('click', '#btn-bug-create').on('click', '#btn-bug-create', functio
             html2canvas(screenshotTarget).then((canvas) => {
                const base64image = canvas.toDataURL("image/png");
                
-               let str = '<h3 class=text-center>DrawerJs Demonstration</h3> <div id="tui-image-editor"></div>';
+               let str = ''; //'<h3 class=text-center>DrawerJs Demonstration</h3> <div id="tui-image-editor"></div>';
                modal.find('.modal-body').html('<img src="' + base64image + '" style="width:50%"/>' + str);
-               canvasEditor();
+               // canvasEditor();
                //window.location.href = base64image;
             });
                       
