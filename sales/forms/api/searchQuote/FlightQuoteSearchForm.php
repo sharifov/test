@@ -16,32 +16,32 @@ use yii\helpers\VarDumper;
  * @property array $stops
  * @property int $price
  * @property array $airlines
- * @property string $tripDuration
- * @property array $tripMaxDurationHours
- * @property array $tripMaxDurationMinutes
- * @property bool $baggage
- * @property bool $airportChange
- * @property array $airportExactMatch
- * @property array $excludeConnectionAirports
- * @property array $includeAirports
+ * @property string|null $tripDuration
+ * @property array|null $tripMaxDurationHours
+ * @property array|null $tripMaxDurationMinutes
+ * @property bool|null $baggage
+ * @property bool|null $airportChange
+ * @property array|null $airportExactMatch
+ * @property array|null $excludeConnectionAirports
+ * @property array|null $includeAirports
  * @property string $sortBy
  * @property array $topCriteria
  * @property mixed $rank
- * @property string $departure
- * @property string $arrival
- * @property array $departureStartTimeList
- * @property array $departureEndTimeList
- * @property array $arrivalStartTimeList
- * @property array $arrivalEndTimeList
- * @property int $departureMin
- * @property int $departureMax
- * @property int $arrivalMin
- * @property int $arrivalMax
- * @property string $departureStart
- * @property string $departureEnd
- * @property string $arrivalStart
- * @property string $arrivalEnd
- * @property int $filterIsShown
+ * @property string|null $departure
+ * @property string|null $arrival
+ * @property array|null $departureStartTimeList
+ * @property array|null $departureEndTimeList
+ * @property array|null $arrivalStartTimeList
+ * @property array|null $arrivalEndTimeList
+ * @property int|null $departureMin
+ * @property int|null $departureMax
+ * @property int|null $arrivalMin
+ * @property int|null $arrivalMax
+ * @property string|null $departureStart
+ * @property string|null $departureEnd
+ * @property string|null $arrivalStart
+ * @property string|null $arrivalEnd
+ * @property int|null $filterIsShown
  */
 class FlightQuoteSearchForm extends Model
 {
@@ -119,7 +119,10 @@ class FlightQuoteSearchForm extends Model
                     'arrivalStartTimeList', 'arrivalEndTimeList', 'filterIsShown', 'tripDuration', 'departure',
                     'arrival'
                 ], 'safe'],
-            [['price', 'arrivalMax', 'arrivalMin', 'filterIsShown', 'departureMin', 'departureMax'], 'filter', 'filter' => 'intval'],
+            [
+                [
+                    'price', 'arrivalMax', 'arrivalMin', 'filterIsShown', 'departureMin', 'departureMax'
+                ], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
             [['rank', 'departure', 'arrival', 'departureStart', 'departureEnd', 'arrivalStart', 'arrivalEnd'], 'string'],
         ];
     }
