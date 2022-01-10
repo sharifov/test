@@ -1,8 +1,8 @@
 <?php
 
-use yii\db\Migration;
 use common\models\Setting;
 use common\models\SettingCategory;
+use yii\db\Migration;
 
 /**
  * Class m210323_134207_recover_client_data_privacy_enabled_setting

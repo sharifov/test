@@ -1,7 +1,7 @@
 <?php
 
-use yii\db\Migration;
 use common\models\EmailTemplateType;
+use yii\db\Migration;
 
 /**
  * Class m210204_153541_add_column_etp_params_json_to_email_template_type_tbl
