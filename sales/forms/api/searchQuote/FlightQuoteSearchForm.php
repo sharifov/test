@@ -23,14 +23,24 @@ use yii\helpers\VarDumper;
  * @property bool $airportChange
  * @property array $airportExactMatch
  * @property array $excludeConnectionAirports
+ * @property array $includeAirports
  * @property string $sortBy
  * @property array $topCriteria
  * @property mixed $rank
+ * @property string $departure
  * @property string $arrival
- * @property string $departureStartTimeList
- * @property string $departureEndTimeList
- * @property string $arrivalStartTimeList
- * @property string $arrivalEndTimeList
+ * @property array $departureStartTimeList
+ * @property array $departureEndTimeList
+ * @property array $arrivalStartTimeList
+ * @property array $arrivalEndTimeList
+ * @property int $departureMin
+ * @property int $departureMax
+ * @property int $arrivalMin
+ * @property int $arrivalMax
+ * @property string $departureStart
+ * @property string $departureEnd
+ * @property string $arrivalStart
+ * @property string $arrivalEnd
  * @property int $filterIsShown
  */
 class FlightQuoteSearchForm extends Model
@@ -75,25 +85,25 @@ class FlightQuoteSearchForm extends Model
 
     public $filterIsShown = 0;
 
-    public string $departure = '';
+    public $departure = '';
 
-    public int $departureMin = 0;
+    public $departureMin = 0;
 
-    public int $departureMax = 1440;
+    public $departureMax = 1440;
 
-    public string $departureStart = '';
+    public $departureStart = '';
 
-    public string $departureEnd = '';
+    public $departureEnd = '';
 
-    public string $arrival = '';
+    public $arrival = '';
 
-    public int $arrivalMin = 0;
+    public $arrivalMin = 0;
 
-    public int $arrivalMax = 1440;
+    public $arrivalMax = 1440;
 
-    public string $arrivalStart = '';
+    public $arrivalStart = '';
 
-    public string $arrivalEnd = '';
+    public $arrivalEnd = '';
 
     /**
      * @return array
@@ -105,10 +115,12 @@ class FlightQuoteSearchForm extends Model
                 [
                     'fareType', 'airlines', 'tripMaxDurationHours', 'tripMaxDurationMinutes', 'stops',
                     'baggage', 'airportChange', 'airportExactMatch', 'excludeConnectionAirports', 'sortBy',
-                    'topCriteria', 'rank', 'departureStartTimeList','departureEndTimeList', 'arrivalStartTimeList',
-                    'arrivalEndTimeList', 'filterIsShown', 'tripDuration', 'departure', 'arrival'
+                    'includeAirports', 'topCriteria', 'rank', 'departureStartTimeList','departureEndTimeList',
+                    'arrivalStartTimeList', 'arrivalEndTimeList', 'filterIsShown', 'tripDuration', 'departure',
+                    'arrival'
                 ], 'safe'],
-            ['price', 'filter', 'filter' => 'intval'],
+            [['price', 'arrivalMax', 'arrivalMin', 'filterIsShown', 'departureMin', 'departureMax'], 'filter', 'filter' => 'intval'],
+            [['rank', 'departure', 'arrival', 'departureStart', 'departureEnd', 'arrivalStart', 'arrivalEnd'], 'string'],
         ];
     }
 
