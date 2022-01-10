@@ -116,7 +116,7 @@ use yii\bootstrap4\Html;
                                 tooltips: {
                                     to: function(value){ return Math.ceil(value);}
                                 },
-                                step: 10,
+                                step: 1,
                                 range: {
                                     'min': min,
                                     'max': max
