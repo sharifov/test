@@ -12,6 +12,7 @@ use sales\model\client\entity\events\ClientChangeIpEvent;
 use sales\model\client\entity\events\ClientCreatedEvent;
 use sales\model\client\entity\events\ClientExcludedEvent;
 use sales\model\clientAccount\entity\ClientAccount;
+use sales\model\clientData\entity\ClientData;
 use sales\model\clientVisitor\entity\ClientVisitor;
 use sales\model\coupon\entity\couponClient\CouponClient;
 use thamtech\uuid\helpers\UuidHelper;
