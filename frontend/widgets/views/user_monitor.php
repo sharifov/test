@@ -78,11 +78,15 @@ const channel = new BroadcastChannel('tabCommands');
 channel.onmessage = function(e) {
     if (e.data.event === 'stopAutoLogout') {
         stopAutoLogout();      
+    } else if (e.data.event === 'logout') {
+        location.assign('/site/logout?type=autologout');
     }
 };
 
 function logout() {
-    window.location.href = '/site/logout?type=autologout';
+    // window.location.href = '/site/logout?type=autologout';
+    channel.postMessage({event: 'logout'});
+    location.assign('/site/logout?type=autologout');
 }
 
 function cancelAutoLogout() {
