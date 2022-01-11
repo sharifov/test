@@ -12,6 +12,7 @@ use modules\flight\src\entities\flightQuoteFlight\serializer\FlightQuoteFlightSe
 use modules\order\src\entities\order\Order;
 use modules\product\src\interfaces\ProductDataInterface;
 use sales\behaviors\StringToJsonBehavior;
+use sales\services\caseSale\PnrPreparingService;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -63,7 +64,6 @@ class FlightQuoteFlight extends ActiveRecord implements ProductDataInterface
 
             ['fqf_booking_id', 'string', 'max' => 50],
             ['fqf_main_airline', 'string', 'max' => 2],
-            ['fqf_pnr', 'string', 'max' => 10],
             ['fqf_validating_carrier', 'string', 'max' => 2],
 
             ['fqf_status_id', 'integer'],
@@ -74,6 +74,11 @@ class FlightQuoteFlight extends ActiveRecord implements ProductDataInterface
             [['fqf_created_dt', 'fqf_updated_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
 
             ['fqf_original_data_json', CheckJsonValidator::class],
+
+            ['fqf_pnr', 'string', 'max' => 70],
+            [['fqf_pnr'], 'filter', 'filter' => static function ($value) {
+                return (new PnrPreparingService($value))->getPnr();
+            }],
         ];
     }
 
