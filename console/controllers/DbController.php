@@ -143,6 +143,7 @@ class DbController extends Controller
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
     }
 
+    //todo may be deprecated. questions
     public function actionLeadQcall()
     {
         printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));

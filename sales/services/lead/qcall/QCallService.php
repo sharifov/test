@@ -45,30 +45,6 @@ class QCallService
         $this->clientPhones = $clientPhones;
     }
 
-    /**
-     * @param Lead $lead
-     */
-    public function createOrUpdate(Lead $lead): void
-    {
-        if ($lq = $lead->leadQcall) {
-            $this->updateInterval(
-                $lq,
-                new Config($lead->status, $lead->getCountOutCallsLastFlow()),
-                $lead->offset_gmt,
-                new FindPhoneParams($lead->project_id, $lead->l_dep_id),
-                new FindWeightParams($lead->project_id, $lead->status)
-            );
-        } else {
-            $this->create(
-                $lead->id,
-                new Config($lead->status, $lead->getCountOutCallsLastFlow()),
-                new FindWeightParams($lead->project_id, $lead->status),
-                $lead->offset_gmt,
-                new FindPhoneParams($lead->project_id, $lead->l_dep_id)
-            );
-        }
-    }
-
     public function createByDefault(Lead $lead): ?int
     {
         return $this->create(

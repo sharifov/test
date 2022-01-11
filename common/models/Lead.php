@@ -2884,29 +2884,6 @@ Reason: {reason}',
         $this->enableActiveRecordEvents = false;
     }
 
-
-//    /**
-//     * @return bool
-//     */
-//    public function createQCall(): bool
-//    {
-//        $qcConfig = QcallConfig::getByStatusCall($this->status, 0);
-//
-//        if ($qcConfig) {
-//            $lq = new LeadQcall();
-//            $lq->lqc_lead_id = $this->id;
-//            $lq->lqc_dt_from = date('Y-m-d H:i:s', (time() + ((int) $qcConfig->qc_time_from * 60)));
-//            $lq->lqc_dt_to = date('Y-m-d H:i:s', (time() + ((int) $qcConfig->qc_time_to * 60)));
-//            $lq->lqc_weight = $this->project_id * 10;
-//            if (!$lq->save()) {
-//                Yii::error(VarDumper::dumpAsString($lq->errors), 'Lead:createQCall:LeadQcall:save');
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
-
-
     /**
      * @return int
      */
@@ -2916,58 +2893,6 @@ Reason: {reason}',
             return (int)$this->lastLeadFlow->lf_out_calls;
         }
         return 0;
-    }
-
-    /**
-     * @return bool
-     */
-    public function createOrUpdateQCall(): bool
-    {
-        if ($this->lastLeadFlow) {
-            $callCount = (int) $this->lastLeadFlow->lf_out_calls;
-        } else {
-            $callCount = 0;
-        }
-
-        $qcConfig = QcallConfig::getByStatusCall($this->status, $callCount);
-
-        // Yii::info(VarDumper::dumpAsString(['lead_id' => $this->id, 'status' => $this->status, 'callCount' => $callCount, 'qcConfig' => $qcConfig ? $qcConfig->attributes : null]), 'info\createOrUpdateQCall');
-
-        $lq = $this->leadQcall;
-
-        if ($qcConfig) {
-            if (!$lq) {
-                $lq = new LeadQcall();
-                $lq->lqc_lead_id = $this->id;
-                $lq->lqc_weight = $this->project_id * 10;
-                $lq->lqc_created_dt = date('Y-m-d H:i:s');
-            }
-
-            $date = (new CalculateDateService())->calculate(
-                $qcConfig->qc_time_from,
-                $qcConfig->qc_time_to,
-                $qcConfig->qc_client_time_enable,
-                $this->offset_gmt,
-                'now'
-            );
-
-            $lq->lqc_dt_from = $date->from;
-            $lq->lqc_dt_to = $date->to;
-
-            if (!$lq->save()) {
-                Yii::error(VarDumper::dumpAsString($lq->errors), 'Lead:createOrUpdateQCall:LeadQcall:save');
-                return true;
-            }
-        } else {
-            if ($lq) {
-                try {
-                    $lq->delete();
-                } catch (\Throwable $throwable) {
-                    Yii::error($throwable->getMessage(), 'Lead:createOrUpdateQCall:Throwable');
-                }
-            }
-        }
-        return false;
     }
 
     /**

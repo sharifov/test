@@ -45,6 +45,7 @@ use yii\helpers\VarDumper;
  */
 class UserMonitorController extends Controller
 {
+    // todo may be deprecated. questions
     public function actionLogout2()
     {
         printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
