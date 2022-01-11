@@ -440,7 +440,7 @@ class LeadController extends Controller
                     $updatedData[] = [
                         'lead' => $row->id,
                         'boFlightId' => $row->bo_flight_id,
-                        'hybridUid' => $row->hybrid_uid
+                        'hybridUid' => $saleData['bookingId']
                     ];
                 } else {
                     throw new \RuntimeException('BookingId is empty in result from BO'  . '; LeadId: ' . $row->id . '; BoFlightId: ' . $row->bo_flight_id . '; ');
