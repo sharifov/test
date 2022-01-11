@@ -46,6 +46,8 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
     public const ACTION_OWNER_ACCESS  = 'ownerAccess';
     public const ACTION_EMPTY_OWNER_ACCESS  = 'emptyOwnerAccess';
     public const ACTION_GROUP_ACCESS  = 'groupAccess';
+    public const ACTION_DEPARTMENT_ACCESS  = 'departmentAccess';
+    public const ACTION_PROJECT_ACCESS  = 'projectAccess';
     public const ACTION_READ  = 'read';
     public const ACTION_CREATE  = 'create';
     public const ACTION_TRANSFER  = 'transfer';
@@ -56,7 +58,14 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         self::UI_BLOCK_EVENT_LOG_LIST           => [self::ACTION_ACCESS],
         self::UI_BTN_EVENT_LOG_VIEW             => [self::ACTION_READ],
         self::OBJ_CASE_STATUS_ROUTE_RULES   => [self::ACTION_TRANSFER],
-        self::SQL_CASE_QUEUES           => [self::ACTION_OWNER_ACCESS, self::ACTION_EMPTY_OWNER_ACCESS, self::ACTION_GROUP_ACCESS, self::ACTION_ALL_ACCESS],
+        self::SQL_CASE_QUEUES => [
+            self::ACTION_OWNER_ACCESS,
+            self::ACTION_EMPTY_OWNER_ACCESS,
+            self::ACTION_GROUP_ACCESS,
+            self::ACTION_ALL_ACCESS,
+            self::ACTION_DEPARTMENT_ACCESS,
+            self::ACTION_PROJECT_ACCESS,
+        ],
     ];
 
     protected const ATTR_CASE_IS_OWNER = [
@@ -150,6 +159,19 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
             self::OP_IN, self::OP_NOT_IN, '<', '>', '<=', '>=']
     ];
 
+    protected const ATTR_MAIN_MENU_CASES_BADGE = [
+        'optgroup' => 'MAIN MENU CASES',
+        'id' => self::NS . 'mainMenuCaseBadgeName',
+        'field' => 'mainMenuCaseBadgeName',
+        'label' => 'Queue Badge ID',
+        'type' => self::ATTR_TYPE_STRING,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2,
+            self::OP_IN, self::OP_NOT_IN, '<', '>', '<=', '>=']
+    ];
+
     /** --------------- ATTRIBUTE LIST --------------------------- */
     public const OBJECT_ATTRIBUTE_LIST = [
         self::LOGIC_CLIENT_DATA    => [self::ATTR_CASE_IS_OWNER, self::ATTR_IS_COMMON_GROUP],
@@ -186,12 +208,29 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         $attrStatusRuleList = self::ATTR_CASE_STATUS_RULE;
         $attrPqcStatusList = self::ATTR_PQC_STATUS;
         $attrPqrStatusList = self::ATTR_PQR_STATUS;
+        $attrCasesBadge = self::ATTR_MAIN_MENU_CASES_BADGE;
 
         $attrStatusList['values'] = CasesStatus::STATUS_LIST;
         $attrStatusRuleList['values'] = CasesStatus::STATUS_LIST;
         $attrCategoryList['values'] = CaseCategory::getList();
         $attrPqcStatusList['values'] = ProductQuoteChangeStatus::getList();
         $attrPqrStatusList['values'] = ProductQuoteRefundStatus::getList();
+        $attrCasesBadge['values'] = [
+            'need_action' => 'Need Action',
+            'pending' => 'Pending',
+            'inbox' => 'Inbox',
+            'unidentified' => 'Unidentified',
+            'first-priority' => 'First Priority',
+            'second-priority' => 'Second Priority',
+            'pass-departure' => 'Pass Departure',
+            'processing' => 'Processing',
+            'follow-up' => 'FollowUp',
+            'awaiting' => 'Awaiting',
+            'auto-processing' => 'Auto Processing',
+            'solved' => 'Solved',
+            'error' => 'Error',
+            'trash' => 'Trash',
+        ];
 
         $attributeList = self::OBJECT_ATTRIBUTE_LIST;
 
@@ -200,6 +239,7 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         $attributeList[self::OBJ_CASE_STATUS_ROUTE_RULES][] = $attrStatusRuleList;
         $attributeList[self::OBJ_CASE_STATUS_ROUTE_RULES][] = $attrPqcStatusList;
         $attributeList[self::OBJ_CASE_STATUS_ROUTE_RULES][] = $attrPqrStatusList;
+        $attributeList[self::SQL_CASE_QUEUES][] = $attrCasesBadge;
 
         return $attributeList;
     }
