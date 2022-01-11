@@ -100,10 +100,8 @@ class BadgesController extends FController
                         $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['data' => $badge]);
                         \Yii::warning($message, 'BadgesController:actionBadgesCount:badgesCollection:Exception');
                     } catch (\Throwable $throwable) {
-                        \Yii::error(
-                            AppHelper::throwableLog($throwable),
-                            'BadgesController:actionBadgesCount:badgesCollection:Throwable'
-                        );
+                        $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['data' => $badge]);
+                        \Yii::error($message, 'BadgesController:actionBadgesCount:badgesCollection:Throwable');
                     }
                 }
                 if (empty($result['data'])) {
