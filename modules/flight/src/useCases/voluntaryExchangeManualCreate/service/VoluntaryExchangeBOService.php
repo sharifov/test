@@ -46,7 +46,10 @@ class VoluntaryExchangeBOService
 
     public function getServiceFeeAmount(): ?float
     {
-        return $this->result['exchange']['customerPackage']['serviceFee']['amount'] ?? null;
+        if ($amount = $this->result['exchange']['customerPackage']['serviceFee']['amount'] ?? null) {
+            return (float) preg_replace("/[^-0-9.]/", '', $amount);
+        }
+        return null;
     }
 
     public function getServiceFeeCurrency(): ?string
