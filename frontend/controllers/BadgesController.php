@@ -95,7 +95,7 @@ class BadgesController extends FController
                         }
 
                         $badgeCounter = (new BadgesObjectFactory($badgeForm->objectKey))->create();
-                        $result['data'][$badgeForm->idName] = $badgeCounter->countTypes($badgeForm->types);
+                        $result['data'][$badgeForm->idName] = $badgeCounter->countTypes((array) $badgeForm->types);
                     } catch (\RuntimeException | \DomainException $throwable) {
                         $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['data' => $badge]);
                         \Yii::warning($message, 'BadgesController:actionBadgesCount:badgesCollection:Exception');
