@@ -73,7 +73,7 @@ $user = Yii::$app->user->identity;
     <?php /*if ($user->canRoute('/user-connection/index')) :*/?>
     <?=Html::a(
         '<span class="fa fa-bug warning"></span>',
-        ['/bug/create'],
+        ['/user-feedback-crud/create-ajax'],
         ['data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => 'Bug Report', 'id' => 'btn-bug-create']
     ) ?>
     <?php /*endif;*/ ?>
@@ -162,11 +162,51 @@ $('body').off('click', '#btn-bug-create').on('click', '#btn-bug-create', functio
           
           const screenshotTarget = document.body;
 
+          let jsonData = {};
+          
+          // $.getJSON("https://api.ipify.org?format=json", function(data) {
+          //       jsonData.ip = data.ip;
+          // })
+          
+          $.getJSON('https://api.db-ip.com/v2/free/self', function(data) {
+              jsonData.dbip = data;
+              //console.log(JSON.stringify(data, null, 2));
+            });
+          
+          
+          $.getJSON('https://ipapi.co/json', function(data) {
+              jsonData.dbip = data;
+              //console.log(JSON.stringify(data, null, 2));
+            });
+          
+          
+          
+          // $.getJSON('https://json.geoiplookup.io', function(data) {
+          //     jsonData.geoiplookup = data;
+          //     //console.log(JSON.stringify(data, null, 2));
+          //   });
+          //
+          // $.getJSON('https://www.geoplugin.net/json.gp', function(data) {
+          //     jsonData.geoplugin = data;
+          //     //console.log(JSON.stringify(data, null, 2));
+          //   });
+          
+          
+          
+          
             html2canvas(screenshotTarget).then((canvas) => {
                const base64image = canvas.toDataURL("image/png");
                
                let str = ''; //'<h3 class=text-center>DrawerJs Demonstration</h3> <div id="tui-image-editor"></div>';
-               modal.find('.modal-body').html('<img src="' + base64image + '" style="width:50%"/>' + str);
+               //modal.find('.modal-body').html('<img src="' + base64image + '" style="width:50%"/>' + str);
+               $('#screenshot-img').attr('src', base64image); 
+               $('#screenshot').val(base64image);
+               jsonData.browserReport = browserReportSync();
+               $('#uf_data').val(JSON.stringify(jsonData));
+               
+               
+               
+               //html('<img src="' + base64image + '" style="width:50%"/>' + str);
                // canvasEditor();
                //window.location.href = base64image;
             });
