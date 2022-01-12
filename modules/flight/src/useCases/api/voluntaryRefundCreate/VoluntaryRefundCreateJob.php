@@ -6,7 +6,7 @@ use common\components\jobs\BaseJob;
 use frontend\helpers\JsonHelper;
 use modules\flight\models\FlightRequest;
 use modules\product\src\entities\productQuote\ProductQuote;
-use sales\helpers\app\AppHelper;
+use src\helpers\app\AppHelper;
 use yii\queue\JobInterface;
 
 /**

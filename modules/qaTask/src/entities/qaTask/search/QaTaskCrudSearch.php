@@ -2,7 +2,7 @@
 
 namespace modules\qaTask\src\entities\qaTask\search;
 
-use sales\helpers\query\QueryHelper;
+use src\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
 
 /**

@@ -2,11 +2,11 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
-use sales\access\EmployeeDepartmentAccess;
-use sales\access\EmployeeProjectAccess;
+use src\access\EmployeeDepartmentAccess;
+use src\access\EmployeeProjectAccess;
 use common\models\Lead;
 use common\models\Employee;
-use sales\auth\Auth;
+use src\auth\Auth;
 
 ?>
 

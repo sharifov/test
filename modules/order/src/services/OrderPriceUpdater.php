@@ -6,7 +6,7 @@ use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderRepository;
 use modules\order\src\entities\orderUserProfit\OrderUserProfitRepository;
 use modules\product\src\entities\productQuote\ProductQuote;
-use sales\services\CurrencyHelper;
+use src\services\CurrencyHelper;
 
 /**
  * Class OrderPriceUpdater

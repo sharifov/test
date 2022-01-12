@@ -3,10 +3,10 @@
 namespace frontend\controllers;
 
 use common\models\Employee;
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
-use sales\model\callLog\entity\callLogUserAccess\CallLogUserAccess;
-use sales\model\callLog\entity\callLogUserAccess\search\CallLogUserAccessSearch;
+use src\model\callLog\entity\callLogUserAccess\CallLogUserAccess;
+use src\model\callLog\entity\callLogUserAccess\search\CallLogUserAccessSearch;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

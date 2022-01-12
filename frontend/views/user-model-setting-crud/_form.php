@@ -2,13 +2,13 @@
 
 use common\models\Employee;
 use frontend\helpers\JsonHelper;
-use sales\helpers\app\AppHelper;
-use sales\model\userModelSetting\entity\UserModelSetting;
+use src\helpers\app\AppHelper;
+use src\model\userModelSetting\entity\UserModelSetting;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\userModelSetting\entity\UserModelSetting */
+/* @var $model src\model\userModelSetting\entity\UserModelSetting */
 /* @var $form ActiveForm */
 ?>
 

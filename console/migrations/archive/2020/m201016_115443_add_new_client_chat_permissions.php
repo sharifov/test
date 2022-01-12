@@ -1,7 +1,7 @@
 <?php
 
-use sales\rbac\rules\clientChat\manage\ClientChatManageEmptyRule;
-use sales\rbac\rules\clientChat\view\ClientChatViewEmptyRule;
+use src\rbac\rules\clientChat\manage\ClientChatManageEmptyRule;
+use src\rbac\rules\clientChat\view\ClientChatViewEmptyRule;
 use yii\db\Migration;
 
 /**

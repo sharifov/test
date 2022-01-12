@@ -3,14 +3,18 @@
 namespace console\controllers;
 
 use common\models\Employee;
-use sales\rbac\roles\ExchangeSenior;
-use sales\rbac\roles\SalesSenior;
-use sales\rbac\roles\SupportSenior;
+use src\rbac\RbacMoveToSrc;
+use src\rbac\roles\ExchangeSenior;
+use src\rbac\roles\SalesSenior;
+use src\rbac\roles\SupportSenior;
 use Yii;
 use console\migrations\RbacMigrationService;
 use yii\console\Controller;
+use yii\db\Query;
+use yii\helpers\ArrayHelper;
 use yii\helpers\BaseConsole;
 use yii\helpers\Console;
+use yii\helpers\VarDumper;
 use yii\rbac\Role;
 
 class RbacController extends Controller
@@ -117,5 +121,23 @@ class RbacController extends Controller
         }
 
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+    }
+
+    public function actionMoveRulesToSrc()
+    {
+        $subDir = 'src';
+        (new RbacMoveToSrc())->move(env('app.path') . DIRECTORY_SEPARATOR . $subDir . DIRECTORY_SEPARATOR . 'rbac', $subDir);
+        if (Yii::$app->cache) {
+            Yii::$app->cache->flush();
+        }
+    }
+
+    public function actionMoveRulesToSales()
+    {
+        $subDir = 'sales';
+        (new RbacMoveToSrc())->move(env('app.path') . DIRECTORY_SEPARATOR . $subDir . DIRECTORY_SEPARATOR . 'rbac', $subDir);
+        if (Yii::$app->cache) {
+            Yii::$app->cache->flush();
+        }
     }
 }

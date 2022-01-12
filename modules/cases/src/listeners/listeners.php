@@ -1,25 +1,25 @@
 <?php
 
-use sales\entities\cases\events\CasesCreatedEvent;
-use sales\entities\cases\events\CasesFollowUpStatusEvent;
-use sales\entities\cases\events\CasesNewStatusEvent;
-use sales\entities\cases\events\CasesPendingStatusEvent;
-use sales\entities\cases\events\CasesProcessingStatusEvent;
-use sales\entities\cases\events\CasesSolvedStatusEvent;
-use sales\entities\cases\events\CasesTrashStatusEvent;
-use sales\entities\cases\events\CasesAwaitingStatusEvent;
-use sales\entities\cases\events\CasesAutoProcessingStatusEvent;
-use sales\entities\cases\events\CasesErrorStatusEvent;
-use sales\listeners\cases\CasesFollowUpStatusEventLogListener;
-use sales\listeners\cases\CasesNewStatusEventLogListener;
-use sales\listeners\cases\CasesPendingStatusEventLogListener;
-use sales\listeners\cases\CasesProcessingStatusEventLogListener;
-use sales\listeners\cases\CasesProcessingStatusEventNotificationsListener;
-use sales\listeners\cases\CasesSolvedStatusEventLogListener;
-use sales\listeners\cases\CasesTrashStatusEventLogListener;
-use sales\listeners\cases\CasesAwaitingStatusEventLogListener;
-use sales\listeners\cases\CasesAutoProcessingStatusEventListener;
-use sales\listeners\cases\CasesErrorStatusEventLogListener;
+use src\entities\cases\events\CasesCreatedEvent;
+use src\entities\cases\events\CasesFollowUpStatusEvent;
+use src\entities\cases\events\CasesNewStatusEvent;
+use src\entities\cases\events\CasesPendingStatusEvent;
+use src\entities\cases\events\CasesProcessingStatusEvent;
+use src\entities\cases\events\CasesSolvedStatusEvent;
+use src\entities\cases\events\CasesTrashStatusEvent;
+use src\entities\cases\events\CasesAwaitingStatusEvent;
+use src\entities\cases\events\CasesAutoProcessingStatusEvent;
+use src\entities\cases\events\CasesErrorStatusEvent;
+use src\listeners\cases\CasesFollowUpStatusEventLogListener;
+use src\listeners\cases\CasesNewStatusEventLogListener;
+use src\listeners\cases\CasesPendingStatusEventLogListener;
+use src\listeners\cases\CasesProcessingStatusEventLogListener;
+use src\listeners\cases\CasesProcessingStatusEventNotificationsListener;
+use src\listeners\cases\CasesSolvedStatusEventLogListener;
+use src\listeners\cases\CasesTrashStatusEventLogListener;
+use src\listeners\cases\CasesAwaitingStatusEventLogListener;
+use src\listeners\cases\CasesAutoProcessingStatusEventListener;
+use src\listeners\cases\CasesErrorStatusEventLogListener;
 
 return [
     CasesCreatedEvent::class => [],

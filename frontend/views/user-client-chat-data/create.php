@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var yii\web\View $this */
-/* @var sales\model\userClientChatData\entity\UserClientChatData $model */
+/* @var src\model\userClientChatData\entity\UserClientChatData $model */
 /* @var string $error */
 
 $this->title = 'Create User Client Chat Data';

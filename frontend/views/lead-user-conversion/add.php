@@ -7,8 +7,8 @@
 
 use common\components\bootstrap4\activeForm\ClientBeforeSubmit;
 use common\models\Employee;
-use sales\auth\Auth;
-use sales\model\leadUserConversion\form\LeadUserConversionAddForm;
+use src\auth\Auth;
+use src\model\leadUserConversion\form\LeadUserConversionAddForm;
 use yii\bootstrap4\Html;
 use common\components\bootstrap4\activeForm\ActiveForm;
 

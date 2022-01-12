@@ -10,7 +10,7 @@ namespace common\components\jobs;
 
 use common\components\SearchService;
 use common\models\Lead;
-use sales\dto\searchService\SearchServiceQuoteDTO;
+use src\dto\searchService\SearchServiceQuoteDTO;
 use yii\base\BaseObject;
 use yii\helpers\VarDumper;
 use yii\queue\JobInterface;

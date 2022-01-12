@@ -6,7 +6,7 @@ use common\models\Lead;
 use common\models\LeadFlightSegment;
 use common\models\local\FlightSegment;
 use common\models\Quote;
-use sales\dto\searchService\SearchServiceQuoteDTO;
+use src\dto\searchService\SearchServiceQuoteDTO;
 use Yii;
 use common\models\Airline;
 use common\models\Airports;

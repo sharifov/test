@@ -13,7 +13,7 @@
  * @var $modelNote Note
  * @var $modelLeadChecklist LeadChecklist
  * @var $dataProviderChecklist ActiveDataProvider
- * @var $itineraryForm \sales\forms\lead\ItineraryEditForm
+ * @var $itineraryForm \src\forms\lead\ItineraryEditForm
  * @var $dataProviderOffers ActiveDataProvider
  * @var $dataProviderOrders ActiveDataProvider
  * @var $fromPhoneNumbers array
@@ -34,7 +34,7 @@ use modules\fileStorage\src\widgets\FileStorageListWidget;
 use modules\fileStorage\src\widgets\FileStorageUploadWidget;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
-use sales\auth\Auth;
+use src\auth\Auth;
 use yii\bootstrap4\Modal;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Url;

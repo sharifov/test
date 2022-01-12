@@ -5,8 +5,8 @@ namespace modules\order\src\entities\order;
 use modules\offer\src\entities\offer\Offer;
 use modules\offer\src\exceptions\OfferCodeException;
 use modules\order\src\exceptions\OrderCodeException;
-use sales\dispatchers\EventDispatcher;
-use sales\repositories\NotFoundException;
+use src\dispatchers\EventDispatcher;
+use src\repositories\NotFoundException;
 
 /**
  * Class OrderRepository

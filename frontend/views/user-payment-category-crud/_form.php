@@ -5,7 +5,7 @@ use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\user\entity\paymentCategory\UserPaymentCategory */
+/* @var $model src\model\user\entity\paymentCategory\UserPaymentCategory */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 

@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\project\entity\projectRelation\ProjectRelation */
+/* @var $model src\model\project\entity\projectRelation\ProjectRelation */
 
 $this->title = 'Update Project Relation: ' . $model->prl_project_id;
 $this->params['breadcrumbs'][] = ['label' => 'Project Relations', 'url' => ['index']];

@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
-/* @var $model \sales\model\user\entity\monitor\search\UserMonitorSearch */
+/* @var $model \src\model\user\entity\monitor\search\UserMonitorSearch */
 ?>
 
 <div class="user-monitor-stats-search">

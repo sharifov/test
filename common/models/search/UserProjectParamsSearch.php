@@ -4,7 +4,7 @@ namespace common\models\search;
 
 use common\models\Employee;
 use common\models\UserGroupAssign;
-use sales\model\userVoiceMail\entity\UserVoiceMail;
+use src\model\userVoiceMail\entity\UserVoiceMail;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;

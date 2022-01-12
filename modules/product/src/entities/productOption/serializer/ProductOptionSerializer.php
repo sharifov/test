@@ -3,7 +3,7 @@
 namespace modules\product\src\entities\productOption\serializer;
 
 use modules\product\src\entities\productOption\ProductOption;
-use sales\entities\serializer\Serializer;
+use src\entities\serializer\Serializer;
 
 /**
  * Class ProductOptionSerializer

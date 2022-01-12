@@ -3,7 +3,7 @@
 namespace webapi\src\forms\leadRequest\userColumnData;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
-use sales\services\client\InternalPhoneValidator;
+use src\services\client\InternalPhoneValidator;
 use yii\base\Model;
 
 /**

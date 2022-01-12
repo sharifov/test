@@ -2,7 +2,7 @@
 
 use common\models\Employee;
 use console\migrations\RbacMigrationService;
-use sales\model\clientChatMessage\entity\ClientChatMessage;
+use src\model\clientChatMessage\entity\ClientChatMessage;
 use yii\db\Migration;
 
 /**

@@ -2,8 +2,8 @@
 
 namespace frontend\controllers;
 
-use sales\model\userAuthClient\entity\UserAuthClient;
-use sales\model\userAuthClient\entity\UserAuthClientSearch;
+use src\model\userAuthClient\entity\UserAuthClient;
+use src\model\userAuthClient\entity\UserAuthClientSearch;
 use frontend\controllers\FController;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

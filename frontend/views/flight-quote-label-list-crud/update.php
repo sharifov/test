@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\flightQuoteLabelList\entity\FlightQuoteLabelList */
+/* @var $model src\model\flightQuoteLabelList\entity\FlightQuoteLabelList */
 
 $this->title = 'Update Flight Quote Label: ' . $model->fqll_id;
 $this->params['breadcrumbs'][] = ['label' => 'Flight Quote Labels', 'url' => ['index']];

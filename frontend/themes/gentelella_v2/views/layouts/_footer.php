@@ -3,7 +3,7 @@
 /* @var $this View */
 
 use common\helpers\LogHelper;
-use sales\helpers\app\ReleaseVersionHelper;
+use src\helpers\app\ReleaseVersionHelper;
 use yii\web\View;
 
 $memoryUsage = Yii::$app->formatter->asShortSize(memory_get_usage());

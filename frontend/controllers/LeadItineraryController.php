@@ -3,9 +3,9 @@
 namespace frontend\controllers;
 
 use common\models\Lead;
-use sales\forms\CompositeFormHelper;
-use sales\forms\lead\ItineraryEditForm;
-use sales\services\lead\LeadManageService;
+use src\forms\CompositeFormHelper;
+use src\forms\lead\ItineraryEditForm;
+use src\services\lead\LeadManageService;
 use Yii;
 use yii\filters\AjaxFilter;
 use yii\filters\ContentNegotiator;

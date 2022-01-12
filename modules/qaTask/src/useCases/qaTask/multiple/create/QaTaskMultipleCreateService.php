@@ -6,7 +6,7 @@ use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
 use modules\qaTask\src\entities\qaTask\QaTaskRepository;
 use modules\qaTask\src\useCases\qaTask\create\manually\QaTaskCreateManuallyForm;
 use modules\qaTask\src\useCases\qaTask\create\manually\QaTaskCreateManuallyService;
-use sales\interfaces\Objectable;
+use src\interfaces\Objectable;
 
 /**
  * Class QaTaskMultipleCreateService

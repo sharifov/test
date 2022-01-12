@@ -3,10 +3,10 @@
 namespace common\components\jobs\clientChat;
 
 use common\components\jobs\BaseJob;
-use sales\helpers\app\AppHelper;
-use sales\model\clientChat\entity\ClientChat;
-use sales\repositories\NotFoundException;
-use sales\services\clientChatService\ClientChatService;
+use src\helpers\app\AppHelper;
+use src\model\clientChat\entity\ClientChat;
+use src\repositories\NotFoundException;
+use src\services\clientChatService\ClientChatService;
 
 /**
  * Class ClientChatUserAccessJob

@@ -5,7 +5,7 @@ namespace modules\offer\src\entities\offerSendLog\search;
 use common\models\Employee;
 use modules\offer\src\entities\offerSendLog\OfferSendLog;
 use modules\offer\src\entities\offerSendLog\OfferSendLogType;
-use sales\helpers\query\QueryHelper;
+use src\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
 
 class OfferSendLogSearch extends OfferSendLog

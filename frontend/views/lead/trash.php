@@ -1,15 +1,15 @@
 <?php
 
 use dosamigos\datepicker\DatePicker;
-use sales\access\EmployeeProjectAccess;
-use sales\access\ListsAccess;
-use sales\formatters\client\ClientTimeFormatter;
-use sales\model\client\helpers\ClientFormatter;
+use src\access\EmployeeProjectAccess;
+use src\access\ListsAccess;
+use src\formatters\client\ClientTimeFormatter;
+use src\model\client\helpers\ClientFormatter;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
 use common\models\Lead;
-use sales\auth\Auth;
+use src\auth\Auth;
 
 /**
  * @var common\models\Employee $user

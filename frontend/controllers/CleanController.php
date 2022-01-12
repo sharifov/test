@@ -2,11 +2,11 @@
 
 namespace frontend\controllers;
 
-use sales\auth\Auth;
-use sales\helpers\app\AppHelper;
-use sales\helpers\ErrorsToStringHelper;
-use sales\services\cleaner\DbCleanerService;
-use sales\services\cleaner\form\DbCleanerParamsForm;
+use src\auth\Auth;
+use src\helpers\app\AppHelper;
+use src\helpers\ErrorsToStringHelper;
+use src\services\cleaner\DbCleanerService;
+use src\services\cleaner\form\DbCleanerParamsForm;
 use Yii;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;

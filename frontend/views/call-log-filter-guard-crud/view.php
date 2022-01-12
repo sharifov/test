@@ -1,11 +1,11 @@
 <?php
 
-use sales\model\callLogFilterGuard\entity\CallLogFilterGuard;
+use src\model\callLogFilterGuard\entity\CallLogFilterGuard;
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\callLogFilterGuard\entity\CallLogFilterGuard */
+/* @var $model src\model\callLogFilterGuard\entity\CallLogFilterGuard */
 
 $this->title = $model->clfg_call_id;
 $this->params['breadcrumbs'][] = ['label' => 'Call Log Filter Guards', 'url' => ['index']];

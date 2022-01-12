@@ -2,7 +2,7 @@
 
 namespace common\models;
 
-use sales\entities\EventTrait;
+use src\entities\EventTrait;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;

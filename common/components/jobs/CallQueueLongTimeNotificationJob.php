@@ -10,11 +10,11 @@ use common\models\ProjectEmployeeAccess;
 use common\models\UserConnection;
 use common\models\UserDepartment;
 use frontend\widgets\notification\NotificationMessage;
-use sales\model\call\services\QueueLongTimeNotificationJobCreator;
-use sales\model\department\departmentPhoneProject\entity\params\QueueLongTimeNotificationParams;
+use src\model\call\services\QueueLongTimeNotificationJobCreator;
+use src\model\department\departmentPhoneProject\entity\params\QueueLongTimeNotificationParams;
 use yii\db\Query;
 use yii\queue\JobInterface;
-use sales\helpers\phone\MaskPhoneHelper;
+use src\helpers\phone\MaskPhoneHelper;
 
 /**
  * Class CallQueueLongTimeNotificationJob

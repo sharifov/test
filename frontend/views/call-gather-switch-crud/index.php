@@ -5,7 +5,7 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\call\entity\callCommand\search\CallGatherSwitchSearch */
+/* @var $searchModel src\model\call\entity\callCommand\search\CallGatherSwitchSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Call Gather Switches';

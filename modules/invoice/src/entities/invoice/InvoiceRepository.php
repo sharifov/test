@@ -3,8 +3,8 @@
 namespace modules\invoice\src\entities\invoice;
 
 use modules\invoice\src\exceptions\InvoiceCodeException;
-use sales\dispatchers\EventDispatcher;
-use sales\repositories\NotFoundException;
+use src\dispatchers\EventDispatcher;
+use src\repositories\NotFoundException;
 
 /**
  * Class InvoiceRepository

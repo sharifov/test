@@ -5,7 +5,7 @@ namespace modules\order\src\forms\api\create;
 use common\models\Project;
 use common\models\Sources;
 use modules\offer\src\entities\offer\Offer;
-use sales\forms\CompositeRecursiveForm;
+use src\forms\CompositeRecursiveForm;
 
 /**
  * Class OrderCreateForm

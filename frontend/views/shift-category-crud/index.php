@@ -2,7 +2,7 @@
 
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
-use sales\model\shiftSchedule\entity\shiftCategory\ShiftCategory;
+use src\model\shiftSchedule\entity\shiftCategory\ShiftCategory;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\ActionColumn;
@@ -10,7 +10,7 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\shiftSchedule\entity\shiftCategory\search\ShiftCategorySearch */
+/* @var $searchModel src\model\shiftSchedule\entity\shiftCategory\search\ShiftCategorySearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Shift Categories';

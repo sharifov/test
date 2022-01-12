@@ -7,7 +7,7 @@ use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $userDataProvider yii\data\ActiveDataProvider */
-/* @var $searchModel \sales\model\user\entity\monitor\search\UserMonitorSearch */
+/* @var $searchModel \src\model\user\entity\monitor\search\UserMonitorSearch */
 /* @var $startDateTime string */
 /* @var $endDateTime string */
 

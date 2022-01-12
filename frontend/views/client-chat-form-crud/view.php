@@ -1,12 +1,12 @@
 <?php
 
-use sales\model\clientChatForm\entity\ClientChatForm;
+use src\model\clientChatForm\entity\ClientChatForm;
 use yii\bootstrap4\Html;
 use yii\helpers\VarDumper;
 use yii\widgets\DetailView;
 
 /* @var yii\web\View $this */
-/* @var sales\model\clientChatForm\entity\ClientChatForm $model */
+/* @var src\model\clientChatForm\entity\ClientChatForm $model */
 
 $this->title = $model->ccf_key;
 $this->params['breadcrumbs'][] = ['label' => 'Client Chat Forms', 'url' => ['index']];

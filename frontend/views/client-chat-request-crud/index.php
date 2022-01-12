@@ -1,7 +1,7 @@
 <?php
 
 use frontend\helpers\JsonHelper;
-use sales\model\clientChatRequest\entity\ClientChatRequest;
+use src\model\clientChatRequest\entity\ClientChatRequest;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\helpers\StringHelper;
@@ -9,7 +9,7 @@ use yii\helpers\VarDumper;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\clientChatRequest\entity\search\ClientChatRequestSearch */
+/* @var $searchModel src\model\clientChatRequest\entity\search\ClientChatRequestSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Client Chat Requests';

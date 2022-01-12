@@ -5,9 +5,9 @@ namespace modules\product\src\abac\dto;
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
-use sales\access\EmployeeGroupAccess;
-use sales\auth\Auth;
-use sales\entities\cases\Cases;
+use src\access\EmployeeGroupAccess;
+use src\auth\Auth;
+use src\entities\cases\Cases;
 use stdClass;
 
 /**

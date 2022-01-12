@@ -4,7 +4,7 @@ use common\models\ClientEmail;
 use common\models\Lead;
 use yii\helpers\Url;
 use yii\web\View;
-use sales\helpers\email\MaskEmailHelper;
+use src\helpers\email\MaskEmailHelper;
 use modules\lead\src\abac\LeadAbacObject;
 
 /**

@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\user\entity\userConnectionActiveChat\UserConnectionActiveChat;
-use sales\model\user\entity\userConnectionActiveChat\search\UserConnectionActiveChatSearch;
+use src\model\user\entity\userConnectionActiveChat\UserConnectionActiveChat;
+use src\model\user\entity\userConnectionActiveChat\search\UserConnectionActiveChatSearch;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

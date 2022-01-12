@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\clientChat\entity\actionReason\ClientChatActionReason;
-use sales\model\clientChat\entity\actionReason\search\ActionReasonSearch;
+use src\model\clientChat\entity\actionReason\ClientChatActionReason;
+use src\model\clientChat\entity\actionReason\search\ActionReasonSearch;
 use frontend\controllers\FController;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

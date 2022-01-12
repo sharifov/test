@@ -1,9 +1,9 @@
 <?php
 
 use frontend\helpers\OutHelper;
-use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChat\permissions\ClientChatActionPermission;
-use sales\model\clientChatNote\entity\ClientChatNote;
+use src\model\clientChat\entity\ClientChat;
+use src\model\clientChat\permissions\ClientChatActionPermission;
+use src\model\clientChatNote\entity\ClientChatNote;
 use yii\helpers\Html;
 use yii\web\View;
 use yii\widgets\Pjax;

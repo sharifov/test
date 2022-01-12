@@ -1,6 +1,6 @@
 <?php
 
-use sales\entities\chat\ChatGraphsSearch;
+use src\entities\chat\ChatGraphsSearch;
 use yii\bootstrap4\ActiveForm;
 use yii\helpers\Html;
 

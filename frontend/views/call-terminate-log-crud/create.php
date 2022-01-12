@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\callTerminateLog\entity\CallTerminateLog */
+/* @var $model src\model\callTerminateLog\entity\CallTerminateLog */
 
 $this->title = 'Create Call Terminate Log';
 $this->params['breadcrumbs'][] = ['label' => 'Call Terminate Logs', 'url' => ['index']];

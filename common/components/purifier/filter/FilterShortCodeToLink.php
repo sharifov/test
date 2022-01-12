@@ -2,7 +2,7 @@
 
 namespace common\components\purifier\filter;
 
-use sales\helpers\phone\MaskPhoneHelper;
+use src\helpers\phone\MaskPhoneHelper;
 use yii\bootstrap4\Html;
 
 /**

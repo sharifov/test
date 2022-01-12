@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\user\entity\userConnectionActiveChat\UserConnectionActiveChat */
+/* @var $model src\model\user\entity\userConnectionActiveChat\UserConnectionActiveChat */
 
 $this->title = 'Create User Connection Active Chat';
 $this->params['breadcrumbs'][] = ['label' => 'User Connection Active Chats', 'url' => ['index']];

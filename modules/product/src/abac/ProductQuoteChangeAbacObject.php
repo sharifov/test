@@ -13,8 +13,8 @@ use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeDecisionType;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use modules\product\src\entities\productType\ProductTypeQuery;
-use sales\entities\cases\CaseCategory;
-use sales\entities\cases\CasesStatus;
+use src\entities\cases\CaseCategory;
+use src\entities\cases\CasesStatus;
 
 class ProductQuoteChangeAbacObject extends AbacBaseModel implements AbacInterface
 {

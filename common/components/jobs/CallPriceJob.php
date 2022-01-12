@@ -2,7 +2,7 @@
 
 namespace common\components\jobs;
 
-use sales\model\call\useCase\UpdateCallPrice;
+use src\model\call\useCase\UpdateCallPrice;
 use yii\queue\JobInterface;
 
 /**

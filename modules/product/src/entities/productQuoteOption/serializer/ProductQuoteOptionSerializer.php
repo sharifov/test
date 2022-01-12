@@ -3,7 +3,7 @@
 namespace modules\product\src\entities\productQuoteOption\serializer;
 
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
-use sales\entities\serializer\Serializer;
+use src\entities\serializer\Serializer;
 
 /**
  * Class ProductQuoteOptionExtraData

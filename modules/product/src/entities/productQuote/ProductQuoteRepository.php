@@ -5,8 +5,8 @@ namespace modules\product\src\entities\productQuote;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productType\ProductType;
 use modules\product\src\exceptions\ProductCodeException;
-use sales\dispatchers\EventDispatcher;
-use sales\repositories\NotFoundException;
+use src\dispatchers\EventDispatcher;
+use src\repositories\NotFoundException;
 
 /**
  * Class ProductQuoteRepository

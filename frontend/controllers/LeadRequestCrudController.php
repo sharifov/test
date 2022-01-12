@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\leadRequest\entity\LeadRequest;
-use sales\model\leadRequest\entity\LeadRequestSearch;
+use src\model\leadRequest\entity\LeadRequest;
+use src\model\leadRequest\entity\LeadRequestSearch;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;

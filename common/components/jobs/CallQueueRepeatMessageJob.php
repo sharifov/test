@@ -4,7 +4,7 @@ namespace common\components\jobs;
 
 use common\models\Call;
 use common\models\DepartmentPhoneProject;
-use sales\model\call\services\RepeatMessageCallJobCreator;
+use src\model\call\services\RepeatMessageCallJobCreator;
 use yii\queue\JobInterface;
 
 /**

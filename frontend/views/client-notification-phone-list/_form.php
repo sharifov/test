@@ -1,14 +1,14 @@
 <?php
 
 use frontend\helpers\JsonHelper;
-use sales\helpers\app\AppHelper;
-use sales\model\client\notifications\phone\entity\Status;
-use sales\widgets\DateTimePicker;
+use src\helpers\app\AppHelper;
+use src\model\client\notifications\phone\entity\Status;
+use src\widgets\DateTimePicker;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\client\notifications\phone\entity\ClientNotificationPhoneList */
+/* @var $model src\model\client\notifications\phone\entity\ClientNotificationPhoneList */
 /* @var $form ActiveForm */
 
 ?>

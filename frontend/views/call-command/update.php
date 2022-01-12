@@ -1,10 +1,10 @@
 <?php
 
-use sales\model\call\entity\callCommand\CallCommand;
+use src\model\call\entity\callCommand\CallCommand;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\call\entity\callCommand\CallCommand */
+/* @var $model src\model\call\entity\callCommand\CallCommand */
 /* @var string $typeForm */
 
 

@@ -2,7 +2,7 @@
 
 use yii\helpers\Html;
 use kartik\form\ActiveForm;
-use sales\widgets\UserSelect2Widget;
+use src\widgets\UserSelect2Widget;
 use kartik\select2\Select2;
 use common\models\Project;
 use common\models\UserGroup;

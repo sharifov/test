@@ -9,7 +9,7 @@ use yii\widgets\ActiveForm;
 /* @var $this yii\web\View */
 /* @var $model OrderSearch */
 /* @var $form yii\widgets\ActiveForm */
-/** @var \sales\access\ListsAccess $lists */
+/** @var \src\access\ListsAccess $lists */
 
 ?>
 

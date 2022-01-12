@@ -5,7 +5,7 @@ namespace modules\flight\src\services\flightQuote;
 use modules\flight\models\FlightQuote;
 use modules\flight\models\FlightQuotePaxPrice;
 use modules\flight\src\helpers\FlightQuoteHelper;
-use sales\services\CurrencyHelper;
+use src\services\CurrencyHelper;
 
 class FlightQuotePriceCalculator
 {

@@ -5,7 +5,7 @@ namespace modules\flight\src\services\api;
 use modules\flight\src\forms\api\FlightUpdateRequestApiForm;
 use modules\flight\src\forms\api\PaymentApiForm;
 use modules\flight\src\forms\api\TicketIssueFlightApiForm;
-use sales\helpers\ErrorsToStringHelper;
+use src\helpers\ErrorsToStringHelper;
 
 /**
  * Class TicketIssueCheckDataService

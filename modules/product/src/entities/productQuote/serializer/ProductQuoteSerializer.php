@@ -7,7 +7,7 @@ use modules\hotel\models\HotelQuote;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteFiles;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
-use sales\entities\serializer\Serializer;
+use src\entities\serializer\Serializer;
 
 /**
  * Class ProductQuoteExtraData

@@ -3,7 +3,7 @@
 namespace modules\rentCar\src\serializer;
 
 use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
-use sales\entities\serializer\Serializer;
+use src\entities\serializer\Serializer;
 
 /**
  * Class RentCarQuoteSerializer

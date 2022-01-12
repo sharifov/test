@@ -6,7 +6,7 @@ use yii\helpers\VarDumper;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChatVisitorData\entity\ClientChatVisitorData */
+/* @var $model src\model\clientChatVisitorData\entity\ClientChatVisitorData */
 
 $this->title = $model->cvd_id;
 $this->params['breadcrumbs'][] = ['label' => 'Client Chat Visitor Datas', 'url' => ['index']];
@@ -46,7 +46,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'cvd_local_time',
                 [
                     'attribute' => 'cvd_data',
-                    'value' => static function (\sales\model\clientChatVisitorData\entity\ClientChatVisitorData $model) {
+                    'value' => static function (\src\model\clientChatVisitorData\entity\ClientChatVisitorData $model) {
                         return Html::tag('pre', VarDumper::dumpAsString(Json::decode($model->cvd_data), 10, true));
                     },
                     'format' => 'raw'

@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChat\entity\channelTranslate\ClientChatChannelTranslate */
+/* @var $model src\model\clientChat\entity\channelTranslate\ClientChatChannelTranslate */
 
 $this->title = 'Create Client Chat Channel Translate';
 $this->params['breadcrumbs'][] = ['label' => 'Client Chat Channel Translates', 'url' => ['index']];

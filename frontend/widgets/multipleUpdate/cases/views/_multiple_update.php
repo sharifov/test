@@ -1,7 +1,7 @@
 <?php
 
 use frontend\widgets\multipleUpdate\cases\MultipleUpdateForm;
-use sales\widgets\DateTimePicker;
+use src\widgets\DateTimePicker;
 use common\components\bootstrap4\activeForm\ActiveForm;
 use yii\bootstrap4\Html;
 use yii\web\View;

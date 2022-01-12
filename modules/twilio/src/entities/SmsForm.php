@@ -6,7 +6,7 @@ use common\models\Language;
 use common\models\Project;
 use common\models\Sms;
 use common\models\SmsTemplateType;
-use sales\model\phoneList\entity\PhoneList;
+use src\model\phoneList\entity\PhoneList;
 use yii\base\Model;
 
 /**

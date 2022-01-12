@@ -12,7 +12,7 @@ use modules\flight\src\useCases\flightQuote\createManually\FlightQuoteCreateForm
 use modules\flight\src\useCases\flightQuote\createManually\FlightQuotePaxPriceForm;
 use modules\flight\src\useCases\reProtectionQuoteManualCreate\form\ReProtectionQuoteCreateForm;
 use modules\product\src\entities\productQuote\ProductQuote;
-use sales\services\parsingDump\lib\ParsingDump;
+use src\services\parsingDump\lib\ParsingDump;
 use yii\bootstrap4\ActiveForm;
 use yii\helpers\Html;
 use yii\helpers\Url;

@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\entities\cases\Cases */
+/* @var $model src\entities\cases\Cases */
 
 $this->title = 'Update Cases: ' . $model->cs_id;
 $this->params['breadcrumbs'][] = ['label' => 'Cases', 'url' => ['index']];

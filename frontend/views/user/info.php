@@ -13,7 +13,7 @@ use yii\widgets\Pjax;
  * @var $datePickerModel  \yii\base\DynamicModel
  * @var $userActivity  \frontend\models\search\UserSiteActivitySearch
  * @var $callLogDataProvider \yii\data\ActiveDataProvider
- * @var $callLogSearchModel \sales\model\callLog\entity\callLog\search\CallLogSearch
+ * @var $callLogSearchModel \src\model\callLog\entity\callLog\search\CallLogSearch
  * @var $emailDataProvider \yii\data\ActiveDataProvider
  * @var $emailSearchModel \common\models\search\EmailSearch
  */
@@ -29,7 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
         <p>
-            <?php if (\sales\auth\Auth::can('/employee/edit')) : ?>
+            <?php if (\src\auth\Auth::can('/employee/edit')) : ?>
                 <?= Html::a('<i class="fa fa-edit"></i> Update', ['employee/update', 'id' => $model->id], ['class' => 'btn btn-warning']) ?>
             <?php endif; ?>
         </p>

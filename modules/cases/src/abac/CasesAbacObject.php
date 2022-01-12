@@ -7,8 +7,8 @@ use modules\abac\src\entities\AbacInterface;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundStatus;
-use sales\entities\cases\CaseCategory;
-use sales\entities\cases\CasesStatus;
+use src\entities\cases\CaseCategory;
+use src\entities\cases\CasesStatus;
 
 class CasesAbacObject extends AbacBaseModel implements AbacInterface
 {

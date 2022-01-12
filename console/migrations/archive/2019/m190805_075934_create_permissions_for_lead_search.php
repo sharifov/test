@@ -33,7 +33,7 @@ class m190805_075934_create_permissions_for_lead_search extends Migration
         $auth->add($leadSearchMultipleUpdatePermission);
         $auth->addChild($admin, $leadSearchMultipleUpdatePermission);
 
-        $leadSearchMultipleUpdateSupervisionRule = new \sales\rbac\rules\LeadSearchMultipleUpdateSupervisionRule();
+        $leadSearchMultipleUpdateSupervisionRule = new \src\rbac\rules\LeadSearchMultipleUpdateSupervisionRule();
         $auth->add($leadSearchMultipleUpdateSupervisionRule);
         $leadSearchMultipleUpdateSupervisionPermission = $auth->createPermission('leadSearchMultipleUpdateSupervisionPermission');
         $leadSearchMultipleUpdateSupervisionPermission->description = 'Lead Search Multiple Update for Supervision';

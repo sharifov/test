@@ -4,7 +4,7 @@ namespace modules\qaTask\controllers;
 
 use frontend\controllers\FController;
 use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
 use modules\qaTask\src\entities\qaTaskRules\QaTaskRules;
 use modules\qaTask\src\entities\qaTaskRules\search\QaTaskRulesSearch;

@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\client\notifications\sms\entity\ClientNotificationSmsList */
+/* @var $model src\model\client\notifications\sms\entity\ClientNotificationSmsList */
 
 $this->title = 'Create Client Notification Sms';
 $this->params['breadcrumbs'][] = ['label' => 'Client Notification Sms List', 'url' => ['index']];

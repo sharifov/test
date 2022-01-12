@@ -5,7 +5,7 @@ namespace modules\offer\controllers;
 use frontend\controllers\FController;
 use modules\offer\src\entities\offerStatusLog\OfferStatusLog;
 use modules\offer\src\entities\offerStatusLog\search\OfferStatusLogCrudSearch;
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;

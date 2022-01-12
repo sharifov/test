@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\userModelSetting\entity\UserModelSetting */
+/* @var $model src\model\userModelSetting\entity\UserModelSetting */
 
 $this->title = 'Update User Model Setting: ' . $model->ums_id;
 $this->params['breadcrumbs'][] = ['label' => 'User Model Settings', 'url' => ['index']];

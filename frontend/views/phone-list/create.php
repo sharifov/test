@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\phoneList\entity\PhoneList */
+/* @var $model src\model\phoneList\entity\PhoneList */
 
 $this->title = 'Create Phone List';
 $this->params['breadcrumbs'][] = ['label' => 'Phone Lists', 'url' => ['index']];

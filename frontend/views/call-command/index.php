@@ -3,13 +3,13 @@
 use common\components\grid\UserSelect2Column;
 use common\components\grid\DateTimeColumn;
 use yii\grid\ActionColumn;
-use sales\model\call\entity\callCommand\CallCommand;
+use src\model\call\entity\callCommand\CallCommand;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var yii\web\View $this */
-/* @var sales\model\call\entity\callCommand\search\CallCommandSearch $searchModel */
+/* @var src\model\call\entity\callCommand\search\CallCommandSearch $searchModel */
 /* @var yii\data\ActiveDataProvider $dataProvider */
 
 $this->title = 'Call Commands';
@@ -69,7 +69,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'ccom_created_user_id',
-                'filter' => \sales\widgets\UserSelect2Widget::widget([
+                'filter' => \src\widgets\UserSelect2Widget::widget([
                     'model' => $searchModel,
                     'attribute' => 'ccom_created_user_id'
                 ]),

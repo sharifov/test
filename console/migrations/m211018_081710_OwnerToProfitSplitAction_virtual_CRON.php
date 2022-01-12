@@ -31,7 +31,7 @@ class m211018_081710_OwnerToProfitSplitAction_virtual_CRON extends Migration
             }
         } catch (Throwable $throwable) {
             \Yii::error(
-                \sales\helpers\app\AppHelper::throwableLog($throwable),
+                \src\helpers\app\AppHelper::throwableLog($throwable),
                 'm211018_081710_OwnerToProfitSplitAction_virtual_CRON:safeUp:Throwable'
             );
         }
@@ -53,7 +53,7 @@ class m211018_081710_OwnerToProfitSplitAction_virtual_CRON extends Migration
             }
         } catch (Throwable $throwable) {
             \Yii::error(
-                \sales\helpers\app\AppHelper::throwableLog($throwable),
+                \src\helpers\app\AppHelper::throwableLog($throwable),
                 'm211018_081710_OwnerToProfitSplitAction_virtual_CRON:safeDown:Throwable'
             );
         }

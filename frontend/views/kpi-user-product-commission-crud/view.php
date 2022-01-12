@@ -1,11 +1,11 @@
 <?php
 
-use sales\helpers\DateHelper;
+use src\helpers\DateHelper;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\kpi\entity\kpiUserProductCommission\KpiUserProductCommission */
+/* @var $model src\model\kpi\entity\kpiUserProductCommission\KpiUserProductCommission */
 
 $this->title = $model->upcProductType->pt_name . ', User: ' . $model->upcUser->username . ', Year: ' . $model->upc_year . ', Month: ' . DateHelper::getMonthName($model->upc_month);
 $this->params['breadcrumbs'][] = ['label' => 'Kpi User Product Commissions', 'url' => ['index']];

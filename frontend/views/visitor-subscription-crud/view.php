@@ -1,11 +1,11 @@
 <?php
 
-use sales\model\visitorSubscription\entity\VisitorSubscription;
+use src\model\visitorSubscription\entity\VisitorSubscription;
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\visitorSubscription\entity\VisitorSubscription */
+/* @var $model src\model\visitorSubscription\entity\VisitorSubscription */
 
 $this->title = $model->vs_id;
 $this->params['breadcrumbs'][] = ['label' => 'Visitor Subscriptions', 'url' => ['index']];

@@ -1,7 +1,7 @@
 <?php
 
 use common\components\grid\UserSelect2Column;
-use sales\model\airportLang\service\AirportLangService;
+use src\model\airportLang\service\AirportLangService;
 use yii\grid\ActionColumn;
 use common\components\grid\DateTimeColumn;
 use yii\bootstrap4\Html;
@@ -9,7 +9,7 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var yii\web\View $this */
-/* @var sales\model\airportLang\entity\AirportLangSearch $searchModel */
+/* @var src\model\airportLang\entity\AirportLangSearch $searchModel */
 /* @var yii\data\ActiveDataProvider $dataProvider */
 
 $this->title = 'Airport Langs';

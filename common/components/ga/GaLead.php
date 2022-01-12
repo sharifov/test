@@ -3,8 +3,8 @@
 namespace common\components\ga;
 
 use common\models\Lead;
-use sales\helpers\app\AppHelper;
-use sales\helpers\lead\LeadHelper;
+use src\helpers\app\AppHelper;
+use src\helpers\lead\LeadHelper;
 use Yii;
 use yii\httpclient\Response;
 

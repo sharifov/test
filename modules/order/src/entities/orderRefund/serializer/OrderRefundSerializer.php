@@ -11,7 +11,7 @@ use modules\order\src\entities\orderRefund\OrderRefundStatus;
  *
  * @property OrderRefund $model
  */
-class OrderRefundSerializer extends \sales\entities\serializer\Serializer
+class OrderRefundSerializer extends \src\entities\serializer\Serializer
 {
     public function __construct(OrderRefund $model)
     {

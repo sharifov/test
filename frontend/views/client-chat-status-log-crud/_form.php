@@ -4,7 +4,7 @@ use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChatStatusLog\entity\ClientChatStatusLog */
+/* @var $model src\model\clientChatStatusLog\entity\ClientChatStatusLog */
 /* @var $form ActiveForm */
 ?>
 
@@ -16,15 +16,15 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'csl_cch_id')->textInput() ?>
 
-        <?= $form->field($model, 'csl_from_status')->dropDownList(\sales\model\clientChat\entity\ClientChat::getStatusList(), ['prompt' => '---']) ?>
+        <?= $form->field($model, 'csl_from_status')->dropDownList(\src\model\clientChat\entity\ClientChat::getStatusList(), ['prompt' => '---']) ?>
 
-        <?= $form->field($model, 'csl_to_status')->dropDownList(\sales\model\clientChat\entity\ClientChat::getStatusList(), ['prompt' => '---']) ?>
+        <?= $form->field($model, 'csl_to_status')->dropDownList(\src\model\clientChat\entity\ClientChat::getStatusList(), ['prompt' => '---']) ?>
 
-        <?= $form->field($model, 'csl_start_dt')->widget(\sales\widgets\DateTimePicker::class, []) ?>
+        <?= $form->field($model, 'csl_start_dt')->widget(\src\widgets\DateTimePicker::class, []) ?>
 
-        <?= $form->field($model, 'csl_end_dt')->widget(\sales\widgets\DateTimePicker::class, []) ?>
+        <?= $form->field($model, 'csl_end_dt')->widget(\src\widgets\DateTimePicker::class, []) ?>
 
-        <?= $form->field($model, 'csl_owner_id')->widget(\sales\widgets\UserSelect2Widget::class, [
+        <?= $form->field($model, 'csl_owner_id')->widget(\src\widgets\UserSelect2Widget::class, [
             'data' => $model->csl_owner_id ? [
                 $model->csl_owner_id => $model->cslOwner->username
             ] : [],

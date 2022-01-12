@@ -2,13 +2,13 @@
 
 use common\components\grid\DateTimeColumn;
 use common\components\i18n\Formatter;
-use sales\model\caseOrder\entity\CaseOrder;
+use src\model\caseOrder\entity\CaseOrder;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\caseOrder\entity\search\CaseOrderSearch */
+/* @var $searchModel src\model\caseOrder\entity\search\CaseOrderSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Case Orders';

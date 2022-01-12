@@ -3,7 +3,7 @@
 namespace modules\fileStorage\src\entity\fileCase;
 
 use modules\fileStorage\src\entity\fileStorage\FileStorage;
-use sales\entities\cases\Cases;
+use src\entities\cases\Cases;
 use Yii;
 
 /**

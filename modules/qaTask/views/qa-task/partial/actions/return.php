@@ -3,7 +3,7 @@
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\qaTask\src\useCases\qaTask\returnTask\toEscalate\QaTaskReturnToEscalateService;
 use modules\qaTask\src\useCases\qaTask\returnTask\toPending\QaTaskReturnToPendingService;
-use sales\auth\Auth;
+use src\auth\Auth;
 use yii\helpers\Html;
 use yii\helpers\Url;
 

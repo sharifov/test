@@ -6,7 +6,7 @@ use common\models\Employee;
 use modules\offer\src\entities\offer\OfferStatus;
 use modules\offer\src\entities\offer\OfferStatusAction;
 use modules\offer\src\entities\offerStatusLog\OfferStatusLog;
-use sales\helpers\query\QueryHelper;
+use src\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
 
 class OfferStatusLogSearch extends OfferStatusLog

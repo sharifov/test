@@ -18,11 +18,11 @@ use modules\product\src\abac\dto\ProductQuoteAbacDto;
 use modules\product\src\abac\ProductQuoteAbacObject;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
-use sales\access\EmployeeGroupAccess;
-use sales\auth\Auth;
-use sales\dispatchers\EventDispatcher;
-use sales\entities\cases\Cases;
-use sales\helpers\app\AppHelper;
+use src\access\EmployeeGroupAccess;
+use src\auth\Auth;
+use src\dispatchers\EventDispatcher;
+use src\entities\cases\Cases;
+use src\helpers\app\AppHelper;
 use Yii;
 use yii\db\Exception;
 use yii\helpers\ArrayHelper;
@@ -30,7 +30,7 @@ use yii\helpers\Html;
 use yii\filters\VerbFilter;
 use yii\web\ForbiddenHttpException;
 use yii\web\Response;
-use sales\model\leadProduct\entity\LeadProductRepository;
+use src\model\leadProduct\entity\LeadProductRepository;
 
 /**
  * @property ProductQuoteRepository $productQuoteRepository

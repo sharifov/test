@@ -6,7 +6,7 @@ use common\components\validators\PhoneValidator;
 use common\models\Client;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\orderContact\serializer\OrderContactSerializer;
-use sales\entities\serializer\Serializable;
+use src\entities\serializer\Serializable;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;

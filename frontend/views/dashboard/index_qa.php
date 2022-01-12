@@ -1,6 +1,6 @@
 <?php
 
-use sales\access\EmployeeProjectAccess;
+use src\access\EmployeeProjectAccess;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */

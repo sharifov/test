@@ -2,16 +2,16 @@
 
 use common\models\Employee;
 use dosamigos\datetimepicker\DateTimePicker;
-use sales\auth\Auth;
-use sales\model\userClientChatData\entity\UserClientChatData;
-use sales\model\userClientChatData\service\UserClientChatDataService;
+use src\auth\Auth;
+use src\model\userClientChatData\entity\UserClientChatData;
+use src\model\userClientChatData\service\UserClientChatDataService;
 use yii\bootstrap4\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 use dosamigos\datepicker\DatePicker;
 
 /* @var yii\web\View $this */
-/* @var sales\model\userClientChatData\entity\UserClientChatData $model */
+/* @var src\model\userClientChatData\entity\UserClientChatData $model */
 /* @var ActiveForm $form */
 ?>
 

@@ -1,6 +1,6 @@
 <?php
 
-use sales\forms\clientChat\RealTimeStartChatForm;
+use src\forms\clientChat\RealTimeStartChatForm;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
 

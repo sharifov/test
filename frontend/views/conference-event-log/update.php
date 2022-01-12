@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\conference\entity\conferenceEventLog\ConferenceEventLog */
+/* @var $model src\model\conference\entity\conferenceEventLog\ConferenceEventLog */
 
 $this->title = 'Update Conference Event Log: ' . $model->cel_id;
 $this->params['breadcrumbs'][] = ['label' => 'Conference Event Logs', 'url' => ['index']];

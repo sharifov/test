@@ -2,7 +2,7 @@
 
 namespace frontend\controllers;
 
-use sales\widgets\UserGroupSelect2Widget;
+use src\widgets\UserGroupSelect2Widget;
 use Yii;
 use common\models\UserGroup;
 use common\models\search\UserGroupSearch;

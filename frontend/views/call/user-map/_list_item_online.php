@@ -1,6 +1,6 @@
 <?php
 
-use sales\model\call\useCase\assignUsers\UserRenderer;
+use src\model\call\useCase\assignUsers\UserRenderer;
 
 /* @var $model \common\models\UserConnection */
 /* @var $index int */

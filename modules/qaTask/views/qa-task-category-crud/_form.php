@@ -1,8 +1,8 @@
 <?php
 
 use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
-use sales\access\ListsAccess;
-use sales\auth\Auth;
+use src\access\ListsAccess;
+use src\auth\Auth;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 

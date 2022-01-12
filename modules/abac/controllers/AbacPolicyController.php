@@ -6,7 +6,7 @@ use frontend\controllers\FController;
 use modules\abac\src\entities\search\AbacPolicyImportSearch;
 use modules\abac\src\forms\AbacPolicyForm;
 use modules\abac\src\forms\AbacPolicyImportForm;
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
 use modules\abac\src\entities\AbacPolicy;
 use modules\abac\src\entities\search\AbacPolicySearch;

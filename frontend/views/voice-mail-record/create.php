@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\voiceMailRecord\entity\VoiceMailRecord */
+/* @var $model src\model\voiceMailRecord\entity\VoiceMailRecord */
 
 $this->title = 'Create Voice Mail Record';
 $this->params['breadcrumbs'][] = ['label' => 'Voice Mail Records', 'url' => ['index']];

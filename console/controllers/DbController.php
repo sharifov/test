@@ -18,16 +18,16 @@ use common\models\ProjectWeight;
 use common\models\Quote;
 use common\models\UserProjectParams;
 use frontend\models\UserSiteActivity;
-use sales\entities\cases\Cases;
-use sales\helpers\app\AppHelper;
-use sales\helpers\email\TextConvertingHelper;
-use sales\logger\db\GlobalLogInterface;
-use sales\logger\db\LogDTO;
-use sales\model\project\entity\projectLocale\ProjectLocale;
-use sales\services\lead\qcall\CalculateDateService;
-use sales\services\log\GlobalEntityAttributeFormatServiceService;
-use sales\services\system\DbViewCryptDictionary;
-use sales\services\system\DbViewCryptService;
+use src\entities\cases\Cases;
+use src\helpers\app\AppHelper;
+use src\helpers\email\TextConvertingHelper;
+use src\logger\db\GlobalLogInterface;
+use src\logger\db\LogDTO;
+use src\model\project\entity\projectLocale\ProjectLocale;
+use src\services\lead\qcall\CalculateDateService;
+use src\services\log\GlobalEntityAttributeFormatServiceService;
+use src\services\system\DbViewCryptDictionary;
+use src\services\system\DbViewCryptService;
 use yii\base\InvalidConfigException;
 use yii\console\Controller;
 use Yii;
@@ -38,7 +38,7 @@ use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Console;
 use yii\helpers\VarDumper;
-use sales\model\airline\service\AirlineService;
+use src\model\airline\service\AirlineService;
 
 /**
  * Class DbController

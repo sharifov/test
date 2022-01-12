@@ -2,7 +2,7 @@
 
 namespace frontend\widgets\frontendWidgetList\userflow;
 
-use sales\auth\Auth;
+use src\auth\Auth;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\base\InvalidConfigException;

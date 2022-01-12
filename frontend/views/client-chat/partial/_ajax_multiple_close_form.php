@@ -1,13 +1,13 @@
 <?php
 
 /***
- * @var \sales\forms\clientChat\MultipleCloseForm $formMultipleClose
+ * @var \src\forms\clientChat\MultipleCloseForm $formMultipleClose
  * @var string $alertMessage
  *
  */
 
-use sales\auth\Auth;
-use sales\model\clientChat\entity\ClientChat;
+use src\auth\Auth;
+use src\model\clientChat\entity\ClientChat;
 use yii\widgets\ActiveForm;
 use yii\helpers\Html;
 use yii\widgets\Pjax;

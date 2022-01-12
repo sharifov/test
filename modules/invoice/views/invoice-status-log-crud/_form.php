@@ -2,9 +2,9 @@
 
 use modules\invoice\src\entities\invoice\InvoiceStatus;
 use modules\invoice\src\entities\invoice\InvoiceStatusAction;
-use sales\access\ListsAccess;
-use sales\auth\Auth;
-use sales\widgets\DateTimePicker;
+use src\access\ListsAccess;
+use src\auth\Auth;
+use src\widgets\DateTimePicker;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 

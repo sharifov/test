@@ -58,11 +58,11 @@ class ConferenceSearch extends Conference
         }
 
         if ($this->cf_start_dt) {
-            \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'cf_start_dt', $this->cf_start_dt, $user->timezone);
+            \src\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'cf_start_dt', $this->cf_start_dt, $user->timezone);
         }
 
         if ($this->cf_end_dt) {
-            \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'cf_end_dt', $this->cf_end_dt, $user->timezone);
+            \src\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'cf_end_dt', $this->cf_end_dt, $user->timezone);
         }
 
         // grid filtering conditions

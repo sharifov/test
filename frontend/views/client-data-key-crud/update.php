@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientDataKey\entity\ClientDataKey */
+/* @var $model src\model\clientDataKey\entity\ClientDataKey */
 
 $this->title = 'Update Client Data Key: ' . $model->cdk_id;
 $this->params['breadcrumbs'][] = ['label' => 'Client Data Keys', 'url' => ['index']];

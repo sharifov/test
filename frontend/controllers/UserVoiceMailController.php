@@ -4,11 +4,11 @@ namespace frontend\controllers;
 
 use common\models\Employee;
 use common\models\Language;
-use sales\helpers\app\AppHelper;
-use sales\model\userVoiceMail\useCase\manage\UserVoiceMailForm;
+use src\helpers\app\AppHelper;
+use src\model\userVoiceMail\useCase\manage\UserVoiceMailForm;
 use Yii;
-use sales\model\userVoiceMail\entity\UserVoiceMail;
-use sales\model\userVoiceMail\entity\search\UserVoiceMailSearch;
+use src\model\userVoiceMail\entity\UserVoiceMail;
+use src\model\userVoiceMail\entity\search\UserVoiceMailSearch;
 use frontend\controllers\FController;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;

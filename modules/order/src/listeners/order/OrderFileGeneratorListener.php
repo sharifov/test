@@ -11,7 +11,7 @@ use modules\order\src\jobs\OrderGeneratorPdfJob;
 use modules\order\src\processManager\queue\Queue;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\rentCar\src\jobs\RentCarQuotePdfJob;
-use sales\helpers\app\AppHelper;
+use src\helpers\app\AppHelper;
 use Yii;
 use yii\web\NotFoundHttpException;
 

@@ -8,12 +8,12 @@ use modules\order\src\entities\orderUserProfit\OrderUserProfit;
 use modules\order\src\entities\orderUserProfit\OrderUserProfitRepository;
 use modules\order\src\forms\OrderUserProfitFormComposite;
 use modules\product\src\entities\productQuote\ProductQuote;
-use sales\dispatchers\EventDispatcher;
-use sales\model\user\entity\profit\event\UserProfitCalculateByOrderUserProfitEvent;
-use sales\model\user\entity\profit\UserProfit;
-use sales\model\user\entity\userProductType\UserProductTypeRepository;
-use sales\repositories\user\UserProfitRepository;
-use sales\services\TransactionManager;
+use src\dispatchers\EventDispatcher;
+use src\model\user\entity\profit\event\UserProfitCalculateByOrderUserProfitEvent;
+use src\model\user\entity\profit\UserProfit;
+use src\model\user\entity\userProductType\UserProductTypeRepository;
+use src\repositories\user\UserProfitRepository;
+use src\services\TransactionManager;
 use yii\helpers\ArrayHelper;
 
 /**

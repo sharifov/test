@@ -1,9 +1,9 @@
 <?php
 
 use yii\db\Migration;
-use sales\rbac\rules\lead\view\leadPreferencesBlock\LeadViewLeadPreferencesBlockIsOwnerRule;
-use sales\rbac\rules\lead\view\leadPreferencesBlock\LeadViewLeadPreferencesBlockEmptyOwnerRule;
-use sales\rbac\rules\lead\view\leadPreferencesBlock\LeadViewLeadPreferencesBlockGroupRule;
+use src\rbac\rules\lead\view\leadPreferencesBlock\LeadViewLeadPreferencesBlockIsOwnerRule;
+use src\rbac\rules\lead\view\leadPreferencesBlock\LeadViewLeadPreferencesBlockEmptyOwnerRule;
+use src\rbac\rules\lead\view\leadPreferencesBlock\LeadViewLeadPreferencesBlockGroupRule;
 
 /**
  * Class m201123_122503_add_lead_view_lead_references_block_permitions

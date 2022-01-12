@@ -1,11 +1,11 @@
 <?php
 
-use sales\model\userStatDay\entity\UserStatDayKey;
+use src\model\userStatDay\entity\UserStatDayKey;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\userStatDay\entity\UserStatDay */
+/* @var $model src\model\userStatDay\entity\UserStatDay */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
@@ -18,7 +18,7 @@ use yii\widgets\ActiveForm;
 
       <?= $form->field($model, 'usd_value')->textInput(['maxlength' => true]) ?>
 
-      <?= $form->field($model, 'usd_user_id')->widget(\sales\widgets\UserSelect2Widget::class, [
+      <?= $form->field($model, 'usd_user_id')->widget(\src\widgets\UserSelect2Widget::class, [
           'data' => $model->usd_user_id ? [
               $model->usd_user_id => $model->user->username
           ] : [],

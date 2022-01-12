@@ -4,13 +4,13 @@ use yii\grid\ActionColumn;
 use common\components\grid\DateTimeColumn;
 use common\components\grid\project\ProjectColumn;
 use common\models\Call;
-use sales\model\callTerminateLog\entity\CallTerminateLog;
+use src\model\callTerminateLog\entity\CallTerminateLog;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\callTerminateLog\entity\CallTerminateLogSearch */
+/* @var $searchModel src\model\callTerminateLog\entity\CallTerminateLogSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Call Terminate Logs';

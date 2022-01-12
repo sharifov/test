@@ -3,7 +3,7 @@
 namespace modules\cruise\src\entity\cruise\serializer;
 
 use modules\cruise\src\entity\cruise\Cruise;
-use sales\entities\serializer\Serializer;
+use src\entities\serializer\Serializer;
 
 /**
  * Class CruiseSerializer

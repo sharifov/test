@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\flightQuoteLabelList\entity\FlightQuoteLabelList;
-use sales\model\flightQuoteLabelList\entity\FlightQuoteLabelListSearch;
+use src\model\flightQuoteLabelList\entity\FlightQuoteLabelList;
+use src\model\flightQuoteLabelList\entity\FlightQuoteLabelListSearch;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;

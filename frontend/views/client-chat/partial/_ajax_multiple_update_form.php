@@ -1,12 +1,12 @@
 <?php
 
 /***
- * @var \sales\forms\clientChat\MultipleUpdateForm $formMultipleUpdate
+ * @var \src\forms\clientChat\MultipleUpdateForm $formMultipleUpdate
  * @var string $alertMessage
  *
  */
 
-use sales\model\clientChat\entity\ClientChat;
+use src\model\clientChat\entity\ClientChat;
 use yii\widgets\ActiveForm;
 use yii\helpers\Html;
 use yii\widgets\Pjax;

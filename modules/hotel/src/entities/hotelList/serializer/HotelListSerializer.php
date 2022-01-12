@@ -3,7 +3,7 @@
 namespace modules\hotel\src\entities\hotelList\serializer;
 
 use modules\hotel\models\HotelList;
-use sales\entities\serializer\Serializer;
+use src\entities\serializer\Serializer;
 
 /**
  * Class HotelListSerializer

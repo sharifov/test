@@ -1,13 +1,13 @@
 <?php
 
-use sales\model\userStatDay\entity\UserStatDay;
-use sales\model\userStatDay\entity\UserStatDayKey;
+use src\model\userStatDay\entity\UserStatDay;
+use src\model\userStatDay\entity\UserStatDayKey;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\userStatDay\entity\search\UserStatDaySearch */
+/* @var $searchModel src\model\userStatDay\entity\search\UserStatDaySearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'User Stat Days';

@@ -3,7 +3,7 @@
 namespace modules\product\controllers;
 
 use frontend\controllers\FController;
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
 use modules\product\src\entities\productOption\ProductOption;
 use modules\product\src\entities\productOption\search\ProductOptionCrudSearch;

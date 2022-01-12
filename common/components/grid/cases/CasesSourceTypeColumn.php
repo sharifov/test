@@ -2,7 +2,7 @@
 
 namespace common\components\grid\cases;
 
-use sales\entities\cases\CasesSourceType;
+use src\entities\cases\CasesSourceType;
 use yii\grid\DataColumn;
 
 /**

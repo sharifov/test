@@ -2,12 +2,12 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
-use sales\access\EmployeeDepartmentAccess;
+use src\access\EmployeeDepartmentAccess;
 use common\models\Employee;
 
 /**
  * @var $this yii\web\View
- * @var $model \sales\model\callLog\entity\callLog\search\CallLogSearch;
+ * @var $model \src\model\callLog\entity\callLog\search\CallLogSearch;
  * @var $list
  */
 ?>

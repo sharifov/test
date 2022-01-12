@@ -19,7 +19,7 @@ use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
  * @property TicketForm[] $tickets
  * @property AuxiliaryOptionForm[] $options
  */
-class VoluntaryRefundUpdateForm extends \sales\forms\CompositeForm
+class VoluntaryRefundUpdateForm extends \src\forms\CompositeForm
 {
     public $refundId;
     public $bookingId;

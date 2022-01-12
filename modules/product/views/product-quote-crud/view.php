@@ -4,7 +4,7 @@ use modules\flight\models\FlightPax;
 use modules\flight\models\FlightQuote;
 use modules\flight\models\FlightQuotePaxPrice;
 use modules\product\src\entities\productQuote\ProductQuote;
-use sales\helpers\product\ProductQuoteHelper;
+use src\helpers\product\ProductQuoteHelper;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 

@@ -4,7 +4,7 @@ use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\caseOrder\entity\CaseOrder */
+/* @var $model src\model\caseOrder\entity\CaseOrder */
 
 $this->title = $model->co_order_id;
 $this->params['breadcrumbs'][] = ['label' => 'Case Orders', 'url' => ['index']];

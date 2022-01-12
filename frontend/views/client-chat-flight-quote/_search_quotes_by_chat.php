@@ -2,7 +2,7 @@
 
 /**
  * @var \yii\web\View $this
- * @var \sales\viewModel\chat\ViewModelSearchQuotes $viewModel
+ * @var \src\viewModel\chat\ViewModelSearchQuotes $viewModel
  */
 
 use frontend\themes\gentelella_v2\widgets\FlashAlert;

@@ -15,7 +15,7 @@ use yii\widgets\DetailView;
                 [
                     'attribute' => 'first_name',
                     'value' => static function (Client $client) {
-                        return \sales\model\client\helpers\ClientFormatter::formatName($client);
+                        return \src\model\client\helpers\ClientFormatter::formatName($client);
                     },
                     'format' => 'raw',
                 ],

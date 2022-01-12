@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\shiftSchedule\entity\shiftScheduleRule\ShiftScheduleRule;
-use sales\model\shiftSchedule\entity\shiftScheduleRule\search\SearchShiftScheduleRule;
+use src\model\shiftSchedule\entity\shiftScheduleRule\ShiftScheduleRule;
+use src\model\shiftSchedule\entity\shiftScheduleRule\search\SearchShiftScheduleRule;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

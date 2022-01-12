@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\project\entity\projectRelation\ProjectRelation;
-use sales\model\project\entity\projectRelation\search\ProjectRelationSearch;
+use src\model\project\entity\projectRelation\ProjectRelation;
+use src\model\project\entity\projectRelation\search\ProjectRelationSearch;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;

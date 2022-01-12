@@ -1,13 +1,13 @@
 <?php
 
 use common\components\grid\UserColumn;
-use sales\model\userData\entity\UserDataKey;
+use src\model\userData\entity\UserDataKey;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\userData\entity\search\UserDataSearch */
+/* @var $searchModel src\model\userData\entity\search\UserDataSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'User Data';

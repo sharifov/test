@@ -1,13 +1,13 @@
 <?php
 
 use common\components\grid\DateTimeColumn;
-use sales\widgets\UserSelect2Widget;
+use src\widgets\UserSelect2Widget;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\phoneLine\phoneLineUserAssign\entity\search\PhoneLineUserAssignSearch */
+/* @var $searchModel src\model\phoneLine\phoneLineUserAssign\entity\search\PhoneLineUserAssignSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Phone Line User Assigns';

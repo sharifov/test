@@ -1,7 +1,7 @@
 <?php
 
 use common\models\Employee;
-use sales\access\EmployeeProjectAccess;
+use src\access\EmployeeProjectAccess;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;

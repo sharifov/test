@@ -1,8 +1,8 @@
 <?php
 
 use common\widgets\Alert;
-use sales\model\clientChat\entity\ClientChat;
-use sales\model\lead\useCases\lead\create\LeadCreateByChatForm;
+use src\model\clientChat\entity\ClientChat;
+use src\model\lead\useCases\lead\create\LeadCreateByChatForm;
 use yii\bootstrap4\ActiveForm;
 use yii\helpers\Html;
 use yii\web\View;

@@ -5,7 +5,7 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\project\entity\projectLocale\ProjectLocale */
+/* @var $model src\model\project\entity\projectLocale\ProjectLocale */
 
 $this->title = $model->plProject ? $model->plProject->name . ' (' . $model->pl_project_id . ')' : '';
 if ($model->pl_language_id) {

@@ -1,11 +1,11 @@
 <?php
 
-use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
+use src\model\sms\entity\smsDistributionList\SmsDistributionList;
 use yii\bootstrap4\ActiveForm;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\sms\entity\smsDistributionList\forms\SmsDistributionListAddMultipleForm */
+/* @var $model src\model\sms\entity\smsDistributionList\forms\SmsDistributionListAddMultipleForm */
 
 $this->title = 'Create Multiple Sms Distribution List';
 $this->params['breadcrumbs'][] = ['label' => 'Sms Distribution List', 'url' => ['index']];

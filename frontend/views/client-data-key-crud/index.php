@@ -2,14 +2,14 @@
 
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserColumn;
-use sales\model\clientDataKey\entity\ClientDataKey;
+use src\model\clientDataKey\entity\ClientDataKey;
 use yii\grid\ActionColumn;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\clientDataKey\entity\ClientDataKeySearch */
+/* @var $searchModel src\model\clientDataKey\entity\ClientDataKeySearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Client Data Keys';

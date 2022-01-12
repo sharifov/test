@@ -2,8 +2,8 @@
 
 use common\models\Department;
 use modules\flight\src\useCases\reprotectionCreate\service\ReprotectionCreateService;
-use sales\entities\cases\CaseCategory;
-use sales\helpers\app\AppHelper;
+use src\entities\cases\CaseCategory;
+use src\helpers\app\AppHelper;
 use yii\db\Migration;
 
 /**

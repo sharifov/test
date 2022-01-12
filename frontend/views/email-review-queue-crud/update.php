@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\emailReviewQueue\entity\EmailReviewQueue */
+/* @var $model src\model\emailReviewQueue\entity\EmailReviewQueue */
 
 $this->title = 'Update Email Review Queue: ' . $model->erq_id;
 $this->params['breadcrumbs'][] = ['label' => 'Email Review Queues', 'url' => ['index']];

@@ -1,11 +1,11 @@
 <?php
 
 use yii\helpers\Url;
-use sales\services\cleaner\form\DbCleanerParamsForm;
+use src\services\cleaner\form\DbCleanerParamsForm;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use dosamigos\datepicker\DatePicker;
-use sales\widgets\DateTimePicker;
+use src\widgets\DateTimePicker;
 
 /* @var yii\web\View $this */
 /* @var DbCleanerParamsForm $modelCleaner */

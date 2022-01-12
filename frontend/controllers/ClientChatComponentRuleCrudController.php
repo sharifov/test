@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\clientChat\componentRule\entity\ClientChatComponentRule;
-use sales\model\clientChat\componentRule\entity\search\ClientChatComponentRuleSearch;
+use src\model\clientChat\componentRule\entity\ClientChatComponentRule;
+use src\model\clientChat\componentRule\entity\search\ClientChatComponentRuleSearch;
 use frontend\controllers\FController;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

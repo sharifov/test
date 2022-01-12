@@ -8,7 +8,7 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\phoneList\entity\search\PhoneListSearch */
+/* @var $searchModel src\model\phoneList\entity\search\PhoneListSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Phone Lists';

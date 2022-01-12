@@ -4,7 +4,7 @@ namespace modules\flight\src\useCases\voluntaryExchangeManualCreate\form;
 
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
-use sales\entities\cases\Cases;
+use src\entities\cases\Cases;
 
 /**
  * Class AddChangeForm

@@ -4,7 +4,7 @@ namespace modules\order\src\services;
 
 use modules\fileStorage\src\entity\fileOrder\FileOrder;
 use modules\order\src\events\OrderFileGeneratedEvent;
-use sales\services\pdf\processingPdf\PdfBaseService;
+use src\services\pdf\processingPdf\PdfBaseService;
 
 /**
  * Class OrderPdfService

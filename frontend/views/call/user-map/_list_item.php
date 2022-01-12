@@ -3,7 +3,7 @@
 use common\models\CallUserAccess;
 use common\models\ConferenceParticipant;
 use common\models\search\CallSearch;
-use sales\auth\Auth;
+use src\auth\Auth;
 use yii\helpers\Html;
 use common\models\Call;
 use yii\helpers\VarDumper;

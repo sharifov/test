@@ -1,6 +1,6 @@
 <?php
 
-use sales\rbac\rules\lead\view\LeadViewBookFailedRule;
+use src\rbac\rules\lead\view\LeadViewBookFailedRule;
 use yii\db\Migration;
 
 /**

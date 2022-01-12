@@ -21,13 +21,13 @@ class UserProjectParamsQuery extends ActiveQuery
     public function byPhone($phone, bool $eagerLoading = true, bool $onyEnabled = false): self
     {
         if ($onyEnabled) {
-            $this->innerJoinWith(['phoneList' => static function (\sales\model\phoneList\entity\Scopes $query) use ($phone) {
+            $this->innerJoinWith(['phoneList' => static function (\src\model\phoneList\entity\Scopes $query) use ($phone) {
                 $query
                     ->andOnCondition(['pl_enabled' => true])
                     ->andOnCondition(['pl_phone_number' => $phone]);
             }], $eagerLoading);
         } else {
-            $this->innerJoinWith(['phoneList' => static function (\sales\model\phoneList\entity\Scopes $query) use ($phone) {
+            $this->innerJoinWith(['phoneList' => static function (\src\model\phoneList\entity\Scopes $query) use ($phone) {
                 $query->andOnCondition(['pl_phone_number' => $phone]);
             }], $eagerLoading);
         }
@@ -48,13 +48,13 @@ class UserProjectParamsQuery extends ActiveQuery
     public function byEmail($email, bool $eagerLoading = true, bool $onyEnabled = false): self
     {
         if ($onyEnabled) {
-            $this->innerJoinWith(['emailList' => static function (\sales\model\emailList\entity\Scopes $query) use ($email) {
+            $this->innerJoinWith(['emailList' => static function (\src\model\emailList\entity\Scopes $query) use ($email) {
                 $query
                     ->andOnCondition(['el_enabled' => true])
                     ->andOnCondition(['el_email' => $email]);
             }], $eagerLoading);
         } else {
-            $this->innerJoinWith(['emailList' => static function (\sales\model\emailList\entity\Scopes $query) use ($email) {
+            $this->innerJoinWith(['emailList' => static function (\src\model\emailList\entity\Scopes $query) use ($email) {
                 $query->andOnCondition(['el_email' => $email]);
             }], $eagerLoading);
         }
@@ -69,7 +69,7 @@ class UserProjectParamsQuery extends ActiveQuery
     public function withPhoneList(bool $onyEnabled = false): self
     {
         if ($onyEnabled) {
-            return $this->with(['phoneList' => static function (\sales\model\phoneList\entity\Scopes $query) {
+            return $this->with(['phoneList' => static function (\src\model\phoneList\entity\Scopes $query) {
                 $query->enabled();
             }]);
         }
@@ -94,7 +94,7 @@ class UserProjectParamsQuery extends ActiveQuery
     public function withEmailList(bool $onyEnabled = false): self
     {
         if ($onyEnabled) {
-            return $this->with(['emailList' => static function (\sales\model\emailList\entity\Scopes $query) {
+            return $this->with(['emailList' => static function (\src\model\emailList\entity\Scopes $query) {
                 $query->enabled();
             }]);
         }

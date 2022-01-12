@@ -3,10 +3,10 @@
 namespace webapi\modules\v2\controllers;
 
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
-use sales\entities\cases\CaseEventLog;
-use sales\helpers\app\AppHelper;
-use sales\repositories\cases\CasesRepository;
-use sales\repositories\NotFoundException;
+use src\entities\cases\CaseEventLog;
+use src\helpers\app\AppHelper;
+use src\repositories\cases\CasesRepository;
+use src\repositories\NotFoundException;
 use webapi\src\forms\boWebhook\BoWebhookForm;
 use webapi\src\forms\boWebhook\ReprotectionUpdateForm;
 use webapi\src\jobs\BoWebhookHandleJob;
@@ -26,8 +26,8 @@ use webapi\src\response\messages\MessageMessage;
 use webapi\src\response\messages\StatusCodeMessage;
 use webapi\src\response\SuccessResponse;
 use Yii;
-use sales\repositories\product\ProductQuoteRepository;
-use sales\services\cases\CasesManageService;
+use src\repositories\product\ProductQuoteRepository;
+use src\services\cases\CasesManageService;
 
 class BoController extends BaseController
 {

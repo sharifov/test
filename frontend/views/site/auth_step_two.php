@@ -2,7 +2,7 @@
 
 /**
  * @var \yii\web\View $this
- * @var \sales\model\userAuthClient\entity\UserAuthClient[] $authClients
+ * @var \src\model\userAuthClient\entity\UserAuthClient[] $authClients
  */
 
 use yii\helpers\StringHelper;

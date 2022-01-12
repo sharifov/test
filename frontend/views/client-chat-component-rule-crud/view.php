@@ -1,11 +1,11 @@
 <?php
 
-use sales\model\clientChat\componentRule\entity\ClientChatComponentRule;
+use src\model\clientChat\componentRule\entity\ClientChatComponentRule;
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChat\componentRule\entity\ClientChatComponentRule */
+/* @var $model src\model\clientChat\componentRule\entity\ClientChatComponentRule */
 
 $this->title = $model->getComponentName();
 $this->params['breadcrumbs'][] = ['label' => 'Client Chat Component Rules', 'url' => ['index']];

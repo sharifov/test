@@ -5,7 +5,7 @@ namespace modules\offer\src\services;
 use modules\offer\src\entities\offer\OfferRepository;
 use modules\offer\src\entities\offerProduct\OfferProduct;
 use modules\product\src\entities\productQuote\ProductQuote;
-use sales\services\CurrencyHelper;
+use src\services\CurrencyHelper;
 
 /**
  * Class OfferPriceUpdater

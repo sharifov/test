@@ -4,7 +4,7 @@ use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChatRequest\entity\ClientChatRequest */
+/* @var $model src\model\clientChatRequest\entity\ClientChatRequest */
 /* @var $form ActiveForm */
 ?>
 
@@ -16,7 +16,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->errorSummary($model) ?>
 
-        <?= $form->field($model, 'ccr_event')->dropDownList(\sales\model\clientChatRequest\entity\ClientChatRequest::getEventList(), ['prompt' => '-']) ?>
+        <?= $form->field($model, 'ccr_event')->dropDownList(\src\model\clientChatRequest\entity\ClientChatRequest::getEventList(), ['prompt' => '-']) ?>
 
         <?php
         try {

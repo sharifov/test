@@ -4,8 +4,8 @@ namespace common\components\jobs;
 
 use common\components\Metrics;
 use console\helpers\OutputHelper;
-use sales\helpers\app\AppHelper;
-use sales\helpers\setting\SettingHelper;
+use src\helpers\app\AppHelper;
+use src\helpers\setting\SettingHelper;
 use yii\base\BaseObject;
 
 /**

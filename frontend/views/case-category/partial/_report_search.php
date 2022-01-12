@@ -2,10 +2,10 @@
 
 use yii\helpers\Html;
 use kartik\form\ActiveForm;
-use sales\access\EmployeeDepartmentAccess;
+use src\access\EmployeeDepartmentAccess;
 
 /* @var $this yii\web\View */
-/* @var $model \sales\entities\cases\CaseCategorySearch */
+/* @var $model \src\entities\cases\CaseCategorySearch */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 

@@ -9,7 +9,7 @@
 
 namespace common\components;
 
-use sales\auth\Auth;
+use src\auth\Auth;
 use yii\base\Component;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;

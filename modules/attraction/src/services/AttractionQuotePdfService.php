@@ -4,7 +4,7 @@ namespace modules\attraction\src\services;
 
 use modules\attraction\models\AttractionQuote;
 use modules\order\src\events\OrderFileGeneratedEvent;
-use sales\services\pdf\processingPdf\PdfBaseService;
+use src\services\pdf\processingPdf\PdfBaseService;
 
 /**
  * Class AttractionQuotePdfService

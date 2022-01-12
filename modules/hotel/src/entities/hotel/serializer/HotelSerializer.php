@@ -4,7 +4,7 @@ namespace modules\hotel\src\entities\hotel\serializer;
 
 use common\models\Airports;
 use modules\hotel\models\Hotel;
-use sales\entities\serializer\Serializer;
+use src\entities\serializer\Serializer;
 
 /**
  * Class HotelSerializer

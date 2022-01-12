@@ -4,7 +4,7 @@ use common\models\Employee;
 use common\models\Lead;
 use common\models\LeadQcall;
 use common\models\search\LeadQcallSearch;
-use sales\formatters\client\ClientTimeFormatter;
+use src\formatters\client\ClientTimeFormatter;
 use yii\grid\GridView;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;

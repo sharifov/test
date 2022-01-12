@@ -8,7 +8,7 @@ namespace frontend\themes\gentelella_v2\widgets;
 
 use common\models\Employee;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
 
 /**

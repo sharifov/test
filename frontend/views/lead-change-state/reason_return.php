@@ -1,7 +1,7 @@
 <?php
 
-use sales\access\ListsAccess;
-use sales\forms\leadflow\ReturnReasonForm;
+use src\access\ListsAccess;
+use src\forms\leadflow\ReturnReasonForm;
 use yii\widgets\ActiveForm;
 use yii\bootstrap\Html;
 

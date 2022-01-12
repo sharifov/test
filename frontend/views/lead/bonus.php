@@ -3,10 +3,10 @@
 use common\components\grid\project\ProjectColumn;
 use common\models\Employee;
 use dosamigos\datepicker\DatePicker;
-use sales\access\ListsAccess;
-use sales\formatters\client\ClientTimeFormatter;
-use sales\helpers\lead\RemainingDayCalculator;
-use sales\model\client\helpers\ClientFormatter;
+use src\access\ListsAccess;
+use src\formatters\client\ClientTimeFormatter;
+use src\helpers\lead\RemainingDayCalculator;
+use src\model\client\helpers\ClientFormatter;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;

@@ -3,12 +3,12 @@
 namespace modules\flight\src\useCases\voluntaryExchange\service;
 
 use modules\flight\models\FlightQuote;
-use sales\entities\cases\CaseCategory;
-use sales\entities\cases\CaseEventLog;
-use sales\entities\cases\Cases;
-use sales\entities\cases\CasesStatus;
-use sales\exception\CheckRestrictionException;
-use sales\helpers\setting\SettingHelper;
+use src\entities\cases\CaseCategory;
+use src\entities\cases\CaseEventLog;
+use src\entities\cases\Cases;
+use src\entities\cases\CasesStatus;
+use src\exception\CheckRestrictionException;
+use src\helpers\setting\SettingHelper;
 
 /**
  * Class CaseVoluntaryExchangeService

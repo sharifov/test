@@ -3,15 +3,15 @@
 use common\models\Client;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
-use sales\entities\cases\Cases;
+use src\entities\cases\Cases;
 use yii\helpers\Html;
 use yii\helpers\Url;
-use sales\auth\Auth;
-use sales\helpers\email\MaskEmailHelper;
-use sales\helpers\phone\MaskPhoneHelper;
+use src\auth\Auth;
+use src\helpers\email\MaskEmailHelper;
+use src\helpers\phone\MaskPhoneHelper;
 
 /* @var $this yii\web\View */
-/* @var $caseModel \sales\entities\cases\Cases */
+/* @var $caseModel \src\entities\cases\Cases */
 /**
  * @var $isAdmin boolean
  * @var $unsubscribedEmails array
@@ -109,7 +109,7 @@ use sales\helpers\phone\MaskPhoneHelper;
                                 [
                                     'attribute' => 'first_name',
                                     'value' => static function (Client $client) {
-                                        return \sales\model\client\helpers\ClientFormatter::formatName($client);
+                                        return \src\model\client\helpers\ClientFormatter::formatName($client);
                                     },
                                     'format' => 'raw',
                                 ],

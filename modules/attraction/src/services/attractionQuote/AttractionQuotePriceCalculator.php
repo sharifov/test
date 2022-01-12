@@ -4,7 +4,7 @@ namespace modules\attraction\src\services\attractionQuote;
 
 use modules\attraction\models\AttractionQuote;
 use modules\attraction\src\helpers\AttractionQuoteHelper;
-use sales\services\CurrencyHelper;
+use src\services\CurrencyHelper;
 
 class AttractionQuotePriceCalculator
 {

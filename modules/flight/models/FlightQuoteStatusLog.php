@@ -3,7 +3,7 @@
 namespace modules\flight\models;
 
 use common\models\Employee;
-use sales\entities\EventTrait;
+use src\entities\EventTrait;
 use Yii;
 use yii\base\InvalidArgumentException;
 

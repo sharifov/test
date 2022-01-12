@@ -4,7 +4,7 @@ namespace common\models\search;
 
 use common\components\validators\IsArrayValidator;
 use common\models\Employee;
-use sales\model\project\entity\projectRelation\ProjectRelation;
+use src\model\project\entity\projectRelation\ProjectRelation;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Project;

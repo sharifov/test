@@ -1,11 +1,11 @@
 <?php
 
-use sales\model\visitorSubscription\entity\VisitorSubscription;
+use src\model\visitorSubscription\entity\VisitorSubscription;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\visitorSubscription\entity\VisitorSubscription */
+/* @var $model src\model\visitorSubscription\entity\VisitorSubscription */
 /* @var $form ActiveForm */
 ?>
 

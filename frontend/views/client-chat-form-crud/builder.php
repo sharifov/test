@@ -8,7 +8,7 @@ use yii\web\View;
 use yii\widgets\ActiveForm;
 
 /* @var yii\web\View $this */
-/* @var sales\model\clientChatForm\entity\ClientChatForm $model */
+/* @var src\model\clientChatForm\entity\ClientChatForm $model */
 
 $this->title = 'Update Client Chat Form: ' . $model->ccf_id;
 $this->params['breadcrumbs'][] = ['label' => 'Client Chat Forms', 'url' => ['index']];

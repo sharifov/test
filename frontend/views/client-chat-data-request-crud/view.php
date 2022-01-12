@@ -1,12 +1,12 @@
 <?php
 
-use sales\model\clientChatDataRequest\entity\ClientChatDataRequest;
+use src\model\clientChatDataRequest\entity\ClientChatDataRequest;
 use yii\helpers\Html;
 use yii\helpers\VarDumper;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChatDataRequest\entity\ClientChatDataRequest */
+/* @var $model src\model\clientChatDataRequest\entity\ClientChatDataRequest */
 
 $this->title = $model->ccdr_id;
 $this->params['breadcrumbs'][] = ['label' => 'Client Chat Data Requests', 'url' => ['index']];

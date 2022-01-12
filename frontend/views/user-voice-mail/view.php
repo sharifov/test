@@ -1,11 +1,11 @@
 <?php
 
-use sales\model\userVoiceMail\entity\UserVoiceMail;
+use src\model\userVoiceMail\entity\UserVoiceMail;
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\userVoiceMail\entity\UserVoiceMail */
+/* @var $model src\model\userVoiceMail\entity\UserVoiceMail */
 
 $this->title = $model->uvmUser ? $model->uvmUser->username : '';
 $this->params['breadcrumbs'][] = ['label' => 'User Voice Mails', 'url' => ['index']];

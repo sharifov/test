@@ -1,12 +1,12 @@
 <?php
 
 use common\models\Project;
-use sales\model\clientChat\cannedResponseCategory\entity\ClientChatCannedResponseCategory;
+use src\model\clientChat\cannedResponseCategory\entity\ClientChatCannedResponseCategory;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChat\cannedResponse\entity\ClientChatCannedResponse */
+/* @var $model src\model\clientChat\cannedResponse\entity\ClientChatCannedResponse */
 /* @var $form ActiveForm */
 ?>
 
@@ -22,7 +22,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'cr_language_id')->dropDownList(\common\models\Language::getList(), ['prompt' => '--']) ?>
 
-        <?= $form->field($model, 'cr_user_id')->widget(\sales\widgets\UserSelect2Widget::class) ?>
+        <?= $form->field($model, 'cr_user_id')->widget(\src\widgets\UserSelect2Widget::class) ?>
 
         <?= $form->field($model, 'cr_sort_order')->textInput() ?>
 

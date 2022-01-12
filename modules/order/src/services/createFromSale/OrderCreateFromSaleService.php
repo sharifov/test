@@ -40,11 +40,11 @@ use modules\product\src\entities\productType\ProductType;
 use modules\product\src\entities\productType\ProductTypeRepository;
 use modules\product\src\useCases\product\create\ProductCreateForm;
 use modules\product\src\useCases\product\create\ProductCreateService;
-use sales\helpers\app\AppHelper;
-use sales\helpers\ErrorsToStringHelper;
-use sales\model\caseOrder\entity\CaseOrder;
-use sales\repositories\product\ProductQuoteRepository;
-use sales\services\client\ClientManageService;
+use src\helpers\app\AppHelper;
+use src\helpers\ErrorsToStringHelper;
+use src\model\caseOrder\entity\CaseOrder;
+use src\repositories\product\ProductQuoteRepository;
+use src\services\client\ClientManageService;
 use yii\helpers\ArrayHelper;
 
 /**

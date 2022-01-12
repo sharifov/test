@@ -2,7 +2,7 @@
 
 namespace modules\flight\src\entities\flightQuoteTrip\serializer;
 
-use sales\entities\serializer\Serializer;
+use src\entities\serializer\Serializer;
 
 class FlightQuoteTripSerializer extends Serializer
 {

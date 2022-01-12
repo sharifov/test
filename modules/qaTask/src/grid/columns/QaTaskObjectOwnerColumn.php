@@ -33,7 +33,7 @@ class QaTaskObjectOwnerColumn extends DataColumn
 
         $this->attribute = 'objectOwner';
         $this->format = 'raw';
-        $this->filter = \sales\widgets\UserSelect2Widget::widget([
+        $this->filter = \src\widgets\UserSelect2Widget::widget([
             'model' => $model,
             'attribute' => 'objectOwner',
             'placeholder' => 'Select User',

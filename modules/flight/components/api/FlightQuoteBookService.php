@@ -8,7 +8,7 @@ use modules\flight\models\FlightQuote;
 use modules\flight\src\repositories\flightQuoteRepository\FlightQuoteRepository;
 use modules\flight\src\services\flightQuote\FlightQuoteBookGuardService;
 use modules\order\src\entities\order\Order;
-use sales\services\TransactionManager;
+use src\services\TransactionManager;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;

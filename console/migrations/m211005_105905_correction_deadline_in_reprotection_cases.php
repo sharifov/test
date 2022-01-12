@@ -1,10 +1,10 @@
 <?php
 
 use modules\product\src\entities\productQuote\ProductQuote;
-use sales\entities\cases\Cases;
-use sales\helpers\app\AppHelper;
-use sales\helpers\ErrorsToStringHelper;
-use sales\helpers\setting\SettingHelper;
+use src\entities\cases\Cases;
+use src\helpers\app\AppHelper;
+use src\helpers\ErrorsToStringHelper;
+use src\helpers\setting\SettingHelper;
 use yii\db\Migration;
 
 /**

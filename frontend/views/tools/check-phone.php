@@ -1,7 +1,7 @@
 <?php
 
 use frontend\helpers\JsonHelper;
-use sales\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
+use src\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
 use yii\helpers\Html;
 use yii\helpers\VarDumper;
 use yii\widgets\Pjax;

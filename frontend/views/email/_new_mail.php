@@ -90,7 +90,7 @@ use yii\widgets\ActiveForm;
             <div class="col-md-4">
                 <?php
 /*                $emailBeforeMasking = $model->e_email_to;
-                $model->e_email_to = \sales\helpers\email\MaskEmailHelper::masking($model->e_email_to)
+                $model->e_email_to = \src\helpers\email\MaskEmailHelper::masking($model->e_email_to)
                 */?>
 
                 <?= $form->field($model, 'e_email_to')->textInput(['maxlength' => true]) ?>

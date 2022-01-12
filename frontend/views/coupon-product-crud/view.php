@@ -5,7 +5,7 @@ use yii\helpers\VarDumper;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\coupon\entity\couponProduct\CouponProduct */
+/* @var $model src\model\coupon\entity\couponProduct\CouponProduct */
 
 $this->title = $model->cup_coupon_id;
 $this->params['breadcrumbs'][] = ['label' => 'Coupon Products', 'url' => ['index']];

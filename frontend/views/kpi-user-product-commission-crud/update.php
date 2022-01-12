@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\kpi\entity\kpiUserProductCommission\KpiUserProductCommission */
+/* @var $model src\model\kpi\entity\kpiUserProductCommission\KpiUserProductCommission */
 
 $this->title = 'Update Kpi User Product Commission: ' . $model->upc_product_type_id;
 $this->params['breadcrumbs'][] = ['label' => 'Kpi User Product Commissions', 'url' => ['index']];

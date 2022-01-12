@@ -51,7 +51,7 @@ class m190819_134505_insert_case_categories extends Migration
     {
 
         //$this->truncateTable('{{%cases_category}}');
-        \sales\entities\cases\CaseCategory::deleteAll();
+        \src\entities\cases\CaseCategory::deleteAll();
 
         foreach ($this->categoryList as $item) {
             $item['cc_created_dt'] = date('Y-m-d H:i:s');

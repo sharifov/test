@@ -5,7 +5,7 @@ namespace frontend\models;
 use common\models\EmailTemplateType;
 use common\models\Employee;
 use common\models\Language;
-use sales\entities\cases\Cases;
+use src\entities\cases\Cases;
 use yii\base\Model;
 
 /**

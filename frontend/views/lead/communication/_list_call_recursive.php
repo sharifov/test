@@ -1,7 +1,7 @@
 <?php
 
 use common\models\Employee;
-use sales\helpers\call\CallHelper;
+use src\helpers\call\CallHelper;
 use yii\helpers\Html;
 use common\models\Call;
 
@@ -70,7 +70,7 @@ $user = Yii::$app->user->identity;
             <?php if ($callItem->calls) :?>
                 <tr>
                     <td colspan="7">
-                        <?php \sales\helpers\communication\CommunicationHelper::renderChildCallsRecursive($callItem->calls)?>
+                        <?php \src\helpers\communication\CommunicationHelper::renderChildCallsRecursive($callItem->calls)?>
                     </td>
                 </tr>
             <?php endif; ?>

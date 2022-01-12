@@ -2,7 +2,7 @@
 
 namespace webapi\src\logger\behaviors\filters\creditCard;
 
-use sales\helpers\payment\CreditCardHelper;
+use src\helpers\payment\CreditCardHelper;
 use webapi\src\logger\behaviors\filters\Filterable;
 
 class V1 implements Filterable

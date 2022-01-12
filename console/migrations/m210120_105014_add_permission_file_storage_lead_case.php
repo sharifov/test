@@ -1,12 +1,12 @@
 <?php
 
 use common\models\Employee;
-use sales\rbac\rules\cases\view\files\CaseViewFilesViewEmptyOwnerRule;
-use sales\rbac\rules\cases\view\files\CaseViewFilesViewGroupRule;
-use sales\rbac\rules\cases\view\files\CaseViewFilesViewIsOwnerRule;
-use sales\rbac\rules\lead\view\files\LeadViewFilesViewEmptyOwnerRule;
-use sales\rbac\rules\lead\view\files\LeadViewFilesViewGroupRule;
-use sales\rbac\rules\lead\view\files\LeadViewFilesViewIsOwnerRule;
+use src\rbac\rules\cases\view\files\CaseViewFilesViewEmptyOwnerRule;
+use src\rbac\rules\cases\view\files\CaseViewFilesViewGroupRule;
+use src\rbac\rules\cases\view\files\CaseViewFilesViewIsOwnerRule;
+use src\rbac\rules\lead\view\files\LeadViewFilesViewEmptyOwnerRule;
+use src\rbac\rules\lead\view\files\LeadViewFilesViewGroupRule;
+use src\rbac\rules\lead\view\files\LeadViewFilesViewIsOwnerRule;
 use yii\db\Migration;
 
 /**

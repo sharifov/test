@@ -4,7 +4,7 @@ namespace modules\order\src\services\confirmation;
 
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\orderData\OrderData;
-use sales\services\cases\CasesCommunicationService;
+use src\services\cases\CasesCommunicationService;
 
 class EmailConfirmationData
 {

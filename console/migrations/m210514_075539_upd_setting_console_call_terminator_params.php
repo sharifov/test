@@ -24,7 +24,7 @@ class m210514_075539_upd_setting_console_call_terminator_params extends Migratio
         $setting->s_value = JsonHelper::encode($value);
 
         if (!$setting->save()) {
-            throw new RuntimeException(\sales\helpers\ErrorsToStringHelper::extractFromModel($setting));
+            throw new RuntimeException(\src\helpers\ErrorsToStringHelper::extractFromModel($setting));
         }
     }
 

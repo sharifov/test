@@ -14,8 +14,8 @@ use modules\product\src\entities\productType\ProductType;
 use modules\product\src\entities\productTypePaymentMethod\ProductTypePaymentMethodQuery;
 use modules\product\src\interfaces\Productable;
 use modules\product\src\interfaces\ProductQuoteService;
-use sales\auth\Auth;
-use sales\helpers\product\ProductQuoteHelper;
+use src\auth\Auth;
+use src\helpers\product\ProductQuoteHelper;
 use yii\helpers\Json;
 use yii\helpers\VarDumper;
 

@@ -4,7 +4,7 @@ namespace common\components\ga;
 
 use common\models\Lead;
 use common\models\Quote;
-use sales\helpers\app\AppHelper;
+use src\helpers\app\AppHelper;
 use Yii;
 use yii\helpers\VarDumper;
 use yii\httpclient\Response;

@@ -1,8 +1,8 @@
 <?php
 
 use common\models\Call;
-use sales\auth\Auth;
-use sales\helpers\call\CallHelper;
+use src\auth\Auth;
+use src\helpers\call\CallHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\DetailView;

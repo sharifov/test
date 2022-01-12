@@ -12,7 +12,7 @@ use modules\rentCar\src\entity\dto\RentCarProductQuoteDto;
 use modules\rentCar\src\entity\dto\RentCarQuoteDto;
 use modules\rentCar\src\entity\rentCar\RentCar;
 use modules\rentCar\src\exceptions\RentCarCodeException;
-use sales\helpers\ErrorsToStringHelper;
+use src\helpers\ErrorsToStringHelper;
 use yii\helpers\Json;
 
 class RentCarQuoteManageService implements ProductQuoteService

@@ -3,9 +3,9 @@
 use common\components\SearchService;
 use common\models\Lead;
 use frontend\helpers\QuoteHelper;
-use sales\auth\Auth;
-use sales\helpers\quote\ImageHelper;
-use sales\model\flightQuoteLabelList\entity\FlightQuoteLabelList;
+use src\auth\Auth;
+use src\helpers\quote\ImageHelper;
+use src\model\flightQuoteLabelList\entity\FlightQuoteLabelList;
 use yii\bootstrap\Html;
 use yii\helpers\ArrayHelper;
 

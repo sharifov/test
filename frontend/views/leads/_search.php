@@ -2,9 +2,9 @@
 
 use common\models\Quote;
 use kartik\select2\Select2;
-use sales\access\ListsAccess;
-use sales\model\flightQuoteLabelList\service\FlightQuoteLabelListService;
-use sales\model\leadDataKey\entity\LeadDataKey;
+use src\access\ListsAccess;
+use src\model\flightQuoteLabelList\service\FlightQuoteLabelListService;
+use src\model\leadDataKey\entity\LeadDataKey;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use common\models\Lead;
@@ -14,7 +14,7 @@ use frontend\extensions\DatePicker;
 /* @var $model common\models\search\LeadSearch */
 /* @var $form yii\widgets\ActiveForm */
 /* @var $action string */
-/** @var \sales\access\ListsAccess $lists */
+/** @var \src\access\ListsAccess $lists */
 
 ?>
 

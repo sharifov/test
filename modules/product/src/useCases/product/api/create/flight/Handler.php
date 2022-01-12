@@ -12,7 +12,7 @@ use modules\product\src\entities\product\dto\CreateDto;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\product\ProductRepository;
 use modules\product\src\entities\productType\ProductType;
-use sales\services\TransactionManager;
+use src\services\TransactionManager;
 
 /**
  * Class Handler

@@ -6,7 +6,7 @@ use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\kpi\entity\kpiProductCommission\KpiProductCommission */
+/* @var $model src\model\kpi\entity\kpiProductCommission\KpiProductCommission */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 

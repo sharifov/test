@@ -2,8 +2,8 @@
 
 namespace common\components\grid\clientNotification;
 
-use sales\model\client\notifications\client\entity\NotificationType;
-use sales\model\client\notifications\phone\entity\Status;
+use src\model\client\notifications\client\entity\NotificationType;
+use src\model\client\notifications\phone\entity\Status;
 use yii\grid\DataColumn;
 
 /**

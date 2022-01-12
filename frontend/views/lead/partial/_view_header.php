@@ -7,7 +7,7 @@
  */
 
 use common\models\Lead;
-use sales\helpers\lead\LeadHelper;
+use src\helpers\lead\LeadHelper;
 use yii\helpers\Html;
 
 $bundle = \frontend\assets\TimerAsset::register($this);
@@ -55,7 +55,7 @@ $bundle = \frontend\assets\TimerAsset::register($this);
                     <?php endif; ?>
                     <div class="page-header__general-item">
                         <strong>Client:</strong>
-                        <?= \sales\formatters\client\ClientTimeFormatter::format($lead->getClientTime2(), $lead->offset_gmt); ?>
+                        <?= \src\formatters\client\ClientTimeFormatter::format($lead->getClientTime2(), $lead->offset_gmt); ?>
                     </div>
 
                     <div class="page-header__general-item">

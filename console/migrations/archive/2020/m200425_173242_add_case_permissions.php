@@ -1,21 +1,21 @@
 <?php
 
-use sales\rbac\rules\cases\take\CasesTakeFollowUpRule;
-use sales\rbac\rules\cases\take\CasesTakeOverRule;
-use sales\rbac\rules\cases\take\CasesTakePendingRule;
-use sales\rbac\rules\cases\take\CasesTakeRule;
-use sales\rbac\rules\cases\take\CasesTakeTrashOwnRule;
-use sales\rbac\rules\cases\take\CasesTakeTrashRule;
-use sales\rbac\rules\cases\update\CasesUpdateActiveOwnRule;
-use sales\rbac\rules\cases\update\CasesUpdateActiveRule;
-use sales\rbac\rules\cases\view\CasesViewFollowUpRule;
-use sales\rbac\rules\cases\view\CasesViewPendingRule;
-use sales\rbac\rules\cases\view\CasesViewProcessingOwnRule;
-use sales\rbac\rules\cases\view\CasesViewProcessingRule;
-use sales\rbac\rules\cases\view\CasesViewSolvedOwnRule;
-use sales\rbac\rules\cases\view\CasesViewSolvedRule;
-use sales\rbac\rules\cases\view\CasesViewTrashOwnRule;
-use sales\rbac\rules\cases\view\CasesViewTrashRule;
+use src\rbac\rules\cases\take\CasesTakeFollowUpRule;
+use src\rbac\rules\cases\take\CasesTakeOverRule;
+use src\rbac\rules\cases\take\CasesTakePendingRule;
+use src\rbac\rules\cases\take\CasesTakeRule;
+use src\rbac\rules\cases\take\CasesTakeTrashOwnRule;
+use src\rbac\rules\cases\take\CasesTakeTrashRule;
+use src\rbac\rules\cases\update\CasesUpdateActiveOwnRule;
+use src\rbac\rules\cases\update\CasesUpdateActiveRule;
+use src\rbac\rules\cases\view\CasesViewFollowUpRule;
+use src\rbac\rules\cases\view\CasesViewPendingRule;
+use src\rbac\rules\cases\view\CasesViewProcessingOwnRule;
+use src\rbac\rules\cases\view\CasesViewProcessingRule;
+use src\rbac\rules\cases\view\CasesViewSolvedOwnRule;
+use src\rbac\rules\cases\view\CasesViewSolvedRule;
+use src\rbac\rules\cases\view\CasesViewTrashOwnRule;
+use src\rbac\rules\cases\view\CasesViewTrashRule;
 use yii\db\Migration;
 
 /**

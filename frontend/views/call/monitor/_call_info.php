@@ -2,12 +2,12 @@
 
 /**
  * @var Call $call
- * @var \sales\guards\call\CallDisplayGuard $callGuard
+ * @var \src\guards\call\CallDisplayGuard $callGuard
  * @var \yii\web\View $this
  */
 
 use common\models\Call;
-use sales\auth\Auth;
+use src\auth\Auth;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 

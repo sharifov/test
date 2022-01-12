@@ -1,14 +1,14 @@
 <?php
 
-use sales\model\clientChat\ClientChatPlatform;
-use sales\model\clientChatMessage\entity\ClientChatMessage;
+use src\model\clientChat\ClientChatPlatform;
+use src\model\clientChatMessage\entity\ClientChatMessage;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use common\components\grid\UserSelect2Column;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\clientChatMessage\entity\search\ClientChatMessageSearch */
+/* @var $searchModel src\model\clientChatMessage\entity\search\ClientChatMessageSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Client Chat Messages';

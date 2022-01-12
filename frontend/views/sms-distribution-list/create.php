@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\sms\entity\smsDistributionList\SmsDistributionList */
+/* @var $model src\model\sms\entity\smsDistributionList\SmsDistributionList */
 
 $this->title = 'Create Sms Distribution List';
 $this->params['breadcrumbs'][] = ['label' => 'Sms Distribution Lists', 'url' => ['index']];

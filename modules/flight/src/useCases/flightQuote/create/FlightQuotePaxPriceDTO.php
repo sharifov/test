@@ -5,7 +5,7 @@ namespace modules\flight\src\useCases\flightQuote\create;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\flight\models\FlightPax;
 use modules\flight\models\FlightQuote;
-use sales\helpers\product\ProductQuoteHelper;
+use src\helpers\product\ProductQuoteHelper;
 
 class FlightQuotePaxPriceDTO
 {

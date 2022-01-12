@@ -4,7 +4,7 @@ namespace modules\offer\controllers;
 
 use frontend\controllers\FController;
 use modules\offer\src\entities\offer\search\OfferCrudSearch;
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
 use modules\offer\src\entities\offer\Offer;
 use yii\helpers\ArrayHelper;

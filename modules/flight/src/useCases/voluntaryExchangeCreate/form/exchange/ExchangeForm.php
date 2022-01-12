@@ -6,8 +6,8 @@ use common\components\validators\CheckAndConvertToJsonValidator;
 use common\models\Currency;
 use modules\flight\src\useCases\voluntaryExchangeCreate\form\flightQuote\tripsForm\TripForm;
 use modules\flight\src\useCases\voluntaryExchangeCreate\form\price\VoluntaryExchangePriceForm;
-use sales\helpers\ErrorsToStringHelper;
-use sales\traits\FormNameModelTrait;
+use src\helpers\ErrorsToStringHelper;
+use src\traits\FormNameModelTrait;
 use yii\base\Model;
 
 /**

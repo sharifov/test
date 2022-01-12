@@ -2,8 +2,8 @@
 
 use common\components\grid\DateTimeColumn;
 use common\components\i18n\Formatter;
-use sales\model\leadProduct\entity\LeadProduct;
-use sales\model\leadProduct\entity\search\LeadProductSearch;
+use src\model\leadProduct\entity\LeadProduct;
+use src\model\leadProduct\entity\search\LeadProductSearch;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;

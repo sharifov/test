@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\visitorSubscription\entity\VisitorSubscription;
-use sales\model\visitorSubscription\entity\search\VisitorSubscriptionSearch;
+use src\model\visitorSubscription\entity\VisitorSubscription;
+use src\model\visitorSubscription\entity\search\VisitorSubscriptionSearch;
 use frontend\controllers\FController;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

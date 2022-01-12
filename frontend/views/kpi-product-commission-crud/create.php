@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\kpi\entity\kpiProductCommission\KpiProductCommission */
+/* @var $model src\model\kpi\entity\kpiProductCommission\KpiProductCommission */
 
 $this->title = 'Create Kpi Product Commission';
 $this->params['breadcrumbs'][] = ['label' => 'Kpi Product Commissions', 'url' => ['index']];

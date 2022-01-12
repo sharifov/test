@@ -5,7 +5,7 @@ namespace  webapi\src\forms\flight\flights\bookingInfo;
 use common\components\validators\CheckJsonValidator;
 use frontend\helpers\JsonHelper;
 use modules\flight\src\services\api\FlightUpdateRequestApiService;
-use sales\helpers\ErrorsToStringHelper;
+use src\helpers\ErrorsToStringHelper;
 use webapi\src\forms\flight\flights\bookingInfo\airlinesCode\AirlinesCodeApiForm;
 use webapi\src\forms\flight\flights\bookingInfo\insurance\InsuranceApiForm;
 use webapi\src\forms\flight\flights\bookingInfo\passengers\PassengerApiForm;

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @var \sales\forms\emailReviewQueue\EmailReviewQueueForm $previewForm
+ * @var \src\forms\emailReviewQueue\EmailReviewQueueForm $previewForm
  * @var $this yii\web\View
  * @var $displayActionBtns bool
  * @var $files array

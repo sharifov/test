@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\user\entity\monitor\UserMonitor */
+/* @var $model src\model\user\entity\monitor\UserMonitor */
 
 $this->title = $model->um_id;
 $this->params['breadcrumbs'][] = ['label' => 'User Monitors', 'url' => ['index']];

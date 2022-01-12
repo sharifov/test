@@ -6,8 +6,8 @@
  */
 
 use frontend\helpers\OutHelper;
-use sales\auth\Auth;
-use sales\helpers\communication\StatisticsHelper;
+use src\auth\Auth;
+use src\helpers\communication\StatisticsHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
 

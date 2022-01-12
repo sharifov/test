@@ -2,7 +2,7 @@
 
 use common\components\grid\DateTimeColumn;
 use frontend\helpers\JsonHelper;
-use sales\model\clientChatDataRequest\entity\ClientChatDataRequest;
+use src\model\clientChatDataRequest\entity\ClientChatDataRequest;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\helpers\StringHelper;
@@ -10,7 +10,7 @@ use yii\helpers\VarDumper;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\clientChatDataRequest\entity\search\ClientChatDataRequestSearch */
+/* @var $searchModel src\model\clientChatDataRequest\entity\search\ClientChatDataRequestSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Client Chat Data Requests';

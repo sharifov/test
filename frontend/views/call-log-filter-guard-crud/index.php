@@ -2,14 +2,14 @@
 
 use common\components\grid\DateTimeColumn;
 use common\models\Call;
-use sales\model\callLogFilterGuard\entity\CallLogFilterGuard;
+use src\model\callLogFilterGuard\entity\CallLogFilterGuard;
 use yii\grid\ActionColumn;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\callLogFilterGuard\entity\CallLogFilterGuardSearch */
+/* @var $searchModel src\model\callLogFilterGuard\entity\CallLogFilterGuardSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Call Log Filter Guards';

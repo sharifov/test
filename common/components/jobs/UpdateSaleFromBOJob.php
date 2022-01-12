@@ -3,10 +3,10 @@
 namespace common\components\jobs;
 
 use common\models\CaseSale;
-use sales\entities\cases\Cases;
-use sales\helpers\app\AppHelper;
-use sales\model\saleTicket\useCase\create\SaleTicketService;
-use sales\services\cases\CasesSaleService;
+use src\entities\cases\Cases;
+use src\helpers\app\AppHelper;
+use src\model\saleTicket\useCase\create\SaleTicketService;
+use src\services\cases\CasesSaleService;
 use yii\base\BaseObject;
 use yii\helpers\VarDumper;
 use yii\queue\JobInterface;

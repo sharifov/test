@@ -2,14 +2,14 @@
 
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
-use sales\model\coupon\entity\couponUserAction\CouponUserAction;
+use src\model\coupon\entity\couponUserAction\CouponUserAction;
 use yii\grid\ActionColumn;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\coupon\entity\couponUserAction\CouponUserActionSearch */
+/* @var $searchModel src\model\coupon\entity\couponUserAction\CouponUserActionSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Coupon User Actions';

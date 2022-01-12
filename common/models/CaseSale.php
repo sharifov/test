@@ -4,10 +4,10 @@ namespace common\models;
 
 use common\models\query\CaseSaleQuery;
 use frontend\helpers\JsonHelper;
-use sales\entities\cases\Cases;
-use sales\model\saleTicket\entity\SaleTicket;
-use sales\services\caseSale\PnrPreparingService;
-use sales\traits\DbSlaveConnection;
+use src\entities\cases\Cases;
+use src\model\saleTicket\entity\SaleTicket;
+use src\services\caseSale\PnrPreparingService;
+use src\traits\DbSlaveConnection;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;

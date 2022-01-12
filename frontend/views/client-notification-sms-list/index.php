@@ -5,7 +5,7 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\client\notifications\sms\entity\search\ClientNotificationSmsListSearch */
+/* @var $searchModel src\model\client\notifications\sms\entity\search\ClientNotificationSmsListSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Client Notification Sms Lists';

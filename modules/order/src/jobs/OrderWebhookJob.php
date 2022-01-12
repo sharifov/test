@@ -5,7 +5,7 @@ namespace modules\order\src\jobs;
 use common\components\BackOffice;
 use common\components\jobs\BaseJob;
 use modules\order\src\entities\order\Order;
-use sales\helpers\app\AppHelper;
+use src\helpers\app\AppHelper;
 use yii\helpers\VarDumper;
 use yii\queue\RetryableJobInterface;
 

@@ -4,7 +4,7 @@ namespace modules\webEngage\form;
 
 use common\components\validators\IsArrayValidator;
 use modules\webEngage\settings\WebEngageDictionary;
-use sales\traits\FormNameModelTrait;
+use src\traits\FormNameModelTrait;
 use yii\base\Model;
 use yii\helpers\ArrayHelper;
 

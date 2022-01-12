@@ -3,13 +3,13 @@
 namespace common\components;
 
 use common\components\jobs\BaseJob;
-use sales\helpers\app\AppHelper;
-use sales\model\contactPhoneList\service\ContactPhoneListService;
-use sales\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
-use sales\model\contactPhoneServiceInfo\repository\ContactPhoneServiceInfoRepository;
-use sales\model\contactPhoneServiceInfo\service\ContactPhoneInfoService;
-use sales\services\phone\checkPhone\CheckPhoneNeutrinoService;
-use sales\services\phone\checkPhone\CheckPhoneService;
+use src\helpers\app\AppHelper;
+use src\model\contactPhoneList\service\ContactPhoneListService;
+use src\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
+use src\model\contactPhoneServiceInfo\repository\ContactPhoneServiceInfoRepository;
+use src\model\contactPhoneServiceInfo\service\ContactPhoneInfoService;
+use src\services\phone\checkPhone\CheckPhoneNeutrinoService;
+use src\services\phone\checkPhone\CheckPhoneService;
 use common\models\ClientPhone;
 use yii\helpers\ArrayHelper;
 

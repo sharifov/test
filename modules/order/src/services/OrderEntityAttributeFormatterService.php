@@ -2,8 +2,8 @@
 
 namespace modules\order\src\services;
 
-use sales\logger\formatter\Formatter;
-use sales\services\EntityAttributeFormatService;
+use src\logger\formatter\Formatter;
+use src\services\EntityAttributeFormatService;
 
 class OrderEntityAttributeFormatterService extends EntityAttributeFormatService
 {

@@ -2,7 +2,7 @@
 
 namespace common\components\grid\coupon;
 
-use sales\model\coupon\entity\coupon\CouponStatus;
+use src\model\coupon\entity\coupon\CouponStatus;
 use yii\grid\DataColumn;
 
 class CouponStatusColumn extends DataColumn

@@ -4,7 +4,7 @@ use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\airportLang\entity\AirportLang */
+/* @var $model src\model\airportLang\entity\AirportLang */
 
 $this->title = $model->ail_iata;
 $this->params['breadcrumbs'][] = ['label' => 'Airport Langs', 'url' => ['index']];

@@ -4,7 +4,7 @@ namespace webapi\src\request;
 
 use modules\flight\src\useCases\voluntaryExchange\service\VoluntaryExchangeBoHandler;
 use modules\product\src\services\ProductQuoteService;
-use sales\interfaces\BoWebhookService;
+use src\interfaces\BoWebhookService;
 use webapi\src\forms\boWebhook\FlightRefundUpdateForm;
 use webapi\src\forms\boWebhook\FlightVoluntaryExchangeUpdateForm;
 use webapi\src\forms\boWebhook\ReprotectionUpdateForm;

@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChat\componentRule\entity\ClientChatComponentRule */
+/* @var $model src\model\clientChat\componentRule\entity\ClientChatComponentRule */
 
 $this->title = 'Update Client Chat Component Rule: ' . $model->cccr_component_event_id;
 $this->params['breadcrumbs'][] = ['label' => 'Client Chat Component Rules', 'url' => ['index']];

@@ -1,12 +1,12 @@
 <?php
 
-use sales\model\clientChat\ClientChatPlatform;
-use sales\model\clientChatLastMessage\entity\ClientChatLastMessage;
+use src\model\clientChat\ClientChatPlatform;
+use src\model\clientChatLastMessage\entity\ClientChatLastMessage;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChatLastMessage\entity\ClientChatLastMessage */
+/* @var $model src\model\clientChatLastMessage\entity\ClientChatLastMessage */
 
 $this->title = $model->cclm_id;
 $this->params['breadcrumbs'][] = ['label' => 'Client Chat Last Messages', 'url' => ['index']];

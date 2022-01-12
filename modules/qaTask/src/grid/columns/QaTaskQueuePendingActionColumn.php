@@ -4,7 +4,7 @@ namespace modules\qaTask\src\grid\columns;
 
 use modules\qaTask\src\entities\qaTask\QaTask;
 use modules\qaTask\src\useCases\qaTask\take\QaTaskTakeService;
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
 use yii\bootstrap4\Html;
 

@@ -1,13 +1,13 @@
 <?php
 
-use sales\model\clientData\entity\ClientData;
-use sales\model\clientDataKey\entity\ClientDataKey;
-use sales\model\clientDataKey\service\ClientDataKeyService;
+use src\model\clientData\entity\ClientData;
+use src\model\clientDataKey\entity\ClientDataKey;
+use src\model\clientDataKey\service\ClientDataKeyService;
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientData\entity\ClientData */
+/* @var $model src\model\clientData\entity\ClientData */
 
 $this->title = $model->cd_id;
 $this->params['breadcrumbs'][] = ['label' => 'Client Data', 'url' => ['index']];

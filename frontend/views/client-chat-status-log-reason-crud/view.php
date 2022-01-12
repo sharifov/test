@@ -1,11 +1,11 @@
 <?php
 
-use sales\model\clientChat\entity\statusLogReason\ClientChatStatusLogReason;
+use src\model\clientChat\entity\statusLogReason\ClientChatStatusLogReason;
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChat\entity\statusLogReason\ClientChatStatusLogReason */
+/* @var $model src\model\clientChat\entity\statusLogReason\ClientChatStatusLogReason */
 
 $this->title = $model->cslr_id;
 $this->params['breadcrumbs'][] = ['label' => 'Client Chat Status Log Reasons', 'url' => ['index']];

@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChatFeedback\entity\ClientChatFeedback */
+/* @var $model src\model\clientChatFeedback\entity\ClientChatFeedback */
 
 $this->title = 'Update Client Chat Feedback: ' . $model->ccf_id;
 $this->params['breadcrumbs'][] = ['label' => 'Client Chat Feedback', 'url' => ['index']];

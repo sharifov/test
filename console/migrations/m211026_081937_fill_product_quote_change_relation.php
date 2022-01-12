@@ -2,7 +2,7 @@
 
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
-use sales\helpers\app\AppHelper;
+use src\helpers\app\AppHelper;
 use yii\db\Migration;
 
 /**

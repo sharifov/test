@@ -3,7 +3,7 @@
 namespace modules\flight\src\entities\flightQuoteLabel\repository;
 
 use modules\flight\src\entities\flightQuoteLabel\FlightQuoteLabel;
-use sales\helpers\ErrorsToStringHelper;
+use src\helpers\ErrorsToStringHelper;
 
 /**
  * Class FlightQuoteLabelRepository

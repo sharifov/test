@@ -1,11 +1,11 @@
 <?php
 
-use sales\model\user\entity\monitor\UserMonitor;
+use src\model\user\entity\monitor\UserMonitor;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\user\entity\monitor\UserMonitor */
+/* @var $model src\model\user\entity\monitor\UserMonitor */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 

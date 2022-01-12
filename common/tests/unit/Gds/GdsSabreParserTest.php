@@ -3,7 +3,7 @@
 namespace common\tests\Gds;
 
 use common\tests\GdsParsing;
-use sales\services\parsingDump\lib\ParsingDump;
+use src\services\parsingDump\lib\ParsingDump;
 
 class GdsSabreParserTest extends GdsParsing
 {

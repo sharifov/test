@@ -1,13 +1,13 @@
 <?php
 
 use frontend\helpers\JsonHelper;
-use sales\helpers\app\AppHelper;
-use sales\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
+use src\helpers\app\AppHelper;
+use src\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo */
+/* @var $model src\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo */
 /* @var $form ActiveForm */
 ?>
 

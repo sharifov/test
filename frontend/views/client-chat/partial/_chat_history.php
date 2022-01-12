@@ -2,11 +2,11 @@
 
 /** @var ClientChat|null $clientChat */
 
-use sales\auth\Auth;
-use sales\helpers\clientChat\ClientChatDialogHelper;
-use sales\helpers\clientChat\ClientChatHelper;
-use sales\helpers\clientChat\ClientChatIframeHelper;
-use sales\model\clientChat\entity\ClientChat;
+use src\auth\Auth;
+use src\helpers\clientChat\ClientChatDialogHelper;
+use src\helpers\clientChat\ClientChatHelper;
+use src\helpers\clientChat\ClientChatIframeHelper;
+use src\model\clientChat\entity\ClientChat;
 
 $readonly = (int)ClientChatHelper::isDialogReadOnly($clientChat, Auth::user());
 $agentToken = ClientChatDialogHelper::getAgentToken(Auth::user());

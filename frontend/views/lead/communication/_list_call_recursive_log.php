@@ -1,9 +1,9 @@
 <?php
 
 use common\models\Employee;
-use sales\helpers\call\CallHelper;
-use sales\model\callLog\entity\callLog\CallLog;
-use sales\model\callLog\entity\callLog\CallLogStatus;
+use src\helpers\call\CallHelper;
+use src\model\callLog\entity\callLog\CallLog;
+use src\model\callLog\entity\callLog\CallLogStatus;
 use yii\helpers\Html;
 
 /* @var $callList CallLog[] */

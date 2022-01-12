@@ -2,12 +2,12 @@
 
 use frontend\widgets\cronExpression\CronExpressionWidget;
 use kartik\time\TimePicker;
-use sales\model\shiftSchedule\widget\ShiftSelectWidget;
+use src\model\shiftSchedule\widget\ShiftSelectWidget;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\shiftSchedule\entity\shiftScheduleRule\ShiftScheduleRule */
+/* @var $model src\model\shiftSchedule\entity\shiftScheduleRule\ShiftScheduleRule */
 /* @var $form ActiveForm */
 ?>
 

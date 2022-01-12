@@ -2,7 +2,7 @@
 
 namespace modules\hotel\src\useCases\api\searchQuote;
 
-use sales\helpers\app\AppHelper;
+use src\helpers\app\AppHelper;
 use yii\base\Model;
 use yii\helpers\VarDumper;
 

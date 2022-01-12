@@ -2,14 +2,14 @@
 
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserColumn;
-use sales\model\voip\phoneDevice\log\PhoneDeviceLog;
+use src\model\voip\phoneDevice\log\PhoneDeviceLog;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\helpers\VarDumper;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\voip\phoneDevice\log\PhoneDeviceLogSearch */
+/* @var $searchModel src\model\voip\phoneDevice\log\PhoneDeviceLogSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Phone Device Logs';

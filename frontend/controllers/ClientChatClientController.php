@@ -2,10 +2,10 @@
 
 namespace frontend\controllers;
 
-use sales\model\clientChat\entity\search\ClientChatClientChatsSearch;
+use src\model\clientChat\entity\search\ClientChatClientChatsSearch;
 use Yii;
-use sales\auth\Auth;
-use sales\model\clientChat\entity\ClientChat;
+use src\auth\Auth;
+use src\model\clientChat\entity\ClientChat;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;

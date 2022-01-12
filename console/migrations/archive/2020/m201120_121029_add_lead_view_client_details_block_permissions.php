@@ -1,9 +1,9 @@
 <?php
 
 use yii\db\Migration;
-use sales\rbac\rules\lead\view\clientInfoBlock\LeadViewClientInfoBlockIsOwnerRule;
-use sales\rbac\rules\lead\view\clientInfoBlock\LeadViewClientInfoBlockEmptyOwnerRule;
-use sales\rbac\rules\lead\view\clientInfoBlock\LeadViewClientInfoBlockGroupRule;
+use src\rbac\rules\lead\view\clientInfoBlock\LeadViewClientInfoBlockIsOwnerRule;
+use src\rbac\rules\lead\view\clientInfoBlock\LeadViewClientInfoBlockEmptyOwnerRule;
+use src\rbac\rules\lead\view\clientInfoBlock\LeadViewClientInfoBlockGroupRule;
 
 /**
  * Class m201120_121029_add_lead_view_client_details_block_permissions

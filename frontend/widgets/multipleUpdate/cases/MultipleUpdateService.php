@@ -4,9 +4,9 @@ namespace frontend\widgets\multipleUpdate\cases;
 
 use modules\cases\src\abac\CasesAbacObject;
 use modules\cases\src\abac\dto\CasesAbacDto;
-use sales\entities\cases\Cases;
-use sales\entities\cases\CasesStatus;
-use sales\services\cases\CasesManageService;
+use src\entities\cases\Cases;
+use src\entities\cases\CasesStatus;
+use src\services\cases\CasesManageService;
 use Yii;
 
 /**

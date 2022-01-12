@@ -1,14 +1,14 @@
 <?php
 
 use common\components\grid\DateTimeColumn;
-use sales\model\userAuthClient\entity\UserAuthClient;
-use sales\model\userAuthClient\entity\UserAuthClientSources;
+use src\model\userAuthClient\entity\UserAuthClient;
+use src\model\userAuthClient\entity\UserAuthClientSources;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\userAuthClient\entity\UserAuthClientSearch */
+/* @var $searchModel src\model\userAuthClient\entity\UserAuthClientSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'User Auth Clients';

@@ -9,7 +9,7 @@ use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionRepository;
-use sales\services\TransactionManager;
+use src\services\TransactionManager;
 
 /**
  * Class ProductQuoteCloneService

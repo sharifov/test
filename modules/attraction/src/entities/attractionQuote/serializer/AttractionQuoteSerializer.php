@@ -3,7 +3,7 @@
 namespace modules\attraction\src\entities\attractionQuote\serializer;
 
 use modules\attraction\models\AttractionQuote;
-use sales\entities\serializer\Serializer;
+use src\entities\serializer\Serializer;
 
 /**
  * Class AttractionQuoteSerializer

@@ -34,8 +34,8 @@ use modules\product\src\listeners\productQuote\ProductQuoteErrorEventListener;
 use modules\product\src\listeners\productQuote\ProductQuoteInProgressEventListener;
 use modules\product\src\listeners\ProductQuoteCloneListener;
 use modules\product\src\listeners\ProductQuoteReplaceListener;
-use sales\model\user\entity\profit\event\UserProfitCalculateByOrderUserProfitEvent;
-use sales\model\user\entity\profit\listener\UserProfitCalculateByOrderUserProfitEventListener;
+use src\model\user\entity\profit\event\UserProfitCalculateByOrderUserProfitEvent;
+use src\model\user\entity\profit\listener\UserProfitCalculateByOrderUserProfitEventListener;
 
 return [
     ProductQuoteCloneCreatedEvent::class => [
@@ -87,19 +87,19 @@ return [
     ProductClientBudgetChangedEvent::class => [],
 
     ProductQuoteChangeAutoDecisionPendingEvent::class => [
-        \sales\model\client\notifications\listeners\productQuoteChangeAutoDecisionPending\ClientNotificationListener::class,
+        \src\model\client\notifications\listeners\productQuoteChangeAutoDecisionPending\ClientNotificationListener::class,
     ],
 
     ProductQuoteChangeDecisionConfirmEvent::class => [
-        \sales\model\client\notifications\listeners\productQuoteChangeDecided\ClientNotificationCancelerListener::class,
+        \src\model\client\notifications\listeners\productQuoteChangeDecided\ClientNotificationCancelerListener::class,
     ],
 
     ProductQuoteChangeDecisionRefundEvent::class => [
-        \sales\model\client\notifications\listeners\productQuoteChangeDecided\ClientNotificationCancelerListener::class,
+        \src\model\client\notifications\listeners\productQuoteChangeDecided\ClientNotificationCancelerListener::class,
     ],
 
     ProductQuoteChangeDecisionModifyEvent::class => [
-        \sales\model\client\notifications\listeners\productQuoteChangeDecided\ClientNotificationCancelerListener::class,
+        \src\model\client\notifications\listeners\productQuoteChangeDecided\ClientNotificationCancelerListener::class,
     ],
     ProductQuoteBookedChangeFlowEvent::class => [
         ProductQuoteBookedChangeFlowListener::class

@@ -1,12 +1,12 @@
 <?php
 
-use sales\model\userAuthClient\entity\UserAuthClientSources;
-use sales\widgets\UserSelect2Widget;
+use src\model\userAuthClient\entity\UserAuthClientSources;
+use src\widgets\UserSelect2Widget;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\userAuthClient\entity\UserAuthClient */
+/* @var $model src\model\userAuthClient\entity\UserAuthClient */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 

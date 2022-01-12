@@ -6,7 +6,7 @@
 
 namespace common\components\logger\traits;
 
-use sales\helpers\app\AppHelper;
+use src\helpers\app\AppHelper;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\log\Logger;

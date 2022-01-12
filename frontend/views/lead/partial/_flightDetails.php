@@ -2,7 +2,7 @@
 
 use yii\widgets\ActiveForm;
 use yii\helpers\Html;
-use sales\helpers\lead\LeadHelper;
+use src\helpers\lead\LeadHelper;
 use yii\web\JqueryAsset;
 use yii\web\View;
 use common\widgets\Alert;
@@ -10,7 +10,7 @@ use common\widgets\Alert;
 /**
  * @var $this yii\web\View
  * @var $form ActiveForm
- * @var $itineraryForm sales\forms\lead\ItineraryEditForm
+ * @var $itineraryForm src\forms\lead\ItineraryEditForm
  */
 
 

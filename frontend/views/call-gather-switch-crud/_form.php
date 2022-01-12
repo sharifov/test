@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\call\entity\callCommand\CallGatherSwitch */
+/* @var $model src\model\call\entity\callCommand\CallGatherSwitch */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
@@ -16,7 +16,7 @@ use yii\widgets\ActiveForm;
     <?php //= $form->field($model, 'cgs_ccom_id')->input('number', ['step' => 1, 'min' => 1]) ?>
 
         <?= $form->field($model, 'cgs_ccom_id')->widget(\kartik\select2\Select2::class, [
-            'data' => \sales\model\call\entity\callCommand\CallCommand::getList(true, \sales\model\call\entity\callCommand\CallCommand::TYPE_GATHER),
+            'data' => \src\model\call\entity\callCommand\CallCommand::getList(true, \src\model\call\entity\callCommand\CallCommand::TYPE_GATHER),
             'size' => \kartik\select2\Select2::SMALL,
             'options' => ['placeholder' => 'Select Command', 'multiple' => false],
             'pluginOptions' => ['allowClear' => true],
@@ -30,7 +30,7 @@ use yii\widgets\ActiveForm;
     <?php //= $form->field($model, 'cgs_exec_ccom_id')->input('number', ['step' => 1, 'min' => 1]) ?>
 
         <?= $form->field($model, 'cgs_exec_ccom_id')->widget(\kartik\select2\Select2::class, [
-            'data' => \sales\model\call\entity\callCommand\CallCommand::getList(true),
+            'data' => \src\model\call\entity\callCommand\CallCommand::getList(true),
             'size' => \kartik\select2\Select2::SMALL,
             'options' => ['placeholder' => 'Select Command', 'multiple' => false],
             'pluginOptions' => ['allowClear' => true],

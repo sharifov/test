@@ -4,7 +4,7 @@ namespace modules\order\src\processManager\clickToBook;
 
 use modules\order\src\entities\order\OrderRepository;
 use modules\order\src\entities\order\OrderStatusAction;
-use sales\services\TransactionManager;
+use src\services\TransactionManager;
 
 /**
  * Class ErrorOrder

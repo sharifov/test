@@ -11,7 +11,7 @@ use modules\hotel\models\Hotel;
 use modules\hotel\models\HotelQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionStatus;
-use sales\auth\Auth;
+use src\auth\Auth;
 use yii\data\ArrayDataProvider;
 use yii\helpers\Url;
 use yii\web\View;

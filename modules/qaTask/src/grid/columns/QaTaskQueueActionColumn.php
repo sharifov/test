@@ -3,7 +3,7 @@
 namespace modules\qaTask\src\grid\columns;
 
 use modules\qaTask\src\entities\qaTask\QaTask;
-use sales\auth\Auth;
+use src\auth\Auth;
 use yii\bootstrap4\Html;
 use yii\grid\ActionColumn;
 

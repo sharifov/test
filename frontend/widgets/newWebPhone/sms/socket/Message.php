@@ -5,7 +5,7 @@ namespace frontend\widgets\newWebPhone\sms\socket;
 use common\models\Employee;
 use common\models\Sms;
 use frontend\widgets\newWebPhone\sms\dto\SmsDto;
-use sales\model\sms\useCase\send\Contact;
+use src\model\sms\useCase\send\Contact;
 
 class Message
 {

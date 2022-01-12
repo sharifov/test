@@ -5,8 +5,8 @@
 /* @var $model LoginForm */
 
 use frontend\themes\gentelella_v2\widgets\FlashAlert;
-use sales\helpers\setting\SettingHelper;
-use sales\services\authentication\AntiBruteForceService;
+use src\helpers\setting\SettingHelper;
+use src\services\authentication\AntiBruteForceService;
 use yii\authclient\widgets\AuthChoice;
 use yii\captcha\Captcha;
 use yii\helpers\Html;

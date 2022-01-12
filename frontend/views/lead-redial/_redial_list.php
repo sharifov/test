@@ -5,7 +5,7 @@ use common\models\Lead;
 use common\models\LeadQcall;
 use common\models\search\LeadQcallSearch;
 use dosamigos\datepicker\DatePicker;
-use sales\formatters\client\ClientTimeFormatter;
+use src\formatters\client\ClientTimeFormatter;
 use kartik\grid\GridView;
 use common\components\grid\client\ClientPhonesColumn;
 use yii\helpers\ArrayHelper;

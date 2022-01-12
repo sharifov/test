@@ -1,13 +1,13 @@
 <?php
 
 use common\components\grid\DateTimeColumn;
-use sales\widgets\UserSelect2Widget;
+use src\widgets\UserSelect2Widget;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\phoneLine\userPersonalPhoneNumber\entity\search\UserPersonalPhoneNumberSearch */
+/* @var $searchModel src\model\phoneLine\userPersonalPhoneNumber\entity\search\UserPersonalPhoneNumberSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'User Personal Phone Numbers';
@@ -48,7 +48,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             /*[
                 'label' => 'Phone Number',
-                'value' => static function (\sales\model\phoneLine\userPersonalPhoneNumber\entity\UserPersonalPhoneNumber $model) {
+                'value' => static function (\src\model\phoneLine\userPersonalPhoneNumber\entity\UserPersonalPhoneNumber $model) {
                     return $model->upnPhoneNumber ? $model->upnPhoneNumber->pl_phone_number : '-';
                 }
             ],*/
@@ -61,7 +61,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'upn_enabled:BooleanByLabel',
             [
                 'attribute' => 'upn_created_user_id',
-                'filter' => \sales\widgets\UserSelect2Widget::widget([
+                'filter' => \src\widgets\UserSelect2Widget::widget([
                     'model' => $searchModel,
                     'attribute' => 'upn_created_user_id'
                 ]),
@@ -72,7 +72,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'upn_updated_user_id',
-                'filter' => \sales\widgets\UserSelect2Widget::widget([
+                'filter' => \src\widgets\UserSelect2Widget::widget([
                     'model' => $searchModel,
                     'attribute' => 'upn_updated_user_id'
                 ]),

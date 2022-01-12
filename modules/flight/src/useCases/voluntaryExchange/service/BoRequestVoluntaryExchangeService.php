@@ -8,11 +8,11 @@ use modules\flight\src\useCases\sale\form\OrderContactForm;
 use modules\flight\src\useCases\voluntaryExchangeCreate\form\VoluntaryExchangeCreateForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
-use sales\entities\cases\Cases;
-use sales\exception\BoResponseException;
-use sales\exception\ValidationException;
-use sales\helpers\ErrorsToStringHelper;
-use sales\services\cases\CasesSaleService;
+use src\entities\cases\Cases;
+use src\exception\BoResponseException;
+use src\exception\ValidationException;
+use src\helpers\ErrorsToStringHelper;
+use src\services\cases\CasesSaleService;
 use webapi\src\ApiCodeException;
 
 /**

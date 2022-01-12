@@ -3,7 +3,7 @@
 namespace common\models;
 
 use common\models\query\CreditCardQuery;
-use sales\helpers\payment\CreditCardHelper;
+use src\helpers\payment\CreditCardHelper;
 use yii\base\Exception;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;

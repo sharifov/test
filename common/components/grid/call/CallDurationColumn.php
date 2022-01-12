@@ -3,7 +3,7 @@
 namespace common\components\grid\call;
 
 use common\models\Call;
-use sales\helpers\call\CallHelper;
+use src\helpers\call\CallHelper;
 use yii\grid\DataColumn;
 use yii\helpers\Html;
 

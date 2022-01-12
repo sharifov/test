@@ -3,7 +3,7 @@
 use common\models\Employee;
 use common\models\UserProfile;
 use console\migrations\RbacMigrationService;
-use sales\model\userClientChatData\entity\UserClientChatData;
+use src\model\userClientChatData\entity\UserClientChatData;
 use yii\db\Migration;
 use yii\helpers\Console;
 

@@ -3,8 +3,8 @@
 namespace modules\cruise\src\entity\cruise;
 
 use modules\cruise\src\exceptions\CruiseCodeException;
-use sales\dispatchers\EventDispatcher;
-use sales\repositories\NotFoundException;
+use src\dispatchers\EventDispatcher;
+use src\repositories\NotFoundException;
 
 class CruiseRepository
 {

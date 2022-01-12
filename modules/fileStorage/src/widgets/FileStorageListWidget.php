@@ -7,7 +7,7 @@ use modules\fileStorage\src\entity\fileCase\FileCaseQuery;
 use modules\fileStorage\src\entity\fileLead\FileLeadQuery;
 use modules\fileStorage\src\services\url\QueryParams;
 use modules\fileStorage\src\services\url\UrlGenerator;
-use sales\auth\Auth;
+use src\auth\Auth;
 use yii\base\Widget;
 
 /**

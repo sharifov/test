@@ -7,7 +7,7 @@ use common\models\ProjectEmployeeAccess;
 use common\models\UserConnection;
 use common\models\UserDepartment;
 use common\models\UserGroupAssign;
-use sales\model\user\entity\userStatus\UserStatus;
+use src\model\user\entity\userStatus\UserStatus;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\UserOnline;

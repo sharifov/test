@@ -3,7 +3,7 @@
 namespace common\models;
 
 use common\models\local\LeadLogMessage;
-use sales\entities\EventTrait;
+use src\entities\EventTrait;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;

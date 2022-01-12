@@ -1,12 +1,12 @@
 <?php
 
-use sales\model\clientAccountSocial\entity\ClientAccountSocial;
-use sales\widgets\DateTimePicker;
+use src\model\clientAccountSocial\entity\ClientAccountSocial;
+use src\widgets\DateTimePicker;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var yii\web\View $this */
-/* @var sales\model\clientAccountSocial\entity\ClientAccountSocial $model */
+/* @var src\model\clientAccountSocial\entity\ClientAccountSocial $model */
 /* @var ActiveForm $form */
 ?>
 

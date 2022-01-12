@@ -4,7 +4,7 @@ namespace modules\order\src\listeners\lead;
 
 use modules\order\src\entities\order\events\OrderCompletedEvent;
 use modules\order\src\entities\order\Order;
-use sales\repositories\lead\LeadRepository;
+use src\repositories\lead\LeadRepository;
 
 /**
  * Class LeadSoldListener

@@ -4,7 +4,7 @@ use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\phoneLine\phoneLineUserAssign\entity\PhoneLineUserAssign */
+/* @var $model src\model\phoneLine\phoneLineUserAssign\entity\PhoneLineUserAssign */
 
 $this->title = $model->plus_line_id;
 $this->params['breadcrumbs'][] = ['label' => 'Phone Line User Assigns', 'url' => ['index']];

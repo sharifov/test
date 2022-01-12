@@ -3,9 +3,9 @@
 /** @var array $callHistory */
 /** @var int $page */
 /** @var int $userId */
-use sales\helpers\call\CallHelper;
+use src\helpers\call\CallHelper;
 
-$userCanAddPhoneBlackList = \sales\guards\phone\PhoneBlackListGuard::canAdd($userId);
+$userCanAddPhoneBlackList = \src\guards\phone\PhoneBlackListGuard::canAdd($userId);
 ?>
 
 <?php foreach ($callHistory as $key => $day) : ?>

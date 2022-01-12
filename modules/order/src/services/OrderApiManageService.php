@@ -33,14 +33,14 @@ use modules\product\src\entities\productOption\ProductOptionRepository;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionRepository;
-use sales\dispatchers\DeferredEventDispatcher;
-use sales\dispatchers\EventDispatcher;
-use sales\repositories\billingInfo\BillingInfoRepository;
-use sales\repositories\creditCard\CreditCardRepository;
-use sales\repositories\lead\LeadRepository;
-use sales\repositories\product\ProductQuoteRepository;
-use sales\services\RecalculateProfitAmountService;
-use sales\services\TransactionManager;
+use src\dispatchers\DeferredEventDispatcher;
+use src\dispatchers\EventDispatcher;
+use src\repositories\billingInfo\BillingInfoRepository;
+use src\repositories\creditCard\CreditCardRepository;
+use src\repositories\lead\LeadRepository;
+use src\repositories\product\ProductQuoteRepository;
+use src\services\RecalculateProfitAmountService;
+use src\services\TransactionManager;
 
 /**
  * Class OrderApiManageService

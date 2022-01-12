@@ -8,7 +8,7 @@ use modules\flight\src\forms\api\PaymentApiForm;
 use modules\order\src\entities\order\Order;
 use modules\order\src\forms\api\create\BillingInfoForm;
 use modules\order\src\forms\api\create\CreditCardForm;
-use sales\helpers\ErrorsToStringHelper;
+use src\helpers\ErrorsToStringHelper;
 use yii\base\Model;
 use yii\helpers\ArrayHelper;
 

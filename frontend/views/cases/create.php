@@ -9,7 +9,7 @@ use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $form yii\widgets\ActiveForm */
-/* @var $model sales\forms\cases\CasesCreateByWebForm */
+/* @var $model src\forms\cases\CasesCreateByWebForm */
 
 $this->title = 'Create Case';
 $this->params['breadcrumbs'][] = ['label' => 'Cases', 'url' => ['index']];

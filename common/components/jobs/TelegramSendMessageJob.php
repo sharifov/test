@@ -3,8 +3,8 @@
 namespace common\components\jobs;
 
 use common\models\UserProfile;
-use sales\helpers\app\AppHelper;
-use sales\services\telegram\TelegramService;
+use src\helpers\app\AppHelper;
+use src\services\telegram\TelegramService;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use Yii;

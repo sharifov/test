@@ -3,12 +3,12 @@
 use dosamigos\datepicker\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
-use sales\entities\cases\CasesStatus;
-use sales\entities\cases\CaseStatusLog;
+use src\entities\cases\CasesStatus;
+use src\entities\cases\CaseStatusLog;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\entities\cases\CaseStatusLogSearch */
+/* @var $searchModel src\entities\cases\CaseStatusLogSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 ?>

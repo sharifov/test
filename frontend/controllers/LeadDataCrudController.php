@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\leadData\entity\LeadData;
-use sales\model\leadData\entity\LeadDataSearch;
+use src\model\leadData\entity\LeadData;
+use src\model\leadData\entity\LeadDataSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

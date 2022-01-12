@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\voip\phoneDevice\log\PhoneDeviceLog */
+/* @var $model src\model\voip\phoneDevice\log\PhoneDeviceLog */
 
 $this->title = 'Create Phone Device Log';
 $this->params['breadcrumbs'][] = ['label' => 'Phone Device Logs', 'url' => ['index']];

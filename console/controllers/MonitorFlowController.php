@@ -4,8 +4,8 @@ namespace console\controllers;
 
 use common\models\Lead;
 use common\models\Quote;
-use sales\helpers\app\AppHelper;
-use sales\repositories\lead\LeadRepository;
+use src\helpers\app\AppHelper;
+use src\repositories\lead\LeadRepository;
 use yii\console\Controller;
 use Yii;
 use yii\db\Expression;

@@ -6,10 +6,10 @@ use common\models\UserProductType;
 use common\models\UserProjectParams;
 use frontend\models\UserFailedLogin;
 use modules\product\src\entities\productType\ProductType;
-use sales\access\UserClientChatDataAccess;
-use sales\auth\Auth;
-use sales\model\clientChatChannel\entity\ClientChatChannel;
-use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
+use src\access\UserClientChatDataAccess;
+use src\auth\Auth;
+use src\model\clientChatChannel\entity\ClientChatChannel;
+use src\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use yii\helpers\Url;
 use yii\web\View;
 use yii\grid\ActionColumn;
@@ -25,7 +25,7 @@ use yii\grid\ActionColumn;
 /* @var $userVoiceMailProvider \yii\data\ActiveDataProvider */
 /* @var UserFailedLogin[] $lastFailedLoginAttempts */
 
-use sales\access\EmployeeProjectAccess;
+use src\access\EmployeeProjectAccess;
 use yii\bootstrap\Html;
 use yii\bootstrap\ActiveForm;
 use common\models\Employee;

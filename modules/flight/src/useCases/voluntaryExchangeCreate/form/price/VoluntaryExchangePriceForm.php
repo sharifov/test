@@ -2,7 +2,7 @@
 
 namespace modules\flight\src\useCases\voluntaryExchangeCreate\form\price;
 
-use sales\traits\FormNameModelTrait;
+use src\traits\FormNameModelTrait;
 use yii\base\Model;
 
 /**

@@ -1,6 +1,6 @@
 <?php
 
-use sales\model\clientChatLead\entity\ClientChatLead;
+use src\model\clientChatLead\entity\ClientChatLead;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */

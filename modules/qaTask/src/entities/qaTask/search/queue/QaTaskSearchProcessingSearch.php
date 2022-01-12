@@ -5,8 +5,8 @@ namespace modules\qaTask\src\entities\qaTask\search\queue;
 use modules\qaTask\src\entities\qaTask\search\CreateDto;
 use modules\qaTask\src\entities\qaTask\search\QaTaskSearch;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
-use sales\auth\Auth;
-use sales\helpers\query\QueryHelper;
+use src\auth\Auth;
+use src\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
 
 /**

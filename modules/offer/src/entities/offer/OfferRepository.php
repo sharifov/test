@@ -3,8 +3,8 @@
 namespace modules\offer\src\entities\offer;
 
 use modules\offer\src\exceptions\OfferCodeException;
-use sales\dispatchers\EventDispatcher;
-use sales\repositories\NotFoundException;
+use src\dispatchers\EventDispatcher;
+use src\repositories\NotFoundException;
 
 /**
  * Class OfferRepository

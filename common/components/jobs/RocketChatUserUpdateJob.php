@@ -2,8 +2,8 @@
 
 namespace common\components\jobs;
 
-use sales\helpers\app\AppHelper;
-use sales\model\userClientChatData\entity\UserClientChatData;
+use src\helpers\app\AppHelper;
+use src\model\userClientChatData\entity\UserClientChatData;
 use yii\base\BaseObject;
 use yii\helpers\VarDumper;
 use yii\queue\JobInterface;

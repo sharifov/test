@@ -3,8 +3,8 @@
 namespace common\components\grid\project;
 
 use common\models\Project;
-use sales\access\ListsAccess;
-use sales\auth\Auth;
+use src\access\ListsAccess;
+use src\auth\Auth;
 use yii\grid\DataColumn;
 
 /**

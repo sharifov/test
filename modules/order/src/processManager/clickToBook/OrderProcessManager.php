@@ -4,7 +4,7 @@ namespace modules\order\src\processManager\clickToBook;
 
 use modules\order\src\processManager\Status;
 use modules\order\src\processManager\Type;
-use sales\entities\EventTrait;
+use src\entities\EventTrait;
 use modules\order\src\processManager\events;
 use modules\order\src\processManager\OrderProcessManager as BaseProcessManager;
 

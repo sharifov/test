@@ -8,8 +8,8 @@ use common\models\ProjectEmployeeAccess;
 use common\models\UserDepartment;
 use common\models\UserGroupAssign;
 use common\models\UserProjectParams;
-use sales\helpers\setting\SettingHelper;
-use sales\model\phoneList\entity\PhoneList;
+use src\helpers\setting\SettingHelper;
+use src\model\phoneList\entity\PhoneList;
 use yii\rbac\ManagerInterface;
 
 /**

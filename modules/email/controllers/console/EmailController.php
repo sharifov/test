@@ -8,7 +8,7 @@ use common\components\debug\Logger;
 use common\components\debug\Message;
 use modules\email\src\entity\emailAccount\EmailAccount;
 use modules\email\src\protocol\gmail\GmailJob;
-use sales\helpers\app\AppHelper;
+use src\helpers\app\AppHelper;
 use Yii;
 use yii\console\Controller;
 use yii\helpers\VarDumper;

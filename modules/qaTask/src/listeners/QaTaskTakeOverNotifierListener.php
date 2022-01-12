@@ -8,8 +8,8 @@ use frontend\widgets\notification\NotificationMessage;
 use modules\qaTask\src\entities\qaTaskActionReason\QaTaskActionReason;
 use Yii;
 use modules\qaTask\src\useCases\qaTask\takeOver\QaTaskTakeOverEvent;
-use sales\repositories\NotFoundException;
-use sales\repositories\user\UserRepository;
+use src\repositories\NotFoundException;
+use src\repositories\user\UserRepository;
 
 /**
  * Class QaTaskTakeOverNotifierListener

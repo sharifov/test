@@ -2,7 +2,7 @@
 
 namespace modules\product\src\entities\productQuoteChange;
 
-use sales\helpers\setting\SettingHelper;
+use src\helpers\setting\SettingHelper;
 use yii\bootstrap4\Html;
 
 class ProductQuoteChangeStatus

@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChatForm\entity\ClientChatForm */
+/* @var $model src\model\clientChatForm\entity\ClientChatForm */
 
 $this->title = 'Create Client Chat Form';
 $this->params['breadcrumbs'][] = ['label' => 'Client Chat Forms', 'url' => ['index']];

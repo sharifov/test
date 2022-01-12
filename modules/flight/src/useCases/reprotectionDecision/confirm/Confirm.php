@@ -9,10 +9,10 @@ use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeDecisionType;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
-use sales\entities\cases\CaseEventLog;
-use sales\helpers\setting\SettingHelper;
-use sales\repositories\product\ProductQuoteRepository;
-use sales\services\TransactionManager;
+use src\entities\cases\CaseEventLog;
+use src\helpers\setting\SettingHelper;
+use src\repositories\product\ProductQuoteRepository;
+use src\services\TransactionManager;
 
 /**
  * Class Confirm

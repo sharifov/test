@@ -2,7 +2,7 @@
 
 namespace console\controllers;
 
-use sales\model\voip\phoneDevice\log\PhoneDeviceLog;
+use src\model\voip\phoneDevice\log\PhoneDeviceLog;
 use yii\console\Controller;
 use yii\helpers\Console;
 

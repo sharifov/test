@@ -3,11 +3,11 @@
 namespace frontend\controllers;
 
 use frontend\helpers\JsonHelper;
-use sales\model\clientChat\entity\projectConfig\ClientChatProjectConfigDefaultParams;
-use sales\model\clientChat\entity\projectConfig\service\ClientChatProjectConfigService;
+use src\model\clientChat\entity\projectConfig\ClientChatProjectConfigDefaultParams;
+use src\model\clientChat\entity\projectConfig\service\ClientChatProjectConfigService;
 use Yii;
-use sales\model\clientChat\entity\projectConfig\ClientChatProjectConfig;
-use sales\model\clientChat\entity\projectConfig\search\ClientChatProjectConfigSearch;
+use src\model\clientChat\entity\projectConfig\ClientChatProjectConfig;
+use src\model\clientChat\entity\projectConfig\search\ClientChatProjectConfigSearch;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;

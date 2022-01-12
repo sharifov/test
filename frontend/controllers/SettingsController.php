@@ -12,7 +12,7 @@ use common\models\GlobalAcl;
 use common\models\Log;
 use common\models\Project;
 use common\models\ProjectEmailTemplate;
-use sales\model\project\entity\params\Params;
+use src\model\project\entity\params\Params;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\filters\AccessControl;

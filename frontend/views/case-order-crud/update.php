@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\caseOrder\entity\CaseOrder */
+/* @var $model src\model\caseOrder\entity\CaseOrder */
 
 $this->title = 'Update Case Order: ' . $model->co_order_id;
 $this->params['breadcrumbs'][] = ['label' => 'Case Orders', 'url' => ['index']];

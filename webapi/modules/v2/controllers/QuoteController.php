@@ -13,7 +13,7 @@ use common\models\UserProjectParams;
 use common\models\VisitorLog;
 use frontend\helpers\JsonHelper;
 use frontend\widgets\notification\NotificationMessage;
-use sales\model\leadData\services\LeadDataService;
+use src\model\leadData\services\LeadDataService;
 use webapi\src\behaviors\ApiUserProjectRelatedAccessBehavior;
 use Yii;
 use yii\helpers\ArrayHelper;

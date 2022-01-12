@@ -1,8 +1,8 @@
 <?php
 
-use sales\model\clientChatChannel\entity\ClientChatChannelDefaultSettings;
+use src\model\clientChatChannel\entity\ClientChatChannelDefaultSettings;
 use yii\db\Migration;
-use sales\model\clientChatChannel\entity\ClientChatChannel;
+use src\model\clientChatChannel\entity\ClientChatChannel;
 use yii\helpers\Json;
 
 /**

@@ -2,7 +2,7 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
-use sales\helpers\phone\MaskPhoneHelper;
+use src\helpers\phone\MaskPhoneHelper;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\Sms */

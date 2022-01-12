@@ -5,8 +5,8 @@
  * @var \common\models\Lead $lead
  */
 
-use sales\model\leadData\abac\dto\LeadDataAbacDto;
-use sales\model\leadData\abac\LeadDataAbacObject;
+use src\model\leadData\abac\dto\LeadDataAbacDto;
+use src\model\leadData\abac\LeadDataAbacObject;
 use yii\helpers\Html;
 
 $leadDatas = [];

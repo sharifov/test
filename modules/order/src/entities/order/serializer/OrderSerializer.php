@@ -7,7 +7,7 @@ use modules\order\src\entities\order\OrderFiles;
 use modules\order\src\entities\order\OrderPayStatus;
 use modules\order\src\entities\order\OrderStatus;
 use modules\product\src\entities\productQuote\ProductQuote;
-use sales\entities\serializer\Serializer;
+use src\entities\serializer\Serializer;
 use yii\helpers\ArrayHelper;
 
 /**

@@ -5,7 +5,7 @@ namespace modules\order\src\processManager\listeners;
 use modules\order\src\entities\order\Order;
 use modules\order\src\events\OrderProcessingEvent;
 use modules\order\src\processManager;
-use sales\helpers\setting\SettingHelper;
+use src\helpers\setting\SettingHelper;
 
 /**
  * Class StartAutoProcessingListener

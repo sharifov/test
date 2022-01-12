@@ -1,6 +1,6 @@
 <?php
 
-use sales\formatters\client\ClientTimeFormatter;
+use src\formatters\client\ClientTimeFormatter;
 use common\components\grid\DateTimeColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;

@@ -3,8 +3,8 @@
 namespace modules\product\src\abac\dto;
 
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
-use sales\access\EmployeeGroupAccess;
-use sales\auth\Auth;
+use src\access\EmployeeGroupAccess;
+use src\auth\Auth;
 use stdClass;
 
 /**

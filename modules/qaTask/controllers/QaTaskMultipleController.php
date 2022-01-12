@@ -10,7 +10,7 @@ use Yii;
 use frontend\controllers\FController;
 use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
 use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategoryQuery;
-use sales\auth\Auth;
+use src\auth\Auth;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;

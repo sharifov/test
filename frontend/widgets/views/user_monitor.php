@@ -1,7 +1,7 @@
 <?php
 
 use common\models\UserConnection;
-use sales\model\user\entity\monitor\UserMonitor;
+use src\model\user\entity\monitor\UserMonitor;
 use yii\bootstrap4\Modal;
 
 /* @var $userId integer */

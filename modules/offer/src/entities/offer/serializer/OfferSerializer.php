@@ -8,8 +8,8 @@ use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelationQuery;
-use sales\entities\serializer\Serializer;
-use sales\model\leadData\services\LeadDataService;
+use src\entities\serializer\Serializer;
+use src\model\leadData\services\LeadDataService;
 use yii\helpers\ArrayHelper;
 
 /**

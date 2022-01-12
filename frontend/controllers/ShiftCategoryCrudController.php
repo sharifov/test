@@ -2,8 +2,8 @@
 
 namespace frontend\controllers;
 
-use sales\model\shiftSchedule\entity\shiftCategory\ShiftCategory;
-use sales\model\shiftSchedule\entity\shiftCategory\search\ShiftCategorySearch;
+use src\model\shiftSchedule\entity\shiftCategory\ShiftCategory;
+use src\model\shiftSchedule\entity\shiftCategory\search\ShiftCategorySearch;
 use frontend\controllers\FController;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

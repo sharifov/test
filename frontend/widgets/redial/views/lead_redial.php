@@ -10,7 +10,7 @@ use yii\bootstrap\Html;
 use yii\helpers\Url;
 use yii\web\View;
 use yii\web\JqueryAsset;
-use sales\helpers\phone\MaskPhoneHelper;
+use src\helpers\phone\MaskPhoneHelper;
 
 /** @var View $this */
 /** @var Lead $lead */

@@ -1,9 +1,9 @@
 <?php
 
 use yii\db\Migration;
-use sales\rbac\rules\lead\view\checkListBlock\LeadViewCheckListBlockEmptyOwnerRule;
-use sales\rbac\rules\lead\view\checkListBlock\LeadViewCheckListBlockGroupRule;
-use sales\rbac\rules\lead\view\checkListBlock\LeadViewCheckListBlockIsOwnerRule;
+use src\rbac\rules\lead\view\checkListBlock\LeadViewCheckListBlockEmptyOwnerRule;
+use src\rbac\rules\lead\view\checkListBlock\LeadViewCheckListBlockGroupRule;
+use src\rbac\rules\lead\view\checkListBlock\LeadViewCheckListBlockIsOwnerRule;
 
 /**
  * Class m201123_155545_add_lead_view_check_list_block_permissions

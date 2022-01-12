@@ -15,7 +15,7 @@ use frontend\models\LeadForm;
 use yii\web\View;
 use yii\helpers\Url;
 use yii\bootstrap4\Modal;
-use sales\auth\Auth;
+use src\auth\Auth;
 use modules\lead\src\abac\LeadAbacObject;
 
 /**
@@ -28,7 +28,7 @@ use modules\lead\src\abac\LeadAbacObject;
 $user = Yii::$app->user->identity;
 
 $formId = sprintf('%s-form', $leadForm->getClient()->formName());
-//$manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadClientInfo($lead, $user);
+//$manageClientInfoAccess = \src\access\ClientInfoAccess::isUserCanManageLeadClientInfo($lead, $user);
 
 ?>
 

@@ -1,9 +1,9 @@
 <?php
 
 use yii\db\Migration;
-use sales\rbac\rules\lead\view\notesBlock\LeadViewNotesBlockEmptyOwnerRule;
-use sales\rbac\rules\lead\view\notesBlock\LeadViewNotesBlockGroupRule;
-use sales\rbac\rules\lead\view\notesBlock\LeadViewNotesBlockIsOwnerRule;
+use src\rbac\rules\lead\view\notesBlock\LeadViewNotesBlockEmptyOwnerRule;
+use src\rbac\rules\lead\view\notesBlock\LeadViewNotesBlockGroupRule;
+use src\rbac\rules\lead\view\notesBlock\LeadViewNotesBlockIsOwnerRule;
 
 /**
  * Class m201124_101134_add_lead_view_notes_block_permissions

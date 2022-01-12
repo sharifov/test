@@ -2,12 +2,12 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
-use sales\model\callLog\entity\callLog\CallLog;
-use sales\helpers\phone\MaskPhoneHelper;
-use sales\model\call\abac\CallAbacObject;
+use src\model\callLog\entity\callLog\CallLog;
+use src\helpers\phone\MaskPhoneHelper;
+use src\model\call\abac\CallAbacObject;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\callLog\entity\callLog\CallLog */
+/* @var $model src\model\callLog\entity\callLog\CallLog */
 /* @var $breadcrumbsPreviousPage string */
 /* @var $breadcrumbsPreviousLabel string */
 
@@ -56,7 +56,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'attribute' => 'cl_phone_from',
                         'value' => static function (CallLog $model) {
-                            if ($model->cl_type_id == \sales\model\callLog\entity\callLog\CallLogType::IN) {
+                            if ($model->cl_type_id == \src\model\callLog\entity\callLog\CallLogType::IN) {
                                 return MaskPhoneHelper::masking($model->cl_phone_from);
                             }
                             return $model->cl_phone_from;
@@ -66,7 +66,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'attribute' => 'cl_phone_to',
                         'value' => static function (CallLog $model) {
-                            if ($model->cl_type_id == \sales\model\callLog\entity\callLog\CallLogType::OUT) {
+                            if ($model->cl_type_id == \src\model\callLog\entity\callLog\CallLogType::OUT) {
                                 return MaskPhoneHelper::masking($model->cl_phone_to);
                             }
                             return $model->cl_phone_to;

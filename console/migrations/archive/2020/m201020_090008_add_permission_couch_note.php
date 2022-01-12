@@ -2,9 +2,9 @@
 
 use common\models\Employee;
 use console\migrations\RbacMigrationService;
-use sales\rbac\rules\clientChat\couchNote\ClientChatCouchNoteHoldRule;
-use sales\rbac\rules\clientChat\couchNote\ClientChatCouchNoteIdleRule;
-use sales\rbac\rules\clientChat\couchNote\ClientChatCouchNoteInProgressRule;
+use src\rbac\rules\clientChat\couchNote\ClientChatCouchNoteHoldRule;
+use src\rbac\rules\clientChat\couchNote\ClientChatCouchNoteIdleRule;
+use src\rbac\rules\clientChat\couchNote\ClientChatCouchNoteInProgressRule;
 use yii\db\Migration;
 
 /**

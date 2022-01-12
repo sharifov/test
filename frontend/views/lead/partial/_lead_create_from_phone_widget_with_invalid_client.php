@@ -1,7 +1,7 @@
 <?php
 
 use common\widgets\Alert;
-use sales\model\lead\useCases\lead\create\fromPhoneWidgetWithInvalidClient\Form;
+use src\model\lead\useCases\lead\create\fromPhoneWidgetWithInvalidClient\Form;
 use yii\bootstrap4\ActiveForm;
 use yii\helpers\Html;
 use yii\web\View;

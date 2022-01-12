@@ -25,11 +25,11 @@ use modules\email\src\abac\dto\EmailPreviewDto;
 use modules\email\src\abac\EmailAbacObject;
 use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\widgets\FileStorageEmailSendListWidget;
-use sales\entities\cases\Cases;
-use sales\helpers\communication\StatisticsHelper;
-use sales\helpers\projectLocale\ProjectLocaleHelper;
-use sales\helpers\setting\SettingHelper;
-use sales\model\project\entity\projectLocale\ProjectLocale;
+use src\entities\cases\Cases;
+use src\helpers\communication\StatisticsHelper;
+use src\helpers\projectLocale\ProjectLocaleHelper;
+use src\helpers\setting\SettingHelper;
+use src\model\project\entity\projectLocale\ProjectLocale;
 use yii\helpers\Html;
 use yii\bootstrap4\Modal;
 use yii\helpers\Url;
@@ -329,7 +329,7 @@ $canShowEmailData = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_
 
                         $clientEmails = $model->client ? $model->client->getEmailList() : [];
                     foreach ($clientEmails as $key => $element) {
-                        $clientEmails[$key] = \sales\helpers\email\MaskEmailHelper::masking($element, $disableMasking);
+                        $clientEmails[$key] = \src\helpers\email\MaskEmailHelper::masking($element, $disableMasking);
                     }
                         $clientPhones = $model->client ? $model->client->getPhoneNumbersSms($disableMasking) : [];
 

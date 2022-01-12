@@ -5,7 +5,7 @@ namespace common\models;
 use common\models\query\LeadQcallQuery;
 use Faker\Provider\DateTime;
 use borales\extensions\phoneInput\PhoneInputValidator;
-use sales\services\lead\qcall\Interval;
+use src\services\lead\qcall\Interval;
 use yii\db\ActiveQuery;
 
 /**

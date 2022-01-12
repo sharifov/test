@@ -2,8 +2,8 @@
 
 namespace frontend\controllers;
 
-use sales\model\userStatDay\entity\UserStatDay;
-use sales\model\userStatDay\entity\search\UserStatDaySearch;
+use src\model\userStatDay\entity\UserStatDay;
+use src\model\userStatDay\entity\search\UserStatDaySearch;
 use frontend\controllers\FController;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
