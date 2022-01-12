@@ -3,6 +3,7 @@
 namespace console\controllers;
 
 use common\models\Employee;
+use src\rbac\RbacMoveToSrc;
 use src\rbac\roles\ExchangeSenior;
 use src\rbac\roles\SalesSenior;
 use src\rbac\roles\SupportSenior;
@@ -124,64 +125,6 @@ class RbacController extends Controller
 
     public function actionMoveRulesToSrc()
     {
-        $pathToRbac = 'src/rbac';
-        $i = 0;
-
-        $rules = (new Query())->select('name')->from('auth_rule')->all();
-        $transaction = Yii::$app->db->beginTransaction();
-        try {
-            foreach ($rules as $rule) {
-                echo 'Rule ' . $rule['name'];
-                $found = false;
-                foreach ($this->getFiles($pathToRbac) as $file) {
-                    if (strpos(file_get_contents($file), $rule['name']) !== false) {
-                        $class = $this->getNamespace($file);
-                        echo ' => ' . $class . PHP_EOL;
-                        $item = Yii::createObject($class);
-                        \Yii::$app->db->createCommand(
-                            'UPDATE auth_rule SET `data` = :newdata WHERE name = :name',
-                            [
-                                ':newdata' => serialize($item),
-                                ':name' => $item->name,
-                            ]
-                        )->execute();
-                        $found = true;
-                        $i++;
-                        break;
-                    }
-                }
-                if (!$found) {
-                    echo ' not found ' . PHP_EOL;
-                }
-            }
-            $transaction->commit();
-        } catch (\Throwable $e) {
-            $transaction->rollBack();
-            throw $e;
-        }
-
-        echo 'Found ' . $i . ' rules' . PHP_EOL;
-    }
-
-    private function getNamespace(string $path)
-    {
-        return str_replace(['/', '.php'], ['\\', ''], $path);
-    }
-
-    private $files = [];
-    private function getFiles(string $path): array
-    {
-        if ($this->files) {
-            return $this->files;
-        }
-        $rii = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path));
-        $this->files = [];
-        foreach ($rii as $file) {
-            if ($file->isDir()) {
-                continue;
-            }
-            $this->files[] = $file->getPathname();
-        }
-        return $this->files;
+        (new RbacMoveToSrc())->move(env('app.path') . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'rbac');
     }
 }
