@@ -1140,7 +1140,7 @@ class Call extends \yii\db\ActiveRecord
             && $this->isStatusInProgress()
             && $this->isIn()
         ) {
-            $host = \Yii::$app->params['url_address'] ?? '';
+            $host = \Yii::$app->params['url'] ?? '';
 
             if ($this->c_dep_id && ($departmentParams = $this->cDep->getParams())) {
                 if ($this->c_lead_id && $departmentParams->object->type->isLead()) {
@@ -2488,7 +2488,7 @@ class Call extends \yii\db\ActiveRecord
     public function cancelCall(): bool
     {
         $communication = \Yii::$app->communication;
-        $callbackUrl = Yii::$app->params['url_api_address'] . '/twilio/cancel-call?id=' . $this->c_id;
+        $callbackUrl = Yii::$app->params['url_api'] . '/twilio/cancel-call?id=' . $this->c_id;
         $data = [];
         $data['c_id'] = $this->c_id;
 

@@ -1264,7 +1264,7 @@ class TestController extends FController
 
     public function actionNotify()
     {
-        $host = \Yii::$app->params['url_address'] ?? '';
+        $host = \Yii::$app->params['url'] ?? '';
         // Notifications::socket(Yii::$app->user->id, null, 'openUrl', ['url' => $host . '/lead/view/b5d963c9241dd741e22b37d1fa80a9b6'], false);
     }
 

@@ -4,8 +4,8 @@ return [
     'appEnv' => 'stage',
     'appInstance' => env('COMMON_CONFIG_PARAMS_APPINSTANCE'),
 
-    'url_address'      => env('COMMON_CONFIG_PARAMS_URLADDRESS'),
-    'url_api_address'  => env('COMMON_CONFIG_PARAMS_URLAPIADDRESS'),
+    'url'      => env('COMMON_CONFIG_PARAMS_URL'),
+    'url_api'  => env('COMMON_CONFIG_PARAMS_URLAPI'),
 
     'backOffice' => [
         'ver' => '1.0.0',

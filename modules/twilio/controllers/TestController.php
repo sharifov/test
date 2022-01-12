@@ -104,7 +104,7 @@ class TestController extends Controller
     public function actionRedirectCall()
     {
         $data['c_id'] = 3368195;
-        $callbackUrl = \Yii::$app->params['url_api_address'] . '/twilio/cancel-call?id=' . 3368195;
+        $callbackUrl = \Yii::$app->params['url_api'] . '/twilio/cancel-call?id=' . 3368195;
         $response = $this->comService->redirectCall('CA276ac3bf5c1eda08cafaaf304804899a', $data, $callbackUrl);
         var_dump($response);
         die;

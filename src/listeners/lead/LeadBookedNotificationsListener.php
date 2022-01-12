@@ -54,7 +54,7 @@ class LeadBookedNotificationsListener
 
         $lead = $event->lead;
 
-        $host = Yii::$app->params['url_address'];
+        $host = Yii::$app->params['url'];
 
         $subject = Yii::t('email', 'Lead-{id} to BOOKED', ['id' => $lead->id]);
 

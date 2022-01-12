@@ -769,11 +769,11 @@ class PhoneController extends FController
             //$updateData = ['status' => 'completed'];
             /*$updateData = [
                 'method'    =>  'POST',
-                'url'       =>  Yii::$app->params['url_api_address'] . '/twilio/redirect-call-user?user_id='.$user->id
+                'url'       =>  Yii::$app->params['url_api'] . '/twilio/redirect-call-user?user_id='.$user->id
             ];*/
 
 
-            $callbackUrl = Yii::$app->params['url_api_address'] . '/twilio/redirect-call?id=' . $id . '&type=' . $type;
+            $callbackUrl = Yii::$app->params['url_api'] . '/twilio/redirect-call?id=' . $id . '&type=' . $type;
             $data['type'] = $type;
             $data['isTransfer'] = true;
 

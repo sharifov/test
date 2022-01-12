@@ -324,7 +324,7 @@ class UserVoiceMail extends \yii\db\ActiveRecord
         if (!$this->uvm_voice_file_message) {
             return '';
         }
-        return Yii::$app->params['url_address'] . $this->uvm_voice_file_message;
+        return Yii::$app->params['url'] . $this->uvm_voice_file_message;
     }
 
     public static function getList(): array
