@@ -5,7 +5,7 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChatDataRequest\entity\ClientChatDataRequest */
+/* @var $model src\model\clientChatDataRequest\entity\ClientChatDataRequest */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 

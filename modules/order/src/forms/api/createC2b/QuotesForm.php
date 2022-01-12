@@ -4,7 +4,7 @@ namespace modules\order\src\forms\api\createC2b;
 
 use common\components\validators\CheckJsonValidator;
 use modules\product\src\entities\productType\ProductType;
-use sales\forms\CompositeForm;
+use src\forms\CompositeForm;
 
 /**
  * Class QuotesForm

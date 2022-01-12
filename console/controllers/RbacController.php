@@ -3,14 +3,17 @@
 namespace console\controllers;
 
 use common\models\Employee;
-use sales\rbac\roles\ExchangeSenior;
-use sales\rbac\roles\SalesSenior;
-use sales\rbac\roles\SupportSenior;
+use src\rbac\roles\ExchangeSenior;
+use src\rbac\roles\SalesSenior;
+use src\rbac\roles\SupportSenior;
 use Yii;
 use console\migrations\RbacMigrationService;
 use yii\console\Controller;
+use yii\db\Query;
+use yii\helpers\ArrayHelper;
 use yii\helpers\BaseConsole;
 use yii\helpers\Console;
+use yii\helpers\VarDumper;
 use yii\rbac\Role;
 
 class RbacController extends Controller
@@ -117,5 +120,68 @@ class RbacController extends Controller
         }
 
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+    }
+
+    public function actionMoveRulesToSrc()
+    {
+        $pathToRbac = 'src/rbac';
+        $i = 0;
+
+        $rules = (new Query())->select('name')->from('auth_rule')->all();
+        $transaction = Yii::$app->db->beginTransaction();
+        try {
+            foreach ($rules as $rule) {
+                echo 'Rule ' . $rule['name'];
+                $found = false;
+                foreach ($this->getFiles($pathToRbac) as $file) {
+                    if (strpos(file_get_contents($file), $rule['name']) !== false) {
+                        $class = $this->getNamespace($file);
+                        echo ' => ' . $class . PHP_EOL;
+                        $item = Yii::createObject($class);
+                        \Yii::$app->db->createCommand(
+                            'UPDATE auth_rule SET `data` = :newdata WHERE name = :name',
+                            [
+                                ':newdata' => serialize($item),
+                                ':name' => $item->name,
+                            ]
+                        )->execute();
+                        $found = true;
+                        $i++;
+                        break;
+                    }
+                }
+                if (!$found) {
+                    echo ' not found ' . PHP_EOL;
+                }
+            }
+            $transaction->commit();
+        } catch (\Throwable $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
+
+        echo 'Found ' . $i . ' rules' . PHP_EOL;
+    }
+
+    private function getNamespace(string $path)
+    {
+        return str_replace(['/', '.php'], ['\\', ''], $path);
+    }
+
+    private $files = [];
+    private function getFiles(string $path): array
+    {
+        if ($this->files) {
+            return $this->files;
+        }
+        $rii = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path));
+        $this->files = [];
+        foreach ($rii as $file) {
+            if ($file->isDir()) {
+                continue;
+            }
+            $this->files[] = $file->getPathname();
+        }
+        return $this->files;
     }
 }

@@ -4,8 +4,8 @@ namespace common\models;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
 use common\models\query\SourcesQuery;
-use sales\access\EmployeeProjectAccess;
-use sales\entities\EventTrait;
+use src\access\EmployeeProjectAccess;
+use src\entities\EventTrait;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;

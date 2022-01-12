@@ -4,9 +4,9 @@ namespace common\models;
 
 use common\components\jobs\AgentCallQueueJob;
 use common\models\query\UserCallStatusQuery;
-use sales\dispatchers\NativeEventDispatcher;
-use sales\model\user\entity\userCallStatus\events\UserCallStatusEvents;
-use sales\model\user\entity\userGroup\events\UserGroupEvents;
+use src\dispatchers\NativeEventDispatcher;
+use src\model\user\entity\userCallStatus\events\UserCallStatusEvents;
+use src\model\user\entity\userGroup\events\UserGroupEvents;
 use Yii;
 
 /**

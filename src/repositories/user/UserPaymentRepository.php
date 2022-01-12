@@ -1,0 +1,33 @@
+<?php
+
+namespace src\repositories\user;
+
+use src\model\user\entity\payment\UserPayment;
+
+class UserPaymentRepository
+{
+    /**
+     * @param int $paymentId
+     * @return UserPayment
+     */
+    public function findById(int $paymentId): UserPayment
+    {
+        $payment = UserPayment::findOne($paymentId);
+        if ($payment === null) {
+            throw new \RuntimeException('User payment not fount');
+        }
+        return $payment;
+    }
+
+    /**
+     * @param UserPayment $userPayment
+     * @return int
+     */
+    public function save(UserPayment $userPayment): int
+    {
+        if (!$userPayment->save()) {
+            throw new \RuntimeException('User Payment saving error');
+        }
+        return $userPayment->upt_id;
+    }
+}

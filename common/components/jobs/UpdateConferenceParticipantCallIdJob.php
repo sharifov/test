@@ -4,9 +4,9 @@ namespace common\components\jobs;
 
 use common\models\Call;
 use common\models\ConferenceParticipant;
-use sales\model\conference\service\ConferenceDataService;
-use sales\model\conference\socket\SocketCommands;
-use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackHandler;
+use src\model\conference\service\ConferenceDataService;
+use src\model\conference\socket\SocketCommands;
+use src\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackHandler;
 use yii\helpers\VarDumper;
 use yii\queue\JobInterface;
 

@@ -4,7 +4,7 @@ namespace modules\product\src\entities\productQuoteRefund;
 
 use modules\flight\models\FlightQuote;
 use modules\flight\models\FlightQuoteFlight;
-use sales\helpers\setting\SettingHelper;
+use src\helpers\setting\SettingHelper;
 
 class ProductQuoteRefundQuery
 {

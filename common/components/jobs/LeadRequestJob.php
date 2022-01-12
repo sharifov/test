@@ -2,8 +2,8 @@
 
 namespace common\components\jobs;
 
-use sales\model\lead\useCases\lead\api\create\LeadCreateGoogleRequest;
-use sales\model\leadRequest\entity\LeadRequest;
+use src\model\lead\useCases\lead\api\create\LeadCreateGoogleRequest;
+use src\model\leadRequest\entity\LeadRequest;
 use yii\queue\RetryableJobInterface;
 
 /**

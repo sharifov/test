@@ -4,7 +4,7 @@
 /* @var $search_text string */
 /* @var $user \common\models\Employee  */
 
-use sales\services\badges\BadgesDictionary;
+use src\services\badges\BadgesDictionary;
 use yii\helpers\Url;
 use yii\widgets\Pjax;
 

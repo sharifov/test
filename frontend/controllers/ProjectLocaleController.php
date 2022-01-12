@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\project\entity\projectLocale\ProjectLocale;
-use sales\model\project\entity\projectLocale\search\ProjectLocaleSearch;
+use src\model\project\entity\projectLocale\ProjectLocale;
+use src\model\project\entity\projectLocale\search\ProjectLocaleSearch;
 use frontend\controllers\FController;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;

@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\kpi\entity\kpiProductCommission\KpiProductCommission */
+/* @var $model src\model\kpi\entity\kpiProductCommission\KpiProductCommission */
 
 $this->title = 'Kpi Product Commission - ' . $model->pcProductType->pt_name;
 $this->params['breadcrumbs'][] = ['label' => 'Kpi Product Commissions', 'url' => ['index']];

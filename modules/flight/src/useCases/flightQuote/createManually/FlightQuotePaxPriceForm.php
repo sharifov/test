@@ -3,7 +3,7 @@
 namespace modules\flight\src\useCases\flightQuote\createManually;
 
 use modules\flight\models\FlightPax;
-use sales\traits\FormNameModelTrait;
+use src\traits\FormNameModelTrait;
 use yii\base\Model;
 
 class FlightQuotePaxPriceForm extends Model

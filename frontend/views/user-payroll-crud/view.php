@@ -1,11 +1,11 @@
 <?php
 
-use sales\model\user\entity\payroll\UserPayroll;
+use src\model\user\entity\payroll\UserPayroll;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\user\entity\payroll\UserPayroll */
+/* @var $model src\model\user\entity\payroll\UserPayroll */
 
 $this->title = $model->upsUser->username;
 $this->title .= $model->ups_agent_status_id ? ' - ' . UserPayroll::getAgentStatusName($model->ups_agent_status_id) : '';

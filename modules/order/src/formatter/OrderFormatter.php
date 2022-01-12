@@ -3,7 +3,7 @@
 namespace modules\order\src\formatter;
 
 use modules\order\src\entities\order\Order;
-use sales\logger\formatter\Formatter;
+use src\logger\formatter\Formatter;
 
 /**
  * Class OrderFormatter

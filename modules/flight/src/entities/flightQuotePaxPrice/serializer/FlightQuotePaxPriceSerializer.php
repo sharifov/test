@@ -4,7 +4,7 @@ namespace modules\flight\src\entities\flightQuotePaxPrice\serializer;
 
 use modules\flight\models\FlightPax;
 use modules\flight\models\FlightQuotePaxPrice;
-use sales\entities\serializer\Serializer;
+use src\entities\serializer\Serializer;
 
 /**
  * Class FlightQuotePaxPriceSerializer

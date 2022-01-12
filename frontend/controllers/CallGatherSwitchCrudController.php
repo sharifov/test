@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\call\entity\callCommand\CallGatherSwitch;
-use sales\model\call\entity\callCommand\search\CallGatherSwitchSearch;
+use src\model\call\entity\callCommand\CallGatherSwitch;
+use src\model\call\entity\callCommand\search\CallGatherSwitchSearch;
 use frontend\controllers\FController;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;

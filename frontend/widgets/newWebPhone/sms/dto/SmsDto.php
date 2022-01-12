@@ -4,7 +4,7 @@ namespace frontend\widgets\newWebPhone\sms\dto;
 
 use common\models\Employee;
 use common\models\Sms;
-use sales\model\sms\useCase\send\Contact;
+use src\model\sms\useCase\send\Contact;
 use yii\helpers\Html;
 
 /**

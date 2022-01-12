@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\phoneLine\phoneLineUserGroup\entity\PhoneLineUserGroup;
-use sales\model\phoneLine\phoneLineUserGroup\entity\search\PhoneLineUserGroupSearch;
+use src\model\phoneLine\phoneLineUserGroup\entity\PhoneLineUserGroup;
+use src\model\phoneLine\phoneLineUserGroup\entity\search\PhoneLineUserGroupSearch;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

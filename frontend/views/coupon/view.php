@@ -1,11 +1,11 @@
 <?php
 
-use sales\model\coupon\entity\coupon\Coupon;
+use src\model\coupon\entity\coupon\Coupon;
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\coupon\entity\coupon\Coupon */
+/* @var $model src\model\coupon\entity\coupon\Coupon */
 
 $this->title = $model->c_id;
 $this->params['breadcrumbs'][] = ['label' => 'Coupons', 'url' => ['index']];

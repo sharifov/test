@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\emailReviewQueue\entity\EmailReviewQueueSearch */
+/* @var $model src\model\emailReviewQueue\entity\EmailReviewQueueSearch */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 

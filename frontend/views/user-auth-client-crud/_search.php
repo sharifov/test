@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\userAuthClient\entity\UserAuthClientSearch */
+/* @var $model src\model\userAuthClient\entity\UserAuthClientSearch */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 

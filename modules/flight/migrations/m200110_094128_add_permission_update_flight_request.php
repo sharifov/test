@@ -2,7 +2,7 @@
 
 namespace modules\flight\migrations;
 
-use sales\rbac\rules\ProductOwnerRule;
+use src\rbac\rules\ProductOwnerRule;
 use Yii;
 use yii\db\Migration;
 

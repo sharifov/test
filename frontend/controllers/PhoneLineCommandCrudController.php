@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\call\entity\callCommand\PhoneLineCommand;
-use sales\model\call\entity\callCommand\search\PhoneLineCommandSearch;
+use src\model\call\entity\callCommand\PhoneLineCommand;
+use src\model\call\entity\callCommand\search\PhoneLineCommandSearch;
 use frontend\controllers\FController;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;

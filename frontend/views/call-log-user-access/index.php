@@ -2,13 +2,13 @@
 
 use common\components\grid\DateTimeColumn;
 use common\models\CallUserAccess;
-use sales\model\callLog\entity\callLogUserAccess\CallLogUserAccess;
+use src\model\callLog\entity\callLogUserAccess\CallLogUserAccess;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\callLog\entity\callLogUserAccess\search\CallLogUserAccessSearch */
+/* @var $searchModel src\model\callLog\entity\callLogUserAccess\search\CallLogUserAccessSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Call Log User Accesses';

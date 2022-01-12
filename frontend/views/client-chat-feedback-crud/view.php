@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChatFeedback\entity\ClientChatFeedback */
+/* @var $model src\model\clientChatFeedback\entity\ClientChatFeedback */
 
 $this->title = $model->ccf_id;
 $this->params['breadcrumbs'][] = ['label' => 'Client Chat Feedback', 'url' => ['index']];

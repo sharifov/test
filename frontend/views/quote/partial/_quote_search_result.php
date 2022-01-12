@@ -3,8 +3,8 @@
 use common\models\Lead;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
-use sales\auth\Auth;
-use sales\forms\api\searchQuote\FlightQuoteSearchForm;
+use src\auth\Auth;
+use src\forms\api\searchQuote\FlightQuoteSearchForm;
 use yii\bootstrap4\Alert;
 use yii\data\ArrayDataProvider;
 use yii\helpers\ArrayHelper;
@@ -26,7 +26,7 @@ use yii\widgets\Pjax;
  * @var $dataProvider ArrayDataProvider
  * @var $searchForm FlightQuoteSearchForm
  * @var $keyCache string
- * @var $searchServiceQuoteDto \sales\dto\searchService\SearchServiceQuoteDTO
+ * @var $searchServiceQuoteDto \src\dto\searchService\SearchServiceQuoteDTO
  */
 //\yii\helpers\VarDumper::dump($airlines);die;
 

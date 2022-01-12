@@ -1,12 +1,12 @@
 <?php
 
 use common\models\Call;
-use sales\model\callTerminateLog\entity\CallTerminateLog;
+use src\model\callTerminateLog\entity\CallTerminateLog;
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\callTerminateLog\entity\CallTerminateLog */
+/* @var $model src\model\callTerminateLog\entity\CallTerminateLog */
 
 $this->title = $model->ctl_id;
 $this->params['breadcrumbs'][] = ['label' => 'Call Terminate Logs', 'url' => ['index']];

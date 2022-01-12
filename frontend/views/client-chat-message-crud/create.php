@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChatMessage\entity\ClientChatMessage */
+/* @var $model src\model\clientChatMessage\entity\ClientChatMessage */
 
 $this->title = 'Create Client Chat Message';
 $this->params['breadcrumbs'][] = ['label' => 'Client Chat Messages', 'url' => ['index']];

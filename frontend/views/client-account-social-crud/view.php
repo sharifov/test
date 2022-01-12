@@ -1,11 +1,11 @@
 <?php
 
-use sales\model\clientAccountSocial\entity\ClientAccountSocial;
+use src\model\clientAccountSocial\entity\ClientAccountSocial;
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var yii\web\View $this */
-/* @var sales\model\clientAccountSocial\entity\ClientAccountSocial $model */
+/* @var src\model\clientAccountSocial\entity\ClientAccountSocial $model */
 
 $this->title = $model->cas_ca_id;
 $this->params['breadcrumbs'][] = ['label' => 'Client Account Socials', 'url' => ['index']];

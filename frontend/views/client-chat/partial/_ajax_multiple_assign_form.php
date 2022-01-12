@@ -1,13 +1,13 @@
 <?php
 
 /***
- * @var \sales\forms\clientChat\MultipleAssignForm $formMultipleAssign
+ * @var \src\forms\clientChat\MultipleAssignForm $formMultipleAssign
  * @var string $alertMessage
  *
  */
 
-use sales\auth\Auth;
-use sales\model\clientChat\entity\ClientChat;
+use src\auth\Auth;
+use src\model\clientChat\entity\ClientChat;
 use yii\widgets\ActiveForm;
 use yii\helpers\Html;
 use yii\widgets\Pjax;

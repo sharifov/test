@@ -1,7 +1,7 @@
 <?php
 
-use sales\rbac\rules\call\PhoneWidgetTransferToUserIncomingRule;
-use sales\rbac\rules\call\PhoneWidgetTransferToUserOutgoingRule;
+use src\rbac\rules\call\PhoneWidgetTransferToUserIncomingRule;
+use src\rbac\rules\call\PhoneWidgetTransferToUserOutgoingRule;
 use yii\db\Migration;
 
 /**

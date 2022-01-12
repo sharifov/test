@@ -15,11 +15,11 @@ use modules\flight\src\useCases\reprotectionExchange\service\ReProtectionExchang
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteChange\service\ProductQuoteChangeService;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
-use sales\helpers\app\AppHelper;
-use sales\helpers\setting\SettingHelper;
-use sales\repositories\NotFoundException;
-use sales\repositories\product\ProductQuoteRepository;
-use sales\services\TransactionManager;
+use src\helpers\app\AppHelper;
+use src\helpers\setting\SettingHelper;
+use src\repositories\NotFoundException;
+use src\repositories\product\ProductQuoteRepository;
+use src\services\TransactionManager;
 use webapi\src\logger\ApiLogger;
 use webapi\src\logger\behaviors\SimpleLoggerBehavior;
 use webapi\src\logger\behaviors\TechnicalInfoBehavior;

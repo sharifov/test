@@ -1,6 +1,6 @@
 <?php
 
-use sales\forms\file\CsvUploadForm;
+use src\forms\file\CsvUploadForm;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;

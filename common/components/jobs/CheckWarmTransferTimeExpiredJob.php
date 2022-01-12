@@ -8,7 +8,7 @@ use common\models\CallUserAccess;
 use common\models\Conference;
 use common\models\ConferenceParticipant;
 use common\models\Notifications;
-use sales\model\call\helper\CallHelper;
+use src\model\call\helper\CallHelper;
 use yii\queue\JobInterface;
 
 /**

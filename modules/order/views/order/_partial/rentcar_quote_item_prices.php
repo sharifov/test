@@ -5,7 +5,7 @@ use kartik\editable\Editable;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\rentCar\src\entity\rentCar\RentCar;
 use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
-use sales\helpers\product\ProductQuoteHelper;
+use src\helpers\product\ProductQuoteHelper;
 use yii\bootstrap4\Html;
 use yii\helpers\Url;
 use yii\web\View;

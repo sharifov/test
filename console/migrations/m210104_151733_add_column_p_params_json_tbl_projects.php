@@ -1,10 +1,10 @@
 <?php
 
-use sales\model\project\entity\params\CallParams;
-use sales\model\project\entity\params\ObjectParams;
-use sales\model\project\entity\params\Params;
-use sales\model\project\entity\params\SmsParams;
-use sales\model\project\entity\params\StyleParams;
+use src\model\project\entity\params\CallParams;
+use src\model\project\entity\params\ObjectParams;
+use src\model\project\entity\params\Params;
+use src\model\project\entity\params\SmsParams;
+use src\model\project\entity\params\StyleParams;
 use yii\helpers\Json;
 use common\models\Project;
 use yii\db\Migration;

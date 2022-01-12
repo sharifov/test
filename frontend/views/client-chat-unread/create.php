@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChatUnread\entity\ClientChatUnread */
+/* @var $model src\model\clientChatUnread\entity\ClientChatUnread */
 
 $this->title = 'Create Client Chat Unread';
 $this->params['breadcrumbs'][] = ['label' => 'Client Chat Unreads', 'url' => ['index']];

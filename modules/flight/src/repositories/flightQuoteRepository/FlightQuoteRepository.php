@@ -4,8 +4,8 @@ namespace modules\flight\src\repositories\flightQuoteRepository;
 
 use modules\flight\models\FlightQuote;
 use modules\flight\src\exceptions\FlightCodeException;
-use sales\dispatchers\EventDispatcher;
-use sales\repositories\NotFoundException;
+use src\dispatchers\EventDispatcher;
+use src\repositories\NotFoundException;
 
 /**
  * Class FlightQuoteRepository

@@ -2,7 +2,7 @@
 
 namespace modules\hotel\src\useCases\quote;
 
-use sales\dto\product\ProductQuoteDTO;
+use src\dto\product\ProductQuoteDTO;
 
 class HotelProductQuoteCreateDto extends ProductQuoteDTO
 {

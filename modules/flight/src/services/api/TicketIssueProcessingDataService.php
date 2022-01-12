@@ -11,8 +11,8 @@ use modules\flight\src\repositories\flightQuoteRepository\FlightQuoteRepository;
 use modules\invoice\src\entities\invoice\Invoice;
 use modules\order\src\entities\order\Order;
 use modules\order\src\payment\PaymentRepository;
-use sales\repositories\product\ProductQuoteRepository;
-use sales\services\TransactionManager;
+use src\repositories\product\ProductQuoteRepository;
+use src\services\TransactionManager;
 use modules\invoice\src\entities\invoice\InvoiceRepository;
 use modules\order\src\payment\method\PaymentMethodRepository;
 

@@ -2,13 +2,13 @@
 
 namespace webapi\modules\v1\controllers;
 
-use sales\model\client\ClientCodeException;
+use src\model\client\ClientCodeException;
 use webapi\src\Messages;
 use webapi\src\response\messages\ErrorsMessage;
 use Yii;
 use common\models\Client;
 use common\models\Project;
-use sales\model\client\useCase\info\ClientForm;
+use src\model\client\useCase\info\ClientForm;
 use webapi\src\response\ErrorResponse;
 use webapi\src\response\messages\CodeMessage;
 use webapi\src\response\messages\DataMessage;

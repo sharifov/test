@@ -3,7 +3,7 @@
 namespace modules\flight\src\entities\flightQuoteSegmentStop\serializer;
 
 use modules\flight\models\FlightQuoteSegmentStop;
-use sales\entities\serializer\Serializer;
+use src\entities\serializer\Serializer;
 
 /**
  * Class FlightQuoteSegmentStopSerializer

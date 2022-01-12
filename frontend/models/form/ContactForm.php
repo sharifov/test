@@ -3,9 +3,9 @@
 namespace frontend\models\form;
 
 use common\models\Project;
-use sales\forms\CompositeForm;
-use sales\forms\lead\EmailCreateForm;
-use sales\forms\lead\PhoneCreateForm;
+use src\forms\CompositeForm;
+use src\forms\lead\EmailCreateForm;
+use src\forms\lead\PhoneCreateForm;
 
 /**
  * @property int $id

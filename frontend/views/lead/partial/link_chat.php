@@ -1,6 +1,6 @@
 <?php
 
-use sales\model\lead\useCases\lead\link\LeadLinkChatForm;
+use src\model\lead\useCases\lead\link\LeadLinkChatForm;
 use yii\bootstrap4\ActiveForm;
 use yii\helpers\Html;
 use yii\widgets\Pjax;

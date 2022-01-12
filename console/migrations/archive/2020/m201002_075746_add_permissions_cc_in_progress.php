@@ -2,8 +2,8 @@
 
 use common\models\Employee;
 use console\migrations\RbacMigrationService;
-use sales\rbac\rules\globalRules\clientChat\ClientChatToInProgressOwnerRule;
-use sales\rbac\rules\globalRules\clientChat\ClientChatToInProgressRule;
+use src\rbac\rules\globalRules\clientChat\ClientChatToInProgressOwnerRule;
+use src\rbac\rules\globalRules\clientChat\ClientChatToInProgressRule;
 use yii\db\Migration;
 
 /**

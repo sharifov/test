@@ -12,7 +12,7 @@ use modules\flight\models\query\FlightQuery;
 use modules\flight\src\events\FlightRequestUpdateEvent;
 use modules\product\src\interfaces\Productable;
 use modules\product\src\interfaces\ProductQuoteService;
-use sales\entities\EventTrait;
+use src\entities\EventTrait;
 use yii\db\ActiveQuery;
 
 /**

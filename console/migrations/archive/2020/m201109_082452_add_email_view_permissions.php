@@ -1,11 +1,11 @@
 <?php
 
-use sales\rbac\rules\email\view\EmailViewAddressOwnerRule;
-use sales\rbac\rules\email\view\EmailViewCaseOwnerRule;
-use sales\rbac\rules\email\view\EmailViewEmptyRule;
-use sales\rbac\rules\email\view\EmailViewGroupRule;
-use sales\rbac\rules\email\view\EmailViewLeadOwnerRule;
-use sales\rbac\rules\email\view\EmailViewOwnerRule;
+use src\rbac\rules\email\view\EmailViewAddressOwnerRule;
+use src\rbac\rules\email\view\EmailViewCaseOwnerRule;
+use src\rbac\rules\email\view\EmailViewEmptyRule;
+use src\rbac\rules\email\view\EmailViewGroupRule;
+use src\rbac\rules\email\view\EmailViewLeadOwnerRule;
+use src\rbac\rules\email\view\EmailViewOwnerRule;
 use yii\db\Migration;
 
 /**

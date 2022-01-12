@@ -3,7 +3,7 @@
 namespace frontend\controllers;
 
 use frontend\widgets\multipleUpdate\cases\MultipleUpdateService;
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
 use common\models\Employee;
 use frontend\widgets\multipleUpdate\cases\MultipleUpdateForm;

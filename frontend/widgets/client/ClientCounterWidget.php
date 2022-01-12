@@ -2,7 +2,7 @@
 
 namespace frontend\widgets\client;
 
-use sales\model\client\query\ClientLeadCaseCounter;
+use src\model\client\query\ClientLeadCaseCounter;
 use yii\base\Widget;
 
 /**

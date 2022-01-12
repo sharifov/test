@@ -8,7 +8,7 @@ use modules\product\src\useCases\product\update\ProductUpdateForm;
 use modules\product\src\useCases\product\create\ProductCreateForm;
 use modules\product\src\useCases\product\create\ProductCreateService;
 use modules\product\src\useCases\product\update\ProductUpdateService;
-use sales\helpers\app\AppHelper;
+use src\helpers\app\AppHelper;
 use common\components\bootstrap4\activeForm\ActiveForm;
 use Yii;
 use common\models\Lead;

@@ -4,7 +4,7 @@ namespace common\components\grid;
 
 use common\models\Employee;
 use Yii;
-use sales\access\ListsAccess;
+use src\access\ListsAccess;
 use yii\grid\DataColumn;
 
 /**

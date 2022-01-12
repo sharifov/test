@@ -5,10 +5,10 @@ use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\UserContactList;
 use common\models\UserProfile;
-use sales\access\CallAccess;
-use sales\access\ContactUpdateAccess;
-use sales\auth\Auth;
-use sales\helpers\call\CallHelper;
+use src\access\CallAccess;
+use src\access\ContactUpdateAccess;
+use src\auth\Auth;
+use src\helpers\call\CallHelper;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 

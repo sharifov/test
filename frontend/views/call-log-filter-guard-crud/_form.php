@@ -4,7 +4,7 @@ use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\callLogFilterGuard\entity\CallLogFilterGuard */
+/* @var $model src\model\callLogFilterGuard\entity\CallLogFilterGuard */
 /* @var $form ActiveForm */
 ?>
 

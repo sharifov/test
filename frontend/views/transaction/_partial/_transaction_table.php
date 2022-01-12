@@ -1,7 +1,7 @@
 <?php
 
 use common\models\Transaction;
-use sales\auth\Auth;
+use src\auth\Auth;
 use yii\bootstrap4\Html;
 use yii\helpers\Url;
 

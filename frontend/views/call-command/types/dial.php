@@ -1,7 +1,7 @@
 <?php
 
-use sales\model\call\entity\callCommand\types\Dial;
-use sales\model\call\services\CallCommandTypeService;
+use src\model\call\entity\callCommand\types\Dial;
+use src\model\call\services\CallCommandTypeService;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 

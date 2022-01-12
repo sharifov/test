@@ -1,8 +1,8 @@
 <?php
 
 use dosamigos\datepicker\DatePicker;
-use sales\access\EmployeeProjectAccess;
-use sales\access\ListsAccess;
+use src\access\EmployeeProjectAccess;
+use src\access\ListsAccess;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use common\models\Lead;

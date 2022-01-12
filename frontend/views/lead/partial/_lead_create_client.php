@@ -1,6 +1,6 @@
 <?php
 
-use sales\model\lead\useCases\lead\create\LeadManageForm;
+use src\model\lead\useCases\lead\create\LeadManageForm;
 use unclead\multipleinput\MultipleInput;
 use yii\widgets\ActiveForm;
 use unclead\multipleinput\MultipleInputColumn;

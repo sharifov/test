@@ -7,7 +7,7 @@
  * @var $div string
  */
 
-use sales\services\parsingDump\ReservationService;
+use src\services\parsingDump\ReservationService;
 use yii\bootstrap\Html;
 use yii\data\ActiveDataProvider;
 use yii\grid\GridView;

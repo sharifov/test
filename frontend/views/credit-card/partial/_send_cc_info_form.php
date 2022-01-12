@@ -1,6 +1,6 @@
 <?php
 
-use sales\forms\caseSale\CaseSaleSendCcInfoForm;
+use src\forms\caseSale\CaseSaleSendCcInfoForm;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;

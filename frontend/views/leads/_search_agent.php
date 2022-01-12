@@ -2,7 +2,7 @@
 
 use common\models\Quote;
 use kartik\select2\Select2;
-use sales\model\leadDataKey\entity\LeadDataKey;
+use src\model\leadDataKey\entity\LeadDataKey;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 

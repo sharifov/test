@@ -4,7 +4,7 @@ use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChat\cannedResponseCategory\entity\ClientChatCannedResponseCategory */
+/* @var $model src\model\clientChat\cannedResponseCategory\entity\ClientChatCannedResponseCategory */
 
 $this->title = $model->crc_id;
 $this->params['breadcrumbs'][] = ['label' => 'Client Chat Canned Response Categories', 'url' => ['index']];

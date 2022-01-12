@@ -6,7 +6,7 @@ use common\components\SearchService;
 use common\models\Airline;
 use common\models\Airports;
 use modules\flight\models\FlightQuoteSegment;
-use sales\entities\serializer\Serializer;
+use src\entities\serializer\Serializer;
 
 /**
  * Class FlightQuoteSegmentSerializer

@@ -1,11 +1,11 @@
 <?php
 
-use sales\model\clientChatChannel\entity\ClientChatChannel;
+use src\model\clientChatChannel\entity\ClientChatChannel;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChatChannel\entity\ClientChatChannel */
+/* @var $model src\model\clientChatChannel\entity\ClientChatChannel */
 /* @var $form ActiveForm */
 ?>
 
@@ -23,7 +23,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'ccc_dep_id')->dropDownList(\common\models\Department::getList(), ['prompt' => '---']) ?>
 
-        <?= $form->field($model, 'ccc_ug_id')->widget(\sales\widgets\UserGroupSelect2Widget::class, [
+        <?= $form->field($model, 'ccc_ug_id')->widget(\src\widgets\UserGroupSelect2Widget::class, [
             'data' => $model->ccc_ug_id ? [
                 $model->ccc_ug_id => $model->cccUg->ug_name
             ] : [],

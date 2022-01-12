@@ -1,11 +1,11 @@
 <?php
 
-use sales\model\contactPhoneData\service\ContactPhoneDataDictionary;
+use src\model\contactPhoneData\service\ContactPhoneDataDictionary;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\contactPhoneData\entity\ContactPhoneData */
+/* @var $model src\model\contactPhoneData\entity\ContactPhoneData */
 /* @var $form ActiveForm */
 ?>
 

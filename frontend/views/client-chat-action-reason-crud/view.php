@@ -1,12 +1,12 @@
 <?php
 
-use sales\model\clientChat\entity\actionReason\ClientChatActionReason;
-use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
+use src\model\clientChat\entity\actionReason\ClientChatActionReason;
+use src\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChat\entity\actionReason\ClientChatActionReason */
+/* @var $model src\model\clientChat\entity\actionReason\ClientChatActionReason */
 
 $this->title = $model->ccar_id;
 $this->params['breadcrumbs'][] = ['label' => 'Client Chat Action Reasons', 'url' => ['index']];

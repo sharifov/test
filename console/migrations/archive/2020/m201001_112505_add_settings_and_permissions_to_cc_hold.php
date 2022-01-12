@@ -4,8 +4,8 @@ use common\models\Employee;
 use common\models\Setting;
 use common\models\SettingCategory;
 use console\migrations\RbacMigrationService;
-use sales\rbac\rules\globalRules\clientChat\ClientChatHoldOwnerRule;
-use sales\rbac\rules\globalRules\clientChat\ClientChatHoldRule;
+use src\rbac\rules\globalRules\clientChat\ClientChatHoldOwnerRule;
+use src\rbac\rules\globalRules\clientChat\ClientChatHoldRule;
 use yii\db\Migration;
 use yii\helpers\Json;
 

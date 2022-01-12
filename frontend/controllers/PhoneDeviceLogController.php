@@ -2,10 +2,10 @@
 
 namespace frontend\controllers;
 
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
-use sales\model\voip\phoneDevice\log\PhoneDeviceLog;
-use sales\model\voip\phoneDevice\log\PhoneDeviceLogSearch;
+use src\model\voip\phoneDevice\log\PhoneDeviceLog;
+use src\model\voip\phoneDevice\log\PhoneDeviceLogSearch;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;

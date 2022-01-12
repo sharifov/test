@@ -2,7 +2,7 @@
 
 namespace frontend\helpers;
 
-use sales\model\clientChatNote\entity\ClientChatNote;
+use src\model\clientChatNote\entity\ClientChatNote;
 use yii\helpers\Html;
 
 /**

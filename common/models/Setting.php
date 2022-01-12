@@ -3,7 +3,7 @@
 namespace common\models;
 
 use common\models\query\SettingQuery;
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
 use yii\behaviors\AttributeBehavior;
 use yii\behaviors\TimestampBehavior;

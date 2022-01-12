@@ -3,7 +3,7 @@
 namespace modules\flight\src\repositories\flightRequestLog;
 
 use modules\flight\models\FlightRequestLog;
-use sales\helpers\ErrorsToStringHelper;
+use src\helpers\ErrorsToStringHelper;
 
 /**
  * Class FlightRequestLogRepository

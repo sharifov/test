@@ -5,7 +5,7 @@ namespace modules\order\src\forms\api\createC2b;
 use common\models\Sources;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderStatus;
-use sales\forms\CompositeForm;
+use src\forms\CompositeForm;
 
 /**
  * Class CreateC2BForm

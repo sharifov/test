@@ -5,7 +5,7 @@ use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\search\LeadSearch */
-/* @var $caseModel \sales\entities\cases\Cases */
+/* @var $caseModel \src\entities\cases\Cases */
 /* @var $form yii\widgets\ActiveForm */
 
 ?>

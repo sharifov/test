@@ -1,13 +1,13 @@
 <?php
 
 use common\models\CallUserAccess;
-use sales\widgets\DateTimePicker;
-use sales\widgets\UserSelect2Widget;
+use src\widgets\DateTimePicker;
+use src\widgets\UserSelect2Widget;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\callLog\entity\callLogUserAccess\CallLogUserAccess */
+/* @var $model src\model\callLog\entity\callLogUserAccess\CallLogUserAccess */
 /* @var $form ActiveForm */
 ?>
 

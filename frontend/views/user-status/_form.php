@@ -5,7 +5,7 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\user\entity\userStatus\UserStatus */
+/* @var $model src\model\user\entity\userStatus\UserStatus */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 

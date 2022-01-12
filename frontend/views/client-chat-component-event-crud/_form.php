@@ -1,12 +1,12 @@
 <?php
 
-use sales\model\clientChat\componentEvent\entity\ClientChatComponentEvent;
-use sales\model\clientChatChannel\entity\ClientChatChannel;
+use src\model\clientChat\componentEvent\entity\ClientChatComponentEvent;
+use src\model\clientChatChannel\entity\ClientChatChannel;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChat\componentEvent\entity\ClientChatComponentEvent */
+/* @var $model src\model\clientChat\componentEvent\entity\ClientChatComponentEvent */
 /* @var $form ActiveForm */
 ?>
 

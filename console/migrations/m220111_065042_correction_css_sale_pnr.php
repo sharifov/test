@@ -1,7 +1,7 @@
 <?php
 
 use common\models\CaseSale;
-use sales\services\caseSale\PnrPreparingService;
+use src\services\caseSale\PnrPreparingService;
 use yii\db\Migration;
 use yii\helpers\Console;
 

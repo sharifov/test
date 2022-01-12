@@ -1,9 +1,9 @@
 <?php
 
 use common\models\Employee;
-use sales\rbac\rules\lead\view\communicationBlock\LeadViewCommunicationBlockCommonGroupRule;
-use sales\rbac\rules\lead\view\communicationBlock\LeadViewCommunicationBlockEmptyOwnerRule;
-use sales\rbac\rules\lead\view\communicationBlock\LeadViewCommunicationBlockIsOwnerRule;
+use src\rbac\rules\lead\view\communicationBlock\LeadViewCommunicationBlockCommonGroupRule;
+use src\rbac\rules\lead\view\communicationBlock\LeadViewCommunicationBlockEmptyOwnerRule;
+use src\rbac\rules\lead\view\communicationBlock\LeadViewCommunicationBlockIsOwnerRule;
 use yii\db\Migration;
 
 /**

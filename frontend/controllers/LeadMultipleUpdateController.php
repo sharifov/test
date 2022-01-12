@@ -4,7 +4,7 @@ namespace frontend\controllers;
 
 use frontend\widgets\multipleUpdate\lead\MultipleUpdateForm;
 use frontend\widgets\multipleUpdate\lead\MultipleUpdateService;
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
 use yii\bootstrap4\ActiveForm;
 use yii\web\BadRequestHttpException;

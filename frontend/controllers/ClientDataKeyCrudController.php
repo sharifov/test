@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\clientDataKey\entity\ClientDataKey;
-use sales\model\clientDataKey\entity\ClientDataKeySearch;
+use src\model\clientDataKey\entity\ClientDataKey;
+use src\model\clientDataKey\entity\ClientDataKeySearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

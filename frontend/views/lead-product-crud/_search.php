@@ -1,6 +1,6 @@
 <?php
 
-use sales\model\leadProduct\entity\search\LeadProductSearch;
+use src\model\leadProduct\entity\search\LeadProductSearch;
 use yii\bootstrap4\Html;
 use common\components\bootstrap4\activeForm\ActiveForm;
 

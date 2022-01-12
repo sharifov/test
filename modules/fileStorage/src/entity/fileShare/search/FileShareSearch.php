@@ -40,10 +40,10 @@ class FileShareSearch extends FileShare
         }
 
         if ($this->fsh_created_dt) {
-            \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'fsh_created_dt', $this->fsh_created_dt, $user->timezone);
+            \src\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'fsh_created_dt', $this->fsh_created_dt, $user->timezone);
         }
         if ($this->fsh_expired_dt) {
-            \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'fsh_expired_dt', $this->fsh_expired_dt, $user->timezone);
+            \src\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'fsh_expired_dt', $this->fsh_expired_dt, $user->timezone);
         }
 
         $query->andFilterWhere([

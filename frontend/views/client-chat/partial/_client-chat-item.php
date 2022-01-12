@@ -2,12 +2,12 @@
 
 use common\components\i18n\Formatter;
 use common\models\Employee;
-use sales\auth\Auth;
-use sales\helpers\clientChat\ClientChatHelper;
-use sales\model\clientChat\ClientChatPlatform;
-use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChatLastMessage\entity\ClientChatLastMessage;
-use sales\model\clientChatMessage\entity\ClientChatMessage;
+use src\auth\Auth;
+use src\helpers\clientChat\ClientChatHelper;
+use src\model\clientChat\ClientChatPlatform;
+use src\model\clientChat\entity\ClientChat;
+use src\model\clientChatLastMessage\entity\ClientChatLastMessage;
+use src\model\clientChatMessage\entity\ClientChatMessage;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\StringHelper;

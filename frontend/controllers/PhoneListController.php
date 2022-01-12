@@ -2,11 +2,11 @@
 
 namespace frontend\controllers;
 
-use sales\auth\Auth;
-use sales\model\phoneList\services\PhoneListService;
+use src\auth\Auth;
+use src\model\phoneList\services\PhoneListService;
 use Yii;
-use sales\model\phoneList\entity\PhoneList;
-use sales\model\phoneList\entity\search\PhoneListSearch;
+use src\model\phoneList\entity\PhoneList;
+use src\model\phoneList\entity\search\PhoneListSearch;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\VarDumper;

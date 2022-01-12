@@ -2,8 +2,8 @@
 
 use common\models\Employee;
 use common\models\UserProjectParams;
-use sales\model\userAuthClient\entity\UserAuthClient;
-use sales\model\userAuthClient\entity\UserAuthClientSources;
+use src\model\userAuthClient\entity\UserAuthClient;
+use src\model\userAuthClient\entity\UserAuthClientSources;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
@@ -176,7 +176,7 @@ $this->title = 'Home Page'; // . $user->username;
             </div>
             <?php endif; ?>
 
-            <?php if (\sales\helpers\setting\SettingHelper::isEnabledAuthClients()) : ?>
+            <?php if (\src\helpers\setting\SettingHelper::isEnabledAuthClients()) : ?>
                 <div class="x_panel">
                     <div class="x_title" >
                         <h2><i class="fa fa-sticky-note-o"></i> Auth clients</h2>

@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\clientAccount\entity\ClientAccount;
-use sales\model\clientAccount\entity\ClientAccountSearch;
+use src\model\clientAccount\entity\ClientAccount;
+use src\model\clientAccount\entity\ClientAccountSearch;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

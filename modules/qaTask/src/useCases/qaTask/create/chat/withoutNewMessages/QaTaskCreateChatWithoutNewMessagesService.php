@@ -10,11 +10,11 @@ use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategoryQuery;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\qaTask\src\entities\qaTaskStatusLog\CreateDto;
 use modules\qaTask\src\useCases\qaTask\QaTaskActions;
-use sales\dispatchers\EventDispatcher;
-use sales\helpers\app\AppHelper;
-use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChatChannel\entity\ClientChatChannel;
-use sales\model\clientChatLastMessage\entity\ClientChatLastMessage;
+use src\dispatchers\EventDispatcher;
+use src\helpers\app\AppHelper;
+use src\model\clientChat\entity\ClientChat;
+use src\model\clientChatChannel\entity\ClientChatChannel;
+use src\model\clientChatLastMessage\entity\ClientChatLastMessage;
 use yii\db\Expression;
 use yii\helpers\VarDumper;
 

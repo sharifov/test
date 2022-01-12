@@ -1,7 +1,7 @@
 <?php
 
 use common\models\Department;
-use sales\model\department\department\Type;
+use src\model\department\department\Type;
 use yii\db\Migration;
 use yii\helpers\VarDumper;
 

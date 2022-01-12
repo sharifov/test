@@ -1,11 +1,11 @@
 <?php
 
-use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
+use src\model\sms\entity\smsDistributionList\SmsDistributionList;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\sms\entity\smsDistributionList\SmsDistributionList */
+/* @var $model src\model\sms\entity\smsDistributionList\SmsDistributionList */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 

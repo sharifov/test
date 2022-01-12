@@ -3,7 +3,7 @@
 namespace modules\rentCar\src\services;
 
 use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
-use sales\services\CurrencyHelper;
+use src\services\CurrencyHelper;
 
 class RentCarQuotePriceCalculator
 {

@@ -10,9 +10,9 @@ use modules\order\src\entities\order\OrderSourceType;
 use modules\order\src\entities\order\OrderStatus;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productType\ProductTypeQuery;
-use sales\entities\cases\CaseCategory;
-use sales\entities\cases\CasesStatus;
-use sales\helpers\setting\SettingHelper;
+use src\entities\cases\CaseCategory;
+use src\entities\cases\CasesStatus;
+use src\helpers\setting\SettingHelper;
 
 class ProductQuoteAbacObject extends AbacBaseModel implements AbacInterface
 {

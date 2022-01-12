@@ -2,7 +2,7 @@
 
 namespace modules\hotel\models;
 
-use sales\entities\EventTrait;
+use src\entities\EventTrait;
 use Yii;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;

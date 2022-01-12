@@ -1,13 +1,13 @@
 <?php
 
-use sales\auth\Auth;
+use src\auth\Auth;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use yii\bootstrap4\Modal;
 
 /* @var $this yii\web\View */
 /* @var $leadModel \common\models\Lead */
-/* @var $caseModel \sales\entities\cases\Cases */
+/* @var $caseModel \src\entities\cases\Cases */
 /* @var $model \common\models\Lead */
 /* @var $isAdmin boolean */
 
@@ -88,13 +88,13 @@ $isAgent = false;
                             'value' => static function (\common\models\Lead $model) {
                                 $clientEmails = $model->client ? $model->client->getEmailList() : [];
                                 foreach ($clientEmails as $key => $element) {
-                                    $clientEmails[$key] = \sales\helpers\email\MaskEmailHelper::masking($element);
+                                    $clientEmails[$key] = \src\helpers\email\MaskEmailHelper::masking($element);
                                 }
 
                                 $clientPhones = \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone');
 
                                 foreach ($clientPhones as $key => $element) {
-                                    $clientPhones[$key] = \sales\helpers\phone\MaskPhoneHelper::masking($element);
+                                    $clientPhones[$key] = \src\helpers\phone\MaskPhoneHelper::masking($element);
                                 }
 
                                 $str = $model->client && $model->client->clientEmails ? ' <i class="fa fa-envelope"></i> ' . implode(' <i class="fa fa-envelope"></i> ', $clientEmails) . '' : '';

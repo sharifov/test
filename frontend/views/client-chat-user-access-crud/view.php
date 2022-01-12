@@ -2,10 +2,10 @@
 
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
-use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
+use src\model\clientChatUserAccess\entity\ClientChatUserAccess;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChatUserAccess\entity\ClientChatUserAccess */
+/* @var $model src\model\clientChatUserAccess\entity\ClientChatUserAccess */
 
 $this->title = $model->ccua_cch_id;
 $this->params['breadcrumbs'][] = ['label' => 'Client Chat User Accesses', 'url' => ['index']];

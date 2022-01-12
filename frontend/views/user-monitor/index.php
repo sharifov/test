@@ -2,15 +2,15 @@
 
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
-use sales\auth\Auth;
-use sales\model\user\entity\monitor\UserMonitor;
-use sales\services\cleaner\form\DbCleanerParamsForm;
+use src\auth\Auth;
+use src\model\user\entity\monitor\UserMonitor;
+use src\services\cleaner\form\DbCleanerParamsForm;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\user\entity\monitor\search\UserMonitorSearch */
+/* @var $searchModel src\model\user\entity\monitor\search\UserMonitorSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var DbCleanerParamsForm $modelCleaner */
 

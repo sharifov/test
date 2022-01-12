@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model \sales\model\kpi\entity\kpiUserPerformance\KpiUserPerformance */
+/* @var $model \src\model\kpi\entity\kpiUserPerformance\KpiUserPerformance */
 
 $this->title = $model->up_user_id;
 $this->params['breadcrumbs'][] = ['label' => 'Kpi User Performances', 'url' => ['index']];

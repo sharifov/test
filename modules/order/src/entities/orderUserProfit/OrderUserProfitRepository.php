@@ -2,7 +2,7 @@
 
 namespace modules\order\src\entities\orderUserProfit;
 
-use sales\dispatchers\EventDispatcher;
+use src\dispatchers\EventDispatcher;
 use yii\db\Exception;
 
 /**

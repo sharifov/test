@@ -3,7 +3,7 @@
 namespace common\tests;
 
 use Codeception\Test\Unit;
-use sales\services\parsingDump\lib\ParsingDump;
+use src\services\parsingDump\lib\ParsingDump;
 
 /**
  * Class AbstractGdsParsing

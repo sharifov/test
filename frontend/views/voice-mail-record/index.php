@@ -9,7 +9,7 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\voiceMailRecord\entity\search\VoiceMailRecordSearch */
+/* @var $searchModel src\model\voiceMailRecord\entity\search\VoiceMailRecordSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Voice Mail Records';

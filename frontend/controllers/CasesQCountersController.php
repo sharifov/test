@@ -3,7 +3,7 @@
 namespace frontend\controllers;
 
 use common\models\Employee;
-use sales\repositories\cases\CasesQRepository;
+use src\repositories\cases\CasesQRepository;
 use yii\filters\ContentNegotiator;
 use yii\helpers\ArrayHelper;
 use yii\web\Response;

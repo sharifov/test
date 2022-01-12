@@ -1,7 +1,7 @@
 <?php
 
 use common\models\Lead;
-use sales\forms\lead\CloneQuoteByUidForm;
+use src\forms\lead\CloneQuoteByUidForm;
 use yii\bootstrap\ActiveForm;
 use yii\bootstrap\Html;
 use yii\bootstrap4\Modal;

@@ -4,8 +4,8 @@ namespace modules\rentCar\src\repositories\rentCar;
 
 use modules\rentCar\src\entity\rentCar\RentCar;
 use modules\rentCar\src\exceptions\RentCarCodeException;
-use sales\dispatchers\EventDispatcher;
-use sales\repositories\NotFoundException;
+use src\dispatchers\EventDispatcher;
+use src\repositories\NotFoundException;
 
 /**
  * Class RentCarRepository

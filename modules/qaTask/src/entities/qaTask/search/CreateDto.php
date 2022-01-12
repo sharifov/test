@@ -10,7 +10,7 @@ use modules\qaTask\src\entities\qaTask\QaTaskRating;
 use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategoryQuery;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\qaTask\src\helpers\formatters\QaTaskCategoryFormatter;
-use sales\access\QueryAccessService;
+use src\access\QueryAccessService;
 use Webmozart\Assert\Assert;
 use yii\base\BaseObject;
 

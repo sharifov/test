@@ -1,10 +1,10 @@
 <?php
 
 use common\models\Employee;
-use sales\access\EmployeeProjectAccess;
+use src\access\EmployeeProjectAccess;
 use yii\helpers\Html;
-use sales\model\callLog\entity\callLog\CallLog;
-use sales\model\callLog\entity\callLog\CallLogType;
+use src\model\callLog\entity\callLog\CallLog;
+use src\model\callLog\entity\callLog\CallLogType;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;

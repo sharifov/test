@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\userVoiceMail\entity\UserVoiceMail */
+/* @var $model src\model\userVoiceMail\entity\UserVoiceMail */
 /* @var $languageList array */
 
 $this->title = 'Create User Voice Mail';

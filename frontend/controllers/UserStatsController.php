@@ -2,12 +2,12 @@
 
 namespace frontend\controllers;
 
-use sales\auth\Auth;
-use sales\model\user\entity\userStats\UserStatsSearch;
-use sales\model\user\reports\stats\Access;
-use sales\model\user\reports\stats\SessionFilterStorage;
-use sales\model\user\reports\stats\UserStatsReport;
-use sales\model\userModelSetting\service\UserModelSettingService;
+use src\auth\Auth;
+use src\model\user\entity\userStats\UserStatsSearch;
+use src\model\user\reports\stats\Access;
+use src\model\user\reports\stats\SessionFilterStorage;
+use src\model\user\reports\stats\UserStatsReport;
+use src\model\userModelSetting\service\UserModelSettingService;
 use Yii;
 
 /**

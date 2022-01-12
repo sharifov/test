@@ -6,7 +6,7 @@ use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\callTerminateLog\entity\CallTerminateLog */
+/* @var $model src\model\callTerminateLog\entity\CallTerminateLog */
 /* @var $form ActiveForm */
 ?>
 

@@ -4,8 +4,8 @@ namespace modules\flight\src\useCases\voluntaryRefund\manualCreate;
 
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
-use sales\entities\cases\Cases;
-use sales\helpers\ErrorsToStringHelper;
+use src\entities\cases\Cases;
+use src\helpers\ErrorsToStringHelper;
 use yii\base\Model;
 use common\components\validators\CheckIsBooleanValidator;
 

@@ -3,8 +3,8 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\project\entity\projectLocale\ProjectLocale */
-/* @var $copyModel sales\model\project\entity\projectLocale\ProjectLocale */
+/* @var $model src\model\project\entity\projectLocale\ProjectLocale */
+/* @var $copyModel src\model\project\entity\projectLocale\ProjectLocale */
 
 $this->title = ($copyModel ? 'Copy' : 'Create' ) . ' Project Locale';
 $this->params['breadcrumbs'][] = ['label' => 'Project Locales', 'url' => ['index']];

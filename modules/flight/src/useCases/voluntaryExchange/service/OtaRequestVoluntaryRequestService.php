@@ -5,8 +5,8 @@ namespace modules\flight\src\useCases\voluntaryExchange\service;
 use common\components\HybridService;
 use modules\flight\models\FlightRequest;
 use modules\product\src\entities\productQuote\ProductQuote;
-use sales\entities\cases\CaseEventLog;
-use sales\entities\cases\Cases;
+use src\entities\cases\CaseEventLog;
+use src\entities\cases\Cases;
 use Yii;
 
 /**

@@ -2,7 +2,7 @@
 
 namespace common\components\jobs;
 
-use sales\model\client\useCase\excludeInfo\ClientExcludeIpChecker;
+use src\model\client\useCase\excludeInfo\ClientExcludeIpChecker;
 use yii\queue\JobInterface;
 
 /**

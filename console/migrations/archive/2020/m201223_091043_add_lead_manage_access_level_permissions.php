@@ -1,9 +1,9 @@
 <?php
 
 use yii\db\Migration;
-use sales\rbac\rules\lead\manage\LeadManageIsOwnerRule;
-use sales\rbac\rules\lead\manage\LeadManageEmptyOwnerRule;
-use sales\rbac\rules\lead\manage\LeadManageGroupRule;
+use src\rbac\rules\lead\manage\LeadManageIsOwnerRule;
+use src\rbac\rules\lead\manage\LeadManageEmptyOwnerRule;
+use src\rbac\rules\lead\manage\LeadManageGroupRule;
 use common\models\Employee;
 use console\migrations\RbacMigrationService;
 

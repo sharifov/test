@@ -3,7 +3,7 @@
 use common\models\Employee;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
-use sales\auth\Auth;
+use src\auth\Auth;
 use yii\grid\GridView;
 use yii\helpers\Html;
 use common\models\Lead;

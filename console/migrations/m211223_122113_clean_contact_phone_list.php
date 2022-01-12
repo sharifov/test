@@ -1,9 +1,9 @@
 <?php
 
 use common\models\ClientPhone;
-use sales\helpers\ErrorsToStringHelper;
-use sales\model\contactPhoneList\entity\ContactPhoneList;
-use sales\model\contactPhoneList\service\PhoneNumberService;
+use src\helpers\ErrorsToStringHelper;
+use src\model\contactPhoneList\entity\ContactPhoneList;
+use src\model\contactPhoneList\service\PhoneNumberService;
 use yii\db\Migration;
 use yii\helpers\Console;
 

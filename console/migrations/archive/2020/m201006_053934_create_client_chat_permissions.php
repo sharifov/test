@@ -1,17 +1,17 @@
 <?php
 
 use common\models\Employee;
-use sales\rbac\rules\clientChat\close\ClientChatCloseInProgressRule;
-use sales\rbac\rules\clientChat\close\ClientChatCloseNewRule;
-use sales\rbac\rules\clientChat\close\ClientChatClosePendingRule;
-use sales\rbac\rules\clientChat\close\ClientChatCloseTransferRule;
-use sales\rbac\rules\clientChat\manage\ClientChatManageGroupRule;
-use sales\rbac\rules\clientChat\manage\ClientChatManageOwnerRule;
-use sales\rbac\rules\clientChat\transfer\ClientChatTransferInProgressRule;
-use sales\rbac\rules\clientChat\transfer\ClientChatTransferNewRule;
-use sales\rbac\rules\clientChat\transfer\ClientChatTransferPendingRule;
-use sales\rbac\rules\clientChat\view\ClientChatViewGroupRule;
-use sales\rbac\rules\clientChat\view\ClientChatViewOwnerRule;
+use src\rbac\rules\clientChat\close\ClientChatCloseInProgressRule;
+use src\rbac\rules\clientChat\close\ClientChatCloseNewRule;
+use src\rbac\rules\clientChat\close\ClientChatClosePendingRule;
+use src\rbac\rules\clientChat\close\ClientChatCloseTransferRule;
+use src\rbac\rules\clientChat\manage\ClientChatManageGroupRule;
+use src\rbac\rules\clientChat\manage\ClientChatManageOwnerRule;
+use src\rbac\rules\clientChat\transfer\ClientChatTransferInProgressRule;
+use src\rbac\rules\clientChat\transfer\ClientChatTransferNewRule;
+use src\rbac\rules\clientChat\transfer\ClientChatTransferPendingRule;
+use src\rbac\rules\clientChat\view\ClientChatViewGroupRule;
+use src\rbac\rules\clientChat\view\ClientChatViewOwnerRule;
 use yii\db\Migration;
 
 /**

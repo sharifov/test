@@ -1,12 +1,12 @@
 <?php
 
-use sales\model\clientDataKey\entity\ClientDataKey;
-use sales\model\clientDataKey\service\ClientDataKeyService;
+use src\model\clientDataKey\entity\ClientDataKey;
+use src\model\clientDataKey\service\ClientDataKeyService;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientData\entity\ClientData */
+/* @var $model src\model\clientData\entity\ClientData */
 /* @var $form ActiveForm */
 ?>
 

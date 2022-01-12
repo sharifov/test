@@ -3,7 +3,7 @@
 namespace modules\qaTask\src\entities\qaTaskCategory;
 
 use modules\qaTask\src\exceptions\QaTaskCodeException;
-use sales\repositories\NotFoundException;
+use src\repositories\NotFoundException;
 
 /**
  * Class QaTaskCategoryRepository

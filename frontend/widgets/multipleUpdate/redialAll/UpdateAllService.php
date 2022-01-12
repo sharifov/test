@@ -4,8 +4,8 @@ namespace frontend\widgets\multipleUpdate\redialAll;
 
 use common\models\Lead;
 use common\models\LeadQcall;
-use sales\repositories\lead\LeadQcallRepository;
-use sales\services\lead\qcall\QCallService;
+use src\repositories\lead\LeadQcallRepository;
+use src\services\lead\qcall\QCallService;
 use yii\db\ActiveQuery;
 
 /**

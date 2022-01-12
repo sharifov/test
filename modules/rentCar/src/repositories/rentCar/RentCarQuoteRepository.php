@@ -4,7 +4,7 @@ namespace modules\rentCar\src\repositories\rentCar;
 
 use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
 use modules\rentCar\src\exceptions\RentCarCodeException;
-use sales\dispatchers\EventDispatcher;
+use src\dispatchers\EventDispatcher;
 
 /**
  * Class RentCarQuoteRepository

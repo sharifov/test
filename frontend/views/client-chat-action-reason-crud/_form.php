@@ -1,11 +1,11 @@
 <?php
 
-use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
+use src\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChat\entity\actionReason\ClientChatActionReason */
+/* @var $model src\model\clientChat\entity\actionReason\ClientChatActionReason */
 /* @var $form ActiveForm */
 ?>
 

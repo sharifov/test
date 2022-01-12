@@ -56,7 +56,7 @@ return [
         ],
         'authManager' => [
             'class' => 'yii\rbac\DbManager',
-            'cache' => 'cache',
+          //  'cache' => 'cache',
         ],
 
         'user' => [
@@ -262,7 +262,7 @@ return [
 
         'translatemanager' => [
             'class'                     => \lajax\translatemanager\Module::class,
-            'root'                      => [/*'@frontend/views/',*/ '@frontend/../sales/model/clientChat/'],               // The root directory of the project scan.
+            'root'                      => [/*'@frontend/views/',*/ '@frontend/../src/model/clientChat/'],               // The root directory of the project scan.
             'scanRootParentDirectory'   => true,
             'layout'                    => '@frontend/themes/gentelella_v2/views/layouts/main_crud',         // Name of the used layout. If using own layout use 'null'.
             'allowedIPs'                => ['*'],               // 127.0.0.1 IP addresses from which the translation interface is accessible.

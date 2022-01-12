@@ -6,7 +6,7 @@
 /* @var $employees [] */
 
 use common\models\Employee;
-use sales\access\EmployeeProjectAccess;
+use src\access\EmployeeProjectAccess;
 use yii\bootstrap\Html;
 use yii\grid\GridView;
 

@@ -2,15 +2,15 @@
 
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
-use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChatChannel\entity\ClientChatChannel;
-use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
+use src\model\clientChat\entity\ClientChat;
+use src\model\clientChatChannel\entity\ClientChatChannel;
+use src\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\clientChatStatusLog\entity\search\ClientChatStatusLog */
+/* @var $searchModel src\model\clientChatStatusLog\entity\search\ClientChatStatusLog */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Client Chat Status Logs';
@@ -51,7 +51,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ) : null;
                 },
                 'format' => 'raw',
-                'filter' => \sales\model\clientChat\entity\ClientChat::getStatusList()
+                'filter' => \src\model\clientChat\entity\ClientChat::getStatusList()
             ],
             [
                 'attribute' => 'csl_to_status',
@@ -63,7 +63,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ) : null;
                 },
                 'format' => 'raw',
-                'filter' => \sales\model\clientChat\entity\ClientChat::getStatusList()
+                'filter' => \src\model\clientChat\entity\ClientChat::getStatusList()
             ],
             [
                 'attribute' => 'csl_prev_channel_id',

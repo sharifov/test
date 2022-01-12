@@ -1,10 +1,10 @@
 <?php
 
 use common\models\UserProjectParams;
-use sales\auth\Auth;
-use sales\model\userVoiceMail\entity\UserVoiceMailQuery;
-use sales\widgets\EmailSelect2Widget;
-use sales\widgets\PhoneSelect2Widget;
+use src\auth\Auth;
+use src\model\userVoiceMail\entity\UserVoiceMailQuery;
+use src\widgets\EmailSelect2Widget;
+use src\widgets\PhoneSelect2Widget;
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
 use borales\extensions\phoneInput\PhoneInput;

@@ -1,7 +1,7 @@
 <?php
 
 use common\models\Lead;
-use sales\model\leadDataKey\entity\LeadDataKey;
+use src\model\leadDataKey\entity\LeadDataKey;
 use yii\web\View;
 
 /**

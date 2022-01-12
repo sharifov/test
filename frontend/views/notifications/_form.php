@@ -1,6 +1,6 @@
 <?php
 
-use sales\widgets\UserSelect2Widget;
+use src\widgets\UserSelect2Widget;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 

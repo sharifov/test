@@ -8,7 +8,7 @@
  * @var $delayChargeAccess bool
  */
 
-use sales\forms\lead\LeadPreferencesForm;
+use src\forms\lead\LeadPreferencesForm;
 use yii\bootstrap\ActiveForm;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -39,7 +39,7 @@ use yii\web\View;
         </div>
         <div class="row">
             <div class="col-md-6">
-                <?= $form->field($leadPreferencesForm, 'numberStops')->dropDownList(\sales\helpers\lead\LeadPreferencesHelper::listNumberStops(), ['prompt' => '-']) ?>
+                <?= $form->field($leadPreferencesForm, 'numberStops')->dropDownList(\src\helpers\lead\LeadPreferencesHelper::listNumberStops(), ['prompt' => '-']) ?>
             </div>
             <div class="col-md-6">
                 <?= $form->field($leadPreferencesForm, 'currency')->dropDownList(\common\models\Currency::getList(), ['prompt' => '-']) ?>

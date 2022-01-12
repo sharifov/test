@@ -2,7 +2,7 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
-use sales\access\EmployeeDepartmentAccess;
+use src\access\EmployeeDepartmentAccess;
 use common\models\Lead;
 use common\models\Employee;
 

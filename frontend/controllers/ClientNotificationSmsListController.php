@@ -2,10 +2,10 @@
 
 namespace frontend\controllers;
 
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
-use sales\model\client\notifications\sms\entity\ClientNotificationSmsList;
-use sales\model\client\notifications\sms\entity\search\ClientNotificationSmsListSearch;
+use src\model\client\notifications\sms\entity\ClientNotificationSmsList;
+use src\model\client\notifications\sms\entity\search\ClientNotificationSmsListSearch;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 use yii\web\NotFoundHttpException;

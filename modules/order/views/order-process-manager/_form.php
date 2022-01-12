@@ -4,7 +4,7 @@ use modules\order\src\entities\order\Order;
 use modules\order\src\processManager\OrderProcessManager;
 use modules\order\src\processManager\Status;
 use modules\order\src\processManager\Type;
-use sales\widgets\DateTimePicker;
+use src\widgets\DateTimePicker;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 

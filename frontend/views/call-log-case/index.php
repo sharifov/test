@@ -1,13 +1,13 @@
 <?php
 
-use sales\model\callLog\entity\callLogCase\CallLogCase;
+use src\model\callLog\entity\callLogCase\CallLogCase;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\helpers\Url;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\callLog\entity\callLogCase\search\CallLogCaseSearch */
+/* @var $searchModel src\model\callLog\entity\callLogCase\search\CallLogCaseSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Call Log Cases';

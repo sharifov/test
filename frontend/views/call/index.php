@@ -8,17 +8,17 @@ use common\models\ConferenceParticipant;
 use common\models\Employee;
 use dosamigos\datepicker\DatePicker;
 use common\components\grid\call\CallDurationColumn;
-use sales\auth\Auth;
-use sales\model\call\abac\CallAbacObject;
-use sales\model\contactPhoneList\service\ContactPhoneListService;
-use sales\model\callLogFilterGuard\entity\CallLogFilterGuard;
-use sales\services\cleaner\form\DbCleanerParamsForm;
+use src\auth\Auth;
+use src\model\call\abac\CallAbacObject;
+use src\model\contactPhoneList\service\ContactPhoneListService;
+use src\model\callLogFilterGuard\entity\CallLogFilterGuard;
+use src\services\cleaner\form\DbCleanerParamsForm;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\helpers\Url;
 use yii\widgets\Pjax;
 use yii\bootstrap4\Modal;
-use sales\helpers\phone\MaskPhoneHelper;
+use src\helpers\phone\MaskPhoneHelper;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\CallSearch */

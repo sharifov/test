@@ -3,7 +3,7 @@
 namespace modules\order\src\forms;
 
 use modules\order\src\entities\orderTipsUserProfit\OrderTipsUserProfit;
-use sales\forms\CompositeForm;
+use src\forms\CompositeForm;
 
 class OrderTipsUserProfitFormComposite extends CompositeForm
 {

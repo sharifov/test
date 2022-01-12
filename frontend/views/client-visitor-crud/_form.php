@@ -4,7 +4,7 @@ use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientVisitor\entity\ClientVisitor */
+/* @var $model src\model\clientVisitor\entity\ClientVisitor */
 /* @var $form ActiveForm */
 ?>
 

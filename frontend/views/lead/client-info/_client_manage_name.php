@@ -16,7 +16,7 @@ use yii\widgets\Pjax;
     <tr>
         <td style="width: 32px; background-color: #eef3f9"><i class="fa fa-user"></i></td>
         <td style="width: 100px; background-color: #eef3f9"><?= $client->getAttributeLabel('firstName') ?></td>
-        <td><?= \sales\model\client\helpers\ClientFormatter::formatName($client) ?></td>
+        <td><?= \src\model\client\helpers\ClientFormatter::formatName($client) ?></td>
     </tr>
     <tr>
         <td style="background-color: #eef3f9"><i class="fa fa-user"></i></td>

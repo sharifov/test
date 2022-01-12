@@ -4,8 +4,8 @@ use common\models\CaseSale;
 use common\models\CreditCard;
 use common\models\Employee;
 use frontend\helpers\JsonHelper;
-use sales\helpers\cases\CaseSaleHelper;
-use sales\model\saleTicket\entity\SaleTicket;
+use src\helpers\cases\CaseSaleHelper;
+use src\model\saleTicket\entity\SaleTicket;
 use yii\helpers\Html;
 
 /** @var $saleTickets SaleTicket[] */

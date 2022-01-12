@@ -7,7 +7,7 @@ use modules\order\src\abac\dto\OrderAbacDto;
 use modules\order\src\abac\OrderAbacObject;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\orderStatusLog\search\OrderStatusLogSearch;
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;

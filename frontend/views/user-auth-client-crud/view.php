@@ -1,12 +1,12 @@
 <?php
 
-use sales\model\userAuthClient\entity\UserAuthClient;
-use sales\model\userAuthClient\entity\UserAuthClientSources;
+use src\model\userAuthClient\entity\UserAuthClient;
+use src\model\userAuthClient\entity\UserAuthClientSources;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\userAuthClient\entity\UserAuthClient */
+/* @var $model src\model\userAuthClient\entity\UserAuthClient */
 
 $this->title = $model->uac_id;
 $this->params['breadcrumbs'][] = ['label' => 'Auth Clients', 'url' => ['index']];

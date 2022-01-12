@@ -1,11 +1,11 @@
 <?php
 
-use sales\model\shiftSchedule\entity\shiftCategory\ShiftCategoryQuery;
+use src\model\shiftSchedule\entity\shiftCategory\ShiftCategoryQuery;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\shiftSchedule\entity\shift\Shift */
+/* @var $model src\model\shiftSchedule\entity\shift\Shift */
 /* @var $form ActiveForm */
 ?>
 

@@ -1,6 +1,6 @@
 <?php
 
-use sales\entities\log\GlobalLogSearch;
+use src\entities\log\GlobalLogSearch;
 use yii\data\ActiveDataProvider;
 use yii\grid\GridView;
 use yii\widgets\Pjax;

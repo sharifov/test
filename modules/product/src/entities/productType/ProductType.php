@@ -5,9 +5,9 @@ namespace modules\product\src\entities\productType;
 use common\models\PaymentMethod;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productTypePaymentMethod\ProductTypePaymentMethod;
-use sales\entities\EventTrait;
-use sales\helpers\product\ProductQuoteHelper;
-use sales\helpers\setting\SettingHelper;
+use src\entities\EventTrait;
+use src\helpers\product\ProductQuoteHelper;
+use src\helpers\setting\SettingHelper;
 
 /**
  * This is the model class for table "product_type".

@@ -4,7 +4,7 @@ namespace common\models;
 
 use lajax\translatemanager\models\LanguageSource;
 use lajax\translatemanager\models\LanguageTranslate;
-use sales\helpers\CountryHelper;
+use src\helpers\CountryHelper;
 use Yii;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;

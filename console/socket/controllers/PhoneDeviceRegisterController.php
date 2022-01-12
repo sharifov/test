@@ -3,9 +3,9 @@
 namespace console\socket\controllers;
 
 use common\models\UserConnection;
-use sales\model\voip\phoneDevice\device\BuidValidator;
-use sales\model\voip\phoneDevice\device\PhoneDevice;
-use sales\model\voip\phoneDevice\device\RandomStringGenerator;
+use src\model\voip\phoneDevice\device\BuidValidator;
+use src\model\voip\phoneDevice\device\PhoneDevice;
+use src\model\voip\phoneDevice\device\RandomStringGenerator;
 
 /**
  * Class PhoneDeviceRegisterController

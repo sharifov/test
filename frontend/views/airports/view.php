@@ -7,7 +7,7 @@ use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\Airports */
-/* @var sales\model\airportLang\entity\AirportLangSearch $searchModel */
+/* @var src\model\airportLang\entity\AirportLangSearch $searchModel */
 /* @var yii\data\ActiveDataProvider $dataProvider */
 
 $this->title = $model->name;

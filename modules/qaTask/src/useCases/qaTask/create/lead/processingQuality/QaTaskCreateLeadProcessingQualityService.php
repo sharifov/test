@@ -10,7 +10,7 @@ use modules\qaTask\src\entities\qaTask\QaTaskRepository;
 use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategoryQuery;
 use modules\qaTask\src\entities\qaTaskStatusLog\CreateDto;
 use modules\qaTask\src\useCases\qaTask\QaTaskActions;
-use sales\dispatchers\EventDispatcher;
+use src\dispatchers\EventDispatcher;
 
 /**
  * Class QaTaskCreateLeadProcessingQualityService

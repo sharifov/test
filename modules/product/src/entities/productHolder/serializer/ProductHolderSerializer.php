@@ -2,7 +2,7 @@
 
 namespace modules\product\src\entities\productHolder\serializer;
 
-use sales\entities\serializer\Serializer;
+use src\entities\serializer\Serializer;
 
 class ProductHolderSerializer extends Serializer
 {

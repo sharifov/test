@@ -1,8 +1,8 @@
 <?php
 
 use common\models\Language;
-use sales\auth\Auth;
-use sales\services\client\ClientCreateForm;
+use src\auth\Auth;
+use src\services\client\ClientCreateForm;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;

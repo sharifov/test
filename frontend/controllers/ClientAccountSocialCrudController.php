@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\clientAccountSocial\entity\ClientAccountSocial;
-use sales\model\clientAccountSocial\entity\ClientAccountSocialSearch;
+use src\model\clientAccountSocial\entity\ClientAccountSocial;
+use src\model\clientAccountSocial\entity\ClientAccountSocialSearch;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;

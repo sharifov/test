@@ -1,7 +1,7 @@
 <?php
 
 use common\components\grid\DateColumn;
-use sales\model\user\entity\sales\SalesSearch;
+use src\model\user\entity\sales\SalesSearch;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;

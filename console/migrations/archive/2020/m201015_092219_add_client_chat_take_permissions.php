@@ -1,11 +1,11 @@
 <?php
 
 use common\models\Employee;
-use sales\rbac\rules\clientChat\returnRule\ClientChatReturnRule;
-use sales\rbac\rules\clientChat\take\ClientChatTakeHoldRule;
-use sales\rbac\rules\clientChat\take\ClientChatTakeIdleRule;
-use sales\rbac\rules\clientChat\take\ClientChatTakeInProgressRule;
-use sales\rbac\rules\clientChat\take\ClientChatTakeRule;
+use src\rbac\rules\clientChat\returnRule\ClientChatReturnRule;
+use src\rbac\rules\clientChat\take\ClientChatTakeHoldRule;
+use src\rbac\rules\clientChat\take\ClientChatTakeIdleRule;
+use src\rbac\rules\clientChat\take\ClientChatTakeInProgressRule;
+use src\rbac\rules\clientChat\take\ClientChatTakeRule;
 use yii\db\Migration;
 
 /**

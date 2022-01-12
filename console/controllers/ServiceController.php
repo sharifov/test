@@ -10,8 +10,8 @@
 namespace console\controllers;
 
 use common\models\Currency;
-use sales\helpers\app\AppHelper;
-use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
+use src\helpers\app\AppHelper;
+use src\model\sms\entity\smsDistributionList\SmsDistributionList;
 use yii\console\Controller;
 use Yii;
 use yii\helpers\Console;

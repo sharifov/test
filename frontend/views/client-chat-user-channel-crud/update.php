@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChatUserChannel\entity\ClientChatUserChannel */
+/* @var $model src\model\clientChatUserChannel\entity\ClientChatUserChannel */
 
 $this->title = 'Update Client Chat User Channel: ' . $model->ccuc_user_id;
 $this->params['breadcrumbs'][] = ['label' => 'Client Chat User Channels', 'url' => ['index']];

@@ -22,7 +22,7 @@ use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\product\src\interfaces\Productable;
 use modules\product\src\interfaces\ProductQuoteService;
-use sales\helpers\app\AppHelper;
+use src\helpers\app\AppHelper;
 use yii\helpers\Json;
 
 /**

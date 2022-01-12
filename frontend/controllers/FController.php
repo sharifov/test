@@ -4,7 +4,7 @@ namespace frontend\controllers;
 
 use common\models\Employee;
 use common\models\UserConnection;
-use sales\helpers\setting\SettingHelper;
+use src\helpers\setting\SettingHelper;
 use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;

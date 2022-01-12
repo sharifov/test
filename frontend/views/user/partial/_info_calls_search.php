@@ -95,7 +95,7 @@ use common\models\Project;
                     <? /*= $form->field($model, 'statusIds', [
                         'options' => ['class' => 'form-group']
                     ])->widget(Select2::class, [
-                        'data' => sales\model\callLog\entity\callLog\CallLogStatus::getList(),
+                        'data' => src\model\callLog\entity\callLog\CallLogStatus::getList(),
                         'size' => Select2::SMALL,
                         'options' => ['placeholder' => 'Select Status', 'multiple' => true],
                         'pluginOptions' => ['allowClear' => true],
@@ -106,7 +106,7 @@ use common\models\Project;
                     <? /*= $form->field($model, 'typesIds', [
                         'options' => ['class' => 'form-group']
                     ])->widget(Select2::class, [
-                        'data' => sales\model\callLog\entity\callLog\CallLogType::getList(),
+                        'data' => src\model\callLog\entity\callLog\CallLogType::getList(),
                         'size' => Select2::SMALL,
                         'options' => ['placeholder' => 'Select Type', 'multiple' => true],
                         'pluginOptions' => ['allowClear' => true],

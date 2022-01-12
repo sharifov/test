@@ -3,7 +3,7 @@
 namespace modules\order\src\entities\orderContact\serializer;
 
 use modules\order\src\entities\orderContact\OrderContact;
-use sales\entities\serializer\Serializer;
+use src\entities\serializer\Serializer;
 
 class OrderContactSerializer extends Serializer
 {

@@ -5,8 +5,8 @@ use yii\grid\GridView;
 use yii\helpers\Html;
 use common\models\Lead;
 use yii\widgets\Pjax;
-use sales\helpers\email\MaskEmailHelper;
-use sales\helpers\phone\MaskPhoneHelper;
+use src\helpers\email\MaskEmailHelper;
+use src\helpers\phone\MaskPhoneHelper;
 
 /** @var ActiveDataProvider $dataProvider */
 

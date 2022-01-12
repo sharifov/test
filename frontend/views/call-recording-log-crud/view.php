@@ -4,7 +4,7 @@ use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\callRecordingLog\entity\CallRecordingLog */
+/* @var $model src\model\callRecordingLog\entity\CallRecordingLog */
 
 $this->title = $model->crl_id;
 $this->params['breadcrumbs'][] = ['label' => 'Call Recording Logs', 'url' => ['index']];

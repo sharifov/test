@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChat\entity\statusLogReason\ClientChatStatusLogReason */
+/* @var $model src\model\clientChat\entity\statusLogReason\ClientChatStatusLogReason */
 
 $this->title = 'Update Client Chat Status Log Reason: ' . $model->cslr_id;
 $this->params['breadcrumbs'][] = ['label' => 'Client Chat Status Log Reasons', 'url' => ['index']];

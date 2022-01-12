@@ -3,7 +3,7 @@
 namespace modules\qaTask\controllers;
 
 use frontend\controllers\FController;
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\qaTask\src\entities\qaTaskStatus\search\QaTaskStatusCrudSearch;

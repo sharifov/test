@@ -1,12 +1,12 @@
 <?php
 
-use sales\model\call\entity\callCommand\CallCommand;
+use src\model\call\entity\callCommand\CallCommand;
 use yii\helpers\Html;
 use yii\helpers\VarDumper;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\call\entity\callCommand\CallCommand */
+/* @var $model src\model\call\entity\callCommand\CallCommand */
 
 $name = $model->ccom_name ? ', Name: ' . $model->ccom_name : '';
 $typeName = CallCommand::getTypeName($model->ccom_type_id);

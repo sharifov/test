@@ -2,10 +2,10 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
-use sales\entities\cases\CaseCategory;
+use src\entities\cases\CaseCategory;
 
 /* @var $this yii\web\View */
-/* @var $model sales\entities\cases\CaseCategory */
+/* @var $model src\entities\cases\CaseCategory */
 
 $this->title = $model->cc_name;
 $this->params['breadcrumbs'][] = ['label' => 'Case Categories', 'url' => ['index']];

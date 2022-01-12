@@ -10,7 +10,7 @@ use borales\extensions\phoneInput\PhoneInput;
 /**
  * @var $this yii\web\View
  * @var $form ActiveForm
- * @var $leadForm sales\forms\lead\LeadCreateForm
+ * @var $leadForm src\forms\lead\LeadCreateForm
  */
 
 ?>

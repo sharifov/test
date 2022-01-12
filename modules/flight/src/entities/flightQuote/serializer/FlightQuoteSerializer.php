@@ -3,7 +3,7 @@
 namespace modules\flight\src\entities\flightQuote\serializer;
 
 use modules\flight\models\FlightQuote;
-use sales\entities\serializer\Serializer;
+use src\entities\serializer\Serializer;
 use yii\helpers\ArrayHelper;
 
 /**

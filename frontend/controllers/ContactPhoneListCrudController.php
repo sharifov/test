@@ -2,10 +2,10 @@
 
 namespace frontend\controllers;
 
-use sales\model\contactPhoneList\entity\ContactPhoneListCrudSearch;
+use src\model\contactPhoneList\entity\ContactPhoneListCrudSearch;
 use Yii;
-use sales\model\contactPhoneList\entity\ContactPhoneList;
-use sales\model\contactPhoneList\entity\ContactPhoneListSearch;
+use src\model\contactPhoneList\entity\ContactPhoneList;
+use src\model\contactPhoneList\entity\ContactPhoneListSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

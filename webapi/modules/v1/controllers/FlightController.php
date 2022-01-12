@@ -16,10 +16,10 @@ use modules\order\src\processManager\clickToBook\events\FlightProductProcessedSu
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\exceptions\ProductCodeException;
 use modules\product\src\services\productQuote\ProductQuoteReplaceService;
-use sales\helpers\app\AppHelper;
-use sales\helpers\ErrorsToStringHelper;
-use sales\repositories\product\ProductQuoteRepository;
-use sales\services\TransactionManager;
+use src\helpers\app\AppHelper;
+use src\helpers\ErrorsToStringHelper;
+use src\repositories\product\ProductQuoteRepository;
+use src\services\TransactionManager;
 use webapi\src\ApiCodeException;
 use webapi\src\forms\flight\FlightRequestApiForm;
 use webapi\src\forms\payment\PaymentFromBoForm;
@@ -37,7 +37,7 @@ use webapi\src\services\payment\PaymentManageApiService;
 use Yii;
 use yii\base\Model;
 use yii\helpers\ArrayHelper;
-use sales\dispatchers\EventDispatcher;
+use src\dispatchers\EventDispatcher;
 
 /**
  * Class FlightController

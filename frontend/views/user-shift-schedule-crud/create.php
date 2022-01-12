@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\shiftSchedule\entity\userShiftSchedule\UserShiftSchedule */
+/* @var $model src\model\shiftSchedule\entity\userShiftSchedule\UserShiftSchedule */
 
 $this->title = 'Create User Shift Schedule';
 $this->params['breadcrumbs'][] = ['label' => 'User Shift Schedules', 'url' => ['index']];

@@ -1,12 +1,12 @@
 <?php
 
 use common\components\grid\DateTimeColumn;
-use sales\model\user\entity\userStatus\UserStatus;
+use src\model\user\entity\userStatus\UserStatus;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\user\entity\userStatus\UserStatus */
+/* @var $model src\model\user\entity\userStatus\UserStatus */
 
 $this->title = $model->us_user_id;
 $this->params['breadcrumbs'][] = ['label' => 'User Statuses', 'url' => ['index']];

@@ -4,7 +4,7 @@ use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\leadRedial\entity\CallRedialUserAccess */
+/* @var $model src\model\leadRedial\entity\CallRedialUserAccess */
 /* @var $form ActiveForm */
 ?>
 

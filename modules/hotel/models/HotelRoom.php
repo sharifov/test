@@ -3,7 +3,7 @@
 namespace modules\hotel\models;
 
 use modules\hotel\models\query\HotelRoomQuery;
-use sales\entities\EventTrait;
+use src\entities\EventTrait;
 use Yii;
 use yii\db\ActiveQuery;
 

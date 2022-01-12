@@ -4,7 +4,7 @@ namespace modules\product\src\entities\productQuoteRefund\serializer;
 
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundStatus;
-use sales\entities\serializer\Serializer;
+use src\entities\serializer\Serializer;
 
 /**
  * Class ProductQuoteRefundSerializer

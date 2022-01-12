@@ -2,9 +2,9 @@
 
 use kartik\export\ExportMenu;
 use kartik\grid\GridView;
-use sales\model\user\reports\stats\Metrics;
-use sales\model\user\reports\stats\UserStatsReport;
-use sales\model\userModelSetting\service\UserModelSettingHelper;
+use src\model\user\reports\stats\Metrics;
+use src\model\user\reports\stats\UserStatsReport;
+use src\model\userModelSetting\service\UserModelSettingHelper;
 use yii\bootstrap4\Html;
 use yii\web\View;
 

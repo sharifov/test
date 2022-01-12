@@ -6,7 +6,7 @@ use yii\widgets\Pjax;
 use common\components\grid\DateTimeColumn;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\userVoiceMail\entity\search\UserVoiceMailSearch */
+/* @var $searchModel src\model\userVoiceMail\entity\search\UserVoiceMailSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'User Voice Mails';

@@ -1,11 +1,11 @@
 <?php
 
-use sales\widgets\DateTimePicker;
+use src\widgets\DateTimePicker;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChatHold\entity\ClientChatHold */
+/* @var $model src\model\clientChatHold\entity\ClientChatHold */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 

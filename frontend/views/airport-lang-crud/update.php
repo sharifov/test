@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\airportLang\entity\AirportLang */
+/* @var $model src\model\airportLang\entity\AirportLang */
 
 $this->title = 'Update Airport Lang: ' . $model->ail_iata;
 $this->params['breadcrumbs'][] = ['label' => 'Airport Langs', 'url' => ['index']];

@@ -4,7 +4,7 @@ use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChatVisitor\entity\ClientChatVisitor */
+/* @var $model src\model\clientChatVisitor\entity\ClientChatVisitor */
 
 $this->title = $model->ccv_id;
 $this->params['breadcrumbs'][] = ['label' => 'Client Chat Visitors', 'url' => ['index']];

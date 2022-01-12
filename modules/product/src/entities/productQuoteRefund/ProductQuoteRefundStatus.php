@@ -2,7 +2,7 @@
 
 namespace modules\product\src\entities\productQuoteRefund;
 
-use sales\helpers\setting\SettingHelper;
+use src\helpers\setting\SettingHelper;
 use yii\helpers\Html;
 
 class ProductQuoteRefundStatus

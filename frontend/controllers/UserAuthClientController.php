@@ -2,9 +2,9 @@
 
 namespace frontend\controllers;
 
-use sales\helpers\setting\SettingHelper;
-use sales\model\userAuthClient\entity\UserAuthClientRepository;
-use sales\repositories\NotFoundException;
+use src\helpers\setting\SettingHelper;
+use src\model\userAuthClient\entity\UserAuthClientRepository;
+use src\repositories\NotFoundException;
 use yii\filters\VerbFilter;
 use yii\web\ForbiddenHttpException;
 use yii\web\MethodNotAllowedHttpException;

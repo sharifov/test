@@ -12,7 +12,7 @@ use modules\order\src\useCase\orderCancel\CancelForm;
 use modules\order\src\useCase\orderCancel\OrderCancelService;
 use modules\order\src\useCase\orderComplete\CompleteForm;
 use modules\order\src\useCase\orderComplete\OrderCompleteService;
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
 use modules\order\src\entities\order\Order;
 use yii\helpers\ArrayHelper;

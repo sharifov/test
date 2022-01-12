@@ -3,7 +3,7 @@
 namespace webapi\src\jobs;
 
 use common\components\jobs\BaseJob;
-use sales\helpers\app\AppHelper;
+use src\helpers\app\AppHelper;
 use webapi\src\request\BoWebhook;
 use yii\base\Model;
 use yii\queue\JobInterface;

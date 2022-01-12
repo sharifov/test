@@ -5,7 +5,7 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\saleTicket\entity\search\SaleTicketSearch */
+/* @var $searchModel src\model\saleTicket\entity\search\SaleTicketSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Sale Tickets';

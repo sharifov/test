@@ -2,18 +2,18 @@
 
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
-use sales\model\clientChat\entity\ClientChat;
+use src\model\clientChat\entity\ClientChat;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
-use sales\model\clientChatChannel\entity\ClientChatChannel;
-use sales\model\clientChatMessage\entity\ClientChatMessage;
+use src\model\clientChatChannel\entity\ClientChatChannel;
+use src\model\clientChatMessage\entity\ClientChatMessage;
 use yii\helpers\Url;
 use yii\helpers\Inflector;
-use sales\auth\Auth;
+use src\auth\Auth;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\clientChat\entity\search\ClientChatSearch */
+/* @var $searchModel src\model\clientChat\entity\search\ClientChatSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Client Chats';

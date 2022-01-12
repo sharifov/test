@@ -1,14 +1,14 @@
 <?php
 
 use common\models\Language;
-use sales\auth\Auth;
+use src\auth\Auth;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
 use yii\helpers\Url;
 
 /* @var $this yii\web\View */
-/* @var $model sales\forms\cases\CasesClientUpdateForm */
+/* @var $model src\forms\cases\CasesClientUpdateForm */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 <?php // Pjax::begin(['id' => 'pjax-cases-client-update-form', 'enablePushState' => false, 'enableReplaceState' => false]); ?>

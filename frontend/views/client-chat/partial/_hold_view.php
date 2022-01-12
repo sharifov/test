@@ -1,8 +1,8 @@
 <?php
 
-use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChat\useCase\hold\ClientChatHoldForm;
-use sales\model\clientChatHold\service\ClientChatHoldService;
+use src\model\clientChat\entity\ClientChat;
+use src\model\clientChat\useCase\hold\ClientChatHoldForm;
+use src\model\clientChatHold\service\ClientChatHoldService;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;

@@ -2,13 +2,13 @@
 
 namespace webapi\modules\v2\controllers;
 
-use sales\helpers\app\AppHelper;
-use sales\model\clientAccount\ClientAccountRepository;
-use sales\model\clientAccount\entity\ClientAccount;
-use sales\model\clientAccount\form\ClientAccountCreateApiForm;
-use sales\model\clientAccount\form\ClientAccountGetApiForm;
-use sales\model\clientAccount\form\ClientAccountUpdateApiForm;
-use sales\services\client\ClientManageService;
+use src\helpers\app\AppHelper;
+use src\model\clientAccount\ClientAccountRepository;
+use src\model\clientAccount\entity\ClientAccount;
+use src\model\clientAccount\form\ClientAccountCreateApiForm;
+use src\model\clientAccount\form\ClientAccountGetApiForm;
+use src\model\clientAccount\form\ClientAccountUpdateApiForm;
+use src\services\client\ClientManageService;
 use webapi\src\ApiCodeException;
 use webapi\src\logger\ApiLogger;
 use webapi\src\Messages;

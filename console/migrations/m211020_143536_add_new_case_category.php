@@ -1,7 +1,7 @@
 <?php
 
 use common\models\Department;
-use sales\entities\cases\CaseCategory;
+use src\entities\cases\CaseCategory;
 use yii\db\Migration;
 
 /**

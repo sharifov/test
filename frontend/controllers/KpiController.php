@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use common\models\Employee;
-use sales\access\EmployeeGroupAccess;
-use sales\auth\Auth;
+use src\access\EmployeeGroupAccess;
+use src\auth\Auth;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;

@@ -5,7 +5,7 @@ namespace modules\product\controllers;
 use modules\product\src\entities\productQuote\ProductQuote;
 use frontend\controllers\FController;
 use modules\product\src\entities\productQuoteStatusLog\search\ProductQuoteStatusLogSearch;
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;

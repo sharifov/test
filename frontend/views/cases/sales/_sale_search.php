@@ -5,7 +5,7 @@ use yii\helpers\Html;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $caseModel \sales\entities\cases\Cases */
+/* @var $caseModel \src\entities\cases\Cases */
 /* @var $isAdmin boolean */
 /* @var $searchModel common\models\search\SaleSearch */
 /* @var $dataProvider yii\data\ArrayDataProvider */

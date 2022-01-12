@@ -1,9 +1,9 @@
 <?php
 
 use common\models\Employee;
-use sales\rbac\rules\globalRules\lead\IsEmptyOwnerRule;
-use sales\rbac\rules\globalRules\lead\IsOwnerMyGroupRule;
-use sales\rbac\rules\globalRules\lead\IsOwnerRule;
+use src\rbac\rules\globalRules\lead\IsEmptyOwnerRule;
+use src\rbac\rules\globalRules\lead\IsOwnerMyGroupRule;
+use src\rbac\rules\globalRules\lead\IsOwnerRule;
 use yii\db\Migration;
 
 /**

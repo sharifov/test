@@ -2,7 +2,7 @@
 
 use common\components\grid\project\ProjectColumn;
 use dosamigos\datepicker\DatePicker;
-use sales\access\ListsAccess;
+use src\access\ListsAccess;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use common\models\Lead;

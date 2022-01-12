@@ -1,6 +1,6 @@
 <?php
 
-use sales\model\client\notifications\phone\entity\ClientNotificationPhoneList;
+use src\model\client\notifications\phone\entity\ClientNotificationPhoneList;
 use yii\bootstrap4\Html;
 use yii\helpers\Json;
 use yii\widgets\DetailView;

@@ -2,18 +2,18 @@
 
 namespace frontend\controllers;
 
-use sales\auth\Auth;
-use sales\helpers\call\CallHelper;
+use src\auth\Auth;
+use src\helpers\call\CallHelper;
 use Yii;
-use sales\model\callLog\entity\callLog\CallLog;
-use sales\model\callLog\entity\callLog\search\CallLogSearch;
+use src\model\callLog\entity\callLog\CallLog;
+use src\model\callLog\entity\callLog\search\CallLogSearch;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
-use sales\model\call\abac\CallAbacObject;
+use src\model\call\abac\CallAbacObject;
 
 class CallLogController extends FController
 {

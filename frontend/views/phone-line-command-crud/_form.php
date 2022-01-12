@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\call\entity\callCommand\PhoneLineCommand */
+/* @var $model src\model\call\entity\callCommand\PhoneLineCommand */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
@@ -13,10 +13,10 @@ use yii\widgets\ActiveForm;
     <?php $form = ActiveForm::begin(); ?>
 
     <div class="col-lg-2">
-    <?php //= $form->field($model, 'plc_line_id')->dropDownList(\sales\model\phoneLine\phoneLine\entity\PhoneLine::getList(), ['prompt' => '-']) ?>
+    <?php //= $form->field($model, 'plc_line_id')->dropDownList(\src\model\phoneLine\phoneLine\entity\PhoneLine::getList(), ['prompt' => '-']) ?>
 
         <?= $form->field($model, 'plc_line_id')->widget(\kartik\select2\Select2::class, [
-            'data' => \sales\model\phoneLine\phoneLine\entity\PhoneLine::getList(),
+            'data' => \src\model\phoneLine\phoneLine\entity\PhoneLine::getList(),
             'size' => \kartik\select2\Select2::SMALL,
             'options' => ['placeholder' => 'Select Line', 'multiple' => false],
             'pluginOptions' => ['allowClear' => true],
@@ -25,7 +25,7 @@ use yii\widgets\ActiveForm;
 
 
         <?= $form->field($model, 'plc_ccom_id')->widget(\kartik\select2\Select2::class, [
-            'data' => \sales\model\call\entity\callCommand\CallCommand::getList(true),
+            'data' => \src\model\call\entity\callCommand\CallCommand::getList(true),
             'size' => \kartik\select2\Select2::SMALL,
             'options' => ['placeholder' => 'Select Command', 'multiple' => false],
             'pluginOptions' => ['allowClear' => true],

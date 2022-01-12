@@ -2,10 +2,10 @@
 
 namespace frontend\controllers;
 
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
-use sales\model\voip\phoneDevice\device\PhoneDevice;
-use sales\model\voip\phoneDevice\device\PhoneDeviceSearch;
+use src\model\voip\phoneDevice\device\PhoneDevice;
+use src\model\voip\phoneDevice\device\PhoneDeviceSearch;
 use yii\caching\TagDependency;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

@@ -4,7 +4,7 @@ namespace frontend\models;
 
 use common\components\validators\IsArrayValidator;
 use common\models\Employee;
-use sales\model\clientChatChannel\entity\ClientChatChannel;
+use src\model\clientChatChannel\entity\ClientChatChannel;
 use yii\base\Model;
 
 /**

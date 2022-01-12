@@ -3,7 +3,7 @@
 namespace modules\flight\src\repositories\flightQuoteStatusLogRepository;
 
 use modules\flight\models\FlightQuoteStatusLog;
-use sales\dispatchers\EventDispatcher;
+use src\dispatchers\EventDispatcher;
 
 /**
  * Class FlightQuoteStatusLogRepository

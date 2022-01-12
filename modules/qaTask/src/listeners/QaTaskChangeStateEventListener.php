@@ -2,7 +2,7 @@
 
 namespace modules\qaTask\src\listeners;
 
-use sales\helpers\app\AppHelper;
+use src\helpers\app\AppHelper;
 use Yii;
 use modules\qaTask\src\entities\qaTask\QaTaskChangeStateInterface;
 use modules\qaTask\src\services\QaTaskStatusLogService;

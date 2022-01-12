@@ -4,7 +4,7 @@ namespace modules\qaTask\src\entities\qaTaskCategory\search;
 
 use common\models\Employee;
 use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
-use sales\helpers\query\QueryHelper;
+use src\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
 use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategory;
 

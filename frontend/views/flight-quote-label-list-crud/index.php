@@ -8,7 +8,7 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\flightQuoteLabelList\entity\FlightQuoteLabelListSearch */
+/* @var $searchModel src\model\flightQuoteLabelList\entity\FlightQuoteLabelListSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Flight Quote Label List';

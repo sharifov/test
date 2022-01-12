@@ -2,8 +2,8 @@
 
 use common\models\Client;
 use common\models\UserContactList;
-use sales\access\EmployeeProjectAccess;
-use sales\auth\Auth;
+use src\access\EmployeeProjectAccess;
+use src\auth\Auth;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 

@@ -8,7 +8,7 @@
  */
 
 use common\models\ClientEmail;
-use sales\forms\lead\EmailCreateForm;
+use src\forms\lead\EmailCreateForm;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;

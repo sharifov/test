@@ -6,11 +6,11 @@ use modules\order\src\entities\order\Order;
 use modules\order\src\entities\orderTipsUserProfit\OrderTipsUserProfit;
 use modules\order\src\entities\orderTipsUserProfit\OrderTipsUserProfitRepository;
 use modules\order\src\forms\OrderTipsUserProfitFormComposite;
-use sales\dispatchers\EventDispatcher;
-use sales\model\user\entity\profit\event\UserProfitCalculateByOrderTipsUserProfitsEvent;
-use sales\model\user\entity\userProductType\UserProductTypeRepository;
-use sales\repositories\user\UserProfitRepository;
-use sales\services\TransactionManager;
+use src\dispatchers\EventDispatcher;
+use src\model\user\entity\profit\event\UserProfitCalculateByOrderTipsUserProfitsEvent;
+use src\model\user\entity\userProductType\UserProductTypeRepository;
+use src\repositories\user\UserProfitRepository;
+use src\services\TransactionManager;
 use yii\helpers\ArrayHelper;
 
 /**

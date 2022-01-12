@@ -2,14 +2,14 @@
 
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
-use sales\model\clientChatChannel\entity\ClientChatChannel;
-use sales\model\clientChatChannelTransfer\entity\ClientChatChannelTransfer;
+use src\model\clientChatChannel\entity\ClientChatChannel;
+use src\model\clientChatChannelTransfer\entity\ClientChatChannelTransfer;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\clientChatChannelTransfer\entity\search\ClientChatChannelTransferSearch */
+/* @var $searchModel src\model\clientChatChannelTransfer\entity\search\ClientChatChannelTransferSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Client Chat Channel Transfers';

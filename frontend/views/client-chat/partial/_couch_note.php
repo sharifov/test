@@ -1,6 +1,6 @@
 <?php
 
-use sales\services\clientChatCouchNote\ClientChatCouchNoteForm;
+use src\services\clientChatCouchNote\ClientChatCouchNoteForm;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 

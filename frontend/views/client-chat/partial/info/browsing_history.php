@@ -1,6 +1,6 @@
 <?php
 
-use sales\model\clientChatRequest\entity\ClientChatRequest;
+use src\model\clientChatRequest\entity\ClientChatRequest;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 

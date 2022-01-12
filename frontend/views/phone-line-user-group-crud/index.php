@@ -6,7 +6,7 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\phoneLine\phoneLineUserGroup\entity\search\PhoneLineUserGroupSearch */
+/* @var $searchModel src\model\phoneLine\phoneLineUserGroup\entity\search\PhoneLineUserGroupSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Phone Line User Groups';

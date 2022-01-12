@@ -14,10 +14,10 @@ use modules\flight\src\useCases\flightQuote\createManually\helpers\FlightQuotePa
 use modules\flight\src\useCases\flightQuote\createManually\VoluntaryQuotePaxPriceForm;
 use modules\flight\src\useCases\form\ChangeQuoteCreateForm;
 use modules\product\src\entities\productTypePaymentMethod\ProductTypePaymentMethodQuery;
-use sales\helpers\ErrorsToStringHelper;
-use sales\helpers\product\ProductQuoteHelper;
-use sales\services\parsingDump\lib\ParsingDump;
-use sales\services\parsingDump\ReservationService;
+use src\helpers\ErrorsToStringHelper;
+use src\helpers\product\ProductQuoteHelper;
+use src\services\parsingDump\lib\ParsingDump;
+use src\services\parsingDump\ReservationService;
 use yii\base\Model;
 use yii\helpers\ArrayHelper;
 

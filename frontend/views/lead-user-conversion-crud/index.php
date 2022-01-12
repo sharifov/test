@@ -2,7 +2,7 @@
 
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserColumn;
-use sales\model\leadUserConversion\entity\LeadUserConversion;
+use src\model\leadUserConversion\entity\LeadUserConversion;
 use yii\grid\SerialColumn;
 use yii\grid\ActionColumn;
 use yii\bootstrap4\Html;
@@ -10,7 +10,7 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var yii\web\View $this */
-/* @var sales\model\leadUserConversion\entity\LeadUserConversionSearch $searchModel */
+/* @var src\model\leadUserConversion\entity\LeadUserConversionSearch $searchModel */
 /* @var yii\data\ActiveDataProvider $dataProvider */
 
 $this->title = 'Lead User Conversions';

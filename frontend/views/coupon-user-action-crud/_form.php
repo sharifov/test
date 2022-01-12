@@ -1,11 +1,11 @@
 <?php
 
-use sales\model\coupon\entity\couponUserAction\CouponUserAction;
+use src\model\coupon\entity\couponUserAction\CouponUserAction;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\coupon\entity\couponUserAction\CouponUserAction */
+/* @var $model src\model\coupon\entity\couponUserAction\CouponUserAction */
 /* @var $form ActiveForm */
 ?>
 

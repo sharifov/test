@@ -1,7 +1,7 @@
 <?php
 
-use sales\model\clientChatCase\entity\ClientChatCase;
-use sales\widgets\DateTimePicker;
+use src\model\clientChatCase\entity\ClientChatCase;
+use src\widgets\DateTimePicker;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 

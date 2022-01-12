@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\leadRedial\entity\CallRedialUserAccess */
+/* @var $model src\model\leadRedial\entity\CallRedialUserAccess */
 
 $this->title = 'Update Call Redial User Access: ' . $model->crua_lead_id;
 $this->params['breadcrumbs'][] = ['label' => 'Call Redial User Accesses', 'url' => ['index']];

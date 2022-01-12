@@ -2,7 +2,7 @@
 
 namespace frontend\widgets;
 
-use sales\helpers\setting\SettingHelper;
+use src\helpers\setting\SettingHelper;
 use Yii;
 
 /**

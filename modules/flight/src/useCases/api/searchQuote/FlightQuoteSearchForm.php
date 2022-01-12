@@ -4,7 +4,7 @@ namespace modules\flight\src\useCases\api\searchQuote;
 
 use modules\flight\models\Flight;
 use modules\flight\models\FlightQuote;
-use sales\helpers\app\AppHelper;
+use src\helpers\app\AppHelper;
 use yii\base\Model;
 
 /**

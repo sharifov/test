@@ -1,8 +1,8 @@
 <?php
 
-use sales\model\call\entity\callCommand\types\VoiceMail;
-use sales\model\call\services\CallCommandTypeService;
-use sales\model\userVoiceMail\entity\UserVoiceMail;
+use src\model\call\entity\callCommand\types\VoiceMail;
+use src\model\call\services\CallCommandTypeService;
+use src\model\userVoiceMail\entity\UserVoiceMail;
 use yii\widgets\ActiveForm;
 use yii\helpers\Url;
 

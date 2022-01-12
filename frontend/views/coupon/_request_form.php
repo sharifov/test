@@ -3,7 +3,7 @@
 /* @var RequestForm $model */
 
 use common\components\bootstrap4\activeForm\ClientBeforeSubmit;
-use sales\model\coupon\useCase\request\RequestForm;
+use src\model\coupon\useCase\request\RequestForm;
 use yii\bootstrap4\Html;
 use common\components\bootstrap4\activeForm\ActiveForm;
 

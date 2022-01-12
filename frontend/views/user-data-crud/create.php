@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\userData\entity\UserData */
+/* @var $model src\model\userData\entity\UserData */
 
 $this->title = 'Create User Data';
 $this->params['breadcrumbs'][] = ['label' => 'User Data', 'url' => ['index']];

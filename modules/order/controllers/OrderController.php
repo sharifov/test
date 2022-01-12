@@ -18,7 +18,7 @@ use modules\order\src\processManager\phoneToBook\OrderProcessManager;
 use modules\order\src\services\CreateOrderDTO;
 use modules\order\src\services\OrderManageService;
 use modules\product\src\entities\productQuote\ProductQuote;
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
 use modules\order\src\entities\order\Order;
 use frontend\controllers\FController;

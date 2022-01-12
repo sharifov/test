@@ -7,7 +7,7 @@ use modules\order\src\entities\order\OrderRepository;
 use modules\order\src\entities\orderTipsUserProfit\OrderTipsUserProfit;
 use modules\order\src\forms\OrderTipsUserProfitFormComposite;
 use modules\order\src\services\OrderTipsUserProfitService;
-use sales\forms\CompositeFormHelper;
+use src\forms\CompositeFormHelper;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;

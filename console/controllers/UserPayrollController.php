@@ -3,10 +3,10 @@
 namespace console\controllers;
 
 use common\models\ProfitSplit;
-use sales\model\user\entity\payment\UserPayment;
-use sales\model\user\entity\profit\search\UserProfitSearch;
-use sales\model\user\entity\profit\UserProfit;
-use sales\services\user\payroll\UserPayrollService;
+use src\model\user\entity\payment\UserPayment;
+use src\model\user\entity\profit\search\UserProfitSearch;
+use src\model\user\entity\profit\UserProfit;
+use src\services\user\payroll\UserPayrollService;
 use yii\console\Controller;
 use yii\helpers\BaseConsole;
 use yii\helpers\Console;

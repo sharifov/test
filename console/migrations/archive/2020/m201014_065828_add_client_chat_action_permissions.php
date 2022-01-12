@@ -1,9 +1,9 @@
 <?php
 
-use sales\rbac\rules\clientChat\close\ClientChatCloseHoldRule;
-use sales\rbac\rules\clientChat\close\ClientChatCloseIdleRule;
-use sales\rbac\rules\clientChat\transfer\ClientChatTransferHoldRule;
-use sales\rbac\rules\clientChat\transfer\ClientChatTransferIdleRule;
+use src\rbac\rules\clientChat\close\ClientChatCloseHoldRule;
+use src\rbac\rules\clientChat\close\ClientChatCloseIdleRule;
+use src\rbac\rules\clientChat\transfer\ClientChatTransferHoldRule;
+use src\rbac\rules\clientChat\transfer\ClientChatTransferIdleRule;
 use yii\db\Migration;
 
 /**

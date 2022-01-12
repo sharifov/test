@@ -4,8 +4,8 @@ namespace modules\product\src\entities\productOption;
 
 use _HumbugBoxa5be08ba8ddb\Symfony\Component\Console\Exception\RuntimeException;
 use modules\product\src\exceptions\ProductCodeException;
-use sales\dispatchers\EventDispatcher;
-use sales\repositories\NotFoundException;
+use src\dispatchers\EventDispatcher;
+use src\repositories\NotFoundException;
 
 /**
  * Class ProductOptionRepository

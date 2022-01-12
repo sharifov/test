@@ -3,7 +3,7 @@
 use common\models\Quote;
 use frontend\helpers\QuoteHelper;
 use kartik\select2\Select2;
-use sales\forms\api\searchQuote\FlightQuoteSearchForm;
+use src\forms\api\searchQuote\FlightQuoteSearchForm;
 use yii\bootstrap4\ActiveForm;
 use yii\bootstrap4\Html;
 
@@ -14,7 +14,7 @@ use yii\bootstrap4\Html;
  * @var $maxTotalDuration int
  * @var $airlines array
  * @var $searchFrom FlightQuoteSearchForm
- * @var \sales\viewModel\chat\ViewModelSearchQuotes $viewModel
+ * @var \src\viewModel\chat\ViewModelSearchQuotes $viewModel
  */
 ?>
 

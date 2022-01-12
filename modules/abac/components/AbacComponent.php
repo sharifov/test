@@ -12,8 +12,8 @@ namespace modules\abac\components;
 use Casbin\CoreEnforcer;
 use common\models\Employee;
 use modules\abac\src\entities\AbacPolicy;
-use sales\auth\Auth;
-use sales\helpers\app\AppHelper;
+use src\auth\Auth;
+use src\helpers\app\AppHelper;
 use stdClass;
 use Yii;
 use yii\base\Component;
@@ -51,6 +51,7 @@ class AbacComponent extends Component
         '/frontend/',
         '/common/',
         '/sales/',
+        '/src/',
     ];
     public array $scanExtMask = ['*.php'];
 

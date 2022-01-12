@@ -1,7 +1,7 @@
 <?php
 
-use sales\widgets\DateTimePicker;
-use sales\widgets\UserSelect2Widget;
+use src\widgets\DateTimePicker;
+use src\widgets\UserSelect2Widget;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 

@@ -4,7 +4,7 @@ namespace webapi\modules\v2\controllers;
 
 use common\models\Department;
 use common\models\DepartmentPhoneProject;
-use sales\model\department\DepartmentCodeException;
+use src\model\department\DepartmentCodeException;
 use webapi\src\Messages;
 use webapi\src\response\ErrorResponse;
 use webapi\src\response\messages\CodeMessage;
@@ -15,7 +15,7 @@ use webapi\src\response\messages\MessageMessage;
 use webapi\src\response\messages\StatusCodeMessage;
 use webapi\src\response\SuccessResponse;
 use Yii;
-use sales\model\department\departmentPhoneProject\useCases\api\get\DepartmentPhoneProjectForm;
+use src\model\department\departmentPhoneProject\useCases\api\get\DepartmentPhoneProjectForm;
 
 /**
  * Class DepartmentPhoneProjectController

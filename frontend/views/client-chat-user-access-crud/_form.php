@@ -4,7 +4,7 @@ use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChatUserAccess\entity\ClientChatUserAccess */
+/* @var $model src\model\clientChatUserAccess\entity\ClientChatUserAccess */
 /* @var $form ActiveForm */
 ?>
 
@@ -16,7 +16,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'ccua_cch_id')->textInput() ?>
 
-        <?= $form->field($model, 'ccua_user_id')->widget(\sales\widgets\UserSelect2Widget::class, [
+        <?= $form->field($model, 'ccua_user_id')->widget(\src\widgets\UserSelect2Widget::class, [
             'data' => $model->ccua_user_id ? [
                 $model->ccua_user_id => $model->ccuaUser->username
             ] : [],
@@ -24,9 +24,9 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'ccua_status_id')->dropDownList($model::STATUS_LIST, ['prompt' => '---']) ?>
 
-        <?= $form->field($model, 'ccua_created_dt')->widget(\sales\widgets\DateTimePicker::class) ?>
+        <?= $form->field($model, 'ccua_created_dt')->widget(\src\widgets\DateTimePicker::class) ?>
 
-        <?= $form->field($model, 'ccua_updated_dt')->widget(\sales\widgets\DateTimePicker::class) ?>
+        <?= $form->field($model, 'ccua_updated_dt')->widget(\src\widgets\DateTimePicker::class) ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

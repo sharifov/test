@@ -4,7 +4,7 @@ namespace modules\fileStorage\src\services\access;
 
 use common\models\Lead;
 use modules\fileStorage\FileStorageSettings;
-use sales\auth\Auth;
+use src\auth\Auth;
 
 /**
  * Class FileStorageAccessService

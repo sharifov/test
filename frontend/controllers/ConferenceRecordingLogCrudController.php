@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\conference\entity\conferenceRecordingLog\ConferenceRecordingLog;
-use sales\model\conference\entity\conferenceRecordingLog\search\ConferenceRecordingLogSearch;
+use src\model\conference\entity\conferenceRecordingLog\ConferenceRecordingLog;
+use src\model\conference\entity\conferenceRecordingLog\search\ConferenceRecordingLogSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

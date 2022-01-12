@@ -1,7 +1,7 @@
 <?php
 
 use common\models\Employee;
-use sales\auth\Auth;
+use src\auth\Auth;
 use yii\grid\ActionColumn;
 use common\components\grid\DateTimeColumn;
 /* @var $this yii\web\View */
@@ -11,7 +11,7 @@ use common\components\grid\DateTimeColumn;
 /* @var $employees [] */
 /* @var array $multipleErrors */
 
-use sales\access\EmployeeProjectAccess;
+use src\access\EmployeeProjectAccess;
 use yii\bootstrap\Html;
 use kartik\grid\GridView;
 use yii\helpers\VarDumper;

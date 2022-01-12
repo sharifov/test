@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\smsSubscribe\entity\SmsSubscribe */
+/* @var $model src\model\smsSubscribe\entity\SmsSubscribe */
 
 $this->title = 'Update Sms Subscribe: ' . $model->ss_id;
 $this->params['breadcrumbs'][] = ['label' => 'Sms Subscribes', 'url' => ['index']];

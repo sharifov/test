@@ -12,9 +12,9 @@
 
 use common\models\Lead;
 use frontend\models\LeadForm;
-use sales\auth\Auth;
-use sales\forms\lead\ItineraryEditForm;
-use sales\model\leadProduct\entity\LeadProduct;
+use src\auth\Auth;
+use src\forms\lead\ItineraryEditForm;
+use src\model\leadProduct\entity\LeadProduct;
 use yii\helpers\Html;
 
 ?>

@@ -1,12 +1,12 @@
 <?php
 
-use sales\model\client\notifications\client\entity\CommunicationType;
-use sales\model\client\notifications\client\entity\NotificationType;
+use src\model\client\notifications\client\entity\CommunicationType;
+use src\model\client\notifications\client\entity\NotificationType;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\client\notifications\client\entity\ClientNotification */
+/* @var $model src\model\client\notifications\client\entity\ClientNotification */
 /* @var $form ActiveForm */
 ?>
 

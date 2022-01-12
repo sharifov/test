@@ -20,7 +20,7 @@ use modules\product\src\entities\product\ProductRepository;
 use modules\product\src\entities\productType\ProductType;
 use modules\product\src\useCases\product\create\ProductCreateForm;
 use modules\product\src\useCases\product\create\ProductCreateService;
-use sales\services\TransactionManager;
+use src\services\TransactionManager;
 
 /**
  * Class FlightManageService

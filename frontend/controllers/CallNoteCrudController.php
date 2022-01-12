@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\callNote\entity\CallNote;
-use sales\model\callNote\entity\search\CallNoteSearch;
+use src\model\callNote\entity\CallNote;
+use src\model\callNote\entity\search\CallNoteSearch;
 use frontend\controllers\FController;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;

@@ -3,8 +3,8 @@
 namespace frontend\widgets\clientChat;
 
 use common\models\Employee;
-use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChat\entity\ClientChatQuery;
+use src\model\clientChat\entity\ClientChat;
+use src\model\clientChat\entity\ClientChatQuery;
 use yii\helpers\Url;
 
 class ClientChatAccessMessage

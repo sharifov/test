@@ -2,10 +2,10 @@
 
 namespace frontend\controllers;
 
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
-use sales\model\client\notifications\client\entity\ClientNotification;
-use sales\model\client\notifications\client\entity\search\ClientNotificationSearch;
+use src\model\client\notifications\client\entity\ClientNotification;
+use src\model\client\notifications\client\entity\search\ClientNotificationSearch;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

@@ -3,7 +3,7 @@
 namespace common\models\search\lead;
 
 use common\models\Lead;
-use sales\access\EmployeeProjectAccess;
+use src\access\EmployeeProjectAccess;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use yii\db\Query;

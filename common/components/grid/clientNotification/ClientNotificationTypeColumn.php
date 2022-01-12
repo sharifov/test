@@ -2,7 +2,7 @@
 
 namespace common\components\grid\clientNotification;
 
-use sales\model\client\notifications\client\entity\NotificationType;
+use src\model\client\notifications\client\entity\NotificationType;
 use yii\grid\DataColumn;
 
 /**

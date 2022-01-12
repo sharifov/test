@@ -1,11 +1,11 @@
 <?php
 
 use kartik\select2\Select2;
-use sales\auth\Auth;
-use sales\model\clientChat\dashboard\FilterForm;
-use sales\model\clientChat\dashboard\GroupFilter;
-use sales\model\clientChat\entity\ClientChat;
-use sales\widgets\UserSelect2Widget;
+use src\auth\Auth;
+use src\model\clientChat\dashboard\FilterForm;
+use src\model\clientChat\dashboard\GroupFilter;
+use src\model\clientChat\entity\ClientChat;
+use src\widgets\UserSelect2Widget;
 use yii\data\ArrayDataProvider;
 use yii\helpers\Html;
 use yii\helpers\Url;

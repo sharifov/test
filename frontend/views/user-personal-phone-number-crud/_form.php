@@ -4,7 +4,7 @@ use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\phoneLine\userPersonalPhoneNumber\entity\UserPersonalPhoneNumber */
+/* @var $model src\model\phoneLine\userPersonalPhoneNumber\entity\UserPersonalPhoneNumber */
 /* @var $form ActiveForm */
 ?>
 
@@ -14,9 +14,9 @@ use yii\widgets\ActiveForm;
 
         <?php $form = ActiveForm::begin(); ?>
 
-        <?= $form->field($model, 'upn_user_id')->widget(\sales\widgets\UserSelect2Widget::class) ?>
+        <?= $form->field($model, 'upn_user_id')->widget(\src\widgets\UserSelect2Widget::class) ?>
 
-        <?= $form->field($model, 'upn_phone_number')->widget(\sales\widgets\PhoneSelect2Widget::class) ?>
+        <?= $form->field($model, 'upn_phone_number')->widget(\src\widgets\PhoneSelect2Widget::class) ?>
 
         <?= $form->field($model, 'upn_title')->textInput(['maxlength' => true]) ?>
 

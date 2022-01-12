@@ -3,7 +3,7 @@
 namespace modules\attraction\src\entities\attractionPax\serializer;
 
 use modules\attraction\models\AttractionPax;
-use sales\entities\serializer\Serializer;
+use src\entities\serializer\Serializer;
 
 /**
  * Class AttractionPaxSerializer

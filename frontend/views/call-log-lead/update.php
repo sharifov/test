@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\callLog\entity\callLogLead\CallLogLead */
+/* @var $model src\model\callLog\entity\callLogLead\CallLogLead */
 
 $this->title = 'Update Call Log Lead: ' . $model->cll_cl_id;
 $this->params['breadcrumbs'][] = ['label' => 'Call Log Leads', 'url' => ['index']];

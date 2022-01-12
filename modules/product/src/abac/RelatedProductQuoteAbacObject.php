@@ -14,8 +14,8 @@ use modules\product\src\entities\productQuoteChange\ProductQuoteChangeDecisionTy
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\entities\productType\ProductTypeQuery;
-use sales\entities\cases\CaseCategory;
-use sales\entities\cases\CasesStatus;
+use src\entities\cases\CaseCategory;
+use src\entities\cases\CasesStatus;
 
 class RelatedProductQuoteAbacObject extends AbacBaseModel implements AbacInterface
 {

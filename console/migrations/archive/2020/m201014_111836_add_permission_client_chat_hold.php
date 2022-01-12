@@ -1,8 +1,8 @@
 <?php
 
 use common\models\Employee;
-use sales\rbac\rules\clientChat\hold\ClientChatHoldRule;
-use sales\rbac\rules\clientChat\hold\ClientChatUnHoldRule;
+use src\rbac\rules\clientChat\hold\ClientChatHoldRule;
+use src\rbac\rules\clientChat\hold\ClientChatUnHoldRule;
 use yii\db\Migration;
 
 /**

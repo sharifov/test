@@ -2,8 +2,8 @@
 
 namespace common\components\grid;
 
-use sales\model\phoneList\entity\PhoneList;
-use sales\widgets\PhoneSelect2Widget;
+use src\model\phoneList\entity\PhoneList;
+use src\widgets\PhoneSelect2Widget;
 use yii\base\Model;
 use yii\grid\DataColumn;
 use yii\helpers\ArrayHelper;

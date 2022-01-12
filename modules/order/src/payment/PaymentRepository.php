@@ -3,8 +3,8 @@
 namespace modules\order\src\payment;
 
 use common\models\Payment;
-use sales\dispatchers\EventDispatcher;
-use sales\repositories\NotFoundException;
+use src\dispatchers\EventDispatcher;
+use src\repositories\NotFoundException;
 
 /**
  * Class PaymentRepository

@@ -182,7 +182,7 @@ return [
             'host' => env('common.config.params.queue.host'),
             'port' => env('common.config.params.queue.port'),
             'tube' => 'queue_client_chat_job',
-            'as idAccess' => sales\behaviors\JobIdAccessBehavior::class
+            'as idAccess' => src\behaviors\JobIdAccessBehavior::class
         ],
         'queue_virtual_cron' => [
             'class' => \kivork\VirtualCron\Queue\Queue::class,

@@ -1,8 +1,8 @@
 <?php
 
-use sales\auth\Auth;
-use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChatMessage\entity\ClientChatMessage;
+use src\auth\Auth;
+use src\model\clientChat\entity\ClientChat;
+use src\model\clientChatMessage\entity\ClientChatMessage;
 
 /** @var $chat ClientChat */
 

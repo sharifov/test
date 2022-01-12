@@ -1,6 +1,6 @@
 <?php
 
-use sales\helpers\setting\SettingHelper;
+use src\helpers\setting\SettingHelper;
 use yii\grid\ActionColumn;
 /**
  * @var $this View
@@ -16,8 +16,8 @@ use yii\grid\ActionColumn;
 use common\models\UserParams;
 use frontend\models\form\UserProfileForm;
 use frontend\themes\gentelella_v2\widgets\FlashAlert;
-use sales\model\userAuthClient\entity\UserAuthClient;
-use sales\model\userAuthClient\entity\UserAuthClientSources;
+use src\model\userAuthClient\entity\UserAuthClient;
+use src\model\userAuthClient\entity\UserAuthClientSources;
 use yii\authclient\widgets\AuthChoice;
 use yii\bootstrap\Html;
 use yii\bootstrap\ActiveForm;

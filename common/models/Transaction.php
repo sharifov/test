@@ -3,7 +3,7 @@
 namespace common\models;
 
 use modules\invoice\src\entities\invoice\Invoice;
-use sales\entities\EventTrait;
+use src\entities\EventTrait;
 use Yii;
 
 /**

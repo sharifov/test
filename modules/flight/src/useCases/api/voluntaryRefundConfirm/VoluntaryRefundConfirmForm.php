@@ -4,7 +4,7 @@ namespace modules\flight\src\useCases\api\voluntaryRefundConfirm;
 
 use common\components\validators\CheckJsonValidator;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
-use sales\helpers\ErrorsToStringHelper;
+use src\helpers\ErrorsToStringHelper;
 use webapi\src\forms\billing\BillingInfoForm;
 use webapi\src\forms\payment\PaymentRequestForm;
 use webapi\src\logger\behaviors\filters\creditCard\CreditCardFilter;

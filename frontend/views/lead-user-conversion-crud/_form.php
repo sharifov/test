@@ -1,11 +1,11 @@
 <?php
 
-use sales\model\leadUserConversion\service\LeadUserConversionDictionary;
+use src\model\leadUserConversion\service\LeadUserConversionDictionary;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\leadUserConversion\entity\LeadUserConversion */
+/* @var $model src\model\leadUserConversion\entity\LeadUserConversion */
 /* @var $form ActiveForm */
 ?>
 

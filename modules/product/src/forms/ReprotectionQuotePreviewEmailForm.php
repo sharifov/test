@@ -5,7 +5,7 @@ namespace modules\product\src\forms;
 use common\models\EmailTemplateType;
 use common\models\Employee;
 use common\models\Language;
-use sales\entities\cases\Cases;
+use src\entities\cases\Cases;
 
 class ReprotectionQuotePreviewEmailForm extends \yii\base\Model
 {

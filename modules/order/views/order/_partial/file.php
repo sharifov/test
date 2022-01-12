@@ -9,7 +9,7 @@ use modules\fileStorage\src\services\url\FileInfo;
 use modules\fileStorage\src\services\url\QueryParams;
 use modules\fileStorage\src\services\url\UrlGenerator;
 use modules\order\src\entities\order\Order;
-use sales\auth\Auth;
+use src\auth\Auth;
 use yii\bootstrap4\Html;
 use yii\helpers\StringHelper;
 use yii\helpers\Url;

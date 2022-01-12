@@ -5,7 +5,7 @@ namespace common\models\search;
 use common\models\Employee;
 use common\models\UserGroupAssign;
 use common\models\UserProjectParams;
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;

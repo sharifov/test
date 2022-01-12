@@ -6,7 +6,7 @@ use common\components\validators\CheckIsNumberValidator;
 use common\components\validators\IsArrayValidator;
 use common\models\Currency;
 use frontend\helpers\JsonHelper;
-use sales\helpers\ErrorsToStringHelper;
+use src\helpers\ErrorsToStringHelper;
 use yii\base\Model;
 
 /**

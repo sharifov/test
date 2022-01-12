@@ -6,7 +6,7 @@ use common\models\Client;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\Project;
-use sales\helpers\query\QueryHelper;
+use src\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
 use common\models\VisitorLog;
 

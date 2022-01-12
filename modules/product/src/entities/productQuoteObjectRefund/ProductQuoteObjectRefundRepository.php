@@ -2,7 +2,7 @@
 
 namespace modules\product\src\entities\productQuoteObjectRefund;
 
-use sales\repositories\NotFoundException;
+use src\repositories\NotFoundException;
 
 class ProductQuoteObjectRefundRepository
 {

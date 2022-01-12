@@ -2,8 +2,8 @@
 
 namespace modules\fileStorage\src\entity\fileStorage;
 
-use sales\dispatchers\EventDispatcher;
-use sales\repositories\NotFoundException;
+use src\dispatchers\EventDispatcher;
+use src\repositories\NotFoundException;
 
 /**
  * Class FileStorageRepository

@@ -1,13 +1,13 @@
 <?php
 
-use sales\auth\Auth;
-use sales\entities\cases\Cases;
-use sales\entities\cases\CasesStatus;
+use src\auth\Auth;
+use src\entities\cases\Cases;
+use src\entities\cases\CasesStatus;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model \sales\entities\cases\Cases */
+/* @var $model \src\entities\cases\Cases */
 /* @var $isAdmin boolean */
 ?>
 

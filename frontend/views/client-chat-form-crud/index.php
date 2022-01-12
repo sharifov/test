@@ -1,7 +1,7 @@
 <?php
 
 use common\components\grid\project\ProjectColumn;
-use sales\model\clientChatForm\entity\ClientChatForm;
+use src\model\clientChatForm\entity\ClientChatForm;
 use yii\grid\ActionColumn;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
@@ -10,7 +10,7 @@ use common\components\grid\UserSelect2Column;
 use dosamigos\datepicker\DatePicker;
 
 /* @var yii\web\View $this */
-/* @var sales\model\clientChatForm\entity\ClientChatFormSearch $searchModel */
+/* @var src\model\clientChatForm\entity\ClientChatFormSearch $searchModel */
 /* @var yii\data\ActiveDataProvider $dataProvider */
 
 $this->title = 'Client Chat Forms';

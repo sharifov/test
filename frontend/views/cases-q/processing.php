@@ -3,22 +3,22 @@
 use common\models\Department;
 use common\models\Employee;
 use common\models\Project;
-use sales\access\ListsAccess;
-use sales\auth\Auth;
-use sales\entities\cases\CaseCategory;
-use sales\entities\cases\CasesQSearch;
+use src\access\ListsAccess;
+use src\auth\Auth;
+use src\entities\cases\CaseCategory;
+use src\entities\cases\CasesQSearch;
 use common\components\grid\cases\NeedActionColumn;
-use sales\helpers\communication\StatisticsHelper;
-use sales\model\saleTicket\entity\SaleTicket;
+use src\helpers\communication\StatisticsHelper;
+use src\model\saleTicket\entity\SaleTicket;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use dosamigos\datepicker\DatePicker;
-use sales\entities\cases\Cases;
+use src\entities\cases\Cases;
 use yii\widgets\Pjax;
 use common\models\Language;
 
 /* @var $this yii\web\View
- * @var $searchModel sales\entities\cases\CasesQSearch
+ * @var $searchModel src\entities\cases\CasesQSearch
  * @var $dataProvider yii\data\ActiveDataProvider
  * @var $isAgent
  */

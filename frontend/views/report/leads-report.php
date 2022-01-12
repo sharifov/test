@@ -2,7 +2,7 @@
 
 use yii\helpers\Html;
 use kartik\grid\GridView;
-use sales\access\ListsAccess;
+use src\access\ListsAccess;
 use kartik\export\ExportMenu;
 
 $this->title = 'Leads Report';

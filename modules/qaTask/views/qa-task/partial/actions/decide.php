@@ -4,7 +4,7 @@ use modules\qaTask\src\useCases\qaTask\decide\lead\reAssign\QaTaskDecideLeadReAs
 use modules\qaTask\src\useCases\qaTask\decide\lead\sendToRedialQueue\QaTaskDecideLeadSendToRedialQueue;
 use modules\qaTask\src\useCases\qaTask\decide\noAction\QaTaskDecideNoActionService;
 use modules\qaTask\src\useCases\qaTask\decide\QaTaskDecideService;
-use sales\auth\Auth;
+use src\auth\Auth;
 use yii\helpers\Html;
 use yii\helpers\Url;
 

@@ -1,10 +1,10 @@
 <?php
 
-use sales\model\conference\form\DebugForm;
+use src\model\conference\form\DebugForm;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
-/** @var \sales\model\conference\form\DebugForm $model */
+/** @var \src\model\conference\form\DebugForm $model */
 /** @var string $content */
 
 $this->title = 'Conference debug';

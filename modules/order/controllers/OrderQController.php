@@ -5,7 +5,7 @@ namespace modules\order\controllers;
 use frontend\controllers\FController;
 use modules\order\src\entities\order\OrderStatus;
 use modules\order\src\entities\order\search\OrderQSearch;
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
 use yii\helpers\Json;
 

@@ -4,18 +4,18 @@ use common\models\Employee;
 use frontend\helpers\EmailHelper;
 use modules\email\src\abac\dto\EmailAbacDto;
 use modules\email\src\abac\EmailAbacObject;
-use sales\auth\Auth;
-use sales\helpers\call\CallHelper;
-use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChatLastMessage\entity\ClientChatLastMessage;
-use sales\model\clientChatMessage\entity\ClientChatMessage;
+use src\auth\Auth;
+use src\helpers\call\CallHelper;
+use src\model\clientChat\entity\ClientChat;
+use src\model\clientChatLastMessage\entity\ClientChatLastMessage;
+use src\model\clientChatMessage\entity\ClientChatMessage;
 use yii\helpers\Html;
 use common\models\Email;
 use common\models\Sms;
 use common\models\Call;
 use yii\helpers\VarDumper;
-use sales\helpers\phone\MaskPhoneHelper;
-use sales\helpers\email\MaskEmailHelper;
+use src\helpers\phone\MaskPhoneHelper;
+use src\helpers\email\MaskEmailHelper;
 
 /**
  * @var $this yii\web\View
@@ -92,7 +92,7 @@ $fromType = 'client';
             <div><?=$call->c_call_duration > 0 ? 'Duration: ' . Yii::$app->formatter->asDuration($call->c_call_duration) : ''?></div>
 
             <?php if ($call->calls) :?>
-                <?php \sales\helpers\communication\CommunicationHelper::renderChildCallsRecursive($call->calls)?>
+                <?php \src\helpers\communication\CommunicationHelper::renderChildCallsRecursive($call->calls)?>
             <?php endif;?>
 
         </div>

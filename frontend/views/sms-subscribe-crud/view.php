@@ -1,12 +1,12 @@
 <?php
 
-use sales\model\smsSubscribe\entity\SmsSubscribe;
-use sales\model\smsSubscribe\entity\SmsSubscribeStatus;
+use src\model\smsSubscribe\entity\SmsSubscribe;
+use src\model\smsSubscribe\entity\SmsSubscribeStatus;
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\smsSubscribe\entity\SmsSubscribe */
+/* @var $model src\model\smsSubscribe\entity\SmsSubscribe */
 
 $this->title = $model->ss_id;
 $this->params['breadcrumbs'][] = ['label' => 'Sms Subscribes', 'url' => ['index']];

@@ -4,7 +4,7 @@ use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\flightQuoteLabelList\entity\FlightQuoteLabelList */
+/* @var $model src\model\flightQuoteLabelList\entity\FlightQuoteLabelList */
 /* @var $form ActiveForm */
 ?>
 

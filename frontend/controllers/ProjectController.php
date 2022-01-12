@@ -2,9 +2,9 @@
 
 namespace frontend\controllers;
 
-use sales\model\project\entity\params\Params;
-use sales\model\project\entity\projectRelation\ProjectRelationRepository;
-use sales\widgets\ProjectSelect2Widget;
+use src\model\project\entity\params\Params;
+use src\model\project\entity\projectRelation\ProjectRelationRepository;
+use src\widgets\ProjectSelect2Widget;
 use Yii;
 use common\models\Project;
 use common\models\search\ProjectSearch;

@@ -3,8 +3,8 @@
 use common\models\Employee;
 use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\widgets\FileStorageListWidget;
-use sales\auth\Auth;
-use sales\helpers\cases\CasesViewRenderHelper;
+use src\auth\Auth;
+use src\helpers\cases\CasesViewRenderHelper;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -15,7 +15,7 @@ use modules\cases\src\widgets\CaseEventLogWidget;
 
 /**
  * @var $this yii\web\View
- * @var $model sales\entities\cases\Cases
+ * @var $model src\entities\cases\Cases
  * @var $comForm frontend\models\CaseCommunicationForm
  * @var $previewEmailForm frontend\models\CasePreviewEmailForm
  * @var $previewSmsForm frontend\models\CasePreviewSmsForm
@@ -36,8 +36,8 @@ use modules\cases\src\widgets\CaseEventLogWidget;
  * @var $modelNote common\models\CaseNote
  * @var $dataProviderNotes yii\data\ArrayDataProvider
  *
- * @var $coupons \sales\model\coupon\entity\couponCase\CouponCase[]
- * @var $sendCouponsForm \sales\model\coupon\useCase\send\SendCouponsForm
+ * @var $coupons \src\model\coupon\entity\couponCase\CouponCase[]
+ * @var $sendCouponsForm \src\model\coupon\useCase\send\SendCouponsForm
  *
  * @var $fromPhoneNumbers array
  * @var bool $smsEnabled

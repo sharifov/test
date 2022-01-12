@@ -2,7 +2,7 @@
 
 namespace common\models;
 
-use sales\model\emailList\entity\EmailList;
+use src\model\emailList\entity\EmailList;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;

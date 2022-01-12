@@ -7,7 +7,7 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\shiftSchedule\entity\userShiftSchedule\search\SearchUserShiftSchedule */
+/* @var $searchModel src\model\shiftSchedule\entity\userShiftSchedule\search\SearchUserShiftSchedule */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'User Shift Schedules';

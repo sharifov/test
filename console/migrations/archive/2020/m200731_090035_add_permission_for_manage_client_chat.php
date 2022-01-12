@@ -2,8 +2,8 @@
 
 use common\models\Employee;
 use console\migrations\RbacMigrationService;
-use sales\rbac\rules\globalRules\clientChat\ClientChatOwnerRule;
-use sales\rbac\rules\globalRules\clientChat\ClientChatIsOwnerMyGroupRule;
+use src\rbac\rules\globalRules\clientChat\ClientChatOwnerRule;
+use src\rbac\rules\globalRules\clientChat\ClientChatIsOwnerMyGroupRule;
 use yii\db\Migration;
 
 /**

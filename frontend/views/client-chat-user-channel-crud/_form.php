@@ -4,7 +4,7 @@ use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChatUserChannel\entity\ClientChatUserChannel */
+/* @var $model src\model\clientChatUserChannel\entity\ClientChatUserChannel */
 /* @var $form ActiveForm */
 ?>
 
@@ -14,7 +14,7 @@ use yii\widgets\ActiveForm;
 
         <?php $form = ActiveForm::begin(); ?>
 
-        <?= $form->field($model, 'ccuc_user_id')->widget(\sales\widgets\UserSelect2Widget::class, [
+        <?= $form->field($model, 'ccuc_user_id')->widget(\src\widgets\UserSelect2Widget::class, [
             'data' => $model->ccuc_user_id ? [
                 $model->ccuc_user_id => $model->ccucUser->username
             ] : [],

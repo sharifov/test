@@ -3,7 +3,7 @@
 namespace modules\cruise\src\entity\cruiseQuote\serializer;
 
 use modules\cruise\src\entity\cruiseQuote\CruiseQuote;
-use sales\entities\serializer\Serializer;
+use src\entities\serializer\Serializer;
 use yii\helpers\ArrayHelper;
 
 /**

@@ -3,12 +3,12 @@
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use common\models\Employee;
-use sales\entities\cases\CasesStatus;
+use src\entities\cases\CasesStatus;
 use dosamigos\datepicker\DatePicker;
 use kartik\select2\Select2;
 
 /* @var $this yii\web\View */
-/* @var $model sales\entities\cases\CaseStatusLogSearch */
+/* @var $model src\entities\cases\CaseStatusLogSearch */
 /* @var $form yii\widgets\ActiveForm */
 
 $userList = Employee::getList();

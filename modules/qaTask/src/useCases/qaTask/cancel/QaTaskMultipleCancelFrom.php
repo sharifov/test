@@ -7,7 +7,7 @@ use common\models\Employee;
 use modules\qaTask\src\entities\qaTaskActionReason\QaTaskActionReason;
 use modules\qaTask\src\useCases\qaTask\QaTaskActions;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
-use sales\auth\Auth;
+use src\auth\Auth;
 use yii\base\Model;
 
 class QaTaskMultipleCancelFrom extends Model

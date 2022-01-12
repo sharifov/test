@@ -11,14 +11,14 @@ use borales\extensions\phoneInput\PhoneInput;
 use common\models\ClientPhone;
 use common\models\Employee;
 use common\models\Lead;
-use sales\forms\lead\PhoneCreateForm;
+use src\forms\lead\PhoneCreateForm;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
 use yii\widgets\ActiveForm;
 use modules\lead\src\abac\LeadAbacObject;
 use modules\lead\src\abac\dto\LeadAbacDto;
-use sales\auth\Auth;
+use src\auth\Auth;
 
 $addPhone->client_id = $lead->client_id;
 $leadAbacDto = new LeadAbacDto($lead, Auth::id())

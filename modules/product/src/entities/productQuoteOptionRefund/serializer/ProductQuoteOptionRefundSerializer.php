@@ -11,7 +11,7 @@ use modules\product\src\entities\productQuoteOptionRefund\ProductQuoteOptionRefu
  *
  * @property ProductQuoteOptionRefund $model
  */
-class ProductQuoteOptionRefundSerializer extends \sales\entities\serializer\Serializer
+class ProductQuoteOptionRefundSerializer extends \src\entities\serializer\Serializer
 {
     public function __construct(ProductQuoteOptionRefund $model)
     {

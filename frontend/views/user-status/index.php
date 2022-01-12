@@ -1,6 +1,6 @@
 <?php
 
-use sales\model\user\entity\userStatus\UserStatus;
+use src\model\user\entity\userStatus\UserStatus;
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserColumn;
 use yii\helpers\Html;
@@ -8,7 +8,7 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\user\entity\userStatus\search\UserStatusSearch */
+/* @var $searchModel src\model\user\entity\userStatus\search\UserStatusSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'User Statuses';

@@ -1,11 +1,11 @@
 <?php
 
-use sales\model\user\entity\paymentCategory\UserPaymentCategory;
+use src\model\user\entity\paymentCategory\UserPaymentCategory;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\user\entity\payment\UserPayment */
+/* @var $model src\model\user\entity\payment\UserPayment */
 
 $this->title = $model->uptAssignedUser->username;
 $this->title .= $model->uptCategory ? ' - ' . $model->uptCategory->upc_name : '';

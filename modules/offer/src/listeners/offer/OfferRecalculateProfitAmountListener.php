@@ -3,8 +3,8 @@
 namespace modules\offer\src\listeners\offer;
 
 use modules\offer\src\entities\offer\events\OfferRecalculateProfitAmountEvent;
-use sales\helpers\app\AppHelper;
-use sales\services\RecalculateProfitAmountService;
+use src\helpers\app\AppHelper;
+use src\services\RecalculateProfitAmountService;
 use Yii;
 
 /**

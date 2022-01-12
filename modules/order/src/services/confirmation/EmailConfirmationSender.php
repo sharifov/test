@@ -14,7 +14,7 @@ use modules\order\src\entities\orderContact\OrderContact;
 use modules\order\src\entities\orderData\OrderData;
 use modules\order\src\entities\orderEmail\OrderEmail;
 use modules\product\src\entities\productQuote\ProductQuote;
-use sales\model\project\entity\projectLocale\ProjectLocale;
+use src\model\project\entity\projectLocale\ProjectLocale;
 use yii\helpers\VarDumper;
 
 /**

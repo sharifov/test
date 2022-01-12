@@ -4,7 +4,7 @@ namespace common\models;
 
 use common\models\query\DepartmentPhoneProjectQuery;
 use frontend\helpers\JsonHelper;
-use sales\model\phoneList\entity\PhoneList;
+use src\model\phoneList\entity\PhoneList;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;

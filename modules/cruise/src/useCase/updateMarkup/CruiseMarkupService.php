@@ -3,9 +3,9 @@
 namespace modules\cruise\src\useCase\updateMarkup;
 
 use modules\cruise\src\entity\cruiseQuote\CruiseQuote;
-use sales\helpers\product\ProductQuoteHelper;
-use sales\services\TransactionManager;
-use sales\repositories\product\ProductQuoteRepository;
+use src\helpers\product\ProductQuoteHelper;
+use src\services\TransactionManager;
+use src\repositories\product\ProductQuoteRepository;
 
 class CruiseMarkupService
 {

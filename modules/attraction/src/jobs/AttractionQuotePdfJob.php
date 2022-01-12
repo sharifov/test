@@ -5,8 +5,8 @@ namespace modules\attraction\src\jobs;
 use modules\attraction\models\AttractionQuote;
 use modules\attraction\src\services\AttractionQuotePdfService;
 use yii\queue\RetryableJobInterface;
-use sales\helpers\app\AppHelper;
-use sales\repositories\NotFoundException;
+use src\helpers\app\AppHelper;
+use src\repositories\NotFoundException;
 
 class AttractionQuotePdfJob implements RetryableJobInterface
 {

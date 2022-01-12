@@ -5,7 +5,7 @@ namespace modules\product\src\entities\productQuoteStatusLog\search;
 use common\models\Employee;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuote\ProductQuoteStatusAction;
-use sales\helpers\query\QueryHelper;
+use src\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
 use modules\product\src\entities\productQuoteStatusLog\ProductQuoteStatusLog;
 

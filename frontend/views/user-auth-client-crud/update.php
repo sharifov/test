@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\userAuthClient\entity\UserAuthClient */
+/* @var $model src\model\userAuthClient\entity\UserAuthClient */
 
 $this->title = 'Update Auth Client: ' . $model->uac_id;
 $this->params['breadcrumbs'][] = ['label' => 'Auth Clients', 'url' => ['index']];

@@ -3,9 +3,9 @@
 namespace frontend\widgets;
 
 use common\models\Lead;
-use sales\entities\cases\Cases;
-use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChatChannel\entity\ClientChatChannel;
+use src\entities\cases\Cases;
+use src\model\clientChat\entity\ClientChat;
+use src\model\clientChatChannel\entity\ClientChatChannel;
 use Yii;
 use yii\helpers\ArrayHelper;
 

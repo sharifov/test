@@ -4,7 +4,7 @@
 /* @var $content string */
 
 use frontend\widgets\OnlineConnection;
-use sales\auth\Auth;
+use src\auth\Auth;
 use yii\helpers\Html;
 
 //\frontend\themes\gentelella_v2\assets\Asset::register($this);

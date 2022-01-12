@@ -2,7 +2,7 @@
 
 namespace frontend\controllers;
 
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
 use common\models\VisitorLog;
 use common\models\search\VisitorLogSearch;

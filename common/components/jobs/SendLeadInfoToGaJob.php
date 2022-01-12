@@ -4,7 +4,7 @@ namespace common\components\jobs;
 
 use common\components\ga\GaLead;
 use common\models\Lead;
-use sales\helpers\app\AppHelper;
+use src\helpers\app\AppHelper;
 use yii\base\BaseObject;
 use yii\helpers\VarDumper;
 use yii\queue\JobInterface;

@@ -1,6 +1,6 @@
 <?php
 
-use sales\model\clientChatCase\entity\ClientChatCase;
+use src\model\clientChatCase\entity\ClientChatCase;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 

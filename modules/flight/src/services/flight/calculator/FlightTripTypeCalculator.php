@@ -4,7 +4,7 @@ namespace modules\flight\src\services\flight\calculator;
 
 use modules\flight\models\Flight;
 use modules\flight\src\dto\flightSegment\SegmentDTO;
-use sales\repositories\airport\AirportRepository;
+use src\repositories\airport\AirportRepository;
 
 class FlightTripTypeCalculator
 {

@@ -6,7 +6,7 @@ use yii\widgets\Pjax;
 /* @var $model common\models\Client */
 /* @var $leadsDataProvider yii\data\ActiveDataProvider */
 /* @var $casesDataProvider yii\data\ActiveDataProvider
- * @var $case \sales\entities\cases\Cases
+ * @var $case \src\entities\cases\Cases
  * @var $call|null \common\models\Call
  */
 

@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\quoteLabel\entity\QuoteLabel;
-use sales\model\quoteLabel\entity\QuoteLabelSearch;
+use src\model\quoteLabel\entity\QuoteLabel;
+use src\model\quoteLabel\entity\QuoteLabelSearch;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;

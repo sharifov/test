@@ -3,8 +3,8 @@
 namespace common\components\jobs\clientChat;
 
 use common\components\jobs\BaseJob;
-use sales\helpers\app\AppHelper;
-use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestService;
+use src\helpers\app\AppHelper;
+use src\model\clientChatRequest\useCase\api\create\ClientChatRequestService;
 use yii\queue\JobInterface;
 use Yii;
 use yii\queue\Queue;

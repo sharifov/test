@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChatLastMessage\entity\ClientChatLastMessage */
+/* @var $model src\model\clientChatLastMessage\entity\ClientChatLastMessage */
 
 $this->title = 'Update Client Chat Last Message: ' . $model->cclm_id;
 $this->params['breadcrumbs'][] = ['label' => 'Client Chat Last Messages', 'url' => ['index']];

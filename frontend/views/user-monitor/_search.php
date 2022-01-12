@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\user\entity\monitor\search\UserMonitorSearch */
+/* @var $model src\model\user\entity\monitor\search\UserMonitorSearch */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
@@ -36,7 +36,7 @@ use yii\widgets\ActiveForm;
                     <?= $form->field($model, 'userId')->dropDownList(\common\models\Employee::getList(), ['prompt' => '']) ?>
                 </div>
                 <div class="col-md-1">
-                    <?= $form->field($model, 'typeId')->dropDownList(\sales\model\user\entity\monitor\UserMonitor::getTypeList(), ['prompt' => '']) ?>
+                    <?= $form->field($model, 'typeId')->dropDownList(\src\model\user\entity\monitor\UserMonitor::getTypeList(), ['prompt' => '']) ?>
                 </div>
 
                 <div class="col-md-3">

@@ -4,7 +4,7 @@ use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\flightQuoteLabelList\entity\FlightQuoteLabelList */
+/* @var $model src\model\flightQuoteLabelList\entity\FlightQuoteLabelList */
 
 $this->title = $model->fqll_id;
 $this->params['breadcrumbs'][] = ['label' => 'Flight Quote Labels', 'url' => ['index']];

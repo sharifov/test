@@ -5,7 +5,7 @@ namespace webapi\src\forms\flight\flights\price;
 use common\components\validators\CheckJsonValidator;
 use common\models\Currency;
 use frontend\helpers\JsonHelper;
-use sales\helpers\ErrorsToStringHelper;
+use src\helpers\ErrorsToStringHelper;
 use webapi\src\forms\flight\flights\price\detail\PriceDetailApiForm;
 use yii\base\Model;
 

@@ -1,6 +1,6 @@
 <?php
 
-use sales\model\leadProduct\entity\LeadProduct;
+use src\model\leadProduct\entity\LeadProduct;
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 

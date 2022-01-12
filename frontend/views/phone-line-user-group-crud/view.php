@@ -4,7 +4,7 @@ use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\phoneLine\phoneLineUserGroup\entity\PhoneLineUserGroup */
+/* @var $model src\model\phoneLine\phoneLineUserGroup\entity\PhoneLineUserGroup */
 
 $this->title = $model->plug_line_id;
 $this->params['breadcrumbs'][] = ['label' => 'Phone Line User Groups', 'url' => ['index']];

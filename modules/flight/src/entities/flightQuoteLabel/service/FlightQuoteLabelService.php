@@ -5,7 +5,7 @@ namespace modules\flight\src\entities\flightQuoteLabel\service;
 use modules\flight\models\FlightQuote;
 use modules\flight\src\entities\flightQuoteLabel\FlightQuoteLabel;
 use modules\flight\src\entities\flightQuoteLabel\repository\FlightQuoteLabelRepository;
-use sales\helpers\ErrorsToStringHelper;
+use src\helpers\ErrorsToStringHelper;
 use yii\helpers\ArrayHelper;
 
 /**

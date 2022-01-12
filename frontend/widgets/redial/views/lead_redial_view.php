@@ -2,7 +2,7 @@
 
 use common\models\Employee;
 use common\models\Lead;
-use sales\formatters\client\ClientTimeFormatter;
+use src\formatters\client\ClientTimeFormatter;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\widgets\DetailView;

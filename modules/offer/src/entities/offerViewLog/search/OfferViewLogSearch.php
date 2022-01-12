@@ -4,7 +4,7 @@ namespace modules\offer\src\entities\offerViewLog\search;
 
 use common\models\Employee;
 use modules\offer\src\entities\offerViewLog\OfferViewLog;
-use sales\helpers\query\QueryHelper;
+use src\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
 
 class OfferViewLogSearch extends OfferViewLog

@@ -2,15 +2,15 @@
 
 use common\components\grid\DateTimeColumn;
 use dosamigos\datepicker\DatePicker;
-use sales\model\clientChatFeedback\entity\ClientChatFeedback;
-use sales\widgets\UserSelect2Widget;
+use src\model\clientChatFeedback\entity\ClientChatFeedback;
+use src\widgets\UserSelect2Widget;
 use yii\grid\ActionColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var yii\web\View $this */
-/* @var sales\model\clientChatFeedback\entity\clientChatFeedbackSearch $searchModel */
+/* @var src\model\clientChatFeedback\entity\clientChatFeedbackSearch $searchModel */
 /* @var yii\data\ActiveDataProvider $dataProvider */
 
 $this->title = 'Client Chat Feedback';

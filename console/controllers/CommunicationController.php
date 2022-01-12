@@ -7,7 +7,7 @@ use common\components\ReceiveEmailsJob;
 use common\models\DepartmentEmailProject;
 use common\models\Email;
 use common\models\UserProjectParams;
-use sales\model\emailList\entity\EmailList;
+use src\model\emailList\entity\EmailList;
 use yii\console\Controller;
 use Yii;
 use yii\helpers\ArrayHelper;

@@ -2,8 +2,8 @@
 
 namespace common\components\grid;
 
-use sales\model\emailList\entity\EmailList;
-use sales\widgets\EmailSelect2Widget;
+use src\model\emailList\entity\EmailList;
+use src\widgets\EmailSelect2Widget;
 use yii\base\Model;
 use yii\grid\DataColumn;
 use yii\helpers\ArrayHelper;

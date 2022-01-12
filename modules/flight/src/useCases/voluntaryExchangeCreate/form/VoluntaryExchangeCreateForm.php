@@ -7,7 +7,7 @@ use common\models\Currency;
 use modules\flight\src\useCases\voluntaryExchangeCreate\form\exchange\ExchangeForm;
 use modules\flight\src\useCases\voluntaryExchangeCreate\form\flightQuote\tripsForm\TripForm;
 use modules\flight\src\useCases\voluntaryExchangeCreate\form\price\VoluntaryExchangePriceForm;
-use sales\helpers\ErrorsToStringHelper;
+use src\helpers\ErrorsToStringHelper;
 use webapi\src\forms\billing\BillingInfoForm;
 use webapi\src\forms\payment\PaymentRequestForm;
 use yii\base\Model;

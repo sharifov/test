@@ -1,15 +1,15 @@
 <?php
 
 use common\models\Employee;
-use sales\model\call\entity\callCommand\CallCommand;
-use sales\model\call\entity\callCommand\types\CommandList;
+use src\model\call\entity\callCommand\CallCommand;
+use src\model\call\entity\callCommand\types\CommandList;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\call\entity\callCommand\CallCommand */
+/* @var $model src\model\call\entity\callCommand\CallCommand */
 /* @var $form yii\widgets\ActiveForm */
 /* @var string $typeForm */
 

@@ -10,7 +10,7 @@ use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionStatus;
 use modules\product\src\entities\productType\ProductType;
-use sales\helpers\ErrorsToStringHelper;
+use src\helpers\ErrorsToStringHelper;
 use webapi\src\forms\flight\flights\FlightApiForm;
 use webapi\src\forms\flight\options\OptionApiForm;
 use webapi\src\services\flight\FlightManageApiService;

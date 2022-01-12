@@ -1,11 +1,11 @@
 <?php
 
-use sales\helpers\clientChat\ClientChatHelper;
-use sales\model\client\helpers\ClientFormatter;
-use sales\model\clientChat\entity\ClientChat;
+use src\helpers\clientChat\ClientChatHelper;
+use src\model\client\helpers\ClientFormatter;
+use src\model\clientChat\entity\ClientChat;
 use yii\helpers\Html;
-use sales\helpers\phone\MaskPhoneHelper;
-use sales\helpers\email\MaskEmailHelper;
+use src\helpers\phone\MaskPhoneHelper;
+use src\helpers\email\MaskEmailHelper;
 
 /** @var ClientChat $clientChat */
 

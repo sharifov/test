@@ -11,11 +11,11 @@ use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\product\src\entities\productQuoteLead\service\ProductQuoteLeadService;
 use modules\product\src\entities\productQuoteOrigin\service\ProductQuoteOriginService;
 use modules\product\src\services\ProductCloneService;
-use sales\model\leadOrder\entity\LeadOrderQuery;
-use sales\model\leadOrder\services\LeadOrderService;
-use sales\model\leadProduct\services\LeadProductService;
-use sales\repositories\lead\LeadRepository;
-use sales\services\TransactionManager;
+use src\model\leadOrder\entity\LeadOrderQuery;
+use src\model\leadOrder\services\LeadOrderService;
+use src\model\leadProduct\services\LeadProductService;
+use src\repositories\lead\LeadRepository;
+use src\services\TransactionManager;
 
 /**
  * Class LeadFailBooking

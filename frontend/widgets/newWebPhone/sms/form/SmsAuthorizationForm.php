@@ -5,7 +5,7 @@ namespace frontend\widgets\newWebPhone\sms\form;
 use common\models\Client;
 use common\models\Employee;
 use common\models\UserProjectParams;
-use sales\model\sms\useCase\send\Contact;
+use src\model\sms\useCase\send\Contact;
 use yii\base\Model;
 
 /**

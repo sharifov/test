@@ -3,9 +3,9 @@
 use common\models\Employee;
 use common\models\UserProjectParams;
 use kartik\select2\Select2;
-use sales\access\EmployeeProjectAccess;
-use sales\widgets\EmailSelect2Widget;
-use sales\widgets\PhoneSelect2Widget;
+use src\access\EmployeeProjectAccess;
+use src\widgets\EmailSelect2Widget;
+use src\widgets\PhoneSelect2Widget;
 use yii\helpers\Html;
 use yii\web\JsExpression;
 use yii\web\View;

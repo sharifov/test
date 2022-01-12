@@ -3,10 +3,10 @@
 namespace common\components\jobs\clientChat;
 
 use common\components\jobs\BaseJob;
-use sales\helpers\app\AppHelper;
-use sales\model\clientChatRequest\entity\ClientChatRequest;
-use sales\model\clientChatRequest\useCase\api\create\requestEvent\ChatRequestEvent;
-use sales\repositories\NotFoundException;
+use src\helpers\app\AppHelper;
+use src\model\clientChatRequest\entity\ClientChatRequest;
+use src\model\clientChatRequest\useCase\api\create\requestEvent\ChatRequestEvent;
+use src\repositories\NotFoundException;
 use yii\queue\JobInterface;
 use Yii;
 

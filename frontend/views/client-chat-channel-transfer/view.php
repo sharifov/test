@@ -4,7 +4,7 @@ use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChatChannelTransfer\entity\ClientChatChannelTransfer */
+/* @var $model src\model\clientChatChannelTransfer\entity\ClientChatChannelTransfer */
 
 $this->title = 'Transfer Rule';
 $this->params['breadcrumbs'][] = ['label' => 'Client Chat Channel Transfers', 'url' => ['index']];

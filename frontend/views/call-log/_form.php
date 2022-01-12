@@ -3,19 +3,19 @@
 use borales\extensions\phoneInput\PhoneInput;
 use common\models\Call;
 use common\models\Department;
-use sales\access\ListsAccess;
-use sales\auth\Auth;
-use sales\model\callLog\entity\callLog\CallLogCategory;
-use sales\model\callLog\entity\callLog\CallLogStatus;
-use sales\model\callLog\entity\callLog\CallLogType;
-use sales\widgets\DateTimePicker;
-use sales\widgets\PhoneSelect2Widget;
-use sales\widgets\UserSelect2Widget;
+use src\access\ListsAccess;
+use src\auth\Auth;
+use src\model\callLog\entity\callLog\CallLogCategory;
+use src\model\callLog\entity\callLog\CallLogStatus;
+use src\model\callLog\entity\callLog\CallLogType;
+use src\widgets\DateTimePicker;
+use src\widgets\PhoneSelect2Widget;
+use src\widgets\UserSelect2Widget;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\callLog\entity\callLog\CallLog */
+/* @var $model src\model\callLog\entity\callLog\CallLog */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 

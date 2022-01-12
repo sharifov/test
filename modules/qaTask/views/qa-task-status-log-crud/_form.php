@@ -4,9 +4,9 @@ use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\qaTask\src\useCases\qaTask\QaTaskActions;
 use modules\qaTask\src\entities\qaTaskStatusLog\QaTaskStatusLog;
 use modules\qaTask\src\helpers\formatters\QaTaskStatusReasonFormatter;
-use sales\access\ListsAccess;
-use sales\auth\Auth;
-use sales\widgets\DateTimePicker;
+use src\access\ListsAccess;
+use src\auth\Auth;
+use src\widgets\DateTimePicker;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 

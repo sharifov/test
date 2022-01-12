@@ -2,15 +2,15 @@
 
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserColumn;
-use sales\model\smsSubscribe\entity\SmsSubscribe;
-use sales\model\smsSubscribe\entity\SmsSubscribeStatus;
+use src\model\smsSubscribe\entity\SmsSubscribe;
+use src\model\smsSubscribe\entity\SmsSubscribeStatus;
 use yii\grid\ActionColumn;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\smsSubscribe\entity\SmsSubscribeSearch */
+/* @var $searchModel src\model\smsSubscribe\entity\SmsSubscribeSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Sms Subscribes';

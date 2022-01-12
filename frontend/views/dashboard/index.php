@@ -1,7 +1,7 @@
 <?php
 
 use common\models\Employee;
-use sales\formatters\client\ClientTimeFormatter;
+use src\formatters\client\ClientTimeFormatter;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;

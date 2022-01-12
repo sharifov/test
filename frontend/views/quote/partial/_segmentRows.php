@@ -7,8 +7,8 @@
  */
 
 use common\models\Airports;
-use sales\forms\segment\SegmentBaggageForm;
-use sales\services\parsingDump\BaggageService;
+use src\forms\segment\SegmentBaggageForm;
+use src\services\parsingDump\BaggageService;
 use unclead\multipleinput\MultipleInput;
 use unclead\multipleinput\MultipleInputColumn;
 use yii\jui\AutoComplete;

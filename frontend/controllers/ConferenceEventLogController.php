@@ -2,10 +2,10 @@
 
 namespace frontend\controllers;
 
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
-use sales\model\conference\entity\conferenceEventLog\ConferenceEventLog;
-use sales\model\conference\entity\conferenceEventLog\search\ConferenceEventLogSearch;
+use src\model\conference\entity\conferenceEventLog\ConferenceEventLog;
+use src\model\conference\entity\conferenceEventLog\search\ConferenceEventLogSearch;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
