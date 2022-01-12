@@ -5,6 +5,7 @@ use yii\helpers\Url;
 use yii\grid\ActionColumn;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel modules\user\userFeedback\entity\search\UserFeedbackFileSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -42,7 +43,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => ActionColumn::className(),
                 'urlCreator' => function ($action, UserFeedbackFile $model, $key, $index, $column) {
                     return Url::toRoute([$action, 'uff_id' => $model->uff_id]);
-                 }
+                }
             ],
         ],
     ]); ?>

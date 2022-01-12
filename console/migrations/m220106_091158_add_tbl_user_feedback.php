@@ -12,7 +12,6 @@ use yii\db\Migration;
  */
 class m220106_091158_add_tbl_user_feedback extends Migration
 {
-
     public function init()
     {
         $this->db = 'db_postgres';
