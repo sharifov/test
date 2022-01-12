@@ -125,6 +125,19 @@ class RbacController extends Controller
 
     public function actionMoveRulesToSrc()
     {
-        (new RbacMoveToSrc())->move(env('app.path') . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'rbac');
+        $subDir = 'src';
+        (new RbacMoveToSrc())->move(env('app.path') . DIRECTORY_SEPARATOR . $subDir . DIRECTORY_SEPARATOR . 'rbac', $subDir);
+        if (Yii::$app->cache) {
+            Yii::$app->cache->flush();
+        }
+    }
+
+    public function actionMoveRulesToSales()
+    {
+        $subDir = 'sales';
+        (new RbacMoveToSrc())->move(env('app.path') . DIRECTORY_SEPARATOR . $subDir . DIRECTORY_SEPARATOR . 'rbac', $subDir);
+        if (Yii::$app->cache) {
+            Yii::$app->cache->flush();
+        }
     }
 }

@@ -8,7 +8,7 @@ class RbacMoveToSrc
 {
     private $files = [];
 
-    public function move(string $path): void
+    public function move(string $path, string $subDir): void
     {
         $processing = 0;
         $notProcessing = 0;
@@ -21,7 +21,7 @@ class RbacMoveToSrc
                 $found = false;
                 foreach ($this->getFiles($path) as $file) {
                     if (strpos(file_get_contents($file), $rule['name']) !== false) {
-                        $class = $this->getNamespace($file);
+                        $class = $this->getNamespace($file, $subDir);
                         echo ' => ' . $class . PHP_EOL;
                         $item = \Yii::createObject($class);
                         \Yii::$app->db->createCommand(
@@ -54,10 +54,10 @@ class RbacMoveToSrc
         echo 'Not Processing ' . $notProcessing . ' rules' . PHP_EOL;
     }
 
-    private function getNamespace(string $path)
+    private function getNamespace(string $path, string $subDir)
     {
         $path = str_replace(['/', '.php'], ['\\', ''], $path);
-        $rbacPosition = strpos($path, 'src\rbac');
+        $rbacPosition = strpos($path, $subDir . '\rbac');
         $path = substr($path, $rbacPosition);
         return $path;
     }
