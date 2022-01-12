@@ -54,7 +54,7 @@ class FlightQuoteBooking extends ActiveRecord implements Serializable, ProductDa
 
             [['fqb_pnr'], 'string', 'max' => 70],
             [['fqb_pnr'], 'filter', 'filter' => static function ($value) {
-                return (new PnrPreparingService($value))->getPnr();
+                return empty($value) ? $value : (new PnrPreparingService($value))->getPnr();
             }],
         ];
     }
