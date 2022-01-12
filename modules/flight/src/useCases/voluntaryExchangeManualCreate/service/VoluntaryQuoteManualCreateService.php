@@ -3,6 +3,7 @@
 namespace modules\flight\src\useCases\voluntaryExchangeManualCreate\service;
 
 use common\components\SearchService;
+use common\models\Currency;
 use common\models\QuoteSegment;
 use common\models\QuoteSegmentBaggage;
 use common\models\QuoteSegmentBaggageCharge;
@@ -255,6 +256,8 @@ class VoluntaryQuoteManualCreateService
     ): ProductQuote {
         $markupSum = 0;
         $sellingSum = 0;
+        $productQuote->pq_origin_currency = $productQuote->pq_origin_currency ?? Currency::DEFAULT_CURRENCY;
+
         if (!empty($form->getFlightQuotePaxPriceForms())) {
             foreach ($form->getFlightQuotePaxPriceForms() as $key => $flightQuotePaxPriceForm) {
                 $paxPrice = FlightQuotePaxPrice::createByVoluntaryQuotePaxPriceForm(
