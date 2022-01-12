@@ -1,9 +1,9 @@
 <?php
 
 return [
-    'limitUserConnections' => env('frontend.config.params.limitUserConnections', 'int'),
+    'limitUserConnections' => env('FRONTEND_CONFIG_PARAMS_LIMITUSERCONNECTIONS', 'int'),
     'minifiedAssetsEnabled' => false,
     'webSocketServer' => [
-        'connectionUrl' => env('frontend.config.params.webSocketServer.connectionUrl'),
+        'connectionUrl' => env('FRONTEND_CONFIG_PARAMS_WEBSOCKETSERVER_CONNECTIONURL'),
     ],
 ];

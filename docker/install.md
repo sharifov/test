@@ -37,8 +37,8 @@ POSTGRES_DB=crm
 POSTGRES_USER=crmuser
 POSTGRES_PASSWORD=Password123
 # ---------------------------------------------------------------------------------
-app.path=APP_PTH_CONTAINER
-app.console.logfile.path=${APP_PTH_CONTAINER}/console/runtime"
+APP_PATH=APP_PTH_CONTAINER
+APP_CONSOLE_LOGFILE_PATH=${APP_PTH_CONTAINER}/console/runtime"
 ```
 
 
