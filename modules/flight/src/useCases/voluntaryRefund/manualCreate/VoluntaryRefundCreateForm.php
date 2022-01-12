@@ -40,6 +40,8 @@ class VoluntaryRefundCreateForm extends Model
             [['bookingId'], 'required'],
             [['bookingId'], 'string', 'max' => 50],
 
+            [['allow', 'airlineAllow', 'automatic'], 'filter', 'filter' => 'floatval', 'skipOnEmpty' => true],
+            [['allow', 'airlineAllow', 'automatic'], 'number'],
             [['allow', 'airlineAllow', 'automatic'], CheckIsBooleanValidator::class],
 
             [['refund'], 'safe'],
