@@ -631,13 +631,13 @@ class ClientChatController extends FController
             $result['iframeSrc'] = $clientChatIframeHelper->generateIframeSrc();
             $result['isShowInput'] = (int) ClientChatHelper::isShowInput($clientChat, Auth::user());
 
-            $result['html'] = $this->renderAjax('partial/_client-chat-info', [
+            $result['html'] = $this->renderPartial('partial/_client-chat-info', [
                 'clientChat' => $clientChat,
                 'client' => $clientChat->cchClient,
                 'actionPermissions' => $this->actionPermissions,
             ]);
             if ($this->actionPermissions->canNoteView($clientChat) || $this->actionPermissions->canNoteAdd($clientChat) || $this->actionPermissions->canNoteDelete($clientChat)) {
-                $result['noteHtml'] = $this->renderAjax('partial/_client-chat-note', [
+                $result['noteHtml'] = $this->renderPartial('partial/_client-chat-note', [
                     'clientChat' => $clientChat,
                     'model' => new ClientChatNote(),
                     'actionPermissions' => $this->actionPermissions,
@@ -656,7 +656,7 @@ class ClientChatController extends FController
 
             if (!$isClosed && (new ClientChatActionPermission())->canCouchNote($clientChat)) {
                 $result['couchNoteStatus'] = 1;
-                $result['couchNoteHtml'] =  $this->renderAjax('partial/_couch_note', [
+                $result['couchNoteHtml'] =  $this->renderPartial('partial/_couch_note', [
                     'couchNoteForm' => new ClientChatCouchNoteForm($clientChat, Auth::user()),
                 ]);
             }
