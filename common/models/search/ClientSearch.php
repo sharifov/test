@@ -9,6 +9,7 @@ use common\models\Project;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Client;
+use yii\helpers\VarDumper;
 
 /**
  * ClientSearch represents the model behind the search form of `common\models\Client`.
@@ -136,7 +137,7 @@ class ClientSearch extends Client
      */
     public function searchFromLead($params): ActiveDataProvider
     {
-        $query = Client::find();
+        $query = Client::find()->select([Client::tableName() . '.id']);
 
         // add conditions that should always apply here
 
@@ -158,29 +159,29 @@ class ClientSearch extends Client
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'id' => $this->id,
+            Client::tableName() . '.id' => $this->id,
             'DATE(created)' => $this->created,
             'DATE(updated)' => $this->updated,
         ]);
 
         if ($this->not_in_client_id) {
-            $query->andWhere(['NOT IN', 'id', $this->not_in_client_id]);
+            $query->andWhere(['NOT IN', Client::tableName() . '.id', $this->not_in_client_id]);
         }
 
         if ($this->client_email) {
             $subQuery = ClientEmail::find()->select(['DISTINCT(client_id)'])->where(['email' => $this->client_email]);
-            $query->andWhere(['IN', 'id', $subQuery]);
+            $query->andWhere(['IN', Client::tableName() . '.id', $subQuery]);
         }
 
         if ($this->client_phone) {
-            $subQuery = ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['phone' => $this->client_phone]);
-            $query->andWhere(['IN', 'id', $subQuery]);
+            $query->leftJoin(['cp' => ClientPhone::tableName()], 'cp.client_id = clients.id');
+            $query->andWhere(['cp.phone' => $this->client_phone])->limit(5);
         }
 
         $query->andFilterWhere(['like', 'first_name', $this->first_name])
             ->andFilterWhere(['like', 'middle_name', $this->middle_name])
             ->andFilterWhere(['like', 'last_name', $this->last_name]);
-
+        
         return $dataProvider;
     }
 

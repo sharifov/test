@@ -68,17 +68,19 @@ echo GridView::widget([
             'header' => 'Leads',
             'value' => static function (\common\models\Client $model) {
 
-                $leads = $model->leads;
+                $leads = $model->first30Leads;
                 $data = [];
                 if ($leads) {
                     foreach ($leads as $lead) {
-                        $data[] = '<i class="fa fa-link"></i> ' . Html::a('lead: ' . $lead->id, ['lead/view', 'gid' => $lead->gid], ['target' => '_blank', 'data-pjax' => 0]) . ' (IP: ' . $lead->request_ip . ')';
+                        $data[] = '<i class="fa fa-link"></i> ' . Html::a('lead: ' . $lead->id, ['lead/view', 'gid' => $lead->gid], ['target' => '_blank', 'data-pjax' => 0]) . ($lead->request_ip ? ' (IP: ' . $lead->request_ip . ')' : '');
                     }
                 }
 
                 $str = '';
                 if ($data) {
-                    $str = '' . implode('<br>', $data) . '';
+                    $str = implode('<br>', $data) . (count($leads) >= 30 ?
+                            '<br>To see all leads in open new window '.
+                            Html::a('click here', '/client/view?id='. $model->id, ['target' => '_blank']) : '<br>');
                 }
 
                 return $str;

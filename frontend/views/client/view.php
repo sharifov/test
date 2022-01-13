@@ -144,6 +144,19 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                 ],
             ]) ?>
+            Leads of users with same phone:<br>
+        <?php
+        $leads = $model->leads;
+        $data = [];
+        if ($leads) {
+            foreach ($leads as $lead) {
+                $data[] = '<i class="fa fa-link"></i> ' . Html::a('lead: ' . $lead->id, ['lead/view', 'gid' => $lead->gid], ['target' => '_blank', 'data-pjax' => 0]) . ($lead->request_ip ? ' (IP: ' . $lead->request_ip . ')' : '');
+            }
+        }
+        if ($data) {
+            echo implode('<br>', $data);
+        }
+        ?>
         </div>
     </div>
 
