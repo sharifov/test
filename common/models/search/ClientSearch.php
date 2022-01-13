@@ -181,7 +181,7 @@ class ClientSearch extends Client
         $query->andFilterWhere(['like', 'first_name', $this->first_name])
             ->andFilterWhere(['like', 'middle_name', $this->middle_name])
             ->andFilterWhere(['like', 'last_name', $this->last_name]);
-        
+
         return $dataProvider;
     }
 
