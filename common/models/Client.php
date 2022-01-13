@@ -56,7 +56,7 @@ use yii\helpers\ArrayHelper;
  * @property ClientPhone[] $clientPhonesByType
  * @property ClientProject[] $clientProjects
  * @property Lead[] $leads
- * @property Lead[] $leadsLimit
+ * @property Lead[] $leadsLimited
  * @property Cases[] $cases
  * @property string $nameByType
  * @property array $phoneNumbersSms
@@ -293,7 +293,7 @@ class Client extends ActiveRecord
     /**
      * @return ActiveQuery
      */
-    public function getLeadsLimit(int $limit = 30): ActiveQuery
+    public function getLeadsLimited(int $limit = 30): ActiveQuery
     {
         return $this->hasMany(Lead::class, ['client_id' => 'id'])->limit($limit);
     }

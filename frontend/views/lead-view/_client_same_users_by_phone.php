@@ -68,7 +68,7 @@ echo GridView::widget([
             'header' => 'Leads',
             'value' => static function (\common\models\Client $model) {
 
-                $leads = $model->leadsLimit;
+                $leads = $model->leadsLimited;
                 $data = [];
                 if (!empty($leads)) {
                     foreach ($leads as $lead) {
