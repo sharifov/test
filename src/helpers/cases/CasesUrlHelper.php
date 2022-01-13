@@ -14,19 +14,19 @@ class CasesUrlHelper
         }
 
         if ($id && $gid) {
-            return Html::a($id, \Yii::$app->params['url_address'] . '/cases/view/' . $gid);
+            return Html::a($id, \Yii::$app->params['url'] . '/cases/view/' . $gid);
         }
 
         if (!$id) {
             if ($case = Cases::findOne(['cs_gid' => $gid])) {
-                return Html::a($case->cs_id, \Yii::$app->params['url_address'] . '/cases/view/' . $case->cs_gid);
+                return Html::a($case->cs_id, \Yii::$app->params['url'] . '/cases/view/' . $case->cs_gid);
             }
             return null;
         }
 
         if (!$gid) {
             if ($case = Cases::findOne($id)) {
-                return Html::a($case->cs_id, \Yii::$app->params['url_address'] . '/cases/view/' . $case->cs_gid);
+                return Html::a($case->cs_id, \Yii::$app->params['url'] . '/cases/view/' . $case->cs_gid);
             }
             return null;
         }

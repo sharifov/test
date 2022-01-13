@@ -15,7 +15,7 @@ class FilterShortCodeToIdUrl implements Filter
 
     public function __construct()
     {
-        $this->host = \Yii::$app->params['url_address'];
+        $this->host = \Yii::$app->params['url'];
     }
 
     /**

@@ -24,7 +24,7 @@ class QuoteController extends Controller
         }
         $errors = [];
 
-        $host = \Yii::$app->params['url_address'];
+        $host = \Yii::$app->params['url'];
 
         $lead = $quote->lead;
         $employee = $lead->employee;

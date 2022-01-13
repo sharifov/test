@@ -79,20 +79,20 @@ class EnvLoader
             $this->dotenv->required('YII_DEBUG')->notEmpty();
             $this->dotenv->required('YII_ENV')->notEmpty();
 
-            $this->dotenv->required('app.path')->notEmpty();
-            $this->dotenv->required('app.console.logfile.path')->notEmpty();
-            $this->dotenv->required('common.config.supervisor.queue.user')->notEmpty();
+            $this->dotenv->required('APP_PATH')->notEmpty();
+            $this->dotenv->required('APP_CONSOLE_LOGFILE_PATH')->notEmpty();
+            $this->dotenv->required('COMMON_CONFIG_SUPERVISOR_QUEUE_USER')->notEmpty();
 
-            $this->dotenv->required('common.config.main.components.db.dsn.dbname')->notEmpty();
-            $this->dotenv->required('common.config.main.components.db.dsn.host')->notEmpty();
+            $this->dotenv->required('COMMON_CONFIG_MAIN_COMPONENTS_DB_DSN_DBNAME')->notEmpty();
+            $this->dotenv->required('COMMON_CONFIG_MAIN_COMPONENTS_DB_DSN_HOST')->notEmpty();
 
-            $this->dotenv->required('common.config.main.components.cache.redis.hostname')->notEmpty();
+            $this->dotenv->required('COMMON_CONFIG_MAIN_COMPONENTS_CACHE_REDIS_HOSTNAME')->notEmpty();
 
-            $this->dotenv->required('common.config.main.components.db_postgres.dsn.host')->notEmpty();
-            $this->dotenv->required('common.config.main.components.db_postgres.username')->notEmpty();
+            $this->dotenv->required('COMMON_CONFIG_MAIN_COMPONENTS_DBPOSTGRES_DSN_HOST')->notEmpty();
+            $this->dotenv->required('COMMON_CONFIG_MAIN_COMPONENTS_DBPOSTGRES_USERNAME')->notEmpty();
 
-            $this->dotenv->required('common.config.supervisor.socket_server.password')->notEmpty();
-            $this->dotenv->required('common.config.supervisor.socket_server.username')->notEmpty();
+            $this->dotenv->required('COMMON_CONFIG_SUPERVISOR_SOCKETSERVER_PASSWORD')->notEmpty();
+            $this->dotenv->required('COMMON_CONFIG_SUPERVISOR_SOCKETSERVER_USERNAME')->notEmpty();
         } catch (ValidationException $e) {
             echo('Dotenv validation failed. ERROR: ' . $e->getMessage());
             exit;

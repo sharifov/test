@@ -37,8 +37,6 @@ use yii\helpers\VarDumper;
 
 /**
  *
- * @deprecated
- * Not used
  * Class CommunicationService
  * @package webapi\src\services\communication
  *

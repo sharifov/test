@@ -31,8 +31,6 @@ use yii\httpclient\CurlTransport;
 use yii\web\BadRequestHttpException;
 
 /**
- * @deprecated
- * Not used
  * Twilio controller
  *
  * @property CommunicationService $communicationService

@@ -4,7 +4,7 @@ $config = [
     'name' => 'CRM - DEV',
     'components' => [
         'request' => [
-            'cookieValidationKey' => env('frontend.config.main.components.request.cookieValidationKey'),
+            'cookieValidationKey' => env('FRONTEND_CONFIG_MAIN_COMPONENTS_REQUEST_COOKIEVALIDATIONKEY'),
         ],
         'log' => [
             'targets' => [
@@ -28,12 +28,12 @@ $config = [
                         'driver' => [
                             'scheme' => 'https',
                             'basePath' => '/api/v4',
-                            'url' => env('common.config.params.mattermostLogTarget.containerSettings.driver.url'),
-                            'login_id' => env('common.config.params.mattermostLogTarget.containerSettings.driver.login_id'),
-                            'password' => env('common.config.params.mattermostLogTarget.containerSettings.driver.password'),
+                            'url' => env('COMMON_CONFIG_PARAMS_MATTERMOSTLOGTARGET_CONTAINERSETTINGS_DRIVER_URL'),
+                            'login_id' => env('COMMON_CONFIG_PARAMS_MATTERMOSTLOGTARGET_CONTAINERSETTINGS_DRIVER_LOGINID'),
+                            'password' => env('COMMON_CONFIG_PARAMS_MATTERMOSTLOGTARGET_CONTAINERSETTINGS_DRIVER_PASSWORD'),
                         ],
                     ],
-                    'chanelId' => env('common.config.params.mattermostLogTarget.chanelId'),
+                    'chanelId' => env('COMMON_CONFIG_PARAMS_MATTERMOSTLOGTARGET_CHANELID'),
                     'handlerClassName' => \common\components\logger\MattermostJobHandler::class,
                     'appPrefix' => 'DEV - CRM - Frontend',
                 ],

@@ -240,8 +240,8 @@ return [
             'clients' => [
                 'google' => [
                     'class' => Google::class,
-                    'clientId' => env('frontend.config.main.components.authClientCollection.clients.google.clientId'),
-                    'clientSecret' => env('frontend.config.main.components.authClientCollection.clients.google.clientSecret')
+                    'clientId' => env('FRONTEND_CONFIG_MAIN_COMPONENTS_AUTHCLIENTCOLLECTION_CLIENTS_GOOGLE_CLIENTID'),
+                    'clientSecret' => env('FRONTEND_CONFIG_MAIN_COMPONENTS_AUTHCLIENTCOLLECTION_CLIENTS_GOOGLE_CLIENTSECRET')
                 ],
             ],
         ]

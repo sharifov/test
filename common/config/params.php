@@ -12,8 +12,8 @@ return [
     'release' => require __DIR__ . '/params-release.php',
     'wsIdentityCookie' => ['name' => '_identity_ws', 'httpOnly' => true],
 
-    'url_address'      => 'https://sales.travelinsides.com',
-    'url_api_address'  => 'https://sales.api.travelinsides.com/v1',
+    'url'      => 'https://sales.travelinsides.com',
+    'url_api'  => 'https://sales.api.travelinsides.com/v1',
 
     'email_from' => [
         'sales' => 'sales@travelinsides.com',

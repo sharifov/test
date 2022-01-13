@@ -14,19 +14,19 @@ class LeadUrlHelper
         }
 
         if ($id && $gid) {
-            return Html::a($id, \Yii::$app->params['url_address'] . '/lead/view/' . $gid);
+            return Html::a($id, \Yii::$app->params['url'] . '/lead/view/' . $gid);
         }
 
         if (!$id) {
             if ($lead = Lead::findOne(['gid' => $gid])) {
-                return Html::a($lead->id, \Yii::$app->params['url_address'] . '/lead/view/' . $lead->gid);
+                return Html::a($lead->id, \Yii::$app->params['url'] . '/lead/view/' . $lead->gid);
             }
             return null;
         }
 
         if (!$gid) {
             if ($lead = Lead::findOne($id)) {
-                return Html::a($lead->id, \Yii::$app->params['url_address'] . '/lead/view/' . $lead->gid);
+                return Html::a($lead->id, \Yii::$app->params['url'] . '/lead/view/' . $lead->gid);
             }
             return null;
         }

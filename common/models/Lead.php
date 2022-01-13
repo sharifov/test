@@ -2727,7 +2727,7 @@ class Lead extends ActiveRecord implements Objectable
     {
         $isSend = false;
 
-        $host = \Yii::$app->params['url_address'];
+        $host = \Yii::$app->params['url'];
 
         if ($type && $employee_id && isset(Yii::$app->params['email_from']['sales'])) {
             $user = Employee::findOne($employee_id);
