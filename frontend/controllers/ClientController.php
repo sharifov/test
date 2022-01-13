@@ -84,11 +84,10 @@ class ClientController extends FController
     {
         $model = $this->findModel($id);
         $query = Lead::find()->select(['id', 'gid', 'request_ip'])->where(['client_id' => $id])->asArray();
-//        VarDumper::dump($model->leads,9,true); die;
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'pagination' => [
-                'pageSize' => 10,
+                'pageSize' => 30,
             ],
         ]);
         return $this->render('view', [
