@@ -78,9 +78,11 @@ echo GridView::widget([
 
                 $str = '';
                 if ($data) {
-                    $str = implode('<br>', $data) . (count($leads) >= 30 ?
-                            '<br>To see all leads in open new window ' .
-                            Html::a('click here', '/client/view?id=' . $model->id, ['target' => '_blank']) : '<br>');
+                    $str = implode('<br>', $data);
+                    if (count($leads) >= 30) {
+                        $str .= '<br>' . Html::a('See all leads in new window', '/client/view?id=' .
+                                $model->id, ['target' => '_blank', 'data-pjax' => 0]);
+                    }
                 }
 
                 return $str;

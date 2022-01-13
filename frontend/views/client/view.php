@@ -3,6 +3,9 @@
 use common\models\Client;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
+use yii\grid\GridView;
+use yii\data\ActiveDataProvider;
+use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\Client */
@@ -144,19 +147,27 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                 ],
             ]) ?>
-            Leads of users with same phone:<br>
+
+            <h5>Leads of users with same phone</h5>
         <?php
-        $leads = $model->leads;
-        $data = [];
-        if (!empty($leads)) {
-            foreach ($leads as $lead) {
-                $data[] = '<i class="fa fa-link"></i> ' . Html::a('lead: ' . $lead->id, ['lead/view', 'gid' => $lead->gid], ['target' => '_blank', 'data-pjax' => 0]) . ($lead->request_ip ? ' (IP: ' . $lead->request_ip . ')' : '');
-            }
-        }
-        if ($data) {
-            echo implode('<br>', $data);
-        }
-        ?>
+            Pjax::begin(['id' => 'pjax-client-same-phone', 'timeout' => 2000, 'enablePushState' => false, 'clientOptions' => ['method' => 'POST', 'data' => [
+                'clientId' => $model->id
+            ]]]);
+
+            echo GridView::widget([
+                'dataProvider' => $dataProvider,
+                'columns' => [
+                    [
+                    'value' => static function (array $model) {
+                        return '<i class="fa fa-link"></i> ' . Html::a('lead: ' . $model['id'], ['lead/view', 'gid' => $model['gid']], ['target' => '_blank', 'data-pjax' => 0]) . ($model['request_ip'] ? ' (IP: ' . $model['request_ip'] . ')' : '');
+                    },
+                    'format' => 'html'
+                    ]
+                ]
+            ]);
+            Pjax::end();
+
+            ?>
         </div>
     </div>
 

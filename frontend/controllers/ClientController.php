@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use common\models\Call;
 use common\models\Employee;
+use common\models\Lead;
 use common\models\Project;
 use common\models\search\lead\LeadSearchByClient;
 use common\models\search\LeadSearch;
@@ -81,8 +82,18 @@ class ClientController extends FController
      */
     public function actionView($id): string
     {
+        $model = $this->findModel($id);
+        $query = Lead::find()->select(['id', 'gid', 'request_ip'])->where(['client_id' => $id])->asArray();
+//        VarDumper::dump($model->leads,9,true); die;
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'pagination' => [
+                'pageSize' => 10,
+            ],
+        ]);
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $model,
+            'dataProvider' => $dataProvider,
         ]);
     }
 
