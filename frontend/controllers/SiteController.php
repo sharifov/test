@@ -28,6 +28,7 @@ use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use common\models\LoginForm;
+use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use Da\QrCode\QrCode;
@@ -427,6 +428,8 @@ class SiteController extends FController
                 $session->remove('auth_client_source');
                 $session->remove('auth_client_source_id');
                 return $this->goBack();
+            } elseif (!empty($userId) && empty($authClient)) {
+                throw new BadRequestHttpException('Bad Request');
             }
 
 
