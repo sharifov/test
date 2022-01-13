@@ -4,6 +4,7 @@ namespace src\model\userAuthClient\handler;
 
 use common\models\Employee;
 use common\models\LoginForm;
+use common\models\Notifications;
 use common\models\UserConnection;
 use Da\TwoFA\Manager;
 use src\helpers\app\AppHelper;
@@ -68,6 +69,7 @@ class GoogleHandler implements ClientHandler
                 try {
                     $this->repository->save($authClient);
                     $this->login($user);
+                    Notifications::create($user->id, 'Auth client assigned', 'Source: ' . UserAuthClientSources::getName($authClient->uac_source) . ' was assigned to your account.', Notifications::TYPE_INFO, true);
                 } catch (\RuntimeException $e) {
                     \Yii::warning(AppHelper::throwableLog($e), 'auth:GoogleHandler:handle:RuntimeException');
                     \Yii::$app->session->setFlash('error', 'Login failed');
@@ -100,6 +102,7 @@ class GoogleHandler implements ClientHandler
             $authClient->setGoogleSource();
             try {
                 $this->repository->save($authClient);
+                Notifications::create($userId, 'Auth client assigned', 'Source: ' . UserAuthClientSources::getName($authClient->uac_source) . ' was assigned to your account.', Notifications::TYPE_INFO, true);
                 \Yii::$app->session->setFlash('success', 'User with email: ' . $email . ' successfully assigned to your profile');
             } catch (\RuntimeException $e) {
                 \Yii::warning(AppHelper::throwableLog($e), 'auth:GoogleHandler:handleAssign:RuntimeException');
