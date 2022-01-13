@@ -293,9 +293,9 @@ class Client extends ActiveRecord
     /**
      * @return ActiveQuery
      */
-    public function getFirst30Leads(): ActiveQuery
+    public function getLeadsLimit(int $limit = 30): ActiveQuery
     {
-        return $this->hasMany(Lead::class, ['client_id' => 'id'])->limit(30);
+        return $this->hasMany(Lead::class, ['client_id' => 'id'])->limit($limit);
     }
 
     public function getCases(): ActiveQuery

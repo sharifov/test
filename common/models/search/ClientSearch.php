@@ -137,7 +137,7 @@ class ClientSearch extends Client
      */
     public function searchFromLead($params): ActiveDataProvider
     {
-        $query = Client::find()->select([Client::tableName() . '.id']);
+        $query = Client::find();
 
         // add conditions that should always apply here
 
@@ -174,8 +174,8 @@ class ClientSearch extends Client
         }
 
         if ($this->client_phone) {
-            $query->leftJoin(['cp' => ClientPhone::tableName()], 'cp.client_id = clients.id');
-            $query->andWhere(['cp.phone' => $this->client_phone])->limit(5);
+            $subQuery = ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['phone' => $this->client_phone]);
+            $query->andWhere(['IN', 'id', $subQuery]);
         }
 
         $query->andFilterWhere(['like', 'first_name', $this->first_name])

@@ -148,7 +148,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?php
         $leads = $model->leads;
         $data = [];
-        if ($leads) {
+        if (!empty($leads)) {
             foreach ($leads as $lead) {
                 $data[] = '<i class="fa fa-link"></i> ' . Html::a('lead: ' . $lead->id, ['lead/view', 'gid' => $lead->gid], ['target' => '_blank', 'data-pjax' => 0]) . ($lead->request_ip ? ' (IP: ' . $lead->request_ip . ')' : '');
             }
