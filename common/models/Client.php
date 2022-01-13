@@ -56,7 +56,7 @@ use yii\helpers\ArrayHelper;
  * @property ClientPhone[] $clientPhonesByType
  * @property ClientProject[] $clientProjects
  * @property Lead[] $leads
- * @property Lead[] $first30Leads
+ * @property Lead[] $leadsLimit
  * @property Cases[] $cases
  * @property string $nameByType
  * @property array $phoneNumbersSms
