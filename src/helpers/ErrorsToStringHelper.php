@@ -39,7 +39,7 @@ class ErrorsToStringHelper
         try {
             return (new \ReflectionClass($model))->getShortName();
         } catch (\Throwable $throwable) {
-            \Yii::error(AppHelper::throwableLog($throwable),'ErrorsToStringHelper:getModelName');
+            \Yii::error(AppHelper::throwableLog($throwable), 'ErrorsToStringHelper:getModelName');
             return '';
         }
     }
