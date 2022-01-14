@@ -1031,6 +1031,7 @@ class FlightQuoteController extends FController
             $caseId = Yii::$app->request->post('case_id', 0);
             $originQuoteId = Yii::$app->request->post('origin_quote_id', 0);
             $changeId = Yii::$app->request->post('change_id', 0);
+            $post = Yii::$app->request->post();
 
             try {
                 $flight = $this->flightRepository->find($flightId);
@@ -1077,10 +1078,12 @@ class FlightQuoteController extends FController
                 $response['message'] = 'Success. FlightQuote ID(' . $flightQuote->getId() . ') created';
                 $response['status'] = 1;
             } catch (\RuntimeException | \DomainException $exception) {
-                Yii::info(AppHelper::throwableLog($exception), 'FlightQuoteController:actionSaveVoluntaryQuote:Exception');
+                $message = ArrayHelper::merge(AppHelper::throwableLog($exception), ['post' => $post]);
+                Yii::warning($message, 'FlightQuoteController:actionSaveVoluntaryQuote:Exception');
                 $response['message'] = VarDumper::dumpAsString($exception->getMessage());
             } catch (\Throwable $throwable) {
-                Yii::error(AppHelper::throwableLog($throwable), 'FlightQuoteController:actionSaveVoluntaryQuote:Throwable');
+                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['post' => $post]);
+                Yii::error($message, 'FlightQuoteController:actionSaveVoluntaryQuote:Throwable');
                 $response['message'] = 'Internal Server Error';
             }
             return $response;
