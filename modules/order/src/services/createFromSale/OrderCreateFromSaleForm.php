@@ -64,7 +64,7 @@ class OrderCreateFromSaleForm extends Model
 
             ['bookingId', 'string', 'max' => 50],
 
-            [['pnr'], 'string', 'max' => 10],
+            [['pnr'], 'string', 'max' => 70],
 
             [['tripType'], 'string', 'max' => 50],
             [['tripType'], 'detectTripTypeId'],
