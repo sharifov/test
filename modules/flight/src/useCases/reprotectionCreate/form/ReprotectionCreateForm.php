@@ -7,7 +7,7 @@ use common\models\Project;
 use frontend\helpers\JsonHelper;
 use modules\flight\models\FlightRequest;
 use modules\flight\src\useCases\reprotectionCreate\form\flightQuote\FlightQuoteForm;
-use sales\helpers\ErrorsToStringHelper;
+use src\helpers\ErrorsToStringHelper;
 use yii\base\Model;
 
 /**

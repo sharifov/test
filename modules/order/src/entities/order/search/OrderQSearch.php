@@ -5,7 +5,7 @@ namespace modules\order\src\entities\order\search;
 use common\models\Employee;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderStatus;
-use sales\helpers\query\QueryHelper;
+use src\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
 
 class OrderQSearch extends Order

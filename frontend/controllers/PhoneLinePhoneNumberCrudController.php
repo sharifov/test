@@ -2,10 +2,10 @@
 
 namespace frontend\controllers;
 
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
-use sales\model\phoneLine\phoneLinePhoneNumber\entity\PhoneLinePhoneNumber;
-use sales\model\phoneLine\phoneLinePhoneNumber\entity\search\PhoneLinePhoneNumberSearch;
+use src\model\phoneLine\phoneLinePhoneNumber\entity\PhoneLinePhoneNumber;
+use src\model\phoneLine\phoneLinePhoneNumber\entity\search\PhoneLinePhoneNumberSearch;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

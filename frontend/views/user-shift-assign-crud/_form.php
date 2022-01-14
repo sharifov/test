@@ -1,11 +1,11 @@
 <?php
 
-use sales\widgets\UserSelect2Widget;
+use src\widgets\UserSelect2Widget;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\shiftSchedule\entity\userShiftAssign\UserShiftAssign */
+/* @var $model src\model\shiftSchedule\entity\userShiftAssign\UserShiftAssign */
 /* @var $form ActiveForm */
 ?>
 
@@ -17,7 +17,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'usa_user_id')->widget(UserSelect2Widget::class) ?>
 
-        <?= $form->field($model, 'usa_ssr_id')->textInput() ?>
+        <?= $form->field($model, 'usa_sh_id')->textInput() ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

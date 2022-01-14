@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\client\notifications\client\entity\ClientNotification */
+/* @var $model src\model\client\notifications\client\entity\ClientNotification */
 
 $this->title = 'Update Client Notification: ' . $model->cn_id;
 $this->params['breadcrumbs'][] = ['label' => 'Client Notifications', 'url' => ['index']];

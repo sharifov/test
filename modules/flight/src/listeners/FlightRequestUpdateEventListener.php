@@ -5,7 +5,7 @@ namespace modules\flight\src\listeners;
 use modules\flight\src\events\FlightRequestUpdateEvent;
 use modules\flight\src\repositories\flightQuoteStatusLogRepository\FlightQuoteStatusLogRepository;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
-use sales\repositories\product\ProductQuoteRepository;
+use src\repositories\product\ProductQuoteRepository;
 
 /**
  * Class FlightRequestUpdateEventListener

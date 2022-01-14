@@ -2,8 +2,8 @@
 
 use common\models\ConferenceParticipant;
 use frontend\extensions\DatePicker;
-use sales\widgets\DateTimePicker;
-use sales\widgets\UserSelect2Widget;
+use src\widgets\DateTimePicker;
+use src\widgets\UserSelect2Widget;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 

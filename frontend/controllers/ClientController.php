@@ -4,18 +4,19 @@ namespace frontend\controllers;
 
 use common\models\Call;
 use common\models\Employee;
+use common\models\Lead;
 use common\models\Project;
 use common\models\search\lead\LeadSearchByClient;
 use common\models\search\LeadSearch;
 use modules\lead\src\abac\LeadAbacObject;
-use sales\access\EmployeeDepartmentAccess;
-use sales\access\EmployeeProjectAccess;
-use sales\auth\Auth;
-use sales\entities\cases\Cases;
-use sales\entities\cases\CasesSearch;
-use sales\entities\cases\CasesSearchByClient;
-use sales\model\call\socket\CallUpdateMessage;
-use sales\model\client\abac\ClientAbacObject;
+use src\access\EmployeeDepartmentAccess;
+use src\access\EmployeeProjectAccess;
+use src\auth\Auth;
+use src\entities\cases\Cases;
+use src\entities\cases\CasesSearch;
+use src\entities\cases\CasesSearchByClient;
+use src\model\call\socket\CallUpdateMessage;
+use src\model\client\abac\ClientAbacObject;
 use Yii;
 use common\models\Client;
 use common\models\search\ClientSearch;
@@ -81,8 +82,17 @@ class ClientController extends FController
      */
     public function actionView($id): string
     {
+        $model = $this->findModel($id);
+        $query = Lead::find()->select(['id', 'gid', 'request_ip'])->where(['client_id' => $id])->asArray();
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'pagination' => [
+                'pageSize' => 30,
+            ],
+        ]);
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $model,
+            'dataProvider' => $dataProvider,
         ]);
     }
 

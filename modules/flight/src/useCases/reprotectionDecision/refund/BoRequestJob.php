@@ -3,7 +3,7 @@
 namespace modules\flight\src\useCases\reprotectionDecision\refund;
 
 use common\components\jobs\BaseJob;
-use sales\helpers\app\AppHelper;
+use src\helpers\app\AppHelper;
 use yii\queue\JobInterface;
 
 /**

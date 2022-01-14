@@ -6,7 +6,7 @@ use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $model sales\forms\cases\CasesAddEmailForm */
+/* @var $model src\forms\cases\CasesAddEmailForm */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 <?php Pjax::begin(['id' => 'pjax-cases-add-phone-form', 'enablePushState' => false, 'enableReplaceState' => false]); ?>

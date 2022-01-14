@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\callLog\entity\callLogQueue\CallLogQueue */
+/* @var $model src\model\callLog\entity\callLogQueue\CallLogQueue */
 
 $this->title = 'Create Call Log Queue';
 $this->params['breadcrumbs'][] = ['label' => 'Call Log Queues', 'url' => ['index']];

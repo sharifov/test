@@ -3,8 +3,8 @@
 namespace frontend\widgets\lead\editTool;
 
 use common\models\Lead;
-use sales\repositories\lead\LeadRepository;
-use sales\services\ServiceFinder;
+use src\repositories\lead\LeadRepository;
+use src\services\ServiceFinder;
 
 /**
  * Class Service

@@ -3,9 +3,9 @@
 namespace common\components\jobs\clientChat;
 
 use common\components\jobs\BaseJob;
-use sales\helpers\app\AppHelper;
-use sales\repositories\NotFoundException;
-use sales\services\clientChat\ClientChatEndConversationService;
+use src\helpers\app\AppHelper;
+use src\repositories\NotFoundException;
+use src\services\clientChat\ClientChatEndConversationService;
 use Yii;
 use yii\queue\Queue;
 use yii\queue\RetryableJobInterface;

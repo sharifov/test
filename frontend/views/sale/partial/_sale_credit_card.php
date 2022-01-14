@@ -11,7 +11,7 @@ use common\components\grid\UserSelect2Column;
 ///* @var $searchModel common\models\search\CreditCardSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $caseSaleModel \common\models\CaseSale */
-/* @var $caseModel sales\entities\cases\Cases */
+/* @var $caseModel src\entities\cases\Cases */
 
 $addCreditCardBtnClass = 'btn-add-sale-cc-' . $saleId;
 $editCreditCardBtnClass = 'btn-edit-credit-card-' . $saleId;

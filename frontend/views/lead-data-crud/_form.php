@@ -1,11 +1,11 @@
 <?php
 
-use sales\model\leadDataKey\entity\LeadDataKey;
+use src\model\leadDataKey\entity\LeadDataKey;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\leadData\entity\LeadData */
+/* @var $model src\model\leadData\entity\LeadData */
 /* @var $form ActiveForm */
 ?>
 

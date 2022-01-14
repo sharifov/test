@@ -2,10 +2,10 @@
 
 namespace frontend\controllers;
 
-use sales\services\user\payroll\UserPayrollService;
+use src\services\user\payroll\UserPayrollService;
 use Yii;
-use sales\model\user\entity\payroll\UserPayroll;
-use sales\model\user\entity\payroll\search\UserPayrollSearch;
+use src\model\user\entity\payroll\UserPayroll;
+use src\model\user\entity\payroll\search\UserPayrollSearch;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

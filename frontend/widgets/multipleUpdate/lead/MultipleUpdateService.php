@@ -4,14 +4,14 @@ namespace frontend\widgets\multipleUpdate\lead;
 
 use common\models\Employee;
 use common\models\Lead;
-use sales\auth\Auth;
-use sales\model\leadUserConversion\service\LeadUserConversionDictionary;
-use sales\model\leadUserConversion\service\LeadUserConversionService;
-use sales\services\lead\LeadStateService;
-use sales\services\lead\qcall\Config;
-use sales\services\lead\qcall\FindPhoneParams;
-use sales\services\lead\qcall\FindWeightParams;
-use sales\services\lead\qcall\QCallService;
+use src\auth\Auth;
+use src\model\leadUserConversion\service\LeadUserConversionDictionary;
+use src\model\leadUserConversion\service\LeadUserConversionService;
+use src\services\lead\LeadStateService;
+use src\services\lead\qcall\Config;
+use src\services\lead\qcall\FindPhoneParams;
+use src\services\lead\qcall\FindWeightParams;
+use src\services\lead\qcall\QCallService;
 use yii\bootstrap4\Html;
 
 /**

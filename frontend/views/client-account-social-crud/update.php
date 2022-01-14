@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientAccountSocial\entity\ClientAccountSocial */
+/* @var $model src\model\clientAccountSocial\entity\ClientAccountSocial */
 
 $this->title = 'Update Client Account Social: ' . $model->cas_ca_id;
 $this->params['breadcrumbs'][] = ['label' => 'Client Account Socials', 'url' => ['index']];

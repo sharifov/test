@@ -1,13 +1,13 @@
 <?php
 
-use sales\model\clientChat\ClientChatPlatform;
-use sales\model\clientChatLastMessage\entity\ClientChatLastMessage;
+use src\model\clientChat\ClientChatPlatform;
+use src\model\clientChatLastMessage\entity\ClientChatLastMessage;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
-use sales\widgets\DateTimePicker;
+use src\widgets\DateTimePicker;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChatLastMessage\entity\ClientChatLastMessage */
+/* @var $model src\model\clientChatLastMessage\entity\ClientChatLastMessage */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 

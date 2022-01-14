@@ -4,7 +4,7 @@ namespace modules\flight\models;
 
 use modules\flight\src\dto\flightSegment\SegmentDTO;
 use modules\flight\src\events\FlightRequestUpdateEvent;
-use sales\entities\EventTrait;
+use src\entities\EventTrait;
 use Yii;
 
 /**

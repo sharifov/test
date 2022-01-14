@@ -6,7 +6,7 @@ use modules\flight\models\Flight;
 use modules\flight\models\FlightQuote;
 use modules\flight\src\useCases\voluntaryExchangeManualCreate\form\AddChangeForm;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
-use sales\services\parsingDump\lib\ParsingDump;
+use src\services\parsingDump\lib\ParsingDump;
 use yii\bootstrap4\ActiveForm;
 use yii\helpers\Html;
 use yii\web\View;

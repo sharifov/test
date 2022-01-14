@@ -2,10 +2,10 @@
 
 namespace frontend\controllers;
 
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
-use sales\model\clientChatChannelTransfer\entity\ClientChatChannelTransfer;
-use sales\model\clientChatChannelTransfer\entity\search\ClientChatChannelTransferSearch;
+use src\model\clientChatChannelTransfer\entity\ClientChatChannelTransfer;
+use src\model\clientChatChannelTransfer\entity\search\ClientChatChannelTransferSearch;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

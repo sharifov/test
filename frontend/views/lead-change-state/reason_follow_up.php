@@ -1,6 +1,6 @@
 <?php
 
-use sales\forms\leadflow\FollowUpReasonForm;
+use src\forms\leadflow\FollowUpReasonForm;
 use yii\widgets\ActiveForm;
 use yii\bootstrap\Html;
 

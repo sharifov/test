@@ -1,14 +1,14 @@
 <?php
 
 use common\components\grid\DateTimeColumn;
-use sales\model\clientAccountSocial\entity\ClientAccountSocial;
+use src\model\clientAccountSocial\entity\ClientAccountSocial;
 use yii\grid\ActionColumn;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var yii\web\View $this */
-/* @var sales\model\clientAccountSocial\entity\ClientAccountSocialSearch $searchModel */
+/* @var src\model\clientAccountSocial\entity\ClientAccountSocialSearch $searchModel */
 /* @var yii\data\ActiveDataProvider $dataProvider */
 
 $this->title = 'Client Account Socials';

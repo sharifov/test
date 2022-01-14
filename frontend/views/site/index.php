@@ -2,6 +2,8 @@
 
 use common\models\Employee;
 use common\models\UserProjectParams;
+use src\model\userAuthClient\entity\UserAuthClient;
+use src\model\userAuthClient\entity\UserAuthClientSources;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
@@ -174,7 +176,7 @@ $this->title = 'Home Page'; // . $user->username;
             </div>
             <?php endif; ?>
 
-            <?php if (\sales\helpers\setting\SettingHelper::isEnabledAuthClients()) : ?>
+            <?php if (\src\helpers\setting\SettingHelper::isEnabledAuthClients()) : ?>
                 <div class="x_panel">
                     <div class="x_title" >
                         <h2><i class="fa fa-sticky-note-o"></i> Auth clients</h2>
@@ -184,16 +186,16 @@ $this->title = 'Home Page'; // . $user->username;
                         <?= \yii\grid\GridView::widget([
                             'dataProvider' => $sourcesDataProvider,
                             'columns' => [
-                                'ac_id',
+                                'uac_id',
                                 [
-                                    'attribute' => 'ac_source',
-                                    'value' => static function (\sales\model\authClient\entity\AuthClient $model) {
-                                        return \yii\helpers\Html::encode(\sales\model\authClient\entity\AuthClientSources::getName($model->ac_source));
+                                    'attribute' => 'uac_source',
+                                    'value' => static function (UserAuthClient $model) {
+                                        return Html::encode(UserAuthClientSources::getName($model->uac_source));
                                     }
                                 ],
-                                'ac_email',
+                                'uac_email',
                                 [
-                                    'attribute' => 'ac_created_dt',
+                                    'attribute' => 'uac_created_dt',
                                     'format' => 'byUserDateTime',
                                     'label' => 'When assigned'
                                 ],

@@ -1,7 +1,7 @@
 <?php
 
 use common\components\grid\DateTimeColumn;
-use sales\model\leadRequest\entity\LeadRequest;
+use src\model\leadRequest\entity\LeadRequest;
 use yii\grid\ActionColumn;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
@@ -10,7 +10,7 @@ use yii\helpers\VarDumper;
 use yii\widgets\Pjax;
 
 /* @var yii\web\View $this */
-/* @var sales\model\leadRequest\entity\LeadRequestSearch $searchModel */
+/* @var src\model\leadRequest\entity\LeadRequestSearch $searchModel */
 /* @var yii\data\ActiveDataProvider $dataProvider */
 
 $this->title = 'Lead Requests';

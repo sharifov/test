@@ -181,7 +181,11 @@
         $.getJSON(twilioTokenUrl)
             .then(function (response) {
                 PhoneWidget.addLogSuccess("Got a Twilio Access token.");
-                device.updateToken(response.data.token);
+                if (response.data.token === device.token) {
+                    PhoneWidget.addLogSuccess("Device Twilio Access token is equal of new token.");
+                } else {
+                    device.updateToken(response.data.token);
+                }
                 setTimeout(async () => updateToken(), response.data.refreshTime * 1000);
             })
             .catch(function (error) {
@@ -289,7 +293,9 @@
 
         initSpeakerDevices();
 
+        device.audio.removeListener('deviceChange', updateMicrophoneDevice);
         device.audio.addListener('deviceChange', updateMicrophoneDevice);
+
         navigator.mediaDevices.getUserMedia({ audio: true })
             .then((stream) => {
                 updateMicrophoneDevice();
@@ -300,6 +306,8 @@
                 PhoneWidget.addLog(error);
                 PhoneWidget.getDeviceState().microphoneError();
             });
+
+        device.removeListener("incoming", incomingCallHandler);
         device.addListener("incoming", incomingCallHandler);
     };
 
@@ -312,12 +320,12 @@
     };
 
     const deviceErrorHandler = (error, call) => {
-        if (error.code === 20104) {
-            twilioLogger.error('%j', error);
-            PhoneWidget.addLogError('Twilio JWT Token Expired');
-            updateToken();
-            return;
-        }
+        // if (error.code === 20104) {
+        //     twilioLogger.error('%j', error);
+        //     PhoneWidget.addLogError('Twilio JWT Token Expired');
+        //     updateToken();
+        //     return;
+        // }
 
         twilioLogger.error('%j', error);
         PhoneWidget.addLog(error);
@@ -338,7 +346,7 @@
         //     }
         // }
 
-        setTimeout(() => device.register(), 5000);
+        // setTimeout(() => device.register(), 5000);
     }
 
     window.twilioLoggerCreateError = (error, defaultMessage) => ({

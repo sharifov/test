@@ -5,7 +5,7 @@ namespace modules\flight\src\dto\flightQuotePaxPrice;
 use modules\flight\models\FlightPax;
 use modules\flight\models\FlightQuote;
 use modules\product\src\entities\productQuote\ProductQuote;
-use sales\helpers\product\ProductQuoteHelper;
+use src\helpers\product\ProductQuoteHelper;
 use webapi\src\forms\flight\flights\price\detail\PriceDetailApiForm;
 
 /**

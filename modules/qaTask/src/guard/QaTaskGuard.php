@@ -2,7 +2,7 @@
 
 namespace modules\qaTask\src\guard;
 
-use sales\access\EmployeeProjectAccess;
+use src\access\EmployeeProjectAccess;
 use yii\web\ForbiddenHttpException;
 
 class QaTaskGuard

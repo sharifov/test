@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use common\components\grid\DateTimeColumn;
-use sales\model\callLog\entity\callLog\search\CallLogSearch;
+use src\model\callLog\entity\callLog\search\CallLogSearch;
 use common\models\Project;
 
 /**
@@ -41,9 +41,9 @@ use common\models\Project;
                 'attribute' => 'cl_department_id',
                 'relation' => 'department',
             ],
-            ['class' => \sales\model\callLog\grid\columns\CallLogTypeColumn::class],
-            ['class' => \sales\model\callLog\grid\columns\CallLogCategoryColumn::class],
-            ['class' => \sales\model\callLog\grid\columns\CallLogStatusColumn::class],
+            ['class' => \src\model\callLog\grid\columns\CallLogTypeColumn::class],
+            ['class' => \src\model\callLog\grid\columns\CallLogCategoryColumn::class],
+            ['class' => \src\model\callLog\grid\columns\CallLogStatusColumn::class],
             [
                 'label' => 'From',
                 'attribute' => 'cl_phone_from',
@@ -66,7 +66,7 @@ use common\models\Project;
                 'filter' => false
             ],
             [
-                'class' => \sales\model\callLog\grid\columns\RecordingUrlColumn::class,
+                'class' => \src\model\callLog\grid\columns\RecordingUrlColumn::class,
                 'filter' => false
             ],
             [

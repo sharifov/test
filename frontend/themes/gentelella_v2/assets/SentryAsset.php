@@ -7,7 +7,7 @@
 
 namespace frontend\themes\gentelella_v2\assets;
 
-use sales\helpers\setting\SettingHelper;
+use src\helpers\setting\SettingHelper;
 
 class SentryAsset extends \yii\web\AssetBundle
 {

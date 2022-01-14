@@ -1,13 +1,13 @@
 <?php
 
 use common\components\grid\DateTimeColumn;
-use sales\model\visitorSubscription\entity\VisitorSubscription;
+use src\model\visitorSubscription\entity\VisitorSubscription;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\visitorSubscription\entity\search\VisitorSubscriptionSearch */
+/* @var $searchModel src\model\visitorSubscription\entity\search\VisitorSubscriptionSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Visitor Subscriptions';

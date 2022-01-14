@@ -4,7 +4,7 @@ use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\userData\entity\UserData */
+/* @var $model src\model\userData\entity\UserData */
 
 $this->title = $model->ud_user_id;
 $this->params['breadcrumbs'][] = ['label' => 'User Data', 'url' => ['index']];

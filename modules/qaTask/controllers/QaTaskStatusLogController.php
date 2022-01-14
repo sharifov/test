@@ -7,7 +7,7 @@ use modules\qaTask\src\entities\qaTask\QaTask;
 use modules\qaTask\src\entities\qaTaskStatusLog\search\QaTaskStatusLogSearch;
 use modules\qaTask\src\guard\QaTaskGuard;
 use Yii;
-use sales\auth\Auth;
+use src\auth\Auth;
 use yii\helpers\ArrayHelper;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;

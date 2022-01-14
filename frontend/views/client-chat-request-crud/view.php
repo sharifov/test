@@ -2,10 +2,10 @@
 
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
-use sales\model\clientChatRequest\entity\ClientChatRequest;
+use src\model\clientChatRequest\entity\ClientChatRequest;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChatRequest\entity\ClientChatRequest */
+/* @var $model src\model\clientChatRequest\entity\ClientChatRequest */
 
 $this->title = $model->ccr_id;
 $this->params['breadcrumbs'][] = ['label' => 'Client Chat Requests', 'url' => ['index']];

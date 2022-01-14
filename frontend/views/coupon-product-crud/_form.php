@@ -2,12 +2,12 @@
 
 use frontend\helpers\JsonHelper;
 use modules\product\src\entities\productType\ProductType;
-use sales\helpers\app\AppHelper;
+use src\helpers\app\AppHelper;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\coupon\entity\couponProduct\CouponProduct */
+/* @var $model src\model\coupon\entity\couponProduct\CouponProduct */
 /* @var $form ActiveForm */
 ?>
 

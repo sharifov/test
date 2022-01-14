@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\callNote\entity\CallNote */
+/* @var $model src\model\callNote\entity\CallNote */
 
 $this->title = 'Create Call Note';
 $this->params['breadcrumbs'][] = ['label' => 'Call Notes', 'url' => ['index']];

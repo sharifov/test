@@ -21,12 +21,12 @@ use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository
 use modules\product\src\entities\productQuoteData\service\ProductQuoteDataManageService;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionRepository;
 use modules\product\src\repositories\ProductQuoteRelationRepository;
-use sales\repositories\cases\CasesRepository;
-use sales\repositories\creditCard\CreditCardRepository;
-use sales\services\cases\CasesCommunicationService;
-use sales\services\cases\CasesSaleService;
-use sales\services\client\ClientManageService;
-use sales\repositories\product\ProductQuoteRepository;
+use src\repositories\cases\CasesRepository;
+use src\repositories\creditCard\CreditCardRepository;
+use src\services\cases\CasesCommunicationService;
+use src\services\cases\CasesSaleService;
+use src\services\client\ClientManageService;
+use src\repositories\product\ProductQuoteRepository;
 use webapi\src\services\payment\PaymentRequestVoluntaryService;
 use Yii;
 

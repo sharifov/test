@@ -2,9 +2,9 @@
 
 use kartik\select2\Select2;
 use kdn\yii2\JsonEditor;
-use sales\model\clientChat\componentEvent\entity\ClientChatComponentEvent;
-use sales\model\clientChat\componentRule\entity\RunnableComponent;
-use sales\model\clientChatChannel\entity\ClientChatChannel;
+use src\model\clientChat\componentEvent\entity\ClientChatComponentEvent;
+use src\model\clientChat\componentRule\entity\RunnableComponent;
+use src\model\clientChatChannel\entity\ClientChatChannel;
 use unclead\multipleinput\MultipleInput;
 use unclead\multipleinput\MultipleInputColumn;
 use yii\bootstrap4\Html;
@@ -13,7 +13,7 @@ use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $model \sales\model\clientChat\componentEvent\form\ComponentEventCreateForm */
+/* @var $model \src\model\clientChat\componentEvent\form\ComponentEventCreateForm */
 /* @var $form ActiveForm */
 
 ?>

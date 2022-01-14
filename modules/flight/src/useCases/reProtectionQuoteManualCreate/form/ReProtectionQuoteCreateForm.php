@@ -10,7 +10,7 @@ use modules\flight\models\FlightQuote;
 use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
 use modules\flight\src\helpers\FlightQuoteHelper;
 use modules\flight\src\useCases\form\ChangeQuoteCreateForm;
-use sales\services\parsingDump\ReservationService;
+use src\services\parsingDump\ReservationService;
 use yii\base\Model;
 use yii\helpers\Html;
 

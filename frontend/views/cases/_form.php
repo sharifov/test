@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\entities\cases\Cases */
+/* @var $model src\entities\cases\Cases */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
@@ -19,7 +19,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'cs_description')->textarea(['rows' => 6]) ?>
 
-        <?= $form->field($model, 'cs_category_id')->dropDownList(\yii\helpers\ArrayHelper::map(\sales\entities\cases\CaseCategory::find()->asArray()->all(), 'cc_id', 'cc_name'), ['prompt' => '-']) ?>
+        <?= $form->field($model, 'cs_category_id')->dropDownList(\yii\helpers\ArrayHelper::map(\src\entities\cases\CaseCategory::find()->asArray()->all(), 'cc_id', 'cc_name'), ['prompt' => '-']) ?>
 
         <?= $form->field($model, 'cs_client_id')->textInput() ?>
 

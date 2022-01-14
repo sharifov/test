@@ -3,7 +3,7 @@
 namespace common\models;
 
 use common\models\query\UserProfileQuery;
-use sales\access\CallAccess;
+use src\access\CallAccess;
 use SebastianBergmann\Comparator\DateTimeComparatorTest;
 use Yii;
 use yii\caching\TagDependency;

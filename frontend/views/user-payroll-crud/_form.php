@@ -1,12 +1,12 @@
 <?php
 
 use common\models\Employee;
-use sales\model\user\entity\payroll\UserPayroll;
+use src\model\user\entity\payroll\UserPayroll;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\user\entity\payroll\UserPayroll */
+/* @var $model src\model\user\entity\payroll\UserPayroll */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
@@ -22,7 +22,7 @@ use yii\widgets\ActiveForm;
 
             <?= $form->field($model, 'ups_user_id')->dropDownList(Employee::getList()) ?>
 
-            <?= $form->field($model, 'ups_month')->dropDownList(\sales\helpers\DateHelper::getMonthList(), ['prompt' => '--']) ?>
+            <?= $form->field($model, 'ups_month')->dropDownList(\src\helpers\DateHelper::getMonthList(), ['prompt' => '--']) ?>
 
             <?= $form->field($model, 'ups_year')->input('number') ?>
 

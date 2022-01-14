@@ -3,7 +3,7 @@
 namespace common\models;
 
 use common\models\query\UserOnlineQuery;
-use sales\helpers\app\AppHelper;
+use src\helpers\app\AppHelper;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;

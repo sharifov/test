@@ -167,7 +167,7 @@ $readonly = $createQuoteForm->hasWarnings();
 
                                 <?= $form->field($createQuoteForm, 'cabin', ['labelOptions' => ['class' => 'control-label']])->dropDownList(Flight::getCabinClassList(), ['prompt' => '---']) ?>
 
-                                <?= $form->field($createQuoteForm, 'quoteCreator', ['labelOptions' => ['class' => 'control-label']])->widget(sales\widgets\UserSelect2Widget::class, [
+                                <?= $form->field($createQuoteForm, 'quoteCreator', ['labelOptions' => ['class' => 'control-label']])->widget(src\widgets\UserSelect2Widget::class, [
                                     'data' => [$createQuoteForm->quoteCreator => Employee::findOne($createQuoteForm->quoteCreator)->username ]
                                 ]) ?>
                             </div>

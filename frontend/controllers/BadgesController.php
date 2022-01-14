@@ -5,11 +5,11 @@ namespace frontend\controllers;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\search\LeadQcallSearch;
-use sales\helpers\app\AppHelper;
-use sales\helpers\ErrorsToStringHelper;
-use sales\repositories\lead\LeadBadgesRepository;
-use sales\services\badges\BadgesObjectFactory;
-use sales\services\badges\form\BadgeForm;
+use src\helpers\app\AppHelper;
+use src\helpers\ErrorsToStringHelper;
+use src\repositories\lead\LeadBadgesRepository;
+use src\services\badges\BadgesObjectFactory;
+use src\services\badges\form\BadgeForm;
 use yii\filters\ContentNegotiator;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
@@ -95,15 +95,13 @@ class BadgesController extends FController
                         }
 
                         $badgeCounter = (new BadgesObjectFactory($badgeForm->objectKey))->create();
-                        $result['data'][$badgeForm->idName] = $badgeCounter->countTypes($badgeForm->types);
+                        $result['data'][$badgeForm->idName] = $badgeCounter->countTypes((array) $badgeForm->types);
                     } catch (\RuntimeException | \DomainException $throwable) {
                         $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['data' => $badge]);
                         \Yii::warning($message, 'BadgesController:actionBadgesCount:badgesCollection:Exception');
                     } catch (\Throwable $throwable) {
-                        \Yii::error(
-                            AppHelper::throwableLog($throwable),
-                            'BadgesController:actionBadgesCount:badgesCollection:Throwable'
-                        );
+                        $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['data' => $badge]);
+                        \Yii::error($message, 'BadgesController:actionBadgesCount:badgesCollection:Throwable');
                     }
                 }
                 if (empty($result['data'])) {

@@ -1,13 +1,13 @@
 <?php
 
 use common\models\Employee;
-use sales\helpers\DateHelper;
+use src\helpers\DateHelper;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $model \sales\model\kpi\entity\kpiUserPerformance\KpiUserPerformance */
+/* @var $model \src\model\kpi\entity\kpiUserPerformance\KpiUserPerformance */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 

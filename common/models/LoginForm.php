@@ -3,8 +3,8 @@
 namespace common\models;
 
 use frontend\models\UserFailedLogin;
-use sales\services\authentication\AntiBruteForceHelper;
-use sales\services\authentication\AntiBruteForceService;
+use src\services\authentication\AntiBruteForceHelper;
+use src\services\authentication\AntiBruteForceService;
 use Yii;
 use yii\base\Model;
 use yii\helpers\Url;

@@ -5,7 +5,7 @@ namespace modules\flight\src\useCases\voluntaryExchangeCreate\form\flightQuote;
 use common\components\validators\CheckJsonValidator;
 use common\components\validators\IsArrayValidator;
 use modules\flight\src\useCases\voluntaryExchangeCreate\form\flightQuote\tripsForm\TripForm;
-use sales\helpers\ErrorsToStringHelper;
+use src\helpers\ErrorsToStringHelper;
 use yii\base\Model;
 
 /**

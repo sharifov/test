@@ -9,8 +9,8 @@
 
 namespace common\components;
 
-use sales\model\airline\service\AirlineService;
-use sales\model\airportLang\service\AirportLangService;
+use src\model\airline\service\AirlineService;
+use src\model\airportLang\service\AirportLangService;
 use yii\base\Component;
 use yii\helpers\VarDumper;
 use yii\httpclient\Client;

@@ -6,7 +6,7 @@ use common\models\Employee;
 use modules\order\src\entities\order\OrderStatus;
 use modules\order\src\entities\order\OrderStatusAction;
 use modules\order\src\entities\orderStatusLog\OrderStatusLog;
-use sales\helpers\query\QueryHelper;
+use src\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
 
 class OrderStatusLogSearch extends OrderStatusLog

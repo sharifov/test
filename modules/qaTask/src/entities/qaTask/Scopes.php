@@ -3,8 +3,8 @@
 namespace modules\qaTask\src\entities\qaTask;
 
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
-use sales\access\DepartmentQueryInterface;
-use sales\access\ProjectQueryInterface;
+use src\access\DepartmentQueryInterface;
+use src\access\ProjectQueryInterface;
 
 /**
  * @see QaTask

@@ -3,7 +3,7 @@
 namespace modules\fileStorage\controllers;
 
 use frontend\controllers\FController;
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
 use modules\fileStorage\src\entity\fileShare\FileShare;
 use modules\fileStorage\src\entity\fileShare\search\FileShareSearch;

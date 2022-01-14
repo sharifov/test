@@ -4,8 +4,8 @@ namespace modules\hotel\src\entities\hotelQuoteRoom;
 
 use modules\hotel\models\HotelQuoteRoom;
 use modules\hotel\src\exceptions\HotelCodeException;
-use sales\dispatchers\EventDispatcher;
-use sales\repositories\NotFoundException;
+use src\dispatchers\EventDispatcher;
+use src\repositories\NotFoundException;
 
 /**
  * Class HotelQuoteRoomRepository

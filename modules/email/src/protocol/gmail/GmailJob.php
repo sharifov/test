@@ -8,8 +8,8 @@ use common\components\debug\Message;
 use modules\email\src\entity\emailAccount\EmailAccount;
 use modules\email\src\Notifier;
 use modules\email\src\Projects;
-use sales\helpers\app\AppHelper;
-use sales\services\email\EmailService;
+use src\helpers\app\AppHelper;
+use src\services\email\EmailService;
 use yii\base\BaseObject;
 use yii\queue\JobInterface;
 

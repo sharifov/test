@@ -2,8 +2,8 @@
 
 namespace frontend\controllers;
 
-use sales\helpers\airport\AirportFormatHelper;
-use sales\services\airport\AirportSearchService;
+use src\helpers\airport\AirportFormatHelper;
+use src\services\airport\AirportSearchService;
 use yii\filters\AjaxFilter;
 use yii\filters\ContentNegotiator;
 use yii\helpers\ArrayHelper;

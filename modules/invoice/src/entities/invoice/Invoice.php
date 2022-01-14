@@ -7,7 +7,7 @@ use common\models\Currency;
 use common\models\Employee;
 use modules\invoice\src\entities\invoice\events\InvoicePaidEvent;
 use modules\order\src\entities\order\Order;
-use sales\entities\EventTrait;
+use src\entities\EventTrait;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;

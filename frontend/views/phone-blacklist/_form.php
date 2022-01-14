@@ -5,7 +5,7 @@ use frontend\widgets\DateTimePickerWidget;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
-/*use sales\widgets\DateTimePicker;*/
+/*use src\widgets\DateTimePicker;*/
 
 /* @var $this yii\web\View */
 /* @var $model common\models\PhoneBlacklist */

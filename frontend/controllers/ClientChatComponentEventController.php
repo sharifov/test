@@ -2,12 +2,12 @@
 
 namespace frontend\controllers;
 
-use sales\forms\CompositeFormHelper;
-use sales\model\clientChat\componentEvent\entity\ClientChatComponentEvent;
-use sales\model\clientChat\componentEvent\entity\search\ClientChatComponentEventSearch;
-use sales\model\clientChat\componentEvent\form\ComponentEventCreateForm;
-use sales\model\clientChat\componentEvent\service\ClientChatComponentEventManageService;
-use sales\repositories\NotFoundException;
+use src\forms\CompositeFormHelper;
+use src\model\clientChat\componentEvent\entity\ClientChatComponentEvent;
+use src\model\clientChat\componentEvent\entity\search\ClientChatComponentEventSearch;
+use src\model\clientChat\componentEvent\form\ComponentEventCreateForm;
+use src\model\clientChat\componentEvent\service\ClientChatComponentEventManageService;
+use src\repositories\NotFoundException;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;

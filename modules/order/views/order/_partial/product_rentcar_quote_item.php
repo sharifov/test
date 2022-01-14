@@ -6,7 +6,7 @@ use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionStatus;
 use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
-use sales\auth\Auth;
+use src\auth\Auth;
 use yii\data\ArrayDataProvider;
 use yii\helpers\Inflector;
 use yii\helpers\Url;

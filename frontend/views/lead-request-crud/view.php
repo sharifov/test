@@ -1,12 +1,12 @@
 <?php
 
 use frontend\helpers\JsonHelper;
-use sales\model\leadRequest\entity\LeadRequest;
+use src\model\leadRequest\entity\LeadRequest;
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\leadRequest\entity\LeadRequest */
+/* @var $model src\model\leadRequest\entity\LeadRequest */
 
 $this->title = $model->lr_id;
 $this->params['breadcrumbs'][] = ['label' => 'Lead Requests', 'url' => ['index']];

@@ -3,7 +3,7 @@
 namespace console\socket\Commands\GetCurrentQueueCalls;
 
 use common\models\UserCallStatus;
-use sales\model\call\services\currentQueueCalls\CurrentQueueCallsService;
+use src\model\call\services\currentQueueCalls\CurrentQueueCallsService;
 
 /**
  * Class Handler

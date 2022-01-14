@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\appProjectKey\entity\AppProjectKey */
+/* @var $model src\model\appProjectKey\entity\AppProjectKey */
 
 $this->title = 'Update App Project Key: ' . $model->apk_id;
 $this->params['breadcrumbs'][] = ['label' => 'App Project Keys', 'url' => ['index']];

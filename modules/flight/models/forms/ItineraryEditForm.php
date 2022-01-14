@@ -6,7 +6,7 @@ use modules\product\src\entities\product\Product;
 use modules\flight\models\Flight;
 use modules\flight\models\FlightSegment;
 use modules\flight\src\helpers\FlightFormatHelper;
-use sales\forms\CompositeForm;
+use src\forms\CompositeForm;
 
 /**
  * Class ItineraryEditForm

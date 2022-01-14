@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChat\entity\channelTranslate\ClientChatChannelTranslate */
+/* @var $model src\model\clientChat\entity\channelTranslate\ClientChatChannelTranslate */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
@@ -13,7 +13,7 @@ use yii\widgets\ActiveForm;
     <?php $form = ActiveForm::begin(); ?>
 
     <div class="col-md-4">
-    <?= $form->field($model, 'ct_channel_id')->dropDownList(\sales\model\clientChatChannel\entity\ClientChatChannel::getList(), ['prompt' => '---']) ?>
+    <?= $form->field($model, 'ct_channel_id')->dropDownList(\src\model\clientChatChannel\entity\ClientChatChannel::getList(), ['prompt' => '---']) ?>
 
     <?= $form->field($model, 'ct_language_id')->dropDownList(\common\models\Language::getLanguages(), ['prompt' => '---']) ?>
 

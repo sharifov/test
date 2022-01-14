@@ -4,7 +4,7 @@ use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\leadOrder\entity\LeadOrder */
+/* @var $model src\model\leadOrder\entity\LeadOrder */
 
 $this->title = $model->lo_order_id;
 $this->params['breadcrumbs'][] = ['label' => 'Lead Orders', 'url' => ['index']];

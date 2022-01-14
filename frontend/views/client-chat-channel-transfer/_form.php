@@ -4,7 +4,7 @@ use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChatChannelTransfer\entity\ClientChatChannelTransfer */
+/* @var $model src\model\clientChatChannelTransfer\entity\ClientChatChannelTransfer */
 /* @var $form ActiveForm */
 ?>
 
@@ -14,9 +14,9 @@ use yii\widgets\ActiveForm;
 
         <?php $form = ActiveForm::begin(); ?>
 
-        <?= $form->field($model, 'cctr_from_ccc_id')->dropDownList(\sales\model\clientChatChannel\entity\ClientChatChannel::getList(), ['prompt' => '---']) ?>
+        <?= $form->field($model, 'cctr_from_ccc_id')->dropDownList(\src\model\clientChatChannel\entity\ClientChatChannel::getList(), ['prompt' => '---']) ?>
 
-        <?= $form->field($model, 'cctr_to_ccc_id')->dropDownList(\sales\model\clientChatChannel\entity\ClientChatChannel::getList(), ['prompt' => '---']) ?>
+        <?= $form->field($model, 'cctr_to_ccc_id')->dropDownList(\src\model\clientChatChannel\entity\ClientChatChannel::getList(), ['prompt' => '---']) ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

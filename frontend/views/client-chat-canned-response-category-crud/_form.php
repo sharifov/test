@@ -4,7 +4,7 @@ use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChat\cannedResponseCategory\entity\ClientChatCannedResponseCategory */
+/* @var $model src\model\clientChat\cannedResponseCategory\entity\ClientChatCannedResponseCategory */
 /* @var $form ActiveForm */
 ?>
 

@@ -6,15 +6,15 @@ use common\components\grid\UserSelect2Column;
 use common\models\Employee;
 use common\models\Language;
 use common\models\Project;
-use sales\model\clientChat\cannedResponse\entity\ClientChatCannedResponse;
-use sales\model\clientChat\cannedResponseCategory\entity\ClientChatCannedResponseCategory;
+use src\model\clientChat\cannedResponse\entity\ClientChatCannedResponse;
+use src\model\clientChat\cannedResponseCategory\entity\ClientChatCannedResponseCategory;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\helpers\StringHelper;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\clientChat\cannedResponse\entity\search\ClientChatCannedResponseSearch */
+/* @var $searchModel src\model\clientChat\cannedResponse\entity\search\ClientChatCannedResponseSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Client Chat Canned Responses';

@@ -3,12 +3,12 @@
 namespace frontend\controllers;
 
 use common\models\Call;
-use sales\auth\Auth;
-use sales\helpers\setting\SettingHelper;
-use sales\model\callLog\entity\callLog\CallLogQuery;
-use sales\model\callRecordingLog\entity\CallRecordingLog;
-use sales\model\conference\entity\conferenceRecordingLog\ConferenceRecordingLog;
-use sales\repositories\NotFoundException;
+use src\auth\Auth;
+use src\helpers\setting\SettingHelper;
+use src\model\callLog\entity\callLog\CallLogQuery;
+use src\model\callRecordingLog\entity\CallRecordingLog;
+use src\model\conference\entity\conferenceRecordingLog\ConferenceRecordingLog;
+use src\repositories\NotFoundException;
 use Yii;
 use common\models\Conference;
 use common\models\search\ConferenceSearch;

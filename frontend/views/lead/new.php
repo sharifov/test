@@ -1,6 +1,6 @@
 <?php
 
-use sales\formatters\client\ClientTimeFormatter;
+use src\formatters\client\ClientTimeFormatter;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 //use kartik\grid\GridView;

@@ -3,7 +3,7 @@
 namespace modules\flight\src\useCases\voluntaryExchangeCreate\form\exchange;
 
 use modules\flight\models\FlightPax;
-use sales\traits\FormNameModelTrait;
+use src\traits\FormNameModelTrait;
 use yii\base\Model;
 
 /**

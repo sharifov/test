@@ -15,7 +15,7 @@ use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productType\ProductType;
 use modules\product\src\interfaces\ProductDataInterface;
 use modules\product\src\interfaces\Quotable;
-use sales\helpers\product\ProductQuoteHelper;
+use src\helpers\product\ProductQuoteHelper;
 use yii\db\ActiveQuery;
 use Yii;
 use yii\helpers\ArrayHelper;

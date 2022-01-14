@@ -1,7 +1,7 @@
 <?php
 
 use common\models\UserConnection;
-use sales\model\user\entity\monitor\UserMonitor;
+use src\model\user\entity\monitor\UserMonitor;
 use yii\bootstrap4\Modal;
 
 /* @var $userId integer */
@@ -78,11 +78,15 @@ const channel = new BroadcastChannel('tabCommands');
 channel.onmessage = function(e) {
     if (e.data.event === 'stopAutoLogout') {
         stopAutoLogout();      
+    } else if (e.data.event === 'logout') {
+        location.assign('/site/logout?type=autologout');
     }
 };
 
 function logout() {
-    window.location.href = '/site/logout?type=autologout';
+    // window.location.href = '/site/logout?type=autologout';
+    channel.postMessage({event: 'logout'});
+    location.assign('/site/logout?type=autologout');
 }
 
 function cancelAutoLogout() {
@@ -107,7 +111,7 @@ window.autoLogout = function (timerSec = isAutoLogoutTimerSec, isShowMessage = i
         }}).timer('start');
     }
 
-    if (isShowMessage || (isShowMessage === 'true')) {
+    if (isShowMessage === 'true') {
         $('#modal-autologout').modal({show: true});
     }
 }

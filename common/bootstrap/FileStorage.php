@@ -56,7 +56,7 @@ class FileStorage implements BootstrapInterface
             return new FSystem($container->get(FilesystemOperator::class), $container->get(Configurator::class));
         });
 
-        $internalUrl = \Yii::$app->params['url_address'];
+        $internalUrl = \Yii::$app->params['url'];
         $container->set(UrlGenerator::class, static function () use ($fileStorageParams, $internalUrl) {
             if ($fileStorageParams['useRemoteStorage']) {
                 return new AwsS3UrlGenerator(

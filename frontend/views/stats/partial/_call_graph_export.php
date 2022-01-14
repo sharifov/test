@@ -1,7 +1,7 @@
 <?php
 
 use kartik\export\ExportMenu;
-use sales\viewModel\call\ViewModelTotalCallGraph;
+use src\viewModel\call\ViewModelTotalCallGraph;
 
 /**
  * @var ViewModelTotalCallGraph $viewModel

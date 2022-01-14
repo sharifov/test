@@ -1,6 +1,6 @@
 <?php
 
-use sales\rbac\rules\clientChat\close\ClientChatCloseReopenRule;
+use src\rbac\rules\clientChat\close\ClientChatCloseReopenRule;
 use yii\db\Migration;
 
 /**

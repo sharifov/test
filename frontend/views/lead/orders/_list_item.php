@@ -13,8 +13,8 @@ use modules\order\src\processManager\phoneToBook\OrderProcessManager;
 use modules\order\src\processManager\Status;
 use modules\order\src\transaction\services\TransactionService;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
-use sales\auth\Auth;
-use sales\helpers\product\ProductQuoteHelper;
+use src\auth\Auth;
+use src\helpers\product\ProductQuoteHelper;
 use yii\bootstrap4\Html;
 use yii\widgets\Pjax;
 

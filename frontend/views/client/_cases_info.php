@@ -1,8 +1,8 @@
 <?php
 
 use common\models\Employee;
-use sales\entities\cases\Cases;
-use sales\entities\cases\CasesStatus;
+use src\entities\cases\Cases;
+use src\entities\cases\CasesStatus;
 use yii\grid\GridView;
 use yii\helpers\Html;
 

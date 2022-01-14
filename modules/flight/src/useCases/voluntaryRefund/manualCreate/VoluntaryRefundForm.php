@@ -6,7 +6,7 @@ use common\components\validators\CheckIsNumberValidator;
 use common\components\validators\IsArrayValidator;
 use common\models\Currency;
 use frontend\helpers\JsonHelper;
-use sales\helpers\ErrorsToStringHelper;
+use src\helpers\ErrorsToStringHelper;
 use yii\base\Model;
 
 /**
@@ -53,15 +53,17 @@ class VoluntaryRefundForm extends Model
             ['currency', 'string', 'max' => 3],
             ['currency', 'exist', 'targetClass' => Currency::class, 'targetAttribute' => 'cur_code'],
 
-            [['totalProcessingFee', 'totalAirlinePenalty', 'totalRefundable', 'totalPaid', 'refundCost'], 'number'],
             [['totalProcessingFee', 'totalAirlinePenalty', 'totalRefundable', 'totalPaid', 'refundCost'], 'filter', 'filter' => 'floatval'],
+            [['totalProcessingFee', 'totalAirlinePenalty', 'totalRefundable', 'totalPaid', 'refundCost'], 'number'],
             [['totalProcessingFee', 'totalAirlinePenalty', 'totalRefundable', 'totalPaid', 'refundCost'], CheckIsNumberValidator::class, 'allowInt' => true],
 
             [['totalPaid', 'totalAirlinePenalty', 'totalRefundable', 'refundCost'], 'number', 'min' => 0],
 
             ['tickets', IsArrayValidator::class, 'skipOnEmpty' => false],
+            ['tickets', 'validateTickets'],
 
             ['auxiliaryOptions', IsArrayValidator::class, 'skipOnEmpty' => true],
+            ['auxiliaryOptions', 'validateOptions'],
         ];
     }
 
@@ -110,5 +112,27 @@ class VoluntaryRefundForm extends Model
     public function getAuxiliaryOptionsForms(): array
     {
         return $this->auxiliaryOptionsForms;
+    }
+
+    public function validateTickets(): bool
+    {
+        foreach ($this->ticketForms as $key => $ticketForm) {
+            if (!$ticketForm->validate()) {
+                $this->addError('general', $ticketForm->getErrorSummary(true)[0]);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public function validateOptions(): bool
+    {
+        foreach ($this->auxiliaryOptionsForms as $key => $auxiliaryOptionForm) {
+            if (!$auxiliaryOptionForm->validate()) {
+                $this->addError('general', $auxiliaryOptionForm->getErrorSummary(true));
+                return false;
+            }
+        }
+        return true;
     }
 }

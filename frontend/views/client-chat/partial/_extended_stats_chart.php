@@ -1,9 +1,9 @@
 <?php
 
-use sales\entities\chat\ChatExtendedGraphsSearch;
+use src\entities\chat\ChatExtendedGraphsSearch;
 
 /**
- * @var $viewModel \sales\viewModel\chat\ViewModelChatExtendedGraph
+ * @var $viewModel \src\viewModel\chat\ViewModelChatExtendedGraph
  */
 ?>
 

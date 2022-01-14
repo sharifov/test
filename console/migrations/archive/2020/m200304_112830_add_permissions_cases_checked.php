@@ -1,7 +1,7 @@
 <?php
 
 use common\models\Employee;
-use sales\rbac\rules\cases\view\CasesViewCheckedOwnerRule;
+use src\rbac\rules\cases\view\CasesViewCheckedOwnerRule;
 use yii\db\Migration;
 
 /**

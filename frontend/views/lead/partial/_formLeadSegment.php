@@ -2,8 +2,8 @@
 
 /**
  * @var $form ActiveForm
- * @var $segment sales\forms\lead\SegmentEditForm
- * @var $model sales\forms\lead\ItineraryEditForm
+ * @var $segment src\forms\lead\SegmentEditForm
+ * @var $model src\forms\lead\ItineraryEditForm
  */
 
 use yii\widgets\ActiveForm;
@@ -11,7 +11,7 @@ use dosamigos\datepicker\DatePicker;
 use yii\web\JsExpression;
 use kartik\select2\Select2;
 use yii\web\View;
-use sales\helpers\lead\LeadFlightSegmentHelper;
+use src\helpers\lead\LeadFlightSegmentHelper;
 use unclead\multipleinput\MultipleInput;
 
 $select2Properties = [

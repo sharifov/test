@@ -1,12 +1,12 @@
 <?php
 
-use sales\auth\Auth;
+use src\auth\Auth;
 use yii\bootstrap4\Html;
 use yii\bootstrap\ActiveForm;
 use yii\helpers\Url;
 
 /* @var yii\web\View $this */
-/* @var sales\model\userClientChatData\entity\UserClientChatData $model */
+/* @var src\model\userClientChatData\entity\UserClientChatData $model */
 /* @var string $error */
 
 $this->title = 'Manage User Client Chat Data: ' . $model->uccd_id;

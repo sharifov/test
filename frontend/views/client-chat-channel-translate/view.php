@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChat\entity\channelTranslate\ClientChatChannelTranslate */
+/* @var $model src\model\clientChat\entity\channelTranslate\ClientChatChannelTranslate */
 
 $this->title = ($model->ctChannel ? $model->ctChannel->ccc_frontend_name : '-') . ' - ' . $model->ct_language_id ;
 $this->params['breadcrumbs'][] = ['label' => 'Client Chat Channel Translates', 'url' => ['index']];

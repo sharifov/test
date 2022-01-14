@@ -2,8 +2,8 @@
 
 namespace frontend\controllers;
 
-use sales\model\clientChatDataRequest\entity\ClientChatDataRequest;
-use sales\model\clientChatDataRequest\entity\search\ClientChatDataRequestSearch;
+use src\model\clientChatDataRequest\entity\ClientChatDataRequest;
+use src\model\clientChatDataRequest\entity\search\ClientChatDataRequestSearch;
 use frontend\controllers\FController;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

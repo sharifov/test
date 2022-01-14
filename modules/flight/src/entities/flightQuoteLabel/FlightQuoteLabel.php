@@ -3,8 +3,8 @@
 namespace modules\flight\src\entities\flightQuoteLabel;
 
 use modules\flight\models\FlightQuote;
-use sales\model\flightQuoteLabelList\entity\FlightQuoteLabelList;
-use sales\model\flightQuoteLabelList\service\FlightQuoteLabelListService;
+use src\model\flightQuoteLabelList\entity\FlightQuoteLabelList;
+use src\model\flightQuoteLabelList\service\FlightQuoteLabelListService;
 use Yii;
 use yii\db\ActiveQuery;
 

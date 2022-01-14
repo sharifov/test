@@ -1,6 +1,6 @@
 <?php
 
-use sales\model\lead\useCases\lead\create\fromPhoneWidgetWithInvalidClient\Form;
+use src\model\lead\useCases\lead\create\fromPhoneWidgetWithInvalidClient\Form;
 use yii\widgets\ActiveForm;
 use borales\extensions\phoneInput\PhoneInput;
 

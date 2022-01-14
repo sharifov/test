@@ -4,7 +4,7 @@ use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\client\notifications\client\entity\ClientNotification */
+/* @var $model src\model\client\notifications\client\entity\ClientNotification */
 
 $this->title = $model->cn_id;
 $this->params['breadcrumbs'][] = ['label' => 'Client Notifications', 'url' => ['index']];

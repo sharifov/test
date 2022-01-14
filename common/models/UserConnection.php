@@ -3,8 +3,8 @@
 namespace common\models;
 
 use common\models\query\UserConnectionQuery;
-use sales\entities\cases\Cases;
-use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
+use src\entities\cases\Cases;
+use src\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;

@@ -3,8 +3,8 @@
 namespace common\components;
 
 use common\models\Project;
-use sales\helpers\setting\SettingHelper;
-use sales\model\project\entity\params\Webhook;
+use src\helpers\setting\SettingHelper;
+use src\model\project\entity\params\Webhook;
 use Yii;
 use yii\base\Component;
 use yii\helpers\VarDumper;

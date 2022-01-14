@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 use kartik\grid\GridView;
 use kartik\export\ExportMenu;
-use sales\auth\Auth;
+use src\auth\Auth;
 
 $this->title = 'Calls Stats';
 $this->params['breadcrumbs'][] = $this->title;

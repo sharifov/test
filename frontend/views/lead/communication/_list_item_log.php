@@ -2,15 +2,15 @@
 
 use common\models\Employee;
 use frontend\helpers\EmailHelper;
-use sales\auth\Auth;
-use sales\model\callLog\entity\callLog\CallLog;
-use sales\model\callLog\entity\callLog\CallLogStatus;
-use sales\model\clientChat\entity\ClientChat;
+use src\auth\Auth;
+use src\model\callLog\entity\callLog\CallLog;
+use src\model\callLog\entity\callLog\CallLogStatus;
+use src\model\clientChat\entity\ClientChat;
 use yii\helpers\Html;
 use common\models\Email;
 use common\models\Sms;
-use sales\helpers\email\MaskEmailHelper;
-use sales\helpers\phone\MaskPhoneHelper;
+use src\helpers\email\MaskEmailHelper;
+use src\helpers\phone\MaskPhoneHelper;
 use modules\email\src\abac\dto\EmailAbacDto;
 use modules\email\src\abac\EmailAbacObject;
 

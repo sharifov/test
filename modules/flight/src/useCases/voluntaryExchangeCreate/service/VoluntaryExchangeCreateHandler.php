@@ -21,10 +21,10 @@ use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelation;
 use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelationRepository;
-use sales\entities\cases\CaseEventLog;
-use sales\entities\cases\Cases;
-use sales\helpers\app\AppHelper;
-use sales\helpers\ErrorsToStringHelper;
+use src\entities\cases\CaseEventLog;
+use src\entities\cases\Cases;
+use src\helpers\app\AppHelper;
+use src\helpers\ErrorsToStringHelper;
 use webapi\src\services\payment\BillingInfoApiVoluntaryService;
 use Yii;
 

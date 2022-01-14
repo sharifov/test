@@ -1,12 +1,12 @@
 <?php
 
-use sales\model\contactPhoneData\service\ContactPhoneDataHelper;
-use sales\model\contactPhoneList\entity\ContactPhoneList;
+use src\model\contactPhoneData\service\ContactPhoneDataHelper;
+use src\model\contactPhoneList\entity\ContactPhoneList;
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\contactPhoneList\entity\ContactPhoneList */
+/* @var $model src\model\contactPhoneList\entity\ContactPhoneList */
 
 $this->title = $model->cpl_id;
 $this->params['breadcrumbs'][] = ['label' => 'Contact Phone Lists', 'url' => ['index']];

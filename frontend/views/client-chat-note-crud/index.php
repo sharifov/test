@@ -9,7 +9,7 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\clientChatNote\entity\ClientChatNoteSearch */
+/* @var $searchModel src\model\clientChatNote\entity\ClientChatNoteSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Client Chat Notes';

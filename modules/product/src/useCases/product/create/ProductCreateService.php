@@ -8,8 +8,8 @@ use modules\product\src\entities\product\ProductRepository;
 use modules\product\src\interfaces\Productable;
 use modules\product\src\repositories\ProductableRepository;
 use modules\product\src\services\ProductFactory;
-use sales\repositories\lead\LeadRepository;
-use sales\services\TransactionManager;
+use src\repositories\lead\LeadRepository;
+use src\services\TransactionManager;
 
 /**
  * Class ProductCreateService

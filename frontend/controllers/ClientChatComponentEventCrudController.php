@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\clientChat\componentEvent\entity\ClientChatComponentEvent;
-use sales\model\clientChat\componentEvent\entity\search\ClientChatComponentEventSearch;
+use src\model\clientChat\componentEvent\entity\ClientChatComponentEvent;
+use src\model\clientChat\componentEvent\entity\search\ClientChatComponentEventSearch;
 use frontend\controllers\FController;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

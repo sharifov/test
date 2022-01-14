@@ -2,7 +2,7 @@
 
 namespace modules\flight\src\useCases\flightQuote\create;
 
-use sales\dto\product\ProductQuoteDTO;
+use src\dto\product\ProductQuoteDTO;
 
 class ProductQuoteCalcPriceDTO extends ProductQuoteDTO
 {

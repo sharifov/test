@@ -1,7 +1,7 @@
 <?php
 
 /** @var $previewEmailForm ReprotectionQuotePreviewEmailForm */
-/** @var $case \sales\entities\cases\Cases */
+/** @var $case \src\entities\cases\Cases */
 /** @var $this \yii\web\View */
 
 use modules\product\src\forms\ReprotectionQuotePreviewEmailForm;

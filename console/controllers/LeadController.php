@@ -8,11 +8,11 @@ use common\models\LeadFlightSegment;
 use common\models\LeadFlow;
 use common\models\LeadQcall;
 use common\models\Task;
-use sales\exception\BoResponseException;
-use sales\helpers\app\AppHelper;
-use sales\helpers\setting\SettingHelper;
-use sales\repositories\lead\LeadRepository;
-use sales\services\cases\CasesSaleService;
+use src\exception\BoResponseException;
+use src\helpers\app\AppHelper;
+use src\helpers\setting\SettingHelper;
+use src\repositories\lead\LeadRepository;
+use src\services\cases\CasesSaleService;
 use yii\base\InvalidArgumentException;
 use yii\console\Controller;
 use yii\db\Expression;
@@ -440,7 +440,7 @@ class LeadController extends Controller
                     $updatedData[] = [
                         'lead' => $row->id,
                         'boFlightId' => $row->bo_flight_id,
-                        'hybridUid' => $row->hybrid_uid
+                        'hybridUid' => $saleData['bookingId']
                     ];
                 } else {
                     throw new \RuntimeException('BookingId is empty in result from BO'  . '; LeadId: ' . $row->id . '; BoFlightId: ' . $row->bo_flight_id . '; ');

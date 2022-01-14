@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use common\models\Employee;
-use sales\auth\Auth;
-use sales\model\user\entity\sales\SalesSearch;
+use src\auth\Auth;
+use src\model\user\entity\sales\SalesSearch;
 use Yii;
 use yii\data\ArrayDataProvider;
 

@@ -6,7 +6,7 @@ use frontend\controllers\FController;
 use modules\qaTask\src\entities\qaTaskStatusLog\QaTaskStatusLog;
 use Yii;
 use modules\qaTask\src\entities\qaTaskStatusLog\search\QaTaskStatusLogCrudSearch;
-use sales\auth\Auth;
+use src\auth\Auth;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;

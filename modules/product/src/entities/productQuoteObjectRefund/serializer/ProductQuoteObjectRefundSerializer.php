@@ -12,7 +12,7 @@ use modules\product\src\entities\productQuoteObjectRefund\ProductQuoteObjectRefu
  *
  * @property ProductQuoteObjectRefund $model
  */
-class ProductQuoteObjectRefundSerializer extends \sales\entities\serializer\Serializer
+class ProductQuoteObjectRefundSerializer extends \src\entities\serializer\Serializer
 {
     public function __construct(ProductQuoteObjectRefund $model)
     {

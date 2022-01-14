@@ -5,8 +5,8 @@ namespace console\controllers;
 use common\models\Call;
 use common\models\Sms;
 use console\helpers\OutputHelper;
-use sales\model\call\useCase\UpdateCallPrice;
-use sales\model\sms\useCase\UpdateSmsPrice;
+use src\model\call\useCase\UpdateCallPrice;
+use src\model\sms\useCase\UpdateSmsPrice;
 use yii\console\Controller;
 use yii\helpers\Console;
 

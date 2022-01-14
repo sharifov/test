@@ -3,8 +3,8 @@
 namespace modules\product\src\entities\productQuoteOption;
 
 use modules\product\src\exceptions\ProductCodeException;
-use sales\dispatchers\EventDispatcher;
-use sales\repositories\NotFoundException;
+use src\dispatchers\EventDispatcher;
+use src\repositories\NotFoundException;
 
 /**
  * Class ProductQuoteOptionRepository

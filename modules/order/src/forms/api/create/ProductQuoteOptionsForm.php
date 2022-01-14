@@ -4,7 +4,7 @@ namespace modules\order\src\forms\api\create;
 
 use common\components\validators\CheckJsonValidator;
 use modules\product\src\entities\productOption\ProductOption;
-use sales\forms\CompositeRecursiveForm;
+use src\forms\CompositeRecursiveForm;
 
 /**
  * Class ProductQuoteOptionsForm

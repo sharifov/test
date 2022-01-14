@@ -3,8 +3,8 @@
 namespace frontend\widgets\frontendWidgetList;
 
 use frontend\helpers\JsonHelper;
-use sales\helpers\app\AppHelper;
-use sales\helpers\setting\SettingHelper;
+use src\helpers\app\AppHelper;
+use src\helpers\setting\SettingHelper;
 use Yii;
 use yii\helpers\ArrayHelper;
 

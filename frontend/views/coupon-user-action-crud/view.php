@@ -1,11 +1,11 @@
 <?php
 
-use sales\model\coupon\entity\couponUserAction\CouponUserAction;
+use src\model\coupon\entity\couponUserAction\CouponUserAction;
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\coupon\entity\couponUserAction\CouponUserAction */
+/* @var $model src\model\coupon\entity\couponUserAction\CouponUserAction */
 
 $this->title = $model->cuu_id;
 $this->params['breadcrumbs'][] = ['label' => 'Coupon User Actions', 'url' => ['index']];

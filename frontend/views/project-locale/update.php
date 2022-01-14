@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\project\entity\projectLocale\ProjectLocale */
+/* @var $model src\model\project\entity\projectLocale\ProjectLocale */
 
 $this->title = 'Update Project Locale: ' . $model->pl_project_id;
 $this->params['breadcrumbs'][] = ['label' => 'Project Locales', 'url' => ['index']];

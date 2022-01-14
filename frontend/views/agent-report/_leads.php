@@ -1,6 +1,6 @@
 <?php
 
-use sales\access\EmployeeProjectAccess;
+use src\access\EmployeeProjectAccess;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use yii\grid\GridView;

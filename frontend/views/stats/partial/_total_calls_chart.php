@@ -1,7 +1,7 @@
 <?php
 
-use sales\entities\call\CallGraphsSearch;
-use sales\viewmodel\call\ViewModelTotalCallGraph;
+use src\entities\call\CallGraphsSearch;
+use src\viewmodel\call\ViewModelTotalCallGraph;
 
 /**
  * @var $viewModel ViewModelTotalCallGraph

@@ -1,12 +1,12 @@
 <?php
 
 use common\models\CallUserAccess;
-use sales\model\callLog\entity\callLogUserAccess\CallLogUserAccess;
+use src\model\callLog\entity\callLogUserAccess\CallLogUserAccess;
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\callLog\entity\callLogUserAccess\CallLogUserAccess */
+/* @var $model src\model\callLog\entity\callLogUserAccess\CallLogUserAccess */
 
 $this->title = $model->clua_cl_id;
 $this->params['breadcrumbs'][] = ['label' => 'Call Log User Accesses', 'url' => ['index']];

@@ -18,7 +18,7 @@ class m190620_122823_create_permission_lead_edit_for_admin extends Migration
         $updateLead = $auth->getPermission('updateLead');
         $auth->removeChild($admin, $updateLead);
 
-        $updateLeadAdminRule = new \sales\rbac\rules\LeadAdminRule();
+        $updateLeadAdminRule = new \src\rbac\rules\LeadAdminRule();
         $auth->add($updateLeadAdminRule);
 
         $updateLeadAdmin = $auth->createPermission('updateLeadAdmin');

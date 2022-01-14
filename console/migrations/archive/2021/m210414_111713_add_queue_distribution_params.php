@@ -2,6 +2,7 @@
 
 use common\models\Department;
 use common\models\DepartmentPhoneProject;
+use src\model\department\department\Type;
 use yii\db\Migration;
 use yii\helpers\VarDumper;
 

@@ -4,10 +4,12 @@ namespace common\components;
 
 use common\models\Project;
 use frontend\helpers\JsonHelper;
+use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
-use sales\exception\BoResponseException;
-use sales\helpers\app\AppHelper;
-use sales\helpers\setting\SettingHelper;
+use src\entities\cases\CaseEventLog;
+use src\exception\BoResponseException;
+use src\helpers\app\AppHelper;
+use src\helpers\setting\SettingHelper;
 use webapi\src\logger\behaviors\filters\creditCard\CreditCardFilter;
 use webapi\src\logger\behaviors\filters\creditCard\V5;
 use Yii;
@@ -311,8 +313,6 @@ class BackOffice
             $request['flightQuote'] = $quote;
         }
 
-//        VarDumper::dump($request);die;
-
         try {
             $response = self::sendRequest2(
                 'flight-request/reprotection-decision',
@@ -350,13 +350,21 @@ class BackOffice
                 ], 'BackOffice:reprotectionCustomerDecision:dataIsInvalid');
                 return false;
             }
-
-            if (!isset($data['success']) || $data['success'] !== true) {
+            if (!isset($data['success'])) {
                 \Yii::error([
-                    'message' => 'BO reprotection customer decision is not success response',
+                    'message' => 'BO reprotection customer decision is not isset "success" in response',
                     'request' => $request,
                     'content' => VarDumper::dumpAsString($response->content),
                 ], 'BackOffice:reprotectionCustomerDecision:dataObjectInvalid');
+                return false;
+            }
+            if ((bool) $data['success'] !== true) {
+                \Yii::warning([
+                    'message' => 'BO reprotection customer decision is not success response',
+                    'request' => $request,
+                    'content' => VarDumper::dumpAsString($response->content),
+                ], 'BackOffice:reprotectionCustomerDecision:not:success');
+                self::addWarningToCaseEventLog($reprotectionQuoteGid, $data);
                 return false;
             }
 
@@ -505,5 +513,31 @@ class BackOffice
             throw new BoResponseException('BO wrong endpoint', BoResponseException::BO_WRONG_ENDPOINT);
         }
         return $data;
+    }
+
+    private static function addWarningToCaseEventLog(?string $reProtectionQuoteGid, array $data): void
+    {
+        if (!$reProtectionQuoteGid || !($errorMsg = $data['errors'] ?? null) || !is_string($errorMsg)) {
+            return;
+        }
+        if (!$reProtectionQuote = ProductQuote::find()->where(['pq_gid' => $reProtectionQuoteGid])->limit(1)->one()) {
+            return;
+        }
+        if (!$originProductQuote = $reProtectionQuote->relateParent) {
+            return;
+        }
+        $productQuoteChange = ProductQuoteChange::find()
+            ->byProductQuote($originProductQuote->pq_id)
+            ->scheduleChangeType()
+            ->orderBy(['pqc_id' => SORT_DESC])
+            ->one();
+        if ($productQuoteChange && ($case = $productQuoteChange->pqcCase)) {
+            $case->addEventLog(
+                CaseEventLog::RE_PROTECTION_CREATE,
+                $errorMsg,
+                ['reProtectionQuoteGid' => $reProtectionQuoteGid],
+                CaseEventLog::CATEGORY_WARNING
+            );
+        }
     }
 }

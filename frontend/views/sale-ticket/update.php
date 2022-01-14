@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\saleTicket\entity\SaleTicket */
+/* @var $model src\model\saleTicket\entity\SaleTicket */
 
 $this->title = 'Update Sale Ticket: ' . $model->st_case_id;
 $this->params['breadcrumbs'][] = ['label' => 'Sale Tickets', 'url' => ['index']];

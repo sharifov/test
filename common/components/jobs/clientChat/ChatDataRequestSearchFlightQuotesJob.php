@@ -6,11 +6,11 @@ use common\components\jobs\BaseJob;
 use common\components\SearchService;
 use common\models\Project;
 use frontend\helpers\QuoteHelper;
-use sales\dto\searchService\SearchServiceQuoteDTO;
-use sales\helpers\app\AppHelper;
-use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChatDataRequest\form\FlightSearchDataRequestForm;
-use sales\model\clientChatLead\entity\ClientChatLead;
+use src\dto\searchService\SearchServiceQuoteDTO;
+use src\helpers\app\AppHelper;
+use src\model\clientChat\entity\ClientChat;
+use src\model\clientChatDataRequest\form\FlightSearchDataRequestForm;
+use src\model\clientChatLead\entity\ClientChatLead;
 use Yii;
 use yii\queue\JobInterface;
 

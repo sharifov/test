@@ -1,9 +1,9 @@
 <?php
 
-use sales\auth\Auth;
-use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChatChannel\entity\ClientChatChannel;
-use sales\model\clientChatMessage\entity\ClientChatMessage;
+use src\auth\Auth;
+use src\model\clientChat\entity\ClientChat;
+use src\model\clientChatChannel\entity\ClientChatChannel;
+use src\model\clientChatMessage\entity\ClientChatMessage;
 use yii\grid\ActionColumn;
 use common\components\grid\DateTimeColumn;
 use yii\bootstrap4\Html;
@@ -12,7 +12,7 @@ use yii\widgets\Pjax;
 use yii\bootstrap4\Modal;
 
 /* @var yii\web\View $this */
-/* @var sales\model\clientChat\entity\search\ClientChatSearch $searchModel */
+/* @var src\model\clientChat\entity\search\ClientChatSearch $searchModel */
 /* @var yii\data\ActiveDataProvider $dataProvider */
 
 $this->title = 'Client Chats';

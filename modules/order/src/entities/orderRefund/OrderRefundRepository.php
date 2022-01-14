@@ -2,7 +2,7 @@
 
 namespace modules\order\src\entities\orderRefund;
 
-use sales\repositories\NotFoundException;
+use src\repositories\NotFoundException;
 
 class OrderRefundRepository
 {

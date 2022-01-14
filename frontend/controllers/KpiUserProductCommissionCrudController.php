@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\kpi\entity\kpiUserProductCommission\KpiUserProductCommission;
-use sales\model\kpi\entity\kpiUserProductCommission\search\KpiUserProductCommissionSearch;
+use src\model\kpi\entity\kpiUserProductCommission\KpiUserProductCommission;
+use src\model\kpi\entity\kpiUserProductCommission\search\KpiUserProductCommissionSearch;
 use frontend\controllers\FController;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;

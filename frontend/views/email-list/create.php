@@ -1,6 +1,6 @@
 <?php
 
-use sales\model\emailList\entity\EmailList;
+use src\model\emailList\entity\EmailList;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */

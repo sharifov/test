@@ -11,7 +11,7 @@ use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundStatus;
-use sales\helpers\product\ProductQuoteHelper;
+use src\helpers\product\ProductQuoteHelper;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -23,16 +23,16 @@ use modules\product\src\abac\dto\ProductQuoteRefundAbacDto;
 use modules\product\src\abac\dto\RelatedProductQuoteAbacDto;
 use modules\product\src\abac\RelatedProductQuoteAbacObject;
 use yii\web\ForbiddenHttpException;
-use sales\access\EmployeeGroupAccess;
-use sales\auth\Auth;
-use sales\helpers\setting\SettingHelper;
+use src\access\EmployeeGroupAccess;
+use src\auth\Auth;
+use src\helpers\setting\SettingHelper;
 
 /**
  * @var Order $order
  * @var ProductQuote $quote
  * @var int $nr
  * @var int $projectId
- * @var  $case \sales\entities\cases\Cases
+ * @var  $case \src\entities\cases\Cases
  * @var \yii\web\View $this
  * @var bool $isReprotection
  * @var $caseAbacDto \modules\cases\src\abac\dto\CasesAbacDto

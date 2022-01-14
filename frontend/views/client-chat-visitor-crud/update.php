@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChatVisitor\entity\ClientChatVisitor */
+/* @var $model src\model\clientChatVisitor\entity\ClientChatVisitor */
 
 $this->title = 'Update Client Chat Visitor: ' . $model->ccv_id;
 $this->params['breadcrumbs'][] = ['label' => 'Client Chat Visitors', 'url' => ['index']];

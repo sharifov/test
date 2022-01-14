@@ -1,7 +1,9 @@
 <?php
 
+use common\models\UserOnline;
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\helpers\Url;
 use yii\widgets\Pjax;
 use dosamigos\datepicker\DatePicker;
 
@@ -112,13 +114,112 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                 ]),
             ],
-
-
-
-            ['class' => 'yii\grid\ActionColumn'],
+            [
+                'class' => 'yii\grid\ActionColumn',
+                'template' => '{view} {update} {delete} {logout} {refresh}',
+                'buttons' => [
+                    'logout' => static function ($url, UserOnline $model) {
+                        return Html::a(
+                            '<i class="glyphicon glyphicon-log-out"></i>',
+                            '#',
+                            [
+                                'class' => 'logout-user',
+                                'data-pjax' => 0,
+                                'title' => 'Logout',
+                                'data-user-id' => $model->uo_user_id,
+                            ]
+                        );
+                    },
+                    'refresh' => static function ($url, UserOnline $model) {
+                        return Html::a(
+                            '<i class="glyphicon glyphicon-refresh"></i>',
+                            '#',
+                            [
+                                'class' => 'refresh-user',
+                                'data-pjax' => 0,
+                                'title' => 'Refresh',
+                                'data-user-id' => $model->uo_user_id
+                            ]
+                        );
+                    },
+                ],
+            ],
         ],
     ]); ?>
 
     <?php Pjax::end(); ?>
 
 </div>
+
+<?php
+$logoutUrl = Url::to(['/user-online/logout']);
+$refreshUrl = Url::to(['/user-online/refresh']);
+
+$js = <<<JS
+ $('body').off('click', '.logout-user').on('click', '.logout-user', function (e) {
+    e.preventDefault();
+    
+    if (!confirm('Are you sure you want to logout this user?')) {
+        return false;
+    }
+    
+    let btn = $(this);
+    
+    $.ajax({
+        type: 'post',
+        url: '$logoutUrl',
+        data: {userId: btn.data('user-id')},
+        dataType: 'json',
+        beforeSend: function () {
+            btn.html('<i class="fa fa-spin fa-spinner" />').addClass('disabled');
+        },
+        success: function (data) {
+            if (data.error) {
+                createNotify('Error', data.message, 'error');
+            } else {
+                createNotify('Success', 'Success', 'success');
+            }
+        },
+        complete: function () {
+            btn.html('<i class="glyphicon glyphicon-log-out"></i>').removeClass('disabled');
+        },
+        error: function (xhr) {
+            createNotify('Error', xhr.responseText, 'error');
+        }
+    })
+});
+ $('body').off('click', '.refresh-user').on('click', '.refresh-user', function (e) {
+    e.preventDefault();
+    
+    if (!confirm('Are you sure you want to reload all pages of this user?')) {
+        return false;
+    }
+    
+    let btn = $(this);
+    
+    $.ajax({
+        type: 'post',
+        url: '$refreshUrl',
+        data: {userId: btn.data('user-id')},
+        dataType: 'json',
+        beforeSend: function () {
+            btn.html('<i class="fa fa-spin fa-spinner" />').addClass('disabled');
+        },
+        success: function (data) {
+            if (data.error) {
+                createNotify('Error', data.message, 'error');
+            } else {
+                createNotify('Success', 'Success', 'success');
+            }
+        },
+        complete: function () {
+            btn.html('<i class="glyphicon glyphicon-refresh"></i>').removeClass('disabled');
+        },
+        error: function (xhr) {
+            createNotify('Error', xhr.responseText, 'error');
+        }
+    })
+});
+JS;
+
+$this->registerJs($js);

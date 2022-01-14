@@ -1,7 +1,7 @@
 <?php
 
-use sales\model\contactPhoneList\entity\ContactPhoneList;
-use sales\services\phone\checkPhone\CheckPhoneService;
+use src\model\contactPhoneList\entity\ContactPhoneList;
+use src\services\phone\checkPhone\CheckPhoneService;
 use yii\db\Migration;
 
 /**

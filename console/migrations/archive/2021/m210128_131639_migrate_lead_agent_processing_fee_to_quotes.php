@@ -2,7 +2,7 @@
 
 use common\models\Lead;
 use common\models\Quote;
-use sales\helpers\setting\SettingHelper;
+use src\helpers\setting\SettingHelper;
 use yii\db\Migration;
 use yii\db\Query;
 use yii\helpers\Console;

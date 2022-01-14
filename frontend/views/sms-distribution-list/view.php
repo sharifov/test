@@ -3,11 +3,11 @@
 use common\components\grid\DateTimeColumn;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
-use sales\helpers\phone\MaskPhoneHelper;
-use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
+use src\helpers\phone\MaskPhoneHelper;
+use src\model\sms\entity\smsDistributionList\SmsDistributionList;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\sms\entity\smsDistributionList\SmsDistributionList */
+/* @var $model src\model\sms\entity\smsDistributionList\SmsDistributionList */
 
 $this->title = 'SMS Distribution ID: ' . $model->sdl_id;
 $this->params['breadcrumbs'][] = ['label' => 'Sms Distribution Lists', 'url' => ['index']];

@@ -67,7 +67,7 @@ class DepartmentPhoneProjectSearch extends DepartmentPhoneProject
         }
 
         if ($this->dpp_updated_dt) {
-            \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'dpp_updated_dt', $this->dpp_updated_dt, $user->timezone);
+            \src\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'dpp_updated_dt', $this->dpp_updated_dt, $user->timezone);
         }
 
         // grid filtering conditions

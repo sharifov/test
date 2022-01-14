@@ -3,8 +3,8 @@
 namespace modules\order\src\listeners\order;
 
 use modules\order\src\entities\order\events\OrderRecalculateProfitAmountEvent;
-use sales\helpers\app\AppHelper;
-use sales\services\RecalculateProfitAmountService;
+use src\helpers\app\AppHelper;
+use src\services\RecalculateProfitAmountService;
 use Yii;
 use yii\helpers\VarDumper;
 

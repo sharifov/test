@@ -1,6 +1,6 @@
 <?php
 
-use sales\forms\leadflow\TrashReasonForm;
+use src\forms\leadflow\TrashReasonForm;
 use yii\widgets\ActiveForm;
 use yii\bootstrap\Html;
 

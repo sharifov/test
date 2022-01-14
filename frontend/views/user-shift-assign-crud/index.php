@@ -7,7 +7,7 @@ use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\shiftSchedule\entity\userShiftAssign\search\SearchUserShiftAssign */
+/* @var $searchModel src\model\shiftSchedule\entity\userShiftAssign\search\SearchUserShiftAssign */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'User Shift Assigns';
@@ -35,7 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'relation' => 'user',
                 'attribute' => 'usa_user_id'
             ],
-            'usa_ssr_id',
+            'usa_sh_id',
             //'usa_created_dt',
             [
                 'class' => DateTimeColumn::class,

@@ -2,15 +2,15 @@
 
 use common\components\grid\BooleanColumn;
 use common\components\grid\DateTimeColumn;
-use sales\helpers\call\CallHelper;
-use sales\model\voiceMailRecord\entity\VoiceMailRecord;
+use src\helpers\call\CallHelper;
+use src\model\voiceMailRecord\entity\VoiceMailRecord;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\helpers\Url;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\voiceMailRecord\entity\search\VoiceMailRecordSearch */
+/* @var $searchModel src\model\voiceMailRecord\entity\search\VoiceMailRecordSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Voice Mail Records';

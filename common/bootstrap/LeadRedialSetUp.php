@@ -2,19 +2,19 @@
 
 namespace common\bootstrap;
 
-use sales\helpers\setting\SettingHelper;
-use sales\model\leadRedial\assign\EmployeeUsers;
-use sales\model\leadRedial\assign\TestUsers;
-use sales\model\leadRedial\assign\Users;
-use sales\model\leadRedial\priorityLevel\PriorityLevelCalculator;
-use sales\model\leadRedial\priorityLevel\SettingsPriorityLevelCalculator;
-use sales\model\leadRedial\queue\CallNextLeads;
-use sales\model\leadRedial\queue\LeadRedialQueue;
-use sales\model\leadRedial\queue\Leads;
-use sales\model\leadRedial\queue\NullLeadRedialQueue;
-use sales\model\leadRedial\queue\SimpleLeadRedialQueue;
-use sales\model\leadRedial\queue\TestLeadRedialQueue;
-use sales\model\leadRedial\queue\TestLeads;
+use src\helpers\setting\SettingHelper;
+use src\model\leadRedial\assign\EmployeeUsers;
+use src\model\leadRedial\assign\TestUsers;
+use src\model\leadRedial\assign\Users;
+use src\model\leadRedial\priorityLevel\PriorityLevelCalculator;
+use src\model\leadRedial\priorityLevel\SettingsPriorityLevelCalculator;
+use src\model\leadRedial\queue\CallNextLeads;
+use src\model\leadRedial\queue\LeadRedialQueue;
+use src\model\leadRedial\queue\Leads;
+use src\model\leadRedial\queue\NullLeadRedialQueue;
+use src\model\leadRedial\queue\SimpleLeadRedialQueue;
+use src\model\leadRedial\queue\TestLeadRedialQueue;
+use src\model\leadRedial\queue\TestLeads;
 use yii\base\BootstrapInterface;
 
 class LeadRedialSetUp implements BootstrapInterface

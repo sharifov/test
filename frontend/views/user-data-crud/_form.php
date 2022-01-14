@@ -1,12 +1,12 @@
 <?php
 
-use sales\model\userData\entity\UserDataKey;
-use sales\widgets\UserSelect2Widget;
+use src\model\userData\entity\UserDataKey;
+use src\widgets\UserSelect2Widget;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\userData\entity\UserData */
+/* @var $model src\model\userData\entity\UserData */
 /* @var $form ActiveForm */
 ?>
 

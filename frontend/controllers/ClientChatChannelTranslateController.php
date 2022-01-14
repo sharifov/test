@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\clientChat\entity\channelTranslate\ClientChatChannelTranslate;
-use sales\model\clientChat\entity\channelTranslate\search\ClientChatChannelTranslateSearch;
+use src\model\clientChat\entity\channelTranslate\ClientChatChannelTranslate;
+use src\model\clientChat\entity\channelTranslate\search\ClientChatChannelTranslateSearch;
 use frontend\controllers\FController;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;

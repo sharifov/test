@@ -2,9 +2,9 @@
 
 namespace frontend\controllers;
 
-use sales\auth\Auth;
-use sales\model\clientChatCase\entity\ClientChatCase;
-use sales\model\clientChatCase\entity\search\ClientChatCaseSearch;
+use src\auth\Auth;
+use src\model\clientChatCase\entity\ClientChatCase;
+use src\model\clientChatCase\entity\search\ClientChatCaseSearch;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;

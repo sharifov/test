@@ -1,14 +1,14 @@
 <?php
 
 use common\components\grid\DateTimeColumn;
-use sales\model\leadDataKey\entity\LeadDataKey;
+use src\model\leadDataKey\entity\LeadDataKey;
 use yii\grid\ActionColumn;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\leadData\entity\LeadDataSearch */
+/* @var $searchModel src\model\leadData\entity\LeadDataSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Lead Datas';

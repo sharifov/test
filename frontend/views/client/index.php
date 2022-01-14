@@ -4,7 +4,7 @@ use common\models\Client;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
-use sales\auth\Auth;
+use src\auth\Auth;
 use common\components\grid\DateTimeColumn;
 
 /* @var $this yii\web\View */

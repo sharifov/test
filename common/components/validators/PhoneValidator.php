@@ -3,7 +3,7 @@
 namespace common\components\validators;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
-use sales\model\voip\phoneDevice\device\VoipDevice;
+use src\model\voip\phoneDevice\device\VoipDevice;
 use Yii;
 use yii\base\InvalidConfigException;
 use yii\base\Model;

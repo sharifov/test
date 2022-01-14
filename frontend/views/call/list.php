@@ -6,7 +6,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use yii\bootstrap4\Modal;
-use sales\helpers\phone\MaskPhoneHelper;
+use src\helpers\phone\MaskPhoneHelper;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\CallSearch */

@@ -4,9 +4,10 @@ namespace common\models;
 
 use common\models\query\CaseSaleQuery;
 use frontend\helpers\JsonHelper;
-use sales\entities\cases\Cases;
-use sales\model\saleTicket\entity\SaleTicket;
-use sales\traits\DbSlaveConnection;
+use src\entities\cases\Cases;
+use src\model\saleTicket\entity\SaleTicket;
+use src\services\caseSale\PnrPreparingService;
+use src\traits\DbSlaveConnection;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -132,7 +133,8 @@ class CaseSale extends \yii\db\ActiveRecord
             [['css_cs_id', 'css_sale_id', 'css_sale_data'], 'required'],
             [['css_cs_id', 'css_sale_id', 'css_sale_pax', 'css_penalty_type'], 'integer'],
             [['css_sale_created_dt', 'css_sale_data', 'css_created_dt', 'css_updated_dt', 'css_created_user_id', 'css_updated_user_id', 'css_fare_rules'], 'safe'],
-            [['css_sale_book_id', 'css_sale_pnr'], 'string', 'max' => 20],
+            [['css_sale_book_id',], 'string', 'max' => 20],
+
             [['css_cs_id', 'css_sale_id'], 'unique', 'targetAttribute' => ['css_cs_id', 'css_sale_id']],
             [['css_cs_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['css_cs_id' => 'cs_id']],
             [['css_profit', 'css_charged'], 'number'],
@@ -144,6 +146,11 @@ class CaseSale extends \yii\db\ActiveRecord
 
             [['css_sale_data'], 'filter', 'filter' => static function ($value) {
                 return JsonHelper::decode($value);
+            }],
+
+            [['css_sale_pnr'], 'string', 'max' => 70],
+            [['css_sale_pnr'], 'filter', 'filter' => static function ($value) {
+                return empty($value) ? $value : (new PnrPreparingService($value))->getPnr();
             }],
         ];
     }

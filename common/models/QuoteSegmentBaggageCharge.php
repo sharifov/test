@@ -2,7 +2,7 @@
 
 namespace common\models;
 
-use sales\forms\segment\SegmentBaggageForm;
+use src\forms\segment\SegmentBaggageForm;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;

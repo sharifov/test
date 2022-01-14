@@ -10,7 +10,8 @@ use modules\flight\models\query\FlightQuoteBookingQuery;
 use modules\flight\src\entities\flightQuoteBooking\serializer\FlightQuoteBookingSerializer;
 use modules\order\src\entities\order\Order;
 use modules\product\src\interfaces\ProductDataInterface;
-use sales\entities\serializer\Serializable;
+use src\entities\serializer\Serializable;
+use src\services\caseSale\PnrPreparingService;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -32,7 +33,7 @@ use yii\helpers\ArrayHelper;
  * @property FlightQuoteBookingAirline[] $flightQuoteBookingAirlines
  * @property FlightQuoteTicket[] $flightQuoteTickets
  * @property FlightQuoteFlight $fqbFqf
- * @property FlightPax[] $fqtPaxes
+ * @property FlightPax[] $fqtPaxess
  */
 class FlightQuoteBooking extends ActiveRecord implements Serializable, ProductDataInterface
 {
@@ -46,11 +47,15 @@ class FlightQuoteBooking extends ActiveRecord implements Serializable, ProductDa
             ['fqb_booking_id', 'string', 'max' => 10],
             ['fqb_gds', 'string', 'max' => 1],
             ['fqb_gds_pcc', 'string', 'max' => 255],
-            ['fqb_pnr', 'string', 'max' => 6],
 
             ['fqb_validating_carrier', 'string', 'max' => 2],
 
             [['fqb_created_dt', 'fqb_updated_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+
+            [['fqb_pnr'], 'string', 'max' => 70],
+            [['fqb_pnr'], 'filter', 'filter' => static function ($value) {
+                return empty($value) ? $value : (new PnrPreparingService($value))->getPnr();
+            }],
         ];
     }
 

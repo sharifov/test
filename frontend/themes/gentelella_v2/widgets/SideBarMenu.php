@@ -8,7 +8,7 @@ namespace frontend\themes\gentelella_v2\widgets;
 
 use common\models\Employee;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
 
 /**
@@ -664,6 +664,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     'icon' => 'calendar',
                     'items' => [
                         ['label' => 'Shift', 'url' => ['/shift-crud/index']],
+                        ['label' => 'Shift Category', 'url' => ['/shift-category-crud/index']],
                         ['label' => 'Shift Schedule Rule', 'url' => ['/shift-schedule-rule-crud/index']],
                         ['label' => 'User Shift Assign', 'url' => ['/user-shift-assign-crud/index']],
                         ['label' => 'User Shift Schedule', 'url' => ['/user-shift-schedule-crud/index']],

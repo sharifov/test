@@ -5,10 +5,10 @@ use common\components\grid\UserSelect2Column;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
-use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
+use src\model\clientChatUserAccess\entity\ClientChatUserAccess;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\clientChatUserAccess\entity\search\ClientChatUserAccessSearch */
+/* @var $searchModel src\model\clientChatUserAccess\entity\search\ClientChatUserAccessSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Client Chat User Accesses';

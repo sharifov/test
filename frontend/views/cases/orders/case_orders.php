@@ -3,7 +3,7 @@
 /**
  * @var $this View
  * @var $dataProviderOrders \yii\data\ActiveDataProvider
- * @var $case \sales\entities\cases\Cases
+ * @var $case \src\entities\cases\Cases
  * @var $caseAbacDto \modules\cases\src\abac\dto\CasesAbacDto
  */
 

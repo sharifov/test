@@ -1,7 +1,7 @@
 <?php
 
 use yii\db\Migration;
-use sales\rbac\rules\lead\splitRules\SplitProfitLeadSoldRule;
+use src\rbac\rules\lead\splitRules\SplitProfitLeadSoldRule;
 use console\migrations\RbacMigrationService;
 
 /**

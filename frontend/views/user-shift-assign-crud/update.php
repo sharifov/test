@@ -3,11 +3,11 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\shiftSchedule\entity\userShiftAssign\UserShiftAssign */
+/* @var $model src\model\shiftSchedule\entity\userShiftAssign\UserShiftAssign */
 
 $this->title = 'Update User Shift Assign: ' . $model->usa_user_id;
 $this->params['breadcrumbs'][] = ['label' => 'User Shift Assigns', 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $model->usa_user_id, 'url' => ['view', 'usa_user_id' => $model->usa_user_id, 'usa_ssr_id' => $model->usa_ssr_id]];
+$this->params['breadcrumbs'][] = ['label' => $model->usa_user_id, 'url' => ['view', 'usa_user_id' => $model->usa_user_id, 'usa_sh_id' => $model->usa_sh_id]];
 $this->params['breadcrumbs'][] = 'Update';
 ?>
 <div class="user-shift-assign-update">

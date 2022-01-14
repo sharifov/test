@@ -3,8 +3,8 @@
 namespace frontend\widgets\notification;
 
 use common\models\Notifications;
-use sales\model\clientChat\entity\ClientChat;
-use sales\services\clientChatMessage\ClientChatMessageService;
+use src\model\clientChat\entity\ClientChat;
+use src\services\clientChatMessage\ClientChatMessageService;
 use yii\bootstrap\Widget;
 use yii\caching\TagDependency;
 use yii\helpers\VarDumper;

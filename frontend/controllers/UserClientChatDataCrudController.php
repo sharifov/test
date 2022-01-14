@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\userClientChatData\entity\UserClientChatData;
-use sales\model\userClientChatData\entity\UserClientChatDataSearch;
+use src\model\userClientChatData\entity\UserClientChatData;
+use src\model\userClientChatData\entity\UserClientChatDataSearch;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;

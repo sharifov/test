@@ -9,14 +9,6 @@ use yii\rbac\Rule;
 
 abstract class LeadRule extends Rule
 {
-    protected $leadRepository;
-
-    public function __construct($config = [])
-    {
-        parent::__construct($config);
-        $this->leadRepository = Yii::createObject(LeadRepository::class);
-    }
-
     /**
      * @param int|string $userId
      * @param yii\rbac\Item $item
@@ -28,6 +20,7 @@ abstract class LeadRule extends Rule
         if (!isset($params['leadId']) && !isset($params['lead'])) {
             throw new \InvalidArgumentException('leadId or lead must be set');
         }
+        $leadRepository = Yii::createObject(LeadRepository::class);
         /** @var  Lead $params['lead'] */
         $leadId = $params['leadId'] ?? $params['lead']->id;
         $leadId = (int)$leadId;
@@ -35,7 +28,7 @@ abstract class LeadRule extends Rule
         $can = Yii::$app->user->identity->getCache($key);
         if ($can === null) {
             try {
-                $lead = $params['lead'] ?? $this->leadRepository->find($leadId);
+                $lead = $params['lead'] ?? $leadRepository->find($leadId);
                 $data = $this->getData($userId, $lead);
                 $can = Yii::$app->user->identity->setCache($key, $data);
             } catch (\Throwable $e) {

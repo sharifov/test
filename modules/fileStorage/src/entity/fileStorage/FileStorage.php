@@ -17,7 +17,7 @@ use modules\fileStorage\src\entity\fileStorage\events\FileUploadedByLeadEvent;
 use modules\fileStorage\src\entity\fileUser\FileUser;
 use modules\fileStorage\src\services\CreateByApiDto;
 use modules\fileStorage\src\services\CreateByLocalFileDto;
-use sales\entities\EventTrait;
+use src\entities\EventTrait;
 use Yii;
 
 /**

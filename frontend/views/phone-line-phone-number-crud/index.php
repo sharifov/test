@@ -6,7 +6,7 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\phoneLine\phoneLinePhoneNumber\entity\search\PhoneLinePhoneNumberSearch */
+/* @var $searchModel src\model\phoneLine\phoneLinePhoneNumber\entity\search\PhoneLinePhoneNumberSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Phone Line Phone Numbers';
@@ -33,7 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'plpn_pl_id',
             /*[
                'label' => 'Phone Number',
-                'value' => static function (\sales\model\phoneLine\phoneLinePhoneNumber\entity\PhoneLinePhoneNumber $model) {
+                'value' => static function (\src\model\phoneLine\phoneLinePhoneNumber\entity\PhoneLinePhoneNumber $model) {
                     return $model->plpnPl ? $model->plpnPl->pl_phone_number : '-';
                 }
             ],*/
@@ -45,7 +45,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'plpn_enabled:BooleanByLabel',
             [
                 'attribute' => 'plpn_created_user_id',
-                'filter' => \sales\widgets\UserSelect2Widget::widget([
+                'filter' => \src\widgets\UserSelect2Widget::widget([
                     'model' => $searchModel,
                     'attribute' => 'plpn_created_user_id'
                 ]),
@@ -56,7 +56,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'plpn_updated_user_id',
-                'filter' => \sales\widgets\UserSelect2Widget::widget([
+                'filter' => \src\widgets\UserSelect2Widget::widget([
                     'model' => $searchModel,
                     'attribute' => 'plpn_updated_user_id'
                 ]),

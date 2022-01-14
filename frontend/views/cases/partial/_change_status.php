@@ -1,11 +1,11 @@
 <?php
 
-use sales\widgets\DateTimePicker;
+use src\widgets\DateTimePicker;
 use yii\bootstrap4\ActiveForm;
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $statusForm sales\forms\cases\CasesChangeStatusForm */
+/* @var $statusForm src\forms\cases\CasesChangeStatusForm */
 /* @var $form yii\widgets\ActiveForm */
 
 $formId = 'change-status-form-id';

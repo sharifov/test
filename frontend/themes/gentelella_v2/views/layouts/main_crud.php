@@ -9,8 +9,8 @@ use frontend\widgets\frontendWidgetList\louassist\LouAssistWidget;
 use frontend\widgets\frontendWidgetList\userflow\UserFlowWidget;
 use frontend\widgets\notification\NotificationSocketWidget;
 use frontend\widgets\notification\NotificationWidget;
-use sales\auth\Auth;
-use sales\helpers\app\ReleaseVersionHelper;
+use src\auth\Auth;
+use src\helpers\app\ReleaseVersionHelper;
 use yii\helpers\Html;
 
 $bundle = \frontend\assets\AppCrudAsset::register($this);

@@ -3,8 +3,8 @@
 namespace modules\flight\src\useCases\voluntaryExchange\service;
 
 use modules\flight\models\FlightQuote;
-use sales\entities\cases\CaseEventLog;
-use sales\entities\cases\Cases;
+use src\entities\cases\CaseEventLog;
+use src\entities\cases\Cases;
 
 /**
  * Class CaseVoluntaryExchangeHandler

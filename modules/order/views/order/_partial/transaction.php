@@ -4,7 +4,7 @@ use common\models\Payment;
 use common\models\Transaction;
 use modules\order\src\entities\order\Order;
 use modules\order\src\transaction\services\TransactionService;
-use sales\auth\Auth;
+use src\auth\Auth;
 use yii\bootstrap4\Html;
 use yii\helpers\Url;
 use yii\widgets\Pjax;

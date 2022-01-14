@@ -3,11 +3,11 @@
 use yii\bootstrap4\Alert;
 use yii\widgets\DetailView;
 use yii\helpers\Html;
-use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChatMessage\entity\ClientChatMessage;
+use src\model\clientChat\entity\ClientChat;
+use src\model\clientChatMessage\entity\ClientChatMessage;
 use common\components\grid\DateTimeColumn;
 
-/** @var $clientChatData \sales\model\clientChat\entity\ClientChat|null */
+/** @var $clientChatData \src\model\clientChat\entity\ClientChat|null */
 
 ?>
 

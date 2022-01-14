@@ -7,7 +7,7 @@ use modules\invoice\src\entities\invoice\Invoice;
 use modules\invoice\src\entities\invoice\InvoiceStatus;
 use modules\invoice\src\entities\invoice\InvoiceStatusAction;
 use modules\invoice\src\entities\invoiceStatusLog\InvoiceStatusLog;
-use sales\helpers\query\QueryHelper;
+use src\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
 
 class InvoiceStatusLogCrudSearch extends InvoiceStatusLog

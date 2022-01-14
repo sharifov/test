@@ -18,29 +18,29 @@ use common\models\Project;
 use common\models\UserCallStatus;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
-use sales\auth\Auth;
-use sales\entities\cases\Cases;
-use sales\helpers\app\AppHelper;
-use sales\helpers\setting\SettingHelper;
-use sales\model\call\helper\CallHelper;
-use sales\model\call\services\currentQueueCalls\ActiveQueueCall;
-use sales\model\call\services\currentQueueCalls\CurrentQueueCallsService;
-use sales\model\call\services\currentQueueCalls\OutgoingQueueCall;
-use sales\model\call\services\FriendlyName;
-use sales\model\call\services\RecordManager;
-use sales\model\call\services\reserve\CallReserver;
-use sales\model\call\services\reserve\Key;
-use sales\model\call\useCase\checkRecording\CheckRecordingForm;
-use sales\model\call\useCase\conference\create\CreateCallForm;
-use sales\model\callLog\entity\callLog\CallLog;
-use sales\model\conference\useCase\PrepareCurrentCallsForNewCall;
-use sales\model\phone\AvailablePhoneList;
-use sales\model\phoneList\entity\PhoneList;
-use sales\model\user\entity\userStatus\UserStatus;
-use sales\model\voip\phoneDevice\device\PhoneDevice;
-use sales\model\voip\phoneDevice\device\ReadyVoipDevice;
-use sales\model\voip\phoneDevice\device\VoipDevice;
-use sales\services\client\ClientManageService;
+use src\auth\Auth;
+use src\entities\cases\Cases;
+use src\helpers\app\AppHelper;
+use src\helpers\setting\SettingHelper;
+use src\model\call\helper\CallHelper;
+use src\model\call\services\currentQueueCalls\ActiveQueueCall;
+use src\model\call\services\currentQueueCalls\CurrentQueueCallsService;
+use src\model\call\services\currentQueueCalls\OutgoingQueueCall;
+use src\model\call\services\FriendlyName;
+use src\model\call\services\RecordManager;
+use src\model\call\services\reserve\CallReserver;
+use src\model\call\services\reserve\Key;
+use src\model\call\useCase\checkRecording\CheckRecordingForm;
+use src\model\call\useCase\conference\create\CreateCallForm;
+use src\model\callLog\entity\callLog\CallLog;
+use src\model\conference\useCase\PrepareCurrentCallsForNewCall;
+use src\model\phone\AvailablePhoneList;
+use src\model\phoneList\entity\PhoneList;
+use src\model\user\entity\userStatus\UserStatus;
+use src\model\voip\phoneDevice\device\PhoneDevice;
+use src\model\voip\phoneDevice\device\ReadyVoipDevice;
+use src\model\voip\phoneDevice\device\VoipDevice;
+use src\services\client\ClientManageService;
 use thamtech\uuid\helpers\UuidHelper;
 use yii\base\Exception;
 use yii\helpers\Html;
@@ -769,11 +769,11 @@ class PhoneController extends FController
             //$updateData = ['status' => 'completed'];
             /*$updateData = [
                 'method'    =>  'POST',
-                'url'       =>  Yii::$app->params['url_api_address'] . '/twilio/redirect-call-user?user_id='.$user->id
+                'url'       =>  Yii::$app->params['url_api'] . '/twilio/redirect-call-user?user_id='.$user->id
             ];*/
 
 
-            $callbackUrl = Yii::$app->params['url_api_address'] . '/twilio/redirect-call?id=' . $id . '&type=' . $type;
+            $callbackUrl = Yii::$app->params['url_api'] . '/twilio/redirect-call?id=' . $id . '&type=' . $type;
             $data['type'] = $type;
             $data['isTransfer'] = true;
 

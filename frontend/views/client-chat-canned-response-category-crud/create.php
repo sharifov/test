@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChat\cannedResponseCategory\entity\ClientChatCannedResponseCategory */
+/* @var $model src\model\clientChat\cannedResponseCategory\entity\ClientChatCannedResponseCategory */
 
 $this->title = 'Create Client Chat Canned Response Category';
 $this->params['breadcrumbs'][] = ['label' => 'Client Chat Canned Response Categories', 'url' => ['index']];

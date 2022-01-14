@@ -3,7 +3,7 @@
 namespace modules\product\src\entities\productQuoteChange\service;
 
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
-use sales\helpers\setting\SettingHelper;
+use src\helpers\setting\SettingHelper;
 
 /**
  * Class ProductQuoteChangeService

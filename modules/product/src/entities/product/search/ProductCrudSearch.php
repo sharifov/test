@@ -5,7 +5,7 @@ namespace modules\product\src\entities\product\search;
 use common\models\Employee;
 use common\models\Lead;
 use modules\product\src\entities\productType\ProductType;
-use sales\helpers\query\QueryHelper;
+use src\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
 use modules\product\src\entities\product\Product;
 

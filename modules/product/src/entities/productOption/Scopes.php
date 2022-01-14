@@ -2,7 +2,7 @@
 
 namespace modules\product\src\entities\productOption;
 
-use sales\helpers\setting\SettingHelper;
+use src\helpers\setting\SettingHelper;
 
 /**
  * @see ProductOption

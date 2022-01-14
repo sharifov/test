@@ -3,9 +3,9 @@
 namespace modules\product\controllers;
 
 use frontend\controllers\FController;
-use sales\auth\Auth;
-use sales\dispatchers\EventDispatcher;
-use sales\helpers\app\AppHelper;
+use src\auth\Auth;
+use src\dispatchers\EventDispatcher;
+use src\helpers\app\AppHelper;
 use Yii;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\productQuoteOption\search\ProductQuoteOptionCrudSearch;

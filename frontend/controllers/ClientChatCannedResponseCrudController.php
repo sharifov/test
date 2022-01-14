@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\clientChat\cannedResponse\entity\ClientChatCannedResponse;
-use sales\model\clientChat\cannedResponse\entity\search\ClientChatCannedResponseSearch;
+use src\model\clientChat\cannedResponse\entity\ClientChatCannedResponse;
+use src\model\clientChat\cannedResponse\entity\search\ClientChatCannedResponseSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

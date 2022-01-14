@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
-use sales\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfoSearch;
+use src\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
+use src\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfoSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

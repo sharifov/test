@@ -1,12 +1,12 @@
 <?php
 
-use sales\model\userModelSetting\entity\UserModelSetting;
+use src\model\userModelSetting\entity\UserModelSetting;
 use yii\bootstrap4\Html;
 use yii\helpers\VarDumper;
 use yii\widgets\DetailView;
 
 /* @var yii\web\View $this */
-/* @var sales\model\userModelSetting\entity\UserModelSetting $model */
+/* @var src\model\userModelSetting\entity\UserModelSetting $model */
 
 $this->title = $model->ums_id;
 $this->params['breadcrumbs'][] = ['label' => 'User Model Settings', 'url' => ['index']];

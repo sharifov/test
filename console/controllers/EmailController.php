@@ -4,7 +4,7 @@ namespace console\controllers;
 
 use common\models\ClientEmail;
 use common\models\Email;
-use sales\model\email\useCase\DownloadEmails;
+use src\model\email\useCase\DownloadEmails;
 use yii\console\Controller;
 use yii\db\Expression;
 use yii\db\Query;

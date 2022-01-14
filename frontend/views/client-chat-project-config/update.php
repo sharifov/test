@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChat\entity\projectConfig\ClientChatProjectConfig */
+/* @var $model src\model\clientChat\entity\projectConfig\ClientChatProjectConfig */
 
 $this->title = 'Update Client Chat Project Config: ' . $model->ccpc_project_id;
 $this->params['breadcrumbs'][] = ['label' => 'Client Chat Project Configs', 'url' => ['index']];

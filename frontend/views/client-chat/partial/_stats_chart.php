@@ -1,6 +1,6 @@
 <?php
 
-use sales\viewmodel\chat\ViewModelChatGraph;
+use src\viewmodel\chat\ViewModelChatGraph;
 
 /**
  * @var $viewModel ViewModelChatGraph

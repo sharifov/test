@@ -1,12 +1,12 @@
 <?php
 
 use common\models\Employee;
-use sales\model\user\entity\profit\UserProfit;
+use src\model\user\entity\profit\UserProfit;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\user\entity\profit\UserProfit */
+/* @var $model src\model\user\entity\profit\UserProfit */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 

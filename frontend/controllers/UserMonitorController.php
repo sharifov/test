@@ -2,11 +2,11 @@
 
 namespace frontend\controllers;
 
-use sales\services\cleaner\form\DbCleanerParamsForm;
-use sales\services\cleaner\cleaners\UserMonitorCleaner;
+use src\services\cleaner\form\DbCleanerParamsForm;
+use src\services\cleaner\cleaners\UserMonitorCleaner;
 use Yii;
-use sales\model\user\entity\monitor\UserMonitor;
-use sales\model\user\entity\monitor\search\UserMonitorSearch;
+use src\model\user\entity\monitor\UserMonitor;
+use src\model\user\entity\monitor\search\UserMonitorSearch;
 use frontend\controllers\FController;
 use yii\data\Pagination;
 use yii\helpers\ArrayHelper;

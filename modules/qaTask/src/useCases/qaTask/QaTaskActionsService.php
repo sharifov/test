@@ -3,10 +3,10 @@
 namespace modules\qaTask\src\useCases\qaTask;
 
 use modules\qaTask\src\entities\qaTask\QaTaskRepository;
-use sales\access\ProjectAccessService;
-use sales\dispatchers\EventDispatcher;
-use sales\repositories\user\UserRepository;
-use sales\services\TransactionManager;
+use src\access\ProjectAccessService;
+use src\dispatchers\EventDispatcher;
+use src\repositories\user\UserRepository;
+use src\services\TransactionManager;
 use yii\rbac\CheckAccessInterface;
 
 /**

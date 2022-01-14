@@ -13,11 +13,11 @@
  *
  * @var $modelLeadChecklist \common\models\LeadChecklist
  * @var $dataProviderChecklist \yii\data\ActiveDataProvider
- * @var $itineraryForm \sales\forms\lead\ItineraryEditForm
+ * @var $itineraryForm \src\forms\lead\ItineraryEditForm
  */
 
 use common\models\Employee;
-use sales\formatters\client\ClientTimeFormatter;
+use src\formatters\client\ClientTimeFormatter;
 use yii\bootstrap\Html;
 use frontend\models\LeadForm;
 

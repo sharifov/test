@@ -2,7 +2,7 @@
 
 namespace common\components\grid\userPayment;
 
-use sales\model\user\entity\paymentCategory\UserPaymentCategory;
+use src\model\user\entity\paymentCategory\UserPaymentCategory;
 use yii\grid\DataColumn;
 
 class UserPaymentCategoryIdColumn extends DataColumn

@@ -4,8 +4,8 @@ namespace modules\flight\src\useCases\voluntaryExchangeCreate\form\flightQuote\t
 
 use common\components\validators\CheckAndConvertToJsonValidator;
 use modules\flight\src\useCases\voluntaryExchangeCreate\form\flightQuote\tripsForm\segmentsForm\stops\StopForm;
-use sales\helpers\ErrorsToStringHelper;
-use sales\traits\FormNameModelTrait;
+use src\helpers\ErrorsToStringHelper;
+use src\traits\FormNameModelTrait;
 use yii\base\Model;
 
 /**

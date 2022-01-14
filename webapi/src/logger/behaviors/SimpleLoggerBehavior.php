@@ -3,7 +3,7 @@
 namespace webapi\src\logger\behaviors;
 
 use frontend\helpers\JsonHelper;
-use sales\helpers\app\AppHelper;
+use src\helpers\app\AppHelper;
 use Throwable;
 use webapi\src\logger\behaviors\filters\Filterable;
 use Yii;

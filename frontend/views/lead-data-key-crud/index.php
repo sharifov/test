@@ -1,6 +1,6 @@
 <?php
 
-use sales\model\leadDataKey\entity\LeadDataKey;
+use src\model\leadDataKey\entity\LeadDataKey;
 use yii\grid\ActionColumn;
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserColumn;
@@ -9,7 +9,7 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var yii\web\View $this */
-/* @var sales\model\leadDataKey\entity\LeadDataKeySearch $searchModel */
+/* @var src\model\leadDataKey\entity\LeadDataKeySearch $searchModel */
 /* @var yii\data\ActiveDataProvider $dataProvider */
 
 $this->title = 'Lead Data Keys';

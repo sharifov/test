@@ -18,7 +18,7 @@ class FlightQuoteFlightSearch extends FlightQuoteFlight
         return [
             ['fqf_booking_id', 'string', 'max' => 50],
             ['fqf_main_airline', 'string', 'max' => 2],
-            ['fqf_pnr', 'string', 'max' => 10],
+            ['fqf_pnr', 'string', 'max' => 70],
             ['fqf_original_data_json', 'string'],
             ['fqf_validating_carrier', 'string', 'max' => 2],
 

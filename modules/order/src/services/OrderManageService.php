@@ -12,9 +12,9 @@ use modules\order\src\entities\orderData\OrderDataMarketCountry;
 use modules\order\src\entities\orderUserProfit\OrderUserProfit;
 use modules\order\src\entities\orderUserProfit\OrderUserProfitRepository;
 use modules\order\src\forms\OrderForm;
-use sales\model\leadOrder\entity\LeadOrder;
-use sales\services\RecalculateProfitAmountService;
-use sales\services\TransactionManager;
+use src\model\leadOrder\entity\LeadOrder;
+use src\services\RecalculateProfitAmountService;
+use src\services\TransactionManager;
 
 /**
  * Class OrderManageService

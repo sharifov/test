@@ -4,9 +4,9 @@ namespace common\components\jobs\clientChat;
 
 use common\components\jobs\BaseJob;
 use common\components\Metrics;
-use sales\helpers\app\AppHelper;
-use sales\repositories\NotFoundException;
-use sales\services\clientChatService\ClientChatService;
+use src\helpers\app\AppHelper;
+use src\repositories\NotFoundException;
+use src\services\clientChatService\ClientChatService;
 use yii\queue\JobInterface;
 
 /**

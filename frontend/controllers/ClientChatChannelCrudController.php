@@ -2,14 +2,14 @@
 
 namespace frontend\controllers;
 
-use sales\helpers\setting\SettingHelper;
-use sales\model\clientChat\entity\projectConfig\service\ClientChatProjectConfigService;
-use sales\model\clientChatChannel\entity\ClientChatChannelDefaultSettings;
-use sales\repositories\NotFoundException;
-use sales\services\clientChatChannel\ClientChatChannelService;
+use src\helpers\setting\SettingHelper;
+use src\model\clientChat\entity\projectConfig\service\ClientChatProjectConfigService;
+use src\model\clientChatChannel\entity\ClientChatChannelDefaultSettings;
+use src\repositories\NotFoundException;
+use src\services\clientChatChannel\ClientChatChannelService;
 use Yii;
-use sales\model\clientChatChannel\entity\ClientChatChannel;
-use sales\model\clientChatChannel\entity\search\ClientChatChannelSearch;
+use src\model\clientChatChannel\entity\ClientChatChannel;
+use src\model\clientChatChannel\entity\search\ClientChatChannelSearch;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;

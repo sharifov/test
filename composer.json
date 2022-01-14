@@ -145,7 +145,8 @@
 			"frontend/models/",
 			"common/components/",
 			"vendor/yiisoft/yii2/Yii.php",
-			"sales/"
+			"sales/",
+			"src/"
 		],
 		"exclude-from-classmap": [
 			"docker/",

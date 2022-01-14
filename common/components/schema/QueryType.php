@@ -11,7 +11,7 @@ use common\models\UserOnline;
 use common\models\UserParams;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
-use sales\model\user\entity\userStatus\UserStatus;
+use src\model\user\entity\userStatus\UserStatus;
 
 /**
  * Class QueryType

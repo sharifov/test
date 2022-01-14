@@ -5,7 +5,7 @@ namespace modules\order\src\entities\order\search;
 use common\models\BillingInfo;
 use common\models\Employee;
 use modules\order\src\entities\orderStatusLog\OrderStatusLog;
-use sales\helpers\query\QueryHelper;
+use src\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
 use modules\order\src\entities\order\Order;
 use yii\db\Expression;

@@ -5,7 +5,7 @@ namespace modules\order\controllers;
 use common\models\Transaction;
 use frontend\controllers\FController;
 use modules\order\src\transaction\repository\TransactionRepository;
-use sales\helpers\app\AppHelper;
+use src\helpers\app\AppHelper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use Yii;

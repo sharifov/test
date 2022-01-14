@@ -2,14 +2,14 @@
 
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
-use sales\model\appProjectKey\entity\AppProjectKey;
+use src\model\appProjectKey\entity\AppProjectKey;
 use yii\grid\ActionColumn;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\appProjectKey\entity\AppProjectKeySearch */
+/* @var $searchModel src\model\appProjectKey\entity\AppProjectKeySearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'App Project Keys';

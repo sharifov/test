@@ -12,8 +12,8 @@ use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundStatus;
 use modules\product\src\entities\productType\ProductTypeQuery;
-use sales\entities\cases\CaseCategory;
-use sales\entities\cases\CasesStatus;
+use src\entities\cases\CaseCategory;
+use src\entities\cases\CasesStatus;
 
 class ProductQuoteRefundAbacObject extends AbacBaseModel implements AbacInterface
 {

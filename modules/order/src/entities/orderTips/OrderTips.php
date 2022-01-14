@@ -4,7 +4,7 @@ namespace modules\order\src\entities\orderTips;
 
 use common\models\Currency;
 use modules\order\src\entities\order\Order;
-use sales\entities\EventTrait;
+use src\entities\EventTrait;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 

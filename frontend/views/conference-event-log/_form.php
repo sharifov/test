@@ -1,12 +1,12 @@
 <?php
 
 use common\models\Conference;
-use sales\widgets\DateTimePicker;
+use src\widgets\DateTimePicker;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\conference\entity\conferenceEventLog\ConferenceEventLog */
+/* @var $model src\model\conference\entity\conferenceEventLog\ConferenceEventLog */
 /* @var $form ActiveForm */
 ?>
 

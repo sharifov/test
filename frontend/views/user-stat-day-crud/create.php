@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\userStatDay\entity\UserStatDay */
+/* @var $model src\model\userStatDay\entity\UserStatDay */
 
 $this->title = 'Create User Stat Day';
 $this->params['breadcrumbs'][] = ['label' => 'User Stat Days', 'url' => ['index']];

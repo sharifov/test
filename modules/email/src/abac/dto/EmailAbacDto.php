@@ -3,9 +3,9 @@
 namespace modules\email\src\abac\dto;
 
 use common\models\Email;
-use sales\auth\Auth;
+use src\auth\Auth;
 use common\models\UserProjectParams;
-use sales\access\EmployeeGroupAccess;
+use src\access\EmployeeGroupAccess;
 
 class EmailAbacDto extends \stdClass
 {

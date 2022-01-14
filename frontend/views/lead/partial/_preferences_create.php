@@ -1,11 +1,11 @@
 <?php
 
-use sales\helpers\lead\LeadHelper;
-use sales\helpers\lead\LeadPreferencesHelper;
+use src\helpers\lead\LeadHelper;
+use src\helpers\lead\LeadPreferencesHelper;
 use yii\widgets\ActiveForm;
 
 /**
- * @var $leadForm sales\forms\lead\LeadCreateForm
+ * @var $leadForm src\forms\lead\LeadCreateForm
  * @var $form ActiveForm
  */
 

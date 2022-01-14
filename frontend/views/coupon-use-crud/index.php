@@ -7,7 +7,7 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\coupon\entity\couponUse\CouponUseSearch */
+/* @var $searchModel src\model\coupon\entity\couponUse\CouponUseSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Coupon Uses';

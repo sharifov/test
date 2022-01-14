@@ -2,8 +2,8 @@
 
 namespace webapi\modules\v2\controllers;
 
-use sales\entities\cases\CasesQuery;
-use sales\model\cases\CaseCodeException;
+use src\entities\cases\CasesQuery;
+use src\model\cases\CaseCodeException;
 use webapi\src\forms\cases\GetCasesByPhoneForm;
 use webapi\src\forms\cases\GetCasesByEmailForm;
 use webapi\src\forms\cases\GetCaseByCaseGidForm;

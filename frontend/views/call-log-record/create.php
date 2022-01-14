@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\callLog\entity\callLogRecord\CallLogRecord */
+/* @var $model src\model\callLog\entity\callLogRecord\CallLogRecord */
 
 $this->title = 'Create Call Log Record';
 $this->params['breadcrumbs'][] = ['label' => 'Call Log Records', 'url' => ['index']];

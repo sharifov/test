@@ -2,7 +2,7 @@
 
 use yii\db\Migration;
 use console\migrations\RbacMigrationService;
-use sales\rbac\rules\lead\splitRules\SplitTipsLeadSoldRule;
+use src\rbac\rules\lead\splitRules\SplitTipsLeadSoldRule;
 
 /**
  * Class m201224_100104_add_lead_split_tips_access_permission

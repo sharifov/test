@@ -1,10 +1,10 @@
 <?php
 
 use common\models\Employee;
-use sales\helpers\user\GravatarHelper;
-use sales\model\user\entity\userStats\UserStatsSearch;
-use sales\model\userModelSetting\service\UserModelSettingDictionary;
-use sales\model\userModelSetting\service\UserModelSettingHelper;
+use src\helpers\user\GravatarHelper;
+use src\model\user\entity\userStats\UserStatsSearch;
+use src\model\userModelSetting\service\UserModelSettingDictionary;
+use src\model\userModelSetting\service\UserModelSettingHelper;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;

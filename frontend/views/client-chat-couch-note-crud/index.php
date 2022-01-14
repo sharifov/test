@@ -1,7 +1,7 @@
 <?php
 
-use sales\model\ClientChatCouchNote\entity\ClientChatCouchNote;
-use sales\widgets\UserSelect2Widget;
+use src\model\ClientChatCouchNote\entity\ClientChatCouchNote;
+use src\widgets\UserSelect2Widget;
 use yii\bootstrap4\Html;
 use yii\grid\ActionColumn;
 use yii\grid\GridView;
@@ -9,7 +9,7 @@ use yii\widgets\Pjax;
 use common\components\grid\DateTimeColumn;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\ClientChatCouchNote\entity\ClientChatCouchNoteSearch */
+/* @var $searchModel src\model\ClientChatCouchNote\entity\ClientChatCouchNoteSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Client Chat Couch Notes';

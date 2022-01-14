@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\leadDataKey\entity\LeadDataKey;
-use sales\model\leadDataKey\entity\LeadDataKeySearch;
+use src\model\leadDataKey\entity\LeadDataKey;
+use src\model\leadDataKey\entity\LeadDataKeySearch;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

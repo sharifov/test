@@ -2,8 +2,8 @@
 
 namespace modules\order\src\processManager\clickToBook;
 
-use sales\dispatchers\EventDispatcher;
-use sales\repositories\NotFoundException;
+use src\dispatchers\EventDispatcher;
+use src\repositories\NotFoundException;
 
 /**
  * Class OrderProcessManagerRepository

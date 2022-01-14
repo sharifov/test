@@ -2,7 +2,7 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
-use sales\helpers\email\MaskEmailHelper;
+use src\helpers\email\MaskEmailHelper;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\Email */

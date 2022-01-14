@@ -6,7 +6,7 @@ use common\models\Project;
 use frontend\helpers\JsonHelper;
 use modules\hotel\models\HotelQuote;
 use modules\hotel\models\HotelQuoteRoom;
-use sales\helpers\text\CleanTextHelper;
+use src\helpers\text\CleanTextHelper;
 use yii\helpers\ArrayHelper;
 
 /**

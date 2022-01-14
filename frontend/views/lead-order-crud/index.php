@@ -2,13 +2,13 @@
 
 use common\components\grid\DateTimeColumn;
 use common\components\i18n\Formatter;
-use sales\model\leadOrder\entity\LeadOrder;
+use src\model\leadOrder\entity\LeadOrder;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\leadOrder\entity\search\LeadOrderSearch */
+/* @var $searchModel src\model\leadOrder\entity\search\LeadOrderSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Lead Orders';

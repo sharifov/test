@@ -1,9 +1,9 @@
 <?php
 
 use common\models\Employee;
-use sales\access\ListsAccess;
-use sales\formatters\client\ClientTimeFormatter;
-use sales\model\client\helpers\ClientFormatter;
+use src\access\ListsAccess;
+use src\formatters\client\ClientTimeFormatter;
+use src\model\client\helpers\ClientFormatter;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use common\models\Lead;

@@ -7,11 +7,11 @@ use common\models\Department;
 use common\models\Employee;
 use Faker\Provider\DateTime;
 use kartik\daterange\DateRangeBehavior;
-use sales\access\EmployeeGroupAccess;
-use sales\auth\Auth;
-use sales\helpers\query\QueryHelper;
-use sales\model\callLogFilterGuard\entity\CallLogFilterGuard;
-use sales\repositories\call\CallSearchRepository;
+use src\access\EmployeeGroupAccess;
+use src\auth\Auth;
+use src\helpers\query\QueryHelper;
+use src\model\callLogFilterGuard\entity\CallLogFilterGuard;
+use src\repositories\call\CallSearchRepository;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Call;
@@ -235,7 +235,7 @@ class CallSearch extends Call
 
 
         if ($this->c_queue_start_dt) {
-            \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'c_queue_start_dt', $this->c_queue_start_dt, $user->timezone);
+            \src\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'c_queue_start_dt', $this->c_queue_start_dt, $user->timezone);
         }
 
         // grid filtering conditions

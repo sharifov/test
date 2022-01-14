@@ -6,7 +6,7 @@ use common\models\Employee;
 use modules\offer\src\entities\offer\events\OfferRecalculateProfitAmountEvent;
 use modules\offer\src\entities\offer\Offer;
 use modules\product\src\entities\productQuote\ProductQuote;
-use sales\entities\EventTrait;
+use src\entities\EventTrait;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;

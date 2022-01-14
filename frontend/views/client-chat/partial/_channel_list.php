@@ -1,7 +1,7 @@
 <?php
 
-use sales\auth\Auth;
-use sales\model\clientChat\dashboard\FilterForm;
+use src\auth\Auth;
+use src\model\clientChat\dashboard\FilterForm;
 
 /** @var $this \yii\web\View */
 /** @var $dataProvider \yii\data\ArrayDataProvider|null */
@@ -15,7 +15,7 @@ use sales\model\clientChat\dashboard\FilterForm;
 /** @var array $listParams */
 
 $formatter = new \common\components\i18n\Formatter();
-$formatter->timeZone = \sales\auth\Auth::user()->timezone;
+$formatter->timeZone = \src\auth\Auth::user()->timezone;
 
 $loadButtonText = '<i class="fa fa-angle-double-down"> </i> Scroll to load more (<span>' . $listParams['moreCount'] . '</span>)';
 if ($listParams['isFullList']) {

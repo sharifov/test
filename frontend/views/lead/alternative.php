@@ -3,8 +3,8 @@
 use yii\grid\SerialColumn;
 use common\models\Employee;
 use dosamigos\datepicker\DatePicker;
-use sales\formatters\client\ClientTimeFormatter;
-use sales\model\client\helpers\ClientFormatter;
+use src\formatters\client\ClientTimeFormatter;
+use src\model\client\helpers\ClientFormatter;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;

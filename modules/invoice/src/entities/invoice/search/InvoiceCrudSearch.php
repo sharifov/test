@@ -3,7 +3,7 @@
 namespace modules\invoice\src\entities\invoice\search;
 
 use common\models\Employee;
-use sales\helpers\query\QueryHelper;
+use src\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
 use modules\invoice\src\entities\invoice\Invoice;
 

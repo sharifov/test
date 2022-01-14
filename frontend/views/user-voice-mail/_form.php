@@ -7,7 +7,7 @@ use yii\helpers\ArrayHelper;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\userVoiceMail\entity\UserVoiceMail */
+/* @var $model src\model\userVoiceMail\entity\UserVoiceMail */
 /* @var $form ActiveForm */
 /* @var $languageList array */
 

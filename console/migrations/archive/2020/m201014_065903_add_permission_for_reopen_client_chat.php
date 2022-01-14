@@ -2,7 +2,7 @@
 
 use common\models\Employee;
 use console\migrations\RbacMigrationService;
-use sales\rbac\rules\clientChat\close\ClientChatCloseReopenRule;
+use src\rbac\rules\clientChat\close\ClientChatCloseReopenRule;
 use yii\db\Migration;
 
 /**

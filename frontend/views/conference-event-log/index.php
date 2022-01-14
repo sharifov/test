@@ -6,7 +6,7 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\conference\entity\conferenceEventLog\search\ConferenceEventLogSearch */
+/* @var $searchModel src\model\conference\entity\conferenceEventLog\search\ConferenceEventLogSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Conference Event Logs';

@@ -3,7 +3,7 @@
 namespace modules\email\src\abac\dto;
 
 use common\models\Lead;
-use sales\entities\cases\Cases;
+use src\entities\cases\Cases;
 
 /**
  * @property int|null $template_id

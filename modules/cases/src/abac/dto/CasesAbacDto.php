@@ -2,9 +2,9 @@
 
 namespace modules\cases\src\abac\dto;
 
-use sales\access\EmployeeGroupAccess;
-use sales\auth\Auth;
-use sales\entities\cases\Cases;
+use src\access\EmployeeGroupAccess;
+use src\auth\Auth;
+use src\entities\cases\Cases;
 
 /**
  * @property bool $is_owner
@@ -18,6 +18,7 @@ class CasesAbacDto extends \stdClass
     public bool $is_common_group = false;
     public ?int $pqc_status = null;
     public ?int $pqr_status = null;
+    public string $mainMenuCaseBadgeName = '';
 
     public function __construct(?Cases $case, ?int $statusSet = null)
     {

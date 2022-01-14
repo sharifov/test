@@ -7,7 +7,7 @@ use common\models\EmailTemplateType;
 use common\models\Employee;
 use common\models\Language;
 use common\models\SmsTemplateType;
-use sales\entities\cases\Cases;
+use src\entities\cases\Cases;
 use yii\base\Model;
 
 /**

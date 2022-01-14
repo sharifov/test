@@ -10,8 +10,8 @@ use modules\flight\models\FlightQuote;
 use modules\flight\src\helpers\FlightQuoteHelper;
 use modules\product\src\entities\productType\ProductType;
 use modules\product\src\entities\productTypePaymentMethod\ProductTypePaymentMethodQuery;
-use sales\auth\Auth;
-use sales\helpers\product\ProductQuoteHelper;
+use src\auth\Auth;
+use src\helpers\product\ProductQuoteHelper;
 use yii\helpers\ArrayHelper;
 
 /**

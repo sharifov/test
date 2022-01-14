@@ -3,7 +3,7 @@
 namespace common\models;
 
 use common\models\query\LeadFlowQuery;
-use sales\entities\EventTrait;
+use src\entities\EventTrait;
 use Yii;
 
 /**

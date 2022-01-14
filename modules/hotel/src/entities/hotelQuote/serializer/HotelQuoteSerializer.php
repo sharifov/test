@@ -3,7 +3,7 @@
 namespace modules\hotel\src\entities\hotelQuote\serializer;
 
 use modules\hotel\models\HotelQuote;
-use sales\entities\serializer\Serializer;
+use src\entities\serializer\Serializer;
 use yii\helpers\VarDumper;
 
 /**

@@ -8,7 +8,7 @@ use modules\flight\src\useCases\flightQuote\createManually\FlightQuotePaxPriceFo
 use modules\flight\src\useCases\flightQuote\createManually\VoluntaryQuotePaxPriceForm;
 use modules\flight\src\useCases\voluntaryExchangeManualCreate\form\VoluntaryQuoteCreateForm;
 use modules\product\src\entities\productQuote\ProductQuote;
-use sales\helpers\product\ProductQuoteHelper;
+use src\helpers\product\ProductQuoteHelper;
 use yii\helpers\ArrayHelper;
 
 /**

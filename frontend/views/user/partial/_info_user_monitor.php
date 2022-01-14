@@ -1,13 +1,13 @@
 <?php
 
 use common\models\Employee;
-use sales\model\user\entity\monitor\UserMonitor;
+use src\model\user\entity\monitor\UserMonitor;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $data yii\data\ActiveDataProvider */
-/* @var $searchModel \sales\model\user\entity\monitor\search\UserMonitorSearch */
+/* @var $searchModel \src\model\user\entity\monitor\search\UserMonitorSearch */
 /* @var $startDateTime string */
 /* @var $endDateTime string */
 

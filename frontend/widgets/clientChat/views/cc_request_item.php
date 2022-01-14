@@ -4,8 +4,8 @@ use common\components\i18n\Formatter;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\Employee;
-use sales\helpers\clientChat\ClientChatHelper;
-use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
+use src\helpers\clientChat\ClientChatHelper;
+use src\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use yii\helpers\Html;
 
 /** @var $access array */

@@ -1,7 +1,7 @@
 <?php
 
-use sales\model\clientChat\entity\projectConfig\ClientChatProjectConfig;
-use sales\model\clientChat\entity\projectConfig\ClientChatProjectConfigDefaultParams;
+use src\model\clientChat\entity\projectConfig\ClientChatProjectConfig;
+use src\model\clientChat\entity\projectConfig\ClientChatProjectConfigDefaultParams;
 use yii\db\Migration;
 use frontend\helpers\JsonHelper;
 

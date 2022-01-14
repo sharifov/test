@@ -3,9 +3,9 @@
 namespace common\models\query;
 
 use common\models\Client;
-use sales\model\clientChatVisitor\entity\ClientChatVisitor;
-use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
-use sales\model\clientVisitor\entity\ClientVisitor;
+use src\model\clientChatVisitor\entity\ClientChatVisitor;
+use src\model\clientChatVisitorData\entity\ClientChatVisitorData;
+use src\model\clientVisitor\entity\ClientVisitor;
 use yii\db\ActiveQuery;
 
 /**

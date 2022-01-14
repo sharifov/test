@@ -1,6 +1,6 @@
 <?php
 
-use sales\helpers\call\CallHelper;
+use src\helpers\call\CallHelper;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 

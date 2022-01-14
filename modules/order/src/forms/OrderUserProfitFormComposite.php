@@ -4,7 +4,7 @@ namespace modules\order\src\forms;
 
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\orderUserProfit\OrderUserProfit;
-use sales\forms\CompositeForm;
+use src\forms\CompositeForm;
 use yii\helpers\ArrayHelper;
 
 class OrderUserProfitFormComposite extends CompositeForm

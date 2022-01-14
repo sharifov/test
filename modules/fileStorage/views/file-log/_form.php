@@ -1,7 +1,7 @@
 <?php
 
 use modules\fileStorage\src\entity\fileLog\FileLogType;
-use sales\widgets\DateTimePicker;
+use src\widgets\DateTimePicker;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 

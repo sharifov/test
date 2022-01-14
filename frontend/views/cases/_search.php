@@ -5,13 +5,13 @@ use common\models\CaseSale;
 use common\models\UserGroup;
 use dosamigos\multiselect\MultiSelect;
 use kartik\select2\Select2;
-use sales\access\EmployeeDepartmentAccess;
-use sales\access\EmployeeProjectAccess;
-use sales\entities\cases\CaseCategory;
-use sales\entities\cases\CasesSearch;
-use sales\entities\cases\CasesSourceType;
-use sales\entities\cases\CasesStatus;
-use sales\model\saleTicket\entity\SaleTicket;
+use src\access\EmployeeDepartmentAccess;
+use src\access\EmployeeProjectAccess;
+use src\entities\cases\CaseCategory;
+use src\entities\cases\CasesSearch;
+use src\entities\cases\CasesSourceType;
+use src\entities\cases\CasesStatus;
+use src\model\saleTicket\entity\SaleTicket;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\web\JsExpression;
@@ -20,7 +20,7 @@ use yii\widgets\ActiveForm;
 use common\models\Language;
 
 /* @var $this yii\web\View */
-/* @var $model sales\entities\cases\CasesSearch */
+/* @var $model src\entities\cases\CasesSearch */
 /* @var $form yii\widgets\ActiveForm */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 

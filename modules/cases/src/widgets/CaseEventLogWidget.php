@@ -2,7 +2,7 @@
 
 namespace modules\cases\src\widgets;
 
-use sales\entities\cases\CaseEventLogSearch;
+use src\entities\cases\CaseEventLogSearch;
 use yii\base\Widget;
 use yii\data\ArrayDataProvider;
 use Yii;

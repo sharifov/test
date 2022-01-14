@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\callLog\entity\callLogQueue\CallLogQueue;
-use sales\model\callLog\entity\callLogQueue\search\CallLogQueueSearch;
+use src\model\callLog\entity\callLogQueue\CallLogQueue;
+use src\model\callLog\entity\callLogQueue\search\CallLogQueueSearch;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

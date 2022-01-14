@@ -1,6 +1,6 @@
 <?php
 
-use sales\model\clientChat\entity\ClientChat;
+use src\model\clientChat\entity\ClientChat;
 use yii\grid\GridView;
 use yii\helpers\Html;
 

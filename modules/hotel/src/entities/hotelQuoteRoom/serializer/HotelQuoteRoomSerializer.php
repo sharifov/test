@@ -3,7 +3,7 @@
 namespace modules\hotel\src\entities\hotelQuoteRoom\serializer;
 
 use modules\hotel\models\HotelQuoteRoom;
-use sales\entities\serializer\Serializer;
+use src\entities\serializer\Serializer;
 
 /**
  * Class HotelQuoteRoomExtraData

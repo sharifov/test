@@ -14,12 +14,12 @@ use common\models\UserConnection;
 use common\models\UserParams;
 use frontend\models\form\UserProfileForm;
 use frontend\themes\gentelella_v2\widgets\SideBarMenu;
-use sales\auth\Auth;
-use sales\helpers\app\AppHelper;
-use sales\helpers\setting\SettingHelper;
-use sales\model\authClient\entity\AuthClientQuery;
-use sales\model\authClient\entity\AuthClientSources;
-use sales\model\user\entity\monitor\UserMonitor;
+use src\auth\Auth;
+use src\helpers\app\AppHelper;
+use src\helpers\setting\SettingHelper;
+use src\model\userAuthClient\entity\UserAuthClientQuery;
+use src\model\userAuthClient\entity\UserAuthClientSources;
+use src\model\user\entity\monitor\UserMonitor;
 use Yii;
 use yii\authclient\AuthAction;
 use yii\authclient\ClientInterface;
@@ -28,6 +28,7 @@ use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use common\models\LoginForm;
+use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use Da\QrCode\QrCode;
@@ -109,7 +110,7 @@ class SiteController extends FController
         $user = Yii::$app->user->identity;
         $sourcesDataProvider = new ActiveDataProvider();
         if (SettingHelper::isEnabledAuthClients()) {
-            $authClients = AuthClientQuery::findAllByUserId(Auth::id());
+            $authClients = UserAuthClientQuery::findAllByUserId(Auth::id());
             $sourcesDataProvider->setModels($authClients);
             $sourcesDataProvider->pagination = false;
         }
@@ -154,7 +155,7 @@ class SiteController extends FController
         $model = new LoginForm();
 
         if ($model->load(Yii::$app->request->post()) && $user = $model->checkedUser()) {
-            if (SettingHelper::isTwoFactorAuthEnabled() && $user->userProfile->is2faEnable()) {
+            if (SettingHelper::isTwoFactorAuthEnabled() && $user->userProfile && $user->userProfile->is2faEnable()) {
                 return $this->redirectToTwoFactorAuth($user, $model);
             }
 
@@ -336,7 +337,7 @@ class SiteController extends FController
 
         $sourcesDataProvider = new ActiveDataProvider();
         if (SettingHelper::isEnabledAuthClients()) {
-            $sources = AuthClientQuery::findAllByUserId(Auth::id());
+            $sources = UserAuthClientQuery::findAllByUserId(Auth::id());
             $sourcesDataProvider->setModels($sources);
             $sourcesDataProvider->pagination = false;
         }
@@ -410,7 +411,7 @@ class SiteController extends FController
 
         if (!empty($source) && !empty($sourceId)) {
             $userId = Yii::$app->request->get('user-id');
-            if ($userId && $authClient = AuthClientQuery::findByUserAndSource((int)$userId, $source, $sourceId)) {
+            if ($userId && $authClient = UserAuthClientQuery::findByUserAndSource((int)$userId, $source, $sourceId)) {
                 $form = new LoginForm();
                 $form->setUser($authClient->user);
                 $form->setUserChecked(true);
@@ -427,15 +428,17 @@ class SiteController extends FController
                 $session->remove('auth_client_source');
                 $session->remove('auth_client_source_id');
                 return $this->goBack();
+            } elseif (!empty($userId) && empty($authClient)) {
+                throw new BadRequestHttpException('Bad Request');
             }
 
 
-            if ($authClients = AuthClientQuery::findAllBySourceData($source, $sourceId)) {
+            if ($authClients = UserAuthClientQuery::findAllBySourceData($source, $sourceId)) {
                 return $this->render('auth_step_two', [
                     'authClients' => $authClients
                 ]);
             }
-            Yii::$app->session->setFlash('error', 'Not found any user assigned with this auth client: ' . AuthClientSources::getName($source));
+            Yii::$app->session->setFlash('error', 'Not found any user assigned with this auth client: ' . UserAuthClientSources::getName($source));
         }
         return $this->redirect('/site/login');
     }
@@ -446,7 +449,7 @@ class SiteController extends FController
      */
     public function onAuthSuccess(ClientInterface $client)
     {
-        $source = AuthClientSources::clientSourceFactory($client->getId());
+        $source = UserAuthClientSources::clientSourceFactory($client->getId());
         $source->handle($this->action, $client);
         return $this->action->redirect($source->getRedirectUrl());
     }
@@ -457,7 +460,7 @@ class SiteController extends FController
             throw new ForbiddenHttpException('Access denied');
         }
 
-        $source = AuthClientSources::clientSourceFactory($client->getId());
+        $source = UserAuthClientSources::clientSourceFactory($client->getId());
         $source->handleAssign(Auth::id(), $this->action, $client);
         return $this->action->redirect($source->getRedirectUrl());
     }

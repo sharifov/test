@@ -3,7 +3,7 @@
 namespace modules\flight\src\entities\flight\serializer;
 
 use modules\flight\models\Flight;
-use sales\entities\serializer\Serializer;
+use src\entities\serializer\Serializer;
 
 /**
  * Class FlightSerializer

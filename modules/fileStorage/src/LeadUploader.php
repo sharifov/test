@@ -15,8 +15,8 @@ use modules\fileStorage\src\entity\fileStorage\Uid;
 use modules\fileStorage\src\entity\fileUser\FileUser;
 use modules\fileStorage\src\entity\fileUser\FileUserRepository;
 use modules\fileStorage\src\services\PathGenerator;
-use sales\auth\Auth;
-use sales\services\PostgresTransactionManager;
+use src\auth\Auth;
+use src\services\PostgresTransactionManager;
 use yii\web\UploadedFile;
 
 /**

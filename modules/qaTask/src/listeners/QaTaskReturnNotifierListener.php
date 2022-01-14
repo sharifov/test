@@ -9,8 +9,8 @@ use modules\qaTask\src\useCases\qaTask\returnTask\QaTaskReturnEvent;
 use Yii;
 use common\models\Notifications;
 use modules\qaTask\src\entities\qaTaskActionReason\QaTaskActionReason;
-use sales\repositories\NotFoundException;
-use sales\repositories\user\UserRepository;
+use src\repositories\NotFoundException;
+use src\repositories\user\UserRepository;
 
 /**
  * Class QaTaskReturnNotifierListener

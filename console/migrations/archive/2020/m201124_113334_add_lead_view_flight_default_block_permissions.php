@@ -1,9 +1,9 @@
 <?php
 
 use yii\db\Migration;
-use sales\rbac\rules\lead\view\flightDefaultBlock\LeadViewFlightDefaultBlockEmptyOwnerRule;
-use sales\rbac\rules\lead\view\flightDefaultBlock\LeadViewFlightDefaultBlockGroupRule;
-use sales\rbac\rules\lead\view\flightDefaultBlock\LeadViewFlightDefaultBlockIsOwnerRule;
+use src\rbac\rules\lead\view\flightDefaultBlock\LeadViewFlightDefaultBlockEmptyOwnerRule;
+use src\rbac\rules\lead\view\flightDefaultBlock\LeadViewFlightDefaultBlockGroupRule;
+use src\rbac\rules\lead\view\flightDefaultBlock\LeadViewFlightDefaultBlockIsOwnerRule;
 
 /**
  * Class m201124_113334_add_lead_view_flight_default_block_permissions

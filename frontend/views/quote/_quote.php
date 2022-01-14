@@ -8,9 +8,9 @@
  */
 
 use common\models\Lead;
-use sales\model\flightQuoteLabelList\service\FlightQuoteLabelListDictionary;
-use sales\model\flightQuoteLabelList\service\FlightQuoteLabelListService;
-use sales\services\parsingDump\lib\ParsingDump;
+use src\model\flightQuoteLabelList\service\FlightQuoteLabelListDictionary;
+use src\model\flightQuoteLabelList\service\FlightQuoteLabelListService;
+use src\services\parsingDump\lib\ParsingDump;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\bootstrap\ActiveForm;

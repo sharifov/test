@@ -4,8 +4,8 @@ use yii\data\ActiveDataProvider;
 use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
-use sales\helpers\email\MaskEmailHelper;
-use sales\helpers\phone\MaskPhoneHelper;
+use src\helpers\email\MaskEmailHelper;
+use src\helpers\phone\MaskPhoneHelper;
 
 /**
  * @var $dataProvider ActiveDataProvider
@@ -68,17 +68,21 @@ echo GridView::widget([
             'header' => 'Leads',
             'value' => static function (\common\models\Client $model) {
 
-                $leads = $model->leads;
+                $leads = $model->leadsLimited;
                 $data = [];
-                if ($leads) {
+                if (!empty($leads)) {
                     foreach ($leads as $lead) {
-                        $data[] = '<i class="fa fa-link"></i> ' . Html::a('lead: ' . $lead->id, ['lead/view', 'gid' => $lead->gid], ['target' => '_blank', 'data-pjax' => 0]) . ' (IP: ' . $lead->request_ip . ')';
+                        $data[] = '<i class="fa fa-link"></i> ' . Html::a('lead: ' . $lead->id, ['lead/view', 'gid' => $lead->gid], ['target' => '_blank', 'data-pjax' => 0]) . ($lead->request_ip ? ' (IP: ' . $lead->request_ip . ')' : '');
                     }
                 }
 
                 $str = '';
                 if ($data) {
-                    $str = '' . implode('<br>', $data) . '';
+                    $str = implode('<br>', $data);
+                    if (count($leads) >= 30) {
+                        $str .= '<br>' . Html::a('See all leads in new window', '/client/view?id=' .
+                                $model->id, ['target' => '_blank', 'data-pjax' => 0]);
+                    }
                 }
 
                 return $str;

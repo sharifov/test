@@ -4,10 +4,10 @@ namespace console\controllers;
 
 use common\models\UserConnection;
 use common\models\UserOnline;
-use sales\helpers\app\AppHelper;
-use sales\model\user\entity\monitor\UserMonitor;
-use sales\model\user\entity\userStatus\UserStatus;
-use sales\services\clientChatService\ClientChatService;
+use src\helpers\app\AppHelper;
+use src\model\user\entity\monitor\UserMonitor;
+use src\model\user\entity\userStatus\UserStatus;
+use src\services\clientChatService\ClientChatService;
 use Swoole\Redis;
 use Swoole\Table;
 use Swoole\WebSocket\Server;

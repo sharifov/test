@@ -163,13 +163,13 @@ $this->params['breadcrumbs'][] = $this->title;
             </tr>
             <tr>
                 <td><?php echo $paramsNum++ ?></td>
-                <td>url_address</td>
-                <td><?=Yii::$app->params['url_address'] ?? ''?></td>
+                <td>url</td>
+                <td><?=Yii::$app->params['url'] ?? ''?></td>
             </tr>
             <tr>
                 <td><?php echo $paramsNum++ ?></td>
-                <td>url_api_address</td>
-                <td><?=Yii::$app->params['url_api_address'] ?? ''?></td>
+                <td>url_api</td>
+                <td><?=Yii::$app->params['url_api'] ?? ''?></td>
             </tr>
             <tr>
                 <td><?php echo $paramsNum++ ?></td>

@@ -1,8 +1,8 @@
 <?php
 
 use common\components\grid\DateColumn;
-use sales\model\leadUserConversion\service\LeadUserConversionDictionary;
-use sales\model\user\entity\sales\SalesSearch;
+use src\model\leadUserConversion\service\LeadUserConversionDictionary;
+use src\model\user\entity\sales\SalesSearch;
 use common\models\Lead;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;

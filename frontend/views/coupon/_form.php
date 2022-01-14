@@ -1,13 +1,13 @@
 <?php
 
-use sales\model\coupon\entity\coupon\CouponStatus;
-use sales\model\coupon\entity\coupon\CouponType;
-use sales\widgets\DateTimePicker;
+use src\model\coupon\entity\coupon\CouponStatus;
+use src\model\coupon\entity\coupon\CouponType;
+use src\widgets\DateTimePicker;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\coupon\entity\coupon\Coupon */
+/* @var $model src\model\coupon\entity\coupon\Coupon */
 /* @var $form ActiveForm */
 ?>
 

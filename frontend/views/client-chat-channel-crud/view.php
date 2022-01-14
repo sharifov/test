@@ -1,11 +1,11 @@
 <?php
 
-use sales\model\clientChatChannel\entity\ClientChatChannel;
+use src\model\clientChatChannel\entity\ClientChatChannel;
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChatChannel\entity\ClientChatChannel */
+/* @var $model src\model\clientChatChannel\entity\ClientChatChannel */
 
 $this->title = 'Channel: ' . $model->ccc_name;
 $this->params['breadcrumbs'][] = ['label' => 'Client Chat Channels', 'url' => ['index']];

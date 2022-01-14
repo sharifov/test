@@ -5,7 +5,7 @@ use yii\widgets\ActiveForm;
 use common\models\Department;
 
 /* @var $this yii\web\View */
-/* @var $model sales\entities\cases\CaseCategory */
+/* @var $model src\entities\cases\CaseCategory */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 

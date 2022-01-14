@@ -3,14 +3,14 @@
 /**
  * @var $form ActiveForm
  * @var $this View
- * @var $editName \sales\services\client\ClientCreateForm
+ * @var $editName \src\services\client\ClientCreateForm
  * @var $lead Lead
  */
 
 use common\models\Language;
 use common\models\Lead;
-use sales\auth\Auth;
-use sales\services\client\ClientCreateForm;
+use src\auth\Auth;
+use src\services\client\ClientCreateForm;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;

@@ -2,8 +2,8 @@
 
 namespace frontend\controllers;
 
-use sales\services\cleaner\form\DbCleanerParamsForm;
-use sales\services\cleaner\cleaners\UserSiteActivityCleaner;
+use src\services\cleaner\form\DbCleanerParamsForm;
+use src\services\cleaner\cleaners\UserSiteActivityCleaner;
 use Yii;
 use frontend\models\UserSiteActivity;
 use frontend\models\search\UserSiteActivitySearch;

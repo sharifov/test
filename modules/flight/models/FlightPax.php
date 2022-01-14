@@ -5,7 +5,7 @@ namespace modules\flight\models;
 use common\models\Language;
 use modules\flight\src\entities\flightPax\serializer\FlightPaxSerializer;
 use modules\flight\src\useCases\flightQuote\create\FlightPaxDTO;
-use sales\entities\serializer\Serializable;
+use src\entities\serializer\Serializable;
 use Yii;
 use yii\db\ActiveQuery;
 

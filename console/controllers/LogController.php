@@ -6,7 +6,7 @@ use common\models\ApiLog;
 use common\models\GlobalLog;
 use console\helpers\OutputHelper;
 use frontend\models\Log;
-use sales\helpers\app\AppHelper;
+use src\helpers\app\AppHelper;
 use Yii;
 use yii\console\Controller;
 use yii\helpers\Console;

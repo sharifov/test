@@ -3,7 +3,7 @@
 namespace console\controllers;
 
 use common\models\Lead;
-use sales\temp\LeadFlowUpdate;
+use src\temp\LeadFlowUpdate;
 use yii\console\Controller;
 
 class UpdateLeadFlowController extends Controller

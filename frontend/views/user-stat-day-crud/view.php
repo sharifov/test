@@ -1,12 +1,12 @@
 <?php
 
-use sales\model\userStatDay\entity\UserStatDay;
-use sales\model\userStatDay\entity\UserStatDayKey;
+use src\model\userStatDay\entity\UserStatDay;
+use src\model\userStatDay\entity\UserStatDayKey;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\userStatDay\entity\UserStatDay */
+/* @var $model src\model\userStatDay\entity\UserStatDay */
 
 $this->title = $model->usd_id;
 $this->params['breadcrumbs'][] = ['label' => 'User Stat Days', 'url' => ['index']];

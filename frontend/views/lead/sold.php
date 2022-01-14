@@ -1,8 +1,8 @@
 <?php
 
 use common\models\ProfitSplit;
-use sales\access\ListsAccess;
-use sales\model\client\helpers\ClientFormatter;
+use src\access\ListsAccess;
+use src\model\client\helpers\ClientFormatter;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use common\models\Lead;

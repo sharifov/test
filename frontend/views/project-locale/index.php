@@ -3,13 +3,13 @@
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
 use kartik\select2\Select2;
-use sales\model\project\entity\projectLocale\ProjectLocale;
+use src\model\project\entity\projectLocale\ProjectLocale;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\project\entity\projectLocale\search\ProjectLocaleSearch */
+/* @var $searchModel src\model\project\entity\projectLocale\search\ProjectLocaleSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Project Locales';

@@ -8,11 +8,13 @@ use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use modules\flight\src\repositories\flightQuoteFlight\FlightQuoteFlightRepository;
-use sales\entities\cases\CaseEventLog;
-use sales\helpers\app\AppHelper;
-use sales\interfaces\BoWebhookService;
-use sales\repositories\cases\CasesRepository;
-use sales\services\cases\CasesManageService;
+use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelation;
+use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
+use src\entities\cases\CaseEventLog;
+use src\helpers\app\AppHelper;
+use src\interfaces\BoWebhookService;
+use src\repositories\cases\CasesRepository;
+use src\services\cases\CasesManageService;
 use webapi\src\forms\boWebhook\ReprotectionUpdateForm;
 use Yii;
 use yii\base\Model;
@@ -118,8 +120,9 @@ class ProductQuoteService implements BoWebhookService
                 if ($case->isNeedAction()) {
                     $case->offNeedAction();
                 }
-
                 $this->casesRepository->save($case);
+
+                $this->removeRelationsProcessing($productQuote);
             }
         } catch (\Throwable $throwable) {
             $message = AppHelper::throwableLog($throwable);
@@ -129,5 +132,15 @@ class ProductQuoteService implements BoWebhookService
                 'ProductQuoteService:processRequest:Throwable'
             );
         }
+    }
+
+    private function removeRelationsProcessing(
+        ProductQuote $reProtectionQuote
+    ): void {
+        ProductQuoteRelation::deleteAll([
+            'pqr_related_pq_id' => $reProtectionQuote->pq_id,
+            'pqr_type_id' => ProductQuoteRelation::TYPE_REPROTECTION
+        ]);
+        ProductQuoteChangeRelation::deleteAll(['pqcr_pq_id' => $reProtectionQuote->pq_id]);
     }
 }

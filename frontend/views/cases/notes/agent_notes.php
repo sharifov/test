@@ -4,12 +4,12 @@
  * @var $this \yii\web\View
  * @var $dataProviderNotes \yii\data\ActiveDataProvider
  * @var $modelNote \common\models\CaseNote
- * @var $caseModel \sales\entities\cases\Cases
+ * @var $caseModel \src\entities\cases\Cases
  */
 
 
 use common\models\Employee;
-use sales\auth\Auth;
+use src\auth\Auth;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;

@@ -5,7 +5,7 @@ namespace modules\flight\src\repositories\flightQuotePaxPriceRepository;
 use modules\flight\models\FlightQuotePaxPrice;
 use modules\flight\src\entities\flightQuotePaxPrice\FlightQuotePaxPriceQuery;
 use modules\flight\src\exceptions\FlightCodeException;
-use sales\repositories\NotFoundException;
+use src\repositories\NotFoundException;
 
 /**
  * Class FlightQuotePaxPriceRepository

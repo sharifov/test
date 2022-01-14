@@ -1,7 +1,7 @@
 <?php
 
-use sales\rbac\rules\clientChat\take\ClientChatTakeNewRule;
-use sales\rbac\rules\clientChat\take\ClientChatTakePendingRule;
+use src\rbac\rules\clientChat\take\ClientChatTakeNewRule;
+use src\rbac\rules\clientChat\take\ClientChatTakePendingRule;
 use yii\db\Migration;
 
 /**

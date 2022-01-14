@@ -48,11 +48,11 @@ use modules\product\src\entities\productQuoteOption\ProductQuoteOptionRepository
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\entities\productType\ProductType;
 use modules\product\src\repositories\ProductQuoteRelationRepository;
-use sales\auth\Auth;
-use sales\forms\segment\SegmentBaggageForm;
-use sales\helpers\ErrorsToStringHelper;
-use sales\repositories\product\ProductQuoteRepository;
-use sales\services\parsingDump\BaggageService;
+use src\auth\Auth;
+use src\forms\segment\SegmentBaggageForm;
+use src\helpers\ErrorsToStringHelper;
+use src\repositories\product\ProductQuoteRepository;
+use src\services\parsingDump\BaggageService;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;

@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\phoneLine\phoneLineUserAssign\entity\PhoneLineUserAssign */
+/* @var $model src\model\phoneLine\phoneLineUserAssign\entity\PhoneLineUserAssign */
 
 $this->title = 'Update Phone Line User Assign: ' . $model->plus_line_id;
 $this->params['breadcrumbs'][] = ['label' => 'Phone Line User Assigns', 'url' => ['index']];

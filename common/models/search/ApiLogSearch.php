@@ -3,7 +3,7 @@
 namespace common\models\search;
 
 use common\models\Employee;
-use sales\helpers\DateHelper;
+use src\helpers\DateHelper;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;

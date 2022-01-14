@@ -3,14 +3,14 @@
 use common\components\grid\BooleanColumn;
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
-use sales\model\clientChat\entity\actionReason\ClientChatActionReason;
-use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
+use src\model\clientChat\entity\actionReason\ClientChatActionReason;
+use src\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\clientChat\entity\actionReason\search\ActionReasonSearch */
+/* @var $searchModel src\model\clientChat\entity\actionReason\search\ActionReasonSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Client Chat Action Reasons';

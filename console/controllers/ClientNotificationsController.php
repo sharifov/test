@@ -2,12 +2,12 @@
 
 namespace console\controllers;
 
-use sales\helpers\app\AppHelper;
-use sales\model\client\notifications\phone\ClientNotificationPhoneExecutor;
-use sales\model\client\notifications\phone\entity\ClientNotificationPhoneList;
-use sales\model\client\notifications\sms\ClientNotificationSmsExecutor;
-use sales\model\client\notifications\sms\entity\ClientNotificationSmsList;
-use sales\services\TransactionManager;
+use src\helpers\app\AppHelper;
+use src\model\client\notifications\phone\ClientNotificationPhoneExecutor;
+use src\model\client\notifications\phone\entity\ClientNotificationPhoneList;
+use src\model\client\notifications\sms\ClientNotificationSmsExecutor;
+use src\model\client\notifications\sms\entity\ClientNotificationSmsList;
+use src\services\TransactionManager;
 use yii\console\Controller;
 use yii\console\ExitCode;
 use yii\console\widgets\Table;

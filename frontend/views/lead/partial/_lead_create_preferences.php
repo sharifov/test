@@ -1,8 +1,8 @@
 <?php
 
-use sales\helpers\lead\LeadHelper;
-use sales\model\lead\useCases\lead\create\LeadCreateForm;
-use sales\model\lead\useCases\lead\create\LeadManageForm;
+use src\helpers\lead\LeadHelper;
+use src\model\lead\useCases\lead\create\LeadCreateForm;
+use src\model\lead\useCases\lead\create\LeadManageForm;
 use yii\widgets\ActiveForm;
 
 /**

@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\callLog\entity\callLogUserAccess\CallLogUserAccess */
+/* @var $model src\model\callLog\entity\callLogUserAccess\CallLogUserAccess */
 
 $this->title = 'Update Call Log User Access: ' . $model->clua_id;
 $this->params['breadcrumbs'][] = ['label' => 'Call Log User Accesses', 'url' => ['index']];

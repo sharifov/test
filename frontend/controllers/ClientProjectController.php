@@ -5,7 +5,7 @@ namespace frontend\controllers;
 use common\models\Lead;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
 use common\models\ClientProject;
 use common\models\search\ClientProjectSearch;

@@ -7,8 +7,8 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\project\entity\projectLocale\ProjectLocale */
-/* @var $copyModel sales\model\project\entity\projectLocale\ProjectLocale */
+/* @var $model src\model\project\entity\projectLocale\ProjectLocale */
+/* @var $copyModel src\model\project\entity\projectLocale\ProjectLocale */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 

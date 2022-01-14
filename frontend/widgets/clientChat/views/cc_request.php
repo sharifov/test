@@ -2,7 +2,7 @@
 
 use common\components\i18n\Formatter;
 use frontend\widgets\clientChat\ClientChatWidgetAsset;
-use sales\model\userClientChatData\entity\UserClientChatData;
+use src\model\userClientChatData\entity\UserClientChatData;
 use yii\helpers\Html;
 
 /** @var $this \yii\web\View */

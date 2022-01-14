@@ -1,12 +1,12 @@
 <?php
 
-use sales\model\callLog\entity\callLogLead\CallLogLead;
+use src\model\callLog\entity\callLogLead\CallLogLead;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\callLog\entity\callLogLead\CallLogLead */
+/* @var $model src\model\callLog\entity\callLogLead\CallLogLead */
 
 $this->title = $model->cll_cl_id;
 $this->params['breadcrumbs'][] = ['label' => 'Call Log Leads', 'url' => ['index']];

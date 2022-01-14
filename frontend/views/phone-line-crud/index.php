@@ -1,13 +1,13 @@
 <?php
 
 use common\components\grid\DateTimeColumn;
-use sales\model\phoneLine\phoneLine\entity\PhoneLine;
+use src\model\phoneLine\phoneLine\entity\PhoneLine;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel \sales\model\phoneLine\phoneLine\entity\search\PhoneLineSearch */
+/* @var $searchModel \src\model\phoneLine\phoneLine\entity\search\PhoneLineSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Phone Lines';
@@ -31,7 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'line_name',
             [
                 'attribute' => 'line_project_id',
-                'filter' => \sales\widgets\ProjectSelect2Widget::widget([
+                'filter' => \src\widgets\ProjectSelect2Widget::widget([
                     'model' => $searchModel,
                     'attribute' => 'line_project_id'
                 ]),
@@ -42,7 +42,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'line_dep_id',
-                'filter' => \sales\widgets\DepartmentSelect2Widget::widget([
+                'filter' => \src\widgets\DepartmentSelect2Widget::widget([
                     'model' => $searchModel,
                     'attribute' => 'line_dep_id'
                 ]),
@@ -54,7 +54,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'line_language_id',
             [
                 'attribute' => 'line_personal_user_id',
-                'filter' => \sales\widgets\UserSelect2Widget::widget([
+                'filter' => \src\widgets\UserSelect2Widget::widget([
                     'model' => $searchModel,
                     'attribute' => 'line_personal_user_id'
                 ]),
@@ -69,7 +69,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'line_enabled:BooleanByLabel',
             [
                 'attribute' => 'line_created_user_id',
-                'filter' => \sales\widgets\UserSelect2Widget::widget([
+                'filter' => \src\widgets\UserSelect2Widget::widget([
                     'model' => $searchModel,
                     'attribute' => 'line_created_user_id'
                 ]),
@@ -80,7 +80,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'line_updated_user_id',
-                'filter' => \sales\widgets\UserSelect2Widget::widget([
+                'filter' => \src\widgets\UserSelect2Widget::widget([
                     'model' => $searchModel,
                     'attribute' => 'line_updated_user_id'
                 ]),

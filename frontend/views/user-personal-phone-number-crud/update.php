@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\phoneLine\userPersonalPhoneNumber\entity\UserPersonalPhoneNumber */
+/* @var $model src\model\phoneLine\userPersonalPhoneNumber\entity\UserPersonalPhoneNumber */
 
 $this->title = 'Update User Personal Phone Number: ' . $model->upn_id;
 $this->params['breadcrumbs'][] = ['label' => 'User Personal Phone Numbers', 'url' => ['index']];

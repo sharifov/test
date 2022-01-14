@@ -1,13 +1,13 @@
 <?php
 
-use sales\entities\cases\CaseEventLog;
+use src\entities\cases\CaseEventLog;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
-use sales\helpers\app\AppHelper;
+use src\helpers\app\AppHelper;
 use frontend\helpers\JsonHelper;
 
 /* @var $this yii\web\View */
-/* @var $model sales\entities\cases\CaseEventLog */
+/* @var $model src\entities\cases\CaseEventLog */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 

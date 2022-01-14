@@ -10,7 +10,7 @@ use modules\order\src\processManager\phoneToBook\OrderProcessManager as OrderPro
 use modules\order\src\processManager\clickToBook\OrderProcessManager as OrderProcessManagerClickToBook;
 use modules\order\src\processManager\queue\Queue;
 use modules\product\src\entities\productQuote\ProductQuote;
-use sales\repositories\NotFoundException;
+use src\repositories\NotFoundException;
 
 /**
  * Class RetryBookAppliedProducts

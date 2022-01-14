@@ -2,8 +2,8 @@
 
 use common\components\grid\DateTimeColumn;
 use frontend\helpers\JsonHelper;
-use sales\model\contactPhoneData\entity\ContactPhoneData;
-use sales\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
+use src\model\contactPhoneData\entity\ContactPhoneData;
+use src\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
 use yii\grid\ActionColumn;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
@@ -12,7 +12,7 @@ use yii\helpers\VarDumper;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfoSearch */
+/* @var $searchModel src\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfoSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Contact Phone Service Info';

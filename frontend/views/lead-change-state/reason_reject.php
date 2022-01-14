@@ -1,6 +1,6 @@
 <?php
 
-use sales\forms\leadflow\RejectReasonForm;
+use src\forms\leadflow\RejectReasonForm;
 use yii\widgets\ActiveForm;
 use yii\bootstrap\Html;
 

@@ -4,7 +4,7 @@ use yii\bootstrap4\Html;
 use common\components\bootstrap4\activeForm\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\shiftSchedule\entity\userShiftAssign\search\SearchUserShiftAssign */
+/* @var $model src\model\shiftSchedule\entity\userShiftAssign\search\SearchUserShiftAssign */
 /* @var $form common\components\bootstrap4\activeForm\ActiveForm */
 ?>
 
@@ -20,7 +20,7 @@ use common\components\bootstrap4\activeForm\ActiveForm;
 
     <?= $form->field($model, 'usa_user_id') ?>
 
-    <?= $form->field($model, 'usa_ssr_id') ?>
+    <?= $form->field($model, 'usa_sh_id') ?>
 
     <?= $form->field($model, 'usa_created_dt') ?>
 

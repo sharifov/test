@@ -3,9 +3,9 @@
 namespace frontend\controllers;
 
 use common\models\Project;
-use sales\auth\Auth;
-use sales\model\emailList\entity\EmailList;
-use sales\model\emailList\entity\search\EmailListSearch;
+use src\auth\Auth;
+use src\model\emailList\entity\EmailList;
+use src\model\emailList\entity\search\EmailListSearch;
 use Yii;
 use yii\bootstrap4\Html;
 use yii\helpers\ArrayHelper;

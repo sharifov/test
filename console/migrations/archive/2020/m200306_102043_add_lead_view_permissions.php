@@ -1,13 +1,13 @@
 <?php
 
-use sales\rbac\rules\lead\view\LeadViewBookedRule;
-use sales\rbac\rules\lead\view\LeadViewFollowUpRule;
-use sales\rbac\rules\lead\view\LeadViewPendingRule;
-use sales\rbac\rules\lead\view\LeadViewProcessingRule;
-use sales\rbac\rules\lead\view\LeadViewRejectRule;
-use sales\rbac\rules\lead\view\LeadViewSnoozeRule;
-use sales\rbac\rules\lead\view\LeadViewSoldRule;
-use sales\rbac\rules\lead\view\LeadViewTrashRule;
+use src\rbac\rules\lead\view\LeadViewBookedRule;
+use src\rbac\rules\lead\view\LeadViewFollowUpRule;
+use src\rbac\rules\lead\view\LeadViewPendingRule;
+use src\rbac\rules\lead\view\LeadViewProcessingRule;
+use src\rbac\rules\lead\view\LeadViewRejectRule;
+use src\rbac\rules\lead\view\LeadViewSnoozeRule;
+use src\rbac\rules\lead\view\LeadViewSoldRule;
+use src\rbac\rules\lead\view\LeadViewTrashRule;
 use yii\db\Migration;
 
 /**

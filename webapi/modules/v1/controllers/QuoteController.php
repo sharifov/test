@@ -22,22 +22,23 @@ use frontend\helpers\QuoteHelper;
 use frontend\widgets\notification\NotificationMessage;
 use modules\invoice\src\exceptions\InvoiceCodeException;
 use modules\lead\src\entities\lead\LeadQuery;
-use sales\auth\Auth;
-use sales\forms\quote\QuoteCreateDataForm;
-use sales\forms\quote\QuoteCreateKeyForm;
-use sales\helpers\app\AppHelper;
-use sales\logger\db\GlobalLogInterface;
-use sales\logger\db\LogDTO;
-use sales\model\leadData\services\LeadDataService;
-use sales\model\project\entity\projectRelation\ProjectRelation;
-use sales\model\project\entity\projectRelation\ProjectRelationQuery;
-use sales\model\project\entity\projectRelation\ProjectRelationRepository;
-use sales\model\quoteLabel\service\QuoteLabelService;
-use sales\repositories\lead\LeadRepository;
-use sales\repositories\NotFoundException;
-use sales\repositories\project\ProjectRepository;
-use sales\services\quote\addQuote\AddQuoteService;
-use sales\services\quote\addQuote\TripService;
+use src\auth\Auth;
+use src\exception\AdditionalDataException;
+use src\forms\quote\QuoteCreateDataForm;
+use src\forms\quote\QuoteCreateKeyForm;
+use src\helpers\app\AppHelper;
+use src\logger\db\GlobalLogInterface;
+use src\logger\db\LogDTO;
+use src\model\leadData\services\LeadDataService;
+use src\model\project\entity\projectRelation\ProjectRelation;
+use src\model\project\entity\projectRelation\ProjectRelationQuery;
+use src\model\project\entity\projectRelation\ProjectRelationRepository;
+use src\model\quoteLabel\service\QuoteLabelService;
+use src\repositories\lead\LeadRepository;
+use src\repositories\NotFoundException;
+use src\repositories\project\ProjectRepository;
+use src\services\quote\addQuote\AddQuoteService;
+use src\services\quote\addQuote\TripService;
 use webapi\src\ApiCodeException;
 use webapi\src\behaviors\ApiUserProjectRelatedAccessBehavior;
 use webapi\src\Messages;
@@ -134,19 +135,16 @@ class QuoteController extends ApiBaseController
      * @apiSuccess {string} agentName    Agent Name
      * @apiSuccess {string} agentEmail    Agent Email
      * @apiSuccess {string} agentDirectLine    Agent DirectLine
-     *
      * @apiSuccess {string} action    Action
      * @apiSuccess {integer} response_id    Response Id
      * @apiSuccess {DateTime} request_dt    Request Date & Time
      * @apiSuccess {DateTime} response_dt   Response Date & Time
-     *
-     * "errors": [],
-     * "uid": "5b7424e858e91",
-     * "agentName": "admin",
-     * "agentEmail": "assistant@wowfare.com",
-     * "agentDirectLine": "+1 888 946 3882",
-     * "action": "v1/quote/get-info",
-     *
+     * @apiSuccess {object}     [lead]                          Lead
+     * @apiSuccess {string}     [lead.department_key]           Department key (For example: <code>sales,exchange,support,schedule_change,fraud_prevention,chat</code>)
+     * @apiSuccess {integer}    [lead.type_create_id]           Type create id
+     * @apiSuccess {string}     [lead.type_create_name]         Type Name
+     * @apiSuccess {object}     [lead.lead_data]                Lead data
+     * @apiSuccess {object}     [lead.additionalInformation]    Additional Information
      *
      * @apiSuccessExample Success-Response:
      * HTTP/1.1 200 OK
@@ -335,7 +333,7 @@ class QuoteController extends ApiBaseController
      *       "additionalInformation": [
      *           {
      *              "pnr": "example_pnr",
-     *               "bo_sale_id": "example_sale_id",
+     *              "bo_sale_id": "example_sale_id",
      *              "vtf_processed": null,
      *              "tkt_processed": null,
      *              "exp_processed": null,
@@ -348,7 +346,10 @@ class QuoteController extends ApiBaseController
      *              "ld_field_key": "kayakclickid",
      *              "ld_field_value": "example_value132"
      *          }
-     *      ]
+     *      ],
+     *      "department_key": "chat",
+     *      "type_create_id": 8,
+     *      "type_create_name": "Client Chat"
      *  },
      *   "action": "v1/quote/get-info",
      *   "response_id": 173,
@@ -475,6 +476,10 @@ class QuoteController extends ApiBaseController
             }
 
             if ($model->lead) {
+                $response['lead']['department_key'] = $model->lead->lDep->dep_key ?? null;
+                $response['lead']['type_create_id'] = $model->lead->l_type_create ?? null;
+                $response['lead']['type_create_name'] = $model->lead->getTypeCreateName();
+
                 ArrayHelper::setValue(
                     $response,
                     'lead.additionalInformation',
@@ -920,10 +925,14 @@ class QuoteController extends ApiBaseController
         } catch (\Throwable $throwable) {
             $transaction->rollBack();
 
+            $errorMessage = ($throwable instanceof AdditionalDataException) ?
+                ArrayHelper::merge(AppHelper::throwableLog($throwable), $throwable->getAdditionalData()) :
+                AppHelper::throwableLog($throwable);
+
             if ($throwable->getCode() < 0) {
-                Yii::warning(AppHelper::throwableFormatter($throwable), 'API:Quote:create:warning:try');
+                Yii::warning($errorMessage, 'API:Quote:create:warning:try');
             } else {
-                Yii::error(VarDumper::dumpAsString($throwable), 'API:Quote:create:try');
+                Yii::error($errorMessage, 'API:Quote:create:try');
             }
 
             if (Yii::$app->request->get('debug')) {

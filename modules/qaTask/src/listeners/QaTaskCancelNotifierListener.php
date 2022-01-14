@@ -8,8 +8,8 @@ use modules\qaTask\src\useCases\qaTask\cancel\QaTaskCancelEvent;
 use Yii;
 use common\models\Notifications;
 use modules\qaTask\src\entities\qaTaskActionReason\QaTaskActionReason;
-use sales\repositories\NotFoundException;
-use sales\repositories\user\UserRepository;
+use src\repositories\NotFoundException;
+use src\repositories\user\UserRepository;
 
 /**
  * Class QaTaskCancelNotifierListener

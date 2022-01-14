@@ -1,6 +1,6 @@
 <?php
 
-use sales\model\client\notifications\sms\entity\ClientNotificationSmsList;
+use src\model\client\notifications\sms\entity\ClientNotificationSmsList;
 use yii\bootstrap4\Html;
 use yii\helpers\Json;
 use yii\widgets\DetailView;

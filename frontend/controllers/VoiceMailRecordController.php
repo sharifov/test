@@ -3,10 +3,10 @@
 namespace frontend\controllers;
 
 use common\models\Notifications;
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
-use sales\model\voiceMailRecord\entity\VoiceMailRecord;
-use sales\model\voiceMailRecord\entity\search\VoiceMailRecordSearch;
+use src\model\voiceMailRecord\entity\VoiceMailRecord;
+use src\model\voiceMailRecord\entity\search\VoiceMailRecordSearch;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

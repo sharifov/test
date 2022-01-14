@@ -2,7 +2,7 @@
 
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\qaTask\src\useCases\qaTask\cancel\QaTaskCancelService;
-use sales\auth\Auth;
+use src\auth\Auth;
 use yii\helpers\Html;
 use yii\helpers\Url;
 

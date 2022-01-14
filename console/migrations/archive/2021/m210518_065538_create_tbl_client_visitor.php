@@ -2,8 +2,8 @@
 
 use common\models\Employee;
 use console\migrations\RbacMigrationService;
-use sales\model\clientChatVisitor\entity\ClientChatVisitor;
-use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
+use src\model\clientChatVisitor\entity\ClientChatVisitor;
+use src\model\clientChatVisitorData\entity\ClientChatVisitorData;
 use yii\db\Migration;
 
 /**

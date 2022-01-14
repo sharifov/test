@@ -7,7 +7,7 @@ use modules\qaTask\src\entities\qaTask\QaTaskCreateType;
 use modules\qaTask\src\entities\qaTask\QaTaskRepository;
 use modules\qaTask\src\entities\qaTaskStatusLog\CreateDto;
 use modules\qaTask\src\useCases\qaTask\QaTaskActions;
-use sales\dispatchers\EventDispatcher;
+use src\dispatchers\EventDispatcher;
 
 /**
  * Class QaTaskCreateManuallyService

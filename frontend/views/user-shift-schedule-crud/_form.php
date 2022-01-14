@@ -1,13 +1,13 @@
 <?php
 
 use frontend\widgets\DateTimePickerWidget;
-use sales\model\shiftSchedule\entity\userShiftSchedule\UserShiftSchedule;
-use sales\widgets\UserSelect2Widget;
+use src\model\shiftSchedule\entity\userShiftSchedule\UserShiftSchedule;
+use src\widgets\UserSelect2Widget;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\shiftSchedule\entity\userShiftSchedule\UserShiftSchedule */
+/* @var $model src\model\shiftSchedule\entity\userShiftSchedule\UserShiftSchedule */
 /* @var $form ActiveForm */
 ?>
 

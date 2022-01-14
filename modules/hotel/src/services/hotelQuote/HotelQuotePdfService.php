@@ -4,7 +4,7 @@ namespace modules\hotel\src\services\hotelQuote;
 
 use modules\hotel\models\HotelQuote;
 use modules\order\src\events\OrderFileGeneratedEvent;
-use sales\services\pdf\processingPdf\PdfBaseService;
+use src\services\pdf\processingPdf\PdfBaseService;
 
 /**
  * Class GeneratorPdfService

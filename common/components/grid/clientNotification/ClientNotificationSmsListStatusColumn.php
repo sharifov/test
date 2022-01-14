@@ -2,7 +2,7 @@
 
 namespace common\components\grid\clientNotification;
 
-use sales\model\client\notifications\sms\entity\Status;
+use src\model\client\notifications\sms\entity\Status;
 use yii\grid\DataColumn;
 
 /**

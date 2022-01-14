@@ -2,8 +2,8 @@
 
 namespace modules\hotel\src\helpers;
 
-use sales\helpers\app\HttpStatusCodeHelper;
-use sales\helpers\email\TextConvertingHelper;
+use src\helpers\app\HttpStatusCodeHelper;
+use src\helpers\email\TextConvertingHelper;
 
 /**
  * Class HotelApiMessageHelper

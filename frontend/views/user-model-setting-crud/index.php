@@ -1,7 +1,7 @@
 <?php
 
 use common\components\grid\UserSelect2Column;
-use sales\model\userModelSetting\entity\UserModelSetting;
+use src\model\userModelSetting\entity\UserModelSetting;
 use yii\grid\ActionColumn;
 use common\components\grid\DateTimeColumn;
 use yii\bootstrap4\Html;
@@ -11,7 +11,7 @@ use yii\helpers\VarDumper;
 use yii\widgets\Pjax;
 
 /* @var yii\web\View $this */
-/* @var sales\model\userModelSetting\entity\UserModelSettingSearch $searchModel */
+/* @var src\model\userModelSetting\entity\UserModelSettingSearch $searchModel */
 /* @var yii\data\ActiveDataProvider $dataProvider */
 
 $this->title = 'User Model Settings';

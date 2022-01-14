@@ -9,7 +9,7 @@ use modules\offer\src\entities\offer\OfferStatus;
 use modules\offer\src\helpers\formatters\OfferFormatter;
 use modules\offer\src\helpers\OfferHelper;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
-use sales\helpers\product\ProductQuoteHelper;
+use src\helpers\product\ProductQuoteHelper;
 use yii\bootstrap4\Html;
 
 ?>

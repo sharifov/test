@@ -35,8 +35,11 @@ class TicketForm extends \yii\base\Model
     public function rules(): array
     {
         return [
+            [['refundAllowed'], 'filter', 'filter' => 'boolval'],
             [['number', 'airlinePenalty', 'processingFee', 'refundable', 'selling', 'status', 'refundAllowed'], 'required'],
             [['number'], 'string', 'max' => 50],
+            [['airlinePenalty', 'processingFee', 'refundable', 'selling'], 'filter', 'filter' => 'floatval', 'skipOnEmpty' => true],
+            [['airlinePenalty', 'processingFee', 'refundable', 'selling'], 'number'],
             [['airlinePenalty', 'processingFee', 'refundable', 'selling'], CheckIsNumberValidator::class],
             [['airlinePenalty', 'refundable', 'selling'], 'number', 'min' => 0, 'skipOnError' => true],
             [['status'], 'string', 'max' => 20]

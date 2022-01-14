@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\clientChatForm\entity\ClientChatForm;
-use sales\model\clientChatForm\entity\ClientChatFormSearch;
+use src\model\clientChatForm\entity\ClientChatForm;
+use src\model\clientChatForm\entity\ClientChatFormSearch;
 use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;

@@ -4,7 +4,7 @@ use common\models\Quote;
 use common\models\Airports;
 use frontend\helpers\QuoteHelper;
 use kartik\select2\Select2;
-use sales\forms\api\searchQuote\FlightQuoteSearchForm;
+use src\forms\api\searchQuote\FlightQuoteSearchForm;
 use yii\bootstrap4\ActiveForm;
 use yii\bootstrap4\Html;
 
@@ -116,7 +116,7 @@ use yii\bootstrap4\Html;
                                 tooltips: {
                                     to: function(value){ return Math.ceil(value);}
                                 },
-                                step: 10,
+                                step: 1,
                                 range: {
                                     'min': min,
                                     'max': max

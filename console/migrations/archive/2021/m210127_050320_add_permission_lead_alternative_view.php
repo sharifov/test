@@ -1,6 +1,6 @@
 <?php
 
-use sales\rbac\rules\lead\view\LeadViewAlternativeRule;
+use src\rbac\rules\lead\view\LeadViewAlternativeRule;
 use yii\db\Migration;
 
 /**

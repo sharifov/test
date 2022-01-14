@@ -3,12 +3,12 @@
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use dosamigos\datepicker\DatePicker;
-use sales\model\clientChatFeedback\entity\ClientChatFeedback;
+use src\model\clientChatFeedback\entity\ClientChatFeedback;
 use yii\grid\ActionColumn;
 use yii\helpers\Html;
 
 /**
- * @var $viewModel \sales\viewModel\chat\ViewModelChatFeedbackGraph
+ * @var $viewModel \src\viewModel\chat\ViewModelChatFeedbackGraph
  */
 
 ?>

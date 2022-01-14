@@ -5,7 +5,7 @@ namespace frontend\widgets\multipleUpdate\lead;
 use common\models\Employee;
 use common\models\Lead;
 use frontend\widgets\multipleUpdate\IdsValidator;
-use sales\access\ListsAccess;
+use src\access\ListsAccess;
 use yii\base\Model;
 
 /**

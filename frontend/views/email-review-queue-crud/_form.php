@@ -2,13 +2,13 @@
 
 use common\models\Department;
 use common\models\Project;
-use sales\model\emailReviewQueue\entity\EmailReviewQueueStatus;
-use sales\widgets\UserSelect2Widget;
+use src\model\emailReviewQueue\entity\EmailReviewQueueStatus;
+use src\widgets\UserSelect2Widget;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\emailReviewQueue\entity\EmailReviewQueue */
+/* @var $model src\model\emailReviewQueue\entity\EmailReviewQueue */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 

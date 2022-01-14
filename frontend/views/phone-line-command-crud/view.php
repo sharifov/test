@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\call\entity\callCommand\PhoneLineCommand */
+/* @var $model src\model\call\entity\callCommand\PhoneLineCommand */
 
 $this->title = $model->plc_id;
 $this->params['breadcrumbs'][] = ['label' => 'Phone Line Commands', 'url' => ['index']];

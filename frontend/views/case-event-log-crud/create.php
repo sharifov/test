@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\entities\cases\CaseEventLog */
+/* @var $model src\entities\cases\CaseEventLog */
 
 $this->title = 'Create Case Event Log';
 $this->params['breadcrumbs'][] = ['label' => 'Case Event Logs', 'url' => ['index']];

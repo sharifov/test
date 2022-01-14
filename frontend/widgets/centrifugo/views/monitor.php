@@ -1,6 +1,6 @@
 <?php
 
-use sales\helpers\setting\SettingHelper;
+use src\helpers\setting\SettingHelper;
 
 /**
  * @var $centrifugoUrl

@@ -47,9 +47,9 @@ use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionRepository;
 use modules\product\src\entities\productType\ProductType;
 use modules\product\src\useCases\product\create\ProductCreateService;
-use sales\helpers\app\AppHelper;
-use sales\helpers\ErrorsToStringHelper;
-use sales\repositories\product\ProductQuoteRepository;
+use src\helpers\app\AppHelper;
+use src\helpers\ErrorsToStringHelper;
+use src\repositories\product\ProductQuoteRepository;
 use webapi\src\forms\flight\flights\trips\SegmentApiForm;
 use webapi\src\forms\flight\options\OptionApiForm;
 use Yii;
@@ -177,7 +177,7 @@ class FlightFromSaleService
         $tripTypeId = self::getFlightTripIdByName(ArrayHelper::getValue($saleData, 'tripType'));
         $flightProduct = Flight::create($product->pr_id, $tripTypeId);
         if (!$flightProduct->validate()) {
-            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($flightProduct));
+            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($flightProduct, ' ', true));
         }
         $this->flightRepository->save($flightProduct);
 
@@ -191,7 +191,7 @@ class FlightFromSaleService
         $productQuote = ProductQuote::create($productQuoteDto, null);
         $productQuote->pq_status_id = self::detectProductQuoteStatus($saleData);
         if (!$productQuote->validate()) {
-            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($productQuote));
+            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($productQuote, ' ', true));
         }
         $this->productQuoteRepository->save($productQuote);
 
@@ -219,7 +219,7 @@ class FlightFromSaleService
                             throw new \RuntimeException('SegmentApiForm not loaded');
                         }
                         if (!$segmentApiForm->validate()) {
-                            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($segmentApiForm));
+                            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($segmentApiForm, ' ', true));
                         }
 
                         $segment['duration'] = (int) $segmentApiForm->flightDuration;
@@ -265,7 +265,7 @@ class FlightFromSaleService
             null
         );
         if (!$flightQuoteFlight->validate()) {
-            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($flightQuoteFlight));
+            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($flightQuoteFlight, ' ', true));
         }
         $flightQuoteFlightId = $this->flightQuoteFlightRepository->save($flightQuoteFlight);
 
@@ -278,7 +278,7 @@ class FlightFromSaleService
             $orderCreateFromSaleForm->validatingCarrier
         );
         if (!$flightQuoteBooking->validate()) {
-            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($flightQuoteBooking));
+            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($flightQuoteBooking, ' ', true));
         }
         $flightQuoteBookingId = $this->flightQuoteBookingRepository->save($flightQuoteBooking);
 
@@ -308,8 +308,12 @@ class FlightFromSaleService
                     $cnt = ArrayHelper::getValue($paxTypeCount, $flightPaxForm->type, 0) + 1;
                     ArrayHelper::setValue($paxTypeCount, $flightPaxForm->type, $cnt);
                 } else {
-                    $warning = ['errors' => ErrorsToStringHelper::extractFromModel($flightPaxForm), 'data' => $passenger];
-                    \Yii::warning($warning, 'FlightFromSaleService:FlightPaxForm:validate');
+                    $warning = [
+                        'message' => 'FlightPax fail create',
+                        'errors' => ErrorsToStringHelper::extractFromModel($flightPaxForm, ' ', true),
+                        'data' => $passenger,
+                    ];
+                    \Yii::warning($warning, 'FlightFromSaleService:FlightPaxForm:create');
                 }
             }
         }

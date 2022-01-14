@@ -4,7 +4,7 @@ namespace modules\flight\src\repositories\flightQuoteSegment;
 
 use modules\flight\models\FlightQuoteSegment;
 use modules\flight\src\exceptions\FlightCodeException;
-use sales\repositories\NotFoundException;
+use src\repositories\NotFoundException;
 
 /**
  * Class FlightQuoteSegmentRepository

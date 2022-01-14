@@ -1,16 +1,16 @@
 <?php
 
 use common\components\grid\DateTimeColumn;
-use sales\model\clientData\entity\ClientData;
-use sales\model\clientDataKey\entity\ClientDataKey;
-use sales\model\clientDataKey\service\ClientDataKeyService;
+use src\model\clientData\entity\ClientData;
+use src\model\clientDataKey\entity\ClientDataKey;
+use src\model\clientDataKey\service\ClientDataKeyService;
 use yii\grid\ActionColumn;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\clientData\entity\ClientDataSearch */
+/* @var $searchModel src\model\clientData\entity\ClientDataSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Client Data';

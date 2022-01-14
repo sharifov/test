@@ -5,7 +5,7 @@ namespace modules\qaTask\src\useCases\qaTask\decide\lead\reAssign;
 use common\models\Employee;
 use modules\qaTask\src\entities\qaTask\QaTask;
 use modules\qaTask\src\useCases\qaTask\QaTaskActionForm;
-use sales\access\ListsAccess;
+use src\access\ListsAccess;
 
 /**
  * Class QaTaskDecideLeadReAssignForm

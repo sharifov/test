@@ -3,6 +3,9 @@
 use common\models\Client;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
+use yii\grid\GridView;
+use yii\data\ActiveDataProvider;
+use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\Client */
@@ -36,7 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'first_name',
                 'value' => static function (Client $client) {
-                    return \sales\model\client\helpers\ClientFormatter::formatName($client);
+                    return \src\model\client\helpers\ClientFormatter::formatName($client);
                 },
                 'format' => 'raw',
             ],
@@ -144,6 +147,27 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                 ],
             ]) ?>
+
+            <h5>Leads of users with same phone</h5>
+        <?php
+            Pjax::begin(['id' => 'pjax-client-same-phone', 'timeout' => 2000, 'enablePushState' => false, 'clientOptions' => ['method' => 'POST', 'data' => [
+                'clientId' => $model->id
+            ]]]);
+
+            echo GridView::widget([
+                'dataProvider' => $dataProvider,
+                'columns' => [
+                    [
+                    'value' => static function (array $model) {
+                        return '<i class="fa fa-link"></i> ' . Html::a('lead: ' . $model['id'], ['lead/view', 'gid' => $model['gid']], ['target' => '_blank', 'data-pjax' => 0]) . ($model['request_ip'] ? ' (IP: ' . $model['request_ip'] . ')' : '');
+                    },
+                    'format' => 'html'
+                    ]
+                ]
+            ]);
+            Pjax::end();
+
+            ?>
         </div>
     </div>
 

@@ -2,12 +2,14 @@
 
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
+use src\model\shiftSchedule\entity\shift\Shift;
+use src\model\shiftSchedule\entity\shiftCategory\ShiftCategoryQuery;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\shiftSchedule\entity\shift\search\SearchShift */
+/* @var $searchModel src\model\shiftSchedule\entity\shift\search\SearchShift */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Shifts';
@@ -30,6 +32,14 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             'sh_id',
             'sh_name',
+            'sh_title',
+            [
+                'attribute' => 'sh_category_id',
+                'value' => static function (Shift $model) {
+                    return $model->category ? Html::encode($model->category->sc_name ?? '') : null;
+                },
+                'filter' => ShiftCategoryQuery::getList()
+            ],
             ['class' => \common\components\grid\BooleanColumn::class, 'attribute' => 'sh_enabled'],
             'sh_color',
             'sh_sort_order',

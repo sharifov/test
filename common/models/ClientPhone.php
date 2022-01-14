@@ -4,12 +4,12 @@ namespace common\models;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
 use common\models\query\ClientPhoneQuery;
-use sales\behaviors\CheckPhoneJobBehavior;
-use sales\behaviors\clientPhone\ContactPhoneListBehavior;
-use sales\behaviors\PhoneCleanerBehavior;
-use sales\behaviors\UidPhoneGeneratorBehavior;
-use sales\entities\EventTrait;
-use sales\model\contactPhoneList\entity\ContactPhoneList;
+use src\behaviors\CheckPhoneJobBehavior;
+use src\behaviors\clientPhone\ContactPhoneListBehavior;
+use src\behaviors\PhoneCleanerBehavior;
+use src\behaviors\UidPhoneGeneratorBehavior;
+use src\entities\EventTrait;
+use src\model\contactPhoneList\entity\ContactPhoneList;
 use Yii;
 use yii\behaviors\AttributeBehavior;
 use yii\behaviors\TimestampBehavior;
