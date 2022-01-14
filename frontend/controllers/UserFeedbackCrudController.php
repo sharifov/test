@@ -131,7 +131,7 @@ class UserFeedbackCrudController extends FController
                 return 'Success <script>$("#modal-lg").modal("hide")</script>';
             }*/
         }
-        return $this->renderAjax('create_ajax', [
+        return $this->renderAjax('create_bug_ajax', [
             'model' => $form,
         ]);
     }

@@ -22,7 +22,7 @@ use yii\widgets\Pjax;
 ]) ?>
 
 <div class="col-md-12">
-    <h3>Bug Report</h3>
+    <h3><i class="fa fa-bug"></i> Bug Report</h3>
 </div>
 <div class="col-md-12">
     <div class="row">
@@ -32,7 +32,11 @@ use yii\widgets\Pjax;
             <?= $form->field($model, 'data')->textarea(['rows' => 10, 'id' => 'uf_data']) ?>
         </div>
         <div class="col-md-5">
-            <img src="<?= Html::encode($model->screenshot) ?>" id="screenshot-img" style="width:100%"  alt="screenshot"/>
+            <label class="control-label" for="userfeedbackbugform-screenshot">
+                <?= $model->getAttributeLabel('screenshot') ?>
+            </label>
+
+            <img src="<?= Html::encode($model->screenshot) ?>" id="screenshot-img" style="width:100%" class="rounded mx-auto d-block" alt="screenshot"/>
             <div style="display: none;">
                 <?= $form->field($model, 'screenshot')->hiddenInput()->label(false)?>
             </div>
