@@ -2162,35 +2162,6 @@ class TestController extends FController
 
     public function actionZ()
     {
-        try {
-            $webEngageRequestService = new WebEngageRequestService();
-
-            $data = [
-                'anonymousId' => 'test',
-                'eventName' => 'Added to Cart1',
-                "eventTime" => date('Y-m-d\TH:i:sO'),
-                'eventData' => [
-                    "Product ID" => 1337,
-                    "Price" => 39.80,
-                    "Quantity" => 1,
-                    "Product" => "Givenchy Pour Homme Cologne",
-                    "Category" => "Fragrance",
-                    "Currency" => "USD",
-                ]
-            ];
-
-            $webEngageEventForm = new WebEngageEventForm();
-            if (!$webEngageEventForm->load($data)) {
-                throw new \RuntimeException('WebEngageEventForm not loaded');
-            }
-            $x = $webEngageRequestService->addEvent($webEngageEventForm);
-
-            \yii\helpers\VarDumper::dump($x, 20, true);
-            exit();
-        } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableLog($throwable), ':Throwable');
-        }
-
         return $this->render('z');
     }
 

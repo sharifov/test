@@ -2,6 +2,8 @@
 
 namespace src\helpers;
 
+use src\helpers\app\AppHelper;
+use yii\base\Model;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -15,9 +17,9 @@ class ErrorsToStringHelper
      * @param bool $withModelName
      * @return string
      */
-    public static function extractFromModel($model, string $glue = '<br />', bool $withModelName = false): string
+    public static function extractFromModel($model, string $glue = '<br />', bool $withModelName = true): string
     {
-        if (!method_exists($model, 'getErrors')) {
+        if (!($model instanceof Model)) {
             return '';
         }
         $result = '';
@@ -32,15 +34,12 @@ class ErrorsToStringHelper
         return implode($glue, ArrayHelper::getColumn($errors, 0, false));
     }
 
-    /**
-     * @param $model
-     * @return string|null
-     */
-    private static function getModelName($model): ?string
+    private static function getModelName(Model $model): ?string
     {
         try {
             return (new \ReflectionClass($model))->getShortName();
         } catch (\Throwable $throwable) {
+            \Yii::error(AppHelper::throwableLog($throwable),'ErrorsToStringHelper:getModelName');
             return '';
         }
     }
