@@ -2,8 +2,10 @@
 
 namespace frontend\controllers;
 
+use common\models\Notifications;
 use src\helpers\setting\SettingHelper;
 use src\model\userAuthClient\entity\UserAuthClientRepository;
+use src\model\userAuthClient\entity\UserAuthClientSources;
 use src\repositories\NotFoundException;
 use yii\filters\VerbFilter;
 use yii\web\ForbiddenHttpException;
@@ -65,6 +67,9 @@ class UserAuthClientController extends FController
             if (!$authClient->delete()) {
                 throw new \RuntimeException('Cannot delete auth client:' . $authClient->getErrorSummary(true)[0]);
             }
+
+            Notifications::create($authClient->uac_user_id, 'Auth client detached', 'Source: ' . UserAuthClientSources::getName($authClient->uac_source) . ' was detached from your account.', Notifications::TYPE_INFO, true);
+
             $result['message'] = 'Auth client detached successfully';
         } catch (NotFoundException | \RuntimeException $e) {
             $result['error'] = true;

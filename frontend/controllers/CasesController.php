@@ -1028,7 +1028,9 @@ class CasesController extends FController
                             throw new \RuntimeException('OrderCreateFromSaleForm not loaded');
                         }
                         if (!$orderCreateFromSaleForm->validate()) {
-                            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($orderCreateFromSaleForm));
+                            throw new \RuntimeException(
+                                ErrorsToStringHelper::extractFromModel($orderCreateFromSaleForm, ' ', true)
+                            );
                         }
                         $order = $this->orderCreateFromSaleService->orderCreate($orderCreateFromSaleForm);
 
