@@ -209,6 +209,54 @@ class WebsocketServerController extends Controller
 
         $server->on('open', static function (Server $server, \Swoole\Http\Request $request) use ($frontendConfig, $thisClass, $redisConfig, $redisList) {
             echo '+ ' . date('m-d H:i:s') . " +{$request->fd}";
+
+            try {
+                if (isset($request->header['health-check'])) {
+                    echo PHP_EOL . ' Health check ';
+                    $dbStatus = 'Ok';
+                    try {
+                        \Yii::$app->db->createCommand('SELECT 1')->execute();
+                    } catch (\Throwable $e) {
+                        \Yii::error([
+                            'message' => $e->getMessage(),
+                        ], 'ws:open:health-check:db');
+                        $dbStatus = 'Error';
+                    }
+                    $dbSlaveStatus = 'Ok';
+                    try {
+                        \Yii::$app->db_slave->createCommand('SELECT 1')->execute();
+                    } catch (\Throwable $e) {
+                        \Yii::error([
+                            'message' => $e->getMessage(),
+                        ], 'ws:open:health-check:db_slave');
+                        $dbSlaveStatus = 'Error';
+                    }
+                    try {
+                        // SWOOLE_REDIS_STATE_READY === 3 ?
+                        $redisStatus = ($server->redis->getState() === 3) ? 'Ok' : 'Error';
+                    } catch (\Throwable $e) {
+                        \Yii::error([
+                            'message' => $e->getMessage(),
+                        ], 'ws:open:health-check:redis');
+                        $redisStatus = 'Error';
+                    }
+                    $result = json_encode([
+                        'ws' => 'Ok',
+                        'message' => 'Successfully connected to websocket server',
+                        'appInstance' => \Yii::$app->params['appInstance'],
+                        'db' => $dbStatus,
+                        'dbSlave' => $dbSlaveStatus,
+                        'redis' => $redisStatus,
+                    ]);
+                    echo $result . PHP_EOL;
+                    $server->push($request->fd, $result);
+                    $server->disconnect($request->fd, 200, '');
+                    return;
+                }
+            } catch (\Throwable $e) {
+                \Yii::error(AppHelper::throwableLog($e, true), 'ws:healthCheck');
+            }
+
             $user = $thisClass->getIdentityByCookie($request, $frontendConfig);
 
             if ($user) {

@@ -2,11 +2,11 @@
 
 namespace webapi\controllers;
 
+use src\services\WebsocketHealthChecker;
 use webapi\behaviors\HttpBasicAuthHealthCheck;
 use yii\rest\Controller;
 use yii\web\Response;
 use Yii;
-use yii\web\NotFoundHttpException;
 
 /**
  * Class HealthController
@@ -140,6 +140,23 @@ class HealthController extends Controller
         return $response['json'] ?? [];
     }
 
+    public function actionWs()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        try {
+            return (new WebsocketHealthChecker())->check(
+                env('CONSOLE_CONFIG_PARAMS_WEBSOCKETSERVER_HOST'),
+                env('CONSOLE_CONFIG_PARAMS_WEBSOCKETSERVER_PORT'),
+                1
+            );
+        } catch (\Throwable $e) {
+            return [
+                'ws' => 'Error',
+                'message' => $e->getMessage(),
+            ];
+        }
+    }
 
     /**
      * @api {get, post} /health-check/metrics Get health check metrics text
