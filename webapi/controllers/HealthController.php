@@ -158,12 +158,6 @@ class HealthController extends Controller
      *
      * @apiParam {string{3..50}=[a-zA-Z]}        ping                 Ping text
      *
-     * @apiParamExample {json} Request-Example:
-     *
-     * {
-     *      "ping": "WebsocketServerTest"
-     * }
-     *
      * @apiSuccessExample {json} Success-Response:
      *
      * HTTP/1.1 200 OK
@@ -216,7 +210,7 @@ class HealthController extends Controller
 
         $form = new HealthCheckRequestForm();
 
-        if (!$form->load(Yii::$app->request->post())) {
+        if (!$form->load(Yii::$app->request->get())) {
             Yii::$app->response->setStatusCode(422);
             return [
                 'ws' => 'Error',
