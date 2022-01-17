@@ -7,6 +7,7 @@ use common\models\Project;
 use common\models\search\ContactsSearch;
 use common\models\UserGroup;
 use frontend\helpers\JsonHelper;
+use Gnello\Mattermost\Driver;
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeCreatedEvent;
 use src\auth\Auth;
 use src\helpers\setting\SettingHelper;
@@ -87,6 +88,8 @@ use src\services\clientChatMessage\ClientChatMessageService;
 use src\services\clientChatUserAccessService\ClientChatUserAccessService;
 use src\services\sms\incoming\SmsIncomingForm;
 use src\services\sms\incoming\SmsIncomingService;
+use src\websocketServer\healthCheck\WebsocketHealthChecker;
+use Swoole\Http\Client;
 use yii\console\Controller;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
@@ -99,6 +102,17 @@ use yii\rbac\Role;
 
 class TestController extends Controller
 {
+    public function actionWsHealthCheck()
+    {
+        $checker = new WebsocketHealthChecker();
+        $result = $checker->check(
+            'ws://' . env('CONSOLE_CONFIG_PARAMS_WEBSOCKETSERVER_HOST') . ':' . env('CONSOLE_CONFIG_PARAMS_WEBSOCKETSERVER_PORT'),
+            5,
+            'qwerty'
+        );
+        VarDumper::dump($result);
+    }
+
     public function actionPending()
     {
         $access = CallUserAccess::find()->andWhere(['cua_call_id' => 3386771, 'cua_user_id' => 295])->one();

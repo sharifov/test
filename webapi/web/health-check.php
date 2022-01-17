@@ -20,6 +20,7 @@ $config = yii\helpers\ArrayHelper::merge(
 );
 
 $config['components']['urlManager']['rules'] = [
+    'health-check/ws' => 'health/ws',
     'health-check/metrics' => 'health/text',
     'health-check/<param:.*>' => 'health/json',
     'health-check' => 'health/json'
