@@ -197,7 +197,7 @@ class FlightFromSaleService
 
         $flightQuoteData = self::prepareFlightQuoteData($saleData, $orderCreateFromSaleForm);
         $flightQuote = FlightQuote::create((new FlightQuoteCreateDTO($flightProduct, $productQuote, $flightQuoteData, null)));
-        $flightQuote->fq_flight_request_uid = ArrayHelper::getValue($saleData, 'bookingId');
+        $flightQuote->fq_flight_request_uid = $orderCreateFromSaleForm->bookingId;
         $flightQuote->fq_hash_key = null;
         $flightQuote->fq_trip_type_id = $flightProduct->fl_trip_type_id;
         $flightQuote->fq_service_fee_percent = 0;
@@ -258,7 +258,7 @@ class FlightFromSaleService
             $flightQuote->getId(),
             $orderCreateFromSaleForm->getTripTypeId(),
             $orderCreateFromSaleForm->validatingCarrier,
-            $orderCreateFromSaleForm->bookingId,
+            $orderCreateFromSaleForm->baseBookingId,
             null,
             $orderCreateFromSaleForm->pnr,
             $orderCreateFromSaleForm->validatingCarrier,
@@ -271,7 +271,7 @@ class FlightFromSaleService
 
         $flightQuoteBooking = FlightQuoteBooking::create(
             $flightQuoteFlightId,
-            $orderCreateFromSaleForm->bookingId,
+            $orderCreateFromSaleForm->baseBookingId,
             $orderCreateFromSaleForm->pnr,
             $orderCreateFromSaleForm->getGdsId(),
             null,

@@ -47,8 +47,6 @@ if (!empty($caseSaleModel)) {
 $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_id' => !empty($caseModel) ? $caseModel->cs_id : 0, 'sale_id' => $data['saleId'], 'booking_id' => $data['bookingId']]);
 ?>
 
-
-
 <div class="sale-view">
     <h3><?= Html::encode($title) ?></h3>
     <div class="row">
@@ -82,6 +80,12 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                     <th>Confirmation Number (Booking Id)</th>
                     <td><?=Html::encode($data['bookingId'])?></td>
                 </tr>
+                <?php if (($baseBookingId = $data['baseBookingId'] ?? null) && $baseBookingId !== $data['bookingId']) : ?>
+                    <tr>
+                        <th>Base Booking Id</th>
+                        <td><?=Html::encode($baseBookingId)?></td>
+                    </tr>
+                <?php endif ?>
                 <tr>
                     <th>PNR</th>
                     <td><?=Html::encode($data['pnr'])?></td>
