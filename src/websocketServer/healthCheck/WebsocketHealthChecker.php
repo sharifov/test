@@ -57,7 +57,7 @@ class WebsocketHealthChecker
     {
         try {
             $response = json_decode($body, true, 3, JSON_THROW_ON_ERROR);
-            if (isset($response['ws'], $response['message'], $response['appInstance'], $response['db'], $response['dbSlave'])) {
+            if (isset($response['ws'], $response['message'], $response['appInstance'], $response['mysql'], $response['mysqlSlave'])) {
                 return $response;
             }
             throw new \DomainException('Websocket server health response is invalid.');

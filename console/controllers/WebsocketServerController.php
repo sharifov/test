@@ -213,23 +213,23 @@ class WebsocketServerController extends Controller
             try {
                 if (isset($request->header['health-check'])) {
                     echo PHP_EOL . ' Health check ';
-                    $dbStatus = 'Ok';
+                    $mysqlStatus = 'Ok';
                     try {
                         \Yii::$app->db->createCommand('SELECT 1')->execute();
                     } catch (\Throwable $e) {
                         \Yii::error([
                             'message' => $e->getMessage(),
                         ], 'ws:open:health-check:db');
-                        $dbStatus = 'Error';
+                        $mysqlStatus = 'Error';
                     }
-                    $dbSlaveStatus = 'Ok';
+                    $mysqlSlaveStatus = 'Ok';
                     try {
                         \Yii::$app->db_slave->createCommand('SELECT 1')->execute();
                     } catch (\Throwable $e) {
                         \Yii::error([
                             'message' => $e->getMessage(),
                         ], 'ws:open:health-check:db_slave');
-                        $dbSlaveStatus = 'Error';
+                        $mysqlSlaveStatus = 'Error';
                     }
                     try {
                         // SWOOLE_REDIS_STATE_READY === 3 ?
@@ -244,8 +244,8 @@ class WebsocketServerController extends Controller
                         'ws' => 'Ok',
                         'message' => 'Successfully connected to websocket server',
                         'appInstance' => \Yii::$app->params['appInstance'],
-                        'db' => $dbStatus,
-                        'dbSlave' => $dbSlaveStatus,
+                        'mysql' => $mysqlStatus,
+                        'mysqlSlave' => $mysqlSlaveStatus,
                         'redis' => $redisStatus,
                     ]);
                     echo $result . PHP_EOL;

@@ -171,8 +171,8 @@ class HealthController extends Controller
      *       "ws": "Ok",
      *       "message": "Successfully connected to websocket server",
      *       "appInstance": "1",
-     *       "db": "Ok",
-     *       "dbSlave": "Ok",
+     *       "mysql": "Ok",
+     *       "mysqlSlave": "Ok",
      *       "redis": "Ok",
      *       "ping": {
      *           "pong": "WebsocketServerTest",
@@ -185,8 +185,8 @@ class HealthController extends Controller
      *       "ws": "Ok",
      *       "message": "Successfully connected to websocket server",
      *       "appInstance": "1",
-     *       "db": "Error",
-     *       "dbSlave": "Ok",
+     *       "mysql": "Error",
+     *       "mysqlSlave": "Ok",
      *       "redis": "Error",
      *       "ping": {
      *           "pong": "WebsocketServerTest",
