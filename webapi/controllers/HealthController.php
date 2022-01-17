@@ -141,6 +141,75 @@ class HealthController extends Controller
         return $response['json'] ?? [];
     }
 
+    /**
+     * @api {post} /health-check/ws Health check Websocket server
+     * @apiVersion 0.1.0
+     * @apiName HealthCheck Sales Websocket
+     * @apiGroup App
+     * @apiPermission Authorized User
+     * @apiDescription If username is empty in config file then HttpBasicAuth is disabled.
+     *
+     * @apiHeader {string} Authorization    Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParam {string{3..50}=[a-zA-Z]}        ping                 Ping text
+     *
+     * @apiParamExample {json} Request-Example:
+     *
+     * {
+     *      "ping": "WebsocketServerTest"
+     * }
+     *
+     * @apiSuccessExample {json} Success-Response:
+     *
+     * HTTP/1.1 200 OK
+     *   {
+     *       "ws": "Ok",
+     *       "message": "Successfully connected to websocket server",
+     *       "appInstance": "1",
+     *       "db": "Ok",
+     *       "dbSlave": "Ok",
+     *       "redis": "Ok",
+     *       "ping": {
+     *           "pong": "WebsocketServerTest",
+     *           "appInstance": "1"
+     *       }
+     *   }
+     *
+     * HTTP/1.1 200 OK
+     *   {
+     *       "ws": "Ok",
+     *       "message": "Successfully connected to websocket server",
+     *       "appInstance": "1",
+     *       "db": "Error",
+     *       "dbSlave": "Ok",
+     *       "redis": "Error",
+     *       "ping": {
+     *           "pong": "WebsocketServerTest",
+     *           "appInstance": "1"
+     *       }
+     *   }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     *   {
+     *       "ws": "Error",
+     *       "message": "Cant connect to Websocket Server."
+     *   }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     *   {
+     *       "ws": "Error",
+     *       "message": "Ping cannot be blank."
+     *   }
+     */
     public function actionWs()
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
@@ -148,14 +217,18 @@ class HealthController extends Controller
         $form = new HealthCheckRequestForm();
 
         if (!$form->load(Yii::$app->request->post())) {
+            Yii::$app->response->setStatusCode(422);
             return [
-                'error' => 'Can load data',
+                'ws' => 'Error',
+                'message' => 'Can load data',
             ];
         }
 
         if (!$form->validate()) {
+            Yii::$app->response->setStatusCode(422);
             return [
-                'error' => $form->getFirstError('ping'),
+                'ws' => 'Error',
+                'message' => $form->getFirstError('ping'),
             ];
         }
 
@@ -166,6 +239,7 @@ class HealthController extends Controller
                 $form->ping
             );
         } catch (\Throwable $e) {
+            Yii::$app->response->setStatusCode(422);
             return [
                 'ws' => 'Error',
                 'message' => $e->getMessage(),
