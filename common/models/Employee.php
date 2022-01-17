@@ -2656,14 +2656,14 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      * @param string $default
      * @return string
      */
-    public function getGravatarUrl(int $s = 128, string $default = 'identicon'): string
+    public function getGravatarUrl(int $s = 128, string $default = 'robohash'): string
     {
-//        if ($this->email) {
-//            $url = '//www.gravatar.com/avatar/' . md5(strtolower(trim($this->email))) . '?d=' . $default . '&s=' . $s;
-//        } else {
-//            $url = '//www.gravatar.com/avatar/?d=' . $default . '&s=60';
-//        }
-        return '/img/user.png';
+        if ($this->email) {
+            $url = '//www.gravatar.com/avatar/' . md5(strtolower(trim($this->email))) . '?d=' . $default . '&s=' . $s;
+        } else {
+            $url = '//www.gravatar.com/avatar/?d=' . $default . '&s=60';
+        }
+        return $url;
     }
 
     public function getAvatar(): string
