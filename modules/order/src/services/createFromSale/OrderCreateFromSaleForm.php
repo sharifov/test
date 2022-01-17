@@ -16,6 +16,7 @@ use yii\helpers\ArrayHelper;
  * @property $saleId
  * @property $project
  * @property $bookingId
+ * @property string|null $baseBookingId
  * @property $pnr
  * @property $price
  * @property $tripType
@@ -36,6 +37,7 @@ class OrderCreateFromSaleForm extends Model
     public $saleId;
     public $project;
     public $bookingId;
+    public $baseBookingId;
     public $pnr;
     public $price;
     public $tripType;
@@ -62,7 +64,8 @@ class OrderCreateFromSaleForm extends Model
             [['project'], 'string'],
             [['project'], 'detectProjectId'],
 
-            ['bookingId', 'string', 'max' => 50],
+            [['bookingId', 'baseBookingId'], 'string', 'max' => 50],
+            [['baseBookingId'], 'baseBookingIdHandle'],
 
             [['pnr'], 'string', 'max' => 70],
 
@@ -86,7 +89,14 @@ class OrderCreateFromSaleForm extends Model
         ];
     }
 
-    public function detectProjectId($attribute)
+    public function baseBookingIdHandle(): void
+    {
+        if (empty($this->baseBookingId)) {
+            $this->baseBookingId = $this->bookingId;
+        }
+    }
+
+    public function detectProjectId($attribute): void
     {
         if ($project = Project::findOne(['name' => $this->project])) {
             $this->projectId = $project->id;
@@ -95,19 +105,19 @@ class OrderCreateFromSaleForm extends Model
         }
     }
 
-    public function detectCurrency()
+    public function detectCurrency(): void
     {
         $this->currency = ArrayHelper::getValue($this->price, 'currency');
     }
 
-    public function detectTripTypeId($attribute)
+    public function detectTripTypeId($attribute): void
     {
         if (!$this->tripTypeId = FlightFromSaleService::getFlightTripIdByName($this->tripType)) {
             $this->addError($attribute, 'Trip tape ID not detected by (' . $this->tripType . ')');
         }
     }
 
-    public function detectGdsId($attribute)
+    public function detectGdsId($attribute): void
     {
         $this->gdsId = SearchService::getGDSKeyByName($this->gds);
     }
