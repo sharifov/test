@@ -142,7 +142,7 @@ class HealthController extends Controller
     }
 
     /**
-     * @api {post} /health-check/ws Health check Websocket server
+     * @api {get} /health-check/ws Health check Websocket server
      * @apiVersion 0.1.0
      * @apiName HealthCheck Sales Websocket
      * @apiGroup App
