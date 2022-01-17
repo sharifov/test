@@ -128,7 +128,7 @@ class ClientPhone extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['phone'], 'required'],
+            [['phone', 'client_id'], 'required'],
             [['client_id', 'is_sms', 'type'], 'integer'],
             [['created', 'updated', 'comments', 'validate_dt'], 'safe'],
 
