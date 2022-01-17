@@ -1,8 +1,8 @@
 <?php
 
-namespace src\services;
+namespace src\websocketServer\healthCheck;
 
-class WebsocketHealthChecker
+class SwooleWebsocketHealthChecker
 {
     public function check(string $host, int $port, float $timeout): array
     {

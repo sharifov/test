@@ -250,7 +250,6 @@ class WebsocketServerController extends Controller
                     ]);
                     echo $result . PHP_EOL;
                     $server->push($request->fd, $result);
-                    $server->disconnect($request->fd, 200, '');
                     return;
                 }
             } catch (\Throwable $e) {
@@ -609,6 +608,13 @@ class WebsocketServerController extends Controller
     public function dataProcessing(Server $server, \Swoole\WebSocket\Frame $frame, array $data): ?array
     {
         $out = null;
+
+        if (!empty($data['ping'])) {
+            return [
+                'pong' => $data['ping'],
+                'appInstance' => \Yii::$app->params['appInstance'],
+            ];
+        }
 
         if (empty($data['c'])) {
             $out['errors'][] = 'Error: Not isset "c" param';

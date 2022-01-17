@@ -88,7 +88,7 @@ use src\services\clientChatMessage\ClientChatMessageService;
 use src\services\clientChatUserAccessService\ClientChatUserAccessService;
 use src\services\sms\incoming\SmsIncomingForm;
 use src\services\sms\incoming\SmsIncomingService;
-use src\services\WebsocketHealthChecker;
+use src\websocketServer\healthCheck\WebsocketHealthChecker;
 use Swoole\Http\Client;
 use yii\console\Controller;
 use yii\db\Expression;
@@ -105,7 +105,11 @@ class TestController extends Controller
     public function actionWsHealthCheck()
     {
         $checker = new WebsocketHealthChecker();
-        $result = $checker->check('localhost', 8095, 1);
+        $result = $checker->check(
+            'ws://' . env('CONSOLE_CONFIG_PARAMS_WEBSOCKETSERVER_HOST') . ':' . env('CONSOLE_CONFIG_PARAMS_WEBSOCKETSERVER_PORT'),
+            5,
+            'qwerty'
+        );
         VarDumper::dump($result);
     }
 

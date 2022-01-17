@@ -2,7 +2,8 @@
 
 namespace webapi\controllers;
 
-use src\services\WebsocketHealthChecker;
+use src\websocketServer\healthCheck\HealthCheckRequestForm;
+use src\websocketServer\healthCheck\WebsocketHealthChecker;
 use webapi\behaviors\HttpBasicAuthHealthCheck;
 use yii\rest\Controller;
 use yii\web\Response;
@@ -144,11 +145,25 @@ class HealthController extends Controller
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
 
+        $form = new HealthCheckRequestForm();
+
+        if (!$form->load(Yii::$app->request->post())) {
+            return [
+                'error' => 'Can load data',
+            ];
+        }
+
+        if (!$form->validate()) {
+            return [
+                'error' => $form->getFirstError('ping'),
+            ];
+        }
+
         try {
             return (new WebsocketHealthChecker())->check(
-                env('CONSOLE_CONFIG_PARAMS_WEBSOCKETSERVER_HOST'),
-                env('CONSOLE_CONFIG_PARAMS_WEBSOCKETSERVER_PORT'),
-                1
+                'ws://' . env('CONSOLE_CONFIG_PARAMS_WEBSOCKETSERVER_HOST') . ':' . env('CONSOLE_CONFIG_PARAMS_WEBSOCKETSERVER_PORT'),
+                5,
+                $form->ping
             );
         } catch (\Throwable $e) {
             return [
