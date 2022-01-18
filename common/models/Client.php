@@ -257,6 +257,14 @@ class Client extends ActiveRecord
     }
 
     /**
+     * @return ActiveQuery
+     */
+    public function getClientEmailsLimited(int $limit = 30): ActiveQuery
+    {
+        return $this->hasMany(ClientEmail::class, ['client_id' => 'id'])->limit($limit);
+    }
+
+    /**
      * @param array $types
      * @return array
      */
@@ -298,9 +306,21 @@ class Client extends ActiveRecord
         return $this->hasMany(Lead::class, ['client_id' => 'id'])->limit($limit);
     }
 
+    /**
+     * @return ActiveQuery
+     */
     public function getCases(): ActiveQuery
     {
         return $this->hasMany(Cases::class, ['cs_client_id' => 'id']);
+    }
+
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getCasesLimited(int $limit = 30): ActiveQuery
+    {
+        return $this->hasMany(Cases::class, ['cs_client_id' => 'id'])->limit($limit);
     }
 
     /**

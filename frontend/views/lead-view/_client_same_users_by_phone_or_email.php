@@ -9,11 +9,9 @@ use src\helpers\phone\MaskPhoneHelper;
 
 /**
  * @var $dataProvider ActiveDataProvider
- * @var $email string
  * @var $clientId int
  */
-Pjax::begin(['id' => 'pjax-client-same-email', 'timeout' => 2000, 'enablePushState' => false, 'clientOptions' => ['method' => 'POST', 'data' => [
-    'email' => $email,
+Pjax::begin(['id' => 'pjax-client-same-phone-or-email', 'timeout' => 2000, 'enablePushState' => false, 'clientOptions' => ['method' => 'POST', 'data' => [
     'clientId' => $clientId
 ]]]);
 
@@ -38,7 +36,7 @@ echo GridView::widget([
                 }
 
                 $str = implode('<br>', $data);
-                return '' . $str . '';
+                return $str;
             },
             'format' => 'raw',
             'contentOptions' => ['class' => 'text-left'],
@@ -49,7 +47,7 @@ echo GridView::widget([
             'attribute' => 'client_email',
             'value' => static function (\common\models\Client $model) {
 
-                $emails = $model->clientEmails;
+                $emails = $model->clientEmailsLimited;
                 $data = [];
                 if ($emails) {
                     foreach ($emails as $k => $email) {
@@ -57,8 +55,16 @@ echo GridView::widget([
                     }
                 }
 
-                $str = implode('<br>', $data);
-                return '' . $str . '';
+                $str = '';
+                if ($data) {
+                    $str = implode('<br>', $data);
+                    if (count($emails) >= 30) {
+                        $str .= '<br>' . Html::a('See all emails in new window', '/client/view?id=' .
+                                $model->id, ['target' => '_blank', 'data-pjax' => 0]);
+                    }
+                }
+
+                return $str;
             },
             'format' => 'raw',
             'contentOptions' => ['class' => 'text-left'],
@@ -68,17 +74,21 @@ echo GridView::widget([
             'header' => 'Leads',
             'value' => static function (\common\models\Client $model) {
 
-                $leads = $model->leads;
+                $leads = $model->leadsLimited;
                 $data = [];
-                if ($leads) {
+                if (!empty($leads)) {
                     foreach ($leads as $lead) {
-                        $data[] = '<i class="fa fa-link"></i> ' . Html::a('lead: ' . $lead->id, ['lead/view', 'gid' => $lead->gid], ['target' => '_blank', 'data-pjax' => 0]) . ' (IP: ' . $lead->request_ip . ')';
+                        $data[] = '<i class="fa fa-link"></i> ' . Html::a('lead: ' . $lead->id, ['lead/view', 'gid' => $lead->gid], ['target' => '_blank', 'data-pjax' => 0]) . ($lead->request_ip ? ' (IP: ' . $lead->request_ip . ')' : '');
                     }
                 }
 
                 $str = '';
                 if ($data) {
-                    $str = '' . implode('<br>', $data) . '';
+                    $str = implode('<br>', $data);
+                    if (count($leads) >= 30) {
+                        $str .= '<br>' . Html::a('See all leads in new window', '/client/view?id=' .
+                                $model->id, ['target' => '_blank', 'data-pjax' => 0]);
+                    }
                 }
 
                 return $str;
@@ -90,8 +100,9 @@ echo GridView::widget([
         [
             'header' => 'Cases',
             'value' => static function (\common\models\Client $model) {
+                $cases = $model->casesLimited;
                 $data = [];
-                if ($cases = $model->cases) {
+                if ($cases) {
                     foreach ($cases as $case) {
                         $data[] = '<i class="fa fa-link"></i> ' . Html::a('case: ' . $case->cs_id, ['cases/view', 'gid' => $case->cs_gid], ['target' => '_blank', 'data-pjax' => 0]);
                     }
@@ -99,7 +110,11 @@ echo GridView::widget([
 
                 $str = '';
                 if ($data) {
-                    $str = '' . implode('<br>', $data) . '';
+                    $str = implode('<br>', $data);
+                    if (count($cases) >= 30) {
+                        $str .= '<br>' . Html::a('See all cases in new window', '/client/view?id=' .
+                                $model->id, ['target' => '_blank', 'data-pjax' => 0]);
+                    }
                 }
 
                 return $str;

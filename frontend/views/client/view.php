@@ -30,7 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-5">
     <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
@@ -86,7 +86,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
     ]) ?>
     </div>
-        <div class="col-md-6">
+        <div class="col-md-7">
             <?= DetailView::widget([
                 'model' => $model,
                 'attributes' => [
@@ -148,14 +148,15 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
             ]) ?>
 
-            <h5>Leads of users with same phone</h5>
-        <?php
-            Pjax::begin(['id' => 'pjax-client-same-phone', 'timeout' => 2000, 'enablePushState' => false, 'clientOptions' => ['method' => 'POST', 'data' => [
+            <div class="col-md-6">
+            <h5>Leads:</h5>
+            <?php
+            Pjax::begin(['id' => 'pjax-client-leads', 'timeout' => 2000, 'enablePushState' => false, 'clientOptions' => ['method' => 'POST', 'data' => [
                 'clientId' => $model->id
             ]]]);
 
             echo GridView::widget([
-                'dataProvider' => $dataProvider,
+                'dataProvider' => $leadsDataProvider,
                 'columns' => [
                     [
                     'value' => static function (array $model) {
@@ -166,8 +167,29 @@ $this->params['breadcrumbs'][] = $this->title;
                 ]
             ]);
             Pjax::end();
-
             ?>
+            </div>
+            <div class="col-md-6">
+                <h5>Cases:</h5>
+                <?php
+                Pjax::begin(['id' => 'pjax-client-cases', 'timeout' => 2000, 'enablePushState' => false, 'clientOptions' => ['method' => 'POST', 'data' => [
+                    'clientId' => $model->id
+                ]]]);
+
+                echo GridView::widget([
+                    'dataProvider' => $casesDataProvider,
+                    'columns' => [
+                        [
+                            'value' => static function (array $model) {
+                                return '<i class="fa fa-link"></i> ' . Html::a('case: ' . $model['cs_id'], ['cases/view', 'gid' => $model['cs_gid'] ], ['target' => '_blank', 'data-pjax' => 0]);
+                            },
+                            'format' => 'html'
+                        ]
+                    ]
+                ]);
+                Pjax::end();
+                ?>
+            </div>
         </div>
     </div>
 
