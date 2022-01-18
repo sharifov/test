@@ -15,7 +15,7 @@ class FlightQuoteBookingSearch extends FlightQuoteBooking
 
             ['fqb_gds', 'string'],
             ['fqb_gds_pcc', 'string'],
-            ['fqb_booking_id', 'string'],
+            [['fqb_booking_id', 'fqb_child_booking_id'], 'string'],
             ['fqb_pnr', 'string'],
             ['fqb_validating_carrier', 'string'],
 
@@ -47,6 +47,7 @@ class FlightQuoteBookingSearch extends FlightQuoteBooking
         ]);
 
         $query->andFilterWhere(['like', 'fqb_booking_id', $this->fqb_booking_id])
+            ->andFilterWhere(['like', 'fqb_child_booking_id', $this->fqb_child_booking_id])
             ->andFilterWhere(['like', 'fqb_pnr', $this->fqb_pnr])
             ->andFilterWhere(['like', 'fqb_gds', $this->fqb_gds])
             ->andFilterWhere(['like', 'fqb_gds_pcc', $this->fqb_gds_pcc])

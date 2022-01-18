@@ -34,6 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'fqb_id',
                 'fqb_fqf_id',
                 'fqb_booking_id',
+                'fqb_child_booking_id',
                 'fqb_pnr',
                 'fqb_gds',
                 'fqb_gds_pcc',

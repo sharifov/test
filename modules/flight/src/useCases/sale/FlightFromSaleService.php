@@ -254,6 +254,8 @@ class FlightFromSaleService
             }
         }
 
+        $childBookingId = ($orderCreateFromSaleForm->bookingId !== $orderCreateFromSaleForm->baseBookingId) ?
+            $orderCreateFromSaleForm->bookingId : null;
         $flightQuoteFlight = FlightQuoteFlight::create(
             $flightQuote->getId(),
             $orderCreateFromSaleForm->getTripTypeId(),
@@ -262,7 +264,8 @@ class FlightFromSaleService
             null,
             $orderCreateFromSaleForm->pnr,
             $orderCreateFromSaleForm->validatingCarrier,
-            null
+            null,
+            $childBookingId
         );
         if (!$flightQuoteFlight->validate()) {
             throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($flightQuoteFlight, ' ', true));
@@ -275,7 +278,8 @@ class FlightFromSaleService
             $orderCreateFromSaleForm->pnr,
             $orderCreateFromSaleForm->getGdsId(),
             null,
-            $orderCreateFromSaleForm->validatingCarrier
+            $orderCreateFromSaleForm->validatingCarrier,
+            $childBookingId
         );
         if (!$flightQuoteBooking->validate()) {
             throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($flightQuoteBooking, ' ', true));

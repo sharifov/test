@@ -16,7 +16,7 @@ class FlightQuoteFlightSearch extends FlightQuoteFlight
     public function rules(): array
     {
         return [
-            ['fqf_booking_id', 'string', 'max' => 50],
+            [['fqf_booking_id', 'fqf_child_booking_id'], 'string', 'max' => 50],
             ['fqf_main_airline', 'string', 'max' => 2],
             ['fqf_pnr', 'string', 'max' => 70],
             ['fqf_original_data_json', 'string'],
@@ -65,6 +65,7 @@ class FlightQuoteFlightSearch extends FlightQuoteFlight
         $query
             ->andFilterWhere(['like', 'fqf_main_airline', $this->fqf_main_airline])
             ->andFilterWhere(['like', 'fqf_booking_id', $this->fqf_booking_id])
+            ->andFilterWhere(['like', 'fqf_child_booking_id', $this->fqf_child_booking_id])
             ->andFilterWhere(['like', 'fqf_pnr', $this->fqf_pnr])
             ->andFilterWhere(['like', 'fqf_validating_carrier', $this->fqf_validating_carrier])
             ->andFilterWhere(['like', 'fqf_original_data_json', $this->fqf_original_data_json]);

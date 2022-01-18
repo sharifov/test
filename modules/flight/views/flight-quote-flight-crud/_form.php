@@ -25,6 +25,8 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'fqf_booking_id')->textInput(['maxlength' => true]) ?>
 
+        <?= $form->field($model, 'fqf_child_booking_id')->textInput(['maxlength' => true]) ?>
+
         <?= $form->field($model, 'fqf_pnr')->textInput(['maxlength' => true]) ?>
 
         <?= $form->field($model, 'fqf_validating_carrier')->textInput(['maxlength' => true]) ?>

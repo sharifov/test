@@ -23,6 +23,7 @@ use yii\helpers\ArrayHelper;
  * @property int $fqb_id
  * @property int $fqb_fqf_id
  * @property string|null $fqb_booking_id
+ * @property string|null $fqb_child_booking_id
  * @property string|null $fqb_pnr
  * @property string|null $fqb_gds
  * @property string|null $fqb_gds_pcc
@@ -45,6 +46,7 @@ class FlightQuoteBooking extends ActiveRecord implements Serializable, ProductDa
             ['fqb_fqf_id', 'exist', 'skipOnError' => true, 'targetClass' => FlightQuoteFlight::class, 'targetAttribute' => ['fqb_fqf_id' => 'fqf_id']],
 
             ['fqb_booking_id', 'string', 'max' => 10],
+            ['fqb_child_booking_id', 'string', 'max' => 10],
             ['fqb_gds', 'string', 'max' => 1],
             ['fqb_gds_pcc', 'string', 'max' => 255],
 
@@ -100,6 +102,7 @@ class FlightQuoteBooking extends ActiveRecord implements Serializable, ProductDa
             'fqb_id' => 'ID',
             'fqb_fqf_id' => 'FlightQuoteFlight',
             'fqb_booking_id' => 'Booking ID',
+            'fqb_child_booking_id' => 'Child Booking Id',
             'fqb_pnr' => 'Pnr',
             'fqb_gds' => 'Gds',
             'fqb_gds_pcc' => 'Gds Pcc',
@@ -125,11 +128,13 @@ class FlightQuoteBooking extends ActiveRecord implements Serializable, ProductDa
         ?string $pnr,
         ?string $gds,
         ?string $gdsPss,
-        ?string $validatingCarrier
+        ?string $validatingCarrier,
+        ?string $childBookingId = null
     ): FlightQuoteBooking {
         $model = new self();
         $model->fqb_fqf_id = $flightQuoteFlightId;
         $model->fqb_booking_id = $bookingId;
+        $model->fqb_child_booking_id = $childBookingId;
         $model->fqb_pnr = $pnr;
         $model->fqb_gds = $gds;
         $model->fqb_gds_pcc = $gdsPss;
