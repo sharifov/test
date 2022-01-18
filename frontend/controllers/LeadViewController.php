@@ -167,9 +167,8 @@ class LeadViewController extends FController
 
                 $dataProvider = $searchModel->searchFromLead($params);
 
-                return $this->renderAjax('_client_same_users_by_phone', [
+                return $this->renderAjax('_client_same_users_by_phone_or_email', [
                     'dataProvider' => $dataProvider,
-                    'phone' => $phone,
                     'clientId' => $clientId
                 ]);
             } catch (\Exception $e) {
@@ -199,9 +198,8 @@ class LeadViewController extends FController
 
                 $dataProvider = $searchModel->searchFromLead($params);
 
-                return $this->renderAjax('_client_same_users_by_email', [
+                return $this->renderAjax('_client_same_users_by_phone_or_email', [
                     'dataProvider' => $dataProvider,
-                    'email' => $email,
                     'clientId' => $clientId
                 ]);
             } catch (\Exception $e) {
