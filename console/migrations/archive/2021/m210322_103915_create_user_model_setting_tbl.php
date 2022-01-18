@@ -3,7 +3,6 @@
 use common\models\Employee;
 use console\migrations\RbacMigrationService;
 use yii\db\Migration;
-use yii\rbac\ManagerInterface;
 
 /**
  * Class m210322_103915_create_user_search_setting_tbl

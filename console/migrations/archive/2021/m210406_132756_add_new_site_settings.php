@@ -1,7 +1,6 @@
 <?php
 
 use common\models\Setting;
-use common\models\SettingCategory;
 use yii\db\Migration;
 
 /**

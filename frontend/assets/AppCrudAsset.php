@@ -18,5 +18,6 @@ class AppCrudAsset extends \yii\web\AssetBundle
         AllSharedAsset::class,
         PageLoaderAsset::class,
         GentelellaCrudAsset::class,
+        BrowserReportAsset::class
     ];
 }

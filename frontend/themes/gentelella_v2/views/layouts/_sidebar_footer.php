@@ -7,8 +7,6 @@ use yii\helpers\Html;
 /** @var \common\models\Employee $user */
 $user = Yii::$app->user->identity;
 ?>
-
-
 <div class="sidebar-footer hidden-small">
     <div class="col-md-12 form-group" id="search-menu-div" style="display: none">
         <div class="input-group mb-2">
@@ -38,13 +36,15 @@ $user = Yii::$app->user->identity;
         ['data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => 'Search menu', 'id' => 'btn-search-menu-toggle']
 ) ?>
 
-    <?php if ($user->canRoute('/user-connection/index')) :?>
+    <?php /* if ($user->canRoute('/user-connection/index')) :?>
         <?=Html::a(
             '<span class="fa fa-plug"></span>',
             ['/user-connection/index'],
             ['data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => 'User Connections']
         ) ?>
-    <?php endif; ?>
+    <?php endif;*/ ?>
+
+
 
     <?php /* if (Yii::$app->user->can('PhoneWidget')) :?>
         <?=Html::a(
@@ -69,6 +69,15 @@ $user = Yii::$app->user->identity;
             ['target' => '_blank', 'data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => 'Site Settings']
         ) ?>
     <?php endif; ?>
+
+    <?php /*if ($user->canRoute('/user-connection/index')) :*/?>
+    <?=Html::a(
+        '<span class="fa fa-bug warning"></span>',
+        ['/user-feedback-crud/create-ajax'],
+        ['data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => 'Bug Report', 'id' => 'btn-bug-create']
+    ) ?>
+    <?php /*endif;*/ ?>
+
 </div>
 <?php
 $sideBarMenuUrl = \yii\helpers\Url::to(['/site/side-bar-menu']);
@@ -80,6 +89,111 @@ $('#btn-search-menu-toggle').on('click', function (e) {
     e.preventDefault();
     $('#search-menu-div').toggle();
 });
+
+
+
+    
+function canvasEditor() {
+   
+      const props = {
+          usageStatistics: false,
+    includeUI: {
+      loadImage: {
+        path: "https://i1.wp.com/www.tor.com/wp-content/uploads/2018/10/Malazan-Kotaki.jpg?fit=740%2C386&type=vertical&quality=100&ssl=1",
+        name: "SampleImage"
+      },
+      uiSize: {
+        width: "100%",
+        height: "600px"
+      },
+      menu: [
+        "crop",
+        //"flip",
+        "rotate",
+        "draw",
+        "shape",
+        "icon",
+        "text",
+        //"filter"
+      ],
+      menuBarPosition: "bottom"
+      // theme: whiteTheme,
+    },
+    cssMaxWidth: 1200,
+    cssMaxHeight: 800,
+    selectionStyle: {
+      cornerSize: 20,
+      rotatingPointOffset: 70
+    }
+  };
+  
+    const imageEditor = new tui.ImageEditor('#tui-image-editor', props);
+    //imageEditor.loadImageFromURL('https://cdn.rawgit.com/nhnent/tui.component.image-editor/1.3.0/samples/img/sampleImage.jpg', 'SampleImage');
+    
+}
+
+
+$('body').off('click', '#btn-bug-create').on('click', '#btn-bug-create', function (e) {
+    e.preventDefault();
+    
+    let btn = $(this);
+    let btnHtml = btn.html();
+    let url = btn.attr('href');
+    let iconSpinner = '<span class="fa fa-spin fa-spinner warning"></i>';
+    
+    btn.html(iconSpinner);
+    btn.addClass('disabled');
+    
+    let modal = $('#modal-lg');
+    modal.find('.modal-body').html('');
+    modal.find('.modal-title').html('Create Bug issue');
+    
+    let jsonData = {};
+    $.getJSON('https://ipapi.co/json', function(data) {
+      jsonData.ipapi = data;
+      if (!jsonData.ipapi) {
+        $.getJSON('https://api.db-ip.com/v2/free/self', function(data) {
+            jsonData.dbip = data;
+        });
+      }
+    });
+    
+    let base64image;
+    html2canvas(document.body, {
+        height: $(window).height(),
+        width: $(window).width(),
+        y: window.scrollY
+    }).then((canvas) => {
+       base64image = canvas.toDataURL("image/png");
+    }).then(() => {
+        modal.find('.modal-body').load(url, {title: document.title}, function( response, status, xhr ) {
+            if(status === 'error') {
+                createNotify('Error', xhr.responseText, 'error');
+            } else {
+                modal.modal('show');
+                $('#screenshot-img').attr('src', base64image).removeClass('hidden'); 
+                $('#bug-screen').val(base64image);
+                jsonData.browserReport = browserReportSync();
+                $('#userBugReportData').find('pre').html(JSON.stringify(jsonData, null, 2));
+                $('#uf_data').val(JSON.stringify(jsonData));
+            }
+            btn.html(btnHtml);
+            btn.removeClass('disabled');
+        });
+    });
+});
+
+// $('#btn-bug-create').on('click', function (e) {
+//     e.preventDefault();
+//     // $('#input-search-menu').val('');
+//     // $('#input-search-menu').trigger('keyup');
+//    
+//    
+//    
+//    
+//     return false;
+// });
+
 
 $('body').on('click', '#btn-remove-search-menu', function (e) {
     e.preventDefault();

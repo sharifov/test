@@ -6,6 +6,7 @@ namespace frontend\themes\gentelella_v2\assets\groups;
 use frontend\assets\CentrifugeAsset;
 use frontend\assets\groups\AllSharedDependenciesAsset;
 use frontend\assets\groups\AllSharedGroupAsset;
+use frontend\assets\Html2CanvasAsset;
 use frontend\themes\gentelella_v2\assets\FontAwesomeAllAsset;
 use frontend\themes\gentelella_v2\assets\FontAwesomeAsset;
 use frontend\themes\gentelella_v2\assets\SentryAsset;
@@ -22,6 +23,7 @@ class GentelellaAsset extends \yii\web\AssetBundle
         SentryAsset::class,
         CentrifugeAsset::class,
         NotificationSocketAsset::class,
-        SwitcheryAsset::class
+        SwitcheryAsset::class,
+        Html2CanvasAsset::class
     ];
 }

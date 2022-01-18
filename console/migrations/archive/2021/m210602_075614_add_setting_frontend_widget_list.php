@@ -2,8 +2,8 @@
 
 use common\models\Setting;
 use common\models\SettingCategory;
-use yii\db\Migration;
 use frontend\helpers\JsonHelper;
+use yii\db\Migration;
 
 /**
  * Class m210602_075614_add_setting_frontend_widget_list

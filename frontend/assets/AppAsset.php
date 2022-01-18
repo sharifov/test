@@ -21,5 +21,6 @@ class AppAsset extends AssetBundle
         AllSharedAsset::class,
         PageLoaderAsset::class,
         GentelellaAsset::class,
+        BrowserReportAsset::class
     ];
 }

@@ -1,6 +1,5 @@
 <?php
 
-use frontend\helpers\JsonHelper;
 use modules\abac\src\entities\AbacPolicy;
 use yii\db\Migration;
 

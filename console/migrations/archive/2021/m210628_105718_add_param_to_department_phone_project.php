@@ -1,10 +1,9 @@
 <?php
 
-use yii\db\Migration;
 use common\models\DepartmentPhoneProject;
-use yii\helpers\ArrayHelper;
-use yii\helpers\VarDumper;
 use frontend\helpers\JsonHelper;
+use yii\db\Migration;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class m210628_105718_add_param_to_department_phone_project
