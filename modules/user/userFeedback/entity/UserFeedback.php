@@ -4,6 +4,8 @@ namespace modules\user\userFeedback\entity;
 
 use Yii;
 use yii\base\InvalidConfigException;
+use yii\behaviors\BlameableBehavior;
+use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\db\Connection;
 
@@ -30,13 +32,58 @@ class UserFeedback extends ActiveRecord
     public const STATUS_NEW         = 1;
     public const STATUS_PENDING     = 2;
     public const STATUS_CANCEL      = 3;
-    public const STATUS_DONE        = 3;
+    public const STATUS_DONE        = 4;
+
+    public const STATUS_LIST = [
+        self::STATUS_NEW => 'New',
+        self::STATUS_PENDING => 'Pending',
+        self::STATUS_CANCEL => 'Cancel',
+        self::STATUS_DONE => 'Done',
+    ];
 
     public const TYPE_LIST = [
         self::TYPE_BUG => 'Bug Report',
         self::TYPE_FEATURE => 'Feature',
         self::TYPE_QUESTION => 'Question'
     ];
+
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['uf_created_dt', 'uf_updated_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['uf_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s'),
+            ],
+            'user' => [
+                'class' => BlameableBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['uf_created_user_id', 'uf_updated_user_id'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['uf_updated_user_id'],
+                ]
+            ]
+        ];
+    }
+
+
+    /**
+     * @inheritdoc
+     */
+    public static function primaryKey(): array
+    {
+        return ["uf_id"];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getId()
+    {
+        return $this->getPrimaryKey();
+    }
 
     /**
      * @return string
@@ -61,9 +108,9 @@ class UserFeedback extends ActiveRecord
     public function rules()
     {
         return [
-            [['uf_id', 'uf_type_id', 'uf_status_id', 'uf_title', 'uf_data_json', 'uf_created_dt'], 'required'],
-            [['uf_id', 'uf_type_id', 'uf_status_id', 'uf_created_user_id', 'uf_updated_user_id'], 'default', 'value' => null],
-            [['uf_id', 'uf_type_id', 'uf_status_id', 'uf_created_user_id', 'uf_updated_user_id'], 'integer'],
+            [['uf_type_id', 'uf_status_id', 'uf_title', 'uf_data_json'], 'required'],
+            [['uf_type_id', 'uf_status_id', 'uf_created_user_id', 'uf_updated_user_id'], 'default', 'value' => null],
+            [['uf_type_id', 'uf_status_id', 'uf_created_user_id', 'uf_updated_user_id'], 'integer'],
             [['uf_message'], 'string'],
             [['uf_data_json', 'uf_created_dt', 'uf_updated_dt'], 'safe'],
             [['uf_title'], 'string', 'max' => 255],
@@ -96,5 +143,48 @@ class UserFeedback extends ActiveRecord
     public static function getTypeList(): array
     {
         return self::TYPE_LIST;
+    }
+
+    public static function create(
+        ?string $title,
+        ?string $message,
+        ?array $data
+    ): self {
+        $self = new self();
+        $self->uf_title = $title;
+        $self->uf_message = $message;
+        $self->uf_data_json = $data;
+        return $self;
+    }
+
+    public static function createNewBug(
+        ?string $title,
+        ?string $message,
+        ?array $data
+    ): self {
+        $self = self::create($title, $message, $data);
+        $self->setTypeBug();
+        $self->setStatusNew();
+        return $self;
+    }
+
+    public function setTypeBug(): void
+    {
+        $this->uf_type_id = self::TYPE_BUG;
+    }
+
+    public function setStatusNew(): void
+    {
+        $this->uf_status_id = self::STATUS_NEW;
+    }
+
+    public function getStatusName(): ?string
+    {
+        return self::STATUS_LIST[$this->uf_status_id] ?? null;
+    }
+
+    public function getTypeName(): ?string
+    {
+        return self::TYPE_LIST[$this->uf_type_id] ?? null;
     }
 }

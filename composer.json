@@ -108,7 +108,9 @@
 		"casbin/casbin": "3.7",
 		"snowplow/snowplow-tracker": "0.4.0",
 		"vlucas/phpdotenv": "^5.3",
-		"yiisoft/yii2-authclient": "^2.2"
+		"yiisoft/yii2-authclient": "^2.2",
+        "ext-fileinfo": "*",
+        "ext-pgsql": "*"
     },
 	"require-dev" : {
 		"yiisoft/yii2-debug" : "~2.1",

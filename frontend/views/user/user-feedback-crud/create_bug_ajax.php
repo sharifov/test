@@ -1,5 +1,7 @@
 <?php
 
+use kartik\date\DatePicker;
+use kartik\time\TimePicker;
 use modules\user\userFeedback\forms\UserFeedbackBugForm;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
@@ -27,18 +29,44 @@ use yii\widgets\Pjax;
 <div class="col-md-12">
     <div class="row">
         <div class="col-md-7">
+            <?= $form->errorSummary($model) ?>
+
             <?= $form->field($model, 'title')->textInput(['maxlength' => true]) ?>
+            <?= $form->field($model, 'pageUrl')->textInput() ?>
             <?= $form->field($model, 'message')->textarea(['rows' => 10]) ?>
-            <?= $form->field($model, 'data')->textarea(['rows' => 10, 'id' => 'uf_data']) ?>
+            <?= $form->field($model, 'data')->hiddenInput(['rows' => 10, 'id' => 'uf_data'])->label(false) ?>
+            <div>
+                <span data-toggle="collapse" href="#userBugReportData" role="button" aria-expanded="false" aria-controls="collapseExample"><i class="fas fa-info-circle"></i> Additional Data</span>
+                <div id="userBugReportData" class="collapse"><pre></pre></div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <?= $form->field($model, 'date')->widget(DatePicker::class, [
+                        'pluginOptions' => [
+                            'format' => 'yyyy-mm-dd',
+                            'autoclose' => true,
+                        ]
+                    ]) ?>
+                </div>
+                <div class="col-md-3">
+                    <?= $form->field($model, 'time')->widget(TimePicker::class, [
+                        'pluginOptions' => [
+                            'autoclose' => true,
+                            'showMeridian' => false,
+                            'minuteStep' => 1
+                        ]
+                    ]) ?>
+                </div>
+            </div>
         </div>
         <div class="col-md-5">
             <label class="control-label" for="userfeedbackbugform-screenshot">
                 <?= $model->getAttributeLabel('screenshot') ?>
             </label>
 
-            <img src="<?= Html::encode($model->screenshot) ?>" id="screenshot-img" style="width:100%" class="rounded mx-auto d-block" alt="screenshot"/>
+            <img src="<?= Html::encode($model->screenshot) ?>" id="screenshot-img" style="width:100%" class="rounded mx-auto <?= $model->screenshot ? '' : 'hidden' ?>" alt="screenshot"/>
             <div style="display: none;">
-                <?= $form->field($model, 'screenshot')->hiddenInput()->label(false)?>
+                <?= $form->field($model, 'screenshot')->hiddenInput(['id' => 'bug-screen'])->label(false) ?>
             </div>
         </div>
     </div>

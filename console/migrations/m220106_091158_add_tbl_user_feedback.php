@@ -40,7 +40,7 @@ class m220106_091158_add_tbl_user_feedback extends Migration
         $tableOptions = 'PARTITION BY RANGE (uf_created_dt)';
 
         $this->createTable('{{%user_feedback}}', [
-            'uf_id' => $this->integer()->unsigned()->notNull(),
+            'uf_id' => $this->integer()->unsigned()->notNull()->append('generated always as identity'),
             'uf_type_id' => $this->tinyInteger(1)->notNull(),
             'uf_status_id' => $this->tinyInteger(1)->notNull(),
             'uf_title' => $this->string(255)->notNull(),

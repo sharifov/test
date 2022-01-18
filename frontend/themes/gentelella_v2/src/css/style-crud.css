@@ -6029,3 +6029,11 @@ ul.bar_tabs>li {
 ul.bar_tabs>li.active {
   margin-top: 5px !important;
 }
+
+/************* BUG REPORT FORM ****************/
+#userBugReportData pre {
+    max-height: 300px;
+    overflow: hidden;
+    overflow-y: scroll;
+}
+/************* END BUG REPORT FORM ****************/

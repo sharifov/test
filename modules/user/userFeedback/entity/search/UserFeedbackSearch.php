@@ -46,6 +46,10 @@ class UserFeedbackSearch extends UserFeedback
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => ['defaultOrder' => ['uf_id' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 20,
+            ],
         ]);
 
         $this->load($params);

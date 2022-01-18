@@ -2,23 +2,48 @@
 
 namespace frontend\controllers;
 
+use common\helpers\LogHelper;
 use common\models\Employee;
 use modules\user\userFeedback\entity\UserFeedback;
 use modules\user\userFeedback\entity\search\UserFeedbackSearch;
+use modules\user\userFeedback\entity\UserFeedbackData;
+use modules\user\userFeedback\entity\UserFeedbackFile;
 use modules\user\userFeedback\forms\UserFeedbackBugForm;
+use modules\user\userFeedback\UserFeedbackFileRepository;
+use modules\user\userFeedback\UserFeedbackRepository;
+use src\auth\Auth;
+use src\helpers\app\AppHelper;
+use src\helpers\app\ReleaseVersionHelper;
 use Yii;
+use yii\db\Transaction;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\UploadedFile;
 
 /**
  * UserFeedbackCrudController implements the CRUD actions for UserFeedback model.
  */
 class UserFeedbackCrudController extends FController
 {
+    private UserFeedbackRepository $userFeedbackRepository;
+    private UserFeedbackFileRepository $userFeedbackFileRepository;
+
+    public function __construct(
+        $id,
+        $module,
+        UserFeedbackRepository $userFeedbackRepository,
+        UserFeedbackFileRepository $userFeedbackFileRepository,
+        $config = []
+    ) {
+        $this->userFeedbackRepository = $userFeedbackRepository;
+        $this->userFeedbackFileRepository = $userFeedbackFileRepository;
+        parent::__construct($id, $module, $config);
+    }
+
     /**
      * @return array
      */
@@ -82,8 +107,11 @@ class UserFeedbackCrudController extends FController
      */
     public function actionView($uf_id, $uf_created_dt)
     {
+        $model = $this->findModel($uf_id, $uf_created_dt);
+        $images = UserFeedbackFile::find()->where(['uff_uf_id' => $model->uf_id])->all();
         return $this->render('view', [
-            'model' => $this->findModel($uf_id, $uf_created_dt),
+            'model' => $model,
+            'images' => $images
         ]);
     }
 
@@ -115,21 +143,68 @@ class UserFeedbackCrudController extends FController
      */
     public function actionCreateAjax(): string
     {
-//        $userId = (int) Yii::$app->request->get('user_id', 0);
-//        if (!$user = Employee::findOne($userId)) {
-//            throw new BadRequestHttpException('Invalid User Id: ' . $userId, 1);
-//        }
-
         $form = new UserFeedbackBugForm();
-        $model = new UserFeedback();
 
-        //$model->uf_created_user_id = $userId;
+        $form->title = Yii::$app->request->post('title', null);
+        $form->pageUrl = Yii::$app->request->referrer;
+        $user = Auth::user();
+        try {
+            $timezone = new \DateTimeZone($user->timezone);
+        } catch (\Throwable $e) {
+            $timezone = null;
+        }
+        $dateNow = new \DateTimeImmutable('now', $timezone);
+        $form->date = $dateNow->format('Y-m-d');
+        $form->time = $dateNow->format('H:i');
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            $transaction = new Transaction(['db' => UserFeedback::getDb()]);
+            try {
+                $dto = new UserFeedbackData($form->getDecodedData(), [
+                    'releaseVersion' => ReleaseVersionHelper::getReleaseVersion(true) ?? '',
+                    'host' => Yii::$app->params['appHostname'] ?? '',
+                    'pageUrl' => $form->pageUrl,
+                    'userIndicatedDate' => $form->date,
+                    'userIndicatedTime' => $form->time
+                ]);
+                $userFeedback = UserFeedback::createNewBug($form->title, $form->message, $dto->toArray());
+                $userFeedbackFileId = null;
+                if ($form->screenshot) {
+                    $userFeedbackFile = UserFeedbackFile::create(
+                        $form->getScreenshotMimeType(),
+                        $form->getScreenshotSize(),
+                        md5($form->title . time()),
+                        $form->title,
+                        $form->screenshot
+                    );
+                    $transaction->begin();
+                    $userFeedbackId = $this->userFeedbackRepository->save($userFeedback);
+                    $userFeedbackFile->uff_uf_id = $userFeedbackId;
+                    $this->userFeedbackFileRepository->save($userFeedbackFile);
+                    $userFeedbackFileId = $userFeedbackFile->uff_id;
+                    $transaction->commit();
+                } else {
+                    $userFeedbackId = $this->userFeedbackRepository->save($userFeedback);
+                }
+                Yii::info([
+                    'message' => 'User create an bug report',
+                    'userId' => Auth::id(),
+                    'userFeedbackEntityId' => $userFeedbackId,
+                    'userFeedbackFileId' => $userFeedbackFileId
+                ], 'info\UserFeedbackCrudController::actionCreateAjax::bugReport');
 
-        if ($form->load(Yii::$app->request->post())) {
-            //return 'Success <script>$("#modal-lg").modal("hide")</script>';
-            /*if ($model->save()) {
-                return 'Success <script>$("#modal-lg").modal("hide")</script>';
-            }*/
+                return "<script>$('#modal-lg').modal('hide'); createNotify('Success', 'Bug report created successfully', 'success')</script>";
+            } catch (\RuntimeException $e) {
+                $transaction->rollBack();
+                $form->addError('general', $e->getMessage());
+            } catch (\Throwable $e) {
+                $transaction->rollBack();
+                $form->addError('general', 'Internal Server error');
+                Yii::error([
+                    'message' => $e->getMessage(),
+                    'userId' => $user->id,
+                    'trace' => AppHelper::throwableLog($e, true)
+                ], 'UserFeedbackCrudController::actionCreateAjax::create');
+            }
         }
         return $this->renderAjax('create_bug_ajax', [
             'model' => $form,

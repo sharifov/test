@@ -137,86 +137,51 @@ $('body').off('click', '#btn-bug-create').on('click', '#btn-bug-create', functio
     e.preventDefault();
     
     let btn = $(this);
+    let btnHtml = btn.html();
     let url = btn.attr('href');
+    let iconSpinner = '<span class="fa fa-spin fa-spinner warning"></i>';
     
-    /*let btnIconHtml = btn.find('i')[0];
-    let iconSpinner = '<i class="fa fa-spin fa-spinner"></i>';
-    
-    
-    btn.find('i').replaceWith(iconSpinner);
-    btn.addClass('disabled');*/
+    btn.html(iconSpinner);
+    btn.addClass('disabled');
     
     let modal = $('#modal-lg');
     modal.find('.modal-body').html('');
     modal.find('.modal-title').html('Create Bug issue');
     
+    let jsonData = {};
+    $.getJSON('https://ipapi.co/json', function(data) {
+      jsonData.ipapi = data;
+      if (!jsonData.ipapi) {
+        $.getJSON('https://api.db-ip.com/v2/free/self', function(data) {
+            jsonData.dbip = data;
+        });
+      }
+    });
     
-    //$('#modal-label').html('Create Bug issue');
-    
-    let id = $(this).attr('data-id');
-    modal.find('.modal-body').load(url, function( response, status, xhr ) {
-        if(status === 'error') {
-            createNotify('Error', xhr.responseText, 'error');
-        } else {
-          modal.modal('show');
-          
-          const screenshotTarget = document.body;
-
-          let jsonData = {};
-          
-          // $.getJSON("https://api.ipify.org?format=json", function(data) {
-          //       jsonData.ip = data.ip;
-          // })
-          
-          $.getJSON('https://api.db-ip.com/v2/free/self', function(data) {
-              jsonData.dbip = data;
-              //console.log(JSON.stringify(data, null, 2));
-            });
-          
-          
-          $.getJSON('https://ipapi.co/json', function(data) {
-              jsonData.dbip = data;
-              //console.log(JSON.stringify(data, null, 2));
-            });
-          
-          
-          
-          // $.getJSON('https://json.geoiplookup.io', function(data) {
-          //     jsonData.geoiplookup = data;
-          //     //console.log(JSON.stringify(data, null, 2));
-          //   });
-          //
-          // $.getJSON('https://www.geoplugin.net/json.gp', function(data) {
-          //     jsonData.geoplugin = data;
-          //     //console.log(JSON.stringify(data, null, 2));
-          //   });
-          
-          
-          
-          
-            html2canvas(screenshotTarget).then((canvas) => {
-               const base64image = canvas.toDataURL("image/png");
-               
-               let str = ''; //'<h3 class=text-center>DrawerJs Demonstration</h3> <div id="tui-image-editor"></div>';
-               //modal.find('.modal-body').html('<img src="' + base64image + '" style="width:50%"/>' + str);
-               $('#screenshot-img').attr('src', base64image); 
-               $('#screenshot').val(base64image);
-               jsonData.browserReport = browserReportSync();
-               $('#uf_data').val(JSON.stringify(jsonData));
-               
-               
-               
-               //html('<img src="' + base64image + '" style="width:50%"/>' + str);
-               // canvasEditor();
-               //window.location.href = base64image;
-            });
-                      
-        }
-        //btn.find('i').replaceWith(btnIconHtml);
-        //btn.removeClass('disabled');
+    let base64image;
+    html2canvas(document.body, {
+        height: $(window).height(),
+        width: $(window).width(),
+        y: window.scrollY
+    }).then((canvas) => {
+       base64image = canvas.toDataURL("image/png");
+    }).then(() => {
+        modal.find('.modal-body').load(url, {title: document.title}, function( response, status, xhr ) {
+            if(status === 'error') {
+                createNotify('Error', xhr.responseText, 'error');
+            } else {
+                modal.modal('show');
+                $('#screenshot-img').attr('src', base64image).removeClass('hidden'); 
+                $('#bug-screen').val(base64image);
+                jsonData.browserReport = browserReportSync();
+                $('#userBugReportData').find('pre').html(JSON.stringify(jsonData, null, 2));
+                $('#uf_data').val(JSON.stringify(jsonData));
+            }
+            btn.html(btnHtml);
+            btn.removeClass('disabled');
+        });
     });
 });
-
 
 // $('#btn-bug-create').on('click', function (e) {
 //     e.preventDefault();
