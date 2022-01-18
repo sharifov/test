@@ -109,8 +109,7 @@
 		"snowplow/snowplow-tracker": "0.4.0",
 		"vlucas/phpdotenv": "^5.3",
 		"yiisoft/yii2-authclient": "^2.2",
-		"textalk/websocket": "^1.5"
-		"yiisoft/yii2-authclient": "^2.2",
+		"textalk/websocket": "^1.5",
         "ext-fileinfo": "*",
         "ext-pgsql": "*"
     },
