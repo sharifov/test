@@ -526,3 +526,8 @@ div#call-controls input {
 {
   display: none;
 }
+
+.incoming-notification__action {
+    width: 60px;
+    height: 40px;
+}
