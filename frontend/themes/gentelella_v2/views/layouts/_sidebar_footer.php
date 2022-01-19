@@ -2,10 +2,14 @@
 
 /* @var $this \yii\web\View */
 
+use modules\user\src\abac\dto\UserAbacDto;
+use modules\user\src\abac\UserAbacObject;
 use yii\helpers\Html;
 
 /** @var \common\models\Employee $user */
 $user = Yii::$app->user->identity;
+
+$userAbacDto = new UserAbacDto('username');
 ?>
 <div class="sidebar-footer hidden-small">
     <div class="col-md-12 form-group" id="search-menu-div" style="display: none">
@@ -70,13 +74,16 @@ $user = Yii::$app->user->identity;
         ) ?>
     <?php endif; ?>
 
-    <?php /*if ($user->canRoute('/user-connection/index')) :*/?>
-    <?=Html::a(
-        '<span class="fa fa-bug warning"></span>',
-        ['/user-feedback-crud/create-ajax'],
-        ['data-toggle' => 'tooltip', 'data-placement' => 'top', 'data-trigger' => 'hover', 'title' => 'Bug Report', 'id' => 'btn-bug-create']
-    ) ?>
-    <?php /*endif;*/ ?>
+    <?php
+        /** @abac new $userAbacDto, UserAbacObject::USER_FEEDBACK, UserAbacObject::ACTION_CREATE, Username field view*/
+    if (Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FEEDBACK, UserAbacObject::ACTION_CREATE)) :
+        ?>
+        <?=Html::a(
+            '<span class="fa fa-bug warning"></span>',
+            ['/user-feedback-crud/create-ajax'],
+            ['data-toggle' => 'tooltip', 'data-placement' => 'top', 'data-trigger' => 'hover', 'title' => 'Bug Report', 'id' => 'btn-bug-create']
+        ) ?>
+    <?php endif; ?>
 
 </div>
 <?php
