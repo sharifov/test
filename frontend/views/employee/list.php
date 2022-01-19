@@ -225,16 +225,8 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             [
                 'label' => 'Grav',
                 'value' => static function (\common\models\Employee $model) {
-
-                    if ($model->email) {
-                        $grav_url = "//www.gravatar.com/avatar/" . md5(mb_strtolower(trim($model->email))) . "?d=identicon&s=25";
-                    } else {
-                        $grav_url = '//www.gravatar.com/avatar/?d=identicon&s=25';
-                    }
-
-                    $icon = \yii\helpers\Html::img($grav_url, ['class' => 'img-circle img-thumbnail']);
-
-                    return $icon;
+                    $gravUrl = $model->getGravatarUrl(25);
+                    return \yii\helpers\Html::img($gravUrl, ['class' => 'img-circle img-thumbnail']);
                 },
                 'format' => 'raw'
             ],
