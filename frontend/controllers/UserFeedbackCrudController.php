@@ -224,8 +224,11 @@ class UserFeedbackCrudController extends FController
     {
         $model = $this->findModel($uf_id, $uf_created_dt);
 
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'uf_id' => $model->uf_id, 'uf_created_dt' => $model->uf_created_dt]);
+        if ($this->request->isPost && $model->load($this->request->post()) && $model->validate()) {
+            $model->uf_data_json = @json_decode($model->uf_data_json);
+            if ($model->save()) {
+                return $this->redirect(['view', 'uf_id' => $model->uf_id, 'uf_created_dt' => $model->uf_created_dt]);
+            }
         }
 
         return $this->render('update', [
