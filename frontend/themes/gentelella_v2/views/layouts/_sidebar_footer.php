@@ -33,7 +33,7 @@ $user = Yii::$app->user->identity;
     <?=Html::a(
         '<span class="fa fa-search"></span>',
         null,
-        ['data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => 'Search menu', 'id' => 'btn-search-menu-toggle']
+        ['data-toggle' => 'tooltip', 'data-trigger' => 'hover', 'data-placement' => 'top', 'title' => 'Search menu', 'id' => 'btn-search-menu-toggle']
 ) ?>
 
     <?php /* if ($user->canRoute('/user-connection/index')) :?>
@@ -58,7 +58,7 @@ $user = Yii::$app->user->identity;
         <?=Html::a(
             '<span class="fa fa-map"></span>',
             ['/call/realtime-map'],
-            ['target' => '_blank', 'data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => 'Call realtime Map']
+            ['target' => '_blank', 'data-toggle' => 'tooltip', 'data-trigger' => 'hover', 'data-placement' => 'top', 'title' => 'Call realtime Map']
         ) ?>
     <?php endif; ?>
 
@@ -66,7 +66,7 @@ $user = Yii::$app->user->identity;
         <?=Html::a(
             '<span class="fa fa-cogs"></span>',
             ['/setting/index'],
-            ['target' => '_blank', 'data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => 'Site Settings']
+            ['target' => '_blank', 'data-toggle' => 'tooltip', 'data-trigger' => 'hover', 'data-placement' => 'top', 'title' => 'Site Settings']
         ) ?>
     <?php endif; ?>
 
@@ -74,7 +74,7 @@ $user = Yii::$app->user->identity;
     <?=Html::a(
         '<span class="fa fa-bug warning"></span>',
         ['/user-feedback-crud/create-ajax'],
-        ['data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => 'Bug Report', 'id' => 'btn-bug-create']
+        ['data-toggle' => 'tooltip', 'data-placement' => 'top', 'data-trigger' => 'hover', 'title' => 'Bug Report', 'id' => 'btn-bug-create']
     ) ?>
     <?php /*endif;*/ ?>
 
@@ -158,29 +158,31 @@ $('body').off('click', '#btn-bug-create').on('click', '#btn-bug-create', functio
       }
     });
     
-    let base64image;
-    html2canvas(document.body, {
-        height: $(window).height(),
-        width: $(window).width(),
-        y: window.scrollY
-    }).then((canvas) => {
-       base64image = canvas.toDataURL("image/png");
-    }).then(() => {
-        modal.find('.modal-body').load(url, {title: document.title}, function( response, status, xhr ) {
-            if(status === 'error') {
-                createNotify('Error', xhr.responseText, 'error');
-            } else {
-                modal.modal('show');
-                $('#screenshot-img').attr('src', base64image).removeClass('hidden'); 
-                $('#bug-screen').val(base64image);
-                jsonData.browserReport = browserReportSync();
-                $('#userBugReportData').find('pre').html(JSON.stringify(jsonData, null, 2));
-                $('#uf_data').val(JSON.stringify(jsonData));
-            }
-            btn.html(btnHtml);
-            btn.removeClass('disabled');
+    setTimeout(function () {
+        let base64image;
+        html2canvas(document.body, {
+            height: $(window).height(),
+            width: $(window).width(),
+            y: window.scrollY
+        }).then((canvas) => {
+           base64image = canvas.toDataURL("image/png");
+        }).then(() => {
+            modal.find('.modal-body').load(url, {title: document.title}, function( response, status, xhr ) {
+                if(status === 'error') {
+                    createNotify('Error', xhr.responseText, 'error');
+                } else {
+                    modal.modal('show');
+                    $('#screenshot-img').attr('src', base64image).removeClass('hidden'); 
+                    $('#bug-screen').val(base64image);
+                    jsonData.browserReport = browserReportSync();
+                    $('#userBugReportData').find('pre').html(JSON.stringify(jsonData, null, 2));
+                    $('#uf_data').val(JSON.stringify(jsonData));
+                }
+                btn.html(btnHtml);
+                btn.removeClass('disabled');
+            });
         });
-    });
+    }, 500);
 });
 
 // $('#btn-bug-create').on('click', function (e) {
