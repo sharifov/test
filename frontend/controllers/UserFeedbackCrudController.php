@@ -2,8 +2,11 @@
 
 namespace frontend\controllers;
 
-use common\helpers\LogHelper;
 use common\models\Employee;
+use frontend\widgets\multipleUpdate\userFeedback\MultipleUpdateForm;
+use frontend\widgets\multipleUpdate\userFeedback\MultipleUpdateService;
+use modules\user\src\abac\dto\UserAbacDto;
+use modules\user\src\abac\UserAbacObject;
 use modules\user\userFeedback\entity\UserFeedback;
 use modules\user\userFeedback\entity\search\UserFeedbackSearch;
 use modules\user\userFeedback\entity\UserFeedbackData;
@@ -15,14 +18,15 @@ use src\auth\Auth;
 use src\helpers\app\AppHelper;
 use src\helpers\app\ReleaseVersionHelper;
 use Yii;
+use yii\bootstrap4\ActiveForm;
 use yii\db\Transaction;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
-use yii\web\Controller;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-use yii\web\UploadedFile;
+use yii\web\Response;
 
 /**
  * UserFeedbackCrudController implements the CRUD actions for UserFeedback model.
@@ -31,16 +35,19 @@ class UserFeedbackCrudController extends FController
 {
     private UserFeedbackRepository $userFeedbackRepository;
     private UserFeedbackFileRepository $userFeedbackFileRepository;
+    private MultipleUpdateService $multipleUpdateService;
 
     public function __construct(
         $id,
         $module,
         UserFeedbackRepository $userFeedbackRepository,
         UserFeedbackFileRepository $userFeedbackFileRepository,
+        MultipleUpdateService $multipleUpdateService,
         $config = []
     ) {
         $this->userFeedbackRepository = $userFeedbackRepository;
         $this->userFeedbackFileRepository = $userFeedbackFileRepository;
+        $this->multipleUpdateService = $multipleUpdateService;
         parent::__construct($id, $module, $config);
     }
 
@@ -50,18 +57,6 @@ class UserFeedbackCrudController extends FController
     public function behaviors(): array
     {
         $behaviors = [
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'roles' => [
-                            Employee::ROLE_ADMIN,
-                            Employee::ROLE_AGENT,
-                        ],
-                        'allow' => true,
-                    ],
-                ],
-            ],
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
@@ -143,6 +138,12 @@ class UserFeedbackCrudController extends FController
      */
     public function actionCreateAjax(): string
     {
+        $userAbacDto = new UserAbacDto('username');
+        /** @abac new $userAbacDto, UserAbacObject::USER_FEEDBACK, UserAbacObject::ACTION_CREATE, Username field view*/
+        if (!Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FEEDBACK, UserAbacObject::ACTION_CREATE)) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
         $form = new UserFeedbackBugForm();
 
         $form->title = Yii::$app->request->post('title', null);
@@ -224,13 +225,91 @@ class UserFeedbackCrudController extends FController
     {
         $model = $this->findModel($uf_id, $uf_created_dt);
 
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'uf_id' => $model->uf_id, 'uf_created_dt' => $model->uf_created_dt]);
+        if ($this->request->isPost && $model->load($this->request->post()) && $model->validate()) {
+            $model->uf_data_json = @json_decode($model->uf_data_json);
+            if ($model->save()) {
+                return $this->redirect(['view', 'uf_id' => $model->uf_id, 'uf_created_dt' => $model->uf_created_dt]);
+            }
         }
 
         return $this->render('update', [
             'model' => $model,
         ]);
+    }
+
+    public function actionMultipleUpdateShow()
+    {
+        $userAbacDto = new UserAbacDto('username');
+        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Username field view*/
+        if (!Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FEEDBACK, UserAbacObject::ACTION_MULTIPLE_UPDATE)) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
+        try {
+            return $this->renderAjax('_multiple_update_show', [
+                'validationUrl' => ['/user-feedback-crud/validation'],
+                'action' => ['/user-feedback-crud/multiple-update'],
+                'modalId' => 'modal-df',
+                'ids' => Yii::$app->request->post('ids'),
+                'pjaxId' => 'feedback-pjax-list',
+                'user' => Auth::user()
+            ]);
+        } catch (\DomainException $e) {
+            return $this->renderAjax('_error', [
+                'error' => $e->getMessage()
+            ]);
+        } catch (\Throwable $e) {
+            Yii::error($e, 'UserFeedbackCrudController:actionMultipleUpdateShow');
+        }
+        throw new BadRequestHttpException();
+    }
+
+    /**
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function actionValidation(): array
+    {
+        $userAbacDto = new UserAbacDto('username');
+        /** @abac new $userAbacDto, UserAbacObject::USER_FEEDBACK, UserAbacObject::ACTION_MULTIPLE_UPDATE, Username field view*/
+        if (!Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FEEDBACK, UserAbacObject::ACTION_MULTIPLE_UPDATE)) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
+        $user = Auth::user();
+
+        $form = new MultipleUpdateForm($user);
+        if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($form);
+        }
+        throw new BadRequestHttpException();
+    }
+
+    /**
+     * @return Response
+     * @throws BadRequestHttpException
+     */
+    public function actionMultipleUpdate(): Response
+    {
+        $userAbacDto = new UserAbacDto('username');
+        /** @abac new $userAbacDto, UserAbacObject::USER_FEEDBACK, UserAbacObject::ACTION_MULTIPLE_UPDATE, Username field view*/
+        if (!Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FEEDBACK, UserAbacObject::ACTION_MULTIPLE_UPDATE)) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
+        $user = Auth::user();
+
+        $form = new MultipleUpdateForm($user);
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            $report = $this->multipleUpdateService->update($form);
+            return $this->asJson([
+                'success' => true,
+                'message' => count($report) . ' rows affected.',
+                'text' => $this->multipleUpdateService->formatReport($report),
+            ]);
+        }
+        throw new BadRequestHttpException();
     }
 
     /**

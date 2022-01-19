@@ -237,8 +237,5 @@ class m211228_131033_update_abac_rules_client_info_block extends Migration
      */
     public function safeDown()
     {
-        echo "m211228_131033_update_abac_rules_client_info_block cannot be reverted.\n";
-
-        return false;
     }
 }

@@ -8,6 +8,7 @@ use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\db\Connection;
+use yii\helpers\Html;
 
 /**
  * This is the model class for table "user_feedback".
@@ -45,6 +46,19 @@ class UserFeedback extends ActiveRecord
         self::TYPE_BUG => 'Bug Report',
         self::TYPE_FEATURE => 'Feature',
         self::TYPE_QUESTION => 'Question'
+    ];
+
+    public const STATUS_LABEL_LIST = [
+        self::STATUS_NEW => 'label-default',
+        self::STATUS_PENDING => 'label-warning',
+        self::STATUS_CANCEL => 'label-danger',
+        self::STATUS_DONE => 'label-success',
+    ];
+
+    public const TYPE_LABEL_LIST = [
+        self::TYPE_BUG => 'label-danger',
+        self::TYPE_FEATURE => 'label-info',
+        self::TYPE_QUESTION => 'label-warning'
     ];
 
     public function behaviors(): array
@@ -180,11 +194,36 @@ class UserFeedback extends ActiveRecord
 
     public function getStatusName(): ?string
     {
-        return self::STATUS_LIST[$this->uf_status_id] ?? null;
+        return self::getStatusList()[$this->uf_status_id] ?? null;
+    }
+
+    public function getClassStatusLabel(): string
+    {
+        return self::STATUS_LABEL_LIST[$this->uf_status_id] ?? '';
+    }
+
+    public function getClassTypeLabel(): string
+    {
+        return self::TYPE_LABEL_LIST[$this->uf_type_id] ?? '';
+    }
+
+    public function getStatusLabel(): string
+    {
+        return Html::tag('span', $this->getStatusName(), ['class' => 'label ' . $this->getClassStatusLabel()]);
+    }
+
+    public function getTypeLabel(): string
+    {
+        return Html::tag('span', $this->getTypeName(), ['class' => 'label ' . $this->getClassTypeLabel()]);
     }
 
     public function getTypeName(): ?string
     {
         return self::TYPE_LIST[$this->uf_type_id] ?? null;
+    }
+
+    public static function getStatusList(): array
+    {
+        return self::STATUS_LIST;
     }
 }

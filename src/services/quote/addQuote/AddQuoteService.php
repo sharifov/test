@@ -176,6 +176,10 @@ class AddQuoteService
         $segmentNr = 1;
         foreach ($segments as $segment) {
             $quoteSegment = QuoteSegment::createFromSearch($segment, $quoteTicketsSegment[$segmentNr] ?? null);
+            if (!$quoteSegment->validate()) {
+                throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($quoteSegment, ' '));
+            }
+
             $this->quoteSegmentRepository->save($quoteSegment);
             $this->tripKey[] = $quoteSegment->qs_key;
             $quoteTrip->link('quoteSegments', $quoteSegment);

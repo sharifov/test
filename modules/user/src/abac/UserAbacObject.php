@@ -13,18 +13,24 @@ class UserAbacObject extends AbacBaseModel implements AbacInterface
     /** OBJECT PERMISSION */
     public const USER_FORM = self::NS . 'form/user_update';
 
+    public const USER_FEEDBACK = self::NS . 'obj/user-feedback';
+
     /** --------------- OBJECT LIST --------------------------- */
     public const OBJECT_LIST = [
-        self::USER_FORM => self::USER_FORM
+        self::USER_FORM => self::USER_FORM,
+        self::USER_FEEDBACK => self::USER_FEEDBACK
     ];
 
     /** --------------- ACTIONS ------------------------------- */
+    public const ACTION_CREATE = 'create';
     public const ACTION_VIEW  = 'view';
     public const ACTION_EDIT  = 'edit';
+    public const ACTION_MULTIPLE_UPDATE = 'multipleUpdate';
 
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
-        self::USER_FORM => [self::ACTION_VIEW, self::ACTION_EDIT]
+        self::USER_FORM => [self::ACTION_VIEW, self::ACTION_EDIT],
+        self::USER_FEEDBACK => [self::ACTION_MULTIPLE_UPDATE, self::ACTION_CREATE]
     ];
 
     protected const ATTR_IS_NEW_RECORD = [
@@ -114,6 +120,9 @@ class UserAbacObject extends AbacBaseModel implements AbacInterface
 
         $attributeList[self::USER_FORM][] = $attrFieldsList;
         $attributeList[self::USER_FORM][] = $attrMultiFieldsList;
+
+        $attributeList[self::USER_FEEDBACK][] = $attrFieldsList;
+        $attributeList[self::USER_FEEDBACK][] = $attrMultiFieldsList;
 
         return $attributeList;
     }

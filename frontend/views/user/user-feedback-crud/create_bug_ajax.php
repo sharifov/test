@@ -35,10 +35,6 @@ use yii\widgets\Pjax;
             <?= $form->field($model, 'pageUrl')->textInput() ?>
             <?= $form->field($model, 'message')->textarea(['rows' => 10]) ?>
             <?= $form->field($model, 'data')->hiddenInput(['rows' => 10, 'id' => 'uf_data'])->label(false) ?>
-            <div>
-                <span data-toggle="collapse" href="#userBugReportData" role="button" aria-expanded="false" aria-controls="collapseExample"><i class="fas fa-info-circle"></i> Additional Data</span>
-                <div id="userBugReportData" class="collapse"><pre></pre></div>
-            </div>
             <div class="row">
                 <div class="col-md-3">
                     <?= $form->field($model, 'date')->widget(DatePicker::class, [
@@ -58,6 +54,10 @@ use yii\widgets\Pjax;
                     ]) ?>
                 </div>
             </div>
+            <div>
+                <span data-toggle="collapse" href="#userBugReportData" role="button" aria-expanded="false" aria-controls="collapseExample"><i class="fas fa-info-circle"></i> Additional Data</span>
+                <div id="userBugReportData" class="collapse"><pre></pre></div>
+            </div>
         </div>
         <div class="col-md-5">
             <label class="control-label" for="userfeedbackbugform-screenshot">
@@ -65,6 +65,9 @@ use yii\widgets\Pjax;
             </label>
 
             <img src="<?= Html::encode($model->screenshot) ?>" id="screenshot-img" style="width:100%" class="rounded mx-auto <?= $model->screenshot ? '' : 'hidden' ?>" alt="screenshot"/>
+            <div style="text-align: right;">
+                <button class="btn btn-sm btn-danger remove-screenshot" style="margin-top: 10px;"><i class="fa fa-trash"></i> Remove screenshot</button>
+            </div>
             <div style="display: none;">
                 <?= $form->field($model, 'screenshot')->hiddenInput(['id' => 'bug-screen'])->label(false) ?>
             </div>
@@ -78,4 +81,17 @@ use yii\widgets\Pjax;
 </div>
 
 <?php ActiveForm::end(); ?>
+
+<?php
+$js = <<<JS
+$('body').off('click', '.remove-screenshot').on('click', '.remove-screenshot', function (e) {
+    e.preventDefault();
+    $('#screenshot-img').remove();
+    $('#bug-screen').val('');
+    $(this).remove();
+});
+JS;
+$this->registerJs($js);
+?>
+
 <?php Pjax::end(); ?>

@@ -39,14 +39,16 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'attribute' => 'uf_type_id',
                         'value' => static function (UserFeedback $model) {
-                            return Html::encode($model->getTypeName());
+                            return $model->getTypeLabel();
                         },
+                        'format' => 'raw'
                     ],
                     [
                         'attribute' => 'uf_status_id',
                         'value' => static function (UserFeedback $model) {
-                            return Html::encode($model->getStatusName());
+                            return $model->getStatusLabel();
                         },
+                        'format' => 'raw'
                     ],
                     'uf_message:ntext',
                     'uf_created_dt:byUserDateTime',

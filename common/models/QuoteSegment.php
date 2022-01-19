@@ -105,13 +105,19 @@ class QuoteSegment extends \yii\db\ActiveRecord
             [['qs_fare_code'], 'string', 'max' => 50],
             [['qs_air_equip_type'], 'string', 'max' => 30],
             [['qs_key'], 'string', 'max' => 255],
-            [['qs_arrival_airport_code'], 'exist', 'skipOnError' => true, 'targetClass' => Airports::class, 'targetAttribute' => ['qs_arrival_airport_code' => 'iata']],
-            [['qs_departure_airport_code'], 'exist', 'skipOnError' => true, 'targetClass' => Airports::class, 'targetAttribute' => ['qs_departure_airport_code' => 'iata']],
             [['qs_trip_id'], 'exist', 'skipOnError' => true, 'targetClass' => QuoteTrip::class, 'targetAttribute' => ['qs_trip_id' => 'qt_id']],
             [['qs_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['qs_updated_user_id' => 'id']],
             [['qs_recheck_baggage'], 'boolean'],
 
             [['qs_duration'], 'integer', 'min' => 0, 'on' => [self::SCENARIO_MANUALLY]],
+
+            [['qs_arrival_airport_code'],
+                'exist', 'skipOnError' => true, 'targetClass' => Airports::class,
+                'targetAttribute' => ['qs_arrival_airport_code' => 'iata'],
+                'message' => 'Arrival Airport Code(' . $this->qs_arrival_airport_code . ') not found in Airports'],
+            [['qs_departure_airport_code'], 'exist', 'skipOnError' => true, 'targetClass' => Airports::class,
+                'targetAttribute' => ['qs_departure_airport_code' => 'iata'],
+                'message' => 'Departure Airport Code(' . $this->qs_departure_airport_code . ') not found in Airports'],
         ];
     }
 
@@ -322,7 +328,6 @@ class QuoteSegment extends \yii\db\ActiveRecord
         $segment->qs_arrival_airport_terminal = $segmentEntry['arrivalAirportTerminal'] ?? null;
         $segment->qs_arrival_time = $segmentEntry['arrivalTime'] ?? null;
         $segment->qs_departure_time = $segmentEntry['departureTime'] ?? null;
-        $segment->qs_air_equip_type = $segmentEntry['airEquipType'] ?? null;
         $segment->qs_booking_class = $segmentEntry['bookingClass'] ?? null;
         $segment->qs_flight_number = $segmentEntry['flightNumber'] ?? null;
         $segment->qs_fare_code = $segmentEntry['fareCode'] ?? null;
