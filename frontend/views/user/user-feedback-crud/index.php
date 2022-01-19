@@ -1,14 +1,16 @@
 <?php
 
+use kartik\grid\CheckboxColumn;
 use common\components\grid\DateTimeColumn;
 use common\models\Employee;
+use frontend\widgets\multipleUpdate\button\MultipleUpdateButtonWidget;
+use kartik\grid\GridView;
 use modules\user\userFeedback\entity\UserFeedback;
 use modules\user\userFeedback\entity\UserFeedbackFile;
 use yii\helpers\Html;
 use yii\helpers\StringHelper;
 use yii\helpers\Url;
 use yii\grid\ActionColumn;
-use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
@@ -26,25 +28,45 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('Create User Feedback', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-    <?php Pjax::begin(); ?>
+    <?php Pjax::begin(['id' => 'feedback-pjax-list']); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
+    <?php $gridId = 'feedback-grid-id'; ?>
+
+    <?= MultipleUpdateButtonWidget::widget([
+        'modalId' => 'modal-df',
+        'showUrl' => Url::to(['/user-feedback-crud/multiple-update-show']),
+        'gridId' => $gridId,
+        'buttonClass' => 'multiple-update-btn',
+        'buttonClassAdditional' => 'btn btn-info btn-warning',
+        'buttonText' => 'Multiple update',
+    ]) ?>
+
     <?= GridView::widget([
+        'id' => $gridId,
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
+            [
+                'class' => CheckboxColumn::class,
+                'name' => 'FeedbackMultipleForm[feedback_list]',
+                'pageSummary' => true,
+                'rowSelectedClass' => GridView::TYPE_INFO,
+            ],
             'uf_id',
             [
                 'attribute' => 'uf_type_id',
                 'value' => static function (UserFeedback $model) {
-                    return Html::encode($model->getTypeName());
+                    return $model->getTypeLabel();
                 },
+                'format' => 'raw'
             ],
             [
                 'attribute' => 'uf_status_id',
                 'value' => static function (UserFeedback $model) {
-                    return Html::encode($model->getStatusName());
+                    return $model->getStatusLabel();
                 },
+                'format' => 'raw'
             ],
             'uf_title',
             [
@@ -71,7 +93,6 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $user->username ?? null;
                 }
             ],
-//            'uf_data_json',
             [
                 'class' => ActionColumn::class,
                 'urlCreator' => static function ($action, UserFeedback $model, $key, $index, $column) {
