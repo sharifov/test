@@ -2288,7 +2288,7 @@ class CommunicationController extends ApiBaseController
 //            }
 
             if (!$sms) {
-                $sms = Sms::findOne(['s_communication_id' => $sq_id]);
+                $sms = Sms::find()->andWhere(['s_communication_id' => $sq_id])->orderBy(['s_id' => SORT_DESC])->one();
             }
 
 
@@ -2308,8 +2308,9 @@ class CommunicationController extends ApiBaseController
                             $sms->s_tw_num_segments = (int) $smsParams['sq_tw_num_segments'];
                         }
 
-                        if (isset($smsParams['sq_tw_status']) && $smsParams['sq_tw_status']) {
-                            $sms->s_error_message = 'status: ' .  $smsParams['sq_tw_status'];
+                        if (isset($smsParams['sq_error_message']) || isset($smsParams['sq_tw_status'])) {
+                            $status = !empty($smsParams['sq_tw_status']) ? ('status: ' . $smsParams['sq_tw_status'] . '. ') : '';
+                            $sms->s_error_message = $status . ($smsParams['sq_error_message'] ?? '');
                         }
 
                         if (!$sms->s_tw_message_sid && isset($smsParams['sq_tw_message_id']) && $smsParams['sq_tw_message_id']) {
@@ -2343,8 +2344,9 @@ class CommunicationController extends ApiBaseController
                                 $smsModel->sdl_num_segments = (int)$smsParams['sq_tw_num_segments'];
                             }
 
-                            if (!empty($smsParams['sq_tw_status'])) {
-                                $smsModel->sdl_error_message = 'status: ' . $smsParams['sq_tw_status'];
+                            if (isset($smsParams['sq_error_message']) || isset($smsParams['sq_tw_status'])) {
+                                $status = !empty($smsParams['sq_tw_status']) ? ('status: ' . $smsParams['sq_tw_status'] . '. ') : '';
+                                $smsModel->sdl_error_message = $status . ($smsParams['sq_error_message'] ?? '');
                             }
 
                             if (!$smsModel->sdl_message_sid && !empty($smsParams['sq_tw_message_id'])) {
@@ -2367,7 +2369,9 @@ class CommunicationController extends ApiBaseController
                 }
             }
         } catch (\Throwable $throwable) {
-            Yii::error($throwable->getTraceAsString(), 'API:Communication:updateSmsStatus:try');
+            Yii::error([
+                'message' => $throwable->getMessage(),
+            ], 'API:Communication:updateSmsStatus:try');
             $message = $this->debug ? $throwable->getTraceAsString() : AppHelper::throwableFormatter($throwable);
             $response['error'] = $message;
             $response['error_code'] = 15;
@@ -2426,7 +2430,7 @@ class CommunicationController extends ApiBaseController
             $sms = Sms::findOne(['s_tw_message_sid' => $smsData['sid']]);
 
             if (!$sms) {
-                $sms = Sms::findOne(['s_communication_id' => $comId]);
+                $sms = Sms::find()->andWhere(['s_communication_id' => $comId])->orderBy(['s_id' => SORT_DESC])->one();
             }
 
 
