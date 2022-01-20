@@ -14,7 +14,8 @@ class BrowserReportAsset extends AssetBundle
     public $css = [
     ];
     public $js = [
-        'https://cdn.jsdelivr.net/npm/browser-report@2.2.12/index.js',
+//        'https://cdn.jsdelivr.net/npm/browser-report@2.2.12/index.js',
+        'js/browser-report.js',
     ];
 
 
