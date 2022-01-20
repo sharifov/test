@@ -908,11 +908,6 @@ class FlightQuoteController extends FController
                             throw new \RuntimeException('OriginProductQuote not found by ID(' . $addChangeForm->origin_quote_id . ')');
                         }
                         $boPrepareService = new VoluntaryExchangeBOPrepareService($case->project, $originProductQuote);
-                        $voluntaryExchangeBOService = new VoluntaryExchangeBOService($boPrepareService);
-//                        if (!$voluntaryExchangeBOService->isAllow()) {
-//                            throw new \RuntimeException('Exchange is not allowed');
-//                        }
-
                         $productQuoteChange = ProductQuoteChange::createVoluntaryExchange(
                             $addChangeForm->origin_quote_id,
                             $addChangeForm->case_id,
@@ -990,9 +985,6 @@ class FlightQuoteController extends FController
 
             $boPrepareService = new VoluntaryExchangeBOPrepareService($case->project, $originProductQuote);
             $voluntaryExchangeBOService = new VoluntaryExchangeBOService($boPrepareService);
-//            if (!$voluntaryExchangeBOService->isAllow()) {
-//                throw new \RuntimeException('Exchange is not allowed');
-//            }
 
             $form = new VoluntaryQuoteCreateForm(Auth::id(), $flight, true, $voluntaryExchangeBOService->getServiceFeeAmount());
             $form->setCustomerPackage($voluntaryExchangeBOService->getCustomerPackage());

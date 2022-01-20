@@ -34,9 +34,13 @@ class VoluntaryExchangeBOService
         $this->result = BackOffice::getExchangeData($data);
     }
 
-    public function isAllow(): bool
+    public function isAllow(): ?bool
     {
-        return (bool) $this->result['allow'];
+        $allow = $this->result['allow'] ?? null;
+        if ($allow === null) {
+            return null;
+        }
+        return (bool) $allow;
     }
 
     public function getResult(): ?array

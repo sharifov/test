@@ -448,6 +448,7 @@ class BackOffice
             \Yii::error([
                     'message' => 'BO voluntaryRefund data is empty',
                     'content' => VarDumper::dumpAsString($response->content),
+                    'requestData' => $requestData,
                 ], 'BackOffice:voluntaryRefund:dataIsEmpty');
             throw new BoResponseException('BO voluntaryRefund data is empty', BoResponseException::BO_DATA_IS_EMPTY);
         }
@@ -455,6 +456,7 @@ class BackOffice
             \Yii::error([
                     'message' => 'BO voluntaryRefund response Data type is invalid',
                     'content' => VarDumper::dumpAsString($response->content),
+                    'requestData' => $requestData,
                 ], 'BackOffice:voluntaryRefund:dataIsInvalid');
             throw new BoResponseException('BO voluntaryRefund response Data type is invalid', BoResponseException::BO_RESPONSE_DATA_TYPE_IS_INVALID);
         }
@@ -462,6 +464,7 @@ class BackOffice
             \Yii::error([
                 'message' => 'BO wrong endpoint: ' . $endpoint,
                 'content' => VarDumper::dumpAsString($response->content),
+                'requestData' => $requestData,
             ], 'BackOffice:voluntaryRefund:wrongEndpoint');
             throw new BoResponseException('BO wrong endpoint', BoResponseException::BO_WRONG_ENDPOINT);
         }
@@ -483,11 +486,21 @@ class BackOffice
             throw new BoResponseException('BO "Get Exchange Data" server error', BoResponseException::BO_SERVER_ERROR);
         }
 
+        if (!$response->isOk) {
+            \Yii::error([
+                    'message' => 'BO (' . $endpoint . ') server error',
+                    'content' => VarDumper::dumpAsString($response->content),
+                    'requestData' => $requestData,
+                ], 'BackOffice:getExchangeData:ServerError');
+            throw new BoResponseException('BO "Get Exchange Data" server error', BoResponseException::BO_SERVER_ERROR);
+        }
+
         $data = $response->data;
         if (!$data) {
             \Yii::error([
                     'message' => 'BO (' . $endpoint . ') data is empty',
                     'content' => VarDumper::dumpAsString($response->content),
+                    'requestData' => $requestData,
                 ], 'BackOffice:getExchangeData:dataIsEmpty');
             throw new BoResponseException('BO "Get Exchange Data" data is empty', BoResponseException::BO_DATA_IS_EMPTY);
         }
@@ -498,17 +511,30 @@ class BackOffice
                 ], 'BackOffice:getExchangeData:dataIsInvalid');
             throw new BoResponseException('BO "Get Exchange Data" response Data type is invalid', BoResponseException::BO_RESPONSE_DATA_TYPE_IS_INVALID);
         }
-        if (!array_key_exists('allow', $data)) {
-            \Yii::error([
-                    'message' => 'BO  (' . $endpoint . ') response Data allow key not found',
+
+        $errors = $data['errors'] ?? null;
+        $success = $data['success'] ?? null;
+        if ($success === false) {
+            \Yii::warning([
+                    'message' => 'BO  (' . $endpoint . ') response not success',
                     'content' => VarDumper::dumpAsString($response->content),
+                    'requestData' => $requestData,
+                ], 'BackOffice:getExchangeData:notSuccess');
+            throw new BoResponseException('BO "Get Exchange Data" response not success. ' . $errors, BoResponseException::BO_RESPONSE_NOT_SUCCESS);
+        }
+        if (!array_key_exists('allow', $data)) {
+            \Yii::warning([
+                    'message' => 'BO  (' . $endpoint . ') response Data "allow" key not found',
+                    'content' => VarDumper::dumpAsString($response->content),
+                    'requestData' => $requestData,
                 ], 'BackOffice:getExchangeData:dataIsInvalid');
-            throw new BoResponseException('BO "Get Exchange Data" response Data allow key not found', BoResponseException::BO_RESPONSE_DATA_TYPE_IS_INVALID);
+            throw new BoResponseException('BO "Get Exchange Data" response Data allow key not found', BoResponseException::BO_RESPONSE_NOT_SUCCESS);
         }
         if (!empty($data['message']) && mb_stripos($data['message'], 'page not found') !== false) {
-            \Yii::error([
+            \Yii::warning([
                 'message' => 'BO wrong endpoint: ' . $endpoint,
                 'content' => VarDumper::dumpAsString($response->content),
+                'requestData' => $requestData,
             ], 'BackOffice:getExchangeData:wrongEndpoint');
             throw new BoResponseException('BO wrong endpoint', BoResponseException::BO_WRONG_ENDPOINT);
         }
