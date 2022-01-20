@@ -646,16 +646,25 @@ JS;
                 </div>
             <?php endif; ?>
 
-    <?php if ($user->isAdmin()) : ?>
+    <?php //if ($user->isAdmin()) : ?>
     <h5>Profile Settings</h5>
     <div class="well">
         <div class="form-group">
             <div class="row">
                 <div class="col-md-3">
+                    <?php
+                    $userAbacDto = new UserAbacDto('up_join_date');
+                    $userAbacDto->isNewRecord = $model->isNewRecord;
+                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Join Date field view*/
+                    $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
+                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Join Date field edit*/
+                    $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
+                    ?>
+
                     <?php if ($modelProfile->up_join_date === null) :
                         $modelProfile->up_join_date = date('Y-m-d');
                     endif; ?>
-                    <?= $form->field($modelProfile, 'up_join_date')->widget(\dosamigos\datepicker\DatePicker::class, [
+                    <?= $form->field($modelProfile, 'up_join_date', ['options' => ['hidden' => ($edit ? !$edit : !$view), 'class' => 'form-group']])->widget(\dosamigos\datepicker\DatePicker::class, [
                         'clientOptions' => [
                             'autoclose' => true,
                             'format' => 'yyyy-mm-dd',
@@ -663,33 +672,129 @@ JS;
                         'options' => [
                             'autocomplete' => 'off',
                             'placeholder' => 'Choose Date',
+                            'disabled' => !$edit
                         ],
                     ]) ?>
-                    <?= $form->field($modelProfile, 'up_skill')->dropDownList(\common\models\UserProfile::SKILL_TYPE_LIST, ['prompt' => '---']) ?>
-                </div>
-                <div class="col-md-3">
-                    <?= $form->field($modelProfile, 'up_call_type_id')->dropDownList(\common\models\UserProfile::CALL_TYPE_LIST) ?>
-                    <?= $form->field($modelProfile, 'up_2fa_secret')->textInput(['maxlength' => true, 'title' => 'Clean for reset'])->label('2fa secret') ?>
-                </div>
-                <div class="col-md-3">
-                    <?= $form->field($modelProfile, 'up_sip')->textInput(['maxlength' => true]) ?>
-                    <?= $form->field($modelProfile, 'up_2fa_enable')->checkbox() ?>
-                </div>
-                <div class="col-md-3">
-                    <?= $form->field($modelProfile, 'up_telegram')->textInput(['maxlength' => true]) ?>
-                    <?= $form->field($modelProfile, 'up_telegram_enable')->checkbox() ?>
 
+                    <?php
+                    $userAbacDto = new UserAbacDto('up_skill');
+                    $userAbacDto->isNewRecord = $model->isNewRecord;
+                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Skill field view*/
+                    $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
+                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Skill field edit*/
+                    $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
+                    ?>
+
+                    <?= $form->field($modelProfile, 'up_skill', ['options' => ['hidden' => ($edit ? !$edit : !$view), 'class' => 'form-group']])->dropDownList(\common\models\UserProfile::SKILL_TYPE_LIST, ['prompt' => '---', 'disabled' => !$edit]) ?>
                 </div>
                 <div class="col-md-3">
-                    <?= $form->field($modelProfile, 'up_auto_redial')->checkbox() ?>
-                    <?= $form->field($modelProfile, 'up_kpi_enable')->checkbox() ?>
-                    <?= $form->field($modelProfile, 'up_show_in_contact_list')->checkbox() ?>
-                    <?= $form->field($modelProfile, 'up_call_recording_disabled')->checkbox() ?>
+                    <?php
+                    $userAbacDto = new UserAbacDto('up_call_type_id');
+                    $userAbacDto->isNewRecord = $model->isNewRecord;
+                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Call Type field view*/
+                    $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
+                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Call Type field edit*/
+                    $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
+                    ?>
+                    <?= $form->field($modelProfile, 'up_call_type_id', ['options' => ['hidden' => ($edit ? !$edit : !$view), 'class' => 'form-group']])->dropDownList(\common\models\UserProfile::CALL_TYPE_LIST, ['disabled' => !$edit]) ?>
+
+                    <?php
+                    $userAbacDto = new UserAbacDto('up_2fa_secret');
+                    $userAbacDto->isNewRecord = $model->isNewRecord;
+                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, 2fa secret field view*/
+                    $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
+                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, 2fa secret field edit*/
+                    $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
+                    ?>
+                    <?= $form->field($modelProfile, 'up_2fa_secret', ['options' => ['hidden' => ($edit ? !$edit : !$view), 'class' => 'form-group']])->textInput(['maxlength' => true, 'title' => 'Clean for reset', 'readonly' => !$edit])->label('2fa secret') ?>
+                </div>
+                <div class="col-md-3">
+                    <?php
+                    $userAbacDto = new UserAbacDto('up_sip');
+                    $userAbacDto->isNewRecord = $model->isNewRecord;
+                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Sip field view*/
+                    $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
+                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Sip field edit*/
+                    $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
+                    ?>
+                    <?= $form->field($modelProfile, 'up_sip', ['options' => ['hidden' => ($edit ? !$edit : !$view), 'class' => 'form-group']])->textInput(['maxlength' => true, 'readonly' => !$edit]) ?>
+
+                    <?php
+                    $userAbacDto = new UserAbacDto('up_2fa_enable');
+                    $userAbacDto->isNewRecord = $model->isNewRecord;
+                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, 2fa enable field view*/
+                    $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
+                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, 2fa enable field edit*/
+                    $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
+                    ?>
+                    <?= $form->field($modelProfile, 'up_2fa_enable', ['options' => ['hidden' => ($edit ? !$edit : !$view), 'class' => 'form-group']])->checkbox(['disabled' => !$edit]) ?>
+                </div>
+                <div class="col-md-3">
+                    <?php
+                    $userAbacDto = new UserAbacDto('up_telegram');
+                    $userAbacDto->isNewRecord = $model->isNewRecord;
+                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Telegram ID field view*/
+                    $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
+                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Telegram ID field edit*/
+                    $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
+                    ?>
+                    <?= $form->field($modelProfile, 'up_telegram', ['options' => ['hidden' => ($edit ? !$edit : !$view), 'class' => 'form-group']])->textInput(['maxlength' => true, 'readonly' => !$edit]) ?>
+
+                    <?php
+                    $userAbacDto = new UserAbacDto('up_telegram_enable');
+                    $userAbacDto->isNewRecord = $model->isNewRecord;
+                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Telegram Enable field view*/
+                    $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
+                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Telegram Enable field edit*/
+                    $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
+                    ?>
+                    <?= $form->field($modelProfile, 'up_telegram_enable', ['options' => ['hidden' => ($edit ? !$edit : !$view), 'class' => 'form-group']])->checkbox(['disabled' => !$edit]) ?>
+                </div>
+                <div class="col-md-3">
+                    <?php
+                    $userAbacDto = new UserAbacDto('up_auto_redial');
+                    $userAbacDto->isNewRecord = $model->isNewRecord;
+                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Auto redial field view*/
+                    $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
+                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Auto redial field edit*/
+                    $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
+                    ?>
+                    <?= $form->field($modelProfile, 'up_auto_redial', ['options' => ['hidden' => ($edit ? !$edit : !$view), 'class' => 'form-group']])->checkbox(['disabled' => !$edit]) ?>
+
+                    <?php
+                    $userAbacDto = new UserAbacDto('up_kpi_enable');
+                    $userAbacDto->isNewRecord = $model->isNewRecord;
+                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, KPI enable field view*/
+                    $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
+                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, KPI enable field edit*/
+                    $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
+                    ?>
+                    <?= $form->field($modelProfile, 'up_kpi_enable', ['options' => ['hidden' => ($edit ? !$edit : !$view), 'class' => 'form-group']])->checkbox(['disabled' => !$edit]) ?>
+
+                    <?php
+                    $userAbacDto = new UserAbacDto('up_show_in_contact_list');
+                    $userAbacDto->isNewRecord = $model->isNewRecord;
+                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Show in contact list field view*/
+                    $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
+                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Show in contact list field edit*/
+                    $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
+                    ?>
+                    <?= $form->field($modelProfile, 'up_show_in_contact_list', ['options' => ['hidden' => ($edit ? !$edit : !$view), 'class' => 'form-group']])->checkbox(['disabled' => !$edit]) ?>
+
+                    <?php
+                    $userAbacDto = new UserAbacDto('up_call_recording_disabled');
+                    $userAbacDto->isNewRecord = $model->isNewRecord;
+                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Call recording disabled  field view*/
+                    $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
+                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Call recording disabled  field edit*/
+                    $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
+                    ?>
+                    <?= $form->field($modelProfile, 'up_call_recording_disabled', ['options' => ['hidden' => ($edit ? !$edit : !$view), 'class' => 'form-group']])->checkbox(['disabled' => !$edit]) ?>
                 </div>
             </div>
         </div>
     </div>
-    <?php endif; ?>
+    <?php //endif; ?>
 
             <div class="form-group text-center">
                 <?= Html::submitButton(($model->isNewRecord ? '<i class="fa fa-plus"></i> Create User' : '<i class="fa fa-save"></i> Update & Save User data'), ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-warning']) ?>

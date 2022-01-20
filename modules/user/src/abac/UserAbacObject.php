@@ -111,6 +111,18 @@ class UserAbacObject extends AbacBaseModel implements AbacInterface
             'up_commission_percent' => 'Commission Percent',
             'up_bonus_active' => 'Bonus Is Active',
             'up_leaderboard_enabled' => 'Leader Board Enabled',
+            'up_join_date' => 'Join Date',
+            'up_skill' => 'Skill',
+            'up_call_type_id' => 'Call Type',
+            'up_2fa_secret' => '2fa secret',
+            'up_sip' => 'Sip',
+            'up_2fa_enable' => '2fa enable',
+            'up_telegram' => 'Telegram ID',
+            'up_telegram_enable' => 'Telegram Enable',
+            'up_auto_redial' => 'Auto redial',
+            'up_kpi_enable' => 'KPI enable',
+            'up_show_in_contact_list' => 'Show in contact list',
+            'up_call_recording_disabled' => 'Call recording disabled',
         ];
 
         $attrFieldsList['values'] = $formFields;
