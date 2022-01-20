@@ -2,12 +2,14 @@
 
 namespace src\helpers\lead;
 
+use common\components\i18n\Formatter;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Lead;
 use DateTime;
 use src\access\EmployeeDepartmentAccess;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
 
 class LeadHelper
 {
@@ -163,5 +165,15 @@ class LeadHelper
         );
 
         return self::$departments;
+    }
+
+    public static function displaySnoozeFor(Lead $lead, int $timeNow, string $style = ''): string
+    {
+        if ($lead->isSnoozeExpired($timeNow)) {
+            $content = 'Pause';
+        } else {
+            $content = (new Formatter())->format($lead->snooze_for, 'byUserDateTime');
+        }
+        return Html::tag('span', $content, ['class' => 'label label-info', 'style' => $style]);
     }
 }

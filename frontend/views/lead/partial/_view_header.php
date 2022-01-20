@@ -24,6 +24,9 @@ $bundle = \frontend\assets\TimerAsset::register($this);
                 }
                 ?>
                 <?= $lead->getStatusLabel() ?>
+                <?php if ($lead->isSnooze()) : ?>
+                    <?= LeadHelper::displaySnoozeFor($lead, time(), 'vertical-align: 3px;font-size: 12px; margin-left: 5px;') ?>
+                <?php endif; ?>
 
                 <?php if ($lead->l_expiration_dt) : ?>
                     <?php if (LeadHelper::expiredLead($lead)) : ?>

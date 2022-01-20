@@ -1325,6 +1325,15 @@ class Lead extends ActiveRecord implements Objectable
         return $this->status === self::STATUS_SNOOZE;
     }
 
+    public function isSnoozeExpired(int $timeNow): bool
+    {
+        if ($this->snooze_for) {
+            $snoozeTimeNow = strtotime($this->snooze_for);
+            return $timeNow > $snoozeTimeNow;
+        }
+        return true;
+    }
+
     /**
      * @param int|null $newOwnerId
      * @param int|null $creatorId
