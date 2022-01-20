@@ -44,6 +44,7 @@ use src\services\quote\addQuote\price\PreparePrices;
 use Yii;
 use yii\base\Model;
 use yii\data\ArrayDataProvider;
+use yii\db\Transaction;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Json;
@@ -789,7 +790,7 @@ class QuoteController extends FController
             'errors' => [],
         ];
 
-        $transaction = Yii::$app->db->beginTransaction();
+        $transaction = new Transaction(['db' => \Yii::$app->db]);
         try {
             if (!Yii::$app->request->isPost) {
                 throw new \DomainException('POST data required', -1);
@@ -831,6 +832,8 @@ class QuoteController extends FController
             }
 
             $quote->reservation_dump = str_replace('&nbsp;', ' ', implode("\n", $itinerary));
+
+            $transaction->begin();
 
             if (!$quote->save()) {
                 $response['errors'] = $quote->getErrors();
@@ -913,6 +916,11 @@ class QuoteController extends FController
             $this->logQuote($quote);
 
             $transaction->commit();
+
+            if ($lead->called_expert) {
+                $quote->sendUpdateBO();
+            }
+
             $response['status'] = 1;
         } catch (\Throwable $throwable) {
             $transaction->rollBack();
@@ -929,10 +937,6 @@ class QuoteController extends FController
             } else {
                 \Yii::warning($errorMessage, 'QuoteController:actionSaveFromDump:Throwable');
             }
-        }
-
-        if ($lead->called_expert) {
-            $quote->sendUpdateBO();
         }
 
         return $response;
