@@ -23,14 +23,21 @@ class m220120_055908_correction_booking_id_in_flight_quote_flight extends Migrat
         echo PHP_EOL;
         $total = count($query);
         $processed = 0;
+        $result = [];
         Console::startProgress($processed, $total);
 
         foreach ($query as $flightQuoteFlight) {
             $flightQuoteFlight->fqf_booking_id = $flightQuoteFlight->fqf_child_booking_id;
             $flightQuoteFlight->save();
+
+            $result[$flightQuoteFlight->fqf_id]['fqf_child_booking_id'] = $flightQuoteFlight->fqf_child_booking_id;
+
             $processed++;
             Console::updateProgress($processed, $total);
         }
+
+        \Yii::info($result, 'info\Result:correction_booking_id_in_flight_quote_flight');
+
         Console::endProgress(false);
         echo PHP_EOL;
     }
