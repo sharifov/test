@@ -65,7 +65,6 @@ class OrderCreateFromSaleForm extends Model
             [['project'], 'detectProjectId'],
 
             [['bookingId', 'baseBookingId'], 'string', 'max' => 50],
-            [['baseBookingId'], 'baseBookingIdHandle'],
 
             [['pnr'], 'string', 'max' => 70],
 
@@ -87,13 +86,6 @@ class OrderCreateFromSaleForm extends Model
             ['phone', 'string', 'skipOnEmpty' => true],
             ['email', 'email', 'skipOnEmpty' => true],
         ];
-    }
-
-    public function baseBookingIdHandle(): void
-    {
-        if (empty($this->baseBookingId)) {
-            $this->baseBookingId = $this->bookingId;
-        }
     }
 
     public function detectProjectId($attribute): void
