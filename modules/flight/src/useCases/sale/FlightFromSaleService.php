@@ -254,13 +254,14 @@ class FlightFromSaleService
             }
         }
 
+        $bookingId = !empty($orderCreateFromSaleForm->baseBookingId) ? $orderCreateFromSaleForm->baseBookingId : $orderCreateFromSaleForm->bookingId;
         $childBookingId = ($orderCreateFromSaleForm->bookingId !== $orderCreateFromSaleForm->baseBookingId) ?
             $orderCreateFromSaleForm->bookingId : null;
         $flightQuoteFlight = FlightQuoteFlight::create(
             $flightQuote->getId(),
             $orderCreateFromSaleForm->getTripTypeId(),
             $orderCreateFromSaleForm->validatingCarrier,
-            $orderCreateFromSaleForm->baseBookingId,
+            $bookingId,
             null,
             $orderCreateFromSaleForm->pnr,
             $orderCreateFromSaleForm->validatingCarrier,
@@ -274,7 +275,7 @@ class FlightFromSaleService
 
         $flightQuoteBooking = FlightQuoteBooking::create(
             $flightQuoteFlightId,
-            $orderCreateFromSaleForm->baseBookingId,
+            $bookingId,
             $orderCreateFromSaleForm->pnr,
             $orderCreateFromSaleForm->getGdsId(),
             null,
