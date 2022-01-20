@@ -1512,13 +1512,33 @@ class Quote extends \yii\db\ActiveRecord
      */
     public function sendUpdateBO(): bool
     {
-        $quote = self::findOne($this->id);
-        if ($quote) {
+        try {
+            if (empty($this->id)) {
+                throw new \RuntimeException('Quote ID is empty');
+            }
+            if (!$quote = self::findOne($this->id)) {
+                throw new \RuntimeException('Not found Quote ID: ' . $this->id);
+            }
             $data = $quote->getQuoteInformationForExpert(true);
             BackOffice::sendRequest('lead/update-quote', 'POST', json_encode($data));
             return true;
+        } catch (\RuntimeException | \DomainException $throwable) {
+            $message = ArrayHelper::merge(AppHelper::throwableLog($throwable, true), [
+                'uid' => $this->uid,
+                'lead_id' => $this->lead_id,
+                'status' => $this->status,
+                'created' => $this->created,
+            ]);
+            \Yii::warning($message, 'Quote::sendUpdateBO:Exception');
+        } catch (\Throwable $throwable) {
+            $message = ArrayHelper::merge(AppHelper::throwableLog($throwable, true), [
+                'uid' => $this->uid,
+                'lead_id' => $this->lead_id,
+                'status' => $this->status,
+                'created' => $this->created,
+            ]);
+            \Yii::error($message, 'Quote::sendUpdateBO:Throwable');
         }
-        Yii::error('Not found Quote ID: ' . $this->id, 'Quote::sendUpdateBO');
         return false;
     }
 
