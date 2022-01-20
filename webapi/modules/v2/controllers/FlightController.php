@@ -3,6 +3,7 @@
 namespace webapi\modules\v2\controllers;
 
 use common\components\jobs\ReprotectionCreateJob;
+use common\helpers\LogHelper;
 use DomainException;
 use modules\flight\models\FlightRequest;
 use modules\flight\src\repositories\flightRequest\FlightRequestRepository;
@@ -2179,7 +2180,7 @@ class FlightController extends BaseController
             \Yii::error([
                 'message' => 'DomainException: Reprotection Exchange error',
                 'error' => $exception->getMessage(),
-                'request' => $reProtectionExchangeForm->getAttributes(),
+                'request' => LogHelper::hidePersonalData($reProtectionExchangeForm->getAttributes(), ['email', 'phone'], 3),
             ], 'FlightController:reprotectionExchange:DomainException');
 
             return new ErrorResponse(

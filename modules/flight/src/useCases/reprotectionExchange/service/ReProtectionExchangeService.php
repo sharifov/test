@@ -132,7 +132,7 @@ class ReProtectionExchangeService
     {
         return Cases::find()
             ->select(Cases::tableName() . '.*')
-            ->innerJoin([ProductQuoteChange::tableName(), 'cs_id = pqc_case_id'])
+            ->innerJoin(ProductQuoteChange::tableName(), 'cs_id = pqc_case_id')
             ->where(['cs_order_uid' => $bookingId])
             ->orderBy(['cs_id' => SORT_DESC])
             ->one();
