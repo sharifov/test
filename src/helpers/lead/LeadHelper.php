@@ -172,7 +172,7 @@ class LeadHelper
         if ($lead->isSnoozeExpired($timeNow)) {
             $content = 'Pause';
         } else {
-            $content = (new Formatter())->format($lead->snooze_for, 'byUserDateTime');
+            $content = \Yii::$app->formatter->format($lead->snooze_for, 'byUserDateTime');
         }
         return Html::tag('span', $content, ['class' => 'label label-info', 'style' => $style]);
     }
