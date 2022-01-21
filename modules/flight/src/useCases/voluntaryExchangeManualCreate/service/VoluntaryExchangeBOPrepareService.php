@@ -4,6 +4,7 @@ namespace modules\flight\src\useCases\voluntaryExchangeManualCreate\service;
 
 use common\models\Project;
 use modules\product\src\entities\productQuote\ProductQuote;
+use src\entities\cases\Cases;
 
 /**
  * Class VoluntaryExchangeBOPrepareService
@@ -14,6 +15,7 @@ use modules\product\src\entities\productQuote\ProductQuote;
  *
  * @property Project $project
  * @property ProductQuote $originProductQuote
+ * @property Cases|null $case
  */
 class VoluntaryExchangeBOPrepareService
 {
@@ -24,15 +26,17 @@ class VoluntaryExchangeBOPrepareService
 
     private Project $project;
     private ProductQuote $originProductQuote;
+    private ?Cases $case = null;
 
     /**
      * @param Project $project
      * @param ProductQuote $originProductQuote
      */
-    public function __construct(Project $project, ProductQuote $originProductQuote)
+    public function __construct(Project $project, ProductQuote $originProductQuote, ?Cases $case = null)
     {
         $this->project = $project;
         $this->originProductQuote = $originProductQuote;
+        $this->case = $case;
     }
 
     public function fill(): void
@@ -56,8 +60,14 @@ class VoluntaryExchangeBOPrepareService
             throw new \RuntimeException('TicketNumbers not found');
         }
 
-        $this->apiKey = $this->project->api_key;
+        if ($this->apiKey = $this->project->api_key) {
+            throw new \RuntimeException('Api key is empty in project(' . $this->project->id . ')');
+        }
+
         if (!$this->bookingId = $this->originProductQuote->getLastBookingId()) {
+            $this->bookingId = $this->case->cs_order_uid;
+        }
+        if (!$this->bookingId) {
             throw new \RuntimeException('BookingId not found in OriginProductQuote Gid(' . $this->originProductQuote->pq_gid . ')');
         }
     }
