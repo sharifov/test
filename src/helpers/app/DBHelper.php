@@ -7,7 +7,7 @@
  * Time: 17:05
  */
 
-namespace sales\helpers\app;
+namespace src\helpers\app;
 
 use DateTime;
 use RuntimeException;

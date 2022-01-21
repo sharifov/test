@@ -2,8 +2,8 @@
 
 use common\models\Employee;
 use console\migrations\RbacMigrationService;
-use sales\helpers\app\AppHelper;
-use sales\helpers\app\DBHelper;
+use src\helpers\app\AppHelper;
+use src\helpers\app\DBHelper;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use yii\db\Migration;
 
