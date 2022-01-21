@@ -21,17 +21,16 @@ class VoluntaryExchangeBOService
     public function __construct(VoluntaryExchangeBOPrepareService $voluntaryExchangeBOPrepareService)
     {
         $this->BOPrepareService = $voluntaryExchangeBOPrepareService;
-
-        $this->requestProcessing();
     }
 
-    private function requestProcessing(): void
+    public function requestProcessing(): VoluntaryExchangeBOService
     {
         $data['apiKey'] = $this->BOPrepareService->getApiKey();
         $data['bookingId'] = $this->BOPrepareService->getBookingId();
         $data['tickets'] = $this->BOPrepareService->getTickets();
 
         $this->result = BackOffice::getExchangeData($data);
+        return $this;
     }
 
     public function isAllow(): ?bool

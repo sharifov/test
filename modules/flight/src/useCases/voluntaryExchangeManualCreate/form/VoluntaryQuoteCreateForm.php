@@ -83,7 +83,7 @@ class VoluntaryQuoteCreateForm extends ChangeQuoteCreateForm
     public ?string $customerPackage = null;
     public ?string $serviceFeeCurrency = null;
 
-    public $serviceFeeAmount;
+    public $serviceFeeAmount = null;
 
     /**
      * @param int|null $creatorId
@@ -102,6 +102,10 @@ class VoluntaryQuoteCreateForm extends ChangeQuoteCreateForm
         $this->quoteCreator = $creatorId;
         $this->flightId = $flight->fl_id ?? null;
         $this->defaultPrices = $defaultPrices;
+
+        if ($systemMarkUp) {
+            $this->serviceFeeAmount = $systemMarkUp;
+        }
 
         if ($flight) {
             if ($this->defaultPrices) {

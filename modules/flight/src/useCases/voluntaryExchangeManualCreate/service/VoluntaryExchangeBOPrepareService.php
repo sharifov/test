@@ -20,6 +20,7 @@ class VoluntaryExchangeBOPrepareService
     private ?string $apiKey = null;
     private ?string $bookingId = null;
     private ?array $tickets = null;
+    private ?bool $statusFill = null;
 
     private Project $project;
     private ProductQuote $originProductQuote;
@@ -32,11 +33,9 @@ class VoluntaryExchangeBOPrepareService
     {
         $this->project = $project;
         $this->originProductQuote = $originProductQuote;
-
-        $this->fill();
     }
 
-    private function fill(): void
+    public function fill(): void
     {
         if (empty($this->project->api_key)) {
             throw new \RuntimeException('Api key is empty. Project(' . $this->project->project_key . ')');
@@ -58,7 +57,9 @@ class VoluntaryExchangeBOPrepareService
         }
 
         $this->apiKey = $this->project->api_key;
-        $this->bookingId = $this->originProductQuote->getLastBookingId();
+        if (!$this->bookingId = $this->originProductQuote->getLastBookingId()) {
+            throw new \RuntimeException('BookingId not found in OriginProductQuote Gid(' . $this->originProductQuote->pq_gid . ')');
+        }
     }
 
     public function getApiKey(): ?string
@@ -74,5 +75,10 @@ class VoluntaryExchangeBOPrepareService
     public function getTickets(): ?array
     {
         return $this->tickets;
+    }
+
+    public function getStatusFill(): ?bool
+    {
+        return $this->statusFill;
     }
 }
