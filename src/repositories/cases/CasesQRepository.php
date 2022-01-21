@@ -59,34 +59,28 @@ class CasesQRepository
         $showDataFlag = false;
         /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_OWNER_ACCESS, Access to all cases where User is Owner Pending Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_OWNER_ACCESS)) {
-            $userIds[] = $user->id;
+            /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS, Access to all cases where Users have common department Pending Queue*/
+            $depAccess = \Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS);
+            /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS, Access to all cases where Users have common project Pending Queue*/
+            $prAccess = \Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS);
+            $query->andWhere($this->createQSubQuery($user->id, [], $depAccess, $prAccess));
             $showDataFlag = true;
         }
         /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_EMPTY_OWNER_ACCESS, Access to all cases where Owner is empty Pending Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_EMPTY_OWNER_ACCESS)) {
             $userIds[] = null;
+            $query->andWhere(['IN', 'cs_user_id', $userIds]);
             $showDataFlag = true;
         }
         /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_GROUP_ACCESS, Access to all cases where User is in common group with Owner Pending Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_GROUP_ACCESS)) {
             $userIds = ArrayHelper::merge($userIds, EmployeeGroupAccess::getUsersIdsInCommonGroups($user->id));
-            $showDataFlag = true;
-        }
-
-        /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS, Access to all cases where User have same department Pending Queue*/
-        if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS)) {
-            $query->andWhere($this->inDepartment($user->id));
-            $showDataFlag = true;
-        }
-
-        /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS, Access to all cases where User have same project Pending Queue*/
-        if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS)) {
-            $query->andWhere($this->inProject($user->id));
+            $query->andWhere(['IN', 'cs_user_id', $userIds]);
             $showDataFlag = true;
         }
 
         if ($showDataFlag) {
-            return $query->andWhere(['IN', 'cs_user_id', $userIds]);
+            return $query;
         } else {
             return $query->andWhere('0 = 1');
         }
@@ -137,34 +131,28 @@ class CasesQRepository
         $showDataFlag = false;
         /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_OWNER_ACCESS, Access to all cases where User is Owner Inbox Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_OWNER_ACCESS)) {
-            $userIds[] = $user->id;
+            /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS, Access to all cases where Users have common department Inbox Queue*/
+            $depAccess = \Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS);
+            /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS, Access to all cases where Users have common project Inbox Queue*/
+            $prAccess = \Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS);
+            $query->andWhere($this->createQSubQuery($user->id, [], $depAccess, $prAccess));
             $showDataFlag = true;
         }
         /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_EMPTY_OWNER_ACCESS, Access to all cases where Owner is empty Inbox Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_EMPTY_OWNER_ACCESS)) {
             $userIds[] = null;
+            $query->andWhere(['IN', 'cs_user_id', $userIds]);
             $showDataFlag = true;
         }
         /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_GROUP_ACCESS, Access to all cases where User is in common group with Owner Inbox Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_GROUP_ACCESS)) {
             $userIds = ArrayHelper::merge($userIds, EmployeeGroupAccess::getUsersIdsInCommonGroups($user->id));
-            $showDataFlag = true;
-        }
-
-        /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS, Access to all cases where User have same department Inbox Queue*/
-        if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS)) {
-            $query->andWhere($this->inDepartment($user->id));
-            $showDataFlag = true;
-        }
-
-        /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS, Access to all cases where User have same project Inbox Queue*/
-        if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS)) {
-            $query->andWhere($this->inProject($user->id));
+            $query->andWhere(['IN', 'cs_user_id', $userIds]);
             $showDataFlag = true;
         }
 
         if ($showDataFlag) {
-            return $query->andWhere(['IN', 'cs_user_id', $userIds]);
+            return $query;
         } else {
             return $query->andWhere('0 = 1');
         }
@@ -213,32 +201,28 @@ class CasesQRepository
         $showDataFlag = false;
         /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_OWNER_ACCESS, Access to all cases where User is Owner Error Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_OWNER_ACCESS)) {
-            $userIds[] = $user->id;
+            /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS, Access to all cases where Users have common department Error Queue*/
+            $depAccess = \Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS);
+            /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS, Access to all cases where Users have common project Error Queue*/
+            $prAccess = \Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS);
+            $query->andWhere($this->createQSubQuery($user->id, [], $depAccess, $prAccess));
             $showDataFlag = true;
         }
         /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_EMPTY_OWNER_ACCESS, Access to all cases where Owner is empty Error Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_EMPTY_OWNER_ACCESS)) {
             $userIds[] = null;
+            $query->andWhere(['IN', 'cs_user_id', $userIds]);
             $showDataFlag = true;
         }
         /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_GROUP_ACCESS, Access to all cases where User is in common group with Owner Error Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_GROUP_ACCESS)) {
             $userIds = ArrayHelper::merge($userIds, EmployeeGroupAccess::getUsersIdsInCommonGroups($user->id));
-            $showDataFlag = true;
-        }
-        /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS, Access to all cases where User have same department Error Queue*/
-        if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS)) {
-            $query->andWhere($this->inDepartment($user->id));
-            $showDataFlag = true;
-        }
-        /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS, Access to all cases where User have same project Error Queue*/
-        if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS)) {
-            $query->andWhere($this->inProject($user->id));
+            $query->andWhere(['IN', 'cs_user_id', $userIds]);
             $showDataFlag = true;
         }
 
         if ($showDataFlag) {
-            return $query->andWhere(['IN', 'cs_user_id', $userIds]);
+            return $query;
         } else {
             return $query->andWhere('0 = 1');
         }
@@ -287,32 +271,28 @@ class CasesQRepository
         $showDataFlag = false;
         /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_OWNER_ACCESS, Access to all cases where User is Owner Awaiting Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_OWNER_ACCESS)) {
-            $userIds[] = $user->id;
+            /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS, Access to all cases where Users have common department Awaiting Queue*/
+            $depAccess = \Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS);
+            /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS, Access to all cases where Users have common project Awaiting Queue*/
+            $prAccess = \Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS);
+            $query->andWhere($this->createQSubQuery($user->id, [], $depAccess, $prAccess));
             $showDataFlag = true;
         }
         /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_EMPTY_OWNER_ACCESS, Access to all cases where Owner is empty Awaiting Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_EMPTY_OWNER_ACCESS)) {
             $userIds[] = null;
+            $query->andWhere(['IN', 'cs_user_id', $userIds]);
             $showDataFlag = true;
         }
         /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_GROUP_ACCESS, Access to all cases where User is in common group with Owner Awaiting Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_GROUP_ACCESS)) {
             $userIds = ArrayHelper::merge($userIds, EmployeeGroupAccess::getUsersIdsInCommonGroups($user->id));
-            $showDataFlag = true;
-        }
-        /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS, Access to all cases where User have same department Awaiting Queue*/
-        if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS)) {
-            $query->andWhere($this->inDepartment($user->id));
-            $showDataFlag = true;
-        }
-        /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS, Access to all cases where User have same project Awaiting Queue*/
-        if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS)) {
-            $query->andWhere($this->inProject($user->id));
+            $query->andWhere(['IN', 'cs_user_id', $userIds]);
             $showDataFlag = true;
         }
 
         if ($showDataFlag) {
-            return $query->andWhere(['IN', 'cs_user_id', $userIds]);
+            return $query;
         } else {
             return $query->andWhere('0 = 1');
         }
@@ -352,41 +332,37 @@ class CasesQRepository
         $caseAbacDto = new CasesAbacDto(null);
         $caseAbacDto->mainMenuCaseBadgeName = 'auto-processing';
 
-        /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_ALL_ACCESS, Access to all Cases Processing Queue*/
+        /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_ALL_ACCESS, Access to all Cases Auto Processing Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_ALL_ACCESS)) {
             return $query;
         }
 
         $userIds = [];
         $showDataFlag = false;
-        /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_OWNER_ACCESS, Access to all cases where User is Owner Processing Queue*/
+        /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_OWNER_ACCESS, Access to all cases where User is Owner Auto Processing Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_OWNER_ACCESS)) {
-            $userIds[] = $user->id;
+            /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS, Access to all cases where Users have common department Auto Processing Queue*/
+            $depAccess = \Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS);
+            /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS, Access to all cases where Users have common project Auto Processing Queue*/
+            $prAccess = \Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS);
+            $query->andWhere($this->createQSubQuery($user->id, [], $depAccess, $prAccess));
             $showDataFlag = true;
         }
         /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_EMPTY_OWNER_ACCESS, Access to all cases where Owner is empty Processing Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_EMPTY_OWNER_ACCESS)) {
             $userIds[] = null;
+            $query->andWhere(['IN', 'cs_user_id', $userIds]);
             $showDataFlag = true;
         }
         /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_GROUP_ACCESS, Access to all cases where User is in common group with Owner Processing Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_GROUP_ACCESS)) {
             $userIds = ArrayHelper::merge($userIds, EmployeeGroupAccess::getUsersIdsInCommonGroups($user->id));
-            $showDataFlag = true;
-        }
-        /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS, Access to all cases where User have same department Processing Queue*/
-        if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS)) {
-            $query->andWhere($this->inDepartment($user->id));
-            $showDataFlag = true;
-        }
-        /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS, Access to all cases where User have same project Processing Queue*/
-        if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS)) {
-            $query->andWhere($this->inProject($user->id));
+            $query->andWhere(['IN', 'cs_user_id', $userIds]);
             $showDataFlag = true;
         }
 
         if ($showDataFlag) {
-            return $query->andWhere(['IN', 'cs_user_id', $userIds]);
+            return $query;
         } else {
             return $query->andWhere('0 = 1');
         }
@@ -419,31 +395,34 @@ class CasesQRepository
         }
 
         $userIds = [];
+        $showDataFlag = false;
         /** @abac null, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_OWNER_ACCESS, Access to all cases where User is Owner NeedAction Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_OWNER_ACCESS)) {
-            $userIds[] = $user->id;
+            /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS, Access to all cases where Users have common department NeedAction Queue*/
+            $depAccess = \Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS);
+            /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS, Access to all cases where Users have common project NeedAction Queue*/
+            $prAccess = \Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS);
+            $query->andWhere($this->createQSubQuery($user->id, [], $depAccess, $prAccess));
+            $showDataFlag = true;
         }
         /** @abac null, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_EMPTY_OWNER_ACCESS, Access to all cases where Owner is empty*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_EMPTY_OWNER_ACCESS)) {
             $userIds[] = null;
+            $query->andWhere(['IN', 'cs_user_id', $userIds]);
+            $showDataFlag = true;
         }
         /** @abac null, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_GROUP_ACCESS, Access to all cases where User is in common group with Owner NeedAction Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_GROUP_ACCESS)) {
             $userIds = ArrayHelper::merge($userIds, EmployeeGroupAccess::getUsersIdsInCommonGroups($user->id));
-        }
-        /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS, Access to all cases where User have same department NeedAction Queue*/
-        if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS)) {
-            $query->andWhere($this->inDepartment($user->id));
+            $query->andWhere(['IN', 'cs_user_id', $userIds]);
+            $showDataFlag = true;
         }
 
-        /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS, Access to all cases where User have same project NeedAction Queue*/
-        if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS)) {
-            $query->andWhere($this->inProject($user->id));
+        if ($showDataFlag) {
+            return $query;
+        } else {
+            return $query->andWhere('0 = 1');
         }
-
-        $query->andWhere(['IN', 'cs_user_id', $userIds]);
-
-        return $query;
     }
 
     /**
@@ -485,32 +464,28 @@ class CasesQRepository
         $showDataFlag = false;
         /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_OWNER_ACCESS, Access to all cases where User is Owner FollowUp Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_OWNER_ACCESS)) {
-            $userIds[] = $user->id;
+            /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS, Access to all cases where Users have common department FollowUp Queue*/
+            $depAccess = \Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS);
+            /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS, Access to all cases where Users have common project FollowUp Queue*/
+            $prAccess = \Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS);
+            $query->andWhere($this->createQSubQuery($user->id, [], $depAccess, $prAccess));
             $showDataFlag = true;
         }
         /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_EMPTY_OWNER_ACCESS, Access to all cases where Owner is empty FollowUp Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_EMPTY_OWNER_ACCESS)) {
             $userIds[] = null;
+            $query->andWhere(['IN', 'cs_user_id', $userIds]);
             $showDataFlag = true;
         }
         /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_GROUP_ACCESS, Access to all cases where User is in common group with Owner FollowUp Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_GROUP_ACCESS)) {
             $userIds = ArrayHelper::merge($userIds, EmployeeGroupAccess::getUsersIdsInCommonGroups($user->id));
-            $showDataFlag = true;
-        }
-        /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS, Access to all cases where User have same department FollowUp Queue*/
-        if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS)) {
-            $query->andWhere($this->inDepartment($user->id));
-            $showDataFlag = true;
-        }
-        /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS, Access to all cases where User have same project FollowUp Queue*/
-        if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS)) {
-            $query->andWhere($this->inProject($user->id));
+            $query->andWhere(['IN', 'cs_user_id', $userIds]);
             $showDataFlag = true;
         }
 
         if ($showDataFlag) {
-            return $query->andWhere(['IN', 'cs_user_id', $userIds]);
+            return $query;
         } else {
             return $query->andWhere('0 = 1');
         }
@@ -574,32 +549,28 @@ class CasesQRepository
         $showDataFlag = false;
         /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_OWNER_ACCESS, Access to all cases where User is Owner Processing Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_OWNER_ACCESS)) {
-            $userIds[] = $user->id;
+            /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS, Access to all cases where Users have common department Processing Queue*/
+            $depAccess = \Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS);
+            /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS, Access to all cases where Users have common project Processing Queue*/
+            $prAccess = \Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS);
+            $query->andWhere($this->createQSubQuery($user->id, [], $depAccess, $prAccess));
             $showDataFlag = true;
         }
         /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_EMPTY_OWNER_ACCESS, Access to all cases where Owner is empty Processing Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_EMPTY_OWNER_ACCESS)) {
             $userIds[] = null;
+            $query->andWhere(['IN', 'cs_user_id', $userIds]);
             $showDataFlag = true;
         }
         /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_GROUP_ACCESS, Access to all cases where User is in common group with Owner Processing Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_GROUP_ACCESS)) {
             $userIds = ArrayHelper::merge($userIds, EmployeeGroupAccess::getUsersIdsInCommonGroups($user->id));
-            $showDataFlag = true;
-        }
-        /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS, Access to all cases where User have same department Processing Queue*/
-        if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS)) {
-            $query->andWhere($this->inDepartment($user->id));
-            $showDataFlag = true;
-        }
-        /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS, Access to all cases where User have same project Processing Queue*/
-        if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS)) {
-            $query->andWhere($this->inProject($user->id));
+            $query->andWhere(['IN', 'cs_user_id', $userIds]);
             $showDataFlag = true;
         }
 
         if ($showDataFlag) {
-            return $query->andWhere(['IN', 'cs_user_id', $userIds]);
+            return $query;
         } else {
             return $query->andWhere('0 = 1');
         }
@@ -663,32 +634,28 @@ class CasesQRepository
         $showDataFlag = false;
         /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_OWNER_ACCESS, Access to all cases where User is Owner Solved Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_OWNER_ACCESS)) {
-            $userIds[] = $user->id;
+            /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS, Access to all cases where Users have common department Solved Queue*/
+            $depAccess = \Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS);
+            /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS, Access to all cases where Users have common project Solved Queue*/
+            $prAccess = \Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS);
+            $query->andWhere($this->createQSubQuery($user->id, [], $depAccess, $prAccess));
             $showDataFlag = true;
         }
         /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_EMPTY_OWNER_ACCESS, Access to all cases where Owner is empty Solved Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_EMPTY_OWNER_ACCESS)) {
             $userIds[] = null;
+            $query->andWhere(['IN', 'cs_user_id', $userIds]);
             $showDataFlag = true;
         }
         /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_GROUP_ACCESS, Access to all cases where User is in common group with Owner Solved Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_GROUP_ACCESS)) {
             $userIds = ArrayHelper::merge($userIds, EmployeeGroupAccess::getUsersIdsInCommonGroups($user->id));
-            $showDataFlag = true;
-        }
-        /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS, Access to all cases where User have same department Solved Queue*/
-        if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS)) {
-            $query->andWhere($this->inDepartment($user->id));
-            $showDataFlag = true;
-        }
-        /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS, Access to all cases where User have same project Solved Queue*/
-        if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS)) {
-            $query->andWhere($this->inProject($user->id));
+            $query->andWhere(['IN', 'cs_user_id', $userIds]);
             $showDataFlag = true;
         }
 
         if ($showDataFlag) {
-            return $query->andWhere(['IN', 'cs_user_id', $userIds]);
+            return $query;
         } else {
             return $query->andWhere('0 = 1');
         }
@@ -752,32 +719,28 @@ class CasesQRepository
         $showDataFlag = false;
         /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_OWNER_ACCESS, Access to all cases where User is Owner Trash Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_OWNER_ACCESS)) {
-            $userIds[] = $user->id;
+            /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS, Access to all cases where Users have common department Trash Queue*/
+            $depAccess = \Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS);
+            /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS, Access to all cases where Users have common project Trash Queue*/
+            $prAccess = \Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS);
+            $query->andWhere($this->createQSubQuery($user->id, [], $depAccess, $prAccess));
             $showDataFlag = true;
         }
         /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_EMPTY_OWNER_ACCESS, Access to all cases where Owner is empty Trash Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_EMPTY_OWNER_ACCESS)) {
             $userIds[] = null;
+            $query->andWhere(['IN', 'cs_user_id', $userIds]);
             $showDataFlag = true;
         }
         /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_GROUP_ACCESS, Access to all cases where User is in common group with Owner Trash Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_GROUP_ACCESS)) {
             $userIds = ArrayHelper::merge($userIds, EmployeeGroupAccess::getUsersIdsInCommonGroups($user->id));
-            $showDataFlag = true;
-        }
-        /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS, Access to all cases where User have same department Trash Queue*/
-        if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS)) {
-            $query->andWhere($this->inDepartment($user->id));
-            $showDataFlag = true;
-        }
-        /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS, Access to all cases where User have same project Trash Queue*/
-        if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS)) {
-            $query->andWhere($this->inProject($user->id));
+            $query->andWhere(['IN', 'cs_user_id', $userIds]);
             $showDataFlag = true;
         }
 
         if ($showDataFlag) {
-            return $query->andWhere(['IN', 'cs_user_id', $userIds]);
+            return $query;
         } else {
             return $query->andWhere('0 = 1');
         }
@@ -818,34 +781,28 @@ class CasesQRepository
         $showDataFlag = false;
         /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_OWNER_ACCESS, Access to all cases where User is Owner Unidentified Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_OWNER_ACCESS)) {
-            $userIds[] = $user->id;
+            /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS, Access to all cases where Users have common department Unidentified Queue*/
+            $depAccess = \Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS);
+            /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS, Access to all cases where Users have common project Unidentified Queue*/
+            $prAccess = \Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS);
+            $query->andWhere($this->createQSubQuery($user->id, [], $depAccess, $prAccess));
             $showDataFlag = true;
         }
         /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_EMPTY_OWNER_ACCESS, Access to all cases where Owner is empty Unidentified Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_EMPTY_OWNER_ACCESS)) {
             $userIds[] = null;
+            $query->andWhere(['IN', 'cs_user_id', $userIds]);
             $showDataFlag = true;
         }
         /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_GROUP_ACCESS, Access to all cases where User is in common group with Owner Unidentified Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_GROUP_ACCESS)) {
             $userIds = ArrayHelper::merge($userIds, EmployeeGroupAccess::getUsersIdsInCommonGroups($user->id));
-            $showDataFlag = true;
-        }
-
-        /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS, Access to all cases where User have same department Unidentified Queue*/
-        if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS)) {
-            $query->andWhere($this->inDepartment($user->id));
-            $showDataFlag = true;
-        }
-
-        /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS, Access to all cases where User have same project Unidentified Queue*/
-        if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS)) {
-            $query->andWhere($this->inProject($user->id));
+            $query->andWhere(['IN', 'cs_user_id', $userIds]);
             $showDataFlag = true;
         }
 
         if ($showDataFlag) {
-            return $query->andWhere(['IN', 'cs_user_id', $userIds]);
+            return $query;
         } else {
             return $query->andWhere('0 = 1');
         }
@@ -908,32 +865,28 @@ class CasesQRepository
         $showDataFlag = false;
         /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_OWNER_ACCESS, Access to all cases where User is Owner FirstPriority Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_OWNER_ACCESS)) {
-            $userIds[] = $user->id;
+            /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS, Access to all cases where Users have common department FirstPriority Queue*/
+            $depAccess = \Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS);
+            /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS, Access to all cases where Users have common project FirstPriority Queue*/
+            $prAccess = \Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS);
+            $query->andWhere($this->createQSubQuery($user->id, [], $depAccess, $prAccess));
             $showDataFlag = true;
         }
         /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_EMPTY_OWNER_ACCESS, Access to all cases where Owner is empty FirstPriority Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_EMPTY_OWNER_ACCESS)) {
             $userIds[] = null;
+            $query->andWhere(['IN', 'cs_user_id', $userIds]);
             $showDataFlag = true;
         }
         /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_GROUP_ACCESS, Access to all cases where User is in common group with Owner FirstPriority Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_GROUP_ACCESS)) {
             $userIds = ArrayHelper::merge($userIds, EmployeeGroupAccess::getUsersIdsInCommonGroups($user->id));
-            $showDataFlag = true;
-        }
-        /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS, Access to all cases where User have same department FirstPriority Queue*/
-        if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS)) {
-            $query->andWhere($this->inDepartment($user->id));
-            $showDataFlag = true;
-        }
-        /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS, Access to all cases where User have same project FirstPriority Queue*/
-        if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS)) {
-            $query->andWhere($this->inProject($user->id));
+            $query->andWhere(['IN', 'cs_user_id', $userIds]);
             $showDataFlag = true;
         }
 
         if ($showDataFlag) {
-            return $query->andWhere(['IN', 'cs_user_id', $userIds]);
+            return $query;
         } else {
             return $query->andWhere('0 = 1');
         }
@@ -996,32 +949,28 @@ class CasesQRepository
         $showDataFlag = false;
         /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_OWNER_ACCESS, Access to all cases where User is Owner SecondPriority Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_OWNER_ACCESS)) {
-            $userIds[] = $user->id;
+            /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS, Access to all cases where Users have common department SecondPriority Queue*/
+            $depAccess = \Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS);
+            /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS, Access to all cases where Users have common project SecondPriority Queue*/
+            $prAccess = \Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS);
+            $query->andWhere($this->createQSubQuery($user->id, [], $depAccess, $prAccess));
             $showDataFlag = true;
         }
         /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_EMPTY_OWNER_ACCESS, Access to all cases where Owner is empty SecondPriority Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_EMPTY_OWNER_ACCESS)) {
             $userIds[] = null;
+            $query->andWhere(['IN', 'cs_user_id', $userIds]);
             $showDataFlag = true;
         }
         /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_GROUP_ACCESS, Access to all cases where User is in common group with Owner SecondPriority Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_GROUP_ACCESS)) {
             $userIds = ArrayHelper::merge($userIds, EmployeeGroupAccess::getUsersIdsInCommonGroups($user->id));
-            $showDataFlag = true;
-        }
-        /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS, Access to all cases where User have same department SecondPriority Queue*/
-        if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS)) {
-            $query->andWhere($this->inDepartment($user->id));
-            $showDataFlag = true;
-        }
-        /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS, Access to all cases where User have same project SecondPriority Queue*/
-        if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS)) {
-            $query->andWhere($this->inProject($user->id));
+            $query->andWhere(['IN', 'cs_user_id', $userIds]);
             $showDataFlag = true;
         }
 
         if ($showDataFlag) {
-            return $query->andWhere(['IN', 'cs_user_id', $userIds]);
+            return $query;
         } else {
             return $query->andWhere('0 = 1');
         }
@@ -1072,32 +1021,28 @@ class CasesQRepository
         $showDataFlag = false;
         /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_OWNER_ACCESS, Access to all cases where User is Owner PassDeparture Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_OWNER_ACCESS)) {
-            $userIds[] = $user->id;
+            /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS, Access to all cases where Users have common department PassDeparture Queue*/
+            $depAccess = \Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS);
+            /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS, Access to all cases where Users have common project PassDeparture Queue*/
+            $prAccess = \Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS);
+            $query->andWhere($this->createQSubQuery($user->id, [], $depAccess, $prAccess));
             $showDataFlag = true;
         }
         /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_EMPTY_OWNER_ACCESS, Access to all cases where Owner is empty PassDeparture Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_EMPTY_OWNER_ACCESS)) {
             $userIds[] = null;
+            $query->andWhere(['IN', 'cs_user_id', $userIds]);
             $showDataFlag = true;
         }
         /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_GROUP_ACCESS, Access to all cases where User is in common group with Owner PassDeparture Queue*/
         if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_GROUP_ACCESS)) {
             $userIds = ArrayHelper::merge($userIds, EmployeeGroupAccess::getUsersIdsInCommonGroups($user->id));
-            $showDataFlag = true;
-        }
-        /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS, Access to all cases where User have same department PassDeparture Queue*/
-        if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_DEPARTMENT_ACCESS)) {
-            $query->andWhere($this->inDepartment($user->id));
-            $showDataFlag = true;
-        }
-        /** @abac $caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS, Access to all cases where User have same project PassDeparture Queue*/
-        if (\Yii::$app->abac->can($caseAbacDto, CasesAbacObject::SQL_CASE_QUEUES, CasesAbacObject::ACTION_PROJECT_ACCESS)) {
-            $query->andWhere($this->inProject($user->id));
+            $query->andWhere(['IN', 'cs_user_id', $userIds]);
             $showDataFlag = true;
         }
 
         if ($showDataFlag) {
-            return $query->andWhere(['IN', 'cs_user_id', $userIds]);
+            return $query;
         } else {
             return $query->andWhere('0 = 1');
         }
@@ -1237,6 +1182,31 @@ class CasesQRepository
             [
                 'and',
                 $this->inProject($userId),
+                $depConditions,
+                $conditions
+            ]
+        ];
+    }
+
+    private function createQSubQuery($userId, $conditions, $checkDepPermission = false, $checkPrPermission = false): array
+    {
+        $depConditions = [];
+        $prConditions = [];
+
+        if ($checkDepPermission) {
+            $depConditions = $this->inDepartment($userId);
+        }
+
+        if ($checkPrPermission) {
+            $prConditions = $this->inProject($userId);
+        }
+
+        return [
+            'or',
+            $this->isOwner($userId),
+            [
+                'and',
+                $prConditions,
                 $depConditions,
                 $conditions
             ]
