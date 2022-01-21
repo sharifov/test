@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\call\entity\callCommand\CallGatherSwitch */
+/* @var $model src\model\call\entity\callCommand\CallGatherSwitch */
 
 $this->title = 'Update Call Gather Switch: ' . $model->cgs_ccom_id;
 $this->params['breadcrumbs'][] = ['label' => 'Call Gather Switches', 'url' => ['index']];

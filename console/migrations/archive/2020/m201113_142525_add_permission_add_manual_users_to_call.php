@@ -1,7 +1,7 @@
 <?php
 
 use common\models\Employee;
-use sales\rbac\rules\call\AssignUsersToCallRule;
+use src\rbac\rules\call\AssignUsersToCallRule;
 use yii\db\Migration;
 
 /**

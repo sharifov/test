@@ -1,18 +1,18 @@
 <?php
 
 use common\models\Call;
-use sales\model\callLog\entity\callLog\CallLogStatus;
-use sales\model\callLog\entity\callLog\CallLogType;
+use src\model\callLog\entity\callLog\CallLogStatus;
+use src\model\callLog\entity\callLog\CallLogType;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use common\components\grid\DateTimeColumn;
-use sales\model\callLog\entity\callLog\search\CallLogSearch;
+use src\model\callLog\entity\callLog\search\CallLogSearch;
 use common\models\Project;
-use sales\helpers\phone\MaskPhoneHelper;
+use src\helpers\phone\MaskPhoneHelper;
 
 /**
- * @var $searchModel sales\model\callLog\entity\callLog\search\CallLogSearch
+ * @var $searchModel src\model\callLog\entity\callLog\search\CallLogSearch
  * @var $dataProvider yii\data\ActiveDataProvider
  */
 
@@ -50,17 +50,17 @@ $this->params['breadcrumbs'][] = $this->title;
                 'relation' => 'department',
             ],
             [
-                'class' => \sales\model\callLog\grid\columns\CallLogTypeColumn::class,
+                'class' => \src\model\callLog\grid\columns\CallLogTypeColumn::class,
                 'attribute' =>  'cl_type_id',
                 'filter' => CallLogType::getList(),
             ],
             [
-                'class' => \sales\model\callLog\grid\columns\CallLogCategoryColumn::class,
+                'class' => \src\model\callLog\grid\columns\CallLogCategoryColumn::class,
                 'attribute' => 'cl_category_id',
                 'filter' => Call::SOURCE_LIST,
             ],
             [
-                'class' => \sales\model\callLog\grid\columns\CallLogStatusColumn::class,
+                'class' => \src\model\callLog\grid\columns\CallLogStatusColumn::class,
                 'attribute' => 'cl_status_id',
                 'filter' => CallLogStatus::getList(),
             ],
@@ -68,7 +68,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'label' => 'From',
                 'attribute' => 'cl_phone_from',
                 'value' => static function (CallLogSearch $model) {
-                    if ($model->cl_type_id == \sales\model\callLog\entity\callLog\CallLogType::IN) {
+                    if ($model->cl_type_id == \src\model\callLog\entity\callLog\CallLogType::IN) {
                         return MaskPhoneHelper::masking($model->cl_phone_from);
                     }
                     return $model->cl_phone_from;
@@ -78,7 +78,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'label' => 'To',
                 'attribute' => 'cl_phone_to',
                 'value' => static function (CallLogSearch $model) {
-                    if ($model->cl_type_id == \sales\model\callLog\entity\callLog\CallLogType::OUT) {
+                    if ($model->cl_type_id == \src\model\callLog\entity\callLog\CallLogType::OUT) {
                         return MaskPhoneHelper::masking($model->cl_phone_to);
                     }
                     return $model->cl_phone_to;
@@ -98,7 +98,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => false
             ],
             [
-                'class' => \sales\model\callLog\grid\columns\RecordingUrlColumn::class,
+                'class' => \src\model\callLog\grid\columns\RecordingUrlColumn::class,
                 'filter' => false
             ],
             [

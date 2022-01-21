@@ -1,12 +1,12 @@
 <?php
 
-use sales\formatters\client\ClientTimeFormatter;
-use sales\model\client\helpers\ClientFormatter;
+use src\formatters\client\ClientTimeFormatter;
+use src\model\client\helpers\ClientFormatter;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use yii\grid\GridView;
 use common\models\Lead;
-use sales\auth\Auth;
+use src\auth\Auth;
 
 /**
  * @var $this yii\web\View

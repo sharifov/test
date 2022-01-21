@@ -3,13 +3,13 @@
 namespace frontend\controllers;
 
 use frontend\widgets\clientChat\ClientChatClientInfoWidget;
-use sales\forms\lead\EmailCreateForm;
-use sales\forms\lead\PhoneCreateForm;
-use sales\services\client\ClientManageService;
+use src\forms\lead\EmailCreateForm;
+use src\forms\lead\PhoneCreateForm;
+use src\services\client\ClientManageService;
 use Yii;
-use sales\auth\Auth;
-use sales\model\clientChat\entity\ClientChat;
-use sales\services\client\ClientCreateForm;
+use src\auth\Auth;
+use src\model\clientChat\entity\ClientChat;
+use src\services\client\ClientCreateForm;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;

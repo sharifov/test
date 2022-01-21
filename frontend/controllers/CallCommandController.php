@@ -3,14 +3,14 @@
 namespace frontend\controllers;
 
 use frontend\helpers\JsonHelper;
-use sales\forms\segment\SegmentBaggageForm;
-use sales\helpers\app\AppHelper;
-use sales\model\call\entity\callCommand\types\CommandList;
-use sales\model\call\services\CallCommandTypeService;
-use sales\model\call\services\CommandListService;
+use src\forms\segment\SegmentBaggageForm;
+use src\helpers\app\AppHelper;
+use src\model\call\entity\callCommand\types\CommandList;
+use src\model\call\services\CallCommandTypeService;
+use src\model\call\services\CommandListService;
 use Yii;
-use sales\model\call\entity\callCommand\CallCommand;
-use sales\model\call\entity\callCommand\search\CallCommandSearch;
+use src\model\call\entity\callCommand\CallCommand;
+use src\model\call\entity\callCommand\search\CallCommandSearch;
 use yii\base\Model;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;

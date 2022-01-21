@@ -1,7 +1,7 @@
 <?php
 
 use common\models\Notifications;
-use sales\model\clientChat\entity\ClientChat;
+use src\model\clientChat\entity\ClientChat;
 use yii\bootstrap4\Html;
 use yii\helpers\Url;
 use yii\web\View;

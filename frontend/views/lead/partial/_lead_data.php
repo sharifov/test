@@ -5,8 +5,8 @@
  * @var \common\models\Lead $lead
  */
 
-use sales\model\leadData\abac\dto\LeadDataAbacDto;
-use sales\model\leadData\abac\LeadDataAbacObject;
+use src\model\leadData\abac\dto\LeadDataAbacDto;
+use src\model\leadData\abac\LeadDataAbacObject;
 use yii\helpers\Html;
 
 $leadDatas = [];
@@ -27,12 +27,12 @@ foreach ($lead->leadData as $leadData) {
                 <li>
                 </li>
                 <li>
-                    <a class="collapse-link"><i class="fa fa-chevron-down"></i></a>
+                    <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                 </li>
             </ul>
             <div class="clearfix"></div>
         </div>
-        <div class="x_content" style="display: none;">
+        <div class="x_content">
             <table class="table table-neutral table-striped">
                 <thead>
                 <tr>

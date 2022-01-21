@@ -4,8 +4,8 @@ namespace modules\webEngage\src\service\webEngageUserData;
 
 use common\models\Client;
 use modules\webEngage\settings\WebEngageSettings;
-use sales\model\clientData\service\ClientDataService;
-use sales\model\clientDataKey\entity\ClientDataKeyDictionary;
+use src\model\clientData\service\ClientDataService;
+use src\model\clientDataKey\entity\ClientDataKeyDictionary;
 
 /**
  * Class WebEngageUserService

@@ -4,10 +4,10 @@ namespace console\controllers;
 
 use common\models\UserConnection;
 use common\models\UserOnline;
-use sales\helpers\app\AppHelper;
-use sales\model\user\entity\monitor\UserMonitor;
-use sales\model\user\entity\userStatus\UserStatus;
-use sales\services\clientChatService\ClientChatService;
+use src\helpers\app\AppHelper;
+use src\model\user\entity\monitor\UserMonitor;
+use src\model\user\entity\userStatus\UserStatus;
+use src\services\clientChatService\ClientChatService;
 use Swoole\Redis;
 use Swoole\Table;
 use Swoole\WebSocket\Server;
@@ -209,6 +209,53 @@ class WebsocketServerController extends Controller
 
         $server->on('open', static function (Server $server, \Swoole\Http\Request $request) use ($frontendConfig, $thisClass, $redisConfig, $redisList) {
             echo '+ ' . date('m-d H:i:s') . " +{$request->fd}";
+
+            try {
+                if (isset($request->header['health-check'])) {
+                    echo PHP_EOL . ' Health check ';
+                    $mysqlStatus = 'Ok';
+                    try {
+                        \Yii::$app->db->createCommand('SELECT 1')->execute();
+                    } catch (\Throwable $e) {
+                        \Yii::error([
+                            'message' => $e->getMessage(),
+                        ], 'ws:open:health-check:db');
+                        $mysqlStatus = 'Error';
+                    }
+                    $mysqlSlaveStatus = 'Ok';
+                    try {
+                        \Yii::$app->db_slave->createCommand('SELECT 1')->execute();
+                    } catch (\Throwable $e) {
+                        \Yii::error([
+                            'message' => $e->getMessage(),
+                        ], 'ws:open:health-check:db_slave');
+                        $mysqlSlaveStatus = 'Error';
+                    }
+                    try {
+                        // SWOOLE_REDIS_STATE_READY === 3 ?
+                        $redisStatus = ($server->redis->getState() === 3) ? 'Ok' : 'Error';
+                    } catch (\Throwable $e) {
+                        \Yii::error([
+                            'message' => $e->getMessage(),
+                        ], 'ws:open:health-check:redis');
+                        $redisStatus = 'Error';
+                    }
+                    $result = json_encode([
+                        'ws' => 'Ok',
+                        'message' => 'Successfully connected to websocket server',
+                        'appInstance' => \Yii::$app->params['appInstance'],
+                        'mysql' => $mysqlStatus,
+                        'mysqlSlave' => $mysqlSlaveStatus,
+                        'redis' => $redisStatus,
+                    ]);
+                    echo $result . PHP_EOL;
+                    $server->push($request->fd, $result);
+                    return;
+                }
+            } catch (\Throwable $e) {
+                \Yii::error(AppHelper::throwableLog($e, true), 'ws:healthCheck');
+            }
+
             $user = $thisClass->getIdentityByCookie($request, $frontendConfig);
 
             if ($user) {
@@ -561,6 +608,13 @@ class WebsocketServerController extends Controller
     public function dataProcessing(Server $server, \Swoole\WebSocket\Frame $frame, array $data): ?array
     {
         $out = null;
+
+        if (!empty($data['ping'])) {
+            return [
+                'pong' => $data['ping'],
+                'appInstance' => \Yii::$app->params['appInstance'],
+            ];
+        }
 
         if (empty($data['c'])) {
             $out['errors'][] = 'Error: Not isset "c" param';

@@ -1,13 +1,13 @@
 <?php
 
-use sales\model\clientChat\ClientChatPlatform;
-use sales\model\clientChatMessage\entity\ClientChatMessage;
+use src\model\clientChat\ClientChatPlatform;
+use src\model\clientChatMessage\entity\ClientChatMessage;
 use yii\helpers\Html;
 use yii\helpers\StringHelper;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChatMessage\entity\ClientChatMessage */
+/* @var $model src\model\clientChatMessage\entity\ClientChatMessage */
 
 $this->title = $model->ccm_id;
 $this->params['breadcrumbs'][] = ['label' => 'Client Chat Messages', 'url' => ['index']];

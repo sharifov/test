@@ -7,5 +7,4 @@ namespace modules\qaTask\src\entities\qaTaskStatus;
  */
 class Scopes extends \yii\db\ActiveQuery
 {
-
 }

@@ -1,6 +1,6 @@
 <?php
 
-use sales\forms\leadflow\SnoozeReasonForm;
+use src\forms\leadflow\SnoozeReasonForm;
 use yii\widgets\ActiveForm;
 use yii\bootstrap\Html;
 

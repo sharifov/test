@@ -1,6 +1,6 @@
 <?php
 
-use sales\model\phoneLine\phoneLine\entity\PhoneLine;
+use src\model\phoneLine\phoneLine\entity\PhoneLine;
 use yii\bootstrap4\Html;
 use yii\web\JsExpression;
 use yii\widgets\ActiveForm;
@@ -18,7 +18,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'line_name')->textInput(['maxlength' => true]) ?>
 
-        <?= $form->field($model, 'line_project_id')->widget(\sales\widgets\ProjectSelect2Widget::class, [
+        <?= $form->field($model, 'line_project_id')->widget(\src\widgets\ProjectSelect2Widget::class, [
             'pluginOptions' => [
                 'allowClear' => true,
                 'templateSelection' => new JsExpression('function (data) { return data.text || data.selection;}'),
@@ -26,7 +26,7 @@ use yii\widgets\ActiveForm;
             'initValueText' => $model->line_project_id ? $model->lineProject->name : null
         ]) ?>
 
-        <?= $form->field($model, 'line_dep_id')->widget(\sales\widgets\DepartmentSelect2Widget::class, [
+        <?= $form->field($model, 'line_dep_id')->widget(\src\widgets\DepartmentSelect2Widget::class, [
             'pluginOptions' => [
                 'allowClear' => true,
                 'templateSelection' => new JsExpression('function (data) { return data.text || data.selection;}'),
@@ -44,7 +44,7 @@ use yii\widgets\ActiveForm;
             ]
         ]) ?>
 
-        <?= $form->field($model, 'line_personal_user_id')->widget(\sales\widgets\UserSelect2Widget::class) ?>
+        <?= $form->field($model, 'line_personal_user_id')->widget(\src\widgets\UserSelect2Widget::class) ?>
 
         <?= $form->field($model, 'line_uvm_id')->textInput() ?>
 

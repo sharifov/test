@@ -4,7 +4,7 @@ use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\leadData\entity\LeadData */
+/* @var $model src\model\leadData\entity\LeadData */
 
 $this->title = $model->ld_id;
 $this->params['breadcrumbs'][] = ['label' => 'Lead Datas', 'url' => ['index']];

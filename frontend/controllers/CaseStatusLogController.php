@@ -3,7 +3,7 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\entities\cases\CaseStatusLogSearch;
+use src\entities\cases\CaseStatusLogSearch;
 
 /**
  * Class CaseStatusLogController

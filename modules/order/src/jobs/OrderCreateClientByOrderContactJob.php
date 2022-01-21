@@ -4,9 +4,9 @@ namespace modules\order\src\jobs;
 
 use modules\order\src\entities\orderContact\OrderContact;
 use modules\order\src\entities\orderContact\OrderContactRepository;
-use sales\helpers\app\AppHelper;
-use sales\repositories\NotFoundException;
-use sales\services\client\ClientManageService;
+use src\helpers\app\AppHelper;
+use src\repositories\NotFoundException;
+use src\services\client\ClientManageService;
 use yii\queue\JobInterface;
 
 /**

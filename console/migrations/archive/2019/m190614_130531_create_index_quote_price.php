@@ -7,8 +7,6 @@ use yii\db\Migration;
  */
 class m190614_130531_create_index_quote_price extends Migration
 {
-
-
     /**
      * {@inheritdoc}
      */

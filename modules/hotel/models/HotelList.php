@@ -4,8 +4,8 @@ namespace modules\hotel\models;
 
 use modules\hotel\models\query\HotelListQuery;
 use modules\hotel\src\entities\hotelList\serializer\HotelListSerializer;
-use sales\entities\EventTrait;
-use sales\entities\serializer\Serializable;
+use src\entities\EventTrait;
+use src\entities\serializer\Serializable;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;

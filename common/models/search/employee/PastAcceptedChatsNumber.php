@@ -3,7 +3,7 @@
 namespace common\models\search\employee;
 
 use common\models\query\EmployeeQuery;
-use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
+use src\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use yii\base\Model;
 
 /**

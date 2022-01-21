@@ -2,7 +2,7 @@
 
 namespace frontend\models;
 
-use sales\forms\NotificationsFormHelper;
+use src\forms\NotificationsFormHelper;
 use yii\base\Model;
 use common\models\Lead;
 use common\models\ProfitSplit;

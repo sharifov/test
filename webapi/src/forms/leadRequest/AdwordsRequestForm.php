@@ -4,10 +4,10 @@ namespace webapi\src\forms\leadRequest;
 
 use common\components\validators\CheckJsonValidator;
 use frontend\helpers\JsonHelper;
-use sales\helpers\ErrorsToStringHelper;
-use sales\model\appProjectKey\entity\AppProjectKey;
-use sales\model\leadRequest\service\LeadRequestDictionary;
-use sales\model\leadRequest\service\LeadRequestService;
+use src\helpers\ErrorsToStringHelper;
+use src\model\appProjectKey\entity\AppProjectKey;
+use src\model\leadRequest\service\LeadRequestDictionary;
+use src\model\leadRequest\service\LeadRequestService;
 use webapi\src\forms\leadRequest\userColumnData\UserColumnDataForm;
 use yii\base\Model;
 

@@ -42,7 +42,6 @@ use yii\helpers\ArrayHelper;
  */
 class ConferenceRoom extends \yii\db\ActiveRecord
 {
-
     public const PARAM_BEEP_TRUE        = 'true';
     public const PARAM_BEEP_FALSE       = 'false';
     public const PARAM_BEEP_ON_ENTER    = 'onEnter';

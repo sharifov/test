@@ -3,7 +3,7 @@
 namespace modules\offer\src\entities\offerProduct\search;
 
 use common\models\Employee;
-use sales\helpers\query\QueryHelper;
+use src\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
 use modules\offer\src\entities\offerProduct\OfferProduct;
 

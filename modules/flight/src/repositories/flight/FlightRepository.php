@@ -4,8 +4,8 @@ namespace modules\flight\src\repositories\flight;
 
 use modules\flight\models\Flight;
 use modules\flight\src\exceptions\FlightCodeException;
-use sales\dispatchers\EventDispatcher;
-use sales\repositories\NotFoundException;
+use src\dispatchers\EventDispatcher;
+use src\repositories\NotFoundException;
 
 /**
  * Class FlightRepository

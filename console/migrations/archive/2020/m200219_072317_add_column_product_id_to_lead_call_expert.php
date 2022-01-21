@@ -9,7 +9,6 @@ use yii\db\Migration;
  */
 class m200219_072317_add_column_product_id_to_lead_call_expert extends Migration
 {
-
     public $routes = [
         '/product/product/update-ajax',
     ];

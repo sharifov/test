@@ -4,28 +4,28 @@ use common\models\CaseSale;
 use common\models\Department;
 use common\models\Employee;
 use frontend\widgets\multipleUpdate\button\MultipleUpdateButtonWidget;
-use sales\access\EmployeeDepartmentAccess;
-use sales\access\EmployeeProjectAccess;
-use sales\entities\cases\CaseCategory;
+use src\access\EmployeeDepartmentAccess;
+use src\access\EmployeeProjectAccess;
+use src\entities\cases\CaseCategory;
 use common\components\grid\cases\CasesSourceTypeColumn;
 use common\components\grid\cases\CasesStatusColumn;
-use sales\helpers\communication\StatisticsHelper;
-use sales\model\client\helpers\ClientFormatter;
+use src\helpers\communication\StatisticsHelper;
+use src\model\client\helpers\ClientFormatter;
 use yii\helpers\Html;
 use kartik\grid\GridView;
-use sales\entities\cases\Cases;
-use sales\entities\cases\CasesStatus;
+use src\entities\cases\Cases;
+use src\entities\cases\CasesStatus;
 use yii\helpers\Url;
 use yii\widgets\Pjax;
 use yii\helpers\ArrayHelper;
-use sales\auth\Auth;
+use src\auth\Auth;
 use common\models\Language;
 use kartik\select2\Select2;
 use common\components\grid\BooleanColumn;
 use common\components\grid\DateTimeColumn;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\entities\cases\CasesSearch */
+/* @var $searchModel src\entities\cases\CasesSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var Employee $user */
 

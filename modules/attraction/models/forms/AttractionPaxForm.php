@@ -20,7 +20,6 @@ use modules\attraction\models\AttractionPax;
  */
 class AttractionPaxForm extends AttractionPax
 {
-
     public $atnp_id;
     public $atnp_atn_id;
     public $atnp_type_id;

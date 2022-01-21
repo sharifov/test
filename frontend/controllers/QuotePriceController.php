@@ -16,7 +16,6 @@ use yii\filters\VerbFilter;
  */
 class QuotePriceController extends FController
 {
-
     public function behaviors()
     {
         $behaviors = [

@@ -18,60 +18,60 @@ use modules\offer\src\entities\offer\Offer;
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\product\Product;
 use phpDocumentor\Reflection\DocBlock\Tags\Source;
-use sales\auth\Auth;
-use sales\behaviors\metric\MetricLeadCounterBehavior;
-use sales\entities\EventTrait;
-use sales\events\lead\LeadBookedEvent;
-use sales\events\lead\LeadCallExpertRequestEvent;
-use sales\events\lead\LeadCallStatusChangeEvent;
-use sales\events\lead\LeadCreatedBookFailedEvent;
-use sales\events\lead\LeadCreatedByApiBOEvent;
-use sales\events\lead\LeadCreatedByApiEvent;
-use sales\events\lead\LeadCreatedByIncomingCallEvent;
-use sales\events\lead\LeadCreatedByIncomingEmailEvent;
-use sales\events\lead\LeadCreatedByIncomingSmsEvent;
-use sales\events\lead\LeadCreatedClientChatEvent;
-use sales\events\lead\LeadCreatedCloneEvent;
-use sales\events\lead\LeadCreatedEvent;
-use sales\events\lead\LeadCreatedManuallyEvent;
-use sales\events\lead\LeadCreatedNewEvent;
-use sales\events\lead\LeadDuplicateDetectedEvent;
-use sales\events\lead\LeadFollowUpEvent;
-use sales\events\lead\LeadNewEvent;
-use sales\events\lead\LeadOwnerChangedEvent;
-use sales\events\lead\LeadCountPassengersChangedEvent;
-use sales\events\lead\LeadOwnerFreedEvent;
-use sales\events\lead\LeadPendingEvent;
-use sales\events\lead\LeadProcessingEvent;
-use sales\events\lead\LeadRejectEvent;
-use sales\events\lead\LeadSnoozeEvent;
-use sales\events\lead\LeadSoldEvent;
-use sales\events\lead\LeadStatusChangedEvent;
-use sales\events\lead\LeadTaskEvent;
-use sales\events\lead\LeadTrashEvent;
-use sales\formatters\client\ClientTimeFormatter;
-use sales\helpers\lead\LeadHelper;
-use sales\helpers\quote\QuoteProviderProjectHelper;
-use sales\helpers\setting\SettingHelper;
-use sales\interfaces\Objectable;
-use sales\model\airportLang\service\AirportLangService;
-use sales\model\callLog\entity\callLog\CallLog;
-use sales\model\callLog\entity\callLog\CallLogType;
-use sales\model\callLog\entity\callLogLead\CallLogLead;
-use sales\model\client\helpers\ClientFormatter;
-use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChatLead\entity\ClientChatLead;
-use sales\model\lead\useCases\lead\api\create\LeadCreateForm;
-use sales\model\lead\useCases\lead\import\LeadImportForm;
-use sales\model\leadData\entity\LeadData;
-use sales\model\leadUserConversion\entity\LeadUserConversion;
-use sales\services\lead\calculator\LeadTripTypeCalculator;
-use sales\services\lead\calculator\SegmentDTO;
-use sales\services\lead\qcall\CalculateDateService;
-use sales\services\lead\qcall\Config;
-use sales\services\lead\qcall\FindPhoneParams;
-use sales\services\lead\qcall\FindWeightParams;
-use sales\services\lead\qcall\QCallService;
+use src\auth\Auth;
+use src\behaviors\metric\MetricLeadCounterBehavior;
+use src\entities\EventTrait;
+use src\events\lead\LeadBookedEvent;
+use src\events\lead\LeadCallExpertRequestEvent;
+use src\events\lead\LeadCallStatusChangeEvent;
+use src\events\lead\LeadCreatedBookFailedEvent;
+use src\events\lead\LeadCreatedByApiBOEvent;
+use src\events\lead\LeadCreatedByApiEvent;
+use src\events\lead\LeadCreatedByIncomingCallEvent;
+use src\events\lead\LeadCreatedByIncomingEmailEvent;
+use src\events\lead\LeadCreatedByIncomingSmsEvent;
+use src\events\lead\LeadCreatedClientChatEvent;
+use src\events\lead\LeadCreatedCloneEvent;
+use src\events\lead\LeadCreatedEvent;
+use src\events\lead\LeadCreatedManuallyEvent;
+use src\events\lead\LeadCreatedNewEvent;
+use src\events\lead\LeadDuplicateDetectedEvent;
+use src\events\lead\LeadFollowUpEvent;
+use src\events\lead\LeadNewEvent;
+use src\events\lead\LeadOwnerChangedEvent;
+use src\events\lead\LeadCountPassengersChangedEvent;
+use src\events\lead\LeadOwnerFreedEvent;
+use src\events\lead\LeadPendingEvent;
+use src\events\lead\LeadProcessingEvent;
+use src\events\lead\LeadRejectEvent;
+use src\events\lead\LeadSnoozeEvent;
+use src\events\lead\LeadSoldEvent;
+use src\events\lead\LeadStatusChangedEvent;
+use src\events\lead\LeadTaskEvent;
+use src\events\lead\LeadTrashEvent;
+use src\formatters\client\ClientTimeFormatter;
+use src\helpers\lead\LeadHelper;
+use src\helpers\quote\QuoteProviderProjectHelper;
+use src\helpers\setting\SettingHelper;
+use src\interfaces\Objectable;
+use src\model\airportLang\service\AirportLangService;
+use src\model\callLog\entity\callLog\CallLog;
+use src\model\callLog\entity\callLog\CallLogType;
+use src\model\callLog\entity\callLogLead\CallLogLead;
+use src\model\client\helpers\ClientFormatter;
+use src\model\clientChat\entity\ClientChat;
+use src\model\clientChatLead\entity\ClientChatLead;
+use src\model\lead\useCases\lead\api\create\LeadCreateForm;
+use src\model\lead\useCases\lead\import\LeadImportForm;
+use src\model\leadData\entity\LeadData;
+use src\model\leadUserConversion\entity\LeadUserConversion;
+use src\services\lead\calculator\LeadTripTypeCalculator;
+use src\services\lead\calculator\SegmentDTO;
+use src\services\lead\qcall\CalculateDateService;
+use src\services\lead\qcall\Config;
+use src\services\lead\qcall\FindPhoneParams;
+use src\services\lead\qcall\FindWeightParams;
+use src\services\lead\qcall\QCallService;
 use Yii;
 use yii\base\InvalidArgumentException;
 use yii\behaviors\TimestampBehavior;
@@ -2727,7 +2727,7 @@ class Lead extends ActiveRecord implements Objectable
     {
         $isSend = false;
 
-        $host = \Yii::$app->params['url_address'];
+        $host = \Yii::$app->params['url'];
 
         if ($type && $employee_id && isset(Yii::$app->params['email_from']['sales'])) {
             $user = Employee::findOne($employee_id);
@@ -2884,29 +2884,6 @@ Reason: {reason}',
         $this->enableActiveRecordEvents = false;
     }
 
-
-//    /**
-//     * @return bool
-//     */
-//    public function createQCall(): bool
-//    {
-//        $qcConfig = QcallConfig::getByStatusCall($this->status, 0);
-//
-//        if ($qcConfig) {
-//            $lq = new LeadQcall();
-//            $lq->lqc_lead_id = $this->id;
-//            $lq->lqc_dt_from = date('Y-m-d H:i:s', (time() + ((int) $qcConfig->qc_time_from * 60)));
-//            $lq->lqc_dt_to = date('Y-m-d H:i:s', (time() + ((int) $qcConfig->qc_time_to * 60)));
-//            $lq->lqc_weight = $this->project_id * 10;
-//            if (!$lq->save()) {
-//                Yii::error(VarDumper::dumpAsString($lq->errors), 'Lead:createQCall:LeadQcall:save');
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
-
-
     /**
      * @return int
      */
@@ -2916,58 +2893,6 @@ Reason: {reason}',
             return (int)$this->lastLeadFlow->lf_out_calls;
         }
         return 0;
-    }
-
-    /**
-     * @return bool
-     */
-    public function createOrUpdateQCall(): bool
-    {
-        if ($this->lastLeadFlow) {
-            $callCount = (int) $this->lastLeadFlow->lf_out_calls;
-        } else {
-            $callCount = 0;
-        }
-
-        $qcConfig = QcallConfig::getByStatusCall($this->status, $callCount);
-
-        // Yii::info(VarDumper::dumpAsString(['lead_id' => $this->id, 'status' => $this->status, 'callCount' => $callCount, 'qcConfig' => $qcConfig ? $qcConfig->attributes : null]), 'info\createOrUpdateQCall');
-
-        $lq = $this->leadQcall;
-
-        if ($qcConfig) {
-            if (!$lq) {
-                $lq = new LeadQcall();
-                $lq->lqc_lead_id = $this->id;
-                $lq->lqc_weight = $this->project_id * 10;
-                $lq->lqc_created_dt = date('Y-m-d H:i:s');
-            }
-
-            $date = (new CalculateDateService())->calculate(
-                $qcConfig->qc_time_from,
-                $qcConfig->qc_time_to,
-                $qcConfig->qc_client_time_enable,
-                $this->offset_gmt,
-                'now'
-            );
-
-            $lq->lqc_dt_from = $date->from;
-            $lq->lqc_dt_to = $date->to;
-
-            if (!$lq->save()) {
-                Yii::error(VarDumper::dumpAsString($lq->errors), 'Lead:createOrUpdateQCall:LeadQcall:save');
-                return true;
-            }
-        } else {
-            if ($lq) {
-                try {
-                    $lq->delete();
-                } catch (\Throwable $throwable) {
-                    Yii::error($throwable->getMessage(), 'Lead:createOrUpdateQCall:Throwable');
-                }
-            }
-        }
-        return false;
     }
 
     /**

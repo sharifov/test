@@ -3,8 +3,8 @@
 namespace common\models;
 
 use common\models\query\UserGroupQuery;
-use sales\dispatchers\NativeEventDispatcher;
-use sales\model\user\entity\userGroup\events\UserGroupEvents;
+use src\dispatchers\NativeEventDispatcher;
+use src\model\user\entity\userGroup\events\UserGroupEvents;
 use Yii;
 use yii\base\Event;
 use yii\base\InvalidConfigException;

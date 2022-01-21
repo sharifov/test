@@ -4,16 +4,17 @@ namespace common\models;
 
 use common\components\Metrics;
 use common\models\query\ClientQuery;
-use sales\behaviors\metric\MetricClientCounterBehavior;
-use sales\entities\cases\Cases;
-use sales\entities\EventTrait;
-use sales\helpers\phone\MaskPhoneHelper;
-use sales\model\client\entity\events\ClientChangeIpEvent;
-use sales\model\client\entity\events\ClientCreatedEvent;
-use sales\model\client\entity\events\ClientExcludedEvent;
-use sales\model\clientAccount\entity\ClientAccount;
-use sales\model\clientVisitor\entity\ClientVisitor;
-use sales\model\coupon\entity\couponClient\CouponClient;
+use src\behaviors\metric\MetricClientCounterBehavior;
+use src\entities\cases\Cases;
+use src\entities\EventTrait;
+use src\helpers\phone\MaskPhoneHelper;
+use src\model\client\entity\events\ClientChangeIpEvent;
+use src\model\client\entity\events\ClientCreatedEvent;
+use src\model\client\entity\events\ClientExcludedEvent;
+use src\model\clientAccount\entity\ClientAccount;
+use src\model\clientData\entity\ClientData;
+use src\model\clientVisitor\entity\ClientVisitor;
+use src\model\coupon\entity\couponClient\CouponClient;
 use thamtech\uuid\helpers\UuidHelper;
 use thamtech\uuid\validators\UuidValidator;
 use yii\behaviors\TimestampBehavior;
@@ -55,6 +56,7 @@ use yii\helpers\ArrayHelper;
  * @property ClientPhone[] $clientPhonesByType
  * @property ClientProject[] $clientProjects
  * @property Lead[] $leads
+ * @property Lead[] $leadsLimited
  * @property Cases[] $cases
  * @property string $nameByType
  * @property array $phoneNumbersSms
@@ -255,6 +257,14 @@ class Client extends ActiveRecord
     }
 
     /**
+     * @return ActiveQuery
+     */
+    public function getClientEmailsLimited(int $limit = 30): ActiveQuery
+    {
+        return $this->hasMany(ClientEmail::class, ['client_id' => 'id'])->limit($limit);
+    }
+
+    /**
      * @param array $types
      * @return array
      */
@@ -288,9 +298,29 @@ class Client extends ActiveRecord
         return $this->hasMany(Lead::class, ['client_id' => 'id']);
     }
 
+    /**
+     * @return ActiveQuery
+     */
+    public function getLeadsLimited(int $limit = 30): ActiveQuery
+    {
+        return $this->hasMany(Lead::class, ['client_id' => 'id'])->limit($limit);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
     public function getCases(): ActiveQuery
     {
         return $this->hasMany(Cases::class, ['cs_client_id' => 'id']);
+    }
+
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getCasesLimited(int $limit = 30): ActiveQuery
+    {
+        return $this->hasMany(Cases::class, ['cs_client_id' => 'id'])->limit($limit);
     }
 
     /**

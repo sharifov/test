@@ -1,15 +1,15 @@
 <?php
 
-use sales\model\clientChat\ClientChatPlatform;
+use src\model\clientChat\ClientChatPlatform;
 use yii\grid\ActionColumn;
-use sales\model\clientChatLastMessage\entity\ClientChatLastMessage;
+use src\model\clientChatLastMessage\entity\ClientChatLastMessage;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use common\components\grid\DateTimeColumn;
 
 /* @var yii\web\View $this */
-/* @var sales\model\clientChatLastMessage\entity\ClientChatLastMessageSearch $searchModel */
+/* @var src\model\clientChatLastMessage\entity\ClientChatLastMessageSearch $searchModel */
 /* @var yii\data\ActiveDataProvider $dataProvider */
 
 $this->title = 'Client Chat Last Messages';

@@ -5,8 +5,8 @@ namespace webapi\tests\forms;
 use common\models\Project;
 use Faker\Factory;
 use Faker\Generator;
-use sales\entities\cases\CaseCategory;
-use sales\model\cases\useCases\cases\api\create\CreateForm;
+use src\entities\cases\CaseCategory;
+use src\model\cases\useCases\cases\api\create\CreateForm;
 
 /**
  * Class CaseCreateFormValidationTest

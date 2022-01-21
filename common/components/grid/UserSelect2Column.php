@@ -3,7 +3,7 @@
 namespace common\components\grid;
 
 use common\models\Employee;
-use sales\widgets\UserSelect2Widget;
+use src\widgets\UserSelect2Widget;
 use yii\base\Model;
 use yii\grid\DataColumn;
 use yii\helpers\Url;

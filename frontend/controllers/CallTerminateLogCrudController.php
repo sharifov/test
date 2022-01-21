@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\callTerminateLog\entity\CallTerminateLog;
-use sales\model\callTerminateLog\entity\CallTerminateLogSearch;
+use src\model\callTerminateLog\entity\CallTerminateLog;
+use src\model\callTerminateLog\entity\CallTerminateLogSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

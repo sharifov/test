@@ -1,11 +1,11 @@
 <?php
 
-use sales\widgets\UserSelect2Widget;
+use src\widgets\UserSelect2Widget;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\conference\entity\conferenceRecordingLog\ConferenceRecordingLog */
+/* @var $model src\model\conference\entity\conferenceRecordingLog\ConferenceRecordingLog */
 /* @var $form ActiveForm */
 ?>
 

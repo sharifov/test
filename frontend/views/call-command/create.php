@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\call\entity\callCommand\CallCommand */
+/* @var $model src\model\call\entity\callCommand\CallCommand */
 
 $this->title = 'Create Call Command';
 $this->params['breadcrumbs'][] = ['label' => 'Call Commands', 'url' => ['index']];

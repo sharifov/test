@@ -4,7 +4,7 @@ use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\phoneLine\phoneLinePhoneNumber\entity\PhoneLinePhoneNumber */
+/* @var $model src\model\phoneLine\phoneLinePhoneNumber\entity\PhoneLinePhoneNumber */
 /* @var $form ActiveForm */
 ?>
 
@@ -16,7 +16,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'plpn_line_id')->textInput() ?>
 
-        <?= $form->field($model, 'plpn_pl_id')->widget(\sales\widgets\PhoneSelect2Widget::class) ?>
+        <?= $form->field($model, 'plpn_pl_id')->widget(\src\widgets\PhoneSelect2Widget::class) ?>
 
         <?= $form->field($model, 'plpn_default')->checkbox() ?>
 

@@ -2,7 +2,7 @@
 
 namespace common\components\grid\coupon;
 
-use sales\model\coupon\entity\coupon\CouponType;
+use src\model\coupon\entity\coupon\CouponType;
 use yii\grid\DataColumn;
 
 class CouponTypeColumn extends DataColumn

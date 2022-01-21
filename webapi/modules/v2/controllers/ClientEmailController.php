@@ -3,10 +3,10 @@
 namespace webapi\modules\v2\controllers;
 
 use common\models\EmailUnsubscribe;
-use sales\forms\api\clientEmail\SubscribeForm;
-use sales\forms\api\clientEmail\UnSubscribeForm;
-use sales\helpers\app\AppHelper;
-use sales\repositories\emailUnsubscribe\EmailUnsubscribeRepository;
+use src\forms\api\clientEmail\SubscribeForm;
+use src\forms\api\clientEmail\UnSubscribeForm;
+use src\helpers\app\AppHelper;
+use src\repositories\emailUnsubscribe\EmailUnsubscribeRepository;
 use webapi\src\ApiCodeException;
 use webapi\src\logger\ApiLogger;
 use webapi\src\Messages;
@@ -26,7 +26,6 @@ use Yii;
  */
 class ClientEmailController extends BaseController
 {
-
     /**
      * @api {post} /v2/client-email/subscribe Client Email Subscribe
      * @apiVersion 0.2.0

@@ -2,8 +2,8 @@
 
 namespace frontend\controllers;
 
-use sales\model\emailReviewQueue\entity\EmailReviewQueue;
-use sales\model\emailReviewQueue\entity\EmailReviewQueueSearch;
+use src\model\emailReviewQueue\entity\EmailReviewQueue;
+use src\model\emailReviewQueue\entity\EmailReviewQueueSearch;
 use frontend\controllers\FController;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

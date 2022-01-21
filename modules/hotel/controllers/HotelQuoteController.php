@@ -31,8 +31,8 @@ use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\product\src\entities\productQuoteOrigin\ProductQuoteOrigin;
 use modules\product\src\entities\productQuoteRelation\service\ProductQuoteRelationService;
-use sales\auth\Auth;
-use sales\helpers\app\AppHelper;
+use src\auth\Auth;
+use src\helpers\app\AppHelper;
 use Yii;
 use yii\base\Exception;
 use yii\data\ArrayDataProvider;
@@ -645,10 +645,6 @@ class HotelQuoteController extends FController
     public function actionAjaxQuoteDetails(): string
     {
         $productQuoteId = Yii::$app->request->get('id');
-
-        if (!Yii::$app->abac->can(null, CasesAbacObject::ACT_PRODUCT_QUOTE_VIEW_DETAILS, CasesAbacObject::ACTION_ACCESS)) {
-            throw new ForbiddenHttpException('Access denied');
-        }
 
         $productQuote = $this->productQuoteRepository->find($productQuoteId);
 

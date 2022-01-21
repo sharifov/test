@@ -7,7 +7,6 @@ use yii\db\Migration;
  */
 class m190811_081538_create_tbl_department extends Migration
 {
-
     public $departments = [
         0 => ['dep_id' => 1, 'dep_key' => 'sales', 'dep_name' => 'Sales'],
         1 => ['dep_id' => 2, 'dep_key' => 'exchange', 'dep_name' => 'Exchange'],

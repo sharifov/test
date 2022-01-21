@@ -1,10 +1,10 @@
 <?php
 
-use sales\entities\chat\ChatFeedbackGraphSearch;
+use src\entities\chat\ChatFeedbackGraphSearch;
 use yii\bootstrap4\ActiveForm;
 use yii\helpers\Html;
-use sales\widgets\UserSelect2Widget;
-use sales\access\EmployeeDepartmentAccess;
+use src\widgets\UserSelect2Widget;
+use src\access\EmployeeDepartmentAccess;
 use yii\web\JsExpression;
 
 /**
@@ -88,7 +88,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             </div>
 
                             <div class="col-md-2">
-                                <?= $form->field($model, 'channelID')->dropDownList(\sales\model\clientChatChannel\entity\ClientChatChannel::getList(), ['prompt' => '-'])->label('Channel') ?>
+                                <?= $form->field($model, 'channelID')->dropDownList(\src\model\clientChatChannel\entity\ClientChatChannel::getList(), ['prompt' => '-'])->label('Channel') ?>
                             </div>
 
                             <div class="col-md-2">

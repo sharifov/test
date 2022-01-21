@@ -4,7 +4,7 @@ namespace console\controllers;
 
 use common\models\Lead;
 use modules\lead\src\services\LeadProfitSplit;
-use sales\helpers\app\AppHelper;
+use src\helpers\app\AppHelper;
 use yii\console\Controller;
 use Yii;
 

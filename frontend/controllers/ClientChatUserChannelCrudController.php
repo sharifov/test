@@ -4,14 +4,14 @@ namespace frontend\controllers;
 
 use common\models\Notifications;
 use frontend\widgets\clientChat\ClientChatAccessMessage;
-use sales\helpers\app\AppHelper;
-use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
-use sales\services\clientChatService\ClientChatService;
-use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
+use src\helpers\app\AppHelper;
+use src\model\clientChat\entity\ClientChat;
+use src\model\clientChatUserAccess\entity\ClientChatUserAccess;
+use src\services\clientChatService\ClientChatService;
+use src\services\clientChatUserAccessService\ClientChatUserAccessService;
 use Yii;
-use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
-use sales\model\clientChatUserChannel\entity\search\ClientChatUserChannelSearch;
+use src\model\clientChatUserChannel\entity\ClientChatUserChannel;
+use src\model\clientChatUserChannel\entity\search\ClientChatUserChannelSearch;
 use frontend\controllers\FController;
 use yii\caching\TagDependency;
 use yii\helpers\ArrayHelper;
@@ -29,7 +29,6 @@ use yii\db\StaleObjectException;
  */
 class ClientChatUserChannelCrudController extends FController
 {
-
     /**
      * @var ClientChatService
      */

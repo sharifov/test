@@ -5,7 +5,7 @@ namespace modules\product\src\useCases\product\create;
 use common\models\Lead;
 use modules\product\src\entities\product\dto\CreateDto;
 use modules\product\src\guards\ProductAvailableGuard;
-use sales\access\EmployeeProductAccess;
+use src\access\EmployeeProductAccess;
 use yii\base\Model;
 
 /**

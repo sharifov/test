@@ -47,10 +47,12 @@ use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionRepository;
 use modules\product\src\entities\productType\ProductType;
 use modules\product\src\useCases\product\create\ProductCreateService;
-use sales\helpers\ErrorsToStringHelper;
-use sales\repositories\product\ProductQuoteRepository;
+use src\helpers\app\AppHelper;
+use src\helpers\ErrorsToStringHelper;
+use src\repositories\product\ProductQuoteRepository;
 use webapi\src\forms\flight\flights\trips\SegmentApiForm;
 use webapi\src\forms\flight\options\OptionApiForm;
+use Yii;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -175,7 +177,7 @@ class FlightFromSaleService
         $tripTypeId = self::getFlightTripIdByName(ArrayHelper::getValue($saleData, 'tripType'));
         $flightProduct = Flight::create($product->pr_id, $tripTypeId);
         if (!$flightProduct->validate()) {
-            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($flightProduct));
+            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($flightProduct, ' ', true));
         }
         $this->flightRepository->save($flightProduct);
 
@@ -189,13 +191,13 @@ class FlightFromSaleService
         $productQuote = ProductQuote::create($productQuoteDto, null);
         $productQuote->pq_status_id = self::detectProductQuoteStatus($saleData);
         if (!$productQuote->validate()) {
-            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($productQuote));
+            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($productQuote, ' ', true));
         }
         $this->productQuoteRepository->save($productQuote);
 
         $flightQuoteData = self::prepareFlightQuoteData($saleData, $orderCreateFromSaleForm);
         $flightQuote = FlightQuote::create((new FlightQuoteCreateDTO($flightProduct, $productQuote, $flightQuoteData, null)));
-        $flightQuote->fq_flight_request_uid = ArrayHelper::getValue($saleData, 'bookingId');
+        $flightQuote->fq_flight_request_uid = $orderCreateFromSaleForm->bookingId;
         $flightQuote->fq_hash_key = null;
         $flightQuote->fq_trip_type_id = $flightProduct->fl_trip_type_id;
         $flightQuote->fq_service_fee_percent = 0;
@@ -217,7 +219,7 @@ class FlightFromSaleService
                             throw new \RuntimeException('SegmentApiForm not loaded');
                         }
                         if (!$segmentApiForm->validate()) {
-                            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($segmentApiForm));
+                            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($segmentApiForm, ' ', true));
                         }
 
                         $segment['duration'] = (int) $segmentApiForm->flightDuration;
@@ -252,31 +254,36 @@ class FlightFromSaleService
             }
         }
 
+        $bookingId = !empty($orderCreateFromSaleForm->baseBookingId) ? $orderCreateFromSaleForm->baseBookingId : $orderCreateFromSaleForm->bookingId;
+        $childBookingId = ($orderCreateFromSaleForm->bookingId !== $orderCreateFromSaleForm->baseBookingId) ?
+            $orderCreateFromSaleForm->bookingId : null;
         $flightQuoteFlight = FlightQuoteFlight::create(
             $flightQuote->getId(),
             $orderCreateFromSaleForm->getTripTypeId(),
             $orderCreateFromSaleForm->validatingCarrier,
-            $orderCreateFromSaleForm->bookingId,
+            $bookingId,
             null,
             $orderCreateFromSaleForm->pnr,
             $orderCreateFromSaleForm->validatingCarrier,
-            null
+            null,
+            $childBookingId
         );
         if (!$flightQuoteFlight->validate()) {
-            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($flightQuoteFlight));
+            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($flightQuoteFlight, ' ', true));
         }
         $flightQuoteFlightId = $this->flightQuoteFlightRepository->save($flightQuoteFlight);
 
         $flightQuoteBooking = FlightQuoteBooking::create(
             $flightQuoteFlightId,
-            $orderCreateFromSaleForm->bookingId,
+            $bookingId,
             $orderCreateFromSaleForm->pnr,
             $orderCreateFromSaleForm->getGdsId(),
             null,
-            $orderCreateFromSaleForm->validatingCarrier
+            $orderCreateFromSaleForm->validatingCarrier,
+            $childBookingId
         );
         if (!$flightQuoteBooking->validate()) {
-            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($flightQuoteBooking));
+            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($flightQuoteBooking, ' ', true));
         }
         $flightQuoteBookingId = $this->flightQuoteBookingRepository->save($flightQuoteBooking);
 
@@ -306,8 +313,12 @@ class FlightFromSaleService
                     $cnt = ArrayHelper::getValue($paxTypeCount, $flightPaxForm->type, 0) + 1;
                     ArrayHelper::setValue($paxTypeCount, $flightPaxForm->type, $cnt);
                 } else {
-                    $warning = ['errors' => ErrorsToStringHelper::extractFromModel($flightPaxForm), 'data' => $passenger];
-                    \Yii::warning($warning, 'FlightFromSaleService:FlightPaxForm:validate');
+                    $warning = [
+                        'message' => 'FlightPax fail create',
+                        'errors' => ErrorsToStringHelper::extractFromModel($flightPaxForm, ' ', true),
+                        'data' => $passenger,
+                    ];
+                    \Yii::warning($warning, 'FlightFromSaleService:FlightPaxForm:create');
                 }
             }
         }
@@ -422,7 +433,19 @@ class FlightFromSaleService
 
     private static function detectProductQuoteStatus(array $saleData): int
     {
-        return (ArrayHelper::getValue($saleData, 'passengers.0.ticket_number')) ? ProductQuoteStatus::SOLD : ProductQuoteStatus::BOOKED;
+        try {
+            if ((!$boStatus = $saleData['saleStatus'] ?? null) || !is_string($boStatus)) {
+                throw new \RuntimeException('"saleStatus" not found in "saleData"');
+            }
+            $boStatus = strtolower($boStatus);
+            if (!$productQuoteStatus = ProductQuoteStatus::STATUS_BO_MAP[$boStatus] ?? null) {
+                throw new \RuntimeException('"saleStatus"(' . $boStatus . ') not mapped in ProductQuoteStatus');
+            }
+            return $productQuoteStatus;
+        } catch (\Throwable $throwable) {
+            Yii::warning(AppHelper::throwableLog($throwable), 'FlightFromSaleService:detectProductQuoteStatus');
+            return ProductQuoteStatus::NEW;
+        }
     }
 
     private static function prepareTrips(array $itinerary)

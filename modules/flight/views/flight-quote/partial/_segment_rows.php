@@ -10,10 +10,10 @@
  */
 
 use common\models\Airports;
-use sales\forms\segment\SegmentBaggageForm;
-use sales\forms\segment\SegmentTripForm;
-use sales\helpers\quote\ImageHelper;
-use sales\services\parsingDump\BaggageService;
+use src\forms\segment\SegmentBaggageForm;
+use src\forms\segment\SegmentTripForm;
+use src\helpers\quote\ImageHelper;
+use src\services\parsingDump\BaggageService;
 use unclead\multipleinput\components\BaseColumn;
 use unclead\multipleinput\MultipleInput;
 use unclead\multipleinput\MultipleInputColumn;

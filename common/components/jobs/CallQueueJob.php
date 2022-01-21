@@ -16,18 +16,20 @@ use common\models\Lead;
 use common\models\Notifications;
 use common\models\Project;
 use common\models\ProjectEmployeeAccess;
+use common\models\query\SourcesQuery;
+use common\models\Sources;
 use common\models\UserGroupAssign;
-use sales\forms\lead\PhoneCreateForm;
-use sales\helpers\app\AppHelper;
-use sales\helpers\setting\SettingHelper;
-use sales\model\contactPhoneList\service\ContactPhoneListService;
-use sales\repositories\cases\CasesRepository;
-use sales\repositories\lead\LeadRepository;
-use sales\services\cases\CasesCreateService;
-use sales\services\cases\CasesSaleService;
-use sales\services\client\ClientCreateForm;
-use sales\services\client\ClientManageService;
-use sales\services\lead\LeadManageService;
+use src\forms\lead\PhoneCreateForm;
+use src\helpers\app\AppHelper;
+use src\helpers\setting\SettingHelper;
+use src\model\contactPhoneList\service\ContactPhoneListService;
+use src\repositories\cases\CasesRepository;
+use src\repositories\lead\LeadRepository;
+use src\services\cases\CasesCreateService;
+use src\services\cases\CasesSaleService;
+use src\services\client\ClientCreateForm;
+use src\services\client\ClientManageService;
+use src\services\lead\LeadManageService;
 use yii\base\Exception;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
@@ -110,6 +112,21 @@ class CallQueueJob extends BaseJob implements JobInterface
                                     $projectParams->object->lead->allow_auto_lead_create &&
                                     !ContactPhoneListService::isAutoCreateLeadOff($call->c_from)
                                 ) {
+                                    if ($call->isDirect()) {
+                                        if ($source = SourcesQuery::getByCidOrDefaultByProject($projectParams->object->lead->default_cid_on_direct_call, $call->c_project_id)) {
+                                            $this->source_id = $source->id;
+                                        } else if ($source = SourcesQuery::getFirstSourceByProjectId($call->c_project_id)) {
+                                            $this->source_id = $source->id;
+                                            Yii::warning([
+                                                'message' => 'Not found source by CID and not found default by project for Direct Call',
+                                                'callId' => $call->c_id,
+                                                'sourceCidFromSettings' => $projectParams->object->lead->default_cid_on_direct_call,
+                                                'projectId' => $call->c_project_id,
+                                                'currentCid' => $source->cid
+                                            ], 'CallQueueJob:defaultSourceCidDetecting');
+                                        }
+                                    }
+
                                     $lead = (Yii::createObject(LeadManageService::class))
                                         ->createByIncomingCall(
                                             $call->c_from,

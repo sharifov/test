@@ -4,7 +4,7 @@ use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\conference\entity\conferenceEventLog\ConferenceEventLog */
+/* @var $model src\model\conference\entity\conferenceEventLog\ConferenceEventLog */
 
 $this->title = $model->cel_id;
 $this->params['breadcrumbs'][] = ['label' => 'Conference Event Logs', 'url' => ['index']];

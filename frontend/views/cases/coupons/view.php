@@ -1,12 +1,12 @@
 <?php
 
-use sales\entities\cases\Cases;
+use src\entities\cases\Cases;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
 
-/** @var $coupons \sales\model\coupon\entity\couponCase\CouponCase[] */
-/** @var $sendCouponsForm \sales\model\coupon\useCase\send\SendCouponsForm */
+/** @var $coupons \src\model\coupon\entity\couponCase\CouponCase[] */
+/** @var $sendCouponsForm \src\model\coupon\useCase\send\SendCouponsForm */
 /** @var View $this */
 /** @var Cases $model */
 /** @var \frontend\models\CaseCouponPreviewEmailForm $previewEmailForm */
@@ -85,7 +85,7 @@ $clientEmails = $model->client ? $model->client->getEmailList() : [];
                                     <td><?= $coupon->coupon->c_currency_code ?></td>
                                     <td><?= $coupon->coupon->c_exp_date ?></td>
                                     <td><?= Yii::$app->formatter->asDatetime(strtotime($coupon->coupon->c_created_dt)) ?></td>
-                                    <td><?= \sales\model\coupon\entity\coupon\CouponStatus::asFormat($coupon->coupon->c_status_id) ?></td>
+                                    <td><?= \src\model\coupon\entity\coupon\CouponStatus::asFormat($coupon->coupon->c_status_id) ?></td>
                                 </tr>
                             <?php endforeach; ?>
                     </tbody>

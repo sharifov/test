@@ -3,13 +3,13 @@
 use common\models\Project;
 use frontend\assets\FormBuilderAsset;
 use frontend\helpers\JsonHelper;
-use sales\helpers\app\AppHelper;
+use src\helpers\app\AppHelper;
 use yii\bootstrap4\Html;
 use yii\web\View;
 use yii\widgets\ActiveForm;
 
 /* @var yii\web\View $this */
-/* @var sales\model\clientChatForm\entity\ClientChatForm $model */
+/* @var src\model\clientChatForm\entity\ClientChatForm $model */
 /* @var ActiveForm $form */
 
 FormBuilderAsset::register($this);

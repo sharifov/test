@@ -17,7 +17,6 @@ use common\models\Employee;
  */
 class ProfitBonusController extends FController
 {
-
     public function behaviors()
     {
         $behaviors = [

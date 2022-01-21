@@ -2,11 +2,11 @@
 
 namespace frontend\controllers;
 
-use sales\model\clientChatRequest\repository\ClientChatRequestRepository;
-use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestService;
+use src\model\clientChatRequest\repository\ClientChatRequestRepository;
+use src\model\clientChatRequest\useCase\api\create\ClientChatRequestService;
 use Yii;
-use sales\model\clientChatRequest\entity\ClientChatRequest;
-use sales\model\clientChatRequest\entity\search\ClientChatRequestSearch;
+use src\model\clientChatRequest\entity\ClientChatRequest;
+use src\model\clientChatRequest\entity\search\ClientChatRequestSearch;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

@@ -4,8 +4,8 @@ namespace modules\flight\src\useCases\voluntaryRefund\manualCreate;
 
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
-use sales\entities\cases\Cases;
-use sales\helpers\ErrorsToStringHelper;
+use src\entities\cases\Cases;
+use src\helpers\ErrorsToStringHelper;
 use yii\base\Model;
 use common\components\validators\CheckIsBooleanValidator;
 
@@ -40,6 +40,8 @@ class VoluntaryRefundCreateForm extends Model
             [['bookingId'], 'required'],
             [['bookingId'], 'string', 'max' => 50],
 
+            [['allow', 'airlineAllow', 'automatic'], 'filter', 'filter' => 'floatval', 'skipOnEmpty' => true],
+            [['allow', 'airlineAllow', 'automatic'], 'number'],
             [['allow', 'airlineAllow', 'automatic'], CheckIsBooleanValidator::class],
 
             [['refund'], 'safe'],

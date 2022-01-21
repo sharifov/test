@@ -3,7 +3,7 @@
 namespace common\models;
 
 use common\models\query\DepartmentQuery;
-use sales\model\department\department\Params;
+use src\model\department\department\Params;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;

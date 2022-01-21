@@ -4,8 +4,8 @@ namespace modules\flight\src\useCases\sale\dto;
 
 use common\models\Currency;
 use modules\flight\models\Flight;
-use sales\dto\product\ProductQuoteDTO;
-use sales\helpers\product\ProductQuoteHelper;
+use src\dto\product\ProductQuoteDTO;
+use src\helpers\product\ProductQuoteHelper;
 
 /**
  * Class ProductQuoteCreateDTO

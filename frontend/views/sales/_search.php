@@ -1,6 +1,6 @@
 <?php
 
-use sales\model\user\entity\sales\SalesSearch;
+use src\model\user\entity\sales\SalesSearch;
 use yii\helpers\Html;
 use yii\web\View;
 use yii\widgets\ActiveForm;

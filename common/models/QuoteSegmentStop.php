@@ -21,7 +21,6 @@ use Yii;
  */
 class QuoteSegmentStop extends \yii\db\ActiveRecord
 {
-
     /**
      * @param array $attributes
      * @param int $qsId

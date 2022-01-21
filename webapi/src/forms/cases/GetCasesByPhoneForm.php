@@ -30,12 +30,18 @@ class GetCasesByPhoneForm extends Model
             [['contact_phone', 'active_only'], 'required'],
             [['contact_phone', 'department_key'],'string', 'max' => 20],
             ['contact_phone', 'trim'],
+            ['contact_phone', 'phonePreparer'],
             ['contact_phone', PhoneInputValidator::class],
             ['contact_phone', 'exist', 'targetClass' => ClientPhone::class, 'targetAttribute' => ['contact_phone' => 'phone'], 'message' => 'Client Phone number not found in DB.'],
             ['active_only', 'in', 'range' => [0, 1]],
             [['active_only', 'results_limit'], 'integer'],
             ['project_key', 'string', 'max' => 50],
         ];
+    }
+
+    public function phonePreparer(): void
+    {
+        $this->contact_phone = '+' . str_replace('+', '', $this->contact_phone);
     }
 
     public function formName(): string

@@ -2,7 +2,7 @@
 
 namespace frontend\controllers;
 
-use sales\model\airportLang\entity\AirportLangSearch;
+use src\model\airportLang\entity\AirportLangSearch;
 use Yii;
 use common\models\Airports;
 use common\models\search\AirportsSearch;

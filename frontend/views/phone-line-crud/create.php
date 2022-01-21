@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\phoneLine\phoneLine\PhoneLine */
+/* @var $model src\model\phoneLine\phoneLine\PhoneLine */
 
 $this->title = 'Create Phone Line';
 $this->params['breadcrumbs'][] = ['label' => 'Phone Lines', 'url' => ['index']];

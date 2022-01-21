@@ -2,7 +2,7 @@
 
 use common\models\Notifications;
 use frontend\widgets\notification\NotificationSocketAsset;
-use sales\model\clientChat\entity\ClientChat;
+use src\model\clientChat\entity\ClientChat;
 use yii\bootstrap4\Html;
 use yii\web\View;
 use yii\widgets\Pjax;

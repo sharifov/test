@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use common\components\grid\DateTimeColumn;
-use sales\helpers\email\MaskEmailHelper;
+use src\helpers\email\MaskEmailHelper;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\EmailUnsubscribeSearch */

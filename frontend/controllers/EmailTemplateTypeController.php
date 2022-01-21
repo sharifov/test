@@ -19,7 +19,6 @@ use yii\web\Response;
  */
 class EmailTemplateTypeController extends FController
 {
-
     public function behaviors()
     {
         $behaviors = [

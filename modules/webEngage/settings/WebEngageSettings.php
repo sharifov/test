@@ -3,7 +3,7 @@
 namespace modules\webEngage\settings;
 
 use frontend\helpers\JsonHelper;
-use sales\helpers\app\AppHelper;
+use src\helpers\app\AppHelper;
 use Yii;
 
 /**

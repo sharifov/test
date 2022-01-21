@@ -7,13 +7,13 @@ use common\models\query\ProjectQuery;
 use frontend\helpers\JsonHelper;
 use modules\flight\src\useCases\voluntaryExchange\service\CaseVoluntaryExchangeService;
 use modules\qaTask\src\entities\qaTask\QaTask;
-use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChat\entity\projectConfig\ClientChatProjectConfig;
-use sales\model\clientChatChannel\entity\ClientChatChannel;
-use sales\model\phoneLine\phoneLine\entity\PhoneLine;
-use sales\model\project\entity\params\Params;
-use sales\model\project\entity\projectRelation\ProjectRelation;
-use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
+use src\model\clientChat\entity\ClientChat;
+use src\model\clientChat\entity\projectConfig\ClientChatProjectConfig;
+use src\model\clientChatChannel\entity\ClientChatChannel;
+use src\model\phoneLine\phoneLine\entity\PhoneLine;
+use src\model\project\entity\params\Params;
+use src\model\project\entity\projectRelation\ProjectRelation;
+use src\model\sms\entity\smsDistributionList\SmsDistributionList;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\behaviors\BlameableBehavior;
@@ -81,7 +81,6 @@ use common\components\validators\IsArrayValidator;
  */
 class Project extends \yii\db\ActiveRecord
 {
-
     public const CACHE_KEY = 'projects';
     public const CACHE_TAG_DEPENDENCY = 'projects-tag-dependency';
 

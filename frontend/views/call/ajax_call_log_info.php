@@ -1,9 +1,9 @@
 <?php
 
-use sales\helpers\call\CallHelper;
-use sales\model\callLog\entity\callLog\CallLog;
-use sales\model\callLog\entity\callLog\CallLogStatus;
-use sales\model\client\helpers\ClientFormatter;
+use src\helpers\call\CallHelper;
+use src\model\callLog\entity\callLog\CallLog;
+use src\model\callLog\entity\callLog\CallLogStatus;
+use src\model\client\helpers\ClientFormatter;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 

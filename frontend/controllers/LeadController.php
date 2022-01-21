@@ -48,53 +48,53 @@ use frontend\models\SendEmailForm;
 use modules\order\src\entities\order\search\OrderSearch;
 use modules\twilio\components\TwilioCommunicationService;
 use PHPUnit\Framework\Warning;
-use sales\access\EmployeeAccess;
-use sales\auth\Auth;
-use sales\entities\cases\Cases;
-use sales\forms\CompositeFormHelper;
-use sales\forms\lead\CloneReasonForm;
-use sales\forms\lead\ItineraryEditForm;
-use sales\forms\lead\LeadCreateForm;
-use sales\forms\leadflow\TakeOverReasonForm;
-use sales\helpers\app\AppHelper;
-use sales\helpers\email\MaskEmailHelper;
-use sales\helpers\setting\SettingHelper;
-use sales\logger\db\GlobalLogInterface;
-use sales\logger\db\LogDTO;
-use sales\model\airportLang\helpers\AirportLangHelper;
-use sales\model\call\socket\CallUpdateMessage;
-use sales\model\callLog\entity\callLog\CallLogType;
-use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChat\permissions\ClientChatActionPermission;
-use sales\model\clientChatLead\entity\ClientChatLead;
-use sales\model\clientChatLead\entity\ClientChatLeadRepository;
-use sales\model\contactPhoneData\entity\ContactPhoneData;
-use sales\model\contactPhoneList\service\ContactPhoneListService;
-use sales\model\department\department\DefaultPhoneType;
-use sales\model\emailReviewQueue\EmailReviewQueueManageService;
-use sales\model\emailReviewQueue\entity\EmailReviewQueue;
-use sales\model\lead\useCases\lead\create\CreateLeadByChatDTO;
-use sales\model\lead\useCases\lead\create\LeadCreateByChatForm;
-use sales\model\lead\useCases\lead\create\LeadManageForm;
-use sales\model\lead\useCases\lead\create\LeadManageService as UseCaseLeadManageService;
-use sales\model\lead\useCases\lead\import\LeadImportForm;
-use sales\model\lead\useCases\lead\import\LeadImportParseService;
-use sales\model\lead\useCases\lead\import\LeadImportService;
-use sales\model\lead\useCases\lead\import\LeadImportUploadForm;
-use sales\model\lead\useCases\lead\link\LeadLinkChatForm;
-use sales\model\leadUserConversion\service\LeadUserConversionDictionary;
-use sales\model\leadUserConversion\service\LeadUserConversionService;
-use sales\model\phone\AvailablePhoneList;
-use sales\repositories\cases\CasesRepository;
-use sales\repositories\lead\LeadRepository;
-use sales\repositories\NotFoundException;
-use sales\repositories\quote\QuoteRepository;
-use sales\services\client\ClientManageService;
-use sales\services\email\EmailService;
-use sales\services\lead\LeadAssignService;
-use sales\services\lead\LeadCloneService;
-use sales\services\lead\LeadManageService;
-use sales\services\TransactionManager;
+use src\access\EmployeeAccess;
+use src\auth\Auth;
+use src\entities\cases\Cases;
+use src\forms\CompositeFormHelper;
+use src\forms\lead\CloneReasonForm;
+use src\forms\lead\ItineraryEditForm;
+use src\forms\lead\LeadCreateForm;
+use src\forms\leadflow\TakeOverReasonForm;
+use src\helpers\app\AppHelper;
+use src\helpers\email\MaskEmailHelper;
+use src\helpers\setting\SettingHelper;
+use src\logger\db\GlobalLogInterface;
+use src\logger\db\LogDTO;
+use src\model\airportLang\helpers\AirportLangHelper;
+use src\model\call\socket\CallUpdateMessage;
+use src\model\callLog\entity\callLog\CallLogType;
+use src\model\clientChat\entity\ClientChat;
+use src\model\clientChat\permissions\ClientChatActionPermission;
+use src\model\clientChatLead\entity\ClientChatLead;
+use src\model\clientChatLead\entity\ClientChatLeadRepository;
+use src\model\contactPhoneData\entity\ContactPhoneData;
+use src\model\contactPhoneList\service\ContactPhoneListService;
+use src\model\department\department\DefaultPhoneType;
+use src\model\emailReviewQueue\EmailReviewQueueManageService;
+use src\model\emailReviewQueue\entity\EmailReviewQueue;
+use src\model\lead\useCases\lead\create\CreateLeadByChatDTO;
+use src\model\lead\useCases\lead\create\LeadCreateByChatForm;
+use src\model\lead\useCases\lead\create\LeadManageForm;
+use src\model\lead\useCases\lead\create\LeadManageService as UseCaseLeadManageService;
+use src\model\lead\useCases\lead\import\LeadImportForm;
+use src\model\lead\useCases\lead\import\LeadImportParseService;
+use src\model\lead\useCases\lead\import\LeadImportService;
+use src\model\lead\useCases\lead\import\LeadImportUploadForm;
+use src\model\lead\useCases\lead\link\LeadLinkChatForm;
+use src\model\leadUserConversion\service\LeadUserConversionDictionary;
+use src\model\leadUserConversion\service\LeadUserConversionService;
+use src\model\phone\AvailablePhoneList;
+use src\repositories\cases\CasesRepository;
+use src\repositories\lead\LeadRepository;
+use src\repositories\NotFoundException;
+use src\repositories\quote\QuoteRepository;
+use src\services\client\ClientManageService;
+use src\services\email\EmailService;
+use src\services\lead\LeadAssignService;
+use src\services\lead\LeadCloneService;
+use src\services\lead\LeadManageService;
+use src\services\TransactionManager;
 use Yii;
 use yii\caching\DbDependency;
 use yii\data\ActiveDataProvider;
@@ -2169,6 +2169,9 @@ class LeadController extends FController
         $form->assignDep(Department::DEPARTMENT_SALES);
         if ($form->load($data['post']) && $form->validate()) {
             try {
+                if ($form->depId === 0) {
+                    $form->depId = null;
+                }
                 $form->client->projectId = $form->projectId;
                 $form->client->typeCreate = Client::TYPE_CREATE_LEAD;
                 $lead = $this->leadManageService->createManuallyByDefault($form, Yii::$app->user->id, Yii::$app->user->id, LeadFlow::DESCRIPTION_MANUAL_CREATE);
@@ -2209,9 +2212,11 @@ class LeadController extends FController
                 []
             );
             $form = new LeadManageForm(0);
-            $form->assignDep(Department::DEPARTMENT_SALES);
             if (Yii::$app->request->isPjax && $form->load($data['post']) && $form->validate()) {
                 try {
+                    if ($form->depId === 0) {
+                        $form->depId = null;
+                    }
                     $leadManageService = Yii::createObject(UseCaseLeadManageService::class);
                     $form->client->projectId = $form->projectId;
                     $form->client->typeCreate = Client::TYPE_CREATE_LEAD;
@@ -2366,7 +2371,7 @@ class LeadController extends FController
         $userId = Auth::id();
 
         try {
-            $form = new \sales\model\lead\useCases\lead\create\fromPhoneWidgetWithInvalidClient\Form($call, $userId);
+            $form = new \src\model\lead\useCases\lead\create\fromPhoneWidgetWithInvalidClient\Form($call, $userId);
 
             if (Yii::$app->request->isPjax && $form->load(Yii::$app->request->post()) && $form->validate()) {
                 try {

@@ -46,21 +46,21 @@ use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\services\productQuote\ProductQuoteCloneService;
 use modules\product\src\useCases\product\create\ProductCreateService;
-use sales\auth\Auth;
-use sales\entities\cases\Cases;
-use sales\exception\BoResponseException;
-use sales\forms\CompositeFormHelper;
-use sales\forms\segment\SegmentBaggageForm;
-use sales\helpers\app\AppHelper;
-use sales\helpers\ErrorsToStringHelper;
-use sales\helpers\product\ProductQuoteHelper;
-use sales\helpers\quote\BaggageHelper;
-use sales\repositories\lead\LeadRepository;
-use sales\repositories\NotFoundException;
-use sales\services\parsingDump\BaggageService;
-use sales\services\parsingDump\ReservationService;
-use sales\services\quote\addQuote\guard\GdsByQuoteGuard;
-use sales\services\TransactionManager;
+use src\auth\Auth;
+use src\entities\cases\Cases;
+use src\exception\BoResponseException;
+use src\forms\CompositeFormHelper;
+use src\forms\segment\SegmentBaggageForm;
+use src\helpers\app\AppHelper;
+use src\helpers\ErrorsToStringHelper;
+use src\helpers\product\ProductQuoteHelper;
+use src\helpers\quote\BaggageHelper;
+use src\repositories\lead\LeadRepository;
+use src\repositories\NotFoundException;
+use src\services\parsingDump\BaggageService;
+use src\services\parsingDump\ReservationService;
+use src\services\quote\addQuote\guard\GdsByQuoteGuard;
+use src\services\TransactionManager;
 use webapi\src\request\BoRequestDataHelper;
 use Yii;
 use modules\flight\models\FlightQuote;
@@ -81,9 +81,9 @@ use modules\product\src\abac\ProductQuoteChangeAbacObject;
 use modules\product\src\abac\dto\ProductQuoteChangeAbacDto;
 use modules\product\src\abac\RelatedProductQuoteAbacObject;
 use modules\product\src\abac\dto\RelatedProductQuoteAbacDto;
-use sales\repositories\cases\CasesRepository;
-use sales\access\EmployeeGroupAccess;
-use sales\helpers\setting\SettingHelper;
+use src\repositories\cases\CasesRepository;
+use src\access\EmployeeGroupAccess;
+use src\helpers\setting\SettingHelper;
 
 /**
  * FlightQuoteController implements the CRUD actions for FlightQuote model.
@@ -1031,6 +1031,7 @@ class FlightQuoteController extends FController
             $caseId = Yii::$app->request->post('case_id', 0);
             $originQuoteId = Yii::$app->request->post('origin_quote_id', 0);
             $changeId = Yii::$app->request->post('change_id', 0);
+            $post = Yii::$app->request->post();
 
             try {
                 $flight = $this->flightRepository->find($flightId);
@@ -1077,10 +1078,12 @@ class FlightQuoteController extends FController
                 $response['message'] = 'Success. FlightQuote ID(' . $flightQuote->getId() . ') created';
                 $response['status'] = 1;
             } catch (\RuntimeException | \DomainException $exception) {
-                Yii::info(AppHelper::throwableLog($exception), 'FlightQuoteController:actionSaveVoluntaryQuote:Exception');
+                $message = ArrayHelper::merge(AppHelper::throwableLog($exception), ['post' => $post]);
+                Yii::warning($message, 'FlightQuoteController:actionSaveVoluntaryQuote:Exception');
                 $response['message'] = VarDumper::dumpAsString($exception->getMessage());
             } catch (\Throwable $throwable) {
-                Yii::error(AppHelper::throwableLog($throwable), 'FlightQuoteController:actionSaveVoluntaryQuote:Throwable');
+                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['post' => $post]);
+                Yii::error($message, 'FlightQuoteController:actionSaveVoluntaryQuote:Throwable');
                 $response['message'] = 'Internal Server Error';
             }
             return $response;
@@ -1255,10 +1258,10 @@ class FlightQuoteController extends FController
                 $response['message'] = 'Success. FlightQuote ID(' . $flightQuote->getId() . ') created';
                 $response['status'] = 1;
             } catch (\RuntimeException | \DomainException $exception) {
-                Yii::info(AppHelper::throwableLog($exception), 'FlightQuoteController:actionAjaxPrepareDump:Exception');
+                Yii::warning(AppHelper::throwableLog($exception, true), 'FlightQuoteController:actionAjaxSaveReProtection:Exception');
                 $response['message'] = VarDumper::dumpAsString($exception->getMessage());
             } catch (\Throwable $throwable) {
-                Yii::error(AppHelper::throwableLog($throwable), 'FlightQuoteController:actionAjaxPrepareDump:throwable');
+                Yii::error(AppHelper::throwableLog($throwable, true), 'FlightQuoteController:actionAjaxSaveReProtection:throwable');
                 $response['message'] = 'Internal Server Error';
             }
             return $response;

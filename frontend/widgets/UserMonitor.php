@@ -36,7 +36,7 @@ class UserMonitor extends \yii\bootstrap\Widget
             return '';
         }
 
-        $this->isAutoLogoutEnabled = \sales\model\user\entity\monitor\UserMonitor::isAutologoutEnabled();
+        $this->isAutoLogoutEnabled = \src\model\user\entity\monitor\UserMonitor::isAutologoutEnabled();
         $this->isIdleMonitorEnabled = UserConnection::isIdleMonitorEnabled();
 
         $userId = Yii::$app->user->id;

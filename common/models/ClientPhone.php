@@ -4,10 +4,12 @@ namespace common\models;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
 use common\models\query\ClientPhoneQuery;
-use sales\behaviors\CheckPhoneJobBehavior;
-use sales\behaviors\PhoneCleanerBehavior;
-use sales\behaviors\UidPhoneGeneratorBehavior;
-use sales\entities\EventTrait;
+use src\behaviors\CheckPhoneJobBehavior;
+use src\behaviors\clientPhone\ContactPhoneListBehavior;
+use src\behaviors\PhoneCleanerBehavior;
+use src\behaviors\UidPhoneGeneratorBehavior;
+use src\entities\EventTrait;
+use src\model\contactPhoneList\entity\ContactPhoneList;
 use Yii;
 use yii\behaviors\AttributeBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -31,7 +33,7 @@ use yii\queue\Queue;
  * @property string $type
  * @property string $cp_title
  * @property string|null $cp_cpl_uid
- *
+ * @property int|null $cp_cpl_id
  *
  * @property Client $client
  */
@@ -126,7 +128,7 @@ class ClientPhone extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['phone'], 'required'],
+            [['phone', 'client_id'], 'required'],
             [['client_id', 'is_sms', 'type'], 'integer'],
             [['created', 'updated', 'comments', 'validate_dt'], 'safe'],
 
@@ -140,6 +142,9 @@ class ClientPhone extends \yii\db\ActiveRecord
             [['cp_title'], 'string', 'max' => 150],
 
             [['cp_cpl_uid'], 'string', 'max' => 36],
+
+            [['cp_cpl_id'], 'integer'],
+            [['cp_cpl_id'], 'exist', 'skipOnError' => true, 'targetClass' => ContactPhoneList::class, 'targetAttribute' => ['cp_cpl_id' => 'cpl_id']],
         ];
     }
 
@@ -171,6 +176,7 @@ class ClientPhone extends \yii\db\ActiveRecord
             'type' => 'Phone Type',
             'cp_title' => 'Title',
             'cp_cpl_uid' => 'Cpl uid',
+            'cpl_id' => 'CplID',
         ];
     }
 
@@ -194,7 +200,10 @@ class ClientPhone extends \yii\db\ActiveRecord
                 'donorColumn' => 'phone',
                 'targetColumn' => 'cp_cpl_uid',
             ],
-            'CheckPhoneJobBehavior' => CheckPhoneJobBehavior::class,
+            'contactPhoneList' => [
+                'class' => ContactPhoneListBehavior::class,
+            ],
+            'checkPhoneJobBehavior' => CheckPhoneJobBehavior::class,
         ];
     }
 

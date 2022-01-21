@@ -1,7 +1,7 @@
 <?php
 
-use sales\model\call\entity\callCommand\types\CommandTypeInterface;
-use sales\model\call\services\CallCommandTypeService;
+use src\model\call\entity\callCommand\types\CommandTypeInterface;
+use src\model\call\services\CallCommandTypeService;
 use yii\helpers\Html;
 
 /* @var yii\web\View $this */

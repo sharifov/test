@@ -16,7 +16,6 @@ use yii\filters\VerbFilter;
  */
 class ApiUserController extends FController
 {
-
     public function behaviors()
     {
         $behaviors = [

@@ -5,7 +5,7 @@ namespace modules\order\controllers;
 use frontend\controllers\FController;
 use modules\order\src\entities\orderStatusLog\OrderStatusLog;
 use modules\order\src\entities\orderStatusLog\search\OrderStatusLogCrudSearch;
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;

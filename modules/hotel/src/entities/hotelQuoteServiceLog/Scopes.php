@@ -9,7 +9,6 @@ namespace modules\hotel\src\entities\hotelQuoteServiceLog;
  */
 class Scopes extends \yii\db\ActiveQuery
 {
-
     /**
      * @param null $db
      * @return array|\yii\db\ActiveRecord[]

@@ -2,15 +2,15 @@
 
 use common\models\Employee;
 use frontend\helpers\EmailHelper;
-use sales\auth\Auth;
-use sales\model\callLog\entity\callLog\CallLog;
-use sales\model\callLog\entity\callLog\CallLogStatus;
-use sales\model\clientChat\entity\ClientChat;
+use src\auth\Auth;
+use src\model\callLog\entity\callLog\CallLog;
+use src\model\callLog\entity\callLog\CallLogStatus;
+use src\model\clientChat\entity\ClientChat;
 use yii\helpers\Html;
 use common\models\Email;
 use common\models\Sms;
-use sales\helpers\email\MaskEmailHelper;
-use sales\helpers\phone\MaskPhoneHelper;
+use src\helpers\email\MaskEmailHelper;
+use src\helpers\phone\MaskPhoneHelper;
 use modules\email\src\abac\dto\EmailAbacDto;
 use modules\email\src\abac\EmailAbacObject;
 
@@ -120,7 +120,7 @@ $fromType = 'client';
                 <div class="chat__date"><?=Yii::$app->formatter->asDatetime(strtotime($mail->e_created_dt))?> <?=$mail->e_language_id ? '(' . $mail->e_language_id . ')' : ''?></div> <?php //11:01AM | June 9?>
             </div>
             <div class="card-body">
-                <h5 class="chat__subtitle"><?= wordwrap(Html::encode($mail->e_email_subject), 60, '<br />', true)?></h5>
+                <h5 class="chat__subtitle" style="word-break: break-all;"><?= wordwrap(Html::encode($mail->e_email_subject), 60, '<br />', true)?></h5>
                 <div class="">
                     <?php echo \yii\helpers\StringHelper::truncate(Email::stripHtmlTags($mail->getEmailBodyHtml()), 300, '...', null, true)?>
                 </div>

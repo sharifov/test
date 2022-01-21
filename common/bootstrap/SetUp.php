@@ -5,8 +5,8 @@ namespace common\bootstrap;
 use common\components\Metrics;
 use dosamigos\datetimepicker\DateTimePicker;
 use frontend\widgets\DateTimePickerWidget;
-use sales\services\log\GlobalLogDBService;
-use sales\logger\db\GlobalLogInterface;
+use src\services\log\GlobalLogDBService;
+use src\logger\db\GlobalLogInterface;
 use yii\base\BootstrapInterface;
 use yii\rbac\CheckAccessInterface;
 

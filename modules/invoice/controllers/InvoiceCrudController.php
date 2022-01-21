@@ -2,7 +2,7 @@
 
 namespace modules\invoice\controllers;
 
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
 use modules\invoice\src\entities\invoice\Invoice;
 use modules\invoice\src\entities\invoice\search\InvoiceCrudSearch;

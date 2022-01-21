@@ -1,12 +1,12 @@
 <?php
 
-use sales\helpers\text\SecureStringHelper;
-use sales\model\userClientChatData\entity\UserClientChatData;
+use src\helpers\text\SecureStringHelper;
+use src\model\userClientChatData\entity\UserClientChatData;
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\userClientChatData\entity\UserClientChatData */
+/* @var $model src\model\userClientChatData\entity\UserClientChatData */
 
 $this->title = $model->uccd_id;
 $this->params['breadcrumbs'][] = ['label' => 'User Client Chat Datas', 'url' => ['index']];

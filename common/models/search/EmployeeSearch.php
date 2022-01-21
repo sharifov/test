@@ -12,8 +12,8 @@ use common\models\UserGroupAssign;
 use common\models\UserOnline;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
-use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
+use src\model\clientChat\entity\ClientChat;
+use src\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -23,7 +23,7 @@ use yii\data\ArrayDataProvider;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
-use sales\auth\Auth;
+use src\auth\Auth;
 
 /**
  * EmployeeSearch represents the model behind the search form of `common\models\Employee`.

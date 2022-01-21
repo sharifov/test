@@ -9,5 +9,4 @@ use yii\db\ActiveQuery;
  */
 class Scopes extends ActiveQuery
 {
-
 }

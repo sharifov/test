@@ -3,7 +3,7 @@
 use common\models\ClientEmail;
 use common\models\ClientPhone;
 use frontend\models\form\ContactForm;
-use sales\access\EmployeeProjectAccess;
+use src\access\EmployeeProjectAccess;
 use unclead\multipleinput\MultipleInput;
 use unclead\multipleinput\MultipleInputColumn;
 use yii\helpers\Html;

@@ -13,12 +13,13 @@ use modules\flight\src\useCases\reprotectionCreate\form\ReprotectionGetForm;
 use modules\flight\src\useCases\reprotectionExchange\form\ReProtectionExchangeForm;
 use modules\flight\src\useCases\reprotectionExchange\service\ReProtectionExchangeService;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuoteChange\service\ProductQuoteChangeService;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
-use sales\helpers\app\AppHelper;
-use sales\helpers\setting\SettingHelper;
-use sales\repositories\NotFoundException;
-use sales\repositories\product\ProductQuoteRepository;
-use sales\services\TransactionManager;
+use src\helpers\app\AppHelper;
+use src\helpers\setting\SettingHelper;
+use src\repositories\NotFoundException;
+use src\repositories\product\ProductQuoteRepository;
+use src\services\TransactionManager;
 use webapi\src\logger\ApiLogger;
 use webapi\src\logger\behaviors\SimpleLoggerBehavior;
 use webapi\src\logger\behaviors\TechnicalInfoBehavior;
@@ -135,9 +136,10 @@ class FlightController extends BaseController
      * @apiParam {string{10}}           booking_id                              Booking Id
      * @apiParam {string{50}}           project_key                             Project key
      * @apiParam {bool}                 [is_automate]                           Is automate (default false)
+     * @apiParam {bool}                 [refundAllowed]                         Refund Allowed (default true)
      * @apiParam {object}               [flight_quote]                          Flight quote
      * @apiParam {string{2}}            flight_quote.gds                        Gds
-     * @apiParam {string{10}}           flight_quote.pcc                        pcc
+     * @apiParam {string{10}}           flight_quote.pcc                        Pcc
      * @apiParam {string{50}}           flight_quote.fareType                   ValidatingCarrier
      * @apiParam {object}               flight_quote.trips                      Trips
      * @apiParam {int}                  [flight_quote.trips.duration]           Trip Duration
@@ -163,6 +165,7 @@ class FlightController extends BaseController
      *   {
      *      "booking_id": "XXXYYYZ",
      *      "is_automate": false,
+     *      "refundAllowed": true,
      *      "project_key":"ovago",
      *      "flight_quote":{
                 "gds": "S",
@@ -1337,8 +1340,8 @@ class FlightController extends BaseController
                 ])
             );
         } catch (\DomainException $e) {
-            \Yii::error([
-                'message' => 'DomainException: Reprotection decision error',
+            \Yii::warning([
+                'message' => 'Reprotection decision failed (DomainException). Reason: ' . $e->getMessage(),
                 'error' => $e->getMessage(),
                 'request' => $form->getAttributes(),
             ], 'FlightController:reprotectionDecision:DomainException');
@@ -1351,12 +1354,12 @@ class FlightController extends BaseController
                 new CodeMessage($e->getCode())
             );
         } catch (\Throwable $e) {
-            \Yii::error([
-                'message' => 'Reprotection decision error',
+            \Yii::warning([
+                'message' => 'Reprotection decision failed (Throwable). Reason: ' . $e->getMessage(),
                 'request' => $form->getAttributes(),
                 'error' => $e->getMessage(),
                 'exception' => AppHelper::throwableLog($e, false),
-            ], 'FlightController:reprotectionDecision');
+            ], 'FlightController:reprotectionDecision:Throwable');
 
             return new ErrorResponse(
                 new DataMessage([
@@ -1619,6 +1622,9 @@ class FlightController extends BaseController
                             "fp_dob": null
                         }
                     ]
+                },
+                "involuntary_change": {
+                    "refundAllowed": false
                 }
             },
             "quote_list": [
@@ -1970,9 +1976,14 @@ class FlightController extends BaseController
 
         try {
             $productQuote = $this->productQuoteRepository->findByGidFlightProductQuote($form->product_quote_gid);
+            $responseProductQuote = $productQuote->toArray();
+
+            if ($lastReProtection = ProductQuoteChangeService::lastActiveReProtection($productQuote->pq_id)) {
+                $responseProductQuote['involuntary_change']['refundAllowed'] = (bool) $lastReProtection->pqc_refund_allowed;
+            }
 
             $response = new SuccessResponse(
-                new Message('product_quote', $productQuote->toArray())
+                new Message('product_quote', $responseProductQuote)
             );
 
             if ($form->withQuoteList()) {

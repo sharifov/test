@@ -6,7 +6,7 @@ use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
-use sales\repositories\product\ProductQuoteRepository;
+use src\repositories\product\ProductQuoteRepository;
 
 /**
  * Class CancelOtherReprotectionQuotes

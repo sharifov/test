@@ -6,7 +6,7 @@ use modules\product\src\entities\productQuote\events\ProductQuoteDeclinedEvent;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteStatusLog\CreateDto;
 use modules\product\src\services\ProductQuoteStatusLogService;
-use sales\helpers\app\AppHelper;
+use src\helpers\app\AppHelper;
 use Yii;
 
 /**

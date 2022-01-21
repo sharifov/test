@@ -7,7 +7,6 @@ use common\models\KpiHistory;
 
 class KpiService
 {
-
     public static function calculateSalary($dateParam = null)
     {
         $errors = [];

@@ -2,7 +2,7 @@
 
 use common\models\Employee;
 use common\models\Lead;
-use sales\access\LeadPreferencesAccess;
+use src\access\LeadPreferencesAccess;
 use yii\helpers\Url;
 use yii\web\View;
 use yii\helpers\Html;

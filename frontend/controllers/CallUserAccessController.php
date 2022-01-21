@@ -15,7 +15,6 @@ use yii\filters\VerbFilter;
  */
 class CallUserAccessController extends FController
 {
-
     public function behaviors()
     {
         $behaviors = [

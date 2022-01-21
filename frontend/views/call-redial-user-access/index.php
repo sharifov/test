@@ -6,7 +6,7 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\leadRedial\entity\search\CallRedialUserAccessSearch */
+/* @var $searchModel src\model\leadRedial\entity\search\CallRedialUserAccessSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Call Redial User Accesses';

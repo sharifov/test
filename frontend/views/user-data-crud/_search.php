@@ -4,7 +4,7 @@ use yii\bootstrap4\Html;
 use common\components\bootstrap4\activeForm\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\userData\entity\search\UserDataSearch */
+/* @var $model src\model\userData\entity\search\UserDataSearch */
 /* @var $form common\components\bootstrap4\activeForm\ActiveForm */
 ?>
 

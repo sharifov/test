@@ -2,7 +2,7 @@
 
 namespace frontend\widgets\clientChat;
 
-use sales\model\clientChat\entity\ClientChat;
+use src\model\clientChat\entity\ClientChat;
 use yii\base\Widget;
 
 class ClientChatClientInfoWidget extends Widget

@@ -5,14 +5,14 @@ use common\components\grid\department\DepartmentColumn;
 use common\components\grid\UserSelect2Column;
 use common\models\Department;
 use common\models\Project;
-use sales\model\emailReviewQueue\entity\EmailReviewQueue;
-use sales\model\emailReviewQueue\entity\EmailReviewQueueStatus;
+use src\model\emailReviewQueue\entity\EmailReviewQueue;
+use src\model\emailReviewQueue\entity\EmailReviewQueueStatus;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\emailReviewQueue\entity\EmailReviewQueueSearch */
+/* @var $searchModel src\model\emailReviewQueue\entity\EmailReviewQueueSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Email Review Queues';

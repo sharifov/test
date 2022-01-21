@@ -9,7 +9,6 @@ use yii\db\ActiveQuery;
  */
 class UserDepartmentQuery extends ActiveQuery
 {
-
     /**
      * @param $depId
      * @return UserDepartmentQuery

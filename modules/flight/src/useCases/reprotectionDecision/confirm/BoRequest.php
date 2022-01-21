@@ -8,10 +8,10 @@ use modules\flight\src\useCases\reprotectionDecision\CustomerDecisionService;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
-use sales\entities\cases\Cases;
-use sales\repositories\cases\CasesRepository;
-use sales\repositories\product\ProductQuoteRepository;
-use sales\services\TransactionManager;
+use src\entities\cases\Cases;
+use src\repositories\cases\CasesRepository;
+use src\repositories\product\ProductQuoteRepository;
+use src\services\TransactionManager;
 
 /**
  * Class BoRequest

@@ -2,7 +2,7 @@
 
 namespace common\components\grid;
 
-use sales\helpers\DateHelper;
+use src\helpers\DateHelper;
 use yii\grid\DataColumn;
 
 class MonthColumn extends DataColumn

@@ -38,7 +38,8 @@ class TipsSplit extends \yii\db\ActiveRecord
     {
         return [
             [['ts_lead_id', 'ts_user_id'], 'required'],
-            [['ts_lead_id', 'ts_user_id', 'ts_percent', 'ts_amount', 'ts_updated_user_id'], 'integer'],
+            [['ts_lead_id', 'ts_user_id', 'ts_amount', 'ts_updated_user_id'], 'integer'],
+            [['ts_percent'], 'integer', 'min' => 1, 'skipOnEmpty' => false],
             [['ts_updated_dt'], 'safe'],
             [['ts_user_id', 'ts_lead_id'], 'unique', 'targetAttribute' => ['ts_user_id', 'ts_lead_id']],
             [['ts_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['ts_updated_user_id' => 'id']],
@@ -110,5 +111,20 @@ class TipsSplit extends \yii\db\ActiveRecord
         }
 
         return 0;
+    }
+
+    /**
+     * @param int $leadId
+     * @param int $userId
+     * @param int $percent
+     * @return TipsSplit
+     */
+    public static function create(int $leadId, int $userId, int $percent): TipsSplit
+    {
+        $self = new self();
+        $self->ts_lead_id = $leadId;
+        $self->ts_user_id = $userId;
+        $self->ts_percent = $percent;
+        return $self;
     }
 }

@@ -1,8 +1,8 @@
 <?php
 
-use sales\auth\Auth;
-use sales\helpers\clientChat\ClientChatHelper;
-use sales\model\clientChat\entity\ClientChat;
+use src\auth\Auth;
+use src\helpers\clientChat\ClientChatHelper;
+use src\model\clientChat\entity\ClientChat;
 use yii\helpers\Html;
 
 /* @var ClientChat|null $clientChat */

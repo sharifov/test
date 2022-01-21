@@ -10,7 +10,6 @@ use yii\rbac\Rule;
  */
 class LeadSearchMultipleUpdateSupervisionRule extends Rule
 {
-
     public $name = 'LeadSearchMultipleUpdateSupervisionRule';
 
     /**

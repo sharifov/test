@@ -5,7 +5,7 @@ namespace modules\order\controllers;
 use frontend\controllers\FController;
 use modules\order\src\widgets\multipleUpdate\order\MultipleUpdateForm;
 use modules\order\src\widgets\multipleUpdate\order\MultipleUpdateService;
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
 use yii\bootstrap4\ActiveForm;
 use yii\web\BadRequestHttpException;

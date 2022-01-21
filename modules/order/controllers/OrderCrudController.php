@@ -3,7 +3,7 @@
 namespace modules\order\controllers;
 
 use frontend\helpers\JsonHelper;
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\search\OrderCrudSearch;

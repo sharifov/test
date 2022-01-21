@@ -16,7 +16,6 @@ use yii\filters\VerbFilter;
  */
 class LeadTaskController extends FController
 {
-
     public function behaviors()
     {
         $behaviors = [

@@ -1,13 +1,13 @@
 <?php
 
-use sales\auth\Auth;
-use sales\model\clientChat\dashboard\FilterForm;
-use sales\model\clientChat\dashboard\ReadUnreadFilter;
-use sales\model\userClientChatData\service\UserClientChatDataService;
+use src\auth\Auth;
+use src\model\clientChat\dashboard\FilterForm;
+use src\model\clientChat\dashboard\ReadUnreadFilter;
+use src\model\userClientChatData\service\UserClientChatDataService;
 use yii\helpers\Url;
 use yii\web\JqueryAsset;
 use yii\web\View;
-use sales\model\clientChat\entity\ClientChat;
+use src\model\clientChat\entity\ClientChat;
 
 /* @var yii\web\View $this */
 /* @var ClientChat|null $clientChat */

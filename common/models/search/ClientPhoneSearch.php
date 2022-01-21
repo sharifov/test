@@ -19,9 +19,9 @@ class ClientPhoneSearch extends ClientPhone
     public function rules()
     {
         return [
-            [['id', 'client_id', 'is_sms', 'type'], 'integer'],
+            [['id', 'client_id', 'is_sms', 'type', 'cp_cpl_id'], 'integer'],
             [['phone', 'comments'], 'safe'],
-            [['cp_title'], 'string', 'max' => 150],
+            [['cp_title', 'cp_cpl_uid'], 'string', 'max' => 150],
             [[ 'created', 'validate_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
@@ -87,11 +87,13 @@ class ClientPhoneSearch extends ClientPhone
             //'DATE(created)' => $this->created,
             'is_sms' => $this->is_sms,
             //'DATE(validate_dt)' => $this->validate_dt,
+            'cp_cpl_id' => $this->cp_cpl_id,
         ]);
 
         $query->andFilterWhere(['like', 'phone', $this->phone])
             ->andFilterWhere(['like', 'comments', $this->comments])
-            ->andFilterWhere(['like', 'cp_title', $this->cp_title]);
+            ->andFilterWhere(['like', 'cp_title', $this->cp_title])
+            ->andFilterWhere(['like', 'cp_cpl_uid', $this->cp_cpl_uid]);
 
         return $dataProvider;
     }

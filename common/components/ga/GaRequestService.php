@@ -3,7 +3,7 @@
 namespace common\components\ga;
 
 use yii\base\Component;
-use sales\helpers\app\AppHelper;
+use src\helpers\app\AppHelper;
 use Throwable;
 use Yii;
 use yii\helpers\ArrayHelper;

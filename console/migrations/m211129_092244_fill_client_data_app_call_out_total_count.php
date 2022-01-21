@@ -2,11 +2,11 @@
 
 use common\models\Call;
 use common\models\Client;
-use sales\helpers\app\AppHelper;
-use sales\model\callLog\entity\callLog\CallLog;
-use sales\model\callLog\entity\callLog\CallLogType;
-use sales\model\clientDataKey\entity\ClientDataKeyDictionary;
-use sales\model\clientDataKey\service\ClientDataKeyService;
+use src\helpers\app\AppHelper;
+use src\model\callLog\entity\callLog\CallLog;
+use src\model\callLog\entity\callLog\CallLogType;
+use src\model\clientDataKey\entity\ClientDataKeyDictionary;
+use src\model\clientDataKey\service\ClientDataKeyService;
 use yii\db\Expression;
 use yii\db\Migration;
 use yii\helpers\Console;

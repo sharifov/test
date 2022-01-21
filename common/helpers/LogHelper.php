@@ -12,7 +12,6 @@ use yii\helpers\ArrayHelper;
 
 class LogHelper
 {
-
     /**
      * @return array
      */
@@ -198,15 +197,15 @@ class LogHelper
     public static function hidePersonalData(
         array $data,
         array $personalDataKeys,
-        int $showLen = 1,
+        int $showLen = 2,
         int $maxLen = 3,
         string $substitute = '*'
     ): array {
         foreach ($data as $key => $value) {
-            if (ArrayHelper::isAssociative($value)) {
+            if (is_array($value)) {
                 $data[$key] = self::hidePersonalData($value, $personalDataKeys, $showLen, $maxLen, $substitute);
             }
-            if (array_key_exists($key, $personalDataKeys)) {
+            if (array_key_exists($key, $personalDataKeys) || in_array($key, $personalDataKeys, true)) {
                 $data[$key] = self::replaceSource($value, $showLen, $maxLen, $substitute);
             }
         }

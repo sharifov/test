@@ -2,12 +2,12 @@
 
 use common\models\Employee;
 use modules\product\src\entities\productType\ProductType;
-use sales\helpers\DateHelper;
+use src\helpers\DateHelper;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\kpi\entity\kpiUserProductCommission\KpiUserProductCommission */
+/* @var $model src\model\kpi\entity\kpiUserProductCommission\KpiUserProductCommission */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 

@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\coupon\entity\couponUserAction\CouponUserAction;
-use sales\model\coupon\entity\couponUserAction\CouponUserActionSearch;
+use src\model\coupon\entity\couponUserAction\CouponUserAction;
+use src\model\coupon\entity\couponUserAction\CouponUserActionSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

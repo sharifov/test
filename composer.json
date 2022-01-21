@@ -107,7 +107,11 @@
 		"pixel418/markdownify": "^2.3",
 		"casbin/casbin": "3.7",
 		"snowplow/snowplow-tracker": "0.4.0",
-		"vlucas/phpdotenv": "^5.3"
+		"vlucas/phpdotenv": "^5.3",
+		"yiisoft/yii2-authclient": "^2.2",
+		"textalk/websocket": "^1.5",
+        "ext-fileinfo": "*",
+        "ext-pgsql": "*"
     },
 	"require-dev" : {
 		"yiisoft/yii2-debug" : "~2.1",
@@ -144,7 +148,8 @@
 			"frontend/models/",
 			"common/components/",
 			"vendor/yiisoft/yii2/Yii.php",
-			"sales/"
+			"sales/",
+			"src/"
 		],
 		"exclude-from-classmap": [
 			"docker/",

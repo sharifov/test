@@ -7,7 +7,7 @@ use frontend\controllers\FController;
 use modules\product\src\entities\productType\ProductType;
 use modules\rentCar\src\forms\RentCarUpdateRequestForm;
 use modules\rentCar\src\repositories\rentCar\RentCarRepository;
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
 use modules\rentCar\src\entity\rentCar\RentCar;
 use modules\rentCar\src\entity\rentCar\RentCarSearch;

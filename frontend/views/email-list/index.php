@@ -1,6 +1,6 @@
 <?php
 
-use sales\model\emailList\entity\search\EmailListSearch;
+use src\model\emailList\entity\search\EmailListSearch;
 use common\components\grid\BooleanColumn;
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;

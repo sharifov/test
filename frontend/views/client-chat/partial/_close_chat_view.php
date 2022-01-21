@@ -1,6 +1,6 @@
 <?php
 
-use sales\model\clientChat\useCase\close\ClientChatCloseForm;
+use src\model\clientChat\useCase\close\ClientChatCloseForm;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;

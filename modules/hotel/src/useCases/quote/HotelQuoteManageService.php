@@ -11,10 +11,10 @@ use modules\offer\src\entities\offerProduct\OfferProduct;
 use modules\offer\src\services\OfferPriceUpdater;
 use modules\order\src\services\OrderPriceUpdater;
 use modules\product\src\entities\productQuote\ProductQuote;
-use sales\helpers\product\ProductQuoteHelper;
-use sales\repositories\product\ProductQuoteRepository;
-use sales\services\CurrencyHelper;
-use sales\services\TransactionManager;
+use src\helpers\product\ProductQuoteHelper;
+use src\repositories\product\ProductQuoteRepository;
+use src\services\CurrencyHelper;
+use src\services\TransactionManager;
 
 /**
  * Class HotelQuoteManageService

@@ -2,7 +2,7 @@
 
 namespace modules\product\src\entities\productQuoteChangeRelation;
 
-use sales\repositories\AbstractBaseRepository;
+use src\repositories\AbstractBaseRepository;
 
 /**
  * Class ProductQuoteChangeRelationRepository

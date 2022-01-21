@@ -1,6 +1,6 @@
 <?php
 
-use sales\services\parsingDump\lib\ParsingDump;
+use src\services\parsingDump\lib\ParsingDump;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */

@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\leadRequest\entity\LeadRequest */
+/* @var $model src\model\leadRequest\entity\LeadRequest */
 
 $this->title = 'Update Lead Request: ' . $model->lr_id;
 $this->params['breadcrumbs'][] = ['label' => 'Lead Requests', 'url' => ['index']];

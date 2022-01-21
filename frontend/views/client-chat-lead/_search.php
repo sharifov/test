@@ -1,6 +1,6 @@
 <?php
 
-use sales\model\clientChatLead\entity\search\ClientChatLeadSearch;
+use src\model\clientChatLead\entity\search\ClientChatLeadSearch;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @var $viewModel \sales\viewModel\chat\ViewModelChatExtendedGraph
+ * @var $viewModel \src\viewModel\chat\ViewModelChatExtendedGraph
  */
 $amountOfChats = $viewModel->amountOfChats;
 ?>

@@ -3,7 +3,7 @@
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use yii\helpers\Html;
-use sales\model\clientChat\entity\ClientChat;
+use src\model\clientChat\entity\ClientChat;
 use common\components\grid\DateTimeColumn;
 
 ?>
@@ -45,7 +45,7 @@ use common\components\grid\DateTimeColumn;
                 return $model->cch_channel_id ? Html::a(Html::encode($model->cchChannel->ccc_name), ['client-chat-channel-crud/view', 'id' => $model->cch_channel_id], ['target' => '_blank', 'data-pjax' => 0]) : '-';
             },
             'format' => 'raw',
-            'filter' => \sales\model\clientChatChannel\entity\ClientChatChannel::getList()
+            'filter' => \src\model\clientChatChannel\entity\ClientChatChannel::getList()
         ],
         [
             'class' => DateTimeColumn::class,

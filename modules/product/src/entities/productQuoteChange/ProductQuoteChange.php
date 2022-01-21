@@ -9,13 +9,13 @@ use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeDec
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeDecisionModifyEvent;
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeDecisionRefundEvent;
 use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelation;
-use sales\behaviors\GidBehavior;
-use sales\entities\cases\Cases;
+use src\behaviors\GidBehavior;
+use src\entities\cases\Cases;
 use modules\product\src\entities\productQuote\ProductQuote;
 use common\models\Employee;
-use sales\entities\EventTrait;
-use sales\helpers\setting\SettingHelper;
-use sales\traits\FieldsTrait;
+use src\entities\EventTrait;
+use src\helpers\setting\SettingHelper;
+use src\traits\FieldsTrait;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
@@ -36,6 +36,7 @@ use yii\helpers\ArrayHelper;
  * @property int|null $pqc_type_id
  * @property array|null $pqc_data_json
  * @property string $pqc_gid
+ * @property bool|null $pqc_refund_allowed
  *
  * @property Cases $pqcCase
  * @property Employee $pqcDecisionUser
@@ -203,6 +204,9 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
             ['pqc_data_json', CheckAndConvertToJsonValidator::class, 'skipOnEmpty' => true],
 
             ['pqc_gid', 'string', 'max' => 32],
+
+            [['pqc_refund_allowed'], 'boolean'],
+            [['pqc_refund_allowed'], 'default', 'value' => true],
         ];
     }
 
@@ -225,6 +229,7 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
             'pqc_type_id' => 'Type ID',
             'pqc_data_json' => 'Data Json',
             'pqc_gid' => 'Gid',
+            'pqc_refund_allowed' => 'Refund allowed',
         ];
     }
 
@@ -268,20 +273,29 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
         return new Scopes(static::class);
     }
 
-    private static function createNew(int $productQuoteId, ?int $caseId, ?bool $isAutomate): ProductQuoteChange
-    {
+    private static function createNew(
+        int $productQuoteId,
+        ?int $caseId,
+        ?bool $isAutomate,
+        ?bool $refundAllowed = null
+    ): ProductQuoteChange {
         $model = new self();
         $model->pqc_pq_id = $productQuoteId;
         $model->pqc_case_id = $caseId;
         $model->pqc_status_id = ProductQuoteChangeStatus::NEW;
         $model->pqc_is_automate = $isAutomate;
+        $model->pqc_refund_allowed = $refundAllowed;
         $model->recordEvent(new ProductQuoteChangeCreatedEvent($model, $model->pqc_pq_id, $model->pqc_case_id));
         return $model;
     }
 
-    public static function createReProtection(int $productQuoteId, ?int $caseId, bool $isAutomate): ProductQuoteChange
-    {
-        $model = self::createNew($productQuoteId, $caseId, $isAutomate);
+    public static function createReProtection(
+        int $productQuoteId,
+        ?int $caseId,
+        bool $isAutomate,
+        bool $refundAllowed = true
+    ): ProductQuoteChange {
+        $model = self::createNew($productQuoteId, $caseId, $isAutomate, $refundAllowed);
         $model->pqc_type_id = self::TYPE_RE_PROTECTION;
         return $model;
     }
@@ -318,7 +332,6 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
     {
         return (bool)$this->pqc_is_automate;
     }
-
 
     public function isActiveStatus(): bool
     {

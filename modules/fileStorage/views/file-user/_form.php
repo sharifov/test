@@ -2,7 +2,7 @@
 
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
-use sales\widgets\UserSelect2Widget;
+use src\widgets\UserSelect2Widget;
 
 /* @var $this yii\web\View */
 /* @var $model modules\fileStorage\src\entity\fileUser\FileUser */

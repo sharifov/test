@@ -2,8 +2,8 @@
 
 use common\models\Employee;
 use kartik\select2\Select2;
-use sales\model\user\entity\userStats\UserStatsSearch;
-use sales\model\userModelSetting\service\UserModelSettingDictionary;
+use src\model\user\entity\userStats\UserStatsSearch;
+use src\model\userModelSetting\service\UserModelSettingDictionary;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 

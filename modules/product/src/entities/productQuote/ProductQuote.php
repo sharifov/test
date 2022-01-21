@@ -41,12 +41,12 @@ use modules\product\src\entities\productQuoteOption\ProductQuoteOptionsQuery;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionStatus;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\interfaces\Quotable;
-use sales\dto\product\ProductQuoteDTO;
-use sales\entities\EventTrait;
-use sales\helpers\product\ProductQuoteHelper;
-use sales\entities\serializer\Serializable;
-use sales\helpers\setting\SettingHelper;
-use sales\services\CurrencyHelper;
+use src\dto\product\ProductQuoteDTO;
+use src\entities\EventTrait;
+use src\helpers\product\ProductQuoteHelper;
+use src\entities\serializer\Serializable;
+use src\helpers\setting\SettingHelper;
+use src\services\CurrencyHelper;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -107,6 +107,7 @@ use yii\db\ActiveRecord;
  * @property ProductQuoteChange|null $productQuoteLastChange
  * @property ProductQuoteChange[] $productQuoteChanges
  * @property ProductQuoteChange[] $productQuoteChangesActive
+ * @property ProductQuoteChange[] $productQuoteInvoluntaryChangesActive
  * @property ProductQuoteRefund|null $productQuoteLastRefund
  * @property ProductQuoteRefund[] $productQuoteRefunds
  * @property ProductQuoteRefund[] $productQuoteRefundsActive
@@ -301,6 +302,18 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function getProductQuoteChangesActive(): ActiveQuery
     {
         return $this->hasMany(ProductQuoteChange::class, ['pqc_pq_id' => 'pq_id'])->andWhere(['pqc_status_id' => SettingHelper::getActiveQuoteChangeStatuses()]);
+    }
+
+    /**
+     * Gets query for [[ProductQuoteChanges]].
+     *
+     * @return ActiveQuery
+     */
+    public function getProductQuoteInvoluntaryChangesActive(): ActiveQuery
+    {
+        return $this->hasMany(ProductQuoteChange::class, ['pqc_pq_id' => 'pq_id'])
+            ->andWhere(['pqc_status_id' => SettingHelper::getInvoluntaryChangeActiveStatuses()])
+            ->andWhere(['pqc_type_id' => ProductQuoteChange::TYPE_RE_PROTECTION]);
     }
 
     public function getProductQuoteLastRefund(): ActiveQuery

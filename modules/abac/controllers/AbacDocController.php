@@ -4,8 +4,8 @@ namespace modules\abac\controllers;
 
 use frontend\controllers\FController;
 use modules\abac\src\services\AbacDocService;
-use sales\helpers\app\AppHelper;
-use sales\helpers\query\QueryHelper;
+use src\helpers\app\AppHelper;
+use src\helpers\query\QueryHelper;
 use Yii;
 use modules\abac\src\entities\abacDoc\AbacDoc;
 use modules\abac\src\entities\abacDoc\AbacDocSearch;

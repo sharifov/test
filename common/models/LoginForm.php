@@ -3,8 +3,8 @@
 namespace common\models;
 
 use frontend\models\UserFailedLogin;
-use sales\services\authentication\AntiBruteForceHelper;
-use sales\services\authentication\AntiBruteForceService;
+use src\services\authentication\AntiBruteForceHelper;
+use src\services\authentication\AntiBruteForceService;
 use Yii;
 use yii\base\Model;
 use yii\helpers\Url;
@@ -205,5 +205,15 @@ class LoginForm extends Model
             }
         }
         parent::afterValidate();
+    }
+
+    public function setUser(Employee $user): void
+    {
+        $this->_user = $user;
+    }
+
+    public function setUserChecked(bool $userChecked): void
+    {
+        $this->userChecked = $userChecked;
     }
 }

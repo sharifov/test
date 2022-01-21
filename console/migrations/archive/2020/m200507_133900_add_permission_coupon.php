@@ -9,7 +9,6 @@ use yii\db\Migration;
  */
 class m200507_133900_add_permission_coupon extends Migration
 {
-
     public $route = [
         '/coupon-case',
         '/coupon-case/index',

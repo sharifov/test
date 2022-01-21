@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientAccount\entity\ClientAccount */
+/* @var $model src\model\clientAccount\entity\ClientAccount */
 
 $this->title = 'Update Client Account: ' . $model->ca_id;
 $this->params['breadcrumbs'][] = ['label' => 'Client Accounts', 'url' => ['index']];

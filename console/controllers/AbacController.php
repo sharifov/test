@@ -3,7 +3,7 @@
 namespace console\controllers;
 
 use modules\abac\src\services\AbacDocService;
-use sales\helpers\app\AppHelper;
+use src\helpers\app\AppHelper;
 use Yii;
 use yii\console\Controller;
 use yii\console\ExitCode;

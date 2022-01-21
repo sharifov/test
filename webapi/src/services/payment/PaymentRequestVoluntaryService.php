@@ -7,8 +7,8 @@ use common\models\PaymentMethod;
 use modules\invoice\src\entities\invoice\Invoice;
 use modules\invoice\src\entities\invoice\InvoiceRepository;
 use modules\order\src\entities\order\Order;
-use sales\helpers\ErrorsToStringHelper;
-use sales\repositories\creditCard\CreditCardRepository;
+use src\helpers\ErrorsToStringHelper;
+use src\repositories\creditCard\CreditCardRepository;
 use webapi\src\forms\payment\PaymentRequestForm;
 
 /**

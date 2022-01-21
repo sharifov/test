@@ -16,9 +16,6 @@ use yii\web\HttpException;
  */
 class TelegramController extends Controller
 {
-
-
-
     public function init()
     {
         parent::init();

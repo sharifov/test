@@ -1,8 +1,8 @@
 <?php
 
 use common\components\grid\DateTimeColumn;
-use sales\model\clientChatCase\entity\ClientChatCase;
-use sales\model\clientChatCase\entity\search\ClientChatCaseSearch;
+use src\model\clientChatCase\entity\ClientChatCase;
+use src\model\clientChatCase\entity\search\ClientChatCaseSearch;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;

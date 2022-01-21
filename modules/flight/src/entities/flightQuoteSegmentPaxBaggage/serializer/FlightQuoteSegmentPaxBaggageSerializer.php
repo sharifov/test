@@ -3,7 +3,7 @@
 namespace modules\flight\src\entities\flightQuoteSegmentPaxBaggage\serializer;
 
 use modules\flight\models\FlightQuoteSegmentPaxBaggage;
-use sales\entities\serializer\Serializer;
+use src\entities\serializer\Serializer;
 
 /**
  * Class FlightQuoteSegmentPaxBaggageSerializer

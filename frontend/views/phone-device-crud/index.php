@@ -1,13 +1,13 @@
 <?php
 
 use common\components\grid\DateTimeColumn;
-use sales\model\voip\phoneDevice\device\PhoneDevice;
+use src\model\voip\phoneDevice\device\PhoneDevice;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\voip\phoneDevice\device\PhoneDeviceSearch */
+/* @var $searchModel src\model\voip\phoneDevice\device\PhoneDeviceSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Phone Devices';

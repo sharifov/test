@@ -1,13 +1,13 @@
 <?php
 
 use dosamigos\datetimepicker\DateTimePicker;
-use sales\model\userClientChatData\entity\UserClientChatData;
+use src\model\userClientChatData\entity\UserClientChatData;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 use dosamigos\datepicker\DatePicker;
 
 /* @var yii\web\View $this */
-/* @var sales\model\userClientChatData\entity\UserClientChatData $model */
+/* @var src\model\userClientChatData\entity\UserClientChatData $model */
 /* @var ActiveForm $form */
 
 ?>

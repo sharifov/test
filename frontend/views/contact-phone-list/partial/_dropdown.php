@@ -1,10 +1,10 @@
 <?php
 
-use sales\model\call\abac\CallAbacObject;
-use sales\model\contactPhoneData\service\ContactPhoneDataDictionary;
-use sales\model\contactPhoneData\service\ContactPhoneDataHelper;
-use sales\model\contactPhoneList\entity\ContactPhoneList;
-use sales\model\contactPhoneList\service\ContactPhoneListService;
+use src\model\call\abac\CallAbacObject;
+use src\model\contactPhoneData\service\ContactPhoneDataDictionary;
+use src\model\contactPhoneData\service\ContactPhoneDataHelper;
+use src\model\contactPhoneList\entity\ContactPhoneList;
+use src\model\contactPhoneList\service\ContactPhoneListService;
 
 /* @var yii\web\View $this */
 /* @var ContactPhoneList $model */

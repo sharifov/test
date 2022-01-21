@@ -2,10 +2,10 @@
 
 namespace console\controllers;
 
-use sales\model\call\useCase\reports\CallReportSender;
-use sales\model\call\useCase\reports\Credential;
-use sales\model\call\useCase\reports\DailyReportGenerator;
-use sales\model\call\useCase\reports\WeeklyReportGenerator;
+use src\model\call\useCase\reports\CallReportSender;
+use src\model\call\useCase\reports\Credential;
+use src\model\call\useCase\reports\DailyReportGenerator;
+use src\model\call\useCase\reports\WeeklyReportGenerator;
 use yii\console\Controller;
 use yii\console\ExitCode;
 use yii\console\widgets\Table;

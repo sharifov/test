@@ -4,7 +4,7 @@ use common\models\Call;
 use common\models\ConferenceParticipant;
 use common\models\Department;
 use common\models\search\CallSearch;
-use sales\auth\Auth;
+use src\auth\Auth;
 use yii\bootstrap4\Modal;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Html;

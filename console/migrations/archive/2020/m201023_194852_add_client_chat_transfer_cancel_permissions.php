@@ -1,7 +1,7 @@
 <?php
 
 use common\models\Employee;
-use sales\rbac\rules\clientChat\transferCancel\ClientChatTransferCancelOwnerRule;
+use src\rbac\rules\clientChat\transferCancel\ClientChatTransferCancelOwnerRule;
 use yii\db\Migration;
 
 /**

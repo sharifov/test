@@ -4,7 +4,7 @@ namespace modules\flight\src\useCases\reprotectionCreate\form\flightQuote\tripsF
 
 use common\components\validators\CheckJsonValidator;
 use modules\flight\src\useCases\reprotectionCreate\form\flightQuote\tripsForm\segmentsForm\SegmentForm;
-use sales\helpers\ErrorsToStringHelper;
+use src\helpers\ErrorsToStringHelper;
 use yii\base\Model;
 
 /**

@@ -1,11 +1,11 @@
 <?php
 
-use sales\model\clientChat\componentRule\entity\RunnableComponent;
+use src\model\clientChat\componentRule\entity\RunnableComponent;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChat\componentRule\entity\ClientChatComponentRule */
+/* @var $model src\model\clientChat\componentRule\entity\ClientChatComponentRule */
 /* @var $form ActiveForm */
 ?>
 

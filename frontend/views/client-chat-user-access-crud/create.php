@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChatUserAccess\entity\ClientChatUserAccess */
+/* @var $model src\model\clientChatUserAccess\entity\ClientChatUserAccess */
 
 $this->title = 'Create Client Chat User Access';
 $this->params['breadcrumbs'][] = ['label' => 'Client Chat User Accesses', 'url' => ['index']];

@@ -1,6 +1,6 @@
 <?php
 
-use sales\model\user\entity\paymentCategory\UserPaymentCategory;
+use src\model\user\entity\paymentCategory\UserPaymentCategory;
 use yii\db\Migration;
 
 /**
@@ -8,7 +8,6 @@ use yii\db\Migration;
  */
 class m200211_083450_create_tbl_user_payment_category extends Migration
 {
-
     public $categories = [
         'Bonus',
         'Penalty',

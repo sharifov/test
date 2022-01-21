@@ -3,7 +3,7 @@
 return [
     'components' => [
         'request' => [
-            'cookieValidationKey' => env('webapi.config.main.components.request.cookieValidationKey'),
+            'cookieValidationKey' => env('WEBAPI_CONFIG_MAIN_COMPONENTS_REQUEST_COOKIEVALIDATIONKEY'),
         ],
     ],
 ];

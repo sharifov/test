@@ -9,5 +9,4 @@ namespace common\models;
  */
 class UserGroupSetQuery extends \yii\db\ActiveQuery
 {
-
 }

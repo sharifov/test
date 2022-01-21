@@ -9,6 +9,7 @@ use common\models\Project;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Client;
+use yii\helpers\VarDumper;
 
 /**
  * ClientSearch represents the model behind the search form of `common\models\Client`.
@@ -88,21 +89,21 @@ class ClientSearch extends Client
 
         // grid filtering conditions
         $query->andFilterWhere([
-            Client::tableName() . '.id' => $this->id,
+            'id' => $this->id,
         ]);
 
         if ($this->not_in_client_id) {
-            $query->andWhere(['NOT IN', Client::tableName() . '.id', $this->not_in_client_id]);
+            $query->andWhere(['NOT IN', 'id', $this->not_in_client_id]);
         }
 
         if ($this->client_email) {
             $subQuery = ClientEmail::find()->select(['DISTINCT(client_id)'])->where(['like', 'email', $this->client_email]);
-            $query->andWhere(['IN', Client::tableName() . '.id', $subQuery]);
+            $query->andWhere(['IN', 'id', $subQuery]);
         }
 
         if ($this->client_phone) {
             $subQuery = ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['like', 'phone', $this->client_phone]);
-            $query->andWhere(['IN', Client::tableName() . '.id', $subQuery]);
+            $query->andWhere(['IN', 'id', $subQuery]);
         }
 
         $query->andFilterWhere(['like', 'first_name', $this->first_name])

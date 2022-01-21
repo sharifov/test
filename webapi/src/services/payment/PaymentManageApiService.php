@@ -7,9 +7,9 @@ use modules\order\src\forms\api\create\BillingInfoForm;
 use modules\order\src\forms\api\create\CreditCardForm;
 use modules\order\src\payment\PaymentRepository;
 use modules\order\src\transaction\repository\TransactionRepository;
-use sales\repositories\billingInfo\BillingInfoRepository;
-use sales\repositories\creditCard\CreditCardRepository;
-use sales\services\TransactionManager;
+use src\repositories\billingInfo\BillingInfoRepository;
+use src\repositories\creditCard\CreditCardRepository;
+use src\services\TransactionManager;
 use webapi\src\forms\payment\PaymentFromBoForm;
 use yii\helpers\ArrayHelper;
 

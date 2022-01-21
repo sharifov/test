@@ -6,8 +6,8 @@ use modules\order\src\entities\order\Order;
 use modules\order\src\services\OrderPdfService;
 use yii\queue\Queue;
 use yii\queue\RetryableJobInterface;
-use sales\helpers\app\AppHelper;
-use sales\repositories\NotFoundException;
+use src\helpers\app\AppHelper;
+use src\repositories\NotFoundException;
 
 /**
  * Class OrderGeneratorPdfJob

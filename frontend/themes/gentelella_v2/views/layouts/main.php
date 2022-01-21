@@ -11,10 +11,10 @@ use frontend\widgets\frontendWidgetList\louassist\LouAssistWidget;
 use frontend\widgets\frontendWidgetList\userflow\UserFlowWidget;
 use frontend\widgets\notification\NotificationSocketWidget;
 use frontend\widgets\notification\NotificationWidget;
-use sales\auth\Auth;
-use sales\helpers\app\ReleaseVersionHelper;
+use src\auth\Auth;
+use src\helpers\app\ReleaseVersionHelper;
 use yii\helpers\Html;
-use sales\helpers\setting\SettingHelper;
+use src\helpers\setting\SettingHelper;
 
 //$bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
 //$bundle = \frontend\assets\AppAsset::register($this);

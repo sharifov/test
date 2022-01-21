@@ -1,5 +1,7 @@
 <?php
 
+use yii\authclient\clients\Google;
+use yii\authclient\Collection;
 use common\components\logger\FilebeatTarget;
 use common\helpers\LogHelper;
 use frontend\assets\groups\BootstrapGroupAsset;
@@ -233,6 +235,16 @@ return [
 //                ]
             ]),
         ],
+        'authClientCollection' => [
+            'class' => Collection::class,
+            'clients' => [
+                'google' => [
+                    'class' => Google::class,
+                    'clientId' => env('FRONTEND_CONFIG_MAIN_COMPONENTS_AUTHCLIENTCOLLECTION_CLIENTS_GOOGLE_CLIENTID'),
+                    'clientSecret' => env('FRONTEND_CONFIG_MAIN_COMPONENTS_AUTHCLIENTCOLLECTION_CLIENTS_GOOGLE_CLIENTSECRET')
+                ],
+            ],
+        ]
     ],
     'modules' => [
         'gridview' =>  [
@@ -250,7 +262,7 @@ return [
 
         'translatemanager' => [
             'class'                     => \lajax\translatemanager\Module::class,
-            'root'                      => [/*'@frontend/views/',*/ '@frontend/../sales/model/clientChat/'],               // The root directory of the project scan.
+            'root'                      => [/*'@frontend/views/',*/ '@frontend/../src/model/clientChat/'],               // The root directory of the project scan.
             'scanRootParentDirectory'   => true,
             'layout'                    => '@frontend/themes/gentelella_v2/views/layouts/main_crud',         // Name of the used layout. If using own layout use 'null'.
             'allowedIPs'                => ['*'],               // 127.0.0.1 IP addresses from which the translation interface is accessible.
@@ -389,21 +401,21 @@ return [
             'class' => CruiseModule::class,
             'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
         ],
-    ],
-    'as beforeRequest' => [
+        ],
+        'as beforeRequest' => [
         'class' => \frontend\components\UserSiteActivityLog::class,
-    ],
-    'as access' => [
+        ],
+        'as access' => [
         'class' => 'yii\filters\AccessControl',
-        'except' => ['site/login', 'site/step-two', 'site/captcha', 'site/error'],
+        'except' => ['site/login', 'site/step-two', 'site/captcha', 'site/error', 'site/auth', 'site/auth-step-two'],
         'rules' => [
             [
                 'allow' => true,
                 'roles' => ['@'],
             ],
         ],
-    ],
-    'container' => [
+        ],
+        'container' => [
         'definitions' => [
             yii\grid\GridView::class => [
                 'options' => ['class' => 'table-responsive'],
@@ -411,7 +423,7 @@ return [
             ],
             \yii\widgets\LinkPager::class => \yii\bootstrap4\LinkPager::class,
         ],
-    ],
+        ],
 
     /*'view' => [
         'theme' => [
@@ -423,5 +435,5 @@ return [
         ],
     ],*/
 
-    'params' => $params,
-];
+        'params' => $params,
+        ];

@@ -1,7 +1,7 @@
 <?php
 
-use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChatMessage\entity\ClientChatMessage;
+use src\model\clientChat\entity\ClientChat;
+use src\model\clientChatMessage\entity\ClientChatMessage;
 use yii\db\Migration;
 
 /**

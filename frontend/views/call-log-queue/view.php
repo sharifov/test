@@ -1,11 +1,11 @@
 <?php
 
-use sales\model\callLog\entity\callLogQueue\CallLogQueue;
+use src\model\callLog\entity\callLogQueue\CallLogQueue;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\callLog\entity\callLogQueue\CallLogQueue */
+/* @var $model src\model\callLog\entity\callLogQueue\CallLogQueue */
 
 $this->title = $model->clq_cl_id;
 $this->params['breadcrumbs'][] = ['label' => 'Call Log Queues', 'url' => ['index']];

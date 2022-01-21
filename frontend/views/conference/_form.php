@@ -1,7 +1,7 @@
 <?php
 
 use common\models\Conference;
-use sales\widgets\DateTimePicker;
+use src\widgets\DateTimePicker;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 

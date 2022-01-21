@@ -4,7 +4,7 @@ namespace modules\qaTask\src\entities\qaTask\search;
 
 use common\models\Employee;
 use modules\qaTask\src\entities\qaTask\QaTask;
-use sales\access\QueryAccessService;
+use src\access\QueryAccessService;
 
 /**
  * Class QaTaskSearch

@@ -4,7 +4,7 @@ namespace common\components\ga;
 
 use common\models\Lead;
 use common\models\VisitorLog;
-use sales\helpers\lead\LeadHelper;
+use src\helpers\lead\LeadHelper;
 use Yii;
 use yii\db\ActiveRecord;
 

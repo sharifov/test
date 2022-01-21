@@ -6,8 +6,8 @@ use common\models\EmailTemplateType;
 use common\models\Employee;
 use common\models\UserGroupAssign;
 use common\models\UserProjectParams;
-use sales\auth\Auth;
-use sales\helpers\query\QueryHelper;
+use src\auth\Auth;
+use src\helpers\query\QueryHelper;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -21,7 +21,6 @@ use yii\db\Query;
  */
 class EmailSearch extends Email
 {
-
     public $email_type_id;
     public $supervision_id;
     public $e_template_type_name;

@@ -29,7 +29,6 @@ use yii\db\ActiveRecord;
  */
 class QaTaskCategory extends \yii\db\ActiveRecord
 {
-
     public static function tableName(): string
     {
         return '{{%qa_task_category}}';

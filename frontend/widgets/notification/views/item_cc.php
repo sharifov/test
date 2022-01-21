@@ -1,7 +1,7 @@
 <?php
 
-use sales\helpers\clientChat\ClientChatMessageHelper;
-use sales\model\clientChat\entity\ClientChat;
+use src\helpers\clientChat\ClientChatMessageHelper;
+use src\model\clientChat\entity\ClientChat;
 use yii\helpers\Html;
 use yii\helpers\Url;
 

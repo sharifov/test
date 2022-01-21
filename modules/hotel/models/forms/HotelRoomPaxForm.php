@@ -20,7 +20,6 @@ use modules\hotel\models\HotelRoomPax;
  */
 class HotelRoomPaxForm extends HotelRoomPax
 {
-
     public $hrp_id;
     public $hrp_hotel_room_id;
     public $hrp_type_id;

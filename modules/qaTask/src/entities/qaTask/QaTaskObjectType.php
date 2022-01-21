@@ -3,8 +3,8 @@
 namespace modules\qaTask\src\entities\qaTask;
 
 use common\models\Lead;
-use sales\entities\cases\Cases;
-use sales\model\clientChat\entity\ClientChat;
+use src\entities\cases\Cases;
+use src\model\clientChat\entity\ClientChat;
 use yii\bootstrap4\Html;
 
 class QaTaskObjectType

@@ -2,14 +2,14 @@
 
 namespace frontend\controllers;
 
-use sales\auth\Auth;
-use sales\model\saleTicket\useCase\create\SaleTicketRepository;
-use sales\model\saleTicket\useCase\sendEmail\SaleTicketEmailService;
-use sales\repositories\cases\CasesSaleRepository;
-use sales\repositories\creditCard\CreditCardRepository;
+use src\auth\Auth;
+use src\model\saleTicket\useCase\create\SaleTicketRepository;
+use src\model\saleTicket\useCase\sendEmail\SaleTicketEmailService;
+use src\repositories\cases\CasesSaleRepository;
+use src\repositories\creditCard\CreditCardRepository;
 use Yii;
-use sales\model\saleTicket\entity\SaleTicket;
-use sales\model\saleTicket\entity\search\SaleTicketSearch;
+use src\model\saleTicket\entity\SaleTicket;
+use src\model\saleTicket\entity\search\SaleTicketSearch;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
@@ -28,7 +28,6 @@ use yii\db\StaleObjectException;
  */
 class SaleTicketController extends FController
 {
-
     /**
      * @var SaleTicketRepository
      */

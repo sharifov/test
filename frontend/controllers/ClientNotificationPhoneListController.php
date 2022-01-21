@@ -2,10 +2,10 @@
 
 namespace frontend\controllers;
 
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
-use sales\model\client\notifications\phone\entity\ClientNotificationPhoneList;
-use sales\model\client\notifications\phone\entity\search\ClientNotificationPhoneListSearch;
+use src\model\client\notifications\phone\entity\ClientNotificationPhoneList;
+use src\model\client\notifications\phone\entity\search\ClientNotificationPhoneListSearch;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 use yii\web\Controller;

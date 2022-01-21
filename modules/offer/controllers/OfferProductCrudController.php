@@ -4,9 +4,9 @@ namespace modules\offer\controllers;
 
 use modules\offer\src\entities\offer\events\OfferRecalculateProfitAmountEvent;
 use modules\offer\src\entities\offerProduct\OfferProductRepository;
-use sales\auth\Auth;
-use sales\dispatchers\EventDispatcher;
-use sales\helpers\app\AppHelper;
+use src\auth\Auth;
+use src\dispatchers\EventDispatcher;
+use src\helpers\app\AppHelper;
 use Yii;
 use modules\offer\src\entities\offerProduct\OfferProduct;
 use modules\offer\src\entities\offerProduct\search\OfferProductCrudSearch;

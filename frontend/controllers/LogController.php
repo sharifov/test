@@ -4,13 +4,13 @@ namespace frontend\controllers;
 
 use aki\telegram\base\Command;
 use Mpdf\Tag\Li;
-use sales\auth\Auth;
-use sales\helpers\app\AppHelper;
-use sales\helpers\ErrorsToStringHelper;
-use sales\services\cleaner\cleaners\LogCleaner;
-use sales\services\cleaner\DbCleanerService;
-use sales\services\cleaner\form\DbCleanerParamsForm;
-use sales\services\cleaner\form\LogCleanerForm;
+use src\auth\Auth;
+use src\helpers\app\AppHelper;
+use src\helpers\ErrorsToStringHelper;
+use src\services\cleaner\cleaners\LogCleaner;
+use src\services\cleaner\DbCleanerService;
+use src\services\cleaner\form\DbCleanerParamsForm;
+use src\services\cleaner\form\LogCleanerForm;
 use Yii;
 use frontend\models\Log;
 use frontend\models\search\LogSearch;
@@ -30,7 +30,6 @@ use yii\web\Response;
  */
 class LogController extends FController
 {
-
     public function behaviors()
     {
         $behaviors = [

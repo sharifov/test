@@ -10,7 +10,7 @@ use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
 use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategoryQuery;
 use modules\qaTask\src\useCases\qaTask\create\manually\QaTaskCreateManuallyForm;
 use modules\qaTask\src\useCases\qaTask\create\manually\QaTaskCreateManuallyService;
-use sales\auth\Auth;
+use src\auth\Auth;
 use yii\helpers\ArrayHelper;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;

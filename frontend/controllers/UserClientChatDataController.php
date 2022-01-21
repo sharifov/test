@@ -3,17 +3,17 @@
 namespace frontend\controllers;
 
 use common\models\Employee;
-use sales\auth\Auth;
-use sales\helpers\app\AppHelper;
-use sales\model\userClientChatData\entity\UserClientChatDataRepository;
-use sales\model\userClientChatData\service\UserClientChatDataService;
-use sales\repositories\clientChatUserChannel\ClientChatUserChannelRepository;
-use sales\services\clientChat\ClientChatRequesterService;
-use sales\services\clientChatMessage\ClientChatMessageService;
-use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
+use src\auth\Auth;
+use src\helpers\app\AppHelper;
+use src\model\userClientChatData\entity\UserClientChatDataRepository;
+use src\model\userClientChatData\service\UserClientChatDataService;
+use src\repositories\clientChatUserChannel\ClientChatUserChannelRepository;
+use src\services\clientChat\ClientChatRequesterService;
+use src\services\clientChatMessage\ClientChatMessageService;
+use src\services\clientChatUserAccessService\ClientChatUserAccessService;
 use Yii;
-use sales\model\userClientChatData\entity\UserClientChatData;
-use sales\model\userClientChatData\entity\UserClientChatDataSearch;
+use src\model\userClientChatData\entity\UserClientChatData;
+use src\model\userClientChatData\entity\UserClientChatDataSearch;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;

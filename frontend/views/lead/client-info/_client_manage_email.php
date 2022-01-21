@@ -4,7 +4,7 @@ use common\models\ClientEmail;
 use common\models\Lead;
 use yii\helpers\Url;
 use yii\web\View;
-use sales\helpers\email\MaskEmailHelper;
+use src\helpers\email\MaskEmailHelper;
 use modules\lead\src\abac\LeadAbacObject;
 
 /**
@@ -28,8 +28,8 @@ $unsubscribedEmails = array_column($lead->project->emailUnsubscribes, 'eu_email'
             <td class="<?= ClientEmail::EMAIL_TYPE_TEXT_DECORATION[$email['type']] ?? '' ?>"> <?= \yii\helpers\Html::encode(MaskEmailHelper::masking($email['email'], $disableMasking))?></td>
 
             <td class="text-right" style="width: 70px">
-                <?php /** @abac $leadAbacDto, LeadAbacObject::ACT_USER_SAME_EMAIL_INFO, LeadAbacObject::ACTION_ACCESS, Access to btn The same user by email on lead*/ ?>
-                <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_USER_SAME_EMAIL_INFO, LeadAbacObject::ACTION_ACCESS)) : ?>
+                <?php /** @abac $leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS_USER_SAME_EMAIL, Access to btn The same user by email on lead*/ ?>
+                <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS_USER_SAME_EMAIL)) : ?>
                     <?php if ($count = $email['countUsersSameEmail']) : ?>
                         <a class="showModalButton" data-modal_id="client-large" title="The Same users by email" data-content-url="<?= Url::to([
                             'lead-view/ajax-get-users-same-email-info',
@@ -38,8 +38,8 @@ $unsubscribedEmails = array_column($lead->project->emailUnsubscribes, 'eu_email'
                         ]) ?>"><i class="fa fa-user"></i> <sup><?= $count ?></sup></a>
                     <?php endif; ?>
                 <?php endif; ?>
-                <?php /** @abac $leadAbacDto, LeadAbacObject::ACT_CLIENT_EDIT_EMAIL, LeadAbacObject::ACTION_ACCESS, Access to btn client edit email on lead*/ ?>
-                <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_CLIENT_EDIT_EMAIL, LeadAbacObject::ACTION_ACCESS)) : ?>
+                <?php /** @abac $leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS_EDIT_EMAIL, Access to btn client edit email on lead*/ ?>
+                <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS_EDIT_EMAIL)) : ?>
                     <a class="showModalButton" title="Edit Email" data-content-url="<?= Url::to([
                         'lead-view/ajax-edit-client-email-modal-content',
                         'gid' => $lead->gid,

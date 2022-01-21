@@ -3,7 +3,7 @@
 use common\models\Call;
 use frontend\widgets\newWebPhone\DeviceAsset;
 use frontend\widgets\newWebPhone\DeviceStorageKey;
-use sales\auth\Auth;
+use src\auth\Auth;
 
 /** @var View $this */
 /** @var \common\models\UserCallStatus $userCallStatus */
@@ -35,8 +35,8 @@ if (!Auth::can('PhoneWidget_Dialpad')) {
                 <?php
 
                 use common\models\UserCallStatus;
-                use sales\guards\phone\PhoneBlackListGuard;
-                use sales\helpers\setting\SettingHelper;
+                use src\guards\phone\PhoneBlackListGuard;
+                use src\helpers\setting\SettingHelper;
                 use yii\bootstrap4\Html;
                 use yii\helpers\Url;
                 use yii\web\View;

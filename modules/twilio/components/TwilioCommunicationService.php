@@ -9,7 +9,7 @@ use modules\twilio\src\entities\ApiVoice;
 use modules\twilio\src\entities\twilioJwtToken\TwilioJwtToken;
 use modules\twilio\src\repositories\sms\SmsRepository;
 use modules\twilio\src\services\sms\SmsCommunicationService;
-use sales\helpers\app\AppHelper;
+use src\helpers\app\AppHelper;
 use Twilio\Jwt\ClientToken;
 use Twilio\Rest\Client as TwClient;
 use Yii;

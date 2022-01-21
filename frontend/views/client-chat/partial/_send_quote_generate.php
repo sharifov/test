@@ -1,6 +1,6 @@
 <?php
 
-use sales\model\clientChat\useCase\sendOffer\GenerateImagesForm;
+use src\model\clientChat\useCase\sendOffer\GenerateImagesForm;
 use yii\bootstrap4\Html;
 use yii\web\View;
 

@@ -2,9 +2,8 @@
 
 namespace modules\attraction\src\useCases\quote\create;
 
-use sales\dto\product\ProductQuoteDTO;
+use src\dto\product\ProductQuoteDTO;
 
 class AttractionProductQuoteCreateDto extends ProductQuoteDTO
 {
-
 }

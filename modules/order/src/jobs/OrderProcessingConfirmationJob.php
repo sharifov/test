@@ -5,7 +5,7 @@ namespace modules\order\src\jobs;
 use common\models\Notifications;
 use modules\order\src\entities\order\Order;
 use modules\order\src\services\confirmation\EmailConfirmationSender;
-use sales\helpers\setting\SettingHelper;
+use src\helpers\setting\SettingHelper;
 use yii\queue\JobInterface;
 use yii\queue\RetryableJobInterface;
 

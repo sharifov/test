@@ -1,5 +1,7 @@
 <?php
 
+use src\helpers\setting\SettingHelper;
+use yii\grid\ActionColumn;
 /**
  * @var $this View
  * @var $model Employee
@@ -8,10 +10,15 @@
  * @var $userCommissionRuleValue int
  * @var $userBonusRuleValue int
  * @var $userProfileForm userProfileForm
+ * @var $sourcesDataProvider \yii\data\ActiveDataProvider
  */
 
 use common\models\UserParams;
 use frontend\models\form\UserProfileForm;
+use frontend\themes\gentelella_v2\widgets\FlashAlert;
+use src\model\userAuthClient\entity\UserAuthClient;
+use src\model\userAuthClient\entity\UserAuthClientSources;
+use yii\authclient\widgets\AuthChoice;
 use yii\bootstrap\Html;
 use yii\bootstrap\ActiveForm;
 use common\models\Employee;
@@ -126,8 +133,110 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
     <?php ActiveForm::end() ?>
 
-
-
+<?php if (SettingHelper::isEnabledAuthClients()) : ?>
+<div class="row">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h6><b>Auth clients:</b></h6>
+            <div class="d-flex justify-content-between align-items-center align-content-center">
+                        <span style="margin-right: 10px;">
+<!--                            <i class="fa fa-plus-circle"></i> Assign auth client:-->
+                        </span>
+                <?php $authChoice = AuthChoice::begin([
+                    'baseAuthUrl' => ['/site/auth-assign'],
+                    'popupMode' => true,
+                    'id' => 'auth-choice',
+                    'clientOptions' => [
+                        'popup' => [
+                            'width' => 450,
+                            'height' => 750,
+                        ],
+                    ],
+                ]) ?>
+                <div class="d-flex" style>
+                    <?php foreach ($authChoice->getClients() as $client) : ?>
+                        <?= $authChoice->clientLink(
+                            $client,
+                            '<button type="button" class="login-with-btn login-with-' . $client->getName() . '-btn">Assign ' . $client->getTitle() . '</button>',
+                            [
+                                'style' => 'margin: 0'
+                            ]
+                        ) ?>
+                    <?php endforeach; ?>
+                </div>
+                <?php AuthChoice::end() ?>
+            </div>
+        </div>
+        <div>
+            <?= \yii\grid\GridView::widget([
+                'dataProvider' => $sourcesDataProvider,
+                'columns' => [
+                    'uac_id',
+                    [
+                        'attribute' => 'uac_source',
+                        'value' => static function (UserAuthClient $model) {
+                            return \yii\helpers\Html::encode(UserAuthClientSources::getName($model->uac_source));
+                        }
+                    ],
+                    'uac_email',
+                    [
+                        'attribute' => 'uac_created_dt',
+                        'format' => 'byUserDateTime',
+                        'label' => 'When assigned'
+                    ],
+                    [
+                        'class' => ActionColumn::class,
+                        'template' => '{detach}',
+                        'buttons' => [
+                            'detach' => static function ($url, UserAuthClient $model) {
+                                return Html::a('<i class="fas fa-unlink"></i> Detach', '#', [
+                                    'class' => 'detach-btn',
+                                    'data-auth-client-id' => $model->uac_id
+                                ]);
+                            }
+                        ]
+                    ],
+                ],
+                'layout' => "{items}",
+            ]) ?>
+        </div>
+    </div>
+</div>
+    <?php
+    $detachUrl = \yii\helpers\Url::to('/user-auth-client/detach');
+    $js = <<<JS
+$(document).on('click', '.detach-btn', function (e) {
+    e.preventDefault();
+    let btn = $(this);
+    let btnHtml = btn.html();
+    let authClientId = btn.attr('data-auth-client-id');
+    
+    $.ajax({
+        url: '$detachUrl',
+        type: 'post',
+        data: {authClientId: authClientId},
+        cache: false,
+        beforeSend: function () {
+            btn.html('<i class="fa fa-spinner fa-spin"></i>').addClass('disabled').attr('disabled', true);
+        },
+        success: function (data) {
+            if (data.error) {
+                createNotify('Error', data.message, 'error');
+            } else {
+                btn.closest('tr').remove();
+                createNotify('Success', data.message, 'success');
+            }
+        },
+        error: function (xhr) {
+            createNotify('Error', xhr.responseText, 'error');
+            btn.html(btnHtml).removeClass('disabled').attr('disabled', false);
+        }
+    })
+});
+JS;
+    $this->registerJs($js);
+    ?>
+<?php endif; ?>
 
 
 </div>

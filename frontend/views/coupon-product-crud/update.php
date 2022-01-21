@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\coupon\entity\couponProduct\CouponProduct */
+/* @var $model src\model\coupon\entity\couponProduct\CouponProduct */
 
 $this->title = 'Update Coupon Product: ' . $model->cup_coupon_id;
 $this->params['breadcrumbs'][] = ['label' => 'Coupon Products', 'url' => ['index']];

@@ -2,7 +2,7 @@
 
 namespace console\socket\controllers;
 
-use sales\model\voip\phoneDevice\device\PhoneDevice;
+use src\model\voip\phoneDevice\device\PhoneDevice;
 
 /**
  * Class PhoneDeviceReadyController

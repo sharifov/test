@@ -18,6 +18,8 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'fqb_booking_id')->textInput(['maxlength' => true]) ?>
 
+        <?= $form->field($model, 'fqb_child_booking_id')->textInput(['maxlength' => true]) ?>
+
         <?= $form->field($model, 'fqb_pnr')->textInput(['maxlength' => true]) ?>
 
         <?= $form->field($model, 'fqb_gds')->textInput(['maxlength' => true]) ?>

@@ -3,7 +3,7 @@
 namespace modules\flight\src\repositories\flightPaxRepository;
 
 use modules\flight\models\FlightPax;
-use sales\repositories\NotFoundException;
+use src\repositories\NotFoundException;
 
 class FlightPaxRepository
 {

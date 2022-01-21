@@ -2,8 +2,8 @@
 
 namespace frontend\controllers;
 
-use sales\entities\cases\CaseEventLog;
-use sales\entities\cases\CaseEventLogSearch;
+use src\entities\cases\CaseEventLog;
+use src\entities\cases\CaseEventLogSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

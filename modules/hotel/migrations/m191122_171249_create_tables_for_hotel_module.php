@@ -9,7 +9,6 @@ use yii\db\Migration;
  */
 class m191122_171249_create_tables_for_hotel_module extends Migration
 {
-
     public $routes = [
         '/hotel/default/*',
         '/hotel/hotel/*',

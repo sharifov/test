@@ -21,7 +21,6 @@ use yii\base\Model;
  */
 class ProductQuoteOptionForm extends Model
 {
-
     public $pqo_id;
     public $pqo_product_quote_id;
     public $pqo_product_option_id;

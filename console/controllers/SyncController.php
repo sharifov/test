@@ -3,6 +3,7 @@
 namespace console\controllers;
 
 use common\components\BackOffice;
+use common\helpers\LogHelper;
 use common\models\Airline;
 use common\models\Airports;
 use common\models\Client;
@@ -29,11 +30,11 @@ use modules\order\src\payment\PaymentRepository;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
 use modules\order\src\services\OrderManageService;
-use sales\helpers\app\AppHelper;
-use sales\helpers\ErrorsToStringHelper;
-use sales\helpers\setting\SettingHelper;
-use sales\model\airportLang\service\AirportLangService;
-use sales\services\cases\CasesSaleService;
+use src\helpers\app\AppHelper;
+use src\helpers\ErrorsToStringHelper;
+use src\helpers\setting\SettingHelper;
+use src\model\airportLang\service\AirportLangService;
+use src\services\cases\CasesSaleService;
 use yii\console\Controller;
 use Yii;
 use yii\console\ExitCode;
@@ -592,7 +593,7 @@ class SyncController extends Controller
             } catch (\Throwable $throwable) {
                 $transactionOrder->rollBack();
                 $message = AppHelper::throwableLog($throwable, true);
-                $message['saleData'] = $saleData;
+                $message['saleData'] = LogHelper::hidePersonalData($saleData, CasesSaleService::SENSITIVE_KEYS);
                 Yii::warning($message, 'SyncController:actionSales::CreateFromSale');
                 self::showMessage($throwable->getMessage());
             }

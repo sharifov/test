@@ -2,7 +2,7 @@
 
 namespace modules\flight\src\useCases\voluntaryExchangeCreate\form\flightQuote\tripsForm\segmentsForm\stops;
 
-use sales\traits\FormNameModelTrait;
+use src\traits\FormNameModelTrait;
 use yii\base\Model;
 
 /**

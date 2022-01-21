@@ -4,14 +4,14 @@ namespace webapi\modules\v2\controllers;
 
 use common\components\jobs\CreateSaleFromBOJob;
 use common\components\jobs\SendEmailOnCaseCreationBOJob;
-use sales\entities\cases\CaseCategory;
-use sales\entities\cases\Cases;
-use sales\helpers\app\AppHelper;
-use sales\model\cases\CaseCodeException;
-use sales\model\cases\useCases\cases\api\create\CreateForm;
-use sales\model\cases\useCases\cases\api\create\Handler;
-use sales\repositories\NotFoundException;
-use sales\services\cases\CasesSaleService;
+use src\entities\cases\CaseCategory;
+use src\entities\cases\Cases;
+use src\helpers\app\AppHelper;
+use src\model\cases\CaseCodeException;
+use src\model\cases\useCases\cases\api\create\CreateForm;
+use src\model\cases\useCases\cases\api\create\Handler;
+use src\repositories\NotFoundException;
+use src\services\cases\CasesSaleService;
 use webapi\src\ApiCodeException;
 use webapi\src\logger\ApiLogger;
 use webapi\src\Messages;
@@ -256,8 +256,8 @@ class CasesController extends BaseController
                 Yii::$app->queue_job->priority(100)->push($job);
             } catch (\Throwable $throwable) {
                 Yii::error(
-                    AppHelper::throwableFormatter($throwable),
-                    'API:CasesController:' . __FUNCTION__ . ':addToJobFailed'
+                    AppHelper::throwableLog($throwable),
+                    'API:CasesController:actionCreate:CreateSaleFromBOJob'
                 );
             }
         }
@@ -268,10 +268,10 @@ class CasesController extends BaseController
                 $job->case_id = $result->csId;
                 $job->contact_email = $form->contact_email;
                 Yii::$app->queue_email_job->priority(10)->push($job);
-            } catch (\Throwable $e) {
+            } catch (\Throwable $throwable) {
                 Yii::error(
-                    AppHelper::throwableFormatter($throwable),
-                    'API:CasesController:' . __FUNCTION__ . ':addToJobFailed'
+                    AppHelper::throwableLog($throwable),
+                    'API:CasesController:actionCreate:SendEmailOnCaseCreationBOJob'
                 );
             }
         }

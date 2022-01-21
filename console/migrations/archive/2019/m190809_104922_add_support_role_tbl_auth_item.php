@@ -7,7 +7,6 @@ use yii\db\Migration;
  */
 class m190809_104922_add_support_role_tbl_auth_item extends Migration
 {
-
     public $routes = [
         '/site/index',
         '/lead/create',

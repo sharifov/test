@@ -2,7 +2,7 @@
 
 use frontend\helpers\JsonHelper;
 use modules\product\src\entities\productType\ProductType;
-use sales\model\coupon\entity\couponProduct\CouponProduct;
+use src\model\coupon\entity\couponProduct\CouponProduct;
 use yii\grid\ActionColumn;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
@@ -12,7 +12,7 @@ use yii\helpers\VarDumper;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\coupon\entity\couponProduct\CouponProductSearch */
+/* @var $searchModel src\model\coupon\entity\couponProduct\CouponProductSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Coupon Products';

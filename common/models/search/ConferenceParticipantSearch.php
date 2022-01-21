@@ -50,15 +50,15 @@ class ConferenceParticipantSearch extends ConferenceParticipant
         }
 
         if ($this->cp_join_dt) {
-            \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'cp_join_dt', $this->cp_join_dt, $user->timezone);
+            \src\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'cp_join_dt', $this->cp_join_dt, $user->timezone);
         }
 
         if ($this->cp_leave_dt) {
-            \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'cp_leave_dt', $this->cp_leave_dt, $user->timezone);
+            \src\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'cp_leave_dt', $this->cp_leave_dt, $user->timezone);
         }
 
         if ($this->cp_hold_dt) {
-            \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'cp_hold_dt', $this->cp_hold_dt, $user->timezone);
+            \src\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'cp_hold_dt', $this->cp_hold_dt, $user->timezone);
         }
 
         // grid filtering conditions

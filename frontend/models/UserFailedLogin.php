@@ -22,7 +22,6 @@ use yii\db\ActiveRecord;
  */
 class UserFailedLogin extends ActiveRecord
 {
-
     public int $minutesInterval;
     public $limitDateTime;
 

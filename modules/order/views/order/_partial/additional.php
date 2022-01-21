@@ -1,7 +1,7 @@
 <?php
 
 use modules\order\src\entities\order\Order;
-use sales\auth\Auth;
+use src\auth\Auth;
 use yii\widgets\Pjax;
 use yii\helpers\Html;
 

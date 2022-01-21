@@ -4,8 +4,8 @@ use common\components\SearchService;
 use common\models\Department;
 use common\models\Lead;
 use frontend\widgets\lead\editTool\ButtonWidget;
-use sales\auth\Auth;
-use sales\model\client\helpers\ClientFormatter;
+use src\auth\Auth;
+use src\model\client\helpers\ClientFormatter;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\DetailView;
@@ -277,7 +277,6 @@ $isAgent = Auth::user()->isAgent();
                             },
                             'format' => 'raw',
                         ],
-
                         [
                             'attribute' => 'updated',
                             'value' => function (\common\models\Lead $model) {
@@ -285,7 +284,6 @@ $isAgent = Auth::user()->isAgent();
                             },
                             'format' => 'raw',
                         ],
-
                         [
                             'attribute' => 'l_last_action_dt',
                             'value' => function (\common\models\Lead $model) {
@@ -293,10 +291,17 @@ $isAgent = Auth::user()->isAgent();
                             },
                             'format' => 'raw',
                         ],
+                        [
+                            'attribute' => 'l_status_dt',
+                            'value' => static function (\common\models\Lead $model) {
+                                return $model->l_status_dt ?
+                                    '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->l_status_dt)) :
+                                    Yii::$app->formatter->nullDisplay;
+                            },
+                            'format' => 'raw',
+                        ],
                         'additional_information',
                         'l_visitor_log_id',
-
-
                     ],
                 ]) ?>
             </div>

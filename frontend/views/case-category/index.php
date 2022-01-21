@@ -4,11 +4,11 @@ use common\components\grid\BooleanColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use common\models\Department;
-use sales\entities\cases\CaseCategory;
+use src\entities\cases\CaseCategory;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\entities\cases\CaseCategorySearch */
+/* @var $searchModel src\entities\cases\CaseCategorySearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Case Categories';

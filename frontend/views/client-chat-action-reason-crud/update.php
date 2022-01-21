@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChat\entity\actionReason\ClientChatActionReason */
+/* @var $model src\model\clientChat\entity\actionReason\ClientChatActionReason */
 
 $this->title = 'Update Client Chat Action Reason: ' . $model->ccar_id;
 $this->params['breadcrumbs'][] = ['label' => 'Client Chat Action Reasons', 'url' => ['index']];

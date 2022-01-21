@@ -14,8 +14,8 @@ use modules\product\src\entities\productQuoteChange\ProductQuoteChangeDecisionTy
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\entities\productType\ProductTypeQuery;
-use sales\entities\cases\CaseCategory;
-use sales\entities\cases\CasesStatus;
+use src\entities\cases\CaseCategory;
+use src\entities\cases\CasesStatus;
 
 class RelatedProductQuoteAbacObject extends AbacBaseModel implements AbacInterface
 {
@@ -195,6 +195,18 @@ class RelatedProductQuoteAbacObject extends AbacBaseModel implements AbacInterfa
         'operators' =>  [self::OP_EQUAL2]
     ];
 
+    protected const ATTR_HAS_PQC_INVOLUNTARY_ACTIVE = [
+        'optgroup' => 'PARENT QUOTE',
+        'id' => self::NS . 'parHasPqcInvoluntaryActive',
+        'field' => 'parHasPqcInvoluntaryActive',
+        'label' => 'Has Active Involuntary Change',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
     protected const ATTR_PARENT_QUOTE_IS_CHANGEABLE = [
         'optgroup' => 'PARENT QUOTE',
         'id' => self::NS . 'parPqIsChangeable',
@@ -349,6 +361,18 @@ class RelatedProductQuoteAbacObject extends AbacBaseModel implements AbacInterfa
             self::OP_IN, self::OP_NOT_IN, '<', '>', '<=', '>=']
     ];
 
+    protected const ATTR_PQC_REFUND_ALLOWED = [
+        'optgroup' => 'PRODUCT QUOTE CHANGE',
+        'id' => self::NS . 'pqcRefundAllowed',
+        'field' => 'pqcRefundAllowed',
+        'label' => 'Refund Allowed',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
     protected const ATTR_CASE_CATEGORY = [
         'optgroup' => 'CASE',
         'id' => self::NS . 'csCategoryId',
@@ -442,7 +466,8 @@ class RelatedProductQuoteAbacObject extends AbacBaseModel implements AbacInterfa
             self::ATTR_IS_COMMON_GROUP,
             self::ATTR_IS_AUTOMATE_CASE,
             self::ATTR_RELATED_QUOTE_IS_CHANGEABLE,
-            self::ATTR_PARENT_QUOTE_IS_CHANGEABLE
+            self::ATTR_PARENT_QUOTE_IS_CHANGEABLE,
+            self::ATTR_HAS_PQC_INVOLUNTARY_ACTIVE
         ]
     ];
 
@@ -473,6 +498,7 @@ class RelatedProductQuoteAbacObject extends AbacBaseModel implements AbacInterfa
         $attrPqcTypeList = self::ATTR_PQC_TYPE;
         $attrPqcStatusList = self::ATTR_PQC_STATUS;
         $attrPqcDecisionList = self::ATTR_PQC_DECISION;
+        $attrPqcRefundAllowedList = self::ATTR_PQC_REFUND_ALLOWED;
         $attrCaseCategoryList = self::ATTR_CASE_CATEGORY;
         $attrCaseProjectList = self::ATTR_CASE_PROJECT;
         $attrCaseStatusList = self::ATTR_CASE_STATUS;
@@ -510,6 +536,7 @@ class RelatedProductQuoteAbacObject extends AbacBaseModel implements AbacInterfa
         $attributeList[self::OBJ_RELATED_PRODUCT_QUOTE][] = $attrCaseCategoryList;
         $attributeList[self::OBJ_RELATED_PRODUCT_QUOTE][] = $attrCaseProjectList;
         $attributeList[self::OBJ_RELATED_PRODUCT_QUOTE][] = $attrCaseStatusList;
+        $attributeList[self::OBJ_RELATED_PRODUCT_QUOTE][] = $attrPqcRefundAllowedList;
 
         return $attributeList;
     }

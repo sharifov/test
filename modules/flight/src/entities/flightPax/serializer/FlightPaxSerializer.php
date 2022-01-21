@@ -2,11 +2,10 @@
 
 namespace modules\flight\src\entities\flightPax\serializer;
 
-use sales\entities\serializer\Serializer;
+use src\entities\serializer\Serializer;
 
 class FlightPaxSerializer extends Serializer
 {
-
     /**
      * @inheritDoc
      */

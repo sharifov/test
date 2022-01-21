@@ -5,7 +5,7 @@ namespace frontend\controllers;
 use common\models\Lead;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
 use common\models\ClientProject;
 use common\models\search\ClientProjectSearch;
@@ -137,8 +137,8 @@ class ClientProjectController extends FController
         $data = Yii::$app->request->get();
         $leadAbacDto = new LeadAbacDto(Lead::findOne($data['leadID']), Auth::id());
 
-        /** @abac $leadAbacDto, LeadAbacObject::ACT_CLIENT_UNSUBSCRIBE, LeadAbacObject::ACTION_ACCESS, Access to action client unsubscribe*/
-        if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_CLIENT_UNSUBSCRIBE, LeadAbacObject::ACTION_ACCESS)) {
+        /** @abac $leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS, Access to action client unsubscribe*/
+        if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_UNSUBSCRIBE)) {
             throw new ForbiddenHttpException('Access denied.');
         }
 
@@ -152,8 +152,8 @@ class ClientProjectController extends FController
         $data = Yii::$app->request->get();
         $leadAbacDto = new LeadAbacDto(Lead::findOne($data['leadID']), Auth::id());
 
-        /** @abac $leadAbacDto, LeadAbacObject::ACT_CLIENT_SUBSCRIBE, LeadAbacObject::ACTION_ACCESS, Access to action client subscribe*/
-        if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_CLIENT_SUBSCRIBE, LeadAbacObject::ACTION_ACCESS)) {
+        /** @abac $leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_SUBSCRIBE, Access to action client subscribe*/
+        if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_SUBSCRIBE)) {
             throw new ForbiddenHttpException('Access denied.');
         }
 

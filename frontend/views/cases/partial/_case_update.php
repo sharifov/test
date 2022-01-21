@@ -1,6 +1,6 @@
 <?php
 
-use sales\model\cases\useCases\cases\updateInfo\UpdateInfoForm;
+use src\model\cases\useCases\cases\updateInfo\UpdateInfoForm;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;

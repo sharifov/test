@@ -1,11 +1,11 @@
 <?php
 
-use sales\model\clientChat\ClientChatPlatform;
+use src\model\clientChat\ClientChatPlatform;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChatMessage\entity\ClientChatMessage */
+/* @var $model src\model\clientChatMessage\entity\ClientChatMessage */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 

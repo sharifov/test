@@ -3,7 +3,7 @@
 namespace modules\order\src\forms\api\create;
 
 use modules\product\src\entities\productQuote\ProductQuote;
-use sales\forms\CompositeRecursiveForm;
+use src\forms\CompositeRecursiveForm;
 use yii\base\Model;
 
 /**

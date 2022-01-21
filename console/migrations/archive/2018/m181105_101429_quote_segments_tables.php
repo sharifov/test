@@ -7,7 +7,6 @@ use yii\db\Migration;
  */
 class m181105_101429_quote_segments_tables extends Migration
 {
-
     /**
      *
      * {@inheritdoc}

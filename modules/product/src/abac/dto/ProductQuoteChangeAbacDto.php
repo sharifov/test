@@ -3,8 +3,8 @@
 namespace modules\product\src\abac\dto;
 
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
-use sales\access\EmployeeGroupAccess;
-use sales\auth\Auth;
+use src\access\EmployeeGroupAccess;
+use src\auth\Auth;
 
 /**
  * Class ProductQuoteChangeAbacDto
@@ -25,6 +25,7 @@ use sales\auth\Auth;
  * @property bool $isOwner
  * @property bool $hasPqrActive
  * @property bool $hasPqcActive
+ * @property bool $hasPqcInvoluntaryActive
  * @property int $prTypeId
  * @property int|null $prProjectId
  * @property int|null $orProjectId
@@ -32,6 +33,7 @@ use sales\auth\Auth;
  * @property int|null $orPayStatusId
  * @property bool $isOrderOwner
  * @property int|null $orTypeId
+ * @property bool|null $refundAllowed
  */
 class ProductQuoteChangeAbacDto extends \stdClass
 {
@@ -52,7 +54,7 @@ class ProductQuoteChangeAbacDto extends \stdClass
     public bool $isOwner;
     public bool $hasPqrActive;
     public bool $hasPqcActive;
-
+    public bool $hasPqcInvoluntaryActive;
     public int $prTypeId;
     public ?int $prProjectId;
 
@@ -62,6 +64,7 @@ class ProductQuoteChangeAbacDto extends \stdClass
     public bool $isOrderOwner;
     public ?int $orTypeId = null;
     public ?int $maxConfirmableQuotesCnt = null;
+    public ?bool $refundAllowed = true;
 
     public function __construct(?ProductQuoteChange $productQuoteChange)
     {
@@ -88,6 +91,7 @@ class ProductQuoteChangeAbacDto extends \stdClass
             $this->isOwner = $productQuoteChange->pqcPq->isOwner($userId);
             $this->hasPqrActive = (bool)$productQuoteChange->pqcPq->productQuoteRefundsActive;
             $this->hasPqcActive = (bool)$productQuoteChange->pqcPq->productQuoteChangesActive;
+            $this->hasPqcInvoluntaryActive = (bool)$productQuoteChange->pqcPq->productQuoteInvoluntaryChangesActive;
 
             $this->prTypeId = $productQuoteChange->pqcPq->pqProduct->pr_type_id;
             $this->prProjectId = $productQuoteChange->pqcPq->pqProduct->pr_project_id;
@@ -97,6 +101,7 @@ class ProductQuoteChangeAbacDto extends \stdClass
             $this->orPayStatusId = $productQuoteChange->pqcPq->pqOrder->or_pay_status_id;
             $this->isOrderOwner = $productQuoteChange->pqcPq->pqOrder->isOwner($userId);
             $this->orTypeId  = $productQuoteChange->pqcPq->pqOrder->or_type_id;
+            $this->refundAllowed = $productQuoteChange->pqc_refund_allowed;
         }
     }
 }

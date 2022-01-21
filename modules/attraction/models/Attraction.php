@@ -10,7 +10,7 @@ use modules\attraction\src\useCases\request\update\AttractionUpdateRequestForm;
 use modules\product\src\interfaces\Productable;
 use modules\product\src\entities\product\Product;
 use modules\product\src\interfaces\ProductQuoteService;
-use sales\entities\EventTrait;
+use src\entities\EventTrait;
 use yii\db\ActiveQuery;
 use Yii;
 

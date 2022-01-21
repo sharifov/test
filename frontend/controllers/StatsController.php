@@ -7,14 +7,14 @@ use common\models\Employee;
 use common\models\search\ApiLogSearch;
 use common\models\search\CallSearch;
 use kartik\export\ExportMenu;
-use sales\entities\call\CallGraphsSearch;
+use src\entities\call\CallGraphsSearch;
 use common\models\search\CommunicationSearch;
 use common\models\search\EmployeeSearch;
 use common\models\search\LeadSearch;
 use common\models\Setting;
 use common\models\Sms;
 use common\models\Email;
-use sales\viewModel\call\ViewModelTotalCallGraph;
+use src\viewModel\call\ViewModelTotalCallGraph;
 use Yii;
 use yii\base\Model;
 use yii\filters\VerbFilter;
@@ -26,7 +26,6 @@ use yii\widgets\ActiveForm;
  */
 class StatsController extends FController
 {
-
     /**
      * {@inheritdoc}
      */

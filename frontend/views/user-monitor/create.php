@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\user\entity\monitor\UserMonitor */
+/* @var $model src\model\user\entity\monitor\UserMonitor */
 
 $this->title = 'Create User Monitor';
 $this->params['breadcrumbs'][] = ['label' => 'User Monitors', 'url' => ['index']];

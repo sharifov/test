@@ -3,8 +3,8 @@
 namespace modules\flight\controllers;
 
 use modules\product\src\entities\productQuote\ProductQuote;
-use sales\dispatchers\EventDispatcher;
-use sales\helpers\app\AppHelper;
+use src\dispatchers\EventDispatcher;
+use src\helpers\app\AppHelper;
 use Yii;
 use modules\flight\models\FlightQuotePaxPrice;
 use modules\flight\models\search\FlightQuotePaxPriceSearch;
@@ -20,7 +20,6 @@ use yii\filters\VerbFilter;
  */
 class FlightQuotePaxPriceController extends FController
 {
-
     private $eventDispatcher;
 
     /**

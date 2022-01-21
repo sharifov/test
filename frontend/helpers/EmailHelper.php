@@ -4,7 +4,7 @@ namespace frontend\helpers;
 
 use common\models\Email;
 use modules\fileStorage\src\widgets\FileStorageEmailSentListWidget;
-use sales\helpers\email\MaskEmailHelper;
+use src\helpers\email\MaskEmailHelper;
 use Yii;
 use yii\helpers\Html;
 

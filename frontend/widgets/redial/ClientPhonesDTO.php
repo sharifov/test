@@ -10,7 +10,6 @@ namespace frontend\widgets\redial;
  */
 class ClientPhonesDTO
 {
-
     public $phone;
     public $description;
 

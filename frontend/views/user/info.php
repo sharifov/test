@@ -13,7 +13,7 @@ use yii\widgets\Pjax;
  * @var $datePickerModel  \yii\base\DynamicModel
  * @var $userActivity  \frontend\models\search\UserSiteActivitySearch
  * @var $callLogDataProvider \yii\data\ActiveDataProvider
- * @var $callLogSearchModel \sales\model\callLog\entity\callLog\search\CallLogSearch
+ * @var $callLogSearchModel \src\model\callLog\entity\callLog\search\CallLogSearch
  * @var $emailDataProvider \yii\data\ActiveDataProvider
  * @var $emailSearchModel \common\models\search\EmailSearch
  */
@@ -29,7 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
         <p>
-            <?php if (\sales\auth\Auth::can('/employee/edit')) : ?>
+            <?php if (\src\auth\Auth::can('/employee/edit')) : ?>
                 <?= Html::a('<i class="fa fa-edit"></i> Update', ['employee/update', 'id' => $model->id], ['class' => 'btn btn-warning']) ?>
             <?php endif; ?>
         </p>
@@ -231,6 +231,10 @@ $this->params['breadcrumbs'][] = $this->title;
                             </li>
                             <!-- <li role="presentation" class=""><a href="#tab_content2" role="tab" id="profile-tab" data-toggle="tab" aria-expanded="false" class="" aria-selected="false">Projects Worked on</a>-->
                             <!-- </li>-->
+                            <li role="presentation" class=""><a href="#tab_content2" id="home-tab" role="tab"
+                                                                data-toggle="tab" aria-expanded="true" class=""
+                                                                aria-selected="true">User data</a>
+                            </li>
                             <li role="presentation" class=""><a href="#tab_content1" id="home-tab" role="tab"
                                                                 data-toggle="tab" aria-expanded="true" class=""
                                                                 aria-selected="true">Recent Activity</a>
@@ -285,6 +289,12 @@ $this->params['breadcrumbs'][] = $this->title;
                                 <?= $this->render('partial/_info_activity', [
                                     'model' => $model,
                                     'userActivity' => $userActivity,
+                                ]) ?>
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade" id="tab_content2" aria-labelledby="home-tab">
+                                <?= $this->render('partial/_info_user_data', [
+                                    'model' => $model,
+                                    'userDataProvider' => $userDataProvider,
                                 ]) ?>
                             </div>
                             <!--                            <div role="tabpanel" class="tab-pane fade" id="tab_content2" aria-labelledby="profile-tab">-->

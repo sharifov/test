@@ -3,19 +3,19 @@
 use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
-use sales\entities\cases\CasesQSearch;
-use sales\entities\cases\CaseCategory;
+use src\entities\cases\CasesQSearch;
+use src\entities\cases\CaseCategory;
 use common\models\Department;
 use common\components\grid\cases\NeedActionColumn;
 use dosamigos\datepicker\DatePicker;
 use common\models\Language;
-use sales\helpers\communication\StatisticsHelper;
-use sales\auth\Auth;
+use src\helpers\communication\StatisticsHelper;
+use src\auth\Auth;
 use common\components\grid\cases\CasesStatusColumn;
 
 /**
  * @var $this yii\web\View
- * @var $searchModel sales\entities\cases\CasesQSearch
+ * @var $searchModel src\entities\cases\CasesQSearch
  * @var $dataProvider yii\data\ActiveDataProvider
  * @var $isAgent bool
  */

@@ -8,8 +8,8 @@
  * @var $is_manager boolean
  */
 
-use sales\auth\Auth;
-use sales\services\quote\addQuote\guard\FlightQuoteGuard;
+use src\auth\Auth;
+use src\services\quote\addQuote\guard\FlightQuoteGuard;
 use yii\bootstrap\Html;
 use yii\helpers\Url;
 use yii\widgets\ListView;

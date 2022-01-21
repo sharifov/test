@@ -5,6 +5,7 @@ namespace webapi\modules\v1\controllers;
 use common\components\antispam\CallAntiSpamDto;
 use common\components\jobs\CallQueueJob;
 use common\components\purifier\Purifier;
+use common\helpers\LogHelper;
 use common\models\ApiLog;
 use common\models\Call;
 use common\models\CallUserGroup;
@@ -28,56 +29,57 @@ use frontend\helpers\JsonHelper;
 use frontend\widgets\newWebPhone\call\socket\RemoveIncomingRequestMessage;
 use frontend\widgets\newWebPhone\sms\socket\Message;
 use frontend\widgets\notification\NotificationMessage;
-use sales\entities\cases\Cases;
-use sales\forms\lead\PhoneCreateForm;
-use sales\guards\call\CallRedialGuard;
-use sales\helpers\app\AppHelper;
-use sales\helpers\DuplicateExceptionChecker;
-use sales\helpers\LogExecutionTime;
-use sales\helpers\setting\SettingHelper;
-use sales\model\call\exceptions\CallFinishedException;
-use sales\model\call\exceptions\UniqueCallNotFoundException;
-use sales\model\call\form\CallCustomParameters;
-use sales\model\call\services\QueueLongTimeNotificationJobCreator;
-use sales\model\call\services\RepeatMessageCallJobCreator;
-use sales\model\callLog\services\CallLogConferenceTransferService;
-use sales\model\callLog\services\CallLogTransferService;
-use sales\model\callLogFilterGuard\entity\CallLogFilterGuard;
-use sales\model\callLogFilterGuard\entity\CallLogFilterGuardScopes;
-use sales\model\callLogFilterGuard\repository\CallLogFilterGuardRepository;
-use sales\model\callLogFilterGuard\service\CallLogFilterGuardService;
-use sales\model\callTerminateLog\service\CallTerminateLogService;
-use sales\model\conference\useCase\recordingStatusCallBackEvent\ConferenceRecordingStatusCallbackForm;
-use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackForm;
-use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackHandler;
-use sales\model\contactPhoneList\service\ContactPhoneListService;
-use sales\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
-use sales\model\contactPhoneServiceInfo\service\ContactPhoneInfoService;
-use sales\model\department\departmentPhoneProject\entity\params\QueueLongTimeNotificationParams;
-use sales\model\emailList\entity\EmailList;
-use sales\model\leadRedial\assign\LeadRedialUnAssigner;
-use sales\model\leadRedial\queue\AutoTakeJob;
-use sales\model\phoneList\entity\PhoneList;
-use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
-use sales\model\user\entity\userStatus\UserStatus;
-use sales\model\userVoiceMail\entity\UserVoiceMail;
-use sales\model\voiceMailRecord\entity\VoiceMailRecord;
-use sales\model\voip\phoneDevice\device\VoipDevice;
-use sales\repositories\client\ClientsQuery;
-use sales\repositories\lead\LeadRepository;
-use sales\repositories\user\UserProjectParamsRepository;
-use sales\services\call\CallDeclinedException;
-use sales\services\call\CallFromInternalNumberException;
-use sales\services\call\CallService;
-use sales\services\cases\CasesCommunicationService;
-use sales\services\client\ClientCreateForm;
-use sales\services\client\ClientManageService;
-use sales\services\departmentPhoneProject\DepartmentPhoneProjectParamsService;
-use sales\services\phone\blackList\PhoneBlackListManageService;
-use sales\services\phone\callFilterGuard\TwilioCallFilterGuard;
-use sales\services\phone\callFilterGuard\CallFilterGuardService;
-use sales\services\sms\incoming\SmsIncomingForm;
-use sales\services\sms\incoming\SmsIncomingService;
+use src\entities\cases\Cases;
+use src\forms\lead\PhoneCreateForm;
+use src\guards\call\CallRedialGuard;
+use src\helpers\app\AppHelper;
+use src\helpers\DuplicateExceptionChecker;
+use src\helpers\LogExecutionTime;
+use src\helpers\setting\SettingHelper;
+use src\model\call\exceptions\CallFinishedException;
+use src\model\call\exceptions\UniqueCallNotFoundException;
+use src\model\call\form\CallCustomParameters;
+use src\model\call\services\QueueLongTimeNotificationJobCreator;
+use src\model\call\services\RepeatMessageCallJobCreator;
+use src\model\callLog\services\CallLogConferenceTransferService;
+use src\model\callLog\services\CallLogTransferService;
+use src\model\callLogFilterGuard\entity\CallLogFilterGuard;
+use src\model\callLogFilterGuard\entity\CallLogFilterGuardScopes;
+use src\model\callLogFilterGuard\repository\CallLogFilterGuardRepository;
+use src\model\callLogFilterGuard\service\CallLogFilterGuardService;
+use src\model\callTerminateLog\service\CallTerminateLogService;
+use src\model\conference\useCase\recordingStatusCallBackEvent\ConferenceRecordingStatusCallbackForm;
+use src\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackForm;
+use src\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackHandler;
+use src\model\contactPhoneList\service\ContactPhoneListService;
+use src\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
+use src\model\contactPhoneServiceInfo\service\ContactPhoneInfoService;
+use src\model\department\departmentPhoneProject\entity\params\QueueLongTimeNotificationParams;
+use src\model\emailList\entity\EmailList;
+use src\model\leadRedial\assign\LeadRedialUnAssigner;
+use src\model\leadRedial\queue\AutoTakeJob;
+use src\model\phoneList\entity\PhoneList;
+use src\model\sms\entity\smsDistributionList\SmsDistributionList;
+use src\model\user\entity\userStatus\UserStatus;
+use src\model\userVoiceMail\entity\UserVoiceMail;
+use src\model\voiceMailRecord\entity\VoiceMailRecord;
+use src\model\voip\phoneDevice\device\VoipDevice;
+use src\repositories\client\ClientsQuery;
+use src\repositories\lead\LeadRepository;
+use src\repositories\user\UserProjectParamsRepository;
+use src\services\call\CallDeclinedException;
+use src\services\call\CallFromInternalNumberException;
+use src\services\call\CallService;
+use src\services\cases\CasesCommunicationService;
+use src\services\client\ClientCreateForm;
+use src\services\client\ClientManageService;
+use src\services\departmentPhoneProject\DepartmentPhoneProjectParamsService;
+use src\services\phone\blackList\PhoneBlackListManageService;
+use src\services\phone\callFilterGuard\TwilioCallFilterGuard;
+use src\services\phone\callFilterGuard\CallFilterGuardService;
+use src\services\phone\checkPhone\CheckPhoneService;
+use src\services\sms\incoming\SmsIncomingForm;
+use src\services\sms\incoming\SmsIncomingService;
 use Twilio\TwiML\VoiceResponse;
 use Yii;
 use yii\helpers\ArrayHelper;
@@ -507,11 +509,12 @@ class CommunicationController extends ApiBaseController
                     } catch (\Throwable $throwable) {
                         $logExecutionTime->end();
                         $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), [
-                            'phoneFrom' => $callModel->c_from,
+                            'phoneFrom' => LogHelper::replaceSource($callModel->c_from, 3),
+                            'phoneUid' => CheckPhoneService::uidGenerator($callModel->c_from),
                             'phoneTo' => $callModel->c_to
                         ]);
                         $category = 'CommunicationController:CallLogFilterGuard:generalLine';
-                        if ($throwable instanceof DomainException) {
+                        if ($throwable instanceof DomainException || strpos($throwable->getMessage(), 'Operation timed out')) {
                             Yii::warning($message, $category);
                         } else {
                             Yii::error($message, $category);
@@ -641,11 +644,12 @@ class CommunicationController extends ApiBaseController
                         } catch (\Throwable $throwable) {
                             $logExecutionTime->end();
                             $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), [
-                                'phoneFrom' => $callModel->c_from,
+                                'phoneFrom' => LogHelper::replaceSource($callModel->c_from, 3),
+                                'phoneUid' => CheckPhoneService::uidGenerator($callModel->c_from),
                                 'phoneTo' => $callModel->c_to
                             ]);
                             $category = 'CommunicationController:CallLogFilterGuard:directCall';
-                            if ($throwable instanceof DomainException) {
+                            if ($throwable instanceof DomainException || strpos($throwable->getMessage(), 'Operation timed out')) {
                                 Yii::warning($message, $category);
                             } else {
                                 Yii::error($message, $category);
@@ -2840,7 +2844,7 @@ class CommunicationController extends ApiBaseController
 
         if (empty($post['conferenceData'])) {
             $response['error'] = 'Not found POST[conferenceData]';
-            Yii::error($response['error'] . ' - ' . VarDumper::dumpAsString($post), 'API:Communication:voiceConferenceCallCallback');
+            Yii::error($response['error'] . ' - ' . VarDumper::dumpAsString($post), 'API:Communication:voiceConferenceCallCallback:emptyConferenceData');
             return $response;
         }
 
@@ -2851,7 +2855,7 @@ class CommunicationController extends ApiBaseController
             Yii::error(VarDumper::dumpAsString([
                 'message' => $response['error'],
                 'post' => $post,
-            ]), 'API:Communication:voiceConferenceCallCallback');
+            ]), 'API:Communication:voiceConferenceCallCallback:cantLoadData');
             return $response;
         }
 
@@ -2862,7 +2866,7 @@ class CommunicationController extends ApiBaseController
                 'errors' => $form->getErrors(),
                 'form' => $form->getAttributes(),
                 'post' => $post,
-            ]), 'API:Communication:voiceConferenceCallCallback');
+            ]), 'API:Communication:voiceConferenceCallCallback:validate');
             return $response;
         }
 
@@ -2879,12 +2883,22 @@ class CommunicationController extends ApiBaseController
 
             try {
                 if (!$conference->save()) {
-                    Yii::error(VarDumper::dumpAsString([
-                        'errors' => $conference->getErrors(),
-                        'model' => $conference->getAttributes(),
-                        'post' => $post,
-                        'form' => $form->getAttributes(),
-                    ]), 'API:Communication:voiceConferenceCallCallback');
+                    $errors = $conference->getErrors();
+                    if (
+                        count($errors) === 1
+                        && array_key_exists('cf_sid', $errors)
+                        && count($errors['cf_sid']) === 1
+                        && strpos($errors['cf_sid'][0], 'has already been taken') !== false
+                    ) {
+                        // 2 callback received in one time
+                    } else {
+                        Yii::error(VarDumper::dumpAsString([
+                            'errors' => $errors,
+                            'model' => $conference->getAttributes(),
+                            'post' => $post,
+                            'form' => $form->getAttributes(),
+                        ]), 'API:Communication:voiceConferenceCallCallback:save');
+                    }
                     $conference = Conference::findOne(['cf_sid' => $form->ConferenceSid]);
                 }
             } catch (\Throwable $e) {

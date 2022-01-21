@@ -18,7 +18,6 @@ use yii\validators\RequiredValidator;
  */
 class PaxForm extends Model
 {
-
     public $atn_attraction_id;
     public $product_id;
     public $atn_pax_list;

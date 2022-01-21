@@ -5,7 +5,7 @@ use common\models\Setting;
 use common\models\SettingCategory;
 use frontend\helpers\JsonHelper;
 use modules\flight\src\useCases\voluntaryExchange\service\CaseVoluntaryExchangeService;
-use sales\entities\cases\CaseCategory;
+use src\entities\cases\CaseCategory;
 use yii\db\Migration;
 use yii\db\Query;
 

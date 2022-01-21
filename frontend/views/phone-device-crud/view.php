@@ -4,7 +4,7 @@ use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\voip\phoneDevice\device\PhoneDevice */
+/* @var $model src\model\voip\phoneDevice\device\PhoneDevice */
 
 $this->title = $model->pd_id;
 $this->params['breadcrumbs'][] = ['label' => 'Phone Devices', 'url' => ['index']];

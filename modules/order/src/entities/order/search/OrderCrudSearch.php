@@ -6,7 +6,7 @@ use common\models\Employee;
 use modules\flight\models\FlightQuote;
 use modules\flight\models\FlightQuoteFlight;
 use modules\product\src\entities\productQuote\ProductQuote;
-use sales\helpers\query\QueryHelper;
+use src\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
 use modules\order\src\entities\order\Order;
 use yii\db\ActiveQuery;

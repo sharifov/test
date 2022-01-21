@@ -3,7 +3,7 @@
 namespace common\models;
 
 use common\models\query\SettingQuery;
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
 use yii\behaviors\AttributeBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -30,7 +30,6 @@ use yii\helpers\Url;
  */
 class Setting extends \yii\db\ActiveRecord
 {
-
     public const TYPE_BOOL      = 'bool';
     public const TYPE_INT       = 'int';
     public const TYPE_DOUBLE    = 'double';

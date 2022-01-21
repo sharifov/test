@@ -8,7 +8,6 @@ use yii\db\ActiveQuery;
 
 class LeadFlowQuery extends ActiveQuery
 {
-
     /**
      * @param $userId
      * @param array $flowDescriptions ['Manual create', 'Call AutoCreated Lead']
@@ -35,7 +34,7 @@ class LeadFlowQuery extends ActiveQuery
             }
         }
 
-        $query->asArray()->orderBy(['created' => SORT_DESC])->limit(1);
+        $query->asArray()->orderBy(['id' => SORT_DESC])->limit(1);
 
         return $query;
     }

@@ -4,7 +4,7 @@ use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\user\entity\userConnectionActiveChat\UserConnectionActiveChat */
+/* @var $model src\model\user\entity\userConnectionActiveChat\UserConnectionActiveChat */
 /* @var $form ActiveForm */
 ?>
 

@@ -1,12 +1,12 @@
 <?php
 
-use sales\model\emailReviewQueue\entity\EmailReviewQueue;
-use sales\model\emailReviewQueue\entity\EmailReviewQueueStatus;
+use src\model\emailReviewQueue\entity\EmailReviewQueue;
+use src\model\emailReviewQueue\entity\EmailReviewQueueStatus;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\emailReviewQueue\entity\EmailReviewQueue */
+/* @var $model src\model\emailReviewQueue\entity\EmailReviewQueue */
 
 $this->title = $model->erqEmail->e_email_subject . ' (' . $model->erq_email_id . ')';
 $this->params['breadcrumbs'][] = ['label' => 'Email Review Queues', 'url' => ['index']];

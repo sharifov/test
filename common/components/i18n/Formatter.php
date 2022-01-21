@@ -45,24 +45,24 @@ use modules\qaTask\src\entities\qaTask\QaTaskRating;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\qaTask\src\useCases\qaTask\QaTaskActions;
 use modules\qaTask\src\helpers\formatters\QaTaskFormatter;
-use sales\entities\cases\Cases;
-use sales\entities\cases\CasesSourceType;
-use sales\helpers\PhoneFormatter;
-use sales\model\callLog\entity\callLog\CallLogCategory;
-use sales\model\callLog\entity\callLog\CallLogStatus;
-use sales\model\callLog\entity\callLog\CallLogType;
-use sales\model\client\notifications\client\ClientNotificationCommunicationType;
-use sales\model\client\notifications\client\ClientNotificationType;
-use sales\model\clientChat\entity\ClientChat;
-use sales\model\coupon\entity\coupon\CouponStatus;
-use sales\model\coupon\entity\coupon\CouponType;
-use sales\model\emailList\entity\EmailList;
-use sales\model\emailList\helpers\formatters\EmailListFormatter;
-use sales\model\phoneList\entity\PhoneList;
-use sales\model\phoneList\helpers\formatters\PhoneListFormatter;
-use sales\model\shiftSchedule\entity\shift\Shift;
-use sales\model\user\entity\paymentCategory\UserPaymentCategory;
-use sales\model\user\entity\payroll\UserPayroll;
+use src\entities\cases\Cases;
+use src\entities\cases\CasesSourceType;
+use src\helpers\PhoneFormatter;
+use src\model\callLog\entity\callLog\CallLogCategory;
+use src\model\callLog\entity\callLog\CallLogStatus;
+use src\model\callLog\entity\callLog\CallLogType;
+use src\model\client\notifications\client\ClientNotificationCommunicationType;
+use src\model\client\notifications\client\ClientNotificationType;
+use src\model\clientChat\entity\ClientChat;
+use src\model\coupon\entity\coupon\CouponStatus;
+use src\model\coupon\entity\coupon\CouponType;
+use src\model\emailList\entity\EmailList;
+use src\model\emailList\helpers\formatters\EmailListFormatter;
+use src\model\phoneList\entity\PhoneList;
+use src\model\phoneList\helpers\formatters\PhoneListFormatter;
+use src\model\shiftSchedule\entity\shift\Shift;
+use src\model\user\entity\paymentCategory\UserPaymentCategory;
+use src\model\user\entity\payroll\UserPayroll;
 use yii\bootstrap4\Html;
 use yii\helpers\Url;
 use yii\helpers\VarDumper;
@@ -415,7 +415,7 @@ class Formatter extends \yii\i18n\Formatter
             return $this->nullDisplay;
         }
 
-        return \sales\model\cases\helpers\formatters\cases\Formatter::asCase($case, $class);
+        return \src\model\cases\helpers\formatters\cases\Formatter::asCase($case, $class);
     }
 
     public function asCaseSale(?CaseSale $caseSale): string
@@ -715,6 +715,19 @@ class Formatter extends \yii\i18n\Formatter
         return Html::tag('span', 'No', ['class' => 'badge badge-danger']);
     }
 
+    public function asBooleanBySquare($value, bool $color = true): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+        if ($value) {
+            $classColor = $color ? 'text-success' : '';
+            return Html::tag('i', '', ['class' => 'fa fa-check-square ' . $classColor]);
+        }
+        $classColor = $color ? 'text-danger' : '';
+        return Html::tag('i', '', ['class' => 'fa fa-minus-square ' . $classColor]);
+    }
+
     /**
      * @param $value
      * @return string
@@ -822,7 +835,7 @@ class Formatter extends \yii\i18n\Formatter
             return $this->nullDisplay;
         }
 
-        return \sales\model\clientChat\Formatter::asClientChat($chat);
+        return \src\model\clientChat\Formatter::asClientChat($chat);
     }
 
     public function asShift(?Shift $model): string
@@ -949,7 +962,7 @@ class Formatter extends \yii\i18n\Formatter
             return $this->nullDisplay;
         }
 
-        return \sales\model\client\notifications\client\entity\NotificationType::asFormat($value);
+        return \src\model\client\notifications\client\entity\NotificationType::asFormat($value);
     }
 
     public function asClientNotificationCommunicationType($value): string
@@ -958,7 +971,7 @@ class Formatter extends \yii\i18n\Formatter
             return $this->nullDisplay;
         }
 
-        return \sales\model\client\notifications\client\entity\CommunicationType::asFormat($value);
+        return \src\model\client\notifications\client\entity\CommunicationType::asFormat($value);
     }
 
     public function asClientNotificationPhoneListStatus($value): string
@@ -967,7 +980,7 @@ class Formatter extends \yii\i18n\Formatter
             return $this->nullDisplay;
         }
 
-        return \sales\model\client\notifications\phone\entity\Status::asFormat($value);
+        return \src\model\client\notifications\phone\entity\Status::asFormat($value);
     }
 
     public function asClientNotificationSmsListStatus($value): string
@@ -976,7 +989,7 @@ class Formatter extends \yii\i18n\Formatter
             return $this->nullDisplay;
         }
 
-        return \sales\model\client\notifications\sms\entity\Status::asFormat($value);
+        return \src\model\client\notifications\sms\entity\Status::asFormat($value);
     }
 
     public function asUserDataKey($value): string
@@ -985,7 +998,7 @@ class Formatter extends \yii\i18n\Formatter
             return $this->nullDisplay;
         }
 
-        return \sales\model\userData\entity\UserDataKey::asFormat($value);
+        return \src\model\userData\entity\UserDataKey::asFormat($value);
     }
 
     public function asLabel($value, string $class = 'label label-default'): string
@@ -1002,6 +1015,6 @@ class Formatter extends \yii\i18n\Formatter
             return $this->nullDisplay;
         }
 
-        return \sales\model\voip\phoneDevice\log\PhoneDeviceLogLevel::asFormat($value);
+        return \src\model\voip\phoneDevice\log\PhoneDeviceLogLevel::asFormat($value);
     }
 }

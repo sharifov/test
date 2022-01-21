@@ -12,8 +12,8 @@ use modules\product\src\interfaces\ProductDataInterface;
 use modules\product\src\interfaces\Quotable;
 use modules\rentCar\src\entity\rentCar\RentCar;
 use modules\rentCar\src\serializer\RentCarQuoteSerializer;
-use sales\entities\EventTrait;
-use sales\helpers\product\ProductQuoteHelper;
+use src\entities\EventTrait;
+use src\helpers\product\ProductQuoteHelper;
 use Yii;
 use yii\helpers\ArrayHelper;
 

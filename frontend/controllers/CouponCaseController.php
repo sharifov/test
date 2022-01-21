@@ -2,10 +2,10 @@
 
 namespace frontend\controllers;
 
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
-use sales\model\coupon\entity\couponCase\CouponCase;
-use sales\model\coupon\entity\couponCase\search\CouponCaseSearch;
+use src\model\coupon\entity\couponCase\CouponCase;
+use src\model\coupon\entity\couponCase\search\CouponCaseSearch;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

@@ -2,13 +2,13 @@
 
 use dosamigos\datetimepicker\DateTimePicker;
 use kartik\select2\Select2;
-use sales\model\voip\phoneDevice\log\PhoneDeviceLogLevel;
-use sales\widgets\UserSelect2Widget;
+use src\model\voip\phoneDevice\log\PhoneDeviceLogLevel;
+use src\widgets\UserSelect2Widget;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\voip\phoneDevice\log\PhoneDeviceLogSearch */
+/* @var $model src\model\voip\phoneDevice\log\PhoneDeviceLogSearch */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 

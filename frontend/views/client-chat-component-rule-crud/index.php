@@ -2,13 +2,13 @@
 
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
-use sales\model\clientChat\componentRule\entity\ClientChatComponentRule;
+use src\model\clientChat\componentRule\entity\ClientChatComponentRule;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\clientChat\componentRule\entity\search\ClientChatComponentRuleSearch */
+/* @var $searchModel src\model\clientChat\componentRule\entity\search\ClientChatComponentRuleSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Client Chat Component Rules';

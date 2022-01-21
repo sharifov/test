@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
-use sales\model\clientChatStatusLog\entity\search\ClientChatStatusLog as ClientChatStatusLogSearch;
+use src\model\clientChatStatusLog\entity\ClientChatStatusLog;
+use src\model\clientChatStatusLog\entity\search\ClientChatStatusLog as ClientChatStatusLogSearch;
 use frontend\controllers\FController;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;

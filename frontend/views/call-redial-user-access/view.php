@@ -4,7 +4,7 @@ use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\leadRedial\entity\CallRedialUserAccess */
+/* @var $model src\model\leadRedial\entity\CallRedialUserAccess */
 
 $this->title = $model->crua_lead_id;
 $this->params['breadcrumbs'][] = ['label' => 'Call Redial User Accesses', 'url' => ['index']];

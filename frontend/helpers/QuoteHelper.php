@@ -218,7 +218,7 @@ class QuoteHelper
                     if ($segment['departureAirportCode'] || $segment['arrivalAirportCode']) {
                         if (!in_array($segment['departureAirportCode'], $connectionAirports) && $segment['departureAirportCode'] != $firstSegment['departureAirportCode'] && $segment['departureAirportCode'] != $lastSegment['arrivalAirportCode']) {
                             $airportObj = Airports::findByIata($segment['departureAirportCode']);
-                            $connectionAirports[$segment['departureAirportCode']] = ($airportObj ? $airportObj->cityName . ' ' : '' ) . $segment['departureAirportCode'];
+                            $connectionAirports[$segment['departureAirportCode']] = $segment['departureAirportCode'] . ($airportObj ? ' (' . $airportObj->cityName . ')' : '' );
                             if (!$airportObj) {
                                 \Yii::warning(
                                     ['message' => 'Airport not found by code', 'airport_iata' => $segment['departureAirportCode']],
@@ -228,7 +228,7 @@ class QuoteHelper
                         }
                         if (!in_array($segment['arrivalAirportCode'], $connectionAirports) && $segment['arrivalAirportCode'] != $firstSegment['departureAirportCode'] && $segment['arrivalAirportCode'] != $lastSegment['arrivalAirportCode']) {
                             $airportObj = Airports::findByIata($segment['arrivalAirportCode']);
-                            $connectionAirports[$segment['arrivalAirportCode']] = ($airportObj ? $airportObj->cityName . ' ' : '' ) . $segment['arrivalAirportCode'];
+                            $connectionAirports[$segment['arrivalAirportCode']] = $segment['arrivalAirportCode'] . ($airportObj ? ' (' . $airportObj->cityName . ')' : '' );
                             if (!$airportObj) {
                                 \Yii::warning(
                                     ['message' => 'Airport not found by code', 'airport_iata' => $segment['arrivalAirportCode']],

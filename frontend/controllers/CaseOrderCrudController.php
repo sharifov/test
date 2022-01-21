@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\caseOrder\entity\CaseOrder;
-use sales\model\caseOrder\entity\search\CaseOrderSearch;
+use src\model\caseOrder\entity\CaseOrder;
+use src\model\caseOrder\entity\search\CaseOrderSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

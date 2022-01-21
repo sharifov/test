@@ -1,9 +1,9 @@
 <?php
 
 use yii\db\Migration;
-use sales\rbac\rules\lead\view\boExpertBlock\LeadViewBoExpertBlockGroupRule;
-use sales\rbac\rules\lead\view\boExpertBlock\LeadViewBoExpertBlockEmptyOwnerRule;
-use sales\rbac\rules\lead\view\boExpertBlock\LeadViewBoExpertBlockIsOwnerRule;
+use src\rbac\rules\lead\view\boExpertBlock\LeadViewBoExpertBlockGroupRule;
+use src\rbac\rules\lead\view\boExpertBlock\LeadViewBoExpertBlockEmptyOwnerRule;
+use src\rbac\rules\lead\view\boExpertBlock\LeadViewBoExpertBlockIsOwnerRule;
 
 /**
  * Class m201124_093813_add_lead_view_bo_expert_block_permissions

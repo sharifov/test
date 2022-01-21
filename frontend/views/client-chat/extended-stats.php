@@ -1,9 +1,9 @@
 <?php
 
-use sales\entities\chat\ChatExtendedGraphsSearch;
+use src\entities\chat\ChatExtendedGraphsSearch;
 use yii\bootstrap4\ActiveForm;
 use yii\helpers\Html;
-use sales\widgets\UserSelect2Widget;
+use src\widgets\UserSelect2Widget;
 use kartik\select2\Select2;
 use common\models\UserGroup;
 use common\models\Employee;
@@ -104,7 +104,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         <div class="col-md-2">
                             <?= $form->field($model, 'cch_channel_id', [
                                 'options' => ['class' => 'form-group']
-                            ])->dropDownList(\sales\model\clientChatChannel\entity\ClientChatChannel::getList(), [
+                            ])->dropDownList(\src\model\clientChatChannel\entity\ClientChatChannel::getList(), [
                                 'prompt' => 'All'
                             ])->label('Channel') ?>
                         </div>

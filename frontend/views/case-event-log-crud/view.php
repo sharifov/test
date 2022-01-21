@@ -3,10 +3,10 @@
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 use yii\helpers\VarDumper;
-use sales\entities\cases\CaseEventLog;
+use src\entities\cases\CaseEventLog;
 
 /* @var $this yii\web\View */
-/* @var $model sales\entities\cases\CaseEventLog */
+/* @var $model src\entities\cases\CaseEventLog */
 
 $this->title = $model->cel_id;
 $this->params['breadcrumbs'][] = ['label' => 'Case Event Logs', 'url' => ['index']];

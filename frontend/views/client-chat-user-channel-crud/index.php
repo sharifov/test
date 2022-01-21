@@ -7,7 +7,7 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\clientChatUserChannel\entity\search\ClientChatUserChannelSearch */
+/* @var $searchModel src\model\clientChatUserChannel\entity\search\ClientChatUserChannelSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Client Chat User Channels';

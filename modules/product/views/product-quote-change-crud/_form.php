@@ -5,7 +5,7 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeDecisionType;
-use sales\widgets\DateTimePicker;
+use src\widgets\DateTimePicker;
 
 /* @var $this yii\web\View */
 /* @var $model modules\product\src\entities\productQuoteChange\ProductQuoteChange */
@@ -22,7 +22,7 @@ use sales\widgets\DateTimePicker;
 
         <?= $form->field($model, 'pqc_case_id')->textInput() ?>
 
-        <?= $form->field($model, 'pqc_decision_user')->widget(\sales\widgets\UserSelect2Widget::class, [
+        <?= $form->field($model, 'pqc_decision_user')->widget(\src\widgets\UserSelect2Widget::class, [
             'data' => $model->pqc_decision_user ? [
                 $model->pqc_decision_user => $model->pqcDecisionUser->username
             ] : [],
@@ -31,6 +31,8 @@ use sales\widgets\DateTimePicker;
         <?= $form->field($model, 'pqc_status_id')->dropDownList(ProductQuoteChangeStatus::getList(), ['prompt' => '---']) ?>
 
         <?= $form->field($model, 'pqc_is_automate')->checkbox() ?>
+
+        <?= $form->field($model, 'pqc_refund_allowed')->checkbox() ?>
 
       <?= $form->field($model, 'pqc_decision_type_id')->dropDownList(ProductQuoteChangeDecisionType::getList(), ['prompt' => '---']) ?>
 

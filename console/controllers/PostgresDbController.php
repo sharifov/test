@@ -2,8 +2,8 @@
 
 namespace console\controllers;
 
-use sales\model\clientChatMessage\entity\ClientChatMessage;
-use sales\services\log\GlobalEntityAttributeFormatServiceService;
+use src\model\clientChatMessage\entity\ClientChatMessage;
+use src\services\log\GlobalEntityAttributeFormatServiceService;
 use yii\console\Controller;
 use yii\helpers\Console;
 

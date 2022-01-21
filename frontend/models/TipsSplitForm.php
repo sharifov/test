@@ -38,7 +38,7 @@ class TipsSplitForm extends Model
         return [
             [['Lead'], 'required'],
             [['TipsSplit'], 'checkSumPercentage'],
-            [['TipsSplit'], 'checkMainAgent'],
+//            [['TipsSplit'], 'checkMainAgent'],
             [['TipsSplit'], 'safe'],
         ];
     }

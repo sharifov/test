@@ -8,7 +8,7 @@ use modules\flight\models\forms\ItineraryEditForm;
 use modules\flight\src\repositories\flight\FlightRepository;
 use modules\flight\src\services\flight\FlightManageService;
 use modules\hotel\models\Hotel;
-use sales\forms\CompositeFormHelper;
+use src\forms\CompositeFormHelper;
 use Yii;
 use modules\flight\models\Flight;
 use modules\flight\models\search\FlightSearch;

@@ -2,18 +2,18 @@
 
 use common\models\Client;
 use common\models\Employee;
-use sales\logger\formatter\ClientFormatter;
+use src\logger\formatter\ClientFormatter;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
-use sales\helpers\email\MaskEmailHelper;
-use sales\helpers\phone\MaskPhoneHelper;
+use src\helpers\email\MaskEmailHelper;
+use src\helpers\phone\MaskPhoneHelper;
 use modules\cases\src\abac\CasesAbacObject;
 use modules\cases\src\abac\dto\CasesAbacDto;
 
 /**
  * @var Employee $user
  * @var $model Client
- * @var $case \sales\entities\cases\Cases
+ * @var $case \src\entities\cases\Cases
  * @var $disableMasking bool
  */
 
@@ -40,7 +40,7 @@ if ($case) {
                 [
                     'attribute' => 'first_name',
                     'value' => static function (Client $client) {
-                        return \sales\model\client\helpers\ClientFormatter::formatName($client);
+                        return \src\model\client\helpers\ClientFormatter::formatName($client);
                     },
                     'format' => 'raw',
                 ],

@@ -29,7 +29,7 @@ use modules\qaTask\src\entities\qaTask\QaTask;
 use modules\qaTask\src\useCases\qaTask\take\QaTaskTakeService;
 use modules\qaTask\src\useCases\qaTask\takeOver\QaTaskTakeOverForm;
 use modules\qaTask\src\useCases\qaTask\takeOver\QaTaskTakeOverService;
-use sales\auth\Auth;
+use src\auth\Auth;
 use yii\helpers\ArrayHelper;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;

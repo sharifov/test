@@ -1,7 +1,7 @@
 <?php
 
 use common\models\Lead;
-use sales\helpers\text\CleanTextHelper;
+use src\helpers\text\CleanTextHelper;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Json;

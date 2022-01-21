@@ -1,9 +1,9 @@
 <?php
 
 use yii\db\Migration;
-use sales\rbac\rules\lead\view\taskListBlock\LeadViewTaskListBlockGroupRule;
-use sales\rbac\rules\lead\view\taskListBlock\LeadViewTaskListBlockEmptyOwnerRule;
-use sales\rbac\rules\lead\view\taskListBlock\LeadViewTaskListBlockIsOwnerRule;
+use src\rbac\rules\lead\view\taskListBlock\LeadViewTaskListBlockGroupRule;
+use src\rbac\rules\lead\view\taskListBlock\LeadViewTaskListBlockEmptyOwnerRule;
+use src\rbac\rules\lead\view\taskListBlock\LeadViewTaskListBlockIsOwnerRule;
 
 /**
  * Class m201124_070405_add_lead_view_task_list_block_permissions

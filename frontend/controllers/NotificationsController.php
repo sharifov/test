@@ -5,7 +5,7 @@ namespace frontend\controllers;
 use frontend\widgets\notification\NotificationCache;
 use frontend\widgets\notification\NotificationMessage;
 use frontend\widgets\notification\NotificationWidget;
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
 use common\models\Notifications;
 use common\models\search\NotificationsSearch;
@@ -19,7 +19,6 @@ use yii\filters\VerbFilter;
  */
 class NotificationsController extends FController
 {
-
     public function behaviors()
     {
         $behaviors = [

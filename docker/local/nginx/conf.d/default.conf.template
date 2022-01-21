@@ -163,7 +163,7 @@ server {
     }
 
     location /health-check {
-        try_files $uri $uri/ /health-check.php;
+        try_files $uri $uri/ /health-check.php$is_args$args;
     }
 
     location ~* /\. {

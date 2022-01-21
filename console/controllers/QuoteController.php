@@ -12,7 +12,6 @@ use common\components\EmailService;
 
 class QuoteController extends Controller
 {
-
     public function actionSendOpenedNotification($quoteUid)
     {
         printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
@@ -25,7 +24,7 @@ class QuoteController extends Controller
         }
         $errors = [];
 
-        $host = \Yii::$app->params['url_address'];
+        $host = \Yii::$app->params['url'];
 
         $lead = $quote->lead;
         $employee = $lead->employee;

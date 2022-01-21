@@ -2,13 +2,13 @@
 
 use common\models\Currency;
 use dosamigos\datepicker\DatePicker;
-use sales\model\clientAccount\entity\ClientAccount;
-use sales\widgets\DateTimePicker;
+use src\model\clientAccount\entity\ClientAccount;
+use src\widgets\DateTimePicker;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientAccount\entity\ClientAccount */
+/* @var $model src\model\clientAccount\entity\ClientAccount */
 /* @var $form ActiveForm */
 ?>
 

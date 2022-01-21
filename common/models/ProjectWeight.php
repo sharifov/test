@@ -16,7 +16,6 @@ use yii\db\ActiveRecord;
  */
 class ProjectWeight extends ActiveRecord
 {
-
     public const SCENARIO_INSERT = 'insert';
 
     /**

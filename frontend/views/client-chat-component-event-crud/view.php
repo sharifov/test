@@ -1,11 +1,11 @@
 <?php
 
-use sales\model\clientChat\componentEvent\entity\ClientChatComponentEvent;
+use src\model\clientChat\componentEvent\entity\ClientChatComponentEvent;
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChat\componentEvent\entity\ClientChatComponentEvent */
+/* @var $model src\model\clientChat\componentEvent\entity\ClientChatComponentEvent */
 
 $this->title = $model->getComponentEventName();
 $this->params['breadcrumbs'][] = ['label' => 'Client Chat Component Events', 'url' => ['index']];

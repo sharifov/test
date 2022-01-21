@@ -21,12 +21,12 @@ use common\models\UserConnection;
 use common\models\UserOnline;
 use common\models\UserProjectParams;
 use frontend\models\UserSiteActivity;
-use sales\entities\cases\Cases;
-use sales\helpers\email\TextConvertingHelper;
-use sales\logger\db\GlobalLogInterface;
-use sales\logger\db\LogDTO;
-use sales\model\user\entity\monitor\UserMonitor;
-use sales\services\lead\qcall\CalculateDateService;
+use src\entities\cases\Cases;
+use src\helpers\email\TextConvertingHelper;
+use src\logger\db\GlobalLogInterface;
+use src\logger\db\LogDTO;
+use src\model\user\entity\monitor\UserMonitor;
+use src\services\lead\qcall\CalculateDateService;
 use yii\base\InvalidConfigException;
 use yii\console\Controller;
 use Yii;
@@ -45,8 +45,7 @@ use yii\helpers\VarDumper;
  */
 class UserMonitorController extends Controller
 {
-
-
+    // todo may be deprecated. questions
     public function actionLogout2()
     {
         printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
@@ -131,9 +130,11 @@ class UserMonitorController extends Controller
 
             $timerSec = UserMonitor::autoLogoutTimerSec();
             $isShowMessage = UserMonitor::isAutologoutShowMessage() ? 'true' : 'false';
-
             $timeStart = microtime(true);
-            $users = UserOnline::find()->where(['uo_idle_state' => true])->andWhere(['<=', 'uo_idle_state_dt', date('Y-m-d H:i:s', strtotime('-' . $idleTimeMinutes . ' minutes'))])->all();
+            $users = UserOnline::find()
+                ->where(['uo_idle_state' => true])
+                ->andWhere(['<=', 'uo_idle_state_dt', date('Y-m-d H:i:s', strtotime('-' . $idleTimeMinutes . ' minutes'))])
+                ->all();
 
             if ($users) {
                 /** @var UserOnline $userOnline */

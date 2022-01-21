@@ -2,7 +2,7 @@
 
 /**
  * @var $this \yii\web\View
- * @var $clientChat \sales\model\clientChat\entity\ClientChat|null
+ * @var $clientChat \src\model\clientChat\entity\ClientChat|null
  * @var $visitorLog \common\models\VisitorLog|null
  * @var $clientChatVisitorData ClientChatVisitorData|null
  * @var yii\data\ActiveDataProvider $dataProviderRequest
@@ -12,7 +12,7 @@
  */
 
 use common\models\Client;
-use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
+use src\model\clientChatVisitorData\entity\ClientChatVisitorData;
 
 $tabs[] = [
     'id' => 'chat-data',

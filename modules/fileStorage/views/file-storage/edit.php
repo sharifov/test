@@ -2,7 +2,7 @@
 
 use modules\fileStorage\src\useCase\fileStorage\update\EditForm;
 use yii\bootstrap4\Html;
-use sales\widgets\DateTimePicker;
+use src\widgets\DateTimePicker;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */

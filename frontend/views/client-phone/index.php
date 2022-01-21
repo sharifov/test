@@ -5,7 +5,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use dosamigos\datepicker\DatePicker;
 use common\components\grid\DateTimeColumn;
-use sales\helpers\phone\MaskPhoneHelper;
+use src\helpers\phone\MaskPhoneHelper;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
@@ -90,7 +90,6 @@ $this->params['breadcrumbs'][] = $this->title;
 
             //'comments:ntext',
             'is_sms:boolean',
-
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'validate_dt'

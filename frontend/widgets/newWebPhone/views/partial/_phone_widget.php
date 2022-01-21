@@ -1,6 +1,6 @@
 <?php
 
-use sales\auth\Auth;
+use src\auth\Auth;
 use yii\web\View;
 
 /** @var $showWidgetContent bool */

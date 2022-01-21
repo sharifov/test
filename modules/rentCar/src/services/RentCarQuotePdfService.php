@@ -3,7 +3,7 @@
 namespace modules\rentCar\src\services;
 
 use modules\order\src\events\OrderFileGeneratedEvent;
-use sales\services\pdf\processingPdf\PdfBaseService;
+use src\services\pdf\processingPdf\PdfBaseService;
 
 /**
  * Class RentCarQuotePdfService

@@ -1,15 +1,15 @@
 <?php
 
 use common\components\grid\DateTimeColumn;
-use sales\helpers\phone\MaskPhoneHelper;
-use sales\model\contactPhoneList\entity\ContactPhoneList;
+use src\helpers\phone\MaskPhoneHelper;
+use src\model\contactPhoneList\entity\ContactPhoneList;
 use yii\grid\ActionColumn;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\contactPhoneList\entity\ContactPhoneListCrudSearch */
+/* @var $searchModel src\model\contactPhoneList\entity\ContactPhoneListCrudSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Contact Phone Lists';

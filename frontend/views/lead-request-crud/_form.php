@@ -1,12 +1,12 @@
 <?php
 
 use frontend\helpers\JsonHelper;
-use sales\helpers\app\AppHelper;
+use src\helpers\app\AppHelper;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\leadRequest\entity\LeadRequest */
+/* @var $model src\model\leadRequest\entity\LeadRequest */
 /* @var $form ActiveForm */
 ?>
 

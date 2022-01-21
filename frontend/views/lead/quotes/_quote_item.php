@@ -12,7 +12,7 @@ use common\models\Quote;
 use common\models\Airline;
 use common\components\SearchService;
 use frontend\helpers\QuoteHelper;
-use sales\helpers\quote\ImageHelper;
+use src\helpers\quote\ImageHelper;
 use yii\bootstrap\Html;
 use yii\helpers\Url;
 

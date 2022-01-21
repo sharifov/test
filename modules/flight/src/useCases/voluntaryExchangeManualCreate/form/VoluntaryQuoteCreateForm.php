@@ -13,11 +13,12 @@ use modules\flight\src\useCases\flightQuote\createManually\FlightQuotePaxPriceFo
 use modules\flight\src\useCases\flightQuote\createManually\helpers\FlightQuotePaxPriceHelper;
 use modules\flight\src\useCases\flightQuote\createManually\VoluntaryQuotePaxPriceForm;
 use modules\flight\src\useCases\form\ChangeQuoteCreateForm;
+use modules\flight\src\useCases\voluntaryExchangeManualCreate\service\VoluntaryExchangeBOService;
 use modules\product\src\entities\productTypePaymentMethod\ProductTypePaymentMethodQuery;
-use sales\helpers\ErrorsToStringHelper;
-use sales\helpers\product\ProductQuoteHelper;
-use sales\services\parsingDump\lib\ParsingDump;
-use sales\services\parsingDump\ReservationService;
+use src\helpers\ErrorsToStringHelper;
+use src\helpers\product\ProductQuoteHelper;
+use src\services\parsingDump\lib\ParsingDump;
+use src\services\parsingDump\ReservationService;
 use yii\base\Model;
 use yii\helpers\ArrayHelper;
 
@@ -80,8 +81,9 @@ class VoluntaryQuoteCreateForm extends ChangeQuoteCreateForm
     private bool $defaultPrices;
 
     public ?string $customerPackage = null;
-    public ?float $serviceFeeAmount = null;
     public ?string $serviceFeeCurrency = null;
+
+    public $serviceFeeAmount;
 
     /**
      * @param int|null $creatorId
@@ -145,7 +147,11 @@ class VoluntaryQuoteCreateForm extends ChangeQuoteCreateForm
             [['prices'], IsArrayValidator::class, 'skipOnError' => true, 'skipOnEmpty' => true],
             [['prices'], 'priceProcessing'],
 
-            [['oldPrices', 'customerPackage', 'serviceFeeAmount', 'serviceFeeCurrency'], 'safe'],
+            [['oldPrices', 'customerPackage', 'serviceFeeCurrency'], 'safe'],
+
+            [['serviceFeeAmount'], 'filter', 'filter' => static function ($value) {
+                return empty($value) ? null : VoluntaryExchangeBOService::prepareFloat($value);
+            }],
         ];
     }
 

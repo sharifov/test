@@ -5,7 +5,7 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\phoneList\entity\PhoneList */
+/* @var $model src\model\phoneList\entity\PhoneList */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 <div class="phone-list-form">

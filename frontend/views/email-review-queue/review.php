@@ -3,7 +3,7 @@
 /**
  * @var EmailReviewQueue $model
  * @var Email $email
- * @var \sales\forms\emailReviewQueue\EmailReviewQueueForm $previewForm
+ * @var \src\forms\emailReviewQueue\EmailReviewQueueForm $previewForm
  * @var $this yii\web\View
  * @var $displayActionBtns bool
  */
@@ -14,9 +14,9 @@ use modules\email\src\abac\EmailAbacObject;
 use modules\fileStorage\src\entity\fileStorage\FileStorageQuery;
 use modules\fileStorage\src\services\url\QueryParams;
 use modules\fileStorage\src\services\url\UrlGenerator;
-use sales\helpers\email\MaskEmailHelper;
-use sales\model\emailReviewQueue\entity\EmailReviewQueue;
-use sales\model\emailReviewQueue\entity\EmailReviewQueueStatus;
+use src\helpers\email\MaskEmailHelper;
+use src\model\emailReviewQueue\entity\EmailReviewQueue;
+use src\model\emailReviewQueue\entity\EmailReviewQueueStatus;
 use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\widgets\DetailView;

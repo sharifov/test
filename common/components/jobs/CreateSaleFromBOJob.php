@@ -2,7 +2,7 @@
 
 namespace common\components\jobs;
 
-use sales\services\cases\CasesSaleService;
+use src\services\cases\CasesSaleService;
 use yii\helpers\VarDumper;
 use yii\queue\JobInterface;
 use Yii;

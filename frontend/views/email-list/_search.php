@@ -1,6 +1,6 @@
 <?php
 
-use sales\model\emailList\entity\search\EmailListSearch;
+use src\model\emailList\entity\search\EmailListSearch;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 

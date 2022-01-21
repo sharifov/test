@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo */
+/* @var $model src\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo */
 
 $this->title = 'Create Contact Phone Service Info';
 $this->params['breadcrumbs'][] = ['label' => 'Contact Phone Service Infos', 'url' => ['index']];

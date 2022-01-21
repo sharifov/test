@@ -2,7 +2,7 @@
 
 namespace webapi\modules\v2\controllers;
 
-use sales\entities\cases\CaseCategory;
+use src\entities\cases\CaseCategory;
 use webapi\src\response\messages\DataMessage;
 use webapi\src\response\messages\Message;
 use webapi\src\response\SuccessResponse;

@@ -3,9 +3,9 @@
 namespace frontend\widgets;
 
 use common\models\Lead;
-use sales\entities\cases\Cases;
-use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChatChannel\entity\ClientChatChannel;
+use src\entities\cases\Cases;
+use src\model\clientChat\entity\ClientChat;
+use src\model\clientChatChannel\entity\ClientChatChannel;
 use Yii;
 use yii\helpers\ArrayHelper;
 
@@ -40,8 +40,6 @@ class OnlineConnection extends \yii\bootstrap\Widget
         $this->subscribeToCaseChannel($caseId, $subList);
         $this->subscribeToClientChatChannel($userId, $subList);
         $pageUrl = urlencode(\yii\helpers\Url::current());
-        $wsHost = (Yii::$app->request->isSecureConnection ? 'wss' : 'ws') .
-            '://' . Yii::$app->request->serverName . '/ws';
 
         $urlParams = [
             'user_id' => $userId,
@@ -54,7 +52,7 @@ class OnlineConnection extends \yii\bootstrap\Widget
             'sub_list' => $subList,
         ];
 
-        $wsUrl = $wsHost . '/?' . http_build_query($urlParams);
+        $wsUrl = (Yii::$app->request->isSecureConnection ? 'wss' : 'ws') . '://' . Yii::$app->params['webSocketServer']['connectionUrl'] . '/?' . http_build_query($urlParams);
 
         return $this->render('online_connection', [
             'userId' =>  $userId,

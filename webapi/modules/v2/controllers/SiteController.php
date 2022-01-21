@@ -15,7 +15,6 @@ use yii\web\Response;
  */
 class SiteController extends Controller
 {
-
     /**
      * @return array
      */

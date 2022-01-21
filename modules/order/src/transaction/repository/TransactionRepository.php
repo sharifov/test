@@ -3,7 +3,7 @@
 namespace modules\order\src\transaction\repository;
 
 use common\models\Transaction;
-use sales\dispatchers\EventDispatcher;
+use src\dispatchers\EventDispatcher;
 
 /**
  * Class TransactionRepository

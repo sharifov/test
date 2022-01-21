@@ -7,7 +7,6 @@ use yii\db\Migration;
  */
 class m201221_141845_add_languages_tbl_language extends Migration
 {
-
     public $langs = [
         [
             'language_id' => 'en-AU',

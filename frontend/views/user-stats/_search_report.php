@@ -2,7 +2,8 @@
 
 use common\models\Employee;
 use kartik\select2\Select2;
-use sales\model\user\reports\stats\UserStatsReport;
+use src\model\user\reports\stats\UserStatsReport;
+use src\model\userModelSetting\service\UserModelSettingDictionary;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -129,7 +130,6 @@ use yii\widgets\ActiveForm;
                 'pluginOptions' => ['allowClear' => true],
             ])->label('Users') ?>
         </div>
-
     </div>
     <br>
     <div class="row">

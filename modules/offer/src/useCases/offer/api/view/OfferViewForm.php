@@ -2,8 +2,8 @@
 
 namespace modules\offer\src\useCases\offer\api\view;
 
-use sales\forms\api\VisitorForm;
-use sales\forms\CompositeForm;
+use src\forms\api\VisitorForm;
+use src\forms\CompositeForm;
 use common\components\validators\IsNotArrayValidator;
 
 /**

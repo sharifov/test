@@ -2,11 +2,12 @@
 
 namespace webapi\controllers;
 
+use src\websocketServer\healthCheck\HealthCheckRequestForm;
+use src\websocketServer\healthCheck\WebsocketHealthChecker;
 use webapi\behaviors\HttpBasicAuthHealthCheck;
 use yii\rest\Controller;
 use yii\web\Response;
 use Yii;
-use yii\web\NotFoundHttpException;
 
 /**
  * Class HealthController
@@ -17,7 +18,6 @@ use yii\web\NotFoundHttpException;
 
 class HealthController extends Controller
 {
-
     public function init()
     {
         parent::init();
@@ -141,6 +141,105 @@ class HealthController extends Controller
         return $response['json'] ?? [];
     }
 
+    /**
+     * @api {get} /health-check/ws Health check Websocket server
+     * @apiVersion 0.1.0
+     * @apiName HealthCheck Sales Websocket
+     * @apiGroup App
+     * @apiPermission Authorized User
+     * @apiDescription If username is empty in config file then HttpBasicAuth is disabled.
+     *
+     * @apiHeader {string} Authorization    Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParam {string{3..50}=[a-zA-Z]}        ping                 Ping text
+     *
+     * @apiSuccessExample {json} Success-Response:
+     *
+     * HTTP/1.1 200 OK
+     *   {
+     *       "ws": "Ok",
+     *       "message": "Successfully connected to websocket server",
+     *       "appInstance": "1",
+     *       "mysql": "Ok",
+     *       "mysqlSlave": "Ok",
+     *       "redis": "Ok",
+     *       "ping": {
+     *           "pong": "WebsocketServerTest",
+     *           "appInstance": "1"
+     *       }
+     *   }
+     *
+     * HTTP/1.1 200 OK
+     *   {
+     *       "ws": "Ok",
+     *       "message": "Successfully connected to websocket server",
+     *       "appInstance": "1",
+     *       "mysql": "Error",
+     *       "mysqlSlave": "Ok",
+     *       "redis": "Error",
+     *       "ping": {
+     *           "pong": "WebsocketServerTest",
+     *           "appInstance": "1"
+     *       }
+     *   }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     *   {
+     *       "ws": "Error",
+     *       "message": "Cant connect to Websocket Server."
+     *   }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     *   {
+     *       "ws": "Error",
+     *       "message": "Ping cannot be blank."
+     *   }
+     */
+    public function actionWs()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $form = new HealthCheckRequestForm();
+
+        if (!$form->load(Yii::$app->request->get())) {
+            Yii::$app->response->setStatusCode(422);
+            return [
+                'ws' => 'Error',
+                'message' => 'Can load data',
+            ];
+        }
+
+        if (!$form->validate()) {
+            Yii::$app->response->setStatusCode(422);
+            return [
+                'ws' => 'Error',
+                'message' => $form->getFirstError('ping'),
+            ];
+        }
+
+        try {
+            return (new WebsocketHealthChecker())->check(
+                'ws://' . env('CONSOLE_CONFIG_PARAMS_WEBSOCKETSERVER_HOST') . ':' . env('CONSOLE_CONFIG_PARAMS_WEBSOCKETSERVER_PORT'),
+                5,
+                $form->ping
+            );
+        } catch (\Throwable $e) {
+            Yii::$app->response->setStatusCode(422);
+            return [
+                'ws' => 'Error',
+                'message' => $e->getMessage(),
+            ];
+        }
+    }
 
     /**
      * @api {get, post} /health-check/metrics Get health check metrics text

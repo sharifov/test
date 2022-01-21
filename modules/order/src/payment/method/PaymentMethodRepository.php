@@ -3,7 +3,7 @@
 namespace modules\order\src\payment\method;
 
 use common\models\PaymentMethod;
-use sales\repositories\NotFoundException;
+use src\repositories\NotFoundException;
 
 class PaymentMethodRepository
 {

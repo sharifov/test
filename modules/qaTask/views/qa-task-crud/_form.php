@@ -7,9 +7,9 @@ use modules\qaTask\src\entities\qaTask\QaTaskRating;
 use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategoryQuery;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\qaTask\src\helpers\formatters\QaTaskCategoryFormatter;
-use sales\access\ListsAccess;
-use sales\auth\Auth;
-use sales\widgets\DateTimePicker;
+use src\access\ListsAccess;
+use src\auth\Auth;
+use src\widgets\DateTimePicker;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 

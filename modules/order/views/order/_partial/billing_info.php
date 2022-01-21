@@ -1,7 +1,7 @@
 <?php
 
 use modules\order\src\entities\order\Order;
-use sales\helpers\attribute\AttributeHelper;
+use src\helpers\attribute\AttributeHelper;
 use yii\widgets\Pjax;
 
 /* @var yii\web\View $this */

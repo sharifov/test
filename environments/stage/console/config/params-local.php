@@ -2,8 +2,8 @@
 
 return [
     'webSocketServer' => [
-        'host' => env('console.config.params.webSocketServer.host'),
-        'port' => env('console.config.params.webSocketServer.port'),
+        'host' => env('CONSOLE_CONFIG_PARAMS_WEBSOCKETSERVER_HOST'),
+        'port' => env('CONSOLE_CONFIG_PARAMS_WEBSOCKETSERVER_PORT'),
         'mode' => SWOOLE_PROCESS,
         'sockType' => SWOOLE_SOCK_TCP,
         'settings' => [

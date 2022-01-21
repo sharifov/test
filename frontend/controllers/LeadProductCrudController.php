@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\leadProduct\entity\LeadProduct;
-use sales\model\leadProduct\entity\search\LeadProductSearch;
+use src\model\leadProduct\entity\LeadProduct;
+use src\model\leadProduct\entity\search\LeadProductSearch;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;

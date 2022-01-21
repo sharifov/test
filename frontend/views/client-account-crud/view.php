@@ -1,11 +1,11 @@
 <?php
 
-use sales\model\clientAccount\entity\ClientAccount;
+use src\model\clientAccount\entity\ClientAccount;
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientAccount\entity\ClientAccount */
+/* @var $model src\model\clientAccount\entity\ClientAccount */
 
 $this->title = $model->ca_id;
 $this->params['breadcrumbs'][] = ['label' => 'Client Accounts', 'url' => ['index']];

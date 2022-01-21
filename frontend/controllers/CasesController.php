@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use _HumbugBox985cd1594210\Symfony\Component\Console\Exception\RuntimeException;
 use common\components\BackOffice;
 use common\components\CommunicationService;
+use common\helpers\LogHelper;
 use common\models\CaseNote;
 use common\models\CaseSale;
 use common\models\ClientEmail;
@@ -44,58 +45,60 @@ use modules\order\src\payment\PaymentRepository;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
 use modules\order\src\services\OrderManageService;
-use sales\auth\Auth;
-use sales\entities\cases\CaseEventLog;
-use sales\entities\cases\CaseEventLogSearch;
-use sales\entities\cases\CasesSourceType;
-use sales\entities\cases\CasesStatus;
-use sales\entities\cases\CaseStatusLogSearch;
-use sales\forms\cases\CasesAddEmailForm;
-use sales\forms\cases\CasesAddPhoneForm;
-use sales\forms\cases\CasesChangeStatusForm;
-use sales\forms\cases\CasesClientUpdateForm;
-use sales\forms\cases\CasesCreateByChatForm;
-use sales\forms\cases\CasesCreateByWebForm;
-use sales\forms\cases\CasesLinkChatForm;
-use sales\forms\cases\CasesSaleForm;
-use sales\helpers\app\AppHelper;
-use sales\helpers\email\MaskEmailHelper;
-use sales\helpers\ErrorsToStringHelper;
-use sales\helpers\setting\SettingHelper;
-use sales\model\callLog\entity\callLog\CallLogType;
-use sales\model\caseOrder\entity\CaseOrder;
-use sales\model\cases\useCases\cases\updateInfo\UpdateInfoForm;
-use sales\guards\cases\CaseManageSaleInfoGuard;
-use sales\model\cases\useCases\cases\updateInfo\Handler;
-use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChat\permissions\ClientChatActionPermission;
-use sales\model\clientChat\services\ClientChatAssignService;
-use sales\model\clientChatCase\entity\ClientChatCase;
-use sales\model\clientChatCase\entity\ClientChatCaseRepository;
-use sales\model\coupon\entity\couponCase\CouponCase;
-use sales\model\coupon\useCase\send\SendCouponsForm;
-use sales\model\department\department\Params;
-use sales\model\emailReviewQueue\EmailReviewQueueManageService;
-use sales\model\phone\AvailablePhoneList;
-use sales\model\saleTicket\useCase\create\SaleTicketService;
-use sales\repositories\cases\CaseCategoryRepository;
-use sales\repositories\cases\CasesRepository;
-use sales\repositories\cases\CasesSaleRepository;
-use sales\repositories\client\ClientEmailRepository;
-use sales\repositories\NotFoundException;
-use sales\repositories\quote\QuoteRepository;
-use sales\services\cases\CasesSaleService;
-use sales\services\cases\CasesCommunicationService;
-use sales\repositories\user\UserRepository;
-use sales\services\cases\CasesCreateService;
-use sales\services\cases\CasesManageService;
-use sales\services\client\ClientManageService;
-use sales\services\client\ClientUpdateFromEntityService;
-use sales\services\email\EmailService;
-use sales\services\TransactionManager;
+use src\auth\Auth;
+use src\entities\cases\CaseEventLog;
+use src\entities\cases\CaseEventLogSearch;
+use src\entities\cases\CasesSourceType;
+use src\entities\cases\CasesStatus;
+use src\entities\cases\CaseStatusLogSearch;
+use src\exception\AccessDeniedException;
+use src\exception\BoResponseException;
+use src\forms\cases\CasesAddEmailForm;
+use src\forms\cases\CasesAddPhoneForm;
+use src\forms\cases\CasesChangeStatusForm;
+use src\forms\cases\CasesClientUpdateForm;
+use src\forms\cases\CasesCreateByChatForm;
+use src\forms\cases\CasesCreateByWebForm;
+use src\forms\cases\CasesLinkChatForm;
+use src\forms\cases\CasesSaleForm;
+use src\helpers\app\AppHelper;
+use src\helpers\email\MaskEmailHelper;
+use src\helpers\ErrorsToStringHelper;
+use src\helpers\setting\SettingHelper;
+use src\model\callLog\entity\callLog\CallLogType;
+use src\model\caseOrder\entity\CaseOrder;
+use src\model\cases\useCases\cases\updateInfo\UpdateInfoForm;
+use src\guards\cases\CaseManageSaleInfoGuard;
+use src\model\cases\useCases\cases\updateInfo\Handler;
+use src\model\clientChat\entity\ClientChat;
+use src\model\clientChat\permissions\ClientChatActionPermission;
+use src\model\clientChat\services\ClientChatAssignService;
+use src\model\clientChatCase\entity\ClientChatCase;
+use src\model\clientChatCase\entity\ClientChatCaseRepository;
+use src\model\coupon\entity\couponCase\CouponCase;
+use src\model\coupon\useCase\send\SendCouponsForm;
+use src\model\department\department\Params;
+use src\model\emailReviewQueue\EmailReviewQueueManageService;
+use src\model\phone\AvailablePhoneList;
+use src\model\saleTicket\useCase\create\SaleTicketService;
+use src\repositories\cases\CaseCategoryRepository;
+use src\repositories\cases\CasesRepository;
+use src\repositories\cases\CasesSaleRepository;
+use src\repositories\client\ClientEmailRepository;
+use src\repositories\NotFoundException;
+use src\repositories\quote\QuoteRepository;
+use src\services\cases\CasesSaleService;
+use src\services\cases\CasesCommunicationService;
+use src\repositories\user\UserRepository;
+use src\services\cases\CasesCreateService;
+use src\services\cases\CasesManageService;
+use src\services\client\ClientManageService;
+use src\services\client\ClientUpdateFromEntityService;
+use src\services\email\EmailService;
+use src\services\TransactionManager;
 use Yii;
-use sales\entities\cases\Cases;
-use sales\entities\cases\CasesSearch;
+use src\entities\cases\Cases;
+use src\entities\cases\CasesSearch;
 use yii\base\Exception;
 use yii\data\ActiveDataProvider;
 use yii\data\ArrayDataProvider;
@@ -1025,7 +1028,9 @@ class CasesController extends FController
                             throw new \RuntimeException('OrderCreateFromSaleForm not loaded');
                         }
                         if (!$orderCreateFromSaleForm->validate()) {
-                            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($orderCreateFromSaleForm));
+                            throw new \RuntimeException(
+                                ErrorsToStringHelper::extractFromModel($orderCreateFromSaleForm, ' ', true)
+                            );
                         }
                         $order = $this->orderCreateFromSaleService->orderCreate($orderCreateFromSaleForm);
 
@@ -1049,7 +1054,7 @@ class CasesController extends FController
             } catch (\Throwable $throwable) {
                 $transactionOrder->rollBack();
                 $message = AppHelper::throwableLog($throwable, true);
-                $message['saleData'] = $saleData;
+                $message['saleData'] = LogHelper::hidePersonalData($saleData, CasesSaleService::SENSITIVE_KEYS);
                 Yii::error($message, 'CasesController:actionAddSale:Order');
             }
         }
@@ -1497,7 +1502,7 @@ class CasesController extends FController
     }
 
     private function sendFeedbackEmail(
-        \sales\model\project\entity\params\Params $params,
+        \src\model\project\entity\params\Params $params,
         Cases $case,
         CasesChangeStatusForm $form,
         Employee $user,
@@ -1839,7 +1844,7 @@ class CasesController extends FController
                     $out['message'] = implode("; ", $form->getErrorSummary(false));
                 }
             }
-        } catch (\RuntimeException $exception) {
+        } catch (\RuntimeException | AccessDeniedException $exception) {
             $out['message'] = $exception->getMessage();
         } catch (\Throwable $exception) {
             $out['message'] = $exception->getMessage();
@@ -1908,16 +1913,16 @@ class CasesController extends FController
                 $out['error'] = 1;
                 $out['message'] = 'BO request Error: ' . (json_decode($response->content, true)['message'] ?? '');
             }
-        } catch (\Throwable $throwable) {
+        } catch (AccessDeniedException $e) {
+            $out['error'] = 1;
+            $out['message'] = $e->getMessage();
+        } catch (\Throwable $e) {
             $out['error'] = 1;
             $out['message'] = 'An internal Sales error has occurred; Check system logs;';
-            if ($throwable->getCode() < 0 && $throwable->getCode() > -4) {
-                $out['message'] = $throwable->getMessage();
+            if ($e->getCode() < 0 && $e->getCode() > -4) {
+                $out['message'] = $e->getMessage();
             }
-            Yii::error(
-                \yii\helpers\VarDumper::dumpAsString($throwable),
-                'CaseController:actionAjaxSyncWithBackOffice:catch:Throwable'
-            );
+            \Yii::error(AppHelper::throwableLog($e), 'CaseController:actionAjaxSyncWithBackOffice:catch:Throwable');
         }
 
         return $out;
@@ -1940,7 +1945,7 @@ class CasesController extends FController
         );
 
         if ($canManageSaleInfo) {
-            throw new \DomainException($canManageSaleInfo, -3);
+            throw new AccessDeniedException($canManageSaleInfo, -3);
         }
 
         return true;
@@ -1982,16 +1987,17 @@ class CasesController extends FController
             }
 
             $out['message'] = 'Sale info: ' . $caseSale->css_sale_id . ' successfully refreshed';
-        } catch (\Throwable $throwable) {
+        } catch (AccessDeniedException | NotFoundException $e) {
+            $out['error'] = 1;
+            $out['message'] = $e->getMessage();
+        } catch (\DomainException | \RuntimeException | BoResponseException $e) {
+            $out['error'] = 1;
+            $out['message'] = $e->getMessage();
+            \Yii::warning(AppHelper::throwableLog($e), 'CaseController:actionAjaxRefreshSaleInfo:DomainException|RuntimeException|BoResponseException');
+        } catch (\Throwable $e) {
             $out['error'] = 1;
             $out['message'] = 'An internal Sales error has occurred; Check system logs;';
-            if ($throwable->getCode() <= 0 && $throwable->getCode() > -4) {
-                $out['message'] = $throwable->getMessage();
-            }
-            Yii::error(
-                \yii\helpers\VarDumper::dumpAsString($throwable->getMessage(), 20),
-                'CaseController:actionAjaxRefreshSaleInfo:Throwable'
-            );
+            \Yii::error(AppHelper::throwableLog($e), 'CaseController:actionAjaxRefreshSaleInfo:Throwable');
         }
 
         return $this->asJson($out);

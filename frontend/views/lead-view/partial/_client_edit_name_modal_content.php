@@ -3,14 +3,14 @@
 /**
  * @var $form ActiveForm
  * @var $this View
- * @var $editName \sales\services\client\ClientCreateForm
+ * @var $editName \src\services\client\ClientCreateForm
  * @var $lead Lead
  */
 
 use common\models\Language;
 use common\models\Lead;
-use sales\auth\Auth;
-use sales\services\client\ClientCreateForm;
+use src\auth\Auth;
+use src\services\client\ClientCreateForm;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
@@ -18,7 +18,6 @@ use yii\widgets\ActiveForm;
 use modules\lead\src\abac\LeadAbacObject;
 use modules\lead\src\abac\dto\LeadAbacDto;
 
-$leadAbacDto = new LeadAbacDto($lead, Auth::id())
 ?>
 
 <div class="edit-name-modal-content-ghj">
@@ -41,15 +40,42 @@ $leadAbacDto = new LeadAbacDto($lead, Auth::id())
 
     <?= $form->field($editName, 'middleName')->textInput() ?>
 
-    <?php /** @abac $leadAbacDto, LeadAbacObject::UI_FIELD_LOCALE_FORM_UPDATE_CLIENT, LeadAbacObject::ACTION_ACCESS, Field Locale in form Client Update*/ ?>
-    <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_FIELD_LOCALE_FORM_UPDATE_CLIENT, LeadAbacObject::ACTION_UPDATE)) : ?>
-        <?= $form->field($editName, 'locale')->dropDownList(Language::getLocaleList(false), ['prompt' => '-']) ?>
-    <?php endif ?>
+    <?php
+    $leadAbacDto = new LeadAbacDto($lead, Auth::id());
+    $leadAbacDto->formAttribute = 'locale';
+    $leadAbacDto->formMultiAttribute[0] = 'locale';
+    $leadAbacDto->isNewRecord = false;
+    /** @abac $leadAbacDto, LeadAbacObject::CLIENT_CREATE_FORM, LeadAbacObject::ACTION_VIEW, Locale field view*/
+    $view = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::CLIENT_CREATE_FORM, LeadAbacObject::ACTION_VIEW);
+    /** @abac $leadAbacDto, LeadAbacObject::CLIENT_CREATE_FORM, LeadAbacObject::ACTION_EDIT, Locale field edit*/
+    $edit = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::CLIENT_CREATE_FORM, LeadAbacObject::ACTION_EDIT);
+    ?>
 
-    <?php /** @abac $leadAbacDto, LeadAbacObject::UI_FIELD_MARKETING_COUNTRY, LeadAbacObject::ACTION_ACCESS, Field Marketing Country */ ?>
-    <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_FIELD_MARKETING_COUNTRY, LeadAbacObject::ACTION_UPDATE)) : ?>
-        <?php echo $form->field($editName, 'marketingCountry')->dropDownList(Language::getCountryNames(), ['prompt' => '-']) ?>
-    <?php endif ?>
+        <?= $form->field($editName, 'locale', [
+            'options' => [
+                'class' => 'form-group',
+                'hidden' => ($edit ? !$edit : !$view),
+            ],
+        ])->dropDownList(Language::getLocaleList(false), ['prompt' => '-', 'disabled' => !$edit]) ?>
+
+    <?php
+    $leadAbacDto = new LeadAbacDto($lead, Auth::id());
+    $leadAbacDto->formAttribute = 'marketingCountry';
+    $leadAbacDto->formMultiAttribute[0] = 'marketingCountry';
+    $leadAbacDto->isNewRecord = false;
+    /** @abac $leadAbacDto, LeadAbacObject::CLIENT_CREATE_FORM, LeadAbacObject::ACTION_VIEW, Locale field view*/
+    $view = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::CLIENT_CREATE_FORM, LeadAbacObject::ACTION_VIEW);
+    /** @abac $leadAbacDto, LeadAbacObject::CLIENT_CREATE_FORM, LeadAbacObject::ACTION_EDIT, Locale field edit*/
+    $edit = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::CLIENT_CREATE_FORM, LeadAbacObject::ACTION_EDIT);
+    ?>
+
+        <?php echo $form->field($editName, 'marketingCountry', [
+            'options' => [
+                'class' => 'form-group',
+                'hidden' => ($edit ? !$edit : !$view),
+            ],
+        ])->dropDownList(Language::getCountryNames(), ['prompt' => '-', 'disabled' => !$edit]) ?>
+
 
     <?= $form->field($editName, 'id')->hiddenInput()->label(false)->error(false); ?>
 

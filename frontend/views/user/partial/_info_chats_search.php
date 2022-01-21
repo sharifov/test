@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use kartik\form\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChat\entity\search\ClientChatSearch */
+/* @var $model src\model\clientChat\entity\search\ClientChatSearch */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 

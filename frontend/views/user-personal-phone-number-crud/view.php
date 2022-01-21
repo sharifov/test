@@ -4,7 +4,7 @@ use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\phoneLine\userPersonalPhoneNumber\entity\UserPersonalPhoneNumber */
+/* @var $model src\model\phoneLine\userPersonalPhoneNumber\entity\UserPersonalPhoneNumber */
 
 $this->title = $model->upn_id;
 $this->params['breadcrumbs'][] = ['label' => 'User Personal Phone Numbers', 'url' => ['index']];

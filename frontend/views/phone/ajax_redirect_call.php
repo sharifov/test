@@ -1,7 +1,7 @@
 <?php
 
 use common\models\DepartmentPhoneProject;
-use sales\auth\Auth;
+use src\auth\Auth;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */

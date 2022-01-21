@@ -1,14 +1,14 @@
 <?php
 
 use common\models\Employee;
-use sales\model\user\entity\payment\UserPayment;
-use sales\model\user\entity\paymentCategory\UserPaymentCategory;
+use src\model\user\entity\payment\UserPayment;
+use src\model\user\entity\paymentCategory\UserPaymentCategory;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\user\entity\payment\UserPayment */
+/* @var $model src\model\user\entity\payment\UserPayment */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 

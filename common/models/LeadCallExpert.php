@@ -31,7 +31,6 @@ use yii\db\ActiveQuery;
  */
 class LeadCallExpert extends \yii\db\ActiveRecord
 {
-
     public const STATUS_PENDING     = 1;
     public const STATUS_PROCESSING  = 2;
     public const STATUS_DONE        = 3;

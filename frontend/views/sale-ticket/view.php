@@ -1,11 +1,11 @@
 <?php
 
-use sales\model\saleTicket\entity\SaleTicket;
+use src\model\saleTicket\entity\SaleTicket;
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\saleTicket\entity\SaleTicket */
+/* @var $model src\model\saleTicket\entity\SaleTicket */
 
 $this->title = 'Sale Ticket - Case Id :' . $model->st_case_id . '; Case Sale Id: ' . $model->st_case_sale_id;
 $this->params['breadcrumbs'][] = ['label' => 'Sale Tickets', 'url' => ['index']];

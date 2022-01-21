@@ -8,7 +8,7 @@ namespace frontend\themes\gentelella_v2\widgets;
 
 use common\models\Employee;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
 
 /**
@@ -340,10 +340,17 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Client Chat Data Request CRUD', 'url' => ['/client-chat-data-request-crud/index']],
                     ],
                 ],
-                ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'list'],
-                ['label' => 'SMS Distrib List', 'url' => ['/sms-distribution-list/index'], 'icon' => 'list'],
+                [
+                    'label' => 'SMS',
+                    'url' => 'javascript:',
+                    'icon' => 'commenting',
+                    'items' => [
+                        ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'list'],
+                        ['label' => 'SMS Distrib List', 'url' => ['/sms-distribution-list/index'], 'icon' => 'list'],
+                        ['label' => 'Sms Subscribe Crud', 'url' => ['/sms-subscribe-crud/index']],
+                    ]
+                ],
                 ['label' => 'Notification List', 'url' => ['/notifications/index'], 'icon' => 'bell-o'],
-
                 [
                     'label' => 'Conferences',
                     'url' => 'javascript:',
@@ -657,6 +664,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     'icon' => 'calendar',
                     'items' => [
                         ['label' => 'Shift', 'url' => ['/shift-crud/index']],
+                        ['label' => 'Shift Category', 'url' => ['/shift-category-crud/index']],
                         ['label' => 'Shift Schedule Rule', 'url' => ['/shift-schedule-rule-crud/index']],
                         ['label' => 'User Shift Assign', 'url' => ['/user-shift-assign-crud/index']],
                         ['label' => 'User Shift Schedule', 'url' => ['/user-shift-schedule-crud/index']],
@@ -666,30 +674,12 @@ class SideBarMenu extends \yii\bootstrap\Widget
             ]
         ];
 
-        $menuItems[] = [
-            'label' => 'Users',
-            'url' => 'javascript:',
-            'icon' => 'user',
-            'items' => [
-                ['label' => 'Users', 'url' => ['/employee/list'], 'icon' => 'user'],
 
-                ['label' => 'User Groups', 'url' => ['/user-group/index'], 'icon' => 'users'],
-                ['label' => 'User Groups Set', 'url' => ['/user-group-set/index'], 'icon' => 'users'],
-                ['label' => 'User Params', 'url' => ['/user-params/index'], 'icon' => 'bars'],
-                ['label' => 'User Project Params', 'url' => ['/user-project-params/index'], 'icon' => 'list'],
-                ['label' => 'User Groups Assignments', 'url' => ['/user-group-assign/index'], 'icon' => 'list'],
-                [
-                    'label' => 'User Product Type',
-                    'url' => ['/user-product-type/index'],
-                    'icon' => 'list',
-                    'visible' => Yii::$app->user->can('user-product-type/list')
-                ],
-                ['label' => 'User Status', 'url' => ['/user-status/index'], 'icon' => 'sliders'],
-                ['label' => 'User Online', 'url' => ['/user-online/index'], 'icon' => 'plug'],
-                ['label' => 'User Connections', 'url' => ['/user-connection/index'], 'icon' => 'plug'],
-                ['label' => 'User Commission Rules', 'url' => ['/user-commission-rules-crud/index'], 'icon' => 'list'],
-                ['label' => 'User Bonus Rules', 'url' => ['/user-bonus-rules-crud/index'], 'icon' => 'list'],
-                ['label' => 'User Failed Login', 'url' => ['/user-failed-login/index'], 'icon' => 'list'],
+        $userMenuItems = [
+            'label' => 'User Addition',
+            'url' => 'javascript:',
+            'icon' => 'folder',
+            'items' => [
                 ['label' => 'User Monitor', 'url' => ['/user-monitor/index'], 'icon' => 'list'],
                 ['label' => 'User Monitor Stats', 'url' => ['/user-monitor/stats'], 'icon' => 'list'],
                 [
@@ -697,8 +687,41 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     'url' => ['/user-model-setting-crud/index'],
                     'icon' => 'list',
                 ],
+                ['label' => 'User Groups Assignments', 'url' => ['/user-group-assign/index'], 'icon' => 'list'],
+                ['label' => 'User Commission Rules', 'url' => ['/user-commission-rules-crud/index'], 'icon' => 'list'],
+                ['label' => 'User Bonus Rules', 'url' => ['/user-bonus-rules-crud/index'], 'icon' => 'list'],
+                ['label' => 'User Failed Login', 'url' => ['/user-failed-login/index'], 'icon' => 'list'],
+
                 ['label' => 'User Stat Day', 'url' => ['/user-stat-day-crud/index'], 'icon' => 'list'],
                 ['label' => 'User Data', 'url' => ['/user-data-crud/index'], 'icon' => 'list'],
+                ['label' => 'User Auth Client', 'url' => ['/auth-client-crud/index'], 'icon' => 'list'],
+                ['label' => 'User Feedback', 'url' => ['/user-feedback-crud/index'], 'icon' => 'comments',
+                    'title' => 'User Feedback CRUD'],
+                ['label' => 'User Feedback Files', 'url' => ['/user-feedback-file-crud/index'], 'icon' => 'list',
+                    'title' => 'User Feedback Files CRUD'],
+                [
+                    'label' => 'User Product Type',
+                    'url' => ['/user-product-type/index'],
+                    'icon' => 'list',
+                    'visible' => Yii::$app->user->can('user-product-type/list')
+                ],
+            ]
+        ];
+
+        $menuItems[] = [
+            'label' => 'Users',
+            'url' => 'javascript:',
+            'icon' => 'user',
+            'items' => [
+                ['label' => 'Users', 'url' => ['/employee/list'], 'icon' => 'users'],
+                ['label' => 'User Online', 'url' => ['/user-online/index'], 'icon' => 'spinner'],
+                ['label' => 'User Connections', 'url' => ['/user-connection/index'], 'icon' => 'plug'],
+                ['label' => 'User Groups', 'url' => ['/user-group/index'], 'icon' => 'users'],
+                ['label' => 'User Groups Set', 'url' => ['/user-group-set/index'], 'icon' => 'users'],
+                ['label' => 'User Params', 'url' => ['/user-params/index'], 'icon' => 'bars'],
+                ['label' => 'User Project Params', 'url' => ['/user-project-params/index'], 'icon' => 'list'],
+                ['label' => 'User Status', 'url' => ['/user-status/index'], 'icon' => 'sliders'],
+                $userMenuItems
             ]
         ];
 

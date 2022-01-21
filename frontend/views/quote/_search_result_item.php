@@ -2,7 +2,7 @@
 
 use common\components\SearchService;
 use frontend\helpers\QuoteHelper;
-use sales\model\flightQuoteLabelList\entity\FlightQuoteLabelList;
+use src\model\flightQuoteLabelList\entity\FlightQuoteLabelList;
 use yii\bootstrap\Html;
 use yii\helpers\ArrayHelper;
 

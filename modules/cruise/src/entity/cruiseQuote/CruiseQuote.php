@@ -6,7 +6,7 @@ use modules\cruise\src\entity\cruise\Cruise;
 use modules\cruise\src\entity\cruiseQuote\serializer\CruiseQuoteSerializer;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\interfaces\Quotable;
-use sales\helpers\product\ProductQuoteHelper;
+use src\helpers\product\ProductQuoteHelper;
 use Yii;
 
 /**

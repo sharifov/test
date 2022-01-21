@@ -2,7 +2,7 @@
 
 namespace frontend\helpers;
 
-use sales\model\clientChatMessage\entity\ClientChatMessage;
+use src\model\clientChatMessage\entity\ClientChatMessage;
 
 /**
  * Class ChatHelper

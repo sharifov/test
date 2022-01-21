@@ -3,7 +3,7 @@
 namespace modules\twilio\components\jobs;
 
 use common\models\Sms;
-use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
+use src\model\sms\entity\smsDistributionList\SmsDistributionList;
 use yii\base\BaseObject;
 use yii\helpers\VarDumper;
 use yii\queue\JobInterface;

@@ -10,7 +10,7 @@ use frontend\widgets;
 use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\entity\fileLead\FileLead;
 use modules\fileStorage\src\entity\fileLead\FileLeadQuery;
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
 use common\models\Lead;
 use yii\helpers\ArrayHelper;

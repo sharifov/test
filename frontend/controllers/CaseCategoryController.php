@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\entities\cases\CaseCategory;
-use sales\entities\cases\CaseCategorySearch;
+use src\entities\cases\CaseCategory;
+use src\entities\cases\CaseCategorySearch;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
@@ -13,7 +13,6 @@ use yii\web\Response;
  */
 class CaseCategoryController extends FController
 {
-
     /**
      * @return string
      */

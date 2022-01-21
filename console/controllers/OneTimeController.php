@@ -23,34 +23,36 @@ use common\models\Project;
 use common\models\Sms;
 use common\models\Sources;
 use common\models\UserProjectParams;
-use sales\helpers\ErrorsToStringHelper;
-use sales\model\contactPhoneData\service\ContactPhoneDataDictionary;
-use sales\entities\cases\Cases;
-use sales\entities\cases\CasesStatus;
-use sales\helpers\app\AppHelper;
-use sales\model\callLog\entity\callLog\CallLog;
-use sales\model\callLog\entity\callLog\CallLogStatus;
-use sales\model\callLog\entity\callLog\CallLogType;
-use sales\model\callLog\entity\callLogLead\CallLogLead;
-use sales\model\callLog\entity\callLogRecord\CallLogRecord;
-use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChatLead\entity\ClientChatLead;
-use sales\model\contactPhoneData\entity\ContactPhoneData;
-use sales\model\contactPhoneData\repository\ContactPhoneDataRepository;
-use sales\model\contactPhoneData\service\ContactPhoneDataService;
-use sales\model\contactPhoneList\entity\ContactPhoneList;
-use sales\model\contactPhoneList\service\ContactPhoneListService;
-use sales\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
-use sales\model\contactPhoneServiceInfo\repository\ContactPhoneServiceInfoRepository;
-use sales\model\emailList\entity\EmailList;
-use sales\model\leadUserConversion\entity\LeadUserConversion;
-use sales\model\phoneList\entity\PhoneList;
-use sales\repositories\client\ClientsQuery;
-use sales\services\cases\CasesSaleService;
-use sales\services\client\ClientCreateForm;
-use sales\services\client\ClientManageService;
-use sales\services\phone\checkPhone\CheckPhoneNeutrinoService;
-use sales\services\phone\checkPhone\CheckPhoneService;
+use src\helpers\ErrorsToStringHelper;
+use src\model\contactPhoneData\service\ContactPhoneDataDictionary;
+use src\entities\cases\Cases;
+use src\entities\cases\CasesStatus;
+use src\helpers\app\AppHelper;
+use src\model\callLog\entity\callLog\CallLog;
+use src\model\callLog\entity\callLog\CallLogStatus;
+use src\model\callLog\entity\callLog\CallLogType;
+use src\model\callLog\entity\callLogLead\CallLogLead;
+use src\model\callLog\entity\callLogRecord\CallLogRecord;
+use src\model\clientChat\entity\ClientChat;
+use src\model\clientChatLead\entity\ClientChatLead;
+use src\model\contactPhoneData\entity\ContactPhoneData;
+use src\model\contactPhoneData\repository\ContactPhoneDataRepository;
+use src\model\contactPhoneData\service\ContactPhoneDataService;
+use src\model\contactPhoneList\entity\ContactPhoneList;
+use src\model\contactPhoneList\repository\ContactPhoneListRepository;
+use src\model\contactPhoneList\service\ContactPhoneListService;
+use src\model\contactPhoneList\service\PhoneNumberService;
+use src\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
+use src\model\contactPhoneServiceInfo\repository\ContactPhoneServiceInfoRepository;
+use src\model\emailList\entity\EmailList;
+use src\model\leadUserConversion\entity\LeadUserConversion;
+use src\model\phoneList\entity\PhoneList;
+use src\repositories\client\ClientsQuery;
+use src\services\cases\CasesSaleService;
+use src\services\client\ClientCreateForm;
+use src\services\client\ClientManageService;
+use src\services\phone\checkPhone\CheckPhoneNeutrinoService;
+use src\services\phone\checkPhone\CheckPhoneService;
 use thamtech\uuid\helpers\UuidHelper;
 use Yii;
 use yii\console\Controller;
@@ -1509,6 +1511,115 @@ class OneTimeController extends Controller
         $time_end = microtime(true);
         $time = number_format(round($time_end - $time_start, 2), 2);
         echo Console::renderColoredString('%g --- Execute Time: %w[' . $time . ' s] %g Processed: %w[' . $processed . '] %g %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+    }
+
+    public function actionFillContactPhoneList(): void
+    {
+        $offset = BaseConsole::input('Offset (if "0" - w/o): ');
+        $limit = BaseConsole::input('Limit (if "0" - w/o): ');
+
+        $offset = (int) $offset;
+        $limit = (int) $limit;
+
+        if ($offset < 0) {
+            echo 'Start must be >= 0' . PHP_EOL;
+            return;
+        }
+        if ($limit < 0) {
+            echo 'Limit must be >= 0' . PHP_EOL;
+            return;
+        }
+
+        $offset--;
+        $time_start = microtime(true);
+
+        echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+
+        ClientPhone::updateAll(
+            ['cp_cpl_uid' => null, 'cp_cpl_id' => null],
+        );
+
+        $query = ClientPhone::find()
+            ->select([ClientPhone::tableName() . '.phone'])
+            ->groupBy([ClientPhone::tableName() . '.phone'])
+            ->orderBy([ClientPhone::tableName() . '.phone' => SORT_ASC]);
+
+        if ($offset !== 0) {
+            $query->offset($offset);
+        }
+        if ($limit !== 0) {
+            $query->limit($limit);
+        }
+
+        $count = $query->count();
+        $validator = new PhoneInputValidator();
+        $processed = 0;
+        $errors = $warnings = $notValidPhones = [];
+        $batchSize = max($limit, 100);
+
+        Console::startProgress(0, $count);
+
+        foreach ($query->each($batchSize) as $clientPhone) {
+            $phoneNumberService = new PhoneNumberService((string) $clientPhone['phone']);
+            if (!$validator->validate($phoneNumberService->getCleanedPhoneNumber())) {
+                $notValidPhones[] = $phoneNumberService->getCleanedPhoneNumber();
+                continue;
+            }
+
+            try {
+                if (!$contactPhoneList = ContactPhoneListService::getByPhone($phoneNumberService->getCleanedPhoneNumber())) {
+                    $contactPhoneList = ContactPhoneList::create($clientPhone['phone']);
+                    if (!$contactPhoneList->validate()) {
+                        throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($contactPhoneList));
+                    }
+                    (new ContactPhoneListRepository())->save($contactPhoneList);
+                }
+
+                ClientPhone::updateAll(
+                    ['cp_cpl_uid' => $contactPhoneList->cpl_uid, 'cp_cpl_id' => $contactPhoneList->cpl_id],
+                    ['phone' => $clientPhone['phone']]
+                );
+
+                $processed++;
+                Console::updateProgress($processed, $count);
+            } catch (\RuntimeException | \DomainException $throwable) {
+                $warnings[] = [
+                    'message' => $throwable->getMessage(),
+                    'phone' => $clientPhone['phone'],
+                    'cleanedPhone' => $phoneNumberService->getCleanedPhoneNumber(),
+                    'uid' => $phoneNumberService->getUid(),
+                ];
+            } catch (\Throwable $throwable) {
+                $errors[] = [
+                    'message' => $throwable->getMessage(),
+                    'phone' => $clientPhone['phone'],
+                    'cleanedPhone' => $phoneNumberService->getCleanedPhoneNumber(),
+                    'uid' => $phoneNumberService->getUid(),
+                ];
+            }
+        }
+
+        Console::endProgress(false);
+
+        if ($notValidPhones) {
+            echo Console::renderColoredString('%r --- NotValidPhones count(' . count($notValidPhones) . '). %n'), PHP_EOL;
+        }
+        if ($warnings) {
+            \Yii::info($warnings, 'info\OneTimeController:actionFillContactPhoneList:Warnings');
+            echo Console::renderColoredString('%r --- Warnings count(' . count($warnings) . '). Please see logs. %n'), PHP_EOL;
+        }
+        if ($errors) {
+            \Yii::info($errors, 'info\OneTimeController:actionFillContactPhoneList:Errors');
+            echo Console::renderColoredString('%r --- Errors count(' . count($errors) . '). Please see logs. %n'), PHP_EOL;
+        }
+
+        $time_end = microtime(true);
+        $time = number_format(round($time_end - $time_start, 2), 2);
+        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time . ' s] %g %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- Processed: %w[' . $processed . '/' . $count . '] %g %n'), PHP_EOL;
         echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
     }

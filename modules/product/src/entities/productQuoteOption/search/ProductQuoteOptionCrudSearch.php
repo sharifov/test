@@ -3,7 +3,7 @@
 namespace modules\product\src\entities\productQuoteOption\search;
 
 use common\models\Employee;
-use sales\helpers\query\QueryHelper;
+use src\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 

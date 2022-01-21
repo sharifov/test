@@ -5,9 +5,9 @@ namespace modules\flight\src\useCases\reprotectionCreate\service;
 use common\components\HybridService;
 use modules\flight\models\FlightRequest;
 use modules\product\src\entities\productQuote\ProductQuote;
-use sales\entities\cases\CaseEventLog;
-use sales\entities\cases\Cases;
-use sales\exception\CheckRestrictionException;
+use src\entities\cases\CaseEventLog;
+use src\entities\cases\Cases;
+use src\exception\CheckRestrictionException;
 use Yii;
 
 /**

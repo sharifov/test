@@ -8,7 +8,6 @@ namespace frontend\themes\gentelella\widgets;
 
 class UserAlerts
 {
-
     public function init()
     {
     }

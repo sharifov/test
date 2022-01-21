@@ -14,13 +14,21 @@ use common\models\UserConnection;
 use common\models\UserParams;
 use frontend\models\form\UserProfileForm;
 use frontend\themes\gentelella_v2\widgets\SideBarMenu;
-use sales\helpers\app\AppHelper;
-use sales\model\user\entity\monitor\UserMonitor;
+use src\auth\Auth;
+use src\helpers\app\AppHelper;
+use src\helpers\setting\SettingHelper;
+use src\model\userAuthClient\entity\UserAuthClientQuery;
+use src\model\userAuthClient\entity\UserAuthClientSources;
+use src\model\user\entity\monitor\UserMonitor;
 use Yii;
+use yii\authclient\AuthAction;
+use yii\authclient\ClientInterface;
+use yii\data\ActiveDataProvider;
 use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use common\models\LoginForm;
+use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use Da\QrCode\QrCode;
@@ -45,11 +53,11 @@ class SiteController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['login', 'error', 'step-two', 'captcha'],
+                        'actions' => ['login', 'error', 'step-two', 'captcha', 'auth', 'auth-step-two'],
                         'allow' => true,
                     ],
                     [
-                        'actions' => ['index', 'logout', 'profile', 'get-airport', 'blank', 'side-bar-menu'],
+                        'actions' => ['index', 'logout', 'profile', 'get-airport', 'blank', 'side-bar-menu', 'auth-assign'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -83,6 +91,14 @@ class SiteController extends FController
                 'offset' => 3,
                 'foreColor' => '596b7d',
             ],
+            'auth' => [
+                'class' => AuthAction::class,
+                'successCallback' => [$this, 'onAuthSuccess'],
+            ],
+            'auth-assign' => [
+                'class' => AuthAction::class,
+                'successCallback' => [$this, 'onAuthAssignSuccess']
+            ]
         ];
     }
 
@@ -92,7 +108,13 @@ class SiteController extends FController
     public function actionIndex(): string
     {
         $user = Yii::$app->user->identity;
-        return $this->render('index', ['user' => $user]);
+        $sourcesDataProvider = new ActiveDataProvider();
+        if (SettingHelper::isEnabledAuthClients()) {
+            $authClients = UserAuthClientQuery::findAllByUserId(Auth::id());
+            $sourcesDataProvider->setModels($authClients);
+            $sourcesDataProvider->pagination = false;
+        }
+        return $this->render('index', ['user' => $user, 'sourcesDataProvider' => $sourcesDataProvider]);
     }
 
 
@@ -125,8 +147,6 @@ class SiteController extends FController
     public function actionLogin()
     {
         $this->layout = '@frontend/themes/gentelella_v2/views/layouts/login';
-        $twoFactorAuthEnable = Yii::$app->params['settings']['two_factor_authentication_enable'];
-        $twoFactorAuthCounter = Yii::$app->params['settings']['two_factor_counter'] ?? 60;
 
         if (!Yii::$app->user->isGuest) {
             return $this->goHome();
@@ -135,19 +155,8 @@ class SiteController extends FController
         $model = new LoginForm();
 
         if ($model->load(Yii::$app->request->post()) && $user = $model->checkedUser()) {
-            if ($twoFactorAuthEnable && $user->userProfile->is2faEnable()) {
-                $twoFaManager = new Manager();
-                $twoFaManager->setCounter($twoFactorAuthCounter);
-                $twoFactorAuthSecretKey = empty($user->userProfile->up_2fa_secret) ?
-                    $twoFaManager->generateSecretKey() : $user->userProfile->up_2fa_secret;
-
-                $session = Yii::$app->session;
-                $session->set('two_factor_email', $user->email);
-                $session->set('two_factor_username', $user->username);
-                $session->set('two_factor_key_exist', !empty($user->userProfile->up_2fa_secret));
-                $session->set('two_factor_key', $twoFactorAuthSecretKey);
-                $session->set('two_factor_remember_me', $model->rememberMe);
-                return $this->redirect(['site/step-two']);
+            if (SettingHelper::isTwoFactorAuthEnabled() && $user->userProfile && $user->userProfile->is2faEnable()) {
+                return $this->redirectToTwoFactorAuth($user, $model);
             }
 
             if ($model->login()) {
@@ -191,6 +200,8 @@ class SiteController extends FController
             ->setRememberMe($session->get('two_factor_remember_me'));
 
         if ($model->load(Yii::$app->request->post()) && $model->login()) {
+            $session->remove('auth_client_source');
+            $session->remove('auth_client_source_id');
             return $this->goHome();
         }
 
@@ -253,7 +264,9 @@ class SiteController extends FController
                         $updated++;
                     }
                 } catch (\Throwable $throwable) {
-                    Yii::error(AppHelper::throwableFormatter($throwable), 'SiteController:actionProfile:updProfile');
+                    $logData = AppHelper::throwableLog($throwable);
+                    $logData['userId'] = (int) $model->id;
+                    Yii::error($logData, 'SiteController:actionProfile:updProfile');
                 }
             }
 
@@ -322,6 +335,12 @@ class SiteController extends FController
         //echo $qrCode->writeDataUri();
         //exit;
 
+        $sourcesDataProvider = new ActiveDataProvider();
+        if (SettingHelper::isEnabledAuthClients()) {
+            $sources = UserAuthClientQuery::findAllByUserId(Auth::id());
+            $sourcesDataProvider->setModels($sources);
+            $sourcesDataProvider->pagination = false;
+        }
 
         return $this->render('/employee/update_profile', [
             'model' => $model,
@@ -330,6 +349,7 @@ class SiteController extends FController
             'userCommissionRuleValue' => $userCommissionRulesValue,
             'userBonusRuleValue' => $userBonusRulesValue,
             'userProfileForm' => $userProfileForm,
+            'sourcesDataProvider' => $sourcesDataProvider
         ]);
     }
 
@@ -375,5 +395,89 @@ class SiteController extends FController
         //VarDumper::dump($data); exit;
 
         return $box->run();
+    }
+
+    public function actionAuthStepTwo()
+    {
+        $this->layout = '@frontend/themes/gentelella_v2/views/layouts/login';
+        $session = Yii::$app->session;
+
+        $source = (int)$session->get('auth_client_source');
+        $sourceId = (string)$session->get('auth_client_source_id');
+
+        if (!Yii::$app->user->isGuest) {
+            return $this->goHome();
+        }
+
+        if (!empty($source) && !empty($sourceId)) {
+            $userId = Yii::$app->request->get('user-id');
+            if ($userId && $authClient = UserAuthClientQuery::findByUserAndSource((int)$userId, $source, $sourceId)) {
+                $form = new LoginForm();
+                $form->setUser($authClient->user);
+                $form->setUserChecked(true);
+
+                if (SettingHelper::isTwoFactorAuthEnabled() && $authClient->user->userProfile && $authClient->user->userProfile->is2faEnable()) {
+                    return $this->redirectToTwoFactorAuth($authClient->user, $form);
+                }
+
+                if ($form->login()) {
+                    if (UserConnection::isIdleMonitorEnabled()) {
+                        UserMonitor::addEvent($userId, UserMonitor::TYPE_LOGIN);
+                    }
+                }
+                $session->remove('auth_client_source');
+                $session->remove('auth_client_source_id');
+                return $this->goBack();
+            } elseif (!empty($userId) && empty($authClient)) {
+                throw new BadRequestHttpException('Bad Request');
+            }
+
+
+            if ($authClients = UserAuthClientQuery::findAllBySourceData($source, $sourceId)) {
+                return $this->render('auth_step_two', [
+                    'authClients' => $authClients
+                ]);
+            }
+            Yii::$app->session->setFlash('error', 'Not found any user assigned with this auth client: ' . UserAuthClientSources::getName($source));
+        }
+        return $this->redirect('/site/login');
+    }
+
+    /**
+     * @param ClientInterface $client
+     * @return void
+     */
+    public function onAuthSuccess(ClientInterface $client)
+    {
+        $source = UserAuthClientSources::clientSourceFactory($client->getId());
+        $source->handle($this->action, $client);
+        return $this->action->redirect($source->getRedirectUrl());
+    }
+
+    public function onAuthAssignSuccess(ClientInterface $client)
+    {
+        if (!SettingHelper::isEnabledAuthClients()) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
+        $source = UserAuthClientSources::clientSourceFactory($client->getId());
+        $source->handleAssign(Auth::id(), $this->action, $client);
+        return $this->action->redirect($source->getRedirectUrl());
+    }
+
+    protected function redirectToTwoFactorAuth(Employee $user, LoginForm $model): Response
+    {
+        $twoFaManager = new Manager();
+        $twoFaManager->setCounter(SettingHelper::getTwoFactorAuthCounter());
+        $twoFactorAuthSecretKey = empty($user->userProfile->up_2fa_secret) ?
+            $twoFaManager->generateSecretKey() : $user->userProfile->up_2fa_secret;
+
+        $session = Yii::$app->session;
+        $session->set('two_factor_email', $user->email);
+        $session->set('two_factor_username', $user->username);
+        $session->set('two_factor_key_exist', !empty($user->userProfile->up_2fa_secret));
+        $session->set('two_factor_key', $twoFactorAuthSecretKey);
+        $session->set('two_factor_remember_me', $model->rememberMe);
+        return $this->redirect(['site/step-two']);
     }
 }

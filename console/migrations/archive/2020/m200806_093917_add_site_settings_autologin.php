@@ -8,7 +8,6 @@ use yii\db\Migration;
  */
 class m200806_093917_add_site_settings_autologin extends Migration
 {
-
     public function safeUp()
     {
 

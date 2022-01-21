@@ -7,7 +7,6 @@ use yii\db\Migration;
  */
 class m181009_133650_alter_leads_for_clone extends Migration
 {
-
     /**
      *
      * {@inheritdoc}

@@ -5,9 +5,9 @@ namespace modules\product\src\abac\dto;
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
-use sales\access\EmployeeGroupAccess;
-use sales\auth\Auth;
-use sales\entities\cases\Cases;
+use src\access\EmployeeGroupAccess;
+use src\auth\Auth;
+use src\entities\cases\Cases;
 use stdClass;
 
 /**
@@ -46,6 +46,7 @@ class RelatedProductQuoteAbacDto extends stdClass
     public bool $parPqIsChangeable;
     public bool $parPqHasPqrActive;
     public bool $parPqHasPqcActive;
+    public bool $parHasPqcInvoluntaryActive;
     public int $parPrTypeId;
     public ?int $parPrProjectId;
     public ?int $orProjectId = null;
@@ -64,6 +65,7 @@ class RelatedProductQuoteAbacDto extends stdClass
     public ?int $csStatusId = null;
     public bool $isAutomateCase;
     public ?int $csProjectId = null;
+    public ?bool $pqcRefundAllowed = true;
 
     public function __construct(?ProductQuote $relatedPrQt)
     {
@@ -85,6 +87,7 @@ class RelatedProductQuoteAbacDto extends stdClass
             $this->parPqIsChangeable = $parentPrQt->isChangeable();
             $this->parPqHasPqrActive = (bool)$parentPrQt->productQuoteRefundsActive;
             $this->parPqHasPqcActive = (bool)$parentPrQt->productQuoteChangesActive;
+            $this->parHasPqcInvoluntaryActive = (bool)$parentPrQt->productQuoteInvoluntaryChangesActive;
 
             $this->parPrTypeId = $parentPrQt->pqProduct->pr_type_id;
             $this->parPrProjectId = $parentPrQt->pqProduct->pr_project_id;
@@ -109,6 +112,7 @@ class RelatedProductQuoteAbacDto extends stdClass
             $this->pqcStatusId = $productQuoteChange->pqc_status_id;
             $this->isAutomatePqc = $productQuoteChange->isAutomate();
             $this->pqcDecisionId = $productQuoteChange->pqc_decision_type_id;
+            $this->pqcRefundAllowed = $productQuoteChange->pqc_refund_allowed;
         }
     }
 

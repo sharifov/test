@@ -4,7 +4,7 @@ namespace modules\flight\src\entities\flightQuoteFlight\serializer;
 
 use modules\flight\models\FlightQuote;
 use modules\flight\models\FlightQuoteFlight;
-use sales\entities\serializer\Serializer;
+use src\entities\serializer\Serializer;
 use yii\helpers\ArrayHelper;
 
 /**

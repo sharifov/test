@@ -1,6 +1,6 @@
 <?php
 
-use sales\widgets\PhoneSelect2Widget;
+use src\widgets\PhoneSelect2Widget;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 

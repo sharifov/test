@@ -5,7 +5,7 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChat\entity\projectConfig\ClientChatProjectConfig */
+/* @var $model src\model\clientChat\entity\projectConfig\ClientChatProjectConfig */
 
 $this->title = $model->ccpcProject ? $model->ccpcProject->name . ' ( ' . $model->ccpc_project_id . ' )' : $model->ccpc_project_id;
 $this->params['breadcrumbs'][] = ['label' => 'Client Chat Project Configs', 'url' => ['index']];

@@ -8,9 +8,9 @@ use modules\product\src\entities\productQuoteOrigin\service\ProductQuoteOriginSe
 use modules\product\src\entities\productType\ProductType;
 use modules\hotel\src\helpers\HotelFormatHelper;
 use modules\product\src\services\ProductCloneService;
-use sales\auth\Auth;
-use sales\repositories\lead\LeadRepository;
-use sales\repositories\product\ProductQuoteRepository;
+use src\auth\Auth;
+use src\repositories\lead\LeadRepository;
+use src\repositories\product\ProductQuoteRepository;
 use Yii;
 use modules\hotel\models\Hotel;
 use modules\hotel\models\search\HotelSearch;

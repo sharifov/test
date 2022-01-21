@@ -1,6 +1,6 @@
 <?php
 
-use sales\model\call\entity\callCommand\types\CommandList;
+use src\model\call\entity\callCommand\types\CommandList;
 use unclead\multipleinput\MultipleInput;
 use unclead\multipleinput\MultipleInputColumn;
 use yii\widgets\ActiveForm;

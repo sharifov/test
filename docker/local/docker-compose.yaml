@@ -160,7 +160,7 @@ services:
     volumes:
       - ./../../:${APP_ROOT}/www
     depends_on:
-      - php-fpm
+      - swoole
       - mysql
       - psql
       - redis

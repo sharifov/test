@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\user\entity\userStatus\UserStatus */
+/* @var $model src\model\user\entity\userStatus\UserStatus */
 
 $this->title = 'Create User Status';
 $this->params['breadcrumbs'][] = ['label' => 'User Statuses', 'url' => ['index']];

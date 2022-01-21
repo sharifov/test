@@ -1,7 +1,7 @@
 <?php
 
 use common\models\Language;
-use sales\model\userVoiceMail\useCase\manage\UserVoiceMailForm;
+use src\model\userVoiceMail\useCase\manage\UserVoiceMailForm;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 

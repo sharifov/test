@@ -3,7 +3,7 @@
 /* @var $this yii\web\View */
 /* @var $order \modules\order\src\entities\order\Order */
 /* @var $index integer */
-/* @var $case \sales\entities\cases\Cases */
+/* @var $case \src\entities\cases\Cases */
 /* @var $caseAbacDto \modules\cases\src\abac\dto\CasesAbacDto */
 
 use common\models\Currency;
@@ -17,8 +17,8 @@ use modules\order\src\processManager\phoneToBook\OrderProcessManager;
 use modules\order\src\processManager\Status;
 use modules\order\src\transaction\services\TransactionService;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
-use sales\auth\Auth;
-use sales\helpers\product\ProductQuoteHelper;
+use src\auth\Auth;
+use src\helpers\product\ProductQuoteHelper;
 use yii\bootstrap4\Html;
 use yii\helpers\Url;
 use yii\widgets\Pjax;

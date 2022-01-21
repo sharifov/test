@@ -7,7 +7,6 @@ use yii\db\Migration;
  */
 class m190902_101109_add_permission_redirect_call extends Migration
 {
-
     public $routes = [
         '/phone/ajax-call-redirect-to-agent'
     ];

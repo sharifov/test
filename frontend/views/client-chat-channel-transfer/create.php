@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChatChannelTransfer\entity\ClientChatChannelTransfer */
+/* @var $model src\model\clientChatChannelTransfer\entity\ClientChatChannelTransfer */
 
 $this->title = 'Create Client Chat Channel Transfer';
 $this->params['breadcrumbs'][] = ['label' => 'Client Chat Channel Transfers', 'url' => ['index']];

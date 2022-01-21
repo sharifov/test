@@ -6,7 +6,7 @@ use modules\invoice\src\entities\invoice\Invoice;
 use modules\order\src\entities\order\Order;
 use modules\order\src\payment\events\PaymentCompletedEvent;
 use modules\order\src\payment\events\PaymentRefundedEvent;
-use sales\entities\EventTrait;
+use src\entities\EventTrait;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;

@@ -3,8 +3,8 @@
 namespace common\components\grid\cases;
 
 use Yii;
-use sales\entities\cases\Cases;
-use sales\entities\cases\CasesStatus;
+use src\entities\cases\Cases;
+use src\entities\cases\CasesStatus;
 use yii\grid\DataColumn;
 use yii\helpers\ArrayHelper;
 

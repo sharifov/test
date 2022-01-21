@@ -1,7 +1,7 @@
 <?php
 
 use frontend\helpers\JsonHelper;
-use sales\auth\Auth;
+use src\auth\Auth;
 use common\models\CreditCard;
 use common\models\search\CreditCardSearch;
 use yii\data\ActiveDataProvider;
@@ -13,7 +13,7 @@ use yii\widgets\Pjax;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\CaseSaleSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
-/* @var $caseModel \sales\entities\cases\Cases */
+/* @var $caseModel \src\entities\cases\Cases */
 /* @var $saleSearchModel common\models\search\SaleSearch */
 /** @var $saleDataProvider yii\data\ArrayDataProvider
  * @var $disableMasking bool

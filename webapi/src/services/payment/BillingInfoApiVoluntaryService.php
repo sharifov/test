@@ -3,8 +3,8 @@
 namespace webapi\src\services\payment;
 
 use common\models\BillingInfo;
-use sales\dto\billingInfo\BillingInfoDTO;
-use sales\repositories\billingInfo\BillingInfoRepository;
+use src\dto\billingInfo\BillingInfoDTO;
+use src\repositories\billingInfo\BillingInfoRepository;
 use webapi\src\forms\billing\BillingInfoForm;
 
 /**

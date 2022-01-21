@@ -30,7 +30,7 @@ class m211004_124303_CasesOnNeedAction_virtual_CRON extends Migration
             }
         } catch (Throwable $throwable) {
             \Yii::error(
-                \sales\helpers\app\AppHelper::throwableLog($throwable),
+                \src\helpers\app\AppHelper::throwableLog($throwable),
                 'm211004_124303_CasesOnNeedAction_virtual_CRON:safeUp:Throwable'
             );
         }
@@ -52,7 +52,7 @@ class m211004_124303_CasesOnNeedAction_virtual_CRON extends Migration
             }
         } catch (Throwable $throwable) {
             \Yii::error(
-                \sales\helpers\app\AppHelper::throwableLog($throwable),
+                \src\helpers\app\AppHelper::throwableLog($throwable),
                 'm211004_124303_CasesOnNeedAction_virtual_CRON:safeDown:Throwable'
             );
         }

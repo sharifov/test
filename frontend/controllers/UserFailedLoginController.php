@@ -3,7 +3,7 @@
 namespace frontend\controllers;
 
 use common\models\Employee;
-use sales\helpers\app\AppHelper;
+use src\helpers\app\AppHelper;
 use Yii;
 use frontend\models\UserFailedLogin;
 use frontend\models\search\UserFailedLoginSearch;

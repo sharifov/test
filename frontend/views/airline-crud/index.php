@@ -2,14 +2,14 @@
 
 use common\components\grid\DateTimeColumn;
 use common\models\Airline;
-use sales\model\airline\service\AirlineService;
+use src\model\airline\service\AirlineService;
 use yii\grid\ActionColumn;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var yii\web\View $this */
-/* @var sales\model\airline\entity\AirlineSearch $searchModel */
+/* @var src\model\airline\entity\AirlineSearch $searchModel */
 /* @var yii\data\ActiveDataProvider $dataProvider */
 
 $this->title = 'Airlines';

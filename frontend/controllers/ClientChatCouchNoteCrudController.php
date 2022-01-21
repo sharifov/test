@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\clientChatCouchNote\entity\ClientChatCouchNote;
-use sales\model\clientChatCouchNote\entity\ClientChatCouchNoteSearch;
+use src\model\clientChatCouchNote\entity\ClientChatCouchNote;
+use src\model\clientChatCouchNote\entity\ClientChatCouchNoteSearch;
 use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -14,7 +14,6 @@ use yii\db\StaleObjectException;
 
 class ClientChatCouchNoteCrudController extends FController
 {
-
     public function init(): void
     {
         parent::init();

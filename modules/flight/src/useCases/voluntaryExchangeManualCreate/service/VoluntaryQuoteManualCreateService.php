@@ -3,6 +3,7 @@
 namespace modules\flight\src\useCases\voluntaryExchangeManualCreate\service;
 
 use common\components\SearchService;
+use common\models\Currency;
 use common\models\QuoteSegment;
 use common\models\QuoteSegmentBaggage;
 use common\models\QuoteSegmentBaggageCharge;
@@ -50,12 +51,12 @@ use modules\product\src\entities\productQuoteOption\ProductQuoteOptionRepository
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\entities\productType\ProductType;
 use modules\product\src\repositories\ProductQuoteRelationRepository;
-use sales\auth\Auth;
-use sales\forms\segment\SegmentBaggageForm;
-use sales\helpers\ErrorsToStringHelper;
-use sales\helpers\product\ProductQuoteHelper;
-use sales\repositories\product\ProductQuoteRepository;
-use sales\services\parsingDump\BaggageService;
+use src\auth\Auth;
+use src\forms\segment\SegmentBaggageForm;
+use src\helpers\ErrorsToStringHelper;
+use src\helpers\product\ProductQuoteHelper;
+use src\repositories\product\ProductQuoteRepository;
+use src\services\parsingDump\BaggageService;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
@@ -255,6 +256,8 @@ class VoluntaryQuoteManualCreateService
     ): ProductQuote {
         $markupSum = 0;
         $sellingSum = 0;
+        $productQuote->pq_origin_currency = $productQuote->pq_origin_currency ?? Currency::DEFAULT_CURRENCY;
+
         if (!empty($form->getFlightQuotePaxPriceForms())) {
             foreach ($form->getFlightQuotePaxPriceForms() as $key => $flightQuotePaxPriceForm) {
                 $paxPrice = FlightQuotePaxPrice::createByVoluntaryQuotePaxPriceForm(

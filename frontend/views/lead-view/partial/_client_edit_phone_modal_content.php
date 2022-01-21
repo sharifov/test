@@ -10,14 +10,14 @@
 use borales\extensions\phoneInput\PhoneInput;
 use common\models\ClientPhone;
 use common\models\Lead;
-use sales\forms\lead\PhoneCreateForm;
+use src\forms\lead\PhoneCreateForm;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
 use yii\widgets\ActiveForm;
 use modules\lead\src\abac\LeadAbacObject;
 use modules\lead\src\abac\dto\LeadAbacDto;
-use sales\auth\Auth;
+use src\auth\Auth;
 
 $leadAbacDto = new LeadAbacDto($lead, Auth::id())
 ?>
@@ -35,17 +35,25 @@ $leadAbacDto = new LeadAbacDto($lead, Auth::id())
 
     <?= $form->errorSummary($editPhone); ?>
 
-    <?php /** @abac $leadAbacDto, LeadAbacObject::UI_FIELD_PHONE_FROM_ADD_PHONE, LeadAbacObject::ACTION_ACCESS, Access Field Phone in form Edit Phone*/ ?>
-    <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_FIELD_PHONE_FORM_ADD_PHONE, LeadAbacObject::ACTION_UPDATE)) : ?>
+    <?php
+    $leadAbacDto->formAttribute = 'phone';
+    $leadAbacDto->isNewRecord = false;
+    /** @abac $leadAbacDto, LeadAbacObject::PHONE_CREATE_FORM, LeadAbacObject::ACTION_VIEW, Phone field view*/
+    $view = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::PHONE_CREATE_FORM, LeadAbacObject::ACTION_VIEW);
+    /** @abac $leadAbacDto, LeadAbacObject::PHONE_CREATE_FORM, LeadAbacObject::ACTION_EDIT, Phone field edit*/
+    $edit = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::PHONE_CREATE_FORM, LeadAbacObject::ACTION_EDIT);
+    ?>
         <?= $form->field($editPhone, 'phone', [
             'options' => [
                 'class' => 'form-group',
+                'hidden' => ($edit ? !$edit : !$view),
             ],
         ])->widget(PhoneInput::class, [
             'options' => [
                 'class' => 'form-control lead-form-input-element',
                 'id' => 'edit-phone',
-                'required' => true
+                'required' => true,
+                'readonly' => !$edit
             ],
             'jsOptions' => [
                 'nationalMode' => false,
@@ -53,8 +61,6 @@ $leadAbacDto = new LeadAbacDto($lead, Auth::id())
                 'customContainer' => 'intl-tel-input'
             ]
         ]) ?>
-    <?php endif; ?>
-
     <?=
     $form->field($editPhone, 'type')->dropDownList(ClientPhone::getPhoneTypeList())
     ?>

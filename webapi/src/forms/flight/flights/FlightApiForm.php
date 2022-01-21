@@ -8,7 +8,7 @@ use frontend\helpers\JsonHelper;
 use modules\flight\models\FlightQuoteFlight;
 use modules\flight\src\services\api\FlightUpdateRequestApiService;
 use modules\order\src\entities\order\Order;
-use sales\helpers\ErrorsToStringHelper;
+use src\helpers\ErrorsToStringHelper;
 use webapi\src\forms\flight\flights\bookingInfo\BookingInfoApiForm;
 use webapi\src\forms\flight\flights\price\PriceApiForm;
 use webapi\src\forms\flight\flights\trips\SegmentApiForm;

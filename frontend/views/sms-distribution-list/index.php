@@ -1,7 +1,7 @@
 <?php
 
 use frontend\widgets\multipleUpdate\button\MultipleUpdateButtonWidget;
-use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
+use src\model\sms\entity\smsDistributionList\SmsDistributionList;
 use common\components\grid\CombinedDataColumn;
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
@@ -9,10 +9,10 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\helpers\Url;
 use yii\widgets\Pjax;
-use sales\helpers\phone\MaskPhoneHelper;
+use src\helpers\phone\MaskPhoneHelper;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\sms\entity\smsDistributionList\search\SmsDistributionListSearch */
+/* @var $searchModel src\model\sms\entity\smsDistributionList\search\SmsDistributionListSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Sms Distribution List';
@@ -180,7 +180,7 @@ $gridId = 'sms-grid-id';
 //            ],
 
 //            [
-//                'class' => \sales\yii\grid\UserColumn::class,
+//                'class' => \src\yii\grid\UserColumn::class,
 //                'attribute' => 'sdl_updated_user_id',
 //                'relation' => 'sdlUpdatedUser'
 //            ],

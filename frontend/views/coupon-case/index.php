@@ -2,13 +2,13 @@
 
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
-use sales\model\coupon\entity\couponCase\CouponCase;
+use src\model\coupon\entity\couponCase\CouponCase;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\coupon\entity\couponCase\search\CouponCaseSearch */
+/* @var $searchModel src\model\coupon\entity\couponCase\search\CouponCaseSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Coupon Cases';

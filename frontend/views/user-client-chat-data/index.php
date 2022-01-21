@@ -1,7 +1,7 @@
 <?php
 
-use sales\helpers\text\SecureStringHelper;
-use sales\model\userClientChatData\entity\UserClientChatData;
+use src\helpers\text\SecureStringHelper;
+use src\model\userClientChatData\entity\UserClientChatData;
 use yii\grid\ActionColumn;
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
@@ -11,7 +11,7 @@ use yii\widgets\Pjax;
 use dosamigos\datepicker\DatePicker;
 
 /* @var yii\web\View $this */
-/* @var sales\model\userClientChatData\entity\UserClientChatDataSearch $searchModel */
+/* @var src\model\userClientChatData\entity\UserClientChatDataSearch $searchModel */
 /* @var yii\data\ActiveDataProvider $dataProvider */
 
 $this->title = 'User Client Chat Data';

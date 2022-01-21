@@ -6,8 +6,8 @@ use modules\flight\models\FlightQuote;
 use modules\flight\src\services\flightQuote\FlightQuoteTicketIssuedService;
 use yii\queue\Queue;
 use yii\queue\RetryableJobInterface;
-use sales\helpers\app\AppHelper;
-use sales\repositories\NotFoundException;
+use src\helpers\app\AppHelper;
+use src\repositories\NotFoundException;
 
 /**
  * Class FlightQuotePdfJob

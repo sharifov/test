@@ -9,11 +9,11 @@ use common\models\Employee;
 use common\models\User;
 use frontend\models\LeadForm;
 use frontend\themes\gentelella_v2\assets\groups\GentelellaAsset;
-use sales\access\EmployeeProductAccess;
-use sales\access\ListsAccess;
+use src\access\EmployeeProductAccess;
+use src\access\ListsAccess;
 use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
 use modules\qaTask\src\widgets\objectMenu\QaTaskObjectMenuWidget;
-use sales\auth\Auth;
+use src\auth\Auth;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use common\models\Lead;
@@ -237,8 +237,8 @@ $leadAbacDto = new LeadAbacDto($leadModel, $userId);
             ])?>
 
             <?php Modal::begin(['id' => 'split-tips-modal',
-                'title' => 'Split tips',
-                'size' => Modal::SIZE_LARGE
+                'title' => 'Split tips for Lead(' . $leadModel->id . ')',
+                'size' => Modal::SIZE_DEFAULT
             ])?>
             <?php Modal::end()?>
         <?php endif;?>

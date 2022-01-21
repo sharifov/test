@@ -4,7 +4,7 @@ namespace modules\hotel\src\services\hotelQuote;
 
 use modules\hotel\models\HotelQuote;
 use modules\hotel\src\helpers\HotelQuoteHelper;
-use sales\services\CurrencyHelper;
+use src\services\CurrencyHelper;
 
 class HotelQuotePriceCalculator
 {

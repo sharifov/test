@@ -48,11 +48,11 @@ use modules\product\src\entities\productQuoteOption\ProductQuoteOptionRepository
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\entities\productType\ProductType;
 use modules\product\src\repositories\ProductQuoteRelationRepository;
-use sales\auth\Auth;
-use sales\forms\segment\SegmentBaggageForm;
-use sales\helpers\ErrorsToStringHelper;
-use sales\repositories\product\ProductQuoteRepository;
-use sales\services\parsingDump\BaggageService;
+use src\auth\Auth;
+use src\forms\segment\SegmentBaggageForm;
+use src\helpers\ErrorsToStringHelper;
+use src\repositories\product\ProductQuoteRepository;
+use src\services\parsingDump\BaggageService;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
@@ -200,10 +200,6 @@ class ReProtectionQuoteManualCreateService
             $segmentDto = new FlightQuoteSegmentDTOItinerary($flightQuote->getId(), $flightQuoteTripId, $itinerary);
             $flightQuoteSegment = FlightQuoteSegment::create($segmentDto);
             $flightQuoteSegment->setCabin($flight->fl_cabin_class);
-
-            if (in_array($form->gds, [SearchService::GDS_WORLDSPAN, SearchService::GDS_TRAVELPORT], false)) {
-                $flightQuoteSegment = self::postProcessingWordspan($flightQuoteSegment, $segments);
-            }
 
             $this->flightQuoteSegmentRepository->save($flightQuoteSegment);
             $keyIata = $flightQuoteSegment->fqs_departure_airport_iata . $flightQuoteSegment->fqs_arrival_airport_iata;

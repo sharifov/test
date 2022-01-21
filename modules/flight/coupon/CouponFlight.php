@@ -2,7 +2,7 @@
 
 namespace modules\flight\coupon;
 
-use sales\model\coupon\entity\couponProduct\service\AbstractCouponProduct;
+use src\model\coupon\entity\couponProduct\service\AbstractCouponProduct;
 
 /**
  * Class CouponFlight

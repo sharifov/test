@@ -1,6 +1,6 @@
 <?php
 
-use sales\auth\Auth;
+use src\auth\Auth;
 use yii\bootstrap4\Html;
 use yii\helpers\Url;
 use yii\web\View;

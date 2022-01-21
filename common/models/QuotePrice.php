@@ -2,7 +2,7 @@
 
 namespace common\models;
 
-use sales\forms\quotePrice\AddQuotePriceForm;
+use src\forms\quotePrice\AddQuotePriceForm;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;

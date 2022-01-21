@@ -3,7 +3,7 @@
 namespace modules\product\src\entities\product\serializer;
 
 use modules\product\src\entities\product\Product;
-use sales\entities\serializer\Serializer;
+use src\entities\serializer\Serializer;
 
 /**
  * Class ProductExtraData

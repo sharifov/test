@@ -4,7 +4,7 @@ namespace modules\flight\src\services\api;
 
 use modules\flight\src\repositories\flightQuoteRepository\FlightQuoteRepository;
 use modules\order\src\entities\order\Order;
-use sales\repositories\product\ProductQuoteRepository;
+use src\repositories\product\ProductQuoteRepository;
 
 /**
  * Class FlightReplaceService

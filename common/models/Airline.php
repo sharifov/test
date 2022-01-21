@@ -2,7 +2,7 @@
 
 namespace common\models;
 
-use sales\model\airline\entity\AirlineScopes;
+use src\model\airline\entity\AirlineScopes;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 use yii\behaviors\AttributeBehavior;
@@ -27,7 +27,6 @@ use yii\behaviors\AttributeBehavior;
  */
 class Airline extends ActiveRecord
 {
-
     /**
      * @inheritdoc
      */

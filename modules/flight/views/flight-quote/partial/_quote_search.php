@@ -4,7 +4,7 @@ use modules\flight\models\Flight;
 use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchForm;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
-use sales\auth\Auth;
+use src\auth\Auth;
 use yii\bootstrap4\Alert;
 use yii\data\ArrayDataProvider;
 use yii\helpers\ArrayHelper;

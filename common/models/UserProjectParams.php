@@ -4,11 +4,11 @@ namespace common\models;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
 use common\models\query\UserProjectParamsQuery;
-use sales\access\CallAccess;
-use sales\model\emailList\entity\EmailList;
-use sales\model\phoneList\entity\PhoneList;
-use sales\model\userVoiceMail\entity\UserVoiceMail;
-use sales\model\userVoiceMail\entity\UserVoiceMailQuery;
+use src\access\CallAccess;
+use src\model\emailList\entity\EmailList;
+use src\model\phoneList\entity\PhoneList;
+use src\model\userVoiceMail\entity\UserVoiceMail;
+use src\model\userVoiceMail\entity\UserVoiceMailQuery;
 use Yii;
 use yii\behaviors\AttributeBehavior;
 use yii\behaviors\TimestampBehavior;

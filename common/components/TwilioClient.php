@@ -35,7 +35,6 @@ use Twilio\Rest\Client;
 
 class TwilioClient extends Component
 {
-
     // Message Status Values - https://www.twilio.com/docs/sms/api/message-resource#message-status-values
 
     public const STATUS_QUEUED          = 'queued';

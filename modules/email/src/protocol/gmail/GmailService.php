@@ -12,10 +12,10 @@ use modules\email\src\helpers\MailHelper;
 use modules\email\src\Projects;
 use modules\email\src\protocol\gmail\message\Gmail;
 use modules\email\src\Result;
-use sales\helpers\app\AppHelper;
-use sales\services\cases\CasesManageService;
-use sales\services\email\EmailService;
-use sales\services\email\incoming\EmailIncomingService;
+use src\helpers\app\AppHelper;
+use src\services\cases\CasesManageService;
+use src\services\email\EmailService;
+use src\services\email\incoming\EmailIncomingService;
 use Yii;
 use yii\helpers\VarDumper;
 

@@ -17,7 +17,6 @@ use yii\filters\VerbFilter;
  */
 class ClientPhoneController extends FController
 {
-
     public function behaviors()
     {
         $behaviors = [

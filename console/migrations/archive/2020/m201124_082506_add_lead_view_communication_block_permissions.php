@@ -1,9 +1,9 @@
 <?php
 
 use yii\db\Migration;
-use sales\rbac\rules\lead\view\communicationBlock\LeadViewCommunicationBlockCommonGroupRule;
-use sales\rbac\rules\lead\view\communicationBlock\LeadViewCommunicationBlockEmptyOwnerRule;
-use sales\rbac\rules\lead\view\communicationBlock\LeadViewCommunicationBlockIsOwnerRule;
+use src\rbac\rules\lead\view\communicationBlock\LeadViewCommunicationBlockCommonGroupRule;
+use src\rbac\rules\lead\view\communicationBlock\LeadViewCommunicationBlockEmptyOwnerRule;
+use src\rbac\rules\lead\view\communicationBlock\LeadViewCommunicationBlockIsOwnerRule;
 
 /**
  * Class m201124_082506_add_lead_view_communication_block_permissions

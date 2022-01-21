@@ -6,7 +6,6 @@ use Workerman\Worker;
 
 class SocketController extends \yii\console\Controller
 {
-
     public function actionStartSocket()
     {
 

@@ -2,10 +2,10 @@
 
 namespace frontend\controllers;
 
-use sales\model\sms\entity\smsDistributionList\forms\SmsDistributionListAddMultipleForm;
+use src\model\sms\entity\smsDistributionList\forms\SmsDistributionListAddMultipleForm;
 use Yii;
-use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
-use sales\model\sms\entity\smsDistributionList\search\SmsDistributionListSearch;
+use src\model\sms\entity\smsDistributionList\SmsDistributionList;
+use src\model\sms\entity\smsDistributionList\search\SmsDistributionListSearch;
 use yii\db\Exception;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
@@ -18,7 +18,6 @@ use yii\filters\VerbFilter;
  */
 class SmsDistributionListController extends FController
 {
-
     /**
      * @return array
      */

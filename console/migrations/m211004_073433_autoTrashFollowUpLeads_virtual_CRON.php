@@ -1,6 +1,6 @@
 <?php
 
-use sales\helpers\app\AppHelper;
+use src\helpers\app\AppHelper;
 use yii\db\Migration;
 
 /**

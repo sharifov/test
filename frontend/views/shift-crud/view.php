@@ -1,10 +1,11 @@
 <?php
 
+use src\model\shiftSchedule\entity\shift\Shift;
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\shiftSchedule\entity\shift\Shift */
+/* @var $model src\model\shiftSchedule\entity\shift\Shift */
 
 $this->title = $model->sh_name;
 $this->params['breadcrumbs'][] = ['label' => 'Shifts', 'url' => ['index']];
@@ -33,6 +34,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'attributes' => [
                 'sh_id',
                 'sh_name',
+                'sh_title',
+                [
+                    'attribute' => 'sh_category_id',
+                    'value' => static function (Shift $model) {
+                        return $model->category ? Html::encode($model->category->sc_name ?? '') : null;
+                    },
+                ],
                 'sh_enabled:booleanByLabel',
                 'sh_color',
                 'sh_sort_order',

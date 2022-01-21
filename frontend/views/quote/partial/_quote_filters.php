@@ -4,7 +4,7 @@ use common\models\Quote;
 use common\models\Airports;
 use frontend\helpers\QuoteHelper;
 use kartik\select2\Select2;
-use sales\forms\api\searchQuote\FlightQuoteSearchForm;
+use src\forms\api\searchQuote\FlightQuoteSearchForm;
 use yii\bootstrap4\ActiveForm;
 use yii\bootstrap4\Html;
 
@@ -46,26 +46,39 @@ use yii\bootstrap4\Html;
                 ]) ?>
 
                 <div class="row">
-                    <div class="col-md-3">
+
+                    <div class="col-md-4">
                         <?= $form->field($searchFrom, 'fareType')->widget(Select2::class, [
                             'options' => [
                                 'placeholder' => '--', //$searchFrom->getAttributeLabel('fareType'),
                                 'multiple' => true,
-                                'id' => 'search-quote-fare-type'
+                                'id' => 'search-quote-fare-type',
                             ],
                             'data' => Quote::getFareTypeList(),
                             'size' => Select2::SIZE_SMALL
                         ]) ?>
                     </div>
 
-                    <div class="col-md-9">
-                        <?= $form->field($searchFrom, 'airlines')->widget(Select2::class, [
+                    <div class="col-md-4">
+                        <?= $form->field($searchFrom, 'excludeConnectionAirports')->widget(Select2::class, [
                             'options' => [
-                                'placeholder' => '--', //$searchFrom->getAttributeLabel('airlines'),
+                                'placeholder' => '--',
                                 'multiple' => true,
-                                'id' => 'search-quote-airlines'
+                                'id' => 'search-quote-exclude-connection-airports'
                             ],
-                            'data' => $airlines,
+                            'data' => $connectionAirports,
+                            'size' => Select2::SIZE_SMALL
+                        ]) ?>
+                    </div>
+
+                    <div class="col-md-4">
+                        <?= $form->field($searchFrom, 'includeAirports')->widget(Select2::class, [
+                            'options' => [
+                                'placeholder' => '--',
+                                'multiple' => true,
+                                'id' => 'search-quote-include-airports'
+                            ],
+                            'data' => $connectionAirports,
                             'size' => Select2::SIZE_SMALL
                         ]) ?>
                     </div>
@@ -103,7 +116,7 @@ use yii\bootstrap4\Html;
                                 tooltips: {
                                     to: function(value){ return Math.ceil(value);}
                                 },
-                                step: 10,
+                                step: 1,
                                 range: {
                                     'min': min,
                                     'max': max
@@ -180,13 +193,13 @@ use yii\bootstrap4\Html;
                     </div>
 
                     <div class="col-md-5">
-                        <?= $form->field($searchFrom, 'excludeConnectionAirports')->widget(Select2::class, [
+                        <?= $form->field($searchFrom, 'airlines')->widget(Select2::class, [
                             'options' => [
-                                'placeholder' => '--',
+                                'placeholder' => '--', //$searchFrom->getAttributeLabel('airlines'),
                                 'multiple' => true,
-                                'id' => 'search-quote-exclude-connection-airports'
+                                'id' => 'search-quote-airlines'
                             ],
-                            'data' => $connectionAirports,
+                            'data' => $airlines,
                             'size' => Select2::SIZE_SMALL
                         ]) ?>
                     </div>
@@ -214,9 +227,9 @@ use yii\bootstrap4\Html;
                     <div class="row mt-2 mb-2 ml-1 font-weight-bold">
                     Trip <?= $key + 1 ?>. <?php
                         $airport = Airports::findByIata($segment->origin);
-                        echo ($airport ? $airport->cityName . ' '  : '') . $segment->origin . ' - ';
+                        echo $segment->origin . ($airport ? ' (' . $airport->cityName . ') - '  : '');
                         $airport = Airports::findByIata($segment->destination);
-                        echo ($airport ? $airport->cityName . ' '  : '') . $segment->destination; ?>
+                        echo $segment->destination . ($airport ? ' (' . $airport->cityName . ')'  : ''); ?>
                     </div>
                     <div class="row">
                         <?php if (isset($tripsMinDurationsInMinutes[$key]) && isset($tripsMaxDurationsInMinutes[$key]) && $tripsMinDurationsInMinutes[$key] > 0 && $tripsMaxDurationsInMinutes[$key] > 0) : ?>

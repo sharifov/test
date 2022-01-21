@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\userModelSetting\entity\UserModelSetting;
-use sales\model\userModelSetting\entity\UserModelSettingSearch;
+use src\model\userModelSetting\entity\UserModelSetting;
+use src\model\userModelSetting\entity\UserModelSettingSearch;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;

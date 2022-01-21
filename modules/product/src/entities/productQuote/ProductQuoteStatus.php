@@ -2,7 +2,7 @@
 
 namespace modules\product\src\entities\productQuote;
 
-use sales\helpers\setting\SettingHelper;
+use src\helpers\setting\SettingHelper;
 use yii\bootstrap4\Html;
 
 class ProductQuoteStatus
@@ -126,6 +126,14 @@ class ProductQuoteStatus
         self::PENDING,
         self::APPLIED,
         self::IN_PROGRESS
+    ];
+
+    public const STATUS_BO_MAP = [
+        'pending' => self::IN_PROGRESS,
+        'processing' => self::IN_PROGRESS,
+        'close' => self::SOLD,
+        'rejected' => self::DECLINED,
+        'void' => self::CANCELED,
     ];
 
     public static function getList(): array

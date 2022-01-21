@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChat\componentEvent\entity\ClientChatComponentEvent */
+/* @var $model src\model\clientChat\componentEvent\entity\ClientChatComponentEvent */
 
 $this->title = 'Update Client Chat Component Event';
 $this->params['breadcrumbs'][] = ['label' => 'Client Chat Component Events', 'url' => ['index']];

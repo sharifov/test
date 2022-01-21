@@ -3,8 +3,8 @@
 use common\components\grid\DateTimeColumn;
 use common\components\grid\MonthColumn;
 use yii\grid\ActionColumn;
-use sales\model\user\entity\payroll\UserPayroll;
-use sales\model\user\entity\profit\search\UserProfitSearch;
+use src\model\user\entity\payroll\UserPayroll;
+use src\model\user\entity\profit\search\UserProfitSearch;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\helpers\Url;
@@ -13,7 +13,7 @@ use yii\widgets\Pjax;
 use common\components\grid\UserSelect2Column;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\user\entity\payroll\search\UserPayrollSearch */
+/* @var $searchModel src\model\user\entity\payroll\search\UserPayrollSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'User Payrolls';

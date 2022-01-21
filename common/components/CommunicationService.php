@@ -11,12 +11,12 @@ namespace common\components;
 
 use common\models\Call;
 use common\models\Project;
-use sales\helpers\email\MaskEmailHelper;
-use sales\helpers\phone\MaskPhoneHelper;
-use sales\helpers\setting\SettingHelper;
-use sales\model\call\entity\call\data\CreatorType;
-use sales\model\call\useCase\conference\create\CreateCallForm;
-use sales\model\project\entity\projectLocale\ProjectLocale;
+use src\helpers\email\MaskEmailHelper;
+use src\helpers\phone\MaskPhoneHelper;
+use src\helpers\setting\SettingHelper;
+use src\model\call\entity\call\data\CreatorType;
+use src\model\call\useCase\conference\create\CreateCallForm;
+use src\model\project\entity\projectLocale\ProjectLocale;
 use thamtech\uuid\helpers\UuidHelper;
 use Yii;
 use yii\base\Component;
@@ -704,7 +704,9 @@ class CommunicationService extends Component implements CommunicationServiceInte
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error']), 'Component:CommunicationService::updateCallTunnel');
+            if (strpos($response->content, 'Unable to update record: Call is not in-progress. Cannot redirect') === false) {
+                \Yii::error(VarDumper::dumpAsString($out['error']), 'Component:CommunicationService::updateCallTunnel');
+            }
         }
 
         return $out;

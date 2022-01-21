@@ -3,8 +3,8 @@
 namespace modules\qaTask\src\entities\qaTask;
 
 use modules\qaTask\src\exceptions\QaTaskCodeException;
-use sales\dispatchers\EventDispatcher;
-use sales\repositories\NotFoundException;
+use src\dispatchers\EventDispatcher;
+use src\repositories\NotFoundException;
 
 /**
  * Class QaTaskRepository

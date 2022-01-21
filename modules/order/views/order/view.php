@@ -5,7 +5,7 @@ use modules\fileStorage\src\entity\fileStorage\FileStorage;
 use modules\fileStorage\src\services\url\UrlGenerator;
 use modules\order\src\entities\order\Order;
 use modules\order\src\processManager\phoneToBook\OrderProcessManager;
-use sales\auth\Auth;
+use src\auth\Auth;
 use yii\helpers\Html;
 
 /* @var yii\web\View $this */

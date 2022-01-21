@@ -1,12 +1,12 @@
 <?php
 
-use sales\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
+use src\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
 use yii\bootstrap4\Html;
 use yii\helpers\VarDumper;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo */
+/* @var $model src\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo */
 
 $this->title = $model->cpsi_cpl_id;
 $this->params['breadcrumbs'][] = ['label' => 'Contact Phone Service Infos', 'url' => ['index']];

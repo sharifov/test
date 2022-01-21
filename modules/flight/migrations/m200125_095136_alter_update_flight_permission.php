@@ -3,7 +3,7 @@
 namespace modules\flight\migrations;
 
 use console\migrations\RbacMigrationService;
-use sales\rbac\rules\ProductOwnerRule;
+use src\rbac\rules\ProductOwnerRule;
 use yii\db\Migration;
 
 /**

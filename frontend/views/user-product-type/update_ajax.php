@@ -1,7 +1,7 @@
 <?php
 
 use modules\product\src\entities\productType\ProductType;
-use sales\access\EmployeeProjectAccess;
+use src\access\EmployeeProjectAccess;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 

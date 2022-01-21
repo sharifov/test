@@ -4,7 +4,7 @@ namespace modules\flight\src\useCases\reprotectionExchange\form;
 
 use frontend\helpers\JsonHelper;
 use modules\flight\src\useCases\reprotectionExchange\service\ReProtectionExchangeService;
-use sales\entities\cases\Cases;
+use src\entities\cases\Cases;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\validators\EmailValidator;

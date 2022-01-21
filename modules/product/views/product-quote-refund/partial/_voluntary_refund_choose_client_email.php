@@ -2,7 +2,7 @@
 
 /**
  * @var $form \modules\product\src\forms\VoluntaryRefundSendEmailForm
- * @var $case \sales\entities\cases\Cases
+ * @var $case \src\entities\cases\Cases
  * @var $this \yii\web\View
  * @var $order \modules\order\src\entities\order\Order
  */

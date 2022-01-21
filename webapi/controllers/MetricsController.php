@@ -3,7 +3,7 @@
 namespace webapi\controllers;
 
 use kartik\select2\ThemeDefaultAsset;
-use sales\helpers\app\AppHelper;
+use src\helpers\app\AppHelper;
 use webapi\models\PrometheusUser;
 use Yii;
 use yii\filters\AccessControl;

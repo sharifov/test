@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\leadUserConversion\entity\LeadUserConversion */
+/* @var $model src\model\leadUserConversion\entity\LeadUserConversion */
 
 $this->title = 'Create Lead User Conversion';
 $this->params['breadcrumbs'][] = ['label' => 'Lead User Conversions', 'url' => ['index']];

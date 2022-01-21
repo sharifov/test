@@ -3,7 +3,7 @@
 namespace common\models\search;
 
 use common\models\Employee;
-use sales\helpers\query\QueryHelper;
+use src\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
 use common\models\PhoneBlacklist;
 

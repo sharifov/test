@@ -4,7 +4,7 @@ use common\models\Employee;
 use frontend\widgets\multipleUpdate\redial\MultipleUpdateWidget;
 use frontend\widgets\multipleUpdate\redialAll\UpdateAllWidget;
 use frontend\widgets\UserInfoProgress;
-use sales\access\ListsAccess;
+use src\access\ListsAccess;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\Pjax;

@@ -4,7 +4,7 @@ namespace modules\flight\src\repositories\flightRequest;
 
 use modules\flight\models\FlightRequest;
 use modules\flight\src\exceptions\FlightCodeException;
-use sales\helpers\ErrorsToStringHelper;
+use src\helpers\ErrorsToStringHelper;
 
 /**
  * Class FlightRequestRepository

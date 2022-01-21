@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientAccountSocial\entity\ClientAccountSocial */
+/* @var $model src\model\clientAccountSocial\entity\ClientAccountSocial */
 
 $this->title = 'Create Client Account Social';
 $this->params['breadcrumbs'][] = ['label' => 'Client Account Socials', 'url' => ['index']];

@@ -2,16 +2,16 @@
 
 use yii\helpers\Html;
 use kartik\grid\GridView;
-use sales\access\ListsAccess;
+use src\access\ListsAccess;
 use kartik\export\ExportMenu;
-use sales\helpers\call\CallHelper;
+use src\helpers\call\CallHelper;
 
 $this->title = 'Calls Report';
 $this->params['breadcrumbs'][] = $this->title;
 
 /**
  * @var $this yii\web\View
- * @var $searchModel \sales\model\callLog\entity\callLog\search\CallLogSearch;
+ * @var $searchModel \src\model\callLog\entity\callLog\search\CallLogSearch;
  * @var $dataProvider yii\data\ArrayDataProvider
  */
 $list = new ListsAccess(Yii::$app->user->id);

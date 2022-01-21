@@ -2,8 +2,8 @@
 
 namespace frontend\controllers;
 
-use sales\services\cleaner\form\DbCleanerParamsForm;
-use sales\services\cleaner\cleaners\GlobalLogCleaner;
+use src\services\cleaner\form\DbCleanerParamsForm;
+use src\services\cleaner\cleaners\GlobalLogCleaner;
 use Yii;
 use common\models\GlobalLog;
 use common\models\search\GlobalLogSearch;
@@ -17,7 +17,6 @@ use yii\filters\VerbFilter;
  */
 class GlobalLogController extends FController
 {
-
     /**
      * @return array
      */

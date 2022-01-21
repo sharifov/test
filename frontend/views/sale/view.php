@@ -4,25 +4,25 @@ use common\models\Airline;
 use common\models\CaseSale;
 use kartik\editable\Editable;
 use kartik\popover\PopoverX;
-use sales\guards\cases\CaseManageSaleInfoGuard;
-use sales\helpers\email\MaskEmailHelper;
-use sales\model\airline\service\AirlineService;
-use sales\model\saleTicket\entity\SaleTicket;
-use sales\model\saleTicket\useCase\sendEmail\SaleTicketHelper;
+use src\guards\cases\CaseManageSaleInfoGuard;
+use src\helpers\email\MaskEmailHelper;
+use src\model\airline\service\AirlineService;
+use src\model\saleTicket\entity\SaleTicket;
+use src\model\saleTicket\useCase\sendEmail\SaleTicketHelper;
 use yii\grid\GridView;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\helpers\VarDumper;
 use yii\widgets\Pjax;
-use sales\helpers\phone\MaskPhoneHelper;
+use src\helpers\phone\MaskPhoneHelper;
 
 /* @var $this yii\web\View */
 /* @var $data array */
 /* @var $csId int */
 /* @var $itemKey int */
 /* @var $caseSaleModel common\models\CaseSale */
-/* @var $caseModel sales\entities\cases\Cases */
+/* @var $caseModel src\entities\cases\Cases */
 /* @var $additionalData array */
 /** @var $dataProviderCc yii\data\ActiveDataProvider
  * @var $disableMasking bool
@@ -46,8 +46,6 @@ if (!empty($caseSaleModel)) {
 
 $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_id' => !empty($caseModel) ? $caseModel->cs_id : 0, 'sale_id' => $data['saleId'], 'booking_id' => $data['bookingId']]);
 ?>
-
-
 
 <div class="sale-view">
     <h3><?= Html::encode($title) ?></h3>
@@ -82,6 +80,12 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                     <th>Confirmation Number (Booking Id)</th>
                     <td><?=Html::encode($data['bookingId'])?></td>
                 </tr>
+                <?php if (($baseBookingId = $data['baseBookingId'] ?? null) && $baseBookingId !== $data['bookingId']) : ?>
+                    <tr>
+                        <th>Base Booking Id</th>
+                        <td><?=Html::encode($baseBookingId)?></td>
+                    </tr>
+                <?php endif ?>
                 <tr>
                     <th>PNR</th>
                     <td><?=Html::encode($data['pnr'])?></td>
@@ -921,7 +925,7 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                         'header' => 'Country',
                                         'asPopover' => false,
                                         'inputType' => Editable::INPUT_DROPDOWN_LIST,
-                                        'data' => \sales\helpers\CountryHelper::getCountriesCode(),
+                                        'data' => \src\helpers\CountryHelper::getCountriesCode(),
                                         'value' => Html::encode(!empty($passenger['pas_country']) ? $passenger['pas_country'] : null),
                                         'formOptions' => [ 'action' => [Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
                                         'pluginEvents' => [

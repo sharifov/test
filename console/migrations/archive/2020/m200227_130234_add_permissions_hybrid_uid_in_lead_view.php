@@ -1,7 +1,7 @@
 <?php
 
 use common\models\Employee;
-use sales\rbac\rules\lead\view\LeadViewHybridUidByStatusRule;
+use src\rbac\rules\lead\view\LeadViewHybridUidByStatusRule;
 use yii\db\Migration;
 use yii\rbac\ManagerInterface;
 

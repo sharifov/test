@@ -4,13 +4,13 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 use yii\helpers\Html;
 use yii\helpers\VarDumper;
-use sales\entities\cases\CaseEventLog;
+use src\entities\cases\CaseEventLog;
 use modules\cases\src\abac\CasesAbacObject;
 use modules\cases\src\abac\dto\CasesAbacDto;
 
 /**
  * @var $dataProvider \yii\data\ActiveDataProvider
- * @var $searchModel \sales\entities\cases\CaseEventLogSearch
+ * @var $searchModel \src\entities\cases\CaseEventLogSearch
  */
 ?>
 

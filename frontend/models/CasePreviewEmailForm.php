@@ -8,7 +8,7 @@ use common\models\Employee;
 use common\models\Language;
 use modules\fileStorage\src\entity\fileCase\FileCaseQuery;
 use modules\fileStorage\src\entity\fileStorage\FileStorage;
-use sales\entities\cases\Cases;
+use src\entities\cases\Cases;
 use yii\base\Model;
 use yii\helpers\ArrayHelper;
 

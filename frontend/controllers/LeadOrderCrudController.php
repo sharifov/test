@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\leadOrder\entity\LeadOrder;
-use sales\model\leadOrder\entity\search\LeadOrderSearch;
+use src\model\leadOrder\entity\LeadOrder;
+use src\model\leadOrder\entity\search\LeadOrderSearch;
 use frontend\controllers\FController;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -14,7 +14,6 @@ use yii\helpers\ArrayHelper;
 
 class LeadOrderCrudController extends FController
 {
-
     public function behaviors(): array
     {
         $behaviors = [

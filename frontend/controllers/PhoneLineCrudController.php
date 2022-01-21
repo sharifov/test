@@ -2,9 +2,9 @@
 
 namespace frontend\controllers;
 
-use sales\auth\Auth;
-use sales\model\phoneLine\phoneLine\entity\PhoneLine;
-use sales\model\phoneLine\phoneLine\entity\search\PhoneLineSearch;
+use src\auth\Auth;
+use src\model\phoneLine\phoneLine\entity\PhoneLine;
+use src\model\phoneLine\phoneLine\entity\search\PhoneLineSearch;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;

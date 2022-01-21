@@ -4,8 +4,8 @@ namespace frontend\widgets\multipleUpdate\cases;
 
 use common\models\Employee;
 use frontend\widgets\multipleUpdate\IdsValidator;
-use sales\entities\cases\CasesStatus;
-use sales\helpers\user\UserDateTimeHelper;
+use src\entities\cases\CasesStatus;
+use src\helpers\user\UserDateTimeHelper;
 use yii\base\Model;
 use yii\helpers\Json;
 

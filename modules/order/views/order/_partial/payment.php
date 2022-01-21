@@ -2,7 +2,7 @@
 
 use common\models\Payment;
 use modules\order\src\entities\order\Order;
-use sales\auth\Auth;
+use src\auth\Auth;
 use yii\bootstrap4\Html;
 use yii\helpers\Url;
 use yii\widgets\Pjax;

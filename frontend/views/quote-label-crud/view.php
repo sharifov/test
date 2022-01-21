@@ -4,7 +4,7 @@ use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\quoteLabel\entity\QuoteLabel */
+/* @var $model src\model\quoteLabel\entity\QuoteLabel */
 
 $this->title = $model->ql_quote_id;
 $this->params['breadcrumbs'][] = ['label' => 'Quote Labels', 'url' => ['index']];

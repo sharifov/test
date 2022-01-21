@@ -5,7 +5,7 @@ namespace modules\product\src\entities\productHolder;
 use modules\product\src\entities\product\Product;
 use common\components\validators\PhoneValidator;
 use modules\product\src\entities\productHolder\serializer\ProductHolderSerializer;
-use sales\entities\serializer\Serializable;
+use src\entities\serializer\Serializable;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 

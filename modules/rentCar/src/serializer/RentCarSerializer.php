@@ -4,7 +4,7 @@ namespace modules\rentCar\src\serializer;
 
 use common\models\Airports;
 use modules\rentCar\src\entity\rentCar\RentCar;
-use sales\entities\serializer\Serializer;
+use src\entities\serializer\Serializer;
 
 /**
  * Class RentCarSerializer

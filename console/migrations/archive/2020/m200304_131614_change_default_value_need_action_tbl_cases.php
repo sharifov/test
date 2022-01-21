@@ -1,6 +1,6 @@
 <?php
 
-use sales\entities\cases\Cases;
+use src\entities\cases\Cases;
 use yii\db\Migration;
 
 /**

@@ -2,10 +2,10 @@
 
 namespace frontend\controllers;
 
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
-use sales\model\shiftSchedule\entity\shift\Shift;
-use sales\model\shiftSchedule\entity\shift\search\SearchShift;
+use src\model\shiftSchedule\entity\shift\Shift;
+use src\model\shiftSchedule\entity\shift\search\SearchShift;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

@@ -2,8 +2,9 @@
 
 use kartik\export\ExportMenu;
 use kartik\grid\GridView;
-use sales\model\user\reports\stats\Metrics;
-use sales\model\user\reports\stats\UserStatsReport;
+use src\model\user\reports\stats\Metrics;
+use src\model\user\reports\stats\UserStatsReport;
+use src\model\userModelSetting\service\UserModelSettingHelper;
 use yii\bootstrap4\Html;
 use yii\web\View;
 
@@ -113,9 +114,27 @@ if ($showReport) {
             'format' => 'raw',
         ];
     }
+    if (Metrics::isCallPriorityCurrent($searchModel->metrics)) {
+        $columns[] = [
+            'attribute' => 'call_priority_current',
+            'format' => 'raw',
+        ];
+    }
+    if (Metrics::isSalesConversionCallPriority($searchModel->metrics)) {
+        $columns[] = [
+            'attribute' => 'sales_conversion_call_priority',
+            'format' => 'raw',
+        ];
+    }
+    if (Metrics::isGrossProfitCallPriority($searchModel->metrics)) {
+        $columns[] = [
+            'attribute' => 'gross_profit_call_priority',
+            'format' => 'raw',
+        ];
+    }
 }
-
 ?>
+
 <div class="user-stats-index">
 
     <h1><?= Html::encode($this->title) ?></h1>

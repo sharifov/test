@@ -2,7 +2,7 @@
 
 namespace frontend\controllers;
 
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
 use common\models\LeadChecklistType;
 use common\models\search\LeadChecklistTypeSearch;

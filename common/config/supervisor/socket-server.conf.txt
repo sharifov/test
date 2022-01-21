@@ -1,7 +1,7 @@
-[program:SoketServer]
+[program:SocketServer2]
 process_name=%(program_name)s_%(process_num)02d
-command=/usr/bin/php /var/www/sale/console/socket-server.php start
-stdout_logfile=/var/www/sale/console/runtime/socket-server.log
+command=/usr/bin/php /var/www/sale/yii websocket-server/start
+stdout_logfile=/var/www/sale/console/runtime/socket-server2.log
 autostart=true
 autorestart=true
 user=root

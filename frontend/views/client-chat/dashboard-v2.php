@@ -1,19 +1,19 @@
 <?php
 
 use frontend\themes\gentelella_v2\assets\ClientChatAsset;
-use sales\auth\Auth;
-use sales\helpers\clientChat\ClientChatHelper;
-use sales\helpers\clientChat\ClientChatIframeHelper;
-use sales\model\clientChat\dashboard\FilterForm;
-use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChat\dashboard\ReadUnreadFilter;
-use sales\model\clientChat\dashboard\GroupFilter;
-use sales\model\clientChat\permissions\ClientChatActionPermission;
-use sales\model\clientChatChannel\entity\ClientChatChannel;
-use sales\model\clientChatMessage\entity\ClientChatMessage;
-use sales\model\clientChatNote\entity\ClientChatNote;
-use sales\model\userClientChatData\service\UserClientChatDataService;
-use sales\services\clientChatCouchNote\ClientChatCouchNoteForm;
+use src\auth\Auth;
+use src\helpers\clientChat\ClientChatHelper;
+use src\helpers\clientChat\ClientChatIframeHelper;
+use src\model\clientChat\dashboard\FilterForm;
+use src\model\clientChat\entity\ClientChat;
+use src\model\clientChat\dashboard\ReadUnreadFilter;
+use src\model\clientChat\dashboard\GroupFilter;
+use src\model\clientChat\permissions\ClientChatActionPermission;
+use src\model\clientChatChannel\entity\ClientChatChannel;
+use src\model\clientChatMessage\entity\ClientChatMessage;
+use src\model\clientChatNote\entity\ClientChatNote;
+use src\model\userClientChatData\service\UserClientChatDataService;
+use src\services\clientChatCouchNote\ClientChatCouchNoteForm;
 use yii\bootstrap4\Alert;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
@@ -25,7 +25,7 @@ use yii\widgets\Pjax;
 /* @var $this yii\web\View */
 /* @var $dataProvider \yii\data\ArrayDataProvider|null */
 /* @var $client \common\models\Client|null */
-/* @var $clientChat \sales\model\clientChat\entity\ClientChat|null */
+/* @var $clientChat \src\model\clientChat\entity\ClientChat|null */
 /* @var $history ClientChatMessage|null */
 /** @var $totalUnreadMessages int */
 /** @var FilterForm $filter */
@@ -43,7 +43,7 @@ ClientChatAsset::register($this);
 $userRcAuthToken = UserClientChatDataService::getCurrentAuthToken() ?? '';
 
 $readonly = (int)ClientChatHelper::isDialogReadOnly($clientChat, Auth::user());
-$agentToken = \sales\helpers\clientChat\ClientChatDialogHelper::getAgentToken(Auth::user());
+$agentToken = \src\helpers\clientChat\ClientChatDialogHelper::getAgentToken(Auth::user());
 $server = Yii::$app->rchat->host;
 $apiServer = Yii::$app->rchat->apiServer;
 $chatApiScriptUrl = Yii::$app->rchat->chatApiScriptUrl;

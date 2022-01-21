@@ -10,7 +10,6 @@ use yii\db\Migration;
  */
 class m210525_143009_add_column_enabled extends Migration
 {
-
     /**
      * {@inheritdoc}
      */

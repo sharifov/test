@@ -11,10 +11,10 @@ use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLog;
 use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLogStatus;
 use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLogStatus as LogStatus;
 use modules\lead\src\services\LeadFailBooking;
-use sales\auth\Auth;
-use sales\helpers\app\AppHelper;
-use sales\repositories\product\ProductQuoteRepository;
-use sales\services\TransactionManager;
+use src\auth\Auth;
+use src\helpers\app\AppHelper;
+use src\repositories\product\ProductQuoteRepository;
+use src\services\TransactionManager;
 use Yii;
 use yii\helpers\ArrayHelper;
 

@@ -11,7 +11,7 @@ use modules\hotel\src\useCases\api\bookQuote\HotelQuoteBookService;
 use modules\hotel\src\useCases\api\bookQuote\HotelQuoteCheckRateService;
 use modules\lead\src\services\LeadFailBooking;
 use modules\order\src\processManager\clickToBook\ErrorOrder;
-use sales\repositories\lead\LeadRepository;
+use src\repositories\lead\LeadRepository;
 use yii\queue\JobInterface;
 use yii\queue\RetryableJobInterface;
 use Yii;

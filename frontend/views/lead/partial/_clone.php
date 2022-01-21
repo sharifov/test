@@ -1,6 +1,6 @@
 <?php
 
-use sales\forms\lead\CloneReasonForm;
+use src\forms\lead\CloneReasonForm;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 

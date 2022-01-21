@@ -4,7 +4,10 @@
 /* @var $form yii\bootstrap\ActiveForm */
 /* @var $model LoginForm */
 
-use sales\services\authentication\AntiBruteForceService;
+use frontend\themes\gentelella_v2\widgets\FlashAlert;
+use src\helpers\setting\SettingHelper;
+use src\services\authentication\AntiBruteForceService;
+use yii\authclient\widgets\AuthChoice;
 use yii\captcha\Captcha;
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
@@ -17,8 +20,9 @@ use yii\helpers\Url;
         <div class="animate form login_form">
             <section class="login_content">
 
-                <?php $form = ActiveForm::begin(['id' => 'login-form']); ?>
+                <?php $form = ActiveForm::begin(['id' => 'login-form', 'validateOnBlur' => false]); ?>
                 <h1>Login Form</h1>
+                <?= FlashAlert::widget() ?>
                 <?php /*<div>
                     <?=$form->errorSummary($model); ?>
                 </div>*/ ?>
@@ -44,8 +48,37 @@ use yii\helpers\Url;
                 <div class="form-group">
                     <div class="text-left"><?= $form->field($model, 'rememberMe')->checkbox() ?></div>
                     <?= Html::submitButton('Login', ['class' => 'btn btn-default', 'name' => 'login-button']) ?>
-
                 </div>
+
+                <?php if (SettingHelper::isEnabledAuthClients()) : ?>
+                <div style="position: relative; margin-top: 20px;">
+                    <h1 style="font-size: 20px;">Or</h1>
+                </div>
+
+                    <?php $authChoice = AuthChoice::begin([
+                        'baseAuthUrl' => ['site/auth'],
+                        'popupMode' => true,
+                        'id' => 'auth-choice',
+                        'clientOptions' => [
+                            'popup' => [
+                                'width' => 450,
+                                'height' => 750,
+                            ],
+                        ],
+                    ]) ?>
+                        <div class="d-flex justify-content-center" style>
+                            <?php foreach ($authChoice->getClients() as $client) : ?>
+                                <?= $authChoice->clientLink(
+                                    $client,
+                                    '<button type="button" class="login-with-btn login-with-' . $client->getName() . '-btn">Sign in with ' . $client->getTitle() . '</button>',
+                                    [
+                                        'style' => 'margin: 0'
+                                    ]
+                                ) ?>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php AuthChoice::end() ?>
+                <?php endif; ?>
 
                 <?php /*<div>
                     <a class="btn btn-default submit" href="index.html">Log in</a>

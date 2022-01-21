@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChat\cannedResponse\entity\ClientChatCannedResponse */
+/* @var $model src\model\clientChat\cannedResponse\entity\ClientChatCannedResponse */
 
 $this->title = 'Create Client Chat Canned Response';
 $this->params['breadcrumbs'][] = ['label' => 'Client Chat Canned Responses', 'url' => ['index']];

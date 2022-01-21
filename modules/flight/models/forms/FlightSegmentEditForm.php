@@ -3,7 +3,7 @@
 namespace modules\flight\models\forms;
 
 use modules\flight\models\FlightSegment;
-use sales\repositories\airport\AirportRepository;
+use src\repositories\airport\AirportRepository;
 use Yii;
 
 class FlightSegmentEditForm extends FlightSegmentForm

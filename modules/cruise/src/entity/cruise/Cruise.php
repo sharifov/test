@@ -9,7 +9,7 @@ use modules\cruise\src\useCase\updateCruiseRequest\CruiseUpdateRequestForm;
 use modules\product\src\entities\product\Product;
 use modules\product\src\interfaces\Productable;
 use modules\product\src\interfaces\ProductQuoteService;
-use sales\entities\EventTrait;
+use src\entities\EventTrait;
 use Yii;
 
 /**

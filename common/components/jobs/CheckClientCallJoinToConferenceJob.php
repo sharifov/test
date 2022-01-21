@@ -5,10 +5,10 @@ namespace common\components\jobs;
 use common\models\Call;
 use common\models\ConferenceParticipant;
 use common\models\DepartmentPhoneProject;
-use sales\helpers\app\AppHelper;
-use sales\model\call\services\QueueLongTimeNotificationJobCreator;
-use sales\model\call\services\RepeatMessageCallJobCreator;
-use sales\model\department\departmentPhoneProject\entity\params\QueueLongTimeNotificationParams;
+use src\helpers\app\AppHelper;
+use src\model\call\services\QueueLongTimeNotificationJobCreator;
+use src\model\call\services\RepeatMessageCallJobCreator;
+use src\model\department\departmentPhoneProject\entity\params\QueueLongTimeNotificationParams;
 use yii\helpers\VarDumper;
 use yii\queue\JobInterface;
 

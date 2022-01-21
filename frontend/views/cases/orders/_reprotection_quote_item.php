@@ -11,7 +11,7 @@ use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundStatus;
-use sales\helpers\product\ProductQuoteHelper;
+use src\helpers\product\ProductQuoteHelper;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -23,16 +23,16 @@ use modules\product\src\abac\dto\ProductQuoteRefundAbacDto;
 use modules\product\src\abac\dto\RelatedProductQuoteAbacDto;
 use modules\product\src\abac\RelatedProductQuoteAbacObject;
 use yii\web\ForbiddenHttpException;
-use sales\access\EmployeeGroupAccess;
-use sales\auth\Auth;
-use sales\helpers\setting\SettingHelper;
+use src\access\EmployeeGroupAccess;
+use src\auth\Auth;
+use src\helpers\setting\SettingHelper;
 
 /**
  * @var Order $order
  * @var ProductQuote $quote
  * @var int $nr
  * @var int $projectId
- * @var  $case \sales\entities\cases\Cases
+ * @var  $case \src\entities\cases\Cases
  * @var \yii\web\View $this
  * @var bool $isReprotection
  * @var $caseAbacDto \modules\cases\src\abac\dto\CasesAbacDto
@@ -177,7 +177,7 @@ $productQuoteAbacDto->mapOrderAttributes($order);
                         <th>Status</th>
                         <th title="Client Status mapping from SiteSettings for OTA" data-toggle="tooltip">Client Status</th>
                         <th style="width: 140px">Created</th>
-                        <th style="width: 60px" title="is Automate">Auto</th>
+                        <th style="width: 84px">Info</th>
                         <th>Decision</th>
                         <th style="width: 60px">Action</th>
                     </tr>
@@ -208,8 +208,14 @@ $productQuoteAbacDto->mapOrderAttributes($order);
                             <td><?= $changeItem->getStatusLabel()?></td>
                             <td><?= Html::encode($changeItem->getClientStatusName()) ?></td>
                             <td><small><?=$changeItem->pqc_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($changeItem->pqc_created_dt)) : '-'?></small></td>
-
-                            <td><?= $changeItem->pqc_is_automate ? '<i class="fa fa-check" title="Automate"></i>' : '-' ?></td>
+                            <td>
+                                <?php if ($changeItem->pqc_is_automate) : ?>
+                                    <?php echo Html::tag('span', 'A', ['class' => 'badge badge-pill badge-success', 'title' => 'Automatic']) ?>
+                                <?php endif ?>
+                                <?php if ($changeItem->isTypeReProtection() && !$changeItem->pqc_refund_allowed) : ?>
+                                    <?php echo Html::tag('span', 'R', ['class' => 'badge badge-pill badge-danger', 'title' => 'Not Refundable']) ?>
+                                <?php endif ?>
+                            </td>
                             <td>
                                 <?= $changeItem->getDecisionTypeLabel()?><br />
                                 <small><?=$changeItem->pqc_decision_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($changeItem->pqc_decision_dt)) : '-'?></small>

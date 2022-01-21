@@ -8,12 +8,12 @@ use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
 use modules\qaTask\src\entities\qaTask\QaTaskRepository;
 use modules\qaTask\src\useCases\qaTask\decide\QaTaskDecideService;
 use modules\qaTask\src\useCases\qaTask\QaTaskActionsService;
-use sales\access\ProjectAccessService;
-use sales\dispatchers\EventDispatcher;
-use sales\repositories\lead\LeadRepository;
-use sales\repositories\user\UserRepository;
-use sales\services\lead\qcall\QCallService;
-use sales\services\TransactionManager;
+use src\access\ProjectAccessService;
+use src\dispatchers\EventDispatcher;
+use src\repositories\lead\LeadRepository;
+use src\repositories\user\UserRepository;
+use src\services\lead\qcall\QCallService;
+use src\services\TransactionManager;
 use yii\rbac\CheckAccessInterface;
 
 /**

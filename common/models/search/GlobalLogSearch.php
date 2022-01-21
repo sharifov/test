@@ -9,7 +9,7 @@ use common\models\Lead;
 use common\models\LeadFlightSegment;
 use common\models\LeadPreferences;
 use common\models\Quote;
-use sales\entities\cases\Cases;
+use src\entities\cases\Cases;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\GlobalLog;

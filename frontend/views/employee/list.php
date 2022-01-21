@@ -1,7 +1,7 @@
 <?php
 
 use common\models\Employee;
-use sales\auth\Auth;
+use src\auth\Auth;
 use yii\grid\ActionColumn;
 use common\components\grid\DateTimeColumn;
 /* @var $this yii\web\View */
@@ -11,7 +11,7 @@ use common\components\grid\DateTimeColumn;
 /* @var $employees [] */
 /* @var array $multipleErrors */
 
-use sales\access\EmployeeProjectAccess;
+use src\access\EmployeeProjectAccess;
 use yii\bootstrap\Html;
 use kartik\grid\GridView;
 use yii\helpers\VarDumper;
@@ -225,16 +225,8 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             [
                 'label' => 'Grav',
                 'value' => static function (\common\models\Employee $model) {
-
-                    if ($model->email) {
-                        $grav_url = "//www.gravatar.com/avatar/" . md5(mb_strtolower(trim($model->email))) . "?d=identicon&s=25";
-                    } else {
-                        $grav_url = '//www.gravatar.com/avatar/?d=identicon&s=25';
-                    }
-
-                    $icon = \yii\helpers\Html::img($grav_url, ['class' => 'img-circle img-thumbnail']);
-
-                    return $icon;
+                    $gravUrl = $model->getGravatarUrl(25);
+                    return \yii\helpers\Html::img($gravUrl, ['class' => 'img-circle img-thumbnail']);
                 },
                 'format' => 'raw'
             ],

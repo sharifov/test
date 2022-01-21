@@ -5,10 +5,15 @@ namespace frontend\controllers;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\search\LeadQcallSearch;
-use sales\repositories\lead\LeadBadgesRepository;
+use src\helpers\app\AppHelper;
+use src\helpers\ErrorsToStringHelper;
+use src\repositories\lead\LeadBadgesRepository;
+use src\services\badges\BadgesObjectFactory;
+use src\services\badges\form\BadgeForm;
 use yii\filters\ContentNegotiator;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
+use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
@@ -62,6 +67,59 @@ class BadgesController extends FController
             ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
+
+    public function actionBadgesCount(): array
+    {
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+
+            $result = ['message' => '', 'status' => 0, 'data' => []];
+
+            try {
+                if (!$badgesCollection = Yii::$app->request->post('badgesCollection')) {
+                    throw new \RuntimeException('Param badgesCollection is required');
+                }
+                if (!is_array($badgesCollection)) {
+                    throw new \RuntimeException('Param badgesCollection not is array');
+                }
+
+                foreach ($badgesCollection as $badge) {
+                    try {
+                        $badgeForm = new BadgeForm();
+                        if (!$badgeForm->load($badge)) {
+                            throw new \RuntimeException('BadgeForm not loaded');
+                        }
+                        if (!$badgeForm->validate()) {
+                            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($badgeForm));
+                        }
+
+                        $badgeCounter = (new BadgesObjectFactory($badgeForm->objectKey))->create();
+                        $result['data'][$badgeForm->idName] = $badgeCounter->countTypes((array) $badgeForm->types);
+                    } catch (\RuntimeException | \DomainException $throwable) {
+                        $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['data' => $badge]);
+                        \Yii::warning($message, 'BadgesController:actionBadgesCount:badgesCollection:Exception');
+                    } catch (\Throwable $throwable) {
+                        $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['data' => $badge]);
+                        \Yii::error($message, 'BadgesController:actionBadgesCount:badgesCollection:Throwable');
+                    }
+                }
+                if (empty($result['data'])) {
+                    throw new \RuntimeException('Data is empty');
+                }
+
+                $result['message'] = 'Success';
+                $result['status'] = 1;
+            } catch (\RuntimeException | \DomainException $exception) {
+                Yii::warning(AppHelper::throwableLog($exception), 'BadgesController:actionBadgesCount::Exception');
+                $result['message'] = VarDumper::dumpAsString($exception->getMessage());
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableLog($throwable), 'BadgesController:actionBadgesCount:Throwable');
+                $result['message'] = 'Internal Server Error';
+            }
+            return $result;
+        }
+        throw new BadRequestHttpException();
     }
 
     /**

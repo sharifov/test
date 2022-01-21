@@ -3,7 +3,7 @@
 namespace webapi\src\forms\billing;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
-use sales\traits\FormNameModelTrait;
+use src\traits\FormNameModelTrait;
 use yii\validators\EmailValidator;
 
 /**

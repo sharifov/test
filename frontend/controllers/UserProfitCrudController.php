@@ -4,8 +4,8 @@ namespace frontend\controllers;
 
 use common\models\Employee;
 use Yii;
-use sales\model\user\entity\profit\UserProfit;
-use sales\model\user\entity\profit\search\UserProfitSearch;
+use src\model\user\entity\profit\UserProfit;
+use src\model\user\entity\profit\search\UserProfitSearch;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

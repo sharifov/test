@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use common\models\Project;
-use sales\widgets\DepartmentSelect2Widget;
-use sales\widgets\ProjectSelect2Widget;
+use src\widgets\DepartmentSelect2Widget;
+use src\widgets\ProjectSelect2Widget;
 use Yii;
 use common\models\Department;
 use common\models\search\DepartmentSearch;
@@ -18,7 +18,6 @@ use yii\filters\VerbFilter;
  */
 class DepartmentController extends FController
 {
-
     public function behaviors()
     {
         $behaviors = [

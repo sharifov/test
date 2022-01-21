@@ -2,7 +2,7 @@
 
 use common\models\Setting;
 use common\models\SettingCategory;
-use sales\services\system\DbViewCryptService;
+use src\services\system\DbViewCryptService;
 use yii\db\Migration;
 
 /**

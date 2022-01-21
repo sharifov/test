@@ -6,7 +6,7 @@ use yii\widgets\Pjax;
 use common\models\Department;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\entities\cases\CaseCategorySearch */
+/* @var $searchModel src\entities\cases\CaseCategorySearch */
 /* @var $dataProvider yii\data\SqlDataProvider */
 
 $this->title = 'Case Categories Report';

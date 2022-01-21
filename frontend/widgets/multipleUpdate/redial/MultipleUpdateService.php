@@ -4,9 +4,9 @@ namespace frontend\widgets\multipleUpdate\redial;
 
 use common\models\LeadFlow;
 use common\models\LeadQcall;
-use sales\repositories\lead\LeadFlowRepository;
-use sales\repositories\lead\LeadQcallRepository;
-use sales\services\lead\qcall\QCallService;
+use src\repositories\lead\LeadFlowRepository;
+use src\repositories\lead\LeadQcallRepository;
+use src\services\lead\qcall\QCallService;
 
 /**
  * Class MultipleUpdateService

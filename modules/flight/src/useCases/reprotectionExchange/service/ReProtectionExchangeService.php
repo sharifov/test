@@ -11,13 +11,13 @@ use modules\flight\src\useCases\reprotectionExchange\form\ReProtectionExchangeFo
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
-use sales\entities\cases\CaseEventLog;
-use sales\entities\cases\Cases;
-use sales\forms\lead\EmailCreateForm;
-use sales\forms\lead\PhoneCreateForm;
-use sales\helpers\ErrorsToStringHelper;
-use sales\repositories\cases\CasesRepository;
-use sales\services\client\ClientManageService;
+use src\entities\cases\CaseEventLog;
+use src\entities\cases\Cases;
+use src\forms\lead\EmailCreateForm;
+use src\forms\lead\PhoneCreateForm;
+use src\helpers\ErrorsToStringHelper;
+use src\repositories\cases\CasesRepository;
+use src\services\client\ClientManageService;
 use Yii;
 
 /**

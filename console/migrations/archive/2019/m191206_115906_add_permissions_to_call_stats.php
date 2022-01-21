@@ -8,7 +8,6 @@ use yii\db\Migration;
  */
 class m191206_115906_add_permissions_to_call_stats extends Migration
 {
-
     public $routes = [
         '/stats/ajax-get-total-chart',
     ];

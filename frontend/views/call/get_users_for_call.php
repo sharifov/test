@@ -1,7 +1,7 @@
 <?php
 
 use common\models\Call;
-use sales\model\call\useCase\assignUsers\UsersForm;
+use src\model\call\useCase\assignUsers\UsersForm;
 use yii\bootstrap\ActiveForm;
 use yii\bootstrap\Html;
 use yii\helpers\Url;

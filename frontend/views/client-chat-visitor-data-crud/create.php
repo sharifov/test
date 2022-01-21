@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChatVisitorData\entity\ClientChatVisitorData */
+/* @var $model src\model\clientChatVisitorData\entity\ClientChatVisitorData */
 
 $this->title = 'Create Client Chat Visitor Data';
 $this->params['breadcrumbs'][] = ['label' => 'Client Chat Visitor Datas', 'url' => ['index']];

@@ -2,7 +2,7 @@
 
 namespace modules\attraction\src\helpers;
 
-use sales\helpers\product\ProductQuoteHelper;
+use src\helpers\product\ProductQuoteHelper;
 use modules\attraction\models\AttractionQuote;
 
 class AttractionQuoteHelper

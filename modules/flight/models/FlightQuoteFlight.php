@@ -11,7 +11,8 @@ use modules\flight\models\query\FlightQuoteFlightQuery;
 use modules\flight\src\entities\flightQuoteFlight\serializer\FlightQuoteFlightSerializer;
 use modules\order\src\entities\order\Order;
 use modules\product\src\interfaces\ProductDataInterface;
-use sales\behaviors\StringToJsonBehavior;
+use src\behaviors\StringToJsonBehavior;
+use src\services\caseSale\PnrPreparingService;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -27,6 +28,7 @@ use yii\helpers\ArrayHelper;
  * @property string|null $fqf_main_airline
  * @property int|null $fqf_status_id
  * @property string|null $fqf_booking_id
+ * @property string|null $fqf_child_booking_id
  * @property string|null $fqf_pnr
  * @property string|null $fqf_validating_carrier
  * @property string|null $fqf_original_data_json
@@ -62,8 +64,8 @@ class FlightQuoteFlight extends ActiveRecord implements ProductDataInterface
             ['fqf_fq_id', 'exist', 'skipOnError' => true, 'targetClass' => FlightQuote::class, 'targetAttribute' => ['fqf_fq_id' => 'fq_id']],
 
             ['fqf_booking_id', 'string', 'max' => 50],
+            ['fqf_child_booking_id', 'string', 'max' => 50],
             ['fqf_main_airline', 'string', 'max' => 2],
-            ['fqf_pnr', 'string', 'max' => 10],
             ['fqf_validating_carrier', 'string', 'max' => 2],
 
             ['fqf_status_id', 'integer'],
@@ -74,6 +76,11 @@ class FlightQuoteFlight extends ActiveRecord implements ProductDataInterface
             [['fqf_created_dt', 'fqf_updated_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
 
             ['fqf_original_data_json', CheckJsonValidator::class],
+
+            ['fqf_pnr', 'string', 'max' => 70],
+            [['fqf_pnr'], 'filter', 'filter' => static function ($value) {
+                return empty($value) ? $value : (new PnrPreparingService($value))->getPnr();
+            }],
         ];
     }
 
@@ -140,6 +147,7 @@ class FlightQuoteFlight extends ActiveRecord implements ProductDataInterface
             'fqf_main_airline' => 'Main Airline',
             'fqf_status_id' => 'Status ID',
             'fqf_booking_id' => 'Booking ID',
+            'fqf_child_booking_id' => 'Child Booking ID',
             'fqf_pnr' => 'Pnr',
             'fqf_validating_carrier' => 'Validating Carrier',
             'fqf_original_data_json' => 'Original Data Json',
@@ -166,13 +174,15 @@ class FlightQuoteFlight extends ActiveRecord implements ProductDataInterface
         ?int $statusId,
         ?string $pnr,
         ?string $validatingCarrier,
-        $originalDataJson
+        $originalDataJson,
+        ?string $childBookingId = null
     ): FlightQuoteFlight {
         $model = new self();
         $model->fqf_fq_id = $flightQuoteId;
         $model->fqf_trip_type_id = $tripTypeId;
         $model->fqf_main_airline = $mainAirline;
         $model->fqf_booking_id = $bookingId;
+        $model->fqf_child_booking_id = $childBookingId;
         $model->fqf_status_id = $statusId;
         $model->fqf_pnr = $pnr;
         $model->fqf_validating_carrier = $validatingCarrier;

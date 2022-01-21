@@ -2,7 +2,7 @@
 
 use yii\helpers\Html;
 use yii\grid\GridView;
-use sales\entities\cases\CaseEventLog;
+use src\entities\cases\CaseEventLog;
 use frontend\helpers\JsonHelper;
 use yii\helpers\StringHelper;
 use yii\helpers\VarDumper;
@@ -12,7 +12,7 @@ use common\components\grid\DateTimeColumn;
 use yii\grid\ActionColumn;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\entities\cases\CaseEventLogSearch */
+/* @var $searchModel src\entities\cases\CaseEventLogSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Case Event Logs';

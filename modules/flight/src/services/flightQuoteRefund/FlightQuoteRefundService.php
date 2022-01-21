@@ -5,7 +5,7 @@ namespace modules\flight\src\services\flightQuoteRefund;
 use modules\flight\models\FlightQuoteTicket;
 use modules\product\src\interfaces\ProductQuoteObjectRefundStructure;
 use modules\product\src\interfaces\ProductQuoteRefundService;
-use sales\repositories\NotFoundException;
+use src\repositories\NotFoundException;
 
 class FlightQuoteRefundService implements ProductQuoteRefundService
 {

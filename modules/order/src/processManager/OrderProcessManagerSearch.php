@@ -3,7 +3,7 @@
 namespace modules\order\src\processManager;
 
 use common\models\Employee;
-use sales\helpers\query\QueryHelper;
+use src\helpers\query\QueryHelper;
 use yii\data\ActiveDataProvider;
 
 class OrderProcessManagerSearch extends OrderProcessManager

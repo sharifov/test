@@ -2,9 +2,9 @@
 
 namespace common\bootstrap;
 
-use sales\dispatchers\DeferredEventDispatcher;
-use sales\dispatchers\EventDispatcher;
-use sales\dispatchers\SimpleEventDispatcher;
+use src\dispatchers\DeferredEventDispatcher;
+use src\dispatchers\EventDispatcher;
+use src\dispatchers\SimpleEventDispatcher;
 use yii\base\BootstrapInterface;
 use yii\di\Container;
 use yii\helpers\ArrayHelper;
@@ -26,7 +26,7 @@ class SetUpListeners implements BootstrapInterface
     {
         $listeners = [];
         $listeners = ArrayHelper::merge($listeners, $this->getListenersFromModules(__DIR__ . '/../../modules'));
-        $listeners = ArrayHelper::merge($listeners, $this->getListenersFromFile(__DIR__ . '/../../sales/listeners/listeners.php'));
+        $listeners = ArrayHelper::merge($listeners, $this->getListenersFromFile(__DIR__ . '/../../src/listeners/listeners.php'));
         return $listeners;
     }
 

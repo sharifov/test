@@ -4,7 +4,7 @@ namespace modules\email\controllers\frontend;
 
 use frontend\controllers\FController;
 use modules\email\src\protocol\gmail\GmailClient;
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
 use modules\email\src\entity\emailAccount\EmailAccount;
 use modules\email\src\entity\emailAccount\search\EmailAccountSearch;

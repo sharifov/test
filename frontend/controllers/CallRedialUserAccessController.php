@@ -2,10 +2,10 @@
 
 namespace frontend\controllers;
 
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
-use sales\model\leadRedial\entity\CallRedialUserAccess;
-use sales\model\leadRedial\entity\search\CallRedialUserAccessSearch;
+use src\model\leadRedial\entity\CallRedialUserAccess;
+use src\model\leadRedial\entity\search\CallRedialUserAccessSearch;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

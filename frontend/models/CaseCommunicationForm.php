@@ -11,7 +11,7 @@ use common\models\Employee;
 use common\models\Language;
 use common\models\Lead;
 use common\models\SmsTemplateType;
-use sales\entities\cases\Cases;
+use src\entities\cases\Cases;
 use yii\base\Model;
 
 /**
@@ -47,7 +47,6 @@ use yii\base\Model;
 
 class CaseCommunicationForm extends Model
 {
-
     public const TYPE_EMAIL = 1;
     public const TYPE_SMS   = 2;
     public const TYPE_VOICE = 3;

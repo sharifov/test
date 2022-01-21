@@ -6,7 +6,7 @@ use common\models\Lead;
 use common\models\LeadFlightSegment;
 use common\models\local\FlightSegment;
 use common\models\Quote;
-use sales\dto\searchService\SearchServiceQuoteDTO;
+use src\dto\searchService\SearchServiceQuoteDTO;
 use Yii;
 use common\models\Airline;
 use common\models\Airports;
@@ -148,10 +148,12 @@ class SearchService
 
         if (!$result['data'] = $response['data']) {
             $result['error'] = $response['error'];
-            \Yii::error(
-                ['lead_id' => $dto->getLeadId(),
-                'params' => $params,
-                'message' => $response['error']],
+            \Yii::warning(
+                [
+                    'message' => $response['error'],
+                    'lead_id' => $dto->getLeadId(),
+                    'params' => $params
+                ],
                 'SearchService::getOnlineQuotes'
             );
         }

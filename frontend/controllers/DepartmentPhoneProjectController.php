@@ -4,8 +4,8 @@ namespace frontend\controllers;
 
 use common\models\DepartmentPhoneProjectUserGroup;
 use common\models\Employee;
-use sales\model\department\departmentPhoneProject\useCases\loadCsv\DepartmentPhonesForm;
-use sales\model\department\departmentPhoneProject\useCases\loadCsv\ImportPhones;
+use src\model\department\departmentPhoneProject\useCases\loadCsv\DepartmentPhonesForm;
+use src\model\department\departmentPhoneProject\useCases\loadCsv\ImportPhones;
 use Yii;
 use common\models\DepartmentPhoneProject;
 use common\models\search\DepartmentPhoneProjectSearch;
@@ -19,7 +19,6 @@ use yii\web\UploadedFile;
  */
 class DepartmentPhoneProjectController extends FController
 {
-
     public function behaviors()
     {
         $behaviors = [

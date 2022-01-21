@@ -9,7 +9,6 @@ use yii\db\Migration;
  */
 class m200313_071557_add_site_setting_param_call_incoming_time_limit extends Migration
 {
-
     public $routes = [
         '/call/cancel',
     ];

@@ -1,11 +1,11 @@
 <?php
 
-use sales\model\clientChat\entity\ClientChat;
+use src\model\clientChat\entity\ClientChat;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChat\entity\ClientChat */
+/* @var $model src\model\clientChat\entity\ClientChat */
 /* @var $form ActiveForm */
 ?>
 
@@ -27,11 +27,11 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'cch_dep_id')->dropDownList(\common\models\Department::getList(), ['prompt' => '---']) ?>
 
-        <?= $form->field($model, 'cch_channel_id')->dropDownList(\sales\model\clientChatChannel\entity\ClientChatChannel::getList(), ['prompt' => '---']) ?>
+        <?= $form->field($model, 'cch_channel_id')->dropDownList(\src\model\clientChatChannel\entity\ClientChatChannel::getList(), ['prompt' => '---']) ?>
 
         <?= $form->field($model, 'cch_client_id')->textInput() ?>
 
-        <?= $form->field($model, 'cch_owner_user_id')->widget(\sales\widgets\UserSelect2Widget::class, [
+        <?= $form->field($model, 'cch_owner_user_id')->widget(\src\widgets\UserSelect2Widget::class, [
             'data' => $model->cch_owner_user_id ? [
                 $model->cch_owner_user_id => $model->cchOwnerUser->username
             ] : [],

@@ -40,7 +40,6 @@ $bundle = \frontend\themes\gentelella_v2\assets\SimpleAsset::register($this);
 </head>
 <body class="login">
 <?php $this->beginBody(); ?>
-    <?= \frontend\themes\gentelella_v2\widgets\FlashAlert::widget() ?>
     <?= $content ?>
 <?php $this->endBody(); ?>
 </body>

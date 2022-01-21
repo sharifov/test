@@ -1,7 +1,7 @@
 <?php
 
 use common\models\Lead;
-use sales\access\ListsAccess;
+use src\access\ListsAccess;
 use yii\helpers\Html;
 use yii\helpers\VarDumper;
 use yii\widgets\Pjax;

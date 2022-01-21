@@ -6,7 +6,7 @@ use modules\order\src\entities\orderTips\OrderTips;
 use modules\order\src\entities\orderTips\OrderTipsRepository;
 use modules\order\src\entities\orderTipsUserProfit\OrderTipsUserProfit;
 use modules\order\src\entities\orderTipsUserProfit\OrderTipsUserProfitRepository;
-use sales\services\TransactionManager;
+use src\services\TransactionManager;
 
 /**
  * Class OrderTipsManageService

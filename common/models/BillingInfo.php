@@ -4,9 +4,9 @@ namespace common\models;
 
 use modules\invoice\src\entities\invoice\Invoice;
 use modules\order\src\entities\order\Order;
-use sales\dto\billingInfo\BillingInfoDTO;
-use sales\entities\serializer\Serializable;
-use sales\model\billingInfo\entity\serializer\BillingInfoSerializer;
+use src\dto\billingInfo\BillingInfoDTO;
+use src\entities\serializer\Serializable;
+use src\model\billingInfo\entity\serializer\BillingInfoSerializer;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;

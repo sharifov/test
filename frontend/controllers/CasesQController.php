@@ -2,8 +2,8 @@
 
 namespace frontend\controllers;
 
-use sales\auth\Auth;
-use sales\entities\cases\CasesQSearch;
+use src\auth\Auth;
+use src\entities\cases\CasesQSearch;
 use Yii;
 
 /**
@@ -11,7 +11,6 @@ use Yii;
  */
 class CasesQController extends FController
 {
-
     public function actionPending()
     {
         $searchModel = new CasesQSearch();

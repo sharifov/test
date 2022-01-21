@@ -9,5 +9,4 @@ namespace common\models\query;
  */
 class ProjectWeightQuery extends \yii\db\ActiveQuery
 {
-
 }

@@ -7,8 +7,8 @@ use common\models\Call;
 use common\models\Lead;
 use common\models\Sms;
 use modules\qaTask\src\entities\qaTask\QaTask;
-use sales\entities\cases\Cases;
-use sales\model\clientChat\entity\ClientChat;
+use src\entities\cases\Cases;
+use src\model\clientChat\entity\ClientChat;
 
 /**
  * Class Purifier

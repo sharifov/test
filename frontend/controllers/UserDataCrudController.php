@@ -2,10 +2,10 @@
 
 namespace frontend\controllers;
 
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
-use sales\model\userData\entity\UserData;
-use sales\model\userData\entity\search\UserDataSearch;
+use src\model\userData\entity\UserData;
+use src\model\userData\entity\search\UserDataSearch;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

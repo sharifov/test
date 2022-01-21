@@ -4,7 +4,7 @@ use yii\bootstrap4\Html;
 use common\components\bootstrap4\activeForm\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChat\cannedResponse\entity\search\ClientChatCannedResponseSearch */
+/* @var $model src\model\clientChat\cannedResponse\entity\search\ClientChatCannedResponseSearch */
 /* @var $form common\components\bootstrap4\activeForm\ActiveForm */
 ?>
 

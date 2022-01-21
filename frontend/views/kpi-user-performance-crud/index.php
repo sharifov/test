@@ -8,7 +8,7 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel \sales\model\kpi\entity\kpiUserPerformance\search\KpiUserPerformanceSearch */
+/* @var $searchModel \src\model\kpi\entity\kpiUserPerformance\search\KpiUserPerformanceSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Kpi User Performances';

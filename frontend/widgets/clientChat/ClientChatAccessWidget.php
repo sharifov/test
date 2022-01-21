@@ -4,11 +4,11 @@ namespace frontend\widgets\clientChat;
 
 use common\components\i18n\Formatter;
 use common\models\Employee;
-use sales\auth\Auth;
-use sales\helpers\setting\SettingHelper;
-use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
-use sales\model\clientChatUserAccess\entity\search\ClientChatUserAccessSearch;
-use sales\repositories\NotFoundException;
+use src\auth\Auth;
+use src\helpers\setting\SettingHelper;
+use src\model\clientChatUserAccess\entity\ClientChatUserAccess;
+use src\model\clientChatUserAccess\entity\search\ClientChatUserAccessSearch;
+use src\repositories\NotFoundException;
 use yii\base\Widget;
 use yii\helpers\ArrayHelper;
 

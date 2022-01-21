@@ -6,5 +6,4 @@ use common\models\Sources;
 
 class StatusWeightQuery extends \yii\db\ActiveQuery
 {
-
 }

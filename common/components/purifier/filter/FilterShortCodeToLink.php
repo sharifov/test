@@ -2,7 +2,7 @@
 
 namespace common\components\purifier\filter;
 
-use sales\helpers\phone\MaskPhoneHelper;
+use src\helpers\phone\MaskPhoneHelper;
 use yii\bootstrap4\Html;
 
 /**
@@ -18,7 +18,7 @@ class FilterShortCodeToLink implements Filter
 
     public function __construct()
     {
-        $this->host = \Yii::$app->params['url_address'];
+        $this->host = \Yii::$app->params['url'];
     }
 
     /**

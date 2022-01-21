@@ -76,6 +76,28 @@ $this->params['breadcrumbs'][] = $this->title;
         </tr>
         </tbody>
     </table>
+        <h4>Upload Configuration Options:</h4>
+    <table class="table table-bordered table-hover">
+        <thead>
+        <tr>
+            <th>Nr</th>
+            <th>Directive</th>
+            <th>Value</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>1</td>
+            <td>post_max_size</td>
+            <td><?= ini_get('post_max_size') ?></td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>upload_max_filesize</td>
+            <td><?= ini_get('upload_max_filesize') ?></td>
+        </tr>
+        </tbody>
+    </table>
     </div>
     <div class="col-md-6">
         <?php if (!empty(Yii::$app->params['release'])) : ?>
@@ -141,13 +163,13 @@ $this->params['breadcrumbs'][] = $this->title;
             </tr>
             <tr>
                 <td><?php echo $paramsNum++ ?></td>
-                <td>url_address</td>
-                <td><?=Yii::$app->params['url_address'] ?? ''?></td>
+                <td>url</td>
+                <td><?=Yii::$app->params['url'] ?? ''?></td>
             </tr>
             <tr>
                 <td><?php echo $paramsNum++ ?></td>
-                <td>url_api_address</td>
-                <td><?=Yii::$app->params['url_api_address'] ?? ''?></td>
+                <td>url_api</td>
+                <td><?=Yii::$app->params['url_api'] ?? ''?></td>
             </tr>
             <tr>
                 <td><?php echo $paramsNum++ ?></td>

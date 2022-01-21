@@ -1,12 +1,12 @@
 <?php
 
 use common\models\Employee;
-use sales\model\clientChatFeedback\entity\ClientChatFeedback;
+use src\model\clientChatFeedback\entity\ClientChatFeedback;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\clientChatFeedback\entity\ClientChatFeedback */
+/* @var $model src\model\clientChatFeedback\entity\ClientChatFeedback */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 

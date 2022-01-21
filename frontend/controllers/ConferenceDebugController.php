@@ -3,14 +3,14 @@
 namespace frontend\controllers;
 
 use common\models\Conference;
-use sales\model\conference\entity\aggregate\ConferenceLogAggregate;
-use sales\model\conference\entity\aggregate\log\HtmlFormatter;
-use sales\model\conference\entity\conferenceEventLog\ConferenceEventLogQuery;
-use sales\model\conference\entity\conferenceEventLog\EventFactory;
-use sales\model\conference\entity\conferenceParticipantStats\ConferenceParticipantStats;
-use sales\model\conference\form\DebugForm;
-use sales\model\conference\useCase\saveParticipantStats\Command;
-use sales\model\conference\useCase\saveParticipantStats\Handler;
+use src\model\conference\entity\aggregate\ConferenceLogAggregate;
+use src\model\conference\entity\aggregate\log\HtmlFormatter;
+use src\model\conference\entity\conferenceEventLog\ConferenceEventLogQuery;
+use src\model\conference\entity\conferenceEventLog\EventFactory;
+use src\model\conference\entity\conferenceParticipantStats\ConferenceParticipantStats;
+use src\model\conference\form\DebugForm;
+use src\model\conference\useCase\saveParticipantStats\Command;
+use src\model\conference\useCase\saveParticipantStats\Handler;
 use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
 use yii\helpers\VarDumper;

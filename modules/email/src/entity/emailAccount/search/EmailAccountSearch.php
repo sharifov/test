@@ -53,10 +53,10 @@ class EmailAccountSearch extends EmailAccount
         }
 
         if ($this->ea_created_dt) {
-            \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'ea_created_dt', $this->ea_created_dt, $user->timezone);
+            \src\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'ea_created_dt', $this->ea_created_dt, $user->timezone);
         }
         if ($this->ea_updated_dt) {
-            \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'ea_updated_dt', $this->ea_updated_dt, $user->timezone);
+            \src\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'ea_updated_dt', $this->ea_updated_dt, $user->timezone);
         }
 
         $query->andFilterWhere([

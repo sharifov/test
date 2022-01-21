@@ -1,6 +1,6 @@
 <?php
 
-use sales\model\coupon\entity\coupon\Coupon;
+use src\model\coupon\entity\coupon\Coupon;
 use yii\grid\ActionColumn;
 use common\components\grid\BooleanColumn;
 use common\components\grid\coupon\CouponStatusColumn;
@@ -13,7 +13,7 @@ use yii\widgets\Pjax;
 use dosamigos\datepicker\DatePicker;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\coupon\entity\coupon\search\CouponSearch */
+/* @var $searchModel src\model\coupon\entity\coupon\search\CouponSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Coupons';

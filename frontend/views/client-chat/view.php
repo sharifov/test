@@ -2,13 +2,13 @@
 
 use common\models\Client;
 use frontend\themes\gentelella_v2\assets\ClientChatAsset;
-use sales\auth\Auth;
-use sales\helpers\clientChat\ClientChatHelper;
-use sales\model\clientChat\dashboard\FilterForm;
-use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChat\permissions\ClientChatActionPermission;
-use sales\model\clientChatNote\entity\ClientChatNote;
-use sales\services\clientChatCouchNote\ClientChatCouchNoteForm;
+use src\auth\Auth;
+use src\helpers\clientChat\ClientChatHelper;
+use src\model\clientChat\dashboard\FilterForm;
+use src\model\clientChat\entity\ClientChat;
+use src\model\clientChat\permissions\ClientChatActionPermission;
+use src\model\clientChatNote\entity\ClientChatNote;
+use src\services\clientChatCouchNote\ClientChatCouchNoteForm;
 use yii\bootstrap4\Alert;
 use yii\helpers\Html;
 
@@ -24,7 +24,7 @@ use yii\helpers\Html;
 ClientChatAsset::register($this);
 
 $readonly = (int)ClientChatHelper::isDialogReadOnly($clientChat, Auth::user());
-$agentToken = \sales\helpers\clientChat\ClientChatDialogHelper::getAgentToken(Auth::user());
+$agentToken = \src\helpers\clientChat\ClientChatDialogHelper::getAgentToken(Auth::user());
 $server = Yii::$app->rchat->host;
 $apiServer = Yii::$app->rchat->apiServer;
 $chatApiScriptUrl = Yii::$app->rchat->chatApiScriptUrl;

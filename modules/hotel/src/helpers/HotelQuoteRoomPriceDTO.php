@@ -2,7 +2,7 @@
 
 namespace modules\hotel\src\helpers;
 
-use sales\helpers\product\ProductQuoteHelper;
+use src\helpers\product\ProductQuoteHelper;
 
 /**
  * Class HotelQuoteRoomPriceDTO

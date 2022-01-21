@@ -4,7 +4,7 @@ namespace modules\flight\src\services\flightQuote;
 
 use modules\flight\models\FlightQuote;
 use modules\order\src\events\OrderFileGeneratedEvent;
-use sales\services\pdf\processingPdf\PdfBaseService;
+use src\services\pdf\processingPdf\PdfBaseService;
 
 /**
  * Class FlightQuotePdfService

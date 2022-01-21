@@ -1,9 +1,8 @@
 <?php
 
-use common\models\Employee;
-use sales\helpers\lead\LeadPreferencesHelper;
-use sales\model\lead\useCases\lead\create\LeadCreateForm;
-use sales\model\lead\useCases\lead\create\LeadManageForm;
+use src\helpers\lead\LeadHelper;
+use src\model\lead\useCases\lead\create\LeadCreateForm;
+use src\model\lead\useCases\lead\create\LeadManageForm;
 use yii\widgets\ActiveForm;
 
 /**
@@ -23,5 +22,9 @@ use yii\widgets\ActiveForm;
             'options' => ['placeholder' => 'Select market', 'multiple' => false],
             'pluginOptions' => ['allowClear' => true],
         ]) ?>
+    </div>
+    <div class="col-md-6">
+        <?= $form->field($leadForm, 'depId', [
+        ])->dropDownList(LeadHelper::getDepartments(Yii::$app->user)) ?>
     </div>
 </div>

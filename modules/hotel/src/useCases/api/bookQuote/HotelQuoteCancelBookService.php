@@ -9,9 +9,9 @@ use modules\hotel\src\entities\hotelQuoteServiceLog\CreateDto;
 use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLog;
 use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLogStatus;
 use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLogStatus as LogStatus;
-use sales\auth\Auth;
-use sales\repositories\product\ProductQuoteRepository;
-use sales\services\TransactionManager;
+use src\auth\Auth;
+use src\repositories\product\ProductQuoteRepository;
+use src\services\TransactionManager;
 
 /**
  * Class HotelQuoteBookService

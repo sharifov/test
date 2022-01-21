@@ -2,8 +2,8 @@
 
 namespace modules\order\src\entities\order;
 
-use sales\model\caseOrder\entity\CaseOrder;
-use sales\model\leadOrder\entity\LeadOrder;
+use src\model\caseOrder\entity\CaseOrder;
+use src\model\leadOrder\entity\LeadOrder;
 use yii\db\Expression;
 
 /**

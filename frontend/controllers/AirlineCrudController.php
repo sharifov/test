@@ -2,11 +2,11 @@
 
 namespace frontend\controllers;
 
-use sales\helpers\app\AppHelper;
-use sales\model\airline\service\AirlineService;
+use src\helpers\app\AppHelper;
+use src\model\airline\service\AirlineService;
 use Yii;
 use common\models\Airline;
-use sales\model\airline\entity\AirlineSearch;
+use src\model\airline\entity\AirlineSearch;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;

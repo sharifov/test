@@ -2,9 +2,8 @@
 
 namespace modules\rentCar\src\entity\dto;
 
-use sales\dto\product\ProductQuoteDTO;
+use src\dto\product\ProductQuoteDTO;
 
 class RentCarProductQuoteCreateDto extends ProductQuoteDTO
 {
-
 }

@@ -2,8 +2,8 @@
 
 namespace frontend\controllers;
 
-use sales\services\cleaner\cleaners\ApiLogCleaner;
-use sales\services\cleaner\form\DbCleanerParamsForm;
+use src\services\cleaner\cleaners\ApiLogCleaner;
+use src\services\cleaner\form\DbCleanerParamsForm;
 use Yii;
 use common\models\ApiLog;
 use common\models\search\ApiLogSearch;
@@ -19,7 +19,6 @@ use yii\web\Response;
  */
 class ApiLogController extends FController
 {
-
     public function behaviors()
     {
         $behaviors = [

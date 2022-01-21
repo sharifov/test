@@ -22,22 +22,23 @@ use frontend\helpers\QuoteHelper;
 use frontend\widgets\notification\NotificationMessage;
 use modules\invoice\src\exceptions\InvoiceCodeException;
 use modules\lead\src\entities\lead\LeadQuery;
-use sales\auth\Auth;
-use sales\forms\quote\QuoteCreateDataForm;
-use sales\forms\quote\QuoteCreateKeyForm;
-use sales\helpers\app\AppHelper;
-use sales\logger\db\GlobalLogInterface;
-use sales\logger\db\LogDTO;
-use sales\model\leadData\services\LeadDataService;
-use sales\model\project\entity\projectRelation\ProjectRelation;
-use sales\model\project\entity\projectRelation\ProjectRelationQuery;
-use sales\model\project\entity\projectRelation\ProjectRelationRepository;
-use sales\model\quoteLabel\service\QuoteLabelService;
-use sales\repositories\lead\LeadRepository;
-use sales\repositories\NotFoundException;
-use sales\repositories\project\ProjectRepository;
-use sales\services\quote\addQuote\AddQuoteService;
-use sales\services\quote\addQuote\TripService;
+use src\auth\Auth;
+use src\exception\AdditionalDataException;
+use src\forms\quote\QuoteCreateDataForm;
+use src\forms\quote\QuoteCreateKeyForm;
+use src\helpers\app\AppHelper;
+use src\logger\db\GlobalLogInterface;
+use src\logger\db\LogDTO;
+use src\model\leadData\services\LeadDataService;
+use src\model\project\entity\projectRelation\ProjectRelation;
+use src\model\project\entity\projectRelation\ProjectRelationQuery;
+use src\model\project\entity\projectRelation\ProjectRelationRepository;
+use src\model\quoteLabel\service\QuoteLabelService;
+use src\repositories\lead\LeadRepository;
+use src\repositories\NotFoundException;
+use src\repositories\project\ProjectRepository;
+use src\services\quote\addQuote\AddQuoteService;
+use src\services\quote\addQuote\TripService;
 use webapi\src\ApiCodeException;
 use webapi\src\behaviors\ApiUserProjectRelatedAccessBehavior;
 use webapi\src\Messages;
@@ -134,19 +135,16 @@ class QuoteController extends ApiBaseController
      * @apiSuccess {string} agentName    Agent Name
      * @apiSuccess {string} agentEmail    Agent Email
      * @apiSuccess {string} agentDirectLine    Agent DirectLine
-     *
      * @apiSuccess {string} action    Action
      * @apiSuccess {integer} response_id    Response Id
      * @apiSuccess {DateTime} request_dt    Request Date & Time
      * @apiSuccess {DateTime} response_dt   Response Date & Time
-     *
-     * "errors": [],
-     * "uid": "5b7424e858e91",
-     * "agentName": "admin",
-     * "agentEmail": "assistant@wowfare.com",
-     * "agentDirectLine": "+1 888 946 3882",
-     * "action": "v1/quote/get-info",
-     *
+     * @apiSuccess {object}     [lead]                          Lead
+     * @apiSuccess {string}     [lead.department_key]           Department key (For example: <code>sales,exchange,support,schedule_change,fraud_prevention,chat</code>)
+     * @apiSuccess {integer}    [lead.type_create_id]           Type create id
+     * @apiSuccess {string}     [lead.type_create_name]         Type Name
+     * @apiSuccess {object}     [lead.lead_data]                Lead data
+     * @apiSuccess {object}     [lead.additionalInformation]    Additional Information
      *
      * @apiSuccessExample Success-Response:
      * HTTP/1.1 200 OK
@@ -335,7 +333,7 @@ class QuoteController extends ApiBaseController
      *       "additionalInformation": [
      *           {
      *              "pnr": "example_pnr",
-     *               "bo_sale_id": "example_sale_id",
+     *              "bo_sale_id": "example_sale_id",
      *              "vtf_processed": null,
      *              "tkt_processed": null,
      *              "exp_processed": null,
@@ -348,7 +346,10 @@ class QuoteController extends ApiBaseController
      *              "ld_field_key": "kayakclickid",
      *              "ld_field_value": "example_value132"
      *          }
-     *      ]
+     *      ],
+     *      "department_key": "chat",
+     *      "type_create_id": 8,
+     *      "type_create_name": "Client Chat"
      *  },
      *   "action": "v1/quote/get-info",
      *   "response_id": 173,
@@ -475,6 +476,10 @@ class QuoteController extends ApiBaseController
             }
 
             if ($model->lead) {
+                $response['lead']['department_key'] = $model->lead->lDep->dep_key ?? null;
+                $response['lead']['type_create_id'] = $model->lead->l_type_create ?? null;
+                $response['lead']['type_create_name'] = $model->lead->getTypeCreateName();
+
                 ArrayHelper::setValue(
                     $response,
                     'lead.additionalInformation',
@@ -558,267 +563,6 @@ class QuoteController extends ApiBaseController
     }
 
     /**
-     * @return mixed
-     * @throws BadRequestHttpException
-     * @throws NotFoundHttpException
-     * @throws UnprocessableEntityHttpException
-     * @throws \yii\db\Exception
-     */
-    public function actionUpdate()
-    {
-        $this->checkPost();
-        $this->startApiLog($this->action->uniqueId);
-
-        $quoteAttributes = Yii::$app->request->post((new Quote())->formName());
-        if (empty($quoteAttributes)) {
-            throw new BadRequestHttpException((new Quote())->formName() . ' is required', 1);
-        }
-
-        if (empty($quoteAttributes['uid'])) {
-            throw new BadRequestHttpException((new Quote())->formName() . '.uid is required', 1);
-        }
-
-        $model = Quote::findOne(['uid' => $quoteAttributes['uid']]);
-
-        if (!$model) {
-            throw new NotFoundHttpException('Not found Quote UID: ' . $quoteAttributes['uid'], 2);
-        }
-
-        $model->setScenario(Quote::SCENARIO_API_UPDATE);
-
-        $oldQuoteType = $model->type_id;
-
-        $response = [
-            'status' => 'Failed',
-            'errors' => []
-        ];
-
-        if (isset($quoteAttributes['baggage']) && !empty($quoteAttributes['baggage'])) {
-            foreach ($quoteAttributes['baggage'] as $baggageAttr) {
-                $segmentKey = $baggageAttr['segment'];
-                $origin = substr($segmentKey, 0, 3);
-                $destination = substr($segmentKey, 2, 3);
-                $segments = QuoteSegment::find()->innerJoin(QuoteTrip::tableName(), 'qs_trip_id = qt_id')
-                ->andWhere(['qt_quote_id' =>  $model->id])
-                ->andWhere(['or',
-                    ['qs_departure_airport_code' => $origin],
-                    ['qs_arrival_airport_code' => $destination]
-                ])
-                ->all();
-                if (!empty($segments)) {
-                    $segmentsIds = [];
-                    foreach ($segments as $segment) {
-                        $segmentsIds[] = $segment->qs_id;
-                    }
-                    if (isset($baggageAttr['free_baggage']) && isset($baggageAttr['free_baggage']['piece'])) {
-                        //QuoteSegmentBaggage::deleteAll('qsb_segment_id IN (:segments)',[':segments' => implode(',', $segmentsIds)]);
-
-                        if ($segmentsIds) {
-                            QuoteSegmentBaggage::deleteAll(['qsb_segment_id' => $segmentsIds]);
-                        }
-
-                        foreach ($segments as $segment) {
-                            $baggage = new QuoteSegmentBaggage();
-                            $baggage->qsb_allow_pieces = $baggageAttr['free_baggage']['piece'];
-                            $baggage->qsb_segment_id = $segment->qs_id;
-                            if (isset($baggageAttr['free_baggage']['weight'])) {
-                                $baggage->qsb_allow_max_weight = substr($baggageAttr['free_baggage']['weight'], 0, 100);
-                            }
-                            if (isset($baggageAttr['free_baggage']['height'])) {
-                                $baggage->qsb_allow_max_size = substr($baggageAttr['free_baggage']['height'], 0, 100);
-                            }
-                            $baggage->save(false);
-                        }
-                    }
-                    if (isset($baggageAttr['paid_baggage']) && !empty($baggageAttr['paid_baggage'])) {
-                        //QuoteSegmentBaggageCharge::deleteAll('qsbc_segment_id IN (:segments)',[':segments' => implode(',', $segmentsIds)]);
-                        if ($segmentsIds) {
-                            QuoteSegmentBaggageCharge::deleteAll(['qsbc_segment_id' => $segmentsIds]);
-                        }
-                        foreach ($segments as $segment) {
-                            foreach ($baggageAttr['paid_baggage'] as $paidBaggageAttr) {
-                                $baggage = new QuoteSegmentBaggageCharge();
-                                $baggage->qsbc_segment_id = $segment->qs_id;
-                                $baggage->qsbc_price = str_replace('USD', '', $paidBaggageAttr['price']);
-                                if (isset($paidBaggageAttr['piece'])) {
-                                    $baggage->qsbc_first_piece = $paidBaggageAttr['piece'];
-                                    $baggage->qsbc_last_piece = $paidBaggageAttr['piece'];
-                                }
-                                if (isset($paidBaggageAttr['weight'])) {
-                                    $baggage->qsbc_max_weight = substr($paidBaggageAttr['weight'], 0, 100);
-                                }
-                                if (isset($paidBaggageAttr['height'])) {
-                                    $baggage->qsbc_max_size = substr($paidBaggageAttr['height'], 0, 100);
-                                }
-                                $baggage->save(false);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        if (isset($quoteAttributes['needSync']) && (bool) $quoteAttributes['needSync'] === true) {
-            try {
-                $data = $model->lead->getLeadInformationForExpert();
-                $result = BackOffice::sendRequest('lead/update-lead', 'POST', json_encode($data));
-
-                if (empty($result)) {
-                    throw new \RuntimeException('Request to BackOffice(lead/update-lead) is failed. Result is empty');
-                }
-                if (!is_array($result)) {
-                    throw new \RuntimeException('Request to BackOffice(lead/update-lead) is failed. Result is not array');
-                }
-
-                if (!array_key_exists('status', $result)) {
-                    $response['errors'][] = 'Not found status key from response (BackOffice - lead/update-lead)';
-                    Yii::error(
-                        [
-                            'result' => VarDumper::dumpAsString($result),
-                            'data' => $data,
-                        ],
-                        'QuoteController:actionUpdate:update-lead'
-                    );
-                } elseif ($result['status'] === 'Success' && empty($result['errors'])) {
-                    $response['status'] = 'Success';
-                } else {
-                    $response['errors'][] = $result['errors'] ?? 'Not found "errors" key from response';
-                }
-            } catch (\Throwable $throwable) {
-                $response['errors'][] = $throwable->getMessage();
-                Yii::warning(AppHelper::throwableLog($throwable), 'QuoteController:BackOffice:updateLead');
-            }
-        } else {
-            $changedAttributes = $model->attributes;
-            $changedAttributes['selling'] = $model->getPricesData()['total']['selling'];
-            //$selling = 0;
-
-            $leadAttributes = Yii::$app->request->post((new Lead())->formName());
-
-            $transaction = Yii::$app->db->beginTransaction();
-            try {
-                $model->attributes = $quoteAttributes;
-
-                $type = $quoteAttributes['type_id'] ?? null;
-                if ($lead = $model->lead) {
-                    $this->setTypeQuoteUpdate($type, $model, $lead);
-                } else {
-                    $model->type_id = $oldQuoteType;
-                    Yii::error('Not found Lead for Quote Id: ' . $model->id, 'API:Quote:update:Lead Not found');
-                }
-
-                $model->save();
-
-                $quotePricesAttributes = Yii::$app->request->post((new QuotePrice())->formName());
-                if (!empty($quotePricesAttributes)) {
-                    foreach ($quotePricesAttributes as $quotePriceAttributes) {
-                        $quotePrice = QuotePrice::findOne([
-                            'uid' => $quotePriceAttributes['uid']
-                        ]);
-                        if ($quotePrice) {
-                            $quotePrice->attributes = $quotePriceAttributes;
-                            //$selling += $quotePrice->selling;
-                            if (!$quotePrice->save()) {
-                                $response['errors'][] = $quotePrice->getErrors();
-                            }
-                        }
-                    }
-                }
-
-                if (!$model->hasErrors()) {
-                    if (!empty($leadAttributes)) {
-                        $model->lead->attributes = $leadAttributes;
-                        if (!$model->lead->hybrid_uid) {
-                            $model->lead->hybrid_uid = $leadAttributes['additional_information'][0]['bookingId'] ?? null;
-                        }
-                        if (!$model->lead->save()) {
-                            $response['errors'][] = $model->lead->getErrors();
-                        }
-                    }
-                    if ($model->status == Quote::STATUS_APPLIED) {
-                        if (!$model->lead->isBooked()) {
-                            try {
-                                $repo = Yii::createObject(LeadRepository::class);
-                                $newOwner = $model->lead->employee_id;
-                                if (!$newOwner) {
-                                    $newOwner = LeadQuery::getLastActiveUserId($model->lead->id);
-                                }
-                                $model->lead->booked($newOwner, null);
-                                $repo->save($model->lead);
-                            } catch (\Throwable $e) {
-                                Yii::error($e->getMessage(), 'API:Quote:Lead:Booked');
-                            }
-                        }
-//                        $model->lead->status = Lead::STATUS_BOOKED;
-//                        $model->lead->save(false, ['status']);
-                    }
-                    $response['status'] = 'Success';
-                    $transaction->commit();
-                    $model->lead->sendNotifOnProcessingStatusChanged();
-
-                    //Add logs after changed model attributes
-
-                    //todo
-//                    $leadLog = new LeadLog((new LeadLogMessage()));
-//                    $leadLog->logMessage->oldParams = $changedAttributes;
-//                    $newParams = array_intersect_key($model->attributes, $changedAttributes);
-//                    $newParams['selling'] = round($model->getPricesData()['total']['selling'], 2);
-//                    $leadLog->logMessage->newParams = $newParams;
-//                    $leadLog->logMessage->title = 'Update';
-//                    $leadLog->logMessage->model = sprintf('%s (%s)', $model->formName(), $model->uid);
-//                    $leadLog->addLog([
-//                        'lead_id' => $model->lead_id,
-//                    ]);
-
-                    (\Yii::createObject(GlobalLogInterface::class))->log(
-                        new LogDTO(
-                            get_class($model),
-                            $model->id,
-                            \Yii::$app->id,
-                            null,
-                            Json::encode(['selling' => $changedAttributes['selling'] ?? 0]),
-                            Json::encode(['selling' => round($model->getPricesData()['total']['selling'], 2)]),
-                            null,
-                            GlobalLog::ACTION_TYPE_UPDATE
-                        )
-                    );
-                } else {
-                    $response['errors'][] = $model->getErrors();
-                    $transaction->rollBack();
-                }
-            } catch (\Throwable $e) {
-                Yii::error($e->getTraceAsString(), 'API:Quote:update:try');
-                if (Yii::$app->request->get('debug')) {
-                    $message = ($e->getTraceAsString());
-                } else {
-                    $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
-                }
-
-                $response['error'] = $message;
-                $response['error_code'] = 30;
-
-                $transaction->rollBack();
-            }
-        }
-
-        $responseData = $response;
-        $responseData = $this->apiLog->endApiLog($responseData);
-
-        if (isset($response['error']) && $response['error']) {
-            $json = @json_encode($response['error']);
-            if (isset($response['error_code']) && $response['error_code']) {
-                $error_code = $response['error_code'];
-            } else {
-                $error_code = 0;
-            }
-            throw new UnprocessableEntityHttpException($json, $error_code);
-        }
-
-        return $responseData;
-    }
-
-
-    /**
      * @return array
      * @throws BadRequestHttpException
      * @throws NotFoundHttpException
@@ -884,6 +628,7 @@ class QuoteController extends ApiBaseController
 
         return $responseData;
     }
+
 
     /**
      *
@@ -1180,10 +925,14 @@ class QuoteController extends ApiBaseController
         } catch (\Throwable $throwable) {
             $transaction->rollBack();
 
+            $errorMessage = ($throwable instanceof AdditionalDataException) ?
+                ArrayHelper::merge(AppHelper::throwableLog($throwable), $throwable->getAdditionalData()) :
+                AppHelper::throwableLog($throwable);
+
             if ($throwable->getCode() < 0) {
-                Yii::warning(AppHelper::throwableFormatter($throwable), 'API:Quote:create:warning:try');
+                Yii::warning($errorMessage, 'API:Quote:create:warning:try');
             } else {
-                Yii::error(VarDumper::dumpAsString($throwable), 'API:Quote:create:try');
+                Yii::error($errorMessage, 'API:Quote:create:try');
             }
 
             if (Yii::$app->request->get('debug')) {
@@ -1204,6 +953,395 @@ class QuoteController extends ApiBaseController
         }
 
         $responseData = $this->apiLog->endApiLog($responseData);
+
+        return $responseData;
+    }
+
+    /**
+     *
+     * @api {post} /v1/quote/update Update Quote
+     * @apiVersion 0.1.0
+     * @apiName UpdateQuote
+     * @apiGroup Quotes
+     * @apiPermission Authorized User
+     *
+     * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParam {string}           [apiKey]                    API Key for Project
+     * @apiParam {object}           Quote                       Quote data array
+     * @apiParam {string}           [Quote.uid]                 uid
+     * @apiParam {bool}             [Quote.needSync]            needSync
+     * @apiParam {string}           [Quote.main_airline_code]   main_airline_code
+     * @apiParam {string}           [Quote.reservation_dump]    reservation_dump
+     * @apiParam {int}              [Quote.status]              status
+     * @apiParam {string}           [Quote.check_payment]       check_payment
+     * @apiParam {string}           [Quote.fare_type]           fare_type
+     * @apiParam {string}           [Quote.employee_name]       employee_name
+     * @apiParam {bool}             [Quote.created_by_seller]   created_by_seller
+     * @apiParam {int}              [Quote.type_id]             type_id
+     * @apiParam {object}           [Quote.prod_types[]]        Quote labels
+     * @apiParam {object}           [Quote.baggage[]]           Quote baggage
+     * @apiParam {object}           [Quote.baggage.segment[]]      Quote baggage segment
+     * @apiParam {object}           [Quote.baggage.free_baggage[]] Quote baggage segment
+     * @apiParam {int}              [Quote.baggage.free_baggage.piece] Quote free baggage piece number
+     * @apiParam {string}           [Quote.baggage.free_baggage.weight] Quote free baggage weight
+     * @apiParam {string}           [Quote.baggage.free_baggage.height] Quote free baggage height
+     * @apiParam {object}           [Quote.baggage.paid_baggage[]] Quote paid baggage
+     * @apiParam {int}               [Quote.baggage.paid_baggage.piece] Quote paid baggage piece number
+     * @apiParam {string}           [Quote.baggage.paid_baggage.weight] Quote paid baggage weight
+     * @apiParam {string}           [Quote.baggage.paid_baggage.height] Quote paid baggage height
+     * @apiParam {string}           [Quote.baggage.paid_baggage.price] Quote paid baggage price
+     * @apiParam {object}           [Lead[]]                    Lead data array
+     * @apiParam {string}           [Lead.uid]                  uid
+     * @apiParam {int}              [Lead.market_info_id]       market_info_id
+     * @apiParam {int}              [Lead.bo_flight_id]         bo_flight_id
+     * @apiParam {float}            [Lead.final_profit]         final_profit
+     * @apiParam {array}            [Lead.additional_information[]]  additional information array
+     * @apiParam {object}           [QuotePrice[]]                QuotePrice data array
+     * @apiParam {string}           [QuotePrice.uid]            uid
+     * @apiParam {string}           [QuotePrice.passenger_type] passenger_type
+     * @apiParam {float}            [QuotePrice.selling]        selling
+     * @apiParam {float}            [QuotePrice.net]            net
+     * @apiParam {float}            [QuotePrice.fare]           fare
+     * @apiParam {float}            [QuotePrice.taxes]          taxes
+     * @apiParam {float}            [QuotePrice.mark_up]        mark_up
+     * @apiParam {float}            [QuotePrice.extra_mark_up]  extra_mark_up
+     * @apiParam {float}            [QuotePrice.service_fee]    service_fee
+     *
+     * @apiParamExample {json} Request-Example:
+     * {
+     *      "apiKey": "d190c378e131ccfd8a889c8ee8994cb55f22fbeeb93f9b99007e8e7ecc24d0dd",
+     *      "Quote": {
+     *          "uid": "5f207ec201b99",
+     *          "record_locator": null,
+     *          "pcc": "0RY9",
+     *          "cabin": "E",
+     *          "gds": "S",
+     *          "trip_type": "RT",
+     *          "main_airline_code": "UA",
+     *          "reservation_dump": "1 KL6123V 15OCT Q MCOAMS SS1   801P 1100A  16OCT F /DCKL /E \n 2 KL1009L 18OCT S AMSLHR SS1  1015A 1045A /DCKL /E",
+     *          "status": 1,
+     *          "check_payment": "1",
+     *          "fare_type": "TOUR",
+     *          "employee_name": "Barry",
+     *          "created_by_seller": false,
+     *          "type_id" : 0,
+     *          "baggage" : [],
+     *          "prod_types" : ["SEP", "TOUR"]
+     *      },
+     *      "Lead": {
+     *          "uid": "5de486f15f095",
+     *          "market_info_id": 52,
+     *          "bo_flight_id": 0,
+     *          "final_profit": 0
+     *      },
+     *      "QuotePrice": [
+     *          {
+     *              "uid": "expert.5f207ec222c86",
+     *              "passenger_type": "ADT",
+     *              "selling": 696.19,
+     *              "net": 622.65,
+     *              "fare": 127,
+     *              "taxes": 495.65,
+     *              "mark_up": 50,
+     *              "extra_mark_up": 0,
+     *              "service_fee": 23.54
+     *          }
+     *      ]
+     * }
+     *
+     * @apiSuccess {string} status    Status
+     *
+     * @apiSuccess {array} errors     Errors
+     * @apiSuccess {string} action    Action
+     * @apiSuccess {integer} response_id    Response Id
+     * @apiSuccess {DateTime} request_dt    Request Date & Time
+     * @apiSuccess {DateTime} response_dt   Response Date & Time
+     *
+     * @apiSuccessExample Success-Response:
+     * HTTP/1.1 200 OK
+     *  {
+     *      "status": "Success",
+     *      "errors":[],
+     *      "action": "v1/quote/update",
+     *      "response_id": 11926893,
+     *      "request_dt": "2020-09-22 05:05:54",
+     *      "response_dt": "2020-09-22 05:05:54",
+     *      "execution_time": 0.193,
+     *      "memory_usage": 1647440
+     *  }
+     *
+     *
+     * @apiErrorExample Error-Response:
+     *   HTTP/1.1 404 Not Found
+     *   {
+     *       "name": "Not Found",
+     *       "message": "Not found Quote UID: 5f207ec201b19",
+     *       "code": 2,
+     *       "status": 404,
+     *       "type": "yii\\web\\NotFoundHttpException"
+     *   }
+     *
+     *
+     * @apiErrorExample {json} Error-Response (400):
+     *
+     * HTTP/1.1 400 Bad Request
+     * {
+     *  "status":400,
+     *  "message":"Quote.uid is required",
+     *  "code":"1",
+     *  "errors":[]
+     * }
+     *
+     *
+     * @return mixed
+     * @throws BadRequestHttpException
+     * @throws NotFoundHttpException
+     * @throws UnprocessableEntityHttpException
+     * @throws \yii\db\Exception
+     */
+    public function actionUpdate()
+    {
+        $this->checkPost();
+        $this->startApiLog($this->action->uniqueId);
+
+        $quoteAttributes = Yii::$app->request->post((new Quote())->formName());
+        if (empty($quoteAttributes)) {
+            throw new BadRequestHttpException((new Quote())->formName() . ' is required', 1);
+        }
+
+        if (empty($quoteAttributes['uid'])) {
+            throw new BadRequestHttpException((new Quote())->formName() . '.uid is required', 1);
+        }
+
+        $model = Quote::findOne(['uid' => $quoteAttributes['uid']]);
+
+        if (!$model) {
+            throw new NotFoundHttpException('Not found Quote UID: ' . $quoteAttributes['uid'], 2);
+        }
+
+        $model->setScenario(Quote::SCENARIO_API_UPDATE);
+
+        $oldQuoteType = $model->type_id;
+
+        $response = [
+            'status' => 'Failed',
+            'errors' => []
+        ];
+
+        if (isset($quoteAttributes['baggage']) && !empty($quoteAttributes['baggage'])) {
+            foreach ($quoteAttributes['baggage'] as $baggageAttr) {
+                $segmentKey = $baggageAttr['segment'];
+                $origin = substr($segmentKey, 0, 3);
+                $destination = substr($segmentKey, 2, 3);
+                $segments = QuoteSegment::find()->innerJoin(QuoteTrip::tableName(), 'qs_trip_id = qt_id')
+                    ->andWhere(['qt_quote_id' =>  $model->id])
+                    ->andWhere(['or',
+                        ['qs_departure_airport_code' => $origin],
+                        ['qs_arrival_airport_code' => $destination]
+                    ])
+                    ->all();
+                if (!empty($segments)) {
+                    $segmentsIds = [];
+                    foreach ($segments as $segment) {
+                        $segmentsIds[] = $segment->qs_id;
+                    }
+                    if (isset($baggageAttr['free_baggage']) && isset($baggageAttr['free_baggage']['piece'])) {
+                        //QuoteSegmentBaggage::deleteAll('qsb_segment_id IN (:segments)',[':segments' => implode(',', $segmentsIds)]);
+
+                        if ($segmentsIds) {
+                            QuoteSegmentBaggage::deleteAll(['qsb_segment_id' => $segmentsIds]);
+                        }
+
+                        foreach ($segments as $segment) {
+                            $baggage = new QuoteSegmentBaggage();
+                            $baggage->qsb_allow_pieces = $baggageAttr['free_baggage']['piece'];
+                            $baggage->qsb_segment_id = $segment->qs_id;
+                            if (isset($baggageAttr['free_baggage']['weight'])) {
+                                $baggage->qsb_allow_max_weight = substr($baggageAttr['free_baggage']['weight'], 0, 100);
+                            }
+                            if (isset($baggageAttr['free_baggage']['height'])) {
+                                $baggage->qsb_allow_max_size = substr($baggageAttr['free_baggage']['height'], 0, 100);
+                            }
+                            $baggage->save(false);
+                        }
+                    }
+                    if (isset($baggageAttr['paid_baggage']) && !empty($baggageAttr['paid_baggage'])) {
+                        //QuoteSegmentBaggageCharge::deleteAll('qsbc_segment_id IN (:segments)',[':segments' => implode(',', $segmentsIds)]);
+                        if ($segmentsIds) {
+                            QuoteSegmentBaggageCharge::deleteAll(['qsbc_segment_id' => $segmentsIds]);
+                        }
+                        foreach ($segments as $segment) {
+                            foreach ($baggageAttr['paid_baggage'] as $paidBaggageAttr) {
+                                $baggage = new QuoteSegmentBaggageCharge();
+                                $baggage->qsbc_segment_id = $segment->qs_id;
+                                $baggage->qsbc_price = str_replace('USD', '', $paidBaggageAttr['price']);
+                                if (isset($paidBaggageAttr['piece'])) {
+                                    $baggage->qsbc_first_piece = $paidBaggageAttr['piece'];
+                                    $baggage->qsbc_last_piece = $paidBaggageAttr['piece'];
+                                }
+                                if (isset($paidBaggageAttr['weight'])) {
+                                    $baggage->qsbc_max_weight = substr($paidBaggageAttr['weight'], 0, 100);
+                                }
+                                if (isset($paidBaggageAttr['height'])) {
+                                    $baggage->qsbc_max_size = substr($paidBaggageAttr['height'], 0, 100);
+                                }
+                                $baggage->save(false);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (isset($quoteAttributes['needSync']) && $quoteAttributes['needSync'] == true) {
+            $data = $model->lead->getLeadInformationForExpert();
+            $result = BackOffice::sendRequest('lead/update-lead', 'POST', json_encode($data));
+
+            if (!array_key_exists('status', $result)) {
+                $response['errors'] = 'Not found status key from response (BackOffice - lead/update-lead)';
+                Yii::error(
+                    [
+                        'result' => VarDumper::dumpAsString($result),
+                        'data' => $data,
+                    ],
+                    'QuoteController:actionUpdate:update-lead'
+                );
+            } elseif ($result['status'] === 'Success' && empty($result['errors'])) {
+                $response['status'] = 'Success';
+            } else {
+                $response['errors'] = $result['errors'];
+            }
+        } else {
+            $changedAttributes = $model->attributes;
+            $changedAttributes['selling'] = $model->getPricesData()['total']['selling'];
+            //$selling = 0;
+
+            $leadAttributes = Yii::$app->request->post((new Lead())->formName());
+
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
+                $model->attributes = $quoteAttributes;
+
+                $type = $quoteAttributes['type_id'] ?? null;
+                if ($lead = $model->lead) {
+                    $this->setTypeQuoteUpdate($type, $model, $lead);
+                } else {
+                    $model->type_id = $oldQuoteType;
+                    Yii::error('Not found Lead for Quote Id: ' . $model->id, 'API:Quote:update:Lead Not found');
+                }
+
+                $model->save();
+
+                $quotePricesAttributes = Yii::$app->request->post((new QuotePrice())->formName());
+                if (!empty($quotePricesAttributes)) {
+                    foreach ($quotePricesAttributes as $quotePriceAttributes) {
+                        $quotePrice = QuotePrice::findOne([
+                            'uid' => $quotePriceAttributes['uid']
+                        ]);
+                        if ($quotePrice) {
+                            $quotePrice->attributes = $quotePriceAttributes;
+                            //$selling += $quotePrice->selling;
+                            if (!$quotePrice->save()) {
+                                $response['errors'][] = $quotePrice->getErrors();
+                            }
+                        }
+                    }
+                }
+
+                if (!$model->hasErrors()) {
+                    if (!empty($leadAttributes)) {
+                        $model->lead->attributes = $leadAttributes;
+                        if (!$model->lead->hybrid_uid) {
+                            $model->lead->hybrid_uid = $leadAttributes['additional_information'][0]['bookingId'] ?? null;
+                        }
+                        if (!$model->lead->save()) {
+                            $response['errors'][] = $model->lead->getErrors();
+                        }
+                    }
+                    if ($model->status == Quote::STATUS_APPLIED) {
+                        if (!$model->lead->isBooked()) {
+                            try {
+                                $repo = Yii::createObject(LeadRepository::class);
+                                $newOwner = $model->lead->employee_id;
+                                if (!$newOwner) {
+                                    $newOwner = LeadQuery::getLastActiveUserId($model->lead->id);
+                                }
+                                $model->lead->booked($newOwner, null);
+                                $repo->save($model->lead);
+                            } catch (\Throwable $e) {
+                                Yii::error($e->getMessage(), 'API:Quote:Lead:Booked');
+                            }
+                        }
+//                        $model->lead->status = Lead::STATUS_BOOKED;
+//                        $model->lead->save(false, ['status']);
+                    }
+                    $response['status'] = 'Success';
+                    $transaction->commit();
+                    $model->lead->sendNotifOnProcessingStatusChanged();
+
+                    //Add logs after changed model attributes
+
+                    //todo
+//                    $leadLog = new LeadLog((new LeadLogMessage()));
+//                    $leadLog->logMessage->oldParams = $changedAttributes;
+//                    $newParams = array_intersect_key($model->attributes, $changedAttributes);
+//                    $newParams['selling'] = round($model->getPricesData()['total']['selling'], 2);
+//                    $leadLog->logMessage->newParams = $newParams;
+//                    $leadLog->logMessage->title = 'Update';
+//                    $leadLog->logMessage->model = sprintf('%s (%s)', $model->formName(), $model->uid);
+//                    $leadLog->addLog([
+//                        'lead_id' => $model->lead_id,
+//                    ]);
+
+                    (\Yii::createObject(GlobalLogInterface::class))->log(
+                        new LogDTO(
+                            get_class($model),
+                            $model->id,
+                            \Yii::$app->id,
+                            null,
+                            Json::encode(['selling' => $changedAttributes['selling'] ?? 0]),
+                            Json::encode(['selling' => round($model->getPricesData()['total']['selling'], 2)]),
+                            null,
+                            GlobalLog::ACTION_TYPE_UPDATE
+                        )
+                    );
+                } else {
+                    $response['errors'][] = $model->getErrors();
+                    $transaction->rollBack();
+                }
+            } catch (\Throwable $e) {
+                Yii::error($e->getTraceAsString(), 'API:Quote:update:try');
+                if (Yii::$app->request->get('debug')) {
+                    $message = ($e->getTraceAsString());
+                } else {
+                    $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
+                }
+
+                $response['error'] = $message;
+                $response['error_code'] = 30;
+
+                $transaction->rollBack();
+            }
+        }
+
+        $responseData = $response;
+        $responseData = $this->apiLog->endApiLog($responseData);
+
+        if (isset($response['error']) && $response['error']) {
+            $json = @json_encode($response['error']);
+            if (isset($response['error_code']) && $response['error_code']) {
+                $error_code = $response['error_code'];
+            } else {
+                $error_code = 0;
+            }
+            throw new UnprocessableEntityHttpException($json, $error_code);
+        }
 
         return $responseData;
     }

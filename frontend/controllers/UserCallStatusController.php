@@ -18,7 +18,6 @@ use yii\filters\VerbFilter;
  */
 class UserCallStatusController extends FController
 {
-
     public function behaviors()
     {
         $behaviors = [

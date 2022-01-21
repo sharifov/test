@@ -6,9 +6,9 @@ return [
     'components' => [
         'apiService' => [
             'class' => ApiAttractionService::class,
-            'url' => env('modules.attraction.config.config.components.apiService.url'),
-            'apiKey' => env('modules.attraction.config.config.components.apiService.apiKey'),
-            'secret' => env('modules.attraction.config.config.components.apiService.secret'),
+            'url' => env('MODULES_ATTRACTION_CONFIG_CONFIG_COMPONENTS_APISERVICE_URL'),
+            'apiKey' => env('MODULES_ATTRACTION_CONFIG_CONFIG_COMPONENTS_APISERVICE_APIKEY'),
+            'secret' => env('MODULES_ATTRACTION_CONFIG_CONFIG_COMPONENTS_APISERVICE_SECRET'),
         ],
     ],
 ];

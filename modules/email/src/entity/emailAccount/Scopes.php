@@ -7,5 +7,4 @@ namespace modules\email\src\entity\emailAccount;
  */
 class Scopes extends \yii\db\ActiveQuery
 {
-
 }

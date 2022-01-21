@@ -15,9 +15,9 @@ use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRe
 use modules\product\src\entities\productQuoteData\service\ProductQuoteDataManageService;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\repositories\ProductQuoteRelationRepository;
-use sales\entities\cases\CaseEventLog;
-use sales\repositories\product\ProductQuoteRepository;
-use sales\services\TransactionManager;
+use src\entities\cases\CaseEventLog;
+use src\repositories\product\ProductQuoteRepository;
+use src\services\TransactionManager;
 
 /**
  * Class Modify

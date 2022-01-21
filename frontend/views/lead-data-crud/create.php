@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\leadData\entity\LeadData */
+/* @var $model src\model\leadData\entity\LeadData */
 
 $this->title = 'Create Lead Data';
 $this->params['breadcrumbs'][] = ['label' => 'Lead Datas', 'url' => ['index']];

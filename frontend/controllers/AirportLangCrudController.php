@@ -2,11 +2,11 @@
 
 namespace frontend\controllers;
 
-use sales\helpers\app\AppHelper;
-use sales\model\airportLang\service\AirportLangService;
+use src\helpers\app\AppHelper;
+use src\model\airportLang\service\AirportLangService;
 use Yii;
-use sales\model\airportLang\entity\AirportLang;
-use sales\model\airportLang\entity\AirportLangSearch;
+use src\model\airportLang\entity\AirportLang;
+use src\model\airportLang\entity\AirportLangSearch;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

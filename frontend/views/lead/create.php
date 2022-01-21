@@ -1,14 +1,14 @@
 <?php
 
 /**
- * @var $leadForm sales\forms\lead\LeadCreateForm
+ * @var $leadForm src\forms\lead\LeadCreateForm
  */
 
 use common\models\Department;
 use yii\bootstrap\Html;
 use yii\widgets\ActiveForm;
 use common\widgets\Alert;
-use sales\helpers\lead\LeadHelper;
+use src\helpers\lead\LeadHelper;
 
 $this->title = 'Create Lead';
 

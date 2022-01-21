@@ -3,8 +3,8 @@
 namespace common\models;
 
 use common\models\local\LeadLogMessage;
-use sales\entities\EventTrait;
-use sales\events\lead\LeadPreferencesUpdateCurrencyEvent;
+use src\entities\EventTrait;
+use src\events\lead\LeadPreferencesUpdateCurrencyEvent;
 use Yii;
 use yii\db\ActiveQuery;
 

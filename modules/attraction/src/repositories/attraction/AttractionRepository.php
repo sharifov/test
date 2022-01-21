@@ -4,8 +4,8 @@ namespace modules\attraction\src\repositories\attraction;
 
 use modules\attraction\models\Attraction;
 use modules\attraction\src\exceptions\AttractionCodeException;
-use sales\dispatchers\EventDispatcher;
-use sales\repositories\NotFoundException;
+use src\dispatchers\EventDispatcher;
+use src\repositories\NotFoundException;
 
 /**
  * Class FlightRepository

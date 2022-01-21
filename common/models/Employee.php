@@ -8,24 +8,24 @@ use common\models\query\EmployeeQuery;
 use common\models\search\EmployeeSearch;
 use frontend\models\UserFailedLogin;
 use modules\product\src\entities\productType\ProductType;
-use sales\access\EmployeeGroupAccess;
-use sales\helpers\setting\SettingHelper;
-use sales\model\clientChatChannel\entity\ClientChatChannel;
-use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
-use sales\model\clientChatUserAccess\event\UpdateChatUserAccessWidgetEvent;
-use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
-use sales\model\coupon\entity\couponSend\CouponSend;
-use sales\model\leadRedial\entity\CallRedialUserAccess;
-use sales\model\user\entity\Access;
-use sales\model\user\entity\AccessCache;
-use sales\model\user\entity\ShiftTime;
-use sales\model\user\entity\StartTime;
-use sales\model\user\entity\UserCache;
-use sales\model\user\entity\userStatus\UserStatus;
-use sales\model\userClientChatData\entity\UserClientChatData;
-use sales\model\userData\entity\UserData;
-use sales\model\userData\entity\UserDataKey;
-use sales\validators\SlugValidator;
+use src\access\EmployeeGroupAccess;
+use src\helpers\setting\SettingHelper;
+use src\model\clientChatChannel\entity\ClientChatChannel;
+use src\model\clientChatUserAccess\entity\ClientChatUserAccess;
+use src\model\clientChatUserAccess\event\UpdateChatUserAccessWidgetEvent;
+use src\model\clientChatUserChannel\entity\ClientChatUserChannel;
+use src\model\coupon\entity\couponSend\CouponSend;
+use src\model\leadRedial\entity\CallRedialUserAccess;
+use src\model\user\entity\Access;
+use src\model\user\entity\AccessCache;
+use src\model\user\entity\ShiftTime;
+use src\model\user\entity\StartTime;
+use src\model\user\entity\UserCache;
+use src\model\user\entity\userStatus\UserStatus;
+use src\model\userClientChatData\entity\UserClientChatData;
+use src\model\userData\entity\UserData;
+use src\model\userData\entity\UserDataKey;
+use src\validators\SlugValidator;
 use Yii;
 use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
@@ -2201,7 +2201,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $phoneList = UserProjectParams::find()
             ->select(['pl_phone_number', 'upp_phone_list_id'])
             ->byUserId($user_id)
-            ->innerJoinWith(['phoneList' => static function (\sales\model\phoneList\entity\Scopes $query) use ($onyEnabled) {
+            ->innerJoinWith(['phoneList' => static function (\src\model\phoneList\entity\Scopes $query) use ($onyEnabled) {
                 if ($onyEnabled) {
                     $query->andOnCondition(['pl_enabled' => true]);
                 }
@@ -2222,7 +2222,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $emailList = UserProjectParams::find()
             ->select(['el_email', 'upp_email_list_id'])
             ->byUserId($user_id)
-            ->innerJoinWith(['emailList' => static function (\sales\model\emailList\entity\Scopes $query) use ($onyEnabled) {
+            ->innerJoinWith(['emailList' => static function (\src\model\emailList\entity\Scopes $query) use ($onyEnabled) {
                 if ($onyEnabled) {
                     $query->andOnCondition(['el_enabled' => true]);
                 }
@@ -2656,7 +2656,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      * @param string $default
      * @return string
      */
-    public function getGravatarUrl(int $s = 128, string $default = 'identicon'): string
+    public function getGravatarUrl(int $s = 128, string $default = 'robohash'): string
     {
         if ($this->email) {
             $url = '//www.gravatar.com/avatar/' . md5(strtolower(trim($this->email))) . '?d=' . $default . '&s=' . $s;

@@ -2,7 +2,7 @@
 
 namespace frontend\controllers;
 
-use sales\services\sources\SourceManageService;
+use src\services\sources\SourceManageService;
 use Yii;
 use common\models\Sources;
 use common\models\search\SourcesSearch;

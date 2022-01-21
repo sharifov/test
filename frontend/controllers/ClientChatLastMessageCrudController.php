@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use sales\model\clientChatLastMessage\entity\ClientChatLastMessage;
-use sales\model\clientChatLastMessage\entity\ClientChatLastMessageSearch;
+use src\model\clientChatLastMessage\entity\ClientChatLastMessage;
+use src\model\clientChatLastMessage\entity\ClientChatLastMessageSearch;
 use frontend\controllers\FController;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;

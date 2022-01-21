@@ -10,7 +10,7 @@ use modules\cruise\src\entity\cruiseQuote\search\CruiseQuoteSearch;
 use modules\cruise\components\Params;
 use modules\cruise\src\useCase\createQuote\CreateQuoteService;
 use modules\cruise\src\useCase\updateMarkup\CruiseMarkupService;
-use sales\auth\Auth;
+use src\auth\Auth;
 use Yii;
 use modules\cruise\src\entity\cruiseQuote\CruiseQuote;
 use yii\base\Exception;

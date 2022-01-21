@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model sales\model\contactPhoneList\entity\ContactPhoneList */
+/* @var $model src\model\contactPhoneList\entity\ContactPhoneList */
 
 $this->title = 'Update Contact Phone List: ' . $model->cpl_id;
 $this->params['breadcrumbs'][] = ['label' => 'Contact Phone Lists', 'url' => ['index']];

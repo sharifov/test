@@ -1,6 +1,6 @@
 <?php
 
-use sales\model\clientChatCase\entity\search\ClientChatCaseSearch;
+use src\model\clientChatCase\entity\search\ClientChatCaseSearch;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 

@@ -1,12 +1,12 @@
 <?php
 
 use common\components\grid\DateTimeColumn;
-use sales\helpers\phone\MaskPhoneHelper;
-use sales\model\call\abac\CallAbacObject;
-use sales\model\contactPhoneData\service\ContactPhoneDataDictionary;
-use sales\model\contactPhoneData\service\ContactPhoneDataHelper;
-use sales\model\contactPhoneList\entity\ContactPhoneList;
-use sales\model\contactPhoneList\service\ContactPhoneListService;
+use src\helpers\phone\MaskPhoneHelper;
+use src\model\call\abac\CallAbacObject;
+use src\model\contactPhoneData\service\ContactPhoneDataDictionary;
+use src\model\contactPhoneData\service\ContactPhoneDataHelper;
+use src\model\contactPhoneList\entity\ContactPhoneList;
+use src\model\contactPhoneList\service\ContactPhoneListService;
 use yii\grid\ActionColumn;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
@@ -14,7 +14,7 @@ use yii\helpers\Url;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel sales\model\contactPhoneList\entity\ContactPhoneListSearch */
+/* @var $searchModel src\model\contactPhoneList\entity\ContactPhoneListSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Contact Phone Lists';
