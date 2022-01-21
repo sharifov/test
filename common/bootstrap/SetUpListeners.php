@@ -36,7 +36,7 @@ class SetUpListeners implements BootstrapInterface
             throw new \InvalidArgumentException('invalid path to modules directory: ' . $path);
         }
         $listeners = [];
-        if ($modules = scandir($path, null)) {
+        if ($modules = array_diff(scandir($path, null), array('..', '.'))) {
             foreach ($modules as $module) {
                 $dir = $path . '/' . $module;
                 if ($dir !== '.' && $dir !== '..' && is_dir($dir)) {
