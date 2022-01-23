@@ -1,6 +1,7 @@
-ARG PROJECT_NAME
+ARG REGISTRY
+ARG IMAGE_TAG
 
-FROM ${PROJECT_NAME}_php-cli:latest
+FROM ${REGISTRY}crm-php-cli:${IMAGE_TAG}
 
 RUN git clone https://github.com/redis/hiredis \
     && cd hiredis/ \
