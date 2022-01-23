@@ -2,8 +2,6 @@ ARG PROJECT_NAME
 
 FROM ${PROJECT_NAME}_swoole:latest
 
-COPY php.ini ${PHP_INI_DIR}/php.ini
-
 RUN apt-get update && apt-get install -y supervisor \
     && mkdir -p /var/log/supervisor \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*

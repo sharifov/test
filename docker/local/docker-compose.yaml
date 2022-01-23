@@ -7,13 +7,19 @@ services:
       args:
         PHP_FPM_VERSION: ${PHP_FPM_VERSION}
 
+  php-cli:
+    build:
+      context: ./php-cli
+      args:
+        PHP_CLI_VERSION: ${PHP_CLI_VERSION}
+
   swoole:
     build:
       context: ./swoole
       args:
         PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
     depends_on:
-      - php-fpm
+      - php-cli
 
   redis:
     build:
@@ -100,8 +106,6 @@ services:
      - centrifugo
      - queue
     restart: always
-    environment:
-      PHP_IDE_CONFIG: "serverName=SalesWebServer"
 
   api:
     build:
@@ -119,8 +123,6 @@ services:
      - centrifugo
      - queue
     restart: always
-    environment:
-      PHP_IDE_CONFIG: "serverName=SalesWebServer"
 
   nginx:
     build:
@@ -177,7 +179,7 @@ services:
     volumes:
       - ./../../:${APP_ROOT}/www
     depends_on:
-      - php-fpm
+      - swoole
       - mysql
       - psql
       - beanstalkd
@@ -194,9 +196,8 @@ services:
     volumes:
       - ./../../:${APP_ROOT}/www
     depends_on:
-      - php-fpm
+      - swoole
       - mysql
       - psql
       - beanstalkd
       - redis
-    restart: always

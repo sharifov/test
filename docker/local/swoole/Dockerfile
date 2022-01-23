@@ -1,6 +1,6 @@
 ARG PROJECT_NAME
 
-FROM ${PROJECT_NAME}_php-fpm:latest
+FROM ${PROJECT_NAME}_php-cli:latest
 
 RUN git clone https://github.com/redis/hiredis \
     && cd hiredis/ \
@@ -18,3 +18,5 @@ RUN git clone https://github.com/redis/hiredis \
     && git checkout tags/v4.4.16 \
     && phpize && ./configure \
     && make -j 4 && make install
+
+COPY conf.d /usr/local/etc/php/conf.d
