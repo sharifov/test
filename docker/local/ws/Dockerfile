@@ -2,5 +2,3 @@ ARG REGISTRY
 ARG IMAGE_TAG
 
 FROM ${REGISTRY}crm-swoole:${IMAGE_TAG}
-
-WORKDIR /var/www/sales/www
