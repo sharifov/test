@@ -1,7 +1,6 @@
-ARG PROJECT_NAME
+ARG REGISTRY
+ARG IMAGE_TAG
 
-FROM ${PROJECT_NAME}_swoole:latest
-
-COPY php.ini ${PHP_INI_DIR}/php.ini
+FROM ${REGISTRY}crm-swoole:${IMAGE_TAG}
 
 WORKDIR /var/www/sales/www

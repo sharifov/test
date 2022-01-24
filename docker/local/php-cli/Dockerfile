@@ -1,6 +1,6 @@
-ARG PHP_FPM_VERSION
+ARG PHP_CLI_VERSION
 
-FROM php:${PHP_FPM_VERSION}-fpm
+FROM php:${PHP_CLI_VERSION}-cli
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         curl \
@@ -42,5 +42,3 @@ RUN runtimeRequirements="libgeoip-dev" \
     && rm -rf /var/lib/apt/lists/*
 
 RUN mv $PHP_INI_DIR/php.ini-development $PHP_INI_DIR/php.ini
-
-COPY conf.d /usr/local/etc/php/conf.d

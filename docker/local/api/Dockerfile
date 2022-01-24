@@ -1,11 +1,6 @@
-ARG PROJECT_NAME
+ARG REGISTRY
+ARG IMAGE_TAG
 
-FROM ${PROJECT_NAME}_php-fpm:latest
-
-COPY php.ini ${PHP_INI_DIR}/php.ini
-
-RUN pecl install xdebug && docker-php-ext-enable xdebug
-
-COPY xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
+FROM ${REGISTRY}crm-php-fpm:${IMAGE_TAG}
 
 WORKDIR /var/www/sales/www

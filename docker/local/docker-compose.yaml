@@ -1,20 +1,6 @@
 version: '3.9'
 
 services:
-  php-fpm:
-    build:
-      context: ./php-fpm
-      args:
-        PHP_FPM_VERSION: ${PHP_FPM_VERSION}
-
-  swoole:
-    build:
-      context: ./swoole
-      args:
-        PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
-    depends_on:
-      - php-fpm
-
   redis:
     build:
       context: ./redis
@@ -88,11 +74,11 @@ services:
     build:
       context: ./frontend
       args:
-        PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
+        REGISTRY: ${REGISTRY}
+        IMAGE_TAG: ${IMAGE_TAG}
     volumes:
       - ./../../:${APP_ROOT}/www
     depends_on:
-     - php-fpm
      - mysql
      - psql
      - redis
@@ -100,18 +86,16 @@ services:
      - centrifugo
      - queue
     restart: always
-    environment:
-      PHP_IDE_CONFIG: "serverName=SalesWebServer"
 
   api:
     build:
       context: ./api
       args:
-        PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
+        REGISTRY: ${REGISTRY}
+        IMAGE_TAG: ${IMAGE_TAG}
     volumes:
       - ./../../:${APP_ROOT}/www
     depends_on:
-     - php-fpm
      - mysql
      - psql
      - redis
@@ -119,8 +103,6 @@ services:
      - centrifugo
      - queue
     restart: always
-    environment:
-      PHP_IDE_CONFIG: "serverName=SalesWebServer"
 
   nginx:
     build:
@@ -156,11 +138,11 @@ services:
     build:
       context: ./ws
       args:
-        PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
+        REGISTRY: ${REGISTRY}
+        IMAGE_TAG: ${IMAGE_TAG}
     volumes:
       - ./../../:${APP_ROOT}/www
     depends_on:
-      - swoole
       - mysql
       - psql
       - redis
@@ -173,11 +155,11 @@ services:
       context: ./queue
       args:
         APP_ROOT: ${APP_ROOT}
-        PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
+        REGISTRY: ${REGISTRY}
+        IMAGE_TAG: ${IMAGE_TAG}
     volumes:
       - ./../../:${APP_ROOT}/www
     depends_on:
-      - php-fpm
       - mysql
       - psql
       - beanstalkd
@@ -189,14 +171,13 @@ services:
     build:
       context: ./console
       args:
-        PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
+        REGISTRY: ${REGISTRY}
+        IMAGE_TAG: ${IMAGE_TAG}
     user: ${USER_ID}:${USER_GID}
     volumes:
       - ./../../:${APP_ROOT}/www
     depends_on:
-      - php-fpm
       - mysql
       - psql
       - beanstalkd
       - redis
-    restart: always
