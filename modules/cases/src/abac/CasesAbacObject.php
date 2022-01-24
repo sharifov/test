@@ -46,8 +46,8 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
     public const ACTION_OWNER_ACCESS  = 'ownerAccess';
     public const ACTION_EMPTY_OWNER_ACCESS  = 'emptyOwnerAccess';
     public const ACTION_GROUP_ACCESS  = 'groupAccess';
-    public const ACTION_DEPARTMENT_ACCESS  = 'departmentAccess';
-    public const ACTION_PROJECT_ACCESS  = 'projectAccess';
+    //public const ACTION_DEPARTMENT_ACCESS  = 'departmentAccess';
+    //public const ACTION_PROJECT_ACCESS  = 'projectAccess';
     public const ACTION_READ  = 'read';
     public const ACTION_CREATE  = 'create';
     public const ACTION_TRANSFER  = 'transfer';
@@ -63,8 +63,8 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
             self::ACTION_EMPTY_OWNER_ACCESS,
             self::ACTION_GROUP_ACCESS,
             self::ACTION_ALL_ACCESS,
-            self::ACTION_DEPARTMENT_ACCESS,
-            self::ACTION_PROJECT_ACCESS,
+            //self::ACTION_DEPARTMENT_ACCESS,
+            //self::ACTION_PROJECT_ACCESS,
         ],
     ];
 
