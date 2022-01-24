@@ -7,7 +7,6 @@ use yii\db\Migration;
  */
 class m220124_102515_add_new_lead_data_key extends Migration
 {
-
     public function safeUp()
     {
         Yii::$app->db->createCommand()->upsert('{{%lead_data_key}}', [
