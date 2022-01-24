@@ -3,6 +3,7 @@
 use common\components\grid\project\ProjectColumn;
 use dosamigos\datepicker\DatePicker;
 use src\access\ListsAccess;
+use src\helpers\lead\LeadHelper;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use common\models\Lead;
@@ -18,6 +19,8 @@ $this->title = 'Processing Queue';
 $lists = new ListsAccess(Yii::$app->user->id);
 
 $this->params['breadcrumbs'][] = $this->title;
+
+$timeNow = time();
 ?>
 
 <style>
@@ -89,9 +92,13 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'attribute' => 'status',
-            'value' => static function (Lead $model) {
+            'value' => static function (Lead $model) use ($timeNow) {
                 $statusValue = $model->getStatusName(true);
                 $reasonValue =  $model->getLastReasonFromLeadFlow();
+
+                if ($model->isSnooze()) {
+                    $statusValue .= '<br>' . LeadHelper::displaySnoozeFor($model, $timeNow);
+                }
 
                 if ($reasonValue) {
                     $reasonValue = '<span>' . $reasonValue . '</span>';

@@ -75,9 +75,11 @@ $leadAbacDto = new LeadAbacDto($leadModel, $userId);
 
     $buttonOnWake = Html::a('<i class="fa fa-street-view"></i> On Wake', Url::to([
         'lead/take',
-        'class' => 'btn btn-primary',
         'gid' => $leadModel->gid
-    ]));
+    ]), [
+        'class' => 'btn btn-primary',
+        'title' => 'On Wake'
+    ]);
 
     $buttonReturnLead = Html::a('<i class="fa fa-share fa-rotate-180"></i> Return Lead', '#', [
         'class' => 'add-reason btn btn-primary',
@@ -89,6 +91,12 @@ $leadAbacDto = new LeadAbacDto($leadModel, $userId);
         'class' => 'add-reason btn btn-primary',
         'data-url' => \yii\helpers\Url::to(['lead-change-state/reject', 'gid' => $leadModel->gid]),
         'title' => 'Reject'
+    ]);
+
+    $buttonDetailInfo = Html::a('<i class="fa fa-info-circle"></i> Lead Details', Url::to(['leads/view', 'id' => $leadModel->id]), [
+        'class' => 'btn btn-info',
+        'title' => 'Lead Details',
+        'target' => '_blank'
     ]);
 
     //$buttonAnswer = Html::a('<i class="fa fa-commenting-o"></i> </span>'. ($leadModel->l_answered ? 'UnAnswered' : 'Answered'), ['lead/update2', 'act' => 'answer', 'id' => $leadModel->id], [
@@ -154,6 +162,10 @@ $leadAbacDto = new LeadAbacDto($leadModel, $userId);
     /** @abac $leadAbacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CLONE, Btn clone lead */
     if (Auth::can('leadSection', ['lead' => $leadModel]) && Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CLONE)) {
         $buttonsSubAction[] = $buttonClone;
+    }
+
+    if (Auth::can('/leads/view', ['lead' => $leadModel])) {
+        $buttonsSubAction[] = $buttonDetailInfo;
     }
 
     $project = $leadModel->project;

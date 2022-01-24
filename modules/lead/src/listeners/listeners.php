@@ -43,6 +43,7 @@ use src\listeners\lead\LeadCreatedNewEventLogListener;
 use src\listeners\lead\LeadDuplicateDetectedEventListener;
 use src\listeners\lead\LeadFollowUpEventLogListener;
 use src\listeners\lead\LeadFollowUpNotificationsListener;
+use src\listeners\lead\LeadFromSnoozeNotificationListener;
 use src\listeners\lead\LeadNewEventLogListener;
 use src\listeners\lead\LeadOwnerChangedNotificationsListener;
 use src\listeners\lead\LeadPendingEventLogListener;
@@ -108,6 +109,7 @@ return [
 
     LeadStatusChangedEvent::class => [
         LeadQcallProcessingListener::class,
+        LeadFromSnoozeNotificationListener::class
     ],
     LeadPendingEvent::class => [LeadPendingEventLogListener::class],
     LeadProcessingEvent::class => [

@@ -21,22 +21,32 @@ class VoluntaryExchangeBOService
     public function __construct(VoluntaryExchangeBOPrepareService $voluntaryExchangeBOPrepareService)
     {
         $this->BOPrepareService = $voluntaryExchangeBOPrepareService;
-
-        $this->requestProcessing();
     }
 
-    private function requestProcessing(): void
+    public function requestProcessing(): VoluntaryExchangeBOService
     {
+        if (empty($this->BOPrepareService->getBookingId())) {
+            throw new \RuntimeException('BookingId is empty. Request to BO "getExchangeData" not send');
+        }
+        if (empty($this->BOPrepareService->getApiKey())) {
+            throw new \RuntimeException('ApiKey is empty. Request to BO "getExchangeData" not send');
+        }
+
         $data['apiKey'] = $this->BOPrepareService->getApiKey();
         $data['bookingId'] = $this->BOPrepareService->getBookingId();
         $data['tickets'] = $this->BOPrepareService->getTickets();
 
         $this->result = BackOffice::getExchangeData($data);
+        return $this;
     }
 
-    public function isAllow(): bool
+    public function isAllow(): ?bool
     {
-        return (bool) $this->result['allow'];
+        $allow = $this->result['allow'] ?? null;
+        if ($allow === null) {
+            return null;
+        }
+        return (bool) $allow;
     }
 
     public function getResult(): ?array

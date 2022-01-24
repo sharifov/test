@@ -908,11 +908,6 @@ class FlightQuoteController extends FController
                             throw new \RuntimeException('OriginProductQuote not found by ID(' . $addChangeForm->origin_quote_id . ')');
                         }
                         $boPrepareService = new VoluntaryExchangeBOPrepareService($case->project, $originProductQuote);
-                        $voluntaryExchangeBOService = new VoluntaryExchangeBOService($boPrepareService);
-//                        if (!$voluntaryExchangeBOService->isAllow()) {
-//                            throw new \RuntimeException('Exchange is not allowed');
-//                        }
-
                         $productQuoteChange = ProductQuoteChange::createVoluntaryExchange(
                             $addChangeForm->origin_quote_id,
                             $addChangeForm->case_id,
@@ -953,6 +948,7 @@ class FlightQuoteController extends FController
         $changeId = Yii::$app->request->get('change_id', 0);
 
         $flight = $this->flightRepository->find($flightId);
+        $getParams = Yii::$app->request->get();
 
         $productQuoteChange = ProductQuoteChange::findOne(['pqc_id' => $changeId]);
 
@@ -989,20 +985,31 @@ class FlightQuoteController extends FController
             }
 
             $boPrepareService = new VoluntaryExchangeBOPrepareService($case->project, $originProductQuote);
+            try {
+                $boPrepareService->fill();
+            } catch (\Throwable $throwable) {
+                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $getParams);
+                \Yii::warning($message, 'FlightQuoteController:actionCreateVoluntaryQuote:VoluntaryExchangeBOPrepareService');
+            }
+
             $voluntaryExchangeBOService = new VoluntaryExchangeBOService($boPrepareService);
-//            if (!$voluntaryExchangeBOService->isAllow()) {
-//                throw new \RuntimeException('Exchange is not allowed');
-//            }
+            try {
+                $voluntaryExchangeBOService->requestProcessing();
+            } catch (\Throwable $throwable) {
+                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $getParams);
+                \Yii::warning($message, 'FlightQuoteController:actionCreateVoluntaryQuote:BoGetExchangeData');
+            }
 
             $form = new VoluntaryQuoteCreateForm(Auth::id(), $flight, true, $voluntaryExchangeBOService->getServiceFeeAmount());
             $form->setCustomerPackage($voluntaryExchangeBOService->getCustomerPackage());
             $form->setServiceFeeCurrency($voluntaryExchangeBOService->getServiceFeeCurrency());
-            $form->setServiceFeeAmount($voluntaryExchangeBOService->getServiceFeeAmount());
         } catch (\RuntimeException | \DomainException $exception) {
-            Yii::warning(AppHelper::throwableLog($exception), 'FlightQuoteController:actionCreateVoluntaryQuote:Exception');
+            $message = ArrayHelper::merge(AppHelper::throwableLog($exception), $getParams);
+            Yii::warning($message, 'FlightQuoteController:actionCreateVoluntaryQuote:Exception');
             return $exception->getMessage();
         } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableLog($throwable), 'FlightQuoteController:actionCreateVoluntaryQuote:Throwable');
+            $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $getParams);
+            Yii::error($message, 'FlightQuoteController:actionCreateVoluntaryQuote:Throwable');
             return $throwable->getMessage();
         }
 

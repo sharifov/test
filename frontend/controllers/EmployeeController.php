@@ -416,18 +416,18 @@ class EmployeeController extends FController
 
             try {
                 if ($model->save()) {
-                    if (Auth::user()->isAdmin()) {
+                    //if (Auth::user()->isAdmin()) {
                         $modelProfile->up_user_id = $model->id;
-                        if ($modelProfile->load(Yii::$app->request->post())) {
-                            $modelProfile->up_updated_dt = date('Y-m-d H:i:s');
-                            if (!$modelProfile->save()) {
-                                Yii::error(VarDumper::dumpAsString($modelProfile->errors), 'EmployeeController:actionCreate:modelProfile:save');
-                                throw new \Exception('Profile settings error');
-                            }
-                        } else {
-                            throw new \Exception('Profile settings is empty');
+                    if ($modelProfile->load(Yii::$app->request->post())) {
+                        $modelProfile->up_updated_dt = date('Y-m-d H:i:s');
+                        if (!$modelProfile->save()) {
+                            Yii::error(VarDumper::dumpAsString($modelProfile->errors), 'EmployeeController:actionCreate:modelProfile:save');
+                            throw new \Exception('Profile settings error');
                         }
+                    } else {
+                        throw new \Exception('Profile settings is empty');
                     }
+                    //}
 
                     // VarDumper::dump($model->form_roles, 10, true); exit;
 

@@ -4,6 +4,7 @@ namespace modules\flight\src\useCases\voluntaryExchangeManualCreate\service;
 
 use common\models\Project;
 use modules\product\src\entities\productQuote\ProductQuote;
+use src\entities\cases\Cases;
 
 /**
  * Class VoluntaryExchangeBOPrepareService
@@ -14,29 +15,31 @@ use modules\product\src\entities\productQuote\ProductQuote;
  *
  * @property Project $project
  * @property ProductQuote $originProductQuote
+ * @property Cases|null $case
  */
 class VoluntaryExchangeBOPrepareService
 {
     private ?string $apiKey = null;
     private ?string $bookingId = null;
     private ?array $tickets = null;
+    private ?bool $statusFill = null;
 
     private Project $project;
     private ProductQuote $originProductQuote;
+    private ?Cases $case = null;
 
     /**
      * @param Project $project
      * @param ProductQuote $originProductQuote
      */
-    public function __construct(Project $project, ProductQuote $originProductQuote)
+    public function __construct(Project $project, ProductQuote $originProductQuote, ?Cases $case = null)
     {
         $this->project = $project;
         $this->originProductQuote = $originProductQuote;
-
-        $this->fill();
+        $this->case = $case;
     }
 
-    private function fill(): void
+    public function fill(): void
     {
         if (empty($this->project->api_key)) {
             throw new \RuntimeException('Api key is empty. Project(' . $this->project->project_key . ')');
@@ -58,7 +61,13 @@ class VoluntaryExchangeBOPrepareService
         }
 
         $this->apiKey = $this->project->api_key;
-        $this->bookingId = $this->originProductQuote->getLastBookingId();
+
+        if (!$this->bookingId = $this->originProductQuote->getLastBookingId()) {
+            $this->bookingId = $this->case->cs_order_uid;
+        }
+        if (!$this->bookingId) {
+            throw new \RuntimeException('BookingId not found in OriginProductQuote Gid(' . $this->originProductQuote->pq_gid . ')');
+        }
     }
 
     public function getApiKey(): ?string
@@ -74,5 +83,10 @@ class VoluntaryExchangeBOPrepareService
     public function getTickets(): ?array
     {
         return $this->tickets;
+    }
+
+    public function getStatusFill(): ?bool
+    {
+        return $this->statusFill;
     }
 }

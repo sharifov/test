@@ -52,7 +52,7 @@ class ClientSearch extends Client
      */
     public function search($params): ActiveDataProvider
     {
-        $query = Client::find()->with(['leads.employee.ugsGroups'])->joinWith(['project']);
+        $query = Client::find()->alias('cl')->with(['leads.employee.ugsGroups'])->joinWith(['project p']);
 
         // add conditions that should always apply here
 
@@ -89,21 +89,21 @@ class ClientSearch extends Client
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'id' => $this->id,
+            'cl.id' => $this->id,
         ]);
 
         if ($this->not_in_client_id) {
-            $query->andWhere(['NOT IN', 'id', $this->not_in_client_id]);
+            $query->andWhere(['NOT IN', 'cl.id', $this->not_in_client_id]);
         }
 
         if ($this->client_email) {
             $subQuery = ClientEmail::find()->select(['DISTINCT(client_id)'])->where(['like', 'email', $this->client_email]);
-            $query->andWhere(['IN', 'id', $subQuery]);
+            $query->andWhere(['IN', 'cl.id', $subQuery]);
         }
 
         if ($this->client_phone) {
             $subQuery = ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['like', 'phone', $this->client_phone]);
-            $query->andWhere(['IN', 'id', $subQuery]);
+            $query->andWhere(['IN', 'cl.id', $subQuery]);
         }
 
         $query->andFilterWhere(['like', 'first_name', $this->first_name])
