@@ -60,9 +60,7 @@ class VoluntaryExchangeBOPrepareService
             throw new \RuntimeException('TicketNumbers not found');
         }
 
-        if ($this->apiKey = $this->project->api_key) {
-            throw new \RuntimeException('Api key is empty in project(' . $this->project->id . ')');
-        }
+        $this->apiKey = $this->project->api_key;
 
         if (!$this->bookingId = $this->originProductQuote->getLastBookingId()) {
             $this->bookingId = $this->case->cs_order_uid;

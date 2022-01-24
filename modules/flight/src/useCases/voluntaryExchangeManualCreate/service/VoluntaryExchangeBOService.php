@@ -25,6 +25,13 @@ class VoluntaryExchangeBOService
 
     public function requestProcessing(): VoluntaryExchangeBOService
     {
+        if (empty($this->BOPrepareService->getBookingId())) {
+            throw new \RuntimeException('BookingId is empty. Request to BO "getExchangeData" not send');
+        }
+        if (empty($this->BOPrepareService->getApiKey())) {
+            throw new \RuntimeException('ApiKey is empty. Request to BO "getExchangeData" not send');
+        }
+
         $data['apiKey'] = $this->BOPrepareService->getApiKey();
         $data['bookingId'] = $this->BOPrepareService->getBookingId();
         $data['tickets'] = $this->BOPrepareService->getTickets();
