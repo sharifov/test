@@ -382,40 +382,18 @@ $canShowEmailData = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_
                                         $call_type_id = \common\models\UserProfile::CALL_TYPE_OFF;
                                     }
 
-                                    //\yii\helpers\VarDumper::dump($leadForm->getLead()->id, 10, true); exit;
-
                                     if ($agentParams) {
                                         foreach (CommunicationForm::TYPE_LIST as $tk => $itemName) {
                                             if ($tk == CommunicationForm::TYPE_EMAIL) {
-//                                                if ($agentParams->upp_email) {
                                                 if ($agentParams->getEmail()) {
-//                                                    $typeList[$tk] = $itemName . ' (' . $agentParams->upp_email . ')';
                                                     $typeList[$tk] = $itemName . ' (' . $agentParams->getEmail() . ')';
                                                 }
                                             }
 
-//                                            if ($agentParams->upp_tw_phone_number) {
                                             if ($agentParams->getPhone()) {
                                                 if ($tk == CommunicationForm::TYPE_SMS && $smsEnabled) {
-//                                                    $typeList[$tk] = $itemName . ' (' . $agentParams->upp_tw_phone_number . ')';
                                                     $typeList[$tk] = $itemName . ' (' . $agentParams->getPhone() . ')';
                                                 }
-
-
-//                                                if($call_type_id) {
-//
-//                                                    $callTypeName = \common\models\UserProfile::CALL_TYPE_LIST[$call_type_id] ?? '-';
-//
-//                                                    if($call_type_id == \common\models\UserProfile::CALL_TYPE_SIP && $userModel->userProfile && !$userModel->userProfile->up_sip) {
-//                                                        $callTypeName .= ' [empty account]';
-//                                                    }
-//
-//                                                    if ($tk == CommunicationForm::TYPE_VOICE) {
-//                                                        //if ($userModel->userProfile->up_sip) {
-//                                                        $typeList[$tk] = $itemName . ' ('.$callTypeName.')';
-//                                                        //}
-//                                                    }
-//                                                }
                                             }
                                         }
                                     }
@@ -523,23 +501,6 @@ $canShowEmailData = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_
                                         ],
                                     ]);
                                     ?>
-
-                                    <!--                                --><?php //= $form->field($comForm, 'c_email_message')->widget(\dosamigos\ckeditor\CKEditor::class, [
-                                    //                                    'options' => [
-                                    //                                        'rows' => 6,
-                                    //                                        'readonly' => false
-                                    //                                    ],
-                                    //                                    'preset' => 'custom',
-                                    //                                    'clientOptions' => [
-                                    //                                        'height' => 500,
-                                    //                                        'fullPage' => false,
-                                    //
-                                    //                                        'allowedContent' => true,
-                                    //                                        'resize_enabled' => false,
-                                    //                                        'removeButtons' => 'Subscript,Superscript,Flash,Table,HorizontalRule,Smiley,SpecialChar,PageBreak,Iframe',
-                                    //                                        'removePlugins' => 'elementspath',
-                                    //                                    ]
-                                    //                                ])?>
 
                                 </div>
                                 <div class="btn-wrapper">
