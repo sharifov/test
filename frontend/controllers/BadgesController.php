@@ -25,11 +25,17 @@ use Yii;
  */
 class BadgesController extends FController
 {
-    private $leadBadgesRepository;
+    private LeadBadgesRepository $leadBadgesRepository;
 
     public $enableCsrfValidation = false;
 
-    public function __construct($id, $module, LeadBadgesRepository $leadBadgesRepository, $config = [])
+    /**
+     * @param $id
+     * @param $module
+     * @param LeadBadgesRepository $leadBadgesRepository
+     * @param array $config
+     */
+    public function __construct($id, $module, LeadBadgesRepository $leadBadgesRepository, array $config = [])
     {
         parent::__construct($id, $module, $config);
         $this->leadBadgesRepository = $leadBadgesRepository;

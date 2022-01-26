@@ -36,6 +36,7 @@ use src\events\lead\LeadCreatedEvent;
 use src\events\lead\LeadCreatedManuallyEvent;
 use src\events\lead\LeadCreatedNewEvent;
 use src\events\lead\LeadDuplicateDetectedEvent;
+use src\events\lead\LeadExtraQueueEvent;
 use src\events\lead\LeadFollowUpEvent;
 use src\events\lead\LeadNewEvent;
 use src\events\lead\LeadOwnerChangedEvent;
@@ -266,6 +267,7 @@ class Lead extends ActiveRecord implements Objectable
     public const STATUS_BOOK_FAILED = 14;
     public const STATUS_ALTERNATIVE = 15;
     public const STATUS_NEW         = 16;
+    public const STATUS_EXTRA_QUEUE = 17;
 
     public const STATUS_LIST = [
         self::STATUS_PENDING        => 'Pending',
@@ -280,6 +282,7 @@ class Lead extends ActiveRecord implements Objectable
         self::STATUS_BOOK_FAILED    => 'Book failed',
         self::STATUS_ALTERNATIVE    => 'Alternative',
         self::STATUS_NEW            => 'New',
+        self::STATUS_EXTRA_QUEUE    => 'Extra queue',
     ];
 
     public const TRAVEL_DATE_PASSED_STATUS_LIST = [
@@ -5023,5 +5026,34 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
             ['title' => 'Send:' . ((int) $quotes['send_q']) .
             ' / Total:' . ($quotes['send_q'] + $quotes['not_send_q'])]
         );
+    }
+
+    public function extraQueue(?string $reason = null): void
+    {
+        if ($this->isExtraQueue()) {
+            return;
+        }
+
+        $this->recordEvent(
+            new LeadExtraQueueEvent(
+                $this,
+                $this->status,
+                $this->employee_id,
+                null,
+                null,
+                $reason
+            )
+        );
+
+        $this->setStatus(self::STATUS_EXTRA_QUEUE);
+
+        if ($this->hasOwner()) {
+            $this->changeOwner(null);
+        }
+    }
+
+    public function isExtraQueue(): bool
+    {
+        return $this->status === self::STATUS_EXTRA_QUEUE;
     }
 }
