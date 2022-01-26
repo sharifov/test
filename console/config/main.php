@@ -45,6 +45,7 @@ return [
                 'modules\rentCar\migrations',
                 'modules\cruise\migrations',
                 'modules\abac\migrations',
+                'modules\featureFlag\migrations',
             ],
         ],
 

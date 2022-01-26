@@ -2,7 +2,7 @@
 
 namespace modules\abac\src\services;
 
-use modules\abac\components\AbacComponent;
+use modules\abac\components\FeatureFlagComponent;
 use modules\abac\src\entities\abacDoc\AbacDoc;
 use Yii;
 use yii\helpers\ArrayHelper;
@@ -10,21 +10,21 @@ use yii\helpers\FileHelper;
 
 /**
  * Class AbacDocService
- * @property AbacComponent $abacComponent
+ * @property FeatureFlagComponent $abacComponent
  * @property string $rootDirectory
  */
 class AbacDocService
 {
-    private AbacComponent $abacComponent;
+    private FeatureFlagComponent $abacComponent;
     private string $rootDirectory;
 
     /**
-     * @param AbacComponent|null $abacComponent
+     * @param FeatureFlagComponent|null $abacComponent
      * @param string|null $rootDir
      */
-    public function __construct(?AbacComponent $abacComponent = null, ?string $rootDir = null)
+    public function __construct(?FeatureFlagComponent $abacComponent = null, ?string $rootDir = null)
     {
-        $this->abacComponent = $abacComponent ?? \Yii::$container->get(AbacComponent::class);
+        $this->abacComponent = $abacComponent ?? \Yii::$container->get(FeatureFlagComponent::class);
         $this->rootDirectory = $rootDir ?? Yii::getAlias('@root/');
     }
 

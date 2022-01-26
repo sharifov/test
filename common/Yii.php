@@ -59,6 +59,7 @@ abstract class BaseApplication extends yii\base\Application
  * @property \common\components\antispam\CallAntiSpamService $callAntiSpam CallAntiSpamService component
  * @property \yii\i18n\Formatter $formatter_search Search Formatter component w/o timezone
  * @property \yii\authclient\Collection $authClientCollection Auth Client Collection
+ * @property \modules\featureFlag\components\FeatureFlagComponent $ff FeatureFlag component
  *
  *
  *
