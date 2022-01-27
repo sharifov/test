@@ -55,7 +55,35 @@ $this->params['breadcrumbs'][] = $this->title;
             'lppl_owner_id:userName',
             'lppl_created_dt:byUserDatetime',
 
-            ['class' => ActionColumn::class],
+            [
+                'class' => ActionColumn::class,
+                'template' => '{view} {update} {delete}',
+                'buttons' => [
+                    'view' => static function ($url, LeadPoorProcessingLog $model) {
+                        return Html::a(
+                            '<i class="fa fa-eye"></i>',
+                            ['/lead-poor-processing-log-crud/view', 'lppl_id' => $model->lppl_id],
+                            ['data-pjax' => 0,]
+                        );
+                    },
+                    'update' => static function ($url, LeadPoorProcessingLog $model) {
+                        return Html::a(
+                            '<i class="fa fa-pencil"></i>',
+                            ['/lead-poor-processing-log-crud/update', 'lppl_id' => $model->lppl_id],
+                            ['data-pjax' => 0,]
+                        );
+                    },
+                    'delete' => static function ($url, LeadPoorProcessingLog $model) {
+                        return Html::a('<i class="fa fa-trash"></i>', ['delete', 'lppl_id' => $model->lppl_id], [
+                            'class' => '',
+                            'data' => [
+                                'confirm' => 'Are you sure you want to delete this item?',
+                                'method' => 'post',
+                            ],
+                        ]);
+                    },
+                ],
+            ],
         ],
     ]); ?>
 

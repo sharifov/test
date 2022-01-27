@@ -27,7 +27,14 @@ $this->params['breadcrumbs'][] = $this->title;
         'layout' => "{errors}\n{summary}\n{items}\n{pager}",
         'columns' => [
             'lppd_id',
-            'lppd_enabled:boolean',
+            [
+                'attribute' => 'lppd_enabled',
+                'value' => static function (LeadPoorProcessingData $model) {
+                    return Yii::$app->formatter->asBooleanByLabel($model->lppd_enabled);
+                },
+                'filter' => [1 => 'Yes', 0 => 'No'],
+                'format' => 'raw',
+            ],
             [
                 'attribute' => 'lppd_key',
                 'value' => static function (LeadPoorProcessingData $model) {

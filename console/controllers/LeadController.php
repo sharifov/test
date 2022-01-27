@@ -11,12 +11,15 @@ use common\models\Task;
 use src\exception\BoResponseException;
 use src\helpers\app\AppHelper;
 use src\helpers\setting\SettingHelper;
+use src\model\leadPoorProcessing\entity\LeadPoorProcessing;
+use src\model\leadPoorProcessing\service\LeadToExtraQueueService;
 use src\repositories\lead\LeadRepository;
 use src\services\cases\CasesSaleService;
 use yii\base\InvalidArgumentException;
 use yii\console\Controller;
 use yii\db\Expression;
 use yii\db\Query;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Console;
 use yii\helpers\VarDumper;
 use Yii;
@@ -468,6 +471,56 @@ class LeadController extends Controller
         }
         printf(PHP_EOL . 'Execute Time: %s' . PHP_EOL, $this->ansiFormat($time . ' s', Console::FG_RED));
         printf(PHP_EOL . ' --- End [' . date('Y-m-d H:i:s') . '] %s ---' . PHP_EOL . PHP_EOL, $this->ansiFormat(self::class . '\\' . $this->action->id, Console::FG_YELLOW));
+    }
+
+    public function actionToExtraQueue(): void
+    {
+        echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+
+        $time_start = microtime(true);
+        $currentDT = new \DateTimeImmutable();
+        $leadsExpiration = Lead::find()
+            ->select(Lead::tableName() . '.id')
+            ->addSelect('lpp_lppd_id')
+            ->innerJoin(LeadPoorProcessing::tableName(), 'id = lpp_lead_id')
+            ->where(['status' => Lead::STATUS_PROCESSING])
+            ->andWhere(['<=', 'lpp_expiration_dt', $currentDT->format('Y-m-d H:i:s')])
+            ->distinct()
+            ->asArray()
+            ->all()
+        ;
+
+        $count = count($leadsExpiration);
+        $processed = 0;
+        Console::startProgress($processed, $count);
+
+        foreach ($leadsExpiration as $item) {
+            $logData = ['leadId' => $item['id']];
+            try {
+                (new LeadToExtraQueueService($item['id'], $item['lpp_lppd_id'], $this->leadRepository))->handle();
+                $processed++;
+                Console::updateProgress($processed, $count);
+            } catch (\RuntimeException | \DomainException $throwable) {
+                $processed--;
+                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
+                \Yii::warning($message, 'LeadController:actionToExtraQueue:Exception');
+            } catch (\Throwable $throwable) {
+                $processed--;
+                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
+                \Yii::error($message, 'LeadController:actionToExtraQueue:Throwable');
+            }
+            Console::updateProgress($processed, $count);
+        }
+
+        Console::endProgress(false);
+
+        $time_end = microtime(true);
+        $time = number_format(round($time_end - $time_start, 2), 2);
+        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time . ' s] %g %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- Processed: %w[' . $processed . '/' . $count . '] %g %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
     }
 
     private function validateDate(\DateTime $dateObject, string $date, string $format = 'Y-m-d H:i:s'): bool

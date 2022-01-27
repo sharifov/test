@@ -5055,10 +5055,6 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         );
 
         $this->setStatus(self::STATUS_EXTRA_QUEUE);
-
-        if ($this->hasOwner()) {
-            $this->changeOwner(null);
-        }
     }
 
     public function isExtraQueue(): bool
