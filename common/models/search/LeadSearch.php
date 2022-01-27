@@ -4351,7 +4351,6 @@ class LeadSearch extends Lead
             $leadTable . '.cabin' => $this->cabin,
             $leadTable . '.request_ip' => $this->request_ip,
             $leadTable . '.l_init_price' => $this->l_init_price,
-            $leadTable . '.l_is_test' => $this->l_is_test,
             $leadTable . '.l_call_status_id' => $this->l_call_status_id,
             $leadTable . '.l_type' => $this->l_type,
         ]);

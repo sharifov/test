@@ -86,8 +86,8 @@ class LeadPoorProcessingLog extends \yii\db\ActiveRecord
     {
         return [
             'lppl_id' => 'ID',
-            'lppl_lead_id' => 'Lead ID',
-            'lppl_lppd_id' => 'LeadPoorProcessingData ID',
+            'lppl_lead_id' => 'Lead',
+            'lppl_lppd_id' => 'LeadPoorProcessingData',
             'lppl_status' => 'Status',
             'lppl_owner_id' => 'Owner',
             'lppl_created_dt' => 'Created',
@@ -109,5 +109,20 @@ class LeadPoorProcessingLog extends \yii\db\ActiveRecord
     public function getStatusName(): string
     {
         return LeadPoorProcessingLogStatus::STATUS_LIST[$this->lppl_status] ?? '---';
+    }
+
+    public static function create(
+        int $leadId,
+        int $dataId,
+        ?int $ownerId,
+        int $status
+    ): LeadPoorProcessingLog {
+        $model = new self();
+        $model->lppl_lead_id = $leadId;
+        $model->lppl_lppd_id = $dataId;
+        $model->lppl_owner_id = $ownerId;
+        $model->lppl_status = $status;
+
+        return $model;
     }
 }

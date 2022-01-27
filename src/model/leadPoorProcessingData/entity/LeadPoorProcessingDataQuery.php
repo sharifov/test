@@ -17,4 +17,13 @@ class LeadPoorProcessingDataQuery
             ->asArray()
             ->column();
     }
+
+    public static function getRuleByKey(string $key): ?LeadPoorProcessingData
+    {
+        return LeadPoorProcessingData::find()
+            ->where(['lppd_key' => $key])
+            ->limit(1)
+            ->one()
+        ;
+    }
 }

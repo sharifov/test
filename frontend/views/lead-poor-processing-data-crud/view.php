@@ -1,5 +1,6 @@
 <?php
 
+use frontend\helpers\JsonHelper;
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
@@ -20,8 +21,7 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <div class="row">
-        <div class="col-md-4">
-
+        <div class="col-md-6">
             <?= DetailView::widget([
                 'model' => $model,
                 'attributes' => [
@@ -37,8 +37,8 @@ $this->params['breadcrumbs'][] = $this->title;
             ]) ?>
         </div>
         <div class="col-md-6 bg-white">
-            <h2>Contact info:</h2>
-            <?=\yii\helpers\VarDumper::dumpAsString(\yii\helpers\Json::decode($model->lppd_params_json), 10, true) ?>
+            <h2>Params:</h2>
+            <?=\yii\helpers\VarDumper::dumpAsString(JsonHelper::decode($model->lppd_params_json), 10, true) ?>
         </div>
     </div>
 </div>

@@ -1,5 +1,7 @@
 <?php
 
+use src\model\leadPoorProcessingData\entity\LeadPoorProcessingData;
+use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataQuery;
 use yii\grid\ActionColumn;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
@@ -26,15 +28,43 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             'lppd_id',
             'lppd_enabled:boolean',
-            'lppd_key',
+            [
+                'attribute' => 'lppd_key',
+                'value' => static function (LeadPoorProcessingData $model) {
+                    return '<i class="fa fa-key"></i> ' . $model->lppd_key;
+                },
+                'filter' => LeadPoorProcessingDataQuery::getList(60),
+                'format' => 'raw',
+            ],
             'lppd_name',
             'lppd_description',
-            'lppd_minute',
-            //'lppd_params_json',
-            //'lppd_updated_dt',
-            //'lppd_updated_user_id',
-
-            ['class' => ActionColumn::class, 'template' => '{view} {update}'],
+            [
+                'attribute' => 'lppd_minute',
+                'value' => static function (LeadPoorProcessingData $model) {
+                    return '<i class="fa fa-clock-o"></i> ' . $model->lppd_minute . ' minutes';
+                },
+                'format' => 'raw',
+            ],
+            [
+                'class' => ActionColumn::class,
+                'template' => '{view} {update}',
+                'buttons' => [
+                    'view' => static function ($url, LeadPoorProcessingData $model) {
+                        return Html::a(
+                            '<i class="fa fa-eye"></i>',
+                            ['/lead-poor-processing-data-crud/view', 'lppd_id' => $model->lppd_id],
+                            ['data-pjax' => 0,]
+                        );
+                    },
+                    'update' => static function ($url, LeadPoorProcessingData $model) {
+                        return Html::a(
+                            '<i class="fa fa-pencil"></i>',
+                            ['/lead-poor-processing-data-crud/update', 'lppd_id' => $model->lppd_id],
+                            ['data-pjax' => 0,]
+                        );
+                    },
+                ],
+            ],
         ],
     ]); ?>
 

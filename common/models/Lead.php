@@ -4,6 +4,7 @@ namespace common\models;
 
 use common\components\EmailService;
 use common\components\ga\GaHelper;
+use common\components\jobs\LeadPoorProcessingJob;
 use common\components\jobs\UpdateLeadBOJob;
 use common\components\Metrics;
 use common\components\purifier\Purifier;
@@ -65,6 +66,7 @@ use src\model\clientChatLead\entity\ClientChatLead;
 use src\model\lead\useCases\lead\api\create\LeadCreateForm;
 use src\model\lead\useCases\lead\import\LeadImportForm;
 use src\model\leadData\entity\LeadData;
+use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
 use src\model\leadUserConversion\entity\LeadUserConversion;
 use src\services\lead\calculator\LeadTripTypeCalculator;
 use src\services\lead\calculator\SegmentDTO;
@@ -2176,7 +2178,14 @@ class Lead extends ActiveRecord implements Objectable
      */
     public function updateLastAction(): int
     {
-        return self::updateAll(['l_last_action_dt' => date('Y-m-d H:i:s')], ['id' => $this->id]);
+        $result = self::updateAll(['l_last_action_dt' => date('Y-m-d H:i:s')], ['id' => $this->id]);
+
+        if ($this->isProcessing()) {
+            $job = new LeadPoorProcessingJob($this->id, LeadPoorProcessingDataDictionary::KEY_LAST_ACTION);
+            Yii::$app->queue_job->priority(100)->push($job);
+        }
+
+        return $result;
     }
 
 //

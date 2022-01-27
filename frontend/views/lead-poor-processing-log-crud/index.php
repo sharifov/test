@@ -31,13 +31,20 @@ $this->params['breadcrumbs'][] = $this->title;
         'layout' => "{errors}\n{summary}\n{items}\n{pager}",
         'columns' => [
             'lppl_id',
-            'lppl_lead_id',
+            [
+                'attribute' => 'lppl_lead_id',
+                'value' => static function (LeadPoorProcessingLog $model) {
+                    return Yii::$app->formatter->asLead($model->lpplLead, 'fa-cubes');
+                },
+                'format' => 'raw',
+            ],
             [
                 'attribute' => 'lppl_lppd_id',
                 'value' => static function (LeadPoorProcessingLog $model) {
-                    return $model->lppl_lppd_id;
+                    return '<i class="fa fa-key"></i> ' . $model->lpplLppd->lppd_key;
                 },
                 'filter' => LeadPoorProcessingDataQuery::getList(60),
+                'format' => 'raw',
             ],
             [
                 'attribute' => 'lppl_status',
