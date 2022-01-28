@@ -84,7 +84,6 @@ use src\model\lead\useCases\lead\import\LeadImportUploadForm;
 use src\model\lead\useCases\lead\link\LeadLinkChatForm;
 use src\model\leadUserConversion\service\LeadUserConversionDictionary;
 use src\model\leadUserConversion\service\LeadUserConversionService;
-use src\model\phone\AvailablePhoneList;
 use src\repositories\cases\CasesRepository;
 use src\repositories\lead\LeadRepository;
 use src\repositories\NotFoundException;
@@ -1224,12 +1223,6 @@ class LeadController extends FController
 //        $tmpl = $isQA ? 'view_qa' : 'view';
         $tmpl = 'view';
 
-        $fromPhoneNumbers = [];
-        if (($department = $leadForm->getLead()->lDep) && $params = $department->getParams()) {
-            $phoneList = new AvailablePhoneList(Auth::id(), $leadForm->getLead()->project_id, $department->dep_id, $params->defaultPhoneType);
-            $fromPhoneNumbers = $phoneList->getFormattedList();
-        }
-
         return $this->render($tmpl, [
             'leadForm' => $leadForm,
             'previewEmailForm' => $previewEmailForm,
@@ -1248,7 +1241,6 @@ class LeadController extends FController
             'dataProviderOffers'    => $dataProviderOffers,
             'dataProviderOrders'    => $dataProviderOrders,
 
-            'fromPhoneNumbers' => $fromPhoneNumbers,
             'smsEnabled' => $smsEnabled
         ]);
     }

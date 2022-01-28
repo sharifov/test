@@ -68,8 +68,7 @@ class AvailablePhoneList
     {
         $list = [];
         foreach ($this->getList() as $phone) {
-            $list[$phone->phone] = $phone->project . ' ' . ($phone->isGeneralType() ? Department::DEPARTMENT_LIST[$phone->departmentId] : self::PERSONAL)
-                . ' (' . $phone->phone . ')';
+            $list[$phone->phone] = $phone->format();
         }
         return $list;
     }

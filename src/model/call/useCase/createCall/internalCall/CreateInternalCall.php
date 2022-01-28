@@ -1,6 +1,6 @@
 <?php
 
-namespace src\model\call\useCase\createCall;
+namespace src\model\call\useCase\createCall\internalCall;
 
 use common\models\Call;
 use common\models\Employee;
@@ -10,12 +10,12 @@ use src\model\voip\phoneDevice\device\ReadyVoipDevice;
 
 class CreateInternalCall
 {
-    public function __invoke(Employee $createdUser, CreateCallForm $form): array
+    public function __invoke(\src\model\call\useCase\createCall\CreateCallForm $form): array
     {
         try {
             //todo: validate can created user cal to other user?
 
-            $key = 'call_user_to_user_' . $createdUser->id;
+            $key = 'call_user_to_user_' . $form->createdUser->id;
 
             if ($result = \Yii::$app->cache->get($key)) {
                 throw new \DomainException('Please wait ' . abs($result - time()) . ' seconds.');
@@ -36,13 +36,13 @@ class CreateInternalCall
 
             \Yii::$app->cache->set($key, (time() + 10), 10);
 
-            $recordingManager = RecordManager::toUser($createdUser->id);
+            $recordingManager = RecordManager::toUser($form->createdUser->id);
 
             $result = \Yii::$app->communication->callToUser(
                 $form->getVoipDevice(),
                 $toUserVoipDevice,
                 $form->toUserId,
-                $createdUser->id,
+                $form->createdUser->id,
                 [
                     'status' => 'Ringing',
                     'duration' => 0,
@@ -61,7 +61,7 @@ class CreateInternalCall
                     'source' => Call::SOURCE_LIST[Call::SOURCE_INTERNAL],
                     'isEnded' => 'false',
                     'contact' => [
-                        'name' => $createdUser->nickname ?: $createdUser->username,
+                        'name' => $form->createdUser->nickname ?: $form->createdUser->username,
                         'phone' => '',
                         'company' => '',
                     ],

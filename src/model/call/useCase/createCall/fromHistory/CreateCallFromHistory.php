@@ -1,6 +1,6 @@
 <?php
 
-namespace src\model\call\useCase\createCall;
+namespace src\model\call\useCase\createCall\fromHistory;
 
 use common\models\Call;
 use src\auth\Auth;
@@ -12,7 +12,7 @@ use src\model\voip\phoneDevice\device\VoipDevice;
 
 class CreateCallFromHistory
 {
-    public function __invoke(CreateCallForm $form): array
+    public function __invoke(\src\model\call\useCase\createCall\CreateCallForm $form): array
     {
         try {
             if (!$call = CallLog::findOne(['cl_call_sid' => $form->historyCallSid])) {

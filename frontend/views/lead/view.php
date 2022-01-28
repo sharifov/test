@@ -16,7 +16,6 @@
  * @var $itineraryForm \src\forms\lead\ItineraryEditForm
  * @var $dataProviderOffers ActiveDataProvider
  * @var $dataProviderOrders ActiveDataProvider
- * @var $fromPhoneNumbers array
  * @var bool $smsEnabled
  */
 
@@ -35,6 +34,7 @@ use modules\fileStorage\src\widgets\FileStorageUploadWidget;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
 use src\auth\Auth;
+use src\model\phone\AvailablePhoneList;
 use yii\bootstrap4\Modal;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Url;
@@ -199,7 +199,6 @@ $disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIEN
                     'dataProvider'  => $dataProviderCommunicationLog,
                     'isAdmin'       => $is_admin,
                     'lead' => $lead,
-                    'fromPhoneNumbers' => $fromPhoneNumbers,
                     'unsubscribe' => $unsubscribe,
                     'unsubscribedEmails' => $unsubscribedEmails,
                     'smsEnabled' => $smsEnabled,

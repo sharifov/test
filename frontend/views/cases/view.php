@@ -39,7 +39,6 @@ use modules\cases\src\widgets\CaseEventLogWidget;
  * @var $coupons \src\model\coupon\entity\couponCase\CouponCase[]
  * @var $sendCouponsForm \src\model\coupon\useCase\send\SendCouponsForm
  *
- * @var $fromPhoneNumbers array
  * @var bool $smsEnabled
  * @var array $unsubscribedEmails
  *
@@ -196,7 +195,6 @@ $unsubscribedEmails =  array_column($model->project->emailUnsubscribes, 'eu_emai
                         'dataProvider'  => (bool)Yii::$app->params['settings']['new_communication_block_case'] ? $dataProviderCommunicationLog : $dataProviderCommunication,
                         'isAdmin'       => $isAdmin,
                         'isCommunicationLogEnabled' => Yii::$app->params['settings']['new_communication_block_case'],
-                        'fromPhoneNumbers' => $fromPhoneNumbers,
                         'smsEnabled' => $smsEnabled,
                         'unsubscribedEmails' => $unsubscribedEmails,
                         'disableMasking' => $disableMasking

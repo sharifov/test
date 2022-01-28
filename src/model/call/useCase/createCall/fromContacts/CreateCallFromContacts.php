@@ -1,6 +1,6 @@
 <?php
 
-namespace src\model\call\useCase\createCall;
+namespace src\model\call\useCase\createCall\fromContacts;
 
 use common\models\search\ContactsSearch;
 use frontend\widgets\newWebPhone\AvailablePhones;
@@ -10,7 +10,7 @@ use src\model\call\services\RecordManager;
 
 class CreateCallFromContacts
 {
-    public function __invoke(CreateCallForm $form): array
+    public function __invoke(\src\model\call\useCase\createCall\CreateCallForm $form): array
     {
         try {
             $availablePhones = new AvailablePhones($form->getCreatedUserId());

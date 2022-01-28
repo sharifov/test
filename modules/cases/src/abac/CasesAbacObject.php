@@ -2,6 +2,8 @@
 
 namespace modules\cases\src\abac;
 
+use common\models\Department;
+use common\models\Project;
 use modules\abac\components\AbacBaseModel;
 use modules\abac\src\entities\AbacInterface;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
@@ -31,12 +33,15 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
     /** OBJECT PERMISSION */
     public const OBJ_CASE_STATUS_ROUTE_RULES = self::NS . 'obj/status_rules';
 
+    public const OBJ_CASE_COMMUNICATION = self::NS . 'communication';
+
     public const OBJECT_LIST = [
         self::LOGIC_CLIENT_DATA             => self::LOGIC_CLIENT_DATA,
         self::UI_BLOCK_EVENT_LOG_LIST       => self::UI_BLOCK_EVENT_LOG_LIST,
         self::UI_BTN_EVENT_LOG_VIEW         => self::UI_BTN_EVENT_LOG_VIEW,
         self::OBJ_CASE_STATUS_ROUTE_RULES   => self::OBJ_CASE_STATUS_ROUTE_RULES,
         self::SQL_CASE_QUEUES               => self::SQL_CASE_QUEUES,
+        self::OBJ_CASE_COMMUNICATION        => self::OBJ_CASE_COMMUNICATION,
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -51,6 +56,9 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
     public const ACTION_READ  = 'read';
     public const ACTION_CREATE  = 'create';
     public const ACTION_TRANSFER  = 'transfer';
+    public const ACTION_SEND_SMS = 'sendSms';
+    public const ACTION_SEND_EMAIL = 'sendEmail';
+    public const ACTION_MAKE_CALL = 'makeCall';
 
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
@@ -66,6 +74,7 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
             //self::ACTION_DEPARTMENT_ACCESS,
             //self::ACTION_PROJECT_ACCESS,
         ],
+        self::OBJ_CASE_COMMUNICATION => [self::ACTION_SEND_SMS, self::ACTION_SEND_EMAIL, self::ACTION_MAKE_CALL],
     ];
 
     protected const ATTR_CASE_IS_OWNER = [
@@ -81,6 +90,43 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         'operators' =>  [self::OP_EQUAL2]
     ];
 
+    protected const ATTR_CASE_HAS_OWNER = [
+        'optgroup' => 'CASE',
+        'id' => self::NS . 'has_owner',
+        'field' => 'has_owner',
+        'label' => 'Has Owner',
+
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
+    protected const ATTR_CASE_PROJECT_NAME = [
+        'optgroup' => 'CASE',
+        'id' => self::NS . 'project_name',
+        'field' => 'project_name',
+        'label' => 'Project',
+        'type' => self::ATTR_TYPE_STRING,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
+        'multiple' => true,
+        'operators' => [self::OP_IN],
+    ];
+
+    protected const ATTR_CASE_DEPARTMENT_NAME = [
+        'optgroup' => 'CASE',
+        'id' => self::NS . 'department_name',
+        'field' => 'department_name',
+        'label' => 'Department',
+        'type' => self::ATTR_TYPE_STRING,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
+        'multiple' => true,
+        'operators' => [self::OP_IN],
+    ];
+
     protected const ATTR_CASE_STATUS = [
         'optgroup' => 'CASE',
         'id' => self::NS . 'status_id',
@@ -92,6 +138,18 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         'multiple' => false,
         'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2,
             self::OP_IN, self::OP_NOT_IN, '<', '>', '<=', '>=']
+    ];
+
+    protected const ATTR_CASE_STATUS_NAME = [
+        'optgroup' => 'CASE',
+        'id' => self::NS . 'status_name',
+        'field' => 'status_name',
+        'label' => 'Status',
+        'type' => self::ATTR_TYPE_STRING,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2]
     ];
 
     protected const ATTR_CASE_STATUS_RULE = [
@@ -172,6 +230,42 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
             self::OP_IN, self::OP_NOT_IN, '<', '>', '<=', '>=']
     ];
 
+    protected const ATTR_CLIENT_IS_EXCLUDED = [
+        'optgroup' => 'CASE',
+        'id' => self::NS . 'client_is_excluded',
+        'field' => 'client_is_excluded',
+        'label' => 'Client is excluded',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
+    protected const ATTR_PHONE_FROM_PERSONAL = [
+        'optgroup' => 'CASE',
+        'id' => self::NS . 'phone_from_personal',
+        'field' => 'phone_from_personal',
+        'label' => 'Phone From Personal',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
+    protected const ATTR_PHONE_FROM_GENERAL = [
+        'optgroup' => 'CASE',
+        'id' => self::NS . 'phone_from_general',
+        'field' => 'phone_from_general',
+        'label' => 'Phone From General',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
     /** --------------- ATTRIBUTE LIST --------------------------- */
     public const OBJECT_ATTRIBUTE_LIST = [
         self::LOGIC_CLIENT_DATA    => [self::ATTR_CASE_IS_OWNER, self::ATTR_IS_COMMON_GROUP],
@@ -180,6 +274,13 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
             self::ATTR_IS_COMMON_GROUP
         ],
         self::SQL_CASE_QUEUES => [],
+        self::OBJ_CASE_COMMUNICATION => [
+            self::ATTR_CASE_IS_OWNER,
+            self::ATTR_CASE_HAS_OWNER,
+            self::ATTR_CLIENT_IS_EXCLUDED,
+            self::ATTR_PHONE_FROM_PERSONAL,
+            self::ATTR_PHONE_FROM_GENERAL,
+        ],
     ];
 
     /**
@@ -240,6 +341,20 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         $attributeList[self::OBJ_CASE_STATUS_ROUTE_RULES][] = $attrPqcStatusList;
         $attributeList[self::OBJ_CASE_STATUS_ROUTE_RULES][] = $attrPqrStatusList;
         $attributeList[self::SQL_CASE_QUEUES][] = $attrCasesBadge;
+
+        $attrCaseStatusName = self::ATTR_CASE_STATUS_NAME;
+        $attrCaseStatusName['values'] = array_combine(CasesStatus::STATUS_LIST, CasesStatus::STATUS_LIST);
+        $attributeList[self::OBJ_CASE_COMMUNICATION][] = $attrCaseStatusName;
+
+        $attrCaseProjectName = self::ATTR_CASE_PROJECT_NAME;
+        $projectNames = Project::getList();
+        $attrCaseProjectName['values'] = array_combine($projectNames, $projectNames);
+        $attributeList[self::OBJ_CASE_COMMUNICATION][] = $attrCaseProjectName;
+
+        $attrCaseDepartmentName = self::ATTR_CASE_DEPARTMENT_NAME;
+        $departmentNames = Department::getList();
+        $attrCaseDepartmentName['values'] = array_combine($departmentNames, $departmentNames);
+        $attributeList[self::OBJ_CASE_COMMUNICATION][] = $attrCaseDepartmentName;
 
         return $attributeList;
     }

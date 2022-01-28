@@ -8,11 +8,12 @@ use common\models\search\ContactsSearch;
 use common\models\UserGroup;
 use frontend\helpers\JsonHelper;
 use Gnello\Mattermost\Driver;
+use modules\cases\src\abac\CasesAbacObject;
+use modules\lead\src\abac\LeadAbacObject;
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeCreatedEvent;
 use src\auth\Auth;
 use src\helpers\setting\SettingHelper;
 use src\model\call\useCase\createCall\CreateCallForm;
-use src\model\call\useCase\createCall\CreateRedialCall;
 use src\model\client\notifications\client\entity\NotificationType;
 use common\components\purifier\Purifier;
 use common\models\CallUserAccess;
@@ -79,7 +80,6 @@ use src\model\leadRedial\entity\CallRedialUserAccessRepository;
 use src\model\leadRedial\priorityLevel\ConversionFetcher;
 use src\model\leadRedial\queue\CallNextLeads;
 use src\model\leadRedial\queue\RedialCall;
-use src\model\phone\AvailablePhoneList;
 use src\model\project\entity\params\Params;
 use src\model\user\reports\stats\UserStatsReport;
 use src\model\voip\phoneDevice\device\ReadyVoipDevice;
@@ -102,6 +102,14 @@ use yii\rbac\Role;
 
 class TestController extends Controller
 {
+    public function actionT2()
+    {
+        VarDumper::dump(LeadCommunicationAbacObject::getObjectAttributeList());
+    }
+    public function actionT()
+    {
+        VarDumper::dump(CasesAbacObject::getObjectAttributeList());
+    }
     public function actionWsHealthCheck()
     {
         $checker = new WebsocketHealthChecker();

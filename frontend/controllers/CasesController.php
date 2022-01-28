@@ -79,7 +79,6 @@ use src\model\coupon\entity\couponCase\CouponCase;
 use src\model\coupon\useCase\send\SendCouponsForm;
 use src\model\department\department\Params;
 use src\model\emailReviewQueue\EmailReviewQueueManageService;
-use src\model\phone\AvailablePhoneList;
 use src\model\saleTicket\useCase\create\SaleTicketService;
 use src\repositories\cases\CaseCategoryRepository;
 use src\repositories\cases\CasesRepository;
@@ -794,12 +793,6 @@ class CasesController extends FController
 
         //VarDumper::dump($dataProvider->allModels); exit;
 
-        $fromPhoneNumbers = [];
-        if (($department = $model->department) && $params = $department->getParams()) {
-            $phoneList = new AvailablePhoneList(Auth::id(), $model->cs_project_id, $department->dep_id, $params->defaultPhoneType);
-            $fromPhoneNumbers = $phoneList->getFormattedList();
-        }
-
         $enableCommunication = true;
         $isAdmin = true;
 
@@ -830,7 +823,6 @@ class CasesController extends FController
             'coupons' => $coupons,
             'sendCouponsForm' => $sendCouponForm,
 
-            'fromPhoneNumbers' => $fromPhoneNumbers,
             'smsEnabled' => $smsEnabled,
 
             'dataProviderOrders' => $dataProviderOrders

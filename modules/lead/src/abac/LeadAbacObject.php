@@ -2,7 +2,9 @@
 
 namespace modules\lead\src\abac;
 
+use common\models\Department;
 use common\models\Lead;
+use common\models\Project;
 use modules\abac\components\AbacBaseModel;
 use modules\abac\src\entities\AbacInterface;
 
@@ -65,6 +67,8 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     public const OBJ_LEAD_PREFERENCES    = self::NS . 'obj/lead_preferences';
     public const OBJ_LEAD                = self::NS . 'obj/lead';
 
+    public const OBJ_LEAD_COMMUNICATION = self::NS . 'communication';
+
     /** --------------- OBJECT LIST --------------------------- */
     public const OBJECT_LIST = [
         self::ACT_USER_CONVERSION   => self::ACT_USER_CONVERSION,
@@ -102,7 +106,8 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::OBJ_LEAD => self::OBJ_LEAD,
         self::PHONE_CREATE_FORM => self::PHONE_CREATE_FORM,
         self::EMAIL_CREATE_FORM => self::EMAIL_CREATE_FORM,
-        self::CLIENT_CREATE_FORM => self::CLIENT_CREATE_FORM
+        self::CLIENT_CREATE_FORM => self::CLIENT_CREATE_FORM,
+        self::OBJ_LEAD_COMMUNICATION => self::OBJ_LEAD_COMMUNICATION,
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -133,6 +138,9 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     public const ACTION_CLONE = 'clone';
     public const ACTION_EDIT = 'edit';
     public const ACTION_VIEW = 'view';
+    public const ACTION_SEND_SMS = 'sendSms';
+    public const ACTION_SEND_EMAIL = 'sendEmail';
+    public const ACTION_MAKE_CALL = 'makeCall';
 
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
@@ -197,7 +205,8 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_LINK_TO_CALL => [self::ACTION_ACCESS],
         self::ACT_TAKE_LEAD_FROM_CALL => [self::ACTION_ACCESS],
         self::OBJ_LEAD_PREFERENCES => [self::ACTION_SET_DELAY_CHARGE],
-        self::OBJ_LEAD => [self::ACTION_CLONE]
+        self::OBJ_LEAD => [self::ACTION_CLONE],
+        self::OBJ_LEAD_COMMUNICATION => [self::ACTION_SEND_SMS, self::ACTION_SEND_EMAIL, self::ACTION_MAKE_CALL],
     ];
 
     protected const ATTR_LEAD_IS_OWNER = [
@@ -330,6 +339,30 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         'operators' =>  [self::OP_EQUAL2]
     ];
 
+    protected const ATTR_LEAD_PROJECT_NAME = [
+        'optgroup' => 'Lead',
+        'id' => self::NS . 'project_name',
+        'field' => 'project_name',
+        'label' => 'Project',
+        'type' => self::ATTR_TYPE_STRING,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
+        'multiple' => true,
+        'operators' => [self::OP_IN],
+    ];
+
+    protected const ATTR_LEAD_DEPARTMENT_NAME = [
+        'optgroup' => 'Lead',
+        'id' => self::NS . 'department_name',
+        'field' => 'department_name',
+        'label' => 'Department',
+        'type' => self::ATTR_TYPE_STRING,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
+        'multiple' => true,
+        'operators' => [self::OP_IN],
+    ];
+
     protected const ATTR_LEAD_STATUS = [
         'optgroup' => 'Lead',
         'id' => self::NS . 'status_id',
@@ -341,6 +374,18 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         'multiple' => false,
         'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2,
             self::OP_IN, self::OP_NOT_IN, '<', '>', '<=', '>=']
+    ];
+
+    protected const ATTR_LEAD_STATUS_NAME = [
+        'optgroup' => 'Lead',
+        'id' => self::NS . 'status_name',
+        'field' => 'status_name',
+        'label' => 'Status',
+        'type' => self::ATTR_TYPE_STRING,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2]
     ];
 
     protected const ATTR_FIELD_NAME = [
@@ -378,6 +423,42 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         'values' => [],
         'multiple' => true,
         'operators' =>  [self::OP_CONTAINS]
+    ];
+
+    protected const ATTR_CLIENT_IS_EXCLUDED = [
+        'optgroup' => 'Lead',
+        'id' => self::NS . 'client_is_excluded',
+        'field' => 'client_is_excluded',
+        'label' => 'Client is excluded',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
+    protected const ATTR_PHONE_FROM_PERSONAL = [
+        'optgroup' => 'Lead',
+        'id' => self::NS . 'phone_from_personal',
+        'field' => 'phone_from_personal',
+        'label' => 'Phone From Personal',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
+    protected const ATTR_PHONE_FROM_GENERAL = [
+        'optgroup' => 'Lead',
+        'id' => self::NS . 'phone_from_general',
+        'field' => 'phone_from_general',
+        'label' => 'Phone From General',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
     ];
 
     public const OBJECT_ATTRIBUTE_LIST = [
@@ -494,6 +575,14 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::QUERY_SOLD_IS_EMPTY_OWNER  => [self::ATTR_LEAD_HAS_OWNER_QUERY],
         self::CMD_AUTO_REDIAL  => [],
         self::ACT_TAKE_LEAD_FROM_CALL  => [],
+
+        self::OBJ_LEAD_COMMUNICATION => [
+            self::ATTR_LEAD_IS_OWNER,
+            self::ATTR_LEAD_HAS_OWNER,
+            self::ATTR_CLIENT_IS_EXCLUDED,
+            self::ATTR_PHONE_FROM_PERSONAL,
+            self::ATTR_PHONE_FROM_GENERAL,
+        ],
     ];
 
     /**
@@ -517,8 +606,9 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
      */
     public static function getObjectAttributeList(): array
     {
+        $leadStatuses = Lead::getAllStatuses();
         $attrStatus = self::ATTR_LEAD_STATUS;
-        $attrStatus['values'] = Lead::getAllStatuses();
+        $attrStatus['values'] = $leadStatuses;
         $attrPhoneCreateFieldsList = self::ATTR_FIELD_NAME;
         $attrEmailCreateFieldsList = self::ATTR_FIELD_NAME;
         $attrClientCreateFieldsList = self::ATTR_FIELD_NAME;
@@ -564,6 +654,20 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         $attributeList[self::EMAIL_CREATE_FORM][] = $attrEmailCreateFieldsList;
         $attributeList[self::CLIENT_CREATE_FORM][] = $attrClientCreateFieldsList;
         $attributeList[self::CLIENT_CREATE_FORM][] = $attrClientCreateMultiFieldsList;
+
+        $attrLeadStatusName = self::ATTR_LEAD_STATUS_NAME;
+        $attrLeadStatusName['values'] = array_combine($leadStatuses, $leadStatuses);
+        $attributeList[self::OBJ_LEAD_COMMUNICATION][] = $attrLeadStatusName;
+
+        $attrLeadProjectName = self::ATTR_LEAD_PROJECT_NAME;
+        $projectNames = Project::getList();
+        $attrLeadProjectName['values'] = array_combine($projectNames, $projectNames);
+        $attributeList[self::OBJ_LEAD_COMMUNICATION][] = $attrLeadProjectName;
+
+        $attrLeadDepartmentName = self::ATTR_LEAD_DEPARTMENT_NAME;
+        $departmentNames = Department::getList();
+        $attrLeadDepartmentName['values'] = array_combine($departmentNames, $departmentNames);
+        $attributeList[self::OBJ_LEAD_COMMUNICATION][] = $attrLeadDepartmentName;
 
         return $attributeList;
     }

@@ -1,17 +1,15 @@
 <?php
 
-namespace src\model\call\useCase\createCall;
+namespace src\model\call\useCase\createCall\fromLead;
 
 use common\models\Call;
 use common\models\Lead;
-use src\auth\Auth;
 use src\model\call\services\FriendlyName;
 use src\model\call\services\RecordManager;
-use src\model\phone\AvailablePhoneList;
 
 class CreateCallFromLead
 {
-    public function __invoke(CreateCallForm $form): array
+    public function __invoke(\src\model\call\useCase\createCall\CreateCallForm $form): array
     {
         try {
             if (!$lead = Lead::findOne(['id' => $form->leadId])) {
@@ -28,18 +26,13 @@ class CreateCallFromLead
                 throw new \DomainException('Not found Department. Lead ID: ' . $lead->id);
             }
 
-            $departmentParams = $lead->lDep->getParams();
-            if (!$departmentParams) {
-                throw new \DomainException('Not found Department parameters. DepartmentId: ' . $lead->l_dep_id);
-            }
-
-            $availablePhones = new AvailablePhoneList($form->getCreatedUserId(), $lead->project_id, $lead->l_dep_id, $departmentParams->defaultPhoneType);
+            $availablePhones = new AbacPhoneList($form->createdUser, $lead);
             if (!$availablePhones->isExist($form->from)) {
                 throw new \DomainException('Phone From (' . $form->from . ') is not available.');
             }
 
             $recordDisabled = (RecordManager::createCall(
-                Auth::id(),
+                $form->createdUser->id,
                 $lead->project_id,
                 $lead->l_dep_id,
                 $form->from,
