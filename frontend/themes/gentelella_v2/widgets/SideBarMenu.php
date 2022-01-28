@@ -113,8 +113,12 @@ class SideBarMenu extends \yii\bootstrap\Widget
         if (isset(Yii::$app->params['settings']['enable_lead_inbox']) && Yii::$app->params['settings']['enable_lead_inbox']) {
             $menuLItems[] = ['label' => 'Inbox <span id="badges-inbox" data-type="inbox" class="label-info label pull-right bginfo"></span> ', 'url' => ['/queue/inbox'], 'icon' => 'briefcase'];
         }
-
-
+        $menuLItems[] = [
+            'label' => 'Extra Queue <span id="badges-extra-queue" data-type="extra-queue" class="label-success label pull-right bginfo"></span> ',
+            'url' => ['/lead/extra-queue'],
+            'icon' => 'history text-success',
+            'title' => 'Extra queue',
+        ];
 
         $menuLItems[] = ['label' => 'Failed Bookings <span id="badges-failed-bookings" data-type="failed-bookings" class="label-success label pull-right bginfo"></span> ',
             'url' => ['/queue/failed-bookings'], 'icon' => 'recycle', 'title' => 'Failed Bookings Leads queue'];
@@ -412,6 +416,9 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Lead Data', 'url' => ['/lead-data-crud/index']],
                         ['label' => 'Lead Data Key', 'url' => ['/lead-data-key-crud/index']],
                         ['label' => 'Lead User Conversion', 'url' => ['/lead-user-conversion-crud/index']],
+                        ['label' => 'Lead Poor Processing Data', 'url' => ['/lead-poor-processing-data-crud/index']],
+                        ['label' => 'Lead Poor Processing', 'url' => ['/lead-poor-processing-crud/index']],
+                        ['label' => 'Lead Poor Processing Log', 'url' => ['/lead-poor-processing-log-crud/index']],
                     ]
                 ],
                 [

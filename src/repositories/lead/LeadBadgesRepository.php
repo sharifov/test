@@ -493,6 +493,18 @@ class LeadBadgesRepository
         return $query;
     }
 
+    public function getExtraQueueCount(): int
+    {
+        return $this->getExtraQueueQuery()->count();
+    }
+
+    public function getExtraQueueQuery(): ActiveQuery
+    {
+        return Lead::find()
+            ->andWhere([Lead::tableName() . '.status' => Lead::STATUS_EXTRA_QUEUE])
+        ;
+    }
+
     /**
      * @param $userId
      * @return array

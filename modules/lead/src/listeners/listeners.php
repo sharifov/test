@@ -14,6 +14,7 @@ use src\events\lead\LeadCreatedEvent;
 use src\events\lead\LeadCreatedManuallyEvent;
 use src\events\lead\LeadCreatedNewEvent;
 use src\events\lead\LeadDuplicateDetectedEvent;
+use src\events\lead\LeadExtraQueueEvent;
 use src\events\lead\LeadFollowUpEvent;
 use src\events\lead\LeadNewEvent;
 use src\events\lead\LeadOwnerChangedEvent;
@@ -41,6 +42,8 @@ use src\listeners\lead\LeadCreatedCloneByUserEventListener;
 use src\listeners\lead\LeadCreatedEventListener;
 use src\listeners\lead\LeadCreatedNewEventLogListener;
 use src\listeners\lead\LeadDuplicateDetectedEventListener;
+use src\listeners\lead\LeadExtraQueueEventLogListener;
+use src\listeners\lead\LeadExtraQueueNotificationsListener;
 use src\listeners\lead\LeadFollowUpEventLogListener;
 use src\listeners\lead\LeadFollowUpNotificationsListener;
 use src\listeners\lead\LeadFromSnoozeNotificationListener;
@@ -145,5 +148,10 @@ return [
     LeadNewEvent::class => [LeadNewEventLogListener::class],
 
     LeadQuoteCloneEvent::class => [LeadQuoteCloneEventListener::class],
-    LeadPreferencesUpdateCurrencyEvent::class => [LeadPreferencesUpdateCurrencyEventListener::class]
+    LeadPreferencesUpdateCurrencyEvent::class => [LeadPreferencesUpdateCurrencyEventListener::class],
+
+    LeadExtraQueueEvent::class => [
+        LeadExtraQueueEventLogListener::class,
+        LeadExtraQueueNotificationsListener::class,
+    ],
 ];

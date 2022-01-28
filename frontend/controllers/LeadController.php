@@ -2869,8 +2869,6 @@ class LeadController extends FController
         return $this->render('import', ['model' => $form, 'log' => $logResult]);
     }
 
-
-
     /**
      * @return mixed|null
      */
@@ -2909,6 +2907,21 @@ class LeadController extends FController
             $result['message'] = $call->getErrorSummary(true)[0];
         }
         return $this->asJson($result);
+    }
+
+    public function actionExtraQueue(): string
+    {
+        $searchModel = new LeadSearch();
+
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+
+        $dataProvider = $searchModel->searchExtraQueue(Yii::$app->request->queryParams, $user);
+
+        return $this->render('extra-queue', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
     }
 
     /**

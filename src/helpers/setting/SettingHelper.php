@@ -802,4 +802,9 @@ class SettingHelper
     {
         return (bool) (Yii::$app->params['settings']['enable_auth_clients'] ?? false);
     }
+
+    public static function getCleanLeadPoorProcessingLogAfterDays(): int
+    {
+        return (int)(Yii::$app->params['settings']['clean_lead_poor_processing_log_after_days'] ?? 90);
+    }
 }

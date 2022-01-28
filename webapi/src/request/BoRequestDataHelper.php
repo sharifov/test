@@ -42,15 +42,17 @@ class BoRequestDataHelper
             ];
         }
         if ($form->paymentRequestForm) {
-            $data['payment'] = [
-                'type' => mb_strtoupper($form->paymentRequestForm->method_key),
-                'card' => [
-                    'holderName' => $form->paymentRequestForm->creditCardForm->holder_name,
-                    'number' => $form->paymentRequestForm->creditCardForm->number,
-                    'expirationDate' => $form->paymentRequestForm->creditCardForm->expiration_month . '/' . $form->paymentRequestForm->creditCardForm->expiration_year,
-                    'cvv' => $form->paymentRequestForm->creditCardForm->cvv
-                ]
-            ];
+            if ($form->paymentRequestForm->creditCardForm) {
+                $data['payment'] = [
+                    'type' => mb_strtoupper($form->paymentRequestForm->method_key),
+                    'card' => [
+                        'holderName' => $form->paymentRequestForm->creditCardForm->holder_name,
+                        'number' => $form->paymentRequestForm->creditCardForm->number,
+                        'expirationDate' => $form->paymentRequestForm->creditCardForm->expiration_month . '/' . $form->paymentRequestForm->creditCardForm->expiration_year,
+                        'cvv' => $form->paymentRequestForm->creditCardForm->cvv
+                    ]
+                ];
+            }
             $data['refund']['refundCost'] = $form->paymentRequestForm->amount;
         }
         return $data;
@@ -88,15 +90,17 @@ class BoRequestDataHelper
             ];
         }
         if ($form->paymentRequestForm) {
-            $data['payment'] = [
-                'type' => mb_strtoupper($form->paymentRequestForm->method_key),
-                'card' => [
-                    'holderName' => $form->paymentRequestForm->creditCardForm->holder_name,
-                    'number' => $form->paymentRequestForm->creditCardForm->number,
-                    'expirationDate' => $form->paymentRequestForm->creditCardForm->expiration_month . '/' . $form->paymentRequestForm->creditCardForm->expiration_year,
-                    'cvv' => $form->paymentRequestForm->creditCardForm->cvv
-                ]
-            ];
+            if ($form->paymentRequestForm->creditCardForm) {
+                $data['payment'] = [
+                    'type' => mb_strtoupper($form->paymentRequestForm->method_key),
+                    'card' => [
+                        'holderName' => $form->paymentRequestForm->creditCardForm->holder_name,
+                        'number' => $form->paymentRequestForm->creditCardForm->number,
+                        'expirationDate' => $form->paymentRequestForm->creditCardForm->expiration_month . '/' . $form->paymentRequestForm->creditCardForm->expiration_year,
+                        'cvv' => $form->paymentRequestForm->creditCardForm->cvv
+                    ]
+                ];
+            }
             $data['refund']['refundCost'] = $form->paymentRequestForm->amount;
         }
         return $data;
