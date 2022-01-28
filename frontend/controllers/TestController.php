@@ -2610,5 +2610,4 @@ class TestController extends FController
         echo '<br><br>';
         return date('Y-m-d H:i:s');
     }
-
 }
