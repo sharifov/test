@@ -15,4 +15,15 @@ class LeadPoorProcessingQuery
             ->limit(1)
             ->one();
     }
+
+    /**
+     * @param int $leadId
+     * @return LeadPoorProcessing[]
+     */
+    public static function getAllByLeadId(int $leadId): array
+    {
+        return LeadPoorProcessing::find()
+            ->where(['lpp_lead_id' => $leadId])
+            ->all();
+    }
 }

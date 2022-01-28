@@ -36,4 +36,15 @@ class LeadPoorProcessingDataQuery
             ->one()
         ;
     }
+
+    /**
+     * @return LeadPoorProcessingData[]
+     */
+    public static function getEnabledList(): array
+    {
+        return LeadPoorProcessingData::find()
+            ->where(['lppd_enabled' => true])
+            ->all()
+        ;
+    }
 }

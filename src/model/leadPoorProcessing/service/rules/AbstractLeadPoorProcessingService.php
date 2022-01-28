@@ -43,7 +43,6 @@ class AbstractLeadPoorProcessingService
                 $this->getRule()->lppd_id,
                 $this->getExpiration()
             );
-
             $logStatus = LeadPoorProcessingLogStatus::STATUS_CREATED;
         } else {
             $leadPoorProcessing->lpp_expiration_dt = $this->getExpiration();
@@ -57,18 +56,11 @@ class AbstractLeadPoorProcessingService
             $logStatus
         );
 
-        if (!$leadPoorProcessing->validate()) {
-            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($leadPoorProcessing, ' '));
-        }
-        if (!$leadPoorProcessingLog->validate()) {
-            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($leadPoorProcessingLog, ' '));
-        }
-
         $leadPoorProcessingRepository = new LeadPoorProcessingRepository($leadPoorProcessing);
-        $leadPoorProcessingRepository->save();
+        $leadPoorProcessingRepository->save(true);
 
         $leadPoorProcessingLogRepository = new LeadPoorProcessingLogRepository($leadPoorProcessingLog);
-        $leadPoorProcessingLogRepository->save();
+        $leadPoorProcessingLogRepository->save(true);
     }
 
     public function getExpiration(): string

@@ -1,5 +1,6 @@
 <?php
 
+use src\model\leadPoorProcessing\entity\LeadPoorProcessing;
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
@@ -31,7 +32,13 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= DetailView::widget([
             'model' => $model,
             'attributes' => [
-                'lpp_lead_id:lead',
+                [
+                    'attribute' => 'lpp_lead_id',
+                    'value' => static function (LeadPoorProcessing $model) {
+                        return Yii::$app->formatter->asLead($model->lppLead, 'fa-cubes');
+                    },
+                    'format' => 'raw',
+                ],
                 'lpp_lppd_id',
                 'lpp_expiration_dt:byUserDatetime',
             ],
