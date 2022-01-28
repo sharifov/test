@@ -4,7 +4,7 @@ namespace src\model\call\useCase\createCall\fromLead;
 
 use common\models\Employee;
 use common\models\Lead;
-use modules\lead\src\abac\dto\LeadCommunicationAbacDto;
+use modules\lead\src\abac\dto\LeadCommunicationBlockAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
 use Yii;
 
@@ -44,8 +44,8 @@ class AbacPhoneList
 
         if ($this->canMakeCall()) {
             foreach ($this->getFromPhones() as $fromPhone) {
-                $tempAbacDto = new LeadCommunicationAbacDto($this->lead, [$fromPhone], $this->user->id);
-                if (Yii::$app->abac->can($tempAbacDto, LeadAbacObject::OBJ_LEAD_COMMUNICATION, LeadAbacObject::ACTION_MAKE_CALL, $this->user)) {
+                $tempAbacDto = new LeadCommunicationBlockAbacDto($this->lead, [$fromPhone], $this->user->id);
+                if (Yii::$app->abac->can($tempAbacDto, LeadAbacObject::OBJ_LEAD_COMMUNICATION_BLOCK, LeadAbacObject::ACTION_MAKE_CALL, $this->user)) {
                     $this->list[] = $fromPhone;
                 }
                 unset($tempAbacDto);
@@ -71,8 +71,8 @@ class AbacPhoneList
             return $this->canCreateCall;
         }
 
-        $leadCommunicationAbacDto = new LeadCommunicationAbacDto($this->lead, $this->getFromPhones(), $this->user->id);
-        $this->canCreateCall = Yii::$app->abac->can($leadCommunicationAbacDto, LeadAbacObject::OBJ_LEAD_COMMUNICATION, LeadAbacObject::ACTION_MAKE_CALL, $this->user);
+        $leadCommunicationBlockAbacDto = new LeadCommunicationBlockAbacDto($this->lead, $this->getFromPhones(), $this->user->id);
+        $this->canCreateCall = Yii::$app->abac->can($leadCommunicationBlockAbacDto, LeadAbacObject::OBJ_LEAD_COMMUNICATION_BLOCK, LeadAbacObject::ACTION_MAKE_CALL, $this->user);
 
         return $this->canCreateCall;
     }

@@ -67,7 +67,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     public const OBJ_LEAD_PREFERENCES    = self::NS . 'obj/lead_preferences';
     public const OBJ_LEAD                = self::NS . 'obj/lead';
 
-    public const OBJ_LEAD_COMMUNICATION = self::NS . 'communication';
+    public const OBJ_LEAD_COMMUNICATION_BLOCK = self::NS . 'communication_block';
 
     /** --------------- OBJECT LIST --------------------------- */
     public const OBJECT_LIST = [
@@ -107,7 +107,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::PHONE_CREATE_FORM => self::PHONE_CREATE_FORM,
         self::EMAIL_CREATE_FORM => self::EMAIL_CREATE_FORM,
         self::CLIENT_CREATE_FORM => self::CLIENT_CREATE_FORM,
-        self::OBJ_LEAD_COMMUNICATION => self::OBJ_LEAD_COMMUNICATION,
+        self::OBJ_LEAD_COMMUNICATION_BLOCK => self::OBJ_LEAD_COMMUNICATION_BLOCK,
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -206,7 +206,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_TAKE_LEAD_FROM_CALL => [self::ACTION_ACCESS],
         self::OBJ_LEAD_PREFERENCES => [self::ACTION_SET_DELAY_CHARGE],
         self::OBJ_LEAD => [self::ACTION_CLONE],
-        self::OBJ_LEAD_COMMUNICATION => [self::ACTION_SEND_SMS, self::ACTION_SEND_EMAIL, self::ACTION_MAKE_CALL],
+        self::OBJ_LEAD_COMMUNICATION_BLOCK => [self::ACTION_VIEW, self::ACTION_SEND_SMS, self::ACTION_SEND_EMAIL, self::ACTION_MAKE_CALL],
     ];
 
     protected const ATTR_LEAD_IS_OWNER = [
@@ -576,7 +576,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::CMD_AUTO_REDIAL  => [],
         self::ACT_TAKE_LEAD_FROM_CALL  => [],
 
-        self::OBJ_LEAD_COMMUNICATION => [
+        self::OBJ_LEAD_COMMUNICATION_BLOCK => [
             self::ATTR_LEAD_IS_OWNER,
             self::ATTR_LEAD_HAS_OWNER,
             self::ATTR_CLIENT_IS_EXCLUDED,
@@ -657,17 +657,17 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
 
         $attrLeadStatusName = self::ATTR_LEAD_STATUS_NAME;
         $attrLeadStatusName['values'] = array_combine($leadStatuses, $leadStatuses);
-        $attributeList[self::OBJ_LEAD_COMMUNICATION][] = $attrLeadStatusName;
+        $attributeList[self::OBJ_LEAD_COMMUNICATION_BLOCK][] = $attrLeadStatusName;
 
         $attrLeadProjectName = self::ATTR_LEAD_PROJECT_NAME;
         $projectNames = Project::getList();
         $attrLeadProjectName['values'] = array_combine($projectNames, $projectNames);
-        $attributeList[self::OBJ_LEAD_COMMUNICATION][] = $attrLeadProjectName;
+        $attributeList[self::OBJ_LEAD_COMMUNICATION_BLOCK][] = $attrLeadProjectName;
 
         $attrLeadDepartmentName = self::ATTR_LEAD_DEPARTMENT_NAME;
         $departmentNames = Department::getList();
         $attrLeadDepartmentName['values'] = array_combine($departmentNames, $departmentNames);
-        $attributeList[self::OBJ_LEAD_COMMUNICATION][] = $attrLeadDepartmentName;
+        $attributeList[self::OBJ_LEAD_COMMUNICATION_BLOCK][] = $attrLeadDepartmentName;
 
         return $attributeList;
     }

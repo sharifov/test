@@ -32,6 +32,7 @@ use modules\fileStorage\src\services\access\FileStorageAccessService;
 use modules\fileStorage\src\widgets\FileStorageListWidget;
 use modules\fileStorage\src\widgets\FileStorageUploadWidget;
 use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\lead\src\abac\dto\LeadCommunicationBlockAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
 use src\auth\Auth;
 use yii\bootstrap4\Modal;
@@ -188,7 +189,8 @@ $disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIEN
                 ]) ?>
             <?php endif;?>
 
-            <?php if (Yii::$app->user->can('lead-view/communication-block/view', ['lead' => $lead])) : ?>
+            <?php $leadCommunicationBlockAbacDto = new LeadCommunicationBlockAbacDto($lead, [], $user->id); ?>
+            <?php if (Yii::$app->abac->can($leadCommunicationBlockAbacDto, LeadAbacObject::OBJ_LEAD_COMMUNICATION_BLOCK, LeadAbacObject::ACTION_VIEW, $user)) : ?>
                 <?= $this->render('communication/lead_communication', [
                     'leadForm'      => $leadForm,
                     'previewEmailForm' => $previewEmailForm,
@@ -203,11 +205,7 @@ $disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIEN
                     'smsEnabled' => $smsEnabled,
                     'disableMasking' => $disableMasking
                 ]); ?>
-                <?php /*else: */ ?><!--
-                <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>-->
             <?php endif;?>
-
-            <?php //php \yii\helpers\VarDumper::dump(Yii::$app->user->identity->callExpertCountByShiftTime)?>
 
             <?php if (FileStorageSettings::isEnabled() && Auth::can('lead-view/files/view', ['lead' => $lead])) : ?>
                 <?= FileStorageListWidget::byLead(

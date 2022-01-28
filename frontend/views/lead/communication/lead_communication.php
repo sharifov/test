@@ -395,7 +395,9 @@ $phoneFromList = new AbacPhoneList(Auth::user(), $lead);
                                         ?>
 
 
-                                        <?= $communicationActiveForm->field($comForm, 'c_type_id')->dropDownList($typeList, ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_type_id']) ?>
+                                        <?php if ($typeList) : ?>
+                                            <?= $communicationActiveForm->field($comForm, 'c_type_id')->dropDownList($typeList, ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_type_id']) ?>
+                                        <?php endif;?>
                                         <?= $communicationActiveForm->field($comForm, 'c_quotes')->hiddenInput(['id' => 'c_quotes'])->label(false) ?>
                                         <?= $communicationActiveForm->field($comForm, 'c_offers')->hiddenInput(['id' => 'c_offers'])->label(false) ?>
                                     </div>
