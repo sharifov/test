@@ -1,11 +1,9 @@
 <?php
 
-namespace src\model\phone;
-
-use common\models\Department;
+namespace src\model\call\useCase\createCall\fromHistory;
 
 /**
- * Class AvailablePhone
+ * Class PhoneFrom
  *
  * @property int $projectId
  * @property string $project
@@ -15,8 +13,14 @@ use common\models\Department;
  * @property int $typeId
  * @property int|null $departmentId
  */
-class AvailablePhone
+class PhoneFrom
 {
+    public const PERSONAL = 'Personal';
+    public const PERSONAL_ID = 0;
+
+    public const GENERAL = 'General';
+    public const GENERAL_ID = 1;
+
     public int $projectId;
     public string $project;
     public int $phoneListId;
@@ -54,25 +58,5 @@ class AvailablePhone
             $row['type'],
             $row['department_id'] ? (int)$row['department_id'] : null
         );
-    }
-
-    public function isGeneralType(): bool
-    {
-        return $this->typeId === AvailablePhoneList::GENERAL_ID;
-    }
-
-    public function isPersonalType(): bool
-    {
-        return $this->typeId === AvailablePhoneList::PERSONAL_ID;
-    }
-
-    public function isEqual(string $number): bool
-    {
-        return $this->phone === $number;
-    }
-
-    public function format(): string
-    {
-        return $this->project . ' ' . ($this->isGeneralType() ? Department::DEPARTMENT_LIST[$this->departmentId] : AvailablePhoneList::PERSONAL) . ' (' . $this->phone . ')';
     }
 }

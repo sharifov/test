@@ -34,7 +34,6 @@ use modules\fileStorage\src\widgets\FileStorageUploadWidget;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
 use src\auth\Auth;
-use src\model\phone\AvailablePhoneList;
 use yii\bootstrap4\Modal;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Url;

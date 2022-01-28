@@ -7,7 +7,6 @@ use src\auth\Auth;
 use src\model\call\services\FriendlyName;
 use src\model\call\services\RecordManager;
 use src\model\callLog\entity\callLog\CallLog;
-use src\model\phone\AvailablePhoneList;
 use src\model\voip\phoneDevice\device\VoipDevice;
 
 class CreateCallFromHistory
@@ -40,7 +39,7 @@ class CreateCallFromHistory
 
             if ($call->isOut()) {
                 if (VoipDevice::isValid($call->cl_phone_from)) {
-                    $list = new AvailablePhoneList(Auth::id(), $call->cl_project_id, $call->cl_department_id, $departmentParams->defaultPhoneType);
+                    $list = new PhoneFromList(Auth::id(), $call->cl_project_id, $call->cl_department_id, $departmentParams->defaultPhoneType);
                     if ($firstPhone = $list->getFirst()) {
                         $phoneFrom = [
                             'phone' => $firstPhone->phone,
@@ -54,7 +53,7 @@ class CreateCallFromHistory
                     ];
                 }
             } elseif ($call->isIn()) {
-                $list = new AvailablePhoneList(Auth::id(), $call->cl_project_id, $call->cl_department_id, $departmentParams->defaultPhoneType);
+                $list = new PhoneFromList(Auth::id(), $call->cl_project_id, $call->cl_department_id, $departmentParams->defaultPhoneType);
                 if ($firstPhone = $list->getFirst()) {
                     $phoneFrom = [
                         'phone' => $firstPhone->phone,
