@@ -39,7 +39,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     },
                     'format' => 'raw',
                 ],
-                'lpp_lppd_id',
+                [
+                    'attribute' => 'lpp_lppd_id',
+                    'value' => static function (LeadPoorProcessing $model) {
+                        return '<i class="fa fa-key"></i> ' . $model->lppLppd->lppd_key;
+                    },
+                    'format' => 'raw',
+                ],
                 'lpp_expiration_dt:byUserDatetime',
             ],
         ]) ?>
