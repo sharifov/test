@@ -374,11 +374,6 @@ $phoneFromList = new AbacPhoneList(Auth::user(), $model);
 
                                 if ($call_type_id) {
                                     $callTypeName = \common\models\UserProfile::CALL_TYPE_LIST[$call_type_id] ?? '-';
-
-                                    if ($call_type_id == \common\models\UserProfile::CALL_TYPE_SIP && $userModel->userProfile && !$userModel->userProfile->up_sip) {
-                                        $callTypeName .= ' [empty account]';
-                                    }
-
                                     $typeList[\frontend\models\CommunicationForm::TYPE_VOICE] = \frontend\models\CommunicationForm::TYPE_LIST[\frontend\models\CommunicationForm::TYPE_VOICE] . ' (' . $callTypeName . ')';
                                 }
 

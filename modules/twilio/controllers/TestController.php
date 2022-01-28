@@ -78,21 +78,6 @@ class TestController extends Controller
         die;
     }
 
-    public function actionCallToPhone()
-    {
-        $user = Employee::findOne(['id' => 464]);
-        $response = $this->comService->callToPhone(
-            6,
-            'sip:' . $user->userProfile->up_sip,
-            '+14159801855',
-            '+37378077519',
-            $user->username
-        );
-        echo '<pre>';
-        var_dump($response);
-        die;
-    }
-
     public function actionUpdateCall()
     {
         $response = $this->comService->updateCall('testsid', ['status' => 'completed']);

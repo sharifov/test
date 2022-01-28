@@ -177,7 +177,6 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                                 $str .= '<td>' . Html::encode($projectParam->uppProject->name) . '</td>';
 //                                $str.='<td>'.Html::encode($projectParam->upp_tw_phone_number).'</td>';
                                 $str .= '<td>' . Html::encode($projectParam->getPhone()) . '</td>';
-                                //$str.='<td>'.Html::encode($model->userProfile->up_sip ?? '').'</td>';
                                 //$str.='<td>'.Html::encode($projectParam->upp_tw_sip_id).'</td>';
                                 //$projectsValueArr[] = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-list']) . ' ' . Html::encode($project->name), ['class' => 'label label-default']);
                                 $str .= '</tr>';
