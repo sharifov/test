@@ -56,7 +56,6 @@ class LeadToExtraQueueService
                 Notifications::TYPE_INFO,
                 true
             );
-            $this->getLead()->employee_id = null;
         }
 
         $this->leadRepository->save($this->getLead());
