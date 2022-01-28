@@ -855,10 +855,10 @@ class SettingHelper
             return [];
         }
 
-        if (array_key_exists('hasFlightDetails', $settings)) {
-            $hasFlightDetails = (bool)$settings['hasFlightDetails'];
+        if (array_key_exists('noFlightDetails', $settings)) {
+            $noFlightDetails = (bool)$settings['noFlightDetails'];
         } else {
-            self::leadRedialExcludeAttributesErrorLog('hasFlightDetails');
+            self::leadRedialExcludeAttributesErrorLog('noFlightDetails');
             return [];
         }
 
@@ -873,7 +873,7 @@ class SettingHelper
             'projects' => $projects,
             'departments' => $departments,
             'cabins' => $cabins,
-            'hasFlightDetails' => $hasFlightDetails,
+            'noFlightDetails' => $noFlightDetails,
             'isTest' => $isTest
         ];
     }

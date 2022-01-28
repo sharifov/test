@@ -37,8 +37,10 @@ class LeadExcluder
             return true;
         }
 
-        if ($this->settings->inFlightDetails($lead->hasFlightDetails())) {
-            return true;
+        if ($this->settings->isNoFlightDetailsEnable()) {
+            if (!$lead->hasFlightDetails()) {
+                return true;
+            }
         }
 
         if ($this->settings->inTest((bool)$lead->l_is_test)) {

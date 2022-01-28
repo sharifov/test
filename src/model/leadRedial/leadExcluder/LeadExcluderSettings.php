@@ -8,7 +8,7 @@ namespace src\model\leadRedial\leadExcluder;
  * @property array $projects
  * @property array $departments
  * @property array $cabins
- * @property bool $hasFlightDetails
+ * @property bool $noFlightDetails
  * @property bool $isTest
  * @property bool $valid
  */
@@ -17,7 +17,7 @@ class LeadExcluderSettings
     private array $projects;
     private array $departments;
     private array $cabins;
-    private bool $hasFlightDetails;
+    private bool $noFlightDetails;
     private bool $isTest;
     private bool $valid;
 
@@ -25,14 +25,14 @@ class LeadExcluderSettings
         array $projects,
         array $departments,
         array $cabins,
-        bool $hasFlightDetails,
+        bool $noFlightDetails,
         bool $isTest,
         bool $valid
     ) {
         $this->projects = $projects;
         $this->departments = $departments;
         $this->cabins = $cabins;
-        $this->hasFlightDetails = $hasFlightDetails;
+        $this->noFlightDetails = $noFlightDetails;
         $this->isTest = $isTest;
         $this->valid = $valid;
     }
@@ -48,7 +48,7 @@ class LeadExcluderSettings
             !array_key_exists('projects', $settings)
             || !array_key_exists('departments', $settings)
             || !array_key_exists('cabins', $settings)
-            || !array_key_exists('hasFlightDetails', $settings)
+            || !array_key_exists('noFlightDetails', $settings)
             || !array_key_exists('isTest', $settings)
         ) {
             return self::createInvalidSettings();
@@ -58,7 +58,7 @@ class LeadExcluderSettings
             $settings['projects'],
             $settings['departments'],
             $settings['cabins'],
-            $settings['hasFlightDetails'],
+            $settings['noFlightDetails'],
             $settings['isTest'],
             true
         );
@@ -79,9 +79,9 @@ class LeadExcluderSettings
         return in_array($cabin, $this->cabins, true);
     }
 
-    public function inFlightDetails(bool $hasFlightDetails): bool
+    public function isNoFlightDetailsEnable(): bool
     {
-        return $this->hasFlightDetails === $hasFlightDetails;
+        return $this->noFlightDetails;
     }
 
     public function inTest(bool $isTest): bool
