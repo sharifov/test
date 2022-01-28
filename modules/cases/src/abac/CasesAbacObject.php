@@ -33,7 +33,7 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
     /** OBJECT PERMISSION */
     public const OBJ_CASE_STATUS_ROUTE_RULES = self::NS . 'obj/status_rules';
 
-    public const OBJ_CASE_COMMUNICATION = self::NS . 'communication';
+    public const OBJ_CASE_COMMUNICATION_BLOCK = self::NS . 'communication_block';
 
     public const OBJECT_LIST = [
         self::LOGIC_CLIENT_DATA             => self::LOGIC_CLIENT_DATA,
@@ -41,7 +41,7 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         self::UI_BTN_EVENT_LOG_VIEW         => self::UI_BTN_EVENT_LOG_VIEW,
         self::OBJ_CASE_STATUS_ROUTE_RULES   => self::OBJ_CASE_STATUS_ROUTE_RULES,
         self::SQL_CASE_QUEUES               => self::SQL_CASE_QUEUES,
-        self::OBJ_CASE_COMMUNICATION        => self::OBJ_CASE_COMMUNICATION,
+        self::OBJ_CASE_COMMUNICATION_BLOCK  => self::OBJ_CASE_COMMUNICATION_BLOCK,
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -56,6 +56,7 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
     public const ACTION_READ  = 'read';
     public const ACTION_CREATE  = 'create';
     public const ACTION_TRANSFER  = 'transfer';
+    public const ACTION_VIEW = 'view';
     public const ACTION_SEND_SMS = 'sendSms';
     public const ACTION_SEND_EMAIL = 'sendEmail';
     public const ACTION_MAKE_CALL = 'makeCall';
@@ -74,7 +75,7 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
             //self::ACTION_DEPARTMENT_ACCESS,
             //self::ACTION_PROJECT_ACCESS,
         ],
-        self::OBJ_CASE_COMMUNICATION => [self::ACTION_SEND_SMS, self::ACTION_SEND_EMAIL, self::ACTION_MAKE_CALL],
+        self::OBJ_CASE_COMMUNICATION_BLOCK => [self::ACTION_VIEW, self::ACTION_SEND_SMS, self::ACTION_SEND_EMAIL, self::ACTION_MAKE_CALL],
     ];
 
     protected const ATTR_CASE_IS_OWNER = [
@@ -274,7 +275,7 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
             self::ATTR_IS_COMMON_GROUP
         ],
         self::SQL_CASE_QUEUES => [],
-        self::OBJ_CASE_COMMUNICATION => [
+        self::OBJ_CASE_COMMUNICATION_BLOCK => [
             self::ATTR_CASE_IS_OWNER,
             self::ATTR_CASE_HAS_OWNER,
             self::ATTR_CLIENT_IS_EXCLUDED,
@@ -344,17 +345,17 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
 
         $attrCaseStatusName = self::ATTR_CASE_STATUS_NAME;
         $attrCaseStatusName['values'] = array_combine(CasesStatus::STATUS_LIST, CasesStatus::STATUS_LIST);
-        $attributeList[self::OBJ_CASE_COMMUNICATION][] = $attrCaseStatusName;
+        $attributeList[self::OBJ_CASE_COMMUNICATION_BLOCK][] = $attrCaseStatusName;
 
         $attrCaseProjectName = self::ATTR_CASE_PROJECT_NAME;
         $projectNames = Project::getList();
         $attrCaseProjectName['values'] = array_combine($projectNames, $projectNames);
-        $attributeList[self::OBJ_CASE_COMMUNICATION][] = $attrCaseProjectName;
+        $attributeList[self::OBJ_CASE_COMMUNICATION_BLOCK][] = $attrCaseProjectName;
 
         $attrCaseDepartmentName = self::ATTR_CASE_DEPARTMENT_NAME;
         $departmentNames = Department::getList();
         $attrCaseDepartmentName['values'] = array_combine($departmentNames, $departmentNames);
-        $attributeList[self::OBJ_CASE_COMMUNICATION][] = $attrCaseDepartmentName;
+        $attributeList[self::OBJ_CASE_COMMUNICATION_BLOCK][] = $attrCaseDepartmentName;
 
         return $attributeList;
     }

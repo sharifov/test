@@ -1,6 +1,7 @@
 <?php
 
 use common\models\Employee;
+use modules\cases\src\abac\dto\CaseCommunicationBlockAbacDto;
 use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\widgets\FileStorageListWidget;
 use src\auth\Auth;
@@ -21,7 +22,6 @@ use modules\cases\src\widgets\CaseEventLogWidget;
  * @var $previewSmsForm frontend\models\CasePreviewSmsForm
  * @var $dataProviderCommunication yii\data\ActiveDataProvider
  * @var $dataProviderCommunicationLog yii\data\ActiveDataProvider
- * @var $enableCommunication boolean
  * @var $isAdmin boolean
  *
  * @var $saleSearchModel common\models\search\SaleSearch
@@ -186,22 +186,20 @@ $unsubscribedEmails =  array_column($model->project->emailUnsubscribes, 'eu_emai
         </div>
 
         <div class="col-md-6">
-            <?php if ($enableCommunication) : ?>
-                    <?= $this->render('communication/case_communication', [
-                        'model'      => $model,
-                        'previewEmailForm' => $previewEmailForm,
-                        'previewSmsForm' => $previewSmsForm,
-                        'comForm'       => $comForm,
-                        'dataProvider'  => (bool)Yii::$app->params['settings']['new_communication_block_case'] ? $dataProviderCommunicationLog : $dataProviderCommunication,
-                        'isAdmin'       => $isAdmin,
-                        'isCommunicationLogEnabled' => Yii::$app->params['settings']['new_communication_block_case'],
-                        'smsEnabled' => $smsEnabled,
-                        'unsubscribedEmails' => $unsubscribedEmails,
-                        'disableMasking' => $disableMasking
-                    ]);
-                    ?>
-            <?php else : ?>
-                <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>
+            <?php $caseCommunicationBlockAbacDto = new CaseCommunicationBlockAbacDto($model, [], $user->id); ?>
+            <?php if (Yii::$app->abac->can($caseCommunicationBlockAbacDto, CasesAbacObject::OBJ_CASE_COMMUNICATION_BLOCK, CasesAbacObject::ACTION_VIEW, $user)) : ?>
+                <?= $this->render('communication/case_communication', [
+                    'model'      => $model,
+                    'previewEmailForm' => $previewEmailForm,
+                    'previewSmsForm' => $previewSmsForm,
+                    'comForm'       => $comForm,
+                    'dataProvider'  => (bool)Yii::$app->params['settings']['new_communication_block_case'] ? $dataProviderCommunicationLog : $dataProviderCommunication,
+                    'isAdmin'       => $isAdmin,
+                    'isCommunicationLogEnabled' => Yii::$app->params['settings']['new_communication_block_case'],
+                    'smsEnabled' => $smsEnabled,
+                    'unsubscribedEmails' => $unsubscribedEmails,
+                    'disableMasking' => $disableMasking
+                ]); ?>
             <?php endif;?>
         </div>
 

@@ -16,7 +16,7 @@ use src\model\call\useCase\createCall\fromCase\PhoneFrom;
  * @property bool $phone_from_personal
  * @property bool $phone_from_general
  */
-class CaseCommunicationAbacDto extends \stdClass
+class CaseCommunicationBlockAbacDto extends \stdClass
 {
     public bool $is_owner;
     public bool $has_owner;

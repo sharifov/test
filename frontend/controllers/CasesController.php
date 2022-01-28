@@ -793,7 +793,6 @@ class CasesController extends FController
 
         //VarDumper::dump($dataProvider->allModels); exit;
 
-        $enableCommunication = true;
         $isAdmin = true;
 
         $dataProviderOrders = (new OrderSearch())->searchByCase($model->cs_id);
@@ -803,7 +802,6 @@ class CasesController extends FController
             'previewEmailForm' => $previewEmailForm,
             'previewSmsForm' => $previewSmsForm,
             'comForm' => $comForm,
-            'enableCommunication' => $enableCommunication,
             'dataProviderCommunication' => $dataProviderCommunication,
             'dataProviderCommunicationLog' => $dataProviderCommunicationLog,
             'isAdmin' => $isAdmin,

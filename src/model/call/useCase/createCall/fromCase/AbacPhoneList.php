@@ -4,7 +4,7 @@ namespace src\model\call\useCase\createCall\fromCase;
 
 use common\models\Employee;
 use modules\cases\src\abac\CasesAbacObject;
-use modules\cases\src\abac\dto\CaseCommunicationAbacDto;
+use modules\cases\src\abac\dto\CaseCommunicationBlockAbacDto;
 use src\entities\cases\Cases;
 use Yii;
 
@@ -44,8 +44,8 @@ class AbacPhoneList
 
         if ($this->canMakeCall()) {
             foreach ($this->getFromPhones() as $fromPhone) {
-                $tempAbacDto = new CaseCommunicationAbacDto($this->case, [$fromPhone], $this->user->id);
-                if (Yii::$app->abac->can($tempAbacDto, CasesAbacObject::OBJ_CASE_COMMUNICATION, CasesAbacObject::ACTION_MAKE_CALL, $this->user)) {
+                $tempAbacDto = new CaseCommunicationBlockAbacDto($this->case, [$fromPhone], $this->user->id);
+                if (Yii::$app->abac->can($tempAbacDto, CasesAbacObject::OBJ_CASE_COMMUNICATION_BLOCK, CasesAbacObject::ACTION_MAKE_CALL, $this->user)) {
                     $this->list[] = $fromPhone;
                 }
                 unset($tempAbacDto);
@@ -71,8 +71,8 @@ class AbacPhoneList
             return $this->canCreateCall;
         }
 
-        $caseCommunicationAbacDto = new CaseCommunicationAbacDto($this->case, $this->getFromPhones(), $this->user->id);
-        $this->canCreateCall = Yii::$app->abac->can($caseCommunicationAbacDto, CasesAbacObject::OBJ_CASE_COMMUNICATION, CasesAbacObject::ACTION_MAKE_CALL, $this->user);
+        $caseCommunicationBlockAbacDto = new CaseCommunicationBlockAbacDto($this->case, $this->getFromPhones(), $this->user->id);
+        $this->canCreateCall = Yii::$app->abac->can($caseCommunicationBlockAbacDto, CasesAbacObject::OBJ_CASE_COMMUNICATION_BLOCK, CasesAbacObject::ACTION_MAKE_CALL, $this->user);
 
         return $this->canCreateCall;
     }
