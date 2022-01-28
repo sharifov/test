@@ -1,11 +1,11 @@
 <?php
 
-namespace src\model\call\useCase\createCall\fromLead;
+namespace src\model\sms\useCase\send\fromLead;
 
 use common\models\Department;
 
 /**
- * Class PhoneFrom
+ * Class SmsFromNumber
  *
  * @property int $projectId
  * @property string $project
@@ -15,7 +15,7 @@ use common\models\Department;
  * @property int $typeId
  * @property int|null $departmentId
  */
-class PhoneFrom
+class SmsFromNumber
 {
     public const PERSONAL = 'Personal';
     public const PERSONAL_ID = 0;

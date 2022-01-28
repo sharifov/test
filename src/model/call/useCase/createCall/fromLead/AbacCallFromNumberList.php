@@ -4,23 +4,23 @@ namespace src\model\call\useCase\createCall\fromLead;
 
 use common\models\Employee;
 use common\models\Lead;
+use modules\lead\src\abac\communicationBlock\LeadCommunicationBlockAbacObject;
 use modules\lead\src\abac\dto\LeadCommunicationBlockAbacDto;
-use modules\lead\src\abac\LeadAbacObject;
 use Yii;
 
 /**
- * Class AbacPhoneList
+ * Class AbacCallFromNumberList
  *
- * @property PhoneFrom[] $list
- * @property PhoneFrom[] $fromPhones
+ * @property CallFromNumber[]|null $list
+ * @property CallFromNumber[]|null $callFromNumbers
  * @property Employee $user
  * @property Lead $lead
  * @property bool $canCreateCall
  */
-class AbacPhoneList
+class AbacCallFromNumberList
 {
     private ?array $list = null;
-    private ?array $fromPhones = null;
+    private ?array $callFromNumbers = null;
     private Employee $user;
     private Lead $lead;
     private ?bool $canCreateCall = null;
@@ -32,7 +32,7 @@ class AbacPhoneList
     }
 
     /**
-     * @return PhoneFrom[]
+     * @return CallFromNumber[]
      */
     public function getList(): array
     {
@@ -43,9 +43,9 @@ class AbacPhoneList
         $this->list = [];
 
         if ($this->canMakeCall()) {
-            foreach ($this->getFromPhones() as $fromPhone) {
-                $tempAbacDto = new LeadCommunicationBlockAbacDto($this->lead, [$fromPhone], $this->user->id);
-                if (Yii::$app->abac->can($tempAbacDto, LeadAbacObject::OBJ_LEAD_COMMUNICATION_BLOCK, LeadAbacObject::ACTION_MAKE_CALL, $this->user)) {
+            foreach ($this->getCallFromNumbers() as $fromPhone) {
+                $tempAbacDto = new LeadCommunicationBlockAbacDto($this->lead, [$fromPhone], [], [], $this->user->id);
+                if (Yii::$app->abac->can($tempAbacDto, LeadCommunicationBlockAbacObject::NS, LeadCommunicationBlockAbacObject::ACTION_MAKE_CALL, $this->user)) {
                     $this->list[] = $fromPhone;
                 }
                 unset($tempAbacDto);
@@ -71,25 +71,25 @@ class AbacPhoneList
             return $this->canCreateCall;
         }
 
-        $leadCommunicationBlockAbacDto = new LeadCommunicationBlockAbacDto($this->lead, $this->getFromPhones(), $this->user->id);
-        $this->canCreateCall = Yii::$app->abac->can($leadCommunicationBlockAbacDto, LeadAbacObject::OBJ_LEAD_COMMUNICATION_BLOCK, LeadAbacObject::ACTION_MAKE_CALL, $this->user);
+        $leadCommunicationBlockAbacDto = new LeadCommunicationBlockAbacDto($this->lead, $this->getCallFromNumbers(), [], [], $this->user->id);
+        $this->canCreateCall = Yii::$app->abac->can($leadCommunicationBlockAbacDto, LeadCommunicationBlockAbacObject::NS, LeadCommunicationBlockAbacObject::ACTION_MAKE_CALL, $this->user);
 
         return $this->canCreateCall;
     }
 
     public function format(): array
     {
-        return array_map(fn (PhoneFrom $phone) => $phone->format(), $this->getList());
+        return array_map(static fn (CallFromNumber $phone) => $phone->format(), $this->getList());
     }
 
-    private function getFromPhones(): array
+    private function getCallFromNumbers(): array
     {
-        if ($this->fromPhones !== null) {
-            return $this->fromPhones;
+        if ($this->callFromNumbers !== null) {
+            return $this->callFromNumbers;
         }
 
-        $this->fromPhones = (new PhoneFromList($this->user->id, $this->lead->project_id, $this->lead->l_dep_id))->getList();
+        $this->callFromNumbers = (new CallFromNumberList($this->user->id, $this->lead->project_id, $this->lead->l_dep_id))->getList();
 
-        return $this->fromPhones;
+        return $this->callFromNumbers;
     }
 }

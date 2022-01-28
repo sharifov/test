@@ -29,6 +29,7 @@ use src\auth\Auth;
 use src\helpers\communication\StatisticsHelper;
 use src\helpers\projectLocale\ProjectLocaleHelper;
 use src\helpers\setting\SettingHelper;
+use src\model\call\useCase\createCall\fromLead\AbacCallFromNumberList;
 use src\model\call\useCase\createCall\fromLead\AbacPhoneList;
 use src\model\project\entity\projectLocale\ProjectLocale;
 use yii\helpers\ArrayHelper;
@@ -66,7 +67,7 @@ $canAttachFiles = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EM
 $canShowEmailData = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SHOW_EMAIL_DATA);
 
 
-$phoneFromList = new AbacPhoneList(Auth::user(), $lead);
+$callFromNumberList = new AbacCallFromNumberList(Auth::user(), $lead);
 ?>
 
     <div class="x_panel">
@@ -355,13 +356,11 @@ $phoneFromList = new AbacPhoneList(Auth::user(), $lead);
                                         /** @var \common\models\Employee $userModel */
                                         $userModel = Yii::$app->user->identity;
 
-
                                         $call_type = \common\models\UserProfile::find()->select('up_call_type_id')->where(['up_user_id' => Yii::$app->user->id])->one();
 
-                                        if ($call_type && $call_type->up_call_type_id && $phoneFromList->canMakeCall()) {
-                                            $call_type_id = $call_type->up_call_type_id;
-                                        } else {
-                                            $call_type_id = \common\models\UserProfile::CALL_TYPE_OFF;
+                                        if ($call_type && $call_type->up_call_type_id && $callFromNumberList->canMakeCall()) {
+                                            $callTypeName = \common\models\UserProfile::CALL_TYPE_LIST[$call_type->up_call_type_id] ?? '-';
+                                            $typeList[\frontend\models\CommunicationForm::TYPE_VOICE] = \frontend\models\CommunicationForm::TYPE_LIST[\frontend\models\CommunicationForm::TYPE_VOICE] . ' (' . $callTypeName . ')';
                                         }
 
                                         if ($agentParams) {
@@ -380,13 +379,7 @@ $phoneFromList = new AbacPhoneList(Auth::user(), $lead);
                                             }
                                         }
 
-                                        if ($call_type_id) {
-                                            $callTypeName = \common\models\UserProfile::CALL_TYPE_LIST[$call_type_id] ?? '-';
-                                            $typeList[\frontend\models\CommunicationForm::TYPE_VOICE] = \frontend\models\CommunicationForm::TYPE_LIST[\frontend\models\CommunicationForm::TYPE_VOICE] . ' (' . $callTypeName . ')';
-                                        }
-
                                         ?>
-
 
                                         <?php if ($typeList) : ?>
                                             <?= $communicationActiveForm->field($comForm, 'c_type_id')->dropDownList($typeList, ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_type_id']) ?>
@@ -433,7 +426,7 @@ $phoneFromList = new AbacPhoneList(Auth::user(), $lead);
 
                                     <div class="col-sm-3 form-group message-field-phone" style="display: block;">
                                         <?= Html::label('Phone from', null, ['class' => 'control-label']) ?>
-                                        <?= Html::dropDownList('call-from-number', null, $phoneFromList->format(), ['prompt' => '---', 'id' => 'call-from-number', 'class' => 'form-control', 'label'])?>
+                                        <?= Html::dropDownList('call-from-number', null, $callFromNumberList->format(), ['prompt' => '---', 'id' => 'call-from-number', 'class' => 'form-control', 'label'])?>
                                     </div>
                                     <div class="col-sm-3 form-group message-field-phone" style="display: block;">
                                         <?= Html::button('<i class="fa fa-phone-square"></i> Make Call', ['class' => 'btn btn-sm btn-success', 'id' => 'btn-make-call-lead-communication-block', 'style' => 'margin-top: 28px'])?>
