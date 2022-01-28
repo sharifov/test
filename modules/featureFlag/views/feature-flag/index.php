@@ -17,7 +17,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><i class="fa fa-flag"></i> <?= Html::encode($this->title) ?></h1>
 
-    <?= Html::a('<i class="fa fa-close"></i> Clear Cache', ['clean'], [
+    <?= Html::a('<i class="fa fa-close"></i> Clear Cache', ['clear-cache'], [
         'class' => 'btn btn-danger',
         'data' => [
             'confirm' => 'Are you sure you want to clear Feature Flags cache data?'
@@ -71,21 +71,26 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
             ],
 
-            //'s_type',
-
-
+            [
+                'attribute' => 'ff_enable_type',
+                'value' => static function (FeatureFlag $model) {
+                    return $model->getEnableTypeLabel();
+                },
+                'format' => 'raw',
+                'filter' => FeatureFlag::getEnableTypeList()
+            ],
 
             [
                 'attribute' => 'ff_value',
                 'value' => static function (FeatureFlag $model) {
                     $val = Html::encode($model->ff_value);
 
-                    if ($model->ff_type == FeatureFlag::TYPE_BOOL) {
+                    if ($model->ff_type === FeatureFlag::TYPE_BOOL) {
                         $val = $model->ff_value ? '<span class="label label-success">true</span>' :
                             '<span class="label label-danger">false</span>';
                     }
 
-                    if ($model->ff_type == FeatureFlag::TYPE_ARRAY) {
+                    if ($model->ff_type === FeatureFlag::TYPE_ARRAY) {
                         $val = '<pre><small>' . ($model->ff_value ?
                                 VarDumper::dumpAsString(@json_decode($model->ff_value, true), 10, false) : '-') .
                             '</small></pre>';
@@ -107,19 +112,19 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
             //'ff_category',
-            'ff_description',
-            'ff_enable_type',
-            'ff_attributes',
+            //'ff_description',
+
+            //'ff_attributes',
             'ff_condition',
 
-            [
-                'attribute' => 'ff_updated_user_id',
-//                'value' => static function (\common\models\Setting $model) {
-//                    return ($model->sUpdatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->sUpdatedUser->username) : $model->s_updated_user_id);
-//                },
-//                'format' => 'raw',
-//                'filter' => \common\models\Employee::getList()
-            ],
+//            [
+//                'attribute' => 'ff_updated_user_id',
+////                'value' => static function (\common\models\Setting $model) {
+////                    return ($model->sUpdatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->sUpdatedUser->username) : $model->s_updated_user_id);
+////                },
+////                'format' => 'raw',
+////                'filter' => \common\models\Employee::getList()
+//            ],
 
 //            /*[
 //                'attribute' => 's_updated_user_id',

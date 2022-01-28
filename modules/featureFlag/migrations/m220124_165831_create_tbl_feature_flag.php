@@ -26,9 +26,9 @@ class m220124_165831_create_tbl_feature_flag extends Migration
             'ff_category' => $this->string(255),
             'ff_description' => $this->string(1000),
             'ff_enable_type' => $this->tinyInteger(1)->defaultValue(0)->notNull(),
-            'ff_attributes' => $this->json(),
-            'ff_condition' => $this->json(),
-           // 'ff_expression' => $this->boolean()->notNull(),
+            'ff_expression' => $this->string(255),
+            'ff_condition_json' => $this->json(),
+            'ff_builder_json' => $this->json(),
             'ff_updated_dt' => $this->dateTime(),
             'ff_updated_user_id' => $this->integer(),
         ], $tableOptions);

@@ -13,6 +13,7 @@ use Casbin\CoreEnforcer;
 use common\models\Employee;
 use modules\abac\src\entities\AbacPolicy;
 use modules\featureFlag\src\entities\FeatureFlag;
+use modules\featureFlag\src\FeatureFlagService;
 use src\auth\Auth;
 use src\helpers\app\AppHelper;
 use stdClass;
@@ -39,6 +40,8 @@ use modules\abac\src\entities\AbacInterface;
  * @property array $scanDirs
  * @property array scanExtMask
  * @property bool $cacheEnable
+ *
+ * @property array $ffList
  */
 class FeatureFlagComponent extends Component
 {
@@ -63,9 +66,15 @@ class FeatureFlagComponent extends Component
     private ?array $objectAttributeList = null;
     private ?array $defaultAttributeList = null;
 
+
+    private ?array $ffList = null;
+
     public function init(): void
     {
         parent::init();
+
+        //$this->cacheEnable = false;
+
 //        $policyListContent = $this->getPolicyListContent();
 //        // $policyListContent = file_get_contents(Yii::getAlias("@common/config/casbin/policy_list.csv"));
 //
@@ -133,39 +142,96 @@ class FeatureFlagComponent extends Component
         return $obj;
     }
 
-    /**
-     * @param stdClass|null $subject
-     * @param string $object
-     * @param string $action
-     * @param Employee|null $user
-     * @return bool|null
-     */
-    final public function can(?\stdClass $subject, string $object, string $action, ?Employee $user = null): ?bool
-    {
-        if (!$subject) {
-            $subject = new \stdClass();
-        }
-        try {
-//            if (!$user && (Yii::$app instanceof \yii\web\Application) && Yii::$app->id === 'app-frontend') {
+//    /**
+//     * @param stdClass|null $subject
+//     * @param string $object
+//     * @param string $action
+//     * @param Employee|null $user
+//     * @return bool|null
+//     */
+//    final public function can(?\stdClass $subject, string $object, string $action, ?Employee $user = null): ?bool
+//    {
+//        if (!$subject) {
+//            $subject = new \stdClass();
+//        }
+//        try {
+    ////            if (!$user && (Yii::$app instanceof \yii\web\Application) && Yii::$app->id === 'app-frontend') {
+    ////                $user = Auth::user();
+    ////            }
+//            if (!$user) {
 //                $user = Auth::user();
 //            }
-            if (!$user) {
-                $user = Auth::user();
-            }
+//
+//            $subject->env = $this->getEnv($user);
+//            //$sub->data = $subject;
+//
+//            if ($this->enforser->enforce($subject, $object, $action) === true) {
+//                return true;
+//            }
+//        } catch (\Throwable $throwable) {
+//            Yii::error(AppHelper::throwableLog($throwable, true), 'AbacComponent::can');
+//            //VarDumper::dump(AppHelper::throwableLog($throwable), 10, true);
+//            return null;
+//        }
+//
+//        return false;
+//    }
 
-            $subject->env = $this->getEnv($user);
-            //$sub->data = $subject;
 
-            if ($this->enforser->enforce($subject, $object, $action) === true) {
-                return true;
+    public function getFFItem(string $key): ?array
+    {
+        if (empty($this->ffList[$key])) {
+            return [];
+        }
+        return $this->ffList[$key];
+    }
+
+    /**
+     * @param string $key
+     * @return bool
+     */
+    final public function can(string $key): bool
+    {
+        if ($this->ffList === null) {
+            $this->ffList = $this->getFFList();
+        }
+        //VarDumper::dump($this->ffList ); exit;
+        $response = false;
+        $item = $this->getFFItem($key);
+
+        //VarDumper::dump($item); exit;
+
+        if ($item) {
+            $type =  $item['ff_enable_type'] ? (int) $item['ff_enable_type'] : 0;
+            if ($type === FeatureFlag::ET_ENABLED) {
+                $response = true;
+            } elseif ($type === FeatureFlag::ET_ENABLED_CONDITION) {
+                $response = true;
+            } elseif ($type === FeatureFlag::ET_DISABLED_CONDITION) {
+                $response = true;
             }
-        } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableLog($throwable, true), 'AbacComponent::can');
-            //VarDumper::dump(AppHelper::throwableLog($throwable), 10, true);
-            return null;
+        }
+        return $response;
+    }
+
+
+
+    /**
+     * @param string $key
+     * @return mixed|null
+     */
+    final public function val(string $key)
+    {
+        if ($this->ffList === null) {
+            $this->ffList = $this->getFFList();
         }
 
-        return false;
+        $item = $this->getFFItem($key);
+        if ($item) {
+            return $item['ff_value'];
+        }
+
+        return null;
     }
 
 
@@ -279,12 +345,40 @@ class FeatureFlagComponent extends Component
 
 
     /**
-     * @return string
+     * @return array
      */
-    final public function getPolicyListContentWOCache(): string
+    final public function getFFListWOCache(): array
     {
+        $ffList = [];
+        $list =  FeatureFlagService::getFeatureFlagList();
+
+
+        if ($list) {
+            foreach ($list as $key => $item) {
+                if (!empty(FeatureFlag::TYPE_LIST[$item['ff_type']])) {
+                    if ($item['ff_type'] === FeatureFlag::TYPE_ARRAY) {
+                        $item['ff_value'] = @json_decode($item['ff_value'], true);
+                    }
+                    @settype($item['ff_value'], $item['ff_type']);
+                }
+                //$value = $item['ff_value'];
+                $ffList[$item['ff_key']] = $item;
+            }
+        }
+
+
+
+//        if ($list) {
+//            foreach ($list as $item) {
+//                $ffList[$item['ff_key']] = $item;
+//            }
+//        }
+//
+        return $ffList;
+        /*
+
         $rows = [];
-        $policyModel = AbacPolicy::find()->select([
+        $policyModel = FeatureFlag::find()->select([
             'ap_rule_type',
             'ap_subject',
             'ap_object',
@@ -309,48 +403,43 @@ class FeatureFlagComponent extends Component
             }
         }
         unset($policyModel);
-        return implode(PHP_EOL, $rows);
+        return implode(PHP_EOL, $rows);*/
     }
 
-    /**
-     * @param bool|null $enabled
-     * @return int
-     */
-    final public function getPolicyListCount(?bool $enabled = null): int
-    {
-        $query = FeatureFlag::find();
-        if ($enabled !== null) {
-            //$query->where(['ff_enable_type' => FeatureFlag::ET_ENABLED]);
-        }
-        $count = $query->count();
-
-        return $count ? (int) $count : 0;
-    }
+//    /**
+//     * @return int
+//     */
+//    final public function getFFListCount(): int
+//    {
+//        $count = FeatureFlag::find()->count();
+//        return $count ? (int) $count : 0;
+//    }
 
 
     /**
-     * @return string
+     * @return array
      */
-    public function getPolicyListContent(): string
+    public function getFFList(): array
     {
         if ($this->getCacheEnabled()) {
-            $policyListContent = Yii::$app->cache->get($this->getCacheKey());
-            if ($policyListContent === false) {
-                $policyListContent = $this->getPolicyListContentWOCache();
+            $ffList = Yii::$app->cache->get($this->getCacheKey());
 
-                if ($policyListContent) {
+            if ($ffList === false) {
+                $ffList = $this->getFFListWOCache();
+
+                if ($ffList) {
                     Yii::$app->cache->set(
                         $this->getCacheKey(),
-                        $policyListContent,
+                        $ffList,
                         0,
                         new TagDependency(['tags' => $this->getCacheTagDependency()])
                     );
                 }
             }
         } else {
-            $policyListContent = $this->getPolicyListContentWOCache();
+            $ffList = $this->getFFListWOCache();
         }
-        return $policyListContent;
+        return $ffList ?: [];
     }
 
     /**

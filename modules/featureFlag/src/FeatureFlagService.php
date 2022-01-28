@@ -275,9 +275,30 @@ class FeatureFlagService
         }
     }
 
+    /**
+     * @param string $key
+     * @return int
+     */
     public static function delete(
         string $key
     ): int {
         return FeatureFlag::deleteAll(['key' => $key]);
+    }
+
+    /**
+     * @return array
+     */
+    public static function getFeatureFlagList(): array
+    {
+        $list = FeatureFlag::find()->indexBy('ff_key')->select([
+            'ff_key',
+            'ff_name',
+            'ff_type',
+            'ff_value',
+            'ff_enable_type',
+            'ff_condition'
+        ])->asArray()->all();
+
+        return $list;
     }
 }

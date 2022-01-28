@@ -42,5 +42,7 @@ class m220125_164931_add_test_feature_flags extends Migration
         $ff = new FeatureFlagService();
         $ff->delete(self::FF1);
         $ff->delete(self::FF2);
+
+        Yii::$app->ff->invalidateCache();
     }
 }

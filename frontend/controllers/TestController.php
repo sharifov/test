@@ -2588,4 +2588,27 @@ class TestController extends FController
 
         return date('Y-m-d H:i:s');
     }
+
+    public function actionFf()
+    {
+        echo 'Feature Flag Test<br><br>';
+
+        if (Yii::$app->ff->can('testFlag2')) {
+            VarDumper::dump(Yii::$app->ff->val('testFlag2'), 10, true);
+        } else {
+            echo 'NO';
+        }
+
+        echo '<br><br>';
+
+        if (Yii::$app->ff->can('testFlag1')) {
+            VarDumper::dump(Yii::$app->ff->val('testFlag1'), 10, true);
+        } else {
+            echo 'NO';
+        }
+
+        echo '<br><br>';
+        return date('Y-m-d H:i:s');
+    }
+
 }

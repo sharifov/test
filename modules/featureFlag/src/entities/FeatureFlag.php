@@ -8,6 +8,7 @@ use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\db\BaseActiveRecord;
+use yii\helpers\Html;
 
 /**
  * This is the model class for table "feature_flag".
@@ -57,6 +58,13 @@ class FeatureFlag extends ActiveRecord
         self::ET_ENABLED                => 'Enabled',
         self::ET_DISABLED_CONDITION     => 'Disabled condition',
         self::ET_ENABLED_CONDITION      => 'Enabled condition',
+    ];
+
+    public const ET_CLASS_LIST    = [
+        self::ET_DISABLED               => 'danger',
+        self::ET_ENABLED                => 'success',
+        self::ET_DISABLED_CONDITION     => 'primary',
+        self::ET_ENABLED_CONDITION      => 'warning',
     ];
 
     public function rules(): array
@@ -147,6 +155,7 @@ class FeatureFlag extends ActiveRecord
         return 'feature_flag';
     }
 
+
     /**
      * @return string[]
      */
@@ -161,5 +170,31 @@ class FeatureFlag extends ActiveRecord
     public static function getTypeList(): array
     {
         return self::TYPE_LIST;
+    }
+
+    /**
+     * @return string
+     */
+    public function getEnableTypeName(): string
+    {
+        return self::ET_LIST[$this->ff_enable_type] ?? '';
+    }
+
+    /**
+     * @return string
+     */
+    public function getEnableTypeClass(): string
+    {
+        return self::ET_CLASS_LIST[$this->ff_enable_type] ?? '';
+    }
+
+    /**
+     * @return string
+     */
+    public function getEnableTypeLabel(): string
+    {
+        $class = $this->getEnableTypeClass();
+        $name = $this->getEnableTypeName();
+        return Html::tag('span', $name, ['class' => $class ? 'label label-' . $class : null]);
     }
 }

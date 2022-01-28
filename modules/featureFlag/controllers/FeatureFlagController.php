@@ -47,14 +47,14 @@ class FeatureFlagController extends FController
     }
 
     /**
-     * @param int $ff_id ID
+     * @param int $id ID
      * @return string
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($ff_id): string
+    public function actionView($id): string
     {
         return $this->render('view', [
-            'model' => $this->findModel($ff_id),
+            'model' => $this->findModel($id),
         ]);
     }
 
@@ -66,7 +66,8 @@ class FeatureFlagController extends FController
         $model = new FeatureFlag();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'ff_id' => $model->ff_id]);
+            $this->invalidateCache();
+            return $this->redirect(['view', 'id' => $model->ff_id]);
         }
 
         return $this->render('create', [
@@ -75,16 +76,17 @@ class FeatureFlagController extends FController
     }
 
     /**
-     * @param int $ff_id ID
+     * @param int $id ID
      * @return string|Response
      * @throws NotFoundHttpException
      */
-    public function actionUpdate($ff_id)
+    public function actionUpdate($id)
     {
-        $model = $this->findModel($ff_id);
+        $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'ff_id' => $model->ff_id]);
+            $this->invalidateCache();
+            return $this->redirect(['view', 'id' => $model->ff_id]);
         }
 
         return $this->render('update', [
@@ -93,30 +95,52 @@ class FeatureFlagController extends FController
     }
 
     /**
-     * @param int $ff_id ID
+     * @param int $id ID
      * @return Response
      * @throws NotFoundHttpException
      * @throws \Throwable
      * @throws StaleObjectException
      */
-    public function actionDelete($ff_id): Response
+    public function actionDelete($id): Response
     {
-        $this->findModel($ff_id)->delete();
+        $this->findModel($id)->delete();
+        $this->invalidateCache();
+        return $this->redirect(['index']);
+    }
+
+    /**
+     * @param int $id ID
+     * @return FeatureFlag
+     * @throws NotFoundHttpException
+     */
+    protected function findModel($id): FeatureFlag
+    {
+        if (($model = FeatureFlag::findOne($id)) !== null) {
+            return $model;
+        }
+
+        throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    /**
+     * @return Response
+     */
+    public function actionClearCache(): Response
+    {
+        if ($this->invalidateCache()) {
+            Yii::$app->session->setFlash('success', 'Feature Flag Cache was successfully cleared');
+        } else {
+            Yii::$app->session->setFlash('warning', 'Feature Flag Cache is disable');
+        }
 
         return $this->redirect(['index']);
     }
 
     /**
-     * @param int $ff_id ID
-     * @return FeatureFlag
-     * @throws NotFoundHttpException
+     * @return bool
      */
-    protected function findModel($ff_id): FeatureFlag
+    private function invalidateCache(): bool
     {
-        if (($model = FeatureFlag::findOne($ff_id)) !== null) {
-            return $model;
-        }
-
-        throw new NotFoundHttpException('The requested page does not exist.');
+        return Yii::$app->ff->invalidateCache();
     }
 }
