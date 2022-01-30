@@ -178,9 +178,12 @@ services:
       args:
         REGISTRY: ${REGISTRY}
         IMAGE_TAG: ${IMAGE_TAG}
-    user: ${USER_ID}:${USER_GID}
+        USER_NAME: ${USER_NAME}
+        USER_ID: ${USER_ID}
+        USER_GID: ${USER_GID}
     volumes:
       - ${APP_PATH}:${APP_PATH}
+      - ${SSH_DIR}:/home/${USER_NAME}/.ssh
     working_dir: ${APP_PATH}
     depends_on:
       - mysql

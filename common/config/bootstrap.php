@@ -9,3 +9,4 @@ Yii::setAlias('@sales', dirname(dirname(__DIR__)) . '/sales');
 Yii::setAlias('@src', dirname(dirname(__DIR__)) . '/src');
 Yii::setAlias('@modules', dirname(dirname(__DIR__)) . '/modules');
 Yii::setAlias('@root', dirname(dirname(__DIR__)));
+Yii::setAlias('@lajax/translatemanager/assets', dirname(dirname(__DIR__)) . '/vendor/lajax/yii2-translate-manager/assets');
