@@ -44,7 +44,7 @@ class LeadToExtraQueueService
         $reason = Html::encode($this->getRule()->lppd_description);
         $ownerId = $this->getLead()->employee_id;
 
-        $this->getLead()->extraQueue($reason);
+        $this->getLead()->extraQueue($ownerId, null, $reason);
 
         if ($this->getLead()->hasOwner()) {
             $message = 'Lead(' . Purifier::createLeadShortLink($this->getLead()) . ') transfer to Extra Queue. ' . $reason;

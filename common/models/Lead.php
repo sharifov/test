@@ -5037,7 +5037,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         );
     }
 
-    public function extraQueue(?string $reason = null): void
+    public function extraQueue(?int $newOwnerId = null, ?int $creatorId = null, ?string $reason = ''): void
     {
         if ($this->isExtraQueue()) {
             return;
@@ -5048,11 +5048,13 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
                 $this,
                 $this->status,
                 $this->employee_id,
-                null,
-                null,
+                $newOwnerId,
+                $creatorId,
                 $reason
             )
         );
+
+        $this->changeOwner($newOwnerId);
 
         $this->setStatus(self::STATUS_EXTRA_QUEUE);
     }

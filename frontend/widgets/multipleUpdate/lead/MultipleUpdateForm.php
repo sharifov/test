@@ -171,9 +171,6 @@ class MultipleUpdateForm extends Model
         if (isset($statusList[Lead::STATUS_BOOK_FAILED])) {
             unset($statusList[Lead::STATUS_BOOK_FAILED]);
         }
-        if (isset($statusList[Lead::STATUS_EXTRA_QUEUE])) {
-            unset($statusList[Lead::STATUS_EXTRA_QUEUE]);
-        }
         return $statusList;
     }
 
@@ -295,5 +292,10 @@ class MultipleUpdateForm extends Model
     public function isNew(): bool
     {
         return $this->statusId === Lead::STATUS_NEW;
+    }
+
+    public function isExtraQueue(): bool
+    {
+        return $this->statusId === Lead::STATUS_EXTRA_QUEUE;
     }
 }

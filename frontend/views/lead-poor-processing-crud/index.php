@@ -51,11 +51,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 'limitEndDay' => false,
             ],
             /*[
+                'class' => \common\components\grid\DateTimeColumn::class,
                 'attribute' => 'lpp_expiration_dt',
                 'value' => static function (LeadPoorProcessing $model) {
                     return Html::tag('i', '', ['class' => 'fa fa-calendar']) . ' ' . $model->lpp_expiration_dt;
                 },
                 'format' => 'raw',
+                'limitEndDay' => false,
             ],*/
 
             ['class' => ActionColumn::class],
