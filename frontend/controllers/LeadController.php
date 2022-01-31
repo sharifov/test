@@ -63,6 +63,7 @@ use src\logger\db\GlobalLogInterface;
 use src\logger\db\LogDTO;
 use src\model\airportLang\helpers\AirportLangHelper;
 use src\model\call\socket\CallUpdateMessage;
+use src\model\call\useCase\createCall\fromLead\AbacCallFromNumberList;
 use src\model\callLog\entity\callLog\CallLogType;
 use src\model\clientChat\entity\ClientChat;
 use src\model\clientChat\permissions\ClientChatActionPermission;
@@ -84,6 +85,7 @@ use src\model\lead\useCases\lead\import\LeadImportUploadForm;
 use src\model\lead\useCases\lead\link\LeadLinkChatForm;
 use src\model\leadUserConversion\service\LeadUserConversionDictionary;
 use src\model\leadUserConversion\service\LeadUserConversionService;
+use src\model\sms\useCase\send\fromLead\AbacSmsFromNumberList;
 use src\repositories\cases\CasesRepository;
 use src\repositories\lead\LeadRepository;
 use src\repositories\NotFoundException;
@@ -249,6 +251,9 @@ class LeadController extends FController
         }
 
         $user = Auth::user();
+
+        $callFromNumberList = new AbacCallFromNumberList($user, $lead);
+        $smsFromNumberList = new AbacSmsFromNumberList($user, $lead);
 
         $itineraryForm = new ItineraryEditForm($lead);
 
@@ -576,7 +581,7 @@ class LeadController extends FController
             $smsEnabled = false;
         }
 
-        $previewSmsForm = new LeadPreviewSmsForm();
+        $previewSmsForm = new LeadPreviewSmsForm($smsFromNumberList);
         $previewSmsForm->is_send = false;
 
         if ($smsEnabled && $previewSmsForm->load(Yii::$app->request->post())) {
@@ -641,7 +646,7 @@ class LeadController extends FController
             }
         }
 
-        $comForm = new CommunicationForm($lead->l_client_lang);
+        $comForm = new CommunicationForm($lead->l_client_lang, $smsFromNumberList);
         $comForm->c_preview_email = 0;
         $comForm->c_preview_sms = 0;
         $comForm->c_voice_status = 0;
@@ -1041,7 +1046,9 @@ class LeadController extends FController
             'dataProviderOffers'    => $dataProviderOffers,
             'dataProviderOrders'    => $dataProviderOrders,
 
-            'smsEnabled' => $smsEnabled
+            'smsEnabled' => $smsEnabled,
+            'callFromNumberList' => $callFromNumberList,
+            'smsFromNumberList' => $smsFromNumberList,
         ]);
     }
 

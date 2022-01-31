@@ -5,7 +5,7 @@ namespace src\model\call\useCase\createCall\fromLead;
 use common\models\Employee;
 use common\models\Lead;
 use modules\lead\src\abac\communicationBlock\LeadCommunicationBlockAbacObject;
-use modules\lead\src\abac\dto\LeadCommunicationBlockAbacDto;
+use modules\lead\src\abac\communicationBlock\LeadCommunicationBlockAbacDto;
 use Yii;
 
 /**
@@ -15,7 +15,7 @@ use Yii;
  * @property CallFromNumber[]|null $callFromNumbers
  * @property Employee $user
  * @property Lead $lead
- * @property bool $canCreateCall
+ * @property bool|null $canCreateCall
  */
 class AbacCallFromNumberList
 {
@@ -43,10 +43,10 @@ class AbacCallFromNumberList
         $this->list = [];
 
         if ($this->canMakeCall()) {
-            foreach ($this->getCallFromNumbers() as $fromPhone) {
-                $tempAbacDto = new LeadCommunicationBlockAbacDto($this->lead, [$fromPhone], [], [], $this->user->id);
+            foreach ($this->getCallFromNumbers() as $number) {
+                $tempAbacDto = new LeadCommunicationBlockAbacDto($this->lead, [$number], [], [], $this->user->id);
                 if (Yii::$app->abac->can($tempAbacDto, LeadCommunicationBlockAbacObject::NS, LeadCommunicationBlockAbacObject::ACTION_MAKE_CALL, $this->user)) {
-                    $this->list[] = $fromPhone;
+                    $this->list[] = $number;
                 }
                 unset($tempAbacDto);
             }
@@ -55,10 +55,10 @@ class AbacCallFromNumberList
         return $this->list;
     }
 
-    public function isExist(string $number): bool
+    public function isExist(string $phoneNumber): bool
     {
-        foreach ($this->getList() as $phone) {
-            if ($phone->isEqual($number)) {
+        foreach ($this->getList() as $number) {
+            if ($number->isEqual($phoneNumber)) {
                 return true;
             }
         }
@@ -79,7 +79,20 @@ class AbacCallFromNumberList
 
     public function format(): array
     {
-        return array_map(static fn (CallFromNumber $phone) => $phone->format(), $this->getList());
+        $list = [];
+        foreach ($this->getList() as $number) {
+            $list[$number->phone] = $number->format();
+        }
+        return $list;
+    }
+
+    public function first(): ?string
+    {
+        $list = $this->getList();
+        if (!$list) {
+            return null;
+        }
+        return $list[0]->phone;
     }
 
     private function getCallFromNumbers(): array

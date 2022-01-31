@@ -17,6 +17,8 @@
  * @var $dataProviderOffers ActiveDataProvider
  * @var $dataProviderOrders ActiveDataProvider
  * @var bool $smsEnabled
+ * @var AbacCallFromNumberList $callFromNumberList
+ * @var AbacSmsFromNumberList $smsFromNumberList
  */
 
 use common\models\Employee;
@@ -31,10 +33,13 @@ use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\services\access\FileStorageAccessService;
 use modules\fileStorage\src\widgets\FileStorageListWidget;
 use modules\fileStorage\src\widgets\FileStorageUploadWidget;
+use modules\lead\src\abac\communicationBlock\LeadCommunicationBlockAbacObject;
 use modules\lead\src\abac\dto\LeadAbacDto;
-use modules\lead\src\abac\dto\LeadCommunicationBlockAbacDto;
+use modules\lead\src\abac\communicationBlock\LeadCommunicationBlockAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
 use src\auth\Auth;
+use src\model\call\useCase\createCall\fromLead\AbacCallFromNumberList;
+use src\model\sms\useCase\send\fromLead\AbacSmsFromNumberList;
 use yii\bootstrap4\Modal;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Url;
@@ -189,8 +194,8 @@ $disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIEN
                 ]) ?>
             <?php endif;?>
 
-            <?php $leadCommunicationBlockAbacDto = new LeadCommunicationBlockAbacDto($lead, [], $user->id); ?>
-            <?php if (Yii::$app->abac->can($leadCommunicationBlockAbacDto, LeadAbacObject::OBJ_LEAD_COMMUNICATION_BLOCK, LeadAbacObject::ACTION_VIEW, $user)) : ?>
+            <?php $leadCommunicationBlockAbacDto = new LeadCommunicationBlockAbacDto($lead, [], [], [], $user->id); ?>
+            <?php if (Yii::$app->abac->can($leadCommunicationBlockAbacDto, LeadCommunicationBlockAbacObject::NS, LeadCommunicationBlockAbacObject::ACTION_VIEW, $user)) : ?>
                 <?= $this->render('communication/lead_communication', [
                     'leadForm'      => $leadForm,
                     'previewEmailForm' => $previewEmailForm,
@@ -203,7 +208,9 @@ $disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIEN
                     'unsubscribe' => $unsubscribe,
                     'unsubscribedEmails' => $unsubscribedEmails,
                     'smsEnabled' => $smsEnabled,
-                    'disableMasking' => $disableMasking
+                    'disableMasking' => $disableMasking,
+                    'callFromNumberList' => $callFromNumberList,
+                    'smsFromNumberList' => $smsFromNumberList,
                 ]); ?>
             <?php endif;?>
 

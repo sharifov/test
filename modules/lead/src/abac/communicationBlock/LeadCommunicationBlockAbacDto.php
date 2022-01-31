@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\lead\src\abac\dto;
+namespace modules\lead\src\abac\communicationBlock;
 
 use common\models\Lead;
 

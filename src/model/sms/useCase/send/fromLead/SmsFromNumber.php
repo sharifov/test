@@ -79,6 +79,14 @@ class SmsFromNumber
 
     public function format(): string
     {
-        return $this->project . ' ' . ($this->isGeneralType() ? Department::DEPARTMENT_LIST[$this->departmentId] : self::PERSONAL) . ' (' . $this->phone . ')';
+        if ($this->isPersonalType()) {
+            return $this->phone . ' (' . self::PERSONAL . ')';
+        }
+
+        if ($this->departmentId) {
+            return $this->phone . ' (General ' . Department::DEPARTMENT_LIST[$this->departmentId] . ')';
+        }
+
+        return $this->phone . ' (General)';
     }
 }

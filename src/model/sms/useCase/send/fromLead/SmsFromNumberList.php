@@ -14,7 +14,7 @@ use yii\db\Query;
 /**
  * Class SmsFromNumberList
  *
- * @property array $list
+ * @property array|null $list
  * @property int $userId
  * @property int $projectId
  * @property int $departmentId

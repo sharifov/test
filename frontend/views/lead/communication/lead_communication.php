@@ -13,6 +13,8 @@
  * @var $unsubscribedEmails array
  * @var $disableMasking bool
  * @var $unsubscribe
+ * @var AbacCallFromNumberList $callFromNumberList
+ * @var AbacSmsFromNumberList $smsFromNumberList
  */
 
 use common\models\Call;
@@ -32,6 +34,7 @@ use src\helpers\setting\SettingHelper;
 use src\model\call\useCase\createCall\fromLead\AbacCallFromNumberList;
 use src\model\call\useCase\createCall\fromLead\AbacPhoneList;
 use src\model\project\entity\projectLocale\ProjectLocale;
+use src\model\sms\useCase\send\fromLead\AbacSmsFromNumberList;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\bootstrap4\Modal;
@@ -66,8 +69,6 @@ $canAttachFiles = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EM
 /** @abac $abacDto, EmailAbacObject::ACT_VIEW, EmailAbacObject::ACTION_SHOW_EMAIL_DATA, Restrict access to view emails on case or lead*/
 $canShowEmailData = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SHOW_EMAIL_DATA);
 
-
-$callFromNumberList = new AbacCallFromNumberList(Auth::user(), $lead);
 ?>
 
     <div class="x_panel">
@@ -359,25 +360,28 @@ $callFromNumberList = new AbacCallFromNumberList(Auth::user(), $lead);
                                         $call_type = \common\models\UserProfile::find()->select('up_call_type_id')->where(['up_user_id' => Yii::$app->user->id])->one();
 
                                         if ($call_type && $call_type->up_call_type_id && $callFromNumberList->canMakeCall()) {
-                                            $callTypeName = \common\models\UserProfile::CALL_TYPE_LIST[$call_type->up_call_type_id] ?? '-';
-                                            $typeList[\frontend\models\CommunicationForm::TYPE_VOICE] = \frontend\models\CommunicationForm::TYPE_LIST[\frontend\models\CommunicationForm::TYPE_VOICE] . ' (' . $callTypeName . ')';
+                                            $typeList[\frontend\models\CommunicationForm::TYPE_VOICE] = \frontend\models\CommunicationForm::TYPE_LIST[\frontend\models\CommunicationForm::TYPE_VOICE];
                                         }
 
-                                        if ($agentParams) {
-                                            foreach (CommunicationForm::TYPE_LIST as $tk => $itemName) {
-                                                if ($tk == CommunicationForm::TYPE_EMAIL) {
-                                                    if ($agentParams->getEmail()) {
-                                                        $typeList[$tk] = $itemName . ' (' . $agentParams->getEmail() . ')';
-                                                    }
-                                                }
-
-                                                if ($agentParams->getPhone()) {
-                                                    if ($tk == CommunicationForm::TYPE_SMS && $smsEnabled) {
-                                                        $typeList[$tk] = $itemName . ' (' . $agentParams->getPhone() . ')';
-                                                    }
-                                                }
-                                            }
+                                        if ($smsFromNumberList->canSendSms()) {
+                                            $typeList[\frontend\models\CommunicationForm::TYPE_SMS] = \frontend\models\CommunicationForm::TYPE_LIST[\frontend\models\CommunicationForm::TYPE_SMS];
                                         }
+
+//                                        if ($agentParams) {
+//                                            foreach (CommunicationForm::TYPE_LIST as $tk => $itemName) {
+//                                                if ($tk == CommunicationForm::TYPE_EMAIL) {
+//                                                    if ($agentParams->getEmail()) {
+//                                                        $typeList[$tk] = $itemName . ' (' . $agentParams->getEmail() . ')';
+//                                                    }
+//                                                }
+//
+//                                                if ($agentParams->getPhone()) {
+//                                                    if ($tk == CommunicationForm::TYPE_SMS && $smsEnabled) {
+//                                                        $typeList[$tk] = $itemName . ' (' . $agentParams->getPhone() . ')';
+//                                                    }
+//                                                }
+//                                            }
+//                                        }
 
                                         ?>
 
@@ -386,6 +390,15 @@ $callFromNumberList = new AbacCallFromNumberList(Auth::user(), $lead);
                                         <?php endif;?>
                                         <?= $communicationActiveForm->field($comForm, 'c_quotes')->hiddenInput(['id' => 'c_quotes'])->label(false) ?>
                                         <?= $communicationActiveForm->field($comForm, 'c_offers')->hiddenInput(['id' => 'c_offers'])->label(false) ?>
+                                    </div>
+
+                                    <div class="col-sm-3 form-group message-field-sms" id="sms-phone-from-group">
+                                        <?php
+                                        if (!$comForm->c_sms_from) {
+                                            $comForm->c_sms_from = $smsFromNumberList->first();
+                                        }
+                                        ?>
+                                        <?= $communicationActiveForm->field($comForm, 'c_sms_from')->dropDownList($smsFromNumberList->format(), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_from']) ?>
                                     </div>
 
                                     <div class="col-sm-3 form-group message-field-sms" id="sms-template-group">
@@ -426,7 +439,7 @@ $callFromNumberList = new AbacCallFromNumberList(Auth::user(), $lead);
 
                                     <div class="col-sm-3 form-group message-field-phone" style="display: block;">
                                         <?= Html::label('Phone from', null, ['class' => 'control-label']) ?>
-                                        <?= Html::dropDownList('call-from-number', null, $callFromNumberList->format(), ['prompt' => '---', 'id' => 'call-from-number', 'class' => 'form-control', 'label'])?>
+                                        <?= Html::dropDownList('call-from-number', $callFromNumberList->first(), $callFromNumberList->format(), ['prompt' => '---', 'id' => 'call-from-number', 'class' => 'form-control', 'label'])?>
                                     </div>
                                     <div class="col-sm-3 form-group message-field-phone" style="display: block;">
                                         <?= Html::button('<i class="fa fa-phone-square"></i> Make Call', ['class' => 'btn btn-sm btn-success', 'id' => 'btn-make-call-lead-communication-block', 'style' => 'margin-top: 28px'])?>

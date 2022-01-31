@@ -5,14 +5,14 @@ namespace src\model\sms\useCase\send\fromLead;
 use common\models\Employee;
 use common\models\Lead;
 use modules\lead\src\abac\communicationBlock\LeadCommunicationBlockAbacObject;
-use modules\lead\src\abac\dto\LeadCommunicationBlockAbacDto;
+use modules\lead\src\abac\communicationBlock\LeadCommunicationBlockAbacDto;
 use Yii;
 
 /**
  * Class AbacSmsFromNumberList
  *
  * @property SmsFromNumber[]|null $list
- * @property SmsFromNumber[]|null $fromNumbers
+ * @property SmsFromNumber[]|null $smsFromNumbers
  * @property Employee $user
  * @property Lead $lead
  * @property bool|null $canSendSmsFlag
@@ -20,7 +20,7 @@ use Yii;
 class AbacSmsFromNumberList
 {
     private ?array $list = null;
-    private ?array $fromNumbers = null;
+    private ?array $smsFromNumbers = null;
     private Employee $user;
     private Lead $lead;
     private ?bool $canSendSmsFlag = null;
@@ -43,10 +43,10 @@ class AbacSmsFromNumberList
         $this->list = [];
 
         if ($this->canSendSms()) {
-            foreach ($this->getSmsFromNumbers() as $fromPhone) {
-                $tempAbacDto = new LeadCommunicationBlockAbacDto($this->lead, [], [$fromPhone], [], $this->user->id);
+            foreach ($this->getSmsFromNumbers() as $number) {
+                $tempAbacDto = new LeadCommunicationBlockAbacDto($this->lead, [], [$number], [], $this->user->id);
                 if (Yii::$app->abac->can($tempAbacDto, LeadCommunicationBlockAbacObject::NS, LeadCommunicationBlockAbacObject::ACTION_SEND_SMS, $this->user)) {
-                    $this->list[] = $fromPhone;
+                    $this->list[] = $number;
                 }
                 unset($tempAbacDto);
             }
@@ -55,10 +55,10 @@ class AbacSmsFromNumberList
         return $this->list;
     }
 
-    public function isExist(string $number): bool
+    public function isExist(string $phoneNumber): bool
     {
-        foreach ($this->getList() as $phone) {
-            if ($phone->isEqual($number)) {
+        foreach ($this->getList() as $number) {
+            if ($number->isEqual($phoneNumber)) {
                 return true;
             }
         }
@@ -79,17 +79,30 @@ class AbacSmsFromNumberList
 
     public function format(): array
     {
-        return array_map(static fn (SmsFromNumber $phone) => $phone->format(), $this->getList());
+        $list = [];
+        foreach ($this->getList() as $number) {
+            $list[$number->phone] = $number->format();
+        }
+        return $list;
+    }
+
+    public function first(): ?string
+    {
+        $list = $this->getList();
+        if (!$list) {
+            return null;
+        }
+        return $list[0]->phone;
     }
 
     private function getSmsFromNumbers(): array
     {
-        if ($this->fromNumbers !== null) {
-            return $this->fromNumbers;
+        if ($this->smsFromNumbers !== null) {
+            return $this->smsFromNumbers;
         }
 
-        $this->fromNumbers = (new SmsFromNumberList($this->user->id, $this->lead->project_id, $this->lead->l_dep_id))->getList();
+        $this->smsFromNumbers = (new SmsFromNumberList($this->user->id, $this->lead->project_id, $this->lead->l_dep_id))->getList();
 
-        return $this->fromNumbers;
+        return $this->smsFromNumbers;
     }
 }
