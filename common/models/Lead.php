@@ -1771,7 +1771,21 @@ class Lead extends ActiveRecord implements Objectable
      */
     public function isAvailableToTake(): bool
     {
-        return in_array($this->status, [null, self::STATUS_TRASH, self::STATUS_PENDING, self::STATUS_FOLLOW_UP, self::STATUS_SNOOZE, self::STATUS_NEW, self::STATUS_BOOK_FAILED, self::STATUS_ALTERNATIVE], true);
+        return in_array(
+            $this->status,
+            [
+                null,
+                self::STATUS_TRASH,
+                self::STATUS_PENDING,
+                self::STATUS_FOLLOW_UP,
+                self::STATUS_SNOOZE,
+                self::STATUS_NEW,
+                self::STATUS_BOOK_FAILED,
+                self::STATUS_ALTERNATIVE,
+                self::STATUS_EXTRA_QUEUE,
+            ],
+            true
+        );
     }
 
     /**

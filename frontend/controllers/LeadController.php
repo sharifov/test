@@ -2912,15 +2912,24 @@ class LeadController extends FController
     public function actionExtraQueue(): string
     {
         $searchModel = new LeadSearch();
+        $params = Yii::$app->request->queryParams;
+        $params2 = Yii::$app->request->post();
+        $params = array_merge($params, $params2);
 
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
+        if ($user->isAgent()) {
+            $isAgent = true;
+        } else {
+            $isAgent = false;
+        }
 
-        $dataProvider = $searchModel->searchExtraQueue(Yii::$app->request->queryParams, $user);
+        $dataProvider = $searchModel->searchExtraQueue($params, $user);
 
         return $this->render('extra-queue', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'isAgent' => $isAgent,
         ]);
     }
 

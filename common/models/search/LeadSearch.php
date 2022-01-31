@@ -4355,6 +4355,23 @@ class LeadSearch extends Lead
             $leadTable . '.l_type' => $this->l_type,
         ]);
 
+        if ($this->email_status > 0) {
+            if ((int) $this->email_status === 2) {
+                $query->andWhere(new Expression('(SELECT COUNT(*) FROM client_email WHERE client_email.client_id = leads.client_id) > 0'));
+            } else {
+                $query->andWhere(new Expression('(SELECT COUNT(*) FROM client_email WHERE client_email.client_id = leads.client_id) = 0'));
+            }
+        }
+
+        if ($this->quote_status > 0) {
+            $subQuery = Quote::find()->select(['COUNT(*)'])->where('quotes.lead_id = leads.id')->andWhere(['status' => [Quote::STATUS_APPLIED, Quote::STATUS_SENT, Quote::STATUS_OPENED] ]);
+            if ((int) $this->quote_status === 2) {
+                $query->andWhere(new Expression('(' . $subQuery->createCommand()->getRawSql() . ') > 0'));
+            } else {
+                $query->andWhere(new Expression('(' . $subQuery->createCommand()->getRawSql() . ') = 0'));
+            }
+        }
+
         $query->with(['client', 'client.clientEmails', 'client.clientPhones']);
 
         return $dataProvider;
