@@ -10,3 +10,4 @@ Yii::setAlias('@src', dirname(dirname(__DIR__)) . '/src');
 Yii::setAlias('@modules', dirname(dirname(__DIR__)) . '/modules');
 Yii::setAlias('@root', dirname(dirname(__DIR__)));
 Yii::setAlias('@lajax/translatemanager/assets', dirname(dirname(__DIR__)) . '/vendor/lajax/yii2-translate-manager/assets');
+Yii::setAlias('@kivork/VirtualCron/Migrations', dirname(dirname(__DIR__)) . '/vendor/kivork/yii2-virtual-cron/src/Migrations');

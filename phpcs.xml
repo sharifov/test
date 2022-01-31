@@ -30,6 +30,8 @@
     <!-- ignore warnings and display ERRORS only -->
     <arg value="np"/>
 
+    <ini name="memory_limit" value="512M"/>
+
     <!-- Our base rule: set to PSR12-->
     <rule ref="PSR12"/>
     <rule ref="Squiz.Classes.ValidClassName">
