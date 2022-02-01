@@ -160,7 +160,7 @@ class UserFeedbackCrudController extends FController
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             $transaction = new Transaction(['db' => UserFeedback::getDb()]);
             try {
-                $dto = new UserFeedbackData($form->getDecodedData(), [
+                $dto = new UserFeedbackData($form->getDecodedData() ?? [], [
                     'releaseVersion' => ReleaseVersionHelper::getReleaseVersion(true) ?? '',
                     'host' => Yii::$app->params['appHostname'] ?? '',
                     'pageUrl' => $form->pageUrl,
