@@ -1,19 +1,19 @@
 <?php
 
-namespace src\model\phoneList\services;
+namespace src\model\emailList\services;
 
 use common\models\Department;
-use common\models\DepartmentPhoneProject;
+use common\models\DepartmentEmailProject;
+use common\models\DepartmentEmailProjectQuery;
 use common\models\Project;
-use common\models\query\DepartmentPhoneProjectQuery;
 use common\models\query\UserProjectParamsQuery;
 use common\models\UserProjectParams;
-use src\model\phoneList\entity\PhoneList;
+use src\model\emailList\entity\EmailList;
 use yii\db\Expression;
 use yii\db\Query;
 
 /**
- * Class AvailablePhoneNumberList
+ * Class AvailableEmailList
  *
  * @property array|null $list
  * @property int $userId
@@ -21,12 +21,12 @@ use yii\db\Query;
  * @property int $departmentId
  * @property bool $isGeneralFirst
  */
-class AvailablePhoneNumberList
+class AvailableEmailList
 {
     private const SORT_GENERAL_FIRST = SORT_DESC;
     private const SORT_PERSONAL_FIRST = SORT_ASC;
 
-    /** @var AvailablePhoneNumber[]|null */
+    /** @var AvailableEmail[]|null */
     private ?array $list = null;
 
     private int $userId;
@@ -45,14 +45,14 @@ class AvailablePhoneNumberList
     public function getFormattedList(): array
     {
         $list = [];
-        foreach ($this->getList() as $phone) {
-            $list[$phone->phone] = $phone->format();
+        foreach ($this->getList() as $email) {
+            $list[$email->email] = $email->format();
         }
         return $list;
     }
 
     /**
-     * @return AvailablePhoneNumber[]
+     * @return AvailableEmail[]
      */
     public function getList(): array
     {
@@ -68,77 +68,77 @@ class AvailablePhoneNumberList
             $sort = self::SORT_PERSONAL_FIRST;
         }
 
-        $phones = (new Query())
+        $emails = (new Query())
             ->select([
                 'project_id',
-                'phone_list_id',
-                'phone',
+                'email_list_id',
+                'email',
                 'type_id',
                 'type',
                 'project.name as project',
                 'department_id',
                 'dep_name as department'
             ])
-            ->from(self::getUserPhones($this->userId, $this->projectId)->union(self::getDepartmentPhones($this->projectId, $this->departmentId)))
+            ->from(self::getUserEmails($this->userId, $this->projectId)->union(self::getDepartmentEmails($this->projectId, $this->departmentId)))
             ->innerJoin(['project' => Project::tableName()], 'project.id = project_id')
             ->leftJoin(Department::tableName(), 'dep_id = department_id')
             ->orderBy(['type_id' => $sort])
             ->all();
 
-        foreach ($phones as $phone) {
-            $this->list[] = AvailablePhoneNumber::createFromRow($phone);
+        foreach ($emails as $email) {
+            $this->list[] = AvailableEmail::createFromRow($email);
         }
 
         return $this->list;
     }
 
-    public function isExist(string $number): bool
+    public function isExist(string $value): bool
     {
-        foreach ($this->getList() as $phone) {
-            if ($phone->isEqual($number)) {
+        foreach ($this->getList() as $email) {
+            if ($email->isEqual($value)) {
                 return true;
             }
         }
         return false;
     }
 
-    private static function getDepartmentPhones(int $projectId, int $departmentId): DepartmentPhoneProjectQuery
+    private static function getDepartmentEmails(int $projectId, int $departmentId): DepartmentEmailProjectQuery
     {
-        return DepartmentPhoneProject::find()
+        return DepartmentEmailProject::find()
             ->select([
-                'dpp_project_id as project_id',
-                'dpp_phone_list_id as phone_list_id',
-                'pl_phone_number as phone',
-                'dpp_dep_id as department_id'
+                'dep_project_id as project_id',
+                'dep_email_list_id as email_list_id',
+                'el_email as email',
+                'dep_dep_id as department_id'
             ])
-            ->addSelect(new Expression(AvailablePhoneNumber::GENERAL_ID . ' as type_id, "' . AvailablePhoneNumber::GENERAL . '" as type'))
-            ->innerJoin(PhoneList::tableName(), 'pl_id = dpp_phone_list_id')
+            ->addSelect(new Expression(AvailableEmail::GENERAL_ID . ' as type_id, "' . AvailableEmail::GENERAL . '" as type'))
+            ->innerJoin(EmailList::tableName(), 'el_id = dep_email_list_id')
             ->andWhere([
-                'dpp_enable' => true,
-                'pl_enabled' => true,
-                'dpp_project_id' => $projectId,
-                'dpp_default' => true,
+                'dep_enable' => true,
+                'el_enabled' => true,
+                'dep_project_id' => $projectId,
+                'dep_default' => true,
             ])
             ->andWhere([
                 'OR',
-                ['dpp_dep_id' => $departmentId],
-                ['IS', 'dpp_dep_id', null],
+                ['dep_dep_id' => $departmentId],
+                ['IS', 'dep_dep_id', null],
             ]);
     }
 
-    private static function getUserPhones(int $userId, int $projectId): UserProjectParamsQuery
+    private static function getUserEmails(int $userId, int $projectId): UserProjectParamsQuery
     {
         return UserProjectParams::find()
             ->select([
                 'upp_project_id as project_id',
-                'upp_phone_list_id as phone_list_id',
-                'pl_phone_number as phone',
+                'upp_email_list_id as email_list_id',
+                'el_email as email',
                 'upp_dep_id as department_id'
             ])
-            ->addSelect(new Expression(AvailablePhoneNumber::PERSONAL_ID . ' as type_id, "' . AvailablePhoneNumber::PERSONAL . '" as type'))
-            ->innerJoin(PhoneList::tableName(), 'pl_id = upp_phone_list_id')
+            ->addSelect(new Expression(AvailableEmail::PERSONAL_ID . ' as type_id, "' . AvailableEmail::PERSONAL . '" as type'))
+            ->innerJoin(EmailList::tableName(), 'el_id = upp_email_list_id')
             ->andWhere([
-                'pl_enabled' => true,
+                'el_enabled' => true,
                 'upp_user_id' => $userId,
                 'upp_project_id' => $projectId,
             ]);

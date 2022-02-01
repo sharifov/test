@@ -28,7 +28,7 @@ class FileStorageEmailSendListWidget extends Widget
     {
         return self::widget([
             'files' => $files,
-            'checkBoxName' => (new LeadPreviewEmailForm())->formName()
+            'checkBoxName' => 'LeadPreviewEmailForm', //(new LeadPreviewEmailForm())->formName()
         ]);
     }
 
@@ -36,7 +36,7 @@ class FileStorageEmailSendListWidget extends Widget
     {
         return self::widget([
             'files' => $files,
-            'checkBoxName' => (new CasePreviewEmailForm())->formName()
+            'checkBoxName' => 'CasePreviewEmailForm', //(new CasePreviewEmailForm())->formName()
         ]);
     }
 

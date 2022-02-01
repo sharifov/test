@@ -203,34 +203,21 @@ class OfferSmsController extends ApiBaseController
             $clientForm->typeCreate = Client::TYPE_CREATE_SMS;
             $client = $this->clientManageService->getOrCreateByPhones([new PhoneCreateForm(['phone' => $sendQuoteApiForm->sms_to])], $clientForm);
 
-            $previewSmsForm = new LeadPreviewSmsForm();
-            $previewSmsForm->is_send = false;
-            $previewSmsForm->s_sms_message = $smsPreview['data']['sms_text'];
-            $previewSmsForm->s_lead_id = $lead->id;
-            $previewSmsForm->s_quote_list = JsonHelper::encode([$quote->id]);
-            $previewSmsForm->s_phone_from = $sendQuoteApiForm->sms_from;
-            $previewSmsForm->s_phone_to = $sendQuoteApiForm->sms_to;
-            $previewSmsForm->s_language_id = $sendQuoteApiForm->language_id;
-
-            if ($templateTypeId = self::getTemplateTypeId($sendQuoteApiForm->template_key)) {
-                $previewSmsForm->s_sms_tpl_id = (int) $templateTypeId;
-            }
-
             $sms = new Sms();
             $sms->s_project_id = $lead->project_id;
             $sms->s_lead_id = $lead->id;
-            if ($previewSmsForm->s_sms_tpl_id) {
-                $sms->s_template_type_id = $previewSmsForm->s_sms_tpl_id;
+            if ($templateTypeId = self::getTemplateTypeId($sendQuoteApiForm->template_key)) {
+                $sms->s_template_type_id = (int) $templateTypeId;
             }
             $sms->s_type_id = Sms::TYPE_OUTBOX;
             $sms->s_status_id = Sms::STATUS_PENDING;
 
-            $sms->s_sms_text = $previewSmsForm->s_sms_message;
-            $sms->s_phone_from = $previewSmsForm->s_phone_from;
-            $sms->s_phone_to = $previewSmsForm->s_phone_to;
+            $sms->s_sms_text = $smsPreview['data']['sms_text'];
+            $sms->s_phone_from = $sendQuoteApiForm->sms_from;
+            $sms->s_phone_to = $sendQuoteApiForm->sms_to;
 
-            if ($previewSmsForm->s_language_id) {
-                $sms->s_language_id = $previewSmsForm->s_language_id;
+            if ($sendQuoteApiForm->language_id) {
+                $sms->s_language_id = $sendQuoteApiForm->language_id;
             }
 
             $sms->s_created_dt = date('Y-m-d H:i:s');

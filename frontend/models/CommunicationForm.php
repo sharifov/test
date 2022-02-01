@@ -9,6 +9,7 @@ use common\models\Employee;
 use common\models\Language;
 use common\models\Lead;
 use common\models\SmsTemplateType;
+use src\model\email\useCase\send\fromLead\AbacEmailList;
 use src\model\sms\useCase\send\fromLead\AbacSmsFromNumberList;
 use yii\base\Model;
 
@@ -24,6 +25,7 @@ use yii\base\Model;
  * @property string $c_sms_message
  * @property string $c_sms_from
  * @property string $c_email_to
+ * @property string $c_email_from
  * @property string $c_email_subject
  * @property string $c_email_message
  * @property integer $c_email_tpl_id
@@ -43,6 +45,7 @@ use yii\base\Model;
  * @property string $c_voice_sid
  *
  * @property AbacSmsFromNumberList $smsFromNumberList
+ * @property AbacEmailList $emailFromList
  *
  */
 
@@ -86,6 +89,7 @@ class CommunicationForm extends Model
     public $c_sms_from;
 
     public $c_email_to;
+    public $c_email_from;
     public $c_email_subject;
     public $c_email_message;
     public $c_email_tpl_id;
@@ -111,17 +115,19 @@ class CommunicationForm extends Model
     public $minMaxSelectedQuotes;
 
     private AbacSmsFromNumberList $smsFromNumberList;
+    private AbacEmailList $emailFromList;
 
     /**
      * CommunicationForm constructor.
      * @param string $languageId
      * @param array $config
      */
-    public function __construct(?string $languageId = null, AbacSmsFromNumberList $smsFromNumberList, $config = [])
+    public function __construct(?string $languageId = null, AbacSmsFromNumberList $smsFromNumberList, AbacEmailList $emailFromList, $config = [])
     {
         $this->c_language_id = self::getDefaultLanguage($languageId);
         parent::__construct($config);
         $this->smsFromNumberList = $smsFromNumberList;
+        $this->emailFromList = $emailFromList;
     }
 
     /**
@@ -262,6 +268,19 @@ class CommunicationForm extends Model
                     $this->addError('c_sms_from', 'Sms From is invalid');
                 }
             }, 'skipOnError' => true, 'skipOnEmpty' => true],
+
+            ['c_email_from', 'string'],
+            ['c_email_from', 'required', 'when' => static function (CommunicationForm $model) {
+                return (int) $model->c_type_id === self::TYPE_EMAIL;
+            },
+                'whenClient' => "function (attribute, value) {
+                    return $('#c_type_id').val() == " . self::TYPE_EMAIL . '; }'
+            ],
+            ['c_email_from', function () {
+                if (!$this->emailFromList->isExist($this->c_email_from)) {
+                    $this->addError('c_email_from', 'Email From is invalid');
+                }
+            }, 'skipOnError' => true, 'skipOnEmpty' => true],
         ];
     }
 
@@ -340,6 +359,7 @@ class CommunicationForm extends Model
             'c_sms_message'     => 'SMS Message',
             'c_sms_from'        => 'SMS From',
             'c_email_to'        => 'Email',
+            'c_email_from'      => 'Email From',
             'c_email_tpl_id'    => 'Email Template',
             'c_email_tpl_key'    => 'Email Template',
             'c_email_message'   => 'Email Message',

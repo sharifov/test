@@ -37,10 +37,10 @@ class LeadCommunicationBlockAbacDto extends \stdClass
      * @param Lead $lead
      * @param \src\model\phoneList\services\AvailablePhoneNumber[] $callFromNumbers
      * @param \src\model\phoneList\services\AvailablePhoneNumber[] $smsFromNumbers
-     * @param array $emailFrom
+     * @param \src\model\emailList\services\AvailableEmail[] $emailFromEmails
      * @param int $userId
      */
-    public function __construct(Lead $lead, array $callFromNumbers, array $smsFromNumbers, array $emailFrom, int $userId)
+    public function __construct(Lead $lead, array $callFromNumbers, array $smsFromNumbers, array $emailFromEmails, int $userId)
     {
         $this->is_owner = $lead->isOwner($userId);
         $this->has_owner = $lead->hasOwner();
@@ -62,12 +62,12 @@ class LeadCommunicationBlockAbacDto extends \stdClass
             $this->sms_from_personal = false;
             $this->sms_from_general = false;
         }
-//        if ($emailFrom) {
-//            $this->email_from_personal = !empty(array_filter($emailFrom, static fn($email) => $email->isPersonalType()));
-//            $this->email_from_general = !empty(array_filter($emailFrom, static fn($email) => $email->isGeneralType()));
-//        } else {
-//            $this->email_from_personal = false;
-//            $this->email_from_general = false;
-//        }
+        if ($emailFromEmails) {
+            $this->email_from_personal = !empty(array_filter($emailFromEmails, static fn($email) => $email->isPersonalType()));
+            $this->email_from_general = !empty(array_filter($emailFromEmails, static fn($email) => $email->isGeneralType()));
+        } else {
+            $this->email_from_personal = false;
+            $this->email_from_general = false;
+        }
     }
 }

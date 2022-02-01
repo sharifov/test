@@ -15,6 +15,7 @@
  * @var $unsubscribe
  * @var AbacCallFromNumberList $callFromNumberList
  * @var AbacSmsFromNumberList $smsFromNumberList
+ * @var AbacEmailList $emailFromList
  */
 
 use common\models\Call;
@@ -32,7 +33,7 @@ use src\helpers\communication\StatisticsHelper;
 use src\helpers\projectLocale\ProjectLocaleHelper;
 use src\helpers\setting\SettingHelper;
 use src\model\call\useCase\createCall\fromLead\AbacCallFromNumberList;
-use src\model\call\useCase\createCall\fromLead\AbacPhoneList;
+use src\model\email\useCase\send\fromLead\AbacEmailList;
 use src\model\project\entity\projectLocale\ProjectLocale;
 use src\model\sms\useCase\send\fromLead\AbacSmsFromNumberList;
 use yii\helpers\ArrayHelper;
@@ -352,11 +353,6 @@ $canShowEmailData = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_
                                     <div class="col-sm-3 form-group">
                                         <?php
                                         $typeList = [];
-                                        $agentParams = \common\models\UserProjectParams::find()->where(['upp_project_id' => $leadForm->getLead()->project_id, 'upp_user_id' => Yii::$app->user->id])->withEmailList()->withPhoneList()->limit(1)->one();
-
-                                        /** @var \common\models\Employee $userModel */
-                                        $userModel = Yii::$app->user->identity;
-
                                         $call_type = \common\models\UserProfile::find()->select('up_call_type_id')->where(['up_user_id' => Yii::$app->user->id])->one();
 
                                         if ($call_type && $call_type->up_call_type_id && $callFromNumberList->canMakeCall()) {
@@ -367,21 +363,9 @@ $canShowEmailData = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_
                                             $typeList[\frontend\models\CommunicationForm::TYPE_SMS] = \frontend\models\CommunicationForm::TYPE_LIST[\frontend\models\CommunicationForm::TYPE_SMS];
                                         }
 
-//                                        if ($agentParams) {
-//                                            foreach (CommunicationForm::TYPE_LIST as $tk => $itemName) {
-//                                                if ($tk == CommunicationForm::TYPE_EMAIL) {
-//                                                    if ($agentParams->getEmail()) {
-//                                                        $typeList[$tk] = $itemName . ' (' . $agentParams->getEmail() . ')';
-//                                                    }
-//                                                }
-//
-//                                                if ($agentParams->getPhone()) {
-//                                                    if ($tk == CommunicationForm::TYPE_SMS && $smsEnabled) {
-//                                                        $typeList[$tk] = $itemName . ' (' . $agentParams->getPhone() . ')';
-//                                                    }
-//                                                }
-//                                            }
-//                                        }
+                                        if ($emailFromList->canSendEmail()) {
+                                            $typeList[\frontend\models\CommunicationForm::TYPE_EMAIL] = \frontend\models\CommunicationForm::TYPE_LIST[\frontend\models\CommunicationForm::TYPE_EMAIL];
+                                        }
 
                                         ?>
 
@@ -404,6 +388,15 @@ $canShowEmailData = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_
                                     <div class="col-sm-3 form-group message-field-sms" id="sms-template-group">
                                         <?php //= $form->field($comForm, 'c_sms_tpl_id')->dropDownList(\common\models\SmsTemplateType::getList(false), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_id'])?>
                                         <?= $communicationActiveForm->field($comForm, 'c_sms_tpl_key')->dropDownList(\common\models\SmsTemplateType::getKeyList(false, \common\models\Department::DEPARTMENT_SALES, $lead->project_id), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_key']) ?>
+                                    </div>
+
+                                    <div class="col-sm-3 form-group message-field-email" id="email-from-address" style="display: none;">
+                                        <?php
+                                        if (!$comForm->c_email_from) {
+                                            $comForm->c_email_from = $emailFromList->first();
+                                        }
+                                        ?>
+                                        <?= $communicationActiveForm->field($comForm, 'c_email_from')->dropDownList($emailFromList->format(), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_email_from']) ?>
                                     </div>
 
                                     <div class="col-sm-3 form-group message-field-email" id="email-address" style="display: none;">

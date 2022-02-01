@@ -72,6 +72,7 @@ use src\model\clientChatLead\entity\ClientChatLeadRepository;
 use src\model\contactPhoneData\entity\ContactPhoneData;
 use src\model\contactPhoneList\service\ContactPhoneListService;
 use src\model\department\department\DefaultPhoneType;
+use src\model\email\useCase\send\fromLead\AbacEmailList;
 use src\model\emailReviewQueue\EmailReviewQueueManageService;
 use src\model\emailReviewQueue\entity\EmailReviewQueue;
 use src\model\lead\useCases\lead\create\CreateLeadByChatDTO;
@@ -254,6 +255,7 @@ class LeadController extends FController
 
         $callFromNumberList = new AbacCallFromNumberList($user, $lead);
         $smsFromNumberList = new AbacSmsFromNumberList($user, $lead);
+        $emailFromList = new AbacEmailList($user, $lead);
 
         $itineraryForm = new ItineraryEditForm($lead);
 
@@ -463,7 +465,7 @@ class LeadController extends FController
         }
 
 
-        $previewEmailForm = new LeadPreviewEmailForm();
+        $previewEmailForm = new LeadPreviewEmailForm($emailFromList);
         $previewEmailForm->e_lead_id = $lead->id;
         $previewEmailForm->is_send = false;
 
@@ -573,6 +575,8 @@ class LeadController extends FController
                     $this->refresh('#communication-form');
                 }
                 //VarDumper::dump($previewEmailForm->attributes, 10, true);              exit;
+            } else {
+                Yii::$app->session->setFlash('send-error', 'Validation form error');
             }
         }
 
@@ -648,7 +652,7 @@ class LeadController extends FController
             }
         }
 
-        $comForm = new CommunicationForm($lead->l_client_lang, $smsFromNumberList);
+        $comForm = new CommunicationForm($lead->l_client_lang, $smsFromNumberList, $emailFromList);
         $comForm->c_preview_email = 0;
         $comForm->c_preview_sms = 0;
         $comForm->c_voice_status = 0;
@@ -664,35 +668,13 @@ class LeadController extends FController
 
                     $comForm->c_preview_email = 1;
 
-                    $mailFrom = Yii::$app->user->identity->email;
-
                     /** @var CommunicationService $communication */
                     $communication = Yii::$app->communication;
                     $data['origin'] = '';
 
-
-                    //$mailPreview = $communication->mailPreview(7, 'cl_offer', 'test@gmail.com', 'test2@gmail.com', $data, 'ru-RU');
-                    //$mailTypes = $communication->mailTypes(7);
-
                     $content_data['email_body_html'] = $comForm->c_email_message;
-                    //$content_data['email_body_text'] = '2';
                     $content_data['email_subject'] = $comForm->c_email_subject;
-
-                    $content_data['email_reply_to'] = $mailFrom;
-                    //$content_data['email_cc'] = 'chalpet-cc@gmail.com';
-                    //$content_data['email_bcc'] = 'chalpet-bcc@gmail.com';
-
-
-                    $upp = null;
-                    if ($lead->project_id) {
-//                        $upp = UserProjectParams::find()->where(['upp_project_id' => $lead->project_id, 'upp_user_id' => Yii::$app->user->id])->one();
-                        $upp = UserProjectParams::find()->where(['upp_project_id' => $lead->project_id, 'upp_user_id' => Yii::$app->user->id])->withEmailList()->one();
-                        if ($upp) {
-//                            $mailFrom = $upp->upp_email;
-                            $mailFrom = $upp->getEmail();
-                        }
-                    }
-
+                    $content_data['email_reply_to'] = Yii::$app->user->identity->email;
 
                     $projectContactInfo = [];
 
@@ -738,7 +720,7 @@ class LeadController extends FController
                         //echo (Html::encode(json_encode($content_data)));
                         //VarDumper::dump($content_data, 10 , true); exit;
 
-                        $mailPreview = $communication->mailPreview($lead->project_id, ($tpl ? $tpl->etp_key : ''), $mailFrom, $comForm->c_email_to, $content_data, $language);
+                        $mailPreview = $communication->mailPreview($lead->project_id, ($tpl ? $tpl->etp_key : ''), $comForm->c_email_from, $comForm->c_email_to, $content_data, $language);
 
                         if ($tpl) {
                             $tplConfigQuotes = $tpl->etp_params_json['quotes'];
@@ -787,8 +769,8 @@ class LeadController extends FController
                                     $previewEmailForm->e_email_subject = $mailPreview['data']['email_subject'];
                                     $previewEmailForm->e_email_subject_origin = $previewEmailForm->e_email_subject;
                                 }
-                                $previewEmailForm->e_email_from = $mailFrom; //$mailPreview['data']['email_from'];
-                                $previewEmailForm->e_email_to = $comForm->c_email_to; //$mailPreview['data']['email_to'];
+                                $previewEmailForm->e_email_from = $comForm->c_email_from;
+                                $previewEmailForm->e_email_to = $comForm->c_email_to;
                                 $previewEmailForm->e_email_from_name = Yii::$app->user->identity->nickname;
                                 $previewEmailForm->e_email_to_name = $lead->client ? $lead->client->full_name : '';
                                 $previewEmailForm->e_quote_list = @json_encode($comForm->quoteList);
@@ -802,7 +784,7 @@ class LeadController extends FController
                         $previewEmailForm->e_email_message_origin = $comForm->c_email_message;
                         $previewEmailForm->e_email_subject = $comForm->c_email_subject;
                         $previewEmailForm->e_email_message_edited = false;
-                        $previewEmailForm->e_email_from = $mailFrom;
+                        $previewEmailForm->e_email_from = $comForm->c_email_from;
                         $previewEmailForm->e_email_to = $comForm->c_email_to;
                         $previewEmailForm->e_email_from_name = Yii::$app->user->identity->nickname;
                         $previewEmailForm->e_email_to_name = $lead->client ? $lead->client->full_name : '';
@@ -1036,6 +1018,7 @@ class LeadController extends FController
             'smsEnabled' => $smsEnabled,
             'callFromNumberList' => $callFromNumberList,
             'smsFromNumberList' => $smsFromNumberList,
+            'emailFromList' => $emailFromList,
         ]);
     }
 

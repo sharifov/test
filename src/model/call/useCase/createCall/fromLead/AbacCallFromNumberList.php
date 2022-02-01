@@ -109,7 +109,7 @@ class AbacCallFromNumberList
             $this->user->id,
             $this->lead->project_id,
             $this->lead->l_dep_id,
-            $departmentParams ? $departmentParams->object->lead->callDefaultPhoneType : null
+            $departmentParams ? $departmentParams->object->lead->callDefaultPhoneType->isGeneral() : false
         );
 
         $this->callFromNumbers = $numbers->getList();

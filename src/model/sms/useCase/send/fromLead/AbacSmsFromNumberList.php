@@ -109,7 +109,7 @@ class AbacSmsFromNumberList
             $this->user->id,
             $this->lead->project_id,
             $this->lead->l_dep_id,
-            $departmentParams ? $departmentParams->object->lead->callDefaultPhoneType : null
+            $departmentParams ? $departmentParams->object->lead->smsDefaultPhoneType->isGeneral() : false
         );
 
         $this->smsFromNumbers = $numbers->getList();
