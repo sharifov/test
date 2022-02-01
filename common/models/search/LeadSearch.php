@@ -4379,6 +4379,16 @@ class LeadSearch extends Lead
             }
         }
 
+        if ($this->created) {
+            $query->andFilterWhere(['>=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created))])
+                ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 * 24)]);
+        }
+
+        if ($this->l_last_action_dt) {
+            $query->andFilterWhere(['>=', 'l_last_action_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->l_last_action_dt))])
+                ->andFilterWhere(['<=', 'l_last_action_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->l_last_action_dt) + 3600 * 24)]);
+        }
+
         $query->with(['client', 'client.clientEmails', 'client.clientPhones']);
 
         return $dataProvider;
