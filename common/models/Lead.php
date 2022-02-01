@@ -66,6 +66,7 @@ use src\model\clientChatLead\entity\ClientChatLead;
 use src\model\lead\useCases\lead\api\create\LeadCreateForm;
 use src\model\lead\useCases\lead\import\LeadImportForm;
 use src\model\leadData\entity\LeadData;
+use src\model\leadPoorProcessing\entity\LeadPoorProcessing;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
 use src\model\leadUserConversion\entity\LeadUserConversion;
 use src\services\lead\calculator\LeadTripTypeCalculator;
@@ -239,6 +240,7 @@ use yii\helpers\VarDumper;
  * @property bool $calledExpert
  * @property $quoteType
  * @property Language $language
+ * @property LeadPoorProcessing $minLpp
  *
  */
 class Lead extends ActiveRecord implements Objectable
@@ -1907,6 +1909,11 @@ class Lead extends ActiveRecord implements Objectable
     public function getLDep()
     {
         return $this->hasOne(Department::class, ['dep_id' => 'l_dep_id']);
+    }
+
+    public function getMinLpp()
+    {
+        return $this->hasOne(LeadPoorProcessing::class, ['lpp_lead_id' => 'id'])->orderBy(['lpp_expiration_dt' => SORT_ASC]);
     }
 
     /**

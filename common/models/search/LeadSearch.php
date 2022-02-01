@@ -2268,6 +2268,11 @@ class LeadSearch extends Lead
 //        }
 
         $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'leadChecklists', 'leadChecklists.lcType', 'employee']);
+        $query->with([
+           'minLpp' => static function (ActiveQuery $query) {
+                $query->joinWith('lppLppd')->andWhere(['lppd_enabled' => 1]);
+           }
+        ]);
 
         if ($this->expiration_dt) {
             $query->andWhere(new Expression(
@@ -2275,6 +2280,8 @@ class LeadSearch extends Lead
                 [':date' => date('Y-m-d', strtotime($this->expiration_dt))]
             ));
         }
+
+//        print_r($query->createCommand()->rawSql);die;
 
         return $dataProvider;
     }
