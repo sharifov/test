@@ -80,10 +80,15 @@ $this->params['breadcrumbs'][] = $this->title;
                 'clientOptions' => [
                     'autoclose' => true,
                     'format' => 'yyyy-mm-dd',
+                    'clearBtn' => true,
                 ],
                 'options' => [
                     'autocomplete' => 'off',
-                    'placeholder' => 'Choose Date'
+                    'placeholder' => 'Choose Date',
+                    'readonly' => '1',
+                ],
+                'clientEvents' => [
+                    'clearDate' => 'function (e) {$(e.target).find("input").change();}',
                 ],
             ]),
         ],
@@ -141,10 +146,15 @@ $this->params['breadcrumbs'][] = $this->title;
                 'clientOptions' => [
                     'autoclose' => true,
                     'format' => 'yyyy-mm-dd',
+                    'clearBtn' => true,
                 ],
                 'options' => [
                     'autocomplete' => 'off',
-                    'placeholder' => 'Choose Date'
+                    'placeholder' => 'Choose Date',
+                    'readonly' => '1',
+                ],
+                'clientEvents' => [
+                    'clearDate' => 'function (e) {$(e.target).find("input").change();}',
                 ],
             ]),
         ],
