@@ -5,6 +5,7 @@ namespace common\models;
 use common\components\jobs\CallOutEndedJob;
 use common\components\jobs\CallPriceJob;
 use common\components\jobs\CheckClientCallJoinToConferenceJob;
+use common\components\jobs\LeadPoorProcessingRemoverJob;
 use common\components\purifier\Purifier;
 use common\models\query\CallQuery;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
@@ -37,6 +38,7 @@ use src\model\callLog\services\CallLogTransferService;
 use src\model\client\notifications\ClientNotificationCanceler;
 use src\model\callLogFilterGuard\entity\CallLogFilterGuard;
 use src\model\conference\service\ConferenceDataService;
+use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
 use src\model\leadUserConversion\service\LeadUserConversionDictionary;
 use src\model\leadUserConversion\service\LeadUserConversionService;
 use src\model\phoneList\entity\PhoneList;
@@ -1370,6 +1372,11 @@ class Call extends \yii\db\ActiveRecord
 
             if ($this->isOut()) {
                 $this->cLead->updateLastAction();
+
+                if ($this->cLead->isProcessing()) {
+                    $job = new LeadPoorProcessingRemoverJob($this->cLead->id, [LeadPoorProcessingDataDictionary::KEY_NO_ACTION]);
+                    Yii::$app->queue_job->priority(100)->push($job);
+                }
             }
         }
 

@@ -39,7 +39,7 @@ class LeadPoorProcessingJob extends BaseJob implements JobInterface
         try {
             $leadPoorProcessingService = (new LeadPoorProcessingRuleFactory($this->leadId, $this->ruleKey))->create();
             if (!$leadPoorProcessingService->checkCondition()) {
-                throw new \RuntimeException('Check Condition failed');
+                throw new \RuntimeException('Check condition failed');
             }
             $leadPoorProcessingService->handle();
         } catch (\RuntimeException | \DomainException $throwable) {

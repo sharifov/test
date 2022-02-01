@@ -8,6 +8,8 @@ use src\helpers\ErrorsToStringHelper;
 use src\model\leadPoorProcessing\entity\LeadPoorProcessing;
 use src\model\leadPoorProcessing\entity\LeadPoorProcessingQuery;
 use src\model\leadPoorProcessing\repository\LeadPoorProcessingRepository;
+use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
+use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataQuery;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLog;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
 use src\model\leadPoorProcessingLog\repository\LeadPoorProcessingLogRepository;
@@ -57,8 +59,9 @@ class LeadPoorProcessingService
                     $leadPoorProcessingLogRepository = new LeadPoorProcessingLogRepository($leadPoorProcessingLog);
                     $leadPoorProcessingLogRepository->save(true);
 
-                    $leadPoorProcessing->delete();
-                    $removedCount++;
+                    if ($leadPoorProcessing->delete()) {
+                        $removedCount++;
+                    }
                 } catch (\RuntimeException | \DomainException $throwable) {
                     $message = ArrayHelper::merge(AppHelper::throwableLog($throwable, true), $logData);
                     \Yii::warning($message, 'LeadPoorProcessingService:removeFromLead:Exception');
@@ -69,5 +72,40 @@ class LeadPoorProcessingService
             }
         }
         return $removedCount;
+    }
+
+    public static function removeFromLeadAndKey(Lead $lead, string $dataKey): void
+    {
+        $logData = [
+            'leadId' => $lead->id,
+            'dataKey' => $dataKey
+        ];
+
+        try {
+            if (!$leadPoorProcessingData = LeadPoorProcessingDataQuery::getRuleByKey($dataKey)) {
+                throw new \RuntimeException('Rule not found by key(' . $dataKey . ')');
+            }
+            if (!$leadPoorProcessing = LeadPoorProcessingQuery::getByLeadAndKey($lead->id, $leadPoorProcessingData->lppd_id)) {
+                throw new \RuntimeException('LeadPoorProcessing not found (' . $lead->id . '/' . $leadPoorProcessingData->lppd_id . ')');
+            }
+
+            $leadPoorProcessingLog = LeadPoorProcessingLog::create(
+                $lead->id,
+                $leadPoorProcessing->lpp_lppd_id,
+                $lead->employee_id,
+                LeadPoorProcessingLogStatus::STATUS_DELETED
+            );
+
+            $leadPoorProcessing->delete();
+
+            $leadPoorProcessingLogRepository = new LeadPoorProcessingLogRepository($leadPoorProcessingLog);
+            $leadPoorProcessingLogRepository->save(true);
+        } catch (\RuntimeException | \DomainException $throwable) {
+            $message = ArrayHelper::merge(AppHelper::throwableLog($throwable, true), $logData);
+            \Yii::info($message, 'info\LeadPoorProcessingService:removeFromLeadAndKey:Exception');
+        } catch (\Throwable $throwable) {
+            $message = ArrayHelper::merge(AppHelper::throwableLog($throwable, true), $logData);
+            \Yii::error($message, 'LeadPoorProcessingService:removeFromLeadAndKey:Throwable');
+        }
     }
 }

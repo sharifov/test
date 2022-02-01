@@ -4,11 +4,14 @@ namespace common\models;
 
 use common\components\ChartTools;
 use common\components\CommunicationService;
+use common\components\jobs\LeadPoorProcessingRemoverJob;
 use common\models\query\EmailQuery;
 use DateTime;
 use src\behaviors\metric\MetricEmailCounterBehavior;
 use src\entities\cases\Cases;
 use src\helpers\email\TextConvertingHelper;
+use src\model\leadPoorProcessing\service\rules\LeadPoorProcessingNoAction;
+use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
 use src\services\email\EmailService;
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -449,6 +452,10 @@ class Email extends \yii\db\ActiveRecord
                 $this->e_error_message = 'Communication error: ' . ($errorData['message'] ?: $request['error']);
                 $this->save();
                 $out['error'] = $this->e_error_message;
+            }
+            if ($this->e_lead_id && in_array($tplType, LeadPoorProcessingNoAction::EMAIL_TPL_OFFER_LIST, true)) {
+                $job = new LeadPoorProcessingRemoverJob($this->e_lead_id, [LeadPoorProcessingDataDictionary::KEY_NO_ACTION]);
+                Yii::$app->queue_job->priority(100)->push($job);
             }
         } catch (\Throwable $exception) {
             $error = VarDumper::dumpAsString($exception->getMessage());

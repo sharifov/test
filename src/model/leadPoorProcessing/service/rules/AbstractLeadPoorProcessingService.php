@@ -30,7 +30,7 @@ class AbstractLeadPoorProcessingService
         $this->lead = $lead;
 
         if (!$rule = LeadPoorProcessingDataQuery::getRuleByKey($ruleKey)) {
-            throw new \RuntimeException('Rule not found by key(' . LeadPoorProcessingDataDictionary::KEY_LAST_ACTION . ')');
+            throw new \RuntimeException('Rule not found by key(' . $ruleKey . ')');
         }
         $this->rule = $rule;
     }

@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use common\components\BackOffice;
 use common\components\CommunicationService;
+use common\components\jobs\LeadPoorProcessingRemoverJob;
 use common\models\Call;
 use common\models\Client;
 use common\models\ClientEmail;
@@ -82,6 +83,7 @@ use src\model\lead\useCases\lead\import\LeadImportParseService;
 use src\model\lead\useCases\lead\import\LeadImportService;
 use src\model\lead\useCases\lead\import\LeadImportUploadForm;
 use src\model\lead\useCases\lead\link\LeadLinkChatForm;
+use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
 use src\model\leadUserConversion\service\LeadUserConversionDictionary;
 use src\model\leadUserConversion\service\LeadUserConversionService;
 use src\model\phone\AvailablePhoneList;
@@ -1152,7 +1154,6 @@ class LeadController extends FController
 
         $modelLeadCallExpert = new LeadCallExpert();
 
-
         if (!$lead->client->isExcluded()) {
             if ($modelLeadCallExpert->load(Yii::$app->request->post())) {
                 $modelLeadCallExpert->lce_agent_user_id = Yii::$app->user->id;
@@ -1162,6 +1163,9 @@ class LeadController extends FController
 
                 if ($modelLeadCallExpert->save()) {
                     $modelLeadCallExpert->lce_request_text = '';
+
+                    $job = new LeadPoorProcessingRemoverJob($lead->id, [LeadPoorProcessingDataDictionary::KEY_NO_ACTION]);
+                    Yii::$app->queue_job->priority(100)->push($job);
                 }
             }
         }

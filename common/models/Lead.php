@@ -44,6 +44,7 @@ use src\events\lead\LeadOwnerChangedEvent;
 use src\events\lead\LeadCountPassengersChangedEvent;
 use src\events\lead\LeadOwnerFreedEvent;
 use src\events\lead\LeadPendingEvent;
+use src\events\lead\LeadPoorProcessingEvent;
 use src\events\lead\LeadProcessingEvent;
 use src\events\lead\LeadRejectEvent;
 use src\events\lead\LeadSnoozeEvent;
@@ -1426,6 +1427,12 @@ class Lead extends ActiveRecord implements Objectable
 
         if (!$this->isProcessing()) {
             $this->setStatus(self::STATUS_PROCESSING);
+            $this->recordEvent(
+                new LeadPoorProcessingEvent(
+                    $this,
+                    LeadPoorProcessingDataDictionary::KEY_NO_ACTION
+                )
+            );
         }
     }
 

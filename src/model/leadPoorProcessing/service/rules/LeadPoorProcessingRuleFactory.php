@@ -23,6 +23,8 @@ class LeadPoorProcessingRuleFactory
         switch ($this->ruleKey) {
             case LeadPoorProcessingDataDictionary::KEY_LAST_ACTION:
                 return new LeadPoorProcessingLastAction($this->leadId, $this->ruleKey);
+            case LeadPoorProcessingDataDictionary::KEY_NO_ACTION:
+                return new LeadPoorProcessingNoAction($this->leadId, $this->ruleKey);
         }
         throw new \RuntimeException('ruleKey (' . $this->ruleKey . ') unprocessed');
     }
