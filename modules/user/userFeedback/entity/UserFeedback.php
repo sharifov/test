@@ -226,4 +226,29 @@ class UserFeedback extends ActiveRecord
     {
         return self::STATUS_LIST;
     }
+
+    public static function partitionDatesFrom(\DateTime $date): array
+    {
+        $monthBegin = date('Y-m-d', strtotime(date_format($date, 'Y-m-1')));
+        if (!$monthBegin) {
+            throw new \RuntimeException("invalid partition start date");
+        }
+
+        $partitionStartDate = date_create_from_format('Y-m-d', $monthBegin);
+        $partitionEndDate = date_create_from_format('Y-m-d', $monthBegin);
+
+        date_add($partitionEndDate, date_interval_create_from_date_string("1 month"));
+
+        return [$partitionStartDate, $partitionEndDate];
+    }
+
+    public static function createMonthlyPartition(\DateTime $partFromDateTime, \DateTime $partToDateTime): string
+    {
+        $db = self::getDb();
+        $partTableName = self::tableName() . "_" . date_format($partFromDateTime, "Y_m");
+        $cmd = $db->createCommand("create table " . $partTableName . " PARTITION OF " . self::tableName() .
+            " FOR VALUES FROM ('" . date_format($partFromDateTime, "Y-m-d") . "') TO ('" . date_format($partToDateTime, "Y-m-d") . "')");
+        $cmd->execute();
+        return $partTableName;
+    }
 }
