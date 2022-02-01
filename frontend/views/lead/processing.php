@@ -388,6 +388,19 @@ $bundle = \frontend\assets\TimerAsset::register($this);
         }
     ]);
 
+    $js = <<<JS
+  $('.enable-timer-lpp').each( function (i, e) {
+      let seconds = $(e).attr('data-seconds');
+      if (seconds < 0) {
+          var params = {format: '%H:%M:%S', seconds: Math.abs(seconds)};
+      } else {
+          var params = {format: '%H:%M:%S', countdown: true, duration: seconds + 's'};
+      }
+      $(e).timer(params).timer('start');
+  });
+JS;
+    $this->registerJs($js, \yii\web\View::POS_READY);
+
     ?>
 
     <?php Pjax::end(); ?>
@@ -436,17 +449,3 @@ $this->registerJsFile('/js/jquery.countdown-2.2.0/jquery.countdown.min.js', [
         \yii\web\JqueryAsset::class
     ]
 ]);
-
-$js = <<<JS
-  $('.enable-timer-lpp').each( function (i, e) {
-      let seconds = $(e).attr('data-seconds');
-      if (seconds < 0) {
-          var params = {format: '%H:%M:%S', seconds: Math.abs(seconds)};
-      } else {
-          var params = {format: '%H:%M:%S', countdown: true, duration: seconds + 's'};
-      }
-      $(e).timer(params).timer('start');
-  });
-JS;
-$this->registerJs($js, \yii\web\View::POS_READY);
-
