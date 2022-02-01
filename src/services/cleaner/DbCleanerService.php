@@ -6,12 +6,16 @@ use common\models\ApiLog;
 use common\models\Call;
 use common\models\GlobalLog;
 use common\models\Log;
+use common\models\Notifications;
 use DateTime;
 use frontend\models\UserSiteActivity;
+use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLog;
 use src\services\cleaner\cleaners\ApiLogCleaner;
 use src\services\cleaner\cleaners\CallCleaner;
 use src\services\cleaner\cleaners\GlobalLogCleaner;
+use src\services\cleaner\cleaners\LeadPoorProcessingLogCleaner;
 use src\services\cleaner\cleaners\LogCleaner;
+use src\services\cleaner\cleaners\NotificationsCleaner;
 use src\services\cleaner\cleaners\UserMonitorCleaner;
 use src\services\cleaner\cleaners\UserSiteActivityCleaner;
 use yii\base\Exception;
@@ -131,6 +135,8 @@ class DbCleanerService
             GlobalLog::tableName() => GlobalLogCleaner::class,
             UserMonitor::tableName() => UserMonitorCleaner::class,
             UserSiteActivity::tableName() => UserSiteActivityCleaner::class,
+            Notifications::tableName() => NotificationsCleaner::class,
+            LeadPoorProcessingLog::tableName() => LeadPoorProcessingLogCleaner::class,
         ];
 
         $this->classMap = ArrayHelper::merge($classMap, $map);

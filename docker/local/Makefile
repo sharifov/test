@@ -4,7 +4,9 @@ down:
 	docker-compose down --remove-orphans
 
 up:
-	docker-compose up
+	docker-compose up -d
+
+restart: down up
 
 app-console:
 	docker-compose run --rm console bash
@@ -23,4 +25,6 @@ init-config:
 	-w=${APP_PATH} \
 	--user ${USER_ID}:${USER_GID} \
 	${REGISTRY}crm-php-cli:${IMAGE_TAG} \
-	php init --env=Local --overwrite=All
+	php init --env=Local --overwrite=All \
+	&& rm ${APP_PATH}/common/config/supervisor/centrifugo.conf \
+	&& rm ${APP_PATH}/common/config/supervisor/socket-server.conf

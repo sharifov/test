@@ -4,6 +4,7 @@
  * This is the template for generating a CRUD controller class file.
  */
 
+use frontend\controllers\FController;
 use yii\db\ActiveRecordInterface;
 use yii\helpers\StringHelper;
 
@@ -24,8 +25,12 @@ $urlParams = $generator->generateUrlParams();
 $actionParams = $generator->generateActionParams();
 $actionParamComments = $generator->generateActionParamComments();
 
+if ($generator->baseFrontendController) {
+    $generator->baseControllerClass = FController::class;
+}
+
 $isCrud = false;
-if (stripos($controllerClass, 'crud') !== false) {
+if ($generator->useLayoutCrud || stripos($controllerClass, 'crud') !== false) {
     $isCrud = true;
 }
 
@@ -61,15 +66,17 @@ class <?= $controllerClass ?> extends <?= StringHelper::basename($generator->bas
 
     public function behaviors(): array
     {
-        $behaviors = [
-            'verbs' => [
-                'class' => VerbFilter::class,
-                'actions' => [
-                    'delete' => ['POST'],
+        return array_merge(
+            parent::behaviors(),
+            [
+                'verbs' => [
+                    'class' => VerbFilter::class,
+                    'actions' => [
+                        'delete' => ['POST'],
+                    ],
                 ],
-            ],
-        ];
-        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+            ]
+        );
     }
 <?php else : ?>
     /**
@@ -77,16 +84,19 @@ class <?= $controllerClass ?> extends <?= StringHelper::basename($generator->bas
     */
     public function behaviors(): array
     {
-        return [
-            'verbs' => [
-                'class' => VerbFilter::class,
-                'actions' => [
-                    'delete' => ['POST'],
+        return array_merge(
+            parent::behaviors(),
+            [
+                'verbs' => [
+                    'class' => VerbFilter::class,
+                    'actions' => [
+                        'delete' => ['POST'],
+                    ],
                 ],
-            ],
-        ];
+            ]
+        );
     }
-    <?php endif; ?>
+<?php endif; ?>
 
     /**
      * @return string
@@ -104,6 +114,18 @@ class <?= $controllerClass ?> extends <?= StringHelper::basename($generator->bas
 <?php else : ?>
         $dataProvider = new ActiveDataProvider([
             'query' => <?= $modelClass ?>::find(),
+            /*
+            'pagination' => [
+                'pageSize' => 50
+            ],
+            'sort' => [
+                'defaultOrder' => [
+<?php foreach ($pks as $pk): ?>
+                    <?= "'$pk' => SORT_DESC,\n" ?>
+<?php endforeach; ?>
+                ]
+            ],
+            */
         ]);
 
         return $this->render('index', [
@@ -115,7 +137,7 @@ class <?= $controllerClass ?> extends <?= StringHelper::basename($generator->bas
     /**
      * <?= implode("\n     * ", $actionParamComments) . "\n" ?>
      * @return string
-     * @throws NotFoundHttpException if the model cannot be found
+     * @throws NotFoundHttpException
      */
     public function actionView(<?= $actionParams ?>): string
     {
@@ -131,8 +153,12 @@ class <?= $controllerClass ?> extends <?= StringHelper::basename($generator->bas
     {
         $model = new <?= $modelClass ?>();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', <?= $urlParams ?>]);
+        if ($this->request->isPost) {
+            if ($model->load($this->request->post()) && $model->save()) {
+                return $this->redirect(['view', <?= $urlParams ?>]);
+            }
+        } else {
+            $model->loadDefaultValues();
         }
 
         return $this->render('create', [
@@ -149,7 +175,7 @@ class <?= $controllerClass ?> extends <?= StringHelper::basename($generator->bas
     {
         $model = $this->findModel(<?= $actionParams ?>);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
             return $this->redirect(['view', <?= $urlParams ?>]);
         }
 
@@ -180,15 +206,11 @@ class <?= $controllerClass ?> extends <?= StringHelper::basename($generator->bas
     protected function findModel(<?= $actionParams ?>): <?= $modelClass  . "\n" ?>
     {
 <?php
-if (count($pks) === 1) {
-    $condition = '$id';
-} else {
-    $condition = [];
-    foreach ($pks as $pk) {
-        $condition[] = "'$pk' => \$$pk";
-    }
-    $condition = '[' . implode(', ', $condition) . ']';
+$condition = [];
+foreach ($pks as $pk) {
+    $condition[] = "'$pk' => \$$pk";
 }
+$condition = '[' . implode(', ', $condition) . ']';
 ?>
         if (($model = <?= $modelClass ?>::findOne(<?= $condition ?>)) !== null) {
             return $model;

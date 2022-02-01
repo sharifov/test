@@ -77,6 +77,11 @@ class LeadBadgeCounter implements BadgeCounterInterface
                         $result['business-inbox'] = $count;
                     }
                     break;
+                case 'extra-queue':
+                    if ($count = $this->getLeadExtraQueue()) {
+                        $result['extra-queue'] = $count;
+                    }
+                    break;
             }
         }
         return $result;
@@ -275,5 +280,13 @@ class LeadBadgeCounter implements BadgeCounterInterface
             return $limit;
         }
         return $count;
+    }
+
+    private function getLeadExtraQueue(): ?int
+    {
+        if (!Yii::$app->user->can('/lead/extra-queue')) {
+            return null;
+        }
+        return $this->leadBadgesRepository->getExtraQueueCount();
     }
 }

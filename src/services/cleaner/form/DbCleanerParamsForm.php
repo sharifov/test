@@ -32,6 +32,7 @@ class DbCleanerParamsForm extends Model
     public $strict_date;
 
     private $brokenParams = [];
+    private int $maxDay = 31;
 
     public function rules(): array
     {
@@ -44,7 +45,7 @@ class DbCleanerParamsForm extends Model
             [['hour', 'day', 'month', 'year'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
 
             ['hour', 'integer', 'min' => 1, 'max' => 24],
-            ['day', 'integer', 'min' => 1, 'max' => 31],
+            ['day', 'integer', 'min' => 1, 'max' => $this->maxDay],
             ['month', 'integer', 'min' => 1, 'max' => 12],
             ['year', 'integer', 'min' => 1, 'max' => 10],
 
@@ -114,5 +115,11 @@ class DbCleanerParamsForm extends Model
     public function formName(): string
     {
         return '';
+    }
+
+    public function setMaxDay(int $maxDay): DbCleanerParamsForm
+    {
+        $this->maxDay = $maxDay;
+        return $this;
     }
 }

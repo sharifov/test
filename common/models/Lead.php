@@ -4,6 +4,7 @@ namespace common\models;
 
 use common\components\EmailService;
 use common\components\ga\GaHelper;
+use common\components\jobs\LeadPoorProcessingJob;
 use common\components\jobs\UpdateLeadBOJob;
 use common\components\Metrics;
 use common\components\purifier\Purifier;
@@ -36,12 +37,14 @@ use src\events\lead\LeadCreatedEvent;
 use src\events\lead\LeadCreatedManuallyEvent;
 use src\events\lead\LeadCreatedNewEvent;
 use src\events\lead\LeadDuplicateDetectedEvent;
+use src\events\lead\LeadExtraQueueEvent;
 use src\events\lead\LeadFollowUpEvent;
 use src\events\lead\LeadNewEvent;
 use src\events\lead\LeadOwnerChangedEvent;
 use src\events\lead\LeadCountPassengersChangedEvent;
 use src\events\lead\LeadOwnerFreedEvent;
 use src\events\lead\LeadPendingEvent;
+use src\events\lead\LeadPoorProcessingEvent;
 use src\events\lead\LeadProcessingEvent;
 use src\events\lead\LeadRejectEvent;
 use src\events\lead\LeadSnoozeEvent;
@@ -64,6 +67,8 @@ use src\model\clientChatLead\entity\ClientChatLead;
 use src\model\lead\useCases\lead\api\create\LeadCreateForm;
 use src\model\lead\useCases\lead\import\LeadImportForm;
 use src\model\leadData\entity\LeadData;
+use src\model\leadPoorProcessing\entity\LeadPoorProcessing;
+use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
 use src\model\leadUserConversion\entity\LeadUserConversion;
 use src\services\lead\calculator\LeadTripTypeCalculator;
 use src\services\lead\calculator\SegmentDTO;
@@ -236,6 +241,7 @@ use yii\helpers\VarDumper;
  * @property bool $calledExpert
  * @property $quoteType
  * @property Language $language
+ * @property LeadPoorProcessing $minLpp
  *
  */
 class Lead extends ActiveRecord implements Objectable
@@ -266,6 +272,7 @@ class Lead extends ActiveRecord implements Objectable
     public const STATUS_BOOK_FAILED = 14;
     public const STATUS_ALTERNATIVE = 15;
     public const STATUS_NEW         = 16;
+    public const STATUS_EXTRA_QUEUE = 17;
 
     public const STATUS_LIST = [
         self::STATUS_PENDING        => 'Pending',
@@ -280,6 +287,7 @@ class Lead extends ActiveRecord implements Objectable
         self::STATUS_BOOK_FAILED    => 'Book failed',
         self::STATUS_ALTERNATIVE    => 'Alternative',
         self::STATUS_NEW            => 'New',
+        self::STATUS_EXTRA_QUEUE    => 'Extra queue',
     ];
 
     public const TRAVEL_DATE_PASSED_STATUS_LIST = [
@@ -1414,6 +1422,12 @@ class Lead extends ActiveRecord implements Objectable
         );
 
         $this->recordEvent(new LeadTaskEvent($this), LeadTaskEvent::class);
+        $this->recordEvent(
+            new LeadPoorProcessingEvent(
+                $this,
+                LeadPoorProcessingDataDictionary::KEY_NO_ACTION
+            )
+        );
 
         $this->changeOwner($newOwnerId);
 
@@ -1766,7 +1780,21 @@ class Lead extends ActiveRecord implements Objectable
      */
     public function isAvailableToTake(): bool
     {
-        return in_array($this->status, [null, self::STATUS_TRASH, self::STATUS_PENDING, self::STATUS_FOLLOW_UP, self::STATUS_SNOOZE, self::STATUS_NEW, self::STATUS_BOOK_FAILED, self::STATUS_ALTERNATIVE], true);
+        return in_array(
+            $this->status,
+            [
+                null,
+                self::STATUS_TRASH,
+                self::STATUS_PENDING,
+                self::STATUS_FOLLOW_UP,
+                self::STATUS_SNOOZE,
+                self::STATUS_NEW,
+                self::STATUS_BOOK_FAILED,
+                self::STATUS_ALTERNATIVE,
+                self::STATUS_EXTRA_QUEUE,
+            ],
+            true
+        );
     }
 
     /**
@@ -1888,6 +1916,11 @@ class Lead extends ActiveRecord implements Objectable
     public function getLDep()
     {
         return $this->hasOne(Department::class, ['dep_id' => 'l_dep_id']);
+    }
+
+    public function getMinLpp()
+    {
+        return $this->hasOne(LeadPoorProcessing::class, ['lpp_lead_id' => 'id'])->orderBy(['lpp_expiration_dt' => SORT_ASC]);
     }
 
     /**
@@ -2173,7 +2206,14 @@ class Lead extends ActiveRecord implements Objectable
      */
     public function updateLastAction(): int
     {
-        return self::updateAll(['l_last_action_dt' => date('Y-m-d H:i:s')], ['id' => $this->id]);
+        $result = self::updateAll(['l_last_action_dt' => date('Y-m-d H:i:s')], ['id' => $this->id]);
+
+        if ($this->isProcessing()) {
+            $job = new LeadPoorProcessingJob($this->id, LeadPoorProcessingDataDictionary::KEY_LAST_ACTION);
+            Yii::$app->queue_job->priority(100)->push($job);
+        }
+
+        return $result;
     }
 
 //
@@ -5023,5 +5063,32 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
             ['title' => 'Send:' . ((int) $quotes['send_q']) .
             ' / Total:' . ($quotes['send_q'] + $quotes['not_send_q'])]
         );
+    }
+
+    public function extraQueue(?int $newOwnerId = null, ?int $creatorId = null, ?string $reason = ''): void
+    {
+        if ($this->isExtraQueue()) {
+            return;
+        }
+
+        $this->recordEvent(
+            new LeadExtraQueueEvent(
+                $this,
+                $this->status,
+                $this->employee_id,
+                $newOwnerId,
+                $creatorId,
+                $reason
+            )
+        );
+
+        $this->changeOwner($newOwnerId);
+
+        $this->setStatus(self::STATUS_EXTRA_QUEUE);
+    }
+
+    public function isExtraQueue(): bool
+    {
+        return $this->status === self::STATUS_EXTRA_QUEUE;
     }
 }

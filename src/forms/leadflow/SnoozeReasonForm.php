@@ -64,6 +64,7 @@ class SnoozeReasonForm extends Model
             ['other', 'filter', 'filter' => 'trim', 'skipOnArray' => true],
             ['other', 'string', 'max' => 250],
 
+            ['snoozeFor', 'required'],
             ['snoozeFor', 'string'],
             ['snoozeFor', function () {
                 if (date('Y-m-d H:i', strtotime($this->snoozeFor)) != $this->snoozeFor) {
