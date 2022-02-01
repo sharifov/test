@@ -20,7 +20,7 @@ class LeadCommunicationBlockAbacObject extends AbacBaseModel implements AbacInte
 
     private const ATTR_PHONE_FROM_PERSONAL = [
         'optgroup' => 'Lead',
-        'id' => self::NS . 'phone_from_personal',
+        'id' => self::NS . '/phone_from_personal',
         'field' => 'phone_from_personal',
         'label' => 'Phone From Personal',
         'type' => self::ATTR_TYPE_BOOLEAN,
@@ -32,9 +32,21 @@ class LeadCommunicationBlockAbacObject extends AbacBaseModel implements AbacInte
 
     private const ATTR_PHONE_FROM_GENERAL = [
         'optgroup' => 'Lead',
-        'id' => self::NS . 'phone_from_general',
+        'id' => self::NS . '/phone_from_general',
         'field' => 'phone_from_general',
         'label' => 'Phone From General',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
+    private const ATTR_PROJECT_SMS_ENABLE = [
+        'optgroup' => 'Project',
+        'id' => self::NS . '/project_sms_enable',
+        'field' => 'project_sms_enable',
+        'label' => 'Project SMS enable',
         'type' => self::ATTR_TYPE_BOOLEAN,
         'input' => self::ATTR_INPUT_RADIO,
         'values' => ['true' => 'True', 'false' => 'False'],
@@ -69,6 +81,7 @@ class LeadCommunicationBlockAbacObject extends AbacBaseModel implements AbacInte
                 LeadAbacObject::ATTR_CLIENT_IS_EXCLUDED,
                 self::ATTR_PHONE_FROM_PERSONAL,
                 self::ATTR_PHONE_FROM_GENERAL,
+                self::ATTR_PROJECT_SMS_ENABLE,
             ],
         ];
 

@@ -16,7 +16,6 @@
  * @var $itineraryForm \src\forms\lead\ItineraryEditForm
  * @var $dataProviderOffers ActiveDataProvider
  * @var $dataProviderOrders ActiveDataProvider
- * @var bool $smsEnabled
  * @var AbacCallFromNumberList $callFromNumberList
  * @var AbacSmsFromNumberList $smsFromNumberList
  * @var AbacEmailList $emailFromList
@@ -40,7 +39,7 @@ use modules\lead\src\abac\communicationBlock\LeadCommunicationBlockAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
 use src\auth\Auth;
 use src\model\call\useCase\createCall\fromLead\AbacCallFromNumberList;
-use src\model\email\services\AbacEmailList;
+use src\model\email\useCase\send\fromLead\AbacEmailList;
 use src\model\sms\useCase\send\fromLead\AbacSmsFromNumberList;
 use yii\bootstrap4\Modal;
 use yii\data\ActiveDataProvider;
@@ -209,7 +208,6 @@ $disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIEN
                     'lead' => $lead,
                     'unsubscribe' => $unsubscribe,
                     'unsubscribedEmails' => $unsubscribedEmails,
-                    'smsEnabled' => $smsEnabled,
                     'disableMasking' => $disableMasking,
                     'callFromNumberList' => $callFromNumberList,
                     'smsFromNumberList' => $smsFromNumberList,

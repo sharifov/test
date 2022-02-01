@@ -9,7 +9,6 @@
  * @var $previewSmsForm LeadPreviewSmsForm
  * @var $isAdmin bool
  * @var $lead Lead
- * @var bool $smsEnabled
  * @var $unsubscribedEmails array
  * @var $disableMasking bool
  * @var $unsubscribe

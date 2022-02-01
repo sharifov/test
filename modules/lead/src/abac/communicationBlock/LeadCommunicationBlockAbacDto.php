@@ -9,6 +9,7 @@ use common\models\Lead;
  * @property bool $has_owner
  * @property string $status_name
  * @property string $project_name
+ * @property bool $project_sms_enable
  * @property string $department_name
  * @property bool $client_is_excluded
  * @property bool $call_from_personal
@@ -24,6 +25,7 @@ class LeadCommunicationBlockAbacDto extends \stdClass
     public bool $has_owner;
     public string $status_name;
     public string $project_name;
+    public bool $project_sms_enable;
     public string $department_name;
     public string $client_is_excluded;
     public bool $call_from_personal;
@@ -46,6 +48,11 @@ class LeadCommunicationBlockAbacDto extends \stdClass
         $this->has_owner = $lead->hasOwner();
         $this->status_name = Lead::STATUS_LIST[$lead->status] ?? '';
         $this->project_name = $lead->project->name ?? '';
+        if ($lead->project->getParams()->sms->isEnabled()) {
+            $this->project_sms_enable = true;
+        } else {
+            $this->project_sms_enable = false;
+        }
         $this->department_name = $lead->lDep->dep_name ?? '';
         $this->client_is_excluded = (bool)$lead->client->cl_excluded;
         if ($callFromNumbers) {

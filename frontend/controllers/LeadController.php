@@ -582,15 +582,10 @@ class LeadController extends FController
             }
         }
 
-        $smsEnabled = true;
-        if (!$lead->project->getParams()->sms->isEnabled()) {
-            $smsEnabled = false;
-        }
-
         $previewSmsForm = new LeadPreviewSmsForm($smsFromNumberList);
         $previewSmsForm->is_send = false;
 
-        if ($smsEnabled && $previewSmsForm->load(Yii::$app->request->post())) {
+        if ($smsFromNumberList->canSendSms() && $previewSmsForm->load(Yii::$app->request->post())) {
             $previewSmsForm->s_lead_id = $lead->id;
             if ($previewSmsForm->validate()) {
                 $sms = new Sms();
@@ -794,7 +789,7 @@ class LeadController extends FController
                 }
 
 
-                if ($smsEnabled && $comForm->c_type_id == CommunicationForm::TYPE_SMS) {
+                if ($smsFromNumberList->canSendSms() && $comForm->c_type_id == CommunicationForm::TYPE_SMS) {
                     $comForm->c_preview_sms = 1;
 
                     /** @var CommunicationService $communication */
@@ -1019,7 +1014,6 @@ class LeadController extends FController
             'dataProviderOffers'    => $dataProviderOffers,
             'dataProviderOrders'    => $dataProviderOrders,
 
-            'smsEnabled' => $smsEnabled,
             'callFromNumberList' => $callFromNumberList,
             'smsFromNumberList' => $smsFromNumberList,
             'emailFromList' => $emailFromList,
