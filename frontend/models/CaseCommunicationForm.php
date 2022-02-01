@@ -151,13 +151,6 @@ class CaseCommunicationForm extends Model
             ],
 
 
-            /*[['c_sms_message'], 'required', 'when' => function (CommunicationForm $model) {
-                return $model->c_sms_tpl_id != self::TPL_TYPE_SMS_OFFER && $model->c_type_id == self::TYPE_SMS;
-            },
-                'whenClient' => "function (attribute, value) { return $('#c_type_id').val() == " . self::TYPE_SMS . " && $('#c_sms_tpl_id').val() != " . self::TPL_TYPE_SMS_OFFER . '; }'
-            ],*/
-
-
             [['c_phone_number'], 'required', 'when' => function (self $model) {
                 return (int) $model->c_type_id === self::TYPE_VOICE;
             },
@@ -222,7 +215,7 @@ class CaseCommunicationForm extends Model
             [['dep_email_id'], 'exist', 'on' => self::SCENARIO_EMAIL_DEPARTMENT, 'targetClass' => DepartmentEmailProject::class, 'targetAttribute' => ['dep_email_id' => 'dep_id'], 'message' => 'Not found Department email'],
 
             ['c_sms_from', 'string'],
-            ['c_sms_from', 'required', 'when' => static function (CommunicationForm $model) {
+            ['c_sms_from', 'required', 'when' => static function (CaseCommunicationForm $model) {
                 return (int) $model->c_type_id === self::TYPE_SMS;
             },
                 'whenClient' => "function (attribute, value) {
@@ -235,7 +228,7 @@ class CaseCommunicationForm extends Model
             }, 'skipOnError' => true, 'skipOnEmpty' => true],
 
             ['c_email_from', 'string'],
-            ['c_email_from', 'required', 'when' => static function (CommunicationForm $model) {
+            ['c_email_from', 'required', 'when' => static function (CaseCommunicationForm $model) {
                 return (int) $model->c_type_id === self::TYPE_EMAIL;
             },
                 'whenClient' => "function (attribute, value) {
