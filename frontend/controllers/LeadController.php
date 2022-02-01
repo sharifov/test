@@ -661,8 +661,6 @@ class LeadController extends FController
                 $project = $lead->project;
 
                 if ($comForm->c_type_id == CommunicationForm::TYPE_EMAIL) {
-                    //VarDumper::dump($comForm->quoteList, 10, true); exit;
-
                     $comForm->c_preview_email = 1;
 
                     /** @var CommunicationService $communication */
@@ -778,8 +776,8 @@ class LeadController extends FController
                         //VarDumper::dump($mailPreview, 10, true);// exit;
                     } else {
                         $previewEmailForm->e_email_message = $comForm->c_email_message;
-                        $previewEmailForm->e_email_message_origin = $comForm->c_email_message;
                         $previewEmailForm->e_email_subject = $comForm->c_email_subject;
+                        $previewEmailForm->e_email_subject_origin = $comForm->c_email_subject;
                         $previewEmailForm->e_email_message_edited = false;
                         $previewEmailForm->e_email_from = $comForm->c_email_from;
                         $previewEmailForm->e_email_to = $comForm->c_email_to;
@@ -789,7 +787,7 @@ class LeadController extends FController
                 }
 
 
-                if ($smsFromNumberList->canSendSms() && $comForm->c_type_id == CommunicationForm::TYPE_SMS) {
+                if ($comForm->c_type_id == CommunicationForm::TYPE_SMS && $smsFromNumberList->canSendSms()) {
                     $comForm->c_preview_sms = 1;
 
                     /** @var CommunicationService $communication */

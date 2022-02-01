@@ -8,6 +8,7 @@ return [
     'modules' => [
         'order' => \modules\order\src\abac\OrderAbacObject::class,
         'case' => \modules\cases\src\abac\CasesAbacObject::class,
+        'case-communication' => \modules\cases\src\abac\communicationBlock\CaseCommunicationBlockAbacObject::class,
         'lead' => \modules\lead\src\abac\LeadAbacObject::class,
         'lead-communication' => \modules\lead\src\abac\communicationBlock\LeadCommunicationBlockAbacObject::class,
         'email' => \modules\email\src\abac\EmailAbacObject::class,

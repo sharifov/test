@@ -7,11 +7,12 @@
  * @var $model Cases
  * @var $previewEmailForm CasePreviewEmailForm
  * @var $previewSmsForm CasePreviewSmsForm
- * @var $isAdmin bool
  * @var $isCommunicationLogEnabled bool
- * @var bool $smsEnabled
  * @var array $unsubscribedEmails
  * @var $disableMasking bool
+ * @var AbacCallFromNumberList $callFromNumberList
+ * @var AbacSmsFromNumberList $smsFromNumberList
+ * @var AbacEmailList $emailFromList
  */
 
 use common\models\Call;
@@ -29,8 +30,10 @@ use src\entities\cases\Cases;
 use src\helpers\communication\StatisticsHelper;
 use src\helpers\projectLocale\ProjectLocaleHelper;
 use src\helpers\setting\SettingHelper;
-use src\model\call\useCase\createCall\fromCase\AbacPhoneList;
+use src\model\call\useCase\createCall\fromCase\AbacCallFromNumberList;
+use src\model\email\useCase\send\fromCase\AbacEmailList;
 use src\model\project\entity\projectLocale\ProjectLocale;
+use src\model\sms\useCase\send\fromCase\AbacSmsFromNumberList;
 use yii\helpers\Html;
 use yii\bootstrap4\Modal;
 use yii\helpers\Url;
@@ -65,7 +68,6 @@ $canAttachFiles = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EM
 /** @abac $abacDto, EmailAbacObject::ACT_VIEW, EmailAbacObject::ACTION_SHOW_EMAIL_DATA, Restrict access to view emails on case or lead*/
 $canShowEmailData = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SHOW_EMAIL_DATA);
 
-$phoneFromList = new AbacPhoneList(Auth::user(), $model);
 ?>
 
 <div class="x_panel">
@@ -335,59 +337,49 @@ $phoneFromList = new AbacPhoneList(Auth::user(), $model);
                         <div class="row">
                             <div class="col-sm-3 form-group">
                                 <?php
-                                    $typeList = [];
-                                    $agentParams = \common\models\UserProjectParams::find()->where(['upp_project_id' => $model->cs_project_id, 'upp_user_id' => Yii::$app->user->id])->withEmailList()->withPhoneList()->limit(1)->one();
+                                $typeList = [];
+                                $call_type = \common\models\UserProfile::find()->select('up_call_type_id')->where(['up_user_id' => Yii::$app->user->id])->one();
 
-                                    /** @var \common\models\Employee $userModel */
-                                    $userModel = Yii::$app->user->identity;
-
-
-                                    $call_type = \common\models\UserProfile::find()->select('up_call_type_id')->where(['up_user_id' => Yii::$app->user->id])->one();
-
-
-                                if ($call_type && $call_type->up_call_type_id && $phoneFromList->canMakeCall()) {
-                                    $call_type_id = $call_type->up_call_type_id;
-                                } else {
-                                    $call_type_id = \common\models\UserProfile::CALL_TYPE_OFF;
+                                if ($call_type && $call_type->up_call_type_id && $callFromNumberList->canMakeCall()) {
+                                    $typeList[\frontend\models\CaseCommunicationForm::TYPE_VOICE] = \frontend\models\CaseCommunicationForm::TYPE_LIST[\frontend\models\CaseCommunicationForm::TYPE_VOICE];
                                 }
 
-
-                                if ($agentParams) {
-                                    foreach (\frontend\models\CommunicationForm::TYPE_LIST as $tk => $itemName) {
-                                        if ($tk == \frontend\models\CommunicationForm::TYPE_EMAIL) {
-                                            if ($model->isDepartmentSupport()) {
-                                                $typeList[$tk] = $itemName;
-                                            } elseif ($agentParams->getEmail()) {
-                                                $typeList[$tk] = $itemName . ' (' . $agentParams->getEmail() . ')';
-                                            }
-                                        }
-
-                                        if ($tk == \frontend\models\CommunicationForm::TYPE_SMS && $smsEnabled) {
-                                            if ($model->isDepartmentSupport()) {
-                                                $typeList[$tk] = $itemName;
-                                            } elseif ($agentParams->getPhone()) {
-                                                $typeList[$tk] = $itemName . ' (' . $agentParams->getPhone() . ')';
-                                            }
-                                        }
-                                    }
+                                if ($smsFromNumberList->canSendSms()) {
+                                    $typeList[\frontend\models\CaseCommunicationForm::TYPE_SMS] = \frontend\models\CaseCommunicationForm::TYPE_LIST[\frontend\models\CaseCommunicationForm::TYPE_SMS];
                                 }
 
-                                if ($call_type_id) {
-                                    $callTypeName = \common\models\UserProfile::CALL_TYPE_LIST[$call_type_id] ?? '-';
-                                    $typeList[\frontend\models\CommunicationForm::TYPE_VOICE] = \frontend\models\CommunicationForm::TYPE_LIST[\frontend\models\CommunicationForm::TYPE_VOICE] . ' (' . $callTypeName . ')';
+                                if ($emailFromList->canSendEmail()) {
+                                    $typeList[\frontend\models\CaseCommunicationForm::TYPE_EMAIL] = \frontend\models\CaseCommunicationForm::TYPE_LIST[\frontend\models\CaseCommunicationForm::TYPE_EMAIL];
                                 }
-
-
                                 ?>
 
-
-                                <?= $communicationActiveForm->field($comForm, 'c_type_id')->dropDownList($typeList, ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_type_id']) ?>
+                                <?php if ($typeList) : ?>
+                                    <?= $communicationActiveForm->field($comForm, 'c_type_id')->dropDownList($typeList, ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_type_id']) ?>
+                                <?php endif;?>
                                 <?= $communicationActiveForm->field($comForm, 'c_quotes')->hiddenInput(['id' => 'c_quotes'])->label(false); ?>
+                            </div>
+
+                            <div class="col-sm-3 form-group message-field-sms" id="sms-phone-from-group">
+                                <?php
+                                if (!$comForm->c_sms_from) {
+                                    $comForm->c_sms_from = $smsFromNumberList->first();
+                                }
+                                ?>
+                                <?= $communicationActiveForm->field($comForm, 'c_sms_from')->dropDownList($smsFromNumberList->format(), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_from']) ?>
                             </div>
 
                             <div class="col-sm-3 form-group message-field-sms" id="sms-template-group">
                                 <?php //= $form->field($comForm, 'c_sms_tpl_id')->dropDownList(\common\models\SmsTemplateType::getList(false), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_id'])?>
                                 <?= $communicationActiveForm->field($comForm, 'c_sms_tpl_key')->dropDownList(\common\models\SmsTemplateType::getKeyList(false, $model->cs_dep_id, $model->cs_project_id), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_key']) ?>
+                            </div>
+
+                            <div class="col-sm-3 form-group message-field-email" id="email-from-address" style="display: none;">
+                                <?php
+                                if (!$comForm->c_email_from) {
+                                    $comForm->c_email_from = $emailFromList->first();
+                                }
+                                ?>
+                                <?= $communicationActiveForm->field($comForm, 'c_email_from')->dropDownList($emailFromList->format(), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_email_from']) ?>
                             </div>
 
                             <div class="col-sm-3 form-group message-field-email" id="email-address" style="display: none;">
@@ -421,29 +413,6 @@ $phoneFromList = new AbacPhoneList(Auth::user(), $model);
                                     ) ?>
                             </div>
 
-                            <?php if ($model->isDepartmentSupport()) : ?>
-                                <div class="col-md-3 form-group message-field-email" id="department-emails">
-                                    <?php
-                                    $departmentEmailsList = [];
-                                    /** @var DepartmentEmailProject[] $departmentEmails */
-                                    $departmentEmails = $model->getDepartmentEmailsByProjectAndDepartment()->where(['dep_default' => \common\models\DepartmentPhoneProject::DEP_DEFAULT_TRUE])->withEmailList()->all();
-                                    foreach ($departmentEmails as $departmentEmail) {
-                                        if ($departmentEmail->getEmail()) {
-                                            $departmentEmailsList[$departmentEmail->dep_id] = $departmentEmail->getEmail();
-                                        }
-                                    }
-                                    ?>
-                                    <?php
-                                        $optionsEmail = ['class' => 'form-control'];
-                                    if (count($departmentEmailsList) > 1) {
-                                        $optionsEmail['prompt'] = '---';
-                                    }
-                                    ?>
-                                    <?php //= $form->field($comForm,'dep_email_id')->dropDownList(\yii\helpers\ArrayHelper::map($departmentEmails, 'dep_id', 'dep_email'), $optionsEmail)?>
-                                    <?= $communicationActiveForm->field($comForm, 'dep_email_id')->dropDownList($departmentEmailsList, $optionsEmail) ?>
-                                </div>
-                            <?php endif; ?>
-
                             <div class="col-sm-12 form-group message-field-email" id="email-subtitle-group" style="display: none;">
                                 <?= $communicationActiveForm->field($comForm, 'c_email_subject')->textInput(['class' => 'form-control', 'id' => 'email-subtitle', 'maxlength' => true]) ?>
                             </div>
@@ -454,36 +423,15 @@ $phoneFromList = new AbacPhoneList(Auth::user(), $model);
 
                             <div class="col-sm-3 form-group message-field-phone" style="display: block;">
                                 <?= Html::label('Phone from', null, ['class' => 'control-label']) ?>
-                                <?= Html::dropDownList('call-from-number', null, $phoneFromList->format(), ['prompt' => '---', 'id' => 'call-from-number', 'class' => 'form-control', 'label'])?>
+                                <?= Html::dropDownList('call-from-number', $callFromNumberList->first(), $callFromNumberList->format(), ['prompt' => '---', 'id' => 'call-from-number', 'class' => 'form-control', 'label'])?>
                             </div>
+
                             <div class="col-sm-3 form-group message-field-phone" style="display: block;">
                                 <?= Html::button('<i class="fa fa-phone-square"></i> Make Call', ['class' => 'btn btn-sm btn-success', 'id' => 'btn-make-call-case-communication-block', 'style' => 'margin-top: 28px'])?>
                             </div>
+                        </div>
                             <?=Html::hiddenInput('call-case-id', $model->cs_id, ['id' => 'call-case-id'])?>
                             <?=Html::hiddenInput('call-client-name', ($model->cs_client_id ? $model->client->getShortName() : ''), ['id' => 'call-client-name'])?>
-
-                            <?php if ($model->isDepartmentSupport()) : ?>
-                                <div class="col-md-3 form-group message-field-sms" id="sms-phone-numbers">
-                                    <?php
-                                        $departmentPhonesList = [];
-                                        /** @var DepartmentPhoneProject[] $departmentPhones */
-                                        $departmentPhones = $model->getDepartmentPhonesByProjectAndDepartment()->where(['dpp_default' => \common\models\DepartmentPhoneProject::DPP_DEFAULT_TRUE])->withPhoneList()->all();
-                                    foreach ($departmentPhones as $departmentPhone) {
-                                        if ($departmentPhone->getPhone()) {
-                                            $departmentPhonesList[$departmentPhone->dpp_id] = $departmentPhone->getPhone();
-                                        }
-                                    }
-                                    ?>
-                                    <?php
-                                    $optionsPhone = ['class' => 'form-control'];
-                                    if (count($departmentPhonesList) > 1) {
-                                        $optionsPhone['prompt'] = '---';
-                                    }
-                                    ?>
-                                    <?php //= $form->field($comForm,'dpp_phone_id')->dropDownList(\yii\helpers\ArrayHelper::map($departmentPhones, 'dpp_id', 'dpp_phone_number'), $optionsPhone)?>
-                                    <?= $communicationActiveForm->field($comForm, 'dpp_phone_id')->dropDownList($departmentPhonesList, $optionsPhone) ?>
-                                </div>
-                            <?php endif; ?>
 
                         </div>
                         <div id="sms-input-box" class="message-field-sms">

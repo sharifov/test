@@ -352,7 +352,7 @@ class CommunicationForm extends Model
     public function attributeLabels(): array
     {
         return [
-            'c_type_id'         => 'Message Type',
+            'c_type_id'         => 'Communication Type',
             'c_lead_id'         => 'Lead Id',
             'c_sms_tpl_id'      => 'SMS Template',
             'c_sms_tpl_key'      => 'SMS Template',

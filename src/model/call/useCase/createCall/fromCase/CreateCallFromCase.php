@@ -26,7 +26,7 @@ class CreateCallFromCase
                 throw new \DomainException('Not found Department. Case ID: ' . $case->cs_id);
             }
 
-            $availablePhones = new AbacPhoneList($form->createdUser, $case);
+            $availablePhones = new AbacCallFromNumberList($form->createdUser, $case);
             if (!$availablePhones->isExist($form->from)) {
                 throw new \DomainException('Phone From (' . $form->from . ') is not available.');
             }

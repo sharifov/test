@@ -1,11 +1,15 @@
 <?php
 
 use common\models\Employee;
-use modules\cases\src\abac\dto\CaseCommunicationBlockAbacDto;
+use modules\cases\src\abac\communicationBlock\CaseCommunicationBlockAbacDto;
+use modules\cases\src\abac\communicationBlock\CaseCommunicationBlockAbacObject;
 use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\widgets\FileStorageListWidget;
 use src\auth\Auth;
 use src\helpers\cases\CasesViewRenderHelper;
+use src\model\call\useCase\createCall\fromCase\AbacCallFromNumberList;
+use src\model\email\useCase\send\fromCase\AbacEmailList;
+use src\model\sms\useCase\send\fromCase\AbacSmsFromNumberList;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -39,10 +43,13 @@ use modules\cases\src\widgets\CaseEventLogWidget;
  * @var $coupons \src\model\coupon\entity\couponCase\CouponCase[]
  * @var $sendCouponsForm \src\model\coupon\useCase\send\SendCouponsForm
  *
- * @var bool $smsEnabled
  * @var array $unsubscribedEmails
  *
  * @var ActiveDataProvider $dataProviderOrders
+ *
+ * @var AbacCallFromNumberList $callFromNumberList
+ * @var AbacSmsFromNumberList $smsFromNumberList
+ * @var AbacEmailList $emailFromList
  */
 
 $this->title = 'Case ' . $model->cs_id;
@@ -186,19 +193,20 @@ $unsubscribedEmails =  array_column($model->project->emailUnsubscribes, 'eu_emai
         </div>
 
         <div class="col-md-6">
-            <?php $caseCommunicationBlockAbacDto = new CaseCommunicationBlockAbacDto($model, [], $user->id); ?>
-            <?php if (Yii::$app->abac->can($caseCommunicationBlockAbacDto, CasesAbacObject::OBJ_CASE_COMMUNICATION_BLOCK, CasesAbacObject::ACTION_VIEW, $user)) : ?>
+            <?php $caseCommunicationBlockAbacDto = new CaseCommunicationBlockAbacDto($model, [], [], [], $user->id); ?>
+            <?php if (Yii::$app->abac->can($caseCommunicationBlockAbacDto, CaseCommunicationBlockAbacObject::NS, CaseCommunicationBlockAbacObject::ACTION_VIEW, $user)) : ?>
                 <?= $this->render('communication/case_communication', [
                     'model'      => $model,
                     'previewEmailForm' => $previewEmailForm,
                     'previewSmsForm' => $previewSmsForm,
                     'comForm'       => $comForm,
                     'dataProvider'  => (bool)Yii::$app->params['settings']['new_communication_block_case'] ? $dataProviderCommunicationLog : $dataProviderCommunication,
-                    'isAdmin'       => $isAdmin,
                     'isCommunicationLogEnabled' => Yii::$app->params['settings']['new_communication_block_case'],
-                    'smsEnabled' => $smsEnabled,
                     'unsubscribedEmails' => $unsubscribedEmails,
-                    'disableMasking' => $disableMasking
+                    'disableMasking' => $disableMasking,
+                    'callFromNumberList' => $callFromNumberList,
+                    'smsFromNumberList' => $smsFromNumberList,
+                    'emailFromList' => $emailFromList,
                 ]); ?>
             <?php endif;?>
         </div>
