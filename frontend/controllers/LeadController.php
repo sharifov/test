@@ -643,6 +643,8 @@ class LeadController extends FController
                     Yii::error(VarDumper::dumpAsString($sms->errors), 'LeadController:view:Sms:save');
                 }
                 //VarDumper::dump($previewEmailForm->attributes, 10, true);              exit;
+            } else {
+                Yii::$app->session->setFlash('send-error', 'Error: <strong>SMS Message</strong> has not been sent to <strong>' . $previewSmsForm->s_phone_to . '</strong> Validation form error');
             }
         }
 
@@ -820,15 +822,6 @@ class LeadController extends FController
 
                     $content_data['message'] = $comForm->c_sms_message;
                     $content_data['project_id'] = $lead->project_id;
-                    $phoneFrom = '';
-
-                    if ($lead->project_id) {
-                        $upp = UserProjectParams::find()->where(['upp_project_id' => $lead->project_id, 'upp_user_id' => Yii::$app->user->id])->withPhoneList()->one();
-                        if ($upp) {
-//                            $phoneFrom = $upp->upp_tw_phone_number;
-                            $phoneFrom = $upp->getPhone();
-                        }
-                    }
 
                     $projectContactInfo = [];
 
@@ -838,59 +831,53 @@ class LeadController extends FController
 
                     $previewSmsForm->s_quote_list = @json_encode([]);
 
-                    if (!$phoneFrom) {
-                        $comForm->c_preview_sms = 0;
-                        $comForm->addError('c_sms_preview', 'Config Error: Not found phone number for Project Id: ' . $lead->project_id . ', agent: "' . Yii::$app->user->identity->username . '"');
-                    } else {
-                        $previewSmsForm->s_phone_to = $comForm->c_phone_number;
-                        $previewSmsForm->s_phone_from = $phoneFrom;
+                    $previewSmsForm->s_phone_to = $comForm->c_phone_number;
+                    $previewSmsForm->s_phone_from = $comForm->c_sms_from;
 
-                        if ($comForm->c_language_id) {
-                            $previewSmsForm->s_language_id = $comForm->c_language_id; //$language;
-                        }
+                    if ($comForm->c_language_id) {
+                        $previewSmsForm->s_language_id = $comForm->c_language_id; //$language;
+                    }
 
 
-                        if ($comForm->c_sms_tpl_id > 0) {
-                            $previewSmsForm->s_sms_tpl_id = $comForm->c_sms_tpl_id;
+                    if ($comForm->c_sms_tpl_id > 0) {
+                        $previewSmsForm->s_sms_tpl_id = $comForm->c_sms_tpl_id;
 
-                            $content_data = $lead->getEmailData2($comForm->quoteList, $projectContactInfo);
-                            $content_data['content'] = $comForm->c_sms_message;
+                        $content_data = $lead->getEmailData2($comForm->quoteList, $projectContactInfo);
+                        $content_data['content'] = $comForm->c_sms_message;
 
-                            //VarDumper::dump($content_data, 10, true); exit;
+                        //VarDumper::dump($content_data, 10, true); exit;
 
-                            $language = $comForm->c_language_id ?: 'en-US';
+                        $language = $comForm->c_language_id ?: 'en-US';
 
-                            $tpl = SmsTemplateType::findOne($comForm->c_sms_tpl_id);
-                            //$mailSend = $communication->mailSend(7, 'cl_offer', 'chalpet@gmail.com', 'chalpet2@gmail.com', $content_data, $data, 'ru-RU', 10);
+                        $tpl = SmsTemplateType::findOne($comForm->c_sms_tpl_id);
+                        //$mailSend = $communication->mailSend(7, 'cl_offer', 'chalpet@gmail.com', 'chalpet2@gmail.com', $content_data, $data, 'ru-RU', 10);
 
-                            $smsPreview = $communication->smsPreview($lead->project_id, ($tpl ? $tpl->stp_key : ''), $phoneFrom, $comForm->c_phone_number, $content_data, $language);
+                        $smsPreview = $communication->smsPreview($lead->project_id, ($tpl ? $tpl->stp_key : ''), $comForm->c_sms_from, $comForm->c_phone_number, $content_data, $language);
 
 
-                            if ($smsPreview && isset($smsPreview['data'])) {
-                                if (isset($smsPreview['error']) && $smsPreview['error']) {
-                                    $errorJson = @json_decode($smsPreview['error'], true);
-                                    $comForm->addError('c_email_preview', 'Communication Server response: ' . ($errorJson['message'] ?? $smsPreview['error']));
-                                    Yii::error($communication->url . "\r\n " . $smsPreview['error'], 'LeadController:view:smsPreview');
-                                    $comForm->c_preview_sms = 0;
-                                } else {
-                                    if ($comForm->offerList) {
-                                        $service = Yii::createObject(OfferSendLogService::class);
-                                        foreach ($comForm->offerList as $offerId) {
-                                            $service->log(new CreateDto($offerId, OfferSendLogType::SMS, $user->id, $comForm->c_phone_number));
-                                        }
+                        if ($smsPreview && isset($smsPreview['data'])) {
+                            if (isset($smsPreview['error']) && $smsPreview['error']) {
+                                $errorJson = @json_decode($smsPreview['error'], true);
+                                $comForm->addError('c_email_preview', 'Communication Server response: ' . ($errorJson['message'] ?? $smsPreview['error']));
+                                Yii::error($communication->url . "\r\n " . $smsPreview['error'], 'LeadController:view:smsPreview');
+                                $comForm->c_preview_sms = 0;
+                            } else {
+                                if ($comForm->offerList) {
+                                    $service = Yii::createObject(OfferSendLogService::class);
+                                    foreach ($comForm->offerList as $offerId) {
+                                        $service->log(new CreateDto($offerId, OfferSendLogType::SMS, $user->id, $comForm->c_phone_number));
                                     }
-
-                                    //$previewSmsForm->s_phone_from = $smsPreview['data']['phone_from'];
-                                    $previewSmsForm->s_sms_message = $smsPreview['data']['sms_text'];
-                                    $previewSmsForm->s_quote_list = @json_encode($comForm->quoteList);
                                 }
+
+                                //$previewSmsForm->s_phone_from = $smsPreview['data']['phone_from'];
+                                $previewSmsForm->s_sms_message = $smsPreview['data']['sms_text'];
+                                $previewSmsForm->s_quote_list = @json_encode($comForm->quoteList);
                             }
-
-
-                            //VarDumper::dump($mailPreview, 10, true);// exit;
-                        } else {
-                            $previewSmsForm->s_sms_message = $comForm->c_sms_message;
                         }
+
+                        //VarDumper::dump($mailPreview, 10, true);// exit;
+                    } else {
+                        $previewSmsForm->s_sms_message = $comForm->c_sms_message;
                     }
                 }
             }
