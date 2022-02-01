@@ -453,7 +453,7 @@ class Email extends \yii\db\ActiveRecord
                 $this->save();
                 $out['error'] = $this->e_error_message;
             }
-            if ($this->e_lead_id && in_array($tplType, LeadPoorProcessingNoAction::EMAIL_TPL_OFFER_LIST, true)) {
+            if ($this->e_lead_id && LeadPoorProcessingNoAction::checkEmailTemplate($tplType)) {
                 $job = new LeadPoorProcessingRemoverJob($this->e_lead_id, [LeadPoorProcessingDataDictionary::KEY_NO_ACTION]);
                 Yii::$app->queue_job->priority(100)->push($job);
             }

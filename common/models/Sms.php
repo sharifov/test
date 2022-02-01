@@ -503,7 +503,7 @@ class Sms extends \yii\db\ActiveRecord
                 Yii::error($str . "\r\n" . $out['error'], 'Sms:sendSms:smsSend:CommunicationError');
             }
 
-            if ($this->s_lead_id && in_array($tplType, LeadPoorProcessingNoAction::SMS_TPL_OFFER_LIST, true)) {
+            if ($this->s_lead_id && LeadPoorProcessingNoAction::checkSmsTemplate($tplType)) {
                 $job = new LeadPoorProcessingRemoverJob($this->s_lead_id, [LeadPoorProcessingDataDictionary::KEY_NO_ACTION]);
                 Yii::$app->queue_job->priority(100)->push($job);
             }
