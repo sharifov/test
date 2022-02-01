@@ -35,8 +35,8 @@ class LeadCommunicationBlockAbacDto extends \stdClass
 
     /**
      * @param Lead $lead
-     * @param \src\model\call\useCase\createCall\fromLead\CallFromNumber[] $callFromNumbers
-     * @param \src\model\sms\useCase\send\fromLead\SmsFromNumber[] $smsFromNumbers
+     * @param \src\model\phoneList\services\AvailablePhoneNumber[] $callFromNumbers
+     * @param \src\model\phoneList\services\AvailablePhoneNumber[] $smsFromNumbers
      * @param array $emailFrom
      * @param int $userId
      */

@@ -8,6 +8,7 @@ use common\models\Project;
 use common\models\query\DepartmentPhoneProjectQuery;
 use common\models\query\UserProjectParamsQuery;
 use common\models\UserProjectParams;
+use src\model\department\department\CallDefaultPhoneType;
 use src\model\phoneList\entity\PhoneList;
 use yii\db\Expression;
 use yii\db\Query;
@@ -19,6 +20,7 @@ use yii\db\Query;
  * @property int $userId
  * @property int $projectId
  * @property int $departmentId
+ * @property CallDefaultPhoneType $callDefaultPhoneType
  */
 class AvailablePhoneNumberList
 {
@@ -31,12 +33,14 @@ class AvailablePhoneNumberList
     private int $userId;
     private int $projectId;
     private int $departmentId;
+    private ?CallDefaultPhoneType $callDefaultPhoneType;
 
-    public function __construct(int $userId, int $projectId, int $departmentId)
+    public function __construct(int $userId, int $projectId, int $departmentId, ?CallDefaultPhoneType $callDefaultPhoneType)
     {
         $this->userId = $userId;
         $this->projectId = $projectId;
         $this->departmentId = $departmentId;
+        $this->callDefaultPhoneType = $callDefaultPhoneType;
     }
 
     public function getFormattedList(): array
@@ -59,6 +63,12 @@ class AvailablePhoneNumberList
 
         $this->list = [];
 
+        if ($this->callDefaultPhoneType && $this->callDefaultPhoneType->isGeneral()) {
+            $sort = self::SORT_GENERAL_FIRST;
+        } else {
+            $sort = self::SORT_PERSONAL_FIRST;
+        }
+
         $phones = (new Query())
             ->select([
                 'project_id',
@@ -73,7 +83,7 @@ class AvailablePhoneNumberList
             ->from(self::getUserPhones($this->userId, $this->projectId)->union(self::getDepartmentPhones($this->projectId, $this->departmentId)))
             ->innerJoin(['project' => Project::tableName()], 'project.id = project_id')
             ->leftJoin(Department::tableName(), 'dep_id = department_id')
-            ->orderBy(['type_id' => self::SORT_PERSONAL_FIRST])
+            ->orderBy(['type_id' => $sort])
             ->all();
 
         foreach ($phones as $phone) {

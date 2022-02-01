@@ -17,6 +17,7 @@ use src\helpers\setting\SettingHelper;
  * @property bool $feedbackBookingIdRequired
  * @property array $createOnDepartmentEmail
  * @property array $createOnPersonalEmail
+ * @property CallDefaultPhoneType $callDefaultPhoneType
  */
 class CaseSettings
 {
@@ -30,6 +31,7 @@ class CaseSettings
     public bool $feedbackBookingIdRequired;
     public array $createOnDepartmentEmail;
     public array $createOnPersonalEmail;
+    public CallDefaultPhoneType $callDefaultPhoneType;
 
     public function __construct(array $params)
     {
@@ -43,6 +45,7 @@ class CaseSettings
         $this->feedbackBookingIdRequired = (bool)($params['feedbackBookingIdRequired'] ?? false);
         $this->createOnDepartmentEmail = (isset($params['createOnDepartmentEmail']) && is_array($params['createOnDepartmentEmail'])) ? $params['createOnDepartmentEmail'] : [];
         $this->createOnPersonalEmail = (isset($params['createOnPersonalEmail']) && is_array($params['createOnPersonalEmail'])) ? $params['createOnPersonalEmail'] : [];
+        $this->callDefaultPhoneType = CallDefaultPhoneType::createFromString($params['callDefaultPhoneType'] ?? '');
     }
 
     public function isActiveFeedback(?string $caseOrderUid): bool

@@ -6,13 +6,15 @@ use common\models\Employee;
 use common\models\Lead;
 use modules\lead\src\abac\communicationBlock\LeadCommunicationBlockAbacObject;
 use modules\lead\src\abac\communicationBlock\LeadCommunicationBlockAbacDto;
+use src\model\phoneList\services\AvailablePhoneNumber;
+use src\model\phoneList\services\AvailablePhoneNumberList;
 use Yii;
 
 /**
  * Class AbacSmsFromNumberList
  *
- * @property SmsFromNumber[]|null $list
- * @property SmsFromNumber[]|null $smsFromNumbers
+ * @property AvailablePhoneNumber[]|null $list
+ * @property AvailablePhoneNumber[]|null $smsFromNumbers
  * @property Employee $user
  * @property Lead $lead
  * @property bool|null $canSendSmsFlag
@@ -32,7 +34,7 @@ class AbacSmsFromNumberList
     }
 
     /**
-     * @return SmsFromNumber[]
+     * @return AvailablePhoneNumber[]
      */
     public function getList(): array
     {
@@ -101,7 +103,16 @@ class AbacSmsFromNumberList
             return $this->smsFromNumbers;
         }
 
-        $this->smsFromNumbers = (new SmsFromNumberList($this->user->id, $this->lead->project_id, $this->lead->l_dep_id))->getList();
+        $departmentParams = $this->lead->lDep->getParams();
+
+        $numbers = new AvailablePhoneNumberList(
+            $this->user->id,
+            $this->lead->project_id,
+            $this->lead->l_dep_id,
+            $departmentParams ? $departmentParams->object->lead->callDefaultPhoneType : null
+        );
+
+        $this->smsFromNumbers = $numbers->getList();
 
         return $this->smsFromNumbers;
     }

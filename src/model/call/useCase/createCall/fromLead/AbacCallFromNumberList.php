@@ -6,13 +6,15 @@ use common\models\Employee;
 use common\models\Lead;
 use modules\lead\src\abac\communicationBlock\LeadCommunicationBlockAbacObject;
 use modules\lead\src\abac\communicationBlock\LeadCommunicationBlockAbacDto;
+use src\model\phoneList\services\AvailablePhoneNumber;
+use src\model\phoneList\services\AvailablePhoneNumberList;
 use Yii;
 
 /**
  * Class AbacCallFromNumberList
  *
- * @property CallFromNumber[]|null $list
- * @property CallFromNumber[]|null $callFromNumbers
+ * @property AvailablePhoneNumber[]|null $list
+ * @property AvailablePhoneNumber[]|null $callFromNumbers
  * @property Employee $user
  * @property Lead $lead
  * @property bool|null $canCreateCall
@@ -32,7 +34,7 @@ class AbacCallFromNumberList
     }
 
     /**
-     * @return CallFromNumber[]
+     * @return AvailablePhoneNumber[]
      */
     public function getList(): array
     {
@@ -101,7 +103,16 @@ class AbacCallFromNumberList
             return $this->callFromNumbers;
         }
 
-        $this->callFromNumbers = (new CallFromNumberList($this->user->id, $this->lead->project_id, $this->lead->l_dep_id))->getList();
+        $departmentParams = $this->lead->lDep->getParams();
+
+        $numbers = new AvailablePhoneNumberList(
+            $this->user->id,
+            $this->lead->project_id,
+            $this->lead->l_dep_id,
+            $departmentParams ? $departmentParams->object->lead->callDefaultPhoneType : null
+        );
+
+        $this->callFromNumbers = $numbers->getList();
 
         return $this->callFromNumbers;
     }
