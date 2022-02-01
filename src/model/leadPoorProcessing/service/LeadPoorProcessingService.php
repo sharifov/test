@@ -11,6 +11,7 @@ use src\model\leadPoorProcessing\repository\LeadPoorProcessingRepository;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataQuery;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLog;
+use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogQuery;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
 use src\model\leadPoorProcessingLog\repository\LeadPoorProcessingLogRepository;
 use yii\helpers\ArrayHelper;
@@ -49,10 +50,11 @@ class LeadPoorProcessingService
                     'lppdId' => $leadPoorProcessing->lpp_lppd_id
                 ];
                 try {
+                    $lastPoorProcessingLog = LeadPoorProcessingLogQuery::getLastLeadPoorProcessingLog($lead->id);
                     $leadPoorProcessingLog = LeadPoorProcessingLog::create(
                         $lead->id,
                         $leadPoorProcessing->lpp_lppd_id,
-                        $lead->employee_id,
+                        $lastPoorProcessingLog->lppl_owner_id ?? $lead->employee_id,
                         LeadPoorProcessingLogStatus::STATUS_DELETED
                     );
 
@@ -89,10 +91,11 @@ class LeadPoorProcessingService
                 throw new \RuntimeException('LeadPoorProcessing not found (' . $lead->id . '/' . $leadPoorProcessingData->lppd_id . ')');
             }
 
+            $lastPoorProcessingLog = LeadPoorProcessingLogQuery::getLastLeadPoorProcessingLog($lead->id);
             $leadPoorProcessingLog = LeadPoorProcessingLog::create(
                 $lead->id,
                 $leadPoorProcessing->lpp_lppd_id,
-                $lead->employee_id,
+                $lastPoorProcessingLog->lppl_owner_id ?? $lead->employee_id,
                 LeadPoorProcessingLogStatus::STATUS_DELETED
             );
 

@@ -38,6 +38,15 @@ class LeadPoorProcessingDataQuery
         ;
     }
 
+    public static function isExistActiveRule(string $key): bool
+    {
+        return LeadPoorProcessingData::find()
+            ->where(['lppd_key' => $key])
+            ->andWhere(['lppd_enabled' => true])
+            ->exists()
+        ;
+    }
+
     /**
      * @return LeadPoorProcessingData[]
      */

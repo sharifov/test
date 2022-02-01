@@ -1422,17 +1422,17 @@ class Lead extends ActiveRecord implements Objectable
         );
 
         $this->recordEvent(new LeadTaskEvent($this), LeadTaskEvent::class);
+        $this->recordEvent(
+            new LeadPoorProcessingEvent(
+                $this,
+                LeadPoorProcessingDataDictionary::KEY_NO_ACTION
+            )
+        );
 
         $this->changeOwner($newOwnerId);
 
         if (!$this->isProcessing()) {
             $this->setStatus(self::STATUS_PROCESSING);
-            $this->recordEvent(
-                new LeadPoorProcessingEvent(
-                    $this,
-                    LeadPoorProcessingDataDictionary::KEY_NO_ACTION
-                )
-            );
         }
     }
 
