@@ -262,9 +262,10 @@ $leadAbacDto = new LeadAbacDto($leadModel, $userId);
     $canStatusLog = Auth::can('/lead/flow-transition');
     $canDataLogs = Auth::can('/global-log/ajax-view-general-lead-log');
     $canVisitorLogs = Auth::can('/visitor-log/index');
+    $canLeadPoorProcessingLogs = Auth::can('/lead-poor-processing-log/ajax-log');
     ?>
 
-    <?php if ($canStatusLog || $canDataLogs || $canVisitorLogs) : ?>
+    <?php if ($canStatusLog || $canDataLogs || $canVisitorLogs || $canLeadPoorProcessingLogs) : ?>
         &nbsp; <div class="dropdown">
             <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fa fa-bars"> </i> Logs
@@ -293,6 +294,15 @@ $leadAbacDto = new LeadAbacDto($leadModel, $userId);
                     <?= Html::a('<i class="fa fa-list"> </i> Visitor Logs', ['/visitor-log/index', 'VisitorLogSearch[vl_lead_id]' => $leadForm->lead->id], [
                         'class' => 'dropdown-item',
                         'title' => 'Visitor log #' . $leadForm->lead->id,
+                    ]) ?>
+                <?php endif; ?>
+
+                <?php if ($canLeadPoorProcessingLogs) : ?>
+                    <?= Html::a('<i class="fa fa-list"> </i> Lead Poor Processing Logs', null, [
+                        'class' => 'dropdown-item showModalButton',
+                        'data-modal_id' => 'lg',
+                        'title' => 'Lead Poor Processing Log #' . $leadForm->lead->id,
+                        'data-content-url' => Url::to(['/lead-poor-processing-log/ajax-log', 'leadId' => $leadForm->lead->id])
                     ]) ?>
                 <?php endif; ?>
 
