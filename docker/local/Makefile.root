@@ -1,0 +1,18 @@
+down:
+	$(MAKE) -C docker/local down
+up:
+	$(MAKE) -C docker/local up
+restart:
+	$(MAKE) -C docker/local restart
+app-console:
+	$(MAKE) -C docker/local app-console
+composer-install:
+	$(MAKE) -C docker/local composer-install
+migrate:
+	$(MAKE) -C docker/local migrate
+build:
+	$(MAKE) -C docker/local build
+init-config:
+	$(MAKE) -C docker/local init-config
+install:
+	$(MAKE) -C docker/local install
