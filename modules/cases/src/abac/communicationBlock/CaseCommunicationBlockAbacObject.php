@@ -27,7 +27,7 @@ class CaseCommunicationBlockAbacObject extends AbacBaseModel implements AbacInte
         'input' => self::ATTR_INPUT_RADIO,
         'values' => ['true' => 'True', 'false' => 'False'],
         'multiple' => false,
-        'operators' =>  [self::OP_EQUAL2]
+        'operators' =>  [self::OP_EQUAL2],
     ];
 
     private const ATTR_PHONE_FROM_GENERAL = [
@@ -39,7 +39,7 @@ class CaseCommunicationBlockAbacObject extends AbacBaseModel implements AbacInte
         'input' => self::ATTR_INPUT_RADIO,
         'values' => ['true' => 'True', 'false' => 'False'],
         'multiple' => false,
-        'operators' =>  [self::OP_EQUAL2]
+        'operators' =>  [self::OP_EQUAL2],
     ];
 
     private const ATTR_PROJECT_SMS_ENABLE = [
@@ -51,7 +51,7 @@ class CaseCommunicationBlockAbacObject extends AbacBaseModel implements AbacInte
         'input' => self::ATTR_INPUT_RADIO,
         'values' => ['true' => 'True', 'false' => 'False'],
         'multiple' => false,
-        'operators' =>  [self::OP_EQUAL2]
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2],
     ];
 
 
