@@ -79,6 +79,7 @@ class CaseCommunicationBlockAbacObject extends AbacBaseModel implements AbacInte
                 CasesAbacObject::ATTR_CASE_IS_OWNER,
                 CasesAbacObject::ATTR_CASE_HAS_OWNER,
                 CasesAbacObject::ATTR_CLIENT_IS_EXCLUDED,
+                CasesAbacObject::ATTR_CLIENT_IS_UNSUBSCRIBE,
                 self::ATTR_PHONE_FROM_PERSONAL,
                 self::ATTR_PHONE_FROM_GENERAL,
                 self::ATTR_PROJECT_SMS_ENABLE,

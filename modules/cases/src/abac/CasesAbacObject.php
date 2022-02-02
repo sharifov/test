@@ -235,6 +235,18 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         'operators' =>  [self::OP_EQUAL2]
     ];
 
+    public const ATTR_CLIENT_IS_UNSUBSCRIBE = [
+        'optgroup' => 'CASE',
+        'id' => self::NS . 'client_is_unsubscribe',
+        'field' => 'client_is_unsubscribe',
+        'label' => 'Client is unsubscribe',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
     protected const ATTR_PHONE_FROM_PERSONAL = [
         'optgroup' => 'CASE',
         'id' => self::NS . 'phone_from_personal',

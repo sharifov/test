@@ -2,6 +2,7 @@
 
 namespace modules\lead\src\abac\communicationBlock;
 
+use common\models\ClientProject;
 use common\models\Lead;
 
 /**
@@ -12,6 +13,7 @@ use common\models\Lead;
  * @property bool $project_sms_enable
  * @property string $department_name
  * @property bool $client_is_excluded
+ * @property bool $client_is_unsubscribe
  * @property bool $call_from_personal
  * @property bool $call_from_general
  * @property bool $sms_from_personal
@@ -27,7 +29,8 @@ class LeadCommunicationBlockAbacDto extends \stdClass
     public string $project_name;
     public bool $project_sms_enable;
     public string $department_name;
-    public string $client_is_excluded;
+    public bool $client_is_excluded;
+    public bool $client_is_unsubscribe;
     public bool $call_from_personal;
     public bool $call_from_general;
     public bool $sms_from_personal;
@@ -55,6 +58,12 @@ class LeadCommunicationBlockAbacDto extends \stdClass
         }
         $this->department_name = $lead->lDep->dep_name ?? '';
         $this->client_is_excluded = (bool)$lead->client->cl_excluded;
+        $clientUnsubscribe = ClientProject::find()->select(['cp_unsubscribe'])->andWhere(['cp_client_id' => $lead->clone_id, 'cp_project_id' => $lead->project_id])->asArray()->one();
+        if ($clientUnsubscribe && (bool)$clientUnsubscribe['cp_unsubscribe']) {
+            $this->client_is_unsubscribe = true;
+        } else {
+            $this->client_is_unsubscribe = false;
+        }
         if ($callFromNumbers) {
             $this->call_from_personal = !empty(array_filter($callFromNumbers, static fn($number) => $number->isPersonalType()));
             $this->call_from_general = !empty(array_filter($callFromNumbers, static fn($number) => $number->isGeneralType()));

@@ -2,6 +2,7 @@
 
 namespace modules\cases\src\abac\communicationBlock;
 
+use common\models\ClientProject;
 use src\entities\cases\Cases;
 use src\entities\cases\CasesStatus;
 
@@ -13,6 +14,7 @@ use src\entities\cases\CasesStatus;
  * @property bool $project_sms_enable
  * @property string $department_name
  * @property bool $client_is_excluded
+ * @property bool $client_is_unsubscribe
  * @property bool $call_from_personal
  * @property bool $call_from_general
  * @property bool $sms_from_personal
@@ -28,7 +30,8 @@ class CaseCommunicationBlockAbacDto extends \stdClass
     public string $project_name;
     public bool $project_sms_enable;
     public string $department_name;
-    public string $client_is_excluded;
+    public bool $client_is_excluded;
+    public bool $client_is_unsubscribe;
     public bool $call_from_personal;
     public bool $call_from_general;
     public bool $sms_from_personal;
@@ -56,6 +59,12 @@ class CaseCommunicationBlockAbacDto extends \stdClass
         }
         $this->department_name = $case->department->dep_name ?? '';
         $this->client_is_excluded = (bool)$case->client->cl_excluded;
+        $clientUnsubscribe = ClientProject::find()->select(['cp_unsubscribe'])->andWhere(['cp_client_id' => $case->cs_client_id, 'cp_project_id' => $case->cs_project_id])->asArray()->one();
+        if ($clientUnsubscribe && (bool)$clientUnsubscribe['cp_unsubscribe']) {
+            $this->client_is_unsubscribe = true;
+        } else {
+            $this->client_is_unsubscribe = false;
+        }
         if ($callFromNumbers) {
             $this->call_from_personal = !empty(array_filter($callFromNumbers, static fn($number) => $number->isPersonalType()));
             $this->call_from_general = !empty(array_filter($callFromNumbers, static fn($number) => $number->isGeneralType()));

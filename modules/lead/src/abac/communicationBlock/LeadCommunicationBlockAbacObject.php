@@ -79,6 +79,7 @@ class LeadCommunicationBlockAbacObject extends AbacBaseModel implements AbacInte
                 LeadAbacObject::ATTR_LEAD_IS_OWNER,
                 LeadAbacObject::ATTR_LEAD_HAS_OWNER,
                 LeadAbacObject::ATTR_CLIENT_IS_EXCLUDED,
+                LeadAbacObject::ATTR_CLIENT_IS_UNSUBSCRIBE,
                 self::ATTR_PHONE_FROM_PERSONAL,
                 self::ATTR_PHONE_FROM_GENERAL,
                 self::ATTR_PROJECT_SMS_ENABLE,

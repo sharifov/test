@@ -430,6 +430,18 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         'operators' =>  [self::OP_EQUAL2]
     ];
 
+    public const ATTR_CLIENT_IS_UNSUBSCRIBE = [
+        'optgroup' => 'Lead',
+        'id' => self::NS . 'client_is_unsubscribe',
+        'field' => 'client_is_unsubscribe',
+        'label' => 'Client is unsubscribe',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
     public const OBJECT_ATTRIBUTE_LIST = [
         self::ACT_USER_CONVERSION    => [self::ATTR_LEAD_IS_OWNER],
         self::UI_BLOCK_CLIENT_INFO   => [
