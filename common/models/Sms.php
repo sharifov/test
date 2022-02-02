@@ -15,6 +15,7 @@ use src\entities\EventTrait;
 use src\events\sms\IncomingSmsCreatedByLeadTypeEvent;
 use src\events\sms\IncomingSmsCreatedByCaseTypeEvent;
 use src\events\sms\SmsCreatedEvent;
+use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadPoorProcessing\service\rules\LeadPoorProcessingNoAction;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
 use src\services\sms\incoming\SmsIncomingForm;
@@ -504,8 +505,7 @@ class Sms extends \yii\db\ActiveRecord
             }
 
             if ($this->s_lead_id && LeadPoorProcessingNoAction::checkSmsTemplate($tplType)) {
-                $job = new LeadPoorProcessingRemoverJob($this->s_lead_id, [LeadPoorProcessingDataDictionary::KEY_NO_ACTION]);
-                Yii::$app->queue_job->priority(100)->push($job);
+                LeadPoorProcessingService::addLeadPoorProcessingRemoverJob($this->s_lead_id, [LeadPoorProcessingDataDictionary::KEY_NO_ACTION]);
             }
         } catch (\Throwable $exception) {
             $error = VarDumper::dumpAsString($exception->getMessage());

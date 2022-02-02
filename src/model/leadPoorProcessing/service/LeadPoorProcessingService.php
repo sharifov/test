@@ -2,6 +2,8 @@
 
 namespace src\model\leadPoorProcessing\service;
 
+use common\components\jobs\LeadPoorProcessingJob;
+use common\components\jobs\LeadPoorProcessingRemoverJob;
 use common\models\Lead;
 use src\helpers\app\AppHelper;
 use src\helpers\ErrorsToStringHelper;
@@ -110,5 +112,23 @@ class LeadPoorProcessingService
             $message = ArrayHelper::merge(AppHelper::throwableLog($throwable, true), $logData);
             \Yii::error($message, 'LeadPoorProcessingService:removeFromLeadAndKey:Throwable');
         }
+    }
+
+    public static function addLeadPoorProcessingJob(
+        int $leadId,
+        string $dataKey,
+        int $priority = 100
+    ): void {
+        $job = new LeadPoorProcessingJob($leadId, $dataKey);
+        \Yii::$app->queue_job->priority($priority)->push($job);
+    }
+
+    public static function addLeadPoorProcessingRemoverJob(
+        int $leadId,
+        array $dataKeys,
+        int $priority = 100
+    ): void {
+        $job = new LeadPoorProcessingRemoverJob($leadId, $dataKeys);
+        \Yii::$app->queue_job->priority($priority)->push($job);
     }
 }
