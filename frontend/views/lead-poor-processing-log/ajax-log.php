@@ -20,16 +20,21 @@ use yii\widgets\Pjax;
             'attribute' => 'lppl_lppd_id',
             'value' => static function (LeadPoorProcessingLog $model): string {
                 if ($model->lpplLppd) {
-                    return Html::encode($model->lpplLppd->lppd_name);
+                    return Html::tag('span', Html::encode($model->lpplLppd->lppd_name), [
+                        'data-toggle' => 'tooltip',
+                        'title' => 'ID: ' . $model->lppl_lppd_id
+                    ]);
                 }
                 return '-';
-            }
+            },
+            'label' => 'Rule Name',
+            'format' => 'raw'
         ],
         [
             'attribute' => 'lppl_status',
             'value' => static function (LeadPoorProcessingLog $model): string {
                 return $model->getStatusName();
-            }
+            },
         ],
         'lppl_owner_id:username',
         'lppl_created_dt:byUserDateTime',
