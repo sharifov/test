@@ -116,7 +116,24 @@ $canShowEmailData = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_
 
                 <?php yii\widgets\Pjax::begin(['id' => $pjaxContainerIdForm, 'timeout' => 6000, 'enablePushState' => false]) ?>
 
-                <?php if ($model->isProcessing() || $model->isSolved()) :?>
+                <?php
+                $typeList = [];
+                $call_type = \common\models\UserProfile::find()->select('up_call_type_id')->where(['up_user_id' => Yii::$app->user->id])->one();
+
+                if ($call_type && $call_type->up_call_type_id && $callFromNumberList->canMakeCall()) {
+                    $typeList[\frontend\models\CaseCommunicationForm::TYPE_VOICE] = \frontend\models\CaseCommunicationForm::TYPE_LIST[\frontend\models\CaseCommunicationForm::TYPE_VOICE];
+                }
+
+                if ($smsFromNumberList->canSendSms()) {
+                    $typeList[\frontend\models\CaseCommunicationForm::TYPE_SMS] = \frontend\models\CaseCommunicationForm::TYPE_LIST[\frontend\models\CaseCommunicationForm::TYPE_SMS];
+                }
+
+                if ($emailFromList->canSendEmail()) {
+                    $typeList[\frontend\models\CaseCommunicationForm::TYPE_EMAIL] = \frontend\models\CaseCommunicationForm::TYPE_LIST[\frontend\models\CaseCommunicationForm::TYPE_EMAIL];
+                }
+                ?>
+
+                <?php if ($typeList) : ?>
                      <div class="chat__form panel">
 
                     <?php Modal::begin(['id' => 'modal-email-preview',
@@ -336,26 +353,7 @@ $canShowEmailData = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_
 
                         <div class="row">
                             <div class="col-sm-3 form-group">
-                                <?php
-                                $typeList = [];
-                                $call_type = \common\models\UserProfile::find()->select('up_call_type_id')->where(['up_user_id' => Yii::$app->user->id])->one();
-
-                                if ($call_type && $call_type->up_call_type_id && $callFromNumberList->canMakeCall()) {
-                                    $typeList[\frontend\models\CaseCommunicationForm::TYPE_VOICE] = \frontend\models\CaseCommunicationForm::TYPE_LIST[\frontend\models\CaseCommunicationForm::TYPE_VOICE];
-                                }
-
-                                if ($smsFromNumberList->canSendSms()) {
-                                    $typeList[\frontend\models\CaseCommunicationForm::TYPE_SMS] = \frontend\models\CaseCommunicationForm::TYPE_LIST[\frontend\models\CaseCommunicationForm::TYPE_SMS];
-                                }
-
-                                if ($emailFromList->canSendEmail()) {
-                                    $typeList[\frontend\models\CaseCommunicationForm::TYPE_EMAIL] = \frontend\models\CaseCommunicationForm::TYPE_LIST[\frontend\models\CaseCommunicationForm::TYPE_EMAIL];
-                                }
-                                ?>
-
-                                <?php if ($typeList) : ?>
-                                    <?= $communicationActiveForm->field($comForm, 'c_type_id')->dropDownList($typeList, ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_type_id']) ?>
-                                <?php endif;?>
+                                <?= $communicationActiveForm->field($comForm, 'c_type_id')->dropDownList($typeList, ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_type_id']) ?>
                                 <?= $communicationActiveForm->field($comForm, 'c_quotes')->hiddenInput(['id' => 'c_quotes'])->label(false); ?>
                             </div>
 
