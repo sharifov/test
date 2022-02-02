@@ -123,7 +123,6 @@ $canShowEmailData = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_
 
                     <?php yii\widgets\Pjax::begin(['id' => 'pjax-lead-communication-log-form' , 'timeout' => 5000]) ?>
 
-                    <?php if (!Yii::$app->user->identity->canRole('qa')) : ?>
                         <?php if ($unsubscribe) : ?>
                             <div class="chat__form panel">
                                 <div class="alert alert-warning" role="alert">
@@ -133,7 +132,25 @@ $canShowEmailData = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_
                             </div>
                         <?php endif; ?>
 
-                        <div class="chat__form panel <?= $unsubscribe ? 'd-none' : '' ?> ">
+                        <?php
+                        $typeList = [];
+                        $call_type = \common\models\UserProfile::find()->select('up_call_type_id')->where(['up_user_id' => Yii::$app->user->id])->one();
+
+                        if ($call_type && $call_type->up_call_type_id && $callFromNumberList->canMakeCall()) {
+                            $typeList[\frontend\models\CommunicationForm::TYPE_VOICE] = \frontend\models\CommunicationForm::TYPE_LIST[\frontend\models\CommunicationForm::TYPE_VOICE];
+                        }
+
+                        if ($smsFromNumberList->canSendSms()) {
+                            $typeList[\frontend\models\CommunicationForm::TYPE_SMS] = \frontend\models\CommunicationForm::TYPE_LIST[\frontend\models\CommunicationForm::TYPE_SMS];
+                        }
+
+                        if ($emailFromList->canSendEmail()) {
+                            $typeList[\frontend\models\CommunicationForm::TYPE_EMAIL] = \frontend\models\CommunicationForm::TYPE_LIST[\frontend\models\CommunicationForm::TYPE_EMAIL];
+                        }
+                        ?>
+
+                    <?php if ($typeList) : ?>
+                        <div class="chat__form panel">
 
                             <?php // Modal Preview Email Start ?>
                             <?php Modal::begin(['id' => 'modal-email-preview',
@@ -350,27 +367,7 @@ $canShowEmailData = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_
 
                                 <div class="row">
                                     <div class="col-sm-3 form-group">
-                                        <?php
-                                        $typeList = [];
-                                        $call_type = \common\models\UserProfile::find()->select('up_call_type_id')->where(['up_user_id' => Yii::$app->user->id])->one();
-
-                                        if ($call_type && $call_type->up_call_type_id && $callFromNumberList->canMakeCall()) {
-                                            $typeList[\frontend\models\CommunicationForm::TYPE_VOICE] = \frontend\models\CommunicationForm::TYPE_LIST[\frontend\models\CommunicationForm::TYPE_VOICE];
-                                        }
-
-                                        if ($smsFromNumberList->canSendSms()) {
-                                            $typeList[\frontend\models\CommunicationForm::TYPE_SMS] = \frontend\models\CommunicationForm::TYPE_LIST[\frontend\models\CommunicationForm::TYPE_SMS];
-                                        }
-
-                                        if ($emailFromList->canSendEmail()) {
-                                            $typeList[\frontend\models\CommunicationForm::TYPE_EMAIL] = \frontend\models\CommunicationForm::TYPE_LIST[\frontend\models\CommunicationForm::TYPE_EMAIL];
-                                        }
-
-                                        ?>
-
-                                        <?php if ($typeList) : ?>
-                                            <?= $communicationActiveForm->field($comForm, 'c_type_id')->dropDownList($typeList, ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_type_id']) ?>
-                                        <?php endif;?>
+                                        <?= $communicationActiveForm->field($comForm, 'c_type_id')->dropDownList($typeList, ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_type_id']) ?>
                                         <?= $communicationActiveForm->field($comForm, 'c_quotes')->hiddenInput(['id' => 'c_quotes'])->label(false) ?>
                                         <?= $communicationActiveForm->field($comForm, 'c_offers')->hiddenInput(['id' => 'c_offers'])->label(false) ?>
                                     </div>
@@ -624,6 +621,7 @@ JS;
                             <?php \yii\bootstrap\ActiveForm::end(); ?>
 
                         </div>
+
                     <?php endif; ?>
 
                     <?php yii\widgets\Pjax::end() ?>

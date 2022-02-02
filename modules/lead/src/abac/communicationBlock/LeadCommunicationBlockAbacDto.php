@@ -58,7 +58,7 @@ class LeadCommunicationBlockAbacDto extends \stdClass
         }
         $this->department_name = $lead->lDep->dep_name ?? '';
         $this->client_is_excluded = (bool)$lead->client->cl_excluded;
-        $clientUnsubscribe = ClientProject::find()->select(['cp_unsubscribe'])->andWhere(['cp_client_id' => $lead->clone_id, 'cp_project_id' => $lead->project_id])->asArray()->one();
+        $clientUnsubscribe = ClientProject::find()->select(['cp_unsubscribe'])->andWhere(['cp_client_id' => $lead->client_id, 'cp_project_id' => $lead->project_id])->asArray()->one();
         if ($clientUnsubscribe && (bool)$clientUnsubscribe['cp_unsubscribe']) {
             $this->client_is_unsubscribe = true;
         } else {

@@ -439,7 +439,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         'input' => self::ATTR_INPUT_RADIO,
         'values' => ['true' => 'True', 'false' => 'False'],
         'multiple' => false,
-        'operators' =>  [self::OP_EQUAL2]
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2]
     ];
 
     public const OBJECT_ATTRIBUTE_LIST = [
