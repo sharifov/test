@@ -1022,7 +1022,8 @@ class CasesController extends FController
             $transactionOrder = new Transaction(['db' => Yii::$app->db]);
             try {
                 if (empty($out['error']) && !empty($saleData)) {
-                    if (!$order = OrderManageService::getBySaleIdOrBookingId($saleId, $saleData['bookingId'])) {
+                    $bookingId = !empty($saleData['baseBookingId']) ? $saleData['baseBookingId'] : $saleData['bookingId'];
+                    if (!$order = OrderManageService::getBySaleIdOrBookingId($saleId, $bookingId)) {
                         $orderCreateFromSaleForm = new OrderCreateFromSaleForm();
                         if (!$orderCreateFromSaleForm->load($saleData)) {
                             throw new \RuntimeException('OrderCreateFromSaleForm not loaded');
