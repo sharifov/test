@@ -9,6 +9,12 @@ class LeadPoorProcessingLastAction extends AbstractLeadPoorProcessingService imp
 {
     public function checkCondition(): bool
     {
-        return $this->getLead()->isProcessing() && $this->getLead()->hasOwner() && $this->getRule()->isEnabled();
+        if (!$this->getRule()->isEnabled()) {
+            throw new \RuntimeException('Rule (' . $this->getRule()->lppd_key . ') not enabled');
+        }
+        if (!$this->getLead()->isProcessing()) {
+            throw new \RuntimeException('Lead (' . $this->getLead()->id . ') not in status "processing"');
+        }
+        return true;
     }
 }
