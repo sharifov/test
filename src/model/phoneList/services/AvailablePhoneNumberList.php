@@ -18,7 +18,7 @@ use yii\db\Query;
  * @property array|null $list
  * @property int $userId
  * @property int $projectId
- * @property int $departmentId
+ * @property int|null $departmentId
  * @property bool $isGeneralFirst
  */
 class AvailablePhoneNumberList
@@ -31,10 +31,10 @@ class AvailablePhoneNumberList
 
     private int $userId;
     private int $projectId;
-    private int $departmentId;
+    private ?int $departmentId;
     private bool $isGeneralFirst;
 
-    public function __construct(int $userId, int $projectId, int $departmentId, bool $isGeneralFirst)
+    public function __construct(int $userId, int $projectId, ?int $departmentId, bool $isGeneralFirst)
     {
         $this->userId = $userId;
         $this->projectId = $projectId;
@@ -102,9 +102,9 @@ class AvailablePhoneNumberList
         return false;
     }
 
-    private static function getDepartmentPhones(int $projectId, int $departmentId): DepartmentPhoneProjectQuery
+    private static function getDepartmentPhones(int $projectId, ?int $departmentId): DepartmentPhoneProjectQuery
     {
-        return DepartmentPhoneProject::find()
+        $query =  DepartmentPhoneProject::find()
             ->select([
                 'dpp_project_id as project_id',
                 'dpp_phone_list_id as phone_list_id',
@@ -118,12 +118,19 @@ class AvailablePhoneNumberList
                 'pl_enabled' => true,
                 'dpp_project_id' => $projectId,
                 'dpp_default' => true,
-            ])
-            ->andWhere([
+            ]);
+
+        if ($departmentId) {
+            $query->andWhere([
                 'OR',
                 ['dpp_dep_id' => $departmentId],
                 ['IS', 'dpp_dep_id', null],
             ]);
+        } else {
+            $query->andWhere(['IS', 'dpp_dep_id', null]);
+        }
+
+        return $query;
     }
 
     private static function getUserPhones(int $userId, int $projectId): UserProjectParamsQuery

@@ -18,7 +18,7 @@ use yii\db\Query;
  * @property array|null $list
  * @property int $userId
  * @property int $projectId
- * @property int $departmentId
+ * @property int|null $departmentId
  * @property bool $isGeneralFirst
  */
 class AvailableEmailList
@@ -31,10 +31,10 @@ class AvailableEmailList
 
     private int $userId;
     private int $projectId;
-    private int $departmentId;
+    private ?int $departmentId;
     private bool $isGeneralFirst;
 
-    public function __construct(int $userId, int $projectId, int $departmentId, bool $isGeneralFirst)
+    public function __construct(int $userId, int $projectId, ?int $departmentId, bool $isGeneralFirst)
     {
         $this->userId = $userId;
         $this->projectId = $projectId;
@@ -102,9 +102,9 @@ class AvailableEmailList
         return false;
     }
 
-    private static function getDepartmentEmails(int $projectId, int $departmentId): DepartmentEmailProjectQuery
+    private static function getDepartmentEmails(int $projectId, ?int $departmentId): DepartmentEmailProjectQuery
     {
-        return DepartmentEmailProject::find()
+        $query = DepartmentEmailProject::find()
             ->select([
                 'dep_project_id as project_id',
                 'dep_email_list_id as email_list_id',
@@ -118,12 +118,19 @@ class AvailableEmailList
                 'el_enabled' => true,
                 'dep_project_id' => $projectId,
                 'dep_default' => true,
-            ])
-            ->andWhere([
+            ]);
+
+        if ($departmentId) {
+            $query->andWhere([
                 'OR',
                 ['dep_dep_id' => $departmentId],
                 ['IS', 'dep_dep_id', null],
             ]);
+        } else {
+            $query->andWhere(['IS', 'dep_dep_id', null]);
+        }
+
+        return $query;
     }
 
     private static function getUserEmails(int $userId, int $projectId): UserProjectParamsQuery
