@@ -26,7 +26,7 @@ fi
 #  exit 1
 #fi
 
-echo "\n---------- Running PHP Lint -------------"
+echo "---------- Running PHP Lint -------------"
 
 parse_error_count=0
 for FILE in $SFILES
@@ -37,7 +37,7 @@ do
     if [ $? != 0 ]
     then
         echo "Failed"
-        parse_error_count=$[$parse_error_count +1]
+        parse_error_count=$((parse_error_count+1))
     else
         echo "Passed"
     fi
@@ -46,7 +46,7 @@ done
 
 if [ "$parse_error_count" != 0 ]; then
     echo "#"
-    echo -en "$parse_error_count PHP Parse error(s) were found!\n"
+    echo "$parse_error_count PHP Parse error(s) were found!"
     echo "Please fix errors before commit!"
     exit 1
 fi
@@ -61,7 +61,7 @@ fi
 
 if [ "$FILES" != "" ]
 then
-    echo "\n---------- Running Code Sniffer -------------"
+    echo "---------- Running Code Sniffer -------------"
     ./vendor/bin/phpcs $FILES
     if [ $? != 0 ]
     then
