@@ -222,7 +222,7 @@
 	"extra": {
 		"hooks": {
 			"pre-commit": [
-				"docker-compose -f /var/www/sales/www/docker/local/docker-compose.yaml run --rm console /bin/sh -c \"./pre-commit.sh\""
+				"if [ -e \"docker-pre-commit.sh\" ]; then\n    docker-compose -f docker/local/docker-compose.yaml run --rm console bash -c \"./docker-pre-commit.sh\"\nelse\n    bash pre-commit.sh\nfi"
 			]
 		}
 	}

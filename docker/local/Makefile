@@ -31,6 +31,7 @@ init-config:
 	php init --env=Local --overwrite=All \
 	&& rm ${APP_PATH}/common/config/supervisor/centrifugo.conf \
 	&& rm ${APP_PATH}/common/config/supervisor/socket-server.conf \
-	&& cp Makefile.root ${APP_PATH}/Makefile
+	&& cp Makefile.root ${APP_PATH}/Makefile \
+	&& cp pre-commit.sh ${APP_PATH}/docker-pre-commit.sh
 
 install: build init-config up
