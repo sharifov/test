@@ -2,7 +2,7 @@
 
 namespace modules\abac\src\forms;
 
-use modules\abac\src\FeatureFlagService;
+use modules\abac\src\AbacService;
 use Yii;
 use yii\base\Model;
 use yii\helpers\Html;

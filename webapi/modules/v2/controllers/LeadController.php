@@ -47,9 +47,9 @@ class LeadController extends BaseController
     }
 
     /**
-     * @api {post} /v2/lead/create Create Lead Alternative
+     * @api {post} /v2/lead/create Create Lead v2
      * @apiVersion 0.2.0
-     * @apiName CreateLeadAlternative
+     * @apiName CreateLeadV1
      * @apiGroup Leads
      * @apiPermission Authorized User
      *

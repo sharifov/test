@@ -2,7 +2,7 @@
 
 namespace modules\abac\src\forms;
 
-use modules\abac\src\FeatureFlagService;
+use modules\abac\src\AbacService;
 use Yii;
 use yii\base\Model;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
@@ -92,7 +92,7 @@ class AbacPolicyForm extends Model
         $code = '';
         $rules = @json_decode($this->ap_subject_json, true);
         if (is_array($rules)) {
-            $code = FeatureFlagService::conditionDecode($rules, '');
+            $code = AbacService::conditionDecode($rules, '');
         }
         return $code;
     }

@@ -4,7 +4,7 @@ namespace modules\abac\src\entities;
 
 use BaconQrCode\Renderer\Text\Html;
 use common\models\Employee;
-use modules\abac\src\FeatureFlagService;
+use modules\abac\src\AbacService;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -252,10 +252,10 @@ class AbacPolicy extends ActiveRecord
         $code = '';
         $rules = @json_decode($this->ap_subject_json, true);
         if (is_array($rules)) {
-            $code = FeatureFlagService::conditionDecode($rules);
+            $code = AbacService::conditionDecode($rules);
 
             if ($human) {
-                $code = FeatureFlagService::humanConditionCode($code);
+                $code = AbacService::humanConditionCode($code);
             }
         }
         return $code;

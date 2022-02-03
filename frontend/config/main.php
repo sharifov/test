@@ -1,7 +1,7 @@
 <?php
 
 use modules\abac\AbacModule;
-use modules\featureFlag\FeatureFlagModule;
+use kivork\FeatureFlag\FeatureFlagModule;
 use yii\authclient\clients\Google;
 use yii\authclient\Collection;
 use common\components\logger\FilebeatTarget;
@@ -352,6 +352,7 @@ return [
         'flag' => [
             'class' => FeatureFlagModule::class,
             'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
+            'roles' => ['admin', 'superadmin']
         ],
 
         'invoice' => [
