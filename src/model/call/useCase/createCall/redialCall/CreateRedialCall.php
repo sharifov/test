@@ -1,6 +1,6 @@
 <?php
 
-namespace src\model\call\useCase\createCall;
+namespace src\model\call\useCase\createCall\redialCall;
 
 use common\models\Call;
 use src\model\call\services\FriendlyName;

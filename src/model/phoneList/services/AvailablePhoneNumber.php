@@ -1,9 +1,9 @@
 <?php
 
-namespace src\model\phone;
+namespace src\model\phoneList\services;
 
 /**
- * Class AvailablePhone
+ * Class AvailablePhoneNumber
  *
  * @property int $projectId
  * @property string $project
@@ -12,9 +12,16 @@ namespace src\model\phone;
  * @property string $type
  * @property int $typeId
  * @property int|null $departmentId
+ * @property string|null $department
  */
-class AvailablePhone
+class AvailablePhoneNumber
 {
+    public const PERSONAL = 'Personal';
+    public const PERSONAL_ID = 0;
+
+    public const GENERAL = 'General';
+    public const GENERAL_ID = 1;
+
     public int $projectId;
     public string $project;
     public int $phoneListId;
@@ -22,6 +29,7 @@ class AvailablePhone
     public int $typeId;
     public string $type;
     public ?int $departmentId;
+    public ?string $department;
 
     private function __construct(
         int $projectId,
@@ -30,7 +38,8 @@ class AvailablePhone
         string $phone,
         int $typeId,
         string $type,
-        ?int $departmentId
+        ?int $departmentId,
+        ?string $department
     ) {
         $this->projectId = $projectId;
         $this->project = $project;
@@ -39,6 +48,7 @@ class AvailablePhone
         $this->typeId = $typeId;
         $this->type = $type;
         $this->departmentId = $departmentId;
+        $this->department = $department;
     }
 
     public static function createFromRow(array $row): self
@@ -50,17 +60,32 @@ class AvailablePhone
             $row['phone'],
             (int)$row['type_id'],
             $row['type'],
-            $row['department_id'] ? (int)$row['department_id'] : null
+            $row['department_id'] ? (int)$row['department_id'] : null,
+            $row['department'] ?: null,
         );
     }
 
     public function isGeneralType(): bool
     {
-        return $this->typeId === AvailablePhoneList::GENERAL_ID;
+        return $this->typeId === self::GENERAL_ID;
+    }
+
+    public function isPersonalType(): bool
+    {
+        return $this->typeId === self::PERSONAL_ID;
     }
 
     public function isEqual(string $number): bool
     {
         return $this->phone === $number;
+    }
+
+    public function format(): string
+    {
+        if ($this->isPersonalType()) {
+            return $this->phone . ' (' . self::PERSONAL . ')';
+        }
+
+        return $this->phone . ' (General' . ($this->department ? ' ' . $this->department : '') . ')';
     }
 }

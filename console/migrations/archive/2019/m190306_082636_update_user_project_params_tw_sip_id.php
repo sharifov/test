@@ -33,7 +33,6 @@ class m190306_082636_update_user_project_params_tw_sip_id extends Migration
                                 $userProfile->save();
                                 $user = Employee::findOne($user->id);
                             }
-                            $user->userProfile->up_sip = $upp->upp_tw_sip_id;
                             $user->userProfile->up_updated_dt = $dateFormatNow;
                             $user->userProfile->save();
                         }

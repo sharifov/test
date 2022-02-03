@@ -9,6 +9,7 @@ use common\models\Language;
 use common\models\Lead;
 use modules\fileStorage\src\entity\fileLead\FileLeadQuery;
 use modules\fileStorage\src\entity\fileStorage\FileStorage;
+use src\model\email\useCase\send\fromLead\AbacEmailList;
 use yii\base\Model;
 use yii\helpers\ArrayHelper;
 
@@ -33,6 +34,8 @@ use yii\helpers\ArrayHelper;
  * @property string $keyCache
  *
  * @property array $files
+ *
+ * @property AbacEmailList $emailFromList
  *
  */
 class LeadPreviewEmailForm extends Model
@@ -60,9 +63,15 @@ class LeadPreviewEmailForm extends Model
     public $files;
 
     private $fileList;
-    /**
-     * @return array
-     */
+
+    private AbacEmailList $emailFromList;
+
+    public function __construct(AbacEmailList $emailFromList, $config = [])
+    {
+        parent::__construct($config);
+        $this->emailFromList = $emailFromList;
+    }
+
     public function rules(): array
     {
         return [
@@ -86,6 +95,12 @@ class LeadPreviewEmailForm extends Model
             ['files', IsArrayValidator::class],
             ['files', 'each', 'rule' => ['integer'], 'skipOnError' => true, 'skipOnEmpty' => true],
             ['files', 'each', 'rule' => ['in', 'range' => array_keys($this->getFileList())], 'skipOnError' => true, 'skipOnEmpty' => true],
+
+            ['e_email_from', function () {
+                if (!$this->emailFromList->isExist($this->e_email_from)) {
+                    $this->addError('e_email_from', 'Email From is invalid');
+                }
+            }, 'skipOnError' => true, 'skipOnEmpty' => true],
         ];
     }
 

@@ -17,7 +17,7 @@ use yii\base\Model;
 /**
  * Class CreateCallForm
  *
- * @property $createdUserId
+ * @property Employee $createdUser
  * @property $phoneListId
  * @property $toUserId
  * @property $from
@@ -34,9 +34,9 @@ use yii\base\Model;
  */
 class CreateCallForm extends Model
 {
-    private $createdUserId;
     private $phoneListId;
     private $voipDevice;
+    public Employee $createdUser;
 
     public $toUserId;
     public $from;
@@ -50,10 +50,10 @@ class CreateCallForm extends Model
     public $fromContacts;
     public $deviceId;
 
-    public function __construct(int $createdUserId, $config = [])
+    public function __construct(Employee $createdUser, $config = [])
     {
         parent::__construct($config);
-        $this->createdUserId = $createdUserId;
+        $this->createdUser = $createdUser;
     }
 
     public function rules(): array
@@ -69,7 +69,7 @@ class CreateCallForm extends Model
             ['toUserId', 'integer'],
             ['toUserId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
             ['toUserId', function ($attribute) {
-                if ($this->{$attribute} === $this->createdUserId) {
+                if ($this->{$attribute} === $this->createdUser->id) {
                     $this->addError($attribute, 'User is invalid');
                 }
             }, 'skipOnEmpty' => true, 'skipOnError' => true],
@@ -132,7 +132,7 @@ class CreateCallForm extends Model
                 'deviceId',
                 function ($attribute) {
                     try {
-                        $this->voipDevice = (new ReadyVoipDevice())->find($this->{$attribute}, $this->getCreatedUserId());
+                        $this->voipDevice = (new ReadyVoipDevice())->find($this->{$attribute}, $this->createdUser->id);
                     } catch (\Throwable $e) {
                         $this->addError($attribute, $e->getMessage());
                     }
@@ -180,7 +180,7 @@ class CreateCallForm extends Model
 
     public function getCreatedUserId(): int
     {
-        return $this->createdUserId;
+        return $this->createdUser->id;
     }
 
     public function getVoipDevice(): string

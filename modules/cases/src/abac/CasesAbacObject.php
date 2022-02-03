@@ -2,6 +2,8 @@
 
 namespace modules\cases\src\abac;
 
+use common\models\Department;
+use common\models\Project;
 use modules\abac\components\AbacBaseModel;
 use modules\abac\src\entities\AbacInterface;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
@@ -13,7 +15,7 @@ use src\entities\cases\CasesStatus;
 class CasesAbacObject extends AbacBaseModel implements AbacInterface
 {
     /** NAMESPACE */
-    private const NS = 'case/case/';
+    public const NS = 'case/case/';
 
     /** ALL PERMISSIONS */
     public const ALL = self::NS . '*';
@@ -68,7 +70,7 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         ],
     ];
 
-    protected const ATTR_CASE_IS_OWNER = [
+    public const ATTR_CASE_IS_OWNER = [
         'optgroup' => 'CASE',
         'id' => self::NS . 'is_owner',
         'field' => 'is_owner',
@@ -81,7 +83,44 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         'operators' =>  [self::OP_EQUAL2]
     ];
 
-    protected const ATTR_CASE_STATUS = [
+    public const ATTR_CASE_HAS_OWNER = [
+        'optgroup' => 'CASE',
+        'id' => self::NS . 'has_owner',
+        'field' => 'has_owner',
+        'label' => 'Has Owner',
+
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
+    public const ATTR_CASE_PROJECT_NAME = [
+        'optgroup' => 'CASE',
+        'id' => self::NS . 'project_name',
+        'field' => 'project_name',
+        'label' => 'Project',
+        'type' => self::ATTR_TYPE_STRING,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
+        'multiple' => true,
+        'operators' => [self::OP_IN],
+    ];
+
+    public const ATTR_CASE_DEPARTMENT_NAME = [
+        'optgroup' => 'CASE',
+        'id' => self::NS . 'department_name',
+        'field' => 'department_name',
+        'label' => 'Department',
+        'type' => self::ATTR_TYPE_STRING,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
+        'multiple' => true,
+        'operators' => [self::OP_IN],
+    ];
+
+    public const ATTR_CASE_STATUS = [
         'optgroup' => 'CASE',
         'id' => self::NS . 'status_id',
         'field' => 'status_id',
@@ -92,6 +131,18 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         'multiple' => false,
         'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2,
             self::OP_IN, self::OP_NOT_IN, '<', '>', '<=', '>=']
+    ];
+
+    public const ATTR_CASE_STATUS_NAME = [
+        'optgroup' => 'CASE',
+        'id' => self::NS . 'status_name',
+        'field' => 'status_name',
+        'label' => 'Status',
+        'type' => self::ATTR_TYPE_STRING,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2]
     ];
 
     protected const ATTR_CASE_STATUS_RULE = [
@@ -170,6 +221,54 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         'multiple' => false,
         'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2,
             self::OP_IN, self::OP_NOT_IN, '<', '>', '<=', '>=']
+    ];
+
+    public const ATTR_CLIENT_IS_EXCLUDED = [
+        'optgroup' => 'CASE',
+        'id' => self::NS . 'client_is_excluded',
+        'field' => 'client_is_excluded',
+        'label' => 'Client is excluded',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
+    public const ATTR_CLIENT_IS_UNSUBSCRIBE = [
+        'optgroup' => 'CASE',
+        'id' => self::NS . 'client_is_unsubscribe',
+        'field' => 'client_is_unsubscribe',
+        'label' => 'Client is unsubscribe',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2]
+    ];
+
+    protected const ATTR_PHONE_FROM_PERSONAL = [
+        'optgroup' => 'CASE',
+        'id' => self::NS . 'phone_from_personal',
+        'field' => 'phone_from_personal',
+        'label' => 'Phone From Personal',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
+    protected const ATTR_PHONE_FROM_GENERAL = [
+        'optgroup' => 'CASE',
+        'id' => self::NS . 'phone_from_general',
+        'field' => 'phone_from_general',
+        'label' => 'Phone From General',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
     ];
 
     /** --------------- ATTRIBUTE LIST --------------------------- */

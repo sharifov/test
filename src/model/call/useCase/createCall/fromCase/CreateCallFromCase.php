@@ -1,17 +1,15 @@
 <?php
 
-namespace src\model\call\useCase\createCall;
+namespace src\model\call\useCase\createCall\fromCase;
 
 use common\models\Call;
-use src\auth\Auth;
 use src\entities\cases\Cases;
 use src\model\call\services\FriendlyName;
 use src\model\call\services\RecordManager;
-use src\model\phone\AvailablePhoneList;
 
 class CreateCallFromCase
 {
-    public function __invoke(CreateCallForm $form): array
+    public function __invoke(\src\model\call\useCase\createCall\CreateCallForm $form): array
     {
         try {
             if (!$case = Cases::findOne(['cs_id' => $form->caseId])) {
@@ -28,18 +26,13 @@ class CreateCallFromCase
                 throw new \DomainException('Not found Department. Case ID: ' . $case->cs_id);
             }
 
-            $departmentParams = $case->department->getParams();
-            if (!$departmentParams) {
-                throw new \DomainException('Not found Department parameters. DepartmentId: ' . $case->cs_dep_id);
-            }
-
-            $availablePhones = new AvailablePhoneList($form->getCreatedUserId(), $case->cs_project_id, $case->cs_dep_id, $departmentParams->defaultPhoneType);
+            $availablePhones = new AbacCallFromNumberList($form->createdUser, $case);
             if (!$availablePhones->isExist($form->from)) {
                 throw new \DomainException('Phone From (' . $form->from . ') is not available.');
             }
 
             $recordDisabled = (RecordManager::createCall(
-                Auth::id(),
+                $form->createdUser->id,
                 $case->cs_project_id,
                 $case->cs_dep_id,
                 $form->from,

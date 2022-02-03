@@ -9,6 +9,7 @@ use common\models\Language;
 use modules\fileStorage\src\entity\fileCase\FileCaseQuery;
 use modules\fileStorage\src\entity\fileStorage\FileStorage;
 use src\entities\cases\Cases;
+use src\model\email\useCase\send\fromCase\AbacEmailList;
 use yii\base\Model;
 use yii\helpers\ArrayHelper;
 
@@ -36,6 +37,8 @@ use yii\helpers\ArrayHelper;
  * @property string $keyCache
  *
  * @property array $files
+ *
+ * @property AbacEmailList $emailFromList
  *
  */
 
@@ -66,19 +69,21 @@ class CasePreviewEmailForm extends Model
 
     private $fileList;
 
-    public function __construct(array $data = [], $config = [])
+    private AbacEmailList $emailFromList;
+
+    public function __construct(AbacEmailList $emailFromList, $config = [])
     {
         parent::__construct($config);
-
-        if ($data) {
-            $this->e_case_id = $data['email_data']['case']['id'] ?? null;
-            $this->e_email_from = $data['email_from'] ?? null;
-            $this->e_email_to = $data['email_to'] ?? null;
-            $this->e_email_from_name = $data['email_from_name'] ?? null;
-            $this->e_email_to_name = $data['email_to_name'] ?? null;
-            $this->e_email_subject = $data['email_subject'] ?? null;
-            $this->e_email_message = $data['email_body_html'] ?? null;
-        }
+        $this->emailFromList = $emailFromList;
+//        if ($data) {
+//            $this->e_case_id = $data['email_data']['case']['id'] ?? null;
+//            $this->e_email_from = $data['email_from'] ?? null;
+//            $this->e_email_to = $data['email_to'] ?? null;
+//            $this->e_email_from_name = $data['email_from_name'] ?? null;
+//            $this->e_email_to_name = $data['email_to_name'] ?? null;
+//            $this->e_email_subject = $data['email_subject'] ?? null;
+//            $this->e_email_message = $data['email_body_html'] ?? null;
+//        }
     }
 
     /**
@@ -107,6 +112,12 @@ class CasePreviewEmailForm extends Model
             ['files', IsArrayValidator::class],
             ['files', 'each', 'rule' => ['integer'], 'skipOnError' => true, 'skipOnEmpty' => true],
             ['files', 'each', 'rule' => ['in', 'range' => array_keys($this->getFileList()), 'skipOnEmpty' => true], 'skipOnError' => true, 'skipOnEmpty' => true],
+
+            ['e_email_from', function () {
+                if (!$this->emailFromList->isExist($this->e_email_from)) {
+                    $this->addError('e_email_from', 'Email From is invalid');
+                }
+            }, 'skipOnError' => true, 'skipOnEmpty' => true],
         ];
     }
 

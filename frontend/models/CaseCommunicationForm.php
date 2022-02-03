@@ -9,9 +9,10 @@ use common\models\DepartmentPhoneProject;
 use common\models\EmailTemplateType;
 use common\models\Employee;
 use common\models\Language;
-use common\models\Lead;
 use common\models\SmsTemplateType;
 use src\entities\cases\Cases;
+use src\model\email\useCase\send\fromCase\AbacEmailList;
+use src\model\sms\useCase\send\fromCase\AbacSmsFromNumberList;
 use yii\base\Model;
 
 /**
@@ -24,7 +25,9 @@ use yii\base\Model;
  * @property integer $c_sms_tpl_id
  * @property string $c_sms_tpl_key
  * @property string $c_sms_message
+ * @property string $c_sms_from
  * @property string $c_email_to
+ * @property string $c_email_from
  * @property string $c_email_subject
  * @property string $c_email_message
  * @property integer $c_email_tpl_id
@@ -43,6 +46,8 @@ use yii\base\Model;
  * @property integer $c_voice_status
  * @property string $c_voice_sid
  *
+ * @property AbacSmsFromNumberList $smsFromNumberList
+ * @property AbacEmailList $emailFromList
  */
 
 class CaseCommunicationForm extends Model
@@ -55,7 +60,7 @@ class CaseCommunicationForm extends Model
     public const TYPE_LIST = [
         self::TYPE_EMAIL    => 'Email',
         self::TYPE_SMS      => 'SMS',
-        self::TYPE_VOICE    => 'Phone',
+        self::TYPE_VOICE    => 'Call',
     ];
 
     public const TPL_TYPE_EMAIL_BLANK       = 8;
@@ -83,8 +88,10 @@ class CaseCommunicationForm extends Model
     public $c_sms_tpl_id;
     public $c_sms_tpl_key;
     public $c_sms_message;
+    public $c_sms_from;
 
     public $c_email_to;
+    public $c_email_from;
     public $c_email_subject;
     public $c_email_message;
     public $c_email_tpl_id;
@@ -105,7 +112,15 @@ class CaseCommunicationForm extends Model
     public $dpp_phone_id;
     public $dep_email_id;
 
+    private AbacSmsFromNumberList $smsFromNumberList;
+    private AbacEmailList $emailFromList;
 
+    public function __construct(AbacSmsFromNumberList $smsFromNumberList, AbacEmailList $emailFromList, $config = [])
+    {
+        parent::__construct($config);
+        $this->smsFromNumberList = $smsFromNumberList;
+        $this->emailFromList = $emailFromList;
+    }
 
     /**
      * @return array
@@ -134,13 +149,6 @@ class CaseCommunicationForm extends Model
             },
                 'whenClient' => "function (attribute, value) { return $('#c_type_id').val() == " . self::TYPE_SMS . '; }'
             ],
-
-
-            /*[['c_sms_message'], 'required', 'when' => function (CommunicationForm $model) {
-                return $model->c_sms_tpl_id != self::TPL_TYPE_SMS_OFFER && $model->c_type_id == self::TYPE_SMS;
-            },
-                'whenClient' => "function (attribute, value) { return $('#c_type_id').val() == " . self::TYPE_SMS . " && $('#c_sms_tpl_id').val() != " . self::TPL_TYPE_SMS_OFFER . '; }'
-            ],*/
 
 
             [['c_phone_number'], 'required', 'when' => function (self $model) {
@@ -206,7 +214,31 @@ class CaseCommunicationForm extends Model
             ['dep_email_id', 'required', 'on' => self::SCENARIO_EMAIL_DEPARTMENT],
             [['dep_email_id'], 'exist', 'on' => self::SCENARIO_EMAIL_DEPARTMENT, 'targetClass' => DepartmentEmailProject::class, 'targetAttribute' => ['dep_email_id' => 'dep_id'], 'message' => 'Not found Department email'],
 
+            ['c_sms_from', 'string'],
+            ['c_sms_from', 'required', 'when' => static function (CaseCommunicationForm $model) {
+                return (int) $model->c_type_id === self::TYPE_SMS;
+            },
+                'whenClient' => "function (attribute, value) {
+                    return $('#c_type_id').val() == " . self::TYPE_SMS . '; }'
+            ],
+            ['c_sms_from', function () {
+                if (!$this->smsFromNumberList->isExist($this->c_sms_from)) {
+                    $this->addError('c_sms_from', 'Sms From is invalid');
+                }
+            }, 'skipOnError' => true, 'skipOnEmpty' => true],
 
+            ['c_email_from', 'string'],
+            ['c_email_from', 'required', 'when' => static function (CaseCommunicationForm $model) {
+                return (int) $model->c_type_id === self::TYPE_EMAIL;
+            },
+                'whenClient' => "function (attribute, value) {
+                    return $('#c_type_id').val() == " . self::TYPE_EMAIL . '; }'
+            ],
+            ['c_email_from', function () {
+                if (!$this->emailFromList->isExist($this->c_email_from)) {
+                    $this->addError('c_email_from', 'Email From is invalid');
+                }
+            }, 'skipOnError' => true, 'skipOnEmpty' => true],
         ];
     }
 
@@ -262,14 +294,16 @@ class CaseCommunicationForm extends Model
     public function attributeLabels(): array
     {
         return [
-            'c_type_id'         => 'Message Type',
+            'c_type_id'         => 'Communication Type',
             'c_lead_id'         => 'Lead Id',
             'c_sms_tpl_id'      => 'SMS Template',
-            'c_sms_tpl_key'      => 'SMS Template',
+            'c_sms_tpl_key'     => 'SMS Template',
             'c_sms_message'     => 'SMS Message',
+            'c_sms_from'        => 'SMS From',
             'c_email_to'        => 'Email',
+            'c_email_from'      => 'Email From',
             'c_email_tpl_id'    => 'Email Template',
-            'c_email_tpl_key'    => 'Email Template',
+            'c_email_tpl_key'   => 'Email Template',
             'c_email_message'   => 'Email Message',
             'c_email_subject'   => 'Subject',
             'c_phone_number'    => 'Phone number',

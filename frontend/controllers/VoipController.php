@@ -9,12 +9,12 @@ use src\helpers\ErrorsToStringHelper;
 use src\helpers\setting\SettingHelper;
 use src\model\call\services\currentQueueCalls\CurrentQueueCallsService;
 use src\model\call\useCase\createCall\CreateCallForm;
-use src\model\call\useCase\createCall\CreateCallFromCase;
-use src\model\call\useCase\createCall\CreateCallFromContacts;
-use src\model\call\useCase\createCall\CreateCallFromHistory;
-use src\model\call\useCase\createCall\CreateCallFromLead;
-use src\model\call\useCase\createCall\CreateInternalCall;
-use src\model\call\useCase\createCall\CreateSimpleCall;
+use src\model\call\useCase\createCall\fromCase\CreateCallFromCase;
+use src\model\call\useCase\createCall\fromContacts\CreateCallFromContacts;
+use src\model\call\useCase\createCall\fromHistory\CreateCallFromHistory;
+use src\model\call\useCase\createCall\fromLead\CreateCallFromLead;
+use src\model\call\useCase\createCall\internalCall\CreateInternalCall;
+use src\model\call\useCase\createCall\simpleCall\CreateSimpleCall;
 use src\model\leadRedial\assign\LeadRedialUnAssigner;
 use src\model\user\entity\userStatus\UserStatus;
 use src\model\voip\phoneDevice\log\PhoneDeviceLogger;
@@ -138,14 +138,14 @@ class VoipController extends FController
             UserStatus::isOnCallOff($createdUser->id);
         }
 
-        $form = new CreateCallForm($createdUser->id);
+        $form = new CreateCallForm($createdUser);
 
         if ($form->load(\Yii::$app->request->post()) && $form->validate()) {
             $this->leadRedialUnAssigner->createCall($form->getCreatedUserId());
 
             if ($form->isInternalCall()) {
                 return $this->asJson(
-                    (new CreateInternalCall())($createdUser, $form)
+                    (new CreateInternalCall())($form)
                 );
             }
             if ($form->fromHistoryCall()) {
