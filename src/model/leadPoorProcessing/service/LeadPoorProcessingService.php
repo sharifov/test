@@ -5,17 +5,22 @@ namespace src\model\leadPoorProcessing\service;
 use common\components\jobs\LeadPoorProcessingJob;
 use common\components\jobs\LeadPoorProcessingRemoverJob;
 use common\models\Lead;
+use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\lead\src\abac\LeadAbacObject;
+use src\auth\Auth;
 use src\helpers\app\AppHelper;
 use src\helpers\ErrorsToStringHelper;
 use src\model\leadPoorProcessing\entity\LeadPoorProcessing;
 use src\model\leadPoorProcessing\entity\LeadPoorProcessingQuery;
 use src\model\leadPoorProcessing\repository\LeadPoorProcessingRepository;
+use src\model\leadPoorProcessing\service\rules\LeadPoorProcessingRuleFactory;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataQuery;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLog;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogQuery;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
 use src\model\leadPoorProcessingLog\repository\LeadPoorProcessingLogRepository;
+use Yii;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -119,8 +124,22 @@ class LeadPoorProcessingService
         string $dataKey,
         int $priority = 100
     ): void {
-        $job = new LeadPoorProcessingJob($leadId, $dataKey);
-        \Yii::$app->queue_job->priority($priority)->push($job);
+        $logData = [
+            'leadId' => $leadId,
+            'dataKey' => $dataKey,
+        ];
+
+        try {
+            self::checkAbacAccess($leadId);
+            $job = new LeadPoorProcessingJob($leadId, $dataKey);
+            \Yii::$app->queue_job->priority($priority)->push($job);
+        } catch (\RuntimeException | \DomainException $throwable) {
+            $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
+            \Yii::warning($message, 'LeadPoorProcessingService:addLeadPoorProcessingJob:Exception');
+        } catch (\Throwable $throwable) {
+            $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
+            \Yii::error($message, 'LeadPoorProcessingService:addLeadPoorProcessingJob:Throwable');
+        }
     }
 
     public static function addLeadPoorProcessingRemoverJob(
@@ -128,7 +147,34 @@ class LeadPoorProcessingService
         array $dataKeys,
         int $priority = 100
     ): void {
-        $job = new LeadPoorProcessingRemoverJob($leadId, $dataKeys);
-        \Yii::$app->queue_job->priority($priority)->push($job);
+        $logData = [
+            'leadId' => $leadId,
+            'dataKeys' => $dataKeys,
+        ];
+        try {
+            self::checkAbacAccess($leadId);
+            $job = new LeadPoorProcessingRemoverJob($leadId, $dataKeys);
+            \Yii::$app->queue_job->priority($priority)->push($job);
+        } catch (\RuntimeException | \DomainException $throwable) {
+            $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
+            \Yii::warning($message, 'LeadPoorProcessingService:addLeadPoorProcessingRemoverJob:Exception');
+        } catch (\Throwable $throwable) {
+            $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
+            \Yii::error($message, 'LeadPoorProcessingService:addLeadPoorProcessingRemoverJob:Throwable');
+        }
+    }
+
+    private static function checkAbacAccess(int $leadId): void
+    {
+        if (!$lead = Lead::find()->where(['id' => $leadId])->limit(1)->one()) {
+            throw new \RuntimeException('Lead not found by ID(' . $leadId . ')');
+        }
+
+        $userId = $lead->employee_id ?: Auth::id();
+        /** @abac $leadAbacDto, LeadAbacObject::LOGIC_POOR_PROCESSING, LeadAbacObject::ACTION_ACCESS, add to LeadPoorProcessingJob */
+        $leadAbacDto = new LeadAbacDto($lead, (int) $userId);
+        if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_POOR_PROCESSING, LeadAbacObject::ACTION_ACCESS)) {
+            throw new \RuntimeException('Abac access is failed. (' . LeadAbacObject::LOGIC_POOR_PROCESSING . '/' . LeadAbacObject::ACTION_ACCESS . ')');
+        }
     }
 }

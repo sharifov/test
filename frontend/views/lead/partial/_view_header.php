@@ -7,6 +7,9 @@
  */
 
 use common\models\Lead;
+use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\lead\src\abac\LeadAbacObject;
+use src\auth\Auth;
 use src\helpers\lead\LeadHelper;
 use yii\helpers\Html;
 
@@ -28,7 +31,13 @@ $bundle = \frontend\assets\TimerAsset::register($this);
                     <?= LeadHelper::displaySnoozeFor($lead, time(), 'vertical-align: 3px;font-size: 12px; margin-left: 5px;') ?>
                 <?php endif; ?>
 
-                <?php if ($lead->minLpp && $lead->minLpp->lpp_expiration_dt) : ?>
+                <?php
+                    $leadAbacDto = new LeadAbacDto($lead, (int) Auth::id());
+                    /** @abac $leadAbacDto, LeadAbacObject::OBJ_EXTRA_QUEUE, LeadAbacObject::ACTION_ACCESS, show timer in lead/view */
+                    $isShowLppTimer = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_EXTRA_QUEUE, LeadAbacObject::ACTION_ACCESS);
+                ?>
+
+                <?php if ($lead->minLpp && $lead->minLpp->lpp_expiration_dt && $isShowLppTimer) : ?>
                     <?= LeadHelper::displayLeadPoorProcessingTimer($lead->minLpp->lpp_expiration_dt, $lead->minLpp->lppLppd->lppd_name, 'vertical-align: 3px;font-size: 12px; margin-left: 5px;') ?>
                     <?php
                     $js = <<<JS
