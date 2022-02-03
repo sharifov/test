@@ -1,0 +1,10 @@
+[haproxy]
+crm-haproxy-1 ansible_ssh_host=3.216.171.133
+
+[shared]
+crm-shared-1 ansible_ssh_host=54.175.19.125
+
+[app]
+crm-app-1 ansible_ssh_host=54.91.203.224
+crm-app-2 ansible_ssh_host=34.207.182.30
+crm-app-3 ansible_ssh_host=52.54.129.111
