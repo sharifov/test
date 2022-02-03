@@ -85,6 +85,7 @@ use src\model\lead\useCases\lead\import\LeadImportParseService;
 use src\model\lead\useCases\lead\import\LeadImportService;
 use src\model\lead\useCases\lead\import\LeadImportUploadForm;
 use src\model\lead\useCases\lead\link\LeadLinkChatForm;
+use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
 use src\model\leadUserConversion\service\LeadUserConversionDictionary;
 use src\model\leadUserConversion\service\LeadUserConversionService;
@@ -930,8 +931,7 @@ class LeadController extends FController
                 if ($modelLeadCallExpert->save()) {
                     $modelLeadCallExpert->lce_request_text = '';
 
-                    $job = new LeadPoorProcessingRemoverJob($lead->id, [LeadPoorProcessingDataDictionary::KEY_NO_ACTION]);
-                    Yii::$app->queue_job->priority(100)->push($job);
+                    LeadPoorProcessingService::addLeadPoorProcessingRemoverJob($lead->id, [LeadPoorProcessingDataDictionary::KEY_NO_ACTION]);
                 }
             }
         }

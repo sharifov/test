@@ -10,6 +10,7 @@ use DateTime;
 use src\behaviors\metric\MetricEmailCounterBehavior;
 use src\entities\cases\Cases;
 use src\helpers\email\TextConvertingHelper;
+use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadPoorProcessing\service\rules\LeadPoorProcessingNoAction;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
 use src\services\email\EmailService;
@@ -454,8 +455,7 @@ class Email extends \yii\db\ActiveRecord
                 $out['error'] = $this->e_error_message;
             }
             if ($this->e_lead_id && LeadPoorProcessingNoAction::checkEmailTemplate($tplType)) {
-                $job = new LeadPoorProcessingRemoverJob($this->e_lead_id, [LeadPoorProcessingDataDictionary::KEY_NO_ACTION]);
-                Yii::$app->queue_job->priority(100)->push($job);
+                LeadPoorProcessingService::addLeadPoorProcessingRemoverJob($this->e_lead_id, [LeadPoorProcessingDataDictionary::KEY_NO_ACTION]);
             }
         } catch (\Throwable $exception) {
             $error = VarDumper::dumpAsString($exception->getMessage());

@@ -68,6 +68,7 @@ use src\model\lead\useCases\lead\api\create\LeadCreateForm;
 use src\model\lead\useCases\lead\import\LeadImportForm;
 use src\model\leadData\entity\LeadData;
 use src\model\leadPoorProcessing\entity\LeadPoorProcessing;
+use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
 use src\model\leadUserConversion\entity\LeadUserConversion;
 use src\services\lead\calculator\LeadTripTypeCalculator;
@@ -1422,18 +1423,19 @@ class Lead extends ActiveRecord implements Objectable
         );
 
         $this->recordEvent(new LeadTaskEvent($this), LeadTaskEvent::class);
-        $this->recordEvent(
-            new LeadPoorProcessingEvent(
-                $this,
-                LeadPoorProcessingDataDictionary::KEY_NO_ACTION
-            )
-        );
 
         $this->changeOwner($newOwnerId);
 
         if (!$this->isProcessing()) {
             $this->setStatus(self::STATUS_PROCESSING);
         }
+
+        $this->recordEvent(
+            new LeadPoorProcessingEvent(
+                $this,
+                LeadPoorProcessingDataDictionary::KEY_NO_ACTION
+            )
+        );
     }
 
     /**
@@ -2209,8 +2211,14 @@ class Lead extends ActiveRecord implements Objectable
         $result = self::updateAll(['l_last_action_dt' => date('Y-m-d H:i:s')], ['id' => $this->id]);
 
         if ($this->isProcessing()) {
-            $job = new LeadPoorProcessingJob($this->id, LeadPoorProcessingDataDictionary::KEY_LAST_ACTION);
-            Yii::$app->queue_job->priority(100)->push($job);
+            LeadPoorProcessingService::addLeadPoorProcessingRemoverJob(
+                $this->id,
+                [
+                    LeadPoorProcessingDataDictionary::KEY_EXTRA_TO_PROCESSING_TAKE,
+                    LeadPoorProcessingDataDictionary::KEY_EXTRA_TO_PROCESSING_MULTIPLE_UPD,
+                ]
+            );
+            LeadPoorProcessingService::addLeadPoorProcessingJob($this->id, LeadPoorProcessingDataDictionary::KEY_LAST_ACTION);
         }
 
         return $result;
