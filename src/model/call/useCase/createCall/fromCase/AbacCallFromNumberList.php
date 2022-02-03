@@ -47,6 +47,7 @@ class AbacCallFromNumberList
         if ($this->canMakeCall()) {
             foreach ($this->getCallFromNumbers() as $number) {
                 $tempAbacDto = new CaseCommunicationBlockAbacDto($this->case, [$number], [], [], $this->user->id);
+                /** @abac $tempAbacDto, CaseCommunicationBlockAbacObject::NS, CaseCommunicationBlockAbacObject::ACTION_MAKE_CALL, Validate Call From number for make call from Case View page */
                 if (Yii::$app->abac->can($tempAbacDto, CaseCommunicationBlockAbacObject::NS, CaseCommunicationBlockAbacObject::ACTION_MAKE_CALL, $this->user)) {
                     $this->list[] = $number;
                 }
@@ -74,6 +75,7 @@ class AbacCallFromNumberList
         }
 
         $caseCommunicationBlockAbacDto = new CaseCommunicationBlockAbacDto($this->case, $this->getCallFromNumbers(), [], [], $this->user->id);
+        /** @abac $caseCommunicationBlockAbacDto, CaseCommunicationBlockAbacObject::NS, CaseCommunicationBlockAbacObject::ACTION_MAKE_CALL, Validate Call From number list for make call from Case View page */
         $this->canCreateCall = (bool)Yii::$app->abac->can($caseCommunicationBlockAbacDto, CaseCommunicationBlockAbacObject::NS, CaseCommunicationBlockAbacObject::ACTION_MAKE_CALL, $this->user);
 
         return $this->canCreateCall;

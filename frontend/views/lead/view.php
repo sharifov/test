@@ -196,6 +196,7 @@ $disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIEN
             <?php endif;?>
 
             <?php $leadCommunicationBlockAbacDto = new LeadCommunicationBlockAbacDto($lead, [], [], [], $user->id); ?>
+            <?php /** @abac $leadCommunicationBlockAbacDto, LeadCommunicationBlockAbacObject::NS, LeadCommunicationBlockAbacObject::ACTION_VIEW, View communication block on Lead View page */ ?>
             <?php if (Yii::$app->abac->can($leadCommunicationBlockAbacDto, LeadCommunicationBlockAbacObject::NS, LeadCommunicationBlockAbacObject::ACTION_VIEW, $user)) : ?>
                 <?= $this->render('communication/lead_communication', [
                     'leadForm'      => $leadForm,

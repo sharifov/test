@@ -194,6 +194,7 @@ $unsubscribedEmails =  array_column($model->project->emailUnsubscribes, 'eu_emai
 
         <div class="col-md-6">
             <?php $caseCommunicationBlockAbacDto = new CaseCommunicationBlockAbacDto($model, [], [], [], $user->id); ?>
+            <?php /** @abac $caseCommunicationBlockAbacDto, CaseCommunicationBlockAbacObject::NS, CaseCommunicationBlockAbacObject::ACTION_VIEW, View communication block on Case View page */ ?>
             <?php if (Yii::$app->abac->can($caseCommunicationBlockAbacDto, CaseCommunicationBlockAbacObject::NS, CaseCommunicationBlockAbacObject::ACTION_VIEW, $user)) : ?>
                 <?= $this->render('communication/case_communication', [
                     'model'      => $model,

@@ -47,6 +47,7 @@ class AbacSmsFromNumberList
         if ($this->canSendSms()) {
             foreach ($this->getSmsFromNumbers() as $number) {
                 $tempAbacDto = new LeadCommunicationBlockAbacDto($this->lead, [], [$number], [], $this->user->id);
+                /** @abac $tempAbacDto, LeadCommunicationBlockAbacObject::NS, LeadCommunicationBlockAbacObject::ACTION_SEND_SMS, Validate Sms From for send sms from Lead View page */
                 if (Yii::$app->abac->can($tempAbacDto, LeadCommunicationBlockAbacObject::NS, LeadCommunicationBlockAbacObject::ACTION_SEND_SMS, $this->user)) {
                     $this->list[] = $number;
                 }
@@ -74,6 +75,7 @@ class AbacSmsFromNumberList
         }
 
         $leadCommunicationBlockAbacDto = new LeadCommunicationBlockAbacDto($this->lead, [], $this->getSmsFromNumbers(), [], $this->user->id);
+        /** @abac $tempAbacDto, LeadCommunicationBlockAbacObject::NS, LeadCommunicationBlockAbacObject::ACTION_SEND_SMS, Validate Sms From list for send sms from Lead View page */
         $this->canSendSmsFlag = (bool)Yii::$app->abac->can($leadCommunicationBlockAbacDto, LeadCommunicationBlockAbacObject::NS, LeadCommunicationBlockAbacObject::ACTION_SEND_SMS, $this->user);
 
         return $this->canSendSmsFlag;

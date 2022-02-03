@@ -47,6 +47,7 @@ class AbacEmailList
         if ($this->canSendEmail()) {
             foreach ($this->getEmailFromEmails() as $email) {
                 $tempAbacDto = new CaseCommunicationBlockAbacDto($this->case, [], [], [$email], $this->user->id);
+                /** @abac $tempAbacDto, CaseCommunicationBlockAbacObject::NS, CaseCommunicationBlockAbacObject::ACTION_SEND_EMAIL, Validate Email From for send email from Case View page */
                 if (Yii::$app->abac->can($tempAbacDto, CaseCommunicationBlockAbacObject::NS, CaseCommunicationBlockAbacObject::ACTION_SEND_EMAIL, $this->user)) {
                     $this->list[] = $email;
                 }
@@ -74,6 +75,7 @@ class AbacEmailList
         }
 
         $caseCommunicationBlockAbacDto = new CaseCommunicationBlockAbacDto($this->case, [], [], $this->getEmailFromEmails(), $this->user->id);
+        /** @abac $tempAbacDto, CaseCommunicationBlockAbacObject::NS, CaseCommunicationBlockAbacObject::ACTION_SEND_EMAIL, Validate Email From list for send email from Case View page */
         $this->canSendEmailFlag = (bool)Yii::$app->abac->can($caseCommunicationBlockAbacDto, CaseCommunicationBlockAbacObject::NS, CaseCommunicationBlockAbacObject::ACTION_SEND_EMAIL, $this->user);
 
         return $this->canSendEmailFlag;
