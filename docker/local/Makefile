@@ -11,11 +11,29 @@ restart: down up
 app-console:
 	docker-compose run --rm console bash
 
+migrate:
+	docker-compose run --rm console ./yii migrate
+
+npm-install:
+	docker-compose run --rm console npm install
+
 composer-install:
 	docker-compose run --rm console composer install --no-plugins
 
-migrate:
-	docker-compose run --rm console ./yii migrate
+cs-check:
+	docker-compose run --rm console composer cs-check
+
+cs-fix:
+	docker-compose run --rm console composer cs-fix2
+
+lint:
+	docker-compose run --rm console composer lint
+
+apidoc-gen:
+	docker-compose run --rm console composer apidoc-gen
+
+assets-compressor:
+	docker-compose run --rm console composer assets-compressor
 
 build:
 	docker build --build-arg PHP_FPM_VERSION=${PHP_FPM_VERSION} --file=php-fpm/Dockerfile --tag=${REGISTRY}crm-php-fpm:${IMAGE_TAG} php-fpm
@@ -34,4 +52,4 @@ init-config:
 	&& cp Makefile.root ${APP_PATH}/Makefile \
 	&& cp pre-commit.sh ${APP_PATH}/docker-pre-commit.sh
 
-install: build init-config up
+install: build init-config composer-install npm-install migrate
