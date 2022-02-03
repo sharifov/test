@@ -186,9 +186,10 @@ class VoluntaryRefundService
         }
 
         try {
+            $bookingId = !empty($saleData['baseBookingId']) ? $saleData['baseBookingId'] : $saleData['bookingId'];
             if (
                 (!$originProductQuote || !$order = $originProductQuote->pqOrder) ||
-                (!$order = OrderManageService::getBySaleIdOrBookingId((int) $saleData['saleId'], $saleData['bookingId']))
+                (!$order = OrderManageService::getBySaleIdOrBookingId((int) $saleData['saleId'], $bookingId))
             ) {
                 $order = $this->createOrder(
                     $orderCreateSaleForm,

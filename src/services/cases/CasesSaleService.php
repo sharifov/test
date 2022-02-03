@@ -637,7 +637,8 @@ class CasesSaleService
                     if ($caseSale->css_cs_id && SettingHelper::isEnableOrderFromSale()) {
                         $transaction = new Transaction(['db' => Yii::$app->db]);
                         try {
-                            if (!$order = OrderManageService::getBySaleIdOrBookingId($saleId, (string) $refreshSaleData['bookingId'])) {
+                            $bookingId = $refreshSaleData['baseBookingId'] ? $refreshSaleData['baseBookingId'] : $refreshSaleData['bookingId'];
+                            if (!$order = OrderManageService::getBySaleIdOrBookingId($saleId, (string) $bookingId)) {
                                 $orderCreateFromSaleForm = new OrderCreateFromSaleForm();
                                 if (!$orderCreateFromSaleForm->load($refreshSaleData)) {
                                     throw new \RuntimeException('OrderCreateFromSaleForm not loaded');
