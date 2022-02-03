@@ -14,19 +14,19 @@ then
 fi
 SFILES=${SFILES:-$STAGED_FILES_CMD}
 
-if [[ "$SFILES" = "" ]]; then
+if [ "$SFILES" = "" ]; then
   exit 0
 fi
 
 ### PHP Linter
 
-which ./vendor/bin/phplint &> /dev/null
-if [[ "$?" == 1 ]]; then
-  echo "Please install PHP Lint"
-  exit 1
-fi
+#which ./vendor/bin/phplint &> /dev/null
+#if [ "$?" == 1 ]; then
+#  echo "Please install PHP Lint"
+#  exit 1
+#fi
 
-echo "Running PHP Lint..."
+echo "\n---------- Running PHP Lint -------------"
 
 parse_error_count=0
 for FILE in $SFILES
@@ -53,16 +53,15 @@ fi
 
 ### PHP Code Sniffer
 
-which ./vendor/bin/phpcs &> /dev/null
-if [[ "$?" == 1 ]]; then
-  echo "Please install PHP Code Sniffer"
-  exit 1
-fi
+#which ./vendor/bin/phpcs &> /dev/null
+#if [[ "$?" == 1 ]]; then
+#  echo "Please install PHP Code Sniffer"
+#  exit 1
+#fi
 
 if [ "$FILES" != "" ]
 then
-    echo "#"
-    echo "Running Code Sniffer..."
+    echo "\n---------- Running Code Sniffer -------------"
     ./vendor/bin/phpcs $FILES
     if [ $? != 0 ]
     then

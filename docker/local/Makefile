@@ -11,6 +11,9 @@ restart: down up
 app-console:
 	docker-compose run --rm console bash
 
+composer-install:
+	docker-compose run --rm console composer install --no-plugins
+
 migrate:
 	docker-compose run --rm console ./yii migrate
 
@@ -27,4 +30,7 @@ init-config:
 	${REGISTRY}crm-php-cli:${IMAGE_TAG} \
 	php init --env=Local --overwrite=All \
 	&& rm ${APP_PATH}/common/config/supervisor/centrifugo.conf \
-	&& rm ${APP_PATH}/common/config/supervisor/socket-server.conf
+	&& rm ${APP_PATH}/common/config/supervisor/socket-server.conf \
+	&& cp Makefile.root ${APP_PATH}/Makefile
+
+install: build init-config up

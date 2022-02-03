@@ -184,6 +184,7 @@ services:
     volumes:
       - ${APP_PATH}:${APP_PATH}
       - ${SSH_DIR}:/home/${USER_NAME}/.ssh
+      - ${COMPOSER_CACHE_DIR}:/home/${USER_NAME}/.composer/cache
     working_dir: ${APP_PATH}
     depends_on:
       - mysql
