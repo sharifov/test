@@ -4334,6 +4334,7 @@ Reason: {reason}',
             self::STATUS_SNOOZE => self::STATUS_LIST[self::STATUS_SNOOZE],
             self::STATUS_PROCESSING => self::STATUS_LIST[self::STATUS_PROCESSING],
             self::STATUS_ON_HOLD => self::STATUS_LIST[self::STATUS_ON_HOLD],
+            self::STATUS_EXTRA_QUEUE => self::STATUS_LIST[self::STATUS_EXTRA_QUEUE],
         ];
     }
 
