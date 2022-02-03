@@ -74,7 +74,7 @@ class AbacEmailList
         }
 
         $caseCommunicationBlockAbacDto = new CaseCommunicationBlockAbacDto($this->case, [], [], $this->getEmailFromEmails(), $this->user->id);
-        $this->canSendEmailFlag = Yii::$app->abac->can($caseCommunicationBlockAbacDto, CaseCommunicationBlockAbacObject::NS, CaseCommunicationBlockAbacObject::ACTION_SEND_EMAIL, $this->user);
+        $this->canSendEmailFlag = (bool)Yii::$app->abac->can($caseCommunicationBlockAbacDto, CaseCommunicationBlockAbacObject::NS, CaseCommunicationBlockAbacObject::ACTION_SEND_EMAIL, $this->user);
 
         return $this->canSendEmailFlag;
     }
@@ -103,7 +103,7 @@ class AbacEmailList
             return $this->emailFromEmails;
         }
 
-        $departmentParams = $this->case->department->getParams();
+        $departmentParams = $this->case->cs_dep_id ? $this->case->department->getParams() : null;
 
         $emails = new AvailableEmailList(
             $this->user->id,

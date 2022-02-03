@@ -18,11 +18,11 @@ class CaseCommunicationBlockAbacObject extends AbacBaseModel implements AbacInte
     public const ACTION_SEND_EMAIL = 'sendEmail';
     public const ACTION_MAKE_CALL = 'makeCall';
 
-    private const ATTR_PHONE_FROM_PERSONAL = [
+    private const ATTR_CALL_FROM_PERSONAL = [
         'optgroup' => 'CASE',
-        'id' => self::NS . '/phone_from_personal',
-        'field' => 'phone_from_personal',
-        'label' => 'Phone From Personal',
+        'id' => self::NS . '/call_from_personal',
+        'field' => 'call_from_personal',
+        'label' => 'Call From Personal',
         'type' => self::ATTR_TYPE_BOOLEAN,
         'input' => self::ATTR_INPUT_RADIO,
         'values' => ['true' => 'True', 'false' => 'False'],
@@ -30,11 +30,59 @@ class CaseCommunicationBlockAbacObject extends AbacBaseModel implements AbacInte
         'operators' =>  [self::OP_EQUAL2],
     ];
 
-    private const ATTR_PHONE_FROM_GENERAL = [
+    private const ATTR_CALL_FROM_GENERAL = [
         'optgroup' => 'CASE',
-        'id' => self::NS . '/phone_from_general',
-        'field' => 'phone_from_general',
-        'label' => 'Phone From General',
+        'id' => self::NS . '/call_from_general',
+        'field' => 'cal_from_general',
+        'label' => 'Call From General',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2],
+    ];
+
+    private const ATTR_SMS_FROM_PERSONAL = [
+        'optgroup' => 'CASE',
+        'id' => self::NS . '/sms_from_personal',
+        'field' => 'sms_from_personal',
+        'label' => 'Sms From Personal',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2],
+    ];
+
+    private const ATTR_SMS_FROM_GENERAL = [
+        'optgroup' => 'CASE',
+        'id' => self::NS . '/sms_from_general',
+        'field' => 'sms_from_general',
+        'label' => 'Sms From General',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2],
+    ];
+
+    private const ATTR_EMAIL_FROM_PERSONAL = [
+        'optgroup' => 'CASE',
+        'id' => self::NS . '/email_from_personal',
+        'field' => 'email_from_personal',
+        'label' => 'Email From Personal',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2],
+    ];
+
+    private const ATTR_EMAIL_FROM_GENERAL = [
+        'optgroup' => 'CASE',
+        'id' => self::NS . '/email_from_general',
+        'field' => 'email_from_general',
+        'label' => 'Email From General',
         'type' => self::ATTR_TYPE_BOOLEAN,
         'input' => self::ATTR_INPUT_RADIO,
         'values' => ['true' => 'True', 'false' => 'False'],
@@ -80,8 +128,12 @@ class CaseCommunicationBlockAbacObject extends AbacBaseModel implements AbacInte
                 CasesAbacObject::ATTR_CASE_HAS_OWNER,
                 CasesAbacObject::ATTR_CLIENT_IS_EXCLUDED,
                 CasesAbacObject::ATTR_CLIENT_IS_UNSUBSCRIBE,
-                self::ATTR_PHONE_FROM_PERSONAL,
-                self::ATTR_PHONE_FROM_GENERAL,
+                self::ATTR_CALL_FROM_PERSONAL,
+                self::ATTR_CALL_FROM_GENERAL,
+                self::ATTR_SMS_FROM_PERSONAL,
+                self::ATTR_SMS_FROM_GENERAL,
+                self::ATTR_EMAIL_FROM_PERSONAL,
+                self::ATTR_EMAIL_FROM_GENERAL,
                 self::ATTR_PROJECT_SMS_ENABLE,
             ],
         ];

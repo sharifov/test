@@ -74,7 +74,7 @@ class AbacSmsFromNumberList
         }
 
         $caseCommunicationBlockAbacDto = new CaseCommunicationBlockAbacDto($this->case, [], $this->getSmsFromNumbers(), [], $this->user->id);
-        $this->canSendSmsFlag = Yii::$app->abac->can($caseCommunicationBlockAbacDto, CaseCommunicationBlockAbacObject::NS, CaseCommunicationBlockAbacObject::ACTION_SEND_SMS, $this->user);
+        $this->canSendSmsFlag = (bool)Yii::$app->abac->can($caseCommunicationBlockAbacDto, CaseCommunicationBlockAbacObject::NS, CaseCommunicationBlockAbacObject::ACTION_SEND_SMS, $this->user);
 
         return $this->canSendSmsFlag;
     }
@@ -103,7 +103,7 @@ class AbacSmsFromNumberList
             return $this->smsFromNumbers;
         }
 
-        $departmentParams = $this->case->department->getParams();
+        $departmentParams = $this->case->cs_dep_id ? $this->case->department->getParams() : null;
 
         $numbers = new AvailablePhoneNumberList(
             $this->user->id,

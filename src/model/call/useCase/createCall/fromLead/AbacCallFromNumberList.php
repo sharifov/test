@@ -74,7 +74,7 @@ class AbacCallFromNumberList
         }
 
         $leadCommunicationBlockAbacDto = new LeadCommunicationBlockAbacDto($this->lead, $this->getCallFromNumbers(), [], [], $this->user->id);
-        $this->canCreateCall = Yii::$app->abac->can($leadCommunicationBlockAbacDto, LeadCommunicationBlockAbacObject::NS, LeadCommunicationBlockAbacObject::ACTION_MAKE_CALL, $this->user);
+        $this->canCreateCall = (bool)Yii::$app->abac->can($leadCommunicationBlockAbacDto, LeadCommunicationBlockAbacObject::NS, LeadCommunicationBlockAbacObject::ACTION_MAKE_CALL, $this->user);
 
         return $this->canCreateCall;
     }
@@ -103,7 +103,7 @@ class AbacCallFromNumberList
             return $this->callFromNumbers;
         }
 
-        $departmentParams = $this->lead->lDep->getParams();
+        $departmentParams = $this->lead->l_dep_id ? $this->lead->lDep->getParams() : null;
 
         $numbers = new AvailablePhoneNumberList(
             $this->user->id,

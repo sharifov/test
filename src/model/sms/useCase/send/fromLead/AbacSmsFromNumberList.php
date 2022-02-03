@@ -74,7 +74,7 @@ class AbacSmsFromNumberList
         }
 
         $leadCommunicationBlockAbacDto = new LeadCommunicationBlockAbacDto($this->lead, [], $this->getSmsFromNumbers(), [], $this->user->id);
-        $this->canSendSmsFlag = Yii::$app->abac->can($leadCommunicationBlockAbacDto, LeadCommunicationBlockAbacObject::NS, LeadCommunicationBlockAbacObject::ACTION_SEND_SMS, $this->user);
+        $this->canSendSmsFlag = (bool)Yii::$app->abac->can($leadCommunicationBlockAbacDto, LeadCommunicationBlockAbacObject::NS, LeadCommunicationBlockAbacObject::ACTION_SEND_SMS, $this->user);
 
         return $this->canSendSmsFlag;
     }
@@ -103,7 +103,7 @@ class AbacSmsFromNumberList
             return $this->smsFromNumbers;
         }
 
-        $departmentParams = $this->lead->lDep->getParams();
+        $departmentParams = $this->lead->l_dep_id ? $this->lead->lDep->getParams() : null;
 
         $numbers = new AvailablePhoneNumberList(
             $this->user->id,

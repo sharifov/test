@@ -247,30 +247,6 @@ class CasesAbacObject extends AbacBaseModel implements AbacInterface
         'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2]
     ];
 
-    protected const ATTR_PHONE_FROM_PERSONAL = [
-        'optgroup' => 'CASE',
-        'id' => self::NS . 'phone_from_personal',
-        'field' => 'phone_from_personal',
-        'label' => 'Phone From Personal',
-        'type' => self::ATTR_TYPE_BOOLEAN,
-        'input' => self::ATTR_INPUT_RADIO,
-        'values' => ['true' => 'True', 'false' => 'False'],
-        'multiple' => false,
-        'operators' =>  [self::OP_EQUAL2]
-    ];
-
-    protected const ATTR_PHONE_FROM_GENERAL = [
-        'optgroup' => 'CASE',
-        'id' => self::NS . 'phone_from_general',
-        'field' => 'phone_from_general',
-        'label' => 'Phone From General',
-        'type' => self::ATTR_TYPE_BOOLEAN,
-        'input' => self::ATTR_INPUT_RADIO,
-        'values' => ['true' => 'True', 'false' => 'False'],
-        'multiple' => false,
-        'operators' =>  [self::OP_EQUAL2]
-    ];
-
     /** --------------- ATTRIBUTE LIST --------------------------- */
     public const OBJECT_ATTRIBUTE_LIST = [
         self::LOGIC_CLIENT_DATA    => [self::ATTR_CASE_IS_OWNER, self::ATTR_IS_COMMON_GROUP],
