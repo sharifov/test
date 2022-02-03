@@ -33,7 +33,7 @@ class CaseCommunicationBlockAbacObject extends AbacBaseModel implements AbacInte
     private const ATTR_CALL_FROM_GENERAL = [
         'optgroup' => 'CASE',
         'id' => self::NS . '/call_from_general',
-        'field' => 'cal_from_general',
+        'field' => 'call_from_general',
         'label' => 'Call From General',
         'type' => self::ATTR_TYPE_BOOLEAN,
         'input' => self::ATTR_INPUT_RADIO,
