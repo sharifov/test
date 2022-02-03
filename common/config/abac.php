@@ -6,6 +6,7 @@ return [
     'class' => AbacComponent::class,
     'cacheEnable' => true,
     'modules' => [
+        'app' => \modules\abac\src\object\AppAbac::class,
         'order' => \modules\order\src\abac\OrderAbacObject::class,
         'case' => \modules\cases\src\abac\CasesAbacObject::class,
         'case-communication' => \modules\cases\src\abac\communicationBlock\CaseCommunicationBlockAbacObject::class,
