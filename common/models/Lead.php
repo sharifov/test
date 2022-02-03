@@ -2606,6 +2606,7 @@ class Lead extends ActiveRecord implements Objectable
             case self::STATUS_NEW:
             case self::STATUS_BOOK_FAILED:
             case self::STATUS_ALTERNATIVE:
+            case self::STATUS_EXTRA_QUEUE:
                 $label = '<span class="label label-default">' . self::getStatus($status) . '</span>';
                 break;
         }
@@ -2638,6 +2639,7 @@ class Lead extends ActiveRecord implements Objectable
             case self::STATUS_NEW:
             case self::STATUS_BOOK_FAILED:
             case self::STATUS_ALTERNATIVE:
+            case self::STATUS_EXTRA_QUEUE:
                 $label = '<span class="label label-default">' . self::getStatus($status) . '</span>';
                 break;
         }
