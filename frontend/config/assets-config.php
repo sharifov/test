@@ -92,9 +92,9 @@ $params = array_merge(
 $appVersion = $params['release']['version'] ?? '';
 
 return [
-    'jsCompressor' => 'gulp compress-js --gulpfile gulpfile.js --src {from} --dist {to}',
+    'jsCompressor' => 'node_modules/.bin/gulp compress-js --gulpfile gulpfile.js --src {from} --dist {to}',
 
-    'cssCompressor' => 'gulp compress-css --gulpfile gulpfile.js --src {from} --dist {to}',
+    'cssCompressor' => 'node_modules/.bin/gulp compress-css --gulpfile gulpfile.js --src {from} --dist {to}',
 
     'deleteSource' => true,
 
