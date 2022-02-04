@@ -37,6 +37,20 @@ class AbstractLeadPoorProcessingService
         $this->description = $description;
     }
 
+    public function checkCondition(): bool
+    {
+        if (!$this->getRule()->isEnabled()) {
+            throw new \RuntimeException('Rule (' . $this->getRule()->lppd_key . ') not enabled');
+        }
+        if (!$this->getLead()->isProcessing()) {
+            throw new \RuntimeException('Lead (' . $this->getLead()->id . ') not in status "processing"');
+        }
+        if (!$this->getLead()->hasOwner()) {
+            throw new \RuntimeException('Lead (' . $this->getLead()->id . ') not has owner');
+        }
+        return true;
+    }
+
     public function handle(): void
     {
         if (!$leadPoorProcessing = LeadPoorProcessingQuery::getByLeadAndKey($this->getLead()->id, $this->getRule()->lppd_id)) {

@@ -29,8 +29,11 @@ class LeadPoorProcessingRemoverOwnerChangedListener
         }
     }
 
-    private static function getUsernameById(int $id): string
+    private static function getUsernameById(?int $id): string
     {
-        return (string) Employee::find()->select('username')->where(['id' => $id])->scalar();
+        if ($username = (string) Employee::find()->select('username')->where(['id' => $id])->scalar()) {
+            return $username;
+        }
+        return 'N/A';
     }
 }
