@@ -20,17 +20,6 @@ class LeadPoorProcessingNoAction extends AbstractLeadPoorProcessingService imple
         self::SMS_TPL_PRODUCT_OFFER_VIEW_KEY => self::SMS_TPL_PRODUCT_OFFER_VIEW_KEY,
     ];
 
-    public function checkCondition(): bool
-    {
-        if (!$this->getRule()->isEnabled()) {
-            throw new \RuntimeException('Rule (' . $this->getRule()->lppd_key . ') not enabled');
-        }
-        if (!$this->getLead()->isProcessing()) {
-            throw new \RuntimeException('Lead (' . $this->getLead()->id . ') not in status "processing"');
-        }
-        return true;
-    }
-
     public static function checkSmsTemplate(?string $template): bool
     {
         return in_array($template, self::SMS_TPL_OFFER_LIST, true);

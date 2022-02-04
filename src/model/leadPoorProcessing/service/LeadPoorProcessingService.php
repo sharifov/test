@@ -157,7 +157,7 @@ class LeadPoorProcessingService
             \Yii::$app->queue_job->priority($priority)->push($job);
         } catch (\RuntimeException | \DomainException $throwable) {
             $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
-            \Yii::warning($message, 'LeadPoorProcessingService:addLeadPoorProcessingRemoverJob:Exception');
+            \Yii::info($message, 'info\LeadPoorProcessingService:addLeadPoorProcessingRemoverJob:Exception');
         } catch (\Throwable $throwable) {
             $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
             \Yii::error($message, 'LeadPoorProcessingService:addLeadPoorProcessingRemoverJob:Throwable');
@@ -166,6 +166,9 @@ class LeadPoorProcessingService
 
     private static function checkAbacAccess(int $leadId): void
     {
+        if (Yii::$app->id !== 'app-frontend') {
+            throw new \RuntimeException('Abac access is failed');
+        }
         if (!$lead = Lead::find()->where(['id' => $leadId])->limit(1)->one()) {
             throw new \RuntimeException('Lead not found by ID(' . $leadId . ')');
         }

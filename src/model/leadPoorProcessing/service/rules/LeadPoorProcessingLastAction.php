@@ -17,17 +17,6 @@ class LeadPoorProcessingLastAction extends AbstractLeadPoorProcessingService imp
     private bool $isCheckDuplicate = true;
     private int $pauseSecond = 5;
 
-    public function checkCondition(): bool
-    {
-        if (!$this->getRule()->isEnabled()) {
-            throw new \RuntimeException('Rule (' . $this->getRule()->lppd_key . ') not enabled');
-        }
-        if (!$this->getLead()->isProcessing()) {
-            throw new \RuntimeException('Lead (' . $this->getLead()->id . ') not in status "processing"');
-        }
-        return true;
-    }
-
     public function handle(): void
     {
         if (!$this->checkDuplicate()) {
