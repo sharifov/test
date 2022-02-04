@@ -1,15 +1,15 @@
 <?php
 
+use modules\abac\AbacModule;
+use kivork\FeatureFlag\FeatureFlagModule;
 use yii\authclient\clients\Google;
 use yii\authclient\Collection;
 use common\components\logger\FilebeatTarget;
 use common\helpers\LogHelper;
 use frontend\assets\groups\BootstrapGroupAsset;
-use kartik\daterange\MomentAsset;
 use kivork\rbacExportImport\src\rbac\DbManager;
 use kivork\rbacExportImport\RbacImportExportModule;
 use common\models\Employee;
-use modules\abac\AbacModule;
 use modules\cruise\CruiseModule;
 use modules\email\EmailModule;
 use modules\fileStorage\FileStorageModule;
@@ -347,6 +347,12 @@ return [
         'abac' => [
             'class' => AbacModule::class,
             'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
+        ],
+
+        'flag' => [
+            'class' => FeatureFlagModule::class,
+            'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
+            'roles' => ['admin', 'superadmin']
         ],
 
         'invoice' => [

@@ -75,6 +75,8 @@ use modules\attraction\models\AttractionQuote;
 use modules\attraction\src\services\AttractionQuotePdfService;
 use modules\email\src\helpers\MailHelper;
 use modules\email\src\Notifier;
+use modules\featureFlag\FFlag;
+use modules\featureFlag\src\entities\FeatureFlag;
 use modules\flight\models\FlightQuote;
 use modules\flight\src\forms\api\PaymentApiForm;
 use modules\flight\src\services\flightQuote\FlightQuotePdfService;
@@ -2586,6 +2588,38 @@ class TestController extends FController
         Yii::info($message, 'AS\AS-test');
         Yii::info($message, 'elk\test-elk');
 
+        return date('Y-m-d H:i:s');
+    }
+
+    public function actionFf()
+    {
+        echo 'Feature Flag Test<br><br>';
+
+        /** @fflag FFlag::FF_TEST_FLAG1, Username field1 */
+        if (Yii::$app->ff->can(FFlag::FF_TEST_FLAG1)) {
+            VarDumper::dump(Yii::$app->ff->val(FFlag::FF_TEST_FLAG1), 10, true);
+        } else {
+            echo 'NO1';
+        }
+
+        echo '<br><br>';
+
+
+        /** @fflag FFlag::FF_TEST_FLAG2, Username field2 */
+        if (Yii::$app->ff->can(FFlag::FF_TEST_FLAG2)) {
+            VarDumper::dump(Yii::$app->ff->val(FFlag::FF_TEST_FLAG2), 10, true);
+        } else {
+            echo 'NO2';
+        }
+
+        if (Yii::$app->ff->isDue(\kivork\FeatureFlag\Models\FeatureFlag::ET_DISABLED_CONDITION, '59 * * * * *')) {
+            echo 'YES3';
+        } else {
+            echo 'NO3';
+        }
+
+
+        echo '<br><br>';
         return date('Y-m-d H:i:s');
     }
 }

@@ -924,6 +924,13 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'Site Settings', 'url' => ['/setting/index'], 'icon' => 'cogs text-success'],
                 ['label' => 'System Logs', 'url' => ['/log/index'], 'icon' => 'bug text-warning'],
                 ['label' => 'API Logs', 'url' => ['/api-log/index'], 'icon' => 'sitemap'],
+                [
+                    'label' => Yii::t('language', 'Feature Flag'), 'url' => 'javascript:', 'icon' => 'folder',
+                    'items' => [
+                        ['label' => Yii::t('menu', 'Feature Flag'), 'url' => ['/flag/feature-flag/index'],
+                            'icon' => 'flag', 'title' => 'Feature Flag CRUD'],
+                    ]
+                ],
                 ['label' => 'API Report', 'url' => ['/stats/api-graph'], 'icon' => 'bar-chart'],
 
                 ['label' => 'User Site Activity', 'url' => ['/user-site-activity/index'], 'icon' => 'bars'],

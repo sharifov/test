@@ -111,8 +111,9 @@
 		"yiisoft/yii2-authclient": "^2.2",
 		"textalk/websocket": "^1.5",
         "ext-fileinfo": "*",
-        "ext-pgsql": "*"
-    },
+        "ext-pgsql": "*",
+		"kivork/yii2-feature-flag": "@dev"
+	},
 	"require-dev" : {
 		"yiisoft/yii2-debug" : "~2.1",
 		"yiisoft/yii2-gii" : "~2.2",
@@ -193,6 +194,10 @@
 		{
 			"type": "vcs",
 			"url": "git@bitbucket.org:techork/yii2-prometheus-client.git"
+		},
+		{
+			"type": "vcs",
+			"url": "git@bitbucket.org:techork/yii2-feature-flag.git"
 		}
 	],
 	"scripts": {
