@@ -4,6 +4,7 @@ namespace src\model\leadPoorProcessing\service;
 
 use common\components\jobs\LeadPoorProcessingJob;
 use common\components\jobs\LeadPoorProcessingRemoverJob;
+use common\models\Employee;
 use common\models\Lead;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
@@ -176,11 +177,13 @@ class LeadPoorProcessingService
         if (!$lead = Lead::find()->where(['id' => $leadId])->limit(1)->one()) {
             throw new \RuntimeException('Lead not found by ID(' . $leadId . ')');
         }
+        if (!$employee = Employee::find()->where(['id' => $lead->employee_id])->limit(1)->one()) {
+            throw new \RuntimeException('LeadOwner not found by ID(' . $lead->employee_id . ')');
+        }
 
-        $userId = $lead->employee_id ?: Auth::id();
         /** @abac $leadAbacDto, LeadAbacObject::LOGIC_POOR_PROCESSING, LeadAbacObject::ACTION_ACCESS, add to LeadPoorProcessingJob */
-        $leadAbacDto = new LeadAbacDto($lead, (int) $userId);
-        if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_POOR_PROCESSING, LeadAbacObject::ACTION_ACCESS)) {
+        $leadAbacDto = new LeadAbacDto($lead, (int) $lead->employee_id);
+        if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_POOR_PROCESSING, LeadAbacObject::ACTION_ACCESS, $employee)) {
             throw new \RuntimeException('Abac access is failed. (' . LeadAbacObject::LOGIC_POOR_PROCESSING . '/' . LeadAbacObject::ACTION_ACCESS . ')');
         }
     }
