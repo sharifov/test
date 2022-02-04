@@ -65,6 +65,7 @@ use src\helpers\app\AppHelper;
 use src\helpers\email\MaskEmailHelper;
 use src\helpers\ErrorsToStringHelper;
 use src\helpers\setting\SettingHelper;
+use src\model\call\useCase\createCall\fromCase\AbacCallFromNumberList;
 use src\model\callLog\entity\callLog\CallLogType;
 use src\model\caseOrder\entity\CaseOrder;
 use src\model\cases\useCases\cases\updateInfo\UpdateInfoForm;
@@ -78,9 +79,10 @@ use src\model\clientChatCase\entity\ClientChatCaseRepository;
 use src\model\coupon\entity\couponCase\CouponCase;
 use src\model\coupon\useCase\send\SendCouponsForm;
 use src\model\department\department\Params;
+use src\model\email\useCase\send\fromCase\AbacEmailList;
 use src\model\emailReviewQueue\EmailReviewQueueManageService;
-use src\model\phone\AvailablePhoneList;
 use src\model\saleTicket\useCase\create\SaleTicketService;
+use src\model\sms\useCase\send\fromCase\AbacSmsFromNumberList;
 use src\repositories\cases\CaseCategoryRepository;
 use src\repositories\cases\CasesRepository;
 use src\repositories\cases\CasesSaleRepository;
@@ -310,7 +312,11 @@ class CasesController extends FController
         /** @var Employee $userModel */
         $userModel = Yii::$app->user->identity;
 
-        $previewEmailForm = new CasePreviewEmailForm();
+        $callFromNumberList = new AbacCallFromNumberList($userModel, $model);
+        $smsFromNumberList = new AbacSmsFromNumberList($userModel, $model);
+        $emailFromList = new AbacEmailList($userModel, $model);
+
+        $previewEmailForm = new CasePreviewEmailForm($emailFromList);
         $previewEmailForm->e_case_id = $model->cs_id;
         $previewEmailForm->is_send = false;
 
@@ -412,18 +418,15 @@ class CasesController extends FController
                     $previewEmailForm->addError('general', 'Access denied: you dont have permission to send email');
                 }
                 //VarDumper::dump($previewEmailForm->attributes, 10, true);              exit;
+            } else {
+                Yii::$app->session->setFlash('send-error', '<strong>Email Message</strong> has been sent for review. Validation error.');
             }
         }
 
-        $smsEnabled = true;
-        if (!$model->project->getParams()->sms->isEnabled()) {
-            $smsEnabled = false;
-        }
-
-        $previewSmsForm = new CasePreviewSmsForm();
+        $previewSmsForm = new CasePreviewSmsForm($smsFromNumberList);
         $previewSmsForm->is_send = false;
 
-        if ($smsEnabled && $previewSmsForm->load(Yii::$app->request->post())) {
+        if ($smsFromNumberList->canSendSms() && $previewSmsForm->load(Yii::$app->request->post())) {
             $previewSmsForm->s_case_id = $model->cs_id;
             if ($previewSmsForm->validate()) {
                 $sms = new Sms();
@@ -483,70 +486,33 @@ class CasesController extends FController
                     Yii::error(VarDumper::dumpAsString($sms->errors), 'CaseController:view:Sms:save');
                 }
                 //VarDumper::dump($previewEmailForm->attributes, 10, true);              exit;
+            } else {
+                Yii::$app->session->setFlash('send-error', 'Error: <strong>SMS Message</strong> has not been sent to <strong>' . $previewSmsForm->s_phone_to . '</strong> Validation form error.');
             }
         }
 
 
-        $comForm = new CaseCommunicationForm();
+        $comForm = new CaseCommunicationForm($smsFromNumberList, $emailFromList);
         $comForm->c_preview_email = 0;
         $comForm->c_preview_sms = 0;
         $comForm->c_voice_status = 0;
 
-
         if ($comForm->load(Yii::$app->request->post())) {
             $comForm->c_case_id = $model->cs_id;
-
-            $isTypeSMS = (int)$comForm->c_type_id === CaseCommunicationForm::TYPE_SMS && $smsEnabled;
-
-            $isTypeEmail = (int)$comForm->c_type_id === CaseCommunicationForm::TYPE_EMAIL;
-
-            if ($isTypeSMS && $model->isDepartmentSupport()) {
-                $comForm->scenario = CaseCommunicationForm::SCENARIO_SMS_DEPARTMENT;
-            }
-
-            if ($isTypeEmail && $model->isDepartmentSupport()) {
-                $comForm->scenario = CaseCommunicationForm::SCENARIO_EMAIL_DEPARTMENT;
-            }
 
             if ($comForm->validate()) {
                 $project = $model->project;
 
-                if ($isTypeEmail) {
-                    //VarDumper::dump($comForm->quoteList, 10, true); exit;
-
+                if ((int)$comForm->c_type_id === CaseCommunicationForm::TYPE_EMAIL) {
                     $comForm->c_preview_email = 1;
-
-                    $mailFrom = $userModel->email;
 
                     /** @var CommunicationService $communication */
                     $communication = Yii::$app->communication;
                     $data['origin'] = '';
 
-
-                    //$mailPreview = $communication->mailPreview(7, 'cl_offer', 'chalpet@gmail.com', 'chalpet2@gmail.com', $data, 'ru-RU');
-                    //$mailTypes = $communication->mailTypes(7);
-
                     $content_data['email_body_html'] = $comForm->c_email_message;
-                    //$content_data['email_body_text'] = '2';
                     $content_data['email_subject'] = $comForm->c_email_subject;
-
-                    $content_data['email_reply_to'] = $mailFrom;
-                    //$content_data['email_cc'] = 'chalpet-cc@gmail.com';
-                    //$content_data['email_bcc'] = 'chalpet-bcc@gmail.com';
-
-
-                    $upp = null;
-                    if ($model->isDepartmentSupport() && $departmentEmail = DepartmentEmailProject::find()->andWhere(['dep_id' => $comForm->dep_email_id])->withEmailList()->one()) {
-//                      $mailFrom = $departmentEmail->dep_email;
-                        $mailFrom = $departmentEmail->getEmail();
-                    } elseif ($model->cs_project_id) {
-                        $upp = UserProjectParams::find()->where(['upp_project_id' => $model->cs_project_id, 'upp_user_id' => Yii::$app->user->id])->withEmailList()->one();
-                        if ($upp) {
-//                            $mailFrom = $upp->upp_email;
-                            $mailFrom = $upp->getEmail();
-                        }
-                    }
-
+                    $content_data['email_reply_to'] = $userModel->email;
 
                     $projectContactInfo = [];
 
@@ -588,7 +554,7 @@ class CasesController extends FController
                         //echo (Html::encode(json_encode($content_data)));
                         //VarDumper::dump($content_data, 10 , true); exit;
 
-                        $mailPreview = $communication->mailPreview($model->cs_project_id, ($tpl ? $tpl->etp_key : ''), $mailFrom, $comForm->c_email_to, $content_data, $language);
+                        $mailPreview = $communication->mailPreview($model->cs_project_id, ($tpl ? $tpl->etp_key : ''), $comForm->c_email_from, $comForm->c_email_to, $content_data, $language);
 
 
                         if ($mailPreview && isset($mailPreview['data'])) {
@@ -609,7 +575,7 @@ class CasesController extends FController
                                     $previewEmailForm->e_email_subject = $mailPreview['data']['email_subject'];
                                     $previewEmailForm->e_email_subject_origin = $mailPreview['data']['email_subject'];
                                 }
-                                $previewEmailForm->e_email_from = $mailFrom; //$mailPreview['data']['email_from'];
+                                $previewEmailForm->e_email_from = $comForm->c_email_from;
                                 $previewEmailForm->e_email_to = $comForm->c_email_to; //$mailPreview['data']['email_to'];
                                 $previewEmailForm->e_email_from_name = $userModel->nickname;
                                 $previewEmailForm->e_email_to_name = $model->client ? $model->client->full_name : '';
@@ -623,7 +589,7 @@ class CasesController extends FController
                         $previewEmailForm->e_email_message_edited = false;
                         $previewEmailForm->e_email_subject = $comForm->c_email_subject;
                         $previewEmailForm->e_email_subject_origin = $comForm->c_email_subject;
-                        $previewEmailForm->e_email_from = $mailFrom;
+                        $previewEmailForm->e_email_from = $comForm->c_email_from;
                         $previewEmailForm->e_email_to = $comForm->c_email_to;
                         $previewEmailForm->e_email_from_name = $userModel->nickname;
                         $previewEmailForm->e_email_to_name = $model->client ? $model->client->full_name : '';
@@ -631,7 +597,7 @@ class CasesController extends FController
                 }
 
 
-                if ($isTypeSMS) {
+                if ((int)$comForm->c_type_id === CaseCommunicationForm::TYPE_SMS && $smsFromNumberList->canSendSms()) {
                     $comForm->c_preview_sms = 1;
 
                     /** @var CommunicationService $communication */
@@ -643,18 +609,6 @@ class CasesController extends FController
 
                     $content_data['message'] = $comForm->c_sms_message;
                     $content_data['project_id'] = $model->cs_project_id;
-                    $phoneFrom = '';
-
-                    if ($model->isDepartmentSupport() && $departmentPhone = DepartmentPhoneProject::find()->andWhere(['dpp_id' => $comForm->dpp_phone_id])->withPhoneList()->one()) {
-//                      $phoneFrom = $departmentPhone->dpp_phone_number;
-                        $phoneFrom = $departmentPhone->getPhone();
-                    } elseif ($model->cs_project_id) {
-                        $upp = UserProjectParams::find()->where(['upp_project_id' => $model->cs_project_id, 'upp_user_id' => Yii::$app->user->id])->withPhoneList()->one();
-                        if ($upp) {
-//                            $phoneFrom = $upp->upp_tw_phone_number;
-                            $phoneFrom = $upp->getPhone();
-                        }
-                    }
 
                     $projectContactInfo = [];
 
@@ -664,53 +618,42 @@ class CasesController extends FController
 
                     $previewSmsForm->s_quote_list = @json_encode([]);
 
-                    if (!$phoneFrom) {
-                        $comForm->c_preview_sms = 0;
-                        $comForm->addError('c_sms_preview', 'Config Error: Not found phone number for Project Id: ' . $model->cs_project_id . ', agent: "' . $userModel->username . '"');
-                    } else {
-                        $previewSmsForm->s_phone_to = $comForm->c_phone_number;
-                        $previewSmsForm->s_phone_from = $phoneFrom;
+                    $previewSmsForm->s_phone_to = $comForm->c_phone_number;
+                    $previewSmsForm->s_phone_from = $comForm->c_sms_from;
 
-                        if ($comForm->c_language_id) {
-                            $previewSmsForm->s_language_id = $comForm->c_language_id; //$language;
-                        }
+                    if ($comForm->c_language_id) {
+                        $previewSmsForm->s_language_id = $comForm->c_language_id; //$language;
+                    }
 
+                    if ($comForm->c_sms_tpl_id > 0) {
+                        $previewSmsForm->s_sms_tpl_id = $comForm->c_sms_tpl_id;
 
-                        if ($comForm->c_sms_tpl_id > 0) {
-                            $previewSmsForm->s_sms_tpl_id = $comForm->c_sms_tpl_id;
+                        //$content_data = []; //$lead->getEmailData2($comForm->quoteList, $projectContactInfo);
+                        $content_data = $this->casesCommunicationService->getEmailData($model, $userModel);
+                        $content_data['content'] = $comForm->c_sms_message;
 
-                            //$content_data = []; //$lead->getEmailData2($comForm->quoteList, $projectContactInfo);
-                            $content_data = $this->casesCommunicationService->getEmailData($model, $userModel);
-                            $content_data['content'] = $comForm->c_sms_message;
+                        //VarDumper::dump($content_data, 10, true); exit;
 
-                            //VarDumper::dump($content_data, 10, true); exit;
+                        $language = $comForm->c_language_id ?: 'en-US';
 
-                            $language = $comForm->c_language_id ?: 'en-US';
+                        $tpl = SmsTemplateType::findOne($comForm->c_sms_tpl_id);
 
-                            $tpl = SmsTemplateType::findOne($comForm->c_sms_tpl_id);
-                            //$mailSend = $communication->mailSend(7, 'cl_offer', 'chalpet@gmail.com', 'chalpet2@gmail.com', $content_data, $data, 'ru-RU', 10);
+                        $smsPreview = $communication->smsPreview($model->cs_project_id, ($tpl ? $tpl->stp_key : ''), $comForm->c_sms_from, $comForm->c_phone_number, $content_data, $language);
 
-                            $smsPreview = $communication->smsPreview($model->cs_project_id, ($tpl ? $tpl->stp_key : ''), $phoneFrom, $comForm->c_phone_number, $content_data, $language);
-
-
-                            if ($smsPreview && isset($smsPreview['data'])) {
-                                if (isset($smsPreview['error']) && $smsPreview['error']) {
-                                    $errorJson = @json_decode($smsPreview['error'], true);
-                                    $comForm->addError('c_email_preview', 'Communication Server response: ' . ($errorJson['message'] ?? $smsPreview['error']));
+                        if ($smsPreview && isset($smsPreview['data'])) {
+                            if (isset($smsPreview['error']) && $smsPreview['error']) {
+                                $errorJson = @json_decode($smsPreview['error'], true);
+                                $comForm->addError('c_email_preview', 'Communication Server response: ' . ($errorJson['message'] ?? $smsPreview['error']));
 //                                    Yii::error($communication->url . "\r\n " . $smsPreview['error'], 'CaseController:view:smsPreview');
-                                    $comForm->c_preview_sms = 0;
-                                } else {
-                                    //$previewSmsForm->s_phone_from = $smsPreview['data']['phone_from'];
-                                    $previewSmsForm->s_sms_message = $smsPreview['data']['sms_text'];
-                                    $previewSmsForm->s_quote_list = @json_encode($comForm->quoteList);
-                                }
+                                $comForm->c_preview_sms = 0;
+                            } else {
+                                //$previewSmsForm->s_phone_from = $smsPreview['data']['phone_from'];
+                                $previewSmsForm->s_sms_message = $smsPreview['data']['sms_text'];
+                                $previewSmsForm->s_quote_list = @json_encode($comForm->quoteList);
                             }
-
-
-                            //VarDumper::dump($mailPreview, 10, true);// exit;
-                        } else {
-                            $previewSmsForm->s_sms_message = $comForm->c_sms_message;
                         }
+                    } else {
+                        $previewSmsForm->s_sms_message = $comForm->c_sms_message;
                     }
                 }
             }
@@ -794,13 +737,6 @@ class CasesController extends FController
 
         //VarDumper::dump($dataProvider->allModels); exit;
 
-        $fromPhoneNumbers = [];
-        if (($department = $model->department) && $params = $department->getParams()) {
-            $phoneList = new AvailablePhoneList(Auth::id(), $model->cs_project_id, $department->dep_id, $params->defaultPhoneType);
-            $fromPhoneNumbers = $phoneList->getFormattedList();
-        }
-
-        $enableCommunication = true;
         $isAdmin = true;
 
         $dataProviderOrders = (new OrderSearch())->searchByCase($model->cs_id);
@@ -810,7 +746,6 @@ class CasesController extends FController
             'previewEmailForm' => $previewEmailForm,
             'previewSmsForm' => $previewSmsForm,
             'comForm' => $comForm,
-            'enableCommunication' => $enableCommunication,
             'dataProviderCommunication' => $dataProviderCommunication,
             'dataProviderCommunicationLog' => $dataProviderCommunicationLog,
             'isAdmin' => $isAdmin,
@@ -830,10 +765,11 @@ class CasesController extends FController
             'coupons' => $coupons,
             'sendCouponsForm' => $sendCouponForm,
 
-            'fromPhoneNumbers' => $fromPhoneNumbers,
-            'smsEnabled' => $smsEnabled,
+            'dataProviderOrders' => $dataProviderOrders,
 
-            'dataProviderOrders' => $dataProviderOrders
+            'callFromNumberList' => $callFromNumberList,
+            'smsFromNumberList' => $smsFromNumberList,
+            'emailFromList' => $emailFromList,
         ]);
     }
 
@@ -967,6 +903,7 @@ class CasesController extends FController
             return $out;
         }
 
+        $bookingId = !empty($saleData['baseBookingId']) ? $saleData['baseBookingId'] : $saleData['bookingId'] ?? null;
         $transaction = new Transaction(['db' => Yii::$app->db]);
         try {
             $cs = new CaseSale();
@@ -975,20 +912,20 @@ class CasesController extends FController
             $cs->css_sale_data = $saleData;
             $cs->css_sale_pnr = $saleData['pnr'] ?? null;
             $cs->css_sale_created_dt = $saleData['created'] ?? null;
-            $cs->css_sale_book_id = $saleData['bookingId'] ?? null;
+            $cs->css_sale_book_id = $bookingId ?? null;
             $cs->css_sale_pax = isset($saleData['passengers']) && is_array($saleData['passengers']) ? count($saleData['passengers']) : null;
             $cs->css_sale_data_updated = $cs->css_sale_data;
 
             $cs = $this->casesSaleService->prepareAdditionalData($cs, $saleData);
 
             if (empty($model->cs_order_uid)) {
-                $model->cs_order_uid = $cs->css_sale_book_id;
+                $model->cs_order_uid = $bookingId;
                 $out['caseBookingId'] = $model->cs_order_uid;
-            } elseif ($model->cs_order_uid !== $cs->css_sale_book_id) {
+            } elseif ($model->cs_order_uid !== $bookingId) {
                 $out['updateCaseBookingId'] = true;
                 $out['updateCaseBookingHtml'] = $this->renderPartial('sales/_sale_update_case_booking_id', [
                     'caseBookingId' => $model->cs_order_uid,
-                    'saleBookingId' => $cs->css_sale_book_id,
+                    'saleBookingId' => $bookingId,
                     'caseId' => $model->cs_id,
                     'saleId' => $cs->css_sale_id
                 ]);
@@ -1022,7 +959,7 @@ class CasesController extends FController
             $transactionOrder = new Transaction(['db' => Yii::$app->db]);
             try {
                 if (empty($out['error']) && !empty($saleData)) {
-                    if (!$order = OrderManageService::getBySaleIdOrBookingId($saleId, $saleData['bookingId'])) {
+                    if (!$order = OrderManageService::getBySaleIdOrBookingId($saleId, $bookingId)) {
                         $orderCreateFromSaleForm = new OrderCreateFromSaleForm();
                         if (!$orderCreateFromSaleForm->load($saleData)) {
                             throw new \RuntimeException('OrderCreateFromSaleForm not loaded');

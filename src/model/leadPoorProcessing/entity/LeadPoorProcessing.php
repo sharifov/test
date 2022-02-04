@@ -64,4 +64,16 @@ class LeadPoorProcessing extends \yii\db\ActiveRecord
     {
         return 'lead_poor_processing';
     }
+
+    public static function create(
+        int $leadId,
+        int $dataId,
+        string $expirationDt
+    ): LeadPoorProcessing {
+        $model = new self();
+        $model->lpp_lead_id = $leadId;
+        $model->lpp_lppd_id = $dataId;
+        $model->lpp_expiration_dt = $expirationDt;
+        return $model;
+    }
 }

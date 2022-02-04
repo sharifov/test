@@ -293,4 +293,9 @@ class MultipleUpdateForm extends Model
     {
         return $this->statusId === Lead::STATUS_NEW;
     }
+
+    public function isExtraQueue(): bool
+    {
+        return $this->statusId === Lead::STATUS_EXTRA_QUEUE;
+    }
 }

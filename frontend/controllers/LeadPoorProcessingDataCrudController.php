@@ -76,16 +76,16 @@ class LeadPoorProcessingDataCrudController extends FController
     }
 
     /**
-     * @param int $lppd_id ID
+     * @param int $id ID
      * @return LeadPoorProcessingData
      * @throws NotFoundHttpException
      */
-    protected function findModel($lppd_id): LeadPoorProcessingData
+    protected function findModel($id): LeadPoorProcessingData
     {
-        if (($model = LeadPoorProcessingData::findOne($lppd_id)) !== null) {
+        if (($model = LeadPoorProcessingData::findOne($id)) !== null) {
             return $model;
         }
 
-        throw new NotFoundHttpException('LeadPoorProcessingData not found by ID(' .  $lppd_id . ')');
+        throw new NotFoundHttpException('LeadPoorProcessingData not found by ID(' .  $id . ')');
     }
 }

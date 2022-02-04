@@ -387,14 +387,6 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
 //                'filter' => $projectList
 //            ],
 
-            /*[
-                'label' => 'Sip',
-                'attribute' => 'user_sip',
-                'value' => static function (\common\models\Employee $model) {
-                    return ($model->userProfile->up_sip) ?? '';
-                },
-                'format' => 'raw'
-            ],*/
 
             [
                 'label' => 'Projects Params',

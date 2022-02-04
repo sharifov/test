@@ -30,17 +30,35 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'layout' => "{errors}\n{summary}\n{items}\n{pager}",
         'columns' => [
-
-            'lpp_lead_id:lead',
-            'lpp_lppd_id',
+            [
+                'attribute' => 'lpp_lead_id',
+                'value' => static function (LeadPoorProcessing $model) {
+                    return Yii::$app->formatter->asLead($model->lppLead, 'fa-cubes');
+                },
+                'format' => 'raw',
+            ],
             [
                 'attribute' => 'lpp_lppd_id',
                 'value' => static function (LeadPoorProcessing $model) {
-                    return $model->lpp_lppd_id;
+                    return '<i class="fa fa-key"></i> ' . $model->lppLppd->lppd_key;
                 },
                 'filter' => LeadPoorProcessingDataQuery::getList(60),
+                'format' => 'raw',
             ],
-            'lpp_expiration_dt:byUserDatetime',
+            [
+                'class' => \common\components\grid\DateTimeColumn::class,
+                'attribute' => 'lpp_expiration_dt',
+                'limitEndDay' => false,
+            ],
+            /*[
+                'class' => \common\components\grid\DateTimeColumn::class,
+                'attribute' => 'lpp_expiration_dt',
+                'value' => static function (LeadPoorProcessing $model) {
+                    return Html::tag('i', '', ['class' => 'fa fa-calendar']) . ' ' . $model->lpp_expiration_dt;
+                },
+                'format' => 'raw',
+                'limitEndDay' => false,
+            ],*/
 
             ['class' => ActionColumn::class],
         ],

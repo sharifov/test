@@ -1932,61 +1932,6 @@ class PhoneController extends FController
         return $this->asJson($result);
     }
 
-    public function actionGetCallHistoryFromNumber()
-    {
-        try {
-            $sid = (string)Yii::$app->request->post('sid');
-            if (!$call = CallLog::findOne(['cl_call_sid' => $sid])) {
-                throw new \DomainException('Not found Call. SID: ' . $sid);
-            }
-
-            if (!$call->cl_project_id) {
-                throw new \DomainException('Not found Project. Call SID: ' . $sid);
-            }
-
-            if (!$call->cl_department_id) {
-                throw new \DomainException('Not found Department. Call SID: ' . $sid);
-            }
-
-            if (!$params = $call->department->getParams()) {
-                throw new \DomainException('Not found Params. Department: ' . $call->department->dep_name);
-            }
-
-            $phone = null;
-
-            if ($call->isOut()) {
-                if (VoipDevice::isValid($call->cl_phone_from)) {
-                    $list = new AvailablePhoneList(Auth::id(), $call->cl_project_id, $call->cl_department_id, $params->defaultPhoneType);
-                    $phone = $list->getFirst()->phone ?? null;
-                } else {
-                    $phone = $call->cl_phone_from;
-                }
-            } elseif ($call->isIn()) {
-                $list = new AvailablePhoneList(Auth::id(), $call->cl_project_id, $call->cl_department_id, $params->defaultPhoneType);
-                $phone = $list->getFirst()->phone ?? null;
-            }
-
-            if ($phone) {
-                $result = [
-                    'error' => false,
-                    'phone' => $phone,
-                ];
-            } else {
-                $result = [
-                    'error' => true,
-                    'message' => 'Phone From not found',
-                ];
-            }
-        } catch (\Throwable $e) {
-            $result = [
-                'error' => true,
-                'message' => $e->getMessage(),
-            ];
-        }
-
-        return $this->asJson($result);
-    }
-
     public function actionAjaxGetPhoneListId()
     {
         try {

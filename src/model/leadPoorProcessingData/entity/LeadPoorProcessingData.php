@@ -136,4 +136,9 @@ class LeadPoorProcessingData extends \yii\db\ActiveRecord
     {
         return 'lead_poor_processing_data';
     }
+
+    public function isEnabled(): bool
+    {
+        return (bool) $this->lppd_enabled;
+    }
 }

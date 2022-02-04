@@ -31,13 +31,20 @@ $this->params['breadcrumbs'][] = $this->title;
         'layout' => "{errors}\n{summary}\n{items}\n{pager}",
         'columns' => [
             'lppl_id',
-            'lppl_lead_id',
+            [
+                'attribute' => 'lppl_lead_id',
+                'value' => static function (LeadPoorProcessingLog $model) {
+                    return Yii::$app->formatter->asLead($model->lpplLead, 'fa-cubes');
+                },
+                'format' => 'raw',
+            ],
             [
                 'attribute' => 'lppl_lppd_id',
                 'value' => static function (LeadPoorProcessingLog $model) {
-                    return $model->lppl_lppd_id;
+                    return '<i class="fa fa-key"></i> ' . $model->lpplLppd->lppd_key;
                 },
                 'filter' => LeadPoorProcessingDataQuery::getList(60),
+                'format' => 'raw',
             ],
             [
                 'attribute' => 'lppl_status',
@@ -48,7 +55,35 @@ $this->params['breadcrumbs'][] = $this->title;
             'lppl_owner_id:userName',
             'lppl_created_dt:byUserDatetime',
 
-            ['class' => ActionColumn::class],
+            [
+                'class' => ActionColumn::class,
+                'template' => '{view} {update} {delete}',
+                'buttons' => [
+                    'view' => static function ($url, LeadPoorProcessingLog $model) {
+                        return Html::a(
+                            '<i class="fa fa-eye"></i>',
+                            ['/lead-poor-processing-log-crud/view', 'lppl_id' => $model->lppl_id],
+                            ['data-pjax' => 0,]
+                        );
+                    },
+                    'update' => static function ($url, LeadPoorProcessingLog $model) {
+                        return Html::a(
+                            '<i class="fa fa-pencil"></i>',
+                            ['/lead-poor-processing-log-crud/update', 'lppl_id' => $model->lppl_id],
+                            ['data-pjax' => 0,]
+                        );
+                    },
+                    'delete' => static function ($url, LeadPoorProcessingLog $model) {
+                        return Html::a('<i class="fa fa-trash"></i>', ['delete', 'lppl_id' => $model->lppl_id], [
+                            'class' => '',
+                            'data' => [
+                                'confirm' => 'Are you sure you want to delete this item?',
+                                'method' => 'post',
+                            ],
+                        ]);
+                    },
+                ],
+            ],
         ],
     ]); ?>
 

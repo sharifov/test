@@ -7,6 +7,7 @@ use common\models\Employee;
 use common\models\search\ApiLogSearch;
 use common\models\search\CallSearch;
 use kartik\export\ExportMenu;
+use modules\user\userFeedback\entity\search\UserFeedbackSearch;
 use src\entities\call\CallGraphsSearch;
 use common\models\search\CommunicationSearch;
 use common\models\search\EmployeeSearch;
@@ -15,6 +16,7 @@ use common\models\Setting;
 use common\models\Sms;
 use common\models\Email;
 use src\viewModel\call\ViewModelTotalCallGraph;
+use src\viewModel\userFeedback\ViewModelUserFeedbackGraph;
 use Yii;
 use yii\base\Model;
 use yii\filters\VerbFilter;
@@ -409,5 +411,44 @@ class StatsController extends FController
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider
         ]);
+    }
+
+    public function actionUserFeedback()
+    {
+        $searchModel = new UserFeedbackSearch();
+        $searchModel->load(Yii::$app->request->queryParams);
+        if ($searchModel->validate()) {
+            $statusData = ($searchModel->getUserFeedbackStatusStats())->getModels()[0] ?? [];
+        } else {
+            $statusData = [];
+        }
+
+        return $this->render('user-feedback-stats', [
+            'searchModel' => $searchModel,
+            'statusData' => $statusData
+        ]);
+    }
+
+    public function actionAjaxGetUserFeedbackChart(): \yii\web\Response
+    {
+        $userFeedbackSearch = new UserFeedbackSearch();
+        $userFeedbackSearch->load(Yii::$app->request->post());
+        if ($userFeedbackSearch->validate()) {
+            $html = $this->renderAjax('partial/_total_user_feedback_chart', [
+                'viewModel' => new ViewModelUserFeedbackGraph($userFeedbackSearch->graphSearch(), $userFeedbackSearch),
+            ]);
+            $statusHtml = $this->renderAjax('partial/_total_user_feedback_status_chart', [
+                'statusData' => ($userFeedbackSearch->getUserFeedbackStatusStats())->getModels()[0] ?? []
+            ]);
+        }
+
+        $response = [
+            'html' => $html ?? '',
+            'error' => $userFeedbackSearch->hasErrors(),
+            'message' => $userFeedbackSearch->getErrorSummary(true),
+            'statusHtml' => $statusHtml ?? ''
+        ];
+
+        return $this->asJson($response);
     }
 }

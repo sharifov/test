@@ -19,6 +19,7 @@ use src\events\lead\LeadFollowUpEvent;
 use src\events\lead\LeadNewEvent;
 use src\events\lead\LeadOwnerChangedEvent;
 use src\events\lead\LeadPendingEvent;
+use src\events\lead\LeadPoorProcessingEvent;
 use src\events\lead\LeadPreferencesUpdateCurrencyEvent;
 use src\events\lead\LeadProcessingEvent;
 use src\events\lead\LeadQuoteCloneEvent;
@@ -51,6 +52,8 @@ use src\listeners\lead\LeadNewEventLogListener;
 use src\listeners\lead\LeadOwnerChangedNotificationsListener;
 use src\listeners\lead\LeadPendingEventLogListener;
 use src\listeners\lead\LeadPhoneTrustListener;
+use src\listeners\lead\LeadPoorProcessingAdderListener;
+use src\listeners\lead\LeadPoorProcessingRemoverListener;
 use src\listeners\lead\LeadPreferencesUpdateCurrencyEventListener;
 use src\listeners\lead\LeadProcessingEventLogListener;
 use src\listeners\lead\LeadQcallAddListener;
@@ -101,7 +104,10 @@ return [
     LeadCreatedClientChatEvent::class => [],
 
     LeadDuplicateDetectedEvent::class => [LeadDuplicateDetectedEventListener::class],
-    LeadOwnerChangedEvent::class => [LeadOwnerChangedNotificationsListener::class],
+    LeadOwnerChangedEvent::class => [
+        LeadOwnerChangedNotificationsListener::class,
+        LeadPoorProcessingRemoverListener::class,
+    ],
     LeadCallExpertRequestEvent::class => [LeadCallExpertRequestEventListener::class],
     LeadTaskEvent::class => [LeadTaskEventListener::class],
     LeadCountPassengersChangedEvent::class => [LeadCountPassengersChangedEventListener::class],
@@ -112,7 +118,8 @@ return [
 
     LeadStatusChangedEvent::class => [
         LeadQcallProcessingListener::class,
-        LeadFromSnoozeNotificationListener::class
+        LeadFromSnoozeNotificationListener::class,
+        LeadPoorProcessingRemoverListener::class,
     ],
     LeadPendingEvent::class => [LeadPendingEventLogListener::class],
     LeadProcessingEvent::class => [
@@ -153,5 +160,8 @@ return [
     LeadExtraQueueEvent::class => [
         LeadExtraQueueEventLogListener::class,
         LeadExtraQueueNotificationsListener::class,
+    ],
+    LeadPoorProcessingEvent::class => [
+        LeadPoorProcessingAdderListener::class,
     ],
 ];

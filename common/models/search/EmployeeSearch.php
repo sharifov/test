@@ -39,7 +39,6 @@ class EmployeeSearch extends Employee
     public $joinDate;
 
     public $user_call_type_id;
-    public $user_sip;
 
     public $timeStart;
     public $timeEnd;
@@ -65,7 +64,7 @@ class EmployeeSearch extends Employee
     {
         return [
             [['id', 'status', 'acl_rules_activated', 'supervision_id', 'user_group_id', 'user_project_id', 'user_params_project_id', 'online', 'user_call_type_id', 'user_department_id', 'experienceMonth'], 'integer'],
-            [['username', 'nickname', 'full_name', 'auth_key', 'password_hash', 'password_reset_token', 'email', 'last_activity', 'user_sip', 'pageSize'], 'safe'],
+            [['username', 'nickname', 'full_name', 'auth_key', 'password_hash', 'password_reset_token', 'email', 'last_activity', 'pageSize'], 'safe'],
             [['timeStart', 'timeEnd', 'roles', 'twoFaEnable', 'joinDate'], 'safe'],
             [['joinDate'], 'date', 'format' => 'php:Y-m-d', 'skipOnEmpty' => true],
             [['timeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
@@ -155,10 +154,6 @@ class EmployeeSearch extends Employee
 //            $query->andWhere(['IN', 'employees.id', $subQuery]);
 //        }
 //
-//        if (strlen($this->user_sip) > 0) {
-//            $subQuery = UserProfile::find()->select(['DISTINCT(up_user_id)'])->where(['like', 'up_sip', $this->user_sip]);
-//            $query->andWhere(['IN', 'employees.id', $subQuery]);
-//        }
 //        if (strlen($this->twoFaEnable) > 0) {
 //            $subQuery = UserProfile::find()->select(['DISTINCT(up_user_id)'])->where(['=', 'up_2fa_enable', $this->twoFaEnable]);
 //            $query->andWhere(['IN', 'employees.id', $subQuery]);
@@ -280,10 +275,6 @@ class EmployeeSearch extends Employee
             $query->andWhere(['IN', 'employees.id', $subQuery]);
         }
 
-        if (strlen($this->user_sip) > 0) {
-            $subQuery = UserProfile::find()->select(['DISTINCT(up_user_id)'])->where(['like', 'up_sip', $this->user_sip]);
-            $query->andWhere(['IN', 'employees.id', $subQuery]);
-        }
         if (strlen($this->twoFaEnable) > 0) {
             $subQuery = UserProfile::find()->select(['DISTINCT(up_user_id)'])->where(['=', 'up_2fa_enable', $this->twoFaEnable]);
             $query->andWhere(['IN', 'employees.id', $subQuery]);

@@ -22,8 +22,6 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'lppd_minute')->textInput() ?>
 
-        <?= $form->field($model, 'lppd_params_json')->textInput() ?>
-
         <?php
         try {
             $model->lppd_params_json = \frontend\helpers\JsonHelper::encode($model->lppd_params_json);
@@ -32,7 +30,7 @@ use yii\widgets\ActiveForm;
                 [
                     'clientOptions' => [
                         'modes' => ['code', 'form', 'tree', 'view'],
-                        'mode' => 'tree'
+                        'mode' => 'code'
                     ],
                     'expandAll' => ['tree', 'form'],
                 ]

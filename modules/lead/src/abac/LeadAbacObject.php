@@ -2,7 +2,9 @@
 
 namespace modules\lead\src\abac;
 
+use common\models\Department;
 use common\models\Lead;
+use common\models\Project;
 use modules\abac\components\AbacBaseModel;
 use modules\abac\src\entities\AbacInterface;
 
@@ -12,7 +14,7 @@ use modules\abac\src\entities\AbacInterface;
 class LeadAbacObject extends AbacBaseModel implements AbacInterface
 {
     /** NAMESPACE */
-    private const NS = 'lead/lead/';
+    public const NS = 'lead/lead/';
 
     /** ALL PERMISSIONS */
     public const ALL = self::NS . '*';
@@ -49,6 +51,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
 
     /** LOGIC PERMISSION */
     public const LOGIC_CLIENT_DATA   = self::NS . 'logic/client_data';
+    public const LOGIC_POOR_PROCESSING = self::NS . 'logic/poor_processing';
 
     /** COMMAND PERMISSION */
     public const CMD_AUTO_REDIAL      = self::NS . 'cmd/auto_redial';
@@ -64,6 +67,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     /** OBJECT PERMISSION */
     public const OBJ_LEAD_PREFERENCES    = self::NS . 'obj/lead_preferences';
     public const OBJ_LEAD                = self::NS . 'obj/lead';
+    public const OBJ_EXTRA_QUEUE         = self::NS . 'obj/extra_queue';
 
     /** --------------- OBJECT LIST --------------------------- */
     public const OBJECT_LIST = [
@@ -102,7 +106,9 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::OBJ_LEAD => self::OBJ_LEAD,
         self::PHONE_CREATE_FORM => self::PHONE_CREATE_FORM,
         self::EMAIL_CREATE_FORM => self::EMAIL_CREATE_FORM,
-        self::CLIENT_CREATE_FORM => self::CLIENT_CREATE_FORM
+        self::CLIENT_CREATE_FORM => self::CLIENT_CREATE_FORM,
+        self::LOGIC_POOR_PROCESSING => self::LOGIC_POOR_PROCESSING,
+        self::OBJ_EXTRA_QUEUE => self::OBJ_EXTRA_QUEUE,
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -197,10 +203,12 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_LINK_TO_CALL => [self::ACTION_ACCESS],
         self::ACT_TAKE_LEAD_FROM_CALL => [self::ACTION_ACCESS],
         self::OBJ_LEAD_PREFERENCES => [self::ACTION_SET_DELAY_CHARGE],
-        self::OBJ_LEAD => [self::ACTION_CLONE]
+        self::OBJ_LEAD => [self::ACTION_CLONE],
+        self::OBJ_EXTRA_QUEUE => [self::ACTION_ACCESS],
+        self::LOGIC_POOR_PROCESSING => [self::ACTION_ACCESS],
     ];
 
-    protected const ATTR_LEAD_IS_OWNER = [
+    public const ATTR_LEAD_IS_OWNER = [
         'optgroup' => 'User',
         'id' => self::NS . 'is_owner',
         'field' => 'is_owner',
@@ -213,7 +221,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         'operators' =>  [self::OP_EQUAL2]
     ];
 
-    protected const ATTR_LEAD_HAS_OWNER = [
+    public const ATTR_LEAD_HAS_OWNER = [
         'optgroup' => 'Lead',
         'id' => self::NS . 'has_owner',
         'field' => 'has_owner',
@@ -330,7 +338,31 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         'operators' =>  [self::OP_EQUAL2]
     ];
 
-    protected const ATTR_LEAD_STATUS = [
+    public const ATTR_LEAD_PROJECT_NAME = [
+        'optgroup' => 'Lead',
+        'id' => self::NS . 'project_name',
+        'field' => 'project_name',
+        'label' => 'Project',
+        'type' => self::ATTR_TYPE_STRING,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
+        'multiple' => true,
+        'operators' => [self::OP_IN],
+    ];
+
+    public const ATTR_LEAD_DEPARTMENT_NAME = [
+        'optgroup' => 'Lead',
+        'id' => self::NS . 'department_name',
+        'field' => 'department_name',
+        'label' => 'Department',
+        'type' => self::ATTR_TYPE_STRING,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
+        'multiple' => true,
+        'operators' => [self::OP_IN],
+    ];
+
+    public const ATTR_LEAD_STATUS = [
         'optgroup' => 'Lead',
         'id' => self::NS . 'status_id',
         'field' => 'status_id',
@@ -341,6 +373,18 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         'multiple' => false,
         'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2,
             self::OP_IN, self::OP_NOT_IN, '<', '>', '<=', '>=']
+    ];
+
+    public const ATTR_LEAD_STATUS_NAME = [
+        'optgroup' => 'Lead',
+        'id' => self::NS . 'status_name',
+        'field' => 'status_name',
+        'label' => 'Status',
+        'type' => self::ATTR_TYPE_STRING,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2]
     ];
 
     protected const ATTR_FIELD_NAME = [
@@ -378,6 +422,30 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         'values' => [],
         'multiple' => true,
         'operators' =>  [self::OP_CONTAINS]
+    ];
+
+    public const ATTR_CLIENT_IS_EXCLUDED = [
+        'optgroup' => 'Lead',
+        'id' => self::NS . 'client_is_excluded',
+        'field' => 'client_is_excluded',
+        'label' => 'Client is excluded',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
+    public const ATTR_CLIENT_IS_UNSUBSCRIBE = [
+        'optgroup' => 'Lead',
+        'id' => self::NS . 'client_is_unsubscribe',
+        'field' => 'client_is_unsubscribe',
+        'label' => 'Client is unsubscribe',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2]
     ];
 
     public const OBJECT_ATTRIBUTE_LIST = [
@@ -517,8 +585,9 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
      */
     public static function getObjectAttributeList(): array
     {
+        $leadStatuses = Lead::getAllStatuses();
         $attrStatus = self::ATTR_LEAD_STATUS;
-        $attrStatus['values'] = Lead::getAllStatuses();
+        $attrStatus['values'] = $leadStatuses;
         $attrPhoneCreateFieldsList = self::ATTR_FIELD_NAME;
         $attrEmailCreateFieldsList = self::ATTR_FIELD_NAME;
         $attrClientCreateFieldsList = self::ATTR_FIELD_NAME;

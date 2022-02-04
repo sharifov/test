@@ -2,15 +2,20 @@
 
 namespace src\services\lead;
 
+use common\components\jobs\LeadPoorProcessingJob;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\LeadQcall;
 use src\access\EmployeeAccess;
 use src\guards\lead\TakeGuard;
+use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
+use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
+use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataQuery;
 use src\repositories\lead\LeadRepository;
 use src\repositories\user\UserRepository;
 use src\services\ServiceFinder;
 use src\services\TransactionManager;
+use Yii;
 
 /**
  * Class LeadAssignService
@@ -54,6 +59,7 @@ class LeadAssignService
     {
         $lead = $this->serviceFinder->leadFind($lead);
         $user = $this->serviceFinder->userFind($user);
+        $oldStatus = $lead->status;
 
         EmployeeAccess::leadAccess($lead, $user);
 
@@ -75,6 +81,13 @@ class LeadAssignService
             }
             $this->leadRepository->save($lead);
         });
+
+        if (
+            $oldStatus === Lead::STATUS_EXTRA_QUEUE &&
+            LeadPoorProcessingDataQuery::isExistActiveRule(LeadPoorProcessingDataDictionary::KEY_EXTRA_TO_PROCESSING_TAKE)
+        ) {
+            LeadPoorProcessingService::addLeadPoorProcessingJob($lead->id, LeadPoorProcessingDataDictionary::KEY_EXTRA_TO_PROCESSING_TAKE);
+        }
     }
 
     /**
@@ -88,6 +101,7 @@ class LeadAssignService
     {
         $lead = $this->serviceFinder->leadFind($lead);
         $user = $this->serviceFinder->userFind($user);
+        $oldStatus = $lead->status;
 
         EmployeeAccess::leadAccess($lead, $user);
 
@@ -107,6 +121,13 @@ class LeadAssignService
             }
             $this->leadRepository->save($lead);
         });
+
+        if (
+            $oldStatus === Lead::STATUS_EXTRA_QUEUE &&
+            LeadPoorProcessingDataQuery::isExistActiveRule(LeadPoorProcessingDataDictionary::KEY_EXTRA_TO_PROCESSING_TAKE)
+        ) {
+            LeadPoorProcessingService::addLeadPoorProcessingJob($lead->id, LeadPoorProcessingDataDictionary::KEY_EXTRA_TO_PROCESSING_TAKE);
+        }
     }
 
     private function checkTakeAccess(Lead $lead, Employee $user): void
