@@ -17,6 +17,7 @@ class LeadPoorProcessingLogSearch extends LeadPoorProcessingLog
             ['lppl_owner_id', 'integer'],
             ['lppl_status', 'integer'],
             ['lppl_updated_user_id', 'integer'],
+            ['lppl_description', 'string']
         ];
     }
 
@@ -47,6 +48,8 @@ class LeadPoorProcessingLogSearch extends LeadPoorProcessingLog
             'DATE(lppl_updated_dt)' => $this->lppl_updated_dt,
             'lppl_updated_user_id' => $this->lppl_updated_user_id,
         ]);
+
+        $query->andFilterWhere(['like', 'lppl_description', $this->lppl_description]);
 
         return $dataProvider;
     }

@@ -37,9 +37,8 @@ use yii\widgets\Pjax;
             },
         ],
         'lppl_owner_id:username',
+        'lppl_description',
         'lppl_created_dt:byUserDateTime',
-        'lppl_updated_dt:byUserDateTime',
-        'lppl_updated_user_id:username',
     ]
 ]); ?>
 <?php Pjax::end();

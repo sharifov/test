@@ -14,6 +14,7 @@ use src\events\quote\QuoteSendEvent;
 use src\helpers\app\AppHelper;
 use src\helpers\setting\SettingHelper;
 use src\model\airportLang\service\AirportLangService;
+use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
 use src\model\quoteLabel\entity\QuoteLabel;
 use src\services\parsingDump\lib\ParsingDump;
 use src\services\parsingDump\ReservationService;
@@ -1502,7 +1503,7 @@ class Quote extends \yii\db\ActiveRecord
         }
 
         if ($this->lead_id && $this->lead) {
-            $this->lead->updateLastAction();
+            $this->lead->updateLastAction(LeadPoorProcessingLogStatus::REASON_QUOTE);
         }
     }
 

@@ -12,16 +12,19 @@ use yii\queue\JobInterface;
  *
  * @property int $leadId
  * @property string $ruleKey
+ * @property string|null $description
  */
 class LeadPoorProcessingJob extends BaseJob implements JobInterface
 {
     public int $leadId;
     public string $ruleKey;
+    private ?string $description = null;
 
-    public function __construct(int $leadId, string $ruleKey, ?float $timeStart = null, array $config = [])
+    public function __construct(int $leadId, string $ruleKey, ?string $description = null, ?float $timeStart = null, array $config = [])
     {
         $this->leadId = $leadId;
         $this->ruleKey = $ruleKey;
+        $this->description = $description;
         parent::__construct($timeStart, $config);
     }
 
@@ -37,7 +40,7 @@ class LeadPoorProcessingJob extends BaseJob implements JobInterface
         ];
 
         try {
-            $leadPoorProcessingService = (new LeadPoorProcessingRuleFactory($this->leadId, $this->ruleKey))->create();
+            $leadPoorProcessingService = (new LeadPoorProcessingRuleFactory($this->leadId, $this->ruleKey, $this->description))->create();
             if (!$leadPoorProcessingService->checkCondition()) {
                 throw new \RuntimeException('Check condition failed');
             }

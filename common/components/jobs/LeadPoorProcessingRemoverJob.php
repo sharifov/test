@@ -14,16 +14,19 @@ use yii\queue\JobInterface;
  *
  * @property int $leadId
  * @property array $ruleKeys
+ * @property string|null $description
  */
 class LeadPoorProcessingRemoverJob extends BaseJob implements JobInterface
 {
-    public int $leadId;
-    public array $ruleKeys;
+    private int $leadId;
+    private array $ruleKeys;
+    private ?string $description = null;
 
-    public function __construct(int $leadId, array $ruleKeys, ?float $timeStart = null, array $config = [])
+    public function __construct(int $leadId, array $ruleKeys, ?string $description = null, ?float $timeStart = null, array $config = [])
     {
         $this->leadId = $leadId;
         $this->ruleKeys = $ruleKeys;
+        $this->description = $description;
         parent::__construct($timeStart, $config);
     }
 
@@ -43,7 +46,7 @@ class LeadPoorProcessingRemoverJob extends BaseJob implements JobInterface
                 throw new \RuntimeException('Lead not found by ID(' . $this->leadId . ')');
             }
             foreach ($this->ruleKeys as $dataKey) {
-                LeadPoorProcessingService::removeFromLeadAndKey($lead, $dataKey);
+                LeadPoorProcessingService::removeFromLeadAndKey($lead, $dataKey, $this->description);
             }
         } catch (\RuntimeException | \DomainException $throwable) {
             $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);

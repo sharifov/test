@@ -5,6 +5,7 @@ namespace common\models;
 use common\components\BackOffice;
 use common\models\query\LeadCallExpertQuery;
 use modules\product\src\entities\product\Product;
+use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
 use Yii;
 use yii\db\ActiveQuery;
 
@@ -249,7 +250,7 @@ class LeadCallExpert extends \yii\db\ActiveRecord
         }
 
         if ($this->lce_lead_id && $this->lceLead) {
-            $this->lceLead->updateLastAction();
+            $this->lceLead->updateLastAction(LeadPoorProcessingLogStatus::REASON_CALL_EXPERT);
         }
     }
 }

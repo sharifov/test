@@ -19,7 +19,11 @@ class LeadPoorProcessingAdderListener
                 throw new \RuntimeException('Rule (' . $event->getDataKey() . ') not enabled');
             }
 
-            LeadPoorProcessingService::addLeadPoorProcessingJob($event->getLead()->id, $event->getDataKey());
+            LeadPoorProcessingService::addLeadPoorProcessingJob(
+                $event->getLead()->id,
+                $event->getDataKey(),
+                $event->getDescription()
+            );
         } catch (\RuntimeException | \DomainException $throwable) {
             \Yii::info(AppHelper::throwableLog($throwable), 'info\LeadPoorProcessingAdderListener:Exception');
         } catch (\Throwable $throwable) {

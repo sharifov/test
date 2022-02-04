@@ -87,6 +87,7 @@ use src\model\lead\useCases\lead\import\LeadImportUploadForm;
 use src\model\lead\useCases\lead\link\LeadLinkChatForm;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
+use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
 use src\model\leadUserConversion\service\LeadUserConversionDictionary;
 use src\model\leadUserConversion\service\LeadUserConversionService;
 use src\model\sms\useCase\send\fromLead\AbacSmsFromNumberList;
@@ -931,7 +932,11 @@ class LeadController extends FController
                 if ($modelLeadCallExpert->save()) {
                     $modelLeadCallExpert->lce_request_text = '';
 
-                    LeadPoorProcessingService::addLeadPoorProcessingRemoverJob($lead->id, [LeadPoorProcessingDataDictionary::KEY_NO_ACTION]);
+                    LeadPoorProcessingService::addLeadPoorProcessingRemoverJob(
+                        $lead->id,
+                        [LeadPoorProcessingDataDictionary::KEY_NO_ACTION],
+                        LeadPoorProcessingLogStatus::REASON_CALL_EXPERT
+                    );
                 }
             }
         }

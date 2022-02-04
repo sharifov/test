@@ -47,7 +47,7 @@ class LeadPoorProcessingService
         return $leadPoorProcessingRepository->getModel();
     }
 
-    public static function removeFromLead(Lead $lead): int
+    public static function removeFromLead(Lead $lead, ?string $description = null): int
     {
         $removedCount = 0;
         if ($leadsPoorProcessing = LeadPoorProcessingQuery::getAllByLeadId($lead->id)) {
@@ -62,7 +62,8 @@ class LeadPoorProcessingService
                         $lead->id,
                         $leadPoorProcessing->lpp_lppd_id,
                         $lastPoorProcessingLog->lppl_owner_id ?? $lead->employee_id,
-                        LeadPoorProcessingLogStatus::STATUS_DELETED
+                        LeadPoorProcessingLogStatus::STATUS_DELETED,
+                        $description
                     );
 
                     $leadPoorProcessingLogRepository = new LeadPoorProcessingLogRepository($leadPoorProcessingLog);
@@ -83,7 +84,7 @@ class LeadPoorProcessingService
         return $removedCount;
     }
 
-    public static function removeFromLeadAndKey(Lead $lead, string $dataKey): void
+    public static function removeFromLeadAndKey(Lead $lead, string $dataKey, ?string $description = null): void
     {
         $logData = [
             'leadId' => $lead->id,
@@ -103,7 +104,8 @@ class LeadPoorProcessingService
                 $lead->id,
                 $leadPoorProcessing->lpp_lppd_id,
                 $lastPoorProcessingLog->lppl_owner_id ?? $lead->employee_id,
-                LeadPoorProcessingLogStatus::STATUS_DELETED
+                LeadPoorProcessingLogStatus::STATUS_DELETED,
+                $description
             );
 
             $leadPoorProcessing->delete();
@@ -122,6 +124,7 @@ class LeadPoorProcessingService
     public static function addLeadPoorProcessingJob(
         int $leadId,
         string $dataKey,
+        ?string $description = null,
         int $priority = 100
     ): void {
         $logData = [
@@ -131,7 +134,7 @@ class LeadPoorProcessingService
 
         try {
             self::checkAbacAccess($leadId);
-            $job = new LeadPoorProcessingJob($leadId, $dataKey);
+            $job = new LeadPoorProcessingJob($leadId, $dataKey, $description);
             \Yii::$app->queue_job->priority($priority)->push($job);
         } catch (\RuntimeException | \DomainException $throwable) {
             $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
@@ -145,6 +148,7 @@ class LeadPoorProcessingService
     public static function addLeadPoorProcessingRemoverJob(
         int $leadId,
         array $dataKeys,
+        ?string $description = null,
         int $priority = 100
     ): void {
         $logData = [
@@ -153,7 +157,7 @@ class LeadPoorProcessingService
         ];
         try {
             self::checkAbacAccess($leadId);
-            $job = new LeadPoorProcessingRemoverJob($leadId, $dataKeys);
+            $job = new LeadPoorProcessingRemoverJob($leadId, $dataKeys, $description);
             \Yii::$app->queue_job->priority($priority)->push($job);
         } catch (\RuntimeException | \DomainException $throwable) {
             $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);

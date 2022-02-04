@@ -13,6 +13,7 @@ use src\helpers\email\TextConvertingHelper;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadPoorProcessing\service\rules\LeadPoorProcessingNoAction;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
+use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
 use src\services\email\EmailService;
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -455,7 +456,11 @@ class Email extends \yii\db\ActiveRecord
                 $out['error'] = $this->e_error_message;
             }
             if ($this->e_lead_id && LeadPoorProcessingNoAction::checkEmailTemplate($tplType)) {
-                LeadPoorProcessingService::addLeadPoorProcessingRemoverJob($this->e_lead_id, [LeadPoorProcessingDataDictionary::KEY_NO_ACTION]);
+                LeadPoorProcessingService::addLeadPoorProcessingRemoverJob(
+                    $this->e_lead_id,
+                    [LeadPoorProcessingDataDictionary::KEY_NO_ACTION],
+                    LeadPoorProcessingLogStatus::REASON_EMAIL
+                );
             }
         } catch (\Throwable $exception) {
             $error = VarDumper::dumpAsString($exception->getMessage());
@@ -806,7 +811,7 @@ class Email extends \yii\db\ActiveRecord
         parent::afterSave($insert, $changedAttributes);
 
         if ($this->e_lead_id && $this->eLead) {
-            $this->eLead->updateLastAction();
+            $this->eLead->updateLastAction(LeadPoorProcessingLogStatus::REASON_EMAIL);
         }
         if ($this->e_case_id && $this->eCase) {
             $this->eCase->updateLastAction();

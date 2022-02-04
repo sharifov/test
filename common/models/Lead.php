@@ -45,6 +45,7 @@ use src\events\lead\LeadCountPassengersChangedEvent;
 use src\events\lead\LeadOwnerFreedEvent;
 use src\events\lead\LeadPendingEvent;
 use src\events\lead\LeadPoorProcessingEvent;
+use src\events\lead\LeadPoorProcessingLastActionEvent;
 use src\events\lead\LeadProcessingEvent;
 use src\events\lead\LeadRejectEvent;
 use src\events\lead\LeadSnoozeEvent;
@@ -70,6 +71,7 @@ use src\model\leadData\entity\LeadData;
 use src\model\leadPoorProcessing\entity\LeadPoorProcessing;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
+use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
 use src\model\leadUserConversion\entity\LeadUserConversion;
 use src\services\lead\calculator\LeadTripTypeCalculator;
 use src\services\lead\calculator\SegmentDTO;
@@ -1402,6 +1404,7 @@ class Lead extends ActiveRecord implements Objectable
     public function processing(?int $newOwnerId = null, ?int $creatorId = null, ?string $reason = ''): void
     {
         self::guardStatus($this->status, self::STATUS_PROCESSING);
+        $oldStatus = $this->status;
 
         if ($newOwnerId === null && !$this->hasOwner() && $this->isProcessing()) {
             throw new \DomainException('Lead is already Processing without owner.');
@@ -1430,10 +1433,16 @@ class Lead extends ActiveRecord implements Objectable
             $this->setStatus(self::STATUS_PROCESSING);
         }
 
+        $description = $reason ? 'Reason: ' . $reason . '. ' : '';
+        if (($fromStatus = self::getStatus($oldStatus)) && $toStatus = self::getStatus(Lead::STATUS_PROCESSING)) {
+            $description .= sprintf(LeadPoorProcessingLogStatus::REASON_CHANGE_STATUS, $fromStatus, $toStatus);
+        }
+
         $this->recordEvent(
             new LeadPoorProcessingEvent(
                 $this,
-                LeadPoorProcessingDataDictionary::KEY_NO_ACTION
+                LeadPoorProcessingDataDictionary::KEY_NO_ACTION,
+                $description
             )
         );
     }
@@ -2203,10 +2212,7 @@ class Lead extends ActiveRecord implements Objectable
         return $this->hasMany(LeadUserConversion::class, ['luc_lead_id' => 'id']);
     }
 
-    /**
-     * @return int
-     */
-    public function updateLastAction(): int
+    public function updateLastAction(?string $description = null): int
     {
         $result = self::updateAll(['l_last_action_dt' => date('Y-m-d H:i:s')], ['id' => $this->id]);
 
@@ -2216,9 +2222,14 @@ class Lead extends ActiveRecord implements Objectable
                 [
                     LeadPoorProcessingDataDictionary::KEY_EXTRA_TO_PROCESSING_TAKE,
                     LeadPoorProcessingDataDictionary::KEY_EXTRA_TO_PROCESSING_MULTIPLE_UPD,
-                ]
+                ],
+                $description
             );
-            LeadPoorProcessingService::addLeadPoorProcessingJob($this->id, LeadPoorProcessingDataDictionary::KEY_LAST_ACTION);
+            LeadPoorProcessingService::addLeadPoorProcessingJob(
+                $this->id,
+                LeadPoorProcessingDataDictionary::KEY_LAST_ACTION,
+                $description
+            );
         }
 
         return $result;

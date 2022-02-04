@@ -11,6 +11,7 @@ use src\guards\lead\TakeGuard;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataQuery;
+use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
 use src\repositories\lead\LeadRepository;
 use src\repositories\user\UserRepository;
 use src\services\ServiceFinder;
@@ -86,7 +87,11 @@ class LeadAssignService
             $oldStatus === Lead::STATUS_EXTRA_QUEUE &&
             LeadPoorProcessingDataQuery::isExistActiveRule(LeadPoorProcessingDataDictionary::KEY_EXTRA_TO_PROCESSING_TAKE)
         ) {
-            LeadPoorProcessingService::addLeadPoorProcessingJob($lead->id, LeadPoorProcessingDataDictionary::KEY_EXTRA_TO_PROCESSING_TAKE);
+            LeadPoorProcessingService::addLeadPoorProcessingJob(
+                $lead->id,
+                LeadPoorProcessingDataDictionary::KEY_EXTRA_TO_PROCESSING_TAKE,
+                LeadPoorProcessingLogStatus::REASON_TAKE
+            );
         }
     }
 
@@ -126,7 +131,11 @@ class LeadAssignService
             $oldStatus === Lead::STATUS_EXTRA_QUEUE &&
             LeadPoorProcessingDataQuery::isExistActiveRule(LeadPoorProcessingDataDictionary::KEY_EXTRA_TO_PROCESSING_TAKE)
         ) {
-            LeadPoorProcessingService::addLeadPoorProcessingJob($lead->id, LeadPoorProcessingDataDictionary::KEY_EXTRA_TO_PROCESSING_TAKE);
+            LeadPoorProcessingService::addLeadPoorProcessingJob(
+                $lead->id,
+                LeadPoorProcessingDataDictionary::KEY_EXTRA_TO_PROCESSING_TAKE,
+                LeadPoorProcessingLogStatus::REASON_TAKE
+            );
         }
     }
 

@@ -5,6 +5,7 @@ use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLog;
 use yii\grid\ActionColumn;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
+use yii\helpers\StringHelper;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
@@ -53,6 +54,16 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
             ],
             'lppl_owner_id:userName',
+            [
+                'attribute' => 'lppl_description',
+                'value' => static function (LeadPoorProcessingLog $model) {
+                    if (!$model->lppl_description) {
+                        return Yii::$app->formatter->nullDisplay;
+                    }
+                    return StringHelper::truncate($model->lppl_description, 100, '...');
+                },
+                'format' => 'raw',
+            ],
             'lppl_created_dt:byUserDatetime',
 
             [

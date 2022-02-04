@@ -18,6 +18,7 @@ use src\events\sms\SmsCreatedEvent;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadPoorProcessing\service\rules\LeadPoorProcessingNoAction;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
+use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
 use src\services\sms\incoming\SmsIncomingForm;
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -505,7 +506,11 @@ class Sms extends \yii\db\ActiveRecord
             }
 
             if ($this->s_lead_id && LeadPoorProcessingNoAction::checkSmsTemplate($tplType)) {
-                LeadPoorProcessingService::addLeadPoorProcessingRemoverJob($this->s_lead_id, [LeadPoorProcessingDataDictionary::KEY_NO_ACTION]);
+                LeadPoorProcessingService::addLeadPoorProcessingRemoverJob(
+                    $this->s_lead_id,
+                    [LeadPoorProcessingDataDictionary::KEY_NO_ACTION],
+                    LeadPoorProcessingLogStatus::REASON_SMS
+                );
             }
         } catch (\Throwable $exception) {
             $error = VarDumper::dumpAsString($exception->getMessage());
@@ -705,7 +710,7 @@ class Sms extends \yii\db\ActiveRecord
         parent::afterSave($insert, $changedAttributes);
 
         if ($this->s_lead_id && $this->sLead) {
-            $this->sLead->updateLastAction();
+            $this->sLead->updateLastAction(LeadPoorProcessingLogStatus::REASON_SMS);
         }
         if ($this->s_case_id && $this->sCase) {
             $this->sCase->updateLastAction();
