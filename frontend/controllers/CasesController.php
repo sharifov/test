@@ -903,6 +903,7 @@ class CasesController extends FController
             return $out;
         }
 
+        $bookingId = !empty($saleData['baseBookingId']) ? $saleData['baseBookingId'] : $saleData['bookingId'] ?? null;
         $transaction = new Transaction(['db' => Yii::$app->db]);
         try {
             $cs = new CaseSale();
@@ -911,20 +912,20 @@ class CasesController extends FController
             $cs->css_sale_data = $saleData;
             $cs->css_sale_pnr = $saleData['pnr'] ?? null;
             $cs->css_sale_created_dt = $saleData['created'] ?? null;
-            $cs->css_sale_book_id = $saleData['bookingId'] ?? null;
+            $cs->css_sale_book_id = $bookingId ?? null;
             $cs->css_sale_pax = isset($saleData['passengers']) && is_array($saleData['passengers']) ? count($saleData['passengers']) : null;
             $cs->css_sale_data_updated = $cs->css_sale_data;
 
             $cs = $this->casesSaleService->prepareAdditionalData($cs, $saleData);
 
             if (empty($model->cs_order_uid)) {
-                $model->cs_order_uid = $cs->css_sale_book_id;
+                $model->cs_order_uid = $bookingId;
                 $out['caseBookingId'] = $model->cs_order_uid;
-            } elseif ($model->cs_order_uid !== $cs->css_sale_book_id) {
+            } elseif ($model->cs_order_uid !== $bookingId) {
                 $out['updateCaseBookingId'] = true;
                 $out['updateCaseBookingHtml'] = $this->renderPartial('sales/_sale_update_case_booking_id', [
                     'caseBookingId' => $model->cs_order_uid,
-                    'saleBookingId' => $cs->css_sale_book_id,
+                    'saleBookingId' => $bookingId,
                     'caseId' => $model->cs_id,
                     'saleId' => $cs->css_sale_id
                 ]);
@@ -958,7 +959,6 @@ class CasesController extends FController
             $transactionOrder = new Transaction(['db' => Yii::$app->db]);
             try {
                 if (empty($out['error']) && !empty($saleData)) {
-                    $bookingId = !empty($saleData['baseBookingId']) ? $saleData['baseBookingId'] : $saleData['bookingId'];
                     if (!$order = OrderManageService::getBySaleIdOrBookingId($saleId, $bookingId)) {
                         $orderCreateFromSaleForm = new OrderCreateFromSaleForm();
                         if (!$orderCreateFromSaleForm->load($saleData)) {

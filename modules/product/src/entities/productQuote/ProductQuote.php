@@ -1034,9 +1034,13 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
             return $this->detailsPageUrl;
         }
 
-        $finder = [ProductQuoteClasses::getClass($this->pqProduct->pr_type_id), 'getQuoteDetailsPageUrl'];
-        $this->detailsPageUrl = $finder();
-        return $this->detailsPageUrl;
+        //$finder = [ProductQuoteClasses::getClass($this->pqProduct->pr_type_id), 'getQuoteDetailsPageUrl'];
+
+        $className = ProductQuoteClasses::getClass($this->pqProduct->pr_type_id);
+        if (!method_exists($className, 'getQuoteDetailsPageUrl')) {
+            throw new \RuntimeException('Method "getQuoteDetailsPageUrl" not exist in (' . $className . ')');
+        }
+        return $this->detailsPageUrl = (new $className())->getQuoteDetailsPageUrl();
     }
 
     public function getDiffUrlOriginReprotectionQuotes(): string
