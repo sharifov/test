@@ -52,4 +52,6 @@ init-config:
 	&& cp Makefile.root ${APP_PATH}/Makefile \
 	&& cp pre-commit.sh ${APP_PATH}/docker-pre-commit.sh
 
-install: build init-config composer-install npm-install migrate
+install: build init-config
+	docker run --rm -v ${APP_PATH}:${APP_PATH} -v ${SSH_DIR}:/home/${USER_NAME}/.ssh -v ${COMPOSER_CACHE_DIR}:/home/${USER_NAME}/.composer/cache -w=${APP_PATH} --user ${USER_ID}:${USER_GID} ${COMPOSE_PROJECT_NAME}_console composer install --no-plugins
+	docker run --rm -v ${APP_PATH}:${APP_PATH} -w=${APP_PATH} --user ${USER_ID}:${USER_GID} ${COMPOSE_PROJECT_NAME}_console npm install
