@@ -1,0 +1,109 @@
+---
+- name: Create application dir
+  file:
+    dest: "{{ web_dir }}/{{ app_ver }}"
+    state: directory
+    owner: "{{ web_user }}"
+    group: "{{ web_user }}"
+    mode: 0755
+
+- name: Extract application tarball
+  unarchive:
+    src: files/build.tar.gz
+    dest: "{{ web_dir }}/{{ app_ver }}"
+    owner: "{{ web_user }}"
+    group: "{{ web_user }}"
+    creates: "{{ web_dir }}/{{ app_ver }}/init"
+    remote_src: no
+
+- name: Create dotenv
+  template:
+    src: env.j2
+    dest: "{{ web_dir }}/{{ app_ver }}/.env"
+    owner: "{{ web_user }}"
+    group: "{{ web_user }}"
+    mode: 0644
+
+- name: Init application
+  command: "php init --env={{ env_name }} --overwrite=All"
+  args:
+    chdir: "{{ web_dir }}/{{ app_ver }}"
+  become_user: "{{ web_user }}"
+  changed_when: false
+
+- name: Run migrations
+  command: 'php yii migrate --interactive=0'
+  args:
+    chdir: "{{ web_dir }}/{{ app_ver }}"
+  become: true
+  become_user: "{{ web_user }}"
+  run_once: yes
+  register: result
+  changed_when: false
+
+- name: Print migration result
+  debug:
+    var: result
+
+- name: Start virtual-cron
+  command: 'php yii virtual-cron/cron/start'
+  args:
+    chdir: "{{ web_dir }}/{{ app_ver }}"
+  become: true
+  become_user: "{{ web_user }}"
+  run_once: true
+  register: result
+  changed_when: false
+
+- name: Print virtual-cron result
+  debug:
+    var: result
+
+- name: Scan ABAC
+  command: 'php yii abac/scan'
+  args:
+    chdir: "{{ web_dir }}/{{ app_ver }}"
+  become: true
+  become_user: "{{ web_user }}"
+  run_once: true
+  register: result
+  changed_when: false
+
+- name: Print abac/scan result
+  debug:
+    var: result
+
+- name: Get current symlink target
+  stat:
+    path: "{{ app_dir }}"
+  register: sym
+
+- name: Enable new release
+  file:
+    src: "{{ web_dir }}/{{ app_ver }}"
+    dest: "{{ app_dir }}"
+    state: link
+    owner: "{{ web_user }}"
+    group: "{{ web_user }}"
+    force: yes
+
+- name: Restart supervisord service
+  service:
+    name: supervisor
+    state: restarted
+
+- name: Find old releases
+  find:
+    paths: "{{ web_dir }}"
+    file_type: directory
+    excludes:
+      - html
+      - "{{ sym.stat.lnk_target | basename }}"
+  register: result
+
+- name: Keep last 3 releases
+  file:
+    path: "{{ item.path }}"
+    state: absent
+  with_items:
+    - "{{ (result.files | sort(attribute='ctime'))[:-3] }}"

@@ -16,8 +16,9 @@
  * @var $itineraryForm \src\forms\lead\ItineraryEditForm
  * @var $dataProviderOffers ActiveDataProvider
  * @var $dataProviderOrders ActiveDataProvider
- * @var $fromPhoneNumbers array
- * @var bool $smsEnabled
+ * @var AbacCallFromNumberList $callFromNumberList
+ * @var AbacSmsFromNumberList $smsFromNumberList
+ * @var AbacEmailList $emailFromList
  */
 
 use common\models\Employee;
@@ -32,9 +33,14 @@ use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\services\access\FileStorageAccessService;
 use modules\fileStorage\src\widgets\FileStorageListWidget;
 use modules\fileStorage\src\widgets\FileStorageUploadWidget;
+use modules\lead\src\abac\communicationBlock\LeadCommunicationBlockAbacObject;
 use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\lead\src\abac\communicationBlock\LeadCommunicationBlockAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
 use src\auth\Auth;
+use src\model\call\useCase\createCall\fromLead\AbacCallFromNumberList;
+use src\model\email\useCase\send\fromLead\AbacEmailList;
+use src\model\sms\useCase\send\fromLead\AbacSmsFromNumberList;
 use yii\bootstrap4\Modal;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Url;
@@ -189,7 +195,9 @@ $disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIEN
                 ]) ?>
             <?php endif;?>
 
-            <?php if (Yii::$app->user->can('lead-view/communication-block/view', ['lead' => $lead])) : ?>
+            <?php $leadCommunicationBlockAbacDto = new LeadCommunicationBlockAbacDto($lead, [], [], [], $user->id); ?>
+            <?php /** @abac $leadCommunicationBlockAbacDto, LeadCommunicationBlockAbacObject::NS, LeadCommunicationBlockAbacObject::ACTION_VIEW, View communication block on Lead View page */ ?>
+            <?php if (Yii::$app->abac->can($leadCommunicationBlockAbacDto, LeadCommunicationBlockAbacObject::NS, LeadCommunicationBlockAbacObject::ACTION_VIEW, $user)) : ?>
                 <?= $this->render('communication/lead_communication', [
                     'leadForm'      => $leadForm,
                     'previewEmailForm' => $previewEmailForm,
@@ -199,17 +207,14 @@ $disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIEN
                     'dataProvider'  => $dataProviderCommunicationLog,
                     'isAdmin'       => $is_admin,
                     'lead' => $lead,
-                    'fromPhoneNumbers' => $fromPhoneNumbers,
                     'unsubscribe' => $unsubscribe,
                     'unsubscribedEmails' => $unsubscribedEmails,
-                    'smsEnabled' => $smsEnabled,
-                    'disableMasking' => $disableMasking
+                    'disableMasking' => $disableMasking,
+                    'callFromNumberList' => $callFromNumberList,
+                    'smsFromNumberList' => $smsFromNumberList,
+                    'emailFromList' => $emailFromList,
                 ]); ?>
-                <?php /*else: */ ?><!--
-                <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>-->
             <?php endif;?>
-
-            <?php //php \yii\helpers\VarDumper::dump(Yii::$app->user->identity->callExpertCountByShiftTime)?>
 
             <?php if (FileStorageSettings::isEnabled() && Auth::can('lead-view/files/view', ['lead' => $lead])) : ?>
                 <?= FileStorageListWidget::byLead(

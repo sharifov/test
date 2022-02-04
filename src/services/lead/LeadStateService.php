@@ -182,6 +182,14 @@ class LeadStateService
         $this->leadRepository->save($lead);
     }
 
+    public function extraQueue($lead, $newOwner, ?int $creatorId = null, ?string $reason = null): void
+    {
+        $lead = $this->serviceFinder->leadFind($lead);
+        $newOwnerId = $this->newOwnerFind($newOwner, $lead);
+        $lead->extraQueue($newOwnerId, $creatorId, $reason);
+        $this->leadRepository->save($lead);
+    }
+
     /**
      * @param $newOwner
      * @param Lead $lead

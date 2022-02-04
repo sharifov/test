@@ -1,0 +1,8 @@
+[haproxy]
+haproxy-1 ansible_ssh_host=44.195.80.50
+
+[shared]
+shared-1 ansible_ssh_host=3.231.155.193
+
+[app]
+app-1 ansible_ssh_host=18.208.247.43

@@ -3,20 +3,26 @@
 use src\forms\leadflow\SnoozeReasonForm;
 use yii\widgets\ActiveForm;
 use yii\bootstrap\Html;
+use yii\widgets\Pjax;
 
 /**
  * @var $reasonForm SnoozeReasonForm
  */
 
+
+Pjax::begin(['enableReplaceState' => false, 'enablePushState' => false]);
 $form = ActiveForm::begin([
     'id' => $reasonForm->formName(),
     'action' => ['lead-change-state/snooze', 'gid' => $reasonForm->leadGid],
     'enableClientValidation' => false,
-    'enableAjaxValidation' => true,
-    'validationUrl' => ['lead-change-state/validate-snooze', 'gid' => $reasonForm->leadGid]
+//    'enableAjaxValidation' => true,
+//    'validationUrl' => ['lead-change-state/validate-snooze', 'gid' => $reasonForm->leadGid],
+    'options' => [
+        'data-pjax' => true
+    ]
 ]) ?>
 
-<?php //= $form->errorSummary($reasonForm) ?>
+<?= $form->errorSummary($reasonForm) ?>
 
     <div class="row">
         <div class="col-sm-6">
@@ -56,3 +62,4 @@ $form = ActiveForm::begin([
     </div>
 
 <?php ActiveForm::end();
+Pjax::end();

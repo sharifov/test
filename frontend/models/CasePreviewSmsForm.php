@@ -8,6 +8,7 @@ use common\models\Employee;
 use common\models\Language;
 use common\models\SmsTemplateType;
 use src\entities\cases\Cases;
+use src\model\sms\useCase\send\fromCase\AbacSmsFromNumberList;
 use yii\base\Model;
 
 /**
@@ -25,6 +26,8 @@ use yii\base\Model;
  * @property string $s_quote_list
  * @property boolean $is_send
  *
+ * @property AbacSmsFromNumberList $smsFromNumberList
+ *
  */
 
 
@@ -40,6 +43,14 @@ class CasePreviewSmsForm extends Model
     public $s_quote_list;
 
     public $is_send;
+
+    private AbacSmsFromNumberList $smsFromNumberList;
+
+    public function __construct(AbacSmsFromNumberList $smsFromNumberList, $config = [])
+    {
+        parent::__construct($config);
+        $this->smsFromNumberList = $smsFromNumberList;
+    }
 
 
     /**
@@ -65,6 +76,12 @@ class CasePreviewSmsForm extends Model
             [['s_language_id'], 'exist', 'skipOnError' => true, 'targetClass' => Language::class, 'targetAttribute' => ['s_language_id' => 'language_id']],
             [['s_case_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['s_case_id' => 'cs_id']],
             [['s_sms_tpl_id'], 'exist', 'skipOnError' => true, 'targetClass' => SmsTemplateType::class, 'targetAttribute' => ['s_sms_tpl_id' => 'stp_id']],
+
+            ['s_phone_from', function () {
+                if (!$this->smsFromNumberList->isExist($this->s_phone_from)) {
+                    $this->addError('s_phone_from', 'Phone Number From is invalid');
+                }
+            }, 'skipOnError' => true, 'skipOnEmpty' => true],
         ];
     }
 

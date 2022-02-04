@@ -139,16 +139,38 @@ class LeadHelper
         return $result;
     }
 
-    public static function expirationNowDiffInSeconds(Lead $lead)
+    public static function expirationNowDiffInSeconds(string $expirationDt)
     {
-        $deadLineTsp = (new DateTime($lead->l_expiration_dt))->getTimestamp();
+        $deadLineTsp = (new DateTime($expirationDt))->getTimestamp();
         $nowTsp = (new DateTime('now'))->getTimestamp();
         return $deadLineTsp - $nowTsp;
     }
 
     public static function expiredLead(Lead $lead)
     {
-        return (self::expirationNowDiffInSeconds($lead) <= 0);
+        return (self::expirationNowDiffInSeconds($lead->l_expiration_dt) <= 0);
+    }
+
+    public static function displayLeadPoorProcessingTimer(string $expirationDt, string $ruleName, string $style = ''): string
+    {
+        $secondsDiff = self::expirationNowDiffInSeconds($expirationDt);
+        $class = 'label label-info';
+        if ($secondsDiff <= 0) {
+            $class = 'label label-danger';
+        } else if ($secondsDiff <= 3600) {
+            $class = 'label label-warning';
+        }
+        $timer = Html::tag('span', '', [
+            'class' => 'enable-timer-lpp',
+            'data-seconds' => $secondsDiff,
+            'data-toggle' => 'tooltip',
+            'data-html' => 'true',
+            'data-original-title' => 'Rule Name: ' . $ruleName . '; <br> Expiration Dt: ' . \Yii::$app->formatter->asDatetime(strtotime($expirationDt)),
+        ]);
+        return Html::tag('span', '<i class="fa fa-clock-o"></i> ' . $timer, [
+            'class' => $class,
+            'style' => $style
+        ]);
     }
 
     public static function getDepartments(\frontend\components\User $user): array

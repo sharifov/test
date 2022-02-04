@@ -48,7 +48,7 @@ class QuoteSegmentBaggage extends \yii\db\ActiveRecord
             [['qsb_segment_id', 'qsb_allow_pieces', 'qsb_allow_weight', 'qsb_updated_user_id'], 'integer'],
             [['qsb_created_dt', 'qsb_updated_dt'], 'safe'],
             [['qsb_pax_code', 'qsb_airline_code'], 'string', 'max' => 3],
-            [['qsb_allow_unit'], 'string', 'max' => 4],
+            [['qsb_allow_unit'], 'string', 'max' => 20],
             [['qsb_carry_one'], 'boolean'],
             [['qsb_carry_one'], 'default', 'value' => true],
             [['qsb_allow_max_weight', 'qsb_allow_max_size'], 'string', 'max' => 100],

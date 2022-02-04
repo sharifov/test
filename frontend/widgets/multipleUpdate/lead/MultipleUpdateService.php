@@ -2,9 +2,13 @@
 
 namespace frontend\widgets\multipleUpdate\lead;
 
+use common\components\jobs\LeadPoorProcessingJob;
 use common\models\Employee;
 use common\models\Lead;
 use src\auth\Auth;
+use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
+use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
+use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataQuery;
 use src\model\leadUserConversion\service\LeadUserConversionDictionary;
 use src\model\leadUserConversion\service\LeadUserConversionService;
 use src\services\lead\LeadStateService;
@@ -12,6 +16,7 @@ use src\services\lead\qcall\Config;
 use src\services\lead\qcall\FindPhoneParams;
 use src\services\lead\qcall\FindWeightParams;
 use src\services\lead\qcall\QCallService;
+use Yii;
 use yii\bootstrap4\Html;
 
 /**
@@ -177,6 +182,7 @@ class MultipleUpdateService
             try {
                 $ownerChanged = $oldOwnerId !== $newOwner->id;
                 $oldStatusIsPending = $lead->isPending();
+                $oldStatus = $lead->status;
                 $this->leadStateService->processing($lead, $newOwner->id, $creatorId, $form->message);
                 $this->addMessage($this->movedStateMessage($lead, 'Processing', $oldOwnerId, $newOwner->id, $newOwner->userName));
                 if ($ownerChanged && $oldStatusIsPending) {
@@ -186,6 +192,13 @@ class MultipleUpdateService
                         LeadUserConversionDictionary::DESCRIPTION_ASSIGN,
                         $creatorId
                     );
+                }
+
+                if (
+                    $oldStatus === Lead::STATUS_EXTRA_QUEUE &&
+                    LeadPoorProcessingDataQuery::isExistActiveRule(LeadPoorProcessingDataDictionary::KEY_EXTRA_TO_PROCESSING_MULTIPLE_UPD)
+                ) {
+                    LeadPoorProcessingService::addLeadPoorProcessingJob($lead->id, LeadPoorProcessingDataDictionary::KEY_EXTRA_TO_PROCESSING_MULTIPLE_UPD);
                 }
             } catch (\DomainException $e) {
                 $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
@@ -236,6 +249,13 @@ class MultipleUpdateService
             try {
                 $this->leadStateService->new($lead, $newOwner->id, $creatorId, $form->message);
                 $this->addMessage($this->movedStateMessage($lead, 'New', $oldOwnerId, $newOwner->id, $newOwner->userName));
+            } catch (\DomainException $e) {
+                $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
+            }
+        } elseif ($form->isExtraQueue()) {
+            try {
+                $this->leadStateService->extraQueue($lead, $newOwner->id, $creatorId, $form->message);
+                $this->addMessage($this->movedStateMessage($lead, 'Extra Queue', $oldOwnerId, $newOwner->id, $newOwner->userName));
             } catch (\DomainException $e) {
                 $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
             }

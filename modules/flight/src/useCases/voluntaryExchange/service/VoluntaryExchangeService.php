@@ -66,7 +66,8 @@ class VoluntaryExchangeService
         Cases $case,
         int $projectId
     ): Order {
-        if ($order = OrderManageService::getBySaleIdOrBookingId($orderCreateFromSaleForm->saleId, $orderCreateFromSaleForm->bookingId)) {
+        $bookingId = !empty($orderCreateFromSaleForm->baseBookingId) ? $orderCreateFromSaleForm->baseBookingId : $orderCreateFromSaleForm->bookingId;
+        if ($order = OrderManageService::getBySaleIdOrBookingId($orderCreateFromSaleForm->saleId, $bookingId)) {
             $this->objectCollection->getOrderCreateFromSaleService()->caseOrderRelation($order->getId(), $case->cs_id);
             $case->addEventLog(
                 CaseEventLog::VOLUNTARY_EXCHANGE_CREATE,

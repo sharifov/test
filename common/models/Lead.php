@@ -44,6 +44,7 @@ use src\events\lead\LeadOwnerChangedEvent;
 use src\events\lead\LeadCountPassengersChangedEvent;
 use src\events\lead\LeadOwnerFreedEvent;
 use src\events\lead\LeadPendingEvent;
+use src\events\lead\LeadPoorProcessingEvent;
 use src\events\lead\LeadProcessingEvent;
 use src\events\lead\LeadRejectEvent;
 use src\events\lead\LeadSnoozeEvent;
@@ -66,6 +67,8 @@ use src\model\clientChatLead\entity\ClientChatLead;
 use src\model\lead\useCases\lead\api\create\LeadCreateForm;
 use src\model\lead\useCases\lead\import\LeadImportForm;
 use src\model\leadData\entity\LeadData;
+use src\model\leadPoorProcessing\entity\LeadPoorProcessing;
+use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
 use src\model\leadUserConversion\entity\LeadUserConversion;
 use src\services\lead\calculator\LeadTripTypeCalculator;
@@ -239,6 +242,7 @@ use yii\helpers\VarDumper;
  * @property bool $calledExpert
  * @property $quoteType
  * @property Language $language
+ * @property LeadPoorProcessing $minLpp
  *
  */
 class Lead extends ActiveRecord implements Objectable
@@ -1425,6 +1429,13 @@ class Lead extends ActiveRecord implements Objectable
         if (!$this->isProcessing()) {
             $this->setStatus(self::STATUS_PROCESSING);
         }
+
+        $this->recordEvent(
+            new LeadPoorProcessingEvent(
+                $this,
+                LeadPoorProcessingDataDictionary::KEY_NO_ACTION
+            )
+        );
     }
 
     /**
@@ -1771,7 +1782,21 @@ class Lead extends ActiveRecord implements Objectable
      */
     public function isAvailableToTake(): bool
     {
-        return in_array($this->status, [null, self::STATUS_TRASH, self::STATUS_PENDING, self::STATUS_FOLLOW_UP, self::STATUS_SNOOZE, self::STATUS_NEW, self::STATUS_BOOK_FAILED, self::STATUS_ALTERNATIVE], true);
+        return in_array(
+            $this->status,
+            [
+                null,
+                self::STATUS_TRASH,
+                self::STATUS_PENDING,
+                self::STATUS_FOLLOW_UP,
+                self::STATUS_SNOOZE,
+                self::STATUS_NEW,
+                self::STATUS_BOOK_FAILED,
+                self::STATUS_ALTERNATIVE,
+                self::STATUS_EXTRA_QUEUE,
+            ],
+            true
+        );
     }
 
     /**
@@ -1893,6 +1918,11 @@ class Lead extends ActiveRecord implements Objectable
     public function getLDep()
     {
         return $this->hasOne(Department::class, ['dep_id' => 'l_dep_id']);
+    }
+
+    public function getMinLpp()
+    {
+        return $this->hasOne(LeadPoorProcessing::class, ['lpp_lead_id' => 'id'])->orderBy(['lpp_expiration_dt' => SORT_ASC]);
     }
 
     /**
@@ -2181,8 +2211,14 @@ class Lead extends ActiveRecord implements Objectable
         $result = self::updateAll(['l_last_action_dt' => date('Y-m-d H:i:s')], ['id' => $this->id]);
 
         if ($this->isProcessing()) {
-            $job = new LeadPoorProcessingJob($this->id, LeadPoorProcessingDataDictionary::KEY_LAST_ACTION);
-            Yii::$app->queue_job->priority(100)->push($job);
+            LeadPoorProcessingService::addLeadPoorProcessingRemoverJob(
+                $this->id,
+                [
+                    LeadPoorProcessingDataDictionary::KEY_EXTRA_TO_PROCESSING_TAKE,
+                    LeadPoorProcessingDataDictionary::KEY_EXTRA_TO_PROCESSING_MULTIPLE_UPD,
+                ]
+            );
+            LeadPoorProcessingService::addLeadPoorProcessingJob($this->id, LeadPoorProcessingDataDictionary::KEY_LAST_ACTION);
         }
 
         return $result;
@@ -2570,6 +2606,7 @@ class Lead extends ActiveRecord implements Objectable
             case self::STATUS_NEW:
             case self::STATUS_BOOK_FAILED:
             case self::STATUS_ALTERNATIVE:
+            case self::STATUS_EXTRA_QUEUE:
                 $label = '<span class="label label-default">' . self::getStatus($status) . '</span>';
                 break;
         }
@@ -2602,6 +2639,7 @@ class Lead extends ActiveRecord implements Objectable
             case self::STATUS_NEW:
             case self::STATUS_BOOK_FAILED:
             case self::STATUS_ALTERNATIVE:
+            case self::STATUS_EXTRA_QUEUE:
                 $label = '<span class="label label-default">' . self::getStatus($status) . '</span>';
                 break;
         }
@@ -4296,6 +4334,7 @@ Reason: {reason}',
             self::STATUS_SNOOZE => self::STATUS_LIST[self::STATUS_SNOOZE],
             self::STATUS_PROCESSING => self::STATUS_LIST[self::STATUS_PROCESSING],
             self::STATUS_ON_HOLD => self::STATUS_LIST[self::STATUS_ON_HOLD],
+            self::STATUS_EXTRA_QUEUE => self::STATUS_LIST[self::STATUS_EXTRA_QUEUE],
         ];
     }
 
@@ -5037,7 +5076,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         );
     }
 
-    public function extraQueue(?string $reason = null): void
+    public function extraQueue(?int $newOwnerId = null, ?int $creatorId = null, ?string $reason = ''): void
     {
         if ($this->isExtraQueue()) {
             return;
@@ -5048,11 +5087,13 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
                 $this,
                 $this->status,
                 $this->employee_id,
-                null,
-                null,
+                $newOwnerId,
+                $creatorId,
                 $reason
             )
         );
+
+        $this->changeOwner($newOwnerId);
 
         $this->setStatus(self::STATUS_EXTRA_QUEUE);
     }

@@ -1,0 +1,10 @@
+---
+# This playbook deploys CRM application
+
+- name: Deploy CRM application
+  hosts: app
+  remote_user: "{{ ssh_user }}"
+  gather_facts: false
+  become: yes
+  roles:
+    - deployment

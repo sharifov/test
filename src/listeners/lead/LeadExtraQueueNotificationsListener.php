@@ -32,7 +32,7 @@ class LeadExtraQueueNotificationsListener
 
                 Notifications::createAndPublish(
                     $ownerId,
-                    'Refund update',
+                    'Lead changed status',
                     $message,
                     Notifications::TYPE_INFO,
                     true

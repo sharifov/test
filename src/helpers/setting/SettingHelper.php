@@ -807,4 +807,9 @@ class SettingHelper
     {
         return (int)(Yii::$app->params['settings']['clean_lead_poor_processing_log_after_days'] ?? 90);
     }
+
+    public static function getSnoozeLimit(): int
+    {
+        return (int)(Yii::$app->params['settings']['snooze_limit'] ?? 10);
+    }
 }

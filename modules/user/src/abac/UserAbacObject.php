@@ -115,7 +115,6 @@ class UserAbacObject extends AbacBaseModel implements AbacInterface
             'up_skill' => 'Skill',
             'up_call_type_id' => 'Call Type',
             'up_2fa_secret' => '2fa secret',
-            'up_sip' => 'Sip',
             'up_2fa_enable' => '2fa enable',
             'up_telegram' => 'Telegram ID',
             'up_telegram_enable' => 'Telegram Enable',

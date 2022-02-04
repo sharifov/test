@@ -568,7 +568,8 @@ class SyncController extends Controller
 
             $transactionOrder = new Transaction(['db' => Yii::$app->db]);
             try {
-                if (!$order = OrderManageService::getBySaleIdOrBookingId($saleId, (string) $saleData['bookingId'])) {
+                $bookingId = !empty($saleData['baseBookingId']) ? $saleData['baseBookingId'] : $saleData['bookingId'];
+                if (!$order = OrderManageService::getBySaleIdOrBookingId($saleId, (string) $bookingId)) {
                     $orderCreateFromSaleForm = new OrderCreateFromSaleForm();
                     if (!$orderCreateFromSaleForm->load($saleData)) {
                         throw new \RuntimeException('OrderCreateFromSaleForm not loaded');

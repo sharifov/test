@@ -1,10 +1,15 @@
 <?php
 
 use common\models\Employee;
+use modules\cases\src\abac\communicationBlock\CaseCommunicationBlockAbacDto;
+use modules\cases\src\abac\communicationBlock\CaseCommunicationBlockAbacObject;
 use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\widgets\FileStorageListWidget;
 use src\auth\Auth;
 use src\helpers\cases\CasesViewRenderHelper;
+use src\model\call\useCase\createCall\fromCase\AbacCallFromNumberList;
+use src\model\email\useCase\send\fromCase\AbacEmailList;
+use src\model\sms\useCase\send\fromCase\AbacSmsFromNumberList;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -21,7 +26,6 @@ use modules\cases\src\widgets\CaseEventLogWidget;
  * @var $previewSmsForm frontend\models\CasePreviewSmsForm
  * @var $dataProviderCommunication yii\data\ActiveDataProvider
  * @var $dataProviderCommunicationLog yii\data\ActiveDataProvider
- * @var $enableCommunication boolean
  * @var $isAdmin boolean
  *
  * @var $saleSearchModel common\models\search\SaleSearch
@@ -39,11 +43,13 @@ use modules\cases\src\widgets\CaseEventLogWidget;
  * @var $coupons \src\model\coupon\entity\couponCase\CouponCase[]
  * @var $sendCouponsForm \src\model\coupon\useCase\send\SendCouponsForm
  *
- * @var $fromPhoneNumbers array
- * @var bool $smsEnabled
  * @var array $unsubscribedEmails
  *
  * @var ActiveDataProvider $dataProviderOrders
+ *
+ * @var AbacCallFromNumberList $callFromNumberList
+ * @var AbacSmsFromNumberList $smsFromNumberList
+ * @var AbacEmailList $emailFromList
  */
 
 $this->title = 'Case ' . $model->cs_id;
@@ -187,23 +193,22 @@ $unsubscribedEmails =  array_column($model->project->emailUnsubscribes, 'eu_emai
         </div>
 
         <div class="col-md-6">
-            <?php if ($enableCommunication) : ?>
-                    <?= $this->render('communication/case_communication', [
-                        'model'      => $model,
-                        'previewEmailForm' => $previewEmailForm,
-                        'previewSmsForm' => $previewSmsForm,
-                        'comForm'       => $comForm,
-                        'dataProvider'  => (bool)Yii::$app->params['settings']['new_communication_block_case'] ? $dataProviderCommunicationLog : $dataProviderCommunication,
-                        'isAdmin'       => $isAdmin,
-                        'isCommunicationLogEnabled' => Yii::$app->params['settings']['new_communication_block_case'],
-                        'fromPhoneNumbers' => $fromPhoneNumbers,
-                        'smsEnabled' => $smsEnabled,
-                        'unsubscribedEmails' => $unsubscribedEmails,
-                        'disableMasking' => $disableMasking
-                    ]);
-                    ?>
-            <?php else : ?>
-                <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>
+            <?php $caseCommunicationBlockAbacDto = new CaseCommunicationBlockAbacDto($model, [], [], [], $user->id); ?>
+            <?php /** @abac $caseCommunicationBlockAbacDto, CaseCommunicationBlockAbacObject::NS, CaseCommunicationBlockAbacObject::ACTION_VIEW, View communication block on Case View page */ ?>
+            <?php if (Yii::$app->abac->can($caseCommunicationBlockAbacDto, CaseCommunicationBlockAbacObject::NS, CaseCommunicationBlockAbacObject::ACTION_VIEW, $user)) : ?>
+                <?= $this->render('communication/case_communication', [
+                    'model'      => $model,
+                    'previewEmailForm' => $previewEmailForm,
+                    'previewSmsForm' => $previewSmsForm,
+                    'comForm'       => $comForm,
+                    'dataProvider'  => (bool)Yii::$app->params['settings']['new_communication_block_case'] ? $dataProviderCommunicationLog : $dataProviderCommunication,
+                    'isCommunicationLogEnabled' => Yii::$app->params['settings']['new_communication_block_case'],
+                    'unsubscribedEmails' => $unsubscribedEmails,
+                    'disableMasking' => $disableMasking,
+                    'callFromNumberList' => $callFromNumberList,
+                    'smsFromNumberList' => $smsFromNumberList,
+                    'emailFromList' => $emailFromList,
+                ]); ?>
             <?php endif;?>
         </div>
 

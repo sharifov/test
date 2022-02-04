@@ -19,11 +19,12 @@ class LeadPoorProcessingDataQuery
         ;
     }
 
-    public static function getRuleByKey(string $key): ?LeadPoorProcessingData
+    public static function getRuleByKey(string $key, int $cacheDuration = -1): ?LeadPoorProcessingData
     {
         return LeadPoorProcessingData::find()
             ->where(['lppd_key' => $key])
             ->limit(1)
+            ->cache($cacheDuration)
             ->one()
         ;
     }
@@ -34,6 +35,15 @@ class LeadPoorProcessingDataQuery
             ->where(['lppd_id' => $id])
             ->limit(1)
             ->one()
+        ;
+    }
+
+    public static function isExistActiveRule(string $key): bool
+    {
+        return LeadPoorProcessingData::find()
+            ->where(['lppd_key' => $key])
+            ->andWhere(['lppd_enabled' => true])
+            ->exists()
         ;
     }
 

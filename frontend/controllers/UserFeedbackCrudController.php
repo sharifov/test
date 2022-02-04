@@ -120,8 +120,16 @@ class UserFeedbackCrudController extends FController
         $model = new UserFeedback();
 
         if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'uf_id' => $model->uf_id, 'uf_created_dt' => $model->uf_created_dt]);
+            if ($model->load($this->request->post())) {
+                try {
+                    $this->userFeedbackRepository->save($model);
+                    return $this->redirect(['view', 'uf_id' => $model->uf_id, 'uf_created_dt' => $model->uf_created_dt]);
+                } catch (\RuntimeException $e) {
+                    Yii::warning([
+                        'message' => $e->getMessage(),
+                        'trace' => AppHelper::throwableLog($e, true)
+                    ], 'UserFeedbackCrudController:actionCreate:RuntimeException');
+                }
             }
         } else {
             $model->loadDefaultValues();
@@ -158,9 +166,8 @@ class UserFeedbackCrudController extends FController
         $form->date = $dateNow->format('Y-m-d');
         $form->time = $dateNow->format('H:i');
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
-            $transaction = new Transaction(['db' => UserFeedback::getDb()]);
             try {
-                $dto = new UserFeedbackData($form->getDecodedData(), [
+                $dto = new UserFeedbackData($form->getDecodedData() ?? [], [
                     'releaseVersion' => ReleaseVersionHelper::getReleaseVersion(true) ?? '',
                     'host' => Yii::$app->params['appHostname'] ?? '',
                     'pageUrl' => $form->pageUrl,
@@ -177,12 +184,10 @@ class UserFeedbackCrudController extends FController
                         $form->title,
                         $form->screenshot
                     );
-                    $transaction->begin();
                     $userFeedbackId = $this->userFeedbackRepository->save($userFeedback);
                     $userFeedbackFile->uff_uf_id = $userFeedbackId;
                     $this->userFeedbackFileRepository->save($userFeedbackFile);
                     $userFeedbackFileId = $userFeedbackFile->uff_id;
-                    $transaction->commit();
                 } else {
                     $userFeedbackId = $this->userFeedbackRepository->save($userFeedback);
                 }
@@ -195,10 +200,8 @@ class UserFeedbackCrudController extends FController
 
                 return "<script>$('#modal-lg').modal('hide'); createNotify('Success', 'Bug report created successfully', 'success')</script>";
             } catch (\RuntimeException $e) {
-                $transaction->rollBack();
                 $form->addError('general', $e->getMessage());
             } catch (\Throwable $e) {
-                $transaction->rollBack();
                 $form->addError('general', 'Internal Server error');
                 Yii::error([
                     'message' => $e->getMessage(),

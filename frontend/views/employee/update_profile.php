@@ -311,7 +311,6 @@ JS;
 
            /* @property int $up_user_id
  * @property int $up_call_type_id
- * @property string $up_sip
  * @property string $up_telegram
  * @property int $up_telegram_enable
  * @property string $up_updated_dt

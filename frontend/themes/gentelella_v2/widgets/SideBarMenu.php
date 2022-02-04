@@ -7,9 +7,15 @@
 namespace frontend\themes\gentelella_v2\widgets;
 
 use common\models\Employee;
+use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\lead\src\abac\LeadAbacObject;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use src\auth\Auth;
+use src\helpers\app\AppHelper;
 use Yii;
+use yii\helpers\ArrayHelper;
+
+use function Amp\Promise\timeoutWithDefault;
 
 /**
  * Class SideBarMenu
@@ -113,11 +119,18 @@ class SideBarMenu extends \yii\bootstrap\Widget
         if (isset(Yii::$app->params['settings']['enable_lead_inbox']) && Yii::$app->params['settings']['enable_lead_inbox']) {
             $menuLItems[] = ['label' => 'Inbox <span id="badges-inbox" data-type="inbox" class="label-info label pull-right bginfo"></span> ', 'url' => ['/queue/inbox'], 'icon' => 'briefcase'];
         }
+
+        /** @abac $leadAbacDto, LeadAbacObject::OBJ_EXTRA_QUEUE, LeadAbacObject::ACTION_ACCESS, show extra-queue in menu */
         $menuLItems[] = [
             'label' => 'Extra Queue <span id="badges-extra-queue" data-type="extra-queue" class="label-success label pull-right bginfo"></span> ',
             'url' => ['/lead/extra-queue'],
             'icon' => 'history text-success',
             'title' => 'Extra queue',
+            'abac' => [
+                'dto' => new LeadAbacDto(null, (int) Auth::id()),
+                'object' => LeadAbacObject::OBJ_EXTRA_QUEUE,
+                'action' => LeadAbacObject::ACTION_ACCESS
+            ],
         ];
 
         $menuLItems[] = ['label' => 'Failed Bookings <span id="badges-failed-bookings" data-type="failed-bookings" class="label-success label pull-right bginfo"></span> ',
@@ -873,6 +886,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ],
                 ['label' => 'User Stats dashboard', 'url' => ['/user-stats/index'], 'icon' => 'users'],
                 ['label' => 'User Stats Report', 'url' => ['/user-stats/report'], 'icon' => 'users'],
+                ['label' => 'User Feedback Statistics', 'url' => ['/stats/user-feedback'], 'icon' => 'users'],
             ]
         ];
 
@@ -1054,6 +1068,30 @@ class SideBarMenu extends \yii\bootstrap\Widget
             }
             if (isset($item['label']) && (!isset($item['visible']) || $item['visible'] === true)) {
                 $allVisible = true;
+            }
+
+            if (isset($item['abac'])) {
+                try {
+                    if (!$abacDto = $item['abac']['dto'] ?? null) {
+                        throw new \RuntimeException('AbacDto is empty');
+                    }
+                    if (!$object = $item['abac']['object'] ?? null) {
+                        throw new \RuntimeException('Abac object is empty');
+                    }
+                    if (!$action = $item['abac']['action'] ?? null) {
+                        throw new \RuntimeException('Abac action is empty');
+                    }
+
+                    if (!Yii::$app->abac->can($abacDto, $object, $action)) {
+                        $item['visible'] = false;
+                    }
+                } catch (\RuntimeException | \DomainException $throwable) {
+                    $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $item);
+                    \Yii::warning($message, 'SideBarMenu:ensureVisibility:Exception');
+                } catch (\Throwable $throwable) {
+                    $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $item);
+                    \Yii::error($message, 'SideBarMenu:ensureVisibility:Throwable');
+                }
             }
         }
         return $allVisible;
