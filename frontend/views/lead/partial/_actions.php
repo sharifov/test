@@ -108,7 +108,20 @@ $leadAbacDto = new LeadAbacDto($leadModel, $userId);
     $viwModeSuperAdminCondition = ($leadForm->mode === $leadForm::VIEW_MODE && ($user->isAdmin() || $user->isSupervision()));
     $buttonsSubAction = [];
 
-    $takeConditions = ($leadForm->viewPermission && ($leadModel->isOnHold() || $leadModel->isFollowUp() || $leadModel->isBookFailed() || $leadModel->isPending() || $leadModel->isProcessing() || $leadModel->isAlternative() || $leadModel->isNew()) && $leadModel->getAppliedAlternativeQuotes() === null);
+    $takeConditions = (
+        $leadForm->viewPermission &&
+        (
+            $leadModel->isOnHold() ||
+            $leadModel->isFollowUp() ||
+            $leadModel->isBookFailed() ||
+            $leadModel->isPending() ||
+            $leadModel->isProcessing() ||
+            $leadModel->isAlternative() ||
+            $leadModel->isNew() ||
+            $leadModel->isExtraQueue()
+        ) &&
+        $leadModel->getAppliedAlternativeQuotes() === null
+    );
     $processingConditions = $leadModel->isOwner($user->id) && $leadModel->isProcessing() && $leadModel->getAppliedAlternativeQuotes() === null;
 
     if ($processingConditions) {
@@ -201,12 +214,19 @@ $leadAbacDto = new LeadAbacDto($leadModel, $userId);
     <?php if (!$user->isQa()) : ?>
             <div class="panel-main__actions">
         <?php if ($takeConditions) {
-            if (!$leadModel->isOwner($user->id) && ($leadModel->isProcessing() || $leadModel->isOnHold())) {
+            if (!$leadModel->isOwner($user->id) && ($leadModel->isProcessing() || $leadModel->isOnHold() || $leadModel->isExtraQueue())) {
                 echo $buttonTakeOver;
-            } elseif ($leadModel->isPending() || $leadModel->isFollowUp() || $leadModel->isAlternative() || $leadModel->isBookFailed() || $leadModel->isNew()) {
+            } elseif (
+                $leadModel->isPending() ||
+                $leadModel->isFollowUp() ||
+                $leadModel->isAlternative() ||
+                $leadModel->isBookFailed() ||
+                $leadModel->isNew() ||
+                $leadModel->isExtraQueue()
+            ) {
                 echo $buttonTake;
             }
-        }?>
+        } ?>
 
         <?php if ($buttonsSubAction) : ?>
             <?php foreach ($buttonsSubAction as $btn) :?>
