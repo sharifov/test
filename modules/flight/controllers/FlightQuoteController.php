@@ -3,6 +3,7 @@
 namespace modules\flight\controllers;
 
 use common\components\BackOffice;
+use common\models\Currency;
 use common\models\Notifications;
 use common\models\Project;
 use frontend\helpers\JsonHelper;
@@ -1485,9 +1486,10 @@ class FlightQuoteController extends FController
                 $form->caseId = $caseId;
                 $form->originData = $result;
 
-//                if (!$form->airlineAllow) {
+                if (!$form->airlineAllow && empty($form->getRefundForm()->currency)) {
+                    $form->getRefundForm()->currency = Currency::getDefaultCurrencyCode();
 //                    throw new \RuntimeException('Refund not allowed by Airline');
-//                }
+                }
 
                 $refundForm = $form->getRefundForm();
 
@@ -1499,9 +1501,6 @@ class FlightQuoteController extends FController
                     }
                     $form->disableReadOnlyAllFields();
                     Yii::$app->getSession()->setFlash('warning', 'Not all data received from BO');
-                }
-                if (!$form->validate()) {
-                    throw new \RuntimeException($form->getErrorSummary(true)[0]);
                 }
             } catch (\DomainException | NotFoundException | \RuntimeException $e) {
                 $message = $e->getMessage();
