@@ -14,6 +14,7 @@ use common\components\validators\CheckIsBooleanValidator;
  *
  * @property bool $refundDataReadOnly
  * @property bool $ticketDataReadOnly
+ * @property bool $allow
  */
 class VoluntaryRefundCreateForm extends Model
 {
@@ -40,8 +41,8 @@ class VoluntaryRefundCreateForm extends Model
             [['bookingId'], 'required'],
             [['bookingId'], 'string', 'max' => 50],
 
-            [['allow', 'airlineAllow', 'automatic'], 'filter', 'filter' => 'floatval', 'skipOnEmpty' => true],
-            [['allow', 'airlineAllow', 'automatic'], 'number'],
+//            [['allow', 'airlineAllow', 'automatic'], 'filter', 'filter' => 'floatval', 'skipOnEmpty' => true],
+//            [['allow', 'airlineAllow', 'automatic'], 'number'],
             [['allow', 'airlineAllow', 'automatic'], CheckIsBooleanValidator::class],
 
             [['refund'], 'safe'],

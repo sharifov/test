@@ -1500,6 +1500,9 @@ class FlightQuoteController extends FController
                     $form->disableReadOnlyAllFields();
                     Yii::$app->getSession()->setFlash('warning', 'Not all data received from BO');
                 }
+                if (!$form->validate()) {
+                    throw new \RuntimeException($form->getErrorSummary(true)[0]);
+                }
             } catch (\DomainException | NotFoundException | \RuntimeException $e) {
                 $message = $e->getMessage();
             } catch (\Throwable $e) {
