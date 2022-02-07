@@ -17,7 +17,6 @@ use Yii;
  * @property AvailablePhoneNumber[]|null $callFromNumbers
  * @property Employee $user
  * @property Lead $lead
- * @property bool|null $canCreateCall
  */
 class AbacCallFromNumberList
 {
@@ -25,7 +24,6 @@ class AbacCallFromNumberList
     private ?array $callFromNumbers = null;
     private Employee $user;
     private Lead $lead;
-    private ?bool $canCreateCall = null;
 
     public function __construct(Employee $user, Lead $lead)
     {
@@ -44,15 +42,13 @@ class AbacCallFromNumberList
 
         $this->list = [];
 
-        if ($this->canMakeCall()) {
-            foreach ($this->getCallFromNumbers() as $number) {
-                $tempAbacDto = new LeadCommunicationBlockAbacDto($this->lead, [$number], [], [], $this->user->id);
-                /** @abac $tempAbacDto, LeadCommunicationBlockAbacObject::NS, LeadCommunicationBlockAbacObject::ACTION_MAKE_CALL, Validate Call From for make call from Lead View page */
-                if (Yii::$app->abac->can($tempAbacDto, LeadCommunicationBlockAbacObject::NS, LeadCommunicationBlockAbacObject::ACTION_MAKE_CALL, $this->user)) {
-                    $this->list[] = $number;
-                }
-                unset($tempAbacDto);
+        foreach ($this->getCallFromNumbers() as $number) {
+            $tempAbacDto = new LeadCommunicationBlockAbacDto($this->lead, [$number], [], [], $this->user->id);
+            /** @abac $tempAbacDto, LeadCommunicationBlockAbacObject::NS, LeadCommunicationBlockAbacObject::ACTION_MAKE_CALL, Validate Call From for make call from Lead View page */
+            if (Yii::$app->abac->can($tempAbacDto, LeadCommunicationBlockAbacObject::NS, LeadCommunicationBlockAbacObject::ACTION_MAKE_CALL, $this->user)) {
+                $this->list[] = $number;
             }
+            unset($tempAbacDto);
         }
 
         return $this->list;
@@ -70,15 +66,7 @@ class AbacCallFromNumberList
 
     public function canMakeCall(): bool
     {
-        if ($this->canCreateCall !== null) {
-            return $this->canCreateCall;
-        }
-
-        $leadCommunicationBlockAbacDto = new LeadCommunicationBlockAbacDto($this->lead, $this->getCallFromNumbers(), [], [], $this->user->id);
-        /** @abac $leadCommunicationBlockAbacDto, LeadCommunicationBlockAbacObject::NS, LeadCommunicationBlockAbacObject::ACTION_MAKE_CALL, Validate Call From list for make call from Lead View page */
-        $this->canCreateCall = (bool)Yii::$app->abac->can($leadCommunicationBlockAbacDto, LeadCommunicationBlockAbacObject::NS, LeadCommunicationBlockAbacObject::ACTION_MAKE_CALL, $this->user);
-
-        return $this->canCreateCall;
+        return !empty($this->getList());
     }
 
     public function format(): array
