@@ -7,6 +7,7 @@ use src\auth\Auth;
 use src\model\call\services\FriendlyName;
 use src\model\call\services\RecordManager;
 use src\model\callLog\entity\callLog\CallLog;
+use src\model\department\department\CallDefaultPhoneType;
 use src\model\voip\phoneDevice\device\VoipDevice;
 
 class CreateCallFromHistory
@@ -32,6 +33,14 @@ class CreateCallFromHistory
                 throw new \DomainException('Not found Params. History Call SID: ' . $form->historyCallSid . ' Department: ' . $call->department->dep_name);
             }
 
+            if (($call->callLogLead && $call->callLogCase) || $call->callLogLead) {
+                $defaultPhoneType = $departmentParams->object->lead->callDefaultPhoneType;
+            } elseif ($call->callLogCase) {
+                $defaultPhoneType = $departmentParams->object->case->callDefaultPhoneType;
+            } else {
+                $defaultPhoneType = CallDefaultPhoneType::createPersonal();
+            }
+
             $phoneFrom = [
                 'phone' => null,
                 'phoneListId' => null
@@ -39,7 +48,7 @@ class CreateCallFromHistory
 
             if ($call->isOut()) {
                 if (VoipDevice::isValid($call->cl_phone_from)) {
-                    $list = new PhoneFromList(Auth::id(), $call->cl_project_id, $call->cl_department_id, $departmentParams->defaultPhoneType);
+                    $list = new PhoneFromList(Auth::id(), $call->cl_project_id, $call->cl_department_id, $defaultPhoneType);
                     if ($firstPhone = $list->getFirst()) {
                         $phoneFrom = [
                             'phone' => $firstPhone->phone,
@@ -53,11 +62,18 @@ class CreateCallFromHistory
                     ];
                 }
             } elseif ($call->isIn()) {
-                $list = new PhoneFromList(Auth::id(), $call->cl_project_id, $call->cl_department_id, $departmentParams->defaultPhoneType);
-                if ($firstPhone = $list->getFirst()) {
+                if (VoipDevice::isValid($call->cl_phone_to)) {
+                    $list = new PhoneFromList(Auth::id(), $call->cl_project_id, $call->cl_department_id, $defaultPhoneType);
+                    if ($firstPhone = $list->getFirst()) {
+                        $phoneFrom = [
+                            'phone' => $firstPhone->phone,
+                            'phoneListId' => $firstPhone->phoneListId,
+                        ];
+                    }
+                } else {
                     $phoneFrom = [
-                        'phone' => $firstPhone->phone,
-                        'phoneListId' => $firstPhone->phoneListId,
+                        'phone' => $call->cl_phone_to,
+                        'phoneListId' => $call->cl_phone_list_id,
                     ];
                 }
             }
