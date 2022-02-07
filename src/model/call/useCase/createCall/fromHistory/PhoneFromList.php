@@ -7,7 +7,7 @@ use common\models\Project;
 use common\models\query\DepartmentPhoneProjectQuery;
 use common\models\query\UserProjectParamsQuery;
 use common\models\UserProjectParams;
-use src\model\department\department\DefaultPhoneType;
+use src\model\department\department\CallDefaultPhoneType;
 use src\model\phoneList\entity\PhoneList;
 use yii\db\Expression;
 use yii\db\Query;
@@ -19,7 +19,7 @@ use yii\db\Query;
  * @property int $userId
  * @property int $projectId
  * @property int $departmentId
- * @property DefaultPhoneType $defaultPhoneType
+ * @property CallDefaultPhoneType $defaultPhoneType
  */
 class PhoneFromList
 {
@@ -29,9 +29,9 @@ class PhoneFromList
     private int $userId;
     private int $projectId;
     private int $departmentId;
-    private DefaultPhoneType $defaultPhoneType;
+    private CallDefaultPhoneType $defaultPhoneType;
 
-    public function __construct(int $userId, int $projectId, int $departmentId, DefaultPhoneType $defaultPhoneType)
+    public function __construct(int $userId, int $projectId, int $departmentId, CallDefaultPhoneType $defaultPhoneType)
     {
         $this->userId = $userId;
         $this->projectId = $projectId;
@@ -59,7 +59,7 @@ class PhoneFromList
             ->select(['project_id', 'phone_list_id', 'phone', 'type_id', 'type', Project::tableName() . '.name as project', 'department_id'])
             ->from(self::getUserPhones($this->userId, $this->projectId)->union(self::getDepartmentPhones($this->projectId, $this->departmentId)))
             ->innerJoin(Project::tableName(), 'id = project_id')
-            ->orderBy(['type_id' => $this->defaultPhoneType->isGeneralFirst() ? SORT_DESC : SORT_ASC])
+            ->orderBy(['type_id' => $this->defaultPhoneType->isGeneral() ? SORT_DESC : SORT_ASC])
             ->all();
 
         foreach ($phones as $phone) {
