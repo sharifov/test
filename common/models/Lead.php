@@ -4038,6 +4038,10 @@ Reason: {reason}',
                     $content_data['quotes'][] = $quoteItem;
                 }
             }
+            // sorting quotes by pricePerPax asc
+            if (isset($content_data['quotes']) && is_array($content_data['quotes'])) {
+                usort($content_data['quotes'], fn($a, $b) => ($a['pricePerPax'] - $b['pricePerPax']));
+            }
         }
 
 
