@@ -22,11 +22,11 @@ server {
     ssl_certificate ${SSL_CRT_PATH};
     ssl_certificate_key ${SSL_KEY_PATH};
 
-    set $base_root ${APP_ROOT}/www;
+    set $base_root ${APP_PATH};
     root $base_root;
 
-    access_log ${APP_ROOT}/logs/access.log;
-    error_log ${APP_ROOT}/logs/error.log;
+    access_log ${LOGS_PATH}/access.log;
+    error_log ${LOGS_PATH}/error.log;
 
     index index.php index.html;
 
@@ -116,7 +116,7 @@ server {
     }
 
     location ^~ /fs {
-        alias ${APP_ROOT}/fileStorage;
+        alias ${FILE_STORAGE_PATH};
         try_files $uri $uri/ /fs/$1;
     }
 
@@ -133,11 +133,11 @@ server {
 
     server_name ${HOST_API};
 
-    root        ${APP_ROOT}/www/webapi/web/;
+    root        ${APP_PATH}/webapi/web/;
     index       index.php;
 
-    access_log  ${APP_ROOT}/logs/api-access.log;
-    error_log   ${APP_ROOT}/logs/api-error.log;
+    access_log  ${LOGS_PATH}/api-access.log;
+    error_log   ${LOGS_PATH}/api-error.log;
 
     location / {
         # Redirect everything that isn't a real file to index.php

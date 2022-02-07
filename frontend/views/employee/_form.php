@@ -710,16 +710,6 @@ JS;
                 </div>
                 <div class="col-md-3">
                     <?php
-                    $userAbacDto = new UserAbacDto('up_sip');
-                    $userAbacDto->isNewRecord = $model->isNewRecord;
-                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Sip field view*/
-                    $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Sip field edit*/
-                    $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                    ?>
-                    <?= $form->field($modelProfile, 'up_sip', ['options' => ['hidden' => ($edit ? !$edit : !$view), 'class' => 'form-group']])->textInput(['maxlength' => true, 'readonly' => !$edit]) ?>
-
-                    <?php
                     $userAbacDto = new UserAbacDto('up_2fa_enable');
                     $userAbacDto->isNewRecord = $model->isNewRecord;
                     /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, 2fa enable field view*/

@@ -17,6 +17,7 @@ use src\services\cleaner\cleaners\ApiLogCleaner;
 use src\services\cleaner\cleaners\CallCleaner;
 use src\services\cleaner\cleaners\ClientChatUserAccessCleaner;
 use src\services\cleaner\cleaners\GlobalLogCleaner;
+use src\services\cleaner\cleaners\LeadPoorProcessingLogCleaner;
 use src\services\cleaner\cleaners\LogCleaner;
 use src\services\cleaner\cleaners\NotificationsCleaner;
 use src\services\cleaner\cleaners\UserMonitorCleaner;
@@ -148,7 +149,14 @@ class CleanController extends Controller
         } catch (\Throwable $throwable) {
             self::throwableHandler($throwable, 'actionOnceDay:PhoneDeviceLog');
         }
-
+        try {
+            $paramsLeadPoorProcessingLog = [
+                'date' => DbCleanerService::daysToBeforeDate(SettingHelper::getCleanLeadPoorProcessingLogAfterDays())
+            ];
+            \Yii::$app->runAction('clean/lead-poor-processing-log', $paramsLeadPoorProcessingLog);
+        } catch (\Throwable $throwable) {
+            self::throwableHandler($throwable, 'actionOnceDay:LeadPoorProcessingLog');
+        }
         $timeEnd = microtime(true);
         $time = number_format(round($timeEnd - $timeStart, 2), 2);
         echo Console::renderColoredString('%y --- Execute Time: %w[' . $time . ' s] %n'), PHP_EOL;
@@ -175,7 +183,8 @@ class CleanController extends Controller
             $dbCleanerParamsForm = (new DbCleanerParamsForm())
                 ->setTable($cleaner->getTable())
                 ->setColumn($cleaner->getColumn())
-                ->fillParam($params);
+                ->fillParam($params)
+                ->setMaxDay($defaultDays + 1);
 
             if ($defaultDays && self::isParamsEmpty($params)) {
                 $dbCleanerParamsForm->day = $defaultDays;
@@ -213,7 +222,8 @@ class CleanController extends Controller
             $dbCleanerParamsForm = (new DbCleanerParamsForm())
                 ->setTable($cleaner->getTable())
                 ->setColumn($cleaner->getColumn())
-                ->fillParam($params);
+                ->fillParam($params)
+                ->setMaxDay($defaultDays + 1);
 
             if ($defaultDays && self::isParamsEmpty($params)) {
                 $dbCleanerParamsForm->day = $defaultDays;
@@ -252,7 +262,8 @@ class CleanController extends Controller
             $dbCleanerParamsForm = (new DbCleanerParamsForm())
                 ->setTable($cleaner->getTable())
                 ->setColumn($cleaner->getColumn())
-                ->fillParam($params);
+                ->fillParam($params)
+                ->setMaxDay($defaultDays + 1);
 
             if ($defaultDays && self::isParamsEmpty($params)) {
                 $dbCleanerParamsForm->day = $defaultDays;
@@ -319,7 +330,8 @@ class CleanController extends Controller
             $dbCleanerParamsForm = (new DbCleanerParamsForm())
                 ->setTable($cleaner->getTable())
                 ->setColumn($cleaner->getColumn())
-                ->fillParam($params);
+                ->fillParam($params)
+                ->setMaxDay($defaultDays + 1);
 
             if ($defaultDays && self::isParamsEmpty($params)) {
                 $dbCleanerParamsForm->day = $defaultDays;
@@ -386,7 +398,8 @@ class CleanController extends Controller
             $dbCleanerParamsForm = (new DbCleanerParamsForm())
                 ->setTable($cleaner->getTable())
                 ->setColumn($cleaner->getColumn())
-                ->fillParam($params);
+                ->fillParam($params)
+                ->setMaxDay($defaultDays + 1);
 
             if ($defaultDays && self::isParamsEmpty($params)) {
                 $dbCleanerParamsForm->day = $defaultDays;
@@ -421,7 +434,8 @@ class CleanController extends Controller
             $dbCleanerParamsForm = (new DbCleanerParamsForm())
                 ->setTable($cleaner->getTable())
                 ->setColumn($cleaner->getColumn())
-                ->fillParam($params);
+                ->fillParam($params)
+                ->setMaxDay($defaultDays + 1);
 
             if ($defaultDays && self::isParamsEmpty($params)) {
                 $dbCleanerParamsForm->day = $defaultDays;
@@ -516,6 +530,42 @@ class CleanController extends Controller
         return ExitCode::OK;
     }
 
+    public function actionLeadPoorProcessingLog(): int
+    {
+        echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+
+        $timeStart = microtime(true);
+        $params = $this->mappingParams();
+        $cleaner = new LeadPoorProcessingLogCleaner();
+        $defaultDays = SettingHelper::getCleanLeadPoorProcessingLogAfterDays();
+
+        try {
+            $dbCleanerParamsForm = (new DbCleanerParamsForm())
+                ->setTable($cleaner->getTable())
+                ->setColumn($cleaner->getColumn())
+                ->fillParam($params)
+                ->setMaxDay($defaultDays + 1);
+
+            if ($defaultDays && self::isParamsEmpty($params)) {
+                $dbCleanerParamsForm->day = $defaultDays;
+            }
+            if (!$dbCleanerParamsForm->validate()) {
+                throw new Exception(ErrorsToStringHelper::extractFromModel($dbCleanerParamsForm));
+            }
+
+            $processed = $cleaner->runDeleteByForm($dbCleanerParamsForm);
+        } catch (\Throwable $throwable) {
+            self::throwableHandler($throwable, 'actionLeadPoorProcessingLog:throwable');
+            return ExitCode::UNSPECIFIED_ERROR;
+        }
+
+        $timeEnd = microtime(true);
+        $time = number_format(round($timeEnd - $timeStart, 2), 2);
+        self::outputResult($processed, $time, 'actionNotifications:result');
+        return ExitCode::OK;
+    }
+
     private function mappingParams(): array
     {
         return [
@@ -550,7 +600,7 @@ class CleanController extends Controller
         string $categoryPrefix = 'CleanController:'
     ): void {
         Yii::error(
-            AppHelper::throwableFormatter($throwable),
+            AppHelper::throwableLog($throwable),
             $categoryPrefix . $category
         );
         echo Console::renderColoredString(

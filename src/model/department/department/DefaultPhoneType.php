@@ -3,6 +3,7 @@
 namespace src\model\department\department;
 
 /**
+ * @deprecated
  * Class DefaultPhoneType
  *
  * @property string $value

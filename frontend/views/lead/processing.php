@@ -21,6 +21,8 @@ $lists = new ListsAccess(Yii::$app->user->id);
 $this->params['breadcrumbs'][] = $this->title;
 
 $timeNow = time();
+
+$bundle = \frontend\assets\TimerAsset::register($this);
 ?>
 
 <style>
@@ -137,6 +139,16 @@ $timeNow = time();
             'contentOptions' => [
                 'class' => 'text-center'
             ]
+        ],
+        [
+            'value' => static function (Lead $lead): ?string {
+                if ($lead->minLpp && $lead->minLpp->lpp_expiration_dt) {
+                    return LeadHelper::displayLeadPoorProcessingTimer($lead->minLpp->lpp_expiration_dt, $lead->minLpp->lppLppd->lppd_name);
+                }
+                return '-';
+            },
+            'format' => 'raw',
+            'label' => 'Extra Timer'
         ],
 
         [
@@ -375,6 +387,19 @@ $timeNow = time();
             }
         }
     ]);
+
+    $js = <<<JS
+  $('.enable-timer-lpp').each( function (i, e) {
+      let seconds = $(e).attr('data-seconds');
+      if (seconds < 0) {
+          var params = {format: '%H:%M:%S', seconds: Math.abs(seconds)};
+      } else {
+          var params = {format: '%H:%M:%S', countdown: true, duration: seconds + 's'};
+      }
+      $(e).timer(params).timer('start');
+  });
+JS;
+    $this->registerJs($js, \yii\web\View::POS_READY);
 
     ?>
 

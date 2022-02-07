@@ -1034,9 +1034,8 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
             return $this->detailsPageUrl;
         }
 
-        $finder = [ProductQuoteClasses::getClass($this->pqProduct->pr_type_id), 'getQuoteDetailsPageUrl'];
-        $this->detailsPageUrl = $finder();
-        return $this->detailsPageUrl;
+        $productQuote = \Yii::createObject(ProductQuoteClasses::getClass($this->pqProduct->pr_type_id));
+        return $this->detailsPageUrl = $productQuote->getQuoteDetailsPageUrl();
     }
 
     public function getDiffUrlOriginReprotectionQuotes(): string
@@ -1045,9 +1044,8 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
             return $this->diffUrl;
         }
 
-        $finder = [ProductQuoteClasses::getClass($this->pqProduct->pr_type_id), 'getDiffUrlOriginReprotectionQuotes'];
-        $this->diffUrl = $finder();
-        return $this->diffUrl;
+        $productQuote = \Yii::createObject(ProductQuoteClasses::getClass($this->pqProduct->pr_type_id));
+        return $this->diffUrl = $productQuote->getDiffUrlOriginReprotectionQuotes();
     }
 
     public function isEqual(ProductQuote $quote): bool

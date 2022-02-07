@@ -7,6 +7,9 @@
  */
 
 use common\models\Lead;
+use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\lead\src\abac\LeadAbacObject;
+use src\auth\Auth;
 use src\helpers\lead\LeadHelper;
 use yii\helpers\Html;
 
@@ -28,7 +31,29 @@ $bundle = \frontend\assets\TimerAsset::register($this);
                     <?= LeadHelper::displaySnoozeFor($lead, time(), 'vertical-align: 3px;font-size: 12px; margin-left: 5px;') ?>
                 <?php endif; ?>
 
-                <?php if ($lead->l_expiration_dt) : ?>
+                <?php
+                    $leadAbacDto = new LeadAbacDto($lead, (int) Auth::id());
+                    /** @abac $leadAbacDto, LeadAbacObject::OBJ_EXTRA_QUEUE, LeadAbacObject::ACTION_ACCESS, show timer in lead/view */
+                    $isShowLppTimer = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_EXTRA_QUEUE, LeadAbacObject::ACTION_ACCESS);
+                ?>
+
+                <?php if ($lead->minLpp && $lead->minLpp->lpp_expiration_dt && $isShowLppTimer) : ?>
+                    <?= LeadHelper::displayLeadPoorProcessingTimer($lead->minLpp->lpp_expiration_dt, $lead->minLpp->lppLppd->lppd_name, 'vertical-align: 3px;font-size: 12px; margin-left: 5px;') ?>
+                    <?php
+                    $js = <<<JS
+  $('.enable-timer-lpp').each( function (i, e) {
+      let seconds = $(e).attr('data-seconds');
+      if (seconds < 0) {
+          var params = {format: '%H:%M:%S', seconds: Math.abs(seconds)};
+      } else {
+          var params = {format: '%H:%M:%S', countdown: true, duration: seconds + 's'};
+      }
+      $(e).timer(params).timer('start');
+  });
+JS;
+                    $this->registerJs($js, \yii\web\View::POS_READY);
+                    ?>
+                <?php elseif ($lead->l_expiration_dt) : ?>
                     <?php if (LeadHelper::expiredLead($lead)) : ?>
                         <span
                             class="label status-label bg-red"
@@ -111,7 +136,7 @@ $bundle = \frontend\assets\TimerAsset::register($this);
 <?php
 
 if ($lead->l_expiration_dt && !LeadHelper::expiredLead($lead)) :
-    $leftTime = LeadHelper::expirationNowDiffInSeconds($lead);
+    $leftTime = LeadHelper::expirationNowDiffInSeconds($lead->l_expiration_dt);
     $js = <<<JS
         let leftTime = '{$leftTime}';
         $('#clock-expiration')

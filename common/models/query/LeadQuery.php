@@ -54,6 +54,11 @@ class LeadQuery extends ActiveQuery
         ]]);
     }
 
+    public static function countSnoozeLeads(): int
+    {
+        return Lead::find()->where(['status' => Lead::STATUS_SNOOZE])->count();
+    }
+
     public function byClient(int $clientId): self
     {
         return $this->andWhere(['client_id' => $clientId]);

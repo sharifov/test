@@ -3,6 +3,8 @@
 namespace src\forms\leadflow;
 
 use common\models\Lead;
+use common\models\query\LeadQuery;
+use src\helpers\setting\SettingHelper;
 use yii\base\Model;
 
 /**
@@ -64,6 +66,7 @@ class SnoozeReasonForm extends Model
             ['other', 'filter', 'filter' => 'trim', 'skipOnArray' => true],
             ['other', 'string', 'max' => 250],
 
+            ['snoozeFor', 'required'],
             ['snoozeFor', 'string'],
             ['snoozeFor', function () {
                 if (date('Y-m-d H:i', strtotime($this->snoozeFor)) != $this->snoozeFor) {
@@ -75,7 +78,8 @@ class SnoozeReasonForm extends Model
                     $now = \Yii::$app->formatter->asDatetime($userTime, 'php:Y-m-d H:i');
                     $this->addError('snoozeFor', 'Must more then: ' . $now);
                 }
-            }]
+            }],
+            ['snoozeFor', 'validateLimit', 'skipOnError' => true],
         ];
     }
 
@@ -130,6 +134,15 @@ class SnoozeReasonForm extends Model
             return $snooze->format('Y-m-d H:i');
         } catch (\Throwable $e) {
             return date('Y-m-d H:i', strtotime($date));
+        }
+    }
+
+    public function validateLimit()
+    {
+        $snoozeLimit = SettingHelper::getSnoozeLimit();
+        if (!(LeadQuery::countSnoozeLeads() < $snoozeLimit)) {
+            $this->addError('leadId', 'It is not possible to transfer a lead to the snooze status, because the number of leads in the snooze status exceeds the limit: ' . $snoozeLimit);
+            return;
         }
     }
 }

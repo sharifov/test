@@ -2,5 +2,3 @@ ARG REGISTRY
 ARG IMAGE_TAG
 
 FROM ${REGISTRY}crm-php-fpm:${IMAGE_TAG}
-
-WORKDIR /var/www/sales/www

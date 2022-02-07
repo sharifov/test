@@ -2268,6 +2268,11 @@ class LeadSearch extends Lead
 //        }
 
         $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'leadChecklists', 'leadChecklists.lcType', 'employee']);
+        $query->with([
+           'minLpp' => static function (ActiveQuery $query) {
+                $query->joinWith('lppLppd')->andWhere(['lppd_enabled' => 1]);
+           }
+        ]);
 
         if ($this->expiration_dt) {
             $query->andWhere(new Expression(
@@ -2275,6 +2280,8 @@ class LeadSearch extends Lead
                 [':date' => date('Y-m-d', strtotime($this->expiration_dt))]
             ));
         }
+
+//        print_r($query->createCommand()->rawSql);die;
 
         return $dataProvider;
     }
@@ -4317,5 +4324,73 @@ class LeadSearch extends Lead
         ];
 
         return new SqlDataProvider($paramsData);
+    }
+
+    /**
+     * @param $params
+     * @param Employee $user
+     * @return ActiveDataProvider
+     */
+    public function searchExtraQueue($params, Employee $user): ActiveDataProvider
+    {
+        $query = $this->leadBadgesRepository->getExtraQueueQuery();
+        $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
+        $leadTable = Lead::tableName();
+
+        $this->load($params);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort' => ['defaultOrder' => ['created' => SORT_DESC]],
+            'pagination' => ['pageSize' => 30],
+        ]);
+
+        if (!$this->validate()) {
+            $query->where('0=1');
+            return $dataProvider;
+        }
+
+        $query->andFilterWhere([
+            $leadTable . '.id' => $this->id,
+            $leadTable . '.project_id' => $this->project_id,
+            $leadTable . '.source_id' => $this->source_id,
+            $leadTable . '.client_id' => $this->client_id,
+            $leadTable . '.cabin' => $this->cabin,
+            $leadTable . '.request_ip' => $this->request_ip,
+            $leadTable . '.l_init_price' => $this->l_init_price,
+            $leadTable . '.l_call_status_id' => $this->l_call_status_id,
+            $leadTable . '.l_type' => $this->l_type,
+        ]);
+
+        if ($this->email_status > 0) {
+            if ((int) $this->email_status === 2) {
+                $query->andWhere(new Expression('(SELECT COUNT(*) FROM client_email WHERE client_email.client_id = leads.client_id) > 0'));
+            } else {
+                $query->andWhere(new Expression('(SELECT COUNT(*) FROM client_email WHERE client_email.client_id = leads.client_id) = 0'));
+            }
+        }
+
+        if ($this->quote_status > 0) {
+            $subQuery = Quote::find()->select(['COUNT(*)'])->where('quotes.lead_id = leads.id')->andWhere(['status' => [Quote::STATUS_APPLIED, Quote::STATUS_SENT, Quote::STATUS_OPENED] ]);
+            if ((int) $this->quote_status === 2) {
+                $query->andWhere(new Expression('(' . $subQuery->createCommand()->getRawSql() . ') > 0'));
+            } else {
+                $query->andWhere(new Expression('(' . $subQuery->createCommand()->getRawSql() . ') = 0'));
+            }
+        }
+
+        if ($this->created) {
+            $query->andFilterWhere(['>=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created))])
+                ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 * 24)]);
+        }
+
+        if ($this->l_last_action_dt) {
+            $query->andFilterWhere(['>=', 'l_last_action_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->l_last_action_dt))])
+                ->andFilterWhere(['<=', 'l_last_action_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->l_last_action_dt) + 3600 * 24)]);
+        }
+
+        $query->with(['client', 'client.clientEmails', 'client.clientPhones']);
+
+        return $dataProvider;
     }
 }

@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use common\components\BackOffice;
 use common\components\CommunicationService;
+use common\components\jobs\LeadPoorProcessingRemoverJob;
 use common\models\Call;
 use common\models\Client;
 use common\models\ClientEmail;
@@ -63,6 +64,7 @@ use src\logger\db\GlobalLogInterface;
 use src\logger\db\LogDTO;
 use src\model\airportLang\helpers\AirportLangHelper;
 use src\model\call\socket\CallUpdateMessage;
+use src\model\call\useCase\createCall\fromLead\AbacCallFromNumberList;
 use src\model\callLog\entity\callLog\CallLogType;
 use src\model\clientChat\entity\ClientChat;
 use src\model\clientChat\permissions\ClientChatActionPermission;
@@ -71,6 +73,7 @@ use src\model\clientChatLead\entity\ClientChatLeadRepository;
 use src\model\contactPhoneData\entity\ContactPhoneData;
 use src\model\contactPhoneList\service\ContactPhoneListService;
 use src\model\department\department\DefaultPhoneType;
+use src\model\email\useCase\send\fromLead\AbacEmailList;
 use src\model\emailReviewQueue\EmailReviewQueueManageService;
 use src\model\emailReviewQueue\entity\EmailReviewQueue;
 use src\model\lead\useCases\lead\create\CreateLeadByChatDTO;
@@ -82,9 +85,11 @@ use src\model\lead\useCases\lead\import\LeadImportParseService;
 use src\model\lead\useCases\lead\import\LeadImportService;
 use src\model\lead\useCases\lead\import\LeadImportUploadForm;
 use src\model\lead\useCases\lead\link\LeadLinkChatForm;
+use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
+use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
 use src\model\leadUserConversion\service\LeadUserConversionDictionary;
 use src\model\leadUserConversion\service\LeadUserConversionService;
-use src\model\phone\AvailablePhoneList;
+use src\model\sms\useCase\send\fromLead\AbacSmsFromNumberList;
 use src\repositories\cases\CasesRepository;
 use src\repositories\lead\LeadRepository;
 use src\repositories\NotFoundException;
@@ -250,6 +255,10 @@ class LeadController extends FController
         }
 
         $user = Auth::user();
+
+        $callFromNumberList = new AbacCallFromNumberList($user, $lead);
+        $smsFromNumberList = new AbacSmsFromNumberList($user, $lead);
+        $emailFromList = new AbacEmailList($user, $lead);
 
         $itineraryForm = new ItineraryEditForm($lead);
 
@@ -459,7 +468,7 @@ class LeadController extends FController
         }
 
 
-        $previewEmailForm = new LeadPreviewEmailForm();
+        $previewEmailForm = new LeadPreviewEmailForm($emailFromList);
         $previewEmailForm->e_lead_id = $lead->id;
         $previewEmailForm->is_send = false;
 
@@ -569,18 +578,15 @@ class LeadController extends FController
                     $this->refresh('#communication-form');
                 }
                 //VarDumper::dump($previewEmailForm->attributes, 10, true);              exit;
+            } else {
+                Yii::$app->session->setFlash('send-error', 'Validation form error');
             }
         }
 
-        $smsEnabled = true;
-        if (!$lead->project->getParams()->sms->isEnabled()) {
-            $smsEnabled = false;
-        }
-
-        $previewSmsForm = new LeadPreviewSmsForm();
+        $previewSmsForm = new LeadPreviewSmsForm($smsFromNumberList);
         $previewSmsForm->is_send = false;
 
-        if ($smsEnabled && $previewSmsForm->load(Yii::$app->request->post())) {
+        if ($smsFromNumberList->canSendSms() && $previewSmsForm->load(Yii::$app->request->post())) {
             $previewSmsForm->s_lead_id = $lead->id;
             if ($previewSmsForm->validate()) {
                 $sms = new Sms();
@@ -639,10 +645,12 @@ class LeadController extends FController
                     Yii::error(VarDumper::dumpAsString($sms->errors), 'LeadController:view:Sms:save');
                 }
                 //VarDumper::dump($previewEmailForm->attributes, 10, true);              exit;
+            } else {
+                Yii::$app->session->setFlash('send-error', 'Error: <strong>SMS Message</strong> has not been sent to <strong>' . $previewSmsForm->s_phone_to . '</strong> Validation form error');
             }
         }
 
-        $comForm = new CommunicationForm($lead->l_client_lang);
+        $comForm = new CommunicationForm($lead->l_client_lang, $smsFromNumberList, $emailFromList);
         $comForm->c_preview_email = 0;
         $comForm->c_preview_sms = 0;
         $comForm->c_voice_status = 0;
@@ -654,39 +662,15 @@ class LeadController extends FController
                 $project = $lead->project;
 
                 if ($comForm->c_type_id == CommunicationForm::TYPE_EMAIL) {
-                    //VarDumper::dump($comForm->quoteList, 10, true); exit;
-
                     $comForm->c_preview_email = 1;
-
-                    $mailFrom = Yii::$app->user->identity->email;
 
                     /** @var CommunicationService $communication */
                     $communication = Yii::$app->communication;
                     $data['origin'] = '';
 
-
-                    //$mailPreview = $communication->mailPreview(7, 'cl_offer', 'test@gmail.com', 'test2@gmail.com', $data, 'ru-RU');
-                    //$mailTypes = $communication->mailTypes(7);
-
                     $content_data['email_body_html'] = $comForm->c_email_message;
-                    //$content_data['email_body_text'] = '2';
                     $content_data['email_subject'] = $comForm->c_email_subject;
-
-                    $content_data['email_reply_to'] = $mailFrom;
-                    //$content_data['email_cc'] = 'chalpet-cc@gmail.com';
-                    //$content_data['email_bcc'] = 'chalpet-bcc@gmail.com';
-
-
-                    $upp = null;
-                    if ($lead->project_id) {
-//                        $upp = UserProjectParams::find()->where(['upp_project_id' => $lead->project_id, 'upp_user_id' => Yii::$app->user->id])->one();
-                        $upp = UserProjectParams::find()->where(['upp_project_id' => $lead->project_id, 'upp_user_id' => Yii::$app->user->id])->withEmailList()->one();
-                        if ($upp) {
-//                            $mailFrom = $upp->upp_email;
-                            $mailFrom = $upp->getEmail();
-                        }
-                    }
-
+                    $content_data['email_reply_to'] = Yii::$app->user->identity->email;
 
                     $projectContactInfo = [];
 
@@ -732,7 +716,7 @@ class LeadController extends FController
                         //echo (Html::encode(json_encode($content_data)));
                         //VarDumper::dump($content_data, 10 , true); exit;
 
-                        $mailPreview = $communication->mailPreview($lead->project_id, ($tpl ? $tpl->etp_key : ''), $mailFrom, $comForm->c_email_to, $content_data, $language);
+                        $mailPreview = $communication->mailPreview($lead->project_id, ($tpl ? $tpl->etp_key : ''), $comForm->c_email_from, $comForm->c_email_to, $content_data, $language);
 
                         if ($tpl) {
                             $tplConfigQuotes = $tpl->etp_params_json['quotes'];
@@ -781,8 +765,8 @@ class LeadController extends FController
                                     $previewEmailForm->e_email_subject = $mailPreview['data']['email_subject'];
                                     $previewEmailForm->e_email_subject_origin = $previewEmailForm->e_email_subject;
                                 }
-                                $previewEmailForm->e_email_from = $mailFrom; //$mailPreview['data']['email_from'];
-                                $previewEmailForm->e_email_to = $comForm->c_email_to; //$mailPreview['data']['email_to'];
+                                $previewEmailForm->e_email_from = $comForm->c_email_from;
+                                $previewEmailForm->e_email_to = $comForm->c_email_to;
                                 $previewEmailForm->e_email_from_name = Yii::$app->user->identity->nickname;
                                 $previewEmailForm->e_email_to_name = $lead->client ? $lead->client->full_name : '';
                                 $previewEmailForm->e_quote_list = @json_encode($comForm->quoteList);
@@ -793,10 +777,10 @@ class LeadController extends FController
                         //VarDumper::dump($mailPreview, 10, true);// exit;
                     } else {
                         $previewEmailForm->e_email_message = $comForm->c_email_message;
-                        $previewEmailForm->e_email_message_origin = $comForm->c_email_message;
                         $previewEmailForm->e_email_subject = $comForm->c_email_subject;
+                        $previewEmailForm->e_email_subject_origin = $comForm->c_email_subject;
                         $previewEmailForm->e_email_message_edited = false;
-                        $previewEmailForm->e_email_from = $mailFrom;
+                        $previewEmailForm->e_email_from = $comForm->c_email_from;
                         $previewEmailForm->e_email_to = $comForm->c_email_to;
                         $previewEmailForm->e_email_from_name = Yii::$app->user->identity->nickname;
                         $previewEmailForm->e_email_to_name = $lead->client ? $lead->client->full_name : '';
@@ -804,7 +788,7 @@ class LeadController extends FController
                 }
 
 
-                if ($smsEnabled && $comForm->c_type_id == CommunicationForm::TYPE_SMS) {
+                if ($comForm->c_type_id == CommunicationForm::TYPE_SMS && $smsFromNumberList->canSendSms()) {
                     $comForm->c_preview_sms = 1;
 
                     /** @var CommunicationService $communication */
@@ -816,15 +800,6 @@ class LeadController extends FController
 
                     $content_data['message'] = $comForm->c_sms_message;
                     $content_data['project_id'] = $lead->project_id;
-                    $phoneFrom = '';
-
-                    if ($lead->project_id) {
-                        $upp = UserProjectParams::find()->where(['upp_project_id' => $lead->project_id, 'upp_user_id' => Yii::$app->user->id])->withPhoneList()->one();
-                        if ($upp) {
-//                            $phoneFrom = $upp->upp_tw_phone_number;
-                            $phoneFrom = $upp->getPhone();
-                        }
-                    }
 
                     $projectContactInfo = [];
 
@@ -834,262 +809,56 @@ class LeadController extends FController
 
                     $previewSmsForm->s_quote_list = @json_encode([]);
 
-                    if (!$phoneFrom) {
-                        $comForm->c_preview_sms = 0;
-                        $comForm->addError('c_sms_preview', 'Config Error: Not found phone number for Project Id: ' . $lead->project_id . ', agent: "' . Yii::$app->user->identity->username . '"');
-                    } else {
-                        $previewSmsForm->s_phone_to = $comForm->c_phone_number;
-                        $previewSmsForm->s_phone_from = $phoneFrom;
+                    $previewSmsForm->s_phone_to = $comForm->c_phone_number;
+                    $previewSmsForm->s_phone_from = $comForm->c_sms_from;
 
-                        if ($comForm->c_language_id) {
-                            $previewSmsForm->s_language_id = $comForm->c_language_id; //$language;
-                        }
-
-
-                        if ($comForm->c_sms_tpl_id > 0) {
-                            $previewSmsForm->s_sms_tpl_id = $comForm->c_sms_tpl_id;
-
-                            $content_data = $lead->getEmailData2($comForm->quoteList, $projectContactInfo);
-                            $content_data['content'] = $comForm->c_sms_message;
-
-                            //VarDumper::dump($content_data, 10, true); exit;
-
-                            $language = $comForm->c_language_id ?: 'en-US';
-
-                            $tpl = SmsTemplateType::findOne($comForm->c_sms_tpl_id);
-                            //$mailSend = $communication->mailSend(7, 'cl_offer', 'chalpet@gmail.com', 'chalpet2@gmail.com', $content_data, $data, 'ru-RU', 10);
-
-                            $smsPreview = $communication->smsPreview($lead->project_id, ($tpl ? $tpl->stp_key : ''), $phoneFrom, $comForm->c_phone_number, $content_data, $language);
-
-
-                            if ($smsPreview && isset($smsPreview['data'])) {
-                                if (isset($smsPreview['error']) && $smsPreview['error']) {
-                                    $errorJson = @json_decode($smsPreview['error'], true);
-                                    $comForm->addError('c_email_preview', 'Communication Server response: ' . ($errorJson['message'] ?? $smsPreview['error']));
-                                    Yii::error($communication->url . "\r\n " . $smsPreview['error'], 'LeadController:view:smsPreview');
-                                    $comForm->c_preview_sms = 0;
-                                } else {
-                                    if ($comForm->offerList) {
-                                        $service = Yii::createObject(OfferSendLogService::class);
-                                        foreach ($comForm->offerList as $offerId) {
-                                            $service->log(new CreateDto($offerId, OfferSendLogType::SMS, $user->id, $comForm->c_phone_number));
-                                        }
-                                    }
-
-                                    //$previewSmsForm->s_phone_from = $smsPreview['data']['phone_from'];
-                                    $previewSmsForm->s_sms_message = $smsPreview['data']['sms_text'];
-                                    $previewSmsForm->s_quote_list = @json_encode($comForm->quoteList);
-                                }
-                            }
-
-
-                            //VarDumper::dump($mailPreview, 10, true);// exit;
-                        } else {
-                            $previewSmsForm->s_sms_message = $comForm->c_sms_message;
-                        }
-                    }
-                }
-
-                if ($comForm->c_type_id == CommunicationForm::TYPE_VOICE) {
-                    //$comForm->c_voice_status = 0;
-                    /** @var CommunicationService $communication */
-                    $communication = Yii::$app->communication;
-
-                    $upp = null;
-                    if ($lead->project_id) {
-                        $upp = UserProjectParams::find()->where(['upp_project_id' => $lead->project_id, 'upp_user_id' => Yii::$app->user->id])->withPhoneList()->one();
+                    if ($comForm->c_language_id) {
+                        $previewSmsForm->s_language_id = $comForm->c_language_id; //$language;
                     }
 
 
-                    /** @var Employee $userModel */
-                    $userModel = Yii::$app->user->identity;
+                    if ($comForm->c_sms_tpl_id > 0) {
+                        $previewSmsForm->s_sms_tpl_id = $comForm->c_sms_tpl_id;
+
+                        $content_data = $lead->getEmailData2($comForm->quoteList, $projectContactInfo);
+                        $content_data['content'] = $comForm->c_sms_message;
+
+                        //VarDumper::dump($content_data, 10, true); exit;
+
+                        $language = $comForm->c_language_id ?: 'en-US';
+
+                        $tpl = SmsTemplateType::findOne($comForm->c_sms_tpl_id);
+                        //$mailSend = $communication->mailSend(7, 'cl_offer', 'chalpet@gmail.com', 'chalpet2@gmail.com', $content_data, $data, 'ru-RU', 10);
+
+                        $smsPreview = $communication->smsPreview($lead->project_id, ($tpl ? $tpl->stp_key : ''), $comForm->c_sms_from, $comForm->c_phone_number, $content_data, $language);
 
 
-                    if ($upp && $userModel) {
-//                        if (!$upp->upp_tw_phone_number) {
-                        if (!$upp->getPhone()) {
-                            $comForm->addError('c_sms_preview', 'Config Error: Not found TW phone number for Project Id: ' . $lead->project_id . ', agent: "' . Yii::$app->user->identity->username . '"');
-                        } elseif (!$userModel->userProfile->up_sip) {
-                            $comForm->addError('c_sms_preview', 'Config Error: Not found TW SIP account for Project Id: ' . $lead->project_id . ', agent: "' . Yii::$app->user->identity->username . '"');
-                        } else {
-                            /*if($comForm->c_voice_status == 1) {
-                                $comForm->c_voice_sid = 'test';
-                            }*/
-
-                            if ($comForm->c_voice_status == 2) {
-                                if ($comForm->c_voice_sid) {
-                                    $response = $communication->updateCall($comForm->c_voice_sid, ['status' => 'completed']);
-
-                                    Yii::info('sid: ' . $comForm->c_voice_sid . " Logs: \r\n" . VarDumper::dumpAsString($response, 10), 'info/LeadController:updateCall');
-
-
-                                    if ($response && isset($response['data']['call'])) {
-                                        $dataCall = $response['data']['call'];
-
-                                    /*if(isset($dataCall['sid'])) {
-                                        $comForm->c_voice_sid = $dataCall['sid'];
-                                    }*/
-                                    } else {
-                                        $comForm->c_voice_status = 5; // Error
-
-                                        if (isset($response['error']) && $response['error']) {
-                                            $error = $response['error'];
-                                        } else {
-                                            $error = VarDumper::dumpAsString($response, 10);
-                                        }
-
-                                        $comForm->addError('c_sms_preview', 'Error call: ' . $error);
-                                    }
-                                } else {
-                                    $comForm->addError('c_sms_preview', 'Error: Not found Call SID');
-                                }
-                            }
-
-                            if ($comForm->c_voice_status == 1) {
-                                $response = $communication->callToPhone($lead->project_id, 'sip:' . $userModel->userProfile->up_sip, $upp->getPhone(), $comForm->c_phone_number, Yii::$app->user->identity->username);
-
-                                Yii::info('ProjectId: ' . $lead->project_id . ', sip:' . $userModel->userProfile->up_sip . ', phoneFrom:' . $upp->getPhone() . ', phoneTo:' . $comForm->c_phone_number . " Logs: \r\n" . VarDumper::dumpAsString($response, 10), 'info/LeadController:callToPhone');
-
-
-                                if ($response && isset($response['data']['call'])) {
-                                    $dataCall = $response['data']['call'];
-
-
-                                    $call = new Call();
-
-                                    $call->c_com_call_id = isset($response['data']['com_call_id']) ? (int)$response['data']['com_call_id'] : null;
-
-                                    $call->c_call_type_id = 1;
-                                    $call->c_call_sid = $dataCall['sid'];
-
-                                    $call->c_to = $comForm->c_phone_number; //$dataCall['to'];
-//                                    $call->c_from = $upp->upp_tw_phone_number; //$dataCall['from'];
-                                    $call->c_from = $upp->getPhone(); //$dataCall['from'];
-                                    $call->c_caller_name = $dataCall['from'];
-                                    $call->c_call_status = $dataCall['status'];
-                                    $call->c_lead_id = $lead->id;
-                                    $call->c_project_id = $lead->project_id;
-
-                                    $call->c_created_dt = date('Y-m-d H:i:s');
-                                    $call->c_created_user_id = Yii::$app->user->id;
-
-                                    if (!$call->save()) {
-                                        Yii::error(VarDumper::dumpAsString($call->errors, 10), '');
-                                        $comForm->addError('c_sms_preview', 'Error call: ' . VarDumper::dumpAsString($call->errors, 10));
-                                    } else {
-                                        $comForm->c_call_id = $call->c_id;
-                                    }
-
-                                    if (isset($dataCall['sid'])) {
-                                        $comForm->c_voice_sid = $dataCall['sid'];
-                                    }
-
-//
-//                                    $response['call']['sid'] = $call->sid;
-//                                    $response['call']['to'] = $call->to;
-//                                    $response['call']['from'] = $call->from;
-//                                    $response['call']['status'] = $call->status;
-//                                    $response['call']['price'] = $call->price;
-//                                    $response['call']['account_sid'] = $call->accountSid;
-//                                    $response['call']['api_version'] = $call->apiVersion;
-//                                    $response['call']['annotation'] = $call->annotation;
-//                                    $response['call']['uri'] = $call->uri;
-//                                    $response['call']['direction'] = $call->direction;
-//                                    $response['call']['phone_number_sid'] = $call->phoneNumberSid;
-//                                    $response['call']['caller_name'] = $call->callerName;
-//                                    $response['call']['start_time'] = $call->startTime;
-//                                    $response['call']['date_created'] = $call->dateCreated;
-//                                    $response['call']['date_updated'] = $call->dateUpdated;
-
-
-//                                "response": {
-//                                    "url": "https://communication.api.travelinsides.com/v1/twilio/voice-request?callerId=sip%3Aalex.connor%40kivork.sip.us1.twilio.com&number=%2B37369594567",
-//                                    "statusCallback": "https://communication.api.travelinsides.com/v1/twilio/voice-status-callback",
-//                                    "statusCallbackMethod": "POST",
-//                                    "statusCallbackEvent": [
-//                                                                "initiated",
-//                                                                "ringing",
-//                                                                "answered",
-//                                                                "completed"
-//                                                            ],
-//                                    "call": {
-//                                        "sid": "CAc447aee392051e4733fa59ade185db67",
-//                                        "to": "sip:alex.connor@kivork.sip.us1.twilio.com",
-//                                        "from": "BotDialer",
-//                                        "status": "queued",
-//                                        "price": null,
-//                                        "account_sid": "AC10f3c74efba7b492cbd7dca86077736c",
-//                                        "api_version": "2010-04-01",
-//                                        "annotation": null,
-//                                        "uri": "/2010-04-01/Accounts/AC10f3c74efba7b492cbd7dca86077736c/Calls/CAc447aee392051e4733fa59ade185db67.json",
-//                                        "direction": "outbound-api",
-//                                        "phone_number_sid": null
-//                                    }
-//                                },
-                                } else {
-                                    $comForm->c_voice_status = 5; // Error
-
-                                    if (isset($response['error']) && $response['error']) {
-                                        $error = $response['error'];
-                                    } else {
-                                        $error = VarDumper::dumpAsString($response, 10);
-                                    }
-
-                                    $comForm->addError('c_sms_preview', 'Error call: ' . $error);
-                                }
-                            }
-
-                            //$comForm->c_voice_status = 1;
-                            //$comForm->addError('c_sms_preview', 'Ok: Not found TW SIP account for Project Id: ' . $lead->project_id . ', agent: "' . Yii::$app->user->identity->username . '"');
-
-                            /*$previewSmsForm->s_phone_to = $comForm->c_phone_number;
-                            $previewSmsForm->s_phone_from = $phoneFrom;
-
-                            if($comForm->c_language_id) {
-                                $previewSmsForm->s_language_id =  $comForm->c_language_id; //$language;
-                            }
-
-
-                            if ($comForm->c_sms_tpl_id > 0) {
-
-                                $previewSmsForm->s_sms_tpl_id = $comForm->c_sms_tpl_id;
-
-                                $content_data = $lead->getEmailData2($comForm->quoteList);
-
-                                $language = $comForm->c_language_id ?: 'en-US';
-
-                                $tpl = SmsTemplateType::findOne($comForm->c_sms_tpl_id);
-                                //$mailSend = $communication->mailSend(7, 'cl_offer', 'chalpet@gmail.com', 'chalpet2@gmail.com', $content_data, $data, 'ru-RU', 10);
-
-                                $smsPreview = $communication->smsPreview($lead->project_id, ($tpl ? $tpl->stp_key : ''), $phoneFrom, $comForm->c_phone_number, $content_data, $language);
-
-
-                                if ($smsPreview && isset($smsPreview['data'])) {
-                                    if (isset($smsPreview['error']) && $smsPreview['error']) {
-
-                                        $errorJson = @json_decode($smsPreview['error'], true);
-                                        $comForm->addError('c_email_preview', 'Communication Server response: ' . ($errorJson['message'] ?? $smsPreview['error']));
-                                        Yii::error($communication->url ."\r\n ".$smsPreview['error'], 'LeadController:view:smsPreview');
-                                        $comForm->c_preview_sms = 0;
-                                    } else {
-                                        //$previewSmsForm->s_phone_from = $smsPreview['data']['phone_from'];
-                                        $previewSmsForm->s_sms_message = $smsPreview['data']['sms_text'];
-                                    }
-                                }
-
-
-                                //VarDumper::dump($mailPreview, 10, true);// exit;
+                        if ($smsPreview && isset($smsPreview['data'])) {
+                            if (isset($smsPreview['error']) && $smsPreview['error']) {
+                                $errorJson = @json_decode($smsPreview['error'], true);
+                                $comForm->addError('c_email_preview', 'Communication Server response: ' . ($errorJson['message'] ?? $smsPreview['error']));
+                                Yii::error($communication->url . "\r\n " . $smsPreview['error'], 'LeadController:view:smsPreview');
+                                $comForm->c_preview_sms = 0;
                             } else {
-                                $previewSmsForm->s_sms_message = $comForm->c_sms_message;
+                                if ($comForm->offerList) {
+                                    $service = Yii::createObject(OfferSendLogService::class);
+                                    foreach ($comForm->offerList as $offerId) {
+                                        $service->log(new CreateDto($offerId, OfferSendLogType::SMS, $user->id, $comForm->c_phone_number));
+                                    }
+                                }
 
-                            }*/
+                                //$previewSmsForm->s_phone_from = $smsPreview['data']['phone_from'];
+                                $previewSmsForm->s_sms_message = $smsPreview['data']['sms_text'];
+                                $previewSmsForm->s_quote_list = @json_encode($comForm->quoteList);
+                            }
                         }
+
+                        //VarDumper::dump($mailPreview, 10, true);// exit;
                     } else {
-                        $comForm->addError('c_sms_preview', 'Config Error: Not found User Params for Project Id: ' . $lead->project_id . ', agent: "' . Yii::$app->user->identity->username . '"');
+                        $previewSmsForm->s_sms_message = $comForm->c_sms_message;
                     }
                 }
             }
-            //return $this->redirect(['view', 'id' => $model->al_id]);
         } else {
             $comForm->c_type_id = ''; //CommunicationForm::TYPE_VOICE;
         }
@@ -1152,7 +921,6 @@ class LeadController extends FController
 
         $modelLeadCallExpert = new LeadCallExpert();
 
-
         if (!$lead->client->isExcluded()) {
             if ($modelLeadCallExpert->load(Yii::$app->request->post())) {
                 $modelLeadCallExpert->lce_agent_user_id = Yii::$app->user->id;
@@ -1162,6 +930,8 @@ class LeadController extends FController
 
                 if ($modelLeadCallExpert->save()) {
                     $modelLeadCallExpert->lce_request_text = '';
+
+                    LeadPoorProcessingService::addLeadPoorProcessingRemoverJob($lead->id, [LeadPoorProcessingDataDictionary::KEY_NO_ACTION]);
                 }
             }
         }
@@ -1224,12 +994,6 @@ class LeadController extends FController
 //        $tmpl = $isQA ? 'view_qa' : 'view';
         $tmpl = 'view';
 
-        $fromPhoneNumbers = [];
-        if (($department = $leadForm->getLead()->lDep) && $params = $department->getParams()) {
-            $phoneList = new AvailablePhoneList(Auth::id(), $leadForm->getLead()->project_id, $department->dep_id, $params->defaultPhoneType);
-            $fromPhoneNumbers = $phoneList->getFormattedList();
-        }
-
         return $this->render($tmpl, [
             'leadForm' => $leadForm,
             'previewEmailForm' => $previewEmailForm,
@@ -1248,8 +1012,9 @@ class LeadController extends FController
             'dataProviderOffers'    => $dataProviderOffers,
             'dataProviderOrders'    => $dataProviderOrders,
 
-            'fromPhoneNumbers' => $fromPhoneNumbers,
-            'smsEnabled' => $smsEnabled
+            'callFromNumberList' => $callFromNumberList,
+            'smsFromNumberList' => $smsFromNumberList,
+            'emailFromList' => $emailFromList,
         ]);
     }
 
@@ -2869,8 +2634,6 @@ class LeadController extends FController
         return $this->render('import', ['model' => $form, 'log' => $logResult]);
     }
 
-
-
     /**
      * @return mixed|null
      */
@@ -2909,6 +2672,30 @@ class LeadController extends FController
             $result['message'] = $call->getErrorSummary(true)[0];
         }
         return $this->asJson($result);
+    }
+
+    public function actionExtraQueue(): string
+    {
+        $searchModel = new LeadSearch();
+        $params = Yii::$app->request->queryParams;
+        $params2 = Yii::$app->request->post();
+        $params = array_merge($params, $params2);
+
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        if ($user->isAgent()) {
+            $isAgent = true;
+        } else {
+            $isAgent = false;
+        }
+
+        $dataProvider = $searchModel->searchExtraQueue($params, $user);
+
+        return $this->render('extra-queue', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'isAgent' => $isAgent,
+        ]);
     }
 
     /**

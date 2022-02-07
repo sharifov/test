@@ -84,6 +84,15 @@ class ClientNotificationListener
             if ($client->phoneId && $notificationSettings->sendSmsNotification->enabled) {
                 $this->smsNotificationProcessing($project, $notificationType, $client, $notificationSettings->sendSmsNotification, $productQuoteChange);
             }
+        } catch (OverdueException $e) {
+            \Yii::warning([
+                'message' => $e->getMessage(),
+                'event' => [
+                    'name' => ProductQuoteChangeAutoDecisionPendingEvent::class,
+                    'productQuoteChangeId' => $event->productQuoteChangeId,
+                ],
+                'exception' => AppHelper::throwableLog($e, true),
+            ], 'ProductQuoteChangeAutoDecisionPendingClientNotificationListener:OverdueException');
         } catch (\Throwable $e) {
             \Yii::error([
                 'message' => $e->getMessage(),
@@ -304,7 +313,7 @@ class ClientNotificationListener
         $endDate = new \DateTimeImmutable($firstDepartureSegment->fqs_departure_dt);
 
         if ($startDate >= $endDate) {
-            throw new \DomainException('"End"(' . $endDate->format('Y-m-d H:i:s') . ') time must less then "start"(' . $startDate->format('Y-m-d H:i:s') . ') time.');
+            throw new OverdueException($startDate, $endDate);
         }
 
         $callTimeHoursSettings = new DayTimeHours(\Yii::$app->params['settings']['qcall_day_time_hours']);

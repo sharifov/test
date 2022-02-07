@@ -1,0 +1,22 @@
+down:
+	$(MAKE) -C docker/local down
+up:
+	$(MAKE) -C docker/local up
+restart:
+	$(MAKE) -C docker/local restart
+app-console:
+	$(MAKE) -C docker/local app-console
+migrate:
+	$(MAKE) -C docker/local migrate
+composer-install:
+	$(MAKE) -C docker/local composer-install
+cs-check:
+	$(MAKE) -C docker/local cs-check
+cs-fix:
+	$(MAKE) -C docker/local cs-fix
+lint:
+	$(MAKE) -C docker/local lint
+apidoc-gen:
+	$(MAKE) -C docker/local apidoc-gen
+assets-compressor:
+	$(MAKE) -C docker/local assets-compressor
