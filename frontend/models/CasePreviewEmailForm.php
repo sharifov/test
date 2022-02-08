@@ -177,6 +177,11 @@ class CasePreviewEmailForm extends Model
         return $files;
     }
 
+    public function attachCount(): int
+    {
+        return !empty($this->files) ? count($this->files) : 0;
+    }
+
     public function isMessageEdited(): bool
     {
         return (bool)$this->e_email_message_edited;

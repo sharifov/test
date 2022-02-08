@@ -178,6 +178,18 @@ class EmailAbacObject extends AbacBaseModel implements AbacInterface
         'operators' =>  [self::OP_EQUAL2]
     ];
 
+    protected const ATTR_ATTACH_COUNT = [
+        'optgroup' => 'EMAIL PREVIEW',
+        'id' => self::NS . 'attachCount',
+        'field' => 'attachCount',
+        'label' => 'Attached files count',
+        'type' => self::ATTR_TYPE_INTEGER,
+        'input' => self::ATTR_INPUT_NUMBER,
+        'validation' => ['min' => 0, 'max' => 999, 'step' => 1],
+        'multiple' => false,
+        'operators' =>  ['>=', '<=', '>', '<'],
+    ];
+
     protected const ATTR_PROJECT_ID = [
         'optgroup' => 'EMAIL PREVIEW',
         'id' => self::NS . 'project_id',
@@ -211,6 +223,7 @@ class EmailAbacObject extends AbacBaseModel implements AbacInterface
             self::ATTR_IS_COMMON_GROUP
         ],
         self::OBJ_PREVIEW_EMAIL => [
+            self::ATTR_ATTACH_COUNT,
             self::ATTR_IS_MESSAGE_EDITED,
             self::ATTR_IS_SUBJECT_EDITED
         ],

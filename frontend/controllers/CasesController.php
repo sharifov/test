@@ -320,7 +320,6 @@ class CasesController extends FController
         $previewEmailForm->e_case_id = $model->cs_id;
         $previewEmailForm->is_send = false;
 
-
         if ($previewEmailForm->load(Yii::$app->request->post())) {
             $previewEmailForm->e_case_id = $model->cs_id;
             if ($previewEmailForm->validate()) {
@@ -328,6 +327,7 @@ class CasesController extends FController
                     $previewEmailForm->e_email_tpl_id,
                     $previewEmailForm->isMessageEdited(),
                     $previewEmailForm->isSubjectEdited(),
+                    $previewEmailForm->attachCount(),
                     null,
                     $model
                 );

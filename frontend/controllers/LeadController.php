@@ -481,6 +481,7 @@ class LeadController extends FController
                     $previewEmailForm->e_email_tpl_id,
                     $previewEmailForm->isMessageEdited(),
                     $previewEmailForm->isSubjectEdited(),
+                    $previewEmailForm->attachCount(),
                     $lead,
                     null
                 );
