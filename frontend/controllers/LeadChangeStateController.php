@@ -4,6 +4,8 @@ namespace frontend\controllers;
 
 use common\models\Employee;
 use common\models\Lead;
+use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\lead\src\abac\LeadAbacObject;
 use modules\qaTask\src\entities\qaTaskRules\QaTaskRules;
 use modules\qaTask\src\useCases\qaTask\create\lead\trashCheck\QaTaskCreateLeadTrashCheckService;
 use modules\qaTask\src\useCases\qaTask\create\lead\trashCheck\Rule;
@@ -259,6 +261,12 @@ class LeadChangeStateController extends FController
     {
         $lead = $this->getLead();
         $form = new SnoozeReasonForm($lead);
+        /** @abac new LeadAbacDto($lead, Auth::id()), LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_SNOOZE, Access to change */
+        $leadAbacDto = new LeadAbacDto($lead, Auth::id());
+        if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_SNOOZE)) {
+            throw new ForbiddenHttpException('Snooze action is not available due to business restrictions. Please contact administrator for more info.');
+        }
+
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
                 $this->stateService->snooze($lead, $lead->employee_id, $form->snoozeFor, Yii::$app->user->id, $form->description);

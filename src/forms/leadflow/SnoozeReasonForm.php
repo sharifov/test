@@ -79,7 +79,6 @@ class SnoozeReasonForm extends Model
                     $this->addError('snoozeFor', 'Must more then: ' . $now);
                 }
             }],
-            ['snoozeFor', 'validateLimit', 'skipOnError' => true],
         ];
     }
 
@@ -134,15 +133,6 @@ class SnoozeReasonForm extends Model
             return $snooze->format('Y-m-d H:i');
         } catch (\Throwable $e) {
             return date('Y-m-d H:i', strtotime($date));
-        }
-    }
-
-    public function validateLimit()
-    {
-        $snoozeLimit = SettingHelper::getSnoozeLimit();
-        if (!(LeadQuery::countSnoozeLeads() < $snoozeLimit)) {
-            $this->addError('leadId', 'It is not possible to transfer a lead to the snooze status, because the number of leads in the snooze status exceeds the limit: ' . $snoozeLimit);
-            return;
         }
     }
 }
