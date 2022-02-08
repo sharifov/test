@@ -2222,6 +2222,7 @@ class Lead extends ActiveRecord implements Objectable
                 [
                     LeadPoorProcessingDataDictionary::KEY_EXTRA_TO_PROCESSING_TAKE,
                     LeadPoorProcessingDataDictionary::KEY_EXTRA_TO_PROCESSING_MULTIPLE_UPD,
+                    LeadPoorProcessingDataDictionary::KEY_EXPERT_IDLE,
                 ],
                 $description
             );

@@ -62,7 +62,7 @@ class CreateCallFromHistory
                     ];
                 }
             } elseif ($call->isIn()) {
-                if (VoipDevice::isValid($call->cl_phone_to)) {
+                if (!$call->cl_phone_to || VoipDevice::isValid($call->cl_phone_to)) {
                     $list = new PhoneFromList(Auth::id(), $call->cl_project_id, $call->cl_department_id, $defaultPhoneType);
                     if ($firstPhone = $list->getFirst()) {
                         $phoneFrom = [

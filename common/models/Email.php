@@ -458,7 +458,7 @@ class Email extends \yii\db\ActiveRecord
             if ($this->e_lead_id && LeadPoorProcessingNoAction::checkEmailTemplate($tplType)) {
                 LeadPoorProcessingService::addLeadPoorProcessingRemoverJob(
                     $this->e_lead_id,
-                    [LeadPoorProcessingDataDictionary::KEY_NO_ACTION],
+                    [LeadPoorProcessingDataDictionary::KEY_NO_ACTION, LeadPoorProcessingDataDictionary::KEY_EXPERT_IDLE],
                     LeadPoorProcessingLogStatus::REASON_EMAIL
                 );
             }

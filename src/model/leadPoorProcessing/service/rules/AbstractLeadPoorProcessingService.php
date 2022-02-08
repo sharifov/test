@@ -37,6 +37,9 @@ class AbstractLeadPoorProcessingService
         $this->description = $description;
     }
 
+    /**
+     * @return bool
+     */
     public function checkCondition(): bool
     {
         if (!$this->getRule()->isEnabled()) {

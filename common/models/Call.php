@@ -1379,7 +1379,7 @@ class Call extends \yii\db\ActiveRecord
                 if ($lead->isProcessing() && $this->isEnded()) {
                     LeadPoorProcessingService::addLeadPoorProcessingRemoverJob(
                         $lead->id,
-                        [LeadPoorProcessingDataDictionary::KEY_NO_ACTION],
+                        [LeadPoorProcessingDataDictionary::KEY_NO_ACTION, LeadPoorProcessingDataDictionary::KEY_EXPERT_IDLE],
                         LeadPoorProcessingLogStatus::REASON_CALL
                     );
                 }

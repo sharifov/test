@@ -17,7 +17,6 @@ use Yii;
  * @property AvailableEmail[]|null $emailFromEmails
  * @property Employee $user
  * @property Lead $lead
- * @property bool|null $canSendEmailFlag
  */
 class AbacEmailList
 {
@@ -25,7 +24,6 @@ class AbacEmailList
     private ?array $emailFromEmails = null;
     private Employee $user;
     private Lead $lead;
-    private ?bool $canSendEmailFlag = null;
 
     public function __construct(Employee $user, Lead $lead)
     {
@@ -44,15 +42,13 @@ class AbacEmailList
 
         $this->list = [];
 
-        if ($this->canSendEmail()) {
-            foreach ($this->getEmailFromEmails() as $email) {
-                $tempAbacDto = new LeadCommunicationBlockAbacDto($this->lead, [], [], [$email], $this->user->id);
-                /** @abac $tempAbacDto, LeadCommunicationBlockAbacObject::NS, LeadCommunicationBlockAbacObject::ACTION_SEND_EMAIL, Validate Email From for send email from Lead View page */
-                if (Yii::$app->abac->can($tempAbacDto, LeadCommunicationBlockAbacObject::NS, LeadCommunicationBlockAbacObject::ACTION_SEND_EMAIL, $this->user)) {
-                    $this->list[] = $email;
-                }
-                unset($tempAbacDto);
+        foreach ($this->getEmailFromEmails() as $email) {
+            $tempAbacDto = new LeadCommunicationBlockAbacDto($this->lead, [], [], [$email], $this->user->id);
+            /** @abac $tempAbacDto, LeadCommunicationBlockAbacObject::NS, LeadCommunicationBlockAbacObject::ACTION_SEND_EMAIL, Validate Email From for send email from Lead View page */
+            if (Yii::$app->abac->can($tempAbacDto, LeadCommunicationBlockAbacObject::NS, LeadCommunicationBlockAbacObject::ACTION_SEND_EMAIL, $this->user)) {
+                $this->list[] = $email;
             }
+            unset($tempAbacDto);
         }
 
         return $this->list;
@@ -70,15 +66,7 @@ class AbacEmailList
 
     public function canSendEmail(): bool
     {
-        if ($this->canSendEmailFlag !== null) {
-            return $this->canSendEmailFlag;
-        }
-
-        $leadCommunicationBlockAbacDto = new LeadCommunicationBlockAbacDto($this->lead, [], [], $this->getEmailFromEmails(), $this->user->id);
-        /** @abac $leadCommunicationBlockAbacDto, LeadCommunicationBlockAbacObject::NS, LeadCommunicationBlockAbacObject::ACTION_SEND_EMAIL, Validate Email From list for send email from Lead View page */
-        $this->canSendEmailFlag = (bool)Yii::$app->abac->can($leadCommunicationBlockAbacDto, LeadCommunicationBlockAbacObject::NS, LeadCommunicationBlockAbacObject::ACTION_SEND_EMAIL, $this->user);
-
-        return $this->canSendEmailFlag;
+        return !empty($this->getList());
     }
 
     public function format(): array

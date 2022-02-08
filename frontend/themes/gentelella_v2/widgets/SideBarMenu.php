@@ -929,6 +929,8 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     'items' => [
                         ['label' => Yii::t('menu', 'Feature Flag'), 'url' => ['/flag/feature-flag/index'],
                             'icon' => 'flag', 'title' => 'Feature Flag CRUD'],
+                        ['label' => Yii::t('menu', 'Feature Flag Docs'), 'url' => ['/flag/feature-flag/doc'],
+                            'title' => 'Feature Flag Docs'],
                     ]
                 ],
                 ['label' => 'API Report', 'url' => ['/stats/api-graph'], 'icon' => 'bar-chart'],
