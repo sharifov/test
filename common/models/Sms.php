@@ -508,7 +508,7 @@ class Sms extends \yii\db\ActiveRecord
             if ($this->s_lead_id && LeadPoorProcessingNoAction::checkSmsTemplate($tplType)) {
                 LeadPoorProcessingService::addLeadPoorProcessingRemoverJob(
                     $this->s_lead_id,
-                    [LeadPoorProcessingDataDictionary::KEY_NO_ACTION],
+                    [LeadPoorProcessingDataDictionary::KEY_NO_ACTION, LeadPoorProcessingDataDictionary::KEY_EXPERT_IDLE],
                     LeadPoorProcessingLogStatus::REASON_SMS
                 );
             }
