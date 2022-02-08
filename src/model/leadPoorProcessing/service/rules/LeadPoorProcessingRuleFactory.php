@@ -31,6 +31,8 @@ class LeadPoorProcessingRuleFactory
                 return new LeadPoorProcessingTake($this->leadId, $this->ruleKey, $this->description);
             case LeadPoorProcessingDataDictionary::KEY_EXTRA_TO_PROCESSING_MULTIPLE_UPD:
                 return new LeadPoorProcessingMultipleUpdate($this->leadId, $this->ruleKey, $this->description);
+            case LeadPoorProcessingDataDictionary::KEY_SCHEDULED_COMMUNICATION:
+                return new LeadPoorProcessingScheduledCommunication($this->leadId, $this->ruleKey, $this->description);
             case LeadPoorProcessingDataDictionary::KEY_EXPERT_IDLE:
                 return new LeadPoorProcessingExpertIdle($this->leadId, $this->ruleKey, $this->description);
         }

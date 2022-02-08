@@ -20,6 +20,13 @@ use src\model\clientDataKey\entity\ClientDataKeyDictionary;
 use src\model\clientDataKey\service\ClientDataKeyService;
 use src\model\leadData\services\LeadDataCreateService;
 use src\model\leadDataKey\services\LeadDataKeyDictionary;
+use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
+use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
+use src\model\leadPoorProcessingData\repository\LeadUserDataRepository;
+use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
+use src\model\leadUserData\entity\LeadUserData;
+use src\model\leadUserData\entity\LeadUserDataDictionary;
+use yii\helpers\ArrayHelper;
 use yii\queue\JobInterface;
 
 /**
@@ -46,6 +53,8 @@ class CallOutEndedJob extends BaseJob implements JobInterface
      */
     public function execute($queue)
     {
+        $this->waitingTimeRegister();
+
         if ($call = Call::findOne($this->callId)) {
             $keyId = ClientDataKeyService::getIdByKeyCache(ClientDataKeyDictionary::APP_CALL_OUT_TOTAL_COUNT);
             if ($keyId) {
@@ -140,6 +149,40 @@ class CallOutEndedJob extends BaseJob implements JobInterface
                 \Yii::warning(AppHelper::throwableLog($throwable), 'CallOutEndedJob:LeadFirstCallNotPicked:Exception');
             } catch (\Throwable $throwable) {
                 \Yii::error(AppHelper::throwableLog($throwable, true), 'CallOutEndedJob:LeadFirstCallNotPicked:Throwable');
+            }
+
+            try {
+                if (($lead = $call->cLead) && $lead->isProcessing()) {
+                    LeadPoorProcessingService::addLeadPoorProcessingRemoverJob(
+                        $lead->id,
+                        [LeadPoorProcessingDataDictionary::KEY_NO_ACTION, LeadPoorProcessingDataDictionary::KEY_EXPERT_IDLE],
+                        LeadPoorProcessingLogStatus::REASON_CALL
+                    );
+                }
+            } catch (\RuntimeException | \DomainException $throwable) {
+                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['callId' => $this->callId]);
+                \Yii::warning($message, 'CallOutEndedJob:addLeadPoorProcessingRemoverJob:Exception');
+            } catch (\Throwable $throwable) {
+                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['callId' => $this->callId]);
+                \Yii::warning($message, 'CallOutEndedJob:addLeadPoorProcessingRemoverJob:Throwable');
+            }
+
+            try {
+                if (($lead = $call->cLead) && $lead->employee_id && $lead->isProcessing()) {
+                    $leadUserData = LeadUserData::create(
+                        LeadUserDataDictionary::TYPE_CALL_OUT,
+                        $lead->id,
+                        $lead->employee_id,
+                        (new \DateTimeImmutable())
+                    );
+                    (new LeadUserDataRepository($leadUserData))->save(true);
+                }
+            } catch (\RuntimeException | \DomainException $throwable) {
+                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['callId' => $this->callId]);
+                \Yii::warning($message, 'CallOutEndedJob:addLeadPoorProcessingRemoverJob:Exception');
+            } catch (\Throwable $throwable) {
+                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['callId' => $this->callId]);
+                \Yii::warning($message, 'CallOutEndedJob:addLeadPoorProcessingRemoverJob:Throwable');
             }
         }
     }

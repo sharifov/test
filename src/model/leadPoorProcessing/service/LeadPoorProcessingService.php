@@ -4,6 +4,7 @@ namespace src\model\leadPoorProcessing\service;
 
 use common\components\jobs\LeadPoorProcessingJob;
 use common\components\jobs\LeadPoorProcessingRemoverJob;
+use common\models\EmailTemplateType;
 use common\models\Employee;
 use common\models\Lead;
 use modules\lead\src\abac\dto\LeadAbacDto;
@@ -12,6 +13,7 @@ use src\auth\Auth;
 use src\helpers\app\AppHelper;
 use src\helpers\ErrorsToStringHelper;
 use src\model\leadPoorProcessing\entity\LeadPoorProcessing;
+use src\model\leadPoorProcessing\entity\LeadPoorProcessingDictionary;
 use src\model\leadPoorProcessing\entity\LeadPoorProcessingQuery;
 use src\model\leadPoorProcessing\repository\LeadPoorProcessingRepository;
 use src\model\leadPoorProcessing\service\rules\LeadPoorProcessingRuleFactory;
@@ -167,6 +169,19 @@ class LeadPoorProcessingService
             $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
             \Yii::error($message, 'LeadPoorProcessingService:addLeadPoorProcessingRemoverJob:Throwable');
         }
+    }
+
+    public static function checkSmsTemplate(?string $template): bool
+    {
+        return in_array($template, LeadPoorProcessingDictionary::SMS_TPL_OFFER_LIST, true);
+    }
+
+    public static function checkEmailTemplate(?string $templateKey): bool
+    {
+        if (!$tpl = EmailTemplateType::find()->where(['etp_key' => $templateKey])->limit(1)->one()) {
+            throw new \RuntimeException('EmailTemplateType not found by(' . $templateKey . ')');
+        }
+        return (bool) ArrayHelper::getValue($tpl->etp_params_json, 'quotes.selectRequired', false);
     }
 
     private static function checkAbacAccess(int $leadId): void
