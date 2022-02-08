@@ -30,4 +30,5 @@ class LeadPoorProcessingLogStatus
     public const REASON_QUOTE = 'Quote';
     public const REASON_LEAD_TACK = 'Lead Task';
     public const REASON_TAKE = 'Take';
+    public const REASON_EXPERT_IDLE = 'Expert Idle';
 }
