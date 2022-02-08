@@ -24,7 +24,7 @@ class ProductQuoteChangeService
     {
         return ProductQuoteChange::find()
             ->where(['pqc_pq_id' => $productQuoteId])
-            ->andWhere(['pqc_status_id' => SettingHelper::getInvoluntaryChangeActiveStatuses()])
+//            ->andWhere(['pqc_status_id' => SettingHelper::getInvoluntaryChangeActiveStatuses()])
             ->andWhere(['pqc_type_id' => ProductQuoteChange::TYPE_RE_PROTECTION])
             ->one();
     }
