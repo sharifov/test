@@ -263,7 +263,7 @@ class LeadChangeStateController extends FController
         $form = new SnoozeReasonForm($lead);
         /** @abac new LeadAbacDto($lead, Auth::id()), LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_SNOOZE, Access to change */
         $leadAbacDto = new LeadAbacDto($lead, Auth::id());
-        if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_SNOOZE)) {
+        if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_SNOOZE)) {
             throw new ForbiddenHttpException('Snooze action is not available due to business restrictions. Please contact administrator for more info.');
         }
 
