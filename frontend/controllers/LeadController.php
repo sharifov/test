@@ -26,6 +26,7 @@ use common\models\Note;
 use common\models\ProjectEmailTemplate;
 use common\models\search\LeadCallExpertSearch;
 use common\models\search\LeadChecklistSearch;
+use frontend\models\LeadUserRatingForm;
 use kivork\rbacExportImport\src\formatters\FileSizeFormatter;
 use modules\email\src\abac\dto\EmailPreviewDto;
 use modules\email\src\abac\EmailAbacObject;
@@ -88,6 +89,9 @@ use src\model\lead\useCases\lead\link\LeadLinkChatForm;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
+use src\model\leadUserRating\abac\dto\LeadUserRatingAbacDto;
+use src\model\leadUserRating\abac\LeadUserRatingAbacObject;
+use src\model\leadUserRating\service\LeadUserRatingService;
 use src\model\leadUserConversion\service\LeadUserConversionDictionary;
 use src\model\leadUserConversion\service\LeadUserConversionService;
 use src\model\sms\useCase\send\fromLead\AbacSmsFromNumberList;
@@ -133,7 +137,7 @@ use common\models\local\LeadLogMessage;
  * @property LeadManageService $leadManageService
  * @property LeadAssignService $leadAssignService
  * @property LeadRepository $leadRepository
-  * @property LeadCloneService $leadCloneService
+ * @property LeadCloneService $leadCloneService
  * @property CasesRepository $casesRepository
  * @property LeadImportParseService $leadImportParseService
  * @property LeadImportService $leadImportService
@@ -1106,22 +1110,49 @@ class LeadController extends FController
 
 
 
-    public function actionSetRating($id)
+    public function actionSetUserRating()
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
-        $lead = Lead::findOne(['id' => $id]);
-        if ($lead !== null && $lead->isProcessing() && Yii::$app->request->isPost) {
-            $rating = (int)Yii::$app->request->post('rating', 0);
-            try {
-                $lead->changeRating($rating);
-                $this->leadRepository->save($lead);
-                return true;
-            } catch (\Exception $e) {
-                Yii::$app->errorHandler->logException($e);
-                return false;
+        try {
+            if (!Yii::$app->request->isAjax || !Yii::$app->request->isPost) {
+                throw new \RuntimeException('Access Denied');
             }
+            $user = Auth::user();
+            $form = new LeadUserRatingForm($user);
+            $form->load(Yii::$app->request->post());
+            if (!$form->validate()) {
+                throw new \RuntimeException(implode(', ', $form->getErrorSummary(true)));
+            }
+            $rating = $form->rating;
+            $leadId = $form->leadId;
+            $lead = Lead::findOne(['id' => $leadId]);
+            $leadUserRatingAbacDto = new LeadUserRatingAbacDto($lead, $user->id);
+            /** @abac leadUserRatingAbacDto, LeadUserRatingAbacObject::LEAD_RATING_FORM, LeadUserRatingAbacObject::ACTION_EDIT, Lead User Rating edit  */
+            $can = Yii::$app->abac->can(
+                $leadUserRatingAbacDto,
+                LeadUserRatingAbacObject::LEAD_RATING_FORM,
+                LeadUserRatingAbacObject::ACTION_EDIT
+            );
+            if (!$can) {
+                throw new \RuntimeException('Access Denied');
+            }
+            LeadUserRatingService::createOrUpdate($leadId, $user->id, $rating);
+            return [
+                'success' => true,
+            ];
+        } catch (\RuntimeException | \DomainException $e) {
+            Yii::warning(AppHelper::throwableFormatter($e), 'LeadController::actionSetRating:exception');
+            return [
+                'success' => false,
+                'error' => $e->getMessage()
+            ];
+        } catch (\Throwable $e) {
+            Yii::error(AppHelper::throwableLog($e), 'LeadController:actionSetRating:Throwable');
+            return [
+                'success' => false,
+                'error' => 'Server Error'
+            ];
         }
-        return false;
     }
 
     /**

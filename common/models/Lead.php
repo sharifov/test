@@ -54,6 +54,7 @@ use src\events\lead\LeadStatusChangedEvent;
 use src\events\lead\LeadTaskEvent;
 use src\events\lead\LeadTrashEvent;
 use src\formatters\client\ClientTimeFormatter;
+use src\helpers\app\AppHelper;
 use src\helpers\lead\LeadHelper;
 use src\helpers\quote\QuoteProviderProjectHelper;
 use src\helpers\setting\SettingHelper;
@@ -72,6 +73,7 @@ use src\model\leadPoorProcessing\entity\LeadPoorProcessing;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
+use src\model\leadUserRating\entity\LeadUserRating;
 use src\model\leadUserConversion\entity\LeadUserConversion;
 use src\services\lead\calculator\LeadTripTypeCalculator;
 use src\services\lead\calculator\SegmentDTO;
@@ -185,6 +187,8 @@ use yii\helpers\VarDumper;
  * @property Project $project
  * @property LeadAdditionalInformation[] $additionalInformationForm
  * @property LeadAdditionalInformation[] $oldAdditionalInformationForm
+ * @property LeadUserRating[] $leadUserRatings
+ * @property LeadUserRating $leadUserRatingByUser
  * @property Lead $clone
  * @property ProfitSplit[] $profitSplits
  * @property TipsSplit[] $tipsSplits
@@ -1988,6 +1992,36 @@ class Lead extends ActiveRecord implements Objectable
     public function getLeadFlows()
     {
         return $this->hasMany(LeadFlow::class, ['lead_id' => 'id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getLeadUserRatings()
+    {
+        return $this->hasMany(LeadUserRating::class, ['lur_lead_id' => 'id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getLeadUserRatingByUser(int $userId)
+    {
+        return $this->hasOne(LeadUserRating::class, ['lur_lead_id' => 'id'])->onCondition(['lur_user_id' => $userId]);
+    }
+
+
+    /*
+     * @return int
+     */
+    public function getLeadUserRatingValueByUserId(int $userId): int
+    {
+        try {
+            return (int)ArrayHelper::getValue($this->getLeadUserRatingByUser($userId)->one(), 'lur_rating', 0);
+        } catch (\Throwable $e) {
+            Yii::error(AppHelper::throwableLog($e), 'LeadModel:getLeadUserRatingValueByUserId:Throwable');
+            return 0;
+        }
     }
 
     /**
