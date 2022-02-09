@@ -17,7 +17,6 @@ use Yii;
  * @property AvailablePhoneNumber[]|null $smsFromNumbers
  * @property Employee $user
  * @property Cases $case
- * @property bool|null $canSendSmsFlag
  */
 class AbacSmsFromNumberList
 {
@@ -25,7 +24,6 @@ class AbacSmsFromNumberList
     private ?array $smsFromNumbers = null;
     private Employee $user;
     private Cases $case;
-    private ?bool $canSendSmsFlag = null;
 
     public function __construct(Employee $user, Cases $case)
     {
@@ -44,15 +42,13 @@ class AbacSmsFromNumberList
 
         $this->list = [];
 
-        if ($this->canSendSms()) {
-            foreach ($this->getSmsFromNumbers() as $number) {
-                $tempAbacDto = new CaseCommunicationBlockAbacDto($this->case, [], [$number], [], $this->user->id);
-                /** @abac $tempAbacDto, CaseCommunicationBlockAbacObject::NS, CaseCommunicationBlockAbacObject::ACTION_SEND_SMS, Validate Sms From number for send sms from Case View page */
-                if (Yii::$app->abac->can($tempAbacDto, CaseCommunicationBlockAbacObject::NS, CaseCommunicationBlockAbacObject::ACTION_SEND_SMS, $this->user)) {
-                    $this->list[] = $number;
-                }
-                unset($tempAbacDto);
+        foreach ($this->getSmsFromNumbers() as $number) {
+            $tempAbacDto = new CaseCommunicationBlockAbacDto($this->case, [], [$number], [], $this->user->id);
+            /** @abac $tempAbacDto, CaseCommunicationBlockAbacObject::NS, CaseCommunicationBlockAbacObject::ACTION_SEND_SMS, Validate Sms From number for send sms from Case View page */
+            if (Yii::$app->abac->can($tempAbacDto, CaseCommunicationBlockAbacObject::NS, CaseCommunicationBlockAbacObject::ACTION_SEND_SMS, $this->user)) {
+                $this->list[] = $number;
             }
+            unset($tempAbacDto);
         }
 
         return $this->list;
@@ -70,15 +66,7 @@ class AbacSmsFromNumberList
 
     public function canSendSms(): bool
     {
-        if ($this->canSendSmsFlag !== null) {
-            return $this->canSendSmsFlag;
-        }
-
-        $caseCommunicationBlockAbacDto = new CaseCommunicationBlockAbacDto($this->case, [], $this->getSmsFromNumbers(), [], $this->user->id);
-        /** @abac $caseCommunicationBlockAbacDto, CaseCommunicationBlockAbacObject::NS, CaseCommunicationBlockAbacObject::ACTION_SEND_SMS, Validate Sms From number list for send sms from Case View page */
-        $this->canSendSmsFlag = (bool)Yii::$app->abac->can($caseCommunicationBlockAbacDto, CaseCommunicationBlockAbacObject::NS, CaseCommunicationBlockAbacObject::ACTION_SEND_SMS, $this->user);
-
-        return $this->canSendSmsFlag;
+        return !empty($this->getList());
     }
 
     public function format(): array

@@ -54,9 +54,9 @@ class LeadQuery extends ActiveQuery
         ]]);
     }
 
-    public static function countSnoozeLeads(): int
+    public static function countSnoozeLeadsByOwner(int $userId): int
     {
-        return Lead::find()->where(['status' => Lead::STATUS_SNOOZE])->count();
+        return Lead::find()->where(['status' => Lead::STATUS_SNOOZE, 'employee_id' => $userId])->count();
     }
 
     public function byClient(int $clientId): self

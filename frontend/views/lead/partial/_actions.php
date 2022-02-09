@@ -842,7 +842,11 @@ $js = <<<JS
         $('#modal-df-label').html(title);
         modal.find('.modal-body').html('');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
-            modal.modal('show');
+            if (xhr.status > 400) {
+                createNotify('Error', xhr.responseText, 'error');
+            } else {
+                modal.modal('show');
+            }
         });
     });
 
