@@ -4,25 +4,27 @@ pipeline {
     ansiColor('xterm')
     disableConcurrentBuilds()
   }
-  environment {
-    SHORT_COMMIT = "${GIT_COMMIT[0..7]}"
-  }
   stages {
     stage('Build') {
       steps {
-        sh "composer install --no-interaction --ignore-platform-reqs"
-        sh "tar --exclude=./devops -czf devops/ansible/roles/deployment/files/build.tar.gz ."
+        sshagent(credentials: ['CRM_GIT']) {
+          sh 'composer install --no-interaction --ignore-platform-reqs'
+        }
+        sh '''
+          tar --exclude=./devops \
+            -czf devops/ansible/roles/deployment/files/build.tar.gz .
+        '''
       }
     }
     stage('Deploy'){
       steps {
         dir('devops/ansible') {
           ansiblePlaybook(
-            playbook: "deploy.yml",
+            playbook: 'deploy.yml',
             inventory: "inventories/${ENV}/hosts",
-            credentialsId: "DEVOPS_RSA",
-            vaultCredentialsId: "ANSIBLE_PASS",
-            extraVars: [ app_ver: "${SHORT_COMMIT}" ]
+            credentialsId: 'DEVOPS_RSA',
+            vaultCredentialsId: 'ANSIBLE_PASS',
+            extraVars: [ app_ver: "${GIT_COMMIT[0..7]}" ]
           )
         }
       }
@@ -31,26 +33,49 @@ pipeline {
   post {
     success {
       script {
-        REPORT_MSG = "Job ${env.JOB_NAME} has succeeded\n${currentBuild.getBuildCauses()[0].shortDescription}\nBuild: <${env.BUILD_URL}display/redirect|${env.BUILD_NUMBER}>\nEnv: ${env.ENV}\nBranch: ${env.GIT_BRANCH}\nTime: ${currentBuild.durationString.minus(' and counting')}"
+        msg1 = "Job ${env.JOB_NAME} has succeeded"
+        msg2 = "${currentBuild.getBuildCauses()[0].shortDescription}"
+        msg3 = "Build: <${env.BUILD_URL}display/redirect|${env.BUILD_NUMBER}>"
+        msg4 = "Env: ${env.ENV}"
+        msg5 = "Branch: ${env.GIT_BRANCH}"
+        msg6 = "Ver: ${GIT_COMMIT[0..7]}"
+        msg7 = "Time: ${currentBuild.durationString.minus(' and counting')}"
+        msg = "${msg1}\n${msg2}\n${msg3}\n${msg4}\n${msg5}\n${msg6}\n${msg7}"
+        if (env.ENV == 'prod') {
+          mattermostSend(
+            color: 'good',
+            channel: 'deploys',
+            icon: 'https://i.pinimg.com/564x/e3/ba/82/e3ba820967cd9642403064f684a9afb2.jpg',
+            message: msg,
+            endpoint: 'https://chat.travel-dev.com/hooks/wfkq819uzjnx8ne3htjnw9pimr'
+          )
+        }
       }
       mattermostSend(
         color: 'good',
-        channel: "crm-deploys",
-        icon: "https://i.pinimg.com/564x/e3/ba/82/e3ba820967cd9642403064f684a9afb2.jpg",
-        message: REPORT_MSG,
-        endpoint: "https://chat.travel-dev.com/hooks/wfkq819uzjnx8ne3htjnw9pimr"
+        channel: 'crm-deploys',
+        icon: 'https://i.pinimg.com/564x/e3/ba/82/e3ba820967cd9642403064f684a9afb2.jpg',
+        message: msg,
+        endpoint: 'https://chat.travel-dev.com/hooks/wfkq819uzjnx8ne3htjnw9pimr'
       )
     }
     failure {
       script {
-        REPORT_MSG = "Job ${env.JOB_NAME} has failed\n${currentBuild.getBuildCauses()[0].shortDescription}\nBuild: <${env.BUILD_URL}display/redirect|${env.BUILD_NUMBER}>\nEnv: ${env.ENV}\nBranch: ${env.GIT_BRANCH}\nTime: ${currentBuild.durationString.minus(' and counting')}"
+        msg1 = "Job ${env.JOB_NAME} has failed"
+        msg2 = "${currentBuild.getBuildCauses()[0].shortDescription}"
+        msg3 = "Build: <${env.BUILD_URL}display/redirect|${env.BUILD_NUMBER}>"
+        msg4 = "Env: ${env.ENV}"
+        msg5 = "Branch: ${env.GIT_BRANCH}"
+        msg6 = "Ver: ${GIT_COMMIT[0..7]}"
+        msg7 = "Time: ${currentBuild.durationString.minus(' and counting')}"
+        msg = "${msg1}\n${msg2}\n${msg3}\n${msg4}\n${msg5}\n${msg6}\n${msg7}"
       }
       mattermostSend(
         color: 'danger',
-        channel: "crm-deploys",
-        icon: "https://i.pinimg.com/564x/e3/ba/82/e3ba820967cd9642403064f684a9afb2.jpg",
-        message: REPORT_MSG,
-        endpoint: "https://chat.travel-dev.com/hooks/wfkq819uzjnx8ne3htjnw9pimr"
+        channel: 'crm-deploys',
+        icon: 'https://i.pinimg.com/564x/e3/ba/82/e3ba820967cd9642403064f684a9afb2.jpg',
+        message: msg,
+        endpoint: 'https://chat.travel-dev.com/hooks/wfkq819uzjnx8ne3htjnw9pimr'
       )
     }
     always {
