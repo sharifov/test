@@ -102,10 +102,17 @@ use yii\rbac\Role;
 
 class TestController extends Controller
 {
-    public function actionT2()
+    public function actionTestWs()
     {
-        VarDumper::dump(LeadCommunicationAbacObject::getObjectAttributeList());
+        Notifications::publish(
+            'testCommand',
+            ['user_id' => 295],
+            [
+                'data' => 'testData',
+            ]
+        );
     }
+
     public function actionT()
     {
         VarDumper::dump(CasesAbacObject::getObjectAttributeList());

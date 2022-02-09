@@ -193,8 +193,12 @@ class WebsocketServerController extends Controller
                                 try {
                                     $server->push($fd, $value);
                                 } catch (\Throwable $e) {
-                                    echo 'Error: ' . $e->getMessage();
-                                    \Yii::error(AppHelper::throwableLog($e, true), 'ws:workerStart:message:server:push');
+                                    echo ': Error: ' . $e->getMessage() . ' Date: ' . date('m-d H:i:s') . PHP_EOL;
+                                    \Yii::error([
+                                        'message' => $e->getMessage(),
+                                        'result' => VarDumper::dumpAsString($result),
+                                        'exception' => AppHelper::throwableLog($e, true)
+                                    ], 'ws:workerStart:message:server:push');
                                 }
                             }
                         }
