@@ -139,6 +139,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     public const ACTION_CLONE = 'clone';
     public const ACTION_EDIT = 'edit';
     public const ACTION_VIEW = 'view';
+    public const ACTION_SNOOZE = 'snooze';
 
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
@@ -203,7 +204,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_LINK_TO_CALL => [self::ACTION_ACCESS],
         self::ACT_TAKE_LEAD_FROM_CALL => [self::ACTION_ACCESS],
         self::OBJ_LEAD_PREFERENCES => [self::ACTION_SET_DELAY_CHARGE],
-        self::OBJ_LEAD => [self::ACTION_CLONE],
+        self::OBJ_LEAD => [self::ACTION_CLONE, self::ACTION_SNOOZE],
         self::OBJ_EXTRA_QUEUE => [self::ACTION_ACCESS],
         self::LOGIC_POOR_PROCESSING => [self::ACTION_ACCESS],
     ];
@@ -448,6 +449,18 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2]
     ];
 
+    public const ATTR_SNOOZE_COUNT = [
+        'optgroup' => 'User',
+        'id' => self::NS . 'snooze_count',
+        'field' => 'snoozeCount',
+        'label' => 'Users Snooze Leads count',
+        'type' => self::ATTR_TYPE_INTEGER,
+        'input' => self::ATTR_INPUT_TEXT,
+        'values' => [],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, '<', '>', '<=', '>=']
+    ];
+
     public const OBJECT_ATTRIBUTE_LIST = [
         self::ACT_USER_CONVERSION    => [self::ATTR_LEAD_IS_OWNER],
         self::UI_BLOCK_CLIENT_INFO   => [
@@ -542,6 +555,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
             self::ATTR_HAS_APPLIED_QUOTE,
             self::ATTR_WITHIN_PERSONAL_TAKE_LIMITS,
             self::ATTR_CAN_TAKE_BY_FREQUENCY_MINUTES,
+            self::ATTR_SNOOZE_COUNT
         ],
 
         self::LOGIC_CLIENT_DATA  => [self::ATTR_LEAD_IS_OWNER],

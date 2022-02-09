@@ -4,6 +4,7 @@ namespace modules\lead\src\abac\dto;
 
 use common\models\Lead;
 use common\models\Employee;
+use common\models\query\LeadQuery;
 use src\access\EmployeeGroupAccess;
 use src\access\EmployeeDepartmentAccess;
 use src\access\EmployeeProjectAccess;
@@ -22,6 +23,7 @@ use yii\helpers\VarDumper;
  * @property bool $canTakeByFrequencyMinutes
  * @property int|null $status_id
  * @property string $formAttribute
+ * @property int $snoozeCount
  */
 class LeadAbacDto extends \stdClass
 {
@@ -39,6 +41,7 @@ class LeadAbacDto extends \stdClass
     public string $formAttribute = '';
     public ?bool $isNewRecord = null;
     public array $formMultiAttribute = [];
+    public int $snoozeCount = 10;
 
 
     /**
@@ -79,6 +82,8 @@ class LeadAbacDto extends \stdClass
             }
 
             $this->status_id = $lead->status;
+
+            $this->snoozeCount = LeadQuery::countSnoozeLeadsByOwner($userId);
         }
     }
 }
