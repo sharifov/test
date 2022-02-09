@@ -14,13 +14,10 @@ class m220209_102524_abac_alter_permission_for_snooze_leads extends Migration
      */
     public function safeUp()
     {
-        $this->delete('{{%abac_policy}}', ['IN', 'ap_object', [
-            'lead/lead/obj/lead',
-        ]]);
         $this->insert('{{%abac_policy}}', [
             'ap_rule_type' => 'p',
             'ap_subject' => '("admin" in r.sub.env.user.roles) || (r.sub.snoozeCount <= 20)',
-            'ap_subject_json' => '{"condition":"OR","rules":[{"id":"env_user_roles","field":"env.user.roles","type":"string","input":"select","operator":"in_array","value":"admin"},{"id":"lead/lead/snooze_count","field":"snoozeCount","type":"integer","input":"number","operator":"<=","value":20}],"valid":true}',
+            'ap_subject_json' => '{"condition":"OR","rules":[{"id":"env_user_roles","field":"env.user.roles","type":"string","input":"select","operator":"in_array","value":"admin"},{"id":"lead/lead/snooze_count","field":"snoozeCount","type":"integer","input":"text","operator":"<=","value":20}],"valid":true}',
             'ap_object' => 'lead/lead/obj/lead',
             'ap_action' => '(snooze)',
             'ap_action_json' => "[\"snooze\"]",
