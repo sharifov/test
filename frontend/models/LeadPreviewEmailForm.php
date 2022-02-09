@@ -162,7 +162,7 @@ class LeadPreviewEmailForm extends Model
 
     public function attachCount(): int
     {
-        return !empty($this->files) ? count($this->files) : 0;
+        return empty($this->files) ? 0 : count($this->files);
     }
 
     public function isMessageEdited(): bool
