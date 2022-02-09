@@ -13,6 +13,7 @@ class EmailPreviewDto extends \stdClass
     public ?int $template_id;
     public ?bool $is_message_edited;
     public ?bool $is_subject_edited;
+    public ?int $attachCount;
     public ?int $project_id;
     public ?int $department_id;
 
@@ -20,11 +21,13 @@ class EmailPreviewDto extends \stdClass
         ?int $emailTemplateId,
         ?bool $messageEdited,
         ?bool $subjectEdited,
+        ?int $attachCount,
         ?Lead $lead,
         ?Cases $case
     ) {
         $this->template_id = $emailTemplateId;
 
+        $this->attachCount = $attachCount;
         $this->is_message_edited = $messageEdited;
         $this->is_subject_edited = $subjectEdited;
 
