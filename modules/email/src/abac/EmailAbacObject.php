@@ -187,7 +187,7 @@ class EmailAbacObject extends AbacBaseModel implements AbacInterface
         'input' => self::ATTR_INPUT_NUMBER,
         'validation' => ['min' => 0, 'max' => 999, 'step' => 1],
         'multiple' => false,
-        'operators' =>  ['>=', '<=', '>', '<'],
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, '>=', '<=', '>', '<'],
     ];
 
     protected const ATTR_PROJECT_ID = [
