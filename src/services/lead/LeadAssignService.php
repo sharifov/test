@@ -89,7 +89,7 @@ class LeadAssignService
         ) {
             LeadPoorProcessingService::addLeadPoorProcessingJob(
                 $lead->id,
-                LeadPoorProcessingDataDictionary::KEY_EXTRA_TO_PROCESSING_TAKE,
+                [LeadPoorProcessingDataDictionary::KEY_EXTRA_TO_PROCESSING_TAKE],
                 LeadPoorProcessingLogStatus::REASON_TAKE
             );
         }
@@ -133,7 +133,7 @@ class LeadAssignService
         ) {
             LeadPoorProcessingService::addLeadPoorProcessingJob(
                 $lead->id,
-                LeadPoorProcessingDataDictionary::KEY_EXTRA_TO_PROCESSING_TAKE,
+                [LeadPoorProcessingDataDictionary::KEY_EXTRA_TO_PROCESSING_TAKE],
                 LeadPoorProcessingLogStatus::REASON_TAKE
             );
         }

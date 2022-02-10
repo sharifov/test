@@ -206,7 +206,7 @@ class MultipleUpdateService
 
                     LeadPoorProcessingService::addLeadPoorProcessingJob(
                         $lead->id,
-                        LeadPoorProcessingDataDictionary::KEY_EXTRA_TO_PROCESSING_MULTIPLE_UPD,
+                        [LeadPoorProcessingDataDictionary::KEY_EXTRA_TO_PROCESSING_MULTIPLE_UPD],
                         $description
                     );
                 }

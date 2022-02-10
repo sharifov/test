@@ -812,4 +812,9 @@ class SettingHelper
     {
         return (int)(Yii::$app->params['settings']['snooze_limit'] ?? 10);
     }
+
+    public static function getSmsTemplateForRemovingLpp(): array
+    {
+        return Yii::$app->params['settings']['lpp_remove_by_sms_tpl'] ?? [];
+    }
 }

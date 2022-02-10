@@ -1441,7 +1441,7 @@ class Lead extends ActiveRecord implements Objectable
         $this->recordEvent(
             new LeadPoorProcessingEvent(
                 $this,
-                LeadPoorProcessingDataDictionary::KEY_NO_ACTION,
+                [LeadPoorProcessingDataDictionary::KEY_NO_ACTION, LeadPoorProcessingDataDictionary::KEY_SEND_SMS_OFFER],
                 $description
             )
         );
@@ -2228,7 +2228,7 @@ class Lead extends ActiveRecord implements Objectable
             );
             LeadPoorProcessingService::addLeadPoorProcessingJob(
                 $this->id,
-                LeadPoorProcessingDataDictionary::KEY_LAST_ACTION,
+                [LeadPoorProcessingDataDictionary::KEY_LAST_ACTION],
                 $description
             );
         }
