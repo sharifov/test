@@ -17,7 +17,7 @@ class LeadPoorProcessingRemoverOwnerChangedListener
     {
         try {
             $description = null;
-            if (($fromName = self::getUsernameById($event->oldOwnerId)) && $toName = self::getUsernameById($event->oldOwnerId)) {
+            if (($fromName = self::getUsernameById($event->oldOwnerId)) && $toName = self::getUsernameById($event->newOwnerId)) {
                 $description = sprintf(LeadPoorProcessingLogStatus::REASON_CHANGE_OWNER, $fromName, $toName);
             }
 
