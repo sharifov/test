@@ -19,14 +19,18 @@ class LeadPoorProcessingDataQuery
         ;
     }
 
-    public static function getRuleByKey(string $key, int $cacheDuration = -1): ?LeadPoorProcessingData
+    public static function getRuleByKey(string $key, ?bool $isEnabled = null, int $cacheDuration = -1): ?LeadPoorProcessingData
     {
-        return LeadPoorProcessingData::find()
+        $query = LeadPoorProcessingData::find()
             ->where(['lppd_key' => $key])
             ->limit(1)
             ->cache($cacheDuration)
-            ->one()
         ;
+
+        if ($isEnabled !== null) {
+            $query->andWhere(['lppd_enabled' => $isEnabled]);
+        }
+        return $query->one();
     }
 
     public static function getRuleById(string $id): ?LeadPoorProcessingData
