@@ -415,7 +415,9 @@ class CasesController extends FController
                         Yii::error(VarDumper::dumpAsString($mail->errors), 'CaseController:view:Email:save');
                     }
                 } else {
+                    Yii::$app->session->setFlash('send-warning', 'Access denied: you dont have permission to send email');
                     $previewEmailForm->addError('general', 'Access denied: you dont have permission to send email');
+                    $this->refresh('#communication-form');
                 }
                 //VarDumper::dump($previewEmailForm->attributes, 10, true);              exit;
             } else {
