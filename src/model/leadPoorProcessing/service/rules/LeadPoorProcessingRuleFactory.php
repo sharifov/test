@@ -35,6 +35,8 @@ class LeadPoorProcessingRuleFactory
                 return new LeadPoorProcessingScheduledCommunication($this->leadId, $this->ruleKey, $this->description);
             case LeadPoorProcessingDataDictionary::KEY_EXPERT_IDLE:
                 return new LeadPoorProcessingExpertIdle($this->leadId, $this->ruleKey, $this->description);
+            case LeadPoorProcessingDataDictionary::KEY_SEND_SMS_OFFER:
+                return new LeadPoorProcessingSendSmsOffer($this->leadId, $this->ruleKey, $this->description);
         }
         throw new \RuntimeException('ruleKey (' . $this->ruleKey . ') unprocessed');
     }
