@@ -645,6 +645,11 @@ class LeadController extends FController
                         Yii::$app->session->setFlash('send-success', '<strong>SMS Message</strong> has been successfully sent to <strong>' . $sms->s_phone_to . '</strong>');
                     }
 
+                    $smsTemplate = $sms->sTemplateType;
+                    if ($smsTemplate && in_array($smsTemplate->stp_key, SettingHelper::getSmsTemplateForRemovingLpp(), true)) {
+                        LeadPoorProcessingService::addLeadPoorProcessingRemoverJob($lead->id, [LeadPoorProcessingDataDictionary::KEY_SEND_SMS_OFFER], 'SMS sent');
+                    }
+
                     $this->refresh('#communication-form');
                 } else {
                     $previewSmsForm->addError('s_sms_text', VarDumper::dumpAsString($sms->errors));

@@ -15,13 +15,12 @@ class LeadPoorProcessingAdderListener
     public function handle(LeadPoorProcessingEvent $event): void
     {
         try {
-            if (!LeadPoorProcessingDataQuery::isExistActiveRule($event->getDataKey())) {
-                throw new \RuntimeException('Rule (' . $event->getDataKey() . ') not enabled');
-            }
-
+//            if (!LeadPoorProcessingDataQuery::isExistActiveRule($event->getDataKeys())) {
+//                throw new \RuntimeException('Rule (' . $event->getDataKeys() . ') not enabled');
+//            }
             LeadPoorProcessingService::addLeadPoorProcessingJob(
                 $event->getLead()->id,
-                $event->getDataKey(),
+                $event->getDataKeys(),
                 $event->getDescription()
             );
         } catch (\RuntimeException | \DomainException $throwable) {

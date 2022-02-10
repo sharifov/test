@@ -913,7 +913,7 @@ class QuoteController extends ApiBaseController
                 if ($lead->called_expert) {
                     LeadPoorProcessingService::addLeadPoorProcessingJob(
                         $lead->id,
-                        LeadPoorProcessingDataDictionary::KEY_EXPERT_IDLE,
+                        [LeadPoorProcessingDataDictionary::KEY_EXPERT_IDLE],
                         LeadPoorProcessingLogStatus::REASON_EXPERT_IDLE
                     );
                 }

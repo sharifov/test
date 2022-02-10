@@ -126,18 +126,18 @@ class LeadPoorProcessingService
 
     public static function addLeadPoorProcessingJob(
         int $leadId,
-        string $dataKey,
+        array $dataKeys,
         ?string $description = null,
         int $priority = 100
     ): void {
         $logData = [
             'leadId' => $leadId,
-            'dataKey' => $dataKey,
+            'dataKeys' => $dataKeys,
         ];
 
         try {
             self::checkAbacAccess($leadId);
-            $job = new LeadPoorProcessingJob($leadId, $dataKey, $description);
+            $job = new LeadPoorProcessingJob($leadId, $dataKeys, $description);
             \Yii::$app->queue_job->priority($priority)->push($job);
         } catch (\RuntimeException | \DomainException $throwable) {
             $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
