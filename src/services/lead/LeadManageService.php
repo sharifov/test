@@ -3,6 +3,7 @@
 namespace src\services\lead;
 
 use common\models\Client;
+use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
 use src\model\visitorLog\useCase\CreateVisitorLog;
 use src\services\client\ClientCreateForm;
 use thamtech\uuid\helpers\UuidHelper;
@@ -339,7 +340,8 @@ class LeadManageService
 
             $this->leadRepository->save($lead);
 
-            $lead->updateLastAction();
+            $description = LeadPoorProcessingLogStatus::REASON_CHANGE_ITINERARY;
+            $lead->updateLastAction($description);
         });
     }
 

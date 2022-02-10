@@ -62,11 +62,13 @@ class LeadToExtraQueueService
 
         LeadPoorProcessing::deleteAll(['lpp_lead_id' => $this->getLead()->id]);
 
+        $description = sprintf(LeadPoorProcessingLogStatus::REASON_ADDED_TO_EXTRA_QUEUE_ACCORDING_TO_THE_RULE, $reason);
         $leadPoorProcessingLog = LeadPoorProcessingLog::create(
             $this->getLead()->id,
             $this->getRule()->lppd_id,
             $ownerId,
-            LeadPoorProcessingLogStatus::STATUS_ADDED_TO_EXTRA_QUEUE
+            LeadPoorProcessingLogStatus::STATUS_ADDED_TO_EXTRA_QUEUE,
+            $description
         );
         if (!$leadPoorProcessingLog->validate()) {
             throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($leadPoorProcessingLog, ' '));
