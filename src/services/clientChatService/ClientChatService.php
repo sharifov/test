@@ -210,23 +210,23 @@ class ClientChatService
         $limit = $channel->getSystemUserLimit();
         $users = $employeeSearch->searchAvailableAgentsForChatRequests($clientChat, $limit, $channel->getSortParameters());
 
-        $key = $this->getRedisDistributionLogicKey($clientChat->cch_id);
-        if ($users) {
-            foreach ($users as $user) {
-                $this->sendRequestToUser($clientChat, $user->id);
-            }
-
-            if ($limit) {
-                $this->createUserAccessDistributionLogicJob($clientChat->cch_id, $channel->getSystemRepeatDelaySeconds());
-            }
-        } elseif (\Yii::$app->redis->exists($key)) {
-            \Yii::$app->redis->del($key);
+//        $key = self::getRedisDistributionLogicKey($clientChat->cch_id);
+//        if ($users) {
+        foreach ($users as $user) {
+            $this->sendRequestToUser($clientChat, $user->id);
         }
+
+//            if ($limit) {
+        $this->createUserAccessDistributionLogicJob($clientChat->cch_id, $channel->getSystemRepeatDelaySeconds());
+//            }
+//        } elseif (\Yii::$app->redis->exists($key)) {
+//            \Yii::$app->redis->del($key);
+//        }
     }
 
     public function createUserAccessDistributionLogicJob(int $chatId, int $delay = 0): void
     {
-        $key = $this->getRedisDistributionLogicKey($chatId);
+        $key = self::getRedisDistributionLogicKey($chatId);
         \Yii::$app->redis->set($key, true);
         \Yii::$app->redis->expire($key, self::REDIS_DISTRIBUTION_LOGIC_EXPIRE_S);
 
@@ -253,7 +253,7 @@ class ClientChatService
         $chats = ClientChatQuery::findAvailablePendingChatsByUser($userId)->all();
         if ($chats) {
             foreach ($chats as $chat) {
-                if (!\Yii::$app->redis->exists($this->getRedisDistributionLogicKey($chat->cch_id))) {
+                if (!\Yii::$app->redis->exists(self::getRedisDistributionLogicKey($chat->cch_id))) {
                     $this->sendRequestToUser($chat, $userId);
                 }
             }
@@ -865,7 +865,7 @@ class ClientChatService
         return $newClientChat;
     }
 
-    private function getRedisDistributionLogicKey(int $chatId): string
+    public static function getRedisDistributionLogicKey(int $chatId): string
     {
         return $chatId . self::REDIS_DISTRIBUTION_LOGIC_KEY;
     }
