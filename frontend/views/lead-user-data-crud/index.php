@@ -9,6 +9,7 @@ use yii\grid\ActionColumn;
 use yii\grid\SerialColumn;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use common\components\grid\DateTimeColumn;
 
 /* @var $this yii\web\View */
 /* @var $searchModel src\model\leadUserData\entity\LeadUserDataSearch */
@@ -55,7 +56,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 'relation' => 'ludUser',
                 'placeholder' => 'User'
             ],
-            'lud_created_dt:byUserDatetime',
+            [
+                'class' =>  DateTimeColumn::class,
+                'attribute' => 'lud_created_dt',
+                'limitEndDay' => false,
+            ],
             [
                 'class' => ActionColumn::class,
                 'urlCreator' => static function ($action, LeadUserData $model, $key, $index, $column) {
