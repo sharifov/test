@@ -6,7 +6,7 @@ return [
     'serviceType' => '',
     'appName' => 'CRM',
     'appHostname' => php_uname('n'),
-    'appInstance' => '1',
+    'appInstance' => gethostname(),
     'appEnv' => '',
 
     'release' => require __DIR__ . '/params-release.php',
