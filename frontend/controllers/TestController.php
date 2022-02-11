@@ -2381,7 +2381,6 @@ class TestController extends FController
 
     public function actionErrorTest()
     {
-
         $message = [
             'message' => 'Test message 1',
             'trace' => ['tr1' => 'ttttttttttt1'],
@@ -2563,7 +2562,6 @@ class TestController extends FController
 
     public function actionAt()
     {
-
         $message = [
             'message' => 'Test message 1',
             'trace' => ['tr1' => 'ttttttttttt1'],
@@ -2621,5 +2619,47 @@ class TestController extends FController
 
         echo '<br><br>';
         return date('Y-m-d H:i:s');
+    }
+
+    public function actionRandomProbability()
+    {
+
+        $games = [
+            ['name' => 'Game 1', 'ver' => 2], //  2/15
+            ['name' => 'Game 2', 'ver' => 0], // probability 0/15
+            ['name' => 'Game 3', 'ver' => 1], // probability 1/15
+            ['name' => 'Game 4', 'ver' => 4], // probability 4/15
+            ['name' => 'Game 5', 'ver' => 8], // probability 8/15
+        ];
+
+
+//        $games = [
+//            ['name' => 'Game 1', 'ver' => 50], // probability 2/15
+//            ['name' => 'Game 2', 'ver' => 50], // probability 0/15
+//        ];
+
+        $data = [];
+        $totalCount = 0;
+
+        for ($a = 1; $a < 1000; $a++) {
+            $i = AppHelper::getRandomProbabilityIndex($games, 'ver');
+            //echo $games[$i]['name'];
+            if (empty($data[$i])) {
+                $data[$i]['cnt'] = 0;
+            }
+            $data[$i]['cnt'] ++;
+            $totalCount++;
+        }
+        if (!$totalCount) {
+            $totalCount = 1;
+        }
+
+        foreach ($data as $i => $item) {
+            $percent = round($item['cnt'] * 100 / $totalCount, 2);
+            //$data[$i]['percent'] = $percent;
+            $games[$i]['percent'] = $percent;
+        }
+
+        VarDumper::dump($games, 10, true);
     }
 }
