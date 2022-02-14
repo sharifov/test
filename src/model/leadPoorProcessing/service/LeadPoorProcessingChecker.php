@@ -5,6 +5,7 @@ namespace src\model\leadPoorProcessing\service;
 use common\models\Employee;
 use common\models\Lead;
 use modules\featureFlag\FFlag;
+use src\model\leadData\services\LeadDataCreateService;
 use src\model\leadPoorProcessingData\abac\dto\LeadPoorProcessingAbacDto;
 use src\model\leadPoorProcessingData\abac\LeadPoorProcessingAbacObject;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingData;
@@ -47,6 +48,8 @@ class LeadPoorProcessingChecker
         /** @abac LeadPoorProcessingAbacDto, LeadPoorProcessingAbacObject::OBJ_PERMISSION_RULE, LeadPoorProcessingAbacObject::DYNAMICAL_RULE, access to LPP logic */
         $leadAbacDto = new LeadPoorProcessingAbacDto($this->lead, (int) $this->lead->employee_id);
         if (!Yii::$app->abac->can($leadAbacDto, LeadPoorProcessingAbacObject::OBJ_PERMISSION_RULE, $this->dataKey, $employee)) {
+            LeadDataCreateService::createOrUpdateLppExclude($this->lead->id, (new \DateTimeImmutable()));
+
             throw new \RuntimeException('Abac access is failed. (' .
                 LeadPoorProcessingAbacObject::OBJ_PERMISSION_RULE . '/' . $this->dataKey . ')');
         }
@@ -68,6 +71,10 @@ class LeadPoorProcessingChecker
 
         /** @abac LeadPoorProcessingAbacDto, LeadPoorProcessingAbacObject::OBJ_PERMISSION_RULE, LeadPoorProcessingAbacObject::DYNAMICAL_RULE, access to LPP logic */
         $leadAbacDto = new LeadPoorProcessingAbacDto($this->lead, (int) $this->lead->employee_id);
-        return Yii::$app->abac->can($leadAbacDto, LeadPoorProcessingAbacObject::OBJ_PERMISSION_RULE, $this->dataKey, $employee);
+        if (!Yii::$app->abac->can($leadAbacDto, LeadPoorProcessingAbacObject::OBJ_PERMISSION_RULE, $this->dataKey, $employee)) {
+            LeadDataCreateService::createOrUpdateLppExclude($this->lead->id, (new \DateTimeImmutable()));
+            return false;
+        }
+        return true;
     }
 }
