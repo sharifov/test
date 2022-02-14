@@ -6,6 +6,7 @@ use common\models\Lead;
 use frontend\widgets\lead\editTool\ButtonWidget;
 use src\auth\Auth;
 use src\model\client\helpers\ClientFormatter;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\DetailView;
@@ -182,7 +183,17 @@ $isAgent = Auth::user()->isAgent();
                             'format' => 'raw',
 
                         ],
-
+                        [
+                            'attribute' => 'l_type',
+                            'value' => function (\common\models\Lead $model) {
+                                if (empty($model->l_type)) {
+                                    return Yii::$app->formatter->nullDisplay;
+                                }
+                                $types = ArrayHelper::merge(Lead::TYPE_LIST, [Lead::TYPE_BASIC => 'Basic']);
+                                return $types[$model->l_type] ?? 'undefined';
+                            },
+                            'format' => 'raw',
+                        ],
                         [
                             'attribute' => 'l_call_status_id',
                             'value' => function (\common\models\Lead $model) {

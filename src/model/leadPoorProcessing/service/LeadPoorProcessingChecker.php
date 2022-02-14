@@ -33,14 +33,13 @@ class LeadPoorProcessingChecker
 
     public function check(): void
     {
+        /** @fflag FFlag::FF_LPP_ENABLE, Lead Poor Processing Enable/Disable */
         if (!Yii::$app->ff->can(FFlag::FF_KEY_LPP_ENABLE)) {
             throw new \RuntimeException('Feature Flag (' . FFlag::FF_KEY_LPP_ENABLE . ') not enabled');
         }
-
         if (!$this->rule->isEnabled()) {
             throw new \RuntimeException('Rule (' . $this->dataKey . ') not enabled');
         }
-
         if (!$employee = Employee::find()->where(['id' => $this->lead->employee_id])->limit(1)->one()) {
             throw new \RuntimeException('LeadOwner not found by ID(' . $this->lead->employee_id . ')');
         }
@@ -57,6 +56,7 @@ class LeadPoorProcessingChecker
 
     public function isChecked(): bool
     {
+        /** @fflag FFlag::FF_LPP_ENABLE, Lead Poor Processing Enable/Disable */
         if (!Yii::$app->ff->can(FFlag::FF_KEY_LPP_ENABLE)) {
             return false;
         }

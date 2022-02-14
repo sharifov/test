@@ -131,6 +131,7 @@ class LeadPoorProcessingService
         ?string $description = null,
         int $priority = 100
     ): void {
+        /** @fflag FFlag::FF_LPP_ENABLE, Lead Poor Processing Enable/Disable */
         if (!Yii::$app->ff->can(FFlag::FF_KEY_LPP_ENABLE)) {
             return;
         }
@@ -158,6 +159,7 @@ class LeadPoorProcessingService
         ?string $description = null,
         int $priority = 100
     ): void {
+        /** @fflag FFlag::FF_LPP_ENABLE, Lead Poor Processing Enable/Disable */
         if (!Yii::$app->ff->can(FFlag::FF_KEY_LPP_ENABLE)) {
             return;
         }

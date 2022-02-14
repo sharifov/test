@@ -2,8 +2,10 @@
 
 namespace common\components\jobs;
 
+use modules\featureFlag\FFlag;
 use src\helpers\app\AppHelper;
 use src\model\leadPoorProcessing\service\rules\LeadPoorProcessingRuleFactory;
+use Yii;
 use yii\helpers\ArrayHelper;
 use yii\queue\JobInterface;
 
@@ -48,8 +50,11 @@ class LeadPoorProcessingJob extends BaseJob implements JobInterface
                 }
                 $leadPoorProcessingService->handle();
             } catch (\RuntimeException | \DomainException $throwable) {
-                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
-                \Yii::warning($message, 'LeadPoorProcessingJob:execute:Exception');
+                /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
+                if (Yii::$app->ff->can(FFlag::FF_KEY_DEBUG)) {
+                    $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
+                    \Yii::warning($message, 'LeadPoorProcessingJob:execute:Exception');
+                }
             } catch (\Throwable $throwable) {
                 $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
                 \Yii::error($message, 'LeadPoorProcessingJob:execute:Throwable');
