@@ -107,7 +107,7 @@ class QCallService
             'now'
         );
 
-        if (!empty($clientPhone) && SettingHelper::isPhoneNumberRedialEnabled()) {
+        if (!empty($clientPhone) && SettingHelper::leadRedialEnabled() && SettingHelper::isPhoneNumberRedialEnabled()) {
             $phoneNumberRedial = PhoneNumberRedialQuery::getOneMatchingByClientPhone($clientPhone->phone);
             if ($phoneNumberRedial) {
                 $phoneFrom = $phoneNumberRedial->phoneList->pl_phone_number;
