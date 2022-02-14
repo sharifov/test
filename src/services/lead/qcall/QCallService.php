@@ -13,6 +13,7 @@ use common\models\StatusWeight;
 use src\helpers\setting\SettingHelper;
 use src\model\leadRedial\queue\ClientPhones;
 use src\model\leadRedial\job\LeadRedialAssignToUsersJob;
+use src\model\phoneNumberRedial\entity\Scopes\PhoneNumberRedialQuery;
 use src\repositories\lead\LeadFlowRepository;
 use src\repositories\lead\LeadQcallRepository;
 use Yii;
@@ -105,6 +106,13 @@ class QCallService
             $clientGmt,
             'now'
         );
+
+        if (!empty($clientPhone) && SettingHelper::isPhoneNumberRedialEnabled()) {
+            $phoneNumberRedial = PhoneNumberRedialQuery::getOneMatchingByClientPhone($clientPhone->phone);
+            if ($phoneNumberRedial) {
+                $phoneFrom = $phoneNumberRedial->phoneList->pl_phone_number;
+            }
+        }
 
         $phone = $phoneFrom ?: $this->findPhone(null, $qConfig->qc_phone_switch, $findPhoneParams);
 
