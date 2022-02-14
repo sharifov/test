@@ -205,7 +205,7 @@ class UserFeedbackCrudController extends FController
                     'userFeedbackFileId' => $userFeedbackFileId
                 ], 'info\UserFeedbackCrudController::actionCreateAjax::bugReport');
 
-                return '';
+                return "<script>$('#modal-lg').modal('hide');";
             } catch (\RuntimeException $e) {
                 $form->addError('general', $e->getMessage());
             } catch (\Throwable $e) {
