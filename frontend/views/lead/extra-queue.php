@@ -198,22 +198,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ]
         ],
         [
-            'label' => 'Rating',
-            'contentOptions' => [
-                'style' => 'width: 90px;',
-                'class' => 'text-center'
-            ],
-            'options' => [
-                'class' => 'text-right'
-            ],
-            'value' => static function (Lead $lead) {
-                return Lead::getRating2($lead->rating);
-            },
-            'format' => 'raw'
-        ],
-
-
-        [
             'class' => ActionColumn::class,
             'template' => '{take} <br> {view}',
             'buttons' => [
