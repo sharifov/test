@@ -32,7 +32,7 @@ class ClientChatUserAccessJob extends BaseJob implements \yii\queue\JobInterface
                 throw new NotFoundException('Chat not found by id: ' . $this->chatId);
             }
 
-            if (!$chat->isPending() && !$chat->isTransfer()) {
+            if (!$chat->isPending() && !$chat->isTransfer() && !$chat->isIdle()) {
                 \Yii::$app->redis->del($key);
                 return;
             }
