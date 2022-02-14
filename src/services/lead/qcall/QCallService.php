@@ -111,6 +111,12 @@ class QCallService
             $phoneNumberRedial = PhoneNumberRedialQuery::getOneMatchingByClientPhone($clientPhone->phone);
             if ($phoneNumberRedial) {
                 $phoneFrom = $phoneNumberRedial->phoneList->pl_phone_number;
+                Yii::info([
+                    'matchedPhone' => $phoneFrom,
+                    'pattern' => $phoneNumberRedial->pnr_phone_pattern,
+                    'phoneTo' => $clientPhone->phone,
+                    'phoneNumberRedialId' => $phoneNumberRedial->pnr_id
+                ], 'info\qCallService::create::phoneNumberRedialReplace');
             }
         }
 
