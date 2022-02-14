@@ -23,8 +23,9 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('Create Phone Number Redial', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-    <?php Pjax::begin(['id' => 'pjax-PhoneNumberRedial']); ?>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php Pjax::begin(['id' => 'pjax-PhoneNumberRedial22']); ?>
+
+    <?= $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,

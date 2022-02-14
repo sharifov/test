@@ -2,11 +2,14 @@
 
 namespace src\model\phoneNumberRedial\entity;
 
+use src\model\phoneList\entity\PhoneList;
 use yii\data\ActiveDataProvider;
-use src\model\phoneNumberRedial\entity\PhoneNumberRedial;
+use yii\db\Expression;
 
 class PhoneNumberRedialSearch extends PhoneNumberRedial
 {
+    public $searchPatternByPhone;
+
     public function rules(): array
     {
         return [
@@ -20,7 +23,7 @@ class PhoneNumberRedialSearch extends PhoneNumberRedial
 
             ['pnr_phone_pattern', 'safe'],
 
-            ['pnr_pl_id', 'integer'],
+            ['pnr_pl_id', 'string'],
 
             ['pnr_priority', 'integer'],
 
@@ -29,6 +32,9 @@ class PhoneNumberRedialSearch extends PhoneNumberRedial
             ['pnr_updated_dt', 'safe'],
 
             ['pnr_updated_user_id', 'integer'],
+
+            ['searchPatternByPhone', 'string'],
+            ['searchPatternByPhone', 'trim'],
         ];
     }
 
@@ -62,6 +68,13 @@ class PhoneNumberRedialSearch extends PhoneNumberRedial
 
         $query->andFilterWhere(['like', 'pnr_phone_pattern', $this->pnr_phone_pattern])
             ->andFilterWhere(['like', 'pnr_name', $this->pnr_name]);
+
+        if ($this->searchPatternByPhone) {
+            $query->join('inner join', PhoneList::tableName(), 'pnr_pl_id = pl_id');
+            $query->andWhere(new Expression(" :phone REGEXP CONCAT('^', pnr_phone_pattern, '$') = 1 "), [
+                'phone' => $this->searchPatternByPhone
+            ]);
+        }
 
         return $dataProvider;
     }

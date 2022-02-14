@@ -1,11 +1,11 @@
 <?php
 
 use yii\bootstrap4\Html;
-use common\components\bootstrap4\activeForm\ActiveForm;
+use yii\bootstrap\ActiveForm;
 
 /* @var $this yii\web\View */
 /* @var $model src\model\phoneNumberRedial\entity\PhoneNumberRedialSearch */
-/* @var $form common\components\bootstrap4\activeForm\ActiveForm */
+/* @var $form yii\bootstrap\ActiveForm */
 ?>
 
 <div class="phone-number-redial-search">
@@ -17,8 +17,14 @@ use common\components\bootstrap4\activeForm\ActiveForm;
             'data-pjax' => 1
         ],
     ]); ?>
+    <div class="row">
+        <div class="col-md-2">
+            <?= $form->field($model, 'searchPatternByPhone') ?>
+        </div>
+    </div>
 
-    <?= $form->field($model, 'pnr_id') ?>
+
+  <?php /* $form->field($model, 'pnr_id') ?>
 
     <?= $form->field($model, 'pnr_project_id') ?>
 
@@ -26,7 +32,7 @@ use common\components\bootstrap4\activeForm\ActiveForm;
 
     <?= $form->field($model, 'pnr_pl_id') ?>
 
-    <?= $form->field($model, 'pnr_name') ?>
+    <?php $form->field($model, 'pnr_name') */ ?>
 
     <?php // echo $form->field($model, 'pnr_enabled') ?>
 
