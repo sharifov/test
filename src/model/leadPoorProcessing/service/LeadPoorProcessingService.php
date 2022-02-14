@@ -77,8 +77,11 @@ class LeadPoorProcessingService
                         $removedCount++;
                     }
                 } catch (\RuntimeException | \DomainException $throwable) {
-                    $message = ArrayHelper::merge(AppHelper::throwableLog($throwable, true), $logData);
-                    \Yii::warning($message, 'LeadPoorProcessingService:removeFromLead:Exception');
+                    /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
+                    if (Yii::$app->ff->can(FFlag::FF_KEY_DEBUG)) {
+                        $message = ArrayHelper::merge(AppHelper::throwableLog($throwable, true), $logData);
+                        \Yii::warning($message, 'LeadPoorProcessingService:removeFromLead:Exception');
+                    }
                 } catch (\Throwable $throwable) {
                     $message = ArrayHelper::merge(AppHelper::throwableLog($throwable, true), $logData);
                     \Yii::error($message, 'LeadPoorProcessingService:removeFromLead:Throwable');
@@ -117,8 +120,11 @@ class LeadPoorProcessingService
             $leadPoorProcessingLogRepository = new LeadPoorProcessingLogRepository($leadPoorProcessingLog);
             $leadPoorProcessingLogRepository->save(true);
         } catch (\RuntimeException | \DomainException $throwable) {
-            $message = ArrayHelper::merge(AppHelper::throwableLog($throwable, true), $logData);
-            \Yii::info($message, 'info\LeadPoorProcessingService:removeFromLeadAndKey:Exception');
+            /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
+            if (Yii::$app->ff->can(FFlag::FF_KEY_DEBUG)) {
+                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable, true), $logData);
+                \Yii::info($message, 'info\LeadPoorProcessingService:removeFromLeadAndKey:Exception');
+            }
         } catch (\Throwable $throwable) {
             $message = ArrayHelper::merge(AppHelper::throwableLog($throwable, true), $logData);
             \Yii::error($message, 'LeadPoorProcessingService:removeFromLeadAndKey:Throwable');
