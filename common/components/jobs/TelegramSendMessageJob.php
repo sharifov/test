@@ -41,6 +41,7 @@ class TelegramSendMessageJob extends BaseJob implements RetryableJobInterface
                     'chat_id' => $telegramChatId,
                     'text' => TelegramService::prepareText($this->text),
                     'parse_mode' => 'markdown',
+                    'disable_web_page_preview' => false
                 ]);
                 unset($tgm);
                 return true;
