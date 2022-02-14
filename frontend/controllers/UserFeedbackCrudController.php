@@ -246,9 +246,10 @@ class UserFeedbackCrudController extends FController
                  */
                 $this->userFeedbackService->update($model, $this->request->post());
                 return $this->redirect(['view', 'uf_id' => $model->uf_id, 'uf_created_dt' => $model->uf_created_dt]);
-            } else {
-                throw new \RuntimeException('Invalid POST data');
             }
+            return $this->render('update', [
+                'model' => $model,
+            ]);
         } catch (\RuntimeException | \DomainException $e) {
             Yii::warning(AppHelper::throwableFormatter($e), 'UserFeedbackCrudController::actionUpdate:exception');
             return $this->renderAjax('_error', [
