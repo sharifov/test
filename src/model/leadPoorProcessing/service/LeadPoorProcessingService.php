@@ -7,6 +7,7 @@ use common\components\jobs\LeadPoorProcessingRemoverJob;
 use common\models\EmailTemplateType;
 use common\models\Employee;
 use common\models\Lead;
+use modules\featureFlag\FFlag;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
 use src\auth\Auth;
@@ -130,13 +131,16 @@ class LeadPoorProcessingService
         ?string $description = null,
         int $priority = 100
     ): void {
+        if (!Yii::$app->ff->can(FFlag::FF_KEY_LPP_ENABLE)) {
+            return;
+        }
+
         $logData = [
             'leadId' => $leadId,
             'dataKeys' => $dataKeys,
         ];
 
         try {
-            self::checkAbacAccess($leadId);
             $job = new LeadPoorProcessingJob($leadId, $dataKeys, $description);
             \Yii::$app->queue_job->priority($priority)->push($job);
         } catch (\RuntimeException | \DomainException $throwable) {
@@ -154,12 +158,15 @@ class LeadPoorProcessingService
         ?string $description = null,
         int $priority = 100
     ): void {
+        if (!Yii::$app->ff->can(FFlag::FF_KEY_LPP_ENABLE)) {
+            return;
+        }
+
         $logData = [
             'leadId' => $leadId,
             'dataKeys' => $dataKeys,
         ];
         try {
-            self::checkAbacAccess($leadId);
             $job = new LeadPoorProcessingRemoverJob($leadId, $dataKeys, $description);
             \Yii::$app->queue_job->priority($priority)->push($job);
         } catch (\RuntimeException | \DomainException $throwable) {
@@ -182,21 +189,5 @@ class LeadPoorProcessingService
             throw new \RuntimeException('EmailTemplateType not found by(' . $templateKey . ')');
         }
         return (bool) ArrayHelper::getValue($tpl->etp_params_json, 'quotes.selectRequired', false);
-    }
-
-    private static function checkAbacAccess(int $leadId): void
-    {
-        if (!$lead = Lead::find()->where(['id' => $leadId])->limit(1)->one()) {
-            throw new \RuntimeException('Lead not found by ID(' . $leadId . ')');
-        }
-        if (!$employee = Employee::find()->where(['id' => $lead->employee_id])->limit(1)->one()) {
-            throw new \RuntimeException('LeadOwner not found by ID(' . $lead->employee_id . ')');
-        }
-
-        /** @abac $leadAbacDto, LeadAbacObject::LOGIC_POOR_PROCESSING, LeadAbacObject::ACTION_ACCESS, add to LeadPoorProcessingJob */
-        $leadAbacDto = new LeadAbacDto($lead, (int) $lead->employee_id);
-        if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_POOR_PROCESSING, LeadAbacObject::ACTION_ACCESS, $employee)) {
-            throw new \RuntimeException('Abac access is failed. (' . LeadAbacObject::LOGIC_POOR_PROCESSING . '/' . LeadAbacObject::ACTION_ACCESS . ')');
-        }
     }
 }
