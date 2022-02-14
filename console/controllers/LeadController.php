@@ -8,10 +8,12 @@ use common\models\LeadFlightSegment;
 use common\models\LeadFlow;
 use common\models\LeadQcall;
 use common\models\Task;
+use modules\featureFlag\FFlag;
 use src\exception\BoResponseException;
 use src\helpers\app\AppHelper;
 use src\helpers\setting\SettingHelper;
 use src\model\leadPoorProcessing\entity\LeadPoorProcessing;
+use src\model\leadPoorProcessing\service\LeadPoorProcessingChecker;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadPoorProcessing\service\LeadToExtraQueueService;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
@@ -484,6 +486,12 @@ class LeadController extends Controller
         echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
 
+        /** @fflag FFlag::FF_LPP_ENABLE, Lead Poor Processing Enable/Disable */
+        if (!Yii::$app->ff->can(FFlag::FF_KEY_LPP_ENABLE)) {
+            echo Console::renderColoredString('%y --- Feature Flag (' . FFlag::FF_KEY_LPP_ENABLE . ') not enabled %n'), PHP_EOL;
+            exit();
+        }
+
         $time_start = microtime(true);
         $currentDT = new \DateTimeImmutable();
         $leadsExpiration = Lead::find()
@@ -530,11 +538,16 @@ class LeadController extends Controller
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
     }
 
-
     public function actionLppScheduledCommunication(): void
     {
         echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+
+        /** @fflag FFlag::FF_LPP_ENABLE, Lead Poor Processing Enable/Disable */
+        if (!Yii::$app->ff->can(FFlag::FF_KEY_LPP_ENABLE)) {
+            echo Console::renderColoredString('%y --- Feature Flag (' . FFlag::FF_KEY_LPP_ENABLE . ') not enabled %n'), PHP_EOL;
+            exit();
+        }
 
         $time_start = microtime(true);
         $scheduledCommunicationRule = LeadPoorProcessingDataQuery::getRuleByKey(

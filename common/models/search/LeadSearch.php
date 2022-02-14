@@ -2224,11 +2224,11 @@ class LeadSearch extends Lead
         }
         if ($this->lead_user_rating) {
             $leadIds = LeadUserRatingQuery::getLeadIdsByUserAndRating($user->id, $this->lead_user_rating);
-            $query->andFilterWhere([
-                'in',
-                'id',
-                $leadIds
-            ]);
+                $query->andWhere([
+                    'in',
+                    'id',
+                    $leadIds
+                ]);
         }
         if ($this->created) {
             $query->andFilterWhere(['>=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created))])

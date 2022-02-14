@@ -12,6 +12,8 @@ use modules\user\userFeedback\entity\search\UserFeedbackSearch;
 use modules\user\userFeedback\entity\UserFeedbackData;
 use modules\user\userFeedback\entity\UserFeedbackFile;
 use modules\user\userFeedback\forms\UserFeedbackBugForm;
+use modules\user\userFeedback\forms\UserFeedbackUpdateForm;
+use modules\user\userFeedback\service\UserFeedbackService;
 use modules\user\userFeedback\UserFeedbackFileRepository;
 use modules\user\userFeedback\UserFeedbackRepository;
 use src\auth\Auth;
@@ -34,6 +36,7 @@ use yii\web\Response;
 class UserFeedbackCrudController extends FController
 {
     private UserFeedbackRepository $userFeedbackRepository;
+    private UserFeedbackService $userFeedbackService;
     private UserFeedbackFileRepository $userFeedbackFileRepository;
     private MultipleUpdateService $multipleUpdateService;
 
@@ -41,11 +44,13 @@ class UserFeedbackCrudController extends FController
         $id,
         $module,
         UserFeedbackRepository $userFeedbackRepository,
+        UserFeedbackService $userFeedbackService,
         UserFeedbackFileRepository $userFeedbackFileRepository,
         MultipleUpdateService $multipleUpdateService,
         $config = []
     ) {
         $this->userFeedbackRepository = $userFeedbackRepository;
+        $this->userFeedbackService = $userFeedbackService;
         $this->userFeedbackFileRepository = $userFeedbackFileRepository;
         $this->multipleUpdateService = $multipleUpdateService;
         parent::__construct($id, $module, $config);
@@ -174,7 +179,6 @@ class UserFeedbackCrudController extends FController
                     'userIndicatedDate' => $form->date,
                     'userIndicatedTime' => $form->time
                 ]);
-                $userFeedback = UserFeedback::createNewBug($form->title, $form->message, $dto->toArray());
                 $userFeedbackFileId = null;
                 if ($form->screenshot) {
                     $userFeedbackFile = UserFeedbackFile::create(
@@ -184,12 +188,15 @@ class UserFeedbackCrudController extends FController
                         $form->title,
                         $form->screenshot
                     );
-                    $userFeedbackId = $this->userFeedbackRepository->save($userFeedback);
+                    /**
+                     * @throws \Throwable
+                     */
+                    $userFeedbackId = $this->userFeedbackService->create($form, $dto);
                     $userFeedbackFile->uff_uf_id = $userFeedbackId;
                     $this->userFeedbackFileRepository->save($userFeedbackFile);
                     $userFeedbackFileId = $userFeedbackFile->uff_id;
                 } else {
-                    $userFeedbackId = $this->userFeedbackRepository->save($userFeedback);
+                    $userFeedbackId = $this->userFeedbackService->create($form, $dto);
                 }
                 Yii::info([
                     'message' => 'User create an bug report',
@@ -198,7 +205,7 @@ class UserFeedbackCrudController extends FController
                     'userFeedbackFileId' => $userFeedbackFileId
                 ], 'info\UserFeedbackCrudController::actionCreateAjax::bugReport');
 
-                return "<script>$('#modal-lg').modal('hide'); createNotify('Success', 'Bug report created successfully', 'success')</script>";
+                return "<script>$('#modal-lg').modal('hide');";
             } catch (\RuntimeException $e) {
                 $form->addError('general', $e->getMessage());
             } catch (\Throwable $e) {
@@ -226,18 +233,34 @@ class UserFeedbackCrudController extends FController
      */
     public function actionUpdate($uf_id, $uf_created_dt)
     {
-        $model = $this->findModel($uf_id, $uf_created_dt);
-
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->validate()) {
-            $model->uf_data_json = @json_decode($model->uf_data_json);
-            if ($model->save()) {
+        try {
+            $model = $this->findModel($uf_id, $uf_created_dt);
+            if ($this->request->isPost) {
+                $form = new UserFeedbackUpdateForm();
+                $form->load($this->request->post());
+                if (!$form->validate()) {
+                    throw new \RuntimeException(implode(', ', $form->getErrorSummary(true)));
+                }
+                /**
+                 * @throws \Throwable
+                 */
+                $this->userFeedbackService->update($model, $this->request->post());
                 return $this->redirect(['view', 'uf_id' => $model->uf_id, 'uf_created_dt' => $model->uf_created_dt]);
             }
+            return $this->render('update', [
+                'model' => $model,
+            ]);
+        } catch (\RuntimeException | \DomainException $e) {
+            Yii::warning(AppHelper::throwableFormatter($e), 'UserFeedbackCrudController::actionUpdate:exception');
+            return $this->renderAjax('_error', [
+                'error' => $e->getMessage()
+            ]);
+        } catch (\Throwable $e) {
+            Yii::error(AppHelper::throwableLog($e), 'UserFeedbackCrudController:actionUpdate:Throwable');
+            return $this->renderAjax('_error', [
+                'error' => 'Server Error'
+            ]);
         }
-
-        return $this->render('update', [
-            'model' => $model,
-        ]);
     }
 
     public function actionMultipleUpdateShow()
@@ -308,8 +331,7 @@ class UserFeedbackCrudController extends FController
             $report = $this->multipleUpdateService->update($form);
             return $this->asJson([
                 'success' => true,
-                'message' => count($report) . ' rows affected.',
-                'text' => $this->multipleUpdateService->formatReport($report),
+                'message' => count($report) . ' rows affected.' . $this->multipleUpdateService->formatReport($report),
             ]);
         }
         throw new BadRequestHttpException();

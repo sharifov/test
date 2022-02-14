@@ -3,9 +3,11 @@
 namespace common\components\jobs;
 
 use common\models\Lead;
+use modules\featureFlag\FFlag;
 use src\helpers\app\AppHelper;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadPoorProcessing\service\rules\LeadPoorProcessingRuleFactory;
+use Yii;
 use yii\helpers\ArrayHelper;
 use yii\queue\JobInterface;
 
@@ -49,8 +51,11 @@ class LeadPoorProcessingRemoverJob extends BaseJob implements JobInterface
                 LeadPoorProcessingService::removeFromLeadAndKey($lead, $dataKey, $this->description);
             }
         } catch (\RuntimeException | \DomainException $throwable) {
-            $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
-            \Yii::info($message, 'LeadPoorProcessingRemoverJob:execute:Exception');
+            /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
+            if (Yii::$app->ff->can(FFlag::FF_KEY_DEBUG)) {
+                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
+                \Yii::info($message, 'LeadPoorProcessingRemoverJob:execute:Exception');
+            }
         } catch (\Throwable $throwable) {
             $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
             \Yii::error($message, 'LeadPoorProcessingRemoverJob:execute:Throwable');

@@ -3,7 +3,7 @@
 namespace frontend\widgets\multipleUpdate\userFeedback;
 
 use modules\user\userFeedback\entity\UserFeedback;
-use modules\user\userFeedback\UserFeedbackRepository;
+use modules\user\userFeedback\service\UserFeedbackService;
 use yii\bootstrap4\Html;
 
 /**
@@ -14,11 +14,11 @@ use yii\bootstrap4\Html;
 class MultipleUpdateService
 {
     private $report;
-    private UserFeedbackRepository $userFeedbackRepository;
+    private UserFeedbackService $userFeedbackService;
 
-    public function __construct(UserFeedbackRepository $repository)
+    public function __construct(UserFeedbackService $service)
     {
-        $this->userFeedbackRepository = $repository;
+        $this->userFeedbackService = $service;
         $this->report = [];
     }
 
@@ -40,16 +40,14 @@ class MultipleUpdateService
 //                $this->addMessage('Lead ID: ' . $leadId . ' with status "' . $lead->getStatusName() . '" is not available for Multiple Update (permission: leadSearchMultipleUpdate)'); //  Available only status: Processing, FollowUp, Hold, Trash, Snooze
 //                continue;
 //            }
-
-            $userFeedback->uf_status_id = $form->statusId;
-            if ($form->typeId) {
-                $userFeedback->uf_type_id = $form->typeId;
-            }
-
+            $form->typeId ? $typeId = $form->typeId : $typeId = null;
             try {
-                $this->userFeedbackRepository->save($userFeedback);
+                $this->userFeedbackService->updateStatusAndTypeId($userFeedback, $form->statusId, $typeId);
             } catch (\RuntimeException $e) {
                 $this->addMessage('UserFeedback(' . $id . ') saving failed: ' . $e->getMessage());
+            } catch (\Throwable $e) {
+                \Yii::error($e, 'userFeedback:MultipleUpdateService:update');
+                $this->addMessage('UserFeedback(' . $id . ') saving failed: server error');
             }
         }
 
@@ -68,7 +66,7 @@ class MultipleUpdateService
 
         $out = '<ul>';
         foreach ($reports as $report) {
-            $out .= Html::tag('li', Html::tag('span', $report, ['style' => 'color: #28a048']));
+            $out .= Html::tag('li', Html::tag('span', $report, ['style' => 'color:red']));
         }
         return $out . '</ul>';
     }

@@ -41,6 +41,8 @@ class LeadToExtraQueueService
 
     public function handle(): void
     {
+        (new LeadPoorProcessingChecker($this->getLead(), $this->getRule()->lppd_key))->check();
+
         $reason = Html::encode($this->getRule()->lppd_description);
         $ownerId = $this->getLead()->employee_id;
 

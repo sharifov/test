@@ -3,12 +3,11 @@
 namespace src\model\leadPoorProcessing\service\rules;
 
 use common\models\Lead;
-use src\helpers\ErrorsToStringHelper;
 use src\model\leadPoorProcessing\entity\LeadPoorProcessing;
 use src\model\leadPoorProcessing\entity\LeadPoorProcessingQuery;
 use src\model\leadPoorProcessing\repository\LeadPoorProcessingRepository;
+use src\model\leadPoorProcessing\service\LeadPoorProcessingChecker;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingData;
-use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataQuery;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLog;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
@@ -42,15 +41,7 @@ class AbstractLeadPoorProcessingService
      */
     public function checkCondition(): bool
     {
-        if (!$this->getRule()->isEnabled()) {
-            throw new \RuntimeException('Rule (' . $this->getRule()->lppd_key . ') not enabled');
-        }
-        if (!$this->getLead()->isProcessing()) {
-            throw new \RuntimeException('Lead (' . $this->getLead()->id . ') not in status "processing"');
-        }
-        if (!$this->getLead()->hasOwner()) {
-            throw new \RuntimeException('Lead (' . $this->getLead()->id . ') not has owner');
-        }
+        (new LeadPoorProcessingChecker($this->getLead(), $this->getRule()->lppd_key))->check();
         return true;
     }
 
