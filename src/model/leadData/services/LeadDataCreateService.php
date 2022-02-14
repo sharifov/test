@@ -70,12 +70,46 @@ class LeadDataCreateService
         return self::createValueTimestamp($lead->id, LeadDataKeyDictionary::KEY_WE_FIRST_CALL_NOT_PICKED);
     }
 
+    public static function createValueDT(int $leadId, string $key, \DateTimeImmutable $date): LeadData
+    {
+        $leadDataRepository = new LeadDataRepository();
+        $leadData = LeadData::create(
+            $leadId,
+            $key,
+            $date->format('Y-m-d H:i:s')
+        );
+        if (!$leadData->validate()) {
+            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($leadData));
+        }
+
+        $leadDataRepository->save($leadData);
+        return $leadData;
+    }
+
+    public static function createOrUpdateLppExclude(int $leadId, \DateTimeImmutable $date): LeadData
+    {
+        if ($leadData = self::getOne($leadId, LeadDataKeyDictionary::KEY_LPP_EXCLUDE)) {
+            $leadData->ld_field_value = $date->format('Y-m-d H:i:s');
+            (new LeadDataRepository())->save($leadData);
+            return $leadData;
+        }
+        return self::createValueDT($leadId, LeadDataKeyDictionary::KEY_LPP_EXCLUDE, $date);
+    }
+
     public static function isExist(int $leadId, string $key): bool
     {
         return LeadData::find()
             ->where(['ld_lead_id' => $leadId])
             ->andWhere(['ld_field_key' => $key])
             ->exists();
+    }
+
+    public static function getOne(int $leadId, string $key): ?LeadData
+    {
+        return LeadData::find()
+            ->where(['ld_lead_id' => $leadId])
+            ->andWhere(['ld_field_key' => $key])
+            ->one();
     }
 
     public function getInserted(): array

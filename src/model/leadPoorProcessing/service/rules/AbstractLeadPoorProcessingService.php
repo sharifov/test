@@ -13,8 +13,6 @@ use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLog;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
 use src\model\leadPoorProcessingLog\repository\LeadPoorProcessingLogRepository;
 
-use function Amp\Promise\timeoutWithDefault;
-
 /**
  * Class AbstractLeadPoorProcessingService
  */
