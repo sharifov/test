@@ -80,6 +80,7 @@ use src\model\leadRedial\entity\CallRedialUserAccessRepository;
 use src\model\leadRedial\priorityLevel\ConversionFetcher;
 use src\model\leadRedial\queue\CallNextLeads;
 use src\model\leadRedial\queue\RedialCall;
+use src\model\phoneNumberRedial\entity\Scopes\PhoneNumberRedialQuery;
 use src\model\project\entity\params\Params;
 use src\model\user\reports\stats\UserStatsReport;
 use src\model\voip\phoneDevice\device\ReadyVoipDevice;
@@ -725,5 +726,11 @@ JSON;
         $logExecutionTime->end();
 
         var_dump($logExecutionTime->getResult());
+    }
+
+    public function actionTestPhoneNumberRedialQuery()
+    {
+        var_dump(PhoneNumberRedialQuery::getOneMatchingByClientPhone('+185553464564'));
+        die;
     }
 }

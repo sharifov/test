@@ -21,10 +21,10 @@ if (!YII_ENV_TEST) {
     $config['modules']['gii'] = [
         'class' => 'yii\gii\Module',
         'allowedIPs' => ['*'],
-        'generators' => [
-            'model' => ['class' => \common\components\gii\model\Generator::class],
-            'crud' => ['class' => \common\components\gii\crud\Generator::class],
-        ],
+//        'generators' => [
+//            'model' => ['class' => \common\components\gii\model\Generator::class],
+//            'crud' => ['class' => \common\components\gii\crud\Generator::class],
+//        ],
     ];
 }
 
