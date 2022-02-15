@@ -115,7 +115,8 @@ class QCallService
                     'matchedPhone' => $phoneFrom,
                     'pattern' => $phoneNumberRedial->pnr_phone_pattern,
                     'phoneTo' => $clientPhone->phone,
-                    'phoneNumberRedialId' => $phoneNumberRedial->pnr_id
+                    'phoneNumberRedialId' => $phoneNumberRedial->pnr_id,
+                    'leadId' => $leadId
                 ], 'info\qCallService::create::phoneNumberRedialReplace');
             }
         }
