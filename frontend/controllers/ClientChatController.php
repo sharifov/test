@@ -1245,7 +1245,7 @@ class ClientChatController extends FController
                     refreshChatPage(' . $form->cchId . '); 
                     
                     setTimeout(()=>
-                    clientChatHoldTimeProgressbar("'.$formatTimer.'",'.$maxProgressBar.','.$leftProgressBar.','.$warningZone.')
+                    clientChatHoldTimeProgressbar("' . $formatTimer . '",' . $maxProgressBar . ',' . $leftProgressBar . ',' . $warningZone . ')
                     ,500);
                     createNotify("Success", "Chat status changed to Hold", "success");</script>';
             } catch (\Throwable $throwable) {

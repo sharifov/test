@@ -510,7 +510,6 @@ $leads = $clientChat->leads;
 </div>
 
 <?php if (isset($clientChatHold)) :
-
     $formatTimer = ClientChatHoldService::isMoreThanHourLeft($clientChatHold) ? "%H:%M:%S" : "%M:%S";
     $maxProgressBar = $clientChatHold->deadlineStartDiffInSeconds();
     $leftProgressBar = $clientChatHold->deadlineNowDiffInSeconds();
@@ -520,7 +519,6 @@ $leads = $clientChat->leads;
     setTimeout(()=>window.clientChatHoldTimeProgressbar('$formatTimer',{$maxProgressBar},{$leftProgressBar},{$warningZone}),500);
     JS;
     $this->registerJs($js);
-
 endif; ?>
     <?php
     $js = <<<JS
