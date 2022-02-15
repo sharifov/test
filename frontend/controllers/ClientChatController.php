@@ -1243,7 +1243,7 @@ class ClientChatController extends FController
 
                 return '<script>$("#modal-sm").modal("hide"); 
                     refreshChatPage(' . $form->cchId . ');                     
-                    setTimeout(() => clientChatHoldTimeProgressbar("' . $formatTimer . '",' . $maxProgressBar . ',' . $leftProgressBar . ',' . $warningZone . '),500);
+                    setTimeout(() => clientChatHoldTimeProgressbar("' . $formatTimer . '",' . $maxProgressBar . ',' . $leftProgressBar . ',' . $warningZone . '), 2000);                    
                     createNotify("Success", "Chat status changed to Hold", "success");</script>';
             } catch (\Throwable $throwable) {
                 $form->addError('general', 'Internal Server Error');
