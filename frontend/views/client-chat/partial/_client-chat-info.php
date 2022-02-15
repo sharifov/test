@@ -509,61 +509,70 @@ $leads = $clientChat->leads;
     <?php // Pjax::end();?>
 </div>
 
-<?php if (isset($clientChatHold)) : ?>
-    <?php
-
-    $formatTimer = ClientChatHoldService::isMoreThanHourLeft($clientChatHold) ? '%H:%M:%S' : '%M:%S';
+<?php if (isset($clientChatHold)) :
+    $formatTimer = ClientChatHoldService::isMoreThanHourLeft($clientChatHold) ? "%H:%M:%S" : "%M:%S";
+    $maxProgressBar = $clientChatHold->deadlineStartDiffInSeconds();
+    $leftProgressBar = $clientChatHold->deadlineNowDiffInSeconds();
+    $warningZone = $clientChatHold->halfWarningSeconds();
 
     $js = <<<JS
+    setTimeout(() => window.clientChatHoldTimeProgressbar('$formatTimer', {$maxProgressBar}, {$leftProgressBar}, {$warningZone}), 500);
+    JS;
+    $this->registerJs($js);
+endif; ?>
+    <?php
+    $js = <<<JS
 
-    clearInterval(timerProgressBar);
-
-    var maxProgressBar = {$clientChatHold->deadlineStartDiffInSeconds()};
-    var leftProgressBar = {$clientChatHold->deadlineNowDiffInSeconds()};
-    var warningZone = {$clientChatHold->halfWarningSeconds()};
-    var progressBoxObj = $('#progressBar');
-    var progressLineObj = progressBoxObj.find('.progress-bar');
-    var progressBarWidth = 0;
-    var timerProgressBar;
-
-    startTimer(leftProgressBar);
-
-    function startTimer(sec) {
-        let seconds = new Date().getTime() + (1000 * sec);
-        $('#clock').countdown(seconds)
-            .on('update.countdown', function(event) {
-                let format = '{$formatTimer}';
-                $(this).html(event.strftime(format));
-                
-            })
-            .on('finish.countdown', function(event) {
-                 $('#clock').html('00:00');  
-                 $('#progress_bar_box').hide();               
-            });
-    }
+    window.clientChatHoldTimeProgressbar =  function (
+        formatTimer,
+        maxProgressBar,
+        leftProgressBar,
+        warningZone
+        ){
     
-    timerProgressBar = setInterval(function() {
+        var progressBoxObj = $('#progressBar');
+        var progressLineObj = progressBoxObj.find('.progress-bar');
+        var progressBarWidth = 0;
+        var timerProgressBar;
         
-        if (leftProgressBar <= 0) {
-            progressLineObj.removeClass('bg-warning progress-bar-animated progress-bar-striped');
-            progressLineObj.width(0);
-            clearInterval(timerProgressBar);
-            return false;
-        }
-        leftProgressBar--;
-        progressBarWidth = leftProgressBar * progressBoxObj.width() / maxProgressBar;
-        
-        if (leftProgressBar < warningZone) {
-            progressLineObj.removeClass('bg-info').addClass('bg-warning');
-        } 
-        progressLineObj.width(progressBarWidth);       
+        startTimer(leftProgressBar);
 
-    }, 1000);
+        function startTimer(sec) {
+            let seconds = new Date().getTime() + (1000 * sec);
+            $('#clock').countdown(seconds)
+                .on('update.countdown', function(event) {
+                    let format = formatTimer;
+                    $(this).html(event.strftime(format));
+                    
+                })
+                .on('finish.countdown', function(event) {
+                     $('#clock').html('00:00');  
+                     $('#progress_bar_box').hide();               
+                });
+        }
+    
+        timerProgressBar = setInterval(function() {
+            
+            if (leftProgressBar <= 0) {
+                progressLineObj.removeClass('bg-warning progress-bar-animated progress-bar-striped');
+                progressLineObj.width(0);
+                clearInterval(timerProgressBar);
+                return false;
+            }
+            leftProgressBar--;
+            progressBarWidth = leftProgressBar * progressBoxObj.width() / maxProgressBar;
+            
+            if (leftProgressBar < warningZone) {
+                progressLineObj.removeClass('bg-info').addClass('bg-warning');
+            } 
+            progressLineObj.width(progressBarWidth);       
+    
+        }, 1000);
+    }    
     
 JS;
     $this->registerJs($js);
     ?>
-<?php endif; ?>
 
 <?php
 $clientInfoUrl = \yii\helpers\Url::to(['/client/ajax-get-info']);
