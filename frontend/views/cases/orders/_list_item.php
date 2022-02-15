@@ -212,7 +212,9 @@ $orderAbacDto = new OrderAbacDto($order);
                     <th>Client Price</th>
                     <th></th>
                 </tr>
-                <?php foreach ($order->nonReprotectionProductQuotes as $productQuote) :
+                <?php
+//            \yii\helpers\VarDumper::dump($order->nonReprotectionProductQuotes, 9, true);
+                foreach ($order->nonReprotectionProductQuotes as $productQuote) :
 //                    $ordTotalPrice += $productQuote->pq_price;
 //                    $ordTotalFee += $productQuote->pq_service_fee_sum;
 //                    $ordClientTotalPrice += $productQuote->pq_client_price;
