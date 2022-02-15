@@ -516,7 +516,7 @@ $leads = $clientChat->leads;
     $warningZone = $clientChatHold->halfWarningSeconds();
 
     $js = <<<JS
-    setTimeout(()=>window.clientChatHoldTimeProgressbar('$formatTimer',{$maxProgressBar},{$leftProgressBar},{$warningZone}),500);
+    setTimeout(() => window.clientChatHoldTimeProgressbar('$formatTimer', {$maxProgressBar}, {$leftProgressBar}, {$warningZone}), 500);
     JS;
     $this->registerJs($js);
 endif; ?>
