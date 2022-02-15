@@ -67,6 +67,7 @@ use src\model\clientChatCouchNote\entity\ClientChatCouchNote;
 use src\model\clientChatFeedback\entity\ClientChatFeedbackSearch;
 use src\model\clientChatHold\ClientChatHoldRepository;
 use src\model\clientChatHold\entity\ClientChatHold;
+use src\model\clientChatHold\service\ClientChatHoldService;
 use src\model\clientChatMessage\entity\ClientChatMessage;
 use src\model\clientChatMessage\entity\search\ClientChatMessageSearch;
 use src\model\clientChatNote\ClientChatNoteRepository;
@@ -1235,8 +1236,17 @@ class ClientChatController extends FController
                     $this->clientChatHoldRepository->save($clientChatHold);
                 }
 
+                $formatTimer = ClientChatHoldService::isMoreThanHourLeft($clientChatHold) ? "%H:%M:%S" : "%M:%S";
+                $maxProgressBar = $clientChatHold->deadlineStartDiffInSeconds();
+                $leftProgressBar = $clientChatHold->deadlineNowDiffInSeconds();
+                $warningZone = $clientChatHold->halfWarningSeconds();
+
                 return '<script>$("#modal-sm").modal("hide"); 
                     refreshChatPage(' . $form->cchId . '); 
+                    
+                    setTimeout(()=>
+                    clientChatHoldTimeProgressbar("'.$formatTimer.'",'.$maxProgressBar.','.$leftProgressBar.','.$warningZone.')
+                    ,500);
                     createNotify("Success", "Chat status changed to Hold", "success");</script>';
             } catch (\Throwable $throwable) {
                 $form->addError('general', 'Internal Server Error');
