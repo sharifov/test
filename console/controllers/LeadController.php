@@ -518,8 +518,11 @@ class LeadController extends Controller
                 Console::updateProgress($processed, $count);
             } catch (\RuntimeException | \DomainException $throwable) {
                 $processed--;
-                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
-                \Yii::warning($message, 'LeadController:actionToExtraQueue:Exception');
+                /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
+                if (Yii::$app->ff->can(FFlag::FF_KEY_DEBUG)) {
+                    $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
+                    \Yii::warning($message, 'LeadController:actionToExtraQueue:Exception');
+                }
             } catch (\Throwable $throwable) {
                 $processed--;
                 $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
@@ -647,8 +650,11 @@ class LeadController extends Controller
                 Console::updateProgress($processed, $count);
             } catch (\RuntimeException | \DomainException $throwable) {
                 $processed--;
-                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
-                \Yii::info($message, 'LeadController:actionLppScheduledCommunication:Exception');
+                /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
+                if (Yii::$app->ff->can(FFlag::FF_KEY_DEBUG)) {
+                    $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
+                    \Yii::info($message, 'LeadController:actionLppScheduledCommunication:Exception');
+                }
             } catch (\Throwable $throwable) {
                 $processed--;
                 $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
