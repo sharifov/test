@@ -7,6 +7,7 @@ use common\models\Lead;
 use common\models\LeadFlightSegment;
 use common\models\LeadFlow;
 use common\models\LeadQcall;
+use common\models\Project;
 use common\models\Task;
 use modules\featureFlag\FFlag;
 use src\exception\BoResponseException;
@@ -572,18 +573,17 @@ class LeadController extends Controller
         $currentDT = new \DateTimeImmutable();
         $dateRule = $currentDT->modify('-' . $scheduledCommunicationRuleService->getIntervalHour() . ' hours');
 
-        $query = LeadFlow::find()
-            ->alias('lead_flow')
-            ->select(['lead_flow.lead_id', 'lead_flow.lf_owner_id AS owner_id'])
+        $query = Lead::find()
+            ->alias('leads')
+            ->select(['leads.id AS lead_id', 'leads.employee_id AS owner_id', 'projects.project_key'])
             ->innerJoin(
-                Lead::tableName() . ' AS leads',
-                'leads.id = lead_flow.lead_id AND leads.employee_id = lf_owner_id AND leads.status = ' . Lead::STATUS_PROCESSING
+                Project::tableName() . ' AS projects',
+                'leads.project_id = projects.id'
             )
-            ->where(['lead_flow.status' => Lead::STATUS_PROCESSING])
+            ->where(['leads.status' => Lead::STATUS_PROCESSING])
             ->andWhere(['>', 'leads.created', $firstLeadUserData->lud_created_dt])
-            ->andHaving(['<', 'MAX(lead_flow.created)', $dateRule->format('Y-m-d H:i:s')])
+            ->andWhere(['<', 'l_status_dt', $dateRule->format('Y-m-d H:i:s')])
             ->orderBy(['leads.id' => SORT_ASC])
-            ->groupBy(['lead_flow.lead_id', 'lead_flow.lf_owner_id'])
             ->asArray()
             ->all()
         ;
@@ -604,18 +604,20 @@ class LeadController extends Controller
                 continue;
             }
 
-            $isSmsOutCommunicationExist = LeadUserData::find()
-                    ->select(new Expression('COUNT(*) AS sms_out_cnt'))
-                    ->where(['lud_type_id' => LeadUserDataDictionary::TYPE_SMS_OUT])
-                    ->andWhere(['>=', 'lud_created_dt', $dateRule->format('Y-m-d H:i:s')])
-                    ->andWhere(['lud_lead_id' => $item['lead_id']])
-                    ->andWhere(['lud_user_id' => $item['owner_id']])
-                    ->andHaving(['>=', 'sms_out_cnt', $scheduledCommunicationRuleService->getSmsOut()])
-                    ->exists()
-            ;
-            if (!$isSmsOutCommunicationExist) {
-                $lppLeads[$item['lead_id']] = LeadUserDataDictionary::TYPE_SMS_OUT;
-                continue;
+            if (!in_array($item['project_key'], $scheduledCommunicationRuleService->getSmsExcludeProjects(), true)) {
+                $isSmsOutCommunicationExist = LeadUserData::find()
+                        ->select(new Expression('COUNT(*) AS sms_out_cnt'))
+                        ->where(['lud_type_id' => LeadUserDataDictionary::TYPE_SMS_OUT])
+                        ->andWhere(['>=', 'lud_created_dt', $dateRule->format('Y-m-d H:i:s')])
+                        ->andWhere(['lud_lead_id' => $item['lead_id']])
+                        ->andWhere(['lud_user_id' => $item['owner_id']])
+                        ->andHaving(['>=', 'sms_out_cnt', $scheduledCommunicationRuleService->getSmsOut()])
+                        ->exists()
+                ;
+                if (!$isSmsOutCommunicationExist) {
+                    $lppLeads[$item['lead_id']] = LeadUserDataDictionary::TYPE_SMS_OUT;
+                    continue;
+                }
             }
 
             $isEmailOutCommunicationExist = LeadUserData::find()
