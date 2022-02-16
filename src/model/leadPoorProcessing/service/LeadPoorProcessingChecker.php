@@ -47,10 +47,10 @@ class LeadPoorProcessingChecker
         /** @abac LeadPoorProcessingAbacDto, LeadPoorProcessingAbacObject::OBJ_PERMISSION_RULE, LeadPoorProcessingAbacObject::DYNAMICAL_RULE, access to LPP logic */
         $leadAbacDto = new LeadPoorProcessingAbacDto($this->lead, (int) $this->lead->employee_id);
         if (!Yii::$app->abac->can($leadAbacDto, LeadPoorProcessingAbacObject::OBJ_PERMISSION_RULE, $this->dataKey, $employee)) {
-            LeadDataCreateService::createOrUpdateLppExclude($this->lead->id, (new \DateTimeImmutable()));
+            LeadDataCreateService::getOrCreateLppExclude($this->lead->id, $this->dataKey, $employee->username);
 
             throw new \RuntimeException('Abac access is failed. (' .
-                LeadPoorProcessingAbacObject::OBJ_PERMISSION_RULE . '/' . $this->dataKey . ')');
+                LeadPoorProcessingAbacObject::OBJ_PERMISSION_RULE . '/' . $this->dataKey . '/' . $employee->username . ')');
         }
     }
 
@@ -72,7 +72,7 @@ class LeadPoorProcessingChecker
         /** @abac LeadPoorProcessingAbacDto, LeadPoorProcessingAbacObject::OBJ_PERMISSION_RULE, LeadPoorProcessingAbacObject::DYNAMICAL_RULE, access to LPP logic */
         $leadAbacDto = new LeadPoorProcessingAbacDto($this->lead, (int) $this->lead->employee_id);
         if (!Yii::$app->abac->can($leadAbacDto, LeadPoorProcessingAbacObject::OBJ_PERMISSION_RULE, $this->dataKey, $employee)) {
-            LeadDataCreateService::createOrUpdateLppExclude($this->lead->id, (new \DateTimeImmutable()));
+            LeadDataCreateService::getOrCreateLppExclude($this->lead->id, $this->dataKey, $employee->username);
             return false;
         }
         return true;
