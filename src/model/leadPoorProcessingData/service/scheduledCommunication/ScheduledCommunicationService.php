@@ -16,6 +16,7 @@ class ScheduledCommunicationService
     private int $smsOut = 1;
     private int $emailOffer = 1;
     private int $callOut = 2;
+    private array $smsExcludeProjects = ['priceline', 'kayak'];
 
     public function __construct(LeadPoorProcessingData $model)
     {
@@ -32,6 +33,7 @@ class ScheduledCommunicationService
         $this->smsOut = (int) ArrayHelper::getValue($this->model, 'lppd_params_json.smsOut', $this->smsOut);
         $this->emailOffer = (int) ArrayHelper::getValue($this->model, 'lppd_params_json.emailOffer', $this->emailOffer);
         $this->callOut = (int) ArrayHelper::getValue($this->model, 'lppd_params_json.callOut', $this->callOut);
+        $this->smsExcludeProjects = ArrayHelper::getValue($this->model, 'lppd_params_json.smsExcludeProjects', $this->smsExcludeProjects);
     }
 
     public function getIntervalHour(): int
@@ -52,5 +54,10 @@ class ScheduledCommunicationService
     public function getCallOut(): int
     {
         return $this->callOut;
+    }
+
+    public function getSmsExcludeProjects(): array
+    {
+        return $this->smsExcludeProjects;
     }
 }
