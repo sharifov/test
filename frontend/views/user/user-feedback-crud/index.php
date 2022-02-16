@@ -31,14 +31,16 @@ $columns = [
         'value' => static function (UserFeedback $model) {
             return $model->getTypeLabel();
         },
-        'format' => 'raw'
+        'format' => 'raw',
+        'filter' => UserFeedback::getTypeList()
     ],
     [
         'attribute' => 'uf_status_id',
         'value' => static function (UserFeedback $model) {
             return $model->getStatusLabel();
         },
-        'format' => 'raw'
+        'format' => 'raw',
+        'filter' => UserFeedback::getStatusList()
     ],
     'uf_title',
     [
