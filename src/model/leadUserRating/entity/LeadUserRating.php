@@ -34,13 +34,23 @@ class LeadUserRating extends \yii\db\ActiveRecord
     public const RATING_4 = 4;
     public const RATING_5 = 5;
 
-    public const RATING_LIST = [
-        'Rating 1' => self::RATING_1,
-        'Rating 2' => self::RATING_2,
-        'Rating 3' => self::RATING_3,
-        'Rating 4' => self::RATING_4,
-        'Rating 5' => self::RATING_5,
+    private const RATING_LIST = [
+        self::RATING_1 => 'Rating 1',
+        self::RATING_2 => 'Rating 2',
+        self::RATING_3 => 'Rating 3',
+        self::RATING_4 => 'Rating 4',
+        self::RATING_5 => 'Rating 5',
     ];
+
+    public static function getRatingList(): array
+    {
+        return self::RATING_LIST;
+    }
+
+    public static function getRatingName(?int $id): string
+    {
+        return self::RATING_LIST[$id] ?? '-';
+    }
 
 
     public function rules(): array

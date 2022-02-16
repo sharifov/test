@@ -43,7 +43,10 @@ $this->params['breadcrumbs'][] = $this->title;
                     'relation' => 'user',
                     'placeholder' => 'User'
                 ],
-                'lur_rating',
+                [
+                    'attribute' => 'lur_rating',
+                    'filter' => LeadUserRating::getRatingList(),
+                ],
                 [
                     'class' => \common\components\grid\DateTimeColumn::class,
                     'attribute' => 'lur_created_dt',
