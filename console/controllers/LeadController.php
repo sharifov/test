@@ -600,7 +600,7 @@ class LeadController extends Controller
                     ->exists()
             ;
             if (!$isCallOutCommunicationExist) {
-                $lppLeads[$item['lead_id']] = LeadUserDataDictionary::TYPE_CALL_OUT;
+                $lppLeads[$item['lead_id']] = LeadUserDataDictionary::getTypeName(LeadUserDataDictionary::TYPE_CALL_OUT);
                 continue;
             }
 
@@ -615,7 +615,7 @@ class LeadController extends Controller
                         ->exists()
                 ;
                 if (!$isSmsOutCommunicationExist) {
-                    $lppLeads[$item['lead_id']] = LeadUserDataDictionary::TYPE_SMS_OUT;
+                    $lppLeads[$item['lead_id']] = LeadUserDataDictionary::getTypeName(LeadUserDataDictionary::TYPE_SMS_OUT);
                     continue;
                 }
             }
@@ -630,7 +630,7 @@ class LeadController extends Controller
                     ->exists()
             ;
             if (!$isEmailOutCommunicationExist) {
-                $lppLeads[$item['lead_id']] = LeadUserDataDictionary::TYPE_EMAIL_OFFER;
+                $lppLeads[$item['lead_id']] = LeadUserDataDictionary::getTypeName(LeadUserDataDictionary::TYPE_EMAIL_OFFER);
                 continue;
             }
         }
