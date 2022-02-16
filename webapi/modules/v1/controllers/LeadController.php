@@ -1531,6 +1531,24 @@ class LeadController extends ApiBaseController
                                 $response['errors'] = $aplliend->getErrors();
                             }
                         }
+
+                        $notifMessage = '';
+                        foreach ($leadAttributes['additional_information'] as $additionalInformation) {
+                            if (isset($additionalInformation['tkt_processed']) && (bool)$additionalInformation['tkt_processed'] === false) {
+                                $linkToLead = Purifier::createLeadShortLink($lead);
+                                $notifMessage .= 'Flight ticket (PNR: ' . $additionalInformation['pnr'] . ') has been voided. Lead UID - ' . $linkToLead . PHP_EOL;
+                            }
+                        }
+
+                        if ($notifMessage) {
+                            Notifications::createAndPublish(
+                                $lead->owner,
+                                'Flight ticket has been voided',
+                                $notifMessage,
+                                Notifications::TYPE_INFO,
+                                true
+                            );
+                        }
                     }
 
                     $lead->sendNotifOnProcessingStatusChanged();
