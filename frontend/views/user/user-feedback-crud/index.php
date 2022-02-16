@@ -27,6 +27,7 @@ $userAbacDto = new UserAbacDto('username');
 $columns = [
     'uf_id',
     [
+        'label' => 'Type',
         'attribute' => 'uf_type_id',
         'value' => static function (UserFeedback $model) {
             return $model->getTypeLabel();
@@ -35,6 +36,7 @@ $columns = [
         'filter' => UserFeedback::getTypeList()
     ],
     [
+        'label' => 'Status',
         'attribute' => 'uf_status_id',
         'value' => static function (UserFeedback $model) {
             return $model->getStatusLabel();
