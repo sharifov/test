@@ -123,7 +123,8 @@ class QCallService
                     'matchedPhone' => $phoneFrom,
                     'pattern' => $phoneNumberRedial->pnr_phone_pattern,
                     'phoneTo' => $clientPhone->phone,
-                    'phoneNumberRedialId' => $phoneNumberRedial->pnr_id
+                    'phoneNumberRedialId' => $phoneNumberRedial->pnr_id,
+                    'leadId' => $leadId
                 ], 'info\qCallService::create::phoneNumberRedialReplace');
             }
         }
@@ -172,7 +173,26 @@ class QCallService
 
         $qCall->updateWeight($this->findWeight($findWeightParams));
 
-        $phone = $this->findPhone($qCall->lqc_call_from, $qConfig->qc_phone_switch, $findPhoneParams, $qCall->lqc_lead_id);
+        $phone = null;
+        if (
+            SettingHelper::leadRedialEnabled() && SettingHelper::isPhoneNumberRedialEnabled() &&
+            ($clientPhone = $this->clientPhones->getFirstClientPhone($qCall->lqcLead)) &&
+            !PhoneBlacklist::find()->isExists($clientPhone->phone) &&
+            ($phoneNumberRedial = PhoneNumberRedialQuery::getOneMatchingByClientPhone($clientPhone->phone))
+        ) {
+            $phone = $phoneNumberRedial->phoneList->pl_phone_number;
+            Yii::info([
+                'matchedPhone' => $phone,
+                'pattern' => $phoneNumberRedial->pnr_phone_pattern,
+                'phoneTo' => $clientPhone->phone,
+                'phoneNumberRedialId' => $phoneNumberRedial->pnr_id,
+                'leadId' => $qCall->lqc_lead_id
+            ], 'info\qCallService::updateInterval::phoneNumberRedialReplace');
+        }
+
+        if (!$phone) {
+            $phone = $this->findPhone($qCall->lqc_call_from, $qConfig->qc_phone_switch, $findPhoneParams, $qCall->lqc_lead_id);
+        }
 
         $qCall->updateCallFrom($phone);
 

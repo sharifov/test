@@ -31,7 +31,7 @@ class LeadUserRatingForm extends Model
     {
         return [
             [['leadId','userId','rating'], 'required'],
-            [['rating'], 'in', 'range' => array_values(LeadUserRating::RATING_LIST)],
+            [['rating'], 'in', 'range' => array_keys(LeadUserRating::getRatingList())],
             ['leadId', 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['leadId' => 'id']],
         ];
     }
