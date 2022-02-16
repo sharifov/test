@@ -392,7 +392,7 @@ $this->registerJs($js);
                     return '-';
                 }
             },
-            'filter' => array_flip(LeadUserRating::RATING_LIST),
+            'filter' => LeadUserRating::getRatingList(),
             'format' => 'raw',
             'enableSorting' => true,
 

@@ -19,7 +19,7 @@ use src\model\leadUserRating\entity\LeadUserRating;
         <?= $form->field($model, 'lur_lead_id')->textInput() ?>
 
 
-        <?= $form->field($model, 'lur_rating')->dropDownList(array_flip(LeadUserRating::RATING_LIST)) ?>
+        <?= $form->field($model, 'lur_rating')->dropDownList(LeadUserRating::getRatingList()) ?>
 
         <?= $form->field($model, 'lur_user_id')->widget(UserSelect2Widget::class, [
             'data' => $model->lur_user_id ? [
