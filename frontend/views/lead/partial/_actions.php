@@ -282,7 +282,9 @@ $leadAbacDto = new LeadAbacDto($leadModel, $userId);
     $canStatusLog = Auth::can('/lead/flow-transition');
     $canDataLogs = Auth::can('/global-log/ajax-view-general-lead-log');
     $canVisitorLogs = Auth::can('/visitor-log/index');
-    $canLeadPoorProcessingLogs = Auth::can('/lead-poor-processing-log/ajax-log');
+    $leadAbacDto = new LeadAbacDto($leadModel, (int) Auth::id());
+    /** @abac $leadAbacDto, LeadAbacObject::OBJ_EXTRA_QUEUE, LeadAbacObject::ACTION_ACCESS, show LeadPoorProcessingLogs in lead/view */
+    $canLeadPoorProcessingLogs = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_EXTRA_QUEUE, LeadAbacObject::ACTION_ACCESS);
     ?>
 
     <?php if ($canStatusLog || $canDataLogs || $canVisitorLogs || $canLeadPoorProcessingLogs) : ?>
