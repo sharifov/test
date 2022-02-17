@@ -11,6 +11,7 @@ use common\models\Lead;
 use common\models\ProjectWeight;
 use common\models\StatusWeight;
 use src\helpers\setting\SettingHelper;
+use src\model\leadRedial\leadExcluder\LeadExcluder;
 use src\model\leadRedial\queue\ClientPhones;
 use src\model\leadRedial\job\LeadRedialAssignToUsersJob;
 use src\model\phoneNumberRedial\entity\Scopes\PhoneNumberRedialQuery;
@@ -29,21 +30,25 @@ use yii\helpers\VarDumper;
  * @property LeadQcallRepository $leadQcallRepository
  * @property LeadFlowRepository $leadFlowRepository
  * @property ClientPhones $clientPhones
+ * @property LeadExcluder $leadExcluder
  */
 class QCallService
 {
     private $leadQcallRepository;
     private $leadFlowRepository;
     private ClientPhones $clientPhones;
+    private LeadExcluder $leadExcluder;
 
     public function __construct(
         LeadQcallRepository $leadQcallRepository,
         LeadFlowRepository $leadFlowRepository,
-        ClientPhones $clientPhones
+        ClientPhones $clientPhones,
+        LeadExcluder $leadExcluder
     ) {
         $this->leadQcallRepository = $leadQcallRepository;
         $this->leadFlowRepository = $leadFlowRepository;
         $this->clientPhones = $clientPhones;
+        $this->leadExcluder = $leadExcluder;
     }
 
     public function createByDefault(Lead $lead): ?int
@@ -86,6 +91,9 @@ class QCallService
 
         $lead = Lead::findOne($leadId);
         if ($lead) {
+            if ($this->leadExcluder->isExclude($lead)) {
+                return null;
+            }
             $clientPhone = $this->clientPhones->getFirstClientPhone($lead);
             if ($clientPhone && PhoneBlacklist::find()->isExists($clientPhone->phone)) {
                 Yii::warning([
