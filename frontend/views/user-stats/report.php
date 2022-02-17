@@ -7,15 +7,20 @@ use src\model\user\reports\stats\UserStatsReport;
 use src\model\userModelSetting\service\UserModelSettingHelper;
 use yii\bootstrap4\Html;
 use yii\web\View;
+use yii\helpers\ArrayHelper;
+use yii\data\ArrayDataProvider;
 
 /* @var yii\web\View $this */
 /* @var UserStatsReport $searchModel */
 /* @var yii\data\ActiveDataProvider $dataProvider */
 /* @var bool $showReport */
+/* @var array $summaryStats */
 
 $this->title = 'User Stats Report';
 $this->params['breadcrumbs'][] = $this->title;
-
+$totalResultsProvider = new ArrayDataProvider([
+    'allModels' => $summaryStats,
+]);
 $columns = [];
 
 if ($showReport) {
@@ -82,12 +87,20 @@ if ($showReport) {
         $columns[] = [
             'attribute' => 'gross_profit',
             'format' => 'raw',
+            'value' => function ($model) {
+                $value = ArrayHelper::getValue($model, 'gross_profit');
+                return Yii::$app->formatter->asCurrency($value, 'USD');
+            }
         ];
     }
     if (Metrics::isTips($searchModel->metrics)) {
         $columns[] = [
             'attribute' => 'tips',
             'format' => 'raw',
+            'value' => function ($model) {
+                $value = ArrayHelper::getValue($model, 'tips');
+                return Yii::$app->formatter->asCurrency($value, 'USD');
+            }
         ];
     }
     if (Metrics::isLeadsProcessed($searchModel->metrics)) {
@@ -229,6 +242,68 @@ if ($showReport) {
 
             </div>
         </div>
+    <div class="row">
+        <div class="col-md-12">
+            <?= GridView::widget([
+                'dataProvider' => $totalResultsProvider,
+                'responsive' => true,
+                'hover' => true,
+                'panel' => [
+                    'type' => GridView::TYPE_PRIMARY,
+                    'heading' => '<h3 class="panel-title"><i class="glyphicon glyphicon-list"></i> Total Report</h3>',
+                ],
+                'export' => [
+                    'label' => 'Page'
+                ],
+                'exportConfig' => [
+                    'html' => [],
+                    'csv' => [],
+                    'txt' => [],
+                    'xls' => [],
+                    'pdf' => [
+                        'config' => [
+                            'mode' => 'c',
+                            'format' => 'A4-L',
+                        ]
+                    ],
+                    'json' => [],
+                ],
+                'toolbar' => [
+                    '{export}',
+                    ExportMenu::widget([
+                        'dataProvider' => $totalResultsProvider,
+                        'columns' => [
+                                'Name',
+                                'total',
+                                'average'
+                        ],
+                        'exportConfig' => [
+                            ExportMenu::FORMAT_PDF => [
+                                'pdfConfig' => [
+                                    'mode' => 'c',
+                                    'format' => 'A4-L',
+                                ]
+                            ]
+                        ],
+                        'target' => \kartik\export\ExportMenu::TARGET_BLANK,
+                        'bsVersion' => '3.x',
+                        'fontAwesome' => true,
+                        'dropdownOptions' => [
+                            'label' => 'Full Export'
+                        ],
+                        'columnSelectorOptions' => [
+                            'label' => 'Export Fields'
+                        ],
+                        'showConfirmAlert' => false,
+                        'options' => [
+                            'id' => 'export-total-links'
+                        ],
+                    ])
+                ],
+            ]);
+            ?>
+        </div>
+    </div>
 
     <?php endif; ?>
 

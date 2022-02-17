@@ -66,6 +66,7 @@ class UserStatsReport extends Model
     public $isValid = false;
 
     private Access $access;
+    private array $summaryStats = [];
 
     public function rules(): array
     {
@@ -551,9 +552,215 @@ class UserStatsReport extends Model
             $dataProvider->sort->defaultOrder = ['role_name' => SORT_ASC];
         }
 
+        $this->calculateSummaryStats($dataProvider->query);
+
 //        VarDumper::dump($query->createCommand()->getRawSql());die;
 
         return $dataProvider;
+    }
+
+    public function calculateSummaryStats(Query $query): void
+    {
+        $data = [];
+        $results = $query->all();
+        if (Metrics::isSalesConversionCallPriority($this->metrics)) {
+            $data['sales_conversion_call_priority'] = [
+                'Name' => 'Sales Conversion Call Priority',
+                'total' => $this->getSumColumn(
+                    $results,
+                    'sales_conversion_call_priority'
+                ),
+                'average' => $this->getAvgValueColumn(
+                    $results,
+                    'sales_conversion_call_priority'
+                ),
+            ];
+        }
+        if (Metrics::isCallPriorityCurrent($this->metrics)) {
+            $data['call_priority_current'] = [
+                'Name' => 'Call Priority Current',
+                'total' => $this->getSumColumn(
+                    $results,
+                    'call_priority_current'
+                ),
+                'average' => $this->getAvgValueColumn(
+                    $results,
+                    'call_priority_current'
+                ),
+            ];
+        }
+        if (Metrics::isGrossProfitCallPriority($this->metrics)) {
+            $data['gross_profit_call_priority'] = [
+                'Name' => 'Gross Profit Call Priority',
+                'total' => $this->getSumColumn(
+                    $results,
+                    'gross_profit_call_priority'
+                ),
+                'average' => $this->getAvgValueColumn(
+                    $results,
+                    'gross_profit_call_priority'
+                ),
+            ];
+        }
+        if (Metrics::isSalesConversion($this->metrics)) {
+            $data['conversion_percent'] = [
+                'Name' => 'Conversion Percent',
+                'average' => $this->getAvgValueColumn(
+                    $results,
+                    'conversion_percent'
+                ),
+            ];
+        }
+        if (Metrics::isSoldLeads($this->metrics)) {
+            $data['sold_leads'] = [
+                'Name' => 'Sold Leads',
+                'total' => $this->getSumColumn(
+                    $results,
+                    'sold_leads'
+                ),
+                'average' => $this->getAvgValueColumn(
+                    $results,
+                    'sold_leads'
+                ),
+            ];
+        }
+        if (Metrics::isSplitShare($this->metrics)) {
+            $data['split_share'] = [
+                'Name' => 'Split Share',
+                'total' => $this->getSumColumn(
+                    $results,
+                    'split_share'
+                ),
+                'average' => $this->getAvgValueColumn(
+                    $results,
+                    'split_share'
+                ),
+            ];
+        }
+        if (Metrics::isQualifiedLeadsTaken($this->metrics)) {
+            $data['qualified_leads_taken'] = [
+                'Name' => 'Qualified Leads Taken',
+                'total' => $this->getSumColumn(
+                    $results,
+                    'qualified_leads_taken'
+                ),
+                'average' => $this->getAvgValueColumn(
+                    $results,
+                    'qualified_leads_taken'
+                ),
+            ];
+        }
+        if (Metrics::isGrossProfit($this->metrics)) {
+            $data['gross_profit'] = [
+                'Name' => 'Gross Profit',
+                'total' => \Yii::$app->formatter->asCurrency($this->getSumColumn(
+                    $results,
+                    'gross_profit'
+                )),
+                'average' => \Yii::$app->formatter->asCurrency($this->getAvgValueColumn(
+                    $results,
+                    'gross_profit'
+                )),
+            ];
+        }
+        if (Metrics::isTips($this->metrics)) {
+            $data['tips'] = [
+                'Name' => 'Tips',
+                'total' => \Yii::$app->formatter->asCurrency($this->getSumColumn(
+                    $results,
+                    'tips'
+                )),
+                'average' => \Yii::$app->formatter->asCurrency($this->getAvgValueColumn(
+                    $results,
+                    'tips'
+                )),
+            ];
+        }
+        if (Metrics::isLeadsCreated($this->metrics)) {
+            $data['leads_created'] = [
+                'Name' => 'Leads Created',
+                'total' => $this->getSumColumn(
+                    $results,
+                    'leads_created'
+                ),
+                'average' => $this->getAvgValueColumn(
+                    $results,
+                    'leads_created'
+                ),
+            ];
+        }
+        if (Metrics::isLeadsProcessed($this->metrics)) {
+            $data['leads_processed'] = [
+                'Name' => 'Leads Processed',
+                'total' => $this->getSumColumn(
+                    $results,
+                    'leads_processed'
+                ),
+                'average' => $this->getAvgValueColumn(
+                    $results,
+                    'leads_processed'
+                ),
+            ];
+        }
+        if (Metrics::isLeadsTrashed($this->metrics)) {
+            $data['leads_trashed'] = [
+                'Name' => 'Leads Trashed',
+                'total' => $this->getSumColumn(
+                    $results,
+                    'leads_trashed'
+                ),
+                'average' => $this->getAvgValueColumn(
+                    $results,
+                    'leads_trashed'
+                ),
+            ];
+        }
+        if (Metrics::isLeadsToFollowUp($this->metrics)) {
+            $data['leads_follow_up'] = [
+                'Name' => 'Leads Follow Up',
+                'total' => $this->getSumColumn(
+                    $results,
+                    'leads_follow_up'
+                ),
+                'average' => $this->getAvgValueColumn(
+                    $results,
+                    'leads_follow_up'
+                ),
+            ];
+        }
+        if (Metrics::isLeadsCloned($this->metrics)) {
+            $data['leads_cloned'] = [
+                'Name' => 'Leads Cloned',
+                'total' => $this->getSumColumn(
+                    $results,
+                    'leads_cloned'
+                ),
+                'average' => $this->getAvgValueColumn(
+                    $results,
+                    'leads_cloned'
+                ),
+            ];
+        }
+        $this->summaryStats = $data;
+    }
+
+    public function getSummaryStats(): array
+    {
+        return $this->summaryStats;
+    }
+
+    private function getSumColumn(array $array, string $key)
+    {
+        return array_sum(array_column($array, $key));
+    }
+
+    private function getAvgValueColumn(array $array, string $key, int $precision = 2)
+    {
+        $count = count($array);
+        if ($count) {
+            return round($this->getSumColumn($array, $key) / $count, $precision);
+        }
+        return 0;
     }
 
     public static function addSelectGroupMetrics(Query $query, array $metrics): void
