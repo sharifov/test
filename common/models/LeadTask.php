@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\models\query\LeadTaskQuery;
+use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
 use Yii;
 
 /**
@@ -205,7 +206,7 @@ class LeadTask extends \yii\db\ActiveRecord
         parent::afterSave($insert, $changedAttributes);
 
         if ($this->lt_completed_dt && $this->lt_lead_id && $this->ltLead) {
-            $this->ltLead->updateLastAction();
+            $this->ltLead->updateLastAction(LeadPoorProcessingLogStatus::REASON_LEAD_TACK);
         }
     }
 }

@@ -4,14 +4,17 @@ namespace src\model\leadPoorProcessing\service;
 
 use common\components\jobs\LeadPoorProcessingJob;
 use common\components\jobs\LeadPoorProcessingRemoverJob;
+use common\models\EmailTemplateType;
 use common\models\Employee;
 use common\models\Lead;
+use modules\featureFlag\FFlag;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
 use src\auth\Auth;
 use src\helpers\app\AppHelper;
 use src\helpers\ErrorsToStringHelper;
 use src\model\leadPoorProcessing\entity\LeadPoorProcessing;
+use src\model\leadPoorProcessing\entity\LeadPoorProcessingDictionary;
 use src\model\leadPoorProcessing\entity\LeadPoorProcessingQuery;
 use src\model\leadPoorProcessing\repository\LeadPoorProcessingRepository;
 use src\model\leadPoorProcessing\service\rules\LeadPoorProcessingRuleFactory;
@@ -48,7 +51,7 @@ class LeadPoorProcessingService
         return $leadPoorProcessingRepository->getModel();
     }
 
-    public static function removeFromLead(Lead $lead): int
+    public static function removeFromLead(Lead $lead, ?string $description = null): int
     {
         $removedCount = 0;
         if ($leadsPoorProcessing = LeadPoorProcessingQuery::getAllByLeadId($lead->id)) {
@@ -63,7 +66,8 @@ class LeadPoorProcessingService
                         $lead->id,
                         $leadPoorProcessing->lpp_lppd_id,
                         $lastPoorProcessingLog->lppl_owner_id ?? $lead->employee_id,
-                        LeadPoorProcessingLogStatus::STATUS_DELETED
+                        LeadPoorProcessingLogStatus::STATUS_DELETED,
+                        $description
                     );
 
                     $leadPoorProcessingLogRepository = new LeadPoorProcessingLogRepository($leadPoorProcessingLog);
@@ -73,8 +77,11 @@ class LeadPoorProcessingService
                         $removedCount++;
                     }
                 } catch (\RuntimeException | \DomainException $throwable) {
-                    $message = ArrayHelper::merge(AppHelper::throwableLog($throwable, true), $logData);
-                    \Yii::warning($message, 'LeadPoorProcessingService:removeFromLead:Exception');
+                    /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
+                    if (Yii::$app->ff->can(FFlag::FF_KEY_DEBUG)) {
+                        $message = ArrayHelper::merge(AppHelper::throwableLog($throwable, true), $logData);
+                        \Yii::warning($message, 'LeadPoorProcessingService:removeFromLead:Exception');
+                    }
                 } catch (\Throwable $throwable) {
                     $message = ArrayHelper::merge(AppHelper::throwableLog($throwable, true), $logData);
                     \Yii::error($message, 'LeadPoorProcessingService:removeFromLead:Throwable');
@@ -84,7 +91,7 @@ class LeadPoorProcessingService
         return $removedCount;
     }
 
-    public static function removeFromLeadAndKey(Lead $lead, string $dataKey): void
+    public static function removeFromLeadAndKey(Lead $lead, string $dataKey, ?string $description = null): void
     {
         $logData = [
             'leadId' => $lead->id,
@@ -104,7 +111,8 @@ class LeadPoorProcessingService
                 $lead->id,
                 $leadPoorProcessing->lpp_lppd_id,
                 $lastPoorProcessingLog->lppl_owner_id ?? $lead->employee_id,
-                LeadPoorProcessingLogStatus::STATUS_DELETED
+                LeadPoorProcessingLogStatus::STATUS_DELETED,
+                $description
             );
 
             $leadPoorProcessing->delete();
@@ -112,8 +120,11 @@ class LeadPoorProcessingService
             $leadPoorProcessingLogRepository = new LeadPoorProcessingLogRepository($leadPoorProcessingLog);
             $leadPoorProcessingLogRepository->save(true);
         } catch (\RuntimeException | \DomainException $throwable) {
-            $message = ArrayHelper::merge(AppHelper::throwableLog($throwable, true), $logData);
-            \Yii::info($message, 'info\LeadPoorProcessingService:removeFromLeadAndKey:Exception');
+            /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
+            if (Yii::$app->ff->can(FFlag::FF_KEY_DEBUG)) {
+                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable, true), $logData);
+                \Yii::info($message, 'info\LeadPoorProcessingService:removeFromLeadAndKey:Exception');
+            }
         } catch (\Throwable $throwable) {
             $message = ArrayHelper::merge(AppHelper::throwableLog($throwable, true), $logData);
             \Yii::error($message, 'LeadPoorProcessingService:removeFromLeadAndKey:Throwable');
@@ -122,17 +133,22 @@ class LeadPoorProcessingService
 
     public static function addLeadPoorProcessingJob(
         int $leadId,
-        string $dataKey,
+        array $dataKeys,
+        ?string $description = null,
         int $priority = 100
     ): void {
+        /** @fflag FFlag::FF_LPP_ENABLE, Lead Poor Processing Enable/Disable */
+        if (!Yii::$app->ff->can(FFlag::FF_KEY_LPP_ENABLE)) {
+            return;
+        }
+
         $logData = [
             'leadId' => $leadId,
-            'dataKey' => $dataKey,
+            'dataKeys' => $dataKeys,
         ];
 
         try {
-            self::checkAbacAccess($leadId);
-            $job = new LeadPoorProcessingJob($leadId, $dataKey);
+            $job = new LeadPoorProcessingJob($leadId, $dataKeys, $description);
             \Yii::$app->queue_job->priority($priority)->push($job);
         } catch (\RuntimeException | \DomainException $throwable) {
             $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
@@ -146,15 +162,20 @@ class LeadPoorProcessingService
     public static function addLeadPoorProcessingRemoverJob(
         int $leadId,
         array $dataKeys,
+        ?string $description = null,
         int $priority = 100
     ): void {
+        /** @fflag FFlag::FF_LPP_ENABLE, Lead Poor Processing Enable/Disable */
+        if (!Yii::$app->ff->can(FFlag::FF_KEY_LPP_ENABLE)) {
+            return;
+        }
+
         $logData = [
             'leadId' => $leadId,
             'dataKeys' => $dataKeys,
         ];
         try {
-            self::checkAbacAccess($leadId);
-            $job = new LeadPoorProcessingRemoverJob($leadId, $dataKeys);
+            $job = new LeadPoorProcessingRemoverJob($leadId, $dataKeys, $description);
             \Yii::$app->queue_job->priority($priority)->push($job);
         } catch (\RuntimeException | \DomainException $throwable) {
             $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
@@ -165,19 +186,16 @@ class LeadPoorProcessingService
         }
     }
 
-    private static function checkAbacAccess(int $leadId): void
+    public static function checkSmsTemplate(?string $template): bool
     {
-        if (!$lead = Lead::find()->where(['id' => $leadId])->limit(1)->one()) {
-            throw new \RuntimeException('Lead not found by ID(' . $leadId . ')');
-        }
-        if (!$employee = Employee::find()->where(['id' => $lead->employee_id])->limit(1)->one()) {
-            throw new \RuntimeException('LeadOwner not found by ID(' . $lead->employee_id . ')');
-        }
+        return in_array($template, LeadPoorProcessingDictionary::SMS_TPL_OFFER_LIST, true);
+    }
 
-        /** @abac $leadAbacDto, LeadAbacObject::LOGIC_POOR_PROCESSING, LeadAbacObject::ACTION_ACCESS, add to LeadPoorProcessingJob */
-        $leadAbacDto = new LeadAbacDto($lead, (int) $lead->employee_id);
-        if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_POOR_PROCESSING, LeadAbacObject::ACTION_ACCESS, $employee)) {
-            throw new \RuntimeException('Abac access is failed. (' . LeadAbacObject::LOGIC_POOR_PROCESSING . '/' . LeadAbacObject::ACTION_ACCESS . ')');
+    public static function checkEmailTemplate(?string $templateKey): bool
+    {
+        if (!$tpl = EmailTemplateType::find()->where(['etp_key' => $templateKey])->limit(1)->one()) {
+            throw new \RuntimeException('EmailTemplateType not found by(' . $templateKey . ')');
         }
+        return (bool) ArrayHelper::getValue($tpl->etp_params_json, 'quotes.selectRequired', false);
     }
 }

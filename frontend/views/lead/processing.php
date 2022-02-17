@@ -7,6 +7,10 @@ use src\helpers\lead\LeadHelper;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use common\models\Lead;
+use src\model\leadUserRating\helpers\formatters\LeadUserRatingFormatter;
+use src\model\leadUserRating\abac\dto\LeadUserRatingAbacDto;
+use src\model\leadUserRating\abac\LeadUserRatingAbacObject;
+use src\model\leadUserRating\entity\LeadUserRating;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\LeadSearch */
@@ -20,14 +24,79 @@ $lists = new ListsAccess(Yii::$app->user->id);
 
 $this->params['breadcrumbs'][] = $this->title;
 
+$ratingUrl = \yii\helpers\Url::to([
+    '/lead/set-user-rating',
+]);
 $timeNow = time();
+$currentUserId = Yii::$app->user->id;
 
 $bundle = \frontend\assets\TimerAsset::register($this);
+$js = <<<JS
+$(document).on('click','.lead-rating-star',function(){
+    let currentInput = $(this);
+    let leadId = $(this).data('lead-id');
+    let defaultValue = $(this).data('default-value');
+    let newValue = $(this).val();
+    if(newValue == defaultValue)
+        return;
+    $.ajax({
+        url: '$ratingUrl',
+        type: 'post',
+        data: 
+        {
+            leadId: leadId,
+            rating: newValue
+        },
+        success: function (data) {
+            if (!data.success) {
+                createNotify('Error', data.error, 'error');
+                currentInput.prop('checked',false);
+                if(defaultValue > 0)
+                {
+                    $('input[name="lead-rating-'+leadId+'"][value='+defaultValue+']').each(function(){
+                        $(this).prop('checked',true);
+                    });
+                }
+            }
+            else 
+            {
+                createNotify('Success', 'Lead Rating ' + leadId + ' updated to ' + newValue, 'success');
+                $('input[name="lead-rating-'+leadId+'"]').each(function(){
+                    $(this).data('default-value', newValue);
+                });
+            }
+        },
+        error: function (error) {
+            createNotify('Error', 'Server error', 'error');
+            currentInput.attr('checked',false);
+            if(defaultValue > 0)
+            {
+                $('input[name="lead-rating-'+leadId+'"][value='+defaultValue+']').each(function(){
+                    $(this).prop('checked',true);
+                });
+            }
+        }
+    });
+});
+JS;
+$this->registerJs($js);
+
 ?>
 
 <style>
 .dropdown-menu {
     z-index: 1010 !important;
+}
+.rate-input-group
+{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    position: relative;
+    height: 19px;
+    line-height: 19px;
+    font-size: 19px;
+    padding: 0 0px;
 }
 </style>
 <h1><i class="fa fa-spinner"></i> <?= Html::encode($this->title)?></h1>
@@ -291,20 +360,43 @@ $bundle = \frontend\assets\TimerAsset::register($this);
             },
             'format' => 'raw'
         ],*/
-//        [
-//            'label' => 'Rating',
-//            'contentOptions' => [
-//                'style' => 'width: 90px;',
-//                'class' => 'text-center'
-//            ],
-//            'options' => [
-//                'class' => 'text-right'
-//            ],
-//            'value' => static function (\common\models\Lead $model) {
-//                return Lead::getRating2($model->rating);
-//            },
-//            'format' => 'raw'
-//        ],
+        [
+            'label' => 'Rating',
+            'attribute' => 'lead_user_rating',
+            'contentOptions' => [
+                'style' => 'min-width: 130px;',
+                'class' => 'text-center'
+            ],
+            'options' => [
+                'class' => 'text-right'
+            ],
+            'value' => function (Lead $lead) use ($currentUserId) {
+
+                $rating =  $lead->getLeadUserRatingValueByUserId($currentUserId);
+                $leadUserRatingAbacDto = new LeadUserRatingAbacDto($lead, $currentUserId);
+                /** @abac leadUserRatingAbacDto, LeadUserRatingAbacObject::LEAD_RATING_FORM, LeadUserRatingAbacObject::ACTION_VIEW, Lead User Rating view */
+                $canViewRating = Yii::$app->abac->can(
+                    $leadUserRatingAbacDto,
+                    LeadUserRatingAbacObject::LEAD_RATING_FORM,
+                    LeadUserRatingAbacObject::ACTION_VIEW
+                );
+                /** @abac leadUserRatingAbacDto, LeadUserRatingAbacObject::LEAD_RATING_FORM, LeadUserRatingAbacObject::ACTION_EDIT, Lead User Rating edit */
+                $canUpdateRating = Yii::$app->abac->can(
+                    $leadUserRatingAbacDto,
+                    LeadUserRatingAbacObject::LEAD_RATING_FORM,
+                    LeadUserRatingAbacObject::ACTION_EDIT
+                );
+                if ($canViewRating) {
+                    return LeadUserRatingFormatter::asStarRating($rating, $lead->id, $canUpdateRating);
+                } else {
+                    return '-';
+                }
+            },
+            'filter' => LeadUserRating::getRatingList(),
+            'format' => 'raw',
+            'enableSorting' => true,
+
+        ],
 
 //        [
 //            'attribute' => 'l_init_price',

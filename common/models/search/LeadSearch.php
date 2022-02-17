@@ -31,6 +31,8 @@ use src\model\clientChat\entity\ClientChat;
 use src\model\clientChatLead\entity\ClientChatLead;
 use src\model\leadData\entity\LeadData;
 use src\model\leadUserConversion\entity\LeadUserConversion;
+use src\model\leadUserRating\entity\LeadUserRating;
+use src\model\leadUserRating\entity\LeadUserRatingQuery;
 use src\model\quoteLabel\entity\QuoteLabel;
 use src\repositories\lead\LeadBadgesRepository;
 use Yii;
@@ -172,6 +174,7 @@ class LeadSearch extends Lead
     public $lead_data_value;
     public $quote_labels;
     public $is_conversion;
+    public $lead_user_rating;
 
     private $leadBadgesRepository;
 
@@ -263,6 +266,7 @@ class LeadSearch extends Lead
             ['sold_date_from', 'default', 'value' => $this->defaultMinDate],
             ['sold_date_to', 'default', 'value' => $this->defaultMaxDate],
             ['createTimeRange', 'default', 'value' => $this->defaultDateRange],
+            ['lead_user_rating', 'in', 'range' => array_keys(LeadUserRating::getRatingList())],
         ];
     }
 
@@ -2218,7 +2222,14 @@ class LeadSearch extends Lead
             $query->where('0=1');
             return $dataProvider;
         }
-
+        if ($this->lead_user_rating) {
+            $leadIds = LeadUserRatingQuery::getLeadIdsByUserAndRating($user->id, $this->lead_user_rating);
+                $query->andWhere([
+                    'in',
+                    'id',
+                    $leadIds
+                ]);
+        }
         if ($this->created) {
             $query->andFilterWhere(['>=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created))])
                 ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 * 24)]);

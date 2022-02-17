@@ -146,12 +146,12 @@ class AppHelper
         return $newArray;
     }
 
-/**
- * @param array $array
- * @param string $index (array key)
- * @param array $arrayVal (array of filter values)
- * @return array
-*/
+    /**
+     * @param array $array
+     * @param string $index (array key)
+     * @param array $arrayVal (array of filter values)
+     * @return array
+    */
     public static function filterByArrayContainValues(array $array, string $index, array $arrayVal = []): array
     {
         $newArray = [];
@@ -251,5 +251,31 @@ class AppHelper
             unset($data);
         }
         return $dataResponse;
+    }
+
+
+    /**
+     * Random selection based on the weight of each item.
+     * @param array $data Array to search for random element
+     * @param string $column Array parameter containing the "weight" of the probability
+     * @return int Index of found element in $data array
+     */
+    public static function getRandomProbabilityIndex(array $data, string $column = 'ver'): int
+    {
+        try {
+            $rand = mt_rand(1, array_sum(array_column($data, $column)));
+            $cur = $prev = 0;
+            for ($i = 0, $count = count($data); $i < $count; ++$i) {
+                $prev += $i != 0 ? $data[$i - 1][$column] : 0;
+                $cur += $data[$i][$column];
+                if ($rand > $prev && $rand <= $cur) {
+                    return $i;
+                }
+            }
+        } catch (\Throwable $throwable) {
+            return -1;
+        }
+
+        return -1;
     }
 }

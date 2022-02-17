@@ -15,11 +15,14 @@ class LeadPoorProcessingAdderListener
     public function handle(LeadPoorProcessingEvent $event): void
     {
         try {
-            if (!LeadPoorProcessingDataQuery::isExistActiveRule($event->getDataKey())) {
-                throw new \RuntimeException('Rule (' . $event->getDataKey() . ') not enabled');
-            }
-
-            LeadPoorProcessingService::addLeadPoorProcessingJob($event->getLead()->id, $event->getDataKey());
+//            if (!LeadPoorProcessingDataQuery::isExistActiveRule($event->getDataKeys())) {
+//                throw new \RuntimeException('Rule (' . $event->getDataKeys() . ') not enabled');
+//            }
+            LeadPoorProcessingService::addLeadPoorProcessingJob(
+                $event->getLead()->id,
+                $event->getDataKeys(),
+                $event->getDescription()
+            );
         } catch (\RuntimeException | \DomainException $throwable) {
             \Yii::info(AppHelper::throwableLog($throwable), 'info\LeadPoorProcessingAdderListener:Exception');
         } catch (\Throwable $throwable) {

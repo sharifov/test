@@ -11,12 +11,14 @@ use common\models\Lead;
 class LeadPoorProcessingEvent
 {
     private Lead $lead;
-    private string $dataKey;
+    private array $dataKeys;
+    private ?string $description = null;
 
-    public function __construct(Lead $lead, string $dataKey)
+    public function __construct(Lead $lead, array $dataKeys, ?string $description = null)
     {
         $this->lead = $lead;
-        $this->dataKey = $dataKey;
+        $this->dataKeys = $dataKeys;
+        $this->description = $description;
     }
 
     public function getLead(): Lead
@@ -24,8 +26,13 @@ class LeadPoorProcessingEvent
         return $this->lead;
     }
 
-    public function getDataKey(): string
+    public function getDataKeys(): array
     {
-        return $this->dataKey;
+        return $this->dataKeys;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
     }
 }

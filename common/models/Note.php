@@ -3,6 +3,7 @@
 namespace common\models;
 
 use src\entities\EventTrait;
+use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
 use Yii;
 
 /**
@@ -88,7 +89,7 @@ class Note extends \yii\db\ActiveRecord
         parent::afterSave($insert, $changedAttributes);
 
         if ($this->lead_id && $this->lead) {
-            $this->lead->updateLastAction();
+            $this->lead->updateLastAction(LeadPoorProcessingLogStatus::REASON_NOTE);
         }
     }
 }

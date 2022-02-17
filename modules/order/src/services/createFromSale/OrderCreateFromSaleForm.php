@@ -48,9 +48,9 @@ class OrderCreateFromSaleForm extends Model
     public $phone;
     public $email;
 
-    private ?int $projectId;
-    private ?string $tripTypeId;
-    private ?string $gdsId;
+    private ?int $projectId = null;
+    private ?string $tripTypeId = null;
+    private ?string $gdsId = null;
     private ?string $currency = null;
 
     public function rules(): array

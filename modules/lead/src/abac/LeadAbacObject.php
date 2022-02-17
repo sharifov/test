@@ -51,7 +51,6 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
 
     /** LOGIC PERMISSION */
     public const LOGIC_CLIENT_DATA   = self::NS . 'logic/client_data';
-    public const LOGIC_POOR_PROCESSING = self::NS . 'logic/poor_processing';
 
     /** COMMAND PERMISSION */
     public const CMD_AUTO_REDIAL      = self::NS . 'cmd/auto_redial';
@@ -107,7 +106,6 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::PHONE_CREATE_FORM => self::PHONE_CREATE_FORM,
         self::EMAIL_CREATE_FORM => self::EMAIL_CREATE_FORM,
         self::CLIENT_CREATE_FORM => self::CLIENT_CREATE_FORM,
-        self::LOGIC_POOR_PROCESSING => self::LOGIC_POOR_PROCESSING,
         self::OBJ_EXTRA_QUEUE => self::OBJ_EXTRA_QUEUE,
     ];
 
@@ -206,7 +204,6 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::OBJ_LEAD_PREFERENCES => [self::ACTION_SET_DELAY_CHARGE],
         self::OBJ_LEAD => [self::ACTION_CLONE, self::ACTION_SNOOZE],
         self::OBJ_EXTRA_QUEUE => [self::ACTION_ACCESS],
-        self::LOGIC_POOR_PROCESSING => [self::ACTION_ACCESS],
     ];
 
     public const ATTR_LEAD_IS_OWNER = [

@@ -9,15 +9,21 @@ use common\models\query\EmailQuery;
 use DateTime;
 use src\behaviors\metric\MetricEmailCounterBehavior;
 use src\entities\cases\Cases;
+use src\helpers\app\AppHelper;
 use src\helpers\email\TextConvertingHelper;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadPoorProcessing\service\rules\LeadPoorProcessingNoAction;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
+use src\model\leadPoorProcessingData\repository\LeadUserDataRepository;
+use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
+use src\model\leadUserData\entity\LeadUserData;
+use src\model\leadUserData\entity\LeadUserDataDictionary;
 use src\services\email\EmailService;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\db\Expression;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 
 /**
@@ -454,8 +460,30 @@ class Email extends \yii\db\ActiveRecord
                 $this->save();
                 $out['error'] = $this->e_error_message;
             }
-            if ($this->e_lead_id && LeadPoorProcessingNoAction::checkEmailTemplate($tplType)) {
-                LeadPoorProcessingService::addLeadPoorProcessingRemoverJob($this->e_lead_id, [LeadPoorProcessingDataDictionary::KEY_NO_ACTION]);
+            if ($this->e_id && $this->e_lead_id && LeadPoorProcessingService::checkEmailTemplate($tplType)) {
+                LeadPoorProcessingService::addLeadPoorProcessingRemoverJob(
+                    $this->e_lead_id,
+                    [LeadPoorProcessingDataDictionary::KEY_NO_ACTION, LeadPoorProcessingDataDictionary::KEY_EXPERT_IDLE],
+                    LeadPoorProcessingLogStatus::REASON_EMAIL
+                );
+
+                if (($lead = $this->eLead) && $lead->employee_id && $lead->isProcessing()) {
+                    try {
+                        $leadUserData = LeadUserData::create(
+                            LeadUserDataDictionary::TYPE_EMAIL_OFFER,
+                            $lead->id,
+                            $lead->employee_id,
+                            (new \DateTimeImmutable())
+                        );
+                        (new LeadUserDataRepository($leadUserData))->save(true);
+                    } catch (\RuntimeException | \DomainException $throwable) {
+                        $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['emailId' => $this->e_id]);
+                        \Yii::warning($message, 'Email:LeadUserData:Exception');
+                    } catch (\Throwable $throwable) {
+                        $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['emailId' => $this->e_id]);
+                        \Yii::error($message, 'Email:LeadUserData:Throwable');
+                    }
+                }
             }
         } catch (\Throwable $exception) {
             $error = VarDumper::dumpAsString($exception->getMessage());
@@ -806,7 +834,7 @@ class Email extends \yii\db\ActiveRecord
         parent::afterSave($insert, $changedAttributes);
 
         if ($this->e_lead_id && $this->eLead) {
-            $this->eLead->updateLastAction();
+            $this->eLead->updateLastAction(LeadPoorProcessingLogStatus::REASON_EMAIL);
         }
         if ($this->e_case_id && $this->eCase) {
             $this->eCase->updateLastAction();

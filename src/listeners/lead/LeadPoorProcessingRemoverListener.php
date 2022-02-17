@@ -2,9 +2,11 @@
 
 namespace src\listeners\lead;
 
-use src\events\lead\LeadableEventInterface;
+use common\models\Lead;
+use src\events\lead\LeadStatusChangedEvent;
 use src\helpers\app\AppHelper;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
+use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
 use Yii;
 
 /**
@@ -12,11 +14,15 @@ use Yii;
  */
 class LeadPoorProcessingRemoverListener
 {
-    public function handle(LeadableEventInterface $event): void
+    public function handle(LeadStatusChangedEvent $event): void
     {
         try {
             $lead = $event->getLead();
-            LeadPoorProcessingService::removeFromLead($lead);
+            $description = null;
+            if (($fromStatus = Lead::getStatus($event->oldStatus)) && $toStatus = Lead::getStatus($event->newStatus)) {
+                $description = sprintf(LeadPoorProcessingLogStatus::REASON_CHANGE_STATUS, $fromStatus, $toStatus);
+            }
+            LeadPoorProcessingService::removeFromLead($lead, $description);
         } catch (\RuntimeException | \DomainException $throwable) {
             \Yii::warning(AppHelper::throwableLog($throwable), 'Listeners:LeadPoorProcessingRemoverListener:Exception');
         } catch (\Throwable $throwable) {

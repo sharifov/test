@@ -4,6 +4,7 @@ namespace src\model\leadPoorProcessing\entity;
 
 use common\models\Lead;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingData;
+use src\traits\FieldsTrait;
 use Yii;
 
 /**
@@ -18,6 +19,8 @@ use Yii;
  */
 class LeadPoorProcessing extends \yii\db\ActiveRecord
 {
+    use FieldsTrait;
+
     public function rules(): array
     {
         return [

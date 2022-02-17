@@ -21,6 +21,7 @@ use yii\helpers\ArrayHelper;
  * @property string|null $lppl_created_dt
  * @property string|null $lppl_updated_dt
  * @property int|null $lppl_updated_user_id
+ * @property string|null $lppl_description
  *
  * @property Lead $lpplLead
  * @property LeadPoorProcessingData $lpplLppd
@@ -49,6 +50,8 @@ class LeadPoorProcessingLog extends \yii\db\ActiveRecord
             [['lppl_created_dt', 'lppl_updated_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s', 'skipOnEmpty' => true],
 
             ['lppl_updated_user_id', 'integer'],
+
+            [['lppl_description'], 'string', 'max' => 500],
         ];
     }
 
@@ -93,6 +96,7 @@ class LeadPoorProcessingLog extends \yii\db\ActiveRecord
             'lppl_created_dt' => 'Created',
             'lppl_updated_dt' => 'Updated',
             'lppl_updated_user_id' => 'Updated User',
+            'lppl_description' => 'Description',
         ];
     }
 
@@ -115,13 +119,15 @@ class LeadPoorProcessingLog extends \yii\db\ActiveRecord
         int $leadId,
         int $dataId,
         ?int $ownerId,
-        int $status
+        int $status,
+        ?string $description = null
     ): LeadPoorProcessingLog {
         $model = new self();
         $model->lppl_lead_id = $leadId;
         $model->lppl_lppd_id = $dataId;
         $model->lppl_owner_id = $ownerId;
         $model->lppl_status = $status;
+        $model->lppl_description = $description;
 
         return $model;
     }

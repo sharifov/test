@@ -24,7 +24,9 @@ return [
         'related-product-quote' => \modules\product\src\abac\RelatedProductQuoteAbacObject::class,
         'notification' => \modules\notification\src\abac\NotificationAbacObject::class,
         'leadData' => \src\model\leadData\abac\LeadDataAbacObject::class,
-        'user' => \modules\user\src\abac\UserAbacObject::class
+        'user' => \modules\user\src\abac\UserAbacObject::class,
+        'lead-rating' => \src\model\leadUserRating\abac\LeadUserRatingAbacObject::class,
+        'lead-poor-processing' => \src\model\leadPoorProcessingData\abac\LeadPoorProcessingAbacObject::class,
     ],
     'scanDirs' => [
         '/modules/',

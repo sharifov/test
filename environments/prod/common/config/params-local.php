@@ -2,7 +2,7 @@
 
 return [
     'appEnv' => 'prod',
-    'appInstance' => env('COMMON_CONFIG_PARAMS_APPINSTANCE'),
+    // 'appInstance' => env('COMMON_CONFIG_PARAMS_APPINSTANCE'),
 
     'url'      => env('COMMON_CONFIG_PARAMS_URL'),
     'url_api'  => env('COMMON_CONFIG_PARAMS_URLAPI'),

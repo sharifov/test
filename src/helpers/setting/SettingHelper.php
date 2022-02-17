@@ -807,4 +807,84 @@ class SettingHelper
     {
         return (int)(Yii::$app->params['settings']['clean_lead_poor_processing_log_after_days'] ?? 90);
     }
+
+    public static function getSnoozeLimit(): int
+    {
+        return (int)(Yii::$app->params['settings']['snooze_limit'] ?? 10);
+    }
+
+    public static function getSmsTemplateForRemovingLpp(): array
+    {
+        return Yii::$app->params['settings']['lpp_remove_by_sms_tpl'] ?? [];
+    }
+
+    public static function isPhoneNumberRedialEnabled(): bool
+    {
+        return (bool)(Yii::$app->params['settings']['phone_number_redial_enable'] ?? false);
+    }
+
+    public static function getRedialLeadExcludeAttributes(): array
+    {
+        $settings = Yii::$app->params['settings']['redial_lead_exclude_attributes'] ?? [];
+        if (!is_array($settings)) {
+            Yii::error([
+                'message' => 'Redial lead exclude attributes settings is invalid. Value must be array',
+                'settingsKey' => 'redial_lead_exclude_attributes',
+            ], 'SettingsHelper:getRedialLeadExcludeAttributes');
+            return [];
+        }
+
+        if (array_key_exists('projects', $settings) && is_array($settings['projects'])) {
+            $projects = $settings['projects'];
+        } else {
+            self::leadRedialExcludeAttributesErrorLog('projects');
+            return [];
+        }
+
+        if (array_key_exists('departments', $settings) && is_array($settings['departments'])) {
+            $departments = $settings['departments'];
+        } else {
+            self::leadRedialExcludeAttributesErrorLog('departments');
+            return [];
+        }
+
+        if (array_key_exists('cabins', $settings) && is_array($settings['cabins'])) {
+            $cabins = $settings['cabins'];
+        } else {
+            self::leadRedialExcludeAttributesErrorLog('cabins');
+            return [];
+        }
+
+        if (array_key_exists('noFlightDetails', $settings)) {
+            $noFlightDetails = (bool)$settings['noFlightDetails'];
+        } else {
+            self::leadRedialExcludeAttributesErrorLog('noFlightDetails');
+            return [];
+        }
+
+        if (array_key_exists('isTest', $settings)) {
+            $isTest = (bool)$settings['isTest'];
+        } else {
+            self::leadRedialExcludeAttributesErrorLog('isTest');
+            return [];
+        }
+
+        return [
+            'projects' => $projects,
+            'departments' => $departments,
+            'cabins' => $cabins,
+            'noFlightDetails' => $noFlightDetails,
+            'isTest' => $isTest
+        ];
+    }
+
+    private static function leadRedialExcludeAttributesErrorLog(string $key): void
+    {
+        \Yii::error([
+            'message' => 'One setting in Lead Redial Exclude Attributes is missing or is invalid',
+            'settingsKey' => 'redial_lead_exclude_attributes',
+            'key' => $key,
+            'forAdmin' => true,
+        ], 'SettingsHelper:leadRedialExcludeAttributesErrorLog');
+    }
 }

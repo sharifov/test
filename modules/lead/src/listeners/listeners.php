@@ -54,6 +54,7 @@ use src\listeners\lead\LeadPendingEventLogListener;
 use src\listeners\lead\LeadPhoneTrustListener;
 use src\listeners\lead\LeadPoorProcessingAdderListener;
 use src\listeners\lead\LeadPoorProcessingRemoverListener;
+use src\listeners\lead\LeadPoorProcessingRemoverOwnerChangedListener;
 use src\listeners\lead\LeadPreferencesUpdateCurrencyEventListener;
 use src\listeners\lead\LeadProcessingEventLogListener;
 use src\listeners\lead\LeadQcallAddListener;
@@ -106,7 +107,7 @@ return [
     LeadDuplicateDetectedEvent::class => [LeadDuplicateDetectedEventListener::class],
     LeadOwnerChangedEvent::class => [
         LeadOwnerChangedNotificationsListener::class,
-        LeadPoorProcessingRemoverListener::class,
+        LeadPoorProcessingRemoverOwnerChangedListener::class,
     ],
     LeadCallExpertRequestEvent::class => [LeadCallExpertRequestEventListener::class],
     LeadTaskEvent::class => [LeadTaskEventListener::class],

@@ -45,6 +45,7 @@ return [
                 'modules\rentCar\migrations',
                 'modules\cruise\migrations',
                 'modules\abac\migrations',
+                'kivork\FeatureFlag\Migrations',
             ],
         ],
 
@@ -186,6 +187,18 @@ return [
             'userIdColumn' => 'id',
             'userClass' => '\common\models\Employee',
             'userFieldDisplay' => 'username', // for gridview, detail vew
+        ],
+        'flag' => [
+            'class' => \kivork\FeatureFlag\FeatureFlagModule::class,
+//            'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
+            'user' => [
+                'table' => 'employee',
+                'idColumn' => 'id',
+                'class' => \common\models\Employee::class,
+                'fieldDisplay' => 'username',           // for gridview, detail vew
+            ],
+
+//            'roles' => ['@', 'admin'],    //for roles can manage module
         ],
         'hotel' => [
             'class' => HotelModule::class,

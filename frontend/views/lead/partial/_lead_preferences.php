@@ -3,6 +3,8 @@
 use common\models\Employee;
 use common\models\Lead;
 use src\access\LeadPreferencesAccess;
+use src\model\leadUserRating\abac\dto\LeadUserRatingAbacDto;
+use src\model\leadUserRating\abac\LeadUserRatingAbacObject;
 use yii\helpers\Url;
 use yii\web\View;
 use yii\helpers\Html;
@@ -17,13 +19,25 @@ $user = Yii::$app->user->identity;
 
 $leadPreferences = $lead->leadPreferences;
 $manageLeadPreferencesAccess = LeadPreferencesAccess::isUserCanManageLeadPreference($lead, $user);
+$leadUserRatingAbacDto = new LeadUserRatingAbacDto($lead, $user->id);
+/** @abac leadUserRatingAbacDto, LeadUserRatingAbacObject::LEAD_RATING_FORM, LeadUserRatingAbacObject::ACTION_EDIT, Lead User Rating view */
+$canViewRating = Yii::$app->abac->can(
+    $leadUserRatingAbacDto,
+    LeadUserRatingAbacObject::LEAD_RATING_FORM,
+    LeadUserRatingAbacObject::ACTION_VIEW
+);
+/** @abac leadUserRatingAbacDto, LeadUserRatingAbacObject::LEAD_RATING_FORM, LeadUserRatingAbacObject::ACTION_EDIT, Lead User Rating edit */
+$canUpdateRating = Yii::$app->abac->can(
+    $leadUserRatingAbacDto,
+    LeadUserRatingAbacObject::LEAD_RATING_FORM,
+    LeadUserRatingAbacObject::ACTION_EDIT
+);
 ?>
 
 <div class="x_panel">
     <div class="x_title">
         <h2><i class="fa fa-cog"></i> Lead Preferences</h2>
         <ul class="nav navbar-right panel_toolbox" style="min-width: initial;">
-
             <?php if ($lead->leadData) : ?>
                 <li>
                     <?= Html::a('<i class="fa fa-database"></i> Lead Data <sup>(' . count($lead->leadData) . ')</sup>', '#', [
@@ -81,6 +95,11 @@ $manageLeadPreferencesAccess = LeadPreferencesAccess::isUserCanManageLeadPrefere
         <div class="clearfix"></div>
     </div>
     <div class="x_content" style="display: block">
+        <div class="row">
+            <?php if ($canViewRating) : ?>
+                <?= $this->render('_rating', ['lead' => $lead, 'canUpdateRating' => $canUpdateRating ]) ?>
+            <?php endif ?>
+        </div>
         <div class="row">
             <div class="col-md-7">
                 <table class="table table-bordered table-condensed">

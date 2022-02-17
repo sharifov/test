@@ -30,6 +30,9 @@ use src\helpers\app\AppHelper;
 use src\logger\db\GlobalLogInterface;
 use src\logger\db\LogDTO;
 use src\model\leadData\services\LeadDataService;
+use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
+use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
+use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
 use src\model\project\entity\projectRelation\ProjectRelation;
 use src\model\project\entity\projectRelation\ProjectRelationQuery;
 use src\model\project\entity\projectRelation\ProjectRelationRepository;
@@ -907,6 +910,13 @@ class QuoteController extends ApiBaseController
 
             if (!$quote->hasErrors()) {
                 $response['status'] = 'Success';
+                if ($lead->called_expert) {
+                    LeadPoorProcessingService::addLeadPoorProcessingJob(
+                        $lead->id,
+                        [LeadPoorProcessingDataDictionary::KEY_EXPERT_IDLE],
+                        LeadPoorProcessingLogStatus::REASON_EXPERT_IDLE
+                    );
+                }
                 $transaction->commit();
 
                 (\Yii::createObject(GlobalLogInterface::class))->log(

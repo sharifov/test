@@ -39,7 +39,8 @@ class LeadPoorProcessingLastAction extends AbstractLeadPoorProcessingService imp
             $this->getLead()->id,
             $this->getRule()->lppd_id,
             $this->getLead()->employee_id,
-            $logStatus
+            $logStatus,
+            $this->getDescription()
         );
 
         $leadPoorProcessingRepository = new LeadPoorProcessingRepository($leadPoorProcessing);

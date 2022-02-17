@@ -36,6 +36,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'lppl_lppd_id',
                 'lppl_status',
                 'lppl_owner_id',
+                'lppl_description',
                 'lppl_created_dt',
                 'lppl_updated_dt',
                 'lppl_updated_user_id',

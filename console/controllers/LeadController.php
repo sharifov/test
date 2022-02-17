@@ -7,12 +7,21 @@ use common\models\Lead;
 use common\models\LeadFlightSegment;
 use common\models\LeadFlow;
 use common\models\LeadQcall;
+use common\models\Project;
 use common\models\Task;
+use modules\featureFlag\FFlag;
 use src\exception\BoResponseException;
 use src\helpers\app\AppHelper;
 use src\helpers\setting\SettingHelper;
 use src\model\leadPoorProcessing\entity\LeadPoorProcessing;
+use src\model\leadPoorProcessing\service\LeadPoorProcessingChecker;
+use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadPoorProcessing\service\LeadToExtraQueueService;
+use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
+use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataQuery;
+use src\model\leadPoorProcessingData\service\scheduledCommunication\ScheduledCommunicationService;
+use src\model\leadUserData\entity\LeadUserData;
+use src\model\leadUserData\entity\LeadUserDataDictionary;
 use src\repositories\lead\LeadRepository;
 use src\services\cases\CasesSaleService;
 use yii\base\InvalidArgumentException;
@@ -478,6 +487,12 @@ class LeadController extends Controller
         echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
 
+        /** @fflag FFlag::FF_LPP_ENABLE, Lead Poor Processing Enable/Disable */
+        if (!Yii::$app->ff->can(FFlag::FF_KEY_LPP_ENABLE)) {
+            echo Console::renderColoredString('%y --- Feature Flag (' . FFlag::FF_KEY_LPP_ENABLE . ') not enabled %n'), PHP_EOL;
+            exit();
+        }
+
         $time_start = microtime(true);
         $currentDT = new \DateTimeImmutable();
         $leadsExpiration = Lead::find()
@@ -486,6 +501,7 @@ class LeadController extends Controller
             ->innerJoin(LeadPoorProcessing::tableName(), 'id = lpp_lead_id')
             ->where(['status' => Lead::STATUS_PROCESSING])
             ->andWhere(['<=', 'lpp_expiration_dt', $currentDT->format('Y-m-d H:i:s')])
+            ->orderBy(['id' => SORT_ASC])
             ->distinct()
             ->asArray()
             ->all()
@@ -503,8 +519,11 @@ class LeadController extends Controller
                 Console::updateProgress($processed, $count);
             } catch (\RuntimeException | \DomainException $throwable) {
                 $processed--;
-                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
-                \Yii::warning($message, 'LeadController:actionToExtraQueue:Exception');
+                /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
+                if (Yii::$app->ff->can(FFlag::FF_KEY_DEBUG)) {
+                    $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
+                    \Yii::warning($message, 'LeadController:actionToExtraQueue:Exception');
+                }
             } catch (\Throwable $throwable) {
                 $processed--;
                 $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
@@ -514,6 +533,148 @@ class LeadController extends Controller
         }
 
         Console::endProgress(false);
+
+        $time_end = microtime(true);
+        $time = number_format(round($time_end - $time_start, 2), 2);
+        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time . ' s] %g %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- Processed: %w[' . $processed . '/' . $count . '] %g %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+    }
+
+    public function actionLppScheduledCommunication(): void
+    {
+        echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+
+        /** @fflag FFlag::FF_LPP_ENABLE, Lead Poor Processing Enable/Disable */
+        if (!Yii::$app->ff->can(FFlag::FF_KEY_LPP_ENABLE)) {
+            echo Console::renderColoredString('%y --- Feature Flag (' . FFlag::FF_KEY_LPP_ENABLE . ') not enabled %n'), PHP_EOL;
+            exit();
+        }
+
+        $time_start = microtime(true);
+        $scheduledCommunicationRule = LeadPoorProcessingDataQuery::getRuleByKey(
+            LeadPoorProcessingDataDictionary::KEY_SCHEDULED_COMMUNICATION,
+            true
+        );
+        if (!$scheduledCommunicationRule) {
+            echo Console::renderColoredString('%y --- Rule(' . LeadPoorProcessingDataDictionary::KEY_SCHEDULED_COMMUNICATION .
+                ') not enabled %n'), PHP_EOL;
+            exit();
+        }
+
+        $scheduledCommunicationRuleService = new ScheduledCommunicationService($scheduledCommunicationRule);
+        if (!$firstLeadUserData = LeadUserData::find()->orderBy(['lud_created_dt' => SORT_ASC])->one()) {
+            echo Console::renderColoredString('%y --- LeadUserData not found %n'), PHP_EOL;
+            exit();
+        }
+
+        $currentDT = new \DateTimeImmutable();
+        $dateRule = $currentDT->modify('-' . $scheduledCommunicationRuleService->getIntervalHour() . ' hours');
+
+        $query = Lead::find()
+            ->alias('leads')
+            ->select(['leads.id AS lead_id', 'leads.employee_id AS owner_id', 'projects.project_key'])
+            ->innerJoin(
+                Project::tableName() . ' AS projects',
+                'leads.project_id = projects.id'
+            )
+            ->where(['leads.status' => Lead::STATUS_PROCESSING])
+            ->andWhere(['>', 'leads.created', $firstLeadUserData->lud_created_dt])
+            ->andWhere(['<', 'l_status_dt', $dateRule->format('Y-m-d H:i:s')])
+            ->orderBy(['leads.id' => SORT_ASC])
+            ->asArray()
+            ->all()
+        ;
+
+        $lppLeads = [];
+        foreach ($query as $item) {
+            $isCallOutCommunicationExist = LeadUserData::find()
+                    ->select(new Expression('COUNT(*) AS call_out_cnt'))
+                    ->where(['lud_type_id' => LeadUserDataDictionary::TYPE_CALL_OUT])
+                    ->andWhere(['>=', 'lud_created_dt', $dateRule->format('Y-m-d H:i:s')])
+                    ->andWhere(['lud_lead_id' => $item['lead_id']])
+                    ->andWhere(['lud_user_id' => $item['owner_id']])
+                    ->andHaving(['>=', 'call_out_cnt', $scheduledCommunicationRuleService->getCallOut()])
+                    ->exists()
+            ;
+            if (!$isCallOutCommunicationExist) {
+                $lppLeads[$item['lead_id']] = LeadUserDataDictionary::TYPE_CALL_OUT;
+                continue;
+            }
+
+            if (!in_array($item['project_key'], $scheduledCommunicationRuleService->getSmsExcludeProjects(), true)) {
+                $isSmsOutCommunicationExist = LeadUserData::find()
+                        ->select(new Expression('COUNT(*) AS sms_out_cnt'))
+                        ->where(['lud_type_id' => LeadUserDataDictionary::TYPE_SMS_OUT])
+                        ->andWhere(['>=', 'lud_created_dt', $dateRule->format('Y-m-d H:i:s')])
+                        ->andWhere(['lud_lead_id' => $item['lead_id']])
+                        ->andWhere(['lud_user_id' => $item['owner_id']])
+                        ->andHaving(['>=', 'sms_out_cnt', $scheduledCommunicationRuleService->getSmsOut()])
+                        ->exists()
+                ;
+                if (!$isSmsOutCommunicationExist) {
+                    $lppLeads[$item['lead_id']] = LeadUserDataDictionary::TYPE_SMS_OUT;
+                    continue;
+                }
+            }
+
+            $isEmailOutCommunicationExist = LeadUserData::find()
+                    ->select(new Expression('COUNT(*) AS email_offer_cnt'))
+                    ->where(['lud_type_id' => LeadUserDataDictionary::TYPE_EMAIL_OFFER])
+                    ->andWhere(['>=', 'lud_created_dt', $dateRule->format('Y-m-d H:i:s')])
+                    ->andWhere(['lud_lead_id' => $item['lead_id']])
+                    ->andWhere(['lud_user_id' => $item['owner_id']])
+                    ->andHaving(['>=', 'email_offer_cnt', $scheduledCommunicationRuleService->getEmailOffer()])
+                    ->exists()
+            ;
+            if (!$isEmailOutCommunicationExist) {
+                $lppLeads[$item['lead_id']] = LeadUserDataDictionary::TYPE_EMAIL_OFFER;
+                continue;
+            }
+        }
+
+        $count = count($lppLeads);
+        $processed = 0;
+        Console::startProgress($processed, $count);
+
+        foreach ($lppLeads as $leadId => $firstReasonId) {
+            $logData = ['leadId' => $leadId];
+            try {
+                LeadPoorProcessingService::addLeadPoorProcessingJob(
+                    (int) $leadId,
+                    [LeadPoorProcessingDataDictionary::KEY_SCHEDULED_COMMUNICATION],
+                    $scheduledCommunicationRule->lppd_description
+                );
+
+                $processed++;
+                Console::updateProgress($processed, $count);
+            } catch (\RuntimeException | \DomainException $throwable) {
+                $processed--;
+                /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
+                if (Yii::$app->ff->can(FFlag::FF_KEY_DEBUG)) {
+                    $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
+                    \Yii::info($message, 'LeadController:actionLppScheduledCommunication:Exception');
+                }
+            } catch (\Throwable $throwable) {
+                $processed--;
+                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
+                \Yii::error($message, 'LeadController:actionLppScheduledCommunication:Throwable');
+            }
+            Console::updateProgress($processed, $count);
+        }
+
+        Console::endProgress(false);
+
+        \Yii::info(
+            [
+                'count' => $count,
+                'processed' => $processed,
+                'LPP' => $lppLeads,
+            ],
+            'info\LeadController:actionLppScheduledCommunication:result'
+        );
 
         $time_end = microtime(true);
         $time = number_format(round($time_end - $time_start, 2), 2);

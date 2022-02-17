@@ -15,6 +15,7 @@ use src\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use src\model\clientChatUserAccess\event\UpdateChatUserAccessWidgetEvent;
 use src\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use src\model\coupon\entity\couponSend\CouponSend;
+use src\model\leadUserRating\entity\LeadUserRating;
 use src\model\leadRedial\entity\CallRedialUserAccess;
 use src\model\user\entity\Access;
 use src\model\user\entity\AccessCache;
@@ -89,6 +90,7 @@ use yii\web\NotFoundHttpException;
  * @property UserOnline $userOnline
  * @property UserStatus $userStatus
  * @property CouponSend[] $couponSend
+ * @property LeadUserRating[] $leadUserRatings
  *
  * @property string|bool|null $timezone
  * @property bool $isAllowCallExpert
@@ -792,6 +794,14 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public function getUppProjects()
     {
         return $this->hasMany(Project::class, ['id' => 'upp_project_id'])->viaTable('user_project_params', ['upp_user_id' => 'id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getLeadUserRatings()
+    {
+        return $this->hasMany(LeadUserRating::class, ['lur_user_id' => 'id']);
     }
 
 

@@ -26,11 +26,14 @@ class ClientChatUserAccessJob extends BaseJob implements \yii\queue\JobInterface
         $service = \Yii::createObject(ClientChatService::class);
 
         try {
+            $key = ClientChatService::getRedisDistributionLogicKey($this->chatId);
+
             if (!$chat = ClientChat::findOne($this->chatId)) {
                 throw new NotFoundException('Chat not found by id: ' . $this->chatId);
             }
 
-            if ($chat->isInProgress() || $chat->isInClosedStatusGroup()) {
+            if (!$chat->isPending() && !$chat->isTransfer() && !$chat->isIdle()) {
+                \Yii::$app->redis->del($key);
                 return;
             }
 

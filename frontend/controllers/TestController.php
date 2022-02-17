@@ -75,6 +75,8 @@ use modules\attraction\models\AttractionQuote;
 use modules\attraction\src\services\AttractionQuotePdfService;
 use modules\email\src\helpers\MailHelper;
 use modules\email\src\Notifier;
+use modules\featureFlag\FFlag;
+use modules\featureFlag\src\entities\FeatureFlag;
 use modules\flight\models\FlightQuote;
 use modules\flight\src\forms\api\PaymentApiForm;
 use modules\flight\src\services\flightQuote\FlightQuotePdfService;
@@ -2162,6 +2164,17 @@ class TestController extends FController
 
     public function actionZ()
     {
+        echo 'Feature Flag Test<br><br>';
+
+        /** @fflag FFlag::FF_KEY_LPP_ENABLE, Lead Poor Processing Enable/Disable */
+        if (Yii::$app->ff->can(FFlag::FF_KEY_LPP_ENABLE)) {
+            VarDumper::dump(Yii::$app->ff->val(FFlag::FF_KEY_LPP_ENABLE), 10, true);
+        } else {
+            echo 'NO1';
+        }
+
+        exit('<br />Stop');
+
         return $this->render('z');
     }
 
@@ -2379,7 +2392,6 @@ class TestController extends FController
 
     public function actionErrorTest()
     {
-
         $message = [
             'message' => 'Test message 1',
             'trace' => ['tr1' => 'ttttttttttt1'],
@@ -2561,7 +2573,6 @@ class TestController extends FController
 
     public function actionAt()
     {
-
         $message = [
             'message' => 'Test message 1',
             'trace' => ['tr1' => 'ttttttttttt1'],
@@ -2587,5 +2598,70 @@ class TestController extends FController
         Yii::info($message, 'elk\test-elk');
 
         return date('Y-m-d H:i:s');
+    }
+
+    public function actionFf()
+    {
+        echo 'Feature Flag Test<br><br>';
+
+        /** @fflag FFlag::FF_TEST_FLAG1, Username field1 */
+        if (Yii::$app->ff->can('ff_test_example')) {
+            VarDumper::dump(Yii::$app->ff->val('ff_test_example'), 10, true);
+        } else {
+            echo 'NO1';
+        }
+
+        echo '<br><br>';
+
+        if (Yii::$app->ff->isDue(\kivork\FeatureFlag\Models\FeatureFlag::ET_DISABLED_CONDITION, '59 * * * * *')) {
+            echo 'YES3';
+        } else {
+            echo 'NO3';
+        }
+
+        echo '<br><br>';
+        return date('Y-m-d H:i:s');
+    }
+
+    public function actionRandomProbability()
+    {
+
+        $games = [
+            ['name' => 'Game 1', 'ver' => 2], //  2/15
+            ['name' => 'Game 2', 'ver' => 0], // probability 0/15
+            ['name' => 'Game 3', 'ver' => 1], // probability 1/15
+            ['name' => 'Game 4', 'ver' => 4], // probability 4/15
+            ['name' => 'Game 5', 'ver' => 8], // probability 8/15
+        ];
+
+
+//        $games = [
+//            ['name' => 'Game 1', 'ver' => 50], // probability 2/15
+//            ['name' => 'Game 2', 'ver' => 50], // probability 0/15
+//        ];
+
+        $data = [];
+        $totalCount = 0;
+
+        for ($a = 1; $a < 1000; $a++) {
+            $i = AppHelper::getRandomProbabilityIndex($games, 'ver');
+            //echo $games[$i]['name'];
+            if (empty($data[$i])) {
+                $data[$i]['cnt'] = 0;
+            }
+            $data[$i]['cnt'] ++;
+            $totalCount++;
+        }
+        if (!$totalCount) {
+            $totalCount = 1;
+        }
+
+        foreach ($data as $i => $item) {
+            $percent = round($item['cnt'] * 100 / $totalCount, 2);
+            //$data[$i]['percent'] = $percent;
+            $games[$i]['percent'] = $percent;
+        }
+
+        VarDumper::dump($games, 10, true);
     }
 }

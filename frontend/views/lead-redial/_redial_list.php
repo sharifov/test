@@ -325,7 +325,7 @@ use yii\helpers\Url;
                 1 => 'True',
                 0 => 'False'
             ],
-            'visible' => ($user->checkIfUsersIpIsAllowed() || Yii::$app->request->get('is_test'))
+//            'visible' => ($user->checkIfUsersIpIsAllowed() || Yii::$app->request->get('is_test'))
         ],
 //        [
 //            'class' => 'yii\grid\ActionColumn',

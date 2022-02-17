@@ -38,8 +38,6 @@ class LeadData extends ActiveRecord implements Serializable
         return [
             [['ld_lead_id', 'ld_field_key'], 'required'],
 
-            [['ld_lead_id', 'ld_field_key'], 'unique', 'targetAttribute' => ['ld_lead_id', 'ld_field_key']],
-
             ['ld_field_key', 'string', 'max' => 50],
             ['ld_field_key', 'in', 'range' => array_keys(LeadDataKey::getListCache())],
 

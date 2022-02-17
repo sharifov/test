@@ -9,6 +9,7 @@ use src\auth\Auth;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataQuery;
+use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
 use src\model\leadUserConversion\service\LeadUserConversionDictionary;
 use src\model\leadUserConversion\service\LeadUserConversionService;
 use src\services\lead\LeadStateService;
@@ -198,7 +199,16 @@ class MultipleUpdateService
                     $oldStatus === Lead::STATUS_EXTRA_QUEUE &&
                     LeadPoorProcessingDataQuery::isExistActiveRule(LeadPoorProcessingDataDictionary::KEY_EXTRA_TO_PROCESSING_MULTIPLE_UPD)
                 ) {
-                    LeadPoorProcessingService::addLeadPoorProcessingJob($lead->id, LeadPoorProcessingDataDictionary::KEY_EXTRA_TO_PROCESSING_MULTIPLE_UPD);
+                    $description = $form->message ? 'Reason: ' . $form->message . '. ' : '';
+                    if (($fromStatus = Lead::getStatus($oldStatus)) && $toStatus = Lead::getStatus(Lead::STATUS_PROCESSING)) {
+                        $description .= sprintf(LeadPoorProcessingLogStatus::REASON_CHANGE_STATUS, $fromStatus, $toStatus);
+                    }
+
+                    LeadPoorProcessingService::addLeadPoorProcessingJob(
+                        $lead->id,
+                        [LeadPoorProcessingDataDictionary::KEY_EXTRA_TO_PROCESSING_MULTIPLE_UPD],
+                        $description
+                    );
                 }
             } catch (\DomainException $e) {
                 $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());

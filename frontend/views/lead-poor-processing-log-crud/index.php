@@ -2,10 +2,14 @@
 
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataQuery;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLog;
+use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
 use yii\grid\ActionColumn;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
+use yii\helpers\StringHelper;
 use yii\widgets\Pjax;
+use common\components\grid\DateTimeColumn;
+use common\components\grid\UserSelect2Column;
 
 /* @var $this yii\web\View */
 /* @var $searchModel src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogSearch */
@@ -48,12 +52,32 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'lppl_status',
+                'filter'  => LeadPoorProcessingLogStatus::STATUS_LIST,
                 'value' => static function (LeadPoorProcessingLog $model) {
                     return $model->getStatusName();
                 },
             ],
-            'lppl_owner_id:userName',
-            'lppl_created_dt:byUserDatetime',
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'lppl_owner_id',
+                'relation' => 'owner',
+                'placeholder' => 'Owner'
+            ],
+            [
+                'attribute' => 'lppl_description',
+                'value' => static function (LeadPoorProcessingLog $model) {
+                    if (!$model->lppl_description) {
+                        return Yii::$app->formatter->nullDisplay;
+                    }
+                    return StringHelper::truncate($model->lppl_description, 100, '...');
+                },
+                'format' => 'raw',
+            ],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'lppl_created_dt',
+                'limitEndDay' => false,
+            ],
 
             [
                 'class' => ActionColumn::class,

@@ -9,6 +9,13 @@ use yii\widgets\Pjax;
 
 $this->title = 'Site Environments';
 $this->params['breadcrumbs'][] = $this->title;
+
+$envData = [
+    'COMMON_CONFIG_MAIN_COMPONENTS_DB_DSN_DBNAME',
+    'COMMON_CONFIG_MAIN_COMPONENTS_DBSLAVE_DSN_DBNAME',
+    'COMMON_CONFIG_MAIN_COMPONENTS_DBPOSTGRES_DSN_DBNAME'
+];
+
 ?>
 <div class="setting-env">
 
@@ -98,6 +105,44 @@ $this->params['breadcrumbs'][] = $this->title;
         </tr>
         </tbody>
     </table>
+        <h4>php_uname:</h4>
+        <table class="table table-bordered table-hover">
+            <thead>
+            <tr>
+                <th>Mode</th>
+                <th>Name</th>
+                <th>Value</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>s</td>
+                <td>Operating system name</td>
+                <td><?= php_uname('s') ?></td>
+            </tr>
+            <tr>
+                <td>n</td>
+                <td>Host name</td>
+                <td><?= php_uname('n') ?></td>
+            </tr>
+            <tr>
+                <td>r</td>
+                <td>Release name</td>
+                <td><?= php_uname('r') ?></td>
+            </tr>
+            <tr>
+                <td>v</td>
+                <td>Version information</td>
+                <td><?= php_uname('v') ?></td>
+            </tr>
+            <tr>
+                <td>m</td>
+                <td>Machine type</td>
+                <td><?= php_uname('m') ?></td>
+            </tr>
+            </tbody>
+        </table>
+
     </div>
     <div class="col-md-6">
         <?php if (!empty(Yii::$app->params['release'])) : ?>
@@ -192,21 +237,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <td>searchApiUrl</td>
                 <td>Not used</td>
             </tr>
-            <tr>
-                <td><?php echo $paramsNum++ ?></td>
-                <td>DB_NAME</td>
-                <td><?php echo getenv('DB_NAME') ?></td>
-            </tr>
-            <tr>
-                <td><?php echo $paramsNum++ ?></td>
-                <td>DB_NAME2</td>
-                <td><?php echo getenv('DB_NAME2') ?></td>
-            </tr>
-            <tr>
-                <td><?php echo $paramsNum++ ?></td>
-                <td>DB_NAME2</td>
-                <td><?php echo $_ENV['DB_NAME2'] ?? '-' ?></td>
-            </tr>
+
 
             <tr>
                 <td><?php echo $paramsNum++ ?></td>
@@ -224,6 +255,27 @@ $this->params['breadcrumbs'][] = $this->title;
 
             </tbody>
         </table>
+
+        <h4>ENV:</h4>
+        <table class="table table-bordered table-hover">
+            <thead>
+            <tr>
+                <th>Nr</th>
+                <th>Name</th>
+                <th>Value</th>
+            </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($envData as $n => $name) : ?>
+            <tr>
+                <td><?php echo($n + 1) ?></td>
+                <td><?php echo Html::encode($name)?></td>
+                <td><?php echo getenv($name) ?></>
+            </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+
         <?php //\yii\helpers\VarDumper::dump(Yii::$app->params, 10 ,true)?>
     </div>
 

@@ -428,10 +428,12 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Lead Request', 'url' => ['/lead-request-crud/index']],
                         ['label' => 'Lead Data', 'url' => ['/lead-data-crud/index']],
                         ['label' => 'Lead Data Key', 'url' => ['/lead-data-key-crud/index']],
+                        ['label' => 'Lead User Data', 'url' => ['/lead-user-data-crud/index']],
                         ['label' => 'Lead User Conversion', 'url' => ['/lead-user-conversion-crud/index']],
                         ['label' => 'Lead Poor Processing Data', 'url' => ['/lead-poor-processing-data-crud/index']],
                         ['label' => 'Lead Poor Processing', 'url' => ['/lead-poor-processing-crud/index']],
                         ['label' => 'Lead Poor Processing Log', 'url' => ['/lead-poor-processing-log-crud/index']],
+                        ['label' => 'Lead User Ratings', 'url' => ['/lead-user-rating-crud/index']],
                     ]
                 ],
                 [
@@ -626,6 +628,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'Phone List', 'url' => ['/phone-list/index'], 'icon' => 'phone'],
                 ['label' => 'Phone BlockList', 'url' => ['/phone-blacklist/index'], 'icon' => 'phone'],
                 ['label' => 'Phone BlockList Log', 'url' => ['/phone-blacklist-log-crud/index'], 'icon' => 'phone'],
+                ['label' => 'Phone Number Redial', 'url' => ['/phone-number-redial-crud/index'], 'icon' => 'phone'],
 
                 //['label' => 'Airlines', 'url' => ['/settings/airlines'], 'icon' => 'plane'],
                 ['label' => 'Airlines', 'url' => ['/airline-crud/index'], 'icon' => 'space-shuttle'],
@@ -924,6 +927,15 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'Site Settings', 'url' => ['/setting/index'], 'icon' => 'cogs text-success'],
                 ['label' => 'System Logs', 'url' => ['/log/index'], 'icon' => 'bug text-warning'],
                 ['label' => 'API Logs', 'url' => ['/api-log/index'], 'icon' => 'sitemap'],
+                [
+                    'label' => Yii::t('language', 'Feature Flag'), 'url' => 'javascript:', 'icon' => 'folder',
+                    'items' => [
+                        ['label' => Yii::t('menu', 'Feature Flag'), 'url' => ['/flag/feature-flag/index'],
+                            'icon' => 'flag', 'title' => 'Feature Flag CRUD'],
+                        ['label' => Yii::t('menu', 'Feature Flag Docs'), 'url' => ['/flag/feature-flag/doc'],
+                            'title' => 'Feature Flag Docs'],
+                    ]
+                ],
                 ['label' => 'API Report', 'url' => ['/stats/api-graph'], 'icon' => 'bar-chart'],
 
                 ['label' => 'User Site Activity', 'url' => ['/user-site-activity/index'], 'icon' => 'bars'],

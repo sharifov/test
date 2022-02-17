@@ -49,7 +49,7 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
 $unsubscribedEmails =  @json_encode($unsubscribedEmails);
 $emailTemplateTypes = \common\models\EmailTemplateType::getEmailTemplateTypesList(false, $model->cs_dep_id, $model->cs_project_id);
 
-$abacDto = new EmailPreviewDto($previewEmailForm->e_email_tpl_id, null, null, null, $model);
+$abacDto = new EmailPreviewDto($previewEmailForm->e_email_tpl_id, null, null, null, null, $model);
 
 /** @abac $abacDto, EmailAbacObject::ACT_VIEOBJ_PREVIEW_EMAILmailAbacObject::ACTION_EDIT_FROM, Restrict access to edit input email_from in lead communication block */
 $emailFromReadonly = !Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_EDIT_FROM);

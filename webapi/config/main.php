@@ -40,6 +40,9 @@ return [
         'hotel' => [
             'class' => HotelModule::class,
         ],
+        'flag' => [
+            'class' => \kivork\FeatureFlag\FeatureFlagModule::class,
+        ],
     ],
 
     'components' => [

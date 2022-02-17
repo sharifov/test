@@ -5,6 +5,7 @@ namespace common\models;
 use common\components\ChartTools;
 use common\components\CommunicationService;
 use common\components\jobs\LeadPoorProcessingRemoverJob;
+use common\components\jobs\SmsOutEndedJob;
 use common\components\jobs\SmsPriceJob;
 use common\models\query\SmsQuery;
 use DateTime;
@@ -18,6 +19,7 @@ use src\events\sms\SmsCreatedEvent;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadPoorProcessing\service\rules\LeadPoorProcessingNoAction;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
+use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
 use src\services\sms\incoming\SmsIncomingForm;
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -493,8 +495,6 @@ class Sms extends \yii\db\ActiveRecord
                 $this->save();
             }
 
-            //VarDumper::dump($request, 10, true); exit;
-
             if ($request && isset($request['error']) && $request['error']) {
                 $this->s_status_id = self::STATUS_ERROR;
                 $errorData = @json_decode($request['error'], true);
@@ -504,8 +504,9 @@ class Sms extends \yii\db\ActiveRecord
                 Yii::error($str . "\r\n" . $out['error'], 'Sms:sendSms:smsSend:CommunicationError');
             }
 
-            if ($this->s_lead_id && LeadPoorProcessingNoAction::checkSmsTemplate($tplType)) {
-                LeadPoorProcessingService::addLeadPoorProcessingRemoverJob($this->s_lead_id, [LeadPoorProcessingDataDictionary::KEY_NO_ACTION]);
+            if ($this->s_id) {
+                $smsOutEndedJob = new SmsOutEndedJob($this->s_id);
+                Yii::$app->queue_job->priority(10)->push($smsOutEndedJob);
             }
         } catch (\Throwable $exception) {
             $error = VarDumper::dumpAsString($exception->getMessage());
@@ -514,8 +515,6 @@ class Sms extends \yii\db\ActiveRecord
             $this->s_error_message = 'Communication error: ' . $error;
             $this->save();
         }
-
-       // VarDumper::dump($request, 10, true); exit;
 
         return $out;
     }
@@ -705,7 +704,7 @@ class Sms extends \yii\db\ActiveRecord
         parent::afterSave($insert, $changedAttributes);
 
         if ($this->s_lead_id && $this->sLead) {
-            $this->sLead->updateLastAction();
+            $this->sLead->updateLastAction(LeadPoorProcessingLogStatus::REASON_SMS);
         }
         if ($this->s_case_id && $this->sCase) {
             $this->sCase->updateLastAction();

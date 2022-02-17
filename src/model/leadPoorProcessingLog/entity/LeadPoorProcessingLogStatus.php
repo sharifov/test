@@ -18,4 +18,19 @@ class LeadPoorProcessingLogStatus
         self::STATUS_DELETED => 'Deleted',
         self::STATUS_ADDED_TO_EXTRA_QUEUE => 'Added to Extra queue',
     ];
+
+    public const REASON_CALL = 'Call';
+    public const REASON_EMAIL = 'Email';
+    public const REASON_CHANGE_STATUS = 'Lead changes status from %s to %s';
+    public const REASON_CHANGE_LAST_ACTION = 'Change last action';
+    public const REASON_CHANGE_OWNER = 'Owner changed from %s to %s';
+    public const REASON_CHANGE_ITINERARY = 'Lead itinerary changed';
+    public const REASON_SMS = 'SMS';
+    public const REASON_CALL_EXPERT = 'Call Expert';
+    public const REASON_NOTE = 'Note';
+    public const REASON_QUOTE = 'Quote';
+    public const REASON_LEAD_TACK = 'Lead Task';
+    public const REASON_TAKE = 'Take';
+    public const REASON_EXPERT_IDLE = 'Expert Idle';
+    public const REASON_ADDED_TO_EXTRA_QUEUE_ACCORDING_TO_THE_RULE = 'Added to Extra queue according to the rule "%s"';
 }

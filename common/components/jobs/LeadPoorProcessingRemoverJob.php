@@ -3,9 +3,11 @@
 namespace common\components\jobs;
 
 use common\models\Lead;
+use modules\featureFlag\FFlag;
 use src\helpers\app\AppHelper;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadPoorProcessing\service\rules\LeadPoorProcessingRuleFactory;
+use Yii;
 use yii\helpers\ArrayHelper;
 use yii\queue\JobInterface;
 
@@ -14,16 +16,19 @@ use yii\queue\JobInterface;
  *
  * @property int $leadId
  * @property array $ruleKeys
+ * @property string|null $description
  */
 class LeadPoorProcessingRemoverJob extends BaseJob implements JobInterface
 {
-    public int $leadId;
-    public array $ruleKeys;
+    private int $leadId;
+    private array $ruleKeys;
+    private ?string $description = null;
 
-    public function __construct(int $leadId, array $ruleKeys, ?float $timeStart = null, array $config = [])
+    public function __construct(int $leadId, array $ruleKeys, ?string $description = null, ?float $timeStart = null, array $config = [])
     {
         $this->leadId = $leadId;
         $this->ruleKeys = $ruleKeys;
+        $this->description = $description;
         parent::__construct($timeStart, $config);
     }
 
@@ -43,11 +48,14 @@ class LeadPoorProcessingRemoverJob extends BaseJob implements JobInterface
                 throw new \RuntimeException('Lead not found by ID(' . $this->leadId . ')');
             }
             foreach ($this->ruleKeys as $dataKey) {
-                LeadPoorProcessingService::removeFromLeadAndKey($lead, $dataKey);
+                LeadPoorProcessingService::removeFromLeadAndKey($lead, $dataKey, $this->description);
             }
         } catch (\RuntimeException | \DomainException $throwable) {
-            $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
-            \Yii::info($message, 'LeadPoorProcessingRemoverJob:execute:Exception');
+            /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
+            if (Yii::$app->ff->can(FFlag::FF_KEY_DEBUG)) {
+                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
+                \Yii::info($message, 'LeadPoorProcessingRemoverJob:execute:Exception');
+            }
         } catch (\Throwable $throwable) {
             $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
             \Yii::error($message, 'LeadPoorProcessingRemoverJob:execute:Throwable');
