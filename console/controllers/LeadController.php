@@ -565,11 +565,6 @@ class LeadController extends Controller
         }
 
         $scheduledCommunicationRuleService = new ScheduledCommunicationService($scheduledCommunicationRule);
-        if (!$firstLeadUserData = LeadUserData::find()->orderBy(['lud_created_dt' => SORT_ASC])->one()) {
-            echo Console::renderColoredString('%y --- LeadUserData not found %n'), PHP_EOL;
-            exit();
-        }
-
         $currentDT = new \DateTimeImmutable();
         $dateRule = $currentDT->modify('-' . $scheduledCommunicationRuleService->getIntervalHour() . ' hours');
         $startDate = '2022-02-17 11:30:00';
