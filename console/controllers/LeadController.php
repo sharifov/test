@@ -572,6 +572,7 @@ class LeadController extends Controller
 
         $currentDT = new \DateTimeImmutable();
         $dateRule = $currentDT->modify('-' . $scheduledCommunicationRuleService->getIntervalHour() . ' hours');
+        $startDate = '2022-02-17 11:30:00';
 
         $query = Lead::find()
             ->alias('leads')
@@ -581,7 +582,7 @@ class LeadController extends Controller
                 'leads.project_id = projects.id'
             )
             ->where(['leads.status' => Lead::STATUS_PROCESSING])
-            ->andWhere(['>', 'leads.created', $firstLeadUserData->lud_created_dt])
+            ->andWhere(['>', 'leads.created', $startDate])
             ->andWhere(['<', 'l_status_dt', $dateRule->format('Y-m-d H:i:s')])
             ->orderBy(['leads.id' => SORT_ASC])
             ->asArray()
