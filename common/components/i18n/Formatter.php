@@ -695,6 +695,21 @@ class Formatter extends \yii\i18n\Formatter
         return Html::tag('span', Html::encode($name), ['class' => 'badge badge-info', 'data-toggle' => 'tooltip',  'data-original-title' => 'Project']);
     }
 
+    public function asProjectNames(?array $projectIds, string $separator = ' ', ?string $tag = 'span'): string
+    {
+        if (empty($projectIds)) {
+            $result = '';
+        } else {
+            $nameList = [];
+            foreach ($projectIds as $projectId) {
+                $name = $this->asProjectName($projectId);
+                $nameList[] = $tag ? Html::tag($tag, $name) : $name;
+            }
+            $result = implode($separator, $nameList);
+        }
+        return $result;
+    }
+
     public function asPercentInteger($value): string
     {
         return $value . ' %';
@@ -1016,5 +1031,20 @@ class Formatter extends \yii\i18n\Formatter
         }
 
         return \src\model\voip\phoneDevice\log\PhoneDeviceLogLevel::asFormat($value);
+    }
+
+    public function asFormattedPhoneNumber(string $number): string
+    {
+        if (preg_match('/^\+?[0-9]{11}$/', $number)) {
+            return '(' . substr($number, 1, 3) . ') ' .
+                '<span style="color:green">' .
+                substr($number, 4, 3) .
+                '</span>
+                 -
+                 <span style="color:blue">' .
+                substr($number, 7, 5) .
+                '</span>';
+        }
+        return $number;
     }
 }
