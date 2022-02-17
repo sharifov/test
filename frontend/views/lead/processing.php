@@ -486,7 +486,9 @@ $this->registerJs($js);
       if (seconds < 0) {
           var params = {format: '%H:%M:%S', seconds: Math.abs(seconds)};
       } else {
-          var params = {format: '%H:%M:%S', countdown: true, duration: seconds + 's'};
+          var params = {format: '%H:%M:%S', countdown: true, duration: seconds + 's', callback: function (el) {
+              $(e).timer('remove').timer({format: '%H:%M:%S', seconds: 0}).timer('start');
+          }};
       }
       $(e).timer(params).timer('start');
   });

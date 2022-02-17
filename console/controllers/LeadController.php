@@ -565,13 +565,9 @@ class LeadController extends Controller
         }
 
         $scheduledCommunicationRuleService = new ScheduledCommunicationService($scheduledCommunicationRule);
-        if (!$firstLeadUserData = LeadUserData::find()->orderBy(['lud_created_dt' => SORT_ASC])->one()) {
-            echo Console::renderColoredString('%y --- LeadUserData not found %n'), PHP_EOL;
-            exit();
-        }
-
         $currentDT = new \DateTimeImmutable();
         $dateRule = $currentDT->modify('-' . $scheduledCommunicationRuleService->getIntervalHour() . ' hours');
+        $startDate = '2022-02-17 11:30:00';
 
         $query = Lead::find()
             ->alias('leads')
@@ -581,14 +577,15 @@ class LeadController extends Controller
                 'leads.project_id = projects.id'
             )
             ->where(['leads.status' => Lead::STATUS_PROCESSING])
-            ->andWhere(['>', 'leads.created', $firstLeadUserData->lud_created_dt])
+            ->andWhere(['>', 'leads.created', $startDate])
             ->andWhere(['<', 'l_status_dt', $dateRule->format('Y-m-d H:i:s')])
             ->orderBy(['leads.id' => SORT_ASC])
             ->asArray()
             ->all()
         ;
 
-        $lppLeads = [];
+
+        $leads = $lppLeads = [];
         foreach ($query as $item) {
             $isCallOutCommunicationExist = LeadUserData::find()
                     ->select(new Expression('COUNT(*) AS call_out_cnt'))
@@ -600,7 +597,7 @@ class LeadController extends Controller
                     ->exists()
             ;
             if (!$isCallOutCommunicationExist) {
-                $lppLeads[$item['lead_id']] = LeadUserDataDictionary::getTypeName(LeadUserDataDictionary::TYPE_CALL_OUT);
+                $leads[$item['lead_id']] = LeadUserDataDictionary::getTypeName(LeadUserDataDictionary::TYPE_CALL_OUT);
                 continue;
             }
 
@@ -615,7 +612,7 @@ class LeadController extends Controller
                         ->exists()
                 ;
                 if (!$isSmsOutCommunicationExist) {
-                    $lppLeads[$item['lead_id']] = LeadUserDataDictionary::getTypeName(LeadUserDataDictionary::TYPE_SMS_OUT);
+                    $leads[$item['lead_id']] = LeadUserDataDictionary::getTypeName(LeadUserDataDictionary::TYPE_SMS_OUT);
                     continue;
                 }
             }
@@ -630,24 +627,32 @@ class LeadController extends Controller
                     ->exists()
             ;
             if (!$isEmailOutCommunicationExist) {
-                $lppLeads[$item['lead_id']] = LeadUserDataDictionary::getTypeName(LeadUserDataDictionary::TYPE_EMAIL_OFFER);
+                $leads[$item['lead_id']] = LeadUserDataDictionary::getTypeName(LeadUserDataDictionary::TYPE_EMAIL_OFFER);
                 continue;
             }
         }
 
-        $count = count($lppLeads);
+        $count = count($leads);
         $processed = 0;
         Console::startProgress($processed, $count);
 
-        foreach ($lppLeads as $leadId => $firstReasonId) {
+        foreach ($leads as $leadId => $firstReason) {
             $logData = ['leadId' => $leadId];
+
             try {
+                if ($lead = Lead::find()->where(['id' => $leadId])->limit(1)->one()) {
+                    throw new \RuntimeException('Lead not found');
+                }
+                if (!(new LeadPoorProcessingChecker($lead, LeadPoorProcessingDataDictionary::KEY_SCHEDULED_COMMUNICATION))->isChecked()) {
+                    continue;
+                }
+
                 LeadPoorProcessingService::addLeadPoorProcessingJob(
                     (int) $leadId,
                     [LeadPoorProcessingDataDictionary::KEY_SCHEDULED_COMMUNICATION],
                     $scheduledCommunicationRule->lppd_description
                 );
-
+                $lppLeads[$leadId] = $firstReason;
                 $processed++;
                 Console::updateProgress($processed, $count);
             } catch (\RuntimeException | \DomainException $throwable) {
