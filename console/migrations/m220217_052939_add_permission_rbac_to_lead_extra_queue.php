@@ -5,9 +5,9 @@ use console\migrations\RbacMigrationService;
 use yii\db\Migration;
 
 /**
- * Class m220217_052939_add_permition_rbac_to_lead_extra_queue
+ * Class m220217_052939_add_permission_rbac_to_lead_extra_queue
  */
-class m220217_052939_add_permition_rbac_to_lead_extra_queue extends Migration
+class m220217_052939_add_permission_rbac_to_lead_extra_queue extends Migration
 {
     private $routes = [
         '/lead/extra-queue',
@@ -17,13 +17,13 @@ class m220217_052939_add_permition_rbac_to_lead_extra_queue extends Migration
         Employee::ROLE_SUPER_ADMIN,
         Employee::ROLE_ADMIN,
 
-        \common\models\Employee::ROLE_AGENT,
-        \common\models\Employee::ROLE_EX_AGENT,
-        \common\models\Employee::ROLE_SUP_AGENT,
+        Employee::ROLE_AGENT,
+        Employee::ROLE_EX_AGENT,
+        Employee::ROLE_SUP_AGENT,
 
-        \common\models\Employee::ROLE_SUPERVISION,
-        \common\models\Employee::ROLE_EX_SUPER,
-        \common\models\Employee::ROLE_SUP_SUPER,
+        Employee::ROLE_SUPERVISION,
+        Employee::ROLE_EX_SUPER,
+        Employee::ROLE_SUP_SUPER,
     ];
 
     /**
