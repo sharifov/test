@@ -14,6 +14,7 @@ use yii\helpers\StringHelper;
 use yii\helpers\Url;
 use yii\grid\ActionColumn;
 use yii\widgets\Pjax;
+use common\components\grid\UserSelect2Column;
 
 /* @var $this yii\web\View */
 /* @var $searchModel modules\user\userFeedback\entity\search\UserFeedbackSearch */
@@ -27,18 +28,22 @@ $userAbacDto = new UserAbacDto('username');
 $columns = [
     'uf_id',
     [
+        'label' => 'Type',
         'attribute' => 'uf_type_id',
         'value' => static function (UserFeedback $model) {
             return $model->getTypeLabel();
         },
-        'format' => 'raw'
+        'format' => 'raw',
+        'filter' => UserFeedback::getTypeList()
     ],
     [
+        'label' => 'Status',
         'attribute' => 'uf_status_id',
         'value' => static function (UserFeedback $model) {
             return $model->getStatusLabel();
         },
-        'format' => 'raw'
+        'format' => 'raw',
+        'filter' => UserFeedback::getStatusList()
     ],
     'uf_title',
     [
@@ -59,11 +64,10 @@ $columns = [
     ],
     ['class' => DateTimeColumn::class, 'attribute' => 'uf_created_dt'],
     [
+        'class' => UserSelect2Column::class,
         'attribute' => 'uf_created_user_id',
-        'value' => static function (UserFeedback $userFeedback) {
-            $user = Employee::findOne($userFeedback->uf_created_user_id);
-            return $user->username ?? null;
-        }
+        'relation' => 'ufCreatedUser',
+        'placeholder' => 'Select user'
     ],
     [
         'class' => ActionColumn::class,
