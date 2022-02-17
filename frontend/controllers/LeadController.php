@@ -209,7 +209,8 @@ class LeadController extends FController
                     'create-by-chat',
                     'ajax-create-from-phone-widget',
                     'ajax-create-from-phone-widget-with-invalid-client',
-                    'ajax-link-to-call'
+                    'ajax-link-to-call',
+                    'extra-queue',
                 ],
             ],
         ];
@@ -2716,8 +2717,19 @@ class LeadController extends FController
         return $this->asJson($result);
     }
 
+    /**
+     * @throws ForbiddenHttpException
+     */
     public function actionExtraQueue(): string
     {
+        $leadAbacDto = new LeadAbacDto(null, (int) Auth::id());
+        /** @abac $leadAbacDto, LeadAbacObject::OBJ_EXTRA_QUEUE, LeadAbacObject::ACTION_ACCESS, access to actionExtraQueue */
+        $canLeadPoorProcessingLogs = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_EXTRA_QUEUE, LeadAbacObject::ACTION_ACCESS);
+
+        if (!$canLeadPoorProcessingLogs) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
         $searchModel = new LeadSearch();
         $params = Yii::$app->request->queryParams;
         $params2 = Yii::$app->request->post();
