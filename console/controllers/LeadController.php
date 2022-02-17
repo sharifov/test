@@ -3,6 +3,7 @@
 namespace console\controllers;
 
 use common\models\Call;
+use common\models\ClientEmail;
 use common\models\Lead;
 use common\models\LeadFlightSegment;
 use common\models\LeadFlow;
@@ -571,7 +572,7 @@ class LeadController extends Controller
 
         $query = Lead::find()
             ->alias('leads')
-            ->select(['leads.id AS lead_id', 'leads.employee_id AS owner_id', 'projects.project_key'])
+            ->select(['leads.id AS lead_id', 'leads.employee_id AS owner_id', 'projects.project_key', 'leads.client_id'])
             ->innerJoin(
                 Project::tableName() . ' AS projects',
                 'leads.project_id = projects.id'
@@ -617,6 +618,9 @@ class LeadController extends Controller
                 }
             }
 
+            if (!ClientEmail::find()->where(['client_id' => $item['client_id']])->exists()) {
+                continue;
+            }
             $isEmailOutCommunicationExist = LeadUserData::find()
                     ->select(new Expression('COUNT(*) AS email_offer_cnt'))
                     ->where(['lud_type_id' => LeadUserDataDictionary::TYPE_EMAIL_OFFER])
