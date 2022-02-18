@@ -48,8 +48,7 @@ if ($listParams['isFullList']) {
     </div>
 
     <div class="_cc-channel-pagination" style="display: flex;justify-content: center; padding: 15px 0 10px;">
-        <p id="load-channels-txt">
-            <?= $loadButtonText ?>
-        </p>
+        <?= $loadButtonText ?>
+        <p id="load-channels-txt"></p>
     </div>
 </div>

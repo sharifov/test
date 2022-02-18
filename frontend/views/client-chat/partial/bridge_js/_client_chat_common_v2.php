@@ -225,7 +225,7 @@ window.addScrollEventListenerToChatListWrapper = function () {
             chatListingAjaxRequestEnabled = true;
             let page = $('#cc-dialogs-wrapper').attr('data-page');
             let loadChannelsTxt = $('#load-channels-txt');
-            
+            let loadChannelsBtn = $('#load-channels-btn');
             let loadChannelsCurrentText = loadChannelsTxt.html();
             
             let params = new URLSearchParams(window.location.search);
@@ -239,6 +239,8 @@ window.addScrollEventListenerToChatListWrapper = function () {
                 cache: false,
                 // data: {loadingChannels: 1, channelId: params.get('channelId') | selectedChannel},
                 beforeSend: function () {
+                    loadChannelsBtn.html('');
+                    loadChannelsBtn.hide();
                     loadChannelsTxt.html('<i class="fa fa-spin fa-spinner"></i> Loading...');
                 },
                 success: function (data) {
@@ -250,8 +252,8 @@ window.addScrollEventListenerToChatListWrapper = function () {
                         loadChannelsTxt.html('All conversations are loaded');
                         window.allDialogsLoaded = true;
                     } else {
-                        let txt = '<a id="load-channels-btn"><i class="fa fa-angle-double-down"> </i> Click to load more (<span>' + data.moreCount + '</span>)</a>';
-                        loadChannelsTxt.html(txt);
+                        loadChannelsBtn.html('<i class="fa fa-angle-double-down"> </i> Click to load more (<span>' + data.moreCount + '</span>)');
+                        loadChannelsBtn.show();
                         $('#cc-dialogs-wrapper').attr('data-page', data.page);
                         window.allDialogsLoaded = false;
                     }
