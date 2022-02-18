@@ -123,7 +123,7 @@ class LeadPoorProcessingAbacObject extends AbacBaseModel implements AbacInterfac
         'label' => 'Lead created Data Time',
         'type' => self::ATTR_TYPE_DATE,
         'input' => self::ATTR_INPUT_TEXT,
-        'placeholder' => 'yyyy-mm-dd hh:mm',
+        'placeholder' => 'yyyy-mm-dd hh:mm:ss',
         'operators' =>  [self::OP_GREATER, self::OP_LESS]
     ];
     protected const ATTR_IS_IN_DEPARTMENT = [
