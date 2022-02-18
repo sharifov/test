@@ -55,6 +55,10 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => 'Used for',
                 'attribute' => 'used_for',
+                'contentOptions' => [
+                    'style' => 'min-width: 100px;',
+                ],
+                'format' => 'raw',
                 'value' => function (PhoneList $model) {
                     $result = \Yii::$app->formatter->nullDisplay;
                     if (isset($model->departmentPhoneProject)) {
