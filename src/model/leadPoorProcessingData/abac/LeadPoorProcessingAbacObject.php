@@ -120,11 +120,10 @@ class LeadPoorProcessingAbacObject extends AbacBaseModel implements AbacInterfac
         'optgroup' => 'Lead',
         'id' => self::NS . 'leadCreated',
         'field' => 'leadCreated',
-        'label' => 'Lead created',
-        'type' => self::ATTR_TYPE_STRING,
+        'label' => 'Lead created Data Time',
+        'type' => self::ATTR_TYPE_DATE,
         'input' => self::ATTR_INPUT_TEXT,
-        'values' => [],
-        'multiple' => false,
+        'placeholder' => 'yyyy-mm-dd hh:mm',
         'operators' =>  [self::OP_GREATER, self::OP_LESS]
     ];
     protected const ATTR_IS_IN_DEPARTMENT = [
