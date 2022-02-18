@@ -252,6 +252,7 @@ window.addScrollEventListenerToChatListWrapper = function () {
                         loadChannelsTxt.html('All conversations are loaded');
                         window.allDialogsLoaded = true;
                     } else {
+                        loadChannelsTxt.html('');
                         loadChannelsBtn.html('<i class="fa fa-angle-double-down"> </i> Click to load more (<span>' + data.moreCount + '</span>)');
                         loadChannelsBtn.show();
                         $('#cc-dialogs-wrapper').attr('data-page', data.page);
