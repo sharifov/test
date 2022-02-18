@@ -1,8 +1,10 @@
 <?php
 
+use src\auth\Auth;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataQuery;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLog;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
+use src\services\cleaner\form\DbCleanerParamsForm;
 use yii\grid\ActionColumn;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
@@ -14,9 +16,11 @@ use common\components\grid\UserSelect2Column;
 /* @var $this yii\web\View */
 /* @var $searchModel src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var DbCleanerParamsForm $modelCleaner */
 
 $this->title = 'Lead Poor Processing Logs';
 $this->params['breadcrumbs'][] = $this->title;
+$pjaxListId = 'pjax-lpp-log';
 ?>
 <div class="lead-poor-processing-log-index">
 
@@ -26,7 +30,14 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('Create Lead Poor Processing Log', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-    <?php Pjax::begin(['id' => 'pjax-lead-poor-processing-log']); ?>
+    <?php if (Auth::can('global/clean/table')) : ?>
+        <?php echo $this->render('../clean/_clean_table_form', [
+            'modelCleaner' => $modelCleaner,
+            'pjaxIdForReload' => $pjaxListId,
+        ]); ?>
+    <?php endif ?>
+
+    <?php Pjax::begin(['id' => $pjaxListId, 'scrollTo' => 0]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <?= GridView::widget([
