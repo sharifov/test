@@ -215,6 +215,5 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
         ]);
 
         ProductQuoteChangeRelation::deleteAll(['pqcr_pq_id' => $voluntaryQuote->pq_id]);
-
     }
 }
