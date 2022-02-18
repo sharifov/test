@@ -116,12 +116,22 @@ class LeadPoorProcessingAbacObject extends AbacBaseModel implements AbacInterfac
         'multiple' => true,
         'operators' =>  [self::OP_IN, self::OP_NOT_IN]
     ];
+    protected const ATTR_LEAD_CREATED = [
+        'optgroup' => 'Lead',
+        'id' => self::NS . 'leadCreated',
+        'field' => 'leadCreated',
+        'label' => 'Lead created',
+        'type' => self::ATTR_TYPE_STRING,
+        'input' => self::ATTR_INPUT_TEXT,
+        'values' => [],
+        'multiple' => false,
+        'operators' =>  [self::OP_GREATER, self::OP_LESS]
+    ];
     protected const ATTR_IS_IN_DEPARTMENT = [
         'optgroup' => 'User',
         'id' => self::NS . 'isInDepartment',
         'field' => 'isInDepartment',
         'label' => 'Has Access to Lead`s Department',
-
         'type' => self::ATTR_TYPE_BOOLEAN,
         'input' => self::ATTR_INPUT_RADIO,
         'values' => ['true' => 'True', 'false' => 'False'],
@@ -179,6 +189,7 @@ class LeadPoorProcessingAbacObject extends AbacBaseModel implements AbacInterfac
         $attributeList[self::OBJ_PERMISSION_RULE][] = $attrLeadType;
         $attributeList[self::OBJ_PERMISSION_RULE][] =  self::ATTR_IS_IN_PROJECT;
         $attributeList[self::OBJ_PERMISSION_RULE][] = self::ATTR_IS_IN_DEPARTMENT;
+        $attributeList[self::OBJ_PERMISSION_RULE][] = self::ATTR_LEAD_CREATED;
 
         return $attributeList;
     }
