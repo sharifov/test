@@ -219,12 +219,11 @@ function updateLastMessageTime() {
     });
 }
 
-window.addScrollEventListenerToChatListWrapper = function () {
-    $('#cc-dialogs-wrapper').scroll(function (e) {
-        var elem = $(e.currentTarget);
-        if (elem.scrollTop() + Math.ceil(elem.innerHeight()) >= elem[0].scrollHeight && !chatListingAjaxRequestEnabled && !window.allDialogsLoaded) {
+window.addScrollEventListenerToChatListWrapper = function () {    
+    $('#load-channels-btn').click(function (e) {        
+        if (!chatListingAjaxRequestEnabled && !window.allDialogsLoaded) {
             chatListingAjaxRequestEnabled = true;
-            let page = $(this).attr('data-page');
+            let page = $('#cc-dialogs-wrapper').attr('data-page');
             let loadChannelsTxt = $('#load-channels-txt');
             
             let loadChannelsCurrentText = loadChannelsTxt.html();
@@ -251,7 +250,7 @@ window.addScrollEventListenerToChatListWrapper = function () {
                         loadChannelsTxt.html('All conversations are loaded');
                         window.allDialogsLoaded = true;
                     } else {
-                        let txt = '<i class="fa fa-angle-double-down"> </i> Scroll to load more (<span>' + data.moreCount + '</span>)';
+                        let txt = '<a id="load-channels-btn"><i class="fa fa-angle-double-down"> </i> Click to load more (<span>' + data.moreCount + '</span>)</a>';
                         loadChannelsTxt.html(txt);
                         $('#cc-dialogs-wrapper').attr('data-page', data.page);
                         window.allDialogsLoaded = false;
