@@ -1542,7 +1542,7 @@ class LeadController extends ApiBaseController
 
                         if ($notifMessage) {
                             Notifications::createAndPublish(
-                                $lead->owner,
+                                $lead->employee_id,
                                 'Flight ticket has been voided',
                                 $notifMessage,
                                 Notifications::TYPE_INFO,
