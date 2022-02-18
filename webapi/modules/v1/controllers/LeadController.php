@@ -1521,11 +1521,11 @@ class LeadController extends ApiBaseController
 
                     if (
                         !empty($leadAttributes['additional_information']) &&
-                        !empty($leadAttributes['additional_information']['pnr'])
+                        !empty($leadAttributes['additional_information'][0]['pnr'])
                     ) {
                         $aplliend = $lead->getAppliedAlternativeQuotes();
                         if ($aplliend !== null) {
-                            $aplliend->record_locator = $leadAttributes['additional_information']['pnr'];
+                            $aplliend->record_locator = $leadAttributes['additional_information'][0]['pnr'];
                             $aplliend->save(false);
                             if ($aplliend->hasErrors()) {
                                 $response['errors'] = $aplliend->getErrors();
@@ -1542,7 +1542,7 @@ class LeadController extends ApiBaseController
 
                         if ($notifMessage) {
                             Notifications::createAndPublish(
-                                $lead->owner,
+                                $lead->employee_id,
                                 'Flight ticket has been voided',
                                 $notifMessage,
                                 Notifications::TYPE_INFO,
