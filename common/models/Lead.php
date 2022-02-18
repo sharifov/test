@@ -1438,7 +1438,7 @@ class Lead extends ActiveRecord implements Objectable
         }
 
         $description = $reason ? 'Reason: ' . $reason . '. ' : '';
-        if (($fromStatus = self::getStatus($oldStatus)) && $toStatus = self::getStatus(Lead::STATUS_PROCESSING)) {
+        if (($fromStatus = self::getStatus($oldStatus)) && $toStatus = self::getStatus(self::STATUS_PROCESSING)) {
             $description .= sprintf(LeadPoorProcessingLogStatus::REASON_CHANGE_STATUS, $fromStatus, $toStatus);
         }
 
