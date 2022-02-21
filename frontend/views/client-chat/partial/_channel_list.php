@@ -17,7 +17,7 @@ use src\model\clientChat\dashboard\FilterForm;
 $formatter = new \common\components\i18n\Formatter();
 $formatter->timeZone = \src\auth\Auth::user()->timezone;
 
-$loadButtonText = '<i class="fa fa-angle-double-down"> </i> Scroll to load more (<span>' . $listParams['moreCount'] . '</span>)';
+$loadButtonText = '<a id="load-channels-btn"><i class="fa fa-angle-double-down"> </i> Click to load more (<span>' . $listParams['moreCount'] . '</span>)</a>';
 if ($listParams['isFullList']) {
     $loadButtonText = 'All conversations are loaded';
 }
@@ -48,8 +48,7 @@ if ($listParams['isFullList']) {
     </div>
 
     <div class="_cc-channel-pagination" style="display: flex;justify-content: center; padding: 15px 0 10px;">
-        <p id="load-channels-txt">
-            <?= $loadButtonText ?>
-        </p>
+        <?= $loadButtonText ?>
+        <p id="load-channels-txt"></p>
     </div>
 </div>

@@ -219,14 +219,13 @@ function updateLastMessageTime() {
     });
 }
 
-window.addScrollEventListenerToChatListWrapper = function () {
-    $('#cc-dialogs-wrapper').scroll(function (e) {
-        var elem = $(e.currentTarget);
-        if (elem.scrollTop() + Math.ceil(elem.innerHeight()) >= elem[0].scrollHeight && !chatListingAjaxRequestEnabled && !window.allDialogsLoaded) {
+window.addScrollEventListenerToChatListWrapper = function () {    
+    $('#load-channels-btn').click(function (e) {        
+        if (!chatListingAjaxRequestEnabled && !window.allDialogsLoaded) {
             chatListingAjaxRequestEnabled = true;
-            let page = $(this).attr('data-page');
+            let page = $('#cc-dialogs-wrapper').attr('data-page');
             let loadChannelsTxt = $('#load-channels-txt');
-            
+            let loadChannelsBtn = $('#load-channels-btn');
             let loadChannelsCurrentText = loadChannelsTxt.html();
             
             let params = new URLSearchParams(window.location.search);
@@ -240,6 +239,8 @@ window.addScrollEventListenerToChatListWrapper = function () {
                 cache: false,
                 // data: {loadingChannels: 1, channelId: params.get('channelId') | selectedChannel},
                 beforeSend: function () {
+                    loadChannelsBtn.html('');
+                    loadChannelsBtn.hide();
                     loadChannelsTxt.html('<i class="fa fa-spin fa-spinner"></i> Loading...');
                 },
                 success: function (data) {
@@ -251,8 +252,9 @@ window.addScrollEventListenerToChatListWrapper = function () {
                         loadChannelsTxt.html('All conversations are loaded');
                         window.allDialogsLoaded = true;
                     } else {
-                        let txt = '<i class="fa fa-angle-double-down"> </i> Scroll to load more (<span>' + data.moreCount + '</span>)';
-                        loadChannelsTxt.html(txt);
+                        loadChannelsTxt.html('');
+                        loadChannelsBtn.html('<i class="fa fa-angle-double-down"> </i> Click to load more (<span>' + data.moreCount + '</span>)');
+                        loadChannelsBtn.show();
                         $('#cc-dialogs-wrapper').attr('data-page', data.page);
                         window.allDialogsLoaded = false;
                     }

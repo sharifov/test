@@ -16,6 +16,7 @@ use src\model\clientData\service\ClientDataService;
 use src\model\clientDataKey\entity\ClientDataKeyDictionary;
 use Throwable;
 use Yii;
+use yii\helpers\ArrayHelper;
 use yii\queue\JobInterface;
 use yii\queue\Queue;
 
@@ -101,10 +102,12 @@ class WebEngageLeadRequestJob extends BaseJob implements JobInterface
                 );
             }
         } catch (Throwable $throwable) {
-            \Yii::error(
-                AppHelper::throwableLog($throwable),
-                'WebEngageLeadRequestJob:throwable'
-            );
+            $message = ArrayHelper::merge(AppHelper::throwableLog($throwable, true), [
+                'leadId' => $this->leadId,
+                'evanName' => $this->eventName,
+                'data' => $this->data,
+            ]);
+            \Yii::error($message, 'WebEngageLeadRequestJob:throwable');
         }
     }
 }
