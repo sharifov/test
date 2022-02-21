@@ -11,6 +11,7 @@ use common\models\Lead;
 use common\models\ProjectWeight;
 use common\models\StatusWeight;
 use src\helpers\setting\SettingHelper;
+use src\model\leadRedial\leadExcluder\LeadExcluder;
 use src\model\leadRedial\queue\ClientPhones;
 use src\model\leadRedial\job\LeadRedialAssignToUsersJob;
 use src\model\phoneNumberRedial\entity\Scopes\PhoneNumberRedialQuery;
@@ -29,21 +30,25 @@ use yii\helpers\VarDumper;
  * @property LeadQcallRepository $leadQcallRepository
  * @property LeadFlowRepository $leadFlowRepository
  * @property ClientPhones $clientPhones
+ * @property LeadExcluder $leadExcluder
  */
 class QCallService
 {
     private $leadQcallRepository;
     private $leadFlowRepository;
     private ClientPhones $clientPhones;
+    private LeadExcluder $leadExcluder;
 
     public function __construct(
         LeadQcallRepository $leadQcallRepository,
         LeadFlowRepository $leadFlowRepository,
-        ClientPhones $clientPhones
+        ClientPhones $clientPhones,
+        LeadExcluder $leadExcluder
     ) {
         $this->leadQcallRepository = $leadQcallRepository;
         $this->leadFlowRepository = $leadFlowRepository;
         $this->clientPhones = $clientPhones;
+        $this->leadExcluder = $leadExcluder;
     }
 
     public function createByDefault(Lead $lead): ?int
@@ -86,6 +91,9 @@ class QCallService
 
         $lead = Lead::findOne($leadId);
         if ($lead) {
+            if ($this->leadExcluder->isExclude($lead)) {
+                return null;
+            }
             $clientPhone = $this->clientPhones->getFirstClientPhone($lead);
             if ($clientPhone && PhoneBlacklist::find()->isExists($clientPhone->phone)) {
                 Yii::warning([
@@ -115,7 +123,8 @@ class QCallService
                     'matchedPhone' => $phoneFrom,
                     'pattern' => $phoneNumberRedial->pnr_phone_pattern,
                     'phoneTo' => $clientPhone->phone,
-                    'phoneNumberRedialId' => $phoneNumberRedial->pnr_id
+                    'phoneNumberRedialId' => $phoneNumberRedial->pnr_id,
+                    'leadId' => $leadId
                 ], 'info\qCallService::create::phoneNumberRedialReplace');
             }
         }
@@ -164,7 +173,26 @@ class QCallService
 
         $qCall->updateWeight($this->findWeight($findWeightParams));
 
-        $phone = $this->findPhone($qCall->lqc_call_from, $qConfig->qc_phone_switch, $findPhoneParams, $qCall->lqc_lead_id);
+        $phone = null;
+        if (
+            SettingHelper::leadRedialEnabled() && SettingHelper::isPhoneNumberRedialEnabled() &&
+            ($clientPhone = $this->clientPhones->getFirstClientPhone($qCall->lqcLead)) &&
+            !PhoneBlacklist::find()->isExists($clientPhone->phone) &&
+            ($phoneNumberRedial = PhoneNumberRedialQuery::getOneMatchingByClientPhone($clientPhone->phone))
+        ) {
+            $phone = $phoneNumberRedial->phoneList->pl_phone_number;
+            Yii::info([
+                'matchedPhone' => $phone,
+                'pattern' => $phoneNumberRedial->pnr_phone_pattern,
+                'phoneTo' => $clientPhone->phone,
+                'phoneNumberRedialId' => $phoneNumberRedial->pnr_id,
+                'leadId' => $qCall->lqc_lead_id
+            ], 'info\qCallService::updateInterval::phoneNumberRedialReplace');
+        }
+
+        if (!$phone) {
+            $phone = $this->findPhone($qCall->lqc_call_from, $qConfig->qc_phone_switch, $findPhoneParams, $qCall->lqc_lead_id);
+        }
 
         $qCall->updateCallFrom($phone);
 

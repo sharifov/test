@@ -20,4 +20,9 @@ class LeadUserDataDictionary
         self::TYPE_SMS_OUT => 'SMS Out',
         self::TYPE_EMAIL_OFFER => 'Email offer',
     ];
+
+    public static function getTypeName(?int $typeId): string
+    {
+        return self::TYPE_LIST[$typeId] ?? '-';
+    }
 }

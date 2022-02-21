@@ -4,8 +4,10 @@ namespace src\model\leadData\services;
 
 use common\models\Lead;
 use DateTime;
+use src\helpers\app\AppHelper;
 use src\helpers\ErrorsToStringHelper;
 use src\model\leadData\entity\LeadData;
+use src\model\leadData\entity\LeadDataQuery;
 use src\model\leadData\repository\LeadDataRepository;
 use src\model\leadDataKey\services\LeadDataKeyDictionary;
 use yii\helpers\ArrayHelper;
@@ -86,14 +88,40 @@ class LeadDataCreateService
         return $leadData;
     }
 
-    public static function createOrUpdateLppExclude(int $leadId, \DateTimeImmutable $date): LeadData
+    public static function getOrCreateLppExclude(int $leadId, string $keyData, string $username): ?LeadData
     {
-        if ($leadData = self::getOne($leadId, LeadDataKeyDictionary::KEY_LPP_EXCLUDE)) {
-            $leadData->ld_field_value = $date->format('Y-m-d H:i:s');
-            (new LeadDataRepository())->save($leadData);
+        $value = 'keyData (' . $keyData . ') username(' . $username . ')';
+        if ($leadData = LeadDataQuery::getOneByLeadKeyValue($leadId, LeadDataKeyDictionary::KEY_LPP_EXCLUDE, $value)) {
             return $leadData;
         }
-        return self::createValueDT($leadId, LeadDataKeyDictionary::KEY_LPP_EXCLUDE, $date);
+
+        $logData = [
+            'leadId' => $leadId,
+            'keyData' => $keyData,
+            'username' => $username,
+        ];
+
+        try {
+            $leadDataRepository = new LeadDataRepository();
+            $leadData = LeadData::create(
+                $leadId,
+                LeadDataKeyDictionary::KEY_LPP_EXCLUDE,
+                $value
+            );
+            if (!$leadData->validate()) {
+                throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($leadData));
+            }
+
+            $leadDataRepository->save($leadData);
+            return $leadData;
+        } catch (\RuntimeException | \DomainException $throwable) {
+            $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
+            \Yii::warning($message, 'LeadDataCreateService:getOrCreateLppExclude:Exception');
+        } catch (\Throwable $throwable) {
+            $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
+            \Yii::error($message, 'LeadDataCreateService:getOrCreateLppExclude:Throwable');
+        }
+        return null;
     }
 
     public static function isExist(int $leadId, string $key): bool
@@ -102,14 +130,6 @@ class LeadDataCreateService
             ->where(['ld_lead_id' => $leadId])
             ->andWhere(['ld_field_key' => $key])
             ->exists();
-    }
-
-    public static function getOne(int $leadId, string $key): ?LeadData
-    {
-        return LeadData::find()
-            ->where(['ld_lead_id' => $leadId])
-            ->andWhere(['ld_field_key' => $key])
-            ->one();
     }
 
     public function getInserted(): array

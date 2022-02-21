@@ -71,7 +71,7 @@ use yii\widgets\ActiveForm;
             <?= $form->field($model, 'groupBy', [
                 'options' => ['class' => 'form-group']
             ])
-            ->dropDownList($model->getGroupByList(), ['prompt' => 'Select Group by'])
+                ->dropDownList($model->getGroupByList(), ['prompt' => '---'])
             ->label('Group By') ?>
         </div>
 

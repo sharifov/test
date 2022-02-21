@@ -3,10 +3,12 @@
 namespace console\controllers;
 
 use common\models\Call;
+use common\models\ClientEmail;
 use common\models\Lead;
 use common\models\LeadFlightSegment;
 use common\models\LeadFlow;
 use common\models\LeadQcall;
+use common\models\Project;
 use common\models\Task;
 use modules\featureFlag\FFlag;
 use src\exception\BoResponseException;
@@ -518,8 +520,11 @@ class LeadController extends Controller
                 Console::updateProgress($processed, $count);
             } catch (\RuntimeException | \DomainException $throwable) {
                 $processed--;
-                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
-                \Yii::warning($message, 'LeadController:actionToExtraQueue:Exception');
+                /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
+                if (Yii::$app->ff->can(FFlag::FF_KEY_DEBUG)) {
+                    $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
+                    \Yii::warning($message, 'LeadController:actionToExtraQueue:Exception');
+                }
             } catch (\Throwable $throwable) {
                 $processed--;
                 $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
@@ -561,31 +566,27 @@ class LeadController extends Controller
         }
 
         $scheduledCommunicationRuleService = new ScheduledCommunicationService($scheduledCommunicationRule);
-        if (!$firstLeadUserData = LeadUserData::find()->orderBy(['lud_created_dt' => SORT_ASC])->one()) {
-            echo Console::renderColoredString('%y --- LeadUserData not found %n'), PHP_EOL;
-            exit();
-        }
-
         $currentDT = new \DateTimeImmutable();
         $dateRule = $currentDT->modify('-' . $scheduledCommunicationRuleService->getIntervalHour() . ' hours');
+        $startDate = '2022-02-17 11:30:00';
 
-        $query = LeadFlow::find()
-            ->alias('lead_flow')
-            ->select(['lead_flow.lead_id', 'lead_flow.lf_owner_id AS owner_id'])
+        $query = Lead::find()
+            ->alias('leads')
+            ->select(['leads.id AS lead_id', 'leads.employee_id AS owner_id', 'projects.project_key', 'leads.client_id'])
             ->innerJoin(
-                Lead::tableName() . ' AS leads',
-                'leads.id = lead_flow.lead_id AND leads.employee_id = lf_owner_id AND leads.status = ' . Lead::STATUS_PROCESSING
+                Project::tableName() . ' AS projects',
+                'leads.project_id = projects.id'
             )
-            ->where(['lead_flow.status' => Lead::STATUS_PROCESSING])
-            ->andWhere(['>', 'leads.created', $firstLeadUserData->lud_created_dt])
-            ->andHaving(['<', 'MAX(lead_flow.created)', $dateRule->format('Y-m-d H:i:s')])
+            ->where(['leads.status' => Lead::STATUS_PROCESSING])
+            ->andWhere(['>', 'leads.created', $startDate])
+            ->andWhere(['<', 'l_status_dt', $dateRule->format('Y-m-d H:i:s')])
             ->orderBy(['leads.id' => SORT_ASC])
-            ->groupBy(['lead_flow.lead_id', 'lead_flow.lf_owner_id'])
             ->asArray()
             ->all()
         ;
 
-        $lppLeads = [];
+
+        $leads = $lppLeads = [];
         foreach ($query as $item) {
             $isCallOutCommunicationExist = LeadUserData::find()
                     ->select(new Expression('COUNT(*) AS call_out_cnt'))
@@ -597,24 +598,29 @@ class LeadController extends Controller
                     ->exists()
             ;
             if (!$isCallOutCommunicationExist) {
-                $lppLeads[$item['lead_id']] = LeadUserDataDictionary::TYPE_CALL_OUT;
+                $leads[$item['lead_id']] = LeadUserDataDictionary::getTypeName(LeadUserDataDictionary::TYPE_CALL_OUT);
                 continue;
             }
 
-            $isSmsOutCommunicationExist = LeadUserData::find()
-                    ->select(new Expression('COUNT(*) AS sms_out_cnt'))
-                    ->where(['lud_type_id' => LeadUserDataDictionary::TYPE_SMS_OUT])
-                    ->andWhere(['>=', 'lud_created_dt', $dateRule->format('Y-m-d H:i:s')])
-                    ->andWhere(['lud_lead_id' => $item['lead_id']])
-                    ->andWhere(['lud_user_id' => $item['owner_id']])
-                    ->andHaving(['>=', 'sms_out_cnt', $scheduledCommunicationRuleService->getSmsOut()])
-                    ->exists()
-            ;
-            if (!$isSmsOutCommunicationExist) {
-                $lppLeads[$item['lead_id']] = LeadUserDataDictionary::TYPE_SMS_OUT;
-                continue;
+            if (!in_array($item['project_key'], $scheduledCommunicationRuleService->getSmsExcludeProjects(), true)) {
+                $isSmsOutCommunicationExist = LeadUserData::find()
+                        ->select(new Expression('COUNT(*) AS sms_out_cnt'))
+                        ->where(['lud_type_id' => LeadUserDataDictionary::TYPE_SMS_OUT])
+                        ->andWhere(['>=', 'lud_created_dt', $dateRule->format('Y-m-d H:i:s')])
+                        ->andWhere(['lud_lead_id' => $item['lead_id']])
+                        ->andWhere(['lud_user_id' => $item['owner_id']])
+                        ->andHaving(['>=', 'sms_out_cnt', $scheduledCommunicationRuleService->getSmsOut()])
+                        ->exists()
+                ;
+                if (!$isSmsOutCommunicationExist) {
+                    $leads[$item['lead_id']] = LeadUserDataDictionary::getTypeName(LeadUserDataDictionary::TYPE_SMS_OUT);
+                    continue;
+                }
             }
 
+            if (!ClientEmail::find()->where(['client_id' => $item['client_id']])->exists()) {
+                continue;
+            }
             $isEmailOutCommunicationExist = LeadUserData::find()
                     ->select(new Expression('COUNT(*) AS email_offer_cnt'))
                     ->where(['lud_type_id' => LeadUserDataDictionary::TYPE_EMAIL_OFFER])
@@ -625,30 +631,41 @@ class LeadController extends Controller
                     ->exists()
             ;
             if (!$isEmailOutCommunicationExist) {
-                $lppLeads[$item['lead_id']] = LeadUserDataDictionary::TYPE_EMAIL_OFFER;
+                $leads[$item['lead_id']] = LeadUserDataDictionary::getTypeName(LeadUserDataDictionary::TYPE_EMAIL_OFFER);
                 continue;
             }
         }
 
-        $count = count($lppLeads);
+        $count = count($leads);
         $processed = 0;
         Console::startProgress($processed, $count);
 
-        foreach ($lppLeads as $leadId => $firstReasonId) {
+        foreach ($leads as $leadId => $firstReason) {
             $logData = ['leadId' => $leadId];
+
             try {
+                if ($lead = Lead::find()->where(['id' => $leadId])->limit(1)->one()) {
+                    throw new \RuntimeException('Lead not found');
+                }
+                if (!(new LeadPoorProcessingChecker($lead, LeadPoorProcessingDataDictionary::KEY_SCHEDULED_COMMUNICATION))->isChecked()) {
+                    continue;
+                }
+
                 LeadPoorProcessingService::addLeadPoorProcessingJob(
                     (int) $leadId,
                     [LeadPoorProcessingDataDictionary::KEY_SCHEDULED_COMMUNICATION],
                     $scheduledCommunicationRule->lppd_description
                 );
-
+                $lppLeads[$leadId] = $firstReason;
                 $processed++;
                 Console::updateProgress($processed, $count);
             } catch (\RuntimeException | \DomainException $throwable) {
                 $processed--;
-                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
-                \Yii::info($message, 'LeadController:actionLppScheduledCommunication:Exception');
+                /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
+                if (Yii::$app->ff->can(FFlag::FF_KEY_DEBUG)) {
+                    $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
+                    \Yii::info($message, 'LeadController:actionLppScheduledCommunication:Exception');
+                }
             } catch (\Throwable $throwable) {
                 $processed--;
                 $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);

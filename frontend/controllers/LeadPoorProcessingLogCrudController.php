@@ -2,6 +2,8 @@
 
 namespace frontend\controllers;
 
+use src\services\cleaner\cleaners\LeadPoorProcessingLogCleaner;
+use src\services\cleaner\form\DbCleanerParamsForm;
 use Yii;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLog;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogSearch;
@@ -40,9 +42,15 @@ class LeadPoorProcessingLogCrudController extends FController
         $searchModel = new LeadPoorProcessingLogSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
+        $cleaner = new LeadPoorProcessingLogCleaner();
+        $dbCleanerParamsForm = (new DbCleanerParamsForm())
+            ->setTable($cleaner->getTable())
+            ->setColumn($cleaner->getColumn());
+
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'modelCleaner' => $dbCleanerParamsForm,
         ]);
     }
 

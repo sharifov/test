@@ -266,7 +266,7 @@ class LeadSearch extends Lead
             ['sold_date_from', 'default', 'value' => $this->defaultMinDate],
             ['sold_date_to', 'default', 'value' => $this->defaultMaxDate],
             ['createTimeRange', 'default', 'value' => $this->defaultDateRange],
-            ['lead_user_rating', 'in', 'range' => array_values(LeadUserRating::RATING_LIST)],
+            ['lead_user_rating', 'in', 'range' => array_keys(LeadUserRating::getRatingList())],
         ];
     }
 

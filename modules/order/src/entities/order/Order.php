@@ -388,8 +388,19 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
             ->andWhere([
             'OR',
                 ['IS NOT', 'quote_relation.parent_id', null],
-                ['IS', 'quote_non_relation.parent_id', null]
+                ['IS', 'quote_non_relation.parent_id', null],
+                [
+                    'AND',
+                    ['IS NOT', 'quote_non_relation.parent_id', null],
+                    ['=', 'product_quote.pq_status_id', 5]
+                ],
+                [
+                    'AND',
+                    ['IS', 'quote_relation.parent_id', null],
+                    ['=', 'product_quote.pq_status_id', 5]
+                ]
             ])
+//            ->createCommand()->getRawSql(); die;
         ;
     }
 
