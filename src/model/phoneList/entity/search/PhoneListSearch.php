@@ -19,11 +19,13 @@ class PhoneListSearch extends PhoneList
     public const USED_FOR_GENERAL_AND_PERSONAL = 'general_and_personal';
     public const USED_FOR_GENERAL = 'general';
     public const USED_FOR_PERSONAL = 'personal';
+    public const USED_FOR_NONE = 'unused';
 
     private const USED_FOR_LIST = [
         self::USED_FOR_GENERAL_AND_PERSONAL => 'General and Personal',
         self::USED_FOR_GENERAL => 'General',
         self::USED_FOR_PERSONAL => 'Personal',
+        self::USED_FOR_NONE => 'Unused',
     ];
 
     public $used_for;
@@ -124,6 +126,17 @@ class PhoneListSearch extends PhoneList
                 $query->innerJoinWith(['departmentPhoneProject']);
             } elseif ($this->used_for === self::USED_FOR_PERSONAL) {
                 $query->innerJoinWith(['userProjectParams']);
+            } elseif ($this->used_for === self::USED_FOR_NONE) {
+                $uppPhoneListQuery = UserProjectParams
+                    ::find()
+                    ->select(['upp_phone_list_id'])
+                    ->where(['NOT', ['upp_phone_list_id' => 'NULL']]);
+                $dppPhoneListQuery = DepartmentPhoneProject
+                    ::find()
+                    ->select(['dpp_phone_list_id'])
+                    ->where(['NOT', ['dpp_phone_list_id' => 'NULL']]);
+                $query->where(['NOT', ['pl_id' => $uppPhoneListQuery]])
+                     ->andWhere(['NOT', ['pl_id' => $dppPhoneListQuery]]);
             } elseif ($this->used_for === self::USED_FOR_GENERAL_AND_PERSONAL) {
                 $query->innerJoinWith(['departmentPhoneProject'])
                     ->innerJoinWith(['userProjectParams']);
