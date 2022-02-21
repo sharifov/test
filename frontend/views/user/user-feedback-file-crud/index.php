@@ -5,6 +5,7 @@ use yii\helpers\Url;
 use yii\grid\ActionColumn;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use modules\user\userFeedback\entity\UserFeedbackFile;
 
 /* @var $this yii\web\View */
 /* @var $searchModel modules\user\userFeedback\entity\search\UserFeedbackFileSearch */
