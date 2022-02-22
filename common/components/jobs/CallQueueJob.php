@@ -112,7 +112,7 @@ class CallQueueJob extends BaseJob implements JobInterface
                                     $projectParams->object->lead->allow_auto_lead_create &&
                                     !ContactPhoneListService::isAutoCreateLeadOff($call->c_from)
                                 ) {
-                                    if ($call->isDirect()) {
+                                    if ($call->isDirect() || $call->isRedirectCall()) {
                                         if ($source = SourcesQuery::getByCidOrDefaultByProject($projectParams->object->lead->default_cid_on_direct_call, $call->c_project_id)) {
                                             $this->source_id = $source->id;
                                         } else if ($source = SourcesQuery::getFirstSourceByProjectId($call->c_project_id)) {
