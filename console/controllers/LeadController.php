@@ -13,6 +13,7 @@ use common\models\Task;
 use modules\featureFlag\FFlag;
 use src\exception\BoResponseException;
 use src\helpers\app\AppHelper;
+use src\helpers\DateHelper;
 use src\helpers\setting\SettingHelper;
 use src\model\leadPoorProcessing\entity\LeadPoorProcessing;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingChecker;
@@ -570,6 +571,10 @@ class LeadController extends Controller
         $currentDT = new \DateTimeImmutable();
         $dateRule = $currentDT->modify('-' . $scheduledCommunicationRuleService->getIntervalHour() . ' hours');
         $startDate = '2022-02-22 08:00:00';
+
+        if (($leadCreatedDT = Yii::$app->ff->val(FFlag::FF_KEY_LPP_LEAD_CREATED)) && DateHelper::checkDateTime($leadCreatedDT)) {
+            $startDate = $leadCreatedDT;
+        }
 
         $query = Lead::find()
             ->alias('leads')
