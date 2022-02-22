@@ -22,4 +22,9 @@ class LeadUserDataDictionary
         self::TYPE_EMAIL_OFFER => 'Email offer',
         self::TYPE_LPP_COMMUNICATION_DONE => 'LPP Scheduled communication done',
     ];
+
+    public static function getTypeName(?int $typeId): string
+    {
+        return self::TYPE_LIST[$typeId] ?? '-';
+    }
 }
