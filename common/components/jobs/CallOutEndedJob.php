@@ -22,7 +22,7 @@ use src\model\leadData\services\LeadDataCreateService;
 use src\model\leadDataKey\services\LeadDataKeyDictionary;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
-use src\model\leadPoorProcessingData\repository\LeadUserDataRepository;
+use src\model\leadUserData\repository\LeadUserDataRepository;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
 use src\model\leadUserData\entity\LeadUserData;
 use src\model\leadUserData\entity\LeadUserDataDictionary;
