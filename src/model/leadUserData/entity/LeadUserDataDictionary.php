@@ -14,10 +14,17 @@ class LeadUserDataDictionary
     public const TYPE_CALL_OUT = 1;
     public const TYPE_SMS_OUT = 2;
     public const TYPE_EMAIL_OFFER = 3;
+    public const TYPE_LPP_COMMUNICATION_DONE = 4;
 
     public const TYPE_LIST = [
         self::TYPE_CALL_OUT => 'Call Out',
         self::TYPE_SMS_OUT => 'SMS Out',
         self::TYPE_EMAIL_OFFER => 'Email offer',
+        self::TYPE_LPP_COMMUNICATION_DONE => 'LPP Scheduled communication done',
     ];
+
+    public static function getTypeName(?int $typeId): string
+    {
+        return self::TYPE_LIST[$typeId] ?? '-';
+    }
 }

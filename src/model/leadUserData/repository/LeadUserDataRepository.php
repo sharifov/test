@@ -1,6 +1,6 @@
 <?php
 
-namespace src\model\leadPoorProcessingData\repository;
+namespace src\model\leadUserData\repository;
 
 use src\model\leadUserData\entity\LeadUserData;
 use src\repositories\AbstractRepositoryWithEvent;
