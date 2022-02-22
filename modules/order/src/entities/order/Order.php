@@ -400,7 +400,7 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
                     ['=', 'product_quote.pq_status_id', 5]
                 ]
             ])
-//            ->createCommand()->getRawSql(); die;
+#            ->createCommand()->getRawSql(); die;
         ;
     }
 
