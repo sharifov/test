@@ -569,7 +569,7 @@ class LeadController extends Controller
         $scheduledCommunicationRuleService = new ScheduledCommunicationService($scheduledCommunicationRule);
         $currentDT = new \DateTimeImmutable();
         $dateRule = $currentDT->modify('-' . $scheduledCommunicationRuleService->getIntervalHour() . ' hours');
-        $startDate = '2022-02-22 09:30:00';
+        $startDate = '2022-02-22 08:00:00';
 
         $query = Lead::find()
             ->alias('leads')
