@@ -273,7 +273,7 @@ class LeadManageService
         $sourceId = null;
 
         if ($internalPhoneNumber) {
-            if ($call->isDirect()) {
+            if ($call->isDirect() || $call->isRedirectCall()) {
                 $project = $call->cProject;
                 $projectParams = $project ? $project->getParams() : null;
                 if ($projectParams && $source = SourcesQuery::getByCidOrDefaultByProject($projectParams->object->lead->default_cid_on_direct_call, $call->c_project_id)) {

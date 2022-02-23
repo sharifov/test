@@ -14,7 +14,7 @@ use src\helpers\email\TextConvertingHelper;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadPoorProcessing\service\rules\LeadPoorProcessingNoAction;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
-use src\model\leadPoorProcessingData\repository\LeadUserDataRepository;
+use src\model\leadUserData\repository\LeadUserDataRepository;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
 use src\model\leadUserData\entity\LeadUserData;
 use src\model\leadUserData\entity\LeadUserDataDictionary;
@@ -463,7 +463,11 @@ class Email extends \yii\db\ActiveRecord
             if ($this->e_id && $this->e_lead_id && LeadPoorProcessingService::checkEmailTemplate($tplType)) {
                 LeadPoorProcessingService::addLeadPoorProcessingRemoverJob(
                     $this->e_lead_id,
-                    [LeadPoorProcessingDataDictionary::KEY_NO_ACTION, LeadPoorProcessingDataDictionary::KEY_EXPERT_IDLE],
+                    [
+                        LeadPoorProcessingDataDictionary::KEY_NO_ACTION,
+                        LeadPoorProcessingDataDictionary::KEY_EXPERT_IDLE,
+                        LeadPoorProcessingDataDictionary::KEY_SEND_SMS_OFFER,
+                    ],
                     LeadPoorProcessingLogStatus::REASON_EMAIL
                 );
 

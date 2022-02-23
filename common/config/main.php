@@ -129,6 +129,7 @@ return [
             'password' => '',
             'recordingUrl' => '',
             'xAccelRedirectUrl' => '',
+            'xAccelRedirectCommunicationUrl' => '',
             'voipApiUsername' => 'sales',
             'host' => ''
         ],
