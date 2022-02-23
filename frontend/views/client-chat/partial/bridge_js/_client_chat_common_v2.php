@@ -220,7 +220,7 @@ function updateLastMessageTime() {
 }
 
 window.addScrollEventListenerToChatListWrapper = function () {
-    function ajaxSenderToLoadChannes(url,loadChannelsTxt,loadChannelsBtn,loadChannelsCurrentText,urlParams){
+    function ajaxSenderToLoadChannels(url,loadChannelsTxt,loadChannelsBtn,loadChannelsCurrentText,urlParams){
          $.ajax({
                 type: 'get',
                 url: url,
@@ -268,7 +268,7 @@ window.addScrollEventListenerToChatListWrapper = function () {
             let params = new URLSearchParams(window.location.search);        
             let urlParams = window.getClientChatLoadMoreUrl('{$filter->getId()}', '{$filter->formName()}');
             let url = '{$loadChannelsUrl}?' + urlParams + '&loadingChannels=1' + '&page=' + page;
-            ajaxSenderToLoadChannes(url,loadChannelsTxt,loadChannelsBtn,loadChannelsCurrentText,urlParams);
+            ajaxSenderToLoadChannels(url,loadChannelsTxt,loadChannelsBtn,loadChannelsCurrentText,urlParams);
         }
     });
     $('#load-channels-btn').click(function (e) {
@@ -281,7 +281,7 @@ window.addScrollEventListenerToChatListWrapper = function () {
             let params = new URLSearchParams(window.location.search);        
             let urlParams = window.getClientChatLoadMoreUrl('{$filter->getId()}', '{$filter->formName()}');
             let url = '{$loadChannelsUrl}?' + urlParams + '&loadingChannels=1' + '&page=' + page;
-            ajaxSenderToLoadChannes(url,loadChannelsTxt,loadChannelsBtn,loadChannelsCurrentText,urlParams);
+            ajaxSenderToLoadChannels(url,loadChannelsTxt,loadChannelsBtn,loadChannelsCurrentText,urlParams);
         }
     });
 };
