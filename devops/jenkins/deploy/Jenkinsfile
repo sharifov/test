@@ -24,7 +24,7 @@ pipeline {
             inventory: "inventories/${ENV}/hosts",
             credentialsId: 'DEVOPS_RSA',
             vaultCredentialsId: 'ANSIBLE_PASS',
-            extraVars: [ app_ver: "${GIT_COMMIT[0..7]}" ]
+            extraVars: [ app_ver: "${GIT_COMMIT[0..6]}" ]
           )
         }
       }
@@ -38,7 +38,7 @@ pipeline {
         msg3 = "Build: <${env.BUILD_URL}display/redirect|${env.BUILD_NUMBER}>"
         msg4 = "Env: ${env.ENV}"
         msg5 = "Branch: ${env.GIT_BRANCH}"
-        msg6 = "Ver: ${GIT_COMMIT[0..7]}"
+        msg6 = "Ver: ${GIT_COMMIT[0..6]}"
         msg7 = "Time: ${currentBuild.durationString.minus(' and counting')}"
         msg = "${msg1}\n${msg2}\n${msg3}\n${msg4}\n${msg5}\n${msg6}\n${msg7}"
         if (env.ENV == 'prod') {
@@ -66,7 +66,7 @@ pipeline {
         msg3 = "Build: <${env.BUILD_URL}display/redirect|${env.BUILD_NUMBER}>"
         msg4 = "Env: ${env.ENV}"
         msg5 = "Branch: ${env.GIT_BRANCH}"
-        msg6 = "Ver: ${GIT_COMMIT[0..7]}"
+        msg6 = "Ver: ${GIT_COMMIT[0..6]}"
         msg7 = "Time: ${currentBuild.durationString.minus(' and counting')}"
         msg = "${msg1}\n${msg2}\n${msg3}\n${msg4}\n${msg5}\n${msg6}\n${msg7}"
       }
