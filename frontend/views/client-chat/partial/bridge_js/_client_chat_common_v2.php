@@ -219,20 +219,9 @@ function updateLastMessageTime() {
     });
 }
 
-window.addScrollEventListenerToChatListWrapper = function () {    
-    $('#load-channels-btn').click(function (e) {        
-        if (!chatListingAjaxRequestEnabled && !window.allDialogsLoaded) {
-            chatListingAjaxRequestEnabled = true;
-            let page = $('#cc-dialogs-wrapper').attr('data-page');
-            let loadChannelsTxt = $('#load-channels-txt');
-            let loadChannelsBtn = $('#load-channels-btn');
-            let loadChannelsCurrentText = loadChannelsTxt.html();
-            
-            let params = new URLSearchParams(window.location.search);
-        
-            let urlParams = window.getClientChatLoadMoreUrl('{$filter->getId()}', '{$filter->formName()}');
-            let url = '{$loadChannelsUrl}?' + urlParams + '&loadingChannels=1' + '&page=' + page;
-            $.ajax({
+window.addScrollEventListenerToChatListWrapper = function () {
+    function ajaxSenderToLoadChannes(url,loadChannelsTxt,loadChannelsBtn,loadChannelsCurrentText,urlParams){
+         $.ajax({
                 type: 'get',
                 url: url,
                 dataType: 'json',
@@ -253,7 +242,7 @@ window.addScrollEventListenerToChatListWrapper = function () {
                         window.allDialogsLoaded = true;
                     } else {
                         loadChannelsTxt.html('');
-                        loadChannelsBtn.html('<i class="fa fa-angle-double-down"> </i> Click to load more (<span>' + data.moreCount + '</span>)');
+                        loadChannelsBtn.html('<i class="fa fa-angle-double-down"> </i> Click or scroll to load more (<span>' + data.moreCount + '</span>)');
                         loadChannelsBtn.show();
                         $('#cc-dialogs-wrapper').attr('data-page', data.page);
                         window.allDialogsLoaded = false;
@@ -267,6 +256,32 @@ window.addScrollEventListenerToChatListWrapper = function () {
                     chatListingAjaxRequestEnabled = false;
                 }
             });
+    }
+    $('#cc-dialogs-wrapper').scroll(function (e) {
+        var elem = $(e.currentTarget);
+        if (elem.scrollTop() + Math.ceil(elem.innerHeight()) >= elem[0].scrollHeight && !chatListingAjaxRequestEnabled && !window.allDialogsLoaded) {
+            chatListingAjaxRequestEnabled = true;
+            let page = $('#cc-dialogs-wrapper').attr('data-page');
+            let loadChannelsTxt = $('#load-channels-txt');
+            let loadChannelsBtn = $('#load-channels-btn');
+            let loadChannelsCurrentText = loadChannelsTxt.html();            
+            let params = new URLSearchParams(window.location.search);        
+            let urlParams = window.getClientChatLoadMoreUrl('{$filter->getId()}', '{$filter->formName()}');
+            let url = '{$loadChannelsUrl}?' + urlParams + '&loadingChannels=1' + '&page=' + page;
+            ajaxSenderToLoadChannes(url,loadChannelsTxt,loadChannelsBtn,loadChannelsCurrentText,urlParams);
+        }
+    });
+    $('#load-channels-btn').click(function (e) {
+        if (!chatListingAjaxRequestEnabled && !window.allDialogsLoaded) {
+            chatListingAjaxRequestEnabled = true;
+            let page = $('#cc-dialogs-wrapper').attr('data-page');
+            let loadChannelsTxt = $('#load-channels-txt');
+            let loadChannelsBtn = $('#load-channels-btn');
+            let loadChannelsCurrentText = loadChannelsTxt.html();            
+            let params = new URLSearchParams(window.location.search);        
+            let urlParams = window.getClientChatLoadMoreUrl('{$filter->getId()}', '{$filter->formName()}');
+            let url = '{$loadChannelsUrl}?' + urlParams + '&loadingChannels=1' + '&page=' + page;
+            ajaxSenderToLoadChannes(url,loadChannelsTxt,loadChannelsBtn,loadChannelsCurrentText,urlParams);
         }
     });
 };
