@@ -103,7 +103,7 @@ class LeadPoorProcessingService
                 throw new \RuntimeException('Rule not found by key(' . $dataKey . ')');
             }
             if (!$leadPoorProcessing = LeadPoorProcessingQuery::getByLeadAndKey($lead->id, $leadPoorProcessingData->lppd_id)) {
-                throw new \RuntimeException('LeadPoorProcessing not found (' . $lead->id . '/' . $leadPoorProcessingData->lppd_id . ')');
+                return;
             }
 
             $lastPoorProcessingLog = LeadPoorProcessingLogQuery::getLastLeadPoorProcessingLog($lead->id);

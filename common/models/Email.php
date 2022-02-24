@@ -14,7 +14,7 @@ use src\helpers\email\TextConvertingHelper;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadPoorProcessing\service\rules\LeadPoorProcessingNoAction;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
-use src\model\leadPoorProcessingData\repository\LeadUserDataRepository;
+use src\model\leadUserData\repository\LeadUserDataRepository;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
 use src\model\leadUserData\entity\LeadUserData;
 use src\model\leadUserData\entity\LeadUserDataDictionary;

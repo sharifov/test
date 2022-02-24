@@ -193,22 +193,24 @@ $unsubscribedEmails =  array_column($model->project->emailUnsubscribes, 'eu_emai
         </div>
 
         <div class="col-md-6">
-            <?php $caseCommunicationBlockAbacDto = new CaseCommunicationBlockAbacDto($model, [], [], [], $user->id); ?>
-            <?php /** @abac $caseCommunicationBlockAbacDto, CaseCommunicationBlockAbacObject::NS, CaseCommunicationBlockAbacObject::ACTION_VIEW, View communication block on Case View page */ ?>
-            <?php if (Yii::$app->abac->can($caseCommunicationBlockAbacDto, CaseCommunicationBlockAbacObject::NS, CaseCommunicationBlockAbacObject::ACTION_VIEW, $user)) : ?>
-                <?= $this->render('communication/case_communication', [
-                    'model'      => $model,
-                    'previewEmailForm' => $previewEmailForm,
-                    'previewSmsForm' => $previewSmsForm,
-                    'comForm'       => $comForm,
-                    'dataProvider'  => (bool)Yii::$app->params['settings']['new_communication_block_case'] ? $dataProviderCommunicationLog : $dataProviderCommunication,
-                    'isCommunicationLogEnabled' => Yii::$app->params['settings']['new_communication_block_case'],
-                    'unsubscribedEmails' => $unsubscribedEmails,
-                    'disableMasking' => $disableMasking,
-                    'callFromNumberList' => $callFromNumberList,
-                    'smsFromNumberList' => $smsFromNumberList,
-                    'emailFromList' => $emailFromList,
-                ]); ?>
+            <?php if ($model->hasClient()) : ?>
+                <?php $caseCommunicationBlockAbacDto = new CaseCommunicationBlockAbacDto($model, [], [], [], $user->id); ?>
+                <?php /** @abac $caseCommunicationBlockAbacDto, CaseCommunicationBlockAbacObject::NS, CaseCommunicationBlockAbacObject::ACTION_VIEW, View communication block on Case View page */ ?>
+                <?php if (Yii::$app->abac->can($caseCommunicationBlockAbacDto, CaseCommunicationBlockAbacObject::NS, CaseCommunicationBlockAbacObject::ACTION_VIEW, $user)) : ?>
+                    <?= $this->render('communication/case_communication', [
+                        'model'      => $model,
+                        'previewEmailForm' => $previewEmailForm,
+                        'previewSmsForm' => $previewSmsForm,
+                        'comForm'       => $comForm,
+                        'dataProvider'  => (bool)Yii::$app->params['settings']['new_communication_block_case'] ? $dataProviderCommunicationLog : $dataProviderCommunication,
+                        'isCommunicationLogEnabled' => Yii::$app->params['settings']['new_communication_block_case'],
+                        'unsubscribedEmails' => $unsubscribedEmails,
+                        'disableMasking' => $disableMasking,
+                        'callFromNumberList' => $callFromNumberList,
+                        'smsFromNumberList' => $smsFromNumberList,
+                        'emailFromList' => $emailFromList,
+                    ]); ?>
+                <?php endif;?>
             <?php endif;?>
         </div>
 

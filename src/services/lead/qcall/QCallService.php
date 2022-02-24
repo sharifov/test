@@ -115,8 +115,8 @@ class QCallService
             'now'
         );
 
-        if (!empty($clientPhone) && SettingHelper::leadRedialEnabled() && SettingHelper::isPhoneNumberRedialEnabled()) {
-            $phoneNumberRedial = PhoneNumberRedialQuery::getOneMatchingByClientPhone($clientPhone->phone);
+        if ($lead->project_id && !empty($clientPhone) && SettingHelper::leadRedialEnabled() && SettingHelper::isPhoneNumberRedialEnabled()) {
+            $phoneNumberRedial = PhoneNumberRedialQuery::getOneMatchingByClientPhone($clientPhone->phone, $lead->project_id);
             if ($phoneNumberRedial) {
                 $phoneFrom = $phoneNumberRedial->phoneList->pl_phone_number;
                 Yii::info([
@@ -178,7 +178,8 @@ class QCallService
             SettingHelper::leadRedialEnabled() && SettingHelper::isPhoneNumberRedialEnabled() &&
             ($clientPhone = $this->clientPhones->getFirstClientPhone($qCall->lqcLead)) &&
             !PhoneBlacklist::find()->isExists($clientPhone->phone) &&
-            ($phoneNumberRedial = PhoneNumberRedialQuery::getOneMatchingByClientPhone($clientPhone->phone))
+            $qCall->lqcLead->project_id &&
+            ($phoneNumberRedial = PhoneNumberRedialQuery::getOneMatchingByClientPhone($clientPhone->phone, $qCall->lqcLead->project_id))
         ) {
             $phone = $phoneNumberRedial->phoneList->pl_phone_number;
             Yii::info([

@@ -2234,6 +2234,11 @@ class Call extends \yii\db\ActiveRecord
         return $this->c_source_type_id === self::SOURCE_REDIAL_CALL;
     }
 
+    public function isRedirectCall(): bool
+    {
+        return $this->c_source_type_id === self::SOURCE_REDIRECT_CALL;
+    }
+
 
     /**
      * @param string $statusName

@@ -13,6 +13,7 @@ use common\models\Task;
 use modules\featureFlag\FFlag;
 use src\exception\BoResponseException;
 use src\helpers\app\AppHelper;
+use src\helpers\DateHelper;
 use src\helpers\setting\SettingHelper;
 use src\model\leadPoorProcessing\entity\LeadPoorProcessing;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingChecker;
@@ -20,6 +21,7 @@ use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadPoorProcessing\service\LeadToExtraQueueService;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataQuery;
+use src\model\leadUserData\repository\LeadUserDataRepository;
 use src\model\leadPoorProcessingData\service\scheduledCommunication\ScheduledCommunicationService;
 use src\model\leadUserData\entity\LeadUserData;
 use src\model\leadUserData\entity\LeadUserDataDictionary;
@@ -568,7 +570,11 @@ class LeadController extends Controller
         $scheduledCommunicationRuleService = new ScheduledCommunicationService($scheduledCommunicationRule);
         $currentDT = new \DateTimeImmutable();
         $dateRule = $currentDT->modify('-' . $scheduledCommunicationRuleService->getIntervalHour() . ' hours');
-        $startDate = '2022-02-17 11:30:00';
+        $startDate = '2022-02-22 08:00:00';
+
+        if (($leadCreatedDT = Yii::$app->ff->val(FFlag::FF_KEY_LPP_LEAD_CREATED)) && DateHelper::checkDateTime($leadCreatedDT)) {
+            $startDate = $leadCreatedDT;
+        }
 
         $query = Lead::find()
             ->alias('leads')
@@ -577,14 +583,19 @@ class LeadController extends Controller
                 Project::tableName() . ' AS projects',
                 'leads.project_id = projects.id'
             )
+            ->leftJoin(
+                LeadUserData::tableName() . ' AS lead_user_data',
+                'leads.id = lud_lead_id AND leads.employee_id = lud_user_id AND lud_type_id = :ludType',
+                [':ludType' => LeadUserDataDictionary::TYPE_LPP_COMMUNICATION_DONE]
+            )
             ->where(['leads.status' => Lead::STATUS_PROCESSING])
             ->andWhere(['>', 'leads.created', $startDate])
             ->andWhere(['<', 'l_status_dt', $dateRule->format('Y-m-d H:i:s')])
+            ->andWhere(['IS', 'lud_id', null])
             ->orderBy(['leads.id' => SORT_ASC])
             ->asArray()
             ->all()
         ;
-
 
         $leads = $lppLeads = [];
         foreach ($query as $item) {
@@ -618,21 +629,33 @@ class LeadController extends Controller
                 }
             }
 
-            if (!ClientEmail::find()->where(['client_id' => $item['client_id']])->exists()) {
-                continue;
+            if (ClientEmail::find()->where(['client_id' => $item['client_id']])->exists()) {
+                $isEmailOutCommunicationExist = LeadUserData::find()
+                        ->select(new Expression('COUNT(*) AS email_offer_cnt'))
+                        ->where(['lud_type_id' => LeadUserDataDictionary::TYPE_EMAIL_OFFER])
+                        ->andWhere(['>=', 'lud_created_dt', $dateRule->format('Y-m-d H:i:s')])
+                        ->andWhere(['lud_lead_id' => $item['lead_id']])
+                        ->andWhere(['lud_user_id' => $item['owner_id']])
+                        ->andHaving(['>=', 'email_offer_cnt', $scheduledCommunicationRuleService->getEmailOffer()])
+                        ->exists()
+                ;
+                if (!$isEmailOutCommunicationExist) {
+                    $leads[$item['lead_id']] = LeadUserDataDictionary::getTypeName(LeadUserDataDictionary::TYPE_EMAIL_OFFER);
+                    continue;
+                }
             }
-            $isEmailOutCommunicationExist = LeadUserData::find()
-                    ->select(new Expression('COUNT(*) AS email_offer_cnt'))
-                    ->where(['lud_type_id' => LeadUserDataDictionary::TYPE_EMAIL_OFFER])
-                    ->andWhere(['>=', 'lud_created_dt', $dateRule->format('Y-m-d H:i:s')])
-                    ->andWhere(['lud_lead_id' => $item['lead_id']])
-                    ->andWhere(['lud_user_id' => $item['owner_id']])
-                    ->andHaving(['>=', 'email_offer_cnt', $scheduledCommunicationRuleService->getEmailOffer()])
-                    ->exists()
-            ;
-            if (!$isEmailOutCommunicationExist) {
-                $leads[$item['lead_id']] = LeadUserDataDictionary::getTypeName(LeadUserDataDictionary::TYPE_EMAIL_OFFER);
-                continue;
+
+            try {
+                $leadUserData = LeadUserData::create(
+                    LeadUserDataDictionary::TYPE_LPP_COMMUNICATION_DONE,
+                    (int) $item['lead_id'],
+                    (int) $item['owner_id'],
+                    (new \DateTimeImmutable())
+                );
+                (new LeadUserDataRepository($leadUserData))->save(true);
+            } catch (\Throwable $throwable) {
+                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $item);
+                \Yii::error($message, 'LeadController:actionLppScheduledCommunication:LeadUserData');
             }
         }
 
@@ -660,14 +683,12 @@ class LeadController extends Controller
                 $processed++;
                 Console::updateProgress($processed, $count);
             } catch (\RuntimeException | \DomainException $throwable) {
-                $processed--;
                 /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
                 if (Yii::$app->ff->can(FFlag::FF_KEY_DEBUG)) {
                     $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
                     \Yii::info($message, 'LeadController:actionLppScheduledCommunication:Exception');
                 }
             } catch (\Throwable $throwable) {
-                $processed--;
                 $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
                 \Yii::error($message, 'LeadController:actionLppScheduledCommunication:Throwable');
             }
@@ -678,7 +699,8 @@ class LeadController extends Controller
 
         \Yii::info(
             [
-                'count' => $count,
+                'stepOne' => count($query),
+                'stepTwo' => $count,
                 'processed' => $processed,
                 'LPP' => $lppLeads,
             ],

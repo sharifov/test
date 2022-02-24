@@ -33,14 +33,16 @@ class PhoneNumberRedialQuery extends \yii\db\ActiveQuery
 
     /**
      * @param string $phone
+     * @param int $projectId
      * @return PhoneNumberRedial|null
      */
-    public static function getOneMatchingByClientPhone(string $phone): ?PhoneNumberRedial
+    public static function getOneMatchingByClientPhone(string $phone, int $projectId): ?PhoneNumberRedial
     {
         return PhoneNumberRedial::find()
             ->where(new Expression(":phone REGEXP concat('^', TRIM(pnr_phone_pattern), '$') = 1", [
                 'phone' => $phone
             ]))
+            ->andWhere(['pnr_project_id' => $projectId])
             ->enabled()
             ->orderBy('rand()')
             ->limit(1)
