@@ -730,7 +730,8 @@ JSON;
 
     public function actionTestPhoneNumberRedialQuery()
     {
-        var_dump(PhoneNumberRedialQuery::getOneMatchingByClientPhone('+185553464564'));
+        $phone = PhoneNumberRedialQuery::getOneMatchingByClientPhone('+185553464564', 8);
+        var_dump($phone->phoneList->pl_phone_number ?? null);
         die;
     }
 }
