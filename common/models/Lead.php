@@ -713,27 +713,30 @@ class Lead extends ActiveRecord implements Objectable
      */
     public function createClone(?string $description): self
     {
-        $clone = self::create();
-        $clone->attributes = $this->attributes;
-        $clone->description = $description;
-        $clone->notes_for_experts = null;
-        $clone->rating = 0;
+        $clone                         = self::create();
+        $clone->attributes             = $this->attributes;
+        $clone->description            = $description;
+        $clone->notes_for_experts      = null;
+        $clone->rating                 = 0;
         $clone->additional_information = null;
-        $clone->l_answered = 0;
-        $clone->snooze_for = null;
-        $clone->called_expert = false;
-        $clone->created = null;
-        $clone->updated = null;
-        $clone->tips = 0;
-        $clone->uid = self::generateUid();
-        $clone->gid = self::generateGid();
-        $clone->status = null;
-        $clone->clone_id = $this->id;
-        $clone->employee_id = null;
-        $clone->l_type_create = self::TYPE_CREATE_CLONE;
-        $clone->bo_flight_id = 0;
-        $clone->final_profit = null;
+        $clone->l_answered             = 0;
+        $clone->snooze_for             = null;
+        $clone->called_expert          = false;
+        $clone->created                = null;
+        $clone->updated                = null;
+        $clone->tips                   = 0;
+        $clone->uid                    = self::generateUid();
+        $clone->gid                    = self::generateGid();
+        $clone->status                 = null;
+        $clone->clone_id               = $this->id;
+        $clone->employee_id            = null;
+        $clone->l_type_create          = self::TYPE_CREATE_CLONE;
+        $clone->bo_flight_id           = 0;
+        $clone->final_profit           = null;
+        $clone->l_delayed_charge       = 0;
+
         $clone->recordEvent(new LeadCreatedCloneEvent($clone));
+
         return $clone;
     }
 
