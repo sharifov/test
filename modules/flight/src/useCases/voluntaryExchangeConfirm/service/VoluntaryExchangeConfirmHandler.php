@@ -16,6 +16,8 @@ use modules\flight\src\useCases\voluntaryExchange\service\VoluntaryExchangeObjec
 use modules\flight\src\useCases\voluntaryExchange\service\VoluntaryExchangeService;
 use modules\flight\src\useCases\voluntaryExchangeConfirm\form\VoluntaryExchangeConfirmForm;
 use modules\flight\src\useCases\voluntaryExchangeCreate\form\VoluntaryExchangeCreateForm;
+use modules\flight\src\useCases\voluntaryExchangeManualCreate\service\VoluntaryExchangeBOPrepareService;
+use modules\flight\src\useCases\voluntaryExchangeManualCreate\service\VoluntaryExchangeBOService;
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
@@ -29,6 +31,8 @@ use webapi\src\forms\billing\BillingInfoForm;
 use webapi\src\forms\payment\PaymentRequestForm;
 use webapi\src\services\payment\BillingInfoApiVoluntaryService;
 use Yii;
+use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 
 use function Amp\Promise\timeoutWithDefault;
 
@@ -100,7 +104,36 @@ class VoluntaryExchangeConfirmHandler
         $caseSale = $this->getSale();
         $data['cons'] = $caseSale->css_sale_data['consolidator'] ?? null;
         $data['tickets'] = null;
-        if ($flightPaxes = $this->voluntaryExchangeQuote->flightQuote->fqFlight->flightPaxes ?? null) {
+
+        if (empty($this->productQuoteChange->pqc_data_json['exchange'])) {
+            $boPrepareService = new VoluntaryExchangeBOPrepareService($this->case->project, $this->originProductQuote);
+            try {
+                $boPrepareService->fill();
+            } catch (\Throwable $throwable) {
+                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $getParams);
+                \Yii::warning($message, 'FlightQuoteController:actionCreateVoluntaryQuote:VoluntaryExchangeBOPrepareService');
+            }
+
+            $voluntaryExchangeBOService = new VoluntaryExchangeBOService($boPrepareService);
+            try {
+                $voluntaryExchangeBOService->requestProcessing();
+            } catch (\Throwable $throwable) {
+                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $getParams);
+                \Yii::warning($message, 'FlightQuoteController:actionCreateVoluntaryQuote:BoGetExchangeData');
+            }
+
+            $this->productQuoteChange->pqc_data_json = JsonHelper::encode($voluntaryExchangeBOService->getResult());
+            $this->productQuoteChange->save();
+        }
+        if (!empty($this->productQuoteChange->pqc_data_json['exchange']['tickets'])) {
+            foreach ($this->productQuoteChange->pqc_data_json['exchange']['tickets'] as $key => $flightPax) {
+                $data['tickets'][$key]['firstName'] = $flightPax['firstName'];
+                $data['tickets'][$key]['lastName']  = $flightPax['lastName'];
+                $data['tickets'][$key]['paxType']   = $flightPax['paxType'];
+                $data['tickets'][$key]['number']    = $flightPax['number'] ?? null;
+                $data['tickets'][$key]['numRef']    = $key + 1 . '.1';
+            }
+        } elseif ($flightPaxes = $this->voluntaryExchangeQuote->flightQuote->fqFlight->flightPaxes ?? null) {
             foreach ($flightPaxes as $key => $flightPax) {
                 $data['tickets'][$key]['firstName'] = $flightPax->fp_first_name;
                 $data['tickets'][$key]['lastName'] = $flightPax->fp_last_name;
