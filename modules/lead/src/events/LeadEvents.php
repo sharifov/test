@@ -7,7 +7,6 @@ use modules\lead\src\events\handler\LeadCloseHandler;
 
 class LeadEvents implements EventInterface
 {
-
     public const EVENT_CLOSE = 'close';
 
     private const ACTION_CLOSE = 'action-close';

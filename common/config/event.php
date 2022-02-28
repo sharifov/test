@@ -1,6 +1,5 @@
 <?php
 
-
 return [
     'class' => \modules\eventManager\components\EventManagerComponent::class,
     'cacheEnable' => true,

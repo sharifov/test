@@ -4,7 +4,6 @@ namespace modules\eventManager\src;
 
 class EventHandler
 {
-
     /**
      * @param $params
      */
