@@ -2,6 +2,8 @@
 
 namespace frontend\controllers;
 
+use src\model\phoneNumberRedial\PhoneNumberRedialRepository;
+use src\model\phoneNumberRedial\useCase\createMultiple\CreateMultipleForm;
 use Yii;
 use src\model\phoneNumberRedial\entity\PhoneNumberRedial;
 use src\model\phoneNumberRedial\entity\PhoneNumberRedialSearch;
@@ -12,8 +14,22 @@ use yii\web\Response;
 use yii\db\StaleObjectException;
 use yii\helpers\ArrayHelper;
 
+/**
+ * Class PhoneNumberRedialCrudController
+ * @package frontend\controllers
+ *
+ * @property-read PhoneNumberRedialRepository $repository
+ */
 class PhoneNumberRedialCrudController extends FController
 {
+    private PhoneNumberRedialRepository $repository;
+
+    public function __construct($id, $module, PhoneNumberRedialRepository $repository, $config = [])
+    {
+        $this->repository = $repository;
+        parent::__construct($id, $module, $config);
+    }
+
     public function init(): void
     {
         parent::init();
@@ -77,6 +93,43 @@ class PhoneNumberRedialCrudController extends FController
         }
 
         return $this->render('create', [
+            'model' => $model,
+        ]);
+    }
+
+    /**
+     * @return string|Response
+     */
+    public function actionCreateMultiple()
+    {
+        $model = new CreateMultipleForm();
+
+        if ($this->request->isPost) {
+            if ($model->load($this->request->post()) && $model->validate()) {
+                try {
+                    foreach ($model->phonePattern as $value) {
+                        foreach ($model->phoneNumber as $numberId) {
+                            $phoneNumberRedial = PhoneNumberRedial::create(
+                                $model->projectId,
+                                $model->name,
+                                (string)$value,
+                                (int)$numberId,
+                                $model->priority,
+                                $model->enabled
+                            );
+                            $this->repository->save($phoneNumberRedial);
+                        }
+                    }
+
+                    Yii::$app->session->setFlash('success', 'Multiple rows created successfully');
+                    return $this->redirect(['index']);
+                } catch (\RuntimeException $e) {
+                    $model->addError('general', $e->getMessage());
+                }
+            }
+        }
+
+        return $this->render('create-multiple', [
             'model' => $model,
         ]);
     }
