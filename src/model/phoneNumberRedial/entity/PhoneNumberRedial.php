@@ -121,4 +121,22 @@ class PhoneNumberRedial extends \yii\db\ActiveRecord
     {
         return 'phone_number_redial';
     }
+
+    public static function create(
+        int $projectId,
+        ?string $name,
+        string $pattern,
+        int $phoneId,
+        ?int $priority,
+        ?int $enabled
+    ): self {
+        $model = new self();
+        $model->pnr_project_id = $projectId;
+        $model->pnr_name = $name;
+        $model->pnr_phone_pattern = $pattern;
+        $model->pnr_pl_id = $phoneId;
+        $model->pnr_priority = $priority;
+        $model->pnr_enabled = $enabled;
+        return $model;
+    }
 }
