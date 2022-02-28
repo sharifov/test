@@ -142,6 +142,11 @@ class LeadPoorProcessingService
             return;
         }
 
+        $idKey = 'adder_' . $leadId . '_' . implode('_', $dataKeys);
+        if (!self::checkDuplicate($idKey)) {
+            return;
+        }
+
         $logData = [
             'leadId' => $leadId,
             'dataKeys' => $dataKeys,
@@ -167,6 +172,11 @@ class LeadPoorProcessingService
     ): void {
         /** @fflag FFlag::FF_LPP_ENABLE, Lead Poor Processing Enable/Disable */
         if (!Yii::$app->ff->can(FFlag::FF_KEY_LPP_ENABLE)) {
+            return;
+        }
+
+        $idKey = 'remover_' . $leadId . '_' . implode('_', $dataKeys);
+        if (!self::checkDuplicate($idKey)) {
             return;
         }
 
@@ -197,5 +207,15 @@ class LeadPoorProcessingService
             throw new \RuntimeException('EmailTemplateType not found by(' . $templateKey . ')');
         }
         return (bool) ArrayHelper::getValue($tpl->etp_params_json, 'quotes.selectRequired', false);
+    }
+
+    private static function checkDuplicate(string $idKey, int $pauseSecond = 10): bool
+    {
+        $redis = Yii::$app->redis;
+        if (!$redis->get($idKey)) {
+            $redis->setex($idKey, $pauseSecond, true);
+            return true;
+        }
+        return false;
     }
 }
