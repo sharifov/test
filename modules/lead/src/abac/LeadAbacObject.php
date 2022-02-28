@@ -67,6 +67,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     public const OBJ_LEAD_PREFERENCES    = self::NS . 'obj/lead_preferences';
     public const OBJ_LEAD                = self::NS . 'obj/lead';
     public const OBJ_EXTRA_QUEUE         = self::NS . 'obj/extra_queue';
+    public const OBJ_CLOSED_QUEUE        = self::NS . 'obj/closed_queue';
 
     /** --------------- OBJECT LIST --------------------------- */
     public const OBJECT_LIST = [
@@ -107,6 +108,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::EMAIL_CREATE_FORM => self::EMAIL_CREATE_FORM,
         self::CLIENT_CREATE_FORM => self::CLIENT_CREATE_FORM,
         self::OBJ_EXTRA_QUEUE => self::OBJ_EXTRA_QUEUE,
+        self::OBJ_CLOSED_QUEUE => self::OBJ_CLOSED_QUEUE,
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -204,6 +206,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::OBJ_LEAD_PREFERENCES => [self::ACTION_SET_DELAY_CHARGE],
         self::OBJ_LEAD => [self::ACTION_CLONE, self::ACTION_SNOOZE],
         self::OBJ_EXTRA_QUEUE => [self::ACTION_ACCESS],
+        self::OBJ_CLOSED_QUEUE => [self::ACTION_ACCESS],
     ];
 
     public const ATTR_LEAD_IS_OWNER = [

@@ -44,6 +44,30 @@ class LeadBadgesRepository
 
     /**
      * @param Employee $user
+     * @return ActiveQuery
+     */
+    public function getClosedQuery(Employee $user): ActiveQuery
+    {
+        $query = Lead::find()->andWhere([Lead::tableName() . '.status' => Lead::STATUS_CLOSED]);
+
+        if ($user->isAdmin()) {
+            return $query;
+        }
+
+        return $query->andWhere('0 = 1');
+    }
+
+    /**
+     * @param Employee $user
+     * @return int
+     */
+    public function getClosedCount(Employee $user): int
+    {
+        return $this->getClosedQuery($user)->count();
+    }
+
+    /**
+     * @param Employee $user
      * @return int
      */
     public function getBusinessInboxCount(Employee $user): int

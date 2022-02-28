@@ -4,6 +4,9 @@ namespace src\services\badges\objects;
 
 use common\models\Employee;
 use common\models\search\LeadQcallSearch;
+use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\lead\src\abac\LeadAbacObject;
+use src\auth\Auth;
 use src\repositories\lead\LeadBadgesRepository;
 use src\services\badges\BadgeCounterInterface;
 use Yii;
@@ -80,6 +83,11 @@ class LeadBadgeCounter implements BadgeCounterInterface
                 case 'extra-queue':
                     if ($count = $this->getLeadExtraQueue()) {
                         $result['extra-queue'] = $count;
+                    }
+                    break;
+                case 'closed':
+                    if ($count = $this->getLeadClosedQueue()) {
+                        $result['closed'] = $count;
                     }
                     break;
             }
@@ -288,5 +296,17 @@ class LeadBadgeCounter implements BadgeCounterInterface
             return null;
         }
         return $this->leadBadgesRepository->getExtraQueueCount();
+    }
+
+    private function getLeadClosedQueue(): ?int
+    {
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        $dto = new LeadAbacDto(null, $user->id);
+        /** @abac $leadAbacDto, LeadAbacObject::OBJ_CLOSED_QUEUE, LeadAbacObject::ACTION_ACCESS, show closed-queue badges count */
+        if (!Yii::$app->abac->can($dto, LeadAbacObject::OBJ_CLOSED_QUEUE, LeadAbacObject::ACTION_ACCESS)) {
+            return null;
+        }
+        return $this->leadBadgesRepository->getClosedCount($user);
     }
 }
