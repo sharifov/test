@@ -919,11 +919,11 @@ class FlightQuoteExchangeController extends BaseController
                 $dataJson['responseBo'] = $responseBo;
                 $flightRequest->fr_data_json = $dataJson;
                 $this->objectCollection->getFlightRequestRepository()->save($flightRequest);
-                $pqc_entity = $this->productQuoteChangeRepository->find($voluntaryExchangeConfirmForm->getProductQuoteChange()->pqc_id);
-                $pqc_data_json_decoded = JsonHelper::decode($pqc_entity->pqc_data_json);
-                $pqc_data_json_decoded['responseBo'] = $responseBo;
-                $pqc_entity->pqc_data_json = JsonHelper::encode($pqc_data_json_decoded);
-                $pqc_entity->save();
+                $pqcEntity = $this->productQuoteChangeRepository->find($voluntaryExchangeConfirmForm->getProductQuoteChange()->pqc_id);
+                $pqcDataJsonDecoded = JsonHelper::decode($pqcEntity->pqc_data_json);
+                $pqcDataJsonDecoded['responseBo'] = $responseBo;
+                $pqcEntity->pqc_data_json = JsonHelper::encode($pqcDataJsonDecoded);
+                $pqcEntity->save();
 
                 $responseBoStatus = ($responseBo['status'] === 'Success');
             } catch (\Throwable $throwable) {
