@@ -537,7 +537,7 @@ $isAgent = Auth::user()->isAgent();
                     'format' => 'html',
                 ],
 
-                ['class' => 'yii\grid\ActionColumn', 'template' => '{view}', 'controller' => 'quote'],
+                ['class' => 'yii\grid\ActionColumn', 'template' => '{view}', 'controller' => 'quotes'],
 
                 //['class' => 'yii\grid\ActionColumn'],
             ],
