@@ -27,7 +27,7 @@ class CountryHelper
     public static function getCountries(string $lang = 'en', bool $additional = true): array
     {
         $result = [];
-        $fileName = Yii::getAlias('@root/vendor') . '/stefangabos/world_countries/data/' . $lang . '/countries.php';
+        $fileName = Yii::getAlias('@root/vendor') . '/stefangabos/world_countries/data/countries/' . $lang . '/countries.php';
 
         if (!file_exists($fileName)) {
             throw new \RuntimeException('Error file (' . $fileName . ') not exist');
