@@ -190,6 +190,13 @@ class LeadStateService
         $this->leadRepository->save($lead);
     }
 
+    public function close($lead): void
+    {
+        $lead = $this->serviceFinder->leadFind($lead);
+        $lead->close();
+        $this->leadRepository->save($lead);
+    }
+
     /**
      * @param $newOwner
      * @param Lead $lead

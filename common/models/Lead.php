@@ -279,6 +279,7 @@ class Lead extends ActiveRecord implements Objectable
     public const STATUS_ALTERNATIVE = 15;
     public const STATUS_NEW         = 16;
     public const STATUS_EXTRA_QUEUE = 17;
+    public const STATUS_CLOSED      = 18;
 
     public const STATUS_LIST = [
         self::STATUS_PENDING        => 'Pending',
@@ -294,6 +295,7 @@ class Lead extends ActiveRecord implements Objectable
         self::STATUS_ALTERNATIVE    => 'Alternative',
         self::STATUS_NEW            => 'New',
         self::STATUS_EXTRA_QUEUE    => 'Extra queue',
+        self::STATUS_CLOSED         => 'Closed',
     ];
 
     public const TRAVEL_DATE_PASSED_STATUS_LIST = [
@@ -310,6 +312,7 @@ class Lead extends ActiveRecord implements Objectable
         self::STATUS_TRASH          => self::STATUS_LIST[self::STATUS_TRASH],
         self::STATUS_BOOKED         => self::STATUS_LIST[self::STATUS_BOOKED],
         self::STATUS_SNOOZE         => self::STATUS_LIST[self::STATUS_SNOOZE],
+        self::STATUS_CLOSED         => self::STATUS_LIST[self::STATUS_CLOSED],
     ];
 
     public const STATUS_CLASS_LIST = [
@@ -5151,9 +5154,22 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         $this->setStatus(self::STATUS_EXTRA_QUEUE);
     }
 
+    public function close(): void
+    {
+        if ($this->isClosed()) {
+            return;
+        }
+        $this->setStatus(self::STATUS_CLOSED);
+    }
+
     public function isExtraQueue(): bool
     {
         return $this->status === self::STATUS_EXTRA_QUEUE;
+    }
+
+    public function isClosed(): bool
+    {
+        return $this->status === self::STATUS_CLOSED;
     }
 
     public function hasFlightDetails(): bool

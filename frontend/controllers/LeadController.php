@@ -211,6 +211,7 @@ class LeadController extends FController
                     'ajax-create-from-phone-widget-with-invalid-client',
                     'ajax-link-to-call',
                     'extra-queue',
+                    'closed',
                 ],
             ],
         ];
@@ -1898,6 +1899,27 @@ class LeadController extends FController
         $dataProvider = $searchModel->searchBooked(Yii::$app->request->queryParams, $user);
 
         return $this->render('booked', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'isAgent' => $isAgent,
+        ]);
+    }
+
+    public function actionClosed(): string
+    {
+        $searchModel = new LeadSearch();
+
+        $user = Auth::user();
+
+        if ($user->isAgent()) {
+            $isAgent = true;
+        } else {
+            $isAgent = false;
+        }
+
+        $dataProvider = $searchModel->searchClosed(Yii::$app->request->queryParams, $user);
+
+        return $this->render('closed', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'isAgent' => $isAgent,
