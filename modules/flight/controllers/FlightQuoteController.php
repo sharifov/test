@@ -1001,6 +1001,9 @@ class FlightQuoteController extends FController
                 \Yii::warning($message, 'FlightQuoteController:actionCreateVoluntaryQuote:BoGetExchangeData');
             }
 
+            $productQuoteChange->pqc_data_json = JsonHelper::encode($voluntaryExchangeBOService->getResult());
+            $productQuoteChange->save();
+
             $form = new VoluntaryQuoteCreateForm(Auth::id(), $flight, true, $voluntaryExchangeBOService->getServiceFeeAmount());
             $form->setCustomerPackage($voluntaryExchangeBOService->getCustomerPackage());
             $form->setServiceFeeCurrency($voluntaryExchangeBOService->getServiceFeeCurrency());

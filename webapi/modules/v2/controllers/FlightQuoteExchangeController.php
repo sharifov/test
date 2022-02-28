@@ -3,6 +3,7 @@
 namespace webapi\modules\v2\controllers;
 
 use common\components\jobs\VoluntaryExchangeCreateJob;
+use frontend\helpers\JsonHelper;
 use modules\flight\models\FlightRequest;
 use modules\flight\src\useCases\voluntaryExchange\codeException\VoluntaryExchangeCodeException;
 use modules\flight\src\useCases\voluntaryExchange\service\BoRequestVoluntaryExchangeService;
@@ -19,6 +20,8 @@ use modules\flight\src\useCases\voluntaryExchangeInfo\service\VoluntaryExchangeI
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
+use modules\product\src\repositories\ProductableRepository;
 use src\entities\cases\CaseEventLog;
 use src\exception\BoResponseException;
 use src\helpers\app\AppHelper;
@@ -40,17 +43,20 @@ use webapi\src\response\messages\TypeMessage;
 use webapi\src\response\SuccessResponse;
 use Yii;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 
 /**
  * Class FlightQuoteExchangeController
  *
  * @property VoluntaryExchangeObjectCollection $objectCollection
  * @property BoRequestVoluntaryExchangeService $boRequestVoluntaryExchangeService
+ * @property ProductQuoteChangeRepository $productQuoteChangeRepository
  */
 class FlightQuoteExchangeController extends BaseController
 {
     private VoluntaryExchangeObjectCollection $objectCollection;
     private BoRequestVoluntaryExchangeService $boRequestVoluntaryExchangeService;
+    private ProductQuoteChangeRepository $productQuoteChangeRepository;
 
     /**
      * @param $id
@@ -58,6 +64,7 @@ class FlightQuoteExchangeController extends BaseController
      * @param ApiLogger $logger
      * @param VoluntaryExchangeObjectCollection $voluntaryExchangeObjectCollection
      * @param BoRequestVoluntaryExchangeService $boRequestVoluntaryExchangeService
+     * @param ProductQuoteChangeRepository $productQuoteChangeRepository
      * @param array $config
      */
     public function __construct(
@@ -66,10 +73,12 @@ class FlightQuoteExchangeController extends BaseController
         ApiLogger $logger,
         VoluntaryExchangeObjectCollection $voluntaryExchangeObjectCollection,
         BoRequestVoluntaryExchangeService $boRequestVoluntaryExchangeService,
+        ProductQuoteChangeRepository $productQuoteChangeRepository,
         $config = []
     ) {
         $this->objectCollection = $voluntaryExchangeObjectCollection;
         $this->boRequestVoluntaryExchangeService = $boRequestVoluntaryExchangeService;
+        $this->productQuoteChangeRepository = $productQuoteChangeRepository;
         parent::__construct($id, $module, $logger, $config);
     }
 
@@ -901,7 +910,6 @@ class FlightQuoteExchangeController extends BaseController
                 VoluntaryExchangeCodeException::PREPARE_DATA_FAILED
             );
         }
-
         try {
             try {
                 if (!$responseBo = $this->boRequestVoluntaryExchangeService->sendVoluntaryConfirm($requestData)) {
@@ -911,6 +919,11 @@ class FlightQuoteExchangeController extends BaseController
                 $dataJson['responseBo'] = $responseBo;
                 $flightRequest->fr_data_json = $dataJson;
                 $this->objectCollection->getFlightRequestRepository()->save($flightRequest);
+                $pqcEntity = $this->productQuoteChangeRepository->find($voluntaryExchangeConfirmForm->getProductQuoteChange()->pqc_id);
+                $pqcDataJsonDecoded = JsonHelper::decode($pqcEntity->pqc_data_json);
+                $pqcDataJsonDecoded['responseBo'] = $responseBo;
+                $pqcEntity->pqc_data_json = JsonHelper::encode($pqcDataJsonDecoded);
+                $pqcEntity->save();
 
                 $responseBoStatus = ($responseBo['status'] === 'Success');
             } catch (\Throwable $throwable) {
