@@ -119,8 +119,8 @@ class UserFeedbackSearch extends UserFeedback
         $query->andFilterWhere([
             'between',
             'uf_created_dt',
-            Employee::convertTimeFromUserDtToUTC(strtotime($this->uf_created_dt.' 00:00:00')),
-            Employee::convertTimeFromUserDtToUTC(strtotime($this->uf_created_dt.' 23:59:59'))
+            Employee::convertTimeFromUserDtToUTC(strtotime($this->uf_created_dt . ' 00:00:00')),
+            Employee::convertTimeFromUserDtToUTC(strtotime($this->uf_created_dt . ' 23:59:59'))
         ]);
 
         $query->andFilterWhere(['ilike', 'uf_title', $this->uf_title])

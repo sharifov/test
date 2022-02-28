@@ -434,6 +434,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Lead Poor Processing', 'url' => ['/lead-poor-processing-crud/index']],
                         ['label' => 'Lead Poor Processing Log', 'url' => ['/lead-poor-processing-log-crud/index']],
                         ['label' => 'Lead User Ratings', 'url' => ['/lead-user-rating-crud/index']],
+                        ['label' => 'Lead Status Reason', 'url' => ['/lead-status-reason-crud/index']],
                     ]
                 ],
                 [
