@@ -10,6 +10,7 @@ return [
     'appEnv' => '',
 
     'release' => require __DIR__ . '/params-release.php',
+    'events' => require __DIR__ . '/params-events.php',
     'wsIdentityCookie' => ['name' => '_identity_ws', 'httpOnly' => true],
 
     'url'      => 'https://sales.travelinsides.com',
