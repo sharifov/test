@@ -1958,6 +1958,9 @@ class CasesController extends FController
 
         try {
             $this->casesManageService->markChecked($model->cs_id);
+            $userId['userId'] = Yii::$app->user->id;
+            $model->addEventLog(CaseEventLog::CASE_MARK_CHECKED, 'Case has been marked as checked by: ' . Auth::user()->username, $userId, CaseEventLog::CATEGORY_INFO);
+
             Yii::$app->session->setFlash('success', 'Success');
         } catch (\DomainException $e) {
             Yii::$app->session->setFlash('error', $e->getMessage());
