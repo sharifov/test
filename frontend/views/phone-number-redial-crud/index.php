@@ -21,6 +21,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <p>
         <?= Html::a('Create Phone Number Redial', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('Create Multiple Phone Number Redial', ['create-multiple'], ['class' => 'btn btn-success']) ?>
     </p>
 
     <?php Pjax::begin(['id' => 'pjax-PhoneNumberRedial22']); ?>
