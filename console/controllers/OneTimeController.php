@@ -20,6 +20,7 @@ use common\models\LeadFlightSegment;
 use common\models\LeadFlow;
 use common\models\PhoneBlacklist;
 use common\models\Project;
+use common\models\QuotePrice;
 use common\models\Sms;
 use common\models\Sources;
 use common\models\UserProjectParams;
@@ -66,6 +67,8 @@ use yii\validators\DateValidator;
 
 class OneTimeController extends Controller
 {
+    private const MC_QUOTE_PRICE_MAX_CHUNK_SIZE_LIMIT = 100000;
+
     public $limit;
 
     public function options($actionID)
@@ -1637,5 +1640,51 @@ class OneTimeController extends Controller
                 'leads.source_id is null'
             ])
             ->all();
+    }
+
+    public function actionFillClientPriceFieldsInQuotePrice(int $chunkSize = self::MC_QUOTE_PRICE_MAX_CHUNK_SIZE_LIMIT): void
+    {
+        try {
+            if ($chunkSize > self::MC_QUOTE_PRICE_MAX_CHUNK_SIZE_LIMIT) {
+                throw new \DomainException('max chunk size is exceeded - Chunk size is:' . $chunkSize);
+            }
+            $timeStart = microtime(true);
+            $quotePriceIds = QuotePrice
+                ::find()
+                ->select('id')
+                ->where(['is', 'qp_client_fare', new Expression('null')])
+                ->limit($chunkSize)
+                ->orderBy(['id' => SORT_ASC])
+                ->column();
+            $quotePriceTable = QuotePrice::tableName();
+            \Yii::$app->db->createCommand()
+                ->update($quotePriceTable, [
+                    'qp_client_fare' => new Expression('fare'),
+                    'qp_client_taxes' => new Expression('taxes'),
+                    'qp_client_extra_mark_up' => new Expression('extra_mark_up'),
+                    'qp_client_service_fee' => new Expression('service_fee'),
+                    'qp_client_markup' => new Expression('mark_up'),
+                    'qp_client_selling' => new Expression('quote_price'),
+                    'qp_client_net' => new Expression('net'),
+                ], ['id' => $quotePriceIds])
+                ->execute();
+            $timeEnd = microtime(true);
+            $executionTime = ($timeEnd - $timeStart) / 60;
+            $message = ['message' => 'actionFillClientPriceFieldsInQuotePrice finished','countAffectedRows' =>  count($quotePriceIds), 'executionTime' => $executionTime ];
+            \Yii::info(
+                $message,
+                'info\OneTimeController::actionFillClientPriceFieldsInQuotePrice'
+            );
+        } catch (\RuntimeException | \DomainException $e) {
+            \Yii::warning(
+                AppHelper::throwableLog($e),
+                'OneTimeController::actionFillClientPriceFieldsInQuotePrice:exception'
+            );
+        } catch (\Throwable $e) {
+            \Yii::error(
+                AppHelper::throwableLog($e),
+                'OneTimeController:actionFillClientPriceFieldsInQuotePrice:Throwable'
+            );
+        }
     }
 }

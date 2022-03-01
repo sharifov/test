@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use common\components\BackOffice;
 use common\components\Metrics;
+use common\models\Currency;
 use common\models\GlobalLog;
 use common\models\Lead;
 use common\models\Notifications;
@@ -41,6 +42,8 @@ use src\services\quote\addQuote\guard\FlightQuoteGuard;
 use src\services\quote\addQuote\guard\GdsByQuoteGuard;
 use src\services\quote\addQuote\guard\LeadGuard;
 use src\services\quote\addQuote\price\PreparePrices;
+use src\services\quote\addQuote\price\QuotePriceCreateService;
+use src\services\quote\addQuote\price\QuotePriceSearchForm;
 use Yii;
 use yii\base\Model;
 use yii\data\ArrayDataProvider;
@@ -242,6 +245,29 @@ class QuoteController extends FController
                     $result = $keyCache && $createFromQuoteSearch ? $resultSearch['results'] : $resultSearch['data']['results'];
                     foreach ($result as $entry) {
                         if ($entry['key'] == $key) {
+                            $logData = [
+                                'leadId' => $leadId,
+                                'searchQuoteKey' => $key,
+                                'currencyCode' => $entry['currency'] ?? null,
+                            ];
+
+                            try {
+                                if (!$currencyCode = $entry['currency'] ?? null) {
+                                    throw new \RuntimeException('Currency not exist in search result');
+                                }
+                                if (!$currency = Currency::find()->byCode((string) $currencyCode)->limit(1)->one()) {
+                                    throw new \RuntimeException('Currency not found by code(' . $currencyCode . ')');
+                                }
+                            } catch (\Throwable $throwable) {
+                                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
+                                \Yii::error(
+                                    $message,
+                                    'QuoteController:actionCreateQuoteFromSearch:checkCurrency'
+                                );
+                                $result['error'] = $throwable->getMessage();
+                                return $result;
+                            }
+
                             $transaction = Quote::getDb()->beginTransaction();
 
                             $quote = new Quote();
@@ -261,6 +287,8 @@ class QuoteController extends FController
                             $quote->origin_search_data = json_encode($entry);
                             $quote->gds_offer_id = $entry['gdsOfferId'] ?? null;
                             $quote->provider_project_id = $providerProjectId;
+                            $quote->q_client_currency = $currency->cur_code;
+                            $quote->q_client_currency_rate = $currency->cur_base_rate;
                             $quote->setMetricLabels(['action' => 'created', 'type_creation' => 'search']);
 
                             if (isset($entry['tickets'])) {
@@ -462,24 +490,32 @@ class QuoteController extends FController
 
                                 foreach ($entry['passengers'] as $paxCode => $paxEntry) {
                                     for ($i = 0; $i < $paxEntry['cnt']; $i++) {
-                                        $price = new QuotePrice();
-                                        $price->passenger_type = $paxCode;
-                                        $price->fare = $paxEntry['baseFare'];
-                                        $price->taxes = $paxEntry['baseTax'];
-                                        $price->net = $price->fare + $price->taxes;
-                                        $price->mark_up = $paxEntry['markup'];
-                                        $price->selling = $price->net + $price->mark_up + $price->extra_mark_up;
-                                        $price->service_fee = ($quote->check_payment) ? QuotePrice::calculateProcessingFeeAmount($price->selling, (new Quote())->serviceFeePercent) : 0;
-                                        $price->selling += $price->service_fee;
+                                        try {
+                                            $quotePriceSearchForm = new QuotePriceSearchForm(
+                                                $paxCode,
+                                                (bool) $quote->check_payment,
+                                                $currencyCode,
+                                                $quote
+                                            );
+                                            if (!$quotePriceSearchForm->load($paxEntry)) {
+                                                throw new \RuntimeException('QuotePriceSearchForm not loaded');
+                                            }
+                                            if (!$quotePriceSearchForm->validate()) {
+                                                throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($quotePriceSearchForm));
+                                            }
 
-                                        if (!$price->validate()) {
-                                            $result['error'] = VarDumper::dumpAsString($price->errors);
-                                            Yii::error(VarDumper::dumpAsString($entry) . "\n" . VarDumper::dumpAsString($price->getErrors()), 'QuoteController:create-quote-from-search:price:save');
+                                            $price = QuotePriceCreateService::createFromSearch($quotePriceSearchForm);
+                                            if (!$price->validate()) {
+                                                throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($price));
+                                            }
+                                            $quote->link('quotePrices', $price);
+                                        } catch (\Throwable $throwable) {
+                                            $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $paxEntry);
+                                            \Yii::error($message, 'QuoteController:actionCreateQuoteFromSearch:Price:Validate');
+                                            $result['error'] = $throwable->getMessage();
                                             $transaction->rollBack();
                                             return $result;
                                         }
-
-                                        $quote->link('quotePrices', $price);
                                     }
                                 }
 

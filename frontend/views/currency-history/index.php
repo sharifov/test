@@ -11,7 +11,7 @@ use common\components\grid\DateTimeColumn;
 /* @var $searchModel common\models\search\CurrencyHistorySearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Currency Histories';
+$this->title = 'Currency History';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="currency-history-index">
@@ -20,6 +20,11 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <p>
         <?= Html::a('<i class="fa fa-plus"></i> Add Currency History', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a(
+            'Currency List',
+            ['currency/index'],
+            ['class' => 'btn btn-default']
+        ) ?>
     </p>
 
     <?php Pjax::begin(['scrollTo' => 0]); ?>

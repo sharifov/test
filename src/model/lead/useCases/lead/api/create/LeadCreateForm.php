@@ -2,10 +2,12 @@
 
 namespace src\model\lead\useCases\lead\api\create;
 
+use common\models\Currency;
 use common\models\Department;
 use common\models\Language;
 use common\models\Lead;
 use common\models\Project;
+use common\models\query\CurrencyQuery;
 use common\models\Sources;
 use src\helpers\lead\LeadHelper;
 use common\components\validators\IsArrayValidator;
@@ -45,6 +47,7 @@ use yii\base\Model;
  * @property bool|null $allow_contact_internal_phone
  * @property bool|null $allow_contact_internal_email
  * @property bool|null $is_test
+ * @property string|null $currency_code
  */
 class LeadCreateForm extends Model
 {
@@ -79,6 +82,7 @@ class LeadCreateForm extends Model
     public $allow_contact_internal_phone;
     public $allow_contact_internal_email;
     public $is_test;
+    public $currency_code;
 
     public function rules(): array
     {
@@ -152,6 +156,11 @@ class LeadCreateForm extends Model
 
             ['department_key', 'string'],
             ['department_key', 'validateDepartment', 'skipOnEmpty' => true, 'skipOnError' => true],
+
+            [['currency_code'], 'string', 'max' => 3],
+            [['currency_code'], 'trim'],
+            [['currency_code'], 'filter', 'filter' => 'mb_strtoupper'],
+            [['currency_code'], 'setDefaultCurrencyCodeIfNotExists', 'skipOnError' => true, 'skipOnEmpty' => false],
         ];
     }
 
@@ -298,6 +307,13 @@ class LeadCreateForm extends Model
             foreach ($error as $err) {
                 $this->addError('client[' . $attr . ']', $err);
             }
+        }
+    }
+
+    public function setDefaultCurrencyCodeIfNotExists(): void
+    {
+        if (empty($this->currency_code) || !CurrencyQuery::existsByCurrencyCode((string)$this->currency_code)) {
+            $this->currency_code = Currency::getDefaultCurrencyCode();
         }
     }
 }

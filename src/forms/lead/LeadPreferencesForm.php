@@ -46,11 +46,17 @@ class LeadPreferencesForm extends Model
     public $clientLang;
 
     /**
+     * @var bool
+     */
+    public bool $canManageCurrency = true;
+
+    /**
      * LeadPreferencesForm constructor.
      * @param Lead|null $lead
+     * @param bool $canManageCurrency
      * @param array $config
      */
-    public function __construct(Lead $lead, $config = [])
+    public function __construct(Lead $lead, bool $canManageCurrency, $config = [])
     {
         if ($lead && $leadPreferences = $lead->leadPreferences) {
             $this->marketPrice = $leadPreferences->market_price;
@@ -62,6 +68,7 @@ class LeadPreferencesForm extends Model
             $this->delayedCharge = $lead->l_delayed_charge;
             $this->clientLang = $lead->l_client_lang;
         }
+        $this->canManageCurrency = $canManageCurrency;
 
         parent::__construct($config);
     }
@@ -81,6 +88,9 @@ class LeadPreferencesForm extends Model
             ['delayedCharge', 'default', 'value' => false],
             [['numberStops'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
             [['marketPrice', 'clientsBudget'], 'filter', 'filter' => 'floatval', 'skipOnEmpty' => true],
+            [['currency'], 'required', 'when' => function (): bool {
+                return $this->canManageCurrency;
+            }],
             [['currency'], 'string', 'max' => 3],
             ['currency', 'default', 'value' => null],
             [['currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['currency' => 'cur_code']],

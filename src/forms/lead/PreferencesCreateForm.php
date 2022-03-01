@@ -20,6 +20,12 @@ class PreferencesCreateForm extends Model
     public $numberStops;
     public $currency;
 
+    public function __construct($config = [])
+    {
+        parent::__construct($config);
+        $this->currency = Currency::getDefaultCurrencyCode();
+    }
+
     /**
      * @return array
      */
@@ -44,8 +50,8 @@ class PreferencesCreateForm extends Model
     public function attributeLabels(): array
     {
         return [
-            'marketPrice' => 'Market, $',
-            'clientsBudget' => 'Budget, $',
+            'marketPrice' => 'Market',
+            'clientsBudget' => 'Budget',
             'numberStops' => 'Stops',
             'currency' => 'Currency'
         ];

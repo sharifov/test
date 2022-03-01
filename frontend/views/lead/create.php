@@ -60,9 +60,7 @@ $this->title = 'Create Lead';
                             <div class="row">
                                 <div class="col-md-3 col-sm-12">
                                     <?= $form->field($leadForm, 'cabin', [
-                                    ])->dropDownList(LeadHelper::cabinList(), [
-                                        'prompt' => '---'
-                                    ]) ?>
+                                    ])->dropDownList(LeadHelper::cabinList()) ?>
                                 </div>
                                 <div class="col-md-2 col-sm-12">
                                     <?= $form->field($leadForm, 'adults', [

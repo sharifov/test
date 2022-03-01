@@ -126,6 +126,8 @@ class CreateLeadByChatDTO
             $ip,
             $gmtOffset
         );
+        $this->lead->adults = 1;
+        $this->lead->setCabinClassEconomy();
         $clientPhones = ArrayHelper::getColumn($this->client->clientPhones, 'phone');
         $hash = $this->leadHashGenerator->generate(
             null,

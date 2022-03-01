@@ -3,6 +3,7 @@
 use common\components\SearchService;
 use frontend\helpers\QuoteHelper;
 use src\model\flightQuoteLabelList\entity\FlightQuoteLabelList;
+use src\services\CurrencyHelper;
 use yii\bootstrap\Html;
 use yii\helpers\ArrayHelper;
 
@@ -176,7 +177,9 @@ if (isset($result['prices']['isCk'])) {
 
         </div>
         <div class="quote__heading-right text-success">
-            <strong class="quote__quote-price">$<?= $price?></strong>
+            <strong class="quote__quote-price">
+                <?php echo CurrencyHelper::getSymbolByCode($result['currency'] ?? null) ?> <?= $price?>
+            </strong>
         </div>
     </div>
     <div class="quote__wrapper">
@@ -327,9 +330,9 @@ if (isset($result['prices']['isCk'])) {
                 <tr>
                     <th title="isCk: <?php echo $isCk ?>">Pax</th>
                     <th>Q</th>
-                    <th>NP, $</th>
+                    <th>NP, <?php echo CurrencyHelper::getSymbolByCode($result['currency'] ?? null) ?></th>
                     <?php if (isset($result['prices']['markup']) && $result['prices']['markup'] > 0) :
-                        ?><th>MU, $</th><?php
+                        ?><th>MU, <?php echo CurrencyHelper::getSymbolByCode($result['currency'] ?? null) ?></th><?php
                     endif;?>
                 </tr>
                 </thead>

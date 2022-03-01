@@ -117,6 +117,17 @@ class CurrencyController extends FController
         return $this->redirect(['index']);
     }
 
+    public function actionClearCache()
+    {
+        if (Currency::clearCache()) {
+            Yii::$app->session->setFlash('warning', 'Cache was not deleted');
+        } else {
+            Yii::$app->session->setFlash('success', 'Cache was deleted successfully');
+        }
+
+        return $this->redirect(['index']);
+    }
+
     /**
      * Finds the Currency model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.

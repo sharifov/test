@@ -26,25 +26,29 @@ use yii\helpers\VarDumper;
  * @property string|null $cur_synch_dt
  *
  * @property CurrencyHistory[] $currencyHistories
+ * @property array $dataList
  */
-class Currency extends \yii\db\ActiveRecord
+class Currency extends ActiveRecord
 {
     public const DEFAULT_CURRENCY = 'USD';
-
     public const DEFAULT_CURRENCY_CLIENT_RATE = 1.00;
 
     private const DEFAULT_CURRENCY_BASE_RATE = 1.00;
+    private const CACHE_KEY = 'cache-currency-list';
+
+    private array $dataList = [];
+
 
     /**
-     * {@inheritdoc}
+     * @return string
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return 'currency';
     }
 
     /**
-     * {@inheritdoc}
+     * @return array
      */
     public function rules()
     {
@@ -79,9 +83,9 @@ class Currency extends \yii\db\ActiveRecord
     }
 
     /**
-     * {@inheritdoc}
+     * @return string[]
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'cur_code' => 'Code',
@@ -115,9 +119,10 @@ class Currency extends \yii\db\ActiveRecord
     public function afterSave($insert, $changedAttributes)
     {
         parent::afterSave($insert, $changedAttributes);
+        self::clearCache();
         $currencyHistory = (new CurrencyHistory())->fillByCurrency($this);
         if (!$currencyHistory->save(false)) {
-            Yii::error($currencyHistory->cur_his_code . ': ' . VarDumper::dumpAsString($currencyHistory->errors), 'Currency:synchronization:CurrencyHistory:save');
+            Yii::error($currencyHistory->ch_code . ': ' . VarDumper::dumpAsString($currencyHistory->errors), 'Currency:synchronization:CurrencyHistory:save');
         }
     }
 
@@ -134,7 +139,7 @@ class Currency extends \yii\db\ActiveRecord
         ];
 
         $currencyService = Yii::$app->currency;
-        $currencyResponse = $currencyService->getRate(true, 'USD');
+        $currencyResponse = $currencyService->getRate(true, self::DEFAULT_CURRENCY);
 
         // VarDumper::dump($currencyResponse); exit;
 
@@ -240,6 +245,7 @@ class Currency extends \yii\db\ActiveRecord
                     Yii::error($currency->cur_code . ': ' . VarDumper::dumpAsString($currency->errors), 'Currency:synchronization:save');
                 }
             }
+            self::clearCache();
         } else {
             $data['error'] = 'Not found response[data][quotes]';
         }
@@ -247,17 +253,42 @@ class Currency extends \yii\db\ActiveRecord
         return $data;
     }
 
-
     /**
-     * @return array
+     * @return bool
      */
-    public static function getList(): array
+    public static function clearCache(): bool
     {
-        $query = self::find()->where(['cur_enabled' => true])->orderBy(['cur_sort_order' => SORT_ASC]);
-        $data = $query->asArray()->all();
-        return ArrayHelper::map($data, 'cur_code', 'cur_code');
+        Yii::$app->cache->delete(self::CACHE_KEY . '-all');
+        return Yii::$app->cache->delete(self::CACHE_KEY);
     }
 
+    /**
+     * @param bool $all
+     * @return array
+     */
+    public static function getList(bool $all = false): array
+    {
+        $cache = Yii::$app->cache;
+        $key = self::CACHE_KEY . ($all ? '-all' : '');
+        $data = $cache->get($key);
+
+        if ($data === false) {
+            $query = self::find()->select(['cur_code'])->orderBy(['cur_sort_order' => SORT_ASC]);
+            if (!$all) {
+                $query->where(['cur_enabled' => true]);
+            }
+            $data = $query->asArray()->all();
+            $data = ArrayHelper::map($data, 'cur_code', 'cur_code');
+            if ($data) {
+                $cache->set($key, $data);
+            }
+        }
+        return $data;
+    }
+
+    /**
+     * @return array|Currency|null
+     */
     public static function getDefaultCurrency()
     {
         return self::find()->where(['cur_default' => 1])->one();

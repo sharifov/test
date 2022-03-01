@@ -375,6 +375,7 @@ class LeadManageService
             $preferencesForm->numberStops,
             $preferencesForm->currency
         );
+        $preferences->setDefaultCurrencyCodeIfNotSet();
         $this->leadPreferencesRepository->save($preferences);
     }
 

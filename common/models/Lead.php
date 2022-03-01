@@ -5179,4 +5179,9 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     {
         return $this->leadFlightSegmentsCount > 0;
     }
+
+    public function setCabinClassEconomy(): void
+    {
+        $this->cabin = self::CABIN_ECONOMY;
+    }
 }

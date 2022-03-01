@@ -140,6 +140,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     public const ACTION_EDIT = 'edit';
     public const ACTION_VIEW = 'view';
     public const ACTION_SNOOZE = 'snooze';
+    public const ACTION_MANAGE_LEAD_PREF_CURRENCY = 'manageLeadPrefCurrency';
 
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
@@ -203,7 +204,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_CREATE_FROM_PHONE_WIDGET => [self::ACTION_CREATE],
         self::ACT_LINK_TO_CALL => [self::ACTION_ACCESS],
         self::ACT_TAKE_LEAD_FROM_CALL => [self::ACTION_ACCESS],
-        self::OBJ_LEAD_PREFERENCES => [self::ACTION_SET_DELAY_CHARGE],
+        self::OBJ_LEAD_PREFERENCES => [self::ACTION_SET_DELAY_CHARGE, self::ACTION_MANAGE_LEAD_PREF_CURRENCY],
         self::OBJ_LEAD => [self::ACTION_CLONE, self::ACTION_SNOOZE],
         self::OBJ_EXTRA_QUEUE => [self::ACTION_ACCESS],
         self::OBJ_CLOSED_QUEUE => [self::ACTION_ACCESS],

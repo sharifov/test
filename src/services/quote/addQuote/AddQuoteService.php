@@ -2,6 +2,7 @@
 
 namespace src\services\quote\addQuote;
 
+use common\models\Currency;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\Quote;
@@ -26,6 +27,8 @@ use src\repositories\quote\QuoteSegmentBaggageRepository;
 use src\repositories\quote\QuoteSegmentRepository;
 use src\repositories\quote\QuoteSegmentStopRepository;
 use src\repositories\quote\QuoteTripRepository;
+use src\services\quote\addQuote\price\QuotePriceCreateService;
+use src\services\quote\addQuote\price\QuotePriceSearchForm;
 use src\services\TransactionManager;
 use yii\helpers\ArrayHelper;
 
@@ -108,7 +111,14 @@ class AddQuoteService
     public function createQuoteFromSearch(array $quoteData, Lead $lead, ?Employee $employee)
     {
         return $this->transactionManager->wrap(function () use ($quoteData, $lead, $employee) {
-            $quote = Quote::createQuoteFromSearch($quoteData, $lead, $employee);
+            if (!$currencyCode = $quoteData['currency'] ?? null) {
+                throw new \RuntimeException('Currency not exist in search result');
+            }
+            if (!$currency = Currency::find()->byCode((string) $currencyCode)->limit(1)->one()) {
+                throw new \RuntimeException('Currency not found by code(' . $currencyCode . ')');
+            }
+
+            $quote = Quote::createQuoteFromSearch($quoteData, $lead, $employee, $currency);
             $this->quoteRepository->save($quote);
 
             $this->createQuoteTripsFromSearch($quoteData['trips'] ?? [], $quote);
@@ -133,7 +143,7 @@ class AddQuoteService
     public function createByData(array $data, Lead $lead, ?int $providerProjectId): string
     {
         return $this->transactionManager->wrap(function () use ($data, $lead, $providerProjectId) {
-            $quote = Quote::createQuoteFromSearch($data, $lead, null);
+            $quote = Quote::createQuoteFromSearch($data, $lead, null, null);
             $quote->provider_project_id = $providerProjectId;
             $this->quoteRepository->save($quote);
 
@@ -219,14 +229,30 @@ class AddQuoteService
     {
         foreach ($passengers as $paxCode => $paxEntry) {
             for ($i = 0; $i < $paxEntry['cnt']; $i++) {
-                $quotePrice = QuotePrice::createFromSearch(
-                    $paxEntry,
-                    (string)$paxCode,
-                    (bool)$quote->check_payment,
-                    (new Quote())->serviceFeePercent
-                );
-                $this->quotePriceRepository->save($quotePrice);
-                $quote->link('quotePrices', $quotePrice);
+                try {
+                    $quotePriceSearchForm = new QuotePriceSearchForm(
+                        $paxCode,
+                        (bool) $quote->check_payment,
+                        $quote->q_client_currency,
+                        $quote
+                    );
+                    if (!$quotePriceSearchForm->load($paxEntry)) {
+                        throw new \RuntimeException('QuotePriceSearchForm not loaded');
+                    }
+                    if (!$quotePriceSearchForm->validate()) {
+                        throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($quotePriceSearchForm));
+                    }
+
+                    $quotePrice = QuotePriceCreateService::createFromSearch($quotePriceSearchForm);
+                    if (!$quotePrice->validate()) {
+                        throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($quotePrice, ' '));
+                    }
+                    $quote->link('quotePrices', $quotePrice);
+                } catch (\Throwable $throwable) {
+                    $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $paxEntry);
+                    \Yii::error($message, 'AddQuoteService:createQuotePriceFromSearch:Throwable');
+                    throw $throwable;
+                }
             }
         }
     }

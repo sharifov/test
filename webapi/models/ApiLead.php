@@ -4,10 +4,12 @@ namespace webapi\models;
 
 use common\components\validators\IsArrayValidator;
 use common\models\Client;
+use common\models\Currency;
 use common\models\DepartmentPhoneProject;
 use common\models\Employee;
 use common\models\Language;
 use common\models\Lead;
+use common\models\query\CurrencyQuery;
 use common\models\Sources;
 use common\models\UserProjectParams;
 use common\models\VisitorLog;
@@ -55,6 +57,7 @@ use yii\base\Model;
  * @property string|null $expire_at
  * @property array|null $lead_data
  * @property array|null $client_data
+ * @property string|null $currency_code
  */
 class ApiLead extends Model
 {
@@ -102,6 +105,8 @@ class ApiLead extends Model
     public $expire_at;
     public $lead_data;
     public $client_data;
+
+    public $currency_code;
 
     public function formName()
     {
@@ -171,6 +176,11 @@ class ApiLead extends Model
             [['expire_at'], 'datetime', 'format' => 'php:Y-m-d H:i:s', 'skipOnEmpty' => true],
 
             [['lead_data', 'client_data'], IsArrayValidator::class, 'skipOnEmpty' => true, 'skipOnError' => true],
+
+            [['currency_code'], 'string', 'max' => 3],
+            [['currency_code'], 'trim'],
+            [['currency_code'], 'filter', 'filter' => 'mb_strtoupper'],
+            [['currency_code'], 'setDefaultCurrencyCodeIfNotExists', 'skipOnError' => true, 'skipOnEmpty' => false],
         ];
     }
 
@@ -381,5 +391,12 @@ class ApiLead extends Model
         //Yii::info('Lead ('.$this->lead_id.', StrHash: "'.$strHash.'", "'.$hash.'")', 'info\APILead:strHash');
 
         return $hash;
+    }
+
+    public function setDefaultCurrencyCodeIfNotExists(): void
+    {
+        if (empty($this->currency_code) || !CurrencyQuery::existsByCurrencyCode((string)$this->currency_code)) {
+            $this->currency_code = Currency::getDefaultCurrencyCode();
+        }
     }
 }

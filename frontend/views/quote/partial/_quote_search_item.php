@@ -6,6 +6,7 @@ use frontend\helpers\QuoteHelper;
 use src\auth\Auth;
 use src\helpers\quote\ImageHelper;
 use src\model\flightQuoteLabelList\entity\FlightQuoteLabelList;
+use src\services\CurrencyHelper;
 use yii\bootstrap\Html;
 use yii\helpers\ArrayHelper;
 
@@ -108,7 +109,8 @@ $isQuoteAssignedToFlight = in_array($result['key'], $flightQuotes);
 
         </div>
         <div class="quote__heading-right text-success" title="Price per PAX">
-            <strong class="quote__quote-price">$<?= number_format($result['price'], 2) ?></strong> &nbsp; per ADT
+            <strong class="quote__quote-price">
+               <?php echo CurrencyHelper::getSymbolByCode($result['currency'] ?? null) ?> <?= number_format($result['price'], 2) ?></strong> &nbsp; per ADT
         </div>
     </div>
 
@@ -267,9 +269,9 @@ $isQuoteAssignedToFlight = in_array($result['key'], $flightQuotes);
                 <tr>
                     <th>Pax</th>
                     <th>Q</th>
-                    <th class="text-right" title="Net price">NP, $</th>
-                    <th class="text-right" title="Markup">Mkp, $</th>
-                    <th class="text-right" title="Selling price">SP, $</th>
+                    <th class="text-right" title="Net price">NP, <?php echo CurrencyHelper::getSymbolByCode($result['currency'] ?? null) ?></th>
+                    <th class="text-right" title="Markup">Mkp, <?php echo CurrencyHelper::getSymbolByCode($result['currency'] ?? null) ?></th>
+                    <th class="text-right" title="Selling price">SP, <?php echo CurrencyHelper::getSymbolByCode($result['currency'] ?? null) ?></th>
                 </tr>
                 </thead>
                 <tbody>

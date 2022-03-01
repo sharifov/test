@@ -313,12 +313,22 @@ class SideBarMenu extends \yii\bootstrap\Widget
             'url' => 'javascript:',
             'icon' => 'th-list',
             'items' => [
-                ['label' => 'Call List', 'url' => ['/call/index'], 'icon' => 'phone'],
-
+                [
+                    'label' => 'Calls',
+                    'url' => 'javascript:',
+                    'icon' => 'folder',
+                    'items' => [
+                        ['label' => 'Call List', 'url' => ['/call/index'], 'icon' => 'phone', 'title' => 'Call list'],
+                        ['label' => 'User Voice Mail', 'url' => ['/user-voice-mail/index'], 'icon' => 'microphone', 'Call User Voice Mail'],
+                        ['label' => 'Voice Mail Records', 'url' => ['/voice-mail-record/index'], 'icon' => 'envelope', 'title' => 'Call Voice Mail Records'],
+                        ['label' => 'User Call Statuses', 'url' => ['/user-call-status/index'], 'icon' => 'list'],
+                        ['label' => 'Call Notes', 'url' => ['/call-note-crud/index']],
+                    ],
+                ],
                 [
                     'label' => 'Call logs',
                     'url' => 'javascript:',
-                    'icon' => 'phone',
+                    'icon' => 'folder',
                     'items' => [
                         ['label' => 'Call Log', 'url' => ['/call-log/index'], 'title' => 'Call Logs'],
                         ['label' => 'User access', 'url' => ['/call-log-user-access/index'], 'title' => 'Call Logs User access'],
@@ -333,7 +343,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 [
                     'label' => 'Client Chat',
                     'url' => 'javascript:',
-                    'icon' => 'comments warning',
+                    'icon' => 'folder',
                     'items' => [
                         ['label' => 'Project config', 'url' => ['/client-chat-project-config/index']],
                         ['label' => 'Client Chat CRUD', 'url' => ['/client-chat-crud/index']],
@@ -383,9 +393,18 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ],
                 ['label' => 'Notification List', 'url' => ['/notifications/index'], 'icon' => 'bell-o'],
                 [
+                    'label' => 'Currency',
+                    'url' => 'javascript:',
+                    'icon' => 'folder',
+                    'items' => [
+                        ['label' => 'Currency List', 'url' => ['/currency/index'], 'title' => 'Currency List CRUD'],
+                        ['label' => 'Currency History', 'url' => ['/currency-history/index'], 'title' => 'Currency History CRUD'],
+                    ]
+                ],
+                [
                     'label' => 'Conferences',
                     'url' => 'javascript:',
-                    'icon' => 'comments',
+                    'icon' => 'folder',
                     'items' => [
                         ['label' => 'Conference Room', 'url' => ['/conference-room/index']],
                         ['label' => 'Conferences', 'url' => ['/conference/index']],
@@ -396,13 +415,11 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Twilio Recording Log', 'url' => ['/conference-recording-log-crud/index']],
                     ]
                 ],
-                ['label' => 'Call Note', 'url' => ['/call-note-crud/index'], 'icon' => 'list'],
-                ['label' => 'User Voice Mail', 'url' => ['/user-voice-mail/index'], 'icon' => 'microphone'],
-                ['label' => 'Voice Mail Records', 'url' => ['/voice-mail-record/index'], 'icon' => 'envelope'],
+
                 [
                     'label' => 'QCall',
                     'url' => 'javascript:',
-                    'icon' => 'phone',
+                    'icon' => 'folder',
                     'items' => [
                         ['label' => 'Redial user access', 'url' => ['/call-redial-user-access/index']],
                         ['label' => 'Lead QCall List', 'url' => ['/lead-qcall/list']],
@@ -412,13 +429,11 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Status Weight', 'url' => ['/status-weight/index']],
                     ]
                 ],
-                ['label' => 'User Call Statuses', 'url' => ['/user-call-status/index'], 'icon' => 'list'],
                 ['label' => 'Flight Segments', 'url' => ['/lead-flight-segment/index'], 'icon' => 'plane'],
-
                 [
                     'label' => 'Quotes',
                     'url' => 'javascript:',
-                    'icon' => 'list',
+                    'icon' => 'folder',
                     'items' => [
                         ['label' => 'Quote List', 'url' => ['/quotes/index'], 'icon' => 'list'],
                         ['label' => 'Quote Price List', 'url' => ['/quote-price/index'], 'icon' => 'list'],
@@ -431,7 +446,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 [
                     'label' => 'Leads',
                     'url' => 'javascript:',
-                    'icon' => 'list',
+                    'icon' => 'folder',
                     'items' => [
                         ['label' => 'Lead Call Experts', 'url' => ['/lead-call-expert/index']],
                         ['label' => 'Lead Status History', 'url' => ['/lead-flow/index']],
@@ -519,8 +534,6 @@ class SideBarMenu extends \yii\bootstrap\Widget
             'icon' => 'list',
             'items' => [
                 ['label' => 'Products', 'url' => 'javascript:', 'items' => [
-                    ['label' => 'Currency List', 'url' => ['/currency/index']],
-                    ['label' => 'Currency History', 'url' => ['/currency-history/index']],
                     ['label' => 'Product Types', 'url' => ['/product/product-type-crud/index']],
                     ['label' => 'Product Type Payment Method', 'url' => ['/product/product-type-payment-method/index']],
                     ['label' => 'Products', 'url' => ['/product/product-crud/index']],

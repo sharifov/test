@@ -3,6 +3,7 @@
 namespace src\dto\searchService;
 
 use common\components\SearchService;
+use common\models\Currency;
 use common\models\Lead;
 use common\models\LeadFlightSegment;
 use yii\helpers\ArrayHelper;
@@ -26,26 +27,17 @@ use yii\helpers\ArrayHelper;
 class SearchServiceQuoteDTO
 {
     private ?Lead $lead = null;
-
     public array $fl = [];
-
     public ?string $cabin = null;
-
     public ?string $cid = '';
-
     public ?int $adt = null;
-
     public ?int $chd = null;
-
     public ?int $inf = null;
-
     public bool $group = true;
-
     public ?int $limit = null;
-
     public $gdsCode;
-
     public $ppn;
+    public string $currency = Currency::DEFAULT_CURRENCY;
 
     public function __construct(?Lead $lead, int $limit = 600, $gdsCode = null, bool $group = true)
     {
@@ -93,6 +85,10 @@ class SearchServiceQuoteDTO
 
             if ($lead->client->isExcluded()) {
                 $this->ppn = $lead->client->cl_ppn;
+            }
+
+            if ($currency = $lead->leadPreferences->prefCurrency->cur_code ?? null) {
+                $this->currency = $currency;
             }
         }
     }

@@ -4,12 +4,14 @@ namespace src\services\lead;
 
 use common\components\jobs\WebEngageLeadRequestJob;
 use common\models\LeadFlow;
+use common\models\LeadPreferences;
 use common\models\VisitorLog;
 use modules\webEngage\settings\WebEngageDictionary;
 use src\forms\lead\EmailCreateForm;
 use src\forms\lead\PhoneCreateForm;
 use src\repositories\client\ClientsCollection;
 use src\repositories\client\ClientsQuery;
+use src\repositories\lead\LeadPreferencesRepository;
 use src\repositories\lead\LeadSegmentRepository;
 use src\services\TransactionManager;
 use Yii;
@@ -38,6 +40,7 @@ use function Amp\Promise\timeoutWithDefault;
  * @property LeadRepository $leadRepository
  * @property LeadSegmentRepository $leadSegmentRepository
  * @property TransactionManager $transactionManager
+ * @property LeadPreferencesRepository $leadPreferencesRepository
  */
 class LeadCreateApiService
 {
@@ -46,19 +49,22 @@ class LeadCreateApiService
     private $leadRepository;
     private $leadSegmentRepository;
     private $transactionManager;
+    private $leadPreferencesRepository;
 
     public function __construct(
         LeadRepository $leadRepository,
         ClientManageService $clientManageService,
         LeadHashGenerator $leadHashGenerator,
         LeadSegmentRepository $leadSegmentRepository,
-        TransactionManager $transactionManager
+        TransactionManager $transactionManager,
+        LeadPreferencesRepository $leadPreferencesRepository
     ) {
         $this->leadRepository = $leadRepository;
         $this->clientManageService = $clientManageService;
         $this->leadHashGenerator = $leadHashGenerator;
         $this->leadSegmentRepository = $leadSegmentRepository;
         $this->transactionManager = $transactionManager;
+        $this->leadPreferencesRepository = $leadPreferencesRepository;
     }
 
     /**
@@ -169,6 +175,9 @@ class LeadCreateApiService
             }
 
             $this->addFlights($modelLead->flights, $lead->id);
+
+            $leadPreferences = LeadPreferences::create($lead->id, null, null, null, $modelLead->currency_code);
+            $this->leadPreferencesRepository->save($leadPreferences);
 
             return $lead;
         });

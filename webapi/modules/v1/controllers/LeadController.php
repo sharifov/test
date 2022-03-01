@@ -105,6 +105,7 @@ class LeadController extends ApiBaseController
      * @apiParam {int}                  [lead.snooze_for]                                    Snooze for
      * @apiParam {int}                  [lead.rating]                                        Rating
      * @apiParam {int}                  [lead.discount_id]                                   Discount Id
+     * @apiParam {string{..3}}          [lead.currency_code]                                 Client currency code
      *
      * @apiParam {string{3..100}}       [lead.client_first_name]                            Client first name
      * @apiParam {string{3..100}}       [lead.client_last_name]                             Client last name
@@ -175,6 +176,7 @@ class LeadController extends ApiBaseController
      *        "user_language": "en-GB",
      *        "is_test": true,
      *        "expire_at": "2020-01-20 12:12:12",
+     *        "currency_code": "USD",
      *        "lead_data": [
      *               {
      *                  "field_key": "example_key",

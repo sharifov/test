@@ -5,10 +5,12 @@ namespace src\model\lead\useCases\lead\api\create;
 use common\models\Client;
 use common\models\Lead;
 use common\models\LeadFlightSegment;
+use common\models\LeadPreferences;
 use src\forms\lead\EmailCreateForm;
 use src\forms\lead\PhoneCreateForm;
 use src\model\clientData\service\ClientDataService;
 use src\model\leadData\services\LeadDataCreateService;
+use src\repositories\lead\LeadPreferencesRepository;
 use src\repositories\lead\LeadRepository;
 use src\repositories\lead\LeadSegmentRepository;
 use src\services\client\ClientCreateForm;
@@ -27,6 +29,7 @@ use yii\helpers\ArrayHelper;
  * @property LeadHashGenerator $hashGenerator
  * @property LeadRepository $leadRepository
  * @property LeadSegmentRepository $segmentRepository
+ * @property LeadPreferencesRepository $leadPreferencesRepository
  *
  * @property array $leadDataInserted
  * @property array $clientDataInserted
@@ -43,19 +46,22 @@ class LeadCreateHandler
     private $hashGenerator;
     private $leadRepository;
     private $segmentRepository;
+    private $leadPreferencesRepository;
 
     public function __construct(
         ClientManageService $clientManageService,
         TransactionManager $transactionManager,
         LeadHashGenerator $hashGenerator,
         LeadRepository $leadRepository,
-        LeadSegmentRepository $segmentRepository
+        LeadSegmentRepository $segmentRepository,
+        LeadPreferencesRepository $leadPreferencesRepository
     ) {
         $this->clientManageService = $clientManageService;
         $this->transactionManager = $transactionManager;
         $this->hashGenerator = $hashGenerator;
         $this->leadRepository = $leadRepository;
         $this->segmentRepository = $segmentRepository;
+        $this->leadPreferencesRepository = $leadPreferencesRepository;
     }
 
     public function handle(LeadCreateForm $form): Lead
@@ -138,6 +144,9 @@ class LeadCreateHandler
                     $this->warnings[] = $clientDataWarnings;
                 }
             }
+
+            $leadPreferences = LeadPreferences::create($lead->id, null, null, null, $form->currency_code);
+            $this->leadPreferencesRepository->save($leadPreferences);
 
             return $lead;
         });

@@ -80,13 +80,83 @@ $this->params['breadcrumbs'][] = $this->title;
                         'contentOptions' => ['class' => 'text-right'],
                         'format' => 'currency'
                     ],
-
                     [
                         'attribute' => 'taxes',
                         'contentOptions' => ['class' => 'text-right'],
                         'format' => 'currency'
                     ],
-
+                    [
+                        'attribute' => 'qp_client_fare',
+                        'contentOptions' => ['class' => 'text-right'],
+                        'value' => static function (\common\models\QuotePrice $model) {
+                            if (empty($model->qp_client_fare)) {
+                                return Yii::$app->formatter->nullDisplay;
+                            }
+                            $clientCurrency = $model->quote->q_client_currency ?? '';
+                            return $model->qp_client_fare . ' ' . $clientCurrency;
+                        },
+                        'format' => 'raw',
+                    ],
+                    [
+                        'attribute' => 'qp_client_taxes',
+                        'contentOptions' => ['class' => 'text-right'],
+                        'value' => static function (\common\models\QuotePrice $model) {
+                            if (empty($model->qp_client_markup)) {
+                                return Yii::$app->formatter->nullDisplay;
+                            }
+                            $clientCurrency = $model->quote->q_client_currency ?? '';
+                            return $model->qp_client_markup . ' ' . $clientCurrency;
+                        },
+                        'format' => 'raw',
+                    ],
+                    [
+                        'attribute' => 'qp_client_markup',
+                        'contentOptions' => ['class' => 'text-right'],
+                        'value' => static function (\common\models\QuotePrice $model) {
+                            if (empty($model->qp_client_taxes)) {
+                                return Yii::$app->formatter->nullDisplay;
+                            }
+                            $clientCurrency = $model->quote->q_client_currency ?? '';
+                            return $model->qp_client_taxes . ' ' . $clientCurrency;
+                        },
+                        'format' => 'raw',
+                    ],
+                    [
+                        'attribute' => 'qp_client_extra_mark_up',
+                        'contentOptions' => ['class' => 'text-right'],
+                        'value' => static function (\common\models\QuotePrice $model) {
+                            if (empty($model->qp_client_extra_mark_up)) {
+                                return Yii::$app->formatter->nullDisplay;
+                            }
+                            $clientCurrency = $model->quote->q_client_currency ?? '';
+                            return $model->qp_client_extra_mark_up . ' ' . $clientCurrency;
+                        },
+                        'format' => 'raw',
+                    ],
+                    [
+                        'attribute' => 'qp_client_service_fee',
+                        'contentOptions' => ['class' => 'text-right'],
+                        'value' => static function (\common\models\QuotePrice $model) {
+                            if (empty($model->qp_client_service_fee)) {
+                                return Yii::$app->formatter->nullDisplay;
+                            }
+                            $clientCurrency = $model->quote->q_client_currency ?? '';
+                            return $model->qp_client_service_fee . ' ' . $clientCurrency;
+                        },
+                        'format' => 'raw',
+                    ],
+                    [
+                        'attribute' => 'qp_client_selling',
+                        'contentOptions' => ['class' => 'text-right'],
+                        'value' => static function (\common\models\QuotePrice $model) {
+                            if (empty($model->qp_client_selling)) {
+                                return Yii::$app->formatter->nullDisplay;
+                            }
+                            $clientCurrency = $model->quote->q_client_currency ?? '';
+                            return $model->qp_client_selling . ' ' . $clientCurrency;
+                        },
+                        'format' => 'raw',
+                    ],
                 ],
             ]) ?>
         </div>

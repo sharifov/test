@@ -71,6 +71,7 @@ class LeadController extends BaseController
      * @apiParam {string{32}}           [lead.discount_id]                          Discount ID
      * @apiParam {string{15}}           [lead.uid]                                  UID value
      * @apiParam {text}                 [lead.user_agent]                           User agent info
+     * @apiParam {string{..3}}          [lead.currency_code]                        Client currency code
      * @apiParam {object[]}             lead.flights                                Flights
      * @apiParam {string{3}}            lead.flights.origin                         Flight Origin location Airport IATA-code
      * @apiParam {string{3}}            lead.flights.destination                    Flight Destination location Airport IATA-code
@@ -119,6 +120,7 @@ class LeadController extends BaseController
      *           "user_language": "en-GB",
      *           "is_test": true,
      *           "expire_at": "2020-01-20 12:12:12",
+     *           "currency_code": "USD",
      *           "flights": [
      *               {
      *                   "origin": "NYC",

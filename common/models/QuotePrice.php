@@ -20,11 +20,17 @@ use yii\db\ActiveRecord;
  * @property string $created
  * @property string $updated
  * @property string $uid
+ * @property double $qp_client_fare
+ * @property double $qp_client_taxes
+ * @property double $qp_client_markup
+ * @property double $qp_client_extra_mark_up
+ * @property double $qp_client_service_fee
+ * @property double $qp_client_selling
+ * @property double $qp_client_net
  *
  * @property string $oldParams
  *
  * @property Quote $quote
- *
  *
  * @property double $selling
  * @property double $net
@@ -36,7 +42,6 @@ class QuotePrice extends \yii\db\ActiveRecord
         PASSENGER_ADULT = 'ADT',
         PASSENGER_CHILD = 'CHD',
         PASSENGER_INFANT = 'INF';
-
 
     public const PASSENGER_TYPE_LIST = [
         self::PASSENGER_ADULT => 'Adult',
@@ -261,6 +266,11 @@ class QuotePrice extends \yii\db\ActiveRecord
             [['created', 'updated', 'oldParams', 'uid'], 'safe'],
             [['passenger_type'], 'string', 'max' => 255],
             [['quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => Quote::class, 'targetAttribute' => ['quote_id' => 'id']],
+
+            [[
+                'qp_client_fare', 'qp_client_taxes', 'qp_client_markup', 'qp_client_net',
+                'qp_client_extra_mark_up', 'qp_client_service_fee', 'qp_client_selling',
+            ], 'number'],
         ];
     }
 
@@ -281,6 +291,12 @@ class QuotePrice extends \yii\db\ActiveRecord
             'extra_mark_up' => 'Extra Mark Up',
             'created' => 'Created',
             'updated' => 'Updated',
+            'qp_client_fare' => 'Client fare',
+            'qp_client_taxes' => 'Client taxes',
+            'qp_client_markup' => 'Client markup',
+            'qp_client_extra_mark_up' => 'Client extra markup',
+            'qp_client_service_fee' => 'Client service fee',
+            'qp_client_selling' => 'Client selling',
         ];
     }
 
@@ -392,19 +408,5 @@ class QuotePrice extends \yii\db\ActiveRecord
             return self::PASSENGER_TYPE_LIST[$type] ?? '-';
         }
         return self::PASSENGER_TYPE_LIST[$this->passenger_type] ?? '-';
-    }
-
-    public static function createFromSearch(array $paxEntry, string $paxCode, bool $checkPayment, float $serviceFeePercent): QuotePrice
-    {
-        $price = new self();
-        $price->passenger_type = $paxCode;
-        $price->fare = $paxEntry['baseFare'] ?? null;
-        $price->taxes = $paxEntry['baseTax'] ?? null;
-        $price->net = $price->fare + $price->taxes;
-        $price->mark_up = $paxEntry['markup'] ?? null;
-        $price->selling = $price->net + $price->mark_up + $price->extra_mark_up;
-        $price->service_fee = ($checkPayment) ? self::calculateProcessingFeeAmount($price->selling, $serviceFeePercent) : 0;
-        $price->selling += $price->service_fee;
-        return $price;
     }
 }
