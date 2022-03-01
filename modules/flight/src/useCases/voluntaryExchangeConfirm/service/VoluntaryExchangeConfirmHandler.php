@@ -2,6 +2,7 @@
 
 namespace modules\flight\src\useCases\voluntaryExchangeConfirm\service;
 
+use common\components\BackOffice;
 use common\components\purifier\Purifier;
 use common\models\CaseSale;
 use common\models\Notifications;
@@ -106,12 +107,14 @@ class VoluntaryExchangeConfirmHandler
         $data['tickets'] = null;
 
         if (empty($this->productQuoteChange->pqc_data_json['exchange'])) {
+            // request to BO /api/v3/flight-request/get-exchange-data/
+            $getParams        = Yii::$app->request->get();
             $boPrepareService = new VoluntaryExchangeBOPrepareService($this->case->project, $this->originProductQuote);
             try {
                 $boPrepareService->fill();
             } catch (\Throwable $throwable) {
                 $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $getParams);
-                \Yii::warning($message, 'FlightQuoteController:actionCreateVoluntaryQuote:VoluntaryExchangeBOPrepareService');
+                \Yii::warning($message, 'VoluntaryExchangeConfirmHandler:prepareExchange:VoluntaryExchangeBOPrepareService');
             }
 
             $voluntaryExchangeBOService = new VoluntaryExchangeBOService($boPrepareService);
@@ -119,12 +122,13 @@ class VoluntaryExchangeConfirmHandler
                 $voluntaryExchangeBOService->requestProcessing();
             } catch (\Throwable $throwable) {
                 $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $getParams);
-                \Yii::warning($message, 'FlightQuoteController:actionCreateVoluntaryQuote:BoGetExchangeData');
+                \Yii::warning($message, 'VoluntaryExchangeConfirmHandler:prepareExchange:BoGetExchangeData');
             }
 
             $this->productQuoteChange->pqc_data_json = JsonHelper::encode($voluntaryExchangeBOService->getResult());
-            $this->productQuoteChange->save();
+            $this->objectCollection->getProductQuoteChangeRepository()->save($this->productQuoteChange);
         }
+
         if (!empty($this->productQuoteChange->pqc_data_json['exchange']['tickets'])) {
             foreach ($this->productQuoteChange->pqc_data_json['exchange']['tickets'] as $key => $flightPax) {
                 $data['tickets'][$key]['firstName'] = $flightPax['firstName'];
