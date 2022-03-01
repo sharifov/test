@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use modules\eventManager\src\entities\EventList;
 use modules\eventManager\src\entities\search\EventListSearch;
+use Yii;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -118,6 +119,20 @@ class EventListController extends FController
     public function actionDelete($el_id)
     {
         $this->findModel($el_id)->delete();
+
+        return $this->redirect(['index']);
+    }
+
+    /**
+     * @return Response
+     */
+    public function actionClearCache()
+    {
+        if (Yii::$app->event->invalidateCache()) {
+            Yii::$app->session->setFlash('success', 'Success invalidate Event List Cache');
+        } else {
+            Yii::$app->session->setFlash('warning', 'Event List Cache is disable');
+        }
 
         return $this->redirect(['index']);
     }

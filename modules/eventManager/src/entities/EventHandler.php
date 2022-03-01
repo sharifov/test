@@ -112,6 +112,30 @@ class EventHandler extends ActiveRecord
         ];
     }
 
+
+    /**
+     * @param bool $insert
+     * @param array $changedAttributes
+     */
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+        Yii::$app->event->invalidateCache();
+    }
+
+    /**
+     * @return bool
+     */
+    public function beforeDelete(): bool
+    {
+        if (!parent::beforeDelete()) {
+            return false;
+        }
+
+        Yii::$app->event->invalidateCache();
+        return true;
+    }
+
     /**
      * Gets query for [[EhEl]].
      *

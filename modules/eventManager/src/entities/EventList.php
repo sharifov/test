@@ -7,6 +7,7 @@ use common\models\Employee;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\caching\TagDependency;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\db\BaseActiveRecord;
@@ -133,6 +134,29 @@ class EventList extends ActiveRecord
             'el_updated_dt' => 'Updated Dt',
             'el_updated_user_id' => 'Updated User ID',
         ];
+    }
+
+    /**
+     * @param bool $insert
+     * @param array $changedAttributes
+     */
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+        Yii::$app->event->invalidateCache();
+    }
+
+    /**
+     * @return bool
+     */
+    public function beforeDelete(): bool
+    {
+        if (!parent::beforeDelete()) {
+            return false;
+        }
+
+        Yii::$app->event->invalidateCache();
+        return true;
     }
 
     /**
