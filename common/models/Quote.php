@@ -5,7 +5,6 @@ namespace common\models;
 use common\components\BackOffice;
 use common\components\SearchService;
 use common\models\local\FlightSegment;
-use common\models\local\LeadLogMessage;
 use common\models\query\QuoteQuery;
 use frontend\helpers\JsonHelper;
 use src\behaviors\metric\MetricQuoteCounterBehavior;
@@ -16,9 +15,6 @@ use src\helpers\setting\SettingHelper;
 use src\model\airportLang\service\AirportLangService;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
 use src\model\quoteLabel\entity\QuoteLabel;
-use src\services\CurrencyHelper;
-use src\services\parsingDump\lib\ParsingDump;
-use src\services\parsingDump\ReservationService;
 use src\traits\MetricObjectCounterTrait;
 use Yii;
 use yii\base\ErrorException;
@@ -1945,13 +1941,29 @@ class Quote extends \yii\db\ActiveRecord
             'marketingAirlines' => $quoteMarketingAirlines,
             'operatingAirlines' => $quoteOperatingAirlines,
             'pricePerPax' => $this->getPricePerPax(),
+            'clientPricePerPax' => $this->geClientPricePerPax(),
             'priceTotal' => 0,
             'currencySymbol' => '$',
             'currencyCode' => 'USD',
+            'clientCurrencySymbol' => $this->getClientCurrencySymbol(),
+            'clientCurrencyCode' => $this->getClientCurrencyCode(),
             'trips' => $trips,
             'maxStopsQuantity' => $maxStopsQuantity
             //'baggage' => $this->getBaggageInfo2(),
         ];
+    }
+
+    private function getClientCurrencyCode(): ?string
+    {
+        return  $this->q_client_currency ?? null;
+    }
+
+    private function getClientCurrencySymbol(): ?string
+    {
+        $currency = Currency::find()
+                            ->where(['cur_code' => $this->getClientCurrencyCode()])
+                            ->one();
+        return $currency->cur_symbol ?? null;
     }
 
     public function getTripsFromDumpLikeSearch()
@@ -2280,6 +2292,29 @@ class Quote extends \yii\db\ActiveRecord
         return 0;
     }
 
+    public function geClientPricePerPax()
+    {
+        $priceData = $this->getClientCurrencyPricesData();
+        $unknownType = null;
+        if (isset($priceData['prices'])) {
+            foreach ($priceData['prices'] as $paxCode => $priceEntry) {
+                if ($paxCode == QuotePrice::PASSENGER_ADULT) {
+                    return round($priceEntry['client_selling'] / $priceEntry['tickets'], 2);
+                }
+                if (!ArrayHelper::keyExists($paxCode, QuotePrice::PASSENGER_TYPE_LIST)) {
+                    $unknownType = $paxCode;
+                }
+            }
+        }
+        if (!empty($priceData['prices']) && $unknownType) {
+            $selling = ArrayHelper::getValue($priceData, 'prices.' . $unknownType . '.client_selling', 0);
+            $tickets = ArrayHelper::getValue($priceData, 'prices.' . $unknownType . '.tickets', 1);
+            return round($selling / $tickets, 2);
+        }
+
+        return 0;
+    }
+
     public function getPricesData()
     {
         $prices = [];
@@ -2326,14 +2361,72 @@ class Quote extends \yii\db\ActiveRecord
             $prices[$key]['selling'] = round($price['selling'], 2);
             $prices[$key]['net'] = round($price['net'], 2);
         }
+        return [
+            'prices'              => $prices,
+            'total'               => $total,
+            'service_fee_percent' => $service_fee_percent,
+            'service_fee'         => ($service_fee_percent > 0) ? $total['selling'] * $service_fee_percent / 100 : 0,
+            'processing_fee'      => $this->getProcessingFee()
+        ];
+    }
+
+    public function getClientCurrencyPricesData()
+    {
+        $prices = [];
+        $service_fee_percent = $this->getServiceFeePercent();
+        $defData = [
+            'client_fare'          => 0,
+            'client_taxes'         => 0,
+            'client_net'           => 0,
+            'tickets'              => 0,
+            'client_mark_up'       => 0,
+            'client_extra_mark_up' => 0,
+            'client_service_fee'   => 0,
+            'client_selling'       => 0,
+        ];
+        $total = $defData;
+
+        $paxCode = null;
+        foreach ($this->quotePrices as $price) {
+            if ($paxCode !== $price->passenger_type) {
+                $prices[$price->passenger_type] = $defData;
+                $paxCode = $price->passenger_type;
+            }
+            $prices[$price->passenger_type]['client_fare']          += $price->qp_client_fare;
+            $prices[$price->passenger_type]['client_taxes']         += $price->qp_client_taxes;
+            $prices[$price->passenger_type]['client_net']           = $prices[$price->passenger_type]['client_fare']
+                                                                      + $prices[$price->passenger_type]['client_taxes'];
+            $prices[$price->passenger_type]['tickets']              += 1;
+            $prices[$price->passenger_type]['client_mark_up']       += $price->qp_client_markup;
+            $prices[$price->passenger_type]['client_extra_mark_up'] += $price->qp_client_extra_mark_up;
+            $prices[$price->passenger_type]['client_selling']       =  $prices[$price->passenger_type]['client_net']
+                                                                       + $prices[$price->passenger_type]['client_mark_up']
+                                                                       + $prices[$price->passenger_type]['client_extra_mark_up'];
+            if ($service_fee_percent > 0) {
+                $prices[$price->passenger_type]['client_service_fee'] = QuotePrice::calculateProcessingFeeAmount((float)$prices[$price->passenger_type]['client_selling'], (float)$service_fee_percent);
+                $prices[$price->passenger_type]['client_selling'] += $prices[$price->passenger_type]['client_service_fee'];
+            }
+            $prices[$price->passenger_type]['client_selling'] = round($prices[$price->passenger_type]['client_selling'], 2);
+        }
+
+        foreach ($prices as $key => $price) {
+            $total['tickets'] += $price['tickets'];
+            $total['client_net'] += $price['client_net'];
+            $total['client_mark_up'] += $price['client_mark_up'];
+            $total['client_extra_mark_up'] += $price['client_extra_mark_up'];
+            $total['client_selling'] += $price['client_selling'];
+
+            $prices[$key]['client_selling'] = round($price['client_selling'], 2);
+            $prices[$key]['client_net'] = round($price['client_net'], 2);
+        }
 
         return [
-                'prices' => $prices,
-                'total' => $total,
-                'service_fee_percent' => $service_fee_percent,
-                'service_fee' => ($service_fee_percent > 0) ? $total['selling'] * $service_fee_percent / 100 : 0,
-                'processing_fee' => $this->getProcessingFee()
-                ];
+            'prices'              => $prices,
+            'total'               => $total,
+            'service_fee_percent' => $service_fee_percent,
+            'service_fee'         => ($service_fee_percent > 0) ? $total['selling'] * $service_fee_percent / 100 : 0,
+            'processing_fee'      => $this->getProcessingFee()
+        ];
     }
 
     /**
