@@ -5,6 +5,7 @@ use yii\helpers\Url;
 use yii\grid\ActionColumn;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel modules\eventManager\src\entities\search\EventHandlerSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -47,7 +48,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => ActionColumn::className(),
                 'urlCreator' => function ($action, EventHandler $model, $key, $index, $column) {
                     return Url::toRoute([$action, 'eh_id' => $model->eh_id]);
-                 }
+                }
             ],
         ],
     ]); ?>

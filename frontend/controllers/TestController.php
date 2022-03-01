@@ -2682,7 +2682,8 @@ class TestController extends FController
 
 
 
-        VarDumper::dump(LeadEvents::getHandlerList(), 10, true); exit;
+        VarDumper::dump(LeadEvents::getHandlerList(), 10, true);
+        exit;
 
 
         Event::on(
