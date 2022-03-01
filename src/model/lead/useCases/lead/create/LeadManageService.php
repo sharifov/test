@@ -13,19 +13,12 @@ use common\models\LeadFlow;
 use common\models\LeadPreferences;
 use common\models\query\SourcesQuery;
 use common\models\Sources;
-use common\models\VisitorLog;
 use src\forms\lead\EmailCreateForm;
 use src\forms\lead\PhoneCreateForm;
 use src\forms\lead\PreferencesCreateForm;
-use src\helpers\clientChat\ClientChatHelper;
 use src\helpers\ErrorsToStringHelper;
-use src\model\clientChat\entity\ClientChat;
 use src\model\clientChatLead\entity\ClientChatLead;
 use src\model\clientChatLead\entity\ClientChatLeadRepository;
-use src\model\clientChatRequest\ClientShortInfo;
-use src\model\clientChatVisitor\entity\ClientChatVisitor;
-use src\model\clientChatVisitor\repository\ClientChatVisitorRepository;
-use src\model\clientChatVisitorData\entity\ClientChatVisitorData;
 use src\model\clientChatVisitorData\repository\ClientChatVisitorDataRepository;
 use src\model\leadData\entity\LeadData;
 use src\model\leadData\repository\LeadDataRepository;
@@ -37,17 +30,13 @@ use src\model\visitorLog\useCase\CreateVisitorLog;
 use src\repositories\cases\CasesRepository;
 use src\repositories\lead\LeadPreferencesRepository;
 use src\repositories\lead\LeadRepository;
-use src\repositories\NotFoundException;
 use src\repositories\visitorLog\VisitorLogRepository;
 use src\services\cases\CasesManageService;
 use src\services\client\ClientCreateForm;
 use src\services\client\ClientManageService;
 use src\services\lead\LeadHashGenerator;
 use src\services\TransactionManager;
-use thamtech\uuid\helpers\UuidHelper;
 use yii\db\Query;
-use yii\helpers\ArrayHelper;
-use yii\helpers\Json;
 
 /**
  * Class LeadManageService
@@ -215,7 +204,7 @@ class LeadManageService
 
         $leadId = $this->leadRepository->save($lead);
 
-        $this->createLeadPreferences($leadId, $form->preferences);
+        $this->createLeadPreferences($leadId, $form->preferences, false);
 
         if ($logId = (new CreateVisitorLog())->create($client, $lead)) {
             $lead->setVisitorLog($logId);
@@ -229,7 +218,7 @@ class LeadManageService
      * @param int $leadId
      * @param PreferencesCreateForm $preferencesForm
      */
-    private function createLeadPreferences(int $leadId, PreferencesCreateForm $preferencesForm): void
+    private function createLeadPreferences(int $leadId, PreferencesCreateForm $preferencesForm, bool $defaultCurrencyByDb = true): void
     {
         $preferences = LeadPreferences::create(
             $leadId,
@@ -238,7 +227,7 @@ class LeadManageService
             null,
             null
         );
-        $preferences->setDefaultCurrencyCodeIfNotSet();
+        $preferences->setDefaultCurrencyCodeIfNotSet($defaultCurrencyByDb);
         $this->leadPreferencesRepository->save($preferences);
     }
 

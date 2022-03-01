@@ -1490,7 +1490,7 @@ class FlightQuoteController extends FController
                 $form->originData = $result;
 
                 if (!$form->airlineAllow && empty($form->getRefundForm()->currency)) {
-                    $form->getRefundForm()->currency = Currency::getDefaultCurrencyCode();
+                    $form->getRefundForm()->currency = Currency::getDefaultCurrencyCodeByDb();
 //                    throw new \RuntimeException('Refund not allowed by Airline');
                 }
 

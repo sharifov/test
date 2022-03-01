@@ -124,9 +124,9 @@ use yii\widgets\Pjax;
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td><?= $order->orderTips->ot_client_amount ?> (<?= $order->orClientCurrency ? $order->orClientCurrency->cur_code : Currency::getDefaultCurrencyCode() ?>)</td>
-                                        <td><?= $order->orderTips->ot_amount ?> (<?= Currency::getDefaultCurrencyCode() ?>)</td>
-                                        <td><?= $order->orderTips->ot_user_profit ?> (<?= Currency::getDefaultCurrencyCode() ?>)</td>
+                                        <td><?= $order->orderTips->ot_client_amount ?> (<?= $order->orClientCurrency ? $order->orClientCurrency->cur_code : Currency::getDefaultCurrencyCodeByDb() ?>)</td>
+                                        <td><?= $order->orderTips->ot_amount ?> (<?= Currency::getDefaultCurrencyCodeByDb() ?>)</td>
+                                        <td><?= $order->orderTips->ot_user_profit ?> (<?= Currency::getDefaultCurrencyCodeByDb() ?>)</td>
                                         <td><?= $order->orderTips->ot_user_profit_percent ?>%</td>
                                     </tr>
                                 </tbody>

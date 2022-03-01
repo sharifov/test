@@ -92,7 +92,7 @@ class LeadPreferencesManageService
             }
 
             if (!$form->canManageCurrency) {
-                $leadPreferences->pref_currency = $leadPreferences->oldAttributes['pref_currency'] ?? Currency::getDefaultCurrencyCode();
+                $leadPreferences->pref_currency = $leadPreferences->oldAttributes['pref_currency'] ?? Currency::getDefaultCurrencyCodeByDb();
             }
 
             $this->leadPreferencesRepository->save($leadPreferences);

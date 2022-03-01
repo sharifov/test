@@ -26,7 +26,7 @@ class PaymentForm extends \yii\base\Model
     public function beforeValidate(): bool
     {
         if (empty($this->clientCurrency)) {
-            $this->clientCurrency = Currency::getDefaultCurrencyCode();
+            $this->clientCurrency = Currency::getDefaultCurrencyCodeByDb();
         }
         return parent::beforeValidate();
     }

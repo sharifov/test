@@ -2,10 +2,7 @@
 
 namespace common\models;
 
-use common\models\local\LeadLogMessage;
 use src\entities\EventTrait;
-use src\events\lead\LeadPreferencesUpdateCurrencyEvent;
-use Yii;
 use yii\db\ActiveQuery;
 
 /**
@@ -133,10 +130,10 @@ class LeadPreferences extends \yii\db\ActiveRecord
         return parent::beforeValidate();
     }
 
-    public function setDefaultCurrencyCodeIfNotSet(): void
+    public function setDefaultCurrencyCodeIfNotSet(bool $defaultCurrencyByDb): void
     {
         if (empty($this->pref_currency)) {
-            $this->pref_currency = Currency::getDefaultCurrencyCodeForManualLeadCreate();
+            $this->pref_currency = $defaultCurrencyByDb ? Currency::getDefaultCurrencyCodeByDb() : Currency::getDefaultCurrencyCode();
         }
     }
 }
