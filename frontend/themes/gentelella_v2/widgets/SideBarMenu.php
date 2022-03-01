@@ -965,6 +965,15 @@ class SideBarMenu extends \yii\bootstrap\Widget
                             'title' => 'Feature Flag Docs'],
                     ]
                 ],
+                [
+                    'label' => Yii::t('language', 'Events'), 'url' => 'javascript:', 'icon' => 'folder',
+                    'items' => [
+                        ['label' => Yii::t('menu', 'Event List'), 'url' => ['/event-list/index'],
+                            'icon' => 'flag', 'title' => 'Event List CRUD'],
+                        ['label' => Yii::t('menu', 'Event Handler'), 'url' => ['/event-handler/index'],
+                            'title' => 'Event Handler CRUD'],
+                    ]
+                ],
                 ['label' => 'API Report', 'url' => ['/stats/api-graph'], 'icon' => 'bar-chart'],
 
                 ['label' => 'User Site Activity', 'url' => ['/user-site-activity/index'], 'icon' => 'bars'],

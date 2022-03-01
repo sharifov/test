@@ -2629,7 +2629,6 @@ class TestController extends FController
 
     public function actionRandomProbability()
     {
-
         $games = [
             ['name' => 'Game 1', 'ver' => 2], //  2/15
             ['name' => 'Game 2', 'ver' => 0], // probability 0/15
@@ -2673,13 +2672,35 @@ class TestController extends FController
     {
         $lead = Lead::find()->limit(1)->one();
 
-        NativeEventDispatcher::recordEvent(
+//        NativeEventDispatcher::recordEvent(
+//            LeadEvents::class,
+//            LeadEvents::EVENT_CLOSE,
+//            [EventHandler::class, 'handler'],
+//            $lead->attributes
+//        );
+//        NativeEventDispatcher::trigger(LeadEvents::class, LeadEvents::EVENT_CLOSE);
+
+
+
+        VarDumper::dump(LeadEvents::getHandlerList(), 10, true); exit;
+
+
+        Event::on(
             LeadEvents::class,
             LeadEvents::EVENT_CLOSE,
             [EventHandler::class, 'handler'],
-            $lead->attributes
         );
-        NativeEventDispatcher::trigger(LeadEvents::class, LeadEvents::EVENT_CLOSE);
+
+
+        Event::trigger(
+            LeadEvents::class,
+            LeadEvents::EVENT_CLOSE
+        );
+
+
+
+
+
 
         VarDumper::dump($lead->attributes, 10, true);
     }
