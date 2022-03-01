@@ -2300,7 +2300,7 @@ class Quote extends \yii\db\ActiveRecord
         if (isset($priceData['prices'])) {
             foreach ($priceData['prices'] as $paxCode => $priceEntry) {
                 if ($paxCode == QuotePrice::PASSENGER_ADULT) {
-                    return round($priceEntry['client_selling'] / $priceEntry['tickets'], 2);
+                    return round($priceEntry['selling'] / $priceEntry['tickets'], 2);
                 }
                 if (!ArrayHelper::keyExists($paxCode, QuotePrice::PASSENGER_TYPE_LIST)) {
                     $unknownType = $paxCode;
@@ -2308,7 +2308,7 @@ class Quote extends \yii\db\ActiveRecord
             }
         }
         if (!empty($priceData['prices']) && $unknownType) {
-            $selling = ArrayHelper::getValue($priceData, 'prices.' . $unknownType . '.client_selling', 0);
+            $selling = ArrayHelper::getValue($priceData, 'prices.' . $unknownType . '.selling', 0);
             $tickets = ArrayHelper::getValue($priceData, 'prices.' . $unknownType . '.tickets', 1);
             return round($selling / $tickets, 2);
         }

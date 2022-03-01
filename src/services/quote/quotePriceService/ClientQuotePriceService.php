@@ -24,7 +24,7 @@ class ClientQuotePriceService
         $priceData = $this->getClientPricesData();
         $result = [
             'prices' => [
-                'totalPrice' => round($priceData['total']['client_selling'], 2),
+                'totalPrice' => round($priceData['total']['selling'], 2),
                 'totalTax' => 0,
                 'isCk' => (bool) $this->quote->check_payment,
             ],
@@ -36,11 +36,11 @@ class ClientQuotePriceService
 
         foreach ($priceData['prices'] as $paxCode => $price) {
             $result['passengers'][$paxCode]['cnt'] = $price['tickets'];
-            $result['passengers'][$paxCode]['price'] = round($price['client_selling'] / $price['tickets'], 2);
-            $result['passengers'][$paxCode]['tax'] = round(($price['client_taxes'] + $price['client_mark_up'] + $price['client_extra_mark_up'] + $price['client_service_fee']) / $price['tickets'], 2);
-            $result['passengers'][$paxCode]['baseFare'] = round($price['client_fare'] / $price['tickets'], 2);
-            $result['passengers'][$paxCode]['mark_up'] = round($price['client_mark_up'], 2);
-            $result['passengers'][$paxCode]['extra_mark_up'] = round($price['client_extra_mark_up'], 2);
+            $result['passengers'][$paxCode]['price'] = round($price['selling'] / $price['tickets'], 2);
+            $result['passengers'][$paxCode]['tax'] = round(($price['taxes'] + $price['mark_up'] + $price['extra_mark_up'] + $price['service_fee']) / $price['tickets'], 2);
+            $result['passengers'][$paxCode]['baseFare'] = round($price['fare'] / $price['tickets'], 2);
+            $result['passengers'][$paxCode]['mark_up'] = round($price['mark_up'], 2);
+            $result['passengers'][$paxCode]['extra_mark_up'] = round($price['extra_mark_up'], 2);
 
             $result['prices']['totalTax'] += $result['passengers'][$paxCode]['tax'] * $price['tickets'];
         }
@@ -54,14 +54,14 @@ class ClientQuotePriceService
         $prices = [];
         $service_fee_percent = $this->quote->getServiceFeePercent();
         $defData = [
-            'client_fare'          => 0,
-            'client_taxes'         => 0,
-            'client_net'           => 0,
+            'fare'          => 0,
+            'taxes'         => 0,
+            'net'           => 0,
             'tickets'              => 0,
-            'client_mark_up'       => 0,
-            'client_extra_mark_up' => 0,
-            'client_service_fee'   => 0,
-            'client_selling'       => 0,
+            'mark_up'       => 0,
+            'extra_mark_up' => 0,
+            'service_fee'   => 0,
+            'selling'       => 0,
         ];
         $total = $defData;
 
@@ -71,32 +71,32 @@ class ClientQuotePriceService
                 $prices[$price->passenger_type] = $defData;
                 $paxCode = $price->passenger_type;
             }
-            $prices[$price->passenger_type]['client_fare']          += $price->qp_client_fare;
-            $prices[$price->passenger_type]['client_taxes']         += $price->qp_client_taxes;
-            $prices[$price->passenger_type]['client_net']           = $prices[$price->passenger_type]['client_fare']
-                                                                      + $prices[$price->passenger_type]['client_taxes'];
+            $prices[$price->passenger_type]['fare']          += $price->qp_client_fare;
+            $prices[$price->passenger_type]['taxes']         += $price->qp_client_taxes;
+            $prices[$price->passenger_type]['net']           = $prices[$price->passenger_type]['fare']
+                                                                      + $prices[$price->passenger_type]['taxes'];
             $prices[$price->passenger_type]['tickets']              += 1;
-            $prices[$price->passenger_type]['client_mark_up']       += $price->qp_client_markup;
-            $prices[$price->passenger_type]['client_extra_mark_up'] += $price->qp_client_extra_mark_up;
-            $prices[$price->passenger_type]['client_selling']       =  $prices[$price->passenger_type]['client_net']
-                                                                       + $prices[$price->passenger_type]['client_mark_up']
-                                                                       + $prices[$price->passenger_type]['client_extra_mark_up'];
+            $prices[$price->passenger_type]['mark_up']       += $price->qp_client_markup;
+            $prices[$price->passenger_type]['extra_mark_up'] += $price->qp_client_extra_mark_up;
+            $prices[$price->passenger_type]['selling']       =  $prices[$price->passenger_type]['net']
+                                                                       + $prices[$price->passenger_type]['mark_up']
+                                                                       + $prices[$price->passenger_type]['extra_mark_up'];
             if ($service_fee_percent > 0) {
-                $prices[$price->passenger_type]['client_service_fee'] = QuotePrice::calculateProcessingFeeAmount((float)$prices[$price->passenger_type]['client_selling'], (float)$service_fee_percent);
-                $prices[$price->passenger_type]['client_selling'] += $prices[$price->passenger_type]['client_service_fee'];
+                $prices[$price->passenger_type]['service_fee'] = QuotePrice::calculateProcessingFeeAmount((float)$prices[$price->passenger_type]['selling'], (float)$service_fee_percent);
+                $prices[$price->passenger_type]['selling'] += $prices[$price->passenger_type]['service_fee'];
             }
-            $prices[$price->passenger_type]['client_selling'] = round($prices[$price->passenger_type]['client_selling'], 2);
+            $prices[$price->passenger_type]['selling'] = round($prices[$price->passenger_type]['selling'], 2);
         }
 
         foreach ($prices as $key => $price) {
             $total['tickets'] += $price['tickets'];
-            $total['client_net'] += $price['client_net'];
-            $total['client_mark_up'] += $price['client_mark_up'];
-            $total['client_extra_mark_up'] += $price['client_extra_mark_up'];
-            $total['client_selling'] += $price['client_selling'];
+            $total['net'] += $price['net'];
+            $total['mark_up'] += $price['mark_up'];
+            $total['extra_mark_up'] += $price['extra_mark_up'];
+            $total['selling'] += $price['selling'];
 
-            $prices[$key]['client_selling'] = round($price['client_selling'], 2);
-            $prices[$key]['client_net'] = round($price['client_net'], 2);
+            $prices[$key]['selling'] = round($price['selling'], 2);
+            $prices[$key]['net'] = round($price['net'], 2);
         }
 
         return [
