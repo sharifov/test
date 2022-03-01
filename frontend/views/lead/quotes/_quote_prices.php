@@ -5,20 +5,25 @@
  * @var $quote \common\models\Quote
  */
 
+use common\models\Currency;
 use kartik\editable\Editable;
+use src\services\quote\quotePriceService\ClientQuotePriceService;
 use yii\helpers\VarDumper;
 
 ?>
-<?php $priceData = $quote->getPricesData();?>
+<?php
+$currency = empty($quote->q_client_currency) ? Currency::DEFAULT_CURRENCY : $quote->q_client_currency;
+$priceData = $quote->getPricesData();
+?>
 <table class="table table-striped table-prices" id="quote-prices-<?= $quote->id?>">
     <thead>
         <tr>
             <th>Pax</th>
             <th>Q</th>
-            <th>NP, $</th>
-            <th>Mkp, $</th>
-            <th>Ex Mkp, $</th>
-            <th>SP, $</th>
+            <th>NP, <?php echo $currency ?></th>
+            <th>Mkp, <?php echo $currency ?></th>
+            <th>Ex Mkp, <?php echo $currency ?></th>
+            <th>SP, <?php echo $currency ?></th>
         </tr>
     </thead>
     <tbody>
