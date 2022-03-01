@@ -136,7 +136,7 @@ class LeadPreferences extends \yii\db\ActiveRecord
     public function setDefaultCurrencyCodeIfNotSet(): void
     {
         if (empty($this->pref_currency)) {
-            $this->pref_currency = Currency::getDefaultCurrencyCode();
+            $this->pref_currency = Currency::getDefaultCurrencyCodeForManualLeadCreate();
         }
     }
 }

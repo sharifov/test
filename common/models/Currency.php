@@ -303,6 +303,14 @@ class Currency extends ActiveRecord
     }
 
     /**
+     * @return string
+     */
+    public static function getDefaultCurrencyCodeForManualLeadCreate(): string
+    {
+        return self::DEFAULT_CURRENCY;
+    }
+
+    /**
      * @return float
      */
     public static function getDefaultClientCurrencyRate(): float
