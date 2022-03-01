@@ -6,6 +6,7 @@ use common\models\Currency;
 use common\models\Quote;
 use common\models\QuotePrice;
 use src\services\CurrencyHelper;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class ClientQuotePriceService
@@ -106,5 +107,28 @@ class ClientQuotePriceService
             'service_fee'         => ($service_fee_percent > 0) ? $total['selling'] * $service_fee_percent / 100 : 0,
             'processing_fee'      => $this->quote->getProcessingFee(),
         ];
+    }
+
+    public function geClientPricePerPax()
+    {
+        $priceData = (new ClientQuotePriceService($this->quote))->getClientPricesData();
+        $unknownType = null;
+        if (isset($priceData['prices'])) {
+            foreach ($priceData['prices'] as $paxCode => $priceEntry) {
+                if ($paxCode == QuotePrice::PASSENGER_ADULT) {
+                    return round($priceEntry['selling'] / $priceEntry['tickets'], 2);
+                }
+                if (!ArrayHelper::keyExists($paxCode, QuotePrice::PASSENGER_TYPE_LIST)) {
+                    $unknownType = $paxCode;
+                }
+            }
+        }
+        if (!empty($priceData['prices']) && $unknownType) {
+            $selling = ArrayHelper::getValue($priceData, 'prices.' . $unknownType . '.selling', 0);
+            $tickets = ArrayHelper::getValue($priceData, 'prices.' . $unknownType . '.tickets', 1);
+            return round($selling / $tickets, 2);
+        }
+
+        return 0;
     }
 }
