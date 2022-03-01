@@ -969,7 +969,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     'label' => Yii::t('language', 'Events'), 'url' => 'javascript:', 'icon' => 'folder',
                     'items' => [
                         ['label' => Yii::t('menu', 'Event List'), 'url' => ['/event-list/index'],
-                            'icon' => 'flag', 'title' => 'Event List CRUD'],
+                            'title' => 'Event List CRUD'],
                         ['label' => Yii::t('menu', 'Event Handler'), 'url' => ['/event-handler/index'],
                             'title' => 'Event Handler CRUD'],
                     ]
