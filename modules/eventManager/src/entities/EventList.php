@@ -2,6 +2,7 @@
 
 namespace modules\eventManager\src\entities;
 
+use common\components\validators\CronExpressionValidator;
 use common\models\Employee;
 use Yii;
 use yii\behaviors\BlameableBehavior;
@@ -32,6 +33,33 @@ use yii\db\BaseActiveRecord;
  */
 class EventList extends ActiveRecord
 {
+    public const ET_DISABLED                = 0;
+    public const ET_ENABLED                 = 1;
+    public const ET_DISABLED_CONDITION      = 2;
+    public const ET_ENABLED_CONDITION       = 3;
+
+    public const ET_LIST    = [
+        self::ET_DISABLED               => 'Disabled',
+        self::ET_ENABLED                => 'Enabled',
+        self::ET_DISABLED_CONDITION     => 'Disabled condition',
+        self::ET_ENABLED_CONDITION      => 'Enabled condition',
+    ];
+
+    public const ET_DESC_LIST    = [
+        self::ET_DISABLED               => 'Always off (disabled)',
+        self::ET_ENABLED                => 'Always on (enabled)',
+        self::ET_DISABLED_CONDITION     => 'Turned on. Disabled only when the time matches the cron expression',
+        self::ET_ENABLED_CONDITION      => 'Turned off. Enabled only when the time matches the cron expression',
+    ];
+
+
+    public const ET_CLASS_LIST    = [
+        self::ET_DISABLED               => 'danger',
+        self::ET_ENABLED                => 'success',
+        self::ET_DISABLED_CONDITION     => 'default',
+        self::ET_ENABLED_CONDITION      => 'warning',
+    ];
+
     /**
      * @return string
      */
@@ -48,6 +76,9 @@ class EventList extends ActiveRecord
         return [
             [['el_key'], 'required'],
             [['el_enable_type', 'el_enable_log', 'el_break', 'el_sort_order', 'el_updated_user_id'], 'integer'],
+
+            ['el_enable_type', 'in', 'range' => array_keys(self::getEnableTypeList())],
+
             [['el_condition'], 'string'],
             [['el_builder_json', 'el_updated_dt'], 'safe'],
             [['el_key'], 'string', 'max' => 500],
@@ -55,6 +86,8 @@ class EventList extends ActiveRecord
             [['el_description'], 'string', 'max' => 1000],
             [['el_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class,
                 'targetAttribute' => ['el_updated_user_id' => 'id']],
+
+            ['el_cron_expression', CronExpressionValidator::class, 'skipOnEmpty' => true, 'skipOnError' => true],
         ];
     }
 
@@ -129,5 +162,13 @@ class EventList extends ActiveRecord
     public static function find(): EventListScopes
     {
         return new EventListScopes(get_called_class());
+    }
+
+    /**
+     * @return string[]
+     */
+    public static function getEnableTypeList(): array
+    {
+        return self::ET_LIST;
     }
 }

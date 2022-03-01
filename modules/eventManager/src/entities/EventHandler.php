@@ -2,6 +2,7 @@
 
 namespace modules\eventManager\src\entities;
 
+use common\components\validators\CronExpressionValidator;
 use common\models\Employee;
 use Yii;
 use yii\behaviors\BlameableBehavior;
@@ -50,6 +51,9 @@ class EventHandler extends ActiveRecord
             [['eh_el_id', 'eh_enable_type', 'eh_enable_log', 'eh_asynch', 'eh_break', 'eh_sort_order',
                 'eh_updated_user_id'], 'integer'],
             [['eh_class', 'eh_method', 'eh_el_id'], 'required'],
+
+            ['el_enable_type', 'in', 'range' => array_keys(EventList::getEnableTypeList())],
+
             [['eh_condition'], 'string'],
             [['eh_builder_json', 'eh_updated_dt'], 'safe'],
             [['eh_class'], 'string', 'max' => 500],
@@ -58,6 +62,8 @@ class EventHandler extends ActiveRecord
                 'targetAttribute' => ['eh_el_id' => 'el_id']],
             [['eh_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class,
                 'targetAttribute' => ['eh_updated_user_id' => 'id']],
+
+            ['eh_cron_expression', CronExpressionValidator::class, 'skipOnEmpty' => true, 'skipOnError' => true],
         ];
     }
 

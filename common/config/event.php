@@ -6,6 +6,9 @@ return [
     'class' => \modules\eventManager\components\EventManagerComponent::class,
     'cacheEnable' => true,
     'objectList' => [
-        LeadEvents::getName()  => LeadEvents::class,
+        LeadEvents::class => LeadEvents::getName(),
+    ],
+    'categoryList' => [
+        'lead'  => 'Lead',
     ],
 ];
