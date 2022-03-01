@@ -2,7 +2,10 @@
 
 namespace common\models;
 
+use common\models\local\LeadLogMessage;
 use src\entities\EventTrait;
+use src\events\lead\LeadPreferencesUpdateCurrencyEvent;
+use Yii;
 use yii\db\ActiveQuery;
 
 /**
