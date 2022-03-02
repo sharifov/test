@@ -88,4 +88,37 @@ class ServiceController extends Controller
 
         printf("\n --- End (" . date('H:i:s') . ") %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
     }
+
+    /**
+     *  Run composer .lock-file info (extension list)
+     */
+    public function actionComposerExtInfo(): void
+    {
+        printf("\n --- Start (" . date('H:i:s') . ") %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+
+        try {
+            $result = Currency::synchronization();
+
+            if ($result) {
+                if ($result['error']) {
+                    Yii::error($result['error'], 'Console:ServiceController:actionUpdateCurrency:Throwable');
+                    echo $this->ansiFormat('Error: ' . $result['error'], Console::FG_RED) . PHP_EOL;
+                } else {
+                    echo $this->ansiFormat('- Synchronization successful', Console::FG_BLUE) . PHP_EOL;
+                    if ($result['created']) {
+                        echo $this->ansiFormat('- Created currency: "' . implode(', ', $result['created']) . '"', Console::FG_YELLOW) . PHP_EOL;
+                    }
+                    if ($result['updated']) {
+                        echo $this->ansiFormat('- Updated currency: "' . implode(', ', $result['updated']) . '"', Console::FG_GREEN) . PHP_EOL;
+                    }
+                }
+            }
+        } catch (\Throwable $throwable) {
+            $message = AppHelper::throwableFormatter($throwable);
+            Yii::error($message, 'Console:ServiceController:actionUpdateCurrency:Throwable');
+            echo $this->ansiFormat('Error: ' . $message, Console::FG_RED) . PHP_EOL;
+        }
+
+        printf("\n --- End (" . date('H:i:s') . ") %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+    }
 }
