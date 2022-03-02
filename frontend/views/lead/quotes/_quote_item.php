@@ -356,6 +356,13 @@ $css = <<<CSS
     } 
     .tooltip_quote_info_box p {
         margin-bottom: 0;
-    }     
+    }
+    .quote__additional-info {
+        max-width: 86px;
+    }
+    .quote_exclamation_currency {
+        text-align: left;
+        margin-top: 3px;
+    }
 CSS;
 $this->registerCss($css);

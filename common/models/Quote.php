@@ -69,6 +69,7 @@ use yii\helpers\VarDumper;
  * @property Airline[] $mainAirline
  * @property Project $providerProject
  * @property QuoteLabel[] $quoteLabel
+ * @property Currency|null $clientCurrency
  */
 class Quote extends \yii\db\ActiveRecord
 {
@@ -771,7 +772,10 @@ class Quote extends \yii\db\ActiveRecord
         return $this->hasOne(Lead::class, ['id' => 'lead_id']);
     }
 
-
+    public function getClientCurrency(): ActiveQuery
+    {
+        return $this->hasOne(Currency::class, ['cur_code' => 'q_client_currency']);
+    }
 
 //    public function beforeValidate()
 //    {
