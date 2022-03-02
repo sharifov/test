@@ -399,7 +399,7 @@ SELECT AES_DECRYPT(FROM_BASE64('PRZKw4PIlNtSPRFuNWYmbA=='), 'PASSWORD', 'IV-STRI
 ```
 
 ## Application Information
-- [Summary Information](/guides/content/application-info)
-  - [General Information](/guides/content/application-general-info)
-  - [Third-party dependencies](/guides/content/application-dependencies) (libraries / projects / services)
+- [Summary Information](/guides/content/application-info.md)
+- - [General Information](/guides/content/application-general-info.md)
+- - [Third-party dependencies](/guides/content/application-dependencies.md) (libraries / projects / services)
 ## License
