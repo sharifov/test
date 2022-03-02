@@ -5,6 +5,8 @@ use kartik\grid\GridView;
 use yii\data\ArrayDataProvider;
 use yii\grid\SerialColumn;
 use yii\helpers\Html;
+use yii\helpers\StringHelper;
+use yii\helpers\Url;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
@@ -35,12 +37,16 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             ['class' => SerialColumn::class],
             [
-                'attribute' => 'name',
-                //'options' => ['style' => 'width: 70px']
-            ],
-            [
                 'attribute' => 'type',
             ],
+            [
+                'attribute' => 'name',
+                'value' => static function ($data) {
+                    return '<b>' . Html::encode($data['name']) . '</b>';
+                },
+                'format' => 'raw',
+            ],
+
             [
                 'attribute' => 'version',
             ],
@@ -49,13 +55,35 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'source',
+                'value' => static function ($data) {
+                    return Html::a(Html::encode($data['source']), $data['source'], ['target' => '_blank', 'pjax' => 0]);
+                },
+                'format' => 'raw',
+                //'format' => 'url'
             ],
-             [
-                'attribute' => 'autors',
+            [
+                'attribute' => 'authors',
+                'value' => static function ($data) {
+                    return Html::tag(
+                        'span',
+                        Html::encode(StringHelper::truncate($data['authors'], 50)),
+                        ['title' => Html::encode($data['authors'])]
+                    );
+                },
+                'format' => 'raw',
             ],
-             [
+            [
                 'attribute' => 'comments',
+                'value' => static function ($data) {
+                    return Html::tag(
+                        'span',
+                        Html::encode(StringHelper::truncate($data['comments'], 70)),
+                        ['title' => Html::encode($data['comments'])]
+                    );
+                },
+                'format' => 'raw',
             ]
+
         ],
     ]); ?>
     <?php Pjax::end(); ?>

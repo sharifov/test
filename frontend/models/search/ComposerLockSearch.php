@@ -12,7 +12,7 @@ use yii\data\ArrayDataProvider;
  * @property string $version
  * @property string $license
  * @property string $source
- * @property string $autors
+ * @property string $authors
  * @property string $comments
  */
 class ComposerLockSearch extends Model
@@ -22,7 +22,7 @@ class ComposerLockSearch extends Model
     public $version;
     public $license;
     public $source;
-    public $autors;
+    public $authors;
     public $comments;
 
     public function rules(): array
@@ -33,7 +33,7 @@ class ComposerLockSearch extends Model
             ['version', 'string'],
             ['license', 'string'],
             ['source', 'string'],
-            ['autors', 'string'],
+            ['authors', 'string'],
             ['comments', 'string'],
         ];
     }
@@ -68,8 +68,8 @@ class ComposerLockSearch extends Model
                 if (!empty($this->source)) {
                     $conditions[] = strpos($value['source'], $this->source) !== false;
                 }
-                if (!empty($this->autors)) {
-                    $conditions[] = strpos($value['autors'], $this->autors) !== false;
+                if (!empty($this->authors)) {
+                    $conditions[] = strpos($value['authors'], $this->authors) !== false;
                 }
                 if (!empty($this->comments)) {
                     $conditions[] = strpos($value['comments'], $this->comments) !== false;
@@ -81,11 +81,11 @@ class ComposerLockSearch extends Model
         $dataProvider = new ArrayDataProvider([
             'allModels' => $data,
             'pagination' => [
-                'pageSize' => 300,
+                'pageSize' => 200,
             ],
             'sort' => [
                 'defaultOrder' => ['name' => SORT_ASC],
-                'attributes' => ['name', 'type', 'version', 'license', 'source', 'autors', 'comments'],
+                'attributes' => ['name', 'type', 'version', 'license', 'source', 'authors', 'comments'],
             ],
         ]);
 
