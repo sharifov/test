@@ -313,7 +313,7 @@ class LeadCreateForm extends Model
     public function setDefaultCurrencyCodeIfNotExists(): void
     {
         if (empty($this->currency_code) || !CurrencyQuery::existsByCurrencyCode((string)$this->currency_code)) {
-            $this->currency_code = Currency::getDefaultCurrencyCode();
+            $this->currency_code = Currency::getDefaultCurrencyCodeByDb();
         }
     }
 }

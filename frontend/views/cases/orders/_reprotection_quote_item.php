@@ -322,8 +322,8 @@ $productQuoteAbacDto->mapOrderAttributes($order);
                                               <th>Status</th>
                                               <th style="width: 45px;" title="Product Quote Options">Opt</th>
                                               <th style="width: 130px">Created</th>
-                                              <th>Extra Markup, <?php echo Currency::getDefaultCurrencyCode() ?></th>
-                                              <th style="white-space: nowrap;">Price, <?php echo Currency::getDefaultCurrencyCode() ?></th>
+                                              <th>Extra Markup, <?php echo Currency::getDefaultCurrencyCodeByDb() ?></th>
+                                              <th style="white-space: nowrap;">Price, <?php echo Currency::getDefaultCurrencyCodeByDb() ?></th>
                                               <th style="width: 60px;">Action</th>
                                         </tr>
                                       </thead>

@@ -297,9 +297,17 @@ class Currency extends ActiveRecord
     /**
      * @return string
      */
-    public static function getDefaultCurrencyCode(): string
+    public static function getDefaultCurrencyCodeByDb(): string
     {
         return self::getDefaultCurrency()->cur_code ?? self::DEFAULT_CURRENCY;
+    }
+
+    /**
+     * @return string
+     */
+    public static function getDefaultCurrencyCode(): string
+    {
+        return self::DEFAULT_CURRENCY;
     }
 
     /**

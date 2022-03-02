@@ -215,7 +215,7 @@ class LeadManageService
 
         $leadId = $this->leadRepository->save($lead);
 
-        $this->createLeadPreferences($leadId, $form->preferences);
+        $this->createLeadPreferences($leadId, $form->preferences, false);
 
         if ($logId = (new CreateVisitorLog())->create($client, $lead)) {
             $lead->setVisitorLog($logId);
@@ -229,7 +229,7 @@ class LeadManageService
      * @param int $leadId
      * @param PreferencesCreateForm $preferencesForm
      */
-    private function createLeadPreferences(int $leadId, PreferencesCreateForm $preferencesForm): void
+    private function createLeadPreferences(int $leadId, PreferencesCreateForm $preferencesForm, bool $defaultCurrencyByDb = true): void
     {
         $preferences = LeadPreferences::create(
             $leadId,
@@ -238,7 +238,7 @@ class LeadManageService
             null,
             null
         );
-        $preferences->setDefaultCurrencyCodeIfNotSet();
+        $preferences->setDefaultCurrencyCodeIfNotSet($defaultCurrencyByDb);
         $this->leadPreferencesRepository->save($preferences);
     }
 

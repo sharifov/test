@@ -23,7 +23,7 @@ class PreferencesCreateForm extends Model
     public function __construct($config = [])
     {
         parent::__construct($config);
-        $this->currency = Currency::getDefaultCurrencyCode();
+        $this->currency = Currency::getDefaultCurrencyCodeByDb();
     }
 
     /**

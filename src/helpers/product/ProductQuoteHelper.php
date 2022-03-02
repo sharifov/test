@@ -57,9 +57,9 @@ class ProductQuoteHelper
     {
         $leadPreferences = $product->prLead->leadPreferences ?? null;
         if ($leadPreferences && $currency = $leadPreferences->prefCurrency) {
-            return $currency->cur_code ?? Currency::getDefaultCurrencyCode();
+            return $currency->cur_code ?? Currency::getDefaultCurrencyCodeByDb();
         }
-        return Currency::getDefaultCurrencyCode();
+        return Currency::getDefaultCurrencyCodeByDb();
     }
 
     /**
