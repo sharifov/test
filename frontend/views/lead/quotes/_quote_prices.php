@@ -7,13 +7,26 @@
 
 use common\models\Currency;
 use kartik\editable\Editable;
+use src\helpers\app\AppHelper;
 use src\services\quote\quotePriceService\ClientQuotePriceService;
-use yii\helpers\VarDumper;
+use yii\helpers\ArrayHelper;
 
 ?>
 <?php
-$currency = empty($quote->q_client_currency) ? Currency::DEFAULT_CURRENCY : $quote->q_client_currency;
-$priceData = $quote->getPricesData();
+$currency = empty($quote->q_client_currency) ? Currency::getDefaultCurrencyCode() : $quote->q_client_currency;
+
+if ($quote->isClientCurrencyDefault()) {
+    $priceData = $quote->getPricesData();
+} else {
+    try {
+        $priceData = (new ClientQuotePriceService($quote))->getClientPricesData();
+    } catch (\Throwable $throwable) {
+        $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['quoteId' => $quote->id]);
+        \Yii::error($message, 'QuotePrices:PriceData:Throwable');
+        $priceData = $quote->getPricesData();
+        $currency = Currency::getDefaultCurrencyCode();
+    }
+}
 ?>
 <table class="table table-striped table-prices" id="quote-prices-<?= $quote->id?>">
     <thead>

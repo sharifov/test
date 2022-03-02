@@ -1962,7 +1962,7 @@ class Quote extends \yii\db\ActiveRecord
     private function getClientCurrencySymbol(): ?string
     {
         $currency = Currency::find()
-                            ->where(['cur_code' => $this->getClientCurrencyCode()])
+                            ->byCode($this->getClientCurrencyCode())
                             ->one();
         return $currency->cur_symbol ?? null;
     }
@@ -2846,5 +2846,10 @@ class Quote extends \yii\db\ActiveRecord
     {
         $this->service_fee_percent = $serviceFeePercent;
         return $this;
+    }
+
+    public function isClientCurrencyDefault(): bool
+    {
+        return $this->q_client_currency === Currency::getDefaultCurrencyCode();
     }
 }
