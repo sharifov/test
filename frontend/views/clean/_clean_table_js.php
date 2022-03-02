@@ -27,6 +27,7 @@ $cleanBtnId = $cleanBtnId ?? 'js_btn_clean_records';
     <p>If there are several parameters from the priority group, only one will be used - strict_date, datetime, date (arranged by priority).</p>
     <p>If there is at least one parameter from the priority group, the parameters from the additional group are ignored.</p>
     <p>The parameters from the additional group are added - for example: month = 2 day = 15 records older than two and a half months will be deleted.</p>
+    <p>In the form of date and time system (UTC). May differ from UI time (displayed with time zone offset).</p>
     <p><i class="fa fa-exclamation-triangle"></i> Warning - records are deleted from database.</p>
 </div>
 

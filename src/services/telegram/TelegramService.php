@@ -107,6 +107,11 @@ class TelegramService
 
     public static function prepareText(string $text): string
     {
-        return self::cleanText($text) . PHP_EOL . ' Environment: ' . strtoupper(YII_ENV);
+        $env = strtoupper(YII_ENV);
+        $message = self::cleanText($text) . PHP_EOL;
+        if ($env !== 'PROD') {
+            $message .= ' Environment: ' . $env;
+        }
+        return $message;
     }
 }

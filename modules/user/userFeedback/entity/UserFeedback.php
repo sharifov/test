@@ -9,6 +9,7 @@ use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\db\Connection;
 use yii\helpers\Html;
+use common\models\Employee;
 
 /**
  * This is the model class for table "user_feedback".
@@ -22,7 +23,9 @@ use yii\helpers\Html;
  * @property string $uf_created_dt
  * @property string|null $uf_updated_dt
  * @property int|null $uf_created_user_id
- * @property int|null $uf_updated_user_id
+ * @property int|null $uf_updated_user_id *
+ *
+ * @property Employee $ufCreatedUser
  */
 class UserFeedback extends ActiveRecord
 {
@@ -180,6 +183,11 @@ class UserFeedback extends ActiveRecord
         $self->setTypeBug();
         $self->setStatusNew();
         return $self;
+    }
+
+    public function getUfCreatedUser()
+    {
+        return $this->hasOne(Employee::class, ['id' => 'uf_created_user_id']);
     }
 
     public function setTypeBug(): void

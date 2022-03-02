@@ -59,8 +59,8 @@ class SmsOutEndedJob extends BaseJob implements JobInterface
         $this->waitingTimeRegister();
 
         if ($sms = Sms::find()->where(['s_id' => $this->smsId])->limit(1)->one()) {
+            $tplType = $sms->sTemplateType->stp_key ?? null;
             try {
-                $tplType = $sms->sTemplateType->stp_key ?? null;
                 if ($sms->s_lead_id && LeadPoorProcessingService::checkSmsTemplate($tplType)) {
                     LeadPoorProcessingService::addLeadPoorProcessingRemoverJob(
                         $sms->s_lead_id,
@@ -77,14 +77,16 @@ class SmsOutEndedJob extends BaseJob implements JobInterface
             }
 
             try {
-                if (($lead = $sms->sLead) && $lead->employee_id && $lead->isProcessing()) {
-                    $leadUserData = LeadUserData::create(
-                        LeadUserDataDictionary::TYPE_SMS_OUT,
-                        $lead->id,
-                        $lead->employee_id,
-                        (new \DateTimeImmutable())
-                    );
-                    (new LeadUserDataRepository($leadUserData))->save(true);
+                if ($sms->s_lead_id && LeadPoorProcessingService::checkSmsTemplate($tplType)) {
+                    if (($lead = $sms->sLead) && $lead->employee_id && $lead->isProcessing()) {
+                        $leadUserData = LeadUserData::create(
+                            LeadUserDataDictionary::TYPE_SMS_OUT,
+                            $lead->id,
+                            $lead->employee_id,
+                            (new \DateTimeImmutable())
+                        );
+                        (new LeadUserDataRepository($leadUserData))->save(true);
+                    }
                 }
             } catch (\RuntimeException | \DomainException $throwable) {
                 $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['callId' => $this->callId]);

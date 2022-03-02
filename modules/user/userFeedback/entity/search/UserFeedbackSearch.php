@@ -111,10 +111,16 @@ class UserFeedbackSearch extends UserFeedback
             'uf_id' => $this->uf_id,
             'uf_type_id' => $this->uf_type_id,
             'uf_status_id' => $this->uf_status_id,
-            'uf_created_dt' => $this->uf_created_dt,
             'uf_updated_dt' => $this->uf_updated_dt,
             'uf_created_user_id' => $this->uf_created_user_id,
             'uf_updated_user_id' => $this->uf_updated_user_id,
+        ]);
+
+        $query->andFilterWhere([
+            'between',
+            'uf_created_dt',
+            Employee::convertTimeFromUserDtToUTC(strtotime($this->uf_created_dt . ' 00:00:00')),
+            Employee::convertTimeFromUserDtToUTC(strtotime($this->uf_created_dt . ' 23:59:59'))
         ]);
 
         $query->andFilterWhere(['ilike', 'uf_title', $this->uf_title])

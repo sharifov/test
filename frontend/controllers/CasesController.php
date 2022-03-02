@@ -428,7 +428,7 @@ class CasesController extends FController
         $previewSmsForm = new CasePreviewSmsForm($smsFromNumberList);
         $previewSmsForm->is_send = false;
 
-        if ($smsFromNumberList->canSendSms() && $previewSmsForm->load(Yii::$app->request->post())) {
+        if ($model->hasClient() && $smsFromNumberList->canSendSms() && $previewSmsForm->load(Yii::$app->request->post())) {
             $previewSmsForm->s_case_id = $model->cs_id;
             if ($previewSmsForm->validate()) {
                 $sms = new Sms();

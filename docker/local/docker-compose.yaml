@@ -15,6 +15,7 @@ services:
       context: ./mysql
       args:
         MYSQL_VERSION: ${MYSQL_VERSION}
+        MYSQL_IMAGE: ${MYSQL_IMAGE}
     volumes:
       - ${MYSQL_HOST_PATH_DB}:/var/lib/mysql
       - ${MYSQL_HOST_PATH_DUMP}:/docker-entrypoint-initdb.d
@@ -138,6 +139,7 @@ services:
       - SSL_CRT_PATH=${SSL_CRT_PATH}
       - SSL_KEY_PATH=${SSL_KEY_PATH}
       - WEB_SOCKET_SERVER_PORT=${WEB_SOCKET_SERVER_PORT}
+      - VOIP_RECORDS_PROXY_URL=${VOIP_RECORDS_PROXY_URL}
 
   ws:
     build:

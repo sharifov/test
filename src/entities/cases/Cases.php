@@ -916,4 +916,9 @@ class Cases extends ActiveRecord implements Objectable
     {
         CaseEventLog::add($this->cs_id, $type, $description, $data, $categoryId);
     }
+
+    public function hasClient(): bool
+    {
+        return $this->cs_client_id ? true : false;
+    }
 }

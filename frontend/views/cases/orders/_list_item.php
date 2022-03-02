@@ -212,7 +212,8 @@ $orderAbacDto = new OrderAbacDto($order);
                     <th>Client Price</th>
                     <th></th>
                 </tr>
-                <?php foreach ($order->nonReprotectionProductQuotes as $productQuote) :
+                <?php
+                foreach ($order->nonReprotectionProductQuotes as $productQuote) :
 //                    $ordTotalPrice += $productQuote->pq_price;
 //                    $ordTotalFee += $productQuote->pq_service_fee_sum;
 //                    $ordClientTotalPrice += $productQuote->pq_client_price;

@@ -5,6 +5,7 @@ namespace src\model\phoneList\entity;
 use common\models\DepartmentPhoneProject;
 use common\models\Employee;
 use common\components\validators\PhoneValidator;
+use common\models\UserProjectParams;
 use yii\behaviors\AttributeBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -25,6 +26,8 @@ use yii\db\ActiveRecord;
  * @property Employee $createdUser
  * @property Employee $updatedUser
  * @property DepartmentPhoneProject $departmentPhoneProject
+ * @property UserProjectParams $userProjectParams
+ * @property Employee $userProjectParamsUser
  */
 class PhoneList extends \yii\db\ActiveRecord
 {
@@ -97,6 +100,16 @@ class PhoneList extends \yii\db\ActiveRecord
     public function getDepartmentPhoneProject(): ActiveQuery
     {
         return $this->hasOne(DepartmentPhoneProject::class, ['dpp_phone_list_id' => 'pl_id']);
+    }
+
+    public function getUserProjectParams(): ActiveQuery
+    {
+        return $this->hasOne(UserProjectParams::class, ['upp_phone_list_id' => 'pl_id']);
+    }
+
+    public function getUserProjectParamsUser(): ActiveQuery
+    {
+        return $this->hasOne(Employee::class, ['id' => 'upp_phone_list_id'])->via('userProjectParams');
     }
 
     public static function find(): Scopes

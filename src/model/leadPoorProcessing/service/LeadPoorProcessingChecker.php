@@ -47,34 +47,20 @@ class LeadPoorProcessingChecker
         /** @abac LeadPoorProcessingAbacDto, LeadPoorProcessingAbacObject::OBJ_PERMISSION_RULE, LeadPoorProcessingAbacObject::DYNAMICAL_RULE, access to LPP logic */
         $leadAbacDto = new LeadPoorProcessingAbacDto($this->lead, (int) $this->lead->employee_id);
         if (!Yii::$app->abac->can($leadAbacDto, LeadPoorProcessingAbacObject::OBJ_PERMISSION_RULE, $this->dataKey, $employee)) {
-            LeadDataCreateService::createOrUpdateLppExclude($this->lead->id, (new \DateTimeImmutable()));
+            LeadDataCreateService::getOrCreateLppExclude($this->lead->id, $this->dataKey, $employee->username);
 
             throw new \RuntimeException('Abac access is failed. (' .
-                LeadPoorProcessingAbacObject::OBJ_PERMISSION_RULE . '/' . $this->dataKey . ')');
+                LeadPoorProcessingAbacObject::OBJ_PERMISSION_RULE . '/' . $this->dataKey . '/' . $employee->username . ')');
         }
     }
 
     public function isChecked(): bool
     {
-        /** @fflag FFlag::FF_LPP_ENABLE, Lead Poor Processing Enable/Disable */
-        if (!Yii::$app->ff->can(FFlag::FF_KEY_LPP_ENABLE)) {
+        try {
+            $this->check();
+            return true;
+        } catch (\Throwable $throwable) {
             return false;
         }
-
-        if (!$this->rule->isEnabled()) {
-            return false;
-        }
-
-        if (!$employee = Employee::find()->where(['id' => $this->lead->employee_id])->limit(1)->one()) {
-            return false;
-        }
-
-        /** @abac LeadPoorProcessingAbacDto, LeadPoorProcessingAbacObject::OBJ_PERMISSION_RULE, LeadPoorProcessingAbacObject::DYNAMICAL_RULE, access to LPP logic */
-        $leadAbacDto = new LeadPoorProcessingAbacDto($this->lead, (int) $this->lead->employee_id);
-        if (!Yii::$app->abac->can($leadAbacDto, LeadPoorProcessingAbacObject::OBJ_PERMISSION_RULE, $this->dataKey, $employee)) {
-            LeadDataCreateService::createOrUpdateLppExclude($this->lead->id, (new \DateTimeImmutable()));
-            return false;
-        }
-        return true;
     }
 }

@@ -220,26 +220,16 @@ function updateLastMessageTime() {
 }
 
 window.addScrollEventListenerToChatListWrapper = function () {
-    $('#cc-dialogs-wrapper').scroll(function (e) {
-        var elem = $(e.currentTarget);
-        if (elem.scrollTop() + Math.ceil(elem.innerHeight()) >= elem[0].scrollHeight && !chatListingAjaxRequestEnabled && !window.allDialogsLoaded) {
-            chatListingAjaxRequestEnabled = true;
-            let page = $(this).attr('data-page');
-            let loadChannelsTxt = $('#load-channels-txt');
-            
-            let loadChannelsCurrentText = loadChannelsTxt.html();
-            
-            let params = new URLSearchParams(window.location.search);
-        
-            let urlParams = window.getClientChatLoadMoreUrl('{$filter->getId()}', '{$filter->formName()}');
-            let url = '{$loadChannelsUrl}?' + urlParams + '&loadingChannels=1' + '&page=' + page;
-            $.ajax({
+    function ajaxSenderToLoadChannels(url,loadChannelsTxt,loadChannelsBtn,loadChannelsCurrentText,urlParams){
+         $.ajax({
                 type: 'get',
                 url: url,
                 dataType: 'json',
                 cache: false,
                 // data: {loadingChannels: 1, channelId: params.get('channelId') | selectedChannel},
                 beforeSend: function () {
+                    loadChannelsBtn.html('');
+                    loadChannelsBtn.hide();
                     loadChannelsTxt.html('<i class="fa fa-spin fa-spinner"></i> Loading...');
                 },
                 success: function (data) {
@@ -251,8 +241,9 @@ window.addScrollEventListenerToChatListWrapper = function () {
                         loadChannelsTxt.html('All conversations are loaded');
                         window.allDialogsLoaded = true;
                     } else {
-                        let txt = '<i class="fa fa-angle-double-down"> </i> Scroll to load more (<span>' + data.moreCount + '</span>)';
-                        loadChannelsTxt.html(txt);
+                        loadChannelsTxt.html('');
+                        loadChannelsBtn.html('<i class="fa fa-angle-double-down"> </i> Click or scroll to load more (<span>' + data.moreCount + '</span>)');
+                        loadChannelsBtn.show();
                         $('#cc-dialogs-wrapper').attr('data-page', data.page);
                         window.allDialogsLoaded = false;
                     }
@@ -265,6 +256,32 @@ window.addScrollEventListenerToChatListWrapper = function () {
                     chatListingAjaxRequestEnabled = false;
                 }
             });
+    }
+    $('#cc-dialogs-wrapper').scroll(function (e) {
+        var elem = $(e.currentTarget);
+        if (elem.scrollTop() + Math.ceil(elem.innerHeight()) >= elem[0].scrollHeight && !chatListingAjaxRequestEnabled && !window.allDialogsLoaded) {
+            chatListingAjaxRequestEnabled = true;
+            let page = $('#cc-dialogs-wrapper').attr('data-page');
+            let loadChannelsTxt = $('#load-channels-txt');
+            let loadChannelsBtn = $('#load-channels-btn');
+            let loadChannelsCurrentText = loadChannelsTxt.html();            
+            let params = new URLSearchParams(window.location.search);        
+            let urlParams = window.getClientChatLoadMoreUrl('{$filter->getId()}', '{$filter->formName()}');
+            let url = '{$loadChannelsUrl}?' + urlParams + '&loadingChannels=1' + '&page=' + page;
+            ajaxSenderToLoadChannels(url,loadChannelsTxt,loadChannelsBtn,loadChannelsCurrentText,urlParams);
+        }
+    });
+    $('#load-channels-btn').click(function (e) {
+        if (!chatListingAjaxRequestEnabled && !window.allDialogsLoaded) {
+            chatListingAjaxRequestEnabled = true;
+            let page = $('#cc-dialogs-wrapper').attr('data-page');
+            let loadChannelsTxt = $('#load-channels-txt');
+            let loadChannelsBtn = $('#load-channels-btn');
+            let loadChannelsCurrentText = loadChannelsTxt.html();            
+            let params = new URLSearchParams(window.location.search);        
+            let urlParams = window.getClientChatLoadMoreUrl('{$filter->getId()}', '{$filter->formName()}');
+            let url = '{$loadChannelsUrl}?' + urlParams + '&loadingChannels=1' + '&page=' + page;
+            ajaxSenderToLoadChannels(url,loadChannelsTxt,loadChannelsBtn,loadChannelsCurrentText,urlParams);
         }
     });
 };

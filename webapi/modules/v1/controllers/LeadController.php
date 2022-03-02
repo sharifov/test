@@ -1521,15 +1521,33 @@ class LeadController extends ApiBaseController
 
                     if (
                         !empty($leadAttributes['additional_information']) &&
-                        !empty($leadAttributes['additional_information']['pnr'])
+                        !empty($leadAttributes['additional_information'][0]['pnr'])
                     ) {
                         $aplliend = $lead->getAppliedAlternativeQuotes();
                         if ($aplliend !== null) {
-                            $aplliend->record_locator = $leadAttributes['additional_information']['pnr'];
+                            $aplliend->record_locator = $leadAttributes['additional_information'][0]['pnr'];
                             $aplliend->save(false);
                             if ($aplliend->hasErrors()) {
                                 $response['errors'] = $aplliend->getErrors();
                             }
+                        }
+
+                        $notifMessage = '';
+                        foreach ($leadAttributes['additional_information'] as $additionalInformation) {
+                            if (isset($additionalInformation['tkt_processed']) && (bool)$additionalInformation['tkt_processed'] === false) {
+                                $linkToLead = Purifier::createLeadShortLink($lead);
+                                $notifMessage .= 'Flight ticket (PNR: ' . $additionalInformation['pnr'] . ') has been voided. Lead UID - ' . $linkToLead . PHP_EOL;
+                            }
+                        }
+
+                        if ($notifMessage) {
+                            Notifications::createAndPublish(
+                                $lead->employee_id,
+                                'Flight ticket has been voided',
+                                $notifMessage,
+                                Notifications::TYPE_INFO,
+                                true
+                            );
                         }
                     }
 

@@ -45,7 +45,6 @@ use src\events\lead\LeadCountPassengersChangedEvent;
 use src\events\lead\LeadOwnerFreedEvent;
 use src\events\lead\LeadPendingEvent;
 use src\events\lead\LeadPoorProcessingEvent;
-use src\events\lead\LeadPoorProcessingLastActionEvent;
 use src\events\lead\LeadProcessingEvent;
 use src\events\lead\LeadRejectEvent;
 use src\events\lead\LeadSnoozeEvent;
@@ -1438,14 +1437,18 @@ class Lead extends ActiveRecord implements Objectable
         }
 
         $description = $reason ? 'Reason: ' . $reason . '. ' : '';
-        if (($fromStatus = self::getStatus($oldStatus)) && $toStatus = self::getStatus(Lead::STATUS_PROCESSING)) {
+        if (($fromStatus = self::getStatus($oldStatus)) && $toStatus = self::getStatus(self::STATUS_PROCESSING)) {
             $description .= sprintf(LeadPoorProcessingLogStatus::REASON_CHANGE_STATUS, $fromStatus, $toStatus);
         }
 
         $this->recordEvent(
             new LeadPoorProcessingEvent(
                 $this,
-                [LeadPoorProcessingDataDictionary::KEY_NO_ACTION, LeadPoorProcessingDataDictionary::KEY_SEND_SMS_OFFER],
+                [
+                    LeadPoorProcessingDataDictionary::KEY_NO_ACTION,
+                    LeadPoorProcessingDataDictionary::KEY_LAST_ACTION,
+                    LeadPoorProcessingDataDictionary::KEY_SEND_SMS_OFFER,
+                ],
                 $description
             )
         );

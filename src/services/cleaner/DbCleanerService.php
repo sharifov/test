@@ -134,8 +134,8 @@ class DbCleanerService
             ApiLog::tableName() => ApiLogCleaner::class,
             GlobalLog::tableName() => GlobalLogCleaner::class,
             UserMonitor::tableName() => UserMonitorCleaner::class,
-            UserSiteActivity::tableName() => UserSiteActivityCleaner::class,
             Notifications::tableName() => NotificationsCleaner::class,
+            UserSiteActivity::tableName() => UserSiteActivityCleaner::class,
             LeadPoorProcessingLog::tableName() => LeadPoorProcessingLogCleaner::class,
         ];
 

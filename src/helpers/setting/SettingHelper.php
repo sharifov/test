@@ -818,6 +818,11 @@ class SettingHelper
         return Yii::$app->params['settings']['lpp_remove_by_sms_tpl'] ?? [];
     }
 
+    public static function isCallEnabledCommunicationProxyRecordings(): bool
+    {
+        return (bool)(Yii::$app->params['settings']['call_enabled_communication_proxy_recordings'] ?? false);
+    }
+
     public static function isPhoneNumberRedialEnabled(): bool
     {
         return (bool)(Yii::$app->params['settings']['phone_number_redial_enable'] ?? false);
