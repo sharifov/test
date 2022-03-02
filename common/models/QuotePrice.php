@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use src\behaviors\quotePrice\ClientPriceBehavior;
 use src\forms\quotePrice\AddQuotePriceForm;
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -125,6 +126,7 @@ class QuotePrice extends \yii\db\ActiveRecord
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
+            'clientPriceBehavior' => ClientPriceBehavior::class,
         ];
     }
 
@@ -297,6 +299,7 @@ class QuotePrice extends \yii\db\ActiveRecord
             'qp_client_extra_mark_up' => 'Client extra markup',
             'qp_client_service_fee' => 'Client service fee',
             'qp_client_selling' => 'Client selling',
+            'qp_client_net' => 'Client net',
         ];
     }
 
