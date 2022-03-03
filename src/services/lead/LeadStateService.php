@@ -190,10 +190,10 @@ class LeadStateService
         $this->leadRepository->save($lead);
     }
 
-    public function close($lead): void
+    public function close($lead, ?string $leadStatusReasonKey = null, ?int $creatorId = null, ?string $reasonComment = ''): void
     {
         $lead = $this->serviceFinder->leadFind($lead);
-        $lead->close();
+        $lead->close($leadStatusReasonKey, $creatorId, $reasonComment);
         $this->leadRepository->save($lead);
     }
 
