@@ -56,7 +56,7 @@ class FlightQuoteExchangeController extends BaseController
 {
     private VoluntaryExchangeObjectCollection $objectCollection;
     private BoRequestVoluntaryExchangeService $boRequestVoluntaryExchangeService;
-    private ProductQuoteChangeRepository      $productQuoteChangeRepository;
+    private ProductQuoteChangeRepository $productQuoteChangeRepository;
 
     /**
      * @param $id
@@ -75,8 +75,7 @@ class FlightQuoteExchangeController extends BaseController
         BoRequestVoluntaryExchangeService $boRequestVoluntaryExchangeService,
         ProductQuoteChangeRepository $productQuoteChangeRepository,
         $config = []
-    )
-    {
+    ) {
         $this->objectCollection                  = $voluntaryExchangeObjectCollection;
         $this->boRequestVoluntaryExchangeService = $boRequestVoluntaryExchangeService;
         $this->productQuoteChangeRepository      = $productQuoteChangeRepository;
@@ -664,7 +663,7 @@ class FlightQuoteExchangeController extends BaseController
                 new ErrorsMessage($throwable->getMessage()),
                 new CodeMessage($throwable->getCode())
             );
-        } catch (\RuntimeException|\DomainException $throwable) {
+        } catch (\RuntimeException | \DomainException $throwable) {
             $message              = AppHelper::throwableLog($throwable);
             $message['bookingId'] = $post['bookingId'] ?? null;
             $message['apiUser']   = [
@@ -973,7 +972,7 @@ class FlightQuoteExchangeController extends BaseController
                 new ErrorsMessage($throwable->getMessage()),
                 new CodeMessage($throwable->getCode())
             );
-        } catch (\RuntimeException|\DomainException $throwable) {
+        } catch (\RuntimeException | \DomainException $throwable) {
             $message              = AppHelper::throwableLog($throwable);
             $message['bookingId'] = $post['bookingId'] ?? null;
             $message['apiUser']   = [
@@ -1336,7 +1335,7 @@ class FlightQuoteExchangeController extends BaseController
                 new DataMessage(ArrayHelper::toArray($productQuoteChange->pqc_data_json)),
                 new CodeMessage(ApiCodeException::SUCCESS)
             );
-        } catch (\RuntimeException|\DomainException $throwable) {
+        } catch (\RuntimeException | \DomainException $throwable) {
             $message            = AppHelper::throwableLog($throwable);
             $message['post']    = $post;
             $message['apiUser'] = [
@@ -1706,7 +1705,7 @@ class FlightQuoteExchangeController extends BaseController
                 new DataMessage(ArrayHelper::toArray($productQuoteChange->pqc_data_json)),
                 new CodeMessage(ApiCodeException::SUCCESS)
             );
-        } catch (\RuntimeException|\DomainException $throwable) {
+        } catch (\RuntimeException | \DomainException $throwable) {
             $message            = AppHelper::throwableLog($throwable);
             $message['post']    = $post;
             $message['apiUser'] = [
@@ -1871,7 +1870,7 @@ class FlightQuoteExchangeController extends BaseController
                                 ]),
                 new CodeMessage(ApiCodeException::SUCCESS)
             );
-        } catch (\RuntimeException|\DomainException $throwable) {
+        } catch (\RuntimeException | \DomainException $throwable) {
             $message            = AppHelper::throwableLog($throwable);
             $message['post']    = $post;
             $message['apiUser'] = [
