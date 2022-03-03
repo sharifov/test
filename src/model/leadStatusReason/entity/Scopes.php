@@ -31,4 +31,14 @@ class Scopes extends \yii\db\ActiveQuery
     {
         return parent::one($db);
     }
+
+    public function byKey(string $key): Scopes
+    {
+        return $this->andWhere(['lsr_key' => $key]);
+    }
+
+    public function enabled(): Scopes
+    {
+        return $this->andWhere(['lsr_enabled' => true]);
+    }
 }

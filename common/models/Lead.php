@@ -25,6 +25,7 @@ use src\entities\EventTrait;
 use src\events\lead\LeadBookedEvent;
 use src\events\lead\LeadCallExpertRequestEvent;
 use src\events\lead\LeadCallStatusChangeEvent;
+use src\events\lead\LeadCloseEvent;
 use src\events\lead\LeadCreatedBookFailedEvent;
 use src\events\lead\LeadCreatedByApiBOEvent;
 use src\events\lead\LeadCreatedByApiEvent;
@@ -5154,11 +5155,12 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         $this->setStatus(self::STATUS_EXTRA_QUEUE);
     }
 
-    public function close(): void
+    public function close(?string $leadStatusReasonKey = null, ?int $creatorId = null, ?string $reasonComment = ''): void
     {
         if ($this->isClosed()) {
             return;
         }
+        $this->recordEvent(new LeadCloseEvent($this, $leadStatusReasonKey, $this->status, $creatorId, $reasonComment));
         $this->setStatus(self::STATUS_CLOSED);
     }
 

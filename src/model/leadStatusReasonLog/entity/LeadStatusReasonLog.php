@@ -102,4 +102,16 @@ class LeadStatusReasonLog extends \yii\db\ActiveRecord
     {
         return new LeadStatusReasonLogQuery(get_called_class());
     }
+
+    public static function create(
+        int $flowId,
+        int $leadStatusReasonId,
+        ?string $comment
+    ): self {
+        $model = new self();
+        $model->lsrl_lead_flow_id = $flowId;
+        $model->lsrl_lead_status_reason_id = $leadStatusReasonId;
+        $model->lsrl_comment = $comment;
+        return $model;
+    }
 }
