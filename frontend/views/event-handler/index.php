@@ -90,7 +90,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'eh_updated_user_id',
                 'class' => UserSelect2Column::class,
-                'relation' => 'elUpdatedUser',
+                'relation' => 'updatedUser',
             ],
 
             [

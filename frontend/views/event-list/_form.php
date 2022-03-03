@@ -16,13 +16,13 @@ use yii\widgets\ActiveForm;
 
 
 
-            <?php /*= $form->field($model, 'el_key')->textInput(['maxlength' => true])*/ ?>
+            <?php echo $form->field($model, 'el_key')->textInput(['maxlength' => true]) ?>
 
             <div class="row">
                 <div class="col-md-6">
                     <?php /*= $form->field($model, 'el_object')->dropDownList(Yii::$app->event->objectList, ['prompt' => '-'])*/ ?>
 
-                    <?= $form->field($model, 'el_key')->dropDownList(Yii::$app->event->objectList, ['prompt' => '-']) ?>
+                    <?php /* $form->field($model, 'el_key')->dropDownList(Yii::$app->event->objectList, ['prompt' => '-'])*/ ?>
 
                     <?= $form->field($model, 'el_category')->dropDownList(Yii::$app->event->categoryList, ['prompt' => '-']) ?>
                 </div>

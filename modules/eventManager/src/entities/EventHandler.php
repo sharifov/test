@@ -53,7 +53,7 @@ class EventHandler extends ActiveRecord
                 'eh_updated_user_id'], 'integer'],
             [['eh_class', 'eh_method', 'eh_el_id'], 'required'],
 
-            ['el_enable_type', 'in', 'range' => array_keys(EventList::getEnableTypeList())],
+            ['eh_enable_type', 'in', 'range' => array_keys(EventList::getEnableTypeList())],
 
             [['eh_condition', 'eh_params'], 'string'],
             [['eh_builder_json', 'eh_updated_dt'], 'safe'],

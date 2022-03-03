@@ -2,6 +2,7 @@
 
 namespace modules\eventManager\components;
 
+use modules\eventManager\src\entities\EventHandler;
 use modules\eventManager\src\entities\EventList;
 use Yii;
 use yii\base\Component;
@@ -19,7 +20,7 @@ class EventManagerComponent extends Component
     public function init(): void
     {
         parent::init();
-        $eventListContent = $this->getEventListContent();
+        $eventListContent = $this->getEventList();
         //VarDumper::dump($eventListContent);
     }
 
@@ -42,10 +43,10 @@ class EventManagerComponent extends Component
     /**
      * @return array|EventList[]
      */
-    final public function getEventListContentWOCache(): array
+    final public function getEventListWOCache(): array
     {
-
         $rows = EventList::find()->select([
+            'el_id',
             'el_key',
             'el_enable_type',
             'el_enable_log',
@@ -60,29 +61,112 @@ class EventManagerComponent extends Component
         return $rows;
     }
 
+
     /**
      * @return array|EventList[]
      */
-    public function getEventListContent(): array
+    final public function getEventHandlerListWOCache(): array
+    {
+        $rows = EventHandler::find()->select([
+            'eh_id',
+            'eh_el_id',
+            'eh_class',
+            'eh_method',
+            'eh_enable_type',
+            'eh_enable_log',
+            'eh_asynch',
+            'eh_break',
+            'eh_cron_expression',
+            'eh_condition',
+            'eh_params'
+        ])
+//            ->where(['ap_enabled' => true])
+            ->orderBy(['eh_sort_order' => SORT_ASC, 'eh_id' => SORT_ASC])->asArray()->all();
+
+        $data = [];
+        if ($rows) {
+            foreach ($rows as $item) {
+                $data[$item['eh_el_id']][] = $item;
+            }
+        }
+        return $data;
+    }
+
+
+    /**
+     * @param int $eventId
+     * @param array $handlerList
+     * @return array
+     */
+    public static function getHandlerListByEventId(int $eventId, array $handlerList): array
+    {
+        $data = empty($handlerList[$eventId]) ? [] : $handlerList[$eventId];
+        return $data;
+    }
+
+    /**
+     * @return array|EventList[]
+     */
+    private function getCompleteEventListWOCache(): array
+    {
+        $eventListData = $this->getEventListWOCache();
+
+        if ($eventListData) {
+            $handlerListData = $this->getEventHandlerListWOCache();
+
+            if ($handlerListData) {
+                foreach ($eventListData as $key => $item) {
+                    $eventListData[$key]['handlerList'] =
+                        self::getHandlerListByEventId($item['el_id'], $handlerListData);
+                }
+            }
+        }
+        return $eventListData;
+    }
+
+
+    /**
+     * @return array|EventList[]
+     */
+    public function getEventList(): array
     {
         if ($this->getCacheEnabled()) {
-            $eventListContent = Yii::$app->cache->get($this->getCacheKey());
-            if ($eventListContent === false) {
-                $eventListContent = $this->getEventListContentWOCache();
+            $eventListData = Yii::$app->cache->get($this->getCacheKey());
+            if ($eventListData === false) {
+                $eventListData = $this->getCompleteEventListWOCache();
 
-                if ($eventListContent) {
+                if ($eventListData) {
                     Yii::$app->cache->set(
                         $this->getCacheKey(),
-                        $eventListContent,
+                        $eventListData,
                         0,
                         new TagDependency(['tags' => $this->getCacheTagDependency()])
                     );
                 }
             }
         } else {
-            $eventListContent = $this->getEventListContentWOCache();
+            $eventListData = $this->getCompleteEventListWOCache();
         }
-        return $eventListContent;
+        return $eventListData;
+    }
+
+    /**
+     * @param string $key
+     * @return array
+     */
+    public function getEventListByKey(string $key): array
+    {
+
+        $data = [];
+        $allList = $this->getEventList();
+        if ($allList) {
+            foreach ($allList as $event) {
+                if ($event['el_key'] === $key) {
+                    $data[] = $event;
+                }
+            }
+        }
+        return $data;
     }
 
     /**

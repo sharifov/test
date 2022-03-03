@@ -2680,15 +2680,15 @@ class TestController extends FController
 //        );
 //        NativeEventDispatcher::trigger(LeadEvents::class, LeadEvents::EVENT_CLOSE);
 
-        Yii::$app->event->getEventListContent();
-        Yii::$app->event->getEventListContent();
+//        Yii::$app->event->getEventListContent();
 
-        VarDumper::dump(Yii::$app->event->getEventListContent(), 10, true);
+//
+//        VarDumper::dump(Yii::$app->event->getEventListContent(), 10, true);
+//
+//        exit;
 
-        exit;
-
-        VarDumper::dump(LeadEvents::getHandlerList(), 10, true);
-        exit;
+//        VarDumper::dump(LeadEvents::getHandlerList(), 10, true);
+//        exit;
 
 
         Event::on(
@@ -2702,10 +2702,6 @@ class TestController extends FController
             LeadEvents::class,
             LeadEvents::EVENT_CLOSE
         );
-
-
-
-
 
 
         VarDumper::dump($lead->attributes, 10, true);
