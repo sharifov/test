@@ -25,6 +25,7 @@ use yii\db\BaseActiveRecord;
  * @property int $eh_sort_order
  * @property string|null $eh_cron_expression
  * @property string|null $eh_condition
+ * @property string|null $eh_params
  * @property string|null $eh_builder_json
  * @property string|null $eh_updated_dt
  * @property int|null $eh_updated_user_id
@@ -54,7 +55,7 @@ class EventHandler extends ActiveRecord
 
             ['el_enable_type', 'in', 'range' => array_keys(EventList::getEnableTypeList())],
 
-            [['eh_condition'], 'string'],
+            [['eh_condition', 'eh_params'], 'string'],
             [['eh_builder_json', 'eh_updated_dt'], 'safe'],
             [['eh_class'], 'string', 'max' => 500],
             [['eh_method', 'eh_cron_expression'], 'string', 'max' => 255],
@@ -106,6 +107,7 @@ class EventHandler extends ActiveRecord
             'eh_sort_order' => 'Sort Order',
             'eh_cron_expression' => 'Cron Expression',
             'eh_condition' => 'Condition',
+            'eh_params' => 'Params',
             'eh_builder_json' => 'Builder Json',
             'eh_updated_dt' => 'Updated Dt',
             'eh_updated_user_id' => 'Updated User ID',

@@ -5,7 +5,7 @@ namespace modules\eventManager\src;
 use yii\base\Event;
 use yii\helpers\VarDumper;
 
-class EventHandler
+class EventApp
 {
     /**
      * @param Event $event

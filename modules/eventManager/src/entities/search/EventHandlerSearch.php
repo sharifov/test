@@ -18,7 +18,7 @@ class EventHandlerSearch extends EventHandler
     {
         return [
             [['eh_id', 'eh_el_id', 'eh_enable_type', 'eh_enable_log', 'eh_asynch', 'eh_break', 'eh_sort_order', 'eh_updated_user_id'], 'integer'],
-            [['eh_class', 'eh_method', 'eh_cron_expression', 'eh_condition', 'eh_builder_json', 'eh_updated_dt'], 'safe'],
+            [['eh_class', 'eh_method', 'eh_cron_expression', 'eh_condition', 'eh_builder_json', 'eh_updated_dt', 'eh_params'], 'safe'],
         ];
     }
 
@@ -77,6 +77,7 @@ class EventHandlerSearch extends EventHandler
             ->andFilterWhere(['like', 'eh_method', $this->eh_method])
             ->andFilterWhere(['like', 'eh_cron_expression', $this->eh_cron_expression])
             ->andFilterWhere(['like', 'eh_condition', $this->eh_condition])
+            ->andFilterWhere(['like', 'eh_params', $this->eh_params])
             ->andFilterWhere(['like', 'eh_builder_json', $this->eh_builder_json]);
 
         return $dataProvider;

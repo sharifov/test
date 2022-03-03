@@ -41,20 +41,6 @@ use yii\widgets\ActiveForm;
                     <?= $form->field($model, 'el_enable_type')->dropDownList(\modules\eventManager\src\entities\EventList::getEnableTypeList()) ?>
                 </div>
             </div>
-
-
-            <?php /*            Example:
-                        <pre>
-             ┌──────── minute (0 - 59)
-             │  ┌──────── hour (0 - 23)
-             │  │  ┌──────── day of month (1 - 31)
-             │  │  │  ┌──────── month (1 - 12) OR jan,feb,mar,apr ...
-             │  │  │  │  ┌──────── day of week (0 - 6) (Sunday=0 or 7)
-             *  *  *  *  *              OR sun,mon,tue,wed,thu,fri,sat
-             1  2  3  4  5
-            </pre>
-            */?>
-
             <div class="row">
                 <div class="col-md-4">
                     <?= $form->field($model, 'el_cron_expression')->textInput(['maxlength' => true]) ?>

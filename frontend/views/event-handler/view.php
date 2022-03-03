@@ -40,6 +40,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'eh_sort_order',
             'eh_cron_expression',
             'eh_condition:ntext',
+            'eh_params:ntext',
             'eh_builder_json',
             'eh_updated_dt',
             'eh_updated_user_id',

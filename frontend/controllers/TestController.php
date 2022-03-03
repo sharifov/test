@@ -75,7 +75,7 @@ use modules\attraction\models\AttractionQuote;
 use modules\attraction\src\services\AttractionQuotePdfService;
 use modules\email\src\helpers\MailHelper;
 use modules\email\src\Notifier;
-use modules\eventManager\src\EventHandler;
+use modules\eventManager\src\EventApp;
 use modules\featureFlag\FFlag;
 use modules\featureFlag\src\entities\FeatureFlag;
 use modules\flight\models\FlightQuote;
@@ -2694,7 +2694,7 @@ class TestController extends FController
         Event::on(
             LeadEvents::class,
             LeadEvents::EVENT_CLOSE,
-            [EventHandler::class, 'handler'],
+            [EventApp::class, 'handler'],
         );
 
 

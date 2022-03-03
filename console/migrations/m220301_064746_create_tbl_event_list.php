@@ -69,6 +69,7 @@ class m220301_064746_create_tbl_event_list extends Migration
             'eh_sort_order' => $this->integer()->defaultValue(0)->notNull(),
             'eh_cron_expression' => $this->string(255)->defaultValue('* * * * *'),
             'eh_condition' => $this->text(),
+            'eh_params' => $this->json(),
             'eh_builder_json' => $this->json(),
             'eh_updated_dt' => $this->dateTime(),
             'eh_updated_user_id' => $this->integer(),

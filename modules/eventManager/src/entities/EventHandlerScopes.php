@@ -5,7 +5,7 @@ namespace modules\eventManager\src\entities;
 /**
  * This is the ActiveQuery class for [[EventHandler]].
  *
- * @see EventHandler
+ * @see EventApp
  */
 class EventHandlerScopes extends \yii\db\ActiveQuery
 {
