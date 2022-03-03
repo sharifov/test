@@ -22,11 +22,10 @@ class EventApp
             foreach ($eventList as $eventItem) {
                 if (!empty($eventItem['handlerList'])) {
                     foreach ($eventItem['handlerList'] as $handlerItem) {
-
                         //if ($handlerItem['eh_'])
                         $obj = Yii::createObject($handlerItem['eh_class']);
                         $method = $handlerItem['eh_method'];
-                        $obj->$method;
+                       // $obj->$method;
                         //echo $handlerItem['eh_class'] . '::' . $handlerItem['eh_method'];
                     }
                 }
