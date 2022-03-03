@@ -76,10 +76,10 @@ use yii\widgets\ActiveForm;
                 </pre>
 
                     <?= Html::a(
-                            '<i class="fa fa-link"></i> Editor for schedule expressions',
-                            'https://crontab.guru/#' . str_replace(' ', '_', $model->eh_cron_expression),
-                            ['class' => 'btn btn-xs btn-warning', 'target' => '_blank']
-                        ) ?>
+                        '<i class="fa fa-link"></i> Editor for schedule expressions',
+                        'https://crontab.guru/#' . str_replace(' ', '_', $model->eh_cron_expression),
+                        ['class' => 'btn btn-xs btn-warning', 'target' => '_blank']
+                    ) ?>
 
 
                 </div>
