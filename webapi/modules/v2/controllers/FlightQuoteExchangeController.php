@@ -56,7 +56,7 @@ class FlightQuoteExchangeController extends BaseController
 {
     private VoluntaryExchangeObjectCollection $objectCollection;
     private BoRequestVoluntaryExchangeService $boRequestVoluntaryExchangeService;
-    private ProductQuoteChangeRepository $productQuoteChangeRepository;
+    private ProductQuoteChangeRepository      $productQuoteChangeRepository;
 
     /**
      * @param $id
@@ -75,18 +75,19 @@ class FlightQuoteExchangeController extends BaseController
         BoRequestVoluntaryExchangeService $boRequestVoluntaryExchangeService,
         ProductQuoteChangeRepository $productQuoteChangeRepository,
         $config = []
-    ) {
-        $this->objectCollection = $voluntaryExchangeObjectCollection;
+    )
+    {
+        $this->objectCollection                  = $voluntaryExchangeObjectCollection;
         $this->boRequestVoluntaryExchangeService = $boRequestVoluntaryExchangeService;
-        $this->productQuoteChangeRepository = $productQuoteChangeRepository;
+        $this->productQuoteChangeRepository      = $productQuoteChangeRepository;
         parent::__construct($id, $module, $logger, $config);
     }
 
     public function behaviors(): array
     {
-        $behaviors = parent::behaviors();
+        $behaviors           = parent::behaviors();
         $behaviors['logger'] = [
-            'class' => SimpleLoggerBehavior::class,
+            'class'  => SimpleLoggerBehavior::class,
             'filter' => CreditCardFilter::class,
             'except' => [],
         ];
@@ -216,167 +217,167 @@ class FlightQuoteExchangeController extends BaseController
      * @apiParam {string{..4}}                  payment_request.method_data.card.cvv                CVV
      *
      * @apiParamExample {json} Request-Example:
-         {
-            "bookingId": "XXXYYYZ",
-            "apiKey": "test-api-key",
-            "exchange": {
-                "trips": [
-                    {
-                        "tripId": 1,
-                        "segments": [
-                            {
-                                "segmentId": 1,
-                                "departureTime": "2022-01-10 20:15",
-                                "arrivalTime": "2022-01-11 21:10",
-                                "stop": 0,
-                                "stops": [
-                                    {
-                                        "locationCode": "LFW",
-                                        "departureDateTime": "2022-01-11 12:35",
-                                        "arrivalDateTime": "2022-01-11 11:35",
-                                        "duration": 60,
-                                        "elapsedTime": 620,
-                                        "equipment": "787"
-                                    }
-                                ],
-                                "flightNumber": "513",
-                                "bookingClass": "H",
-                                "duration": 1015,
-                                "departureAirportCode": "JFK",
-                                "departureAirportTerminal": "8",
-                                "arrivalAirportCode": "ADD",
-                                "arrivalAirportTerminal": "2",
-                                "operatingAirline": "ET",
-                                "airEquipType": "787",
-                                "marketingAirline": "ET",
-                                "marriageGroup": "O",
-                                "cabin": "Y",
-                                "meal": "DL",
-                                "fareCode": "HLESUS",
-                                "recheckBaggage": false
-                            },
-                            {
-                                "segmentId": 2,
-                                "departureTime": "2022-01-11 23:15",
-                                "arrivalTime": "2022-01-12 01:20",
-                                "stop": 0,
-                                "stops": null,
-                                "flightNumber": "308",
-                                "bookingClass": "H",
-                                "duration": 125,
-                                "departureAirportCode": "ADD",
-                                "departureAirportTerminal": "2",
-                                "arrivalAirportCode": "NBO",
-                                "arrivalAirportTerminal": "1C",
-                                "operatingAirline": "ET",
-                                "airEquipType": "738",
-                                "marketingAirline": "ET",
-                                "marriageGroup": "I",
-                                "cabin": "Y",
-                                "meal": "D",
-                                "fareCode": "HLESUS",
-                                "recheckBaggage": false
-                            }
-                        ],
-                        "duration": 1265
-                    }
-                ],
-                "tickets": [
-                    {
-                        "numRef": "1.1",
-                        "firstName": "PAULA ANNE",
-                        "lastName": "ALVAREZ",
-                        "paxType": "ADT",
-                        "number": "123456789"
-                    },
-                    {
-                        "numRef": "2.1",
-                        "firstName": "ANNE",
-                        "lastName": "ALVAREZ",
-                        "paxType": "ADT",
-                        "number": "987654321"
-                    }
-                ],
-                "passengers": {
-                    "ADT": {
-                        "codeAs": "JCB",
-                        "cnt": 1,
-                        "baseFare": 32.12,
-                        "pubBaseFare": 32.12,
-                        "baseTax": 300,
-                        "markup": 0,
-                        "comm": 0,
-                        "price": 332.12,
-                        "tax": 300,
-                        "oBaseFare": {
-                            "amount": 32.120003,
-                            "currency": "USD"
-                        },
-                        "oBaseTax": {
-                            "amount": 300,
-                            "currency": "USD"
-                        },
-                        "oExchangeFareDiff": {
-                            "amount": 8,
-                            "currency": "USD"
-                        },
-                        "oExchangeTaxDiff": {
-                            "amount": 24.12,
-                            "currency": "USD"
-                        }
-                    }
-                },
-                "validatingCarrier": "AA",
-                "gds": "S",
-                "pcc": "G9MJ",
-                "cons": "GTT",
-                "fareType": "SR",
-                "cabin": "Y",
-                "currency": "USD",
-                "currencies": [
-                    "USD"
-                ],
-                "currencyRates": {
-                    "USDUSD": {
-                        "from": "USD",
-                        "to": "USD",
-                        "rate": 1
-                    }
-                },
-                "keys": {},
-                "meta": {}
-            },
-            "billing": {
-                  "first_name": "John",
-                  "last_name": "Doe",
-                  "middle_name": "",
-                  "address_line1": "1013 Weda Cir",
-                  "address_line2": "",
-                  "country_id": "US",
-                  "country" : "United States",
-                  "city": "Mayfield",
-                  "state": "KY",
-                  "zip": "99999",
-                  "company_name": "",
-                  "contact_phone": "+19074861000",
-                  "contact_email": "test@test.com",
-                  "contact_name": "Test Name"
-            },
-            "payment_request": {
-                  "method_key": "card",
-                  "currency": "USD",
-                  "method_data": {
-                      "card": {
-                          "number": "4111555577778888",
-                          "holder_name": "Test test",
-                          "expiration_month": 10,
-                          "expiration_year": 23,
-                          "cvv": "123"
-                      }
-                  },
-                  "amount": 112.25
-            }
-        }
+     * {
+     * "bookingId": "XXXYYYZ",
+     * "apiKey": "test-api-key",
+     * "exchange": {
+     * "trips": [
+     * {
+     * "tripId": 1,
+     * "segments": [
+     * {
+     * "segmentId": 1,
+     * "departureTime": "2022-01-10 20:15",
+     * "arrivalTime": "2022-01-11 21:10",
+     * "stop": 0,
+     * "stops": [
+     * {
+     * "locationCode": "LFW",
+     * "departureDateTime": "2022-01-11 12:35",
+     * "arrivalDateTime": "2022-01-11 11:35",
+     * "duration": 60,
+     * "elapsedTime": 620,
+     * "equipment": "787"
+     * }
+     * ],
+     * "flightNumber": "513",
+     * "bookingClass": "H",
+     * "duration": 1015,
+     * "departureAirportCode": "JFK",
+     * "departureAirportTerminal": "8",
+     * "arrivalAirportCode": "ADD",
+     * "arrivalAirportTerminal": "2",
+     * "operatingAirline": "ET",
+     * "airEquipType": "787",
+     * "marketingAirline": "ET",
+     * "marriageGroup": "O",
+     * "cabin": "Y",
+     * "meal": "DL",
+     * "fareCode": "HLESUS",
+     * "recheckBaggage": false
+     * },
+     * {
+     * "segmentId": 2,
+     * "departureTime": "2022-01-11 23:15",
+     * "arrivalTime": "2022-01-12 01:20",
+     * "stop": 0,
+     * "stops": null,
+     * "flightNumber": "308",
+     * "bookingClass": "H",
+     * "duration": 125,
+     * "departureAirportCode": "ADD",
+     * "departureAirportTerminal": "2",
+     * "arrivalAirportCode": "NBO",
+     * "arrivalAirportTerminal": "1C",
+     * "operatingAirline": "ET",
+     * "airEquipType": "738",
+     * "marketingAirline": "ET",
+     * "marriageGroup": "I",
+     * "cabin": "Y",
+     * "meal": "D",
+     * "fareCode": "HLESUS",
+     * "recheckBaggage": false
+     * }
+     * ],
+     * "duration": 1265
+     * }
+     * ],
+     * "tickets": [
+     * {
+     * "numRef": "1.1",
+     * "firstName": "PAULA ANNE",
+     * "lastName": "ALVAREZ",
+     * "paxType": "ADT",
+     * "number": "123456789"
+     * },
+     * {
+     * "numRef": "2.1",
+     * "firstName": "ANNE",
+     * "lastName": "ALVAREZ",
+     * "paxType": "ADT",
+     * "number": "987654321"
+     * }
+     * ],
+     * "passengers": {
+     * "ADT": {
+     * "codeAs": "JCB",
+     * "cnt": 1,
+     * "baseFare": 32.12,
+     * "pubBaseFare": 32.12,
+     * "baseTax": 300,
+     * "markup": 0,
+     * "comm": 0,
+     * "price": 332.12,
+     * "tax": 300,
+     * "oBaseFare": {
+     * "amount": 32.120003,
+     * "currency": "USD"
+     * },
+     * "oBaseTax": {
+     * "amount": 300,
+     * "currency": "USD"
+     * },
+     * "oExchangeFareDiff": {
+     * "amount": 8,
+     * "currency": "USD"
+     * },
+     * "oExchangeTaxDiff": {
+     * "amount": 24.12,
+     * "currency": "USD"
+     * }
+     * }
+     * },
+     * "validatingCarrier": "AA",
+     * "gds": "S",
+     * "pcc": "G9MJ",
+     * "cons": "GTT",
+     * "fareType": "SR",
+     * "cabin": "Y",
+     * "currency": "USD",
+     * "currencies": [
+     * "USD"
+     * ],
+     * "currencyRates": {
+     * "USDUSD": {
+     * "from": "USD",
+     * "to": "USD",
+     * "rate": 1
+     * }
+     * },
+     * "keys": {},
+     * "meta": {}
+     * },
+     * "billing": {
+     * "first_name": "John",
+     * "last_name": "Doe",
+     * "middle_name": "",
+     * "address_line1": "1013 Weda Cir",
+     * "address_line2": "",
+     * "country_id": "US",
+     * "country" : "United States",
+     * "city": "Mayfield",
+     * "state": "KY",
+     * "zip": "99999",
+     * "company_name": "",
+     * "contact_phone": "+19074861000",
+     * "contact_email": "test@test.com",
+     * "contact_name": "Test Name"
+     * },
+     * "payment_request": {
+     * "method_key": "card",
+     * "currency": "USD",
+     * "method_data": {
+     * "card": {
+     * "number": "4111555577778888",
+     * "holder_name": "Test test",
+     * "expiration_month": 10,
+     * "expiration_year": 23,
+     * "cvv": "123"
+     * }
+     * },
+     * "amount": 112.25
+     * }
+     * }
      *
      * @apiSuccessExample {json} Success-Response:
      * HTTP/1.1 200 OK
@@ -384,12 +385,12 @@ class FlightQuoteExchangeController extends BaseController
      *        "status": 200,
      *        "message": "OK",
      *        "data": {
-                    "resultMessage": "Processing was successful",
-                    "originQuoteGid" : "a1275b33cda3bbcbeea2d684475a7e8a",
-                    "changeQuoteGid" : "5c63db4e9d4d24f480088fd5e194e4f5",
-                    "productQuoteChangeGid" : "ee61d0abb62d96879e2c29ddde403650",
-                    "caseGid" : "e7dce13b4e6a5f3ccc2cec9c21fa3255"
-               },
+     * "resultMessage": "Processing was successful",
+     * "originQuoteGid" : "a1275b33cda3bbcbeea2d684475a7e8a",
+     * "changeQuoteGid" : "5c63db4e9d4d24f480088fd5e194e4f5",
+     * "productQuoteChangeGid" : "ee61d0abb62d96879e2c29ddde403650",
+     * "caseGid" : "e7dce13b4e6a5f3ccc2cec9c21fa3255"
+     * },
      *        "code": "13200",
      *        "technical": {
      *           ...
@@ -570,7 +571,7 @@ class FlightQuoteExchangeController extends BaseController
                     }
                 } else {
                     throw new \DomainException('Product Quote not available for exchange. Status(' .
-                        ProductQuoteStatus::getName($productQuote->pq_status_id) . ')', ApiCodeException::REQUEST_ALREADY_PROCESSED);
+                                               ProductQuoteStatus::getName($productQuote->pq_status_id) . ')', ApiCodeException::REQUEST_ALREADY_PROCESSED);
                 }
             }
 
@@ -613,8 +614,8 @@ class FlightQuoteExchangeController extends BaseController
                     );
                     throw new BoResponseException('Request to Back Office is failed', ApiCodeException::REQUEST_TO_BACK_OFFICE_ERROR);
                 }
-                $dataJson = $flightRequest->fr_data_json;
-                $dataJson['responseBo'] = $responseBo;
+                $dataJson                    = $flightRequest->fr_data_json;
+                $dataJson['responseBo']      = $responseBo;
                 $flightRequest->fr_data_json = $dataJson;
                 $this->objectCollection->getFlightRequestRepository()->save($flightRequest);
 
@@ -625,8 +626,8 @@ class FlightQuoteExchangeController extends BaseController
             }
 
             if (!$responseBoStatus) {
-                $message = $responseBo['message'] ?? '';
-                $description = 'Response from Back Office is failed, status(' . $responseBo['status']  . ') ' . $message;
+                $message     = $responseBo['message'] ?? '';
+                $description = 'Response from Back Office is failed, status(' . $responseBo['status'] . ') ' . $message;
                 $voluntaryExchangeCreateHandler->failProcess($description);
                 throw new \RuntimeException($description, ApiCodeException::REQUEST_TO_BACK_OFFICE_ERROR);
             }
@@ -639,22 +640,22 @@ class FlightQuoteExchangeController extends BaseController
                 Yii::error(AppHelper::throwableLog($throwable), 'FlightQuoteExchangeController:AdditionalProcessing');
             }
 
-            $dataMessage['resultMessage'] = 'Processing was successful';
-            $dataMessage['originQuoteGid'] = $voluntaryExchangeCreateHandler->getOriginProductQuote()->pq_gid;
-            $dataMessage['changeQuoteGid'] = $voluntaryExchangeCreateHandler->getVoluntaryExchangeQuote()->pq_gid ?? null;
+            $dataMessage['resultMessage']         = 'Processing was successful';
+            $dataMessage['originQuoteGid']        = $voluntaryExchangeCreateHandler->getOriginProductQuote()->pq_gid;
+            $dataMessage['changeQuoteGid']        = $voluntaryExchangeCreateHandler->getVoluntaryExchangeQuote()->pq_gid ?? null;
             $dataMessage['productQuoteChangeGid'] = $voluntaryExchangeCreateHandler->getProductQuoteChange()->pqc_gid ?? null;
-            $dataMessage['caseGid'] = $case->cs_gid;
+            $dataMessage['caseGid']               = $case->cs_gid;
 
             return new SuccessResponse(
                 new DataMessage($dataMessage),
                 new CodeMessage(ApiCodeException::SUCCESS)
             );
         } catch (BoResponseException $throwable) {
-            $message = AppHelper::throwableLog($throwable);
+            $message              = AppHelper::throwableLog($throwable);
             $message['bookingId'] = $post['bookingId'] ?? null;
-            $message['apiUser'] = [
+            $message['apiUser']   = [
                 'username' => $this->auth->au_api_username ?? null,
-                'project' => $this->auth->auProject->project_key ?? null,
+                'project'  => $this->auth->auProject->project_key ?? null,
             ];
             \Yii::warning($message, 'FlightQuoteExchangeController:actionCreate:BoResponseException');
 
@@ -663,12 +664,12 @@ class FlightQuoteExchangeController extends BaseController
                 new ErrorsMessage($throwable->getMessage()),
                 new CodeMessage($throwable->getCode())
             );
-        } catch (\RuntimeException | \DomainException $throwable) {
-            $message = AppHelper::throwableLog($throwable);
+        } catch (\RuntimeException|\DomainException $throwable) {
+            $message              = AppHelper::throwableLog($throwable);
             $message['bookingId'] = $post['bookingId'] ?? null;
-            $message['apiUser'] = [
+            $message['apiUser']   = [
                 'username' => $this->auth->au_api_username ?? null,
-                'project' => $this->auth->auProject->project_key ?? null,
+                'project'  => $this->auth->auProject->project_key ?? null,
             ];
             \Yii::warning($message, 'FlightQuoteExchangeController:actionCreate:Warning');
 
@@ -678,11 +679,11 @@ class FlightQuoteExchangeController extends BaseController
                 new CodeMessage($throwable->getCode())
             );
         } catch (\Throwable $throwable) {
-            $message = AppHelper::throwableLog($throwable);
+            $message              = AppHelper::throwableLog($throwable);
             $message['bookingId'] = $post['bookingId'] ?? null;
-            $message['apiUser'] = [
+            $message['apiUser']   = [
                 'username' => $this->auth->au_api_username ?? null,
-                'project' => $this->auth->auProject->project_key ?? null,
+                'project'  => $this->auth->auProject->project_key ?? null,
             ];
             \Yii::error($message, 'FlightQuoteExchangeController:actionCreate:Throwable');
 
@@ -738,40 +739,40 @@ class FlightQuoteExchangeController extends BaseController
      * @apiParam {string{..4}}                  payment_request.method_data.card.cvv                CVV
      *
      * @apiParamExample {json} Request-Example:
-         {
-            "booking_id":"XXXYYYZ",
-            "quote_gid": "2f2887a061f8069f7ada8af9e062f0f4",
-            "billing": {
-                  "first_name": "John",
-                  "last_name": "Doe",
-                  "middle_name": "",
-                  "address_line1": "1013 Weda Cir",
-                  "address_line2": "",
-                  "country_id": "US",
-                  "country" : "United States",
-                  "city": "Mayfield",
-                  "state": "KY",
-                  "zip": "99999",
-                  "company_name": "",
-                  "contact_phone": "+19074861000",
-                  "contact_email": "test@test.com",
-                  "contact_name": "Test Name"
-            },
-            "payment_request": {
-                  "method_key": "card",
-                  "currency": "USD",
-                  "method_data": {
-                      "card": {
-                          "number": "4111555577778888",
-                          "holder_name": "Test test",
-                          "expiration_month": 10,
-                          "expiration_year": 23,
-                          "cvv": "123"
-                      }
-                  },
-                  "amount": 112.25
-            }
-        }
+     * {
+     * "booking_id":"XXXYYYZ",
+     * "quote_gid": "2f2887a061f8069f7ada8af9e062f0f4",
+     * "billing": {
+     * "first_name": "John",
+     * "last_name": "Doe",
+     * "middle_name": "",
+     * "address_line1": "1013 Weda Cir",
+     * "address_line2": "",
+     * "country_id": "US",
+     * "country" : "United States",
+     * "city": "Mayfield",
+     * "state": "KY",
+     * "zip": "99999",
+     * "company_name": "",
+     * "contact_phone": "+19074861000",
+     * "contact_email": "test@test.com",
+     * "contact_name": "Test Name"
+     * },
+     * "payment_request": {
+     * "method_key": "card",
+     * "currency": "USD",
+     * "method_data": {
+     * "card": {
+     * "number": "4111555577778888",
+     * "holder_name": "Test test",
+     * "expiration_month": 10,
+     * "expiration_year": 23,
+     * "cvv": "123"
+     * }
+     * },
+     * "amount": 112.25
+     * }
+     * }
      *
      * @apiSuccessExample {json} Success-Response:
      * HTTP/1.1 200 OK
@@ -779,12 +780,12 @@ class FlightQuoteExchangeController extends BaseController
      *        "status": 200,
      *        "message": "OK",
      *        "data": {
-                    "resultMessage": "Processing was successful",
-                    "originQuoteGid" : "a1275b33cda3bbcbeea2d684475a7e8a",
-                    "changeQuoteGid" : "5c63db4e9d4d24f480088fd5e194e4f5",
-                    "productQuoteChangeGid" : "ee61d0abb62d96879e2c29ddde403650",
-                    "caseGid" : "e7dce13b4e6a5f3ccc2cec9c21fa3255"
-               },
+     * "resultMessage": "Processing was successful",
+     * "originQuoteGid" : "a1275b33cda3bbcbeea2d684475a7e8a",
+     * "changeQuoteGid" : "5c63db4e9d4d24f480088fd5e194e4f5",
+     * "productQuoteChangeGid" : "ee61d0abb62d96879e2c29ddde403650",
+     * "caseGid" : "e7dce13b4e6a5f3ccc2cec9c21fa3255"
+     * },
      *        "code": "13200",
      *        "technical": {
      *           ...
@@ -915,25 +916,27 @@ class FlightQuoteExchangeController extends BaseController
                 if (!$responseBo = $this->boRequestVoluntaryExchangeService->sendVoluntaryConfirm($requestData)) {
                     throw new \RuntimeException('Request to Back Office is failed', ApiCodeException::REQUEST_TO_BACK_OFFICE_ERROR);
                 }
-                $dataJson = $flightRequest->fr_data_json;
-                $dataJson['responseBo'] = $responseBo;
-                $flightRequest->fr_data_json = $dataJson;
-                $this->objectCollection->getFlightRequestRepository()->save($flightRequest);
-                $pqcEntity = $this->productQuoteChangeRepository->find($voluntaryExchangeConfirmForm->getProductQuoteChange()->pqc_id);
-                $pqcDataJsonDecoded = JsonHelper::decode($pqcEntity->pqc_data_json);
-                $pqcDataJsonDecoded['responseBo'] = $responseBo;
-                $pqcEntity->pqc_data_json = JsonHelper::encode($pqcDataJsonDecoded);
-                $pqcEntity->save();
 
                 $responseBoStatus = ($responseBo['status'] === 'Success');
+                if ($responseBoStatus) {
+                    $dataJson                         = $flightRequest->fr_data_json;
+                    $dataJson['responseBo']           = $responseBo;
+                    $flightRequest->fr_data_json      = $dataJson;
+                    $this->objectCollection->getFlightRequestRepository()->save($flightRequest);
+                    $pqcEntity                        = $this->productQuoteChangeRepository->find($voluntaryExchangeConfirmForm->getProductQuoteChange()->pqc_id);
+                    $pqcDataJsonDecoded               = JsonHelper::decode($pqcEntity->pqc_data_json);
+                    $pqcDataJsonDecoded['responseBo'] = $responseBo;
+                    $pqcEntity->pqc_data_json         = JsonHelper::encode($pqcDataJsonDecoded);
+                    $this->productQuoteChangeRepository->save($pqcEntity);
+                }
             } catch (\Throwable $throwable) {
                 $voluntaryExchangeConfirmHandler->failProcess($throwable->getMessage());
                 throw $throwable;
             }
 
             if (!$responseBoStatus) {
-                $message = $responseBo['message'] ?? '';
-                $description = 'Request to Back Office is failed, status (' . $responseBo['status']  . ') ' . $message;
+                $message     = $responseBo['message'] ?? '';
+                $description = 'Request to Back Office is failed, status (' . $responseBo['status'] . ') ' . $message;
                 $voluntaryExchangeConfirmHandler->failProcess($description);
                 throw new \RuntimeException($description, ApiCodeException::REQUEST_TO_BACK_OFFICE_ERROR);
             }
@@ -946,22 +949,22 @@ class FlightQuoteExchangeController extends BaseController
                 Yii::error(AppHelper::throwableLog($throwable), 'FlightQuoteExchangeController:AdditionalProcessing');
             }
 
-            $dataMessage['resultMessage'] = 'Processing was successful';
-            $dataMessage['originQuoteGid'] = $voluntaryExchangeConfirmForm->getOriginQuote()->pq_gid ?? null;
-            $dataMessage['changeQuoteGid'] = $voluntaryExchangeConfirmForm->getChangeQuote()->pq_gid ?? null;
+            $dataMessage['resultMessage']         = 'Processing was successful';
+            $dataMessage['originQuoteGid']        = $voluntaryExchangeConfirmForm->getOriginQuote()->pq_gid ?? null;
+            $dataMessage['changeQuoteGid']        = $voluntaryExchangeConfirmForm->getChangeQuote()->pq_gid ?? null;
             $dataMessage['productQuoteChangeGid'] = $voluntaryExchangeConfirmForm->getProductQuoteChange()->pqc_gid ?? null;
-            $dataMessage['caseGid'] = $voluntaryExchangeConfirmForm->getCase()->cs_gid ?? null;
+            $dataMessage['caseGid']               = $voluntaryExchangeConfirmForm->getCase()->cs_gid ?? null;
 
             return new SuccessResponse(
                 new DataMessage($dataMessage),
                 new CodeMessage(ApiCodeException::SUCCESS)
             );
         } catch (BoResponseException $throwable) {
-            $message = AppHelper::throwableLog($throwable);
+            $message              = AppHelper::throwableLog($throwable);
             $message['bookingId'] = $post['bookingId'] ?? null;
-            $message['apiUser'] = [
+            $message['apiUser']   = [
                 'username' => $this->auth->au_api_username ?? null,
-                'project' => $this->auth->auProject->project_key ?? null,
+                'project'  => $this->auth->auProject->project_key ?? null,
             ];
             \Yii::warning($message, 'FlightQuoteExchangeController:actionConfirm:BoResponseException');
 
@@ -970,12 +973,12 @@ class FlightQuoteExchangeController extends BaseController
                 new ErrorsMessage($throwable->getMessage()),
                 new CodeMessage($throwable->getCode())
             );
-        } catch (\RuntimeException | \DomainException $throwable) {
-            $message = AppHelper::throwableLog($throwable);
+        } catch (\RuntimeException|\DomainException $throwable) {
+            $message              = AppHelper::throwableLog($throwable);
             $message['bookingId'] = $post['bookingId'] ?? null;
-            $message['apiUser'] = [
+            $message['apiUser']   = [
                 'username' => $this->auth->au_api_username ?? null,
-                'project' => $this->auth->auProject->project_key ?? null,
+                'project'  => $this->auth->auProject->project_key ?? null,
             ];
             \Yii::warning($message, 'FlightQuoteExchangeController:actionConfirm:Warning');
 
@@ -985,11 +988,11 @@ class FlightQuoteExchangeController extends BaseController
                 new CodeMessage($throwable->getCode())
             );
         } catch (\Throwable $throwable) {
-            $message = AppHelper::throwableLog($throwable);
+            $message              = AppHelper::throwableLog($throwable);
             $message['bookingId'] = $post['bookingId'] ?? null;
-            $message['apiUser'] = [
+            $message['apiUser']   = [
                 'username' => $this->auth->au_api_username ?? null,
-                'project' => $this->auth->auProject->project_key ?? null,
+                'project'  => $this->auth->auProject->project_key ?? null,
             ];
             \Yii::error($message, 'FlightQuoteExchangeController:actionConfirm:Throwable');
 
@@ -1028,223 +1031,223 @@ class FlightQuoteExchangeController extends BaseController
      *        "status": 200,
      *        "message": "OK",
      *        "data": {
-                "bookingId": "XXXYYYZ",
-                "quote_gid" : "48c82774ead469ad311c1e6112562726",
-                "key": "51_U1NTMTAxKlkxMDAwL0pGS05CTzIwMjItMDEtMTAvTkJPSkZLMjAyMi0wMS0zMSp+I0VUNTEzI0VUMzA4I0VUMzA5I0VUNTEyfmxjOmVuX3VzOkVYXzE3Yz123456789",
-                "prices": {
-                    "totalPrice": 332.12,
-                    "comm": 0,
-                    "isCk": false
-                },
-                "passengers": {
-                    "ADT": {
-                        "codeAs": "JCB",
-                        "cnt": 1,
-                        "baseFare": 32.12,
-                        "pubBaseFare": 32.12,
-                        "baseTax": 300,
-                        "markup": 0,
-                        "comm": 0,
-                        "price": 332.12,
-                        "tax": 300,
-                        "oBaseFare": {
-                            "amount": 32.120003,
-                            "currency": "USD"
-                        },
-                        "oBaseTax": {
-                            "amount": 300,
-                            "currency": "USD"
-                        },
-                        "oExchangeFareDiff": {
-                            "amount": 8,
-                            "currency": "USD"
-                        },
-                        "oExchangeTaxDiff": {
-                            "amount": 24.12,
-                            "currency": "USD"
-                        }
-                    }
-                },
-                "trips": [
-                    {
-                        "tripId": 1,
-                        "segments": [
-                            {
-                                "segmentId": 1,
-                                "departureTime": "2022-01-10 20:15",
-                                "arrivalTime": "2022-01-11 21:10",
-                                "stop": 1,
-                                "stops": [
-                                    {
-                                        "locationCode": "LFW",
-                                        "departureDateTime": "2022-01-11 12:35",
-                                        "arrivalDateTime": "2022-01-11 11:35",
-                                        "duration": 60,
-                                        "elapsedTime": 620,
-                                        "equipment": "787"
-                                    }
-                                ],
-                                "flightNumber": "513",
-                                "bookingClass": "H",
-                                "duration": 1015,
-                                "departureAirportCode": "JFK",
-                                "departureAirportTerminal": "8",
-                                "arrivalAirportCode": "ADD",
-                                "arrivalAirportTerminal": "2",
-                                "operatingAirline": "ET",
-                                "airEquipType": "787",
-                                "marketingAirline": "ET",
-                                "marriageGroup": "O",
-                                "cabin": "Y",
-                                "meal": "DL",
-                                "fareCode": "HLESUS",
-                                "recheckBaggage": false
-                            },
-                            {
-                                "segmentId": 2,
-                                "departureTime": "2022-01-11 23:15",
-                                "arrivalTime": "2022-01-12 01:20",
-                                "stop": 0,
-                                "stops": null,
-                                "flightNumber": "308",
-                                "bookingClass": "H",
-                                "duration": 125,
-                                "departureAirportCode": "ADD",
-                                "departureAirportTerminal": "2",
-                                "arrivalAirportCode": "NBO",
-                                "arrivalAirportTerminal": "1C",
-                                "operatingAirline": "ET",
-                                "airEquipType": "738",
-                                "marketingAirline": "ET",
-                                "marriageGroup": "I",
-                                "cabin": "Y",
-                                "meal": "D",
-                                "fareCode": "HLESUS",
-                                "recheckBaggage": false
-                            }
-                        ],
-                        "duration": 1265
-                    },
-                    {
-                        "tripId": 2,
-                        "segments": [
-                            {
-                                "segmentId": 1,
-                                "departureTime": "2022-01-31 05:00",
-                                "arrivalTime": "2022-01-31 07:15",
-                                "stop": 0,
-                                "stops": null,
-                                "flightNumber": "309",
-                                "bookingClass": "E",
-                                "duration": 135,
-                                "departureAirportCode": "NBO",
-                                "departureAirportTerminal": "1C",
-                                "arrivalAirportCode": "ADD",
-                                "arrivalAirportTerminal": "2",
-                                "operatingAirline": "ET",
-                                "airEquipType": "738",
-                                "marketingAirline": "ET",
-                                "marriageGroup": "O",
-                                "cabin": "Y",
-                                "meal": "B",
-                                "fareCode": "ELPRUS",
-                                "recheckBaggage": false
-                            },
-                            {
-                                "segmentId": 2,
-                                "departureTime": "2022-01-31 08:30",
-                                "arrivalTime": "2022-01-31 18:15",
-                                "stop": 1,
-                                "stops": [
-                                    {
-                                        "locationCode": "LFW",
-                                        "departureDateTime": "2022-01-31 12:15",
-                                        "arrivalDateTime": "2022-01-31 11:00",
-                                        "duration": 75,
-                                        "elapsedTime": 330,
-                                        "equipment": "787"
-                                    }
-                                ],
-                                "flightNumber": "512",
-                                "bookingClass": "E",
-                                "duration": 1065,
-                                "departureAirportCode": "ADD",
-                                "departureAirportTerminal": "2",
-                                "arrivalAirportCode": "JFK",
-                                "arrivalAirportTerminal": "8",
-                                "operatingAirline": "ET",
-                                "airEquipType": "787",
-                                "marketingAirline": "ET",
-                                "marriageGroup": "I",
-                                "cabin": "Y",
-                                "meal": "LD",
-                                "fareCode": "ELPRUS",
-                                "recheckBaggage": false
-                            }
-                        ],
-                        "duration": 1275
-                    }
-                ],
-                "paxCnt": 1,
-                "validatingCarrier": "",
-                "gds": "S",
-                "pcc": "G9MJ",
-                "cons": "GTT",
-                "fareType": "SR",
-                "cabin": "Y",
-                "currency": "USD",
-                "currencies": [
-                    "USD"
-                ],
-                "currencyRates": {
-                    "USDUSD": {
-                        "from": "USD",
-                        "to": "USD",
-                        "rate": 1
-                    }
-                },
-                "keys": {},
-                "meta": {
-                    "eip": 0,
-                    "noavail": false,
-                    "searchId": "U1NTMTAxWTEwMDB8SkZLTkJPMjAyMi0wMS0xMHxOQk9KRksyMDIyLTAxLTMx",
-                    "lang": "en",
-                    "rank": 0,
-                    "cheapest": false,
-                    "fastest": false,
-                    "best": false,
-                    "country": "us"
-                },
-                "billing": {
-                      "first_name": "John",
-                      "last_name": "Doe",
-                      "middle_name": "",
-                      "address_line1": "1013 Weda Cir",
-                      "address_line2": "",
-                      "country_id": "US",
-                      "city": "Mayfield",
-                      "state": "KY",
-                      "zip": "99999",
-                      "company_name": "",
-                      "contact_phone": "+19074861000",
-                      "contact_email": "test@test.com",
-                      "contact_name": "Test Name"
-                },
-                "payment_request": {
-                      "method_key": "cc",
-                      "currency": "USD",
-                      "method_data": {
-                          "card": {
-                              "number": "4111555577778888",
-                              "holder_name": "Test test",
-                              "expiration_month": 10,
-                              "expiration_year": 23,
-                              "cvv": "1234"
-                          }
-                      },
-                      "amount": 112.25
-                }
-            },
+     * "bookingId": "XXXYYYZ",
+     * "quote_gid" : "48c82774ead469ad311c1e6112562726",
+     * "key": "51_U1NTMTAxKlkxMDAwL0pGS05CTzIwMjItMDEtMTAvTkJPSkZLMjAyMi0wMS0zMSp+I0VUNTEzI0VUMzA4I0VUMzA5I0VUNTEyfmxjOmVuX3VzOkVYXzE3Yz123456789",
+     * "prices": {
+     * "totalPrice": 332.12,
+     * "comm": 0,
+     * "isCk": false
+     * },
+     * "passengers": {
+     * "ADT": {
+     * "codeAs": "JCB",
+     * "cnt": 1,
+     * "baseFare": 32.12,
+     * "pubBaseFare": 32.12,
+     * "baseTax": 300,
+     * "markup": 0,
+     * "comm": 0,
+     * "price": 332.12,
+     * "tax": 300,
+     * "oBaseFare": {
+     * "amount": 32.120003,
+     * "currency": "USD"
+     * },
+     * "oBaseTax": {
+     * "amount": 300,
+     * "currency": "USD"
+     * },
+     * "oExchangeFareDiff": {
+     * "amount": 8,
+     * "currency": "USD"
+     * },
+     * "oExchangeTaxDiff": {
+     * "amount": 24.12,
+     * "currency": "USD"
+     * }
+     * }
+     * },
+     * "trips": [
+     * {
+     * "tripId": 1,
+     * "segments": [
+     * {
+     * "segmentId": 1,
+     * "departureTime": "2022-01-10 20:15",
+     * "arrivalTime": "2022-01-11 21:10",
+     * "stop": 1,
+     * "stops": [
+     * {
+     * "locationCode": "LFW",
+     * "departureDateTime": "2022-01-11 12:35",
+     * "arrivalDateTime": "2022-01-11 11:35",
+     * "duration": 60,
+     * "elapsedTime": 620,
+     * "equipment": "787"
+     * }
+     * ],
+     * "flightNumber": "513",
+     * "bookingClass": "H",
+     * "duration": 1015,
+     * "departureAirportCode": "JFK",
+     * "departureAirportTerminal": "8",
+     * "arrivalAirportCode": "ADD",
+     * "arrivalAirportTerminal": "2",
+     * "operatingAirline": "ET",
+     * "airEquipType": "787",
+     * "marketingAirline": "ET",
+     * "marriageGroup": "O",
+     * "cabin": "Y",
+     * "meal": "DL",
+     * "fareCode": "HLESUS",
+     * "recheckBaggage": false
+     * },
+     * {
+     * "segmentId": 2,
+     * "departureTime": "2022-01-11 23:15",
+     * "arrivalTime": "2022-01-12 01:20",
+     * "stop": 0,
+     * "stops": null,
+     * "flightNumber": "308",
+     * "bookingClass": "H",
+     * "duration": 125,
+     * "departureAirportCode": "ADD",
+     * "departureAirportTerminal": "2",
+     * "arrivalAirportCode": "NBO",
+     * "arrivalAirportTerminal": "1C",
+     * "operatingAirline": "ET",
+     * "airEquipType": "738",
+     * "marketingAirline": "ET",
+     * "marriageGroup": "I",
+     * "cabin": "Y",
+     * "meal": "D",
+     * "fareCode": "HLESUS",
+     * "recheckBaggage": false
+     * }
+     * ],
+     * "duration": 1265
+     * },
+     * {
+     * "tripId": 2,
+     * "segments": [
+     * {
+     * "segmentId": 1,
+     * "departureTime": "2022-01-31 05:00",
+     * "arrivalTime": "2022-01-31 07:15",
+     * "stop": 0,
+     * "stops": null,
+     * "flightNumber": "309",
+     * "bookingClass": "E",
+     * "duration": 135,
+     * "departureAirportCode": "NBO",
+     * "departureAirportTerminal": "1C",
+     * "arrivalAirportCode": "ADD",
+     * "arrivalAirportTerminal": "2",
+     * "operatingAirline": "ET",
+     * "airEquipType": "738",
+     * "marketingAirline": "ET",
+     * "marriageGroup": "O",
+     * "cabin": "Y",
+     * "meal": "B",
+     * "fareCode": "ELPRUS",
+     * "recheckBaggage": false
+     * },
+     * {
+     * "segmentId": 2,
+     * "departureTime": "2022-01-31 08:30",
+     * "arrivalTime": "2022-01-31 18:15",
+     * "stop": 1,
+     * "stops": [
+     * {
+     * "locationCode": "LFW",
+     * "departureDateTime": "2022-01-31 12:15",
+     * "arrivalDateTime": "2022-01-31 11:00",
+     * "duration": 75,
+     * "elapsedTime": 330,
+     * "equipment": "787"
+     * }
+     * ],
+     * "flightNumber": "512",
+     * "bookingClass": "E",
+     * "duration": 1065,
+     * "departureAirportCode": "ADD",
+     * "departureAirportTerminal": "2",
+     * "arrivalAirportCode": "JFK",
+     * "arrivalAirportTerminal": "8",
+     * "operatingAirline": "ET",
+     * "airEquipType": "787",
+     * "marketingAirline": "ET",
+     * "marriageGroup": "I",
+     * "cabin": "Y",
+     * "meal": "LD",
+     * "fareCode": "ELPRUS",
+     * "recheckBaggage": false
+     * }
+     * ],
+     * "duration": 1275
+     * }
+     * ],
+     * "paxCnt": 1,
+     * "validatingCarrier": "",
+     * "gds": "S",
+     * "pcc": "G9MJ",
+     * "cons": "GTT",
+     * "fareType": "SR",
+     * "cabin": "Y",
+     * "currency": "USD",
+     * "currencies": [
+     * "USD"
+     * ],
+     * "currencyRates": {
+     * "USDUSD": {
+     * "from": "USD",
+     * "to": "USD",
+     * "rate": 1
+     * }
+     * },
+     * "keys": {},
+     * "meta": {
+     * "eip": 0,
+     * "noavail": false,
+     * "searchId": "U1NTMTAxWTEwMDB8SkZLTkJPMjAyMi0wMS0xMHxOQk9KRksyMDIyLTAxLTMx",
+     * "lang": "en",
+     * "rank": 0,
+     * "cheapest": false,
+     * "fastest": false,
+     * "best": false,
+     * "country": "us"
+     * },
+     * "billing": {
+     * "first_name": "John",
+     * "last_name": "Doe",
+     * "middle_name": "",
+     * "address_line1": "1013 Weda Cir",
+     * "address_line2": "",
+     * "country_id": "US",
+     * "city": "Mayfield",
+     * "state": "KY",
+     * "zip": "99999",
+     * "company_name": "",
+     * "contact_phone": "+19074861000",
+     * "contact_email": "test@test.com",
+     * "contact_name": "Test Name"
+     * },
+     * "payment_request": {
+     * "method_key": "cc",
+     * "currency": "USD",
+     * "method_data": {
+     * "card": {
+     * "number": "4111555577778888",
+     * "holder_name": "Test test",
+     * "expiration_month": 10,
+     * "expiration_year": 23,
+     * "cvv": "1234"
+     * }
+     * },
+     * "amount": 112.25
+     * }
+     * },
      *        "code": "13200",
      *        "technical": {
      *           ...
@@ -1333,12 +1336,12 @@ class FlightQuoteExchangeController extends BaseController
                 new DataMessage(ArrayHelper::toArray($productQuoteChange->pqc_data_json)),
                 new CodeMessage(ApiCodeException::SUCCESS)
             );
-        } catch (\RuntimeException | \DomainException $throwable) {
-            $message = AppHelper::throwableLog($throwable);
-            $message['post'] = $post;
+        } catch (\RuntimeException|\DomainException $throwable) {
+            $message            = AppHelper::throwableLog($throwable);
+            $message['post']    = $post;
             $message['apiUser'] = [
                 'username' => $this->auth->au_api_username ?? null,
-                'project' => $this->auth->auProject->project_key ?? null,
+                'project'  => $this->auth->auProject->project_key ?? null,
             ];
             \Yii::warning($message, 'FlightQuoteExchangeController:actionInfo:Warning');
 
@@ -1348,11 +1351,11 @@ class FlightQuoteExchangeController extends BaseController
                 new CodeMessage($throwable->getCode())
             );
         } catch (\Throwable $throwable) {
-            $message = AppHelper::throwableLog($throwable);
-            $message['post'] = $post;
+            $message            = AppHelper::throwableLog($throwable);
+            $message['post']    = $post;
             $message['apiUser'] = [
                 'username' => $this->auth->au_api_username ?? null,
-                'project' => $this->auth->auProject->project_key ?? null,
+                'project'  => $this->auth->auProject->project_key ?? null,
             ];
             \Yii::error($message, 'FlightQuoteExchangeController:actionInfo:Throwable');
 
@@ -1391,223 +1394,223 @@ class FlightQuoteExchangeController extends BaseController
      *        "status": 200,
      *        "message": "OK",
      *        "data": {
-                "bookingId": "XXXYYYZ",
-                "quote_gid" : "48c82774ead469ad311c1e6112562726",
-                "key": "51_U1NTMTAxKlkxMDAwL0pGS05CTzIwMjItMDEtMTAvTkJPSkZLMjAyMi0wMS0zMSp+I0VUNTEzI0VUMzA4I0VUMzA5I0VUNTEyfmxjOmVuX3VzOkVYXzE3Yz123456789",
-                "prices": {
-                    "totalPrice": 332.12,
-                    "comm": 0,
-                    "isCk": false
-                },
-                "passengers": {
-                    "ADT": {
-                        "codeAs": "JCB",
-                        "cnt": 1,
-                        "baseFare": 32.12,
-                        "pubBaseFare": 32.12,
-                        "baseTax": 300,
-                        "markup": 0,
-                        "comm": 0,
-                        "price": 332.12,
-                        "tax": 300,
-                        "oBaseFare": {
-                            "amount": 32.120003,
-                            "currency": "USD"
-                        },
-                        "oBaseTax": {
-                            "amount": 300,
-                            "currency": "USD"
-                        },
-                        "oExchangeFareDiff": {
-                            "amount": 8,
-                            "currency": "USD"
-                        },
-                        "oExchangeTaxDiff": {
-                            "amount": 24.12,
-                            "currency": "USD"
-                        }
-                    }
-                },
-                "trips": [
-                    {
-                        "tripId": 1,
-                        "segments": [
-                            {
-                                "segmentId": 1,
-                                "departureTime": "2022-01-10 20:15",
-                                "arrivalTime": "2022-01-11 21:10",
-                                "stop": 1,
-                                "stops": [
-                                    {
-                                        "locationCode": "LFW",
-                                        "departureDateTime": "2022-01-11 12:35",
-                                        "arrivalDateTime": "2022-01-11 11:35",
-                                        "duration": 60,
-                                        "elapsedTime": 620,
-                                        "equipment": "787"
-                                    }
-                                ],
-                                "flightNumber": "513",
-                                "bookingClass": "H",
-                                "duration": 1015,
-                                "departureAirportCode": "JFK",
-                                "departureAirportTerminal": "8",
-                                "arrivalAirportCode": "ADD",
-                                "arrivalAirportTerminal": "2",
-                                "operatingAirline": "ET",
-                                "airEquipType": "787",
-                                "marketingAirline": "ET",
-                                "marriageGroup": "O",
-                                "cabin": "Y",
-                                "meal": "DL",
-                                "fareCode": "HLESUS",
-                                "recheckBaggage": false
-                            },
-                            {
-                                "segmentId": 2,
-                                "departureTime": "2022-01-11 23:15",
-                                "arrivalTime": "2022-01-12 01:20",
-                                "stop": 0,
-                                "stops": null,
-                                "flightNumber": "308",
-                                "bookingClass": "H",
-                                "duration": 125,
-                                "departureAirportCode": "ADD",
-                                "departureAirportTerminal": "2",
-                                "arrivalAirportCode": "NBO",
-                                "arrivalAirportTerminal": "1C",
-                                "operatingAirline": "ET",
-                                "airEquipType": "738",
-                                "marketingAirline": "ET",
-                                "marriageGroup": "I",
-                                "cabin": "Y",
-                                "meal": "D",
-                                "fareCode": "HLESUS",
-                                "recheckBaggage": false
-                            }
-                        ],
-                        "duration": 1265
-                    },
-                    {
-                        "tripId": 2,
-                        "segments": [
-                            {
-                                "segmentId": 1,
-                                "departureTime": "2022-01-31 05:00",
-                                "arrivalTime": "2022-01-31 07:15",
-                                "stop": 0,
-                                "stops": null,
-                                "flightNumber": "309",
-                                "bookingClass": "E",
-                                "duration": 135,
-                                "departureAirportCode": "NBO",
-                                "departureAirportTerminal": "1C",
-                                "arrivalAirportCode": "ADD",
-                                "arrivalAirportTerminal": "2",
-                                "operatingAirline": "ET",
-                                "airEquipType": "738",
-                                "marketingAirline": "ET",
-                                "marriageGroup": "O",
-                                "cabin": "Y",
-                                "meal": "B",
-                                "fareCode": "ELPRUS",
-                                "recheckBaggage": false
-                            },
-                            {
-                                "segmentId": 2,
-                                "departureTime": "2022-01-31 08:30",
-                                "arrivalTime": "2022-01-31 18:15",
-                                "stop": 1,
-                                "stops": [
-                                    {
-                                        "locationCode": "LFW",
-                                        "departureDateTime": "2022-01-31 12:15",
-                                        "arrivalDateTime": "2022-01-31 11:00",
-                                        "duration": 75,
-                                        "elapsedTime": 330,
-                                        "equipment": "787"
-                                    }
-                                ],
-                                "flightNumber": "512",
-                                "bookingClass": "E",
-                                "duration": 1065,
-                                "departureAirportCode": "ADD",
-                                "departureAirportTerminal": "2",
-                                "arrivalAirportCode": "JFK",
-                                "arrivalAirportTerminal": "8",
-                                "operatingAirline": "ET",
-                                "airEquipType": "787",
-                                "marketingAirline": "ET",
-                                "marriageGroup": "I",
-                                "cabin": "Y",
-                                "meal": "LD",
-                                "fareCode": "ELPRUS",
-                                "recheckBaggage": false
-                            }
-                        ],
-                        "duration": 1275
-                    }
-                ],
-                "paxCnt": 1,
-                "validatingCarrier": "",
-                "gds": "S",
-                "pcc": "G9MJ",
-                "cons": "GTT",
-                "fareType": "SR",
-                "cabin": "Y",
-                "currency": "USD",
-                "currencies": [
-                    "USD"
-                ],
-                "currencyRates": {
-                    "USDUSD": {
-                        "from": "USD",
-                        "to": "USD",
-                        "rate": 1
-                    }
-                },
-                "keys": {},
-                "meta": {
-                    "eip": 0,
-                    "noavail": false,
-                    "searchId": "U1NTMTAxWTEwMDB8SkZLTkJPMjAyMi0wMS0xMHxOQk9KRksyMDIyLTAxLTMx",
-                    "lang": "en",
-                    "rank": 0,
-                    "cheapest": false,
-                    "fastest": false,
-                    "best": false,
-                    "country": "us"
-                },
-                "billing": {
-                      "first_name": "John",
-                      "last_name": "Doe",
-                      "middle_name": "",
-                      "address_line1": "1013 Weda Cir",
-                      "address_line2": "",
-                      "country_id": "US",
-                      "city": "Mayfield",
-                      "state": "KY",
-                      "zip": "99999",
-                      "company_name": "",
-                      "contact_phone": "+19074861000",
-                      "contact_email": "test@test.com",
-                      "contact_name": "Test Name"
-                },
-                "payment_request": {
-                      "method_key": "cc",
-                      "currency": "USD",
-                      "method_data": {
-                          "card": {
-                              "number": "4111555577778888",
-                              "holder_name": "Test test",
-                              "expiration_month": 10,
-                              "expiration_year": 23,
-                              "cvv": "1234"
-                          }
-                      },
-                      "amount": 112.25
-                }
-            },
+     * "bookingId": "XXXYYYZ",
+     * "quote_gid" : "48c82774ead469ad311c1e6112562726",
+     * "key": "51_U1NTMTAxKlkxMDAwL0pGS05CTzIwMjItMDEtMTAvTkJPSkZLMjAyMi0wMS0zMSp+I0VUNTEzI0VUMzA4I0VUMzA5I0VUNTEyfmxjOmVuX3VzOkVYXzE3Yz123456789",
+     * "prices": {
+     * "totalPrice": 332.12,
+     * "comm": 0,
+     * "isCk": false
+     * },
+     * "passengers": {
+     * "ADT": {
+     * "codeAs": "JCB",
+     * "cnt": 1,
+     * "baseFare": 32.12,
+     * "pubBaseFare": 32.12,
+     * "baseTax": 300,
+     * "markup": 0,
+     * "comm": 0,
+     * "price": 332.12,
+     * "tax": 300,
+     * "oBaseFare": {
+     * "amount": 32.120003,
+     * "currency": "USD"
+     * },
+     * "oBaseTax": {
+     * "amount": 300,
+     * "currency": "USD"
+     * },
+     * "oExchangeFareDiff": {
+     * "amount": 8,
+     * "currency": "USD"
+     * },
+     * "oExchangeTaxDiff": {
+     * "amount": 24.12,
+     * "currency": "USD"
+     * }
+     * }
+     * },
+     * "trips": [
+     * {
+     * "tripId": 1,
+     * "segments": [
+     * {
+     * "segmentId": 1,
+     * "departureTime": "2022-01-10 20:15",
+     * "arrivalTime": "2022-01-11 21:10",
+     * "stop": 1,
+     * "stops": [
+     * {
+     * "locationCode": "LFW",
+     * "departureDateTime": "2022-01-11 12:35",
+     * "arrivalDateTime": "2022-01-11 11:35",
+     * "duration": 60,
+     * "elapsedTime": 620,
+     * "equipment": "787"
+     * }
+     * ],
+     * "flightNumber": "513",
+     * "bookingClass": "H",
+     * "duration": 1015,
+     * "departureAirportCode": "JFK",
+     * "departureAirportTerminal": "8",
+     * "arrivalAirportCode": "ADD",
+     * "arrivalAirportTerminal": "2",
+     * "operatingAirline": "ET",
+     * "airEquipType": "787",
+     * "marketingAirline": "ET",
+     * "marriageGroup": "O",
+     * "cabin": "Y",
+     * "meal": "DL",
+     * "fareCode": "HLESUS",
+     * "recheckBaggage": false
+     * },
+     * {
+     * "segmentId": 2,
+     * "departureTime": "2022-01-11 23:15",
+     * "arrivalTime": "2022-01-12 01:20",
+     * "stop": 0,
+     * "stops": null,
+     * "flightNumber": "308",
+     * "bookingClass": "H",
+     * "duration": 125,
+     * "departureAirportCode": "ADD",
+     * "departureAirportTerminal": "2",
+     * "arrivalAirportCode": "NBO",
+     * "arrivalAirportTerminal": "1C",
+     * "operatingAirline": "ET",
+     * "airEquipType": "738",
+     * "marketingAirline": "ET",
+     * "marriageGroup": "I",
+     * "cabin": "Y",
+     * "meal": "D",
+     * "fareCode": "HLESUS",
+     * "recheckBaggage": false
+     * }
+     * ],
+     * "duration": 1265
+     * },
+     * {
+     * "tripId": 2,
+     * "segments": [
+     * {
+     * "segmentId": 1,
+     * "departureTime": "2022-01-31 05:00",
+     * "arrivalTime": "2022-01-31 07:15",
+     * "stop": 0,
+     * "stops": null,
+     * "flightNumber": "309",
+     * "bookingClass": "E",
+     * "duration": 135,
+     * "departureAirportCode": "NBO",
+     * "departureAirportTerminal": "1C",
+     * "arrivalAirportCode": "ADD",
+     * "arrivalAirportTerminal": "2",
+     * "operatingAirline": "ET",
+     * "airEquipType": "738",
+     * "marketingAirline": "ET",
+     * "marriageGroup": "O",
+     * "cabin": "Y",
+     * "meal": "B",
+     * "fareCode": "ELPRUS",
+     * "recheckBaggage": false
+     * },
+     * {
+     * "segmentId": 2,
+     * "departureTime": "2022-01-31 08:30",
+     * "arrivalTime": "2022-01-31 18:15",
+     * "stop": 1,
+     * "stops": [
+     * {
+     * "locationCode": "LFW",
+     * "departureDateTime": "2022-01-31 12:15",
+     * "arrivalDateTime": "2022-01-31 11:00",
+     * "duration": 75,
+     * "elapsedTime": 330,
+     * "equipment": "787"
+     * }
+     * ],
+     * "flightNumber": "512",
+     * "bookingClass": "E",
+     * "duration": 1065,
+     * "departureAirportCode": "ADD",
+     * "departureAirportTerminal": "2",
+     * "arrivalAirportCode": "JFK",
+     * "arrivalAirportTerminal": "8",
+     * "operatingAirline": "ET",
+     * "airEquipType": "787",
+     * "marketingAirline": "ET",
+     * "marriageGroup": "I",
+     * "cabin": "Y",
+     * "meal": "LD",
+     * "fareCode": "ELPRUS",
+     * "recheckBaggage": false
+     * }
+     * ],
+     * "duration": 1275
+     * }
+     * ],
+     * "paxCnt": 1,
+     * "validatingCarrier": "",
+     * "gds": "S",
+     * "pcc": "G9MJ",
+     * "cons": "GTT",
+     * "fareType": "SR",
+     * "cabin": "Y",
+     * "currency": "USD",
+     * "currencies": [
+     * "USD"
+     * ],
+     * "currencyRates": {
+     * "USDUSD": {
+     * "from": "USD",
+     * "to": "USD",
+     * "rate": 1
+     * }
+     * },
+     * "keys": {},
+     * "meta": {
+     * "eip": 0,
+     * "noavail": false,
+     * "searchId": "U1NTMTAxWTEwMDB8SkZLTkJPMjAyMi0wMS0xMHxOQk9KRksyMDIyLTAxLTMx",
+     * "lang": "en",
+     * "rank": 0,
+     * "cheapest": false,
+     * "fastest": false,
+     * "best": false,
+     * "country": "us"
+     * },
+     * "billing": {
+     * "first_name": "John",
+     * "last_name": "Doe",
+     * "middle_name": "",
+     * "address_line1": "1013 Weda Cir",
+     * "address_line2": "",
+     * "country_id": "US",
+     * "city": "Mayfield",
+     * "state": "KY",
+     * "zip": "99999",
+     * "company_name": "",
+     * "contact_phone": "+19074861000",
+     * "contact_email": "test@test.com",
+     * "contact_name": "Test Name"
+     * },
+     * "payment_request": {
+     * "method_key": "cc",
+     * "currency": "USD",
+     * "method_data": {
+     * "card": {
+     * "number": "4111555577778888",
+     * "holder_name": "Test test",
+     * "expiration_month": 10,
+     * "expiration_year": 23,
+     * "cvv": "1234"
+     * }
+     * },
+     * "amount": 112.25
+     * }
+     * },
      *        "code": "13200",
      *        "technical": {
      *           ...
@@ -1703,12 +1706,12 @@ class FlightQuoteExchangeController extends BaseController
                 new DataMessage(ArrayHelper::toArray($productQuoteChange->pqc_data_json)),
                 new CodeMessage(ApiCodeException::SUCCESS)
             );
-        } catch (\RuntimeException | \DomainException $throwable) {
-            $message = AppHelper::throwableLog($throwable);
-            $message['post'] = $post;
+        } catch (\RuntimeException|\DomainException $throwable) {
+            $message            = AppHelper::throwableLog($throwable);
+            $message['post']    = $post;
             $message['apiUser'] = [
                 'username' => $this->auth->au_api_username ?? null,
-                'project' => $this->auth->auProject->project_key ?? null,
+                'project'  => $this->auth->auProject->project_key ?? null,
             ];
             \Yii::warning($message, 'FlightQuoteExchangeController:actionInfo:Warning');
 
@@ -1718,11 +1721,11 @@ class FlightQuoteExchangeController extends BaseController
                 new CodeMessage($throwable->getCode())
             );
         } catch (\Throwable $throwable) {
-            $message = AppHelper::throwableLog($throwable);
-            $message['post'] = $post;
+            $message            = AppHelper::throwableLog($throwable);
+            $message['post']    = $post;
             $message['apiUser'] = [
                 'username' => $this->auth->au_api_username ?? null,
-                'project' => $this->auth->auProject->project_key ?? null,
+                'project'  => $this->auth->auProject->project_key ?? null,
             ];
             \Yii::error($message, 'FlightQuoteExchangeController:actionInfo:Throwable');
 
@@ -1761,21 +1764,21 @@ class FlightQuoteExchangeController extends BaseController
      *        "status": 200,
      *        "message": "OK",
      *        "data": {
-                    "productQuoteChange": {
-                        "id": 950326,
-                        "productQuoteId": 950326,
-                        "productQuoteGid": "b1ae27497b6eaab24a39fc1370069bd4",
-                        "caseId": 35618,
-                        "caseGid": "e7dce13b4e6a5f3ccc2cec9c21fa3255",
-                        "statusId": 4,
-                        "statusName": "Complete",
-                        "decisionTypeId": null,
-                        "decisionTypeName": "Undefined",
-                        "isAutomate": 1,
-                        "createdDt": "2021-09-21 03:28:33",
-                        "updatedDt": "2021-09-28 09:11:38"
-                    }
-               },
+     * "productQuoteChange": {
+     * "id": 950326,
+     * "productQuoteId": 950326,
+     * "productQuoteGid": "b1ae27497b6eaab24a39fc1370069bd4",
+     * "caseId": 35618,
+     * "caseGid": "e7dce13b4e6a5f3ccc2cec9c21fa3255",
+     * "statusId": 4,
+     * "statusName": "Complete",
+     * "decisionTypeId": null,
+     * "decisionTypeName": "Undefined",
+     * "isAutomate": 1,
+     * "createdDt": "2021-09-21 03:28:33",
+     * "updatedDt": "2021-09-28 09:11:38"
+     * }
+     * },
      *        "code": "13200",
      *        "technical": {
      *           ...
@@ -1862,18 +1865,18 @@ class FlightQuoteExchangeController extends BaseController
 
             return new SuccessResponse(
                 new DataMessage([
-                    'productQuoteChange' => $productQuoteChange
-                        ->setFields(VoluntaryExchangeInfoService::apiDataMapper($productQuoteChange))
-                        ->toArray(),
-                ]),
+                                    'productQuoteChange' => $productQuoteChange
+                                        ->setFields(VoluntaryExchangeInfoService::apiDataMapper($productQuoteChange))
+                                        ->toArray(),
+                                ]),
                 new CodeMessage(ApiCodeException::SUCCESS)
             );
-        } catch (\RuntimeException | \DomainException $throwable) {
-            $message = AppHelper::throwableLog($throwable);
-            $message['post'] = $post;
+        } catch (\RuntimeException|\DomainException $throwable) {
+            $message            = AppHelper::throwableLog($throwable);
+            $message['post']    = $post;
             $message['apiUser'] = [
                 'username' => $this->auth->au_api_username ?? null,
-                'project' => $this->auth->auProject->project_key ?? null,
+                'project'  => $this->auth->auProject->project_key ?? null,
             ];
             \Yii::warning($message, 'FlightQuoteExchangeController:actionInfo:Warning');
 
@@ -1883,11 +1886,11 @@ class FlightQuoteExchangeController extends BaseController
                 new CodeMessage($throwable->getCode())
             );
         } catch (\Throwable $throwable) {
-            $message = AppHelper::throwableLog($throwable);
-            $message['post'] = $post;
+            $message            = AppHelper::throwableLog($throwable);
+            $message['post']    = $post;
             $message['apiUser'] = [
                 'username' => $this->auth->au_api_username ?? null,
-                'project' => $this->auth->auProject->project_key ?? null,
+                'project'  => $this->auth->auProject->project_key ?? null,
             ];
             \Yii::error($message, 'FlightQuoteExchangeController:actionInfo:Throwable');
 
