@@ -1,0 +1,44 @@
+---
+- name: Create phpfpm_exporter user
+  user:
+    name: phpfpm_exporter
+    shell: /usr/sbin/nologin
+    state: present
+    system: yes
+    home: /
+    create_home: no
+
+- name: Add phpfpm_exporter to fpm group
+  user:
+    name: phpfpm_exporter
+    groups: phpfpm_exporter,nginx
+    append: yes
+
+- name: Check phpfpm_exporter installation
+  stat:
+    path: /usr/local/bin/phpfpm_exporter
+  register: phpfpm_exporter
+
+- name: Download and install phpfpm_exporter
+  get_url:
+    url: https://github.com/bakins/php-fpm-exporter/releases/download/v0.6.1/php-fpm-exporter.linux.amd64
+    dest: /usr/local/bin/phpfpm_exporter
+    mode: 0755
+    owner: root
+    group: root
+  when: not phpfpm_exporter.stat.exists
+
+- name: Create phpfpm_exporter service
+  copy:
+    src: phpfpm_exporter.service
+    dest: /etc/systemd/system/phpfpm_exporter.service
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Ensure phpfpm_exporter is started
+  systemd:
+    name: phpfpm_exporter
+    daemon_reload: yes
+    enabled: yes
+    state: started

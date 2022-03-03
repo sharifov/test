@@ -1,0 +1,28 @@
+---
+- name: Set hostname
+  hostname:
+    name: "{{ inventory_hostname }}"
+
+- name: Install a common list of sys packages
+  import_tasks: apt.yml
+
+- name: Disable autoupgrades
+  copy:
+    src: 10periodic
+    dest: /etc/apt/apt.conf.d/10periodic
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Set sytems limits
+  import_tasks: limits.yml
+
+- name: Set timezone to UTC
+  timezone:
+    name: UTC
+
+- name: Set UTF locale
+  locale_gen:
+    name: en_US.UTF-8
+    state: present
+

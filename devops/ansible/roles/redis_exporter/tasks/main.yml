@@ -1,0 +1,64 @@
+---
+- name: Create redis_exporter user
+  user:
+    name: redis_exporter
+    shell: /usr/sbin/nologin
+    state: present
+    system: yes
+    home: /
+    create_home: no
+
+- name: Create redis_exporter group
+  user:
+    name: redis_exporter
+    groups: redis_exporter
+    append: yes
+
+- name: Check redis_exporter installation
+  stat:
+    path: /usr/local/bin/redis_exporter
+  register: redis_exporter
+
+- name: Download redis_exporter tarball
+  get_url:
+    url: https://github.com/oliver006/redis_exporter/releases/download/v1.7.0/redis_exporter-v1.7.0.linux-amd64.tar.gz
+    dest: /tmp/redis_exporter-v1.7.0.linux-amd64.tar.gz
+    mode: 0644
+    owner: root
+    group: root
+  when: not node_exporter.stat.exists
+
+- name: Extract redis_exporter
+  unarchive:
+    src: /tmp/redis_exporter-v1.7.0.linux-amd64.tar.gz
+    dest: /tmp
+    owner: root
+    group: root
+    remote_src: yes
+    creates: /tmp/redis_exporter-v1.7.0.linux-amd64/redis_exporter
+  when: not redis_exporter.stat.exists
+
+- name: Install redis_exporter
+  copy:
+    src: /tmp/redis_exporter-v1.7.0.linux-amd64/redis_exporter
+    dest: /usr/local/bin/redis_exporter
+    mode: 0755
+    owner: root
+    group: root
+    remote_src: yes
+  when: not redis_exporter.stat.exists
+
+- name: Create redis_exporter service
+  copy:
+    src: redis_exporter.service
+    dest: /etc/systemd/system/redis_exporter.service
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Ensure redis_exporter is started
+  systemd:
+    name: redis_exporter
+    daemon_reload: yes
+    enabled: yes
+    state: started

@@ -1,0 +1,52 @@
+---
+# This playbook provisions CRM application server
+
+- name: Setup application server
+  hosts: app
+  gather_facts: false
+  remote_user: "{{ ssh_user }}"
+
+  roles:
+    - role: common
+      tags: common
+      become: yes
+
+    - role: nginx
+      tags: nginx
+      become: yes
+
+    - role: phpfpm
+      tags: php-fpm
+      become: yes
+
+    - role: supervisor
+      tags: supervisor
+      become: yes
+
+    - role: docker
+      tags: docker
+      become: yes
+
+    - role: antispam
+      tags: antispam
+      vars:
+        callantispam_ver: latest
+      become: yes
+
+    - role: filebeat
+      tags: filebeat
+      vars:
+        nginx: yes
+      become: yes
+
+    - role: node_exporter
+      tags: node-exporter
+      become: yes
+
+    - role: phpfpm_exporter
+      tags: phpfpm-exporter
+      become: yes
+
+    - role: beat_exporter
+      tags: beat-exporter
+      become: yes

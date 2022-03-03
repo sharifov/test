@@ -1,0 +1,57 @@
+server {
+    listen 443 ssl http2;
+    listen 9443 ssl http2;
+    server_name {{ api_domain }};
+
+    charset utf-8;
+    client_max_body_size 128M;
+
+    root {{ app_dir }}/webapi/web;
+    index index.php;
+
+    ssl_certificate /etc/nginx/ssl/api.crt;
+    ssl_certificate_key /etc/nginx/ssl/api.key;
+
+    access_log  /var/log/nginx/api-access.log;
+    error_log   /var/log/nginx/api-error.log;
+
+    location / {
+        proxy_send_timeout 300;
+        proxy_read_timeout 300;
+        try_files $uri $uri/ /index.php$is_args$args;
+    }
+
+    location ~ ^/(doc|phpdoc) {
+        satisfy all;
+
+        allow 217.26.162.22;
+        allow 92.115.180.30;
+        allow 185.70.189.104;
+        allow 188.237.171.194;
+        allow 109.185.148.147;
+        deny  all;
+
+        auth_basic  "Restricted area";
+        auth_basic_user_file /etc/nginx/conf.d/.api-htpasswd;
+    }
+
+    location ~ ^/assets/.*\.php$ {
+        deny all;
+    }
+
+    location ~ \.php$ {
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;
+        fastcgi_read_timeout 300;
+        try_files $uri =404;
+    }
+
+    location /health-check {
+        try_files $uri $uri/ /health-check.php$is_args$args;
+    }
+
+    location ~* /\. {
+        deny all;
+    }
+}

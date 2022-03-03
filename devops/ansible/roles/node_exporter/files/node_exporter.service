@@ -1,0 +1,23 @@
+[Unit]
+Description=Prometheus Node Exporter
+After=network-online.target
+StartLimitInterval=0
+
+[Service]
+Type=simple
+User=node_exporter
+Group=node_exporter
+ExecStart=/usr/local/bin/node_exporter \
+    --collector.supervisord \
+    --collector.supervisord.url=unix:///var/run/supervisor.sock \
+    --collector.systemd \
+    --web.listen-address=0.0.0.0:9100
+SyslogIdentifier=node_exporter
+Restart=always
+RestartSec=1
+PrivateTmp=yes
+ProtectHome=yes
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=multi-user.target

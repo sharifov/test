@@ -1,0 +1,70 @@
+---
+- name: Install GPG key for nginx repo
+  apt_key:
+    url: https://nginx.org/keys/nginx_signing.key
+
+- name: Add nginx repository
+  apt_repository:
+    repo: deb http://nginx.org/packages/ubuntu focal nginx
+
+- name: Install nginx
+  apt:
+    name: nginx
+    state: present
+
+- name: Remove default config
+  file:
+    path: /etc/nginx/conf.d/default.conf
+    state: absent
+
+- name: Copy SSL certificates
+  copy:
+    src: "{{ env }}/ssl/"
+    dest: /etc/nginx/ssl/
+    owner: root
+    group: root
+    mode: 0644
+    directory_mode: 0755
+  notify: restart nginx
+
+- name: Enable nginx status
+  copy:
+    src: stub_status.conf
+    dest: /etc/nginx/conf.d/stub_status.conf
+    owner: root
+    group: root
+    mode: 0644
+    directory_mode: 0755
+  notify: restart nginx
+
+- name: Enable app config
+  template:
+    src: app.conf.j2
+    dest: /etc/nginx/conf.d/app.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart nginx
+
+- name: Enable api config
+  template:
+    src: api.conf.j2
+    dest: /etc/nginx/conf.d/api.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart nginx
+
+- name: Copy httpasswd
+  copy:
+    src: "{{ env }}/.api-htpasswd"
+    dest: /etc/nginx/conf.d/.api-htpasswd
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Ensure nginx is started
+  systemd:
+    name: nginx
+    state: started
+    enabled: yes

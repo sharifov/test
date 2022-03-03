@@ -1,0 +1,32 @@
+---
+- name: Install GPG Key centrifugo repo
+  apt_key:
+    url: https://packagecloud.io/FZambia/centrifugo/gpgkey
+    state: present
+
+- name: Create centrifugo repo
+  apt_repository:
+    repo: deb https://packagecloud.io/FZambia/centrifugo/ubuntu/ focal main
+    state: present
+    filename: centrifugo.list
+
+- name: Install centrifugo
+  apt:
+    pkg: centrifugo
+    state: present
+
+- name: Configure centrifugo
+  template:
+    src: config.json.j2
+    dest: /etc/centrifugo/config.json
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart centrifugo
+  become: yes
+
+- name: Ensure centrifugo is started
+  service:
+    name: centrifugo
+    state: started
+    enabled: yes

@@ -1,0 +1,44 @@
+---
+- name: Create beanstalkd_exporter user
+  user:
+    name: beanstalkd_exporter
+    shell: /usr/sbin/nologin
+    state: present
+    system: yes
+    home: /
+    create_home: no
+
+- name: Create beanstalkd_exporter group
+  user:
+    name: beanstalkd_exporter
+    groups: beanstalkd_exporter
+    append: yes
+
+- name: Check node_exporter installation
+  stat:
+    path: /usr/local/bin/beanstalkd_exporter
+  register: beanstalkd_exporter
+
+- name: Download and install beanstalkd_exporter
+  get_url:
+    url: https://github.com/messagebird/beanstalkd_exporter/releases/download/1.0.5/beanstalkd_exporter-1.0.5.linux-amd64
+    dest: /usr/local/bin/beanstalkd_exporter
+    mode: 0755
+    owner: root
+    group: root
+  when: not beanstalkd_exporter.stat.exists
+
+- name: Create beanstalkd_exporter service
+  copy:
+    src: beanstalkd_exporter.service
+    dest: /etc/systemd/system/beanstalkd_exporter.service
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Ensure beanstalkd_exporter is started
+  systemd:
+    name: beanstalkd_exporter
+    daemon_reload: yes
+    enabled: yes
+    state: started
