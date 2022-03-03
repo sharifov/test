@@ -93,8 +93,10 @@ if ($quote->isClientCurrencyDefault()) {
         </tr>
     </tfoot>
 </table>
-<?php if (!$quote->isClientCurrencyDefault()) : ?>
+
 <div class="quote_exclamation_currency">
-    <i class="fa fa-exclamation-circle warning"></i> &nbsp;Currency: <strong><?php echo $currency ?></strong>
+    <?php if (!$quote->isClientCurrencyDefault()) : ?>
+        <i class="fa fa-exclamation-circle warning"></i>
+    <?php endif ?>
+    &nbsp;Currency: <strong><?php echo $currency ?></strong>
 </div>
-<?php endif ?>
