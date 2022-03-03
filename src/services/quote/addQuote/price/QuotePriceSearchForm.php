@@ -19,7 +19,7 @@ class QuotePriceSearchForm extends Model
 
     public string $paxCode;
     public bool $checkPayment;
-    public string $currency;
+    public ?string $currency;
 
     private Quote $quote;
 
