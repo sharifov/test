@@ -2,6 +2,7 @@
 
 use src\events\lead\LeadBookedEvent;
 use src\events\lead\LeadCallExpertRequestEvent;
+use src\events\lead\LeadCloseEvent;
 use src\events\lead\LeadCountPassengersChangedEvent;
 use src\events\lead\LeadCreatedByApiBOEvent;
 use src\events\lead\LeadCreatedByApiEvent;
@@ -32,6 +33,7 @@ use src\events\lead\LeadTrashEvent;
 use src\listeners\lead\LeadBookedEventLogListener;
 use src\listeners\lead\LeadBookedNotificationsListener;
 use src\listeners\lead\LeadCallExpertRequestEventListener;
+use src\listeners\lead\LeadCloseListener;
 use src\listeners\lead\LeadCountPassengersChangedEventListener;
 use src\listeners\lead\LeadCreatedByApiBOLogEventListener;
 use src\listeners\lead\LeadCreatedByApiLogEventListener;
@@ -165,4 +167,7 @@ return [
     LeadPoorProcessingEvent::class => [
         LeadPoorProcessingAdderListener::class,
     ],
+    LeadCloseEvent::class => [
+        LeadCloseListener::class
+    ]
 ];

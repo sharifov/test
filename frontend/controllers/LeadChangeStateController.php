@@ -11,6 +11,7 @@ use modules\qaTask\src\useCases\qaTask\create\lead\trashCheck\QaTaskCreateLeadTr
 use modules\qaTask\src\useCases\qaTask\create\lead\trashCheck\Rule;
 use modules\qaTask\src\useCases\qaTask\create\lead\trashCheck\RuleException;
 use src\auth\Auth;
+use src\forms\leadflow\CloseReasonForm;
 use src\forms\leadflow\FollowUpReasonForm;
 use src\forms\leadflow\RejectReasonForm;
 use src\forms\leadflow\ReturnReasonForm;
@@ -18,6 +19,7 @@ use src\forms\leadflow\SnoozeReasonForm;
 use src\forms\leadflow\TrashReasonForm;
 use src\guards\lead\FollowUpGuard;
 use src\helpers\app\AppHelper;
+use src\model\leadStatusReason\entity\LeadStatusReason;
 use src\model\leadUserConversion\entity\LeadUserConversion;
 use src\model\leadUserConversion\repository\LeadUserConversionRepository;
 use src\model\leadUserConversion\service\LeadUserConversionDictionary;
@@ -82,6 +84,7 @@ class LeadChangeStateController extends FController
                 'allowActions' => [
                     'take-over',
                     'validate-take-over',
+                    'close'
                 ],
             ],
         ];
@@ -232,6 +235,37 @@ class LeadChangeStateController extends FController
         } else {
             return $this->renderAjax('reason_trash', [
                 'reasonForm' => $form
+            ]);
+        }
+        return $this->redirect(['lead/view', 'gid' => $lead->gid]);
+    }
+
+    public function actionClose()
+    {
+        $lead = $this->getLead();
+        $form = new CloseReasonForm($lead);
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            try {
+                $this->stateService->close($lead, $form->reasonKey, Auth::id(), $form->reason);
+                Yii::$app->getSession()->setFlash('success', 'Success');
+            } catch (RuleException $e) {
+                Yii::error(AppHelper::throwableFormatter($e), 'LeadChangeStateController::actionTrash::RuleException');
+            } catch (\DomainException $e) {
+                Yii::$app->getSession()->setFlash('warning', $e->getMessage());
+            } catch (\Throwable $e) {
+                Yii::error(AppHelper::throwableFormatter($e), 'LeadChangeStateController::actionTrash::Throwable');
+                Yii::$app->getSession()->setFlash('danger', 'Server error occurred');
+            }
+        } else {
+            $leadReasonStatues = LeadStatusReason::find()->enabled()->asArray()->all();
+
+            $reasonStatues = ArrayHelper::map($leadReasonStatues, 'lsr_key', 'lsr_name');
+            $reasonStatuesCommentRequired = ArrayHelper::map($leadReasonStatues, 'lsr_key', 'lsr_comment_required');
+
+            return $this->renderAjax('reason_close', [
+                'reasonForm' => $form,
+                'reasonStatuses' => $reasonStatues,
+                'reasonStatuesCommentRequired' => $reasonStatuesCommentRequired
             ]);
         }
         return $this->redirect(['lead/view', 'gid' => $lead->gid]);

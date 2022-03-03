@@ -54,7 +54,7 @@ class LeadFlowLogService
         ?int $creatorId,
         ?string $reason,
         ?string $created
-    ): void {
+    ): LeadFlow {
         if ($previous = $this->leadFlowRepository->getPrevious($leadId)) {
             $previous->end($created);
             $this->leadFlowRepository->save($previous);
@@ -82,5 +82,6 @@ class LeadFlowLogService
                 }
             }
         }
+        return $current;
     }
 }
