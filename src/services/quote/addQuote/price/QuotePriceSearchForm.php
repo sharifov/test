@@ -45,7 +45,7 @@ class QuotePriceSearchForm extends Model
 
             [['cnt'], 'integer'],
 
-            [['baseFare', 'baseTax', 'markup'], 'number', 'max' => 99999],
+            [['baseFare', 'baseTax', 'markup'], 'number'],
 
             [['paxCode'], 'string', 'max' => 3],
             [['paxCode'], 'in', 'range' => array_keys(QuotePrice::PASSENGER_TYPE_LIST)],
