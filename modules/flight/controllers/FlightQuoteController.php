@@ -1002,7 +1002,7 @@ class FlightQuoteController extends FController
             }
 
             $productQuoteChange->pqc_data_json = JsonHelper::encode($voluntaryExchangeBOService->getResult());
-            if ($productQuoteChange->pqc_data_json) {
+            if (!empty($productQuoteChange->pqc_data_json)) {
                 $this->productQuoteChangeRepository->save($productQuoteChange);
             }
 
