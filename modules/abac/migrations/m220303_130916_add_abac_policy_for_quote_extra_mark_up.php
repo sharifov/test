@@ -17,8 +17,8 @@ class m220303_130916_add_abac_policy_for_quote_extra_mark_up extends Migration
 
         $this->insert('{{%abac_policy}}', [
             'ap_rule_type' => 'p',
-            'ap_subject' => '(r.sub.quote_status_id in [1]) && (r.sub.is_owner == true) && (r.sub.lead_status_id in [2])',
-            'ap_subject_json' => '{"condition":"AND","rules":[{"id":"lead-view/quote_status__id","field":"quote_status_id","type":"integer","input":"select","operator":"==","value":[1]},{"id":"lead-view/is_owner","field":"is_owner","type":"boolean","input":"select","operator":"==","value":true},{"id":"lead-view/lead_status_id","field":"lead_status_id","type":"integer","input":"select","operator":"==","value":[2]}],"valid":true}',
+            'ap_subject' => '(r.sub.lead_status_id in [2]) && (r.sub.is_owner == true) && (r.sub.quote_status_id in [1])',
+            'ap_subject_json' => '{"condition":"AND","rules":[{"id":"lead-view/lead_status_id","field":"lead_status_id","type":"integer","input":"select","operator":"==","value":[2]},{"id":"lead-view/is_owner","field":"is_owner","type":"boolean","input":"select","operator":"==","value":true},{"id":"lead-view/quote_status_id","field":"quote_status_id","type":"integer","input":"select","operator":"==","value":[1]}],"valid":true}',
             'ap_object' => 'lead-view/action-ajax-edit-lead-quote-extra-mark-up-modal-content',
             'ap_action' => '(edit)',
             'ap_action_json' => "[\"edit\"]",

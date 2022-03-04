@@ -7,25 +7,25 @@ use common\models\Quote;
 use modules\abac\components\AbacBaseModel;
 use modules\abac\src\entities\AbacInterface;
 
-class QuoteExtraMarkUpChangeAbacObject extends AbacBaseModel implements AbacInterface
+class QuoteAbacObject extends AbacBaseModel implements AbacInterface
 {
     /** NAMESPACE */
     private const NS = 'lead-view/';
 
-    public const QUOTE_CHANGE_EXTRA_MARK_UP_FORM =  self::NS . 'action-ajax-edit-lead-quote-extra-mark-up-modal-content';
+    public const QUOTE_CHANGE_EXTRA_MARK_UP_ACTION =  self::NS . 'action-ajax-edit-lead-quote-extra-mark-up';
 
     public const ACTION_EDIT  = 'edit';
 
     public const OBJECT_LIST = [
-        self::QUOTE_CHANGE_EXTRA_MARK_UP_FORM => self::QUOTE_CHANGE_EXTRA_MARK_UP_FORM,
+        self::QUOTE_CHANGE_EXTRA_MARK_UP_ACTION => self::QUOTE_CHANGE_EXTRA_MARK_UP_ACTION,
     ];
 
     public const OBJECT_ACTION_LIST = [
-        self::QUOTE_CHANGE_EXTRA_MARK_UP_FORM => [ self::ACTION_EDIT],
+        self::QUOTE_CHANGE_EXTRA_MARK_UP_ACTION => [ self::ACTION_EDIT ],
     ];
 
     public const OBJECT_ATTRIBUTE_LIST = [
-        self::QUOTE_CHANGE_EXTRA_MARK_UP_FORM => [
+        self::QUOTE_CHANGE_EXTRA_MARK_UP_ACTION => [
         ],
     ];
 
@@ -44,7 +44,7 @@ class QuoteExtraMarkUpChangeAbacObject extends AbacBaseModel implements AbacInte
 
     protected const ATTR_QUOTE_STATUS = [
         'optgroup' => 'Quote',
-        'id' => self::NS . 'quote_status__id',
+        'id' => self::NS . 'quote_status_id',
         'field' => 'quote_status_id',
         'label' => 'Status',
         'type' => self::ATTR_TYPE_INTEGER,
@@ -85,10 +85,10 @@ class QuoteExtraMarkUpChangeAbacObject extends AbacBaseModel implements AbacInte
         $attrQuoteStatus                                        = self::ATTR_QUOTE_STATUS;
         $attrQuoteStatus['values']                              = Quote::STATUS_LIST;
         $attributeList                                          = self::OBJECT_ATTRIBUTE_LIST;
-        $attributeList[self::QUOTE_CHANGE_EXTRA_MARK_UP_FORM][] = $attrLeadStatus;
-        $attributeList[self::QUOTE_CHANGE_EXTRA_MARK_UP_FORM][] = $attrQuoteStatus;
+        $attributeList[self::QUOTE_CHANGE_EXTRA_MARK_UP_ACTION][] = $attrLeadStatus;
+        $attributeList[self::QUOTE_CHANGE_EXTRA_MARK_UP_ACTION][] = $attrQuoteStatus;
         $attrIsOwner                                            = self::ATTR_USER_IS_OWNER;
-        $attributeList[self::QUOTE_CHANGE_EXTRA_MARK_UP_FORM][] = $attrIsOwner;
+        $attributeList[self::QUOTE_CHANGE_EXTRA_MARK_UP_ACTION][] = $attrIsOwner;
         return $attributeList;
     }
 }

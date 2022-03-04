@@ -28,4 +28,13 @@ class QuotePriceRepository
             ->andWhere(['passenger_type' => $paxCode])
             ->one();
     }
+
+    public static function getAllByQuoteIdAndPaxCode(int $quoteId, string $paxCode)
+    {
+        return QuotePrice
+            ::find()
+            ->where(['quote_id' => $quoteId])
+            ->andWhere(['passenger_type' => $paxCode])
+            ->all();
+    }
 }

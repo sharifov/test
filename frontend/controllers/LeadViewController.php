@@ -33,7 +33,8 @@ use src\logger\db\LogDTO;
 use src\model\clientChat\socket\ClientChatSocketCommands;
 use src\model\clientChatLead\entity\ClientChatLead;
 use src\model\quote\abac\dto\QuoteExtraMarkUpChangeAbacDto;
-use src\model\quote\abac\QuoteExtraMarkUpChangeAbacObject;
+use src\model\quote\abac\QuoteAbacObject;
+use src\repositories\quote\QuotePriceRepository;
 use src\services\client\ClientCreateForm;
 use src\services\client\ClientManageService;
 use src\services\lead\LeadCloneQuoteService;
@@ -909,41 +910,39 @@ class LeadViewController extends FController
     {
         try {
             if (!Yii::$app->request->isAjax || !Yii::$app->request->isPost) {
-                throw new \RuntimeException('Wrong method');
+                throw new \RuntimeException('Method is not allowed');
             }
-            $quoteId = Yii::$app->request->get('quoteId');
-            $paxCode = Yii::$app->request->get('paxCode');
+            $quoteId = (int)Yii::$app->request->get('quoteId');
+            $paxCode = (string)Yii::$app->request->get('paxCode');
             $quote   = Quote::findOne($quoteId);
+            if (empty($quote)) {
+                throw new \RuntimeException('Quote not founded');
+            }
             $lead = $quote->lead;
-            $quoteExtraMarkUpAbacDto = new QuoteExtraMarkUpChangeAbacDto($lead, Auth::id(), $quote);
-            /** @abac quoteExtraMarkUpAbacDto, QuoteExtraMarkUpChangeAbacObject::QUOTE_CHANGE_EXTRA_MARK_UP_FORM, QuoteExtraMarkUpChangeAbacObject::ACTION_EDIT, Access to edit Quote Extra mark-up */
-            $canEditRating = Yii::$app->abac->can(
+            $quoteExtraMarkUpAbacDto = new QuoteExtraMarkUpChangeAbacDto($lead, $quote);
+            /** @abac quoteExtraMarkUpAbacDto, QuoteAbacObject::QUOTE_CHANGE_EXTRA_MARK_UP_ACTION, QuoteExtraMarkUpChangeAbacObject::ACTION_EDIT, Access to edit Quote Extra mark-up */
+            $canUpdateExtraMarkUp = Yii::$app->abac->can(
                 $quoteExtraMarkUpAbacDto,
-                QuoteExtraMarkUpChangeAbacObject::QUOTE_CHANGE_EXTRA_MARK_UP_FORM,
-                QuoteExtraMarkUpChangeAbacObject::ACTION_EDIT
+                QuoteAbacObject::QUOTE_CHANGE_EXTRA_MARK_UP_ACTION,
+                QuoteAbacObject::ACTION_EDIT
             );
-            if (!$canEditRating) {
+            if (!$canUpdateExtraMarkUp) {
                 throw new \RuntimeException('Access Denied');
             }
-            $quotePrices = QuotePrice
-                ::find()
-                ->where(['quote_id' => $quoteId, 'passenger_type' => $paxCode])
-                ->asArray()
-                ->all();
-            $clientCurrency = Currency
-                ::find()
-                ->where(['cur_code' => $quote->q_client_currency])
-                ->one();
+            $quotePrices = QuotePriceRepository::getAllByQuoteIdAndPaxCode($quoteId, $paxCode);
             if (empty($quotePrices)) {
                 throw new \RuntimeException('Quote Price not founded');
             }
-            $quotePrice = $quotePrices[0];
-            $form = new LeadQuoteExtraMarkUpForm($clientCurrency->cur_code, $quote->q_client_currency_rate);
+            $clientCurrency = $quote->clientCurrency;
+            if (empty($clientCurrency)) {
+                throw new \RuntimeException('Currency not Founded');
+            }
+            $quotePrice = QuotePriceRepository::findByQuoteIdAndPaxCode($quoteId, $paxCode)->toArray();
+            $form = new LeadQuoteExtraMarkUpForm($quote->q_client_currency_rate);
             $form->load($quotePrice);
             return $this->renderAjax('partial/_quote_edit_extra_mark_up_content', [
                 'quote'                    => $quote,
                 'paxCode'                  => $paxCode,
-                'clientCurrency'           => $clientCurrency,
                 'leadQuoteExtraMarkUpForm' => $form,
             ]);
         } catch (\RuntimeException | \DomainException $e) {
@@ -967,38 +966,35 @@ class LeadViewController extends FController
 
     public function actionAjaxEditLeadQuoteExtraMarkUp()
     {
+        Yii::$app->response->format = Response::FORMAT_JSON;
         try {
             $transaction = \Yii::$app->db->beginTransaction();
             if (!Yii::$app->request->isAjax || !Yii::$app->request->isPost) {
                 throw new \RuntimeException('Wrong method');
             }
-            Yii::$app->response->format = Response::FORMAT_JSON;
-            $quoteId = Yii::$app->request->get('quoteId');
-            $paxCode = Yii::$app->request->get('paxCode');
+            $quoteId = (int)Yii::$app->request->get('quoteId');
+            $paxCode = (string)Yii::$app->request->get('paxCode');
             $quote   = Quote::findOne($quoteId);
             $lead = $quote->lead;
-            $quoteExtraMarkUpAbacDto = new QuoteExtraMarkUpChangeAbacDto($lead, Auth::id(), $quote);
-            /** @abac quoteExtraMarkUpAbacDto, QuoteExtraMarkUpChangeAbacObject::QUOTE_CHANGE_EXTRA_MARK_UP_FORM, QuoteExtraMarkUpChangeAbacObject::ACTION_EDIT, Access to edit Quote Extra mark-up */
-            $canEditRating = Yii::$app->abac->can(
+            $quoteExtraMarkUpAbacDto = new QuoteExtraMarkUpChangeAbacDto($lead, $quote);
+            /** @abac quoteExtraMarkUpAbacDto, QuoteAbacObject::QUOTE_CHANGE_EXTRA_MARK_UP_ACTION, QuoteExtraMarkUpChangeAbacObject::ACTION_EDIT, Access to edit Quote Extra mark-up */
+            $canUpdateExtraMarkUp = Yii::$app->abac->can(
                 $quoteExtraMarkUpAbacDto,
-                QuoteExtraMarkUpChangeAbacObject::QUOTE_CHANGE_EXTRA_MARK_UP_FORM,
-                QuoteExtraMarkUpChangeAbacObject::ACTION_EDIT
+                QuoteAbacObject::QUOTE_CHANGE_EXTRA_MARK_UP_ACTION,
+                QuoteAbacObject::ACTION_EDIT
             );
-            if (!$canEditRating) {
+            if (!$canUpdateExtraMarkUp) {
                 throw new \RuntimeException('Access Denied');
             }
-            $quotePrices = QuotePrice
-                ::find()
-                ->where(['quote_id' => $quoteId, 'passenger_type' => $paxCode])
-                ->all();
-            $clientCurrency = Currency
-                ::find()
-                ->where(['cur_code' => $quote->q_client_currency])
-                ->one();
+            $quotePrices = QuotePriceRepository::getAllByQuoteIdAndPaxCode($quoteId, $paxCode);
             if (empty($quotePrices)) {
                 throw new \RuntimeException('Quote Prices not founded');
             }
-            $form = new LeadQuoteExtraMarkUpForm($clientCurrency->cur_code, $quote->q_client_currency_rate);
+            $clientCurrency = $quote->clientCurrency;
+            if (empty($clientCurrency)) {
+                throw new \RuntimeException('Currency not Founded');
+            }
+            $form = new LeadQuoteExtraMarkUpForm($quote->q_client_currency_rate);
             $form->load(Yii::$app->request->post());
             if (!$form->validate()) {
                 throw new \RuntimeException(implode(', ', $form->getErrorSummary(true)));
@@ -1011,6 +1007,27 @@ class LeadViewController extends FController
                 $quotePrice->qp_client_extra_mark_up = $form->qp_client_extra_mark_up;
                 $quotePrice->update();
             }
+            $transaction->commit();
+        } catch (\RuntimeException | \DomainException $e) {
+            $transaction->rollBack();
+            Yii::warning(
+                AppHelper::throwableFormatter($e),
+                'LeadViewController::actionAjaxEditQuoteExtraMarkUp:exception'
+            );
+            return [
+                'error' => $e->getMessage()
+            ];
+        } catch (\Throwable $e) {
+            $transaction->rollBack();
+            Yii::error(
+                AppHelper::throwableLog($e),
+                'LeadViewController:actionAjaxEditQuoteExtraMarkUp:Throwable'
+            );
+            return [
+                'error' => 'Server Error'
+            ];
+        }
+        try {
             $priceData = $clientQuotePriceService->getClientPricesData();
             (\Yii::createObject(GlobalLogInterface::class))->log(
                 new LogDTO(
@@ -1035,18 +1052,8 @@ class LeadViewController extends FController
                     ));
                 }
             }
-            $transaction->commit();
             return [
                 'message' => 'Quote Extra mark-up Updated Successfully'
-            ];
-        } catch (\RuntimeException | \DomainException $e) {
-            $transaction->rollBack();
-            Yii::warning(
-                AppHelper::throwableFormatter($e),
-                'LeadViewController::actionAjaxEditQuoteExtraMarkUp:exception'
-            );
-            return [
-                'error' => $e->getMessage()
             ];
         } catch (\Throwable $e) {
             $transaction->rollBack();
@@ -1059,6 +1066,8 @@ class LeadViewController extends FController
             ];
         }
     }
+
+
 
     /**
      * @return string

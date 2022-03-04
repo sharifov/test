@@ -6,7 +6,6 @@
  * @var $leadQuoteExtraMarkUpForm LeadQuoteExtraMarkUpForm
  * @var $paxCode string
  * @var $quote Quote
- * @var $clientCurrency Currency
  *
  */
 
@@ -18,8 +17,10 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
 
-$defaultCurrencyCode = Currency::getDefaultCurrencyCode();
-$inverseCurrencyRate = 1 / $quote->q_client_currency_rate;
+$defaultCurrencyCode     = Currency::getDefaultCurrencyCode();
+$inverseCurrencyRate     = 1 / $quote->q_client_currency_rate;
+$qp_client_extra_mark_up = (float)$leadQuoteExtraMarkUpForm->qp_client_extra_mark_up;
+$extra_mark_up           = (float)$leadQuoteExtraMarkUpForm->extra_mark_up;
 
 ?>
     <div class="edit-name-modal-content-ghj">
@@ -43,13 +44,15 @@ $inverseCurrencyRate = 1 / $quote->q_client_currency_rate;
                              'number',
                              [
                                  'min'   => 0,
-                                 'step'  => 'any',
-                                 'value' => (float)$leadQuoteExtraMarkUpForm->qp_client_extra_mark_up
+                                 'step'  => '0.01',
+                                 'value' => $qp_client_extra_mark_up
                              ]
-                         ) ?>
+                         )
+                         ->label('Client Currency Extra Mark-Up' . ' (' . $quote->q_client_currency . ')')
+                ?>
             </div>
             <div class="col-md-6
-            <?php if ($clientCurrency->cur_code == $defaultCurrencyCode) :?>
+            <?php if ($quote->q_client_currency == $defaultCurrencyCode) : ?>
                         d-none
             <?php endif; ?>">
                 <?= $form->field(
@@ -59,22 +62,31 @@ $inverseCurrencyRate = 1 / $quote->q_client_currency_rate;
                 )
                          ->input(
                              'number',
-                             ['min' => 0, 'step' => 'any', 'value' => (float)$leadQuoteExtraMarkUpForm->extra_mark_up]
-                         ) ?>
+                             ['min' => 0,  'step'  => '0.01', 'value' => $extra_mark_up]
+                         )
+                         ->label('Default Currency Extra Mark-Up' . ' (' . $defaultCurrencyCode . ')')
+                ?>
             </div>
         </div>
-<?php if ($clientCurrency->cur_code !== $defaultCurrencyCode) :?>
+<?php if ($quote->q_client_currency !== $defaultCurrencyCode) :?>
         <h2> currency rates:</h2>
     <div class="row">
         <div class="col-md-6">
-        <?= Yii::$app
-            ->formatter
-            ->asCurrenciesComparison($defaultCurrencyCode, $leadQuoteExtraMarkUpForm->clientCurrencyCode, $quote->q_client_currency_rate) ;?>
+
+        <?='1 <strong> ' .
+          $defaultCurrencyCode .
+          '</strong> = ' .
+          round($quote->q_client_currency_rate, 2) .
+          ' <strong>' . $quote->q_client_currency .
+          '</strong>';?>
         </div>
     <div class="col-md-6">
-        <?= Yii::$app
-            ->formatter
-            ->asCurrenciesComparison($leadQuoteExtraMarkUpForm->clientCurrencyCode, $defaultCurrencyCode, $inverseCurrencyRate) ;?>
+        <?='1 <strong> ' .
+          $quote->q_client_currency .
+          '</strong> = ' .
+          round($inverseCurrencyRate, 2) .
+          ' <strong>' . $defaultCurrencyCode .
+          '</strong>';?>
     </div>
     </div>
 <?php endif; ?>
@@ -93,11 +105,11 @@ $js = <<<JS
 
 $('#qp_client_extra_mark_up_modal_field').on('change keyup input',function(){
     let currencyRate = '$inverseCurrencyRate';
-    $('#extra_mark_up_modal_field').val(($(this).val() * currencyRate).toFixed(4) );
+    $('#extra_mark_up_modal_field').val(($(this).val() * currencyRate).toFixed(2) );
 });
 $('#extra_mark_up_modal_field').on('change keyup input',function(){
        let currencyRate = '$quote->q_client_currency_rate';
-       $('#qp_client_extra_mark_up_modal_field').val(($(this).val() * currencyRate).toFixed(4));
+       $('#qp_client_extra_mark_up_modal_field').val(($(this).val() * currencyRate).toFixed(2));
 });
 
 $('#lead-quote-extra-mark-up-edit-form').on('beforeSubmit', function (e) {

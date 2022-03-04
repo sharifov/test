@@ -27,7 +27,7 @@ return [
         'user' => \modules\user\src\abac\UserAbacObject::class,
         'lead-rating' => \src\model\leadUserRating\abac\LeadUserRatingAbacObject::class,
         'lead-poor-processing' => \src\model\leadPoorProcessingData\abac\LeadPoorProcessingAbacObject::class,
-        'quote-extra-mark-up' => \src\model\quote\abac\QuoteExtraMarkUpChangeAbacObject::class,
+        'quote' => \src\model\quote\abac\QuoteAbacObject::class,
     ],
     'scanDirs' => [
         '/modules/',

@@ -2,7 +2,6 @@
 
 namespace src\forms\lead;
 
-use common\models\Currency;
 use yii\base\Model;
 
 class LeadQuoteExtraMarkUpForm extends Model
@@ -17,14 +16,12 @@ class LeadQuoteExtraMarkUpForm extends Model
      */
     public $qp_client_extra_mark_up;
 
-    public $clientCurrencyCode;
 
     public $clientCurrencyRate;
 
 
-    public function __construct(string $clientCurrencyCode, float $clientCurrencyRate, $config = [])
+    public function __construct(float $clientCurrencyRate, $config = [])
     {
-        $this->clientCurrencyCode = $clientCurrencyCode;
         $this->clientCurrencyRate = $clientCurrencyRate;
 
         parent::__construct($config);
@@ -39,20 +36,17 @@ class LeadQuoteExtraMarkUpForm extends Model
         return [
             [['extra_mark_up'], 'number','min' => 0 ],
             [['qp_client_extra_mark_up'], 'number','min' => 0],
-            [['qp_client_extra_mark_up'], 'validateCurrencyRate'],
+            [['qp_client_extra_mark_up'], 'validateCurrencyRate', 'message' => 'Incorrect client/default mark-up relation'],
         ];
     }
 
     public function validateCurrencyRate($attribute, $value)
     {
-        if (round($this->extra_mark_up, 4) !== round($this->qp_client_extra_mark_up * $this->clientCurrencyRate, 4)) {
+        if (round($this->extra_mark_up, 2) !== round($this->qp_client_extra_mark_up * $this->clientCurrencyRate, 2)) {
             return false;
         }
         return true;
     }
-
-
-
 
 
     /**
@@ -61,8 +55,8 @@ class LeadQuoteExtraMarkUpForm extends Model
     public function attributeLabels(): array
     {
         return [
-            'extra_mark_up' => 'Default Currency Extra Mark-Up (' . Currency::getDefaultCurrencyCode() . ')',
-            'qp_client_extra_mark_up' => 'Client Currency Extra Mark-Up (' . $this->clientCurrencyCode . ')',
+            'extra_mark_up' => 'Default Currency Extra Mark-Up ',
+            'qp_client_extra_mark_up' => 'Client Currency Extra Mark-Up',
         ];
     }
 
