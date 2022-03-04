@@ -16,6 +16,7 @@ class QuotePriceSearchForm extends Model
     public $baseFare;
     public $baseTax;
     public $markup;
+    public $clientExtraMarkUp;
 
     public string $paxCode;
     public bool $checkPayment;
@@ -45,7 +46,7 @@ class QuotePriceSearchForm extends Model
 
             [['cnt'], 'integer'],
 
-            [['baseFare', 'baseTax', 'markup'], 'number'],
+            [['baseFare', 'baseTax', 'markup', 'clientExtraMarkUp'], 'number'],
 
             [['paxCode'], 'string', 'max' => 3],
             [['paxCode'], 'in', 'range' => array_keys(QuotePrice::PASSENGER_TYPE_LIST)],

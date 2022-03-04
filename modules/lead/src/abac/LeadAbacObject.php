@@ -142,6 +142,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     public const ACTION_SNOOZE = 'snooze';
     public const ACTION_MANAGE_LEAD_PREF_CURRENCY = 'manageLeadPrefCurrency';
     public const ACTION_CLOSE = 'close';
+    public const ACTION_TRASH = 'trash';
 
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
@@ -206,7 +207,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_LINK_TO_CALL => [self::ACTION_ACCESS],
         self::ACT_TAKE_LEAD_FROM_CALL => [self::ACTION_ACCESS],
         self::OBJ_LEAD_PREFERENCES => [self::ACTION_SET_DELAY_CHARGE, self::ACTION_MANAGE_LEAD_PREF_CURRENCY],
-        self::OBJ_LEAD => [self::ACTION_CLONE, self::ACTION_SNOOZE, self::ACTION_CLOSE],
+        self::OBJ_LEAD => [self::ACTION_CLONE, self::ACTION_SNOOZE, self::ACTION_CLOSE, self::ACTION_TRASH],
         self::OBJ_EXTRA_QUEUE => [self::ACTION_ACCESS],
         self::OBJ_CLOSED_QUEUE => [self::ACTION_ACCESS],
     ];

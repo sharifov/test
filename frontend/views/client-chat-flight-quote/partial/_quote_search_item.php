@@ -9,6 +9,7 @@ use src\auth\Auth;
 use src\helpers\quote\ImageHelper;
 use src\model\flightQuoteLabelList\entity\FlightQuoteLabelList;
 use src\repositories\quote\QuotePriceRepository;
+use src\services\CurrencyHelper;
 use yii\bootstrap\Html;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
@@ -48,6 +49,8 @@ $urlCreateQuoteFromSearch = Url::to(['client-chat-flight-quote/create-quote-from
 $urlSendQuoteFromSearch = Url::to(['client-chat-flight-quote/send-quote-from-search', 'leadId' => $lead->id]);
 
 $keyId = md5($result['key']);
+
+$currencySymbol = CurrencyHelper::getSymbolByCode($result['currency'] ?? null);
 ?>
 <div
     class="quote search-result__quote <?= !$isQuoteAssignedToFlight ?: 'quote--selected' ?>"
@@ -119,7 +122,9 @@ $keyId = md5($result['key']);
 
         </div>
         <div class="quote__heading-right text-success">
-            <strong class="quote__quote-price">$<?= $result['price'] ?></strong>
+            <strong class="quote__quote-price">
+                <?php echo $currencySymbol ?> <?= $result['price'] ?>
+            </strong>
         </div>
     </div>
     <div class="quote_search_wrapper">
@@ -278,10 +283,10 @@ $keyId = md5($result['key']);
                     <th>Pax</th>
                     <th>Q</th>
                     <?php if (isset($result['prices']['markup']) && $result['prices']['markup'] > 0) :
-                        ?><th class="text-right">MU, $</th><?php
+                        ?><th class="text-right">MU, <?php echo $currencySymbol ?></th><?php
                     endif;?>
-                    <th  class="text-right">Ex Mkp, $</th>
-                    <th class="text-right">SP, $</th>
+                    <th  class="text-right">Ex Mkp, <?php echo $currencySymbol ?></th>
+                    <th class="text-right">SP, <?php echo $currencySymbol ?></th>
                 </tr>
                 </thead>
                 <tbody>
