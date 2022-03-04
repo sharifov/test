@@ -21,6 +21,38 @@ resource "aws_instance" "app" {
   }
 }
 
+# App Target Group
+resource "aws_lb_target_group" "app" {
+  name     = "app-${var.PROJECT}-${var.ENV}"
+  port     = 8443
+  protocol = "HTTPS"
+  vpc_id   = var.VPC_ID
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+resource "aws_lb_target_group_attachment" "app" {
+  count            = length(aws_instance.app)
+  target_group_arn = aws_lb_target_group.app.arn
+  target_id        = aws_instance.app[count.index].id
+}
+
+# API Target Group
+resource "aws_lb_target_group" "api" {
+  name     = "api-${var.PROJECT}-${var.ENV}"
+  port     = 9443
+  protocol = "HTTPS"
+  vpc_id   = var.VPC_ID
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+resource "aws_lb_target_group_attachment" "api" {
+  count            = length(aws_instance.app)
+  target_group_arn = aws_lb_target_group.api.arn
+  target_id        = aws_instance.app[count.index].id
+}
+
 # Private Security Group
 resource "aws_security_group" "app_private" {
   name        = "private-${var.PROJECT}-${var.ENV}"
