@@ -60,14 +60,6 @@ class QuoteController extends ApiBaseController
      *
      * @apiSuccess {string} status    Status
      * @apiSuccess {object} result Result of itinerary and pricing
-     * @apiSuccess {object}     [result.clientPrice]                        Client Price
-     * @apiSuccess {object}     [result.clientPrice.prices]                 Prices
-     * @apiSuccess {float}      [result.clientPrice.prices.totalPrice]      Total Price
-     * @apiSuccess {float}      [result.clientPrice.prices.totalTax]        Total Tax
-     * @apiSuccess {float}      [result.clientPrice.currencyRate]           Currency Rate
-     * @apiSuccess {string}     [result.clientPrice.currency]               Currency
-     * @apiSuccess {string}     [result.clientPrice.fareType]               FareType
-     * @apiSuccess {object}     [result.clientPrice.passengers]             Passengers
      * @apiSuccess {array} errors    Errors
      * @apiSuccess {string} uid    Quote UID
      * @apiSuccess {integer} lead_id    Lead ID
@@ -340,26 +332,7 @@ class QuoteController extends ApiBaseController
      *       "fareType": "PUB",
      *       "tripType": "RT",
      *       "currency": "USD",
-     *       "currencyRate": 1,
-     *       "clientPrice": {
-     *          "prices": {
-     *              "totalPrice": 326.94,
-     *              "totalTax": 134.97
-     *          },
-     *          "passengers": {
-     *              "ADT": {
-     *                  "cnt": 1,
-     *                  "price": 326.94,
-     *                  "tax": 134.97,
-     *                  "baseFare": 191.98,
-     *                  "mark_up": 15.05,
-     *                  "extra_mark_up": 0
-     *              }
-     *          },
-     *          "currency": "EUR",
-     *          "currencyRate": "0.89313",
-     *          "fareType": "PUB"
-     *        }
+     *       "currencyRate": 1
      *   },
      *   "errors": [],
      *   "uid": "5cb97d1c78486",
@@ -629,15 +602,14 @@ class QuoteController extends ApiBaseController
 
             $paxPriceData = $model->getQuotePricePassengersData();
             $response['result'] = array_merge($response['result'], $paxPriceData);
-            $response['result']['clientPrice'] = null;
 
             try {
-                $response['result']['clientPrice'] = (new ClientQuotePriceService($model))->getClientQuotePricePassengersData();
+                if (!$model->isClientCurrencyDefault()) {
+                    $clientPriceData = (new ClientQuotePriceService($model))->getClientQuotePricePassengersData();
+                    $response['result'] = array_merge($response['result'], $clientPriceData);
+                }
             } catch (\Throwable $throwable) {
-                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), [
-                    'quoteId' => $model->id,
-                    'paxPriceData' => $paxPriceData,
-                ]);
+                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['quoteId' => $model->id]);
                 \Yii::error($message, 'QuoteController:actionGetInfo:Throwable');
             }
 
