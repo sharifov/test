@@ -32,7 +32,7 @@ use src\logger\db\GlobalLogInterface;
 use src\logger\db\LogDTO;
 use src\model\clientChat\socket\ClientChatSocketCommands;
 use src\model\clientChatLead\entity\ClientChatLead;
-use src\model\quote\abac\dto\QuoteExtraMarkUpChangeAbacDto;
+use src\model\quote\abac\dto\QuoteAbacDto;
 use src\model\quote\abac\QuoteAbacObject;
 use src\repositories\quote\QuotePriceRepository;
 use src\services\client\ClientCreateForm;
@@ -919,7 +919,7 @@ class LeadViewController extends FController
                 throw new \RuntimeException('Quote not founded');
             }
             $lead = $quote->lead;
-            $quoteExtraMarkUpAbacDto = new QuoteExtraMarkUpChangeAbacDto($lead, $quote);
+            $quoteExtraMarkUpAbacDto = new QuoteAbacDto($lead, $quote);
             /** @abac quoteExtraMarkUpAbacDto, QuoteAbacObject::QUOTE_CHANGE_EXTRA_MARK_UP_ACTION, QuoteExtraMarkUpChangeAbacObject::ACTION_EDIT, Access to edit Quote Extra mark-up */
             $canUpdateExtraMarkUp = Yii::$app->abac->can(
                 $quoteExtraMarkUpAbacDto,
@@ -976,7 +976,7 @@ class LeadViewController extends FController
             $paxCode = (string)Yii::$app->request->get('paxCode');
             $quote   = Quote::findOne($quoteId);
             $lead = $quote->lead;
-            $quoteExtraMarkUpAbacDto = new QuoteExtraMarkUpChangeAbacDto($lead, $quote);
+            $quoteExtraMarkUpAbacDto = new QuoteAbacDto($lead, $quote);
             /** @abac quoteExtraMarkUpAbacDto, QuoteAbacObject::QUOTE_CHANGE_EXTRA_MARK_UP_ACTION, QuoteExtraMarkUpChangeAbacObject::ACTION_EDIT, Access to edit Quote Extra mark-up */
             $canUpdateExtraMarkUp = Yii::$app->abac->can(
                 $quoteExtraMarkUpAbacDto,

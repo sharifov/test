@@ -6,7 +6,7 @@ use common\models\Lead;
 use common\models\Quote;
 use src\auth\Auth;
 
-class QuoteExtraMarkUpChangeAbacDto extends \stdClass
+class QuoteAbacDto extends \stdClass
 {
     public int $lead_status_id;
     public bool $is_owner;

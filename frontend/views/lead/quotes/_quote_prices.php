@@ -10,7 +10,7 @@ use common\models\query\CurrencyQuery;
 use kartik\editable\Editable;
 use src\auth\Auth;
 use src\helpers\app\AppHelper;
-use src\model\quote\abac\dto\QuoteExtraMarkUpChangeAbacDto;
+use src\model\quote\abac\dto\QuoteAbacDto;
 use src\model\quote\abac\QuoteAbacObject;
 use src\services\quote\quotePriceService\ClientQuotePriceService;
 use yii\helpers\ArrayHelper;
@@ -20,7 +20,7 @@ use yii\helpers\Url;
 ?>
 <?php
 $currency = empty($quote->q_client_currency) ? Currency::getDefaultCurrencyCode() : $quote->q_client_currency;
-$quoteExtraMarkUpAbacDto = new QuoteExtraMarkUpChangeAbacDto($quote->lead, $quote);
+$quoteExtraMarkUpAbacDto = new QuoteAbacDto($quote->lead, $quote);
 /** @abac quoteExtraMarkUpAbacDto, QuoteExtraMarkUpChangeAbacObject::QUOTE_CHANGE_EXTRA_MARK_UP_FORM, QuoteExtraMarkUpChangeAbacObject::ACTION_EDIT, Access to edit Quote Extra mark-up */
 $canEditQuoteExtraMarkUp = Yii::$app->abac->can(
     $quoteExtraMarkUpAbacDto,
