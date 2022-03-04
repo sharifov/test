@@ -28,6 +28,7 @@
     - python3-passlib
     - python3-psycopg2
     - mysql-client
+    - postgresql-client
     - gnupg2
     - ca-certificates
     - apt-transport-https
