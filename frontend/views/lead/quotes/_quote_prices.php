@@ -21,11 +21,11 @@ use yii\helpers\Url;
 <?php
 $currency = empty($quote->q_client_currency) ? Currency::getDefaultCurrencyCode() : $quote->q_client_currency;
 $quoteExtraMarkUpAbacDto = new QuoteAbacDto($quote->lead, $quote);
-/** @abac quoteExtraMarkUpAbacDto, QuoteExtraMarkUpChangeAbacObject::QUOTE_CHANGE_EXTRA_MARK_UP_FORM, QuoteExtraMarkUpChangeAbacObject::ACTION_EDIT, Access to edit Quote Extra mark-up */
+/** @abac quoteExtraMarkUpAbacDto, QuoteAbacObject::ACTION_UPDATE_EXTRA_MARKUP, QuoteExtraMarkUpChangeAbacObject::ACTION_ACCESS, Access to edit Quote Extra mark-up */
 $canEditQuoteExtraMarkUp = Yii::$app->abac->can(
     $quoteExtraMarkUpAbacDto,
-    QuoteAbacObject::QUOTE_CHANGE_EXTRA_MARK_UP_ACTION,
-    QuoteAbacObject::ACTION_UPDATE
+    QuoteAbacObject::ACTION_UPDATE_EXTRA_MARKUP,
+    QuoteAbacObject::ACTION_ACCESS
 );
 
 try {

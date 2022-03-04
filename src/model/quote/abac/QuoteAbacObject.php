@@ -10,22 +10,25 @@ use modules\abac\src\entities\AbacInterface;
 class QuoteAbacObject extends AbacBaseModel implements AbacInterface
 {
     /** NAMESPACE */
-    private const NS = 'lead-view/';
+    private const NS = 'quote/quote/';
 
-    public const QUOTE_CHANGE_EXTRA_MARK_UP_ACTION =  self::NS . 'action-ajax-edit-lead-quote-extra-mark-up';
+    /** ACTION PERMISSION */
+    public const ACTION_UPDATE_EXTRA_MARKUP =  self::NS . 'update-extra-markup';
 
-    public const ACTION_UPDATE  = 'update';
+    /** --------------- ACTIONS --------------------------- */
+    public const ACTION_ACCESS  = 'access';
+
 
     public const OBJECT_LIST = [
-        self::QUOTE_CHANGE_EXTRA_MARK_UP_ACTION => self::QUOTE_CHANGE_EXTRA_MARK_UP_ACTION,
+        self::ACTION_UPDATE_EXTRA_MARKUP => self::ACTION_UPDATE_EXTRA_MARKUP,
     ];
 
     public const OBJECT_ACTION_LIST = [
-        self::QUOTE_CHANGE_EXTRA_MARK_UP_ACTION => [ self::ACTION_UPDATE ],
+        self::ACTION_UPDATE_EXTRA_MARKUP => [ self::ACTION_ACCESS ],
     ];
 
     public const OBJECT_ATTRIBUTE_LIST = [
-        self::QUOTE_CHANGE_EXTRA_MARK_UP_ACTION => [
+        self::ACTION_UPDATE_EXTRA_MARKUP => [
         ],
     ];
 
@@ -80,15 +83,15 @@ class QuoteAbacObject extends AbacBaseModel implements AbacInterface
 
     public static function getObjectAttributeList(): array
     {
-        $attrLeadStatus                                         = self::ATTR_LEAD_STATUS;
-        $attrLeadStatus['values']                               = Lead::getAllStatuses();
-        $attrQuoteStatus                                        = self::ATTR_QUOTE_STATUS;
-        $attrQuoteStatus['values']                              = Quote::STATUS_LIST;
-        $attributeList                                          = self::OBJECT_ATTRIBUTE_LIST;
-        $attributeList[self::QUOTE_CHANGE_EXTRA_MARK_UP_ACTION][] = $attrLeadStatus;
-        $attributeList[self::QUOTE_CHANGE_EXTRA_MARK_UP_ACTION][] = $attrQuoteStatus;
-        $attrIsOwner                                            = self::ATTR_USER_IS_OWNER;
-        $attributeList[self::QUOTE_CHANGE_EXTRA_MARK_UP_ACTION][] = $attrIsOwner;
+        $attrLeadStatus                                    = self::ATTR_LEAD_STATUS;
+        $attrLeadStatus['values']                          = Lead::getAllStatuses();
+        $attrQuoteStatus                                   = self::ATTR_QUOTE_STATUS;
+        $attrQuoteStatus['values']                         = Quote::STATUS_LIST;
+        $attributeList                                     = self::OBJECT_ATTRIBUTE_LIST;
+        $attributeList[self::ACTION_UPDATE_EXTRA_MARKUP][] = $attrLeadStatus;
+        $attributeList[self::ACTION_UPDATE_EXTRA_MARKUP][] = $attrQuoteStatus;
+        $attrIsOwner                                       = self::ATTR_USER_IS_OWNER;
+        $attributeList[self::ACTION_UPDATE_EXTRA_MARKUP][] = $attrIsOwner;
         return $attributeList;
     }
 }

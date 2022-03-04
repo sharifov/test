@@ -920,11 +920,11 @@ class LeadViewController extends FController
             }
             $lead = $quote->lead;
             $quoteExtraMarkUpAbacDto = new QuoteAbacDto($lead, $quote);
-            /** @abac quoteExtraMarkUpAbacDto, QuoteAbacObject::QUOTE_CHANGE_EXTRA_MARK_UP_ACTION, QuoteExtraMarkUpChangeAbacObject::ACTION_EDIT, Access to edit Quote Extra mark-up */
+            /** @abac quoteExtraMarkUpAbacDto, QuoteAbacObject::ACTION_UPDATE_EXTRA_MARKUP, QuoteExtraMarkUpChangeAbacObject::ACTION_ACCESS, Access to edit Quote Extra mark-up */
             $canUpdateExtraMarkUp = Yii::$app->abac->can(
                 $quoteExtraMarkUpAbacDto,
-                QuoteAbacObject::QUOTE_CHANGE_EXTRA_MARK_UP_ACTION,
-                QuoteAbacObject::ACTION_UPDATE
+                QuoteAbacObject::ACTION_UPDATE_EXTRA_MARKUP,
+                QuoteAbacObject::ACTION_ACCESS
             );
             if (!$canUpdateExtraMarkUp) {
                 throw new \RuntimeException('Access Denied');
@@ -977,11 +977,11 @@ class LeadViewController extends FController
             $quote   = Quote::findOne($quoteId);
             $lead = $quote->lead;
             $quoteExtraMarkUpAbacDto = new QuoteAbacDto($lead, $quote);
-            /** @abac quoteExtraMarkUpAbacDto, QuoteAbacObject::QUOTE_CHANGE_EXTRA_MARK_UP_ACTION, QuoteExtraMarkUpChangeAbacObject::ACTION_EDIT, Access to edit Quote Extra mark-up */
+            /** @abac quoteExtraMarkUpAbacDto, QuoteAbacObject::ACTION_UPDATE_EXTRA_MARKUP, QuoteExtraMarkUpChangeAbacObject::ACTION_ACCESS, Access to edit Quote Extra mark-up */
             $canUpdateExtraMarkUp = Yii::$app->abac->can(
                 $quoteExtraMarkUpAbacDto,
-                QuoteAbacObject::QUOTE_CHANGE_EXTRA_MARK_UP_ACTION,
-                QuoteAbacObject::ACTION_UPDATE
+                QuoteAbacObject::ACTION_UPDATE_EXTRA_MARKUP,
+                QuoteAbacObject::ACTION_ACCESS
             );
             if (!$canUpdateExtraMarkUp) {
                 throw new \RuntimeException('Access Denied');
