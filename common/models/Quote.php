@@ -2372,6 +2372,8 @@ class Quote extends \yii\db\ActiveRecord
             'fare_type' => $this->fare_type,
             'employee_name' => $this->employee_name,
             'type_id' => $this->type_id,
+            'client_currency_code' => $this->q_client_currency,
+            'client_currency_rate' => $this->q_client_currency_rate
         ];
 
         $pQInformation = [];
@@ -2386,7 +2388,15 @@ class Quote extends \yii\db\ActiveRecord
                     'taxes' => $quotePrice->taxes,
                     'mark_up' => $quotePrice->mark_up,
                     'extra_mark_up' => $quotePrice->extra_mark_up,
-                    'service_fee' => $quotePrice->service_fee
+                    'service_fee' => $quotePrice->service_fee,
+                    'client_selling' => $quotePrice->qp_client_selling,
+                    'client_net' => $quotePrice->qp_client_net,
+                    'client_fare' => $quotePrice->qp_client_fare,
+                    'client_taxes' => $quotePrice->qp_client_taxes,
+                    'client_mark_up' => $quotePrice->qp_client_markup,
+                    'client_extra_mark_up' => $quotePrice->qp_client_extra_mark_up,
+                    'client_service_fee' => $quotePrice->qp_client_service_fee,
+
                 ]
             ];
         }
