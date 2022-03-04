@@ -127,11 +127,11 @@ $this->params['breadcrumbs'][] = $this->title;
                         'attribute' => 'qp_client_taxes',
                         'contentOptions' => ['class' => 'text-right'],
                         'value' => static function (\common\models\QuotePrice $model) {
-                            if (empty($model->qp_client_markup)) {
+                            if (empty($model->qp_client_taxes)) {
                                 return Yii::$app->formatter->nullDisplay;
                             }
                             $clientCurrency = $model->quote->q_client_currency ?? '';
-                            return $model->qp_client_markup . ' ' . $clientCurrency;
+                            return $model->qp_client_taxes . ' ' . $clientCurrency;
                         },
                         'format' => 'raw',
                     ],
@@ -139,11 +139,11 @@ $this->params['breadcrumbs'][] = $this->title;
                         'attribute' => 'qp_client_markup',
                         'contentOptions' => ['class' => 'text-right'],
                         'value' => static function (\common\models\QuotePrice $model) {
-                            if (empty($model->qp_client_taxes)) {
+                            if (empty($model->qp_client_markup)) {
                                 return Yii::$app->formatter->nullDisplay;
                             }
                             $clientCurrency = $model->quote->q_client_currency ?? '';
-                            return $model->qp_client_taxes . ' ' . $clientCurrency;
+                            return $model->qp_client_markup . ' ' . $clientCurrency;
                         },
                         'format' => 'raw',
                     ],
