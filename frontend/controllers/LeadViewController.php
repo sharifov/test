@@ -2,44 +2,51 @@
 
 namespace frontend\controllers;
 
+use common\components\BackOffice;
 use common\models\Client;
 use common\models\ClientEmail;
 use common\models\ClientEmailQuery;
 use common\models\ClientPhone;
+use common\models\Currency;
 use common\models\Employee;
-use common\models\LeadPreferences;
+use common\models\GlobalLog;
+use common\models\Lead;
 use common\models\query\ClientPhoneQuery;
+use common\models\Quote;
+use common\models\QuotePrice;
 use common\models\search\ClientSearch;
 use common\models\search\lead\LeadSearchByClient;
-use frontend\models\LeadForm;
+use common\models\search\lead\LeadSearchByIp;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
-use src\access\ClientInfoAccess;
-use src\access\EmployeeGroupAccess;
 use src\access\LeadPreferencesAccess;
 use src\auth\Auth;
 use src\entities\cases\CasesSearchByClient;
-use src\model\clientChat\socket\ClientChatSocketCommands;
-use src\model\clientChatLead\entity\ClientChatLead;
-use src\services\client\ClientCreateForm;
+use src\forms\lead\CloneQuoteByUidForm;
 use src\forms\lead\EmailCreateForm;
 use src\forms\lead\LeadPreferencesForm;
+use src\forms\lead\LeadQuoteExtraMarkUpForm;
 use src\forms\lead\PhoneCreateForm;
+use src\helpers\app\AppHelper;
+use src\logger\db\GlobalLogInterface;
+use src\logger\db\LogDTO;
+use src\model\clientChat\socket\ClientChatSocketCommands;
+use src\model\clientChatLead\entity\ClientChatLead;
+use src\model\quote\abac\dto\QuoteExtraMarkUpChangeAbacDto;
+use src\model\quote\abac\QuoteExtraMarkUpChangeAbacObject;
+use src\services\client\ClientCreateForm;
 use src\services\client\ClientManageService;
-use common\models\Quote;
-use src\forms\lead\CloneQuoteByUidForm;
 use src\services\lead\LeadCloneQuoteService;
 use src\services\lead\LeadPreferencesManageService;
+use src\services\quote\quotePriceService\ClientQuotePriceService;
 use Yii;
-use common\models\Lead;
-use common\models\search\lead\LeadSearchByIp;
-use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Json;
+use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\HttpException;
-use yii\helpers\VarDumper;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
@@ -896,6 +903,161 @@ class LeadViewController extends FController
         }
 
         throw new BadRequestHttpException();
+    }
+
+    public function actionAjaxEditLeadQuoteExtraMarkUpModalContent()
+    {
+        try {
+            if (!Yii::$app->request->isAjax || !Yii::$app->request->isPost) {
+                throw new \RuntimeException('Wrong method');
+            }
+            $quoteId = Yii::$app->request->get('quoteId');
+            $paxCode = Yii::$app->request->get('paxCode');
+            $quote   = Quote::findOne($quoteId);
+            $lead = $quote->lead;
+            $quoteExtraMarkUpAbacDto = new QuoteExtraMarkUpChangeAbacDto($lead, Auth::id(), $quote);
+            /** @abac quoteExtraMarkUpAbacDto, QuoteExtraMarkUpChangeAbacObject::QUOTE_CHANGE_EXTRA_MARK_UP_FORM, QuoteExtraMarkUpChangeAbacObject::ACTION_EDIT, Access to edit Quote Extra mark-up */
+            $canEditRating = Yii::$app->abac->can(
+                $quoteExtraMarkUpAbacDto,
+                QuoteExtraMarkUpChangeAbacObject::QUOTE_CHANGE_EXTRA_MARK_UP_FORM,
+                QuoteExtraMarkUpChangeAbacObject::ACTION_EDIT
+            );
+            if (!$canEditRating) {
+                throw new \RuntimeException('Access Denied');
+            }
+            $quotePrices = QuotePrice
+                ::find()
+                ->where(['quote_id' => $quoteId, 'passenger_type' => $paxCode])
+                ->asArray()
+                ->all();
+            $clientCurrency = Currency
+                ::find()
+                ->where(['cur_code' => $quote->q_client_currency])
+                ->one();
+            if (empty($quotePrices)) {
+                throw new \RuntimeException('Quote Price not founded');
+            }
+            $quotePrice = $quotePrices[0];
+            $form = new LeadQuoteExtraMarkUpForm($clientCurrency->cur_code, $quote->q_client_currency_rate);
+            $form->load($quotePrice);
+            return $this->renderAjax('partial/_quote_edit_extra_mark_up_content', [
+                'quote'                    => $quote,
+                'paxCode'                  => $paxCode,
+                'clientCurrency'           => $clientCurrency,
+                'leadQuoteExtraMarkUpForm' => $form,
+            ]);
+        } catch (\RuntimeException | \DomainException $e) {
+            Yii::warning(
+                AppHelper::throwableFormatter($e),
+                'LeadViewController::actionAjaxEditQuoteExtraMarkUpModalContent:exception'
+            );
+            return $this->renderAjax('_error', [
+                'error' => $e->getMessage()
+            ]);
+        } catch (\Throwable $e) {
+            Yii::error(
+                AppHelper::throwableLog($e),
+                'LeadViewController:actionAjaxEditQuoteExtraMarkUpModalContent:Throwable'
+            );
+            return $this->renderAjax('_error', [
+                'error' => 'ServerError'
+            ]);
+        }
+    }
+
+    public function actionAjaxEditLeadQuoteExtraMarkUp()
+    {
+        try {
+            $transaction = \Yii::$app->db->beginTransaction();
+            if (!Yii::$app->request->isAjax || !Yii::$app->request->isPost) {
+                throw new \RuntimeException('Wrong method');
+            }
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            $quoteId = Yii::$app->request->get('quoteId');
+            $paxCode = Yii::$app->request->get('paxCode');
+            $quote   = Quote::findOne($quoteId);
+            $lead = $quote->lead;
+            $quoteExtraMarkUpAbacDto = new QuoteExtraMarkUpChangeAbacDto($lead, Auth::id(), $quote);
+            /** @abac quoteExtraMarkUpAbacDto, QuoteExtraMarkUpChangeAbacObject::QUOTE_CHANGE_EXTRA_MARK_UP_FORM, QuoteExtraMarkUpChangeAbacObject::ACTION_EDIT, Access to edit Quote Extra mark-up */
+            $canEditRating = Yii::$app->abac->can(
+                $quoteExtraMarkUpAbacDto,
+                QuoteExtraMarkUpChangeAbacObject::QUOTE_CHANGE_EXTRA_MARK_UP_FORM,
+                QuoteExtraMarkUpChangeAbacObject::ACTION_EDIT
+            );
+            if (!$canEditRating) {
+                throw new \RuntimeException('Access Denied');
+            }
+            $quotePrices = QuotePrice
+                ::find()
+                ->where(['quote_id' => $quoteId, 'passenger_type' => $paxCode])
+                ->all();
+            $clientCurrency = Currency
+                ::find()
+                ->where(['cur_code' => $quote->q_client_currency])
+                ->one();
+            if (empty($quotePrices)) {
+                throw new \RuntimeException('Quote Prices not founded');
+            }
+            $form = new LeadQuoteExtraMarkUpForm($clientCurrency->cur_code, $quote->q_client_currency_rate);
+            $form->load(Yii::$app->request->post());
+            if (!$form->validate()) {
+                throw new \RuntimeException(implode(', ', $form->getErrorSummary(true)));
+            }
+            $clientQuotePriceService = new ClientQuotePriceService($quote);
+            $priceData = $clientQuotePriceService->getClientPricesData();
+            $sellingOld = $priceData['total']['selling'];
+            foreach ($quotePrices as $quotePrice) {
+                $quotePrice->extra_mark_up = $form->extra_mark_up;
+                $quotePrice->qp_client_extra_mark_up = $form->qp_client_extra_mark_up;
+                $quotePrice->update();
+            }
+            $priceData = $clientQuotePriceService->getClientPricesData();
+            (\Yii::createObject(GlobalLogInterface::class))->log(
+                new LogDTO(
+                    get_class($quote),
+                    $quote->id,
+                    \Yii::$app->id,
+                    Auth::id(),
+                    Json::encode(['selling' => $sellingOld]),
+                    Json::encode(['selling' => $priceData['total']['selling']]),
+                    null,
+                    GlobalLog::ACTION_TYPE_UPDATE
+                )
+            );
+            if ($lead->called_expert) {
+                $data = $quote->getQuoteInformationForExpert(true);
+                $response = BackOffice::sendRequest('lead/update-quote', 'POST', json_encode($data));
+                if ($response['status'] != 'Success' || !empty($response['errors'])) {
+                    \Yii::$app->getSession()->setFlash('warning', sprintf(
+                        'Update info quote [%s] for expert failed! %s',
+                        $quote->uid,
+                        print_r($response['errors'], true)
+                    ));
+                }
+            }
+            $transaction->commit();
+            return [
+                'message' => 'Quote Extra mark-up Updated Successfully'
+            ];
+        } catch (\RuntimeException | \DomainException $e) {
+            $transaction->rollBack();
+            Yii::warning(
+                AppHelper::throwableFormatter($e),
+                'LeadViewController::actionAjaxEditQuoteExtraMarkUp:exception'
+            );
+            return [
+                'error' => $e->getMessage()
+            ];
+        } catch (\Throwable $e) {
+            $transaction->rollBack();
+            Yii::error(
+                AppHelper::throwableLog($e),
+                'LeadViewController:actionAjaxEditQuoteExtraMarkUp:Throwable'
+            );
+            return [
+                'error' => 'Server Error'
+            ];
+        }
     }
 
     /**
