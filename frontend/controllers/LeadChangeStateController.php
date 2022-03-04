@@ -84,7 +84,9 @@ class LeadChangeStateController extends FController
                 'allowActions' => [
                     'take-over',
                     'validate-take-over',
-                    'close'
+                    'close',
+                    'trash',
+                    'validate-trash'
                 ],
             ],
         ];
@@ -207,6 +209,13 @@ class LeadChangeStateController extends FController
     public function actionTrash()
     {
         $lead = $this->getLead();
+
+        /** @abac new LeadAbacDto($lead, Auth::id()), LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_TRASH, Access to move lead to trash */
+        $leadAbacDto = new LeadAbacDto($lead, Auth::id());
+        if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_TRASH)) {
+            throw new ForbiddenHttpException('Access Denied');
+        }
+
         $form = new TrashReasonForm($lead);
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
@@ -249,11 +258,11 @@ class LeadChangeStateController extends FController
                 $this->stateService->close($lead, $form->reasonKey, Auth::id(), $form->reason);
                 Yii::$app->getSession()->setFlash('success', 'Success');
             } catch (RuleException $e) {
-                Yii::error(AppHelper::throwableFormatter($e), 'LeadChangeStateController::actionTrash::RuleException');
+                Yii::error(AppHelper::throwableFormatter($e), 'LeadChangeStateController::actionClose::RuleException');
             } catch (\DomainException $e) {
                 Yii::$app->getSession()->setFlash('warning', $e->getMessage());
             } catch (\Throwable $e) {
-                Yii::error(AppHelper::throwableFormatter($e), 'LeadChangeStateController::actionTrash::Throwable');
+                Yii::error(AppHelper::throwableFormatter($e), 'LeadChangeStateController::actionClose::Throwable');
                 Yii::$app->getSession()->setFlash('danger', 'Server error occurred');
             }
         } else {
@@ -279,6 +288,11 @@ class LeadChangeStateController extends FController
     public function actionValidateTrash(): array
     {
         $lead = $this->getLead();
+        /** @abac new LeadAbacDto($lead, Auth::id()), LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_TRASH, Access to move lead to trash */
+        $leadAbacDto = new LeadAbacDto($lead, Auth::id());
+        if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_TRASH)) {
+            throw new ForbiddenHttpException('Access Denied');
+        }
         $form = new TrashReasonForm($lead);
         if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
             Yii::$app->response->format = Response::FORMAT_JSON;
