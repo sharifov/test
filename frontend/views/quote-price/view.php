@@ -78,7 +78,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attributes' => [
                     [
                         'attribute' => 'selling',
-                        //'format' => ['decimal',2],
                         'contentOptions' => ['class' => 'text-right'],
                         'format' => 'currency'
                     ],
@@ -104,6 +103,11 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     [
                         'attribute' => 'extra_mark_up',
+                        'contentOptions' => ['class' => 'text-right'],
+                        'format' => 'currency'
+                    ],
+                    [
+                        'attribute' => 'service_fee',
                         'contentOptions' => ['class' => 'text-right'],
                         'format' => 'currency'
                     ],
