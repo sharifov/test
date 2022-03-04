@@ -924,7 +924,7 @@ class LeadViewController extends FController
             $canUpdateExtraMarkUp = Yii::$app->abac->can(
                 $quoteExtraMarkUpAbacDto,
                 QuoteAbacObject::QUOTE_CHANGE_EXTRA_MARK_UP_ACTION,
-                QuoteAbacObject::ACTION_EDIT
+                QuoteAbacObject::ACTION_UPDATE
             );
             if (!$canUpdateExtraMarkUp) {
                 throw new \RuntimeException('Access Denied');
@@ -981,7 +981,7 @@ class LeadViewController extends FController
             $canUpdateExtraMarkUp = Yii::$app->abac->can(
                 $quoteExtraMarkUpAbacDto,
                 QuoteAbacObject::QUOTE_CHANGE_EXTRA_MARK_UP_ACTION,
-                QuoteAbacObject::ACTION_EDIT
+                QuoteAbacObject::ACTION_UPDATE
             );
             if (!$canUpdateExtraMarkUp) {
                 throw new \RuntimeException('Access Denied');

@@ -14,14 +14,14 @@ class QuoteAbacObject extends AbacBaseModel implements AbacInterface
 
     public const QUOTE_CHANGE_EXTRA_MARK_UP_ACTION =  self::NS . 'action-ajax-edit-lead-quote-extra-mark-up';
 
-    public const ACTION_EDIT  = 'edit';
+    public const ACTION_UPDATE  = 'update';
 
     public const OBJECT_LIST = [
         self::QUOTE_CHANGE_EXTRA_MARK_UP_ACTION => self::QUOTE_CHANGE_EXTRA_MARK_UP_ACTION,
     ];
 
     public const OBJECT_ACTION_LIST = [
-        self::QUOTE_CHANGE_EXTRA_MARK_UP_ACTION => [ self::ACTION_EDIT ],
+        self::QUOTE_CHANGE_EXTRA_MARK_UP_ACTION => [ self::ACTION_UPDATE ],
     ];
 
     public const OBJECT_ATTRIBUTE_LIST = [
