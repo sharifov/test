@@ -100,6 +100,7 @@
       - html
       - "{{ sym.stat.lnk_target | basename }}"
   register: result
+  when: sym.stat.lnk_target
 
 - name: Keep last 3 releases
   file:
