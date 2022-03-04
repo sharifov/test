@@ -7,7 +7,6 @@ use Yii;
 use yii\base\Event;
 use yii\helpers\VarDumper;
 
-
 class EventApp
 {
     /**
