@@ -1,0 +1,6 @@
+[client]
+user={{ mysql_exporter_username }}
+password={{ mysql_exporter_password }}
+{% if mysql_host|length > 0 %}
+host={{ mysql_host }}
+{% endif %}

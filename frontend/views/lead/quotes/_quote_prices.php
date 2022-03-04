@@ -6,6 +6,7 @@
  */
 
 use common\models\Currency;
+use common\models\query\CurrencyQuery;
 use kartik\editable\Editable;
 use src\auth\Auth;
 use src\helpers\app\AppHelper;
@@ -27,6 +28,16 @@ $canEditQuoteExtraMarkUp = Yii::$app->abac->can(
     QuoteExtraMarkUpChangeAbacObject::ACTION_EDIT
 );
 
+try {
+    if (!$currencySymbol = CurrencyQuery::getCurrencySymbolByCode($currency)) {
+        throw new \RuntimeException('Currency Symbol not found');
+    }
+} catch (\Throwable $throwable) {
+    $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['quoteId' => $quote->id, 'currency' => $currency]);
+    \Yii::error($message, 'QuotePrices:currencySymbol:Throwable');
+    $currencySymbol = $currency;
+}
+
 if ($quote->isClientCurrencyDefault()) {
     $priceData = $quote->getPricesData();
 } else {
@@ -40,15 +51,16 @@ if ($quote->isClientCurrencyDefault()) {
     }
 }
 ?>
+
 <table class="table table-striped table-prices" id="quote-prices-<?= $quote->id?>">
     <thead>
         <tr>
             <th>Pax</th>
             <th>Q</th>
-            <th>NP, <?php echo $currency ?></th>
-            <th>Mkp, <?php echo $currency ?></th>
-            <th>Ex Mkp, <?php echo $currency ?></th>
-            <th>SP, <?php echo $currency ?></th>
+            <th>NP, <?php echo $currencySymbol ?></th>
+            <th>Mkp, <?php echo $currencySymbol ?></th>
+            <th>Ex Mkp, <?php echo $currencySymbol ?></th>
+            <th>SP, <?php echo $currencySymbol ?></th>
         </tr>
     </thead>
     <tbody>
@@ -90,3 +102,10 @@ if ($quote->isClientCurrencyDefault()) {
         </tr>
     </tfoot>
 </table>
+
+<div class="quote_exclamation_currency">
+    <?php if (!$quote->isClientCurrencyDefault()) : ?>
+        <i class="fa fa-exclamation-circle warning"></i>
+    <?php endif ?>
+    &nbsp;Currency: <strong><?php echo $currency ?></strong>
+</div>

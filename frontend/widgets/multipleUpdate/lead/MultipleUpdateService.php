@@ -271,7 +271,7 @@ class MultipleUpdateService
             }
         } elseif ($form->isClosed()) {
             try {
-                $this->leadStateService->close($lead);
+                $this->leadStateService->close($lead, null, Auth::id());
                 $this->addMessage($this->movedStateMessage($lead, 'Close Queue', $oldOwnerId, $newOwner->id, $newOwner->userName));
             } catch (\DomainException $e) {
                 $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());

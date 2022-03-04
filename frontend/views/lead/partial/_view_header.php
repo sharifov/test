@@ -44,10 +44,10 @@ $bundle = \frontend\assets\TimerAsset::register($this);
   $('.enable-timer-lpp').each( function (i, e) {
       let seconds = $(e).attr('data-seconds');
       if (seconds < 0) {
-          var params = {format: '%H:%M:%S', seconds: Math.abs(seconds)};
+          var params = {format: '%d %H:%M:%S', seconds: Math.abs(seconds)};
       } else {
-          var params = {format: '%H:%M:%S', countdown: true, duration: seconds + 's', callback: function () {
-              $(e).timer('remove').timer({format: '%H:%M:%S', seconds: 0}).timer('start');
+          var params = {format: '%d %H:%M:%S', countdown: true, duration: seconds + 's', callback: function () {
+              $(e).timer('remove').timer({format: '%d %H:%M:%S', seconds: 0}).timer('start');
           }};
       }
       $(e).timer(params).timer('start');

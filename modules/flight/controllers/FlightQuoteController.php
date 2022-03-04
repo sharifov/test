@@ -1002,7 +1002,9 @@ class FlightQuoteController extends FController
             }
 
             $productQuoteChange->pqc_data_json = JsonHelper::encode($voluntaryExchangeBOService->getResult());
-            $productQuoteChange->save();
+            if (!empty($productQuoteChange->pqc_data_json)) {
+                $this->productQuoteChangeRepository->save($productQuoteChange);
+            }
 
             $form = new VoluntaryQuoteCreateForm(Auth::id(), $flight, true, $voluntaryExchangeBOService->getServiceFeeAmount());
             $form->setCustomerPackage($voluntaryExchangeBOService->getCustomerPackage());

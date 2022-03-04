@@ -1,6 +1,6 @@
 # CRM Sale
-Installation:
--------------------
+Customer relationship management (CRM) is a technology for managing all your company’s relationships and interactions with customers and potential customers.
+## Installation:
 Minimal Installation setup for local / stage / development server:
 (full toolkit setup documentation located at https://traveldev.atlassian.net/wiki/spaces/SLS/pages/1584791640/ )
 
@@ -14,7 +14,7 @@ Or Install PHP 8.0 and redis-server
 sudo apt-get install php8.0 php8.0-dev php8.0-fpm php-pear php-imagick php8.0-intl php8.0-zip php8.0-curl php8.0-gd php8.0-mysql php8.0-xml php8.0-mbstring php8.0-pgsql php8.0-xmlrpc php8.0-sqlite3 php8.0-soap php8.0-tidy php8.0-pspell php8.0-imap php8.0-bcmath php-redis php-ssh2
 
 # set default php CLI version
-    sudo update-alternatives --config php
+sudo update-alternatives --config php
 ```
 
 1.1) INSTALL swoole 4.4.16 & ext-async v4.4.16 for swoole_redis
@@ -54,8 +54,7 @@ composer install
 ./init #(select ENV)
 ```
 
-Nginx configuration
--------------------
+### Nginx configuration
 1. Copy example config file ./nginx.conf from project folder to your nginx configs directory usually located at `/etc/nginx/sites-available/`;
 2. (Optional) You can edit our test hosts to anything else (if you want);
 3. Generate self-signed SSL certificate (for example you can use certutil or openssl) and edit in nginx config their file names for 2 hosts (add them to `/etc/hosts` too):
@@ -71,8 +70,7 @@ location ~ \.php$ {
 }
 ```
 
-Migration (RBAC + LOG):
--------------------
+### Migration (RBAC + LOG):
 ```sh
 ./yii migrate --migrationPath=@yii/rbac/migrations/
 ./yii migrate --migrationPath=@yii/log/migrations/
@@ -100,8 +98,7 @@ sql_mode=only_full_group_by
 sudo service mysql restart
 ```
 
-Install Supervisor
--------------------
+## Install Supervisor
  ```sh
 sudo apt-get install supervisor
 sudo nano /etc/supervisor/supervisord.conf
@@ -129,10 +126,8 @@ sudo service supervisor start (OR sudo /etc/init.d/supervisor restart)
  ``` 
 
 
-Beanstalk:
--------------------
- [Beanstalk driver for queue](https://github.com/yiisoft/yii2-queue/blob/master/docs/guide-ru/driver-beanstalk.md)
-
+### Beanstalk:
+[Beanstalk driver for queue](https://github.com/yiisoft/yii2-queue/blob/master/docs/guide-ru/driver-beanstalk.md)
 ```php
 <?php
 // example in yii components
@@ -158,12 +153,10 @@ yum install beanstalkd
 service beanstalkd start
 ```
 
-Cetrifugo Server
--------------------
+### Centrifugo Server
 *Install on Ubuntu:*
 
 https://centrifugal.github.io/centrifugo/server/install/
-
 ```sh
 # in .. config/supervisor rename file centrifugo.conf.txt
 sudo service supervisor restart
@@ -171,8 +164,7 @@ sudo service supervisor restart
 END of installation. Now frontend and api must respond. 
 
 
-DOCUMENTATION
-----------
+## DOCUMENTATION
 
 ### Prod Kiv Host:
 - [sales.travelinsides.com](https://sales.travelinsides.com) - Frontend
@@ -198,8 +190,7 @@ DOCUMENTATION
 - [api-sales.dev.travelinsides.com/doc/index.html](https://api-sales.dev.travelinsides.com/doc/index.html) - API Documentation
 - [api-sales.dev.travelinsides.com/phpdoc/index.html](https://api-sales.dev.travelinsides.com/phpdoc/index.html) - PHP Documentation
 
-Health check API:
--------------------
+### Health check API:
 ```
 https://{API_HOST}/health-check
 ```
@@ -228,14 +219,13 @@ sudo apidoc -c ./apidoc.json -i "./webapi/modules/" -i "./webapi/controllers/" -
 sudo apidoc -c ./apidoc.json -i "./webapi/modules/" -i "./webapi/controllers/" -o "./webapi/web/doc2/" -t ./webapi/web/apidoc/template2 -f ".*\\.php$"
 ```
 
-Api Example:
--------------------
+### Api Example:
+
 
 Documentation is at [docs/guide/README.md](docs/guide/README.md).
 
-Test Code - Migration:
--------------------
-common/config/test-local.php
+### Test Code - Migration:
+`common/config/test-local.php`
 ```php
 <?php
 'db' => [
@@ -262,8 +252,7 @@ Migrate command:
 * run test ```vendor/bin/codecept run```
 
 
-PhantomJS
--------------------
+### PhantomJS
 * Download & install - [http://phantomjs.org/download.html](http://phantomjs.org/download.html)
 * Run  ```phantomjs --webdriver=4444```
 
@@ -281,7 +270,6 @@ sudo netstat -tulpn| grep :8080
 ```
 
 ### Filebeat for ELK
-
 Filebeat on Ubuntu:
 ```sh
 wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
@@ -316,8 +304,7 @@ sudo service filebeat status
 sudo tail -f /var/log/filebeat/filebeat
 ``` 
 
-CRONs
--------------------
+### CRONs
 ```
 #*/17  *  *  *  *     run-this-one php /var/www/sale/yii monitor-flow/follow-up
 */15  *  *  *  *     run-this-one php /var/www/sale/yii monitor-flow/on-wake
@@ -360,8 +347,7 @@ sudo service php7.3-fpm restart
 ./self-signed-tls.sh -c=MD -s=Chisinau -l=Chisinau -o=Kivork -u=Kivork -n=sales.zeit.test -e=alex.connor@techork.com
 ```
 
-PHPDoc (phpDocumentor)
--------------------
+### PHPDoc (phpDocumentor)
 Installation PHIVE (https://phar.io/):
 ```sh
 wget -O phive.phar https://phar.io/releases/phive.phar
@@ -398,16 +384,22 @@ php -r "echo geoip_time_zone_by_country_and_region('US', 'CA') . PHP_EOL;"
 ```
 - Command must return the time zone of the USA - California ---> America/Los_Angeles
 
-### CRYPTO - PgSQL
+### CRYPTO
+PgSQL Example:
 ```sql
 CREATE EXTENSION pgcrypto;
 SELECT encode(encrypt_iv('Hello!', 'PASSWORD', 'IV-STRING-16', 'aes-cbc'), 'base64');
 SELECT convert_from(decrypt_iv(decode('a5S7B5nas5XaWibbuX45AA==','base64'), 'PASSWORD', 'IV-STRING-16', 'aes-cbc'),'SQL_ASCII') AS str;
 ```
-### CRYPTO - MySQL
+MySQL Example:
 ```sql
 SET block_encryption_mode = 'aes-256-cbc';
 SELECT TO_BASE64(AES_ENCRYPT('Hello!','PASSWORD', 'IV-STRING-16')) AS aes
 SELECT AES_DECRYPT(FROM_BASE64('PRZKw4PIlNtSPRFuNWYmbA=='), 'PASSWORD', 'IV-STRING-16') AS aes
 ```
 
+## Application Information
+- [Summary Information](/guides/content/application-info.md)
+- - [General Information](/guides/content/application-general-info.md)
+- - [Third-party dependencies](/guides/content/application-dependencies.md) (libraries / projects / services)
+## License

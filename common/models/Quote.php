@@ -8,6 +8,7 @@ use common\models\local\FlightSegment;
 use common\models\query\QuoteQuery;
 use frontend\helpers\JsonHelper;
 use src\behaviors\metric\MetricQuoteCounterBehavior;
+use src\behaviors\quote\ClientCurrencyBehavior;
 use src\entities\EventTrait;
 use src\events\quote\QuoteSendEvent;
 use src\helpers\app\AppHelper;
@@ -69,6 +70,7 @@ use yii\helpers\VarDumper;
  * @property Airline[] $mainAirline
  * @property Project $providerProject
  * @property QuoteLabel[] $quoteLabel
+ * @property Currency|null $clientCurrency
  */
 class Quote extends \yii\db\ActiveRecord
 {
@@ -296,7 +298,6 @@ class Quote extends \yii\db\ActiveRecord
             ['provider_project_id', 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['provider_project_id' => 'id']],
 
             [['q_client_currency'], 'string', 'max' => 3],
-            [['q_client_currency'], 'default', 'value' => Currency::DEFAULT_CURRENCY],
             [['q_client_currency'], 'exist', 'skipOnError' => true, 'skipOnEmpty' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['q_client_currency' => 'cur_code']],
 
             [['q_client_currency_rate'], 'number'],
@@ -361,6 +362,7 @@ class Quote extends \yii\db\ActiveRecord
             'metric' => [
                 'class' => MetricQuoteCounterBehavior::class,
             ],
+            'clientCurrencyBehavior' => ClientCurrencyBehavior::class,
         ];
     }
 
@@ -771,7 +773,10 @@ class Quote extends \yii\db\ActiveRecord
         return $this->hasOne(Lead::class, ['id' => 'lead_id']);
     }
 
-
+    public function getClientCurrency(): ActiveQuery
+    {
+        return $this->hasOne(Currency::class, ['cur_code' => 'q_client_currency']);
+    }
 
 //    public function beforeValidate()
 //    {

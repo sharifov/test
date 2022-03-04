@@ -1535,8 +1535,13 @@ class LeadController extends ApiBaseController
                         }
 
                         $notifMessage = '';
+                        $leadAdditionalInformation = $lead->additionalInformationFormFirstElement;
+                        $leadOldAdditionalInformation = $lead->oldAdditionalInformationFormFirstElement;
                         foreach ($leadAttributes['additional_information'] as $additionalInformation) {
-                            if (isset($additionalInformation['tkt_processed']) && (bool)$additionalInformation['tkt_processed'] === false) {
+                            if (
+                                isset($additionalInformation['tkt_processed']) && (bool)$additionalInformation['tkt_processed'] === false
+                                && $leadAdditionalInformation->tkt_processed !== $leadOldAdditionalInformation->tkt_processed
+                            ) {
                                 $linkToLead = Purifier::createLeadShortLink($lead);
                                 $notifMessage .= 'Flight ticket (PNR: ' . $additionalInformation['pnr'] . ') has been voided. Lead UID - ' . $linkToLead . PHP_EOL;
                             }

@@ -7,6 +7,7 @@
  * @var $project_id int
  */
 
+use common\models\Currency;
 use common\models\Lead;
 use src\model\flightQuoteLabelList\service\FlightQuoteLabelListDictionary;
 use src\model\flightQuoteLabelList\service\FlightQuoteLabelListService;
@@ -55,6 +56,14 @@ $paxCntTypes = [
         ['id' => 'reservation_result', 'style' => 'display:none;']
     )
 ?>
+
+<?php $currencyLead = $quote->lead->leadPreferences->pref_currency ?? Currency::getDefaultCurrencyCode() ?>
+<?php if ($currencyLead !== Currency::getDefaultCurrencyCode()) : ?>
+<div class="quote_exclamation_currency">
+    <i class="fa fa-exclamation-circle warning"></i> Lead Currency: <strong><?php echo $currencyLead ?></strong>
+</div>
+<?php endif ?>
+
     <div class="table-wrapper table-responsive ticket-details-block__table mb-20"
          id="alt-quote-fares-info-<?= $quote->id ?>">
         <?= $form->field($quote, 'id', [

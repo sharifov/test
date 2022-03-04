@@ -1,0 +1,28 @@
+---
+- name: "Docker login {{ docker_registry }}"
+  docker_login:
+    registry_url: "https://{{ docker_registry }}"
+    username: "{{ docker_username }}"
+    password: "{{ docker_password }}"
+    tls: true
+    tls_hostname: "{{ docker_registry }}"
+
+- name: "Pull image {{ callantispam_image }}"
+  docker_image:
+    name: "{{ docker_registry }}/{{ callantispam_image }}:{{ callantispam_ver }}"
+    source: pull
+    force_source: yes
+
+- name: "Run container {{ callantispam_image }}"
+  docker_container:
+    detach: yes
+    state: started
+    name: "{{ callantispam_image }}"
+    image: "{{ docker_registry }}/{{ callantispam_image }}:{{ callantispam_ver }}"
+    restart_policy: unless-stopped
+    ports:
+    - 127.0.0.1:8001:8000
+
+- name: Prune old images
+  docker_prune:
+    images: yes

@@ -39,14 +39,14 @@ class CurrencyQuery extends \yii\db\ActiveQuery
         return $this->andWhere(['cur_code' => $code]);
     }
 
-    public function addCache(int $cacheDuration = 60): self
+    public function addCache(int $cacheDuration = 30): self
     {
         return $this->cache($cacheDuration);
     }
 
-    public static function getCurrencySymbolByCode(string $code): string
+    public static function getCurrencySymbolByCode(string $code, int $cacheDuration = 30): string
     {
-        return Currency::find()->select(['cur_symbol'])->byCode($code)->scalar();
+        return Currency::find()->select(['cur_symbol'])->byCode($code)->addCache($cacheDuration)->scalar();
     }
 
     public static function existsByCurrencyCode(string $code): bool
