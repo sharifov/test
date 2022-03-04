@@ -1,0 +1,13 @@
+[Unit]
+Description=Beanstalkd Exporter
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=beanstalkd_exporter
+Group=beanstalkd_exporter
+Type=simple
+ExecStart=/usr/local/bin/beanstalkd_exporter -web.listen-address ":9300"
+
+[Install]
+WantedBy=multi-user.target

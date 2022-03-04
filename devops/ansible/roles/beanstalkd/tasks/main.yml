@@ -1,0 +1,20 @@
+---
+- name: Install beanstalkd
+  apt:
+    name: beanstalkd
+    state: present
+
+- name: Configure beanstalkd
+  copy:
+    src: beanstalkd.conf
+    dest: /etc/default/beanstalkd
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart beanstalkd
+
+- name: Ensure beanstalkd is started
+  systemd:
+     name: beanstalkd
+     state: started
+     enabled: yes

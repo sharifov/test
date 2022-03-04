@@ -1,0 +1,92 @@
+---
+- name: Create postgres_exporter user
+  user:
+    name: postgres_exporter
+    shell: /usr/sbin/nologin
+    state: present
+    system: yes
+    home: /
+    create_home: no
+
+- name: Create postgres_exporter group
+  user:
+    name: postgres_exporter
+    groups: postgres_exporter
+    append: yes
+
+- name: Check postgres_exporter installation
+  stat:
+    path: /usr/local/bin/postgres_exporter
+  register: postgres_exporter
+
+- name: Download postgres_exporter tarball
+  get_url:
+    url: https://github.com/wrouesnel/postgres_exporter/releases/download/v0.8.0/postgres_exporter_v0.8.0_linux-amd64.tar.gz
+    dest: /tmp/postgres_exporter-0.8.0.linux-amd64.tar.gz
+    mode: 0644
+    owner: root
+    group: root
+  when: not postgres_exporter.stat.exists
+
+- name: Extract postgres_exporter
+  unarchive:
+    src: /tmp/postgres_exporter-0.8.0.linux-amd64.tar.gz
+    dest: /tmp
+    owner: root
+    group: root
+    remote_src: yes
+    creates: /tmp/postgres_exporter_v0.8.0_linux-amd64/postgres_exporter
+  when: not postgres_exporter.stat.exists
+
+- name: Install postgres_exporter
+  copy:
+    src: /tmp/postgres_exporter_v0.8.0_linux-amd64/postgres_exporter
+    dest: /usr/local/bin/postgres_exporter
+    mode: 0755
+    owner: root
+    group: root
+    remote_src: yes
+  when: not postgres_exporter.stat.exists
+
+- name: Create postgres_exporter config dir
+  file:
+    path: /etc/postgres_exporter
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Configure postgres_exporter
+  template:
+    src: postgres_exporter.env.j2
+    dest: /etc/postgres_exporter/postgres_exporter.env
+    owner: postgres_exporter
+    group: postgres_exporter
+    mode: 0440
+
+- name: Create postgres exporter user
+  postgresql_user:
+    db: "{{ postgres_exporter_dbname }}"
+    name: "{{ postgres_exporter_username }}"
+    password: "{{ postgres_exporter_password }}"
+    priv: 'CONNECT/pg_catalog.pg_stat_activity:ALL/pg_catalog.pg_stat_replication:ALL'
+    state: present
+    groups:
+    login_host: "{{ postgres_host }}"
+    login_user: "{{ postgres_username }}"
+    login_password: "{{ postgres_password }}"
+
+- name: Create postgres_exporter service
+  copy:
+    src: postgres_exporter.service
+    dest: /etc/systemd/system/postgres_exporter.service
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Ensure postgres_exporter is started
+  systemd:
+    name: postgres_exporter
+    daemon_reload: yes
+    enabled: yes
+    state: started

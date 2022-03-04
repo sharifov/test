@@ -1,0 +1,22 @@
+[Unit]
+Description=Prometheus Mysqld Exporter
+After=network-online.target
+StartLimitInterval=0
+
+[Service]
+Type=simple
+User=mysqld_exporter
+Group=mysqld_exporter
+ExecStart=/usr/local/bin/mysqld_exporter \
+  --config.my-cnf=/etc/mysqld_exporter/mysqld_exporter.my.cnf \
+  --web.listen-address=0.0.0.0:9104
+
+SyslogIdentifier=mysqld_exporter
+Restart=always
+RestartSec=1
+
+PrivateTmp=yes
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=multi-user.target

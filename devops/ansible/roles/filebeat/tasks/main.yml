@@ -1,0 +1,63 @@
+---
+- name: Import GPG for elasticsearch repo
+  apt_key:
+    url: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+    state: present
+
+- name: Create elasticsearch repo
+  apt_repository:
+    repo: deb https://artifacts.elastic.co/packages/7.x/apt stable main
+    state: present
+    filename: elastic-7.x.list
+
+- name: Install filebeat
+  apt:
+    name: filebeat
+    state: present
+
+- name: Hold filebeat version
+  dpkg_selections:
+    name: filebeat
+    selection: hold
+
+- name: Syncrohinize filebeat SSL certificates
+  copy:
+    src: certs
+    dest: /etc/filebeat/
+    owner: root
+    group: root
+    mode: 0644
+    directory_mode: 0755
+  notify: restart filebeat
+
+- name: Configure filebeat
+  template:
+    src: filebeat.yml.j2
+    dest: /etc/filebeat/filebeat.yml
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart filebeat
+
+- name: Configure nginx module
+  template:
+    src: nginx.yml.j2
+    dest: /etc/filebeat/modules.d/nginx.yml
+    mode: 0644
+  when: nginx is defined
+  notify: restart filebeat
+
+- name: Configure redis module
+  template:
+    src: redis.yml.j2
+    dest: /etc/filebeat/modules.d/redis.yml
+    mode: 0644
+  when: redis is defined
+  notify: restart filebeat
+
+- name: Ensure filebeat is started
+  tags: filebeat
+  service:
+    name: filebeat
+    state: started
+    enabled: true

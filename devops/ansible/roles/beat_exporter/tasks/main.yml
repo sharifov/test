@@ -1,0 +1,53 @@
+---
+- name: Create beat_exporter user
+  user:
+    name: beat_exporter
+    shell: /usr/sbin/nologin
+    state: present
+    system: yes
+    home: /
+    create_home: no
+
+- name: Create beat_exporter group
+  user:
+    name: beat_exporter
+    groups: beat_exporter
+    append: yes
+
+- name: Check beat-exporter installation
+  stat:
+    path: /usr/local/bin/beat-exporter
+  register: beat_exporter
+
+- name: Download beat-exporter
+  get_url:
+    url: https://github.com/trustpilot/beat-exporter/releases/download/0.4.0/beat-exporter-0.4.0-linux-amd64.tar.gz
+    dest: /tmp/
+    owner: root
+    group: root
+    mode: 0644
+  when: not beat_exporter.stat.exists
+
+- name: Install beat-exporter
+  unarchive:
+    src: /tmp/beat-exporter-0.4.0-linux-amd64.tar.gz
+    dest: /usr/local/bin
+    owner: root
+    group: root
+    remote_src: yes
+    creates: /usr/local/bin/beat-exporter
+
+- name: Create beat-exporter service
+  copy:
+    src: beat-exporter.service
+    dest: /etc/systemd/system/beat-exporter.service
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Ensure beat-exporter is started
+  systemd:
+    name: beat-exporter
+    daemon_reload: yes
+    enabled: yes
+    state: started

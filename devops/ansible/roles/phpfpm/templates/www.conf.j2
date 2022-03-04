@@ -1,0 +1,19 @@
+[www]
+
+user = {{ web_user }}
+group = {{ web_user }}
+
+listen.owner = {{ web_user }}
+listen.group = {{ web_user }}
+listen = /run/php/php7.4-fpm.sock
+
+pm = dynamic
+pm.max_children = 150
+pm.start_servers = 35
+pm.min_spare_servers = 30
+pm.max_spare_servers = 100
+pm.max_requests = 500
+
+pm.status_path = /status
+slowlog = /var/log/php7.4-fpm.slow.log
+request_slowlog_timeout = 10

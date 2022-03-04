@@ -1,0 +1,6 @@
+---
+- name: restart php7.4-fpm
+  service:
+    name: php7.4-fpm
+    state: restarted
+    enabled: yes

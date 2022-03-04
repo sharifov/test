@@ -1,0 +1,96 @@
+---
+- name: Create mysqld_exporter user
+  user:
+    name: mysqld_exporter
+    shell: /usr/sbin/nologin
+    state: present
+    system: yes
+    home: /
+    create_home: no
+
+- name: Create mysqld_exporter group
+  user:
+    name: mysqld_exporter
+    groups: mysqld_exporter
+    append: yes
+
+- name: Check mysqld_exporter installation
+  stat:
+    path: /usr/local/bin/mysqld_exporter
+  register: mysqld_exporter
+
+- name: Download mysqld_exporter tarball
+  get_url:
+    url: https://github.com/prometheus/mysqld_exporter/releases/download/v0.12.1/mysqld_exporter-0.12.1.linux-amd64.tar.gz
+    dest: /tmp/mysqld_exporter-0.12.1.linux-amd64.tar.gz
+    mode: 0644
+    owner: root
+    group: root
+  when: not mysqld_exporter.stat.exists
+
+- name: Extract mysqld_exporter
+  unarchive:
+    src: /tmp/mysqld_exporter-0.12.1.linux-amd64.tar.gz
+    dest: /tmp
+    owner: root
+    group: root
+    remote_src: yes
+    creates: /tmp/mysqld_exporter-0.12.1.linux-amd64/mysqld_exporter
+  when: not mysqld_exporter.stat.exists
+
+- name: Install mysqld_exporter
+  copy:
+    src: /tmp/mysqld_exporter-0.12.1.linux-amd64/mysqld_exporter
+    dest: /usr/local/bin/mysqld_exporter
+    mode: 0755
+    owner: root
+    group: root
+    remote_src: yes
+  when: not mysqld_exporter.stat.exists
+
+- name: Create mysqld_exporter config dir
+  file:
+    path: /etc/mysqld_exporter
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Configure mysqld_exporter config
+  template:
+    src: mysqld_exporter.my.cnf.j2
+    dest: /etc/mysqld_exporter/mysqld_exporter.my.cnf
+    owner: mysqld_exporter
+    group: mysqld_exporter
+    mode: 0440
+
+- name: Install python3-mysqldb
+  apt:
+    name: python3-mysqldb
+    state: present
+
+- name: Create mysql exporter user
+  mysql_user:
+    name: "{{ mysql_exporter_username }}"
+    password: "{{ mysql_exporter_password }}"
+    host: "%"
+    state: present
+    priv: "*.*:PROCESS,REPLICATION CLIENT,SELECT"
+    login_host: "{{ mysql_host }}"
+    login_user: "{{ mysql_username }}"
+    login_password: "{{ mysql_password }}"
+
+- name: Create mysqld_exporter service
+  copy:
+    src: mysqld_exporter.service
+    dest: /etc/systemd/system/mysqld_exporter.service
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Ensure mysqld_exporter is started
+  systemd:
+    name: mysqld_exporter
+    daemon_reload: yes
+    enabled: yes
+    state: started
