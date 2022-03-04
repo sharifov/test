@@ -13,6 +13,8 @@ class CloseReasonForm extends Model
     public $leadGid;
     public $reason;
 
+    private const REASON_MAX_STRING_CHAR = 255;
+
     public function __construct(Lead $lead, $config = [])
     {
         $this->leadGid = $lead->gid;
@@ -24,10 +26,32 @@ class CloseReasonForm extends Model
         return [
             [['reasonKey', 'leadGid'], 'required'],
             ['reasonKey', 'exist', 'skipOnEmpty' => false, 'skipOnError' => true, 'targetClass' => LeadStatusReason::class, 'targetAttribute' => ['reasonKey' => 'lsr_key']],
-            ['reason', 'required', 'when' => function (): bool {
-                return (bool)((LeadStatusReasonQuery::getLeadStatusReasonByKey($this->reasonKey))->lsr_comment_required ?? false);
-            }, 'skipOnError' => true],
-            ['reason', 'string', 'max' => 255],
+            [['reason'], 'string'],
+            ['reason', 'validateReason', 'skipOnEmpty' => false],
         ];
+    }
+
+    public function attributeLabels()
+    {
+        return [
+            'reasonKey' => 'Reason',
+            'reason' => 'Comment'
+        ];
+    }
+
+    public function validateReason($attribute, $params, $validator)
+    {
+        $commentRequired = (bool)((LeadStatusReasonQuery::getLeadStatusReasonByKey($this->reasonKey))->lsr_comment_required ?? false);
+        if ($commentRequired) {
+            if (empty($this->reason)) {
+                $this->addError('reason', 'Comment cannot be blank');
+            }
+
+            if (strlen($this->reason) > self::REASON_MAX_STRING_CHAR) {
+                $this->addError('reason', 'Comment should contain at most ' . self::REASON_MAX_STRING_CHAR . ' characters');
+            }
+        } else {
+            $this->reason = '';
+        }
     }
 }

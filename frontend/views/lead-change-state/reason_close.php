@@ -10,6 +10,8 @@ use yii\bootstrap\Html;
  * @var $reasonStatuesCommentRequired array
  */
 
+$jsonReasonStatusCommentRequired = json_encode($reasonStatuesCommentRequired);
+$commentRequired = (bool)($reasonStatuesCommentRequired[$reasonForm->reasonKey] ?? false);
 ?>
 
 <script>pjaxOffFormSubmit('#close-reason-pjax')</script>
@@ -24,12 +26,12 @@ $form = ActiveForm::begin([
     ]
 ]) ?>
 
-<?php //= $form->errorSummary($reasonForm) ?>
+<?= $form->errorSummary($reasonForm) ?>
 
     <div class="row">
         <div class="col-sm-12">
             <?= $form->field($reasonForm, 'reasonKey')->dropDownList($reasonStatuses, [
-                'prompt' => 'Select reason',
+                'prompt' => '---',
                 'onchange' => "
                 var commentRequired = JSON.parse('" . json_encode($reasonStatuesCommentRequired) . "');
                 console.log(commentRequired);
@@ -45,12 +47,12 @@ $form = ActiveForm::begin([
         </div>
     </div>
 
-    <div class="form-group collapse" id="<?= $form->id ?>-other-wrapper">
+    <div class="form-group collapse <?= $commentRequired ? 'show' : '' ?>" id="<?= $form->id ?>-other-wrapper">
         <?= $form->field($reasonForm, 'reason')->textarea(['rows' => 5]) ?>
     </div>
 
     <div class="actions-btn-wrapper text-center">
-        <?= Html::submitButton('Add', ['class' => 'btn btn-success popover-close-btn']) ?>
+        <?= Html::submitButton('<i class="fa fa-close"></i> Close Lead', ['class' => 'btn btn-primary popover-close-btn']) ?>
     </div>
 
 <?php ActiveForm::end();
