@@ -2695,6 +2695,7 @@ class TestController extends FController
             LeadEvents::class,
             LeadEvents::EVENT_CLOSE,
             [EventApp::class, 'handler'],
+            ['a' => 123, 'b' => 'sdfsdf']
         );
 
 
@@ -2704,6 +2705,6 @@ class TestController extends FController
         );
 
 
-        VarDumper::dump($lead->attributes, 10, true);
+        //VarDumper::dump($lead->attributes, 10, true);
     }
 }
