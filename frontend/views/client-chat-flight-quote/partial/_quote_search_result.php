@@ -79,6 +79,7 @@ JS;
         'minPrice' => $quotes['minPrice'],
         'maxPrice' => $quotes['maxPrice'],
         'airlines' => $airlines,
+        'lead' => $lead,
         'searchFrom' => $searchForm,
         'minTotalDuration' => min($quotes['totalDuration']),
         'maxTotalDuration' => max($quotes['totalDuration']),

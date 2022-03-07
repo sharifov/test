@@ -1,11 +1,12 @@
 <?php
 
-use common\models\Quote;
 use common\models\Airports;
+use common\models\Currency;
+use common\models\Quote;
 use frontend\helpers\QuoteHelper;
 use kartik\select2\Select2;
 use src\forms\api\searchQuote\FlightQuoteSearchForm;
-use yii\bootstrap4\ActiveForm;
+use src\services\CurrencyHelper;
 use yii\bootstrap4\Html;
 
 /**
@@ -17,6 +18,8 @@ use yii\bootstrap4\Html;
  * @var $searchFrom FlightQuoteSearchForm
  * @var $lead \common\models\Lead
  */
+
+$clientCurrencySymbol = CurrencyHelper::getSymbolByCode($lead->leadPreferences->pref_currency ?? Currency::getDefaultCurrencyCode());
 ?>
 <div class="x_panel">
     <div class="x_title">
@@ -108,6 +111,8 @@ use yii\bootstrap4\Html;
                             var min = <?= $minPrice ?? 0 ?>;
                             var max = <?= $maxPrice ?? 0 ?>;
 
+                            var currencySymbol = '<?php echo($clientCurrencySymbol);?>';
+
                             var start = '<?= $searchFrom->price ?>' || max;
                             var sliderDuration = $('#search-quote-price-filter')[0];
                             noUiSlider.create(sliderDuration, {
@@ -125,7 +130,7 @@ use yii\bootstrap4\Html;
 
                             sliderDuration.noUiSlider.on('update', function (values, handle) {
                                 $('#search-quote-price-filter').closest('.form-group').find('input').val(Math.ceil(values[handle]));
-                                $('#search-quote-price-filter').closest('.form-group').find('#search-quote-price-value').html('$'+Math.ceil(values[handle]));
+                                $('#search-quote-price-filter').closest('.form-group').find('#search-quote-price-value').html(currencySymbol+' '+Math.ceil(values[handle]));
                             });
                         </script>
                       </div>
