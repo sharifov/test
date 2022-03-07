@@ -4,6 +4,7 @@ namespace modules\eventManager\components;
 
 use modules\eventManager\src\entities\EventHandler;
 use modules\eventManager\src\entities\EventList;
+use modules\eventManager\src\services\EventService;
 use Yii;
 use yii\base\Component;
 use yii\caching\TagDependency;
@@ -204,5 +205,35 @@ class EventManagerComponent extends Component
             return true;
         }
         return false;
+    }
+
+    /**
+     * @param int|null $enableType
+     * @param string|null $cronExpression
+     * @param $currentTime
+     * @return bool
+     */
+    public static function isDue(?int $enableType, ?string $cronExpression, $currentTime = 'now'): bool
+    {
+        $response = false;
+        $enableType = $enableType ? (int) $enableType : 0;
+        if ($enableType === EventList::ET_ENABLED) {
+            $response = true;
+        } elseif ($enableType === EventList::ET_ENABLED_CONDITION) {
+            if (!empty($cronExpression)) {
+                if (EventService::isDueCronExpression($cronExpression, $currentTime)) {
+                    $response = true;
+                }
+            }
+        } elseif ($enableType === EventList::ET_DISABLED_CONDITION) {
+            if (!empty($cronExpression)) {
+                if (!EventService::isDueCronExpression($cronExpression, $currentTime)) {
+                    $response = true;
+                }
+            } else {
+                $response = true;
+            }
+        }
+        return $response;
     }
 }

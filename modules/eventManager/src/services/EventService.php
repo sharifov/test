@@ -15,24 +15,6 @@ use yii\helpers\VarDumper;
 class EventService
 {
     /**
-     * @return array
-     */
-    public static function getFeatureFlagList(): array
-    {
-        $list = FeatureFlag::find()->indexBy('ff_key')->select([
-            'ff_key',
-            'ff_name',
-            'ff_type',
-            'ff_value',
-            'ff_enable_type',
-            'ff_condition',
-            'ff_cron_expression',
-        ])->asArray()->all();
-
-        return $list;
-    }
-
-    /**
      * @param mixed|null $expression
      * @param $currentTime
      * @return bool
