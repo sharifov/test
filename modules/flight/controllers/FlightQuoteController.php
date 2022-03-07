@@ -1000,6 +1000,7 @@ class FlightQuoteController extends FController
                 $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $getParams);
                 \Yii::warning($message, 'FlightQuoteController:actionCreateVoluntaryQuote:BoGetExchangeData');
             }
+            Yii::warning(VarDumper::dump($voluntaryExchangeBOService->getResult(), 9, true), 'FlightQuoteController:actionCreateVoluntaryQuote:LOG');
 
             $productQuoteChange->pqc_data_json = JsonHelper::encode($voluntaryExchangeBOService->getResult());
             if (!empty($productQuoteChange->pqc_data_json)) {
