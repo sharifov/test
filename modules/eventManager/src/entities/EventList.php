@@ -2,6 +2,7 @@
 
 namespace modules\eventManager\src\entities;
 
+use common\components\validators\CheckJsonValidator;
 use common\components\validators\CronExpressionValidator;
 use common\models\Employee;
 use Yii;
@@ -26,6 +27,7 @@ use yii\db\BaseActiveRecord;
  * @property string|null $el_cron_expression
  * @property string|null $el_condition
  * @property string|null $el_builder_json
+ * @property string|null $el_params
  * @property string|null $el_updated_dt
  * @property int|null $el_updated_user_id
  *
@@ -80,7 +82,23 @@ class EventList extends ActiveRecord
 
             ['el_enable_type', 'in', 'range' => array_keys(self::getEnableTypeList())],
 
-            [['el_condition'], 'string'],
+            [['el_condition', 'el_params'], 'string'],
+
+            [['el_params'], CheckJsonValidator::class],
+
+            [['el_params'], 'filter', 'filter' => function ($value) {
+                try {
+                    $data = [];
+                    if (is_string($value)) {
+                        $data = \yii\helpers\Json::decode($value);
+                    }
+                    return $data;
+                } catch (\Throwable $throwable) {
+                    $this->addError('el_params', $throwable->getMessage());
+                    return null;
+                }
+            }],
+
             [['el_builder_json', 'el_updated_dt'], 'safe'],
             [['el_key'], 'string', 'max' => 500],
             [['el_category', 'el_cron_expression'], 'string', 'max' => 255],
@@ -91,6 +109,8 @@ class EventList extends ActiveRecord
             ['el_cron_expression', CronExpressionValidator::class, 'skipOnEmpty' => true, 'skipOnError' => true],
         ];
     }
+
+
 
     /**
      * @return array
@@ -131,6 +151,7 @@ class EventList extends ActiveRecord
             'el_cron_expression' => 'Cron Expression',
             'el_condition' => 'Condition',
             'el_builder_json' => 'Builder Json',
+            'el_params' => 'Params',
             'el_updated_dt' => 'Updated Dt',
             'el_updated_user_id' => 'Updated User ID',
         ];

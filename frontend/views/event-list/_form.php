@@ -1,5 +1,7 @@
 <?php
 
+use frontend\helpers\JsonHelper;
+use src\helpers\app\AppHelper;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -61,10 +63,10 @@ use yii\widgets\ActiveForm;
         </pre>
 
                     <?= Html::a(
-                        '<i class="fa fa-link"></i> Editor for schedule expressions',
-                        'https://crontab.guru/#' . str_replace(' ', '_', $model->el_cron_expression),
-                        ['class' => 'btn btn-xs btn-warning', 'target' => '_blank']
-                    ) ?>
+    '<i class="fa fa-link"></i> Editor for schedule expressions',
+    'https://crontab.guru/#' . str_replace(' ', '_', $model->el_cron_expression),
+    ['class' => 'btn btn-xs btn-warning', 'target' => '_blank']
+) ?>
 
 
                 </div>
@@ -80,10 +82,37 @@ use yii\widgets\ActiveForm;
         <div class="col-md-6">
             <div class="row">
                 <div class="col-md-4">
-                    <?= $form->field($model, 'el_sort_order')->input('number', ['min' => 0, 'max' => 32000, 'step' => 1]) ?>
+                    <?= $form->field($model, 'el_sort_order')->input(
+                        'number',
+                        ['min' => 0, 'max' => 1000, 'step' => 1]
+                    ) ?>
                 </div>
             </div>
             <?= $form->field($model, 'el_description')->textarea(['rows' => 3]) ?>
+        </div>
+        <div class="col-md-6">
+
+            <?php
+            $model->el_params = JsonHelper::encode($model->el_params);
+            try {
+                echo $form->field($model, 'el_params')->widget(
+                    \kdn\yii2\JsonEditor::class,
+                    [
+                        'clientOptions' => [
+                            'modes' => ['code', 'form'],
+                            'mode' => $model->isNewRecord ? 'code' : 'form'
+                        ],
+                        'expandAll' => ['tree', 'form'],
+                    ]
+                );
+            } catch (Throwable $throwable) {
+                echo $form->field($model, 'el_params')->textarea(['rows' => 8, 'class' => 'form-control']);
+                Yii::error(
+                    AppHelper::throwableLog($throwable),
+                    'EventListController:el_params:_form:notValidJson'
+                );
+            }
+            ?>
         </div>
     </div>
 

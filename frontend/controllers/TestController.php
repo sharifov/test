@@ -2692,30 +2692,29 @@ class TestController extends FController
 
 
 
-        NativeEventDispatcher::recordEvent(
-            LeadEvents::class,
-            LeadEvents::EVENT_CLOSE,
-            [EventApp::class, EventApp::HANDLER],
-            [1, 2] //$lead->attributes
-        );
-
-        //NativeEventDispatcher::trigger(LeadEvents::class, LeadEvents::EVENT_CLOSE);
-
+//        NativeEventDispatcher::recordEvent(
+//            LeadEvents::class,
+//            LeadEvents::EVENT_CLOSE,
+//            [EventApp::class, EventApp::HANDLER],
+//            [1, 2] //$lead->attributes
+//        );
+//
+//        //NativeEventDispatcher::trigger(LeadEvents::class, LeadEvents::EVENT_CLOSE);
+//
+//
+//        Event::on(
+//            LeadEvents::class,
+//            LeadEvents::EVENT_CLOSE,
+//            [EventApp::class, EventApp::HANDLER],
+//            ['a' => 123, 'b' => 'sdfsdf'],
+//            false
+//        );
 
         Event::on(
             LeadEvents::class,
             LeadEvents::EVENT_CLOSE,
             [EventApp::class, EventApp::HANDLER],
-            ['a' => 123, 'b' => 'sdfsdf'],
-            false
-        );
-
-        Event::on(
-            LeadEvents::class,
-            LeadEvents::EVENT_CLOSE,
-            [EventApp::class, EventApp::HANDLER],
-            ['a' => 123, 'b' => 'sdfsdf'],
-            true
+            ['a' => 123, 'b' => 'abc']
         );
 
 

@@ -2,6 +2,7 @@
 
 namespace modules\eventManager\src\entities;
 
+use common\components\validators\CheckJsonValidator;
 use common\components\validators\CronExpressionValidator;
 use common\models\Employee;
 use Yii;
@@ -10,6 +11,7 @@ use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\db\BaseActiveRecord;
+use yii\helpers\VarDumper;
 
 /**
  * This is the model class for table "event_handler".
@@ -56,6 +58,21 @@ class EventHandler extends ActiveRecord
             ['eh_enable_type', 'in', 'range' => array_keys(EventList::getEnableTypeList())],
 
             [['eh_condition', 'eh_params'], 'string'],
+            [['eh_params'], CheckJsonValidator::class],
+
+            [['eh_params'], 'filter', 'filter' => function ($value) {
+                try {
+                    $data = [];
+                    if (is_string($value)) {
+                        $data = \yii\helpers\Json::decode($value);
+                    }
+                    return $data;
+                } catch (\Throwable $throwable) {
+                    $this->addError('eh_params', $throwable->getMessage());
+                    return null;
+                }
+            }],
+
             [['eh_builder_json', 'eh_updated_dt'], 'safe'],
             [['eh_class'], 'string', 'max' => 500],
             [['eh_method', 'eh_cron_expression'], 'string', 'max' => 255],
@@ -66,6 +83,18 @@ class EventHandler extends ActiveRecord
 
             ['eh_cron_expression', CronExpressionValidator::class, 'skipOnEmpty' => true, 'skipOnError' => true],
         ];
+    }
+
+    public function validateJson($attribute, $params, $validator)
+    {
+        // The JSON might already be a string
+        if (is_string($this->$attribute)) {
+            $decoded = \yii\helpers\Json::decode($this->$attribute);
+        }
+        // Now perform your custom validation
+        // In case of error add the error to the field
+        // $this->addError( $attribute, 'My custom error' );
+        // This will validate the model to false
     }
 
     /**

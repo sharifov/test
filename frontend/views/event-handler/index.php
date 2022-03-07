@@ -77,7 +77,16 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw',
             ],
-            'eh_params',
+
+            [
+                'attribute' => 'eh_params',
+                'value' => static function (EventHandler $model) {
+                    return $model->eh_params ?
+                        Html::tag('small', \yii\helpers\VarDumper::dumpAsString($model->eh_params)) : '-';
+                },
+                'format' => 'raw',
+            ],
+            //'eh_params',
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'eh_updated_dt',

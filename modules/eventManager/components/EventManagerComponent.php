@@ -54,7 +54,8 @@ class EventManagerComponent extends Component
             'el_break',
             'el_sort_order',
             'el_cron_expression',
-            'el_condition'
+            'el_condition',
+            'el_params'
         ])
 //            ->where(['ap_enabled' => true])
             ->orderBy(['el_sort_order' => SORT_ASC, 'el_id' => SORT_ASC])->asArray()->all();

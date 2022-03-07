@@ -18,7 +18,7 @@ class EventListSearch extends EventList
     {
         return [
             [['el_id', 'el_enable_type', 'el_enable_log', 'el_break', 'el_sort_order', 'el_updated_user_id'], 'integer'],
-            [['el_key', 'el_category', 'el_description', 'el_cron_expression', 'el_condition', 'el_builder_json', 'el_updated_dt'], 'safe'],
+            [['el_key', 'el_category', 'el_description', 'el_cron_expression', 'el_condition', 'el_builder_json', 'el_updated_dt', 'el_params'], 'safe'],
         ];
     }
 
@@ -76,6 +76,7 @@ class EventListSearch extends EventList
             ->andFilterWhere(['like', 'el_description', $this->el_description])
             ->andFilterWhere(['like', 'el_cron_expression', $this->el_cron_expression])
             ->andFilterWhere(['like', 'el_condition', $this->el_condition])
+            ->andFilterWhere(['like', 'el_params', $this->el_params])
             ->andFilterWhere(['like', 'el_builder_json', $this->el_builder_json]);
 
         return $dataProvider;

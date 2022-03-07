@@ -26,6 +26,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ]) ?>
     </p>
 
+    <div class="col-md-6">
     <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
@@ -40,11 +41,17 @@ $this->params['breadcrumbs'][] = $this->title;
             'eh_sort_order',
             'eh_cron_expression',
             'eh_condition:ntext',
-            'eh_params:ntext',
+            //'eh_params',
             'eh_builder_json',
             'eh_updated_dt',
             'eh_updated_user_id',
         ],
     ]) ?>
+    </div>
+    <div class="col-md-6">
+        <pre>
+            <?php \yii\helpers\VarDumper::dump($model->eh_params, 10, true) ?>
+        </pre>
+    </div>
 
 </div>

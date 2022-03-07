@@ -152,6 +152,15 @@ $this->params['breadcrumbs'][] = $this->title;
             //'el_builder_json',
 
             [
+                'attribute' => 'el_params',
+                'value' => static function (EventList $model) {
+                    return $model->el_params ?
+                        Html::tag('small', \yii\helpers\VarDumper::dumpAsString($model->el_params)) : '-';
+                },
+                'format' => 'raw',
+            ],
+
+            [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'el_updated_dt',
                 'format' => 'byUserDateTime',
