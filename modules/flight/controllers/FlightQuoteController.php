@@ -1000,12 +1000,12 @@ class FlightQuoteController extends FController
                 $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $getParams);
                 \Yii::warning($message, 'FlightQuoteController:actionCreateVoluntaryQuote:BoGetExchangeData');
             }
-            Yii::info(var_export($voluntaryExchangeBOService->getResult(), true), 'info\*');//'FlightQuoteController:actionCreateVoluntaryQuote:LOG');
+//            Yii::info(var_export($voluntaryExchangeBOService->getResult(), true), 'info\*');//'FlightQuoteController:actionCreateVoluntaryQuote:LOG');
 
             $productQuoteChange->pqc_data_json = JsonHelper::encode($voluntaryExchangeBOService->getResult());
-//            if (!empty($productQuoteChange->pqc_data_json)) {
+            if (!empty($productQuoteChange->pqc_data_json)) {
                 $this->productQuoteChangeRepository->save($productQuoteChange);
-//            }
+            }
 
             $form = new VoluntaryQuoteCreateForm(Auth::id(), $flight, true, $voluntaryExchangeBOService->getServiceFeeAmount());
             $form->setCustomerPackage($voluntaryExchangeBOService->getCustomerPackage());

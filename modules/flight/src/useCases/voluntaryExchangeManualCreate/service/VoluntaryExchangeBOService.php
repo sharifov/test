@@ -34,7 +34,7 @@ class VoluntaryExchangeBOService
 
         $data['apiKey'] = $this->BOPrepareService->getApiKey();
         $data['bookingId'] = $this->BOPrepareService->getBookingId();
-        $data['tickets'] = $this->BOPrepareService->getTickets();
+//        $data['tickets'] = $this->BOPrepareService->getTickets();
 
         $this->result = BackOffice::getExchangeData($data);
         return $this;
