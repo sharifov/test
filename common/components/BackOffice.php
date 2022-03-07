@@ -494,7 +494,7 @@ class BackOffice
                 ], 'BackOffice:getExchangeData:ServerError');
             throw new BoResponseException('BO "Get Exchange Data" server error', BoResponseException::BO_SERVER_ERROR);
         }
-
+        \Yii::info(var_export($response, true), 'info\FlightQuoteController:actionCreateVoluntaryQuote:LOG');
         $data = $response->data;
         if (!$data) {
             \Yii::error([
