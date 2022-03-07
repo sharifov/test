@@ -7,28 +7,27 @@ use common\models\Quote;
 use modules\abac\components\AbacBaseModel;
 use modules\abac\src\entities\AbacInterface;
 
-class QuoteAbacObject extends AbacBaseModel implements AbacInterface
+class QuoteFlightAbacObject extends AbacBaseModel implements AbacInterface
 {
     /** NAMESPACE */
     private const NS = 'quote/quote/';
 
-    /** ACTION PERMISSION */
-    public const ACTION_UPDATE_EXTRA_MARKUP =  self::NS . 'update-extra-markup';
+    public const OBJ_EXTRA_MARKUP =  self::NS . 'obj-extra-markup';
 
     /** --------------- ACTIONS --------------------------- */
-    public const ACTION_ACCESS  = 'access';
+    public const ACTION_EDIT  = 'edit';
 
 
     public const OBJECT_LIST = [
-        self::ACTION_UPDATE_EXTRA_MARKUP => self::ACTION_UPDATE_EXTRA_MARKUP,
+        self::OBJ_EXTRA_MARKUP => self::ACTION_EDIT,
     ];
 
     public const OBJECT_ACTION_LIST = [
-        self::ACTION_UPDATE_EXTRA_MARKUP => [ self::ACTION_ACCESS ],
+        self::OBJ_EXTRA_MARKUP => [ self::ACTION_EDIT ],
     ];
 
     public const OBJECT_ATTRIBUTE_LIST = [
-        self::ACTION_UPDATE_EXTRA_MARKUP => [
+        self::OBJ_EXTRA_MARKUP => [
         ],
     ];
 
@@ -88,10 +87,10 @@ class QuoteAbacObject extends AbacBaseModel implements AbacInterface
         $attrQuoteStatus                                   = self::ATTR_QUOTE_STATUS;
         $attrQuoteStatus['values']                         = Quote::STATUS_LIST;
         $attributeList                                     = self::OBJECT_ATTRIBUTE_LIST;
-        $attributeList[self::ACTION_UPDATE_EXTRA_MARKUP][] = $attrLeadStatus;
-        $attributeList[self::ACTION_UPDATE_EXTRA_MARKUP][] = $attrQuoteStatus;
+        $attributeList[self::OBJ_EXTRA_MARKUP][] = $attrLeadStatus;
+        $attributeList[self::OBJ_EXTRA_MARKUP][] = $attrQuoteStatus;
         $attrIsOwner                                       = self::ATTR_USER_IS_OWNER;
-        $attributeList[self::ACTION_UPDATE_EXTRA_MARKUP][] = $attrIsOwner;
+        $attributeList[self::OBJ_EXTRA_MARKUP][] = $attrIsOwner;
         return $attributeList;
     }
 }

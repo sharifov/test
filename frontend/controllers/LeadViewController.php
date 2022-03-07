@@ -32,8 +32,8 @@ use src\logger\db\GlobalLogInterface;
 use src\logger\db\LogDTO;
 use src\model\clientChat\socket\ClientChatSocketCommands;
 use src\model\clientChatLead\entity\ClientChatLead;
-use src\model\quote\abac\dto\QuoteAbacDto;
-use src\model\quote\abac\QuoteAbacObject;
+use src\model\quote\abac\dto\QuoteFlightExtraMarkupAbacDto;
+use src\model\quote\abac\QuoteFlightAbacObject;
 use src\repositories\quote\QuotePriceRepository;
 use src\services\client\ClientCreateForm;
 use src\services\client\ClientManageService;
@@ -919,12 +919,13 @@ class LeadViewController extends FController
                 throw new \RuntimeException('Quote not founded');
             }
             $lead = $quote->lead;
-            $quoteExtraMarkUpAbacDto = new QuoteAbacDto($lead, $quote);
-            /** @abac quoteExtraMarkUpAbacDto, QuoteAbacObject::ACTION_UPDATE_EXTRA_MARKUP, QuoteExtraMarkUpChangeAbacObject::ACTION_ACCESS, Access to edit Quote Extra mark-up */
+            $isOwner = $lead->employee_id = Auth::id();
+            $quoteFlightExtraMarkUpAbacDto = new QuoteFlightExtraMarkupAbacDto($lead, $quote, $isOwner);
+            /** @abac quoteFlightExtraMarkUpAbacDto, QuoteFlightAbacObject::OBJ_EXTRA_MARKUP, QuoteExtraMarkUpChangeAbacObject::ACTION_EDIT, Access to edit Quote Extra mark-up */
             $canUpdateExtraMarkUp = Yii::$app->abac->can(
-                $quoteExtraMarkUpAbacDto,
-                QuoteAbacObject::ACTION_UPDATE_EXTRA_MARKUP,
-                QuoteAbacObject::ACTION_ACCESS
+                $quoteFlightExtraMarkUpAbacDto,
+                QuoteFlightAbacObject::OBJ_EXTRA_MARKUP,
+                QuoteFlightAbacObject::ACTION_EDIT
             );
             if (!$canUpdateExtraMarkUp) {
                 throw new \RuntimeException('Access Denied');
@@ -976,12 +977,13 @@ class LeadViewController extends FController
             $paxCode = (string)Yii::$app->request->get('paxCode');
             $quote   = Quote::findOne($quoteId);
             $lead = $quote->lead;
-            $quoteExtraMarkUpAbacDto = new QuoteAbacDto($lead, $quote);
-            /** @abac quoteExtraMarkUpAbacDto, QuoteAbacObject::ACTION_UPDATE_EXTRA_MARKUP, QuoteExtraMarkUpChangeAbacObject::ACTION_ACCESS, Access to edit Quote Extra mark-up */
+            $isOwner = $lead->employee_id = Auth::id();
+            $quoteFlightExtraMarkUpAbacDto = new QuoteFlightExtraMarkupAbacDto($lead, $quote, $isOwner);
+            /** @abac quoteFlightExtraMarkUpAbacDto, QuoteFlightAbacObject::OBJ_EXTRA_MARKUP, QuoteExtraMarkUpChangeAbacObject::ACTION_EDIT, Access to edit Quote Extra mark-up */
             $canUpdateExtraMarkUp = Yii::$app->abac->can(
-                $quoteExtraMarkUpAbacDto,
-                QuoteAbacObject::ACTION_UPDATE_EXTRA_MARKUP,
-                QuoteAbacObject::ACTION_ACCESS
+                $quoteFlightExtraMarkUpAbacDto,
+                QuoteFlightAbacObject::OBJ_EXTRA_MARKUP,
+                QuoteFlightAbacObject::ACTION_EDIT
             );
             if (!$canUpdateExtraMarkUp) {
                 throw new \RuntimeException('Access Denied');

@@ -10,8 +10,8 @@ use common\models\query\CurrencyQuery;
 use kartik\editable\Editable;
 use src\auth\Auth;
 use src\helpers\app\AppHelper;
-use src\model\quote\abac\dto\QuoteAbacDto;
-use src\model\quote\abac\QuoteAbacObject;
+use src\model\quote\abac\dto\QuoteFlightExtraMarkupAbacDto;
+use src\model\quote\abac\QuoteFlightAbacObject;
 use src\services\quote\quotePriceService\ClientQuotePriceService;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
@@ -20,12 +20,13 @@ use yii\helpers\Url;
 ?>
 <?php
 $currency = empty($quote->q_client_currency) ? Currency::getDefaultCurrencyCode() : $quote->q_client_currency;
-$quoteExtraMarkUpAbacDto = new QuoteAbacDto($quote->lead, $quote);
-/** @abac quoteExtraMarkUpAbacDto, QuoteAbacObject::ACTION_UPDATE_EXTRA_MARKUP, QuoteExtraMarkUpChangeAbacObject::ACTION_ACCESS, Access to edit Quote Extra mark-up */
+$isOwner = $quote->lead->employee_id == Auth::id();
+$quoteFlightExtraMarkUpAbacDto = new QuoteFlightExtraMarkupAbacDto($quote->lead, $quote, $isOwner);
+/** @abac quoteFlightExtraMarkUpAbacDto, QuoteFlightAbacObject::OBJ_EXTRA_MARKUP, QuoteExtraMarkUpChangeAbacObject::ACTION_EDIT, Access to edit Quote Extra mark-up */
 $canEditQuoteExtraMarkUp = Yii::$app->abac->can(
-    $quoteExtraMarkUpAbacDto,
-    QuoteAbacObject::ACTION_UPDATE_EXTRA_MARKUP,
-    QuoteAbacObject::ACTION_ACCESS
+    $quoteFlightExtraMarkUpAbacDto,
+    QuoteFlightAbacObject::OBJ_EXTRA_MARKUP,
+    QuoteFlightAbacObject::ACTION_EDIT
 );
 
 try {
