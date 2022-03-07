@@ -1030,6 +1030,7 @@ class LeadViewController extends FController
             ];
         }
         try {
+            $quote->refresh();
             $priceData = $clientQuotePriceService->getClientPricesData();
             (\Yii::createObject(GlobalLogInterface::class))->log(
                 new LogDTO(
