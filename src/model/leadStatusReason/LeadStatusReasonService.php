@@ -72,10 +72,10 @@ class LeadStatusReasonService
         $this->toBonusQueue($dto);
     }
 
-    private function duplicate(HandleReasonDto $dto)
+    private function duplicated(HandleReasonDto $dto)
     {
         $stateService = \Yii::createObject(LeadStateService::class);
-        $stateService->duplicate($dto->lead, $dto->newLeadOwnerId, (int)$dto->reason, $dto->creatorId);
+        $stateService->duplicate($dto->lead, $dto->newLeadOwnerId, ((int)$dto->reason) ?: null, $dto->creatorId);
     }
 
     private function toBonusQueue(HandleReasonDto $dto)

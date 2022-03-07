@@ -127,11 +127,11 @@ class LeadStateService
     /**
      * @param int|Lead $lead
      * @param int|Employee|null $newOwner
-     * @param int $originId
+     * @param int|null $originId
      * @param int|null $creatorId
      * @param string|null $reason
      */
-    public function duplicate($lead, $newOwner, int $originId, ?int $creatorId = null, ?string $reason = ''): void
+    public function duplicate($lead, $newOwner, ?int $originId, ?int $creatorId = null, ?string $reason = ''): void
     {
         $lead = $this->serviceFinder->leadFind($lead);
         $newOwnerId = $this->newOwnerFind($newOwner, $lead);

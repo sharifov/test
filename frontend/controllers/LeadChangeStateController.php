@@ -20,10 +20,12 @@ use src\forms\leadflow\TrashReasonForm;
 use src\guards\lead\FollowUpGuard;
 use src\helpers\app\AppHelper;
 use src\model\leadStatusReason\entity\LeadStatusReason;
+use src\model\leadStatusReason\entity\LeadStatusReasonQuery;
 use src\model\leadUserConversion\entity\LeadUserConversion;
 use src\model\leadUserConversion\repository\LeadUserConversionRepository;
 use src\model\leadUserConversion\service\LeadUserConversionDictionary;
 use src\model\leadUserConversion\service\LeadUserConversionService;
+use src\repositories\NotFoundException;
 use src\services\lead\LeadAssignService;
 use src\services\lead\LeadStateService;
 use Yii;
@@ -85,6 +87,7 @@ class LeadChangeStateController extends FController
                     'take-over',
                     'validate-take-over',
                     'close',
+                    'ajax-changed-close-reason',
                     'trash',
                     'validate-trash'
                 ],
@@ -252,6 +255,12 @@ class LeadChangeStateController extends FController
     public function actionClose()
     {
         $lead = $this->getLead();
+        /** @abac new LeadAbacDto($lead, Auth::id()), LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CLOSE, Access to close lead */
+        $leadAbacDto = new LeadAbacDto($lead, Auth::id());
+        if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CLOSE)) {
+            throw new ForbiddenHttpException('Access Denied');
+        }
+
         $form = new CloseReasonForm($lead);
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
@@ -266,7 +275,7 @@ class LeadChangeStateController extends FController
                 Yii::$app->getSession()->setFlash('danger', 'Server error occurred');
             }
         } else {
-            $leadReasonStatues = LeadStatusReason::find()->enabled()->asArray()->all();
+            $leadReasonStatues = LeadStatusReasonQuery::getAllEnabledAsArray();
 
             $reasonStatues = ArrayHelper::map($leadReasonStatues, 'lsr_key', 'lsr_name');
             $reasonStatuesCommentRequired = ArrayHelper::map($leadReasonStatues, 'lsr_key', 'lsr_comment_required');
@@ -278,6 +287,30 @@ class LeadChangeStateController extends FController
             ]);
         }
         return $this->redirect(['lead/view', 'gid' => $lead->gid]);
+    }
+
+    public function actionAjaxChangedCloseReason()
+    {
+        $isMultipleUpdate = Yii::$app->request->get('multipleUpdate', false);
+        if (!$isMultipleUpdate) {
+            $lead = $this->getLead();
+            /** @abac new LeadAbacDto($lead, Auth::id()), LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CLOSE, Access to close lead */
+            $leadAbacDto = new LeadAbacDto($lead, Auth::id());
+            if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CLOSE)) {
+                throw new ForbiddenHttpException('Access Denied');
+            }
+        }
+
+        $reasonKey = Yii::$app->request->get('reasonKey');
+        $reason = LeadStatusReasonQuery::getLeadStatusReasonByKey($reasonKey);
+        if (!$reason) {
+            throw new NotFoundException('LeadStatusReason not found');
+        }
+
+        return $this->asJson([
+            'commentRequired' => $reason->lsr_comment_required,
+            'description' => nl2br($reason->lsr_description)
+        ]);
     }
 
     /**
