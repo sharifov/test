@@ -19,7 +19,7 @@ class QuoteFlightAbacObject extends AbacBaseModel implements AbacInterface
 
 
     public const OBJECT_LIST = [
-        self::OBJ_EXTRA_MARKUP => self::ACTION_UPDATE,
+        self::OBJ_EXTRA_MARKUP => self::OBJ_EXTRA_MARKUP,
     ];
 
     public const OBJECT_ACTION_LIST = [
