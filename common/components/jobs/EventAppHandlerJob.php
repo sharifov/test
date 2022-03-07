@@ -54,6 +54,8 @@ class EventAppHandlerJob extends BaseJob implements JobInterface
             $method = $this->method;
 
             if ($this->enableLog) {
+                $this->infoData['object'] = get_class($obj);
+                $this->infoData['method'] = $this->method;
                 \Yii::info($this->infoData, 'info\EventAppHandlerJob:execute-' . get_class($obj) . '::' . $method);
             }
             $obj->$method($this->eventData, $this->eventParams, $this->handlerParams);
