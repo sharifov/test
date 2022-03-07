@@ -2,6 +2,8 @@
 
 namespace src\services;
 
+use common\models\Currency;
+
 class CurrencyHelper
 {
     public static function convertToBaseCurrency($price, $rate)
@@ -44,5 +46,19 @@ class CurrencyHelper
         }
 
         return floor(($price) * (10 ** $precision)) / (10 ** $precision);
+    }
+
+    public static function getSymbolByCode(?string $code, int $cacheDuration = 60): string
+    {
+        if (empty($code)) {
+            return '';
+        }
+        if (!$currency = Currency::find()->byCode($code)->addCache($cacheDuration)->limit(1)->one()) {
+            return $code;
+        }
+        if (empty($currency->cur_symbol)) {
+            return $code;
+        }
+        return $currency->cur_symbol;
     }
 }

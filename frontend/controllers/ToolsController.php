@@ -3,9 +3,11 @@
 namespace frontend\controllers;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
+use common\components\AppService;
 use common\components\CheckPhoneByNeutrinoJob;
 use common\components\CheckPhoneNumberJob;
 use common\models\Quote;
+use frontend\models\search\ComposerLockSearch;
 use src\forms\file\CsvUploadForm;
 use src\model\contactPhoneList\service\ContactPhoneListService;
 use src\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
@@ -450,5 +452,37 @@ class ToolsController extends FController
         // Close file and return
         fclose($f);
         return trim($output);
+    }
+
+
+    /**
+     * @return string
+     */
+    public function actionComposerInfo(): string
+    {
+        $searchModel = new ComposerLockSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        return $this->render('composer-info', [
+            'dataProvider' => $dataProvider,
+            'searchModel' => $searchModel,
+        ]);
+    }
+
+    /**
+     * @throws \yii\web\RangeNotSatisfiableHttpException
+     */
+    public function actionExportComposerLock()
+    {
+        $data = AppService::getComposerLockData();
+        if (empty($data)) {
+            return false;
+        }
+        $content = json_encode($data);
+        $date = date('Ymd-Hi');
+        Yii::$app->response->sendContentAsFile(
+            $content,
+            'crm-export-composer-lock-' . $date . '.json',
+            ['mimeType' => 'application/json']
+        );
     }
 }

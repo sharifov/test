@@ -132,4 +132,11 @@ class LeadPreferences extends \yii\db\ActiveRecord
 
         return parent::beforeValidate();
     }
+
+    public function setDefaultCurrencyCodeIfNotSet(bool $defaultCurrencyByDb): void
+    {
+        if (empty($this->pref_currency)) {
+            $this->pref_currency = $defaultCurrencyByDb ? Currency::getDefaultCurrencyCodeByDb() : Currency::getDefaultCurrencyCode();
+        }
+    }
 }

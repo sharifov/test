@@ -25,6 +25,7 @@ use src\entities\EventTrait;
 use src\events\lead\LeadBookedEvent;
 use src\events\lead\LeadCallExpertRequestEvent;
 use src\events\lead\LeadCallStatusChangeEvent;
+use src\events\lead\LeadCloseEvent;
 use src\events\lead\LeadCreatedBookFailedEvent;
 use src\events\lead\LeadCreatedByApiBOEvent;
 use src\events\lead\LeadCreatedByApiEvent;
@@ -711,27 +712,30 @@ class Lead extends ActiveRecord implements Objectable
      */
     public function createClone(?string $description): self
     {
-        $clone = self::create();
-        $clone->attributes = $this->attributes;
-        $clone->description = $description;
-        $clone->notes_for_experts = null;
-        $clone->rating = 0;
+        $clone                         = self::create();
+        $clone->attributes             = $this->attributes;
+        $clone->description            = $description;
+        $clone->notes_for_experts      = null;
+        $clone->rating                 = 0;
         $clone->additional_information = null;
-        $clone->l_answered = 0;
-        $clone->snooze_for = null;
-        $clone->called_expert = false;
-        $clone->created = null;
-        $clone->updated = null;
-        $clone->tips = 0;
-        $clone->uid = self::generateUid();
-        $clone->gid = self::generateGid();
-        $clone->status = null;
-        $clone->clone_id = $this->id;
-        $clone->employee_id = null;
-        $clone->l_type_create = self::TYPE_CREATE_CLONE;
-        $clone->bo_flight_id = 0;
-        $clone->final_profit = null;
+        $clone->l_answered             = 0;
+        $clone->snooze_for             = null;
+        $clone->called_expert          = false;
+        $clone->created                = null;
+        $clone->updated                = null;
+        $clone->tips                   = 0;
+        $clone->uid                    = self::generateUid();
+        $clone->gid                    = self::generateGid();
+        $clone->status                 = null;
+        $clone->clone_id               = $this->id;
+        $clone->employee_id            = null;
+        $clone->l_type_create          = self::TYPE_CREATE_CLONE;
+        $clone->bo_flight_id           = 0;
+        $clone->final_profit           = null;
+        $clone->l_delayed_charge       = 0;
+
         $clone->recordEvent(new LeadCreatedCloneEvent($clone));
+
         return $clone;
     }
 
@@ -5154,11 +5158,12 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         $this->setStatus(self::STATUS_EXTRA_QUEUE);
     }
 
-    public function close(): void
+    public function close(?string $leadStatusReasonKey = null, ?int $creatorId = null, ?string $reasonComment = ''): void
     {
         if ($this->isClosed()) {
             return;
         }
+        $this->recordEvent(new LeadCloseEvent($this, $leadStatusReasonKey, $this->status, $creatorId, $reasonComment));
         $this->setStatus(self::STATUS_CLOSED);
     }
 
@@ -5175,5 +5180,10 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     public function hasFlightDetails(): bool
     {
         return $this->leadFlightSegmentsCount > 0;
+    }
+
+    public function setCabinClassEconomy(): void
+    {
+        $this->cabin = self::CABIN_ECONOMY;
     }
 }

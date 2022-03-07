@@ -1000,9 +1000,12 @@ class FlightQuoteController extends FController
                 $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $getParams);
                 \Yii::warning($message, 'FlightQuoteController:actionCreateVoluntaryQuote:BoGetExchangeData');
             }
+            Yii::warning(VarDumper::dump($voluntaryExchangeBOService->getResult(), 9, true), 'FlightQuoteController:actionCreateVoluntaryQuote:LOG');
 
             $productQuoteChange->pqc_data_json = JsonHelper::encode($voluntaryExchangeBOService->getResult());
-            $productQuoteChange->save();
+            if (!empty($productQuoteChange->pqc_data_json)) {
+                $this->productQuoteChangeRepository->save($productQuoteChange);
+            }
 
             $form = new VoluntaryQuoteCreateForm(Auth::id(), $flight, true, $voluntaryExchangeBOService->getServiceFeeAmount());
             $form->setCustomerPackage($voluntaryExchangeBOService->getCustomerPackage());
@@ -1490,7 +1493,7 @@ class FlightQuoteController extends FController
                 $form->originData = $result;
 
                 if (!$form->airlineAllow && empty($form->getRefundForm()->currency)) {
-                    $form->getRefundForm()->currency = Currency::getDefaultCurrencyCode();
+                    $form->getRefundForm()->currency = Currency::getDefaultCurrencyCodeByDb();
 //                    throw new \RuntimeException('Refund not allowed by Airline');
                 }
 

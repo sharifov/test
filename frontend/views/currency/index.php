@@ -18,22 +18,50 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <p>
         <?= Html::a('<i class="fa fa-plus"></i> Add Currency', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a(
+            '<i class="fa fa-list"></i> Currency History',
+            ['currency-history/index'],
+            ['class' => 'btn btn-default']
+) ?>
+        <?= Html::a(
+            '<i class="fa fa-refresh"></i> Synchronization rate',
+            ['synchronization'],
+            ['class' => 'btn btn-warning',
+                'title' => Html::encode(Yii::$app->currency->url),
+                'data' =>
+                [
+                    'confirm' => 'Are you sure you want synchronization all currency?',
+                    'method' => 'post',
+                ],
+            ]
+        ) ?>
 
-        <?= Html::a('<i class="fa fa-refresh"></i> Synchronization rate', ['synchronization'], ['class' => 'btn btn-warning', 'title' => Html::encode(Yii::$app->currency->url), 'data' => [
-            'confirm' => 'Are you sure you want synchronization all currency?',
-            'method' => 'post',
-        ],]) ?>
+        <?= Html::a(
+            '<i class="fa fa-remove"></i> Clear Cache',
+            ['clear-cache'],
+            ['class' => 'btn btn-danger', 'title' => 'Clear Currency cache', 'data' => [
+                'confirm' => 'Are you sure you want clear currency cache?',
+                'method' => 'post',
+            ],]
+        ) ?>
     </p>
 
+    <div class="alert alert-secondary" role="alert" title="Synchronization URL">
+        <?php
+            echo Html::encode(Yii::$app->currency->url);
+        ?>
+    </div>
+
+
+
     <?php Pjax::begin(['scrollTo' => 0]); ?>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'tableOptions' => ['class' => 'table table-bordered table-condensed table-hover'],
         'rowOptions' => static function (\common\models\Currency $model) {
-
             if (!$model->cur_enabled) {
                 return [
                     'class' => 'danger'
@@ -111,5 +139,10 @@ $this->params['breadcrumbs'][] = $this->title;
     ]); ?>
 
     <?php Pjax::end(); ?>
+
+    <p>
+        <?php \yii\helpers\VarDumper::dump(\common\models\Currency::getList(), 10, true); ?>
+        <?php \yii\helpers\VarDumper::dump(\common\models\Currency::getList(), 10, true); ?><?php \yii\helpers\VarDumper::dump(\common\models\Currency::getList(), 10, true); ?><?php \yii\helpers\VarDumper::dump(\common\models\Currency::getList(), 10, true); ?><?php \yii\helpers\VarDumper::dump(\common\models\Currency::getList(), 10, true); ?><?php \yii\helpers\VarDumper::dump(\common\models\Currency::getList(), 10, true); ?>
+    </p>
 
 </div>

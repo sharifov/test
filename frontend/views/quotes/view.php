@@ -135,6 +135,8 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
                         'attribute' => 'service_fee_percent',
                         'visible' => $showGdsOfferId,
                     ],
+                    'q_client_currency',
+                    'q_client_currency_rate',
                 ],
             ]) ?>
         </div>

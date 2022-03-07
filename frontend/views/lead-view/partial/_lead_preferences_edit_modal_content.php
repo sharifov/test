@@ -41,9 +41,14 @@ use yii\web\View;
             <div class="col-md-6">
                 <?= $form->field($leadPreferencesForm, 'numberStops')->dropDownList(\src\helpers\lead\LeadPreferencesHelper::listNumberStops(), ['prompt' => '-']) ?>
             </div>
-            <div class="col-md-6">
-                <?= $form->field($leadPreferencesForm, 'currency')->dropDownList(\common\models\Currency::getList(), ['prompt' => '-']) ?>
-            </div>
+            <?php if ($leadPreferencesForm->canManageCurrency) : ?>
+                <div class="col-md-6">
+                    <?= $form->field($leadPreferencesForm, 'currency')->widget(\kartik\select2\Select2::class, [
+                        'data' => \common\models\Currency::getList(),
+                        'size' => \kartik\select2\Select2::SIZE_SMALL
+                    ]) ?>
+                </div>
+            <?php endif; ?>
         </div>
         <div class="row">
             <div class="col-md-12">

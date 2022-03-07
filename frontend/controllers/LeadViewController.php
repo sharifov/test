@@ -811,11 +811,13 @@ class LeadViewController extends FController
         if (Yii::$app->request->isAjax) {
             $gid = Yii::$app->request->get('gid');
             if ($lead = $this->findLeadByGid($gid)) {
-
+                $dto = new LeadAbacDto($lead, Auth::id());
                 /** @abac new LeadAbacDto($lead), LeadAbacObject::OBJ_LEAD_PREFERENCES, LeadAbacObject::ACTION_SET_DELAY_CHARGE, Lead preferences update Delay Charge access */
-                $delayChargeAccess = Yii::$app->abac->can(new LeadAbacDto($lead, Auth::id()), LeadAbacObject::OBJ_LEAD_PREFERENCES, LeadAbacObject::ACTION_SET_DELAY_CHARGE);
+                $delayChargeAccess = Yii::$app->abac->can($dto, LeadAbacObject::OBJ_LEAD_PREFERENCES, LeadAbacObject::ACTION_SET_DELAY_CHARGE);
+                /** @abac new LeadAbacDto($lead), LeadAbacObject::OBJ_LEAD_PREFERENCES, LeadAbacObject::ACTION_MANAGE_LEAD_PREF_CURRENCY, Access to manage lead preferences currency */
+                $modifyCurrencyAccess = Yii::$app->abac->can($dto, LeadAbacObject::OBJ_LEAD_PREFERENCES, LeadAbacObject::ACTION_MANAGE_LEAD_PREF_CURRENCY);
 
-                $leadPreferencesForm = new LeadPreferencesForm($lead);
+                $leadPreferencesForm = new LeadPreferencesForm($lead, $modifyCurrencyAccess);
                 return $this->renderAjax('partial/_lead_preferences_edit_modal_content', [
                     'leadPreferencesForm' => $leadPreferencesForm,
                     'gid' => $lead->gid,
@@ -858,11 +860,22 @@ class LeadViewController extends FController
             }
 
             try {
-                $form = new LeadPreferencesForm($lead);
+                $dto = new LeadAbacDto($lead, Auth::id());
+                /** @abac new LeadAbacDto($lead), LeadAbacObject::OBJ_LEAD_PREFERENCES, LeadAbacObject::ACTION_MANAGE_LEAD_PREF_CURRENCY, Access to manage lead preferences currency */
+                $canManageCurrency = Yii::$app->abac->can($dto, LeadAbacObject::OBJ_LEAD_PREFERENCES, LeadAbacObject::ACTION_MANAGE_LEAD_PREF_CURRENCY);
+                $form = new LeadPreferencesForm($lead, $canManageCurrency);
+                $oldCurrency = $lead->leadPreferences->prefCurrency->cur_code ?? '';
                 if ($form->load(Yii::$app->request->post()) && $form->validate()) {
-                    $this->leadPreferencesManageService->edit($form, $lead);
+                    $this->leadPreferencesManageService->edit($form, $lead, Auth::id());
 
                     $lead->refresh();
+
+                    if ($oldCurrency !== $form->currency) {
+                        $keyCache = sprintf('quick-search-new-%d-%s-%s', $lead->id, '', $lead->generateLeadKey());
+                        if (Yii::$app->cacheFile->get($keyCache) !== false) {
+                            Yii::$app->cacheFile->delete($keyCache);
+                        }
+                    }
 
                     $response['error'] = false;
                     $response['message'] = 'Lead preferences successfully updated';

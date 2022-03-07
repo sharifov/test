@@ -5,10 +5,10 @@ namespace common\models;
 use common\components\BackOffice;
 use common\components\SearchService;
 use common\models\local\FlightSegment;
-use common\models\local\LeadLogMessage;
 use common\models\query\QuoteQuery;
 use frontend\helpers\JsonHelper;
 use src\behaviors\metric\MetricQuoteCounterBehavior;
+use src\behaviors\quote\ClientCurrencyBehavior;
 use src\entities\EventTrait;
 use src\events\quote\QuoteSendEvent;
 use src\helpers\app\AppHelper;
@@ -16,8 +16,7 @@ use src\helpers\setting\SettingHelper;
 use src\model\airportLang\service\AirportLangService;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
 use src\model\quoteLabel\entity\QuoteLabel;
-use src\services\parsingDump\lib\ParsingDump;
-use src\services\parsingDump\ReservationService;
+use src\services\quote\quotePriceService\ClientQuotePriceService;
 use src\traits\MetricObjectCounterTrait;
 use Yii;
 use yii\base\ErrorException;
@@ -60,6 +59,8 @@ use yii\helpers\VarDumper;
  * @property string $gds_offer_id
  * @property float $agent_processing_fee
  * @property int|null $provider_project_id
+ * @property string $q_client_currency
+ * @property double $q_client_currency_rate
  *
  * @property QuotePrice[] $quotePrices
  * @property int $quotePricesCount
@@ -69,6 +70,7 @@ use yii\helpers\VarDumper;
  * @property Airline[] $mainAirline
  * @property Project $providerProject
  * @property QuoteLabel[] $quoteLabel
+ * @property Currency|null $clientCurrency
  */
 class Quote extends \yii\db\ActiveRecord
 {
@@ -294,6 +296,12 @@ class Quote extends \yii\db\ActiveRecord
 
             ['provider_project_id', 'integer'],
             ['provider_project_id', 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['provider_project_id' => 'id']],
+
+            [['q_client_currency'], 'string', 'max' => 3],
+            [['q_client_currency'], 'exist', 'skipOnError' => true, 'skipOnEmpty' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['q_client_currency' => 'cur_code']],
+
+            [['q_client_currency_rate'], 'number'],
+            [['q_client_currency_rate'], 'default', 'value' => 1],
         ];
     }
 
@@ -334,7 +342,9 @@ class Quote extends \yii\db\ActiveRecord
             'tickets'   => 'Tickets JSON',
             'origin_search_data' => 'Original Search JSON',
             'gds_offer_id' => 'GDS Offer ID',
-            'agent_processing_fee' => 'Agent Processing Fee'
+            'agent_processing_fee' => 'Agent Processing Fee',
+            'q_client_currency' => 'Client currency',
+            'q_client_currency_rate' => 'Client rate',
         ];
     }
 
@@ -352,6 +362,7 @@ class Quote extends \yii\db\ActiveRecord
             'metric' => [
                 'class' => MetricQuoteCounterBehavior::class,
             ],
+            'clientCurrencyBehavior' => ClientCurrencyBehavior::class,
         ];
     }
 
@@ -398,8 +409,12 @@ class Quote extends \yii\db\ActiveRecord
         return $quote;
     }
 
-    public static function createQuoteFromSearch(array $quoteData, Lead $lead, ?Employee $employee): Quote
-    {
+    public static function createQuoteFromSearch(
+        array $quoteData,
+        Lead $lead,
+        ?Employee $employee,
+        ?Currency $currency
+    ): Quote {
         $quote = new self();
         $quote->uid = uniqid();
         $quote->lead_id = $lead->id;
@@ -416,6 +431,10 @@ class Quote extends \yii\db\ActiveRecord
         $quote->employee_name = $employee->username ?? null;
         $quote->origin_search_data = json_encode($quoteData);
         $quote->gds_offer_id = $quoteData['gdsOfferId'] ?? null;
+
+        $quote->q_client_currency = $currency->cur_code ?? null;
+        $quote->q_client_currency_rate = $currency->cur_base_rate ?? null;
+
         $quote->setMetricLabels(['action' => 'created', 'type_creation' => 'search']);
 
         if (isset($entry['tickets'])) {
@@ -754,7 +773,10 @@ class Quote extends \yii\db\ActiveRecord
         return $this->hasOne(Lead::class, ['id' => 'lead_id']);
     }
 
-
+    public function getClientCurrency(): ActiveQuery
+    {
+        return $this->hasOne(Currency::class, ['cur_code' => 'q_client_currency']);
+    }
 
 //    public function beforeValidate()
 //    {
@@ -1925,13 +1947,29 @@ class Quote extends \yii\db\ActiveRecord
             'marketingAirlines' => $quoteMarketingAirlines,
             'operatingAirlines' => $quoteOperatingAirlines,
             'pricePerPax' => $this->getPricePerPax(),
+            'clientPricePerPax' => (new ClientQuotePriceService($this))->geClientPricePerPax(),
             'priceTotal' => 0,
             'currencySymbol' => '$',
             'currencyCode' => 'USD',
+            'clientCurrencySymbol' => $this->getClientCurrencySymbol(),
+            'clientCurrencyCode' => $this->getClientCurrencyCode(),
             'trips' => $trips,
             'maxStopsQuantity' => $maxStopsQuantity
             //'baggage' => $this->getBaggageInfo2(),
         ];
+    }
+
+    private function getClientCurrencyCode(): ?string
+    {
+        return  $this->q_client_currency ?? null;
+    }
+
+    private function getClientCurrencySymbol(): ?string
+    {
+        $currency = Currency::find()
+                            ->byCode($this->getClientCurrencyCode())
+                            ->one();
+        return $currency->cur_symbol ?? null;
     }
 
     public function getTripsFromDumpLikeSearch()
@@ -2198,7 +2236,6 @@ class Quote extends \yii\db\ActiveRecord
             'fareType' => empty($this->fare_type) ? self::FARE_TYPE_PUB : $this->fare_type,
         ];
 
-        $priceData = $this->getPricesData();
         foreach ($priceData['prices'] as $paxCode => $price) {
             $result['passengers'][$paxCode]['cnt'] = $price['tickets'];
             $result['passengers'][$paxCode]['price'] = round($price['selling'] / $price['tickets'], 2);
@@ -2210,7 +2247,6 @@ class Quote extends \yii\db\ActiveRecord
             $result['prices']['totalTax'] += $result['passengers'][$paxCode]['tax'] * $price['tickets'];
         }
         $result['prices']['totalTax'] = round($result['prices']['totalTax'], 2);
-
 
         return $result;
     }
@@ -2308,14 +2344,13 @@ class Quote extends \yii\db\ActiveRecord
             $prices[$key]['selling'] = round($price['selling'], 2);
             $prices[$key]['net'] = round($price['net'], 2);
         }
-
         return [
-                'prices' => $prices,
-                'total' => $total,
-                'service_fee_percent' => $service_fee_percent,
-                'service_fee' => ($service_fee_percent > 0) ? $total['selling'] * $service_fee_percent / 100 : 0,
-                'processing_fee' => $this->getProcessingFee()
-                ];
+            'prices'              => $prices,
+            'total'               => $total,
+            'service_fee_percent' => $service_fee_percent,
+            'service_fee'         => ($service_fee_percent > 0) ? $total['selling'] * $service_fee_percent / 100 : 0,
+            'processing_fee'      => $this->getProcessingFee()
+        ];
     }
 
     /**
@@ -2337,6 +2372,8 @@ class Quote extends \yii\db\ActiveRecord
             'fare_type' => $this->fare_type,
             'employee_name' => $this->employee_name,
             'type_id' => $this->type_id,
+            'client_currency_code' => $this->q_client_currency,
+            'client_currency_rate' => $this->q_client_currency_rate
         ];
 
         $pQInformation = [];
@@ -2351,7 +2388,15 @@ class Quote extends \yii\db\ActiveRecord
                     'taxes' => $quotePrice->taxes,
                     'mark_up' => $quotePrice->mark_up,
                     'extra_mark_up' => $quotePrice->extra_mark_up,
-                    'service_fee' => $quotePrice->service_fee
+                    'service_fee' => $quotePrice->service_fee,
+                    'client_selling' => $quotePrice->qp_client_selling,
+                    'client_net' => $quotePrice->qp_client_net,
+                    'client_fare' => $quotePrice->qp_client_fare,
+                    'client_taxes' => $quotePrice->qp_client_taxes,
+                    'client_mark_up' => $quotePrice->qp_client_markup,
+                    'client_extra_mark_up' => $quotePrice->qp_client_extra_mark_up,
+                    'client_service_fee' => $quotePrice->qp_client_service_fee,
+
                 ]
             ];
         }
@@ -2816,5 +2861,10 @@ class Quote extends \yii\db\ActiveRecord
     {
         $this->service_fee_percent = $serviceFeePercent;
         return $this;
+    }
+
+    public function isClientCurrencyDefault(): bool
+    {
+        return $this->q_client_currency === Currency::getDefaultCurrencyCode();
     }
 }

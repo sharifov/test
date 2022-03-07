@@ -1,5 +1,7 @@
 <?php
 
+use common\models\Currency;
+use kartik\select2\Select2;
 use src\helpers\lead\LeadHelper;
 use src\helpers\lead\LeadPreferencesHelper;
 use yii\widgets\ActiveForm;
@@ -15,12 +17,18 @@ use yii\widgets\ActiveForm;
 
     <div class="row">
         <div class="col-md-3">
-            <?= $form->field($leadForm, 'sourceId')->widget(\kartik\select2\Select2::class, [
+            <?= $form->field($leadForm, 'sourceId')->widget(Select2::class, [
                     'data' => $leadForm->listSources(),
-                    'size' => \kartik\select2\Select2::SMALL,
+                    'size' => Select2::SMALL,
                     'options' => ['placeholder' => 'Select market', 'multiple' => false],
                     'pluginOptions' => ['allowClear' => true],
                 ]) ?>
+        </div>
+        <div class="col-md-2">
+            <?= $form->field($leadForm->preferences, 'currency')->widget(Select2::class, [
+                'data' => Currency::getList(),
+                'size' => Select2::SIZE_SMALL
+            ]) ?>
         </div>
         <div class="col-md-2">
             <?= $form->field($leadForm->preferences, 'marketPrice')->input('number', ['min' => 0, 'max' => 99000]) ?>

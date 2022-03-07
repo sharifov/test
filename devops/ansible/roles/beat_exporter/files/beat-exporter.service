@@ -1,0 +1,14 @@
+[Unit]
+Description=Prometheus Beat Exporter
+After=network-online.target
+StartLimitInterval=0
+
+[Service]
+Type=simple
+User=beat_exporter
+Group=beat_exporter
+ExecStart=/usr/local/bin/beat-exporter
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

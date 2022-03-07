@@ -2,6 +2,7 @@
 
 namespace src\services\lead;
 
+use common\models\Currency;
 use common\models\Lead;
 use common\models\LeadPreferences;
 use modules\lead\src\abac\dto\LeadAbacDto;
@@ -59,22 +60,24 @@ class LeadPreferencesManageService
     /**
      * @param LeadPreferencesForm $form
      * @param int|Lead $lead
+     * @param int $userId
      * @throws \Throwable
      */
-    public function edit(LeadPreferencesForm $form, Lead $lead): void
+    public function edit(LeadPreferencesForm $form, Lead $lead, int $userId): void
     {
         $lead = $this->finder->leadFind($lead);
         $leadPreferences = $lead->leadPreferences;
 
-        $this->transactionManager->wrap(function () use ($form, $lead, $leadPreferences) {
+        $this->transactionManager->wrap(function () use ($form, $lead, $leadPreferences, $userId) {
+            $dto = new LeadAbacDto($lead, $userId);
+
             /** @abac new LeadAbacDto($lead), LeadAbacObject::OBJ_LEAD_PREFERENCES, LeadAbacObject::ACTION_SET_DELAY_CHARGE, Lead preferences update Delay Charge access */
-            $delayChargeAccess = Yii::$app->abac->can(new LeadAbacDto($lead, Auth::id()), LeadAbacObject::OBJ_LEAD_PREFERENCES, LeadAbacObject::ACTION_SET_DELAY_CHARGE);
+            $delayChargeAccess = Yii::$app->abac->can($dto, LeadAbacObject::OBJ_LEAD_PREFERENCES, LeadAbacObject::ACTION_SET_DELAY_CHARGE);
             $lead->editDelayedChargeAndNote($form->delayedCharge, $form->notesForExperts, $delayChargeAccess);
             if ($lead->l_client_lang !== $form->clientLang) {
                 $lead->l_client_lang = $form->clientLang;
 //                $this->processOrderData($lead->id, $lead->l_client_lang);
             }
-
             $this->leadRepository->save($lead);
 
             if ($leadPreferences) {
@@ -87,6 +90,11 @@ class LeadPreferencesManageService
             } else {
                 $leadPreferences = LeadPreferences::create($lead->id, $form->marketPrice, $form->clientsBudget, $form->numberStops, $form->currency);
             }
+
+            if (!$form->canManageCurrency) {
+                $leadPreferences->pref_currency = $leadPreferences->oldAttributes['pref_currency'] ?? Currency::getDefaultCurrencyCodeByDb();
+            }
+
             $this->leadPreferencesRepository->save($leadPreferences);
         });
     }

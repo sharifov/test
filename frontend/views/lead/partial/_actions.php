@@ -66,6 +66,12 @@ $leadAbacDto = new LeadAbacDto($leadModel, $userId);
         'title' => 'Trash'
     ]);
 
+    $buttonClose = Html::a('<i class="fa fa-close"></i> Close', '#', [
+        'class' => 'add-reason btn btn-danger',
+        'data-url' => Url::to(['lead-change-state/close', 'gid' => $leadModel->gid]),
+        'title' => 'Close Lead'
+    ]);
+
     $buttonSnooze = Html::a('<i class="fa fa-clock-o"></i> Snooze', '#', [
         'class' => 'add-reason btn btn-primary',
         'data-url' => Url::to(['lead-change-state/snooze', 'gid' => $leadModel->gid]),
@@ -133,7 +139,6 @@ $leadAbacDto = new LeadAbacDto($leadModel, $userId);
         if (Auth::can('/lead-change-state/snooze')) {
             $buttonsSubAction[] = $buttonSnooze;
         }
-        $buttonsSubAction[] = $buttonTrash;
         /*if ($leadModel->isSold()) {
             if ($user->isAdmin()) {
                 $buttonsSubAction[] = $buttonClone;
@@ -142,6 +147,18 @@ $leadAbacDto = new LeadAbacDto($leadModel, $userId);
             $buttonsSubAction[] = $buttonClone;
         }*/
     }
+
+    /** @abac $leadAbacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_TRASH, Btn lead trash */
+    if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_TRASH)) {
+        $buttonsSubAction[] = $buttonTrash;
+    }
+
+
+    /** @abac $leadAbacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CLOSE, Btn lead close */
+    if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CLOSE)) {
+        $buttonsSubAction[] = $buttonClose;
+    }
+
     if ($leadModel->isSnooze()) {
         $buttonsSubAction[] = $buttonOnWake;
     }

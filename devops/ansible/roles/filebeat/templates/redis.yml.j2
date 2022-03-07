@@ -1,0 +1,6 @@
+- module: redis
+  log:
+    enabled: true
+    var.paths: ["/var/log/redis/redis.log*", "/var/log/redis/redis-server.log"]
+  slowlog:
+    enabled: false

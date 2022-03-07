@@ -18,7 +18,7 @@ npm-install:
 	docker-compose run --rm console npm install
 
 composer-install:
-	docker-compose run --rm console composer install --no-plugins
+	docker-compose run --rm console composer install
 
 cs-check:
 	docker-compose run --rm console composer cs-check

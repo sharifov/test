@@ -52,7 +52,10 @@ class CurrencyHistorySearch extends CurrencyHistory
                     'ch_created_date' => SORT_DESC,
                     'ch_code' => SORT_ASC
                 ]
-            ]
+            ],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
         ]);
 
         $this->load($params);

@@ -23,6 +23,7 @@ use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataQuery;
 use src\model\leadUserData\repository\LeadUserDataRepository;
 use src\model\leadPoorProcessingData\service\scheduledCommunication\ScheduledCommunicationService;
+use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLog;
 use src\model\leadUserData\entity\LeadUserData;
 use src\model\leadUserData\entity\LeadUserDataDictionary;
 use src\repositories\lead\LeadRepository;
@@ -713,6 +714,68 @@ class LeadController extends Controller
         echo Console::renderColoredString('%g --- Processed: %w[' . $processed . '/' . $count . '] %g %n'), PHP_EOL;
         echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+    }
+
+    public function actionToLastActionLpp()
+    {
+        /** @fflag FFlag::FF_LPP_ENABLE, Lead Poor Processing Enable/Disable */
+        if (!Yii::$app->ff->can(FFlag::FF_KEY_LPP_ENABLE)) {
+            echo Console::renderColoredString('%y --- Feature Flag (' . FFlag::FF_KEY_LPP_ENABLE . ') not enabled %n'), PHP_EOL;
+            exit();
+        }
+
+        $time_start     = microtime(true);
+        $lastActionRule = LeadPoorProcessingDataQuery::getRuleByKey(
+            LeadPoorProcessingDataDictionary::KEY_LAST_ACTION,
+            true
+        );
+        if (!$lastActionRule) {
+            echo Console::renderColoredString('%y --- Rule(' . LeadPoorProcessingDataDictionary::KEY_LAST_ACTION .
+                                              ') not enabled %n'), PHP_EOL;
+            exit();
+        }
+        if (!($leadCreatedDT = Yii::$app->ff->val(FFlag::FF_KEY_LPP_LEAD_CREATED)) || !DateHelper::checkDateTime($leadCreatedDT)) {
+            echo Console::renderColoredString('Last Created DT is not set'), PHP_EOL;
+            exit();
+        }
+        $lppLogTableName = LeadPoorProcessingLog::tableName();
+        $leads = Lead::find()
+                     ->leftJoin($lppLogTableName, $lppLogTableName . '.lppl_lead_id = id')
+                     ->where(['status' => Lead::STATUS_PROCESSING])
+                     ->andWhere(['<=', 'created', $leadCreatedDT])
+                     ->andWhere(['is', $lppLogTableName . '.lppl_lead_id', new \yii\db\Expression('null')])
+                     ->all();
+        $processed = 0;
+        $count     = count($leads);
+        Console::startProgress($processed, $count);
+        foreach ($leads as $lead) {
+            $logData = ['leadId' => $lead->id];
+            try {
+                LeadPoorProcessingService::addLeadPoorProcessingJob(
+                    $lead->id,
+                    [LeadPoorProcessingDataDictionary::KEY_LAST_ACTION],
+                    'Lead Added to Extra Queue by Last Action Rule due to old created date'
+                );
+                $processed++;
+                Console::updateProgress($processed, $count);
+            } catch (\RuntimeException | \DomainException $throwable) {
+                /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
+                if (Yii::$app->ff->can(FFlag::FF_KEY_DEBUG)) {
+                    $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
+                    \Yii::info($message, 'LeadController:actionToLastActionLpp:Exception');
+                }
+            } catch (\Throwable $throwable) {
+                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
+                \Yii::error($message, 'LeadController:actionToLastActionLpp:Throwable');
+            }
+        }
+        Console::endProgress(false);
+        $time_end = microtime(true);
+        $time     = number_format(round($time_end - $time_start, 2), 2);
+        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time . ' s] %g %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- Processed: %w[' . $processed . '/' . $count . '] %g %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
+                                          self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
     }
 
     private function validateDate(\DateTime $dateObject, string $date, string $format = 'Y-m-d H:i:s'): bool

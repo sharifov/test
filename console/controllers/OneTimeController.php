@@ -12,14 +12,17 @@ use common\models\Client;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\Conference;
+use common\models\Currency;
 use common\models\DepartmentEmailProject;
 use common\models\DepartmentPhoneProject;
 use common\models\Email;
 use common\models\Lead;
 use common\models\LeadFlightSegment;
 use common\models\LeadFlow;
+use common\models\LeadPreferences;
 use common\models\PhoneBlacklist;
 use common\models\Project;
+use common\models\QuotePrice;
 use common\models\Sms;
 use common\models\Sources;
 use common\models\UserProjectParams;
@@ -66,6 +69,8 @@ use yii\validators\DateValidator;
 
 class OneTimeController extends Controller
 {
+    private const MC_QUOTE_PRICE_MAX_CHUNK_SIZE_LIMIT = 100000;
+
     public $limit;
 
     public function options($actionID)
@@ -1637,5 +1642,120 @@ class OneTimeController extends Controller
                 'leads.source_id is null'
             ])
             ->all();
+    }
+
+    public function actionFillClientPriceFieldsInQuotePrice(int $chunkSize = self::MC_QUOTE_PRICE_MAX_CHUNK_SIZE_LIMIT): void
+    {
+        try {
+            if ($chunkSize > self::MC_QUOTE_PRICE_MAX_CHUNK_SIZE_LIMIT) {
+                throw new \DomainException('max chunk size is exceeded - Chunk size is:' . $chunkSize);
+            }
+            $timeStart = microtime(true);
+            $quotePriceIds = QuotePrice
+                ::find()
+                ->select('id')
+                ->where(['is', 'qp_client_fare', new Expression('null')])
+                ->limit($chunkSize)
+                ->orderBy(['id' => SORT_ASC])
+                ->column();
+            $quotePriceTable = QuotePrice::tableName();
+            \Yii::$app->db->createCommand()
+                ->update($quotePriceTable, [
+                    'qp_client_fare' => new Expression('fare'),
+                    'qp_client_taxes' => new Expression('taxes'),
+                    'qp_client_extra_mark_up' => new Expression('extra_mark_up'),
+                    'qp_client_service_fee' => new Expression('service_fee'),
+                    'qp_client_markup' => new Expression('mark_up'),
+                    'qp_client_selling' => new Expression('quote_price'),
+                    'qp_client_net' => new Expression('net'),
+                ], ['id' => $quotePriceIds])
+                ->execute();
+            $timeEnd = microtime(true);
+            $executionTime = ($timeEnd - $timeStart) / 60;
+            $message = ['message' => 'actionFillClientPriceFieldsInQuotePrice finished','countAffectedRows' =>  count($quotePriceIds), 'executionTime' => $executionTime ];
+            \Yii::info(
+                $message,
+                'info\OneTimeController::actionFillClientPriceFieldsInQuotePrice'
+            );
+        } catch (\RuntimeException | \DomainException $e) {
+            \Yii::warning(
+                AppHelper::throwableLog($e),
+                'OneTimeController::actionFillClientPriceFieldsInQuotePrice:exception'
+            );
+        } catch (\Throwable $e) {
+            \Yii::error(
+                AppHelper::throwableLog($e),
+                'OneTimeController:actionFillClientPriceFieldsInQuotePrice:Throwable'
+            );
+        }
+    }
+
+    public function actionFillDefaultCurrencyInLeadPreferences()
+    {
+        try {
+            $timeStart = microtime(true);
+            $chunkSize = 10000;
+            $preferencesTableName = LeadPreferences::tableName();
+            $leads = Lead::find()
+                         ->leftJoin($preferencesTableName, $preferencesTableName . '.lead_id = leads.id')
+                         ->where(['is', $preferencesTableName . '.lead_id', new Expression('null')])
+                         ->orWhere(['is', $preferencesTableName . '.pref_currency', new Expression('null')])
+                         ->limit($chunkSize)
+                         ->all();
+            $data = ArrayHelper::toArray($leads, [
+                'common\models\Lead' => [
+                    'id',
+                    'hasPreferences'     => function ($lead) {
+                        return isset($lead->leadPreferences);
+                    },
+                    'hasSettledCurrency' => function ($lead) {
+                        return isset($lead->leadPreferences->pref_currency);
+                    },
+                ],
+            ]);
+            $leadsWithoutPreferences = array_filter($data, function ($item) {
+                return !$item['hasPreferences'];
+            });
+            array_walk($leadsWithoutPreferences, function (&$item) {
+                $item['lead_id'] = $item['id'];
+                unset($item['id']);
+                unset($item['hasPreferences']);
+                unset($item['hasSettledCurrency']);
+                $item['pref_currency'] = Currency::DEFAULT_CURRENCY;
+            });
+            $leadsWithoutDefaultCurrency  = array_filter($data, function ($item) {
+                return $item['hasPreferences'] && !$item['hasSettledCurrency'];
+            });
+            $leadsWithoutDefaultCurrency = ArrayHelper::getColumn($leadsWithoutDefaultCurrency, 'id');
+            Yii::$app
+                ->db
+                ->createCommand()
+                ->batchInsert($preferencesTableName, ['lead_id', 'pref_currency'], $leadsWithoutPreferences)
+                ->execute();
+            Yii::$app
+                ->db
+                ->createCommand()
+                ->update($preferencesTableName, [
+                    'pref_currency' => Currency::DEFAULT_CURRENCY,
+                ], ['lead_id' => $leadsWithoutDefaultCurrency])
+                ->execute();
+            $timeEnd = microtime(true);
+            $executionTime = ($timeEnd - $timeStart) / 60;
+            $message = ['message' => 'actionFillClientPriceFieldsInQuotePrice finished','countAffectedRows' =>  count($leads), 'executionTime' => $executionTime ];
+            \Yii::info(
+                $message,
+                'info\OneTimeController::actionFillDefaultCurrencyInLeadPreferences'
+            );
+        } catch (\RuntimeException | \DomainException $e) {
+            \Yii::warning(
+                AppHelper::throwableLog($e),
+                'OneTimeController::actionFillDefaultCurrencyInLeadPreferences:exception'
+            );
+        } catch (\Throwable $e) {
+            \Yii::error(
+                AppHelper::throwableLog($e),
+                'OneTimeController:actionFillDefaultCurrencyInLeadPreferences:Throwable'
+            );
+        }
     }
 }

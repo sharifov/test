@@ -737,9 +737,9 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                         'value' => date('d M Y', strtotime($passenger['birth_date'])),
                                         'formOptions' => [ 'action' => [Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
                                         'options' => [
-                                            'convertFormat' => true,
+                                            'convertFormat' => false,
                                             'pluginOptions' => [
-                                                'format' => 'php:d M Y',
+                                                'format' => 'dd M yyyy',
                                                 'autoclose' => true,
     //                                            'type' =>
                                             ],
@@ -976,9 +976,9 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                         'value' => $pasExpirationDate,
                                         'formOptions' => [ 'action' => [Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
                                         'options' => [
-                                            'convertFormat' => true,
+                                            'convertFormat' => false,
                                             'pluginOptions' => [
-                                                'format' => 'php:d M Y',
+                                                'format' => 'dd M yyyy',
                                                 'autoclose' => true,
                                                 //                                            'type' =>
                                             ],

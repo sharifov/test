@@ -706,7 +706,7 @@ class FlightQuoteManageService implements ProductQuoteService
                     $flightQuotePaxPrice = FlightQuotePaxPrice::createByExchangePassengerForm(
                         $exchangePassengerForm,
                         $flightQuote->fq_id,
-                        Currency::getDefaultCurrencyCode()
+                        Currency::getDefaultCurrencyCodeByDb()
                     );
                     $this->flightQuotePaxPriceRepository->save($flightQuotePaxPrice);
                 }

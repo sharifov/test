@@ -1,0 +1,51 @@
+---
+# This playbook provisions CRM shared server
+
+- name: Setup shared server
+  hosts: shared
+  remote_user: "{{ ssh_user }}"
+  gather_facts: false
+  roles:
+    - role: common
+      tags: common
+      become: yes
+
+    - role: beanstalkd
+      tags: beanstalkd
+      become: yes
+
+    - role: centrifugo
+      tags: centrifugo
+      become: yes
+
+    - role: redis
+      tags: redis
+      become: yes
+
+    - role: filebeat
+      tags: filebeat
+      become: yes
+
+    - role: node_exporter
+      tags: node-exporter
+      become: yes
+
+    - role: beanstalkd_exporter
+      tags: beanstalkd-exporter
+      become: yes
+
+    - role: redis_exporter
+      tags: redis-exporter
+      become: yes
+
+    - role: mysqld_exporter
+      tags: mysqld-exporter
+      become: yes
+
+    - role: postgresql_exporter
+      tags: postgresql-exporter
+      become: yes
+
+    - role: beat_exporter
+      tags: beat-exporter
+      become: yes

@@ -5,20 +5,50 @@
  * @var $quote \common\models\Quote
  */
 
+use common\models\Currency;
+use common\models\query\CurrencyQuery;
 use kartik\editable\Editable;
-use yii\helpers\VarDumper;
+use src\helpers\app\AppHelper;
+use src\services\quote\quotePriceService\ClientQuotePriceService;
+use yii\helpers\ArrayHelper;
 
 ?>
-<?php $priceData = $quote->getPricesData();?>
+<?php
+$currency = empty($quote->q_client_currency) ? Currency::getDefaultCurrencyCode() : $quote->q_client_currency;
+
+try {
+    if (!$currencySymbol = CurrencyQuery::getCurrencySymbolByCode($currency)) {
+        throw new \RuntimeException('Currency Symbol not found');
+    }
+} catch (\Throwable $throwable) {
+    $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['quoteId' => $quote->id, 'currency' => $currency]);
+    \Yii::error($message, 'QuotePrices:currencySymbol:Throwable');
+    $currencySymbol = $currency;
+}
+
+if ($quote->isClientCurrencyDefault()) {
+    $priceData = $quote->getPricesData();
+} else {
+    try {
+        $priceData = (new ClientQuotePriceService($quote))->getClientPricesData();
+    } catch (\Throwable $throwable) {
+        $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['quoteId' => $quote->id]);
+        \Yii::error($message, 'QuotePrices:PriceData:Throwable');
+        $priceData = $quote->getPricesData();
+        $currency = Currency::getDefaultCurrencyCode();
+    }
+}
+?>
+
 <table class="table table-striped table-prices" id="quote-prices-<?= $quote->id?>">
     <thead>
         <tr>
             <th>Pax</th>
             <th>Q</th>
-            <th>NP, $</th>
-            <th>Mkp, $</th>
-            <th>Ex Mkp, $</th>
-            <th>SP, $</th>
+            <th>NP, <?php echo $currencySymbol ?></th>
+            <th>Mkp, <?php echo $currencySymbol ?></th>
+            <th>Ex Mkp, <?php echo $currencySymbol ?></th>
+            <th>SP, <?php echo $currencySymbol ?></th>
         </tr>
     </thead>
     <tbody>
@@ -63,3 +93,10 @@ use yii\helpers\VarDumper;
         </tr>
     </tfoot>
 </table>
+
+<div class="quote_exclamation_currency">
+    <?php if (!$quote->isClientCurrencyDefault()) : ?>
+        <i class="fa fa-exclamation-circle warning"></i>
+    <?php endif ?>
+    &nbsp;Currency: <strong><?php echo $currency ?></strong>
+</div>

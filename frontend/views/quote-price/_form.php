@@ -28,10 +28,6 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'extra_mark_up')->textInput() ?>
 
-    <?= $form->field($model, 'created')->textInput() ?>
-
-    <?= $form->field($model, 'updated')->textInput() ?>
-
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>

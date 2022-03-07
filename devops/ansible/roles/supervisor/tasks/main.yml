@@ -1,0 +1,20 @@
+---
+- name: Install supervisor
+  apt:
+    name: supervisor
+    state: present
+
+- name: Copy supervisord.conf
+  template:
+    src: supervisord.conf.j2
+    dest: /etc/supervisor/supervisord.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart supervisor
+
+- name: Ensure supervisor is stared
+  service:
+    name: supervisor
+    state: started
+    enabled: yes

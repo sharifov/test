@@ -215,7 +215,7 @@ class LeadManageService
 
         $leadId = $this->leadRepository->save($lead);
 
-        $this->createLeadPreferences($leadId, $form->preferences);
+        $this->createLeadPreferences($leadId, $form->preferences, false);
 
         if ($logId = (new CreateVisitorLog())->create($client, $lead)) {
             $lead->setVisitorLog($logId);
@@ -229,7 +229,7 @@ class LeadManageService
      * @param int $leadId
      * @param PreferencesCreateForm $preferencesForm
      */
-    private function createLeadPreferences(int $leadId, PreferencesCreateForm $preferencesForm): void
+    private function createLeadPreferences(int $leadId, PreferencesCreateForm $preferencesForm, bool $defaultCurrencyByDb = true): void
     {
         $preferences = LeadPreferences::create(
             $leadId,
@@ -238,6 +238,7 @@ class LeadManageService
             null,
             null
         );
+        $preferences->setDefaultCurrencyCodeIfNotSet($defaultCurrencyByDb);
         $this->leadPreferencesRepository->save($preferences);
     }
 
@@ -314,7 +315,7 @@ class LeadManageService
             $call->cClient->first_name,
             $call->cClient->last_name,
             null,
-            null,
+            1,
             null,
             null,
             null,
@@ -327,15 +328,16 @@ class LeadManageService
             null,
             Lead::TYPE_CREATE_MANUALLY_FROM_CALL
         );
+        $lead->setCabinClassEconomy();
         $lead->processing($user->id, $user->id, LeadFlow::DESCRIPTION_MANUAL_FROM_CALL);
 
         $hash = $this->leadHashGenerator->generate(
             null,
             $call->c_project_id,
+            $lead->adults,
             null,
             null,
-            null,
-            null,
+            $lead->cabin,
             [$clientPhoneNumber],
             null
         );
@@ -399,7 +401,7 @@ class LeadManageService
                 $client->first_name,
                 $client->last_name,
                 null,
-                null,
+                1,
                 null,
                 null,
                 null,
@@ -412,15 +414,16 @@ class LeadManageService
                 null,
                 Lead::TYPE_CREATE_MANUALLY_FROM_CALL
             );
+            $lead->setCabinClassEconomy();
             $lead->processing($form->getUserId(), $form->getUserId(), LeadFlow::DESCRIPTION_MANUAL_FROM_CALL);
 
             $hash = $this->leadHashGenerator->generate(
                 null,
                 $form->getProjectId(),
+                $lead->adults,
                 null,
                 null,
-                null,
-                null,
+                $lead->cabin,
                 [$form->phone],
                 null
             );
