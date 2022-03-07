@@ -10,6 +10,8 @@ use common\models\Department;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\PaymentMethod;
+use common\models\Project;
+use common\models\Quote;
 use modules\fileStorage\src\entity\fileLog\FileLogType;
 use modules\fileStorage\src\entity\fileStorage\FileStorageStatus;
 use modules\invoice\src\entities\invoice\Invoice;
@@ -29,8 +31,6 @@ use modules\order\src\helpers\formatters\OrderFormatter;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productOption\ProductOptionPriceType;
 use modules\product\src\entities\productQuote\ProductQuote;
-use common\models\Project;
-use common\models\Quote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuote\ProductQuoteStatusAction;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeDecisionType;
@@ -38,17 +38,16 @@ use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionStatus;
 use modules\product\src\helpers\formatters\ProductFormatter;
 use modules\product\src\helpers\formatters\ProductQuoteFormatter;
-use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
 use modules\qaTask\src\entities\qaTask\QaTask;
 use modules\qaTask\src\entities\qaTask\QaTaskCreateType;
+use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
 use modules\qaTask\src\entities\qaTask\QaTaskRating;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
-use modules\qaTask\src\useCases\qaTask\QaTaskActions;
 use modules\qaTask\src\helpers\formatters\QaTaskFormatter;
+use modules\qaTask\src\useCases\qaTask\QaTaskActions;
 use src\entities\cases\Cases;
 use src\entities\cases\CasesSourceType;
 use src\helpers\PhoneFormatter;
-use src\model\callLog\entity\callLog\CallLogCategory;
 use src\model\callLog\entity\callLog\CallLogStatus;
 use src\model\callLog\entity\callLog\CallLogType;
 use src\model\client\notifications\client\ClientNotificationCommunicationType;
@@ -1036,14 +1035,15 @@ class Formatter extends \yii\i18n\Formatter
     public function asFormattedPhoneNumber(string $number): string
     {
         if (preg_match('/^\+?[0-9]{11}$/', $number)) {
-            return '(' . substr($number, 1, 3) . ') ' .
-                '<span style="color:green">' .
-                substr($number, 4, 3) .
-                '</span>
+            return '+' . substr($number, 1, 1) .
+                   ' (' . substr($number, 2, 3) . ') ' .
+                   '<span style="color:green">' .
+                   substr($number, 5, 3) .
+                   '</span>
                  -
                  <span style="color:blue">' .
-                substr($number, 7, 5) .
-                '</span>';
+                   substr($number, 8, 4) .
+                   '</span>';
         }
         return $number;
     }

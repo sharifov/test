@@ -43,7 +43,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'label' => 'Phone Number Formatter',
                 'attribute' => 'pl_phone_number',
                 'contentOptions' => [
-                    'style' => 'min-width: 130px;',
+                    'style' => 'min-width: 140px;',
                 ],
                 'format' => 'raw',
                 'value' =>  function (PhoneList $model) {
