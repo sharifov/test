@@ -7,7 +7,6 @@ use Yii;
 use yii\base\ErrorException;
 use yii\base\Event;
 
-
 class EventApp
 {
     public const HANDLER = 'handler';
