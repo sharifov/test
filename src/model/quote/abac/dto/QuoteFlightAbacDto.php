@@ -2,7 +2,6 @@
 
 namespace src\model\quote\abac\dto;
 
-use common\models\Lead;
 use common\models\Quote;
 
 class QuoteFlightAbacDto extends \stdClass

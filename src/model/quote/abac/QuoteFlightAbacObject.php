@@ -15,15 +15,15 @@ class QuoteFlightAbacObject extends AbacBaseModel implements AbacInterface
     public const OBJ_EXTRA_MARKUP =  self::NS . 'obj-extra-markup';
 
     /** --------------- ACTIONS --------------------------- */
-    public const ACTION_EDIT  = 'edit';
+    public const ACTION_UPDATE  = 'update';
 
 
     public const OBJECT_LIST = [
-        self::OBJ_EXTRA_MARKUP => self::ACTION_EDIT,
+        self::OBJ_EXTRA_MARKUP => self::ACTION_UPDATE,
     ];
 
     public const OBJECT_ACTION_LIST = [
-        self::OBJ_EXTRA_MARKUP => [ self::ACTION_EDIT ],
+        self::OBJ_EXTRA_MARKUP => [ self::ACTION_UPDATE ],
     ];
 
     public const OBJECT_ATTRIBUTE_LIST = [

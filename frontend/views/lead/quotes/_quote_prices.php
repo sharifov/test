@@ -22,11 +22,11 @@ use yii\helpers\Url;
 $currency = empty($quote->q_client_currency) ? Currency::getDefaultCurrencyCode() : $quote->q_client_currency;
 $isOwner = $quote->lead->employee_id == Auth::id();
 $quoteFlightExtraMarkUpAbacDto = new QuoteFlightExtraMarkupAbacDto($quote->lead, $quote, $isOwner);
-/** @abac quoteFlightExtraMarkUpAbacDto, QuoteFlightAbacObject::OBJ_EXTRA_MARKUP, QuoteExtraMarkUpChangeAbacObject::ACTION_EDIT, Access to edit Quote Extra mark-up */
+/** @abac quoteFlightExtraMarkUpAbacDto, QuoteFlightAbacObject::OBJ_EXTRA_MARKUP, QuoteExtraMarkUpChangeAbacObject::ACTION_UPDATE, Access to edit Quote Extra mark-up */
 $canEditQuoteExtraMarkUp = Yii::$app->abac->can(
     $quoteFlightExtraMarkUpAbacDto,
     QuoteFlightAbacObject::OBJ_EXTRA_MARKUP,
-    QuoteFlightAbacObject::ACTION_EDIT
+    QuoteFlightAbacObject::ACTION_UPDATE
 );
 
 try {
