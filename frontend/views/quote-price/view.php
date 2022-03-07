@@ -69,6 +69,26 @@ $this->params['breadcrumbs'][] = $this->title;
                         },
                         'format' => 'html',
                     ],
+                    [
+                        'label' => 'Quote Currency',
+                        'value' => function (\common\models\QuotePrice $model) {
+                            if (!$currency = $model->quote->q_client_currency) {
+                                return Yii::$app->formatter->nullDisplay;
+                            }
+                            return $currency;
+                        },
+                        'format' => 'raw',
+                    ],
+                    [
+                        'label' => 'Quote Currency Rate',
+                        'value' => function (\common\models\QuotePrice $model) {
+                            if (!$rate = $model->quote->q_client_currency_rate) {
+                                return Yii::$app->formatter->nullDisplay;
+                            }
+                            return $rate;
+                        },
+                        'format' => 'raw',
+                    ],
                 ],
             ]) ?>
         </div>
@@ -77,22 +97,17 @@ $this->params['breadcrumbs'][] = $this->title;
                 'model' => $model,
                 'attributes' => [
                     [
-                        'attribute' => 'selling',
-                        'contentOptions' => ['class' => 'text-right'],
-                        'format' => 'currency'
-                    ],
-                    [
-                        'attribute' => 'net',
-                        'contentOptions' => ['class' => 'text-right'],
-                        'format' => 'currency'
-                    ],
-                    [
                         'attribute' => 'fare',
                         'contentOptions' => ['class' => 'text-right'],
                         'format' => 'currency'
                     ],
                     [
                         'attribute' => 'taxes',
+                        'contentOptions' => ['class' => 'text-right'],
+                        'format' => 'currency'
+                    ],
+                    [
+                        'attribute' => 'net',
                         'contentOptions' => ['class' => 'text-right'],
                         'format' => 'currency'
                     ],
@@ -111,6 +126,18 @@ $this->params['breadcrumbs'][] = $this->title;
                         'contentOptions' => ['class' => 'text-right'],
                         'format' => 'currency'
                     ],
+                    [
+                        'attribute' => 'selling',
+                        'contentOptions' => ['class' => 'text-right'],
+                        'format' => 'currency'
+                    ],
+                ],
+            ]) ?>
+        </div>
+        <div class="col-md-3">
+            <?= DetailView::widget([
+                'model' => $model,
+                'attributes' => [
                     [
                         'attribute' => 'qp_client_fare',
                         'contentOptions' => ['class' => 'text-right'],
@@ -132,6 +159,18 @@ $this->params['breadcrumbs'][] = $this->title;
                             }
                             $clientCurrency = $model->quote->q_client_currency ?? '';
                             return $model->qp_client_taxes . ' ' . $clientCurrency;
+                        },
+                        'format' => 'raw',
+                    ],
+                    [
+                        'attribute' => 'qp_client_net',
+                        'contentOptions' => ['class' => 'text-right'],
+                        'value' => static function (\common\models\QuotePrice $model) {
+                            if (empty($model->qp_client_net)) {
+                                return Yii::$app->formatter->nullDisplay;
+                            }
+                            $clientCurrency = $model->quote->q_client_currency ?? '';
+                            return $model->qp_client_net . ' ' . $clientCurrency;
                         },
                         'format' => 'raw',
                     ],
@@ -180,18 +219,6 @@ $this->params['breadcrumbs'][] = $this->title;
                             }
                             $clientCurrency = $model->quote->q_client_currency ?? '';
                             return $model->qp_client_selling . ' ' . $clientCurrency;
-                        },
-                        'format' => 'raw',
-                    ],
-                    [
-                        'attribute' => 'qp_client_net',
-                        'contentOptions' => ['class' => 'text-right'],
-                        'value' => static function (\common\models\QuotePrice $model) {
-                            if (empty($model->qp_client_net)) {
-                                return Yii::$app->formatter->nullDisplay;
-                            }
-                            $clientCurrency = $model->quote->q_client_currency ?? '';
-                            return $model->qp_client_net . ' ' . $clientCurrency;
                         },
                         'format' => 'raw',
                     ],

@@ -23,7 +23,7 @@ class QuotePriceCreateService
             $taxes = $clientTaxes = $form->baseTax;
             $markUp = $clientMarkUp = $form->markup;
             $net = $clientNet = ($fare + $taxes);
-            $extraMarkUp = (float) $form->clientExtraMarkUp;
+            $extraMarkUp = $clientExtraMarkUp = (float) $form->clientExtraMarkUp;
             $selling = ($net + $markUp + $extraMarkUp);
             $serviceFee = $clientServiceFee = $form->checkPayment ? self::calculateServiceFee($selling) : 0;
             $selling = $clientSelling = ($selling + $serviceFee);
@@ -31,15 +31,16 @@ class QuotePriceCreateService
             $clientFare = $form->baseFare;
             $clientTaxes = $form->baseTax;
             $clientMarkUp = $form->markup;
+            $clientExtraMarkUp = (float) $form->clientExtraMarkUp;
             $clientNet = ($clientFare + $clientTaxes);
-            $clientSelling = $clientNet + $clientMarkUp + (float) $form->clientExtraMarkUp;
+            $clientSelling = ($clientNet + $clientMarkUp + $clientExtraMarkUp);
             $clientServiceFee = $form->checkPayment ? self::calculateServiceFee($clientSelling) : 0;
             $clientSelling += $clientServiceFee;
 
             $fare = CurrencyHelper::convertToBaseCurrency($clientFare, $quote->q_client_currency_rate);
             $taxes = CurrencyHelper::convertToBaseCurrency($clientTaxes, $quote->q_client_currency_rate);
             $markUp = CurrencyHelper::convertToBaseCurrency($clientMarkUp, $quote->q_client_currency_rate);
-            $extraMarkUp = CurrencyHelper::convertToBaseCurrency((float) $form->clientExtraMarkUp, $quote->q_client_currency_rate);
+            $extraMarkUp = CurrencyHelper::convertToBaseCurrency($clientExtraMarkUp, $quote->q_client_currency_rate);
             $net = CurrencyHelper::convertToBaseCurrency($clientNet, $quote->q_client_currency_rate);
             $serviceFee = CurrencyHelper::convertToBaseCurrency($clientServiceFee, $quote->q_client_currency_rate);
             $selling = CurrencyHelper::convertToBaseCurrency($clientSelling, $quote->q_client_currency_rate);
@@ -57,7 +58,7 @@ class QuotePriceCreateService
         $quotePrice->qp_client_taxes = CurrencyHelper::roundUp($clientTaxes);
         $quotePrice->qp_client_net = CurrencyHelper::roundUp($clientNet);
         $quotePrice->qp_client_markup = CurrencyHelper::roundUp($clientMarkUp);
-        $quotePrice->qp_client_extra_mark_up = CurrencyHelper::roundUp((float) $form->clientExtraMarkUp);
+        $quotePrice->qp_client_extra_mark_up = CurrencyHelper::roundUp($clientExtraMarkUp);
         $quotePrice->qp_client_selling = CurrencyHelper::roundUp($clientSelling);
         $quotePrice->qp_client_service_fee = CurrencyHelper::roundUp($clientServiceFee);
 
@@ -66,6 +67,6 @@ class QuotePriceCreateService
 
     private static function calculateServiceFee(float $selling): float
     {
-        return QuotePrice::calculateProcessingFeeAmount($selling, (new Quote())->serviceFeePercent);
+        return QuotePrice::calculateProcessingFeeAmount($selling, (new Quote())->serviceFeePercent); /* TODO::  */
     }
 }
