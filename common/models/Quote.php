@@ -16,6 +16,7 @@ use src\helpers\setting\SettingHelper;
 use src\model\airportLang\service\AirportLangService;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
 use src\model\quoteLabel\entity\QuoteLabel;
+use src\services\CurrencyHelper;
 use src\services\quote\quotePriceService\ClientQuotePriceService;
 use src\traits\MetricObjectCounterTrait;
 use Yii;
@@ -1942,17 +1943,24 @@ class Quote extends \yii\db\ActiveRecord
             }
         }
 
+        if ($this->isClientCurrencyDefault()) {
+            $pricePerPax = $this->getPricePerPax();
+            $currencyCode = Currency::getDefaultCurrencyCode();
+            $currencySymbol = CurrencyHelper::getSymbolByCode($currencyCode);
+        } else {
+            $pricePerPax = (new ClientQuotePriceService($this))->geClientPricePerPax();
+            $currencyCode = $this->q_client_currency;
+            $currencySymbol = $this->clientCurrency->cur_symbol ?? $this->q_client_currency;
+        }
+
         return [
             'cabinClasses' => $quoteCabinClasses,
             'marketingAirlines' => $quoteMarketingAirlines,
             'operatingAirlines' => $quoteOperatingAirlines,
-            'pricePerPax' => $this->getPricePerPax(),
-            'clientPricePerPax' => (new ClientQuotePriceService($this))->geClientPricePerPax(),
+            'pricePerPax' => $pricePerPax,
             'priceTotal' => 0,
-            'currencySymbol' => '$',
-            'currencyCode' => 'USD',
-            'clientCurrencySymbol' => $this->getClientCurrencySymbol(),
-            'clientCurrencyCode' => $this->getClientCurrencyCode(),
+            'currencySymbol' => $currencySymbol,
+            'currencyCode' => $currencyCode,
             'trips' => $trips,
             'maxStopsQuantity' => $maxStopsQuantity
             //'baggage' => $this->getBaggageInfo2(),
