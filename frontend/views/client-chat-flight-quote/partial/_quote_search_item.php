@@ -309,7 +309,7 @@ $currencySymbol = CurrencyHelper::getSymbolByCode($result['currency'] ?? null);
                         ($quote = $flightQuotes[$result['key']] ?? null) &&
                         $price = QuotePriceRepository::findByQuoteIdAndPaxCode($quote->id, $paxCode)
                     ) {
-                        $value = $price->extra_mark_up;
+                        $value = !empty($price->qp_client_extra_mark_up) ? $price->qp_client_extra_mark_up : $price->extra_mark_up;
                     }
                     ?>
                             <input
