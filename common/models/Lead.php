@@ -325,6 +325,7 @@ class Lead extends ActiveRecord implements Objectable
         self::STATUS_TRASH          => 'll-trash',
         self::STATUS_BOOKED         => 'll-booked',
         self::STATUS_SNOOZE         => 'll-snooze',
+        self::STATUS_CLOSED         => 'll-close',
     ];
 
 
@@ -1772,7 +1773,7 @@ class Lead extends ActiveRecord implements Objectable
      * @param int|null $creatorId
      * @param string|null $reason
      */
-    public function duplicate(int $originId, ?int $newOwnerId = null, ?int $creatorId = null, ?string $reason = ''): void
+    public function duplicate(?int $originId, ?int $newOwnerId = null, ?int $creatorId = null, ?string $reason = ''): void
     {
         $this->l_duplicate_lead_id = $originId;
         $this->trash($newOwnerId, $creatorId, $reason ?: 'Duplicate. OriginId: ' . $originId);
@@ -2657,6 +2658,7 @@ class Lead extends ActiveRecord implements Objectable
                 break;
             case self::STATUS_TRASH:
             case self::STATUS_REJECT:
+            case self::STATUS_CLOSED:
                 $label = '<span class="label status-label bg-red">' . self::getStatus($status) . '</span>';
                 break;
             case self::STATUS_NEW:
@@ -2690,6 +2692,7 @@ class Lead extends ActiveRecord implements Objectable
                 break;
             case self::STATUS_TRASH:
             case self::STATUS_REJECT:
+            case self::STATUS_CLOSED:
                 $label = '<span class="label status-label bg-red">' . self::getStatus($status) . '</span>';
                 break;
             case self::STATUS_NEW:

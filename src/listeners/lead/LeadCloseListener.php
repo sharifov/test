@@ -37,17 +37,22 @@ class LeadCloseListener
 
     public function handle(LeadCloseEvent $event)
     {
+        $leadStatusReason = LeadStatusReasonQuery::getLeadStatusReasonByKey($event->leadStatusReasonKey);
+
+        $reason = $leadStatusReason->lsr_name ?? '';
+        if ($event->reasonComment) {
+            $reason .= ': ' . $event->reasonComment;
+        }
         $leadFlow = $this->leadFlowLogService->log(
             $event->lead->id,
             Lead::STATUS_CLOSED,
             $event->oldStatus,
             null,
             $event->creatorId,
-            null,
+            $reason,
             null
         );
 
-        $leadStatusReason = LeadStatusReasonQuery::getLeadStatusReasonByKey($event->leadStatusReasonKey);
         if ($leadStatusReason) {
             $leadStatusReasonLog = LeadStatusReasonLog::create($leadFlow->id, $leadStatusReason->lsr_id, $event->reasonComment);
             $this->leadStatusReasonLogRepository->save($leadStatusReasonLog);

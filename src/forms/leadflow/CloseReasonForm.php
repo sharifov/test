@@ -27,6 +27,7 @@ class CloseReasonForm extends Model
             [['reasonKey', 'leadGid'], 'required'],
             ['reasonKey', 'exist', 'skipOnEmpty' => false, 'skipOnError' => true, 'targetClass' => LeadStatusReason::class, 'targetAttribute' => ['reasonKey' => 'lsr_key']],
             [['reason'], 'string'],
+            [['reason'], 'filter', 'filter' => 'trim'],
             ['reason', 'validateReason', 'skipOnEmpty' => false],
         ];
     }
