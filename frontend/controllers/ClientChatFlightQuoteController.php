@@ -21,6 +21,7 @@ use src\forms\CompositeFormHelper;
 use src\forms\lead\ItineraryEditForm;
 use src\helpers\app\AppHelper;
 use src\helpers\ErrorsToStringHelper;
+use src\helpers\text\HashHelper;
 use src\model\clientChat\entity\abac\ClientChatAbacObject;
 use src\model\clientChat\entity\ClientChat;
 use src\model\clientChat\socket\ClientChatSocketCommands;
@@ -113,10 +114,8 @@ class ClientChatFlightQuoteController extends FController
         }
 
         $errors = [];
-
         $chat = ClientChat::findOne(['cch_id' => $chatId]);
         $viewModel = new ViewModelSearchQuotes();
-
         $viewModel->chatId = (int)$chatId;
         $viewModel->flightRequestFormMode = $flightRequestFormMode;
 
@@ -124,9 +123,11 @@ class ClientChatFlightQuoteController extends FController
             if (!$chat) {
                 throw new NotFoundException('Chat not found by id: ' . $chatId);
             }
-            $keyCache = 'quote-search-' . $chat->cch_rid;
 
             $lead = Lead::findOne($leadId);
+            $searchServiceDto = new SearchServiceQuoteDTO($lead);
+            $keyCache = 'quote-search-' . $chat->cch_rid . '-' . HashHelper::generateHashFromArray($searchServiceDto->getAsArray());
+
             if (!$lead) {
                 $userId = Auth::id();
                 $createLeadByChatForm = new LeadCreateByChatForm($chat);
@@ -162,7 +163,7 @@ class ClientChatFlightQuoteController extends FController
                     );
                 }
 
-                $searchServiceDto = new SearchServiceQuoteDTO($lead);
+
                 $quotes = Yii::$app->cacheFile->get($keyCache);
                 if ($quotes === false) {
                     $quotes = SearchService::getOnlineQuotes($searchServiceDto);
