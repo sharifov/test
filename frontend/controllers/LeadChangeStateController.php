@@ -266,27 +266,25 @@ class LeadChangeStateController extends FController
             try {
                 $this->stateService->close($lead, $form->reasonKey, Auth::id(), $form->reason);
                 Yii::$app->getSession()->setFlash('success', 'Success');
-            } catch (RuleException $e) {
-                Yii::error(AppHelper::throwableFormatter($e), 'LeadChangeStateController::actionClose::RuleException');
-            } catch (\DomainException $e) {
-                Yii::$app->getSession()->setFlash('warning', $e->getMessage());
+
+                return $this->redirect(['lead/view', 'gid' => $lead->gid]);
+            } catch (RuleException | \RuntimeException | \DomainException $e) {
+                $form->addError('general', $e->getMessage());
             } catch (\Throwable $e) {
                 Yii::error(AppHelper::throwableFormatter($e), 'LeadChangeStateController::actionClose::Throwable');
                 Yii::$app->getSession()->setFlash('danger', 'Server error occurred');
             }
-        } else {
-            $leadReasonStatues = LeadStatusReasonQuery::getAllEnabledAsArray();
-
-            $reasonStatues = ArrayHelper::map($leadReasonStatues, 'lsr_key', 'lsr_name');
-            $reasonStatuesCommentRequired = ArrayHelper::map($leadReasonStatues, 'lsr_key', 'lsr_comment_required');
-
-            return $this->renderAjax('reason_close', [
-                'reasonForm' => $form,
-                'reasonStatuses' => $reasonStatues,
-                'reasonStatuesCommentRequired' => $reasonStatuesCommentRequired
-            ]);
         }
-        return $this->redirect(['lead/view', 'gid' => $lead->gid]);
+        $leadReasonStatues = LeadStatusReasonQuery::getAllEnabledAsArray();
+
+        $reasonStatues = ArrayHelper::map($leadReasonStatues, 'lsr_key', 'lsr_name');
+        $reasonStatuesCommentRequired = ArrayHelper::map($leadReasonStatues, 'lsr_key', 'lsr_comment_required');
+
+        return $this->renderAjax('reason_close', [
+            'reasonForm' => $form,
+            'reasonStatuses' => $reasonStatues,
+            'reasonStatuesCommentRequired' => $reasonStatuesCommentRequired
+        ]);
     }
 
     public function actionAjaxChangedCloseReason()

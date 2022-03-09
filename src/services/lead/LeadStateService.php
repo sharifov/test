@@ -5,30 +5,43 @@ namespace src\services\lead;
 use common\models\Employee;
 use common\models\Lead;
 use src\access\EmployeeAccess;
+use src\model\leadStatusReason\HandleReasonDto;
+use src\model\leadStatusReason\LeadStatusReasonService;
 use src\repositories\lead\LeadRepository;
 use src\services\ServiceFinder;
+use src\services\TransactionManager;
 
 /**
  * Class LeadStateService
  *
  * @property ServiceFinder $serviceFinder
  * @property LeadRepository $leadRepository
+ * @property LeadStatusReasonService $leadStatusReasonService
+ * @property TransactionManager $transactionManager
  */
 class LeadStateService
 {
     private $serviceFinder;
     private $leadRepository;
+    private $leadStatusReasonService;
+    private $transactionManager;
 
     /**
      * @param ServiceFinder $serviceFinder
      * @param LeadRepository $leadRepository
+     * @param LeadStatusReasonService $leadStatusReasonService
+     * @param TransactionManager $transactionManager
      */
     public function __construct(
         ServiceFinder $serviceFinder,
-        LeadRepository $leadRepository
+        LeadRepository $leadRepository,
+        LeadStatusReasonService $leadStatusReasonService,
+        TransactionManager $transactionManager
     ) {
         $this->serviceFinder = $serviceFinder;
         $this->leadRepository = $leadRepository;
+        $this->leadStatusReasonService = $leadStatusReasonService;
+        $this->transactionManager = $transactionManager;
     }
 
     /**
@@ -194,7 +207,17 @@ class LeadStateService
     {
         $lead = $this->serviceFinder->leadFind($lead);
         $lead->close($leadStatusReasonKey, $creatorId, $reasonComment);
-        $this->leadRepository->save($lead);
+        $dto = new HandleReasonDto(
+            $lead,
+            $leadStatusReasonKey,
+            null,
+            $creatorId,
+            $reasonComment
+        );
+        $this->transactionManager->wrap(function () use ($dto) {
+            $this->leadRepository->save($dto->lead);
+            $this->leadStatusReasonService->handleReason($dto);
+        });
     }
 
     /**

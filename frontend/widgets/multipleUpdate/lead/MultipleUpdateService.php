@@ -273,7 +273,7 @@ class MultipleUpdateService
             try {
                 $this->leadStateService->close($lead, $form->reason, Auth::id(), $form->message);
                 $this->addMessage($this->movedStateMessage($lead, 'Close Queue', $oldOwnerId, $newOwner->id, $newOwner->userName));
-            } catch (\DomainException $e) {
+            } catch (\DomainException | \RuntimeException $e) {
                 $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
             }
         } else {

@@ -30,8 +30,11 @@ class LeadStatusReasonService
     private LeadUserConversionRepository $leadUserConversionRepository;
     private QaTaskCreateLeadCloseCheckService $qaTaskCreateLeadCloseCheckService;
 
-    public function __construct(LeadRepository $leadRepository, LeadUserConversionRepository $leadUserConversionRepository, QaTaskCreateLeadCloseCheckService $qaTaskCreateLeadCloseCheckService)
-    {
+    public function __construct(
+        LeadRepository $leadRepository,
+        LeadUserConversionRepository $leadUserConversionRepository,
+        QaTaskCreateLeadCloseCheckService $qaTaskCreateLeadCloseCheckService
+    ) {
         $this->leadRepository = $leadRepository;
         $this->leadUserConversionRepository = $leadUserConversionRepository;
         $this->qaTaskCreateLeadCloseCheckService = $qaTaskCreateLeadCloseCheckService;
@@ -53,63 +56,64 @@ class LeadStatusReasonService
 
     private function bookedWithAnotherAgent(HandleReasonDto $dto): void
     {
-        $this->toBonusQueue($dto)
-            ->leadToConversion($dto)
-            ->createQaTaskLead($dto);
+        $this->leadToConversion($dto)
+            ->createQaTaskLead($dto)
+            ->toBonusQueue($dto);
     }
 
     private function canceledTrip(HandleReasonDto $dto): void
     {
-        $this->toBonusQueue($dto)
-            ->leadToConversion($dto)
-            ->createQaTaskLead($dto);
+        $this->leadToConversion($dto)
+            ->createQaTaskLead($dto)
+            ->toBonusQueue($dto);
     }
 
     private function clientAskedNotToBeContactedAgain(HandleReasonDto $dto): void
     {
-        $this->toBonusQueue($dto)
-            ->leadToConversion($dto)
+        $this->leadToConversion($dto)
             ->createQaTaskLead($dto);
     }
 
     private function clientNeedsNoSales(HandleReasonDto $dto): void
     {
-        $this->leadToConversion($dto)->createQaTaskLead($dto);
+        $this->leadToConversion($dto)
+            ->createQaTaskLead($dto)
+            ->toBonusQueue($dto);
     }
 
     private function competitorHasABetterContract(HandleReasonDto $dto): void
     {
-        $this->toBonusQueue($dto)
-            ->leadToConversion($dto)
-            ->createQaTaskLead($dto);
+        $this->leadToConversion($dto)
+            ->createQaTaskLead($dto)
+            ->toBonusQueue($dto);
     }
 
     private function invalid(HandleReasonDto $dto): void
     {
-        $this->toBonusQueue($dto)
-            ->leadToConversion($dto)
-            ->createQaTaskLead($dto);
+        $this->leadToConversion($dto)
+            ->createQaTaskLead($dto)
+            ->toBonusQueue($dto);
     }
 
     private function properFollowUpDone(HandleReasonDto $dto): void
     {
-        $this->toBonusQueue($dto)
-            ->leadToConversion($dto)
-            ->createQaTaskLead($dto);
+        $this->leadToConversion($dto)
+            ->createQaTaskLead($dto)
+            ->toBonusQueue($dto);
     }
 
     private function purchasedElsewhere(HandleReasonDto $dto): void
     {
-        $this->toBonusQueue($dto)
-            ->leadToConversion($dto)
-            ->createQaTaskLead($dto);
+        $this->leadToConversion($dto)
+            ->createQaTaskLead($dto)
+            ->toBonusQueue($dto);
     }
 
     private function travelDatesPassed(HandleReasonDto $dto): void
     {
-        $this->toBonusQueue($dto)
-            ->leadToConversion($dto)
-            ->createQaTaskLead($dto);
+        $this->leadToConversion($dto)
+            ->createQaTaskLead($dto)
+            ->toBonusQueue($dto);
     }
 
     private function transfer(HandleReasonDto $dto): void
@@ -125,7 +129,7 @@ class LeadStatusReasonService
     private function duplicated(HandleReasonDto $dto): void
     {
         $stateService = \Yii::createObject(LeadStateService::class);
-        $stateService->duplicate($dto->lead, $dto->newLeadOwnerId, ((int)$dto->reason) ?: null, $dto->creatorId);
+        $stateService->duplicate($dto->lead, $dto->lead->employee_id, null, $dto->creatorId);
         $this->leadToConversion($dto)->createQaTaskLead($dto);
     }
 
@@ -139,17 +143,23 @@ class LeadStatusReasonService
     private function leadToConversion(HandleReasonDto $dto): self
     {
         $leadClosedCount = LeadFlowQuery::countByStatus($dto->lead->id, Lead::STATUS_CLOSED);
+        if (empty($dto->lead->employee_id)) {
+            throw new \RuntimeException('Lead has no owner; Cannot Close;');
+        }
         if ($leadClosedCount <= 1) {
             $abacDto = new LeadAbacDto($dto->lead, $dto->creatorId);
             $abacDto->closeReason = $dto->leadStatusReasonKey;
-            if (\Yii::$app->abac->can($abacDto, LeadAbacObject::ACT_USER_CONVERSION, LeadAbacObject::ACTION_CREATE)) {
-                $leadUserConversion = LeadUserConversion::create(
-                    $dto->lead->id,
-                    $dto->lead->employee_id,
-                    $dto->reason,
-                    $dto->creatorId
-                );
-                $this->leadUserConversionRepository->save($leadUserConversion);
+            $canAbac = \Yii::$app->abac->can($abacDto, LeadAbacObject::ACT_USER_CONVERSION, LeadAbacObject::ACTION_CLOSE);
+            if ($canAbac) {
+                if (!$this->leadUserConversionRepository->exist($dto->lead->id, $dto->lead->id)) {
+                    $leadUserConversion = LeadUserConversion::create(
+                        $dto->lead->id,
+                        $dto->lead->employee_id,
+                        $dto->reason,
+                        $dto->creatorId
+                    );
+                    $this->leadUserConversionRepository->save($leadUserConversion);
+                }
             } else {
                 LeadUserConversionQuery::removeByLeadId($dto->lead->id);
             }
