@@ -19,6 +19,7 @@ class QaTaskActions
     public const USER_ASSIGN = 11;
     public const CREAT_CHAT_WITHOUT_NEW_MESSAGES = 12;
     public const MULTIPLE_CANCEL = 13;
+    public const CREATE_LEAD_CLOSE_CHECK = 14;
 
     private const LIST = [
         self::TAKE => 'Take',
@@ -34,6 +35,7 @@ class QaTaskActions
         self::USER_ASSIGN => 'User Assign',
         self::CREAT_CHAT_WITHOUT_NEW_MESSAGES => 'Rule: Chat Without New Messages',
         self::MULTIPLE_CANCEL => 'Multiple Cancel',
+        self::CREATE_LEAD_CLOSE_CHECK => 'Close',
     ];
 
     public static function getList(): array

@@ -7,6 +7,7 @@ use common\models\Lead;
 use common\models\Project;
 use modules\abac\components\AbacBaseModel;
 use modules\abac\src\entities\AbacInterface;
+use src\model\leadStatusReason\entity\LeadStatusReasonQuery;
 
 /**
  * Class LeadAbacObject
@@ -143,6 +144,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     public const ACTION_MANAGE_LEAD_PREF_CURRENCY = 'manageLeadPrefCurrency';
     public const ACTION_CLOSE = 'close';
     public const ACTION_TRASH = 'trash';
+    public const ACTION_TO_QA_LIST = 'toQaList';
 
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
@@ -207,7 +209,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_LINK_TO_CALL => [self::ACTION_ACCESS],
         self::ACT_TAKE_LEAD_FROM_CALL => [self::ACTION_ACCESS],
         self::OBJ_LEAD_PREFERENCES => [self::ACTION_SET_DELAY_CHARGE, self::ACTION_MANAGE_LEAD_PREF_CURRENCY],
-        self::OBJ_LEAD => [self::ACTION_CLONE, self::ACTION_SNOOZE, self::ACTION_CLOSE, self::ACTION_TRASH],
+        self::OBJ_LEAD => [self::ACTION_CLONE, self::ACTION_SNOOZE, self::ACTION_CLOSE, self::ACTION_TRASH, self::ACTION_TO_QA_LIST],
         self::OBJ_EXTRA_QUEUE => [self::ACTION_ACCESS],
         self::OBJ_CLOSED_QUEUE => [self::ACTION_ACCESS],
     ];
@@ -464,6 +466,18 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, '<', '>', '<=', '>=']
     ];
 
+    public const ATTR_CLOSE_REASON = [
+        'optgroup' => 'Lead',
+        'id' => self::NS . 'close_reason',
+        'field' => 'closeReason',
+        'label' => 'Lead Close Reason Key',
+        'type' => self::ATTR_TYPE_STRING,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_CONTAINS]
+    ];
+
     public const OBJECT_ATTRIBUTE_LIST = [
         self::ACT_USER_CONVERSION    => [self::ATTR_LEAD_IS_OWNER],
         self::UI_BLOCK_CLIENT_INFO   => [
@@ -609,6 +623,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         $attrEmailCreateFieldsList = self::ATTR_FIELD_NAME;
         $attrClientCreateFieldsList = self::ATTR_FIELD_NAME;
         $attrClientCreateMultiFieldsList = self::ATTR_MULTI_FIELD_NAME;
+        $attrLeadCloseReasons = self::ATTR_CLOSE_REASON;
 
         $formPhoneCreateFields = [
             'phone' => 'Phone'
@@ -623,10 +638,13 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
             'marketingCountry' => 'Marketing Country',
         ];
 
+        $closeReasons = LeadStatusReasonQuery::getList();
+
         $attrPhoneCreateFieldsList['values'] = $formPhoneCreateFields;
         $attrEmailCreateFieldsList['values'] = $formEmailCreateFields;
         $attrClientCreateFieldsList['values'] = $formClientCreateFields;
         $attrClientCreateMultiFieldsList['values'] = $formClientCreateFields;
+        $attrLeadCloseReasons['values'] = $closeReasons;
 
         $attributeList = self::OBJECT_ATTRIBUTE_LIST;
         $attributeList[self::UI_BLOCK_CLIENT_INFO][] = $attrStatus;
@@ -646,10 +664,12 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         $attributeList[self::ACT_TAKE_LEAD_FROM_CALL][] = $attrStatus;
         $attributeList[self::OBJ_LEAD_PREFERENCES][] = $attrStatus;
         $attributeList[self::OBJ_LEAD][] = $attrStatus;
+        $attributeList[self::OBJ_LEAD][] = $attrLeadCloseReasons;
         $attributeList[self::PHONE_CREATE_FORM][] = $attrPhoneCreateFieldsList;
         $attributeList[self::EMAIL_CREATE_FORM][] = $attrEmailCreateFieldsList;
         $attributeList[self::CLIENT_CREATE_FORM][] = $attrClientCreateFieldsList;
         $attributeList[self::CLIENT_CREATE_FORM][] = $attrClientCreateMultiFieldsList;
+        $attributeList[self::ACT_USER_CONVERSION][] = $attrLeadCloseReasons;
 
         return $attributeList;
     }

@@ -24,6 +24,7 @@ use yii\helpers\VarDumper;
  * @property int|null $status_id
  * @property string $formAttribute
  * @property int $snoozeCount
+ * @property string|null $closeReason
  */
 class LeadAbacDto extends \stdClass
 {
@@ -42,6 +43,7 @@ class LeadAbacDto extends \stdClass
     public ?bool $isNewRecord = null;
     public array $formMultiAttribute = [];
     public int $snoozeCount = 10;
+    public ?string $closeReason = '';
 
 
     /**
