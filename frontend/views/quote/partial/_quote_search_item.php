@@ -288,11 +288,11 @@ $isQuoteAssignedToFlight = in_array($result['key'], $flightQuotes);
                 </tbody>
                 <tfoot>
                 <tr>
-                    <th>Total</th>
+                    <th title="isCk: <?php echo $result['prices']['isCk'] ?? '' ?>">Total</th>
                     <td><?= $paxTotal?></td>
-                    <td  class="text-right"><?= number_format($result['prices']['totalPrice'] - $result['prices']['markup'] ?? 0, 2) ?></td>
-                    <td  class="text-right"><?= number_format($result['prices']['markup'], 2)?></td>
-                    <td  class="text-right"><?= number_format($result['prices']['totalPrice'], 2)?></td>
+                    <td class="text-right"><?= number_format($result['prices']['totalPrice'] - $result['prices']['markup'] ?? 0, 2) ?></td>
+                    <td class="text-right"><?= number_format($result['prices']['markup'], 2)?></td>
+                    <td class="text-right"><?= number_format($result['prices']['totalPrice'], 2)?></td>
                 </tr>
                 </tfoot>
             </table>

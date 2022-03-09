@@ -44,7 +44,17 @@ $this->params['breadcrumbs'][] = $this->title;
                         'header'    => 'Quote UID',
                         'format' => 'html',
                         'value' => function (\common\models\QuotePrice $model) {
-                            return $model->quote ? Html::a($model->quote->uid, ['quote/view', 'id' => $model->quote_id], ['target' => '_blank']) . ' (id: ' . $model->quote_id . ')' : '-';
+                            return $model->quote ? Html::a($model->quote->uid, ['quotes/view', 'id' => $model->quote_id], ['target' => '_blank']) . ' (id: ' . $model->quote_id . ')' : '-';
+                        },
+                    ],
+                    [
+                        'label' => 'Lead',
+                        'format' => 'raw',
+                        'value' => function (\common\models\QuotePrice $model) {
+                            if (!$lead = $model->quote->lead ?? null) {
+                                return Yii::$app->formatter->nullDisplay;
+                            }
+                            return Yii::$app->formatter->asLead($lead);
                         },
                     ],
                     [
@@ -72,7 +82,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'label' => 'Quote Currency',
                         'value' => function (\common\models\QuotePrice $model) {
-                            if (!$currency = $model->quote->q_client_currency) {
+                            if (!$currency = $model->quote->q_client_currency ?? null) {
                                 return Yii::$app->formatter->nullDisplay;
                             }
                             return $currency;
@@ -82,10 +92,30 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'label' => 'Quote Currency Rate',
                         'value' => function (\common\models\QuotePrice $model) {
-                            if (!$rate = $model->quote->q_client_currency_rate) {
+                            if (!$rate = $model->quote->q_client_currency_rate ?? null) {
                                 return Yii::$app->formatter->nullDisplay;
                             }
                             return $rate;
+                        },
+                        'format' => 'raw',
+                    ],
+                    [
+                        'label' => 'Quote Check Payment',
+                        'value' => function (\common\models\QuotePrice $model) {
+                            if (!$checkPayment = $model->quote->check_payment ?? null) {
+                                return Yii::$app->formatter->nullDisplay;
+                            }
+                            return Yii::$app->formatter->asBooleanBySquare($checkPayment);
+                        },
+                        'format' => 'raw',
+                    ],
+                    [
+                        'label' => 'Quote ServiceFee %',
+                        'value' => function (\common\models\QuotePrice $model) {
+                            if (!$checkPayment = $model->quote->service_fee_percent) {
+                                return Yii::$app->formatter->nullDisplay;
+                            }
+                            return $model->quote->service_fee_percent . '%';
                         },
                         'format' => 'raw',
                     ],
