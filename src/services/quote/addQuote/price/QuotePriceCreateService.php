@@ -25,7 +25,7 @@ class QuotePriceCreateService
             $net = $clientNet = ($fare + $taxes);
             $extraMarkUp = $clientExtraMarkUp = (float) $form->clientExtraMarkUp;
             $selling = ($net + $markUp + $extraMarkUp);
-            $serviceFee = $clientServiceFee = $form->checkPayment ? self::calculateServiceFee($selling, $form->getQuote()) : 0;
+            $serviceFee = $clientServiceFee = $quote->service_fee_percent ? self::calculateServiceFee($selling, $form->getQuote()) : 0;
             $selling = $clientSelling = ($selling + $serviceFee);
         } else {
             $clientFare = $form->baseFare;
@@ -34,7 +34,7 @@ class QuotePriceCreateService
             $clientExtraMarkUp = (float) $form->clientExtraMarkUp;
             $clientNet = ($clientFare + $clientTaxes);
             $clientSelling = ($clientNet + $clientMarkUp + $clientExtraMarkUp);
-            $clientServiceFee = $form->checkPayment ? self::calculateServiceFee($clientSelling, $form->getQuote()) : 0;
+            $clientServiceFee = $quote->service_fee_percent ? self::calculateServiceFee($clientSelling, $form->getQuote()) : 0;
             $clientSelling += $clientServiceFee;
 
             $fare = CurrencyHelper::convertToBaseCurrency($clientFare, $quote->q_client_currency_rate);
