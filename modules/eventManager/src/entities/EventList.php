@@ -12,6 +12,7 @@ use yii\caching\TagDependency;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\db\BaseActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the modclass for table "event_list".
@@ -215,5 +216,14 @@ class EventList extends ActiveRecord
     public static function getEnableTypeList(): array
     {
         return self::ET_LIST;
+    }
+
+    /**
+     * @return array
+     */
+    public static function getList(): array
+    {
+        $data = self::find()->orderBy(['el_id' => SORT_ASC])->asArray()->all();
+        return ArrayHelper::map($data, 'el_id', 'el_key');
     }
 }

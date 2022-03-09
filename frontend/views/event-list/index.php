@@ -90,7 +90,13 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
-            'el_id',
+//            'el_id',
+            [
+                'attribute' => 'el_id',
+                'options' => [
+                    'style' => 'width:80px'
+                ]
+            ],
 
 //            [
 //                'attribute' => 'el_key',
@@ -139,7 +145,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => BooleanColumn::class,
             ],
 
-            'el_sort_order',
+            [
+                'attribute' => 'el_sort_order',
+                'options' => [
+                    'style' => 'width:100px'
+                ]
+            ],
             [
                 'attribute' => 'el_cron_expression',
                 'value' => static function (EventList $model) {
@@ -156,6 +167,24 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => static function (EventList $model) {
                     return $model->el_params ?
                         Html::tag('small', \yii\helpers\VarDumper::dumpAsString($model->el_params)) : '-';
+                },
+                'format' => 'raw',
+            ],
+
+            [
+                'label' => 'Handler List',
+                'value' => static function (EventList $model) {
+                    $data = [];
+                    if ($list = $model->eventHandlers) {
+                        foreach ($list as $handler) {
+                            $data[] = Html::a(
+                                Html::decode($handler->eh_class . '::' . $handler->eh_method),
+                                ['event-handler/update', 'eh_id' => $handler->eh_id],
+                                ['target' => '_blank', 'data-pjax' => 0, 'title' => 'Update ID: ' . $handler->eh_id]
+                            );
+                        }
+                    }
+                    return $data ? '<p>' . implode('</p><p>', $data) . '</p>' : '-';
                 },
                 'format' => 'raw',
             ],

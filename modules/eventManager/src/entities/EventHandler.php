@@ -32,7 +32,7 @@ use yii\helpers\VarDumper;
  * @property string|null $eh_updated_dt
  * @property int|null $eh_updated_user_id
  *
- * @property EventList $ehList
+ * @property EventList $eventList
  * @property Employee $updatedUser
  */
 class EventHandler extends ActiveRecord
@@ -168,7 +168,7 @@ class EventHandler extends ActiveRecord
     }
 
     /**
-     * Gets query for [[EhEl]].
+     * Gets query for [[EventList]].
      *
      * @return ActiveQuery
      */
@@ -178,7 +178,7 @@ class EventHandler extends ActiveRecord
     }
 
     /**
-     * Gets query for [[EhUpdatedUser]].
+     * Gets query for [[UpdatedUser]].
      *
      * @return ActiveQuery
      */

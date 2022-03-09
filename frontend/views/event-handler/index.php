@@ -17,6 +17,7 @@ use yii\widgets\Pjax;
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Event Handlers';
+$this->params['breadcrumbs'][] = ['label' => 'Event List', 'url' => ['event-list/index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="event-handler-index">
@@ -37,9 +38,34 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
 //            ['class' => 'yii\grid\SerialColumn'],
 
-            'eh_id',
-            'eh_el_id',
-            'eh_class',
+            [
+                'attribute' => 'eh_id',
+                'options' => [
+                    'style' => 'width:100px'
+                ]
+            ],
+            //'eh_id',
+            //'eh_el_id',
+            [
+                'attribute' => 'eh_el_id',
+                'label' => 'Event Key',
+                'value' => static function (EventHandler $model) {
+                    return $model->eventList ? $model->eventList->el_key : '-';
+                },
+                'filter' => EventList::getList(),
+//                'format' => 'raw',
+            ],
+
+
+//            'eh_class',
+            [
+                'attribute' => 'eh_class',
+                'value' => static function (EventHandler $model) {
+                    return $model->eh_class ?
+                        Html::tag('span', Html::encode($model->eh_class), ['class' => 'label label-primary', 'style' => 'font-size: 12px']) : '-';
+                },
+                'format' => 'raw',
+            ],
             'eh_method',
             [
                 'attribute' => 'eh_enable_type',
@@ -64,7 +90,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => BooleanColumn::class,
             ],
 
-            'eh_sort_order',
+            //'eh_sort_order',
+            [
+                'attribute' => 'eh_sort_order',
+                'options' => [
+                    'style' => 'width:100px'
+                ]
+            ],
             //'eh_cron_expression',
             //'eh_condition:ntext',
             //'eh_builder_json',
