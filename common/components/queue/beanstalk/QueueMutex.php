@@ -41,11 +41,9 @@ class QueueMutex extends \yii\queue\beanstalk\Queue
                         }
                     } elseif (!$repeat) {
                         $this->mutex->release($this->tube);
-                        $this->delayAfterRelease();
                         break;
                     }
                     $this->mutex->release($this->tube);
-                    $this->delayAfterRelease();
                 }
             }
         });
