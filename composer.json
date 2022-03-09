@@ -112,7 +112,8 @@
 		"textalk/websocket": "^1.5",
         "ext-fileinfo": "*",
         "ext-pgsql": "*",
-		"kivork/yii2-feature-flag": "@dev"
+		"kivork/yii2-feature-flag": "@dev",
+		"kivork/yii2-search-module": "1.0.*"
 	},
 	"require-dev" : {
 		"yiisoft/yii2-debug" : "~2.1",
@@ -198,6 +199,10 @@
 		{
 			"type": "vcs",
 			"url": "git@bitbucket.org:techork/yii2-feature-flag.git"
+		},
+		{
+			"type": "vcs",
+			"url": "git@bitbucket.org:techork/yii2-search-module.git"
 		}
 	],
 	"scripts": {
