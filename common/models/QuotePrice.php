@@ -316,15 +316,23 @@ class QuotePrice extends \yii\db\ActiveRecord
         $serviceFeePercent = $this->quote->getServiceFeePercent();
         //$this->oldParams = serialize($this->attributes);
         $this->net = $this->taxes + $this->fare;
+        $this->qp_client_net = $this->qp_client_taxes + $this->qp_client_fare;
 
         $this->selling = ($this->net + $this->mark_up + $this->extra_mark_up);
+        $this->qp_client_selling = ($this->qp_client_net + $this->qp_client_markup + $this->qp_client_extra_mark_up);
         if ($serviceFeePercent > 0) {
             $this->service_fee = self::calculateProcessingFeeAmount((float)$this->selling, (float)$serviceFeePercent);
+            $this->qp_client_service_fee = self::calculateProcessingFeeAmount((float)$this->qp_client_selling, (float)$serviceFeePercent);
             $this->selling += $this->service_fee;
+            $this->qp_client_selling += $this->qp_client_service_fee;
         }
         $this->net = round($this->net, 2);
         $this->service_fee = round($this->service_fee, 2);
         $this->selling = round($this->selling, 2);
+
+        $this->qp_client_net = round($this->qp_client_net, 2);
+        $this->qp_client_service_fee = round($this->qp_client_service_fee, 2);
+        $this->qp_client_selling = round($this->qp_client_selling, 2);
 
         parent::afterFind();
     }
