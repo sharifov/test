@@ -355,6 +355,11 @@ return [
             'roles' => ['admin', 'superadmin']
         ],
 
+        'smart' => [
+            'class' => \kivork\search\SearchModule::class,
+            'Cid' => 'SAL103'
+        ],
+
         'invoice' => [
             'class' => InvoiceModule::class,
             'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',

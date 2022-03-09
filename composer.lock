@@ -4217,6 +4217,50 @@
             "time": "2021-02-23T10:29:59+00:00"
         },
         {
+            "name": "kivork/yii2-search-module",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "git@bitbucket.org:techork/yii2-search-module.git",
+                "reference": "a90493d11fcd47949ec0dd1b7f03c23653080069"
+            },
+            "require": {
+                "kovalenkojuls/yii2-widget-combodate": "*",
+                "php": ">=7.4",
+                "yiisoft/yii2": "~2.0.10",
+                "yiisoft/yii2-bootstrap4": "~2.0.0",
+                "yiisoft/yii2-httpclient": "^2.0"
+            },
+            "type": "yii2-extension",
+            "extra": {
+                "bootstrap": "kivork\\search\\BootstrapModule"
+            },
+            "autoload": {
+                "psr-4": {
+                    "kivork\\search\\": "src\\"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Andrew Butler",
+                    "email": "andrew.butler@techork.com"
+                }
+            ],
+            "description": "Yii2 search module",
+            "keywords": [
+                "extension",
+                "search",
+                "yii2"
+            ],
+            "support": {
+                "source": "https://bitbucket.org/techork/yii2-search-module"
+            },
+            "time": "2022-02-15T00:00:00+00:00"
+        },
+        {
             "name": "kivork/yii2-virtual-cron",
             "version": "dev-master",
             "source": {
