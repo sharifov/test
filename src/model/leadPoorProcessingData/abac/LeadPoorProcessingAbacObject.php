@@ -148,6 +148,17 @@ class LeadPoorProcessingAbacObject extends AbacBaseModel implements AbacInterfac
         'multiple' => false,
         'operators' =>  [self::OP_EQUAL2]
     ];
+    protected const ATTR_LEAD_IS_CLONE = [
+        'optgroup' => 'Lead',
+        'id' => self::NS . 'leadIsClone',
+        'field' => 'leadIsClone',
+        'label' => 'Lead Is Clone',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => [],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
 
     /** --------------- ATTRIBUTE LIST --------------------------- */
     public const OBJECT_ATTRIBUTE_LIST = [
@@ -178,6 +189,8 @@ class LeadPoorProcessingAbacObject extends AbacBaseModel implements AbacInterfac
         $attrLeadCallStatus['values'] = Lead::CALL_STATUS_LIST;
         $attrLeadType = self::ATTR_LEAD_TYPE_ID;
         $attrLeadType['values'] = ArrayHelper::merge(Lead::TYPE_LIST, [Lead::TYPE_BASIC => 'Basic']);
+        $attrLeadIsClone = self::ATTR_LEAD_IS_CLONE;
+        $attrLeadIsClone['values'] = ['true' => 'Yes', 'false' => 'No'];
 
         $attributeList = self::OBJECT_ATTRIBUTE_LIST;
         $attributeList[self::OBJ_PERMISSION_RULE][] = $attrLeadStatus;
@@ -189,6 +202,7 @@ class LeadPoorProcessingAbacObject extends AbacBaseModel implements AbacInterfac
         $attributeList[self::OBJ_PERMISSION_RULE][] =  self::ATTR_IS_IN_PROJECT;
         $attributeList[self::OBJ_PERMISSION_RULE][] = self::ATTR_IS_IN_DEPARTMENT;
         $attributeList[self::OBJ_PERMISSION_RULE][] = self::ATTR_LEAD_CREATED;
+        $attributeList[self::OBJ_PERMISSION_RULE][] = $attrLeadIsClone;
 
         return $attributeList;
     }
