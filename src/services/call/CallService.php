@@ -193,7 +193,7 @@ class CallService
             return;
         }
 
-        if (!PhoneList::find()->andWhere(['pl_phone_number' => $from])->exists()) {
+        if (!PhoneList::find()->andWhere(['pl_phone_number' => $from])->enabled()->exists()) {
             return;
         }
 
