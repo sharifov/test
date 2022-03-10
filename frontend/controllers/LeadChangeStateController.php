@@ -278,6 +278,13 @@ class LeadChangeStateController extends FController
         $leadReasonStatues = LeadStatusReasonQuery::getAllEnabledAsArray();
 
         $reasonStatues = ArrayHelper::map($leadReasonStatues, 'lsr_key', 'lsr_name');
+        if (!empty($reasonStatues)) {
+            $n = 1;
+            foreach ($reasonStatues as $key => $name) {
+                $reasonStatues[$key] = $n++ . '. ' . $name;
+            }
+        }
+
         $reasonStatuesCommentRequired = ArrayHelper::map($leadReasonStatues, 'lsr_key', 'lsr_comment_required');
 
         return $this->renderAjax('reason_close', [
