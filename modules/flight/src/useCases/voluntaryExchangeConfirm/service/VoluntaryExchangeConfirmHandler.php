@@ -10,7 +10,6 @@ use frontend\helpers\JsonHelper;
 use modules\flight\models\FlightPax;
 use modules\flight\models\FlightQuote;
 use modules\flight\models\FlightRequest;
-use modules\flight\src\useCases\voluntaryExchange\service\BoRequestVoluntaryExchangeService;
 use modules\flight\src\useCases\voluntaryExchange\service\CaseVoluntaryExchangeHandler;
 use modules\flight\src\useCases\voluntaryExchange\service\CleanDataVoluntaryExchangeService;
 use modules\flight\src\useCases\voluntaryExchange\service\FlightRequestService;
@@ -24,6 +23,7 @@ use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use src\entities\cases\CaseEventLog;
 use src\entities\cases\Cases;
 use src\helpers\app\AppHelper;
+use webapi\src\request\BoRequestDataHelper;
 use webapi\src\services\payment\BillingInfoApiVoluntaryService;
 use yii\helpers\ArrayHelper;
 
@@ -86,8 +86,8 @@ class VoluntaryExchangeConfirmHandler
     {
         $request['apiKey'] = $this->case->project->api_key;
         $request['bookingId'] = $this->confirmForm->booking_id;
-        $request['billing'] = BoRequestVoluntaryExchangeService::fillBillingData($this->confirmForm->getBillingInfoForm());
-        $request['payment'] = BoRequestVoluntaryExchangeService::fillPaymentData($this->confirmForm->getPaymentRequestForm());
+        $request['billing'] = BoRequestDataHelper::fillBillingData($this->confirmForm->getBillingInfoForm());
+        $request['payment'] = BoRequestDataHelper::fillPaymentData($this->confirmForm->getPaymentRequestForm());
         $request['exchange'] = $this->prepareExchange();
         return $request;
     }
