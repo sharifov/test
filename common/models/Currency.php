@@ -60,7 +60,8 @@ class Currency extends ActiveRecord
             [['cur_enabled', 'cur_default'], 'boolean'],
             [['cur_sort_order'], 'integer'],
             [['cur_created_dt', 'cur_updated_dt', 'cur_synch_dt'], 'safe'],
-            [['cur_code', 'cur_symbol'], 'string', 'max' => 3],
+            [['cur_code'], 'string', 'max' => 3],
+            [['cur_symbol'], 'string', 'max' => 10],
             [['cur_name'], 'string', 'max' => 34],
             [['cur_code'], 'unique'],
         ];

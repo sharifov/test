@@ -37,7 +37,7 @@ class CurrencyHistory extends \yii\db\ActiveRecord
         return [
             [['ch_code', 'ch_created_date'], 'required'],
             [['ch_app_percent'], 'number', 'max' => 100],
-            [['ch_base_rate', 'ch_app_rate'], 'number', 'max' => 1000],
+            [['ch_base_rate', 'ch_app_rate'], 'number'],
             [['ch_created_date', 'ch_main_created_dt', 'ch_main_updated_dt', 'ch_main_synch_dt'], 'safe'],
             [['ch_code'], 'string', 'max' => 3],
             [['ch_code', 'ch_created_date'], 'unique', 'targetAttribute' => ['ch_code', 'ch_created_date']],
