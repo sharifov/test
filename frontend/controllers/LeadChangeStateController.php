@@ -11,6 +11,7 @@ use modules\qaTask\src\useCases\qaTask\create\lead\trashCheck\QaTaskCreateLeadTr
 use modules\qaTask\src\useCases\qaTask\create\lead\trashCheck\Rule;
 use modules\qaTask\src\useCases\qaTask\create\lead\trashCheck\RuleException;
 use src\auth\Auth;
+use src\forms\leadflow\CloseReasonForm;
 use src\forms\leadflow\FollowUpReasonForm;
 use src\forms\leadflow\RejectReasonForm;
 use src\forms\leadflow\ReturnReasonForm;
@@ -18,10 +19,13 @@ use src\forms\leadflow\SnoozeReasonForm;
 use src\forms\leadflow\TrashReasonForm;
 use src\guards\lead\FollowUpGuard;
 use src\helpers\app\AppHelper;
+use src\model\leadStatusReason\entity\LeadStatusReason;
+use src\model\leadStatusReason\entity\LeadStatusReasonQuery;
 use src\model\leadUserConversion\entity\LeadUserConversion;
 use src\model\leadUserConversion\repository\LeadUserConversionRepository;
 use src\model\leadUserConversion\service\LeadUserConversionDictionary;
 use src\model\leadUserConversion\service\LeadUserConversionService;
+use src\repositories\NotFoundException;
 use src\services\lead\LeadAssignService;
 use src\services\lead\LeadStateService;
 use Yii;
@@ -82,6 +86,10 @@ class LeadChangeStateController extends FController
                 'allowActions' => [
                     'take-over',
                     'validate-take-over',
+                    'close',
+                    'ajax-changed-close-reason',
+                    'trash',
+                    'validate-trash'
                 ],
             ],
         ];
@@ -204,6 +212,13 @@ class LeadChangeStateController extends FController
     public function actionTrash()
     {
         $lead = $this->getLead();
+
+        /** @abac new LeadAbacDto($lead, Auth::id()), LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_TRASH, Access to move lead to trash */
+        $leadAbacDto = new LeadAbacDto($lead, Auth::id());
+        if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_TRASH)) {
+            throw new ForbiddenHttpException('Access Denied');
+        }
+
         $form = new TrashReasonForm($lead);
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
@@ -237,6 +252,79 @@ class LeadChangeStateController extends FController
         return $this->redirect(['lead/view', 'gid' => $lead->gid]);
     }
 
+    public function actionClose()
+    {
+        $lead = $this->getLead();
+        /** @abac new LeadAbacDto($lead, Auth::id()), LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CLOSE, Access to close lead */
+        $leadAbacDto = new LeadAbacDto($lead, Auth::id());
+        if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CLOSE)) {
+            throw new ForbiddenHttpException('Access Denied');
+        }
+
+        $form = new CloseReasonForm($lead);
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            try {
+                $this->stateService->close($lead, $form->reasonKey, Auth::id(), $form->reason);
+                Yii::$app->getSession()->setFlash('success', 'Success');
+
+                return $this->redirect(['lead/view', 'gid' => $lead->gid]);
+            } catch (RuleException | \RuntimeException | \DomainException $e) {
+                $form->addError('general', $e->getMessage());
+            } catch (\Throwable $e) {
+                Yii::error(AppHelper::throwableFormatter($e), 'LeadChangeStateController::actionClose::Throwable');
+                Yii::$app->getSession()->setFlash('danger', 'Server error occurred');
+            }
+        }
+        $leadReasonStatues = LeadStatusReasonQuery::getAllEnabledAsArray();
+
+        $reasonStatues = ArrayHelper::map($leadReasonStatues, 'lsr_key', 'lsr_name');
+        if (!empty($reasonStatues)) {
+            $n = 1;
+            foreach ($reasonStatues as $key => $name) {
+                $reasonStatues[$key] = $n++ . '. ' . $name;
+            }
+        }
+
+        $reasonStatuesCommentRequired = ArrayHelper::map($leadReasonStatues, 'lsr_key', 'lsr_comment_required');
+
+        return $this->renderAjax('reason_close', [
+            'reasonForm' => $form,
+            'reasonStatuses' => $reasonStatues,
+            'reasonStatuesCommentRequired' => $reasonStatuesCommentRequired
+        ]);
+    }
+
+    public function actionAjaxChangedCloseReason()
+    {
+        $isMultipleUpdate = Yii::$app->request->get('multipleUpdate', false);
+        if (!$isMultipleUpdate) {
+            $lead = $this->getLead();
+            /** @abac new LeadAbacDto($lead, Auth::id()), LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CLOSE, Access to close lead */
+            $leadAbacDto = new LeadAbacDto($lead, Auth::id());
+            if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CLOSE)) {
+                throw new ForbiddenHttpException('Access Denied');
+            }
+        }
+
+        $reasonKey = Yii::$app->request->get('reasonKey');
+        if (empty($reasonKey)) {
+            $commentRequired = 0;
+            $description = '';
+        } else {
+            $reason = LeadStatusReasonQuery::getLeadStatusReasonByKey($reasonKey);
+            if (!$reason) {
+                throw new NotFoundException('LeadStatusReason not found');
+            }
+            $commentRequired = $reason->lsr_comment_required;
+            $description = nl2br($reason->lsr_description);
+        }
+
+        return $this->asJson([
+            'commentRequired' => $commentRequired,
+            'description' => $description
+        ]);
+    }
+
     /**
      * @return array
      * @throws BadRequestHttpException
@@ -245,6 +333,11 @@ class LeadChangeStateController extends FController
     public function actionValidateTrash(): array
     {
         $lead = $this->getLead();
+        /** @abac new LeadAbacDto($lead, Auth::id()), LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_TRASH, Access to move lead to trash */
+        $leadAbacDto = new LeadAbacDto($lead, Auth::id());
+        if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_TRASH)) {
+            throw new ForbiddenHttpException('Access Denied');
+        }
         $form = new TrashReasonForm($lead);
         if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
             Yii::$app->response->format = Response::FORMAT_JSON;

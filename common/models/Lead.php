@@ -25,6 +25,7 @@ use src\entities\EventTrait;
 use src\events\lead\LeadBookedEvent;
 use src\events\lead\LeadCallExpertRequestEvent;
 use src\events\lead\LeadCallStatusChangeEvent;
+use src\events\lead\LeadCloseEvent;
 use src\events\lead\LeadCreatedBookFailedEvent;
 use src\events\lead\LeadCreatedByApiBOEvent;
 use src\events\lead\LeadCreatedByApiEvent;
@@ -279,6 +280,7 @@ class Lead extends ActiveRecord implements Objectable
     public const STATUS_ALTERNATIVE = 15;
     public const STATUS_NEW         = 16;
     public const STATUS_EXTRA_QUEUE = 17;
+    public const STATUS_CLOSED      = 18;
 
     public const STATUS_LIST = [
         self::STATUS_PENDING        => 'Pending',
@@ -294,6 +296,7 @@ class Lead extends ActiveRecord implements Objectable
         self::STATUS_ALTERNATIVE    => 'Alternative',
         self::STATUS_NEW            => 'New',
         self::STATUS_EXTRA_QUEUE    => 'Extra queue',
+        self::STATUS_CLOSED         => 'Closed',
     ];
 
     public const TRAVEL_DATE_PASSED_STATUS_LIST = [
@@ -310,6 +313,7 @@ class Lead extends ActiveRecord implements Objectable
         self::STATUS_TRASH          => self::STATUS_LIST[self::STATUS_TRASH],
         self::STATUS_BOOKED         => self::STATUS_LIST[self::STATUS_BOOKED],
         self::STATUS_SNOOZE         => self::STATUS_LIST[self::STATUS_SNOOZE],
+        self::STATUS_CLOSED         => self::STATUS_LIST[self::STATUS_CLOSED],
     ];
 
     public const STATUS_CLASS_LIST = [
@@ -321,6 +325,7 @@ class Lead extends ActiveRecord implements Objectable
         self::STATUS_TRASH          => 'll-trash',
         self::STATUS_BOOKED         => 'll-booked',
         self::STATUS_SNOOZE         => 'll-snooze',
+        self::STATUS_CLOSED         => 'll-close',
     ];
 
 
@@ -708,27 +713,30 @@ class Lead extends ActiveRecord implements Objectable
      */
     public function createClone(?string $description): self
     {
-        $clone = self::create();
-        $clone->attributes = $this->attributes;
-        $clone->description = $description;
-        $clone->notes_for_experts = null;
-        $clone->rating = 0;
+        $clone                         = self::create();
+        $clone->attributes             = $this->attributes;
+        $clone->description            = $description;
+        $clone->notes_for_experts      = null;
+        $clone->rating                 = 0;
         $clone->additional_information = null;
-        $clone->l_answered = 0;
-        $clone->snooze_for = null;
-        $clone->called_expert = false;
-        $clone->created = null;
-        $clone->updated = null;
-        $clone->tips = 0;
-        $clone->uid = self::generateUid();
-        $clone->gid = self::generateGid();
-        $clone->status = null;
-        $clone->clone_id = $this->id;
-        $clone->employee_id = null;
-        $clone->l_type_create = self::TYPE_CREATE_CLONE;
-        $clone->bo_flight_id = 0;
-        $clone->final_profit = null;
+        $clone->l_answered             = 0;
+        $clone->snooze_for             = null;
+        $clone->called_expert          = false;
+        $clone->created                = null;
+        $clone->updated                = null;
+        $clone->tips                   = 0;
+        $clone->uid                    = self::generateUid();
+        $clone->gid                    = self::generateGid();
+        $clone->status                 = null;
+        $clone->clone_id               = $this->id;
+        $clone->employee_id            = null;
+        $clone->l_type_create          = self::TYPE_CREATE_CLONE;
+        $clone->bo_flight_id           = 0;
+        $clone->final_profit           = null;
+        $clone->l_delayed_charge       = 0;
+
         $clone->recordEvent(new LeadCreatedCloneEvent($clone));
+
         return $clone;
     }
 
@@ -1765,7 +1773,7 @@ class Lead extends ActiveRecord implements Objectable
      * @param int|null $creatorId
      * @param string|null $reason
      */
-    public function duplicate(int $originId, ?int $newOwnerId = null, ?int $creatorId = null, ?string $reason = ''): void
+    public function duplicate(?int $originId, ?int $newOwnerId = null, ?int $creatorId = null, ?string $reason = ''): void
     {
         $this->l_duplicate_lead_id = $originId;
         $this->trash($newOwnerId, $creatorId, $reason ?: 'Duplicate. OriginId: ' . $originId);
@@ -2650,6 +2658,7 @@ class Lead extends ActiveRecord implements Objectable
                 break;
             case self::STATUS_TRASH:
             case self::STATUS_REJECT:
+            case self::STATUS_CLOSED:
                 $label = '<span class="label status-label bg-red">' . self::getStatus($status) . '</span>';
                 break;
             case self::STATUS_NEW:
@@ -2683,6 +2692,7 @@ class Lead extends ActiveRecord implements Objectable
                 break;
             case self::STATUS_TRASH:
             case self::STATUS_REJECT:
+            case self::STATUS_CLOSED:
                 $label = '<span class="label status-label bg-red">' . self::getStatus($status) . '</span>';
                 break;
             case self::STATUS_NEW:
@@ -5151,9 +5161,23 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         $this->setStatus(self::STATUS_EXTRA_QUEUE);
     }
 
+    public function close(?string $leadStatusReasonKey = null, ?int $creatorId = null, ?string $reasonComment = ''): void
+    {
+        if ($this->isClosed()) {
+            return;
+        }
+        $this->recordEvent(new LeadCloseEvent($this, $leadStatusReasonKey, $this->status, $creatorId, $reasonComment));
+        $this->setStatus(self::STATUS_CLOSED);
+    }
+
     public function isExtraQueue(): bool
     {
         return $this->status === self::STATUS_EXTRA_QUEUE;
+    }
+
+    public function isClosed(): bool
+    {
+        return $this->status === self::STATUS_CLOSED;
     }
 
     public function hasFlightDetails(): bool

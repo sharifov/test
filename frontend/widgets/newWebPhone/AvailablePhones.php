@@ -124,7 +124,7 @@ class AvailablePhones
     {
         return DepartmentPhoneProject::find()
             ->select(['min(dpp_project_id) as project_id', 'pl_phone_number as phone_number', 'min(pl_title) as title', 'min(dpp_dep_id) as department_id'])
-            ->leftJoin(PhoneList::tableName(), 'pl_id = dpp_phone_list_id and pl_enabled = :pl_enabled', ['pl_enabled' => true])
+            ->innerJoin(PhoneList::tableName(), 'pl_id = dpp_phone_list_id and pl_enabled = :pl_enabled and pl_phone_number is not null', ['pl_enabled' => true])
             ->leftJoin(DepartmentPhoneProjectUserGroup::tableName(), 'dug_dpp_id = dpp_id')
             ->andWhere([
                 'dpp_project_id' => ProjectEmployeeAccess::find()->select(['project_id'])->andWhere(['employee_id' => $userId])

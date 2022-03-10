@@ -83,17 +83,17 @@ class LeadStatusReason extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'lsr_id' => 'Lsr ID',
-            'lsr_key' => 'Lsr Key',
-            'lsr_name' => 'Lsr Name',
-            'lsr_description' => 'Lsr Description',
-            'lsr_enabled' => 'Lsr Enabled',
-            'lsr_comment_required' => 'Lsr Comment Required',
-            'lsr_params' => 'Lsr Params',
-            'lsr_created_user_id' => 'Lsr Created User ID',
-            'lsr_updated_user_id' => 'Lsr Updated User ID',
-            'lsr_created_dt' => 'Lsr Created Dt',
-            'lsr_updated_dt' => 'Lsr Updated Dt',
+            'lsr_id' => 'ID',
+            'lsr_key' => 'Key',
+            'lsr_name' => 'Name',
+            'lsr_description' => 'Description',
+            'lsr_enabled' => 'Enabled',
+            'lsr_comment_required' => 'Comment Required',
+            'lsr_params' => 'Params',
+            'lsr_created_user_id' => 'Created User ID',
+            'lsr_updated_user_id' => 'Updated User ID',
+            'lsr_created_dt' => 'Created Dt',
+            'lsr_updated_dt' => 'Updated Dt',
         ];
     }
 

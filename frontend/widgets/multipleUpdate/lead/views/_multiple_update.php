@@ -4,6 +4,7 @@ use frontend\widgets\multipleUpdate\lead\MultipleUpdateForm;
 use yii\bootstrap4\ActiveForm;
 use yii\bootstrap4\Html;
 use yii\helpers\Json;
+use yii\helpers\Url;
 use yii\web\View;
 
 /** @var  $updateForm MultipleUpdateForm */
@@ -45,6 +46,8 @@ $form = ActiveForm::begin([
 
             <?= $form->field($updateForm, 'reason')->dropDownList([]) ?>
 
+            <div class="alert alert-info" style="display: none;" id="lead-close-reason-description"></div>
+
             <div class="message-wrapper d-none">
                 <?= $form->field($updateForm, 'message')->textarea() ?>
             </div>
@@ -75,6 +78,7 @@ $messageId = Html::getInputId($updateForm, 'message');
 $userId = Html::getInputId($updateForm, 'userId');
 $reasonList = Json::encode($updateForm->reasonList());
 
+$url = Url::to(['/lead-change-state/ajax-changed-close-reason', 'multipleUpdate' => true]);
 $js = <<<JS
 
 var reason = $('#{$reasonId}'); 
@@ -100,9 +104,12 @@ $('#{$statusId}').on('change', function () {
 
 $('#{$reasonId}').on('change', function () {
     var val = $(this).val() || null;
+    var selectedStatus = $('#{$statusId}').val();
     if (val == '{$updateForm->reasonOther()}') {
         message.val('');
         messageWrapper.removeClass('d-none');
+    } else if (selectedStatus == '{$updateForm->getClosedStatusId()}') {
+        getReasonData(val);
     } else {
         messageWrapper.addClass('d-none');
     }
@@ -114,6 +121,7 @@ function resetMultiUpdateForm() {
      reasonWrapper.addClass('d-none');
      messageWrapper.addClass('d-none');
      user[0].selectedIndex = 0;
+     $('#lead-close-reason-description').hide();
 }
 
 $('#{$formId}').on('beforeSubmit', function (e) {
@@ -158,6 +166,38 @@ $('#{$formId}').on('beforeSubmit', function (e) {
        }
     })
     return false;
-}); 
+});
+
+function getReasonData(reasonKey)
+{
+    $.ajax({
+        type: 'get',
+        url: '$url' + '&reasonKey=' + reasonKey,
+        cache: false,
+        dataType: 'json',
+        beforeSend: function () {
+            $('#close-reason-submit').addClass('disabled').prop('disabled', true);           
+        },
+        success: function (data) {
+            $('#lead-close-reason-description').hide();
+            if (data.description) {
+                $('#lead-close-reason-description').html(data.description);
+                $('#lead-close-reason-description').show();
+            }
+            
+            if (data.commentRequired) {
+                messageWrapper.removeClass('d-none');
+            } else {
+                messageWrapper.addClass('d-none');
+            }
+        },
+        complete: function () {
+            $('#close-reason-submit').removeClass('disabled').prop('disabled', false);                                     
+        },
+        error: function (xhr) {
+            createNotify('Error', xhr.responseText, 'error');
+        }
+    });
+}
 JS;
 $this->registerJs($js);

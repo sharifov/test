@@ -6,6 +6,7 @@ use common\models\Employee;
 use common\models\Lead;
 use frontend\widgets\multipleUpdate\IdsValidator;
 use src\access\ListsAccess;
+use src\model\leadStatusReason\entity\LeadStatusReasonQuery;
 use yii\base\Model;
 
 /**
@@ -104,7 +105,7 @@ class MultipleUpdateForm extends Model
 
             ['message', 'string', 'max' => 255],
             ['message', 'required', 'when' => function () {
-                return $this->reason === $this->reasonOther();
+                return $this->reason === $this->reasonOther() || $this->isClosedAndCommentRequired();
             }],
 
             ['userId', 'integer'],
@@ -197,7 +198,9 @@ class MultipleUpdateForm extends Model
 
     public function reasonList(): array
     {
-        return self::STATUS_REASON_LIST;
+        $reasonList = self::STATUS_REASON_LIST;
+        $reasonList[Lead::STATUS_CLOSED] = LeadStatusReasonQuery::getList();
+        return $reasonList;
     }
 
     public function getReasonByStatus($status_id = 0, $reason_id = 0): string
@@ -297,5 +300,21 @@ class MultipleUpdateForm extends Model
     public function isExtraQueue(): bool
     {
         return $this->statusId === Lead::STATUS_EXTRA_QUEUE;
+    }
+
+    public function isClosed(): bool
+    {
+        return $this->statusId === Lead::STATUS_CLOSED;
+    }
+
+    public function getClosedStatusId(): int
+    {
+        return Lead::STATUS_CLOSED;
+    }
+
+    public function isClosedAndCommentRequired(): bool
+    {
+        $reason = LeadStatusReasonQuery::getLeadStatusReasonByKey((string)$this->reason);
+        return $this->isClosed() && $reason && $reason->lsr_comment_required;
     }
 }

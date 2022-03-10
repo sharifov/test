@@ -143,6 +143,20 @@ class SideBarMenu extends \yii\bootstrap\Widget
             'url' => ['/queue/follow-up'], 'icon' => 'recycle', 'title' => 'Follow Up Leads queue'];
         $menuLItems[] = ['label' => 'Processing <span id="badges-processing" data-type="processing" class="label-warning label pull-right bginfo"></span> ',
             'url' => ['/queue/processing'], 'icon' => 'spinner', 'title' => 'Processing Leads queue'];
+
+        /** @abac $leadAbacDto, LeadAbacObject::OBJ_CLOSED_QUEUE, LeadAbacObject::ACTION_ACCESS, show closed-queue in menu */
+        $menuLItems[] = [
+            'label' => 'Closed Queue <span id="badges-closed" data-type="closed" class="label-danger label pull-right bginfo"></span> ',
+            'url' => ['/lead/closed'],
+            'icon' => 'times text-danger',
+            'title' => 'Closed queue',
+            'abac' => [
+                'dto' => new LeadAbacDto(null, (int) Auth::id()),
+                'object' => LeadAbacObject::OBJ_CLOSED_QUEUE,
+                'action' => LeadAbacObject::ACTION_ACCESS
+            ],
+        ];
+
         $menuLItems[] = ['label' => 'Booked <span id="badges-booked" data-type="booked" class="label-success label pull-right bginfo"></span>',
             'url' => ['/queue/booked'], 'icon' => 'flag-o text-warning', 'title' => 'Booked Leads queue'];
         $menuLItems[] = ['label' => 'Sold <span id="badges-sold" data-type="sold" class="label-success label pull-right bginfo"></span> ',

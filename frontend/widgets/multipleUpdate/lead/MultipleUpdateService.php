@@ -269,6 +269,13 @@ class MultipleUpdateService
             } catch (\DomainException $e) {
                 $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
             }
+        } elseif ($form->isClosed()) {
+            try {
+                $this->leadStateService->close($lead, $form->reason, Auth::id(), $form->message);
+                $this->addMessage($this->movedStateMessage($lead, 'Close Queue', $oldOwnerId, $newOwner->id, $newOwner->userName));
+            } catch (\DomainException | \RuntimeException $e) {
+                $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
+            }
         } else {
             $this->addMessage('Undefined status: ' . $form->statusId . ' for multi update Lead: ' . $lead->id);
             \Yii::warning('Undefined status: ' . $form->statusId . ' for multi update Lead: ' . $lead->id, 'lead\MultipleUpdateService:changeStatus:undefinedStatus:LeadId:' . $lead->id);
