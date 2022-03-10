@@ -1,6 +1,7 @@
 <?php
 
 use frontend\helpers\JsonHelper;
+use kartik\select2\Select2;
 use src\helpers\app\AppHelper;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
@@ -18,24 +19,29 @@ use yii\widgets\ActiveForm;
 
 
 
-            <?php echo $form->field($model, 'el_key')->textInput(['maxlength' => true]) ?>
+<!--            --><?php //echo $form->field($model, 'el_key')->textInput(['maxlength' => true])?>
 
             <div class="row">
                 <div class="col-md-6">
                     <?php /*= $form->field($model, 'el_object')->dropDownList(Yii::$app->event->objectList, ['prompt' => '-'])*/ ?>
 
-                    <?php /* $form->field($model, 'el_key')->dropDownList(Yii::$app->event->objectList, ['prompt' => '-'])*/ ?>
-
                     <?= $form->field($model, 'el_category')->dropDownList(Yii::$app->event->categoryList, ['prompt' => '-']) ?>
+
+                    <?php //echo $form->field($model, 'el_key')->dropDownList(Yii::$app->event->objectList, ['prompt' => '-'])?>
+
+                    <?= $form->field($model, 'el_key')->widget(Select2::class, [
+                        'options' => [
+                            'placeholder' => '--', //$searchFrom->getAttributeLabel('fareType'),
+                            'multiple' => false,
+                            'id' => 'el_key',
+                        ],
+                        'data' => Yii::$app->event->getObjectEventList(),
+                        'size' => Select2::SIZE_SMALL
+                    ]) ?>
+
+
                 </div>
             </div>
-
-
-            <?= $form->field($model, 'el_enable_log')->checkbox() ?>
-
-            <?= $form->field($model, 'el_break')->checkbox() ?>
-
-
 
 
             <div class="row">
@@ -43,6 +49,12 @@ use yii\widgets\ActiveForm;
                     <?= $form->field($model, 'el_enable_type')->dropDownList(\modules\eventManager\src\entities\EventList::getEnableTypeList()) ?>
                 </div>
             </div>
+
+            <?= $form->field($model, 'el_break')->checkbox() ?>
+
+            <?= $form->field($model, 'el_enable_log')->checkbox() ?>
+
+
             <div class="row">
                 <div class="col-md-4">
                     <?= $form->field($model, 'el_cron_expression')->textInput(['maxlength' => true]) ?>
@@ -65,14 +77,11 @@ use yii\widgets\ActiveForm;
                     <?= Html::a(
                         '<i class="fa fa-link"></i> Editor for schedule expressions',
                         'https://crontab.guru/#' . str_replace(' ', '_', $model->el_cron_expression),
-                        ['class' => 'btn btn-xs btn-warning', 'target' => '_blank']
-) ?>
-
+                        ['class' => '', 'target' => '_blank']
+                    ) ?>
 
                 </div>
             </div>
-        </div>
-
 
 
             <?php /*= $form->field($model, 'el_condition')->textarea(['rows' => 6])*/ ?>
@@ -85,12 +94,11 @@ use yii\widgets\ActiveForm;
                     <?= $form->field($model, 'el_sort_order')->input(
                         'number',
                         ['min' => 0, 'max' => 1000, 'step' => 1]
-                    ) ?>
+) ?>
                 </div>
             </div>
             <?= $form->field($model, 'el_description')->textarea(['rows' => 3]) ?>
-        </div>
-        <div class="col-md-6">
+
 
             <?php
             $model->el_params = JsonHelper::encode($model->el_params);
@@ -113,7 +121,9 @@ use yii\widgets\ActiveForm;
                 );
             }
             ?>
+
         </div>
+
     </div>
 
     <div class="row">

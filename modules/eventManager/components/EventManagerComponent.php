@@ -5,8 +5,10 @@ namespace modules\eventManager\components;
 use modules\eventManager\src\entities\EventHandler;
 use modules\eventManager\src\entities\EventList;
 use modules\eventManager\src\services\EventService;
+use src\helpers\app\AppHelper;
 use Yii;
 use yii\base\Component;
+use yii\base\InvalidConfigException;
 use yii\caching\TagDependency;
 use yii\helpers\VarDumper;
 
@@ -236,5 +238,29 @@ class EventManagerComponent extends Component
             }
         }
         return $response;
+    }
+
+    /**
+     * @return array
+     */
+    public function getObjectEventList(): array
+    {
+        $data = [];
+        try {
+            $objectList = $this->getObjectList();
+            if (!empty($objectList)) {
+                foreach ($objectList as $objectKey => $objectName) {
+                    if (class_exists($objectKey)) {
+                        $object = Yii::createObject($objectKey);
+                        foreach ($object->getEventList() as $eventKey => $eventName) {
+                            $data[$eventKey] = $eventKey . ' (' . $eventName . ')';
+                        }
+                    }
+                }
+            }
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableLog($throwable), 'EventManagerComponent:getObjectEventList:throwable');
+        }
+        return $data;
     }
 }

@@ -15,7 +15,7 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="event-handler-view">
 
-    <h1><i class="fa fa-list"></i> <?= Html::encode($this->title) ?></h1>
+    <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
         <?= Html::a('<i class="fa fa-edit"></i> Update', ['update', 'eh_id' => $model->eh_id], ['class' => 'btn btn-primary']) ?>

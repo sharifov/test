@@ -20,7 +20,7 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="event-list-index">
 
-    <h1><?= Html::encode($this->title) ?></h1>
+    <h1><i class="fa fa-list"></i> <?= Html::encode($this->title) ?></h1>
 
     <p>
         <?= Html::a('<i class="fa fa-plus"></i> Create Event List', ['create'], ['class' => 'btn btn-success']) ?>
