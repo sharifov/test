@@ -266,27 +266,32 @@ class LeadChangeStateController extends FController
             try {
                 $this->stateService->close($lead, $form->reasonKey, Auth::id(), $form->reason);
                 Yii::$app->getSession()->setFlash('success', 'Success');
-            } catch (RuleException $e) {
-                Yii::error(AppHelper::throwableFormatter($e), 'LeadChangeStateController::actionClose::RuleException');
-            } catch (\DomainException $e) {
-                Yii::$app->getSession()->setFlash('warning', $e->getMessage());
+
+                return $this->redirect(['lead/view', 'gid' => $lead->gid]);
+            } catch (RuleException | \RuntimeException | \DomainException $e) {
+                $form->addError('general', $e->getMessage());
             } catch (\Throwable $e) {
                 Yii::error(AppHelper::throwableFormatter($e), 'LeadChangeStateController::actionClose::Throwable');
                 Yii::$app->getSession()->setFlash('danger', 'Server error occurred');
             }
-        } else {
-            $leadReasonStatues = LeadStatusReasonQuery::getAllEnabledAsArray();
-
-            $reasonStatues = ArrayHelper::map($leadReasonStatues, 'lsr_key', 'lsr_name');
-            $reasonStatuesCommentRequired = ArrayHelper::map($leadReasonStatues, 'lsr_key', 'lsr_comment_required');
-
-            return $this->renderAjax('reason_close', [
-                'reasonForm' => $form,
-                'reasonStatuses' => $reasonStatues,
-                'reasonStatuesCommentRequired' => $reasonStatuesCommentRequired
-            ]);
         }
-        return $this->redirect(['lead/view', 'gid' => $lead->gid]);
+        $leadReasonStatues = LeadStatusReasonQuery::getAllEnabledAsArray();
+
+        $reasonStatues = ArrayHelper::map($leadReasonStatues, 'lsr_key', 'lsr_name');
+        if (!empty($reasonStatues)) {
+            $n = 1;
+            foreach ($reasonStatues as $key => $name) {
+                $reasonStatues[$key] = $n++ . '. ' . $name;
+            }
+        }
+
+        $reasonStatuesCommentRequired = ArrayHelper::map($leadReasonStatues, 'lsr_key', 'lsr_comment_required');
+
+        return $this->renderAjax('reason_close', [
+            'reasonForm' => $form,
+            'reasonStatuses' => $reasonStatues,
+            'reasonStatuesCommentRequired' => $reasonStatuesCommentRequired
+        ]);
     }
 
     public function actionAjaxChangedCloseReason()
@@ -302,14 +307,21 @@ class LeadChangeStateController extends FController
         }
 
         $reasonKey = Yii::$app->request->get('reasonKey');
-        $reason = LeadStatusReasonQuery::getLeadStatusReasonByKey($reasonKey);
-        if (!$reason) {
-            throw new NotFoundException('LeadStatusReason not found');
+        if (empty($reasonKey)) {
+            $commentRequired = 0;
+            $description = '';
+        } else {
+            $reason = LeadStatusReasonQuery::getLeadStatusReasonByKey($reasonKey);
+            if (!$reason) {
+                throw new NotFoundException('LeadStatusReason not found');
+            }
+            $commentRequired = $reason->lsr_comment_required;
+            $description = nl2br($reason->lsr_description);
         }
 
         return $this->asJson([
-            'commentRequired' => $reason->lsr_comment_required,
-            'description' => nl2br($reason->lsr_description)
+            'commentRequired' => $commentRequired,
+            'description' => $description
         ]);
     }
 
