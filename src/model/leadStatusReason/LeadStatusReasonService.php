@@ -6,10 +6,11 @@ use common\models\Lead;
 use common\models\query\LeadFlowQuery;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
-use modules\qaTask\src\abac\dto\QaTaskAbacDto;
 use modules\qaTask\src\entities\qaTaskRules\QaTaskRules;
 use modules\qaTask\src\useCases\qaTask\create\lead\closeCheck\QaTaskCreateLeadCloseCheckService;
 use modules\qaTask\src\useCases\qaTask\create\lead\closeCheck\Rule;
+use src\model\leadUserConversion\abac\dto\LeadAbacUserConversionAbacDto;
+use src\model\leadUserConversion\abac\LeadUserConversionAbacObject;
 use src\model\leadUserConversion\entity\LeadUserConversion;
 use src\model\leadUserConversion\entity\LeadUserConversionQuery;
 use src\model\leadUserConversion\repository\LeadUserConversionRepository;
@@ -147,10 +148,10 @@ class LeadStatusReasonService
             throw new \RuntimeException('Lead has no owner; Cannot Close;');
         }
         if ($leadClosedCount <= 1) {
-            $abacDto = new LeadAbacDto($dto->lead, $dto->creatorId);
+            $abacDto = new LeadAbacUserConversionAbacDto();
             $abacDto->closeReason = $dto->leadStatusReasonKey;
-            /** @abac new LeadAbacDto($lead, Auth::id()), LeadAbacObject::ACT_USER_CONVERSION, LeadAbacObject::ACTION_CREATE, Access to create lead user conversion */
-            $canAbac = \Yii::$app->abac->can($abacDto, LeadAbacObject::ACT_USER_CONVERSION, LeadAbacObject::ACTION_CREATE);
+            /** @abac new LeadAbacUserConversionAbacDto($lead, Auth::id()), LeadUserConversionAbacObject::OBJ_USER_CONVERSION, LeadUserConversionAbacObject::ACTION_CREATE, Access to create lead user conversion */
+            $canAbac = \Yii::$app->abac->can($abacDto, LeadUserConversionAbacObject::OBJ_USER_CONVERSION, LeadUserConversionAbacObject::ACTION_CREATE);
             if ($canAbac) {
                 if (!$this->leadUserConversionRepository->exist($dto->lead->id, $dto->lead->id)) {
                     $leadUserConversion = LeadUserConversion::create(
@@ -170,7 +171,7 @@ class LeadStatusReasonService
 
     private function createQaTaskLead(HandleReasonDto $dto): self
     {
-        $abacDto = new QaTaskAbacDto(null);
+        $abacDto = new LeadAbacDto($dto->lead, $dto->creatorId);
         $abacDto->closeReason = $dto->leadStatusReasonKey;
         /** @abac new LeadAbacDto($lead, Auth::id()), LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_TO_QA_LIST, Access to create qa task rule */
         if (\Yii::$app->abac->can($abacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_TO_QA_LIST)) {

@@ -27,6 +27,7 @@ return [
         'user' => \modules\user\src\abac\UserAbacObject::class,
         'lead-rating' => \src\model\leadUserRating\abac\LeadUserRatingAbacObject::class,
         'lead-poor-processing' => \src\model\leadPoorProcessingData\abac\LeadPoorProcessingAbacObject::class,
+        'lead-user-conversion' => \src\model\leadUserConversion\abac\LeadUserConversionAbacObject::class
     ],
     'scanDirs' => [
         '/modules/',
