@@ -34,12 +34,15 @@ $extra_mark_up           = (float)$leadQuoteExtraMarkUpForm->extra_mark_up;
         ]);?>
         <?= $form->errorSummary($leadQuoteExtraMarkUpForm) ?>
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-12">
                 <?= $form->field(
-                    $leadQuoteExtraMarkUpForm,
-                    'qp_client_extra_mark_up',
-                    ['inputOptions' => ['id' => 'qp_client_extra_mark_up_modal_field'],]
-                )
+            $leadQuoteExtraMarkUpForm,
+            'qp_client_extra_mark_up',
+            [
+                        'template' => '{label} <div class="input-group">{input}<span class="input-group-addon">' . $quote->q_client_currency . '</span></div>{error}{hint}',
+                            'inputOptions' => ['id' => 'qp_client_extra_mark_up_modal_field'],
+                        ]
+        )
                          ->input(
                              'number',
                              [
@@ -48,53 +51,56 @@ $extra_mark_up           = (float)$leadQuoteExtraMarkUpForm->extra_mark_up;
                                  'value' => $qp_client_extra_mark_up
                              ]
                          )
-                         ->label('Client Currency Extra Mark-Up' . ' (' . $quote->q_client_currency . ')')
+                         ->label('Client Currency ' . ' (' . $quote->q_client_currency . ')')
                 ?>
+                <?php if ($quote->q_client_currency !== $defaultCurrencyCode) :?>
+                    <div class="label label-default" title="Rate: <?= Html::decode(round($quote->q_client_currency_rate, 5))?>
+                    <?= Html::decode($quote->q_client_currency)?>">
+                        1 <?=$defaultCurrencyCode?> = <?= round($quote->q_client_currency_rate, 4)?>
+                        <?=Html::decode($quote->q_client_currency); ?>
+                    </div>
+                <?php endif; ?>
             </div>
-            <div class="col-md-6
+            <div class="col-md-12">
+                <hr>
+            </div>
+
+            <div class="col-md-12
             <?php if ($quote->q_client_currency == $defaultCurrencyCode) : ?>
                         d-none
             <?php endif; ?>">
+
+
                 <?= $form->field(
-                    $leadQuoteExtraMarkUpForm,
-                    'extra_mark_up',
-                    ['inputOptions' => ['id' => 'extra_mark_up_modal_field']]
-                )
+                            $leadQuoteExtraMarkUpForm,
+                            'extra_mark_up',
+                            [
+                        'template' => '{label} <div class="input-group">{input}<span class="input-group-addon">' . $defaultCurrencyCode . '</span></div>{error}{hint}',
+                        'inputOptions' => ['id' => 'extra_mark_up_modal_field']
+                    ]
+                        )
                          ->input(
                              'number',
                              ['min' => 0,  'step'  => '0.01', 'value' => $extra_mark_up]
                          )
-                         ->label('Default Currency Extra Mark-Up' . ' (' . $defaultCurrencyCode . ')')
+                         ->label('Base Currency ' . ' (' . $defaultCurrencyCode . ')')
                 ?>
+
+                <?php if ($quote->q_client_currency !== $defaultCurrencyCode) :?>
+                    <span class="label label-default" title="Rate: <?= Html::decode(round($inverseCurrencyRate, 5))?>
+                        <?= Html::decode($defaultCurrencyCode)?>">
+                            1 <?= $quote->q_client_currency?>
+                        = <?=round($inverseCurrencyRate, 4)?> <?= Html::decode($defaultCurrencyCode)?>
+                    </span>
+                <?php endif; ?>
+
             </div>
         </div>
-<?php if ($quote->q_client_currency !== $defaultCurrencyCode) :?>
-        <h2> currency rates:</h2>
-    <div class="row">
-        <div class="col-md-6">
-
-        <?='1 <strong> ' .
-          $defaultCurrencyCode .
-          '</strong> = ' .
-          round($quote->q_client_currency_rate, 2) .
-          ' <strong>' . $quote->q_client_currency .
-          '</strong>';?>
-        </div>
-    <div class="col-md-6">
-        <?='1 <strong> ' .
-          $quote->q_client_currency .
-          '</strong> = ' .
-          round($inverseCurrencyRate, 2) .
-          ' <strong>' . $defaultCurrencyCode .
-          '</strong>';?>
-    </div>
-    </div>
-<?php endif; ?>
 
 
         <div style="margin-top: 20px;" class="text-center">
-            <?= Html::submitButton('<i class="fa fa-check-square-o"></i> Update Extra Mark-Up', [
-                'class' => 'btn btn-warning'
+            <?= Html::submitButton('<i class="fa fa-save"></i> Save Extra MarkUp', [
+                'class' => 'btn btn-primary'
             ]) ?>
         </div>
         <?php ActiveForm::end(); ?>
@@ -123,7 +129,7 @@ $('#lead-quote-extra-mark-up-edit-form').on('beforeSubmit', function (e) {
        success: function(data) {
             var type = 'error',
                 text = data.message,
-                title = 'Lead extra mark-up savin error error';
+                title = 'Lead extra markup savin error error';
        
             if (!data.error) {
                 $('#modal-client-manage-info').modal('hide');
