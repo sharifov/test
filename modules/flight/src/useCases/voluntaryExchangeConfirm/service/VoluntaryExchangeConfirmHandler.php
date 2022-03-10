@@ -10,6 +10,7 @@ use frontend\helpers\JsonHelper;
 use modules\flight\models\FlightPax;
 use modules\flight\models\FlightQuote;
 use modules\flight\models\FlightRequest;
+use modules\flight\src\useCases\voluntaryExchange\service\BoRequestVoluntaryExchangeService;
 use modules\flight\src\useCases\voluntaryExchange\service\CaseVoluntaryExchangeHandler;
 use modules\flight\src\useCases\voluntaryExchange\service\CleanDataVoluntaryExchangeService;
 use modules\flight\src\useCases\voluntaryExchange\service\FlightRequestService;
@@ -94,8 +95,8 @@ class VoluntaryExchangeConfirmHandler
     {
         $request['apiKey'] = $this->case->project->api_key;
         $request['bookingId'] = $this->confirmForm->booking_id;
-        $request['billing'] = self::mappingBilling($this->confirmForm->getBillingInfoForm());
-        $request['payment'] = self::mappingPayment($this->confirmForm->getPaymentRequestForm());
+        $request['billing'] = BoRequestVoluntaryExchangeService::fillBillingData($this->confirmForm->getBillingInfoForm());
+        $request['payment'] = BoRequestVoluntaryExchangeService::fillPaymentData($this->confirmForm->getPaymentRequestForm());
         $request['exchange'] = $this->prepareExchange();
         return $request;
     }
@@ -369,37 +370,5 @@ class VoluntaryExchangeConfirmHandler
     public function getProductQuoteChange(): ?ProductQuoteChange
     {
         return $this->productQuoteChange;
-    }
-
-    public static function mappingBilling(?BillingInfoForm $billingInfoForm): ?array
-    {
-        if ($billingInfoForm) {
-            $data = [
-                'address' => $billingInfoForm->address_line1,
-                'countryCode' => $billingInfoForm->country_id,
-                'country' => $billingInfoForm->country,
-                'city' => $billingInfoForm->city,
-                'state' => $billingInfoForm->state,
-                'zip' => $billingInfoForm->zip,
-                'phone' => $billingInfoForm->contact_phone,
-                'email' => $billingInfoForm->contact_email
-            ];
-        }
-        return $data ?? null;
-    }
-    public static function mappingPayment(?PaymentRequestForm $paymentRequestForm): ?array
-    {
-        if ($paymentRequestForm) {
-            $data = [
-                'type' => mb_strtoupper($paymentRequestForm->method_key),
-                'card' => [
-                    'holderName' => $paymentRequestForm->creditCardForm->holder_name,
-                    'number' => $paymentRequestForm->creditCardForm->number,
-                    'expirationDate' => $paymentRequestForm->creditCardForm->expiration_month . '/' . $paymentRequestForm->creditCardForm->expiration_year,
-                    'cvv' => $paymentRequestForm->creditCardForm->cvv
-                ]
-            ];
-        }
-        return $data ?? null;
     }
 }
