@@ -67,10 +67,10 @@ class LeadStatusReason extends \yii\db\ActiveRecord
     {
         return [
             [['lsr_enabled', 'lsr_comment_required', 'lsr_created_user_id', 'lsr_updated_user_id'], 'integer'],
-            [['lsr_params', 'lsr_created_dt', 'lsr_updated_dt'], 'safe'],
-            [['lsr_key'], 'string', 'max' => 30],
-            [['lsr_name'], 'string', 'max' => 50],
-            [['lsr_description'], 'string', 'max' => 255],
+            [['lsr_params', 'lsr_created_dt', 'lsr_updated_dt', 'lsr_description'], 'safe'],
+            [['lsr_key'], 'string', 'max' => 50],
+            [['lsr_name'], 'string', 'max' => 100],
+//            [['lsr_description'], 'string', 'max' => 255],
             [['lsr_key'], 'unique'],
             [['lsr_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['lsr_created_user_id' => 'id']],
             [['lsr_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['lsr_updated_user_id' => 'id']],
