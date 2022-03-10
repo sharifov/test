@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fa60a3e5999dc6302ef981dc7a585480",
+    "content-hash": "5d5a942eeffa28c5555b3354fa4c8ba0",
     "packages": [
         {
             "name": "2amigos/2fa-library",
@@ -535,7 +535,6 @@
                 "kartik-v/yii2-krajee-base": "*",
                 "yiisoft/yii2": "~2"
             },
-            "default-branch": true,
             "type": "yii2-extension",
             "extra": {
                 "asset-installer-paths": {
@@ -1370,7 +1369,6 @@
             "require-dev": {
                 "phpunit/phpunit": "9.*"
             },
-            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -1754,12 +1752,12 @@
             },
             "type": "library",
             "autoload": {
-                "files": [
-                    "library/HTMLPurifier.composer.php"
-                ],
                 "psr-0": {
                     "HTMLPurifier": "library/"
                 },
+                "files": [
+                    "library/HTMLPurifier.composer.php"
+                ],
                 "exclude-from-classmap": [
                     "/library/HTMLPurifier/Language/"
                 ]
@@ -2201,12 +2199,12 @@
                 }
             },
             "autoload": {
-                "files": [
-                    "src/functions_include.php"
-                ],
                 "psr-4": {
                     "GuzzleHttp\\": "src/"
-                }
+                },
+                "files": [
+                    "src/functions_include.php"
+                ]
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -2308,12 +2306,12 @@
                 }
             },
             "autoload": {
-                "files": [
-                    "src/functions_include.php"
-                ],
                 "psr-4": {
                     "GuzzleHttp\\Promise\\": "src/"
-                }
+                },
+                "files": [
+                    "src/functions_include.php"
+                ]
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -3128,7 +3126,6 @@
                 "kartik-v/yii2-popover-x": "~1.3",
                 "kartik-v/yii2-widget-activeform": ">=1.6.0"
             },
-            "default-branch": true,
             "type": "yii2-extension",
             "extra": {
                 "branch-alias": {
@@ -3261,7 +3258,6 @@
                 "kartik-v/yii2-bootstrap5-dropdown": "For enabling dropdown support when using with Bootstrap v5.x",
                 "kartik-v/yii2-mpdf": "For exporting grids to PDF"
             },
-            "default-branch": true,
             "type": "yii2-extension",
             "extra": {
                 "branch-alias": {
@@ -3553,7 +3549,6 @@
             "require": {
                 "kartik-v/yii2-krajee-base": ">=3.0.3"
             },
-            "default-branch": true,
             "type": "yii2-extension",
             "extra": {
                 "branch-alias": {
@@ -3797,7 +3792,6 @@
             "require": {
                 "kartik-v/yii2-krajee-base": ">=2.0.0"
             },
-            "default-branch": true,
             "type": "yii2-extension",
             "extra": {
                 "branch-alias": {
@@ -3916,7 +3910,6 @@
             "require": {
                 "yiisoft/yii2": "*"
             },
-            "default-branch": true,
             "type": "yii2-extension",
             "extra": {
                 "branch-alias": {
@@ -3972,12 +3965,12 @@
             },
             "type": "library",
             "autoload": {
-                "files": [
-                    "lib/Common/customFunctions.php"
-                ],
                 "psr-4": {
                     "Zxing\\": "lib/"
-                }
+                },
+                "files": [
+                    "lib/Common/customFunctions.php"
+                ]
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -4063,7 +4056,6 @@
             "require-dev": {
                 "roave/security-advisories": "dev-master"
             },
-            "default-branch": true,
             "type": "yii2-extension",
             "autoload": {
                 "psr-4": {
@@ -4089,7 +4081,7 @@
             "support": {
                 "source": "https://bitbucket.org/techork/yii2-feature-flag.git"
             },
-            "time": "2022-02-01T00:00:00+00:00"
+            "time": "2022-02-15T10:34:01+00:00"
         },
         {
             "name": "kivork/yii2-mattermost-log-target",
@@ -4103,7 +4095,6 @@
                 "gnello/php-mattermost-driver": "^2.3",
                 "yiisoft/yii2": "~2.0.0"
             },
-            "default-branch": true,
             "type": "yii2-extension",
             "autoload": {
                 "psr-4": {
@@ -4148,7 +4139,6 @@
             "require-dev": {
                 "roave/security-advisories": "dev-master"
             },
-            "default-branch": true,
             "type": "yii2-extension",
             "autoload": {
                 "psr-4": {
@@ -4190,7 +4180,6 @@
                 "yiisoft/yii2": "~2.0.13",
                 "yiisoft/yii2-jui": "~2.0"
             },
-            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -4219,11 +4208,11 @@
         },
         {
             "name": "kivork/yii2-search-module",
-            "version": "1.0.0",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "git@bitbucket.org:techork/yii2-search-module.git",
-                "reference": "84980c69fb2bd50447be137d62e4681670abc131"
+                "reference": "2df3c81c37b7dbbc9bc44e307ef5f4f746aee4f5"
             },
             "require": {
                 "kovalenkojuls/yii2-widget-combodate": "*",
@@ -4248,6 +4237,14 @@
                 {
                     "name": "Andrew Butler",
                     "email": "andrew.butler@techork.com"
+                },
+                {
+                    "name": "Vincent Barnes",
+                    "email": "vincent.barnes@techork.com"
+                },
+                {
+                    "name": "Dmitriy Anderson",
+                    "email": "dmitriy.anderson@techork.com"
                 }
             ],
             "description": "Yii2 search module",
@@ -4259,7 +4256,7 @@
             "support": {
                 "source": "https://bitbucket.org/techork/yii2-search-module"
             },
-            "time": "2022-02-15T00:00:00+00:00"
+            "time": "2022-03-10T14:35:40+00:00"
         },
         {
             "name": "kivork/yii2-virtual-cron",
@@ -4277,7 +4274,6 @@
                 "yiisoft/yii2": "~2.0.0",
                 "yiisoft/yii2-queue": "^2.3"
             },
-            "default-branch": true,
             "type": "yii2-extension",
             "autoload": {
                 "psr-4": {
@@ -4933,12 +4929,12 @@
                 }
             },
             "autoload": {
-                "files": [
-                    "src/JmesPath.php"
-                ],
                 "psr-4": {
                     "JmesPath\\": "src/"
-                }
+                },
+                "files": [
+                    "src/JmesPath.php"
+                ]
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -6427,12 +6423,12 @@
                 }
             },
             "autoload": {
-                "files": [
-                    "src/functions.php"
-                ],
                 "psr-4": {
                     "Ramsey\\Uuid\\": "src/"
-                }
+                },
+                "files": [
+                    "src/functions.php"
+                ]
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -6763,7 +6759,6 @@
             "require-dev": {
                 "roave/security-advisories": "dev-master"
             },
-            "default-branch": true,
             "type": "yii2-extension",
             "extra": {
                 "asset-installer-paths": {
@@ -6927,7 +6922,6 @@
                 "ext-sockets": "*",
                 "ext-zip": "*"
             },
-            "default-branch": true,
             "type": "library",
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -6959,7 +6953,7 @@
                 "source": "https://github.com/sunhater/kcfinder"
             },
             "abandoned": true,
-            "time": "2014-08-24T00:00:00+00:00"
+            "time": "2014-09-27T18:47:34+00:00"
         },
         {
             "name": "swiftmailer/swiftmailer",
@@ -8556,9 +8550,9 @@
             "type": "yii2-extension",
             "autoload": {
                 "psr-4": {
+                    "unclead\\multipleinput\\examples\\": "examples/",
                     "unclead\\multipleinput\\": "src/",
-                    "unclead\\multipleinput\\tests\\": "tests/",
-                    "unclead\\multipleinput\\examples\\": "examples/"
+                    "unclead\\multipleinput\\tests\\": "tests/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -9985,16 +9979,16 @@
             "autoload": {
                 "psr-4": {
                     "yii\\queue\\": "src",
-                    "yii\\queue\\db\\": "src/drivers/db",
-                    "yii\\queue\\sqs\\": "src/drivers/sqs",
                     "yii\\queue\\amqp\\": "src/drivers/amqp",
-                    "yii\\queue\\file\\": "src/drivers/file",
-                    "yii\\queue\\sync\\": "src/drivers/sync",
-                    "yii\\queue\\redis\\": "src/drivers/redis",
-                    "yii\\queue\\stomp\\": "src/drivers/stomp",
-                    "yii\\queue\\gearman\\": "src/drivers/gearman",
+                    "yii\\queue\\amqp_interop\\": "src/drivers/amqp_interop",
                     "yii\\queue\\beanstalk\\": "src/drivers/beanstalk",
-                    "yii\\queue\\amqp_interop\\": "src/drivers/amqp_interop"
+                    "yii\\queue\\db\\": "src/drivers/db",
+                    "yii\\queue\\file\\": "src/drivers/file",
+                    "yii\\queue\\gearman\\": "src/drivers/gearman",
+                    "yii\\queue\\redis\\": "src/drivers/redis",
+                    "yii\\queue\\sync\\": "src/drivers/sync",
+                    "yii\\queue\\sqs\\": "src/drivers/sqs",
+                    "yii\\queue\\stomp\\": "src/drivers/stomp"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -10324,12 +10318,12 @@
                 }
             },
             "autoload": {
-                "files": [
-                    "lib/functions.php"
-                ],
                 "psr-4": {
                     "Amp\\ByteStream\\": "lib"
-                }
+                },
+                "files": [
+                    "lib/functions.php"
+                ]
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -10475,12 +10469,12 @@
                 }
             },
             "autoload": {
-                "files": [
-                    "src/helpers.php"
-                ],
                 "psr-4": {
                     "BrainMaestro\\GitHooks\\": "src/"
-                }
+                },
+                "files": [
+                    "src/helpers.php"
+                ]
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -11454,7 +11448,6 @@
             "require": {
                 "php": ">=7.0"
             },
-            "default-branch": true,
             "type": "library",
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -12060,12 +12053,12 @@
                 }
             },
             "autoload": {
-                "files": [
-                    "functions.php"
-                ],
                 "psr-4": {
                     "Opis\\Closure\\": "src/"
-                }
+                },
+                "files": [
+                    "functions.php"
+                ]
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -12371,12 +12364,12 @@
             },
             "type": "library",
             "autoload": {
-                "files": [
-                    "lib/Exception/TimeoutException.php"
-                ],
                 "psr-4": {
                     "Facebook\\WebDriver\\": "lib/"
-                }
+                },
+                "files": [
+                    "lib/Exception/TimeoutException.php"
+                ]
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -14947,12 +14940,12 @@
             },
             "type": "library",
             "autoload": {
-                "files": [
-                    "Resources/functions.php"
-                ],
                 "psr-4": {
                     "Symfony\\Component\\String\\": ""
                 },
+                "files": [
+                    "Resources/functions.php"
+                ],
                 "exclude-from-classmap": [
                     "/Tests/"
                 ]
@@ -15125,13 +15118,13 @@
                 }
             },
             "autoload": {
+                "psr-4": {
+                    "Psalm\\": "src/Psalm/"
+                },
                 "files": [
                     "src/functions.php",
                     "src/spl_object_id.php"
-                ],
-                "psr-4": {
-                    "Psalm\\": "src/Psalm/"
-                }
+                ]
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -15550,5 +15543,5 @@
         "ext-pgsql": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.2.0"
+    "plugin-api-version": "1.1.0"
 }
