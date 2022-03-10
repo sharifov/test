@@ -45,7 +45,8 @@ use yii\web\View;
                 <div class="col-md-6">
                     <?= $form->field($leadPreferencesForm, 'currency')->widget(\kartik\select2\Select2::class, [
                         'data' => \common\models\Currency::getList(),
-                        'size' => \kartik\select2\Select2::SIZE_SMALL
+                        'size' => \kartik\select2\Select2::SIZE_SMALL,
+                        'options' => ['placeholder' => '---', 'multiple' => false],
                     ]) ?>
                 </div>
             <?php endif; ?>
