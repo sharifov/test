@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\models\query\CurrencyQuery;
+use src\helpers\ErrorsToStringHelper;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -55,7 +56,7 @@ class Currency extends ActiveRecord
         return [
             [['cur_code', 'cur_name', 'cur_symbol'], 'required'],
             [['cur_app_percent'], 'number', 'max' => 100],
-            [['cur_base_rate', 'cur_app_rate'], 'number', 'max' => 1000],
+            [['cur_base_rate', 'cur_app_rate'], 'number'],
             [['cur_enabled', 'cur_default'], 'boolean'],
             [['cur_sort_order'], 'integer'],
             [['cur_created_dt', 'cur_updated_dt', 'cur_synch_dt'], 'safe'],
@@ -240,9 +241,12 @@ class Currency extends ActiveRecord
                 $currency->cur_app_rate = round((float) $curItem['systemRate'], 5);
                 $currency->cur_app_percent = (float) $curItem['rateReservePercent'];
 
-
                 if (!$currency->save()) {
-                    Yii::error($currency->cur_code . ': ' . VarDumper::dumpAsString($currency->errors), 'Currency:synchronization:save');
+                    $logData['message'] = ErrorsToStringHelper::extractFromModel($currency, ' ');
+                    $logData['data'] = $curItem;
+                    $logData['code'] = $currency->cur_code;
+
+                    Yii::error($logData, 'Currency:synchronization:save');
                 }
             }
             self::clearCache();
