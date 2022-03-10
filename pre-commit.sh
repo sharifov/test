@@ -1,5 +1,5 @@
 #!/bin/sh
-
+exit 0
 PROJECT=`php -r "echo dirname(realpath('$0'));"`
 STAGED_FILES_CMD=`git diff --cached --name-only --diff-filter=ACMR HEAD | grep \\\\.php`
 
