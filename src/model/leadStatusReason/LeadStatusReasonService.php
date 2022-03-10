@@ -149,7 +149,8 @@ class LeadStatusReasonService
         if ($leadClosedCount <= 1) {
             $abacDto = new LeadAbacDto($dto->lead, $dto->creatorId);
             $abacDto->closeReason = $dto->leadStatusReasonKey;
-            $canAbac = \Yii::$app->abac->can($abacDto, LeadAbacObject::ACT_USER_CONVERSION, LeadAbacObject::ACTION_CLOSE);
+            /** @abac new LeadAbacDto($lead, Auth::id()), LeadAbacObject::ACT_USER_CONVERSION, LeadAbacObject::ACTION_CREATE, Access to create lead user conversion */
+            $canAbac = \Yii::$app->abac->can($abacDto, LeadAbacObject::ACT_USER_CONVERSION, LeadAbacObject::ACTION_CREATE);
             if ($canAbac) {
                 if (!$this->leadUserConversionRepository->exist($dto->lead->id, $dto->lead->id)) {
                     $leadUserConversion = LeadUserConversion::create(
@@ -171,6 +172,7 @@ class LeadStatusReasonService
     {
         $abacDto = new QaTaskAbacDto(null);
         $abacDto->closeReason = $dto->leadStatusReasonKey;
+        /** @abac new LeadAbacDto($lead, Auth::id()), LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_TO_QA_LIST, Access to create qa task rule */
         if (\Yii::$app->abac->can($abacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_TO_QA_LIST)) {
             if (($parameters = QaTaskRules::getRule(QaTaskCreateLeadCloseCheckService::CATEGORY_KEY)) && $parameters->isEnabled()) {
                 $rule = new Rule($parameters->getValue());
