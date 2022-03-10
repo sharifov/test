@@ -5230,6 +5230,10 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
             //'redirectUrl' => urlencode(base64_encode($settings['redirectUrl']))
         ] + $flexParams;
 
+        if ($this->leadPreferences && $this->leadPreferences->pref_currency != 'USD') {
+            $params['currency'] = $this->leadPreferences->pref_currency;
+        }
+
         return $url . $segments . '?' . http_build_query($params);
     }
 
