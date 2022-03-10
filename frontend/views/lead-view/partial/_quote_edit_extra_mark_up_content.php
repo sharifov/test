@@ -36,13 +36,13 @@ $extra_mark_up           = (float)$leadQuoteExtraMarkUpForm->extra_mark_up;
         <div class="row">
             <div class="col-md-12">
                 <?= $form->field(
-            $leadQuoteExtraMarkUpForm,
-            'qp_client_extra_mark_up',
-            [
+                    $leadQuoteExtraMarkUpForm,
+                    'qp_client_extra_mark_up',
+                    [
                         'template' => '{label} <div class="input-group">{input}<span class="input-group-addon">' . $quote->q_client_currency . '</span></div>{error}{hint}',
                             'inputOptions' => ['id' => 'qp_client_extra_mark_up_modal_field'],
                         ]
-        )
+                )
                          ->input(
                              'number',
                              [
@@ -72,13 +72,13 @@ $extra_mark_up           = (float)$leadQuoteExtraMarkUpForm->extra_mark_up;
 
 
                 <?= $form->field(
-                            $leadQuoteExtraMarkUpForm,
-                            'extra_mark_up',
-                            [
+                    $leadQuoteExtraMarkUpForm,
+                    'extra_mark_up',
+                    [
                         'template' => '{label} <div class="input-group">{input}<span class="input-group-addon">' . $defaultCurrencyCode . '</span></div>{error}{hint}',
                         'inputOptions' => ['id' => 'extra_mark_up_modal_field']
-                    ]
-                        )
+                            ]
+                )
                          ->input(
                              'number',
                              ['min' => 0,  'step'  => '0.01', 'value' => $extra_mark_up]
