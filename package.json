@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "scss-watch": "node-sass --watch frontend/web/scss/*.scss -o frontend/web/css"
+    "scss-watch": "node-sass --watch frontend/web/scss/*.scss -o frontend/web/css",
+    "apidoc-gen": "apidoc -c ./apidoc.json -i \"./webapi/modules/\" -i \"./webapi/controllers/\" -o \"./webapi/web/doc\" -f \".*\\\\.php$\""
   },
   "author": "",
   "license": "ISC",
