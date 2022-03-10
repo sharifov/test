@@ -78,6 +78,10 @@ use yii\validators\ValidationAsset;
 use yii\web\JqueryAsset;
 use yii\widgets\ActiveFormAsset;
 use yii\widgets\MaskedInputAsset;
+use kivork\search\widgets\searchForm\SearchFormAssets;
+use kivork\search\widgets\loader\LoaderAssets;
+use kivork\search\widgets\flightResult\FlightResultsAssets;
+use kivork\search\assets\SearchAssets;
 
 Yii::setAlias('@webroot', __DIR__ . '/../../frontend/web');
 Yii::setAlias('@web', '/');
@@ -1032,6 +1036,10 @@ return [
                 'sourcePath' => null,
                 'depends' => [],
             ],
+            SearchFormAssets::class => false,
+            LoaderAssets::class => false,
+            FlightResultsAssets::class => false,
+            SearchAssets::class => false
         ],
         'hashCallback' => static function ($path) {
             return hash('md4', $path);
