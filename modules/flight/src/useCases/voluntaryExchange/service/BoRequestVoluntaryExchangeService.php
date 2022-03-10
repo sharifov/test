@@ -11,8 +11,7 @@ use src\exception\BoResponseException;
 use src\exception\ValidationException;
 use src\helpers\ErrorsToStringHelper;
 use src\services\cases\CasesSaleService;
-use webapi\src\forms\billing\BillingInfoForm;
-use webapi\src\forms\payment\PaymentRequestForm;
+use webapi\src\request\BoRequestDataHelper;
 
 /**
  * Class BoRequestReProtectionService
@@ -98,8 +97,8 @@ class BoRequestVoluntaryExchangeService
             unset($data['payment_request']);
         }
 
-        $data['billing'] = self::fillBillingData($form->billingInfoForm);
-        $data['payment'] = self::fillPaymentData($form->paymentRequestForm);
+        $data['billing'] = BoRequestDataHelper::fillBillingData($form->billingInfoForm);
+        $data['payment'] = BoRequestDataHelper::fillPaymentData($form->paymentRequestForm);
 
         return $data;
     }
@@ -107,53 +106,5 @@ class BoRequestVoluntaryExchangeService
     public function sendVoluntaryConfirm(array $requestData): ?array
     {
         return BackOffice::voluntaryExchange($requestData);
-    }
-
-    public static function fillBillingData(?BillingInfoForm $form): ?array
-    {
-        if ($form) {
-            $data = [
-                'address' => $form->address_line1,
-                'countryCode' => $form->country_id,
-                'country' => $form->country,
-                'city' => $form->city,
-                'state' => $form->state,
-                'zip' => $form->zip,
-                'phone' => $form->contact_phone,
-                'email' => $form->contact_email
-            ];
-        }
-        return $data ?? null;
-    }
-
-    /**
-     * @param PaymentRequestForm|null $form
-     * @return array|null
-     */
-    public static function fillPaymentData(?PaymentRequestForm $form): ?array
-    {
-        if ($form) {
-            $data = [
-                'type' => mb_strtoupper($form->method_key),
-            ];
-
-            switch ($form->method_key) {
-                case PaymentRequestForm::TYPE_METHOD_STRIPE:
-                    $data['merchant'] = [
-                        'tokenSource' => $form->stripeForm->token_source,
-                    ];
-                    break;
-                default:
-                    $data['card'] = [
-                        'holderName' => $form->creditCardForm->holder_name,
-                        'number' => $form->creditCardForm->number,
-                        'expirationDate' => $form->creditCardForm->expiration_month . '/' . $form->creditCardForm->expiration_year,
-                        'cvv' => $form->creditCardForm->cvv,
-                    ];
-                    break;
-            }
-        }
-
-        return $data ?? null;
     }
 }
