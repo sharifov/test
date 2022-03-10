@@ -300,14 +300,21 @@ class LeadChangeStateController extends FController
         }
 
         $reasonKey = Yii::$app->request->get('reasonKey');
-        $reason = LeadStatusReasonQuery::getLeadStatusReasonByKey($reasonKey);
-        if (!$reason) {
-            throw new NotFoundException('LeadStatusReason not found');
+        if (empty($reasonKey)) {
+            $commentRequired = 0;
+            $description = '';
+        } else {
+            $reason = LeadStatusReasonQuery::getLeadStatusReasonByKey($reasonKey);
+            if (!$reason) {
+                throw new NotFoundException('LeadStatusReason not found');
+            }
+            $commentRequired = $reason->lsr_comment_required;
+            $description = nl2br($reason->lsr_description);
         }
 
         return $this->asJson([
-            'commentRequired' => $reason->lsr_comment_required,
-            'description' => nl2br($reason->lsr_description)
+            'commentRequired' => $commentRequired,
+            'description' => $description
         ]);
     }
 

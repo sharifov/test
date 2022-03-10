@@ -46,10 +46,10 @@ $form = ActiveForm::begin([
                           $('#close-reason-submit').addClass('disabled').prop('disabled', true);           
                       },
                       success: function (data) {
-                          $('#lead-close-reason-description').hide();
+                          $('#lead-close-reason-description-div').hide();
                           if (data.description) {
-                              $('#lead-close-reason-description').html(data.description);
-                              $('#lead-close-reason-description').show();
+                              $('#lead-close-reason-description-text').html(data.description);
+                              $('#lead-close-reason-description-div').show();
                           }
                           
                           if (data.commentRequired) {
@@ -67,7 +67,10 @@ $form = ActiveForm::begin([
                   });
             "]) ?>
 
-            <div class="alert alert-info" style="display: none;" id="lead-close-reason-description"></div>
+            <div class="alert alert-secondary" style="display: none;" id="lead-close-reason-description-div">
+                <h5 class="alert-heading"><i class="fa fa-exclamation-triangle"></i> Notification</h5>
+                <p id="lead-close-reason-description-text"></p>
+            </div>
         </div>
     </div>
 
