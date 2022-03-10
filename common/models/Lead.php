@@ -15,6 +15,7 @@ use common\models\query\SourcesQuery;
 use DateTime;
 use frontend\helpers\JsonHelper;
 use frontend\widgets\notification\NotificationMessage;
+use kivork\search\core\urlsig\UrlSignature;
 use modules\offer\src\entities\offer\Offer;
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\product\Product;
@@ -95,6 +96,7 @@ use yii\helpers\Html;
 use common\components\SearchService;
 use yii\helpers\Url;
 use yii\helpers\VarDumper;
+use src\helpers\lead\LeadUrlHelper;
 
 /**
  * This is the model class for table "leads".
@@ -5010,6 +5012,11 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         return $this->trip_type === self::TRIP_TYPE_ROUND_TRIP;
     }
 
+    public function isOneWayTrip(): bool
+    {
+        return $this->trip_type === self::TRIP_TYPE_ONE_WAY;
+    }
+
     public function isReadyForGa(): bool
     {
         return (GaHelper::getTrackingIdByLead($this) && GaHelper::getClientIdByLead($this));
@@ -5178,6 +5185,56 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     public function isClosed(): bool
     {
         return $this->status === self::STATUS_CLOSED;
+    }
+
+    public function getDeepLink(array $settings): string
+    {
+        $url = '/smart/search/';
+
+        $flightSegments = LeadFlightSegment::findAll(['lead_id' => $this->id]);
+        $segmentsStr = [];
+        $signedParams = [];
+        $flexParams = [];
+        foreach ($flightSegments as $key => $entry) {
+            if ($this->isRoundTrip()) {
+                $trip = '';
+                if ($key == 0) {
+                    $trip = $entry['origin'] . '-' . $entry['destination'] . '/';
+                    $flexParams['departureFlexd'] = LeadUrlHelper::formatFlexOptions($entry['flexibility'], $entry['flexibility_type']);
+                }
+                if ($key == 1) {
+                    $flexParams['returnFlexd'] = LeadUrlHelper::formatFlexOptions($entry['flexibility'], $entry['flexibility_type']);
+                }
+                $segmentsStr[] = $trip . date('Y-m-d', strtotime($entry['departure']));
+            } else {
+                $segmentsStr[] = $entry['origin'] . '-' . $entry['destination'] . '/' . date('Y-m-d', strtotime($entry['departure']));
+                if ($this->isOneWayTrip()) {
+                    $flexParams['departureFlexd'] = LeadUrlHelper::formatFlexOptions($entry['flexibility'], $entry['flexibility_type']);
+                }
+            }
+            array_push($signedParams, $entry['origin'], $entry['destination']);
+        }
+
+        $segments =  implode('/', $segmentsStr);
+        $signedParams[] = strval($this->id);
+        $params = [
+            'tt' => $this->trip_type,
+            'cabin' => strtolower($this->cabin),
+            'adt' => $this->adults,
+            'chd' => $this->children,
+            'inf' => $this->infants,
+            'leadId' => $this->id,
+            //TODO: refactor, use singleton, get from container doesn't work
+            UrlSignature::FORM_QUERY_KEY => UrlSignature::CalculateWithKey($signedParams, 'secretKey'),
+            //'CID' => $this->source ? $this->source->cid : '',
+            //'redirectUrl' => urlencode(base64_encode($settings['redirectUrl']))
+        ] + $flexParams;
+
+        if ($this->leadPreferences && $this->leadPreferences->pref_currency != 'USD') {
+            $params['currency'] = $this->leadPreferences->pref_currency;
+        }
+
+        return $url . $segments . '?' . http_build_query($params);
     }
 
     public function hasFlightDetails(): bool

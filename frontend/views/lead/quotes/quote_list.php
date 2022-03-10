@@ -14,6 +14,11 @@ use yii\bootstrap\Html;
 use yii\helpers\Url;
 use yii\widgets\ListView;
 use yii\widgets\Pjax;
+use src\helpers\lead\LeadUrlHelper;
+use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\lead\src\abac\LeadAbacObject;
+
+$leadAbacDto = new LeadAbacDto($lead, Auth::id());
 
 $addAutoQuoteBtn = '';
 if (FlightQuoteGuard::canAutoSelectQuotes(Auth::user(), $lead)) {
@@ -85,6 +90,24 @@ JS;
                 <li>
                     <?=Html::a('<i class="fa fa-search warning"></i> Quote Search', null, ['class' => '', 'id' => 'search-quotes-btn', 'data-url' => Url::to(['quote/ajax-search-quotes', 'leadId' => $leadForm->getLead()->id])])?>
                 </li>
+                    <?php /** @abac new $leadAbacDto, LeadAbacObject::OBJ_LEAD_SMART_SEARCH, LeadAbacObject::ACTION_ACCESS_SMART_SEARCH, Access Smart Search*/?>
+                    <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_LEAD_SMART_SEARCH, LeadAbacObject::ACTION_ACCESS_SMART_SEARCH)) :
+                        $deepLink = $lead->getDeepLink([]);
+                        $deepLinkInfo = LeadUrlHelper::checkDeepLink($deepLink);
+                        ?>
+                        <li>
+                            <?=Html::a('<i class="fas fa-glasses ' . ($deepLinkInfo['error'] ? 'red' : 'blue') . '"></i> Smart Search', $deepLink, [
+                                'id' => 'smart-search-btn',
+                                'class' => '',
+                                'target' => '_blank',
+                                'onclick' => 'return ' . ($deepLinkInfo['error'] ? 'false' : 'true') . ';',
+                                'data-pjax' => 0,
+                                //'onclick' => 'return false;',
+                                'title' => $deepLinkInfo['message']])
+                            ?>
+                        </li>
+                    <?php endif; ?>
+
                 <?php else : ?>
                 <li>
                   <span class="badge badge-warning"><i class="fa fa-warning"></i> Warning: Flight Segments is empty!</span>
