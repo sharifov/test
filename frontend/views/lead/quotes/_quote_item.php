@@ -71,10 +71,10 @@ if ($model->isClientCurrencyDefault()) {
             <?php endif; ?>
 
             <?=$model->isAlternative() ? Html::tag(
-            'i',
-            '',
-            ['class' => 'fa fa-font', 'title' => 'Alternative quote']
-        ) : ''?>
+                'i',
+                '',
+                ['class' => 'fa fa-font', 'title' => 'Alternative quote']
+            ) : ''?>
 
             <span class="quote__id" title="Quote ID: <?=$model->id ?>, UID: <?= Html::decode($model->uid) ?>" data-toggle="tooltip">
                 <strong><?= Html::decode($model->uid) ?></strong>
@@ -83,7 +83,7 @@ if ($model->isClientCurrencyDefault()) {
             <?= $model->getStatusSpan()?>
 
             <span class="quote__id" title="Created Date Time">
-                <?php if ($model->created): ?>
+                <?php if ($model->created) : ?>
                     <small><i class="fa fa-calendar"></i> <?= Yii::$app->formatter->asDatetime(strtotime($model->created)) ?></small>
                 <?php endif; ?>
             </span>
@@ -264,9 +264,9 @@ if ($model->isClientCurrencyDefault()) {
                         <?php endif ?>
                     <?php else :?>
                         <?php echo Html::img(
-                    "/img/multiple_airlines.png",
-                    ['class' => 'quote__airline-logo', 'alt' => implode(', ', $marketingAirlines)]
-                ); ?>
+                            "/img/multiple_airlines.png",
+                            ['class' => 'quote__airline-logo', 'alt' => implode(', ', $marketingAirlines)]
+                        ); ?>
                     <?php endif;?>
 
                     <div class="quote__info-options">

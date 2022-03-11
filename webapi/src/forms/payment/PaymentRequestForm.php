@@ -72,8 +72,7 @@ class PaymentRequestForm extends Model
         if (empty($this->method_data[$this->method_key]) && in_array($this->method_key, self::REQUIRED_METHOD_DATA_BY_TYPES, true)) {
             $this->addError($attribute, $this->method_key . ' data is not provided');
         } else if (!empty($this->method_data[$this->method_key]) && is_array($this->method_data[$this->method_key])) {
-            switch ($this->method_key)
-            {
+            switch ($this->method_key) {
                 case self::TYPE_METHOD_CARD:
                     $creditCardForm = new CreditCardForm();
                     $creditCardForm->load($this->method_data, self::TYPE_METHOD_CARD);
@@ -104,6 +103,4 @@ class PaymentRequestForm extends Model
     {
         return $this->stripeForm;
     }
-
-
 }
