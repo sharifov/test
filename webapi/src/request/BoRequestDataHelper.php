@@ -112,23 +112,27 @@ class BoRequestDataHelper
     public static function fillPaymentData(?PaymentRequestForm $form): ?array
     {
         if ($form) {
-            $data = [
-                'type' => mb_strtoupper($form->method_key),
-            ];
-
             switch ($form->method_key) {
                 case PaymentRequestForm::TYPE_METHOD_STRIPE:
-                    $data['merchant'] = [
-                        'tokenSource' => $form->stripeForm->token_source,
+                    $data = [
+                        'type' => mb_strtoupper($form->method_key),
+                        'merchant' => [
+                            'tokenSource' => $form->stripeForm->token_source,
+                        ],
+                    ];
+                    break;
+                case PaymentRequestForm::TYPE_METHOD_CARD:
+                    $data = [
+                        'type' => mb_strtoupper($form->method_key),
+                        'card' => [
+                            'holderName' => $form->creditCardForm->holder_name,
+                            'number' => $form->creditCardForm->number,
+                            'expirationDate' => $form->creditCardForm->expiration_month . '/' . $form->creditCardForm->expiration_year,
+                            'cvv' => $form->creditCardForm->cvv,
+                        ],
                     ];
                     break;
                 default:
-                    $data['card'] = [
-                        'holderName' => $form->creditCardForm->holder_name,
-                        'number' => $form->creditCardForm->number,
-                        'expirationDate' => $form->creditCardForm->expiration_month . '/' . $form->creditCardForm->expiration_year,
-                        'cvv' => $form->creditCardForm->cvv,
-                    ];
                     break;
             }
         }
