@@ -1666,7 +1666,7 @@ class OneTimeController extends Controller
                     'qp_client_extra_mark_up' => new Expression('extra_mark_up'),
                     'qp_client_service_fee' => new Expression('service_fee'),
                     'qp_client_markup' => new Expression('mark_up'),
-                    'qp_client_selling' => new Expression('quote_price'),
+                    'qp_client_selling' => new Expression('selling'),
                     'qp_client_net' => new Expression('net'),
                 ], ['id' => $quotePriceIds])
                 ->execute();
