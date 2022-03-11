@@ -21,7 +21,7 @@ pipeline {
         dir('devops/ansible') {
           ansiblePlaybook(
             playbook: 'deploy.yml',
-            inventory: "inventories/${ENV}/hosts",
+            inventory: "inventories/${ENV}/aws_ec2.yml",
             credentialsId: 'DEVOPS_RSA',
             vaultCredentialsId: 'ANSIBLE_PASS',
             extraVars: [ app_ver: "${GIT_COMMIT[0..6]}" ]
