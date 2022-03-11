@@ -3,17 +3,15 @@
 namespace modules\flight\src\useCases\voluntaryExchange\service;
 
 use common\components\BackOffice;
-use frontend\helpers\JsonHelper;
 use modules\flight\src\useCases\sale\form\OrderContactForm;
 use modules\flight\src\useCases\voluntaryExchangeCreate\form\VoluntaryExchangeCreateForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
-use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use src\entities\cases\Cases;
 use src\exception\BoResponseException;
 use src\exception\ValidationException;
 use src\helpers\ErrorsToStringHelper;
 use src\services\cases\CasesSaleService;
-use webapi\src\ApiCodeException;
+use webapi\src\request\BoRequestDataHelper;
 
 /**
  * Class BoRequestReProtectionService
@@ -99,29 +97,8 @@ class BoRequestVoluntaryExchangeService
             unset($data['payment_request']);
         }
 
-        if ($form->billingInfoForm) {
-            $data['billing'] = [
-                'address' => $form->billingInfoForm->address_line1,
-                'countryCode' => $form->billingInfoForm->country_id,
-                'country' => $form->billingInfoForm->country,
-                'city' => $form->billingInfoForm->city,
-                'state' => $form->billingInfoForm->state,
-                'zip' => $form->billingInfoForm->zip,
-                'phone' => $form->billingInfoForm->contact_phone,
-                'email' => $form->billingInfoForm->contact_email
-            ];
-        }
-        if ($form->paymentRequestForm) {
-            $data['payment'] = [
-                'type' => mb_strtoupper($form->paymentRequestForm->method_key),
-                'card' => [
-                    'holderName' => $form->paymentRequestForm->creditCardForm->holder_name,
-                    'number' => $form->paymentRequestForm->creditCardForm->number,
-                    'expirationDate' => $form->paymentRequestForm->creditCardForm->expiration_month . '/' . $form->paymentRequestForm->creditCardForm->expiration_year,
-                    'cvv' => $form->paymentRequestForm->creditCardForm->cvv
-                ]
-            ];
-        }
+        $data['billing'] = BoRequestDataHelper::fillBillingData($form->billingInfoForm);
+        $data['payment'] = BoRequestDataHelper::fillPaymentData($form->paymentRequestForm);
 
         return $data;
     }

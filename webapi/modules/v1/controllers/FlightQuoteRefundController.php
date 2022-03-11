@@ -329,7 +329,7 @@ class FlightQuoteRefundController extends ApiBaseController
      * @apiParam {object}               payment_request                      Payment request
      * @apiParam {number}               payment_request.amount               Customer must pay for initiate refund process
      * @apiParam {string{3}}            payment_request.currency             Currency code
-     * @apiParam {string{50}}            payment_request.method_key           Method key (for example "card")
+     * @apiParam {string = "card", "stripe"} payment_request.method_key                          Method key (for example "card")
      * @apiParam {object}               payment_request.method_data          Method data
      * @apiParam {object}               payment_request.method_data.card     Card (for credit card)
      * @apiParam {string{..20}}           payment_request.method_data.card.number          Number
@@ -337,6 +337,8 @@ class FlightQuoteRefundController extends ApiBaseController
      * @apiParam {int}                  payment_request.method_data.card.expiration_month       Month
      * @apiParam {int}                  payment_request.method_data.card.expiration_year        Year
      * @apiParam {string{..4}}           payment_request.method_data.card.cvv             CVV
+     * @apiParam {object}                payment_request.method_data.stripe                  Stripe (for credit stripe)
+     * @apiParam {string}                payment_request.method_data.stripe.token_source            Token Source
      *
      * @apiParamExample {json} Request-Example:
      *  {
@@ -648,12 +650,14 @@ class FlightQuoteRefundController extends ApiBaseController
      * @apiParam {string{3}}            payment_request.currency             Currency code
      * @apiParam {string{50}}            payment_request.method_key           Method key (for example "card")
      * @apiParam {object}               payment_request.method_data          Method data
-     * @apiParam {object}               payment_request.method_data.card     Card (for credit card)
+     * @apiParam {string = "card", "stripe"} payment_request.method_key                          Method key (for example "card")
      * @apiParam {string{..20}}           payment_request.method_data.card.number          Number
      * @apiParam {string{..50}}           payment_request.method_data.card.holder_name   Holder name
      * @apiParam {int}                  payment_request.method_data.card.expiration_month       Month
      * @apiParam {int}                  payment_request.method_data.card.expiration_year        Year
      * @apiParam {string{..4}}           payment_request.method_data.card.cvv             CVV
+     * @apiParam {object}                payment_request.method_data.stripe                  Stripe (for credit stripe)
+     * @apiParam {string}                payment_request.method_data.stripe.token_source            Token Source
      *
      * @apiParamExample {json} Request-Example:
      *  {

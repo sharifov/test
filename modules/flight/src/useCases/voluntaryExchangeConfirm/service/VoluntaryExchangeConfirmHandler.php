@@ -14,26 +14,18 @@ use modules\flight\src\useCases\voluntaryExchange\service\CaseVoluntaryExchangeH
 use modules\flight\src\useCases\voluntaryExchange\service\CleanDataVoluntaryExchangeService;
 use modules\flight\src\useCases\voluntaryExchange\service\FlightRequestService;
 use modules\flight\src\useCases\voluntaryExchange\service\VoluntaryExchangeObjectCollection;
-use modules\flight\src\useCases\voluntaryExchange\service\VoluntaryExchangeService;
 use modules\flight\src\useCases\voluntaryExchangeConfirm\form\VoluntaryExchangeConfirmForm;
-use modules\flight\src\useCases\voluntaryExchangeCreate\form\VoluntaryExchangeCreateForm;
 use modules\flight\src\useCases\voluntaryExchangeManualCreate\service\VoluntaryExchangeBOPrepareService;
 use modules\flight\src\useCases\voluntaryExchangeManualCreate\service\VoluntaryExchangeBOService;
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
-use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelation;
-use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelationRepository;
 use src\entities\cases\CaseEventLog;
 use src\entities\cases\Cases;
 use src\helpers\app\AppHelper;
-use src\helpers\ErrorsToStringHelper;
-use webapi\src\forms\billing\BillingInfoForm;
-use webapi\src\forms\payment\PaymentRequestForm;
+use webapi\src\request\BoRequestDataHelper;
 use webapi\src\services\payment\BillingInfoApiVoluntaryService;
-use Yii;
 use yii\helpers\ArrayHelper;
-use yii\helpers\VarDumper;
 
 use function Amp\Promise\timeoutWithDefault;
 
@@ -94,8 +86,8 @@ class VoluntaryExchangeConfirmHandler
     {
         $request['apiKey'] = $this->case->project->api_key;
         $request['bookingId'] = $this->confirmForm->booking_id;
-        $request['billing'] = self::mappingBilling($this->confirmForm->getBillingInfoForm());
-        $request['payment'] = self::mappingPayment($this->confirmForm->getPaymentRequestForm());
+        $request['billing'] = BoRequestDataHelper::fillBillingData($this->confirmForm->getBillingInfoForm());
+        $request['payment'] = BoRequestDataHelper::fillPaymentData($this->confirmForm->getPaymentRequestForm());
         $request['exchange'] = $this->prepareExchange();
         return $request;
     }
@@ -369,37 +361,5 @@ class VoluntaryExchangeConfirmHandler
     public function getProductQuoteChange(): ?ProductQuoteChange
     {
         return $this->productQuoteChange;
-    }
-
-    public static function mappingBilling(?BillingInfoForm $billingInfoForm): ?array
-    {
-        if ($billingInfoForm) {
-            $data = [
-                'address' => $billingInfoForm->address_line1,
-                'countryCode' => $billingInfoForm->country_id,
-                'country' => $billingInfoForm->country,
-                'city' => $billingInfoForm->city,
-                'state' => $billingInfoForm->state,
-                'zip' => $billingInfoForm->zip,
-                'phone' => $billingInfoForm->contact_phone,
-                'email' => $billingInfoForm->contact_email
-            ];
-        }
-        return $data ?? null;
-    }
-    public static function mappingPayment(?PaymentRequestForm $paymentRequestForm): ?array
-    {
-        if ($paymentRequestForm) {
-            $data = [
-                'type' => mb_strtoupper($paymentRequestForm->method_key),
-                'card' => [
-                    'holderName' => $paymentRequestForm->creditCardForm->holder_name,
-                    'number' => $paymentRequestForm->creditCardForm->number,
-                    'expirationDate' => $paymentRequestForm->creditCardForm->expiration_month . '/' . $paymentRequestForm->creditCardForm->expiration_year,
-                    'cvv' => $paymentRequestForm->creditCardForm->cvv
-                ]
-            ];
-        }
-        return $data ?? null;
     }
 }

@@ -2,14 +2,13 @@
 
 namespace webapi\src\forms\payment;
 
-use common\components\validators\CheckJsonValidator;
 use common\components\validators\IsArrayValidator;
 use common\models\Currency;
 use common\models\PaymentMethod;
-use frontend\helpers\JsonHelper;
 use src\helpers\ErrorsToStringHelper;
 use src\traits\FormNameModelTrait;
 use webapi\src\forms\payment\creditCard\CreditCardForm;
+use webapi\src\forms\payment\creditCard\StripeForm;
 use yii\base\Model;
 use common\components\validators\CheckIsNumberValidator;
 
@@ -22,12 +21,14 @@ use common\components\validators\CheckIsNumberValidator;
  * @property $amount
  *
  * @property CreditCardForm $creditCardForm
+ * @property StripeForm $stripeForm
  */
 class PaymentRequestForm extends Model
 {
     use FormNameModelTrait;
 
     public const TYPE_METHOD_CARD = 'card';
+    public const TYPE_METHOD_STRIPE = 'stripe';
 
     public $method_key;
     public $currency;
@@ -35,9 +36,11 @@ class PaymentRequestForm extends Model
     public $amount;
 
     private ?CreditCardForm $creditCardForm = null;
+    private ?StripeForm $stripeForm = null;
 
     private const REQUIRED_METHOD_DATA_BY_TYPES = [
-        self::TYPE_METHOD_CARD
+        self::TYPE_METHOD_CARD,
+        self::TYPE_METHOD_STRIPE,
     ];
 
     public function rules(): array
@@ -68,23 +71,39 @@ class PaymentRequestForm extends Model
     {
         if (empty($this->method_data[$this->method_key]) && in_array($this->method_key, self::REQUIRED_METHOD_DATA_BY_TYPES, true)) {
             $this->addError($attribute, $this->method_key . ' data is not provided');
-            return false;
-        }
-
-        if (!empty($this->method_data[$this->method_key]) && is_array($this->method_data[$this->method_key])) {
-            $creditCardForm = new CreditCardForm();
-            $creditCardForm->load($this->method_data, self::TYPE_METHOD_CARD);
-            if (!$creditCardForm->validate()) {
-                $this->addError($attribute, 'CreditCardForm: ' . ErrorsToStringHelper::extractFromModel($creditCardForm, ', '));
-                return false;
+        } else if (!empty($this->method_data[$this->method_key]) && is_array($this->method_data[$this->method_key])) {
+            switch ($this->method_key)
+            {
+                case self::TYPE_METHOD_CARD:
+                    $creditCardForm = new CreditCardForm();
+                    $creditCardForm->load($this->method_data, self::TYPE_METHOD_CARD);
+                    if (!$creditCardForm->validate()) {
+                        $this->addError($attribute, 'CreditCardForm: ' . ErrorsToStringHelper::extractFromModel($creditCardForm, ', '));
+                    }
+                    $this->creditCardForm = $creditCardForm;
+                    break;
+                case self::TYPE_METHOD_STRIPE:
+                    $stripeForm = new StripeForm();
+                    $stripeForm->load($this->method_data, self::TYPE_METHOD_STRIPE);
+                    if (!$stripeForm->validate()) {
+                        $this->addError($attribute, 'StripeForm: ' . ErrorsToStringHelper::extractFromModel($stripeForm, ', '));
+                    }
+                    $this->stripeForm = $stripeForm;
+                    break;
             }
-            $this->creditCardForm = $creditCardForm;
         }
-        return true;
+        return !$this->hasErrors();
     }
 
     public function getCreditCardForm(): ?CreditCardForm
     {
         return $this->creditCardForm;
     }
+
+    public function getStripeForm(): ?StripeForm
+    {
+        return $this->stripeForm;
+    }
+
+
 }
