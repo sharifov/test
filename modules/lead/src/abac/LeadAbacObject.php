@@ -2,9 +2,7 @@
 
 namespace modules\lead\src\abac;
 
-use common\models\Department;
 use common\models\Lead;
-use common\models\Project;
 use modules\abac\components\AbacBaseModel;
 use modules\abac\src\entities\AbacInterface;
 use src\model\leadStatusReason\entity\LeadStatusReasonQuery;
@@ -37,6 +35,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     public const ACT_CREATE_FROM_PHONE_WIDGET = self::NS . 'act/create-from-phone-widget';
     public const ACT_LINK_TO_CALL = self::NS . 'act/link-to-call';
     public const ACT_TAKE_LEAD_FROM_CALL = self::NS . 'act/take-from-call';
+    public const ACT_PRICE_LINK_RESEARCH = self::NS . 'act/price-link-research';
 
     /** UI PERMISSION */
     public const UI_BLOCK_CLIENT_INFO  = self::NS . 'ui/block/client-info';
@@ -84,6 +83,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         //self::ACT_CLIENT_SUBSCRIBE    => self::ACT_CLIENT_SUBSCRIBE,
         //self::ACT_CLIENT_UNSUBSCRIBE    => self::ACT_CLIENT_UNSUBSCRIBE,
         self::ACT_TAKE_LEAD => self::ACT_TAKE_LEAD,
+        self::ACT_PRICE_LINK_RESEARCH => self::ACT_PRICE_LINK_RESEARCH,
         self::UI_BLOCK_CLIENT_INFO  => self::UI_BLOCK_CLIENT_INFO,
         //self::UI_MENU_CLIENT_INFO   => self::UI_MENU_CLIENT_INFO,
         //self::ACT_SEARCH_LEADS_BY_IP   => self::ACT_SEARCH_LEADS_BY_IP,
@@ -192,6 +192,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         //self::ACT_CLIENT_UNSUBSCRIBE => [self::ACTION_ACCESS],
         //self::ACT_SEARCH_LEADS_BY_IP => [self::ACTION_ACCESS],
         self::ACT_TAKE_LEAD => [self::ACTION_ACCESS],
+        self::ACT_PRICE_LINK_RESEARCH => [self::ACTION_ACCESS],
         self::LOGIC_CLIENT_DATA  => [self::ACTION_UNMASK],
         //self::UI_FIELD_PHONE_FORM_ADD_PHONE  => [self::ACTION_CREATE, self::ACTION_UPDATE],
         //self::UI_FIELD_EMAIL_FORM_ADD_EMAIL  => [self::ACTION_CREATE, self::ACTION_UPDATE],
@@ -561,6 +562,9 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
             self::ATTR_LEAD_HAS_OWNER,
             self::ATTR_IS_COMMON_GROUP
         ],
+        self::ACT_PRICE_LINK_RESEARCH => [
+            self::ATTR_LEAD_IS_OWNER,
+        ],
 
         self::OBJ_LEAD => [
             self::ATTR_LEAD_IS_OWNER,
@@ -662,6 +666,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         //$attributeList[self::ACT_USER_SAME_EMAIL_INFO][] = $attrStatus;
         //$attributeList[self::ACT_SEARCH_LEADS_BY_IP][] = $attrStatus;
         $attributeList[self::ACT_TAKE_LEAD_FROM_CALL][] = $attrStatus;
+        $attributeList[self::ACT_PRICE_LINK_RESEARCH][] = $attrStatus;
         $attributeList[self::OBJ_LEAD_PREFERENCES][] = $attrStatus;
         $attributeList[self::OBJ_LEAD][] = $attrStatus;
         $attributeList[self::OBJ_LEAD][] = $attrLeadCloseReasons;
