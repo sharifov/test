@@ -9,7 +9,7 @@ use yii\helpers\VarDumper;
 ?>
 
 <?php foreach ($errors as $error) :?>
-    <?php if (array_key_exists('messages', $error)) : ?>
+    <?php if (!array_key_exists('messages', $error)) : ?>
         <?php \Yii::info(VarDumper::dumpAsString($error, 20), 'info\_sale_info_errors:notFoundMessagesKey'); ?>
         <?php continue; ?>
     <?php endif ?>

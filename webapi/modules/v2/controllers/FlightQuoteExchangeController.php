@@ -206,7 +206,7 @@ class FlightQuoteExchangeController extends BaseController
      * @apiParam {object}                       [payment_request]                                   Payment request
      * @apiParam {number}                       payment_request.amount                              Customer must pay for initiate refund process
      * @apiParam {string{3}}                    payment_request.currency                            Currency code
-     * @apiParam {string{50}}                   payment_request.method_key                          Method key (for example "card")
+     * @apiParam {string = "card", "stripe"} payment_request.method_key                          Method key (for example "card")
      * @apiParam {object}                       payment_request.method_data                         Method data
      * @apiParam {object}                       payment_request.method_data.card                    Card (for credit card)
      * @apiParam {string{..20}}                 payment_request.method_data.card.number             Number
@@ -214,169 +214,174 @@ class FlightQuoteExchangeController extends BaseController
      * @apiParam {int}                          payment_request.method_data.card.expiration_month   Month
      * @apiParam {int}                          payment_request.method_data.card.expiration_year    Year
      * @apiParam {string{..4}}                  payment_request.method_data.card.cvv                CVV
+     * @apiParam {object}                       payment_request.method_data.stripe                  Stripe (for credit stripe)
+     * @apiParam {string}                       payment_request.method_data.stripe.token_source            Token Source
      *
      * @apiParamExample {json} Request-Example:
-     * {
-     * "bookingId": "XXXYYYZ",
-     * "apiKey": "test-api-key",
-     * "exchange": {
-     * "trips": [
-     * {
-     * "tripId": 1,
-     * "segments": [
-     * {
-     * "segmentId": 1,
-     * "departureTime": "2022-01-10 20:15",
-     * "arrivalTime": "2022-01-11 21:10",
-     * "stop": 0,
-     * "stops": [
-     * {
-     * "locationCode": "LFW",
-     * "departureDateTime": "2022-01-11 12:35",
-     * "arrivalDateTime": "2022-01-11 11:35",
-     * "duration": 60,
-     * "elapsedTime": 620,
-     * "equipment": "787"
-     * }
-     * ],
-     * "flightNumber": "513",
-     * "bookingClass": "H",
-     * "duration": 1015,
-     * "departureAirportCode": "JFK",
-     * "departureAirportTerminal": "8",
-     * "arrivalAirportCode": "ADD",
-     * "arrivalAirportTerminal": "2",
-     * "operatingAirline": "ET",
-     * "airEquipType": "787",
-     * "marketingAirline": "ET",
-     * "marriageGroup": "O",
-     * "cabin": "Y",
-     * "meal": "DL",
-     * "fareCode": "HLESUS",
-     * "recheckBaggage": false
-     * },
-     * {
-     * "segmentId": 2,
-     * "departureTime": "2022-01-11 23:15",
-     * "arrivalTime": "2022-01-12 01:20",
-     * "stop": 0,
-     * "stops": null,
-     * "flightNumber": "308",
-     * "bookingClass": "H",
-     * "duration": 125,
-     * "departureAirportCode": "ADD",
-     * "departureAirportTerminal": "2",
-     * "arrivalAirportCode": "NBO",
-     * "arrivalAirportTerminal": "1C",
-     * "operatingAirline": "ET",
-     * "airEquipType": "738",
-     * "marketingAirline": "ET",
-     * "marriageGroup": "I",
-     * "cabin": "Y",
-     * "meal": "D",
-     * "fareCode": "HLESUS",
-     * "recheckBaggage": false
-     * }
-     * ],
-     * "duration": 1265
-     * }
-     * ],
-     * "tickets": [
-     * {
-     * "numRef": "1.1",
-     * "firstName": "PAULA ANNE",
-     * "lastName": "ALVAREZ",
-     * "paxType": "ADT",
-     * "number": "123456789"
-     * },
-     * {
-     * "numRef": "2.1",
-     * "firstName": "ANNE",
-     * "lastName": "ALVAREZ",
-     * "paxType": "ADT",
-     * "number": "987654321"
-     * }
-     * ],
-     * "passengers": {
-     * "ADT": {
-     * "codeAs": "JCB",
-     * "cnt": 1,
-     * "baseFare": 32.12,
-     * "pubBaseFare": 32.12,
-     * "baseTax": 300,
-     * "markup": 0,
-     * "comm": 0,
-     * "price": 332.12,
-     * "tax": 300,
-     * "oBaseFare": {
-     * "amount": 32.120003,
-     * "currency": "USD"
-     * },
-     * "oBaseTax": {
-     * "amount": 300,
-     * "currency": "USD"
-     * },
-     * "oExchangeFareDiff": {
-     * "amount": 8,
-     * "currency": "USD"
-     * },
-     * "oExchangeTaxDiff": {
-     * "amount": 24.12,
-     * "currency": "USD"
-     * }
-     * }
-     * },
-     * "validatingCarrier": "AA",
-     * "gds": "S",
-     * "pcc": "G9MJ",
-     * "cons": "GTT",
-     * "fareType": "SR",
-     * "cabin": "Y",
-     * "currency": "USD",
-     * "currencies": [
-     * "USD"
-     * ],
-     * "currencyRates": {
-     * "USDUSD": {
-     * "from": "USD",
-     * "to": "USD",
-     * "rate": 1
-     * }
-     * },
-     * "keys": {},
-     * "meta": {}
-     * },
-     * "billing": {
-     * "first_name": "John",
-     * "last_name": "Doe",
-     * "middle_name": "",
-     * "address_line1": "1013 Weda Cir",
-     * "address_line2": "",
-     * "country_id": "US",
-     * "country" : "United States",
-     * "city": "Mayfield",
-     * "state": "KY",
-     * "zip": "99999",
-     * "company_name": "",
-     * "contact_phone": "+19074861000",
-     * "contact_email": "test@test.com",
-     * "contact_name": "Test Name"
-     * },
-     * "payment_request": {
-     * "method_key": "card",
-     * "currency": "USD",
-     * "method_data": {
-     * "card": {
-     * "number": "4111555577778888",
-     * "holder_name": "Test test",
-     * "expiration_month": 10,
-     * "expiration_year": 23,
-     * "cvv": "123"
-     * }
-     * },
-     * "amount": 112.25
-     * }
-     * }
+         {
+            "bookingId": "XXXYYYZ",
+            "apiKey": "test-api-key",
+            "exchange": {
+                "trips": [
+                    {
+                        "tripId": 1,
+                        "segments": [
+                            {
+                                "segmentId": 1,
+                                "departureTime": "2022-01-10 20:15",
+                                "arrivalTime": "2022-01-11 21:10",
+                                "stop": 0,
+                                "stops": [
+                                    {
+                                        "locationCode": "LFW",
+                                        "departureDateTime": "2022-01-11 12:35",
+                                        "arrivalDateTime": "2022-01-11 11:35",
+                                        "duration": 60,
+                                        "elapsedTime": 620,
+                                        "equipment": "787"
+                                    }
+                                ],
+                                "flightNumber": "513",
+                                "bookingClass": "H",
+                                "duration": 1015,
+                                "departureAirportCode": "JFK",
+                                "departureAirportTerminal": "8",
+                                "arrivalAirportCode": "ADD",
+                                "arrivalAirportTerminal": "2",
+                                "operatingAirline": "ET",
+                                "airEquipType": "787",
+                                "marketingAirline": "ET",
+                                "marriageGroup": "O",
+                                "cabin": "Y",
+                                "meal": "DL",
+                                "fareCode": "HLESUS",
+                                "recheckBaggage": false
+                            },
+                            {
+                                "segmentId": 2,
+                                "departureTime": "2022-01-11 23:15",
+                                "arrivalTime": "2022-01-12 01:20",
+                                "stop": 0,
+                                "stops": null,
+                                "flightNumber": "308",
+                                "bookingClass": "H",
+                                "duration": 125,
+                                "departureAirportCode": "ADD",
+                                "departureAirportTerminal": "2",
+                                "arrivalAirportCode": "NBO",
+                                "arrivalAirportTerminal": "1C",
+                                "operatingAirline": "ET",
+                                "airEquipType": "738",
+                                "marketingAirline": "ET",
+                                "marriageGroup": "I",
+                                "cabin": "Y",
+                                "meal": "D",
+                                "fareCode": "HLESUS",
+                                "recheckBaggage": false
+                            }
+                        ],
+                        "duration": 1265
+                    }
+                ],
+                "tickets": [
+                    {
+                        "numRef": "1.1",
+                        "firstName": "PAULA ANNE",
+                        "lastName": "ALVAREZ",
+                        "paxType": "ADT",
+                        "number": "123456789"
+                    },
+                    {
+                        "numRef": "2.1",
+                        "firstName": "ANNE",
+                        "lastName": "ALVAREZ",
+                        "paxType": "ADT",
+                        "number": "987654321"
+                    }
+                ],
+                "passengers": {
+                    "ADT": {
+                        "codeAs": "JCB",
+                        "cnt": 1,
+                        "baseFare": 32.12,
+                        "pubBaseFare": 32.12,
+                        "baseTax": 300,
+                        "markup": 0,
+                        "comm": 0,
+                        "price": 332.12,
+                        "tax": 300,
+                        "oBaseFare": {
+                            "amount": 32.120003,
+                            "currency": "USD"
+                        },
+                        "oBaseTax": {
+                            "amount": 300,
+                            "currency": "USD"
+                        },
+                        "oExchangeFareDiff": {
+                            "amount": 8,
+                            "currency": "USD"
+                        },
+                        "oExchangeTaxDiff": {
+                            "amount": 24.12,
+                            "currency": "USD"
+                        }
+                    }
+                },
+                "validatingCarrier": "AA",
+                "gds": "S",
+                "pcc": "G9MJ",
+                "cons": "GTT",
+                "fareType": "SR",
+                "cabin": "Y",
+                "currency": "USD",
+                "currencies": [
+                    "USD"
+                ],
+                "currencyRates": {
+                    "USDUSD": {
+                        "from": "USD",
+                        "to": "USD",
+                        "rate": 1
+                    }
+                },
+                "keys": {},
+                "meta": {}
+            },
+            "billing": {
+                  "first_name": "John",
+                  "last_name": "Doe",
+                  "middle_name": "",
+                  "address_line1": "1013 Weda Cir",
+                  "address_line2": "",
+                  "country_id": "US",
+                  "country" : "United States",
+                  "city": "Mayfield",
+                  "state": "KY",
+                  "zip": "99999",
+                  "company_name": "",
+                  "contact_phone": "+19074861000",
+                  "contact_email": "test@test.com",
+                  "contact_name": "Test Name"
+            },
+            "payment_request": {
+                  "method_key": "card",
+                  "currency": "USD",
+                  "method_data": {
+                      "card": {
+                          "number": "4111555577778888",
+                          "holder_name": "Test test",
+                          "expiration_month": 10,
+                          "expiration_year": 23,
+                          "cvv": "123"
+                      },
+                      "stripe": {
+                           "token_source": "tok_ddsadas3423sdfdad"
+                      }
+                  },
+                  "amount": 112.25
+            }
+        }
      *
      * @apiSuccessExample {json} Success-Response:
      * HTTP/1.1 200 OK
@@ -384,12 +389,12 @@ class FlightQuoteExchangeController extends BaseController
      *        "status": 200,
      *        "message": "OK",
      *        "data": {
-     * "resultMessage": "Processing was successful",
-     * "originQuoteGid" : "a1275b33cda3bbcbeea2d684475a7e8a",
-     * "changeQuoteGid" : "5c63db4e9d4d24f480088fd5e194e4f5",
-     * "productQuoteChangeGid" : "ee61d0abb62d96879e2c29ddde403650",
-     * "caseGid" : "e7dce13b4e6a5f3ccc2cec9c21fa3255"
-     * },
+     *              "resultMessage": "Processing was successful",
+     *              "originQuoteGid" : "a1275b33cda3bbcbeea2d684475a7e8a",
+     *              "changeQuoteGid" : "5c63db4e9d4d24f480088fd5e194e4f5",
+     *              "productQuoteChangeGid" : "ee61d0abb62d96879e2c29ddde403650",
+     *              "caseGid" : "e7dce13b4e6a5f3ccc2cec9c21fa3255"
+     *         },
      *        "code": "13200",
      *        "technical": {
      *           ...
@@ -728,7 +733,7 @@ class FlightQuoteExchangeController extends BaseController
      * @apiParam {object}                       [payment_request]                                   Payment request
      * @apiParam {number}                       payment_request.amount                              Customer must pay for initiate refund process
      * @apiParam {string{3}}                    payment_request.currency                            Currency code
-     * @apiParam {string{50}}                   payment_request.method_key                          Method key (for example "card")
+     * @apiParam {string = "card", "stripe"} payment_request.method_key                          Method key (for example "card")
      * @apiParam {object}                       payment_request.method_data                         Method data
      * @apiParam {object}                       payment_request.method_data.card                    Card (for credit card)
      * @apiParam {string{..20}}                 payment_request.method_data.card.number             Number
@@ -736,42 +741,47 @@ class FlightQuoteExchangeController extends BaseController
      * @apiParam {int}                          payment_request.method_data.card.expiration_month   Month
      * @apiParam {int}                          payment_request.method_data.card.expiration_year    Year
      * @apiParam {string{..4}}                  payment_request.method_data.card.cvv                CVV
+     * @apiParam {object}                       payment_request.method_data.stripe                  Stripe (for credit stripe)
+     * @apiParam {string}                       payment_request.method_data.stripe.token_source            Token Source
      *
      * @apiParamExample {json} Request-Example:
-     * {
-     * "booking_id":"XXXYYYZ",
-     * "quote_gid": "2f2887a061f8069f7ada8af9e062f0f4",
-     * "billing": {
-     * "first_name": "John",
-     * "last_name": "Doe",
-     * "middle_name": "",
-     * "address_line1": "1013 Weda Cir",
-     * "address_line2": "",
-     * "country_id": "US",
-     * "country" : "United States",
-     * "city": "Mayfield",
-     * "state": "KY",
-     * "zip": "99999",
-     * "company_name": "",
-     * "contact_phone": "+19074861000",
-     * "contact_email": "test@test.com",
-     * "contact_name": "Test Name"
-     * },
-     * "payment_request": {
-     * "method_key": "card",
-     * "currency": "USD",
-     * "method_data": {
-     * "card": {
-     * "number": "4111555577778888",
-     * "holder_name": "Test test",
-     * "expiration_month": 10,
-     * "expiration_year": 23,
-     * "cvv": "123"
-     * }
-     * },
-     * "amount": 112.25
-     * }
-     * }
+         {
+            "booking_id":"XXXYYYZ",
+            "quote_gid": "2f2887a061f8069f7ada8af9e062f0f4",
+            "billing": {
+                  "first_name": "John",
+                  "last_name": "Doe",
+                  "middle_name": "",
+                  "address_line1": "1013 Weda Cir",
+                  "address_line2": "",
+                  "country_id": "US",
+                  "country" : "United States",
+                  "city": "Mayfield",
+                  "state": "KY",
+                  "zip": "99999",
+                  "company_name": "",
+                  "contact_phone": "+19074861000",
+                  "contact_email": "test@test.com",
+                  "contact_name": "Test Name"
+            },
+            "payment_request": {
+                  "method_key": "card",
+                  "currency": "USD",
+                  "method_data": {
+                      "card": {
+                          "number": "4111555577778888",
+                          "holder_name": "Test test",
+                          "expiration_month": 10,
+                          "expiration_year": 23,
+                          "cvv": "123"
+                      },
+                      "stripe": {
+                          "token_source": "tok_ddsadas3423sdfdad"
+                      }
+                  },
+                  "amount": 112.25
+            }
+        }
      *
      * @apiSuccessExample {json} Success-Response:
      * HTTP/1.1 200 OK
@@ -779,12 +789,12 @@ class FlightQuoteExchangeController extends BaseController
      *        "status": 200,
      *        "message": "OK",
      *        "data": {
-     * "resultMessage": "Processing was successful",
-     * "originQuoteGid" : "a1275b33cda3bbcbeea2d684475a7e8a",
-     * "changeQuoteGid" : "5c63db4e9d4d24f480088fd5e194e4f5",
-     * "productQuoteChangeGid" : "ee61d0abb62d96879e2c29ddde403650",
-     * "caseGid" : "e7dce13b4e6a5f3ccc2cec9c21fa3255"
-     * },
+     *          "resultMessage": "Processing was successful",
+     *          "originQuoteGid" : "a1275b33cda3bbcbeea2d684475a7e8a",
+     *          "changeQuoteGid" : "5c63db4e9d4d24f480088fd5e194e4f5",
+     *          "productQuoteChangeGid" : "ee61d0abb62d96879e2c29ddde403650",
+     *          "caseGid" : "e7dce13b4e6a5f3ccc2cec9c21fa3255"
+     *        },
      *        "code": "13200",
      *        "technical": {
      *           ...

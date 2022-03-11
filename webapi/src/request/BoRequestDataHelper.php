@@ -8,6 +8,8 @@ use modules\flight\src\useCases\api\voluntaryRefundConfirm\VoluntaryRefundConfir
 use modules\flight\src\useCases\api\voluntaryRefundCreate\VoluntaryRefundCreateForm;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use src\services\CurrencyHelper;
+use webapi\src\forms\billing\BillingInfoForm;
+use webapi\src\forms\payment\PaymentRequestForm;
 
 class BoRequestDataHelper
 {
@@ -29,30 +31,9 @@ class BoRequestDataHelper
                 'refundable' => $ticket->refundable
             ];
         }
-        if ($form->billingInfoForm) {
-            $data['billing'] = [
-                'address' => $form->billingInfoForm->address_line1,
-                'countryCode' => $form->billingInfoForm->country_id,
-                'country' => $form->billingInfoForm->country,
-                'city' => $form->billingInfoForm->city,
-                'state' => $form->billingInfoForm->state,
-                'zip' => $form->billingInfoForm->zip,
-                'phone' => $form->billingInfoForm->contact_phone,
-                'email' => $form->billingInfoForm->contact_email
-            ];
-        }
+        $data['billing'] = BoRequestDataHelper::fillBillingData($form->billingInfoForm);
+        $data['payment'] = BoRequestDataHelper::fillPaymentData($form->paymentRequestForm);
         if ($form->paymentRequestForm) {
-            if ($form->paymentRequestForm->creditCardForm) {
-                $data['payment'] = [
-                    'type' => mb_strtoupper($form->paymentRequestForm->method_key),
-                    'card' => [
-                        'holderName' => $form->paymentRequestForm->creditCardForm->holder_name,
-                        'number' => $form->paymentRequestForm->creditCardForm->number,
-                        'expirationDate' => $form->paymentRequestForm->creditCardForm->expiration_month . '/' . $form->paymentRequestForm->creditCardForm->expiration_year,
-                        'cvv' => $form->paymentRequestForm->creditCardForm->cvv
-                    ]
-                ];
-            }
             $data['refund']['refundCost'] = $form->paymentRequestForm->amount;
         }
         return $data;
@@ -77,30 +58,9 @@ class BoRequestDataHelper
                 'refundable' => $productQuoteObjectRefund->pqor_client_refund_amount
             ];
         }
-        if ($form->billingInfoForm) {
-            $data['billing'] = [
-                'address' => $form->billingInfoForm->address_line1,
-                'countryCode' => $form->billingInfoForm->country_id,
-                'country' => $form->billingInfoForm->country,
-                'city' => $form->billingInfoForm->city,
-                'state' => $form->billingInfoForm->state,
-                'zip' => $form->billingInfoForm->zip,
-                'phone' => $form->billingInfoForm->contact_phone,
-                'email' => $form->billingInfoForm->contact_email
-            ];
-        }
+        $data['billing'] = BoRequestDataHelper::fillBillingData($form->billingInfoForm);
+        $data['payment'] = BoRequestDataHelper::fillPaymentData($form->paymentRequestForm);
         if ($form->paymentRequestForm) {
-            if ($form->paymentRequestForm->creditCardForm) {
-                $data['payment'] = [
-                    'type' => mb_strtoupper($form->paymentRequestForm->method_key),
-                    'card' => [
-                        'holderName' => $form->paymentRequestForm->creditCardForm->holder_name,
-                        'number' => $form->paymentRequestForm->creditCardForm->number,
-                        'expirationDate' => $form->paymentRequestForm->creditCardForm->expiration_month . '/' . $form->paymentRequestForm->creditCardForm->expiration_year,
-                        'cvv' => $form->paymentRequestForm->creditCardForm->cvv
-                    ]
-                ];
-            }
             $data['refund']['refundCost'] = $form->paymentRequestForm->amount;
         }
         return $data;
@@ -126,5 +86,53 @@ class BoRequestDataHelper
             }
         }
         return $data;
+    }
+
+    public static function fillBillingData(?BillingInfoForm $form): ?array
+    {
+        if ($form) {
+            $data = [
+                'address' => $form->address_line1,
+                'countryCode' => $form->country_id,
+                'country' => $form->country,
+                'city' => $form->city,
+                'state' => $form->state,
+                'zip' => $form->zip,
+                'phone' => $form->contact_phone,
+                'email' => $form->contact_email
+            ];
+        }
+        return $data ?? null;
+    }
+
+    /**
+     * @param PaymentRequestForm|null $form
+     * @return array|null
+     */
+    public static function fillPaymentData(?PaymentRequestForm $form): ?array
+    {
+        if ($form) {
+            $data = [
+                'type' => mb_strtoupper($form->method_key),
+            ];
+
+            switch ($form->method_key) {
+                case PaymentRequestForm::TYPE_METHOD_STRIPE:
+                    $data['merchant'] = [
+                        'tokenSource' => $form->stripeForm->token_source,
+                    ];
+                    break;
+                default:
+                    $data['card'] = [
+                        'holderName' => $form->creditCardForm->holder_name,
+                        'number' => $form->creditCardForm->number,
+                        'expirationDate' => $form->creditCardForm->expiration_month . '/' . $form->creditCardForm->expiration_year,
+                        'cvv' => $form->creditCardForm->cvv,
+                    ];
+                    break;
+            }
+        }
+
+        return $data ?? null;
     }
 }

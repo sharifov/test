@@ -553,6 +553,47 @@ class QuoteController extends FController
         return $result;
     }
 
+    public function actionAssignQuote(): Response
+    {
+        $key = Yii::$app->request->post('key', 0);
+        $leadId = Yii::$app->request->post('leadId', 0);
+        $projectProviderId = null;
+        $response = [
+            'error' => true,
+            'message' => ''
+        ];
+        try {
+            $searchQuoteRequest = SearchService::getOnlineQuoteByKey($key);
+
+            if (empty($searchQuoteRequest['data'])) {
+                throw new \RuntimeException('Quote not found by key: ' . $key);
+            }
+            $lead = Lead::findOne($leadId);
+            $preparedQuoteData = QuoteHelper::formatQuoteData(['results' => [$searchQuoteRequest['data']]]);
+            $addQuoteService = Yii::createObject(AddQuoteService::class);
+            $quoteUid = $addQuoteService->createByData($preparedQuoteData['results'][0], $lead, $projectProviderId);
+
+            Notifications::pub(
+                ['lead-' . $leadId],
+                'reloadFlightDefaultQuotes',
+                ['data' => []]
+            );
+
+
+            $response['error'] = false;
+            $response['message'] = 'Add quote from Smart Search completed successfully';
+        } catch (\RuntimeException | \DomainException $e) {
+            $response['message'] = $e->getMessage();
+            if ($e->getCode() !== self::RUNTIME_ERROR_AUTO_ADD_QUOTES_ACTION_IN_PROGRESS) {
+            }
+        } catch (\Throwable $e) {
+            Yii::error(AppHelper::throwableLog($e), 'QuoteController::actionAssignQuote::Throwable');
+            $response['message'] = 'Internal Server Error';
+        }
+
+        return $this->asJson($response);
+    }
+
     public function actionAutoAddQuotes(): Response
     {
         $leadId = Yii::$app->request->post('leadId', 0);

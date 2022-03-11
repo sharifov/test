@@ -75,7 +75,7 @@ if ($quote->isClientCurrencyDefault()) {
                     <?=
                     Html::a('<i class="fa fa-edit yellow"></i>' . number_format($price['extra_mark_up'] / $price['tickets'], 2), '#', [
                         'class' => 'showModalButton',
-                        'title' =>  'Edit extra mark-up, QUID:' . $quote->uid,
+                        'title' =>  'Edit extra markup, QUID:' . $quote->uid,
                         'data-modal_id' => 'client-manage-info',
                         'data-content-url' => Url::to([
                             'lead-view/ajax-edit-lead-quote-extra-mark-up-modal-content',

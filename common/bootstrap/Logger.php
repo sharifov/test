@@ -15,6 +15,7 @@ use common\models\Setting;
 use src\entities\cases\Cases;
 use src\logger\db\GlobalLogInterface;
 use src\logger\db\LogDTO;
+use src\model\leadPoorProcessingData\entity\LeadPoorProcessingData;
 use src\services\log\GlobalEntityAttributeFormatServiceService;
 use yii\base\BootstrapInterface;
 use yii\base\Event;
@@ -34,6 +35,7 @@ class Logger implements BootstrapInterface
         QuotePrice::class,
         Setting::class,
         Cases::class,
+        LeadPoorProcessingData::class,
     ];
 
     /**

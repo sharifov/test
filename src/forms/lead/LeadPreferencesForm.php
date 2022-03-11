@@ -88,11 +88,12 @@ class LeadPreferencesForm extends Model
             ['delayedCharge', 'default', 'value' => false],
             [['numberStops'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
             [['marketPrice', 'clientsBudget'], 'filter', 'filter' => 'floatval', 'skipOnEmpty' => true],
+
             [['currency'], 'required', 'when' => function (): bool {
                 return $this->canManageCurrency;
             }],
             [['currency'], 'string', 'max' => 3],
-            ['currency', 'default', 'value' => null],
+            [['currency'], 'default', 'value' => Currency::getDefaultCurrencyCode()],
             [['currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['currency' => 'cur_code']],
 
             [['clientLang'], 'filter', 'filter' => static function ($value) {

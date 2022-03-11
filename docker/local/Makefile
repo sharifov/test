@@ -30,7 +30,7 @@ lint:
 	docker-compose run --rm console composer lint
 
 apidoc-gen:
-	docker-compose run --rm console composer apidoc-gen
+	docker-compose run --rm console npm run apidoc-gen
 
 assets-compressor:
 	docker-compose run --rm console composer assets-compressor
@@ -54,5 +54,5 @@ init-config:
 	&& chmod +x ${APP_PATH}/docker-pre-commit.sh
 
 install: build init-config
-	docker run --rm -v ${APP_PATH}:${APP_PATH} -v ${SSH_DIR}:/home/${USER_NAME}/.ssh -v ${COMPOSER_CACHE_DIR}:/home/${USER_NAME}/.composer/cache -w=${APP_PATH} --user ${USER_ID}:${USER_GID} ${COMPOSE_PROJECT_NAME}_console composer install --no-plugins
+	docker run --rm -v ${APP_PATH}:${APP_PATH} -v ${SSH_DIR}:/home/${USER_NAME}/.ssh -v ${COMPOSER_CACHE_DIR}:/home/${USER_NAME}/.composer/cache -w=${APP_PATH} --user ${USER_ID}:${USER_GID} ${COMPOSE_PROJECT_NAME}_console composer install
 	docker run --rm -v ${APP_PATH}:${APP_PATH} -w=${APP_PATH} --user ${USER_ID}:${USER_GID} ${COMPOSE_PROJECT_NAME}_console npm install
