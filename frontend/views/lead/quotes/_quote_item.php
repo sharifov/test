@@ -341,7 +341,7 @@ if ($model->isDeclined()) {
                 </div>
                 <div class="quote__additional-info">
                     <div class="quote__stops">
-                        <span class="quote__stop-quantity">
+                        <span class="quote__stop-quantity <?= $stopCnt ? 'text-warning': 'text-success'?>">
                             <?= \Yii::t('search', '{n, plural, =0{Nonstop} one{# stop} other{# stops}}', ['n' => $stopCnt]);?>
                         </span>
                     </div>
