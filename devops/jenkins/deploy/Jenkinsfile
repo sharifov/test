@@ -3,6 +3,7 @@ pipeline {
   options {
     ansiColor('xterm')
     disableConcurrentBuilds()
+    withAWS(credentials:'AWS_PROD_INFRA')
   }
   stages {
     stage('Build') {
