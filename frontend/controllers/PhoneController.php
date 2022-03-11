@@ -1120,7 +1120,7 @@ class PhoneController extends FController
 
             $result = Yii::$app->communication->hangUp($call->c_call_sid);
 
-            if (isset($result['result']['status']) && !$call->isEqualTwStatus((string)$result['result']['status'])) {
+            if (isset($result['result']['status']) && (!$call->isEqualTwStatus((string)$result['result']['status']) || $call->isTwFinishStatus())) {
                 $this->processCall($call, (string)$result['result']['status']);
             }
         } catch (\Throwable $e) {
@@ -1150,7 +1150,7 @@ class PhoneController extends FController
             if (!$call->c_conference_id) {
                 return;
             }
-            $this->processConference($call->c_conference_id);
+            $this->processConference($call->c_conference_id, $call->c_created_user_id);
         } catch (\Throwable $e) {
             Yii::error([
                 'error' => $e->getMessage(),
@@ -1159,7 +1159,7 @@ class PhoneController extends FController
         }
     }
 
-    private function processConference(int $conferenceId): void
+    private function processConference(int $conferenceId, int $userId): void
     {
         $conference = Conference::findOne($conferenceId);
         if (!$conference) {
@@ -1169,9 +1169,14 @@ class PhoneController extends FController
             ], 'PhoneController:AjaxHangup:processConference');
             return;
         }
-        if ($conference->isEnd()) {
+
+        if (!$conference->isCreator($userId)) {
             return;
         }
+
+//        if ($conference->isEnd()) {
+//            return;
+//        }
 
         $conferenceInfo = $this->getConferenceInfo($conference->cf_sid);
 
@@ -1193,13 +1198,15 @@ class PhoneController extends FController
 
     private function completeConference(Conference $conference, string $endDt): void
     {
-        $conference->end($endDt);
-        if (!$conference->save()) {
-            \Yii::error([
-                'errors' => $conference->getErrors(),
-                'model' => $conference->getAttributes(),
-            ], 'PhoneController:processConference:Conference:Save');
-            return;
+        if (!$conference->isEnd()) {
+            $conference->end($endDt);
+            if (!$conference->save()) {
+                \Yii::error([
+                    'errors' => $conference->getErrors(),
+                    'model' => $conference->getAttributes(),
+                ], 'PhoneController:processConference:Conference:Save');
+                return;
+            }
         }
 
         $this->completeConferenceParticipants($conference);
@@ -1224,11 +1231,11 @@ class PhoneController extends FController
                     ], 'PhoneController:processConference:Participant:Save');
                 }
             }
-            $call = Call::find()->andWhere(['c_call_sid' => $participant->cp_call_sid])->one();
-            if ($call && !$call->isTwFinishStatus()) {
+            $call = Call::find()->andWhere(['c_call_sid' => $participant->cp_call_sid, 'c_conference_id' => $conference->cf_id])->one();
+            if ($call && (!$call->isTwFinishStatus() || !$call->isFinishStatus())) {
                 try {
                     $result = $this->getCallInfo($call->c_call_sid);
-                    if (isset($result['status']) && !$call->isEqualTwStatus($result['status'])) {
+                    if (isset($result['status'])) {
                         $call->c_call_status = $result['status'];
                         $call->setStatusByTwilioStatus($call->c_call_status);
                         if (!$call->save()) {
