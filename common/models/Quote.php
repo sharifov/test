@@ -210,6 +210,8 @@ class Quote extends \yii\db\ActiveRecord
 
     private ?float $agentProcessingFee = null;
 
+    public const EXCLUDE_AIRLINE_LOGO = ['6X'];
+
     /**
      * Quote constructor.
      * @param array $config
@@ -2874,5 +2876,20 @@ class Quote extends \yii\db\ActiveRecord
     public function isClientCurrencyDefault(): bool
     {
         return $this->q_client_currency === Currency::getDefaultCurrencyCode();
+    }
+
+    /**
+     * @param string|null $code
+     * @param int $size
+     * @return string
+     */
+    public static function getAirlineLogo(?string $code = null, int $size = 70): string
+    {
+        $airlineLogo = '';
+        if ($code && !in_array($code, self::EXCLUDE_AIRLINE_LOGO)) {
+            $airlineLogo = '//www.gstatic.com/flights/airline_logos/' . $size . 'px/'
+                . $code . '.png';
+        }
+        return $airlineLogo;
     }
 }
