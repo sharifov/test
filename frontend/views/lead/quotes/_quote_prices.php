@@ -2,12 +2,13 @@
 
 /**
  * @var $this \yii\web\View
- * @var $quote \common\models\Quote
+ * @var $quote Quote
  * @var $priceData array
  */
 
 use common\models\Currency;
 use common\models\query\CurrencyQuery;
+use common\models\Quote;
 use src\auth\Auth;
 use src\helpers\app\AppHelper;
 use src\model\quote\abac\dto\QuoteFlightExtraMarkupAbacDto;
@@ -45,7 +46,7 @@ try {
 
 <table class="table table-hover table-bordered" id="quote-prices-<?= $quote->id?>">
     <thead>
-        <tr class="text-center table-primary">
+        <tr class="text-center table-<?= $quote->isDeclined() ? 'default' : 'primary' ?>">
             <th title="Pax type" data-toggle="tooltip">Pax type</th>
             <th title="Quantity" data-toggle="tooltip">Quan</th>
             <th title="Net price" data-toggle="tooltip">Net Price, <?php echo $currencySymbol ?></th>
@@ -72,7 +73,7 @@ try {
                     <?=
                     Html::a(number_format($price['extra_mark_up'] / $price['tickets'], 2), '#', [
                         'class' => 'showModalButton',
-                        'title' =>  'Edit extra markup, QUID:' . $quote->uid,
+                        'title' =>  'Edit extra markup, QUID: ' . $quote->uid,
                         'data-modal_id' => 'client-manage-info',
                         'data-content-url' => Url::to([
                             'lead-view/ajax-edit-lead-quote-extra-mark-up-modal-content',
@@ -80,8 +81,7 @@ try {
                             'paxCode' =>  strtolower($paxCode)
                         ])
                     ])
-                    ?>
-                    </u>
+                    ?></u>
                     <?= Html::encode($currency)?>
                 <?php else :?>
                     <?= number_format($price['extra_mark_up'] / $price['tickets'], 2)?>

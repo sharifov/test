@@ -41,6 +41,13 @@ if ($model->isClientCurrencyDefault()) {
     }
 }
 
+$bgColor = '';
+if ($model->isDeclined()) {
+    $bgColor =  '#EEEEEE';
+} elseif ($model->isAlternative()) {
+    $bgColor =  '#fdffe5';
+}
+
 ?>
 <div class="quote quote--highlight" id="quote-<?=$model->uid?>">
     <?php $tripsInfo = []?>
@@ -55,12 +62,11 @@ if ($model->isClientCurrencyDefault()) {
                     $firstSegment->qs_departure_airport_code . ' → ' . $lastSegment->qs_arrival_airport_code;
         ?>
     <?php endforeach;?>
-    <div class="quote__heading" <?=$model->isAlternative() ? 'style="background-color: #fdffe5;"' : ''?>>
+    <div class="quote__heading" style="background-color: <?=$bgColor?>">
         <div class="quote__heading-left">
-            <span class="quote__id">
+            <span>
                 <span class="badge badge-white"><?= ($index + 1) ?></span>
             </span>
-
             <?php if ($model->isOriginal()) : ?>
                 <span class="label label-primary"><?= Quote::getTypeName($model->type_id) ?></span>
             <?php elseif (($leadForm->mode !== $leadForm::VIEW_MODE || $isManager) && in_array($model->status, [Quote::STATUS_CREATED, Quote::STATUS_SENT, Quote::STATUS_OPENED])) : ?>
@@ -76,33 +82,33 @@ if ($model->isClientCurrencyDefault()) {
                 ['class' => 'fa fa-font', 'title' => 'Alternative quote']
             ) : ''?>
 
-            <span class="quote__id" title="Quote ID: <?=$model->id ?>, UID: <?= Html::decode($model->uid) ?>" data-toggle="tooltip">
+            <span title="Quote ID: <?=$model->id ?>, UID: <?= Html::decode($model->uid) ?>" data-toggle="tooltip">
                 <strong><?= Html::decode($model->uid) ?></strong>
             </span>
 
             <?= $model->getStatusSpan()?>
 
-            <span class="quote__id" title="Created Date Time">
+            <span title="Created Date Time: <?= Yii::$app->formatter->asDatetime(strtotime($model->created)) ?>" data-toggle="tooltip">
                 <?php if ($model->created) : ?>
-                    <small><i class="fa fa-calendar"></i> <?= Yii::$app->formatter->asDatetime(strtotime($model->created)) ?></small>
+                    <small><i class="fa fa-clock-o"></i>
+                        <?= Yii::$app->formatter->asRelativeTime(strtotime($model->created)) ?>
+                    </small>
                 <?php endif; ?>
             </span>
 
-
-            <?php
-
-            if ($ticketSegments = $model->getTicketSegments()) :?>
-                <span title="Separate Ticket">
-                    <i class="fa fa-ticket warning"></i> (<?=count($ticketSegments)?>)
-                </span>
-            <?php endif; ?>
-
         </div>
         <div class="quote__heading-right">
-            <span class="label label-info" style="font-size: 15px">
-                <b><?= number_format($priceData['total']['selling'], 2)?></b>
-                <?= Html::encode($currency)?>
-            </span>
+            <?php if ($model->isDeclined()) : ?>
+                <span>
+                    <?= number_format($priceData['total']['selling'], 2)?>
+                    <?= Html::encode($currency)?>
+                </span>
+            <?php else : ?>
+                <span class="label label-info" style="font-size: 15px">
+                    <b><?= number_format($priceData['total']['selling'], 2)?></b>
+                    <?= Html::encode($currency)?>
+                </span>
+            <?php endif; ?>
             <div class="dropdown"  title="Menu">
                     <button type="button" class="btn btn-light dropdown-toggle" data-toggle="dropdown">
                         <span class="fas fa-list-ul"></span>
@@ -186,12 +192,29 @@ if ($model->isClientCurrencyDefault()) {
                             <?= Html::encode($airlineName)?>
                         <strong><?= Html::encode($model->main_airline_code)?></strong>
                     </span>
-                        &nbsp; | &nbsp;
+
+
+                    &nbsp; | &nbsp;
+                    <span title="Created Date Time: ">
+                        <?php if ($model->created) : ?>
+                            <i class="fa fa-calendar"></i>
+                                <?= Yii::$app->formatter->asDatetime(strtotime($model->created)) ?>
+                        <?php endif; ?>
+                    </span>
+
+                    &nbsp; | &nbsp;
                     <span title="<?= $model->created_by_seller ? 'Agent' : 'Expert'?>: <?= Html::encode($model->employee_name)?>">
                         <?php echo Html::encode($model->created_by_seller) ? '<i class="fa fa-user"></i>' :
                             '<i class="fa fa-user-secret text-warning"></i>'; ?>
                         <strong><?= Html::encode($model->employee_name)?></strong>
                     </span>
+
+                    <?php if ($ticketSegments = $model->getTicketSegments()) :?>
+                        &nbsp; | &nbsp;
+                        <span title="Separate Ticket">
+                            <i class="fa fa-ticket warning"></i> Separate Ticket (<?=count($ticketSegments)?>)
+                        </span>
+                    <?php endif; ?>
 
                     <?php /*
                     &nbsp; | &nbsp;
@@ -278,10 +301,10 @@ if ($model->isClientCurrencyDefault()) {
                     <div class="quote__itinerary-col quote__itinerary-col--from">
                         <div class="quote__datetime">
                             <span class="quote__time">
-                                <?= Yii::$app->formatter_search->asDatetime(strtotime($firstSegment->qs_departure_time), 'h:mm a')?>
+                                <?= Yii::$app->formatter_search->asDatetime(strtotime($firstSegment->qs_departure_time), 'h:mm a')?>,
                             </span>
                             <span class="quote__date">
-                                <?= Yii::$app->formatter_search->asDatetime(strtotime($firstSegment->qs_departure_time), 'MMM d')?>
+                                <?= Yii::$app->formatter_search->asDatetime(strtotime($firstSegment->qs_departure_time), 'd MMM')?>
                             </span>
                         </div>
                         <div class="quote__location">
@@ -298,10 +321,10 @@ if ($model->isClientCurrencyDefault()) {
                     <div class="quote__itinerary-col quote__itinerary-col--to">
                         <div class="quote__datetime">
                             <span class="quote__time">
-                                <?= Yii::$app->formatter_search->asDatetime(strtotime($lastSegment->qs_arrival_time), 'h:mm a')?>
+                                <?= Yii::$app->formatter_search->asDatetime(strtotime($lastSegment->qs_arrival_time), 'h:mm a')?>,
                             </span>
                             <span class="quote__date">
-                                <?= Yii::$app->formatter_search->asDatetime(strtotime($lastSegment->qs_arrival_time), 'MMM d')?>
+                                <?= Yii::$app->formatter_search->asDatetime(strtotime($lastSegment->qs_arrival_time), 'd MMM')?>
                             </span>
                         </div>
                         <div class="quote__location">
@@ -334,7 +357,7 @@ if ($model->isClientCurrencyDefault()) {
             </div>
         </div>
         <div class="row">
-            <div class="col-md-7">
+            <div class="col-md-6">
                 <div class="quote__badges text-left">
 
                     <?php echo QuoteHelper::formattedFreeBaggage($model->getMetaInfo()) ?>
@@ -364,54 +387,44 @@ if ($model->isClientCurrencyDefault()) {
                     <?php echo QuoteHelper::formattedProviderProject($model) ?>
                 </div>
             </div>
-            <div class="col-md-5">
+            <div class="col-md-6">
                 <table class="table table-bordered">
                     <tr>
-                        <th>
+                        <td>
+
                             <?php Pjax::begin(['id' => 'pjax-quote_estimation_profit-' . $model->id,
                                 'enablePushState' => false, 'enableReplaceState' => false]); ?>
-
-                                <?php /*$priceData = $model->getPricesData();*/ ?>
-
-                                <?php if ($model->isApplied() && $model->lead->final_profit !== null) :?>
-                                    <a id="quote_profit_<?= $model->id?>" data-toggle="popover" data-html="true" data-trigger="hover"
-                                       data-placement="top" data-container="body" title="Final Profit"
-                                       class="popover-class quote__profit "
-                                       data-content='<?= $model->getEstimationProfitText();?>'>
-                                        <?= '$' . $model->lead->getFinalProfit();?>
-                                        <i class="fas fa-info-circle"></i>
-                                    </a>
-                                <?php else :?>
-                                    <a id="quote_profit_<?= $model->id?>" data-toggle="popover" data-html="true" data-trigger="hover"
-                                       data-placement="top" data-container="body" title="Estimation Profit"
-                                       class="popover-class quote__profit"
-                                       data-content='<?= $model->getEstimationProfitText();?>'>
-                                        <?php if (isset($priceData['total'])) :?>
-                                            <?=number_format($model->getEstimationProfit(), 2);?>$
+                                    <span id="quote_profit_<?= $model->id?>" data-html="true" data-toggle="tooltip"
+                                       title='<?= $model->getEstimationProfitText();?>'>
+                                        <?php if ($model->isApplied() && $model->lead->final_profit !== null) :?>
+                                            Final Profit:
+                                            <?= number_format($model->lead->getFinalProfit(), 2);?> $
+                                        <?php else :?>
+                                            Estimation Profit:
+                                            <?php if (isset($priceData['total'])) :?>
+                                                <?=number_format($model->getEstimationProfit(), 2);?> $
+                                            <?php endif;?>
                                         <?php endif;?>
-                                        <i class="fas fa-info-circle"></i>
-                                    </a>
-                                <?php endif;?>
+                                    </span>
                             <?php Pjax::end(); ?>
-                        </th>
-                        <td>
-                            <?php if ($model->quoteLabel) : ?>
-                                <?php $quoteLabels = '' ?>
-                                <?php foreach ($model->quoteLabel as $quoteLabel) : ?>
-                                    <?php $quoteLabels .= $quoteLabel->getDescription() . '<br />' ?>
-                                <?php endforeach ?>
-                                <a class="popover-class"
-                                   data-toggle="popover"
-                                   data-html="true"
-                                   data-placement="top"
-                                   data-container="body"
-                                   data-trigger="hover"
-                                   title="Quote Label"
-                                   data-content='<?= Html::encode($quoteLabels) ?>'>
-                                    <i class="fa fa-tags"></i> Labels
-                                </a>
-                            <?php endif ?>
                         </td>
+
+                        <?php if ($model->quoteLabel) : ?>
+                        <td>
+                            <span>
+                            <?php $quoteLabelData = [] ?>
+                            <?php foreach ($model->quoteLabel as $quoteLabel) : ?>
+                                <?php $quoteLabelData[] = '<i class="fa fa-tag"></i> ' . $quoteLabel->getDescription(); ?>
+                            <?php endforeach ?>
+
+                            <?php
+                                echo implode(', ', $quoteLabelData);
+                            ?>
+                            </span>
+
+                        </td>
+                        <?php endif ?>
+
                     </tr>
                 </table>
             </div>

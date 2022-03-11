@@ -22,7 +22,7 @@ $leadAbacDto = new LeadAbacDto($lead, Auth::id());
 
 $addAutoQuoteBtn = '';
 if (FlightQuoteGuard::canAutoSelectQuotes(Auth::user(), $lead)) {
-    $addAutoQuoteBtn = Html::a('<i class="fa fa-plus green"></i> Auto Select Quotes', null, ['class' => 'auto_add_quotes_btn', 'data-lead-id' => $lead->id, 'title' => 'Auto-select best options', 'data-toggle' => 'tooltip']);
+    $addAutoQuoteBtn = Html::a('<i class="fa fa-plus green"></i> Auto add Quotes', null, ['class' => 'auto_add_quotes_btn', 'data-lead-id' => $lead->id, 'title' => 'Auto-select best options', 'data-toggle' => 'tooltip']);
     $addAutoQuoteUrl = Url::toRoute('/quote/auto-add-quotes');
     $js = <<<JS
     window.leadQuoteAutoAddAjax = false;
@@ -78,9 +78,12 @@ JS;
 </style>
 
 <?php Pjax::begin(['id' => 'quotes_list', 'timeout' => 10000]); ?>
+<?php
+    $countQuotes = $dataProvider->count;
+?>
 <div class="x_panel">
     <div class="x_title">
-        <h2><i class="fa fa-folder-o"></i> Quotes</h2>
+        <h2><i class="fa fa-folder-o"></i> Flight Quotes <?= $countQuotes ? '<sup>(' . $countQuotes . ')</sup>' : '' ?></h2>
         <ul class="nav navbar-right panel_toolbox">
             <?php if ($leadForm->mode !== $leadForm::VIEW_MODE || $is_manager) : ?>
                 <?php if ($lead->leadFlightSegmentsCount) :?>
@@ -117,7 +120,7 @@ JS;
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
                 <div class="dropdown-menu" role="menu">
                     <?php if ($lead->leadFlightSegmentsCount) :?>
-                        <?=Html::a('<i class="fa fa-search warning"></i> Quick Search', null, ['class' => 'dropdown-item', 'id' => 'quick-search-quotes-btn', 'data-url' => Url::to(['quote/get-online-quotes', 'leadId' => $leadForm->getLead()->id])])?>
+                        <?=Html::a('<i class="fa fa-search info"></i> Quick Search', null, ['class' => 'dropdown-item', 'id' => 'quick-search-quotes-btn', 'data-url' => Url::to(['quote/get-online-quotes', 'leadId' => $leadForm->getLead()->id])])?>
                     <?php endif; ?>
                     <?php if (!$lead->client->isExcluded()) : ?>
                         <?= Html::a('<i class="fa fa-plus-circle success"></i> Add Quote', null, ['class' => 'add-clone-alt-quote dropdown-item', 'data-uid' => 0, 'data-url' => Url::to(['quote/create', 'leadId' => $leadForm->getLead()->id, 'qId' => 0])])?>
