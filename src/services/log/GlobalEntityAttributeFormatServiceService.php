@@ -2,7 +2,9 @@
 
 namespace src\services\log;
 
+use src\helpers\app\AppHelper;
 use src\services\EntityAttributeFormatService;
+use yii\helpers\ArrayHelper;
 
 class GlobalEntityAttributeFormatServiceService extends EntityAttributeFormatService
 {
@@ -34,7 +36,12 @@ class GlobalEntityAttributeFormatServiceService extends EntityAttributeFormatSer
 
             return json_encode($formattedAttr);
         } catch (\Throwable $e) {
-            \Yii::error($e->getMessage() . ' File: ' . $e->getFile() . ' Line: ' . $e->getLine(), 'Console:LoggerController:formAttr:Throwable');
+            $message = ArrayHelper::merge(AppHelper::throwableLog($e), [
+                'modelPath' => $modelPath,
+                'oldAttr' => $oldAttr,
+                'newAttr' => $newAttr,
+            ]);
+            \Yii::error($message, 'Console:LoggerController:formAttr:Throwable');
 
             return null;
         }

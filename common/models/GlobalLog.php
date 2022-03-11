@@ -39,6 +39,7 @@ class GlobalLog extends ActiveRecord
     public const MODEL_QUOTE    = 'common\models\Quote';
     public const MODEL_SETTING  = 'common\models\Setting';
     public const MODEL_CASES  = 'src\entities\cases\Cases';
+    public const MODEL_LPPD  = 'src\model\leadPoorProcessingData\entity\LeadPoorProcessingData';
 
     public const MODEL_LIST         = [
         self::MODEL_CLIENT          => 'Client',
@@ -50,6 +51,7 @@ class GlobalLog extends ActiveRecord
         self::MODEL_QUOTE => 'Quote',
         self::MODEL_SETTING => 'Setting',
         self::MODEL_CASES => 'Cases',
+        self::MODEL_LPPD => 'LeadPoorProcessingData',
     ];
 
     public const APP_CONSOLE    = 'app-console';
@@ -94,7 +96,7 @@ class GlobalLog extends ActiveRecord
             [['gl_app_user_id', 'gl_obj_id', 'gl_action_type'], 'integer'],
             [['gl_old_attr', 'gl_new_attr', 'gl_formatted_attr', 'gl_created_at'], 'safe'],
             [['gl_app_id'], 'string', 'max' => 20],
-            [['gl_model'], 'string', 'max' => 50],
+            [['gl_model'], 'string', 'max' => 100],
         ];
     }
 
@@ -114,8 +116,7 @@ class GlobalLog extends ActiveRecord
             'gl_formatted_attr' => 'Formatted Attr',
             'gl_action_type' => 'Action',
             'gl_created_at' => 'DateTime',
-            'glModel' => 'Model'
-
+            'glModel' => 'Model',
         ];
     }
 
