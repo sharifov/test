@@ -1555,6 +1555,11 @@ class Call extends \yii\db\ActiveRecord
         return $this->isCompletedTw() || $this->isBusyTw() || $this->isNoAnswerTw() || $this->isFailedTw() || $this->isCanceledTw();
     }
 
+    public function isFinishStatus(): bool
+    {
+        return $this->isStatusCompleted() || $this->isStatusBusy() || $this->isStatusNoAnswer() || $this->isStatusFailed() || $this->isStatusCanceled() || $this->isStatusDeclined();
+    }
+
     /**
      * @param Call $call
      * @param int $user_id
@@ -2373,6 +2378,14 @@ class Call extends \yii\db\ActiveRecord
     public function isStatusCanceled(): bool
     {
         return $this->c_status_id === self::STATUS_CANCELED;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isStatusDeclined(): bool
+    {
+        return $this->c_status_id === self::STATUS_DECLINED;
     }
 
     /**

@@ -26,6 +26,10 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'c_status_id')->dropDownList(\common\models\Call::STATUS_LIST, ['prompt' => 'Select status']) ?>
 
+    <?= $form->field($model, 'c_conference_id')->textInput(['maxlength' => true]) ?>
+
+    <?= $form->field($model, 'c_conference_sid')->textInput(['maxlength' => true]) ?>
+
     <?= $form->field($model, 'c_forwarded_from')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'c_caller_name')->textInput(['maxlength' => true]) ?>

@@ -1164,6 +1164,7 @@ class CallController extends FController
 
                 $return = new ReturnToHoldCall();
                 if (!$return->return($call, $userId, $voipDevice)) {
+                    $this->validateCallStatus($call);
                     throw new \DomainException('Return Hold call error');
                 }
 
@@ -1183,6 +1184,48 @@ class CallController extends FController
         }
 
         return $this->asJson($response);
+    }
+
+    private function validateCallStatus(Call $call): void
+    {
+        $result = $this->getCallInfo($call->c_call_sid);
+        if (isset($result['status']) && $result['status'] === Call::TW_STATUS_COMPLETED) {
+            $call->c_call_status = $result['status'];
+            $call->setStatusByTwilioStatus($call->c_call_status);
+            if (!$call->save()) {
+                Yii::error([
+                    'errors' => $call->getErrors(),
+                    'model' => $call->getAttributes(),
+                ], 'CallController:checkCallStatusIsActive:Call:save');
+            }
+        }
+    }
+
+    private function getCallInfo(string $callSid): array
+    {
+        try {
+            $result = \Yii::$app->communication->getCallInfo($callSid);
+            if ($result['error']) {
+                \Yii::error(VarDumper::dumpAsString([
+                    'result' => $result,
+                    'callSid' => $callSid,
+                ]), 'CallController:getCallInfo:Result');
+            } else {
+                if (!empty($result['result'])) {
+                    return $result['result'];
+                }
+                Yii::error([
+                    'message' => 'Not found result',
+                    'callSid' => $callSid,
+                ], 'CallController:getCallInfo:Result');
+            }
+        } catch (\Throwable $e) {
+            \Yii::error(VarDumper::dumpAsString([
+                'error' => AppHelper::throwableFormatter($e),
+                'callSid' => $callSid,
+            ]), 'CallController:getCallInfo:Throwable');
+        }
+        return [];
     }
 
     /**
