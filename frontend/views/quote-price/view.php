@@ -6,6 +6,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model common\models\QuotePrice */
 
+$defaultCurrencyCode = \common\models\Currency::getDefaultCurrencyCode();
 $this->title = 'Price Quote: ' . $model->id . ', Quote UID: "' . ($model->quote ? $model->quote->uid : '-') . '"';
 $this->params['breadcrumbs'][] = ['label' => 'Quote Prices', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
@@ -125,43 +126,83 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="col-md-3">
             <?= DetailView::widget([
                 'model' => $model,
-                'attributes' => [
                     [
                         'attribute' => 'fare',
                         'contentOptions' => ['class' => 'text-right'],
-                        'format' => 'currency'
+                        'value' => static function (\common\models\QuotePrice $model) use ($defaultCurrencyCode) {
+                            if (empty($model->fare)) {
+                                return Yii::$app->formatter->nullDisplay;
+                            }
+                            return $model->fare . ' ' . $defaultCurrencyCode;
+                        },
+                        'format' => 'raw',
                     ],
                     [
                         'attribute' => 'taxes',
                         'contentOptions' => ['class' => 'text-right'],
-                        'format' => 'currency'
+                        'value' => static function (\common\models\QuotePrice $model) use ($defaultCurrencyCode) {
+                            if (empty($model->taxes)) {
+                                return Yii::$app->formatter->nullDisplay;
+                            }
+                            return $model->taxes . ' ' . $defaultCurrencyCode;
+                        },
+                        'format' => 'raw',
                     ],
                     [
                         'attribute' => 'net',
                         'contentOptions' => ['class' => 'text-right'],
-                        'format' => 'currency'
+                        'value' => static function (\common\models\QuotePrice $model) use ($defaultCurrencyCode) {
+                            if (empty($model->net)) {
+                                return Yii::$app->formatter->nullDisplay;
+                            }
+                            return $model->net . ' ' . $defaultCurrencyCode;
+                        },
+                        'format' => 'raw',
                     ],
                     [
                         'attribute' => 'mark_up',
                         'contentOptions' => ['class' => 'text-right'],
-                        'format' => 'currency'
+                        'value' => static function (\common\models\QuotePrice $model) use ($defaultCurrencyCode) {
+                            if (empty($model->mark_up)) {
+                                return Yii::$app->formatter->nullDisplay;
+                            }
+                            return $model->mark_up . ' ' . $defaultCurrencyCode;
+                        },
+                        'format' => 'raw',
                     ],
                     [
                         'attribute' => 'extra_mark_up',
                         'contentOptions' => ['class' => 'text-right'],
-                        'format' => 'currency'
+                        'value' => static function (\common\models\QuotePrice $model) use ($defaultCurrencyCode) {
+                            if (empty($model->extra_mark_up)) {
+                                return Yii::$app->formatter->nullDisplay;
+                            }
+                            return $model->extra_mark_up . ' ' . $defaultCurrencyCode;
+                        },
+                        'format' => 'raw',
                     ],
                     [
                         'attribute' => 'service_fee',
                         'contentOptions' => ['class' => 'text-right'],
-                        'format' => 'currency'
+                        'value' => static function (\common\models\QuotePrice $model) use ($defaultCurrencyCode) {
+                            if (empty($model->service_fee)) {
+                                return Yii::$app->formatter->nullDisplay;
+                            }
+                            return $model->service_fee . ' ' . $defaultCurrencyCode;
+                        },
+                        'format' => 'raw',
                     ],
                     [
                         'attribute' => 'selling',
                         'contentOptions' => ['class' => 'text-right'],
-                        'format' => 'currency'
+                        'value' => static function (\common\models\QuotePrice $model) use ($defaultCurrencyCode) {
+                            if (empty($model->selling)) {
+                                return Yii::$app->formatter->nullDisplay;
+                            }
+                            return $model->selling . ' ' . $defaultCurrencyCode;
+                        },
+                        'format' => 'raw',
                     ],
-                ],
             ]) ?>
         </div>
         <div class="col-md-3">
