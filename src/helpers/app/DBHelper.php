@@ -11,6 +11,7 @@ namespace src\helpers\app;
 
 use DateTime;
 use RuntimeException;
+use Yii;
 use yii\db\Connection;
 use yii\db\Exception;
 
@@ -62,5 +63,44 @@ class DBHelper
             date_format($partToDateTime, 'Y-m-d') . "')");
         $cmd->execute();
         return $partTableName;
+    }
+
+    public static function isColumnExist(string $table, string $column, ?\yii\db\Connection $db = null): bool
+    {
+        if (!$db) {
+            $db = Yii::$app->db;
+        }
+        $tableSchema = $db->schema->getTableSchema($table);
+        return isset($tableSchema->columns[$column]);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public static function isIndexExist(string $table, string $index, ?\yii\db\Connection $db = null): bool
+    {
+        if (!$db) {
+            $db = Yii::$app->db;
+        }
+        $schema = $db->createCommand('select database()')->queryScalar();
+
+        return (bool) $db->createCommand(
+            '
+            SELECT 
+                COUNT(1) AS cnt 
+            FROM 
+                information_schema.table_constraints 
+            WHERE 
+                constraint_name=:indKey 
+            AND 
+                table_name=:tableName
+            AND 
+                constraint_schema=:schema',
+            [
+                ':indKey' => $index,
+                ':tableName' => $table,
+                ':schema' => $schema,
+            ]
+        )->queryScalar();
     }
 }
