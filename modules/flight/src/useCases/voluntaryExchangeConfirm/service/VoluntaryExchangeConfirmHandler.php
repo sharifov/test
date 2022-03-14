@@ -100,7 +100,7 @@ class VoluntaryExchangeConfirmHandler
 
         if (empty($this->productQuoteChange->pqc_data_json['exchange'])) {
             // request to BO /api/v3/flight-request/get-exchange-data/
-            $getParams        = Yii::$app->request->get();
+            $getParams        = \Yii::$app->request->get();
             $boPrepareService = new VoluntaryExchangeBOPrepareService($this->case->project, $this->originProductQuote);
             try {
                 $boPrepareService->fill();
