@@ -1473,12 +1473,7 @@ class FlightQuoteController extends FController
                     throw new NotFoundException('BookingId not found');
                 }
 
-/*                $tickets = FlightQuoteTicketQuery::findByFlightQuoteId((int)$flightQuoteId);
-                if (!$tickets) {
-                    throw new \DomainException('Tickets not found');
-                }*/
-
-                $boDataRequest = BoRequestDataHelper::getRequestDataForVoluntaryRefundData($project->api_key, $flightQuoteFlight->fqf_booking_id); // , $tickets
+                $boDataRequest = BoRequestDataHelper::getRequestDataForVoluntaryRefundData($project->api_key, $flightQuoteFlight->fqf_booking_id);
                 $result = BackOffice::voluntaryRefund($boDataRequest, 'flight-request/get-refund-data');
 
                 if (!empty($result['status']) && mb_strtolower($result['status']) === 'failed') {
@@ -1506,7 +1501,7 @@ class FlightQuoteController extends FController
                 if ($refundForm && !$refundForm->getTicketForms() && !empty($result['refund']['tickets'])) {
                     foreach ($result['refund']['tickets'] as $ticket) {
                         $ticketForm = new TicketForm();
-                        $ticketForm->number = $ticket['number']; // $ticket->fqt_ticket_number
+                        $ticketForm->number = $ticket['number'] ?? '';
                         $refundForm->setTicketForm($ticketForm);
                     }
                     $form->disableReadOnlyAllFields();
