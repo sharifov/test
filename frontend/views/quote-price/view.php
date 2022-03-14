@@ -126,6 +126,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="col-md-3">
             <?= DetailView::widget([
                 'model' => $model,
+                'attributes' => [
                     [
                         'attribute' => 'fare',
                         'contentOptions' => ['class' => 'text-right'],
@@ -203,6 +204,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         },
                         'format' => 'raw',
                     ],
+                ]
             ]) ?>
         </div>
         <div class="col-md-3">
