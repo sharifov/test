@@ -236,7 +236,7 @@ class LeadManageService
             null,
             null,
             null,
-            null
+            $preferencesForm->currency
         );
         $preferences->setDefaultCurrencyCodeIfNotSet($defaultCurrencyByDb);
         $this->leadPreferencesRepository->save($preferences);
