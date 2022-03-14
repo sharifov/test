@@ -1,16 +1,16 @@
 <?php
 
 use common\components\grid\project\ProjectColumn;
+use common\models\Lead;
 use dosamigos\datepicker\DatePicker;
 use src\access\ListsAccess;
 use src\helpers\lead\LeadHelper;
-use yii\helpers\Html;
-use yii\widgets\Pjax;
-use common\models\Lead;
-use src\model\leadUserRating\helpers\formatters\LeadUserRatingFormatter;
 use src\model\leadUserRating\abac\dto\LeadUserRatingAbacDto;
 use src\model\leadUserRating\abac\LeadUserRatingAbacObject;
 use src\model\leadUserRating\entity\LeadUserRating;
+use src\model\leadUserRating\helpers\formatters\LeadUserRatingFormatter;
+use yii\helpers\Html;
+use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\LeadSearch */
@@ -217,7 +217,9 @@ $this->registerJs($js);
                 return '-';
             },
             'format' => 'raw',
-            'label' => 'Extra Timer'
+            'attribute' => 'extra_timer',
+            'label' => 'Extra Timer',
+            'filter' => false,
         ],
 
         [
