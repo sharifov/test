@@ -72,7 +72,7 @@ class BoRequestDataHelper
      * @param FlightQuoteTicket[] $flightQuoteTickets
      * @return array
      */
-    public static function getRequestDataForVoluntaryRefundData(string $apiKey, string $bookingId, array $flightQuoteTickets): array
+    public static function getRequestDataForVoluntaryRefundData(string $apiKey, string $bookingId, array $flightQuoteTickets = []): array
     {
         $data = [
             'apiKey' => $apiKey,
@@ -80,7 +80,7 @@ class BoRequestDataHelper
             'tickets' => []
         ];
 
-        if ($flightQuoteTickets) {
+        if (!empty($flightQuoteTickets)) {
             foreach ($flightQuoteTickets as $flightQuoteTicket) {
                 $data['tickets'][] = $flightQuoteTicket->fqt_ticket_number;
             }

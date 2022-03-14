@@ -1473,16 +1473,15 @@ class FlightQuoteController extends FController
                     throw new NotFoundException('BookingId not found');
                 }
 
-                $tickets = FlightQuoteTicketQuery::findByFlightQuoteId((int)$flightQuoteId);
-                if (!$tickets) {
-                    throw new \DomainException('Tickets not found');
-                }
-
-                $boDataRequest = BoRequestDataHelper::getRequestDataForVoluntaryRefundData($project->api_key, $flightQuoteFlight->fqf_booking_id, $tickets);
+                $boDataRequest = BoRequestDataHelper::getRequestDataForVoluntaryRefundData($project->api_key, $flightQuoteFlight->fqf_booking_id);
                 $result = BackOffice::voluntaryRefund($boDataRequest, 'flight-request/get-refund-data');
 
                 if (!empty($result['status']) && mb_strtolower($result['status']) === 'failed') {
                     throw new BoResponseException($result['errors'] ? ErrorsToStringHelper::extractFromGetErrors($result['errors']) : $result['message']);
+                }
+
+                if (is_empty($result['refund']['tickets'])) {
+                    throw new \DomainException('Tickets not found');
                 }
 
                 $form->load($result);
@@ -1499,10 +1498,10 @@ class FlightQuoteController extends FController
 
                 $refundForm = $form->getRefundForm();
 
-                if ($refundForm && !$refundForm->getTicketForms()) {
-                    foreach ($tickets as $ticket) {
+                if ($refundForm && !$refundForm->getTicketForms() && !empty($result['refund']['tickets'])) {
+                    foreach ($result['refund']['tickets'] as $ticket) {
                         $ticketForm = new TicketForm();
-                        $ticketForm->number = $ticket->fqt_ticket_number;
+                        $ticketForm->number = $ticket['number'] ?? '';
                         $refundForm->setTicketForm($ticketForm);
                     }
                     $form->disableReadOnlyAllFields();
