@@ -1499,10 +1499,10 @@ class FlightQuoteController extends FController
 
                 $refundForm = $form->getRefundForm();
 
-                if ($refundForm && !$refundForm->getTicketForms()) {
-                    foreach ($tickets as $ticket) {
+                if ($refundForm && !$refundForm->getTicketForms() && !empty($result['refund']['tickets'])) {
+                    foreach ($result['refund']['tickets'] as $ticket) {
                         $ticketForm = new TicketForm();
-                        $ticketForm->number = $ticket->fqt_ticket_number;
+                        $ticketForm->number = $ticket['number']; // $ticket->fqt_ticket_number
                         $refundForm->setTicketForm($ticketForm);
                     }
                     $form->disableReadOnlyAllFields();
