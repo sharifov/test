@@ -1473,12 +1473,12 @@ class FlightQuoteController extends FController
                     throw new NotFoundException('BookingId not found');
                 }
 
-                $tickets = FlightQuoteTicketQuery::findByFlightQuoteId((int)$flightQuoteId);
+/*                $tickets = FlightQuoteTicketQuery::findByFlightQuoteId((int)$flightQuoteId);
                 if (!$tickets) {
                     throw new \DomainException('Tickets not found');
-                }
+                }*/
 
-                $boDataRequest = BoRequestDataHelper::getRequestDataForVoluntaryRefundData($project->api_key, $flightQuoteFlight->fqf_booking_id, $tickets);
+                $boDataRequest = BoRequestDataHelper::getRequestDataForVoluntaryRefundData($project->api_key, $flightQuoteFlight->fqf_booking_id); // , $tickets
                 $result = BackOffice::voluntaryRefund($boDataRequest, 'flight-request/get-refund-data');
 
                 if (!empty($result['status']) && mb_strtolower($result['status']) === 'failed') {
