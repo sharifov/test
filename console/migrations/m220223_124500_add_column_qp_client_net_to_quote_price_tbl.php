@@ -1,5 +1,6 @@
 <?php
 
+use src\helpers\app\DBHelper;
 use yii\db\Migration;
 
 /**
@@ -12,7 +13,9 @@ class m220223_124500_add_column_qp_client_net_to_quote_price_tbl extends Migrati
      */
     public function safeUp()
     {
-        $this->addColumn('{{%quote_price}}', 'qp_client_net', $this->decimal(10, 2));
+        if (!DBHelper::isColumnExist('quote_price', 'qp_client_net')) {
+            $this->addColumn('{{%quote_price}}', 'qp_client_net', $this->decimal(10, 2));
+        }
     }
 
     /**
@@ -20,6 +23,8 @@ class m220223_124500_add_column_qp_client_net_to_quote_price_tbl extends Migrati
      */
     public function safeDown()
     {
-        $this->dropColumn('{{%quote_price}}', 'qp_client_net');
+        if (DBHelper::isColumnExist('quote_price', 'qp_client_net')) {
+            $this->dropColumn('{{%quote_price}}', 'qp_client_net');
+        }
     }
 }
