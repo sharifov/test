@@ -2,7 +2,7 @@
 
 namespace common\models\search;
 
-use borales\extensions\phoneInput\PhoneInputValidator;
+use common\components\ChartTools;
 use common\models\Airports;
 use common\models\Call;
 use common\models\Client;
@@ -10,26 +10,30 @@ use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\Email;
 use common\models\Employee;
+use common\models\Lead;
+use common\models\LeadFlightSegment;
+use common\models\LeadFlow;
+use common\models\ProfitSplit;
 use common\models\Project;
 use common\models\ProjectEmployeeAccess;
+use common\models\Quote;
 use common\models\QuotePrice;
 use common\models\Sms;
 use common\models\Sources;
+use common\models\TipsSplit;
 use common\models\UserDepartment;
 use common\models\UserGroupAssign;
 use common\models\UserProfile;
-use Faker\Provider\DateTime;
 use modules\fileStorage\src\entity\fileLead\FileLead;
-use src\access\EmployeeDepartmentAccess;
 use src\access\EmployeeGroupAccess;
 use src\access\EmployeeProjectAccess;
+use src\auth\Auth;
 use src\model\callLog\entity\callLog\CallLog;
 use src\model\callLog\entity\callLog\CallLogType;
-use src\model\callLog\entity\callLogCase\CallLogCase;
 use src\model\callLog\entity\callLogLead\CallLogLead;
-use src\model\clientChat\entity\ClientChat;
 use src\model\clientChatLead\entity\ClientChatLead;
 use src\model\leadData\entity\LeadData;
+use src\model\leadPoorProcessing\entity\LeadPoorProcessing;
 use src\model\leadUserConversion\entity\LeadUserConversion;
 use src\model\leadUserRating\entity\LeadUserRating;
 use src\model\leadUserRating\entity\LeadUserRatingQuery;
@@ -38,21 +42,12 @@ use src\repositories\lead\LeadBadgesRepository;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use common\models\Lead;
-use yii\data\SqlDataProvider;
 use yii\data\ArrayDataProvider;
+use yii\data\SqlDataProvider;
 use yii\db\ActiveQuery;
 use yii\db\Expression;
 use yii\db\Query;
-use common\models\Quote;
-use common\models\LeadFlightSegment;
-use common\models\LeadFlow;
-use common\models\ProfitSplit;
-use common\models\TipsSplit;
-use common\components\ChartTools;
 use yii\helpers\ArrayHelper;
-use yii\helpers\VarDumper;
-use src\auth\Auth;
 
 /**
  * LeadSearch represents the model behind the search form of `common\models\Lead`.
@@ -175,6 +170,7 @@ class LeadSearch extends Lead
     public $quote_labels;
     public $is_conversion;
     public $lead_user_rating;
+    public $extra_timer;
 
     private $leadBadgesRepository;
 
@@ -267,6 +263,7 @@ class LeadSearch extends Lead
             ['sold_date_to', 'default', 'value' => $this->defaultMaxDate],
             ['createTimeRange', 'default', 'value' => $this->defaultDateRange],
             ['lead_user_rating', 'in', 'range' => array_keys(LeadUserRating::getRatingList())],
+            [['extra_timer'],'safe']
         ];
     }
 
@@ -2249,6 +2246,7 @@ class LeadSearch extends Lead
                     'status',
                     'l_last_action_dt',
                     'expiration_dt',
+                    'extra_timer',
                 ]
             ],
             'pagination' => [
@@ -2260,6 +2258,10 @@ class LeadSearch extends Lead
             'expiration_dt' => [
                 'asc' => [Lead::tableName() . '.l_expiration_dt' => SORT_ASC],
                 'desc' => [Lead::tableName() . '.l_expiration_dt' => SORT_DESC]
+            ],
+            'extra_timer' => [
+                'asc' => [LeadPoorProcessing::tableName() . '.lpp_expiration_dt' => SORT_ASC],
+                'desc' => [LeadPoorProcessing::tableName() . '.lpp_expiration_dt' => SORT_DESC]
             ],
         ]);
         $dataProvider->setSort($sort);
@@ -2333,6 +2335,9 @@ class LeadSearch extends Lead
                 $query->joinWith('lppLppd')->andWhere(['lppd_enabled' => 1]);
            }
         ]);
+        $lppTableName = LeadPoorProcessing::tableName();
+        $onCondition = new Expression($lppTableName . '.lpp_lead_id = leads.id AND ' . $lppTableName . '.lpp_expiration_dt = (SELECT MIN(lpp_expiration_dt) FROM ' . $lppTableName . ' WHERE lpp_lead_id = leads.id)');
+        $query->leftJoin(LeadPoorProcessing::tableName(), $onCondition);
 
         if ($this->expiration_dt) {
             $query->andWhere(new Expression(

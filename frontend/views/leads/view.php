@@ -311,6 +311,16 @@ $isAgent = Auth::user()->isAgent();
                             },
                             'format' => 'raw',
                         ],
+                        [
+                            'attribute' => 'l_expiration_dt',
+                            'value' => static function (\common\models\Lead $model) {
+                                if (!$model->l_expiration_dt) {
+                                    return Yii::$app->formatter->nullDisplay;
+                                }
+                                return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->l_expiration_dt));
+                            },
+                            'format' => 'raw',
+                        ],
                         'additional_information',
                         'l_visitor_log_id',
                     ],

@@ -4052,6 +4052,8 @@ input[disabled] + .radio-tab__text {
   display: flex;
   padding: 10px 20px;
   position: relative;
+  border: 1px solid #EAEAEA;
+  margin: 0 5px 5px 5px;
 }
 
 .quote__segment + .quote__segment:before {
@@ -4092,9 +4094,9 @@ input[disabled] + .radio-tab__text {
 }
 
 .quote__airline-logo {
-  margin-right: 20px;
+  margin-right: 18px;
   width: auto;
-  height: 26px;
+  height: 34px;
   margin-top: 5px;
 }
 
@@ -4270,11 +4272,11 @@ input[disabled] + .radio-tab__text {
   border-right: 1px solid #c2cad8;
 }
 
-.quote__heading-right .btn {
+/*.quote__heading-right .btn {
   padding: 7px 12px;
   border-radius: 6px;
   margin: 0;
-}
+}*/
 
 .quote__heading-right .btn + .btn {
   border-left: 1px solid rgba(255, 255, 255, 0.3);
