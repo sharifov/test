@@ -20,6 +20,10 @@ class PriceResearchLinkService
         $this->itineraryEditForm     = $itineraryEditForm;
     }
 
+    /**
+     * @return string
+     * @throws \yii\base\InvalidConfigException
+     */
     public function generateUrl(): string
     {
         if ($this->itineraryEditForm->tripType === Lead::TRIP_TYPE_ONE_WAY) {
@@ -37,6 +41,7 @@ class PriceResearchLinkService
 
     /**
      * @return string
+     * @throws \yii\base\InvalidConfigException
      */
     private function generateOneTripUrl(): string
     {
@@ -52,6 +57,7 @@ class PriceResearchLinkService
 
     /**
      * @return string
+     * @throws \yii\base\InvalidConfigException
      */
     private function generateRoundTripUrl(): string
     {
@@ -76,6 +82,7 @@ class PriceResearchLinkService
 
     /**
      * @return string
+     * @throws \yii\base\InvalidConfigException
      */
     private function generateMultiCityUrl(): string
     {
@@ -110,6 +117,7 @@ class PriceResearchLinkService
     {
         return \Yii::$app->formatter->asDate($date, $dateFormat);
     }
+
 
     /**
      * @param string $url

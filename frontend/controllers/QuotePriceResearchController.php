@@ -68,7 +68,6 @@ class QuotePriceResearchController extends FController
             ]);
         } catch (\Throwable $e) {
             \Yii::error(AppHelper::throwableLog($e), 'QuoteController:actionOpenPriceResearchLink:Throwable');
-            VarDumper::dump($e->getMessage());
             return $this->render('_error', [
                 'error' => 'Server Error',
             ]);

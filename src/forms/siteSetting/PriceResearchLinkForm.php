@@ -5,7 +5,20 @@ namespace src\forms\siteSetting;
 use yii\base\Model;
 
 /**
- *
+ * @property string $name
+ * @property boolean $enabled
+ * @property string $oneTripUrl
+ * @property string $multiCityUrl
+ * @property string $roundTripUrl
+ * @property string $multiCityItineraryPattern
+ * @property string $dateFormat
+ * @property string $cabinClassMappings
+ * @property string $multiCityDateFormat
+ * @property string $childrenParameterType
+ * @property string $childrenSubQueryPart
+ * @property string $childrenParameterSeparator
+ * @property string $childPaxTypeEnumerableParameter
+ * @property string $infantPaxTypeEnumerableParameter
  */
 class PriceResearchLinkForm extends Model
 {

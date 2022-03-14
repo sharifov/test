@@ -28,7 +28,5 @@ class m220311_103552_modyfy_setting_table_expand_s_value_column extends Migratio
     public function safeDown()
     {
         echo "m220311_103552_modyfy_setting_table_expand_s_value_column cannot be reverted.\n";
-
-        return false;
     }
 }
