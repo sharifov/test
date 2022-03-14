@@ -1480,7 +1480,7 @@ class FlightQuoteController extends FController
                     throw new BoResponseException($result['errors'] ? ErrorsToStringHelper::extractFromGetErrors($result['errors']) : $result['message']);
                 }
 
-                if (is_empty($result['refund']['tickets'])) {
+                if (empty($result['refund']['tickets'])) {
                     throw new \DomainException('Tickets not found');
                 }
 
