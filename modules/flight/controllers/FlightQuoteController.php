@@ -1485,6 +1485,10 @@ class FlightQuoteController extends FController
                     throw new BoResponseException($result['errors'] ? ErrorsToStringHelper::extractFromGetErrors($result['errors']) : $result['message']);
                 }
 
+                if (is_empty($result['refund']['tickets'])) {
+                    throw new \DomainException('Tickets not found');
+                }
+
                 $form->load($result);
                 $form->bookingId = $flightQuoteFlight->fqf_booking_id;
                 $form->originProductQuoteId = $originProductQuoteId;
