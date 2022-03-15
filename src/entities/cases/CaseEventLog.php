@@ -40,6 +40,7 @@ class CaseEventLog extends ActiveRecord
     public const VOLUNTARY_REFUND_WH_SEND_OTA    = 15;
     public const EMAIL_REVIEWED    = 16;
     public const CASE_MARK_CHECKED    = 17;
+    public const RE_PROTECTION_REFUND = 18;
 
     public const CASE_EVENT_LOG_LIST = [
         self::CASE_CREATED         => 'Case created',
@@ -50,6 +51,7 @@ class CaseEventLog extends ActiveRecord
         self::REPROTECTION_DECISION => 'Reprotection Decision',
         self::RE_PROTECTION_CREATE => 'ReProtection Create',
         self::RE_PROTECTION_EXCHANGE => 'ReProtection Exchange',
+        self::RE_PROTECTION_REFUND => 'ReProtection Refund',
         self::VOLUNTARY_EXCHANGE_CREATE => 'Voluntary Exchange Create',
         self::VOLUNTARY_EXCHANGE_CONFIRM => 'Voluntary Exchange Confirm',
         self::VOLUNTARY_REFUND_CREATE => 'Voluntary Refund Create',
