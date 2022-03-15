@@ -63,4 +63,9 @@ class LeadPoorProcessingChecker
             return false;
         }
     }
+
+    public function getRule(): LeadPoorProcessingData
+    {
+        return $this->rule;
+    }
 }

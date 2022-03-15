@@ -12,7 +12,7 @@ use src\model\leadPoorProcessingLog\repository\LeadPoorProcessingLogRepository;
 /**
  * Class LeadPoorProcessingLastAction
  */
-class LeadPoorProcessingLastAction extends AbstractLeadPoorProcessingService implements LeadPoorProcessingServiceInterface
+class LeadPoorProcessingLastAction extends AbstractLeadPoorProcessingService
 {
     private bool $isCheckDuplicate = true;
     private int $pauseSecond = 5;
@@ -22,32 +22,7 @@ class LeadPoorProcessingLastAction extends AbstractLeadPoorProcessingService imp
         if (!$this->checkDuplicate()) {
             return;
         }
-
-        if (!$leadPoorProcessing = LeadPoorProcessingQuery::getByLeadAndKey($this->getLead()->id, $this->getRule()->lppd_id)) {
-            $leadPoorProcessing = LeadPoorProcessing::create(
-                $this->getLead()->id,
-                $this->getRule()->lppd_id,
-                $this->getExpiration()
-            );
-            $logStatus = LeadPoorProcessingLogStatus::STATUS_CREATED;
-        } else {
-            $leadPoorProcessing->lpp_expiration_dt = $this->getExpiration();
-            $logStatus = LeadPoorProcessingLogStatus::STATUS_UPDATED;
-        }
-
-        $leadPoorProcessingLog = LeadPoorProcessingLog::create(
-            $this->getLead()->id,
-            $this->getRule()->lppd_id,
-            $this->getLead()->employee_id,
-            $logStatus,
-            $this->getDescription()
-        );
-
-        $leadPoorProcessingRepository = new LeadPoorProcessingRepository($leadPoorProcessing);
-        $leadPoorProcessingRepository->save(true);
-
-        $leadPoorProcessingLogRepository = new LeadPoorProcessingLogRepository($leadPoorProcessingLog);
-        $leadPoorProcessingLogRepository->save(true);
+        parent::handle();
     }
 
     public function isCheckDuplicate(): bool

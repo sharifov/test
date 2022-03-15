@@ -4,7 +4,7 @@ namespace src\model\leadPoorProcessing\service\rules;
 
 use yii\helpers\ArrayHelper;
 
-class LeadPoorProcessingSendSmsOffer extends AbstractLeadPoorProcessingService implements LeadPoorProcessingServiceInterface
+class LeadPoorProcessingSendSmsOffer extends AbstractLeadPoorProcessingService
 {
     public function checkCondition(): bool
     {
