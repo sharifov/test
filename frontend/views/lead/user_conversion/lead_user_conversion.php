@@ -59,12 +59,11 @@ use yii\widgets\Pjax;
                             '<i class="fa fa-times"></i>',
                             null,
                             [
-                                    'class' => 'js-remove-conversation-btn text-danger',
-                                    'title' => 'Delete',
-                                    'data-lead-id' => $leadUserConversion->luc_lead_id,
-                                    'data-user-id' => $leadUserConversion->luc_user_id,
-                                    'onclick' => "return confirm('Are you sure you want to delete this item?')"
-                                ]
+                                'class' => 'js-remove-conversation-btn text-danger',
+                                'title' => 'Delete',
+                                'data-lead-id' => $leadUserConversion->luc_lead_id,
+                                'data-user-id' => $leadUserConversion->luc_user_id,
+                            ]
                         );
                         ?>
                     <?php endif; ?>
