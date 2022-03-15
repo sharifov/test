@@ -6,9 +6,7 @@ use common\models\Notifications;
 use modules\user\userFeedback\entity\UserFeedback;
 use modules\user\userFeedback\entity\UserFeedbackData;
 use modules\user\userFeedback\forms\UserFeedbackBugForm;
-use modules\user\userFeedback\forms\UserFeedbackUpdateForm;
 use modules\user\userFeedback\UserFeedbackRepository;
-use yii\helpers\ArrayHelper;
 
 /**
  * Class UserFeedbackService
@@ -17,23 +15,23 @@ use yii\helpers\ArrayHelper;
 class UserFeedbackService
 {
     private const NOTIFICATION_MESSAGE_ON_CREATE = [
-        'n_title' => 'Thanks for your feedback! ',
-        'n_message' => 'Feedback #%s is under consideration',
+        'n_title' => 'Thanks for your feedback!',
+        'n_message' => 'Feedback #%s "%s" is under consideration',
         'n_type_id' => Notifications::TYPE_SUCCESS,
     ];
     private const NOTIFICATION_MESSAGE_FROM_NEW_TO_PENDING = [
         'n_title' => 'Alert',
-        'n_message' => 'Your Feedback #%s has been sent for processing',
+        'n_message' => 'Your Feedback #%s "%s" has been sent for processing',
         'n_type_id' => Notifications::TYPE_INFO,
     ];
     private const NOTIFICATION_MESSAGE_CLOSED = [
         'n_title' => 'Thanks!',
-        'n_message' => 'Your Feedback #%s has been successfully closed',
+        'n_message' => 'Your Feedback #%s "%s" has been successfully closed',
         'n_type_id' => Notifications::TYPE_SUCCESS,
     ];
     private const NOTIFICATION_MESSAGE_DONE = [
         'n_title' => 'Thanks!',
-        'n_message' => 'Your Feedback #%s has been successfully completed',
+        'n_message' => 'Your Feedback #%s  "%s" has been successfully completed',
         'n_type_id' => Notifications::TYPE_SUCCESS,
     ];
 
@@ -54,7 +52,7 @@ class UserFeedbackService
     {
         $model = UserFeedback::createNewBug($form->title, $form->message, $dto->toArray());
         $this->repository->save($model);
-        $this->sendNotification($model->uf_created_user_id, $model->uf_id, self::NOTIFICATION_MESSAGE_ON_CREATE);
+        $this->sendNotification($model->uf_id, $model->uf_created_user_id, $model->uf_title, self::NOTIFICATION_MESSAGE_ON_CREATE);
         return $model->uf_id;
     }
 
@@ -73,7 +71,7 @@ class UserFeedbackService
         $this->repository->save($model);
         $notificationMessage = $this->getNotificationMessage($oldStatus, $newStatus);
         if (!empty($notificationMessage)) {
-            $this->sendNotification($model->uf_created_user_id, $model->uf_id, $notificationMessage);
+            $this->sendNotification($model->uf_id, $model->uf_created_user_id, $model->uf_title, $notificationMessage);
         }
     }
 
@@ -97,7 +95,7 @@ class UserFeedbackService
         $this->repository->save($model);
         $notificationMessage = $this->getNotificationMessage($oldStatus, $newStatus);
         if (!empty($notificationMessage)) {
-            $this->sendNotification($model->uf_created_user_id, $model->uf_id, $notificationMessage);
+            $this->sendNotification($model->uf_id, $model->uf_created_user_id, $model->uf_title, $notificationMessage);
         }
     }
 
@@ -123,19 +121,19 @@ class UserFeedbackService
     }
 
     /**
-     * @param int $userId
      * @param int $uf_id
+     * @param int $user_id
+     * @param string $title
      * @param array $message
      * @return void
-     * @throws \Exception
      */
-    private function sendNotification(int $userId, int $uf_id, array $message): void
+    private function sendNotification(int $uf_id, int $user_id, string $title, array $message): void
     {
-        $subject = ArrayHelper::getValue($message, 'n_title');
-        $body = sprintf(ArrayHelper::getValue($message, 'n_message'), $uf_id);
-        $type = ArrayHelper::getValue($message, 'n_type_id');
+        $subject = $message['n_title'] ?? '';
+        $body    = sprintf($message['n_message'] ?? '', $uf_id, $title);
+        $type    = $message['n_type_id'] ?? '';
         Notifications::createAndPublish(
-            $userId,
+            $user_id,
             $subject,
             $body,
             $type,
