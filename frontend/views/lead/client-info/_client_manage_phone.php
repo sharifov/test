@@ -28,7 +28,11 @@ use modules\lead\src\abac\LeadAbacObject;
                 <?php /** @abac $leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS_USER_SAME_PHONE, Access to btn The same user by phone on lead*/ ?>
                 <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS_USER_SAME_PHONE)) : ?>
                     <?php if ($count = $phone['countUsersSamePhone']) : ?>
-                        <a class="showModalButton" data-modal_id="client-large" title="The Same users by phone" data-content-url="<?= Url::to([
+                        <a
+                            class="showModalButton"
+                            data-modal_id="client-large"
+                            title="The Same users by phone (excluding the lead current client)"
+                            data-content-url="<?= Url::to([
                             'lead-view/ajax-get-users-same-phone-info',
                             'phone' => $phone['phone'],
                             'clientId' => $phone['client_id']
