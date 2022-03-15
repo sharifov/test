@@ -4472,7 +4472,7 @@ class LeadSearch extends Lead
                 'segment_destination_airport' => LeadFlightSegment
                     ::find()
                     ->select(['lead_id'])
-                    ->where(['origin' => $this->destination_airport])
+                    ->where(['destination' => $this->destination_airport])
                     ->groupBy(['lead_id'])
             ], 'leads.id = segment_destination_airport.lead_id');
         }
