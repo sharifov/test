@@ -151,10 +151,6 @@ class ProductQuoteService implements BoWebhookService
                 );
 
                 $this->hybridWh();
-
-                if ($form->isExchanged()) {
-                    $this->removeRelationsProcessing();
-                }
             }
         } catch (\Throwable $throwable) {
             $message = AppHelper::throwableLog($throwable);
