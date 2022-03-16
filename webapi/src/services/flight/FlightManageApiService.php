@@ -524,22 +524,19 @@ class FlightManageApiService implements BoWebhookService
     public function processRequest(Model $form): void
     {
         $this->form = $form;
+        $this->productQuote = ProductQuoteQuery::getProductQuoteByBookingId($form->booking_id);
+        $this->productQuoteRefund = $this->productQuote->productQuoteLastRefund;
+
+        $transaction = new Transaction(['db' => \Yii::$app->db]);
         try {
-            if (!$this->productQuote = ProductQuoteQuery::getProductQuoteByBookingId($form->booking_id)) {
+            if (!$this->productQuote) {
                 throw new NotFoundException('Product Quote not found by bookingId: ' . $form->booking_id);
             }
-
-            if (!$project = Project::findOne(['project_key' => $form->project_key])) {
-                throw new NotFoundException('Not found project by project key: ' . $form->project_key);
-            }
-
-            if (!$this->productQuoteRefund = $this->productQuote->productQuoteLastRefund) {
+            if (!$this->productQuoteRefund) {
                 throw new NotFoundException('Product Quote Refund found by bookingId: ' . $form->booking_id);
             }
-
             if ($this->productQuoteRefund->isInProcessing()) {
                 $this->case = $this->productQuoteRefund->case;
-
                 if ($form->isProcessing()) {
                     if (!$this->productQuoteRefund->isCompleted()) {
                         $this->productQuoteRefund->processing();
@@ -565,10 +562,11 @@ class FlightManageApiService implements BoWebhookService
                     $this->productQuote->cancelled();
                     $this->productQuoteRepository->save($this->productQuote);
                 }
-
+                $transaction->commit();
                 $this->hybridWh();
             }
         } catch (\Throwable $throwable) {
+            $transaction->rollBack();
             $message = AppHelper::throwableLog($throwable);
             $message['data'] = $form->toArray();
             \Yii::error(
@@ -580,27 +578,35 @@ class FlightManageApiService implements BoWebhookService
 
     private function hybridWh()
     {
-        $originQuote = ProductQuoteQuery::getOriginProductQuoteByReprotection($this->productQuote->pq_id);
-        $hybridService = \Yii::createObject(HybridService::class);
-        $whData = [
-            'data' => [
-                'booking_id' => $this->form->booking_id,
-                'reprotection_quote_gid' => $this->productQuote->pq_gid,
-                'case_gid' => $this->case->cs_gid,
-                'product_quote_gid' => $originQuote->pq_gid,
-                'status' => ProductQuoteRefundStatus::getClientKeyStatusById($this->productQuoteRefund->pqr_status_id),
-            ]
-        ];
-        \Yii::info([
-            'type' => HybridWhData::WH_TYPE_FLIGHT_SCHEDULE_CHANGE,
-            'requestData' => $whData,
-            'formBOData' => $this->form->toArray(),
-            'ProductQuoteChangeStatus' => ProductQuoteChangeStatus::getName($this->productQuoteRefund->pqr_status_id),
-        ], 'info\Webhook::OTA::ScheduleChangeRefund:Request');
-        $responseData = $hybridService->whReprotection($this->case->cs_project_id, $whData);
-        \Yii::info([
-            'type' => HybridWhData::WH_TYPE_FLIGHT_SCHEDULE_CHANGE,
-            'responseData' => $responseData,
-        ], 'info\Webhook::OTA::ScheduleChangeRefund:Response');
+        try {
+            $originQuote = ProductQuoteQuery::getOriginProductQuoteByReprotection($this->productQuote->pq_id);
+            $hybridService = \Yii::createObject(HybridService::class);
+            $whData = [
+                'data' => [
+                    'booking_id' => $this->form->booking_id,
+                    'reprotection_quote_gid' => $this->productQuote->pq_gid,
+                    'case_gid' => $this->case->cs_gid,
+                    'product_quote_gid' => $originQuote->pq_gid,
+                    'status' => ProductQuoteRefundStatus::getClientKeyStatusById($this->productQuoteRefund->pqr_status_id),
+                ]
+            ];
+            \Yii::info([
+                'type' => HybridWhData::WH_TYPE_FLIGHT_SCHEDULE_CHANGE,
+                'requestData' => $whData,
+                'formBOData' => $this->form->toArray(),
+                'ProductQuoteChangeStatus' => ProductQuoteChangeStatus::getName($this->productQuoteRefund->pqr_status_id),
+            ], 'info\Webhook::OTA::ScheduleChangeRefund:Request');
+            $responseData = $hybridService->whReprotection($this->case->cs_project_id, $whData);
+            \Yii::info([
+                'type' => HybridWhData::WH_TYPE_FLIGHT_SCHEDULE_CHANGE,
+                'responseData' => $responseData,
+            ], 'info\Webhook::OTA::ScheduleChangeRefund:Response');
+        } catch (\Throwable $throwable) {
+            $message = AppHelper::throwableLog($throwable);
+            \Yii::error(
+                $message,
+                'ProductQuoteService:hybridWh:Throwable'
+            );
+        }
     }
 }
