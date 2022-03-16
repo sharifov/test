@@ -11,11 +11,11 @@ use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use src\auth\Auth;
+use modules\user\userFeedback\abac\dto\UserFeedbackAbacDto;
+use modules\user\userFeedback\abac\UserFeedbackAbacObject;
 use src\helpers\app\AppHelper;
 use Yii;
 use yii\helpers\ArrayHelper;
-
-use function Amp\Promise\timeoutWithDefault;
 
 /**
  * Class SideBarMenu
@@ -765,6 +765,17 @@ class SideBarMenu extends \yii\bootstrap\Widget
             'url' => 'javascript:',
             'icon' => 'user',
             'items' => [
+                [
+                    /** @abac $userFeedbackAbacDto, UserFeedbackAbacObject::ACT_USER_FEEDBACK_INDEX, UserFeedbackAbacObject::ACTION_ACCESS, Access to view list of  User Feedback*/
+                    'label' => 'My Feedbacks',
+                    'url'   => ['/user-feedback/index'],
+                    'icon'  => 'newspaper-o',
+                    'abac'  => [
+                        'dto'    => new UserFeedbackAbacDto(),
+                        'object' => UserFeedbackAbacObject::ACT_USER_FEEDBACK_INDEX,
+                        'action' => UserFeedbackAbacObject::ACTION_ACCESS
+                    ],
+                ],
                 ['label' => 'Users', 'url' => ['/employee/list'], 'icon' => 'users'],
                 ['label' => 'User Online', 'url' => ['/user-online/index'], 'icon' => 'spinner'],
                 ['label' => 'User Connections', 'url' => ['/user-connection/index'], 'icon' => 'plug'],

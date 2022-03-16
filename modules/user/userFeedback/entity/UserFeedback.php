@@ -235,6 +235,11 @@ class UserFeedback extends ActiveRecord
         return self::STATUS_LIST;
     }
 
+    public function isOwner(int $userId): bool
+    {
+        return $this->uf_created_user_id === $userId;
+    }
+
     public static function partitionDatesFrom(\DateTime $date): array
     {
         $monthBegin = date('Y-m-d', strtotime(date_format($date, 'Y-m-1')));

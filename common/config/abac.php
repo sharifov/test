@@ -28,7 +28,8 @@ return [
         'lead-rating' => \src\model\leadUserRating\abac\LeadUserRatingAbacObject::class,
         'lead-poor-processing' => \src\model\leadPoorProcessingData\abac\LeadPoorProcessingAbacObject::class,
         'quote' => \src\model\quote\abac\QuoteFlightAbacObject::class,
-        'lead-user-conversion' => \src\model\leadUserConversion\abac\LeadUserConversionAbacObject::class
+        'lead-user-conversion' => \src\model\leadUserConversion\abac\LeadUserConversionAbacObject::class,
+        'user-feedback' => \modules\user\userFeedback\abac\UserFeedbackAbacObject::class,
     ],
     'scanDirs' => [
         '/modules/',
