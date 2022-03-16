@@ -122,7 +122,7 @@ class ProductQuoteService implements BoWebhookService
                 }
                 $this->casesRepository->save($case);
 
-                $this->removeRelationsProcessing($productQuote);
+//                $this->removeRelationsProcessing($productQuote);
             }
         } catch (\Throwable $throwable) {
             $message = AppHelper::throwableLog($throwable);
