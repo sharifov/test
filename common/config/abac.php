@@ -9,6 +9,7 @@ return [
         'app' => \modules\abac\src\object\AppAbac::class,
         'order' => \modules\order\src\abac\OrderAbacObject::class,
         'case' => \modules\cases\src\abac\CasesAbacObject::class,
+        'case-sale-list' => \modules\cases\src\abac\saleList\SaleListAbacObject::class,
         'case-communication' => \modules\cases\src\abac\communicationBlock\CaseCommunicationBlockAbacObject::class,
         'lead' => \modules\lead\src\abac\LeadAbacObject::class,
         'lead-communication' => \modules\lead\src\abac\communicationBlock\LeadCommunicationBlockAbacObject::class,
