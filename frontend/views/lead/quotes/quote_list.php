@@ -8,7 +8,11 @@
  * @var $is_manager boolean
  */
 
+use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\lead\src\abac\LeadAbacObject;
 use src\auth\Auth;
+use src\helpers\app\AppHelper;
+use src\helpers\setting\SettingHelper;
 use src\services\quote\addQuote\guard\FlightQuoteGuard;
 use yii\bootstrap\Html;
 use yii\helpers\Url;
@@ -21,6 +25,31 @@ use modules\lead\src\abac\LeadAbacObject;
 $leadAbacDto = new LeadAbacDto($lead, Auth::id());
 
 $addAutoQuoteBtn = '';
+try {
+    $priceResearchLinks = SettingHelper::getPriceResearchLinksNamesArray();
+} catch (\RuntimeException | \DomainException $e) {
+    Yii::warning(AppHelper::throwableFormatter($e), 'SettingHelper::getPriceResearchLinksNamesArray:exception');
+    $priceResearchLinks = [];
+}
+$leadAbacDto = new LeadAbacDto($lead, Auth::id());
+/** @abac $leadAbacDto, LeadAbacObject::ACT_PRICE_LINK_RESEARCH, LeadAbacObject::ACTION_ACCESS, Access to edit price research links  */
+$canAccessPriceResearchLinks = \Yii::$app->abac->can(
+    $leadAbacDto,
+    LeadAbacObject::ACT_PRICE_LINK_RESEARCH,
+    LeadAbacObject::ACTION_ACCESS
+);
+
+if ($canAccessPriceResearchLinks) {
+    try {
+        $priceResearchLinks = SettingHelper::getPriceResearchLinksNamesArray();
+    } catch (\RuntimeException | \DomainException $e) {
+        Yii::warning(AppHelper::throwableFormatter($e), 'SettingHelper::getPriceResearchLinksNamesArray:exception');
+        $priceResearchLinks = [];
+    }
+} else {
+    $priceResearchLinks = [];
+}
+
 if (FlightQuoteGuard::canAutoSelectQuotes(Auth::user(), $lead)) {
     $addAutoQuoteBtn = Html::a('<i class="fa fa-plus green"></i> Auto add Quotes', null, ['class' => 'auto_add_quotes_btn', 'data-lead-id' => $lead->id, 'title' => 'Auto-select best options', 'data-toggle' => 'tooltip']);
     $addAutoQuoteUrl = Url::toRoute('/quote/auto-add-quotes');
@@ -114,6 +143,24 @@ JS;
                 <?php else : ?>
                 <li>
                   <span class="badge badge-warning"><i class="fa fa-warning"></i> Warning: Flight Segments is empty!</span>
+                </li>
+                <?php endif; ?>
+                <?php if ($canAccessPriceResearchLinks) :?>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Market Price Research Tool</a>
+                    <div class="dropdown-menu" role="menu">
+                        <?php foreach ($priceResearchLinks as $key => $priceResearchLink) : ?>
+                            <?= Html::a('<i class="fa fa- "></i>' . $priceResearchLink, [
+                                'quote-price-research/open-price-research-link',
+                                'leadId'               => $lead->id,
+                                'researchLinkKey' => $key,
+                            ], [
+                                'class' => 'dropdown-item text-danger',
+                                'target' => '_blank',
+                                'data-pjax' => 0
+                            ]) ?>
+                        <?php endforeach ?>
+                    </div>
                 </li>
                 <?php endif; ?>
               <li class="dropdown">
