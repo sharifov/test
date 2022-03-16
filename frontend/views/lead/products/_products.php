@@ -30,7 +30,7 @@ use yii\helpers\Html;
 <?php if (Auth::can('lead-view/flight-default/view', ['lead' => $lead])) : ?>
 <div class="x_panel">
         <div class="x_title">
-            <h2><i class="fa fa-plane"></i> Flight - default</h2>
+            <h2 id="js_flight_default"><i class="fa fa-plane"></i> Flight - default</h2>
             <ul class="nav navbar-right panel_toolbox">
                 <?php /*php if ($is_manager) : ?>
                     <li class="dropdown">
@@ -59,6 +59,7 @@ JS;
             <?php \yii\widgets\Pjax::begin(['id' => 'pj-itinerary', 'enablePushState' => false, 'enableReplaceState' => false, 'timeout' => 5000])?>
             <?= $this->render('../partial/_flightDetails', [
                 'itineraryForm' => $itineraryForm,
+                'isCreatedFlightRequest' => false,
             ]) ?>
             <?php \yii\widgets\Pjax::end();?>
 

@@ -9,11 +9,13 @@ class FFlag
     public const FF_KEY_LPP_ENABLE = 'lppEnable';
     public const FF_KEY_DEBUG = 'debug';
     public const FF_KEY_LPP_LEAD_CREATED = 'lppLeadCreated';
+    public const FF_KEY_ADD_AUTO_QUOTES = 'autoAddQuotes';
 
     public const FF_KEY_LIST = [
         self::FF_KEY_LPP_ENABLE => self::FF_KEY_LPP_ENABLE,
         self::FF_KEY_DEBUG => self::FF_KEY_DEBUG,
         self::FF_KEY_LPP_LEAD_CREATED => self::FF_KEY_LPP_LEAD_CREATED,
+        self::FF_KEY_ADD_AUTO_QUOTES => self::FF_KEY_ADD_AUTO_QUOTES,
     ];
 
     public const FF_CATEGORY_LEAD = 'lead';
