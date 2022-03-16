@@ -25,7 +25,8 @@ class ReprotectionUpdateForm extends Model implements WebhookFromDefinitions
     public function rules(): array
     {
         return [
-            [['booking_id', 'reprotection_quote_gid', 'status', 'orderId'], 'required'],
+            [['booking_id', 'reprotection_quote_gid', 'status'], 'required'],
+            [['orderId'], 'safe'],
 
             [['booking_id', 'reprotection_quote_gid', 'orderId'], 'string'],
 
