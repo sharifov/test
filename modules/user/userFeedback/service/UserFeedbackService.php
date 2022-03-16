@@ -50,7 +50,7 @@ class UserFeedbackService
      */
     public function create(UserFeedbackBugForm $form, UserFeedbackData $dto): int
     {
-        $model = UserFeedback::createNewBug($form->title, $form->message, $dto->toArray());
+        $model = UserFeedback::createNewBug($form->title, $form->message, $form->type_id, $dto->toArray());
         $this->repository->save($model);
         $this->sendNotification($model->uf_id, $model->uf_created_user_id, $model->uf_title, self::NOTIFICATION_MESSAGE_ON_CREATE);
         return $model->uf_id;

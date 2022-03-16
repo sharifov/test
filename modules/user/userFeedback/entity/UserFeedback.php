@@ -177,10 +177,11 @@ class UserFeedback extends ActiveRecord
     public static function createNewBug(
         ?string $title,
         ?string $message,
+        ?int $type,
         ?array $data
     ): self {
         $self = self::create($title, $message, $data);
-        $self->setTypeBug();
+        $self->setType($type);
         $self->setStatusNew();
         return $self;
     }
@@ -190,9 +191,34 @@ class UserFeedback extends ActiveRecord
         return $this->hasOne(Employee::class, ['id' => 'uf_created_user_id']);
     }
 
+    public function setType(?int $type): void
+    {
+        switch ($type) {
+            case self::TYPE_BUG:
+                $this->setTypeBug();
+                break;
+            case self::TYPE_FEATURE:
+                $this->setTypeFeature();
+                break;
+            case self::TYPE_QUESTION:
+                $this->setTypeQuestion();
+                break;
+        }
+    }
+
     public function setTypeBug(): void
     {
         $this->uf_type_id = self::TYPE_BUG;
+    }
+
+    public function setTypeFeature(): void
+    {
+        $this->uf_type_id = self::TYPE_FEATURE;
+    }
+
+    public function setTypeQuestion(): void
+    {
+        $this->uf_type_id = self::TYPE_QUESTION;
     }
 
     public function setStatusNew(): void
