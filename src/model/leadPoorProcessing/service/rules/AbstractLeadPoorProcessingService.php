@@ -16,7 +16,7 @@ use src\model\leadPoorProcessingLog\repository\LeadPoorProcessingLogRepository;
 /**
  * Class AbstractLeadPoorProcessingService
  */
-class AbstractLeadPoorProcessingService
+class AbstractLeadPoorProcessingService implements LeadPoorProcessingServiceInterface
 {
     private Lead $lead;
     private LeadPoorProcessingData $rule;
@@ -24,7 +24,8 @@ class AbstractLeadPoorProcessingService
 
     public function __construct(int $leadId, string $ruleKey, ?string $description = null)
     {
-        if (!$lead = Lead::find()->where(['id' => $leadId])->limit(1)->one()) {
+        $sql = 'SELECT * FROM ' . Lead::tableName() . ' WHERE id = ' . $leadId . ' LIMIT 1 FOR UPDATE';
+        if (!$lead = Lead::findBySql($sql)->one()) {
             throw new \RuntimeException('Lead not found by ID(' . $leadId . ')');
         }
         $this->lead = $lead;

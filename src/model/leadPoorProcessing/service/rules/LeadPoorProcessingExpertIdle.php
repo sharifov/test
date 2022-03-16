@@ -2,6 +2,6 @@
 
 namespace src\model\leadPoorProcessing\service\rules;
 
-class LeadPoorProcessingExpertIdle extends AbstractLeadPoorProcessingService implements LeadPoorProcessingServiceInterface
+class LeadPoorProcessingExpertIdle extends AbstractLeadPoorProcessingService
 {
 }

@@ -19,6 +19,7 @@ use src\model\leadPoorProcessing\entity\LeadPoorProcessing;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingChecker;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadPoorProcessing\service\LeadToExtraQueueService;
+use src\model\leadPoorProcessingData\entity\LeadPoorProcessingData;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataQuery;
 use src\model\leadUserData\repository\LeadUserDataRepository;
@@ -499,14 +500,22 @@ class LeadController extends Controller
 
         $time_start = microtime(true);
         $currentDT = new \DateTimeImmutable();
-        $leadsExpiration = Lead::find()
-            ->select(Lead::tableName() . '.id')
-            ->addSelect('lpp_lppd_id')
-            ->innerJoin(LeadPoorProcessing::tableName(), 'id = lpp_lead_id')
-            ->where(['status' => Lead::STATUS_PROCESSING])
+        $leadsExpiration = LeadPoorProcessing::find()
+            ->select([
+                'lpp_lead_id AS leadId',
+                'lppd_key',
+                'MAX(lpp_expiration_dt) AS max_expiration',
+            ])
+            ->innerJoin(LeadPoorProcessingData::tableName() . ' AS lead_poor_processing_data', 'lpp_lppd_id = lppd_id')
+            ->innerJoin(
+                Lead::tableName() . ' AS leads',
+                'leads.id = lpp_lead_id AND leads.status = :status',
+                ['status' => Lead::STATUS_PROCESSING]
+            )
             ->andWhere(['<=', 'lpp_expiration_dt', $currentDT->format('Y-m-d H:i:s')])
-            ->orderBy(['id' => SORT_ASC])
-            ->distinct()
+            ->indexBy('leadId')
+            ->orderBy(['max_expiration' => SORT_ASC])
+            ->groupBy(['lpp_lead_id', 'lppd_key'])
             ->asArray()
             ->all()
         ;
@@ -515,27 +524,25 @@ class LeadController extends Controller
         $processed = 0;
         Console::startProgress($processed, $count);
 
-        foreach ($leadsExpiration as $item) {
-            $logData = ['leadId' => $item['id']];
+        foreach ($leadsExpiration as $leadId => $item) {
             try {
-                (new LeadToExtraQueueService($item['id'], $item['lpp_lppd_id'], $this->leadRepository))->handle();
+                (new LeadToExtraQueueService($leadId, $item['lppd_key'], $this->leadRepository))->handle();
                 $processed++;
                 Console::updateProgress($processed, $count);
             } catch (\RuntimeException | \DomainException $throwable) {
-                $processed--;
                 /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
                 if (Yii::$app->ff->can(FFlag::FF_KEY_DEBUG)) {
-                    $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
+                    $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $item);
                     \Yii::warning($message, 'LeadController:actionToExtraQueue:Exception');
                 }
             } catch (\Throwable $throwable) {
-                $processed--;
-                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
+                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $item);
                 \Yii::error($message, 'LeadController:actionToExtraQueue:Throwable');
             }
             Console::updateProgress($processed, $count);
         }
 
+        LeadPoorProcessing::deleteAll(['IN', 'lpp_lead_id', array_keys($leadsExpiration)]);
         Console::endProgress(false);
 
         $time_end = microtime(true);

@@ -14,6 +14,8 @@ use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLog;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
 use src\model\leadPoorProcessingLog\repository\LeadPoorProcessingLogRepository;
 use src\repositories\lead\LeadRepository;
+use Yii;
+use yii\db\Transaction;
 use yii\helpers\Html;
 
 /**
@@ -21,53 +23,48 @@ use yii\helpers\Html;
  */
 class LeadToExtraQueueService
 {
-    private Lead $lead;
-    private LeadPoorProcessingData $rule;
+    private int $leadId;
+    private string $dataKey;
     private LeadRepository $leadRepository;
 
-    public function __construct(int $leadId, int $lppDataId, LeadRepository $leadRepository)
+    public function __construct(int $leadId, string $dataKey, LeadRepository $leadRepository)
     {
-        if (!$lead = Lead::find()->where(['id' => $leadId])->limit(1)->one()) {
-            throw new \RuntimeException('Lead not found by ID(' . $leadId . ')');
-        }
-        $this->lead = $lead;
-
-        if (!$rule = LeadPoorProcessingDataQuery::getRuleById($lppDataId)) {
-            throw new \RuntimeException('Rule not found by key(' . LeadPoorProcessingDataDictionary::KEY_LAST_ACTION . ')');
-        }
-        $this->rule = $rule;
+        $this->leadId = $leadId;
+        $this->dataKey = $dataKey;
         $this->leadRepository = $leadRepository;
     }
 
     public function handle(): void
     {
-        (new LeadPoorProcessingChecker($this->getLead(), $this->getRule()->lppd_key))->check();
+        $transaction = new Transaction(['db' => Yii::$app->db]);
 
-        $reason = Html::encode($this->getRule()->lppd_description);
-        $ownerId = $this->getLead()->employee_id;
+        try {
+            $transaction->begin();
 
-        $this->getLead()->extraQueue($ownerId, null, $reason);
+            if (!$lead = Lead::find()->where(['id' => $this->leadId])->limit(1)->one()) {
+                throw new \RuntimeException('Lead not found by ID(' . $this->leadId . ')');
+            }
+            $lppChecker = new LeadPoorProcessingChecker($lead, $this->dataKey);
+            if (!$lppChecker->isChecked()) {
+                throw new \RuntimeException('Lpp check is failed. Lead(' . $this->leadId . ') : LPPD(' . $this->dataKey . ')');
+            }
 
-        if ($this->getLead()->hasOwner()) {
-            $message = 'Lead(' . Purifier::createLeadShortLink($this->getLead()) . ') transfer to Extra Queue. ' . $reason;
+            $ownerId = $lead->employee_id;
+            $reason = Html::encode($lppChecker->getRule()->lppd_description);
+            $lead->extraQueue($ownerId, null, $reason);
+            $this->leadRepository->save($lead);
+            LeadPoorProcessing::deleteAll(['lpp_lead_id' => $lead->id]);
 
-            Notifications::createAndPublish(
-                $ownerId,
-                'Lead transfer to Extra Queue',
-                $message,
-                Notifications::TYPE_INFO,
-                true
-            );
+            $transaction->commit();
+        } catch (\Throwable $throwable) {
+            $transaction->rollBack();
+            throw $throwable;
         }
-
-        $this->leadRepository->save($this->getLead());
-
-        LeadPoorProcessing::deleteAll(['lpp_lead_id' => $this->getLead()->id]);
 
         $description = sprintf(LeadPoorProcessingLogStatus::REASON_ADDED_TO_EXTRA_QUEUE_ACCORDING_TO_THE_RULE, $reason);
         $leadPoorProcessingLog = LeadPoorProcessingLog::create(
-            $this->getLead()->id,
-            $this->getRule()->lppd_id,
+            $lead->id,
+            $lppChecker->getRule()->lppd_id,
             $ownerId,
             LeadPoorProcessingLogStatus::STATUS_ADDED_TO_EXTRA_QUEUE,
             $description
@@ -78,15 +75,17 @@ class LeadToExtraQueueService
 
         $leadPoorProcessingLogRepository = new LeadPoorProcessingLogRepository($leadPoorProcessingLog);
         $leadPoorProcessingLogRepository->save();
-    }
 
-    public function getLead(): Lead
-    {
-        return $this->lead;
-    }
+        if ($lead->hasOwner()) {
+            $message = 'Lead(' . Purifier::createLeadShortLink($lead) . ') transfer to Extra Queue. ' . $reason;
 
-    public function getRule(): LeadPoorProcessingData
-    {
-        return $this->rule;
+            Notifications::createAndPublish(
+                $ownerId,
+                'Lead transfer to Extra Queue',
+                $message,
+                Notifications::TYPE_INFO,
+                true
+            );
+        }
     }
 }

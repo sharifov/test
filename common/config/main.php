@@ -259,6 +259,7 @@ return [
             'apikey' => '',
         ],
         'abac' => require __DIR__ . '/abac.php',
+        'event' => require __DIR__ . '/event.php',
         'ff' => require __DIR__ . '/featureFlag.php',
 //        'abac' => [
 //            'class' => \modules\abac\components\AbacComponent::class,

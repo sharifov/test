@@ -337,6 +337,9 @@ if (!$lead->isNewRecord) {
 
     $(document).on('click', '.js-remove-conversation-btn', function (e) {
         e.preventDefault();
+        if(!confirm('Are you sure you want to delete this item?')) {
+            return false;
+        }
     
         let leadId = $(this).attr('data-lead-id');
         let userId = $(this).attr('data-user-id');

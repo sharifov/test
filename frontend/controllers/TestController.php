@@ -75,6 +75,7 @@ use modules\attraction\models\AttractionQuote;
 use modules\attraction\src\services\AttractionQuotePdfService;
 use modules\email\src\helpers\MailHelper;
 use modules\email\src\Notifier;
+use modules\eventManager\src\EventApp;
 use modules\featureFlag\FFlag;
 use modules\featureFlag\src\entities\FeatureFlag;
 use modules\flight\models\FlightQuote;
@@ -89,6 +90,7 @@ use modules\hotel\models\HotelQuote;
 use modules\hotel\src\services\hotelQuote\CommunicationDataService;
 use modules\hotel\src\services\hotelQuote\HotelQuotePdfService;
 use modules\lead\src\entities\lead\LeadQuery;
+use modules\lead\src\events\LeadEvents;
 use modules\order\src\abac\OrderAbacObject;
 use modules\order\src\entities\order\Order;
 use modules\order\src\events\OrderFileGeneratedEvent;
@@ -131,6 +133,7 @@ use src\auth\Auth;
 use src\cache\app\AppCache;
 use src\dispatchers\DeferredEventDispatcher;
 use src\dispatchers\EventDispatcher;
+use src\dispatchers\NativeEventDispatcher;
 use src\entities\cases\Cases;
 use src\entities\cases\CaseCategory;
 use src\events\lead\LeadCreatedByApiEvent;
@@ -148,6 +151,7 @@ use src\model\clientChatVisitorData\entity\ClientChatVisitorData;
 use src\model\coupon\entity\coupon\service\CouponService;
 use src\model\project\entity\projectLocale\ProjectLocale;
 use src\model\project\entity\projectLocale\ProjectLocaleScopes;
+use src\model\user\entity\userCallStatus\events\UserCallStatusEvents;
 use src\repositories\client\ClientsQuery;
 use src\repositories\NotFoundException;
 use src\services\call\CallDeclinedException;
@@ -2625,7 +2629,6 @@ class TestController extends FController
 
     public function actionRandomProbability()
     {
-
         $games = [
             ['name' => 'Game 1', 'ver' => 2], //  2/15
             ['name' => 'Game 2', 'ver' => 0], // probability 0/15
@@ -2663,5 +2666,64 @@ class TestController extends FController
         }
 
         VarDumper::dump($games, 10, true);
+    }
+
+    public function actionEvent()
+    {
+        $lead = Lead::find()->limit(1)->one();
+
+//        NativeEventDispatcher::recordEvent(
+//            LeadEvents::class,
+//            LeadEvents::EVENT_CLOSE,
+//            [EventHandler::class, 'handler'],
+//            $lead->attributes
+//        );
+//        NativeEventDispatcher::trigger(LeadEvents::class, LeadEvents::EVENT_CLOSE);
+
+//        Yii::$app->event->getEventListContent();
+
+//
+//        VarDumper::dump(Yii::$app->event->getEventListContent(), 10, true);
+//
+//        exit;
+
+//        VarDumper::dump(LeadEvents::getHandlerList(), 10, true);
+//        exit;
+
+
+
+//        NativeEventDispatcher::recordEvent(
+//            LeadEvents::class,
+//            LeadEvents::EVENT_CLOSE,
+//            [EventApp::class, EventApp::HANDLER],
+//            [1, 2] //$lead->attributes
+//        );
+//
+//        //NativeEventDispatcher::trigger(LeadEvents::class, LeadEvents::EVENT_CLOSE);
+//
+//
+//        Event::on(
+//            LeadEvents::class,
+//            LeadEvents::EVENT_CLOSE,
+//            [EventApp::class, EventApp::HANDLER],
+//            ['a' => 123, 'b' => 'sdfsdf'],
+//            false
+//        );
+
+        Event::on(
+            LeadEvents::class,
+            LeadEvents::EVENT_CLOSE,
+            [EventApp::class, EventApp::HANDLER],
+            ['a' => 123, 'b' => 'abc']
+        );
+
+
+        Event::trigger(
+            LeadEvents::class,
+            LeadEvents::EVENT_CLOSE
+        );
+
+
+        //VarDumper::dump($lead->attributes, 10, true);
     }
 }

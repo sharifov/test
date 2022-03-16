@@ -199,7 +199,9 @@ class LeadSearch extends Lead
             [['email_status', 'quote_status', 'l_is_test', 'l_type'], 'integer'],
             [['lfOwnerId', 'userGroupId', 'departmentId', 'projectId', 'createdType', 'lead_type'], 'integer'],
 
-            [['client_name', 'client_email', 'quote_pnr', 'gid', 'origin_airport','destination_airport', 'origin_country', 'destination_country', 'l_request_hash'], 'string'],
+            [['client_name', 'client_email', 'quote_pnr', 'gid', 'origin_country', 'destination_country', 'l_request_hash'], 'string'],
+
+            [['origin_airport', 'destination_airport'], 'safe'],
 
             //['created_date_from', 'default', 'value' => '2018-01-01'],
             //['created_date_to', 'default', 'value' => date('Y-m-d')],
@@ -4443,6 +4445,38 @@ class LeadSearch extends Lead
                 $query->andWhere(new Expression('(' . $subQuery->createCommand()->getRawSql() . ') = 0'));
             }
         }
+
+        if ($this->departRangeTime) {
+            $departRange = explode(" - ", $this->departRangeTime);
+            $having = [];
+            if ($departRange[0] && $departRange[1]) {
+                $having[] = "MAX(departure) >= '" . date('Y-m-d', strtotime($departRange[0])) . "'";
+                $having[] = "MIN(departure) <= '" . date('Y-m-d', strtotime($departRange[1])) . "'";
+                $subQuery = LeadFlightSegment::find()->select(['DISTINCT(lead_id)'])->groupBy('lead_id')->having(implode(" AND ", $having));
+                $query->andWhere(['IN', 'leads.id', $subQuery]);
+            }
+        }
+
+        if (!empty($this->origin_airport)) {
+            $query->innerJoin([
+                'segment_origin_airport' => LeadFlightSegment
+                    ::find()
+                    ->select(['lead_id'])
+                    ->where(['origin' => $this->origin_airport])
+                    ->groupBy(['lead_id'])
+            ], 'leads.id = segment_origin_airport.lead_id');
+        }
+
+        if (!empty($this->destination_airport)) {
+            $query->innerJoin([
+                'segment_destination_airport' => LeadFlightSegment
+                    ::find()
+                    ->select(['lead_id'])
+                    ->where(['destination' => $this->destination_airport])
+                    ->groupBy(['lead_id'])
+            ], 'leads.id = segment_destination_airport.lead_id');
+        }
+
 
         if ($this->created) {
             $query->andFilterWhere(['>=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created))])

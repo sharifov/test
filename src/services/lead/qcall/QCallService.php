@@ -2,6 +2,7 @@
 
 namespace src\services\lead\qcall;
 
+use common\helpers\LogHelper;
 use common\models\Call;
 use common\models\Department;
 use common\models\DepartmentPhoneProject;
@@ -119,13 +120,14 @@ class QCallService
             $phoneNumberRedial = PhoneNumberRedialQuery::getOneMatchingByClientPhone($clientPhone->phone, $lead->project_id);
             if ($phoneNumberRedial) {
                 $phoneFrom = $phoneNumberRedial->phoneList->pl_phone_number;
-                Yii::info([
+                $logData = LogHelper::hidePersonalData([
                     'matchedPhone' => $phoneFrom,
                     'pattern' => $phoneNumberRedial->pnr_phone_pattern,
                     'phoneTo' => $clientPhone->phone,
                     'phoneNumberRedialId' => $phoneNumberRedial->pnr_id,
                     'leadId' => $leadId
-                ], 'info\qCallService::create::phoneNumberRedialReplace');
+                ], ['matchedPhone', 'phoneTo']);
+                Yii::info($logData, 'info\qCallService::create::phoneNumberRedialReplace');
             }
         }
 

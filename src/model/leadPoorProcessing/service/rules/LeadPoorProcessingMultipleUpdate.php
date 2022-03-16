@@ -5,6 +5,6 @@ namespace src\model\leadPoorProcessing\service\rules;
 /**
  * Class LeadPoorProcessingMultipleUpdate
  */
-class LeadPoorProcessingMultipleUpdate extends AbstractLeadPoorProcessingService implements LeadPoorProcessingServiceInterface
+class LeadPoorProcessingMultipleUpdate extends AbstractLeadPoorProcessingService
 {
 }

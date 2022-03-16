@@ -31,7 +31,11 @@ $unsubscribedEmails = array_column($lead->project->emailUnsubscribes, 'eu_email'
                 <?php /** @abac $leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS_USER_SAME_EMAIL, Access to btn The same user by email on lead*/ ?>
                 <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS_USER_SAME_EMAIL)) : ?>
                     <?php if ($count = $email['countUsersSameEmail']) : ?>
-                        <a class="showModalButton" data-modal_id="client-large" title="The Same users by email" data-content-url="<?= Url::to([
+                        <a
+                            class="showModalButton"
+                            data-modal_id="client-large"
+                            title="The Same users by email (excluding the lead current client)"
+                            data-content-url="<?= Url::to([
                             'lead-view/ajax-get-users-same-email-info',
                             'email' => $email['email'],
                             'clientId' => $email['client_id']
