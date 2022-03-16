@@ -49,6 +49,7 @@ use Yii;
 use yii\base\Model;
 use yii\data\ArrayDataProvider;
 use yii\db\Transaction;
+use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Json;
@@ -71,6 +72,18 @@ class QuoteController extends FController
 {
     private const RUNTIME_ERROR_QUOTES_NO_RESULTS = 100;
     private const RUNTIME_ERROR_AUTO_ADD_QUOTES_ACTION_IN_PROGRESS = 101;
+
+    public function behaviors(): array
+    {
+        $behaviors = [
+            'access' => [
+                'allowActions' => [
+                    'auto-adding-quotes',
+                ],
+            ],
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
 
     /**
      * @param $leadId
