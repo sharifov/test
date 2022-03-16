@@ -1,8 +1,0 @@
-[lb]
-lb-crm-stage3383 ansible_ssh_host=34.227.20.39
-
-[shared]
-shared-crm-stage3383 ansible_ssh_host=35.170.187.82
-
-[app]
-app0-crm-stage3383 ansible_ssh_host=34.227.20.39
