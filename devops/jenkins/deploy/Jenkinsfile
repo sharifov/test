@@ -3,7 +3,7 @@ pipeline {
   options {
     ansiColor('xterm')
     disableConcurrentBuilds()
-    withAWS(credentials:'AWS_PROD_INFRA')
+    withAWS(credentials: "aws-${ENV}")
   }
   stages {
     stage('Build') {
@@ -17,7 +17,7 @@ pipeline {
         '''
       }
     }
-    stage('Deploy'){
+    stage('Deploy') {
       steps {
         dir('devops/ansible') {
           ansiblePlaybook(

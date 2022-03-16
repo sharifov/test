@@ -3,6 +3,7 @@
 namespace modules\user\userFeedback\forms;
 
 use frontend\helpers\JsonHelper;
+use modules\user\userFeedback\entity\UserFeedback;
 use yii\base\Model;
 use common\components\validators\CheckJsonValidator;
 
@@ -16,6 +17,7 @@ use common\components\validators\CheckJsonValidator;
  * @property string|null $pageUrl
  * @property string|null $date
  * @property string|null $time
+ * @property string|null $type_id
  */
 class UserFeedbackBugForm extends Model
 {
@@ -26,6 +28,7 @@ class UserFeedbackBugForm extends Model
     public $pageUrl;
     public $date;
     public $time;
+    public $type_id;
 
     private const VALID_MIME_TYPES = [
         'image/png',
@@ -53,6 +56,8 @@ class UserFeedbackBugForm extends Model
             [['date', 'time'], 'safe'],
             [['date'], 'date', 'format' => 'php:Y-m-d'],
             [['time'], 'datetime', 'format' => 'php:H:s'],
+            [['type_id'], 'required'],
+            [['type_id'], 'in', 'range' => array_keys(UserFeedback::TYPE_LIST)],
             [['screenshot'], 'validateScreenshot', 'skipOnEmpty' => true, 'skipOnError' => true],
         ];
     }
@@ -64,6 +69,7 @@ class UserFeedbackBugForm extends Model
     {
         return [
             'title' => 'Title',
+            'type_id' => 'Type',
             'message' => 'Message',
             'screenshot' => 'Screenshot',
             'data' => 'Data',

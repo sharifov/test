@@ -2,14 +2,14 @@
 
 /* @var $this \yii\web\View */
 
-use modules\user\src\abac\dto\UserAbacDto;
-use modules\user\src\abac\UserAbacObject;
+use modules\user\userFeedback\abac\dto\UserFeedbackAbacDto;
+use modules\user\userFeedback\abac\UserFeedbackAbacObject;
 use yii\helpers\Html;
 
 /** @var \common\models\Employee $user */
 $user = Yii::$app->user->identity;
 
-$userAbacDto = new UserAbacDto('username');
+$userFeedbackAbacDto = new UserFeedbackAbacDto();
 ?>
 <div class="sidebar-footer hidden-small">
     <div class="col-md-12 form-group" id="search-menu-div" style="display: none">
@@ -75,8 +75,8 @@ $userAbacDto = new UserAbacDto('username');
     <?php endif; ?>
 
     <?php
-        /** @abac new $userAbacDto, UserAbacObject::USER_FEEDBACK, UserAbacObject::ACTION_CREATE, Username field view*/
-    if (Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FEEDBACK, UserAbacObject::ACTION_CREATE)) :
+        /** @abac $userFeedbackAbacDto, UserFeedbackAbacObject::OBJ_USER_FEEDBACK, UserFeedbackAbacObject::ACTION_ACCESS, Access to create User Feedback*/
+    if (Yii::$app->abac->can($userFeedbackAbacDto, UserFeedbackAbacObject::OBJ_USER_FEEDBACK, UserFeedbackAbacObject::ACTION_CREATE)) :
         ?>
         <?=Html::a(
             '<span class="fa fa-bug warning"></span>',
