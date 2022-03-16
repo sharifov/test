@@ -174,7 +174,7 @@ class UserFeedback extends ActiveRecord
         return $self;
     }
 
-    public static function createNewBug(
+    public static function createNewFeedback(
         ?string $title,
         ?string $message,
         ?int $type,
