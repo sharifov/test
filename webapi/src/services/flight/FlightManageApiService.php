@@ -587,7 +587,7 @@ class FlightManageApiService implements BoWebhookService
                 'booking_id' => $this->form->booking_id,
                 'reprotection_quote_gid' => $this->productQuote->pq_gid,
                 'case_gid' => $this->case->cs_gid,
-                'product_quote_gid' => $originQuote->pq_gid ?? '1500b1172d7ce86e8519df00c39b4200',
+                'product_quote_gid' => $originQuote->pq_gid,
                 'status' => ProductQuoteRefundStatus::getClientKeyStatusById($this->productQuoteRefund->pqr_status_id),
             ]
         ];
