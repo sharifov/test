@@ -19,8 +19,6 @@ use yii\helpers\Url;
 use yii\widgets\ListView;
 use yii\widgets\Pjax;
 use src\helpers\lead\LeadUrlHelper;
-use modules\lead\src\abac\dto\LeadAbacDto;
-use modules\lead\src\abac\LeadAbacObject;
 
 $leadAbacDto = new LeadAbacDto($lead, Auth::id());
 
