@@ -525,10 +525,11 @@ class FlightManageApiService implements BoWebhookService
     {
         $this->form = $form;
         $this->productQuote = ProductQuoteQuery::getProductQuoteByBookingId($form->booking_id);
-        $this->productQuoteRefund = $this->productQuote->productQuoteLastRefund;
+        $this->productQuoteRefund = $this->productQuote->productQuoteLastRefund ?? null;
 
         $transaction = new Transaction(['db' => \Yii::$app->db]);
         try {
+            $transaction->begin();
             if (!$this->productQuote) {
                 throw new NotFoundException('Product Quote not found by bookingId: ' . $form->booking_id);
             }
@@ -548,6 +549,7 @@ class FlightManageApiService implements BoWebhookService
                     $this->productQuoteRefund->declined();
                     $this->productQuoteRefundRepository->save($this->productQuoteRefund);
                     $description = 'Refund is canceled (WH BO)';
+                    $this->case->cs_need_action = true;
                     $this->case->error(null, $description);
                     $this->casesRepository->save($this->case);
                     $this->case->addEventLog(CaseEventLog::RE_PROTECTION_REFUND, $description, ['status' => $form->status], CaseEventLog::CATEGORY_INFO);
@@ -586,7 +588,7 @@ class FlightManageApiService implements BoWebhookService
                     'booking_id' => $this->form->booking_id,
                     'reprotection_quote_gid' => $this->productQuote->pq_gid,
                     'case_gid' => $this->case->cs_gid,
-                    'product_quote_gid' => $originQuote->pq_gid,
+                    'product_quote_gid' => $originQuote->pq_gid ?? $this->productQuote->pq_gid,
                     'status' => ProductQuoteRefundStatus::getClientKeyStatusById($this->productQuoteRefund->pqr_status_id),
                 ]
             ];
