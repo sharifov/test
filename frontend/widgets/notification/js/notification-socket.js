@@ -1,3 +1,7 @@
+let countCurrentDisplayingNotifications = 0;
+let notifLimit = 5;
+let notifQueue = [];
+
 function notificationInit(data) {
     console.log('notificationInit.start');
     console.log(data);
@@ -194,21 +198,7 @@ function notificationTimeDifference(current, previous) {
 }
 
 function notificationPNotify(id, type, title, message, desktopMessage) {
-    new PNotify({
-        type: type,
-        title: title,
-        text: message,
-        icon: true,
-        desktop: {
-            desktop: true,
-            fallback: true,
-            text: desktopMessage,
-            tag: 'notification-popup-showed-id-' + id
-        },
-        delay: 10000,
-        mouse_reset: false,
-        hide: true,
-    });
+    createDesktopNotify(id, type, title, message, desktopMessage);
     if (document.visibilityState === 'visible') {
         soundNotification();
     }

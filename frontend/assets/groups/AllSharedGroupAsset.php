@@ -9,11 +9,15 @@ class AllSharedGroupAsset extends AssetBundle
     public $baseUrl = '@web';
 
     public $css = [
-        ['js/pnotify/pnotify.custom.min.css'],
+        ['js/pnotify/pnotify5.custom.min.css'],
     ];
 
     public $js = [
-        ['js/pnotify/pnotify.https.custom.min.js'],
+        ['js/pnotify/pnotify5.custom.min.js'],
+        ['js/pnotify/pnotify5.bootstrap4.min.js'],
+        ['js/pnotify/pnotify5.fontawesome.min.js'],
+        ['js/pnotify/pnotify5.desktop.min.js'],
+        ['js/pnotify/pnotify5.paginate.min.js'],
 
         ['js/init-objects.js'],
 

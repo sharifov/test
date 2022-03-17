@@ -10,11 +10,19 @@ faviconChat = new Favico({
 
 
 
-PNotify.prototype.options.styling = "bootstrap3";
-// PNotify.defaults.styling = 'bootstrap3'; // Bootstrap version 3
-// PNotify.defaults.icons = 'bootstrap3'; // glyphicons
+PNotify.defaultModules.set(PNotifyBootstrap4, {});
+PNotify.defaultModules.set(PNotifyFontAwesome5, {});
+if (typeof window.stackPaginate === 'undefined') {
+    window.stackPaginate = new PNotify.Stack({
+        dir1: 'down',
+        dir2: 'left',
+        firstpos1: 25,
+        firstpos2: 25,
+        modal: false
+    });
+}
 
-PNotify.desktop.permission();
+PNotifyDesktop.permission();
 
 /*ion.sound({
     sounds: [
@@ -30,12 +38,37 @@ PNotify.desktop.permission();
 })*/
 
 function createNotify (title, message, type) {
-    new PNotify({
+    PNotify.alert({
         title: title,
-        type: type,
         text: message,
+        stack: window.stackPaginate,
+        type: type,
+        destroy: true,
         icon: true,
-        hide: true,
+        modules: new Map([
+            ...PNotify.defaultModules,
+            [PNotifyPaginate, {}],
+        ]),
+        delay: 4000,
+        mouse_reset: false
+    });
+}
+
+function createDesktopNotify(id, title, message, type, desktopMessage)
+{
+    PNotify.alert({
+        title: title,
+        text: message,
+        type: type,
+        destroy: true,
+        modules: new Map([
+            ...PNotify.defaultModules,
+            [PNotifyDesktop, {
+                fallback: true,
+                text: desktopMessage,
+                tag: 'notification-popup-showed-id-' + id
+            }],
+        ]),
         delay: 4000,
         mouse_reset: false
     });
