@@ -311,7 +311,7 @@ $js = <<<JS
         modal.find('.modal-body').load(url, {flightId: flightId, leadId: leadId, pjaxReloadId: pjaxReloadId}, function( response, status, xhr ) {
             $('#preloader').addClass('d-none');
             if (status == 'error') {
-                new PNotify({
+                createNotifyByObject({
                     'title': 'Error',
                     'type': 'error',
                     'text': xhr.statusText
@@ -355,7 +355,7 @@ $js = <<<JS
 //          .done(function(data) {
 //              if (data.error) {
 //                  alert(data.error);
-//                  new PNotify({
+//                  createNotifyByObject({
 //                        title: 'Error: delete room',
 //                        type: 'error',
 //                        text: data.error,
@@ -365,7 +365,7 @@ $js = <<<JS
 //                  $.pjax.reload({
 //                      container: '#pjax-flight-rooms-' + hotelId
 //                  });
-//                  new PNotify({
+//                  createNotifyByObject({
 //                        title: 'The room was successfully removed',
 //                        type: 'success',
 //                        text: data.message,

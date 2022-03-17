@@ -728,7 +728,7 @@ $js = <<<JS
                 $('#save_dump_btn').show(500);                                                            
             } else {
                 if (dataResponse.error.length) {                        
-                    new PNotify({
+                    createNotifyByObject({
                         title: "Error",
                         type: "error",
                         text: dataResponse.error,
@@ -768,7 +768,7 @@ $js = <<<JS
             loadingBtn($('#save_dump_btn'), false);
                 
             if (dataResponse.status === 1) {                   
-                new PNotify({
+                createNotifyByObject({
                     title: 'Success',
                     type: 'success',
                     text: 'Quote created',
@@ -792,7 +792,7 @@ $js = <<<JS
                 });
                                   
                 if (dataResponse.errorMessage.length) {                        
-                    new PNotify({
+                    createNotifyByObject({
                         title: "Error",
                         type: "error",
                         text: dataResponse.errorMessage,
@@ -819,7 +819,7 @@ $js = <<<JS
             message = 'Select GDS please';
         }         
         if (message !== '') {
-            new PNotify({title: "Error", type: "error",
+            createNotifyByObject({title: "Error", type: "error",
                 text: message, hide: true
             });
             return false;

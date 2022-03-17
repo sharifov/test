@@ -187,28 +187,28 @@ $('#form-' + availabilityID).on('beforeSubmit', function (e) {
        success: function(data) {
             if (!data.error) {
                 $('#' + data.availabilityID).html(data.html);  
-                new PNotify({
+                createNotifyByObject({
                     title: 'Quote successfully added',
                     text: data.message,
                     type: 'success'
                 });
             } else {               
                 if (data.message == 'Quantity not selected'){
-                    new PNotify({
+                    createNotifyByObject({
                         title: 'Error',
                         text: data.message,
                         type: 'error'                
                     });
                 }
                 if (data.message == 'invalidPricing'){
-                    new PNotify({
+                    createNotifyByObject({
                         title: 'Error',
                         text: 'Please check quantity according to participants',
                         type: 'error'                
                     });
                 }
                 if (Array.isArray(data.message) && data.message.length > 0){
-                    new PNotify({
+                    createNotifyByObject({
                         title: 'Error',
                         text: data.message.join(" <br> "),
                         type: 'error'                
@@ -218,7 +218,7 @@ $('#form-' + availabilityID).on('beforeSubmit', function (e) {
             }            
        },
        error: function (error) {
-            new PNotify({
+            createNotifyByObject({
                 title: 'Error',
                 text: 'Internal Server Error. Try again letter.',
                 type: 'error'                

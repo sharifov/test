@@ -106,14 +106,14 @@ $('#lead-preferences-edit-form').on('beforeSubmit', function (e) {
                 $.pjax.reload({container: '#pjax-lead-products-wrap', async: false, replace: false, pushState: false});
             }
             
-            new PNotify({
+            createNotifyByObject({
                 title: title,
                 text: data.message,
                 type: type
             });
        },
        error: function (error) {
-            new PNotify({
+            createNotifyByObject({
                 title: 'Error',
                 text: 'Internal Server Error. Try again letter.',
                 type: 'error'                

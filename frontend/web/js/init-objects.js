@@ -54,6 +54,23 @@ function createNotify (title, message, type) {
     });
 }
 
+function createNotifyByObject(obj)
+{
+    let options = {
+        stack: window.stackPaginate,
+        destroy: true,
+        icon: true,
+        modules: new Map([
+            ...PNotify.defaultModules,
+            [PNotifyPaginate, {}],
+        ]),
+        delay: 4000,
+        mouse_reset: false
+    };
+    options = $.extend(true, options, obj);
+    PNotify.alert(options);
+}
+
 function createDesktopNotify(id, title, message, type, desktopMessage)
 {
     PNotify.alert({

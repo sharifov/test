@@ -1175,14 +1175,14 @@ $js = <<<JS
     //              
     //             if (dataResponse.status === 1) {                        
     //                 objBtn.hide(); 
-    //                 new PNotify({
+    //                 createNotifyByObject({
     //                     title: "Success",
     //                     type: "success",
     //                     text: dataResponse.message,
     //                     hide: true
     //                 });                      
     //             } else {                        
-    //                 new PNotify({
+    //                 createNotifyByObject({
     //                     title: "Error:",
     //                     type: "error",
     //                     text: dataResponse.message,
@@ -1202,7 +1202,7 @@ $js = <<<JS
         $.pjax.reload({container:'#pjax-grid-voice-mail', 'async': false});
         $.pjax.reload({container: "#pjax-grid-product-type", 'async': false});
         
-        /*new PNotify({
+        /*createNotifyByObject({
             title: 'Params successfully updated',
             text: 'User project Parameters have been saved successfully.',
             type: 'success'

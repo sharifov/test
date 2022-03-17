@@ -198,7 +198,7 @@ function notificationTimeDifference(current, previous) {
 }
 
 function notificationPNotify(id, type, title, message, desktopMessage) {
-    createDesktopNotify(id, type, title, message, desktopMessage);
+    createDesktopNotify(id, title, message, type, desktopMessage);
     if (document.visibilityState === 'visible') {
         soundNotification();
     }

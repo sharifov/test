@@ -43,7 +43,7 @@ use yii\widgets\Pjax;
           dataType: 'json',
         }).done(function(data) {
             if (parseInt(data.status) === 1) {
-                new PNotify({
+                createNotifyByObject({
                     title: 'The quote was successfully booking',
                     type: 'success',
                     text: data.message,
@@ -52,7 +52,7 @@ use yii\widgets\Pjax;
                 pjaxReload({container: '#pjax-product-quote-list-' + productId});
                 addFileToFileStorageList();                
             } else {
-                new PNotify({
+                createNotifyByObject({
                     title: 'Booking failed',
                     type: 'error',
                     text: data.message,
@@ -88,7 +88,7 @@ use yii\widgets\Pjax;
           dataType: 'json',
         }).done(function(data) {
             if (parseInt(data.status) === 1) {
-                new PNotify({
+                createNotifyByObject({
                     title: 'Document have been successfully generated',
                     type: 'success',
                     text: data.message,
@@ -96,7 +96,7 @@ use yii\widgets\Pjax;
                 });                
                 addFileToFileStorageList();                
             } else {
-                new PNotify({
+                createNotifyByObject({
                     title: 'File generated failed',
                     type: 'error',
                     text: data.message,
@@ -130,7 +130,7 @@ use yii\widgets\Pjax;
           dataType: 'json',
         }).done(function(data) {
             if (parseInt(data.status) === 1) {
-                new PNotify({
+                createNotifyByObject({
                     title: 'Booking is canceled',
                     type: 'success',
                     text: data.message,
@@ -140,7 +140,7 @@ use yii\widgets\Pjax;
                     container: '#pjax-product-quote-list-' + productId
                 });
             } else {
-                new PNotify({
+                createNotifyByObject({
                     title: 'Process failed',
                     type: 'error',
                     text: data.message,
