@@ -131,9 +131,7 @@ class ProductQuoteService implements BoWebhookService
         try {
             $this->productQuote = $this->productQuoteRepository
                 ->findByGidFlightProductQuote($this->form->reprotection_quote_gid);
-
             if ($this->productQuote->isInProgress()) {
-
                 if (!$this->productQuoteChange = $this->productQuote->productQuoteChangeLastRelation->pqcrPqc ?? null) {
                     throw new \RuntimeException('productQuoteChange not found');
                 }
@@ -162,7 +160,8 @@ class ProductQuoteService implements BoWebhookService
         }
     }
 
-    private function removeRelationsProcessing(): void {
+    private function removeRelationsProcessing(): void
+    {
         ProductQuoteRelation::deleteAll([
             'pqr_related_pq_id' => $this->productQuote->pq_id,
             'pqr_type_id' => ProductQuoteRelation::TYPE_REPROTECTION
