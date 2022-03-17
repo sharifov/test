@@ -150,9 +150,9 @@ class EmailService
         if (!empty($matches[1])) {
             foreach ($matches[1] as $messageId) {
                 $messageArr = explode('.', $messageId);
-                if (!empty($messageArr[6])) {
-                    $case_id = (int) $messageArr[6];
-
+                $caseId = end($messageArr);
+                if (!empty($caseId)) {
+                    $case_id = (int) $caseId;
                     $case = $this->casesRepository->find($case_id);
                     if ($case) {
                         return $case;
