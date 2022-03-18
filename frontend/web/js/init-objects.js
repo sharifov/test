@@ -10,8 +10,11 @@ faviconChat = new Favico({
 
 
 
-PNotify.defaultModules.set(PNotifyBootstrap4, {});
-PNotify.defaultModules.set(PNotifyFontAwesome5, {});
+// PNotify.defaultModules.set(PNotifyBootstrap4, {});
+// PNotify.defaultModules.set(PNotifyFontAwesome5, {});
+PNotify.defaults.styling = 'angeler';
+PNotify.defaults.icons = 'angeler';
+// PNotify.defaults.addClass = 'angeler-extended';
 if (typeof window.stackPaginate === 'undefined') {
     window.stackPaginate = new PNotify.Stack({
         dir1: 'down',
@@ -38,6 +41,9 @@ PNotifyDesktop.permission();
 })*/
 
 function createNotify (title, message, type) {
+    if (type === 'warning') {
+        type = 'notice';
+    }
     PNotify.alert({
         title: title,
         text: message,
@@ -49,13 +55,16 @@ function createNotify (title, message, type) {
             ...PNotify.defaultModules,
             [PNotifyPaginate, {}],
         ]),
-        delay: 4000,
+        delay: 2000,
         mouse_reset: false
     });
 }
 
 function createNotifyByObject(obj)
 {
+    if (obj.type === 'warning') {
+        obj.type = 'notice';
+    }
     let options = {
         stack: window.stackPaginate,
         destroy: true,
@@ -64,7 +73,7 @@ function createNotifyByObject(obj)
             ...PNotify.defaultModules,
             [PNotifyPaginate, {}],
         ]),
-        delay: 4000,
+        delay: 2000,
         mouse_reset: false
     };
     options = $.extend(true, options, obj);
