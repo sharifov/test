@@ -94,6 +94,16 @@ server {
         proxy_pass https://api.twilio.com/;
     }
 
+    location /voip-records/ {
+        internal;
+        proxy_buffering off;
+{% if env == 'prod' %}
+        proxy_pass https://api.comms.{{ domain }};
+{% else %}
+        proxy_pass https://api.comms.{{ env }.{{ domain }};
+    }
+{% endif %}
+
     location /admin {
         proxy_send_timeout 300;
         proxy_read_timeout 300;
