@@ -4,10 +4,9 @@ namespace src\model\leadDataKey\entity;
 
 use common\models\Employee;
 use src\behaviors\cache\CleanCacheBehavior;
-use src\behaviors\cache\CleanCacheFileBehavior;
+use src\behaviors\KeySlugBehavior;
 use Yii;
 use yii\behaviors\BlameableBehavior;
-use yii\behaviors\SluggableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\caching\TagDependency;
 use yii\db\ActiveQuery;
@@ -77,9 +76,9 @@ class LeadDataKey extends ActiveRecord
                 'defaultValue' => null,
             ],
             'keySlug' => [
-                'class' => SluggableBehavior::class,
-                'attribute' => 'ldk_key',
-                'slugAttribute' => 'ldk_key',
+                'class' => KeySlugBehavior::class,
+                'donorColumn' => 'ldk_key',
+                'targetColumn' => 'ldk_key',
             ],
             'cleanCache' => [
                 'class' => CleanCacheBehavior::class,

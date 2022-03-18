@@ -36,6 +36,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     public const ACT_LINK_TO_CALL = self::NS . 'act/link-to-call';
     public const ACT_TAKE_LEAD_FROM_CALL = self::NS . 'act/take-from-call';
     public const ACT_PRICE_LINK_RESEARCH = self::NS . 'act/price-link-research';
+    public const ACT_ADD_AUTO_QUOTES = self::NS . 'act/auto-add-quotes';
 
     /** UI PERMISSION */
     public const UI_BLOCK_CLIENT_INFO  = self::NS . 'ui/block/client-info';
@@ -111,7 +112,8 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::CLIENT_CREATE_FORM => self::CLIENT_CREATE_FORM,
         self::OBJ_EXTRA_QUEUE => self::OBJ_EXTRA_QUEUE,
         self::OBJ_CLOSED_QUEUE => self::OBJ_CLOSED_QUEUE,
-        self::OBJ_LEAD_SMART_SEARCH => self::OBJ_LEAD_SMART_SEARCH
+        self::OBJ_LEAD_SMART_SEARCH => self::OBJ_LEAD_SMART_SEARCH,
+        self::ACT_ADD_AUTO_QUOTES => self::ACT_ADD_AUTO_QUOTES,
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -217,6 +219,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::OBJ_EXTRA_QUEUE => [self::ACTION_ACCESS],
         self::OBJ_CLOSED_QUEUE => [self::ACTION_ACCESS],
         self::OBJ_LEAD_SMART_SEARCH => [self::ACTION_ACCESS_SMART_SEARCH],
+        self::ACT_ADD_AUTO_QUOTES => [self::ACTION_ACCESS],
     ];
 
     public const ATTR_LEAD_IS_OWNER = [
@@ -471,6 +474,28 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, '<', '>', '<=', '>=']
     ];
 
+    public const ATTR_QUOTES_COUNT = [
+        'optgroup' => 'Lead',
+        'id' => self::NS . 'quotesCount',
+        'field' => 'quotesCount',
+        'label' => 'Quotes Count in Lead',
+        'type' => self::ATTR_TYPE_INTEGER,
+        'input' => self::ATTR_INPUT_TEXT,
+        'values' => [],
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, '<', '>', '<=', '>=']
+    ];
+
+    public const ATTR_FLIGHT_SEGMENT_COUNT = [
+        'optgroup' => 'Lead',
+        'id' => self::NS . 'flightSegmentsCount',
+        'field' => 'flightSegmentsCount',
+        'label' => 'Flight Segments Count in Lead',
+        'type' => self::ATTR_TYPE_INTEGER,
+        'input' => self::ATTR_INPUT_TEXT,
+        'values' => [],
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, '<', '>', '<=', '>=']
+    ];
+
     public const ATTR_CLOSE_REASON = [
         'optgroup' => 'Lead',
         'id' => self::NS . 'close_reason',
@@ -607,7 +632,8 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
             self::ATTR_IS_COMMON_GROUP,
             self::ATTR_IS_IN_PROJECT,
             self::ATTR_IS_IN_DEPARTMENT,
-        ]
+        ],
+        self::ACT_ADD_AUTO_QUOTES  => [],
     ];
 
     /**
@@ -687,6 +713,8 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         $attributeList[self::CLIENT_CREATE_FORM][] = $attrClientCreateMultiFieldsList;
         $attributeList[self::ACT_USER_CONVERSION][] = $attrLeadCloseReasons;
         $attributeList[self::OBJ_LEAD_SMART_SEARCH][] = $attrStatus;
+        $attributeList[self::ACT_ADD_AUTO_QUOTES][] = self::ATTR_QUOTES_COUNT;
+        $attributeList[self::ACT_ADD_AUTO_QUOTES][] = self::ATTR_FLIGHT_SEGMENT_COUNT;
 
         return $attributeList;
     }

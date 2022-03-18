@@ -109,7 +109,7 @@ use yii\widgets\ActiveForm;
             ])->label('Roles') ?>
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-2">
             <?= $form->field($model, 'groups', [
                 'options' => ['class' => 'form-group']
             ])->widget(Select2::class, [
@@ -120,7 +120,7 @@ use yii\widgets\ActiveForm;
             ])->label('Groups') ?>
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-2">
             <?= $form->field($model, 'user', [
                 'options' => ['class' => 'form-group']
             ])->widget(Select2::class, [
@@ -129,6 +129,17 @@ use yii\widgets\ActiveForm;
                 'options' => ['placeholder' => 'Select User', 'multiple' => false],
                 'pluginOptions' => ['allowClear' => true],
             ])->label('Users') ?>
+        </div>
+
+        <div class="col-md-2">
+            <?= $form->field($model, 'project', [
+                'options' => ['class' => 'form-group']
+            ])->widget(Select2::class, [
+                'data' => \common\models\Project::getList(),
+                'size' => Select2::SMALL,
+                'options' => ['placeholder' => 'Select Project', 'multiple' => true],
+                'pluginOptions' => ['allowClear' => true],
+            ])->label('Project') ?>
         </div>
     </div>
     <br>
