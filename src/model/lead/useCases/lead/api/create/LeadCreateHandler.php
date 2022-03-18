@@ -101,7 +101,7 @@ class LeadCreateHandler
                 $this->clientManageService->addEmail(
                     $client,
                     new EmailCreateForm(
-                        ['phone' => $form->clientForm->email]
+                        ['email' => $form->clientForm->email]
                     )
                 );
             }
