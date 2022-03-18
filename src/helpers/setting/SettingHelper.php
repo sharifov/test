@@ -6,10 +6,8 @@ use common\models\Department;
 use common\models\DepartmentPhoneProject;
 use common\models\Lead;
 use frontend\helpers\JsonHelper;
-use src\helpers\app\AppHelper;
 use Yii;
 use yii\helpers\ArrayHelper;
-use yii\helpers\VarDumper;
 
 class SettingHelper
 {
@@ -882,6 +880,66 @@ class SettingHelper
             'isTest' => $isTest
         ];
     }
+
+    /**
+     * @return array
+     * @throws \RuntimeException
+     */
+    public static function getPriceResearchLinksNamesArray(): array
+    {
+        $researchLinks = Yii::$app->params['settings']['price_research_links'] ?? null;
+        if (empty($researchLinks)) {
+            $error = 'Price research links settings mot found. Value must be array';
+            throw new \RuntimeException($error);
+        }
+        if (!is_array($researchLinks)) {
+            $error = 'Price research links settings is invalid. Value must be array';
+            throw new \RuntimeException($error);
+        }
+        $results = [];
+        foreach ($researchLinks as $key => $researchLink) {
+            if (!is_array($researchLink)) {
+                $error = 'Price research links settings is invalid. Link value must be array, arrayKey is ' . $researchLink;
+                throw new \RuntimeException($error);
+            }
+            if (!ArrayHelper::getValue($researchLink, 'enabled')) {
+                continue;
+            }
+            $linkName  = ArrayHelper::getValue($researchLink, 'name');
+            $results[] = $linkName;
+        }
+        return $results;
+    }
+
+    /**
+     * @param int $key
+     * @return array
+     * @throws \RuntimeException
+     */
+    public static function getPriceResearchLinkByKey(int $key): array
+    {
+        $researchLinks = Yii::$app->params['settings']['price_research_links'] ?? null;
+        if (empty($researchLinks)) {
+            $error = 'Price research links settings mot found. Value must be array';
+            throw new \RuntimeException($error);
+        }
+        if (!is_array($researchLinks)) {
+            $error = 'Price research links settings is invalid. Value must be array';
+            throw  new  \RuntimeException($error);
+        }
+        if (!array_key_exists($key, $researchLinks)) {
+            $error = 'Price research links settings key is invalid. Value not found arrayKey is' . $key;
+            throw new  \RuntimeException($error);
+        }
+        $element = $researchLinks[$key];
+        if (!is_array($element)) {
+            $error = 'Price research links settings is invalid. Link value must be array arrayKey is' . $key;
+            throw new  \RuntimeException($error);
+        }
+
+        return $element;
+    }
+
 
     private static function leadRedialExcludeAttributesErrorLog(string $key): void
     {

@@ -24,7 +24,7 @@ use yii\widgets\Pjax;
 ]) ?>
 
 <div class="col-md-12">
-    <h3><i class="fa fa-bug"></i> Bug Report</h3>
+    <h3><i class="fa fa-bug"></i> User Feedback Report</h3>
 </div>
 <div class="col-md-12">
     <div class="row">
@@ -32,6 +32,13 @@ use yii\widgets\Pjax;
             <?= $form->errorSummary($model) ?>
 
             <?= $form->field($model, 'title')->textInput(['maxlength' => true]) ?>
+            <?= $form->field($model, 'type_id')->widget(\kartik\select2\Select2::class, [
+                'model' => $model,
+                'data' => \modules\user\userFeedback\entity\UserFeedback::TYPE_LIST,
+                'options' => [
+                    'prompt' => '---'
+                ]
+            ])  ?>
             <?= $form->field($model, 'pageUrl')->textInput() ?>
             <?= $form->field($model, 'message')->textarea(['rows' => 10]) ?>
             <?= $form->field($model, 'data')->hiddenInput(['rows' => 10, 'id' => 'uf_data'])->label(false) ?>
