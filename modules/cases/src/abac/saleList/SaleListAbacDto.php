@@ -19,7 +19,7 @@ class SaleListAbacDto extends \stdClass
     public bool $need_action;
     public bool $is_common_group;
 
-    public function __construct(Cases $case, $userId)
+    public function __construct(Cases $case, int $userId)
     {
         if ($case) {
             $this->is_owner = $case->isOwner($userId);

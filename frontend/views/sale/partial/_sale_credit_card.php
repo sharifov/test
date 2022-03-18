@@ -21,7 +21,8 @@ $deleteCreditCardBtnClass = 'btn-delete-credit-card-' . $saleId;
 $pjaxCreditCardTable = 'pjax-credit-card-table' . $saleId;
 $sendCcInfoBtnClass = 'btn-send-cc-info-' . $saleId;
 
-$caseAbacDto = new SaleListAbacDto($caseModel);
+$user_id = \Yii::$app->user->id;
+$caseAbacDto = new SaleListAbacDto($caseModel, $user_id);
 /** @abac $caseAbacDto, CasesAbacObject::UI_BLOCK_SALE_LIST, CasesAbacObject::ACTION_ADD_CREDIT_CARD, Restrict access to add credit card */
 $canAdd = Yii::$app->abac->can($caseAbacDto, SaleListAbacObject::UI_BLOCK_SALE_LIST, SaleListAbacObject::ACTION_ADD_CREDIT_CARD);
 
