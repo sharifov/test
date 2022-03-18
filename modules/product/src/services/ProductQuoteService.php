@@ -142,6 +142,9 @@ class ProductQuoteService implements BoWebhookService
                     $this->handleCanceled();
                 } elseif ($form->isExchanged()) {
                     $this->handleExchanged();
+                } elseif ($form->isProcessing()) {
+                    $this->productQuoteChange->statusToProcessing();
+                    $this->productQuoteChangeRepository->save($this->productQuoteChange);
                 }
 
                 $this->case->addEventLog(
