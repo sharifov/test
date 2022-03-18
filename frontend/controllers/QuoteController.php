@@ -13,8 +13,8 @@ use common\models\QuotePrice;
 use frontend\helpers\JsonHelper;
 use frontend\helpers\QuoteHelper;
 use modules\featureFlag\FFlag;
-use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchHelper;
-use PhpParser\Node\Expr\Empty_;
+use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\lead\src\abac\LeadAbacObject;
 use src\auth\Auth;
 use src\dto\searchService\SearchServiceQuoteDTO;
 use src\exception\AdditionalDataException;
@@ -1370,7 +1370,6 @@ class QuoteController extends FController
         }
 
         Yii::$app->response->format = Response::FORMAT_JSON;
-
         $leadId = (int) Yii::$app->request->post('leadId', 0);
         $gds = (string) Yii::$app->request->post('gds', '');
         $response = ['status' => 0, 'message' => ''];
@@ -1380,16 +1379,14 @@ class QuoteController extends FController
             if (!Yii::$app->ff->can(FFlag::FF_KEY_ADD_AUTO_QUOTES)) {
                 throw new \RuntimeException('Auto add quote is disabled');
             }
-
             $lead = Lead::findOne($leadId);
             if (!$lead) {
                 throw new \RuntimeException('Lead not found');
             }
-            if ($lead->quotesCount) {
-                throw new \RuntimeException('Lead already has quotes');
-            }
-            if (!$lead->leadFlightSegmentsCount) {
-                throw new \RuntimeException('Lead not have flight request');
+            /** @abac new LeadAbacDto($lead, Auth::id()), LeadAbacObject::ACT_ADD_AUTO_QUOTES, LeadAbacObject::ACTION_ACCESS, Access to auto add quotes */
+            $leadAbacDto = new LeadAbacDto($lead, Auth::id());
+            if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_ADD_AUTO_QUOTES, LeadAbacObject::ACTION_ACCESS)) {
+                throw new \RuntimeException('Check ABAC(' . LeadAbacObject::ACT_ADD_AUTO_QUOTES . ') access is failed');
             }
 
             $keyCache = sprintf('quick-search-new-%d-%s-%s', $lead->id, $gds, $lead->generateLeadKey());
@@ -1420,14 +1417,17 @@ class QuoteController extends FController
             ]);
 
             $addQuoteService = Yii::createObject(AddQuoteService::class);
-            $addQuoteService->autoSelectQuotes($dataProvider->getModels(), $lead, Auth::user());
+            $addQuoteService->autoSelectQuotes($dataProvider->getModels(), $lead, Auth::user(), true);
 
             $response['status'] = 1;
             $response['message'] = 'Auto add quotes completed successfully';
-        } catch (\RuntimeException | \DomainException $e) {
-            $response['message'] = $e->getMessage();
-        } catch (\Throwable $e) {
-            Yii::error(AppHelper::throwableLog($e), 'QuoteController::actionAutoAddingQuotes::Throwable');
+        } catch (\RuntimeException | \DomainException $throwable) {
+            $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['lead_id' => $leadId]);
+            Yii::info($message, 'QuoteController::actionAutoAddingQuotes::Exception');
+            $response['message'] = $throwable->getMessage();
+        } catch (\Throwable $throwable) {
+            $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['lead_id' => $leadId]);
+            Yii::error($message, 'QuoteController::actionAutoAddingQuotes::Throwable');
             $response['message'] = 'Internal Server Error';
         }
 

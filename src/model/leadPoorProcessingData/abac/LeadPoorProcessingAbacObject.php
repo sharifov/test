@@ -210,7 +210,7 @@ class LeadPoorProcessingAbacObject extends AbacBaseModel implements AbacInterfac
         $attributeList[self::OBJ_PERMISSION_RULE][] = $attrLeadIsTest;
         $attributeList[self::OBJ_PERMISSION_RULE][] = $attrLeadCallStatus;
         $attributeList[self::OBJ_PERMISSION_RULE][] = $attrLeadType;
-        $attributeList[self::OBJ_PERMISSION_RULE][] =  self::ATTR_IS_IN_PROJECT;
+        $attributeList[self::OBJ_PERMISSION_RULE][] = self::ATTR_IS_IN_PROJECT;
         $attributeList[self::OBJ_PERMISSION_RULE][] = self::ATTR_IS_IN_DEPARTMENT;
         $attributeList[self::OBJ_PERMISSION_RULE][] = self::ATTR_LEAD_CREATED;
         $attributeList[self::OBJ_PERMISSION_RULE][] = self::ATTR_LEAD_HAS_FLIGHT_DETAILS;

@@ -1,6 +1,9 @@
 <?php
 
 use modules\featureFlag\FFlag;
+use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\lead\src\abac\LeadAbacObject;
+use src\auth\Auth;
 use yii\widgets\ActiveForm;
 use yii\helpers\Html;
 use src\helpers\lead\LeadHelper;
@@ -233,7 +236,14 @@ JS;
 
 <?php
 /** @fflag FFlag::FF_KEY_ADD_AUTO_QUOTES, Auto add quote */
-if ($isCreatedFlightRequest && Yii::$app->ff->can(FFlag::FF_KEY_ADD_AUTO_QUOTES)) {
+/** @abac new LeadAbacDto($lead, Auth::id()), LeadAbacObject::ACT_ADD_AUTO_QUOTES, LeadAbacObject::ACTION_ACCESS, Access to auto add quotes */
+$itineraryForm->getLead()->refresh();
+$leadAbacDto = new LeadAbacDto($itineraryForm->getLead(), Auth::id());
+if (
+    $isCreatedFlightRequest &&
+    Yii::$app->ff->can(FFlag::FF_KEY_ADD_AUTO_QUOTES) &&
+    Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_ADD_AUTO_QUOTES, LeadAbacObject::ACTION_ACCESS)
+) {
     $autoAddQuoteUrl = Url::toRoute('/quote/auto-adding-quotes');
     $leadId = $itineraryForm->getLeadId();
 
