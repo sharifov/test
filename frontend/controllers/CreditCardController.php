@@ -236,7 +236,8 @@ class CreditCardController extends FController
             throw new NotFoundHttpException('Not found case');
         }
 
-        $caseAbacDto = new SaleListAbacDto($case);
+        $user_id = \Yii::$app->user->id;
+        $caseAbacDto = new SaleListAbacDto($case, $user_id);
         /** @abac $caseAbacDto, CasesAbacObject::UI_BLOCK_SALE_LIST, CasesAbacObject::ACTION_ADD_CREDIT_CARD, Restrict access to add credit card */
         if (!Yii::$app->abac->can($caseAbacDto, SaleListAbacObject::UI_BLOCK_SALE_LIST, SaleListAbacObject::ACTION_ADD_CREDIT_CARD)) {
             throw new ForbiddenHttpException('Access denied');
@@ -306,7 +307,8 @@ class CreditCardController extends FController
             throw new NotFoundHttpException('Not found case');
         }
 
-        $caseAbacDto = new SaleListAbacDto($case);
+        $user_id = \Yii::$app->user->id;
+        $caseAbacDto = new SaleListAbacDto($case, $user_id);
         /** @abac $caseAbacDto, CasesAbacObject::UI_BLOCK_SALE_LIST, CasesAbacObject::ACTION_SEND_CC_INFO, Restrict access to send credit card info */
         if (!Yii::$app->abac->can($caseAbacDto, SaleListAbacObject::UI_BLOCK_SALE_LIST, SaleListAbacObject::ACTION_SEND_CC_INFO)) {
             throw new ForbiddenHttpException('Access denied');
