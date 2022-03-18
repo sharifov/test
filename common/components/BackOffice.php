@@ -439,7 +439,9 @@ class BackOffice
                 Yii::$app->params['backOffice']['serverUrlV3']
             );
         } catch (\Throwable $exception) {
-            \Yii::error(AppHelper::throwableLog($exception, true), 'BackOffice:voluntaryRefund');
+            \Yii::error([
+                'message' => $exception->getMessage(),
+            ], 'BackOffice:voluntaryRefund');
             throw new BoResponseException('BO voluntaryRefund server error', BoResponseException::BO_SERVER_ERROR);
         }
 

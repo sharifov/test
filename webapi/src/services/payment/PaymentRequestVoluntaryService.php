@@ -66,15 +66,13 @@ class PaymentRequestVoluntaryService
 
         if ($creditCardForm = $paymentRequestForm->getCreditCardForm()) {
             $creditCard = CreditCard::create(
-                $creditCardForm->number,
+                null,
                 $creditCardForm->holder_name,
                 $creditCardForm->expiration_month,
                 $creditCardForm->expiration_year,
-                $creditCardForm->cvv,
+                null,
                 null
             );
-            $creditCard->updateSecureCardNumber();
-            $creditCard->updateSecureCvv();
             if (!$creditCard->validate()) {
                 throw new \RuntimeException('CreditCard not saved. ' . ErrorsToStringHelper::extractFromModel($creditCard));
             }
