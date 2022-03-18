@@ -8,6 +8,7 @@ use common\models\Employee;
 use Yii;
 use common\models\Call;
 use yii\data\SqlDataProvider;
+use yii\db\Expression;
 use yii\db\Query;
 use common\models\Lead;
 use common\models\Quote;
@@ -40,7 +41,8 @@ class AgentActivitySearch extends Call
     public $project_id;
     public $from_status;
     public $to_status;
-
+    public $lf_owner_id;
+    public $isExtraQLostLeads = false;
 
      /**
      * @inheritdoc
@@ -50,6 +52,9 @@ class AgentActivitySearch extends Call
         return [
             [['date_range','date_from', 'date_to', 'user_groups', 'id', 'username', 'c_project_id','c_call_type_id','s_type_id','s_project_id','project_id'], 'safe'],
             [['to_status', 'from_status'], 'safe'],
+
+            [['lf_owner_id'], 'integer'],
+            [['isExtraQLostLeads'], 'boolean'],
         ];
     }
 
@@ -63,6 +68,7 @@ class AgentActivitySearch extends Call
             'date_from' => 'Date From',
             'date_to' => 'Date To',
             'user_groups' => 'Teams',
+            'lf_owner_id' => 'OwnerId',
         ];
     }
 
@@ -146,7 +152,36 @@ class AgentActivitySearch extends Call
         $query->addSelect(['(SELECT COUNT(*) FROM lead_task WHERE (lt_date ' . $between_condition . ') AND lt_user_id=e.id) AS total_tasks ']);
         $query->addSelect(['(SELECT COUNT(*) FROM lead_task WHERE (lt_date ' . $between_condition . ') AND lt_user_id=e.id AND lt_completed_dt IS NOT NULL) AS completed_tasks ']);
 
+        $query->addSelect(['extra_q_to_processing_query.extra_q_to_processing_cnt']);
+        $query->addSelect(['processing_to_extra_q_query.processing_to_extra_q_cnt']);
+
         $query->from('employees AS e');
+
+        $query->leftJoin([
+            'extra_q_to_processing_query' => LeadFlow::find()
+                ->select(['COUNT(*) AS extra_q_to_processing_cnt', 'lf_owner_id'])
+                ->where(['BETWEEN', 'created', $date_from, $date_to])
+                ->andWhere(['lf_from_status_id' => Lead::STATUS_EXTRA_QUEUE])
+                ->andWhere(['status' => Lead::STATUS_PROCESSING])
+                ->groupBy(['lf_owner_id'])
+        ], 'e.id = extra_q_to_processing_query.lf_owner_id');
+
+        $query->leftJoin([
+            'processing_to_extra_q_query' => LeadFlow::find()
+                ->alias('lead_flow_pe')
+                ->select('COUNT(*) AS processing_to_extra_q_cnt')
+                ->addSelect('lead_flow_pe.employee_id')
+                ->andWhere(['lead_flow_pe.lf_from_status_id' => Lead::STATUS_PROCESSING])
+                ->andWhere(['lead_flow_pe.status' => Lead::STATUS_EXTRA_QUEUE])
+                ->innerJoin([
+                    'first_extra_q_query' => LeadFlow::find()
+                        ->select(['MIN(created) AS min_created_dt', 'lead_id'])
+                        ->andWhere(['lf_from_status_id' => Lead::STATUS_PROCESSING])
+                        ->andWhere(['status' => Lead::STATUS_EXTRA_QUEUE])
+                        ->groupBy(['lead_id'])
+                ], 'lead_flow_pe.lead_id = first_extra_q_query.lead_id AND lead_flow_pe.created = first_extra_q_query.min_created_dt')
+                ->groupBy(['lead_flow_pe.employee_id'])
+        ], 'e.id = processing_to_extra_q_query.employee_id');
 
         if ($user->isSupervision()) {
             $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $user->id]);
@@ -299,11 +334,19 @@ class AgentActivitySearch extends Call
                     'created_leads' => [
                         'asc' => ['created_leads' => SORT_ASC],
                         'desc' => ['created_leads' => SORT_DESC],
-                    ]
+                    ],
+                    'extra_q_to_processing_cnt' => [
+                        'asc' => ['extra_q_to_processing_cnt' => SORT_ASC],
+                        'desc' => ['extra_q_to_processing_cnt' => SORT_DESC],
+                    ],
+                    'processing_to_extra_q_cnt' => [
+                        'asc' => ['processing_to_extra_q_cnt' => SORT_ASC],
+                        'desc' => ['processing_to_extra_q_cnt' => SORT_DESC],
+                    ],
                 ],
             ],
             'pagination' => [
-                'pageSize' => 25,
+                'pageSize' => 35,
             ],
         ];
 
@@ -509,12 +552,25 @@ class AgentActivitySearch extends Call
             return $dataProvider;
         }
 
-        $query->where(['lead_flow.employee_id' => $this->id ,'lead_flow.status' => $this->to_status, 'lead_flow.lf_from_status_id' => $this->from_status]);
         $query->andWhere(['between','lead_flow.created', $this->date_from, $this->date_to]);
 
         $query->andFilterWhere([
             'leads.project_id' => $this->project_id,
+            'lead_flow.employee_id' => $this->id,
+            'lead_flow.lf_owner_id' => $this->lf_owner_id,
+            'lead_flow.status' => $this->to_status,
+            'lead_flow.lf_from_status_id' => $this->from_status,
         ]);
+
+        if ($this->isExtraQLostLeads) {
+            $query->innerJoin([
+                'first_extra_q_query' => LeadFlow::find()
+                    ->select(['MIN(created) AS min_created_dt', 'lead_id'])
+                    ->andWhere(['lf_from_status_id' => Lead::STATUS_PROCESSING])
+                    ->andWhere(['status' => Lead::STATUS_EXTRA_QUEUE])
+                    ->groupBy(['lead_id'])
+            ], 'lead_flow.lead_id = first_extra_q_query.lead_id AND lead_flow.created = first_extra_q_query.min_created_dt');
+        }
 
         return $dataProvider;
     }

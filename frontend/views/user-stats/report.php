@@ -175,6 +175,7 @@ if ($showReport) {
         <?php
         $exportMenu = ExportMenu::widget([
             'dataProvider' => $dataProvider,
+            'layout' => "{errors}\n{summary}\n{items}\n{pager}",
             'columns' => $columns,
             'exportConfig' => [
                 ExportMenu::FORMAT_PDF => [
