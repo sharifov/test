@@ -879,10 +879,9 @@ class FlightQuoteRefundController extends ApiBaseController
         } catch (BoResponseException $e) {
             $flightRequest->statusToError();
             $flightRequest->save();
-            \Yii::error(
-                AppHelper::throwableLog($e, true),
-                'FlightQuoteRefundController:actionConfirm:BoResponseException'
-            );
+            \Yii::error([
+                'message' => $e->getMessage(),
+            ], 'FlightQuoteRefundController:actionConfirm:BoResponseException');
             return $this->endApiLog(new ErrorResponse(
                 new MessageMessage($e->getMessage()),
                 new ErrorName('BO Error'),
@@ -893,10 +892,9 @@ class FlightQuoteRefundController extends ApiBaseController
         } catch (\RuntimeException | \DomainException $throwable) {
             $flightRequest->statusToError();
             $flightRequest->save();
-            \Yii::warning(
-                AppHelper::throwableLog($throwable),
-                'FlightQuoteRefundController:actionConfirm:Warning'
-            );
+            \Yii::warning([
+                'message' => $throwable->getMessage(),
+            ], 'FlightQuoteRefundController:actionConfirm:Warning');
             return $this->endApiLog(new ErrorResponse(
                 new MessageMessage($throwable->getMessage()),
                 new ErrorName(HttpStatusCodeHelper::getName(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY)),
@@ -907,10 +905,9 @@ class FlightQuoteRefundController extends ApiBaseController
         } catch (\Throwable $throwable) {
             $flightRequest->statusToError();
             $flightRequest->save();
-            \Yii::error(
-                AppHelper::throwableLog($throwable, true),
-                'FlightQuoteRefundController:actionConfirm:Throwable'
-            );
+            \Yii::error([
+                'message' => $throwable->getMessage(),
+            ], 'FlightQuoteRefundController:actionConfirm:Throwable');
             return $this->endApiLog(new ErrorResponse(
                 new MessageMessage(HttpStatusCodeHelper::getName(HttpStatusCodeHelper::INTERNAL_SERVER_ERROR)),
                 new ErrorName('Server Error'),

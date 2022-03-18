@@ -445,6 +445,8 @@ class BackOffice
             throw new BoResponseException('BO voluntaryRefund server error', BoResponseException::BO_SERVER_ERROR);
         }
 
+        unset($requestData['payment']);
+
         $data = $response->data;
         if (!$data) {
             \Yii::error([
