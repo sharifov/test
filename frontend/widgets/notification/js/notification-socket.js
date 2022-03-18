@@ -1,3 +1,7 @@
+let countCurrentDisplayingNotifications = 0;
+let notifLimit = 5;
+let notifQueue = [];
+
 function notificationInit(data) {
     console.log('notificationInit.start');
     console.log(data);
@@ -39,6 +43,10 @@ function notificationInit(data) {
         }
     } else if (command === 'delete_all') {
         notificationDeleteAllMessages();
+    } else if (command === 'delete_batch') {
+        data['ids'].forEach(function (id) {
+            notificationDeleteMessage(parseInt(id));
+        });
     }
 
     notificationUpdateTime();
@@ -65,16 +73,17 @@ function notificationDeleteAllMessages() {
 
 function notificationDeleteMessage(id) {
     let isDeleted = false;
-    $("#notification-menu li").each(function(e) {
-        let messageId = $(this).data('id');
+    let notif = $('#notification-menu li[data-id="'+id+'"]');
+    if (notif.length) {
+        let messageId = notif.data('id');
         if (messageId && messageId === id) {
             isDeleted = true;
-            $(this).remove();
+            notif.remove();
             notificationCounterDecrement();
             console.log('Message Id: ' + id + ' was deleted');
             return false;
         }
-    });
+    }
     if (!isDeleted) {
         console.error('Message Id: ' + id + ' not found');
     }
@@ -194,21 +203,8 @@ function notificationTimeDifference(current, previous) {
 }
 
 function notificationPNotify(id, type, title, message, desktopMessage) {
-    new PNotify({
-        type: type,
-        title: title,
-        text: message,
-        icon: true,
-        desktop: {
-            desktop: true,
-            fallback: true,
-            text: desktopMessage,
-            tag: 'notification-popup-showed-id-' + id
-        },
-        delay: 10000,
-        mouse_reset: false,
-        hide: true,
-    });
+    createNotify(title, message, type);
+    createDesktopNotify(id, title, message, type, desktopMessage);
     if (document.visibilityState === 'visible') {
         soundNotification();
     }

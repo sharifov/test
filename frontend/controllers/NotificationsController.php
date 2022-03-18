@@ -2,13 +2,18 @@
 
 namespace frontend\controllers;
 
+use frontend\widgets\multipleUpdate\myNotifications\MultipleUpdateForm;
+use frontend\widgets\multipleUpdate\myNotifications\MultipleUpdateService;
 use frontend\widgets\notification\NotificationCache;
 use frontend\widgets\notification\NotificationMessage;
 use frontend\widgets\notification\NotificationWidget;
+use modules\notification\src\abac\dto\NotificationAbacDto;
+use modules\notification\src\abac\NotificationAbacObject;
 use src\auth\Auth;
 use Yii;
 use common\models\Notifications;
 use common\models\search\NotificationsSearch;
+use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
@@ -16,9 +21,19 @@ use yii\filters\VerbFilter;
 
 /**
  * NotificationsController implements the CRUD actions for Notifications model.
+ *
+ * @property-read MultipleUpdateService $multipleUpdateService
  */
 class NotificationsController extends FController
 {
+    private MultipleUpdateService $multipleUpdateService;
+
+    public function __construct($id, $module, MultipleUpdateService $multipleUpdateService, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->multipleUpdateService = $multipleUpdateService;
+    }
+
     public function behaviors()
     {
         $behaviors = [
@@ -28,6 +43,16 @@ class NotificationsController extends FController
                     'delete' => ['POST'],
                 ],
             ],
+            'access' => [
+                'class' => AccessControl::class,
+                'only' => ['multiple-update-read'],
+                'rules' => [
+                    [
+                        'allow' => true,
+                        'actions' => ['multiple-update-read'],
+                    ],
+                ],
+            ]
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
@@ -51,6 +76,30 @@ class NotificationsController extends FController
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
+    }
+
+    public function actionMultipleUpdateRead()
+    {
+        $notificationAbacDto = new NotificationAbacDto(null);
+        /** @abac $abacDto, NotificationAbacDto::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_MULTIPLE_UPDATE_MAKE_READ, Access to action multiple update notification */
+        if (!Yii::$app->abac->can($notificationAbacDto, NotificationAbacObject::OBJ_NOTIFICATION_MULTIPLE_UPDATE, NotificationAbacObject::ACTION_MULTIPLE_UPDATE_MAKE_READ, Auth::user())) {
+            throw new ForbiddenHttpException('Access Denied');
+        }
+
+        $result = [
+            'error' => false,
+            'message' => 'Notification updated successfully'
+        ];
+
+        $form = new MultipleUpdateForm();
+        $form->load(Yii::$app->request->post());
+        if ($form->validate()) {
+            $this->multipleUpdateService->makeReadNotifications($form->ids, Auth::id());
+            return $this->asJson($result);
+        }
+        $result['error'] = true;
+        $result['message'] = $form->getErrorSummary(true)[0] ?? '';
+        return $this->asJson($result);
     }
 
     /**

@@ -125,7 +125,7 @@ use modules\user\userFeedback\entity\UserFeedback;
 
                 if (arr.length < 2) {
                     $(this).prop('checked', !$(this).prop('checked'));
-                    new PNotify({
+                    createNotifyByObject({
                         title: 'Warning',
                         text: 'Graph must contain min 1 column',
                         type: 'warning'
@@ -156,7 +156,7 @@ use modules\user\userFeedback\entity\UserFeedback;
 
                 if (arr.length < 2) {
                     $(this).prop('checked', !$(this).prop('checked'));
-                    new PNotify({
+                    createNotifyByObject({
                         title: 'Warning',
                         text: 'Graph must contain min 1 column',
                         type: 'warning'

@@ -141,14 +141,14 @@ $('#lead-quote-extra-mark-up-edit-form').on('beforeSubmit', function (e) {
                 $.pjax.reload({container: '#pjax-quote_estimation_profit-{$quote->id}', async: false});
             }
             
-            new PNotify({
+            createNotifyByObject({
                 title: title,
                 text: data.message,
                 type: type
             });
        },
        error: function (error) {
-            new PNotify({
+            createNotifyByObject({
                 title: 'Error',
                 text: 'Internal Server Error. Try again letter.',
                 type: 'error'                

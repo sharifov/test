@@ -104,7 +104,7 @@ let PhoneWidgetEmail = function () {
                 hidePreloader();
                 if (!data.success) {
                     let content = parseErrors(data.errors);
-                    new PNotify({title: "Send email", type: "error", text: content, hide: true});
+                    createNotifyByObject({title: "Send email", type: "error", text: content, hide: true});
                     return false;
                 }
                 form.find(".email-modal__contact-input").val("");
@@ -113,11 +113,11 @@ let PhoneWidgetEmail = function () {
                 if (data.message) {
                     message = data.message;
                 }
-                new PNotify({title: "Send email", type: "success", text: message, hide: true});
+                createNotifyByObject({title: "Send email", type: "success", text: message, hide: true});
             })
             .fail(function () {
                 hidePreloader();
-                new PNotify({title: "Send email", type: "error", text: 'Server Error. Try again later', hide: true});
+                createNotifyByObject({title: "Send email", type: "error", text: 'Server Error. Try again later', hide: true});
             });
     }
 
@@ -135,7 +135,7 @@ let PhoneWidgetEmail = function () {
 $(document).on("click", ".js-trigger-email-modal", function () {
     let countEmails = PhoneWidgetEmail.getUserEmails().length;
     if (countEmails < 1) {
-        new PNotify({title: "Send email", type: "error", text: 'Not found user emails.', hide: true});
+        createNotifyByObject({title: "Send email", type: "error", text: 'Not found user emails.', hide: true});
         return false;
     }
 

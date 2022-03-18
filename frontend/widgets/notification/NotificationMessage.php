@@ -21,6 +21,7 @@ class NotificationMessage
 {
     private const COMMAND_ADD = 'add';
     private const COMMAND_DELETE = 'delete';
+    private const COMMAND_DELETE_BATCH = 'delete_batch';
     private const COMMAND_DELETE_ALL = 'delete_all';
 
     /**
@@ -53,6 +54,17 @@ class NotificationMessage
                 'command' => self::COMMAND_DELETE,
                 'userId' => $ntf->n_user_id,
                 'id' => $ntf->n_id,
+            ]
+        ];
+    }
+
+    public static function deleteBatch(array $ids, int $userId): array
+    {
+        return [
+            'notification' => [
+                'command' => self::COMMAND_DELETE_BATCH,
+                'userId' => $userId,
+                'ids' => $ids,
             ]
         ];
     }
