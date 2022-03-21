@@ -483,15 +483,9 @@ $leads = $clientChat->leads;
                                 'cvd_timezone',
                                 [
                                     'label' => 'Last Url',
-                                    'value' => static function (ClientChatVisitorData $model) use ($clientChat) {
-                                        $visitorId = '';
-                                        if ($clientChat->ccv && $clientChat->ccv->ccvCvd) {
-                                            $visitorId = $clientChat->ccv->ccvCvd->cvd_visitor_rc_id ?? '';
-                                        }
-                                        if ($chatRequest = ClientChatRequest::getLastRequestPageByVisitorId($visitorId)) {
-                                            if ($pageUrl = $chatRequest->getPageUrl()) {
-                                                return Yii::$app->formatter->asUrl($pageUrl, ['target' => '_blank']);
-                                            }
+                                    'value' => static function (ClientChatVisitorData $model) {
+                                        if ($model->cvd_url) {
+                                            return Yii::$app->formatter->asUrl($model->cvd_url, ['target' => '_blank']);
                                         }
                                         return Yii::$app->formatter->nullDisplay;
                                     },
