@@ -25,12 +25,10 @@ class SaleListAbacDto extends \stdClass
         $this->has_owner = $case->hasOwner();
         $this->status_id = $case->cs_status;
         $this->department_name = $case->department->dep_name ?? '';
+        $this->category_id = $case->cs_category_id ?: null;
         $this->project_name = $case->project->name ?? '';
         $this->is_automate = $case->isAutomate();
         $this->need_action = $case->isNeedAction();
-        if ($case->cs_category_id) {
-            $this->category_id = $case->cs_category_id;
-        }
         if ($case->hasOwner()) {
             $this->is_common_group = EmployeeGroupAccess::isUserInCommonGroup($userId, $case->cs_user_id);
         }
