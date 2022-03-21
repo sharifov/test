@@ -167,7 +167,7 @@ JS;
                                 'Open All Links',
                                 null,
                                 [
-                                    'id' => 'btn-open-all-price-links',
+                                    'id' => 'btn-open-all-price-research-links',
                                     'class' => 'dropdown-item',
                                     'data-pjax' => 0
                                     ]
@@ -419,17 +419,9 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || $is_manager) {
         }
     });
     
-    $(document).on('click', '#btn-open-all-price-links', function () {
+    $(document).on('click', '#btn-open-all-price-research-links', function () {
         $('.price-research-link').each(function( index ) {
-            /*setTimeout(function(){
-                console.log($('#price-research-link-' + index)[0]);
-                let url = ''; //$('#price-research-link-' + index)[0].attr('href');
-                //$('#price-research-link-' + index)[0].click();
-                window.open(url, 'name-' + index, "popup")
-                console.log(url + index);
-            }, (index + 1) * 1000);*/ 
             $(this)[0].click();
-            // '#price-research-link-' + index
         });
     });
    
