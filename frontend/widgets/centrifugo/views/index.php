@@ -75,20 +75,7 @@ function getOldNotificationsIds()
 }
 
 function centNotify(message){
-    new PNotify({
-        type: 'info',
-        title: 'Centrifugo',
-        text: message,
-        icon: true,
-        /*desktop: {
-            desktop: true,
-            fallback: true,
-            text: message.data.message
-        },*/
-        delay: 10000,
-        mouse_reset: false,
-        hide: true
-    });
+    createNotify('info', message, 'Centrifugo');
 }
 
 setInterval(centRefreshNotifications, 30 * 1000);

@@ -55,11 +55,11 @@ class RentCarController extends FController
                 $rentCarRepository = Yii::createObject(RentCarRepository::class);
                 $rentCarRepository->save($rentCar);
 
-                $out .= 'new PNotify({title: "Rent Car update request", type: "success", text: "Success" , hide: true});';
+                $out .= 'createNotifyByObject({title: "Rent Car update request", type: "success", text: "Success" , hide: true});';
             } catch (\DomainException $e) {
-                $out .= 'new PNotify({title: "Rent Car update request", type: "error", text: "' . $e->getMessage() . '" , hide: true});';
+                $out .= 'createNotifyByObject({title: "Rent Car update request", type: "error", text: "' . $e->getMessage() . '" , hide: true});';
             } catch (\Throwable $e) {
-                $out .= 'new PNotify({title: "Rent Car update request", type: "error", text: "Server error" , hide: true});';
+                $out .= 'createNotifyByObject({title: "Rent Car update request", type: "error", text: "Server error" , hide: true});';
                 Yii::error($e, 'RentCarController:actionUpdateAjax');
             }
 

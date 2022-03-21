@@ -161,7 +161,7 @@ $('.nav.side-menu [data-ajax-link]').on('click', function (e) {
                 $('#preloader').addClass('d-none');
             },
             error: function () {
-                new PNotify({
+                createNotifyByObject({
                     title: 'Error',
                     type: 'error',
                     text: 'Internal Server Error. Try again letter.',

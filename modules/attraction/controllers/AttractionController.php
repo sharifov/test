@@ -131,11 +131,11 @@ class AttractionController extends FController
             $out = '<script>$("#modal-sm").modal("hide"); pjaxReload({container: "#pjax-product-search-' . $attraction->atn_product_id . '"});';
             try {
                 $this->attractionRequestUpdateService->update($form);
-                $out .= 'new PNotify({title: "Attraction update request", type: "success", text: "Success" , hide: true});';
+                $out .= 'createNotifyByObject({title: "Attraction update request", type: "success", text: "Success" , hide: true});';
             } catch (\DomainException $e) {
-                $out .= 'new PNotify({title: "Attraction update request", type: "error", text: "' . $e->getMessage() . '" , hide: true});';
+                $out .= 'createNotifyByObject({title: "Attraction update request", type: "error", text: "' . $e->getMessage() . '" , hide: true});';
             } catch (\Throwable $e) {
-                $out .= 'new PNotify({title: "Attraction update request", type: "error", text: "Server error" , hide: true});';
+                $out .= 'createNotifyByObject({title: "Attraction update request", type: "error", text: "Server error" , hide: true});';
                 Yii::error($e, 'HotelController:actionUpdateAjax');
             }
 

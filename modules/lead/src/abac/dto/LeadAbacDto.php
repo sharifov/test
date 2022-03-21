@@ -44,7 +44,8 @@ class LeadAbacDto extends \stdClass
     public array $formMultiAttribute = [];
     public int $snoozeCount = 10;
     public ?string $closeReason = '';
-
+    public ?int $quotesCount = null;
+    public ?int $flightSegmentsCount = null;
 
     /**
      * @param Lead|null $lead
@@ -56,6 +57,8 @@ class LeadAbacDto extends \stdClass
             $this->is_owner = $lead->isOwner($userId);
             $this->has_owner = $lead->hasOwner();
             $this->has_owner_query = $this->has_owner;
+            $this->quotesCount = $lead->quotesCount;
+            $this->flightSegmentsCount = $lead->leadFlightSegmentsCount;
 
             if ($this->has_owner) {
                 $this->is_common_group = EmployeeGroupAccess::isUserInCommonGroup($userId, $lead->employee_id);

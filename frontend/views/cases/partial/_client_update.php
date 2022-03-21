@@ -71,7 +71,7 @@ $('#client-edit-name-form').on('beforeSubmit', function (e) {
                 
                 $('#modalCaseSm').modal('hide');
                 
-                new PNotify({
+                createNotifyByObject({
                     title: 'Client info successfully updated',
                     text: data.message,
                     type: 'success'
@@ -79,7 +79,7 @@ $('#client-edit-name-form').on('beforeSubmit', function (e) {
             }
        },
        error: function (error) {
-            new PNotify({
+            createNotifyByObject({
                 title: 'Error',
                 text: 'Internal Server Error. Try again letter.',
                 type: 'error'                

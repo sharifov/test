@@ -734,4 +734,31 @@ JSON;
         var_dump($phone->phoneList->pl_phone_number ?? null);
         die;
     }
+
+    public function actionNotif()
+    {
+//        $notification = Notifications::create(
+//            464,
+//            'Call - Long Queue Time',
+//            'Call ID:' . 15646852 . ' to PRICELINE Sales from +37378*****456 is stuck in the queue for 15 sec.',
+//            Notifications::TYPE_WARNING,
+//            true
+//        );
+//        if ($notification) {
+//            Notifications::publish('getNewNotification', ['user_id' => 464], NotificationMessage::add($notification));
+//        }
+        $message = 'Call ID:' . 15646852 . ' to PRICELINE Sales from +37378*****456 is stuck in the queue for 15 sec.';
+        Notifications::publish(
+            'showDesktopNotification',
+            ['user_id' => 464],
+            NotificationMessage::desktopMessage(
+                464 . '-desk',
+                'Call - Long Queue Time',
+                $message,
+                'notice',
+                $message,
+                true
+            )
+        );
+    }
 }

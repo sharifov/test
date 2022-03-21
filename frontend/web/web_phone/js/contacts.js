@@ -403,7 +403,7 @@ let PhoneWidgetContacts = function () {
             .fail(function (e) {
                 console.log(e);
                 hidePreloader();
-                new PNotify({title: "Search contacts", type: "error", text: 'Server Error. Try again later', hide: true});
+                createNotifyByObject({title: "Search contacts", type: "error", text: 'Server Error. Try again later', hide: true});
             });
     }
 
@@ -428,7 +428,7 @@ let PhoneWidgetContacts = function () {
             })
             .fail(function () {
                 hidePreloader();
-                new PNotify({title: "Search contacts", type: "error", text: 'Server Error. Try again later', hide: true});
+                createNotifyByObject({title: "Search contacts", type: "error", text: 'Server Error. Try again later', hide: true});
             });
     }
 
@@ -548,7 +548,7 @@ $('#contact-list-ajax').on('beforeSubmit', function (e) {
     let yiiform = $(this);
     let q = yiiform.find("input[name=q]").val();
     if (q.length < 2) {
-         // new PNotify({title: "Search contacts", type: "warning", text: 'Minimum 2 symbols', hide: true});
+         // createNotifyByObject({title: "Search contacts", type: "warning", text: 'Minimum 2 symbols', hide: true});
         PhoneWidgetContacts.setCurrentFullListContainer();
         return false;
     }

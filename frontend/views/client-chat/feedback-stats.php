@@ -146,7 +146,7 @@ $(document).ready( function () {
             if (!data.error) {
                 $('#client-chat-chart').html(data.html);
             } else {
-               new PNotify({
+               createNotifyByObject({
                     title: 'Attention',
                     text: data.message,
                     type: 'warning'                
@@ -154,7 +154,7 @@ $(document).ready( function () {
             }
         },
         error: function (error) {
-            new PNotify({
+            createNotifyByObject({
                 title: 'Error',
                 text: 'Internal Server Error. Try again letter.',
                 type: 'error'                
@@ -195,7 +195,7 @@ $(document).ready( function () {
                     
                     window.history.replaceState({}, '', location.pathname+'?'+params);
                 } else {
-                   new PNotify({
+                   createNotifyByObject({
                         title: 'Attention',
                         text: data.message,
                         type: 'warning'                
@@ -203,7 +203,7 @@ $(document).ready( function () {
                 }
             },
             error: function (error) {
-                new PNotify({
+                createNotifyByObject({
                     title: 'Error',
                     text: 'Internal Server Error. Try again letter.',
                     type: 'error'                

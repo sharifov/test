@@ -265,7 +265,7 @@ $js = <<<JS
           .done(function(data) {
               if (data.error) {
                   alert(data.error);
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'Error: delete room',
                         type: 'error',
                         text: data.error,
@@ -275,7 +275,7 @@ $js = <<<JS
                   pjaxReload({
                       container: '#pjax-hotel-rooms-' + hotelId
                   });
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'The room was successfully removed',
                         type: 'success',
                         text: data.message,

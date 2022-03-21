@@ -80,13 +80,13 @@ $js = <<<JS
                     if (data.message) {
                         message = data.message;
                     }
-                    new PNotify({title: 'Create QA Tasks', text: message, type: 'info'});
+                    createNotifyByObject({title: 'Create QA Tasks', text: message, type: 'info'});
                 } else {
                     message = 'Error. Try again later.';
                     if (data.message) {
                         message = data.message;
                     }
-                    new PNotify({title: 'Create QA Tasks', text: message, type: 'error'});
+                    createNotifyByObject({title: 'Create QA Tasks', text: message, type: 'error'});
                 }
                 var summary = '{$summaryIdentifier}';
                 if (summary && data.text) {
@@ -103,7 +103,7 @@ $js = <<<JS
            },
            error: function (error) {
                $('#{$modalId}').modal('toggle');
-               new PNotify({title: 'Error', text: 'Internal Server Error. Try again later.', type: 'error'});
+               createNotifyByObject({title: 'Error', text: 'Internal Server Error. Try again later.', type: 'error'});
            }
         })
         return false;

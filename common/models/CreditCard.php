@@ -77,6 +77,7 @@ class CreditCard extends ActiveRecord
     ];
 
     public const SCENARIO_CASE_AJAX_UPDATE = 'case_ajax_update';
+    public const SCENARIO_WITHOUT_PRIVATE_DATA = 'without_private_data';
 
     /**
      * @return string
@@ -89,6 +90,7 @@ class CreditCard extends ActiveRecord
     public function scenarios()
     {
         $scenarios = parent::scenarios();
+        $scenarios[self::SCENARIO_WITHOUT_PRIVATE_DATA] = $scenarios[self::SCENARIO_DEFAULT];
         $scenarios[self::SCENARIO_CASE_AJAX_UPDATE] = ['cc_holder_name', 'cc_type_id'];
         return $scenarios;
     }
@@ -99,16 +101,20 @@ class CreditCard extends ActiveRecord
     public function rules()
     {
         return [
-            [['cc_number', 'cc_expiration_month', 'cc_expiration_year'], 'required'],
+            ['cc_number', 'required', 'on' => self::SCENARIO_DEFAULT],
+            ['cc_number', 'string', 'max' => 50],
+
+            ['cc_cvv', 'string', 'skipOnEmpty' => true],
+            ['cc_cvv', 'string', 'max' => 32],
+
+            [['cc_expiration_month', 'cc_expiration_year'], 'required'],
             [['cc_expiration_month', 'cc_expiration_year', 'cc_type_id', 'cc_status_id', 'cc_is_expired', 'cc_created_user_id', 'cc_updated_user_id'], 'integer'],
             [['cc_created_dt', 'cc_updated_dt'], 'safe'],
-            [['cc_number'], 'string', 'max' => 50],
             [['cc_is_sync_bo'], 'integer'],
             [['cc_display_number'], 'string', 'max' => 18],
             [['cc_holder_name'], 'string', 'max' => 50],
             [['cc_bo_link'], 'string', 'max' => 255],
-            [['cc_cvv'], 'string', 'skipOnEmpty' => true],
-            [['cc_cvv', 'cc_security_hash'], 'string', 'max' => 32],
+            ['cc_security_hash', 'string', 'max' => 32],
             [['cc_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['cc_created_user_id' => 'id']],
             [['cc_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['cc_updated_user_id' => 'id']],
         ];
@@ -340,11 +346,11 @@ class CreditCard extends ActiveRecord
     }
 
     public static function create(
-        string $number,
+        ?string $number,
         string $holder,
         int $expirationMonth,
         int $expirationYear,
-        string $cvv,
+        ?string $cvv,
         ?int $typeId
     ): CreditCard {
         $card = new self();

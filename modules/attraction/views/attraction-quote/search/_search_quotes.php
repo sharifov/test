@@ -76,7 +76,7 @@ $js = <<<JS
           .done(function(data) {
               if (data.error) {
                   alert(data.error);
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'Error: fail to get Quotes',
                         type: 'error',
                         text: data.error,
@@ -93,7 +93,7 @@ $js = <<<JS
                   
                   $('#' + productKey).html(data.html);
                   if (data.result) {
-                      new PNotify({
+                      createNotifyByObject({
                         title: 'Check Availability',
                         type: 'warning',
                         text: 'No available quotes. For Attraction with ID ' + atnId +'.',
@@ -102,7 +102,7 @@ $js = <<<JS
                       
                       btnAdd.addClass('btn-warning').html('<i class="fa fa-stop"></i>  Quotes are not available');
                   } else {
-                      new PNotify({
+                      createNotifyByObject({
                         title: 'Check Availability',
                         type: 'success',
                         text: 'Availability was successfully checked. For Attraction with ID ' + atnId +'.',
@@ -148,7 +148,7 @@ $('body').off('click', '.btn-availability-quote').on('click', '.btn-availability
           .done(function(data) {
               if (data.error) {
                   //alert(data.error);
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'Info: fail to get availability data',
                         type: 'info',
                         text: data.message,
@@ -163,7 +163,7 @@ $('body').off('click', '.btn-availability-quote').on('click', '.btn-availability
                       push: false, replace: false, timeout: 2000
                   });*/
                   $('#' + availabilityKey).html(data);
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'Availability was successfully checked',
                         type: 'success',
                         text: 'Attraction ID ' + atnId,
@@ -233,7 +233,7 @@ $('body').off('click', '.btn-availability-quote').on('click', '.btn-availability
           .done(function(data) {
               if (data.error) {
                   alert(data.error);
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'Error: add hotel quote',
                         type: 'error',
                         text: data.error,
@@ -249,7 +249,7 @@ $('body').off('click', '.btn-availability-quote').on('click', '.btn-availability
                       push: false, replace: false, timeout: 2000
                   });
                   
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'Quote successfully added',
                         type: 'success',
                         text: data.message,

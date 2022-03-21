@@ -159,6 +159,17 @@ class LeadPoorProcessingAbacObject extends AbacBaseModel implements AbacInterfac
         'multiple' => false,
         'operators' =>  [self::OP_EQUAL2]
     ];
+    protected const ATTR_LEAD_HAS_FLIGHT_DETAILS = [
+        'optgroup' => 'Lead',
+        'id' => self::NS . 'leadHasFlightDetails',
+        'field' => 'leadHasFlightDetails',
+        'label' => 'Lead Has Flight Details',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' =>  ['true' => 'Yes', 'false' => 'No'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
 
     /** --------------- ATTRIBUTE LIST --------------------------- */
     public const OBJECT_ATTRIBUTE_LIST = [
@@ -199,9 +210,10 @@ class LeadPoorProcessingAbacObject extends AbacBaseModel implements AbacInterfac
         $attributeList[self::OBJ_PERMISSION_RULE][] = $attrLeadIsTest;
         $attributeList[self::OBJ_PERMISSION_RULE][] = $attrLeadCallStatus;
         $attributeList[self::OBJ_PERMISSION_RULE][] = $attrLeadType;
-        $attributeList[self::OBJ_PERMISSION_RULE][] =  self::ATTR_IS_IN_PROJECT;
+        $attributeList[self::OBJ_PERMISSION_RULE][] = self::ATTR_IS_IN_PROJECT;
         $attributeList[self::OBJ_PERMISSION_RULE][] = self::ATTR_IS_IN_DEPARTMENT;
         $attributeList[self::OBJ_PERMISSION_RULE][] = self::ATTR_LEAD_CREATED;
+        $attributeList[self::OBJ_PERMISSION_RULE][] = self::ATTR_LEAD_HAS_FLIGHT_DETAILS;
         $attributeList[self::OBJ_PERMISSION_RULE][] = $attrLeadIsClone;
 
         return $attributeList;

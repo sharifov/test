@@ -19,7 +19,6 @@ use src\services\lead\calculator\LeadTripTypeCalculator;
 use src\services\lead\calculator\SegmentDTO;
 use src\services\lead\LeadHashGenerator;
 use src\services\TransactionManager;
-use yii\helpers\ArrayHelper;
 
 /**
  * Class Handler
@@ -92,6 +91,19 @@ class LeadCreateHandler
                 } else {
                     $client = $this->clientManageService->create($clientForm, null);
                 }
+            } else {
+                $this->clientManageService->addPhone(
+                    $client,
+                    new PhoneCreateForm(
+                        ['phone' => $form->clientForm->phone]
+                    )
+                );
+                $this->clientManageService->addEmail(
+                    $client,
+                    new EmailCreateForm(
+                        ['email' => $form->clientForm->email]
+                    )
+                );
             }
 
             $visitorId = null;

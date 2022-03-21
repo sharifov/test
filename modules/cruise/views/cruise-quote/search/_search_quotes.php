@@ -173,7 +173,7 @@ $js = <<<JS
           .done(function(data) {
               if (data.error) {
                   //alert(data.error);
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'Error: add cruise quote',
                         type: 'error',
                         text: data.error,
@@ -189,7 +189,7 @@ $js = <<<JS
                       push: false, replace: false, timeout: 2000
                   });
 
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'Quote was successfully added',
                         type: 'success',
                         text: data.message,

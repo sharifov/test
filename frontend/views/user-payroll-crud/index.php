@@ -182,13 +182,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 success: function (data) {
                     if (data.error) {
-                        new PNotify({
+                        createNotifyByObject({
                             title: 'Attention!',
                             text: data.message,
                             type: 'warning'
                         });
                     } else {
-                        new PNotify({
+                        createNotifyByObject({
                             title: 'Success',
                             text: data.message,
                             type: 'success'
@@ -202,7 +202,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     if (obj.status === 403) {
                         message = 'Permission Denied';
                     }
-                    new PNotify({
+                    createNotifyByObject({
                         title: 'Error',
                         text: message,
                         type: 'error'                
