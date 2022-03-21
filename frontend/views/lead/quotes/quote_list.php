@@ -162,17 +162,16 @@ JS;
                                     'data-pjax' => 0
                                 ]) ?>
                             <?php endforeach ?>
-                            <?php /*
                             <div class="dropdown-divider"></div>
                             <?= Html::a(
-                                    'Open All Links',
-                                    null,
-                                    [
+                                'Open All Links',
+                                null,
+                                [
                                     'id' => 'btn-open-all-price-links',
                                     'class' => 'dropdown-item',
                                     'data-pjax' => 0
-                            ]
-                                )*/ ?>
+                                    ]
+                            ) ?>
                         <?php endif; ?>
                     </div>
                 </li>
