@@ -149,17 +149,31 @@ JS;
                         <i class="fa fa-link text-info"></i> Price Research
                     </a>
                     <div class="dropdown-menu" role="menu">
-                        <?php foreach ($priceResearchLinks as $key => $priceResearchName) : ?>
-                            <?= Html::a('<i class="fa fa-link"></i> "' . Html::encode($priceResearchName) . '"', [
-                                'quote-price-research/open-price-research-link',
-                                'leadId'               => $lead->id,
-                                'researchLinkKey' => $key,
-                            ], [
-                                'class' => 'dropdown-item',
-                                'target' => '_blank',
-                                'data-pjax' => 0
-                            ]) ?>
-                        <?php endforeach ?>
+                        <?php if ($priceResearchLinks) : ?>
+                            <?php foreach ($priceResearchLinks as $key => $priceResearchName) : ?>
+                                <?= Html::a('<i class="fa fa-link"></i> "' . Html::encode($priceResearchName) . '"', [
+                                    'quote-price-research/open-price-research-link',
+                                    'leadId'               => $lead->id,
+                                    'researchLinkKey'       => $key
+                                ], [
+                                    'id' => 'price-research-link-' . $key,
+                                    'class' => 'dropdown-item price-research-link',
+                                    'target' => '_blank',
+                                    'data-pjax' => 0
+                                ]) ?>
+                            <?php endforeach ?>
+                            <?php /*
+                            <div class="dropdown-divider"></div>
+                            <?= Html::a(
+                                    'Open All Links',
+                                    null,
+                                    [
+                                    'id' => 'btn-open-all-price-links',
+                                    'class' => 'dropdown-item',
+                                    'data-pjax' => 0
+                            ]
+                                )*/ ?>
+                        <?php endif; ?>
                     </div>
                 </li>
                 <?php endif; ?>
@@ -405,6 +419,21 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || $is_manager) {
             $(this).parents('.quote').removeClass("quote--selected");
         }
     });
+    
+    $(document).on('click', '#btn-open-all-price-links', function () {
+        $('.price-research-link').each(function( index ) {
+            /*setTimeout(function(){
+                console.log($('#price-research-link-' + index)[0]);
+                let url = ''; //$('#price-research-link-' + index)[0].attr('href');
+                //$('#price-research-link-' + index)[0].click();
+                window.open(url, 'name-' + index, "popup")
+                console.log(url + index);
+            }, (index + 1) * 1000);*/ 
+            $(this)[0].click();
+            // '#price-research-link-' + index
+        });
+    });
+   
 
 JS;
     $this->registerJs($js);
