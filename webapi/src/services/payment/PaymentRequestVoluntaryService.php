@@ -73,6 +73,7 @@ class PaymentRequestVoluntaryService
                 null,
                 null
             );
+            $creditCard->scenario = CreditCard::SCENARIO_WITHOUT_PRIVATE_DATA;
             if (!$creditCard->validate()) {
                 throw new \RuntimeException('CreditCard not saved. ' . ErrorsToStringHelper::extractFromModel($creditCard));
             }
