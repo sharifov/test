@@ -29,6 +29,7 @@ class SaleListAbacDto extends \stdClass
         $this->project_name = $case->project->name ?? '';
         $this->is_automate = $case->isAutomate();
         $this->need_action = $case->isNeedAction();
+
         if ($case->hasOwner()) {
             $this->is_common_group = EmployeeGroupAccess::isUserInCommonGroup($userId, $case->cs_user_id);
         }
