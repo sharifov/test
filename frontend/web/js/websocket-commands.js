@@ -451,6 +451,14 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                         createNotify(data.title, data.message, data.type);
                     }
 
+                    if (obj.cmd === 'showDesktopNotification') {
+                        let data = obj.data;
+                        createDesktopNotify(data.desktopId, data.title, data.message, data.type, data.desktopMessage);
+                        if (data.showBrowserNotify) {
+                            createNotify(data.title, data.message, data.type);
+                        }
+                    }
+
                     if (obj.cmd === 'updateVoiceMailRecord') {
                         if ($("#voice-mail-pjax").length > 0) {
                             pjaxReload({container: "#voice-mail-pjax"});
