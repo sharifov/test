@@ -248,7 +248,7 @@ class ProductQuoteService implements BoWebhookService
                 'product_quote_gid' => $originQuote->pq_gid ?? null,
                 'status' => $this->form->isCanceled()
                     ? ProductQuoteChangeStatus::getClientKeyStatusById(ProductQuoteChangeStatus::DECLINED)
-                    : ProductQuoteChangeStatus::getClientKeyStatusById($this->productQuote->pq_status_id),
+                    : ProductQuoteChangeStatus::getClientKeyStatusById($this->productQuoteChange->pqc_status_id),
             ]
         ];
         \Yii::info([

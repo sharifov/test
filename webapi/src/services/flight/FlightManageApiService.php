@@ -596,7 +596,7 @@ class FlightManageApiService implements BoWebhookService
                 'type' => HybridWhData::WH_TYPE_FLIGHT_SCHEDULE_CHANGE,
                 'requestData' => $whData,
                 'formBOData' => $this->form->toArray(),
-                'ProductQuoteChangeStatus' => ProductQuoteChangeStatus::getName($this->productQuoteRefund->pqr_status_id),
+                'ProductQuoteRefundStatus' => ProductQuoteRefundStatus::getName($this->productQuoteRefund->pqr_status_id),
             ], 'info\Webhook::OTA::ScheduleChangeRefund:Request');
             $responseData = $hybridService->whReprotection($this->case->cs_project_id, $whData);
             \Yii::info([
