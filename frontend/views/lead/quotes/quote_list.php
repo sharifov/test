@@ -145,15 +145,17 @@ JS;
                 <?php endif; ?>
                 <?php if ($canAccessPriceResearchLinks) :?>
                 <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Market Price Research Tool</a>
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false" title="Market Price Research Tool">
+                        <i class="fa fa-link text-info"></i> Price Research
+                    </a>
                     <div class="dropdown-menu" role="menu">
-                        <?php foreach ($priceResearchLinks as $key => $priceResearchLink) : ?>
-                            <?= Html::a('<i class="fa fa- "></i>' . $priceResearchLink, [
+                        <?php foreach ($priceResearchLinks as $key => $priceResearchName) : ?>
+                            <?= Html::a('<i class="fa fa-link"></i> "' . Html::encode($priceResearchName) . '"', [
                                 'quote-price-research/open-price-research-link',
                                 'leadId'               => $lead->id,
                                 'researchLinkKey' => $key,
                             ], [
-                                'class' => 'dropdown-item text-danger',
+                                'class' => 'dropdown-item',
                                 'target' => '_blank',
                                 'data-pjax' => 0
                             ]) ?>
