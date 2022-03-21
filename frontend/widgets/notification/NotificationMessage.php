@@ -78,4 +78,24 @@ class NotificationMessage
             ]
         ];
     }
+
+    public static function desktopMessage(
+        string $desktopId,
+        string $title,
+        string $message,
+        string $type,
+        string $desktopMessage,
+        bool $showBrowserNotify
+    ): array {
+        return [
+            'data' => [
+                'desktopId' => $desktopId,
+                'title' => $title,
+                'message' => $message,
+                'type' => $type,
+                'desktopMessage' => $desktopMessage,
+                'showBrowserNotify' => (int)$showBrowserNotify
+            ]
+        ];
+    }
 }
