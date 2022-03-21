@@ -906,7 +906,7 @@ class SettingHelper
                 continue;
             }
             $linkName  = ArrayHelper::getValue($researchLink, 'name');
-            $results[] = $linkName;
+            $results[$key] = $linkName;
         }
         return $results;
     }
@@ -916,7 +916,7 @@ class SettingHelper
      * @return array
      * @throws \RuntimeException
      */
-    public static function getPriceResearchLinkByKey(int $key): array
+    public static function getPriceResearchLinkByKey(string $key): array
     {
         $researchLinks = Yii::$app->params['settings']['price_research_links'] ?? null;
         if (empty($researchLinks)) {

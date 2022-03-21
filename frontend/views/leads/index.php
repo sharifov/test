@@ -238,13 +238,25 @@ $this->registerJs($js);
             'attribute' => 'status',
             'value' => static function (Lead $lead) {
                 $statusValue = $lead->getStatusName(true);
+                $statusChangeInfo = '';
+                if ($lead->hasTakenFromBonusToProcessing()) {
+                    $statusChangeInfo = Html::tag('span', '<i class="fa fa-star"></i>', [
+                        'title' => 'Lead has been taken from Bonus Queue',
+                        'style' => 'font-size:larger; margin-left:10px',
+                    ]);
+                } elseif ($lead->hasTakenFromExtraToProcessing()) {
+                    $statusChangeInfo = Html::tag('span', '<i class="fa fa-star-o"></i>', [
+                        'title' => 'Lead has been taken from Extra Queue',
+                        'style' => 'font-size:larger; margin-left:10px',
+                    ]);
+                }
 
                 if ($lead->isTrash() && ($lastLeadFlow = $lead->lastLeadFlow)) {
                     if ($lastLeadFlow->status === $lead->status && $lastLeadFlow->lf_description) {
                         $statusValue .= ' <span data-toggle="tooltip" data-placement="top" title="' . Html::encode($lastLeadFlow->lf_description) . '"><i class="fa fa-warning"></i></span>';
                     }
                 }
-                return $statusValue;
+                return $statusValue . $statusChangeInfo;
             },
             'format' => 'raw',
             'filter' => $showFilter ? Lead::STATUS_LIST : false,

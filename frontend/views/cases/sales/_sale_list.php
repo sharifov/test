@@ -245,7 +245,7 @@ document.activateButtonSync = function(data) {
     }
     
     if (data.success_message !== '') {
-        new PNotify({
+        createNotifyByObject({
             title: data.sync ? 'Updated' : 'Warning',
             type: data.sync ? 'success' : 'warning',
             text: data.success_message,
@@ -284,14 +284,14 @@ $(document).on('click', '.refresh-from-bo', function (e) {
         },
         success: function (data) {
             if (data.error) {
-               new PNotify({
+               createNotifyByObject({
                     title: "Error",
                     type: "error",
                     text: data.message,
                     hide: true
                 }); 
             } else {
-                new PNotify({
+                createNotifyByObject({
                     title: "Success",
                     type: "success",
                     text: data.message,
@@ -310,7 +310,7 @@ $(document).on('click', '.refresh-from-bo', function (e) {
             }
         },
         error: function (text) {
-            new PNotify({
+            createNotifyByObject({
                 title: "Error",
                 type: "error",
                 text: "Internal Server Error. Try again letter.",

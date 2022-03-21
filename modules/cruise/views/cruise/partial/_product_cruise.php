@@ -257,7 +257,7 @@ $js = <<<JS
           .done(function(data) {
               if (data.error) {
                   alert(data.error);
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'Error: delete cabin',
                         type: 'error',
                         text: data.error,
@@ -267,7 +267,7 @@ $js = <<<JS
                   pjaxReload({
                       container: '#pjax-cruise-cabins-' + cruiseId
                   });
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'The cabin was successfully removed',
                         type: 'success',
                         text: data.message,

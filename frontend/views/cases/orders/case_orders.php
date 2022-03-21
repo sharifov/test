@@ -161,7 +161,7 @@ $js = <<<JS
             //$('#preloader').addClass('d-none');
             if (status == 'error') {
                 let message = xhr.status === 403 ? xhr.responseText : 'Internal Server Error.';
-                new PNotify({
+                createNotifyByObject({
                     title: 'Error',
                     text: message,
                     type: 'error'
@@ -204,7 +204,7 @@ $js = <<<JS
           .done(function(data) {
               if (data.error) {
                   alert(data.error);
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'Error: delete order',
                         type: 'error',
                         text: data.error,
@@ -212,7 +212,7 @@ $js = <<<JS
                     });
               } else {
                   $.pjax.reload({container: '#pjax-case-orders', push: false, replace: false, async: false, timeout: 2000});
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'The order was successfully removed',
                         type: 'success',
                         text: data.message,
@@ -250,14 +250,14 @@ $js = <<<JS
       })
           .done(function(data) {
               if (data.error) {
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'Error: send email confirmation',
                         type: 'error',
                         text: data.message,
                         hide: true
                     });
               } else {
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'The email was successfully sent',
                         type: 'success',
                         text: 'Success',
@@ -289,7 +289,7 @@ $js = <<<JS
       })
           .done(function(data) {
               if (data.error) {
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'Error: file generating',
                         type: 'error',
                         text: data.message,
@@ -297,7 +297,7 @@ $js = <<<JS
                     });
               } else {
                   addFileToFileStorageList();        
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'File generated',
                         type: 'success',
                         text: 'Success',
@@ -330,7 +330,7 @@ $js = <<<JS
       })
           .done(function(data) {
               if (data.error) {
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'Error: cancel order process',
                         type: 'error',
                         text: data.message,
@@ -338,7 +338,7 @@ $js = <<<JS
                     });
               } else {
                   $.pjax.reload({container: '#pjax-case-orders', push: false, replace: false, async: false, timeout: 2000});
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'The order process was successfully canceled',
                         type: 'success',
                         text: data.message,
@@ -371,7 +371,7 @@ $js = <<<JS
       })
           .done(function(data) {
               if (data.error) {
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'Error: start order process',
                         type: 'error',
                         text: data.message,
@@ -379,7 +379,7 @@ $js = <<<JS
                     });
               } else {
                   $.pjax.reload({container: '#pjax-case-orders', push: false, replace: false, async: false, timeout: 2000});
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'The order process was successfully started',
                         type: 'success',
                         text: data.message,
@@ -673,7 +673,7 @@ $js = <<<JS
           })
           .done(function(data) {
               if (data.error) {
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'Error: delete Invoice',
                         type: 'error',
                         text: data.error,
@@ -682,7 +682,7 @@ $js = <<<JS
               } else {
                   
                   pjaxReload({container: '#pjax-order-invoice-' + orderId, timout: 8000});
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'Invoice was successfully deleted',
                         type: 'success',
                         text: data.message,
@@ -716,7 +716,7 @@ $js = <<<JS
           })
               .done(function(data) {
                   if (data.error) {
-                      new PNotify({
+                      createNotifyByObject({
                             title: 'Error: Capture Payment',
                             type: 'error',
                             text: data.message,
@@ -724,7 +724,7 @@ $js = <<<JS
                         });
                       return;
                   }
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'Payment was successfully Capture',
                         type: 'success',
                         text: 'Success',
@@ -801,7 +801,7 @@ $js = <<<JS
           })
               .done(function(data) {
                   if (data.error) {
-                      new PNotify({
+                      createNotifyByObject({
                             title: 'Error: delete Payment',
                             type: 'error',
                             text: data.error,
@@ -810,7 +810,7 @@ $js = <<<JS
                       return;
                   }
                   pjaxReload({container: '#pjax-order-payment-' + orderId, timout: 8000, async: true});
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'Payment was successfully deleted',
                         type: 'success',
                         text: data.message,
@@ -849,7 +849,7 @@ $js = <<<JS
           })
               .done(function(data) {
                   if (data.error) {
-                      new PNotify({
+                      createNotifyByObject({
                             title: 'Error: Void Payment',
                             type: 'error',
                             text: data.message,
@@ -857,7 +857,7 @@ $js = <<<JS
                         });
                       return;
                   } 
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'Payment was successfully Void',
                         type: 'success',
                         text: 'Success',
@@ -897,7 +897,7 @@ $js = <<<JS
           })
               .done(function(data) {
                   if (data.error) {
-                      new PNotify({
+                      createNotifyByObject({
                             title: 'Error: delete quote from order',
                             type: 'error',
                             text: data.error,
@@ -907,7 +907,7 @@ $js = <<<JS
                       
                       // pjaxReload({container: '#pjax-lead-orders', timout: 2000});
                       pjaxReload({container: '#pjax-case-orders'});
-                      new PNotify({
+                      createNotifyByObject({
                             title: 'Quote was successfully deleted',
                             type: 'success',
                             text: data.message,

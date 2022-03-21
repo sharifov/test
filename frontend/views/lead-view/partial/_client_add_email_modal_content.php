@@ -85,7 +85,7 @@ $('#client-add-email-form').on('beforeSubmit', function (e) {
                 $('#client-manage-email').html(data.html);
                 $('#modal-client-manage-info').modal('hide');
                 
-                new PNotify({
+                createNotifyByObject({
                     title: 'Email successfully added',
                     text: data.message,
                     type: 'success'
@@ -94,13 +94,13 @@ $('#client-add-email-form').on('beforeSubmit', function (e) {
        },
        error: function (error) {
             if(error.status == 403) {
-                new PNotify({
+                createNotifyByObject({
                     title: error.statusText,
                     text: error.responseText,
                     type: 'warning'                
                 });
             } else {                
-                new PNotify({
+                createNotifyByObject({
                     title: 'Error',
                     text: 'Internal Server Error. Try again letter.',
                     type: 'error'                

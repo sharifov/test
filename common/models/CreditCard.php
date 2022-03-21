@@ -340,11 +340,11 @@ class CreditCard extends ActiveRecord
     }
 
     public static function create(
-        string $number,
+        ?string $number,
         string $holder,
         int $expirationMonth,
         int $expirationYear,
-        string $cvv,
+        ?string $cvv,
         ?int $typeId
     ): CreditCard {
         $card = new self();

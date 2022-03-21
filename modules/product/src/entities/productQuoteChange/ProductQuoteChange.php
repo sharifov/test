@@ -173,6 +173,11 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
         $this->pqc_status_id = ProductQuoteChangeStatus::CONFIRMED;
     }
 
+    public function statusToProcessing(): void
+    {
+        $this->pqc_status_id = ProductQuoteChangeStatus::PROCESSING;
+    }
+
     /**
      * {@inheritdoc}
      */

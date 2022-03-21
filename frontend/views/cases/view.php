@@ -350,9 +350,9 @@ Modal::end();
             success: function(response){
                 $.pjax.reload({container: '#pjax-client-info', timeout: 10000, async: false});
                 if (Boolean(Number(response.data.action))){
-                    new PNotify({title: "Communication", type: "info", text: 'Client communication restricted', hide: true});
+                    createNotifyByObject({title: "Communication", type: "info", text: 'Client communication restricted', hide: true});
                 } else {
-                    new PNotify({title: "Communication", type: "info", text: 'Client communication allowed', hide: true});
+                    createNotifyByObject({title: "Communication", type: "info", text: 'Client communication allowed', hide: true});
                 }
                 updateCommunication();                
             }

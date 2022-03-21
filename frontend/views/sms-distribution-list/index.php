@@ -252,14 +252,14 @@ $js = <<<JS
             //alert(123);
             let ids = $('#sms-list-grid').yiiGridView('getSelectedRows');
             if (ids.length < 1) {
-                new PNotify({title: "Multiple update", type: "error", text: 'Not selected rows', hide: true});
+                createNotifyByObject({title: "Multiple update", type: "error", text: 'Not selected rows', hide: true});
                 return;
             }
             
             let status_id = $('#status_id').val();
             
             if (!status_id) {
-                new PNotify({title: "Select Status", type: "error", text: 'Not select status', hide: true});
+                createNotifyByObject({title: "Select Status", type: "error", text: 'Not select status', hide: true});
                 return;
             }
             
@@ -274,7 +274,7 @@ $js = <<<JS
                 data: {"sms_list": ids, "status_id" : status_id},
                 success: function (data) {
                     $('#preloader').addClass('hidden');
-                    new PNotify({title: "Multiple update Success", type: "success", text: 'Multiple update Success', hide: true});
+                    createNotifyByObject({title: "Multiple update Success", type: "success", text: 'Multiple update Success', hide: true});
                     $.pjax.reload({container: '#pjax-sms-grid-list', async: false});
                 },
                 error: function (error) {

@@ -140,6 +140,9 @@ class ProductQuoteService implements BoWebhookService
                     $this->handleCanceled();
                 } elseif ($form->isExchanged()) {
                     $this->handleExchanged();
+                } elseif ($form->isProcessing()) {
+                    $this->productQuoteChange->statusToProcessing();
+                    $this->productQuoteChangeRepository->save($this->productQuoteChange);
                 }
 
                 $this->case->addEventLog(
@@ -243,7 +246,9 @@ class ProductQuoteService implements BoWebhookService
                 'reprotection_quote_gid' => $this->productQuote->pq_gid,
                 'case_gid' => $this->case->cs_gid,
                 'product_quote_gid' => $originQuote->pq_gid ?? null,
-                'status' => ProductQuoteChangeStatus::getClientKeyStatusById($this->productQuoteChange->pqc_status_id),
+                'status' => $this->form->isCanceled()
+                    ? ProductQuoteChangeStatus::getClientKeyStatusById(ProductQuoteChangeStatus::DECLINED)
+                    : ProductQuoteChangeStatus::getClientKeyStatusById($this->productQuoteChange->pqc_status_id),
             ]
         ];
         \Yii::info([

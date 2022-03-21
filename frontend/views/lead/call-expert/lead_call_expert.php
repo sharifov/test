@@ -199,7 +199,7 @@ $js = <<<JS
         let productDescriptionElement = $('#product_description_' + productId);
         
         if (productDescriptionElement.length == 0) {
-            new PNotify({title: 'Error', text: 'Description is empty.', type: 'error'});
+            createNotifyByObject({title: 'Error', text: 'Description is empty.', type: 'error'});
             return false;
         }
         
