@@ -30,7 +30,7 @@ class QuotePriceResearchController extends FController
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
-    public function actionOpenPriceResearchLink(int $leadId, int $researchLinkKey)
+    public function actionOpenPriceResearchLink(int $leadId, string $researchLinkKey)
     {
         try {
             $lead = Lead::findOne(['id' => $leadId]);

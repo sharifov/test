@@ -34,9 +34,9 @@ class PriceResearchLinkForm extends Model
     public $name;
     public $enabled;
 
-    public $oneTripUrl;
-    public $roundTripUrl;
-    public $multiCityUrl;
+    public $url;
+    public $types;
+
     public $multiCityItineraryPattern;
 
 
@@ -59,9 +59,8 @@ class PriceResearchLinkForm extends Model
             [['name'], 'string', 'length' => [1, 100]],
             [['enabled'], 'boolean'],
 
-            [['oneTripUrl'], 'string', 'length' => [5, 1000]],
-            [['roundTripUrl'], 'string', 'length' => [5, 1000]],
-            [['multiCityUrl'], 'string', 'length' => [5, 1000]],
+            [['url'], 'string', 'length' => [5, 1000]],
+            [['types'],  'isArray', 'message' => 'Types should be array'],
             [['multiCityItineraryPattern'], 'string', 'length' => [5, 1000]],
 
             [['dateFormat'], 'string', 'length' => [1, 100]],
@@ -79,10 +78,8 @@ class PriceResearchLinkForm extends Model
             [
                 [
                     'name',
-                    'oneTripUrl',
-                    'roundTripUrl',
-                    'multiCityUrl',
-                    //'multiCityItineraryPattern',
+                    'url',
+                    'types',
                     'enabled',
                     'dateFormat',
                     'cabinClassMappings',
