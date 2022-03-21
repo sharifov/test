@@ -917,8 +917,13 @@ class ClientChatController extends FController
         if ($clientChat->ccv && $clientChat->ccv->ccvCvd) {
             $visitorId = $clientChat->ccv->ccvCvd->cvd_visitor_rc_id ?? '';
         }
+        $requestEventList = [
+            ClientChatRequest::EVENT_ROOM_CONNECTED,
+            ClientChatRequest::EVENT_TRACK,
+        ];
         $data[$requestSearch->formName()]['ccr_visitor_id'] = $visitorId;
         $data[$requestSearch->formName()]['ccr_json_data'] = 'url":"http';
+        $data[$requestSearch->formName()]['ccr_event'] = $requestEventList;
         $dataProviderRequest = $requestSearch->search($data);
         $dataProviderRequest->setPagination(['pageSize' => 40]);
         $dataProviderRequest->pagination->params = array_merge(Yii::$app->request->get(), ['cchId' => $cchId]);
