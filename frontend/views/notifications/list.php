@@ -65,6 +65,15 @@ $canMultipleUpdateRead = Yii::$app->abac->can($notificationAbacDto, Notification
         //'n_user_id',
 
         //'n_title',
+        [
+            'attribute' => 'n_type_id',
+            //'format' => 'html',
+            'value' => function (\common\models\Notifications $model) {
+                return $model->typeIcon . ' ' . Html::tag('small', $model->getType());
+            },
+            'format' => 'raw',
+            'filter' => \common\models\Notifications::getTypeList()
+        ],
 
         [
             'attribute' => 'n_title',
@@ -80,39 +89,29 @@ $canMultipleUpdateRead = Yii::$app->abac->can($notificationAbacDto, Notification
 
         'n_new:boolean',
 
-        [
-            'attribute' => 'n_type_id',
-            //'format' => 'html',
-            'value' => function (\common\models\Notifications $model) {
-                return '<span class="label label-default">' . $model->getType() . '</span>';
-            },
-            'format' => 'raw',
-            'filter' => \common\models\Notifications::getTypeList()
-        ],
-
         //'n_deleted:boolean',
         //'n_popup:boolean',
         //'n_popup_show:boolean',
 
-        [
-            'attribute' => 'n_read_dt',
-            'value' => static function (\common\models\Notifications $model) {
-                return $model->n_read_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->n_read_dt)) : '-';
-            },
-            'format' => 'raw',
-            'filter' => DatePicker::widget([
-                'model' => $searchModel,
-                'attribute' => 'n_read_dt',
-                'clientOptions' => [
-                    'autoclose' => true,
-                    'format' => 'yyyy-mm-dd',
-                ],
-                'options' => [
-                    'autocomplete' => 'off',
-                    'placeholder' => 'Choose Date'
-                ],
-            ]),
-        ],
+//        [
+//            'attribute' => 'n_read_dt',
+//            'value' => static function (\common\models\Notifications $model) {
+//                return $model->n_read_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->n_read_dt)) : '-';
+//            },
+//            'format' => 'raw',
+//            'filter' => DatePicker::widget([
+//                'model' => $searchModel,
+//                'attribute' => 'n_read_dt',
+//                'clientOptions' => [
+//                    'autoclose' => true,
+//                    'format' => 'yyyy-mm-dd',
+//                ],
+//                'options' => [
+//                    'autocomplete' => 'off',
+//                    'placeholder' => 'Choose Date'
+//                ],
+//            ]),
+//        ],
 
         [
             'attribute' => 'n_created_dt',
