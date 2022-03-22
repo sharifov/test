@@ -122,7 +122,9 @@ class LeadViewController extends FController
                     'ajax-edit-client-phone',
                     'ajax-edit-client-email-modal-content',
                     'ajax-edit-client-email-validation',
-                    'ajax-edit-client-email'
+                    'ajax-edit-client-email',
+                    'ajax-edit-lead-quote-extra-mark-up-modal-content',
+                    'ajax-edit-lead-quote-extra-mark-up'
                 ],
             ],
         ];
