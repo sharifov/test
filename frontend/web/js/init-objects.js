@@ -56,7 +56,8 @@ function createNotify (title, message, type) {
             [PNotifyPaginate, {}],
         ]),
         delay: 2000,
-        mouse_reset: false
+        mouse_reset: false,
+        textTrusted: true
     });
 }
 
@@ -74,7 +75,8 @@ function createNotifyByObject(obj)
             [PNotifyPaginate, {}],
         ]),
         delay: 2000,
-        mouse_reset: false
+        mouse_reset: false,
+        textTrusted: true
     };
     options = $.extend(true, options, obj);
     PNotify.alert(options);
@@ -96,7 +98,8 @@ function createDesktopNotify(id, title, message, type, desktopMessage)
             }],
         ]),
         delay: 4000,
-        mouse_reset: false
+        mouse_reset: false,
+        textTrusted: true
     });
 }
 
