@@ -5,7 +5,6 @@ namespace modules\cases\src\abac\saleList;
 use src\access\EmployeeGroupAccess;
 use src\auth\Auth;
 use src\entities\cases\Cases;
-use src\entities\cases\CasesStatus;
 
 class SaleListAbacDto extends \stdClass
 {
@@ -24,7 +23,7 @@ class SaleListAbacDto extends \stdClass
     {
         $this->is_owner = $case->isOwner($userId);
         $this->has_owner = $case->hasOwner();
-        $this->status_id = CasesStatus::STATUS_LIST[$case->cs_status] ?? '';
+        $this->status_id = $case->cs_status;
         $this->department_name = $case->department->dep_name ?? '';
         $this->category_id = $case->cs_category_id ?: null;
         $this->project_name = $case->project->name ?? '';
