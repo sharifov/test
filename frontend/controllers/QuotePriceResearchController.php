@@ -26,6 +26,11 @@ class QuotePriceResearchController extends FController
                     'delete' => ['POST'],
                 ],
             ],
+            'access' => [
+                'allowActions' => [
+                    'open-price-research-link',
+                ],
+            ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
