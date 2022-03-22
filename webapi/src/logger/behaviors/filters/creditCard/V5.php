@@ -10,7 +10,11 @@ class V5 implements Filterable
     {
         if (isset($data['payment']['card']) && is_array($data['payment']['card'])) {
             foreach ($data['payment']['card'] as $key => $value) {
-                $data['payment']['card'][$key] = CreditCardFilter::replaceSource($value);
+                if (in_array($key, ['cvv', 'number'], true)) {
+                    unset($data['payment']['card'][$key]);
+                } else {
+                    $data['payment']['card'][$key] = CreditCardFilter::replaceSource($value);
+                }
             }
         }
 

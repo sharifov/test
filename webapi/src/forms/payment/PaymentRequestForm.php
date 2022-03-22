@@ -27,6 +27,8 @@ class PaymentRequestForm extends Model
 {
     use FormNameModelTrait;
 
+    public const SCENARIO_WITHOUT_PRIVATE_DATA = \webapi\src\forms\payment\creditCard\CreditCardForm::SCENARIO_WITHOUT_PRIVATE_DATA;
+
     public const TYPE_METHOD_CARD = 'card';
     public const TYPE_METHOD_STRIPE = 'stripe';
 
@@ -67,6 +69,13 @@ class PaymentRequestForm extends Model
         ];
     }
 
+    public function scenarios()
+    {
+        $scenarios = parent::scenarios();
+        $scenarios[self::SCENARIO_WITHOUT_PRIVATE_DATA] = $scenarios[self::SCENARIO_DEFAULT];
+        return $scenarios;
+    }
+
     public function methodDataProcessing(string $attribute): bool
     {
         if (empty($this->method_data[$this->method_key]) && in_array($this->method_key, self::REQUIRED_METHOD_DATA_BY_TYPES, true)) {
@@ -74,7 +83,9 @@ class PaymentRequestForm extends Model
         } else if (!empty($this->method_data[$this->method_key]) && is_array($this->method_data[$this->method_key])) {
             switch ($this->method_key) {
                 case self::TYPE_METHOD_CARD:
-                    $creditCardForm = new CreditCardForm();
+                    $creditCardForm = new CreditCardForm([
+                        'scenario' => $this->scenario,
+                    ]);
                     $creditCardForm->load($this->method_data, self::TYPE_METHOD_CARD);
                     if (!$creditCardForm->validate()) {
                         $this->addError($attribute, 'CreditCardForm: ' . ErrorsToStringHelper::extractFromModel($creditCardForm, ', '));
