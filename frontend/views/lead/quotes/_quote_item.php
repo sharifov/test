@@ -82,8 +82,8 @@ if ($model->isDeclined()) {
                 ['class' => 'fa fa-font', 'title' => 'Alternative quote']
             ) : ''?>
 
-            <span title="Quote ID: <?=$model->id ?>, UID: <?= Html::decode($model->uid) ?>" data-toggle="tooltip">
-                <strong><?= Html::decode($model->uid) ?></strong>
+            <span title="Quote ID: <?=$model->id ?>, UID: <?= Html::decode($model->uid) ?>" data-toggle="tooltip" class="quote__id">
+                <strong data-srv-quote-uid="<?= Html::decode($model->uid) ?>"><?= Html::decode($model->uid) ?></strong>
             </span>
 
             <?= $model->getStatusSpan()?>

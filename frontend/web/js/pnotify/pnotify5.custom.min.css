@@ -614,7 +614,7 @@ Add the class 'angeler-extended' to the notice to use extended styling.
     --notice-text-border-color: #eee;
     --notice-icon-filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(240deg)
     brightness(105%) contrast(101%);
-    --info-background-color: #d2ecf1;
+    --info-background-color: #009bb9;
     --info-border-color: #fff;
     --info-text-color: #fff;
     --info-text-border-color: #eee;
@@ -643,7 +643,7 @@ Add the class 'angeler-extended' to the notice to use extended styling.
         --notice-icon-filter: invert(47%) sepia(19%) saturate(1430%)
         hue-rotate(255deg) brightness(87%) contrast(85%);
         --info-background-color: #000;
-        --info-border-color: #d2ecf1;
+        --info-border-color: #009bb9;
         --info-text-color: #fff;
         --info-text-border-color: #4c4c4c;
         --info-icon-filter: invert(69%) sepia(15%) saturate(1110%)
@@ -671,7 +671,7 @@ Add the class 'angeler-extended' to the notice to use extended styling.
     --notice-icon-filter: invert(47%) sepia(19%) saturate(1430%)
     hue-rotate(255deg) brightness(87%) contrast(85%);
     --info-background-color: #000;
-    --info-border-color: #d2ecf1;
+    --info-border-color: #009bb9;
     --info-text-color: #fff;
     --info-text-border-color: #4c4c4c;
     --info-icon-filter: invert(69%) sepia(15%) saturate(1110%) hue-rotate(172deg)

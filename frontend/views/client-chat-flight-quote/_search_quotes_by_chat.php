@@ -102,7 +102,7 @@ if ($viewModel->lead) {
                     createNotifyByObject({
                         title: "Create quote - search",
                         type: "success",
-                        text: 'Added new quote id: ' + searchResId,
+                        text: 'Added new quote',
                         hide: true
                     });
                 } else {

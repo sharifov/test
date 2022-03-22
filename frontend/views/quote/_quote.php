@@ -838,8 +838,7 @@ $js = <<<JS
         $('.field-error').each(function() {
             $(this).removeClass('field-error');
         });
-        $('.parent-error').removeClass('has-error');        
-        PNotify.removeAll();
+        $('.parent-error').removeClass('has-error');
     }
     
     var clipboard = new ClipboardJS('.clipboard');

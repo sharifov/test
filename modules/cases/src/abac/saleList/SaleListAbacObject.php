@@ -2,8 +2,11 @@
 
 namespace modules\cases\src\abac\saleList;
 
+use common\models\Department;
+use common\models\Project;
 use modules\abac\components\AbacBaseModel;
 use modules\abac\src\entities\AbacInterface;
+use modules\cases\src\abac\CasesAbacObject;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundStatus;
 use src\entities\cases\CaseCategory;
@@ -15,6 +18,7 @@ class SaleListAbacObject extends AbacBaseModel implements AbacInterface
     public const NS = 'case/case/';
 
     /** UI PERMISSION */
+
     public const UI_BLOCK_SALE_LIST = self::NS . 'ui/block/sale-list';
 
     public const OBJECT_LIST = [
@@ -51,7 +55,6 @@ class SaleListAbacObject extends AbacBaseModel implements AbacInterface
         'id' => self::NS . 'has_owner',
         'field' => 'has_owner',
         'label' => 'Has Owner',
-
         'type' => self::ATTR_TYPE_BOOLEAN,
         'input' => self::ATTR_INPUT_RADIO,
         'values' => ['true' => 'True', 'false' => 'False'],
@@ -90,7 +93,7 @@ class SaleListAbacObject extends AbacBaseModel implements AbacInterface
         'label' => 'Status',
         'type' => self::ATTR_TYPE_INTEGER,
         'input' => self::ATTR_INPUT_SELECT,
-        'values' => [],
+        'values' => CasesStatus::STATUS_LIST,
         'multiple' => false,
         'operators' => [self::OP_EQUAL2, self::OP_NOT_EQUAL2,
             self::OP_IN, self::OP_NOT_IN, '<', '>', '<=', '>=']
@@ -173,21 +176,6 @@ class SaleListAbacObject extends AbacBaseModel implements AbacInterface
         'operators' => [self::OP_EQUAL2]
     ];
 
-    /** --------------- ATTRIBUTE LIST --------------------------- */
-    public const OBJECT_ATTRIBUTE_LIST = [
-        self::UI_BLOCK_SALE_LIST => [
-            self::ATTR_CASE_IS_OWNER,
-            self::ATTR_IS_COMMON_GROUP_OWNER,
-            self::ATTR_CASE_HAS_OWNER,
-            self::ATTR_CASE_STATUS,
-            self::ATTR_CASE_DEPARTMENT_NAME,
-            self::ATTR_CASE_CATEGORY,
-            self::ATTR_CASE_PROJECT_NAME,
-            self::ATTR_IS_AUTOMATE,
-            self::ATTR_NEED_ACTION,
-        ],
-    ];
-
     /**
      * @return string[]
      */
@@ -209,17 +197,31 @@ class SaleListAbacObject extends AbacBaseModel implements AbacInterface
      */
     public static function getObjectAttributeList(): array
     {
-        $attrStatusList = self::ATTR_CASE_STATUS;
-        $attrCategoryList = self::ATTR_CASE_CATEGORY;
-        $attrStatusList['values'] = CasesStatus::STATUS_LIST;
-        $attrStatusRuleList['values'] = CasesStatus::STATUS_LIST;
-        $attrCategoryList['values'] = CaseCategory::getList();
-        $attrPqcStatusList['values'] = ProductQuoteChangeStatus::getList();
-        $attrPqrStatusList['values'] = ProductQuoteRefundStatus::getList();
-        $attrCasesBadge['values'] = [
-            'need_action' => 'Need Action',
+        $attributes = [
+            self::UI_BLOCK_SALE_LIST => [
+                self::ATTR_CASE_IS_OWNER,
+                self::ATTR_IS_COMMON_GROUP_OWNER,
+                self::ATTR_CASE_HAS_OWNER,
+                self::ATTR_CASE_STATUS,
+                self::ATTR_IS_AUTOMATE,
+                self::ATTR_NEED_ACTION,
+            ],
         ];
 
-        return self::OBJECT_ATTRIBUTE_LIST;
+        $attrCategoryList = self::ATTR_CASE_CATEGORY;
+        $attrCategoryList['values'] = CaseCategory::getList();
+        $attributes[self::UI_BLOCK_SALE_LIST][] = $attrCategoryList;
+
+        $attrCaseProjectName = CasesAbacObject::ATTR_CASE_PROJECT_NAME;
+        $projectNames = Project::getList();
+        $attrCaseProjectName['values'] = array_combine($projectNames, $projectNames);
+        $attributes[self::UI_BLOCK_SALE_LIST][] = $attrCaseProjectName;
+
+        $attrCaseDepartmentName = CasesAbacObject::ATTR_CASE_DEPARTMENT_NAME;
+        $departmentNames = Department::getList();
+        $attrCaseDepartmentName['values'] = array_combine($departmentNames, $departmentNames);
+        $attributes[self::UI_BLOCK_SALE_LIST][] = $attrCaseDepartmentName;
+
+        return $attributes;
     }
 }
