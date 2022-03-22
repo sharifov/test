@@ -4,6 +4,7 @@ namespace console\controllers;
 
 use common\models\Department;
 use common\models\Project;
+use common\models\query\LeadFlowQuery;
 use common\models\search\ContactsSearch;
 use common\models\UserGroup;
 use frontend\helpers\JsonHelper;
@@ -760,5 +761,12 @@ JSON;
                 true
             )
         );
+    }
+
+    public function actionFirstLeadFlow()
+    {
+        $firstLeadFlow = LeadFlowQuery::getFirstOwnerOfLead(513131);
+        var_dump($firstLeadFlow->toArray());
+        die;
     }
 }
