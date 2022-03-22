@@ -755,8 +755,8 @@ JSON;
             NotificationMessage::desktopMessage(
                 464 . '-desk',
                 'Call - Long Queue Time',
-                $message,
-                'notice',
+                '<strong>Hello World</strong> Hello World',
+                'info',
                 $message,
                 true
             )
