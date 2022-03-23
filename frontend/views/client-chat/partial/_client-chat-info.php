@@ -481,7 +481,7 @@ $leads = $clientChat->leads;
                                 'cvd_region',
                                 'cvd_city',
                                 'cvd_timezone',
-                                /*[
+                                [
                                     'label' => 'Last Url',
                                     'value' => static function (ClientChatVisitorData $model) {
                                         if ($model->cvd_url) {
@@ -490,7 +490,7 @@ $leads = $clientChat->leads;
                                         return Yii::$app->formatter->nullDisplay;
                                     },
                                     'format' => 'raw',
-                                ],*/
+                                ],
                             ],
                             'template' => '<div class="_cc-addition-data-item"><span>{label}</span><span>{value}</span></div>',
                         ]);
