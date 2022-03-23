@@ -358,34 +358,35 @@ if ($model->isDeclined()) {
         </div>
         <div class="row">
             <div class="col-md-6">
-                <div class="quote__badges text-left">
+                <div class="quote__badges">
+                        <?php echo QuoteHelper::formattedMetaRank($model->getMetaInfo())?>
 
-                    <?php echo QuoteHelper::formattedFreeBaggage($model->getMetaInfo()) ?>
+                        <div style="width: 30px"></div>
 
-                    <span class="quote__badge quote__badge--warning <?php if (!$needRecheck) :
-                        ?>quote__badge--disabled<?php
-                                                                    endif;?>" data-toggle="tooltip"
-                          title="<?= ($needRecheck) ? 'Bag re-check may be required' : 'Bag re-check not required'?>"
-                          data-original-title="<?= ($needRecheck) ? 'Bag re-check may be required' : 'Bag re-check not required'?>">
-                        <i class="fa fa-warning"></i>
-                    </span>
+                        <?php echo QuoteHelper::formattedFreeBaggage($model->getMetaInfo()) ?>
 
-                    <span class="quote__badge <?php if ($model->hasAirportChange) :
-                        ?>quote__badge--warning<?php
-                                              else :
-                                                    ?>quote__badge--disabled<?php
-                                              endif;?>" data-toggle="tooltip"
-                          title="<?= ($model->hasAirportChange) ? 'Airports Change' : 'No Airports Change'?>"
-                          data-original-title="<?= ($model->hasAirportChange) ? 'Airports Change' : 'No Airports Change'?>">
-                        <i class="fa fa-exchange"></i>
-                    </span>
+                        <span class="quote__badge quote__badge--warning <?php if (!$needRecheck) :
+                            ?>quote__badge--disabled<?php
+                                                                        endif;?>" data-toggle="tooltip"
+                              title="<?= ($needRecheck) ? 'Bag re-check may be required' : 'Bag re-check not required'?>"
+                              data-original-title="<?= ($needRecheck) ? 'Bag re-check may be required' : 'Bag re-check not required'?>">
+                            <i class="fa fa-warning"></i>
+                        </span>
 
-                    <?php echo QuoteHelper::formattedPenalties($model->getPenaltiesInfo()) ?>
+                        <span class="quote__badge <?php if ($model->hasAirportChange) :
+                            ?>quote__badge--warning<?php
+                                                  else :
+                                                        ?>quote__badge--disabled<?php
+                                                  endif;?>" data-toggle="tooltip"
+                              title="<?= ($model->hasAirportChange) ? 'Airports Change' : 'No Airports Change'?>"
+                              data-original-title="<?= ($model->hasAirportChange) ? 'Airports Change' : 'No Airports Change'?>">
+                            <i class="fa fa-exchange"></i>
+                        </span>
 
-                    <?php echo QuoteHelper::formattedMetaRank($model->getMetaInfo())?>
+                        <?php echo QuoteHelper::formattedPenalties($model->getPenaltiesInfo()) ?>
 
-                    <?php echo QuoteHelper::formattedProviderProject($model) ?>
-                </div>
+                        <?php echo QuoteHelper::formattedProviderProject($model) ?>
+                    </div>
             </div>
             <div class="col-md-6">
                 <table class="table table-bordered">

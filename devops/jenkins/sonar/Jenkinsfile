@@ -1,0 +1,17 @@
+pipeline{
+  agent{
+    docker{
+      image 'sonarsource/sonar-scanner-cli'
+      args '-e SONAR_SCANNER_OPTS=-Xmx6144m'
+    }
+  }
+stages{
+    stage('SonarQube Analysis'){
+      steps {
+        withSonarQubeEnv(installationName: 'SonarScanner') {
+          sh 'sonar-scanner'
+        }
+      }
+    }
+  }
+}
