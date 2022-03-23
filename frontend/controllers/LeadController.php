@@ -748,7 +748,14 @@ class LeadController extends FController
                             if (isset($mailPreview['error']) && $mailPreview['error']) {
                                 $errorJson = @json_decode($mailPreview['error'], true);
                                 $comForm->addError('c_email_preview', 'Communication Server response: ' . ($errorJson['message'] ?? $mailPreview['error']));
-                                Yii::error($mailPreview['error'], 'LeadController:view:mailPreview');
+
+                                $errorLog = $mailPreview['error'];
+                                if (is_array($errorJson)) {
+                                    $errorLog = $errorJson;
+                                    $errorLog['forAdmin'] = true;
+                                    $errorLog['communicationUrl'] = $communication->url;
+                                }
+                                Yii::error($errorLog, 'LeadController:view:mailPreview');
                                 $comForm->c_preview_email = 0;
                             } elseif (isset($checkOriginalQuoteExistence) && !$checkOriginalQuoteExistence) {
                                 $comForm->addError('originalQuotesRequired', 'Original quote required');
@@ -850,6 +857,13 @@ class LeadController extends FController
                             if (isset($smsPreview['error']) && $smsPreview['error']) {
                                 $errorJson = @json_decode($smsPreview['error'], true);
                                 $comForm->addError('c_email_preview', 'Communication Server response: ' . ($errorJson['message'] ?? $smsPreview['error']));
+
+                                $errorLog = $communication->url . "\r\n " . $smsPreview['error'];
+                                if (is_array($errorJson)) {
+                                    $errorLog = $errorJson;
+                                    $errorLog['forAdmin'] = true;
+                                    $errorLog['communicationUrl'] = $communication->url;
+                                }
                                 Yii::error($communication->url . "\r\n " . $smsPreview['error'], 'LeadController:view:smsPreview');
                                 $comForm->c_preview_sms = 0;
                             } else {
