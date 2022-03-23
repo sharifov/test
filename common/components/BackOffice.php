@@ -445,14 +445,12 @@ class BackOffice
             throw new BoResponseException('BO voluntaryRefund server error', BoResponseException::BO_SERVER_ERROR);
         }
 
-        unset($requestData['payment']);
-
         $data = $response->data;
         if (!$data) {
             \Yii::error([
                     'message' => 'BO voluntaryRefund data is empty',
                     'content' => VarDumper::dumpAsString($response->content),
-                    'requestData' => $requestData,
+                    'requestData' => (new CreditCardFilter())->filterData($requestData),
                 ], 'BackOffice:voluntaryRefund:dataIsEmpty');
             throw new BoResponseException('BO voluntaryRefund data is empty', BoResponseException::BO_DATA_IS_EMPTY);
         }
@@ -460,7 +458,7 @@ class BackOffice
             \Yii::error([
                     'message' => 'BO voluntaryRefund response Data type is invalid',
                     'content' => VarDumper::dumpAsString($response->content),
-                    'requestData' => $requestData,
+                    'requestData' => (new CreditCardFilter())->filterData($requestData),
                 ], 'BackOffice:voluntaryRefund:dataIsInvalid');
             throw new BoResponseException('BO voluntaryRefund response Data type is invalid', BoResponseException::BO_RESPONSE_DATA_TYPE_IS_INVALID);
         }
@@ -468,7 +466,7 @@ class BackOffice
             \Yii::error([
                 'message' => 'BO wrong endpoint: ' . $endpoint,
                 'content' => VarDumper::dumpAsString($response->content),
-                'requestData' => $requestData,
+                'requestData' => (new CreditCardFilter())->filterData($requestData),
             ], 'BackOffice:voluntaryRefund:wrongEndpoint');
             throw new BoResponseException('BO wrong endpoint', BoResponseException::BO_WRONG_ENDPOINT);
         }
