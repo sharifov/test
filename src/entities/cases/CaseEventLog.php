@@ -38,10 +38,10 @@ class CaseEventLog extends ActiveRecord
     public const VOLUNTARY_REFUND_CONFIRM    = 13;
     public const VOLUNTARY_REFUND_EMAIL_SEND    = 14;
     public const VOLUNTARY_REFUND_WH_SEND_OTA    = 15;
-    public const VOLUNTARY_PRODUCT_REFUND_ACCEPTED    = 17;
     public const EMAIL_REVIEWED    = 16;
     public const CASE_MARK_CHECKED    = 17;
     public const RE_PROTECTION_REFUND = 18;
+    public const VOLUNTARY_PRODUCT_REFUND_ACCEPTED    = 19;
 
     public const CASE_EVENT_LOG_LIST = [
         self::CASE_CREATED         => 'Case created',

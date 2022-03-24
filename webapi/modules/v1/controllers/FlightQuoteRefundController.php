@@ -876,7 +876,7 @@ class FlightQuoteRefundController extends ApiBaseController
             $productQuoteRefund->case->addEventLog(
                 CaseEventLog::VOLUNTARY_PRODUCT_REFUND_ACCEPTED,
                 CaseEventLog::CASE_EVENT_LOG_LIST[CaseEventLog::VOLUNTARY_PRODUCT_REFUND_ACCEPTED],
-                ['data_json' => $productQuoteRefund->pqr_id],
+                ['data_json' => ['product_quote_refund_id' => $productQuoteRefund->pqr_id ?? 0]],
                 CaseEventLog::CATEGORY_INFO
             );
 
