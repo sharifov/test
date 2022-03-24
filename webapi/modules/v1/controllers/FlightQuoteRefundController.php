@@ -20,6 +20,7 @@ use modules\product\src\entities\productQuoteOptionRefund\ProductQuoteOptionRefu
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundQuery;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundRepository;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundStatus;
+use src\entities\cases\CaseEventLog;
 use src\exception\BoResponseException;
 use src\helpers\app\AppHelper;
 use src\helpers\app\HttpStatusCodeHelper;
@@ -40,6 +41,7 @@ use webapi\src\response\messages\TypeMessage;
 use webapi\src\response\Response;
 use webapi\src\response\SuccessResponse;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\MethodNotAllowedHttpException;
 
@@ -870,6 +872,13 @@ class FlightQuoteRefundController extends ApiBaseController
 
             $flightRequest->fr_job_id = $jobId;
             $this->flightRequestRepository->save($flightRequest);
+
+            $productQuoteRefund->case->addEventLog(
+                CaseEventLog::VOLUNTARY_PRODUCT_REFUND_ACCEPTED,
+                CaseEventLog::CASE_EVENT_LOG_LIST[CaseEventLog::VOLUNTARY_PRODUCT_REFUND_ACCEPTED],
+                ['data_json' => $productQuoteRefund->pqr_id],
+                CaseEventLog::CATEGORY_INFO
+            );
 
             return $this->endApiLog(new SuccessResponse(
                 new CodeMessage(ApiCodeException::SUCCESS),
