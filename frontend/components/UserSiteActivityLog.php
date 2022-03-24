@@ -38,6 +38,13 @@ class UserSiteActivityLog extends Behavior
             if (strpos(Yii::$app->request->getAbsoluteUrl(), 'call/record') !== false) {
                 return;
             }
+            if (strpos(Yii::$app->request->getAbsoluteUrl(), 'smart/default/async-poll') !== false) {
+                return;
+            }
+            if (strpos(Yii::$app->request->getAbsoluteUrl(), 'smart/default/async-get') !== false) {
+                return;
+            }
+
             $request_url = mb_substr(Yii::$app->request->getAbsoluteUrl(), 0, 490);
 
             $settings = Yii::$app->params['settings'];
