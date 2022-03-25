@@ -593,6 +593,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         ],
         self::ACT_PRICE_LINK_RESEARCH => [
             self::ATTR_LEAD_IS_OWNER,
+            self::ATTR_FLIGHT_SEGMENT_COUNT
         ],
 
         self::OBJ_LEAD => [
