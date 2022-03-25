@@ -1995,12 +1995,17 @@ class LeadController extends FController
             'LeadCreateForm',
             ['emails' => 'EmailCreateForm', 'phones' => 'PhoneCreateForm', 'segments' => 'SegmentCreateForm']
         );
+        $dto = new LeadAbacDto(null, Auth::id());
+        $delayedChargeAccess = Yii::$app->abac->can($dto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CREATE, Auth::user());
         $form = new LeadCreateForm(count($data['post']['EmailCreateForm']), count($data['post']['PhoneCreateForm']), count($data['post']['SegmentCreateForm']));
         $form->assignDep(Department::DEPARTMENT_SALES);
         if ($form->load($data['post']) && $form->validate()) {
             try {
                 if ($form->depId === 0) {
                     $form->depId = null;
+                }
+                if (!$delayedChargeAccess) {
+                    $form->delayedCharge = false;
                 }
                 $form->client->projectId = $form->projectId;
                 $form->client->typeCreate = Client::TYPE_CREATE_LEAD;
@@ -2027,7 +2032,7 @@ class LeadController extends FController
                 return $this->redirect(['/lead/create']);
             }
         }
-        return $this->render('create', ['leadForm' => $form]);
+        return $this->render('create', ['leadForm' => $form, 'delayedChargeAccess' => $delayedChargeAccess]);
     }
 
     /**
