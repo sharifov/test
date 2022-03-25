@@ -223,12 +223,12 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
             $chatsData[$key]['chat_duration'] = 0;
 
             if (isset($firstChatAgentMessageResults[$chat['cch_id']])) {
-                $chatsData[$key]['agent_frt'] = strtotime($firstChatAgentMessageResults['cch_id']['first_msg_date']) - strtotime($chat['cch_created_dt']);
+                $chatsData[$key]['agent_frt'] = strtotime($firstChatAgentMessageResults[$chat['cch_id']]['first_msg_date']) - strtotime($chat['cch_created_dt']);
             }
 
 
             if (isset($firstMessagesOfChatsResults[$chat['cch_id']]) && ($chat['cch_status_id'] == ClientChat::STATUS_CLOSED || $chat['cch_status_id'] == ClientChat::STATUS_ARCHIVE)) {
-                $chatsData[$key]['chat_duration'] = strtotime($chat['cch_updated_dt']) - strtotime($firstMessagesOfChatsResults['cch_id']['first_msg_date']);
+                $chatsData[$key]['chat_duration'] = strtotime($chat['cch_updated_dt']) - strtotime($firstMessagesOfChatsResults[$chat['cch_id']]['first_msg_date']);
             }
         }
 
