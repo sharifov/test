@@ -99,6 +99,7 @@ class ClientChatUserAccessSearch extends ClientChatUserAccess
             'cch_project_id',
             'project_name' => 'project.name',
             'ccc_name',
+            'ccc_id',
             'ccua_created_dt',
             'cch_created_dt',
             'owner_nickname' => 'owner.nickname',
