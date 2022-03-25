@@ -7,7 +7,10 @@ use common\models\Department;
 use common\models\Employee;
 use common\models\Lead;
 use DateTime;
+use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\lead\src\abac\LeadAbacObject;
 use src\access\EmployeeDepartmentAccess;
+use src\auth\Auth;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 
@@ -197,5 +200,21 @@ class LeadHelper
             $content = \Yii::$app->formatter->format($lead->snooze_for, 'byUserDateTime');
         }
         return Html::tag('span', $content, ['class' => 'label label-info', 'style' => $style]);
+    }
+
+    public static function isShowLppTimer(Lead $lead, ?int $userId = null): bool
+    {
+        if (!$lead->isProcessing()) {
+            return false;
+        }
+
+        $leadAbacDto = new LeadAbacDto($lead, $userId ?? (int) Auth::id());
+        /** @abac $leadAbacDto, LeadAbacObject::OBJ_EXTRA_QUEUE, LeadAbacObject::ACTION_ACCESS, show timer in lead/view */
+        $isAbacLppTimer = \Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_EXTRA_QUEUE, LeadAbacObject::ACTION_ACCESS);
+        if (!$isAbacLppTimer) {
+            return false;
+        }
+
+        return (bool) ($lead->minLpp->lpp_expiration_dt ?? null);
     }
 }
