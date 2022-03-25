@@ -9,6 +9,7 @@ use yii\widgets\ActiveForm;
 /**
  * @var $leadForm src\forms\lead\LeadCreateForm
  * @var $form ActiveForm
+ * @var $delayedChargeAccess bool
  */
 
 ?>
@@ -43,11 +44,13 @@ use yii\widgets\ActiveForm;
             <?= $form->field($leadForm, 'depId', [
             ])->dropDownList(LeadHelper::getDepartments(Yii::$app->user)) ?>
         </div>
-        <div class="col-md-3">
-            <div class="d-flex flex-direction-column align-content-end align-items-end" style="height: 100%;">
-                <?= $form->field($leadForm, 'delayedCharge')->checkbox()?>
+        <?php if ($delayedChargeAccess) : ?>
+            <div class="col-md-3">
+                <div class="d-flex flex-direction-column align-content-end align-items-end" style="height: 100%;">
+                    <?= $form->field($leadForm, 'delayedCharge')->checkbox()?>
+                </div>
             </div>
-        </div>
+        <?php endif; ?>
     </div>
 
     <div class="row">
