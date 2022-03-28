@@ -95,8 +95,7 @@
         }
 
         this.defaultSort = {
-            'ccc_priority': 'desc',
-            'is_transfer': 'desc',
+            'ccc_id': 'desc',
             'ccua_created_t': 'asc',
             'cch_created_t': 'asc'
         }
