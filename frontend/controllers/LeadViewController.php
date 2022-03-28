@@ -978,8 +978,8 @@ class LeadViewController extends FController
             $paxCode = (string)Yii::$app->request->get('paxCode');
             $quote   = Quote::findOne($quoteId);
             $lead = $quote->lead;
-            $currentUserId =  Auth::id();
-            $isOwner = $lead->employee_id === $currentUserId;
+            $currentUserId = Auth::id();
+            $isOwner = $lead->isOwner($currentUserId);
             $quoteFlightExtraMarkUpAbacDto = new QuoteFlightExtraMarkupAbacDto($lead, $quote, $isOwner);
             /** @abac quoteFlightExtraMarkUpAbacDto, QuoteFlightAbacObject::OBJ_EXTRA_MARKUP, QuoteExtraMarkUpChangeAbacObject::ACTION_UPDATE, Access to edit Quote Extra mark-up */
             $canUpdateExtraMarkUp = Yii::$app->abac->can(
