@@ -92,6 +92,14 @@
     name: supervisor
     state: restarted
 
+- name: Chown supervisord logs
+  file:
+    dest: "{{ app_console_logfile_path }}"
+    owner: "{{ web_user }}"
+    group: "{{ web_user }}"
+    state: directory
+    recurse: yes
+
 - name: Find old releases
   find:
     paths: "{{ web_dir }}"
