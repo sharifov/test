@@ -96,7 +96,7 @@
 
         this.defaultSort = {
             'ccc_id': 'desc',
-            'cch_created_t': 'asc'
+            'cch_created_dt': 'asc'
         }
 
         this.initData();
