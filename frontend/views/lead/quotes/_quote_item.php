@@ -401,7 +401,7 @@ if ($model->isDeclined()) {
                                             Final Profit:
                                             <?= number_format($model->lead->getFinalProfit(), 2);?> $
                                         <?php else :?>
-                                            Estimation Profit:
+                                            Estimated Profit:
                                             <?php if (isset($priceData['total'])) :?>
                                                 <?=number_format($model->getEstimationProfit(), 2);?> $
                                             <?php endif;?>
