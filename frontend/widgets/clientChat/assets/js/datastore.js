@@ -96,7 +96,6 @@
 
         this.defaultSort = {
             'ccc_id': 'desc',
-            'ccua_created_t': 'asc',
             'cch_created_t': 'asc'
         }
 
