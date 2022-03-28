@@ -10,6 +10,7 @@ use frontend\helpers\JsonHelper;
 use src\behaviors\metric\MetricQuoteCounterBehavior;
 use src\behaviors\quote\ClientCurrencyBehavior;
 use src\entities\EventTrait;
+use src\events\quote\QuoteExtraMarkUpChangeEvent;
 use src\events\quote\QuoteSendEvent;
 use src\helpers\app\AppHelper;
 use src\helpers\setting\SettingHelper;
@@ -2871,6 +2872,11 @@ class Quote extends \yii\db\ActiveRecord
     {
         $this->service_fee_percent = $serviceFeePercent;
         return $this;
+    }
+
+    public function changeExtraMarkUp(?int $userId, ?float $sellingOld)
+    {
+        $this->recordEvent(new QuoteExtraMarkUpChangeEvent($this, $userId, $sellingOld));
     }
 
     public function isClientCurrencyDefault(): bool
