@@ -117,9 +117,13 @@ JS;
                 <li>
                     <?= $addAutoQuoteBtn ?>
                 </li>
-                <li>
-                    <?=Html::a('<i class="fa fa-search warning"></i> Quote Search', null, ['class' => '', 'id' => 'search-quotes-btn', 'data-url' => Url::to(['quote/ajax-search-quotes', 'leadId' => $leadForm->getLead()->id])])?>
-                </li>
+                    <?php /** @abac new $leadAbacDto, LeadAbacObject::OBJ_LEAD_QUOTE_SEARCH, LeadAbacObject::ACTION_ACCESS_QUOTE_SEARCH, Access Quote Search*/?>
+                    <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_LEAD_QUOTE_SEARCH, LeadAbacObject::ACTION_ACCESS_QUOTE_SEARCH)) : ?>
+                        <li>
+                            <?=Html::a('<i class="fa fa-search warning"></i> Quote Search', null, ['class' => '', 'id' => 'search-quotes-btn', 'data-url' => Url::to(['quote/ajax-search-quotes', 'leadId' => $leadForm->getLead()->id])])?>
+                        </li>
+                    <?php endif; ?>
+
                     <?php /** @abac new $leadAbacDto, LeadAbacObject::OBJ_LEAD_SMART_SEARCH, LeadAbacObject::ACTION_ACCESS_SMART_SEARCH, Access Smart Search*/?>
                     <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_LEAD_SMART_SEARCH, LeadAbacObject::ACTION_ACCESS_SMART_SEARCH)) :
                         $deepLink = $lead->getDeepLink([]);
@@ -180,7 +184,10 @@ JS;
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
                 <div class="dropdown-menu" role="menu">
                     <?php if ($lead->leadFlightSegmentsCount) :?>
-                        <?=Html::a('<i class="fa fa-search info"></i> Quick Search', null, ['class' => 'dropdown-item', 'id' => 'quick-search-quotes-btn', 'data-url' => Url::to(['quote/get-online-quotes', 'leadId' => $leadForm->getLead()->id])])?>
+                        <?php /** @abac new $leadAbacDto, LeadAbacObject::OBJ_LEAD_QUOTE_SEARCH, LeadAbacObject::ACTION_ACCESS_QUOTE_SEARCH, Access Quote Search*/?>
+                        <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_LEAD_QUICK_SEARCH, LeadAbacObject::ACTION_ACCESS_QUICK_SEARCH)) : ?>
+                            <?=Html::a('<i class="fa fa-search info"></i> Quick Search', null, ['class' => 'dropdown-item', 'id' => 'quick-search-quotes-btn', 'data-url' => Url::to(['quote/get-online-quotes', 'leadId' => $leadForm->getLead()->id])])?>
+                        <?php endif; ?>
                     <?php endif; ?>
                     <?php if (!$lead->client->isExcluded()) : ?>
                         <?= Html::a('<i class="fa fa-plus-circle success"></i> Add Quote', null, ['class' => 'add-clone-alt-quote dropdown-item', 'data-uid' => 0, 'data-url' => Url::to(['quote/create', 'leadId' => $leadForm->getLead()->id, 'qId' => 0])])?>
