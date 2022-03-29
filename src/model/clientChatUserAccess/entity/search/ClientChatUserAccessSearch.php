@@ -123,7 +123,7 @@ class ClientChatUserAccessSearch extends ClientChatUserAccess
             ['cch_status_id' => ClientChat::STATUS_PENDING],
             ['cch_status_id' => ClientChat::STATUS_TRANSFER],
             ['cch_status_id' => ClientChat::STATUS_IDLE]]);
-        $query->orderBy(['ccc_id' => SORT_DESC, 'cch_created_dt' => SORT_ASC]);
+        $query->orderBy(['ccc_priority' => SORT_DESC, 'cch_created_dt' => SORT_ASC]);
 
         $query->groupBy([
             'ccua_id',

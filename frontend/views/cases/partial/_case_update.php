@@ -26,9 +26,11 @@ use yii\helpers\Url;
     <?= $form->field($model, 'depId')->dropDownList($model->getdepartmentList(), [
         'prompt' => '-',
         'onchange' => '
+            $( "#' . Html::getInputId($model, 'categoryId') . '").prop("disabled", true);
             $.get( "' . Url::to(['/cases/get-categories']) . '", { id: $(this).val() } )
                 .done(function( data ) {
                     $( "#' . Html::getInputId($model, 'categoryId') . '" ).html( data );
+                    $( "#' . Html::getInputId($model, 'categoryId') . '").prop("disabled", false);
                 }
             );
         '

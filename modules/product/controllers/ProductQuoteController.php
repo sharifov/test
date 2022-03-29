@@ -407,7 +407,7 @@ class ProductQuoteController extends FController
                                     'booking_id' => $originQuote->getBookingId(),
                                     'product_quote_gid' => $originQuote->pq_gid,
                                     'exchange_gid' => $productQuoteChange->pqc_gid,
-                                    'exchange_status' => ucfirst(ProductQuoteChangeStatus::getClientKeyStatusById($productQuoteChange->pqc_status_id)),
+                                    'exchange_status' => ProductQuoteChangeStatus::getClientKeyStatusById($productQuoteChange->pqc_status_id),
                                 ]
                             )->getCollectedData();
 
