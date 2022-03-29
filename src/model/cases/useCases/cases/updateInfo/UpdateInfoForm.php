@@ -116,7 +116,6 @@ class UpdateInfoForm extends Model
 
     private function getAvailableCategories(int $depId)
     {
-        $depId = (int)$depId;
         $categories = CaseCategory::find()->select(['cc_id'])->andWhere(['cc_dep_id' => $depId])->asArray()->all();
         return array_column($categories, 'cc_id');
     }
