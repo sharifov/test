@@ -1707,6 +1707,7 @@ class CasesController extends FController
 
         $form = new UpdateInfoForm(
             $case,
+            Department::getList(),
             ArrayHelper::map($this->caseCategoryRepository->getEnabledByDep($case->cs_dep_id), 'cc_id', 'cc_name'),
             Auth::user()->username
         );

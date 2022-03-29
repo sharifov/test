@@ -42,11 +42,13 @@ class CaseEventLog extends ActiveRecord
     public const CASE_MARK_CHECKED    = 17;
     public const RE_PROTECTION_REFUND = 18;
     public const VOLUNTARY_PRODUCT_REFUND_ACCEPTED    = 19;
+    public const CASE_DEPARTMENT_CHANGE    = 20;
 
     public const CASE_EVENT_LOG_LIST = [
         self::CASE_CREATED         => 'Case created',
         self::CASE_STATUS_CHANGED  => 'Case status changed',
         self::CASE_CATEGORY_CHANGE => 'Case category changed',
+        self::CASE_DEPARTMENT_CHANGE => 'Case department changed',
         self::CASE_AUTO_PROCESSING_MARK => 'Case auto processing mark has changed',
         self::CASE_MARK_CHECKED => 'Case Mark as Checked',
         self::REPROTECTION_DECISION => 'Reprotection Decision',

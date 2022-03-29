@@ -6,6 +6,7 @@ namespace src\model\cases\useCases\cases\updateInfo;
  * Class Command
  *
  * @property int $caseId
+ * @property int $depId
  * @property int $categoryId
  * @property string|null $subject
  * @property string|null $description
@@ -14,6 +15,7 @@ namespace src\model\cases\useCases\cases\updateInfo;
 class Command
 {
     public $caseId;
+    public $depId;
     public $categoryId;
     public $subject;
     public $description;
@@ -22,6 +24,7 @@ class Command
 
     public function __construct(
         int $caseId,
+        int $depId,
         int $categoryId,
         ?string $subject,
         ?string $description,
@@ -29,6 +32,7 @@ class Command
         ?string $username
     ) {
         $this->caseId = $caseId;
+        $this->depId = $depId;
         $this->categoryId = $categoryId;
         $this->subject = $subject;
         $this->description = $description;

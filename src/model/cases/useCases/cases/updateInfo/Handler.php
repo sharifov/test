@@ -27,7 +27,11 @@ class Handler
             $case->addEventLog(CaseEventLog::CASE_CATEGORY_CHANGE, 'Case category changed to ' . $case->category->cc_name . ' By: ' . ($command->username ?? 'System.'));
         }
 
-        $case->updateInfo($command->categoryId, $command->subject, $command->description, $command->orderUid);
+        if (($case->cs_dep_id != $command->depId) && $case->department) {
+            $case->addEventLog(CaseEventLog::CASE_DEPARTMENT_CHANGE, 'Case department changed to ' . $case->department->dep_name . ' By: ' . ($command->username ?? 'System.'));
+        }
+
+        $case->updateInfo($command->depId, $command->categoryId, $command->subject, $command->description, $command->orderUid);
 
         $this->repository->save($case);
     }
