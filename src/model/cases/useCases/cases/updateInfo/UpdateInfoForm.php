@@ -60,7 +60,9 @@ class UpdateInfoForm extends Model
 
             ['categoryId', 'required'],
             ['categoryId', 'integer'],
-            ['categoryId', 'in', 'range' => array_keys($this->getAvailableCategories($this->depId))],
+            ['categoryId', 'in', 'range' => function () {
+                return $this->getAvailableCategories($this->depId);
+            }],
 
             ['subject', 'string', 'max' => 200],
             ['username', 'string'],
@@ -114,7 +116,6 @@ class UpdateInfoForm extends Model
 
     private function getAvailableCategories(int $depId)
     {
-        $depId = (int)$depId;
         $categories = CaseCategory::find()->select(['cc_id'])->andWhere(['cc_dep_id' => $depId])->asArray()->all();
         return array_column($categories, 'cc_id');
     }
