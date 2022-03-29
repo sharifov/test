@@ -60,7 +60,9 @@ class UpdateInfoForm extends Model
 
             ['categoryId', 'required'],
             ['categoryId', 'integer'],
-            ['categoryId', 'in', 'range' => array_keys($this->getAvailableCategories($this->depId))],
+            ['categoryId', 'in', 'range' => function () {
+                return $this->getAvailableCategories($this->depId);
+            }],
 
             ['subject', 'string', 'max' => 200],
             ['username', 'string'],
