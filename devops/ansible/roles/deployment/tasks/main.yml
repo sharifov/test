@@ -92,6 +92,10 @@
     name: supervisor
     state: restarted
 
+- name: Wait for queue-job.log
+  wait_for:
+    path: "{{ app_console_logfile_path }}/queue-job.log"
+
 - name: Find supervisord logs
   find:
     paths: "{{ app_console_logfile_path }}"
