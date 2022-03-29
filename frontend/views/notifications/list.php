@@ -80,7 +80,8 @@ $canMultipleUpdateRead = Yii::$app->abac->can($notificationAbacDto, Notification
             'value' => static function (\common\models\Notifications $model) {
                 return Html::a($model->n_title, ['/notifications/view2', 'id' => $model->n_id], ['data-pjax' => 0]);
             },
-            'format' => 'raw'
+            'format' => 'raw',
+            'contentOptions' => ['class' => 'group-td']
         ],
 
         //'n_message:ntextWithPurify',
@@ -199,7 +200,7 @@ $(document).ready(function () {
     let sameNotifCnt = 0;
     var serialClass;
     $('.tbl-notif-list tbody tr').each(function (i, e) {
-        let elemTitle = $(e).find('td.serial-td').next().text();
+        let elemTitle = $(e).find('td.group-td').text();
         if (elemTitle === title) {
             sameNotif = true;
             sameNotifCnt++;
