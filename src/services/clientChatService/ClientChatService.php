@@ -15,6 +15,7 @@ use frontend\widgets\clientChat\ClientChatAccessMessage;
 use frontend\widgets\notification\NotificationMessage;
 use src\dispatchers\DeferredEventDispatcher;
 use src\forms\clientChat\RealTimeStartChatForm;
+use src\helpers\app\AppHelper;
 use src\helpers\setting\SettingHelper;
 use src\model\clientChat\ClientChatCodeException;
 use src\model\clientChat\entity\ClientChat;
@@ -423,7 +424,8 @@ class ClientChatService
                         try {
                             $this->sendRequestToUser($clientChat, $agent->id);
                         } catch (\RuntimeException $e) {
-                            \Yii::error('Send request to user ' . $agent->id . ' failed... ' . $e->getMessage() . '; File: ' . $e->getFile() . '; Line: ' . $e->getLine(), 'ClientChatService::transfer::RuntimeException');
+                            $message = ArrayHelper::merge(AppHelper::throwableLog($e), ['agentId' => $agent->id]);
+                            \Yii::warning($message, 'ClientChatService::transfer::RuntimeException');
                             throw $e;
                         }
                     }
