@@ -184,7 +184,7 @@ JS;
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
                 <div class="dropdown-menu" role="menu">
                     <?php if ($lead->leadFlightSegmentsCount) :?>
-                        <?php /** @abac new $leadAbacDto, LeadAbacObject::OBJ_LEAD_QUOTE_SEARCH, LeadAbacObject::ACTION_ACCESS_QUOTE_SEARCH, Access Quote Search*/?>
+                        <?php /** @abac new $leadAbacDto, LeadAbacObject::OBJ_LEAD_QUICK_SEARCH, LeadAbacObject::ACTION_ACCESS_QUICK_SEARCH, Access Quick Search*/?>
                         <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_LEAD_QUICK_SEARCH, LeadAbacObject::ACTION_ACCESS_QUICK_SEARCH)) : ?>
                             <?=Html::a('<i class="fa fa-search info"></i> Quick Search', null, ['class' => 'dropdown-item', 'id' => 'quick-search-quotes-btn', 'data-url' => Url::to(['quote/get-online-quotes', 'leadId' => $leadForm->getLead()->id])])?>
                         <?php endif; ?>
