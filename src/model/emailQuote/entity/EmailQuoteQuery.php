@@ -7,28 +7,14 @@ namespace src\model\emailQuote\entity;
  *
  * @see EmailQuote
  */
-class EmailQuoteQuery extends \yii\db\ActiveQuery
+class EmailQuoteQuery
 {
-    /*public function active()
-    {
-        return $this->andWhere('[[status]]=1');
-    }*/
-
     /**
-     * {@inheritdoc}
-     * @return EmailQuote[]|array
+     * @param int $id
+     * @return EmailQuote[]
      */
-    public function all($db = null)
+    public static function getGroupedByEmailId(int $id): array
     {
-        return parent::all($db);
-    }
-
-    /**
-     * {@inheritdoc}
-     * @return EmailQuote|array|null
-     */
-    public function one($db = null)
-    {
-        return parent::one($db);
+        return EmailQuote::find()->byEmailId($id)->groupBy(['eq_email_id', 'eq_quote_id'])->all();
     }
 }

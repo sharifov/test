@@ -124,4 +124,12 @@ class EmailQuote extends \yii\db\ActiveRecord
     {
         return new Scopes(get_called_class());
     }
+
+    public static function create(int $emailId, int $quoteId): self
+    {
+        $self = new self();
+        $self->eq_email_id = $emailId;
+        $self->eq_quote_id = $quoteId;
+        return $self;
+    }
 }

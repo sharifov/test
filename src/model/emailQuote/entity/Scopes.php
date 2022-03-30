@@ -9,11 +9,6 @@ namespace src\model\emailQuote\entity;
  */
 class Scopes extends \yii\db\ActiveQuery
 {
-    /*public function active()
-    {
-        return $this->andWhere('[[status]]=1');
-    }*/
-
     /**
      * {@inheritdoc}
      * @return EmailQuote[]|array
@@ -30,5 +25,10 @@ class Scopes extends \yii\db\ActiveQuery
     public function one($db = null)
     {
         return parent::one($db);
+    }
+
+    public function byEmailId(int $id): self
+    {
+        return $this->andWhere(['eq_email_id' => $id]);
     }
 }

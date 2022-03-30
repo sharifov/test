@@ -12,9 +12,11 @@ use modules\fileStorage\src\services\url\UrlGenerator;
 use src\auth\Auth;
 use src\entities\cases\CaseEventLog;
 use src\forms\emailReviewQueue\EmailReviewQueueForm;
+use src\model\emailQuote\entity\EmailQuoteQuery;
 use src\model\emailReviewQueue\entity\EmailReviewQueue;
 use src\model\emailReviewQueue\entity\EmailReviewQueueSearch;
 use src\model\emailReviewQueue\entity\EmailReviewQueueStatus;
+use src\repositories\quote\QuoteRepository;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
@@ -22,11 +24,13 @@ use yii\web\NotFoundHttpException;
 class EmailReviewQueueController extends FController
 {
     private UrlGenerator $fileStorageUrlGenerator;
+    private QuoteRepository $quoteRepository;
 
-    public function __construct($id, $module, UrlGenerator $fileStorageUrlGenerator, $config = [])
+    public function __construct($id, $module, UrlGenerator $fileStorageUrlGenerator, QuoteRepository $quoteRepository, $config = [])
     {
         parent::__construct($id, $module, $config);
         $this->fileStorageUrlGenerator = $fileStorageUrlGenerator;
+        $this->quoteRepository = $quoteRepository;
     }
 
     /**
@@ -150,6 +154,17 @@ class EmailReviewQueueController extends FController
                         if ($case = $email->eCase) {
                             $case->addEventLog(CaseEventLog::EMAIL_REVIEWED, ($email->eTemplateType->etp_name ?? '') . ' email sent. By: ' . $email->e_email_from_name, [], CaseEventLog::CATEGORY_INFO);
                         }
+
+                        if ($email->e_lead_id) {
+                            $emailQuotes = EmailQuoteQuery::getGroupedByEmailId($email->e_id);
+                            foreach ($emailQuotes as $emailQuote) {
+                                if ($quote = $emailQuote->quote) {
+                                    $quote->setStatusSend();
+                                    $this->quoteRepository->save($quote);
+                                }
+                            }
+                        }
+
                         \Yii::$app->session->setFlash('success', 'Email(' . $email->e_id . ') was sent to ' . $email->e_email_to);
                         return $this->redirect('/email-review-queue/index');
                     }
