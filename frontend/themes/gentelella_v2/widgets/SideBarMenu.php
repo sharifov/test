@@ -1046,7 +1046,6 @@ class SideBarMenu extends \yii\bootstrap\Widget
         self::ensureVisibility($menuItems);
 
 
-        Yii::error($menuItems);
         return $this->render('side_bar_menu', ['menuItems' => $menuItems, 'user' => $user, 'search_text' => $search_text]);
     }
 
