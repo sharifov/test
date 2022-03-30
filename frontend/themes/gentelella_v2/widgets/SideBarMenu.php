@@ -775,6 +775,8 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         'object' => UserFeedbackAbacObject::ACT_USER_FEEDBACK_INDEX,
                         'action' => UserFeedbackAbacObject::ACTION_ACCESS
                     ],
+                    /** @abac $userFeedbackAbacDto, UserFeedbackAbacObject::ACT_USER_FEEDBACK_INDEX, UserFeedbackAbacObject::ACTION_ACCESS, Access to view list of  User Feedback*/
+                    'visible' => \Yii::$app->abac->can(new UserFeedbackAbacDto(), UserFeedbackAbacObject::ACT_USER_FEEDBACK_INDEX, UserFeedbackAbacObject::ACTION_ACCESS),
                 ],
                 ['label' => 'Users', 'url' => ['/employee/list'], 'icon' => 'users'],
                 ['label' => 'User Online', 'url' => ['/user-online/index'], 'icon' => 'spinner'],
