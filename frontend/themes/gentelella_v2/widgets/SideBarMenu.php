@@ -295,6 +295,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'Review Queue Completed', 'url' => ['/email-review-queue/completed'], 'icon' => 'list'],
                 ['label' => 'Email List', 'url' => ['/email-list/index'], 'icon' => 'envelope-o'],
                 ['label' => 'Email Review Queue Crud', 'url' => ['/email-review-queue-crud/index'], 'icon' => 'list'],
+                ['label' => 'Email Quote Crud', 'url' => ['/email-quote-crud/index'], 'icon' => 'list'],
             ]
         ];
 
