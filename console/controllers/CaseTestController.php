@@ -39,7 +39,7 @@ class CaseTestController extends Controller
 
         if ($case) {
             try {
-                $case->solved($case->cs_user_id, 'test status notification');
+                $case->solved($case->cs_user_id, 'test status notification solved');
                 $this->caseRepository->save($case);
             } catch (\Throwable $e) {
                 $message = AppHelper::throwableLog($e);
@@ -67,7 +67,7 @@ class CaseTestController extends Controller
 
         if ($case) {
             try {
-                $case->error($case->cs_user_id, 'test status notification');
+                $case->error($case->cs_user_id, 'test status notification error');
                 $this->caseRepository->save($case);
             } catch (\Throwable $e) {
                 $message = AppHelper::throwableLog($e);
