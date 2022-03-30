@@ -16,6 +16,7 @@ use modules\user\userFeedback\abac\UserFeedbackAbacObject;
 use src\helpers\app\AppHelper;
 use Yii;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 
 /**
  * Class SideBarMenu
@@ -775,8 +776,6 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         'object' => UserFeedbackAbacObject::ACT_USER_FEEDBACK_INDEX,
                         'action' => UserFeedbackAbacObject::ACTION_ACCESS
                     ],
-                    /** @abac $userFeedbackAbacDto, UserFeedbackAbacObject::ACT_USER_FEEDBACK_INDEX, UserFeedbackAbacObject::ACTION_ACCESS, Access to view list of  User Feedback*/
-                    'visible' => \Yii::$app->abac->can(new UserFeedbackAbacDto(), UserFeedbackAbacObject::ACT_USER_FEEDBACK_INDEX, UserFeedbackAbacObject::ACTION_ACCESS),
                 ],
                 ['label' => 'Users', 'url' => ['/employee/list'], 'icon' => 'users'],
                 ['label' => 'User Online', 'url' => ['/user-online/index'], 'icon' => 'spinner'],
@@ -1047,7 +1046,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
         self::ensureVisibility($menuItems);
 
 
-
+        Yii::error($menuItems);
         return $this->render('side_bar_menu', ['menuItems' => $menuItems, 'user' => $user, 'search_text' => $search_text]);
     }
 
@@ -1130,10 +1129,6 @@ class SideBarMenu extends \yii\bootstrap\Widget
             if (isset($item['items']) && (!self::ensureVisibility($item['items']) && !isset($item['visible']))) {
                 $item['visible'] = false;
             }
-            if (isset($item['label']) && (!isset($item['visible']) || $item['visible'] === true)) {
-                $allVisible = true;
-            }
-
             if (isset($item['abac'])) {
                 try {
                     if (!$abacDto = $item['abac']['dto'] ?? null) {
@@ -1145,10 +1140,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     if (!$action = $item['abac']['action'] ?? null) {
                         throw new \RuntimeException('Abac action is empty');
                     }
-
-                    if (!Yii::$app->abac->can($abacDto, $object, $action)) {
-                        $item['visible'] = false;
-                    }
+                    $item['visible'] = (bool) Yii::$app->abac->can($abacDto, $object, $action);
                 } catch (\RuntimeException | \DomainException $throwable) {
                     $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $item);
                     \Yii::warning($message, 'SideBarMenu:ensureVisibility:Exception');
@@ -1156,6 +1148,9 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $item);
                     \Yii::error($message, 'SideBarMenu:ensureVisibility:Throwable');
                 }
+            }
+            if (isset($item['label']) && (!isset($item['visible']) || $item['visible'] === true)) {
+                $allVisible = true;
             }
         }
         return $allVisible;
