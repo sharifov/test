@@ -242,7 +242,9 @@ class VoluntaryExchangeCreateHandler
         }
 
         try {
-            $voluntaryExchangeCreateForm = new VoluntaryExchangeCreateForm();
+            $voluntaryExchangeCreateForm = new VoluntaryExchangeCreateForm([
+                'scenario' => VoluntaryExchangeCreateForm::SCENARIO_WITHOUT_PRIVATE_DATA,
+            ]);
             if (!$voluntaryExchangeCreateForm->load($flightProductQuoteData)) {
                 throw new \RuntimeException('VoluntaryExchangeCreateForm not loaded');
             }

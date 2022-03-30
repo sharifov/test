@@ -3,12 +3,12 @@
 namespace src\entities\chat;
 
 use common\models\Employee;
-use src\model\clientChat\entity\search\ClientChatSearch;
+use common\models\UserGroupAssign;
 use src\model\clientChat\entity\ClientChat;
+use src\model\clientChat\entity\search\ClientChatSearch;
 use src\model\clientChatMessage\entity\ClientChatMessage;
 use src\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use yii\data\ArrayDataProvider;
-use common\models\UserGroupAssign;
 use yii\db\Query;
 
 class ChatExtendedGraphsSearch extends ClientChatSearch
@@ -87,15 +87,11 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
             '' . $this->setGroupingParam() . ' AS date',
             'SUM(IF(cch_source_type_id = ' . ClientChat::SOURCE_TYPE_CLIENT . ', 1, 0)) AS newIncomingClientChats',
             'SUM(IF(cch_source_type_id = ' . ClientChat::SOURCE_TYPE_AGENT . ', 1, 0)) AS newOutgoingAgentChats',
-            //'SUM(IF(cch_source_type_id = ' . ClientChat::SOURCE_TYPE_CLIENT . ' AND cch_status_id = '. ClientChat::STATUS_IN_PROGRESS . ', 1, 0)) AS progressIncomingClientChats',
-            //'SUM(IF(cch_source_type_id = ' . ClientChat::SOURCE_TYPE_AGENT . ' AND cch_status_id = '. ClientChat::STATUS_IN_PROGRESS . ', 1, 0)) AS progressOutgoingAgentChats',
             'SUM(IF(cch_source_type_id = ' . ClientChat::SOURCE_TYPE_CLIENT . ' AND (cch_status_id = ' . ClientChat::STATUS_CLOSED . ' OR cch_status_id = ' . ClientChat::STATUS_ARCHIVE . '), 1, 0)) AS initByClientClosedArchive',
             'SUM(IF(cch_source_type_id = ' . ClientChat::SOURCE_TYPE_AGENT . ' AND (cch_status_id = ' . ClientChat::STATUS_CLOSED . ' OR cch_status_id = ' . ClientChat::STATUS_ARCHIVE . '), 1, 0)) AS initByAgentClosedArchive',
             'SUM(IF(cch_missed = ' . ClientChat::MISSED . ', 1, 0)) AS missedChats',
             'GROUP_CONCAT(DISTINCT cch_owner_user_id) AS agentsInGroup'
         ]);
-
-        //$query->where(['cch_status_id' => [ClientChat::STATUS_PENDING, ClientChat::STATUS_CLOSED]]);
 
         if ($this->cch_project_id) {
             $query->andWhere(['cch_project_id' => $this->cch_project_id]);
@@ -130,8 +126,6 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
             'acceptedByAgentSourceAgent' => (new Query())
                 ->select('COUNT(*)')
                 ->from([
-                    //'ccTbl' => ((new Query())->select('*')->from(ClientChat::tableName())->where('date_format(cch_created_dt, "%Y-%m-%d") = date')),
-                    //'ccuaTbl' => (new Query())->select('*')->from(ClientChatUserAccess::tableName())->where(['ccua_status_id' => ClientChatUserAccess::STATUS_ACCEPT])
                     'ccTbl' => $ccTblSubQuery,
                     'ccuaTbl' => $ccuaTblSubQuery
                 ])
@@ -150,8 +144,6 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
                 ->andWhere('ccTbl.cch_source_type_id = ' . ClientChat::SOURCE_TYPE_CLIENT)
         ]);
 
-        //$query->andWhere('cch_owner_user_id IS NOT NULL');
-
         $query->andWhere([
             'between',
             'cch_created_dt',
@@ -162,7 +154,6 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
 
         $query->groupBy(['date']);
         $allData = $query->createCommand()->queryAll();
-        //var_dump($allData); die();
 
         $queryChats = static::find()->select([
             '' . $this->setGroupingParam() . ' AS date',
@@ -173,7 +164,6 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
             'cch_created_dt',
             'cch_updated_dt'
         ]);
-        //$queryChats->where(['cch_status_id' => [ClientChat::STATUS_PENDING, ClientChat::STATUS_CLOSED]]);
 
         if ($this->cch_owner_user_id) {
             $queryChats->andWhere(['cch_owner_user_id' => $this->cch_owner_user_id]);
@@ -184,7 +174,6 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
         }
 
         $queryChats->andWhere('cch_owner_user_id IS NOT NULL');
-        //$queryChats->andWhere(['cch_source_type_id' => ClientChat::SOURCE_TYPE_CLIENT]);
         $queryChats->andWhere([
             'between',
             'cch_created_dt',
@@ -192,54 +181,57 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
             Employee::convertTimeFromUserDtToUTC(strtotime($this->createTimeEnd))
         ]);
         $chatsData = $queryChats->createCommand()->queryAll();
-        //var_dump($chatsData); die();
 
         $queryFirstAgentMsg = ClientChatMessage::find();
         $queryFirstAgentMsg->select([
             'each_item.ccm_cch_id',
             'first_msg_date',
-            //'ccm_client_id',
             'ccm_user_id',
-            //new Expression("ccm_body->>'msg' as msg")
         ]);
         $queryFirstAgentMsg->innerJoin('(SELECT ccm_cch_id, MIN(ccm_sent_dt) AS first_msg_date FROM client_chat_message 
                        WHERE ccm_client_id IS NOT NULL AND ccm_user_id IS NOT NULL GROUP BY ccm_cch_id) AS each_item', 'each_item.first_msg_date = client_chat_message.ccm_sent_dt AND each_item.ccm_cch_id = client_chat_message.ccm_cch_id');
 
         $firstChatAgentMessage = $queryFirstAgentMsg->createCommand()->queryAll();
-        //var_dump($firstChatAgentMessage); die();
+
+        $firstChatAgentMessageResults = [];
+        foreach ($firstChatAgentMessage as $message) {
+            $firstChatAgentMessageResults[$message['ccm_cch_id']] = $message;
+        }
+        unset($firstChatAgentMessage);
 
         $queryFirstMessagesOfChats = ClientChatMessage::find();
         $queryFirstMessagesOfChats->select([
             'each_item.ccm_cch_id',
             'first_msg_date',
-            //'ccm_client_id',
             'ccm_user_id',
-            //new Expression("ccm_body->>'msg' as msg")
         ]);
         $queryFirstMessagesOfChats->innerJoin('(SELECT ccm_cch_id, MIN(ccm_sent_dt) AS first_msg_date FROM client_chat_message 
                        GROUP BY ccm_cch_id) AS each_item', 'each_item.first_msg_date = client_chat_message.ccm_sent_dt AND each_item.ccm_cch_id = client_chat_message.ccm_cch_id');
 
         $firstMessagesOfChats = $queryFirstMessagesOfChats->createCommand()->queryAll();
-        //var_dump( $firstMessagesOfChats); die();
+
+        $firstMessagesOfChatsResults = [];
+        foreach ($firstMessagesOfChats as $messagesOfChat) {
+            $firstMessagesOfChatsResults[$messagesOfChat['ccm_cch_id']] = $messagesOfChat;
+        }
+
+        unset($firstMessagesOfChats);
+
 
         foreach ($chatsData as $key => $chat) {
             $chatsData[$key]['agent_frt'] = 0;
             $chatsData[$key]['chat_duration'] = 0;
 
-            foreach ($firstChatAgentMessage as $message) {
-                if ($chat['cch_id'] == $message['ccm_cch_id']) {
-                    $chatsData[$key]['agent_frt'] = strtotime($message['first_msg_date']) - strtotime($chat['cch_created_dt']);
-                }
+            if (isset($firstChatAgentMessageResults[$chat['cch_id']])) {
+                $chatsData[$key]['agent_frt'] = strtotime($firstChatAgentMessageResults[$chat['cch_id']]['first_msg_date']) - strtotime($chat['cch_created_dt']);
             }
 
-            foreach ($firstMessagesOfChats as $messageOfChat) {
-                if ($chat['cch_id'] == $messageOfChat['ccm_cch_id'] && ($chat['cch_status_id'] == ClientChat::STATUS_CLOSED || $chat['cch_status_id'] == ClientChat::STATUS_ARCHIVE)) {
-                    $chatsData[$key]['chat_duration'] = strtotime($chat['cch_updated_dt']) - strtotime($messageOfChat['first_msg_date']);
-                }
+
+            if (isset($firstMessagesOfChatsResults[$chat['cch_id']]) && ($chat['cch_status_id'] == ClientChat::STATUS_CLOSED || $chat['cch_status_id'] == ClientChat::STATUS_ARCHIVE)) {
+                $chatsData[$key]['chat_duration'] = strtotime($chat['cch_updated_dt']) - strtotime($firstMessagesOfChatsResults[$chat['cch_id']]['first_msg_date']);
             }
         }
 
-        //var_dump($chatsData); die();
 
         foreach ($allData as $key => $finalData) {
             $allData[$key]['sumFrtOfChatsInGroup'] = 0;
@@ -261,7 +253,6 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
             }
         }
 
-        //var_dump($allData); die();
 
         return new ArrayDataProvider([
             'allModels' => $allData,

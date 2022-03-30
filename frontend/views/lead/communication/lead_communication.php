@@ -468,7 +468,13 @@ $canShowEmailData = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_
                                                 'plugins' => [
                                                     'clips',
                                                     'fullscreen',
-                                                ]
+                                                ],
+                                                'pasteCallback' => new \yii\web\JsExpression('function(html) { 
+                                                    let dataImageSubstring = `<img src="data:image/png;base64,`;
+                                                    if(html.includes(dataImageSubstring)) {
+                                                        html = "";
+                                                    }
+                                                  return html;}')
                                             ],
                                         ]);
                                         ?>

@@ -207,6 +207,7 @@ class SaleListAbacObject extends AbacBaseModel implements AbacInterface
                 self::ATTR_NEED_ACTION,
             ],
         ];
+
         $attrCategoryList = self::ATTR_CASE_CATEGORY;
         $attrCategoryList['values'] = CaseCategory::getList();
         $attributes[self::UI_BLOCK_SALE_LIST][] = $attrCategoryList;

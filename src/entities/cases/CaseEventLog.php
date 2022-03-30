@@ -41,11 +41,14 @@ class CaseEventLog extends ActiveRecord
     public const EMAIL_REVIEWED    = 16;
     public const CASE_MARK_CHECKED    = 17;
     public const RE_PROTECTION_REFUND = 18;
+    public const VOLUNTARY_PRODUCT_REFUND_ACCEPTED    = 19;
+    public const CASE_DEPARTMENT_CHANGE    = 20;
 
     public const CASE_EVENT_LOG_LIST = [
         self::CASE_CREATED         => 'Case created',
         self::CASE_STATUS_CHANGED  => 'Case status changed',
         self::CASE_CATEGORY_CHANGE => 'Case category changed',
+        self::CASE_DEPARTMENT_CHANGE => 'Case department changed',
         self::CASE_AUTO_PROCESSING_MARK => 'Case auto processing mark has changed',
         self::CASE_MARK_CHECKED => 'Case Mark as Checked',
         self::REPROTECTION_DECISION => 'Reprotection Decision',
@@ -60,6 +63,7 @@ class CaseEventLog extends ActiveRecord
         self::VOLUNTARY_REFUND_CONFIRM => 'Voluntary Refund Confirm',
         self::VOLUNTARY_REFUND_EMAIL_SEND => 'Voluntary Refund Send Email to client',
         self::VOLUNTARY_REFUND_WH_SEND_OTA => 'Voluntary Refund Send WH to OTA',
+        self::VOLUNTARY_PRODUCT_REFUND_ACCEPTED => 'Voluntary Product Refund Accepted',
         self::EMAIL_REVIEWED => 'Email Reviewed',
     ];
 

@@ -187,7 +187,7 @@ $canMultipleUpdateRead = Yii::$app->abac->can($notificationAbacDto, Notification
             }*/
 
             if ($model->n_new) {
-                return ['class' =>  'warning'];
+                return ['class' =>  'bold'];
             }
         },
         'columns' => $columns,
@@ -240,3 +240,15 @@ JS;
 
 $this->registerJs($js, $this::POS_END);
 ?>
+<?php
+$css = <<<CSS
+.tbl-notif-list.table-striped > tbody > tr:nth-child(2n+1) > td, 
+.tbl-notif-list.table-striped > tbody > tr:nth-child(2n+1) > th,
+.tbl-notif-list.table-striped tbody tr:nth-of-type(odd) {
+    background-color: initial !important;
+}
+.tbl-notif-list .bold {
+font-weight: bold;
+}
+CSS;
+$this->registerCss($css);

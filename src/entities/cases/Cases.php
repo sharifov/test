@@ -565,11 +565,13 @@ class Cases extends ActiveRecord implements Objectable
     }
 
     public function updateInfo(
+        int $depId,
         int $categoryId,
         ?string $subject,
         ?string $description,
         ?string $orderUid
     ): void {
+        $this->cs_dep_id = $depId;
         $this->updateCategory($categoryId);
         $this->cs_subject = $subject;
         $this->cs_description = $description;
