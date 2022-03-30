@@ -18,7 +18,7 @@ class CasesSwitchStatusAwaitingtoSolvedListener
                 Notifications::publish('getNewNotification', ['user_id' => $event->ownerId], $dataNotification);
             }
         } catch (\Throwable $e) {
-            Yii::error($e, 'Listeners:CasesSwitchStatusAwaitingtoSolvedListener');
+            Yii::error(['message' => 'Case Status from Awaiting to Solved error', 'e' => $e->getMessage(), 'caseId' => $event->case->cs_id], 'Listeners:CasesSwitchStatusAwaitingtoSolvedListener');
         }
     }
 }
