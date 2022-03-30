@@ -12,6 +12,7 @@ use common\models\LeadPreferences;
 use common\models\Quote;
 use common\models\QuotePrice;
 use common\models\Setting;
+use modules\abac\src\entities\AbacPolicy;
 use src\entities\cases\Cases;
 use src\logger\db\GlobalLogInterface;
 use src\logger\db\LogDTO;
@@ -36,6 +37,7 @@ class Logger implements BootstrapInterface
         Setting::class,
         Cases::class,
         LeadPoorProcessingData::class,
+        AbacPolicy::class,
     ];
 
     /**
