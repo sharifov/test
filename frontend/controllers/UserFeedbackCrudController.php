@@ -7,6 +7,7 @@ use frontend\widgets\multipleUpdate\userFeedback\MultipleUpdateForm;
 use frontend\widgets\multipleUpdate\userFeedback\MultipleUpdateService;
 use modules\user\src\abac\dto\UserAbacDto;
 use modules\user\src\abac\UserAbacObject;
+use modules\user\userFeedback\abac\UserFeedbackAbacObject;
 use modules\user\userFeedback\entity\UserFeedback;
 use modules\user\userFeedback\entity\search\UserFeedbackSearch;
 use modules\user\userFeedback\entity\UserFeedbackData;
@@ -151,9 +152,9 @@ class UserFeedbackCrudController extends FController
      */
     public function actionCreateAjax(): string
     {
-        $userAbacDto = new UserAbacDto('username');
-        /** @abac new $userAbacDto, UserAbacObject::USER_FEEDBACK, UserAbacObject::ACTION_CREATE, Username field view*/
-        if (!Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FEEDBACK, UserAbacObject::ACTION_CREATE)) {
+        $userAbacDto =  new UserFeedbackAbacDto();
+        /** @abac $userFeedbackAbacDto, UserFeedbackAbacObject::OBJ_USER_FEEDBACK, UserFeedbackAbacObject::ACTION_ACCESS, Access to create User Feedback*/
+        if (!Yii::$app->abac->can($userAbacDto, UserFeedbackAbacObject::OBJ_USER_FEEDBACK, UserAbacObject::ACTION_CREATE)) {
             throw new ForbiddenHttpException('Access denied');
         }
 
