@@ -29,6 +29,6 @@ class UserFeedbackResolutionForm extends Model
 
     public function formName()
     {
-        return 'UserFeedback';
+        return '';
     }
 }

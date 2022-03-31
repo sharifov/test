@@ -29,6 +29,7 @@ use common\models\Employee;
  * @property string|null $uf_resolution_dt *
  *
  * @property Employee $ufCreatedUser
+ * @property Employee $ufResolutionUser
  */
 class UserFeedback extends ActiveRecord
 {

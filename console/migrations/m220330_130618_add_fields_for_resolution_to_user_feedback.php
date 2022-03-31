@@ -30,9 +30,9 @@ class m220330_130618_add_fields_for_resolution_to_user_feedback extends Migratio
             if (!DBHelper::isColumnExist('user_feedback', 'uf_resolution_dt')) {
                 $this->addColumn('{{%user_feedback}}', 'uf_resolution_dt', $this->dateTime());
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             Yii::error(
-                $e,
+                AppHelper::throwableLog($throwable),
                 'm220330_130618_add_fields_for_resolution_to_user_feedback:safeUp:Throwable'
             );
         }
