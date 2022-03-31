@@ -13,7 +13,7 @@ class CasesSwitchStatusAwaitingtoSolvedListener
     public function handle(CasesSolvedStatusEvent $event): void
     {
         try {
-            if ($ntf = Notifications::create($event->ownerId, 'Case Solved', 'Case (' . $event->case->cs_id . ' ' . Purifier::createCaseShortLink($event->case)  . ') has been moved from Awaiting to Solved', Notifications::TYPE_SUCCESS, true)) {
+            if ($ntf = Notifications::create($event->ownerId, 'Case Solved', 'Case (' . Purifier::createCaseShortLink($event->case) . ') has been moved Awaiting to Solved', Notifications::TYPE_SUCCESS, true)) {
                 $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
                 Notifications::publish('getNewNotification', ['user_id' => $event->ownerId], $dataNotification);
             }
