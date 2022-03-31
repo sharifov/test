@@ -64,6 +64,11 @@ class UserFeedbackCrudController extends FController
     public function behaviors(): array
     {
         $behaviors = [
+            'access' => [
+                'allowActions' => [
+                    'create-ajax',
+                ],
+            ],
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
@@ -153,9 +158,9 @@ class UserFeedbackCrudController extends FController
      */
     public function actionCreateAjax(): string
     {
-        $userAbacDto =  new UserFeedbackAbacDto();
+        $userFeedbackAbacDto =  new UserFeedbackAbacDto();
         /** @abac $userFeedbackAbacDto, UserFeedbackAbacObject::OBJ_USER_FEEDBACK, UserFeedbackAbacObject::ACTION_CREATE, Access to create User Feedback*/
-        if (!Yii::$app->abac->can($userAbacDto, UserFeedbackAbacObject::OBJ_USER_FEEDBACK, UserAbacObject::ACTION_CREATE)) {
+        if (!Yii::$app->abac->can($userFeedbackAbacDto, UserFeedbackAbacObject::OBJ_USER_FEEDBACK, UserFeedbackAbacObject::ACTION_CREATE)) {
             throw new ForbiddenHttpException('Access denied');
         }
 
