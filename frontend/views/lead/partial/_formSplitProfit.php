@@ -70,7 +70,7 @@ function calcProfitByPercent(obj, total){
     })
 
     mainAgentPercentVal = 100 - otherPercent;
-    mainAgentProfitVal = total * mainAgentPercentVal / 100;
+    mainAgentProfitVal = (total * mainAgentPercentVal / 100).toFixed(4);
     
     mainAgentProfit();
 }
