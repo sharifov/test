@@ -77,7 +77,11 @@ class FilterShortCodeToLink implements Filter
         }, $this->content);
 
         $this->content = preg_replace_callback('/from(.*?)to/', function ($matches) {
-            return '<br><pre><code>from: ' . self::detectPhones($matches[1]) . '</pre></code>to';
+            $detectPhone = self::detectPhones($matches[1]);
+            if ($detectPhone !== $matches[1]) {
+                return '<br><pre><code>from: ' . $detectPhone . '</pre></code>to';
+            }
+            return $matches[0];
         }, $this->content);
 
         $this->content = preg_replace_callback('/to(.*?)by/', function ($matches) {
