@@ -75,6 +75,14 @@ class UserFeedbackService
         }
     }
 
+    public function resolve(UserFeedback $model, string $resolution, int $userId)
+    {
+        $model->uf_resolution         = $resolution;
+        $model->uf_resolution_user_id = $userId;
+        $model->uf_resolution_dt      = date('Y-m-d H:i:s');
+        $this->repository->save($model);
+    }
+
     /**
      * @param UserFeedback $model
      * @param int|null $statusId
