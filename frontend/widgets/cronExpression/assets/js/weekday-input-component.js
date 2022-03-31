@@ -12,7 +12,7 @@ const WeekdayInputComponent = {
             <div class="d-flex">
                 <input type="radio" @change="apply" v-model="selectedRadio" v-bind:name="inputRadioName" value="0" style="margin-right: 5px;">
                 <select v-bind:name="selectName" @change="applyByweekdays()" v-model="selectedweekdays" multiple size="10" class="form-control">
-                  <option v-for="(weekday, index) in weekdays"  v-bind:value="index+1">
+                  <option v-for="(weekday, index) in weekdays"  v-bind:value="index">
                     {{weekday}}
                   </option>
                 </select>
