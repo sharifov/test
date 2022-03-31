@@ -7,6 +7,7 @@ use frontend\widgets\multipleUpdate\userFeedback\MultipleUpdateForm;
 use frontend\widgets\multipleUpdate\userFeedback\MultipleUpdateService;
 use modules\user\src\abac\dto\UserAbacDto;
 use modules\user\src\abac\UserAbacObject;
+use modules\user\userFeedback\abac\dto\UserFeedbackAbacDto;
 use modules\user\userFeedback\abac\UserFeedbackAbacObject;
 use modules\user\userFeedback\entity\UserFeedback;
 use modules\user\userFeedback\entity\search\UserFeedbackSearch;
