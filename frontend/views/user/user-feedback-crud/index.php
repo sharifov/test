@@ -70,10 +70,34 @@ $columns = [
         'placeholder' => 'Select user'
     ],
     [
+        'attribute' => 'uf_resolution',
+        'value' => static function (UserFeedback $model) {
+            if (!$model->uf_resolution) {
+                return null;
+            }
+            return '<pre><small>' . (StringHelper::truncate($model->uf_resolution, 400, '...', null, true)) . '</small></pre>';
+        },
+        'format' => 'raw'
+    ],
+    [
+        'class' => UserSelect2Column::class,
+        'attribute' => 'uf_resolution_user_id',
+        'relation' => 'ufResolutionUser',
+        'placeholder' => 'Select user'
+    ],
+    ['class' => DateTimeColumn::class, 'attribute' => 'uf_resolution_dt'],
+    [
         'class' => ActionColumn::class,
+        'template' => '{view} {update} {delete} {resolve}',
         'urlCreator' => static function ($action, UserFeedback $model, $key, $index, $column) {
             return Url::toRoute([$action, 'uf_id' => $model->uf_id, 'uf_created_dt' => $model->uf_created_dt]);
-        }
+        },
+        'buttons' => [
+            'resolve' => function ($action, $model, $key) {
+                $url = Url::toRoute([$action, 'uf_id' => $model->uf_id, 'uf_created_dt' => $model->uf_created_dt]);
+                return Html::a('<i class="fa fa-check"></i>', $url, ['title' => 'Resolve']);
+            },
+        ]
     ],
 ];
 ?>

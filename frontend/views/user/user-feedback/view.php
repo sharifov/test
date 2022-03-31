@@ -43,6 +43,9 @@ $this->params['breadcrumbs'][] = $this->title;
                     'uf_updated_dt:byUserDateTime',
                     'uf_created_user_id:username',
                     'uf_updated_user_id:username',
+                    'uf_resolution:ntext',
+                    'uf_resolution_user_id:username',
+                    'uf_resolution_dt:byUserDateTime',
                 ],
             ]) ?>
         </div>

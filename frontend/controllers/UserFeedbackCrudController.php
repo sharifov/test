@@ -12,6 +12,7 @@ use modules\user\userFeedback\entity\search\UserFeedbackSearch;
 use modules\user\userFeedback\entity\UserFeedbackData;
 use modules\user\userFeedback\entity\UserFeedbackFile;
 use modules\user\userFeedback\forms\UserFeedbackBugForm;
+use modules\user\userFeedback\forms\UserFeedbackResolutionForm;
 use modules\user\userFeedback\forms\UserFeedbackUpdateForm;
 use modules\user\userFeedback\service\UserFeedbackService;
 use modules\user\userFeedback\UserFeedbackFileRepository;
@@ -257,6 +258,38 @@ class UserFeedbackCrudController extends FController
             ]);
         } catch (\Throwable $e) {
             Yii::error(AppHelper::throwableLog($e), 'UserFeedbackCrudController:actionUpdate:Throwable');
+            return $this->renderAjax('_error', [
+                'error' => 'Server Error'
+            ]);
+        }
+    }
+
+    public function actionResolve($uf_id, $uf_created_dt)
+    {
+        try {
+            $model = $this->findModel($uf_id, $uf_created_dt);
+            if ($this->request->isPost) {
+                $form = new UserFeedbackResolutionForm();
+                $form->load($this->request->post());
+                if (!$form->validate()) {
+                    throw new \RuntimeException(implode(', ', $form->getErrorSummary(true)));
+                }
+                /**
+                 * @throws \Throwable
+                 */
+                $this->userFeedbackService->resolve($model, $form->uf_resolution, Auth::id());
+                return $this->redirect(['view', 'uf_id' => $model->uf_id, 'uf_created_dt' => $model->uf_created_dt]);
+            }
+            return $this->render('resolution', [
+                'model' => $model,
+            ]);
+        } catch (\RuntimeException | \DomainException $e) {
+            Yii::warning(AppHelper::throwableFormatter($e), 'UserFeedbackCrudController::actionResolve:exception');
+            return $this->renderAjax('_error', [
+                'error' => $e->getMessage()
+            ]);
+        } catch (\Throwable $e) {
+            Yii::error(AppHelper::throwableLog($e), 'UserFeedbackCrudController:actionResolve:Throwable');
             return $this->renderAjax('_error', [
                 'error' => 'Server Error'
             ]);
