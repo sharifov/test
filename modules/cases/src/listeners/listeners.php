@@ -20,16 +20,18 @@ use src\listeners\cases\CasesTrashStatusEventLogListener;
 use src\listeners\cases\CasesAwaitingStatusEventLogListener;
 use src\listeners\cases\CasesAutoProcessingStatusEventListener;
 use src\listeners\cases\CasesErrorStatusEventLogListener;
+use src\listeners\cases\CasesSwitchStatusAwaitingtoSolvedListener;
+use src\listeners\cases\CasesSwitchStatusAwaitingtoErrorListener;
 
 return [
     CasesCreatedEvent::class => [],
     CasesPendingStatusEvent::class => [CasesPendingStatusEventLogListener::class],
     CasesProcessingStatusEvent::class => [CasesProcessingStatusEventLogListener::class, CasesProcessingStatusEventNotificationsListener::class],
     CasesFollowUpStatusEvent::class => [CasesFollowUpStatusEventLogListener::class],
-    CasesSolvedStatusEvent::class => [CasesSolvedStatusEventLogListener::class],
+    CasesSolvedStatusEvent::class => [ CasesSolvedStatusEventLogListener::class, CasesSwitchStatusAwaitingtoSolvedListener::class ],
     CasesTrashStatusEvent::class => [CasesTrashStatusEventLogListener::class],
     CasesNewStatusEvent::class => [CasesNewStatusEventLogListener::class],
     CasesAwaitingStatusEvent::class => [CasesAwaitingStatusEventLogListener::class],
     CasesAutoProcessingStatusEvent::class => [CasesAutoProcessingStatusEventListener::class],
-    CasesErrorStatusEvent::class => [CasesErrorStatusEventLogListener::class],
+    CasesErrorStatusEvent::class => [CasesErrorStatusEventLogListener::class, CasesSwitchStatusAwaitingtoErrorListener::class],
 ];
