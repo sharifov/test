@@ -21,6 +21,7 @@ use modules\offer\OfferModule;
 use modules\order\OrderModule;
 use modules\product\ProductModule;
 use modules\qaTask\QaTaskModule;
+use modules\requestControl\RequestControlModule;
 use common\components\i18n\Formatter;
 use modules\rentCar\RentCarModule;
 use yii\log\DbTarget;
@@ -331,6 +332,11 @@ return [
 
         'product' => [
             'class' => ProductModule::class,
+            'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
+        ],
+
+        'requestControl' => [
+            'class' => RequestControlModule::class,
             'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
         ],
 
