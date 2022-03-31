@@ -153,7 +153,7 @@ class UserFeedbackCrudController extends FController
     public function actionCreateAjax(): string
     {
         $userAbacDto =  new UserFeedbackAbacDto();
-        /** @abac $userFeedbackAbacDto, UserFeedbackAbacObject::OBJ_USER_FEEDBACK, UserFeedbackAbacObject::ACTION_ACCESS, Access to create User Feedback*/
+        /** @abac $userFeedbackAbacDto, UserFeedbackAbacObject::OBJ_USER_FEEDBACK, UserFeedbackAbacObject::ACTION_CREATE, Access to create User Feedback*/
         if (!Yii::$app->abac->can($userAbacDto, UserFeedbackAbacObject::OBJ_USER_FEEDBACK, UserAbacObject::ACTION_CREATE)) {
             throw new ForbiddenHttpException('Access denied');
         }
