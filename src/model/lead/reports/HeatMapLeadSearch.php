@@ -77,19 +77,17 @@ class HeatMapLeadSearch extends Model
                 ->groupBy(['lead_id'])
         ],'leads.id = lead_created.id');*/
 
-
         $query->andWhere(['BETWEEN', 'created', $this->fromDT, $this->toDT]);
 
         $query->groupBy(['MONTH(created)', 'DAY(created)', 'HOUR(created)']);
 
         $query->orderBy(['month' => SORT_ASC, 'day' => SORT_ASC, 'hour' => SORT_ASC]);
 
-        //\yii\helpers\VarDumper::dump($query->createCommand()->getRawSql(), 10, true); exit();  /* FOR DEBUG:: must by remove */
-
-        \yii\helpers\VarDumper::dump($query->asArray()->all(), 20, true); exit();
+        // \yii\helpers\VarDumper::dump($query->createCommand()->getRawSql(), 10, true); exit();  /* FOR DEBUG:: must by remove */
+        // \yii\helpers\VarDumper::dump($query->asArray()->all(), 20, true); exit();
         /* FOR DEBUG:: must by remove */
 
-        return $dataProvider; /* TODO::  */
+        return $dataProvider;/* TODO::  */
     }
 
     /**
