@@ -2,10 +2,6 @@
 
 namespace src\model\lead\reports;
 
-
-
-use yii\db\ForeignKeyConstraint;
-
 /**
  * Class HeatMapLeadService
  */
@@ -34,7 +30,7 @@ class HeatMapLeadService
         $hourMap = self::generateHourMap();
         $result[$fromDT->format(self::MONTH_DAY_FORMAT)] = $hourMap;
 
-        while($fromDT <= $toDT) {
+        while ($fromDT <= $toDT) {
             $result[$fromDT->modify('+1 day')->format(self::MONTH_DAY_FORMAT)] = $hourMap;
         }
 
