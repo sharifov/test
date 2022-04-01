@@ -65,9 +65,31 @@ class HeatMapLeadSearch extends Model
             return $dataProvider;
         }
 
-        //$query->andWhere(['between','c_created_dt', $this->date_from, $this->date_to]); /* TODO::  */
+        $query->addSelect(['MONTH(created) AS month']);
+        $query->addSelect(['DAY(created) AS day']);
+        $query->addSelect(['HOUR(created) AS hour']);
+        $query->addSelect(['COUNT(*) AS cnt']);
 
-        return $dataProvider;
+        /*$query->innerJoin([
+            'lead_created' => Lead::find()
+                ->select(['lead_id'])
+                ->andWhere(['BETWEEN', 'created', $this->fromDT, $this->toDT])
+                ->groupBy(['lead_id'])
+        ],'leads.id = lead_created.id');*/
+
+
+        $query->andWhere(['BETWEEN', 'created', $this->fromDT, $this->toDT]);
+
+        $query->groupBy(['MONTH(created)', 'DAY(created)', 'HOUR(created)']);
+
+        $query->orderBy(['month' => SORT_ASC, 'day' => SORT_ASC, 'hour' => SORT_ASC]);
+
+        //\yii\helpers\VarDumper::dump($query->createCommand()->getRawSql(), 10, true); exit();  /* FOR DEBUG:: must by remove */
+
+        \yii\helpers\VarDumper::dump($query->asArray()->all(), 20, true); exit();
+        /* FOR DEBUG:: must by remove */
+
+        return $dataProvider; /* TODO::  */
     }
 
     /**

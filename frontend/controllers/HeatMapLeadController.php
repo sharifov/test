@@ -18,9 +18,11 @@ class HeatMapLeadController extends FController
     public function actionIndex()
     {
         $searchModel = new HeatMapLeadSearch(); /* TODO::  */
+        $dataProvider = $searchModel->search(\Yii::$app->request->queryParams);
 
         return $this->render('index', [
             'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
         ]);
     }
 }

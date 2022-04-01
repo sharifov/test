@@ -7,11 +7,12 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var yii\web\View $this */
-/* @var HeatMapLeadSearch $model */
+/* @var HeatMapLeadSearch $searchModel */
 /* @var yii\widgets\ActiveForm $form */
+/* @var yii\data\ActiveDataProvider $dataProvider */
 ?>
 
-<div class="heat-map-lead-search">
+<div class="heat-map-lead-index">
     <?php /* TODO::  */ ?>
     <h1><?= Html::encode($this->title) ?></h1>
 
@@ -33,5 +34,8 @@ use yii\widgets\ActiveForm;
             ?>
         </div>
     </div>
+
+    <?php /* TODO::  */ ?>
+
 </div>
 
