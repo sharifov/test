@@ -932,9 +932,16 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'User Stats dashboard', 'url' => ['/user-stats/index'], 'icon' => 'users'],
                 ['label' => 'User Stats Report', 'url' => ['/user-stats/report'], 'icon' => 'users'],
                 ['label' => 'User Feedback Statistics', 'url' => ['/stats/user-feedback'], 'icon' => 'users'],
+                [
+                    'label' => 'Leads',
+                    'url' => 'javascript:',
+                    'icon' => 'folder',
+                    'items' => [
+                        ['label' => 'Heat Map Leads', 'url' => ['/heat-map-lead/index'], 'icon' => 'area-chart'], /* TODO:: add FF */
+                    ]
+                ],
             ]
         ];
-
 
         $menuLanguages = [
             'label' => Yii::t('menu', 'Languages'),
