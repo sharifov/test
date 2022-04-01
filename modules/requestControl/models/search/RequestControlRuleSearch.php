@@ -7,10 +7,10 @@
 
 namespace modules\requestControl\models\search;
 
-use modules\requestControl\models\Rule;
+use modules\requestControl\models\RequestControlRule;
 use yii\data\ActiveDataProvider;
 
-class RuleSearch extends Rule
+class RequestControlRuleSearch extends RequestControlRule
 {
     /**
      * @param $params
@@ -18,7 +18,7 @@ class RuleSearch extends Rule
      */
     public function search($params): ActiveDataProvider
     {
-        $query = Rule::find();
+        $query = RequestControlRule::find();
         $dataProvider = new ActiveDataProvider(['query' => $query]);
         $this->load($params);
         return $dataProvider;

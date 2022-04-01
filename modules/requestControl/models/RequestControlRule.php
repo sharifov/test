@@ -17,7 +17,7 @@ namespace modules\requestControl\models;
  * @property integer $global
  *
  */
-class Rule extends \yii\db\ActiveRecord
+class RequestControlRule extends \yii\db\ActiveRecord
 {
     /**
      * @inheritdoc

@@ -12,8 +12,8 @@ use yii\db\StaleObjectException;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 
-use modules\requestControl\models\Rule;
-use modules\requestControl\models\search\RuleSearch;
+use modules\requestControl\models\RequestControlRule;
+use modules\requestControl\models\search\RequestControlRuleSearch;
 
 // NOTICE: Should be apart if it possible. Temporary here for `frontend`
 use frontend\controllers\FController;
@@ -66,7 +66,7 @@ class ManageController extends FController
      */
     public function actionIndex(): string
     {
-        $searchModel = new RuleSearch();
+        $searchModel = new RequestControlRuleSearch();
         $dataProvider = $searchModel->search(\Yii::$app->request->queryParams);
 
         return $this->render('index', [
@@ -96,7 +96,7 @@ class ManageController extends FController
      */
     public function actionCreate()
     {
-        $model = new Rule();
+        $model = new RequestControlRule();
 
         if ($model->load(\Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
@@ -144,12 +144,12 @@ class ManageController extends FController
 
     /**
      * @param $id
-     * @return Rule
+     * @return RequestControlRule
      * @throws NotFoundHttpException
      */
-    protected function findModel($id): Rule
+    protected function findModel($id): RequestControlRule
     {
-        if (($model = Rule::findOne($id)) !== null)
+        if (($model = RequestControlRule::findOne($id)) !== null)
             return $model;
         throw new NotFoundHttpException('The requested page does not exist.');
     }
