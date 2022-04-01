@@ -8,6 +8,8 @@ use common\models\Lead;
 use common\models\Project;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
+use yii\db\ActiveQuery;
+use yii\db\Expression;
 use yii\validators\DateValidator;
 
 /**
@@ -47,47 +49,74 @@ class HeatMapLeadSearch extends Model
         ];
     }
 
-    public function search($params)
+    public function leadChtHeatMap(array $params, int $cacheDuration = -1): array
     {
         $query = Lead::find();
-
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-            'pagination' => [
-                'pageSize' => 20,
-            ],
-        ]);
-
         $this->load($params);
-
         if (!$this->validate()) {
             $query->where('0=1');
-            return $dataProvider;
         }
 
-        $query->addSelect(['MONTH(created) AS month']);
-        $query->addSelect(['DAY(created) AS day']);
-        $query->addSelect(['HOUR(created) AS hour']);
+        $query->addSelect(['MONTH(created) AS monthHeatMap']);
+        $query->addSelect(['DAY(created) AS dayHeatMap']);
+        $query->addSelect(['HOUR(created) AS hourHeatMap']);
         $query->addSelect(['COUNT(*) AS cnt']);
+        $query = $this->queryCondition($query);
+        $query->groupBy(['monthHeatMap', 'dayHeatMap', 'hourHeatMap']);
+        $query->orderBy(['monthHeatMap' => SORT_ASC, 'dayHeatMap' => SORT_ASC, 'hourHeatMap' => SORT_ASC]);
+        $query->indexBy(function ($row) {
+            return $row['monthHeatMap'] . '-' . $row['dayHeatMap'] . '-' . $row['hourHeatMap'];
+        });
+        $query->cache($cacheDuration);
 
-        /*$query->innerJoin([
-            'lead_created' => Lead::find()
-                ->select(['lead_id'])
-                ->andWhere(['BETWEEN', 'created', $this->fromDT, $this->toDT])
-                ->groupBy(['lead_id'])
-        ],'leads.id = lead_created.id');*/
+        return $query->asArray()->all();
+    }
 
+    public function leadChtByHour(array $params, int $cacheDuration = -1): array
+    {
+        $query = Lead::find();
+        $this->load($params);
+        if (!$this->validate()) {
+            $query->where('0=1');
+        }
+
+        $query->addSelect(['HOUR(created) AS hourHeatMap']);
+        $query->addSelect(['COUNT(*) AS cnt']);
+        $query = $this->queryCondition($query);
+        $query->groupBy(['hourHeatMap']);
+        $query->indexBy(function ($row) {
+            return $row['hourHeatMap'];
+        });
+        $query->cache($cacheDuration);
+
+        return $query->asArray()->all();
+    }
+
+    public function leadChtByMonthDay(array $params, int $cacheDuration = -1): array
+    {
+        $query = Lead::find();
+        $this->load($params);
+        if (!$this->validate()) {
+            $query->where('0=1');
+        }
+
+        $query->addSelect(['MONTH(created) AS monthHeatMap']);
+        $query->addSelect(['DAY(created) AS dayHeatMap']);
+        $query->addSelect(['COUNT(*) AS cnt']);
+        $query = $this->queryCondition($query);
+        $query->groupBy(['monthHeatMap', 'dayHeatMap']);
+        $query->indexBy(function ($row) {
+            return $row['monthHeatMap'] . '-' . $row['dayHeatMap'];
+        });
+        $query->cache($cacheDuration);
+
+        return $query->asArray()->all();
+    }
+
+    private function queryCondition(ActiveQuery $query): ActiveQuery
+    {
         $query->andWhere(['BETWEEN', 'created', $this->fromDT, $this->toDT]);
-
-        $query->groupBy(['MONTH(created)', 'DAY(created)', 'HOUR(created)']);
-
-        $query->orderBy(['month' => SORT_ASC, 'day' => SORT_ASC, 'hour' => SORT_ASC]);
-
-        // \yii\helpers\VarDumper::dump($query->createCommand()->getRawSql(), 10, true); exit();  /* FOR DEBUG:: must by remove */
-        // \yii\helpers\VarDumper::dump($query->asArray()->all(), 20, true); exit();
-        /* FOR DEBUG:: must by remove */
-
-        return $dataProvider;/* TODO::  */
+        return $query;
     }
 
     /**
