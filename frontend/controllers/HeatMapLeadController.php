@@ -2,8 +2,6 @@
 
 namespace frontend\controllers;
 
-
-
 /**
  * Class HeatMapLeadController
  */
