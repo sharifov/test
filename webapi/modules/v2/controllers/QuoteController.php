@@ -106,7 +106,7 @@ class QuoteController extends ApiBaseController
      *               "baseFare": 499,
      *               "mark_up": 20,
      *               "extra_mark_up": 10,
-     *               "baseTaxes": 499.49
+     *               "baseTax": 499.49
      *           },
      *           "INF": {
      *               "cnt": 1,
@@ -115,7 +115,7 @@ class QuoteController extends ApiBaseController
      *               "baseFare": 0,
      *               "mark_up": 0,
      *               "extra_mark_up": 0,
-     *               "baseTaxes": 0
+     *               "baseTax": 0
      *           }
      *       },
      *       "trips": [
