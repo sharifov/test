@@ -2,6 +2,8 @@
 
 namespace frontend\controllers;
 
+use src\model\lead\reports\HeatMapLeadSearch;
+
 /**
  * Class HeatMapLeadController
  */
@@ -15,7 +17,7 @@ class HeatMapLeadController extends FController
 
     public function actionIndex()
     {
-        $searchModel = null; /* TODO::  */
+        $searchModel = new HeatMapLeadSearch(); /* TODO::  */
 
         return $this->render('index', [
             'searchModel' => $searchModel,

@@ -3,8 +3,11 @@
 namespace src\model\lead\reports;
 
 use common\components\validators\IsArrayValidator;
+use common\models\Call;
+use common\models\Lead;
 use common\models\Project;
 use yii\base\Model;
+use yii\data\ActiveDataProvider;
 use yii\validators\DateValidator;
 
 /**
@@ -13,17 +16,19 @@ use yii\validators\DateValidator;
 class HeatMapLeadSearch extends Model
 {
     public $dateRange;
+    public $project;
 
-    private $dateFrom;
-    private $dateTo;
-
-    private string $endDefaultDT;
-    private string $startDefaultDT;
+    private string $toDT;
+    private string $fromDT;
+    private string $toDefaultDT;
+    private string $fromDefaultDT;
     private int $intervalDaysDefault = 30;
 
-    public function __construct(
-        array $config = []
-    ) {
+    /**
+     * @throws \Exception
+     */
+    public function __construct(array $config = [])
+    {
         $this->setDataRangeDefault();
         parent::__construct($config);
     }
@@ -33,7 +38,7 @@ class HeatMapLeadSearch extends Model
         return [
             ['dateRange', 'required'],
             ['dateRange', 'match', 'pattern' => '/^.+\s\-\s.+$/'],
-            ['dateRange', 'dateRangeProcessing', 'params' => ['minStartFrom' => '2018-01-01 00:00', 'maxEndTo' => date("Y-m-d 23:59")]],
+            ['dateRange', 'dateRangeProcessing'],
 
             /* TODO:: minStartFrom */
 
@@ -42,17 +47,45 @@ class HeatMapLeadSearch extends Model
         ];
     }
 
+    public function search($params)
+    {
+        $query = Lead::find();
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'pagination' => [
+                'pageSize' => 20,
+            ],
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            $query->where('0=1');
+            return $dataProvider;
+        }
+
+        //$query->andWhere(['between','c_created_dt', $this->date_from, $this->date_to]); /* TODO::  */
+
+        return $dataProvider;
+    }
+
     /**
      * @throws \Exception
      */
     private function setDataRangeDefault(): void
     {
         $currentDT = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
-        $this->startDefaultDT = $currentDT->modify('-' . $this->getIntervalDaysDefault() . ' day')->format('Y-m-d 00:00:00');
-        $this->endDefaultDT = $currentDT->modify('-1 day')->format('Y-m-d 23:59:59');
+        $this->fromDefaultDT = $currentDT->modify('-' . $this->getIntervalDaysDefault() . ' day')->format('Y-m-d 00:00');
+        $this->toDefaultDT = $currentDT->modify('-1 day')->format('Y-m-d 23:59');
     }
 
-    public function dateRangeProcessing($attribute, $params): void
+    /**
+     * @param $attribute
+     * @return void
+     * @throws \Exception
+     */
+    public function dateRangeProcessing($attribute): void
     {
         $range = explode(' - ', $this->$attribute);
         if (count($range) !== 2) {
@@ -64,13 +97,11 @@ class HeatMapLeadSearch extends Model
             'type' => DateValidator::TYPE_DATETIME,
             'format' => 'php:Y-m-d H:i'
         ]);
-
         $dateTimeValidator->validate($range[0], $errors);
         if ($errors) {
             $this->addError($attribute, 'Range From date is incorrect');
             return;
         }
-
         $dateTimeValidator->validate($range[1], $errors);
         if ($errors) {
             $this->addError($attribute, 'Range To date is incorrect');
@@ -79,29 +110,13 @@ class HeatMapLeadSearch extends Model
 
         $from = new \DateTimeImmutable($range[0]);
         $to = new \DateTimeImmutable($range[1]);
-        if ($from > $to) {
+        if ($from >= $to) {
             $this->addError($attribute, 'Range From date more than To date');
             return;
         }
-        if ($from == $to) {
-            $this->addError($attribute, 'Range From date and To date is equal');
-            return;
-        }
 
-        $paramsFrom = new \DateTimeImmutable($params['minStartFrom']);
-        if ($from < $paramsFrom) {
-            $this->addError($attribute, 'Range From date must be more or equal than ' . $paramsFrom->format('Y-m-d H:i'));
-            return;
-        }
-
-        $paramsTo = new \DateTimeImmutable($params['maxEndTo']);
-        if ($to > $paramsTo) {
-            $this->addError($attribute, 'Range To date must be less or equal than ' . $paramsTo->format('Y-m-d H:i'));
-            return;
-        }
-
-        $this->dateFrom = $from->format('Y-m-d H:i');
-        $this->dateTo = $to->format('Y-m-d H:i');
+        $this->fromDT = $from->format('Y-m-d H:i');
+        $this->toDT = $to->format('Y-m-d H:i');
     }
 
     public function getIntervalDaysDefault(): int
@@ -113,5 +128,15 @@ class HeatMapLeadSearch extends Model
     {
         $this->intervalDaysDefault = $intervalDaysDefault;
         return $this;
+    }
+
+    public function getFromDT(): string
+    {
+        return $this->fromDT ?: $this->fromDefaultDT;
+    }
+
+    public function getToDT(): string
+    {
+        return $this->toDT ?: $this->toDefaultDT;
     }
 }
