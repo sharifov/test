@@ -9,6 +9,8 @@ namespace modules\requestControl;
 
 use frontend\models\UserSiteActivity;
 use modules\requestControl\accessCheck\AdmissionPass;
+use modules\requestControl\accessCheck\conditions\RoleCondition;
+use modules\requestControl\accessCheck\conditions\UsernameCondition;
 use yii\base\Module;
 use yii\db\Query;
 
@@ -83,5 +85,18 @@ class RequestControlModule extends Module
                 $query->select('COUNT(*) as local')->andWhere('usa_page_url=:url', [":url" => $path])
             ])
             ->one();
+    }
+
+    /**
+     * Returns list of available rule types
+     *
+     * @return array
+     */
+    public function ruleTypeList(): array
+    {
+        return [
+            RoleCondition::TYPE => RoleCondition::TYPE,
+            UsernameCondition::TYPE => UsernameCondition::TYPE
+        ];
     }
 }

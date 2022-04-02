@@ -4,8 +4,9 @@ use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model modules\requestControl\models\Rule */
+/* @var $model modules\requestControl\models\RequestControlRule */
 /* @var $form ActiveForm */
+
 ?>
 
 <div class="request-control-form">
@@ -14,7 +15,7 @@ use yii\widgets\ActiveForm;
 
         <?php $form = ActiveForm::begin(); ?>
 
-        <?= $form->field($model, 'type')->textInput() ?>
+        <?= $form->field($model, 'type')->dropDownList($this->context->module->ruleTypeList()) ?>
 
         <?= $form->field($model, 'subject')->textInput() ?>
 
