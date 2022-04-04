@@ -49,6 +49,11 @@ class UserFeedback extends ActiveRecord
         self::STATUS_DONE => 'Done',
     ];
 
+    public const FINAL_STATUS_LIST = [
+        self::STATUS_CANCEL => 'Cancel',
+        self::STATUS_DONE => 'Done',
+    ];
+
     public const TYPE_LIST = [
         self::TYPE_BUG => 'Bug Report',
         self::TYPE_FEATURE => 'Feature',

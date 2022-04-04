@@ -22,6 +22,7 @@ $this->params['breadcrumbs'][] = 'Update';
     <?php $form = ActiveForm::begin(); ?>
 
     <div class="col-md-4">
+        <?= $form->field($model, 'uf_status_id')->dropDownList(UserFeedback::FINAL_STATUS_LIST, ['prompt' => '---']) ?>
         <?= $form->field($model, 'uf_resolution')->textarea(['rows' => 6, 'maxlength' => 500]) ?>
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

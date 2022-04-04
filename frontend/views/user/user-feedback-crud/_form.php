@@ -3,6 +3,8 @@
 use modules\user\userFeedback\entity\UserFeedback;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+use src\widgets\UserSelect2Widget;
+use src\widgets\DateTimePicker;
 
 /* @var $this yii\web\View */
 /* @var $model modules\user\userFeedback\entity\UserFeedback */
@@ -21,6 +23,17 @@ use yii\widgets\ActiveForm;
         <?= $form->field($model, 'uf_title')->textInput(['maxlength' => true]) ?>
 
         <?= $form->field($model, 'uf_message')->textarea(['rows' => 6]) ?>
+
+        <?= $form->field($model, 'uf_resolution')->textarea(['rows' => 6, 'maxlength' => 500]) ?>
+
+        <?= $form->field($model, 'uf_resolution_user_id')->widget(UserSelect2Widget::class, [
+            'data' => $model->uf_resolution_user_id ? [
+                $model->uf_resolution_user_id => $model->ufResolutionUser->username
+            ] : [],
+        ]) ?>
+
+        <?php echo $form->field($model, 'uf_resolution_dt')->widget(DateTimePicker::class) ?>
+
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

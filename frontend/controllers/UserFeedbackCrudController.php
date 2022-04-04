@@ -284,7 +284,7 @@ class UserFeedbackCrudController extends FController
                 /**
                  * @throws \Throwable
                  */
-                $this->userFeedbackService->resolve($model, $form->uf_resolution, Auth::id());
+                $this->userFeedbackService->resolve($model, $form->uf_resolution, $form->uf_status_id, Auth::id());
                 return $this->redirect(['view', 'uf_id' => $model->uf_id, 'uf_created_dt' => $model->uf_created_dt]);
             }
             return $this->render('resolution', [
