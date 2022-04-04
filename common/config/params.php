@@ -10,7 +10,7 @@ return [
     'appEnv' => '',
 
     'release' => require __DIR__ . '/params-release.php',
-    'wsIdentityCookie' => ['name' => '_identity_ws', 'httpOnly' => true],
+    'wsIdentityCookie' => ['name' => '_identity_ws', 'httpOnly' => true, 'domain' => '.' . implode('.', array_slice(explode('.', $_SERVER['HTTP_HOST']), 1)) ],
 
     'url'      => 'https://sales.travelinsides.com',
     'url_api'  => 'https://sales.api.travelinsides.com/v1',
