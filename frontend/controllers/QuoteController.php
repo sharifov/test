@@ -12,6 +12,7 @@ use common\models\Quote;
 use common\models\QuotePrice;
 use frontend\helpers\JsonHelper;
 use frontend\helpers\QuoteHelper;
+use frontend\widgets\notification\NotificationMessage;
 use modules\featureFlag\FFlag;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
@@ -585,6 +586,19 @@ class QuoteController extends FController
             if (!$lead = Lead::findOne($leadId)) {
                 throw new \Exception('Lead id(' . $leadId . ') not found');
             }
+
+            if ($lead->leadPreferences && !empty($lead->leadPreferences->pref_currency)) {
+                if ($lead->leadPreferences->pref_currency !== $searchQuoteRequest['data']['currency']) {
+                    $subject = 'Smart Search';
+                    $body = 'Lead currency was changed. Adding quote was restricted.';
+                    if ($ntf = Notifications::create(Auth::id(), $subject, $body, Notifications::TYPE_INFO, true)) {
+                        $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+                        Notifications::publish('getNewNotification', ['user_id' => Auth::id()], $dataNotification);
+                    }
+                    throw new \DomainException($body);
+                }
+            }
+
             $preparedQuoteData = QuoteHelper::formatQuoteData(['results' => [$searchQuoteRequest['data']]]);
             $addQuoteService = Yii::createObject(AddQuoteService::class);
             $quoteUid = $addQuoteService->createByData($preparedQuoteData['results'][0], $lead, $projectProviderId);
@@ -599,8 +613,6 @@ class QuoteController extends FController
             $response['message'] = 'Add quote from Smart Search completed successfully';
         } catch (\RuntimeException | \DomainException $e) {
             $response['message'] = $e->getMessage();
-            if ($e->getCode() !== self::RUNTIME_ERROR_AUTO_ADD_QUOTES_ACTION_IN_PROGRESS) {
-            }
         } catch (\Throwable $throwable) {
             $response['message'] = 'Internal Server Error';
             $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), [
