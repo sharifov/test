@@ -2,7 +2,7 @@
 
 namespace src\services\cleaner\cleaners;
 
-use frontend\models\UserSiteActivity;
+use modules\requestControl\models\UserSiteActivity;
 use src\services\cleaner\BaseCleaner;
 use src\services\cleaner\CleanerInterface;
 use src\services\cleaner\DbCleanerService;

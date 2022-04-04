@@ -11,7 +11,7 @@ use yii\widgets\Pjax;
  * @var $model Employee
  * @var $data yii\data\ActiveDataProvider
  * @var $datePickerModel  \yii\base\DynamicModel
- * @var $userActivity  \frontend\models\search\UserSiteActivitySearch
+ * @var $userActivity modules\requestControl\models\search\UserSiteActivitySearch
  * @var $callLogDataProvider \yii\data\ActiveDataProvider
  * @var $callLogSearchModel \src\model\callLog\entity\callLog\search\CallLogSearch
  * @var $emailDataProvider \yii\data\ActiveDataProvider
