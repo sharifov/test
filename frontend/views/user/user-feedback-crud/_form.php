@@ -4,6 +4,7 @@ use modules\user\userFeedback\entity\UserFeedback;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use src\widgets\UserSelect2Widget;
+use src\widgets\DateTimePicker;
 
 /* @var $this yii\web\View */
 /* @var $model modules\user\userFeedback\entity\UserFeedback */
@@ -31,7 +32,7 @@ use src\widgets\UserSelect2Widget;
             ] : [],
         ]) ?>
 
-        <?= $form->field($model, 'uf_resolution_dt')->textInput() ?>
+        <?php echo $form->field($model, 'uf_resolution_dt')->widget(DateTimePicker::class) ?>
 
 
         <div class="form-group">
