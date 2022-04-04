@@ -1092,7 +1092,7 @@ class CasesController extends FController
             if (isset($params['project'])) {
                 $form->projectId = (new ProjectRepository())->getIdByName($params['project']);
             }
-            $form->orderUid = $params['orderUid'];
+            $form->orderUid = $params['orderUid'] ?? null;
         } elseif ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
                 /** @var Cases $case */
