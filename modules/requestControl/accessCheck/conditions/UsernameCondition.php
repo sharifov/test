@@ -8,7 +8,6 @@
 namespace modules\requestControl\accessCheck\conditions;
 
 
-use modules\requestControl\interfaces\ConditionInterface;
 use yii\db\Query;
 
 /**
@@ -17,7 +16,7 @@ use yii\db\Query;
  * Class AccessCheckCondition
  * @package modules\requestControl
  */
-class UsernameCondition extends AbstractCondition implements ConditionInterface
+class UsernameCondition extends AbstractCondition
 {
     const TYPE = 'USERNAME';
 

@@ -79,8 +79,8 @@ class UserSiteActivityLog extends Behavior
 
                 // Access checking
                 $checkAccess = (new AdmissionPass((int) $settings['user_site_activity_time']))
-                    ->addCondition(UsernameCondition::TYPE, \Yii::$app->user->identity->username)
-                    ->addCondition(RoleCondition::TYPE, $roleNames);
+                    ->addConditionByType(UsernameCondition::TYPE, \Yii::$app->user->identity->username)
+                    ->addConditionByType(RoleCondition::TYPE, $roleNames);
 
                 if ($accessControlModule->can($checkAccess) === false)
                     throw new ForbiddenHttpException(

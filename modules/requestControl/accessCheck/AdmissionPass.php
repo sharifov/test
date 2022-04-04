@@ -10,9 +10,8 @@ namespace modules\requestControl\accessCheck;
 
 use yii\db\Query;
 
+use modules\requestControl\accessCheck\conditions\AbstractCondition;
 use modules\requestControl\interfaces\AllowanceInterface;
-use modules\requestControl\interfaces\ConditionInterface;
-
 use modules\requestControl\accessCheck\allowance\Limited;
 use modules\requestControl\accessCheck\allowance\Limitless;
 use modules\requestControl\accessCheck\conditions\RoleCondition;
@@ -42,8 +41,8 @@ use modules\requestControl\RequestControlModule;
  *          // Creating the checking entity for 600sec limit
  *          $checkAccess = new AdmissionPass(600);
  *          $checkAccess
- *              ->addCondition(UsernameCondition::TYPE, "johndoe")
- *              ->addCondition(RoleCondition::TYPE, ["admin", "agent"])
+ *              ->addConditionByType(UsernameCondition::TYPE, "johndoe")
+ *              ->addConditionByType(RoleCondition::TYPE, ["admin", "agent"])
  *
  *          if (\Yii::$app->getModule('requestControl')->can($checkAccess) === true) {
  *              // ...code, if access allow
@@ -58,7 +57,7 @@ use modules\requestControl\RequestControlModule;
  */
 class AdmissionPass
 {
-    /** @var ConditionInterface[] $conditions */
+    /** @var AbstractCondition[] $conditions */
     private $conditions = [];
 
     /** @var RequestCountLedger $requestCountLedger */
@@ -96,16 +95,28 @@ class AdmissionPass
      * @param string|array $value
      * @return AdmissionPass
      */
-    public function addCondition(string $type, $value): self
+    public function addConditionByType(string $type, $value): self
     {
         switch ($type) {
             case UsernameCondition::TYPE:
-                $this->conditions[] = new UsernameCondition($value);
+                return $this->addCondition(new UsernameCondition($value));
                 break;
             case RoleCondition::TYPE:
-                $this->conditions[] = new RoleCondition($value);
+                return $this->addCondition(new RoleCondition($value));
                 break;
         }
+        return $this;
+    }
+
+    /**
+     * Adds AbstractCondition extension into admission pass
+     *
+     * @param AbstractCondition $condition
+     * @return $this
+     */
+    public function addCondition(AbstractCondition $condition)
+    {
+        $this->conditions[] = $condition;
         return $this;
     }
 

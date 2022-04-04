@@ -8,11 +8,13 @@
 namespace modules\requestControl\accessCheck\conditions;
 
 
+use modules\requestControl\interfaces\ConditionInterface;
+
 /**
  * Abstract class for any Condition
  * @package modules\requestControl\accessCheck\conditions
  */
-abstract class AbstractCondition
+abstract class AbstractCondition implements ConditionInterface
 {
     /**
      * @var null|array|string
