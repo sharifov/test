@@ -25,8 +25,6 @@ use src\widgets\UserSelect2Widget;
 
         <?= $form->field($model, 'uf_resolution')->textarea(['rows' => 6, 'maxlength' => 500]) ?>
 
-        <?= $form->field($model, 'uf_resolution')->textarea(['rows' => 6, 'maxlength' => 500]) ?>
-
         <?= $form->field($model, 'uf_resolution_user_id')->widget(UserSelect2Widget::class, [
             'data' => $model->uf_resolution_user_id ? [
                 $model->uf_resolution_user_id => $model->ufResolutionUser->username
