@@ -20,8 +20,8 @@ class HeatMapLeadSearch extends Model
     public $dateRange;
     public $project;
 
-    private string $toDT;
-    private string $fromDT;
+    private ?string $toDT = null;
+    private ?string $fromDT = null;
     private string $toDefaultDT;
     private string $fromDefaultDT;
     private int $intervalDaysDefault = 30;
@@ -38,15 +38,20 @@ class HeatMapLeadSearch extends Model
     public function rules(): array
     {
         return [
-            ['dateRange', 'required'],
-            ['dateRange', 'match', 'pattern' => '/^.+\s\-\s.+$/'],
-            ['dateRange', 'dateRangeProcessing'],
+            [['dateRange'], 'required'],
+            [['dateRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
+            [['dateRange'], 'dateRangeProcessing'],
 
-            /* TODO:: minStartFrom */
-
-            ['project', IsArrayValidator::class],
-            ['project', 'each', 'rule' => ['in', 'range' => array_keys(Project::getList())], 'skipOnError' => true, 'skipOnEmpty' => true],
+            [['project'], 'required'],
+            [['project'], IsArrayValidator::class],
+            [['project'], 'each', 'rule' => ['in', 'range' => array_keys(Project::getList())], 'skipOnError' => true, 'skipOnEmpty' => true],
         ];
+    }
+
+    private function queryCondition(ActiveQuery $query): ActiveQuery
+    {
+        $query->andWhere(['BETWEEN', 'created', $this->getFromDT(), $this->getToDT()]);
+        return $query;
     }
 
     public function leadChtHeatMap(array $params, int $cacheDuration = -1): array
@@ -113,12 +118,6 @@ class HeatMapLeadSearch extends Model
         return $query->asArray()->all();
     }
 
-    private function queryCondition(ActiveQuery $query): ActiveQuery
-    {
-        $query->andWhere(['BETWEEN', 'created', $this->fromDT, $this->toDT]);
-        return $query;
-    }
-
     /**
      * @throws \Exception
      */
@@ -127,6 +126,8 @@ class HeatMapLeadSearch extends Model
         $currentDT = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
         $this->fromDefaultDT = $currentDT->modify('-' . $this->getIntervalDaysDefault() . ' day')->format('Y-m-d 00:00');
         $this->toDefaultDT = $currentDT->modify('-1 day')->format('Y-m-d 23:59');
+
+        $this->dateRange = $this->fromDefaultDT . ' - ' . $this->toDefaultDT;
     }
 
     /**
@@ -187,5 +188,10 @@ class HeatMapLeadSearch extends Model
     public function getToDT(): string
     {
         return $this->toDT ?: $this->toDefaultDT;
+    }
+
+    public function formName(): string
+    {
+        return '';
     }
 }

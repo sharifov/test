@@ -29,11 +29,11 @@ class HeatMapLeadController extends FController
         return $this->render('index', [
             'searchModel' => $searchModel,
             'result' => $mappedResult,
-            'maxCnt' => max(array_column($resultHeatMap, 'cnt')),
+            'maxCnt' => HeatMapLeadService::getMaxCnt($resultHeatMap),
             'resultByHour' => $resultByHour,
-            'maxCntByHour' => max(array_column($resultByHour, 'cnt')),
+            'maxCntByHour' => HeatMapLeadService::getMaxCnt($resultByHour),
             'resultByMonthDay' => $resultByMonthDay,
-            'maxCntByMonthDay' => max(array_column($resultByMonthDay, 'cnt')),
+            'maxCntByMonthDay' => HeatMapLeadService::getMaxCnt($resultByMonthDay),
         ]);
     }
 }

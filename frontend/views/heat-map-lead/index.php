@@ -20,8 +20,17 @@ use yii\widgets\ActiveForm;
 ?>
 
 <div class="heat-map-lead-index">
-    <?php /* TODO::  */ ?>
+
     <h1><?= Html::encode($this->title) ?></h1>
+
+    <?php if (!$searchModel->validate()) : ?>
+        <div class="js_error_box alert alert-warning alert-dismissible fade show" role="alert">
+            <?php echo \src\helpers\ErrorsToStringHelper::extractFromModel($searchModel) ?>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    <?php endif ?>
 
     <div class="x_panel">
         <div class="x_title">

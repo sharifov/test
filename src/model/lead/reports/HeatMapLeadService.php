@@ -54,11 +54,22 @@ class HeatMapLeadService
         int $decimals = 1
     ): string {
         $fromRange = $fromHigh - $fromLow;
+        if (!$fromRange) {
+            return 0;
+        }
         $toRange = $toHigh - $toLow;
         $scaleFactor = $toRange / $fromRange;
         $tmpValue = $value - $fromLow;
         $tmpValue *= $scaleFactor;
 
         return number_format($tmpValue + $toLow, $decimals, '.', '');
+    }
+
+    public static function getMaxCnt(?array $searchResult = null, string $keyName = 'cnt'): int
+    {
+        if (!$searchResult) {
+            return 0;
+        }
+        return (int) max(array_column($searchResult, 'cnt'));
     }
 }
