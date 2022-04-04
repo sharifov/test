@@ -7,7 +7,7 @@
 
 namespace modules\requestControl;
 
-use frontend\models\UserSiteActivity;
+use modules\requestControl\models\UserSiteActivity;
 use modules\requestControl\accessCheck\AdmissionPass;
 use modules\requestControl\accessCheck\conditions\RoleCondition;
 use modules\requestControl\accessCheck\conditions\UsernameCondition;
