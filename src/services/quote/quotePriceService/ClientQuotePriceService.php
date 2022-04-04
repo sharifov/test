@@ -43,6 +43,7 @@ class ClientQuotePriceService
             $result['passengers'][$paxCode]['mark_up'] = round($price['mark_up'], 2);
             $result['passengers'][$paxCode]['extra_mark_up'] = round($price['extra_mark_up'], 2);
             $result['passengers'][$paxCode]['baseTax'] = round(($price['taxes']) / $price['tickets'], 2);
+            $result['passengers'][$paxCode]['service_fee'] = round($price['service_fee'] ?? 0, 2);
 
             $result['prices']['totalTax'] += $result['passengers'][$paxCode]['tax'] * $price['tickets'];
         }
