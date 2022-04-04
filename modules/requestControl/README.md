@@ -81,6 +81,21 @@ if (\Yii::$app->getModule('requestControl')->can($checkAccess) === true) {
 ...
 ```
 
+Also, you can include prepared behavior class for request logging and checking the access;
+
+In config:
+
+```
+...
+return [
+    ...,
+    'as beforeRequest' => [
+        'class' => modules\requestControl\components\Watcher::class,
+    ]
+    ...
+...
+```
+
 ## Logic extension
 
 At this time module checks access by `USERNAME` and `ROLE` only, but you can extend the checking logic. 
