@@ -188,16 +188,12 @@ public function addConditionByType(string $type, $value): self
     switch ($type) {
         case UsernameCondition::TYPE:
             return $this->addCondition(new UsernameCondition($value));
-            break;
         case RoleCondition::TYPE:
             return $this->addCondition(new RoleCondition($value));
-            break;
         case RoleCondition::TYPE:
             return $this->addCondition(new RoleCondition($value));
-            break;
         case IPCondition::TYPE:
             return $this->addCondition(new IPCondition($value));
-            break;
     }
     return $this;
 }
