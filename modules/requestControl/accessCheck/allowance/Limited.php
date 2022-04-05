@@ -11,8 +11,8 @@ use modules\requestControl\accessCheck\RequestCountLedger;
  */
 class Limited implements AllowanceInterface
 {
-    private $local = 0;
-    private $global = 0;
+    private $local;
+    private $global;
 
     /**
      * AllowLimits constructor.
@@ -20,8 +20,8 @@ class Limited implements AllowanceInterface
      */
     public function __construct($items = [])
     {
-        $this->local = self::reduceToLower($items, 'local');
-        $this->global = self::reduceToLower($items, 'global');
+        $this->local = self::reduceToLower($items, 'rcr_local');
+        $this->global = self::reduceToLower($items, 'rcr_global');
     }
 
     /**

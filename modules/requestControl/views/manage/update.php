@@ -3,11 +3,11 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model modules\requestControl\models\Rule */
+/* @var $model modules\requestControl\models\RequestControlRule */
 
-$this->title = 'Request Control Rule:' . $model->id;
+$this->title = 'Request Control Rule:' . $model->rcr_id;
 $this->params['breadcrumbs'][] = ['label' => 'Request Control', 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $model->id, 'url' => ['view', 'id' => $model->id]];
+$this->params['breadcrumbs'][] = ['label' => $model->rcr_id, 'url' => ['view', 'id' => $model->rcr_id]];
 $this->params['breadcrumbs'][] = 'Update';
 ?>
 <div class="request-control-rule-update">

@@ -20,6 +20,6 @@ class RoleCondition extends AbstractCondition
      */
     public function modifyQuery(Query $query): Query
     {
-        return $query->orWhere(["type" => self::TYPE, "subject" => $this->value]);
+        return $query->orWhere(["rcr_type" => self::TYPE, "rcr_subject" => $this->value]);
     }
 }

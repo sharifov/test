@@ -23,11 +23,11 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            'id',
-            'type',
-            'subject',
-            'local',
-            'global',
+            'rcr_id',
+            'rcr_type',
+            'rcr_subject',
+            'rcr_local',
+            'rcr_global',
             ['class' => ActionColumn::class]
         ],
     ]); ?>

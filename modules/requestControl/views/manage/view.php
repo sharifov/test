@@ -4,9 +4,9 @@ use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model modules\requestControl\models\Rule */
+/* @var $model modules\requestControl\models\RequestControlRule */
 
-$this->title = "ID: #{$model->id}";
+$this->title = "ID: #{$model->rcr_id}";
 $this->params['breadcrumbs'][] = ['label' => 'Request Control Rule', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
@@ -18,8 +18,8 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="col-md-4">
 
         <p>
-            <?= Html::a('Update', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
-            <?= Html::a('Delete', ['delete', 'id' => $model->id], [
+            <?= Html::a('Update', ['update', 'id' => $model->rcr_id], ['class' => 'btn btn-primary']) ?>
+            <?= Html::a('Delete', ['delete', 'id' => $model->rcr_id], [
                 'class' => 'btn btn-danger',
                 'data' => [
                     'confirm' => 'Are you sure you want to delete this item?',
@@ -31,11 +31,11 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= DetailView::widget([
             'model' => $model,
             'attributes' => [
-                'id',
-                'type',
-                'subject',
-                'local',
-                'global'
+                'rcr_id',
+                'rcr_type',
+                'rcr_subject',
+                'rcr_local',
+                'rcr_global'
             ],
         ]) ?>
 

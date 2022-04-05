@@ -66,8 +66,6 @@ class AdmissionPass
             \Yii::$app->request->pathInfo,
             date('Y-m-d H:i:s', time() - $period)
         );
-
-        $this->conditions = [];
         $this->userActivityRegistry = new RequestCountLedger($activityList);
     }
 
@@ -92,10 +90,8 @@ class AdmissionPass
         switch ($type) {
             case UsernameCondition::TYPE:
                 return $this->addCondition(new UsernameCondition($value));
-                break;
             case RoleCondition::TYPE:
                 return $this->addCondition(new RoleCondition($value));
-                break;
         }
         return $this;
     }

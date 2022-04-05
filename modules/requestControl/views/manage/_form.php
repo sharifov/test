@@ -15,13 +15,13 @@ use yii\widgets\ActiveForm;
 
         <?php $form = ActiveForm::begin(); ?>
 
-        <?= $form->field($model, 'type')->dropDownList($this->context->module->ruleTypeList()) ?>
+        <?= $form->field($model, 'rcr_type')->dropDownList($this->context->module->ruleTypeList()) ?>
 
-        <?= $form->field($model, 'subject')->textInput() ?>
+        <?= $form->field($model, 'rcr_subject')->textInput() ?>
 
-        <?= $form->field($model, 'local')->textInput() ?>
+        <?= $form->field($model, 'rcr_local')->textInput() ?>
 
-        <?= $form->field($model, 'global')->textInput() ?>
+        <?= $form->field($model, 'rcr_global')->textInput() ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

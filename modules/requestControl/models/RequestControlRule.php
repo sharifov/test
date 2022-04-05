@@ -5,11 +5,11 @@ namespace modules\requestControl\models;
 /**
  * Class Rule
  *
- * @property integer $id
- * @property string $type
- * @property string $subject
- * @property integer $local
- * @property integer $global
+ * @property integer $rcr_id
+ * @property string $rcr_type
+ * @property string $rcr_subject
+ * @property integer $rcr_local
+ * @property integer $rcr_global
  *
  */
 class RequestControlRule extends \yii\db\ActiveRecord
@@ -30,12 +30,12 @@ class RequestControlRule extends \yii\db\ActiveRecord
     public function rules(): array
     {
         return [
-            [['type', 'subject', 'local', 'global'], 'required'],
-            ['type', 'string', 'max' => 50],
-            ['subject', 'string', 'max' => 255],
-            ['local', 'integer'],
-            ['global', 'integer'],
-            [['local', 'global'], 'default', 'value' => 0]
+            [['rcr_type', 'rcr_subject', 'rcr_local', 'rcr_global'], 'required'],
+            ['rcr_type', 'string', 'max' => 50],
+            ['rcr_subject', 'string', 'max' => 255],
+            ['rcr_local', 'integer'],
+            ['rcr_global', 'integer'],
+            [['rcr_local', 'rcr_global'], 'default', 'value' => 0]
         ];
     }
 
@@ -46,10 +46,10 @@ class RequestControlRule extends \yii\db\ActiveRecord
     public function attributeLabels(): array
     {
         return [
-          'type' => 'Rule type',
-          'subject' => 'Rule subject',
-          'local' => 'Local limit',
-          'global' => 'Global limit'
+          'rcr_type' => 'Rule type',
+          'rcr_subject' => 'Rule subject',
+          'rcr_local' => 'Local limit',
+          'rcr_global' => 'Global limit'
         ];
     }
 }
