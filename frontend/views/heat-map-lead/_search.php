@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Employee;
 use common\models\UserGroup;
 use src\model\lead\reports\HeatMapLeadSearch;
 use yii\web\View;
@@ -34,7 +35,10 @@ use kartik\select2\Select2;
                 'hideInput' => true,
                 'convertFormat' => true,
                 'pluginOptions' => [
-                    'minDate' => $model->getFromDefaultDT(),
+                    'dateLimit' => [
+                        'days' => $model->getIntervalDaysDefault(),
+                    ],
+                    //'minDate' => $model->getFromDefaultDT(),
                     'maxDate' => $model->getToDefaultDT(),
                     'timePicker' => true,
                     'timePickerIncrement' => 1,
@@ -50,7 +54,7 @@ use kartik\select2\Select2;
                         "Last Month" => ["moment().subtract(1, 'month').startOf('month')", "moment().subtract(1, 'month').endOf('month')"],
                     ]
                 ]
-            ])->label('From / To (UTC)') ?>
+            ])->label('From / To') ?>
         </div>
         <div class="col-md-2">
             <?= $form->field($model, 'project', [
@@ -91,6 +95,18 @@ use kartik\select2\Select2;
                 'options' => ['placeholder' => 'Select User Group', 'multiple' => true],
                 'pluginOptions' => ['allowClear' => true],
             ])->label('User Group') ?>
+        </div>
+        <div class="col-md-2">
+            <?= $form->field($model, 'timeZone')->widget(\kartik\select2\Select2::class, [
+                'data' => Employee::timezoneList(true),
+                'size' => \kartik\select2\Select2::SMALL,
+                'options' => [
+                    'placeholder' => 'Select TimeZone',
+                    'multiple' => false,
+                    'value' =>  $model->timeZone,
+                ],
+                'pluginOptions' => ['allowClear' => true],
+            ]) ?>
         </div>
     </div>
     <div class="row">

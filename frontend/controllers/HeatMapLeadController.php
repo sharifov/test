@@ -2,6 +2,8 @@
 
 namespace frontend\controllers;
 
+use common\models\Project;
+use common\models\Sources;
 use src\model\lead\reports\HeatMapLeadSearch;
 use src\model\lead\reports\HeatMapLeadService;
 
@@ -18,7 +20,7 @@ class HeatMapLeadController extends FController
 
     public function actionIndex(): string
     {
-        $searchModel = new HeatMapLeadSearch();
+        $searchModel = new HeatMapLeadSearch(\Yii::$app->user->identity->timezone);
         $resultHeatMap = $searchModel->leadCountHeatMap(\Yii::$app->request->queryParams);
         $mappedResult = HeatMapLeadService::mapResult($resultHeatMap, $searchModel->getFromDT(), $searchModel->getToDT());
         $resultByHour = $searchModel->leadChtByHour(\Yii::$app->request->queryParams);

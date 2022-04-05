@@ -18,7 +18,7 @@ use yii\widgets\ActiveForm;
 /* @var array $resultByMonthDay */
 /* @var int $maxCntByMonthDay */
 
-$this->title = 'Heat Map Lead';
+$this->title = 'Heat Map Lead Report';
 $this->params['breadcrumbs'][] = $this->title;
 $rgbaTitle = '151, 149, 149, 0.1';
 ?>
@@ -69,7 +69,7 @@ $rgbaTitle = '151, 149, 149, 0.1';
                     <?php foreach (HeatMapLeadService::generateHourMap() as $value) : ?>
                         <div class="hour_box" style="background: rgba(<?php echo $rgbaTitle ?>);">
                             <strong>
-                                <?php echo $value ?>
+                                <?php echo $value . ':00' ?>
                             </strong>
                         </div>
                     <?php endforeach ?>
@@ -79,7 +79,7 @@ $rgbaTitle = '151, 149, 149, 0.1';
                     <div class="title_box">
                         <div class="title_row"></div>
                         <div class="title_row"></div>
-                        <div class="title_row_last">
+                        <div class="title_row_last" data-toggle="tooltip" data-original-title="Count by hour">
                             <strong>Count</strong>
                         </div>
                     </div>
@@ -87,12 +87,25 @@ $rgbaTitle = '151, 149, 149, 0.1';
                         <?php $cntByHour = $resultByHour[$value]['cnt'] ?? 0 ?>
                         <?php $alphaHour = HeatMapLeadService::proportionalMap($cntByHour, 0, $maxCntByHour, 0, 0.9) ?>
                         <?php $backgroundHour = $cntByHour ? '255, 0, 0, ' . $alphaHour : $rgbaTitle ?>
-                        <div class="hour_box" style="background: rgba(<?php echo $backgroundHour ?>);">
-                            <span>
-                                <?php echo $cntByHour ?: '-' ?>
-                            </span>
-                        </div>
+                        <?php $dataTitleCnt = $value . ':00 - ' . $value . ':59' ?>
+                        <?php $cellContent = '<span>' . ($cntByHour ?: '-') . '</span>' ?>
+                        <?php $cellCnt = Html::tag(
+                            'div',
+                            $cellContent,
+                            [
+                                'class' => 'hour_box',
+                                'data-toggle' => 'tooltip',
+                                'data-original-title' => $dataTitleCnt,
+                                'style' => 'background: rgba(' . $backgroundHour . ')',
+                            ]
+                        ) ?>
+                        <?php echo $cellCnt ?>
                     <?php endforeach ?>
+                    <div class="hour_box" style="background: rgba(<?php echo $rgbaTitle ?>);" data-toggle="tooltip" data-original-title="Total by day">
+                        <strong>
+                            Total:
+                        </strong>
+                    </div>
                 </div>
 
                 <?php $prevMonth = null ?>
@@ -117,17 +130,20 @@ $rgbaTitle = '151, 149, 149, 0.1';
 
                         <?php foreach ($hours as $hour => $cnt) : ?>
                             <?php $dataTitle = $date->format('d-M') . ' (' . $hour . ':00 - ' . $hour . ':59)' ?>
-                            <?php $cell = Html::tag(
-                                'span',
-                                $cnt ?: '-',
+                            <?php $alpha = HeatMapLeadService::proportionalMap($cnt, 0, $maxCnt, 0, 0.9) ?>
+
+                            <?php $cellHourContent = '<span>' . ($cnt ?: '-') . '</span>' ?>
+                            <?php $cellHour = Html::tag(
+                                'div',
+                                $cellHourContent,
                                 [
-                                    'class' => '', 'data-toggle' => 'tooltip', 'data-original-title' => $dataTitle
+                                    'class' => 'hour_box',
+                                    'data-toggle' => 'tooltip',
+                                    'data-original-title' => $dataTitle,
+                                    'style' => 'background: rgba(255, 0, 0, ' . $alpha . ')',
                                 ]
                             ) ?>
-                            <?php $alpha = HeatMapLeadService::proportionalMap($cnt, 0, $maxCnt, 0, 0.9) ?>
-                            <div class="hour_box" style="background: rgba(255, 0, 0, <?php echo $alpha ?>);">
-                                <?php echo $cell ?>
-                            </div>
+                            <?php echo $cellHour ?>
                         <?php endforeach ?>
 
                         <?php $cntByMonthDay = $resultByMonthDay[$keyMonthDay]['cnt'] ?? 0 ?>
@@ -151,10 +167,11 @@ $css = <<<CSS
     }
     .md_box {
         float: left; 
-        width: 50px;
+        width: 48px;
+        margin-right: 1px;
     }
     .hour_box {
-        width: 50px; 
+        width: 48px; 
         height: 28px; 
         text-align: center; 
         border: 1px solid #ccc; 
@@ -163,7 +180,7 @@ $css = <<<CSS
     }
     .title_box {
         display: inline-block;
-        width: 50px; 
+        width: 48px; 
         height: 60px;
         text-align: center; 
         border: 1px solid #ccc; 

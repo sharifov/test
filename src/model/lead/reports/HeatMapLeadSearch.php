@@ -5,11 +5,13 @@ namespace src\model\lead\reports;
 use common\components\validators\IsArrayValidator;
 use common\models\Call;
 use common\models\Department;
+use common\models\Employee;
 use common\models\Lead;
 use common\models\Project;
 use common\models\Sources;
 use common\models\UserGroup;
 use common\models\UserGroupAssign;
+use src\helpers\query\QueryHelper;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use yii\db\ActiveQuery;
@@ -27,6 +29,7 @@ class HeatMapLeadSearch extends Model
     public $userGroup;
     public $source;
     public $cache;
+    public $timeZone;
 
     private ?string $toDT = null;
     private ?string $fromDT = null;
@@ -37,8 +40,9 @@ class HeatMapLeadSearch extends Model
     /**
      * @throws \Exception
      */
-    public function __construct(array $config = [])
+    public function __construct(string $defaultTimeZone, array $config = [])
     {
+        $this->timeZone = $defaultTimeZone;
         $this->setDataRangeDefault();
         parent::__construct($config);
     }
@@ -60,16 +64,20 @@ class HeatMapLeadSearch extends Model
             [['userGroup'], 'each', 'rule' => ['in', 'range' => array_keys(UserGroup::getList())], 'skipOnError' => true, 'skipOnEmpty' => true],
 
             [['source'], IsArrayValidator::class],
-            [['source'], 'each', 'rule' => ['in', 'range' => array_keys(Sources::getList())], 'skipOnError' => true, 'skipOnEmpty' => true],
 
             [['cache'], 'integer'],
             [['cache'], 'default', 'value' => 300],
+
+            ['timeZone', 'string'],
+            ['timeZone', 'in', 'range' => array_keys(Employee::timezoneList(true))],
         ];
     }
 
     private function queryCondition(ActiveQuery $query): ActiveQuery
     {
-        $query->andWhere(['BETWEEN', 'created', $this->getFromDT(), $this->getToDT()]);
+        $from = QueryHelper::getDateFromUserTZToUtc($this->getFromDT(), $this->timeZone)->format('Y-m-d H:i');
+        $to = QueryHelper::getDateFromUserTZToUtc($this->getToDT(), $this->timeZone)->format('Y-m-d H:i');
+        $query->andWhere(['BETWEEN', 'created', $from, $to]);
 
         if ($this->project) {
             $query->andWhere(['IN', 'project_id', $this->project]);
@@ -161,7 +169,7 @@ class HeatMapLeadSearch extends Model
      */
     private function setDataRangeDefault(): void
     {
-        $currentDT = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
+        $currentDT = new \DateTimeImmutable('now', new \DateTimeZone($this->timeZone));
         $this->fromDefaultDT = $currentDT->modify('-' . $this->getIntervalDaysDefault() . ' day')->format('Y-m-d 00:00');
         $this->toDefaultDT = $currentDT->modify('-1 day')->format('Y-m-d 23:59');
 
