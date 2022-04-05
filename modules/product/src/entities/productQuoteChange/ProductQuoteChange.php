@@ -131,6 +131,20 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
         return $this->pqc_status_id === ProductQuoteChangeStatus::PROCESSING && $this->pqc_decision_type_id === ProductQuoteChangeDecisionType::REFUND;
     }
 
+    public function decisionToCreate(): ProductQuoteChange
+    {
+        $this->pqc_decision_type_id =  ProductQuoteChangeDecisionType::CREATE;
+        $this->pqc_decision_dt = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
+        return $this;
+    }
+
+    public function decisionToConfirm(): ProductQuoteChange
+    {
+        $this->pqc_decision_type_id =  ProductQuoteChangeDecisionType::CONFIRM;
+        $this->pqc_decision_dt = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
+        return $this;
+    }
+
     public function isPending(): bool
     {
         return $this->pqc_status_id === ProductQuoteChangeStatus::PENDING;
