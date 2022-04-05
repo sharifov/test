@@ -2,7 +2,6 @@
 
 namespace modules\requestControl\migrations;
 
-
 use yii\db\Migration;
 use common\models\Employee;
 use console\migrations\RbacMigrationService;

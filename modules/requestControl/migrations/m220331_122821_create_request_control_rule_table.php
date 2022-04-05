@@ -2,7 +2,6 @@
 
 namespace modules\requestControl\migrations;
 
-
 use yii\db\Migration;
 
 /**
@@ -11,7 +10,7 @@ use yii\db\Migration;
 class m220331_122821_create_request_control_rule_table extends Migration
 {
     private const TABLE_NAME = 'request_control_rule';
-    private const TABLE = "{{%". self::TABLE_NAME ."}}";
+    private const TABLE = "{{%" . self::TABLE_NAME . "}}";
 
     /**
      * {@inheritdoc}
@@ -19,18 +18,19 @@ class m220331_122821_create_request_control_rule_table extends Migration
     public function safeUp()
     {
         $tableOptions = null;
-        if ($this->db->driverName === 'mysql')
+        if ($this->db->driverName === 'mysql') {
             $tableOptions = 'CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE=InnoDB';
+        }
 
         $this->createTable(self::TABLE, [
-            'id' => $this->primaryKey(),
-            'type' => $this->string(50)->notNull()->comment('type of rule'),
-            'subject' => $this->string(255)->notNull()->comment('checking subject'),
-            'local' => $this->integer()->defaultValue(0)->notNull()->comment('available request count to current resource per period'),
-            'global' => $this->integer()->defaultValue(0)->notNull()->comment('available request count to system per period')
+            'rcr_id' => $this->primaryKey(),
+            'rcr_type' => $this->string(50)->notNull()->comment('type of rule'),
+            'rcr_subject' => $this->string(255)->notNull()->comment('checking subject'),
+            'rcr_local' => $this->integer()->defaultValue(0)->notNull()->comment('available request count to current resource per period'),
+            'rcr_global' => $this->integer()->defaultValue(0)->notNull()->comment('available request count to system per period')
         ], $tableOptions);
 
-        $this->createIndex(implode('__', ['unq', self::TABLE_NAME, 'type', 'subject']), self::TABLE, ['type', 'subject'],true);
+        $this->createIndex('unq__' . self::TABLE_NAME . '__type__subject', self::TABLE, ['rcr_type', 'rcr_subject'], true);
     }
 
     /**
@@ -38,7 +38,7 @@ class m220331_122821_create_request_control_rule_table extends Migration
      */
     public function safeDown()
     {
-        $this->dropIndex(implode('__', ['unq', self::TABLE_NAME, 'type', 'subject']), self::TABLE);
+        $this->dropIndex('unq__' . self::TABLE_NAME . '__type__subject', self::TABLE);
         $this->dropTable(self::TABLE);
     }
 }
