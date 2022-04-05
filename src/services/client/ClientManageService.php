@@ -146,7 +146,7 @@ class ClientManageService
     {
         $phone = $this->clientPhoneRepository->find($form->id);
 
-        if ($form->phone !== null) {
+        if (!empty($form->phone)) {
             $phone->phone = $form->phone;
         }
         if ($form->type !== null) {
@@ -197,7 +197,7 @@ class ClientManageService
     {
         $email = $this->clientEmailRepository->find($form->id);
         // $email->editEmail($form->email), $form->type);
-        if ($form->email !== null) {
+        if (!empty($form->email)) {
             $email->email = $form->email;
         }
         if ($form->type !== null) {
