@@ -4,8 +4,12 @@ namespace src\model\lead\reports;
 
 use common\components\validators\IsArrayValidator;
 use common\models\Call;
+use common\models\Department;
 use common\models\Lead;
 use common\models\Project;
+use common\models\Sources;
+use common\models\UserGroup;
+use common\models\UserGroupAssign;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use yii\db\ActiveQuery;
@@ -19,6 +23,10 @@ class HeatMapLeadSearch extends Model
 {
     public $dateRange;
     public $project;
+    public $department;
+    public $userGroup;
+    public $source;
+    public $cache;
 
     private ?string $toDT = null;
     private ?string $fromDT = null;
@@ -42,19 +50,49 @@ class HeatMapLeadSearch extends Model
             [['dateRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['dateRange'], 'dateRangeProcessing'],
 
-            [['project'], 'required'],
             [['project'], IsArrayValidator::class],
             [['project'], 'each', 'rule' => ['in', 'range' => array_keys(Project::getList())], 'skipOnError' => true, 'skipOnEmpty' => true],
+
+            [['department'], IsArrayValidator::class],
+            [['department'], 'each', 'rule' => ['in', 'range' => array_keys(Department::getList())], 'skipOnError' => true, 'skipOnEmpty' => true],
+
+            [['userGroup'], IsArrayValidator::class],
+            [['userGroup'], 'each', 'rule' => ['in', 'range' => array_keys(UserGroup::getList())], 'skipOnError' => true, 'skipOnEmpty' => true],
+
+            [['source'], IsArrayValidator::class],
+            [['source'], 'each', 'rule' => ['in', 'range' => array_keys(Sources::getList())], 'skipOnError' => true, 'skipOnEmpty' => true],
+
+            [['cache'], 'integer'],
+            [['cache'], 'default', 'value' => 300],
         ];
     }
 
     private function queryCondition(ActiveQuery $query): ActiveQuery
     {
         $query->andWhere(['BETWEEN', 'created', $this->getFromDT(), $this->getToDT()]);
+
+        if ($this->project) {
+            $query->andWhere(['IN', 'project_id', $this->project]);
+        }
+        if ($this->department) {
+            $query->andWhere(['IN', 'l_dep_id', $this->department]);
+        }
+        if ($this->source) {
+            $query->andWhere(['IN', 'source_id', $this->source]);
+        }
+        if ($this->userGroup) {
+            $query->innerJoin([
+                'userGroupAssign' => UserGroupAssign::find()
+                    ->select(['ugs_user_id'])
+                    ->andWhere(['IN', 'ugs_group_id', $this->userGroup])
+                    ->groupBy(['ugs_user_id'])
+            ], 'userGroupAssign.ugs_user_id = employee_id');
+        }
+
         return $query;
     }
 
-    public function leadChtHeatMap(array $params, int $cacheDuration = -1): array
+    public function leadCountHeatMap(array $params): array
     {
         $query = Lead::find();
         $this->load($params);
@@ -72,12 +110,12 @@ class HeatMapLeadSearch extends Model
         $query->indexBy(function ($row) {
             return $row['monthHeatMap'] . '-' . $row['dayHeatMap'] . '-' . $row['hourHeatMap'];
         });
-        $query->cache($cacheDuration);
+        $query->cache($this->cache);
 
         return $query->asArray()->all();
     }
 
-    public function leadChtByHour(array $params, int $cacheDuration = -1): array
+    public function leadChtByHour(array $params): array
     {
         $query = Lead::find();
         $this->load($params);
@@ -92,12 +130,12 @@ class HeatMapLeadSearch extends Model
         $query->indexBy(function ($row) {
             return $row['hourHeatMap'];
         });
-        $query->cache($cacheDuration);
+        $query->cache($this->cache);
 
         return $query->asArray()->all();
     }
 
-    public function leadChtByMonthDay(array $params, int $cacheDuration = -1): array
+    public function leadChtByMonthDay(array $params): array
     {
         $query = Lead::find();
         $this->load($params);
@@ -113,7 +151,7 @@ class HeatMapLeadSearch extends Model
         $query->indexBy(function ($row) {
             return $row['monthHeatMap'] . '-' . $row['dayHeatMap'];
         });
-        $query->cache($cacheDuration);
+        $query->cache($this->cache);
 
         return $query->asArray()->all();
     }
@@ -193,5 +231,15 @@ class HeatMapLeadSearch extends Model
     public function formName(): string
     {
         return '';
+    }
+
+    public function getToDefaultDT(): string
+    {
+        return $this->toDefaultDT;
+    }
+
+    public function getFromDefaultDT(): string
+    {
+        return $this->fromDefaultDT;
     }
 }

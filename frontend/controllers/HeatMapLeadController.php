@@ -16,15 +16,13 @@ class HeatMapLeadController extends FController
         $this->layoutCrud();
     }
 
-    public function actionIndex()
+    public function actionIndex(): string
     {
-        /* TODO:: cache */
-
         $searchModel = new HeatMapLeadSearch();
-        $resultHeatMap = $searchModel->leadChtHeatMap(\Yii::$app->request->queryParams, 300);
+        $resultHeatMap = $searchModel->leadCountHeatMap(\Yii::$app->request->queryParams);
         $mappedResult = HeatMapLeadService::mapResult($resultHeatMap, $searchModel->getFromDT(), $searchModel->getToDT());
-        $resultByHour = $searchModel->leadChtByHour(\Yii::$app->request->queryParams, 300);
-        $resultByMonthDay = $searchModel->leadChtByMonthDay(\Yii::$app->request->queryParams, 300);
+        $resultByHour = $searchModel->leadChtByHour(\Yii::$app->request->queryParams);
+        $resultByMonthDay = $searchModel->leadChtByMonthDay(\Yii::$app->request->queryParams);
 
         return $this->render('index', [
             'searchModel' => $searchModel,

@@ -1,8 +1,11 @@
 <?php
 
+use common\models\UserGroup;
 use src\model\lead\reports\HeatMapLeadSearch;
+use yii\web\View;
 use yii\widgets\ActiveForm;
 use yii\helpers\Html;
+use kartik\select2\Select2;
 
 /* @var \yii\web\View $this */
 /* @var HeatMapLeadSearch $model */
@@ -12,7 +15,7 @@ use yii\helpers\Html;
 <div class="heat-map-lead-search">
 
     <?php $form = ActiveForm::begin([
-        'id' => 'UserStatsReportForm',
+        'id' => 'heatMapLeadForm',
         'action' => ['index'],
         'options' => [
           //  'data-pjax' => 1
@@ -23,7 +26,6 @@ use yii\helpers\Html;
 
     <hr />
     <div class="row">
-
         <div class="col-md-3">
             <?= $form->field($model, 'dateRange', [
                 'options' => ['class' => 'form-group'],
@@ -32,8 +34,8 @@ use yii\helpers\Html;
                 'hideInput' => true,
                 'convertFormat' => true,
                 'pluginOptions' => [
-                    'minDate' => "2018-01-01 00:00", /* TODO::  */
-                    'maxDate' => date("Y-m-d 23:59"),
+                    'minDate' => $model->getFromDefaultDT(),
+                    'maxDate' => $model->getToDefaultDT(),
                     'timePicker' => true,
                     'timePickerIncrement' => 1,
                     'timePicker24Hour' => true,
@@ -48,18 +50,66 @@ use yii\helpers\Html;
                         "Last Month" => ["moment().subtract(1, 'month').startOf('month')", "moment().subtract(1, 'month').endOf('month')"],
                     ]
                 ]
-            ])->label('From / To') ?>
+            ])->label('From / To (UTC)') ?>
         </div>
-
+        <div class="col-md-2">
+            <?= $form->field($model, 'project', [
+                'options' => ['class' => 'form-group']
+            ])->widget(Select2::class, [
+                'data' => \common\models\Project::getList(),
+                'size' => Select2::SMALL,
+                'options' => ['placeholder' => 'Select Project', 'multiple' => true],
+                'pluginOptions' => ['allowClear' => true],
+            ])->label('Project') ?>
+        </div>
+        <div class="col-md-2">
+            <?= $form->field($model, 'department', [
+                'options' => ['class' => 'form-group']
+            ])->widget(Select2::class, [
+                'data' => \common\models\Department::getList(),
+                'size' => Select2::SMALL,
+                'options' => ['placeholder' => 'Select Department', 'multiple' => true],
+                'pluginOptions' => ['allowClear' => true],
+            ])->label('Department') ?>
+        </div>
+        <div class="col-md-2">
+            <?= $form->field($model, 'source', [
+                'options' => ['class' => 'form-group']
+            ])->widget(Select2::class, [
+                'data' => \common\models\Sources::getList(),
+                'size' => Select2::SMALL,
+                'options' => ['placeholder' => 'Select Source', 'multiple' => true],
+                'pluginOptions' => ['allowClear' => true],
+            ])->label('Source') ?>
+        </div>
+        <div class="col-md-2">
+            <?= $form->field($model, 'userGroup', [
+                'options' => ['class' => 'form-group']
+            ])->widget(Select2::class, [
+                'data' => UserGroup::getList(),
+                'size' => Select2::SMALL,
+                'options' => ['placeholder' => 'Select User Group', 'multiple' => true],
+                'pluginOptions' => ['allowClear' => true],
+            ])->label('User Group') ?>
+        </div>
     </div>
     <div class="row">
         <div class="col-md-12">
             <div class="form-group">
-                <?= Html::submitButton('Generate report', ['class' => 'btn btn-primary js-user-stats-btn']) ?>
-                <?= Html::a('<i class="glyphicon glyphicon-repeat"></i> Reset form', ['report?reset=1'], ['class' => 'btn btn-warning']) ?>
+                <?= Html::submitButton('Generate report', ['class' => 'btn btn-primary js-search-btn']) ?>
+                <?= Html::a('<i class="glyphicon glyphicon-repeat"></i> Reset form', ['index?cache=-1'], ['class' => 'btn btn-warning']) ?>
             </div>
         </div>
    </div>
 
    <?php ActiveForm::end(); ?>
 </div>
+
+<?php
+$js = <<<JS
+$(document).on('beforeSubmit', '#heatMapLeadForm', function(event) {
+    let btn = $(this).find('.js-search-btn');
+    btn.html('<i class="fa fa-cog fa-spin"></i> Loading').prop("disabled", true);
+});
+JS;
+$this->registerJs($js, View::POS_READY);
