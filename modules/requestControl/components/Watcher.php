@@ -94,8 +94,13 @@ class Watcher extends Behavior
             $username = \Yii::$app->user->identity->username;
             $roleNames = $this->getUserRoles();
 
+            $admissionPass = new AdmissionPass(
+                (int)\Yii::$app->user->id,
+                (string)\Yii::$app->request->pathInfo,
+                (int)$settings['user_site_activity_time']
+            );
             /** @var AdmissionPass $checkAccess */
-            $checkAccess = (new AdmissionPass((int) $settings['user_site_activity_time']))
+            $checkAccess = ($admissionPass)
                 ->addConditionByType(UsernameCondition::TYPE, $username)
                 ->addConditionByType(RoleCondition::TYPE, $roleNames);
 

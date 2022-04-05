@@ -78,7 +78,12 @@ class UserSiteActivityLog extends Behavior
                 );
 
                 // Access checking
-                $checkAccess = (new AdmissionPass((int) $settings['user_site_activity_time']))
+                $admissionPass = new AdmissionPass(
+                    (int)\Yii::$app->user->id,
+                    (string)\Yii::$app->request->pathInfo,
+                    (int)$settings['user_site_activity_time']
+                );
+                $checkAccess = ($admissionPass)
                     ->addConditionByType(UsernameCondition::TYPE, \Yii::$app->user->identity->username)
                     ->addConditionByType(RoleCondition::TYPE, $roleNames);
 
