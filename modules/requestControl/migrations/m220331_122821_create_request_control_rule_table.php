@@ -30,7 +30,7 @@ class m220331_122821_create_request_control_rule_table extends Migration
             'rcr_global' => $this->integer()->defaultValue(0)->notNull()->comment('available request count to system per period')
         ], $tableOptions);
 
-        $this->createIndex('unq__' . self::TABLE_NAME . '__type__subject', self::TABLE, ['rcr_type', 'rcr_subject'], true);
+        $this->createIndex('IND-request_control_rule-rcr_type-rcr_subject', self::TABLE, ['rcr_type', 'rcr_subject'], true);
     }
 
     /**
@@ -38,7 +38,7 @@ class m220331_122821_create_request_control_rule_table extends Migration
      */
     public function safeDown()
     {
-        $this->dropIndex('unq__' . self::TABLE_NAME . '__type__subject', self::TABLE);
+        $this->dropIndex('IND-request_control_rule-rcr_type-rcr_subject', self::TABLE);
         $this->dropTable(self::TABLE);
     }
 }
