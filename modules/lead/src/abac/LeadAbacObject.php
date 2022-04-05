@@ -72,6 +72,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     public const OBJ_LEAD_SMART_SEARCH   = self::NS . 'obj/smart_search';
     public const OBJ_LEAD_QUOTE_SEARCH   = self::NS . 'obj/quote_search';
     public const OBJ_LEAD_QUICK_SEARCH   = self::NS . 'obj/quick_search';
+    public const OBJ_HEAT_MAP_LEAD       = self::NS . 'obj/heat_map_lead';
 
     /** --------------- OBJECT LIST --------------------------- */
     public const OBJECT_LIST = [
@@ -118,6 +119,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_ADD_AUTO_QUOTES => self::ACT_ADD_AUTO_QUOTES,
         self::OBJ_LEAD_QUOTE_SEARCH => self::OBJ_LEAD_QUOTE_SEARCH,
         self::OBJ_LEAD_QUICK_SEARCH => self::OBJ_LEAD_QUICK_SEARCH,
+        self::OBJ_HEAT_MAP_LEAD => self::OBJ_HEAT_MAP_LEAD,
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -228,6 +230,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_ADD_AUTO_QUOTES => [self::ACTION_ACCESS],
         self::OBJ_LEAD_QUOTE_SEARCH => [self::ACTION_ACCESS_QUOTE_SEARCH],
         self::OBJ_LEAD_QUICK_SEARCH => [self::ACTION_ACCESS_QUICK_SEARCH],
+        self::OBJ_HEAT_MAP_LEAD => [self::ACTION_ACCESS],
     ];
 
     public const ATTR_LEAD_IS_OWNER = [
