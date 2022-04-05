@@ -19,7 +19,12 @@ class RequestControlRuleSearch extends RequestControlRule
     {
         $query = RequestControlRule::find();
         $dataProvider = new ActiveDataProvider(['query' => $query]);
+
         $this->load($params);
+
+        if (!$this->validate()) {
+            return $dataProvider;
+        }
 
         $query
             ->andFilterWhere(['rcr_local' => $this->rcr_local, 'rcr_global' => $this->rcr_global])
