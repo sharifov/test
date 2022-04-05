@@ -19,6 +19,7 @@ use src\traits\FieldsTrait;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
+use yii\behaviors\BlameableBehavior;
 
 /**
  * This is the model class for table "product_quote_change".
@@ -78,6 +79,11 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
                 'class' => GidBehavior::class,
                 'targetColumn' => 'pqc_gid',
                 'value' => self::generateGid(),
+            ],
+            'user' => [
+                'class' => BlameableBehavior::class,
+                'createdByAttribute' => 'pqc_created_user_id',
+                'updatedByAttribute' => null,
             ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
