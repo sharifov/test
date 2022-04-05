@@ -139,10 +139,4 @@ $this->params['breadcrumbs'][] = $this->title;
     ]); ?>
 
     <?php Pjax::end(); ?>
-
-    <p>
-        <?php \yii\helpers\VarDumper::dump(\common\models\Currency::getList(), 10, true); ?>
-        <?php \yii\helpers\VarDumper::dump(\common\models\Currency::getList(), 10, true); ?><?php \yii\helpers\VarDumper::dump(\common\models\Currency::getList(), 10, true); ?><?php \yii\helpers\VarDumper::dump(\common\models\Currency::getList(), 10, true); ?><?php \yii\helpers\VarDumper::dump(\common\models\Currency::getList(), 10, true); ?><?php \yii\helpers\VarDumper::dump(\common\models\Currency::getList(), 10, true); ?>
-    </p>
-
 </div>

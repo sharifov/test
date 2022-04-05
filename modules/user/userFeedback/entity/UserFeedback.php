@@ -24,8 +24,12 @@ use common\models\Employee;
  * @property string|null $uf_updated_dt
  * @property int|null $uf_created_user_id
  * @property int|null $uf_updated_user_id *
+ * @property string|null $uf_resolution
+ * @property int|null $uf_resolution_user_id
+ * @property string|null $uf_resolution_dt *
  *
  * @property Employee $ufCreatedUser
+ * @property Employee $ufResolutionUser
  */
 class UserFeedback extends ActiveRecord
 {
@@ -41,6 +45,11 @@ class UserFeedback extends ActiveRecord
     public const STATUS_LIST = [
         self::STATUS_NEW => 'New',
         self::STATUS_PENDING => 'Pending',
+        self::STATUS_CANCEL => 'Cancel',
+        self::STATUS_DONE => 'Done',
+    ];
+
+    public const FINAL_STATUS_LIST = [
         self::STATUS_CANCEL => 'Cancel',
         self::STATUS_DONE => 'Done',
     ];
@@ -126,12 +135,14 @@ class UserFeedback extends ActiveRecord
     {
         return [
             [['uf_type_id', 'uf_status_id', 'uf_title', 'uf_data_json'], 'required'],
-            [['uf_type_id', 'uf_status_id', 'uf_created_user_id', 'uf_updated_user_id'], 'default', 'value' => null],
-            [['uf_type_id', 'uf_status_id', 'uf_created_user_id', 'uf_updated_user_id'], 'integer'],
+            [['uf_type_id', 'uf_status_id', 'uf_created_user_id', 'uf_updated_user_id', 'uf_resolution_user_id'], 'default', 'value' => null],
+            [['uf_type_id', 'uf_status_id', 'uf_created_user_id', 'uf_updated_user_id', 'uf_resolution_user_id'], 'integer'],
             [['uf_message'], 'string'],
-            [['uf_data_json', 'uf_created_dt', 'uf_updated_dt'], 'safe'],
+            [['uf_data_json', 'uf_created_dt', 'uf_updated_dt', 'uf_resolution_dt'], 'safe'],
             [['uf_title'], 'string', 'max' => 255],
             [['uf_id', 'uf_created_dt'], 'unique', 'targetAttribute' => ['uf_id', 'uf_created_dt']],
+            [['uf_resolution'], 'string', 'max' => 500],
+            [['uf_title'], 'string', 'max' => 255],
         ];
     }
 
@@ -151,6 +162,9 @@ class UserFeedback extends ActiveRecord
             'uf_updated_dt' => 'Updated Dt',
             'uf_created_user_id' => 'Created User ID',
             'uf_updated_user_id' => 'Updated User ID',
+            'uf_resolution' => 'Resolution',
+            'uf_resolution_user_id' => 'Resolution User ID',
+            'uf_resolution_dt' => 'Resolution Dt'
         ];
     }
 
@@ -189,6 +203,11 @@ class UserFeedback extends ActiveRecord
     public function getUfCreatedUser()
     {
         return $this->hasOne(Employee::class, ['id' => 'uf_created_user_id']);
+    }
+
+    public function getUfResolutionUser()
+    {
+        return $this->hasOne(Employee::class, ['id' => 'uf_resolution_user_id']);
     }
 
     public function setType(?int $type): void
