@@ -33,7 +33,7 @@ class ProductQuoteCreateFromSaleDto extends ProductQuoteDTO
         ?string $currency,
         ?int $userId = null
     ) {
-        $currencyRate = $currency ? CurrencyHelper::getAppRateByCode($currency) ?? Currency::getDefaultBaseCurrencyRate()  : ProductQuoteHelper::getClientCurrencyRate($flight->flProduct);
+        $currencyRate = $currency ? CurrencyHelper::getAppRateByCode($currency) : ProductQuoteHelper::getClientCurrencyRate($flight->flProduct);
         $this->name = $flight->flProduct->pr_name;
         $this->productId = $flight->fl_product_id;
         $this->orderId = $orderId;

@@ -351,7 +351,7 @@ class FlightFromSaleService
                     throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($priceQuotesForm));
                 }
 
-                $currencyRate = CurrencyHelper::getAppRateByCode($orderCreateFromSaleForm->currency) ?? Currency::getDefaultBaseCurrencyRate();
+                $currencyRate = CurrencyHelper::getAppRateByCode($orderCreateFromSaleForm->currency);
                 $flightQuotePaxPrice = new FlightQuotePaxPrice();
                 $flightQuotePaxPrice->qpp_flight_pax_code_id = $priceQuotesForm->getPaxTypeId();
                 $flightQuotePaxPrice->qpp_flight_quote_id = $flightQuote->getId();
