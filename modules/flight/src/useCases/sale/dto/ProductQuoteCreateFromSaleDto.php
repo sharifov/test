@@ -6,6 +6,7 @@ use common\models\Currency;
 use modules\flight\models\Flight;
 use src\dto\product\ProductQuoteDTO;
 use src\helpers\product\ProductQuoteHelper;
+use src\services\CurrencyHelper;
 
 /**
  * Class ProductQuoteCreateDTO
@@ -32,6 +33,7 @@ class ProductQuoteCreateFromSaleDto extends ProductQuoteDTO
         ?string $currency,
         ?int $userId = null
     ) {
+        $currencyRate = $currency ? CurrencyHelper::getAppRateByCode($currency) : ProductQuoteHelper::getClientCurrencyRate($flight->flProduct);
         $this->name = $flight->flProduct->pr_name;
         $this->productId = $flight->fl_product_id;
         $this->orderId = $orderId;
@@ -42,8 +44,8 @@ class ProductQuoteCreateFromSaleDto extends ProductQuoteDTO
         $this->serviceFeeSum = null;
         $this->originCurrency = $currency ?? ProductQuoteHelper::getClientCurrencyCode($flight->flProduct);
         $this->clientCurrency = $currency ?? ProductQuoteHelper::getClientCurrencyCode($flight->flProduct);
-        $this->originCurrencyRate = Currency::getDefaultClientCurrencyRate();
-        $this->clientCurrencyRate = ProductQuoteHelper::getClientCurrencyRate($flight->flProduct);
+        $this->originCurrencyRate = 1 / $currencyRate;
+        $this->clientCurrencyRate = $currencyRate;
         $this->ownerUserId = $userId;
         $this->createdUserId = $userId;
         $this->updatedUserId = $userId;

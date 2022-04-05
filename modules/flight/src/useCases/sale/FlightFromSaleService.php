@@ -3,6 +3,7 @@
 namespace modules\flight\src\useCases\sale;
 
 use common\components\SearchService;
+use common\models\Currency;
 use frontend\helpers\JsonHelper;
 use modules\flight\models\Flight;
 use modules\flight\models\FlightPax;
@@ -50,6 +51,7 @@ use modules\product\src\useCases\product\create\ProductCreateService;
 use src\helpers\app\AppHelper;
 use src\helpers\ErrorsToStringHelper;
 use src\repositories\product\ProductQuoteRepository;
+use src\services\CurrencyHelper;
 use webapi\src\forms\flight\flights\trips\SegmentApiForm;
 use webapi\src\forms\flight\options\OptionApiForm;
 use Yii;
@@ -349,15 +351,19 @@ class FlightFromSaleService
                     throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($priceQuotesForm));
                 }
 
+                $currencyRate = CurrencyHelper::getAppRateByCode($orderCreateFromSaleForm->currency);
                 $flightQuotePaxPrice = new FlightQuotePaxPrice();
                 $flightQuotePaxPrice->qpp_flight_pax_code_id = $priceQuotesForm->getPaxTypeId();
                 $flightQuotePaxPrice->qpp_flight_quote_id = $flightQuote->getId();
                 $flightQuotePaxPrice->qpp_origin_currency = $orderCreateFromSaleForm->currency;
-                $flightQuotePaxPrice->qpp_fare = $priceQuotesForm->fare;
-                $flightQuotePaxPrice->qpp_tax = $priceQuotesForm->taxes;
-                $flightQuotePaxPrice->qpp_system_mark_up = $priceQuotesForm->mark_up;
+                $flightQuotePaxPrice->qpp_fare = $priceQuotesForm->fare / $currencyRate;
+                $flightQuotePaxPrice->qpp_tax = $priceQuotesForm->taxes / $currencyRate;
+                $flightQuotePaxPrice->qpp_system_mark_up = $priceQuotesForm->mark_up / $currencyRate;
                 $flightQuotePaxPrice->qpp_cnt = $priceQuotesForm->cnt;
                 $flightQuotePaxPrice->qpp_client_currency = $orderCreateFromSaleForm->currency;
+
+                $flightQuotePaxPrice->qpp_client_fare = $priceQuotesForm->fare;
+                $flightQuotePaxPrice->qpp_client_tax = $priceQuotesForm->taxes;
 
                 if (!$flightQuotePaxPrice->validate()) {
                     throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($flightQuotePaxPrice));
