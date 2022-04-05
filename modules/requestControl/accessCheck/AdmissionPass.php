@@ -31,7 +31,7 @@ use modules\requestControl\RequestControlModule;
  *      public function myCallFunction() {
  *          ...
  *          // Creating the checking entity for 600sec limit
- *          $checkAccess = new AdmissionPass(600);
+ *          $checkAccess = new AdmissionPass(Yii::$app->user->id, Yii::$app->request->pathInfo, 600);
  *          $checkAccess
  *              ->addConditionByType(UsernameCondition::TYPE, "johndoe")
  *              ->addConditionByType(RoleCondition::TYPE, ["admin", "agent"])
