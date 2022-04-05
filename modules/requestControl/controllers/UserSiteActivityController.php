@@ -63,7 +63,6 @@ class UserSiteActivityController extends FController
 
     /**
      * Lists all UserSiteActivity models.
-     * 
      * @return string
      * @throws \yii\db\Exception
      */
@@ -162,6 +161,9 @@ class UserSiteActivityController extends FController
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 
+    /**
+     * @return \yii\web\Response
+     */
     public function actionClearLogs()
     {
         $countLogs = UserSiteActivity::clearHistoryLogs();

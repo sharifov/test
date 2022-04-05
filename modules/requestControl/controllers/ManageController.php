@@ -1,9 +1,4 @@
 <?php
-/**
- * User: shakarim
- * Date: 3/31/22
- * Time: 6:39 PM
- */
 
 namespace modules\requestControl\controllers;
 
@@ -11,10 +6,8 @@ use yii\base\Response;
 use yii\db\StaleObjectException;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
-
 use modules\requestControl\models\RequestControlRule;
 use modules\requestControl\models\search\RequestControlRuleSearch;
-
 // NOTICE: Should be apart if it possible. Temporary here for `frontend`
 use frontend\controllers\FController;
 use yii\web\NotFoundHttpException;
@@ -118,8 +111,9 @@ class ManageController extends FController
     {
         $model = $this->findModel($id);
 
-        if ($model->load(\Yii::$app->request->post()) && $model->save())
+        if ($model->load(\Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
+        }
 
         return $this->render('update', [
             'model' => $model,
@@ -149,8 +143,9 @@ class ManageController extends FController
      */
     protected function findModel($id): RequestControlRule
     {
-        if (($model = RequestControlRule::findOne($id)) !== null)
+        if (($model = RequestControlRule::findOne($id)) !== null) {
             return $model;
+        }
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 }

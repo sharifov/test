@@ -1,15 +1,13 @@
 <?php
-/**
- * User: shakarim
- * Date: 3/31/22
- * Time: 9:42 PM
- */
 
 namespace modules\requestControl\interfaces;
 
-
 use yii\db\Query;
 
+/**
+ * Interface ConditionInterface
+ * @package modules\requestControl\interfaces
+ */
 interface ConditionInterface
 {
     /**

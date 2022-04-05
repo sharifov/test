@@ -1,22 +1,14 @@
 <?php
-/**
- * User: shakarim
- * Date: 3/31/22
- * Time: 9:33 PM
- */
 
 namespace modules\requestControl\accessCheck;
 
-
 use yii\db\Query;
-
 use modules\requestControl\accessCheck\conditions\AbstractCondition;
 use modules\requestControl\interfaces\AllowanceInterface;
 use modules\requestControl\accessCheck\allowance\Limited;
 use modules\requestControl\accessCheck\allowance\Limitless;
 use modules\requestControl\accessCheck\conditions\RoleCondition;
 use modules\requestControl\accessCheck\conditions\UsernameCondition;
-
 use modules\requestControl\models\RequestControlRule;
 use modules\requestControl\RequestControlModule;
 
@@ -128,8 +120,9 @@ class AdmissionPass
         $query = (new Query())
             ->select('*')
             ->from(RequestControlRule::tableName());
-        foreach ($this->conditions as $condition)
+        foreach ($this->conditions as $condition) {
             $condition->modifyQuery($query);
+        }
 
         $items = $query->all();
 

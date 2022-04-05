@@ -11,7 +11,6 @@ use yii\helpers\StringHelper;
 use yii\web\ForbiddenHttpException;
 use yii\web\Application;
 use yii\rbac\Role;
-
 use modules\requestControl\RequestControlModule;
 use modules\requestControl\accessCheck\conditions\RoleCondition;
 use modules\requestControl\accessCheck\conditions\UsernameCondition;
@@ -100,11 +99,12 @@ class Watcher extends Behavior
                 ->addConditionByType(UsernameCondition::TYPE, $username)
                 ->addConditionByType(RoleCondition::TYPE, $roleNames);
 
-            if ($accessControlModule->can($checkAccess) === false)
+            if ($accessControlModule->can($checkAccess) === false) {
                 throw new ForbiddenHttpException(
                     "You've made too many requests recently. Please wait and try your request again later.",
                     111
                 );
+            }
         }
     }
 
@@ -118,9 +118,10 @@ class Watcher extends Behavior
     {
         return array_reduce(
             \Yii::$app->authManager->getRolesByUser(\Yii::$app->user->id),
-            function($acc, $item) {
-                if ($item instanceof Role)
+            function ($acc, $item) {
+                if ($item instanceof Role) {
                     $acc[] = $item->name;
+                }
                 return $acc;
             },
             []

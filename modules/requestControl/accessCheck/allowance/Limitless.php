@@ -1,9 +1,4 @@
 <?php
-/**
- * User: shakarim
- * Date: 4/1/22
- * Time: 5:53 PM
- */
 
 namespace modules\requestControl\accessCheck\allowance;
 

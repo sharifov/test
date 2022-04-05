@@ -1,12 +1,6 @@
 <?php
-/**
- * User: shakarim
- * Date: 3/31/22
- * Time: 9:49 PM
- */
 
 namespace modules\requestControl\accessCheck\conditions;
-
 
 use modules\requestControl\interfaces\ConditionInterface;
 

@@ -1,15 +1,14 @@
 <?php
-/**
- * User: shakarim
- * Date: 3/31/22
- * Time: 7:27 PM
- */
 
 namespace modules\requestControl\models\search;
 
 use modules\requestControl\models\RequestControlRule;
 use yii\data\ActiveDataProvider;
 
+/**
+ * Class RequestControlRuleSearch
+ * @package modules\requestControl\models\search
+ */
 class RequestControlRuleSearch extends RequestControlRule
 {
     /**

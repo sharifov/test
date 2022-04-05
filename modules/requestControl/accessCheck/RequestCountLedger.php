@@ -1,12 +1,6 @@
 <?php
-/**
- * User: shakarim
- * Date: 3/31/22
- * Time: 10:14 PM
- */
 
 namespace modules\requestControl\accessCheck;
-
 
 /**
  * This class determines requests that actually exist.

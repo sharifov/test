@@ -1,18 +1,13 @@
 <?php
-/**
- * User: shakarim
- * Date: 3/31/22
- * Time: 6:51 PM
- */
 
 namespace modules\requestControl;
 
+use yii\base\Module;
+use yii\db\Query;
 use modules\requestControl\models\UserSiteActivity;
 use modules\requestControl\accessCheck\AdmissionPass;
 use modules\requestControl\accessCheck\conditions\RoleCondition;
 use modules\requestControl\accessCheck\conditions\UsernameCondition;
-use yii\base\Module;
-use yii\db\Query;
 
 /**
  * Class RequestControlModule

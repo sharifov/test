@@ -1,9 +1,4 @@
 <?php
-/**
- * User: shakarim
- * Date: 3/31/22
- * Time: 7:30 PM
- */
 
 namespace modules\requestControl\models;
 
