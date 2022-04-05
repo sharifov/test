@@ -147,6 +147,8 @@ $rgbaTitle = '151, 149, 149, 0.1';
 
 <?php
 $css = <<<CSS
+    .map_box {
+    }
     .md_box {
         float: left; 
         width: 50px;
