@@ -118,7 +118,8 @@ $rgbaTitle = '151, 149, 149, 0.1';
                         <?php foreach ($hours as $hour => $cnt) : ?>
                             <?php $dataTitle = $date->format('d-M') . ' (' . $hour . ':00 - ' . $hour . ':59)' ?>
                             <?php $cell = Html::tag(
-                                'span', $cnt ?: '-',
+                                'span',
+                                $cnt ?: '-',
                                 [
                                     'class' => '', 'data-toggle' => 'tooltip', 'data-original-title' => $dataTitle
                                 ]
