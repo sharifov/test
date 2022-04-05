@@ -37,9 +37,11 @@ use yii\helpers\ArrayHelper;
  * @property array|null $pqc_data_json
  * @property string $pqc_gid
  * @property bool|null $pqc_refund_allowed
+ * @property int|null $pqc_created_user_id
  *
  * @property Cases $pqcCase
  * @property Employee $pqcDecisionUser
+ * @property Employee $pqcCreatedUser
  * @property ProductQuote $pqcPq
  * @property ProductQuoteChangeRelation[]|null $productQuoteChangeRelations
  */
@@ -212,6 +214,10 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
 
             [['pqc_refund_allowed'], 'boolean'],
             [['pqc_refund_allowed'], 'default', 'value' => true],
+
+            ['pqc_created_user_id', 'integer'],
+            ['pqc_created_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pqc_created_user_id' => 'id']],
+
         ];
     }
 
@@ -235,6 +241,7 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
             'pqc_data_json' => 'Data Json',
             'pqc_gid' => 'Gid',
             'pqc_refund_allowed' => 'Refund allowed',
+            'pqc_created_user_id' => 'Created User',
         ];
     }
 
@@ -256,6 +263,14 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
     public function getPqcDecisionUser()
     {
         return $this->hasOne(Employee::class, ['id' => 'pqc_decision_user']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPqcCreatedUser()
+    {
+        return $this->hasOne(Employee::class, ['id' => 'pqc_created_user_id']);
     }
 
     /**
