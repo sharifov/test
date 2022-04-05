@@ -9,17 +9,20 @@ class ProductQuoteChangeDecisionType
     public const CONFIRM = 1;
     public const MODIFY = 2;
     public const REFUND = 3;
+    public const CREATE = 4;
 
     public const LIST = [
         self::CONFIRM => 'Confirm',
         self::MODIFY => 'Modify',
         self::REFUND => 'Refund',
+        self::CREATE => 'Create',
     ];
 
     private const CLASS_LIST = [
         self::CONFIRM => 'info',
         self::MODIFY => 'warning',
         self::REFUND => 'info',
+        self::CREATE => 'primary',
     ];
 
     public static function getList(): array
