@@ -62,7 +62,7 @@ class CurrencyHelper
         return $currency->cur_symbol;
     }
 
-    public static function getAppRateByCode(string $code): ?string
+    public static function getAppRateByCode(string $code): ?float
     {
         if (!$currency = Currency::find()->byCode($code)->limit(1)->one()) {
             return null;
