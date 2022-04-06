@@ -10,17 +10,14 @@ use kartik\select2\Select2;
 
 /* @var \yii\web\View $this */
 /* @var HeatMapLeadSearch $model */
-
-/* TODO::  */
 ?>
+
 <div class="heat-map-lead-search">
 
     <?php $form = ActiveForm::begin([
         'id' => 'heatMapLeadForm',
         'action' => ['index'],
-        'options' => [
-          //  'data-pjax' => 1
-        ],
+        'options' => [],
         'method' => 'get',
         'enableClientValidation' => true,
     ]) ?>
