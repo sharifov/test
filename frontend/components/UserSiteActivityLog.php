@@ -36,6 +36,9 @@ class UserSiteActivityLog extends Behavior
             /*if (strpos(Yii::$app->request->getAbsoluteUrl(), 'lead/check-updates') !== false) {
                 return true;
             }*/
+            if (strpos(Yii::$app->request->getAbsoluteUrl(), 'voip/log') !== false) {
+                return;
+            }
             if (strpos(Yii::$app->request->getAbsoluteUrl(), 'call/record') !== false) {
                 return;
             }
@@ -69,9 +72,10 @@ class UserSiteActivityLog extends Behavior
                  */
                 $roleNames = array_reduce(
                     \Yii::$app->authManager->getRolesByUser(\Yii::$app->user->id),
-                    function($acc, $item) {
-                        if ($item instanceof Role)
+                    function ($acc, $item) {
+                        if ($item instanceof Role) {
                             $acc[] = $item->name;
+                        }
                         return $acc;
                     },
                     []
@@ -87,11 +91,12 @@ class UserSiteActivityLog extends Behavior
                     ->addConditionByType(UsernameCondition::TYPE, \Yii::$app->user->identity->username)
                     ->addConditionByType(RoleCondition::TYPE, $roleNames);
 
-                if ($accessControlModule->can($checkAccess) === false)
+                if ($accessControlModule->can($checkAccess) === false) {
                     throw new ForbiddenHttpException(
                         "You've made too many requests recently. Please wait and try your request again later.",
                         111
                     );
+                }
             }
 
             // <<< [UserSiteActivityLog_A_001] END
