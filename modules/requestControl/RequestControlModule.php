@@ -66,20 +66,28 @@ class RequestControlModule extends Module
      */
     public static function existActivities(int $userId, string $path, string $limitDate): array
     {
-        $query = (new Query())
+        $globalQuery = (new Query())
             ->from(UserSiteActivity::tableName())
             ->where(
                 'usa_created_dt >= :limitDate AND usa_user_id=:userId',
                 [":limitDate" => $limitDate, ":userId" => $userId]
-            );
+            )
+            ->select('COUNT(*) as global');
+
+        $localQuery = (new Query())
+            ->from(UserSiteActivity::tableName())
+            ->where(
+                'usa_created_dt >= :limitDate AND usa_user_id=:userId',
+                [":limitDate" => $limitDate, ":userId" => $userId]
+            )
+            ->select('COUNT(*) as local')->andWhere('usa_page_url=:url', [":url" => $path]);
 
         return (new Query())
             ->select('*')
             ->from([
-                $query->select('COUNT(*) as global'),
-                $query->select('COUNT(*) as local')->andWhere('usa_page_url=:url', [":url" => $path])
-            ])
-            ->one();
+                'global' => $globalQuery,
+                'local' => $localQuery
+            ])->one();
     }
 
     /**
