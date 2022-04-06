@@ -11,7 +11,7 @@ filters:
     - crm
   tag:Ns:
     - kiv
-  instance-state-name : running
+  instance-state-name: running
 keyed_groups:
   - prefix: ''
     separator: ''
@@ -23,4 +23,3 @@ compose:
 
 hostnames:
   - tag:Name
-  
