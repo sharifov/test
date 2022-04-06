@@ -47,12 +47,14 @@ class Limited implements AllowanceInterface
      * Find lowest value by key in items of received list.
      * @param array $items
      * @param string $key
-     * @return mixed
+     * @return int
      */
-    private static function reduceToLower(array $items, string $key)
+    private static function reduceToLower(array $items, string $key): int
     {
-        return array_reduce($items, function ($acc, $item) use ($key) {
-            return (gettype($acc) === 'NULL' || (int)$acc > $item[$key]) ? $item[$key] : $acc;
-        }, null);
+        $mapped_values = array_map(function ($item) use ($key) {
+            return (int)$item[$key];
+        }, $items);
+        sort($mapped_values);
+        return ($mapped_values[0]) ? $mapped_values[0] : 0;
     }
 }
