@@ -5,7 +5,7 @@ resource "aws_instance" "app" {
   instance_type          = var.APP_INSTANCE_TYPE
   key_name               = var.SSH_KEY
   subnet_id              = var.PRIVATE_SUBNETS[0]
-  vpc_security_group_ids = [aws_security_group.app_private.id]
+  vpc_security_group_ids = [aws_security_group.app.id]
 
   root_block_device {
     volume_size = 30
@@ -21,44 +21,103 @@ resource "aws_instance" "app" {
   }
 }
 
-# Target Group
+# App Target Group
 resource "aws_lb_target_group" "app" {
   name     = "app-${var.PROJECT}-${var.ENV}"
-  port     = 80
-  protocol = "HTTP"
+  port     = 8443
+  protocol = "HTTPS"
   vpc_id   = var.VPC_ID
-  lifecycle {
-    create_before_destroy = true
+
+  health_check {
+    path = "/"
+    port = "traffic-port"
+    timeout = 3
+    interval = 5
+    healthy_threshold = 4
+    unhealthy_threshold = 2
+    matcher = "200-400"
   }
 }
+
 resource "aws_lb_target_group_attachment" "app" {
   count            = length(aws_instance.app)
   target_group_arn = aws_lb_target_group.app.arn
   target_id        = aws_instance.app[count.index].id
 }
 
-# Application Load Balancer
-resource "aws_lb" "app" {
-  name            = "app-${var.PROJECT}-${var.ENV}"
-  subnets         = var.PUBLIC_SUBNETS
-  security_groups = [aws_security_group.app_public.id, aws_security_group.app_private.id]
-  internal        = false
-  idle_timeout    = "120"
+# API Target Group
+resource "aws_lb_target_group" "api" {
+  name     = "api-${var.PROJECT}-${var.ENV}"
+  port     = 9443
+  protocol = "HTTPS"
+  vpc_id   = var.VPC_ID
 }
 
-# HTTP Listener
-resource "aws_lb_listener" "app_http" {
-  load_balancer_arn = aws_lb.app.arn
-  port              = 80
-  protocol          = "HTTP"
-  default_action {
-    target_group_arn = aws_lb_target_group.app.arn
-    type             = "forward"
+resource "aws_lb_target_group_attachment" "api" {
+  count            = length(aws_instance.app)
+  target_group_arn = aws_lb_target_group.api.arn
+  target_id        = aws_instance.app[count.index].id
+}
+
+# WS Target Group
+resource "aws_lb_target_group" "ws" {
+  name     = "ws-${var.PROJECT}-${var.ENV}"
+  port     = 8080
+  protocol = "HTTP"
+  vpc_id   = var.VPC_ID
+
+  stickiness {
+    cookie_duration = 86400
+    type            = "lb_cookie"
+  }
+
+  health_check {
+    path = "/"
+    port = "traffic-port"
+    timeout = 3
+    interval = 5
+    healthy_threshold = 4
+    unhealthy_threshold = 2
+    matcher = "400"
   }
 }
 
-# Private Security Group
-resource "aws_security_group" "app_private" {
+resource "aws_lb_target_group_attachment" "ws" {
+  count            = length(aws_instance.app)
+  target_group_arn = aws_lb_target_group.ws.arn
+  target_id        = aws_instance.app[count.index].id
+}
+
+# Centrifugo Target Group
+resource "aws_lb_target_group" "centrifugo" {
+  name     = "centrifugo-${var.PROJECT}-${var.ENV}"
+  port     = 8000
+  protocol = "HTTP"
+  vpc_id   = var.VPC_ID
+
+  stickiness {
+    cookie_duration = 86400
+    type            = "lb_cookie"
+  }
+
+  health_check {
+    path = "/health"
+    port = "traffic-port"
+    timeout = 3
+    interval = 5
+    healthy_threshold = 4
+    unhealthy_threshold = 2
+    matcher = "200"
+  }
+}
+
+resource "aws_lb_target_group_attachment" "centrifugo" {
+  target_group_arn = aws_lb_target_group.centrifugo.arn
+  target_id        = aws_instance.shared.id
+}
+
+# Application Security Group
+resource "aws_security_group" "app" {
   name        = "private-${var.PROJECT}-${var.ENV}"
   description = "Allows internal communication betwen ALB and TG"
   vpc_id      = var.VPC_ID
@@ -80,7 +139,7 @@ resource "aws_security_group" "app_private" {
   }
 
   ingress {
-    description = "APP HTTPS"
+    description = "APP"
     from_port   = 8443
     to_port     = 8443
     protocol    = "tcp"
@@ -88,7 +147,7 @@ resource "aws_security_group" "app_private" {
   }
 
   ingress {
-    description = "API HTTPS"
+    description = "API"
     from_port   = 9443
     to_port     = 9443
     protocol    = "tcp"
@@ -142,32 +201,3 @@ resource "aws_security_group" "app_private" {
   }
 }
 
-# Public Security Group
-resource "aws_security_group" "app_public" {
-  name        = "public-${var.PROJECT}-${var.ENV}"
-  description = "Allows HTTP/HTTPS traffic"
-  vpc_id      = var.VPC_ID
-
-  ingress {
-    description = "All"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name        = "public-${var.PROJECT}-${var.ENV}"
-    Environment = var.ENV
-    Project     = var.PROJECT
-    Ns          = var.NAMESPACE
-  }
-
-}
