@@ -241,12 +241,12 @@ $canShowEmailData = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_
 
                                     <div class="btn-wrapper text-right">
                                         <?php /** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND, Restrict access to send email in preview email */ ?>
-                                        <?php  if (Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND)) : ?>
+                                        <?php /** if (Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND)) : */ ?>
                                             <?= Html::submitButton(
                                                 '<i class="fa fa-envelope-o"></i> Send Email',
                                                 ['class' => 'btn btn-lg btn-primary', 'id' => 'send_email_btn']
                                             ) ?>
-                                        <?php  endif; ?>
+                                        <?php  /** endif; */ ?>
                                         <?php if ($canShowEmailData) :?>
                                             <?= Html::button('<i class="fa fa-list"></i> Show Email data (for Admins)', ['class' => 'btn btn-lg btn-warning', 'onclick' => '$("#email-data-content-div").toggle()']) ?>
                                         <?php endif; ?>
