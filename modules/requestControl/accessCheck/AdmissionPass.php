@@ -57,26 +57,26 @@ class AdmissionPass
 
     /**
      * AdmissionPass constructor.
-     * @param int $user_id
+     * @param int $userId
      * @param string $pathInfo
      * @param int $period
      */
-    public function __construct(int $user_id, string $pathInfo, int $period)
+    public function __construct(int $userId, string $pathInfo, int $period)
     {
-        $activityList = RequestControlModule::existActivities($user_id, $pathInfo, date('Y-m-d H:i:s', time() - $period));
+        $activityList = RequestControlModule::existActivities($userId, $pathInfo, date('Y-m-d H:i:s', time() - $period));
         $this->userActivityRegistry = new RequestCountLedger($activityList);
     }
 
     /**
      * Static function for new instance creation
-     * @param int $user_id
+     * @param int $userId
      * @param string $pathInfo
      * @param int $period
      * @return AdmissionPass
      */
-    public static function create(int $user_id, string $pathInfo, int $period): self
+    public static function create(int $userId, string $pathInfo, int $period): self
     {
-        return new self($user_id, $pathInfo, $period);
+        return new self($userId, $pathInfo, $period);
     }
 
     /**
