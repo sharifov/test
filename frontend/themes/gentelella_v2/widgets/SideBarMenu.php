@@ -16,6 +16,7 @@ use modules\user\userFeedback\abac\UserFeedbackAbacObject;
 use src\helpers\app\AppHelper;
 use Yii;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 
 /**
  * Class SideBarMenu
@@ -294,6 +295,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'Review Queue Completed', 'url' => ['/email-review-queue/completed'], 'icon' => 'list'],
                 ['label' => 'Email List', 'url' => ['/email-list/index'], 'icon' => 'envelope-o'],
                 ['label' => 'Email Review Queue Crud', 'url' => ['/email-review-queue-crud/index'], 'icon' => 'list'],
+                ['label' => 'Email Quote Crud', 'url' => ['/email-quote-crud/index'], 'icon' => 'list'],
             ]
         ];
 
@@ -930,9 +932,26 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'User Stats dashboard', 'url' => ['/user-stats/index'], 'icon' => 'users'],
                 ['label' => 'User Stats Report', 'url' => ['/user-stats/report'], 'icon' => 'users'],
                 ['label' => 'User Feedback Statistics', 'url' => ['/stats/user-feedback'], 'icon' => 'users'],
+                /** @abac $leadAbacDto, LeadAbacObject::OBJ_HEAT_MAP_LEAD, LeadAbacObject::ACTION_ACCESS, show heat-map-lead in menu */
+                [
+                    'label' => 'Leads',
+                    'url' => 'javascript:',
+                    'icon' => 'folder',
+                    'items' => [
+                        [
+                            'label' => 'Heat Map Leads',
+                            'url' => ['/heat-map-lead/index'],
+                            'icon' => 'area-chart',
+                            'abac' => [
+                                'dto' => new LeadAbacDto(null, (int) Auth::id()),
+                                'object' => LeadAbacObject::OBJ_HEAT_MAP_LEAD,
+                                'action' => LeadAbacObject::ACTION_ACCESS
+                            ],
+                        ],
+                    ],
+                ],
             ]
         ];
-
 
         $menuLanguages = [
             'label' => Yii::t('menu', 'Languages'),
@@ -987,8 +1006,14 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ],
                 ['label' => 'API Report', 'url' => ['/stats/api-graph'], 'icon' => 'bar-chart'],
 
-                ['label' => 'User Site Activity', 'url' => ['/user-site-activity/index'], 'icon' => 'bars'],
-                ['label' => 'User Activity Report', 'url' => ['/user-site-activity/report'], 'icon' => 'bar-chart'],
+                [
+                    'label' => Yii::t('requestControl', 'Request Control'), 'url' => 'javascript:', 'icon' => 'folder',
+                    'items' => [
+                        ['label' => 'User Site Activity', 'url' => ['/requestControl/user-site-activity'], 'icon' => 'bars'],
+                        ['label' => 'User Activity Report', 'url' => ['/requestControl/user-site-activity/report'], 'icon' => 'bar-chart'],
+                        ['label' => 'Request Control Manage', 'url' => ['/requestControl/manage'], 'icon' => 'bars']
+                    ]
+                ],
                 ['label' => 'Global Model Logs', 'url' => ['/global-log/index'], 'icon' => 'list'],
                 ['label' => 'Clean cache & assets', 'url' => ['/clean/index'], 'icon' => 'remove'],
                 [
@@ -1043,7 +1068,6 @@ class SideBarMenu extends \yii\bootstrap\Widget
             self::filterMenuItems($menuItems, $search_text);
         }
         self::ensureVisibility($menuItems);
-
 
 
         return $this->render('side_bar_menu', ['menuItems' => $menuItems, 'user' => $user, 'search_text' => $search_text]);
@@ -1128,10 +1152,6 @@ class SideBarMenu extends \yii\bootstrap\Widget
             if (isset($item['items']) && (!self::ensureVisibility($item['items']) && !isset($item['visible']))) {
                 $item['visible'] = false;
             }
-            if (isset($item['label']) && (!isset($item['visible']) || $item['visible'] === true)) {
-                $allVisible = true;
-            }
-
             if (isset($item['abac'])) {
                 try {
                     if (!$abacDto = $item['abac']['dto'] ?? null) {
@@ -1143,10 +1163,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     if (!$action = $item['abac']['action'] ?? null) {
                         throw new \RuntimeException('Abac action is empty');
                     }
-
-                    if (!Yii::$app->abac->can($abacDto, $object, $action)) {
-                        $item['visible'] = false;
-                    }
+                    $item['visible'] = (bool) Yii::$app->abac->can($abacDto, $object, $action);
                 } catch (\RuntimeException | \DomainException $throwable) {
                     $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $item);
                     \Yii::warning($message, 'SideBarMenu:ensureVisibility:Exception');
@@ -1154,6 +1171,9 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $item);
                     \Yii::error($message, 'SideBarMenu:ensureVisibility:Throwable');
                 }
+            }
+            if (isset($item['label']) && (!isset($item['visible']) || $item['visible'] === true)) {
+                $allVisible = true;
             }
         }
         return $allVisible;

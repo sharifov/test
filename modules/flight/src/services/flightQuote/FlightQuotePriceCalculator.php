@@ -13,8 +13,8 @@ class FlightQuotePriceCalculator
     {
         $priceData = FlightQuoteHelper::getPricesData($quote);
 
-        $originPrice = CurrencyHelper::convertToBaseCurrency($priceData->total->net, $originCurrencyRate);
-        $appMarkup = CurrencyHelper::convertToBaseCurrency($priceData->total->markUp, $originCurrencyRate);
+        $originPrice = $priceData->total->net;
+        $appMarkup = $priceData->total->markUp;
         // agent_markup - already in base currency
         $agentMarkup = $priceData->total->extraMarkUp;
 

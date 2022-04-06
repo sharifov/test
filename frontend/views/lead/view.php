@@ -464,7 +464,7 @@ Modal::end();
 
 $jsCommBlockChatView = <<<JS
 
-$('body').on('click', '.comm-chat-room-view', function(e) {  
+$('body').on('click', '.comm-chat-room-view', function(e) {
     e.preventDefault();
     $.get(        
         '/client-chat-qa/room',       
@@ -480,3 +480,10 @@ $('body').on('click', '.comm-chat-room-view', function(e) {
 
 JS;
 $this->registerJs($jsCommBlockChatView);
+
+$css = <<<CSS
+    .datepicker {
+        z-index: 1040!important;
+    }
+CSS;
+$this->registerCss($css);

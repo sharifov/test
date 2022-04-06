@@ -71,7 +71,7 @@ try {
             <td><?php if ($canEditQuoteExtraMarkUp) :?>
                     <u>
                     <?=
-                    Html::a(number_format($price['extra_mark_up'] / $price['tickets'], 2), '#', [
+                    Html::a(number_format($price['extra_mark_up'] / $price['tickets'], 2), 'javascript:void(0)', [
                         'class' => 'showModalButton',
                         'title' =>  'Edit extra markup, QUID: ' . $quote->uid,
                         'data-modal_id' => 'client-manage-info',

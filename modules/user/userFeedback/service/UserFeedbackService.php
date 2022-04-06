@@ -75,6 +75,20 @@ class UserFeedbackService
         }
     }
 
+    public function resolve(UserFeedback $model, string $resolution, int $newStatus, int $userId)
+    {
+        $oldStatus = $model->uf_status_id;
+        $model->uf_resolution         = $resolution;
+        $model->uf_resolution_user_id = $userId;
+        $model->uf_resolution_dt      = date('Y-m-d H:i:s');
+        $model->uf_status_id = $newStatus;
+        $this->repository->save($model);
+        $notificationMessage = $this->getNotificationMessage($oldStatus, $newStatus);
+        if (!empty($notificationMessage)) {
+            $this->sendNotification($model->uf_id, $model->uf_created_user_id, $model->uf_title, $notificationMessage);
+        }
+    }
+
     /**
      * @param UserFeedback $model
      * @param int|null $statusId

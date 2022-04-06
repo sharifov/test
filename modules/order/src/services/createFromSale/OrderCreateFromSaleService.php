@@ -2,23 +2,11 @@
 
 namespace modules\order\src\services\createFromSale;
 
-use common\components\SearchService;
 use common\models\Currency;
 use common\models\Payment;
-use modules\flight\models\Flight;
-use modules\flight\models\FlightPax;
-use modules\flight\models\FlightQuote;
-use modules\flight\models\FlightQuotePaxPrice;
-use modules\flight\models\FlightQuoteSegment;
-use modules\flight\models\FlightQuoteStatusLog;
-use modules\flight\models\FlightQuoteTicket;
-use modules\flight\models\FlightQuoteTrip;
 use modules\flight\src\repositories\flightQuoteRepository\FlightQuoteRepository;
 use modules\flight\src\repositories\flightQuoteSegment\FlightQuoteSegmentRepository;
 use modules\flight\src\repositories\flightQuoteTripRepository\FlightQuoteTripRepository;
-use modules\flight\src\useCases\flightQuote\create\FlightQuoteCreateDTO;
-use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentDTO;
-use modules\flight\src\useCases\flightQuote\create\ProductQuoteCreateDTO;
 use modules\flight\src\useCases\sale\form\OrderContactForm;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderPayStatus;
@@ -27,24 +15,17 @@ use modules\order\src\entities\order\OrderStatus;
 use modules\order\src\entities\orderContact\OrderContact;
 use modules\order\src\entities\orderContact\OrderContactRepository;
 use modules\order\src\payment\helpers\PaymentHelper;
-use modules\order\src\payment\method\PaymentMethodRepository;
 use modules\order\src\payment\PaymentRepository;
 use modules\order\src\services\CreateOrderDTO;
 use modules\order\src\services\OrderContactManageService;
-use modules\product\src\entities\product\Product;
 use modules\product\src\entities\product\ProductRepository;
-use modules\product\src\entities\productHolder\ProductHolder;
-use modules\product\src\entities\productQuote\ProductQuote;
-use modules\product\src\entities\productQuote\ProductQuoteStatus;
-use modules\product\src\entities\productType\ProductType;
-use modules\product\src\entities\productType\ProductTypeRepository;
-use modules\product\src\useCases\product\create\ProductCreateForm;
 use modules\product\src\useCases\product\create\ProductCreateService;
 use src\helpers\app\AppHelper;
 use src\helpers\ErrorsToStringHelper;
 use src\model\caseOrder\entity\CaseOrder;
 use src\repositories\product\ProductQuoteRepository;
 use src\services\client\ClientManageService;
+use src\services\CurrencyHelper;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -134,7 +115,9 @@ class OrderCreateFromSaleService
         );
         $order = (new Order())->create($dto);
         $order->or_pay_status_id = $payStatusId;
-        $order->or_client_currency_rate = $form->currency === Currency::DEFAULT_CURRENCY ? Currency::DEFAULT_CURRENCY_CLIENT_RATE : null;
+        $order->or_client_currency_rate = $form->currency === Currency::DEFAULT_CURRENCY ?
+            Currency::DEFAULT_CURRENCY_CLIENT_RATE :
+            CurrencyHelper::getAppRateByCode($form->currency);
         return $order;
     }
 

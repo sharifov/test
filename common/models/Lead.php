@@ -5242,14 +5242,19 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
             'inf' => $this->infants,
             'leadId' => $this->id,
             //TODO: refactor, use singleton, get from container doesn't work
-            UrlSignature::FORM_QUERY_KEY => UrlSignature::CalculateWithKey($signedParams, 'secretKey'),
-            //'CID' => $this->source ? $this->source->cid : '',
             //'redirectUrl' => urlencode(base64_encode($settings['redirectUrl']))
         ] + $flexParams;
 
         if ($this->leadPreferences && $this->leadPreferences->pref_currency != 'USD') {
             $params['currency'] = $this->leadPreferences->pref_currency;
         }
+
+        if ($this->project && $cid = $this->project->getAirSearchCid()) {
+            $params['cid'] = $cid;
+            $signedParams[] = $cid;
+        }
+
+        $params[UrlSignature::FORM_QUERY_KEY] = UrlSignature::CalculateWithKey($signedParams, 'secretKey');
 
         return $url . $segments . '?' . http_build_query($params);
     }

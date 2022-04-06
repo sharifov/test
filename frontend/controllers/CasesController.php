@@ -118,6 +118,7 @@ use yii\web\Response;
 use yii\widgets\ActiveForm;
 use modules\cases\src\abac\CasesAbacObject;
 use modules\cases\src\abac\dto\CasesAbacDto;
+use src\repositories\project\ProjectRepository;
 
 /**
  * Class CasesController
@@ -1086,7 +1087,13 @@ class CasesController extends FController
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
         $form = new CasesCreateByWebForm($user);
-        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+        if (!Yii::$app->request->isPost) {
+            $params = Yii::$app->request->queryParams;
+            if (isset($params['project'])) {
+                $form->projectId = (new ProjectRepository())->getIdByName($params['project']);
+            }
+            $form->orderUid = $params['orderUid'] ?? null;
+        } elseif ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
                 /** @var Cases $case */
                 $case = $this->casesCreateService->createByWeb($form, $user->id);

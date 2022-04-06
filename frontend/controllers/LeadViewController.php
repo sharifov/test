@@ -415,10 +415,13 @@ class LeadViewController extends FController
 
             $form->load(Yii::$app->request->post());
 
-            if (!($user->isAdmin() || $user->isSuperAdmin())) {
-                $form->phone = null;
-            } else {
+            $leadAbacDto->formAttribute = 'phone';
+            $leadAbacDto->isNewRecord = false;
+
+            if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::PHONE_CREATE_FORM, LeadAbacObject::ACTION_EDIT)) {
                 $form->required = true;
+            } else {
+                $form->phone = null;
             }
 
             if ($form->validate()) {
@@ -645,10 +648,12 @@ class LeadViewController extends FController
 
             $form->load(Yii::$app->request->post());
 
-            if (!($user->isAdmin() || $user->isSuperAdmin())) {
-                $form->email = null;
-            } else {
+            $leadAbacDto->formAttribute = 'email';
+            $leadAbacDto->isNewRecord = false;
+            if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::EMAIL_CREATE_FORM, LeadAbacObject::ACTION_EDIT)) {
                 $form->required = true;
+            } else {
+                $form->email = null;
             }
 
             if ($form->validate()) {

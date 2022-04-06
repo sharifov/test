@@ -65,20 +65,24 @@ class AirportRepository
      * @param $term
      * @return array|ActiveRecord[]
      */
-    public function getListForSearch($term): array
+    public function getListForSearch($term, ?bool $disabled = false): array
     {
         $countTerm = mb_strlen($term);
 
         $query = Airports::find();
 
         if ($countTerm < 4) {
-            $query->orfilterWhere(['like', 'LOWER(iata)', $term]);
+            $query->orFilterWhere(['like', 'LOWER(iata)', $term]);
         }
 
         if ($countTerm > 3) {
             $query->orFilterWhere(['like', 'LOWER(name)', $term]);
             $query->orFilterWhere(['like', 'LOWER(city)', $term]);
             $query->orFilterWhere(['like', 'LOWER(country)', $term]);
+        }
+
+        if ($disabled !== null) {
+            $query->andWhere(['a_disabled' => $disabled]);
         }
 
         $query->orderBy(['iata' => SORT_ASC]);

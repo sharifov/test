@@ -685,19 +685,19 @@ $js = <<<JS
     
     $('#prepare_dump_btn').click(function (e) {
         e.preventDefault(); 
-        
+
         cleanErrors(); 
         cleanData();      
-        
+
         $('#save_dump_btn').hide();                            
         let form = $('#$formID');
-                 
+
         loadingBtn($(this), true);        
         if (!checkPrepareDumpQuote()) {
             loadingBtn($(this), false); 
             return false;
         }
-                        
+
         $.ajax({
             url: '/quote/prepare-dump?lead_id=' + leadId,
             type: 'POST',
@@ -706,9 +706,8 @@ $js = <<<JS
         })
         .done(function(dataResponse) {
             loadingBtn($('#prepare_dump_btn'), false);
-                
+
             if (dataResponse.status === 1) {
-               
                 if (dataResponse.validating_carrier.length) {
                    $('#quote-main_airline_code').val(dataResponse.validating_carrier).trigger('change');
                 } 
@@ -826,14 +825,13 @@ $js = <<<JS
         } 
         return true;   
     } 
-    
+
     function cleanData() {   
         $('#head_reservation_result i').attr('class', 'fas fa-copy clipboard');
         $('#box_reservation_result').text('');
         $('#reservation_result').val('');
-        $('#quote-main_airline_code').val('').trigger('change');
     }
-    
+
     function cleanErrors() {    
         $('.field-error').each(function() {
             $(this).removeClass('field-error');

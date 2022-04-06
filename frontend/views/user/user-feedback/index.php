@@ -61,7 +61,25 @@ $columns = [
     ],
     ['class' => DateTimeColumn::class, 'attribute' => 'uf_created_dt'],
     [
+        'attribute' => 'uf_resolution',
+        'value' => static function (UserFeedback $model) {
+            if (!$model->uf_resolution) {
+                return null;
+            }
+            return '<pre><small>' . (StringHelper::truncate($model->uf_resolution, 400, '...', null, true)) . '</small></pre>';
+        },
+        'format' => 'raw'
+    ],
+    [
+        'class' => \common\components\grid\UserSelect2Column::class,
+        'attribute' => 'uf_resolution_user_id',
+        'relation' => 'ufResolutionUser',
+        'placeholder' => 'Select user'
+    ],
+    ['class' => DateTimeColumn::class, 'attribute' => 'uf_resolution_dt'],
+    [
         'class'      => ActionColumn::class,
+        'template' => '{view}',
         'urlCreator' => static function ($action, UserFeedback $model, $key, $index, $column) {
             if ($action === 'view') {
                 return Url::toRoute([$action, 'uf_id' => $model->uf_id, 'uf_created_dt' => $model->uf_created_dt]);

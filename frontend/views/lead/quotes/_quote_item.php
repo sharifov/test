@@ -7,6 +7,7 @@
  * @var $leadForm LeadForm
  * @var $isManager bool
  * @var $index int
+ * @var $totalCount int
  */
 
 use common\models\Currency;
@@ -19,6 +20,7 @@ use src\helpers\app\AppHelper;
 use src\helpers\quote\ImageHelper;
 use src\services\quote\quotePriceService\ClientQuotePriceService;
 use yii\bootstrap\Html;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 use yii\widgets\Pjax;
 
@@ -65,7 +67,7 @@ if ($model->isDeclined()) {
     <div class="quote__heading" style="background-color: <?=$bgColor?>">
         <div class="quote__heading-left">
             <span>
-                <span class="badge badge-white"><?= ($index + 1) ?></span>
+                <span class="badge badge-white"><?= ($totalCount - $index) ?></span>
             </span>
             <?php if ($model->isOriginal()) : ?>
                 <span class="label label-primary"><?= Quote::getTypeName($model->type_id) ?></span>
