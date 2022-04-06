@@ -6,9 +6,10 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use common\components\grid\DateTimeColumn;
+use modules\requestControl\models\UserSiteActivity;
 
 /* @var $this yii\web\View */
-/* @var $searchModel frontend\models\search\UserSiteActivitySearch */
+/* @var $searchModel modules\requestControl\models\search\UserSiteActivitySearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var DbCleanerParamsForm $modelCleaner */
 
@@ -23,7 +24,7 @@ $pjaxListId = 'pjax-site-activity';
     <?php echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?php if (Auth::can('global/clean/table')) : ?>
-        <?php echo $this->render('../clean/_clean_table_form', [
+        <?php echo $this->render('@frontend/views/clean/_clean_table_form', [
             'modelCleaner' => $modelCleaner,
             'pjaxIdForReload' => $pjaxListId,
         ]); ?>
@@ -61,11 +62,11 @@ $pjaxListId = 'pjax-site-activity';
             //'usa_request_type',
             [
                 'attribute' => 'usa_request_type',
-                'value' => static function (\frontend\models\UserSiteActivity $model) {
+                'value' => static function (UserSiteActivity $model) {
                     return  $model->getRequestTypeName();
                 },
                 //'format' => 'raw',
-                'filter' => \frontend\models\UserSiteActivity::REQUEST_TYPE_LIST
+                'filter' => UserSiteActivity::REQUEST_TYPE_LIST
             ],
             //'usa_request_get:ntext',
             //'usa_request_post:ntext',
@@ -84,7 +85,7 @@ $pjaxListId = 'pjax-site-activity';
             ],*/
             [
                 'label' => 'Duration',
-                'value' => static function (\frontend\models\UserSiteActivity $model) {
+                'value' => static function (UserSiteActivity $model) {
                     return Yii::$app->formatter->asRelativeTime(strtotime($model->usa_created_dt));
                 },
                 'format' => 'raw'

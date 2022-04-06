@@ -1006,8 +1006,14 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ],
                 ['label' => 'API Report', 'url' => ['/stats/api-graph'], 'icon' => 'bar-chart'],
 
-                ['label' => 'User Site Activity', 'url' => ['/user-site-activity/index'], 'icon' => 'bars'],
-                ['label' => 'User Activity Report', 'url' => ['/user-site-activity/report'], 'icon' => 'bar-chart'],
+                [
+                    'label' => Yii::t('requestControl', 'Request Control'), 'url' => 'javascript:', 'icon' => 'folder',
+                    'items' => [
+                        ['label' => 'User Site Activity', 'url' => ['/requestControl/user-site-activity'], 'icon' => 'bars'],
+                        ['label' => 'User Activity Report', 'url' => ['/requestControl/user-site-activity/report'], 'icon' => 'bar-chart'],
+                        ['label' => 'Request Control Manage', 'url' => ['/requestControl/manage'], 'icon' => 'bars']
+                    ]
+                ],
                 ['label' => 'Global Model Logs', 'url' => ['/global-log/index'], 'icon' => 'list'],
                 ['label' => 'Clean cache & assets', 'url' => ['/clean/index'], 'icon' => 'remove'],
                 [

@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model frontend\models\UserSiteActivity */
+/* @var $model modules\requestControl\models\UserSiteActivity */
 
 $this->title = $model->usa_id;
 $this->params['breadcrumbs'][] = ['label' => 'User Site Activities', 'url' => ['index']];

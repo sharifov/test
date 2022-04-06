@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model frontend\models\UserSiteActivity */
+/* @var $model modules\requestControl\models\UserSiteActivity */
 
 $this->title = 'Create User Site Activity';
 $this->params['breadcrumbs'][] = ['label' => 'User Site Activities', 'url' => ['index']];

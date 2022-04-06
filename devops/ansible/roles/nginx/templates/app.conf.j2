@@ -1,8 +1,3 @@
-map $http_upgrade $connection_upgrade {
-    default upgrade;
-    '' close;
-}
-
 server {
     listen 443 ssl http2;
     listen 8443 ssl http2;
@@ -38,56 +33,6 @@ server {
         }
     }
 
-    location /ws/ {
-        proxy_pass http://localhost:8080;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-
-        proxy_connect_timeout       10m;
-        proxy_send_timeout          10m;
-        proxy_read_timeout          90m;
-        send_timeout                10m;
-    }
-
-    location /centrifugo/ {
-        rewrite ^/centrifugo/(.*)        /$1 break;
-        proxy_pass_header Server;
-        proxy_set_header Host $http_host;
-        proxy_redirect off;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Scheme $scheme;
-        proxy_pass http://{{ centrifugo_host }};
-    }
-
-    location /centrifugo/metrics {
-        satisfy all;
-        allow 198.100.146.72;
-        deny  all;
-
-        rewrite ^/centrifugo/(.*)        /$1 break;
-        proxy_pass http://{{ centrifugo_host }};
-    }
-
-    location /centrifugo/connection {
-        rewrite ^/centrifugo(.*)        $1 break;
-
-        proxy_next_upstream error;
-        gzip on;
-        gzip_min_length 1000;
-        gzip_proxied any;
-        proxy_buffering off;
-        keepalive_timeout 65;
-        proxy_pass http://{{ centrifugo_host }};
-        proxy_read_timeout 600s;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Scheme $scheme;
-        proxy_set_header Host $http_host;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection $connection_upgrade;
-    }
-
     location /twilio-records/ {
         internal;
         proxy_buffering off;
@@ -97,12 +42,8 @@ server {
     location /voip-records/ {
         internal;
         proxy_buffering off;
-{% if env == 'prod' %}
-        proxy_pass https://api.comms.{{ domain }};
-{% else %}
-        proxy_pass https://api.comms.{{ env }.{{ domain }};
+        proxy_pass https://{{ common_config_main_components_communication_host }};
     }
-{% endif %}
 
     location /admin {
         proxy_send_timeout 300;

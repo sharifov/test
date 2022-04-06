@@ -221,6 +221,7 @@ JS;
                 'leadId' => $lead->id,
                 'leadForm' => $leadForm,
                 'isManager' => $is_manager,
+                'totalCount' => $dataProvider->count
             ],
             'itemOptions' => [
                 //'class' => 'item',

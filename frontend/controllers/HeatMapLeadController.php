@@ -39,7 +39,7 @@ class HeatMapLeadController extends FController
     {
         $leadAbacDto = new LeadAbacDto(null, (int) Auth::id());
         /** @abac $leadAbacDto, LeadAbacObject::OBJ_HEAT_MAP_LEAD, LeadAbacObject::ACTION_ACCESS, access to actionIndex */
-        $canView = \Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_EXTRA_QUEUE, LeadAbacObject::ACTION_ACCESS);
+        $canView = \Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_HEAT_MAP_LEAD, LeadAbacObject::ACTION_ACCESS);
 
         if (!$canView) {
             throw new ForbiddenHttpException('Access denied.');

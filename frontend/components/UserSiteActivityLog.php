@@ -2,17 +2,18 @@
 
 namespace frontend\components;
 
-use frontend\models\UserSiteActivity;
+use modules\requestControl\models\UserSiteActivity;
+use modules\requestControl\accessCheck\conditions\RoleCondition;
+use modules\requestControl\accessCheck\conditions\UsernameCondition;
+use modules\requestControl\accessCheck\AdmissionPass;
 use src\helpers\app\AppHelper;
 use src\helpers\ErrorsToStringHelper;
 use Yii;
 use yii\base\Behavior;
-use yii\helpers\ArrayHelper;
 use yii\helpers\StringHelper;
-use yii\helpers\VarDumper;
+use yii\rbac\Role;
 use yii\web\Application;
 use yii\web\ForbiddenHttpException;
-use yii\web\NotAcceptableHttpException;
 
 class UserSiteActivityLog extends Behavior
 {
@@ -27,7 +28,7 @@ class UserSiteActivityLog extends Behavior
     }
 
     /**
-     *
+     * @throws ForbiddenHttpException
      */
     public function activityLog(): void
     {
@@ -35,6 +36,9 @@ class UserSiteActivityLog extends Behavior
             /*if (strpos(Yii::$app->request->getAbsoluteUrl(), 'lead/check-updates') !== false) {
                 return true;
             }*/
+            if (strpos(Yii::$app->request->getAbsoluteUrl(), 'voip/log') !== false) {
+                return;
+            }
             if (strpos(Yii::$app->request->getAbsoluteUrl(), 'call/record') !== false) {
                 return;
             }
@@ -49,19 +53,53 @@ class UserSiteActivityLog extends Behavior
 
             $settings = Yii::$app->params['settings'];
 
-            if (isset($settings['user_site_activity_time'], $settings['user_site_activity_count']) && $settings['user_site_activity_time'] && $settings['user_site_activity_count']) {
-                $sec = (int) $settings['user_site_activity_time'];
+            /*
+             * Checking and filtering for frequent page refreshes
+             *
+             * NOTICE [UserSiteActivityLog_A_001]: this business logic may looks better in specific apart filter. This class (`UserSiteActivityLog`) judging by the name - have to do logging and nothing more.
+             *
+             * Mixing the logging and access control logic in one class (especially at one function) very hard violation of `Single Responsibility Principle`.
+             *
+             * [UserSiteActivityLog_A_001] BEGIN >>>
+             */
 
-                $requestCount = UserSiteActivity::find()
-                    ->where(['usa_user_id' => Yii::$app->user->id, 'usa_page_url' => Yii::$app->request->pathInfo])
-                    //->where(['usa_user_id' => Yii::$app->user->id, 'usa_request_url' => $request_url])
-                    ->andWhere(['>=', 'usa_created_dt', date('Y-m-d H:i:s', time() - $sec)])
-                    ->count();
+            $accessControlModule = \Yii::$app->getModule('requestControl');
 
-                if ($requestCount > $settings['user_site_activity_count']) {
-                    throw new ForbiddenHttpException('You\'ve made too many requests recently. Please wait and try your request again later.', 111);
+            if ($accessControlModule !== null && isset($settings['user_site_activity_time'])) {
+                /**
+                 * Making the list of role names for `AdmissionPass` class
+                 * @var string[] $roleNames
+                 */
+                $roleNames = array_reduce(
+                    \Yii::$app->authManager->getRolesByUser(\Yii::$app->user->id),
+                    function ($acc, $item) {
+                        if ($item instanceof Role) {
+                            $acc[] = $item->name;
+                        }
+                        return $acc;
+                    },
+                    []
+                );
+
+                // Access checking
+                $admissionPass = new AdmissionPass(
+                    (int)\Yii::$app->user->id,
+                    (string)\Yii::$app->request->pathInfo,
+                    (int)$settings['user_site_activity_time']
+                );
+                $checkAccess = ($admissionPass)
+                    ->addConditionByType(UsernameCondition::TYPE, \Yii::$app->user->identity->username)
+                    ->addConditionByType(RoleCondition::TYPE, $roleNames);
+
+                if ($accessControlModule->can($checkAccess) === false) {
+                    throw new ForbiddenHttpException(
+                        "You've made too many requests recently. Please wait and try your request again later.",
+                        111
+                    );
                 }
             }
+
+            // <<< [UserSiteActivityLog_A_001] END
 
             try {
                 $activity = new UserSiteActivity();

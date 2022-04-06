@@ -1,6 +1,6 @@
 <?php
 
-namespace frontend\models;
+namespace modules\requestControl\models;
 
 /**
  * This is the ActiveQuery class for [[UserSiteActivity]].
