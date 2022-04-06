@@ -79,6 +79,7 @@ $columns = [
     ['class' => DateTimeColumn::class, 'attribute' => 'uf_resolution_dt'],
     [
         'class'      => ActionColumn::class,
+        'template' => '{view}',
         'urlCreator' => static function ($action, UserFeedback $model, $key, $index, $column) {
             if ($action === 'view') {
                 return Url::toRoute([$action, 'uf_id' => $model->uf_id, 'uf_created_dt' => $model->uf_created_dt]);
