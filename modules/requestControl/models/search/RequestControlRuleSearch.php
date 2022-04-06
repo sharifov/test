@@ -12,6 +12,17 @@ use yii\data\ActiveDataProvider;
 class RequestControlRuleSearch extends RequestControlRule
 {
     /**
+     * @return array
+     */
+    public function rules(): array
+    {
+        return [
+            [['rcr_local', 'rcr_global'], 'integer'],
+            [['rcr_type', 'rcr_subject'], 'string'],
+            [['rcr_local', 'rcr_global', 'rcr_type', 'rcr_subject'], 'safe'],
+        ];
+    }
+    /**
      * @param $params
      * @return ActiveDataProvider
      */
