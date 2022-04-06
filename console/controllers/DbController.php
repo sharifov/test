@@ -17,7 +17,7 @@ use common\models\Project;
 use common\models\ProjectWeight;
 use common\models\Quote;
 use common\models\UserProjectParams;
-use frontend\models\UserSiteActivity;
+use modules\requestControl\models\UserSiteActivity;
 use src\entities\cases\Cases;
 use src\helpers\app\AppHelper;
 use src\helpers\email\TextConvertingHelper;

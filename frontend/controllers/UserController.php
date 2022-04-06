@@ -7,7 +7,7 @@ use common\models\Notifications;
 use common\models\search\EmailSearch;
 use common\models\search\LeadSearch;
 use common\models\search\SmsSearch;
-use frontend\models\search\UserSiteActivitySearch;
+use modules\requestControl\models\search\UserSiteActivitySearch;
 use src\model\userData\entity\search\UserDataSearch;
 use src\auth\Auth;
 use src\entities\cases\CasesSearch;

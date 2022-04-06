@@ -1,12 +1,12 @@
 <?php
 
-namespace frontend\models\search;
+namespace modules\requestControl\models\search;
 
 use common\models\Employee;
 use kartik\daterange\DateRangeBehavior;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use frontend\models\UserSiteActivity;
+use modules\requestControl\models\UserSiteActivity;
 use yii\db\Expression;
 
 /**
@@ -119,7 +119,11 @@ class UserSiteActivitySearch extends UserSiteActivity
         return $dataProvider;
     }
 
-
+    /**
+     * @param $params
+     * @return mixed
+     * @throws \yii\db\Exception
+     */
     public function searchReport($params)
     {
         $this->load($params);

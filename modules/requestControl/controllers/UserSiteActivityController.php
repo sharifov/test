@@ -1,16 +1,16 @@
 <?php
 
-namespace frontend\controllers;
+namespace modules\requestControl\controllers;
 
+use Yii;
+use yii\helpers\ArrayHelper;
+use yii\filters\VerbFilter;
+use yii\web\NotFoundHttpException;
 use src\services\cleaner\form\DbCleanerParamsForm;
 use src\services\cleaner\cleaners\UserSiteActivityCleaner;
-use Yii;
-use frontend\models\UserSiteActivity;
-use frontend\models\search\UserSiteActivitySearch;
-use yii\helpers\ArrayHelper;
-use yii\web\Controller;
-use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
+use modules\requestControl\models\UserSiteActivity;
+use modules\requestControl\models\search\UserSiteActivitySearch;
+use frontend\controllers\FController;
 
 /**
  * UserSiteActivityController implements the CRUD actions for UserSiteActivity model.
@@ -63,7 +63,8 @@ class UserSiteActivityController extends FController
 
     /**
      * Lists all UserSiteActivity models.
-     * @return mixed
+     * @return string
+     * @throws \yii\db\Exception
      */
     public function actionReport()
     {
@@ -131,9 +132,11 @@ class UserSiteActivityController extends FController
     /**
      * Deletes an existing UserSiteActivity model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
+     *
+     * @param $id
+     * @return \yii\web\Response
+     * @throws NotFoundHttpException
+     * @throws \yii\db\StaleObjectException
      */
     public function actionDelete($id)
     {
@@ -158,6 +161,9 @@ class UserSiteActivityController extends FController
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 
+    /**
+     * @return \yii\web\Response
+     */
     public function actionClearLogs()
     {
         $countLogs = UserSiteActivity::clearHistoryLogs();

@@ -1,6 +1,6 @@
 <?php
 
-namespace frontend\models;
+namespace modules\requestControl\models;
 
 use common\models\Employee;
 use Yii;
@@ -23,7 +23,7 @@ use yii\db\ActiveRecord;
  *
  * @property Employee $usaUser
  */
-class UserSiteActivity extends \yii\db\ActiveRecord
+class UserSiteActivity extends ActiveRecord
 {
     public const REQUEST_TYPE_GET = 1;
     public const REQUEST_TYPE_POST = 2;

@@ -20,7 +20,7 @@ use common\models\Quote;
 use common\models\UserConnection;
 use common\models\UserOnline;
 use common\models\UserProjectParams;
-use frontend\models\UserSiteActivity;
+use modules\requestControl\models\UserSiteActivity;
 use src\entities\cases\Cases;
 use src\helpers\email\TextConvertingHelper;
 use src\logger\db\GlobalLogInterface;

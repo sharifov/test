@@ -5,7 +5,7 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel frontend\models\search\UserSiteActivitySearch */
+/* @var $searchModel modules\requestControl\models\search\UserSiteActivitySearch */
 /* @var $data array */
 
 $this->title = 'User Site Activities Report';
