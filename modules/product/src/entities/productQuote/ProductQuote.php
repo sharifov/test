@@ -486,11 +486,31 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         return self::findOne(['pq_gid' => $gid]);
     }
 
-    public function applied(): void
+    /**
+     * @param int|null $creatorId
+     * @param string|null $description
+     */
+    public function applied(?int $creatorId = null, ?string $description = null): void
     {
+        $this->recordEvent(
+            new ProductQuoteStatusChangeEvent(
+                    $this->pq_id,
+                    $this->pq_status_id,
+                    ProductQuoteStatus::APPLIED,
+                    $description,
+                    null,
+                    $this->pq_owner_user_id,
+                    $creatorId
+                )
+        );
+
         $this->pq_status_id = ProductQuoteStatus::APPLIED;
     }
 
+    /**
+        @deprecated
+        use instead method error(?int $creatorId = null, ?string $description = null)
+     */
     public function failed(): void
     {
         $this->pq_status_id = ProductQuoteStatus::ERROR;
