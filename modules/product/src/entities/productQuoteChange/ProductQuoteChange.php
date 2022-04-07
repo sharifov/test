@@ -80,11 +80,6 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
                 'targetColumn' => 'pqc_gid',
                 'value' => self::generateGid(),
             ],
-            'user' => [
-                'class' => BlameableBehavior::class,
-                'createdByAttribute' => 'pqc_created_user_id',
-                'updatedByAttribute' => null,
-            ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
