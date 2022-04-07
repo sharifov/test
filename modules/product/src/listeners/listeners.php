@@ -36,6 +36,8 @@ use modules\product\src\listeners\ProductQuoteCloneListener;
 use modules\product\src\listeners\ProductQuoteReplaceListener;
 use src\model\user\entity\profit\event\UserProfitCalculateByOrderUserProfitEvent;
 use src\model\user\entity\profit\listener\UserProfitCalculateByOrderUserProfitEventListener;
+use modules\product\src\entities\productQuote\events\ProductQuoteStatusChangeEvent;
+use modules\product\src\listeners\productQuote\ProductQuoteStatusChangeEventListener;
 
 return [
     ProductQuoteCloneCreatedEvent::class => [
@@ -103,5 +105,8 @@ return [
     ],
     ProductQuoteBookedChangeFlowEvent::class => [
         ProductQuoteBookedChangeFlowListener::class
+    ],
+    ProductQuoteStatusChangeEvent::class => [
+        ProductQuoteStatusChangeEventListener::class
     ],
 ];
