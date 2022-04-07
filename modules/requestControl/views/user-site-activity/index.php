@@ -5,6 +5,7 @@ use src\services\cleaner\form\DbCleanerParamsForm;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use yii\helpers\StringHelper;
 use common\components\grid\DateTimeColumn;
 use modules\requestControl\models\UserSiteActivity;
 
@@ -36,53 +37,52 @@ $pjaxListId = 'pjax-site-activity';
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            //['class' => 'yii\grid\SerialColumn'],
-
             'usa_id',
-
-           /*[
-                'attribute' => 'usa_user_id',
-                'value' => static function (\frontend\models\UserSiteActivity $model) {
-                    return  ($model->usaUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->usaUser->username) : $model->usa_user_id);
-                },
-                'format' => 'raw',
-                'filter' => \common\models\Employee::getList()
-            ],*/
-
             [
                 'class' => \common\components\grid\UserSelect2Column::class,
                 'attribute' => 'usa_user_id',
                 'relation' => 'usaUser',
                 'placeholder' => 'Select User',
             ],
+            [
+                'attribute' => 'usa_request_url',
+                'contentOptions' => ['style' => 'max-width: 300px; word-wrap: break-word;'],
+                'format' => 'raw',
+                'value' => static function (UserSiteActivity $model) {
+                    // Limit for string length
+                    $stringLength = 90;
 
-            'usa_request_url',
+                    /*
+                     * List for rendering.
+                     * - If string is longer than value in `$stringLength` - we cut it and add the button for showing details.
+                     * - If not - string will shown as is.
+                     */
+                    $renderList = (mb_strlen($model->usa_request_url) > $stringLength)
+                        ? [
+                            Html::tag('span', StringHelper::truncate(Html::encode($model->usa_request_url), $stringLength, '...', null, false)),
+                            Html::tag('div', $model->usa_request_url, ['id' => "detail_{$model->usa_id}", 'style' => 'display: none;']),
+                            Html::tag('i', '', ['class' => 'fas fa-eye green showDetail', 'style' => 'cursor: pointer; padding-left: 5px;', 'data-idt' => $model->usa_id])
+                        ]
+                        : [Html::tag('span', Html::encode($model->usa_request_url))];
+
+                    // Replacing of concatenation. Render list will be imploded into the string with delimiter (empty space in this case)
+                    return Html::tag('div', implode('', $renderList));
+                },
+            ],
             'usa_page_url',
             'usa_ip',
-            //'usa_request_type',
             [
                 'attribute' => 'usa_request_type',
                 'value' => static function (UserSiteActivity $model) {
                     return  $model->getRequestTypeName();
                 },
-                //'format' => 'raw',
                 'filter' => UserSiteActivity::REQUEST_TYPE_LIST
             ],
-            //'usa_request_get:ntext',
-            //'usa_request_post:ntext',
 
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'usa_created_dt'
             ],
-
-            /*[
-                'attribute' => 'usa_created_dt',
-                'value' => static function(\frontend\models\UserSiteActivity $model) {
-                    return $model->usa_created_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->usa_created_dt), 'php: Y-m-d [H:i:s]') : $model->usa_created_dt;
-                },
-                'format' => 'raw',
-            ],*/
             [
                 'label' => 'Duration',
                 'value' => static function (UserSiteActivity $model) {
@@ -98,3 +98,27 @@ $pjaxListId = 'pjax-site-activity';
     <?php Pjax::end(); ?>
 
 </div>
+
+<?php
+yii\bootstrap4\Modal::begin([
+    'title' => 'UserSiteActivityDetail',
+    'id' => 'modal',
+    'size' => \yii\bootstrap4\Modal::SIZE_LARGE,
+]);
+yii\bootstrap4\Modal::end();
+
+$jsCode = <<<JS
+    $(document).on('click', '.showDetail', function(){
+        let logId = $(this).data('idt');
+        let detailEl = $('#detail_' + logId);
+        let modalBodyEl = $('#modal .modal-body');
+        
+        modalBodyEl.html('<p style="word-wrap: break-word;">' + detailEl.html() + '</p>');
+        $('#modal-label').html('Detail User Site Activity (' + logId + ')');       
+        $('#modal').modal('show');
+        return false;
+    });
+JS;
+
+$this->registerJs($jsCode, \yii\web\View::POS_READY);
+
