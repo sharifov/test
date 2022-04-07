@@ -185,10 +185,10 @@ END of installation. Now frontend and api must respond.
 - [stage-sales-api.travel-dev.com/phpdoc/index.html](https://stage-sales-api.travel-dev.com/phpdoc/index.html) - PHP Documentation
 
 ### Dev Host:
-- [sales.dev.travelinsides.com](https://sales.dev.travelinsides.com) - Frontend
-- [api-sales.dev.travelinsides.com](https://api-sales.dev.travelinsides.com) - API
-- [api-sales.dev.travelinsides.com/doc/index.html](https://api-sales.dev.travelinsides.com/doc/index.html) - API Documentation
-- [api-sales.dev.travelinsides.com/phpdoc/index.html](https://api-sales.dev.travelinsides.com/phpdoc/index.html) - PHP Documentation
+- [crm.dev.travel-dev.com](https://crm.dev.travel-dev.com) - Frontend
+- [api.crm.dev.travel-dev.com](https://api.crm.dev.travel-dev.com) - API
+- [api.crm.dev.travel-dev.com/doc/index.html](https://api.crm.dev.travel-dev.com/doc/index.html) - API Documentation
+- [api.crm.dev.travel-dev.com/phpdoc/index.html](https://api.crm.dev.travel-dev.com/phpdoc/index.html) - PHP Documentation
 
 ### Health check API:
 ```
