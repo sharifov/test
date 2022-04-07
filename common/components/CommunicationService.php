@@ -17,7 +17,7 @@ use src\helpers\setting\SettingHelper;
 use src\model\call\entity\call\data\CreatorType;
 use src\model\call\useCase\conference\create\CreateCallForm;
 use src\model\project\entity\projectLocale\ProjectLocale;
-use thamtech\uuid\helpers\UuidHelper;
+use src\helpers\ProjectHashGenerator;
 use Yii;
 use yii\base\Component;
 use yii\caching\TagDependency;
@@ -91,6 +91,20 @@ class CommunicationService extends Component implements CommunicationServiceInte
     }
 
     /**
+     * @param array $data
+     * @return array
+     */
+    private function setCommonParams(array $data): array
+    {
+        try {
+            $data['mail']['email_data']['hash_code_receiver_email'] = ProjectHashGenerator::getHashByProjectId($data['project_id'], strtolower($data['mail']['email_to']));
+        } catch (\Throwable $exception) {
+            //
+        }
+        return $data;
+    }
+
+    /**
      * @param string $action
      * @param array $data
      * @param string $method
@@ -105,6 +119,8 @@ class CommunicationService extends Component implements CommunicationServiceInte
 
         //$options = ['RETURNTRANSFER' => 1];
 //        VarDumper::dump($url);die;
+
+        $data = $this->setCommonParams($data);
 
         $this->request->setMethod($method)
             ->setUrl($url)
