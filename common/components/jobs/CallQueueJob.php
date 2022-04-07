@@ -133,7 +133,8 @@ class CallQueueJob extends BaseJob implements JobInterface
                                             $call->c_project_id,
                                             $this->source_id,
                                             $call->c_dep_id,
-                                            $call->c_offset_gmt
+                                            $call->c_offset_gmt,
+                                            $call->c_id
                                         );
                                 }
 

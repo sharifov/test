@@ -29,6 +29,7 @@ use src\model\clientChatVisitorData\entity\ClientChatVisitorData;
 use src\model\clientChatVisitorData\repository\ClientChatVisitorDataRepository;
 use src\model\leadData\entity\LeadData;
 use src\model\leadData\repository\LeadDataRepository;
+use src\model\leadData\services\LeadDataCreateService;
 use src\model\leadDataKey\services\LeadDataKeyDictionary;
 use src\model\leadUserConversion\service\LeadUserConversionDictionary;
 use src\model\leadUserConversion\service\LeadUserConversionService;
@@ -363,6 +364,8 @@ class LeadManageService
 
             $this->updateLeadOnRelationActiveCalls($lead, $call);
 
+            LeadDataCreateService::createByCallId($lead->id, $call->c_id);
+
             return $lead;
         });
     }
@@ -449,6 +452,8 @@ class LeadManageService
             );
 
             $this->updateLeadOnRelationActiveCalls($lead, $call);
+
+            LeadDataCreateService::createByCallId($lead->id, $call->c_id);
 
             return $lead;
         });

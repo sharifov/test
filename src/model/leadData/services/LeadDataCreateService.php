@@ -124,6 +124,21 @@ class LeadDataCreateService
         return null;
     }
 
+    public static function createByCallId(int $leadId, int $callId): void
+    {
+        try {
+            $leadDataRepository = \Yii::createObject(LeadDataRepository::class);
+            $leadData = LeadData::create($leadId, LeadDataKeyDictionary::KEY_CREATED_BY_CALL_ID, $callId);
+            $leadDataRepository->save($leadData);
+        } catch (\Throwable $e) {
+            \Yii::error([
+                'message' => $e->getMessage(),
+                'leadId' => $leadId,
+                'callId' => $callId,
+            ], 'LeadDataCreateService::createByCallId');
+        }
+    }
+
     public static function isExist(int $leadId, string $key): bool
     {
         return LeadData::find()
