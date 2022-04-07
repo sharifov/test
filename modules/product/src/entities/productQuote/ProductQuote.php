@@ -779,8 +779,24 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         return $this->pqProduct->isCruise();
     }
 
-    public function pending(): void
+    /**
+    * @param int|null $creatorId
+    * @param string|null $description
+    */
+    public function pending(?int $creatorId = null, ?string $description = null): void
     {
+        $this->recordEvent(
+            new ProductQuoteStatusChangeEvent(
+                $this->pq_id,
+                $this->pq_status_id,
+                ProductQuoteStatus::PENDING,
+                $description,
+                null,
+                $this->pq_owner_user_id,
+                $creatorId
+                )
+        );
+
         $this->pq_status_id = ProductQuoteStatus::PENDING;
     }
 
