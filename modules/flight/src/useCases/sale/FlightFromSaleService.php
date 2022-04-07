@@ -191,7 +191,7 @@ class FlightFromSaleService
             $order->or_client_currency
         );
         $productQuote = ProductQuote::create($productQuoteDto, null);
-        $productQuote->pq_status_id = self::detectProductQuoteStatus($saleData);
+        $productQuote->pq_status_id = self::detectProductQuoteStatus($saleData); //TODO: set status with some method which event save status log
         if (!$productQuote->validate()) {
             throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($productQuote, ' ', true));
         }
