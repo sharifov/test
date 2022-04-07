@@ -2252,8 +2252,8 @@ class Quote extends \yii\db\ActiveRecord
             $result['passengers'][$paxCode]['price'] = round($price['selling'] / $price['tickets'], 2);
             $result['passengers'][$paxCode]['tax'] = round(($price['taxes'] + $price['mark_up'] + $price['extra_mark_up'] + $price['service_fee']) / $price['tickets'], 2);
             $result['passengers'][$paxCode]['baseFare'] = round($price['fare'] / $price['tickets'], 2);
-            $result['passengers'][$paxCode]['mark_up'] = round($price['mark_up'], 2);
-            $result['passengers'][$paxCode]['extra_mark_up'] = round($price['extra_mark_up'], 2);
+            $result['passengers'][$paxCode]['mark_up'] = round($price['mark_up'] / $price['tickets'], 2);
+            $result['passengers'][$paxCode]['extra_mark_up'] = round($price['extra_mark_up'] / $price['tickets'], 2);
             $result['passengers'][$paxCode]['baseTax'] = round(($price['taxes']) / $price['tickets'], 2);
             $result['passengers'][$paxCode]['service_fee'] = round($price['service_fee'] ?? 0, 2);
 

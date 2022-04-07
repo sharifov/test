@@ -15,6 +15,7 @@ export-mysql.sh |gzip > /tmp/crm-mysql.sql.gz
 Import MySQL dump:
 ```
 ssh ubuntu@new-app-host
+scp ubuntu@current-app-host:/tmp/crm-mysql.sql /tmp/
 gunzip < /tmp/crm-mysql.sql.gz |import-mysql.sh
 ```
 
@@ -30,6 +31,7 @@ export-pgsql.sh |gzip > /tmp/crm-pgsql.sql.gz
 Import PostgreSQL dump:
 ```
 ssh ubuntu@new-app-host
+scp ubuntu@current-app-host:/tmp/crm-pgsql.sql /tmp/
 gunzip < /tmp/crm-pgsql.sql.gz |import-pgsql.sh
 ```
 

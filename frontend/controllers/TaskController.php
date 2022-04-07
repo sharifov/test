@@ -127,4 +127,19 @@ class TaskController extends FController
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
+
+    /**
+     * Lists all Task models.
+     * @return mixed
+     */
+    public function actionList()
+    {
+//        $searchModel = new TaskSearch();
+//        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+        return $this->render('list', [
+//            'searchModel' => $searchModel,
+//            'dataProvider' => $dataProvider,
+        ]);
+    }
 }

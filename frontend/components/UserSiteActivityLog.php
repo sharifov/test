@@ -36,20 +36,24 @@ class UserSiteActivityLog extends Behavior
             /*if (strpos(Yii::$app->request->getAbsoluteUrl(), 'lead/check-updates') !== false) {
                 return true;
             }*/
-            if (strpos(Yii::$app->request->getAbsoluteUrl(), 'voip/log') !== false) {
+            $absUrl = Yii::$app->request->getAbsoluteUrl();
+            if (strpos($absUrl, 'voip/log') !== false) {
                 return;
             }
-            if (strpos(Yii::$app->request->getAbsoluteUrl(), 'call/record') !== false) {
+            if (strpos($absUrl, 'call/record') !== false) {
                 return;
             }
-            if (strpos(Yii::$app->request->getAbsoluteUrl(), 'smart/default/async-poll') !== false) {
+            if (strpos($absUrl, 'smart/default/async-poll') !== false) {
                 return;
             }
-            if (strpos(Yii::$app->request->getAbsoluteUrl(), 'smart/default/async-get') !== false) {
+            if (strpos($absUrl, 'smart/default/async-get') !== false) {
+                return;
+            }
+            if (strpos($absUrl, 'smart/default/bestdeal') !== false) {
                 return;
             }
 
-            $request_url = mb_substr(Yii::$app->request->getAbsoluteUrl(), 0, 490);
+            $request_url = mb_substr($absUrl, 0, 490);
 
             $settings = Yii::$app->params['settings'];
 
