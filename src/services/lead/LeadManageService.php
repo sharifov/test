@@ -3,6 +3,7 @@
 namespace src\services\lead;
 
 use common\models\Client;
+use src\model\leadData\services\LeadDataCreateService;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
 use src\model\visitorLog\useCase\CreateVisitorLog;
 use src\services\client\ClientCreateForm;
@@ -136,6 +137,7 @@ class LeadManageService
      * @param int|null $sourceId
      * @param int $departmentId
      * @param $gmt
+     * @param int $callId
      * @return Lead
      * @throws \Throwable
      */
@@ -144,9 +146,10 @@ class LeadManageService
         ?int $projectId,
         ?int $sourceId,
         int $departmentId,
-        $gmt
+        $gmt,
+        int $callId
     ): Lead {
-        $lead = $this->transaction->wrap(function () use ($phoneNumber, $projectId, $sourceId, $departmentId, $gmt) {
+        $lead = $this->transaction->wrap(function () use ($phoneNumber, $projectId, $sourceId, $departmentId, $gmt, $callId) {
 
             $clientForm = ClientCreateForm::createWidthDefaultName();
             $clientForm->projectId = $projectId;
@@ -165,6 +168,8 @@ class LeadManageService
                 $lead->setVisitorLog($logId);
                 $this->leadRepository->save($lead);
             }
+
+            LeadDataCreateService::createByCallId($lead->id, $callId);
 
             return $lead;
         });
