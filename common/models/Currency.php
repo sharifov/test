@@ -223,7 +223,7 @@ class Currency extends ActiveRecord
                     }
 
                     if (isset($curItem['isEnabled']) && $currency->cur_enabled !== $curItem['isEnabled']) {
-                        $currency->cur_enabled = (bool) $curItem['isEnabled'];
+                        //$currency->cur_enabled = (bool) $curItem['isEnabled'];
                     }
 
                     if (isset($curItem['sort']) && $currency->cur_sort_order !== $curItem['sort']) {
