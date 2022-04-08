@@ -12,7 +12,9 @@ class CasesCreateEventLogListener
     public function handle(CasesCreatedEvent $event): void
     {
         try {
-            $description = CasesStatus::STATUS_LIST[$event->case->cs_status] . ' Case created for department: ' . $event->case->department->dep_name . ', category: ' . $event->case->category->cc_name . ', subject:' . $event->case->cs_subject;
+            $category = isset($event->case->category) ? ', category: ' . $event->case->category->cc_name : '';
+            $department = isset($event->case->department) ? 'department: ' . $event->case->department->dep_name : '';
+            $description = CasesStatus::STATUS_LIST[$event->case->cs_status] . ' Case created for ' . $department . $category . ', subject:' . $event->case->cs_subject;
             $data = [
                 'status_id' => $event->case->cs_status,
                 'department_key' => $event->case->cs_dep_id,
