@@ -38,7 +38,7 @@ class QuoteCommunication extends ActiveRecord
             'user' => [
                 'class' => BlameableBehavior::class,
                 'createdByAttribute' => 'qc_created_by',
-                'updatedByAttribute' => false,
+                'updatedByAttribute' => false
             ],
         ];
     }
@@ -57,8 +57,8 @@ class QuoteCommunication extends ActiveRecord
     public function rules()
     {
         return [
-            [['qc_communication_id', 'qc_communication_type', 'eq_quote_id'], 'required'],
-            [['qc_communication_id', 'qc_communication_type', 'eq_quote_id', 'eq_created_by'], 'integer'],
+            [['qc_communication_id', 'qc_communication_type', 'qc_quote_id'], 'required'],
+            [['qc_communication_id', 'qc_communication_type', 'qc_quote_id', 'qc_created_by'], 'integer'],
             [['qc_created_dt'], 'safe'],
             [['qc_created_by'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['qc_created_by' => 'id']],
             [['qc_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => Quote::class, 'targetAttribute' => ['qc_quote_id' => 'id']],
@@ -76,7 +76,7 @@ class QuoteCommunication extends ActiveRecord
             'qc_communication_id' => 'Communication ID',
             'qc_quote_id' => 'Quote ID',
             'qc_created_dt' => 'Created Dt',
-            'qc_created_by' => 'Created By',
+            'qc_created_by' => 'Created By'
         ];
     }
 
