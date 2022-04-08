@@ -681,7 +681,7 @@ class QuoteController extends ApiBaseController
      * @apiParam {float}            [QuotePrice.taxes]          taxes
      * @apiParam {float}            [QuotePrice.mark_up]        mark_up
      * @apiParam {float}            [QuotePrice.extra_mark_up]  extra_mark_up
-     *
+     * @apiParam {float}            [QuotePrice.service_fee]    service_fee
      *
      * @apiParamExample {json} Request-Example:
      * {

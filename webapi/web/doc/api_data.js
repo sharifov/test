@@ -10623,6 +10623,13 @@ define({ "api": [
             "optional": true,
             "field": "QuotePrice.extra_mark_up",
             "description": "<p>extra_mark_up</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "float",
+            "optional": true,
+            "field": "QuotePrice.service_fee",
+            "description": "<p>service_fee</p>"
           }
         ]
       },
