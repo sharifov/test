@@ -4,25 +4,24 @@ namespace common\models;
 
 use common\components\ChartTools;
 use common\components\CommunicationService;
-use common\components\jobs\LeadPoorProcessingRemoverJob;
 use common\models\query\EmailQuery;
 use DateTime;
+use modules\featureFlag\FFlag;
 use src\behaviors\metric\MetricEmailCounterBehavior;
 use src\entities\cases\Cases;
 use src\helpers\app\AppHelper;
 use src\helpers\email\TextConvertingHelper;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
-use src\model\leadPoorProcessing\service\rules\LeadPoorProcessingNoAction;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
-use src\model\leadUserData\repository\LeadUserDataRepository;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
 use src\model\leadUserData\entity\LeadUserData;
 use src\model\leadUserData\entity\LeadUserDataDictionary;
+use src\model\leadUserData\repository\LeadUserDataRepository;
+use src\services\abtesting\email\EmailTemplateOfferABTestingService;
 use src\services\email\EmailService;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
-use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 
@@ -459,6 +458,13 @@ class Email extends \yii\db\ActiveRecord
                 $this->e_error_message = 'Communication error: ' . ($errorData['message'] ?: $request['error']);
                 $this->save();
                 $out['error'] = $this->e_error_message;
+            }
+            /** @fflag FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES, A/B testing for email offer templates enable/disable */
+            if ($this->e_status_id === self::STATUS_DONE && Yii::$app->ff->can(FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES)) {
+                EmailTemplateOfferABTestingService::incrementCounterByTemplateAndProjectIds(
+                    $this->e_template_type_id,
+                    $this->e_project_id
+                );
             }
             if ($this->e_id && $this->e_lead_id && LeadPoorProcessingService::checkEmailTemplate($tplType)) {
                 LeadPoorProcessingService::addLeadPoorProcessingRemoverJob(
