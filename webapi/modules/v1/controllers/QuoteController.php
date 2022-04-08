@@ -42,6 +42,7 @@ use src\repositories\NotFoundException;
 use src\repositories\project\ProjectRepository;
 use src\services\quote\addQuote\AddQuoteService;
 use src\services\quote\addQuote\TripService;
+use src\services\quote\quotePriceService\ClientQuotePriceService;
 use webapi\src\ApiCodeException;
 use webapi\src\behaviors\ApiUserProjectRelatedAccessBehavior;
 use webapi\src\Messages;
@@ -670,6 +671,7 @@ class QuoteController extends ApiBaseController
      * @apiParam {bool}             [Quote.created_by_seller]   created_by_seller
      * @apiParam {int}              [Quote.type_id]             type_id
      * @apiParam {object}           [Quote.prod_types[]]        Quote labels
+     * @apiParam {string{3}}        [Quote.currency_code]       Currency code
      * @apiParam {object}           QuotePrice[]                QuotePrice data array
      * @apiParam {string}           [QuotePrice.uid]            uid
      * @apiParam {string}           [QuotePrice.passenger_type] passenger_type
@@ -705,7 +707,8 @@ class QuoteController extends ApiBaseController
      *          "employee_name": "Barry",
      *          "created_by_seller": false,
      *          "type_id" : 0,
-     *          "prod_types" : ["SEP", "TOUR"]
+     *          "prod_types" : ["SEP", "TOUR"],
+     *          "currency_code" : "USD"
      *      },
      *      "QuotePrice": [
      *          {
@@ -814,6 +817,12 @@ class QuoteController extends ApiBaseController
                 $projectRelationsCount = count($projectRelationsIds);
                 $randomProjectIndex = $projectRelationsCount > 1 ? random_int(0, $projectRelationsCount - 1) : 0;
                 $quote->provider_project_id = $projectRelationsIds[$randomProjectIndex] ?? null;
+            }
+
+            if ($currencyCode = $quoteAttributes['currency_code'] ?? null) {
+                $clientQuotePriceService = new ClientQuotePriceService($quote);
+                $clientQuotePriceService->setClientCurrency($currencyCode)->calculateClientCurrencyRate();
+                $quote = $clientQuotePriceService->getQuote();
             }
 
             $quote->save();

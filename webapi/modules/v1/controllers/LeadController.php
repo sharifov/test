@@ -1355,12 +1355,23 @@ class LeadController extends ApiBaseController
                         "cl_marketing_country": null,
                         "cl_call_recording_disabled": 0
                     },
-                    "lead_data": [
+                   "lead_preferences": {
+                            "id": 155398,
+                            "lead_id": 371058,
+                            "notes": null,
+                            "pref_language": null,
+                            "pref_currency": "USD",
+                            "pref_airline": null,
+                            "number_stops": null,
+                            "clients_budget": null,
+                            "market_price": null
+                   },
+                   "lead_data": [
                         {
                             "key": "cross_system_xp",
                             "value": "example123"
                         }
-                    ]
+                   ]
                 }
             },
             "action": "v1/lead/get",
@@ -1430,6 +1441,7 @@ class LeadController extends ApiBaseController
             $response['emails'] = $lead->client->clientEmails;
             $response['phones'] = $lead->client->clientPhones;
             $response['client'] = $lead->client;
+            $response['lead_preferences'] = $lead->leadPreferences ?? null;
             ArrayHelper::setValue(
                 $response,
                 'lead_data',
