@@ -490,6 +490,15 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
      * @param int|null $creatorId
      * @param string|null $description
      */
+    public function inNew(?int $creatorId = null, ?string $description = null): void
+    {
+        $this->setStatusWithEvent(ProductQuoteStatus::NEW, $creatorId, $description);
+    }
+
+    /**
+     * @param int|null $creatorId
+     * @param string|null $description
+     */
     public function applied(?int $creatorId = null, ?string $description = null): void
     {
         $this->setStatusWithEvent(ProductQuoteStatus::APPLIED, $creatorId, $description);
