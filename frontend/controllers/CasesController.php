@@ -1097,7 +1097,7 @@ class CasesController extends FController
             try {
                 /** @var Cases $case */
                 $case = $this->casesCreateService->createByWeb($form, $user->id);
-                $case->addEventLog(CaseEventLog::CASE_CREATED, CasesStatus::STATUS_LIST[$case->cs_status] . ' Case created for category: ' . $case->category->cc_name . ' and by source: ' . CasesSourceType::getList()[$case->cs_source_type_id]);
+                $case->addEventLog(CaseEventLog::CASE_CREATED, CasesStatus::STATUS_LIST[$case->cs_status] . ' Case created for department: ' . $case->department->dep_name . ', category: ' . $case->category->cc_name . ', subject:' . $case->cs_subject);
                 $this->casesManageService->processing($case->cs_id, Yii::$app->user->id, Yii::$app->user->id);
                 Yii::$app->session->setFlash('success', 'Case created');
                 return $this->redirect(['view', 'gid' => $case->cs_gid]);
