@@ -32,7 +32,7 @@ class QuoteCommunicationController extends FController
     }
 
     /**
-     * Lists all EmailQuote models.
+     * Lists all QuoteCommunication models.
      *
      * @return string
      */
