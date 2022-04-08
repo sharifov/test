@@ -933,6 +933,28 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         $this->pq_status_id = $status;
     }
 
+    /**
+     * @param int|null $status
+     * @param int|null $creatorId
+     * @param string|null $description
+     */
+    public function setStatusWithEvent(?int $status, ?int $creatorId = null, ?string $description = null): void
+    {
+        $this->recordEvent(
+            new ProductQuoteStatusChangeEvent(
+                $this->pq_id,
+                $this->pq_status_id,
+                $status,
+                $description,
+                null,
+                $this->pq_owner_user_id,
+                $creatorId
+                )
+            );
+
+        $this->setStatus($status);
+    }
+
     public function prepareRemove(): void
     {
         $this->recordEvent(new ProductQuoteRecalculateChildrenProfitAmountEvent($this));
