@@ -2,9 +2,10 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+use common\models\QuoteCommunication;
 
 /* @var $this yii\web\View */
-/* @var $model src\model\emailQuote\entity\EmailQuote */
+/* @var $model QuoteCommunication */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
@@ -13,9 +14,11 @@ use yii\widgets\ActiveForm;
       <div class="col-md-2">
           <?php $form = ActiveForm::begin(); ?>
 
-          <?= $form->field($model, 'eq_email_id')->textInput() ?>
+          <?= $form->field($model, 'qc_communication_type')->textInput() ?>
 
-          <?= $form->field($model, 'eq_quote_id')->textInput() ?>
+          <?= $form->field($model, 'qc_communication_id')->textInput() ?>
+
+          <?= $form->field($model, 'qc_quote_id')->textInput() ?>
 
           <div class="form-group">
               <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
