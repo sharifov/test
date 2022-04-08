@@ -312,7 +312,7 @@ class EmailTemplateType extends \yii\db\ActiveRecord
      * @param int|null $dep_id
      * @return array
      */
-    public static function getEmailTemplateTypesList(bool $withHidden, ?int $dep_id, ?int $pr_id, ?Lead $lead): array
+    public static function getEmailTemplateTypesList(bool $withHidden, ?int $dep_id, ?int $pr_id, ?Lead $lead = null): array
     {
         $query = self::find()->select(['etp_id', 'etp_key', 'etp_name', 'etp_ignore_unsubscribe'])->orderBy(['etp_name' => SORT_ASC]);
         $query->joinWith(['emailTemplateTypeDepartments']);
