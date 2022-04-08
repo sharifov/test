@@ -492,19 +492,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
      */
     public function applied(?int $creatorId = null, ?string $description = null): void
     {
-        $this->recordEvent(
-            new ProductQuoteStatusChangeEvent(
-                    $this->pq_id,
-                    $this->pq_status_id,
-                    ProductQuoteStatus::APPLIED,
-                    $description,
-                    null,
-                    $this->pq_owner_user_id,
-                    $creatorId
-                )
-        );
-
-        $this->pq_status_id = ProductQuoteStatus::APPLIED;
+        $this->setStatusWithEvent(ProductQuoteStatus::APPLIED, $creatorId, $description);
     }
 
     /**
@@ -785,19 +773,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     */
     public function pending(?int $creatorId = null, ?string $description = null): void
     {
-        $this->recordEvent(
-            new ProductQuoteStatusChangeEvent(
-                $this->pq_id,
-                $this->pq_status_id,
-                ProductQuoteStatus::PENDING,
-                $description,
-                null,
-                $this->pq_owner_user_id,
-                $creatorId
-                )
-        );
-
-        $this->pq_status_id = ProductQuoteStatus::PENDING;
+        $this->setStatusWithEvent(ProductQuoteStatus::PENDING, $creatorId, $description);
     }
 
     /**
