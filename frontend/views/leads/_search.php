@@ -103,8 +103,25 @@ use frontend\extensions\DatePicker;
                         </div>
                     <!--</div>
                     <div class="row">-->
-                        <div class="col-md-1"><?php echo $form->field($model, 'projectId')->dropDownList($lists->getProjects(), ['prompt' => '-']) ?></div>
-                        <div class="col-md-1"><?php echo $form->field($model, 'source_id')->dropDownList($lists->getSources(true), ['prompt' => '-']) ?></div>
+
+                         <div class="col-md-1">
+                            <?php echo $form->field($model, 'projectId')->widget(Select2::class, [
+                                'data' => $lists->getProjects(),
+                                'size' => Select2::SMALL,
+                                'options' => ['placeholder' => 'Select Project', 'multiple' => false],
+                                'pluginOptions' => ['allowClear' => true],
+                            ]); ?>
+                        </div>
+
+                        <div class="col-md-1">
+                            <?php echo $form->field($model, 'source_id')->widget(Select2::class, [
+                                'data' => $lists->getSources(true),
+                                'size' => Select2::SMALL,
+                                'options' => ['placeholder' => 'Select SourceID', 'multiple' => false],
+                                'pluginOptions' => ['allowClear' => true],
+                            ]); ?>
+                        </div>
+
                     <!--</div>
                     <div class="row">-->
                         <div class="col-md-1">
