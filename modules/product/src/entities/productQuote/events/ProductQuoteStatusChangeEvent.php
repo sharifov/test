@@ -2,9 +2,11 @@
 
 namespace modules\product\src\entities\productQuote\events;
 
+use modules\product\src\entities\productQuote\ProductQuote;
+
 class ProductQuoteStatusChangeEvent implements ProductQuoteStatusChangeInterface
 {
-    public $productQuoteId;
+    public $quote;
     public $startStatusId;
     public $endStatusId;
     public $description;
@@ -12,9 +14,9 @@ class ProductQuoteStatusChangeEvent implements ProductQuoteStatusChangeInterface
     public $ownerId;
     public $creatorId;
 
-    public function __construct(int $productQuoteId, ?int $startStatusId, ?int $endStatusId, ?string $description, ?int $actionId, ?int $ownerId, ?int $creatorId)
+    public function __construct(ProductQuote $quote, ?int $startStatusId, ?int $endStatusId, ?string $description, ?int $actionId, ?int $ownerId, ?int $creatorId)
     {
-        $this->productQuoteId = $productQuoteId;
+        $this->quote = $quote;
         $this->startStatusId = $startStatusId;
         $this->endStatusId = $endStatusId;
         $this->description = $description;
@@ -25,7 +27,7 @@ class ProductQuoteStatusChangeEvent implements ProductQuoteStatusChangeInterface
 
     public function getId(): int
     {
-        return $this->productQuoteId;
+        return $this->quote->pq_id;
     }
 
     public function getStartStatus(): ?int
