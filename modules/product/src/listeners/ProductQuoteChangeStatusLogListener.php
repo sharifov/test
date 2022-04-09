@@ -2,10 +2,10 @@
 
 namespace modules\product\src\listeners;
 
-use modules\product\src\entities\productQuote\ProductQuoteChangeStatusInterface;
 use modules\product\src\entities\productQuoteStatusLog\CreateDto;
 use Yii;
 use modules\product\src\services\ProductQuoteStatusLogService;
+use modules\product\src\entities\productQuote\events\ProductQuoteStatusChangeInterface;
 
 /**
  * Class ProductQuoteChangeStatusLogListener
@@ -21,7 +21,7 @@ class ProductQuoteChangeStatusLogListener
         $this->logger = $logger;
     }
 
-    public function handle(ProductQuoteChangeStatusInterface $event): void
+    public function handle(ProductQuoteStatusChangeInterface $event): void
     {
         try {
             $this->logger->log(new CreateDto(
