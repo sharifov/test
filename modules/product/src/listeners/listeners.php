@@ -23,7 +23,6 @@ use modules\product\src\listeners\productQuote\ProductQuoteRecalculateChildrenPr
 use modules\product\src\listeners\productQuote\ProductQuoteRecalculateProfitAmountListener;
 use modules\product\src\listeners\productQuote\ProductQuoteUpdateLeadOfferListener;
 use modules\product\src\listeners\productQuote\ProductQuoteUpdateLeadOrderListener;
-use modules\product\src\listeners\ProductQuoteChangeStatusLogListener;
 use modules\product\src\entities\productQuote\events\ProductQuoteBookedEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteCanceledEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteErrorEvent;
@@ -41,7 +40,7 @@ use modules\product\src\listeners\productQuote\ProductQuoteStatusChangeEventList
 
 return [
     ProductQuoteCloneCreatedEvent::class => [
-        ProductQuoteChangeStatusLogListener::class,
+        ProductQuoteStatusChangeEventListener::class,
         ProductQuoteCloneListener::class,
     ],
     ProductQuoteReplaceEvent::class => [
