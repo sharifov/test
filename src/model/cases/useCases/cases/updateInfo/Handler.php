@@ -23,15 +23,7 @@ class Handler
     {
         $case = $this->repository->find($command->caseId);
 
-        if (($case->cs_category_id != $command->categoryId) && $case->category) {
-            $case->addEventLog(CaseEventLog::CASE_CATEGORY_CHANGE, 'Case category changed to ' . $case->category->cc_name . ' By: ' . ($command->username ?? 'System.'));
-        }
-
-        if (($case->cs_dep_id != $command->depId) && $case->department) {
-            $case->addEventLog(CaseEventLog::CASE_DEPARTMENT_CHANGE, 'Case department changed to ' . $case->department->dep_name . ' By: ' . ($command->username ?? 'System.'));
-        }
-
-        $case->updateInfo($command->depId, $command->categoryId, $command->subject, $command->description, $command->orderUid);
+        $case->updateInfo($command->depId, $command->categoryId, $command->subject, $command->description, $command->orderUid, $command->username ?? 'System');
 
         $this->repository->save($case);
     }
