@@ -592,7 +592,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         $quote->pq_product_id = $dto->productId;
         $quote->pq_order_id = $dto->orderId;
         $quote->pq_description = $dto->description;
-        $quote->pq_status_id = ProductQuoteStatus::NEW;
+        $quote->setStatusWithEvent(ProductQuoteStatus::NEW, null, 'Created new product quote');
         $quote->pq_price = $dto->price;
         $quote->pq_origin_price = $dto->originPrice;
         $quote->pq_client_price = $dto->clientPrice;
@@ -648,7 +648,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         $copy->pq_gid = self::generateGid();
         $copy->pq_product_id = $quote->pq_product_id;
         $copy->pq_order_id = $quote->pq_order_id;
-        $copy->pq_status_id = ProductQuoteStatus::NEW;
+        $copy->setStatusWithEvent(ProductQuoteStatus::NEW, null, 'Product quote was copied');
         $copy->pq_owner_user_id = $ownerId;
         $copy->pq_created_user_id = $creatorId;
         return $copy;
@@ -899,7 +899,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     {
         $this->recordEvent(
             new ProductQuoteExpiredEvent($this->pq_id, $this->pq_status_id, $description, $this->pq_owner_user_id, $creatorId)
-        );
+        ); //TODO: check if its right. log status expired its not right, but other? (ProductQuoteUpdateLeadOrderListener, ProductQuoteUpdateLeadOfferListener)
         if ($this->pq_status_id !== ProductQuoteStatus::SOLD) {
             $this->setStatus(ProductQuoteStatus::SOLD);
         }
@@ -927,7 +927,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     {
         $this->recordEvent(
             new ProductQuoteStatusChangeEvent(
-                $this->pq_id,
+                $this,
                 $this->pq_status_id,
                 $status,
                 $description,
