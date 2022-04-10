@@ -20,6 +20,30 @@ class ClientQuotePriceService
         $this->quote = $quote;
     }
 
+    public function setClientCurrency(?string $currencyCode, bool $isSetDefault = true): ClientQuotePriceService
+    {
+        if ($isSetDefault) {
+            $this->quote->q_client_currency = $currencyCode ?: Currency::getDefaultCurrencyCode();
+        } else {
+            $this->quote->q_client_currency = $currencyCode;
+        }
+        return $this;
+    }
+
+    public function calculateClientCurrencyRate(): ClientQuotePriceService
+    {
+        if ($currencyCode = $this->quote->q_client_currency) {
+            $this->quote->q_client_currency_rate = Currency::getBaseRateByCurrencyCode($currencyCode);
+        }
+        return $this;
+    }
+
+    public function setClientCurrencyRate(?float $rate): ClientQuotePriceService
+    {
+        $this->quote->q_client_currency_rate = $rate;
+        return $this;
+    }
+
     public function getClientQuotePricePassengersData(): array
     {
         $priceData = $this->getClientPricesData();
@@ -132,5 +156,10 @@ class ClientQuotePriceService
         }
 
         return 0;
+    }
+
+    public function getQuote(): Quote
+    {
+        return $this->quote;
     }
 }

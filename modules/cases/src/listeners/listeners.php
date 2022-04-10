@@ -22,9 +22,10 @@ use src\listeners\cases\CasesAutoProcessingStatusEventListener;
 use src\listeners\cases\CasesErrorStatusEventLogListener;
 use src\listeners\cases\CasesSwitchStatusAwaitingtoSolvedListener;
 use src\listeners\cases\CasesSwitchStatusAwaitingtoErrorListener;
+use src\listeners\cases\CasesCreateEventLogListener;
 
 return [
-    CasesCreatedEvent::class => [],
+    CasesCreatedEvent::class => [CasesCreateEventLogListener::class],
     CasesPendingStatusEvent::class => [CasesPendingStatusEventLogListener::class],
     CasesProcessingStatusEvent::class => [CasesProcessingStatusEventLogListener::class, CasesProcessingStatusEventNotificationsListener::class],
     CasesFollowUpStatusEvent::class => [CasesFollowUpStatusEventLogListener::class],

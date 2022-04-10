@@ -47,7 +47,7 @@ $c_type_id = $comForm->c_type_id;
 
 $pjaxContainerId = 'pjax-lead-communication-log';
 $unsubscribedEmails = @json_encode($unsubscribedEmails);
-$emailTemplateTypes = EmailTemplateType::getEmailTemplateTypesList(false, \common\models\Department::DEPARTMENT_SALES, $lead->project_id);
+$emailTemplateTypes = EmailTemplateType::getEmailTemplateTypesList(false, \common\models\Department::DEPARTMENT_SALES, $lead->project_id, $lead);
 $emailTemplateTypes = @json_encode($emailTemplateTypes);
 
 $abacDto = new EmailPreviewDto($previewEmailForm->e_email_tpl_id, null, null, null, $lead, null);
@@ -400,7 +400,6 @@ $canShowEmailData = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_
                                     </div>
 
                                     <div class="col-sm-3 form-group message-field-email" id="email-template-group" style="display: none;">
-                                        <?php //= $form->field($comForm, 'c_email_tpl_id')->dropDownList(\common\models\EmailTemplateType::getList(false, \common\models\Department::DEPARTMENT_SALES), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_email_tpl_id'])?>
                                         <?= $communicationActiveForm->field($comForm, 'c_email_tpl_key')->dropDownList([], ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_email_tpl_key']) ?>
                                     </div>
 

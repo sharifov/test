@@ -66,6 +66,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     'pqc_is_automate:booleanByLabel',
                     'pqc_refund_allowed:booleanByLabel',
+                    'pqc_created_user_id:username',
                     'pqc_created_dt:byUserDateTime',
                     'pqc_updated_dt:byUserDateTime',
                     'pqc_decision_dt:byUserDateTime',
