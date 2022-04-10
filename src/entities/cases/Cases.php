@@ -20,6 +20,7 @@ use src\entities\cases\events\CasesAssignLeadEvent;
 use src\entities\cases\events\CasesAutoProcessingStatusEvent;
 use src\entities\cases\events\CasesAwaitingStatusEvent;
 use src\entities\cases\events\CasesCreatedEvent;
+use src\entities\cases\events\CasesUpdatedEvent;
 use src\entities\cases\events\CasesErrorStatusEvent;
 use src\entities\cases\events\CasesFollowUpStatusEvent;
 use src\entities\cases\events\CasesNewStatusEvent;
@@ -577,19 +578,7 @@ class Cases extends ActiveRecord implements Objectable
         $this->cs_subject = $subject;
         $this->cs_description = $description;
         $this->cs_order_uid = $orderUid;
-
-        $department = $this->cs_dep_id ? ', department: ' . $this->department->dep_name : '';
-        $category = $this->cs_category_id ? ', category: ' . $this->category->cc_name : '';
-        $description = 'Case updated by: ' . $username . $department . $category . ', subject: ' . $this->cs_subject . ', Booking ID: ' . $this->cs_order_uid;
-        $data = [
-            'department_key' => $this->cs_dep_id,
-            'category_key' => $this->cs_category_id,
-            'subject' => $this->cs_subject,
-            'description' => $this->cs_description,
-            'case_order_uid' => $this->cs_order_uid,
-            'user_id' => $this->cs_user_id,
-        ];
-        self::addEventLog(CaseEventLog::CASE_INFO_UPDATE, $description, $data);
+        $this->recordEvent(new CasesUpdatedEvent($this, $username));
     }
 
     /**
