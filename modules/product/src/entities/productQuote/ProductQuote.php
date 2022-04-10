@@ -592,7 +592,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         $quote->pq_product_id = $dto->productId;
         $quote->pq_order_id = $dto->orderId;
         $quote->pq_description = $dto->description;
-        $quote->setStatusWithEvent(ProductQuoteStatus::NEW, null, 'Created new product quote');
+        $quote->new($dto->createdUserId, 'Created new product quote');
         $quote->pq_price = $dto->price;
         $quote->pq_origin_price = $dto->originPrice;
         $quote->pq_client_price = $dto->clientPrice;
@@ -648,7 +648,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         $copy->pq_gid = self::generateGid();
         $copy->pq_product_id = $quote->pq_product_id;
         $copy->pq_order_id = $quote->pq_order_id;
-        $copy->setStatusWithEvent(ProductQuoteStatus::NEW, null, 'Product quote was copied');
+        $copy->new($creatorId, 'Product quote was copied');
         $copy->pq_owner_user_id = $ownerId;
         $copy->pq_created_user_id = $creatorId;
         return $copy;
@@ -661,7 +661,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
 
         $clone->pq_id = null;
         $clone->pq_gid = self::generateGid();
-        $clone->pq_status_id = ProductQuoteStatus::NEW;
+        $clone->new(null, 'Replace');
         $clone->pq_clone_id = $quote->pq_id;
         $clone->recordEvent(new ProductQuoteReplaceEvent($clone, $quote->pq_id));
         return $clone;
