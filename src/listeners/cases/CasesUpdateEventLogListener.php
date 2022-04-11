@@ -14,7 +14,8 @@ class CasesUpdateEventLogListener
         try {
             $department = $event->case->cs_dep_id ? ', department: ' . $event->case->department->dep_name : '';
             $category = $event->case->cs_category_id ? ', category: ' . $event->case->category->cc_name : '';
-            $description = 'Case updated by: ' . $event->username . $department . $category . ', subject: ' . $event->case->cs_subject . ', Booking ID: ' . $event->case->cs_order_uid;
+            $username = $event->username ?? 'System';
+            $description = 'Case updated by: ' . $username . $department . $category . ', subject: ' . $event->case->cs_subject . ', Booking ID: ' . $event->case->cs_order_uid;
             $data = [
                 'department_key' => $event->case->cs_dep_id,
                 'category_key' => $event->case->cs_category_id,

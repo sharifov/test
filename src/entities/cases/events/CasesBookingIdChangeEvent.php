@@ -6,22 +6,22 @@ use src\entities\cases\Cases;
 
 /**
  * Class CasesBookingIdChangeEvent
- * @property Cases $cases
- * @property string $username
+ * @property Cases $case
+ * @property int $userId
  */
 class CasesBookingIdChangeEvent
 {
-    public $cases;
-    public $username;
+    public $case;
+    public $userId;
 
     /**
      * CasesBookingIdChangeEvent constructor.
-     * @param Cases $cases
-     * @param string $username
+     * @param Cases $case
+     * @param int $userId
      */
-    public function __construct(Cases $cases, string $username)
+    public function __construct(Cases $case, int $userId)
     {
-        $this->cases  = $cases;
-        $this->username = $username;
+        $this->case  = $case;
+        $this->userId = $userId;
     }
 }
