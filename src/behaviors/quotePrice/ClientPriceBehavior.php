@@ -2,6 +2,7 @@
 
 namespace src\behaviors\quotePrice;
 
+use common\models\Quote;
 use common\models\QuotePrice;
 use src\helpers\app\AppHelper;
 use src\services\CurrencyHelper;
@@ -30,6 +31,10 @@ class ClientPriceBehavior extends \yii\base\Behavior
             if (!$this->owner instanceof QuotePrice) {
                 throw new \RuntimeException('Owner class must by instanceof "QuotePrice"');
             }
+            if (!$this->owner->quote instanceof Quote) {
+                throw new \RuntimeException('Class must by instanceof "Quote"');
+            }
+
             if ($this->owner->quote->isClientCurrencyDefault()) {
                 $this->owner->qp_client_net = $this->owner->qp_client_net ?: $this->owner->net;
                 $this->owner->qp_client_fare = $this->owner->qp_client_fare ?: $this->owner->fare;
