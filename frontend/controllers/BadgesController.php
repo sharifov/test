@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\search\LeadQcallSearch;
+use modules\featureFlag\FFlag;
 use src\helpers\app\AppHelper;
 use src\helpers\ErrorsToStringHelper;
 use src\repositories\lead\LeadBadgesRepository;
@@ -83,6 +84,11 @@ class BadgesController extends FController
             $result = ['message' => '', 'status' => 0, 'data' => []];
 
             try {
+                /** @fflag FFlag::FF_KEY_BADGE_COUNT_ENABLE, Badge Count Enable/Disable */
+                if (!Yii::$app->ff->can(FFlag::FF_KEY_BADGE_COUNT_ENABLE)) {
+                    throw new \RuntimeException('Feature Flag (' . FFlag::FF_KEY_BADGE_COUNT_ENABLE . ') is disabled');
+                }
+
                 if (!$badgesCollection = Yii::$app->request->post('badgesCollection')) {
                     throw new \RuntimeException('Param badgesCollection is required');
                 }

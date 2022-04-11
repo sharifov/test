@@ -12,6 +12,7 @@ class FFlag
     public const FF_KEY_ADD_AUTO_QUOTES = 'autoAddQuotes';
     public const FF_KEY_LPP_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT = 'lppToClosedQueueTransferringDaysCount';
     public const FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES = 'aBTestingEmailOfferTemplates';
+    public const FF_KEY_BADGE_COUNT_ENABLE = 'badgeCountEnable';
 
     public const FF_KEY_LIST = [
         self::FF_KEY_LPP_ENABLE => self::FF_KEY_LPP_ENABLE,
@@ -20,6 +21,7 @@ class FFlag
         self::FF_KEY_LPP_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT => self::FF_KEY_LPP_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT,
         self::FF_KEY_ADD_AUTO_QUOTES => self::FF_KEY_ADD_AUTO_QUOTES,
         self::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES => self::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES,
+        self::FF_KEY_BADGE_COUNT_ENABLE => self::FF_KEY_BADGE_COUNT_ENABLE,
     ];
 
     public const FF_CATEGORY_LEAD = 'lead';
