@@ -15,8 +15,7 @@ class CasesUpdatedInfoEventLogListener
         try {
             $department = $event->case->cs_dep_id ? ', department: ' . $event->case->department->dep_name : '';
             $category = $event->case->cs_category_id ? ', category: ' . $event->case->category->cc_name : '';
-            $user = Employee::findOne($event->userId);
-            $username = $user ? $user->username : 'System';
+            $username = $event->userId ? Employee::findOne($event->userId)->username : 'System';
             $description = 'Case updated by: ' . $username . $department . $category . ', subject: ' . $event->case->cs_subject . ', Booking ID: ' . $event->case->cs_order_uid;
             $data = [
                 'department_key' => $event->case->cs_dep_id,

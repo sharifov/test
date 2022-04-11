@@ -16,8 +16,9 @@ class CasesUpdatedInfoEvent
 
     /**
      * @param Cases $case
+     * @param int $userId
      */
-    public function __construct(Cases $case, int $userId)
+    public function __construct(Cases $case, ?int $userId)
     {
         $this->case = $case;
         $this->userId = $userId;

@@ -13,8 +13,7 @@ class CasesBookingIdChangeEventLogListener
     public function handle(CasesBookingIdChangeEvent $event): void
     {
         try {
-            $user = Employee::findOne($event->userId);
-            $username = $user ? $user->username : 'System';
+            $username = $event->userId ? Employee::findOne($event->userId)->username : 'System';
             $description = 'Case BookingId changed to: ' . $event->case->cs_order_uid . ' by: ' . $username;
             $event->case->addEventLog(CaseEventLog::CASE_BOOKINGID_CHANGE, $description);
         } catch (\Throwable $e) {
