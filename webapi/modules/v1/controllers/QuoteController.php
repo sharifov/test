@@ -819,11 +819,10 @@ class QuoteController extends ApiBaseController
                 $quote->provider_project_id = $projectRelationsIds[$randomProjectIndex] ?? null;
             }
 
-            if ($currencyCode = $quoteAttributes['currency_code'] ?? null) {
-                $clientQuotePriceService = new ClientQuotePriceService($quote);
-                $clientQuotePriceService->setClientCurrency($currencyCode)->calculateClientCurrencyRate();
-                $quote = $clientQuotePriceService->getQuote();
-            }
+            $currencyCode = $quoteAttributes['currency_code'] ?? null;
+            $clientQuotePriceService = new ClientQuotePriceService($quote);
+            $clientQuotePriceService->setClientCurrency($currencyCode)->calculateClientCurrencyRate();
+            $quote = $clientQuotePriceService->getQuote();
 
             $quote->save();
             if ($quote->hasErrors()) {

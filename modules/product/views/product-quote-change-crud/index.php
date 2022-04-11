@@ -37,6 +37,12 @@ $this->params['breadcrumbs'][] = $this->title;
             'pqc_gid',
             [
                 'class' => UserSelect2Column::class,
+                'attribute' => 'pqc_created_user_id',
+                'relation' => 'pqcCreatedUser',
+                'placeholder' => 'Created User'
+            ],
+            [
+                'class' => UserSelect2Column::class,
                 'attribute' => 'pqc_decision_user',
                 'relation' => 'pqcDecisionUser',
                 'placeholder' => 'Decision User'
