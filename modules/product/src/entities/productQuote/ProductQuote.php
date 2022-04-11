@@ -34,6 +34,7 @@ use modules\product\src\entities\productQuote\events\ProductQuoteInProgressEvent
 use modules\product\src\entities\productQuote\events\ProductQuoteCloneCreatedEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteRecalculateChildrenProfitAmountEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteRecalculateProfitAmountEvent;
+use modules\product\src\entities\productQuote\events\ProductQuoteSoldEvent;
 use modules\product\src\entities\productQuote\serializer\ProductQuoteSerializer;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\product\Product;
@@ -898,11 +899,9 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function sold(?int $creatorId = null, ?string $description = null): void
     {
         $this->recordEvent(
-            new ProductQuoteExpiredEvent($this->pq_id, $this->pq_status_id, $description, $this->pq_owner_user_id, $creatorId)
-        ); //TODO: check if its right. log status expired its not right, but other? (ProductQuoteUpdateLeadOrderListener, ProductQuoteUpdateLeadOfferListener)
-        if ($this->pq_status_id !== ProductQuoteStatus::SOLD) {
-            $this->setStatus(ProductQuoteStatus::SOLD);
-        }
+            new ProductQuoteSoldEvent($this->pq_id)
+        );
+        $this->setStatusWithEvent(ProductQuoteStatus::SOLD, $creatorId, $description);
     }
 
     /**
@@ -925,19 +924,21 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
      */
     public function setStatusWithEvent(?int $status, ?int $creatorId = null, ?string $description = null): void
     {
-        $this->recordEvent(
-            new ProductQuoteStatusChangeEvent(
-                $this,
-                $this->pq_status_id,
-                $status,
-                $description,
-                null,
-                $this->pq_owner_user_id,
-                $creatorId
-                )
-            );
+        if($this->pq_status_id !== $status) {
+            $this->recordEvent(
+                new ProductQuoteStatusChangeEvent(
+                    $this,
+                    $this->pq_status_id,
+                    $status,
+                    $description,
+                    null,
+                    $this->pq_owner_user_id,
+                    $creatorId
+                    )
+                );  //TODO: maybe need check if status may be changed then trigger event
 
-        $this->setStatus($status);
+            $this->setStatus($status);
+        }
     }
 
     public function prepareRemove(): void
