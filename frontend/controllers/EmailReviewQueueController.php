@@ -156,12 +156,16 @@ class EmailReviewQueueController extends FController
                         }
 
                         if ($email->e_lead_id) {
-                            $emailQuotes = EmailQuoteQuery::getGroupedByEmailId($email->e_id);
-                            foreach ($emailQuotes as $emailQuote) {
-                                if ($quote = $emailQuote->quote) {
-                                    $quote->setStatusSend();
-                                    $this->quoteRepository->save($quote);
-                                }
+                            $quoteIdSubquery = (new Query())
+                                ->select(['qc_quote_id'])
+                                ->from(['qc' => QuoteCommunication::tableName()])
+                                ->where('qc_communication_type=:communication_type', [':communication_type' => CommunicationForm::TYPE_EMAIL])
+                                ->distinct();
+                            /** @var Quote[] $quotes */
+                            $quotes = Quote::find()->where(['IN', 'id', $quoteIdSubquery])->all();
+                            foreach ($quotes as $quote) {
+                                $quote->setStatusSend();
+                                $this->quoteRepository->save($quote);
                             }
                         }
 
