@@ -156,6 +156,9 @@ class EmailReviewQueueController extends FController
                         }
 
                         if ($email->e_lead_id) {
+                            /*
+                             * TODO: The similar logic exist in `\frontend\controllers\LeadController::actionView`. Need to shrink code duplications.
+                             */
                             $quoteIdSubquery = (new Query())
                                 ->select(['qc_quote_id'])
                                 ->from(['qc' => QuoteCommunication::tableName()])

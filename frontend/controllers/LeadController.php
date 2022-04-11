@@ -551,6 +551,9 @@ class LeadController extends FController
                                     }
                                 }
 
+                                /*
+                                * TODO: The similar logic exist in `\frontend\controllers\EmailReviewQueueController::actionSend`. Need to shrink code duplications.
+                                 * */
                                 /** @var string[] $quoteIds */
                                 $quoteIds = Json::decode($previewEmailForm->e_quote_list);
                                 /** @var Quote[] $quoteObjects */
