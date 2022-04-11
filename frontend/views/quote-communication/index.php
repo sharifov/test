@@ -42,7 +42,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'qc_communication_type',
                 'filter' => CommunicationForm::TYPE_LIST,
                 'value' => static function (QuoteCommunication $model): string {
-                    return (isset(CommunicationForm::TYPE_LIST[$model->qc_communication_type])) ? CommunicationForm::TYPE_LIST[$model->qc_communication_type] : 'Unknown communication type';
+                    return (isset(CommunicationForm::TYPE_LIST[$model->qc_communication_type]))
+                        ? CommunicationForm::TYPE_LIST[$model->qc_communication_type]
+                        : 'Unknown communication type';
                 },
                 'format' => 'raw',
             ],
@@ -53,16 +55,22 @@ $this->params['breadcrumbs'][] = $this->title;
                         case CommunicationForm::TYPE_EMAIL:
                             return Html::a('<i class="fa fa-link"></i> ' . $model->qc_communication_id, ['/email/view', 'id' => $model->qc_communication_id], ['target' => '_blank', 'data-pjax' => 0]);
                         case CommunicationForm::TYPE_SMS:
-                            return 'NEED TO ADD LINK';
+                            return Html::a('<i class="fa fa-link"></i> ' . $model->qc_communication_id, ['/sms/view', 'id' => $model->qc_communication_id], ['target' => '_blank', 'data-pjax' => 0]);
                         case CommunicationForm::TYPE_CHAT:
-                            return $model->qc_communication_id;
+                            return Html::a('<i class="fa fa-link"></i> ' . $model->qc_communication_id, ['/client-chat-crud/view', 'id' => $model->qc_communication_id], ['target' => '_blank', 'data-pjax' => 0]);
                         default:
-                            return $model->qc_communication_id;
+                            return 'Unknown communication type';
                     }
                 },
                 'format' => 'raw',
             ],
-            'qc_quote_id',
+            [
+                'attribute' => 'qc_quote_id',
+                'value' => function (QuoteCommunication $model) {
+                    return Html::a('<i class="fa fa-link"></i> ' . $model->qc_quote_id, ['/quotes/view', 'id' => $model->qc_quote_id], ['target' => '_blank', 'data-pjax' => 0]);
+                },
+                'format' => 'raw'
+            ],
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'qc_created_dt',
