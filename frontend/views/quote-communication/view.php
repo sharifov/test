@@ -2,6 +2,8 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
+use frontend\models\CommunicationForm;
+use common\models\QuoteCommunication;
 
 /**
  * @var $this yii\web\View
@@ -32,9 +34,39 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'attributes' => [
             'qc_id',
-            'qc_communication_type',
-            'qc_communication_id',
-            'qc_quote_id',
+            [
+                'attribute' => 'qc_communication_type',
+                'filter' => CommunicationForm::TYPE_LIST,
+                'value' => static function (QuoteCommunication $model): string {
+                    return (isset(CommunicationForm::TYPE_LIST[$model->qc_communication_type]))
+                        ? CommunicationForm::TYPE_LIST[$model->qc_communication_type]
+                        : 'Unknown communication type';
+                },
+                'format' => 'raw',
+            ],
+            [
+                'attribute' => 'qc_communication_id',
+                'value' => static function (QuoteCommunication $model): string {
+                    switch ($model->qc_communication_type) {
+                        case CommunicationForm::TYPE_EMAIL:
+                            return Html::a('<i class="fa fa-link"></i> ' . $model->qc_communication_id, ['/email/view', 'id' => $model->qc_communication_id], ['target' => '_blank', 'data-pjax' => 0]);
+                        case CommunicationForm::TYPE_SMS:
+                            return Html::a('<i class="fa fa-link"></i> ' . $model->qc_communication_id, ['/sms/view', 'id' => $model->qc_communication_id], ['target' => '_blank', 'data-pjax' => 0]);
+                        case CommunicationForm::TYPE_CHAT:
+                            return Html::a('<i class="fa fa-link"></i> ' . $model->qc_communication_id, ['/client-chat-crud/view', 'id' => $model->qc_communication_id], ['target' => '_blank', 'data-pjax' => 0]);
+                        default:
+                            return 'Unknown communication type';
+                    }
+                },
+                'format' => 'raw',
+            ],
+            [
+                'attribute' => 'qc_quote_id',
+                'value' => function (QuoteCommunication $model) {
+                    return Html::a('<i class="fa fa-link"></i> ' . $model->qc_quote_id, ['/quotes/view', 'id' => $model->qc_quote_id], ['target' => '_blank', 'data-pjax' => 0]);
+                },
+                'format' => 'raw'
+            ],
             'qc_created_dt:byUserDateTime',
             'qc_created_by:username',
         ],
