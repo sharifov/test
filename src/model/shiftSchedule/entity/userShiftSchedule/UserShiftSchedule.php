@@ -246,6 +246,4 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
     {
         return $this->shift ? $this->shift->sh_title : '-';
     }
-
-
 }
