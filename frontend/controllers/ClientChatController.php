@@ -84,6 +84,7 @@ use src\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use src\model\user\entity\userConnectionActiveChat\UserConnectionActiveChat;
 use src\model\userClientChatData\entity\UserClientChatData;
 use src\model\userClientChatData\service\UserClientChatDataService;
+use src\quoteCommunication\Repo;
 use src\repositories\clientChatChannel\ClientChatChannelRepository;
 use src\repositories\clientChatStatusLogRepository\ClientChatStatusLogRepository;
 use src\repositories\clientChatUserAccessRepository\ClientChatUserAccessRepository;
@@ -310,6 +311,13 @@ class ClientChatController extends FController
         ]);
     }
 
+    /**
+     * @param int $id
+     * @return string
+     * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
+     * @throws UnprocessableEntityHttpException
+     */
     public function actionDetail(int $id): string
     {
         $employee = Auth::user();
@@ -404,6 +412,12 @@ class ClientChatController extends FController
         return '<br>' . $placeName . ' - Used memory: ' . round($memory, 2) . $name[$i];
     }
 
+    /**
+     * @param int $id
+     * @return string
+     * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
+     */
     public function actionRoom(int $id): string
     {
         if (!$clientChat = ClientChat::findOne($id)) {
@@ -1609,6 +1623,10 @@ class ClientChatController extends FController
         ]);
     }
 
+    /**
+     * @return Response
+     * @throws \yii\httpclient\Exception
+     */
     public function actionSendQuote(): Response
     {
         $out = ['error' => false, 'message' => '', 'warning' => ''];
@@ -1637,15 +1655,16 @@ class ClientChatController extends FController
             Yii::$app->chatBot->sendOffer($message, $headers);
             $this->removeQuoteCaptures(Auth::id(), $clientChat->cch_id, $lead->id);
 
-            $quoteList = ArrayHelper::getColumn($captures, 'quoteId');
-            foreach ($quoteList as $quoteId) {
-                $quote = Quote::findOne($quoteId);
-                if ($quote) {
-                    $quote->setStatusSend();
-                    if (!$this->quoteRepository->save($quote)) {
-                        Yii::error($quote->errors, 'ClientChatController::sendQuote:Quote:save');
-                        $out['warning'] = 'Update status of Quote(' . $quoteId . ') failed';
-                    }
+            $quoteIds = ArrayHelper::getColumn($captures, 'quoteId');
+            /** @var Quote[] $quoteList */
+            $quoteList = Quote::find()->where(['IN', 'id', $quoteIds])->all();
+            foreach ($quoteList as $quote) {
+                $quote->setStatusSend();
+                if ($this->quoteRepository->save($quote)) {
+                    Repo::createForChat($chatId, $quote->id);
+                } else {
+                    Yii::error($quote->errors, 'ClientChatController::sendQuote:Quote:save');
+                    $out['warning'] = "Update status of Quote({$quote->id}) failed";
                 }
             }
         } catch (\DomainException $e) {

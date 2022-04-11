@@ -26,4 +26,19 @@ class Repo
         ]);
         return $model->save();
     }
+
+    /**
+     * @param int $chatId
+     * @param int $quoteId
+     * @return bool
+     */
+    public static function createForChat(int $chatId, int $quoteId): bool
+    {
+        $model = new QuoteCommunication([
+            'qc_communication_type' => CommunicationForm::TYPE_CHAT,
+            'qc_communication_id' => $chatId,
+            'qc_quote_id' => $quoteId
+        ]);
+        return $model->save();
+    }
 }
