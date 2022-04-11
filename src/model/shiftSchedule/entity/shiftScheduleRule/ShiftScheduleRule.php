@@ -10,6 +10,8 @@ use src\model\shiftSchedule\entity\userShiftSchedule\UserShiftSchedule;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\db\BaseActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "shift_schedule_rule".
@@ -37,7 +39,7 @@ use yii\db\ActiveRecord;
  * @property Employee $updatedUser
  * @property UserShiftSchedule[] $userShiftSchedules
  */
-class ShiftScheduleRule extends \yii\db\ActiveRecord
+class ShiftScheduleRule extends ActiveRecord
 {
     private const MAX_VALUE_INT = 2147483647;
 
@@ -50,16 +52,16 @@ class ShiftScheduleRule extends \yii\db\ActiveRecord
             'timestamp' => [
                 'class' => TimestampBehavior::class,
                 'attributes' => [
-                    ActiveRecord::EVENT_BEFORE_INSERT => ['ssr_created_dt', 'ssr_updated_dt'],
-                    ActiveRecord::EVENT_BEFORE_UPDATE => ['ssr_updated_dt'],
+                    BaseActiveRecord::EVENT_BEFORE_INSERT => ['ssr_created_dt', 'ssr_updated_dt'],
+                    BaseActiveRecord::EVENT_BEFORE_UPDATE => ['ssr_updated_dt'],
                 ],
                 'value' => date('Y-m-d H:i:s'),
             ],
             'user' => [
                 'class' => BlameableBehavior::class,
                 'attributes' => [
-                    ActiveRecord::EVENT_BEFORE_INSERT => ['ssr_created_user_id'],
-                    ActiveRecord::EVENT_BEFORE_UPDATE => ['ssr_updated_user_id'],
+                    BaseActiveRecord::EVENT_BEFORE_INSERT => ['ssr_created_user_id'],
+                    BaseActiveRecord::EVENT_BEFORE_UPDATE => ['ssr_updated_user_id'],
                 ]
             ],
         ];
@@ -78,7 +80,8 @@ class ShiftScheduleRule extends \yii\db\ActiveRecord
 
             ['ssr_shift_id', 'required'],
             ['ssr_shift_id', 'integer'],
-            ['ssr_shift_id', 'exist', 'skipOnError' => true, 'targetClass' => Shift::class, 'targetAttribute' => ['ssr_shift_id' => 'sh_id']],
+            ['ssr_shift_id', 'exist', 'skipOnError' => true,
+                'targetClass' => Shift::class, 'targetAttribute' => ['ssr_shift_id' => 'sh_id']],
 
             ['ssr_start_time_loc', 'required'],
             [['ssr_start_time_loc', 'ssr_end_time_loc'], 'safe'],
@@ -90,7 +93,8 @@ class ShiftScheduleRule extends \yii\db\ActiveRecord
 
             ['ssr_title', 'string', 'max' => 255],
 
-            [['ssr_title', 'ssr_timezone', 'ssr_cron_expression', 'ssr_cron_expression_exclude'], 'default', 'value' => null],
+            [['ssr_title', 'ssr_timezone', 'ssr_cron_expression', 'ssr_cron_expression_exclude'],
+                'default', 'value' => null],
 
             ['ssr_created_dt', 'safe'],
             ['ssr_updated_dt', 'safe'],
@@ -169,5 +173,19 @@ class ShiftScheduleRule extends \yii\db\ActiveRecord
             return false;
         }
         return true;
+    }
+
+    /**
+     * @param bool $enabled
+     * @return array
+     */
+    public static function getList(?bool $enabled = null): array
+    {
+        $query = self::find()->orderBy(['ssr_title' => SORT_ASC]);
+        if ($enabled !== null) {
+            $query->andWhere(['ssr_enabled' => true]);
+        }
+        $data = $query->asArray()->all();
+        return ArrayHelper::map($data, 'ssr_id', 'ssr_title');
     }
 }

@@ -11,6 +11,8 @@ use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\db\BaseActiveRecord;
+use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
 
 /**
  * This is the model class for table "shift_schedule_type".
@@ -134,5 +136,43 @@ class ShiftScheduleType extends \yii\db\ActiveRecord
     public static function find(): Scopes
     {
         return new Scopes(get_called_class());
+    }
+
+    /**
+     * @param bool $enabled
+     * @return array
+     */
+    public static function getList(?bool $enabled = null): array
+    {
+        $query = self::find()->orderBy(['sst_sort_order' => SORT_ASC]);
+        if ($enabled !== null) {
+            $query->andWhere(['sst_enabled' => true]);
+        }
+        $data = $query->asArray()->all();
+        return ArrayHelper::map($data, 'sst_id', 'sst_title');
+    }
+
+    /**
+     * @return string
+     */
+    public function getColorLabel(): string
+    {
+        return $this->sst_color ? Html::tag(
+            'span',
+            '&nbsp;&nbsp;&nbsp;',
+            ['class' => 'label', 'style' => 'background-color: ' . $this->sst_color]
+        ) : '-';
+    }
+
+    /**
+     * @return string
+     */
+    public function getIconLabel(): string
+    {
+        return $this->sst_icon_class ? Html::tag(
+            'i',
+            '',
+            ['class' => $this->sst_icon_class] // , 'style' => 'color: ' . $model->sst_color
+        ) : '-';
     }
 }

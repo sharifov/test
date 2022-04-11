@@ -39,6 +39,7 @@ class SearchUserShiftSchedule extends UserShiftSchedule
             ['uss_updated_user_id', 'integer'],
 
             ['uss_user_id', 'integer'],
+            ['uss_sst_id', 'integer'],
         ];
     }
 
@@ -62,6 +63,7 @@ class SearchUserShiftSchedule extends UserShiftSchedule
             'uss_user_id' => $this->uss_user_id,
             'uss_shift_id' => $this->uss_shift_id,
             'uss_ssr_id' => $this->uss_ssr_id,
+            'uss_sst_id' => $this->uss_sst_id,
             'DATE(uss_start_utc_dt)' => $this->uss_start_utc_dt,
             'DATE(uss_end_utc_dt)' => $this->uss_end_utc_dt,
             'uss_duration' => $this->uss_duration,

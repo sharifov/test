@@ -1,5 +1,6 @@
 <?php
 
+use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -8,6 +9,8 @@ use yii\widgets\Pjax;
 /* @var $searchModel common\models\search\TaskSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $monthList array */
+/* @var $scheduleTypeList ShiftScheduleType[] */
+/* @var $scheduleSumData array */
 
 $this->title = 'My Shift Schedule';
 $this->params['breadcrumbs'][] = $this->title;
@@ -58,18 +61,33 @@ $bundle = \frontend\assets\FullCalendarAsset::register($this);
                             <thead>
                             <tr class="text-center">
                                 <th></th>
+                                <th></th>
                                 <?php foreach ($monthList as $month) : ?>
                                     <th><h4><?= Html::encode($month)?></h4></th>
                                 <?php endforeach; ?>
                             </tr>
                             </thead>
                             <tbody>
-                            <tr class="text-center">
-                                <td class="text-left">Total days</td>
-                                <td>31</td>
-                                <td>28</td>
-                                <td>12</td>
-                            </tr>
+                            <?php if ($scheduleTypeList) : ?>
+                                <?php foreach ($scheduleTypeList as $item) : ?>
+                                <tr class="text-center" title="<?= Html::encode($item->sst_title)?>">
+                                    <td class="text-left">
+                                        <span class="label label-default"><?= Html::encode($item->sst_key)?></span>
+                                    </td>
+                                    <td class="text-left">
+                                        <?= $item->getColorLabel()?>
+                                        <?= Html::encode($item->sst_name)?>
+                                    </td>
+                                    <?php foreach ($monthList as $monthId => $month) : ?>
+                                        <?php if (!empty($scheduleSumData[$item->sst_id][$monthId])) : ?>
+                                            <?php foreach ($scheduleSumData[$item->sst_id][$monthId] as $dataItem) : ?>
+                                            <td><?= Html::encode($dataItem['uss_sst_id'])?></td>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    <?php endforeach; ?>
+                                </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                             </tbody>
                         </table>
 

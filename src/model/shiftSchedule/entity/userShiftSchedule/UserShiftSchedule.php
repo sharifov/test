@@ -3,11 +3,14 @@
 namespace src\model\shiftSchedule\entity\userShiftSchedule;
 
 use common\models\Employee;
+use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use src\model\shiftSchedule\entity\shift\Shift;
 use src\model\shiftSchedule\entity\shiftScheduleRule\ShiftScheduleRule;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\db\BaseActiveRecord;
 
 /**
  * This is the model class for table "user_shift_schedule".
@@ -27,12 +30,16 @@ use yii\db\ActiveRecord;
  * @property string|null $uss_updated_dt
  * @property int|null $uss_created_user_id
  * @property int|null $uss_updated_user_id
+ * @property int|null $uss_sst_id
  *
  * @property string $statusName
  * @property string $typeName
  *
  * @property Shift $shift
  * @property ShiftScheduleRule $shiftScheduleRule
+ * @property ShiftScheduleType $shiftScheduleType
+ * @property-read ActiveQuery $createdUser
+ * @property-read ActiveQuery $updatedUser
  * @property Employee $user
  */
 class UserShiftSchedule extends \yii\db\ActiveRecord
@@ -67,16 +74,16 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
             'timestamp' => [
                 'class' => TimestampBehavior::class,
                 'attributes' => [
-                    ActiveRecord::EVENT_BEFORE_INSERT => ['uss_created_dt', 'uss_updated_dt'],
-                    ActiveRecord::EVENT_BEFORE_UPDATE => ['uss_updated_dt'],
+                    BaseActiveRecord::EVENT_BEFORE_INSERT => ['uss_created_dt', 'uss_updated_dt'],
+                    BaseActiveRecord::EVENT_BEFORE_UPDATE => ['uss_updated_dt'],
                 ],
                 'value' => date('Y-m-d H:i:s'),
             ],
             'user' => [
                 'class' => BlameableBehavior::class,
                 'attributes' => [
-                    ActiveRecord::EVENT_BEFORE_INSERT => ['uss_created_user_id'],
-                    ActiveRecord::EVENT_BEFORE_UPDATE => ['uss_updated_user_id'],
+                    BaseActiveRecord::EVENT_BEFORE_INSERT => ['uss_created_user_id'],
+                    BaseActiveRecord::EVENT_BEFORE_UPDATE => ['uss_updated_user_id'],
                 ]
             ],
         ];
@@ -87,14 +94,17 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
         return [
             ['uss_user_id', 'required'],
             ['uss_user_id', 'integer', 'max' => self::MAX_VALUE_INT],
-            ['uss_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['uss_user_id' => 'id']],
+            ['uss_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class,
+                'targetAttribute' => ['uss_user_id' => 'id']],
 
 //            ['uss_shift_id', 'required'],
             ['uss_shift_id', 'integer', 'max' => self::MAX_VALUE_INT],
-            ['uss_shift_id', 'exist', 'skipOnError' => true, 'targetClass' => Shift::class, 'targetAttribute' => ['uss_shift_id' => 'sh_id']],
+            ['uss_shift_id', 'exist', 'skipOnError' => true, 'targetClass' => Shift::class,
+                'targetAttribute' => ['uss_shift_id' => 'sh_id']],
 
             ['uss_ssr_id', 'integer', 'max' => self::MAX_VALUE_INT],
-            ['uss_ssr_id', 'exist', 'skipOnError' => true, 'targetClass' => ShiftScheduleRule::class, 'targetAttribute' => ['uss_ssr_id' => 'ssr_id']],
+            ['uss_ssr_id', 'exist', 'skipOnError' => true, 'targetClass' => ShiftScheduleRule::class,
+                'targetAttribute' => ['uss_ssr_id' => 'ssr_id']],
 
             ['uss_description', 'string', 'max' => 500],
 
@@ -118,52 +128,68 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
 
             ['uss_created_user_id', 'integer'],
             ['uss_updated_user_id', 'integer'],
+            ['uss_sst_id', 'integer'],
+
+            [['uss_sst_id'], 'exist', 'skipOnError' => true, 'targetClass' => ShiftScheduleType::class,
+                'targetAttribute' => ['uss_sst_id' => 'sst_id']],
         ];
     }
 
-    public function getShift(): \yii\db\ActiveQuery
+    /**
+     * @return ActiveQuery
+     */
+    public function getShift(): ActiveQuery
     {
         return $this->hasOne(Shift::class, ['sh_id' => 'uss_shift_id']);
     }
 
-    public function getShiftScheduleRule(): \yii\db\ActiveQuery
+    public function getShiftScheduleRule(): ActiveQuery
     {
         return $this->hasOne(ShiftScheduleRule::class, ['ssr_id' => 'uss_ssr_id']);
     }
 
-    public function getUser(): \yii\db\ActiveQuery
+    public function getUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'uss_user_id']);
     }
 
-    public function getCreatedUser(): \yii\db\ActiveQuery
+    public function getCreatedUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'uss_created_user_id']);
     }
 
-    public function getUpdatedUser(): \yii\db\ActiveQuery
+    public function getUpdatedUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'uss_updated_user_id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getShiftScheduleType(): ActiveQuery
+    {
+        return $this->hasOne(ShiftScheduleType::class, ['sst_id' => 'uss_sst_id']);
     }
 
     public function attributeLabels(): array
     {
         return [
             'uss_id' => 'ID',
-            'uss_user_id' => 'User ID',
-            'uss_shift_id' => 'Shift ID',
-            'uss_ssr_id' => 'Ssr ID',
+            'uss_user_id' => 'User',
+            'uss_shift_id' => 'Shift',
+            'uss_ssr_id' => 'Schedule Rule',
             'uss_description' => 'Description',
-            'uss_start_utc_dt' => 'Start Utc Dt',
-            'uss_end_utc_dt' => 'End Utc Dt',
+            'uss_start_utc_dt' => 'Start DateTime (UTC)',
+            'uss_end_utc_dt' => 'End DateTime (UTC)',
             'uss_duration' => 'Duration',
-            'uss_status_id' => 'Status ID',
-            'uss_type_id' => 'Type ID',
+            'uss_status_id' => 'Status',
+            'uss_type_id' => 'Type',
             'uss_customized' => 'Customized',
             'uss_created_dt' => 'Created Dt',
             'uss_updated_dt' => 'Updated Dt',
-            'uss_created_user_id' => 'Created User ID',
-            'uss_updated_user_id' => 'Updated User ID',
+            'uss_created_user_id' => 'Created User',
+            'uss_updated_user_id' => 'Updated User',
+            'uss_sst_id' => 'Schedule Type',
         ];
     }
 
@@ -196,4 +222,30 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
     {
         return self::TYPE_LIST;
     }
+
+    /**
+     * @return string
+     */
+    public function getRuleTitle(): string
+    {
+        return $this->shiftScheduleRule ? $this->shiftScheduleRule->ssr_title : '-';
+    }
+
+    /**
+     * @return string
+     */
+    public function getScheduleTypeTitle(): string
+    {
+        return $this->shiftScheduleType ? $this->shiftScheduleType->sst_title : '-';
+    }
+
+    /**
+     * @return string
+     */
+    public function getShiftTitle(): string
+    {
+        return $this->shift ? $this->shift->sh_title : '-';
+    }
+
+
 }
