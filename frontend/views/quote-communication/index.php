@@ -55,7 +55,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         case CommunicationForm::TYPE_SMS:
                             return 'NEED TO ADD LINK';
                         case CommunicationForm::TYPE_CHAT:
-                            return 'NEED TO ADD LINK';
+                            return $model->qc_communication_id;
                         default:
                             return $model->qc_communication_id;
                     }
