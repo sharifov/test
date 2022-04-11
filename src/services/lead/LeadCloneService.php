@@ -56,7 +56,6 @@ class LeadCloneService
      * @return Lead
      * @throws \Throwable
      */
-    
     public function cloneLead($lead, int $ownerId, ?int $creatorId = null, ?string $reason = ''): Lead
     {
         $lead = $this->serviceFinder->leadFind($lead);
@@ -64,7 +63,7 @@ class LeadCloneService
         $clone = $this->transactionManager->wrap(function () use ($lead, $ownerId, $creatorId, $reason) {
 
             $ownerOfOriginalLead = $lead->employee_id;
-
+            
             $clone = $lead->createClone($reason);
             $clone->processing($ownerId, $creatorId, $reason);
 

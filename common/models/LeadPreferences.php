@@ -140,19 +140,9 @@ class LeadPreferences extends \yii\db\ActiveRecord
         }
     }
 
-      public function createClone($leadId, $currency): self
+    public function createOnlyCurrency($leadId, $currency): self
     {
         $clone = self::create($leadId, null, null, null, $currency);
-        $clone->attributes    = $this->attributes;
-        $clone->lead_id = $leadId;
-        $clone->pref_currency = $currency;
-        $clone->clients_budget = null;
-        $clone->market_price = null;
-        $clone->number_stops = null;
-        $clone->notes = null;
-        $clone->pref_airline = null;
         return $clone;
     }
-    
-    
 }

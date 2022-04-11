@@ -16,7 +16,6 @@ use yii\web\NotFoundHttpException;
  * @property EventDispatcher $eventDispatcher
  * @property ServiceFinder $serviceFinder
  */
-
 class LeadPreferencesCloneService
 {
 
@@ -41,7 +40,6 @@ class LeadPreferencesCloneService
      * @return LeadPreferences
      * @throws \Throwable
      */
-
     public function cloneLeadPreferences($leadId, $cloneLeadId): LeadPreferences
     {
 
@@ -60,6 +58,4 @@ class LeadPreferencesCloneService
 
         return $clone;
     }
-    
-
 }
