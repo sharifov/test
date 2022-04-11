@@ -76,7 +76,7 @@ class QuoteCommunicationSearch extends QuoteCommunication
          * but didn't, because in MySQL the 'DATE/1' function calculates date for every single record in database
          * (including values that not included in the selection), as result - uses more system resources.
          */
-        if ($this->qc_created_dt !== null) {
+        if ($this->qc_created_dt !== null && $this->qc_created_dt !== "") {
             $qcCreatedDateTime = \DateTime::createFromFormat('Y-m-d', $this->qc_created_dt);
             $qcFromCreatedDateTime = "{$qcCreatedDateTime->format('Y-m-d')} 00:00:00";
             $qcToCreatedDateTime = "{$qcCreatedDateTime->format('Y-m-d')} 23:59:59";
