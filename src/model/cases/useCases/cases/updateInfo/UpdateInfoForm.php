@@ -26,7 +26,7 @@ class UpdateInfoForm extends Model
     public $subject;
     public $description;
     public $orderUid;
-    public $username;
+    public $userId;
 
     private $case;
     private $categoryList = [];
@@ -36,7 +36,7 @@ class UpdateInfoForm extends Model
         Cases $case,
         array $departmentList,
         array $categoryList,
-        string $username,
+        int $userId,
         $config = []
     ) {
         parent::__construct($config);
@@ -48,7 +48,7 @@ class UpdateInfoForm extends Model
         $this->subject = $case->cs_subject;
         $this->description = $case->cs_description;
         $this->categoryList = $categoryList;
-        $this->username = $username;
+        $this->userId = $userId;
     }
 
     public function rules(): array
@@ -65,7 +65,7 @@ class UpdateInfoForm extends Model
             }],
 
             ['subject', 'string', 'max' => 200],
-            ['username', 'string'],
+            ['userId', 'integer'],
 
             ['description', 'string'],
 
@@ -105,7 +105,7 @@ class UpdateInfoForm extends Model
             $this->subject,
             $this->description,
             $this->orderUid,
-            $this->username
+            $this->userId
         );
     }
 

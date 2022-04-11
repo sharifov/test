@@ -20,7 +20,7 @@ class Command
     public $subject;
     public $description;
     public $orderUid;
-    public $username;
+    public $userId;
 
     public function __construct(
         int $caseId,
@@ -29,7 +29,7 @@ class Command
         ?string $subject,
         ?string $description,
         ?string $orderUid,
-        ?string $username
+        ?int $userId
     ) {
         $this->caseId = $caseId;
         $this->depId = $depId;
@@ -37,6 +37,6 @@ class Command
         $this->subject = $subject;
         $this->description = $description;
         $this->orderUid = $orderUid;
-        $this->username = $username;
+        $this->userId = $userId;
     }
 }

@@ -43,7 +43,7 @@ class CaseEventLog extends ActiveRecord
     public const RE_PROTECTION_REFUND = 18;
     public const VOLUNTARY_PRODUCT_REFUND_ACCEPTED    = 19;
     public const CASE_DEPARTMENT_CHANGE    = 20;
-    public const CASE_INFO_UPDATE = 21;
+    public const CASE_UPDATE_INFO = 21;
     public const CASE_BOOKINGID_CHANGE = 22;
 
     public const CASE_EVENT_LOG_LIST = [
@@ -67,7 +67,7 @@ class CaseEventLog extends ActiveRecord
         self::VOLUNTARY_REFUND_WH_SEND_OTA => 'Voluntary Refund Send WH to OTA',
         self::VOLUNTARY_PRODUCT_REFUND_ACCEPTED => 'Voluntary Product Refund Accepted',
         self::EMAIL_REVIEWED => 'Email Reviewed',
-        self::CASE_INFO_UPDATE => 'Case info updated',
+        self::CASE_UPDATE_INFO => 'Case info updated',
         self::CASE_BOOKINGID_CHANGE => 'Case bookingId changed',
     ];
 

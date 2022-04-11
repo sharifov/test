@@ -23,7 +23,7 @@ class Handler
     {
         $case = $this->repository->find($command->caseId);
 
-        $case->updateInfo($command->depId, $command->categoryId, $command->subject, $command->description, $command->orderUid, $command->username);
+        $case->updateInfo($command->depId, $command->categoryId, $command->subject, $command->description, $command->orderUid, $command->userId);
 
         $this->repository->save($case);
     }

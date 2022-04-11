@@ -20,7 +20,7 @@ use src\entities\cases\events\CasesAssignLeadEvent;
 use src\entities\cases\events\CasesAutoProcessingStatusEvent;
 use src\entities\cases\events\CasesAwaitingStatusEvent;
 use src\entities\cases\events\CasesCreatedEvent;
-use src\entities\cases\events\CasesUpdatedEvent;
+use src\entities\cases\events\CasesUpdatedInfoEvent;
 use src\entities\cases\events\CasesErrorStatusEvent;
 use src\entities\cases\events\CasesFollowUpStatusEvent;
 use src\entities\cases\events\CasesNewStatusEvent;
@@ -572,14 +572,14 @@ class Cases extends ActiveRecord implements Objectable
         ?string $subject,
         ?string $description,
         ?string $orderUid,
-        ?string $username
+        ?int $userId
     ): void {
         $this->cs_dep_id = $depId;
         $this->updateCategory($categoryId);
         $this->cs_subject = $subject;
         $this->cs_description = $description;
         $this->cs_order_uid = $orderUid;
-        $this->recordEvent(new CasesUpdatedEvent($this, $username));
+        $this->recordEvent(new CasesUpdatedInfoEvent($this, $userId));
     }
 
     /**

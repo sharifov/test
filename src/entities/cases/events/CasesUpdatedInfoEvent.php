@@ -5,21 +5,21 @@ namespace src\entities\cases\events;
 use src\entities\cases\Cases;
 
 /**
- * Class CasesUpdatedEvent
+ * Class CasesUpdatedInfoEvent
  *
  * @property Cases $case
  */
-class CasesUpdatedEvent
+class CasesUpdatedInfoEvent
 {
     public $case;
-    public $username;
+    public $userId;
 
     /**
      * @param Cases $case
      */
-    public function __construct(Cases $case, $username)
+    public function __construct(Cases $case, $userId)
     {
         $this->case = $case;
-        $this->username = $username;
+        $this->userId = $userId;
     }
 }

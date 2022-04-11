@@ -14,7 +14,8 @@ class CasesBookingIdChangeEventLogListener
     {
         try {
             $user = Employee::findOne($event->userId);
-            $description = 'Case BookingId changed to: ' . $event->case->cs_order_uid . ' by: ' . $user->username;
+            $username = $user ? $user->username : 'System';
+            $description = 'Case BookingId changed to: ' . $event->case->cs_order_uid . ' by: ' . $username;
             $event->case->addEventLog(CaseEventLog::CASE_BOOKINGID_CHANGE, $description);
         } catch (\Throwable $e) {
             Yii::error(['message' => 'Case BookingId Change Event Log error', 'e' => $e->getMessage(), 'caseId' => $event->case->cs_id], 'Listeners:CasesBookingIdChangeEventLogListener');

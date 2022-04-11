@@ -10,7 +10,7 @@ use src\entities\cases\events\CasesTrashStatusEvent;
 use src\entities\cases\events\CasesAwaitingStatusEvent;
 use src\entities\cases\events\CasesAutoProcessingStatusEvent;
 use src\entities\cases\events\CasesErrorStatusEvent;
-use src\entities\cases\events\CasesUpdatedEvent;
+use src\entities\cases\events\CasesUpdatedInfoEvent;
 use src\entities\cases\events\CasesBookingIdChangeEvent;
 use src\listeners\cases\CasesFollowUpStatusEventLogListener;
 use src\listeners\cases\CasesNewStatusEventLogListener;
@@ -25,7 +25,7 @@ use src\listeners\cases\CasesErrorStatusEventLogListener;
 use src\listeners\cases\CasesSwitchStatusAwaitingtoSolvedListener;
 use src\listeners\cases\CasesSwitchStatusAwaitingtoErrorListener;
 use src\listeners\cases\CasesCreateEventLogListener;
-use src\listeners\cases\CasesUpdateEventLogListener;
+use src\listeners\cases\CasesUpdatedInfoEventLogListener;
 use src\listeners\cases\CasesBookingIdChangeEventLogListener;
 
 return [
@@ -39,6 +39,6 @@ return [
     CasesAwaitingStatusEvent::class => [CasesAwaitingStatusEventLogListener::class],
     CasesAutoProcessingStatusEvent::class => [CasesAutoProcessingStatusEventListener::class],
     CasesErrorStatusEvent::class => [CasesErrorStatusEventLogListener::class, CasesSwitchStatusAwaitingtoErrorListener::class],
-    CasesUpdatedEvent::class => [CasesUpdateEventLogListener::class],
+    CasesUpdatedInfoEvent::class => [CasesUpdatedInfoEventLogListener::class],
     CasesBookingIdChangeEvent::class => [CasesBookingIdChangeEventLogListener::class],
 ];

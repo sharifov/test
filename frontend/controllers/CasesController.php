@@ -922,8 +922,7 @@ class CasesController extends FController
             $cs = $this->casesSaleService->prepareAdditionalData($cs, $saleData);
 
             if (empty($model->cs_order_uid)) {
-                $userId = Auth::user()->id;
-                $model->updateBookingId($bookingId, $userId);
+                $model->updateBookingId($bookingId, Auth::user()->id);
                 $out['caseBookingId'] = $model->cs_order_uid;
             } elseif ($model->cs_order_uid !== $bookingId) {
                 $out['updateCaseBookingId'] = true;
@@ -1016,8 +1015,7 @@ class CasesController extends FController
         try {
             $case = $this->casesRepository->find((int)$caseId);
             $sale = $this->casesSaleRepository->getSaleByPrimaryKeys($case->cs_id, (int) $saleId);
-            $userId = Auth::user()->id;
-            $case->updateBookingId($sale->css_sale_book_id, $userId);
+            $case->updateBookingId($sale->css_sale_book_id, Auth::user()->id);
             $this->casesRepository->save($case);
 
             $response['message'] = 'Booking Id(' . $case->cs_order_uid . ') of case successfully updated';
@@ -1716,7 +1714,7 @@ class CasesController extends FController
             $case,
             Department::getList(),
             ArrayHelper::map($this->caseCategoryRepository->getEnabledByDep($case->cs_dep_id), 'cc_id', 'cc_name'),
-            Auth::user()->username
+            Auth::user()->id
         );
 
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
