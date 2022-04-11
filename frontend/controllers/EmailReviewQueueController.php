@@ -5,18 +5,21 @@ namespace frontend\controllers;
 use common\components\purifier\Purifier;
 use common\models\Email;
 use common\models\Notifications;
+use common\models\Quote;
+use common\models\QuoteCommunication;
 use frontend\helpers\JsonHelper;
+use frontend\models\CommunicationForm;
 use frontend\widgets\notification\NotificationMessage;
 use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\services\url\UrlGenerator;
 use src\auth\Auth;
 use src\entities\cases\CaseEventLog;
 use src\forms\emailReviewQueue\EmailReviewQueueForm;
-use src\model\emailQuote\entity\EmailQuoteQuery;
 use src\model\emailReviewQueue\entity\EmailReviewQueue;
 use src\model\emailReviewQueue\entity\EmailReviewQueueSearch;
 use src\model\emailReviewQueue\entity\EmailReviewQueueStatus;
 use src\repositories\quote\QuoteRepository;
+use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
@@ -139,10 +142,7 @@ class EmailReviewQueueController extends FController
                 $email->e_status_id = Email::STATUS_PENDING;
                 $email->body_html = $form->emailMessage;
                 $attachments = JsonHelper::decode($email->e_email_data);
-//                if ($form->files && FileStorageSettings::canEmailAttach()) {
-//                    $attachments['files'] = $this->fileStorageUrlGenerator->generateForExternal($form->getFilesPath());
-//                }
-//                $email->e_email_data = json_encode($attachments);
+
                 if ($email->save()) {
                     $mailResponse = $email->sendMail($attachments);
 

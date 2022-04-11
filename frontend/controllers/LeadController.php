@@ -75,8 +75,6 @@ use src\model\contactPhoneData\entity\ContactPhoneData;
 use src\model\contactPhoneList\service\ContactPhoneListService;
 use src\model\department\department\DefaultPhoneType;
 use src\model\email\useCase\send\fromLead\AbacEmailList;
-use src\model\emailQuote\EmailQuoteRepository;
-use src\model\emailQuote\entity\EmailQuote;
 use src\model\emailReviewQueue\EmailReviewQueueManageService;
 use src\model\emailReviewQueue\entity\EmailReviewQueue;
 use src\model\lead\useCases\lead\create\CreateLeadByChatDTO;
@@ -97,6 +95,7 @@ use src\model\leadUserRating\service\LeadUserRatingService;
 use src\model\leadUserConversion\service\LeadUserConversionDictionary;
 use src\model\leadUserConversion\service\LeadUserConversionService;
 use src\model\sms\useCase\send\fromLead\AbacSmsFromNumberList;
+use src\quoteCommunication\Repo;
 use src\repositories\cases\CasesRepository;
 use src\repositories\lead\LeadRepository;
 use src\repositories\NotFoundException;
@@ -531,6 +530,7 @@ class LeadController extends FController
 
                         /** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND_WITHOUT_REVIEW, Restrict access to send without review email */
                         $canSendWithoutReview = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND_WITHOUT_REVIEW);
+
                         if ($canSendWithoutReview) {
                             $previewEmailForm->is_send = true;
                             $mailResponse = $mail->sendMail($attachments);
@@ -551,23 +551,18 @@ class LeadController extends FController
                                     }
                                 }
 
-
-                                if ($quoteList = @json_decode($previewEmailForm->e_quote_list)) {
-                                    if (is_array($quoteList)) {
-                                        foreach ($quoteList as $quoteId) {
-                                            $quoteId = (int)$quoteId;
-                                            $quote = Quote::findOne($quoteId);
-                                            if ($quote) {
-                                                $quote->setStatusSend();
-                                                if (!$this->quoteRepository->save($quote)) {
-                                                    Yii::error($quote->errors, 'LeadController:view:Email:Quote:save');
-                                                }
-
-                                                $emailQuoteRepository = Yii::createObject(EmailQuoteRepository::class);
-                                                $emailQuote = EmailQuote::create($mail->e_id, $quote->id);
-                                                $emailQuoteRepository->save($emailQuote);
-                                            }
-                                        }
+                                /** @var string[] $quoteIds */
+                                $quoteIds = Json::decode($previewEmailForm->e_quote_list);
+                                /** @var Quote[] $quoteObjects */
+                                $quoteObjects = Quote::find()->where(['IN', 'id', $quoteIds])->all();
+                                foreach ($quoteObjects as $quoteObject) {
+                                    $quoteObject->setStatusSend();
+                                    // - Do email should be sent if quote didn't change status?
+                                    // - Do we should call saving request in loop? Calling all updates via one request would be better way
+                                    if ($this->quoteRepository->save($quoteObject)) {
+                                        Repo::createForEmail($mail, $quoteObject->id);
+                                    } else {
+                                        Yii::error($quoteObject->errors, 'LeadController:view:Email:Quote:save');
                                     }
                                 }
 
@@ -580,10 +575,7 @@ class LeadController extends FController
                             if ($quoteList = @json_decode($previewEmailForm->e_quote_list)) {
                                 if (is_array($quoteList)) {
                                     foreach ($quoteList as $quoteId) {
-                                        $quoteId = (int)$quoteId;
-                                        $emailQuoteRepository = Yii::createObject(EmailQuoteRepository::class);
-                                        $emailQuote = EmailQuote::create($mail->e_id, $quoteId);
-                                        $emailQuoteRepository->save($emailQuote);
+                                        Repo::createForEmail($mail, (int)$quoteId);
                                     }
                                 }
                             }

@@ -19,8 +19,7 @@ class Repo
      */
     public static function createForEmail(Email $email, int $quoteId): bool
     {
-        $model = new QuoteCommunication();
-        $model->setAttributes([
+        $model = new QuoteCommunication([
             'qc_communication_type' => CommunicationForm::TYPE_EMAIL,
             'qc_communication_id' => $email->e_id,
             'qc_quote_id' => $quoteId
