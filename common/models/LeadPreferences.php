@@ -154,4 +154,5 @@ class LeadPreferences extends \yii\db\ActiveRecord
         return $clone;
     }
     
+    
 }
