@@ -50,7 +50,7 @@ class LeadPreferencesCloneService
 
             $currency = $leadPreferences->pref_currency;
 
-            $clone = $leadPreferences->createClone($lead->id, $currency);
+            $clone = $leadPreferences->createOnlyCurrency($lead->id, $currency);
             $this->leadPreferencesRepository->save($clone);
 
             return $clone;
