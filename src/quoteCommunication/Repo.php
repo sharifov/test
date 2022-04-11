@@ -41,4 +41,19 @@ class Repo
         ]);
         return $model->save();
     }
+
+    /**
+     * @param int $smsId
+     * @param int $quoteId
+     * @return bool
+     */
+    public static function createForSms(int $smsId, int $quoteId): bool
+    {
+        $model = new QuoteCommunication([
+            'qc_communication_type' => CommunicationForm::TYPE_SMS,
+            'qc_communication_id' => $smsId,
+            'qc_quote_id' => $quoteId
+        ]);
+        return $model->save();
+    }
 }

@@ -640,18 +640,16 @@ class LeadController extends FController
                         Yii::$app->session->setFlash('send-error', 'Error: <strong>SMS Message</strong> has not been sent to <strong>' . $sms->s_phone_to . '</strong>');
                         Yii::error('Error: SMS Message has not been sent to ' . $sms->s_phone_to . "\r\n " . $smsResponse['error'], 'LeadController:view:Sms:sendSms');
                     } else {
-                        if ($quoteList = @json_decode($previewSmsForm->s_quote_list)) {
-                            if (is_array($quoteList)) {
-                                foreach ($quoteList as $quoteId) {
-                                    $quoteId = (int)$quoteId;
-                                    $quote = Quote::findOne($quoteId);
-                                    if ($quote) {
-                                        $quote->setStatusSend();
-                                        if (!$this->quoteRepository->save($quote)) {
-                                            Yii::error($quote->errors, 'LeadController:view:Sms:Quote:save');
-                                        }
-                                    }
-                                }
+                        /** @var string[] $quoteIds */
+                        $quoteIds = Json::decode($previewSmsForm->s_quote_list);
+                        /** @var Quote[] $quoteObjects */
+                        $quoteObjects = Quote::find()->where(['IN', 'id', $quoteIds])->all();
+                        foreach ($quoteObjects as $quote) {
+                            $quote->setStatusSend();
+                            if ($this->quoteRepository->save($quote)) {
+                                Repo::createForSms($sms->s_id, $quote->id);
+                            } else {
+                                Yii::error($quote->errors, 'LeadController:view:Sms:Quote:save');
                             }
                         }
 
