@@ -41,6 +41,7 @@ use src\repositories\lead\LeadRepository;
 use src\repositories\NotFoundException;
 use src\repositories\project\ProjectRepository;
 use src\services\quote\addQuote\AddQuoteService;
+use src\services\quote\addQuote\price\QuotePriceCreateService;
 use src\services\quote\addQuote\TripService;
 use src\services\quote\quotePriceService\ClientQuotePriceService;
 use webapi\src\ApiCodeException;
@@ -899,13 +900,9 @@ class QuoteController extends ApiBaseController
             $quotePricesAttributes = Yii::$app->request->post((new QuotePrice())->formName());
             if (!empty($quotePricesAttributes)) {
                 foreach ($quotePricesAttributes as $quotePriceAttributes) {
-                    $quotePrice = new QuotePrice();
-                    if ($quotePrice) {
-                        $quotePrice->attributes = $quotePriceAttributes;
-                        $quotePrice->quote_id = $quote->id;
-                        if (!$quotePrice->save()) {
-                            $warnings[] = $quotePrice->getErrorSummary(false)[0];
-                        }
+                    $quotePrice = QuotePriceCreateService::createFromApi($quote, $quotePriceAttributes);
+                    if (!$quotePrice->save()) {
+                        $warnings[] = $quotePrice->getErrorSummary(false)[0];
                     }
                 }
             }
