@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use common\models\QuoteCommunication;
+use frontend\models\CommunicationForm;
 
 /* @var $this yii\web\View */
 /* @var $model QuoteCommunication */
@@ -14,7 +15,7 @@ use common\models\QuoteCommunication;
       <div class="col-md-2">
           <?php $form = ActiveForm::begin(); ?>
 
-          <?= $form->field($model, 'qc_communication_type')->textInput() ?>
+          <?= $form->field($model, 'qc_communication_type')->dropDownList(CommunicationForm::TYPE_LIST) ?>
 
           <?= $form->field($model, 'qc_communication_id')->textInput() ?>
 
