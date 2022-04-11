@@ -922,7 +922,8 @@ class CasesController extends FController
             $cs = $this->casesSaleService->prepareAdditionalData($cs, $saleData);
 
             if (empty($model->cs_order_uid)) {
-                $model->cs_order_uid = $bookingId;
+                $user = Auth::user()->username;
+                $model->updateBookingId($bookingId, $user ?? 'System');
                 $out['caseBookingId'] = $model->cs_order_uid;
             } elseif ($model->cs_order_uid !== $bookingId) {
                 $out['updateCaseBookingId'] = true;
@@ -1015,8 +1016,8 @@ class CasesController extends FController
         try {
             $case = $this->casesRepository->find((int)$caseId);
             $sale = $this->casesSaleRepository->getSaleByPrimaryKeys($case->cs_id, (int) $saleId);
-
-            $case->cs_order_uid = $sale->css_sale_book_id;
+            $user = Auth::user()->username;
+            $case->updateBookingId($sale->css_sale_book_id, $user ?? 'System');
             $this->casesRepository->save($case);
 
             $response['message'] = 'Booking Id(' . $case->cs_order_uid . ') of case successfully updated';

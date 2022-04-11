@@ -31,6 +31,7 @@ use src\entities\cases\events\CasesProcessingStatusEvent;
 use src\entities\cases\events\CasesSolvedStatusEvent;
 use src\entities\cases\events\CasesStatusChangeEvent;
 use src\entities\cases\events\CasesTrashStatusEvent;
+use src\entities\cases\events\CasesBookingIdChangeEvent;
 use src\entities\EventTrait;
 use src\interfaces\Objectable;
 use src\traits\DbSlaveConnection;
@@ -587,6 +588,15 @@ class Cases extends ActiveRecord implements Objectable
     public function updateCategory(int $categoryId): void
     {
         $this->cs_category_id = $categoryId;
+    }
+
+    /**
+     * @param int $orderId
+     */
+    public function updateBookingId(int $orderId, string $username): void
+    {
+        $this->cs_order_uid = $orderId;
+        $this->recordEvent(new CasesBookingIdChangeEvent($this, $username));
     }
 
     public function setDeadline(string $deadline)
