@@ -37,6 +37,7 @@ use src\model\user\entity\profit\event\UserProfitCalculateByOrderUserProfitEvent
 use src\model\user\entity\profit\listener\UserProfitCalculateByOrderUserProfitEventListener;
 use modules\product\src\entities\productQuote\events\ProductQuoteStatusChangeEvent;
 use modules\product\src\listeners\productQuote\ProductQuoteStatusChangeEventListener;
+use modules\product\src\entities\productQuote\events\ProductQuoteSoldEvent;
 
 return [
     ProductQuoteCloneCreatedEvent::class => [
@@ -78,6 +79,10 @@ return [
     ],
     ProductQuoteExpiredEvent::class => [
         ProductQuoteExpiredEventListener::class,
+        ProductQuoteUpdateLeadOrderListener::class,
+        ProductQuoteUpdateLeadOfferListener::class,
+    ],
+    ProductQuoteSoldEvent::class => [
         ProductQuoteUpdateLeadOrderListener::class,
         ProductQuoteUpdateLeadOfferListener::class,
     ],
