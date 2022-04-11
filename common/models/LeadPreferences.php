@@ -139,4 +139,10 @@ class LeadPreferences extends \yii\db\ActiveRecord
             $this->pref_currency = $defaultCurrencyByDb ? Currency::getDefaultCurrencyCodeByDb() : Currency::getDefaultCurrencyCode();
         }
     }
+
+    public function createOnlyCurrency($leadId, $currency): self
+    {
+        $clone = self::create($leadId, null, null, null, $currency);
+        return $clone;
+    }
 }
