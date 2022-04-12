@@ -46,11 +46,11 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
 {
     private const MAX_VALUE_INT = 2147483647;
 
-    private const STATUS_PENDING = 1;
-    private const STATUS_APPROVED = 2;
-    private const STATUS_DONE = 3;
-    private const STATUS_CANCELED = 6;
-    private const STATUS_DELETED = 8;
+    public const STATUS_PENDING = 1;
+    public const STATUS_APPROVED = 2;
+    public const STATUS_DONE = 3;
+    public const STATUS_CANCELED = 6;
+    public const STATUS_DELETED = 8;
 
     private const STATUS_LIST = [
         self::STATUS_PENDING => 'Pending',
@@ -208,9 +208,27 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
         return self::STATUS_LIST[$this->uss_status_id] ?? 'Unknown status';
     }
 
+    /**
+     * @param int|null $typeId
+     * @return string
+     */
+    public static function getStatusNameById(?int $typeId): string
+    {
+        return self::STATUS_LIST[$typeId] ?? '-';
+    }
+
     public function getTypeName(): string
     {
         return self::TYPE_LIST[$this->uss_type_id] ?? 'Unknown type';
+    }
+
+    /**
+     * @param int|null $typeId
+     * @return string
+     */
+    public static function getTypeNameById(?int $typeId): string
+    {
+        return self::TYPE_LIST[$typeId] ?? '-';
     }
 
     public static function getStatusList(): array
@@ -237,6 +255,14 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
     public function getScheduleTypeTitle(): string
     {
         return $this->shiftScheduleType ? $this->shiftScheduleType->sst_title : '-';
+    }
+
+    /**
+     * @return string
+     */
+    public function getScheduleTypeKey(): string
+    {
+        return $this->shiftScheduleType ? $this->shiftScheduleType->sst_key : '-';
     }
 
     /**
