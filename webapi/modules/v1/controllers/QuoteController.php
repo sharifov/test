@@ -900,9 +900,13 @@ class QuoteController extends ApiBaseController
             $quotePricesAttributes = Yii::$app->request->post((new QuotePrice())->formName());
             if (!empty($quotePricesAttributes)) {
                 foreach ($quotePricesAttributes as $quotePriceAttributes) {
-                    $quotePrice = QuotePriceCreateService::createFromApi($quote, $quotePriceAttributes);
-                    if (!$quotePrice->save()) {
-                        $warnings[] = $quotePrice->getErrorSummary(false)[0];
+                    $quotePrice = new QuotePrice();
+                    if ($quotePrice) {
+                        $quotePrice->attributes = $quotePriceAttributes;
+                        $quotePrice->quote_id = $quote->id;
+                        if (!$quotePrice->save()) {
+                            $warnings[] = $quotePrice->getErrorSummary(false)[0];
+                        }
                     }
                 }
             }
