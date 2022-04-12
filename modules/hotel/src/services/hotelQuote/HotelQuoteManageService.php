@@ -80,9 +80,9 @@ class HotelQuoteManageService implements ProductQuoteService
 
             $productQuote = $hotelQuote->hqProductQuote;
             if ($form->isBooked()) {
-                $productQuote->applied();
+                $productQuote->applied(); //TODO: set correct description
             } else {
-                $productQuote->failed();
+                $productQuote->error(null, join('. ',$form->getErrorSummary(true)));
             }
             $this->productQuoteRepository->save($productQuote);
 
