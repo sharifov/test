@@ -65,17 +65,21 @@ class Confirm
             $this->inProgressProductQuoteChange($productQuoteChange);
             $this->markQuoteToApplied($reprotectionQuote);
             $this->cancelOtherReprotectionQuotes->cancelByQuoteChange($productQuoteChange, $reprotectionQuote, $userId);
-            $this->processingProductQuoteChange($productQuoteChange, $userId);
+            $this->processingProductQuoteChange($productQuoteChange, $userId, $reprotectionQuote);
         });
 
         $this->createBoRequestJob($reprotectionQuote, $userId);
     }
 
-    private function processingProductQuoteChange(ProductQuoteChange $change, ?int $userId): void
+    private function processingProductQuoteChange(ProductQuoteChange $change, ?int $userId, $reprotectionQuote): void
     {
         $change->customerDecisionConfirm($userId, new \DateTimeImmutable());
         $this->productQuoteChangeRepository->save($change);
-        CaseEventLog::add($change->pqc_case_id, CaseEventLog::REPROTECTION_DECISION, 'Flight reprotection decided: ' . ProductQuoteChangeDecisionType::LIST[ProductQuoteChangeDecisionType::CONFIRM]);
+        CaseEventLog::add($change->pqc_case_id, CaseEventLog::REPROTECTION_DECISION, 'Flight reprotection decided: ' . ProductQuoteChangeDecisionType::LIST[ProductQuoteChangeDecisionType::CONFIRM], [
+                'productQuoteChangeId' => $change->pqc_id,
+                'confirmedProductQuoteId' => $reprotectionQuote->pq_id,
+                'originalProductQuoteId' => $reprotectionQuote->pqRelation->originProductQuote->pq_id,
+            ]);
     }
 
     private function confirmProductQuoteChange(ProductQuoteChange $change): void

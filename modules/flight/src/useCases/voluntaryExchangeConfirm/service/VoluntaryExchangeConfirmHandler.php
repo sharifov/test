@@ -252,7 +252,11 @@ class VoluntaryExchangeConfirmHandler
                 true
             );
         }
-        $this->addCaseEventLog('Voluntary Exchange Confirm process completed successfully', [], CaseEventLog::CATEGORY_INFO);
+        $this->addCaseEventLog('Voluntary Exchange Confirm process completed successfully', [
+            'productQuoteChangeId' => $this->productQuoteChange->pqc_id,
+            'confirmedProductQuoteId' => $this->voluntaryExchangeQuote->pq_id,
+            'originalProductQuoteId' => $this->originProductQuote->pq_id,
+        ], CaseEventLog::CATEGORY_INFO);
     }
 
     public function failProcess(string $description): void
