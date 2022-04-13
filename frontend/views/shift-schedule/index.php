@@ -248,6 +248,15 @@ $scheduleTotalData = [];
                             'format' => 'byUserDateTime'
                         ],
                         [
+                            'label' => 'start DT',
+                            'value' => static function (
+                                UserShiftSchedule $model
+                            ) {
+                                return date('Y-m-d [H:i]', strtotime($model->uss_start_utc_dt));
+                            },
+                            'options' => ['style' => 'width:180px']
+                        ],
+                        [
                             'attribute' => 'uss_duration',
                             'value' => static function (
                                 UserShiftSchedule $model

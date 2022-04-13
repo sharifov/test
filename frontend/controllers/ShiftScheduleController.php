@@ -135,6 +135,9 @@ class ShiftScheduleController extends FController
         $startDt = Yii::$app->request->get('start', date('Y-m-d'));
         $endDt = Yii::$app->request->get('end', date('Y-m-d'));
 
+
+        // CONVERT_TZ(NOW(), 'Asia/Calcutta', 'UTC')
+
         $timelineList = UserShiftSchedule::find()
             ->where(['uss_user_id' => $userId])
             ->andWhere(['AND',
@@ -149,7 +152,7 @@ class ShiftScheduleController extends FController
                 $dataItem = [
                     'id' => $item->uss_id,
                     //groupId: '999',
-                    'title' => $item->getScheduleTypeKey() . '-' . $item->uss_id,
+                    'title' => $item->getScheduleTypeKey() . '-' . $item->uss_id . ' - ' . date('d H:i', strtotime($item->uss_start_utc_dt)),
                     'description' => $item->getScheduleTypeTitle() . "\r\n" . ', duration: ' .
                         Yii::$app->formatter->asDuration($item->uss_duration * 60),
                         //. "\r\n" . $item->uss_description,

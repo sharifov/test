@@ -82,8 +82,19 @@ class SearchUserShiftSchedule extends UserShiftSchedule
         return $dataProvider;
     }
 
-    public function searchByUserId($params, int $userId, ?string $startDate = null, ?string $endDate = null): ActiveDataProvider
-    {
+    /**
+     * @param $params
+     * @param int $userId
+     * @param string|null $startDate
+     * @param string|null $endDate
+     * @return ActiveDataProvider
+     */
+    public function searchByUserId(
+        $params,
+        int $userId,
+        ?string $startDate = null,
+        ?string $endDate = null
+    ): ActiveDataProvider {
         $query = static::find();
 
         $dataProvider = new ActiveDataProvider([
@@ -103,17 +114,59 @@ class SearchUserShiftSchedule extends UserShiftSchedule
 
         $query->where(['uss_user_id' => $userId]);
 
-        if (!empty($startDate)) {
+        if (!empty($startDate) && !empty($endDate)) {
             $startDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($startDate));
-            $query->andWhere(['>=', 'uss_start_utc_dt', $startDateTime]);
-            $this->uss_start_utc_dt = $startDateTime;
+            $endDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($endDate));
+
+            /*$query->andWhere(
+                [
+                    'OR',
+                    ['AND',
+                        ['>=', 'uss_start_utc_dt', $startDateTime],
+                        ['<=', 'uss_end_utc_dt', $startDateTime]
+                    ],
+                    ['AND',
+                        ['>=', 'uss_start_utc_dt', $endDateTime],
+                        ['<=', 'uss_end_utc_dt', $endDateTime]
+                    ],
+                ]
+            );*/
+
+            $query->andWhere([
+                'OR',
+                ['between', 'uss_start_utc_dt', $startDateTime, $endDateTime],
+                ['between', 'uss_end_utc_dt', $startDateTime, $endDateTime],
+                [
+                    'AND',
+                    ['>=', 'uss_start_utc_dt', $startDateTime],
+                    ['<=', 'uss_end_utc_dt', $endDateTime]
+                ]
+            ]);
+
+//            $query->orWhere(
+//                ['AND',
+//                        ['>=', 'uss_start_utc_dt', $endDateTime],
+//                        ['<=', 'uss_end_utc_dt', $endDateTime]
+//                    ]
+//            );
+
+            // $this->uss_start_utc_dt = $startDateTime;
         }
 
-        if (!empty($endDate)) {
-            $endDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($endDate));
-            $query->andWhere(['<=', 'uss_end_utc_dt', $endDateTime]);
-            $this->uss_end_utc_dt = $endDateTime;
-        }
+//        if (!empty($endDate)) {
+//            $endDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($endDate));
+//
+//            $query->andWhere(
+//                'AND',
+//                ['>=', 'uss_start_utc_dt', $startDateTime],
+//                ['<=', 'uss_end_utc_dt', $startDateTime]
+//            );
+//
+//            $query->andWhere(['<=', 'uss_start_utc_dt', $endDateTime]);
+//            // $this->uss_end_utc_dt = $endDateTime;
+//        }
+
+        //CONVERT_TZ(NOW(), 'Asia/Calcutta', 'UTC')
 
         $query->andFilterWhere([
             'uss_id' => $this->uss_id,
