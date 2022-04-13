@@ -6,8 +6,15 @@ use common\models\Employee;
 use yii\data\ActiveDataProvider;
 use src\model\shiftSchedule\entity\userShiftSchedule\UserShiftSchedule;
 
+/**
+ * @property string $clientStartDate
+ * @property string $clientEndDate
+ */
 class SearchUserShiftSchedule extends UserShiftSchedule
 {
+    public string $clientStartDate = '';
+    public string $clientEndDate = '';
+
     public function rules(): array
     {
         return [
@@ -115,22 +122,11 @@ class SearchUserShiftSchedule extends UserShiftSchedule
         $query->where(['uss_user_id' => $userId]);
 
         if (!empty($startDate) && !empty($endDate)) {
+            $this->clientStartDate = $startDate;
+            $this->clientEndDate = $endDate;
+
             $startDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($startDate));
             $endDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($endDate));
-
-            /*$query->andWhere(
-                [
-                    'OR',
-                    ['AND',
-                        ['>=', 'uss_start_utc_dt', $startDateTime],
-                        ['<=', 'uss_end_utc_dt', $startDateTime]
-                    ],
-                    ['AND',
-                        ['>=', 'uss_start_utc_dt', $endDateTime],
-                        ['<=', 'uss_end_utc_dt', $endDateTime]
-                    ],
-                ]
-            );*/
 
             $query->andWhere([
                 'OR',
@@ -140,31 +136,15 @@ class SearchUserShiftSchedule extends UserShiftSchedule
                     'AND',
                     ['>=', 'uss_start_utc_dt', $startDateTime],
                     ['<=', 'uss_end_utc_dt', $endDateTime]
+                ],
+                [
+                    'AND',
+                    ['<=', 'uss_start_utc_dt', $startDateTime],
+                    ['>=', 'uss_end_utc_dt', $endDateTime]
                 ]
             ]);
-
-//            $query->orWhere(
-//                ['AND',
-//                        ['>=', 'uss_start_utc_dt', $endDateTime],
-//                        ['<=', 'uss_end_utc_dt', $endDateTime]
-//                    ]
-//            );
-
-            // $this->uss_start_utc_dt = $startDateTime;
         }
 
-//        if (!empty($endDate)) {
-//            $endDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($endDate));
-//
-//            $query->andWhere(
-//                'AND',
-//                ['>=', 'uss_start_utc_dt', $startDateTime],
-//                ['<=', 'uss_end_utc_dt', $startDateTime]
-//            );
-//
-//            $query->andWhere(['<=', 'uss_start_utc_dt', $endDateTime]);
-//            // $this->uss_end_utc_dt = $endDateTime;
-//        }
 
         //CONVERT_TZ(NOW(), 'Asia/Calcutta', 'UTC')
 

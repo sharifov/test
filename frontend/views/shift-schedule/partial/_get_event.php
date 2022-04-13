@@ -43,16 +43,20 @@ $tsEndUtc = strtotime($event->uss_end_utc_dt);
                     <h6><?= Yii::$app->formatter->asDatetime($tsStartUtc, 'php: d-M-Y')?></h6>
                     <h4><i class="fa fa-clock-o"></i> <?= Yii::$app->formatter->asTime($tsStartUtc)?></h4>
                 </td>
-                <td style="width: 40%">
-                    <table class="table">
-                        <tr style="background: <?=Html::encode($event->shiftScheduleType->sst_color)?>">
-                            <?php for ($i = 0; $i < $hours; $i++) : ?>
-                            <td style="color: #FFFFFF">
-                                <?= Yii::$app->formatter->asDatetime($tsStartUtc + (60 * 60 * $i), 'php:H') ?>
-                            </td>
-                            <?php endfor; ?>
-                        </tr>
-                    </table>
+                <td style="width: 400px">
+                    <div class="table-responsive" style="width: 400px">
+                        <table class="table">
+                            <thead>
+                            <tr style="background: <?=Html::encode($event->shiftScheduleType->sst_color)?>">
+                                <?php for ($i = 0; $i < $hours; $i++) : ?>
+                                <td style="color: #FFFFFF">
+                                    <?= Yii::$app->formatter->asDatetime($tsStartUtc + (60 * 60 * $i), 'php:H') ?>
+                                </td>
+                                <?php endfor; ?>
+                            </tr>
+                            </thead>
+                        </table>
+                    </div>
                     <strong>
                         Duration Time: <?php echo Yii::$app->formatter->asDuration($event->uss_duration * 60) ?>
                     </strong>

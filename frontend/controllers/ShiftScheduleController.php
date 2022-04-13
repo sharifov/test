@@ -2,22 +2,21 @@
 
 namespace frontend\controllers;
 
+use Exception;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
+use modules\shiftSchedule\src\services\UserShiftScheduleService;
 use src\auth\Auth;
 use src\helpers\app\AppHelper;
-use src\model\shiftSchedule\entity\shift\Shift;
-use src\model\shiftSchedule\entity\shiftScheduleRule\ShiftScheduleRule;
 use src\model\shiftSchedule\entity\userShiftSchedule\search\SearchUserShiftSchedule;
 use src\model\shiftSchedule\entity\userShiftSchedule\UserShiftSchedule;
 use Yii;
-use src\model\shiftSchedule\entity\shiftScheduleRule\search\SearchShiftScheduleRule;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
-use yii\web\Controller;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\web\NotAcceptableHttpException;
 use yii\web\NotFoundHttpException;
+use yii\web\Response;
 
 class ShiftScheduleController extends FController
 {
@@ -45,11 +44,7 @@ class ShiftScheduleController extends FController
      */
     public function actionIndex(): string
     {
-//        $searchModel = new SearchShiftScheduleRule();
-//        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-
-        //$currentMonth = date('m');
-
+        $user = Auth::user();
         $scheduleTypeList = null;
 
         $curMonth = mktime(0, 0, 0, date("m"), 1, date("Y"));
@@ -63,25 +58,16 @@ class ShiftScheduleController extends FController
         $minDate = date('Y-m-d H:i:s', $prevMonth);
         $maxDate = date('Y-m-d H:i:s', mktime(0, 0, 0, date("m") + 2, 1, date("Y")));
 
-        $data = UserShiftSchedule::find()
-            ->select(['uss_sst_id', 'uss_year' => 'YEAR(uss_start_utc_dt)',
-                'uss_month' => 'MONTH(uss_start_utc_dt)',
-                'uss_cnt' => 'COUNT(*)',
-                'uss_duration' => 'SUM(uss_duration)',
-                ])
-            ->where(['uss_user_id' => Auth::id()])
-            ->andWhere(['AND',
-                ['>=', 'uss_start_utc_dt', $minDate],
-                ['<=', 'uss_start_utc_dt', $maxDate]
-                ])
-            ->andWhere(['uss_status_id' => [UserShiftSchedule::STATUS_APPROVED, UserShiftSchedule::STATUS_DONE]])
-            ->groupBy(['uss_sst_id', 'uss_year', 'uss_month'])
-            ->asArray()
-            ->all();
+
+        $data = UserShiftScheduleService::getUserShiftScheduleDataStats(
+            $user->id,
+            $minDate,
+            $maxDate,
+            [UserShiftSchedule::STATUS_APPROVED, UserShiftSchedule::STATUS_DONE]
+        );
 
         $scheduleTypeData = [];
         $scheduleSumData = [];
-
 
         if ($data) {
             foreach ($data as $item) {
@@ -101,8 +87,6 @@ class ShiftScheduleController extends FController
 //        VarDumper::dump($data, 10, true); exit;
 
         $userTimeZone = 'local'; //'UTC'; //'Europe/Chisinau'; //Auth::user()->userParams->up_timezone ?? 'local';
-
-        $user = Auth::user();
         $searchModel = new SearchUserShiftSchedule();
 
         $startDate = Yii::$app->request->get('startDate', date('Y-m-d'));
@@ -114,11 +98,11 @@ class ShiftScheduleController extends FController
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
-              'monthList' => $monthList,
-              'scheduleTypeList' => $scheduleTypeList,
-              'scheduleSumData' => $scheduleSumData,
-              'userTimeZone' => $userTimeZone,
-                'user' => $user,
+            'monthList' => $monthList,
+            'scheduleTypeList' => $scheduleTypeList,
+            'scheduleSumData' => $scheduleSumData,
+            'userTimeZone' => $userTimeZone,
+            'user' => $user,
         ]);
     }
 
@@ -127,107 +111,25 @@ class ShiftScheduleController extends FController
      */
     public function actionMyDataAjax(): array
     {
-        $data = [];
+        \Yii::$app->response->format = Response::FORMAT_JSON;
+
         $userId = Auth::id();
-
-        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-
         $startDt = Yii::$app->request->get('start', date('Y-m-d'));
         $endDt = Yii::$app->request->get('end', date('Y-m-d'));
 
-
-        // CONVERT_TZ(NOW(), 'Asia/Calcutta', 'UTC')
-
-        $timelineList = UserShiftSchedule::find()
-            ->where(['uss_user_id' => $userId])
-            ->andWhere(['AND',
-                ['>=', 'uss_start_utc_dt', date('Y-m-d H:i:s', strtotime($startDt))],
-                ['<=', 'uss_start_utc_dt', date('Y-m-d H:i:s', strtotime($endDt))]
-            ])
-            ->all();
-
-
-        if ($timelineList) {
-            foreach ($timelineList as $item) {
-                $dataItem = [
-                    'id' => $item->uss_id,
-                    //groupId: '999',
-                    'title' => $item->getScheduleTypeKey() . '-' . $item->uss_id . ' - ' . date('d H:i', strtotime($item->uss_start_utc_dt)),
-                    'description' => $item->getScheduleTypeTitle() . "\r\n" . ', duration: ' .
-                        Yii::$app->formatter->asDuration($item->uss_duration * 60),
-                        //. "\r\n" . $item->uss_description,
-                    'start' => date('c', strtotime($item->uss_start_utc_dt)),
-                    'end' => date('c', strtotime($item->uss_end_utc_dt)),
-                    'color' => $item->shiftScheduleType ? $item->shiftScheduleType->sst_color : 'gray',
-
-                    'display' => 'block', // 'list-item' , 'background'
-                    //'textColor' => 'black' // an option!
-                    'extendedProps' => [
-                        'icon' => $item->shiftScheduleType->sst_icon_class,
-                    ]
-                ];
-
-                if (!in_array($item->uss_status_id, [UserShiftSchedule::STATUS_DONE, UserShiftSchedule::STATUS_APPROVED])) {
-                    $dataItem['borderColor'] = '#000000';
-                    $dataItem['title'] .= ' (' . $item->getStatusName() . ')';
-                    $dataItem['description'] .= ' (' . $item->getStatusName() . ')';
-                    //$data[$item->uss_id]['extendedProps']['icon'] = 'rgb(255,0,0)';
-                }
-
-                $data[] = $dataItem;
-            }
-        }
-
-        return $data;
+        $timelineList = UserShiftScheduleService::getTimelineListByUser($userId, $startDt, $endDt);
+        return UserShiftScheduleService::getCalendarTimelineJsonData($timelineList);
     }
 
 
     /**
-     * @throws \Exception
+     * @return Response
+     * @throws Exception
      */
-    public function actionGenerateExample(): \yii\web\Response
+    public function actionGenerateExample(): Response
     {
         $userId = Auth::id();
-
-        $statuses = array_keys(UserShiftSchedule::getTypeList());
-        $shiftList = array_keys(Shift::getList());
-        $shiftRuleList = array_keys(ShiftScheduleRule::getList());
-        $shiftTypeList = array_keys(ShiftScheduleType::getList());
-
-        $minutes = [0, 10, 20, 30, 40];
-
-        //VarDumper::dump($statuses, 10, true); exit;
-
-        $cnt = 0;
-
-        for ($i = 1; $i <= 90; $i++) {
-            $hour = random_int(12, 22);
-            $min = $minutes[random_int(1, count($minutes)) - 1];
-            $timeStart = mktime($hour, $min, 0, date("m") - 1, $i, date("Y"));
-            $duration = random_int(2, 8) * 60 + $minutes[random_int(1, count($minutes)) - 1];
-            $timeEnd = mktime($hour, $duration + $min, 0, date("m") - 1, $i, date("Y"));
-
-
-            $statusId = $statuses[random_int(0, count($statuses) - 1)];
-            $shiftId = $shiftList[random_int(0, count($shiftList) - 1)];
-            $shiftRuleId = $shiftRuleList[random_int(0, count($shiftRuleList) - 1)];
-            $shiftTypeId = $shiftTypeList[random_int(0, count($shiftTypeList) - 1)];
-
-            $tl = new UserShiftSchedule();
-            $tl->uss_user_id = $userId;
-            $tl->uss_sst_id = $shiftTypeId;
-            $tl->uss_type_id = random_int(1, 2);
-            $tl->uss_start_utc_dt = date('Y-m-d H:i:s', $timeStart);
-            $tl->uss_end_utc_dt = date('Y-m-d H:i:s', $timeEnd);
-            $tl->uss_duration = $duration;
-            $tl->uss_ssr_id = $shiftRuleId;
-            $tl->uss_shift_id = $shiftId;
-            $tl->uss_status_id = $statusId;
-            $tl->uss_description = 'Description UserShiftSchedule ' . $tl->uss_start_utc_dt;
-            if ($tl->save()) {
-                $cnt++;
-            }
-        }
+        $cnt = UserShiftScheduleService::generateExampleDataByUser($userId);
 
         if ($cnt > 0) {
             Yii::$app->session->addFlash('success', 'Successfully: Generate example data (' . $cnt . ')!');
@@ -237,10 +139,13 @@ class ShiftScheduleController extends FController
         return $this->redirect(['index']);
     }
 
-    public function actionRemoveUserData(): \yii\web\Response
+    /**
+     * @return Response
+     */
+    public function actionRemoveUserData(): Response
     {
         $userId = Auth::id();
-        if (UserShiftSchedule::deleteAll(['uss_user_id' => $userId])) {
+        if (UserShiftScheduleService::removeDataByUser($userId)) {
             Yii::$app->session->addFlash('success', 'Successfully: Remove example data UserId (' . $userId . ')!');
         }
         return $this->redirect(['index']);

@@ -210,9 +210,11 @@ $scheduleTotalData = [];
                 </div>
             </div>
 
+        <?php Pjax::begin(['id' => 'pjax-user-timeline']); ?>
         <div class="x_panel">
             <div class="x_title">
-                <h2><i class="fa fa-bars"></i> My TimeLine List</h2>
+                <h2><i class="fa fa-bars"></i> My TimeLine List (<?=Html::encode($searchModel->clientStartDate)?> -
+                    <?=Html::encode($searchModel->clientEndDate)?>)</h2>
                 <!--            <ul class="nav navbar-right panel_toolbox" style="min-width: initial;">-->
                 <!--                <li>-->
                 <!--                    <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>-->
@@ -222,9 +224,7 @@ $scheduleTotalData = [];
             </div>
             <div class="x_content" style="display: block">
 
-                <?php Pjax::begin(['id' => 'pjax-user-timeline']); ?>
-
-                    <?= GridView::widget([
+                <?= GridView::widget([
                     'dataProvider' => $dataProvider,
                     'filterModel' => $searchModel,
                     'columns' => [
@@ -234,43 +234,63 @@ $scheduleTotalData = [];
                             'filter' => false
                         ],
                         [
+                            'label' => 'Type',
+                            'value' => static function (
+                                UserShiftSchedule $model
+                            ) {
+                                return $model->shiftScheduleType ? $model->shiftScheduleType->getColorLabel() : '-';
+                            },
+                            'format' => 'raw',
+
+                        ],
+                        [
                             'attribute' => 'uss_sst_id',
                             'value' => static function (
                                 UserShiftSchedule $model
                             ) {
-                                return $model->getScheduleTypeTitle();
+                                return ($model->shiftScheduleType ? $model->shiftScheduleType->getIconLabel() . ' ' : '') . Html::a(
+                                    $model->getScheduleTypeTitle(),
+                                    null,
+                                    ['class' => 'btn-open-timeline', 'data-tl_id' => $model->uss_id]
+                                );
                             },
+                            'format' => 'raw',
                             'filter' => ShiftScheduleType::getList()
                         ],
                         [
+                            'label' => 'Start Date Time',
                             'class' => DateTimeColumn::class,
                             'attribute' => 'uss_start_utc_dt',
-                            'format' => 'byUserDateTime'
+                            'format' => 'byUserDateTime',
+                            'filter' => false
                         ],
-                        [
-                            'label' => 'start DT',
-                            'value' => static function (
-                                UserShiftSchedule $model
-                            ) {
-                                return date('Y-m-d [H:i]', strtotime($model->uss_start_utc_dt));
-                            },
-                            'options' => ['style' => 'width:180px']
-                        ],
+//                        [
+//                            'label' => 'start DT',
+//                            'value' => static function (
+//                                UserShiftSchedule $model
+//                            ) {
+//                                return date('Y-m-d [H:i]', strtotime($model->uss_start_utc_dt));
+//                            },
+//                            'options' => ['style' => 'width:180px']
+//                        ],
                         [
                             'attribute' => 'uss_duration',
                             'value' => static function (
                                 UserShiftSchedule $model
                             ) {
-                                return Html::tag('span', round($model->uss_duration / 60, 1) . 'h', ['title' => Yii::$app->formatter->asDuration($model->uss_duration * 60)]);
+                                return Html::tag('span', round($model->uss_duration / 60, 1)
+                                    . 'h', ['title' => Yii::$app->formatter->asDuration($model->uss_duration * 60)]);
                             },
                             'format' => 'raw',
                             'options' => ['style' => 'width:100px'],
                             'filter' => false
                         ],
                         [
+                            'label' => 'End Date Time',
                             'class' => DateTimeColumn::class,
                             'attribute' => 'uss_end_utc_dt',
-                            'format' => 'byUserDateTime'
+                            'format' => 'byUserDateTime',
+                            'filter' => false
                         ],
 //            'uss_duration',
 
@@ -336,20 +356,12 @@ $scheduleTotalData = [];
                        // ['class' => 'yii\grid\ActionColumn'],
                     ],
                 ]); ?>
-                <?php Pjax::end(); ?>
 
             </div>
         </div>
+        <?php Pjax::end(); ?>
     </div>
-
-
 </div>
-
-
-
-
-
-
 
 
 <?php
@@ -362,7 +374,6 @@ $js = <<<JS
     var shiftScheduleDataUrl = '$ajaxUrl';
     var openModalEventUrl = '$openModalEventUrl';
     var calendarEl = document.getElementById('calendar');
-
 
     var calendar = new FullCalendar.Calendar(calendarEl, {
         //initialView: 'dayGridWeek',
@@ -491,7 +502,7 @@ $js = <<<JS
               },*/
               failure: function() {
                 alert('There was an error while fetching events!');
-              },
+              }
               // color: 'yellow',   // a non-ajax option
               // textColor: 'black' // a non-ajax option
             }
@@ -510,19 +521,19 @@ $js = <<<JS
         //     { start: '2022-04-07T12:30:00' }, // already same offset as local, so won't shift
         //     { start: '2022-04-08T12:30:00' } // will be parsed as if it were '2018-09-01T12:30:00+XX:XX'
         //   ],
-          dateClick: function(arg) {
-            
-            // console.log('Clicked on: ' + arg.dateStr);
-            // console.log('Coordinates: ' + arg.jsEvent.pageX + ',' + arg.jsEvent.pageY);
-            // console.log('Current view: ' + arg.view.type);
-            //console.log('Resource ID: ' + arg.resource.id);
-            console.log(arg);
-            // change the day's background color just for fun
-            // arg.dayEl.style.backgroundColor = 'red';
-            
-            //console.log(arg.date.toString()); // use *local* methods on the native Date Object
-            // will output something like 'Sat Sep 01 2018 00:00:00 GMT-XX:XX (Eastern Daylight Time)'
-          },
+        //   dateClick: function(arg) {
+        //    
+        //     // console.log('Clicked on: ' + arg.dateStr);
+        //     // console.log('Coordinates: ' + arg.jsEvent.pageX + ',' + arg.jsEvent.pageY);
+        //     // console.log('Current view: ' + arg.view.type);
+        //     //console.log('Resource ID: ' + arg.resource.id);
+        //     console.log(arg);
+        //     // change the day's background color just for fun
+        //     // arg.dayEl.style.backgroundColor = 'red';
+        //    
+        //     //console.log(arg.date.toString()); // use *local* methods on the native Date Object
+        //     // will output something like 'Sat Sep 01 2018 00:00:00 GMT-XX:XX (Eastern Daylight Time)'
+        //   },
           eventClick: function(info) {
             info.jsEvent.preventDefault();
             var eventObj = info.event;
@@ -530,8 +541,8 @@ $js = <<<JS
           },
           select: function(info) {
             updateTimeLineList(info.startStr, info.endStr);
-            console.log(info);
-            //console.log('selected ' + info.startStr + ' to ' + info.endStr);
+            // console.log(info);
+            // console.log('selected ' + info.startStr + ' to ' + info.endStr);
           }
     });
 
@@ -555,13 +566,19 @@ $js = <<<JS
             }
         });
     }
-    
+
     function updateTimeLineList(startDate, endDate) 
     {
-        // let startDate = '';
-        // let endDate = '';
         $.pjax.reload({container: '#pjax-user-timeline', push: false, replace: false, timeout: 5000, data: {startDate: startDate, endDate: endDate}});
     }
+    
+    $('body').off('click', '.btn-open-timeline').on('click', '.btn-open-timeline', function (e) {
+        e.preventDefault();
+        let id = $(this).data('tl_id');
+        openModalEventId(id);
+    });
+    
+    
 JS;
 
 $this->registerJs($js);
