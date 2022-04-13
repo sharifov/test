@@ -1361,7 +1361,8 @@ class CasesController extends FController
                     case CasesStatus::STATUS_SOLVED:
                         $this->casesManageService->solved($case->cs_id, $user->id, $statusForm->message, $user->username);
                         if ($statusForm->isSendFeedback()) {
-                            $this->sendFeedbackEmailProcess($case, $statusForm, Auth::user());
+                            $this->casesCommunicationService->sendFeedbackEmail($case, $statusForm, Auth::user(), true);
+                            //$this->sendFeedbackEmailProcess($case, $statusForm, Auth::user());
                         }
                         break;
                     case CasesStatus::STATUS_PENDING:
@@ -1403,7 +1404,7 @@ class CasesController extends FController
             'statusForm' => $statusForm,
         ]);
     }
-
+    //TODO: need remove before merge with master. Unused method
     private function sendFeedbackEmailProcess(Cases $case, CasesChangeStatusForm $form, Employee $user): void
     {
         if (!$project = $case->project) {
@@ -1444,7 +1445,7 @@ class CasesController extends FController
 
         Yii::$app->session->addFlash('success', 'Email has been successfully sent.');
     }
-
+    //TODO: need remove before merge with master. Unused method
     private function sendFeedbackEmail(
         \src\model\project\entity\params\Params $params,
         Cases $case,
