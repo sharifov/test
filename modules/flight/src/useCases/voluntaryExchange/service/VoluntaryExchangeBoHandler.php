@@ -52,6 +52,9 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
         $this->objectCollection = $voluntaryExchangeObjectCollection;
     }
 
+    /**
+     * @throws \Throwable
+     */
     public function processRequest(Model $form): void
     {
         if (!$form instanceof FlightVoluntaryExchangeUpdateForm) {
@@ -172,7 +175,6 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
                 $this->objectCollection->getFlightQuoteFlightRepository()->save($flightQuoteFlight);
             }
 
-//            $this->bookingProductQuotePostProcessing($this->voluntaryQuote);
             $transaction->commit();
         } catch (\Throwable $throwable) {
             $transaction->rollBack();
@@ -203,17 +205,5 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
 
     private function handleProcessing(): void
     {
-    }
-
-    private function bookingProductQuotePostProcessing(
-        ProductQuote $voluntaryQuote
-    ): void {
-
-        ProductQuoteRelation::deleteAll([
-            'pqr_related_pq_id' => $voluntaryQuote->pq_id,
-            'pqr_type_id' => ProductQuoteRelation::TYPE_VOLUNTARY_EXCHANGE
-        ]);
-
-        ProductQuoteChangeRelation::deleteAll(['pqcr_pq_id' => $voluntaryQuote->pq_id]);
     }
 }
