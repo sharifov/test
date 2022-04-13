@@ -21,6 +21,9 @@ class Auth
 
     public static function employeeId(): ?int
     {
+        if (Yii::$app instanceof \yii\console\Application) {
+            return null;
+        }
         $identity = Yii::$app->user->identity;
         return ($identity instanceof Employee) ? $identity->getId() : null;
     }
