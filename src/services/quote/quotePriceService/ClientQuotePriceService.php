@@ -20,13 +20,9 @@ class ClientQuotePriceService
         $this->quote = $quote;
     }
 
-    public function setClientCurrency(?string $currencyCode, bool $isSetDefault = true): ClientQuotePriceService
+    public function setClientCurrency(?string $currencyCode): ClientQuotePriceService
     {
-        if ($isSetDefault) {
-            $this->quote->q_client_currency = $currencyCode ?: Currency::getDefaultCurrencyCode();
-        } else {
-            $this->quote->q_client_currency = $currencyCode;
-        }
+        $this->quote->q_client_currency = $currencyCode;
         return $this;
     }
 

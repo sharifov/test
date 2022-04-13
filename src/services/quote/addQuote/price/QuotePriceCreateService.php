@@ -5,6 +5,7 @@ namespace src\services\quote\addQuote\price;
 use common\models\Currency;
 use common\models\Quote;
 use common\models\QuotePrice;
+use RuntimeException;
 use src\services\CurrencyHelper;
 
 /**
@@ -65,9 +66,25 @@ class QuotePriceCreateService
         return $quotePrice;
     }
 
-    public static function createFromApi(Quote $quote, array $quotePriceAttributes): QuotePrice
+    public static function createFromApi(Quote $quote, array $quotePriceAttributes, ?string $currencyCode): QuotePrice
     {
-        if ($quote->isClientCurrencyDefault()) {
+        if ($currencyCode === null) {
+            $fare = $quotePriceAttributes['fare'] ?? null;
+            $taxes = $quotePriceAttributes['taxes'] ?? null;
+            $markUp = $quotePriceAttributes['mark_up'] ?? null;
+            $net = $quotePriceAttributes['net'] ?? null;
+            $extraMarkUp = $quotePriceAttributes['extra_mark_up'] ?? null;
+            $selling = $quotePriceAttributes['selling'] ?? null;
+            $serviceFee = $quotePriceAttributes['service_fee'] ?? null;
+
+            $clientFare = CurrencyHelper::convertFromBaseCurrency($fare, $quote->q_client_currency_rate);
+            $clientTaxes = CurrencyHelper::convertFromBaseCurrency($taxes, $quote->q_client_currency_rate);
+            $clientMarkUp = CurrencyHelper::convertFromBaseCurrency($markUp, $quote->q_client_currency_rate);
+            $clientExtraMarkUp = CurrencyHelper::convertFromBaseCurrency($extraMarkUp, $quote->q_client_currency_rate);
+            $clientNet = CurrencyHelper::convertFromBaseCurrency($net, $quote->q_client_currency_rate);
+            $clientSelling = CurrencyHelper::convertFromBaseCurrency($selling, $quote->q_client_currency_rate);
+            $clientServiceFee = CurrencyHelper::convertFromBaseCurrency($serviceFee, $quote->q_client_currency_rate);
+        } elseif ($currencyCode === Currency::getDefaultCurrencyCode()) {
             $fare = $clientFare = $quotePriceAttributes['fare'] ?? null;
             $taxes = $clientTaxes = $quotePriceAttributes['taxes'] ?? null;
             $markUp = $clientMarkUp = $quotePriceAttributes['mark_up'] ?? null;
@@ -76,6 +93,10 @@ class QuotePriceCreateService
             $selling = $clientSelling = $quotePriceAttributes['selling'] ?? null;
             $serviceFee = $clientServiceFee = $quotePriceAttributes['service_fee'] ?? null;
         } else {
+            if (!$currencyRate = Currency::getBaseRateByCurrencyCode($currencyCode)) {
+                throw new RuntimeException('Base Rate By CurrencyCode (' . $currencyCode . ') not found');
+            }
+
             $clientFare = $quotePriceAttributes['fare'] ?? null;
             $clientTaxes = $quotePriceAttributes['taxes'] ?? null;
             $clientMarkUp = $quotePriceAttributes['mark_up'] ?? null;
@@ -84,13 +105,13 @@ class QuotePriceCreateService
             $clientSelling = $quotePriceAttributes['selling'] ?? null;
             $clientServiceFee = $quotePriceAttributes['service_fee'] ?? null;
 
-            $fare = CurrencyHelper::convertToBaseCurrency($clientFare, $quote->q_client_currency_rate);
-            $taxes = CurrencyHelper::convertToBaseCurrency($clientTaxes, $quote->q_client_currency_rate);
-            $markUp = CurrencyHelper::convertToBaseCurrency($clientMarkUp, $quote->q_client_currency_rate);
-            $extraMarkUp = CurrencyHelper::convertToBaseCurrency($clientExtraMarkUp, $quote->q_client_currency_rate);
-            $net = CurrencyHelper::convertToBaseCurrency($clientNet, $quote->q_client_currency_rate);
-            $serviceFee = CurrencyHelper::convertToBaseCurrency($clientServiceFee, $quote->q_client_currency_rate);
-            $selling = CurrencyHelper::convertToBaseCurrency($clientSelling, $quote->q_client_currency_rate);
+            $fare = CurrencyHelper::convertToBaseCurrency($clientFare, $currencyRate);
+            $taxes = CurrencyHelper::convertToBaseCurrency($clientTaxes, $currencyRate);
+            $markUp = CurrencyHelper::convertToBaseCurrency($clientMarkUp, $currencyRate);
+            $extraMarkUp = CurrencyHelper::convertToBaseCurrency($clientExtraMarkUp, $currencyRate);
+            $net = CurrencyHelper::convertToBaseCurrency($clientNet, $currencyRate);
+            $serviceFee = CurrencyHelper::convertToBaseCurrency($clientServiceFee, $currencyRate);
+            $selling = CurrencyHelper::convertToBaseCurrency($clientSelling, $currencyRate);
         }
 
         $quotePrice = new QuotePrice();
