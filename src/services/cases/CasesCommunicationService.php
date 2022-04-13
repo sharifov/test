@@ -293,7 +293,7 @@ class CasesCommunicationService
                 'e_email_from_name' => $params->object->case->feedbackNameFrom ?: ($user->nickname ?? ''),
                 'e_email_to' => $form->sendTo,
                 'e_email_to_name' => $case->client ? $case->client->full_name : '',
-                'e_language_id' =>$form->language,
+                'e_language_id' => $form->language,
                 'e_created_user_id' => $user->id ?? null,
             ]);
             $mail->body_html = $mailPreview['data']['email_body_html'];
