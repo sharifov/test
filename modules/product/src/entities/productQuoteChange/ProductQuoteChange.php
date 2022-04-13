@@ -81,14 +81,14 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
                 'targetColumn' => 'pqc_gid',
                 'value' => self::generateGid(),
             ],
-            'blameable' => [
+            /*'blameable' => [
                 'class' => BlameableBehavior::class,
                 'createdByAttribute' => 'pqc_created_user_id',
                 'updatedByAttribute' => null,
                 'value' => function() {
                     return Auth::employeeId();
                 }
-            ],
+            ],*/
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }

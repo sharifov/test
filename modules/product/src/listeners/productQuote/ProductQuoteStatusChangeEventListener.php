@@ -2,7 +2,7 @@
 
 namespace modules\product\src\listeners\productQuote;
 
-use modules\product\src\entities\productQuote\events\ProductQuoteStatusChangeEvent;
+use modules\product\src\entities\productQuote\events\ProductQuoteStatusChangeInterface;
 use modules\product\src\entities\productQuoteStatusLog\CreateDto;
 use modules\product\src\services\ProductQuoteStatusLogService;
 use src\helpers\app\AppHelper;
@@ -22,19 +22,19 @@ class ProductQuoteStatusChangeEventListener
     }
 
     /**
-     * @param ProductQuoteStatusChangeEvent $event
+     * @param ProductQuoteStatusChangeInterface $event
      */
-    public function handle(ProductQuoteStatusChangeEvent $event): void
+    public function handle(ProductQuoteStatusChangeInterface $event): void
     {
         try {
             $this->productQuoteStatusLogService->log(new CreateDto(
-                $event->productQuoteId,
-                $event->startStatusId,
-                $event->endStatusId,
-                $event->description,
-                $event->actionId,
-                $event->ownerId,
-                $event->creatorId
+                $event->getId(),
+                $event->getStartStatus(),
+                $event->getEndStatus(),
+                $event->getDescription(),
+                $event->getActionId(),
+                $event->getOwnerId(),
+                $event->getCreatorId()
             ));
         } catch (\Throwable $e) {
             Yii::error(AppHelper::throwableFormatter($e), 'Listeners:' . self::class);

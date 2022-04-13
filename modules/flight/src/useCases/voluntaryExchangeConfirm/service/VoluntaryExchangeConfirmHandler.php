@@ -202,6 +202,9 @@ class VoluntaryExchangeConfirmHandler
         $data['gds'] = $this->voluntaryExchangeQuote->flightQuote->fq_gds;
         $data['pcc'] = $this->voluntaryExchangeQuote->flightQuote->fq_gds_pcc;
         $data['fareType'] = FlightQuote::getFareTypeNameById($this->voluntaryExchangeQuote->flightQuote->fq_fare_type_id);
+        if (!empty($this->voluntaryExchangeQuote->flightQuote->fq_record_locator)) {
+            $data['pnr'] = $this->voluntaryExchangeQuote->flightQuote->fq_record_locator;
+        }
 
         $data['cabin'] = $this->voluntaryExchangeQuote->flightQuote->fqFlight->fl_cabin_class;
 

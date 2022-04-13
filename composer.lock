@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "54e602a453843a5e76fa2963a3bf996a",
+    "content-hash": "dc74378cc7b482a926d69db27ebca122",
     "packages": [
         {
             "name": "2amigos/2fa-library",
@@ -4208,11 +4208,11 @@
         },
         {
             "name": "kivork/yii2-search-module",
-            "version": "v1.03.0",
+            "version": "v1.04.0",
             "source": {
                 "type": "git",
                 "url": "git@bitbucket.org:techork/yii2-search-module.git",
-                "reference": "dc84ec0509295a66e3034931e1ad364bd5fa3ba9"
+                "reference": "68a6b79f97f326f29620e7b0434f01f50a5c0947"
             },
             "require": {
                 "kovalenkojuls/yii2-widget-combodate": "*",
@@ -15543,5 +15543,5 @@
         "ext-pgsql": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "1.1.0"
+    "plugin-api-version": "2.0.0"
 }

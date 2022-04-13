@@ -1,8 +1,8 @@
 <?php
 
-namespace modules\product\src\entities\productQuote;
+namespace modules\product\src\entities\productQuote\events;
 
-interface ProductQuoteChangeStatusInterface
+interface ProductQuoteStatusChangeInterface
 {
     public function getId(): int;
     public function getStartStatus(): ?int;
