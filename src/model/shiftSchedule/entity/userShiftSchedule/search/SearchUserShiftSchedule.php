@@ -2,6 +2,7 @@
 
 namespace src\model\shiftSchedule\entity\userShiftSchedule\search;
 
+use common\models\Employee;
 use yii\data\ActiveDataProvider;
 use src\model\shiftSchedule\entity\userShiftSchedule\UserShiftSchedule;
 
@@ -77,6 +78,54 @@ class SearchUserShiftSchedule extends UserShiftSchedule
         ]);
 
         $query->andFilterWhere(['like', 'uss_description', $this->uss_description]);
+
+        return $dataProvider;
+    }
+
+    public function searchByUserId($params, int $userId, ?string $startDate = null, ?string $endDate = null): ActiveDataProvider
+    {
+        $query = static::find();
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort' => ['defaultOrder' => ['uss_id' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 7,
+            ],
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+
+        $query->where(['uss_user_id' => $userId]);
+
+        if (!empty($startDate)) {
+            $startDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($startDate));
+            $query->andWhere(['>=', 'uss_start_utc_dt', $startDateTime]);
+            $this->uss_start_utc_dt = $startDateTime;
+        }
+
+        if (!empty($endDate)) {
+            $endDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($endDate));
+            $query->andWhere(['<=', 'uss_end_utc_dt', $endDateTime]);
+            $this->uss_end_utc_dt = $endDateTime;
+        }
+
+        $query->andFilterWhere([
+            'uss_id' => $this->uss_id,
+            'uss_shift_id' => $this->uss_shift_id,
+            'uss_ssr_id' => $this->uss_ssr_id,
+            'uss_sst_id' => $this->uss_sst_id,
+            //'DATE(uss_start_utc_dt)' => $this->uss_start_utc_dt,
+            //'DATE(uss_end_utc_dt)' => $this->uss_end_utc_dt,
+            'uss_duration' => $this->uss_duration,
+            'uss_status_id' => $this->uss_status_id,
+            'uss_type_id' => $this->uss_type_id
+        ]);
 
         return $dataProvider;
     }

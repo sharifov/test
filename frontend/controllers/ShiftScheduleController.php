@@ -7,6 +7,7 @@ use src\auth\Auth;
 use src\helpers\app\AppHelper;
 use src\model\shiftSchedule\entity\shift\Shift;
 use src\model\shiftSchedule\entity\shiftScheduleRule\ShiftScheduleRule;
+use src\model\shiftSchedule\entity\userShiftSchedule\search\SearchUserShiftSchedule;
 use src\model\shiftSchedule\entity\userShiftSchedule\UserShiftSchedule;
 use Yii;
 use src\model\shiftSchedule\entity\shiftScheduleRule\search\SearchShiftScheduleRule;
@@ -101,14 +102,23 @@ class ShiftScheduleController extends FController
 
         $userTimeZone = 'local'; //'UTC'; //'Europe/Chisinau'; //Auth::user()->userParams->up_timezone ?? 'local';
 
+        $user = Auth::user();
+        $searchModel = new SearchUserShiftSchedule();
+
+        $startDate = Yii::$app->request->get('startDate', date('Y-m-d'));
+        $endDate = Yii::$app->request->get('endDate', date('Y-m-d', strtotime('+1 day')));
+
+        $dataProvider = $searchModel->searchByUserId(Yii::$app->request->queryParams, $user->id, $startDate, $endDate);
+
 
         return $this->render('index', [
-//            'searchModel' => $searchModel,
-//            'dataProvider' => $dataProvider,
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
               'monthList' => $monthList,
               'scheduleTypeList' => $scheduleTypeList,
               'scheduleSumData' => $scheduleSumData,
               'userTimeZone' => $userTimeZone,
+                'user' => $user,
         ]);
     }
 

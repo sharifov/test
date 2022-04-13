@@ -1,21 +1,29 @@
 <?php
 
+use common\components\grid\DateTimeColumn;
+use common\components\grid\UserSelect2Column;
+use common\models\Employee;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use src\auth\Auth;
+use src\model\shiftSchedule\entity\shift\Shift;
+use src\model\shiftSchedule\entity\shiftScheduleRule\ShiftScheduleRule;
+use src\model\shiftSchedule\entity\userShiftSchedule\search\SearchUserShiftSchedule;
 use src\model\shiftSchedule\entity\userShiftSchedule\UserShiftSchedule;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel common\models\search\TaskSearch */
-/* @var $dataProvider yii\data\ActiveDataProvider */
+
 /* @var $monthList array */
 /* @var $scheduleTypeList ShiftScheduleType[] */
 /* @var $scheduleSumData array */
 /* @var $userTimeZone string */
+/* @var $user Employee */
+/* @var $searchModel SearchUserShiftSchedule */
+/* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'My Shift Schedule';
+$this->title = 'My Shift Schedule' . ' (' . $user->username . ')';
 $this->params['breadcrumbs'][] = $this->title;
 
 $bundle = \frontend\assets\FullCalendarAsset::register($this);
@@ -41,7 +49,7 @@ $scheduleTotalData = [];
         <div class="col-md-6">
             <div class="x_panel">
                 <div class="x_title">
-                    <h2><i class="fa fa-calendar"></i> My Shift Schedule (TimeZone: <?= Html::encode($userTimeZone)?>)</h2>
+                    <h2><i class="fa fa-calendar"></i> My Calendar (TimeZone: <?= Html::encode($userTimeZone)?>)</h2>
         <!--            <ul class="nav navbar-right panel_toolbox" style="min-width: initial;">-->
         <!--                <li>-->
         <!--                    <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>-->
@@ -59,10 +67,9 @@ $scheduleTotalData = [];
             </div>
         </div>
         <div class="col-md-6">
-
             <div class="x_panel">
                 <div class="x_title">
-                    <h2><i class="fa fa-list"></i> Monthly scheduling statistics</h2>
+                    <h2><i class="fa fa-bar-chart"></i> My Monthly scheduling statistics</h2>
                     <!--            <ul class="nav navbar-right panel_toolbox" style="min-width: initial;">-->
                     <!--                <li>-->
                     <!--                    <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>-->
@@ -202,45 +209,139 @@ $scheduleTotalData = [];
                     </div>
                 </div>
             </div>
+
+        <div class="x_panel">
+            <div class="x_title">
+                <h2><i class="fa fa-bars"></i> My TimeLine List</h2>
+                <!--            <ul class="nav navbar-right panel_toolbox" style="min-width: initial;">-->
+                <!--                <li>-->
+                <!--                    <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>-->
+                <!--                </li>-->
+                <!--            </ul>-->
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content" style="display: block">
+
+                <?php Pjax::begin(['id' => 'pjax-user-timeline']); ?>
+
+                    <?= GridView::widget([
+                    'dataProvider' => $dataProvider,
+                    'filterModel' => $searchModel,
+                    'columns' => [
+                        [
+                            'attribute' => 'uss_id',
+                            'options' => ['style' => 'width:80px'],
+                            'filter' => false
+                        ],
+                        [
+                            'attribute' => 'uss_sst_id',
+                            'value' => static function (
+                                UserShiftSchedule $model
+                            ) {
+                                return $model->getScheduleTypeTitle();
+                            },
+                            'filter' => ShiftScheduleType::getList()
+                        ],
+                        [
+                            'class' => DateTimeColumn::class,
+                            'attribute' => 'uss_start_utc_dt',
+                            'format' => 'byUserDateTime'
+                        ],
+                        [
+                            'attribute' => 'uss_duration',
+                            'value' => static function (
+                                UserShiftSchedule $model
+                            ) {
+                                return Html::tag('span', round($model->uss_duration / 60, 1) . 'h', ['title' => Yii::$app->formatter->asDuration($model->uss_duration * 60)]);
+                            },
+                            'format' => 'raw',
+                            'options' => ['style' => 'width:100px'],
+                            'filter' => false
+                        ],
+                        [
+                            'class' => DateTimeColumn::class,
+                            'attribute' => 'uss_end_utc_dt',
+                            'format' => 'byUserDateTime'
+                        ],
+//            'uss_duration',
+
+//                        [
+//                            'attribute' => 'uss_shift_id',
+//                            'value' => static function (
+//                                UserShiftSchedule $model
+//                            ) {
+//                                return $model->getShiftTitle();
+//                            },
+//                            'filter' => false //Shift::getList()
+//                        ],
+
+//                        [
+//                            'attribute' => 'uss_ssr_id',
+//                            'value' => static function (
+//                                UserShiftSchedule $model
+//                            ) {
+//                                return $model->getRuleTitle();
+//                            },
+//                            'filter' => ShiftScheduleRule::getList()
+//                        ],
+                        //'uss_status_id',
+                        [
+                            'attribute' => 'uss_status_id',
+                            'value' => static function (
+                                UserShiftSchedule $model
+                            ) {
+                                return $model->getStatusName();
+                            },
+                            'filter' => UserShiftSchedule::getStatusList()
+                        ],
+//                        [
+//                            'attribute' => 'uss_type_id',
+//                            'value' => static function (
+//                                UserShiftSchedule $model
+//                            ) {
+//                                return $model->getTypeName();
+//                            },
+//                            'filter' => UserShiftSchedule::getTypeList()
+//                        ],
+//            'uss_type_id',
+//                        'uss_customized:boolean',
+//                        [
+//                            'class' => DateTimeColumn::class,
+//                            'attribute' => 'uss_created_dt',
+//                            'format' => 'byUserDateTime'
+//                        ],
+//            [
+//                'class' => DateTimeColumn::class,
+//                'attribute' => 'uss_updated_dt',
+//                'format' => 'byUserDateTime'
+//            ],
+
+//            [
+//                'class' => UserSelect2Column::class,
+//                'attribute' => 'uss_updated_user_id',
+//                'relation' => 'updatedUser',
+//                'format' => 'username',
+//                'placeholder' => 'Select User'
+//            ],
+
+                       // ['class' => 'yii\grid\ActionColumn'],
+                    ],
+                ]); ?>
+                <?php Pjax::end(); ?>
+
+            </div>
         </div>
     </div>
 
 
-
-
-    <?php Pjax::begin(); ?>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
-
-    <p>
-        <?php /*= Html::a('Create Task', ['create'], ['class' => 'btn btn-success'])*/ ?>
-    </p>
-
-    <?php /*= GridView::widget([
-        'dataProvider' => $dataProvider,
-        'filterModel' => $searchModel,
-        'columns' => [
-            //['class' => 'yii\grid\SerialColumn'],
-
-            't_id',
-            't_key',
-            't_name',
-            [
-                'attribute' => 't_category_id',
-                'value' => function (\common\models\Task $model) {
-                    return $model->getCategoryName();
-                },
-                'filter' => \common\models\Task::CAT_LIST
-            ],
-
-            't_description',
-            't_hidden:boolean',
-            't_sort_order',
-
-            ['class' => 'yii\grid\ActionColumn'],
-        ],
-    ]); */?>
-    <?php Pjax::end(); ?>
 </div>
+
+
+
+
+
+
+
 
 <?php
 
@@ -419,6 +520,7 @@ $js = <<<JS
             openModalEventId(eventObj.id);
           },
           select: function(info) {
+            updateTimeLineList(info.startStr, info.endStr);
             console.log(info);
             //console.log('selected ' + info.startStr + ' to ' + info.endStr);
           }
@@ -445,6 +547,12 @@ $js = <<<JS
         });
     }
     
+    function updateTimeLineList(startDate, endDate) 
+    {
+        // let startDate = '';
+        // let endDate = '';
+        $.pjax.reload({container: '#pjax-user-timeline', push: false, replace: false, timeout: 5000, data: {startDate: startDate, endDate: endDate}});
+    }
 JS;
 
 $this->registerJs($js);

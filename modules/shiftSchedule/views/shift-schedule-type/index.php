@@ -2,6 +2,7 @@
 
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
+use common\models\Employee;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -12,6 +13,7 @@ use yii\widgets\Pjax;
 /* @var $this yii\web\View */
 /* @var $searchModel modules\shiftSchedule\src\entities\shiftScheduleType\search\ShiftScheduleTypeSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var $user Employee */
 
 $this->title = 'Shift Schedule Types';
 $this->params['breadcrumbs'][] = $this->title;
