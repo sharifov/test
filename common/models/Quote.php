@@ -11,6 +11,9 @@ use src\behaviors\metric\MetricQuoteCounterBehavior;
 use src\behaviors\quote\ClientCurrencyBehavior;
 use src\entities\EventTrait;
 use src\events\quote\QuoteExtraMarkUpChangeEvent;
+use src\events\quote\QuoteSendByChatLoggingEvent;
+use src\events\quote\QuoteSendByEmailLoggingEvent;
+use src\events\quote\QuoteSendBySmsLoggingEvent;
 use src\events\quote\QuoteSendEvent;
 use src\helpers\app\AppHelper;
 use src\helpers\setting\SettingHelper;
@@ -2707,6 +2710,30 @@ class Quote extends \yii\db\ActiveRecord
     public static function find(): QuoteQuery
     {
         return new QuoteQuery(get_called_class());
+    }
+
+    /**
+     * @param int $emailId
+     */
+    public function sendingByEmail(int $emailId): void
+    {
+        $this->recordEvent(new QuoteSendByEmailLoggingEvent($this->id, $emailId));
+    }
+
+    /**
+     * @param int $smsId
+     */
+    public function sendingBySms(int $smsId): void
+    {
+        $this->recordEvent(new QuoteSendBySmsLoggingEvent($this->id, $smsId));
+    }
+
+    /**
+     * @param int $chatId
+     */
+    public function sendingByChat(int $chatId): void
+    {
+        $this->recordEvent(new QuoteSendByChatLoggingEvent($this->id, $chatId));
     }
 
     public function setStatusSend(): void

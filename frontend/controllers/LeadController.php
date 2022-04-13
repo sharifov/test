@@ -559,12 +559,11 @@ class LeadController extends FController
                                 /** @var Quote[] $quoteObjects */
                                 $quoteObjects = Quote::find()->where(['IN', 'id', $quoteIds])->all();
                                 foreach ($quoteObjects as $quoteObject) {
+                                    $quoteObject->sendingByEmail($mail->e_id);
                                     $quoteObject->setStatusSend();
-                                    // - Do email should be sent if quote didn't change status?
+                                    // - Do email should be sent if quote didn't change sxtatus?
                                     // - Do we should call saving request in loop? Calling all updates via one request would be better way
-                                    if ($this->quoteRepository->save($quoteObject)) {
-                                        Repo::createForEmail($mail, $quoteObject->id);
-                                    } else {
+                                    if (!$this->quoteRepository->save($quoteObject)) {
                                         Yii::error($quoteObject->errors, 'LeadController:view:Email:Quote:save');
                                     }
                                 }
@@ -575,15 +574,17 @@ class LeadController extends FController
                         } else {
                             $mail->statusToReview();
                             $this->emailReviewQueueManageService->createByEmail($mail, $lead->l_dep_id);
-                            if ($quoteList = @json_decode($previewEmailForm->e_quote_list)) {
-                                if (is_array($quoteList)) {
-                                    foreach ($quoteList as $quoteId) {
-                                        Repo::createForEmail($mail, (int)$quoteId);
-                                    }
+                            /** @var string[] $quoteIds */
+                            $quoteIds = Json::decode($previewEmailForm->e_quote_list);
+                            /** @var Quote[] $quoteObjects */
+                            $quoteObjects = Quote::find()->where(['IN', 'id', $quoteIds])->all();
+                            foreach ($quoteObjects as $quoteObject) {
+                                $quoteObject->sendingByEmail($mail->e_id);
+                                if (!$this->quoteRepository->save($quoteObject)) {
+                                    Yii::error($quoteObject->errors, 'LeadController:view:Email:Quote:save');
                                 }
                             }
                             $mail->update();
-
                             Yii::$app->session->setFlash('send-warning', '<strong>Email Message</strong> has been sent for review');
                             $this->refresh('#communication-form');
                         }
@@ -645,10 +646,9 @@ class LeadController extends FController
                         /** @var Quote[] $quoteObjects */
                         $quoteObjects = Quote::find()->where(['IN', 'id', $quoteIds])->all();
                         foreach ($quoteObjects as $quote) {
+                            $quote->sendingBySms($sms->s_id);
                             $quote->setStatusSend();
-                            if ($this->quoteRepository->save($quote)) {
-                                Repo::createForSms($sms->s_id, $quote->id);
-                            } else {
+                            if (!$this->quoteRepository->save($quote)) {
                                 Yii::error($quote->errors, 'LeadController:view:Sms:Quote:save');
                             }
                         }

@@ -44,10 +44,19 @@ use src\model\visitorSubscription\event\VisitorSubscriptionEnabled;
 use src\model\visitorSubscription\listener\FindChatsAndRunDistributionLogic;
 use src\events\quote\QuoteExtraMarkUpChangeEvent;
 use src\listeners\quote\QuoteExtraMarkUpChangeEventListener;
+use src\events\quote\QuoteSendByEmailLoggingEvent;
+use src\listeners\quote\QuoteSendingByEmailLoggingEventHandler;
+use src\events\quote\QuoteSendBySmsLoggingEvent;
+use src\listeners\quote\QuoteSendingBySmsLoggingEventHandler;
+use src\events\quote\QuoteSendByChatLoggingEvent;
+use src\listeners\quote\QuoteSendingByChatLoggingEventHandler;
 
 return [
     UserProfitCalculateByOrderTipsUserProfitsEvent::class => [UserProfitCalculateByOrderTipsUserProfitsEventListener::class],
     QuoteSendEvent::class => [QuoteSendEventListener::class],
+    QuoteSendByEmailLoggingEvent::class => [QuoteSendingByEmailLoggingEventHandler::class],
+    QuoteSendBySmsLoggingEvent::class => [QuoteSendingBySmsLoggingEventHandler::class],
+    QuoteSendByChatLoggingEvent::class => [QuoteSendingByChatLoggingEventHandler::class],
     QuoteExtraMarkUpChangeEvent::class => [
         QuoteExtraMarkUpChangeEventListener::class,
     ],

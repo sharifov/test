@@ -1659,10 +1659,9 @@ class ClientChatController extends FController
             /** @var Quote[] $quoteList */
             $quoteList = Quote::find()->where(['IN', 'id', $quoteIds])->all();
             foreach ($quoteList as $quote) {
+                $quote->sendingByChat($chatId);
                 $quote->setStatusSend();
-                if ($this->quoteRepository->save($quote)) {
-                    Repo::createForChat($chatId, $quote->id);
-                } else {
+                if (!$this->quoteRepository->save($quote)) {
                     Yii::error($quote->errors, 'ClientChatController::sendQuote:Quote:save');
                     $out['warning'] = "Update status of Quote({$quote->id}) failed";
                 }
