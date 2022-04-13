@@ -11,10 +11,9 @@ use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
-use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelation;
-use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use src\entities\cases\CaseEventLog;
 use src\entities\cases\Cases;
+use src\forms\cases\CasesChangeStatusForm;
 use src\interfaces\BoWebhookService;
 use webapi\src\forms\boWebhook\FlightVoluntaryExchangeUpdateForm;
 use yii\base\Model;
@@ -90,6 +89,21 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
         switch ($form->status) {
             case FlightVoluntaryExchangeUpdateForm::STATUS_EXCHANGED:
                 $this->handleExchanged();
+                $statusForm = new CasesChangeStatusForm($this->case, null);
+                $statusForm->setAttributes([
+                    'language' => 'en-US',
+                    'sendTo' => $this->case->client->lastClientEmail,
+                    'resendFeedbackForm' => true
+                ]);
+                if ($statusForm->isSendFeedback()) {
+                    $sent = $this->objectCollection->getCasesCommunicationService()->sendFeedbackEmail($this->case, $statusForm, null);
+                    if ($sent) {
+                        $this->case->addEventLog(
+                            CaseEventLog::VOLUNTARY_EXCHANGE_WH_UPDATE,
+                            'Sent Feedback Survey Email By: System'
+                        );
+                    }
+                }
                 break;
             case FlightVoluntaryExchangeUpdateForm::STATUS_CANCELED:
                 $this->handleCanceled();
