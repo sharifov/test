@@ -2322,11 +2322,18 @@ class LeadController extends FController
             'LeadCreateForm',
             ['emails' => 'EmailCreateForm', 'phones' => 'PhoneCreateForm', 'segments' => 'SegmentCreateForm']
         );
+
+        $dto = new LeadAbacDto(null, Auth::id());
+        $delayedChargeAccess = Yii::$app->abac->can($dto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CREATE, Auth::user());
+
         $form = new LeadCreateForm(count($data['post']['EmailCreateForm']), count($data['post']['PhoneCreateForm']), count($data['post']['SegmentCreateForm']));
         $form->assignCase($case->cs_gid);
         $form->assignDep(Department::DEPARTMENT_EXCHANGE);
         if ($form->load($data['post']) && $form->validate()) {
             try {
+                if (!$delayedChargeAccess) {
+                    $form->delayedCharge = false;
+                }
                 $form->client->projectId = $form->projectId;
                 $form->client->typeCreate = Client::TYPE_CREATE_LEAD;
                 $lead = $this->leadManageService->createManuallyFromCase($form, Yii::$app->user->id, Yii::$app->user->id, 'Manual create form Case');
@@ -2338,7 +2345,7 @@ class LeadController extends FController
                 return $this->redirect(['/lead/create-case', 'case_gid' => $case->cs_gid]);
             }
         }
-        return $this->render('create', ['leadForm' => $form]);
+        return $this->render('create', ['leadForm' => $form, 'delayedChargeAccess' => $delayedChargeAccess]);
     }
 
     /**

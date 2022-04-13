@@ -41,7 +41,9 @@ use src\repositories\lead\LeadRepository;
 use src\repositories\NotFoundException;
 use src\repositories\project\ProjectRepository;
 use src\services\quote\addQuote\AddQuoteService;
+use src\services\quote\addQuote\price\QuotePriceCreateService;
 use src\services\quote\addQuote\TripService;
+use src\services\quote\quotePriceService\ClientQuotePriceService;
 use webapi\src\ApiCodeException;
 use webapi\src\behaviors\ApiUserProjectRelatedAccessBehavior;
 use webapi\src\Messages;
@@ -670,6 +672,7 @@ class QuoteController extends ApiBaseController
      * @apiParam {bool}             [Quote.created_by_seller]   created_by_seller
      * @apiParam {int}              [Quote.type_id]             type_id
      * @apiParam {object}           [Quote.prod_types[]]        Quote labels
+     * @apiParam {string{3}}        [Quote.currency_code]       Currency code
      * @apiParam {object}           QuotePrice[]                QuotePrice data array
      * @apiParam {string}           [QuotePrice.uid]            uid
      * @apiParam {string}           [QuotePrice.passenger_type] passenger_type
@@ -705,7 +708,8 @@ class QuoteController extends ApiBaseController
      *          "employee_name": "Barry",
      *          "created_by_seller": false,
      *          "type_id" : 0,
-     *          "prod_types" : ["SEP", "TOUR"]
+     *          "prod_types" : ["SEP", "TOUR"],
+     *          "currency_code" : "USD"
      *      },
      *      "QuotePrice": [
      *          {
@@ -816,6 +820,11 @@ class QuoteController extends ApiBaseController
                 $quote->provider_project_id = $projectRelationsIds[$randomProjectIndex] ?? null;
             }
 
+            $currencyCode = $quoteAttributes['currency_code'] ?? null;
+            $clientQuotePriceService = new ClientQuotePriceService($quote);
+            $clientQuotePriceService->setClientCurrency($currencyCode)->calculateClientCurrencyRate();
+            $quote = $clientQuotePriceService->getQuote();
+
             $quote->save();
             if ($quote->hasErrors()) {
                 throw new \RuntimeException($quote->getErrorSummary(false)[0]);
@@ -891,13 +900,9 @@ class QuoteController extends ApiBaseController
             $quotePricesAttributes = Yii::$app->request->post((new QuotePrice())->formName());
             if (!empty($quotePricesAttributes)) {
                 foreach ($quotePricesAttributes as $quotePriceAttributes) {
-                    $quotePrice = new QuotePrice();
-                    if ($quotePrice) {
-                        $quotePrice->attributes = $quotePriceAttributes;
-                        $quotePrice->quote_id = $quote->id;
-                        if (!$quotePrice->save()) {
-                            $warnings[] = $quotePrice->getErrorSummary(false)[0];
-                        }
+                    $quotePrice = QuotePriceCreateService::createFromApi($quote, $quotePriceAttributes, $currencyCode);
+                    if (!$quotePrice->save()) {
+                        $warnings[] = $quotePrice->getErrorSummary(false)[0];
                     }
                 }
             }
