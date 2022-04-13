@@ -2,11 +2,19 @@
 
 namespace src\model\shiftSchedule\entity\userShiftSchedule\search;
 
+use common\models\Employee;
 use yii\data\ActiveDataProvider;
 use src\model\shiftSchedule\entity\userShiftSchedule\UserShiftSchedule;
 
+/**
+ * @property string $clientStartDate
+ * @property string $clientEndDate
+ */
 class SearchUserShiftSchedule extends UserShiftSchedule
 {
+    public string $clientStartDate = '';
+    public string $clientEndDate = '';
+
     public function rules(): array
     {
         return [
@@ -39,6 +47,7 @@ class SearchUserShiftSchedule extends UserShiftSchedule
             ['uss_updated_user_id', 'integer'],
 
             ['uss_user_id', 'integer'],
+            ['uss_sst_id', 'integer'],
         ];
     }
 
@@ -62,6 +71,7 @@ class SearchUserShiftSchedule extends UserShiftSchedule
             'uss_user_id' => $this->uss_user_id,
             'uss_shift_id' => $this->uss_shift_id,
             'uss_ssr_id' => $this->uss_ssr_id,
+            'uss_sst_id' => $this->uss_sst_id,
             'DATE(uss_start_utc_dt)' => $this->uss_start_utc_dt,
             'DATE(uss_end_utc_dt)' => $this->uss_end_utc_dt,
             'uss_duration' => $this->uss_duration,
@@ -75,6 +85,80 @@ class SearchUserShiftSchedule extends UserShiftSchedule
         ]);
 
         $query->andFilterWhere(['like', 'uss_description', $this->uss_description]);
+
+        return $dataProvider;
+    }
+
+    /**
+     * @param $params
+     * @param int $userId
+     * @param string|null $startDate
+     * @param string|null $endDate
+     * @return ActiveDataProvider
+     */
+    public function searchByUserId(
+        $params,
+        int $userId,
+        ?string $startDate = null,
+        ?string $endDate = null
+    ): ActiveDataProvider {
+        $query = static::find();
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort' => ['defaultOrder' => ['uss_id' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 7,
+            ],
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+
+        $query->where(['uss_user_id' => $userId]);
+
+        if (!empty($startDate) && !empty($endDate)) {
+            $this->clientStartDate = $startDate;
+            $this->clientEndDate = $endDate;
+
+            $startDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($startDate));
+            $endDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($endDate));
+
+            $query->andWhere([
+                'OR',
+                ['between', 'uss_start_utc_dt', $startDateTime, $endDateTime],
+                ['between', 'uss_end_utc_dt', $startDateTime, $endDateTime],
+                [
+                    'AND',
+                    ['>=', 'uss_start_utc_dt', $startDateTime],
+                    ['<=', 'uss_end_utc_dt', $endDateTime]
+                ],
+                [
+                    'AND',
+                    ['<=', 'uss_start_utc_dt', $startDateTime],
+                    ['>=', 'uss_end_utc_dt', $endDateTime]
+                ]
+            ]);
+        }
+
+
+        //CONVERT_TZ(NOW(), 'Asia/Calcutta', 'UTC')
+
+        $query->andFilterWhere([
+            'uss_id' => $this->uss_id,
+            'uss_shift_id' => $this->uss_shift_id,
+            'uss_ssr_id' => $this->uss_ssr_id,
+            'uss_sst_id' => $this->uss_sst_id,
+            //'DATE(uss_start_utc_dt)' => $this->uss_start_utc_dt,
+            //'DATE(uss_end_utc_dt)' => $this->uss_end_utc_dt,
+            'uss_duration' => $this->uss_duration,
+            'uss_status_id' => $this->uss_status_id,
+            'uss_type_id' => $this->uss_type_id
+        ]);
 
         return $dataProvider;
     }

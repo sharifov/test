@@ -11,6 +11,7 @@ use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "shift".
@@ -140,5 +141,19 @@ class Shift extends ActiveRecord
     public static function tableName(): string
     {
         return 'shift';
+    }
+
+    /**
+     * @param bool $enabled
+     * @return array
+     */
+    public static function getList(?bool $enabled = null): array
+    {
+        $query = self::find()->orderBy(['sh_sort_order' => SORT_ASC]);
+        if ($enabled !== null) {
+            $query->andWhere(['sh_enabled' => true]);
+        }
+        $data = $query->asArray()->all();
+        return ArrayHelper::map($data, 'sh_id', 'sh_title');
     }
 }

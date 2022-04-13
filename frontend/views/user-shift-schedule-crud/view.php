@@ -7,7 +7,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model src\model\shiftSchedule\entity\userShiftSchedule\UserShiftSchedule */
 
-$this->title = $model->uss_id;
+$this->title = 'Time Line ' . $model->uss_id;
 $this->params['breadcrumbs'][] = ['label' => 'User Shift Schedules', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
@@ -19,8 +19,8 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="col-md-4">
 
         <p>
-            <?= Html::a('Update', ['update', 'id' => $model->uss_id], ['class' => 'btn btn-primary']) ?>
-            <?= Html::a('Delete', ['delete', 'id' => $model->uss_id], [
+            <?= Html::a('<i class="fa fa-edit"></i> Update', ['update', 'id' => $model->uss_id], ['class' => 'btn btn-primary']) ?>
+            <?= Html::a('<i class="fa fa-remove"></i> Delete', ['delete', 'id' => $model->uss_id], [
                 'class' => 'btn btn-danger',
                 'data' => [
                     'confirm' => 'Are you sure you want to delete this item?',
@@ -34,8 +34,27 @@ $this->params['breadcrumbs'][] = $this->title;
             'attributes' => [
                 'uss_id',
                 'uss_user_id:username',
-                'uss_shift_id',
-                'uss_ssr_id',
+//                'uss_shift_id',
+//                'uss_ssr_id',
+
+                [
+                    'attribute' => 'uss_shift_id',
+                    'value' => static function (
+                        UserShiftSchedule $model
+                    ) {
+                        return $model->getShiftTitle();
+                    },
+                ],
+
+                [
+                    'attribute' => 'uss_ssr_id',
+                    'value' => static function (
+                        UserShiftSchedule $model
+                    ) {
+                        return $model->getRuleTitle();
+                    },
+                ],
+
                 'uss_description',
                 'uss_start_utc_dt:byUSerDateTime',
                 'uss_end_utc_dt:byUSerDateTime',
@@ -52,7 +71,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         return $model->getTypeName();
                     }
                 ],
-                'uss_customized',
+                'uss_customized:boolean',
                 'uss_created_dt:byUSerDateTime',
                 'uss_updated_dt:byUSerDateTime',
                 'uss_created_user_id:username',
