@@ -857,7 +857,9 @@ class Email extends \yii\db\ActiveRecord
      */
     public function beforeSave($insert): bool
     {
-        $this->e_created_dt = date('Y-m-d H:i:s');
+        if ($insert) {
+            $this->e_created_dt = date('Y-m-d H:i:s');
+        }
         if (parent::beforeSave($insert)) {
             if (!empty($this->body_html)) {
                 $this->e_email_body_text = TextConvertingHelper::htmlToText($this->body_html);
