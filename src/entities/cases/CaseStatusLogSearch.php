@@ -61,7 +61,7 @@ class CaseStatusLogSearch extends CaseStatusLog
 
             ['project_id', 'integer'],
 
-            ['department_id', 'integer']
+            ['department_id', 'integer'],
 
         ];
     }

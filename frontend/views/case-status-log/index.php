@@ -8,7 +8,7 @@ use src\entities\cases\CaseStatusLog;
 use common\models\Employee;
 use yii\widgets\Pjax;
 use src\auth\Auth;
-use \src\access\ListsAccess;
+use src\access\ListsAccess;
 
 /* @var $this yii\web\View */
 /* @var $searchModel src\entities\cases\CaseStatusLogSearch */
@@ -65,14 +65,14 @@ $lists = new ListsAccess($user->id);
                 'attribute' => 'project_id',
                 'options' => ['style' => 'width:140px'],
                 'label' => 'Project',
-                'filter' => $lists->getProjects()
+                'filter' => $lists->getProjects(),
             ],
 
             [
                 'attribute' => 'department_id',
                 'options' => ['style' => 'width:140px'],
                 'label' => 'Department',
-                'filter' => $lists->getDepartments()
+                'filter' => $lists->getDepartments(),
             ],
 
             [
