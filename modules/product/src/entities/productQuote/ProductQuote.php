@@ -1147,14 +1147,29 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         return null;
     }
 
+    public function getProductQuoteData(): ActiveQuery
+    {
+        return $this->hasMany(ProductQuoteData::class, ['pqd_product_quote_id' => 'pq_id']);
+    }
+
     public function getProductQuoteDataRecommended(): ActiveQuery
     {
         return $this->hasOne(ProductQuoteData::class, ['pqd_product_quote_id' => 'pq_id'])->andWhere(['pqd_key' => ProductQuoteDataKey::RECOMMENDED]);
     }
 
+    public function getProductQuoteDataConfirmed(): ActiveQuery
+    {
+        return $this->hasOne(ProductQuoteData::class, ['pqd_product_quote_id' => 'pq_id'])->andWhere(['pqd_key' => ProductQuoteDataKey::CONFIRMED]);
+    }
+
     public function isRecommended(): bool
     {
         return $this->productQuoteDataRecommended ? $this->productQuoteDataRecommended->isRecommended() : false;
+    }
+
+    public function isConfirmed(): bool
+    {
+        return $this->productQuoteDataConfirmed ? $this->productQuoteDataConfirmed->isConfirmed() : false;
     }
 
     public function isChangeable(): bool
