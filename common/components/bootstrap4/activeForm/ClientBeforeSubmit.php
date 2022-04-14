@@ -88,7 +88,7 @@ $('#{$widgetId}').on('beforeSubmit', function (e) {
                     if (data.message) {
                         message = data.message;
                     }
-                    new PNotify({title: '{$this->header}', text: message, type: 'info'});
+                    createNotifyByObject({title: '{$this->header}', text: message, type: 'info'});
                 }
             } else {
                 {$this->doneErrorScript};
@@ -97,14 +97,14 @@ $('#{$widgetId}').on('beforeSubmit', function (e) {
                     if (data.message) {
                         message = data.message;
                     }
-                    new PNotify({title: '{$this->header}', text: message, type: 'error'});
+                    createNotifyByObject({title: '{$this->header}', text: message, type: 'error'});
                 }
             }
             {$this->doneAlwaysScript};
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
             if ({$this->notify}) {
-               new PNotify({title: '{$this->header}', text: "Request failed: " + textStatus, type: 'error'});
+               createNotifyByObject({title: '{$this->header}', text: "Request failed: " + textStatus, type: 'error'});
            }
         })
         .always(function() {

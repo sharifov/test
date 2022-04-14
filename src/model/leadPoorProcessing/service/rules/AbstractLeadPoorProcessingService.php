@@ -24,8 +24,7 @@ class AbstractLeadPoorProcessingService implements LeadPoorProcessingServiceInte
 
     public function __construct(int $leadId, string $ruleKey, ?string $description = null)
     {
-        $sql = 'SELECT * FROM ' . Lead::tableName() . ' WHERE id = ' . $leadId . ' LIMIT 1 FOR UPDATE';
-        if (!$lead = Lead::findBySql($sql)->one()) {
+        if (!$lead = Lead::find()->where(['id' => $leadId])->limit(1)->one()) {
             throw new \RuntimeException('Lead not found by ID(' . $leadId . ')');
         }
         $this->lead = $lead;

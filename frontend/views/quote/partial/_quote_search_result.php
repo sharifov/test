@@ -32,6 +32,7 @@ use yii\widgets\Pjax;
 
 $leadAbacDto = new LeadAbacDto($lead ?? null, Auth::id());
 $canDisplayQuoteSearchParams = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_DISPLAY_QUOTE_SEARCH_PARAMS, LeadAbacObject::ACTION_ACCESS);
+
 if ($quotes && (isset($quotes['count']) && $quotes['count'] > 0)) :
     $js = <<<JS
     $(document).on('click','.search_quote_details__btn', function (e) {

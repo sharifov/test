@@ -164,6 +164,19 @@ $this->registerJs($js);
         [
             'attribute' => 'status',
             'value' => static function (Lead $model) use ($timeNow) {
+
+                $statusChangeInfo = '';
+                if ($model->hasTakenFromBonusToProcessing()) {
+                    $statusChangeInfo = Html::tag('span', '<i class="fa fa-star"></i>', [
+                        'title' => 'Lead has been taken from Bonus Queue',
+                        'style' => 'font-size:larger',
+                    ]);
+                } elseif ($model->hasTakenFromExtraToProcessing()) {
+                    $statusChangeInfo = Html::tag('span', '<i class="fa fa-star-o"></i>', [
+                        'title' => 'Lead has been taken from Extra Queue',
+                        'style' => 'font-size:larger',
+                    ]);
+                }
                 $statusValue = $model->getStatusName(true);
                 $reasonValue =  $model->getLastReasonFromLeadFlow();
 
@@ -175,7 +188,7 @@ $this->registerJs($js);
                     $reasonValue = '<span>' . $reasonValue . '</span>';
                 }
 
-                return $statusValue . '<br>' . $reasonValue;
+                return $statusValue . '<br>' . $reasonValue . '<br>' . $statusChangeInfo;
             },
             'format' => 'raw',
             'filter' => Lead::getProcessingStatuses(),

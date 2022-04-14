@@ -95,7 +95,7 @@ let PhoneWidgetSms = function () {
                 if (data.status && data.status === 403) {
                     text = 'Access denied'
                 }
-                new PNotify({title: "Get sms", type: "error", text: text, hide: true});
+                createNotifyByObject({title: "Get sms", type: "error", text: text, hide: true});
             });
     }
 
@@ -273,7 +273,7 @@ let PhoneWidgetSms = function () {
 $(document).on('click', '.js-trigger-messages-modal', function () {
     let countPhones = PhoneWidgetSms.getUserPhones().length;
     if (countPhones < 1) {
-        new PNotify({title: "Get sms messages", type: "error", text: 'Not found user phones.', hide: true});
+        createNotifyByObject({title: "Get sms messages", type: "error", text: 'Not found user phones.', hide: true});
         return false;
     }
     let contact = {"id": $(this).data('contact-id'), "phone": $(this).data('contact-phone'), "type": $(this).data('contact-type')};
@@ -312,7 +312,7 @@ $(document).on('click', '.messages-modal__send-btn', function (e) {
                         content += err + '<br>';
                     });
                 });
-                new PNotify({title: "Send sms", type: "error", text: content, hide: true});
+                createNotifyByObject({title: "Send sms", type: "error", text: content, hide: true});
                 return false;
             }
             PhoneWidgetSms.addSms(data.sms, PhoneWidgetSms.getSmsesContainer(data.contact, data.user));
@@ -320,7 +320,7 @@ $(document).on('click', '.messages-modal__send-btn', function (e) {
         })
         .fail(function () {
             PhoneWidgetSms.sendFinish();
-            new PNotify({title: "Send sms", type: "error", text: 'Server Error. Try again later', hide: true});
+            createNotifyByObject({title: "Send sms", type: "error", text: 'Server Error. Try again later', hide: true});
         });
     return false;
 });

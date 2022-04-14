@@ -147,14 +147,14 @@ class CruiseController extends FController
             $out = '<script>$("#modal-sm").modal("hide"); pjaxReload({container: "#pjax-product-search-' . $cruise->crs_product_id . '"});';
             try {
                 $this->cruiseUpdateService->update($form);
-                $out .= 'new PNotify({title: "Cruise update request", type: "success", text: "Success" , hide: true});
+                $out .= 'createNotifyByObject({title: "Cruise update request", type: "success", text: "Success" , hide: true});
                  setTimeout(function () {
                       $(\'.btn-add-cabin[data-product-id="' . $cruise->crs_product_id . '"]\').trigger(\'click\');
                   }, 500);';
             } catch (\DomainException $e) {
-                $out .= 'new PNotify({title: "Cruise update request", type: "error", text: "' . $e->getMessage() . '" , hide: true});';
+                $out .= 'createNotifyByObject({title: "Cruise update request", type: "error", text: "' . $e->getMessage() . '" , hide: true});';
             } catch (\Throwable $e) {
-                $out .= 'new PNotify({title: "Cruise update request", type: "error", text: "Server error" , hide: true});';
+                $out .= 'createNotifyByObject({title: "Cruise update request", type: "error", text: "Server error" , hide: true});';
                 Yii::error($e, 'CruiseController:actionUpdateAjax');
             }
 

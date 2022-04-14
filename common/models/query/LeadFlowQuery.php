@@ -80,4 +80,14 @@ class LeadFlowQuery extends ActiveQuery
     {
         return $this->andWhere(['status' => $id]);
     }
+
+    public function notEmptyOwner(): self
+    {
+        return $this->andWhere(['IS NOT', 'lf_owner_id', null]);
+    }
+
+    public static function getFirstOwnerOfLead(int $leadId): ?LeadFlow
+    {
+        return LeadFlow::find()->byLeadId($leadId)->notEmptyOwner()->orderBy(['id' => SORT_ASC])->one();
+    }
 }

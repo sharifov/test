@@ -61,7 +61,7 @@ $js = <<<JS
           .done(function(data) {
               if (data.error) {
                   alert(data.error);
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'Error: add rent car quote',
                         type: 'error',
                         text: data.error,
@@ -77,7 +77,7 @@ $js = <<<JS
                       push: false, replace: false, timeout: 2000
                   });
                   
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'Quote was successfully added',
                         type: 'success',
                         text: data.message,
@@ -115,7 +115,7 @@ $js = <<<JS
       })
           .done(function(data) {
               if (data.status == 1) {                  
-                   new PNotify({
+                   createNotifyByObject({
                         title: 'Contract request success',
                         type: 'success',
                         text: data.message,
@@ -125,7 +125,7 @@ $js = <<<JS
                   btnAdd.find('i').removeClass('fa-spin fa-spinner').addClass('fa-check-circle-o');
                   btnAdd.removeClass('disabled').prop('disabled', false);
               } else {                  
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'Error: Contract request',
                         type: 'error',
                         text: data.message,

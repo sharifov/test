@@ -19,9 +19,12 @@ class LeadPoorProcessingAbacDto extends \stdClass
     public ?string $leadCabin = null;
     public ?string $leadCreated = null;
     public ?bool $leadIsClone = null;
+    public ?bool $leadHasFlightDetails = null;
+
 
     public bool $isInProject = false;
     public bool $isInDepartment = false;
+
 
     /**
      * @param Lead|null $lead
@@ -39,6 +42,7 @@ class LeadPoorProcessingAbacDto extends \stdClass
         $this->leadCabin = $lead->cabin ?? null;
         $this->leadCreated = $lead->created ?? null;
         $this->leadIsClone = $lead ? $lead->isCloneCreated() : null;
+        $this->leadHasFlightDetails = $lead ? $lead->hasFlightDetails() : null;
 
         if ($lead && $lead->project_id) {
             $this->isInProject = EmployeeProjectAccess::isInProject($lead->project_id, $userId);

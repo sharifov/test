@@ -42,6 +42,7 @@ $this->registerJs("$(function() {
         Pjax::begin(['id' => 'agent-activity', 'timeout' => 10000, 'scrollTo' => 0]);
         echo GridView::widget([
             'dataProvider' => $dataProvider,
+            'layout' => "{errors}\n{summary}\n{items}\n{pager}",
             'filterModel' => $searchModel,
             //'containerOptions' => ['style'=>'overflow: auto'], // only set when $responsive = false
 
@@ -364,6 +365,53 @@ $this->registerJs("$(function() {
                         'contentOptions' => ['class' => 'text-center'],
                         'filter' => false,
                         'format' => 'raw'
+                    ],
+                    [
+                        'label' => 'Extra Q Taken Leads',
+                        'attribute' => 'extra_q_to_processing_cnt',
+                        'value' => function ($data) use ($searchModel) {
+                            if (!$data['extra_q_to_processing_cnt']) {
+                                return '-';
+                            }
+                                return \yii\bootstrap\Html::a(
+                                    $data['extra_q_to_processing_cnt'],
+                                    ['/agent-report/from-to-leads',
+                                        'title' => 'From Processing to Snooze',
+                                        $searchModel->formName() . '[from_status]' => Lead::STATUS_EXTRA_QUEUE,
+                                        $searchModel->formName() . '[to_status]' => Lead::STATUS_PROCESSING,
+                                        $searchModel->formName() . '[lf_owner_id]' => $data['id'],
+                                        $searchModel->formName() . '[date_from]' => Employee::convertTimeFromUserDtToUTC(strtotime($searchModel->date_from)),
+                                        $searchModel->formName() . '[date_to]' => Employee::convertTimeFromUserDtToUTC(strtotime($searchModel->date_to))],
+                                    ['target' => '_blank', 'data-pjax' => 0]
+                                );
+                        },
+                        'contentOptions' => ['class' => 'text-center'],
+                        'filter' => false,
+                        'format' => 'raw',
+                    ],
+                    [
+                        'label' => 'Extra Q Lost Leads',
+                        'attribute' => 'processing_to_extra_q_cnt',
+                        'value' => function ($data) use ($searchModel) {
+                            if (!$data['processing_to_extra_q_cnt']) {
+                                return '-';
+                            }
+                                return \yii\bootstrap\Html::a(
+                                    $data['processing_to_extra_q_cnt'],
+                                    ['/agent-report/from-to-leads',
+                                        'title' => 'From Processing to Snooze',
+                                        $searchModel->formName() . '[from_status]' => Lead::STATUS_PROCESSING,
+                                        $searchModel->formName() . '[to_status]' => Lead::STATUS_EXTRA_QUEUE,
+                                        $searchModel->formName() . '[id]' => $data['id'],
+                                        $searchModel->formName() . '[isExtraQLostLeads]' => true,
+                                        $searchModel->formName() . '[date_from]' => Employee::convertTimeFromUserDtToUTC(strtotime($searchModel->date_from)),
+                                        $searchModel->formName() . '[date_to]' => Employee::convertTimeFromUserDtToUTC(strtotime($searchModel->date_to))],
+                                    ['target' => '_blank', 'data-pjax' => 0]
+                                );
+                        },
+                        'contentOptions' => ['class' => 'text-center'],
+                        'filter' => false,
+                        'format' => 'raw',
                     ],
 
                     [

@@ -2,11 +2,11 @@
 
 namespace frontend\controllers;
 
-use common\models\CaseSale;
 use common\models\SaleCreditCard;
 use frontend\helpers\JsonHelper;
 use frontend\models\form\CreditCardForm;
-use http\Exception\RuntimeException;
+use modules\cases\src\abac\saleList\SaleListAbacDto;
+use modules\cases\src\abac\saleList\SaleListAbacObject;
 use src\forms\caseSale\CaseSaleSendCcInfoForm;
 use src\helpers\app\AppHelper;
 use src\helpers\cases\CaseSaleHelper;
@@ -22,7 +22,7 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
-use yii\web\Controller;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
@@ -221,12 +221,26 @@ class CreditCardController extends FController
 
     public function actionAjaxAddCreditCard()
     {
+
         $caseId = Yii::$app->request->get('caseId');
         $saleId = Yii::$app->request->get('saleId');
         $pjaxId = Yii::$app->request->get('pjaxId');
 
         if (!$caseId || !$saleId) {
             throw new BadRequestHttpException();
+        }
+
+        try {
+            $case = $this->casesRepository->find((int)$caseId);
+        } catch (NotFoundException $e) {
+            throw new NotFoundHttpException('Not found case');
+        }
+
+        $userId = \Yii::$app->user->id;
+        $caseAbacDto = new SaleListAbacDto($case, $userId);
+        /** @abac $caseAbacDto, CasesAbacObject::UI_BLOCK_SALE_LIST, CasesAbacObject::ACTION_ADD_CREDIT_CARD, Restrict access to add credit card */
+        if (!Yii::$app->abac->can($caseAbacDto, SaleListAbacObject::UI_BLOCK_SALE_LIST, SaleListAbacObject::ACTION_ADD_CREDIT_CARD)) {
+            throw new ForbiddenHttpException('Access denied');
         }
 
         try {
@@ -286,11 +300,25 @@ class CreditCardController extends FController
 
         $form = new CaseSaleSendCcInfoForm();
         $caseSale = null;
+
+        try {
+            $case = $this->casesRepository->find((int)$caseId);
+        } catch (NotFoundException $e) {
+            throw new NotFoundHttpException('Not found case');
+        }
+
+        $userId = \Yii::$app->user->id;
+        $caseAbacDto = new SaleListAbacDto($case, $userId);
+        /** @abac $caseAbacDto, CasesAbacObject::UI_BLOCK_SALE_LIST, CasesAbacObject::ACTION_SEND_CC_INFO, Restrict access to send credit card info */
+        if (!Yii::$app->abac->can($caseAbacDto, SaleListAbacObject::UI_BLOCK_SALE_LIST, SaleListAbacObject::ACTION_SEND_CC_INFO)) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
         try {
             $caseSale = $this->casesSaleRepository->getSaleByPrimaryKeys((int)$caseId, (int)$saleId);
-            $case = $this->casesRepository->find((int)$caseId);
             $client = $this->clientRepository->find($case->cs_client_id);
             $customerEmail = CaseSaleHelper::getCustomerEmail(JsonHelper::decode($caseSale->css_sale_data));
+
             if ($customerEmail) {
                 $form->emailList[$customerEmail] = $customerEmail;
             }

@@ -30,7 +30,7 @@ use yii\helpers\Html;
 <?php if (Auth::can('lead-view/flight-default/view', ['lead' => $lead])) : ?>
 <div class="x_panel">
         <div class="x_title">
-            <h2><i class="fa fa-plane"></i> Flight - default</h2>
+            <h2 id="js_flight_default"><i class="fa fa-plane"></i> Flight - default</h2>
             <ul class="nav navbar-right panel_toolbox">
                 <?php /*php if ($is_manager) : ?>
                     <li class="dropdown">
@@ -59,6 +59,7 @@ JS;
             <?php \yii\widgets\Pjax::begin(['id' => 'pj-itinerary', 'enablePushState' => false, 'enableReplaceState' => false, 'timeout' => 5000])?>
             <?= $this->render('../partial/_flightDetails', [
                 'itineraryForm' => $itineraryForm,
+                'isCreatedFlightRequest' => false,
             ]) ?>
             <?php \yii\widgets\Pjax::end();?>
 
@@ -181,7 +182,7 @@ $js = <<<JS
           .done(function(data) {
               if (data.error) {
                   alert(data.error);
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'Error: delete product',
                         type: 'error',
                         text: data.error,
@@ -189,7 +190,7 @@ $js = <<<JS
                     });
               } else {
                   pjaxReload({container: '#product-accordion'});
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'The product was successfully removed',
                         type: 'success',
                         text: data.message,
@@ -266,7 +267,7 @@ $js = <<<JS
           .done(function(data) {
               if (data.error) {
                   alert(data.error);
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'Error: clone product quote',
                         type: 'error',
                         text: data.error,
@@ -276,7 +277,7 @@ $js = <<<JS
                   pjaxReload({
                       container: '#pjax-product-quote-list-' + productId
                   });
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'The product quote was successfully cloned',
                         type: 'success',
                         text: data.message,
@@ -328,7 +329,7 @@ $js = <<<JS
           .done(function(data) {
               if (data.error) {
                   alert(data.error);
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'Error: delete product quote',
                         type: 'error',
                         text: data.error,
@@ -338,7 +339,7 @@ $js = <<<JS
                   pjaxReload({
                       container: '#pjax-product-quote-list-' + productId
                   });
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'The product quote was successfully removed',
                         type: 'success',
                         text: data.message,
@@ -378,7 +379,7 @@ $js = <<<JS
       })
           .done(function(data) {
               if (data.error) {
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'Error: Cancel book',
                         type: 'error',
                         text: data.message,
@@ -388,7 +389,7 @@ $js = <<<JS
                   pjaxReload({
                       container: '#pjax-product-quote-list-' + productId
                   });
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'The flight quote was successfully canceled',
                         type: 'success',
                         text: 'Success',
@@ -421,7 +422,7 @@ $js = <<<JS
       })
           .done(function(data) {
               if (data.error) {
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'Error: Void book',
                         type: 'error',
                         text: data.message,
@@ -431,7 +432,7 @@ $js = <<<JS
                   pjaxReload({
                       container: '#pjax-product-quote-list-' + productId
                   });
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'The flight quote was successfully void',
                         type: 'success',
                         text: 'Success',
@@ -512,7 +513,7 @@ $js = <<<JS
           .done(function(data) {
               if (data.error) {
                   alert(data.error);
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'Error: delete quote option',
                         type: 'error',
                         text: data.error,
@@ -520,7 +521,7 @@ $js = <<<JS
                     });
               } else {
                   
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'The option was successfully removed',
                         type: 'success',
                         text: data.message,
@@ -565,7 +566,7 @@ $js = <<<JS
               })
                   .done(function(data) {
                       if (data.error) {
-                          new PNotify({
+                          createNotifyByObject({
                                 title: 'Error: offer menu',
                                 type: 'error',
                                 text: data.error,
@@ -595,7 +596,7 @@ $js = <<<JS
               })
                   .done(function(data) {
                       if (data.error) {
-                          new PNotify({
+                          createNotifyByObject({
                                 title: 'Error: order menu',
                                 type: 'error',
                                 text: data.error,
@@ -629,7 +630,7 @@ $js = <<<JS
               })
                   .done(function(data) {
                       if (data.error) {
-                          new PNotify({
+                          createNotifyByObject({
                                 title: 'Error: offer transfer',
                                 type: 'error',
                                 text: data.error,
@@ -638,7 +639,7 @@ $js = <<<JS
                       } else {
                           
                           pjaxReload({container: '#pjax-lead-offers', timout: 8000});
-                          new PNotify({
+                          createNotifyByObject({
                                 title: 'Quote was successfully added',
                                 type: 'success',
                                 text: data.message,
@@ -671,7 +672,7 @@ $js = <<<JS
               })
                   .done(function(data) {
                       if (data.error) {
-                          new PNotify({
+                          createNotifyByObject({
                                 title: 'Error: order',
                                 type: 'error',
                                 text: data.error,
@@ -680,7 +681,7 @@ $js = <<<JS
                       } else {
                           
                           pjaxReload({container: '#pjax-lead-orders', timout: 2000, push: false, relplace: false, async: false});
-                          new PNotify({
+                          createNotifyByObject({
                                 title: 'Quote was successfully added',
                                 type: 'success',
                                 text: data.message,
@@ -719,7 +720,7 @@ $js = <<<JS
               })
                   .done(function(data) {
                       if (data.error) {
-                          new PNotify({
+                          createNotifyByObject({
                                 title: 'Error: delete quote from offer',
                                 type: 'error',
                                 text: data.error,
@@ -728,7 +729,7 @@ $js = <<<JS
                       } else {
                           
                           pjaxReload({container: '#pjax-lead-offers', timout: 8000});
-                          new PNotify({
+                          createNotifyByObject({
                                 title: 'Quote was successfully deleted',
                                 type: 'success',
                                 text: data.message,
@@ -767,7 +768,7 @@ $js = <<<JS
               })
                   .done(function(data) {
                       if (data.error) {
-                          new PNotify({
+                          createNotifyByObject({
                                 title: 'Error: delete quote from order',
                                 type: 'error',
                                 text: data.error,
@@ -777,7 +778,7 @@ $js = <<<JS
                           
                           // pjaxReload({container: '#pjax-lead-orders', timout: 2000});
                           pjaxReload({container: '#pjax-lead-orders'});
-                          new PNotify({
+                          createNotifyByObject({
                                 title: 'Quote was successfully deleted',
                                 type: 'success',
                                 text: data.message,
@@ -875,7 +876,7 @@ $js = <<<JS
               })
                   .done(function(data) {
                       if (data.error) {
-                          new PNotify({
+                          createNotifyByObject({
                                 title: 'Error: delete Invoice',
                                 type: 'error',
                                 text: data.error,
@@ -884,7 +885,7 @@ $js = <<<JS
                       } else {
                           
                           pjaxReload({container: '#pjax-order-invoice-' + orderId, timout: 8000});
-                          new PNotify({
+                          createNotifyByObject({
                                 title: 'Invoice was successfully deleted',
                                 type: 'success',
                                 text: data.message,
@@ -921,7 +922,7 @@ $js = <<<JS
               })
                   .done(function(data) {
                       if (data.error) {
-                          new PNotify({
+                          createNotifyByObject({
                                 title: 'Error: delete Payment',
                                 type: 'error',
                                 text: data.error,
@@ -930,7 +931,7 @@ $js = <<<JS
                           return;
                       }
                       pjaxReload({container: '#pjax-order-payment-' + orderId, timout: 8000, async: true});
-                      new PNotify({
+                      createNotifyByObject({
                             title: 'Payment was successfully deleted',
                             type: 'success',
                             text: data.message,
@@ -970,7 +971,7 @@ $js = <<<JS
               })
                   .done(function(data) {
                       if (data.error) {
-                          new PNotify({
+                          createNotifyByObject({
                                 title: 'Error: Void Payment',
                                 type: 'error',
                                 text: data.message,
@@ -978,7 +979,7 @@ $js = <<<JS
                             });
                           return;
                       } 
-                      new PNotify({
+                      createNotifyByObject({
                             title: 'Payment was successfully Void',
                             type: 'success',
                             text: 'Success',
@@ -1013,7 +1014,7 @@ $js = <<<JS
               })
                   .done(function(data) {
                       if (data.error) {
-                          new PNotify({
+                          createNotifyByObject({
                                 title: 'Error: Capture Payment',
                                 type: 'error',
                                 text: data.message,
@@ -1021,7 +1022,7 @@ $js = <<<JS
                             });
                           return;
                       }
-                      new PNotify({
+                      createNotifyByObject({
                             title: 'Payment was successfully Capture',
                             type: 'success',
                             text: 'Success',

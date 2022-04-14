@@ -1,11 +1,12 @@
 <?php
 
+use common\components\grid\DateTimeColumn;
 use common\models\SettingCategory;
-use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\helpers\Html;
+use yii\helpers\StringHelper;
 use yii\helpers\VarDumper;
 use yii\widgets\Pjax;
-use common\components\grid\DateTimeColumn;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\SettingSearch */
@@ -79,11 +80,22 @@ $this->params['breadcrumbs'][] = $this->title;
                     if ($model->s_type == \common\models\Setting::TYPE_BOOL) {
                         $val = $model->s_value ? '<span class="label label-success">true</span>' : '<span class="label label-danger">false</span>';
                     }
-
                     if ($model->s_type == \common\models\Setting::TYPE_ARRAY) {
-                        $val = '<pre><small>' . ($model->s_value ? VarDumper::dumpAsString(@json_decode($model->s_value, true), 10, false) : '-') . '</small></pre>';
+                        if ($decodedData = @json_decode($model->s_value, true, 512, JSON_THROW_ON_ERROR)) {
+                            $truncatedStr = '<pre><small>' .
+                                            StringHelper::truncate(
+                                                VarDumper::dumpAsString($decodedData),
+                                                1200,
+                                                '...',
+                                                null,
+                                                false
+                                            ) . '</small></pre>';
+                            $detailData   = VarDumper::dumpAsString($decodedData, 10, true);
+                            $detailBox    = '<div id="detail_' . $model->s_id . '" style="display: none;">' . $detailData . '</div>';
+                            $detailBtn    = ' <i class="fas fa-eye green showDetail" style="cursor: pointer;" data-idt="' . $model->s_id . '"></i>';
+                            $val          = $truncatedStr . $detailBox . $detailBtn;
+                        }
                     }
-
                     return $val;
                 },
                 'format' => 'raw',
@@ -135,3 +147,27 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php Pjax::end(); ?>
 
 </div>
+<?php
+yii\bootstrap4\Modal::begin([
+    'title' => 'Log detail',
+    'id' => 'modal',
+    'size' => \yii\bootstrap4\Modal::SIZE_LARGE,
+]);
+yii\bootstrap4\Modal::end();
+
+
+$jsCode = <<<JS
+    $(document).on('click', '.showDetail', function(){
+        
+        let recordId = $(this).data('idt');
+        let detailEl = $('#detail_' + recordId);
+        let modalBodyEl = $('#modal .modal-body');
+        
+        modalBodyEl.html(detailEl.html()); 
+        $('#modal-label').html('Detail Api Log (' + recordId + ')');       
+        $('#modal').modal('show');
+        return false;
+    });
+JS;
+
+$this->registerJs($jsCode, \yii\web\View::POS_READY);

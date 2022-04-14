@@ -7,6 +7,8 @@ use common\models\Employee;
 use common\models\Lead;
 use common\models\LeadFlow;
 use common\models\ProfitSplit;
+use common\models\Project;
+use common\models\ProjectEmployeeAccess;
 use common\models\TipsSplit;
 use common\models\UserDepartment;
 use common\models\UserGroup;
@@ -62,6 +64,7 @@ class UserStatsReport extends Model
     public $user;
     public $groupBy;
     public $metrics;
+    public $project;
 
     public $isValid = false;
 
@@ -99,6 +102,9 @@ class UserStatsReport extends Model
             ['metrics', 'required'],
             ['metrics', IsArrayValidator::class],
             ['metrics', 'each', 'rule' => ['in', 'range' => array_keys($this->getMetricsList())], 'skipOnError' => true, 'skipOnEmpty' => true],
+
+            ['project', IsArrayValidator::class],
+            ['project', 'each', 'rule' => ['in', 'range' => array_keys(Project::getList())], 'skipOnError' => true, 'skipOnEmpty' => true],
         ];
     }
 
@@ -517,6 +523,15 @@ class UserStatsReport extends Model
         if ($this->user || $this->access->usersLimitedAccess) {
             $users = $this->user ?: array_keys($this->access->users);
             $query->andWhere(['users.id' => $users]);
+        }
+
+        if ($this->project) {
+            $query->innerJoin([
+                'project_employee' => ProjectEmployeeAccess::find()
+                    ->select(['employee_id'])
+                    ->where(['project_id' => $this->project])
+                    ->groupBy(['employee_id'])
+            ], 'users.id = project_employee.employee_id');
         }
 
         if ($this->isGroupByUserGroup()) {

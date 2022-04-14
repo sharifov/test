@@ -19,6 +19,7 @@ class HybridWhData
             'reprotection_quote_gid'    => '',
             'case_gid'                  => '',
             'product_quote_gid'         => '',
+            'status'                    => '',
         ],
         self::WH_TYPE_VOLUNTARY_CHANGE_UPDATE => [
             'booking_id'                => '',

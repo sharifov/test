@@ -22,6 +22,16 @@
       tags: redis
       become: yes
 
+    - role: docker
+      tags: docker
+      become: yes
+
+    - role: antispam
+      tags: antispam
+      vars:
+        antispam_ver: latest
+      become: yes
+
     - role: filebeat
       tags: filebeat
       become: yes

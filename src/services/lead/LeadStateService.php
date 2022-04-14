@@ -4,12 +4,15 @@ namespace src\services\lead;
 
 use common\models\Employee;
 use common\models\Lead;
+use modules\eventManager\src\EventApp;
+use modules\lead\src\events\LeadEvents;
 use src\access\EmployeeAccess;
 use src\model\leadStatusReason\HandleReasonDto;
 use src\model\leadStatusReason\LeadStatusReasonService;
 use src\repositories\lead\LeadRepository;
 use src\services\ServiceFinder;
 use src\services\TransactionManager;
+use yii\base\Event;
 
 /**
  * Class LeadStateService
@@ -214,9 +217,18 @@ class LeadStateService
             $creatorId,
             $reasonComment
         );
+        Event::on(
+            LeadEvents::class,
+            LeadEvents::EVENT_CLOSE,
+            [EventApp::class, EventApp::HANDLER],
+            ['dto' => $dto]
+        );
         $this->transactionManager->wrap(function () use ($dto) {
             $this->leadRepository->save($dto->lead);
-            $this->leadStatusReasonService->handleReason($dto);
+            Event::trigger(
+                LeadEvents::class,
+                LeadEvents::EVENT_CLOSE
+            );
         });
     }
 

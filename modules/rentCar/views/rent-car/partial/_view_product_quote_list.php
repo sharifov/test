@@ -77,7 +77,7 @@ $js = <<<JS
           dataType: 'json',
         }).done(function(data) {
             if (parseInt(data.status) === 1) {
-                new PNotify({
+                createNotifyByObject({
                     title: 'The quote was successfully booking',
                     type: 'success',
                     text: data.message,
@@ -86,7 +86,7 @@ $js = <<<JS
                 pjaxReload({container: '#pjax-product-quote-list-' + productId});
                 //addFileToFileStorageList();                
             } else {
-                new PNotify({
+                createNotifyByObject({
                     title: 'Booking failed',
                     type: 'error',
                     text: data.message,
@@ -121,7 +121,7 @@ $js = <<<JS
           dataType: 'json',
         }).done(function(data) {
             if (parseInt(data.status) === 1) {
-                new PNotify({
+                createNotifyByObject({
                     title: 'Document have been successfully generated',
                     type: 'success',
                     text: data.message,
@@ -129,7 +129,7 @@ $js = <<<JS
                 });                
                 addFileToFileStorageList();                
             } else {
-                new PNotify({
+                createNotifyByObject({
                     title: 'File generated failed',
                     type: 'error',
                     text: data.message,
@@ -162,7 +162,7 @@ $js = <<<JS
           dataType: 'json',
         }).done(function(data) {
             if (parseInt(data.status) === 1) {
-                new PNotify({
+                createNotifyByObject({
                     title: 'Booking is canceled',
                     type: 'success',
                     text: data.message,
@@ -172,7 +172,7 @@ $js = <<<JS
                     container: '#pjax-product-quote-list-' + productId
                 });
             } else {
-                new PNotify({
+                createNotifyByObject({
                     title: 'Process failed',
                     type: 'error',
                     text: data.message,

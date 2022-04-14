@@ -14,6 +14,7 @@ use src\helpers\ErrorsToStringHelper;
 use src\helpers\setting\SettingHelper;
 use webapi\src\forms\billing\BillingInfoForm;
 use webapi\src\forms\payment\PaymentRequestForm;
+use webapi\src\logger\behaviors\filters\creditCard\CreditCardFilter;
 use yii\base\Model;
 
 /**
@@ -177,5 +178,10 @@ class VoluntaryExchangeConfirmForm extends Model
     public function getCase(): Cases
     {
         return $this->case;
+    }
+
+    public function getFilteredData(): array
+    {
+        return (\Yii::createObject(CreditCardFilter::class))->filterData($this->toArray());
     }
 }

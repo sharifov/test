@@ -105,7 +105,7 @@ $('#clone-quote-by-id-form').on('beforeSubmit', function (e) {
            }
             $.pjax.reload({container: '#quotes_list', async: true, push: false, replace: false, timeout: 10000});
             
-            new PNotify({
+            createNotifyByObject({
                 title: "Clone Quote by UID",
                 type: "success",
                 text: text,
@@ -116,7 +116,7 @@ $('#clone-quote-by-id-form').on('beforeSubmit', function (e) {
            if (data.message) {
                text = data.message;
            }
-            new PNotify({
+            createNotifyByObject({
                 title: "Clone Quote by UID",
                 type: "error",
                 text: text,
@@ -126,7 +126,7 @@ $('#clone-quote-by-id-form').on('beforeSubmit', function (e) {
     })
     .fail(function () {
        resetCloneForm();
-        new PNotify({
+        createNotifyByObject({
             title: "Clone Quote by UID",
             type: "error",
             text: 'Error. Try again later',

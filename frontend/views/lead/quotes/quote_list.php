@@ -117,9 +117,13 @@ JS;
                 <li>
                     <?= $addAutoQuoteBtn ?>
                 </li>
-                <li>
-                    <?=Html::a('<i class="fa fa-search warning"></i> Quote Search', null, ['class' => '', 'id' => 'search-quotes-btn', 'data-url' => Url::to(['quote/ajax-search-quotes', 'leadId' => $leadForm->getLead()->id])])?>
-                </li>
+                    <?php /** @abac new $leadAbacDto, LeadAbacObject::OBJ_LEAD_QUOTE_SEARCH, LeadAbacObject::ACTION_ACCESS_QUOTE_SEARCH, Access Quote Search*/?>
+                    <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_LEAD_QUOTE_SEARCH, LeadAbacObject::ACTION_ACCESS_QUOTE_SEARCH)) : ?>
+                        <li>
+                            <?=Html::a('<i class="fa fa-search warning"></i> Quote Search', null, ['class' => '', 'id' => 'search-quotes-btn', 'data-url' => Url::to(['quote/ajax-search-quotes', 'leadId' => $leadForm->getLead()->id])])?>
+                        </li>
+                    <?php endif; ?>
+
                     <?php /** @abac new $leadAbacDto, LeadAbacObject::OBJ_LEAD_SMART_SEARCH, LeadAbacObject::ACTION_ACCESS_SMART_SEARCH, Access Smart Search*/?>
                     <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_LEAD_SMART_SEARCH, LeadAbacObject::ACTION_ACCESS_SMART_SEARCH)) :
                         $deepLink = $lead->getDeepLink([]);
@@ -145,19 +149,34 @@ JS;
                 <?php endif; ?>
                 <?php if ($canAccessPriceResearchLinks) :?>
                 <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Market Price Research Tool</a>
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false" title="Market Price Research Tool">
+                        <i class="fa fa-link text-info"></i> Price Research
+                    </a>
                     <div class="dropdown-menu" role="menu">
-                        <?php foreach ($priceResearchLinks as $key => $priceResearchLink) : ?>
-                            <?= Html::a('<i class="fa fa- "></i>' . $priceResearchLink, [
-                                'quote-price-research/open-price-research-link',
-                                'leadId'               => $lead->id,
-                                'researchLinkKey' => $key,
-                            ], [
-                                'class' => 'dropdown-item text-danger',
-                                'target' => '_blank',
-                                'data-pjax' => 0
-                            ]) ?>
-                        <?php endforeach ?>
+                        <?php if ($priceResearchLinks) : ?>
+                            <?php foreach ($priceResearchLinks as $key => $priceResearchName) : ?>
+                                <?= Html::a('<i class="fa fa-link"></i> "' . Html::encode($priceResearchName) . '"', [
+                                    'quote-price-research/open-price-research-link',
+                                    'leadId'               => $lead->id,
+                                    'researchLinkKey'       => $key
+                                ], [
+                                    'id' => 'price-research-link-' . $key,
+                                    'class' => 'dropdown-item price-research-link',
+                                    'target' => '_blank',
+                                    'data-pjax' => 0
+                                ]) ?>
+                            <?php endforeach ?>
+                            <div class="dropdown-divider"></div>
+                            <?= Html::a(
+                                'Open All Links',
+                                null,
+                                [
+                                    'id' => 'btn-open-all-price-research-links',
+                                    'class' => 'dropdown-item',
+                                    'data-pjax' => 0
+                                    ]
+                            ) ?>
+                        <?php endif; ?>
                     </div>
                 </li>
                 <?php endif; ?>
@@ -165,7 +184,10 @@ JS;
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
                 <div class="dropdown-menu" role="menu">
                     <?php if ($lead->leadFlightSegmentsCount) :?>
-                        <?=Html::a('<i class="fa fa-search info"></i> Quick Search', null, ['class' => 'dropdown-item', 'id' => 'quick-search-quotes-btn', 'data-url' => Url::to(['quote/get-online-quotes', 'leadId' => $leadForm->getLead()->id])])?>
+                        <?php /** @abac new $leadAbacDto, LeadAbacObject::OBJ_LEAD_QUICK_SEARCH, LeadAbacObject::ACTION_ACCESS_QUICK_SEARCH, Access Quick Search*/?>
+                        <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_LEAD_QUICK_SEARCH, LeadAbacObject::ACTION_ACCESS_QUICK_SEARCH)) : ?>
+                            <?=Html::a('<i class="fa fa-search info"></i> Quick Search', null, ['class' => 'dropdown-item', 'id' => 'quick-search-quotes-btn', 'data-url' => Url::to(['quote/get-online-quotes', 'leadId' => $leadForm->getLead()->id])])?>
+                        <?php endif; ?>
                     <?php endif; ?>
                     <?php if (!$lead->client->isExcluded()) : ?>
                         <?= Html::a('<i class="fa fa-plus-circle success"></i> Add Quote', null, ['class' => 'add-clone-alt-quote dropdown-item', 'data-uid' => 0, 'data-url' => Url::to(['quote/create', 'leadId' => $leadForm->getLead()->id, 'qId' => 0])])?>
@@ -199,6 +221,7 @@ JS;
                 'leadId' => $lead->id,
                 'leadForm' => $leadForm,
                 'isManager' => $is_manager,
+                'totalCount' => $dataProvider->count
             ],
             'itemOptions' => [
                 //'class' => 'item',
@@ -403,6 +426,13 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || $is_manager) {
             $(this).parents('.quote').removeClass("quote--selected");
         }
     });
+    
+    $(document).on('click', '#btn-open-all-price-research-links', function () {
+        $('.price-research-link').each(function( index ) {
+            $(this)[0].click();
+        });
+    });
+   
 
 JS;
     $this->registerJs($js);

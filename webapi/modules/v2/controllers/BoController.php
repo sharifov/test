@@ -95,6 +95,7 @@ class BoController extends BaseController
      * @apiParam {string{8}}               data.booking_id               Booking Id
      * @apiParam {string{20}}               data.project_key            Project Key ("ovago", "hop2")
      * @apiParam {string{32}}               data.reprotection_quote_gid   Reprotection quote GID
+     * @apiParam {string{20}=Processing, Exchanged, Canceled}               data.status               Exchang status
      *
      * @apiParamExample {json} Request-Example Reprotection Update:
      *  {
@@ -102,7 +103,8 @@ class BoController extends BaseController
      *      "data": {
      *          "booking_id": "C4RB44",
      *          "project_key": "ovago",
-     *          "reprotection_quote_gid": "4569a42c916c811e2033142d8ae54179"
+     *          "reprotection_quote_gid": "4569a42c916c811e2033142d8ae54179",
+     *          "status": "Exchanged" // allowed values Processing, Exchanged, Canceled
      *      }
      *  }
      *
@@ -145,6 +147,8 @@ class BoController extends BaseController
      * @apiParam {string{30}=flight_refund}           type                          Message Type action
      * @apiParam {array[]}              data                          Any Data
      * @apiParam {string{8}}               data.booking_id               Booking Id
+     * @apiParam {string{20}}               data.project_key            Project Key ("ovago", "hop2")
+     * @apiParam {string{20}=Processing,Refunded,Canceled}               data.status               Refund status
      *
      *
      * @apiParamExample {json} Request-Example Flight Refund:
@@ -152,6 +156,8 @@ class BoController extends BaseController
      *      "type": "flight_refund",
      *      "data": {
      *          "booking_id": "C4RB44",
+     *          "project_key": "ovago",
+     *          "status": "Refunded", // allowed values Processing, Refunded, Canceled
      *      }
      *  }
      *

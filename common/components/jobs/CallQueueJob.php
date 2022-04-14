@@ -23,6 +23,7 @@ use src\forms\lead\PhoneCreateForm;
 use src\helpers\app\AppHelper;
 use src\helpers\setting\SettingHelper;
 use src\model\contactPhoneList\service\ContactPhoneListService;
+use src\model\leadData\services\LeadDataCreateService;
 use src\repositories\cases\CasesRepository;
 use src\repositories\lead\LeadRepository;
 use src\services\cases\CasesCreateService;
@@ -133,7 +134,8 @@ class CallQueueJob extends BaseJob implements JobInterface
                                             $call->c_project_id,
                                             $this->source_id,
                                             $call->c_dep_id,
-                                            $call->c_offset_gmt
+                                            $call->c_offset_gmt,
+                                            $call->c_id
                                         );
                                 }
 

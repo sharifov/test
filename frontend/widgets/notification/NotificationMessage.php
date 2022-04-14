@@ -21,6 +21,7 @@ class NotificationMessage
 {
     private const COMMAND_ADD = 'add';
     private const COMMAND_DELETE = 'delete';
+    private const COMMAND_DELETE_BATCH = 'delete_batch';
     private const COMMAND_DELETE_ALL = 'delete_all';
 
     /**
@@ -57,12 +58,43 @@ class NotificationMessage
         ];
     }
 
+    public static function deleteBatch(array $ids, int $userId): array
+    {
+        return [
+            'notification' => [
+                'command' => self::COMMAND_DELETE_BATCH,
+                'userId' => $userId,
+                'ids' => $ids,
+            ]
+        ];
+    }
+
     public static function deleteAll(int $user_id): array
     {
         return [
             'notification' => [
                 'command' => self::COMMAND_DELETE_ALL,
                 'userId' => $user_id,
+            ]
+        ];
+    }
+
+    public static function desktopMessage(
+        string $desktopId,
+        string $title,
+        string $message,
+        string $type,
+        string $desktopMessage,
+        bool $showBrowserNotify
+    ): array {
+        return [
+            'data' => [
+                'desktopId' => $desktopId,
+                'title' => $title,
+                'message' => $message,
+                'type' => $type,
+                'desktopMessage' => $desktopMessage,
+                'showBrowserNotify' => (int)$showBrowserNotify
             ]
         ];
     }

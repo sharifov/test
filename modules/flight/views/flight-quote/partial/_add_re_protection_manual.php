@@ -232,7 +232,7 @@ $pjaxId = 'pjax-container-prices';
                     modal.modal('hide');
                 }
                 if (dataResponse.message.length) {
-                    new PNotify({
+                    createNotifyByObject({
                         title: "Quote saved",
                         type: "success",
                         text: dataResponse.message,
@@ -243,7 +243,7 @@ $pjaxId = 'pjax-container-prices';
                 $('#save_dump_btn').hide(500);
             } else {
                 if (dataResponse.message.length) {
-                    new PNotify({
+                    createNotifyByObject({
                         title: "Error",
                         type: "error",
                         text: dataResponse.message,
@@ -291,7 +291,7 @@ $pjaxId = 'pjax-container-prices';
                     $('#save_dump_btn').show(500);
                 } else {
                     if (dataResponse.message.length) {
-                        new PNotify({
+                        createNotifyByObject({
                             title: "Error",
                             type: "error",
                             text: dataResponse.message,

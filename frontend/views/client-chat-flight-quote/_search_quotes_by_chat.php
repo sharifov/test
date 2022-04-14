@@ -99,10 +99,10 @@ if ($viewModel->lead) {
                         }
                     }
                     
-                    new PNotify({
+                    createNotifyByObject({
                         title: "Create quote - search",
                         type: "success",
-                        text: 'Added new quote id: ' + searchResId,
+                        text: 'Added new quote',
                         hide: true
                     });
                 } else {
@@ -112,7 +112,7 @@ if ($viewModel->lead) {
                         error = 'Some errors was happened during create quote. Please try again later';
                     }
                     
-                    new PNotify({
+                    createNotifyByObject({
                         title: "Error: Create quote - search",
                         type: "error",
                         text: error,

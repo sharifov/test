@@ -19,6 +19,8 @@ use src\forms\lead\PhoneCreateForm;
 use src\forms\lead\PreferencesCreateForm;
 use src\helpers\clientChat\ClientChatHelper;
 use src\helpers\ErrorsToStringHelper;
+use src\model\callLog\entity\callLogLead\CallLogLead;
+use src\model\callLog\services\CallLogLeadCreateService;
 use src\model\clientChat\entity\ClientChat;
 use src\model\clientChatLead\entity\ClientChatLead;
 use src\model\clientChatLead\entity\ClientChatLeadRepository;
@@ -29,6 +31,7 @@ use src\model\clientChatVisitorData\entity\ClientChatVisitorData;
 use src\model\clientChatVisitorData\repository\ClientChatVisitorDataRepository;
 use src\model\leadData\entity\LeadData;
 use src\model\leadData\repository\LeadDataRepository;
+use src\model\leadData\services\LeadDataCreateService;
 use src\model\leadDataKey\services\LeadDataKeyDictionary;
 use src\model\leadUserConversion\service\LeadUserConversionDictionary;
 use src\model\leadUserConversion\service\LeadUserConversionService;
@@ -361,6 +364,8 @@ class LeadManageService
                 $user->id
             );
 
+            $this->createLeadData($lead->id, $call->c_lead_id, $call->c_id);
+
             $this->updateLeadOnRelationActiveCalls($lead, $call);
 
             return $lead;
@@ -448,10 +453,21 @@ class LeadManageService
                 $form->getUserId()
             );
 
+            $this->createLeadData($lead->id, $call->c_lead_id, $call->c_id);
+
             $this->updateLeadOnRelationActiveCalls($lead, $call);
 
             return $lead;
         });
+    }
+
+    private function createLeadData(int $newLeadId, ?int $oldLeadId, int $callId): void
+    {
+        LeadDataCreateService::createByCallId($newLeadId, $callId);
+        if ($oldLeadId) {
+            CallLogLeadCreateService::create($callId, $oldLeadId);
+        }
+        CallLogLeadCreateService::create($callId, $newLeadId);
     }
 
     private function updateLeadOnRelationActiveCalls(Lead $lead, Call $call): void

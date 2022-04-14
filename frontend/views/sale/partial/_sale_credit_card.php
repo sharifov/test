@@ -1,5 +1,7 @@
 <?php
 
+use modules\cases\src\abac\saleList\SaleListAbacDto;
+use modules\cases\src\abac\saleList\SaleListAbacObject;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -18,27 +20,38 @@ $editCreditCardBtnClass = 'btn-edit-credit-card-' . $saleId;
 $deleteCreditCardBtnClass = 'btn-delete-credit-card-' . $saleId;
 $pjaxCreditCardTable = 'pjax-credit-card-table' . $saleId;
 $sendCcInfoBtnClass = 'btn-send-cc-info-' . $saleId;
+
+$userId = \Yii::$app->user->id;
+$caseAbacDto = new SaleListAbacDto($caseModel, $userId);
+/** @abac $caseAbacDto, CasesAbacObject::UI_BLOCK_SALE_LIST, CasesAbacObject::ACTION_ADD_CREDIT_CARD, Restrict access to add credit card */
+$canAdd = Yii::$app->abac->can($caseAbacDto, SaleListAbacObject::UI_BLOCK_SALE_LIST, SaleListAbacObject::ACTION_ADD_CREDIT_CARD);
+
+/** @abac $caseAbacDto, CasesAbacObject::UI_BLOCK_SALE_LIST, CasesAbacObject::ACTION_SEND_CC_INFO, Restrict access to send credit card */
+$canSend = Yii::$app->abac->can($caseAbacDto, SaleListAbacObject::UI_BLOCK_SALE_LIST, SaleListAbacObject::ACTION_SEND_CC_INFO);
 ?>
 <div class="sale-credit-card">
 
     <h2>Credit Card (Optional)</h2>
-    <?php if ($caseModel->isProcessing()) : ?>
+    <?php if ($canAdd || $canSend) : ?>
         <p>
             <?php
+            if ($canAdd) {
                 echo Html::button('<i class="fa fa-plus"></i> Add Credit Card', [
                     'class' => $addCreditCardBtnClass . ' btn btn-success btn-sm',
                     'data-case-id' => $csId,
                     'data-case-sale-id' => $saleId,
                     'title' => 'Add Credit Card'
                 ]);
+            }
+            if ($canSend) {
+                echo Html::button('<i class="fa fa-envelope"></i> Send CC Info', [
+                    'class' => 'btn btn-success btn-sm ' . $sendCcInfoBtnClass,
+                    'data-case-id' => $csId,
+                    'data-case-sale-id' => $saleId,
+                    'title' => 'Send CC Info'
+                ]);
+            }
             ?>
-
-            <?= Html::button('<i class="fa fa-envelope"></i> Send CC Info', [
-                'class' => 'btn btn-success btn-sm ' . $sendCcInfoBtnClass,
-                'data-case-id' => $csId,
-                'data-case-sale-id' => $saleId,
-                'title' => 'Send CC Info'
-            ]) ?>
         </p>
         <br>
     <?php endif; ?>

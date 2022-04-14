@@ -40,16 +40,23 @@ class CaseEventLog extends ActiveRecord
     public const VOLUNTARY_REFUND_WH_SEND_OTA    = 15;
     public const EMAIL_REVIEWED    = 16;
     public const CASE_MARK_CHECKED    = 17;
+    public const RE_PROTECTION_REFUND = 18;
+    public const VOLUNTARY_PRODUCT_REFUND_ACCEPTED    = 19;
+    public const CASE_DEPARTMENT_CHANGE    = 20;
+    public const CASE_UPDATE_INFO = 21;
+    public const CASE_BOOKINGID_CHANGE = 22;
 
     public const CASE_EVENT_LOG_LIST = [
         self::CASE_CREATED         => 'Case created',
         self::CASE_STATUS_CHANGED  => 'Case status changed',
         self::CASE_CATEGORY_CHANGE => 'Case category changed',
+        self::CASE_DEPARTMENT_CHANGE => 'Case department changed',
         self::CASE_AUTO_PROCESSING_MARK => 'Case auto processing mark has changed',
         self::CASE_MARK_CHECKED => 'Case Mark as Checked',
         self::REPROTECTION_DECISION => 'Reprotection Decision',
         self::RE_PROTECTION_CREATE => 'ReProtection Create',
         self::RE_PROTECTION_EXCHANGE => 'ReProtection Exchange',
+        self::RE_PROTECTION_REFUND => 'ReProtection Refund',
         self::VOLUNTARY_EXCHANGE_CREATE => 'Voluntary Exchange Create',
         self::VOLUNTARY_EXCHANGE_CONFIRM => 'Voluntary Exchange Confirm',
         self::VOLUNTARY_REFUND_CREATE => 'Voluntary Refund Create',
@@ -58,7 +65,10 @@ class CaseEventLog extends ActiveRecord
         self::VOLUNTARY_REFUND_CONFIRM => 'Voluntary Refund Confirm',
         self::VOLUNTARY_REFUND_EMAIL_SEND => 'Voluntary Refund Send Email to client',
         self::VOLUNTARY_REFUND_WH_SEND_OTA => 'Voluntary Refund Send WH to OTA',
+        self::VOLUNTARY_PRODUCT_REFUND_ACCEPTED => 'Voluntary Product Refund Accepted',
         self::EMAIL_REVIEWED => 'Email Reviewed',
+        self::CASE_UPDATE_INFO => 'Case info updated',
+        self::CASE_BOOKINGID_CHANGE => 'Case bookingId changed',
     ];
 
     public const CATEGORY_ERROR = 1;

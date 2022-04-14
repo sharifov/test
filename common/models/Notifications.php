@@ -9,10 +9,12 @@ use common\models\query\NotificationsQuery;
 use frontend\widgets\notification\NotificationCache;
 use frontend\widgets\notification\NotificationMessage;
 use src\helpers\app\AppHelper;
+use src\helpers\NotificationsHelper;
 use src\services\telegram\TelegramService;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\Html;
 use yii\helpers\Json;
 
 /**
@@ -34,6 +36,7 @@ use yii\helpers\Json;
  * @property array $_eventList
  *
  * @property Employee $nUser
+ * @property string $typeIcon
  */
 class Notifications extends ActiveRecord
 {
@@ -91,7 +94,7 @@ class Notifications extends ActiveRecord
         return [
             'n_id' => 'ID',
             'n_user_id' => 'User',
-            'n_type_id' => 'Type ID',
+            'n_type_id' => 'Type',
             'n_title' => 'Title',
             'n_message' => 'Message',
             'n_new' => 'New',
@@ -557,5 +560,10 @@ class Notifications extends ActiveRecord
             }
         }
         return $resultUserIds;
+    }
+
+    public function getTypeIcon(): string
+    {
+        return NotificationsHelper::getIcon($this->n_type_id);
     }
 }

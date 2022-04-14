@@ -10,6 +10,7 @@ use modules\flight\src\useCases\voluntaryExchangeCreate\form\price\VoluntaryExch
 use src\helpers\ErrorsToStringHelper;
 use webapi\src\forms\billing\BillingInfoForm;
 use webapi\src\forms\payment\PaymentRequestForm;
+use webapi\src\logger\behaviors\filters\creditCard\CreditCardFilter;
 use yii\base\Model;
 
 /**
@@ -21,6 +22,8 @@ use yii\base\Model;
  */
 class VoluntaryExchangeCreateForm extends Model
 {
+    public const SCENARIO_WITHOUT_PRIVATE_DATA = \webapi\src\forms\payment\creditCard\CreditCardForm::SCENARIO_WITHOUT_PRIVATE_DATA;
+
     public $bookingId;
     public $apiKey;
     public $exchange;
@@ -53,6 +56,13 @@ class VoluntaryExchangeCreateForm extends Model
         ];
     }
 
+    public function scenarios()
+    {
+        $scenarios = parent::scenarios();
+        $scenarios[self::SCENARIO_WITHOUT_PRIVATE_DATA] = $scenarios[self::SCENARIO_DEFAULT];
+        return $scenarios;
+    }
+
     public function exchangeProcessing(string $attribute): void
     {
         if (!empty($this->exchange)) {
@@ -71,7 +81,9 @@ class VoluntaryExchangeCreateForm extends Model
     public function paymentRequestProcessing(string $attribute): void
     {
         if (!empty($this->payment_request)) {
-            $paymentRequestForm = new PaymentRequestForm();
+            $paymentRequestForm = new PaymentRequestForm([
+                'scenario' => $this->scenario,
+            ]);
             $paymentRequestForm->setFormName('');
             if (!$paymentRequestForm->load($this->payment_request)) {
                 $this->addError($attribute, 'PaymentRequestForm is not loaded');
@@ -111,5 +123,10 @@ class VoluntaryExchangeCreateForm extends Model
     public function getBillingInfoForm(): ?BillingInfoForm
     {
         return $this->billingInfoForm;
+    }
+
+    public function getFilteredData(): array
+    {
+        return (\Yii::createObject(CreditCardFilter::class))->filterData($this->toArray());
     }
 }

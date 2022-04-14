@@ -7,11 +7,14 @@ use frontend\widgets\multipleUpdate\userFeedback\MultipleUpdateForm;
 use frontend\widgets\multipleUpdate\userFeedback\MultipleUpdateService;
 use modules\user\src\abac\dto\UserAbacDto;
 use modules\user\src\abac\UserAbacObject;
+use modules\user\userFeedback\abac\dto\UserFeedbackAbacDto;
+use modules\user\userFeedback\abac\UserFeedbackAbacObject;
 use modules\user\userFeedback\entity\UserFeedback;
 use modules\user\userFeedback\entity\search\UserFeedbackSearch;
 use modules\user\userFeedback\entity\UserFeedbackData;
 use modules\user\userFeedback\entity\UserFeedbackFile;
 use modules\user\userFeedback\forms\UserFeedbackBugForm;
+use modules\user\userFeedback\forms\UserFeedbackResolutionForm;
 use modules\user\userFeedback\forms\UserFeedbackUpdateForm;
 use modules\user\userFeedback\service\UserFeedbackService;
 use modules\user\userFeedback\UserFeedbackFileRepository;
@@ -62,6 +65,11 @@ class UserFeedbackCrudController extends FController
     public function behaviors(): array
     {
         $behaviors = [
+            'access' => [
+                'allowActions' => [
+                    'create-ajax',
+                ],
+            ],
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
@@ -151,9 +159,9 @@ class UserFeedbackCrudController extends FController
      */
     public function actionCreateAjax(): string
     {
-        $userAbacDto = new UserAbacDto('username');
-        /** @abac new $userAbacDto, UserAbacObject::USER_FEEDBACK, UserAbacObject::ACTION_CREATE, Username field view*/
-        if (!Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FEEDBACK, UserAbacObject::ACTION_CREATE)) {
+        $userFeedbackAbacDto =  new UserFeedbackAbacDto();
+        /** @abac $userFeedbackAbacDto, UserFeedbackAbacObject::OBJ_USER_FEEDBACK, UserFeedbackAbacObject::ACTION_CREATE, Access to create User Feedback*/
+        if (!Yii::$app->abac->can($userFeedbackAbacDto, UserFeedbackAbacObject::OBJ_USER_FEEDBACK, UserFeedbackAbacObject::ACTION_CREATE)) {
             throw new ForbiddenHttpException('Access denied');
         }
 
@@ -257,6 +265,38 @@ class UserFeedbackCrudController extends FController
             ]);
         } catch (\Throwable $e) {
             Yii::error(AppHelper::throwableLog($e), 'UserFeedbackCrudController:actionUpdate:Throwable');
+            return $this->renderAjax('_error', [
+                'error' => 'Server Error'
+            ]);
+        }
+    }
+
+    public function actionResolve($uf_id, $uf_created_dt)
+    {
+        try {
+            $model = $this->findModel($uf_id, $uf_created_dt);
+            if ($this->request->isPost) {
+                $form = new UserFeedbackResolutionForm();
+                $form->load($this->request->post());
+                if (!$form->validate()) {
+                    throw new \RuntimeException(implode(', ', $form->getErrorSummary(true)));
+                }
+                /**
+                 * @throws \Throwable
+                 */
+                $this->userFeedbackService->resolve($model, $form->uf_resolution, $form->uf_status_id, Auth::id());
+                return $this->redirect(['view', 'uf_id' => $model->uf_id, 'uf_created_dt' => $model->uf_created_dt]);
+            }
+            return $this->render('resolution', [
+                'model' => $model,
+            ]);
+        } catch (\RuntimeException | \DomainException $e) {
+            Yii::warning(AppHelper::throwableFormatter($e), 'UserFeedbackCrudController::actionResolve:exception');
+            return $this->renderAjax('_error', [
+                'error' => $e->getMessage()
+            ]);
+        } catch (\Throwable $e) {
+            Yii::error(AppHelper::throwableLog($e), 'UserFeedbackCrudController:actionResolve:Throwable');
             return $this->renderAjax('_error', [
                 'error' => 'Server Error'
             ]);

@@ -592,11 +592,11 @@
             })
                 .done(function (data) {
                     if (data.error) {
-                        new PNotify({title: source_type, type: "error", text: data.message, hide: true});
+                        createNotifyByObject({title: source_type, type: "error", text: data.message, hide: true});
                     }
                 })
                 .fail(function (error) {
-                    new PNotify({title: source_type, type: "error", text: "Server error", hide: true});
+                    createNotifyByObject({title: source_type, type: "error", text: "Server error", hide: true});
                     console.error(error);
                 })
         };
@@ -609,7 +609,7 @@
                     if (data.message) {
                         text = data.message;
                     }
-                    new PNotify({title: "Make call", type: "error", text: text, hide: true});
+                    createNotifyByObject({title: "Make call", type: "error", text: text, hide: true});
                 } else {
                     let params = {
                         params: {

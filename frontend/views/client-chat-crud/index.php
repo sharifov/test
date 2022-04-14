@@ -248,7 +248,7 @@ $script = <<< JS
     }
     
     function notifyAlert(text, type = 'success') {
-        new PNotify({
+        createNotifyByObject({
             title: type,
             type: type,
             text: text,

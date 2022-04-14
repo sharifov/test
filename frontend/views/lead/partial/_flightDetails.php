@@ -1,16 +1,22 @@
 <?php
 
+use modules\featureFlag\FFlag;
+use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\lead\src\abac\LeadAbacObject;
+use src\auth\Auth;
 use yii\widgets\ActiveForm;
 use yii\helpers\Html;
 use src\helpers\lead\LeadHelper;
 use yii\web\JqueryAsset;
 use yii\web\View;
 use common\widgets\Alert;
+use yii\helpers\Url;
 
 /**
  * @var $this yii\web\View
  * @var $form ActiveForm
  * @var $itineraryForm src\forms\lead\ItineraryEditForm
+ * @var bool $isCreatedFlightRequest
  */
 
 
@@ -132,7 +138,7 @@ $itineraryFormId = $itineraryForm->formName() . '-form';
                             <?= Html::a(
                                 '<i class="fa fa-edit"></i> Edit Request',
                                 ['/lead-itinerary/view-edit-form', 'id' => $itineraryForm->leadId],
-                                ['class' => 'btn btn-default']
+                                ['class' => 'btn btn-default js-edit-request']
                             ) ?>
                         </div>
                         <?php endif; ?>
@@ -227,3 +233,54 @@ JS;
         </div>
     </div>
 </div>
+
+<?php
+/** @fflag FFlag::FF_KEY_ADD_AUTO_QUOTES, Auto add quote */
+/** @abac new LeadAbacDto($lead, Auth::id()), LeadAbacObject::ACT_ADD_AUTO_QUOTES, LeadAbacObject::ACTION_ACCESS, Access to auto add quotes */
+$itineraryForm->getLead()->refresh();
+$leadAbacDto = new LeadAbacDto($itineraryForm->getLead(), Auth::id());
+if (
+    $isCreatedFlightRequest &&
+    Yii::$app->ff->can(FFlag::FF_KEY_ADD_AUTO_QUOTES) &&
+    Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_ADD_AUTO_QUOTES, LeadAbacObject::ACTION_ACCESS)
+) {
+    $autoAddQuoteUrl = Url::toRoute('/quote/auto-adding-quotes');
+    $leadId = $itineraryForm->getLeadId();
+
+    $jsAfterItinerarySave = <<<JS
+
+        let editRequestBtn = $('#js_flight_default');
+        let btnContent = editRequestBtn.html();
+        editRequestBtn.html('<div><i class="fa fa-spin fa-spinner"></i> Loading quotes. Please, wait.</div>');
+
+        $.ajax({
+            url: '$autoAddQuoteUrl',
+            type: 'POST',
+            data: {leadId: '$leadId'},
+            dataType: 'json'
+        })
+        .done(function(dataResponse) {
+            if (dataResponse.status === 1) {
+                $.pjax.reload({container: '#quotes_list', async: false});
+                $('.popover-class[data-toggle="popover"]').popover({ sanitize: false });
+                createNotify('Success', dataResponse.message, 'success');
+            } else if (dataResponse.message.length) {
+                createNotify('Error', dataResponse.message, 'error');
+            } else {
+                createNotify('Error', 'Error, please check logs', 'error');
+            }
+            editRequestBtn.html(btnContent);
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            console.log({
+                jqXHR : jqXHR,
+                textStatus : textStatus,
+                errorThrown : errorThrown
+            });
+            editRequestBtn.html(btnContent);
+        })
+        .always(function(jqXHR, textStatus, errorThrown) {
+        });
+JS;
+    $this->registerJs($jsAfterItinerarySave);
+}

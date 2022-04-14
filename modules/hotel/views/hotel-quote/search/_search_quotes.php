@@ -193,7 +193,7 @@ $js = <<<JS
           .done(function(data) {
               if (data.error) {
                   alert(data.error);
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'Error: add hotel quote',
                         type: 'error',
                         text: data.error,
@@ -209,7 +209,7 @@ $js = <<<JS
                       push: false, replace: false, timeout: 2000
                   });
                   
-                  new PNotify({
+                  createNotifyByObject({
                         title: 'Quote was successfully added',
                         type: 'success',
                         text: data.message,
@@ -251,7 +251,7 @@ $js = <<<JS
         })
         .done(function(data) {
           if (data.status == 0) {              
-              new PNotify({
+              createNotifyByObject({
                 title: 'Error: Check Rate',
                 type: 'error',
                 text: data.message,
@@ -260,7 +260,7 @@ $js = <<<JS
               btnAdd.find('i').removeClass('fa-spin fa-spinner').addClass('fa-ban');
               btnAdd.removeClass('disabled').prop('disabled', false);                  
           } else {                  
-              new PNotify({
+              createNotifyByObject({
                 title: 'Check Rate',
                 type: 'success',
                 text: data.message,

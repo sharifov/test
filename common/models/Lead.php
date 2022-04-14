@@ -2,14 +2,10 @@
 
 namespace common\models;
 
-use common\components\EmailService;
 use common\components\ga\GaHelper;
-use common\components\jobs\LeadPoorProcessingJob;
 use common\components\jobs\UpdateLeadBOJob;
-use common\components\Metrics;
 use common\components\purifier\Purifier;
 use common\models\local\LeadAdditionalInformation;
-use common\models\local\LeadLogMessage;
 use common\models\query\LeadQuery;
 use common\models\query\SourcesQuery;
 use DateTime;
@@ -19,7 +15,6 @@ use kivork\search\core\urlsig\UrlSignature;
 use modules\offer\src\entities\offer\Offer;
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\product\Product;
-use phpDocumentor\Reflection\DocBlock\Tags\Source;
 use src\auth\Auth;
 use src\behaviors\metric\MetricLeadCounterBehavior;
 use src\entities\EventTrait;
@@ -27,6 +22,7 @@ use src\events\lead\LeadBookedEvent;
 use src\events\lead\LeadCallExpertRequestEvent;
 use src\events\lead\LeadCallStatusChangeEvent;
 use src\events\lead\LeadCloseEvent;
+use src\events\lead\LeadCountPassengersChangedEvent;
 use src\events\lead\LeadCreatedBookFailedEvent;
 use src\events\lead\LeadCreatedByApiBOEvent;
 use src\events\lead\LeadCreatedByApiEvent;
@@ -43,7 +39,6 @@ use src\events\lead\LeadExtraQueueEvent;
 use src\events\lead\LeadFollowUpEvent;
 use src\events\lead\LeadNewEvent;
 use src\events\lead\LeadOwnerChangedEvent;
-use src\events\lead\LeadCountPassengersChangedEvent;
 use src\events\lead\LeadOwnerFreedEvent;
 use src\events\lead\LeadPendingEvent;
 use src\events\lead\LeadPoorProcessingEvent;
@@ -57,15 +52,13 @@ use src\events\lead\LeadTrashEvent;
 use src\formatters\client\ClientTimeFormatter;
 use src\helpers\app\AppHelper;
 use src\helpers\lead\LeadHelper;
-use src\helpers\quote\QuoteProviderProjectHelper;
+use src\helpers\lead\LeadUrlHelper;
 use src\helpers\setting\SettingHelper;
 use src\interfaces\Objectable;
 use src\model\airportLang\service\AirportLangService;
 use src\model\callLog\entity\callLog\CallLog;
-use src\model\callLog\entity\callLog\CallLogType;
 use src\model\callLog\entity\callLogLead\CallLogLead;
 use src\model\client\helpers\ClientFormatter;
-use src\model\clientChat\entity\ClientChat;
 use src\model\clientChatLead\entity\ClientChatLead;
 use src\model\lead\useCases\lead\api\create\LeadCreateForm;
 use src\model\lead\useCases\lead\import\LeadImportForm;
@@ -74,11 +67,10 @@ use src\model\leadPoorProcessing\entity\LeadPoorProcessing;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
-use src\model\leadUserRating\entity\LeadUserRating;
 use src\model\leadUserConversion\entity\LeadUserConversion;
+use src\model\leadUserRating\entity\LeadUserRating;
 use src\services\lead\calculator\LeadTripTypeCalculator;
 use src\services\lead\calculator\SegmentDTO;
-use src\services\lead\qcall\CalculateDateService;
 use src\services\lead\qcall\Config;
 use src\services\lead\qcall\FindPhoneParams;
 use src\services\lead\qcall\FindWeightParams;
@@ -93,10 +85,8 @@ use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
-use common\components\SearchService;
 use yii\helpers\Url;
 use yii\helpers\VarDumper;
-use src\helpers\lead\LeadUrlHelper;
 
 /**
  * This is the model class for table "leads".
@@ -5168,6 +5158,33 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         $this->setStatus(self::STATUS_EXTRA_QUEUE);
     }
 
+    public function hasTakenFromExtraToProcessing(): bool
+    {
+        if ($this->isProcessing()) {
+            $lastLeadFlow = $this->lastLeadFlow;
+            if (!$lastLeadFlow) {
+                return false;
+            }
+            if ($lastLeadFlow->lf_from_status_id === self::STATUS_EXTRA_QUEUE) {
+                return true;
+            }
+        }
+        return false;
+    }
+    public function hasTakenFromBonusToProcessing(): bool
+    {
+        if ($this->isProcessing()) {
+            $lastLeadFlow = $this->lastLeadFlow;
+            if (!$lastLeadFlow) {
+                return false;
+            }
+            if ($lastLeadFlow->lf_from_status_id === self::STATUS_FOLLOW_UP) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public function close(?string $leadStatusReasonKey = null, ?int $creatorId = null, ?string $reasonComment = ''): void
     {
         if ($this->isClosed()) {
@@ -5225,14 +5242,19 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
             'inf' => $this->infants,
             'leadId' => $this->id,
             //TODO: refactor, use singleton, get from container doesn't work
-            UrlSignature::FORM_QUERY_KEY => UrlSignature::CalculateWithKey($signedParams, 'secretKey'),
-            //'CID' => $this->source ? $this->source->cid : '',
             //'redirectUrl' => urlencode(base64_encode($settings['redirectUrl']))
         ] + $flexParams;
 
         if ($this->leadPreferences && $this->leadPreferences->pref_currency != 'USD') {
             $params['currency'] = $this->leadPreferences->pref_currency;
         }
+
+        if ($this->project && $cid = $this->project->getAirSearchCid()) {
+            $params['cid'] = $cid;
+            $signedParams[] = $cid;
+        }
+
+        $params[UrlSignature::FORM_QUERY_KEY] = UrlSignature::CalculateWithKey($signedParams, 'secretKey');
 
         return $url . $segments . '?' . http_build_query($params);
     }

@@ -445,8 +445,14 @@ if (isset($result['prices']['isCk'])) {
                                             </span>
                                                     <?php if (isset($baggage['charge'])) :?>
                                                         <?php foreach ($baggage['charge'] as $charge) :?>
-                                                            <span title="<?= (isset($charge['maxSize']) ? $charge['maxSize'] : '') . ' ' . (isset($charge['maxWeight']) ? $charge['maxWeight'] : '')?>" class="badge badge-light"><i class="fa fa-plus"></i>&nbsp;
-                                            <i class="fa fa-suitcase"></i>&nbsp;<?= (isset($charge['price'])) ? $charge['price'] : ''?>$</span>
+                                                            <span
+                                                                title="<?php echo ($charge['maxSize'] ?? '') . ' ' . ($charge['maxWeight'] ?? '') ?>"
+                                                                class="badge badge-light">
+                                                                    <i class="fa fa-plus"></i>&nbsp;
+                                                                    <i class="fa fa-suitcase"></i>&nbsp;
+                                                                    <?php echo $charge['price'] ?? '' ?>
+                                                                    <?php echo CurrencyHelper::getSymbolByCode($result['currency'] ?? null) ?>
+                                                            </span>
                                                         <?php endforeach;?>
                                                     <?php endif;?>
 

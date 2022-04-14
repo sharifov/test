@@ -3,7 +3,6 @@
 namespace modules\product\src\entities\productQuote\events;
 
 use modules\product\src\entities\productQuote\ProductQuote;
-use modules\product\src\entities\productQuote\ProductQuoteChangeStatusInterface;
 
 /**
  * Class ProductQuoteCloneCreatedEvent
@@ -16,7 +15,7 @@ use modules\product\src\entities\productQuote\ProductQuoteChangeStatusInterface;
  * @property $ownerId
  * @property $creatorId
  */
-class ProductQuoteCloneCreatedEvent implements ProductQuoteChangeStatusInterface
+class ProductQuoteCloneCreatedEvent implements ProductQuoteStatusChangeInterface
 {
     public $quote;
 

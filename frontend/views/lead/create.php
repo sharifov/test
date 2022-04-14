@@ -2,6 +2,7 @@
 
 /**
  * @var $leadForm src\forms\lead\LeadCreateForm
+ * @var $delayedChargeAccess bool
  */
 
 use common\models\Department;
@@ -113,7 +114,8 @@ $this->title = 'Create Lead';
                         <div class="offset-xl-1 col-xl-9 col-lg-12 col-md-12 col-sm-12 col-xs-12">
                             <?= $this->render('partial/_preferences_create', [
                                 'form' => $form,
-                                'leadForm' => $leadForm
+                                'leadForm' => $leadForm,
+                                'delayedChargeAccess' => $delayedChargeAccess
                             ])
 ?>
                         </div>

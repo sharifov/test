@@ -338,7 +338,7 @@ $js = <<<JS
                         }     
                         objBtn.data('is-disabled', dataResponse.disabled);                     
                     } else {                        
-                        new PNotify({
+                        createNotifyByObject({
                             title: "Error:",
                             type: "error",
                             text: dataResponse.message,
@@ -392,7 +392,7 @@ $js = <<<JS
                         }     
                         objBtn.data('is-favorite', dataResponse.favorite);                     
                     } else {                        
-                        new PNotify({
+                        createNotifyByObject({
                             title: "Error:",
                             type: "error",
                             text: dataResponse.message,

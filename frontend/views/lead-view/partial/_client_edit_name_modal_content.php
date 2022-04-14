@@ -107,7 +107,7 @@ $('#client-edit-name-form').on('beforeSubmit', function (e) {
                     $('#language option[value=' + clientLocale + ']').prop('selected', true);
                 }
                 
-                new PNotify({
+                createNotifyByObject({
                     title: 'User name successfully updated',
                     text: data.message,
                     type: 'success'
@@ -115,7 +115,7 @@ $('#client-edit-name-form').on('beforeSubmit', function (e) {
             }
        },
        error: function (error) {
-            new PNotify({
+            createNotifyByObject({
                 title: 'Error',
                 text: 'Internal Server Error. Try again letter.',
                 type: 'error'                

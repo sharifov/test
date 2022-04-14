@@ -43,7 +43,7 @@ use modules\product\src\entities\productQuote\ProductQuote;
           dataType: 'json',
         }).done(function(data) {
             if (parseInt(data.status) === 1) {
-                new PNotify({
+                createNotifyByObject({
                     title: 'The quote was successfully booking',
                     type: 'success',
                     text: data.message,
@@ -56,7 +56,7 @@ use modules\product\src\entities\productQuote\ProductQuote;
                  pjaxReload({container: "#pjax-lead-orders"});
                  /*pjaxReload({container: "#pjax-lead-products-wrap"});*/
             } else {
-                new PNotify({
+                createNotifyByObject({
                     title: 'Booking failed',
                     type: 'error',
                     text: data.message,
@@ -93,7 +93,7 @@ use modules\product\src\entities\productQuote\ProductQuote;
           dataType: 'json',
         }).done(function(data) {
             if (parseInt(data.status) === 1) {
-                new PNotify({
+                createNotifyByObject({
                     title: 'Booking is canceled',
                     type: 'success',
                     text: data.message,
@@ -105,7 +105,7 @@ use modules\product\src\entities\productQuote\ProductQuote;
                 pjaxReload({container: "#pjax-lead-offers"});
                 pjaxReload({container: "#pjax-lead-orders"});
             } else {
-                new PNotify({
+                createNotifyByObject({
                     title: 'Process failed',
                     type: 'error',
                     text: data.message,
@@ -158,7 +158,7 @@ use modules\product\src\entities\productQuote\ProductQuote;
           dataType: 'json',
         }).done(function(data) {
             if (parseInt(data.status) === 1) {
-                new PNotify({
+                createNotifyByObject({
                     title: 'Document have been successfully generated',
                     type: 'success',
                     text: data.message,
@@ -166,7 +166,7 @@ use modules\product\src\entities\productQuote\ProductQuote;
                 });                
                 addFileToFileStorageList();                
             } else {
-                new PNotify({
+                createNotifyByObject({
                     title: 'File generated failed',
                     type: 'error',
                     text: data.message,

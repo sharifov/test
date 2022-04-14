@@ -19,10 +19,13 @@ use common\models\UserProfile;
 use common\models\UserProjectParams;
 use frontend\models\UserFailedLogin;
 use frontend\models\UserMultipleForm;
+use modules\shiftSchedule\src\abac\ShiftAbacObject;
+use modules\shiftSchedule\src\entities\userShiftAssign\repository\UserShiftAssignRepository;
 use src\auth\Auth;
 use src\helpers\app\AppHelper;
 use src\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use src\model\emailList\entity\EmailList;
+use modules\shiftSchedule\src\entities\userShiftAssign\UserShiftAssign;
 use src\model\userClientChatData\entity\UserClientChatData;
 use src\model\userClientChatData\entity\UserClientChatDataScopes;
 use src\model\userClientChatData\service\UserClientChatDataService;
@@ -816,6 +819,34 @@ class EmployeeController extends FController
                     TagDependency::invalidate(Yii::$app->cache, ClientChatUserChannel::cacheTags($model->id));
                 }
 
+                /** @abac ShiftAbacObject::ACT_USER_SHIFT_ASSIGN, ShiftAbacObject::ACTION_UPDATE, Access edit UserShiftAssign */
+                if (
+                    isset($attr['user_shift_assigns']) &&
+                    \Yii::$app->abac->can(null, ShiftAbacObject::ACT_USER_SHIFT_ASSIGN, ShiftAbacObject::ACTION_UPDATE)
+                ) {
+                    UserShiftAssign::deleteAll(['usa_user_id' => $model->id]);
+                    if ($attr['user_shift_assigns']) {
+                        foreach ($attr['user_shift_assigns'] as $shiftId) {
+                            try {
+                                $userShiftAssign = UserShiftAssign::create($model->id, $shiftId);
+                                (new UserShiftAssignRepository($userShiftAssign))->save(true);
+                            } catch (\RuntimeException | \DomainException $throwable) {
+                                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), [
+                                    'userId' => $model->id, 'shiftId' => $shiftId,
+                                ]);
+                                \Yii::warning($message, 'EmployeeController:actionUpdate:Exception');
+                                \Yii::$app->getSession()->setFlash('warning', $throwable->getMessage());
+                            } catch (\Throwable $throwable) {
+                                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), [
+                                    'userId' => $model->id, 'shiftId' => $shiftId,
+                                ]);
+                                \Yii::error($message, 'EmployeeController:actionUpdate:Throwable');
+                                \Yii::$app->getSession()->setFlash('danger', 'UserShiftAssign not saved');
+                            }
+                        }
+                    }
+                }
+
                 if (!empty($updateRC) && $userClientChatData && $userClientChatData->isRegisteredInRc()) {
                     $job = new RocketChatUserUpdateJob();
                     $job->userId = $userClientChatData->getRcUserId();
@@ -836,6 +867,7 @@ class EmployeeController extends FController
         $model->user_projects = ArrayHelper::map($model->projects, 'id', 'id');
         $model->user_departments = ArrayHelper::map($model->userDepartments, 'ud_dep_id', 'ud_dep_id');
         $model->client_chat_user_channel = ArrayHelper::map($model->clientChatUserChannel, 'ccuc_channel_id', 'ccuc_channel_id');
+        $model->user_shift_assigns = ArrayHelper::map($model->userShiftAssigns, 'usa_sh_id', 'usa_sh_id');
 
         $searchModel = new UserProjectParamsSearch();
         $params = Yii::$app->request->queryParams;

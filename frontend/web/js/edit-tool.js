@@ -12,7 +12,7 @@ function editToolSend(form, modalId, script, header, isNotify) {
                     if (data.text) {
                         text = data.text;
                     }
-                    new PNotify({title: header, text: text, type: 'info'});
+                    createNotifyByObject({title: header, text: text, type: 'info'});
                 }
             } else {
                 if (isNotify) {
@@ -20,7 +20,7 @@ function editToolSend(form, modalId, script, header, isNotify) {
                     if (data.text) {
                         text = data.text;
                     }
-                    new PNotify({title: header, text: text, type: 'error'});
+                    createNotifyByObject({title: header, text: text, type: 'error'});
                 }
             }
             if (script) {
@@ -30,7 +30,7 @@ function editToolSend(form, modalId, script, header, isNotify) {
         error: function (error) {
             $('#' + modalId).modal('toggle');
             if (isNotify) {
-                new PNotify({title: 'Error', text: 'Internal Server Error. Try again later.', type: 'error'});
+                createNotifyByObject({title: 'Error', text: 'Internal Server Error. Try again later.', type: 'error'});
             }
         }
     })

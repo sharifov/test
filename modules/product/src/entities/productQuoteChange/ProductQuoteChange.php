@@ -19,6 +19,8 @@ use src\traits\FieldsTrait;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
+use yii\behaviors\BlameableBehavior;
+use src\auth\Auth;
 
 /**
  * This is the model class for table "product_quote_change".
@@ -37,9 +39,11 @@ use yii\helpers\ArrayHelper;
  * @property array|null $pqc_data_json
  * @property string $pqc_gid
  * @property bool|null $pqc_refund_allowed
+ * @property int|null $pqc_created_user_id
  *
  * @property Cases $pqcCase
  * @property Employee $pqcDecisionUser
+ * @property Employee $pqcCreatedUser
  * @property ProductQuote $pqcPq
  * @property ProductQuoteChangeRelation[]|null $productQuoteChangeRelations
  */
@@ -76,6 +80,14 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
                 'class' => GidBehavior::class,
                 'targetColumn' => 'pqc_gid',
                 'value' => self::generateGid(),
+            ],
+            'blameable' => [
+                'class' => BlameableBehavior::class,
+                'createdByAttribute' => 'pqc_created_user_id',
+                'updatedByAttribute' => null,
+                'value' => function () {
+                    return Auth::employeeId();
+                }
             ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
@@ -121,6 +133,20 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
     public function isCustomerDecisionRefund(): bool
     {
         return $this->pqc_status_id === ProductQuoteChangeStatus::PROCESSING && $this->pqc_decision_type_id === ProductQuoteChangeDecisionType::REFUND;
+    }
+
+    public function decisionToCreate(): ProductQuoteChange
+    {
+        $this->pqc_decision_type_id =  ProductQuoteChangeDecisionType::CREATE;
+        $this->pqc_decision_dt = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
+        return $this;
+    }
+
+    public function decisionToConfirm(): ProductQuoteChange
+    {
+        $this->pqc_decision_type_id =  ProductQuoteChangeDecisionType::CONFIRM;
+        $this->pqc_decision_dt = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
+        return $this;
     }
 
     public function isPending(): bool
@@ -173,6 +199,11 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
         $this->pqc_status_id = ProductQuoteChangeStatus::CONFIRMED;
     }
 
+    public function statusToProcessing(): void
+    {
+        $this->pqc_status_id = ProductQuoteChangeStatus::PROCESSING;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -207,6 +238,10 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
 
             [['pqc_refund_allowed'], 'boolean'],
             [['pqc_refund_allowed'], 'default', 'value' => true],
+
+            ['pqc_created_user_id', 'integer'],
+            ['pqc_created_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['pqc_created_user_id' => 'id']],
+
         ];
     }
 
@@ -230,6 +265,7 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
             'pqc_data_json' => 'Data Json',
             'pqc_gid' => 'Gid',
             'pqc_refund_allowed' => 'Refund allowed',
+            'pqc_created_user_id' => 'Created User',
         ];
     }
 
@@ -251,6 +287,14 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
     public function getPqcDecisionUser()
     {
         return $this->hasOne(Employee::class, ['id' => 'pqc_decision_user']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPqcCreatedUser()
+    {
+        return $this->hasOne(Employee::class, ['id' => 'pqc_created_user_id']);
     }
 
     /**

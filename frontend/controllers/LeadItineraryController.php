@@ -67,13 +67,21 @@ class LeadItineraryController extends FController
         if ($mode !== 'view') {
             $form->setEditMode();
         }
-        return $this->renderAjax('/lead/partial/_flightDetails', ['itineraryForm' => $form]);
+        return $this->renderAjax(
+            '/lead/partial/_flightDetails',
+            [
+                'itineraryForm' => $form,
+                'isCreatedFlightRequest' => false,
+            ]
+        );
     }
 
     public function actionEdit(): string
     {
         $id = Yii::$app->request->post('id');
         $lead = $this->findLead($id);
+        $isCreatedFlightRequest = false;
+        $beginLeadSegmentCnt = $lead->leadFlightSegmentsCount;
 
         if (!Yii::$app->user->can('updateLead', ['lead' => $lead])) {
             throw new ForbiddenHttpException();
@@ -96,10 +104,21 @@ class LeadItineraryController extends FController
             }
         }
 
+        $currentLeadSegmentCnt = $lead->leadFlightSegmentsCount;
+        if ($beginLeadSegmentCnt === 0 && $currentLeadSegmentCnt > 0) {
+            $isCreatedFlightRequest = true;
+        }
+
         $lead = $this->findLead($id);
         $form = new ItineraryEditForm($lead);
         $form->setViewMode();
-        return $this->renderAjax('/lead/partial/_flightDetails', ['itineraryForm' => $form]);
+        return $this->renderAjax(
+            '/lead/partial/_flightDetails',
+            [
+                'itineraryForm' => $form,
+                'isCreatedFlightRequest' => $isCreatedFlightRequest,
+            ]
+        );
     }
 
     public function actionValidate(): array

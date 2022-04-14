@@ -5,7 +5,6 @@ namespace console\controllers;
 use common\models\Call;
 use common\models\ClientEmail;
 use common\models\Lead;
-use common\models\LeadFlightSegment;
 use common\models\LeadFlow;
 use common\models\LeadQcall;
 use common\models\Project;
@@ -16,19 +15,21 @@ use src\helpers\app\AppHelper;
 use src\helpers\DateHelper;
 use src\helpers\setting\SettingHelper;
 use src\model\leadPoorProcessing\entity\LeadPoorProcessing;
+use src\model\leadPoorProcessing\service\LeadFromExtraQueueToClosedService;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingChecker;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadPoorProcessing\service\LeadToExtraQueueService;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingData;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataQuery;
-use src\model\leadUserData\repository\LeadUserDataRepository;
 use src\model\leadPoorProcessingData\service\scheduledCommunication\ScheduledCommunicationService;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLog;
 use src\model\leadUserData\entity\LeadUserData;
 use src\model\leadUserData\entity\LeadUserDataDictionary;
+use src\model\leadUserData\repository\LeadUserDataRepository;
 use src\repositories\lead\LeadRepository;
 use src\services\cases\CasesSaleService;
+use Yii;
 use yii\base\InvalidArgumentException;
 use yii\console\Controller;
 use yii\db\Expression;
@@ -36,8 +37,6 @@ use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Console;
 use yii\helpers\VarDumper;
-use Yii;
-use yii\validators\Validator;
 
 /**
  * Class LeadController
@@ -774,6 +773,50 @@ class LeadController extends Controller
             } catch (\Throwable $throwable) {
                 $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
                 \Yii::error($message, 'LeadController:actionToLastActionLpp:Throwable');
+            }
+        }
+        Console::endProgress(false);
+        $time_end = microtime(true);
+        $time     = number_format(round($time_end - $time_start, 2), 2);
+        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time . ' s] %g %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- Processed: %w[' . $processed . '/' . $count . '] %g %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
+                                          self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+    }
+
+    public function actionToClosedFromExtra()
+    {
+        /** @fflag FFlag::FF_KEY_LPP_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT, Lead Poor Processing to Closing transferring enable/Disable */
+        if (!Yii::$app->ff->can(FFlag::FF_KEY_LPP_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT)) {
+            echo Console::renderColoredString('%y --- Feature Flag (' . FFlag::FF_KEY_LPP_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT . ') not enabled %n'), PHP_EOL;
+            exit();
+        }
+        $time_start     = microtime(true);
+
+        $maxDaysInExtraQueue =  Yii::$app->ff->val(FFlag::FF_KEY_LPP_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT);
+        $thresholdDate = new \DateTimeImmutable(date('Y-m-d H:i:s'));
+        $thresholdDate = $thresholdDate->modify('-' . $maxDaysInExtraQueue . ' days');
+        $leads = Lead::find()
+                     ->where(['status' => Lead::STATUS_EXTRA_QUEUE])
+                     ->andWhere(['<=', 'l_status_dt', $thresholdDate->format('Y-m-d H:i:s')])
+                     ->all();
+        $processed = 0;
+        $count     = count($leads);
+        foreach ($leads as $lead) {
+            $logData = ['leadId' => $lead->id];
+            try {
+                LeadFromExtraQueueToClosedService::addLeadFromExtraToClosedJob($lead);
+                $processed++;
+                Console::updateProgress($processed, $count);
+            } catch (\RuntimeException | \DomainException $throwable) {
+                /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
+                if (Yii::$app->ff->can(FFlag::FF_KEY_DEBUG)) {
+                    $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
+                    \Yii::info($message, 'LeadController:actionToClosedFromExtra:Exception');
+                }
+            } catch (\Throwable $throwable) {
+                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
+                \Yii::error($message, 'LeadController:actionToClosedFromExtra:Throwable');
             }
         }
         Console::endProgress(false);

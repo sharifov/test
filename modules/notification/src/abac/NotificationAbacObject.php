@@ -13,18 +13,22 @@ class NotificationAbacObject extends AbacBaseModel implements AbacInterface
 
     /** OBJECT PERMISSION */
     public const OBJ_NOTIFICATION = self::NS . 'obj/notification';
+    public const OBJ_NOTIFICATION_MULTIPLE_UPDATE = self::NS . 'obj/notification/multiple-update';
 
     /** --------------- OBJECT LIST --------------------------- */
     public const OBJECT_LIST = [
-        self::OBJ_NOTIFICATION => self::OBJ_NOTIFICATION
+        self::OBJ_NOTIFICATION => self::OBJ_NOTIFICATION,
+        self::OBJ_NOTIFICATION_MULTIPLE_UPDATE => self::OBJ_NOTIFICATION_MULTIPLE_UPDATE,
     ];
 
     /** --------------- ACTIONS ------------------------------- */
     public const ACTION_ACCESS  = 'access';
+    public const ACTION_MULTIPLE_UPDATE_MAKE_READ = 'multipleUpdateMakeRead';
 
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
-        self::OBJ_NOTIFICATION => [self::ACTION_ACCESS]
+        self::OBJ_NOTIFICATION => [self::ACTION_ACCESS],
+        self::OBJ_NOTIFICATION_MULTIPLE_UPDATE => [self::ACTION_MULTIPLE_UPDATE_MAKE_READ],
     ];
 
     protected const ATTR_NOTIFICATION_TYPE = [
@@ -65,7 +69,11 @@ class NotificationAbacObject extends AbacBaseModel implements AbacInterface
         self::OBJ_NOTIFICATION  =>  [
             self::ATTR_NOTIFICATION_TITLE,
             self::ATTR_NOTIFICATION_USER_ID
-            ]
+        ],
+        self::OBJ_NOTIFICATION_MULTIPLE_UPDATE => [
+            self::ATTR_NOTIFICATION_TITLE,
+            self::ATTR_NOTIFICATION_USER_ID
+        ]
     ];
 
     public static function getObjectList(): array
@@ -85,6 +93,7 @@ class NotificationAbacObject extends AbacBaseModel implements AbacInterface
 
         $attributeList = self::OBJECT_ATTRIBUTE_LIST;
         $attributeList[self::OBJ_NOTIFICATION][] = $attrTypeList;
+        $attributeList[self::OBJ_NOTIFICATION_MULTIPLE_UPDATE][] = $attrTypeList;
 
         return $attributeList;
     }

@@ -38,7 +38,7 @@ class CreditCardFilter implements Filterable
      * @param int $maxLen
      * @return mixed
      */
-    public static function replaceSource($source, string $substitute = '*', int $maxLen = 3)
+    public static function replaceSource($source, string $substitute = '*', int $maxLen = 4)
     {
         if (is_numeric($source)) {
             $source = (string) $source;

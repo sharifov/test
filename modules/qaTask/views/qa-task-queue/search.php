@@ -220,7 +220,7 @@ $(document).on('click', '#btn-check-all',  function (e) {
 
 function checkedVerify(title) {
     if (!$("input[name='selection[]']:checked").length) {
-        new PNotify({title: title, type: "error", text: 'Not selected rows.', hide: true});
+        createNotifyByObject({title: title, type: "error", text: 'Not selected rows.', hide: true});
         return false;
     }
     return true;

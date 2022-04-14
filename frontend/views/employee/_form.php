@@ -1,18 +1,24 @@
 <?php
 
-use common\components\grid\DateTimeColumn;
+use common\models\Employee;
+use common\models\EmployeeAcl;
 use common\models\UserParams;
 use common\models\UserProductType;
 use common\models\UserProjectParams;
 use frontend\models\UserFailedLogin;
-use modules\product\src\entities\productType\ProductType;
-use src\access\UserClientChatDataAccess;
+use kartik\select2\Select2;
+use modules\shiftSchedule\src\abac\ShiftAbacObject;
+use modules\shiftSchedule\src\entities\shift\Shift;
+use modules\user\src\abac\dto\UserAbacDto;
+use modules\user\src\abac\UserAbacObject;
+use src\access\EmployeeProjectAccess;
 use src\auth\Auth;
 use src\model\clientChatChannel\entity\ClientChatChannel;
-use src\model\clientChatUserChannel\entity\ClientChatUserChannel;
-use yii\helpers\Url;
-use yii\web\View;
+use yii\bootstrap\ActiveForm;
+use yii\bootstrap\Html;
 use yii\grid\ActionColumn;
+use yii\helpers\Url;
+
 /**
  * @var $this \yii\web\View
  * @var $modelUserParams UserParams
@@ -24,15 +30,6 @@ use yii\grid\ActionColumn;
 /* @var $model common\models\Employee */
 /* @var $userVoiceMailProvider \yii\data\ActiveDataProvider */
 /* @var UserFailedLogin[] $lastFailedLoginAttempts */
-
-use src\access\EmployeeProjectAccess;
-use yii\bootstrap\Html;
-use yii\bootstrap\ActiveForm;
-use common\models\Employee;
-use common\models\EmployeeAcl;
-use modules\user\src\abac\UserAbacObject;
-use modules\user\src\abac\dto\UserAbacDto;
-use kartik\select2\Select2;
 
 $data = [];
 $dataProjects = [];
@@ -349,6 +346,15 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                         }
                         ?>
 
+                        <?php /** @abac ShiftAbacObject::ACT_USER_SHIFT_ASSIGN, ShiftAbacObject::ACTION_UPDATE, Access edit UserShiftAssign */ ?>
+                        <?php if (\Yii::$app->abac->can(null, ShiftAbacObject::ACT_USER_SHIFT_ASSIGN, ShiftAbacObject::ACTION_UPDATE)) : ?>
+                            <?php echo $form->field($model, 'user_shift_assigns', ['options' => []])->widget(Select2::class, [
+                                'data' => Shift::getList(),
+                                'size' => Select2::SMALL,
+                                'options' => ['placeholder' => 'Select Shift', 'multiple' => true],
+                                'pluginOptions' => ['allowClear' => true],
+                            ]); ?>
+                        <?php endif ?>
                     </div>
                 </div>
 
@@ -1175,14 +1181,14 @@ $js = <<<JS
     //              
     //             if (dataResponse.status === 1) {                        
     //                 objBtn.hide(); 
-    //                 new PNotify({
+    //                 createNotifyByObject({
     //                     title: "Success",
     //                     type: "success",
     //                     text: dataResponse.message,
     //                     hide: true
     //                 });                      
     //             } else {                        
-    //                 new PNotify({
+    //                 createNotifyByObject({
     //                     title: "Error:",
     //                     type: "error",
     //                     text: dataResponse.message,
@@ -1202,7 +1208,7 @@ $js = <<<JS
         $.pjax.reload({container:'#pjax-grid-voice-mail', 'async': false});
         $.pjax.reload({container: "#pjax-grid-product-type", 'async': false});
         
-        /*new PNotify({
+        /*createNotifyByObject({
             title: 'Params successfully updated',
             text: 'User project Parameters have been saved successfully.',
             type: 'success'

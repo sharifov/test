@@ -82,7 +82,7 @@ $('#client-edit-phone-form').on('beforeSubmit', function (e) {
                 phoneRow.replaceWith(data.html);
                 $('#modal-sm').modal('hide');
                 
-                new PNotify({
+                createNotifyByObject({
                     title: 'Phone successfully updated',
                     text: data.message,
                     type: 'success'
@@ -90,7 +90,7 @@ $('#client-edit-phone-form').on('beforeSubmit', function (e) {
             }
        },
        error: function (error) {
-            new PNotify({
+            createNotifyByObject({
                 title: 'Error',
                 text: 'Internal Server Error. Try again letter.',
                 type: 'error'                

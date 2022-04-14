@@ -157,8 +157,11 @@ class AddQuoteService
         });
     }
 
-    public function autoSelectQuotes(array $quotes, Lead $lead, ?Employee $employee): void
+    public function autoSelectQuotes(array $quotes, Lead $lead, ?Employee $employee, bool $isReverse = false): void
     {
+        if ($isReverse) {
+            $quotes = array_reverse($quotes);
+        }
         foreach ($quotes as $quote) {
             $this->createQuoteFromSearch($quote, $lead, $employee);
         }

@@ -136,7 +136,7 @@ function loadRedialCallBoxBlock(type, url, data) {
            if (data.message) {
                text = data.message;
            }
-            new PNotify({title: "Lead redial", type: "error", text: text, hide: true});
+            createNotifyByObject({title: "Lead redial", type: "error", text: text, hide: true});
         } 
         if (data.data) {
             $("#redial-call-box-wrapper").html(data.data);
@@ -144,7 +144,7 @@ function loadRedialCallBoxBlock(type, url, data) {
     })
     .fail(function() {
         $("#loading").hide();
-        new PNotify({title: "Lead redial", type: "error", text: 'Error', hide: true});
+        createNotifyByObject({title: "Lead redial", type: "error", text: 'Error', hide: true});
     })
 }
 
@@ -231,7 +231,7 @@ function leadRedialLastCallsReload() {
         $("#lead-redial-last-calls-data").html(data);
     })
     .fail(function() {
-        new PNotify({title: "Reload last dialed leads", type: "error", text: 'Error', hide: true});
+        createNotifyByObject({title: "Reload last dialed leads", type: "error", text: 'Error', hide: true});
     })
 }
 

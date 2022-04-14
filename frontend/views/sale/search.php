@@ -190,7 +190,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 'template' => '{view}',
                 'buttons' => [
                     'view' => function ($url, $model, $key) {
-                        return Html::a('<span class="fa fa-search"></span>', ['view', 'h' => base64_encode($model['confirmationNumber'] . '|' . $model['saleId'])], ['title' => 'View', 'data-pjax' => 0]);
+                        return Html::a('<span class="fa fa-search"></span> View sale', ['view', 'h' => base64_encode($model['confirmationNumber'] . '|' . $model['saleId'])], ['title' => 'View', 'data-pjax' => 0, 'class' => 'btn btn-info btn-xs']) .
+                        '<br/>' .
+                        Html::a('<span class="fa fa-cube"></span> Create case', ['/cases/create', 'orderUid' => $model['confirmationNumber'], 'project' => $model['project']], ['data-pjax' => 0, 'class' => 'btn btn-success btn-xs'])
+                        ;
                     },
                 ]
             ]

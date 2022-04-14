@@ -15,7 +15,11 @@ class V4 implements Filterable
             return $data;
         }
         foreach ($data['payment_request']['method_data']['card'] as $key => $value) {
-            $data['payment_request']['method_data']['card'][$key] = CreditCardFilter::replaceSource($value);
+            if (in_array($key, ['cvv', 'number'], true)) {
+                unset($data['payment_request']['method_data']['card'][$key]);
+            } else {
+                $data['payment_request']['method_data']['card'][$key] = CreditCardFilter::replaceSource($value);
+            }
         }
         return $data;
     }

@@ -4,6 +4,8 @@ namespace common\models;
 
 use common\components\CommunicationService;
 use common\models\query\EmailTemplateTypeQuery;
+use modules\featureFlag\FFlag;
+use src\services\abtesting\email\EmailTemplateOfferABTestingService;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -310,7 +312,7 @@ class EmailTemplateType extends \yii\db\ActiveRecord
      * @param int|null $dep_id
      * @return array
      */
-    public static function getEmailTemplateTypesList(bool $withHidden, ?int $dep_id, ?int $pr_id): array
+    public static function getEmailTemplateTypesList(bool $withHidden, ?int $dep_id, ?int $pr_id, ?Lead $lead = null): array
     {
         $query = self::find()->select(['etp_id', 'etp_key', 'etp_name', 'etp_ignore_unsubscribe'])->orderBy(['etp_name' => SORT_ASC]);
         $query->joinWith(['emailTemplateTypeDepartments']);
@@ -328,6 +330,14 @@ class EmailTemplateType extends \yii\db\ActiveRecord
         if ($pr_id !== null) {
             $query->orHaving(['ettp_project_id' => $pr_id]);
             $query->orHaving(['=', 'COUNT(ettp_project_id)', 0]);
+        }
+        /** @fflag FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES, A/B testing for email offer templates enable/disable */
+        if (Yii::$app->ff->can(FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES) && $lead) {
+            $emailAbTestingService = new EmailTemplateOfferABTestingService();
+            $etpId = $emailAbTestingService->assignEmailOfferTemplateToLead($lead);
+            if ($etpId) {
+                $query->orWhere(['etp_id' => $etpId]);
+            }
         }
 
         return $query->asArray()->all();

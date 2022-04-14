@@ -20,6 +20,7 @@ use modules\product\src\entities\productQuoteOptionRefund\ProductQuoteOptionRefu
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundQuery;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundRepository;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundStatus;
+use src\entities\cases\CaseEventLog;
 use src\exception\BoResponseException;
 use src\helpers\app\AppHelper;
 use src\helpers\app\HttpStatusCodeHelper;
@@ -40,6 +41,7 @@ use webapi\src\response\messages\TypeMessage;
 use webapi\src\response\Response;
 use webapi\src\response\SuccessResponse;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\MethodNotAllowedHttpException;
 
@@ -571,10 +573,9 @@ class FlightQuoteRefundController extends ApiBaseController
         } catch (BoResponseException $e) {
             $flightRequest->statusToError();
             $flightRequest->save();
-            \Yii::error(
-                AppHelper::throwableLog($e, true),
-                'FlightQuoteRefundController:actionCreate:BoResponseException'
-            );
+            \Yii::error([
+                'message' => $e->getMessage(),
+            ], 'FlightQuoteRefundController:actionCreate:BoResponseException');
             return $this->endApiLog(new ErrorResponse(
                 new MessageMessage($e->getMessage()),
                 new ErrorName('BO Error'),
@@ -585,10 +586,9 @@ class FlightQuoteRefundController extends ApiBaseController
         } catch (\RuntimeException | \DomainException $e) {
             $flightRequest->statusToError();
             $flightRequest->save();
-            \Yii::error(
-                AppHelper::throwableLog($e, true),
-                'FlightQuoteRefundController:actionCreate:RuntimeException|DomainException'
-            );
+            \Yii::error([
+                'message' => $e->getMessage(),
+            ], 'FlightQuoteRefundController:actionCreate:RuntimeException|DomainException');
             return $this->endApiLog(new ErrorResponse(
                 new MessageMessage($e->getMessage()),
                 new ErrorName(HttpStatusCodeHelper::getName(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY)),
@@ -599,10 +599,9 @@ class FlightQuoteRefundController extends ApiBaseController
         } catch (\Throwable $e) {
             $flightRequest->statusToError();
             $flightRequest->save();
-            \Yii::error(
-                AppHelper::throwableLog($e, true),
-                'FlightQuoteRefundController:actionCreate:Throwable'
-            );
+            \Yii::error([
+                'message' => $e->getMessage(),
+            ], 'FlightQuoteRefundController:actionCreate:Throwable');
             return $this->endApiLog(new ErrorResponse(
                 new MessageMessage(HttpStatusCodeHelper::getName(HttpStatusCodeHelper::INTERNAL_SERVER_ERROR)),
                 new ErrorName('Server Error'),
@@ -874,6 +873,13 @@ class FlightQuoteRefundController extends ApiBaseController
             $flightRequest->fr_job_id = $jobId;
             $this->flightRequestRepository->save($flightRequest);
 
+            $productQuoteRefund->case->addEventLog(
+                CaseEventLog::VOLUNTARY_PRODUCT_REFUND_ACCEPTED,
+                CaseEventLog::CASE_EVENT_LOG_LIST[CaseEventLog::VOLUNTARY_PRODUCT_REFUND_ACCEPTED],
+                ['data_json' => ['product_quote_refund_id' => $productQuoteRefund->pqr_id ?? 0]],
+                CaseEventLog::CATEGORY_INFO
+            );
+
             return $this->endApiLog(new SuccessResponse(
                 new CodeMessage(ApiCodeException::SUCCESS),
                 new Message('saleData', $result['saleData'] ?? []),
@@ -882,10 +888,9 @@ class FlightQuoteRefundController extends ApiBaseController
         } catch (BoResponseException $e) {
             $flightRequest->statusToError();
             $flightRequest->save();
-            \Yii::error(
-                AppHelper::throwableLog($e, true),
-                'FlightQuoteRefundController:actionConfirm:BoResponseException'
-            );
+            \Yii::error([
+                'message' => $e->getMessage(),
+            ], 'FlightQuoteRefundController:actionConfirm:BoResponseException');
             return $this->endApiLog(new ErrorResponse(
                 new MessageMessage($e->getMessage()),
                 new ErrorName('BO Error'),
@@ -896,10 +901,9 @@ class FlightQuoteRefundController extends ApiBaseController
         } catch (\RuntimeException | \DomainException $throwable) {
             $flightRequest->statusToError();
             $flightRequest->save();
-            \Yii::warning(
-                AppHelper::throwableLog($throwable),
-                'FlightQuoteRefundController:actionConfirm:Warning'
-            );
+            \Yii::warning([
+                'message' => $throwable->getMessage(),
+            ], 'FlightQuoteRefundController:actionConfirm:Warning');
             return $this->endApiLog(new ErrorResponse(
                 new MessageMessage($throwable->getMessage()),
                 new ErrorName(HttpStatusCodeHelper::getName(HttpStatusCodeHelper::UNPROCESSABLE_ENTITY)),
@@ -910,10 +914,9 @@ class FlightQuoteRefundController extends ApiBaseController
         } catch (\Throwable $throwable) {
             $flightRequest->statusToError();
             $flightRequest->save();
-            \Yii::error(
-                AppHelper::throwableLog($throwable, true),
-                'FlightQuoteRefundController:actionConfirm:Throwable'
-            );
+            \Yii::error([
+                'message' => $throwable->getMessage(),
+            ], 'FlightQuoteRefundController:actionConfirm:Throwable');
             return $this->endApiLog(new ErrorResponse(
                 new MessageMessage(HttpStatusCodeHelper::getName(HttpStatusCodeHelper::INTERNAL_SERVER_ERROR)),
                 new ErrorName('Server Error'),

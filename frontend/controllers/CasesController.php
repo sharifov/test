@@ -118,6 +118,7 @@ use yii\web\Response;
 use yii\widgets\ActiveForm;
 use modules\cases\src\abac\CasesAbacObject;
 use modules\cases\src\abac\dto\CasesAbacDto;
+use src\repositories\project\ProjectRepository;
 
 /**
  * Class CasesController
@@ -921,7 +922,7 @@ class CasesController extends FController
             $cs = $this->casesSaleService->prepareAdditionalData($cs, $saleData);
 
             if (empty($model->cs_order_uid)) {
-                $model->cs_order_uid = $bookingId;
+                $model->updateBookingId($bookingId, Auth::id());
                 $out['caseBookingId'] = $model->cs_order_uid;
             } elseif ($model->cs_order_uid !== $bookingId) {
                 $out['updateCaseBookingId'] = true;
@@ -1014,8 +1015,7 @@ class CasesController extends FController
         try {
             $case = $this->casesRepository->find((int)$caseId);
             $sale = $this->casesSaleRepository->getSaleByPrimaryKeys($case->cs_id, (int) $saleId);
-
-            $case->cs_order_uid = $sale->css_sale_book_id;
+            $case->updateBookingId($sale->css_sale_book_id, Auth::id());
             $this->casesRepository->save($case);
 
             $response['message'] = 'Booking Id(' . $case->cs_order_uid . ') of case successfully updated';
@@ -1086,11 +1086,16 @@ class CasesController extends FController
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
         $form = new CasesCreateByWebForm($user);
-        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+        if (!Yii::$app->request->isPost) {
+            $params = Yii::$app->request->queryParams;
+            if (isset($params['project'])) {
+                $form->projectId = (new ProjectRepository())->getIdByName($params['project']);
+            }
+            $form->orderUid = $params['orderUid'] ?? null;
+        } elseif ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
                 /** @var Cases $case */
                 $case = $this->casesCreateService->createByWeb($form, $user->id);
-                $case->addEventLog(CaseEventLog::CASE_CREATED, CasesStatus::STATUS_LIST[$case->cs_status] . ' Case created for category: ' . $case->category->cc_name . ' and by source: ' . CasesSourceType::getList()[$case->cs_source_type_id]);
                 $this->casesManageService->processing($case->cs_id, Yii::$app->user->id, Yii::$app->user->id);
                 Yii::$app->session->setFlash('success', 'Case created');
                 return $this->redirect(['view', 'gid' => $case->cs_gid]);
@@ -1356,7 +1361,8 @@ class CasesController extends FController
                     case CasesStatus::STATUS_SOLVED:
                         $this->casesManageService->solved($case->cs_id, $user->id, $statusForm->message, $user->username);
                         if ($statusForm->isSendFeedback()) {
-                            $this->sendFeedbackEmailProcess($case, $statusForm, Auth::user());
+                            $this->casesCommunicationService->sendFeedbackEmail($case, $statusForm, Auth::user(), true);
+                            //$this->sendFeedbackEmailProcess($case, $statusForm, Auth::user());
                         }
                         break;
                     case CasesStatus::STATUS_PENDING:
@@ -1398,7 +1404,7 @@ class CasesController extends FController
             'statusForm' => $statusForm,
         ]);
     }
-
+    //TODO: need remove before merge with master. Unused method
     private function sendFeedbackEmailProcess(Cases $case, CasesChangeStatusForm $form, Employee $user): void
     {
         if (!$project = $case->project) {
@@ -1439,7 +1445,7 @@ class CasesController extends FController
 
         Yii::$app->session->addFlash('success', 'Email has been successfully sent.');
     }
-
+    //TODO: need remove before merge with master. Unused method
     private function sendFeedbackEmail(
         \src\model\project\entity\params\Params $params,
         Cases $case,
@@ -1707,8 +1713,9 @@ class CasesController extends FController
 
         $form = new UpdateInfoForm(
             $case,
+            Department::getList(),
             ArrayHelper::map($this->caseCategoryRepository->getEnabledByDep($case->cs_dep_id), 'cc_id', 'cc_name'),
-            Auth::user()->username
+            Auth::id()
         );
 
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {

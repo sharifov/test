@@ -5,6 +5,7 @@ namespace modules\flight\src\useCases\reprotectionCreate\service;
 use common\components\HybridService;
 use modules\flight\models\FlightRequest;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use src\entities\cases\CaseEventLog;
 use src\entities\cases\Cases;
 use src\exception\CheckRestrictionException;
@@ -46,12 +47,16 @@ class OtaRequestReProtectionService
     public function send(): ?array
     {
         $hybridService = Yii::createObject(HybridService::class);
+        if (!$productQuoteChange = $this->reProtectionQuote->productQuoteChangeLastRelation->pqcrPqc ?? null) {
+            throw new \RuntimeException('productQuoteChange not found');
+        }
         $data = [
             'data' => [
                 'booking_id' => $this->flightRequest->fr_booking_id,
                 'reprotection_quote_gid' => $this->reProtectionQuote->pq_gid,
                 'case_gid' => $this->case->cs_gid,
                 'product_quote_gid' => $this->originProductQuote->pq_gid,
+                'status' => ProductQuoteChangeStatus::getClientKeyStatusById($productQuoteChange->pqc_status_id),
             ]
         ];
         if (!$result = $hybridService->whReprotection($this->flightRequest->fr_project_id, $data)) {

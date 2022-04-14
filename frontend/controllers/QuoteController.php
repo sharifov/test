@@ -12,8 +12,10 @@ use common\models\Quote;
 use common\models\QuotePrice;
 use frontend\helpers\JsonHelper;
 use frontend\helpers\QuoteHelper;
-use modules\flight\src\useCases\api\searchQuote\FlightQuoteSearchHelper;
-use PhpParser\Node\Expr\Empty_;
+use frontend\widgets\notification\NotificationMessage;
+use modules\featureFlag\FFlag;
+use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\lead\src\abac\LeadAbacObject;
 use src\auth\Auth;
 use src\dto\searchService\SearchServiceQuoteDTO;
 use src\exception\AdditionalDataException;
@@ -48,6 +50,7 @@ use Yii;
 use yii\base\Model;
 use yii\data\ArrayDataProvider;
 use yii\db\Transaction;
+use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Json;
@@ -70,6 +73,18 @@ class QuoteController extends FController
 {
     private const RUNTIME_ERROR_QUOTES_NO_RESULTS = 100;
     private const RUNTIME_ERROR_AUTO_ADD_QUOTES_ACTION_IN_PROGRESS = 101;
+
+    public function behaviors(): array
+    {
+        $behaviors = [
+            'access' => [
+                'allowActions' => [
+                    'auto-adding-quotes',
+                ],
+            ],
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
 
     /**
      * @param $leadId
@@ -568,7 +583,22 @@ class QuoteController extends FController
             if (empty($searchQuoteRequest['data'])) {
                 throw new \RuntimeException('Quote not found by key: ' . $key);
             }
-            $lead = Lead::findOne($leadId);
+            if (!$lead = Lead::findOne($leadId)) {
+                throw new \Exception('Lead id(' . $leadId . ') not found');
+            }
+
+            if ($lead->leadPreferences && !empty($lead->leadPreferences->pref_currency)) {
+                if ($lead->leadPreferences->pref_currency !== $searchQuoteRequest['data']['currency']) {
+                    $subject = 'Smart Search';
+                    $body = 'Lead currency was changed. Adding quote was restricted.';
+                    if ($ntf = Notifications::create(Auth::id(), $subject, $body, Notifications::TYPE_INFO, true)) {
+                        $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+                        Notifications::publish('getNewNotification', ['user_id' => Auth::id()], $dataNotification);
+                    }
+                    throw new \DomainException($body);
+                }
+            }
+
             $preparedQuoteData = QuoteHelper::formatQuoteData(['results' => [$searchQuoteRequest['data']]]);
             $addQuoteService = Yii::createObject(AddQuoteService::class);
             $quoteUid = $addQuoteService->createByData($preparedQuoteData['results'][0], $lead, $projectProviderId);
@@ -579,16 +609,17 @@ class QuoteController extends FController
                 ['data' => []]
             );
 
-
             $response['error'] = false;
             $response['message'] = 'Add quote from Smart Search completed successfully';
         } catch (\RuntimeException | \DomainException $e) {
             $response['message'] = $e->getMessage();
-            if ($e->getCode() !== self::RUNTIME_ERROR_AUTO_ADD_QUOTES_ACTION_IN_PROGRESS) {
-            }
-        } catch (\Throwable $e) {
-            Yii::error(AppHelper::throwableLog($e), 'QuoteController::actionAssignQuote::Throwable');
+        } catch (\Throwable $throwable) {
             $response['message'] = 'Internal Server Error';
+            $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), [
+                'leadId' => $leadId,
+                'key' => $key,
+            ]);
+            \Yii::error($message, 'QuoteController::actionAssignQuote::Throwable');
         }
 
         return $this->asJson($response);
@@ -678,7 +709,6 @@ class QuoteController extends FController
 
         return $this->asJson($response);
     }
-
 
     public function actionDecline()
     {
@@ -1348,6 +1378,77 @@ class QuoteController extends FController
             return ActiveForm::validateMultiple($models);
         }
         throw new BadRequestHttpException('Not found POST request');
+    }
+
+    public function actionAutoAddingQuotes()
+    {
+        if (!Yii::$app->request->isAjax) {
+            throw new BadRequestHttpException();
+        }
+
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $leadId = (int) Yii::$app->request->post('leadId', 0);
+        $gds = (string) Yii::$app->request->post('gds', '');
+        $response = ['status' => 0, 'message' => ''];
+
+        try {
+            /** @fflag FFlag::FF_KEY_ADD_AUTO_QUOTES, Auto add quote */
+            if (!Yii::$app->ff->can(FFlag::FF_KEY_ADD_AUTO_QUOTES)) {
+                throw new \RuntimeException('Auto add quote is disabled');
+            }
+            $lead = Lead::findOne($leadId);
+            if (!$lead) {
+                throw new \RuntimeException('Lead not found');
+            }
+            /** @abac new LeadAbacDto($lead, Auth::id()), LeadAbacObject::ACT_ADD_AUTO_QUOTES, LeadAbacObject::ACTION_ACCESS, Access to auto add quotes */
+            $leadAbacDto = new LeadAbacDto($lead, Auth::id());
+            if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_ADD_AUTO_QUOTES, LeadAbacObject::ACTION_ACCESS)) {
+                throw new \RuntimeException('Check ABAC(' . LeadAbacObject::ACT_ADD_AUTO_QUOTES . ') access is failed');
+            }
+
+            $keyCache = sprintf('quick-search-new-%d-%s-%s', $lead->id, $gds, $lead->generateLeadKey());
+            $quotes = \Yii::$app->cacheFile->get($keyCache);
+
+            if ($quotes === false) {
+                $dto = new SearchServiceQuoteDTO($lead);
+                $quotes = SearchService::getOnlineQuotes($dto);
+
+                if ($quotes && !empty($quotes['data']['results']) && empty($quotes['error'])) {
+                    \Yii::$app->cacheFile->set($keyCache, $quotes = QuoteHelper::formatQuoteData($quotes['data']), 600);
+                } else {
+                    throw new \RuntimeException(!empty($quotes['error']) ? JsonHelper::decode($quotes['error'])['Message'] : 'Search result is empty!');
+                }
+            }
+
+            $form = (new FlightQuoteSearchForm())->setSortBy(Quote::SORT_BY_PRICE_ASC);
+            $dataProvider = new ArrayDataProvider([
+                'allModels' => $quotes['results'] ?? [],
+                'pagination' => [
+                    'pageSize' => Yii::$app->ff->val(FFlag::FF_KEY_ADD_AUTO_QUOTES) ?? 5,
+                    'params' => array_merge(Yii::$app->request->get(), $form->getFilters()),
+                ],
+                'sort' => [
+                    'attributes' => ['price', 'duration'],
+                    'defaultOrder' => [$form->getSortBy() => $form->getSortType()],
+                ],
+            ]);
+
+            $addQuoteService = Yii::createObject(AddQuoteService::class);
+            $addQuoteService->autoSelectQuotes($dataProvider->getModels(), $lead, Auth::user(), true);
+
+            $response['status'] = 1;
+            $response['message'] = 'Auto add quotes completed successfully';
+        } catch (\RuntimeException | \DomainException $throwable) {
+            $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['lead_id' => $leadId]);
+            Yii::info($message, 'QuoteController::actionAutoAddingQuotes::Exception');
+            $response['message'] = $throwable->getMessage();
+        } catch (\Throwable $throwable) {
+            $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['lead_id' => $leadId]);
+            Yii::error($message, 'QuoteController::actionAutoAddingQuotes::Throwable');
+            $response['message'] = 'Internal Server Error';
+        }
+
+        return $response;
     }
 
     private function logQuote(Quote $quote): void

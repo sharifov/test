@@ -147,7 +147,8 @@ class LeadStatusReasonService
         if (empty($dto->lead->employee_id)) {
             throw new \RuntimeException('Lead has no owner; Cannot Close;');
         }
-        if ($leadClosedCount < 1) {
+        $firstOwnerOfLead = LeadFlowQuery::getFirstOwnerOfLead($dto->lead->id);
+        if ($leadClosedCount < 1 && ($firstOwnerOfLead && $firstOwnerOfLead->lf_owner_id === $dto->lead->employee_id)) {
             $abacDto = new LeadAbacUserConversionAbacDto();
             $abacDto->closeReason = $dto->leadStatusReasonKey;
             /** @abac new LeadAbacUserConversionAbacDto($lead, Auth::id()), LeadUserConversionAbacObject::OBJ_USER_CONVERSION, LeadUserConversionAbacObject::ACTION_CREATE, Access to create lead user conversion */

@@ -171,10 +171,10 @@ JS;
                     // $.pjax.reload({container: '#quotes_list', async: false});
                     $('.popover-class[data-toggle="popover"]').popover({ sanitize: false });
                     
-                    new PNotify({
+                    createNotifyByObject({
                         title: "Create quote - search",
                         type: "success",
-                        text: 'Added new quote id: ' + searchResId,
+                        text: 'Added new quote',
                         hide: true
                     });
                     
@@ -186,7 +186,7 @@ JS;
                         error = 'Some errors was happened during create quote. Please try again later';
                     }
                     
-                    new PNotify({
+                    createNotifyByObject({
                         title: "Error: Create quote - search",
                         type: "error",
                         text: error,

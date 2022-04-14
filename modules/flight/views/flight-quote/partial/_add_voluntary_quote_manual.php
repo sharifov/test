@@ -217,7 +217,7 @@ $pjaxId = 'pjax-container-vc';
                 $('#box_quote_pax_price').html(dataResponse.data);
             } else {
                 if (dataResponse.message.length) {
-                    new PNotify({
+                    createNotifyByObject({
                         title: "Error",
                         type: "error",
                         text: dataResponse.message,
@@ -271,7 +271,7 @@ $pjaxId = 'pjax-container-vc';
                     modal.modal('hide');
                 }
                 if (dataResponse.message.length) {
-                    new PNotify({
+                    createNotifyByObject({
                         title: "Quote saved",
                         type: "success",
                         text: dataResponse.message,
@@ -282,7 +282,7 @@ $pjaxId = 'pjax-container-vc';
                 $('#save_dump_btn').hide(500);
             } else {
                 if (dataResponse.message.length) {
-                    new PNotify({
+                    createNotifyByObject({
                         title: "Error",
                         type: "error",
                         text: dataResponse.message,
@@ -330,7 +330,7 @@ $pjaxId = 'pjax-container-vc';
                     $('#save_dump_btn').show(500);
                 } else {
                     if (dataResponse.message.length) {
-                        new PNotify({
+                        createNotifyByObject({
                             title: "Error",
                             type: "error",
                             text: dataResponse.message,

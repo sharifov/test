@@ -171,7 +171,8 @@ class LeadSearch extends Lead
     public $is_conversion;
     public $lead_user_rating;
     public $extra_timer;
-
+    public $excludeExtraQueue;
+    public $excludeBonusQueue;
     private $leadBadgesRepository;
 
     private $defaultDateRange;
@@ -265,7 +266,8 @@ class LeadSearch extends Lead
             ['sold_date_to', 'default', 'value' => $this->defaultMaxDate],
             ['createTimeRange', 'default', 'value' => $this->defaultDateRange],
             ['lead_user_rating', 'in', 'range' => array_keys(LeadUserRating::getRatingList())],
-            [['extra_timer'],'safe']
+            [['extra_timer'],'safe'],
+            [['excludeExtraQueue', 'excludeBonusQueue'], 'boolean'],
         ];
     }
 
@@ -371,7 +373,7 @@ class LeadSearch extends Lead
      */
     public function search($params, Employee $user)
     {
-        $query = static::find()->with('project', 'lDep', 'source', 'employee', 'client');
+        $query = static::find()->with('project', 'lDep', 'source', 'employee', 'client', 'leadFlows');
         $query->select([
             Lead::tableName() . '.*',
             'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")
@@ -558,6 +560,14 @@ class LeadSearch extends Lead
             //$query->andWhere(['IN', 'leads.id', $subQuery]);
 
             $query->andWhere(['LIKE','leads.additional_information', new Expression('\'%"pnr":%"' . $this->quote_pnr . '"%\'')]);
+        }
+
+        if ($this->excludeBonusQueue) {
+            $query->andFilterWhere(['<>', 'leads.status', Lead::STATUS_FOLLOW_UP]);
+        }
+
+        if ($this->excludeExtraQueue) {
+            $query->andFilterWhere(['<>', 'leads.status', Lead::STATUS_EXTRA_QUEUE]);
         }
 
         if ($this->supervision_id > 0) {
@@ -1614,6 +1624,7 @@ class LeadSearch extends Lead
     public function searchAgent($params, Employee $user)
     {
         $query = Lead::find();
+        $query->with(['leadFlows']);
         $query->with(['project', 'lDep', 'source', 'employee', 'client', 'client.clientEmails', 'client.clientPhones', 'leadFlightSegments']);
         $query->select([Lead::tableName() . '.*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 
@@ -1749,6 +1760,14 @@ class LeadSearch extends Lead
                 'DATE(l_expiration_dt) = :date',
                 [':date' => date('Y-m-d', strtotime($this->expiration_dt))]
             ));
+        }
+
+        if ($this->excludeBonusQueue) {
+            $query->andFilterWhere(['<>', 'leads.status', Lead::STATUS_FOLLOW_UP]);
+        }
+
+        if ($this->excludeExtraQueue) {
+            $query->andFilterWhere(['<>', 'leads.status', Lead::STATUS_EXTRA_QUEUE]);
         }
 
         if ($this->lead_data_key) {
@@ -2232,6 +2251,7 @@ class LeadSearch extends Lead
 //        $query = Lead::find()->with('project');
         $query = $this->leadBadgesRepository->getProcessingQuery($user)->with('project');
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
+        $query->with(['leadFlows']);
 
         $leadTable = Lead::tableName();
 

@@ -44,17 +44,17 @@ $('.cancel-call-btn').click(function (e) {
                 PhoneWidget.refreshCallStatus(obj);
             }
             if (data.success) {
-                new PNotify({title: "Call status", type: "success", text: 'Success', hide: true});
+                createNotifyByObject({title: "Call status", type: "success", text: 'Success', hide: true});
             } else {
                let text = 'Error. Try again later';
                if (data.message) {
                    text = data.message;
                }
-               new PNotify({title: "Call status", type: "error", text: text, hide: true});
+               createNotifyByObject({title: "Call status", type: "error", text: text, hide: true});
             }
         })
         .fail(function() {
-            new PNotify({title: "Call status", type: "error", text: 'Try again later.', hide: true});
+            createNotifyByObject({title: "Call status", type: "error", text: 'Try again later.', hide: true});
         })
    }
 });

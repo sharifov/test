@@ -48,21 +48,12 @@
 
                     if ($n === 0) {
                         $js2 = '
-                            new PNotify({
-                                title: "' . \yii\helpers\Html::encode($item->n_title) . '",
-                                type: "' . $type . '",
-                                text: "' . $message . '",
-                                icon: true,
-                                desktop: {
-                                    desktop: true,
-                                    fallback: true,
-                                    text: "' . $desktopMessage . '"
-                                },
-                                delay: 10000,
-                                mouse_reset: false, 
-                                hide: true
-                            });
-                            ';
+                            createDesktopNotify(
+                                "notif",
+                                "' . \yii\helpers\Html::encode($item->n_title) . '",
+                                ' . $message . '",
+                                "' . $type . '",
+                            );';
 
 //                            .get().click(function(e) {
 //                            });
@@ -71,7 +62,7 @@
                                    nonblock: true
                                },*/
 
-//                            new PNotify({
+//                            createNotifyByObject({
 //                                title: "'.\yii\helpers\Html::encode($item->n_title).'",
 //                                type: "'.$type.'",
 //                                text: "'.$message.'",

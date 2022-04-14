@@ -34,6 +34,8 @@ class ItineraryEditForm extends CompositeForm
 
     public $mode = self::MODE_VIEW;
 
+    private Lead $lead;
+
     /**
      * ItineraryEditForm constructor.
      * @param Lead $lead
@@ -48,6 +50,8 @@ class ItineraryEditForm extends CompositeForm
         $this->children = $lead->children;
         $this->infants = $lead->infants;
         $this->tripType = $lead->trip_type;
+
+        $this->lead = $lead;
 
         $this->segments = array_map(function ($segment) {
             return new SegmentEditForm($segment);
@@ -180,5 +184,15 @@ class ItineraryEditForm extends CompositeForm
                 'departure' => $returnDate
             ]]);
         }
+    }
+
+    public function getLeadId(): ?int
+    {
+        return $this->leadId;
+    }
+
+    public function getLead(): Lead
+    {
+        return $this->lead;
     }
 }

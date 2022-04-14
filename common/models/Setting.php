@@ -66,7 +66,7 @@ class Setting extends \yii\db\ActiveRecord
             [['s_updated_dt'], 'safe'],
             [['s_updated_user_id', 's_category_id'], 'integer'],
             [['s_key', 's_name'], 'string', 'max' => 700],
-            [['s_value'], 'string', 'max' => 2000],
+            [['s_value'], 'string', 'max' => 5000],
             [['s_type'], 'string', 'max' => 10],
             [['s_description'], 'string', 'max' => 1000],
             [['s_key'], 'unique'],

@@ -2,18 +2,14 @@
 
 namespace frontend\controllers;
 
-use common\components\BackOffice;
 use common\models\Client;
 use common\models\ClientEmail;
 use common\models\ClientEmailQuery;
 use common\models\ClientPhone;
-use common\models\Currency;
 use common\models\Employee;
-use common\models\GlobalLog;
 use common\models\Lead;
 use common\models\query\ClientPhoneQuery;
 use common\models\Quote;
-use common\models\QuotePrice;
 use common\models\search\ClientSearch;
 use common\models\search\lead\LeadSearchByClient;
 use common\models\search\lead\LeadSearchByIp;
@@ -28,13 +24,12 @@ use src\forms\lead\LeadPreferencesForm;
 use src\forms\lead\LeadQuoteExtraMarkUpForm;
 use src\forms\lead\PhoneCreateForm;
 use src\helpers\app\AppHelper;
-use src\logger\db\GlobalLogInterface;
-use src\logger\db\LogDTO;
 use src\model\clientChat\socket\ClientChatSocketCommands;
 use src\model\clientChatLead\entity\ClientChatLead;
 use src\model\quote\abac\dto\QuoteFlightExtraMarkupAbacDto;
 use src\model\quote\abac\QuoteFlightAbacObject;
 use src\repositories\quote\QuotePriceRepository;
+use src\repositories\quote\QuoteRepository;
 use src\services\client\ClientCreateForm;
 use src\services\client\ClientManageService;
 use src\services\lead\LeadCloneQuoteService;
@@ -76,6 +71,8 @@ class LeadViewController extends FController
      */
     private $leadPreferencesManageService;
 
+    private QuoteRepository $quoteRepository;
+
     /**
      * LeadViewController constructor.
      * @param $id
@@ -91,11 +88,13 @@ class LeadViewController extends FController
         ClientManageService $clientManageService,
         LeadCloneQuoteService $leadCloneQuoteService,
         LeadPreferencesManageService $leadPreferencesManageService,
+        QuoteRepository $quoteRepository,
         $config = []
     ) {
         $this->clientManageService = $clientManageService;
         $this->leadCloneQuoteService = $leadCloneQuoteService;
         $this->leadPreferencesManageService = $leadPreferencesManageService;
+        $this->quoteRepository = $quoteRepository;
         parent::__construct($id, $module, $config);
     }
 
@@ -122,7 +121,9 @@ class LeadViewController extends FController
                     'ajax-edit-client-phone',
                     'ajax-edit-client-email-modal-content',
                     'ajax-edit-client-email-validation',
-                    'ajax-edit-client-email'
+                    'ajax-edit-client-email',
+                    'ajax-edit-lead-quote-extra-mark-up-modal-content',
+                    'ajax-edit-lead-quote-extra-mark-up'
                 ],
             ],
         ];
@@ -414,10 +415,13 @@ class LeadViewController extends FController
 
             $form->load(Yii::$app->request->post());
 
-            if (!($user->isAdmin() || $user->isSuperAdmin())) {
-                $form->phone = null;
-            } else {
+            $leadAbacDto->formAttribute = 'phone';
+            $leadAbacDto->isNewRecord = false;
+
+            if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::PHONE_CREATE_FORM, LeadAbacObject::ACTION_EDIT)) {
                 $form->required = true;
+            } else {
+                $form->phone = null;
             }
 
             if ($form->validate()) {
@@ -644,10 +648,12 @@ class LeadViewController extends FController
 
             $form->load(Yii::$app->request->post());
 
-            if (!($user->isAdmin() || $user->isSuperAdmin())) {
-                $form->email = null;
-            } else {
+            $leadAbacDto->formAttribute = 'email';
+            $leadAbacDto->isNewRecord = false;
+            if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::EMAIL_CREATE_FORM, LeadAbacObject::ACTION_EDIT)) {
                 $form->required = true;
+            } else {
+                $form->email = null;
             }
 
             if ($form->validate()) {
@@ -977,7 +983,8 @@ class LeadViewController extends FController
             $paxCode = (string)Yii::$app->request->get('paxCode');
             $quote   = Quote::findOne($quoteId);
             $lead = $quote->lead;
-            $isOwner = $lead->employee_id = Auth::id();
+            $currentUserId = Auth::id();
+            $isOwner = $lead->isOwner($currentUserId);
             $quoteFlightExtraMarkUpAbacDto = new QuoteFlightExtraMarkupAbacDto($lead, $quote, $isOwner);
             /** @abac quoteFlightExtraMarkUpAbacDto, QuoteFlightAbacObject::OBJ_EXTRA_MARKUP, QuoteExtraMarkUpChangeAbacObject::ACTION_UPDATE, Access to edit Quote Extra mark-up */
             $canUpdateExtraMarkUp = Yii::$app->abac->can(
@@ -1009,7 +1016,12 @@ class LeadViewController extends FController
                 $quotePrice->qp_client_extra_mark_up = $form->qp_client_extra_mark_up;
                 $quotePrice->update();
             }
+            $quote->changeExtraMarkUp($currentUserId, $sellingOld);
+            $this->quoteRepository->save($quote);
             $transaction->commit();
+            return [
+                'message' => 'Quote Extra mark-up Updated Successfully'
+            ];
         } catch (\RuntimeException | \DomainException $e) {
             $transaction->rollBack();
             Yii::warning(
@@ -1018,45 +1030,6 @@ class LeadViewController extends FController
             );
             return [
                 'error' => $e->getMessage()
-            ];
-        } catch (\Throwable $e) {
-            $transaction->rollBack();
-            Yii::error(
-                AppHelper::throwableLog($e),
-                'LeadViewController:actionAjaxEditQuoteExtraMarkUp:Throwable'
-            );
-            return [
-                'error' => 'Server Error'
-            ];
-        }
-        try {
-            $quote->refresh();
-            $priceData = $clientQuotePriceService->getClientPricesData();
-            (\Yii::createObject(GlobalLogInterface::class))->log(
-                new LogDTO(
-                    get_class($quote),
-                    $quote->id,
-                    \Yii::$app->id,
-                    Auth::id(),
-                    Json::encode(['selling' => $sellingOld]),
-                    Json::encode(['selling' => $priceData['total']['selling']]),
-                    null,
-                    GlobalLog::ACTION_TYPE_UPDATE
-                )
-            );
-            if ($lead->called_expert) {
-                $data = $quote->getQuoteInformationForExpert(true);
-                $response = BackOffice::sendRequest('lead/update-quote', 'POST', json_encode($data));
-                if ($response['status'] != 'Success' || !empty($response['errors'])) {
-                    \Yii::$app->getSession()->setFlash('warning', sprintf(
-                        'Update info quote [%s] for expert failed! %s',
-                        $quote->uid,
-                        print_r($response['errors'], true)
-                    ));
-                }
-            }
-            return [
-                'message' => 'Quote Extra mark-up Updated Successfully'
             ];
         } catch (\Throwable $e) {
             $transaction->rollBack();

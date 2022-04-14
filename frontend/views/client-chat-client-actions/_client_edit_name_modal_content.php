@@ -72,7 +72,7 @@ $('#client-edit-name-form').on('beforeSubmit', function (e) {
                 $(document).find('span[data-cc-client-name-id="' + data.client.id + '"]').html(data.client.name);                
                 $(document).find('span[data-cc-client-fl-name-id="' + data.client.id + '"]').html(data.client.name.charAt(0).toUpperCase());                
                 
-                new PNotify({
+                createNotifyByObject({
                     title: 'User name successfully updated',
                     text: data.message,
                     type: 'success'
@@ -80,7 +80,7 @@ $('#client-edit-name-form').on('beforeSubmit', function (e) {
             }
        },
        error: function (error) {
-            new PNotify({
+            createNotifyByObject({
                 title: 'Error',
                 text: 'Internal Server Error. Try again letter.',
                 type: 'error'                

@@ -20,6 +20,7 @@ use src\entities\cases\events\CasesAssignLeadEvent;
 use src\entities\cases\events\CasesAutoProcessingStatusEvent;
 use src\entities\cases\events\CasesAwaitingStatusEvent;
 use src\entities\cases\events\CasesCreatedEvent;
+use src\entities\cases\events\CasesUpdatedInfoEvent;
 use src\entities\cases\events\CasesErrorStatusEvent;
 use src\entities\cases\events\CasesFollowUpStatusEvent;
 use src\entities\cases\events\CasesNewStatusEvent;
@@ -30,6 +31,7 @@ use src\entities\cases\events\CasesProcessingStatusEvent;
 use src\entities\cases\events\CasesSolvedStatusEvent;
 use src\entities\cases\events\CasesStatusChangeEvent;
 use src\entities\cases\events\CasesTrashStatusEvent;
+use src\entities\cases\events\CasesBookingIdChangeEvent;
 use src\entities\EventTrait;
 use src\interfaces\Objectable;
 use src\traits\DbSlaveConnection;
@@ -565,15 +567,19 @@ class Cases extends ActiveRecord implements Objectable
     }
 
     public function updateInfo(
+        int $depId,
         int $categoryId,
         ?string $subject,
         ?string $description,
-        ?string $orderUid
+        ?string $orderUid,
+        ?int $userId
     ): void {
+        $this->cs_dep_id = $depId;
         $this->updateCategory($categoryId);
         $this->cs_subject = $subject;
         $this->cs_description = $description;
         $this->cs_order_uid = $orderUid;
+        $this->recordEvent(new CasesUpdatedInfoEvent($this, $userId));
     }
 
     /**
@@ -582,6 +588,15 @@ class Cases extends ActiveRecord implements Objectable
     public function updateCategory(int $categoryId): void
     {
         $this->cs_category_id = $categoryId;
+    }
+
+    /**
+     * @param int $orderId
+     */
+    public function updateBookingId(int $orderId, ?int $userId): void
+    {
+        $this->cs_order_uid = $orderId;
+        $this->recordEvent(new CasesBookingIdChangeEvent($this, $userId));
     }
 
     public function setDeadline(string $deadline)

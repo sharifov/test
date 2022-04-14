@@ -123,7 +123,8 @@ if ($airline) {
                                                     class="badge badge-light">
                                                         <i class="fa fa-plus"></i>&nbsp;
                                                         <i class="fa fa-suitcase"></i>&nbsp;
-                                                        <?= $baggageCh->qsbc_price?>$
+                                                        <?= $baggageCh->qsbc_price?>
+                                                        <?php echo $model->clientCurrency->cur_symbol ?? '' ?>
                                                 </span>
                                             <?php endforeach;?>
                                         <?php endif;?>

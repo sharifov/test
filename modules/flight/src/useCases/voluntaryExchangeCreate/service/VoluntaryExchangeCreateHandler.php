@@ -242,7 +242,9 @@ class VoluntaryExchangeCreateHandler
         }
 
         try {
-            $voluntaryExchangeCreateForm = new VoluntaryExchangeCreateForm();
+            $voluntaryExchangeCreateForm = new VoluntaryExchangeCreateForm([
+                'scenario' => VoluntaryExchangeCreateForm::SCENARIO_WITHOUT_PRIVATE_DATA,
+            ]);
             if (!$voluntaryExchangeCreateForm->load($flightProductQuoteData)) {
                 throw new \RuntimeException('VoluntaryExchangeCreateForm not loaded');
             }
@@ -307,7 +309,7 @@ class VoluntaryExchangeCreateHandler
         $this->voluntaryExchangeQuote->inProgress(null, 'Voluntary Exchange api processing');
         $this->objectCollection->getProductQuoteRepository()->save($this->voluntaryExchangeQuote);
 
-        $this->productQuoteChange->inProgress();
+        $this->productQuoteChange->decisionToCreate()->inProgress();
         $this->objectCollection->getProductQuoteChangeRepository()->save($this->productQuoteChange);
 
         $this->flightRequestService->done('FlightRequest successfully processed');

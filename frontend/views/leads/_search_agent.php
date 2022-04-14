@@ -46,6 +46,12 @@ use yii\widgets\ActiveForm;
                 <div class="col-md-6">
                     <?= $form->field($model, 'quoteTypeId')->dropDownList(Quote::TYPE_LIST, ['prompt' => '-']) ?>
                 </div>
+                <div class="col-md-6">
+                    <?= $form->field($model, 'excludeExtraQueue')->checkbox([])->label('Exclude Extra Queue'); ?>
+                </div>
+                <div class="col-md-6">
+                    <?= $form->field($model, 'excludeBonusQueue')->checkbox([])->label('Exclude Bonus Queue / Follow up Queue'); ?>
+                </div>
             </div>
 
         </div>

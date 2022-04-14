@@ -262,7 +262,7 @@ $jsCode = <<<JS
                     alert('Error: ' + data.error);
                     btn.removeClass('disabled');
                     btn.find('span').removeClass('fa-spinner fa-spin').addClass('fa-plus');
-                    new PNotify({
+                    createNotifyByObject({
                         title: "Error add Sale",
                         type: "error",
                         text: 'Error add sale in case',
@@ -282,7 +282,7 @@ $jsCode = <<<JS
                         $.pjax.reload({container: '#pjax-case-orders', push: false, replace: false, timeout: 10000, async: false});
                     }
                     
-                    new PNotify({
+                    createNotifyByObject({
                         title: "Sale successfully added",
                         type: "success",
                         text: 'Sale Id: ' + data.data.sale_id +' successfully added',

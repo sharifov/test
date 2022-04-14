@@ -7,6 +7,7 @@ use src\forms\lead\ItineraryEditForm;
 use src\forms\lead\SegmentEditForm;
 use src\forms\siteSetting\PriceResearchLinkForm;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 
 class PriceResearchLinkService
 {
@@ -26,16 +27,18 @@ class PriceResearchLinkService
      */
     public function generateUrl(): string
     {
-        if ($this->itineraryEditForm->tripType === Lead::TRIP_TYPE_ONE_WAY) {
-            $url = $this->generateOneTripUrl();
+        $url = '';
+        switch ($this->itineraryEditForm->tripType) {
+            case Lead::TRIP_TYPE_ONE_WAY:
+                $url = $this->generateOneTripUrl();
+                break;
+            case Lead::TRIP_TYPE_ROUND_TRIP:
+                $url = $this->generateRoundTripUrl();
+                break;
+            case Lead::TRIP_TYPE_MULTI_DESTINATION:
+                $url = $this->generateMultiCityUrl();
+                break;
         }
-        if ($this->itineraryEditForm->tripType === Lead::TRIP_TYPE_ROUND_TRIP) {
-            $url = $this->generateRoundTripUrl();
-        }
-        if ($this->itineraryEditForm->tripType === Lead::TRIP_TYPE_MULTI_DESTINATION) {
-            $url = $this->generateMultiCityUrl();
-        }
-
         return $url;
     }
 
@@ -45,7 +48,8 @@ class PriceResearchLinkService
      */
     private function generateOneTripUrl(): string
     {
-        $rawUrl = $this->priceResearchLinkForm->oneTripUrl;
+        $types = ArrayHelper::toArray($this->priceResearchLinkForm->types);
+        $rawUrl = $this->priceResearchLinkForm->url . ArrayHelper::getValue($types, 'oneTrip');
         /* @var SegmentEditForm $flightSegment */
         $flightSegment = $this->itineraryEditForm->segments[0];
         $departureDate = $this->formatDate($flightSegment->departure, $this->priceResearchLinkForm->dateFormat);
@@ -61,7 +65,8 @@ class PriceResearchLinkService
      */
     private function generateRoundTripUrl(): string
     {
-        $rawUrl = $this->priceResearchLinkForm->roundTripUrl;
+        $types = ArrayHelper::toArray($this->priceResearchLinkForm->types);
+        $rawUrl = $this->priceResearchLinkForm->url .  ArrayHelper::getValue($types, 'roundTrip');
         /* @var SegmentEditForm $flightSegment */
         $firstFlightSegment  = $this->itineraryEditForm->segments[0];
         $secondFlightSegment = $this->itineraryEditForm->segments[1];
@@ -86,8 +91,8 @@ class PriceResearchLinkService
      */
     private function generateMultiCityUrl(): string
     {
-
-        $rawUrl   = $this->priceResearchLinkForm->multiCityUrl;
+        $types = ArrayHelper::toArray($this->priceResearchLinkForm->types);
+        $rawUrl = $this->priceResearchLinkForm->url .  ArrayHelper::getValue($types, 'multiCity');
         $segments = $this->itineraryEditForm->segments;
         /* @var SegmentEditForm $segment */
         $itineraryPart = '';
@@ -143,7 +148,7 @@ class PriceResearchLinkService
                 );
                 $infantsCountPart            = str_repeat(
                     $this->priceResearchLinkForm->infantPaxTypeEnumerableParameter . $this->priceResearchLinkForm->childrenParameterSeparator,
-                    $this->itineraryEditForm->children
+                    $this->itineraryEditForm->infants
                 );
                 $childrenAndInfantsCountPart = $childrenCountPart . $infantsCountPart;
                 $childrenAndInfantsCountPart = substr_replace($childrenAndInfantsCountPart, "", -1);

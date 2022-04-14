@@ -120,13 +120,14 @@ $('#extra_mark_up_modal_field').on('change keyup input',function(){
 
 $('#lead-quote-extra-mark-up-edit-form').on('beforeSubmit', function (e) {
     e.preventDefault();
-    
+    $('#preloader').removeClass('d-none');
     $.ajax({
        type: $(this).attr('method'),
        url: $(this).attr('action'),
        data: $(this).serializeArray(),
        dataType: 'json',
        success: function(data) {
+           $('#preloader').addClass('d-none');
             var type = 'error',
                 text = data.message,
                 title = 'Lead extra markup savin error error';
@@ -141,14 +142,15 @@ $('#lead-quote-extra-mark-up-edit-form').on('beforeSubmit', function (e) {
                 $.pjax.reload({container: '#pjax-quote_estimation_profit-{$quote->id}', async: false});
             }
             
-            new PNotify({
+            createNotifyByObject({
                 title: title,
                 text: data.message,
                 type: type
             });
        },
        error: function (error) {
-            new PNotify({
+           $('#preloader').addClass('d-none');
+            createNotifyByObject({
                 title: 'Error',
                 text: 'Internal Server Error. Try again letter.',
                 type: 'error'                

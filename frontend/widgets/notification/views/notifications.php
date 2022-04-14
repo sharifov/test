@@ -138,20 +138,7 @@ $("#notify-pjax-cc").on('pjax:timeout', function(event) {
 });
  
 function notificationPNotify(type, title, message, desktopMessage) {
-    new PNotify({
-        type: type,
-        title: title,
-        text: message,
-        icon: true,
-        desktop: {
-            desktop: true,
-            fallback: true,
-            text: desktopMessage
-        },
-        delay: 10000,
-        mouse_reset: false,
-        hide: true
-    });
+    createDesktopNotify('none', title, message, type, desktopMessage);
     soundNotification();
 }
 

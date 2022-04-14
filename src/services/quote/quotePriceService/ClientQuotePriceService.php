@@ -20,6 +20,26 @@ class ClientQuotePriceService
         $this->quote = $quote;
     }
 
+    public function setClientCurrency(?string $currencyCode): ClientQuotePriceService
+    {
+        $this->quote->q_client_currency = $currencyCode;
+        return $this;
+    }
+
+    public function calculateClientCurrencyRate(): ClientQuotePriceService
+    {
+        if ($currencyCode = $this->quote->q_client_currency) {
+            $this->quote->q_client_currency_rate = Currency::getBaseRateByCurrencyCode($currencyCode);
+        }
+        return $this;
+    }
+
+    public function setClientCurrencyRate(?float $rate): ClientQuotePriceService
+    {
+        $this->quote->q_client_currency_rate = $rate;
+        return $this;
+    }
+
     public function getClientQuotePricePassengersData(): array
     {
         $priceData = $this->getClientPricesData();
@@ -40,8 +60,10 @@ class ClientQuotePriceService
             $result['passengers'][$paxCode]['price'] = round($price['selling'] / $price['tickets'], 2);
             $result['passengers'][$paxCode]['tax'] = round(($price['taxes'] + $price['mark_up'] + $price['extra_mark_up'] + $price['service_fee']) / $price['tickets'], 2);
             $result['passengers'][$paxCode]['baseFare'] = round($price['fare'] / $price['tickets'], 2);
-            $result['passengers'][$paxCode]['mark_up'] = round($price['mark_up'], 2);
-            $result['passengers'][$paxCode]['extra_mark_up'] = round($price['extra_mark_up'], 2);
+            $result['passengers'][$paxCode]['mark_up'] = round($price['mark_up'] / $price['tickets'], 2);
+            $result['passengers'][$paxCode]['extra_mark_up'] = round($price['extra_mark_up'] / $price['tickets'], 2);
+            $result['passengers'][$paxCode]['baseTax'] = round(($price['taxes']) / $price['tickets'], 2);
+            $result['passengers'][$paxCode]['service_fee'] = round($price['service_fee'] ?? 0, 2);
 
             $result['prices']['totalTax'] += $result['passengers'][$paxCode]['tax'] * $price['tickets'];
         }
@@ -130,5 +152,10 @@ class ClientQuotePriceService
         }
 
         return 0;
+    }
+
+    public function getQuote(): Quote
+    {
+        return $this->quote;
     }
 }

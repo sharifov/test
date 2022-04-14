@@ -57,7 +57,7 @@ function widgetStatus(selector, updateStatusUrl) {
 
             })
             .fail(function () {
-                new PNotify({title: "Change status", type: "error", text: "Server error", hide: true});
+                createNotifyByObject({title: "Change status", type: "error", text: "Server error", hide: true});
             })
             .always(function() {
                 btn.html('<i class="fa fa-check"></i>');

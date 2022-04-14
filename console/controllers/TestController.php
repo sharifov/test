@@ -4,6 +4,7 @@ namespace console\controllers;
 
 use common\models\Department;
 use common\models\Project;
+use common\models\query\LeadFlowQuery;
 use common\models\search\ContactsSearch;
 use common\models\UserGroup;
 use frontend\helpers\JsonHelper;
@@ -161,7 +162,7 @@ class TestController extends Controller
 //        die;
 
         $m = <<<JSON
-{\"message\":\"ConnectionError (31005): Error sent from gateway in HANGUP\",\"causes\":[],\"code\":31005,\"description\":\"Connection error\",\"explanation\":\"A connection error occurred during the call\",\"name\":\"ConnectionError\",\"solutions\":[]}            
+{\"message\":\"ConnectionError (31005): Error sent from gateway in HANGUP\",\"causes\":[],\"code\":31005,\"description\":\"Connection error\",\"explanation\":\"A connection error occurred during the call\",\"name\":\"ConnectionError\",\"solutions\":[]}
 JSON;
 //        $m = preg_replace("/\n/", "", $m);
         $m = preg_replace('/\\\"/', "\"", $m);
@@ -732,6 +733,46 @@ JSON;
     {
         $phone = PhoneNumberRedialQuery::getOneMatchingByClientPhone('+185553464564', 8);
         var_dump($phone->phoneList->pl_phone_number ?? null);
+        die;
+    }
+
+    public function actionNotif()
+    {
+//        $notification = Notifications::create(
+//            464,
+//            'Call - Long Queue Time',
+//            'Call ID:' . 15646852 . ' to PRICELINE Sales from +37378*****456 is stuck in the queue for 15 sec.',
+//            Notifications::TYPE_WARNING,
+//            true
+//        );
+//        if ($notification) {
+//            Notifications::publish('getNewNotification', ['user_id' => 464], NotificationMessage::add($notification));
+//        }
+        $message = 'Call ID:' . 15646852 . ' to PRICELINE Sales from +37378*****456 is stuck in the queue for 15 sec.';
+        Notifications::publish(
+            'showDesktopNotification',
+            ['user_id' => 464],
+            NotificationMessage::desktopMessage(
+                464 . '-desk',
+                'Call - Long Queue Time',
+                '<strong>Hello World</strong> Hello World',
+                'info',
+                $message,
+                true
+            )
+        );
+    }
+
+    public function actionFirstLeadFlow()
+    {
+        $firstLeadFlow = LeadFlowQuery::getFirstOwnerOfLead(513131);
+        var_dump($firstLeadFlow->toArray());
+        die;
+    }
+
+    public function actionBlameable()
+    {
+        echo 'Blameable '.Auth::employeeId();
         die;
     }
 }

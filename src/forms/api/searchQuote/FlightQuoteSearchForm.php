@@ -402,4 +402,10 @@ class FlightQuoteSearchForm extends Model
 
         return $quotes;
     }
+
+    public function setSortBy(string $sortBy): FlightQuoteSearchForm
+    {
+        $this->sortBy = $sortBy;
+        return $this;
+    }
 }

@@ -1245,7 +1245,7 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                     type = !json.error ? 'success' : 'error',
                                     text = json.message;
                                 
-                                new PNotify({
+                                createNotifyByObject({
                                     title: title,
                                     type: type,
                                     text: text,
@@ -1268,7 +1268,7 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                 }
                             },
                             error: function (text) {
-                                new PNotify({
+                                createNotifyByObject({
                                     title: "Error",
                                     type: "error",
                                     text: "Internal Server Error. Try again letter.",
@@ -1302,14 +1302,14 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
             },
             success: function (data) {
                 if (data.error) {
-                   new PNotify({
+                   createNotifyByObject({
                         title: "Error",
                         type: "error",
                         text: data.error,
                         hide: true
                     }); 
                 } else {
-                    new PNotify({
+                    createNotifyByObject({
                         title: "Success",
                         type: "success",
                         text: 'Successfully deleted',
@@ -1322,7 +1322,7 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                 }
             },
             error: function (text) {
-                new PNotify({
+                createNotifyByObject({
                     title: "Error",
                     type: "error",
                     text: "Internal Server Error. Try again letter.",

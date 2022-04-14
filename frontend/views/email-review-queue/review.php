@@ -170,7 +170,6 @@ $files = JsonHelper::decode($email->e_email_data);
                   'e_email_cc:email',
                   'e_email_bc:email',
                   'e_email_subject:email',
-                  'e_attach',
                   'e_email_data:ntext',
                   [
                       'attribute' => 'e_type_id',

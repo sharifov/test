@@ -441,9 +441,9 @@ $(document).on('click','#client-unsubscribe-button', function (e) {
             success: function(response){
                 $.pjax.reload({container: '#pjax-client-info', timeout: 10000, async: false});
                 if (Boolean(Number(response.data.action))){
-                    new PNotify({title: "Communication", type: "info", text: 'Client communication restricted', hide: true});
+                    createNotifyByObject({title: "Communication", type: "info", text: 'Client communication restricted', hide: true});
                 } else {
-                    new PNotify({title: "Communication", type: "info", text: 'Client communication allowed', hide: true});
+                    createNotifyByObject({title: "Communication", type: "info", text: 'Client communication allowed', hide: true});
                 }
                 updateCommunication();                
             }
@@ -464,7 +464,7 @@ Modal::end();
 
 $jsCommBlockChatView = <<<JS
 
-$('body').on('click', '.comm-chat-room-view', function(e) {  
+$('body').on('click', '.comm-chat-room-view', function(e) {
     e.preventDefault();
     $.get(        
         '/client-chat-qa/room',       
@@ -480,3 +480,10 @@ $('body').on('click', '.comm-chat-room-view', function(e) {
 
 JS;
 $this->registerJs($jsCommBlockChatView);
+
+$css = <<<CSS
+    .datepicker {
+        z-index: 1040!important;
+    }
+CSS;
+$this->registerCss($css);

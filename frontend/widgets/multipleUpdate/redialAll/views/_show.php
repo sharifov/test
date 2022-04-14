@@ -65,19 +65,19 @@ $('body').find('#update-all-form').on('beforeSubmit', function (e) {
                 if (data.text) {
                     text = data.text;
                 }
-                new PNotify({title: 'Update all', text: text, type: 'info'});
+                createNotifyByObject({title: 'Update all', text: text, type: 'info'});
             } else {
                 let text = 'Error. Try again later.';
                 if (data.text) {
                     text = data.text;
                 }
-                new PNotify({title: 'Update all', text: text, type: 'error'});
+                createNotifyByObject({title: 'Update all', text: text, type: 'error'});
             }
             {$script}
        },
        error: function (error) {
            $('#{$modalId}').modal('toggle');
-           new PNotify({title: 'Error', text: 'Internal Server Error. Try again later.', type: 'error'});
+           createNotifyByObject({title: 'Error', text: 'Internal Server Error. Try again later.', type: 'error'});
        }
     })
     return false;

@@ -57,7 +57,7 @@ class CallQueueLongTimeNotificationJob extends BaseJob implements JobInterface
             $users = $this->getUsers($params->roleKeys, $call->c_dep_id, $call->c_project_id);
 
             if ($users) {
-                $this->sendNotifications($users, $call);
+                $this->sendDesktopMessage($users, $call);
             }
 
             if ($params->isActive()) {
@@ -86,6 +86,25 @@ class CallQueueLongTimeNotificationJob extends BaseJob implements JobInterface
             if ($notification) {
                 Notifications::publish('getNewNotification', ['user_id' => $userId], NotificationMessage::add($notification));
             }
+        }
+    }
+
+    private function sendDesktopMessage(array $users, Call $call): void
+    {
+        $message = $this->createMessage($call);
+        foreach ($users as $userId) {
+            Notifications::publish(
+                'showDesktopNotification',
+                ['user_id' => $userId],
+                NotificationMessage::desktopMessage(
+                    $userId . '-desk',
+                    'Call - Long Queue Time',
+                    $message,
+                    Notifications::TYPE_WARNING,
+                    $message,
+                    true
+                )
+            );
         }
     }
 

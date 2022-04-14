@@ -79,7 +79,7 @@ $('#client-add-phone-form').on('beforeSubmit', function (e) {
                 $('#contact-phones').append(data.html);
                 $('#modal-sm').modal('hide');
                 
-                new PNotify({
+                createNotifyByObject({
                     title: 'Phone successfully added',
                     text: data.message,
                     type: 'success'
@@ -87,7 +87,7 @@ $('#client-add-phone-form').on('beforeSubmit', function (e) {
             }
        },
        error: function (error) {
-            new PNotify({
+            createNotifyByObject({
                 title: 'Error',
                 text: 'Internal Server Error. Try again letter.',
                 type: 'error'                

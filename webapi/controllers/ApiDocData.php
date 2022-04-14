@@ -43,6 +43,7 @@ class ApiDocData
      * @apiParam {string{32}}               data.reprotection_quote_gid   Reprotection quote GID
      * @apiParam {string{32}}               data.case_gid                 Case GID
      * @apiParam {string{32}}               data.product_quote_gid        Product quote GID
+     * @apiParam {string{32}=pending,processing,refunded,exchanged,canceled}    data.status         Client status
      *
      *
      * @apiParamExample {json} Request message Example:
@@ -52,7 +53,8 @@ class ApiDocData
      *          "booking_id": "C4RB44",
      *          "reprotection_quote_gid": "4569a42c916c811e2033142d8ae54179"
      *          "case_gid": "1569a42c916c811e2033142d8ae54176"
-     *          "product_quote_gid": "5569a42c916c811e2033142d8ae54170"
+     *          "product_quote_gid": "5569a42c916c811e2033142d8ae54170",
+     *          "status": "processing"
      *      }
      *  }
      *

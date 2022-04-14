@@ -118,7 +118,6 @@
             ajax.done(function (response) {
                 if (response.data.length) {
                     this.db.addBatch(response.data)
-                        .then(() => {this.db.sortData()})
                         .then(() => {this.totalItems = response.totalItems})
                         .then(() => {resolve()});
                 } else {

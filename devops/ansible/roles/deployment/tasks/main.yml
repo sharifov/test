@@ -92,6 +92,24 @@
     name: supervisor
     state: restarted
 
+- name: Wait for queue-job.log
+  wait_for:
+    path: "{{ app_console_logfile_path }}/queue-job.log"
+
+- name: Find supervisord logs
+  find:
+    paths: "{{ app_console_logfile_path }}"
+    patterns: "*.log"
+  register: supervisord_logs
+
+- name: Chown supervisord logs
+  file:
+    path: "{{ item.path }}"
+    owner: "{{ web_user }}"
+    group: "{{ web_user }}"
+    mode: 755
+  with_items: "{{ supervisord_logs.files }}"
+
 - name: Find old releases
   find:
     paths: "{{ web_dir }}"
@@ -100,7 +118,9 @@
       - html
       - "{{ sym.stat.lnk_target | basename }}"
   register: result
-  when: sym.stat.lnk_target
+  when:
+    - sym.stat.exists
+    - sym.stat.lnk_target
 
 - name: Keep last 3 releases
   file:
@@ -108,3 +128,4 @@
     state: absent
   with_items:
     - "{{ (result.files | sort(attribute='ctime'))[:-3] }}"
+  when: sym.stat.exists

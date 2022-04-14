@@ -46,7 +46,7 @@ use modules\attraction\src\helpers\AttractionQuoteHelper;
             if (parseInt(data.status) === 1) {
                 modal.find('.modal-body').html(data.html);
                 modal.modal('show');
-                /*new PNotify({
+                /*createNotifyByObject({
                     title: 'The quote was successfully booking',
                     type: 'success',
                     text: data.message,
@@ -59,7 +59,7 @@ use modules\attraction\src\helpers\AttractionQuoteHelper;
                 pjaxReload({container: "#pjax-lead-orders"});
                 /*pjaxReload({container: "#pjax-lead-products-wrap"});*/
             } else {
-                new PNotify({
+                createNotifyByObject({
                     title: 'Booking process failed',
                     type: 'error',
                     text: data.message,
@@ -96,7 +96,7 @@ use modules\attraction\src\helpers\AttractionQuoteHelper;
           dataType: 'json',
         }).done(function(data) {
             if (parseInt(data.status) === 1) {
-                new PNotify({
+                createNotifyByObject({
                     title: 'Booking is canceled',
                     type: 'success',
                     text: data.message,
@@ -108,7 +108,7 @@ use modules\attraction\src\helpers\AttractionQuoteHelper;
                 pjaxReload({container: "#pjax-lead-offers"});
                 pjaxReload({container: "#pjax-lead-orders"});
             } else {
-                new PNotify({
+                createNotifyByObject({
                     title: 'Process failed',
                     type: 'error',
                     text: data.message,
@@ -161,7 +161,7 @@ use modules\attraction\src\helpers\AttractionQuoteHelper;
           dataType: 'json',
         }).done(function(data) {
             if (parseInt(data.status) === 1) {
-                new PNotify({
+                createNotifyByObject({
                     title: 'Document have been successfully generated',
                     type: 'success',
                     text: data.message,
@@ -169,7 +169,7 @@ use modules\attraction\src\helpers\AttractionQuoteHelper;
                 });                
                 addFileToFileStorageList();                
             } else {
-                new PNotify({
+                createNotifyByObject({
                     title: 'File generated failed',
                     type: 'error',
                     text: data.message,
@@ -226,7 +226,7 @@ use modules\attraction\src\helpers\AttractionQuoteHelper;
                 
                 $('#modalCaseSm').modal('hide');
                 
-                new PNotify({
+                createNotifyByObject({
                     title: 'Client info successfully updated',
                     text: data.message,
                     type: 'success'
@@ -234,7 +234,7 @@ use modules\attraction\src\helpers\AttractionQuoteHelper;
             }*/
        },
        error: function (error) {
-            new PNotify({
+            createNotifyByObject({
                 title: 'Error',
                 text: 'Internal Server Error. Try again letter.',
                 type: 'error'                
@@ -270,7 +270,7 @@ use modules\attraction\src\helpers\AttractionQuoteHelper;
                     });
                 }
                 
-                new PNotify({
+                createNotifyByObject({
                     title: 'Booking Info',
                     type: 'success',
                     text: data.message,
@@ -278,7 +278,7 @@ use modules\attraction\src\helpers\AttractionQuoteHelper;
                 });               
                               
             } else {
-                new PNotify({
+                createNotifyByObject({
                     title: 'Please check later',
                     type: 'error',
                     text: data.message,
@@ -320,7 +320,7 @@ use modules\attraction\src\helpers\AttractionQuoteHelper;
                     });
                 }           
             } else {
-                new PNotify({
+                createNotifyByObject({
                     title: 'Please check later',
                     type: 'error',
                     text: data.message,

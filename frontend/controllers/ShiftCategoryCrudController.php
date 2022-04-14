@@ -2,11 +2,10 @@
 
 namespace frontend\controllers;
 
-use src\model\shiftSchedule\entity\shiftCategory\ShiftCategory;
-use src\model\shiftSchedule\entity\shiftCategory\search\ShiftCategorySearch;
-use frontend\controllers\FController;
-use yii\web\NotFoundHttpException;
+use modules\shiftSchedule\src\entities\shiftCategory\search\ShiftCategorySearch;
+use modules\shiftSchedule\src\entities\shiftCategory\ShiftCategory;
 use yii\filters\VerbFilter;
+use yii\web\NotFoundHttpException;
 
 /**
  * ShiftCategoryCrudController implements the CRUD actions for ShiftCategory model.

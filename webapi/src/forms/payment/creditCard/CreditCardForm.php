@@ -9,6 +9,8 @@ use yii\base\Model;
  */
 class CreditCardForm extends Model
 {
+    public const SCENARIO_WITHOUT_PRIVATE_DATA = 'without_private_data';
+
     public $number;
     public $holder_name;
     public $expiration_month;
@@ -21,7 +23,9 @@ class CreditCardForm extends Model
     public function rules()
     {
         return [
-            [['number', 'expiration_month', 'expiration_year', 'cvv', 'holder_name'], 'required'],
+            [['expiration_month', 'expiration_year', 'holder_name'], 'required'],
+
+            [['number', 'cvv'], 'required', 'on' => self::SCENARIO_DEFAULT],
 
             [['expiration_month'], 'integer', 'min' => 1, 'max' => 12],
             [['expiration_year'], 'integer', 'min' => 0],
@@ -35,6 +39,13 @@ class CreditCardForm extends Model
 
             [['cvv'], 'string', 'max' => 4],
         ];
+    }
+
+    public function scenarios()
+    {
+        $scenarios = parent::scenarios();
+        $scenarios[self::SCENARIO_WITHOUT_PRIVATE_DATA] = $scenarios[self::SCENARIO_DEFAULT];
+        return $scenarios;
     }
 
     public function formName(): string

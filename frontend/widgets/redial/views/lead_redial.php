@@ -122,14 +122,14 @@ $js = <<<JS
 $("#redial-lead-actions-block-call").on('click', function (e) {
     let cann = $("body").find("#online-connection-indicator").attr("title").indexOf(": true");
     if (cann < 0) {
-        new PNotify({title: "Lead Redial: Call", type: "error", text: 'Online connection error. Please wait some seconds.', hide: true});
+        createNotifyByObject({title: "Lead Redial: Call", type: "error", text: 'Online connection error. Please wait some seconds.', hide: true});
         return ;
     }
     let phoneToStr = $('#redial-lead-phone-to').val();
     let phoneTo = phoneToStr.split(":")[0];
     
     if (!phoneTo) {
-        new PNotify({title: "Lead Redial: Call", type: "error", text: 'Not selected phone', hide: true});
+        createNotifyByObject({title: "Lead Redial: Call", type: "error", text: 'Not selected phone', hide: true});
         return ;
     }
     $('.group-redial-lead-phone-to').hide();
@@ -180,16 +180,16 @@ function checkBlackPhoneAndNext(phoneTo) {
            if (data.message) {
                text = data.message;
            }
-           new PNotify({title: "Lead Redial", type: "error", text: text, hide: true});
+           createNotifyByObject({title: "Lead Redial", type: "error", text: text, hide: true});
         }
     })
     .fail(function() {
-        new PNotify({title: "Lead Redial", type: "error", text: 'Try again later.', hide: true});
+        createNotifyByObject({title: "Lead Redial", type: "error", text: 'Try again later.', hide: true});
     })
 }
 
 function getPhoneNumberFromAndNext(phoneTo) {
-    // new PNotify({title: "Take Lead", type: "info", text: 'Get "from phone number"', hide: true});
+    // createNotifyByObject({title: "Take Lead", type: "info", text: 'Get "from phone number"', hide: true});
     $.ajax({
         type: '{$phoneNumberFromUrl->method}',
         url: '{$phoneNumberFromUrl->url}',
@@ -197,18 +197,18 @@ function getPhoneNumberFromAndNext(phoneTo) {
     })
     .done(function(data) {
         if (data.success) {
-            // new PNotify({title: "Take Lead", type: "success", text: 'Phone number found', hide: true});
+            // createNotifyByObject({title: "Take Lead", type: "success", text: 'Phone number found', hide: true});
             leadRedialReservationAndNext(data.phoneFrom, phoneTo);
         } else {
            let text = 'Error. Try again later';
            if (data.message) {
                text = data.message;
            }
-           new PNotify({title: "Lead Redial", type: "error", text: text, hide: true});
+           createNotifyByObject({title: "Lead Redial", type: "error", text: text, hide: true});
         }
     })
     .fail(function() {
-        new PNotify({title: "Lead Redial", type: "error", text: 'Try again later.', hide: true});
+        createNotifyByObject({title: "Lead Redial", type: "error", text: 'Try again later.', hide: true});
     })
 }
 
@@ -216,7 +216,7 @@ function leadRedialTake() {
     $('#clock').countdown('stop');
     $('#redial-lead-actions-take').hide();
     //$('#redial-lead-actions-take-cancel').hide();        
-    new PNotify({title: "Take Lead", type: "info", text: 'Wait', hide: true});
+    createNotifyByObject({title: "Take Lead", type: "info", text: 'Wait', hide: true});
     $.ajax({
         type: '{$takeUrl->method}',
         url: '{$takeUrl->url}',
@@ -230,24 +230,24 @@ function leadRedialTake() {
              if (data.message) {
                 text = data.message;
              }
-             new PNotify({title: "Take Lead", type: "success", text: text, hide: true});
+             createNotifyByObject({title: "Take Lead", type: "success", text: text, hide: true});
              reloadContainers();
         } else {
            let text = 'Error. Try again later';
            if (data.message) {
                text = data.message;
            }
-           new PNotify({title: "Take Lead", type: "error", text: text, hide: true});
+           createNotifyByObject({title: "Take Lead", type: "error", text: text, hide: true});
         }
     })
     .fail(function() {
         hideActionBlock();
-        new PNotify({title: "Take lead", type: "error", text: 'Try again later.', hide: true});
+        createNotifyByObject({title: "Take lead", type: "error", text: 'Try again later.', hide: true});
     })
 }
 
 function leadRedialReservationAndNext(phoneFrom, phoneTo) {
-    new PNotify({title: "Take Lead", type: "info", text: 'Reservation for call', hide: true});
+    createNotifyByObject({title: "Take Lead", type: "info", text: 'Reservation for call', hide: true});
     $.ajax({
         type: '{$reservationUrl->method}',
         url: '{$reservationUrl->url}',
@@ -255,18 +255,18 @@ function leadRedialReservationAndNext(phoneFrom, phoneTo) {
     })
     .done(function(data) {
         if (data.success) {
-            new PNotify({title: "Take Lead: Reservation", type: "success", text: 'Success', hide: true});
+            createNotifyByObject({title: "Take Lead: Reservation", type: "success", text: 'Success', hide: true});
             leadRedialCall(phoneFrom, phoneTo);
         } else {
            let text = 'Error. Try again later';
            if (data.message) {
                text = data.message;
            }
-           new PNotify({title: "Take Lead", type: "error", text: text, hide: true});
+           createNotifyByObject({title: "Take Lead", type: "error", text: text, hide: true});
         }
     })
     .fail(function() {
-        new PNotify({title: "Take lead", type: "error", text: 'Try again later.', hide: true});
+        createNotifyByObject({title: "Take lead", type: "error", text: 'Try again later.', hide: true});
     })
 }
 
@@ -315,11 +315,11 @@ function reloadLeadViewContainer() {
         if (data.success) {
             $("#redial-lead-view-block").html(data.data);
         } else {
-           new PNotify({title: "Update Lead details", type: "error", text: 'Error', hide: true});
+           createNotifyByObject({title: "Update Lead details", type: "error", text: 'Error', hide: true});
         }
     })
     .fail(function() {
-        new PNotify({title: "Update Lead details", type: "error", text: 'Error', hide: true});
+        createNotifyByObject({title: "Update Lead details", type: "error", text: 'Error', hide: true});
     })
 }
 

@@ -7,6 +7,7 @@
  * @var $leadForm LeadForm
  * @var $isManager bool
  * @var $index int
+ * @var $totalCount int
  */
 
 use common\models\Currency;
@@ -19,6 +20,7 @@ use src\helpers\app\AppHelper;
 use src\helpers\quote\ImageHelper;
 use src\services\quote\quotePriceService\ClientQuotePriceService;
 use yii\bootstrap\Html;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 use yii\widgets\Pjax;
 
@@ -65,7 +67,7 @@ if ($model->isDeclined()) {
     <div class="quote__heading" style="background-color: <?=$bgColor?>">
         <div class="quote__heading-left">
             <span>
-                <span class="badge badge-white"><?= ($index + 1) ?></span>
+                <span class="badge badge-white"><?= ($totalCount - $index) ?></span>
             </span>
             <?php if ($model->isOriginal()) : ?>
                 <span class="label label-primary"><?= Quote::getTypeName($model->type_id) ?></span>
@@ -82,8 +84,8 @@ if ($model->isDeclined()) {
                 ['class' => 'fa fa-font', 'title' => 'Alternative quote']
             ) : ''?>
 
-            <span title="Quote ID: <?=$model->id ?>, UID: <?= Html::decode($model->uid) ?>" data-toggle="tooltip">
-                <strong><?= Html::decode($model->uid) ?></strong>
+            <span title="Quote ID: <?=$model->id ?>, UID: <?= Html::decode($model->uid) ?>" data-toggle="tooltip" class="quote__id">
+                <strong data-srv-quote-uid="<?= Html::decode($model->uid) ?>"><?= Html::decode($model->uid) ?></strong>
             </span>
 
             <?= $model->getStatusSpan()?>
@@ -358,34 +360,35 @@ if ($model->isDeclined()) {
         </div>
         <div class="row">
             <div class="col-md-6">
-                <div class="quote__badges text-left">
+                <div class="quote__badges">
+                        <?php echo QuoteHelper::formattedMetaRank($model->getMetaInfo())?>
 
-                    <?php echo QuoteHelper::formattedFreeBaggage($model->getMetaInfo()) ?>
+                        <div style="width: 30px"></div>
 
-                    <span class="quote__badge quote__badge--warning <?php if (!$needRecheck) :
-                        ?>quote__badge--disabled<?php
-                                                                    endif;?>" data-toggle="tooltip"
-                          title="<?= ($needRecheck) ? 'Bag re-check may be required' : 'Bag re-check not required'?>"
-                          data-original-title="<?= ($needRecheck) ? 'Bag re-check may be required' : 'Bag re-check not required'?>">
-                        <i class="fa fa-warning"></i>
-                    </span>
+                        <?php echo QuoteHelper::formattedFreeBaggage($model->getMetaInfo()) ?>
 
-                    <span class="quote__badge <?php if ($model->hasAirportChange) :
-                        ?>quote__badge--warning<?php
-                                              else :
-                                                    ?>quote__badge--disabled<?php
-                                              endif;?>" data-toggle="tooltip"
-                          title="<?= ($model->hasAirportChange) ? 'Airports Change' : 'No Airports Change'?>"
-                          data-original-title="<?= ($model->hasAirportChange) ? 'Airports Change' : 'No Airports Change'?>">
-                        <i class="fa fa-exchange"></i>
-                    </span>
+                        <span class="quote__badge quote__badge--warning <?php if (!$needRecheck) :
+                            ?>quote__badge--disabled<?php
+                                                                        endif;?>" data-toggle="tooltip"
+                              title="<?= ($needRecheck) ? 'Bag re-check may be required' : 'Bag re-check not required'?>"
+                              data-original-title="<?= ($needRecheck) ? 'Bag re-check may be required' : 'Bag re-check not required'?>">
+                            <i class="fa fa-warning"></i>
+                        </span>
 
-                    <?php echo QuoteHelper::formattedPenalties($model->getPenaltiesInfo()) ?>
+                        <span class="quote__badge <?php if ($model->hasAirportChange) :
+                            ?>quote__badge--warning<?php
+                                                  else :
+                                                        ?>quote__badge--disabled<?php
+                                                  endif;?>" data-toggle="tooltip"
+                              title="<?= ($model->hasAirportChange) ? 'Airports Change' : 'No Airports Change'?>"
+                              data-original-title="<?= ($model->hasAirportChange) ? 'Airports Change' : 'No Airports Change'?>">
+                            <i class="fa fa-exchange"></i>
+                        </span>
 
-                    <?php echo QuoteHelper::formattedMetaRank($model->getMetaInfo())?>
+                        <?php echo QuoteHelper::formattedPenalties($model->getPenaltiesInfo()) ?>
 
-                    <?php echo QuoteHelper::formattedProviderProject($model) ?>
-                </div>
+                        <?php echo QuoteHelper::formattedProviderProject($model) ?>
+                    </div>
             </div>
             <div class="col-md-6">
                 <table class="table table-bordered">
@@ -400,7 +403,7 @@ if ($model->isDeclined()) {
                                             Final Profit:
                                             <?= number_format($model->lead->getFinalProfit(), 2);?> $
                                         <?php else :?>
-                                            Estimation Profit:
+                                            Estimated Profit:
                                             <?php if (isset($priceData['total'])) :?>
                                                 <?=number_format($model->getEstimationProfit(), 2);?> $
                                             <?php endif;?>

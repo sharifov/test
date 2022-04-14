@@ -99,6 +99,7 @@ class ClientChatUserAccessSearch extends ClientChatUserAccess
             'cch_project_id',
             'project_name' => 'project.name',
             'ccc_name',
+            'ccc_id',
             'ccua_created_dt',
             'cch_created_dt',
             'owner_nickname' => 'owner.nickname',
@@ -122,7 +123,7 @@ class ClientChatUserAccessSearch extends ClientChatUserAccess
             ['cch_status_id' => ClientChat::STATUS_PENDING],
             ['cch_status_id' => ClientChat::STATUS_TRANSFER],
             ['cch_status_id' => ClientChat::STATUS_IDLE]]);
-        $query->orderBy(['ccc_priority' => SORT_DESC, 'is_transfer' => SORT_DESC, 'ccua_created_dt' => SORT_ASC,  'cch_created_dt' => SORT_ASC]);
+        $query->orderBy(['ccc_priority' => SORT_DESC, 'cch_created_dt' => SORT_ASC]);
 
         $query->groupBy([
             'ccua_id',

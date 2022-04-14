@@ -8,7 +8,7 @@ use frontend\models\ProfitSplitForm;
 
 class LeadProfitSplit
 {
-    public function save(Lead $lead, int $newOwnerId = null, $percent = 100)
+    public function save(Lead $lead, int $newOwnerId = null, $percent = 100): void
     {
         if (!$newOwnerId) {
             return;
@@ -21,6 +21,9 @@ class LeadProfitSplit
 
         /** @var ProfitSplit $profitSplit */
         foreach ($lead->profitSplits as $profitSplit) {
+            if ($profitSplit->ps_user_id === $newOwnerId) {
+                return;
+            }
             $profitSplitData[$profitSplit->ps_id] = [
                 'ps_user_id' => $profitSplit->ps_user_id,
                 'ps_percent' => $profitSplit->ps_percent,

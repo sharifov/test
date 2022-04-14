@@ -36,6 +36,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     public const ACT_LINK_TO_CALL = self::NS . 'act/link-to-call';
     public const ACT_TAKE_LEAD_FROM_CALL = self::NS . 'act/take-from-call';
     public const ACT_PRICE_LINK_RESEARCH = self::NS . 'act/price-link-research';
+    public const ACT_ADD_AUTO_QUOTES = self::NS . 'act/auto-add-quotes';
 
     /** UI PERMISSION */
     public const UI_BLOCK_CLIENT_INFO  = self::NS . 'ui/block/client-info';
@@ -69,6 +70,9 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     public const OBJ_EXTRA_QUEUE         = self::NS . 'obj/extra_queue';
     public const OBJ_CLOSED_QUEUE        = self::NS . 'obj/closed_queue';
     public const OBJ_LEAD_SMART_SEARCH   = self::NS . 'obj/smart_search';
+    public const OBJ_LEAD_QUOTE_SEARCH   = self::NS . 'obj/quote_search';
+    public const OBJ_LEAD_QUICK_SEARCH   = self::NS . 'obj/quick_search';
+    public const OBJ_HEAT_MAP_LEAD       = self::NS . 'obj/heat_map_lead';
 
     /** --------------- OBJECT LIST --------------------------- */
     public const OBJECT_LIST = [
@@ -111,7 +115,11 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::CLIENT_CREATE_FORM => self::CLIENT_CREATE_FORM,
         self::OBJ_EXTRA_QUEUE => self::OBJ_EXTRA_QUEUE,
         self::OBJ_CLOSED_QUEUE => self::OBJ_CLOSED_QUEUE,
-        self::OBJ_LEAD_SMART_SEARCH => self::OBJ_LEAD_SMART_SEARCH
+        self::OBJ_LEAD_SMART_SEARCH => self::OBJ_LEAD_SMART_SEARCH,
+        self::ACT_ADD_AUTO_QUOTES => self::ACT_ADD_AUTO_QUOTES,
+        self::OBJ_LEAD_QUOTE_SEARCH => self::OBJ_LEAD_QUOTE_SEARCH,
+        self::OBJ_LEAD_QUICK_SEARCH => self::OBJ_LEAD_QUICK_SEARCH,
+        self::OBJ_HEAT_MAP_LEAD => self::OBJ_HEAT_MAP_LEAD,
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -148,6 +156,8 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     public const ACTION_TRASH = 'trash';
     public const ACTION_TO_QA_LIST = 'toQaList';
     public const ACTION_ACCESS_SMART_SEARCH = 'accessSmartSearch';
+    public const ACTION_ACCESS_QUOTE_SEARCH = 'accessQuoteSearch';
+    public const ACTION_ACCESS_QUICK_SEARCH = 'accessQuickSearch';
 
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
@@ -213,10 +223,14 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_LINK_TO_CALL => [self::ACTION_ACCESS],
         self::ACT_TAKE_LEAD_FROM_CALL => [self::ACTION_ACCESS],
         self::OBJ_LEAD_PREFERENCES => [self::ACTION_SET_DELAY_CHARGE, self::ACTION_MANAGE_LEAD_PREF_CURRENCY],
-        self::OBJ_LEAD => [self::ACTION_CLONE, self::ACTION_SNOOZE, self::ACTION_CLOSE, self::ACTION_TRASH, self::ACTION_TO_QA_LIST],
+        self::OBJ_LEAD => [self::ACTION_CREATE, self::ACTION_CLONE, self::ACTION_SNOOZE, self::ACTION_CLOSE, self::ACTION_TRASH, self::ACTION_TO_QA_LIST],
         self::OBJ_EXTRA_QUEUE => [self::ACTION_ACCESS],
         self::OBJ_CLOSED_QUEUE => [self::ACTION_ACCESS],
         self::OBJ_LEAD_SMART_SEARCH => [self::ACTION_ACCESS_SMART_SEARCH],
+        self::ACT_ADD_AUTO_QUOTES => [self::ACTION_ACCESS],
+        self::OBJ_LEAD_QUOTE_SEARCH => [self::ACTION_ACCESS_QUOTE_SEARCH],
+        self::OBJ_LEAD_QUICK_SEARCH => [self::ACTION_ACCESS_QUICK_SEARCH],
+        self::OBJ_HEAT_MAP_LEAD => [self::ACTION_ACCESS],
     ];
 
     public const ATTR_LEAD_IS_OWNER = [
@@ -471,6 +485,28 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, '<', '>', '<=', '>=']
     ];
 
+    public const ATTR_QUOTES_COUNT = [
+        'optgroup' => 'Lead',
+        'id' => self::NS . 'quotesCount',
+        'field' => 'quotesCount',
+        'label' => 'Quotes Count in Lead',
+        'type' => self::ATTR_TYPE_INTEGER,
+        'input' => self::ATTR_INPUT_TEXT,
+        'values' => [],
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, '<', '>', '<=', '>=']
+    ];
+
+    public const ATTR_FLIGHT_SEGMENT_COUNT = [
+        'optgroup' => 'Lead',
+        'id' => self::NS . 'flightSegmentsCount',
+        'field' => 'flightSegmentsCount',
+        'label' => 'Flight Segments Count in Lead',
+        'type' => self::ATTR_TYPE_INTEGER,
+        'input' => self::ATTR_INPUT_TEXT,
+        'values' => [],
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, '<', '>', '<=', '>=']
+    ];
+
     public const ATTR_CLOSE_REASON = [
         'optgroup' => 'Lead',
         'id' => self::NS . 'close_reason',
@@ -568,6 +604,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         ],
         self::ACT_PRICE_LINK_RESEARCH => [
             self::ATTR_LEAD_IS_OWNER,
+            self::ATTR_FLIGHT_SEGMENT_COUNT
         ],
 
         self::OBJ_LEAD => [
@@ -607,7 +644,22 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
             self::ATTR_IS_COMMON_GROUP,
             self::ATTR_IS_IN_PROJECT,
             self::ATTR_IS_IN_DEPARTMENT,
-        ]
+        ],
+        self::ACT_ADD_AUTO_QUOTES  => [],
+        self::OBJ_LEAD_QUOTE_SEARCH => [
+            self::ATTR_LEAD_IS_OWNER,
+            self::ATTR_LEAD_HAS_OWNER,
+            self::ATTR_IS_COMMON_GROUP,
+            self::ATTR_IS_IN_PROJECT,
+            self::ATTR_IS_IN_DEPARTMENT,
+        ],
+        self::OBJ_LEAD_QUICK_SEARCH => [
+            self::ATTR_LEAD_IS_OWNER,
+            self::ATTR_LEAD_HAS_OWNER,
+            self::ATTR_IS_COMMON_GROUP,
+            self::ATTR_IS_IN_PROJECT,
+            self::ATTR_IS_IN_DEPARTMENT,
+        ],
     ];
 
     /**
@@ -687,6 +739,10 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         $attributeList[self::CLIENT_CREATE_FORM][] = $attrClientCreateMultiFieldsList;
         $attributeList[self::ACT_USER_CONVERSION][] = $attrLeadCloseReasons;
         $attributeList[self::OBJ_LEAD_SMART_SEARCH][] = $attrStatus;
+        $attributeList[self::OBJ_LEAD_QUOTE_SEARCH][] = $attrStatus;
+        $attributeList[self::OBJ_LEAD_QUICK_SEARCH][] = $attrStatus;
+        $attributeList[self::ACT_ADD_AUTO_QUOTES][] = self::ATTR_QUOTES_COUNT;
+        $attributeList[self::ACT_ADD_AUTO_QUOTES][] = self::ATTR_FLIGHT_SEGMENT_COUNT;
 
         return $attributeList;
     }

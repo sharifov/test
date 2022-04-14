@@ -8,6 +8,7 @@ use common\models\Lead;
 use frontend\helpers\JsonHelper;
 use Yii;
 use yii\helpers\ArrayHelper;
+use yii\web\NotFoundHttpException;
 
 class SettingHelper
 {
@@ -896,7 +897,7 @@ class SettingHelper
                 continue;
             }
             $linkName  = ArrayHelper::getValue($researchLink, 'name');
-            $results[] = $linkName;
+            $results[$key] = $linkName;
         }
         return $results;
     }
@@ -906,25 +907,25 @@ class SettingHelper
      * @return array
      * @throws \RuntimeException
      */
-    public static function getPriceResearchLinkByKey(int $key): array
+    public static function getPriceResearchLinkByKey(string $key): array
     {
         $researchLinks = Yii::$app->params['settings']['price_research_links'] ?? null;
         if (empty($researchLinks)) {
             $error = 'Price research links settings mot found. Value must be array';
-            throw new \RuntimeException($error);
+            throw new NotFoundHttpException($error);
         }
         if (!is_array($researchLinks)) {
             $error = 'Price research links settings is invalid. Value must be array';
-            throw  new  \RuntimeException($error);
+            throw  new  NotFoundHttpException($error);
         }
         if (!array_key_exists($key, $researchLinks)) {
             $error = 'Price research links settings key is invalid. Value not found arrayKey is' . $key;
-            throw new  \RuntimeException($error);
+            throw new  NotFoundHttpException($error);
         }
         $element = $researchLinks[$key];
         if (!is_array($element)) {
             $error = 'Price research links settings is invalid. Link value must be array arrayKey is' . $key;
-            throw new  \RuntimeException($error);
+            throw new  NotFoundHttpException($error);
         }
 
         return $element;

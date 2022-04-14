@@ -1066,12 +1066,12 @@ var PhoneWidget = function () {
             let callSid = $(this).attr('data-call-sid');
 
             if (!callSid) {
-                new PNotify({title: "Transfer call", type: "error", text: "Not found Call SID!", hide: true});
+                createNotifyByObject({title: "Transfer call", type: "error", text: "Not found Call SID!", hide: true});
                 return false;
             }
 
             if (!(objValue && objType)) {
-                new PNotify({
+                createNotifyByObject({
                     title: "Transfer call",
                     type: "error",
                     text: "Please try again after some seconds",
@@ -1098,7 +1098,7 @@ var PhoneWidget = function () {
             modal.find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
 
             if (!callSid) {
-                new PNotify({title: "Transfer call", type: "error", text: "Not found Call SID!", hide: true});
+                createNotifyByObject({title: "Transfer call", type: "error", text: "Not found Call SID!", hide: true});
                 return false;
             }
 
@@ -1123,7 +1123,7 @@ var PhoneWidget = function () {
             }
 
             if (!callSid) {
-                new PNotify({title: "Transfer call", type: "error", text: "Not found active Connection CallSid", hide: true});
+                createNotifyByObject({title: "Transfer call", type: "error", text: "Not found active Connection CallSid", hide: true});
                 return false;
             }
 
@@ -1158,7 +1158,7 @@ var PhoneWidget = function () {
                 $('#preloader').addClass('d-none');
             },
             error: function () {
-                new PNotify({
+                createNotifyByObject({
                     title: 'Error',
                     type: 'error',
                     text: 'Internal Server Error. Try again letter.',
@@ -2148,7 +2148,7 @@ var PhoneWidget = function () {
         let yiiform = $(this);
         let q = yiiform.find("input[name=q]").val();
         if (q.length < 3) {
-            //  new PNotify({
+            //  createNotifyByObject({
             //     title: "Search contacts",
             //     type: "warning",
             //     text: 'Minimum 2 symbols',
@@ -2184,7 +2184,7 @@ var PhoneWidget = function () {
                 //$('.call-pane__dial-clear-all').addClass('is-shown')
             })
             .fail(function () {
-                new PNotify({
+                createNotifyByObject({
                     title: "Search contacts",
                     type: "error",
                     text: 'Server Error. Try again later',

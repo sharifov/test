@@ -8,7 +8,7 @@ pipeline {
   stages {
     stage('Build') {
       steps {
-        sshagent(credentials: ['CRM_GIT']) {
+        sshagent(credentials: ['git-crm']) {
           sh 'composer install --no-interaction --ignore-platform-reqs'
         }
         sh '''
@@ -23,8 +23,8 @@ pipeline {
           ansiblePlaybook(
             playbook: 'deploy.yml',
             inventory: "inventories/${ENV}/aws_ec2.yml",
-            credentialsId: 'DEVOPS_RSA',
-            vaultCredentialsId: 'ANSIBLE_PASS',
+            credentialsId: "ssh-${ENV}",
+            vaultCredentialsId: "vault-${ENV}",
             extraVars: [ app_ver: "${GIT_COMMIT[0..6]}" ]
           )
         }

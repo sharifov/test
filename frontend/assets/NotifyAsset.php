@@ -22,12 +22,19 @@ class NotifyAsset extends AssetBundle
         /*'https://cdnjs.cloudflare.com/ajax/libs/pnotify/3.2.1/pnotify.css',
         'https://cdnjs.cloudflare.com/ajax/libs/pnotify/3.2.1/pnotify.mobile.css',
         'https://cdnjs.cloudflare.com/ajax/libs/pnotify/3.2.1/pnotify.nonblock.css',*/
-        'js/pnotify/pnotify.custom.min.css'
+//        'js/pnotify/pnotify.custom.min.css',
+//        'js/pnotify/pnotify5.custom.min.css'
+        ['js/pnotify/pnotify5.custom.min.css']
     ];
 
     public $js = [
 //        'js/pnotify/pnotify.custom.min.js',
-        'js/pnotify/pnotify.https.custom.min.js',
+//        'js/pnotify/pnotify.https.custom.min.js',
+        ['js/pnotify/pnotify5.custom.min.js'],
+        ['js/pnotify/pnotify5.bootstrap4.min.js'],
+        ['js/pnotify/pnotify5.fontawesome.min.js'],
+        ['js/pnotify/pnotify5.desktop.min.js'],
+        ['js/pnotify/pnotify5.paginate.min.js'],
         //'https://cdnjs.cloudflare.com/ajax/libs/ion-sound/3.0.7/js/ion.sound.min.js',
         'https://cdnjs.cloudflare.com/ajax/libs/favico.js/0.3.10/favico.min.js',
 

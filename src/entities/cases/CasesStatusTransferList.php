@@ -61,7 +61,8 @@ class CasesStatusTransferList
             $caseAbacDto->pqr_status = $case->productQuoteRefund->pqr_status_id ?? null;
 
             /** @abac new $caseAbacDto, CasesAbacObject::OBJ_CASE_STATUS_ROUTE_RULES, CasesAbacObject::ACTION_TRANSFER, Case Status transfer rules */
-            if (!Yii::$app->abac->can($caseAbacDto, CasesAbacObject::OBJ_CASE_STATUS_ROUTE_RULES, CasesAbacObject::ACTION_TRANSFER)) {
+            $isConsoleApp = (Yii::$app instanceof \yii\console\Application);
+            if (!$isConsoleApp && !Yii::$app->abac->can($caseAbacDto, CasesAbacObject::OBJ_CASE_STATUS_ROUTE_RULES, CasesAbacObject::ACTION_TRANSFER)) {
                 unset($list[$statusId]);
             }
         }

@@ -612,7 +612,7 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || ($leadForm->mode === $leadForm::
         } else {
             //alert('Notes for Expert cannot be blank.');
             
-            new PNotify({
+            createNotifyByObject({
                 title: 'Error: notes',
                 type: 'error',
                 text: 'Notes for Expert cannot be blank',
@@ -671,7 +671,7 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || ($leadForm->mode === $leadForm::
             }
         });
             
-        new PNotify({
+        createNotifyByObject({
             title: 'Error: notes',
             type: 'error',
             text: 'Notes for Expert cannot be blank',
@@ -727,10 +727,10 @@ $js = <<<JS
                     $.pjax.reload({container: '#quotes_list', async: false});
                     $('.popover-class[data-toggle="popover"]').popover({ sanitize: false });
                     
-                    new PNotify({
+                    createNotifyByObject({
                         title: "Create quote - search",
                         type: "success",
-                        text: 'Added new quote id: ' + searchResId,
+                        text: 'Added new quote',
                         hide: true
                     });
                     
@@ -742,7 +742,7 @@ $js = <<<JS
                         error = 'Some errors was happened during create quote. Please try again later';
                     }
                     
-                    new PNotify({
+                    createNotifyByObject({
                         title: "Error: Create quote - search",
                         type: "error",
                         text: error,
@@ -801,10 +801,10 @@ $js = <<<JS
                     $.pjax.reload({container: '#quotes_list', async: false});
                     $('.popover-class[data-toggle="popover"]').popover({ sanitize: false });
                     
-                    new PNotify({
+                    createNotifyByObject({
                         title: "Create quote - search",
                         type: "success",
-                        text: 'Added new quote id: ' + searchResId,
+                        text: 'Added new quote',
                         hide: true
                     });
                 } else {
@@ -814,7 +814,7 @@ $js = <<<JS
                         error = 'Some errors was happened during create quote. Please try again later';
                     }
                     
-                    new PNotify({
+                    createNotifyByObject({
                         title: "Error: Create quote - search",
                         type: "error",
                         text: error,

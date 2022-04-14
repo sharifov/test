@@ -85,6 +85,7 @@ class FlightQuoteExchangeController extends BaseController
     public function behaviors(): array
     {
         $behaviors           = parent::behaviors();
+        unset($behaviors['request']);
         $behaviors['logger'] = [
             'class'  => SimpleLoggerBehavior::class,
             'filter' => CreditCardFilter::class,
@@ -398,9 +399,6 @@ class FlightQuoteExchangeController extends BaseController
      *        "code": "13200",
      *        "technical": {
      *           ...
-     *        },
-     *        "request": {
-     *           ...
      *        }
      * }
      *
@@ -415,9 +413,6 @@ class FlightQuoteExchangeController extends BaseController
      *        "code": "13106",
      *        "technical": {
      *           ...
-     *        },
-     *        "request": {
-     *           ...
      *        }
      * }
      *
@@ -431,9 +426,6 @@ class FlightQuoteExchangeController extends BaseController
      *        ],
      *        "code": "13101",
      *        "technical": {
-     *           ...
-     *        },
-     *        "request": {
      *           ...
      *        }
      * }
@@ -451,9 +443,6 @@ class FlightQuoteExchangeController extends BaseController
      *        "code": "13107",
      *        "technical": {
      *           ...
-     *        },
-     *        "request": {
-     *           ...
      *        }
      * }
      *
@@ -467,9 +456,6 @@ class FlightQuoteExchangeController extends BaseController
      *      ],
      *      "code": "13113",
      *      "technical": {
-     *         ...
-     *      },
-     *      "request": {
      *         ...
      *      }
      * }
@@ -485,9 +471,6 @@ class FlightQuoteExchangeController extends BaseController
      *      "code": "21101",
      *      "technical": {
      *         ...
-     *      },
-     *      "request": {
-     *         ...
      *      }
      * }
      *
@@ -501,9 +484,6 @@ class FlightQuoteExchangeController extends BaseController
      *      ],
      *      "code": 0,
      *      "technical": {
-     *         ...
-     *      },
-     *      "request": {
      *         ...
      *      }
      * }
@@ -582,7 +562,7 @@ class FlightQuoteExchangeController extends BaseController
             $flightRequest = FlightRequest::create(
                 $voluntaryExchangeCreateForm->bookingId,
                 FlightRequest::TYPE_VOLUNTARY_EXCHANGE_CREATE,
-                $post,
+                $voluntaryExchangeCreateForm->getFilteredData(),
                 $project->id,
                 $this->auth->getId()
             );
@@ -798,9 +778,6 @@ class FlightQuoteExchangeController extends BaseController
      *        "code": "13200",
      *        "technical": {
      *           ...
-     *        },
-     *        "request": {
-     *           ...
      *        }
      * }
      *
@@ -814,9 +791,6 @@ class FlightQuoteExchangeController extends BaseController
      *        ],
      *        "code": "13106",
      *        "technical": {
-     *           ...
-     *        },
-     *        "request": {
      *           ...
      *        }
      * }
@@ -833,9 +807,6 @@ class FlightQuoteExchangeController extends BaseController
      *        ],
      *        "code": "13107",
      *        "technical": {
-     *           ...
-     *        },
-     *        "request": {
      *           ...
      *        }
      * }
@@ -898,7 +869,7 @@ class FlightQuoteExchangeController extends BaseController
         $flightRequest = FlightRequest::create(
             $voluntaryExchangeConfirmForm->booking_id,
             FlightRequest::TYPE_VOLUNTARY_EXCHANGE_CONFIRM,
-            $post,
+            $voluntaryExchangeConfirmForm->getFilteredData(),
             $project->id,
             $this->auth->getId()
         );
@@ -1260,9 +1231,6 @@ class FlightQuoteExchangeController extends BaseController
      *        "code": "13200",
      *        "technical": {
      *           ...
-     *        },
-     *        "request": {
-     *           ...
      *        }
      * }
      *
@@ -1276,9 +1244,6 @@ class FlightQuoteExchangeController extends BaseController
      *        ],
      *        "code": "13106",
      *        "technical": {
-     *           ...
-     *        },
-     *        "request": {
      *           ...
      *        }
      * }
@@ -1295,9 +1260,6 @@ class FlightQuoteExchangeController extends BaseController
      *        ],
      *        "code": "13107",
      *        "technical": {
-     *           ...
-     *        },
-     *        "request": {
      *           ...
      *        }
      * }
@@ -1640,9 +1602,6 @@ class FlightQuoteExchangeController extends BaseController
      *        "code": "13106",
      *        "technical": {
      *           ...
-     *        },
-     *        "request": {
-     *           ...
      *        }
      * }
      *
@@ -1658,9 +1617,6 @@ class FlightQuoteExchangeController extends BaseController
      *        ],
      *        "code": "13107",
      *        "technical": {
-     *           ...
-     *        },
-     *        "request": {
      *           ...
      *        }
      * }
@@ -1791,9 +1747,6 @@ class FlightQuoteExchangeController extends BaseController
      *        "code": "13200",
      *        "technical": {
      *           ...
-     *        },
-     *        "request": {
-     *           ...
      *        }
      * }
      *
@@ -1807,9 +1760,6 @@ class FlightQuoteExchangeController extends BaseController
      *        ],
      *        "code": "13106",
      *        "technical": {
-     *           ...
-     *        },
-     *        "request": {
      *           ...
      *        }
      * }
@@ -1826,9 +1776,6 @@ class FlightQuoteExchangeController extends BaseController
      *        ],
      *        "code": "13107",
      *        "technical": {
-     *           ...
-     *        },
-     *        "request": {
      *           ...
      *        }
      * }

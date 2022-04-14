@@ -27,7 +27,7 @@ $.ajax({
             } 
         },
         error: function (error) {            
-            new PNotify({
+            createNotifyByObject({
                 title: 'Error',
                 text: 'Event Log: Internal Server Error',
                 type: 'error'                

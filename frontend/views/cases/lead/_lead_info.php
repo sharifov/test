@@ -611,7 +611,7 @@ $jsCode = <<<JS
                     alert('Error: ' + data.error);
                     btn.removeClass('disabled');
                     btn.find('span').removeClass('fa-spinner fa-spin').addClass('fa-check');
-                    new PNotify({
+                    createNotifyByObject({
                         title: "Error add Lead",
                         type: "error",
                         text: 'Lead add sale in case',
@@ -622,7 +622,7 @@ $jsCode = <<<JS
                     btn.removeClass('disabled');
                     btn.find('span').removeClass('fa-spinner fa-spin').addClass('fa-check-circle-o');
                     $.pjax.reload({container: '#pjax-lead-info', push: false, replace: false, timeout: 10000, async: false});
-                    new PNotify({
+                    createNotifyByObject({
                         title: "Lead successfully added",
                         type: "success",
                         text: 'Lead Id: ' + data.data.lead_id +' successfully added',

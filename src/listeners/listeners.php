@@ -42,10 +42,15 @@ use src\model\user\entity\profit\event\UserProfitCalculateByOrderTipsUserProfits
 use src\model\user\entity\profit\listener\UserProfitCalculateByOrderTipsUserProfitsEventListener;
 use src\model\visitorSubscription\event\VisitorSubscriptionEnabled;
 use src\model\visitorSubscription\listener\FindChatsAndRunDistributionLogic;
+use src\events\quote\QuoteExtraMarkUpChangeEvent;
+use src\listeners\quote\QuoteExtraMarkUpChangeEventListener;
 
 return [
     UserProfitCalculateByOrderTipsUserProfitsEvent::class => [UserProfitCalculateByOrderTipsUserProfitsEventListener::class],
     QuoteSendEvent::class => [QuoteSendEventListener::class],
+    QuoteExtraMarkUpChangeEvent::class => [
+        QuoteExtraMarkUpChangeEventListener::class,
+    ],
     UpdateChatUserAccessWidgetEvent::class => [UpdateChatUserAccessWidgetListener::class],
     ResetChatUserAccessWidgetEvent::class => [ResetChatUserAccessWidgetListener::class],
     ClientChatPendingEvent::class => [

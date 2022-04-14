@@ -25,6 +25,8 @@ use src\model\callLogFilterGuard\entity\CallLogFilterGuard;
 use src\model\callLogFilterGuard\repository\CallLogFilterGuardRepository;
 use src\model\callLogFilterGuard\service\CallLogFilterGuardService;
 use src\model\callNote\entity\CallNote;
+use src\model\leadData\entity\LeadData;
+use src\model\leadDataKey\services\LeadDataKeyDictionary;
 use src\model\phoneList\entity\PhoneList;
 use src\model\voip\phoneDevice\device\VoipDevice;
 use Yii;
@@ -418,12 +420,17 @@ class CallLogTransferService
             }
 
             if ($this->call['c_lead_id']) {
-                $callLogLead = new CallLogLead([
-                    'cll_cl_id' => $log->cl_id,
-                    'cll_lead_id' => $this->call['c_lead_id']
-                ]);
-                if (!$callLogLead->save()) {
-                    throw new \RuntimeException(VarDumper::dumpAsString(['model' => $callLogLead->toArray(), 'message' => $callLogLead->getErrors()]));
+                CallLogLeadCreateService::create($log->cl_id, $this->call['c_lead_id']);
+            }
+            if ($this->call['c_parent_id'] && $this->call['c_id'] !== $log->cl_group_id) {
+                try {
+                    LeadData::updateAll(['ld_field_value' => $this->call['c_id']], ['ld_field_key' => LeadDataKeyDictionary::KEY_CREATED_BY_CALL_ID, 'ld_field_value' => $this->call['c_parent_id']]);
+                } catch (\Throwable $e) {
+                    Yii::error([
+                        'message' => $e->getMessage(),
+                        'callId' => $this->call['c_id'],
+                        'parentCallId' => $this->call['c_parent_id'],
+                    ], 'CallLogTransferService');
                 }
             }
 

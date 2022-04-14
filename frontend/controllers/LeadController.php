@@ -75,6 +75,8 @@ use src\model\contactPhoneData\entity\ContactPhoneData;
 use src\model\contactPhoneList\service\ContactPhoneListService;
 use src\model\department\department\DefaultPhoneType;
 use src\model\email\useCase\send\fromLead\AbacEmailList;
+use src\model\emailQuote\EmailQuoteRepository;
+use src\model\emailQuote\entity\EmailQuote;
 use src\model\emailReviewQueue\EmailReviewQueueManageService;
 use src\model\emailReviewQueue\entity\EmailReviewQueue;
 use src\model\lead\useCases\lead\create\CreateLeadByChatDTO;
@@ -560,6 +562,10 @@ class LeadController extends FController
                                                 if (!$this->quoteRepository->save($quote)) {
                                                     Yii::error($quote->errors, 'LeadController:view:Email:Quote:save');
                                                 }
+
+                                                $emailQuoteRepository = Yii::createObject(EmailQuoteRepository::class);
+                                                $emailQuote = EmailQuote::create($mail->e_id, $quote->id);
+                                                $emailQuoteRepository->save($emailQuote);
                                             }
                                         }
                                     }
@@ -571,6 +577,16 @@ class LeadController extends FController
                         } else {
                             $mail->statusToReview();
                             $this->emailReviewQueueManageService->createByEmail($mail, $lead->l_dep_id);
+                            if ($quoteList = @json_decode($previewEmailForm->e_quote_list)) {
+                                if (is_array($quoteList)) {
+                                    foreach ($quoteList as $quoteId) {
+                                        $quoteId = (int)$quoteId;
+                                        $emailQuoteRepository = Yii::createObject(EmailQuoteRepository::class);
+                                        $emailQuote = EmailQuote::create($mail->e_id, $quoteId);
+                                        $emailQuoteRepository->save($emailQuote);
+                                    }
+                                }
+                            }
                             $mail->update();
 
                             Yii::$app->session->setFlash('send-warning', '<strong>Email Message</strong> has been sent for review');
@@ -748,7 +764,14 @@ class LeadController extends FController
                             if (isset($mailPreview['error']) && $mailPreview['error']) {
                                 $errorJson = @json_decode($mailPreview['error'], true);
                                 $comForm->addError('c_email_preview', 'Communication Server response: ' . ($errorJson['message'] ?? $mailPreview['error']));
-                                Yii::error($mailPreview['error'], 'LeadController:view:mailPreview');
+
+                                $errorLog = $mailPreview['error'];
+                                if (is_array($errorJson)) {
+                                    $errorLog = $errorJson;
+                                    $errorLog['forAdmin'] = true;
+                                    $errorLog['communicationUrl'] = $communication->url;
+                                }
+                                Yii::error($errorLog, 'LeadController:view:mailPreview');
                                 $comForm->c_preview_email = 0;
                             } elseif (isset($checkOriginalQuoteExistence) && !$checkOriginalQuoteExistence) {
                                 $comForm->addError('originalQuotesRequired', 'Original quote required');
@@ -850,6 +873,13 @@ class LeadController extends FController
                             if (isset($smsPreview['error']) && $smsPreview['error']) {
                                 $errorJson = @json_decode($smsPreview['error'], true);
                                 $comForm->addError('c_email_preview', 'Communication Server response: ' . ($errorJson['message'] ?? $smsPreview['error']));
+
+                                $errorLog = $communication->url . "\r\n " . $smsPreview['error'];
+                                if (is_array($errorJson)) {
+                                    $errorLog = $errorJson;
+                                    $errorLog['forAdmin'] = true;
+                                    $errorLog['communicationUrl'] = $communication->url;
+                                }
                                 Yii::error($communication->url . "\r\n " . $smsPreview['error'], 'LeadController:view:smsPreview');
                                 $comForm->c_preview_sms = 0;
                             } else {
@@ -1995,12 +2025,17 @@ class LeadController extends FController
             'LeadCreateForm',
             ['emails' => 'EmailCreateForm', 'phones' => 'PhoneCreateForm', 'segments' => 'SegmentCreateForm']
         );
+        $dto = new LeadAbacDto(null, Auth::id());
+        $delayedChargeAccess = Yii::$app->abac->can($dto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CREATE, Auth::user());
         $form = new LeadCreateForm(count($data['post']['EmailCreateForm']), count($data['post']['PhoneCreateForm']), count($data['post']['SegmentCreateForm']));
         $form->assignDep(Department::DEPARTMENT_SALES);
         if ($form->load($data['post']) && $form->validate()) {
             try {
                 if ($form->depId === 0) {
                     $form->depId = null;
+                }
+                if (!$delayedChargeAccess) {
+                    $form->delayedCharge = false;
                 }
                 $form->client->projectId = $form->projectId;
                 $form->client->typeCreate = Client::TYPE_CREATE_LEAD;
@@ -2027,7 +2062,7 @@ class LeadController extends FController
                 return $this->redirect(['/lead/create']);
             }
         }
-        return $this->render('create', ['leadForm' => $form]);
+        return $this->render('create', ['leadForm' => $form, 'delayedChargeAccess' => $delayedChargeAccess]);
     }
 
     /**
@@ -2287,11 +2322,18 @@ class LeadController extends FController
             'LeadCreateForm',
             ['emails' => 'EmailCreateForm', 'phones' => 'PhoneCreateForm', 'segments' => 'SegmentCreateForm']
         );
+
+        $dto = new LeadAbacDto(null, Auth::id());
+        $delayedChargeAccess = Yii::$app->abac->can($dto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CREATE, Auth::user());
+
         $form = new LeadCreateForm(count($data['post']['EmailCreateForm']), count($data['post']['PhoneCreateForm']), count($data['post']['SegmentCreateForm']));
         $form->assignCase($case->cs_gid);
         $form->assignDep(Department::DEPARTMENT_EXCHANGE);
         if ($form->load($data['post']) && $form->validate()) {
             try {
+                if (!$delayedChargeAccess) {
+                    $form->delayedCharge = false;
+                }
                 $form->client->projectId = $form->projectId;
                 $form->client->typeCreate = Client::TYPE_CREATE_LEAD;
                 $lead = $this->leadManageService->createManuallyFromCase($form, Yii::$app->user->id, Yii::$app->user->id, 'Manual create form Case');
@@ -2303,7 +2345,7 @@ class LeadController extends FController
                 return $this->redirect(['/lead/create-case', 'case_gid' => $case->cs_gid]);
             }
         }
-        return $this->render('create', ['leadForm' => $form]);
+        return $this->render('create', ['leadForm' => $form, 'delayedChargeAccess' => $delayedChargeAccess]);
     }
 
     /**
