@@ -15,9 +15,9 @@ server {
 	fastcgi_buffers 16 16k;
 	fastcgi_buffer_size 32k;
 
-    listen ${HOST_PORT} ssl;
+    listen ${NGINX_PORT} ssl;
 
-    server_name ${HOST}:${HOST_PORT};
+    server_name ${HOST}:${NGINX_PORT};
 
     ssl_certificate ${SSL_CRT_PATH};
     ssl_certificate_key ${SSL_KEY_PATH};
@@ -141,9 +141,9 @@ server {
     charset utf-8;
     client_max_body_size 128M;
 
-    listen ${HOST_API_PORT};
+    listen ${NGINX_API_PORT};
 
-    server_name ${HOST_API};
+    server_name 127.0.0.1 ${HOST_API};
 
     root        ${APP_PATH}/webapi/web/;
     index       index.php;
