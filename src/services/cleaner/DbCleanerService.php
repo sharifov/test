@@ -8,7 +8,7 @@ use common\models\GlobalLog;
 use common\models\Log;
 use common\models\Notifications;
 use DateTime;
-use frontend\models\UserSiteActivity;
+use modules\requestControl\models\UserSiteActivity;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLog;
 use src\services\cleaner\cleaners\ApiLogCleaner;
 use src\services\cleaner\cleaners\CallCleaner;

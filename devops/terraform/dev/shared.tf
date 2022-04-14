@@ -1,10 +1,10 @@
-# Beanstalkd & Redis EC2 Instance
+# Beanstalkd, Redis, Centrifugo EC2 Instance
 resource "aws_instance" "shared" {
   ami                    = var.SHARED_AMI
   instance_type          = var.SHARED_INSTANCE_TYPE
   key_name               = var.SSH_KEY
   subnet_id              = var.PRIVATE_SUBNETS[0]
-  vpc_security_group_ids = [aws_security_group.app_private.id]
+  vpc_security_group_ids = [aws_security_group.shared.id]
 
   root_block_device {
     volume_size = 30
@@ -31,7 +31,7 @@ resource "aws_security_group" "shared" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = [var.VPC_CIDR]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {

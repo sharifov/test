@@ -23,7 +23,6 @@ use modules\product\src\listeners\productQuote\ProductQuoteRecalculateChildrenPr
 use modules\product\src\listeners\productQuote\ProductQuoteRecalculateProfitAmountListener;
 use modules\product\src\listeners\productQuote\ProductQuoteUpdateLeadOfferListener;
 use modules\product\src\listeners\productQuote\ProductQuoteUpdateLeadOrderListener;
-use modules\product\src\listeners\ProductQuoteChangeStatusLogListener;
 use modules\product\src\entities\productQuote\events\ProductQuoteBookedEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteCanceledEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteErrorEvent;
@@ -36,10 +35,13 @@ use modules\product\src\listeners\ProductQuoteCloneListener;
 use modules\product\src\listeners\ProductQuoteReplaceListener;
 use src\model\user\entity\profit\event\UserProfitCalculateByOrderUserProfitEvent;
 use src\model\user\entity\profit\listener\UserProfitCalculateByOrderUserProfitEventListener;
+use modules\product\src\entities\productQuote\events\ProductQuoteStatusChangeEvent;
+use modules\product\src\listeners\productQuote\ProductQuoteStatusChangeEventListener;
+use modules\product\src\entities\productQuote\events\ProductQuoteSoldEvent;
 
 return [
     ProductQuoteCloneCreatedEvent::class => [
-        ProductQuoteChangeStatusLogListener::class,
+        ProductQuoteStatusChangeEventListener::class,
         ProductQuoteCloneListener::class,
     ],
     ProductQuoteReplaceEvent::class => [
@@ -80,6 +82,10 @@ return [
         ProductQuoteUpdateLeadOrderListener::class,
         ProductQuoteUpdateLeadOfferListener::class,
     ],
+    ProductQuoteSoldEvent::class => [
+        ProductQuoteUpdateLeadOrderListener::class,
+        ProductQuoteUpdateLeadOfferListener::class,
+    ],
     ProductQuoteRecalculateProfitAmountEvent::class => [ProductQuoteRecalculateProfitAmountListener::class],
     ProductQuoteRecalculateChildrenProfitAmountEvent::class => [ProductQuoteRecalculateChildrenProfitAmountListener::class],
     UserProfitCalculateByOrderUserProfitEvent::class => [UserProfitCalculateByOrderUserProfitEventListener::class],
@@ -103,5 +109,8 @@ return [
     ],
     ProductQuoteBookedChangeFlowEvent::class => [
         ProductQuoteBookedChangeFlowListener::class
+    ],
+    ProductQuoteStatusChangeEvent::class => [
+        ProductQuoteStatusChangeEventListener::class
     ],
 ];

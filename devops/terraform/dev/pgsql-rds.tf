@@ -5,7 +5,7 @@ module "pgsql" {
   identifier = "pgsql-${var.ENV}-${var.PROJECT}"
 
   engine            = "postgres"
-  engine_version    = "12.7"
+  engine_version    = "12.8"
   instance_class    = var.PGSQL_RDS_INSTANCE_TYPE
   allocated_storage = 5
   storage_encrypted = true

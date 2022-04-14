@@ -19,6 +19,17 @@ class Auth
         return $user;
     }
 
+    public static function employeeId(): ?int
+    {
+        if (Yii::$app instanceof \yii\console\Application) {
+            return null;
+        }
+        if (!$identity = Yii::$app->user->identity ?? null) {
+            return null;
+        }
+        return ($identity instanceof Employee) ? $identity->getId() : null;
+    }
+
     public static function isGuest(): bool
     {
         return Yii::$app->user->isGuest;

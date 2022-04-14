@@ -47,7 +47,7 @@ $c_type_id = $comForm->c_type_id;
 
 $pjaxContainerId = 'pjax-lead-communication-log';
 $unsubscribedEmails = @json_encode($unsubscribedEmails);
-$emailTemplateTypes = EmailTemplateType::getEmailTemplateTypesList(false, \common\models\Department::DEPARTMENT_SALES, $lead->project_id);
+$emailTemplateTypes = EmailTemplateType::getEmailTemplateTypesList(false, \common\models\Department::DEPARTMENT_SALES, $lead->project_id, $lead);
 $emailTemplateTypes = @json_encode($emailTemplateTypes);
 
 $abacDto = new EmailPreviewDto($previewEmailForm->e_email_tpl_id, null, null, null, $lead, null);
@@ -241,12 +241,12 @@ $canShowEmailData = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_
 
                                     <div class="btn-wrapper text-right">
                                         <?php /** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND, Restrict access to send email in preview email */ ?>
-                                        <?php  if (Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND)) : ?>
+                                        <?php /** if (Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND)) : */ ?>
                                             <?= Html::submitButton(
                                                 '<i class="fa fa-envelope-o"></i> Send Email',
                                                 ['class' => 'btn btn-lg btn-primary', 'id' => 'send_email_btn']
                                             ) ?>
-                                        <?php  endif; ?>
+                                        <?php  /** endif; */ ?>
                                         <?php if ($canShowEmailData) :?>
                                             <?= Html::button('<i class="fa fa-list"></i> Show Email data (for Admins)', ['class' => 'btn btn-lg btn-warning', 'onclick' => '$("#email-data-content-div").toggle()']) ?>
                                         <?php endif; ?>
@@ -400,7 +400,6 @@ $canShowEmailData = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_
                                     </div>
 
                                     <div class="col-sm-3 form-group message-field-email" id="email-template-group" style="display: none;">
-                                        <?php //= $form->field($comForm, 'c_email_tpl_id')->dropDownList(\common\models\EmailTemplateType::getList(false, \common\models\Department::DEPARTMENT_SALES), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_email_tpl_id'])?>
                                         <?= $communicationActiveForm->field($comForm, 'c_email_tpl_key')->dropDownList([], ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_email_tpl_key']) ?>
                                     </div>
 

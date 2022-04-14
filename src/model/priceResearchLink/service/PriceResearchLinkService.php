@@ -7,6 +7,7 @@ use src\forms\lead\ItineraryEditForm;
 use src\forms\lead\SegmentEditForm;
 use src\forms\siteSetting\PriceResearchLinkForm;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 
 class PriceResearchLinkService
 {
@@ -147,7 +148,7 @@ class PriceResearchLinkService
                 );
                 $infantsCountPart            = str_repeat(
                     $this->priceResearchLinkForm->infantPaxTypeEnumerableParameter . $this->priceResearchLinkForm->childrenParameterSeparator,
-                    $this->itineraryEditForm->children
+                    $this->itineraryEditForm->infants
                 );
                 $childrenAndInfantsCountPart = $childrenCountPart . $infantsCountPart;
                 $childrenAndInfantsCountPart = substr_replace($childrenAndInfantsCountPart, "", -1);
