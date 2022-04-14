@@ -8,7 +8,6 @@ use src\services\ServiceFinder;
 use src\services\TransactionManager;
 use yii\web\NotFoundHttpException;
 
-
 /**
  * Class LeadAssignService
  * @property LeadPreferencesRepository $leadPreferencesRepository
@@ -18,7 +17,6 @@ use yii\web\NotFoundHttpException;
  */
 class LeadPreferencesCloneService
 {
-
     private $leadPreferencesRepository;
     private $transactionManager;
     private $eventDispatcher;
@@ -42,14 +40,11 @@ class LeadPreferencesCloneService
      */
     public function cloneLeadPreferences($leadId, $cloneLeadId): LeadPreferences
     {
-
         $lead = $this->serviceFinder->leadFind($cloneLeadId);
         $leadPreferences = LeadPreferences::find()->where(['lead_id' => $leadId])->one();
 
         $clone = $this->transactionManager->wrap(function () use ($lead, $leadPreferences) {
-
             $currency = $leadPreferences->pref_currency ?? null;
-
             $clone = $leadPreferences->createOnlyCurrency($lead->id, $currency);
             $this->leadPreferencesRepository->save($clone);
 
