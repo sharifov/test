@@ -2,15 +2,14 @@
 
 namespace frontend\controllers;
 
+use modules\shiftSchedule\src\entities\shiftScheduleRule\search\SearchShiftScheduleRule;
+use modules\shiftSchedule\src\entities\shiftScheduleRule\ShiftScheduleRule;
 use Yii;
-use src\model\shiftSchedule\entity\shiftScheduleRule\ShiftScheduleRule;
-use src\model\shiftSchedule\entity\shiftScheduleRule\search\SearchShiftScheduleRule;
-use yii\web\Controller;
-use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
-use yii\web\Response;
 use yii\db\StaleObjectException;
+use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
+use yii\web\NotFoundHttpException;
+use yii\web\Response;
 
 class ShiftScheduleRuleCrudController extends FController
 {

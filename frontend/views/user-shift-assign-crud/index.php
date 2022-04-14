@@ -1,13 +1,15 @@
 <?php
 
+use common\components\grid\DateTimeColumn;
+use common\components\grid\UserSelect2Column;
+use modules\shiftSchedule\src\entities\shift\Shift;
+use modules\shiftSchedule\src\entities\userShiftAssign\UserShiftAssign;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
-use common\components\grid\DateTimeColumn;
-use common\components\grid\UserSelect2Column;
 
 /* @var $this yii\web\View */
-/* @var $searchModel src\model\shiftSchedule\entity\userShiftAssign\search\SearchUserShiftAssign */
+/* @var $searchModel modules\shiftSchedule\src\entities\userShiftAssign\search\SearchUserShiftAssign */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'User Shift Assigns';
@@ -35,7 +37,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'relation' => 'user',
                 'attribute' => 'usa_user_id'
             ],
-            'usa_sh_id',
+            [
+                'attribute' => 'usa_sh_id',
+                'value' => static function (UserShiftAssign $model) {
+                    return $model->shift->sh_name ?? Yii::$app->formatter->nullDisplay;
+                },
+                'filter' => Shift::getList(null),
+                'format' => 'raw',
+            ],
             //'usa_created_dt',
             [
                 'class' => DateTimeColumn::class,

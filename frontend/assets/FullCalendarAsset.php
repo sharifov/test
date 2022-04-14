@@ -25,16 +25,17 @@ class FullCalendarAsset extends AssetBundle
     public $js = [
         'https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.js',
         'https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/locales-all.min.js',
+//        'https://unpkg.com/tooltip.js/dist/umd/tooltip.min.js',
 
         // 'https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@5.10.2/main.min.js',
         // 'https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@5.10.2/locales-all.min.js',
     ];
 
-//    public $depends = [
+    public $depends = [
 //        YiiAsset::class,
 //        JqueryAsset::class,
 //        BootstrapAsset::class,
-//        JuiAsset::class,
+////        JuiAsset::class,
 //        BootstrapPluginAsset::class,
-//    ];
+    ];
 }

@@ -34,6 +34,7 @@ use modules\product\src\entities\productQuote\events\ProductQuoteInProgressEvent
 use modules\product\src\entities\productQuote\events\ProductQuoteCloneCreatedEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteRecalculateChildrenProfitAmountEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteRecalculateProfitAmountEvent;
+use modules\product\src\entities\productQuote\events\ProductQuoteSoldEvent;
 use modules\product\src\entities\productQuote\serializer\ProductQuoteSerializer;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\product\Product;
@@ -486,11 +487,28 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         return self::findOne(['pq_gid' => $gid]);
     }
 
-    public function applied(): void
+    /**
+     * @param int|null $creatorId
+     * @param string|null $description
+     */
+    public function new(?int $creatorId = null, ?string $description = null): void
     {
-        $this->pq_status_id = ProductQuoteStatus::APPLIED;
+        $this->setStatusWithEvent(ProductQuoteStatus::NEW, $creatorId, $description);
     }
 
+    /**
+     * @param int|null $creatorId
+     * @param string|null $description
+     */
+    public function applied(?int $creatorId = null, ?string $description = null): void
+    {
+        $this->setStatusWithEvent(ProductQuoteStatus::APPLIED, $creatorId, $description);
+    }
+
+    /**
+        @deprecated
+        use instead method error(?int $creatorId = null, ?string $description = null)
+     */
     public function failed(): void
     {
         $this->pq_status_id = ProductQuoteStatus::ERROR;
@@ -575,7 +593,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         $quote->pq_product_id = $dto->productId;
         $quote->pq_order_id = $dto->orderId;
         $quote->pq_description = $dto->description;
-        $quote->pq_status_id = ProductQuoteStatus::NEW;
+        $quote->new($dto->createdUserId, 'Created new product quote');
         $quote->pq_price = $dto->price;
         $quote->pq_origin_price = $dto->originPrice;
         $quote->pq_client_price = $dto->clientPrice;
@@ -631,7 +649,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         $copy->pq_gid = self::generateGid();
         $copy->pq_product_id = $quote->pq_product_id;
         $copy->pq_order_id = $quote->pq_order_id;
-        $copy->pq_status_id = ProductQuoteStatus::NEW;
+        $copy->new($creatorId, 'Product quote was copied');
         $copy->pq_owner_user_id = $ownerId;
         $copy->pq_created_user_id = $creatorId;
         return $copy;
@@ -644,7 +662,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
 
         $clone->pq_id = null;
         $clone->pq_gid = self::generateGid();
-        $clone->pq_status_id = ProductQuoteStatus::NEW;
+        $clone->new(null, 'Replace');
         $clone->pq_clone_id = $quote->pq_id;
         $clone->recordEvent(new ProductQuoteReplaceEvent($clone, $quote->pq_id));
         return $clone;
@@ -759,9 +777,13 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         return $this->pqProduct->isCruise();
     }
 
-    public function pending(): void
+    /**
+    * @param int|null $creatorId
+    * @param string|null $description
+    */
+    public function pending(?int $creatorId = null, ?string $description = null): void
     {
-        $this->pq_status_id = ProductQuoteStatus::PENDING;
+        $this->setStatusWithEvent(ProductQuoteStatus::PENDING, $creatorId, $description);
     }
 
     /**
@@ -877,11 +899,9 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function sold(?int $creatorId = null, ?string $description = null): void
     {
         $this->recordEvent(
-            new ProductQuoteExpiredEvent($this->pq_id, $this->pq_status_id, $description, $this->pq_owner_user_id, $creatorId)
+            new ProductQuoteSoldEvent($this->pq_id)
         );
-        if ($this->pq_status_id !== ProductQuoteStatus::SOLD) {
-            $this->setStatus(ProductQuoteStatus::SOLD);
-        }
+        $this->setStatusWithEvent(ProductQuoteStatus::SOLD, $creatorId, $description);
     }
 
     /**
@@ -895,6 +915,30 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         ProductQuoteStatus::guard($this->pq_status_id, $status);
 
         $this->pq_status_id = $status;
+    }
+
+    /**
+     * @param int|null $status
+     * @param int|null $creatorId
+     * @param string|null $description
+     */
+    public function setStatusWithEvent(?int $status, ?int $creatorId = null, ?string $description = null): void
+    {
+        if ($this->pq_status_id !== $status) {
+            $this->recordEvent(
+                new ProductQuoteStatusChangeEvent(
+                    $this,
+                    $this->pq_status_id,
+                    $status,
+                    $description,
+                    null,
+                    $this->pq_owner_user_id,
+                    $creatorId
+                )
+            );  //TODO: maybe need check if status may be changed then trigger event
+
+            $this->setStatus($status);
+        }
     }
 
     public function prepareRemove(): void

@@ -233,6 +233,12 @@ class SideBarMenu extends \yii\bootstrap\Widget
             $menuItems[] = ['label' => 'KPI <span id="kpi" class="label-info label pull-right"></span> ', 'url' => ['/kpi/index'], 'icon' => 'money'];
         }
 
+        $menuItems[] = [
+            'label' => 'My Shift Schedule <sup style="color: red">NEW</sup>',
+            'url' => ['/shift-schedule/index'],
+            'icon' => 'calendar'
+        ];
+
         if (!$isUM) {
             // $cntNotifications = \common\models\Notifications::findNewCount(Yii::$app->user->id);
             $cntNotifications = null;
@@ -717,11 +723,17 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     'url' => 'javascript:',
                     'icon' => 'calendar',
                     'items' => [
-                        ['label' => 'Shift', 'url' => ['/shift-crud/index']],
-                        ['label' => 'Shift Category', 'url' => ['/shift-category-crud/index']],
-                        ['label' => 'Shift Schedule Rule', 'url' => ['/shift-schedule-rule-crud/index']],
-                        ['label' => 'User Shift Assign', 'url' => ['/user-shift-assign-crud/index']],
-                        ['label' => 'User Shift Schedule', 'url' => ['/user-shift-schedule-crud/index']],
+                        ['label' => 'Shift', 'url' => ['/shift-crud/index'], 'title' => 'Shift'],
+                        ['label' => 'Shift Category', 'url' => ['/shift-category-crud/index'],
+                            'title' => 'Shift category'],
+                        ['label' => 'Shift Schedule Type', 'url' => ['/shift/shift-schedule-type/index'],
+                            'title' => 'Shift Schedule Type'],
+                        ['label' => 'Shift Schedule Rule', 'url' => ['/shift-schedule-rule-crud/index'],
+                            'title' => 'Shift Schedule Rule'],
+                        ['label' => 'User Shift Assign', 'url' => ['/user-shift-assign-crud/index'],
+                            'title' => 'Shift Schedule User Assign'],
+                        ['label' => 'User Shift Schedule', 'url' => ['/user-shift-schedule-crud/index'],
+                            'title' => 'User Shift Schedule'],
                     ]
                 ],
 

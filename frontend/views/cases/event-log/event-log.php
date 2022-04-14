@@ -96,7 +96,7 @@ use modules\cases\src\abac\dto\CasesAbacDto;
             ],
         ]) ?>
         <script>
-            $('[data-toggle="tooltip"]').tooltip();
+            $('[data-toggle="tooltip"]').tooltip({ boundary: 'window' });
         </script>
         <?php Pjax::end() ?>
     </div>
