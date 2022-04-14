@@ -33,4 +33,14 @@ class EmailTemplateTypeQuery extends \yii\db\ActiveQuery
     {
         return parent::one($db);
     }
+
+    /**
+     * @param string $key
+     * @return EmailTemplateTypeQuery
+     */
+    public function findByTemplateKey(string $key): EmailTemplateTypeQuery
+    {
+        return $this->andWhere(['etp_key' => $key])
+            ->limit(1);
+    }
 }

@@ -1,6 +1,6 @@
 <?php
 
-use src\model\shiftSchedule\entity\userShiftSchedule\UserShiftSchedule;
+use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */

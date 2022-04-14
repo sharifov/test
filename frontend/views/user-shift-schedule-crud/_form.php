@@ -2,13 +2,13 @@
 
 use frontend\widgets\DateTimePickerWidget;
 use kartik\select2\Select2;
-use src\model\shiftSchedule\entity\userShiftSchedule\UserShiftSchedule;
+use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use src\widgets\UserSelect2Widget;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model src\model\shiftSchedule\entity\userShiftSchedule\UserShiftSchedule */
+/* @var $model \modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule */
 /* @var $form ActiveForm */
 ?>
 
@@ -38,14 +38,14 @@ use yii\widgets\ActiveForm;
         <?php /*echo $form->field($model, 'uss_ssr_id')->textInput()*/ ?>
 
         <?= $form->field($model, 'uss_shift_id')->widget(Select2::class, [
-            'data' => \src\model\shiftSchedule\entity\shift\Shift::getList(),
+            'data' => \modules\shiftSchedule\src\entities\shift\Shift::getList(),
             'size' => Select2::SMALL,
             'options' => ['placeholder' => 'Select Shift', 'multiple' => false],
             'pluginOptions' => ['allowClear' => true],
         ]) ?>
 
         <?= $form->field($model, 'uss_ssr_id')->widget(Select2::class, [
-            'data' => \src\model\shiftSchedule\entity\shiftScheduleRule\ShiftScheduleRule::getList(),
+            'data' => \modules\shiftSchedule\src\entities\shiftScheduleRule\ShiftScheduleRule::getList(),
             'size' => Select2::SMALL,
             'options' => ['placeholder' => 'Select Shift', 'multiple' => false],
             'pluginOptions' => ['allowClear' => true],

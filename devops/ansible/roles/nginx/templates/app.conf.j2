@@ -1,25 +1,24 @@
 server {
-    listen 443 ssl http2;
     listen 8443 ssl http2;
     server_name {{ app_domain }};
 
     charset utf-8;
     client_max_body_size 128M;
-
     fastcgi_buffers 16 16k;
     fastcgi_buffer_size 32k;
 
     ssl_certificate /etc/nginx/ssl/app.crt;
     ssl_certificate_key /etc/nginx/ssl/app.key;
-    add_header Strict-Transport-Security "max-age=31536000; includeSubdomains; preload";
 
     set $base_root {{ app_dir }};
     root $base_root;
+    index index.php;
 
     error_log /var/log/nginx/app-error.log warn;
     access_log /var/log/nginx/app-access.log;
 
-    index index.php;
+    real_ip_header X-Forwarded-For;
+    set_real_ip_from 0.0.0.0/0;
 
     location / {
         proxy_connect_timeout 300;

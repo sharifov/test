@@ -118,7 +118,9 @@
       - html
       - "{{ sym.stat.lnk_target | basename }}"
   register: result
-  when: sym.stat.lnk_target
+  when:
+    - sym.stat.exists
+    - sym.stat.lnk_target
 
 - name: Keep last 3 releases
   file:
@@ -126,3 +128,4 @@
     state: absent
   with_items:
     - "{{ (result.files | sort(attribute='ctime'))[:-3] }}"
+  when: sym.stat.exists

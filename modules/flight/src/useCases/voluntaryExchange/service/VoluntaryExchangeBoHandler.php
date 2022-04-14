@@ -11,10 +11,9 @@ use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
-use modules\product\src\entities\productQuoteChangeRelation\ProductQuoteChangeRelation;
-use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use src\entities\cases\CaseEventLog;
 use src\entities\cases\Cases;
+use src\forms\cases\CasesChangeStatusForm;
 use src\interfaces\BoWebhookService;
 use webapi\src\forms\boWebhook\FlightVoluntaryExchangeUpdateForm;
 use yii\base\Model;
@@ -52,6 +51,9 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
         $this->objectCollection = $voluntaryExchangeObjectCollection;
     }
 
+    /**
+     * @throws \Throwable
+     */
     public function processRequest(Model $form): void
     {
         if (!$form instanceof FlightVoluntaryExchangeUpdateForm) {
@@ -87,6 +89,21 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
         switch ($form->status) {
             case FlightVoluntaryExchangeUpdateForm::STATUS_EXCHANGED:
                 $this->handleExchanged();
+                $statusForm = new CasesChangeStatusForm($this->case, null);
+                $statusForm->setAttributes([
+                    'language' => 'en-US',
+                    'sendTo' => $this->case->client->lastClientEmail,
+                    'resendFeedbackForm' => true
+                ]);
+                if ($statusForm->isSendFeedback()) {
+                    $sent = $this->objectCollection->getCasesCommunicationService()->sendFeedbackEmail($this->case, $statusForm, null);
+                    if ($sent) {
+                        $this->case->addEventLog(
+                            CaseEventLog::VOLUNTARY_EXCHANGE_WH_UPDATE,
+                            'Sent Feedback Survey Email By: System'
+                        );
+                    }
+                }
                 break;
             case FlightVoluntaryExchangeUpdateForm::STATUS_CANCELED:
                 $this->handleCanceled();
@@ -172,7 +189,6 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
                 $this->objectCollection->getFlightQuoteFlightRepository()->save($flightQuoteFlight);
             }
 
-//            $this->bookingProductQuotePostProcessing($this->voluntaryQuote);
             $transaction->commit();
         } catch (\Throwable $throwable) {
             $transaction->rollBack();
@@ -203,17 +219,5 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
 
     private function handleProcessing(): void
     {
-    }
-
-    private function bookingProductQuotePostProcessing(
-        ProductQuote $voluntaryQuote
-    ): void {
-
-        ProductQuoteRelation::deleteAll([
-            'pqr_related_pq_id' => $voluntaryQuote->pq_id,
-            'pqr_type_id' => ProductQuoteRelation::TYPE_VOLUNTARY_EXCHANGE
-        ]);
-
-        ProductQuoteChangeRelation::deleteAll(['pqcr_pq_id' => $voluntaryQuote->pq_id]);
     }
 }
