@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model src\model\shiftSchedule\entity\shiftCategory\ShiftCategory */
+/* @var $model \modules\shiftSchedule\src\entities\shiftCategory\ShiftCategory */
 
 $this->title = 'Update Shift Category: ' . $model->sc_id;
 $this->params['breadcrumbs'][] = ['label' => 'Shift Categories', 'url' => ['index']];

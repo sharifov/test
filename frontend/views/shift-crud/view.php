@@ -1,11 +1,11 @@
 <?php
 
-use src\model\shiftSchedule\entity\shift\Shift;
+use modules\shiftSchedule\src\entities\shift\Shift;
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model src\model\shiftSchedule\entity\shift\Shift */
+/* @var $model \modules\shiftSchedule\src\entities\shift\Shift */
 
 $this->title = $model->sh_name;
 $this->params['breadcrumbs'][] = ['label' => 'Shifts', 'url' => ['index']];

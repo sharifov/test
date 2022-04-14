@@ -3,17 +3,21 @@
 namespace src\services\cases;
 
 use common\models\Client;
+use common\models\Email;
+use common\models\EmailTemplateType;
 use common\models\Employee;
 use common\models\Project;
 use common\models\UserProjectParams;
 use frontend\helpers\JsonHelper;
 use src\entities\cases\Cases;
+use src\forms\cases\CasesChangeStatusForm;
 use src\model\project\entity\projectLocale\ProjectLocale;
 use src\repositories\cases\CasesRepository;
 use src\services\client\ClientManageService;
 use src\services\TransactionManager;
 use Yii;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 
 /**
  * Class CasesCommunicationService
@@ -151,26 +155,28 @@ class CasesCommunicationService
      * @param string|null $locale
      * @return array
      */
-    public function getEmailData(Cases $case, Employee $user, ?string $locale = null): array
+    public function getEmailData(Cases $case, ?Employee $user, ?string $locale = null): array
     {
         $project = $case->project;
         $upp = null;
 
-        if ($project) {
+        if ($project && $user) {
             $upp = UserProjectParams::find()->where(['upp_project_id' => $project->id, 'upp_user_id' => $user->id])->withEmailList()->withPhoneList()->one();
         }
 
         $content_data = $this->getEmailDataWithoutAgentData($case, $project, $locale);
 
-        $content_data['agent'] = [
-            'name'      => $user->full_name,
-            'username'  => $user->username,
-            'nickname'  => $user->nickname,
+        if ($user) {
+            $content_data['agent'] = [
+                'name' => $user->full_name,
+                'username' => $user->username,
+                'nickname' => $user->nickname,
 //            'phone'     => $upp && $upp->upp_tw_phone_number ? $upp->upp_tw_phone_number : '',
-            'phone'     => $upp && $upp->getPhone() ? $upp->getPhone() : '',
+                'phone' => $upp && $upp->getPhone() ? $upp->getPhone() : '',
 //            'email'     => $upp && $upp->upp_email ? $upp->upp_email : '',
-            'email'     => $upp && $upp->getEmail() ? $upp->getEmail() : '',
-        ];
+                'email' => $upp && $upp->getEmail() ? $upp->getEmail() : '',
+            ];
+        }
 
         return $content_data;
     }
@@ -238,5 +244,80 @@ class CasesCommunicationService
                 Yii::error($e, 'CasesCommunicationService:processIncoming' . ':type:' . $typeProcessing);
             }
         }
+    }
+
+    /**
+     * @param Cases $case
+     * @param CasesChangeStatusForm $form
+     * @param Employee|null $user
+     * @param bool $enableFlashMessage
+     * @return bool
+     */
+    public function sendFeedbackEmail(Cases $case, CasesChangeStatusForm $form, ?Employee $user, bool $enableFlashMessage = false): bool
+    {
+        if (!$project = $case->project) {
+            return false;
+        }
+        if (!$params = $project->getParams()) {
+            return false;
+        }
+
+        $content = $this->getEmailData($case, $user);
+
+        try {
+            $mailPreview = Yii::$app->communication->mailPreview(
+                $case->cs_project_id,
+                $params->object->case->feedbackTemplateTypeKey,
+                $params->object->case->feedbackEmailFrom,
+                $form->sendTo,
+                $content,
+                $form->language
+            );
+            if ($mailPreview['error'] !== false) {
+                throw new \DomainException($mailPreview['error']);
+            }
+
+            $templateTypeId = EmailTemplateType::find()
+                ->select(['etp_id'])
+                ->findByTemplateKey($params->object->case->feedbackTemplateTypeKey)
+                ->asArray()
+                ->one();
+            $mail = new Email([
+                'e_project_id' => $case->cs_project_id,
+                'e_case_id' => $case->cs_id,
+                'e_template_type_id' => $templateTypeId['etp_id'] ?? null,
+                'e_type_id' => Email::TYPE_OUTBOX,
+                'e_status_id' => Email::STATUS_PENDING,
+                'e_email_subject' => $mailPreview['data']['email_subject'],
+                'e_email_from' => $params->object->case->feedbackEmailFrom,
+                'e_email_from_name' => $params->object->case->feedbackNameFrom ?: ($user->nickname ?? ''),
+                'e_email_to' => $form->sendTo,
+                'e_email_to_name' => $case->client ? $case->client->full_name : '',
+                'e_language_id' => $form->language,
+                'e_created_user_id' => $user->id ?? null,
+            ]);
+            $mail->body_html = $mailPreview['data']['email_body_html'];
+            if (!$mail->save()) {
+                throw new \DomainException(VarDumper::dumpAsString($mail->getErrors()));
+            }
+            $mail->e_message_id = $mail->generateMessageId();
+            $mail->update(true, ['e_message_id' => $mail->e_message_id]);
+
+            $mailResponse = $mail->sendMail();
+            if ($mailResponse['error'] !== false) {
+                throw new \DomainException('Email(Id: ' . $mail->e_id . ') has not been sent.');
+            }
+        } catch (\Throwable $e) {
+            if ($enableFlashMessage) {
+                Yii::$app->session->addFlash('error', 'Send email error: ' . $e->getMessage());
+            }
+            return false;
+        }
+
+        if ($enableFlashMessage) {
+            Yii::$app->session->addFlash('success', 'Email has been successfully sent.');
+        }
+
+        return true;
     }
 }

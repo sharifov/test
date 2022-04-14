@@ -1,12 +1,12 @@
 <?php
 
-use src\model\shiftSchedule\entity\shiftScheduleRule\ShiftScheduleRule;
+use modules\shiftSchedule\src\entities\shiftScheduleRule\ShiftScheduleRule;
 use yii\bootstrap4\Html;
 use yii\helpers\Url;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model src\model\shiftSchedule\entity\shiftScheduleRule\ShiftScheduleRule */
+/* @var $model \modules\shiftSchedule\src\entities\shiftScheduleRule\ShiftScheduleRule */
 
 $this->title = $model->ssr_id;
 $this->params['breadcrumbs'][] = ['label' => 'Shift Schedule Rules', 'url' => ['index']];

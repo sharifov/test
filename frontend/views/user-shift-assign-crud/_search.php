@@ -4,7 +4,7 @@ use yii\bootstrap4\Html;
 use common\components\bootstrap4\activeForm\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model src\model\shiftSchedule\entity\userShiftAssign\search\SearchUserShiftAssign */
+/* @var $model modules\shiftSchedule\src\entities\userShiftAssign\search\SearchUserShiftAssign */
 /* @var $form common\components\bootstrap4\activeForm\ActiveForm */
 ?>
 

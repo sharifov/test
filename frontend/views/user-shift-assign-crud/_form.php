@@ -1,11 +1,12 @@
 <?php
 
+use modules\shiftSchedule\src\entities\shift\Shift;
 use src\widgets\UserSelect2Widget;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model src\model\shiftSchedule\entity\userShiftAssign\UserShiftAssign */
+/* @var $model modules\shiftSchedule\src\entities\userShiftAssign\UserShiftAssign */
 /* @var $form ActiveForm */
 ?>
 
@@ -17,7 +18,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'usa_user_id')->widget(UserSelect2Widget::class) ?>
 
-        <?= $form->field($model, 'usa_sh_id')->textInput() ?>
+        <?= $form->field($model, 'usa_sh_id')->dropDownList(Shift::getList(null), ['prompt' => '---']) ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

@@ -4,7 +4,7 @@ use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model src\model\shiftSchedule\entity\userShiftAssign\UserShiftAssign */
+/* @var $model modules\shiftSchedule\src\entities\userShiftAssign\UserShiftAssign */
 
 $this->title = $model->usa_user_id;
 $this->params['breadcrumbs'][] = ['label' => 'User Shift Assigns', 'url' => ['index']];

@@ -2,15 +2,15 @@
 
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
-use src\model\shiftSchedule\entity\shiftCategory\ShiftCategory;
-use yii\helpers\Html;
-use yii\helpers\Url;
+use modules\shiftSchedule\src\entities\shiftCategory\ShiftCategory;
 use yii\grid\ActionColumn;
 use yii\grid\GridView;
+use yii\helpers\Html;
+use yii\helpers\Url;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel src\model\shiftSchedule\entity\shiftCategory\search\ShiftCategorySearch */
+/* @var $searchModel \modules\shiftSchedule\src\entities\shiftCategory\search\ShiftCategorySearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Shift Categories';
