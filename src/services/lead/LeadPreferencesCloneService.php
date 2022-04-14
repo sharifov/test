@@ -48,7 +48,7 @@ class LeadPreferencesCloneService
 
         $clone = $this->transactionManager->wrap(function () use ($lead, $leadPreferences) {
 
-            $currency = $leadPreferences->pref_currency;
+            $currency = $leadPreferences->pref_currency ?? null;
 
             $clone = $leadPreferences->createOnlyCurrency($lead->id, $currency);
             $this->leadPreferencesRepository->save($clone);
