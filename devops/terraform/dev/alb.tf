@@ -132,5 +132,6 @@ resource "aws_security_group" "lb" {
     Environment = var.ENV
     Project     = var.PROJECT
     Ns          = var.NAMESPACE
+    Domain      = var.DOMAIN
   }
 }

@@ -24,7 +24,10 @@ module "mysql" {
   create_monitoring_role = true
 
   tags = {
+    Project     = var.PROJECT
     Environment = var.ENV
+    Ns          = var.NAMESPACE
+    Domain      = var.DOMAIN
   }
 
   subnet_ids           = var.PRIVATE_SUBNETS
@@ -89,5 +92,6 @@ resource "aws_security_group" "mysql" {
     Environment = var.ENV
     Project     = var.PROJECT
     Ns          = var.NAMESPACE
+    Domain      = var.DOMAIN
   }
 }

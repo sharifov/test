@@ -2,7 +2,10 @@
 resource "aws_route53_zone" "public" {
   name = var.DOMAIN
   tags = {
+    Project     = var.PROJECT
     Environment = var.ENV
+    Ns          = var.NAMESPACE
+    Domain      = var.DOMAIN
     Terraform   = "true"
   }
 }
@@ -106,6 +109,15 @@ resource "aws_route53_record" "public_centrifugo" {
 resource "aws_route53_record" "public_beanstalkd" {
   zone_id = aws_route53_zone.public.zone_id
   name    = "beanstalkd"
+  type    = "A"
+  ttl     = "300"
+  records = [aws_instance.shared.private_ip]
+}
+
+# Call antispam
+resource "aws_route53_record" "public_antispam" {
+  zone_id = aws_route53_zone.public.zone_id
+  name    = "antispam"
   type    = "A"
   ttl     = "300"
   records = [aws_instance.shared.private_ip]

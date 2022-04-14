@@ -17,27 +17,19 @@ CRM: Terraform
 ##### 1. Configure AWS access profile
     aws configure --profile aws-dev-infra
 
-##### 2. Create new ssh key for this environment
 
-    aws ec2 create-key-pair \
-        --key-name dev \
-        --query 'KeyMaterial' \
-        --output text > aws-dev-infra.pem
-    mv aws-dev-infra.pem ~/.ssh/
-    chmod 600 ~/.ssh/aws-dev-infra.pem
+##### 2. Decrypt terraform variable file with sops
 
-##### 3. Decrypt terraform variable file with sops
-
-    export SOPS_AGE_KEY_FILE="~/work/techork/sops/key"
-    export SOPS_AGE_RECIPIENTS=age166r5dtedlc4y8nq50d8qp60z72r4w833l6rmwv4kg76j5833gapqv2x0a2
+    export SOPS_AGE_KEY_FILE="$HOME/.sops/aws-dev-age"
+    export SOPS_AGE_RECIPIENTS="age13svya8dz2uwhw4j8qy93hvyc3q7u03y2xqj5fgda7uc89gmsvcqqh62nf0"
     sops -d enc.variables > variables.tf
 
-##### 4. Initialize terraform
+##### 3. Initialize terraform
     terraform init
 
-##### 5. Review terraform plan
+##### 4. Review terraform plan
     terraform plan
 
-##### 6. Apply the plan and save the output
+##### 5. Apply the plan and save the output
     terraform apply
 

@@ -24,6 +24,9 @@ module "pgsql" {
   tags = {
     Terraform   = "true"
     Environment = var.ENV
+    Project     = var.PROJECT
+    Ns          = var.NAMESPACE
+    Domain      = var.DOMAIN
   }
 
   enabled_cloudwatch_logs_exports = ["postgresql", "upgrade"]
@@ -65,5 +68,6 @@ resource "aws_security_group" "pgsql" {
     Environment = var.ENV
     Project     = var.PROJECT
     Ns          = var.NAMESPACE
+    Domain      = var.DOMAIN
   }
 }

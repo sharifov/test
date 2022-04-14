@@ -23,3 +23,12 @@ output "ip_shared" {
   description = "Private IPs"
 }
 
+output "domain" {
+  value       = var.DOMAIN
+  description = "Domain"
+}
+
+output "domain_ns" {
+  value       = aws_route53_zone.public.name_servers
+  description = "Domain Name Servers"
+}

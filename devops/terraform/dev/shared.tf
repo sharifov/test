@@ -16,6 +16,7 @@ resource "aws_instance" "shared" {
     Environment = var.ENV
     Project     = var.PROJECT
     Ns          = var.NAMESPACE
+    Domain      = var.DOMAIN
     Kind        = "shared"
   }
 }
@@ -59,6 +60,14 @@ resource "aws_security_group" "shared" {
   }
 
   ingress {
+    description = "Antispam"
+    from_port   = 8001
+    to_port     = 8001
+    protocol    = "tcp"
+    cidr_blocks = [var.VPC_CIDR]
+  }
+
+  ingress {
     description = "Filebeat"
     from_port   = 5066
     to_port     = 5066
@@ -71,7 +80,7 @@ resource "aws_security_group" "shared" {
     from_port   = 9100
     to_port     = 9100
     protocol    = "tcp"
-    cidr_blocks = [var.VPC_CIDR]
+    cidr_blocks = [var.VPC_CIDR, var.INFRA_CIDR]
   }
 
   ingress {
@@ -79,7 +88,7 @@ resource "aws_security_group" "shared" {
     from_port   = 9479
     to_port     = 9479
     protocol    = "tcp"
-    cidr_blocks = [var.VPC_CIDR]
+    cidr_blocks = [var.VPC_CIDR, var.INFRA_CIDR]
   }
 
   ingress {
@@ -87,7 +96,7 @@ resource "aws_security_group" "shared" {
     from_port   = 9300
     to_port     = 9300
     protocol    = "tcp"
-    cidr_blocks = [var.VPC_CIDR]
+    cidr_blocks = [var.VPC_CIDR, var.INFRA_CIDR]
   }
 
   ingress {
@@ -95,7 +104,7 @@ resource "aws_security_group" "shared" {
     from_port   = 9121
     to_port     = 9121
     protocol    = "tcp"
-    cidr_blocks = [var.VPC_CIDR]
+    cidr_blocks = [var.VPC_CIDR, var.INFRA_CIDR]
   }
 
   egress {
@@ -110,5 +119,6 @@ resource "aws_security_group" "shared" {
     Environment = var.ENV
     Project     = var.PROJECT
     Ns          = var.NAMESPACE
+    Domain      = var.DOMAIN
   }
 }
