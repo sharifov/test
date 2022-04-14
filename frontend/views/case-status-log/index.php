@@ -7,6 +7,8 @@ use src\entities\cases\CasesStatus;
 use src\entities\cases\CaseStatusLog;
 use common\models\Employee;
 use yii\widgets\Pjax;
+use src\auth\Auth;
+use src\access\ListsAccess;
 
 /* @var $this yii\web\View */
 /* @var $searchModel src\entities\cases\CaseStatusLogSearch */
@@ -16,6 +18,8 @@ $this->title = 'Case Status History';
 $this->params['breadcrumbs'][] = $this->title;
 
 $userList = Employee::getList();
+$user = Auth::user();
+$lists = new ListsAccess($user->id);
 
 ?>
 <div class="case-status-log-index">
@@ -55,6 +59,20 @@ $userList = Employee::getList();
             [
                 'attribute' => 'csl_case_id',
                 'options' => ['style' => 'width:140px'],
+            ],
+
+            [
+                'attribute' => 'project_id',
+                'options' => ['style' => 'width:140px'],
+                'label' => 'Project',
+                'filter' => $lists->getProjects(),
+            ],
+
+            [
+                'attribute' => 'department_id',
+                'options' => ['style' => 'width:140px'],
+                'label' => 'Department',
+                'filter' => $lists->getDepartments(),
             ],
 
             [
