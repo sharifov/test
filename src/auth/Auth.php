@@ -24,7 +24,9 @@ class Auth
         if (Yii::$app instanceof \yii\console\Application) {
             return null;
         }
-        $identity = Yii::$app->user->identity;
+        if (!$identity = Yii::$app->user->identity ?? null) {
+            return null;
+        }
         return ($identity instanceof Employee) ? $identity->getId() : null;
     }
 
