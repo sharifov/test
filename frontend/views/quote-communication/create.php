@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model src\model\emailQuote\entity\EmailQuote */
+/* @var $model \common\models\QuoteCommunication */
 
 $this->title = 'Create Email Quote';
 $this->params['breadcrumbs'][] = ['label' => 'Email Quotes', 'url' => ['index']];
