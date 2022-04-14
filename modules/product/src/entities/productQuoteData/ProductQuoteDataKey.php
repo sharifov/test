@@ -7,17 +7,21 @@ use yii\bootstrap4\Html;
 class ProductQuoteDataKey
 {
     public const RECOMMENDED = 1;
+    public const CONFIRMED = 2;
 
     public const VALUES = [
-        self::RECOMMENDED => '1'
+        self::RECOMMENDED => '1',
+        self::CONFIRMED => '1'
     ];
 
     private const LIST_NAME = [
-        self::RECOMMENDED => 'Recommended'
+        self::RECOMMENDED => 'Recommended',
+        self::CONFIRMED => 'Confirmed'
     ];
 
     private const LIST_CLASS = [
-        self::RECOMMENDED => 'info'
+        self::RECOMMENDED => 'info',
+        self::CONFIRMED => 'success'
     ];
 
     public static function getList(): array

@@ -17,10 +17,13 @@ use modules\flight\src\useCases\voluntaryExchangeCreate\service\VoluntaryExchang
 use modules\flight\src\useCases\voluntaryExchangeCreate\service\VoluntaryExchangeCreateService;
 use modules\flight\src\useCases\voluntaryExchangeInfo\form\VoluntaryExchangeInfoForm;
 use modules\flight\src\useCases\voluntaryExchangeInfo\service\VoluntaryExchangeInfoService;
+use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
+use modules\product\src\entities\productQuoteData\ProductQuoteData;
+use modules\product\src\entities\productQuoteData\ProductQuoteDataRepository;
 use modules\product\src\repositories\ProductableRepository;
 use src\entities\cases\CaseEventLog;
 use src\exception\BoResponseException;
@@ -51,12 +54,14 @@ use yii\helpers\VarDumper;
  * @property VoluntaryExchangeObjectCollection $objectCollection
  * @property BoRequestVoluntaryExchangeService $boRequestVoluntaryExchangeService
  * @property ProductQuoteChangeRepository $productQuoteChangeRepository
+ * @property ProductQuoteDataRepository $productQuoteDataRepository
  */
 class FlightQuoteExchangeController extends BaseController
 {
     private VoluntaryExchangeObjectCollection $objectCollection;
     private BoRequestVoluntaryExchangeService $boRequestVoluntaryExchangeService;
     private ProductQuoteChangeRepository $productQuoteChangeRepository;
+    private ProductQuoteDataRepository $productQuoteDataRepository;
 
     /**
      * @param $id
@@ -65,6 +70,7 @@ class FlightQuoteExchangeController extends BaseController
      * @param VoluntaryExchangeObjectCollection $voluntaryExchangeObjectCollection
      * @param BoRequestVoluntaryExchangeService $boRequestVoluntaryExchangeService
      * @param ProductQuoteChangeRepository $productQuoteChangeRepository
+     * @param ProductQuoteDataRepository $productQuoteDataRepository
      * @param array $config
      */
     public function __construct(
@@ -74,11 +80,13 @@ class FlightQuoteExchangeController extends BaseController
         VoluntaryExchangeObjectCollection $voluntaryExchangeObjectCollection,
         BoRequestVoluntaryExchangeService $boRequestVoluntaryExchangeService,
         ProductQuoteChangeRepository $productQuoteChangeRepository,
+        ProductQuoteDataRepository $productQuoteDataRepository,
         $config = []
     ) {
         $this->objectCollection                  = $voluntaryExchangeObjectCollection;
         $this->boRequestVoluntaryExchangeService = $boRequestVoluntaryExchangeService;
         $this->productQuoteChangeRepository      = $productQuoteChangeRepository;
+        $this->productQuoteDataRepository        = $productQuoteDataRepository;
         parent::__construct($id, $module, $logger, $config);
     }
 
@@ -874,6 +882,10 @@ class FlightQuoteExchangeController extends BaseController
             $this->auth->getId()
         );
         $flightRequest = $this->objectCollection->getFlightRequestRepository()->save($flightRequest);
+
+        $changeQuote = ProductQuote::findByGid($voluntaryExchangeConfirmForm->quote_gid);
+        $pQuoteData = ProductQuoteData::createConfirmed($changeQuote->pq_id);
+        $this->productQuoteDataRepository->save($pQuoteData);
 
         $voluntaryExchangeConfirmHandler = new VoluntaryExchangeConfirmHandler(
             $flightRequest,
