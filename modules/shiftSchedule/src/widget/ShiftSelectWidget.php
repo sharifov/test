@@ -1,6 +1,6 @@
 <?php
 
-namespace src\model\shiftSchedule\widget;
+namespace modules\shiftSchedule\src\widget;
 
 use yii\helpers\ArrayHelper;
 use yii\helpers\Url;

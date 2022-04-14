@@ -31,6 +31,7 @@ return [
         'quote' => \src\model\quote\abac\QuoteFlightAbacObject::class,
         'lead-user-conversion' => \src\model\leadUserConversion\abac\LeadUserConversionAbacObject::class,
         'user-feedback' => \modules\user\userFeedback\abac\UserFeedbackAbacObject::class,
+        'shift' => \src\model\shiftSchedule\abac\ShiftAbacObject::class,
     ],
     'scanDirs' => [
         '/modules/',

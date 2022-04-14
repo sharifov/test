@@ -1,12 +1,11 @@
 <?php
 
-namespace src\model\shiftSchedule\entity\shiftScheduleRule;
+namespace modules\shiftSchedule\src\entities\shiftScheduleRule;
 
 use common\models\Employee;
 use Cron\CronExpression;
-use src\model\shiftSchedule\entity\shift\Shift;
-use src\model\shiftSchedule\entity\userShiftAssign\UserShiftAssign;
-use src\model\shiftSchedule\entity\userShiftSchedule\UserShiftSchedule;
+use modules\shiftSchedule\src\entities\shift\Shift;
+use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;

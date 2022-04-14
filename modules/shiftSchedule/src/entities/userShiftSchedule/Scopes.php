@@ -1,14 +1,14 @@
 <?php
 
-namespace src\model\shiftSchedule\entity\shift;
+namespace modules\shiftSchedule\src\entities\userShiftSchedule;
 
 /**
-* @see Shift
+* @see UserShiftSchedule
 */
 class Scopes extends \yii\db\ActiveQuery
 {
     /**
-    * @return Shift[]|array
+    * @return UserShiftSchedule[]|array
     */
     public function all($db = null)
     {
@@ -16,7 +16,7 @@ class Scopes extends \yii\db\ActiveQuery
     }
 
     /**
-    * @return Shift|array|null
+    * @return UserShiftSchedule|array|null
     */
     public function one($db = null)
     {

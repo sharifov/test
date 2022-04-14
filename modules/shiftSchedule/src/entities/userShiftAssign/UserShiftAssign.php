@@ -1,10 +1,9 @@
 <?php
 
-namespace src\model\shiftSchedule\entity\userShiftAssign;
+namespace modules\shiftSchedule\src\entities\userShiftAssign;
 
 use common\models\Employee;
-use src\model\shiftSchedule\entity\shift\Shift;
-use src\model\shiftSchedule\entity\shiftScheduleRule\ShiftScheduleRule;
+use modules\shiftSchedule\src\entities\shift\Shift;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -17,7 +16,7 @@ use yii\db\ActiveRecord;
  * @property string|null $usa_created_dt
  * @property int|null $usa_created_user_id
  *
- * @property ShiftScheduleRule $shiftScheduleRule
+ * @property Shift $shift
  * @property Employee $user
  * @property Employee $createdUser
  */
@@ -39,7 +38,8 @@ class UserShiftAssign extends \yii\db\ActiveRecord
                 'class' => BlameableBehavior::class,
                 'attributes' => [
                     ActiveRecord::EVENT_BEFORE_INSERT => ['usa_created_user_id'],
-                ]
+                ],
+                'defaultValue' => null,
             ],
         ];
     }
@@ -62,9 +62,9 @@ class UserShiftAssign extends \yii\db\ActiveRecord
         ];
     }
 
-    public function getShiftScheduleRule(): \yii\db\ActiveQuery
+    public function getShift(): \yii\db\ActiveQuery
     {
-        return $this->hasOne(ShiftScheduleRule::class, ['ssr_id' => 'usa_sh_id']);
+        return $this->hasOne(Shift::class, ['sh_id' => 'usa_sh_id']);
     }
 
     public function getUser(): \yii\db\ActiveQuery
@@ -85,6 +85,14 @@ class UserShiftAssign extends \yii\db\ActiveRecord
             'usa_created_dt' => 'Created Dt',
             'usa_created_user_id' => 'Created User ID',
         ];
+    }
+
+    public static function create(?int $userId, ?int $shiftId): UserShiftAssign
+    {
+        $model = new self();
+        $model->usa_user_id = $userId;
+        $model->usa_sh_id = $shiftId;
+        return $model;
     }
 
     public static function find(): Scopes

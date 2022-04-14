@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model src\model\shiftSchedule\entity\shift\Shift */
+/* @var $model \modules\shiftSchedule\src\entities\shift\Shift */
 
 $this->title = 'Create Shift';
 $this->params['breadcrumbs'][] = ['label' => 'Shifts', 'url' => ['index']];

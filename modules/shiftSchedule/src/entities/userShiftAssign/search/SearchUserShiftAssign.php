@@ -1,9 +1,9 @@
 <?php
 
-namespace src\model\shiftSchedule\entity\userShiftAssign\search;
+namespace modules\shiftSchedule\src\entities\userShiftAssign\search;
 
 use yii\data\ActiveDataProvider;
-use src\model\shiftSchedule\entity\userShiftAssign\UserShiftAssign;
+use modules\shiftSchedule\src\entities\userShiftAssign\UserShiftAssign;
 
 class SearchUserShiftAssign extends UserShiftAssign
 {

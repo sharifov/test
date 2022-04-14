@@ -1,13 +1,13 @@
 <?php
 
-namespace src\model\shiftSchedule\entity\shiftCategory\search;
+namespace modules\shiftSchedule\src\entities\shiftCategory\search;
 
+use modules\shiftSchedule\src\entities\shiftCategory\ShiftCategory;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use src\model\shiftSchedule\entity\shiftCategory\ShiftCategory;
 
 /**
- * ShiftCategorySearch represents the model behind the search form of `src\model\shiftSchedule\entity\shiftCategory\ShiftCategory`.
+ * ShiftCategorySearch represents the model behind the search form of `shiftCategory`.
  */
 class ShiftCategorySearch extends ShiftCategory
 {

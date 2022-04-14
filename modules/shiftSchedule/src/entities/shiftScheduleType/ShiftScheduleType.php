@@ -3,13 +3,11 @@
 namespace modules\shiftSchedule\src\entities\shiftScheduleType;
 
 use common\models\Employee;
-use src\model\shiftSchedule\entity\shiftScheduleRule\ShiftScheduleRule;
-use src\model\shiftSchedule\entity\userShiftSchedule\UserShiftSchedule;
-use Yii;
+use modules\shiftSchedule\src\entities\shiftScheduleRule\ShiftScheduleRule;
+use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
-use yii\db\ActiveRecord;
 use yii\db\BaseActiveRecord;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;

@@ -3,15 +3,14 @@
 use common\components\grid\BooleanColumn;
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
-use src\model\shiftSchedule\entity\shiftScheduleRule\ShiftScheduleRule;
-use src\model\shiftSchedule\widget\ShiftSelectWidget;
+use modules\shiftSchedule\src\entities\shiftScheduleRule\ShiftScheduleRule;
+use modules\shiftSchedule\src\widget\ShiftSelectWidget;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
-use common\components\grid\DurationColumn;
 
 /* @var $this yii\web\View */
-/* @var $searchModel src\model\shiftSchedule\entity\shiftScheduleRule\search\SearchShiftScheduleRule */
+/* @var $searchModel \modules\shiftSchedule\src\entities\shiftScheduleRule\search\SearchShiftScheduleRule */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Shift Schedule Rules';

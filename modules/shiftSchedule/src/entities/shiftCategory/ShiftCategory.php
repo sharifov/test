@@ -1,10 +1,9 @@
 <?php
 
-namespace src\model\shiftSchedule\entity\shiftCategory;
+namespace modules\shiftSchedule\src\entities\shiftCategory;
 
 use common\models\Employee;
 use common\models\query\EmployeeQuery;
-use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;

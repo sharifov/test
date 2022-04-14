@@ -1,10 +1,10 @@
 <?php
 
-namespace src\model\shiftSchedule\entity\userShiftSchedule\search;
+namespace modules\shiftSchedule\src\entities\userShiftSchedule\search;
 
 use common\models\Employee;
+use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use yii\data\ActiveDataProvider;
-use src\model\shiftSchedule\entity\userShiftSchedule\UserShiftSchedule;
 
 /**
  * @property string $clientStartDate

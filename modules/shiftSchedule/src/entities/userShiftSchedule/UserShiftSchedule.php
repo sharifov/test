@@ -1,15 +1,14 @@
 <?php
 
-namespace src\model\shiftSchedule\entity\userShiftSchedule;
+namespace modules\shiftSchedule\src\entities\userShiftSchedule;
 
 use common\models\Employee;
+use modules\shiftSchedule\src\entities\shift\Shift;
+use modules\shiftSchedule\src\entities\shiftScheduleRule\ShiftScheduleRule;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
-use src\model\shiftSchedule\entity\shift\Shift;
-use src\model\shiftSchedule\entity\shiftScheduleRule\ShiftScheduleRule;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
-use yii\db\ActiveRecord;
 use yii\db\BaseActiveRecord;
 
 /**

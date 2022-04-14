@@ -1,11 +1,11 @@
 <?php
 
-use src\model\shiftSchedule\entity\userShiftSchedule\UserShiftSchedule;
+use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model src\model\shiftSchedule\entity\userShiftSchedule\UserShiftSchedule */
+/* @var $model \modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule */
 
 $this->title = 'Time Line ' . $model->uss_id;
 $this->params['breadcrumbs'][] = ['label' => 'User Shift Schedules', 'url' => ['index']];

@@ -2,16 +2,16 @@
 
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
+use modules\shiftSchedule\src\entities\shift\Shift;
+use modules\shiftSchedule\src\entities\shiftScheduleRule\ShiftScheduleRule;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
-use src\model\shiftSchedule\entity\shift\Shift;
-use src\model\shiftSchedule\entity\shiftScheduleRule\ShiftScheduleRule;
-use src\model\shiftSchedule\entity\userShiftSchedule\UserShiftSchedule;
+use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel src\model\shiftSchedule\entity\userShiftSchedule\search\SearchUserShiftSchedule */
+/* @var $searchModel \modules\shiftSchedule\src\entities\userShiftSchedule\search\SearchUserShiftSchedule */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'User Shift Schedules';

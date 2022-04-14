@@ -1,6 +1,6 @@
 <?php
 
-namespace src\model\shiftSchedule\entity\shiftScheduleRule;
+namespace modules\shiftSchedule\src\entities\shiftScheduleRule;
 
 /**
 * @see ShiftScheduleRule

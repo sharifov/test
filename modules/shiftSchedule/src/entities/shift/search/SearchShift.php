@@ -1,9 +1,9 @@
 <?php
 
-namespace src\model\shiftSchedule\entity\shift\search;
+namespace modules\shiftSchedule\src\entities\shift\search;
 
+use modules\shiftSchedule\src\entities\shift\Shift;
 use yii\data\ActiveDataProvider;
-use src\model\shiftSchedule\entity\shift\Shift;
 
 class SearchShift extends Shift
 {

@@ -1,12 +1,12 @@
 <?php
 
-namespace src\model\shiftSchedule\entity\shift;
+namespace modules\shiftSchedule\src\entities\shift;
 
 use common\models\Employee;
-use src\model\shiftSchedule\entity\shiftCategory\ShiftCategory;
-use src\model\shiftSchedule\entity\shiftScheduleRule\ShiftScheduleRule;
-use src\model\shiftSchedule\entity\userShiftAssign\UserShiftAssign;
-use src\model\shiftSchedule\entity\userShiftSchedule\UserShiftSchedule;
+use modules\shiftSchedule\src\entities\shiftCategory\ShiftCategory;
+use modules\shiftSchedule\src\entities\shiftScheduleRule\ShiftScheduleRule;
+use modules\shiftSchedule\src\entities\userShiftAssign\UserShiftAssign;
+use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -55,7 +55,8 @@ class Shift extends ActiveRecord
                 'attributes' => [
                     ActiveRecord::EVENT_BEFORE_INSERT => ['sh_created_user_id'],
                     ActiveRecord::EVENT_BEFORE_UPDATE => ['sh_updated_user_id'],
-                ]
+                ],
+                'defaultValue' => null,
             ],
         ];
     }
@@ -143,17 +144,13 @@ class Shift extends ActiveRecord
         return 'shift';
     }
 
-    /**
-     * @param bool $enabled
-     * @return array
-     */
-    public static function getList(?bool $enabled = null): array
+    public static function getList(?bool $enabled = true): array
     {
-        $query = self::find()->orderBy(['sh_sort_order' => SORT_ASC]);
+        $query = self::find()->orderBy(['sh_sort_order' => SORT_DESC, 'sh_name' => SORT_ASC]);
         if ($enabled !== null) {
-            $query->andWhere(['sh_enabled' => true]);
+            $query->andWhere(['sh_enabled' => $enabled]);
         }
         $data = $query->asArray()->all();
-        return ArrayHelper::map($data, 'sh_id', 'sh_title');
+        return ArrayHelper::map($data, 'sh_id', 'sh_name');
     }
 }

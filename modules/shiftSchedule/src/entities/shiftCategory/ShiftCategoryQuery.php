@@ -1,6 +1,6 @@
 <?php
 
-namespace src\model\shiftSchedule\entity\shiftCategory;
+namespace modules\shiftSchedule\src\entities\shiftCategory;
 
 /**
  * This is the ActiveQuery class for [[ShiftCategory]].

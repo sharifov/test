@@ -1,6 +1,6 @@
 <?php
 
-namespace src\model\shiftSchedule\entity\userShiftAssign;
+namespace modules\shiftSchedule\src\entities\userShiftAssign;
 
 /**
 * @see UserShiftAssign
