@@ -7,21 +7,21 @@
     tls: true
     tls_hostname: "{{ docker_registry }}"
 
-- name: "Pull image {{ callantispam_image }}"
+- name: "Pull image {{ antispam_image }}"
   docker_image:
-    name: "{{ docker_registry }}/{{ callantispam_image }}:{{ callantispam_ver }}"
+    name: "{{ docker_registry }}/{{ antispam_image }}:{{ antispam_ver }}"
     source: pull
     force_source: yes
 
-- name: "Run container {{ callantispam_image }}"
+- name: "Run container {{ antispam_image | split('/') | last }}"
   docker_container:
     detach: yes
     state: started
-    name: "{{ callantispam_image }}"
-    image: "{{ docker_registry }}/{{ callantispam_image }}:{{ callantispam_ver }}"
+    name: "{{ antispam_image | split('/') | last }}"
+    image: "{{ docker_registry }}/{{ antispam_image }}:{{ antispam_ver }}"
     restart_policy: unless-stopped
     ports:
-    - 127.0.0.1:8001:8000
+    - 8001:8000
 
 - name: Prune old images
   docker_prune:
