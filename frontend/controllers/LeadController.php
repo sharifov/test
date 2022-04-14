@@ -559,7 +559,7 @@ class LeadController extends FController
                                 /** @var Quote[] $quoteObjects */
                                 $quoteObjects = Quote::find()->where(['IN', 'id', $quoteIds])->all();
                                 foreach ($quoteObjects as $quoteObject) {
-                                    $quoteObject->sendingByEmail($mail->e_id);
+                                    Repo::createForEmail($mail->e_id, $quoteObject->id);
                                     $quoteObject->setStatusSend();
                                     // - Do email should be sent if quote didn't change sxtatus?
                                     // - Do we should call saving request in loop? Calling all updates via one request would be better way
@@ -579,7 +579,7 @@ class LeadController extends FController
                             /** @var Quote[] $quoteObjects */
                             $quoteObjects = Quote::find()->where(['IN', 'id', $quoteIds])->all();
                             foreach ($quoteObjects as $quoteObject) {
-                                $quoteObject->sendingByEmail($mail->e_id);
+                                Repo::createForEmail($mail->e_id, $quoteObject->id);
                                 if (!$this->quoteRepository->save($quoteObject)) {
                                     Yii::error($quoteObject->errors, 'LeadController:view:Email:Quote:save');
                                 }
@@ -646,7 +646,7 @@ class LeadController extends FController
                         /** @var Quote[] $quoteObjects */
                         $quoteObjects = Quote::find()->where(['IN', 'id', $quoteIds])->all();
                         foreach ($quoteObjects as $quote) {
-                            $quote->sendingBySms($sms->s_id);
+                            Repo::createForSms($sms->s_id, $quote->id);
                             $quote->setStatusSend();
                             if (!$this->quoteRepository->save($quote)) {
                                 Yii::error($quote->errors, 'LeadController:view:Sms:Quote:save');

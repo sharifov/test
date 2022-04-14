@@ -2,7 +2,6 @@
 
 namespace src\quoteCommunication;
 
-use common\models\Email;
 use common\models\QuoteCommunication;
 use frontend\models\CommunicationForm;
 
@@ -13,15 +12,15 @@ use frontend\models\CommunicationForm;
 class Repo
 {
     /**
-     * @param Email $email
+     * @param int $emailId
      * @param int $quoteId
      * @return bool
      */
-    public static function createForEmail(Email $email, int $quoteId): bool
+    public static function createForEmail(int $emailId, int $quoteId): bool
     {
         $model = new QuoteCommunication([
             'qc_communication_type' => CommunicationForm::TYPE_EMAIL,
-            'qc_communication_id' => $email->e_id,
+            'qc_communication_id' => $emailId,
             'qc_quote_id' => $quoteId
         ]);
         return $model->save();
