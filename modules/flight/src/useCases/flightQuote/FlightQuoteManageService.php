@@ -490,7 +490,7 @@ class FlightQuoteManageService implements ProductQuoteService
             $productQuote = ProductQuote::create(new ProductQuoteCreateDTO($flightProduct, $quoteData, null), $productTypeServiceFee);
             $productQuote->pq_order_id = $form->orderId;
             if ($form->isFailed()) {
-                $productQuote->error(null, join('. ',$form->getErrorSummary(true))); //TODO: fill correct description
+                $productQuote->error(null, join('. ', $form->getErrorSummary(true))); //TODO: fill correct description
             } else {
                 $productQuote->inProgress(); //TODO: fill correct description, check if needed events on this method
             }

@@ -924,7 +924,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
      */
     public function setStatusWithEvent(?int $status, ?int $creatorId = null, ?string $description = null): void
     {
-        if($this->pq_status_id !== $status) {
+        if ($this->pq_status_id !== $status) {
             $this->recordEvent(
                 new ProductQuoteStatusChangeEvent(
                     $this,
@@ -934,8 +934,8 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
                     null,
                     $this->pq_owner_user_id,
                     $creatorId
-                    )
-                );  //TODO: maybe need check if status may be changed then trigger event
+                )
+            );  //TODO: maybe need check if status may be changed then trigger event
 
             $this->setStatus($status);
         }
