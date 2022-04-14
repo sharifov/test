@@ -54,11 +54,13 @@ class CommunicationForm extends Model
     public const TYPE_EMAIL = 1;
     public const TYPE_SMS   = 2;
     public const TYPE_VOICE = 3;
+    public const TYPE_CHAT = 4;
 
     public const TYPE_LIST = [
         self::TYPE_EMAIL    => 'Email',
         self::TYPE_SMS      => 'SMS',
         self::TYPE_VOICE    => 'Call',
+        self::TYPE_CHAT    => 'Chat',
     ];
 
     public const TPL_TYPE_EMAIL_BLANK       = 8;
