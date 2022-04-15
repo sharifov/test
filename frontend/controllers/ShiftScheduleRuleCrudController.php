@@ -2,8 +2,11 @@
 
 namespace frontend\controllers;
 
+use common\models\Employee;
 use modules\shiftSchedule\src\entities\shiftScheduleRule\search\SearchShiftScheduleRule;
 use modules\shiftSchedule\src\entities\shiftScheduleRule\ShiftScheduleRule;
+use modules\shiftSchedule\src\forms\ShiftScheduleForm;
+use src\auth\Auth;
 use Yii;
 use yii\db\StaleObjectException;
 use yii\filters\VerbFilter;
@@ -63,37 +66,52 @@ class ShiftScheduleRuleCrudController extends FController
      */
     public function actionCreate()
     {
-        $model = new ShiftScheduleRule();
+        $ssrModel = new ShiftScheduleRule();
+        $form = new ShiftScheduleForm();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->ssr_id]);
+        if ($form->load(Yii::$app->request->post())) {
+            $form->setTimeComplete();
+            $ssrModel->attributes = $form->attributes;
+            if ($form->validate() && $ssrModel->save()) {
+                return $this->redirect(['view', 'id' => $ssrModel->ssr_id]);
+            }
+        } else {
+            $form->setDefaultData(Auth::user()->timezone);
         }
 
         return $this->render('create', [
-            'model' => $model,
+            'model' => $form,
         ]);
     }
 
     /**
-     * @param integer $id
+     * @param int $id
      * @return string|Response
      * @throws NotFoundHttpException
      */
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
+        $ssrModel = $this->findModel($id);
+        $form = new ShiftScheduleForm();
+        $form->ssr_id = $ssrModel->ssr_id;
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->ssr_id]);
+        if ($form->load(Yii::$app->request->post())) {
+            $form->setTimeComplete();
+            $ssrModel->attributes = $form->attributes;
+            if ($form->validate() && $ssrModel->save()) {
+                return $this->redirect(['view', 'id' => $ssrModel->ssr_id]);
+            }
+        } else {
+            $form->attributes = $ssrModel->attributes;
         }
 
         return $this->render('update', [
-            'model' => $model,
+            'model' => $form,
         ]);
     }
 
     /**
-     * @param integer $id
+     * @param int $id
      * @return Response
      * @throws NotFoundHttpException
      * @throws \Throwable

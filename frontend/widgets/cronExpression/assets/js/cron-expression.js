@@ -3,8 +3,8 @@ function initCronExpressionApp(id, curValue) {
         components: {
             'day-input': DayInputComponent,
             'month-input': MonthInputComponent,
-            'weekday-input': WeekdayInputComponent,
-            'year-input': YearInputComponent,
+            'weekday-input': WeekdayInputComponent
+            //'year-input': YearInputComponent,
         },
         data() {
             return {
@@ -20,25 +20,25 @@ function initCronExpressionApp(id, curValue) {
             },
             getWeekdayFormat() {
                 return this.$refs.weekday.getFormatByValue(this.$refs.weekday.selectedRadio);
-            },
-            getYearFormat() {
-                return this.$refs.year.getFormatByValue(this.$refs.year.selectedRadio);
             }
+            // getYearFormat() {
+            //     return this.$refs.year.getFormatByValue(this.$refs.year.selectedRadio);
+            // }
         },
         methods: {
             generate() {
                 let dayFormat = this.getDayFormat;
                 let monthFormat = this.getMonthFormat;
                 let weekdayFormat = this.getWeekdayFormat;
-                let yearFormat = this.getYearFormat;
-                this.expression = dayFormat + ' ' + monthFormat + ' ' + weekdayFormat + ' ' + yearFormat;
+                // let yearFormat = this.getYearFormat;
+                this.expression = dayFormat + ' ' + monthFormat + ' ' + weekdayFormat; // + ' ' + yearFormat;
             },
             parse() {
                 let expression = this.expression.replace(/  +/g, ' ').split(' ');
                 this.$refs.day.parse(expression[0] || '');
                 this.$refs.month.parse(expression[1] || '');
                 this.$refs.weekday.parse(expression[2] || '');
-                this.$refs.year.parse(expression[3] || '');
+                //this.$refs.year.parse(expression[3] || '');
             }
         },
         mounted() {

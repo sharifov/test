@@ -5,9 +5,11 @@ namespace modules\shiftSchedule\src\entities\shiftScheduleRule;
 use common\models\Employee;
 use Cron\CronExpression;
 use modules\shiftSchedule\src\entities\shift\Shift;
+use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\db\BaseActiveRecord;
 use yii\helpers\ArrayHelper;
@@ -25,6 +27,7 @@ use yii\helpers\ArrayHelper;
  * @property string|null $ssr_cron_expression
  * @property string|null $ssr_cron_expression_exclude
  * @property int $ssr_enabled
+ * @property int|null $ssr_sst_id
  * @property string $ssr_start_time_utc
  * @property string|null $ssr_end_time_utc
  * @property string|null $ssr_created_dt
@@ -33,6 +36,7 @@ use yii\helpers\ArrayHelper;
  * @property int|null $ssr_updated_user_id
  *
  * @property Shift $shift
+ * @property ShiftScheduleType $scheduleType
  * @property Employee $user
  * @property Employee $createdUser
  * @property Employee $updatedUser
@@ -85,7 +89,7 @@ class ShiftScheduleRule extends ActiveRecord
             ['ssr_start_time_loc', 'required'],
             [['ssr_start_time_loc', 'ssr_end_time_loc'], 'safe'],
 
-            ['ssr_start_time_utc', 'required'],
+            //['ssr_start_time_utc', 'required'],
             [['ssr_start_time_utc', 'ssr_end_time_utc'], 'safe'],
 
             ['ssr_timezone', 'string', 'max' => 100],
@@ -101,33 +105,45 @@ class ShiftScheduleRule extends ActiveRecord
             ['ssr_created_user_id', 'integer'],
             ['ssr_updated_user_id', 'integer'],
 
-            [['ssr_cron_expression', 'ssr_cron_expression_exclude'], 'validateCronExpression']
+            [['ssr_cron_expression', 'ssr_cron_expression_exclude'], 'validateCronExpression'],
+            [['ssr_sst_id'], 'exist', 'skipOnError' => true, 'targetClass' => ShiftScheduleType::class,
+                'targetAttribute' => ['ssr_sst_id' => 'sst_id']],
         ];
     }
 
-    public function getShift(): \yii\db\ActiveQuery
+    public function getShift(): ActiveQuery
     {
         return $this->hasOne(Shift::class, ['sh_id' => 'ssr_shift_id']);
     }
 
-    public function getUser(): \yii\db\ActiveQuery
+    public function getUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'usa_user_id']);
     }
 
-    public function getUserShiftSchedules(): \yii\db\ActiveQuery
+    public function getUserShiftSchedules(): ActiveQuery
     {
         return $this->hasMany(UserShiftSchedule::class, ['uss_ssr_id' => 'ssr_id']);
     }
 
-    public function getCreatedUser(): \yii\db\ActiveQuery
+    public function getCreatedUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'ssr_created_user_id']);
     }
 
-    public function getUpdatedUser(): \yii\db\ActiveQuery
+    public function getUpdatedUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'ssr_updated_user_id']);
+    }
+
+    /**
+     * Gets query for [[ScheduleType]].
+     *
+     * @return ActiveQuery|Scopes
+     */
+    public function getScheduleType(): ActiveQuery
+    {
+        return $this->hasOne(ShiftScheduleType::class, ['sst_id' => 'ssr_sst_id']);
     }
 
     public function attributeLabels(): array
@@ -149,6 +165,7 @@ class ShiftScheduleRule extends ActiveRecord
             'ssr_updated_dt' => 'Updated Dt',
             'ssr_created_user_id' => 'Created User ID',
             'ssr_updated_user_id' => 'Updated User ID',
+            'ssr_sst_id' => 'Schedule Type',
         ];
     }
 
@@ -186,5 +203,13 @@ class ShiftScheduleRule extends ActiveRecord
         }
         $data = $query->asArray()->all();
         return ArrayHelper::map($data, 'ssr_id', 'ssr_title');
+    }
+
+    /**
+     * @return string
+     */
+    public function getScheduleTypeTitle(): string
+    {
+        return $this->scheduleType ? $this->scheduleType->sst_title : '-';
     }
 }
