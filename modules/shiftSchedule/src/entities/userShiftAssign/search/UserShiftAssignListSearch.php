@@ -31,11 +31,6 @@ class UserShiftAssignListSearch extends Employee
         ];
     }
 
-    /* TODO::
-        * User groups
-        * Shift
-     */
-
     public function search($params): ActiveDataProvider
     {
         $query = Employee::find();
@@ -43,7 +38,7 @@ class UserShiftAssignListSearch extends Employee
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort' => ['defaultOrder' => ['username' => SORT_ASC]],
-            'pagination' => ['pageSize' => 30],
+            'pagination' => ['pageSize' => 50],
         ]);
 
         $this->load($params);

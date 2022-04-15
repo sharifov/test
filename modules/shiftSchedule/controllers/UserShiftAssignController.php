@@ -13,6 +13,7 @@ use modules\shiftSchedule\src\entities\userShiftAssign\UserShiftAssign;
 use src\access\ListsAccess;
 use src\auth\Auth;
 use src\helpers\app\AppHelper;
+use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -29,10 +30,21 @@ class UserShiftAssignController extends FController
     public function behaviors(): array
     {
         $behaviors = [
-            'verbs' => [
-                'class' => VerbFilter::class,
-                'actions' => [
-                    'delete-ajax' => ['POST'],
+            'access' => [
+                'class' => AccessControl::class,
+                'rules' => [
+                    /** @abac ShiftAbacObject::ACT_USER_SHIFT_ASSIGN, ShiftAbacObject::ACTION_ACCESS, Access to page user-shift-assign/index */
+                    [
+                        'actions' => ['index'],
+                        'allow' => \Yii::$app->abac->can(null, ShiftAbacObject::ACT_USER_SHIFT_ASSIGN, ShiftAbacObject::ACTION_ACCESS),
+                        'roles' => ['@'],
+                    ],
+                    /** @abac ShiftAbacObject::ACT_USER_SHIFT_ASSIGN, ShiftAbacObject::ACTION_UPDATE, Access to page user-shift-assign/assign */
+                    [
+                        'actions' => ['assign'],
+                        'allow' => \Yii::$app->abac->can(null, ShiftAbacObject::ACT_USER_SHIFT_ASSIGN, ShiftAbacObject::ACTION_UPDATE),
+                        'roles' => ['@'],
+                    ],
                 ],
             ],
         ];

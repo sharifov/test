@@ -2,6 +2,7 @@
 
 use common\components\grid\Select2Column;
 use common\models\Employee;
+use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use src\access\ListsAccess;
 use yii\grid\ActionColumn;
 use yii\bootstrap4\Html;
@@ -121,6 +122,12 @@ $this->params['breadcrumbs'][] = $this->title;
                             ['assign', 'id' => $model->id],
                             ['title' => 'Assign to Shift', 'target' => '_blank', 'data-pjax' => 0,]
                         );
+                    },
+                ],
+                'visibleButtons' => [
+                    'assign' => static function ($model, $key, $index) {
+                        /** @abac ShiftAbacObject::ACT_USER_SHIFT_ASSIGN, ShiftAbacObject::ACTION_UPDATE, Access to button UserShiftAssign */
+                        return \Yii::$app->abac->can(null, ShiftAbacObject::ACT_USER_SHIFT_ASSIGN, ShiftAbacObject::ACTION_UPDATE);
                     },
                 ],
             ],
