@@ -105,11 +105,6 @@ class SettingHelper
         return (int)(Yii::$app->params['settings']['clean_call_after_days'] ?? 10);
     }
 
-    public static function isCallRecordingSecurityEnabled(): bool
-    {
-        return (bool)(Yii::$app->params['settings']['call_recording_security'] ?? false);
-    }
-
     public static function isCallRecordingLogEnabled(): bool
     {
         return (bool)(Yii::$app->params['settings']['enable_call_recording_log'] ?? false);
@@ -815,11 +810,6 @@ class SettingHelper
     public static function getSmsTemplateForRemovingLpp(): array
     {
         return Yii::$app->params['settings']['lpp_remove_by_sms_tpl'] ?? [];
-    }
-
-    public static function isCallEnabledCommunicationProxyRecordings(): bool
-    {
-        return (bool)(Yii::$app->params['settings']['call_enabled_communication_proxy_recordings'] ?? false);
     }
 
     public static function isPhoneNumberRedialEnabled(): bool
