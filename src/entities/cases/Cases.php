@@ -593,7 +593,7 @@ class Cases extends ActiveRecord implements Objectable
     /**
      * @param int $orderId
      */
-    public function updateBookingId(int $orderId, ?int $userId): void
+    public function updateBookingId(string $orderId, ?int $userId): void
     {
         $this->cs_order_uid = $orderId;
         $this->recordEvent(new CasesBookingIdChangeEvent($this, $userId));
