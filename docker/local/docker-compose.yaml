@@ -88,7 +88,7 @@ services:
       - backend
 
   frontend:
-    container_name: crm-frontand
+    container_name: crm-frontend
     build:
       context: ./frontend
       args:
@@ -144,8 +144,8 @@ services:
       - ${FILE_STORAGE_PATH}:${FILE_STORAGE_PATH}
       - ${APP_PATH}:${APP_PATH}
     ports:
-      - ${HOST_PORT}:${NGINX_PORT} #frontend
-      - ${HOST_API_PORT}:${NGINX_API_PORT} #api
+      - ${HOST_PORT}:${HOST_PORT} #frontend
+      - ${HOST_API_PORT}:${HOST_API_PORT} #api
     depends_on:
       - frontend
       - api
@@ -159,8 +159,6 @@ services:
       - HOST_PORT=${HOST_PORT}
       - HOST_API=${HOST_API}
       - HOST_API_PORT=${HOST_API_PORT}
-      - NGINX_PORT=${NGINX_PORT}
-      - NGINX_API_PORT=${NGINX_API_PORT}
       - SSL_CRT_PATH=${SSL_CRT_PATH}
       - SSL_KEY_PATH=${SSL_KEY_PATH}
       - WEB_SOCKET_SERVER_PORT=${WEB_SOCKET_SERVER_PORT}
