@@ -884,8 +884,10 @@ class FlightQuoteExchangeController extends BaseController
         $flightRequest = $this->objectCollection->getFlightRequestRepository()->save($flightRequest);
 
         $changeQuote = ProductQuote::findByGid($voluntaryExchangeConfirmForm->quote_gid);
-        $pQuoteData = ProductQuoteData::createConfirmed($changeQuote->pq_id);
-        $this->productQuoteDataRepository->save($pQuoteData);
+        if (!empty($changeQuote->pq_id)) {
+            $pQuoteData = ProductQuoteData::createConfirmed($changeQuote->pq_id);
+            $this->productQuoteDataRepository->save($pQuoteData);
+        }
 
         $voluntaryExchangeConfirmHandler = new VoluntaryExchangeConfirmHandler(
             $flightRequest,
