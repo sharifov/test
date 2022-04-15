@@ -11,17 +11,17 @@ class ProductQuoteDataKey
 
     public const VALUES = [
         self::RECOMMENDED => '1',
-        self::CONFIRMED => '1'
+        self::CONFIRMED => '1',
     ];
 
     private const LIST_NAME = [
         self::RECOMMENDED => 'Recommended',
-        self::CONFIRMED => 'Confirmed'
+        self::CONFIRMED => 'Confirmed',
     ];
 
     private const LIST_CLASS = [
         self::RECOMMENDED => 'info',
-        self::CONFIRMED => 'success'
+        self::CONFIRMED => 'success',
     ];
 
     public static function getList(): array
