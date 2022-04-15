@@ -245,7 +245,8 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
      */
     public function getRuleTitle(): string
     {
-        return empty($this->shiftScheduleRule) ? '-' : $this->shiftScheduleRule->ssr_title;
+        return (!$this->shiftScheduleRule || empty($this->shiftScheduleRule->ssr_title)) ? '-' :
+            $this->shiftScheduleRule->ssr_title;
     }
 
     /**
@@ -253,7 +254,8 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
      */
     public function getScheduleTypeTitle(): string
     {
-        return empty($this->shiftScheduleType) ? '-' : $this->shiftScheduleType->sst_title;
+        return (!$this->shiftScheduleType || empty($this->shiftScheduleType->sst_title)) ? '-' :
+            $this->shiftScheduleType->sst_title;
     }
 
     /**
@@ -269,6 +271,6 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
      */
     public function getShiftTitle(): string
     {
-        return empty($this->shift) ? '-' : $this->shift->sh_title;
+        return (!$this->shift || empty($this->shift->sh_title)) ? '-' : $this->shift->sh_title;
     }
 }
