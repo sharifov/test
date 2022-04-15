@@ -4,6 +4,7 @@ use common\components\grid\BooleanColumn;
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
 use modules\shiftSchedule\src\entities\shiftScheduleRule\ShiftScheduleRule;
+use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\widget\ShiftSelectWidget;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
@@ -41,6 +42,15 @@ $this->params['breadcrumbs'][] = $this->title;
                 'options' => [
                     'style' => 'width: 100px'
                 ]
+            ],
+            [
+                'attribute' => 'uss_sst_id',
+                'value' => static function (
+                    ShiftScheduleRule $model
+                ) {
+                    return $model->getScheduleTypeTitle();
+                },
+                'filter' => ShiftScheduleType::getList()
             ],
             'ssr_title',
             'ssr_timezone',
