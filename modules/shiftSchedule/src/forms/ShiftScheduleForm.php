@@ -1,19 +1,14 @@
 <?php
 
-namespace modules\shiftSchedule\forms;
+namespace modules\shiftSchedule\src\forms;
 
 use common\models\Employee;
 use Cron\CronExpression;
 use modules\shiftSchedule\src\entities\shift\Shift;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
-use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
+use src\auth\Auth;
 use yii\base\Model;
-use yii\behaviors\BlameableBehavior;
-use yii\behaviors\TimestampBehavior;
-use yii\db\ActiveQuery;
-use yii\db\ActiveRecord;
-use yii\db\BaseActiveRecord;
-use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 
 /**
  * This is the model class for table "shift_schedule_rule".
@@ -35,6 +30,20 @@ use yii\helpers\ArrayHelper;
  */
 class ShiftScheduleForm extends Model
 {
+    public $ssr_id;
+    public $ssr_shift_id;
+    public $ssr_title;
+    public $ssr_timezone;
+    public $ssr_start_time_loc;
+    public $ssr_end_time_loc;
+    public $ssr_duration_time;
+    public $ssr_cron_expression;
+    public $ssr_cron_expression_exclude;
+    public $ssr_enabled;
+    public $ssr_sst_id;
+    public $ssr_start_time_utc;
+    public $ssr_end_time_utc;
+
     private const MAX_VALUE_INT = 2147483647;
     private const CRON_EXPRESSION_MINUTES = '*';
     private const CRON_EXPRESSION_HOURS = '*';
@@ -99,11 +108,45 @@ class ShiftScheduleForm extends Model
     {
         $expression = self::CRON_EXPRESSION_MINUTES . ' ' . self::CRON_EXPRESSION_HOURS . ' ' . $this->$attribute;
         $isValidCronExpression = CronExpression::isValidExpression($expression);
-
         if (!$isValidCronExpression) {
-            $this->addError($attribute, 'Expression not valid');
-            return false;
+            $this->addError($attribute, 'Cron Expression not valid');
         }
         return true;
+    }
+
+    /**
+     * @return void
+     */
+    public function setTimeComplete(): void
+    {
+        $this->ssr_end_time_loc = date('H:i', strtotime($this->ssr_start_time_loc) +
+            ($this->ssr_duration_time * 60));
+
+        if ($this->ssr_timezone) {
+            $this->ssr_start_time_utc = Employee::convertToUTC(
+                strtotime($this->ssr_start_time_loc),
+                $this->ssr_timezone
+            );
+            $this->ssr_end_time_utc = Employee::convertToUTC(
+                strtotime($this->ssr_end_time_loc),
+                $this->ssr_timezone
+            );
+        } else {
+            $this->ssr_start_time_utc = $this->ssr_start_time_loc;
+            $this->ssr_end_time_utc = $this->ssr_end_time_loc;
+        }
+    }
+
+    /**
+     * @return void
+     */
+    public function setDefaultData(?string $timezone = null)
+    {
+        if ($timezone) {
+            $this->ssr_timezone = $timezone;
+        }
+        $this->ssr_duration_time = 60;
+        $this->ssr_title = 'Schedule Rule ';
+        $this->ssr_enabled = true;
     }
 }

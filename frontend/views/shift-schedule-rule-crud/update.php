@@ -1,9 +1,10 @@
 <?php
 
+use modules\shiftSchedule\src\entities\shiftScheduleRule\ShiftScheduleRule;
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model \modules\shiftSchedule\src\entities\shiftScheduleRule\ShiftScheduleRule */
+/* @var $model ShiftScheduleRule */
 
 $this->title = 'Update Shift Schedule Rule: ' . $model->ssr_id;
 $this->params['breadcrumbs'][] = ['label' => 'Shift Schedule Rules', 'url' => ['index']];

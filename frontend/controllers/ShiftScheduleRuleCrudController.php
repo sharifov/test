@@ -3,9 +3,9 @@
 namespace frontend\controllers;
 
 use common\models\Employee;
-use modules\shiftSchedule\forms\ShiftScheduleForm;
 use modules\shiftSchedule\src\entities\shiftScheduleRule\search\SearchShiftScheduleRule;
 use modules\shiftSchedule\src\entities\shiftScheduleRule\ShiftScheduleRule;
+use modules\shiftSchedule\src\forms\ShiftScheduleForm;
 use src\auth\Auth;
 use Yii;
 use yii\db\StaleObjectException;
@@ -66,63 +66,52 @@ class ShiftScheduleRuleCrudController extends FController
      */
     public function actionCreate()
     {
-        $model = new ShiftScheduleRule();
-        $modelForm = new ShiftScheduleForm();
+        $ssrModel = new ShiftScheduleRule();
+        $form = new ShiftScheduleForm();
 
-        if ($model->load(Yii::$app->request->post())) {
-            $model->ssr_end_time_loc = date('H:i', strtotime($model->ssr_start_time_loc) +
-                ($model->ssr_duration_time * 60));
-
-            if ($model->ssr_timezone) {
-                $model->ssr_start_time_utc = Employee::convertToUTC(
-                    strtotime($model->ssr_start_time_loc),
-                    $model->ssr_timezone
-                );
-                $model->ssr_end_time_utc = Employee::convertToUTC(
-                    strtotime($model->ssr_end_time_utc),
-                    $model->ssr_timezone
-                );
-            } else {
-                $model->ssr_start_time_utc = $model->ssr_start_time_loc;
-                $model->ssr_end_time_utc = $model->ssr_end_time_loc;
-            }
-
-            if ($model->save()) {
-                return $this->redirect(['view', 'id' => $model->ssr_id]);
+        if ($form->load(Yii::$app->request->post())) {
+            $form->setTimeComplete();
+            $ssrModel->attributes = $form->attributes;
+            if ($form->validate() && $ssrModel->save()) {
+                return $this->redirect(['view', 'id' => $ssrModel->ssr_id]);
             }
         } else {
-            $model->ssr_timezone = Auth::user()->timezone;
-            $model->ssr_duration_time = 60;
-            $model->ssr_title = 'Schedule Rule ';
-            $model->ssr_enabled = true;
-            //$model->ssr_cron_expression_exclude = '';
+            $form->setDefaultData(Auth::user()->timezone);
         }
 
         return $this->render('create', [
-            'model' => $model,
+            'model' => $form,
         ]);
     }
 
     /**
-     * @param integer $id
+     * @param int $id
      * @return string|Response
      * @throws NotFoundHttpException
      */
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
+        $ssrModel = $this->findModel($id);
+        $form = new ShiftScheduleForm();
+        $form->ssr_id = $ssrModel->ssr_id;
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->ssr_id]);
+        if ($form->load(Yii::$app->request->post())) {
+            $form->setTimeComplete();
+            $ssrModel->attributes = $form->attributes;
+            if ($form->validate() && $ssrModel->save()) {
+                return $this->redirect(['view', 'id' => $ssrModel->ssr_id]);
+            }
+        } else {
+            $form->attributes = $ssrModel->attributes;
         }
 
         return $this->render('update', [
-            'model' => $model,
+            'model' => $form,
         ]);
     }
 
     /**
-     * @param integer $id
+     * @param int $id
      * @return Response
      * @throws NotFoundHttpException
      * @throws \Throwable
