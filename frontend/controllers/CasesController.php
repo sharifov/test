@@ -921,7 +921,7 @@ class CasesController extends FController
 
             $cs = $this->casesSaleService->prepareAdditionalData($cs, $saleData);
 
-            if (empty($model->cs_order_uid)) {
+            if (empty($model->cs_order_uid) && !$bookingId) {
                 $model->updateBookingId($bookingId, Auth::id());
                 $out['caseBookingId'] = $model->cs_order_uid;
             } elseif ($model->cs_order_uid !== $bookingId) {
@@ -1015,14 +1015,22 @@ class CasesController extends FController
         try {
             $case = $this->casesRepository->find((int)$caseId);
             $sale = $this->casesSaleRepository->getSaleByPrimaryKeys($case->cs_id, (int) $saleId);
+            if (!$sale->css_sale_book_id) {
+                throw new \RuntimeException('Sale bookingId is empty');
+            }
             $case->updateBookingId($sale->css_sale_book_id, Auth::id());
             $this->casesRepository->save($case);
 
             $response['message'] = 'Booking Id(' . $case->cs_order_uid . ') of case successfully updated';
             $response['newCaseBookingId'] = $case->cs_order_uid;
-        } catch (NotFoundException $e) {
+        } catch (\RuntimeException | NotFoundException $e) {
             $response['message'] = $e->getMessage();
             $response['error'] = true;
+            $message = ArrayHelper::merge(AppHelper::throwableLog($e), [
+                'caseId' => $caseId,
+                'saleId' => $saleId,
+            ]);
+            \Yii::warning($message, 'CasesController:actionUpdateBookingIdBySale:Exception');
         } catch (\Throwable $e) {
             $response['message'] = 'Internal error has occurred';
             $response['error'] = true;
