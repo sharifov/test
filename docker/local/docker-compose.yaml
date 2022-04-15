@@ -2,15 +2,19 @@ version: '3.9'
 
 services:
   redis:
+    container_name: crm-redis
     build:
       context: ./redis
       args:
         REDIS_VERSION: ${REDIS_VERSION}
-    restart: always
+    restart: on-failure
     ports:
       - ${REDIS_HOST_PORT}:6379
+    networks:
+      - backend
 
   mysql:
+    container_name: crm-mysql
     build:
       context: ./mysql
       args:
@@ -28,9 +32,12 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
     security_opt:
       - seccomp:unconfined
-    restart: always
+    restart: on-failure
+    networks:
+      - backend
 
   psql:
+    container_name: crm-psql
     build:
       context: ./psql
       args:
@@ -45,9 +52,12 @@ services:
       - ${POSTGRES_HOST_PATH_DUMP}:/docker-entrypoint-initdb.d
     ports:
       - ${POSTGRES_HOST_PORT}:5432
-    restart: always
+    restart: on-failure
+    networks:
+      - backend
 
   centrifugo:
+    container_name: crm-centrifugo
     image: centrifugo/centrifugo:${CENTRIFUGO_VERSION}
     volumes:
       - ${CENTRIFUGO_CONFIG_PATH}:/centrifugo/config.json
@@ -59,21 +69,26 @@ services:
         soft: 65535
         hard: 65535
     networks:
+      backend:
       default:
         aliases:
           - centrifugo
-    restart: always
+    restart: on-failure
 
   beanstalkd:
+    container_name: crm-beanstalkd
     build:
       context: ./beanstalkd
       args:
         version: ${BEANSTALKD_VERSION}
-    restart: always
+    restart: on-failure
     ports:
       - ${BEANSTALKD_PORT}
+    networks:
+      - backend
 
   frontend:
+    container_name: crm-frontend
     build:
       context: ./frontend
       args:
@@ -89,9 +104,13 @@ services:
      - beanstalkd
      - centrifugo
      - queue
-    restart: always
+    restart: on-failure
+    networks:
+      - backend
+      - kivork-proxy
 
   api:
+    container_name: crm-api
     build:
       context: ./api
       args:
@@ -107,9 +126,13 @@ services:
      - beanstalkd
      - centrifugo
      - queue
-    restart: always
+    restart: on-failure
+    networks:
+      - backend
+      - kivork-proxy
 
-  nginx:
+  nginx-crm:
+    container_name: crm-nginx
     build:
       context: ./nginx
       args:
@@ -126,7 +149,7 @@ services:
     depends_on:
       - frontend
       - api
-    restart: always
+    restart: on-failure
     environment:
       - NGINX_ENVSUBST_TEMPLATE_DIR=${NGINX_TEMPLATE_PATH}
       - APP_PATH=${APP_PATH}
@@ -140,8 +163,13 @@ services:
       - SSL_KEY_PATH=${SSL_KEY_PATH}
       - WEB_SOCKET_SERVER_PORT=${WEB_SOCKET_SERVER_PORT}
       - VOIP_RECORDS_PROXY_URL=${VOIP_RECORDS_PROXY_URL}
+    networks:
+      - frontend
+      - backend
+      - kivork-proxy
 
   ws:
+    container_name: crm-ws
     build:
       context: ./ws
       args:
@@ -155,10 +183,13 @@ services:
       - psql
       - redis
       - beanstalkd
-    restart: always
+    restart: on-failure
     command: ./yii websocket-server/start
+    networks:
+      - backend
 
   queue:
+    container_name: crm-queue
     build:
       context: ./queue
       args:
@@ -174,9 +205,13 @@ services:
       - beanstalkd
       - centrifugo
       - redis
-    restart: always
+    restart: on-failure
+    networks:
+      - backend
+      - kivork-proxy
 
   console:
+    container_name: crm-console
     build:
       context: ./console
       args:
@@ -195,3 +230,13 @@ services:
       - psql
       - beanstalkd
       - redis
+    networks:
+      - backend
+      - kivork-proxy
+
+networks:
+  frontend:
+  backend:
+  kivork-proxy:
+    external: true
+    name: kivork-proxy

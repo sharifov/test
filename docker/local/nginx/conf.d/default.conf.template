@@ -137,7 +137,7 @@ server {
 
     listen ${HOST_API_PORT};
 
-    server_name ${HOST_API};
+    server_name 127.0.0.1 ${HOST_API};
 
     root        ${APP_PATH}/webapi/web/;
     index       index.php;
