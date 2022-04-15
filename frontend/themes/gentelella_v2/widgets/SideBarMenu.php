@@ -237,7 +237,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
             'label' => 'My Shift Schedule <sup style="color: red">NEW</sup>',
             'url' => ['/shift-schedule/index'],
             'icon' => 'calendar'
-        ];
+        ]; /* TODO:: add abac */
 
         if (!$isUM) {
             // $cntNotifications = \common\models\Notifications::findNewCount(Yii::$app->user->id);
@@ -723,23 +723,24 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     'url' => 'javascript:',
                     'icon' => 'calendar',
                     'items' => [
-                        ['label' => 'Shift', 'url' => ['/shift-crud/index'], 'title' => 'Shift'],
-                        ['label' => 'Shift Category', 'url' => ['/shift-category-crud/index'],
-                            'title' => 'Shift category'],
-                        ['label' => 'Shift Schedule Type', 'url' => ['/shift/shift-schedule-type/index'],
+                        ['label' => 'Shift Crud', 'url' => ['/shift-crud/index'], 'title' => 'Shift'],
+                        ['label' => 'Shift Category Crud', 'url' => ['/shift-category-crud/index'],
+                            'title' => 'Shift category Crud'],
+                        ['label' => 'Shift Schedule Type Crud', 'url' => ['/shift/shift-schedule-type/index'],
                             'title' => 'Shift Schedule Type'],
-                        ['label' => 'Shift Schedule Rule', 'url' => ['/shift-schedule-rule-crud/index'],
+                        ['label' => 'Shift Schedule Rule Crud', 'url' => ['/shift-schedule-rule-crud/index'],
                             'title' => 'Shift Schedule Rule'],
-                        ['label' => 'User Shift Assign', 'url' => ['/user-shift-assign-crud/index'],
+                        ['label' => 'User Shift Assign Crud', 'url' => ['/user-shift-assign-crud/index'],
                             'title' => 'Shift Schedule User Assign'],
-                        ['label' => 'User Shift Schedule', 'url' => ['/user-shift-schedule-crud/index'],
+                        ['label' => 'User Shift Schedule Crud', 'url' => ['/user-shift-schedule-crud/index'],
                             'title' => 'User Shift Schedule'],
-                    ]
-                ],
 
+                        ['label' => 'User Shift Assign', 'url' => ['/shift/user-shift-assign/index'], 'title' => 'Shift', 'icon' => 'user-plus'],
+                    ],
+                    /* TODO:: add abac */
+                ],
             ]
         ];
-
 
         $userMenuItems = [
             'label' => 'User Addition',

@@ -1260,12 +1260,7 @@ class CallController extends FController
                     }
                 }
             }
-
-            if (SettingHelper::isCallEnabledCommunicationProxyRecordings()) {
-                header('X-Accel-Redirect: ' . Yii::$app->communication->xAccelRedirectCommunicationUrl . $callRecordSid);
-            } else {
-                header('X-Accel-Redirect: ' . Yii::$app->communication->xAccelRedirectUrl . $callRecordSid);
-            }
+            header('X-Accel-Redirect: ' . Yii::$app->communication->xAccelRedirectCommunicationUrl . $callRecordSid);
         } catch (NotFoundException $e) {
             throw new NotFoundHttpException($e->getMessage());
         }

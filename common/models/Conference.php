@@ -264,6 +264,6 @@ class Conference extends \yii\db\ActiveRecord
 
     public function getRecordingUrl(): string
     {
-        return $this->cf_recording_sid ? Yii::$app->communication->getConferenceRecordingCall($this->cf_sid, $this->cf_recording_sid) : '';
+        return $this->cf_recording_sid ? Yii::$app->communication->getConferenceRecordingUrl($this->cf_sid) : '';
     }
 }

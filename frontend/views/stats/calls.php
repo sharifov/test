@@ -243,6 +243,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ]
         ],
         'fontAwesome' => true,
+        'bsVersion' => '3.x',
         'timeout' => 60,
         'dropdownOptions' => [
             'label' => 'Full Export'
