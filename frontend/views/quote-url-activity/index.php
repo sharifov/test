@@ -35,6 +35,10 @@ $this->params['breadcrumbs'][] = $this->title;
                     'options' => ['width' => '100px']
                 ],
                 [
+                    'attribute' => 'qua_uid',
+                    'options' => ['width' => '100px']
+                ],
+                [
                     'attribute' => 'qua_communication_type',
                     'filter' => CommunicationForm::TYPE_LIST,
                     'value' => static function (QuoteUrlActivity $model): string {
