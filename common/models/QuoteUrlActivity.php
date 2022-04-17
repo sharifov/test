@@ -80,6 +80,7 @@ class QuoteUrlActivity extends ActiveRecord
             [['qua_quote_id', 'qua_communication_type', 'qua_status'], 'integer'],
             [['qua_ext_data'], 'string'],
             [['qua_created_dt'], 'safe'],
+            ['qua_uid', 'unique', 'targetClass' => self::class, 'message' => 'This uid has already been taken'],
             [['qua_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => Quote::class, 'targetAttribute' => ['qua_quote_id' => 'id']],
         ];
     }
