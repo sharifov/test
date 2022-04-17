@@ -31,47 +31,53 @@ $this->params['breadcrumbs'][] = $this->title;
         ]) ?>
     </p>
 
-    <?= DetailView::widget([
-        'model' => $model,
-        'attributes' => [
-            'qua_id',
-            'qua_uid',
-            [
-                'attribute' => 'qua_communication_type',
-                'filter' => CommunicationForm::TYPE_LIST,
-                'value' => static function (QuoteUrlActivity $model): string {
-                    return (isset(CommunicationForm::TYPE_LIST[$model->qua_communication_type]))
-                        ? CommunicationForm::TYPE_LIST[$model->qua_communication_type]
-                        : 'Unknown communication type';
-                },
-                'format' => 'raw',
+    <?php
+    try {
+        echo DetailView::widget([
+            'model' => $model,
+            'attributes' => [
+                'qua_id',
+                'qua_uid',
+                [
+                    'attribute' => 'qua_communication_type',
+                    'filter' => CommunicationForm::TYPE_LIST,
+                    'value' => static function (QuoteUrlActivity $model): string {
+                        return (isset(CommunicationForm::TYPE_LIST[$model->qua_communication_type]))
+                            ? CommunicationForm::TYPE_LIST[$model->qua_communication_type]
+                            : 'Unknown communication type';
+                    },
+                    'format' => 'raw',
+                ],
+                [
+                    'attribute' => 'qua_status',
+                    'filter' => QuoteUrlActivity::statusList(),
+                    'value' => static function (QuoteUrlActivity $model): string {
+                        $quaStatus = QuoteUrlActivity::statusName($model->qua_status);
+                        return is_null($quaStatus) ? 'Unknown communication type' : $quaStatus;
+                    },
+                    'format' => 'raw',
+                ],
+                [
+                    'attribute' => 'qua_quote_id',
+                    'value' => function (QuoteUrlActivity $model) {
+                        return Html::a("<i class=\"fa fa-link\"></i> {$model->qua_quote_id}", ['/quotes/view', 'id' => $model->qua_quote_id], ['target' => '_blank', 'data-pjax' => 0]);
+                    },
+                    'format' => 'raw'
+                ],
+                [
+                    'attribute' => 'qua_ext_data',
+                    'value' => function (QuoteUrlActivity $model) {
+                        $json = Json::decode($model->qua_ext_data);
+                        return Html::tag('pre', Json::encode($json, JSON_PRETTY_PRINT), ['style' => 'margin: 0;']);
+                    },
+                    'format' => 'html'
+                ],
+                'qua_created_dt:byUserDateTime'
             ],
-            [
-                'attribute' => 'qua_status',
-                'filter' => QuoteUrlActivity::statusList(),
-                'value' => static function (QuoteUrlActivity $model): string {
-                    $quaStatus = QuoteUrlActivity::statusName($model->qua_status);
-                    return is_null($quaStatus) ? 'Unknown communication type' : $quaStatus;
-                },
-                'format' => 'raw',
-            ],
-            [
-                'attribute' => 'qua_quote_id',
-                'value' => function (QuoteUrlActivity $model) {
-                    return Html::a("<i class=\"fa fa-link\"></i> {$model->qua_quote_id}", ['/quotes/view', 'id' => $model->qua_quote_id], ['target' => '_blank', 'data-pjax' => 0]);
-                },
-                'format' => 'raw'
-            ],
-            [
-                'attribute' => 'qua_ext_data',
-                'value' => function (QuoteUrlActivity $model) {
-                    $json = Json::decode($model->qua_ext_data);
-                    return Html::tag('pre', Json::encode($json, JSON_PRETTY_PRINT), ['style' => 'margin: 0;']);
-                },
-                'format' => 'html'
-            ],
-            'qua_created_dt:byUserDateTime'
-        ],
-    ]) ?>
+        ]);
+    } catch (\Exception $e) {
+        echo Html::tag('pre', $e->getMessage());
+    }
+    ?>
 
 </div>
