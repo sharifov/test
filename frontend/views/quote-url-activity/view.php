@@ -18,7 +18,7 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="quote-url-activity-view">
 
-    <h1><?= Html::encode($this->title) ?></h1>
+    <?= Html::tag('h1', Html::encode($this->title)) ?>
 
     <p>
         <?= Html::a('Update', ['update', 'qua_id' => $model->qua_id], ['class' => 'btn btn-primary']) ?>
