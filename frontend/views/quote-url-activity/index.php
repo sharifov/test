@@ -24,56 +24,62 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?php Pjax::begin(); ?>
 
-    <?= GridView::widget([
-        'dataProvider' => $dataProvider,
-        'filterModel' => $searchModel,
-        'columns' => [
-            [
-                'attribute' => 'qua_id',
-                'options' => ['width' => '100px']
-            ],
-            [
-                'attribute' => 'qua_communication_type',
-                'filter' => CommunicationForm::TYPE_LIST,
-                'value' => static function (QuoteUrlActivity $model): string {
-                    return (isset(CommunicationForm::TYPE_LIST[$model->qua_communication_type]))
-                        ? CommunicationForm::TYPE_LIST[$model->qua_communication_type]
-                        : 'Unknown communication type';
-                },
-                'format' => 'raw',
-            ],
-            [
-                'attribute' => 'qua_status',
-                'filter' => QuoteUrlActivity::statusList(),
-                'value' => static function (QuoteUrlActivity $model): string {
-                    $statusName = QuoteUrlActivity::statusName($model->qua_status);
-                    return is_null($statusName) ? 'Unknown status' : $statusName;
-                },
-                'format' => 'raw',
-            ],
-            [
-                'attribute' => 'qua_quote_id',
-                'value' => function (QuoteUrlActivity $model) {
-                    return Html::a("<i class=\"fa fa-link\"></i> {$model->qua_quote_id}", ['/quotes/view', 'id' => $model->qua_quote_id], ['target' => '_blank', 'data-pjax' => 0]);
-                },
-                'format' => 'raw'
-            ],
-            [
-                'class' => DateTimeColumn::class,
-                'attribute' => 'qua_created_dt',
-                'format' => 'byUserDateTime',
-                'options' => [
-                    'width' => '200px'
+    <?php
+    try {
+        echo GridView::widget([
+            'dataProvider' => $dataProvider,
+            'filterModel' => $searchModel,
+            'columns' => [
+                [
+                    'attribute' => 'qua_id',
+                    'options' => ['width' => '100px']
+                ],
+                [
+                    'attribute' => 'qua_communication_type',
+                    'filter' => CommunicationForm::TYPE_LIST,
+                    'value' => static function (QuoteUrlActivity $model): string {
+                        return (isset(CommunicationForm::TYPE_LIST[$model->qua_communication_type]))
+                            ? CommunicationForm::TYPE_LIST[$model->qua_communication_type]
+                            : 'Unknown communication type';
+                    },
+                    'format' => 'raw',
+                ],
+                [
+                    'attribute' => 'qua_status',
+                    'filter' => QuoteUrlActivity::statusList(),
+                    'value' => static function (QuoteUrlActivity $model): string {
+                        $statusName = QuoteUrlActivity::statusName($model->qua_status);
+                        return is_null($statusName) ? 'Unknown status' : $statusName;
+                    },
+                    'format' => 'raw',
+                ],
+                [
+                    'attribute' => 'qua_quote_id',
+                    'value' => function (QuoteUrlActivity $model) {
+                        return Html::a("<i class=\"fa fa-link\"></i> {$model->qua_quote_id}", ['/quotes/view', 'id' => $model->qua_quote_id], ['target' => '_blank', 'data-pjax' => 0]);
+                    },
+                    'format' => 'raw'
+                ],
+                [
+                    'class' => DateTimeColumn::class,
+                    'attribute' => 'qua_created_dt',
+                    'format' => 'byUserDateTime',
+                    'options' => [
+                        'width' => '200px'
+                    ],
+                ],
+                [
+                    'class' => ActionColumn::class,
+                    'urlCreator' => static function ($action, QuoteUrlActivity $model, $key, $index, $column): string {
+                        return Url::toRoute([$action, 'qua_id' => $model->qua_id]);
+                    }
                 ],
             ],
-            [
-                'class' => ActionColumn::class,
-                'urlCreator' => static function ($action, QuoteUrlActivity $model, $key, $index, $column): string {
-                    return Url::toRoute([$action, 'qua_id' => $model->qua_id]);
-                }
-            ],
-        ],
-    ]); ?>
+        ]);
+    } catch (\Exception $e) {
+        echo Html::tag('pre', $e->getMessage());
+    }
+    ?>
 
     <?php Pjax::end(); ?>
 
