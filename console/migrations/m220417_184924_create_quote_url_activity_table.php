@@ -22,6 +22,7 @@ class m220417_184924_create_quote_url_activity_table extends Migration
             '[[qua_uid]]' => $this->string(32)->notNull(),
             '[[qua_quote_id]]' => $this->integer()->notNull(),
             '[[qua_communication_type]]' => $this->smallInteger()->notNull(),
+            '[[qua_status]]' => $this->smallInteger()->notNull(),
             '[[qua_ext_data]]' => $this->text()->defaultValue(null),
             '[[qua_created_dt]]' => $this->timestamp()
         ], $tableOptions);
