@@ -12,6 +12,7 @@ use Gnello\Mattermost\Driver;
 use modules\cases\src\abac\CasesAbacObject;
 use modules\lead\src\abac\LeadAbacObject;
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeCreatedEvent;
+use modules\user\src\update\UpdateForm;
 use src\auth\Auth;
 use src\helpers\setting\SettingHelper;
 use src\model\call\socket\CallUpdateMessage;
@@ -106,6 +107,17 @@ use yii\rbac\Role;
 
 class TestController extends Controller
 {
+    public function actionRr()
+    {
+        $user = Employee::findOne(294);
+        $updatedUser = Employee::findOne(294);
+        $form = new UpdateForm($user, $updatedUser);
+        $form->form_roles = ['admin', 'agent_qw'];
+        $form->validate();
+        VarDumper::dump($form);
+        VarDumper::dump($form->getErrors());
+    }
+
     public function actionW()
     {
         $s = \Yii::createObject(LeadRedialAssigner::class);

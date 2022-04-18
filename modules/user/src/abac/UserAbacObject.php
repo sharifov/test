@@ -122,6 +122,7 @@ class UserAbacObject extends AbacBaseModel implements AbacInterface
             'up_kpi_enable' => 'KPI enable',
             'up_show_in_contact_list' => 'Show in contact list',
             'up_call_recording_disabled' => 'Call recording disabled',
+            'user_shift_assigns' => 'User shift assigns',
         ];
 
         $attrFieldsList['values'] = $formFields;

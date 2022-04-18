@@ -937,9 +937,10 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
     /**
+     * @param Employee $user
      * @return array
      */
-    public static function getAllRoles(): array
+    public static function getAllRoles(Employee $user): array
     {
         $auth = \Yii::$app->authManager;
 
@@ -950,8 +951,6 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
         $result = $auth->getRoles();
         $roles = ArrayHelper::map($result, 'name', 'description');
-        /** @var Employee $user */
-        $user = Yii::$app->user->identity;
 
         if ($user->isUserManager()) {
             if (isset($roles[self::ROLE_ADMIN])) {
