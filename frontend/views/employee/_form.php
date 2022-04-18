@@ -197,7 +197,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                     <?php endif; ?>
 
                     <?= $form->field($model, 'form_roles', ['options' => ($edit ?: $view) ? ['class' => 'form-group'] : $optionsS2])->widget(Select2::class, [
-                        'data' => Employee::getAllRoles(),
+                        'data' => Employee::getAllRoles(Auth::user()),
                         'size' => Select2::SMALL,
                         'options' => ['placeholder' => 'Select user roles', 'multiple' => true],
                         'pluginOptions' => ['allowClear' => true, 'disabled' => !$edit],
@@ -210,7 +210,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                     <?php
                     if (!$edit) {
                         echo $form->field($model, 'form_roles', ['options' => $optionsS2])->widget(Select2::class, [
-                            'data' => Employee::getAllRoles(),
+                            'data' => Employee::getAllRoles(Auth::user()),
                             'size' => Select2::SMALL,
                             'options' => ['placeholder' => 'Select user roles', 'multiple' => true],
                             'pluginOptions' => ['allowClear' => true],

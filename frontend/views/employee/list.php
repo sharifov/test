@@ -240,7 +240,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                     return $roles ? implode(', ', $roles) : '-';
                 },
                 'format' => 'raw',
-                'filter' => \common\models\Employee::getAllRoles(),
+                'filter' => \common\models\Employee::getAllRoles(Auth::user()),
                 'contentOptions' => ['style' => 'width: 10%; white-space: pre-wrap']
             ],
 

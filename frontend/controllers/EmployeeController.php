@@ -435,7 +435,7 @@ class EmployeeController extends FController
                     // VarDumper::dump($model->form_roles, 10, true); exit;
 
                     if ($model->form_roles) {
-                        $availableRoles = Employee::getAllRoles();
+                        $availableRoles = Employee::getAllRoles(Auth::user());
                         foreach ($model->form_roles as $keyItem => $roleItem) {
                             if (!array_key_exists($roleItem, $availableRoles)) {
                                 unset($model->form_roles[$keyItem]);
@@ -733,7 +733,7 @@ class EmployeeController extends FController
 
             if ($model->save()) {
                 if ($model->form_roles) {
-                    $availableRoles = Employee::getAllRoles();
+                    $availableRoles = Employee::getAllRoles(Auth::user());
                     foreach ($model->form_roles as $keyItem => $roleItem) {
                         if (!array_key_exists($roleItem, $availableRoles)) {
                             unset($model->form_roles[$keyItem]);
