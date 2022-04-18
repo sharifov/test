@@ -8,6 +8,8 @@ use common\models\UserGroupAssign;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use modules\shiftSchedule\src\entities\userShiftAssign\UserShiftAssign;
+use yii\db\Query;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class UserShiftAssignListSearch
@@ -31,6 +33,10 @@ class UserShiftAssignListSearch extends Employee
         ];
     }
 
+    /**
+     * @param $params
+     * @return ActiveDataProvider
+     */
     public function search($params): ActiveDataProvider
     {
         $query = Employee::find();
@@ -47,7 +53,28 @@ class UserShiftAssignListSearch extends Employee
             $query->where('0=1');
             return $dataProvider;
         }
+        $this->filterQuery($query);
 
+        return $dataProvider;
+    }
+
+    public function searchIds($params): array
+    {
+        $query = static::find();
+
+        $this->load($params);
+        if (!$this->validate()) {
+            $query->where('0=1');
+            return [];
+        }
+        $query->select('id');
+        $query = $this->filterQuery($query);
+
+        return ArrayHelper::map($query->asArray()->all(), 'id', 'id');
+    }
+
+    private function filterQuery(Query $query): Query
+    {
         if ($this->shiftId) {
             $query->innerJoin(
                 UserShiftAssign::tableName(),
@@ -69,11 +96,9 @@ class UserShiftAssignListSearch extends Employee
                 ['projectId' => $this->projectId]
             );
         }
-
         $query->andFilterWhere([
             'employees.id' => $this->userId,
         ]);
-
-        return $dataProvider;
+        return $query;
     }
 }
