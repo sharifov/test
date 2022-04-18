@@ -8,10 +8,12 @@ use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 
 /**
- * This is the model class for table "email_quote".
+ * This is the model class for table "quote_communication".
  *
  * @property int $qc_id
+ * @property int $qc_uid
  * @property int $qc_communication_type
+ * @property string|null $qc_ext_data
  * @property int $qc_communication_id
  * @property int $qc_quote_id
  * @property string|null $qc_created_dt
@@ -33,7 +35,7 @@ class QuoteCommunication extends ActiveRecord
                 'attributes' => [
                     ActiveRecord::EVENT_BEFORE_INSERT => ['qc_created_dt'],
                 ],
-                'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
+                'value' => date('Y-m-d H:i:s')
             ],
             'user' => [
                 'class' => BlameableBehavior::class,
@@ -57,9 +59,11 @@ class QuoteCommunication extends ActiveRecord
     public function rules()
     {
         return [
-            [['qc_communication_id', 'qc_communication_type', 'qc_quote_id'], 'required'],
+            [['qc_uid', 'qc_communication_id', 'qc_communication_type', 'qc_quote_id'], 'required'],
             [['qc_communication_id', 'qc_communication_type', 'qc_quote_id', 'qc_created_by'], 'integer'],
-            [['qc_created_dt'], 'safe'],
+            [['qc_uid', 'qc_ext_data'], 'string'],
+            [['qc_created_dt', 'qc_ext_data'], 'safe'],
+            ['qc_uid', 'unique', 'targetClass' => self::class, 'message' => 'This uid has already been taken'],
             [['qc_created_by'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['qc_created_by' => 'id']],
             [['qc_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => Quote::class, 'targetAttribute' => ['qc_quote_id' => 'id']],
         ];
@@ -72,8 +76,10 @@ class QuoteCommunication extends ActiveRecord
     {
         return [
             'qc_id' => 'ID',
+            'qc_uid' => 'UID',
             'qc_communication_type' => 'Communication Type',
             'qc_communication_id' => 'Communication ID',
+            'qc_ext_data' => 'Ext Data',
             'qc_quote_id' => 'Quote ID',
             'qc_created_dt' => 'Created Dt',
             'qc_created_by' => 'Created By'
