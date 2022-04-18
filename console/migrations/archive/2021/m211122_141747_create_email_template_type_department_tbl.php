@@ -1,10 +1,10 @@
 <?php
 
-use yii\db\Migration;
 use common\models\EmailTemplateType;
 use common\models\EmailTemplateTypeDepartment;
 use common\models\SmsTemplateType;
 use common\models\SmsTemplateTypeDepartment;
+use yii\db\Migration;
 
 /**
  * Class m211122_141747_create_email_template_type_department_tbl

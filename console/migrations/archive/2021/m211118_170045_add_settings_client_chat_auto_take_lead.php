@@ -4,7 +4,6 @@ use common\models\Lead;
 use common\models\Setting;
 use common\models\SettingCategory;
 use src\model\clientChatChannel\entity\ClientChatChannel;
-use src\model\clientChatChannel\entity\ClientChatChannelDefaultSettings;
 use yii\db\Migration;
 use yii\helpers\Json;
 
