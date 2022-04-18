@@ -24,7 +24,7 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <?php Pjax::begin(['id' => 'pjax-shift', 'scrollTo' => 0]); ?>
-        <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+        <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -41,6 +41,19 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => ShiftCategoryQuery::getList()
             ],
             ['class' => \common\components\grid\BooleanColumn::class, 'attribute' => 'sh_enabled'],
+
+            [
+                'label' => 'Rules',
+                'value' => static function (Shift $model) {
+                    return $model->shiftScheduleRules ? Html::a(
+                        count($model->shiftScheduleRules),
+                        ['shift-schedule-rule-crud/index', 'SearchShiftScheduleRule[ssr_shift_id]' => $model->sh_id],
+                        ['data-pjax' => 0]
+                    )
+                        : '-';
+                },
+                'format' => 'raw'
+            ],
             'sh_color',
             'sh_sort_order',
             [

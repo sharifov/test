@@ -2,6 +2,8 @@
 
 namespace modules\shiftSchedule\src\services;
 
+use Cron\CronExpression;
+use Exception;
 use modules\shiftSchedule\src\entities\shift\Shift;
 use modules\shiftSchedule\src\entities\shiftScheduleRule\ShiftScheduleRule;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
@@ -27,15 +29,13 @@ class UserShiftScheduleService
      */
     public static function getTimelineListByUser(int $userId, string $startDt, string $endDt): array
     {
-        $timelineList = UserShiftSchedule::find()
+        return UserShiftSchedule::find()
             ->where(['uss_user_id' => $userId])
             ->andWhere(['AND',
                 ['>=', 'uss_start_utc_dt', date('Y-m-d H:i:s', strtotime($startDt))],
                 ['<=', 'uss_start_utc_dt', date('Y-m-d H:i:s', strtotime($endDt))]
             ])
             ->all();
-
-        return $timelineList;
     }
 
     /**
@@ -121,7 +121,7 @@ class UserShiftScheduleService
      * @param int $userId
      * @param int $days
      * @return int
-     * @throws \Exception
+     * @throws Exception
      */
     public static function generateExampleDataByUser(int $userId, int $days = 90): int
     {
@@ -165,5 +165,145 @@ class UserShiftScheduleService
             }
         }
         return $cnt;
+    }
+
+    /**
+     * @param int $daysLimit
+     * @param int $daysOffset
+     * @param string|null $dateFrom
+     * @param array $userList
+     * @return array
+     */
+    public static function generateUserSchedule(
+        int $daysLimit = 20,
+        int $daysOffset = 0,
+        ?string $dateFrom = null,
+        array $userList = []
+    ): array {
+        if (empty($dateFrom)) {
+            $dateFrom = date('Y-m-d');
+        }
+
+        $dateFromTs = strtotime($dateFrom);
+
+        $m = (int) date("m", $dateFromTs);
+        $d = (int) date("d", $dateFromTs);
+        $y = (int) date("Y", $dateFromTs);
+
+        //$cnt = 0;
+        $data = [];
+        $rules = ShiftScheduleRule::find()->where(['ssr_enabled' => true])->all();
+
+//        $scheduleData = UserShiftSchedule::find()
+//            ->groupBy(['uss_id', 'uss_ru'])
+//            ->all();
+
+        if ($rules) {
+            for ($i = $daysOffset; $i < ($daysLimit + $daysOffset); $i++) {
+                $dateTs = mktime(0, 0, 0, $m, ($d + $i), $y);
+                $dateTime = date('Y-m-d H:i:s', $dateTs);
+                $date = date('Y-m-d', $dateTs);
+
+                foreach ($rules as $rule) {
+                    $expression = $rule->getCronExpression();
+                    if (empty($expression)) {
+                        continue;
+                    }
+                    //echo 'CRON Expression: ' . $expression . " - ";
+                    $valid = CronExpression::isValidExpression($expression);
+                    if (!$valid) {
+                        $errorData['error'] = 'Invalid CRON Expression';
+                        $errorData['data'] = $rule->attributes;
+                        Yii::warning($errorData, 'UserShiftScheduleService:CronExpression:isValidExpression');
+                        continue;
+                    }
+                    //echo 'Valid CRON Expression: ' . $expression . "\r\n";
+
+                    $isDue = false;
+                    if (self::isDueCronExpression($expression, $dateTime)) {
+                        $isDue = true;
+                        $expressionExclude = $rule->getCronExpressionExclude();
+                        if (
+                            $expressionExclude &&
+                            self::isDueCronExpression($expressionExclude, $dateTime)
+                        ) {
+                            $isDue = false;
+                        }
+                    }
+                    if ($isDue) {
+                        if ($rule->shift && $rule->shift->sh_enabled) {
+                            // echo $rule->shift->sh_id . "\r\n";
+                            if ($rule->shift->userShiftAssigns) {
+                                foreach ($rule->shift->userShiftAssigns as $user) {
+                                    if (!empty($userList)) {
+                                        if (!in_array($user->usa_user_id, $userList)) {
+                                            continue;
+                                        }
+                                    }
+
+                                    $data[$date][$user->usa_user_id][$rule->ssr_id] =
+                                        self::createUserTimeLineByRule($rule, $user->usa_user_id, $date);
+                                    //echo  '['.$date.'] Rule: ' . $rule->ssr_id . ' - shId: ' . $rule->shift->sh_id .
+                                    // ' - user: ' . $user->usa_user_id . "\r\n";
+                                }
+                            }
+                        }
+                        // echo 'Is Due: ' . $rule->ssr_id . "\r\n";
+                        //$cnt++;
+                    }
+                }
+            }
+        }
+        return $data;
+    }
+
+    /**
+     * @param ShiftScheduleRule $rule
+     * @param int $userId
+     * @param string $date
+     * @return bool
+     */
+    public static function createUserTimeLineByRule(ShiftScheduleRule $rule, int $userId, string $date): bool
+    {
+        $tl = new UserShiftSchedule();
+        $tl->uss_user_id = $userId;
+        $tl->uss_sst_id = $rule->ssr_sst_id;
+        $tl->uss_type_id = UserShiftSchedule::TYPE_AUTO;
+
+        $timeStart = strtotime($date . ' ' . $rule->ssr_start_time_utc);
+        $timeEnd = strtotime($date . ' ' . $rule->ssr_end_time_utc);
+
+        $tl->uss_start_utc_dt = date('Y-m-d H:i:s', $timeStart);
+        $tl->uss_end_utc_dt = date('Y-m-d H:i:s', $timeEnd);
+        //$duration = (strtotime($tl->uss_end_utc_dt) - strtotime($tl->uss_end_utc_dt)) / 60;
+        $tl->uss_duration = $rule->ssr_duration_time; //$duration;
+        $tl->uss_ssr_id = $rule->ssr_id;
+        $tl->uss_shift_id = $rule->ssr_shift_id;
+        $tl->uss_status_id = UserShiftSchedule::STATUS_DONE;
+        $tl->uss_customized = true;
+        $tl->uss_description = 'CRON';
+        if (!$tl->save()) {
+            $errorData['errors'] = $tl->errors;
+            $errorData['data'] = $tl->attributes;
+            Yii::warning($errorData, 'UserShiftScheduleService:createUserTimeLineByRule:save');
+            return false;
+        }
+        return true;
+    }
+
+
+
+    /**
+     * @param mixed|null $expression
+     * @param string $currentTime
+     * @return bool
+     */
+    public static function isDueCronExpression(?string $expression, string $currentTime = 'now'): bool
+    {
+        if ($expression === null) {
+            return false;
+        }
+        $cron = CronExpression::factory($expression);
+        return $cron->isDue($currentTime);
     }
 }

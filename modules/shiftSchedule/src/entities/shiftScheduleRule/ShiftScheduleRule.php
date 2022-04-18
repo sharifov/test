@@ -212,4 +212,23 @@ class ShiftScheduleRule extends ActiveRecord
     {
         return $this->scheduleType ? $this->scheduleType->sst_title : '-';
     }
+
+    /**
+     * @return string|null
+     */
+    public function getCronExpression(): ?string
+    {
+        return empty($this->ssr_cron_expression) ? null :
+            self::CRON_EXPRESSION_MINUTES . ' ' . self::CRON_EXPRESSION_HOURS . ' ' . $this->ssr_cron_expression;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getCronExpressionExclude(): ?string
+    {
+        return empty($this->ssr_cron_expression_exclude) ? null :
+            (self::CRON_EXPRESSION_MINUTES . ' ' . self::CRON_EXPRESSION_HOURS . ' '
+            . $this->ssr_cron_expression_exclude);
+    }
 }

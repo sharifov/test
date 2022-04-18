@@ -941,4 +941,13 @@ class SettingHelper
             'forAdmin' => true,
         ], 'SettingsHelper:leadRedialExcludeAttributesErrorLog');
     }
+
+    public static function getShiftSchedule(): array
+    {
+        return Yii::$app->params['settings']['shift_schedule'] ?? [
+                'enabled'                => false,
+                'days_limit'              => 20,
+                'days_offset'             => 0
+            ];
+    }
 }
