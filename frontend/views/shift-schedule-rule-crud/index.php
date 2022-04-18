@@ -33,16 +33,23 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            'ssr_id',
+            ['attribute' => 'ssr_id', 'options' => [
+                'style' => 'width: 80px'
+            ]],
             [
                 'attribute' => 'ssr_shift_id',
                 'value' => static function (ShiftScheduleRule $model) {
-                    return $model->shift->sh_name;
+                    return $model->shift ? Html::a(
+                        $model->shift->sh_name,
+                        ['shift-schedule-rule-crud/view', 'id' => $model->shift->sh_id],
+                        ['data-pjax' => 0]
+                    ) : '-';
                 },
                 'filter' => ShiftSelectWidget::widget(['model' => $searchModel, 'attribute' => 'ssr_shift_id']),
                 'options' => [
-                    'style' => 'width: 100px'
-                ]
+                    'style' => 'width: 120px'
+                ],
+                'format' => 'raw'
             ],
             [
                 'attribute' => 'ssr_sst_id',

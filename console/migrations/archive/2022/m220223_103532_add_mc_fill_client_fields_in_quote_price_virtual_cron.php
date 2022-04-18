@@ -1,8 +1,8 @@
 <?php
 
-use yii\db\Migration;
 use kivork\VirtualCron\Models\CronScheduler;
 use kivork\VirtualCron\Services\Hasher;
+use yii\db\Migration;
 
 /**
  * Class m220223_103532_add_mc_fill_client_fields_in_quote_price_virtual_cron

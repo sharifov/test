@@ -148,5 +148,6 @@ class ShiftScheduleForm extends Model
         $this->ssr_duration_time = 60;
         $this->ssr_title = 'Schedule Rule ';
         $this->ssr_enabled = true;
+        $this->ssr_cron_expression_exclude = '';
     }
 }

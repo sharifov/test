@@ -24,7 +24,7 @@ use yii\db\BaseActiveRecord;
  * @property int|null $uss_duration
  * @property int $uss_status_id
  * @property int $uss_type_id
- * @property int|null $uss_customized
+ * @property bool|null $uss_customized
  * @property string|null $uss_created_dt
  * @property string|null $uss_updated_dt
  * @property int|null $uss_created_user_id
@@ -59,8 +59,8 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
         self::STATUS_DELETED => 'Deleted',
     ];
 
-    private const TYPE_AUTO = 1;
-    private const TYPE_MANUAL = 2;
+    public const TYPE_AUTO = 1;
+    public const TYPE_MANUAL = 2;
 
     private const TYPE_LIST = [
         self::TYPE_AUTO => 'Auto',
@@ -111,7 +111,7 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
             ['uss_start_utc_dt', 'safe'],
             ['uss_end_utc_dt', 'safe'],
 
-            ['uss_customized', 'integer', 'max' => 1, 'min' => 0, 'skipOnEmpty' => true],
+            ['uss_customized', 'boolean', 'skipOnEmpty' => true],
             ['uss_duration', 'integer', 'max' => self::MAX_VALUE_INT],
 
             ['uss_status_id', 'required'],
