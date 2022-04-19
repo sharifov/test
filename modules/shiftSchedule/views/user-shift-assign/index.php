@@ -1,5 +1,6 @@
 <?php
 
+use common\models\query\EmployeeQuery;
 use yii\helpers\Url;
 use yii\grid\CheckboxColumn;
 use common\components\grid\Select2Column;
@@ -50,27 +51,17 @@ $pjaxContainerId = 'pjax-user-shift-assign';
                 'cssClass' => 'multiple-checkbox'
             ],
             [
-                'attribute' => 'id',
-                'contentOptions' => ['class' => 'text-left'],
-            ],
-            [
-                'label' => '',
-                'format' => 'raw',
-                'value' => static function (Employee $model) {
-                    $gravUrl = $model->getGravatarUrl(25);
-                    return \yii\helpers\Html::img($gravUrl, ['class' => 'img-circle img-thumbnail']);
-                },
-                'options' => ['width' => '50px'],
-            ],
-            [
                 'label' => 'User',
                 'class' => Select2Column::class,
+
                 'attribute' => 'userId',
                 'format' => 'raw',
                 'value' => static function (Employee $model) {
-                    return '<span style="white-space: nowrap;"><i class="fa fa-user"></i> ' . Html::encode($model->username) . '</span>';
+                    return '<span style="white-space: nowrap;"><i class="fa fa-user"></i> ' .
+                        Html::encode($model->username) . ' (' . $model->id . ')' .
+                    '</span>';
                 },
-                'data' => $listsAccess->getEmployees() ?: [],
+                'data' => EmployeeQuery::getList(\src\auth\Auth::id()) ?: [],
                 'filter' => true,
                 'id' => 'employee-filter',
                 'options' => ['min-width' => '280px'],
@@ -111,6 +102,21 @@ $pjaxContainerId = 'pjax-user-shift-assign';
                 'options' => ['min-width' => '320px'],
                 'pluginOptions' => ['allowClear' => true],
                 'format' => 'raw',
+            ],
+            [
+                'attribute' => 'role',
+                'label' => 'Role',
+                'value' => static function (Employee $model) {
+                    $items = $model->getRoles();
+                    $itemsData = [];
+                    foreach ($items as $item) {
+                        $itemsData[] = Html::tag('span', Html::encode($item), ['class' => 'label bg-light text-dark']);
+                    }
+                    return implode(' ', $itemsData);
+                },
+                'format' => 'raw',
+                'filter' => \common\models\Employee::getAllRoles(),
+                'contentOptions' => ['style' => 'width: 10%; white-space: pre-wrap']
             ],
             [
                 'label' => 'Project',
@@ -274,7 +280,7 @@ $script = <<< JS
             notifyAlert('Please select items', 'error');
             return false; 
         }
-        
+
         let data = jQuery.parseJSON(sessionStorage.getItem(storageName));
         let cnt = Object.keys(data).length;
     

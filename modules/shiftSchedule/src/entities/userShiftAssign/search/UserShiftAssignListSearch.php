@@ -20,16 +20,13 @@ class UserShiftAssignListSearch extends Employee
     public $shiftId;
     public $userGroupId;
     public $projectId;
+    public $role;
 
     public function rules(): array
     {
         return [
-            [
-                [
-                    'shiftId', 'userId', 'userGroupId', 'projectId',
-                ],
-                'integer',
-            ],
+            [['shiftId', 'userId', 'userGroupId', 'projectId'], 'integer'],
+            [['role'], 'string'],
         ];
     }
 
@@ -95,6 +92,9 @@ class UserShiftAssignListSearch extends Employee
                 'employee_id = employees.id AND project_id = :projectId',
                 ['projectId' => $this->projectId]
             );
+        }
+        if ($this->role) {
+            $query->andWhere(['IN', 'employees.id', array_keys(Employee::getListByRole($this->role))]);
         }
         $query->andFilterWhere([
             'employees.id' => $this->userId,
