@@ -35,6 +35,10 @@ class ClientChatSurvey extends ActiveRecord
     const TYPE_STICKY = 'sticky';
     const TYPE_QUESTIONS = 'questions';
 
+    const TRIGGER_SOURCE_AGENT = 'agent';
+    const TRIGGER_SOURCE_CHAT_CLOSE = 'chat-close';
+    const TRIGGER_SOURCE_BOT = 'bot';
+
     const STATUS_LIST = [
         self::STATUS_PENDING => 'PENDING',
         self::STATUS_SUBMITTED => 'SUBMITTED',
@@ -47,6 +51,20 @@ class ClientChatSurvey extends ActiveRecord
         self::TYPE_STICKY => 'STICKY',
         self::TYPE_QUESTIONS => 'QUESTIONS'
     ];
+
+    const TRIGGER_SOURCE_LIST = [
+        self::TRIGGER_SOURCE_AGENT => 'Agent',
+        self::TRIGGER_SOURCE_CHAT_CLOSE => 'Chat closing',
+        self::TRIGGER_SOURCE_BOT => 'Bot'
+    ];
+
+    /**
+     * @return string
+     */
+    public static function tableName()
+    {
+        return '{{%client_chat_survey}}';
+    }
 
     /**
      * @param int $id
@@ -67,13 +85,13 @@ class ClientChatSurvey extends ActiveRecord
     }
 
     /**
+     * @param string $identity
      * @return string
      */
-    public static function tableName()
+    public static function triggerSourceName(string $identity): string
     {
-        return '{{%client_chat_survey}}';
+        return self::TRIGGER_SOURCE_LIST[$identity];
     }
-
 
     /**
      * @return array
