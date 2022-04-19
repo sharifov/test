@@ -37,7 +37,7 @@ class ShiftScheduleController extends FController
                 'rules' => [
                     /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_ACCESS, Access to page shift-schedule/index */
                     [
-                        'actions' => ['index', 'my-data-ajax', 'generate-example', 'remove-user-data', 'get-event', 'generate-user-schedule'],
+                        'actions' => ['index', 'my-data-ajax', 'generate-example', 'remove-user-data', 'get-event', 'generate-user-schedule', 'legend-ajax'],
                         'allow' => \Yii::$app->abac->can(null, ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_ACCESS),
                         'roles' => ['@'],
                     ],
@@ -129,6 +129,21 @@ class ShiftScheduleController extends FController
 
         $timelineList = UserShiftScheduleService::getTimelineListByUser($userId, $startDt, $endDt);
         return UserShiftScheduleService::getCalendarTimelineJsonData($timelineList);
+    }
+
+    /**
+     * @return array
+     */
+    public function actionLegendAjax()
+    {
+        //\Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $scheduleTypes = ShiftScheduleType::find()->where(['sst_enabled' => true])->all();
+
+
+        return $this->renderPartial('partial/_legend', [
+            'scheduleTypes' => $scheduleTypes,
+        ]);
     }
 
 
