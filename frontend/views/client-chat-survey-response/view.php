@@ -35,6 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'model' => $model,
             'attributes' => [
                 'ccsr_id',
+                'ccsr_created_dt:datetime',
                 [
                     'attribute' => 'ccsr_client_chat_survey_id',
                     'value' => function (ClientChatSurveyResponse $model) {

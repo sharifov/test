@@ -1,14 +1,15 @@
 <?php
 
 use yii\helpers\Html;
+use yii\helpers\Url;
 use yii\widgets\DetailView;
 use yii\grid\GridView;
 use yii\grid\ActionColumn;
-use yii\helpers\Url;
+use yii\data\ActiveDataProvider;
+use common\components\grid\DateTimeColumn;
 use common\models\ClientChatSurvey;
 use common\models\ClientChatSurveyResponse;
 use common\models\search\ClientChatSurveyResponseSearch;
-use yii\data\ActiveDataProvider;
 
 /**
  * @var $this yii\web\View
@@ -87,6 +88,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 'ccsr_id',
                 'ccsr_question',
                 'ccsr_response',
+                [
+                    'class' => DateTimeColumn::class,
+                    'attribute' => 'ccsr_created_dt',
+                    'options' => [
+                        'width' => '200px'
+                    ],
+                ],
                 [
                     'class' => ActionColumn::class,
                     'urlCreator' => static function ($action, ClientChatSurveyResponse $model, $key, $index, $column): string {
