@@ -9,6 +9,7 @@ use modules\shiftSchedule\src\entities\shiftScheduleRule\ShiftScheduleRule;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use Yii;
+use yii\helpers\VarDumper;
 
 class UserShiftScheduleService
 {
@@ -85,9 +86,9 @@ class UserShiftScheduleService
                 $dataItem = [
                     'id' => $item->uss_id,
                     //groupId: '999',
-                    'title' => $item->getScheduleTypeKey() . '-' . $item->uss_id,
+                    'title' => $item->getScheduleTypeKey(), // . '-' . $item->uss_id,
                         //. ' - ' . date('d H:i', strtotime($item->uss_start_utc_dt)),
-                    'description' => $item->getScheduleTypeTitle() . "\r\n" . ', duration: ' .
+                    'description' => $item->getScheduleTypeTitle() . "\r\n" . '(' . $item->uss_id . ')' . ', duration: ' .
                         Yii::$app->formatter->asDuration($item->uss_duration * 60),
                     //. "\r\n" . $item->uss_description,
                     'start' => date('c', strtotime($item->uss_start_utc_dt)),
@@ -194,9 +195,31 @@ class UserShiftScheduleService
         $data = [];
         $rules = ShiftScheduleRule::find()->where(['ssr_enabled' => true])->all();
 
-//        $scheduleData = UserShiftSchedule::find()
-//            ->groupBy(['uss_id', 'uss_ru'])
-//            ->all();
+
+        $minDate = date('Y-m-d H:i:s', mktime(0, 0, 0, $m, ($d + $daysOffset), $y));
+        $maxDate = date('Y-m-d H:i:s', mktime(0, 0, 0, $m, ($d + $daysLimit + $daysOffset), $y));
+
+        $scheduleData = UserShiftSchedule::find()
+            ->select(['uss_user_id', 'uss_ssr_id', 'uss_start_utc_dt'])
+            ->andWhere(['AND',
+                ['>=', 'uss_start_utc_dt', $minDate],
+                ['<=', 'uss_start_utc_dt', $maxDate]
+            ])
+            ->groupBy(['uss_user_id', 'uss_ssr_id', 'uss_start_utc_dt'])
+            ->asArray()
+            ->all();
+
+        $timeLineData = [];
+
+        if ($scheduleData) {
+            foreach ($scheduleData as $item) {
+                $timeLineData[$item['uss_user_id']][$item['uss_ssr_id']][$item['uss_start_utc_dt']] = true;
+            }
+        }
+
+
+//        VarDumper::dump($timeLineData, 10, true); exit;
+
 
         if ($rules) {
             for ($i = $daysOffset; $i < ($daysLimit + $daysOffset); $i++) {
@@ -239,6 +262,14 @@ class UserShiftScheduleService
                                         if (!in_array($user->usa_user_id, $userList)) {
                                             continue;
                                         }
+                                    }
+
+                                    $timeStart = date(
+                                        'Y-m-d H:i:s',
+                                        strtotime($date . ' ' . $rule->ssr_start_time_utc)
+                                    );
+                                    if (isset($timeLineData[$user->usa_user_id][$rule->ssr_id][$timeStart])) {
+                                        continue;
                                     }
 
                                     $data[$date][$user->usa_user_id][$rule->ssr_id] =

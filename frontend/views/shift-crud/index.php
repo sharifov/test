@@ -30,8 +30,17 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            'sh_id',
-            'sh_name',
+            ['attribute' => 'sh_id', 'options' => [
+                'style' => 'width: 80px'
+            ]],
+            //'sh_name',
+            [
+                'attribute' => 'sh_name',
+                'value' => static function (Shift $model) {
+                    return $model->getColorLabel() . ' ' . Html::encode($model->sh_name);
+                },
+                'format' => 'raw'
+            ],
             'sh_title',
             [
                 'attribute' => 'sh_category_id',
@@ -40,7 +49,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'filter' => ShiftCategoryQuery::getList()
             ],
-            ['class' => \common\components\grid\BooleanColumn::class, 'attribute' => 'sh_enabled'],
+
 
             [
                 'label' => 'Rules',
@@ -54,6 +63,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw'
             ],
+
+            ['class' => \common\components\grid\BooleanColumn::class, 'attribute' => 'sh_enabled'],
             'sh_color',
             'sh_sort_order',
             [

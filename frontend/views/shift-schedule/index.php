@@ -51,14 +51,20 @@ $scheduleTotalData = [];
                 ['class' => 'btn btn-success']
             ) ?>
 
-            <?= Html::a('<i class="fa fa-remove"></i> Remove User Data', ['remove-user-data'], [
+            <?= Html::a('<i class="fa fa-remove"></i> Remove All User Schedule Data', ['remove-user-data'], [
             'class' => 'btn btn-danger',
             'data' => [
             'confirm' => 'Are you sure you want to delete all User Timelines?',
             'method' => 'post',
             ],
-    ]) ?>
+            ]) ?>
         <?php endif; ?>
+        <?= Html::a(
+            '<i class="fa fa-info-circle"></i> Legend',
+            ['legend-ajax'],
+            ['class' => 'btn btn-info', 'id' => 'btn-legend']
+        ) ?>
+
     </p>
 
     <div class="row">
@@ -129,8 +135,7 @@ $scheduleTotalData = [];
                             }?>
                             <tr>
                                 <th title="<?= Html::encode($assignShift->shift->sh_title)?>">
-                                    <i class="fa fa-circle" <?= $assignShift->shift->sh_color ? 'style="color: ' .
-                                        Html::encode($assignShift->shift->sh_color) . '"' : ''?>></i> &nbsp;
+                                    <?= $assignShift->shift->getColorLabel(); ?>&nbsp; &nbsp;
                                     <?= Html::encode($assignShift->shift->sh_name)?>
                                 </th>
                                 <td>
@@ -675,6 +680,23 @@ $js = <<<JS
             }
         });
     }
+    
+    
+    $(document).on('click', '#btn-legend', function(e) {
+        e.preventDefault();
+        let modal = $('#modal-md');
+        let url = $(this).attr('href');
+        $('#modal-md-label').html('<i class="fa fa-info-circle"></i> Schedule Legend');
+        modal.find('.modal-body').html('');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            if (status === 'error') {
+                alert(response);
+            } else {
+                modal.modal('show');
+            }   
+        });
+    });
+    
 
     function updateTimeLineList(startDate, endDate) 
     {

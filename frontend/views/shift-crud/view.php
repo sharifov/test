@@ -33,7 +33,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'model' => $model,
             'attributes' => [
                 'sh_id',
-                'sh_name',
+                [
+                    'attribute' => 'sh_name',
+                    'value' => static function (Shift $model) {
+                        return $model->getColorLabel() . ' ' . Html::encode($model->sh_name);
+                    },
+                    'format' => 'raw'
+                ],
                 'sh_title',
                 [
                     'attribute' => 'sh_category_id',
