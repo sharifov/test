@@ -10,7 +10,7 @@ use src\repositories\lead\LeadRepository;
 use src\repositories\lead\LeadSegmentRepository;
 use src\services\ServiceFinder;
 use src\services\TransactionManager;
-use src\services\lead\LeadPreferencesCloneService as LPCloneService;
+use src\services\lead\LeadPreferencesCloneService;
 
 
 /**
@@ -37,7 +37,7 @@ class LeadCloneService
         TransactionManager $transactionManager,
         EventDispatcher $eventDispatcher,
         ServiceFinder $serviceFinder,
-        LPCloneService $leadPreferencesCloneService
+        LeadPreferencesCloneService $leadPreferencesCloneService
 
     ) {
         $this->leadRepository = $leadRepository;
@@ -60,16 +60,15 @@ class LeadCloneService
     {
         $lead = $this->serviceFinder->leadFind($lead);
 
-        $clone = $this->transactionManager->wrap(function () use ($lead, $ownerId, $creatorId, $reason) {
+        return $this->transactionManager->wrap(function () use ($lead, $ownerId, $creatorId, $reason) {
 
             $ownerOfOriginalLead = $lead->employee_id;
             
             $clone = $lead->createClone($reason);
             $clone->processing($ownerId, $creatorId, $reason);
-
             $this->leadRepository->save($clone);
 
-            $this->leadPreferencesCloneService->cloneLeadPreferences($lead->id, $clone->id);
+            $this->leadPreferencesCloneService->cloneLeadPreferenceCurrency($lead->id, $clone->id);
             $this->eventDispatcher->dispatchAll([new LeadCreatedCloneByUserEvent($clone, $ownerId, $ownerOfOriginalLead)]);
 
             foreach ($lead->leadFlightSegments as $segment) {
@@ -81,7 +80,5 @@ class LeadCloneService
 
             return $clone;
         });
-
-        return $clone;
     }
 }
