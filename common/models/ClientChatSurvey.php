@@ -26,6 +26,33 @@ use yii\db\ActiveRecord;
  */
 class ClientChatSurvey extends ActiveRecord
 {
+    const STATUS_PENDING = 1;
+    const STATUS_SUBMITTED = 2;
+    const STATUS_REJECT = 3;
+
+    const STATUS_LIST = [
+        self::STATUS_PENDING => 'PENDING',
+        self::STATUS_SUBMITTED => 'SUBMITTED',
+        self::STATUS_REJECT => 'REJECT'
+    ];
+
+    /**
+     * @return array
+     */
+    public static function statusList(): array
+    {
+        return self::STATUS_LIST;
+    }
+
+    /**
+     * @param int $id
+     * @return string
+     */
+    public static function statusName(int $id): string
+    {
+        return self::STATUS_LIST[$id];
+    }
+
     /**
      * @return string
      */
