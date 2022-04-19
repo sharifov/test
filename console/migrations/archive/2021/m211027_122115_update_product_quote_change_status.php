@@ -1,7 +1,6 @@
 <?php
 
 use common\models\Setting;
-use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use yii\db\Migration;
 

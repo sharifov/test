@@ -482,9 +482,14 @@ class CasesSearch extends Cases
         if ($this->saleTicketSendEmailDate) {
             $emails = SettingHelper::getCaseSaleTicketMainEmailList();
             $this->saleTicketSendEmailDate = date('Y-m-d', strtotime($this->saleTicketSendEmailDate));
-            $query->innerJoin(Email::tableName(), new Expression('cs_id = e_case_id'))
-                ->andWhere(['e_email_to' => $emails, 'date_format(e_created_dt, "%Y-%m-%d")' => $this->saleTicketSendEmailDate])
-                ->groupBy('cs_id');
+
+            $query->innerJoin([
+                'emailQuery' => Email::find()
+                    ->select(['e_case_id'])
+                    ->andWhere(['e_email_to' => $emails])
+                    ->andWhere(['DATE(e_created_dt)' => $this->saleTicketSendEmailDate])
+                    ->groupBy(['e_case_id'])
+            ], 'emailQuery.e_case_id = cs_id');
 
             if ($params['export_type']) {
                 $query->addSelect(['cases.*', 'css_sale_id as cssSaleId', 'css_sale_book_id as cssBookId', 'css_sale_pnr as salePNR', 'css_send_email_dt as saleTicketSendEmailDate', 'username as sentEmailBy', 'ug_name as userGroup'])
@@ -713,7 +718,7 @@ class CasesSearch extends Cases
                 'csl_status_dt',
                 $fromDate, $toDate
             ]);
-        };
+        }
 
         if ($this->nextFlight) {
             $query->andWhere(['=','DATE(if(last_out_date IS NULL, last_in_date, IF(last_in_date is NULL, last_out_date, LEAST(last_in_date, last_out_date))))', $this->nextFlight]);
@@ -853,9 +858,14 @@ class CasesSearch extends Cases
         if ($this->saleTicketSendEmailDate) {
             $emails = SettingHelper::getCaseSaleTicketMainEmailList();
             $this->saleTicketSendEmailDate = date('Y-m-d', strtotime($this->saleTicketSendEmailDate));
-            $query->innerJoin(Email::tableName(), new Expression('cs_id = e_case_id'))
-                ->andWhere(['e_email_to' => $emails, 'date_format(e_created_dt, "%Y-%m-%d")' => $this->saleTicketSendEmailDate])
-                ->groupBy('cs_id');
+
+            $query->innerJoin([
+                'emailQuery' => Email::find()
+                    ->select(['e_case_id'])
+                    ->andWhere(['e_email_to' => $emails])
+                    ->andWhere(['DATE(e_created_dt)' => $this->saleTicketSendEmailDate])
+                    ->groupBy(['e_case_id'])
+            ], 'emailQuery.e_case_id = cs_id');
 
             if ($params['export_type']) {
                 $query->addSelect(['cases.*', 'css_sale_id as cssSaleId', 'css_sale_book_id as cssBookId', 'css_sale_pnr as salePNR', 'css_send_email_dt as saleTicketSendEmailDate', 'username as sentEmailBy', 'ug_name as userGroup'])

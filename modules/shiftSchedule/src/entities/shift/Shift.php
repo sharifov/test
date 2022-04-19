@@ -11,7 +11,9 @@ use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\db\BaseActiveRecord;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
 
 /**
  * This is the model class for table "shift".
@@ -45,16 +47,16 @@ class Shift extends ActiveRecord
             'timestamp' => [
                 'class' => TimestampBehavior::class,
                 'attributes' => [
-                    ActiveRecord::EVENT_BEFORE_INSERT => ['sh_created_dt', 'sh_updated_dt'],
-                    ActiveRecord::EVENT_BEFORE_UPDATE => ['sh_updated_dt'],
+                    BaseActiveRecord::EVENT_BEFORE_INSERT => ['sh_created_dt', 'sh_updated_dt'],
+                    BaseActiveRecord::EVENT_BEFORE_UPDATE => ['sh_updated_dt'],
                 ],
                 'value' => date('Y-m-d H:i:s'),
             ],
             'user' => [
                 'class' => BlameableBehavior::class,
                 'attributes' => [
-                    ActiveRecord::EVENT_BEFORE_INSERT => ['sh_created_user_id'],
-                    ActiveRecord::EVENT_BEFORE_UPDATE => ['sh_updated_user_id'],
+                    BaseActiveRecord::EVENT_BEFORE_INSERT => ['sh_created_user_id'],
+                    BaseActiveRecord::EVENT_BEFORE_UPDATE => ['sh_updated_user_id'],
                 ],
                 'defaultValue' => null,
             ],
@@ -83,7 +85,8 @@ class Shift extends ActiveRecord
             ['sh_updated_user_id', 'integer', 'max' => self::MAX_VALUE_INT],
 
             ['sh_category_id', 'integer', 'max' => self::MAX_VALUE_INT],
-            [['sh_category_id'], 'exist', 'skipOnError' => true, 'targetClass' => ShiftCategory::class, 'targetAttribute' => ['sh_category_id' => 'sc_id']],
+            [['sh_category_id'], 'exist', 'skipOnError' => true,
+                'targetClass' => ShiftCategory::class, 'targetAttribute' => ['sh_category_id' => 'sc_id']],
         ];
     }
 
@@ -152,5 +155,17 @@ class Shift extends ActiveRecord
         }
         $data = $query->asArray()->all();
         return ArrayHelper::map($data, 'sh_id', 'sh_name');
+    }
+
+    /**
+     * @return string
+     */
+    public function getColorLabel(): string
+    {
+        return Html::tag(
+            'i',
+            '',
+            ['class' => 'fa fa-circle', 'style' => ($this->sh_color ? 'color: ' . $this->sh_color : 'color: #EAEAEA')]
+        );
     }
 }

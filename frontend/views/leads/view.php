@@ -556,7 +556,27 @@ $isAgent = Auth::user()->isAgent();
         </div>
     </div>
 
-
+    <div class="row">
+        <div class="col-md-3">
+            <h3>Lead Preferences:</h3>
+            <?php if ($model->leadPreferences) : ?>
+                <?php echo DetailView::widget([
+                    'model' => $model->leadPreferences,
+                    'attributes' => [
+                        'pref_currency',
+                        'notes',
+                        'pref_language',
+                        'pref_airline',
+                        'number_stops',
+                        'clients_budget',
+                        'market_price',
+                    ],
+                ]) ?>
+            <?php else : ?>
+                <?php echo Yii::$app->formatter->nullDisplay ?>
+            <?php endif ?>
+        </div>
+    </div>
 </div>
 
 

@@ -68,6 +68,10 @@ class QuotePriceCreateService
 
     public static function createFromApi(Quote $quote, array $quotePriceAttributes, ?string $currencyCode): QuotePrice
     {
+        $quotePrice = new QuotePrice();
+        $quotePrice->passenger_type = $quotePriceAttributes['passenger_type'] ?? null;
+        $quotePrice->uid = $quotePriceAttributes['uid'] ?? null;
+
         if ($currencyCode === null) {
             $fare = $quotePriceAttributes['fare'] ?? null;
             $taxes = $quotePriceAttributes['taxes'] ?? null;
@@ -114,8 +118,6 @@ class QuotePriceCreateService
             $selling = CurrencyHelper::convertToBaseCurrency($clientSelling, $currencyRate);
         }
 
-        $quotePrice = new QuotePrice();
-        $quotePrice->passenger_type = $quotePriceAttributes['passenger_type'] ?? null;
         $quotePrice->quote_id = $quote->id;
 
         $quotePrice->fare = CurrencyHelper::roundUp($fare);

@@ -1,7 +1,7 @@
 <?php
 
-use yii\db\Migration;
 use src\model\leadDataKey\services\LeadDataKeyDictionary;
+use yii\db\Migration;
 
 /**
  * Class m220211_145141_add_lead_data_key_lpp_exclude

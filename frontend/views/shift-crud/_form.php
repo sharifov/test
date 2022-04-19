@@ -25,9 +25,13 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'sh_enabled')->checkbox() ?>
 
-        <?= $form->field($model, 'sh_color')->textInput(['maxlength' => true]) ?>
+        <div class="col-md-6">
+            <?= $form->field($model, 'sh_color')->input('color') ?>
+        </div>
 
-        <?= $form->field($model, 'sh_sort_order')->input('number') ?>
+        <div class="col-md-6">
+            <?= $form->field($model, 'sh_sort_order')->input('number') ?>
+        </div>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
