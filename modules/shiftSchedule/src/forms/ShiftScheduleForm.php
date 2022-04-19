@@ -51,6 +51,7 @@ class ShiftScheduleForm extends Model
     public function rules(): array
     {
         return [
+            [['ssr_sst_id', 'ssr_duration_time', 'ssr_cron_expression'], 'required'],
             ['ssr_cron_expression', 'string', 'max' => 100],
             ['ssr_cron_expression_exclude', 'string', 'max' => 100],
 

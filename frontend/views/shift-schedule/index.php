@@ -147,7 +147,7 @@ $scheduleTotalData = [];
                                                     continue;
                                                 }?>
 
-                                                <div class="col-md-1"><?= $rule->scheduleType->getColorLabel()?></div>
+                                                <div class="col-md-1"><?= ($rule->scheduleType ? $rule->scheduleType->getColorLabel() : '') ?></div>
                                                 <div class="col-md-5 text-left" title="Expression: <?= Html::encode($rule->getCronExpression())?>, Exclude: <?= Html::encode($rule->getCronExpressionExclude())?>">
                                                     <?= Html::encode($rule->getScheduleTypeTitle())?>
                                                 </div>
