@@ -20,7 +20,7 @@ class m220419_042957_create_client_chat_survey_response_table extends Migration
             '[[ccsr_created_dt]]' => $this->timestamp()
         ]);
 
-        $this->addForeignKey('FK-client_chat_survey_response-ccsr_client_chat_survey_id', '{{%client_chat_survey_response}}', '[[ccsr_client_chat_survey_id]]', '{{%client_chat_survey}}', '[[ccs_id]]');
+        $this->addForeignKey('FK-client_chat_survey_response-ccsr_client_chat_survey_id', '{{%client_chat_survey_response}}', '[[ccsr_client_chat_survey_id]]', '{{%client_chat_survey}}', '[[ccs_id]]', 'CASCADE', 'CASCADE');
     }
 
     /**
