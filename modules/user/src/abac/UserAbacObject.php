@@ -123,6 +123,14 @@ class UserAbacObject extends AbacBaseModel implements AbacInterface
             'up_show_in_contact_list' => 'Show in contact list',
             'up_call_recording_disabled' => 'Call recording disabled',
             'user_shift_assigns' => 'User shift assigns',
+            'up_inbox_show_limit_leads' => 'Inbox show limit leads',
+            'up_default_take_limit_leads' => 'Default take limit leads',
+            'up_min_percent_for_take_leads' => 'Min percent for take leads',
+            'up_frequency_minutes' => 'Take Frequency minutes',
+            'up_call_expert_limit' => 'Call expert limit',
+            'up_call_user_level' => 'Call priority level',
+            'acl_rules_activated' => 'Acl rules activated',
+
         ];
 
         $attrFieldsList['values'] = $formFields;

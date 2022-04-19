@@ -1402,6 +1402,16 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             ->orderBy(['ug_name' => SORT_ASC]);
     }
 
+    public function isUserGroupIntersection(array $groups): bool
+    {
+        foreach ($this->getUserGroupList() as $grId => $grName) {
+            if (in_array($grId, $groups, true)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * @return array
      */

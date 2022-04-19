@@ -1,578 +1,460 @@
 <?php
 
-use common\models\Employee;
 use common\models\EmployeeAcl;
-use common\models\UserParams;
 use common\models\UserProductType;
 use common\models\UserProjectParams;
 use frontend\models\UserFailedLogin;
 use kartik\select2\Select2;
-use modules\shiftSchedule\src\abac\ShiftAbacObject;
-use modules\shiftSchedule\src\entities\shift\Shift;
-use modules\user\src\abac\dto\UserAbacDto;
-use modules\user\src\abac\UserAbacObject;
-use src\access\EmployeeProjectAccess;
+use modules\user\src\update\UpdateForm;
 use src\auth\Auth;
-use src\model\clientChatChannel\entity\ClientChatChannel;
 use yii\bootstrap\ActiveForm;
 use yii\bootstrap\Html;
 use yii\grid\ActionColumn;
 use yii\helpers\Url;
 
-/**
- * @var $this \yii\web\View
- * @var $modelUserParams UserParams
- * @var $modelProfile \common\models\UserProfile
- */
-/* @var $searchModel common\models\search\UserProjectParamsSearch */
-/* @var $dataProvider yii\data\ActiveDataProvider */
-/* @var $dataUserProductType yii\data\ActiveDataProvider */
-/* @var $model common\models\Employee */
+/* @var $this \yii\web\View */
+/* @var $userProjectParamsDataProvider yii\data\ActiveDataProvider */
+/* @var $dataUserProductTypeDataProvider yii\data\ActiveDataProvider */
+/* @var $form UpdateForm */
 /* @var $userVoiceMailProvider \yii\data\ActiveDataProvider */
-/* @var UserFailedLogin[] $lastFailedLoginAttempts */
+/* @var $dataLastFailedLoginDataProvider \yii\data\ActiveDataProvider */
 
-$data = [];
-$dataProjects = [];
-
-/** @var Employee $user */
-$user = Yii::$app->user->identity;
-
-if ($model->isNewRecord) {
-    $this->title = 'Create new User';
-} else {
-    $this->title = 'Update user: ' . $model->username . ' (ID:  ' . $model->id . ')';
-}
+$this->title = 'Update user: ' . $form->targetUser->username . ' (ID:  ' . $form->targetUser->id . ')';
 
 $this->params['breadcrumbs'][] = ['label' => 'User List', 'url' => ['list']];
 $this->params['breadcrumbs'][] = $this->title;
 
-$projectList = EmployeeProjectAccess::getProjects($user->id);
-
 ?>
 
-<div class="col-sm-5">
-    <?php $form = ActiveForm::begin([
-        'successCssClass' => '',
-        'id' => sprintf('%s-ID', $model->formName()),
-        'enableClientValidation' => false,
-        'enableAjaxValidation' => true,
-        'validateOnChange' => false,
-        'validateOnBlur' => false,
-        'validationUrl' => Url::to(['employee/employee-validation', 'id' => (int) $model->id]),
-    ]) ?>
-            <div class="well">
+    <div class="row">
+        <div class="col-md-12">
+            <?= Html::errorSummary($form) ?>
+        </div>
+    </div>
 
-                <?php if ($model->isBlocked()) :?>
-                    <div class="alert alert-warning" role="alert">
-                        <i class="fa fa-warning"></i> This user is <strong>Blocked</strong>!
-                    </div>
-                <?php endif ?>
+    <div class="col-sm-5">
+        <?php $activeForm = ActiveForm::begin([
+            'successCssClass' => '',
+            'id' => sprintf('%s-ID', $form->formName()),
+            'enableClientValidation' => false,
+            'enableAjaxValidation' => true,
+            'validateOnChange' => false,
+            'validateOnBlur' => false,
+            'validationUrl' => Url::to(['employee/employee-validation', 'id' => (int)$form->targetUser->id]),
+        ]) ?>
+        <div class="well">
 
-                <?php if ($model->isDeleted()) :?>
-                    <div class="alert alert-danger" role="alert">
-                        <i class="fa fa-warning"></i> This user is <strong>Deleted</strong>!
-                    </div>
-                <?php endif ?>
-
-                <div class="row">
-                    <?php
-                    $userAbacDto = new UserAbacDto('username');
-                    $userAbacDto->isNewRecord = $model->isNewRecord;
-                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Username field view*/
-                    $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Username field edit*/
-                    $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                    ?>
-
-                    <?php if ($view || $edit) :?>
-                    <div class="col-md-6">
-                    <?php endif; ?>
-                        <?= $form->field($model, 'username', [
-                                'options' => [
-                                    'hidden' => ($edit ? !$edit : !$view),
-                                    'class' => 'form-group'
-                                ]
-                            ])->textInput(['autocomplete' => "new-user", 'readonly' => !$edit])?>
-                    <?php if ($view || $edit) :?>
-                    </div>
-                    <?php endif; ?>
-
-                    <?php
-                    $userAbacDto = new UserAbacDto('email');
-                    $userAbacDto->isNewRecord = $model->isNewRecord;
-                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Email field view*/
-                    $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Email field edit*/
-                    $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                    ?>
-
-                    <?php if ($view || $edit) :?>
-                    <div class="col-md-6">
-                    <?php endif; ?>
-                        <?= $form->field($model, 'email', ['options' => ['hidden' => ($edit ? !$edit : !$view), 'class' => 'form-group']])->input('email', ['readonly' => !$edit])?>
-                    <?php if ($view || $edit) :?>
-                    </div>
-                    <?php endif; ?>
+            <?php if ($form->targetUser->isBlocked()) : ?>
+                <div class="alert alert-warning" role="alert">
+                    <i class="fa fa-warning"></i> This user is <strong>Blocked</strong>!
                 </div>
-                <div class="row">
-                    <?php
-                    $userAbacDto = new UserAbacDto('full_name');
-                    $userAbacDto->isNewRecord = $model->isNewRecord;
-                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Full Name field view*/
-                    $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Full Name field edit*/
-                    $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                    ?>
+            <?php endif ?>
 
-                    <?php if ($view || $edit) :?>
-                    <div class="col-md-6">
-                    <?php endif; ?>
-                        <?= $form->field($model, 'full_name', ['options' => ['hidden' => ($edit ? !$edit : !$view), 'class' => 'form-group']])->textInput(['readonly' => !$edit])?>
-                    <?php if ($view || $edit) :?>
-                    </div>
-                    <?php endif; ?>
-
-                    <?php
-                    $userAbacDto = new UserAbacDto('password');
-                    $userAbacDto->isNewRecord = $model->isNewRecord;
-                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Pass field view*/
-                    $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Pass field edit*/
-                    $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                    ?>
-
-                    <?php if ($view || $edit) :?>
-                    <div class="col-md-6">
-                    <?php endif; ?>
-                        <?= $form->field($model, 'password', [
-                                'options' => [
-                                    'hidden' => ($edit ? !$edit : !$view),
-                                    'class' => 'form-group'
-                                ]
-                            ])->passwordInput(['autocomplete' => 'new-password', 'readonly' => !$edit])?>
-                    <?php if ($view || $edit) :?>
-                    </div>
-                    <?php endif; ?>
+            <?php if ($form->targetUser->isDeleted()) : ?>
+                <div class="alert alert-danger" role="alert">
+                    <i class="fa fa-warning"></i> This user is <strong>Deleted</strong>!
                 </div>
+            <?php endif ?>
 
-                <div class="row">
-                    <?php
-                    $userAbacDto = new UserAbacDto('nickname');
-                    $userAbacDto->isNewRecord = $model->isNewRecord;
-                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Nickname field view*/
-                    $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Nickname field edit*/
-                    $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                    ?>
-
-                    <?php if ($view || $edit) :?>
+            <div class="row">
+                <?php if ($form->fieldAccess->canViewUsername() || $form->fieldAccess->canEditUsername()) : ?>
                     <div class="col-md-6">
-                    <?php endif; ?>
-                        <?= $form->field($model, 'nickname', ['options' => ['hidden' => ($edit ? !$edit : !$view), 'class' => 'form-group']])->textInput(['readonly' => !$edit])?>
-                    <?php if ($view || $edit) :?>
+                        <?= $activeForm->field($form, 'username', [
+                            'options' => [
+                                'class' => 'form-group'
+                            ]
+                        ])->textInput([
+                            'autocomplete' => "new-user",
+                            'readonly' => !$form->fieldAccess->canEditUsername()
+                        ]) ?>
                     </div>
-                    <?php endif; ?>
-                </div>
+                <?php endif; ?>
 
-                <div class="row">
-                    <?php
-                    $optionsS2 = ['class' => 'd-none'];
-                    $userAbacDto = new UserAbacDto('form_roles');
-                    $userAbacDto->isNewRecord = $model->isNewRecord;
-                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, User Roles field view*/
-                    $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, User Roles field edit*/
-                    $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                    ?>
-
-                    <?php if ($view || $edit) :?>
+                <?php if ($form->fieldAccess->canViewEmail() || $form->fieldAccess->canEditEmail()) : ?>
                     <div class="col-md-6">
-                    <?php endif; ?>
-
-                    <?= $form->field($model, 'form_roles', ['options' => ($edit ?: $view) ? ['class' => 'form-group'] : $optionsS2])->widget(Select2::class, [
-                        'data' => Employee::getAllRoles(Auth::user()),
-                        'size' => Select2::SMALL,
-                        'options' => ['placeholder' => 'Select user roles', 'multiple' => true],
-                        'pluginOptions' => ['allowClear' => true, 'disabled' => !$edit],
-                    ]) ?>
-
-                    <?php if ($view || $edit) :?>
+                        <?= $activeForm
+                            ->field($form, 'email', ['options' => ['class' => 'form-group']])
+                            ->input('email', ['readonly' => !$form->fieldAccess->canEditEmail()])
+                        ?>
                     </div>
-                    <?php endif; ?>
+                <?php endif; ?>
+            </div>
 
-                    <?php
-                    if (!$edit) {
-                        echo $form->field($model, 'form_roles', ['options' => $optionsS2])->widget(Select2::class, [
-                            'data' => Employee::getAllRoles(Auth::user()),
-                            'size' => Select2::SMALL,
-                            'options' => ['placeholder' => 'Select user roles', 'multiple' => true],
-                            'pluginOptions' => ['allowClear' => true],
-                        ]);
-                    }
-                    ?>
+            <div class="row">
 
-                    <?php
-                    $userAbacDto = new UserAbacDto('status');
-                    $userAbacDto->isNewRecord = $model->isNewRecord;
-                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Status field view*/
-                    $view = !$model->isNewRecord && Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Status field edit*/
-                    $edit = !$model->isNewRecord && Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                    ?>
-
-                    <?php if ($view || $edit) :?>
+                <?php if ($form->fieldAccess->canViewFullName() || $form->fieldAccess->canEditFullName()) : ?>
                     <div class="col-md-6">
-                    <?php endif; ?>
-                        <?= $form->field($model, 'status', ['options' => ['hidden' => ($edit ? !$edit : !$view), 'class' => 'form-group']])->dropDownList($model::getStatusList(), ['disabled' => !$edit]) ?>
-                    <?php if ($view || $edit) :?>
+                        <?= $activeForm
+                            ->field($form, 'full_name', ['options' => ['class' => 'form-group']])
+                            ->textInput(['readonly' => !$form->fieldAccess->canEditFullName()])
+                        ?>
                     </div>
-                    <?php endif; ?>
-                </div>
+                <?php endif; ?>
 
-                <div class="row">
-                    <div class="col-sm-12">
-                        <?php
-                        if ($user->isAdmin() || $user->isSuperAdmin() || $user->isUserManager()) {
-                            $data = \common\models\UserGroup::getList();
-                            $dataProjects = \common\models\Project::getList();
-                        }
+                <?php if ($form->fieldAccess->canViewPassword() || $form->fieldAccess->canEditPassword()) : ?>
+                    <div class="col-md-6">
+                        <?= $activeForm->field($form, 'password', [
+                            'options' => [
+                                'class' => 'form-group'
+                            ]
+                        ])->passwordInput([
+                            'autocomplete' => 'new-password',
+                            'readonly' => !$form->fieldAccess->canEditPassword()
+                        ]) ?>
+                    </div>
+                <?php endif; ?>
+            </div>
 
-                        if ($user->isSupervision()) {
-                            $data = $user->getUserGroupList();
-                            $dataProjects = \yii\helpers\ArrayHelper::map($user->projects, 'id', 'name');
-                        }
+            <div class="row">
+                <?php if ($form->fieldAccess->canViewNickname() || $form->fieldAccess->canEditNickname()) : ?>
+                    <div class="col-md-6">
+                        <?= $activeForm
+                            ->field($form, 'nickname', ['options' => ['class' => 'form-group']])
+                            ->textInput(['readonly' => !$form->fieldAccess->canEditNickname()])
+                        ?>
+                    </div>
+                <?php endif; ?>
+            </div>
 
-                        $userAbacDto = new UserAbacDto('user_groups');
-                        $userAbacDto->isNewRecord = $model->isNewRecord;
-                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, User Groups field view*/
-                        $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, User Groups field edit*/
-                        $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
+            <div class="row">
 
-                        echo $form->field($model, 'user_groups', ['options' => ($edit ?: $view) ? ['class' => 'form-group'] : $optionsS2])->widget(Select2::class, [
-                            'data' => $data,
+                <?php if ($form->fieldAccess->canViewRoles() || $form->fieldAccess->canEditRoles()) : ?>
+                    <div class="col-md-6">
+                        <?= $activeForm
+                            ->field($form, 'form_roles', ['options' => ['class' => 'form-group']])
+                            ->widget(Select2::class, [
+                                'data' => $form->availableList->getRoles(),
+                                'size' => Select2::SMALL,
+                                'options' => ['placeholder' => 'Select user roles', 'multiple' => true],
+                                'pluginOptions' => [
+                                    'allowClear' => true,
+                                    'disabled' => !$form->fieldAccess->canEditRoles(),
+                                ],
+                            ])
+                        ?>
+                    </div>
+                <?php endif; ?>
+
+                <?php if ($form->fieldAccess->canViewStatus() || $form->fieldAccess->canEditStatus()) : ?>
+                    <div class="col-md-6">
+                        <?= $activeForm
+                            ->field($form, 'status', ['options' => ['class' => 'form-group']])
+                            ->dropDownList(
+                                $form->availableList->getStatuses(),
+                                ['disabled' => !$form->fieldAccess->canEditStatus()]
+                            )
+                        ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-12">
+
+                    <?php if ($form->fieldAccess->canViewUserGroups() || $form->fieldAccess->canEditUserGroups()) : ?>
+                        <?= $activeForm->field(
+                            $form,
+                            'user_groups',
+                            ['options' => ['class' => 'form-group']]
+                        )->widget(Select2::class, [
+                            'data' => $form->availableList->getUserGroups(),
                             'size' => Select2::SMALL,
                             'options' => ['placeholder' => 'Select user groups', 'multiple' => true],
-                            'pluginOptions' => ['allowClear' => true, 'disabled' => !$edit],
-                        ]);
+                            'pluginOptions' => [
+                                'allowClear' => true,
+                                'disabled' => !$form->fieldAccess->canEditUserGroups()
+                            ],
+                            ]); ?>
+                    <?php endif; ?>
 
-                        if (!$edit) {
-                            echo $form->field($model, 'user_groups', ['options' => $optionsS2])->widget(Select2::class, [
-                                'data' => $data,
-                                'size' => Select2::SMALL,
-                                'options' => ['placeholder' => 'Select user groups', 'multiple' => true],
-                                'pluginOptions' => ['allowClear' => true],
-                            ]);
-                        }
-
-                        $userAbacDto = new UserAbacDto('user_projects');
-                        $userAbacDto->isNewRecord = $model->isNewRecord;
-                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, User Projects field view*/
-                        $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, User Projects field edit*/
-                        $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-
-                        echo $form->field($model, 'user_projects', ['options' => ($edit ?: $view) ? [] : $optionsS2])->widget(Select2::class, [
-                            'data' => $dataProjects,
+                    <?php if ($form->fieldAccess->canViewProjects() || $form->fieldAccess->canEditProjects()) : ?>
+                        <?= $activeForm->field(
+                            $form,
+                            'user_projects',
+                            ['options' => ['class' => 'form-group']]
+                        )->widget(Select2::class, [
+                            'data' => $form->availableList->getProjects(),
                             'size' => Select2::SMALL,
                             'options' => ['placeholder' => 'Select user projects', 'multiple' => true],
-                            'pluginOptions' => ['allowClear' => true, 'disabled' => !$edit],
-                        ]);
+                            'pluginOptions' => [
+                                'allowClear' => true,
+                                'disabled' => !$form->fieldAccess->canEditProjects()
+                            ],
+                            ]) ?>
 
-                        if (!$edit) {
-                            echo $form->field($model, 'user_projects', ['options' => $optionsS2])->widget(Select2::class, [
-                                'data' => $dataProjects,
-                                'size' => Select2::SMALL,
-                                'options' => ['placeholder' => 'Select user projects', 'multiple' => true],
-                                'pluginOptions' => ['allowClear' => true],
-                            ]);
-                        }
+                    <?php endif; ?>
 
-                        if ($model->isNewRecord) {
-                            echo $form->field($model, 'make_user_project_params')->checkbox();
-                        }
-
-                        $userAbacDto = new UserAbacDto('user_departments');
-                        $userAbacDto->isNewRecord = $model->isNewRecord;
-                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, User Projects field view*/
-                        $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, User Projects field edit*/
-                        $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-
-                        echo $form->field($model, 'user_departments', ['options' => ($edit ?: $view) ? [] : $optionsS2])->widget(Select2::class, [
-                            'data' => \common\models\Department::getList(),
+                    <?php if ($form->fieldAccess->canViewDepartments() || $form->fieldAccess->canEditDepartments()) : ?>
+                        <?= $activeForm->field(
+                            $form,
+                            'user_departments',
+                            ['options' => ['class' => 'form-group']]
+                        )->widget(Select2::class, [
+                            'data' => $form->availableList->getDepartments(),
                             'size' => Select2::SMALL,
                             'options' => ['placeholder' => 'Select departments', 'multiple' => true],
-                            'pluginOptions' => ['allowClear' => true, 'disabled' => !$edit],
-                        ]);
+                            'pluginOptions' => [
+                                'allowClear' => true,
+                                'disabled' => !$form->fieldAccess->canEditDepartments()
+                            ],
+                            ]); ?>
 
-                        if (!$edit) {
-                            echo $form->field($model, 'user_departments', ['options' => $optionsS2])->widget(Select2::class, [
-                                'data' => \common\models\Department::getList(),
-                                'size' => Select2::SMALL,
-                                'options' => ['placeholder' => 'Select departments', 'multiple' => true],
-                                'pluginOptions' => ['allowClear' => true],
-                            ]);
-                        }
+                    <?php endif; ?>
 
-                        $userAbacDto = new UserAbacDto('client_chat_user_channel');
-                        $userAbacDto->isNewRecord = $model->isNewRecord;
-                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, User Projects field view*/
-                        $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, User Projects field edit*/
-                        $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-
-                        echo $form->field($model, 'client_chat_user_channel', ['options' => ($edit ?: $view) ? [] : $optionsS2])->widget(Select2::class, [
-                            'data' => ClientChatChannel::getList(),
+                    <?php if ($form->fieldAccess->canViewClientChatUserChannels() || $form->fieldAccess->canEditClientChatUserChannels()) : ?>
+                        <?= $activeForm->field(
+                            $form,
+                            'client_chat_user_channel',
+                            ['options' => ['class' => 'form-group']]
+                        )->widget(Select2::class, [
+                            'data' => $form->availableList->getClientChatUserChannels(),
                             'size' => Select2::SMALL,
                             'options' => ['placeholder' => 'Select Client Chat Chanel', 'multiple' => true],
-                            'pluginOptions' => ['allowClear' => true, 'disabled' => !$edit],
-                        ]);
-
-                        if (!$edit) {
-                            echo $form->field($model, 'client_chat_user_channel', ['options' => $optionsS2])->widget(Select2::class, [
-                                'data' => ClientChatChannel::getList(),
-                                'size' => Select2::SMALL,
-                                'options' => ['placeholder' => 'Select Client Chat Chanel', 'multiple' => true],
-                                'pluginOptions' => ['allowClear' => true],
-                            ]);
-                        }
-                        ?>
-
-                        <?php /** @abac ShiftAbacObject::ACT_USER_SHIFT_ASSIGN, ShiftAbacObject::ACTION_UPDATE, Access edit UserShiftAssign */ ?>
-                        <?php if (\Yii::$app->abac->can(null, ShiftAbacObject::ACT_USER_SHIFT_ASSIGN, ShiftAbacObject::ACTION_UPDATE)) : ?>
-                            <?php echo $form->field($model, 'user_shift_assigns', ['options' => []])->widget(Select2::class, [
-                                'data' => Shift::getList(),
-                                'size' => Select2::SMALL,
-                                'options' => ['placeholder' => 'Select Shift', 'multiple' => true],
-                                'pluginOptions' => ['allowClear' => true],
+                            'pluginOptions' => [
+                                'allowClear' => true,
+                                'disabled' => !$form->fieldAccess->canEditClientChatUserChannels()
+                            ],
                             ]); ?>
-                        <?php endif ?>
-                    </div>
+
+                    <?php endif; ?>
+
+                    <?php if ($form->fieldAccess->canViewUserShiftAssign() || $form->fieldAccess->canEditUserShiftAssign()) : ?>
+                        <?= $activeForm->field(
+                            $form,
+                            'user_shift_assigns',
+                            ['options' => ['class' => 'form-group']]
+                        )->widget(Select2::class, [
+                            'data' => $form->availableList->getUserShiftAssign(),
+                            'size' => Select2::SMALL,
+                            'options' => ['placeholder' => 'Select Shift', 'multiple' => true],
+                            'pluginOptions' => [
+                                'allowClear' => true,
+                                'disabled' => !$form->fieldAccess->canEditClientChatUserChannels()
+                            ],
+                            ]); ?>
+
+                    <?php endif; ?>
                 </div>
+            </div>
 
-                    <div class="row">
-                        <div class="col-md-12">
-                            <?php  echo Html::errorSummary($modelUserParams) ?>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <?php
-                        $userAbacDto = new UserAbacDto('up_work_start_tm');
-                        $userAbacDto->isNewRecord = $model->isNewRecord;
-                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Work Start Time field view*/
-                        $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Work Start Time field edit*/
-                        $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                        ?>
-
-                        <?php if ($view || $edit) :?>
-                            <div class="col-md-3">
-                        <?php endif; ?>
-                            <?= $form->field($modelUserParams, 'up_work_start_tm', ['options' => ['hidden' => ($edit ? !$edit : !$view), 'class' => 'form-group']])->widget(
-                                \kartik\time\TimePicker::class,
-                                [
-                                    'pluginOptions' => [
-                                        'showSeconds' => false,
-                                        'showMeridian' => false,
-                                    ],
-                                    'disabled' => !$edit
+            <div class="row">
+                <?php if ($form->fieldAccess->canViewWorkStartTime() || $form->fieldAccess->canEditWorkStartTime()) : ?>
+                    <div class="col-md-3">
+                        <?= $activeForm->field(
+                            $form,
+                            'up_work_start_tm',
+                            ['options' => ['class' => 'form-group']]
+                        )->widget(
+                            \kartik\time\TimePicker::class,
+                            [
+                                'pluginOptions' => [
+                                    'showSeconds' => false,
+                                    'showMeridian' => false,
+                                ],
+                                'disabled' => !$form->fieldAccess->canEditWorkStartTime()
                                 ]
-                            )?>
-                        <?php if ($view || $edit) :?>
-                            </div>
-                        <?php endif; ?>
-
-                        <?php
-                        $userAbacDto = new UserAbacDto('up_work_minutes');
-                        $userAbacDto->isNewRecord = $model->isNewRecord;
-                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Work Minute's field view*/
-                        $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Work Minute's field edit*/
-                        $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                        ?>
-
-                        <?php if ($view || $edit) :?>
-                        <div class="col-md-3">
-                        <?php endif; ?>
-                            <?= $form->field($modelUserParams, 'up_work_minutes', [
-                                    'options' => [
-                                        'hidden' => ($edit ? !$edit : !$view),
-                                        'class' => 'form-group'
-                                    ]
-                                ])->input('number', ['step' => 10, 'min' => 0, 'readonly' => !$edit])?>
-                        <?php if ($view || $edit) :?>
-                        </div>
-                        <?php endif; ?>
-
-                        <?php
-                        $userAbacDto = new UserAbacDto('up_timezone');
-                        $userAbacDto->isNewRecord = $model->isNewRecord;
-                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Timezone field view*/
-                        $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Timezone field edit*/
-                        $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                        ?>
-
-                        <?php if ($view || $edit) :?>
-                        <div class="col-md-6">
-                        <?php endif; ?>
-                            <?php
-                            echo $form->field($modelUserParams, 'up_timezone', ['options' => ['hidden' => ($edit ? !$edit : !$view), 'class' => 'form-group']])->widget(Select2::class, [
-                                'data' => Employee::timezoneList(true),
-                                'size' => Select2::SMALL,
-                                'options' => ['placeholder' => 'Select TimeZone', 'multiple' => false],
-                                'pluginOptions' => ['allowClear' => true, 'disabled' => !$edit],
-                            ]);
-                            ?>
-                        <?php if ($view || $edit) :?>
-                        </div>
-                        <?php endif; ?>
+                        ) ?>
                     </div>
+                <?php endif; ?>
 
-                <?php //if ($user->isAdmin() || $user->isSuperAdmin() || $user->isSupervision()) : ?>
-                    <div class="row">
-                        <?php
-                        $userAbacDto = new UserAbacDto('up_base_amount');
-                        $userAbacDto->isNewRecord = $model->isNewRecord;
-                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Base Amount field view*/
-                        $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Base Amount field edit*/
-                        $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                        ?>
-
-                        <?php if ($view || $edit) :?>
-                        <div class="col-md-3">
-                        <?php endif; ?>
-                            <?= $form->field($modelUserParams, 'up_base_amount', [
-                                    'options' => [
-                                        'hidden' => ($edit ? !$edit : !$view),
-                                        'class' => 'form-group'
-                                    ]
-                                ])->input('number', ['step' => 0.01, 'min' => 0, 'max' => 1000, 'readonly' => !$edit]) ?>
-                        <?php if ($view || $edit) :?>
-                        </div>
-                        <?php endif; ?>
-
-                        <?php
-                        $userAbacDto = new UserAbacDto('up_commission_percent');
-                        $userAbacDto->isNewRecord = $model->isNewRecord;
-                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Commission Percent field view*/
-                        $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Commission Percent field edit*/
-                        $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                        ?>
-
-                        <?php if ($view || $edit) :?>
-                        <div class="col-md-3">
-                        <?php endif; ?>
-                            <?= $form->field($modelUserParams, 'up_commission_percent', [
-                                    'options' => [
-                                        'hidden' => ($edit ? !$edit : !$view),
-                                        'class' => 'form-group'
-                                    ]
-                                ])->input('number', ['step' => 1, 'max' => 100, 'min' => 0, 'readonly' => !$edit]) ?>
-                        <?php if ($view || $edit) :?>
-                        </div>
-                        <?php endif; ?>
-
-                        <?php
-                        $userAbacDto = new UserAbacDto('up_bonus_active');
-                        $userAbacDto->isNewRecord = $model->isNewRecord;
-                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Bonus Is Active field view*/
-                        $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Bonus Is Active field edit*/
-                        $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                        ?>
-                        <?php if ($view || $edit) :?>
-                        <div class="col-md-3">
-                        <?php endif; ?>
-                            <?= $form->field($modelUserParams, 'up_bonus_active', [
-                                    'options' => [
-                                        'hidden' => ($edit ? !$edit : !$view),
-                                        'class' => 'form-group'
-                                    ]
-                                ])->checkbox(['disabled' => !$edit]) ?>
-                        <?php if ($view || $edit) :?>
-                        </div>
-                        <?php endif; ?>
-
-                        <?php
-                        $userAbacDto = new UserAbacDto('up_leaderboard_enabled');
-                        $userAbacDto->isNewRecord = $model->isNewRecord;
-                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Leader Board Enabled field view*/
-                        $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Leader Board Enabled field edit*/
-                        $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                        ?>
-                        <?php if ($view) :?>
-                        <div class="col-md-3">
-                        <?php endif; ?>
-                            <?= $form->field($modelUserParams, 'up_leaderboard_enabled', [
-                                    'options' => [
-                                        'hidden' => ($edit ? !$edit : !$view),
-                                        'class' => 'form-group'
-                                    ]
-                                ])->checkbox(['disabled' => !$edit]) ?>
-                        <?php if ($view) :?>
-                        </div>
-                        <?php endif; ?>
+                <?php if ($form->fieldAccess->canViewWorkMinutes() || $form->fieldAccess->canEditWorkMinutes()) : ?>
+                    <div class="col-md-3">
+                        <?= $activeForm->field($form, 'up_work_minutes', [
+                            'options' => [
+                                'class' => 'form-group'
+                            ]
+                        ])->input(
+                            'number',
+                            ['step' => 10, 'min' => 0, 'readonly' => !$form->fieldAccess->canEditWorkMinutes()]
+                        ) ?>
                     </div>
+                <?php endif; ?>
 
-                    <?php if (!Yii::$app->user->identity->canRole('supervision')) : ?>
-                        <hr>
-                        <div class="row">
-                            <div class="col-md-3">
-                                <?= $form->field($modelUserParams, 'up_inbox_show_limit_leads')->input('number', ['step' => 1, 'min' => 0, 'max' => 500]) ?>
-                            </div>
-                            <div class="col-md-3">
-                                <?= $form->field($modelUserParams, 'up_default_take_limit_leads')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
-                            </div>
-                            <div class="col-md-3">
-                                <?= $form->field($modelUserParams, 'up_min_percent_for_take_leads')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
-                            </div>
-                            <div class="col-md-3">
-                                <?= $form->field($modelUserParams, 'up_frequency_minutes')->input('number', ['step' => 1, 'max' => 1000, 'min' => 0]) ?>
-                            </div>
-                        </div>
-                    <?php endif; ?>
-
-                <?php //endif; ?>
-
-                <?php if ($user->isAdmin() || $user->isSuperAdmin() || $user->isSupervision() || $user->isUserManager()) : ?>
-                    <?php if (!Yii::$app->user->identity->canRole('supervision')) : ?>
-                        <div class="row">
-                            <div class="col-md-3">
-                                <?= $form->field($modelUserParams, 'up_call_expert_limit')->input('number', ['step' => 1, 'min' => -1, 'max' => 1000]) ?>
-                            </div>
-                            <div class="col-md-3">
-                                <?= $form->field($modelUserParams, 'up_call_user_level')->input('number', ['step' => 1, 'min' => -128, 'max' => 127]) ?>
-                            </div>
-                        </div>
-                    <?php endif; ?>
+                <?php if ($form->fieldAccess->canViewTimeZone() || $form->fieldAccess->canEditTimeZone()) : ?>
+                    <div class="col-md-6">
+                        <?= $activeForm->field(
+                            $form,
+                            'up_timezone',
+                            ['options' => ['class' => 'form-group']]
+                        )->widget(Select2::class, [
+                            'data' => $form->availableList->getTimezones(),
+                            'size' => Select2::SMALL,
+                            'options' => ['placeholder' => 'Select TimeZone', 'multiple' => false],
+                            'pluginOptions' => [
+                                'allowClear' => true,
+                                'disabled' => !$form->fieldAccess->canEditTimeZone()
+                            ],
+                            ]); ?>
+                    </div>
                 <?php endif; ?>
 
             </div>
-            <?php
-            if (!$model->isNewRecord) : ?>
-                <div class="well">
-                    <div class="form-group">
-                        <?= $form->field($model, 'acl_rules_activated', [
-                            'template' => '{input}'
-                        ])->checkbox() ?>
-                        <span>&nbsp;</span>
-                        <?= Html::a('<i class="glyphicon glyphicon-plus"></i> Add Extra Rule', null, [
-                            'class' => 'btn btn-success btn-xs',
-                            'id' => 'acl-rule-id',
-                        ]) ?>
-                        <?php
-                        $aclModel = new EmployeeAcl();
-                        $aclModel->employee_id = $model->id;
-                        $idForm = sprintf('%s-ID', $aclModel->formName());
-                        $idMaskIP = Html::getInputId($aclModel, 'mask');
 
-                        $js = <<<JS
+            <div class="row">
+                <?php if ($form->fieldAccess->canViewBaseAmount() || $form->fieldAccess->canEditBaseAmount()) : ?>
+                    <div class="col-md-3">
+                        <?= $activeForm->field($form, 'up_base_amount', [
+                            'options' => [
+                                'class' => 'form-group'
+                            ]
+                        ])->input('number', [
+                            'step' => 0.01,
+                            'min' => 0,
+                            'max' => 1000,
+                            'readonly' => !$form->fieldAccess->canEditBaseAmount()
+                        ]) ?>
+                    </div>
+                <?php endif; ?>
+
+                <?php if ($form->fieldAccess->canViewCommissionPercent() || $form->fieldAccess->canEditCommissionPercent()) : ?>
+                    <div class="col-md-3">
+                        <?= $activeForm->field($form, 'up_commission_percent', [
+                            'options' => [
+                                'class' => 'form-group'
+                            ]
+                        ])->input('number', [
+                            'step' => 1,
+                            'max' => 100,
+                            'min' => 0,
+                            'readonly' => !$form->fieldAccess->canEditCommissionPercent()
+                        ]) ?>
+                    </div>
+                <?php endif; ?>
+
+                <?php if ($form->fieldAccess->canViewBonusActive() || $form->fieldAccess->canEditBonusActive()) : ?>
+                    <div class="col-md-3">
+                        <?= $activeForm->field($form, 'up_bonus_active', [
+                            'options' => [
+                                'class' => 'form-group'
+                            ]
+                        ])->checkbox(['disabled' => !$form->fieldAccess->canEditBonusActive()]) ?>
+                    </div>
+                <?php endif; ?>
+
+                <?php if ($form->fieldAccess->canViewLeaderboardEnabled() || $form->fieldAccess->canEditLeaderboardEnabled()) : ?>
+                    <div class="col-md-3">
+                        <?= $activeForm->field($form, 'up_leaderboard_enabled', [
+                            'options' => [
+                                'class' => 'form-group'
+                            ]
+                        ])->checkbox(['disabled' => !$form->fieldAccess->canEditLeaderboardEnabled()]) ?>
+                    </div>
+                <?php endif; ?>
+
+            </div>
+            <hr>
+            <div class="row">
+                <?php if ($form->fieldAccess->canViewInboxShowLimitLeads() || $form->fieldAccess->canEditInboxShowLimitLeads()) : ?>
+                    <div class="col-md-3">
+                        <?= $activeForm->field($form, 'up_inbox_show_limit_leads', [
+                            'options' => [
+                                'class' => 'form-group'
+                            ]
+                        ])->input('number', [
+                            'step' => 1,
+                            'min' => 0,
+                            'max' => 500,
+                            'readonly' => !$form->fieldAccess->canEditInboxShowLimitLeads()
+                        ]) ?>
+                    </div>
+                <?php endif; ?>
+                <?php if ($form->fieldAccess->canViewDefaultTakeLimitLeads() || $form->fieldAccess->canEditDefaultTakeLimitLeads()) : ?>
+                    <div class="col-md-3">
+                        <?= $activeForm->field($form, 'up_default_take_limit_leads', [
+                            'options' => [
+                                'class' => 'form-group'
+                            ]
+                        ])->input('number', [
+                            'step' => 1,
+                            'max' => 100,
+                            'min' => 0,
+                            'readonly' => !$form->fieldAccess->canEditDefaultTakeLimitLeads()
+                        ]) ?>
+                    </div>
+                <?php endif; ?>
+                <?php if ($form->fieldAccess->canViewMinPercentForTakeLeads() || $form->fieldAccess->canEditMinPercentForTakeLeads()) : ?>
+                    <div class="col-md-3">
+                        <?= $activeForm->field($form, 'up_min_percent_for_take_leads', [
+                            'options' => [
+                                'class' => 'form-group'
+                            ]
+                        ])->input('number', [
+                            'step' => 1,
+                            'max' => 100,
+                            'min' => 0,
+                            'readonly' => !$form->fieldAccess->canEditMinPercentForTakeLeads()
+                        ]) ?>
+                    </div>
+                <?php endif; ?>
+                <?php if ($form->fieldAccess->canViewFrequencyMinutes() || $form->fieldAccess->canEditFrequencyMinutes()) : ?>
+                    <div class="col-md-3">
+                        <?= $activeForm->field($form, 'up_frequency_minutes', [
+                            'options' => [
+                                'class' => 'form-group'
+                            ]
+                        ])->input('number', [
+                            'step' => 1,
+                            'max' => 1000,
+                            'min' => 0,
+                            'readonly' => !$form->fieldAccess->canEditFrequencyMinutes()
+                        ]) ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+
+            <div class="row">
+
+                <?php if ($form->fieldAccess->canViewCallExpertLimit() || $form->fieldAccess->canEditCallExpertLimit()) : ?>
+                    <div class="col-md-3">
+                        <?= $activeForm->field($form, 'up_call_expert_limit', [
+                            'options' => [
+                                'class' => 'form-group'
+                            ]
+                        ])->input('number', [
+                            'step' => 1,
+                            'min' => -1,
+                            'max' => 1000,
+                            'readonly' => !$form->fieldAccess->canEditCallExpertLimit()
+                        ]) ?>
+                    </div>
+                <?php endif; ?>
+                <?php if ($form->fieldAccess->canViewCallUserLevel() || $form->fieldAccess->canEditCallUserLevel()) : ?>
+                    <div class="col-md-3">
+                        <?= $activeForm->field($form, 'up_call_user_level', [
+                            'options' => [
+                                'class' => 'form-group'
+                            ]
+                        ])->input('number', [
+                            'step' => 1,
+                            'min' => -128,
+                            'max' => 127,
+                            'readonly' => !$form->fieldAccess->canEditCallUserLevel()
+                        ]) ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+        </div>
+
+
+        <div class="well">
+            <div class="form-group">
+                <?= $activeForm->field($form, 'acl_rules_activated', [
+                    'template' => '{input}'
+                ])->checkbox() ?>
+                <span>&nbsp;</span>
+                <?= Html::a('<i class="glyphicon glyphicon-plus"></i> Add Extra Rule', null, [
+                    'class' => 'btn btn-success btn-xs',
+                    'id' => 'acl-rule-id',
+                ]) ?>
+                <?php
+                $aclModel = new EmployeeAcl();
+                $aclModel->employee_id = $form->targetUser->id;
+                $idForm = sprintf('%s-ID', $aclModel->formName());
+                $idMaskIP = Html::getInputId($aclModel, 'mask');
+
+                $js = <<<JS
     $('#acl-rule-id').on('click', function() {
         $(this).addClass('d-none');
         $('#$idForm').removeClass('d-none');
@@ -595,213 +477,202 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
         });
     });
 JS;
-                        $this->registerJs($js);
-                        ?>
-                        <div class="form-group d-none" id="<?= $idForm ?>">
-                            <?= $form->field($aclModel, 'employee_id', [
-                                'options' => [
-                                    'tag' => false
-                                ],
-                                'template' => '{input}'
-                            ])->hiddenInput() ?>
-                            <?= $form->field($aclModel, 'mask', [
-                                'options' => [
-                                    'class' => 'form-group'
-                                ],
-                                'template' => '{label}: {input}',
-                                'enableClientValidation' => false
-                            ])->textInput(['maxlength' => true])
-//                                ->widget(MaskedInput::class, [
-//                                'clientOptions' => [
-//                                    'alias' => 'ip',
-//                                ],
-//                            ])
-                            ?>
-                            <span>&nbsp;</span>
-                            <?= $form->field($aclModel, 'description', [
-                                'options' => [
-                                    'class' => 'form-group'
-                                ],
-                                'template' => '{label}: {input}',
-                                'enableClientValidation' => false
-                            ])->textInput() ?>
-                            <span>&nbsp;</span>
-                            <?= Html::button('Save', [
-                                'class' => 'btn-success btn',
-                                'id' => 'submit-btn',
-                                'data-url' => Yii::$app->urlManager->createUrl(['employee/acl-rule', 'id' => 0])
-                            ]) ?>
-                            <?= Html::button('Close', [
-                                'class' => 'btn-danger btn',
-                                'id' => 'close-btn'
-                            ]) ?>
-                        </div>
-                    </div>
-                    <div class="grid-view" id="employee-acl-rule" style="padding-top: 10px;">
-                        <?= $this->render('partial/_aclList', [
-                            'models' => $model->employeeAcl
-                        ]) ?>
-                    </div>
-                </div>
-            <?php endif; ?>
-
-    <?php //if ($user->isAdmin()) : ?>
-    <h5>Profile Settings</h5>
-    <div class="well">
-        <div class="form-group">
-            <div class="row">
-                <div class="col-md-3">
-                    <?php
-                    $userAbacDto = new UserAbacDto('up_join_date');
-                    $userAbacDto->isNewRecord = $model->isNewRecord;
-                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Join Date field view*/
-                    $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Join Date field edit*/
-                    $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                    ?>
-
-                    <?php if ($modelProfile->up_join_date === null) :
-                        $modelProfile->up_join_date = date('Y-m-d');
-                    endif; ?>
-                    <?= $form->field($modelProfile, 'up_join_date', ['options' => ['hidden' => ($edit ? !$edit : !$view), 'class' => 'form-group']])->widget(\dosamigos\datepicker\DatePicker::class, [
-                        'clientOptions' => [
-                            'autoclose' => true,
-                            'format' => 'yyyy-mm-dd',
-                        ],
+                $this->registerJs($js);
+                ?>
+                <div class="form-group d-none" id="<?= $idForm ?>">
+                    <?= $activeForm->field($aclModel, 'employee_id', [
                         'options' => [
-                            'autocomplete' => 'off',
-                            'placeholder' => 'Choose Date',
-                            'disabled' => !$edit
+                            'tag' => false
                         ],
+                        'template' => '{input}'
+                    ])->hiddenInput() ?>
+                    <?= $activeForm->field($aclModel, 'mask', [
+                        'options' => [
+                            'class' => 'form-group'
+                        ],
+                        'template' => '{label}: {input}',
+                        'enableClientValidation' => false
+                    ])->textInput(['maxlength' => true])
+                    //                                ->widget(MaskedInput::class, [
+                    //                                'clientOptions' => [
+                    //                                    'alias' => 'ip',
+                    //                                ],
+                    //                            ])
+?>
+                    <span>&nbsp;</span>
+                    <?= $activeForm->field($aclModel, 'description', [
+                        'options' => [
+                            'class' => 'form-group'
+                        ],
+                        'template' => '{label}: {input}',
+                        'enableClientValidation' => false
+                    ])->textInput() ?>
+                    <span>&nbsp;</span>
+                    <?= Html::button('Save', [
+                        'class' => 'btn-success btn',
+                        'id' => 'submit-btn',
+                        'data-url' => Yii::$app->urlManager->createUrl(['employee/acl-rule', 'id' => 0])
                     ]) ?>
-
-                    <?php
-                    $userAbacDto = new UserAbacDto('up_skill');
-                    $userAbacDto->isNewRecord = $model->isNewRecord;
-                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Skill field view*/
-                    $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Skill field edit*/
-                    $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                    ?>
-
-                    <?= $form->field($modelProfile, 'up_skill', ['options' => ['hidden' => ($edit ? !$edit : !$view), 'class' => 'form-group']])->dropDownList(\common\models\UserProfile::SKILL_TYPE_LIST, ['prompt' => '---', 'disabled' => !$edit]) ?>
+                    <?= Html::button('Close', [
+                        'class' => 'btn-danger btn',
+                        'id' => 'close-btn'
+                    ]) ?>
                 </div>
-                <div class="col-md-3">
-                    <?php
-                    $userAbacDto = new UserAbacDto('up_call_type_id');
-                    $userAbacDto->isNewRecord = $model->isNewRecord;
-                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Call Type field view*/
-                    $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Call Type field edit*/
-                    $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                    ?>
-                    <?= $form->field($modelProfile, 'up_call_type_id', ['options' => ['hidden' => ($edit ? !$edit : !$view), 'class' => 'form-group']])->dropDownList(\common\models\UserProfile::CALL_TYPE_LIST, ['disabled' => !$edit]) ?>
+            </div>
+            <div class="grid-view" id="employee-acl-rule" style="padding-top: 10px;">
+                <?= $this->render('../partial/_aclList', [
+                    'models' => $form->targetUser->employeeAcl
+                ]) ?>
+            </div>
+        </div>
 
-                    <?php
-                    $userAbacDto = new UserAbacDto('up_2fa_secret');
-                    $userAbacDto->isNewRecord = $model->isNewRecord;
-                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, 2fa secret field view*/
-                    $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, 2fa secret field edit*/
-                    $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                    ?>
-                    <?= $form->field($modelProfile, 'up_2fa_secret', ['options' => ['hidden' => ($edit ? !$edit : !$view), 'class' => 'form-group']])->textInput(['maxlength' => true, 'title' => 'Clean for reset', 'readonly' => !$edit])->label('2fa secret') ?>
-                </div>
-                <div class="col-md-3">
-                    <?php
-                    $userAbacDto = new UserAbacDto('up_2fa_enable');
-                    $userAbacDto->isNewRecord = $model->isNewRecord;
-                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, 2fa enable field view*/
-                    $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, 2fa enable field edit*/
-                    $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                    ?>
-                    <?= $form->field($modelProfile, 'up_2fa_enable', ['options' => ['hidden' => ($edit ? !$edit : !$view), 'class' => 'form-group']])->checkbox(['disabled' => !$edit]) ?>
-                </div>
-                <div class="col-md-3">
-                    <?php
-                    $userAbacDto = new UserAbacDto('up_telegram');
-                    $userAbacDto->isNewRecord = $model->isNewRecord;
-                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Telegram ID field view*/
-                    $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Telegram ID field edit*/
-                    $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                    ?>
-                    <?= $form->field($modelProfile, 'up_telegram', ['options' => ['hidden' => ($edit ? !$edit : !$view), 'class' => 'form-group']])->textInput(['maxlength' => true, 'readonly' => !$edit]) ?>
-
-                    <?php
-                    $userAbacDto = new UserAbacDto('up_telegram_enable');
-                    $userAbacDto->isNewRecord = $model->isNewRecord;
-                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Telegram Enable field view*/
-                    $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Telegram Enable field edit*/
-                    $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                    ?>
-                    <?= $form->field($modelProfile, 'up_telegram_enable', ['options' => ['hidden' => ($edit ? !$edit : !$view), 'class' => 'form-group']])->checkbox(['disabled' => !$edit]) ?>
-                </div>
-                <div class="col-md-3">
-                    <?php
-                    $userAbacDto = new UserAbacDto('up_auto_redial');
-                    $userAbacDto->isNewRecord = $model->isNewRecord;
-                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Auto redial field view*/
-                    $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Auto redial field edit*/
-                    $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                    ?>
-                    <?= $form->field($modelProfile, 'up_auto_redial', ['options' => ['hidden' => ($edit ? !$edit : !$view), 'class' => 'form-group']])->checkbox(['disabled' => !$edit]) ?>
-
-                    <?php
-                    $userAbacDto = new UserAbacDto('up_kpi_enable');
-                    $userAbacDto->isNewRecord = $model->isNewRecord;
-                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, KPI enable field view*/
-                    $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, KPI enable field edit*/
-                    $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                    ?>
-                    <?= $form->field($modelProfile, 'up_kpi_enable', ['options' => ['hidden' => ($edit ? !$edit : !$view), 'class' => 'form-group']])->checkbox(['disabled' => !$edit]) ?>
-
-                    <?php
-                    $userAbacDto = new UserAbacDto('up_show_in_contact_list');
-                    $userAbacDto->isNewRecord = $model->isNewRecord;
-                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Show in contact list field view*/
-                    $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Show in contact list field edit*/
-                    $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                    ?>
-                    <?= $form->field($modelProfile, 'up_show_in_contact_list', ['options' => ['hidden' => ($edit ? !$edit : !$view), 'class' => 'form-group']])->checkbox(['disabled' => !$edit]) ?>
-
-                    <?php
-                    $userAbacDto = new UserAbacDto('up_call_recording_disabled');
-                    $userAbacDto->isNewRecord = $model->isNewRecord;
-                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Call recording disabled  field view*/
-                    $view = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW);
-                    /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Call recording disabled  field edit*/
-                    $edit = Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT);
-                    ?>
-                    <?= $form->field($modelProfile, 'up_call_recording_disabled', ['options' => ['hidden' => ($edit ? !$edit : !$view), 'class' => 'form-group']])->checkbox(['disabled' => !$edit]) ?>
+        <h5>Profile Settings</h5>
+        <div class="well">
+            <div class="form-group">
+                <div class="row">
+                    <?php if ($form->fieldAccess->canViewJoinDate() || $form->fieldAccess->canEditJoinDate()) : ?>
+                        <div class="col-md-3">
+                            <?= $activeForm->field(
+                                $form,
+                                'up_join_date',
+                                ['options' => ['class' => 'form-group']]
+                            )->widget(
+                                \dosamigos\datepicker\DatePicker::class,
+                                [
+                                    'clientOptions' => [
+                                        'autoclose' => true,
+                                        'format' => 'yyyy-mm-dd',
+                                    ],
+                                    'options' => [
+                                        'autocomplete' => 'off',
+                                        'placeholder' => 'Choose Date',
+                                        'disabled' => !$form->fieldAccess->canEditJoinDate()
+                                    ],
+                                    ]
+                            ) ?>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($form->fieldAccess->canViewSkill() || $form->fieldAccess->canEditSkill()) : ?>
+                        <div class="col-md-3">
+                            <?= $activeForm
+                                ->field($form, 'up_skill', ['options' => ['class' => 'form-group']])
+                                ->dropDownList(\common\models\UserProfile::SKILL_TYPE_LIST, [
+                                    'prompt' => '---',
+                                    'disabled' => !$form->fieldAccess->canEditSkill()
+                                ]) ?>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($form->fieldAccess->canViewCallTypeId() || $form->fieldAccess->canEditCallTypeId()) : ?>
+                        <div class="col-md-3">
+                            <?= $activeForm->field(
+                                $form,
+                                'up_call_type_id',
+                                ['options' => ['class' => 'form-group']]
+                            )->dropDownList(
+                                \common\models\UserProfile::CALL_TYPE_LIST,
+                                ['disabled' => !$form->fieldAccess->canEditCallTypeId()]
+                            ) ?>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($form->fieldAccess->canView2faSecret() || $form->fieldAccess->canEdit2faSecret()) : ?>
+                        <div class="col-md-3">
+                            <?= $activeForm->field(
+                                $form,
+                                'up_2fa_secret',
+                                ['options' => ['class' => 'form-group']]
+                            )->textInput([
+                                'maxlength' => true,
+                                'title' => 'Clean for reset',
+                                'readonly' => !$form->fieldAccess->canEdit2faSecret()
+                                ])->label('2fa secret') ?>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($form->fieldAccess->canView2faEnable() || $form->fieldAccess->canEdit2faEnable()) : ?>
+                        <div class="col-md-3">
+                            <?= $activeForm->field(
+                                $form,
+                                'up_2fa_enable',
+                                ['options' => ['class' => 'form-group']]
+                            )->checkbox(['disabled' => !$form->fieldAccess->canEdit2faEnable()]) ?>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($form->fieldAccess->canViewTelegram() || $form->fieldAccess->canEditTelegram()) : ?>
+                        <div class="col-md-3">
+                            <?= $activeForm->field(
+                                $form,
+                                'up_telegram',
+                                ['options' => ['class' => 'form-group']]
+                            )->textInput([
+                                'maxlength' => true,
+                                'readonly' => !$form->fieldAccess->canEditTelegram()
+                                ]) ?>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($form->fieldAccess->canViewTelegramEnable() || $form->fieldAccess->canEditTelegramEnable()) : ?>
+                        <div class="col-md-3">
+                            <?= $activeForm->field(
+                                $form,
+                                'up_telegram_enable',
+                                ['options' => ['class' => 'form-group']]
+                            )->checkbox(['disabled' => !$form->fieldAccess->canEditTelegramEnable()]) ?>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($form->fieldAccess->canViewAutoRedial() || $form->fieldAccess->canEditAutoRedial()) : ?>
+                        <div class="col-md-3">
+                            <?= $activeForm->field(
+                                $form,
+                                'up_auto_redial',
+                                ['options' => ['class' => 'form-group']]
+                            )->checkbox(['disabled' => !$form->fieldAccess->canEditAutoRedial()]) ?>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($form->fieldAccess->canViewKpiEnable() || $form->fieldAccess->canEditKpiEnable()) : ?>
+                        <div class="col-md-3">
+                            <?= $activeForm->field(
+                                $form,
+                                'up_kpi_enable',
+                                ['options' => ['class' => 'form-group']]
+                            )->checkbox(['disabled' => !$form->fieldAccess->canEditKpiEnable()]) ?>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($form->fieldAccess->canViewShowInContactList() || $form->fieldAccess->canEditShowInContactList()) : ?>
+                        <div class="col-md-3">
+                            <?= $activeForm->field(
+                                $form,
+                                'up_show_in_contact_list',
+                                ['options' => ['class' => 'form-group']]
+                            )->checkbox(['disabled' => !$form->fieldAccess->canEditShowInContactList()]) ?>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($form->fieldAccess->canViewCallRecordingDisabled() || $form->fieldAccess->canEditCallRecordingDisabled()) : ?>
+                        <div class="col-md-3">
+                            <?= $activeForm->field(
+                                $form,
+                                'up_call_recording_disabled',
+                                ['options' => ['class' => 'form-group']]
+                            )->checkbox(['disabled' => !$form->fieldAccess->canEditCallRecordingDisabled()]) ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
+        <div class="form-group text-center">
+            <?= Html::submitButton(
+                '<i class="fa fa-save"></i> Update & Save User data',
+                ['class' => 'btn btn-warning']
+            ) ?>
+        </div>
+        <?php ActiveForm::end() ?>
     </div>
-    <?php //endif; ?>
 
-            <div class="form-group text-center">
-                <?= Html::submitButton(($model->isNewRecord ? '<i class="fa fa-plus"></i> Create User' : '<i class="fa fa-save"></i> Update & Save User data'), ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-warning']) ?>
-            </div>
-    <?php ActiveForm::end() ?>
-</div>
+    <div class="col-sm-7">
 
-<div class="col-sm-7">
 
-    <?php if (!$model->isNewRecord) : ?>
         <div class="user-project-params-index">
             <h4>Project Params</h4>
 
-            <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
             <?php \yii\widgets\Pjax::begin(['id' => 'pjax-grid-upp']); ?>
             <p>
-                <?php //= Html::a('Create User Project Params', ['user-project-params/create'], ['class' => 'btn btn-success']) ?>
-
                 <?php echo Html::a(
                     '<i class="glyphicon glyphicon-plus"></i> Create Project Params',
                     null,
@@ -810,28 +681,22 @@ JS;
                         'title' => 'Create Project Params',
                         //'data-toggle'=>'modal',
                         //'data-target'=>'#activity-modal',
-                        'data-user_id' => $model->id,
+                        'data-user_id' => $form->updaterUser->id,
                         'data-pjax' => '0',
                     ]
                 );
-                ?>
-
+?>
             </p>
-
-
             <?= \yii\grid\GridView::widget([
-                'dataProvider' => $dataProvider,
-                //'filterModel' => $searchModel,
+                'dataProvider' => $userProjectParamsDataProvider,
                 'columns' => [
                     ['class' => 'yii\grid\SerialColumn'],
-
-
                     [
                         'attribute' => 'upp_project_id',
                         'value' => function (\common\models\UserProjectParams $model) {
                             return $model->uppProject ? '' . $model->uppProject->name . '' : '-';
                         },
-                        'filter' => $projectList
+                        'filter' => $form->availableList->getProjects(),
                         //'format' => 'raw'
                         //'contentOptions' => ['class' => 'text-right']
                     ],
@@ -890,39 +755,6 @@ JS;
                             return $model->upp_vm_id ? $model->voiceMail->uvm_name : null;
                         },
                     ],
-                    //'upp_tw_sip_id',
-
-                    /*[
-                        'label' => 'Action',
-                        'value' => function(\common\models\UserProjectParams $model) {
-                            return Html::a('<i class="glyphicon glyphicon-edit"></i> Update',
-                                 ['user-project-params/update','upp_user_id' => $model->upp_user_id, 'upp_project_id' => $model->upp_project_id, 'redirect' => 'employee/update?id='.$model->upp_user_id],
-                                [
-                                    'class' => 'btn btn-xs btn-warning',
-                                    'title' => 'Update Params',
-                                    'data-toggle'=>'modal',
-                                    'data-target'=>'#modal-dialog',
-                                    'data-id' => $model->upp_user_id . '_' . $model->upp_project_id,
-                                    //'data-pjax' => '0',
-                                ]
-                            );
-
-                        },
-                        'format' => 'raw'
-                    ],*/
-
-                    //'upp_created_dt',
-                    //'upp_updated_dt',
-                    /*[
-                        'attribute' => 'upp_updated_dt',
-                        'value' => function(\common\models\UserProjectParams $model) {
-                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->upp_updated_dt));
-                        },
-                        'format' => 'raw',
-                    ],*/
-
-
-
                     [
                         'class' => ActionColumn::class,
                         'template' => '{update} {delete}',
@@ -956,10 +788,10 @@ JS;
                     [
                         'class' => 'btn btn-success btn-xs add-voice-mail',
                         'title' => 'Add Voice Mail',
-                        'data-user_id' => $model->id,
+                        'data-user_id' => $form->updaterUser->id,
                         'data-pjax' => '0',
                     ]
-                )?>
+                ) ?>
             </p>
 
             <?= \yii\grid\GridView::widget([
@@ -1001,12 +833,12 @@ JS;
             <?php \yii\widgets\Pjax::end(); ?>
         </div>
 
-        <?php if (Auth::can('user-product-type/list')) :?>
+        <?php if (Auth::can('user-product-type/list')) : ?>
             <div class="user-product-type">
                 <h4>Product Type</h4>
                 <?php \yii\widgets\Pjax::begin(['id' => 'pjax-grid-product-type']); ?>
 
-                <?php if (Auth::can('user-product-type/create')) :?>
+                <?php if (Auth::can('user-product-type/create')) : ?>
                     <p>
                         <?php echo Html::a(
                             '<i class="glyphicon glyphicon-plus"></i> Add Product Type',
@@ -1014,16 +846,16 @@ JS;
                             [
                                 'class' => 'btn btn-success btn-xs add-product-type',
                                 'title' => 'Add Product Type',
-                                'data-user_id' => $model->id,
-                                'data-user_name' => $model->username,
+                                'data-user_id' => $form->updaterUser->id,
+                                'data-user_name' => $form->updaterUser->username,
                                 'data-pjax' => '0',
                             ]
-                        )?>
+                        ) ?>
                     </p>
                 <?php endif ?>
 
                 <?= \yii\grid\GridView::widget([
-                    'dataProvider' => $dataUserProductType,
+                    'dataProvider' => $dataUserProductTypeDataProvider,
                     'columns' => [
                         [
                             'attribute' => 'upt_product_type_id',
@@ -1056,7 +888,11 @@ JS;
                                 },
                                 'delete' => static function ($url) {
                                     if (Auth::can('user-product-type/delete')) {
-                                        $deleteButton = Html::a('<span class="glyphicon glyphicon-trash"></span>', $url, []);
+                                        $deleteButton = Html::a(
+                                            '<span class="glyphicon glyphicon-trash"></span>',
+                                            $url,
+                                            []
+                                        );
                                     } else {
                                         $deleteButton = Html::tag('span', '', [
                                             'class' => 'glyphicon glyphicon-trash text-secondary',
@@ -1071,79 +907,34 @@ JS;
                 ]); ?>
                 <?php \yii\widgets\Pjax::end(); ?>
             </div>
-        <?php endif ?>
 
+            <?php if (Auth::user()->isAdmin() || Auth::user()->isSuperAdmin()) : ?>
+                <div class="user-failed-login">
+                    <h5>User Failed Login</h5>
 
-        <?php if (Auth::user()->isAdmin() || Auth::user()->isSuperAdmin()) :?>
-            <div class="user-failed-login">
-                <h5>User Failed Login</h5>
+                    <?php \yii\widgets\Pjax::begin(['id' => 'pjax-grid-user-failed']); ?>
 
-                <?php /*if ($model->isBlocked()) :?>
+                    <?= \yii\grid\GridView::widget([
+                        'dataProvider' => $dataLastFailedLoginDataProvider,
+                        'rowOptions' => static function (UserFailedLogin $UserFailedLogin, $index, $widget, $grid) {
+                            if ($UserFailedLogin->ufl_created_dt > $UserFailedLogin->limitDateTime) {
+                                return ['class' => 'danger'];
+                            }
+                        },
+                        'columns' => [
+                            'ufl_ip',
+                            'ufl_ua',
+                            'ufl_session_id',
+                            'ufl_created_dt:byUserDateTime',
+                        ],
+                    ]); ?>
+                    <?php \yii\widgets\Pjax::end(); ?>
+                </div>
 
-                        <?php echo Html::a('<i class="glyphicon glyphicon-remove-circle"></i> User Blocked',null,
-                            [
-                                'class' => 'btn btn-warning btn-xs unblock-user',
-                                'title' => 'Click to unblock user',
-                                'data-user_id' => $model->id,
-                                'data-pjax' => '0',
-                            ]
-                        )?>
+            <?php endif ?>
 
-                <?php endif*/ ?>
-
-                <?php \yii\widgets\Pjax::begin(['id' => 'pjax-grid-user-failed']); ?>
-
-                <?= \yii\grid\GridView::widget([
-                    'dataProvider' => $lastFailedLoginAttempts,
-                    'rowOptions' => static function (UserFailedLogin $UserFailedLogin, $index, $widget, $grid) {
-                        if ($UserFailedLogin->ufl_created_dt > $UserFailedLogin->limitDateTime) {
-                            return ['class' => 'danger'];
-                        }
-                    },
-                    'columns' => [
-                        'ufl_ip',
-                        'ufl_ua',
-                        'ufl_session_id',
-                        'ufl_created_dt:byUserDateTime',
-                    ],
-                ]); ?>
-                <?php \yii\widgets\Pjax::end(); ?>
-            </div>
-
-        <?php endif ?>
-
-        <?php /*
-        <div class="card card-default">
-            <div class="panel-heading collapsing-heading">
-                <?= Html::a('Seller Contact Info <i class="collapsing-heading__arrow"></i>', '#seller-contact-info', [
-                    'data-toggle' => 'collapse',
-                    'class' => 'collapsing-heading__collapse-link'
-                ]) ?>
-            </div>
-            <div class="panel-body panel-collapse collapse in" id="seller-contact-info">
-                <?= $this->render('partial/_sellerContactInfo', [
-                    'model' => $model
-                ]) ?>
-            </div>
-        </div>
-        */ ?>
-
-
-    <?php endif; ?>
-    <?php /*= $this->render('partial/_activities', [
-        'model' => $model
-    ])*/ ?>
-
-    <?php /*
-    if (!$model->isNewRecord && !$model->isAdmin()) {
-        echo $this->render('partial/_permissions', [
-            'model' => $model,
-            'isProfile' => $isProfile
-        ]);
-    }*/
-    ?>
-</div>
-
+        <?php endif; ?>
+    </div>
 
 <?php
 
