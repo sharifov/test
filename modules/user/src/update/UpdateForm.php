@@ -4,17 +4,14 @@ namespace modules\user\src\update;
 
 use common\components\validators\IsArrayValidator;
 use common\models\Employee;
-use modules\shiftSchedule\src\entities\shift\Shift;
-use modules\user\src\abac\dto\UserAbacDto;
-use modules\user\src\abac\UserAbacObject;
-use src\model\clientChatChannel\entity\ClientChatChannel;
+use common\models\UserParams;
+use common\models\UserProfile;
 use yii\base\Model;
 use yii\helpers\ArrayHelper;
 
 /**
  * Class UpdateForm
  *
- * @property int $userId
  * @property string $username
  * @property string $email
  * @property string $full_name
@@ -30,11 +27,39 @@ use yii\helpers\ArrayHelper;
  * @property $client_chat_user_channel
  * @property $user_shift_assigns
  *
- * @property Employee $updater
+ * @property $up_work_start_tm
+ * @property $up_work_minutes
+ * @property $up_timezone
+ * @property $up_base_amount
+ * @property $up_commission_percent
+ * @property $up_bonus_active
+ * @property $up_leaderboard_enabled
+ * @property $up_inbox_show_limit_leads
+ * @property $up_default_take_limit_leads
+ * @property $up_min_percent_for_take_leads
+ * @property $up_frequency_minutes
+ * @property $up_call_expert_limit
+ * @property $up_call_user_level
+ *
+ * @property $up_join_date
+ * @property $up_skill
+ * @property $up_call_type_id
+ * @property $up_2fa_secret
+ * @property $up_2fa_enable
+ * @property $up_telegram
+ * @property $up_telegram_enable
+ * @property $up_auto_redial
+ * @property $up_kpi_enable
+ * @property $up_show_in_contact_list
+ * @property $up_call_recording_disabled
+ *
+ * @property Employee $targetUser
+ * @property Employee $updaterUser
+ * @property FieldAccess $fieldAccess
+ * @property AvailableList $availableList
  */
 class UpdateForm extends Model
 {
-    public $userId;
     public $username;
     public $email;
     public $full_name;
@@ -50,13 +75,44 @@ class UpdateForm extends Model
     public $client_chat_user_channel;
     public $user_shift_assigns;
 
-    public Employee $updater;
+    public $up_work_start_tm;
+    public $up_work_minutes;
+    public $up_timezone;
+    public $up_base_amount;
+    public $up_commission_percent;
+    public $up_bonus_active;
+    public $up_leaderboard_enabled;
+    public $up_inbox_show_limit_leads;
+    public $up_default_take_limit_leads;
+    public $up_min_percent_for_take_leads;
+    public $up_frequency_minutes;
+    public $up_call_expert_limit;
+    public $up_call_user_level;
 
-    public function __construct(Employee $targetUser, Employee $updater, $config = [])
+    public $up_join_date;
+    public $up_skill;
+    public $up_call_type_id;
+    public $up_2fa_secret;
+    public $up_2fa_enable;
+    public $up_telegram;
+    public $up_telegram_enable;
+    public $up_auto_redial;
+    public $up_kpi_enable;
+    public $up_show_in_contact_list;
+    public $up_call_recording_disabled;
+
+    public Employee $targetUser;
+    public Employee $updaterUser;
+    public FieldAccess $fieldAccess;
+    public AvailableList $availableList;
+
+    public function __construct(Employee $targetUser, Employee $updaterUser, $config = [])
     {
-        $this->updater = $updater;
+        $this->targetUser = $targetUser;
+        $this->updaterUser = $updaterUser;
+        $this->fieldAccess = new FieldAccess($updaterUser, false);
+        $this->availableList = new AvailableList($updaterUser);
 
-        $this->userId = $targetUser->id;
         $this->username = $targetUser->username;
         $this->email = $targetUser->email;
         $this->full_name = $targetUser->full_name;
@@ -72,6 +128,17 @@ class UpdateForm extends Model
         $this->client_chat_user_channel = ArrayHelper::map($targetUser->clientChatUserChannel, 'ccuc_channel_id', 'ccuc_channel_id');
         $this->user_shift_assigns = ArrayHelper::map($targetUser->userShiftAssigns, 'usa_sh_id', 'usa_sh_id');
 
+        if (!$userParams = $targetUser->userParams) {
+            $userParams = new UserParams();
+        }
+        $this->setAttributes($userParams->getAttributes());
+
+        if (!$profile = $targetUser->userProfile) {
+            $profile = new UserProfile();
+            $profile->up_join_date = date('Y-m-d');
+        }
+        $this->setAttributes($profile->getAttributes());
+
         parent::__construct($config);
     }
 
@@ -79,287 +146,71 @@ class UpdateForm extends Model
     {
         return [
             ['username', 'required', 'when' => function () {
-                return $this->canEditUsername();
+                return $this->fieldAccess->canEditUsername();
             }],
 
             ['email', 'required', 'when' => function () {
-                return $this->canEditEmail();
+                return $this->fieldAccess->canEditEmail();
             }],
 
             ['full_name', 'required', 'when' => function () {
-                return $this->canEditFullName();
+                return $this->fieldAccess->canEditFullName();
             }],
 
             ['nickname', 'required', 'when' => function () {
-                return $this->canEditNickname();
+                return $this->fieldAccess->canEditNickname();
             }],
 
             ['status', 'required', 'when' => function () {
-                return $this->canEditStatus();
+                return $this->fieldAccess->canEditStatus();
             }],
 
             ['form_roles', 'required', 'when' => function () {
-                return $this->canEditRoles();
+                return $this->fieldAccess->canEditRoles();
             }],
             ['form_roles', IsArrayValidator::class],
-            ['form_roles', 'each', 'rule' => ['in', 'range' => array_keys($this->getAvailableRoles())]],
+            ['form_roles', 'each', 'rule' => ['in', 'range' => array_keys($this->availableList->getRoles())]],
 
             ['user_groups', IsArrayValidator::class],
-            ['user_groups', 'each', 'rule' => ['in', 'range' => array_keys($this->getAvailableUserGroups())]],
+            ['user_groups', 'each', 'rule' => ['in', 'range' => array_keys($this->availableList->getUserGroups())]],
 
             ['user_projects', IsArrayValidator::class],
-            ['user_projects', 'each', 'rule' => ['in', 'range' => array_keys($this->getAvailableProjects())]],
+            ['user_projects', 'each', 'rule' => ['in', 'range' => array_keys($this->availableList->getProjects())]],
 
             ['user_departments', IsArrayValidator::class],
-            ['user_departments', 'each', 'rule' => ['in', 'range' => array_keys($this->getAvailableDepartments())]],
+            ['user_departments', 'each', 'rule' => ['in', 'range' => array_keys($this->availableList->getDepartments())]],
 
             ['client_chat_user_channel', IsArrayValidator::class],
-            ['client_chat_user_channel', 'each', 'rule' => ['in', 'range' => array_keys($this->getAvailableClientChatUserChannels())]],
+            ['client_chat_user_channel', 'each', 'rule' => ['in', 'range' => array_keys($this->availableList->getClientChatUserChannels())]],
 
             ['user_shift_assigns', IsArrayValidator::class],
-            ['user_shift_assigns', 'each', 'rule' => ['in', 'range' => array_keys($this->getAvailableUserShiftAssign())]],
+            ['user_shift_assigns', 'each', 'rule' => ['in', 'range' => array_keys($this->availableList->getUserShiftAssign())]],
+
+            ['up_work_start_tm', 'safe'],
+            ['up_work_minutes', 'safe'],
+            ['up_timezone', 'safe'],
+            ['up_base_amount', 'safe'],
+            ['up_commission_percent', 'safe'],
+            ['up_bonus_active', 'safe'],
+            ['up_leaderboard_enabled', 'safe'],
+            ['up_inbox_show_limit_leads', 'safe'],
+            ['up_default_take_limit_leads', 'safe'],
+            ['up_min_percent_for_take_leads', 'safe'],
+            ['up_frequency_minutes', 'safe'],
+            ['up_call_expert_limit', 'safe'],
+            ['up_call_user_level', 'safe'],
+
+            ['up_join_date', 'safe'],
+            ['up_skill', 'safe'],
+            ['up_call_type_id', 'safe'],
+            ['up_2fa_secret', 'safe'],
+            ['up_2fa_enable', 'safe'],
+            ['up_telegram', 'safe'],
+            ['up_telegram_enable', 'safe'],
+            ['up_auto_redial', 'safe'],
+            ['up_kpi_enable', 'safe'],
+            ['up_show_in_contact_list', 'safe'],
+            ['up_call_recording_disabled', 'safe'],
         ];
-    }
-
-    public function canViewStatus(): bool
-    {
-        $userAbacDto = new UserAbacDto('status');
-        $userAbacDto->isNewRecord = false;
-        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Status field view*/
-        return \Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, $this->updater);
-    }
-
-    public function canEditStatus(): bool
-    {
-        $userAbacDto = new UserAbacDto('status');
-        $userAbacDto->isNewRecord = false;
-        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Status field edit*/
-        return \Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, $this->updater);
-    }
-
-    public function canViewNickname(): bool
-    {
-        $userAbacDto = new UserAbacDto('nickname');
-        $userAbacDto->isNewRecord = false;
-        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Nickname field view*/
-        return \Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, $this->updater);
-    }
-
-    public function canEditNickname(): bool
-    {
-        $userAbacDto = new UserAbacDto('nickname');
-        $userAbacDto->isNewRecord = false;
-        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Nickname field edit*/
-        return \Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, $this->updater);
-    }
-
-    public function canViewPassword(): bool
-    {
-        $userAbacDto = new UserAbacDto('password');
-        $userAbacDto->isNewRecord = false;
-        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Password field view*/
-        return \Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, $this->updater);
-    }
-
-    public function canEditPassword(): bool
-    {
-        $userAbacDto = new UserAbacDto('password');
-        $userAbacDto->isNewRecord = false;
-        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Password field edit*/
-        return \Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, $this->updater);
-    }
-
-    public function canViewFullName(): bool
-    {
-        $userAbacDto = new UserAbacDto('full_name');
-        $userAbacDto->isNewRecord = false;
-        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Full name field view*/
-        return \Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, $this->updater);
-    }
-
-    public function canEditFullName(): bool
-    {
-        $userAbacDto = new UserAbacDto('full_name');
-        $userAbacDto->isNewRecord = false;
-        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Full name field edit*/
-        return \Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, $this->updater);
-    }
-
-    public function canViewEmail(): bool
-    {
-        $userAbacDto = new UserAbacDto('email');
-        $userAbacDto->isNewRecord = false;
-        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Email field view*/
-        return \Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, $this->updater);
-    }
-
-    public function canEditEmail(): bool
-    {
-        $userAbacDto = new UserAbacDto('email');
-        $userAbacDto->isNewRecord = false;
-        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Email field edit*/
-        return \Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, $this->updater);
-    }
-
-    public function canViewUsername(): bool
-    {
-        $userAbacDto = new UserAbacDto('username');
-        $userAbacDto->isNewRecord = false;
-        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, Username field view*/
-        return \Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, $this->updater);
-    }
-
-    public function canEditUsername(): bool
-    {
-        $userAbacDto = new UserAbacDto('username');
-        $userAbacDto->isNewRecord = false;
-        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, Username field edit*/
-        return \Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, $this->updater);
-    }
-
-    public function getAvailableRoles(): array
-    {
-        //todo validate available roles for updater user
-        return Employee::getAllRoles($this->updater);
-    }
-
-    public function canEditRoles(): bool
-    {
-        $userAbacDto = new UserAbacDto('form_roles');
-        $userAbacDto->isNewRecord = false;
-        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, User Roles field edit*/
-        return \Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, $this->updater);
-    }
-
-    public function canViewRoles(): bool
-    {
-        $userAbacDto = new UserAbacDto('form_roles');
-        $userAbacDto->isNewRecord = false;
-        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, User Roles field view*/
-        return \Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, $this->updater);
-    }
-
-    public function getAvailableUserGroups(): array
-    {
-        if ($this->updater->isAdmin() || $this->updater->isSuperAdmin() || $this->updater->isUserManager()) {
-            return \common\models\UserGroup::getList();
-        }
-
-        if ($this->updater->isSupervision()) {
-            return $this->updater->getUserGroupList();
-        }
-
-        return [];
-    }
-
-    public function canViewUserGroups(): bool
-    {
-        $userAbacDto = new UserAbacDto('user_groups');
-        $userAbacDto->isNewRecord = false;
-        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, User Groups field view*/
-        return \Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, $this->updater);
-    }
-
-    public function canEditUserGroups(): bool
-    {
-        $userAbacDto = new UserAbacDto('user_groups');
-        $userAbacDto->isNewRecord = false;
-        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, User Groups field edit*/
-        return \Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, $this->updater);
-    }
-
-    public function getAvailableProjects(): array
-    {
-        if ($this->updater->isAdmin() || $this->updater->isSuperAdmin() || $this->updater->isUserManager()) {
-            return \common\models\Project::getList();
-        }
-
-        if ($this->updater->isSupervision()) {
-            return \yii\helpers\ArrayHelper::map($this->updater->projects, 'id', 'name');
-        }
-
-        return [];
-    }
-
-    public function canViewProjects(): bool
-    {
-        $userAbacDto = new UserAbacDto('user_projects');
-        $userAbacDto->isNewRecord = false;
-        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, User Projects field view*/
-        return \Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, $this->updater);
-    }
-
-    public function canEditProjects(): bool
-    {
-        $userAbacDto = new UserAbacDto('user_projects');
-        $userAbacDto->isNewRecord = false;
-        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, User Projects field edit*/
-        return \Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, $this->updater);
-    }
-
-    public function getAvailableDepartments(): array
-    {
-        //todo validate available departments for updater user
-        return \common\models\Department::getList();
-    }
-
-    public function canViewDepartments(): bool
-    {
-        $userAbacDto = new UserAbacDto('user_departments');
-        $userAbacDto->isNewRecord = false;
-        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, User Departments field view*/
-        return \Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, $this->updater);
-    }
-
-    public function canEditDepartments(): bool
-    {
-        $userAbacDto = new UserAbacDto('user_departments');
-        $userAbacDto->isNewRecord = false;
-        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, User Departments field edit*/
-        return \Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, $this->updater);
-    }
-
-    public function getAvailableClientChatUserChannels(): array
-    {
-        //todo validate available client chats for updater user
-        return ClientChatChannel::getList();
-    }
-
-    public function canViewClientChatUserChannels(): bool
-    {
-        $userAbacDto = new UserAbacDto('client_chat_user_channel');
-        $userAbacDto->isNewRecord = false;
-        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, User Client Chat User Channels field view*/
-        return \Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, $this->updater);
-    }
-
-    public function canEditClientChatUserChannels(): bool
-    {
-        $userAbacDto = new UserAbacDto('client_chat_user_channel');
-        $userAbacDto->isNewRecord = false;
-        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, User Client Chat User Channels field edit*/
-        return \Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, $this->updater);
-    }
-
-    public function getAvailableUserShiftAssign(): array
-    {
-        //todo validate available shifts for updater user
-        return Shift::getList();
-    }
-
-    public function canViewUserShiftAssign(): bool
-    {
-        $userAbacDto = new UserAbacDto('user_shift_assigns');
-        $userAbacDto->isNewRecord = false;
-        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, User Shift Assigns field view*/
-        return \Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, $this->updater);
-    }
-
-    public function canEditUserShiftAssign(): bool
-    {
-        $userAbacDto = new UserAbacDto('user_shift_assigns');
-        $userAbacDto->isNewRecord = false;
-        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, User Shift Assigns field edit*/
-        return \Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, $this->updater);
     }
 }
