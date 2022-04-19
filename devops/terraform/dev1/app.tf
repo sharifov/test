@@ -30,13 +30,13 @@ resource "aws_lb_target_group" "app" {
   vpc_id   = var.VPC_ID
 
   health_check {
-    path = "/"
-    port = "traffic-port"
-    timeout = 3
-    interval = 5
-    healthy_threshold = 4
+    path                = "/"
+    port                = "traffic-port"
+    timeout             = 3
+    interval            = 5
+    healthy_threshold   = 4
     unhealthy_threshold = 2
-    matcher = "200-400"
+    matcher             = "200-400"
   }
 }
 
@@ -73,13 +73,13 @@ resource "aws_lb_target_group" "ws" {
   }
 
   health_check {
-    path = "/"
-    port = "traffic-port"
-    timeout = 3
-    interval = 5
-    healthy_threshold = 4
+    path                = "/"
+    port                = "traffic-port"
+    timeout             = 3
+    interval            = 5
+    healthy_threshold   = 4
     unhealthy_threshold = 2
-    matcher = "400"
+    matcher             = "400"
   }
 }
 
@@ -102,13 +102,13 @@ resource "aws_lb_target_group" "centrifugo" {
   }
 
   health_check {
-    path = "/health"
-    port = "traffic-port"
-    timeout = 3
-    interval = 5
-    healthy_threshold = 4
+    path                = "/health"
+    port                = "traffic-port"
+    timeout             = 3
+    interval            = 5
+    healthy_threshold   = 4
     unhealthy_threshold = 2
-    matcher = "200"
+    matcher             = "200"
   }
 }
 
