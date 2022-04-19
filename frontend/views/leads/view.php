@@ -572,7 +572,7 @@ $isAgent = Auth::user()->isAgent();
                         'market_price',
                     ],
                 ]) ?>
-            <?php else: ?>
+            <?php else : ?>
                 <?php echo Yii::$app->formatter->nullDisplay ?>
             <?php endif ?>
         </div>

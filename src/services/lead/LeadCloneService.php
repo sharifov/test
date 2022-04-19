@@ -10,8 +10,6 @@ use src\repositories\lead\LeadRepository;
 use src\repositories\lead\LeadSegmentRepository;
 use src\services\ServiceFinder;
 use src\services\TransactionManager;
-use src\services\lead\LeadPreferencesCloneService;
-
 
 /**
  * Class LeadAssignService
@@ -30,7 +28,6 @@ class LeadCloneService
     private $serviceFinder;
     private $leadPreferencesCloneService;
 
-
     public function __construct(
         LeadRepository $leadRepository,
         LeadSegmentRepository $leadSegmentRepository,
@@ -38,7 +35,6 @@ class LeadCloneService
         EventDispatcher $eventDispatcher,
         ServiceFinder $serviceFinder,
         LeadPreferencesCloneService $leadPreferencesCloneService
-
     ) {
         $this->leadRepository = $leadRepository;
         $this->leadSegmentRepository = $leadSegmentRepository;
@@ -63,7 +59,6 @@ class LeadCloneService
         return $this->transactionManager->wrap(function () use ($lead, $ownerId, $creatorId, $reason) {
 
             $ownerOfOriginalLead = $lead->employee_id;
-            
             $clone = $lead->createClone($reason);
             $clone->processing($ownerId, $creatorId, $reason);
             $this->leadRepository->save($clone);
