@@ -16,7 +16,8 @@ class m220419_042957_create_client_chat_survey_response_table extends Migration
             '[[ccsr_id]]' => $this->primaryKey(),
             '[[ccsr_client_chat_survey_id]]' => $this->integer()->notNull(),
             '[[ccsr_question]]' => $this->text()->notNull(),
-            '[[ccsr_response]]' => $this->text()->notNull()
+            '[[ccsr_response]]' => $this->text()->notNull(),
+            '[[ccsr_created_dt]]' => $this->timestamp()
         ]);
 
         $this->addForeignKey('FK-client_chat_survey_response-ccsr_client_chat_survey_id', '{{%client_chat_survey_response}}', '[[ccsr_client_chat_survey_id]]', '{{%client_chat_survey}}', '[[ccs_id]]');
