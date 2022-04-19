@@ -2,11 +2,19 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
+use yii\grid\GridView;
+use yii\grid\ActionColumn;
+use yii\helpers\Url;
 use common\models\ClientChatSurvey;
+use common\models\ClientChatSurveyResponse;
+use common\models\search\ClientChatSurveyResponseSearch;
+use yii\data\ActiveDataProvider;
 
 /**
  * @var $this yii\web\View
  * @var $model \common\models\ClientChatSurvey
+ * @var $clientChatSurveyResponseSearchModel ClientChatSurveyResponseSearch
+ * @var $clientChatSurveyResponseDataProvider ActiveDataProvider
  **/
 
 $this->title = $model->ccs_id;
@@ -60,6 +68,32 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
                 'ccs_created_dt:byUserDateTime'
             ]
+        ]);
+    } catch (\Exception $e) {
+        echo Html::tag('pre', $e->getMessage());
+    }
+    ?>
+
+    <?= Html::tag('h2', 'Responses'); ?>
+
+    <?= Html::tag('p', Html::a('Create Client Chat Survey Response', ['client-chat-survey-response/create', 'ccs_id' => $model->ccs_id], ['class' => 'btn btn-success'])) ?>
+
+    <?php
+    try {
+        echo GridView::widget([
+            'dataProvider' => $clientChatSurveyResponseDataProvider,
+            'filterModel' => $clientChatSurveyResponseSearchModel,
+            'columns' => [
+                'ccsr_id',
+                'ccsr_question',
+                'ccsr_response',
+                [
+                    'class' => ActionColumn::class,
+                    'urlCreator' => static function ($action, ClientChatSurveyResponse $model, $key, $index, $column): string {
+                        return Url::toRoute(["client-chat-survey-response/{$action}", 'ccsr_id' => $model->ccsr_id]);
+                    }
+                ],
+            ],
         ]);
     } catch (\Exception $e) {
         echo Html::tag('pre', $e->getMessage());

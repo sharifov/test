@@ -37,11 +37,21 @@ class ClientChatSurveyResponse extends ActiveRecord
         ];
     }
 
+    public function attributeLabels(): array
+    {
+        return [
+          'ccsr_id' => 'ID',
+          'ccsr_client_chat_survey_id' => 'Client Chat Survey ID',
+          'ccsr_question' => 'Question',
+          'ccsr_response' => 'Response'
+        ];
+    }
+
     /**
      * @return \yii\db\ActiveQuery
      */
     public function getClientChatSurvey()
     {
-        return $this->hasOne(ClientChatSurvey::class, ['id' => 'ccsr_client_chat_survey_id']);
+        return $this->hasOne(ClientChatSurvey::class, ['ccs_id' => 'ccsr_client_chat_survey_id']);
     }
 }

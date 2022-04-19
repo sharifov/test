@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use common\models\ClientChatSurvey;
+use common\models\search\ClientChatSurveyResponseSearch;
 use common\models\search\ClientChatSurveySearch;
 use yii\filters\VerbFilter;
 use yii\web\NotFoundHttpException;
@@ -52,8 +53,13 @@ class ClientChatSurveyController extends FController
      */
     public function actionView($ccs_id)
     {
+        $clientChatSurveyResponseSearchModel = new ClientChatSurveyResponseSearch();
+        $clientChatSurveyResponseDataProvider = $clientChatSurveyResponseSearchModel->searchByClientChatSurveyId($ccs_id, $this->request->queryParams);
+
         return $this->render('view', [
-            'model' => $this->findModel($ccs_id)
+            'model' => $this->findModel($ccs_id),
+            'clientChatSurveyResponseSearchModel' => $clientChatSurveyResponseSearchModel,
+            'clientChatSurveyResponseDataProvider' => $clientChatSurveyResponseDataProvider
         ]);
     }
 
