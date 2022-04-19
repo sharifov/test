@@ -30,19 +30,23 @@ class ClientChatSurvey extends ActiveRecord
     const STATUS_SUBMITTED = 2;
     const STATUS_REJECT = 3;
 
+    const TYPE_FULLSCREEN = 'fullscreen';
+    const TYPE_INLINE = 'inline';
+    const TYPE_STICKY = 'sticky';
+    const TYPE_QUESTIONS = 'questions';
+
     const STATUS_LIST = [
         self::STATUS_PENDING => 'PENDING',
         self::STATUS_SUBMITTED => 'SUBMITTED',
         self::STATUS_REJECT => 'REJECT'
     ];
 
-    /**
-     * @return array
-     */
-    public static function statusList(): array
-    {
-        return self::STATUS_LIST;
-    }
+    const TYPE_LIST = [
+        self::TYPE_FULLSCREEN => 'FULLSCREEN',
+        self::TYPE_INLINE => 'INLINE',
+        self::TYPE_STICKY => 'STICKY',
+        self::TYPE_QUESTIONS => 'QUESTIONS'
+    ];
 
     /**
      * @param int $id
@@ -51,6 +55,15 @@ class ClientChatSurvey extends ActiveRecord
     public static function statusName(int $id): string
     {
         return self::STATUS_LIST[$id];
+    }
+
+    /**
+     * @param string $identity
+     * @return string
+     */
+    public static function typeName(string $identity): string
+    {
+        return self::TYPE_LIST[$identity];
     }
 
     /**
