@@ -120,6 +120,7 @@ use yii\db\ActiveRecord;
  * @property Quotable|null $childQuote
  * @property string|null $detailsPageUrl
  * @property string|null $diffUrl
+ * @property-read  ProductQuoteRefund[]|null $productQuoteRefundAccepted
  */
 class ProductQuote extends \yii\db\ActiveRecord implements Serializable
 {
@@ -341,6 +342,27 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function getProductQuoteRefundsActive(): ActiveQuery
     {
         return $this->hasMany(ProductQuoteRefund::class, ['pqr_product_quote_id' => 'pq_id'])->andWhere(['pqr_status_id' => SettingHelper::getActiveQuoteRefundStatuses()]);
+    }
+
+    /**
+     * Gets query for [[ProductQuoteRefunds]].
+     *
+     * @return ActiveQuery
+     */
+    public function getProductQuoteRefundAccepted(): ActiveQuery
+    {
+        return $this->hasMany(ProductQuoteRefund::class, ['pqr_product_quote_id' => 'pq_id'])
+            ->andWhere(['pqr_status_id' => SettingHelper::getAcceptedQuoteRefundStatuses()]);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isProductQuoteRefundAccepted(): bool
+    {
+        return $this->getProductQuoteRefundAccepted()
+            ->limit(1)
+            ->exists();
     }
 
     /**
