@@ -135,8 +135,7 @@ $scheduleTotalData = [];
                             }?>
                             <tr>
                                 <th title="<?= Html::encode($assignShift->shift->sh_title)?>">
-                                    <i class="fa fa-circle" <?= $assignShift->shift->sh_color ? 'style="color: ' .
-                                        Html::encode($assignShift->shift->sh_color) . '"' : ''?>></i> &nbsp;
+                                    <?= $assignShift->shift->getColorLabel(); ?>&nbsp; &nbsp;
                                     <?= Html::encode($assignShift->shift->sh_name)?>
                                 </th>
                                 <td>

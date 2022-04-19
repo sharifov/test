@@ -30,6 +30,8 @@ use yii\db\BaseActiveRecord;
  * @property int|null $uss_created_user_id
  * @property int|null $uss_updated_user_id
  * @property int|null $uss_sst_id
+ * @property string $uss_year_start
+ * @property int $uss_month_start
  *
  * @property string $statusName
  * @property string $typeName
@@ -78,6 +80,7 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
                 ],
                 'value' => date('Y-m-d H:i:s'),
             ],
+
             'user' => [
                 'class' => BlameableBehavior::class,
                 'attributes' => [
@@ -88,10 +91,22 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
         ];
     }
 
+    public function beforeSave($insert): bool
+    {
+        if (!$this->uss_year_start) {
+            $this->uss_year_start = date('Y', strtotime($this->uss_start_utc_dt));
+        }
+        if (!$this->uss_month_start) {
+            $this->uss_month_start = (int) date('m', strtotime($this->uss_start_utc_dt));
+        }
+        return parent::beforeSave($insert);
+    }
+
     public function rules(): array
     {
         return [
             ['uss_user_id', 'required'],
+
             ['uss_user_id', 'integer', 'max' => self::MAX_VALUE_INT],
             ['uss_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class,
                 'targetAttribute' => ['uss_user_id' => 'id']],
@@ -128,6 +143,9 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
             ['uss_created_user_id', 'integer'],
             ['uss_updated_user_id', 'integer'],
             ['uss_sst_id', 'integer'],
+
+            ['uss_year_start', 'integer', 'max' => 2200, 'min' => 2000],
+            ['uss_month_start', 'integer', 'max' => 12, 'min' => 1],
 
             [['uss_sst_id'], 'exist', 'skipOnError' => true, 'targetClass' => ShiftScheduleType::class,
                 'targetAttribute' => ['uss_sst_id' => 'sst_id']],
@@ -189,6 +207,8 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
             'uss_created_user_id' => 'Created User',
             'uss_updated_user_id' => 'Updated User',
             'uss_sst_id' => 'Schedule Type',
+            'uss_year_start' => 'Year Start',
+            'uss_month_start' => 'Month Start',
         ];
     }
 
