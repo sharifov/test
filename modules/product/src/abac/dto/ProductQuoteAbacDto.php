@@ -20,6 +20,7 @@ use src\entities\cases\Cases;
  * @property bool $hasPqrActive
  * @property bool $hasPqcActive
  * @property bool $hasPqrAccepted;
+ * @property bool $hasPqcAccepted;
  * @property bool $hasPqcInvoluntaryActive
  * @property int $prTypeId
  * @property int|null $prProjectId
@@ -44,6 +45,7 @@ class ProductQuoteAbacDto extends \stdClass
     public bool $hasPqrActive;
     public bool $hasPqcActive;
     public bool $hasPqrAccepted;
+    public bool $hasPqcAccepted;
     public bool $hasPqcInvoluntaryActive;
     public int $prTypeId;
     public ?int $prProjectId;
@@ -72,6 +74,7 @@ class ProductQuoteAbacDto extends \stdClass
             $this->hasPqrActive = (bool)$productQuote->productQuoteRefundsActive;
             $this->hasPqcActive = (bool)$productQuote->productQuoteChangesActive;
             $this->hasPqrAccepted = $productQuote->isProductQuoteRefundAccepted();
+            $this->hasPqcAccepted = $productQuote->isProductQuoteChangeAccepted();
             $this->hasPqcInvoluntaryActive = (bool)$productQuote->productQuoteInvoluntaryChangesActive;
 
             $this->prTypeId = $productQuote->pqProduct->pr_type_id;
