@@ -1,6 +1,5 @@
 <?php
 
-use common\models\Call;
 use common\models\Client;
 use src\helpers\app\AppHelper;
 use src\model\callLog\entity\callLog\CallLog;

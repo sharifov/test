@@ -1,7 +1,7 @@
 <?php
 
-use yii\db\Migration;
 use common\models\BillingInfo;
+use yii\db\Migration;
 
 /**
  * Class m211028_093858_add_column_bi_hash_to_billing_info_tbl

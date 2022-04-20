@@ -11,36 +11,22 @@ class SearchShiftScheduleRule extends ShiftScheduleRule
     {
         return [
             ['ssr_created_dt', 'safe'],
-
             ['ssr_created_user_id', 'integer'],
-
             ['ssr_cron_expression', 'safe'],
-
             ['ssr_cron_expression_exclude', 'safe'],
-
             ['ssr_duration_time', 'integer'],
-
             ['ssr_enabled', 'integer'],
-
             ['ssr_end_time_loc', 'safe'],
-
             ['ssr_end_time_utc', 'safe'],
-
             ['ssr_id', 'integer'],
-
             ['ssr_shift_id', 'integer'],
-
             ['ssr_start_time_loc', 'safe'],
-
             ['ssr_start_time_utc', 'safe'],
-
             ['ssr_timezone', 'safe'],
-
             ['ssr_title', 'safe'],
-
             ['ssr_updated_dt', 'safe'],
-
             ['ssr_updated_user_id', 'integer'],
+            ['ssr_sst_id', 'integer'],
         ];
     }
 
@@ -50,6 +36,10 @@ class SearchShiftScheduleRule extends ShiftScheduleRule
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => ['defaultOrder' => ['ssr_id' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
         ]);
 
         $this->load($params);
@@ -72,6 +62,7 @@ class SearchShiftScheduleRule extends ShiftScheduleRule
             'date(ssr_updated_dt)' => $this->ssr_updated_dt,
             'ssr_created_user_id' => $this->ssr_created_user_id,
             'ssr_updated_user_id' => $this->ssr_updated_user_id,
+            'ssr_sst_id' => $this->ssr_sst_id,
         ]);
 
         $query->andFilterWhere(['like', 'ssr_title', $this->ssr_title])

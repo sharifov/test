@@ -104,9 +104,7 @@ return [
             'username' => env('COMMON_CONFIG_MAIN_COMPONENTS_COMMUNICATION_USERNAME'),
             'password' => env('COMMON_CONFIG_MAIN_COMPONENTS_COMMUNICATION_PASSWORD'),
             'voipApiUsername' => env('COMMON_CONFIG_MAIN_COMPONENTS_COMMUNICATION_VOIPAPIUSERNAME'),
-            'xAccelRedirectUrl' => env('COMMON_CONFIG_MAIN_COMPONENTS_COMMUNICATION_XACCELREDIRECTURL'),
             'xAccelRedirectCommunicationUrl' => env('COMMON_CONFIG_MAIN_COMPONENTS_COMMUNICATION_XACCELREDIRECTCOMMUNICATIONURL'),
-            'recordingUrl' => env('COMMON_CONFIG_MAIN_COMPONENTS_COMMUNICATION_RECORDINGURL')
         ],
         'hybrid' => [
             'class' => \common\components\HybridService::class,

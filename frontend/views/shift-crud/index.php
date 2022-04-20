@@ -24,14 +24,23 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <?php Pjax::begin(['id' => 'pjax-shift', 'scrollTo' => 0]); ?>
-        <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+        <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            'sh_id',
-            'sh_name',
+            ['attribute' => 'sh_id', 'options' => [
+                'style' => 'width: 80px'
+            ]],
+            //'sh_name',
+            [
+                'attribute' => 'sh_name',
+                'value' => static function (Shift $model) {
+                    return $model->getColorLabel() . ' ' . Html::encode($model->sh_name);
+                },
+                'format' => 'raw'
+            ],
             'sh_title',
             [
                 'attribute' => 'sh_category_id',
@@ -40,6 +49,21 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'filter' => ShiftCategoryQuery::getList()
             ],
+
+
+            [
+                'label' => 'Rules',
+                'value' => static function (Shift $model) {
+                    return $model->shiftScheduleRules ? Html::a(
+                        count($model->shiftScheduleRules),
+                        ['shift-schedule-rule-crud/index', 'SearchShiftScheduleRule[ssr_shift_id]' => $model->sh_id],
+                        ['data-pjax' => 0]
+                    )
+                        : '-';
+                },
+                'format' => 'raw'
+            ],
+
             ['class' => \common\components\grid\BooleanColumn::class, 'attribute' => 'sh_enabled'],
             'sh_color',
             'sh_sort_order',

@@ -1398,7 +1398,9 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public function getUgsGroups()
     {
-        return $this->hasMany(UserGroup::class, ['ug_id' => 'ugs_group_id'])->viaTable('user_group_assign', ['ugs_user_id' => 'id']);
+        return $this->hasMany(UserGroup::class, ['ug_id' => 'ugs_group_id'])
+            ->viaTable('user_group_assign', ['ugs_user_id' => 'id'])
+            ->orderBy(['ug_name' => SORT_ASC]);
     }
 
     /**

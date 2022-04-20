@@ -3,13 +3,17 @@
 namespace frontend\controllers;
 
 use Exception;
+use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
+use modules\shiftSchedule\src\entities\userShiftAssign\UserShiftAssign;
 use modules\shiftSchedule\src\entities\userShiftSchedule\search\SearchUserShiftSchedule;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\shiftSchedule\src\services\UserShiftScheduleService;
 use src\auth\Auth;
 use src\helpers\app\AppHelper;
+use src\helpers\setting\SettingHelper;
 use Yii;
+use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
@@ -28,10 +32,15 @@ class ShiftScheduleController extends FController
     public function behaviors(): array
     {
         $behaviors = [
-            'verbs' => [
-                'class' => VerbFilter::class,
-                'actions' => [
-                    'delete' => ['POST'],
+            'access' => [
+                'class' => AccessControl::class,
+                'rules' => [
+                    /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_ACCESS, Access to page shift-schedule/index */
+                    [
+                        'actions' => ['index', 'my-data-ajax', 'generate-example', 'remove-user-data', 'get-event', 'generate-user-schedule', 'legend-ajax'],
+                        'allow' => \Yii::$app->abac->can(null, ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_ACCESS),
+                        'roles' => ['@'],
+                    ],
                 ],
             ],
         ];
@@ -93,6 +102,7 @@ class ShiftScheduleController extends FController
 
         $dataProvider = $searchModel->searchByUserId(Yii::$app->request->queryParams, $user->id, $startDate, $endDate);
 
+        $assignedShifts = UserShiftAssign::find()->where(['usa_user_id' => $user->id])->all();
 
         return $this->render('index', [
             'searchModel' => $searchModel,
@@ -102,6 +112,7 @@ class ShiftScheduleController extends FController
             'scheduleSumData' => $scheduleSumData,
             'userTimeZone' => $userTimeZone,
             'user' => $user,
+            'assignedShifts' => $assignedShifts,
         ]);
     }
 
@@ -118,6 +129,21 @@ class ShiftScheduleController extends FController
 
         $timelineList = UserShiftScheduleService::getTimelineListByUser($userId, $startDt, $endDt);
         return UserShiftScheduleService::getCalendarTimelineJsonData($timelineList);
+    }
+
+    /**
+     * @return array
+     */
+    public function actionLegendAjax()
+    {
+        //\Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $scheduleTypes = ShiftScheduleType::find()->where(['sst_enabled' => true])->all();
+
+
+        return $this->renderPartial('partial/_legend', [
+            'scheduleTypes' => $scheduleTypes,
+        ]);
     }
 
 
@@ -146,6 +172,27 @@ class ShiftScheduleController extends FController
         $userId = Auth::id();
         if (UserShiftScheduleService::removeDataByUser($userId)) {
             Yii::$app->session->addFlash('success', 'Successfully: Remove example data UserId (' . $userId . ')!');
+        }
+        return $this->redirect(['index']);
+    }
+
+    /**
+     * @return Response
+     * @throws Exception
+     */
+    public function actionGenerateUserSchedule(): Response
+    {
+        $userId = Auth::id();
+        $setting = SettingHelper::getShiftSchedule();
+        $data = [];
+        $limit = $setting['days_limit'] ?? 0;
+        $offset = $setting['days_offset'] ?? 0;
+        $data = UserShiftScheduleService::generateUserSchedule($limit, $offset, null, [$userId]);
+
+        if ($data) {
+            Yii::$app->session->addFlash('success', 'Successfully: Generate User Schedule data (' . count($data) . ')!');
+        } else {
+            Yii::$app->session->addFlash('error', 'Error: Generate User Schedule data is empty!');
         }
         return $this->redirect(['index']);
     }
