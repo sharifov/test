@@ -6,6 +6,7 @@ use modules\flight\models\Flight;
 use modules\flight\models\FlightPax;
 use modules\flight\models\FlightQuote;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuoteData\ProductQuoteDataKey;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
@@ -98,6 +99,36 @@ use yii\helpers\Html;
         <?php else : ?>
             <div class="alert alert-warning alert-dismissible fade show" role="alert">
                 <strong>Flight Quote Pax Prices</strong> data is empty.
+            </div>
+        <?php endif ?>
+
+        <h2><i class="fa fa-cubes"></i> Product Quote Data:</h2>
+        <?php if ($pqDatas = $productQuote->productQuoteData) : ?>
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered">
+                    <tr>
+                        <th style="width: 50px">Nr</th>
+                        <th>Name</th>
+                        <th>Value</th>
+                        <th>Created</th>
+                        <th>Updated</th>
+                    </tr>
+                    <?php foreach ($pqDatas as $nr => $pqData) : ?>
+                        <tr>
+                            <td><?= ($nr + 1) ?>.</td>
+                            <td title="Name key ID: <?= Html::encode($pqData->pqd_key) ?>">
+                                <span class="badge badge-primary"><?= Html::encode(ProductQuoteDataKey::getList()[$pqData->pqd_key]) ?></span>
+                            </td>
+                            <td class="text-center"><?= Html::encode($pqData->pqd_value) ?></td>
+                            <td class="text-center"><?= $pqData->pqd_created_dt ?></td>
+                            <td class="text-center"><?= $pqData->pqd_updated_dt ?></td>
+                        </tr>
+                    <?php endforeach ?>
+                </table>
+            </div>
+        <?php else : ?>
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <strong>Product Quote Data</strong> is empty.
             </div>
         <?php endif ?>
 
