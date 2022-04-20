@@ -42,11 +42,11 @@ function initCronExpressionApp(id, curValue) {
             }
         },
         mounted() {
-            if (curValue) {
+            if (curValue.length > 0) {
                 this.expression = curValue;
                 this.parse();
             } else {
-                this.generate();
+                // this.generate();
             }
         }
     }).mount('#' + id);
