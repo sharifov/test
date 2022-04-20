@@ -1,12 +1,15 @@
 <?php
 
+use common\models\Setting;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
+use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundStatus;
 use yii\db\Migration;
 use yii\db\Query;
 
 /**
- * Class m220419_114345_add_settings_accepted_quote_refund_statuses
+ * Class m220419_114345_add_settings_accepted_quote_refund_and_change_statuses
  */
-class m220419_114345_add_settings_accepted_quote_refund_statuses extends Migration
+class m220419_114345_add_settings_accepted_quote_refund_and_change_statuses extends Migration
 {
     public const TABLE_SETTING_CATEGORY = '{{%setting_category}}';
     public const TABLE_SETTING = '{{%setting}}';
@@ -30,15 +33,28 @@ class m220419_114345_add_settings_accepted_quote_refund_statuses extends Migrati
         if ($settingCategory) {
             $this->insert(self::TABLE_SETTING, [
                 's_key' => 'accepted_quote_refund_statuses',
-                's_name' => 'Refund statuses of the accepted product quote ',
-                's_type' => 'array',
+                's_name' => 'Refund statuses of the accepted product quote',
+                's_type' => Setting::TYPE_ARRAY,
                 's_value' => json_encode([
-                    5 => 'COMPLETED',
-                    7 => 'PROCESSING',
+                    ProductQuoteRefundStatus::COMPLETED => 'COMPLETED',
+                    ProductQuoteRefundStatus::PROCESSING => 'PROCESSING',
                 ]),
                 's_updated_dt' => date('Y-m-d H:i:s'),
                 's_category_id' => $settingCategory['sc_id'],
                 's_description' => 'Refund statuses of the accepted product quote for Voluntary Exchange',
+            ]);
+
+            $this->insert(self::TABLE_SETTING, [
+                's_key' => 'accepted_quote_change_statuses',
+                's_name' => 'Change statuses of the accepted product quote',
+                's_type' => Setting::TYPE_ARRAY,
+                's_value' => json_encode([
+                    ProductQuoteChangeStatus::PROCESSING => 'PROCESSING',
+                    ProductQuoteChangeStatus::IN_PROGRESS => 'IN_PROGRESS',
+                ]),
+                's_updated_dt' => date('Y-m-d H:i:s'),
+                's_category_id' => $settingCategory['sc_id'],
+                's_description' => 'Change statuses of the accepted product quote for Voluntary Exchange',
             ]);
 
             if (Yii::$app->cache) {
@@ -52,7 +68,10 @@ class m220419_114345_add_settings_accepted_quote_refund_statuses extends Migrati
      */
     public function safeDown()
     {
-        $this->delete(self::TABLE_SETTING, ['s_key' => 'accepted_quote_refund_statuses']);
+        $this->delete(
+            self::TABLE_SETTING,
+            ['in', 's_key',  ['accepted_quote_refund_statuses', 'accepted_quote_change_statuses']]
+        );
     }
 
     /**
