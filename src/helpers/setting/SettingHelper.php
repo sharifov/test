@@ -942,12 +942,27 @@ class SettingHelper
         ], 'SettingsHelper:leadRedialExcludeAttributesErrorLog');
     }
 
-    public static function getShiftSchedule(): array
+    private static function getShiftSchedule(): array
     {
         return Yii::$app->params['settings']['shift_schedule'] ?? [
-                'enabled'                => false,
+                'generate_enabled'        => false,
                 'days_limit'              => 20,
                 'days_offset'             => 0
             ];
+    }
+
+    public static function getShiftScheduleGenerateEnabled(): bool
+    {
+        return (bool) (self::getShiftSchedule()['generate_enabled'] ?? false);
+    }
+
+    public static function getShiftScheduleDaysLimit(): int
+    {
+        return (int) (self::getShiftSchedule()['days_limit'] ?? 20);
+    }
+
+    public static function getShiftScheduleDaysOffset(): int
+    {
+        return (int) (self::getShiftSchedule()['days_offset'] ?? 0);
     }
 }

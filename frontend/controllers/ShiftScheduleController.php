@@ -183,16 +183,14 @@ class ShiftScheduleController extends FController
     public function actionGenerateUserSchedule(): Response
     {
         $userId = Auth::id();
-        $setting = SettingHelper::getShiftSchedule();
-        $data = [];
-        $limit = $setting['days_limit'] ?? 0;
-        $offset = $setting['days_offset'] ?? 0;
+        $limit = SettingHelper::getShiftScheduleDaysLimit();
+        $offset = SettingHelper::getShiftScheduleDaysOffset();
         $data = UserShiftScheduleService::generateUserSchedule($limit, $offset, null, [$userId]);
 
         if ($data) {
             Yii::$app->session->addFlash('success', 'Successfully: Generate User Schedule data (' . count($data) . ')!');
         } else {
-            Yii::$app->session->addFlash('error', 'Error: Generate User Schedule data is empty!');
+            Yii::$app->session->addFlash('warning', 'Warning: Generate User Schedule data is empty!');
         }
         return $this->redirect(['index']);
     }

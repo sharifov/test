@@ -45,10 +45,9 @@ $scheduleTotalData = [];
             ) ?>
             <?= Html::a(
                 '<i class="fa fa-play-circle"></i> Generate User Schedule (' .
-                (empty(SettingHelper::getShiftSchedule()['days_limit']) ? '-' :
-                    SettingHelper::getShiftSchedule()['days_limit'] . ' days') . ')',
+                SettingHelper::getShiftScheduleDaysLimit() . ' days' . ')',
                 ['generate-user-schedule'],
-                ['class' => 'btn btn-success']
+                ['class' => 'btn btn-success'],
             ) ?>
 
             <?= Html::a('<i class="fa fa-remove"></i> Remove All User Schedule Data', ['remove-user-data'], [
