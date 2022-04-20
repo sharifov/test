@@ -1,5 +1,7 @@
 <?php
 
+use modules\cases\src\abac\update\UpdateAbacDto;
+use modules\cases\src\abac\update\UpdateAbacObject;
 use src\model\cases\useCases\cases\updateInfo\UpdateInfoForm;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
@@ -10,10 +12,10 @@ use yii\helpers\Url;
 /* @var $model UpdateInfoForm */
 /* @var $form yii\widgets\ActiveForm */
 /* @var $categoryList [] */
+
 ?>
 <?php Pjax::begin(['id' => 'pjax-cases-update-form']); ?>
 <div class="cases-change-status">
-
     <?php $form = ActiveForm::begin([
         'action' => ['/cases/ajax-update', 'gid' => $model->getCaseGid()],
         'method' => 'post',
@@ -23,26 +25,33 @@ use yii\helpers\Url;
     <?php
     echo $form->errorSummary($model);
     ?>
+
     <?= $form->field($model, 'depId')->dropDownList($model->getdepartmentList(), [
         'prompt' => '-',
-        'onchange' => '
-            $( "#' . Html::getInputId($model, 'categoryId') . '").prop("disabled", true);
+        'disabled' => !$model->fieldAccess->canEditDepartment(),
+        'onchange' => $model->fieldAccess->canEditCategory() ?
+            '$( "#' . Html::getInputId($model, 'categoryId') . '").prop("disabled", true);
             $.get( "' . Url::to(['/cases/get-categories']) . '", { id: $(this).val() } )
                 .done(function( data ) {
                     $( "#' . Html::getInputId($model, 'categoryId') . '" ).html( data );
                     $( "#' . Html::getInputId($model, 'categoryId') . '").prop("disabled", false);
                 }
             );
-        '
-    ]) ?>
+        ' : '$( "#' . Html::getInputId($model, 'categoryId') . '").prop("disabled", true);'
+    ]);
+    ?>
 
-    <?= $form->field($model, 'categoryId')->dropDownList($model->getCategoryList(), ['prompt' => '-']) ?>
+    <?= $form->field($model, 'categoryId')->dropDownList($model->getCategoryList(), [
+        'prompt' => '-',
+        'disabled' => !$model->fieldAccess->canEditCategory(),
+    ]);
+    ?>
 
     <?= $form->field($model, 'orderUid')->textInput(['maxlength' => 7]) ?>
 
     <?= $form->field($model, 'subject')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'description')->textarea(['rows' => 4]) ?>
+    <?= $form->field($model, 'description')->textarea(['rows' => 4, 'disabled' => !$model->fieldAccess->canEditDescription()]); ?>
 
     <div class="form-group text-center">
         <?= Html::submitButton('Update', ['class' => 'btn btn-warning']) ?>
@@ -50,11 +59,9 @@ use yii\helpers\Url;
 
     <?php ActiveForm::end(); ?>
 </div>
-<?php
-if (count($model->getdepartmentList()) === 1) {
+<?php if ($model->fieldAccess->canEditDepartment() && (count($model->getdepartmentList()) === 1)) {
     $keyDepartment = array_key_first($model->getdepartmentList());
     $js = '$( "#' . Html::getInputId($model, 'depId') . '" ).val("' . $keyDepartment . '").change();';
     $this->registerJs($js);
-}
-?>
+} ?>
 <?php Pjax::end(); ?>

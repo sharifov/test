@@ -68,6 +68,7 @@ use src\helpers\setting\SettingHelper;
 use src\model\call\useCase\createCall\fromCase\AbacCallFromNumberList;
 use src\model\callLog\entity\callLog\CallLogType;
 use src\model\caseOrder\entity\CaseOrder;
+use src\model\cases\useCases\cases\updateInfo\FieldAccess;
 use src\model\cases\useCases\cases\updateInfo\UpdateInfoForm;
 use src\guards\cases\CaseManageSaleInfoGuard;
 use src\model\cases\useCases\cases\updateInfo\Handler;
@@ -1723,10 +1724,12 @@ class CasesController extends FController
             $case,
             Department::getList(),
             ArrayHelper::map($this->caseCategoryRepository->getEnabledByDep($case->cs_dep_id), 'cc_id', 'cc_name'),
-            Auth::id()
+            Auth::id(),
+            new FieldAccess(Auth::user(), $case),
         );
 
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+
             try {
                 $this->updateHandler->handle($form->getDto());
                 Yii::$app->session->setFlash('success', 'Case information has been updated successfully.');
