@@ -30,35 +30,35 @@ class MonitorFlowController extends Controller
 
     /**
      * @param bool $test
-     * @throws \Throwable
-     * @throws \yii\db\StaleObjectException
+     * @param int $limit
      */
-    public function actionWatchDogDeclineQuote($test = false): void
+    public function actionWatchDogDeclineQuote($test = false, $limit = 5000): void
     {
-        printf("\n --- Start [" . date('Y-m-d H:i:s') . "] %s ---\n", $this->ansiFormat(self::class . '/' . $this->action->id, Console::FG_YELLOW));
-        $time_start = microtime(true);
+        echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
 
-        $resultQuery = Yii::$app->db->createCommand(
-            'SELECT 
-                    `quotes`.`id`,
-                    `quotes`.`uid`,
-                    `quotes`.`lead_id`,
-                    `quotes`.`created`
+        $time_start = microtime(true);
+        $processedCnt = 0;
+        $test = (bool) $test;
+        $limit = (int) $limit;
+
+        $quoteIds = Quote::findBySql(
+            '
+                SELECT 
+                    `quotes`.`id`
                 FROM
                     `quotes`
                 INNER JOIN
                     `leads` ON `quotes`.`lead_id` = `leads`.`id` AND `leads`.`status` NOT IN (:statusLeadBooked, :statusLeadSold, :statusLeadPending)
-                
                 LEFT JOIN (
-                        SELECT 
-                            `quote_applied`.`lead_id`
-                        FROM
-                            `quotes` AS `quote_applied`
-                        WHERE 
-                            `quote_applied`.`status` = :statusAppliedQuote
-                        GROUP BY 
-                            `quote_applied`.`lead_id`
-                
+                    SELECT 
+                        `quote_applied`.`lead_id`
+                    FROM
+                        `quotes` AS `quote_applied`
+                    WHERE 
+                        `quote_applied`.`status` = :statusAppliedQuote
+                    GROUP BY 
+                        `quote_applied`.`lead_id`
                 ) AS `lead_quote_applied`
                 ON 
                     `lead_quote_applied`.`lead_id` = `quotes`.`lead_id`
@@ -68,8 +68,9 @@ class MonitorFlowController extends Controller
                         `quotes`.`created` <= :createdQuote
                     AND 
                        `lead_quote_applied`.`lead_id` IS NULL
-                
-                ORDER BY `quotes`.`id` DESC',
+                ORDER BY `quotes`.`id` DESC 
+                LIMIT :limit
+            ',
             [
                 ':statusLeadBooked' => Lead::STATUS_BOOKED,
                 ':statusLeadSold' => Lead::STATUS_SOLD,
@@ -78,42 +79,43 @@ class MonitorFlowController extends Controller
                 ':statusQuoteCreated' => Quote::STATUS_CREATED,
                 ':statusQuoteSend' => Quote::STATUS_SENT,
                 ':statusQuoteOpen' => Quote::STATUS_OPENED,
-                ':createdQuote' => date('Y-m-d H:i:s', strtotime('-1 day'))
+                ':createdQuote' => date('Y-m-d H:i:s', strtotime('-1 day')),
+                ':limit' => $limit,
             ]
-        )
-        ->queryAll();
+        )->indexBy('id')->asArray()->column();
 
-        foreach ($resultQuery as $quoteData) {
+        if ($quoteIds) {
             try {
-                if (!Quote::updateAll(['status' => Quote::STATUS_DECLINED], ['id' => $quoteData['id']])) {
-                    throw new \RuntimeException('Quote (' . $quoteData['id'] . ') not saved, status not changed to declined.');
-                }
-                if ($test) {
-                    echo sprintf(
-                        'Decline quote: %s. FR: %d, Created: %s',
-                        $quoteData['uid'],
-                        $quoteData['lead_id'],
-                        $quoteData['created']
-                    ) . PHP_EOL;
-                }
+                $processedCnt = Quote::updateAll(['status' => Quote::STATUS_DECLINED], ['IN', 'id', $quoteIds]);
             } catch (\Throwable $throwable) {
-                $message = AppHelper::throwableLog($throwable);
-                $message['data'] = $quoteData;
-                Yii::error($message, 'console:MonitorFlowController:actionWatchDogDeclineQuote:Quote:save');
-                echo 'Quote: ' . $quoteData['id'] . ' ' . VarDumper::dumpAsString($throwable->getMessage()) . PHP_EOL;
+                \Yii::error(AppHelper::throwableLog($throwable), 'MonitorFlowController:actionWatchDogDeclineQuote:Throwable');
             }
-        }
-
-        if ($test) {
-            echo sprintf('Count: %s', count($resultQuery)); // . PHP_EOL;
         }
 
         $time_end = microtime(true);
         $time = number_format(round($time_end - $time_start, 2), 2);
 
-        Yii::info('Execute Time: ' . $time . ', count quotes: ' . count($resultQuery), 'Console:MonitorFlowController/watch-dog-decline-quote');
-        printf("\nExecute Time: %s, count quotes: " . count($resultQuery), $this->ansiFormat($time . ' s', Console::FG_RED));
-        printf("\n --- End [" . date('Y-m-d H:i:s') . "] %s ---\n", $this->ansiFormat(self::class . '/' . $this->action->id, Console::FG_YELLOW));
+        if ($test) {
+            $resultMessage = [
+                'message' => 'WatchDogDeclineQuote result',
+                'limit' => $limit,
+                'processedCnt' => $processedCnt,
+                'quoteIds' => $quoteIds,
+                'executeTime(sec)' => $time,
+            ];
+            $logCategory = 'info\MonitorFlowController:actionWatchDogDeclineQuote:Result';
+        } else {
+            $resultMessage = [
+                'message' => 'Execute Time:(' . $time . '), Count quotes:(' . count($quoteIds) . '), Processed:(' . $processedCnt . ')',
+            ];
+            $logCategory = 'info\Console:MonitorFlowController/watch-dog-decline-quote';
+        }
+
+        \Yii::info($resultMessage, $logCategory);
+
+        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time .
+            ' s] %g Processed: %w[' . $processedCnt . '] %g Count quotes: %w[' . count($quoteIds) . '] %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . ']%n'), PHP_EOL;
     }
 
     /**
