@@ -589,7 +589,6 @@ class FlightQuoteExchangeController extends BaseController
                 throw new \RuntimeException('Case creation Failed', VoluntaryExchangeCodeException::CASE_CREATION_FAILED);
             }
 
-
             $voluntaryExchangeCreateHandler = new VoluntaryExchangeCreateHandler($case, $flightRequest, $this->objectCollection);
             try {
                 $voluntaryExchangeCreateHandler->processing();
@@ -630,6 +629,12 @@ class FlightQuoteExchangeController extends BaseController
             } catch (\Throwable $throwable) {
                 $voluntaryExchangeCreateHandler->failProcess($throwable->getMessage());
                 Yii::error(AppHelper::throwableLog($throwable), 'FlightQuoteExchangeController:AdditionalProcessing');
+            }
+
+            $changeQuote = $voluntaryExchangeCreateHandler->getVoluntaryExchangeQuote();
+            if (!empty($changeQuote)) {
+                $pQuoteData = ProductQuoteData::createConfirmed($changeQuote->pq_id);
+                $this->productQuoteDataRepository->save($pQuoteData);
             }
 
             $dataMessage['resultMessage']         = 'Processing was successful';
