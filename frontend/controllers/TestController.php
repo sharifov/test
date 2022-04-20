@@ -2726,4 +2726,10 @@ class TestController extends FController
 
         //VarDumper::dump($lead->attributes, 10, true);
     }
+
+    public function actionBlameable()
+    {
+        echo 'Blameable ' . Auth::employeeId();
+        die;
+    }
 }

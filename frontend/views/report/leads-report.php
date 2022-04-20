@@ -203,6 +203,7 @@ $list = new ListsAccess(Yii::$app->user->id);
             ]
         ],
         'fontAwesome' => true,
+        'bsVersion' => '3.x',
         'timeout' => 60,
         'target' => \kartik\export\ExportMenu::TARGET_BLANK,
 

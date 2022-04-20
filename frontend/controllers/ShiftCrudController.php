@@ -2,16 +2,14 @@
 
 namespace frontend\controllers;
 
-use src\auth\Auth;
+use modules\shiftSchedule\src\entities\shift\search\SearchShift;
+use modules\shiftSchedule\src\entities\shift\Shift;
 use Yii;
-use src\model\shiftSchedule\entity\shift\Shift;
-use src\model\shiftSchedule\entity\shift\search\SearchShift;
-use yii\web\Controller;
-use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
-use yii\web\Response;
 use yii\db\StaleObjectException;
+use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
+use yii\web\NotFoundHttpException;
+use yii\web\Response;
 
 class ShiftCrudController extends FController
 {

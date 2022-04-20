@@ -17,6 +17,7 @@ use src\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use src\model\coupon\entity\couponSend\CouponSend;
 use src\model\leadUserRating\entity\LeadUserRating;
 use src\model\leadRedial\entity\CallRedialUserAccess;
+use modules\shiftSchedule\src\entities\userShiftAssign\UserShiftAssign;
 use src\model\user\entity\Access;
 use src\model\user\entity\AccessCache;
 use src\model\user\entity\ShiftTime;
@@ -91,6 +92,7 @@ use yii\web\NotFoundHttpException;
  * @property UserStatus $userStatus
  * @property CouponSend[] $couponSend
  * @property LeadUserRating[] $leadUserRatings
+ * @property UserShiftAssign[] $userShiftAssigns
  *
  * @property string|bool|null $timezone
  * @property bool $isAllowCallExpert
@@ -157,6 +159,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public $user_projects;
     public $user_departments;
     public $client_chat_user_channel;
+    public $user_shift_assigns;
 
     private $shiftTime;
     public $currentShiftTaskInfoSummary = [];
@@ -415,7 +418,13 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             [['username'], 'match' ,'pattern' => '/^[a-z0-9_\-\.]+$/i', 'message' => 'Username can contain only characters ("a-z", "0-9", "_", "-", ".")'],
             [['make_user_project_params'], 'boolean'],
             [['password_reset_token'], 'unique'],
-            [['created_at', 'updated_at', 'last_activity', 'acl_rules_activated', 'user_groups', 'user_projects', 'deleted', 'user_departments', 'client_chat_user_channel'], 'safe'],
+            [
+                [
+                    'created_at', 'updated_at', 'last_activity', 'acl_rules_activated', 'user_groups',
+                    'user_projects', 'deleted', 'user_departments', 'client_chat_user_channel', 'user_shift_assigns',
+                ],
+                'safe',
+            ],
         ];
     }
 
@@ -441,6 +450,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             'make_user_project_params' => 'Make user project params (automatic)',
             'full_name' => 'Full Name',
             'client_chat_user_channel' => 'Client chat user channel',
+            'user_shift_assigns' => 'User Shift Assign',
         ];
     }
 
@@ -804,6 +814,10 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $this->hasMany(LeadUserRating::class, ['lur_user_id' => 'id']);
     }
 
+    public function getUserShiftAssigns(): ActiveQuery
+    {
+        return $this->hasMany(UserShiftAssign::class, ['usa_user_id' => 'id']);
+    }
 
     /**
      * @return ActiveQuery
@@ -1384,7 +1398,9 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public function getUgsGroups()
     {
-        return $this->hasMany(UserGroup::class, ['ug_id' => 'ugs_group_id'])->viaTable('user_group_assign', ['ugs_user_id' => 'id']);
+        return $this->hasMany(UserGroup::class, ['ug_id' => 'ugs_group_id'])
+            ->viaTable('user_group_assign', ['ugs_user_id' => 'id'])
+            ->orderBy(['ug_name' => SORT_ASC]);
     }
 
     /**

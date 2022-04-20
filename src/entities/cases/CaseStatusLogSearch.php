@@ -11,6 +11,8 @@ use yii\data\ActiveDataProvider;
  * @property array $statuses
  * @property string $created_date_from
  * @property string $created_date_to
+ * @property int $project_id
+ * @property int $department_id
  */
 class CaseStatusLogSearch extends CaseStatusLog
 {
@@ -19,6 +21,10 @@ class CaseStatusLogSearch extends CaseStatusLog
     public $created_date_from;
 
     public $created_date_to;
+
+    public $project_id;
+
+    public $department_id;
 
     /**
      * @return array
@@ -53,6 +59,10 @@ class CaseStatusLogSearch extends CaseStatusLog
 
             [['created_date_from', 'created_date_to'], 'string'],
 
+            ['project_id', 'integer'],
+
+            ['department_id', 'integer'],
+
         ];
     }
 
@@ -63,6 +73,7 @@ class CaseStatusLogSearch extends CaseStatusLog
     public function search($params): ActiveDataProvider
     {
         $query = CaseStatusLog::find();
+        $query->joinWith(['cases']);
 
         // add conditions that should always apply here
 
@@ -115,6 +126,14 @@ class CaseStatusLogSearch extends CaseStatusLog
 
         if ($this->statuses && is_array($this->statuses)) {
             $query->andWhere(['csl_to_status' => $this->statuses]);
+        }
+
+        if ($this->project_id) {
+            $query->andFilterWhere(['=', 'cases.cs_project_id', $this->project_id]);
+        }
+
+        if ($this->department_id) {
+            $query->andFilterWhere(['=', 'cases.cs_dep_id', $this->department_id]);
         }
 
         return $dataProvider;

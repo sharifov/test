@@ -400,6 +400,7 @@ $select2Properties = [
                 ],
                 'target' => \kartik\export\ExportMenu::TARGET_BLANK,
                 'fontAwesome' => true,
+                'bsVersion' => '3.x',
                 'dropdownOptions' => [
                     'label' => 'Full Export'
                 ],

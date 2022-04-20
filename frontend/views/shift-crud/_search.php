@@ -1,10 +1,10 @@
 <?php
 
-use yii\bootstrap4\Html;
 use common\components\bootstrap4\activeForm\ActiveForm;
+use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model src\model\shiftSchedule\entity\shift\search\SearchShift */
+/* @var $model \modules\shiftSchedule\src\entities\shift\search\SearchShift */
 /* @var $form common\components\bootstrap4\activeForm\ActiveForm */
 ?>
 

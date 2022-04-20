@@ -10,6 +10,7 @@ use common\models\Employee;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
+use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use src\auth\Auth;
 use modules\user\userFeedback\abac\dto\UserFeedbackAbacDto;
 use modules\user\userFeedback\abac\UserFeedbackAbacObject;
@@ -232,6 +233,18 @@ class SideBarMenu extends \yii\bootstrap\Widget
         if ($isAdmin || $user->isKpiEnable()) {
             $menuItems[] = ['label' => 'KPI <span id="kpi" class="label-info label pull-right"></span> ', 'url' => ['/kpi/index'], 'icon' => 'money'];
         }
+
+        /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_ACCESS, Access menu My Shift Schedule */
+        $menuItems[] = [
+            'label' => 'My Shift Schedule <sup style="color: red">NEW</sup>',
+            'url' => ['/shift-schedule/index'],
+            'icon' => 'calendar',
+            'abac'  => [
+                'dto'    => null,
+                'object' => ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE,
+                'action' => ShiftAbacObject::ACTION_ACCESS,
+            ],
+        ];
 
         if (!$isUM) {
             // $cntNotifications = \common\models\Notifications::findNewCount(Yii::$app->user->id);
@@ -699,7 +712,6 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Sale Ticket', 'url' => ['/sale-ticket/index'], 'icon' => 'list'],
                     ]
                 ],
-
                 [
                     'label' => 'Template types',
                     'url' => 'javascript:',
@@ -717,17 +729,33 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     'url' => 'javascript:',
                     'icon' => 'calendar',
                     'items' => [
-                        ['label' => 'Shift', 'url' => ['/shift-crud/index']],
-                        ['label' => 'Shift Category', 'url' => ['/shift-category-crud/index']],
-                        ['label' => 'Shift Schedule Rule', 'url' => ['/shift-schedule-rule-crud/index']],
-                        ['label' => 'User Shift Assign', 'url' => ['/user-shift-assign-crud/index']],
-                        ['label' => 'User Shift Schedule', 'url' => ['/user-shift-schedule-crud/index']],
-                    ]
+                        ['label' => 'Shift CRUD', 'url' => ['/shift-crud/index'], 'title' => 'Shift'],
+                        ['label' => 'Shift Category CRUD', 'url' => ['/shift-category-crud/index'],
+                            'title' => 'Shift category CRUD'],
+                        ['label' => 'Shift Schedule Type CRUD', 'url' => ['/shift/shift-schedule-type/index'],
+                            'title' => 'Shift Schedule Type'],
+                        ['label' => 'Shift Schedule Rule CRUD', 'url' => ['/shift-schedule-rule-crud/index'],
+                            'title' => 'Shift Schedule Rule'],
+                        ['label' => 'User Shift Assign CRUD', 'url' => ['/user-shift-assign-crud/index'],
+                            'title' => 'Shift Schedule User Assign'],
+                        ['label' => 'User Shift Schedule CRUD', 'url' => ['/user-shift-schedule-crud/index'],
+                            'title' => 'User Shift Schedule'],
+                        /** @abac ShiftAbacObject::ACT_USER_SHIFT_ASSIGN, ShiftAbacObject::ACTION_ACCESS, Access menu UserShiftAssign */
+                        [
+                            'label' => 'User Shift Assign',
+                            'url' => ['/shift/user-shift-assign/index'],
+                            'title' => 'Shift',
+                            'icon' => 'user-plus',
+                            'abac'  => [
+                                'dto'    => null,
+                                'object' => ShiftAbacObject::ACT_USER_SHIFT_ASSIGN,
+                                'action' => ShiftAbacObject::ACTION_ACCESS,
+                            ],
+                        ],
+                    ],
                 ],
-
             ]
         ];
-
 
         $userMenuItems = [
             'label' => 'User Addition',
@@ -1154,9 +1182,12 @@ class SideBarMenu extends \yii\bootstrap\Widget
             }
             if (isset($item['abac'])) {
                 try {
-                    if (!$abacDto = $item['abac']['dto'] ?? null) {
-                        throw new \RuntimeException('AbacDto is empty');
+                    $abacItem = (array) $item['abac'];
+                    if (!array_key_exists('dto', $abacItem)) {
+                        throw new \RuntimeException('Abac dto is empty');
                     }
+
+                    $abacDto = $item['abac']['dto'] ?? null;
                     if (!$object = $item['abac']['object'] ?? null) {
                         throw new \RuntimeException('Abac object is empty');
                     }

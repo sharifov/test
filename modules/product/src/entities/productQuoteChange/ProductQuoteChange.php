@@ -85,7 +85,7 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
                 'class' => BlameableBehavior::class,
                 'createdByAttribute' => 'pqc_created_user_id',
                 'updatedByAttribute' => null,
-                'value' => function() {
+                'value' => function () {
                     return Auth::employeeId();
                 }
             ],

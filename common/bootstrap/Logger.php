@@ -22,6 +22,7 @@ use yii\base\BootstrapInterface;
 use yii\base\Event;
 use yii\db\ActiveRecord;
 use yii\db\AfterSaveEvent;
+use common\models\Employee;
 
 class Logger implements BootstrapInterface
 {
@@ -38,6 +39,7 @@ class Logger implements BootstrapInterface
         Cases::class,
         LeadPoorProcessingData::class,
         AbacPolicy::class,
+        Employee::class,
     ];
 
     /**

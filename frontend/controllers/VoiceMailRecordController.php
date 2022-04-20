@@ -193,4 +193,14 @@ class VoiceMailRecordController extends FController
             'count' => VoiceMailRecord::find()->andWhere(['vmr_user_id' => Auth::id(), 'vmr_new' => true, 'vmr_deleted' => false])->count()
         ]);
     }
+
+    public function actionRecord(string $callId)
+    {
+        $record = VoiceMailRecord::find()->andWhere(['vmr_call_id' => $callId])->andWhere(['IS NOT', 'vmr_record_sid', null])->asArray()->one();
+        if (!$record) {
+            throw new NotFoundHttpException();
+        }
+        //todo validate permissions
+        header('X-Accel-Redirect: ' . Yii::$app->communication->xAccelRedirectCommunicationUrl . $record['vmr_record_sid']);
+    }
 }

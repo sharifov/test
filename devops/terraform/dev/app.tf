@@ -16,8 +16,9 @@ resource "aws_instance" "app" {
     Name        = "app${count.index}-${var.PROJECT}-${var.ENV}"
     Environment = var.ENV
     Project     = var.PROJECT
-    Kind        = "app"
     Ns          = var.NAMESPACE
+    Domain      = var.DOMAIN
+    Kind        = "app"
   }
 }
 
@@ -135,7 +136,7 @@ resource "aws_security_group" "app" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = [var.VPC_CIDR]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
@@ -167,7 +168,7 @@ resource "aws_security_group" "app" {
     from_port   = 9100
     to_port     = 9100
     protocol    = "tcp"
-    cidr_blocks = [var.VPC_CIDR]
+    cidr_blocks = [var.VPC_CIDR, var.INFRA_CIDR]
   }
 
   ingress {
@@ -175,7 +176,7 @@ resource "aws_security_group" "app" {
     from_port   = 9479
     to_port     = 9479
     protocol    = "tcp"
-    cidr_blocks = [var.VPC_CIDR]
+    cidr_blocks = [var.VPC_CIDR, var.INFRA_CIDR]
   }
 
   ingress {
@@ -183,7 +184,7 @@ resource "aws_security_group" "app" {
     from_port   = 9280
     to_port     = 9280
     protocol    = "tcp"
-    cidr_blocks = [var.VPC_CIDR]
+    cidr_blocks = [var.VPC_CIDR, var.INFRA_CIDR]
   }
 
   egress {
@@ -198,6 +199,7 @@ resource "aws_security_group" "app" {
     Environment = var.ENV
     Project     = var.PROJECT
     Ns          = var.NAMESPACE
+    Domain      = var.DOMAIN
   }
 }
 

@@ -38,10 +38,9 @@ use yii\httpclient\Response;
  * @property string $url
  * @property string $username
  * @property string $password
- * @property string $recordingUrl
+ * @property string $securityVoiceMailRecordingUrl
  * @property string $securityCallRecordingUrl
  * @property string $securityConferenceRecordingUrl
- * @property string $xAccelRedirectUrl
  * @property string $xAccelRedirectCommunicationUrl
  * @property Request $request
  * @property string $voipApiUsername
@@ -54,10 +53,9 @@ class CommunicationService extends Component implements CommunicationServiceInte
     public $username;
     public $password;
     public $request;
-    public $recordingUrl = '';
+    public $securityVoiceMailRecordingUrl = '/voice-mail-record/record/';
     public $securityCallRecordingUrl = '/call/record/';
     public $securityConferenceRecordingUrl = '/conference/record/';
-    public $xAccelRedirectUrl = '';
     public $xAccelRedirectCommunicationUrl = '';
     public $voipApiUsername = '';
     public $host = '';
@@ -1370,14 +1368,19 @@ class CommunicationService extends Component implements CommunicationServiceInte
         return $out;
     }
 
-    public function getCallRecordingUrl(string $callSid, string $recordingSid): string
+    public function getCallRecordingUrl(string $callSid): string
     {
-        return SettingHelper::isCallRecordingSecurityEnabled() ? (Url::toRoute([$this->securityCallRecordingUrl, 'callSid' => $callSid])) : ($this->recordingUrl . $recordingSid);
+        return Url::toRoute([$this->securityCallRecordingUrl, 'callSid' => $callSid]);
     }
 
-    public function getConferenceRecordingCall(string $conferenceSid, string $recordingSid): string
+    public function getConferenceRecordingUrl(string $conferenceSid): string
     {
-        return SettingHelper::isCallRecordingSecurityEnabled() ? (Url::toRoute([$this->securityConferenceRecordingUrl, 'conferenceSid' => $conferenceSid])) : ($this->recordingUrl . $recordingSid);
+        return Url::toRoute([$this->securityConferenceRecordingUrl, 'conferenceSid' => $conferenceSid]);
+    }
+
+    public function getVoiceMailRecordingUrl(int $callId): string
+    {
+        return Url::toRoute([$this->securityVoiceMailRecordingUrl, 'callId' => $callId]);
     }
 
     /**

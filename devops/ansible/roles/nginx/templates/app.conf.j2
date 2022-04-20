@@ -1,25 +1,24 @@
 server {
-    listen 443 ssl http2;
     listen 8443 ssl http2;
     server_name {{ app_domain }};
 
     charset utf-8;
     client_max_body_size 128M;
-
     fastcgi_buffers 16 16k;
     fastcgi_buffer_size 32k;
 
     ssl_certificate /etc/nginx/ssl/app.crt;
     ssl_certificate_key /etc/nginx/ssl/app.key;
-    add_header Strict-Transport-Security "max-age=31536000; includeSubdomains; preload";
 
     set $base_root {{ app_dir }};
     root $base_root;
+    index index.php;
 
     error_log /var/log/nginx/app-error.log warn;
     access_log /var/log/nginx/app-access.log;
 
-    index index.php;
+    real_ip_header X-Forwarded-For;
+    set_real_ip_from 0.0.0.0/0;
 
     location / {
         proxy_connect_timeout 300;
@@ -45,33 +44,6 @@ server {
         proxy_pass https://{{ common_config_main_components_communication_host }};
     }
 
-    location /admin {
-        proxy_send_timeout 300;
-        proxy_read_timeout 300;
-        proxy_connect_timeout 300;
-        alias $base_root/backend/web/;
-
-        location = /admin/ {
-            return 301 /admin;
-        }
-
-        location = /admin {
-            try_files $uri /backend/web/index.php$is_args$args;
-        }
-
-        try_files $uri $uri/ /backend/web/index.php$is_args$args;
-
-        location ~ ^/admin/.+\.(css|js|ico|png|jpe?g|gif|svg|ttf|mp4|mov|swf|pdf|zip|rar)$ {
-            log_not_found off;
-            access_log off;
-            try_files $uri /backend/web/$1?$args;
-        }
-
-        location ~ ^/admin/assets/.+\.php(/|$) {
-            deny all;
-        }
-    }
-
     location ~ ^/.+\.php(/|$) {
         rewrite (?!^/((frontend|backend)/web|admin))^ /frontend/web$uri break;
         rewrite (?!^/backend/web)^/admin(/.+)$ /backend/web$1 break;
@@ -86,7 +58,7 @@ server {
         fastcgi_connect_timeout 300;
         fastcgi_send_timeout 300;
         fastcgi_read_timeout 300;
-   }
+    }
 
     location ~ /\. {
         deny all;

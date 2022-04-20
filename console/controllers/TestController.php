@@ -162,7 +162,7 @@ class TestController extends Controller
 //        die;
 
         $m = <<<JSON
-{\"message\":\"ConnectionError (31005): Error sent from gateway in HANGUP\",\"causes\":[],\"code\":31005,\"description\":\"Connection error\",\"explanation\":\"A connection error occurred during the call\",\"name\":\"ConnectionError\",\"solutions\":[]}            
+{\"message\":\"ConnectionError (31005): Error sent from gateway in HANGUP\",\"causes\":[],\"code\":31005,\"description\":\"Connection error\",\"explanation\":\"A connection error occurred during the call\",\"name\":\"ConnectionError\",\"solutions\":[]}
 JSON;
 //        $m = preg_replace("/\n/", "", $m);
         $m = preg_replace('/\\\"/', "\"", $m);
@@ -767,6 +767,12 @@ JSON;
     {
         $firstLeadFlow = LeadFlowQuery::getFirstOwnerOfLead(513131);
         var_dump($firstLeadFlow->toArray());
+        die;
+    }
+
+    public function actionBlameable()
+    {
+        echo 'Blameable ' . Auth::employeeId();
         die;
     }
 }

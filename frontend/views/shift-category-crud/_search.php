@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model src\model\shiftSchedule\entity\shiftCategory\search\ShiftCategorySearch */
+/* @var $model \modules\shiftSchedule\src\entities\shiftCategory\search\ShiftCategorySearch */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
