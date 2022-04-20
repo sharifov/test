@@ -578,13 +578,15 @@ class QuoteController extends FController
             'message' => ''
         ];
         try {
-            $searchQuoteRequest = SearchService::getOnlineQuoteByKey($key);
+            if (!$lead = Lead::findOne($leadId)) {
+                throw new \Exception('Lead id(' . $leadId . ') not found');
+            }
+
+            $cid = $lead->project->getAirSearchCid();
+            $searchQuoteRequest = SearchService::getOnlineQuoteByKeySmartSearch($key, $cid);
 
             if (empty($searchQuoteRequest['data'])) {
                 throw new \RuntimeException('Quote not found by key: ' . $key);
-            }
-            if (!$lead = Lead::findOne($leadId)) {
-                throw new \Exception('Lead id(' . $leadId . ') not found');
             }
 
             if ($lead->leadPreferences && !empty($lead->leadPreferences->pref_currency)) {
