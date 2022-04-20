@@ -1,7 +1,7 @@
 ---
 - name: Copy bash scripts
   copy:
-    src: ../../../bash_scritps/
+    src: ../../../bash/
     dest: /usr/local/bin
     owner: root
     group: root
