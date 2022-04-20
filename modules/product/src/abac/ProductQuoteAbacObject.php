@@ -114,7 +114,7 @@ class ProductQuoteAbacObject extends AbacBaseModel implements AbacInterface
         'operators' =>  [self::OP_EQUAL2]
     ];
 
-    protected const ATTR_HAS_PQR_PROCESSING = [
+    protected const ATTR_HAS_PQR_ACCEPTED = [
         'optgroup' => 'PRODUCT QUOTE',
         'id' => self::NS . 'hasPqrAccepted',
         'field' => 'hasPqrAccepted',
@@ -126,7 +126,7 @@ class ProductQuoteAbacObject extends AbacBaseModel implements AbacInterface
         'operators' =>  [self::OP_EQUAL2]
     ];
 
-    protected const ATTR_HAS_PQC_PROCESSING = [
+    protected const ATTR_HAS_PQC_ACCEPTED = [
         'optgroup' => 'PRODUCT QUOTE',
         'id' => self::NS . 'hasPqcAccepted',
         'field' => 'hasPqcAccepted',
@@ -342,8 +342,8 @@ class ProductQuoteAbacObject extends AbacBaseModel implements AbacInterface
             self::ATTR_HAS_PQR_ACTIVE,
             self::ATTR_HAS_PQC_INVOLUNTARY_ACTIVE,
             self::ATTR_HAS_PQC_ACTIVE,
-            self::ATTR_HAS_PQR_PROCESSING,
-            self::ATTR_HAS_PQC_PROCESSING,
+            self::ATTR_HAS_PQR_ACCEPTED,
+            self::ATTR_HAS_PQC_ACCEPTED,
         ]
     ];
 
