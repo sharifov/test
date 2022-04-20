@@ -632,7 +632,7 @@ class FlightQuoteExchangeController extends BaseController
             }
 
             $changeQuote = $voluntaryExchangeCreateHandler->getVoluntaryExchangeQuote();
-            if (!empty($changeQuote)) {
+            if (!empty($changeQuote->pq_id)) {
                 $pQuoteData = ProductQuoteData::createConfirmed($changeQuote->pq_id);
                 $this->productQuoteDataRepository->save($pQuoteData);
             }
