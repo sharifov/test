@@ -1,5 +1,7 @@
 down:
 	$(MAKE) -C docker/local down
+stop:
+	$(MAKE) -C docker/local stop
 up:
 	$(MAKE) -C docker/local up
 restart:

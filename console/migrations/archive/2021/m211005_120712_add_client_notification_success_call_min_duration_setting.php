@@ -2,7 +2,6 @@
 
 use common\models\Setting;
 use common\models\SettingCategory;
-use frontend\helpers\JsonHelper;
 use yii\db\Migration;
 
 /**

@@ -1,8 +1,8 @@
 <?php
 
-use yii\db\Migration;
 use common\models\Employee;
 use console\migrations\RbacMigrationService;
+use yii\db\Migration;
 
 /**
  * Class m220208_074711_add_rbac_permission_for_lead_rating_crud

@@ -56,6 +56,10 @@ return [
         'pattern' => 'conference/record/<conferenceSid>',
         'route' => 'conference/record'
     ],
+    [
+        'pattern' => 'voice-mail-record/record/<callId>',
+        'route' => 'voice-mail-record/record'
+    ],
 
     [
         'pattern' => 'take/<gid>',
