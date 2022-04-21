@@ -28,9 +28,9 @@ resource "aws_lb_listener" "http" {
 resource "aws_lb_listener" "app" {
   load_balancer_arn = aws_lb.app.arn
   port              = 443
-  protocol          = "HTTP"
-  # ssl_policy        = "ELBSecurityPolicy-2016-08"
-  # certificate_arn   = aws_acm_certificate.wildcard_cert.arn
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = aws_acm_certificate.wildcard_cert.arn
 
   default_action {
     target_group_arn = aws_lb_target_group.app.arn
