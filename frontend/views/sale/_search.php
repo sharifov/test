@@ -1,5 +1,6 @@
 <?php
 
+use modules\cases\src\abac\saleList\SaleListAbacObject;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -30,7 +31,7 @@ use yii\widgets\ActiveForm;
                 <li><a href="#">Settings 2</a>
                 </li>
             </ul>
-        </li>*/?>
+        </li>*/ ?>
             </ul>
             <div class="clearfix"></div>
         </div>
@@ -47,15 +48,24 @@ use yii\widgets\ActiveForm;
             <div class="row">
                 <div class="col-md-4">
                     <div class="row">
-                        <div class="col-md-4">
-                            <?= $form->field($model, 'sale_id')->input('number', ['min' => 1]) ?>
-                        </div>
-                        <div class="col-md-4">
-                            <?= $form->field($model, 'ticket_number')->textInput(['maxlength' => true]) ?>
-                        </div>
-                        <div class="col-md-4">
-                            <?= $form->field($model, 'pnr')->textInput(['maxlength' => true]) ?>
-                        </div>
+                        <?php if (!Yii::$app->abac->can(null, SaleListAbacObject::UI_SALE_ID, SaleListAbacObject::ACTION_READ)) : ?>
+                            <div class="col-md-4">
+                                <?= $form->field($model, 'sale_id')->input('number', ['min' => 1]) ?>
+                            </div>
+                            <div class="col-md-4">
+                                <?= $form->field($model, 'ticket_number')->textInput(['maxlength' => true]) ?>
+                            </div>
+                            <div class="col-md-4">
+                                <?= $form->field($model, 'pnr')->textInput(['maxlength' => true]) ?>
+                            </div>
+                        <?php else : ?>
+                            <div class="col-md-6">
+                                <?= $form->field($model, 'ticket_number')->textInput(['maxlength' => true]) ?>
+                            </div>
+                            <div class="col-md-6">
+                                <?= $form->field($model, 'pnr')->textInput(['maxlength' => true]) ?>
+                            </div>
+                        <?php endif; ?>
                     </div>
 
                     <div class="row">
@@ -89,9 +99,6 @@ use yii\widgets\ActiveForm;
                         <div class="col-md-6">
                             <?= $form->field($model, 'phone', ['enableClientValidation' => false])->textInput(['maxlength' => true]) ?>
                         </div>
-<!--                        <div class="col-md-4">-->
-<!--                            --><?php ////= $form->field($model, 'card')->textInput(['maxlength' => true]) ?>
-<!--                        </div>-->
                     </div>
                 </div>
             </div>
