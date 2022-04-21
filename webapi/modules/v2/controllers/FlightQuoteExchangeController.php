@@ -72,6 +72,7 @@ class FlightQuoteExchangeController extends BaseController
      * @param VoluntaryExchangeObjectCollection $voluntaryExchangeObjectCollection
      * @param BoRequestVoluntaryExchangeService $boRequestVoluntaryExchangeService
      * @param ProductQuoteChangeRepository $productQuoteChangeRepository
+     * @param ProductQuoteRefundRepository $productQuoteRefundRepository
      * @param ProductQuoteDataRepository $productQuoteDataRepository
      * @param array $config
      */
@@ -90,8 +91,8 @@ class FlightQuoteExchangeController extends BaseController
         $this->boRequestVoluntaryExchangeService = $boRequestVoluntaryExchangeService;
         $this->productQuoteChangeRepository      = $productQuoteChangeRepository;
         $this->productQuoteDataRepository        = $productQuoteDataRepository;
-        parent::__construct($id, $module, $logger, $config);
         $this->productQuoteRefundRepository = $productQuoteRefundRepository;
+        parent::__construct($id, $module, $logger, $config);
     }
 
     public function behaviors(): array
