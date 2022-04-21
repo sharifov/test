@@ -43,7 +43,7 @@ class m220421_101724_new_abac_for_case_update extends Migration
                 'ap_action' => '(Edit Department)|(Edit Category)|(Edit Description)',
                 'ap_action_json' => "[\"Edit Department\",\"Edit Category\",\"Edit Description\"]",
                 'ap_effect' => 1,
-                'ap_title' => 'Case - update, Allow access to edit from API',
+                'ap_title' => 'Case - update, Allow access',
                 'ap_sort_order' => 50,
                 'ap_enabled' => 1,
                 'ap_created_dt' => date('Y-m-d H:i:s'),
