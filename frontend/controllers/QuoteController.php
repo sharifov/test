@@ -1430,8 +1430,19 @@ class QuoteController extends FController
                     'params' => array_merge(Yii::$app->request->get(), $form->getFilters()),
                 ],
                 'sort' => [
-                    'attributes' => ['price', 'duration'],
-                    'defaultOrder' => [$form->getSortBy() => $form->getSortType()],
+                    'defaultOrder' => ['autoSort' => SORT_ASC, 'price' => SORT_ASC],
+                    'attributes' => [
+                        'price' => [
+                            'asc' => ['price' => SORT_ASC],
+                            'desc' => ['price' => SORT_DESC],
+                            'default' => SORT_ASC,
+                        ],
+                        'autoSort' => [
+                            'asc' => ['autoSort' => SORT_ASC],
+                            'desc' => ['autoSort' => SORT_DESC],
+                            'default' => SORT_ASC,
+                        ],
+                    ],
                 ],
             ]);
 
@@ -1445,7 +1456,7 @@ class QuoteController extends FController
             Yii::info($message, 'QuoteController::actionAutoAddingQuotes::Exception');
             $response['message'] = $throwable->getMessage();
         } catch (\Throwable $throwable) {
-            $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['lead_id' => $leadId]);
+            $message = ArrayHelper::merge(AppHelper::throwableLog($throwable, true), ['lead_id' => $leadId]);
             Yii::error($message, 'QuoteController::actionAutoAddingQuotes::Throwable');
             $response['message'] = 'Internal Server Error';
         }
