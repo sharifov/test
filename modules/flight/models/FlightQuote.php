@@ -185,7 +185,7 @@ class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
             [['fq_hash_key', 'fq_request_hash'], 'string', 'max' => 32],
             [['fq_record_locator'], 'string', 'max' => 8],
             [['fq_gds', 'fq_main_airline'], 'string', 'max' => 2],
-            [['fq_gds_pcc'], 'string', 'max' => 10],
+            [['fq_gds_pcc'], 'string', 'max' => 50],
             [['fq_cabin_class'], 'string', 'max' => 1],
             [['fq_created_expert_name'], 'string', 'max' => 20],
             [['fq_uid'], 'string', 'max' => 50],
