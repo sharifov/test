@@ -185,7 +185,7 @@ class SearchService
      */
     public static function getOnlineQuoteByKeySmartSearch(string $key, string $cid): array
     {
-        $cid = !empty($cid) ? $cid : 'SAL103';
+        $cid = !empty($cid) ? $cid : Yii::$app->getModule('smart-search')->Cid;
         $response = \Yii::$app->airsearch->searchQuoteByKey($cid, $key);
 
         if (!$result['data'] = $response['data']) {
