@@ -19,6 +19,9 @@ use modules\requestControl\accessCheck\conditions\UsernameCondition;
  */
 class RequestControlModule extends Module
 {
+
+    const REQUEST_CONTROL_RULES_CACHE_KEY = 'requestControlRules';
+
     /**
      * @var string namespace of this module controllers
      */

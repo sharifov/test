@@ -2,8 +2,6 @@
 
 namespace modules\requestControl\interfaces;
 
-use yii\db\Query;
-
 /**
  * Interface ConditionInterface
  * @package modules\requestControl\interfaces
@@ -11,8 +9,7 @@ use yii\db\Query;
 interface ConditionInterface
 {
     /**
-     * @param Query $query
-     * @return Query
+     * @return string
      */
-    public function modifyQuery(Query $query): Query;
+    public function getType(): string;
 }

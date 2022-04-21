@@ -112,14 +112,12 @@ class AdmissionPass
      */
     public function createAllowance(): AllowanceInterface
     {
-        $query = (new Query())
-            ->select('*')
-            ->from(RequestControlRule::tableName());
-        foreach ($this->conditions as $condition) {
-            $condition->modifyQuery($query);
-        }
-
-        $items = $query->all();
+        $cachedData = \Yii::$app->cache->get(RequestControlModule::REQUEST_CONTROL_RULES_CACHE_KEY);
+        $data = (is_array($cachedData)) ? $cachedData : [];
+        $items = array_reduce($this->conditions, function ($acc, $x) use ($data) {
+            /** @var ConditionInterface $x */
+            return $x->reduceData($acc, $data);
+        }, []);
 
         return (count($items) > 0) ? new Limited($items) : new Limitless();
     }

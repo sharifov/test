@@ -23,4 +23,23 @@ abstract class AbstractCondition implements ConditionInterface
     {
         $this->value = $value;
     }
+
+    /**
+     * @param array $result
+     * @param array $data
+     * @return array
+     */
+    public function reduceData($result, $data): array
+    {
+        return array_reduce($data, function ($acc, $x) {
+            if (isset($x['rcr_type']) && isset($x['rcr_subject'])) {
+                $isTypeValid = $x['rcr_type'] === $this->getType();
+                $isValueValid = is_array($this->value) ? in_array($x['rcr_subject'], $this->value) : $this->value === $x['rcr_subject'];
+                if ($isTypeValid && $isValueValid) {
+                    $acc[] = $x;
+                }
+            }
+            return $acc;
+        }, $result);
+    }
 }
