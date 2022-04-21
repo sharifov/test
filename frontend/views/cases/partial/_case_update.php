@@ -1,7 +1,5 @@
 <?php
 
-use modules\cases\src\abac\update\UpdateAbacDto;
-use modules\cases\src\abac\update\UpdateAbacObject;
 use src\model\cases\useCases\cases\updateInfo\UpdateInfoForm;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
@@ -38,14 +36,12 @@ use yii\helpers\Url;
                 }
             );
         ' : '$( "#' . Html::getInputId($model, 'categoryId') . '").prop("disabled", true);'
-    ]);
-    ?>
+    ]); ?>
 
     <?= $form->field($model, 'categoryId')->dropDownList($model->getCategoryList(), [
         'prompt' => '-',
         'disabled' => !$model->fieldAccess->canEditCategory(),
-    ]);
-    ?>
+    ]); ?>
 
     <?= $form->field($model, 'orderUid')->textInput(['maxlength' => 7]) ?>
 

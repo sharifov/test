@@ -28,18 +28,18 @@ class FieldAccess
     public function canEditDepartment(): bool
     {
         /** @abac $caseAbacDto, UpdateAbacObject::UI_BLOCK_SALE_LIST, UpdateAbacObject::ACTION_EDIT_DEPARTMENT, Restrict access to edit department */
-        return Yii::$app->abac->can(new UpdateAbacDto($this->case), UpdateAbacObject::UI_BLOCK_UPDATE_LIST, UpdateAbacObject::ACTION_EDIT_DEPARTMENT,$this->user);
+        return Yii::$app->abac->can(new UpdateAbacDto($this->case), UpdateAbacObject::UI_BLOCK_UPDATE_LIST, UpdateAbacObject::ACTION_EDIT_DEPARTMENT, $this->user);
     }
 
     public function canEditCategory(): bool
     {
         /** @abac $caseAbacDto, UpdateAbacObject::UI_BLOCK_SALE_LIST, UpdateAbacObject::ACTION_EDIT_CATEGORY, Restrict access to edit category */
-        return Yii::$app->abac->can(new UpdateAbacDto($this->case), UpdateAbacObject::UI_BLOCK_UPDATE_LIST, UpdateAbacObject::ACTION_EDIT_CATEGORY,$this->user);
+        return Yii::$app->abac->can(new UpdateAbacDto($this->case), UpdateAbacObject::UI_BLOCK_UPDATE_LIST, UpdateAbacObject::ACTION_EDIT_CATEGORY, $this->user);
     }
 
     public function canEditDescription(): bool
     {
-        /** @abac $caseAbacDto, UpdateAbacObject::UI_BLOCK_SALE_LIST, UpdateAbacObject::ACTION_EDIT_DEPARTMENT, Restrict access to edit description */
-        return Yii::$app->abac->can(new UpdateAbacDto($this->case), UpdateAbacObject::UI_BLOCK_UPDATE_LIST, UpdateAbacObject::ACTION_EDIT_DESCRIPTION,$this->user);
+        /** @abac $caseAbacDto, UpdateAbacObject::UI_BLOCK_SALE_LIST, UpdateAbacObject::ACTION_EDIT_DESCRIPTION, Restrict access to edit description */
+        return Yii::$app->abac->can(new UpdateAbacDto($this->case), UpdateAbacObject::UI_BLOCK_UPDATE_LIST, UpdateAbacObject::ACTION_EDIT_DESCRIPTION, $this->user);
     }
 }

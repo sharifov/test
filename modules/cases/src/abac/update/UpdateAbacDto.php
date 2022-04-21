@@ -10,12 +10,13 @@ class UpdateAbacDto extends \stdClass
     public string $department_name;
     public ?int $category_id;
     public string $project_name;
+    public ?int $source_type_id;
 
     public function __construct(Cases $case)
     {
         $this->department_name = $case->department->dep_name ?? '';
         $this->category_id = $case->cs_category_id ?: null;
         $this->project_name = $case->project->name ?? '';
-        $this->source_type_id = $case->cs_source_type_id;
+        $this->source_type_id = $case->cs_source_type_id ?: null;
     }
 }

@@ -20,6 +20,7 @@ use yii\base\Model;
  * @property string|null $orderUid
  * @property array $departmentList
  * @property array $categoryList
+ * @property FieldAccess $fieldAccess;
  */
 class UpdateInfoForm extends Model
 {
@@ -88,7 +89,6 @@ class UpdateInfoForm extends Model
         if (!$this->fieldAccess->canEditDepartment() && $this->depId !== $this->case->getDepartmentId()) {
             $this->addError($attribute, 'The value is not acceptable.');
         }
-
     }
 
     public function validateCategory($attribute)
@@ -96,7 +96,6 @@ class UpdateInfoForm extends Model
         if (!$this->fieldAccess->canEditCategory() && $this->categoryId !== $this->case->cs_category_id) {
             $this->addError($attribute, 'The value is not acceptable.');
         }
-
     }
 
     public function validateDescription($attribute)
@@ -104,9 +103,7 @@ class UpdateInfoForm extends Model
         if (!$this->fieldAccess->canEditDescription() && $this->description !== $this->case->cs_description) {
             $this->addError($attribute, 'The value is not acceptable.');
         }
-
     }
-
 
     public function attributeLabels(): array
     {

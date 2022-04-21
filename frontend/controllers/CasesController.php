@@ -1729,7 +1729,6 @@ class CasesController extends FController
         );
 
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
-
             try {
                 $this->updateHandler->handle($form->getDto());
                 Yii::$app->session->setFlash('success', 'Case information has been updated successfully.');
