@@ -209,7 +209,7 @@ class LeadPoorProcessingService
         return (bool) ArrayHelper::getValue($tpl->etp_params_json, 'quotes.selectRequired', false);
     }
 
-    private static function checkDuplicate(string $idKey, int $pauseSecond = 10): bool
+    public static function checkDuplicate(string $idKey, int $pauseSecond = 10): bool
     {
         $redis = Yii::$app->redis;
         if (!$redis->get($idKey)) {
