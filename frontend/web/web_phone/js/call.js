@@ -39,6 +39,8 @@ var PhoneWidget = function () {
         'active': PhoneWidgetPaneActive,
         'outgoing': PhoneWidgetPaneOutgoing,
         'incoming': PhoneWidgetPaneIncoming,
+        'accepted': PhoneWidgetPaneAccepted,
+        'acceptedRedial': PhoneWidgetPaneAcceptedRedial,
         'queue': new PhoneWidgetPaneQueue(queues)
     };
 
@@ -308,6 +310,40 @@ var PhoneWidget = function () {
         // openCallTab();
     }
 
+    function requestAcceptedCall(call) {
+        if (panes.active.isActive()) {
+            return;
+        }
+        console.log('accepted call');
+        panes.accepted.init(call);
+        iconUpdate();
+        openWidget();
+    }
+
+    function requestAcceptedCallHide() {
+        if (!panes.accepted.isActive()) {
+            return;
+        }
+        refreshPanes();
+    }
+
+    function requestAcceptedCallRedial(call) {
+        if (panes.active.isActive()) {
+            return;
+        }
+        console.log('accepted call redial');
+        panes.acceptedRedial.init(call);
+        iconUpdate();
+        openWidget();
+    }
+
+    function requestAcceptedCallRedialHide() {
+        if (!panes.acceptedRedial.isActive()) {
+            return;
+        }
+        refreshPanes();
+    }
+
     function requestOutgoingCall(data) {
         console.log('outgoing call');
         let call = null;
@@ -434,6 +470,9 @@ var PhoneWidget = function () {
 
     function completeCall(callSid)
     {
+        if (panes.accepted.isActive()) {
+            refreshPanes();
+        }
         queues.active.remove(callSid);
         queues.outgoing.remove(callSid);
         waitQueue.remove(callSid);
@@ -659,6 +698,9 @@ var PhoneWidget = function () {
 
     function refreshCallStatus(obj)
     {
+        if (panes.accepted.isActive()) {
+            refreshPanes();
+        }
         if (obj.status === 'In progress') {
             requestActiveCall(obj);
         } else if (obj.status === 'Ringing' || obj.status === 'Queued') {
@@ -2076,6 +2118,10 @@ var PhoneWidget = function () {
         volumeIndicatorsChange: volumeIndicatorsChange,
         refreshCallStatus: refreshCallStatus,
         panes: panes,
+        requestAcceptedCall: requestAcceptedCall,
+        requestAcceptedCallHide: requestAcceptedCallHide,
+        requestAcceptedCallRedial: requestAcceptedCallRedial,
+        requestAcceptedCallRedialHide: requestAcceptedCallRedialHide,
         requestIncomingCall: requestIncomingCall,
         requestOutgoingCall: requestOutgoingCall,
         changeStatus: changeStatus,
@@ -2116,7 +2162,8 @@ var PhoneWidget = function () {
         removeTwilioInternalIncomingConnection: removeTwilioInternalIncomingConnection,
         isInitiated: isInitiated,
         addLogError: addLogError,
-        addLogSuccess: addLogSuccess
+        addLogSuccess: addLogSuccess,
+        refreshPanes: refreshPanes
     };
 }();
 

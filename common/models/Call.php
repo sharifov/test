@@ -33,6 +33,7 @@ use src\helpers\lead\LeadUrlHelper;
 use src\model\call\entity\call\events\CallEvents;
 use src\model\call\services\FriendlyName;
 use src\model\call\services\RecordManager;
+use src\model\call\socket\AcceptCallMessage;
 use src\model\call\socket\CallUpdateMessage;
 use src\model\callLog\services\CallLogTransferService;
 use src\model\client\notifications\ClientNotificationCanceler;
@@ -1658,6 +1659,8 @@ class Call extends \yii\db\ActiveRecord
                     $call->setConferenceType();
                     $call->update();
                 }
+
+                Notifications::publish('acceptedCall', ['user_id' => $user_id], (new AcceptCallMessage())->create($call));
                 $res = \Yii::$app->communication->acceptConferenceCall(
                     $call->c_id,
                     $call->c_call_sid,
@@ -1687,11 +1690,12 @@ class Call extends \yii\db\ActiveRecord
                                 ]
                             ]);
                         }
-
+                        Notifications::publish('acceptedCallHide', ['user_id' => $user_id], []);
                         return false;
                     }
                     return true;
                 }
+                Notifications::publish('acceptedCallHide', ['user_id' => $user_id], []);
 
                 \Yii::warning('Error: ' . VarDumper::dumpAsString($res), 'Call:applyCallToAgent:callRedirect');
             } else {
@@ -1788,6 +1792,7 @@ class Call extends \yii\db\ActiveRecord
                 $departmentId = $userDepartment['upp_dep_id'];
             }
 
+            Notifications::publish('acceptedCall', ['user_id' => $user_id], (new AcceptCallMessage())->create($call));
             $res = \Yii::$app->communication->acceptWarmTransferCall(
                 $call->c_id,
                 $call->c_call_sid,
@@ -1821,6 +1826,7 @@ class Call extends \yii\db\ActiveRecord
                         ]
                     ]);
                 }
+                Notifications::publish('acceptedCallHide', ['user_id' => $user_id], []);
                 return false;
             }
             return true;

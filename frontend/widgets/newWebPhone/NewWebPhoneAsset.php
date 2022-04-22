@@ -30,6 +30,8 @@ class NewWebPhoneAsset extends AssetBundle
         ['/web_phone/component/pane/call_action_timer.jsx', 'position' => \yii\web\View::POS_HEAD, 'type' => 'text/babel'],
         ['/web_phone/component/pane/active/pane.jsx', 'position' => \yii\web\View::POS_HEAD, 'type' => 'text/babel'],
         ['/web_phone/component/pane/incoming/pane.jsx', 'position' => \yii\web\View::POS_HEAD, 'type' => 'text/babel'],
+        ['/web_phone/component/pane/accepted/pane.jsx', 'position' => \yii\web\View::POS_HEAD, 'type' => 'text/babel'],
+        ['/web_phone/component/pane/acceptedRedial/pane.jsx', 'position' => \yii\web\View::POS_HEAD, 'type' => 'text/babel'],
         ['/web_phone/component/pane/active/controls.jsx', 'position' => \yii\web\View::POS_HEAD, 'type' => 'text/babel'],
         ['/web_phone/component/pane/call_info.jsx', 'position' => \yii\web\View::POS_HEAD, 'type' => 'text/babel'],
         ['/web_phone/component/pane/queue/list_item.jsx', 'position' => \yii\web\View::POS_HEAD, 'type' => 'text/babel'],
@@ -51,6 +53,8 @@ class NewWebPhoneAsset extends AssetBundle
         '/web_phone/js/pane/active/btn/mute.js',
 
         '/web_phone/js/pane/active/pane.js',
+        '/web_phone/js/pane/accepted/pane.js',
+        '/web_phone/js/pane/acceptedRedial/pane.js',
         '/web_phone/js/pane/incoming/pane.js',
         '/web_phone/js/pane/outgoing/pane.js',
         '/web_phone/js/pane/queue/pane.js',

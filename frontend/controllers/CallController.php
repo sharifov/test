@@ -36,6 +36,8 @@ use src\model\call\abac\CallAbacObject;
 use src\model\call\services\currentQueueCalls\CurrentQueueCallsService;
 use src\model\call\services\reserve\CallReserver;
 use src\model\call\services\reserve\Key;
+use src\model\call\socket\AcceptCallMessage;
+use src\model\call\socket\AcceptRedialCallMessage;
 use src\model\call\useCase\assignUsers\UsersForm;
 use src\model\call\useCase\createCall\redialCall\CreateRedialCall;
 use src\model\callLog\entity\callLog\CallLog;
@@ -1089,8 +1091,10 @@ class CallController extends FController
                             \Yii::$app->queue_job->delay($delay)->push($job);
                             $response['isRedialCall'] = true;
                             try {
+                                Notifications::publish('acceptedCallRedial', ['user_id' => $userId], (new AcceptRedialCallMessage())->create($redialCall));
                                 $result = (new CreateRedialCall())($redialCall, $voipDevice);
                                 if ($result['error']) {
+                                    Notifications::publish('acceptedCallRedialHide', ['user_id' => $userId], []);
                                     $response['redialError'] = $result['message'];
                                 }
                             } catch (\Throwable $t) {
