@@ -79,4 +79,14 @@ class AvailableList
     {
         return Employee::timezoneList(true);
     }
+
+    public function getCallTypes(): array
+    {
+        return \common\models\UserProfile::CALL_TYPE_LIST;
+    }
+
+    public function getSkillTypes(): array
+    {
+        return \common\models\UserProfile::SKILL_TYPE_LIST;
+    }
 }

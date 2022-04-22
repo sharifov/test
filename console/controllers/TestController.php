@@ -108,12 +108,12 @@ class TestController extends Controller
     public function actionRr()
     {
         $user = Employee::findOne(294);
-        $updatedUser = Employee::findOne(295);
+        $updatedUser = Employee::findOne(294);
         $form = new UpdateForm($user, $updatedUser);
-//        $form->form_roles = ['admin', 'agent_qw'];
-//        $form->validate();
-        VarDumper::dump($form->getAttributes(null, ['targetUser', 'updaterUser']));
-//        VarDumper::dump($form->getErrors());
+        $form->form_roles = ['admin', 'agent_qw'];
+        $form->validate();
+        VarDumper::dump($form);
+        VarDumper::dump($form->getErrors());
     }
 
     public function actionTestWs()
