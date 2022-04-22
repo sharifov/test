@@ -20,7 +20,7 @@ class m220418_115718_add_site_setting_shift_schedule extends Migration
                     's_type'        => \common\models\Setting::TYPE_ARRAY,
                     's_value'       => json_encode([
                             'generate_enabled'        => true,
-                            'days_limit'              => 20,
+                            'days_limit'              => \src\enum\SettingEnum::DEFAULT_SHIFT_SCHEDULE_DAYS_LIMIT,
                             'days_offset'             => 0,
                         ]),
                     's_updated_dt'  => date('Y-m-d H:i:s'),

@@ -6,6 +6,7 @@ use common\models\Department;
 use common\models\DepartmentPhoneProject;
 use common\models\Lead;
 use frontend\helpers\JsonHelper;
+use src\enum\SettingEnum;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
@@ -958,7 +959,16 @@ class SettingHelper
 
     public static function getShiftScheduleDaysLimit(): int
     {
-        return (int) (self::getShiftSchedule()['days_limit'] ?? 20);
+        $days_limit = self::getShiftSchedule()['days_limit'];
+        if (!isset($days_limit) || $days_limit <= 0) {
+            Yii::warning([
+                'message' => 'Days limit cannot be less or equal to 0',
+                'daysLimit' => $days_limit,
+            ], 'SettingHelper:getShiftScheduleDaysLimit:DaysLimitIsInvalid');
+
+            return SettingEnum::DEFAULT_SHIFT_SCHEDULE_DAYS_LIMIT;
+        }
+        return (int)$days_limit;
     }
 
     public static function getShiftScheduleDaysOffset(): int
