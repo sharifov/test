@@ -118,6 +118,52 @@ class UserShiftScheduleService
         return $data;
     }
 
+
+    /**
+     * @param UserShiftSchedule[] $timelineList
+     * @return array
+     */
+    public static function getCalendarEventsJsonData(array $timelineList): array
+    {
+        $data = [];
+        if ($timelineList) {
+            foreach ($timelineList as $item) {
+                $dataItem = [
+                    'id' => $item->uss_id,
+                    //groupId: '999',
+                    'title' => $item->getScheduleTypeKey(), // . '-' . $item->uss_id,
+                    //. ' - ' . date('d H:i', strtotime($item->uss_start_utc_dt)),
+                    'description' => $item->getScheduleTypeTitle() . "\r\n" . '(' . $item->uss_id . ')' . ', duration: ' .
+                        Yii::$app->formatter->asDuration($item->uss_duration * 60),
+                    //. "\r\n" . $item->uss_description,
+                    'start' => date('c', strtotime($item->uss_start_utc_dt)),
+                    'end' => date('c', strtotime($item->uss_end_utc_dt)),
+                    'color' => $item->shiftScheduleType ? $item->shiftScheduleType->sst_color : 'gray',
+
+                    'resource' => 'us-' . $item->uss_user_id, //random_int(1, 1),
+                    //'textColor' => 'black' // an option!
+                    'extendedProps' => [
+                        'icon' => $item->shiftScheduleType->sst_icon_class,
+                    ]
+                ];
+
+                if (
+                    !in_array($item->uss_status_id, [UserShiftSchedule::STATUS_DONE,
+                        UserShiftSchedule::STATUS_APPROVED])
+                ) {
+                    $dataItem['borderColor'] = '#000000';
+                    $dataItem['title'] .= ' (' . $item->getStatusName() . ')';
+                    $dataItem['description'] .= ' (' . $item->getStatusName() . ')';
+                    //$data[$item->uss_id]['extendedProps']['icon'] = 'rgb(255,0,0)';
+                }
+
+                $data[] = $dataItem;
+            }
+        }
+        return $data;
+    }
+
+
     /**
      * @param int $userId
      * @param int $days
