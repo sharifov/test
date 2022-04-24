@@ -40,7 +40,6 @@ var PhoneWidget = function () {
         'outgoing': PhoneWidgetPaneOutgoing,
         'incoming': PhoneWidgetPaneIncoming,
         'accepted': PhoneWidgetPaneAccepted,
-        'acceptedRedial': PhoneWidgetPaneAcceptedRedial,
         'queue': new PhoneWidgetPaneQueue(queues)
     };
 
@@ -297,7 +296,7 @@ var PhoneWidget = function () {
         panes.queue.refresh();
         panes.queue.hide();
 
-        if (queues.active.count() > 0 || queues.outgoing.count() > 0 || panes.incoming.isActive()) {
+        if (queues.active.count() > 0 || queues.outgoing.count() > 0 || panes.incoming.isActive() || panes.accepted.isActive()) {
             addIncomingCallNotification(call, true);
         } else {
             addFirstIncomingCallNotification(call, true);
@@ -311,37 +310,18 @@ var PhoneWidget = function () {
     }
 
     function requestAcceptedCall(call) {
-        if (panes.active.isActive()) {
-            return;
+        let data = [];
+        for (let [key, value] of call.customParameters.entries()) {
+            data[key] = value;
         }
-        console.log('accepted call');
-        panes.accepted.init(call);
-        iconUpdate();
-        openWidget();
-    }
-
-    function requestAcceptedCallHide() {
-        if (!panes.accepted.isActive()) {
-            return;
+        if ("acceptType" in data) {
+            data['callSid'] = call.parameters.CallSid;
+            panes.accepted.init(data);
+            iconUpdate();
+            panes.queue.hide();
+            openWidget();
+            openCallTab();
         }
-        refreshPanes();
-    }
-
-    function requestAcceptedCallRedial(call) {
-        if (panes.active.isActive()) {
-            return;
-        }
-        console.log('accepted call redial');
-        panes.acceptedRedial.init(call);
-        iconUpdate();
-        openWidget();
-    }
-
-    function requestAcceptedCallRedialHide() {
-        if (!panes.acceptedRedial.isActive()) {
-            return;
-        }
-        refreshPanes();
     }
 
     function requestOutgoingCall(data) {
@@ -470,9 +450,6 @@ var PhoneWidget = function () {
 
     function completeCall(callSid)
     {
-        if (panes.accepted.isActive()) {
-            refreshPanes();
-        }
         queues.active.remove(callSid);
         queues.outgoing.remove(callSid);
         waitQueue.remove(callSid);
@@ -511,6 +488,13 @@ var PhoneWidget = function () {
         if (panes.incoming.isEqual(callSid)) {
             panes.incoming.removeCallSid();
             if (panes.incoming.isActive()) {
+                needRefresh = true;
+            }
+        }
+
+        if (panes.accepted.isEqual(callSid)) {
+            panes.accepted.removeCallSid();
+            if (panes.accepted.isActive()) {
                 needRefresh = true;
             }
         }
@@ -698,9 +682,6 @@ var PhoneWidget = function () {
 
     function refreshCallStatus(obj)
     {
-        if (panes.accepted.isActive()) {
-            refreshPanes();
-        }
         if (obj.status === 'In progress') {
             requestActiveCall(obj);
         } else if (obj.status === 'Ringing' || obj.status === 'Queued') {
@@ -1778,6 +1759,7 @@ var PhoneWidget = function () {
             'CallSid': call.parameters.CallSid,
             'To': call.parameters.To
         }));
+        requestAcceptedCall(call);
     }
 
     function acceptInternalCall(call) {
@@ -2118,10 +2100,6 @@ var PhoneWidget = function () {
         volumeIndicatorsChange: volumeIndicatorsChange,
         refreshCallStatus: refreshCallStatus,
         panes: panes,
-        requestAcceptedCall: requestAcceptedCall,
-        requestAcceptedCallHide: requestAcceptedCallHide,
-        requestAcceptedCallRedial: requestAcceptedCallRedial,
-        requestAcceptedCallRedialHide: requestAcceptedCallRedialHide,
         requestIncomingCall: requestIncomingCall,
         requestOutgoingCall: requestOutgoingCall,
         changeStatus: changeStatus,

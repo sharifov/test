@@ -14,7 +14,6 @@ use modules\lead\src\abac\LeadAbacObject;
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeCreatedEvent;
 use src\auth\Auth;
 use src\helpers\setting\SettingHelper;
-use src\model\call\socket\AcceptCallMessage;
 use src\model\call\socket\CallUpdateMessage;
 use src\model\call\useCase\createCall\CreateCallForm;
 use src\model\client\notifications\client\entity\NotificationType;
@@ -114,8 +113,8 @@ class TestController extends Controller
         die;
         $call = Call::findOne(3386979);
         $message = (new AcceptCallMessage())->create($call, 295);
-//        Notifications::publish('acceptedCall', ['user_id' => 295], $message);
-        Notifications::publish('acceptedCallHide', ['user_id' => 295], []);
+        Notifications::publish('acceptedCall', ['user_id' => 295], $message);
+//        Notifications::publish('acceptedCallHide', ['user_id' => 295], []);
     }
 
     public function actionTestWs()

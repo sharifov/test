@@ -167,9 +167,7 @@ if (!Auth::can('PhoneWidget_Dialpad')) {
 
   <div class="call-pane-incoming call-pane-initial" id="call-pane-incoming"> </div>
 
-  <div class="call-pane-incoming call-pane-initial" id="call-pane-accepted"> </div>
-
-    <div class="call-pane-outgoing call-pane-initial" id="call-pane-accepted-redial"> </div>
+  <div class="call-pane-outgoing call-pane-initial" id="call-pane-accepted"> </div>
 
   <div class="call-pane-outgoing call-pane-initial" id="call-pane-outgoing"> </div>
 

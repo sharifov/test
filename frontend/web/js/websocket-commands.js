@@ -148,30 +148,6 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                         }
                     }
 
-                    if (obj.cmd === 'acceptedCall') {
-                        if (typeof PhoneWidget === 'object') {
-                            PhoneWidget.requestAcceptedCall(obj);
-                        }
-                    }
-
-                    if (obj.cmd === 'acceptedCallHide') {
-                        if (typeof PhoneWidget === 'object') {
-                            PhoneWidget.requestAcceptedCallHide(obj);
-                        }
-                    }
-
-                    if (obj.cmd === 'acceptedCallRedial') {
-                        if (typeof PhoneWidget === 'object') {
-                            PhoneWidget.requestAcceptedCallRedial(obj);
-                        }
-                    }
-
-                    if (obj.cmd === 'acceptedCallRedialHide') {
-                        if (typeof PhoneWidget === 'object') {
-                            PhoneWidget.requestAcceptedCallRedialHide(obj);
-                        }
-                    }
-
                     if (obj.cmd === 'webCallUpdate') {
                         //console.info('webCallUpdate - 1');
                         if (typeof webCallUpdate === "function") {

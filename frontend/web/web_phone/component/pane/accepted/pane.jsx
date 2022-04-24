@@ -16,17 +16,11 @@ class AcceptedPane extends React.Component {
                         <div className="contact-info-card__line history-details">
                             <span className="contact-info-card__label">{call.type}</span>
                             <div className="credential">
-                                <div className="contact-info-card__name">
-                                    <i className="user-icon fa fa-user"> </i>&nbsp;
-                                    <strong>{call.contact.name}</strong>
-                                </div>
-                                <div className="contact-info-card__phone">
-                                    <span> </span>
-                                </div>
+                                <div className="contact-info-card__phone"> </div>
                             </div>
                         </div>
                         <div className="contact-info-card__line history-details">
-                            <span className="contact-info-card__call-type">{call.contact.phone}</span>
+                            <span className="contact-info-card__call-type">{call.phone}</span>
                         </div>
                     </div>
                 </div>
