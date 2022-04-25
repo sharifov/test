@@ -113,9 +113,9 @@ class AdmissionPass
     public function createAllowance(): AllowanceInterface
     {
         $cachedData = \Yii::$app->cache->get(RequestControlModule::REQUEST_CONTROL_RULES_CACHE_KEY);
-        $data = (is_array($cachedData)) ? $cachedData : [];
+        $data = is_array($cachedData) ? $cachedData : [];
         $items = array_reduce($this->conditions, function ($acc, $x) use ($data) {
-            /** @var ConditionInterface $x */
+            /** @var AbstractCondition $x */
             return $x->reduceData($acc, $data);
         }, []);
 
