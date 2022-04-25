@@ -2,14 +2,12 @@
 
 namespace modules\requestControl\accessCheck;
 
-use yii\db\Query;
 use modules\requestControl\accessCheck\conditions\AbstractCondition;
 use modules\requestControl\interfaces\AllowanceInterface;
 use modules\requestControl\accessCheck\allowance\Limited;
 use modules\requestControl\accessCheck\allowance\Limitless;
 use modules\requestControl\accessCheck\conditions\RoleCondition;
 use modules\requestControl\accessCheck\conditions\UsernameCondition;
-use modules\requestControl\models\RequestControlRule;
 use modules\requestControl\RequestControlModule;
 
 /**
