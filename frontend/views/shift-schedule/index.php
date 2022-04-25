@@ -71,6 +71,11 @@ $subtypeTotalData = [];
             ['legend-ajax'],
             ['class' => 'btn btn-info', 'id' => 'btn-legend']
         ) ?>
+        <?= Html::a(
+            '<i class="fa fa-info-circle"></i> Schedule Request',
+            ['schedule-request-ajax'],
+            ['class' => 'btn btn-primary', 'id' => 'btn-schedule-request']
+        ) ?>
 
     </p>
 
@@ -405,7 +410,7 @@ $js = <<<JS
     var shiftScheduleDataUrl = '$ajaxUrl';
     var openModalEventUrl = '$openModalEventUrl';
     var calendarEl = document.getElementById('calendar');
-
+    var selectedRange = null;
     var calendar = new FullCalendar.Calendar(calendarEl, {
         //initialView: 'dayGridWeek',
         initialView: 'dayGridMonth',
@@ -574,6 +579,10 @@ $js = <<<JS
             updateTimeLineList(info.startStr, info.endStr);
             // console.log(info);
             // console.log('selected ' + info.startStr + ' to ' + info.endStr);
+            selectedRange = {
+                start: info.startStr,
+                end: info.endStr
+            }
           }
     });
 
@@ -604,6 +613,19 @@ $js = <<<JS
         let modal = $('#modal-md');
         let url = $(this).attr('href');
         $('#modal-md-label').html('<i class="fa fa-info-circle"></i> Schedule Legend');
+        getRequest(modal, url);
+    });
+    
+    $(document).on('click', '#btn-schedule-request', function(e) {
+        e.preventDefault();
+        let modal = $('#modal-md');
+        let url = processingUrlWithQueryParam($(this).attr('href'));
+        $('#modal-md-label').html('<i class="fa fa-info-circle"></i> Schedule Request');
+        getRequest(modal, url);
+        selectedRange = null;
+    });
+    
+    function getRequest(modal, url) {
         modal.find('.modal-body').html('');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
             if (status === 'error') {
@@ -612,8 +634,24 @@ $js = <<<JS
                 modal.modal('show');
             }   
         });
-    });
+    }
     
+    function processingUrlWithQueryParam(url) {
+        if (!selectedRange) {
+            return url;
+        }
+
+        var data = {
+            start: selectedRange.start,            
+            end: selectedRange.end            
+        };
+        
+        var prefix = '?';
+        if (url.indexOf('?') !== -1) {
+            prefix = '&';
+        }
+        return url + prefix + $.param(data);
+    }
 
     function updateTimeLineList(startDate, endDate) 
     {
