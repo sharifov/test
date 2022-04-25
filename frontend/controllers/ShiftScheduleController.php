@@ -8,6 +8,7 @@ use common\models\query\UserGroupQuery;
 use common\models\UserGroup;
 use common\models\UserGroupAssign;
 use Exception;
+use frontend\models\form\shiftSchedule\ScheduleRequestForm;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\shiftScheduleTypeLabel\ShiftScheduleTypeLabel;
@@ -58,7 +59,8 @@ class ShiftScheduleController extends FController
                     /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_ACCESS, Access to page shift-schedule/index */
                     [
                         'actions' => ['index', 'my-data-ajax', 'generate-example', 'remove-user-data', 'get-event',
-                            'generate-user-schedule', 'legend-ajax', 'calendar', 'calendar-events-ajax', 'add-event', 'add-single-event'],
+                            'generate-user-schedule', 'legend-ajax', 'calendar', 'calendar-events-ajax', 'add-event', 'add-single-event',
+                            'schedule-request-ajax'],
                         'allow' => \Yii::$app->abac->can(
                             null,
                             ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE,
@@ -432,6 +434,35 @@ class ShiftScheduleController extends FController
 
         return $this->renderAjax('partial/_shift_schedule_create_form_single_event', [
             'singleEventForm' => $form
+        ]);
+    }
+
+    /**
+     * @return string|Response
+     */
+    public function actionScheduleRequestAjax()
+    {
+        $request = Yii::$app->request;
+        $scheduleRequestModel = new ScheduleRequestForm();
+        if ($request->isPost) {
+            if ($scheduleRequestModel->load($request->post()) && $scheduleRequestModel->validate()) {
+                if ($scheduleRequestModel->saveRequest()) {
+                    return $this->redirect(['shift-schedule/index']);
+                }
+            }
+        } else {
+            if (!empty($start = $request->get('start'))) {
+                $scheduleRequestModel->startDt = date('Y-m-d', strtotime($start));
+                $scheduleRequestModel->validate(['startDt']);
+            }
+            if (!empty($end = $request->get('end'))) {
+                $scheduleRequestModel->endDt = date('Y-m-d', strtotime($end));
+                $scheduleRequestModel->validate(['endDt']);
+            }
+        }
+
+        return $this->renderAjax('partial/_schedule_request', [
+            'scheduleRequestModel' => $scheduleRequestModel,
         ]);
     }
 }
