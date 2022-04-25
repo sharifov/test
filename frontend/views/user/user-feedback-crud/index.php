@@ -58,7 +58,10 @@ $columns = [
             if (!$model->uf_message) {
                 return null;
             }
-            return '<pre><small>' . (StringHelper::truncate($model->uf_message, 400, '...', null, true)) . '</small></pre>';
+            $message = StringHelper::truncate($model->uf_message, 400, '...', null, true);
+            return '<pre><small>' .
+                \frontend\widgets\ShowMoreFieldWidget::addLinkToShowMore($message, $model->uf_message, $model->uf_id) .
+                '</small></pre>';
         },
         'format' => 'raw'
     ],
@@ -147,3 +150,5 @@ $columns = [
     <?php Pjax::end(); ?>
 
 </div>
+<?= \frontend\widgets\ShowMoreFieldWidget::widget(['title' => 'Message - User Feedback']); ?>
+
