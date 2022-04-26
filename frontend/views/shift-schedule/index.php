@@ -626,14 +626,22 @@ $js = <<<JS
     });
     
     function getRequest(modal, url) {
-        modal.find('.modal-body').html('');
+        modal.find('.modal-body').html(loaderTemplate);
+        modal.modal('show');
         modal.find('.modal-body').load(url, function( response, status, xhr ) {
             if (status === 'error') {
+                modal.modal('hide');
                 alert(response);
-            } else {
-                modal.modal('show');
             }   
         });
+    }
+    
+    function loaderTemplate(modal) {
+        return '<div class="text-center"> \
+                    <div class="spinner-border m-5" role="status"> \
+                        <span class="sr-only">Loading...</span> \
+                    </div> \
+                </div>';
     }
     
     function processingUrlWithQueryParam(url) {
