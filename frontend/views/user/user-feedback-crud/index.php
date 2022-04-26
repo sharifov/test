@@ -58,9 +58,8 @@ $columns = [
             if (!$model->uf_message) {
                 return null;
             }
-            $message = StringHelper::truncate($model->uf_message, 400, '...', null, true);
             return '<pre><small>' .
-                \frontend\widgets\ShowMoreFieldWidget::addLinkToShowMore($message, $model->uf_message, $model->uf_id) .
+                \frontend\widgets\ShowMoreFieldWidget::addLinkToShowMore($model->uf_message, $model->uf_id) .
                 '</small></pre>';
         },
         'format' => 'raw'
