@@ -8,6 +8,7 @@ use modules\requestControl\accessCheck\allowance\Limited;
 use modules\requestControl\accessCheck\allowance\Limitless;
 use modules\requestControl\accessCheck\conditions\RoleCondition;
 use modules\requestControl\accessCheck\conditions\UsernameCondition;
+use modules\requestControl\models\RequestControlRule;
 use modules\requestControl\RequestControlModule;
 
 /**
@@ -110,8 +111,13 @@ class AdmissionPass
      */
     public function createAllowance(): AllowanceInterface
     {
+        /** @var array|boolean $cachedData */
         $cachedData = \Yii::$app->cache->get(RequestControlModule::REQUEST_CONTROL_RULES_CACHE_KEY);
-        $data = is_array($cachedData) ? $cachedData : [];
+        $data = $cachedData;
+        if ($cachedData === false) {
+            RequestControlRule::refreshCache();
+            $data = \Yii::$app->cache->get(RequestControlModule::REQUEST_CONTROL_RULES_CACHE_KEY);
+        }
         $items = array_reduce($this->conditions, function ($acc, $x) use ($data) {
             /** @var AbstractCondition $x */
             return $x->reduceData($acc, $data);
