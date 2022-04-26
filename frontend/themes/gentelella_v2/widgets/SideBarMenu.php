@@ -729,22 +729,28 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     'url' => 'javascript:',
                     'icon' => 'calendar',
                     'items' => [
-                        ['label' => 'Shift CRUD', 'url' => ['/shift-crud/index'], 'title' => 'Shift'],
-                        ['label' => 'Shift Category CRUD', 'url' => ['/shift-category-crud/index'],
+                        ['label' => 'Shift List', 'url' => ['/shift-crud/index'], 'title' => 'Shift CRUD'],
+                        ['label' => 'Shift Category', 'url' => ['/shift-category-crud/index'],
                             'title' => 'Shift category CRUD'],
-                        ['label' => 'Shift Schedule Type CRUD', 'url' => ['/shift/shift-schedule-type/index'],
+                        ['label' => 'Shift Schedule Type', 'url' => ['/shift/shift-schedule-type/index'],
                             'title' => 'Shift Schedule Type'],
-                        ['label' => 'Shift Schedule Rule CRUD', 'url' => ['/shift-schedule-rule-crud/index'],
+                        ['label' => 'Shift Schedule Rule', 'url' => ['/shift-schedule-rule-crud/index'],
                             'title' => 'Shift Schedule Rule'],
                         ['label' => 'User Shift Assign CRUD', 'url' => ['/user-shift-assign-crud/index'],
                             'title' => 'Shift Schedule User Assign'],
                         ['label' => 'User Shift Schedule CRUD', 'url' => ['/user-shift-schedule-crud/index'],
                             'title' => 'User Shift Schedule'],
+
+                        ['label' => 'User Shift Calendar', 'url' => ['/shift-schedule/calendar'],
+                            'icon' => 'calendar',
+                            'title' => 'User Shift Schedule Calendar'
+                        ],
+
                         /** @abac ShiftAbacObject::ACT_USER_SHIFT_ASSIGN, ShiftAbacObject::ACTION_ACCESS, Access menu UserShiftAssign */
                         [
-                            'label' => 'User Shift Assign',
+                            'label' => 'User Shift Schedule Assign',
                             'url' => ['/shift/user-shift-assign/index'],
-                            'title' => 'Shift',
+                            'title' => 'User Shift Assign',
                             'icon' => 'user-plus',
                             'abac'  => [
                                 'dto'    => null,
