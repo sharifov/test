@@ -10,6 +10,7 @@ use modules\requestControl\accessCheck\conditions\RoleCondition;
 use modules\requestControl\accessCheck\conditions\UsernameCondition;
 use modules\requestControl\models\RequestControlRule;
 use modules\requestControl\RequestControlModule;
+use yii\db\Query;
 
 /**
  * Class `AdmissionPass` basic class for working with access control
@@ -111,17 +112,20 @@ class AdmissionPass
      */
     public function createAllowance(): AllowanceInterface
     {
-        /** @var array|boolean $cachedData */
-        $cachedData = \Yii::$app->cache->get(RequestControlModule::REQUEST_CONTROL_RULES_CACHE_KEY);
-        $data = $cachedData;
-        if ($cachedData === false) {
-            RequestControlRule::refreshCache();
-            $data = \Yii::$app->cache->get(RequestControlModule::REQUEST_CONTROL_RULES_CACHE_KEY);
+        /** @var array|boolean $data */
+        $data = \Yii::$app->cache->get(RequestControlModule::REQUEST_CONTROL_RULES_CACHE_KEY);
+
+        if ($data === false) {
+            $items = array_reduce($this->conditions, function ($resultQuery, $condition) {
+                /** @var AbstractCondition $condition */
+                return $condition->modifyQuery($resultQuery);
+            }, (new Query())->select('*')->from(RequestControlRule::tableName()))->all();
+        } else {
+            $items = array_reduce($this->conditions, function ($acc, $x) use ($data) {
+                /** @var AbstractCondition $x */
+                return $x->reduceData($acc, $data);
+            }, []);
         }
-        $items = array_reduce($this->conditions, function ($acc, $x) use ($data) {
-            /** @var AbstractCondition $x */
-            return $x->reduceData($acc, $data);
-        }, []);
 
         return (count($items) > 0) ? new Limited($items) : new Limitless();
     }
