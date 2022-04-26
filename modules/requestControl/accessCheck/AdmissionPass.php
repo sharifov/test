@@ -112,22 +112,15 @@ class AdmissionPass
      */
     public function createAllowance(): AllowanceInterface
     {
-        /** @var array|boolean $data */
-        $data = \Yii::$app->cache->get(RequestControlModule::REQUEST_CONTROL_RULES_CACHE_KEY);
-
-        if ($data === false) {
-            $items = array_reduce($this->conditions, function ($resultQuery, $condition) {
-                /** @var AbstractCondition $condition */
-                return $condition->modifyQuery($resultQuery);
-            }, (new Query())->select('*')->from(RequestControlRule::tableName()))->all();
-        } else {
-            $items = array_reduce($this->conditions, function ($acc, $x) use ($data) {
-                /** @var AbstractCondition $x */
-                return $x->reduceData($acc, $data);
-            }, []);
+        try {
+            $rulesInCache = \Yii::$app->cache->get(RequestControlModule::REQUEST_CONTROL_RULES_CACHE_KEY);
+        } catch (\Throwable $e) {
+            $rulesInCache = false;
         }
 
-        return (count($items) > 0) ? new Limited($items) : new Limitless();
+        $rules = ($rulesInCache === false) ? $this->getRulesFromDatabase() : $this->getRulesFromCache($rulesInCache);
+
+        return (count($rules) > 0) ? new Limited($rules) : new Limitless();
     }
 
     /**
@@ -141,5 +134,30 @@ class AdmissionPass
     public function checkAllowance(AllowanceInterface $allowance): bool
     {
         return $allowance->isAllow($this->userActivityRegistry);
+    }
+
+    /**
+     * @param array $rulesInCache
+     * @return array
+     */
+    private function getRulesFromCache($rulesInCache): array
+    {
+        return array_reduce($this->conditions, function ($acc, $x) use ($rulesInCache) {
+            /** @var AbstractCondition $x */
+            return $x->reduceData($acc, $rulesInCache);
+        }, []);
+    }
+
+    /**
+     * @return array
+     */
+    private function getRulesFromDatabase(): array
+    {
+        $query = new Query();
+        $query->select('*')->from(RequestControlRule::tableName());
+        return array_reduce($this->conditions, function ($resultQuery, $condition) {
+            /** @var AbstractCondition $condition */
+            return $condition->modifyQuery($resultQuery);
+        }, $query)->all();
     }
 }
