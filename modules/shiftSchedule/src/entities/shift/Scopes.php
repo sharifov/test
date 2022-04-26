@@ -22,4 +22,9 @@ class Scopes extends \yii\db\ActiveQuery
     {
         return parent::one($db);
     }
+
+    public function enabled(): self
+    {
+        return $this->andWhere(['sh_enabled' => true]);
+    }
 }
