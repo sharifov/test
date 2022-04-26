@@ -1,6 +1,6 @@
 <?php
 
-namespace frontend\models\form\shiftSchedule;
+namespace modules\shiftSchedule\src\forms;
 
 use Yii;
 use yii\base\Model;

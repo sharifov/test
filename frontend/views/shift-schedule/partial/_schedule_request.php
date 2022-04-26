@@ -6,10 +6,10 @@
 
 use kartik\select2\Select2;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
+use modules\shiftSchedule\src\forms\ScheduleRequestForm;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use frontend\widgets\DateTimePickerWidget;
-use frontend\models\form\shiftSchedule\ScheduleRequestForm;
 use yii\widgets\Pjax;
 
 ?>
