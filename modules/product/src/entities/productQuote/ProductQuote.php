@@ -120,6 +120,8 @@ use yii\db\ActiveRecord;
  * @property Quotable|null $childQuote
  * @property string|null $detailsPageUrl
  * @property string|null $diffUrl
+ * @property-read  ProductQuoteRefund[]|null $productQuoteRefundAccepted
+ * @property-read  ProductQuoteRefund[]|null $productQuoteChangeAccepted
  */
 class ProductQuote extends \yii\db\ActiveRecord implements Serializable
 {
@@ -306,6 +308,27 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     }
 
     /**
+     * Gets query for [[ProductQuoteRefunds]].
+     *
+     * @return ActiveQuery
+     */
+    public function getProductQuoteChangeAccepted(): ActiveQuery
+    {
+        return $this->hasMany(ProductQuoteChange::class, ['pqc_pq_id' => 'pq_id'])
+            ->andWhere(['pqc_status_id' => SettingHelper::getAcceptedQuoteChangeStatuses()]);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isProductQuoteChangeAccepted(): bool
+    {
+        return $this->getProductQuoteChangeAccepted()
+            ->limit(1)
+            ->exists();
+    }
+
+    /**
      * Gets query for [[ProductQuoteChanges]].
      *
      * @return ActiveQuery
@@ -341,6 +364,27 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function getProductQuoteRefundsActive(): ActiveQuery
     {
         return $this->hasMany(ProductQuoteRefund::class, ['pqr_product_quote_id' => 'pq_id'])->andWhere(['pqr_status_id' => SettingHelper::getActiveQuoteRefundStatuses()]);
+    }
+
+    /**
+     * Gets query for [[ProductQuoteRefunds]].
+     *
+     * @return ActiveQuery
+     */
+    public function getProductQuoteRefundAccepted(): ActiveQuery
+    {
+        return $this->hasMany(ProductQuoteRefund::class, ['pqr_product_quote_id' => 'pq_id'])
+            ->andWhere(['pqr_status_id' => SettingHelper::getAcceptedQuoteRefundStatuses()]);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isProductQuoteRefundAccepted(): bool
+    {
+        return $this->getProductQuoteRefundAccepted()
+            ->limit(1)
+            ->exists();
     }
 
     /**

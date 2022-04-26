@@ -677,9 +677,19 @@ class SettingHelper
         return self::prePareStatusIds(Yii::$app->params['settings']['active_quote_change_statuses']);
     }
 
+    public static function getAcceptedQuoteChangeStatuses(): array
+    {
+        return self::prePareStatusIds(Yii::$app->params['settings']['accepted_quote_change_statuses']);
+    }
+
     public static function getActiveQuoteRefundStatuses(): array
     {
         return self::prePareStatusIds(Yii::$app->params['settings']['active_quote_refund_statuses']);
+    }
+
+    public static function getAcceptedQuoteRefundStatuses(): array
+    {
+        return self::prePareStatusIds(Yii::$app->params['settings']['accepted_quote_refund_statuses']);
     }
 
     public static function getFinishedQuoteChangeStatuses(): array
