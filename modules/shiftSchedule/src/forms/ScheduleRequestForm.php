@@ -2,12 +2,27 @@
 
 namespace modules\shiftSchedule\src\forms;
 
+use DateInterval;
+use DateTime;
+use Exception;
+use src\helpers\app\AppHelper;
 use Yii;
 use yii\base\Model;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
+use yii\web\Request;
 
+/**
+ *
+ * @property-write Request $attributesRequest
+ * @property-read string $endDt
+ */
 class ScheduleRequestForm extends Model
 {
+    const DATE_FORMAT = 'Y-m-d';
+    const MIN_DAYS_DURATION = 0;
+    const MAX_DAYS_DURATION = 20;
+    const SCENARIO_DATETIME = 'scenario-datetime';
+
     /**
      * @var string
      */
@@ -15,11 +30,11 @@ class ScheduleRequestForm extends Model
     /**
      * @var string
      */
-    public string $endDt = '';
-    /**
-     * @var string
-     */
     public string $scheduleType = '';
+    /**
+     * @var int|null
+     */
+    public ?int $duration = null;
 
     /**
      * @return array
@@ -30,7 +45,6 @@ class ScheduleRequestForm extends Model
             [
                 [
                     'startDt',
-                    'endDt',
                     'scheduleType',
                 ],
                 'required',
@@ -38,7 +52,6 @@ class ScheduleRequestForm extends Model
             [
                 [
                     'startDt',
-                    'endDt',
                 ],
                 'validateDates',
                 'skipOnEmpty' => true,
@@ -48,12 +61,19 @@ class ScheduleRequestForm extends Model
                 'string',
                 'max' => 100,
             ],
+            [
+                'duration',
+                'number',
+                'min' => self::MIN_DAYS_DURATION,
+                'max' => self::MAX_DAYS_DURATION,
+            ],
         ];
     }
 
     /**
      * Save request to user shift schedule
      * @return bool
+     * @throws Exception
      */
     public function saveRequest(): bool
     {
@@ -64,6 +84,7 @@ class ScheduleRequestForm extends Model
     /**
      * Mapping form data with UserShiftSchedule props, before save
      * @return array
+     * @throws Exception
      */
     private function mappingData(): array
     {
@@ -73,25 +94,60 @@ class ScheduleRequestForm extends Model
             'uss_status_id' => UserShiftSchedule::STATUS_PENDING,
             'uss_type_id' => UserShiftSchedule::TYPE_MANUAL,
             'uss_start_utc_dt' => $this->startDt,
-            'uss_end_utc_dt' => $this->endDt,
+            'uss_end_utc_dt' => $this->getEndDt(),
         ];
     }
 
     /**
      * Inline validator for dates
+     * @param string $attribute
      * @return void
      */
-    public function validateDates(): void
+    public function validateDates(string $attribute): void
     {
-        if (strtotime($this->startDt) < strtotime(date('Y-m-d'))) {
-            $this->addError('startDt', 'Invalid start date');
+        if (strtotime($this->$attribute) < strtotime(date(self::DATE_FORMAT))) {
+            $this->addError($attribute, Yii::t('schedule-request', 'Invalid start date'));
         }
-        if (strtotime($this->endDt) < strtotime(date('Y-m-d'))) {
-            $this->addError('endDt', 'Invalid end date');
+    }
+
+    /**
+     * Setting attribute from request data
+     * @param Request $request
+     * @return void
+     * @throws Exception
+     */
+    public function setAttributesRequest(Request $request): void
+    {
+        if (!empty($start = $request->get('start'))) {
+            if (AppHelper::validateDate($start, self::DATE_FORMAT)) {
+                $start = new DateTime($start);
+                $this->startDt = $start->format(self::DATE_FORMAT);
+                $this->validate(['startDt']);
+
+                if (!empty($end = $request->get('end'))) {
+                    if (AppHelper::validateDate($end, self::DATE_FORMAT)) {
+                        $end = new DateTime($end);
+                        $this->endDt = $end->format(self::DATE_FORMAT);
+                        if ($this->validate(['endDt'])) {
+                            $this->duration = $end->diff($start)->format("%a");
+                        }
+                    }
+                }
+            }
         }
-        if (strtotime($this->endDt) <= strtotime($this->startDt)) {
-            $this->addError('startDt', 'Please give correct Start and End dates');
-            $this->addError('endDt', 'Please give correct Start and End dates');
+    }
+
+    /**
+     * @return string
+     * @throws Exception
+     */
+    public function getEndDt(): string
+    {
+        if (AppHelper::validateDate($this->startDt, self::DATE_FORMAT) && !empty($this->duration)) {
+            $start = new DateTime($this->startDt);
+            $start->add(new DateInterval('P' . $this->duration . 'D'));
+            return $start->format(self::DATE_FORMAT);
         }
+        return '';
     }
 }
