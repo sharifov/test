@@ -129,17 +129,6 @@ var PhoneWidget = function () {
         initiated = true;
     }
 
-    function acceptedCallEvent() {
-        window.addEventListener('storage', function(event) {
-            if (event.key === 'activeCall') {
-                let call = JSON.parse(event.newValue);
-                if (typeof call.acceptType !== 'undefined') {
-                    initAcceptedPane(call);
-                }
-            }
-        });
-    }
-
     function openVoipPageEvent() {
         $('.phone-widget__start-btn').on('click', function () {
             window.open('/voip/index', '_blank').focus();
@@ -1801,11 +1790,23 @@ var PhoneWidget = function () {
         if (!settings.enableAcceptedPanel) {
             return;
         }
-        panes.accepted.init(call);
+        let acceptedCall = {...call}
+        panes.accepted.init(acceptedCall);
         iconUpdate();
         panes.queue.hide();
         openWidget();
         openCallTab();
+    }
+
+    function acceptedCallEvent() {
+        window.addEventListener('storage', function(event) {
+            if (event.key === 'activeCall') {
+                let call = JSON.parse(event.newValue);
+                if (typeof call.acceptType !== 'undefined') {
+                    initAcceptedPane(call);
+                }
+            }
+        });
     }
 
     function acceptInternalCall(call) {
