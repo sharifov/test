@@ -2,6 +2,8 @@
 
 namespace src\model\call\useCase\createCall\simpleCall;
 
+use common\models\Call;
+use common\models\Project;
 use common\models\search\ContactsSearch;
 use frontend\widgets\newWebPhone\AvailablePhones;
 use src\auth\Auth;
@@ -36,6 +38,8 @@ class CreateSimpleCall
                 $contactId,
             ))->isDisabledRecord();
 
+            $project = $phone->projectId ? Project::findOne($phone->projectId) : '';
+
             $result = \Yii::$app->communication->createCall(
                 new \src\model\call\useCase\conference\create\CreateCallForm([
                     'device' => $form->getVoipDevice(),
@@ -48,6 +52,9 @@ class CreateSimpleCall
                     'client_id' => $contactId,
                     'call_recording_disabled' => $recordDisabled,
                     'friendly_name' => FriendlyName::next(),
+                    'project' => $project ? $project->name : '',
+                    'source' => '',
+                    'type' => Call::TYPE_LIST[Call::CALL_TYPE_OUT],
                 ])
             );
         } catch (\Throwable $e) {
