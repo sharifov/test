@@ -13,7 +13,7 @@ class CronExpressionAssets extends \yii\web\AssetBundle
         'js/day-input-component.js',
         'js/month-input-component.js',
         'js/weekday-input-component.js',
-        'js/year-input-component.js',
+        //'js/year-input-component.js',
         'js/cron-expression.js',
     ];
 

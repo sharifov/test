@@ -11,6 +11,10 @@
       tags: common
       become: yes
 
+    - role: bash_scripts
+      tags: bash-scripts
+      become: yes
+
     - role: nginx
       tags: nginx
       become: yes
@@ -21,16 +25,6 @@
 
     - role: supervisor
       tags: supervisor
-      become: yes
-
-    - role: docker
-      tags: docker
-      become: yes
-
-    - role: antispam
-      tags: antispam
-      vars:
-        callantispam_ver: latest
       become: yes
 
     - role: filebeat

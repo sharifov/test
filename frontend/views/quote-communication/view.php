@@ -1,0 +1,75 @@
+<?php
+
+use yii\helpers\Html;
+use yii\widgets\DetailView;
+use frontend\models\CommunicationForm;
+use common\models\QuoteCommunication;
+
+/**
+ * @var $this yii\web\View
+ * @var $model \common\models\QuoteCommunication
+ **/
+
+$this->title = $model->qc_id;
+$this->params['breadcrumbs'][] = ['label' => 'Quote Communication', 'url' => ['index']];
+$this->params['breadcrumbs'][] = $this->title;
+\yii\web\YiiAsset::register($this);
+?>
+<div class="quote-controller-view">
+
+    <h1><?= Html::encode($this->title) ?></h1>
+
+    <p>
+        <?= Html::a('Update', ['update', 'qc_id' => $model->qc_id], ['class' => 'btn btn-primary']) ?>
+        <?= Html::a('Delete', ['delete', 'qc_id' => $model->qc_id], [
+            'class' => 'btn btn-danger',
+            'data' => [
+                'confirm' => 'Are you sure you want to delete this item?',
+                'method' => 'post',
+            ],
+        ]) ?>
+    </p>
+
+    <?= DetailView::widget([
+        'model' => $model,
+        'attributes' => [
+            'qc_id',
+            [
+                'attribute' => 'qc_communication_type',
+                'filter' => CommunicationForm::TYPE_LIST,
+                'value' => static function (QuoteCommunication $model): string {
+                    return (isset(CommunicationForm::TYPE_LIST[$model->qc_communication_type]))
+                        ? CommunicationForm::TYPE_LIST[$model->qc_communication_type]
+                        : 'Unknown communication type';
+                },
+                'format' => 'raw',
+            ],
+            [
+                'attribute' => 'qc_communication_id',
+                'value' => static function (QuoteCommunication $model): string {
+                    switch ($model->qc_communication_type) {
+                        case CommunicationForm::TYPE_EMAIL:
+                            return Html::a('<i class="fa fa-link"></i> ' . $model->qc_communication_id, ['/email/view', 'id' => $model->qc_communication_id], ['target' => '_blank', 'data-pjax' => 0]);
+                        case CommunicationForm::TYPE_SMS:
+                            return Html::a('<i class="fa fa-link"></i> ' . $model->qc_communication_id, ['/sms/view', 'id' => $model->qc_communication_id], ['target' => '_blank', 'data-pjax' => 0]);
+                        case CommunicationForm::TYPE_CHAT:
+                            return Html::a('<i class="fa fa-link"></i> ' . $model->qc_communication_id, ['/client-chat-crud/view', 'id' => $model->qc_communication_id], ['target' => '_blank', 'data-pjax' => 0]);
+                        default:
+                            return 'Unknown communication type';
+                    }
+                },
+                'format' => 'raw',
+            ],
+            [
+                'attribute' => 'qc_quote_id',
+                'value' => function (QuoteCommunication $model) {
+                    return Html::a('<i class="fa fa-link"></i> ' . $model->qc_quote_id, ['/quotes/view', 'id' => $model->qc_quote_id], ['target' => '_blank', 'data-pjax' => 0]);
+                },
+                'format' => 'raw'
+            ],
+            'qc_created_dt:byUserDateTime',
+            'qc_created_by:username',
+        ],
+    ]) ?>
+
+</div>

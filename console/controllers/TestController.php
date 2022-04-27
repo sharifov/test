@@ -772,7 +772,7 @@ JSON;
 
     public function actionBlameable()
     {
-        echo 'Blameable '.Auth::employeeId();
+        echo 'Blameable ' . Auth::employeeId();
         die;
     }
 }

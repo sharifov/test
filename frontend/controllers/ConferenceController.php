@@ -141,12 +141,7 @@ class ConferenceController extends FController
                     }
                 }
             }
-
-            if (SettingHelper::isCallEnabledCommunicationProxyRecordings()) {
-                header('X-Accel-Redirect: ' . Yii::$app->communication->xAccelRedirectCommunicationUrl . $conferenceRecordSid);
-            } else {
-                header('X-Accel-Redirect: ' . Yii::$app->communication->xAccelRedirectUrl . $conferenceRecordSid);
-            }
+            header('X-Accel-Redirect: ' . Yii::$app->communication->xAccelRedirectCommunicationUrl . $conferenceRecordSid);
         } catch (NotFoundException $e) {
             throw new NotFoundHttpException($e->getMessage());
         }

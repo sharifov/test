@@ -3,7 +3,7 @@
 use yii\bootstrap4\Html;
 
 /* @var $this yii\web\View */
-/* @var $model src\model\shiftSchedule\entity\userShiftAssign\UserShiftAssign */
+/* @var $model modules\shiftSchedule\src\entities\userShiftAssign\UserShiftAssign */
 
 $this->title = 'Create User Shift Assign';
 $this->params['breadcrumbs'][] = ['label' => 'User Shift Assigns', 'url' => ['index']];

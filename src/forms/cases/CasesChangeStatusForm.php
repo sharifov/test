@@ -33,7 +33,7 @@ use yii\helpers\Json;
  * @property string $sendTo
  * @property string $language
  * @property Cases $case
- * @property Employee $user
+ * @property Employee|null $user
  * @property array|null $sendToList
  * @property array|null $languageList
  * @property bool|null $enabledSendFeedbackEmail
@@ -53,13 +53,18 @@ class CasesChangeStatusForm extends Model
     public $caseGid;
     public ?string $sendEmailDefault = null;
 
-    private $case;
-    private $user;
+    private Cases $case;
+    private ?Employee $user;
     private ?array $sendToList = null;
     private ?array $languageList = null;
     private ?bool $enabledSendFeedbackEmail = null;
 
-    public function __construct(Cases $case, Employee $user, $config = [])
+    /**
+     * @param Cases $case
+     * @param Employee|null $user
+     * @param array $config
+     */
+    public function __construct(Cases $case, ?Employee $user, $config = [])
     {
         parent::__construct($config);
         $this->case = $case;

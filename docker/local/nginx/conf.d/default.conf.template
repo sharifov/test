@@ -88,12 +88,6 @@ server {
         proxy_set_header Connection $connection_upgrade;
     }
 
-    location /twilio-records/ {
-        internal;
-        proxy_buffering off;
-        proxy_pass https://api.twilio.com/;
-    }
-
     location /voip-records/ {
         internal;
         proxy_buffering off;
@@ -143,7 +137,7 @@ server {
 
     listen ${HOST_API_PORT};
 
-    server_name ${HOST_API};
+    server_name 127.0.0.1 ${HOST_API};
 
     root        ${APP_PATH}/webapi/web/;
     index       index.php;

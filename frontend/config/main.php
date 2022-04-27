@@ -374,6 +374,11 @@ return [
             'class' => QaTaskModule::class,
             'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
         ],
+
+        'shift' => [
+            'class' => \modules\shiftSchedule\ShiftScheduleModule::class,
+            'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
+        ],
         'rbac-import-export' => [
             'class' => RbacImportExportModule::class,
             'as access' => [
@@ -416,6 +421,9 @@ return [
         'cruise' => [
             'class' => CruiseModule::class,
             'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
+        ],
+        'smart-search' => [
+            'class' => \kivork\search\SearchModule::class,
         ],
         ],
         'as beforeRequest' => [

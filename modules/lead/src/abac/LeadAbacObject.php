@@ -49,6 +49,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     //public const UI_FIELD_LOCALE_FORM_UPDATE_CLIENT = self::NS . 'ui/field/locale'; //TODO: To Remove 14
     //public const UI_FIELD_MARKETING_COUNTRY = self::NS . 'ui/field/marketing_country'; //TODO: To Remove 15
     public const UI_DISPLAY_QUOTE_SEARCH_PARAMS = self::NS . 'ui/quote/search/params';
+    public const UI_DISPLAY_MARKETING_SOURCE = self::NS . 'ui/block/marketing_source';
 
     /** LOGIC PERMISSION */
     public const LOGIC_CLIENT_DATA   = self::NS . 'logic/client_data';
@@ -120,6 +121,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::OBJ_LEAD_QUOTE_SEARCH => self::OBJ_LEAD_QUOTE_SEARCH,
         self::OBJ_LEAD_QUICK_SEARCH => self::OBJ_LEAD_QUICK_SEARCH,
         self::OBJ_HEAT_MAP_LEAD => self::OBJ_HEAT_MAP_LEAD,
+        self::UI_DISPLAY_MARKETING_SOURCE => self::UI_DISPLAY_MARKETING_SOURCE,
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -231,6 +233,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::OBJ_LEAD_QUOTE_SEARCH => [self::ACTION_ACCESS_QUOTE_SEARCH],
         self::OBJ_LEAD_QUICK_SEARCH => [self::ACTION_ACCESS_QUICK_SEARCH],
         self::OBJ_HEAT_MAP_LEAD => [self::ACTION_ACCESS],
+        self::UI_DISPLAY_MARKETING_SOURCE => [self::ACTION_READ],
     ];
 
     public const ATTR_LEAD_IS_OWNER = [

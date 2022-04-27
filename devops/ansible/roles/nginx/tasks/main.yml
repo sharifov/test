@@ -19,7 +19,7 @@
 
 - name: Copy SSL certificates
   copy:
-    src: "{{ env }}/ssl/"
+    src: files/ssl/
     dest: /etc/nginx/ssl/
     owner: root
     group: root
@@ -57,7 +57,7 @@
 
 - name: Copy httpasswd
   copy:
-    src: "{{ env }}/.api-htpasswd"
+    src: files/.api-htpasswd
     dest: /etc/nginx/conf.d/.api-htpasswd
     owner: root
     group: root

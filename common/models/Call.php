@@ -2558,7 +2558,7 @@ class Call extends \yii\db\ActiveRecord
      */
     public function getRecordingUrl(): string
     {
-        return $this->c_recording_sid ? Yii::$app->communication->getCallRecordingUrl($this->c_call_sid, $this->c_recording_sid) : '';
+        return $this->c_recording_sid ? Yii::$app->communication->getCallRecordingUrl($this->c_call_sid) : '';
     }
 
     public function isConferenceType(): bool

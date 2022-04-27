@@ -1,19 +1,21 @@
 CRM: Ansible Playbooks
 -------------------------------------------
 
-# Provision CRM application server:
+# Provision CRM application server (12 minutes):
 
     ansible-playbook app.yml \
-        -i inventories/dev-new/aws_ec2.yml \
-        --vault-password-file=~/.ansible/vaultfile
+        -i inventories/dev/aws_ec2.yml \
+        --vault-password-file=~/.ansible/vaultfile-dev \
+        --private-key ~/.ssh/aws-dev-ssh.pem
 
-# Provision CRM shared server:
+# Provision CRM shared server (12 minutes):
 
-    ansible-playbook app.yml \
-        -i inventories/dev-new/aws_ec2.yml \
-        --vault-password-file=~/.ansible/vaultfile
+    ansible-playbook shared.yml \
+        -i inventories/dev/aws_ec2.yml \
+        --vault-password-file=~/.ansible/vaultfile-dev \
+        --private-key ~/.ssh/aws-dev-ssh.pem
 
-# Deploy a test release:
+# Deploy a test release (2 minutes):
 
     # Go to application root directory
     cd ../../
@@ -30,11 +32,12 @@ CRM: Ansible Playbooks
 
     # Run deploy.yml and set app_ver to test
     ansible-playbook deploy.yml \
-        -i inventories/dev-new/aws_ec2.yml \
-        --vault-password-file=~/.ansible/vaultfile \
+        -i inventories/dev/aws_ec2.yml \
+        --vault-password-file=~/.ansible/vaultfile-dev \
+        --private-key ~/.ssh/aws-dev-ssh.pem \
         -e app_ver=test
 
 # Update dotenv for dev environment:
 
     ansible-vault edit inventories/dev/group_vars/all/secrets.yml \
-        --vault-password-file=~/.ansible/vaultfile
+        --vault-password-file=~/.ansible/vaultfile-dev

@@ -105,11 +105,6 @@ class SettingHelper
         return (int)(Yii::$app->params['settings']['clean_call_after_days'] ?? 10);
     }
 
-    public static function isCallRecordingSecurityEnabled(): bool
-    {
-        return (bool)(Yii::$app->params['settings']['call_recording_security'] ?? false);
-    }
-
     public static function isCallRecordingLogEnabled(): bool
     {
         return (bool)(Yii::$app->params['settings']['enable_call_recording_log'] ?? false);
@@ -817,11 +812,6 @@ class SettingHelper
         return Yii::$app->params['settings']['lpp_remove_by_sms_tpl'] ?? [];
     }
 
-    public static function isCallEnabledCommunicationProxyRecordings(): bool
-    {
-        return (bool)(Yii::$app->params['settings']['call_enabled_communication_proxy_recordings'] ?? false);
-    }
-
     public static function isPhoneNumberRedialEnabled(): bool
     {
         return (bool)(Yii::$app->params['settings']['phone_number_redial_enable'] ?? false);
@@ -950,5 +940,29 @@ class SettingHelper
             'key' => $key,
             'forAdmin' => true,
         ], 'SettingsHelper:leadRedialExcludeAttributesErrorLog');
+    }
+
+    private static function getShiftSchedule(): array
+    {
+        return Yii::$app->params['settings']['shift_schedule'] ?? [
+                'generate_enabled'        => false,
+                'days_limit'              => 20,
+                'days_offset'             => 0
+            ];
+    }
+
+    public static function getShiftScheduleGenerateEnabled(): bool
+    {
+        return (bool) (self::getShiftSchedule()['generate_enabled'] ?? false);
+    }
+
+    public static function getShiftScheduleDaysLimit(): int
+    {
+        return (int) (self::getShiftSchedule()['days_limit'] ?? 20);
+    }
+
+    public static function getShiftScheduleDaysOffset(): int
+    {
+        return (int) (self::getShiftSchedule()['days_offset'] ?? 0);
     }
 }

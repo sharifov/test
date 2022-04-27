@@ -68,6 +68,7 @@ use yii\helpers\ArrayHelper;
  * @property ClientVisitor|null $clientVisitor
  * @property CouponClient[] $couponClient
  * @property ClientData[] $clientData
+ * @property string lastClientEmail
  *
  * @method clientPhonesByType(array $array)
  */
@@ -471,6 +472,12 @@ class Client extends ActiveRecord
             }
         }
         return $phoneList;
+    }
+
+    public function getLastClientEmail(): string
+    {
+        $emails = $this->emailList;
+        return strval(end($emails));
     }
 
     /**

@@ -2,14 +2,14 @@
 
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
-use src\model\shiftSchedule\entity\shift\Shift;
-use src\model\shiftSchedule\entity\shiftCategory\ShiftCategoryQuery;
+use modules\shiftSchedule\src\entities\shift\Shift;
+use modules\shiftSchedule\src\entities\shiftCategory\ShiftCategoryQuery;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel src\model\shiftSchedule\entity\shift\search\SearchShift */
+/* @var $searchModel \modules\shiftSchedule\src\entities\shift\search\SearchShift */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Shifts';
@@ -24,14 +24,23 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <?php Pjax::begin(['id' => 'pjax-shift', 'scrollTo' => 0]); ?>
-        <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+        <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            'sh_id',
-            'sh_name',
+            ['attribute' => 'sh_id', 'options' => [
+                'style' => 'width: 80px'
+            ]],
+            //'sh_name',
+            [
+                'attribute' => 'sh_name',
+                'value' => static function (Shift $model) {
+                    return $model->getColorLabel() . ' ' . Html::encode($model->sh_name);
+                },
+                'format' => 'raw'
+            ],
             'sh_title',
             [
                 'attribute' => 'sh_category_id',
@@ -40,6 +49,21 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'filter' => ShiftCategoryQuery::getList()
             ],
+
+
+            [
+                'label' => 'Rules',
+                'value' => static function (Shift $model) {
+                    return $model->shiftScheduleRules ? Html::a(
+                        count($model->shiftScheduleRules),
+                        ['shift-schedule-rule-crud/index', 'SearchShiftScheduleRule[ssr_shift_id]' => $model->sh_id],
+                        ['data-pjax' => 0]
+                    )
+                        : '-';
+                },
+                'format' => 'raw'
+            ],
+
             ['class' => \common\components\grid\BooleanColumn::class, 'attribute' => 'sh_enabled'],
             'sh_color',
             'sh_sort_order',
