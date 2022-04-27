@@ -1445,7 +1445,10 @@ class PhoneController extends FController
                 Auth::id(),
                 $conference->isRecordingDisabled(),
                 $call->getDataPhoneListId(),
-                $call->c_to
+                $call->c_to,
+                $call->c_project_id ? $call->cProject->name : '',
+                $call->getSourceName(),
+                $call->getCallTypeName()
             );
             Yii::$app->session->set($key, time());
         } catch (\Throwable $e) {

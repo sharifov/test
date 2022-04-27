@@ -1658,6 +1658,7 @@ class Call extends \yii\db\ActiveRecord
                     $call->setConferenceType();
                     $call->update();
                 }
+
                 $res = \Yii::$app->communication->acceptConferenceCall(
                     $call->c_id,
                     $call->c_call_sid,
@@ -1667,7 +1668,10 @@ class Call extends \yii\db\ActiveRecord
                     $call->isRecordingDisable(),
                     $call->getDataPhoneListId(),
                     $call->c_to,
-                    FriendlyName::nextWithSid($call->c_call_sid)
+                    FriendlyName::nextWithSid($call->c_call_sid),
+                    $call->c_project_id ? $call->cProject->name : '',
+                    $call->getSourceName(),
+                    $call->getCallTypeName()
                 );
 
                 if ($res) {
@@ -1687,7 +1691,6 @@ class Call extends \yii\db\ActiveRecord
                                 ]
                             ]);
                         }
-
                         return false;
                     }
                     return true;
@@ -1800,7 +1803,10 @@ class Call extends \yii\db\ActiveRecord
                 FriendlyName::nextWithSid($call->c_call_sid),
                 $departmentId,
                 $call->c_created_user_id,
-                $call->c_group_id
+                $call->c_group_id,
+                $call->c_project_id ? $call->cProject->name : '',
+                $call->getSourceName(),
+                $call->getCallTypeName()
             );
 
             $isError = (bool)($res['error'] ?? true);
