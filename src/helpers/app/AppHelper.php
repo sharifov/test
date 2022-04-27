@@ -278,4 +278,17 @@ class AppHelper
 
         return -1;
     }
+
+    /**
+     * Check incoming string on valid date
+     * @param string $date
+     * @param string $format
+     * @return bool
+     */
+    public static function validateDate(string $date, string $format = 'Y-m-d'): bool
+    {
+        $d = \DateTime::createFromFormat($format, $date);
+
+        return $d && $d->format($format) === $date;
+    }
 }
