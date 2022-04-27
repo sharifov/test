@@ -749,6 +749,8 @@ class ClientChatRequestController extends ApiBaseController
      *  "errors":["Event is invalid."]
      * }
      *
+     * @return ErrorResponse|Response
+     * @throws \yii\base\InvalidConfigException
      */
     public function actionFeedback()
     {
