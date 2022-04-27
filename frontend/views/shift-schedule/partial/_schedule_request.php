@@ -5,11 +5,11 @@
  */
 
 use kartik\select2\Select2;
+use kartik\time\TimePicker;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\forms\ScheduleRequestForm;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
-use frontend\widgets\DateTimePickerWidget;
 use yii\widgets\Pjax;
 
 ?>
@@ -31,14 +31,13 @@ use yii\widgets\Pjax;
 
         <div class="row">
             <div class="col-md-6">
-                <?= $form->field($scheduleRequestModel, 'startDt')->widget(DateTimePickerWidget::class, [
-                    'clientOptions' => [
-                        'autoclose' => true,
-                        'format' => 'yyyy-mm-dd hh:ii:ss',
-                        'todayBtn' => true,
-                        'startDate' => date('Y-m-d h:i:m'),
-                    ]
-                ])->label(Yii::t('schedule-request', 'From')) ?>
+                <?= $form->field($scheduleRequestModel, 'startDt')
+                    ->textInput([
+                        'type' => 'date',
+                        'min' => date('Y-m-d'),
+                        'max' => date('Y-m-d', strtotime('+1 year')),
+                    ])
+                    ->label(Yii::t('schedule-request', 'From'))?>
             </div>
             <div class="col-md-6">
                 <?= $form->field($scheduleRequestModel, 'duration')
@@ -49,6 +48,29 @@ use yii\widgets\Pjax;
                         )
                     )
                     ->label(Yii::t('schedule-request', 'Duration (days)')) ?>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <?= $form->field($scheduleRequestModel, 'startTime')->widget(TimePicker::class, [
+                    'pluginOptions' => [
+                        'showSeconds' => false,
+                        'showMeridian' => false,
+                        'minuteStep' => 1,
+                        'secondStep' => 5,
+                    ]
+                ])->label(Yii::t('schedule-request', 'Start Time (UTC)')) ?>
+            </div>
+            <div class="col-md-6">
+                <?= $form->field($scheduleRequestModel, 'endTime')->widget(TimePicker::class, [
+                    'pluginOptions' => [
+                        'showSeconds' => false,
+                        'showMeridian' => false,
+                        'minuteStep' => 1,
+                        'secondStep' => 5,
+                    ]
+                ])->label(Yii::t('schedule-request', 'End Time (UTC)')) ?>
             </div>
         </div>
 
