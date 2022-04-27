@@ -38,17 +38,17 @@ use yii\widgets\Pjax;
                         'todayBtn' => true,
                         'startDate' => date('Y-m-d h:i:m'),
                     ]
-                ]) ?>
+                ])->label(Yii::t('schedule-request', 'From')) ?>
             </div>
             <div class="col-md-6">
-                <?= $form->field($scheduleRequestModel, 'endDt')->widget(DateTimePickerWidget::class, [
-                    'clientOptions' => [
-                        'autoclose' => true,
-                        'format' => 'yyyy-mm-dd hh:ii:ss',
-                        'todayBtn' => true,
-                        'startDate' => date('Y-m-d h:i:m'),
-                    ]
-                ]) ?>
+                <?= $form->field($scheduleRequestModel, 'duration')
+                    ->dropDownList(
+                        array_combine(
+                            range($scheduleRequestModel::MIN_DAYS_DURATION, $scheduleRequestModel::MAX_DAYS_DURATION),
+                            range($scheduleRequestModel::MIN_DAYS_DURATION, $scheduleRequestModel::MAX_DAYS_DURATION)
+                        )
+                    )
+                    ->label(Yii::t('schedule-request', 'Duration (days)')) ?>
             </div>
         </div>
 
@@ -57,7 +57,10 @@ use yii\widgets\Pjax;
                 <?= $form->field($scheduleRequestModel, 'scheduleType')->widget(Select2::class, [
                     'data' => ShiftScheduleType::getList(),
                     'size' => Select2::SMALL,
-                    'options' => ['placeholder' => 'Select Schedule Type', 'multiple' => false],
+                    'options' => [
+                        'placeholder' => Yii::t('schedule-request', 'Select Schedule Type'),
+                        'multiple' => false,
+                    ],
                     'pluginOptions' => ['allowClear' => true],
                 ]) ?>
             </div>
