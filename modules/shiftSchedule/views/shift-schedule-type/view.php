@@ -62,6 +62,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw',
             ],
+            [
+                'label' => 'Labels',
+                'value' => static function (ShiftScheduleType $model) {
+                    $labelList = $model->getLabelList();
+                    return $labelList ? implode(', ', $labelList) : '-';
+                },
+            ],
             'sst_css_class',
             'sst_params_json',
             'sst_sort_order',
