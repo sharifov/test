@@ -127,10 +127,7 @@ class ScheduleRequestForm extends Model
                 if (!empty($end = $request->get('end'))) {
                     if (AppHelper::validateDate($end, self::DATE_FORMAT)) {
                         $end = new DateTime($end);
-                        $this->endDt = $end->format(self::DATE_FORMAT);
-                        if ($this->validate(['endDt'])) {
-                            $this->duration = $end->diff($start)->format("%a");
-                        }
+                        $this->duration = $end->diff($start)->format("%a");
                     }
                 }
             }
