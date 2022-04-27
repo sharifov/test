@@ -439,6 +439,7 @@ class ShiftScheduleController extends FController
 
     /**
      * @return string|Response
+     * @throws Exception
      */
     public function actionScheduleRequestAjax()
     {
@@ -451,14 +452,7 @@ class ShiftScheduleController extends FController
                 }
             }
         } else {
-            if (!empty($start = $request->get('start'))) {
-                $scheduleRequestModel->startDt = date('Y-m-d', strtotime($start));
-                $scheduleRequestModel->validate(['startDt']);
-            }
-            if (!empty($end = $request->get('end'))) {
-                $scheduleRequestModel->endDt = date('Y-m-d', strtotime($end));
-                $scheduleRequestModel->validate(['endDt']);
-            }
+            $scheduleRequestModel->setAttributesRequest($request);
         }
 
         return $this->renderAjax('partial/_schedule_request', [
