@@ -978,7 +978,7 @@ class EmployeeController extends FController
                 $userUpdated = true;
             }
 
-            if ($form->fieldAccess->canEditRoles() && $form->isChangedRoles()) {
+            if ($form->fieldAccess->canEdit('form_roles') && $form->isChangedRoles()) {
                 $targetUser->updateRoles($form->form_roles);
                 $userUpdated = true;
             }
@@ -998,7 +998,7 @@ class EmployeeController extends FController
                 $userUpdated = true;
             }
 
-            if ($form->fieldAccess->canEditUserGroups() && $form->isChangedGroups()) {
+            if ($form->fieldAccess->canEdit('user_groups') && $form->isChangedGroups()) {
                 UserGroupAssign::deleteAll(['ugs_user_id' => $targetUser->id]);
                 foreach ($form->user_groups as $id) {
                     $uga = new UserGroupAssign();
@@ -1009,7 +1009,7 @@ class EmployeeController extends FController
                 $userUpdated = true;
             }
 
-            if ($form->fieldAccess->canEditDepartments() && $form->isChangedDepartments()) {
+            if ($form->fieldAccess->canEdit('user_departments') && $form->isChangedDepartments()) {
                 UserDepartment::deleteAll(['ud_user_id' => $targetUser->id]);
                 foreach ($form->user_departments as $id) {
                     $ud = new UserDepartment();
@@ -1019,7 +1019,7 @@ class EmployeeController extends FController
                 }
                 $userUpdated = true;
             }
-            if ($form->fieldAccess->canEditProjects() && $form->isChangedProjects()) {
+            if ($form->fieldAccess->canEdit('user_projects') && $form->isChangedProjects()) {
                 ProjectEmployeeAccess::deleteAll(['employee_id' => $targetUser->id]);
                 foreach ($form->user_projects as $id) {
                     $up = new ProjectEmployeeAccess();
@@ -1033,7 +1033,7 @@ class EmployeeController extends FController
 
             $userClientChatData = UserClientChatData::findOne(['uccd_employee_id' => $targetUser->id]);
 
-            if ($form->fieldAccess->canEditClientChatUserChannels() && $form->isChangedClientChatsChannels()) {
+            if ($form->fieldAccess->canEdit('client_chat_user_channel') && $form->isChangedClientChatsChannels()) {
                 ClientChatUserChannel::deleteAll(['ccuc_user_id' => $targetUser->id]);
                 if ($form->client_chat_user_channel) {
                     foreach ($form->client_chat_user_channel as $id) {
@@ -1056,7 +1056,7 @@ class EmployeeController extends FController
                 $userUpdated = true;
             }
 
-            if ($form->fieldAccess->canEditUserShiftAssign() && $form->isChangedUserShiftAssign()) {
+            if ($form->fieldAccess->canEdit('user_shift_assigns') && $form->isChangedUserShiftAssign()) {
                 UserShiftAssign::deleteAll(['usa_user_id' => $targetUser->id]);
                 foreach ($form->user_shift_assigns as $shiftId) {
                     try {
