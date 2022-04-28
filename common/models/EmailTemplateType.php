@@ -336,7 +336,11 @@ class EmailTemplateType extends \yii\db\ActiveRecord
             $emailAbTestingService = new EmailTemplateOfferABTestingService();
             $etpId = $emailAbTestingService->assignEmailOfferTemplateToLead($lead);
             if ($etpId) {
-                $query->orWhere(['etp_id' => $etpId]);
+                $defaultTemplateId = $emailAbTestingService->getDefaultOfferTemplateId();
+                if ($etpId !== $defaultTemplateId) {
+                    $query->andWhere(['<>', 'etp_id', $defaultTemplateId])
+                          ->orWhere(['etp_id' => $etpId]);
+                }
             }
         }
 
