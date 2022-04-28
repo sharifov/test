@@ -1424,8 +1424,8 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
     public function isUserGroupIntersection(array $groups): bool
     {
-        foreach ($this->getUserGroupList() as $grId => $grName) {
-            if (in_array($grId, $groups, true)) {
+        foreach ($this->getUserGroupList() as $groupId => $groupName) {
+            if (in_array($groupId, $groups, true)) {
                 return true;
             }
         }

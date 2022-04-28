@@ -922,7 +922,6 @@ class EmployeeController extends FController
             throw new BadRequestHttpException('Invalid request');
         }
         $targetUser = Employee::findOne($targetUserId);
-
         if (!$targetUser) {
             throw new NotFoundHttpException('The requested user does not exist.');
         }
@@ -957,6 +956,7 @@ class EmployeeController extends FController
                 'up_join_date' => date('Y-m-d'),
             ]);
         }
+
         $form = new UpdateForm($targetUser, $updaterUser, $userParams, $userProfile);
 
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
@@ -964,7 +964,7 @@ class EmployeeController extends FController
             $updateRC = [];
 
             $targetUser->setAttributes($form->getValuesOfAvailableAttributes());
-            if (!empty($targetUser->getDirtyAttributes())) {
+            if (count($targetUser->getDirtyAttributes()) > 0) {
                 if ($targetUser->isAttributeChanged('email')) {
                     $updateRC['email'] = $targetUser->email;
                 }
@@ -974,8 +974,15 @@ class EmployeeController extends FController
                 if ($form->password) {
                     $targetUser->setPassword($form->password);
                 }
-                $targetUser->save();
-                $userUpdated = true;
+                if ($targetUser->save()) {
+                    $userUpdated = true;
+                } else {
+                    Yii::error([
+                        'errors' => $targetUser->getErrors(),
+                        'targetUserId' => $targetUser->id,
+                        'updaterUserId' => $updaterUser->id,
+                    ], 'EmployeeController:update:targetUserSave');
+                }
             }
 
             if ($form->fieldAccess->canEdit('form_roles') && $form->isChangedRoles()) {
@@ -984,18 +991,32 @@ class EmployeeController extends FController
             }
 
             $userProfile->setAttributes($form->getValuesOfAvailableAttributes());
-            if (!empty($userProfile->getDirtyAttributes())) {
+            if (count($userProfile->getDirtyAttributes()) > 0) {
                 $userProfile->up_updated_dt = date('Y-m-d H:i:s');
-                $userProfile->save();
-                $userUpdated = true;
+                if ($userProfile->save()) {
+                    $userUpdated = true;
+                } else {
+                    Yii::error([
+                        'errors' => $userProfile->getErrors(),
+                        'targetUserId' => $targetUser->id,
+                        'updaterUserId' => $updaterUser->id,
+                    ], 'EmployeeController:update:userProfileSave');
+                }
             }
 
             $userParams->setAttributes($form->getValuesOfAvailableAttributes());
-            if (!empty($userParams->getDirtyAttributes())) {
+            if (count($userParams->getDirtyAttributes()) > 0) {
                 $userParams->up_updated_user_id = $updaterUser->id;
                 $userParams->up_updated_dt = date('Y-m-d H:i:s');
-                $userParams->save();
-                $userUpdated = true;
+                if ($userParams->save()) {
+                    $userUpdated = true;
+                } else {
+                    Yii::error([
+                        'errors' => $userParams->getErrors(),
+                        'targetUserId' => $targetUser->id,
+                        'updaterUserId' => $updaterUser->id,
+                    ], 'EmployeeController:update:userParamsSave');
+                }
             }
 
             if ($form->fieldAccess->canEdit('user_groups') && $form->isChangedGroups()) {
@@ -1004,7 +1025,7 @@ class EmployeeController extends FController
                     $uga = new UserGroupAssign();
                     $uga->ugs_user_id = $targetUser->id;
                     $uga->ugs_group_id = $id;
-                    $uga->save();
+                    $uga->save(false);
                 }
                 $userUpdated = true;
             }
@@ -1015,10 +1036,11 @@ class EmployeeController extends FController
                     $ud = new UserDepartment();
                     $ud->ud_user_id = $targetUser->id;
                     $ud->ud_dep_id = $id;
-                    $ud->save();
+                    $ud->save(false);
                 }
                 $userUpdated = true;
             }
+
             if ($form->fieldAccess->canEdit('user_projects') && $form->isChangedProjects()) {
                 ProjectEmployeeAccess::deleteAll(['employee_id' => $targetUser->id]);
                 foreach ($form->user_projects as $id) {
@@ -1026,7 +1048,7 @@ class EmployeeController extends FController
                     $up->employee_id = $targetUser->id;
                     $up->project_id = $id;
                     $up->created = date('Y-m-d H:i:s');
-                    $up->save();
+                    $up->save(false);
                 }
                 $userUpdated = true;
             }
@@ -1041,8 +1063,8 @@ class EmployeeController extends FController
                         $clientChatChanel->ccuc_user_id = $targetUser->id;
                         $clientChatChanel->ccuc_channel_id = $id;
                         $clientChatChanel->ccuc_created_dt = date('Y-m-d H:i:s');
-                        $clientChatChanel->ccuc_created_user_id = Auth::id();
-                        $clientChatChanel->save();
+                        $clientChatChanel->ccuc_created_user_id = $updaterUser->id;
+                        $clientChatChanel->save(false);
                     }
                     if ($userClientChatData && $userClientChatData->isRegisteredInRc()) {
                         $this->clientChatUserAccessService->setUserAccessToAllChatsByChannelIds($form->client_chat_user_channel, $targetUser->id);
@@ -1099,7 +1121,7 @@ class EmployeeController extends FController
         $params['UserProjectParamsSearch']['upp_user_id'] = $targetUser->id;
         $userProjectParamsDataProvider = $userProjectParamsSearch->search($params);
 
-        $dataLastFailedLoginDataProvider = new ActiveDataProvider([
+        $lastFailedLoginDataProvider = new ActiveDataProvider([
             'query' => UserFailedLogin::find()->andFilterWhere(['ufl_user_id' => $targetUser->id]),
             'sort' => ['defaultOrder' => ['ufl_id' => SORT_DESC]],
             'pagination' => [
@@ -1110,17 +1132,17 @@ class EmployeeController extends FController
         $result = [
             'form' => $form,
             'userProjectParamsDataProvider' => $userProjectParamsDataProvider,
-            'dataLastFailedLoginDataProvider' => $dataLastFailedLoginDataProvider,
+            'lastFailedLoginDataProvider' => $lastFailedLoginDataProvider,
         ];
 
         $userVoiceMailSearch = new UserVoiceMailSearch();
         $result['userVoiceMailDataProvider'] = $userVoiceMailSearch->search(['UserVoiceMailSearch' => ['uvm_user_id' => $targetUser->id]]);
 
         if (Auth::can('user-product-type/list')) {
-            $dataUserProductTypeDataProvider = new ActiveDataProvider([
+            $userProductTypeDataProvider = new ActiveDataProvider([
                 'query' => UserProductType::find()->andFilterWhere(['upt_user_id' => $targetUser->id])
             ]);
-            $result['dataUserProductTypeDataProvider'] = $dataUserProductTypeDataProvider;
+            $result['userProductTypeDataProvider'] = $userProductTypeDataProvider;
         }
 
         return $this->render('update/_form', $result);

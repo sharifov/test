@@ -9,10 +9,10 @@ use yii\helpers\Url;
 
 /* @var $this \yii\web\View */
 /* @var $userProjectParamsDataProvider yii\data\ActiveDataProvider */
-/* @var $dataUserProductTypeDataProvider yii\data\ActiveDataProvider */
+/* @var $userProductTypeDataProvider yii\data\ActiveDataProvider */
 /* @var $form UpdateForm */
 /* @var $userVoiceMailDataProvider \yii\data\ActiveDataProvider */
-/* @var $dataLastFailedLoginDataProvider \yii\data\ActiveDataProvider */
+/* @var $lastFailedLoginDataProvider \yii\data\ActiveDataProvider */
 
 $this->title = 'Update user: ' . $form->targetUser->username . ' (ID:  ' . $form->targetUser->id . ')';
 
@@ -671,6 +671,6 @@ echo $this->render('_additional', [
         'form' => $form,
         'userProjectParamsDataProvider' => $userProjectParamsDataProvider,
         'userVoiceMailDataProvider' => $userVoiceMailDataProvider,
-        'dataLastFailedLoginDataProvider' => $dataLastFailedLoginDataProvider,
-        'dataUserProductTypeDataProvider' => $dataUserProductTypeDataProvider,
+        'lastFailedLoginDataProvider' => $lastFailedLoginDataProvider,
+        'userProductTypeDataProvider' => $userProductTypeDataProvider,
 ]);
