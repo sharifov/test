@@ -21,6 +21,7 @@ use frontend\models\UserFailedLogin;
 use frontend\models\UserMultipleForm;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\entities\userShiftAssign\repository\UserShiftAssignRepository;
+use modules\user\src\update\FieldAccess;
 use modules\user\src\update\UpdateForm;
 use src\auth\Auth;
 use src\helpers\app\AppHelper;
@@ -189,25 +190,30 @@ class EmployeeController extends FController
             $model = EmployeeAcl::findOne(['id' => $id]);
         }
 
-        if (Yii::$app->request->isPost) {
-            $attr = Yii::$app->request->post($model->formName());
-            $model->attributes = $attr;
-            if ($model->isNewRecord) {
-                $success = $model->save();
-                Yii::$app->response->format = Response::FORMAT_JSON;
-                $employee = Employee::findOne($model->employee_id);
-                return [
-                    'body' => $this->renderAjax('partial/_aclList', [
-                        'models' => $employee->employeeAcl,
-                    ]),
-                    'success' => $success
-                ];
-            } else {
-                return $model->save();
-            }
+        $fieldAccess = new FieldAccess(Auth::user(), $model->isNewRecord);
+        if (!$fieldAccess->canEdit('acl_rules_activated')) {
+            throw new ForbiddenHttpException('Access denied.');
         }
 
-        return null;
+        if (!Yii::$app->request->isPost) {
+            throw new BadRequestHttpException();
+        }
+
+        $attr = Yii::$app->request->post($model->formName());
+        $model->attributes = $attr;
+        if ($model->isNewRecord) {
+            $success = $model->save();
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            $employee = Employee::findOne($model->employee_id);
+            return [
+                'body' => $this->renderAjax('update/_aclList', [
+                    'models' => $employee->employeeAcl,
+                    'canEditAclRulesActivated' => $fieldAccess->canEdit('acl_rules_activated'),
+                ]),
+                'success' => $success
+            ];
+        }
+        return $model->save();
     }
 
     /**
