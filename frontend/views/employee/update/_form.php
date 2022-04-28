@@ -51,9 +51,9 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
         <?php endif ?>
 
-        <?php if ($form->fieldAccess->canShowUsername() || $form->fieldAccess->canShowEmail()) : ?>
+        <?php if ($form->fieldAccess->canShow('username') || $form->fieldAccess->canShow('email')) : ?>
             <div class="row">
-                <?php if ($form->fieldAccess->canShowUsername()) : ?>
+                <?php if ($form->fieldAccess->canShow('username')) : ?>
                     <div class="col-md-6">
                         <?= $activeForm->field($form, 'username', [
                             'options' => [
@@ -61,32 +61,32 @@ $this->params['breadcrumbs'][] = $this->title;
                             ]
                         ])->textInput([
                             'autocomplete' => "new-user",
-                            'readonly' => !$form->fieldAccess->canEditUsername()
+                            'readonly' => !$form->fieldAccess->canEdit('username')
                         ]) ?>
                     </div>
                 <?php endif; ?>
-                <?php if ($form->fieldAccess->canShowEmail()) : ?>
+                <?php if ($form->fieldAccess->canShow('email')) : ?>
                     <div class="col-md-6">
                         <?= $activeForm
                             ->field($form, 'email', ['options' => ['class' => 'form-group']])
-                            ->input('email', ['readonly' => !$form->fieldAccess->canEditEmail()])
+                            ->input('email', ['readonly' => !$form->fieldAccess->canEdit('email')])
                         ?>
                     </div>
                 <?php endif; ?>
             </div>
         <?php endif; ?>
 
-        <?php if ($form->fieldAccess->canShowFullName() || $form->fieldAccess->canShowPassword()) : ?>
+        <?php if ($form->fieldAccess->canShow('full_name') || $form->fieldAccess->canShow('password')) : ?>
             <div class="row">
-                <?php if ($form->fieldAccess->canShowFullName()) : ?>
+                <?php if ($form->fieldAccess->canShow('full_name')) : ?>
                     <div class="col-md-6">
                         <?= $activeForm
                             ->field($form, 'full_name', ['options' => ['class' => 'form-group']])
-                            ->textInput(['readonly' => !$form->fieldAccess->canEditFullName()])
+                            ->textInput(['readonly' => !$form->fieldAccess->canEdit('full_name')])
                         ?>
                     </div>
                 <?php endif; ?>
-                <?php if ($form->fieldAccess->canShowPassword()) : ?>
+                <?php if ($form->fieldAccess->canShow('password')) : ?>
                     <div class="col-md-6">
                         <?= $activeForm->field($form, 'password', [
                             'options' => [
@@ -94,27 +94,27 @@ $this->params['breadcrumbs'][] = $this->title;
                             ]
                         ])->passwordInput([
                             'autocomplete' => 'new-password',
-                            'readonly' => !$form->fieldAccess->canEditPassword()
+                            'readonly' => !$form->fieldAccess->canEdit('password')
                         ]) ?>
                     </div>
                 <?php endif; ?>
             </div>
         <?php endif; ?>
 
-        <?php if ($form->fieldAccess->canShowNickname()) : ?>
+        <?php if ($form->fieldAccess->canShow('nickname')) : ?>
             <div class="row">
                 <div class="col-md-6">
                     <?= $activeForm
                         ->field($form, 'nickname', ['options' => ['class' => 'form-group']])
-                        ->textInput(['readonly' => !$form->fieldAccess->canEditNickname()])
+                        ->textInput(['readonly' => !$form->fieldAccess->canEdit('nickname')])
                     ?>
                 </div>
             </div>
         <?php endif; ?>
 
-        <?php if ($form->fieldAccess->canShowRoles() || $form->fieldAccess->canShowStatus()) : ?>
+        <?php if ($form->fieldAccess->canShow('form_roles') || $form->fieldAccess->canShow('status')) : ?>
             <div class="row">
-                <?php if ($form->fieldAccess->canShowRoles()) : ?>
+                <?php if ($form->fieldAccess->canShow('form_roles')) : ?>
                     <div class="col-md-6">
                         <?= $activeForm
                             ->field($form, 'form_roles', ['options' => ['class' => 'form-group']])
@@ -124,19 +124,19 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'options' => ['placeholder' => 'Select user roles', 'multiple' => true],
                                 'pluginOptions' => [
                                     'allowClear' => true,
-                                    'disabled' => !$form->fieldAccess->canEditRoles(),
+                                    'disabled' => !$form->fieldAccess->canEdit('form_roles'),
                                 ],
                             ])
                         ?>
                     </div>
                 <?php endif; ?>
-                <?php if ($form->fieldAccess->canShowStatus()) : ?>
+                <?php if ($form->fieldAccess->canShow('status')) : ?>
                     <div class="col-md-6">
                         <?= $activeForm
                             ->field($form, 'status', ['options' => ['class' => 'form-group']])
                             ->dropDownList(
                                 $form->availableList->getStatuses(),
-                                ['disabled' => !$form->fieldAccess->canEditStatus()]
+                                ['disabled' => !$form->fieldAccess->canEdit('status')]
                             )
                         ?>
                     </div>
@@ -144,7 +144,7 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
         <?php endif; ?>
 
-        <?php if ($form->fieldAccess->canShowUserGroups()) : ?>
+        <?php if ($form->fieldAccess->canShow('user_groups')) : ?>
             <div class="row">
                 <div class="col-md-12">
                         <?= $activeForm->field(
@@ -157,14 +157,14 @@ $this->params['breadcrumbs'][] = $this->title;
                             'options' => ['placeholder' => 'Select user groups', 'multiple' => true],
                             'pluginOptions' => [
                                 'allowClear' => true,
-                                'disabled' => !$form->fieldAccess->canEditUserGroups()
+                                'disabled' => !$form->fieldAccess->canEdit('user_groups')
                             ],
                         ]) ?>
                 </div>
             </div>
         <?php endif; ?>
 
-        <?php if ($form->fieldAccess->canShowProjects()) : ?>
+        <?php if ($form->fieldAccess->canShow('user_projects')) : ?>
             <div class="row">
                 <div class="col-md-12">
                         <?= $activeForm->field(
@@ -177,14 +177,14 @@ $this->params['breadcrumbs'][] = $this->title;
                             'options' => ['placeholder' => 'Select user projects', 'multiple' => true],
                             'pluginOptions' => [
                                 'allowClear' => true,
-                                'disabled' => !$form->fieldAccess->canEditProjects()
+                                'disabled' => !$form->fieldAccess->canEdit('user_projects')
                             ],
                         ]) ?>
                 </div>
             </div>
         <?php endif; ?>
 
-        <?php if ($form->fieldAccess->canShowDepartments()) : ?>
+        <?php if ($form->fieldAccess->canShow('user_departments')) : ?>
             <div class="row">
                 <div class="col-md-12">
                         <?= $activeForm->field(
@@ -197,14 +197,14 @@ $this->params['breadcrumbs'][] = $this->title;
                             'options' => ['placeholder' => 'Select departments', 'multiple' => true],
                             'pluginOptions' => [
                                 'allowClear' => true,
-                                'disabled' => !$form->fieldAccess->canEditDepartments()
+                                'disabled' => !$form->fieldAccess->canEdit('user_departments')
                             ],
                         ]) ?>
                 </div>
             </div>
         <?php endif; ?>
 
-        <?php if ($form->fieldAccess->canShowClientChatUserChannels()) : ?>
+        <?php if ($form->fieldAccess->canShow('client_chat_user_channel')) : ?>
             <div class="row">
                 <div class="col-md-12">
                         <?= $activeForm->field(
@@ -217,14 +217,14 @@ $this->params['breadcrumbs'][] = $this->title;
                             'options' => ['placeholder' => 'Select Client Chat Chanel', 'multiple' => true],
                             'pluginOptions' => [
                                 'allowClear' => true,
-                                'disabled' => !$form->fieldAccess->canEditClientChatUserChannels()
+                                'disabled' => !$form->fieldAccess->canEdit('client_chat_user_channel')
                             ],
                         ]) ?>
                 </div>
             </div>
         <?php endif; ?>
 
-        <?php if ($form->fieldAccess->canShowUserShiftAssign()) : ?>
+        <?php if ($form->fieldAccess->canShow('user_shift_assigns')) : ?>
             <div class="row">
                 <div class="col-md-12">
                         <?= $activeForm->field(
@@ -237,16 +237,16 @@ $this->params['breadcrumbs'][] = $this->title;
                             'options' => ['placeholder' => 'Select Shift', 'multiple' => true],
                             'pluginOptions' => [
                                 'allowClear' => true,
-                                'disabled' => !$form->fieldAccess->canEditUserShiftAssign()
+                                'disabled' => !$form->fieldAccess->canEdit('user_shift_assigns')
                             ],
                         ]) ?>
                 </div>
             </div>
         <?php endif; ?>
 
-        <?php if ($form->fieldAccess->canShowWorkStartTime() || $form->fieldAccess->canShowWorkMinutes() || $form->fieldAccess->canShowTimeZone()) : ?>
+        <?php if ($form->fieldAccess->canShow('up_work_start_tm') || $form->fieldAccess->canShow('up_work_minutes') || $form->fieldAccess->canShow('up_timezone')) : ?>
             <div class="row">
-                <?php if ($form->fieldAccess->canShowWorkStartTime()) : ?>
+                <?php if ($form->fieldAccess->canShow('up_work_start_tm')) : ?>
                     <div class="col-md-3">
                         <?= $activeForm->field(
                             $form,
@@ -259,12 +259,12 @@ $this->params['breadcrumbs'][] = $this->title;
                                     'showSeconds' => false,
                                     'showMeridian' => false,
                                 ],
-                                'disabled' => !$form->fieldAccess->canEditWorkStartTime()
+                                'disabled' => !$form->fieldAccess->canEdit('up_work_start_tm')
                                 ]
                         ) ?>
                     </div>
                 <?php endif; ?>
-                <?php if ($form->fieldAccess->canShowWorkMinutes()) : ?>
+                <?php if ($form->fieldAccess->canShow('up_work_minutes')) : ?>
                     <div class="col-md-3">
                         <?= $activeForm->field($form, 'up_work_minutes', [
                             'options' => [
@@ -272,11 +272,11 @@ $this->params['breadcrumbs'][] = $this->title;
                             ]
                         ])->input(
                             'number',
-                            ['step' => 10, 'min' => 0, 'readonly' => !$form->fieldAccess->canEditWorkMinutes()]
+                            ['step' => 10, 'min' => 0, 'readonly' => !$form->fieldAccess->canEdit('up_work_minutes')]
                         ) ?>
                     </div>
                 <?php endif; ?>
-                <?php if ($form->fieldAccess->canShowTimeZone()) : ?>
+                <?php if ($form->fieldAccess->canShow('up_timezone')) : ?>
                     <div class="col-md-6">
                         <?= $activeForm->field(
                             $form,
@@ -288,7 +288,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             'options' => ['placeholder' => 'Select TimeZone', 'multiple' => false],
                             'pluginOptions' => [
                                 'allowClear' => true,
-                                'disabled' => !$form->fieldAccess->canEditTimeZone()
+                                'disabled' => !$form->fieldAccess->canEdit('up_timezone')
                             ],
                             ]); ?>
                     </div>
@@ -296,9 +296,9 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
         <?php endif; ?>
 
-        <?php if ($form->fieldAccess->canShowBaseAmount() || $form->fieldAccess->canShowCommissionPercent() || $form->fieldAccess->canShowBonusActive() || $form->fieldAccess->canShowLeaderboardEnabled()) : ?>
+        <?php if ($form->fieldAccess->canShow('up_base_amount') || $form->fieldAccess->canShow('up_commission_percent') || $form->fieldAccess->canShow('up_bonus_active') || $form->fieldAccess->canShow('up_leaderboard_enabled')) : ?>
             <div class="row">
-                <?php if ($form->fieldAccess->canShowBaseAmount()) : ?>
+                <?php if ($form->fieldAccess->canShow('up_base_amount')) : ?>
                     <div class="col-md-3">
                         <?= $activeForm->field($form, 'up_base_amount', [
                             'options' => [
@@ -308,11 +308,11 @@ $this->params['breadcrumbs'][] = $this->title;
                             'step' => 0.01,
                             'min' => 0,
                             'max' => 1000,
-                            'readonly' => !$form->fieldAccess->canEditBaseAmount()
+                            'readonly' => !$form->fieldAccess->canEdit('up_base_amount')
                         ]) ?>
                     </div>
                 <?php endif; ?>
-                <?php if ($form->fieldAccess->canShowCommissionPercent()) : ?>
+                <?php if ($form->fieldAccess->canShow('up_commission_percent')) : ?>
                     <div class="col-md-3">
                         <?= $activeForm->field($form, 'up_commission_percent', [
                             'options' => [
@@ -322,35 +322,35 @@ $this->params['breadcrumbs'][] = $this->title;
                             'step' => 1,
                             'max' => 100,
                             'min' => 0,
-                            'readonly' => !$form->fieldAccess->canEditCommissionPercent()
+                            'readonly' => !$form->fieldAccess->canEdit('up_commission_percent')
                         ]) ?>
                     </div>
                 <?php endif; ?>
-                <?php if ($form->fieldAccess->canShowBonusActive()) : ?>
+                <?php if ($form->fieldAccess->canShow('up_bonus_active')) : ?>
                     <div class="col-md-3">
                         <?= $activeForm->field($form, 'up_bonus_active', [
                             'options' => [
                                 'class' => 'form-group'
                             ]
-                        ])->checkbox(['disabled' => !$form->fieldAccess->canEditBonusActive()]) ?>
+                        ])->checkbox(['disabled' => !$form->fieldAccess->canEdit('up_bonus_active')]) ?>
                     </div>
                 <?php endif; ?>
-                <?php if ($form->fieldAccess->canShowLeaderboardEnabled()) : ?>
+                <?php if ($form->fieldAccess->canShow('up_leaderboard_enabled')) : ?>
                     <div class="col-md-3">
                         <?= $activeForm->field($form, 'up_leaderboard_enabled', [
                             'options' => [
                                 'class' => 'form-group'
                             ]
-                        ])->checkbox(['disabled' => !$form->fieldAccess->canEditLeaderboardEnabled()]) ?>
+                        ])->checkbox(['disabled' => !$form->fieldAccess->canEdit('up_leaderboard_enabled')]) ?>
                     </div>
                 <?php endif; ?>
             </div>
         <?php endif; ?>
 
-        <?php if ($form->fieldAccess->canShowInboxShowLimitLeads() || $form->fieldAccess->canShowDefaultTakeLimitLeads() || $form->fieldAccess->canShowMinPercentForTakeLeads() || $form->fieldAccess->canShowFrequencyMinutes()) : ?>
+        <?php if ($form->fieldAccess->canShow('up_inbox_show_limit_leads') || $form->fieldAccess->canShow('up_default_take_limit_leads') || $form->fieldAccess->canShow('up_min_percent_for_take_leads') || $form->fieldAccess->canShow('up_frequency_minutes')) : ?>
             <hr>
             <div class="row">
-                <?php if ($form->fieldAccess->canShowInboxShowLimitLeads()) : ?>
+                <?php if ($form->fieldAccess->canShow('up_inbox_show_limit_leads')) : ?>
                     <div class="col-md-3">
                         <?= $activeForm->field($form, 'up_inbox_show_limit_leads', [
                             'options' => [
@@ -360,11 +360,11 @@ $this->params['breadcrumbs'][] = $this->title;
                             'step' => 1,
                             'min' => 0,
                             'max' => 500,
-                            'readonly' => !$form->fieldAccess->canEditInboxShowLimitLeads()
+                            'readonly' => !$form->fieldAccess->canEdit('up_inbox_show_limit_leads')
                         ]) ?>
                     </div>
                 <?php endif; ?>
-                <?php if ($form->fieldAccess->canShowDefaultTakeLimitLeads()) : ?>
+                <?php if ($form->fieldAccess->canShow('up_default_take_limit_leads')) : ?>
                     <div class="col-md-3">
                         <?= $activeForm->field($form, 'up_default_take_limit_leads', [
                             'options' => [
@@ -374,11 +374,11 @@ $this->params['breadcrumbs'][] = $this->title;
                             'step' => 1,
                             'max' => 100,
                             'min' => 0,
-                            'readonly' => !$form->fieldAccess->canEditDefaultTakeLimitLeads()
+                            'readonly' => !$form->fieldAccess->canEdit('up_default_take_limit_leads')
                         ]) ?>
                     </div>
                 <?php endif; ?>
-                <?php if ($form->fieldAccess->canShowMinPercentForTakeLeads()) : ?>
+                <?php if ($form->fieldAccess->canShow('up_min_percent_for_take_leads')) : ?>
                     <div class="col-md-3">
                         <?= $activeForm->field($form, 'up_min_percent_for_take_leads', [
                             'options' => [
@@ -388,11 +388,11 @@ $this->params['breadcrumbs'][] = $this->title;
                             'step' => 1,
                             'max' => 100,
                             'min' => 0,
-                            'readonly' => !$form->fieldAccess->canEditMinPercentForTakeLeads()
+                            'readonly' => !$form->fieldAccess->canEdit('up_min_percent_for_take_leads')
                         ]) ?>
                     </div>
                 <?php endif; ?>
-                <?php if ($form->fieldAccess->canShowFrequencyMinutes()) : ?>
+                <?php if ($form->fieldAccess->canShow('up_frequency_minutes')) : ?>
                     <div class="col-md-3">
                         <?= $activeForm->field($form, 'up_frequency_minutes', [
                             'options' => [
@@ -402,16 +402,16 @@ $this->params['breadcrumbs'][] = $this->title;
                             'step' => 1,
                             'max' => 1000,
                             'min' => 0,
-                            'readonly' => !$form->fieldAccess->canEditFrequencyMinutes()
+                            'readonly' => !$form->fieldAccess->canEdit('up_frequency_minutes')
                         ]) ?>
                     </div>
                 <?php endif; ?>
             </div>
         <?php endif; ?>
 
-        <?php if ($form->fieldAccess->canShowCallExpertLimit() || $form->fieldAccess->canShowCallUserLevel()) : ?>
+        <?php if ($form->fieldAccess->canShow('up_call_expert_limit') || $form->fieldAccess->canShow('up_call_user_level')) : ?>
             <div class="row">
-                <?php if ($form->fieldAccess->canShowCallExpertLimit()) : ?>
+                <?php if ($form->fieldAccess->canShow('up_call_expert_limit')) : ?>
                     <div class="col-md-3">
                         <?= $activeForm->field($form, 'up_call_expert_limit', [
                             'options' => [
@@ -421,11 +421,11 @@ $this->params['breadcrumbs'][] = $this->title;
                             'step' => 1,
                             'min' => -1,
                             'max' => 1000,
-                            'readonly' => !$form->fieldAccess->canEditCallExpertLimit()
+                            'readonly' => !$form->fieldAccess->canEdit('up_call_expert_limit')
                         ]) ?>
                     </div>
                 <?php endif; ?>
-                <?php if ($form->fieldAccess->canShowCallUserLevel()) : ?>
+                <?php if ($form->fieldAccess->canShow('up_call_user_level')) : ?>
                     <div class="col-md-3">
                         <?= $activeForm->field($form, 'up_call_user_level', [
                             'options' => [
@@ -435,7 +435,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             'step' => 1,
                             'min' => -128,
                             'max' => 127,
-                            'readonly' => !$form->fieldAccess->canEditCallUserLevel()
+                            'readonly' => !$form->fieldAccess->canEdit('up_call_user_level')
                         ]) ?>
                     </div>
                 <?php endif; ?>
@@ -443,13 +443,13 @@ $this->params['breadcrumbs'][] = $this->title;
         <?php endif; ?>
     </div>
 
-    <?php if ($form->fieldAccess->canShowAclRulesActivated()) : ?>
+    <?php if ($form->fieldAccess->canShow('acl_rules_activated')) : ?>
         <div class="well">
             <div class="form-group">
                 <?= $activeForm->field($form, 'acl_rules_activated', [
                     'template' => '{input}'
-                ])->checkbox(['disabled' => !$form->fieldAccess->canEditAclRulesActivated()]) ?>
-                <?php if ($form->fieldAccess->canEditAclRulesActivated()) : ?>
+                ])->checkbox(['disabled' => !$form->fieldAccess->canEdit('acl_rules_activated')]) ?>
+                <?php if ($form->fieldAccess->canEdit('acl_rules_activated')) : ?>
                     <span>&nbsp;</span>
                     <?= Html::a('<i class="glyphicon glyphicon-plus"></i> Add Extra Rule', null, [
                         'class' => 'btn btn-success btn-xs',
@@ -524,7 +524,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <div class="grid-view" id="employee-acl-rule" style="padding-top: 10px;">
                 <?= $this->render('_aclList', [
                     'models' => $form->targetUser->employeeAcl,
-                    'canEditAclRulesActivated' => $form->fieldAccess->canEditAclRulesActivated(),
+                    'canEditAclRulesActivated' => $form->fieldAccess->canEdit('acl_rules_activated'),
                 ]) ?>
             </div>
         </div>
@@ -535,9 +535,9 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="well">
             <div class="form-group">
                 <div class="row">
-                    <?php if ($form->fieldAccess->canShowJoinDate() || $form->fieldAccess->canShowSkill()) : ?>
+                    <?php if ($form->fieldAccess->canShow('up_join_date') || $form->fieldAccess->canShow('up_skill')) : ?>
                         <div class="col-md-3">
-                            <?php if ($form->fieldAccess->canShowJoinDate()) : ?>
+                            <?php if ($form->fieldAccess->canShow('up_join_date')) : ?>
                                     <?= $activeForm->field(
                                         $form,
                                         'up_join_date',
@@ -550,24 +550,24 @@ $this->params['breadcrumbs'][] = $this->title;
                                         'options' => [
                                             'autocomplete' => 'off',
                                             'placeholder' => 'Choose Date',
-                                            'disabled' => !$form->fieldAccess->canEditJoinDate()
+                                            'disabled' => !$form->fieldAccess->canEdit('up_join_date')
                                         ],
                                     ]) ?>
                             <?php endif; ?>
-                            <?php if ($form->fieldAccess->canShowSkill()) : ?>
+                            <?php if ($form->fieldAccess->canShow('up_skill')) : ?>
                                     <?= $activeForm
                                         ->field($form, 'up_skill', ['options' => ['class' => 'form-group']])
-                                        ->dropDownList(\common\models\UserProfile::SKILL_TYPE_LIST, [
+                                        ->dropDownList($form->availableList->getSkillTypes(), [
                                             'prompt' => '---',
-                                            'disabled' => !$form->fieldAccess->canEditSkill()
+                                            'disabled' => !$form->fieldAccess->canEdit('up_skill')
                                         ]) ?>
                             <?php endif; ?>
                         </div>
                     <?php endif; ?>
 
-                    <?php if ($form->fieldAccess->canShow2faEnable() || $form->fieldAccess->canShow2faSecret()) : ?>
+                    <?php if ($form->fieldAccess->canShow('up_2fa_secret') || $form->fieldAccess->canShow('up_2fa_enable')) : ?>
                         <div class="col-md-3">
-                            <?php if ($form->fieldAccess->canShow2faSecret()) : ?>
+                            <?php if ($form->fieldAccess->canShow('up_2fa_secret')) : ?>
                                 <?= $activeForm->field(
                                     $form,
                                     'up_2fa_secret',
@@ -575,20 +575,20 @@ $this->params['breadcrumbs'][] = $this->title;
                                 )->textInput([
                                     'maxlength' => true,
                                     'title' => 'Clean for reset',
-                                    'readonly' => !$form->fieldAccess->canEdit2faSecret()
+                                    'readonly' => !$form->fieldAccess->canEdit('up_2fa_secret')
                                 ])->label('2fa secret') ?>
                             <?php endif; ?>
-                            <?php if ($form->fieldAccess->canShow2faEnable()) : ?>
+                            <?php if ($form->fieldAccess->canShow('up_2fa_enable')) : ?>
                                     <?= $activeForm->field(
                                         $form,
                                         'up_2fa_enable',
                                         ['options' => ['class' => 'form-group']]
-                                    )->checkbox(['disabled' => !$form->fieldAccess->canEdit2faEnable()]) ?>
+                                    )->checkbox(['disabled' => !$form->fieldAccess->canEdit('up_2fa_enable')]) ?>
                             <?php endif; ?>
                         </div>
                     <?php endif; ?>
 
-                    <?php if ($form->fieldAccess->canShowCallTypeId()) : ?>
+                    <?php if ($form->fieldAccess->canShow('up_call_type_id')) : ?>
                         <div class="col-md-3">
                             <?= $activeForm->field(
                                 $form,
@@ -596,62 +596,62 @@ $this->params['breadcrumbs'][] = $this->title;
                                 ['options' => ['class' => 'form-group']]
                             )->dropDownList(
                                 $form->availableList->getCallTypes(),
-                                ['disabled' => !$form->fieldAccess->canEditCallTypeId()]
+                                ['disabled' => !$form->fieldAccess->canEdit('up_call_type_id')]
                             ) ?>
                         </div>
                     <?php endif; ?>
 
-                    <?php if ($form->fieldAccess->canShowTelegram() || $form->fieldAccess->canShowTelegramEnable()) : ?>
+                    <?php if ($form->fieldAccess->canShow('up_telegram') || $form->fieldAccess->canShow('up_telegram_enable')) : ?>
                         <div class="col-md-3">
-                            <?php if ($form->fieldAccess->canShowTelegram()) : ?>
+                            <?php if ($form->fieldAccess->canShow('up_telegram')) : ?>
                                 <?= $activeForm->field(
                                     $form,
                                     'up_telegram',
                                     ['options' => ['class' => 'form-group']]
                                 )->textInput([
                                     'maxlength' => true,
-                                    'readonly' => !$form->fieldAccess->canEditTelegram()
+                                    'readonly' => !$form->fieldAccess->canEdit('up_telegram')
                                     ]) ?>
                             <?php endif; ?>
-                            <?php if ($form->fieldAccess->canShowTelegramEnable()) : ?>
+                            <?php if ($form->fieldAccess->canShow('up_telegram_enable')) : ?>
                                 <?= $activeForm->field(
                                     $form,
                                     'up_telegram_enable',
                                     ['options' => ['class' => 'form-group']]
-                                )->checkbox(['disabled' => !$form->fieldAccess->canEditTelegramEnable()]) ?>
+                                )->checkbox(['disabled' => !$form->fieldAccess->canEdit('up_telegram_enable')]) ?>
                             <?php endif; ?>
                         </div>
                     <?php endif; ?>
 
-                    <?php if ($form->fieldAccess->canShowAutoRedial() || $form->fieldAccess->canShowKpiEnable() || $form->fieldAccess->canShowInContactList() || $form->fieldAccess->canShowCallRecordingDisabled()) : ?>
+                    <?php if ($form->fieldAccess->canShow('up_auto_redial') || $form->fieldAccess->canShow('up_kpi_enable') || $form->fieldAccess->canShow('up_show_in_contact_list') || $form->fieldAccess->canShow('up_call_recording_disabled')) : ?>
                         <div class="col-md-3">
-                            <?php if ($form->fieldAccess->canShowAutoRedial()) : ?>
+                            <?php if ($form->fieldAccess->canShow('up_auto_redial')) : ?>
                                     <?= $activeForm->field(
                                         $form,
                                         'up_auto_redial',
                                         ['options' => ['class' => 'form-group']]
-                                    )->checkbox(['disabled' => !$form->fieldAccess->canEditAutoRedial()]) ?>
+                                    )->checkbox(['disabled' => !$form->fieldAccess->canEdit('up_auto_redial')]) ?>
                             <?php endif; ?>
-                            <?php if ($form->fieldAccess->canShowKpiEnable()) : ?>
+                            <?php if ($form->fieldAccess->canShow('up_kpi_enable')) : ?>
                                     <?= $activeForm->field(
                                         $form,
                                         'up_kpi_enable',
                                         ['options' => ['class' => 'form-group']]
-                                    )->checkbox(['disabled' => !$form->fieldAccess->canEditKpiEnable()]) ?>
+                                    )->checkbox(['disabled' => !$form->fieldAccess->canEdit('up_kpi_enable')]) ?>
                             <?php endif; ?>
-                            <?php if ($form->fieldAccess->canShowInContactList()) : ?>
+                            <?php if ($form->fieldAccess->canShow('up_show_in_contact_list')) : ?>
                                     <?= $activeForm->field(
                                         $form,
                                         'up_show_in_contact_list',
                                         ['options' => ['class' => 'form-group']]
-                                    )->checkbox(['disabled' => !$form->fieldAccess->canEditShowInContactList()]) ?>
+                                    )->checkbox(['disabled' => !$form->fieldAccess->canEdit('up_show_in_contact_list')]) ?>
                             <?php endif; ?>
-                            <?php if ($form->fieldAccess->canShowCallRecordingDisabled()) : ?>
+                            <?php if ($form->fieldAccess->canShow('up_call_recording_disabled')) : ?>
                                     <?= $activeForm->field(
                                         $form,
                                         'up_call_recording_disabled',
                                         ['options' => ['class' => 'form-group']]
-                                    )->checkbox(['disabled' => !$form->fieldAccess->canEditCallRecordingDisabled()]) ?>
+                                    )->checkbox(['disabled' => !$form->fieldAccess->canEdit('up_call_recording_disabled')]) ?>
                             <?php endif; ?>
                         </div>
                     <?php endif; ?>
@@ -661,10 +661,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php endif; ?>
 
     <div class="form-group text-center">
-        <?= Html::submitButton(
-            '<i class="fa fa-save"></i> Update & Save User data',
-            ['class' => 'btn btn-warning']
-        ) ?>
+        <?= Html::submitButton('<i class="fa fa-save"></i> Update & Save User data', ['class' => 'btn btn-warning']) ?>
     </div>
     <?php ActiveForm::end() ?>
 </div>
