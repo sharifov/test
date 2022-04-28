@@ -890,9 +890,8 @@ class LeadSearch extends Lead
         if (ArrayHelper::isIn($this->is_conversion, ['1', '0'], false)) {
             $leadIds = LeadUserConversion::find()
                 ->select('luc_lead_id')
-                ->groupBy(['luc_lead_id'])
-                ->indexBy('luc_lead_id')
-                ->column();
+                ->groupBy(['luc_lead_id']);
+
             $command = $this->is_conversion ? 'IN' : 'NOT IN';
 
             $query->andWhere([
