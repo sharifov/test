@@ -17,7 +17,6 @@ class FeedbackRejectedForm extends Model
     public $createdAt;
     public $triggerSource;
     public $requestedBy;
-    public $responses;
 
     /**
      * @return array
