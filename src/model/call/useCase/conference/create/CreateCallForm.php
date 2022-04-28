@@ -38,6 +38,9 @@ class CreateCallForm extends Model
     public $call_recording_disabled;
     public $friendly_name;
     public $is_redial_call;
+    public $project;
+    public $source;
+    public $type;
 
     public function rules(): array
     {
@@ -60,6 +63,8 @@ class CreateCallForm extends Model
             ['project_id', 'required'],
             ['project_id', 'integer'],
 
+            ['project', 'string'],
+
             ['department_id', 'integer'],
 
             ['lead_id', 'integer'],
@@ -70,6 +75,8 @@ class CreateCallForm extends Model
 
             ['source_type_id', 'integer'],
 
+            ['source', 'string'],
+
             ['call_recording_disabled', 'required'],
             ['call_recording_disabled', 'boolean'],
 
@@ -78,6 +85,8 @@ class CreateCallForm extends Model
 
             ['is_redial_call', 'default', 'value' => false],
             ['is_redial_call', 'boolean'],
+
+            ['type', 'string'],
         ];
     }
 

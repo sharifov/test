@@ -36,7 +36,8 @@ const YearInputComponent = {
             type: Object,
         },
         defaultInputRadio: {
-            type: [Number, null]
+            type: Number,
+            required: true
         },
         years: {
             type: Array,
@@ -122,8 +123,6 @@ const YearInputComponent = {
         }
     },
     created() {
-        if (this.defaultInputRadio !== null) {
-            this.selectedRadio = this.defaultInputRadio;
-        }
+        this.selectedRadio = this.defaultInputRadio;
     }
 };

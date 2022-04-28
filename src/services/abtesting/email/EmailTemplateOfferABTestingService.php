@@ -206,4 +206,19 @@ class EmailTemplateOfferABTestingService extends ABTestingBaseService
             );
         }
     }
+
+    /**
+     * @return int
+     */
+    public function getDefaultOfferTemplateId(): int
+    {
+        $settingsValue            = \Yii::$app->ff->val(FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES);
+        if (!is_array($settingsValue)) {
+            throw new \DomainException('Params must be array');
+        }
+        if (!isset($settingsValue['defaultOfferTemplateKey'])) {
+            throw new \DomainException('Default Offer key should be set');
+        }
+        return $this->getEmailOfferTemplateIdByKey($settingsValue['defaultOfferTemplateKey']);
+    }
 }
