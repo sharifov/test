@@ -12,8 +12,8 @@ use yii\grid\ActionColumn;
  * @var $form UpdateForm
  * @var $userProjectParamsDataProvider \yii\data\ActiveDataProvider
  * @var $userVoiceMailDataProvider \yii\data\ActiveDataProvider
- * @var $dataLastFailedLoginDataProvider \yii\data\ActiveDataProvider
- * @var $dataUserProductTypeDataProvider yii\data\ActiveDataProvider
+ * @var $lastFailedLoginDataProvider \yii\data\ActiveDataProvider
+ * @var $userProductTypeDataProvider yii\data\ActiveDataProvider
  */
 
 ?>
@@ -192,7 +192,7 @@ use yii\grid\ActionColumn;
                 <?php endif ?>
 
                 <?= \yii\grid\GridView::widget([
-                    'dataProvider' => $dataUserProductTypeDataProvider,
+                    'dataProvider' => $userProductTypeDataProvider,
                     'columns' => [
                         [
                             'attribute' => 'upt_product_type_id',
@@ -252,7 +252,7 @@ use yii\grid\ActionColumn;
                     <?php \yii\widgets\Pjax::begin(['id' => 'pjax-grid-user-failed']); ?>
 
                     <?= \yii\grid\GridView::widget([
-                        'dataProvider' => $dataLastFailedLoginDataProvider,
+                        'dataProvider' => $lastFailedLoginDataProvider,
                         'rowOptions' => static function (UserFailedLogin $UserFailedLogin, $index, $widget, $grid) {
                             if ($UserFailedLogin->ufl_created_dt > $UserFailedLogin->limitDateTime) {
                                 return ['class' => 'danger'];
