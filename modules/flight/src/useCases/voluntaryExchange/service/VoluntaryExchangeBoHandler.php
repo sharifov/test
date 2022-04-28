@@ -94,7 +94,7 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
                     'language' => 'en-US',
                     'sendTo' => $this->case->client->lastClientEmail,
                 ]);
-                if ($this->case->project->getParams()->object->case->sendFeedback) {
+                if ($this->case->project->getParams()->object->case->sendFeedback ?? null) {
                     $sent = $this->objectCollection->getCasesCommunicationService()->sendFeedbackEmail($this->case, $statusForm, null);
                     if ($sent) {
                         $this->case->addEventLog(
