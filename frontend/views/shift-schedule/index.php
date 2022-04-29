@@ -4,10 +4,12 @@ use common\components\grid\DateTimeColumn;
 use common\models\Employee;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
+use modules\shiftSchedule\src\entities\shiftScheduleTypeLabel\ShiftScheduleTypeLabel;
 use modules\shiftSchedule\src\entities\userShiftAssign\UserShiftAssign;
 use modules\shiftSchedule\src\entities\userShiftSchedule\search\SearchUserShiftSchedule;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use src\helpers\setting\SettingHelper;
+use yii\bootstrap4\Tabs;
 use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
@@ -16,7 +18,11 @@ use yii\widgets\Pjax;
 
 /* @var $monthList array */
 /* @var $scheduleTypeList ShiftScheduleType[] */
+/* @var $scheduleTypeLabelList ShiftScheduleTypeLabel[] */
+
 /* @var $scheduleSumData array */
+/* @var $scheduleLabelSumData array */
+
 /* @var $subtypeList array */
 /* @var $userTimeZone string */
 /* @var $user Employee */
@@ -187,124 +193,50 @@ $subtypeTotalData = [];
             <div class="x_panel">
                 <div class="x_title">
                     <h2><i class="fa fa-bar-chart"></i> My Monthly scheduling statistics</h2>
-                    <!--            <ul class="nav navbar-right panel_toolbox" style="min-width: initial;">-->
-                    <!--                <li>-->
-                    <!--                    <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>-->
-                    <!--                </li>-->
-                    <!--            </ul>-->
                     <div class="clearfix"></div>
                 </div>
                 <div class="x_content" style="display: block">
 
-                    <div class="col-md-12">
-                        <i class="fa fa-info-circle"></i> TimeLine statistics consists of statuses (
-                        <?= Html::encode(UserShiftSchedule::getStatusNameById(UserShiftSchedule::STATUS_APPROVED))?>,
-                        <?= Html::encode(UserShiftSchedule::getStatusNameById(UserShiftSchedule::STATUS_DONE))?>
-                        )</>
+                    <div class="row">
+                        <div class="col-md-12">
+
+                            <div class="text-right">
+                            <i class="fa fa-info-circle"></i> TimeLine statistics consists of statuses (
+                                <?= Html::encode(UserShiftSchedule::getStatusNameById(UserShiftSchedule::STATUS_APPROVED))?>,
+                                <?= Html::encode(UserShiftSchedule::getStatusNameById(UserShiftSchedule::STATUS_DONE))?>
+                            )
+                            </div>
+
+                        <?php
+                        try {
+                            echo Tabs::widget([
+                                'items' => [
+                                    [
+                                        'label' => 'Group by Types',
+                                        'content' => $this->render('partial/_tab_types', [
+                                            'monthList' => $monthList,
+                                            'scheduleTypeList' => $scheduleTypeList,
+                                            'scheduleSumData' => $scheduleSumData,
+                                        ]),
+                                        'active' => true
+                                    ],
+                                    [
+                                        'label' => 'Group by Labels',
+                                        'content' => $this->render('partial/_tab_labels', [
+                                            'monthList' => $monthList,
+                                            'scheduleTypeLabelList' => $scheduleTypeLabelList,
+                                            'scheduleLabelSumData' => $scheduleLabelSumData,
+                                        ]),
+                                    ]
+                                ]
+                            ]);
+                        } catch (Exception $e) {
+                            echo 'Error: ' . $e->getMessage();
+                        }
+                        ?>
+
+                        </div>
                     </div>
-
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr class="text-center bg-info">
-                                <th>Key</th>
-                                <th>Type</th>
-                                <th title="Subtype">Subtype</th>
-                                <?php foreach ($monthList as $month) : ?>
-                                    <th style="font-size: 16px"><?= Html::encode($month)?></th>
-                                <?php endforeach; ?>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        <?php if ($scheduleTypeList) : ?>
-                            <?php foreach ($scheduleTypeList as $item) : ?>
-                            <tr class="text-center" title="<?= Html::encode($item->sst_title)?>">
-                                <td title="Type Id: <?= $item->sst_id?>">
-                                    <span class="label label-default"><?= Html::encode($item->sst_key)?></span>
-                                </td>
-                                <td class="text-left">
-                                    <?= $item->getColorLabel()?> &nbsp;
-                                    <?= $item->getIconLabel()?> &nbsp;
-                                    <?= Html::encode($item->sst_name)?>
-                                </td>
-                                <td>
-                                    <?php echo Html::encode($item->getSubtypeName()) ?>
-                                    <?php /*if ($item->getSubtypeName()) :?>
-                                        <i class="fa fa-check-circle"></i>
-                                    <?php endif;*/ ?>
-                                </td>
-                                <?php foreach ($monthList as $monthId => $month) : ?>
-                                    <?php /*echo $monthId; \yii\helpers\VarDumper::dump($scheduleSumData[$item->sst_id], 10, true)*/ ?>
-                                    <td>
-                                    <?php if (!empty($scheduleSumData[$item->sst_id][$monthId])) :
-                                        $dataItem = $scheduleSumData[$item->sst_id][$monthId];
-
-                                        if ($item->sst_subtype_id) {
-                                            if (isset($subtypeTotalData[$item->sst_subtype_id][$monthId]['cnt'])) {
-                                                $subtypeTotalData[$item->sst_subtype_id][$monthId]['duration'] += $dataItem['uss_duration'];
-                                                $subtypeTotalData[$item->sst_subtype_id][$monthId]['cnt'] += $dataItem['uss_cnt'];
-                                            } else {
-                                                $subtypeTotalData[$item->sst_subtype_id][$monthId]['duration'] = $dataItem['uss_duration'];
-                                                $subtypeTotalData[$item->sst_subtype_id][$monthId]['cnt'] = $dataItem['uss_cnt'];
-                                            }
-                                        }
-
-                                        if (isset($scheduleTotalData[$monthId]['th'])) {
-                                            $scheduleTotalData[$monthId]['th'] += $dataItem['uss_duration'];
-                                            $scheduleTotalData[$monthId]['th_cnt'] += $dataItem['uss_cnt'];
-                                        } else {
-                                            $scheduleTotalData[$monthId]['th'] = $dataItem['uss_duration'];
-                                            $scheduleTotalData[$monthId]['th_cnt'] = $dataItem['uss_cnt'];
-                                        }
-                                        ?>
-
-                                            <?= round($dataItem['uss_duration'] / 60, 1)?>h
-                                            / <?= Html::encode($dataItem['uss_cnt'])?>
-
-                                    <?php else : ?>
-                                        -
-                                    <?php endif; ?>
-                                    </td>
-                                <?php endforeach; ?>
-                            </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <td colspan="6"></td>
-                            </tr>
-
-                            <?php if ($subtypeTotalData) : ?>
-                                <?php foreach ($subtypeTotalData as $subtypeId => $dataItem) : ?>
-                                    <tr class="text-center">
-                                        <th></th>
-                                        <th class="text-right">Total "<?php echo Html::encode(ShiftScheduleType::getSubtypeNameById($subtypeId))?>"</th>
-                                        <th></th>
-                                        <?php foreach ($monthList as $monthId => $month) : ?>
-                                            <th>
-                                                <?= isset($dataItem[$monthId]['duration']) ? round($dataItem[$monthId]['duration'] / 60, 1) . 'h' : '-'?> /
-                                                <?= isset($dataItem[$monthId]['cnt']) ? ($dataItem[$monthId]['cnt']) : '-'?>
-                                            </th>
-                                        <?php endforeach; ?>
-                                    </tr>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-
-                            <tr class="text-center">
-                                <th></th>
-                                <th class="text-right">Total Hours</th>
-                                <th></th>
-                                <?php foreach ($monthList as $monthId => $month) : ?>
-                                    <th>
-                                        <?= isset($scheduleTotalData[$monthId]['th']) ? round($scheduleTotalData[$monthId]['th'] / 60, 1) . 'h' : '-'?> /
-                                        <?= isset($scheduleTotalData[$monthId]['th_cnt']) ? ($scheduleTotalData[$monthId]['th_cnt']) : '-'?>
-                                    </th>
-                                <?php endforeach; ?>
-                            </tr>
-
-                        </tfoot>
-                    </table>
-
 
                 </div>
             </div>

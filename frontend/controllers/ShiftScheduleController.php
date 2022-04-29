@@ -7,6 +7,7 @@ use common\models\UserGroup;
 use Exception;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
+use modules\shiftSchedule\src\entities\shiftScheduleTypeLabel\ShiftScheduleTypeLabel;
 use modules\shiftSchedule\src\entities\userShiftAssign\UserShiftAssign;
 use modules\shiftSchedule\src\entities\userShiftSchedule\search\SearchUserShiftSchedule;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
@@ -18,6 +19,7 @@ use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotAcceptableHttpException;
 use yii\web\NotFoundHttpException;
@@ -61,6 +63,7 @@ class ShiftScheduleController extends FController
     {
         $user = Auth::user();
         $scheduleTypeList = null;
+        $scheduleTypeLabelList = null;
 
         $curMonth = mktime(0, 0, 0, date("m"), 1, date("Y"));
         $prevMonth = mktime(0, 0, 0, date("m") - 1, 1, date("Y"));
@@ -81,8 +84,19 @@ class ShiftScheduleController extends FController
             [UserShiftSchedule::STATUS_APPROVED, UserShiftSchedule::STATUS_DONE]
         );
 
+        $labelData = UserShiftScheduleService::getUserShiftScheduleLabelDataStats(
+            $user->id,
+            $minDate,
+            $maxDate,
+            [UserShiftSchedule::STATUS_APPROVED, UserShiftSchedule::STATUS_DONE]
+        );
+
+       // VarDumper::dump($labelData, 10, true); exit;
+
         $scheduleTypeData = [];
+        $scheduleTypeLabelData = [];
         $scheduleSumData = [];
+        $scheduleLabelSumData = [];
 
         if ($data) {
             foreach ($data as $item) {
@@ -91,12 +105,29 @@ class ShiftScheduleController extends FController
                 $scheduleSumData[$item['uss_sst_id']][$month] = $item;
             }
         }
+        unset($data);
+
+        if ($labelData) {
+            foreach ($labelData as $item) {
+                $scheduleTypeLabelData[$item['stl_key']] = $item['stl_key'];
+                $month = $item['uss_year'] . '-' . $item['uss_month'];
+                $scheduleLabelSumData[$item['stl_key']][$month] = $item;
+            }
+        }
+        unset($labelData);
 
         if ($scheduleTypeData) {
             $scheduleTypeList = ShiftScheduleType::find()->where(['sst_id' => $scheduleTypeData])
                 ->orderBy(['sst_sort_order' => SORT_ASC])->all();
         }
 
+        if ($scheduleTypeLabelData) {
+            $scheduleTypeLabelList = ShiftScheduleTypeLabel::find()->where(['stl_key' => $scheduleTypeLabelData])
+                ->orderBy(['stl_sort_order' => SORT_ASC])->all();
+        }
+
+//        VarDumper::dump($scheduleTypeLabelData, 10, true);
+//        exit;
 //
 //        VarDumper::dump($monthList, 10, true); exit;
 //        VarDumper::dump($data, 10, true); exit;
@@ -116,8 +147,13 @@ class ShiftScheduleController extends FController
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'monthList' => $monthList,
+
             'scheduleTypeList' => $scheduleTypeList,
+            'scheduleTypeLabelList' => $scheduleTypeLabelList,
+
             'scheduleSumData' => $scheduleSumData,
+            'scheduleLabelSumData' => $scheduleLabelSumData,
+
             'userTimeZone' => $userTimeZone,
             'user' => $user,
             'assignedShifts' => $assignedShifts,
