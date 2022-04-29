@@ -38,7 +38,7 @@ $pjaxListId = 'pjax-log';
         </div>
     <?php endif ?>
 
-    <?php \yii\widgets\Pjax::begin(['id' => $pjaxListId, 'scrollTo' => 0]); ?>
+    <?php // \yii\widgets\Pjax::begin(['id' => $pjaxListId, 'scrollTo' => 0]); ?>
 
     <div class="row">
         <div class="col-md-12">
@@ -120,7 +120,7 @@ $pjaxListId = 'pjax-log';
                     [
                         'attribute' => 'log_time',
                         'value' => static function (\frontend\models\Log $model) {
-                            return Yii::$app->formatter->asDatetime($model->log_time, 'php:d-M-Y [H:i:s]');
+                            return date('d-M-Y [H:i:s]', $model->log_time);
                         },
                         'format' => 'raw',
                         'filter' => DatePicker::widget([
@@ -131,6 +131,15 @@ $pjaxListId = 'pjax-log';
                                 'format' => 'dd-M-yyyy'
                             ]
                         ]),
+                        'contentOptions' => ['style' => 'width: 180px;text-align:center;']
+                    ],
+
+                    [
+                        'attribute' => 'timezone_log_time',
+                        'value' => static function (\frontend\models\Log $model) {
+                            return Yii::$app->formatter->asDatetime($model->log_time, 'php:d-M-Y [H:i:s]');
+                        },
+                        'format' => 'raw',
                         'contentOptions' => ['style' => 'width: 180px;text-align:center;']
                     ],
 
@@ -155,7 +164,7 @@ $pjaxListId = 'pjax-log';
         </div>
     </div>
 
-    <?php \yii\widgets\Pjax::end(); ?>
+    <?php // \yii\widgets\Pjax::end(); ?>
 </div>
 
 <div id="confirm_html" style="display: none;">

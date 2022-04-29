@@ -16,6 +16,7 @@ use Yii;
  */
 class Log extends \yii\db\ActiveRecord
 {
+    public $timezone_log_time;
     /**
      * @return string
      */
@@ -58,6 +59,7 @@ class Log extends \yii\db\ActiveRecord
             'log_time' => 'Log Time',
             'prefix' => 'Prefix',
             'message' => 'Message',
+            'timezone_log_time' => 'Log time with Current Timezone'
         ];
     }
 

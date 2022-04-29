@@ -55,8 +55,8 @@ class LogSearch extends Log
             'level' => $this->level,
         ]);
         if (empty($this->log_time) === false) {
-            $from = strtotime(date('Y-m-d 00:00:00', strtotime($this->log_time . ' GMT')));
-            $to = strtotime(date('Y-m-d 23:59:59', strtotime($this->log_time . ' GMT')));
+            $from = strtotime(date('Y-m-d 00:00:00', strtotime($this->log_time)));
+            $to = strtotime(date('Y-m-d 23:59:59', strtotime($this->log_time)));
             $query->andOnCondition('log_time >= :from AND log_time <= :to', array(':from' => $from, ':to' => $to));
         }
         $query->andFilterWhere(['like', 'category', $this->category])
