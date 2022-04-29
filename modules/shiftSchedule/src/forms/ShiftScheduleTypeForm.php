@@ -15,7 +15,7 @@ use yii\helpers\VarDumper;
  * @property string|null $sst_title
  * @property int $sst_enabled
  * @property int $sst_readonly
- * @property int $sst_work_time
+ * @property int $sst_subtype_id
  * @property string|null $sst_color
  * @property string|null $sst_icon_class
  * @property string|null $sst_css_class
@@ -34,7 +34,7 @@ class ShiftScheduleTypeForm extends Model
     public $sst_title;
     public $sst_enabled;
     public $sst_readonly;
-    public $sst_work_time;
+    public $sst_subtype_id;
     public $sst_color;
     public $sst_icon_class;
     public $sst_css_class;
@@ -52,7 +52,7 @@ class ShiftScheduleTypeForm extends Model
     {
         return [
             [['sst_key', 'sst_name'], 'required'],
-            [['sst_enabled', 'sst_readonly', 'sst_work_time', 'sst_sort_order'], 'integer'],
+            [['sst_enabled', 'sst_readonly', 'sst_subtype_id', 'sst_sort_order'], 'integer'],
             [['sst_params_json', 'sst_label_list'], 'safe'],
             [['sst_key', 'sst_name', 'sst_icon_class', 'sst_css_class'], 'string', 'max' => 100],
             [['sst_title'], 'string', 'max' => 255],
@@ -73,7 +73,7 @@ class ShiftScheduleTypeForm extends Model
             'sst_title' => 'Title',
             'sst_enabled' => 'Enabled',
             'sst_readonly' => 'Readonly',
-            'sst_work_time' => 'Work Time',
+            'sst_subtype_id' => 'Subtype',
             'sst_color' => 'Color',
             'sst_icon_class' => 'Icon Class',
             'sst_css_class' => 'CSS Class',

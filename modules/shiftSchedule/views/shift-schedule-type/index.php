@@ -87,8 +87,17 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'sst_enabled:boolean',
             'sst_readonly:boolean',
-            'sst_work_time:boolean',
+            //'sst_subtype_id',
             //'sst_color',
+            [
+                'attribute' => 'sst_subtype_id',
+                'value' => static function (ShiftScheduleType $model) {
+                    return $model->getSubtypeName();
+                },
+                'filter' => ShiftScheduleType::getSubtypeList()
+                // 'format' => 'raw',
+                // 'options' => ['style' => 'width:180px']
+            ],
             [
                 'attribute' => 'sst_color',
                 'value' => static function (ShiftScheduleType $model) {

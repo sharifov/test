@@ -17,6 +17,7 @@ use yii\widgets\Pjax;
 /* @var $monthList array */
 /* @var $scheduleTypeList ShiftScheduleType[] */
 /* @var $scheduleSumData array */
+/* @var $subtypeList array */
 /* @var $userTimeZone string */
 /* @var $user Employee */
 /* @var $searchModel SearchUserShiftSchedule */
@@ -28,6 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 $bundle = \frontend\assets\FullCalendarAsset::register($this);
 $scheduleTotalData = [];
+$subtypeTotalData = [];
 ?>
 <div class="shift-schedule-index">
 
@@ -206,7 +208,7 @@ $scheduleTotalData = [];
                             <tr class="text-center bg-info">
                                 <th>Key</th>
                                 <th>Type</th>
-                                <th title="Work Time">WT</th>
+                                <th title="Subtype">Subtype</th>
                                 <?php foreach ($monthList as $month) : ?>
                                     <th style="font-size: 16px"><?= Html::encode($month)?></th>
                                 <?php endforeach; ?>
@@ -225,9 +227,10 @@ $scheduleTotalData = [];
                                     <?= Html::encode($item->sst_name)?>
                                 </td>
                                 <td>
-                                    <?php if ($item->sst_work_time) :?>
+                                    <?php echo Html::encode($item->getSubtypeName()) ?>
+                                    <?php /*if ($item->getSubtypeName()) :?>
                                         <i class="fa fa-check-circle"></i>
-                                    <?php endif; ?>
+                                    <?php endif;*/ ?>
                                 </td>
                                 <?php foreach ($monthList as $monthId => $month) : ?>
                                     <?php /*echo $monthId; \yii\helpers\VarDumper::dump($scheduleSumData[$item->sst_id], 10, true)*/ ?>
@@ -235,21 +238,13 @@ $scheduleTotalData = [];
                                     <?php if (!empty($scheduleSumData[$item->sst_id][$monthId])) :
                                         $dataItem = $scheduleSumData[$item->sst_id][$monthId];
 
-                                        if ($item->sst_work_time) {
-                                            if (isset($scheduleTotalData[$monthId]['twh'])) {
-                                                $scheduleTotalData[$monthId]['twh'] += $dataItem['uss_duration'];
-                                                $scheduleTotalData[$monthId]['twh_cnt'] += $dataItem['uss_cnt'];
+                                        if ($item->sst_subtype_id) {
+                                            if (isset($subtypeTotalData[$item->sst_subtype_id][$monthId]['cnt'])) {
+                                                $subtypeTotalData[$item->sst_subtype_id][$monthId]['duration'] += $dataItem['uss_duration'];
+                                                $subtypeTotalData[$item->sst_subtype_id][$monthId]['cnt'] += $dataItem['uss_cnt'];
                                             } else {
-                                                $scheduleTotalData[$monthId]['twh'] = $dataItem['uss_duration'];
-                                                $scheduleTotalData[$monthId]['twh_cnt'] = $dataItem['uss_cnt'];
-                                            }
-                                        } else {
-                                            if (isset($scheduleTotalData[$monthId]['toh'])) {
-                                                $scheduleTotalData[$monthId]['toh'] += $dataItem['uss_duration'];
-                                                $scheduleTotalData[$monthId]['toh_cnt'] += $dataItem['uss_cnt'];
-                                            } else {
-                                                $scheduleTotalData[$monthId]['toh'] = $dataItem['uss_duration'];
-                                                $scheduleTotalData[$monthId]['toh_cnt'] = $dataItem['uss_cnt'];
+                                                $subtypeTotalData[$item->sst_subtype_id][$monthId]['duration'] = $dataItem['uss_duration'];
+                                                $subtypeTotalData[$item->sst_subtype_id][$monthId]['cnt'] = $dataItem['uss_cnt'];
                                             }
                                         }
 
@@ -260,8 +255,6 @@ $scheduleTotalData = [];
                                             $scheduleTotalData[$monthId]['th'] = $dataItem['uss_duration'];
                                             $scheduleTotalData[$monthId]['th_cnt'] = $dataItem['uss_cnt'];
                                         }
-
-
                                         ?>
 
                                             <?= round($dataItem['uss_duration'] / 60, 1)?>h
@@ -280,33 +273,26 @@ $scheduleTotalData = [];
                             <tr>
                                 <td colspan="6"></td>
                             </tr>
-                            <tr class="text-center">
-                                <th></th>
-                                <th class="text-center">Work Hours:</th>
-                                <th></th>
-                                <?php foreach ($monthList as $monthId => $month) : ?>
-                                    <th>
-                                        <?= isset($scheduleTotalData[$monthId]['twh']) ? round($scheduleTotalData[$monthId]['twh'] / 60, 1) . 'h' : '-'?> /
-                                        <?= isset($scheduleTotalData[$monthId]['twh_cnt']) ? ($scheduleTotalData[$monthId]['twh_cnt']) : '-'?>
-                                    </th>
+
+                            <?php if ($subtypeTotalData) : ?>
+                                <?php foreach ($subtypeTotalData as $subtypeId => $dataItem) : ?>
+                                    <tr class="text-center">
+                                        <th></th>
+                                        <th class="text-right">Total "<?php echo Html::encode(ShiftScheduleType::getSubtypeNameById($subtypeId))?>"</th>
+                                        <th></th>
+                                        <?php foreach ($monthList as $monthId => $month) : ?>
+                                            <th>
+                                                <?= isset($dataItem[$monthId]['duration']) ? round($dataItem[$monthId]['duration'] / 60, 1) . 'h' : '-'?> /
+                                                <?= isset($dataItem[$monthId]['cnt']) ? ($dataItem[$monthId]['cnt']) : '-'?>
+                                            </th>
+                                        <?php endforeach; ?>
+                                    </tr>
                                 <?php endforeach; ?>
-                            </tr>
+                            <?php endif; ?>
 
                             <tr class="text-center">
                                 <th></th>
-                                <th class="text-center">Other Hours:</th>
-                                <th></th>
-                                <?php foreach ($monthList as $monthId => $month) : ?>
-                                    <th>
-                                        <?= isset($scheduleTotalData[$monthId]['toh']) ? round($scheduleTotalData[$monthId]['toh'] / 60, 1) . 'h' : '-'?> /
-                                        <?= isset($scheduleTotalData[$monthId]['toh_cnt']) ? ($scheduleTotalData[$monthId]['toh_cnt']) : '-'?>
-                                    </th>
-                                <?php endforeach; ?>
-                            </tr>
-
-                            <tr class="text-center">
-                                <th></th>
-                                <th class="text-center">Total Hours:</th>
+                                <th class="text-right">Total Hours</th>
                                 <th></th>
                                 <?php foreach ($monthList as $monthId => $month) : ?>
                                     <th>

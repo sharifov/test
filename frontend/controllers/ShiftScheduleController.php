@@ -110,6 +110,7 @@ class ShiftScheduleController extends FController
         $dataProvider = $searchModel->searchByUserId(Yii::$app->request->queryParams, $user->id, $startDate, $endDate);
 
         $assignedShifts = UserShiftAssign::find()->where(['usa_user_id' => $user->id])->all();
+        $subtypeList = ShiftScheduleType::getSubtypeList();
 
         return $this->render('index', [
             'searchModel' => $searchModel,
@@ -120,6 +121,7 @@ class ShiftScheduleController extends FController
             'userTimeZone' => $userTimeZone,
             'user' => $user,
             'assignedShifts' => $assignedShifts,
+            'subtypeList' => $subtypeList
         ]);
     }
 

@@ -37,7 +37,12 @@ $this->params['breadcrumbs'][] = $this->title;
             'sst_title',
             'sst_enabled:boolean',
             'sst_readonly:boolean',
-            'sst_work_time:boolean',
+            [
+                'attribute' => 'sst_subtype_id',
+                'value' => static function (ShiftScheduleType $model) {
+                    return $model->getSubtypeName();
+                }
+            ],
             'sst_color',
             'sst_icon_class',
             [
@@ -46,7 +51,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $model->sst_icon_class ? Html::tag(
                         'i',
                         '',
-                        ['class' => $model->sst_icon_class] // , 'style' => 'color: ' . $model->sst_color
+                        ['class' => $model->sst_icon_class]
                     ) : '-';
                 },
                 'format' => 'raw',

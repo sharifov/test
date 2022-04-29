@@ -1,6 +1,7 @@
 <?php
 
 use kartik\select2\Select2;
+use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\shiftScheduleTypeLabel\ShiftScheduleTypeLabel;
 use modules\shiftSchedule\src\forms\ShiftScheduleTypeForm;
 use yii\helpers\Html;
@@ -17,7 +18,19 @@ use yii\widgets\ActiveForm;
 
     <div class="row">
         <div class="col-md-4">
-        <?= $form->field($model, 'sst_key')->textInput(['maxlength' => true]) ?>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <?= $form->field($model, 'sst_key')->textInput(['maxlength' => true]) ?>
+                </div>
+                <div class="col-md-6">
+                <?php echo $form->field($model, 'sst_subtype_id')
+                    ->dropDownList(
+                        ShiftScheduleType::getSubtypeList(),
+                        ['prompt' => '-']
+                    ) ?>
+                </div>
+            </div>
 
         <?= $form->field($model, 'sst_name')->textInput(['maxlength' => true]) ?>
 
@@ -36,14 +49,7 @@ use yii\widgets\ActiveForm;
             ?>
 
 
-
-
         <?php /*= $form->field($model, 'sst_readonly')->checkbox()*/ ?>
-
-        <?php /*= $form->field($model, 'sst_work_time')->checkbox()*/ ?>
-
-
-
 
 
 
