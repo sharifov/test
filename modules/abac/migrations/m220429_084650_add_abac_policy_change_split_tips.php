@@ -18,7 +18,7 @@ class m220429_084650_add_abac_policy_change_split_tips extends Migration
             'ap_rule_type' => 'p',
             'ap_subject' => '(r.sub.env.available == false)',
             'ap_subject_json' => '{"condition":"AND","rules":[{"id":"env_available","field":"env.available","type":"boolean","input":"radio","operator":"==","value":false}],"valid":true}',
-            'ap_object' => 'lead/lead/change-split-tips',
+            'ap_object' => 'lead/lead/change_split_tips',
             'ap_action' => '(update)',
             'ap_action_json' => "[\"update\"]",
             'ap_effect' => 1,
@@ -36,7 +36,7 @@ class m220429_084650_add_abac_policy_change_split_tips extends Migration
     public function safeDown()
     {
         $this->delete('{{%abac_policy}}', ['AND', ['IN', 'ap_object', [
-            'lead/lead/change-split-tips',
+            'lead/lead/change_split_tips',
         ]], ['IN', 'ap_action', ['(update)']]]);
 
         \Yii::$app->abac->invalidatePolicyCache();
