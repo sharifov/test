@@ -60,7 +60,7 @@ use yii\widgets\Pjax;
                         'minuteStep' => 1,
                         'secondStep' => 5,
                     ]
-                ])->label(Yii::t('schedule-request', 'Start Time (UTC)')) ?>
+                ])->label(Yii::t('schedule-request', 'Start Time (Local)')) ?>
             </div>
             <div class="col-md-6">
                 <?= $form->field($scheduleRequestModel, 'endTime')->widget(TimePicker::class, [
@@ -70,14 +70,14 @@ use yii\widgets\Pjax;
                         'minuteStep' => 1,
                         'secondStep' => 5,
                     ]
-                ])->label(Yii::t('schedule-request', 'End Time (UTC)')) ?>
+                ])->label(Yii::t('schedule-request', 'End Time (Local)')) ?>
             </div>
         </div>
 
         <div class="row">
             <div class="col-md-12">
                 <?= $form->field($scheduleRequestModel, 'scheduleType')->widget(Select2::class, [
-                    'data' => ShiftScheduleType::getList(),
+                    'data' => ShiftScheduleType::getList(true),
                     'size' => Select2::SMALL,
                     'options' => [
                         'placeholder' => Yii::t('schedule-request', 'Select Schedule Type'),
@@ -85,6 +85,15 @@ use yii\widgets\Pjax;
                     ],
                     'pluginOptions' => ['allowClear' => true],
                 ]) ?>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <?= $form->field($scheduleRequestModel, 'description')
+                    ->textarea([
+                        'rows' => 3,
+                        'maxLength' => $scheduleRequestModel::DESCRIPTION_MAX_LENGTH,
+                    ]) ?>
             </div>
         </div>
 
