@@ -76,8 +76,9 @@ abstract class FeedbackFormBase extends Model implements FeedbackFormInterface
      */
     public function validateRoomId($attribute, $params, $validator): void
     {
+        $ownerUsername = (isset($this->requestedFor['username'])) ? $this->requestedFor['username'] : null;
         $repo = \Yii::createObject(ClientChatRepository::class);
-        if (is_null($repo->findByRid($this->rid))) {
+        if (is_null($repo->getByRidAndOwnerUsername($this->rid, $ownerUsername))) {
             $this->addError($attribute, "the chat with room id `{$this->rid}` not found");
         }
     }
