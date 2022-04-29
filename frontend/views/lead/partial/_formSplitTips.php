@@ -5,6 +5,7 @@
  * @var $split TipsSplit
  * @var $key string|integer
  * @var $totalTips float
+ * @var $changeSplitTips bool
  * @var $userList []
  */
 
@@ -31,6 +32,7 @@ $this->registerJs($js);
             [
             'class' => 'form-control',
             'placeholder' => 'Percent',
+                'disabled' => !$changeSplitTips
             ]
         );?>
     </div>
@@ -43,20 +45,24 @@ $this->registerJs($js);
         'class' => 'form-control',
         'placeholder' => 'Percent',
         'onchange' => "calcTipsByPercent(this, $totalTips);",
+        'readonly' => !$changeSplitTips
     ]);?>
     </div>
     <div class="col-md-3">
         <input type="text" class="tips-amount form-control" readonly value="<?= (!empty($split->ts_percent)) ? $totalTips * $split->ts_percent / 100 : '0'?>"/>
     </div>
     <div class="col-md-1">
-        <?= Html::button('<i class="fa fa-trash"></i>', [
-            'class' => 'btn btn-danger pull-right remove-split-button' ,
-        ]); ?>
-        <?= $form->field($split, '[' . $key . ']ts_id', [
-            'options' => [
-                'tag' => false
-            ],
-        ])->hiddenInput()->label(false);
-?>
+        <?php
+        if ($changeSplitTips) :?>
+            <?= Html::button('<i class="fa fa-trash"></i>', [
+                'class' => 'btn btn-danger pull-right remove-split-button' ,
+            ]); ?>
+            <?= $form->field($split, '[' . $key . ']ts_id', [
+                'options' => [
+                    'tag' => false
+                ],
+            ])->hiddenInput()->label(false);
+            ?>
+        <?php endif;?>
     </div>
 </div>

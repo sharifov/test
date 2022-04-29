@@ -34,6 +34,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     public const CLIENT_CREATE_FORM = self::NS . 'form/client_create';
     public const UI_DISPLAY_QUOTE_SEARCH_PARAMS = self::NS . 'ui/quote/search/params';
     public const UI_DISPLAY_MARKETING_SOURCE = self::NS . 'ui/block/marketing_source';
+    public const CHANGE_SPLIT_TIPS  = self::NS . 'change_split_tips';
 
     /** LOGIC PERMISSION */
     public const LOGIC_CLIENT_DATA   = self::NS . 'logic/client_data';
@@ -90,6 +91,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::OBJ_LEAD_QUICK_SEARCH => self::OBJ_LEAD_QUICK_SEARCH,
         self::OBJ_HEAT_MAP_LEAD => self::OBJ_HEAT_MAP_LEAD,
         self::UI_DISPLAY_MARKETING_SOURCE => self::UI_DISPLAY_MARKETING_SOURCE,
+        self::CHANGE_SPLIT_TIPS  => self::CHANGE_SPLIT_TIPS,
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -186,6 +188,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::OBJ_LEAD_QUICK_SEARCH => [self::ACTION_ACCESS_QUICK_SEARCH],
         self::OBJ_HEAT_MAP_LEAD => [self::ACTION_ACCESS],
         self::UI_DISPLAY_MARKETING_SOURCE => [self::ACTION_READ],
+        self::CHANGE_SPLIT_TIPS => [self::ACTION_UPDATE],
     ];
 
     public const ATTR_LEAD_IS_OWNER = [
