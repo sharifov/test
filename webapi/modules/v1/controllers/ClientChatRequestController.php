@@ -22,6 +22,9 @@ use src\model\clientChatRequest\repository\ClientChatRequestRepository;
 use src\model\clientChatRequest\useCase\api\create\ClientChatRequestApiForm;
 use src\model\clientChatRequest\useCase\api\create\ClientChatRequestFeedbackSubForm;
 use src\model\clientChatRequest\useCase\api\create\ClientChatRequestService;
+use src\model\clientChatRequest\useCase\api\create\FeedbackRejectedForm;
+use src\model\clientChatRequest\useCase\api\create\FeedbackRequestedForm;
+use src\model\clientChatRequest\useCase\api\create\FeedbackSubmittedForm;
 use src\repositories\NotFoundException;
 use webapi\src\ApiCodeException;
 use webapi\src\response\ErrorResponse;
@@ -796,8 +799,25 @@ private ClientChatRequestRepository $clientChatRequestRepository;
             ));
         }
 
-        $feedbackForm = (new ClientChatRequestFeedbackSubForm())->fillIn($data);
-        if (!$feedbackForm->validate()) {
+        switch ($form->event) {
+            case 'FEEDBACK_REQUESTED':
+                $feedbackForm = new FeedbackRequestedForm();
+                break;
+            case 'FEEDBACK_REJECTED':
+                $feedbackForm = new FeedbackRejectedForm();
+                break;
+            case 'FEEDBACK_SUBMITTED':
+                $feedbackForm = new FeedbackSubmittedForm();
+                break;
+            default:
+                return new ErrorResponse(
+                    new StatusCodeMessage(400),
+                    new MessageMessage('Received event is not provided'),
+                    new CodeMessage(ApiCodeException::EVENT_OR_DATA_IS_NOT_PROVIDED)
+                );
+        }
+
+        if (!$feedbackForm->load($data, "") || !$feedbackForm->validate()) {
             return $this->endApiLog(new ErrorResponse(
                 new StatusCodeMessage(400),
                 new MessageMessage('Feedback validate failed.'),
@@ -820,31 +840,32 @@ private ClientChatRequestRepository $clientChatRequestRepository;
 
         try {
             $feedbackJob = new ClientChatFeedbackJob();
-            $feedbackJob->rid = $feedbackForm->rid;
-            $feedbackJob->comment = $feedbackForm->comment;
-            $feedbackJob->rating = $feedbackForm->rating;
+            $feedbackJob->feedbackForm = $feedbackForm;
 
             if ($feedbackJobId = Yii::$app->queue_client_chat_job->priority(10)->push($feedbackJob)) {
                 $clientChatRequest->ccr_job_id = $feedbackJobId;
                 $clientChatRequest->save();
-                $resultMessage = 'Feedback added to queue (jobId: ' . $feedbackJobId . ')';
+                $resultMessage = "Feedback added to queue (jobId: {$feedbackJobId})";
             } else {
-                throw new \Exception('Feedback not added to queue. ClientChatRequest ID : ' .
-                    $clientChatRequest->ccr_rid);
+                throw new \Exception("Feedback not added to queue. ClientChatRequest ID : {$clientChatRequest->ccr_rid}");
             }
         } catch (\Throwable $e) {
-            return $this->endApiLog(new ErrorResponse(
-                new StatusCodeMessage(400),
-                new MessageMessage('Client Chat Feedback not saved.'),
-                new ErrorsMessage($e->getMessage()),
-                new CodeMessage(ApiCodeException::CLIENT_CHAT_FEEDBACK_CREATE_FAILED)
-            ));
+            return $this->endApiLog(
+                new ErrorResponse(
+                    new StatusCodeMessage(400),
+                    new MessageMessage('Client Chat Feedback not saved.'),
+                    new ErrorsMessage($e->getMessage()),
+                    new CodeMessage(ApiCodeException::CLIENT_CHAT_FEEDBACK_CREATE_FAILED)
+                )
+            );
         }
 
-        return $this->endApiLog(new SuccessResponse(
-            new StatusCodeMessage(200),
-            new MessageMessage($resultMessage ?? 'Ok'),
-        ));
+        return $this->endApiLog(
+            new SuccessResponse(
+                new StatusCodeMessage(200),
+                new MessageMessage($resultMessage ?? 'Ok')
+            )
+        );
     }
 
     /**
