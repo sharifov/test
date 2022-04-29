@@ -1,0 +1,88 @@
+<?php
+
+/**
+ * @var View $this
+ * @var ShiftScheduleRequestSearch $searchModel
+ * @var ActiveDataProvider $dataProvider
+ */
+
+use modules\shiftSchedule\src\entities\shiftScheduleRequest\search\ShiftScheduleRequestSearch;
+use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
+use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
+use yii\data\ActiveDataProvider;
+use yii\helpers\Html;
+use yii\grid\GridView;
+use yii\web\View;
+
+$this->title = Yii::t('app', 'Shift Schedule Requests');
+$this->params['breadcrumbs'][] = $this->title;
+
+$shiftScheduleTypes = ShiftScheduleType::getList(true);
+
+?>
+<div class="shift-schedule-request-index">
+
+    <h1><?= Html::encode($this->title) ?></h1>
+
+    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+
+    <?= GridView::widget([
+        'dataProvider' => $dataProvider,
+        'filterModel' => $searchModel,
+        'columns' => [
+            [
+                'attribute' => 'srh_id',
+                'options' => [
+                    'style' => 'width: 5%',
+                ],
+            ],
+            [
+                'attribute' => 'srh_uss_id',
+                'options' => [
+                    'style' => 'width: 10%',
+                ],
+            ],
+            [
+                'attribute' => 'srh_sst_id',
+                'value' => function (ShiftScheduleRequest $model) use ($shiftScheduleTypes) {
+                    return $shiftScheduleTypes[$model->srh_sst_id] ?? $model->srh_sst_id;
+                },
+                'options' => [
+                    'style' => 'width: 20%',
+                ],
+                'filter' => $shiftScheduleTypes,
+            ],
+            [
+                'attribute' => 'srh_status_id',
+                'value' => function (ShiftScheduleRequest $model) {
+                    $statusName = $model->getStatusName();
+                    if (!empty($statusName)) {
+                        return sprintf(
+                            '<span class="badge badge-%s">%s</span>',
+                            $model->getStatusNameColor(),
+                            $statusName
+                        );
+                    }
+                    return $model->srh_status_id;
+                },
+                'options' => [
+                    'style' => 'width: 10%',
+                ],
+                'filter' => ShiftScheduleRequest::getList(),
+                'format' => 'raw',
+            ],
+            [
+                'attribute' => 'srh_description',
+                'options' => [
+                    'style' => 'width: 20%',
+                ],
+            ],
+            'srh_created_dt',
+            'srh_update_dt',
+            'srh_created_user_id',
+            'srh_updated_user_id',
+        ],
+    ]); ?>
+
+
+</div>
