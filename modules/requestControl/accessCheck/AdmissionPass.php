@@ -2,7 +2,6 @@
 
 namespace modules\requestControl\accessCheck;
 
-use yii\db\Query;
 use modules\requestControl\accessCheck\conditions\AbstractCondition;
 use modules\requestControl\interfaces\AllowanceInterface;
 use modules\requestControl\accessCheck\allowance\Limited;
@@ -11,6 +10,7 @@ use modules\requestControl\accessCheck\conditions\RoleCondition;
 use modules\requestControl\accessCheck\conditions\UsernameCondition;
 use modules\requestControl\models\RequestControlRule;
 use modules\requestControl\RequestControlModule;
+use yii\db\Query;
 
 /**
  * Class `AdmissionPass` basic class for working with access control
@@ -112,16 +112,15 @@ class AdmissionPass
      */
     public function createAllowance(): AllowanceInterface
     {
-        $query = (new Query())
-            ->select('*')
-            ->from(RequestControlRule::tableName());
-        foreach ($this->conditions as $condition) {
-            $condition->modifyQuery($query);
+        try {
+            $rulesInCache = \Yii::$app->cache->get(RequestControlModule::REQUEST_CONTROL_RULES_CACHE_KEY);
+        } catch (\Throwable $e) {
+            $rulesInCache = false;
         }
 
-        $items = $query->all();
+        $rules = ($rulesInCache === false) ? $this->getRulesFromDatabase() : $this->getRulesFromCache($rulesInCache);
 
-        return (count($items) > 0) ? new Limited($items) : new Limitless();
+        return (count($rules) > 0) ? new Limited($rules) : new Limitless();
     }
 
     /**
@@ -135,5 +134,30 @@ class AdmissionPass
     public function checkAllowance(AllowanceInterface $allowance): bool
     {
         return $allowance->isAllow($this->userActivityRegistry);
+    }
+
+    /**
+     * @param array $rulesInCache
+     * @return array
+     */
+    private function getRulesFromCache($rulesInCache): array
+    {
+        return array_reduce($this->conditions, function ($acc, $x) use ($rulesInCache) {
+            /** @var AbstractCondition $x */
+            return $x->reduceData($acc, $rulesInCache);
+        }, []);
+    }
+
+    /**
+     * @return array
+     */
+    private function getRulesFromDatabase(): array
+    {
+        $query = new Query();
+        $query->select('*')->from(RequestControlRule::tableName());
+        return array_reduce($this->conditions, function ($resultQuery, $condition) {
+            /** @var AbstractCondition $condition */
+            return $condition->modifyQuery($resultQuery);
+        }, $query)->all();
     }
 }

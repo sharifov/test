@@ -2024,9 +2024,6 @@ class LeadController extends FController
         $form->assignDep(Department::DEPARTMENT_SALES);
         if ($form->load($data['post']) && $form->validate()) {
             try {
-                if ($form->depId === 0) {
-                    $form->depId = null;
-                }
                 if (!$delayedChargeAccess) {
                     $form->delayedCharge = false;
                 }
@@ -2072,9 +2069,6 @@ class LeadController extends FController
             $form = new LeadManageForm(0);
             if (Yii::$app->request->isPjax && $form->load($data['post']) && $form->validate()) {
                 try {
-                    if ($form->depId === 0) {
-                        $form->depId = null;
-                    }
                     $leadManageService = Yii::createObject(UseCaseLeadManageService::class);
                     $form->client->projectId = $form->projectId;
                     $form->client->typeCreate = Client::TYPE_CREATE_LEAD;

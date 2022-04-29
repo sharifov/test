@@ -11,6 +11,11 @@ use yii\db\Query;
 interface ConditionInterface
 {
     /**
+     * @return string
+     */
+    public function getType(): string;
+
+    /**
      * @param Query $query
      * @return Query
      */

@@ -54,6 +54,8 @@ class QuoteSegmentBaggage extends \yii\db\ActiveRecord
             [['qsb_allow_max_weight', 'qsb_allow_max_size'], 'string', 'max' => 100],
             [['qsb_segment_id'], 'exist', 'skipOnError' => true, 'targetClass' => QuoteSegment::class, 'targetAttribute' => ['qsb_segment_id' => 'qs_id']],
             [['qsb_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['qsb_updated_user_id' => 'id']],
+
+            [['qsb_pax_code'], 'default', 'value' => Quote::PASSENGER_ADULT],
         ];
     }
 

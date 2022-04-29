@@ -57,7 +57,7 @@ class UserShiftAssign extends \yii\db\ActiveRecord
             ['usa_user_id', 'integer'],
             ['usa_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['usa_user_id' => 'id']],
 
-            ['usa_created_dt', 'date', 'format' => 'php:Y-m-d'],
+            ['usa_created_dt', 'date', 'format' => 'php:Y-m-d H:i:s'],
             ['usa_created_user_id', 'integer', 'max' => self::MAX_VALUE_INT],
         ];
     }

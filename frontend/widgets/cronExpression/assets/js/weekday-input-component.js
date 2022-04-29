@@ -36,8 +36,7 @@ const WeekdayInputComponent = {
             type: Object,
         },
         defaultInputRadio: {
-            type: Number,
-            required: true
+            type: [Number, null]
         }
     },
     data () {
@@ -61,7 +60,7 @@ const WeekdayInputComponent = {
             let countOfSequence = 0;
             let sequenceNumbers = [];
             this.selectedweekdays.forEach((e, i) => {
-                if (k === 0) {
+                if (i === 0) {
                     format += e.toString();
                     sequenceNumbers.push(e);
                 } else if (k+1 !== e) {
@@ -124,6 +123,8 @@ const WeekdayInputComponent = {
         }
     },
     created() {
-        this.selectedRadio = this.defaultInputRadio;
+        if (this.defaultInputRadio !== null) {
+            this.selectedRadio = this.defaultInputRadio;
+        }
     }
 };

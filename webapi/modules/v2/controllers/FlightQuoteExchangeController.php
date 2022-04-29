@@ -20,10 +20,11 @@ use modules\flight\src\useCases\voluntaryExchangeInfo\service\VoluntaryExchangeI
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
-use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productQuoteData\ProductQuoteData;
 use modules\product\src\entities\productQuoteData\ProductQuoteDataRepository;
+use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundRepository;
+use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundStatus;
 use modules\product\src\repositories\ProductableRepository;
 use src\entities\cases\CaseEventLog;
 use src\exception\BoResponseException;
@@ -61,6 +62,7 @@ class FlightQuoteExchangeController extends BaseController
     private VoluntaryExchangeObjectCollection $objectCollection;
     private BoRequestVoluntaryExchangeService $boRequestVoluntaryExchangeService;
     private ProductQuoteChangeRepository $productQuoteChangeRepository;
+    private ProductQuoteRefundRepository $productQuoteRefundRepository;
     private ProductQuoteDataRepository $productQuoteDataRepository;
 
     /**
@@ -70,6 +72,7 @@ class FlightQuoteExchangeController extends BaseController
      * @param VoluntaryExchangeObjectCollection $voluntaryExchangeObjectCollection
      * @param BoRequestVoluntaryExchangeService $boRequestVoluntaryExchangeService
      * @param ProductQuoteChangeRepository $productQuoteChangeRepository
+     * @param ProductQuoteRefundRepository $productQuoteRefundRepository
      * @param ProductQuoteDataRepository $productQuoteDataRepository
      * @param array $config
      */
@@ -80,6 +83,7 @@ class FlightQuoteExchangeController extends BaseController
         VoluntaryExchangeObjectCollection $voluntaryExchangeObjectCollection,
         BoRequestVoluntaryExchangeService $boRequestVoluntaryExchangeService,
         ProductQuoteChangeRepository $productQuoteChangeRepository,
+        ProductQuoteRefundRepository $productQuoteRefundRepository,
         ProductQuoteDataRepository $productQuoteDataRepository,
         $config = []
     ) {
@@ -87,6 +91,7 @@ class FlightQuoteExchangeController extends BaseController
         $this->boRequestVoluntaryExchangeService = $boRequestVoluntaryExchangeService;
         $this->productQuoteChangeRepository      = $productQuoteChangeRepository;
         $this->productQuoteDataRepository        = $productQuoteDataRepository;
+        $this->productQuoteRefundRepository = $productQuoteRefundRepository;
         parent::__construct($id, $module, $logger, $config);
     }
 
@@ -558,7 +563,7 @@ class FlightQuoteExchangeController extends BaseController
         try {
             if ($productQuote = ProductQuoteQuery::getProductQuoteByBookingId($voluntaryExchangeCreateForm->bookingId)) {
                 if ($productQuote->isChangeable()) {
-                    if ($productQuote->productQuoteRefundsActive || $productQuote->productQuoteChangesActive) {
+                    if ($productQuote->isProductQuoteRefundAccepted() || $productQuote->productQuoteChangesActive) {
                         throw new \DomainException('Product Quote not available for exchange', ApiCodeException::REQUEST_ALREADY_PROCESSED);
                     }
                 } else {
@@ -897,7 +902,8 @@ class FlightQuoteExchangeController extends BaseController
         $voluntaryExchangeConfirmHandler = new VoluntaryExchangeConfirmHandler(
             $flightRequest,
             $voluntaryExchangeConfirmForm,
-            $this->objectCollection
+            $this->objectCollection,
+            $this->productQuoteRefundRepository
         );
 
         try {
@@ -943,6 +949,7 @@ class FlightQuoteExchangeController extends BaseController
             try {
                 $voluntaryExchangeConfirmHandler->doneProcess();
                 $voluntaryExchangeConfirmHandler->additionalProcessing();
+                $voluntaryExchangeConfirmHandler->cancelChangeQuotes();
             } catch (\Throwable $throwable) {
                 $voluntaryExchangeConfirmHandler->failProcess($throwable->getMessage());
                 Yii::error(AppHelper::throwableLog($throwable), 'FlightQuoteExchangeController:AdditionalProcessing');

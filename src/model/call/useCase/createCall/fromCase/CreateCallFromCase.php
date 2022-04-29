@@ -53,6 +53,9 @@ class CreateCallFromCase
                     'source_type_id' => Call::SOURCE_CASE,
                     'call_recording_disabled' => $recordDisabled,
                     'friendly_name' => FriendlyName::next(),
+                    'project' => $case->cs_project_id ? $case->project->name : '',
+                    'source' => Call::SOURCE_LIST[Call::SOURCE_CASE],
+                    'type' => Call::TYPE_LIST[Call::CALL_TYPE_OUT],
                 ])
             );
         } catch (\Throwable $e) {

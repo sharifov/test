@@ -20,6 +20,8 @@ use modules\flight\src\useCases\voluntaryExchangeManualCreate\service\VoluntaryE
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundRepository;
+use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundStatus;
 use src\entities\cases\CaseEventLog;
 use src\entities\cases\Cases;
 use src\helpers\app\AppHelper;
@@ -58,6 +60,7 @@ class VoluntaryExchangeConfirmHandler
     private ?ProductQuote $voluntaryExchangeQuote = null;
     private ?ProductQuoteChange $productQuoteChange = null;
     private ?Order $order = null;
+    private ProductQuoteRefundRepository $productQuoteRefundRepository;
 
     /**
      * @param FlightRequest $flightRequest
@@ -67,7 +70,8 @@ class VoluntaryExchangeConfirmHandler
     public function __construct(
         FlightRequest $flightRequest,
         VoluntaryExchangeConfirmForm $confirmForm,
-        VoluntaryExchangeObjectCollection $voluntaryExchangeObjectCollection
+        VoluntaryExchangeObjectCollection $voluntaryExchangeObjectCollection,
+        ProductQuoteRefundRepository $productQuoteRefundRepository
     ) {
         $this->confirmForm = $confirmForm;
         $this->flightRequest = $flightRequest;
@@ -80,6 +84,7 @@ class VoluntaryExchangeConfirmHandler
 
         $this->flightRequestService = new FlightRequestService($flightRequest, $this->objectCollection);
         $this->caseHandler = new CaseVoluntaryExchangeHandler($this->case, $this->objectCollection);
+        $this->productQuoteRefundRepository = $productQuoteRefundRepository;
     }
 
     public function prepareRequest(): array
@@ -343,6 +348,24 @@ class VoluntaryExchangeConfirmHandler
                     'VoluntaryExchangeCreateHandler:additionalProcessing:Billing'
                 );
             }
+        }
+    }
+
+    /**
+     * Cancel all change quotes in statuses NEW and PENDING
+     *
+     * @return void
+     */
+    public function cancelChangeQuotes(): void
+    {
+        $productRefundQuotes = $this->productQuoteRefundRepository->findAllByBookingId(
+            $this->flightRequest->fr_booking_id,
+            [ProductQuoteRefundStatus::PENDING, ProductQuoteRefundStatus::NEW]
+        );
+        foreach ($productRefundQuotes as $productRefundQuote) {
+            $productRefundQuote->detachBehavior('user');
+            $productRefundQuote->cancel();
+            $this->productQuoteRefundRepository->save($productRefundQuote);
         }
     }
 

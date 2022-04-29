@@ -114,6 +114,30 @@ class ProductQuoteAbacObject extends AbacBaseModel implements AbacInterface
         'operators' =>  [self::OP_EQUAL2]
     ];
 
+    protected const ATTR_HAS_PQR_ACCEPTED = [
+        'optgroup' => 'PRODUCT QUOTE',
+        'id' => self::NS . 'hasPqrAccepted',
+        'field' => 'hasPqrAccepted',
+        'label' => 'Has accepted refund quote',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
+    protected const ATTR_HAS_PQC_ACCEPTED = [
+        'optgroup' => 'PRODUCT QUOTE',
+        'id' => self::NS . 'hasPqcAccepted',
+        'field' => 'hasPqcAccepted',
+        'label' => 'Has accepted change quote',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
     protected const ATTR_HAS_PQC_INVOLUNTARY_ACTIVE = [
         'optgroup' => 'PRODUCT QUOTE',
         'id' => self::NS . 'hasPqcInvoluntaryActive',
@@ -318,6 +342,8 @@ class ProductQuoteAbacObject extends AbacBaseModel implements AbacInterface
             self::ATTR_HAS_PQR_ACTIVE,
             self::ATTR_HAS_PQC_INVOLUNTARY_ACTIVE,
             self::ATTR_HAS_PQC_ACTIVE,
+            self::ATTR_HAS_PQR_ACCEPTED,
+            self::ATTR_HAS_PQC_ACCEPTED,
         ]
     ];
 
