@@ -59,6 +59,7 @@ use yii\base\Model;
  */
 class UpdateForm extends Model
 {
+    // @see \common\models\Employee
     public $username;
     public $email;
     public $full_name;
@@ -88,6 +89,7 @@ class UpdateForm extends Model
     public $up_call_expert_limit;
     public $up_call_user_level;
 
+    // @see \common\models\UserProfile
     public $up_join_date;
     public $up_skill;
     public $up_call_type_id;
@@ -271,7 +273,7 @@ class UpdateForm extends Model
             ['email', 'required', 'when' => fn () => $this->fieldAccess->canEdit('email')],
             ['email', 'trim'],
             ['email', 'string', 'max' => 255],
-            ['email', 'filter', 'filter' => 'strtolower', 'skipOnEmpty' => true],
+            ['email', 'filter', 'filter' => 'strtolower', 'skipOnEmpty' => true, 'skipOnError' => true],
             ['email', 'validateUniqueEmail', 'skipOnEmpty' => true, 'skipOnError' => true],
 
             ['full_name', 'required', 'when' => fn () => $this->fieldAccess->canEdit('full_name')],
@@ -286,8 +288,8 @@ class UpdateForm extends Model
             ['nickname', 'string', 'min' => 3, 'max' => 50],
 
             ['status', 'required', 'when' => fn () => $this->fieldAccess->canEdit('status')],
-            ['status', 'filter', 'filter' => 'intval', 'skipOnError' => true, 'skipOnEmpty' => true],
             ['status', 'integer'],
+            ['status', 'filter', 'filter' => 'intval', 'skipOnError' => true, 'skipOnEmpty' => true],
             ['status', 'in', 'range' => array_keys($this->availableList->getStatuses())],
 
             ['acl_rules_activated', 'default', 'value' => null],
@@ -412,11 +414,11 @@ class UpdateForm extends Model
             ['up_kpi_enable', 'boolean'],
             ['up_kpi_enable', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
 
-            ['up_show_in_contact_list', 'default', 'value' => null],
+            ['up_show_in_contact_list', 'default', 'value' => false],
             ['up_show_in_contact_list', 'boolean'],
             ['up_show_in_contact_list', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
 
-            ['up_call_recording_disabled', 'default', 'value' => null],
+            ['up_call_recording_disabled', 'default', 'value' => false],
             ['up_call_recording_disabled', 'boolean'],
             ['up_call_recording_disabled', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
         ];
