@@ -19,7 +19,7 @@ class m220419_042912_create_client_chat_survey_table extends Migration
         $this->createTable('{{%client_chat_survey}}', [
             '[[ccs_id]]' => $this->primaryKey(),
             '[[ccs_uid]]' => $this->string(64)->notNull(),
-            '[[ccs_chat_id]]' => $this->string(64)->notNull(),
+            '[[ccs_client_chat_id]]' => $this->integer()->notNull(),
             '[[ccs_type]]' => $this->string(64)->notNull(),
             '[[ccs_template]]' => $this->text()->notNull(),
             '[[ccs_trigger_source]]' => $this->string(64)->notNull(),
@@ -31,6 +31,7 @@ class m220419_042912_create_client_chat_survey_table extends Migration
 
         $this->addForeignKey('FK-client_chat_survey-ccs_requested_by', '{{%client_chat_survey}}', '[[ccs_requested_by]]', '{{%employees}}', '[[id]]');
         $this->addForeignKey('FK-client_chat_survey-ccs_requested_for', '{{%client_chat_survey}}', '[[ccs_requested_for]]', '{{%employees}}', '[[id]]');
+        $this->addForeignKey('FK-client_chat_survey-ccs_client_chat_id', '{{%client_chat_survey}}', '[[ccs_client_chat_id]]', '{{%client_chat}}', '[[cch_id]]');
     }
 
     /**
@@ -38,6 +39,7 @@ class m220419_042912_create_client_chat_survey_table extends Migration
      */
     public function safeDown()
     {
+        $this->dropForeignKey('FK-client_chat_survey-ccs_client_chat_id', '{{%client_chat_survey}}');
         $this->dropForeignKey('FK-client_chat_survey-ccs_requested_for', '{{%client_chat_survey}}');
         $this->dropForeignKey('FK-client_chat_survey-ccs_requested_by', '{{%client_chat_survey}}');
 
