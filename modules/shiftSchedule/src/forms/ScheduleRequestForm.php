@@ -2,9 +2,12 @@
 
 namespace modules\shiftSchedule\src\forms;
 
+use common\models\Employee;
 use DateInterval;
 use DateTime;
 use Exception;
+use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
+use src\auth\Auth;
 use src\helpers\app\AppHelper;
 use Yii;
 use yii\base\Model;
@@ -14,6 +17,8 @@ use yii\web\Request;
 /**
  *
  * @property-write Request $attributesRequest
+ * @property-read string $endDateTime
+ * @property-read string $startDateTime
  * @property-read string $endDt
  */
 class ScheduleRequestForm extends Model
@@ -22,6 +27,7 @@ class ScheduleRequestForm extends Model
     const DATETIME_FORMAT = 'Y-m-d H:i';
     const MIN_DAYS_DURATION = 1;
     const MAX_DAYS_DURATION = 20;
+    const DESCRIPTION_MAX_LENGTH = 1000;
 
     /**
      * @var string
@@ -44,6 +50,10 @@ class ScheduleRequestForm extends Model
      * @var string
      */
     public string $endTime = '';
+    /**
+     * @var string
+     */
+    public string $description = '';
 
     /**
      * @return void
@@ -118,6 +128,11 @@ class ScheduleRequestForm extends Model
                 'validateChronologicallyTime',
                 'skipOnEmpty' => true,
             ],
+            [
+                'description',
+                'string',
+                'max' => self::DESCRIPTION_MAX_LENGTH,
+            ],
         ];
     }
 
@@ -129,7 +144,17 @@ class ScheduleRequestForm extends Model
     public function saveRequest(): bool
     {
         $userShiftSchedule = new UserShiftSchedule($this->mappingData());
-        return $userShiftSchedule->validate() && $userShiftSchedule->save();
+        if ($userShiftSchedule->validate() && $userShiftSchedule->save()) {
+            $requestModel = new ShiftScheduleRequest([
+                'srh_uss_id' => $userShiftSchedule->uss_id,
+                'srh_sst_id' => $this->scheduleType,
+                'srh_status_id' => ShiftScheduleRequest::STATUS_PENDING,
+                'srh_description' => $this->description,
+            ]);
+            $requestModel->save();
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -140,12 +165,12 @@ class ScheduleRequestForm extends Model
     private function mappingData(): array
     {
         return [
-            'uss_user_id' => Yii::$app->user->getId(),
+            'uss_user_id' => Auth::user()->id,
             'uss_sst_id' => $this->scheduleType,
             'uss_status_id' => UserShiftSchedule::STATUS_PENDING,
             'uss_type_id' => UserShiftSchedule::TYPE_MANUAL,
-            'uss_start_utc_dt' => $this->startDt,
-            'uss_end_utc_dt' => $this->getEndDt(),
+            'uss_start_utc_dt' => $this->getStartDateTime(),
+            'uss_end_utc_dt' => $this->getEndDateTime(),
         ];
     }
 
@@ -160,6 +185,7 @@ class ScheduleRequestForm extends Model
             'startTime' => Yii::t('schedule-request', 'Start Time'),
             'endTime' => Yii::t('schedule-request', 'End Time'),
             'scheduleType' => Yii::t('schedule-request', 'Schedule Type'),
+            'description' => Yii::t('schedule-request', 'Description'),
         ];
     }
 
@@ -251,5 +277,45 @@ class ScheduleRequestForm extends Model
             return $start->format(self::DATE_FORMAT);
         }
         return '';
+    }
+
+    /**
+     * Convert datetime to UTC
+     * @param string $dateTime
+     * @return string
+     */
+    public function convertToUTC(string $dateTime): string
+    {
+        return Employee::convertToUTC(
+            strtotime($dateTime),
+            Auth::user()->timezone
+        );
+    }
+
+    /**
+     * Return start date with time
+     * @return string
+     */
+    public function getStartDateTime(): string
+    {
+        return $this->convertToUTC(sprintf(
+            '%s %s',
+            $this->startDt,
+            $this->startTime
+        ));
+    }
+
+    /**
+     * Return end date with time
+     * @return string
+     * @throws Exception
+     */
+    public function getEndDateTime(): string
+    {
+        return $this->convertToUTC(sprintf(
+            '%s %s',
+            $this->getEndDt(),
+            $this->endTime
+        ));
     }
 }
