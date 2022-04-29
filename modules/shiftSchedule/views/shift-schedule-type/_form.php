@@ -1,10 +1,14 @@
 <?php
 
+use kartik\select2\Select2;
+use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
+use modules\shiftSchedule\src\entities\shiftScheduleTypeLabel\ShiftScheduleTypeLabel;
+use modules\shiftSchedule\src\forms\ShiftScheduleTypeForm;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType */
+/* @var $model ShiftScheduleTypeForm */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
@@ -14,7 +18,19 @@ use yii\widgets\ActiveForm;
 
     <div class="row">
         <div class="col-md-4">
-        <?= $form->field($model, 'sst_key')->textInput(['maxlength' => true]) ?>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <?= $form->field($model, 'sst_key')->textInput(['maxlength' => true]) ?>
+                </div>
+                <div class="col-md-6">
+                <?php echo $form->field($model, 'sst_subtype_id')
+                    ->dropDownList(
+                        ShiftScheduleType::getSubtypeList(),
+                        ['prompt' => '-']
+                    ) ?>
+                </div>
+            </div>
 
         <?= $form->field($model, 'sst_name')->textInput(['maxlength' => true]) ?>
 
@@ -22,12 +38,18 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'sst_enabled')->checkbox() ?>
 
-        <?= $form->field($model, 'sst_readonly')->checkbox() ?>
+        <?php
+            echo $form->field($model, 'sst_label_list', ['options' => ['class' => 'form-group']])
+                ->widget(Select2::class, [
+                'data' => ShiftScheduleTypeLabel::getList(),
+                'size' => Select2::SMALL,
+                'options' => ['placeholder' => 'Select type labels', 'multiple' => true],
+                'pluginOptions' => ['allowClear' => true],
+            ]);
+            ?>
 
-        <?= $form->field($model, 'sst_work_time')->checkbox() ?>
 
-
-
+        <?php /*= $form->field($model, 'sst_readonly')->checkbox()*/ ?>
 
 
 

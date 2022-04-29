@@ -1,214 +1,51 @@
 <?php
 
-use common\components\grid\DateTimeColumn;
-use common\models\Employee;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
-use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
-use modules\shiftSchedule\src\entities\userShiftAssign\UserShiftAssign;
-use modules\shiftSchedule\src\entities\userShiftSchedule\search\SearchUserShiftSchedule;
-use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
-use src\helpers\setting\SettingHelper;
-use yii\grid\GridView;
 use yii\helpers\Html;
-use yii\widgets\Pjax;
+use yii\helpers\Json;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $resourceList array */
 
-
-$this->title = 'Calendar Mobiscroll';
+$this->title = 'Users Shift Calendar';
 $this->params['breadcrumbs'][] = $this->title;
-
-$bundle = \frontend\assets\MobiscrollCalendarAsset::register($this);
-
+$bundle = \frontend\assets\UserShiftCalendarAsset::register($this);
 ?>
-<style>
-    .tl-tpl .mbsc-schedule-event.mbsc-ltr {
-        height: auto !important;
-    }
-
-    .tl-tpl-event {
-        border: 1px solid transparent;
-        margin: 2px 0;
-    }
-
-    .tl-tpl-event-cont {
-        background: rgba(255, 255, 255, .8);
-        font-size: 15px;
-        height: 32px;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        overflow: hidden;
-    }
-
-    .tl-tpl-event-cont .mbsc-icon {
-        padding:  7px 6px 2px 5px;
-        box-sizing: content-box;
-    }
-
-    .mbsc-timeline-event-start .tl-tpl-event,
-    .mbsc-timeline-event-start .tl-tpl-event-cont,
-    .mbsc-timeline-event-start .tl-tpl-event-cont .mbsc-icon {
-        border-top-left-radius: 20px;
-        border-bottom-left-radius: 20px;
-    }
-
-    .mbsc-timeline-event-end .tl-tpl-event,
-    .mbsc-timeline-event-end .tl-tpl-event-cont,
-    .mbsc-timeline-event-end .tl-tpl-event-cont .mbsc-icon {
-        border-top-right-radius: 20px;
-        border-bottom-right-radius: 20px;
-    }
-
-    .tl-tpl-event-cont .mbsc-icon:before {
-        color: #fff;
-        font-size: 15px;
-    }
-
-    .tl-tpl-time {
-        margin: 0 10px;
-    }
-
-    .tl-tpl-title {
-        color: #666;
-    }
-
-    .tl-tpl .mbsc-timeline-column,
-    .tl-tpl .mbsc-timeline-header-column {
-        min-width: 100px;
-    }
-
-    .tl-tpl .mbsc-timeline-resource,
-    .tl-tpl .mbsc-timeline-row {
-        min-height: 100px;
-    }
-
-
-
-
-
-
-
-
-
-
-    .md-work-week-cont {
-        position: relative;
-        padding-left: 50px;
-    }
-
-    .md-work-week-avatar {
-        position: absolute;
-        max-height: 50px;
-        max-width: 50px;
-        top: 21px;
-        -webkit-transform: translate(-50%, -50%);
-        transform: translate(-50%, -50%);
-        left: 20px;
-    }
-
-    .md-work-week-name {
-        font-size: 16px;
-    }
-
-    .md-work-week-title {
-        font-size: 12px;
-        margin-top: 5px;
-    }
-
-    .tl-tpl .mbsc-segmented {
-        max-width: 600px;
-        margin: 0 auto;
-        padding: 1px;
-    }
-
-    .md-work-week-picker {
-        flex: 1 0 auto;
-    }
-
-    .md-work-week-nav {
-        width: 200px;
-    }
-
-    .tl-tpl .mbsc-timeline-resource {
-        display: flex;
-        align-items: center;
-    }
-
-    .tl-tpl .mbsc-timeline-resource-col {
-        width: 205px;
-    }
-
-    @supports (overflow:clip) {
-        .tl-tpl.mbsc-ltr .mbsc-schedule-event-inner {
-            left: 205px;
-        }
-        .tl-tpl.mbsc-rtl .mbsc-schedule-event-inner {
-            right: 205px;
-        }
-    }
-
-
-
-
-
-    .md-custom-range-view-controls {
-        display: flex;
-        flex: 1 0 auto;
-        justify-content: end;
-        align-items: center;
-    }
-
-    .mbsc-material .mbsc-calendar-title {
-        font-size: 1.428572em;
-        font-weight: 400;
-        text-transform: none;
-        line-height: 1.4em;
-    }
-
-
-</style>
 
 <div class="shift-schedule-calendar">
     <h1><i class="fa fa-calendar"></i> <?= Html::encode($this->title) ?></h1>
-    <div class="row">
-        <div class="col-md-12">
-            <div id="calendar"  class="tl-tpl"></div>
-        </div>
-    </div>
+
+    <p>
+        <?php
+        /** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_CREATE, Create user shift schedule event */
+        if (\Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_CREATE)) :
+            ?>
+            <?= Html::a(
+                '<i class="fa fa-plus-circle"></i> Add Schedule Event',
+                ['shift-event-add'],
+                ['class' => 'btn btn-success', 'id' => 'btn-shift-event-add']
+            ) ?>
+        <?php endif; ?>
+    </p>
 
     <div class="row">
-        <div class="col-md-6">
-            <div id="eventcalendar"></div>
-        </div>
         <div class="col-md-12">
-            <div id="mycalendar"></div>
+            <div id="calendar" class="ssc"></div>
         </div>
     </div>
 </div>
 
 
 <?php
-$ajaxUrl = \yii\helpers\Url::to(['shift-schedule/calendar-events-ajax']);
-$resourceListJson = \yii\helpers\Json::encode($resourceList);
+$ajaxUrl = Url::to(['shift-schedule/calendar-events-ajax']);
+$resourceListJson = Json::encode($resourceList);
 $today = date('Y-m-d');
 
 $js = <<<JS
 var resourceListJson = $resourceListJson;
 var calendarEventsAjaxUrl = '$ajaxUrl';
 var today = '$today';
-
-// $('#eventcalendar').mobiscroll().eventcalendar({
-//     data: [{
-//         start: new Date(),
-//         title: 'Today\'s event'
-//     }, {
-//         start: new Date(2022, 4, 19, 9, 0),
-//         end: new Date(2022, 4, 20, 13, 0),
-//         title: 'Multi day event'
-//     }]
-// });
-
 
 mobiscroll.setOptions({
     theme: 'ios',
@@ -236,11 +73,11 @@ var inst = $('#calendar').mobiscroll().eventcalendar({
 //            let color = data.color;
 //            let icon = ev.extendedProps.icon;
 //
-//            return '<div class="tl-tpl-event" style="border-color:' + color + ';background:' + color + '">' +
-//                '<div class="tl-tpl-event-cont">' +
+//            return '<div class="ssc-event" style="border-color:' + color + ';background:' + color + '">' +
+//                '<div class="ssc-event-cont">' +
 //                '<span class="mbsc-icon ' + icon + '" style="background:' + color + '"></span>' +
-//                '<span class="tl-tpl-time" style="color:' + color + ';">' + data.start + '</span>' +
-//                '<span class="tl-tpl-title">' + ev.title + '</span></div></div>';
+//                '<span class="ssc-time" style="color:' + color + ';">' + data.start + '</span>' +
+//                '<span class="ssc-title">' + ev.title + '</span></div></div>';
 //        },
 //         extendDefaultEvent: function () {
 //             return {
@@ -346,8 +183,7 @@ var inst = $('#calendar').mobiscroll().eventcalendar({
                         } else {
                             calendar.updateEvent(event);
                         }
-    
-                        mobiscroll.toast({
+                            mobiscroll.toast({
                             message: isNew ? 'Event created' : 'Event updated'
                         });
                     }
@@ -357,114 +193,59 @@ var inst = $('#calendar').mobiscroll().eventcalendar({
 
 
     $('.md-timeline-view-change').change(function (ev) {
-            switch (ev.target.value) {
-                case 'day':
-                    inst.setOptions({
-                        view: {
-                            timeline: { 
-                                type: 'day',
-                                // timeCellStep: 60,
-                                // timeLabelStep: 60,
-                                //eventList: true
-                                size: 2
-                            },
-                            refDate: today
-                        }
-                    })
-                    break;
-                case 'month':
-                    inst.setOptions({
-                        view: {
-                            timeline: {
-                                type: 'month',
-                                // startDay: 1,
-                                // endDay: 5,
-                                // eventList: true,
-                                // weekNumbers: false,
-                                timeCellStep: 360,
-                                timeLabelStep: 360
-                            }
-                        }
-                    })
-                    break;
-                    
-                case '7day':
-                    inst.setOptions({
-                        view: {
-                            timeline: {
-                                type: 'day',
-                                timeCellStep: 360,
-                                timeLabelStep: 360,
-                                size: 7
-                                /*eventList: true,
-                                startDay: 1,
-                                endDay: 5*/
-                                //startDay: 1
-                                // timeCellStep: 360,
-                                // timeLabelStep: 360,
-                                // eventList: true
-                            }
-                        },
+        switch (ev.target.value) {
+            case 'day':
+                inst.setOptions({
+                    view: {
+                        timeline: { type: 'day', size: 2 },
                         refDate: today
-                    })
-                    break;
-                    
-                case '30days':
-                    inst.setOptions({
-                        view: {
-                            timeline: {
-                                type: 'day',
-                                timeCellStep: 720,
-                                timeLabelStep: 720,
-                                size: 30,
-                                //eventList: true,
-                                /*startDay: 1,
-                                endDay: 5*/
-                                //startDay: 1
-                                // timeCellStep: 360,
-                                // timeLabelStep: 360,
-                                // eventList: true
-                            }
-                        },
-                        refDate: today
-                    })
-                    break;
-                    
-                case 'week':
-                    inst.setOptions({
-                        view: {
-                            timeline: {
-                                type: 'week',
-                                /*eventList: true,
-                                startDay: 1,
-                                endDay: 5*/
-                                //startDay: 1
-                                timeCellStep: 720,
-                                timeLabelStep: 720
-                                // eventList: true
-                            }
-                        }/*,
-                        refDate: today*/
-                    })
-                    break;
+                    }
+                })
+                break;
+            case 'month':
+                inst.setOptions({
+                    view: {
+                        timeline: { type: 'month', timeCellStep: 360, timeLabelStep: 360 }
+                    }
+                })
+                break;
                 
-                case 'month-day':
-                    inst.setOptions({
-                        view: {
-                            timeline: {
-                                type: 'month',
-                                // startDay: 1,
-                                // endDay: 5,
-                                // eventList: true,
-                                // weekNumbers: false,
-                                timeCellStep: 1440,
-                                timeLabelStep: 1440
-                            }
-                        }
-                    })
-                    break;
-            }
-        });
+            case '7day':
+                inst.setOptions({
+                    view: {
+                        timeline: { type: 'day', timeCellStep: 360, timeLabelStep: 360, size: 7 }
+                    },
+                    refDate: today
+                })
+                break;
+                
+            case '30days':
+                inst.setOptions({
+                    view: {
+                        timeline: { type: 'day', timeCellStep: 720, timeLabelStep: 720, size: 30 }
+                    },
+                    refDate: today
+                })
+                break;
+                
+            case 'week':
+                inst.setOptions({
+                    view: {
+                        timeline: { type: 'week', timeCellStep: 720, timeLabelStep: 720 }
+                    }/*,
+                    refDate: today*/
+                })
+                break;
+            
+            case 'month-day':
+                inst.setOptions({
+                    view: {
+                        timeline: { type: 'month', timeCellStep: 1440, timeLabelStep: 1440 }
+                    }
+                })
+                break;
+        }
+    });
 
 
 

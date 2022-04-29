@@ -1,0 +1,28 @@
+/*.ssc-event-cont .mbsc-icon:before {*/
+/*    color: #fff;*/
+/*    font-size: 15px;*/
+/*}*/
+
+/*.ssc .mbsc-timeline-column,*/
+/*.ssc .mbsc-timeline-header-column {*/
+/*    min-width: 100px;*/
+/*}*/
+
+/*.ssc .mbsc-timeline-resource,*/
+/*.ssc .mbsc-timeline-row {*/
+/*    min-height: 100px;*/
+/*}*/
+
+.ssc .mbsc-segmented {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 1px;
+}
+
+.md-work-week-picker {
+  flex: 1 0 auto;
+}
+
+.md-work-week-nav {
+  width: 200px;
+}
