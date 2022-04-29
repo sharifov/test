@@ -5208,7 +5208,8 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     {
         $url = '/smart/search/';
 
-        $flightSegments = LeadFlightSegment::findAll(['lead_id' => $this->id]);
+        //$flightSegments = LeadFlightSegment::findAll(['lead_id' => $this->id]);
+        $flightSegments = $this->getleadFlightSegments()->orderBy(['departure' => SORT_ASC])->all();
         $segmentsStr = [];
         $signedParams = [];
         $flexParams = [];
