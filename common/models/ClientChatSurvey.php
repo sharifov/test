@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use src\model\clientChat\entity\ClientChat;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 
@@ -11,7 +12,7 @@ use yii\db\ActiveRecord;
  *
  * @property int $ccs_id
  * @property string $ccs_uid
- * @property string $ccs_chat_id
+ * @property int $ccs_client_chat_id
  * @property string $ccs_type
  * @property string $ccs_template
  * @property string $ccs_trigger_source
@@ -115,9 +116,9 @@ class ClientChatSurvey extends ActiveRecord
     public function rules()
     {
         return [
-            [['ccs_uid', 'ccs_chat_id', 'ccs_type', 'ccs_template', 'ccs_trigger_source', 'ccs_requested_for', 'ccs_status'], 'required'],
-            [['ccs_uid', 'ccs_chat_id', 'ccs_type', 'ccs_template', 'ccs_trigger_source'], 'string'],
-            [['ccs_requested_by', 'ccs_requested_for', 'ccs_status'], 'integer'],
+            [['ccs_uid', 'ccs_client_chat_id', 'ccs_type', 'ccs_template', 'ccs_trigger_source', 'ccs_requested_for', 'ccs_status'], 'required'],
+            [['ccs_uid', 'ccs_type', 'ccs_template', 'ccs_trigger_source'], 'string'],
+            [['ccs_client_chat_id', 'ccs_requested_by', 'ccs_requested_for', 'ccs_status'], 'integer'],
             [['ccs_created_dt'], 'safe']
         ];
     }
@@ -155,6 +156,14 @@ class ClientChatSurvey extends ActiveRecord
     public function getRequestedFor()
     {
         return $this->hasOne(Employee::class, ['id' => 'ccs_requested_for']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getClientChat()
+    {
+        return $this->hasOne(ClientChat::class, ['cch_id' => 'ccs_client_chat_id']);
     }
 
     /**
