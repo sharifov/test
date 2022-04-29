@@ -2663,7 +2663,7 @@ class LeadController extends FController
 
                 /** @abac null, LeadAbacObject::CHANGE_SPLIT_TIPS, LeadAbacObject::ACTION_UPDATE, hide split tips edition */
                 if (!Yii::$app->abac->can(null, LeadAbacObject::CHANGE_SPLIT_TIPS, LeadAbacObject::ACTION_UPDATE)) {
-                    $errors = 'Forbidden';
+                    $errors[] = 'Forbidden';
                 }
 
                 if (empty($errors) && $splitForm->save($errors)) {

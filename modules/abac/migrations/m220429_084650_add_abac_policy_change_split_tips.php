@@ -2,6 +2,7 @@
 
 namespace modules\abac\migrations;
 
+use modules\abac\src\entities\AbacPolicy;
 use yii\db\Migration;
 
 /**
@@ -35,10 +36,8 @@ class m220429_084650_add_abac_policy_change_split_tips extends Migration
      */
     public function safeDown()
     {
-        $this->delete('{{%abac_policy}}', ['AND', ['IN', 'ap_object', [
-            'lead/lead/change_split_tips',
-        ]], ['IN', 'ap_action', ['(update)']]]);
-
-        \Yii::$app->abac->invalidatePolicyCache();
+        if (AbacPolicy::deleteAll(['AND', ['IN', 'ap_object', ['lead/lead/change_split_tips',]], ['IN', 'ap_action', ['(update)']]])) {
+            \Yii::$app->abac->invalidatePolicyCache();
+        }
     }
 }
