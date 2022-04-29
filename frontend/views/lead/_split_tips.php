@@ -9,6 +9,7 @@
  */
 
 use common\models\Employee;
+use modules\lead\src\abac\LeadAbacObject;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use common\models\TipsSplit;
@@ -21,6 +22,8 @@ if ($user->isAdmin()) {
 } else {
     $userList = \common\models\Employee::getListByRole(Employee::ROLE_AGENT);
 }
+/** @abac null, LeadAbacObject::UI_CHANGE_SPLIT_TIPS, LeadAbacObject::ACTION_READ, hide split tips edition */
+$changeSplitTips = Yii::$app->abac->can(null, LeadAbacObject::UI_CHANGE_SPLIT_TIPS, LeadAbacObject::ACTION_READ);
 
 $js = <<<JS
 $(function(){
@@ -64,10 +67,12 @@ $this->registerJs($js);?>
 <div class="d-flex justify-content-between align-items-center">
     <div><h6><b>Total tips: $<?= number_format($totalTips, 2)?></b></h6></div>
     <div>
-    <?= Html::button('<i class="fa fa-plus"></i> Add Agent', [
-            'id' => 'new-split-tips-button',
-            'class' => 'btn btn-success pull-right' ,
-        ]); ?>
+        <?php if ($changeSplitTips) :?>
+            <?= Html::button('<i class="fa fa-plus"></i> Add Agent', [
+                 'id' => 'new-split-tips-button',
+                 'class' => 'btn btn-success pull-right' ,
+             ]); ?>
+        <?php endif;?>
     </div>
 </div>
 <div class="row">
@@ -87,20 +92,24 @@ $this->registerJs($js);?>
                 'split' => $_split,
                 'userList' => $userList,
                 'totalTips' => $totalTips,
+                'changeSplitTips' => $changeSplitTips
             ]);
         }
     }
     ?>
-    <div id="new-split-tips-block" style="display: none;">
-        <?php $newSplit = new TipsSplit(); ?>
-        <?= $this->render('partial/_formSplitTips', [
-            'key' => '__id__',
-            'form' => $form,
-            'split' => $newSplit,
-            'userList' => $userList,
-            'totalTips' => $totalTips,
-        ]) ?>
-    </div>
+    <?php if ($changeSplitTips) :?>
+         <div id="new-split-tips-block" style="display: none;">
+             <?php $newSplit = new TipsSplit(); ?>
+             <?= $this->render('partial/_formSplitTips', [
+                 'key' => '__id__',
+                 'form' => $form,
+                 'split' => $newSplit,
+                 'userList' => $userList,
+                 'totalTips' => $totalTips,
+                 'changeSplitTips' => $changeSplitTips
+             ]) ?>
+         </div>
+    <?php endif;?>
 </div>
 <?php ob_start(); // output buffer the javascript to register later ?>
 <script>
@@ -121,7 +130,10 @@ $this->registerJs($js);?>
 <?php $this->registerJs(str_replace(['<script>', '</script>'], '', ob_get_clean())); ?>
 <div class="btn-wrapper text-center">
     <?=Html::button('<i class="glyphicon glyphicon-remove-circle"></i> Cancel', ['id' => 'cancel-btn','class' => 'btn btn-danger'])?>
-    <?=Html::submitButton('<i class="fa fa-save"></i> Confirm', ['id' => 'save-btn','class' => 'btn btn-primary'])?>
+
+    <?php if ($changeSplitTips) :?>
+        <?= Html::submitButton('<i class="fa fa-save"></i> Confirm', ['id' => 'save-btn','class' => 'btn btn-primary'])?>
+    <?php endif;?>
 </div>
 <?php \yii\widgets\ActiveForm::end() ?>
 <?php yii\widgets\Pjax::end() ?>
