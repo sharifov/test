@@ -2,48 +2,22 @@
 
 namespace src\model\clientChatRequest\useCase\api\create;
 
-use yii\base\Model;
+use common\models\ClientChatSurvey;
+use src\model\clientChat\entity\ClientChat;
 
 /**
  * Class FeedbackRejectedForm
  * @package src\model\clientChatRequest\useCase\api\create
  */
-class FeedbackRejectedForm extends Model
+class FeedbackRejectedForm extends FeedbackFormBase
 {
-    public $id;
-    public $rid;
-    public $type;
-    public $template;
-    public $createdAt;
-    public $triggerSource;
-    public $requestedBy;
-
     /**
-     * @return array
+     * @param ClientChat $clientChat
+     * @return bool
      */
-    public function rules(): array
+    public function syncWithDb(ClientChat $clientChat): bool
     {
-        return [
-            [['id', 'rid', 'type', 'template', 'createdAt', 'triggerSource', 'requestedBy'], 'required'],
-            [['id', 'rid', 'type', 'template', 'createdAt', 'triggerSource'], 'string'],
-            ['requestedBy', 'validateRequestedBy'],
-            ['type', 'in', 'range' => ['sticky', 'fullscreen', 'questions', 'inline']],
-            ['triggerSource', 'in', 'range' => ['agent', 'chat-close', 'bot']],
-        ];
-    }
-
-    /**
-     * @param $attribute
-     * @param $params
-     * @param $validator
-     */
-    public function validateRequestedBy($attribute, $params, $validator): void
-    {
-        if (!isset($this->$attribute['name'])) {
-            $this->addError($attribute, "the `{$attribute}` field should contain `name` field");
-        }
-        if (!isset($this->$attribute['username'])) {
-            $this->addError($attribute, "the `{$attribute}` field should contain `username` field");
-        }
+        $result = ClientChatSurvey::updateAll(['ccs_status' => ClientChatSurvey::STATUS_REJECT], 'ccs_client_chat_id=:client_chat_id', [':client_chat_id' => $clientChat->cch_id]);
+        return $result > 0;
     }
 }

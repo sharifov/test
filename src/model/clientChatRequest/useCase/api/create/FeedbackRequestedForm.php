@@ -2,48 +2,37 @@
 
 namespace src\model\clientChatRequest\useCase\api\create;
 
-use yii\base\Model;
+use common\models\ClientChatSurvey;
+use common\models\Employee;
+use src\model\clientChat\entity\ClientChat;
 
 /**
  * Class FeedbackRequestedForm
  * @package src\model\clientChatRequest\useCase\api\create
  */
-class FeedbackRequestedForm extends Model
+class FeedbackRequestedForm extends FeedbackFormBase
 {
-    public $id;
-    public $rid;
-    public $type;
-    public $template;
-    public $createdAt;
-    public $triggerSource;
-    public $requestedBy;
-
     /**
-     * @return array
+     * @param ClientChat $clientChat
+     * @return bool
      */
-    public function rules(): array
+    public function syncWithDb(ClientChat $clientChat): bool
     {
-        return [
-            [['id', 'rid', 'type', 'template', 'createdAt', 'triggerSource', 'requestedBy'], 'required'],
-            [['id', 'rid', 'type', 'template', 'createdAt', 'triggerSource'], 'string'],
-            ['requestedBy', 'validateRequestedBy'],
-            ['type', 'in', 'range' => ['sticky', 'fullscreen', 'questions', 'inline']],
-            ['triggerSource', 'in', 'range' => ['agent', 'chat-close', 'bot']],
-        ];
-    }
+        $requestedByEmployee = Employee::find()->where(['username' => $this->requestedBy['username']])->one();
+        $requestedForEmployee = Employee::find()->where(['username' => $this->requestedFor['username']])->one();
 
-    /**
-     * @param $attribute
-     * @param $params
-     * @param $validator
-     */
-    public function validateRequestedBy($attribute, $params, $validator): void
-    {
-        if (!isset($this->$attribute['name'])) {
-            $this->addError($attribute, "the `{$attribute}` field should contain `name` field");
-        }
-        if (!isset($this->$attribute['username'])) {
-            $this->addError($attribute, "the `{$attribute}` field should contain `username` field");
-        }
+        $model = new ClientChatSurvey();
+        $model->load([
+            'ccs_uid' => $this->id,
+            'ccs_client_chat_id' => $clientChat->cch_id,
+            'ccs_type' => $this->type,
+            'ccs_template' => $this->template,
+            'ccs_trigger_source' => $this->triggerSource,
+            'ccs_requested_by' => ($requestedByEmployee !== null) ? $requestedByEmployee->getPrimaryKey() : null,
+            'ccs_requested_for' => $requestedForEmployee->getPrimaryKey(),
+            'ccs_status' => ClientChatSurvey::STATUS_PENDING
+        ], '');
+
+        return $model->save();
     }
 }
