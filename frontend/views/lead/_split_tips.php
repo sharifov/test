@@ -22,8 +22,8 @@ if ($user->isAdmin()) {
 } else {
     $userList = \common\models\Employee::getListByRole(Employee::ROLE_AGENT);
 }
-/** @abac null, LeadAbacObject::CHANGE_SPLIT_TIPS, LeadAbacObject::ACTION_UPDATE, hide split tips edition */
-$changeSplitTips = Yii::$app->abac->can(null, LeadAbacObject::CHANGE_SPLIT_TIPS, LeadAbacObject::ACTION_UPDATE);
+/** @abac null, LeadAbacObject::UI_CHANGE_SPLIT_TIPS, LeadAbacObject::ACTION_READ, hide split tips edition */
+$changeSplitTips = Yii::$app->abac->can(null, LeadAbacObject::UI_CHANGE_SPLIT_TIPS, LeadAbacObject::ACTION_READ);
 
 $js = <<<JS
 $(function(){
