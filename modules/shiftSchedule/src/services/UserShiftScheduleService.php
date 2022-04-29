@@ -7,6 +7,7 @@ use Exception;
 use modules\shiftSchedule\src\entities\shift\Shift;
 use modules\shiftSchedule\src\entities\shiftScheduleRule\ShiftScheduleRule;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
+use modules\shiftSchedule\src\entities\shiftScheduleTypeLabelAssign\ShiftScheduleTypeLabelAssign;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use Yii;
 use yii\helpers\VarDumper;
@@ -65,6 +66,46 @@ class UserShiftScheduleService
             ])
 
             ->groupBy(['uss_sst_id', 'uss_year', 'uss_month'])
+            ->asArray();
+
+        if ($statusList) {
+            $query->andWhere(['uss_status_id' => $statusList]);
+        }
+
+        return $query->all();
+    }
+
+    /**
+     * @param int $userId
+     * @param string $minDate
+     * @param string $maxDate
+     * @param array $statusList
+     * @return array|UserShiftSchedule[]
+     */
+    public static function getUserShiftScheduleLabelDataStats(
+        int $userId,
+        string $minDate,
+        string $maxDate,
+        array $statusList = []
+    ): array {
+        $query = UserShiftSchedule::find()
+            ->select(['stl_key' => 'tla_stl_key', 'uss_year' => 'YEAR(uss_start_utc_dt)',
+                'uss_month' => 'MONTH(uss_start_utc_dt)',
+                'uss_cnt' => 'COUNT(*)',
+                'uss_duration' => 'SUM(uss_duration)',
+            ])
+            ->alias('uss')
+            //->with(['shiftScheduleType'])
+            //->innerJoin(ShiftScheduleType::tableName(), 'sst_id=uss.uss_sst_id')
+            ->innerJoin(ShiftScheduleTypeLabelAssign::tableName(), 'uss.uss_sst_id = tla_sst_id')
+            // ['tla_stl_key', 'tla_sst_id']
+            ->where(['uss_user_id' => $userId])
+            ->andWhere(['AND',
+                ['>=', 'uss_start_utc_dt', $minDate],
+                ['<=', 'uss_start_utc_dt', $maxDate]
+            ])
+
+            ->groupBy(['tla_stl_key', 'uss_year', 'uss_month'])
             ->asArray();
 
         if ($statusList) {
