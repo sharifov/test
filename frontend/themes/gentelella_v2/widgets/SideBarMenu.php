@@ -380,6 +380,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Visitor Data', 'url' => ['/client-chat-visitor-data-crud/index']],
                         ['label' => 'Client Chat QA', 'url' => ['/client-chat-qa/index']],
                         ['label' => 'Feedback', 'url' => ['/client-chat-feedback-crud/index']],
+                        ['label' => 'Chat Survey', 'url' => ['/client-chat-survey/index']],
                         ['label' => 'Last Message', 'url' => ['/client-chat-last-message-crud/index']],
                         ['label' => 'Hold', 'url' => ['/client-chat-hold-crud/index']],
                         ['label' => 'Unread messages', 'url' => ['/client-chat-unread/index']],
