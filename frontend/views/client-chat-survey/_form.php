@@ -20,7 +20,7 @@ use common\models\ClientChatSurvey;
 
           <?= $form->field($model, 'ccs_uid')->textInput() ?>
 
-          <?= $form->field($model, 'ccs_chat_id')->textInput() ?>
+          <?= $form->field($model, 'ccs_client_chat_id')->textInput() ?>
 
           <?= $form->field($model, 'ccs_template')->textInput() ?>
 

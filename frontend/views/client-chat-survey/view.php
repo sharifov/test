@@ -45,7 +45,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'attributes' => [
                 'ccs_id',
                 'ccs_uid',
-                'ccs_chat_id',
+                'ccs_client_chat_id',
                 [
                     'attribute' => 'ccs_type',
                     'value' => function (ClientChatSurvey $model) {

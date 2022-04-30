@@ -18,8 +18,8 @@ class ClientChatSurveySearch extends ClientChatSurvey
     public function rules()
     {
         return [
-            [['ccs_id', 'ccs_uid', 'ccs_chat_id', 'ccs_type', 'ccs_template', 'ccs_trigger_source', 'ccs_requested_by', 'ccs_requested_for', 'ccs_status', 'ccs_created_dt'], 'string'],
-            [['ccs_id', 'ccs_uid', 'ccs_chat_id', 'ccs_type', 'ccs_template', 'ccs_trigger_source', 'ccs_requested_by', 'ccs_requested_for', 'ccs_status', 'ccs_created_dt'], 'safe']
+            [['ccs_id', 'ccs_uid', 'ccs_client_chat_id', 'ccs_type', 'ccs_template', 'ccs_trigger_source', 'ccs_requested_by', 'ccs_requested_for', 'ccs_status', 'ccs_created_dt'], 'string'],
+            [['ccs_id', 'ccs_uid', 'ccs_client_chat_id', 'ccs_type', 'ccs_template', 'ccs_trigger_source', 'ccs_requested_by', 'ccs_requested_for', 'ccs_status', 'ccs_created_dt'], 'safe']
         ];
     }
 
@@ -54,7 +54,7 @@ class ClientChatSurveySearch extends ClientChatSurvey
 
         $query
             ->andFilterWhere(['like', 'ccs_uid', $this->ccs_uid])
-            ->andFilterWhere(['like', 'ccs_chat_id', $this->ccs_chat_id])
+            ->andFilterWhere(['like', 'ccs_client_chat_id', $this->ccs_client_chat_id])
             ->andFilterWhere(['like', 'ccs_type', $this->ccs_type])
             ->andFilterWhere(['like', 'ccs_template', $this->ccs_template])
             ->andFilterWhere(['like', 'ccs_trigger_source', $this->ccs_trigger_source]);
