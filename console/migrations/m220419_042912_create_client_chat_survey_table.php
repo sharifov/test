@@ -26,6 +26,7 @@ class m220419_042912_create_client_chat_survey_table extends Migration
             '[[ccs_requested_by]]' => $this->integer()->defaultValue(null),
             '[[ccs_requested_for]]' => $this->integer()->notNull(),
             '[[ccs_status]]' => $this->integer()->notNull(),
+            '[[ccs_rc_created_dt]]' => $this->timestamp(),
             '[[ccs_created_dt]]' => $this->timestamp()
         ], $tableOptions);
 
