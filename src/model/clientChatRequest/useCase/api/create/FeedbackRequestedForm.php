@@ -30,6 +30,7 @@ class FeedbackRequestedForm extends FeedbackFormBase
             'ccs_trigger_source' => $this->triggerSource,
             'ccs_requested_by' => ($requestedByEmployee !== null) ? $requestedByEmployee->getPrimaryKey() : null,
             'ccs_requested_for' => $requestedForEmployee->getPrimaryKey(),
+            'ccs_rc_created_dt' => date('Y-m-d H:i:s', strtotime($this->createdAt)),
             'ccs_status' => ClientChatSurvey::STATUS_PENDING
         ], '');
 
