@@ -19,6 +19,7 @@ use yii\db\ActiveRecord;
  * @property int|null $ccs_requested_by
  * @property int $ccs_requested_for
  * @property int $ccs_status
+ * @property string $ccs_rc_created_dt
  * @property string|null $ccs_created_dt
  *
  * @property Employee $requestedBy
@@ -116,7 +117,7 @@ class ClientChatSurvey extends ActiveRecord
     public function rules()
     {
         return [
-            [['ccs_uid', 'ccs_client_chat_id', 'ccs_type', 'ccs_template', 'ccs_trigger_source', 'ccs_requested_for', 'ccs_status'], 'required'],
+            [['ccs_uid', 'ccs_client_chat_id', 'ccs_type', 'ccs_template', 'ccs_trigger_source', 'ccs_requested_for', 'ccs_status', 'ccs_rc_created_dt'], 'required'],
             [['ccs_uid', 'ccs_type', 'ccs_template', 'ccs_trigger_source'], 'string'],
             [['ccs_client_chat_id', 'ccs_requested_by', 'ccs_requested_for', 'ccs_status'], 'integer'],
             [['ccs_created_dt'], 'safe']
@@ -134,6 +135,7 @@ class ClientChatSurvey extends ActiveRecord
             'ccs_chat_id' => 'Chat Id',
             'ccs_type' => 'Type',
             'ccs_template' => 'Template',
+            'ccs_rc_created_dt' => 'Created Dt in RocketChat',
             'ccs_created_dt' => 'Created Dt',
             'ccs_trigger_source' => 'Trigger Source',
             'ccs_requested_by' => 'Requested By',
