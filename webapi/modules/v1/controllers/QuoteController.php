@@ -14,6 +14,7 @@ use common\models\Log;
 use common\models\Notifications;
 use common\models\Project;
 use common\models\Quote;
+use common\models\QuoteCommunicationOpenLog;
 use common\models\QuotePrice;
 use common\models\UserProjectParams;
 use common\models\VisitorLog;
@@ -125,6 +126,7 @@ class QuoteController extends ApiBaseController
      * @apiParamExample {json} Request-Example:
      * {
      *      "uid": "5b6d03d61f078",
+     *      "queryParams": {},
      *      "apiKey": "d190c378e131ccfd8a889c8ee8994cb55f22fbeeb93f9b99007e8e7ecc24d0dd"
      * }
      *
@@ -381,13 +383,10 @@ class QuoteController extends ApiBaseController
      * @throws NotFoundHttpException
      * @throws UnprocessableEntityHttpException
      */
-
-
     public function actionGetInfo(): array
     {
         $this->checkPost();
         $this->startApiLog($this->action->uniqueId);
-
 
         $uid = Yii::$app->request->post('uid');
         $clientIP = Yii::$app->request->post('clientIP');
@@ -395,6 +394,8 @@ class QuoteController extends ApiBaseController
         if (!$uid) {
             throw new BadRequestHttpException('Not found UID on POST request', 1);
         }
+
+        QuoteCommunicationOpenLog::createByRequestData(\Yii::$app->request->params);
 
         if ($this->apiProject) {
             $projectIds = [$this->apiProject->id];

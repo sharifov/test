@@ -72,4 +72,19 @@ class QuoteCommunicationOpenLog extends ActiveRecord
     {
         return $this->hasOne(QuoteCommunication::class, ['qc_id' => 'qcol_quote_communication_id']);
     }
+
+    /**
+     * @param $data
+     */
+    public static function createByRequestData($data): void
+    {
+        if (isset($data['qc_uuid'])) {
+            $quoteCommunication = QuoteCommunication::find()->where(['qc_uid' => $data['qc_uuid']])->one();
+            if (!is_null($quoteCommunication)) {
+                $model = new self();
+                $model->qcol_quote_communication_id = $quoteCommunication->getPrimaryKey();
+                $model->save();
+            }
+        }
+    }
 }
