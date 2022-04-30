@@ -132,15 +132,16 @@ class ClientChatRepository
     /**
      * @param string $rid
      * @param null|string $ownerUsername
-     * @return ClientChat
+     * @return null|ClientChat
      */
-    public function getByRidAndOwnerUsername(string $rid, ?string $ownerUsername): ClientChat
+    public function getByRidAndOwnerUsername(string $rid, ?string $ownerUsername): ?ClientChat
     {
         $query = ClientChat::find()->alias('cc')->andWhere(['cch_rid' => $rid])->orderBy(['cch_id' => SORT_DESC]);
         if (!is_null($ownerUsername)) {
             $query->leftJoin(['e' => Employee::tableName()], 'cc.cch_owner_user_id=e.id');
             $query->where('e.username=:username', [':username' => $ownerUsername]);
         }
+
         return $query->one();
     }
 
