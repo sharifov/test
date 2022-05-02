@@ -75,6 +75,7 @@ class UpdateForm extends Model
     public $client_chat_user_channel;
     public $user_shift_assigns;
 
+    // @see \common\models\UserParams
     public $up_work_start_tm;
     public $up_work_minutes;
     public $up_timezone;

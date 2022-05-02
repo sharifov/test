@@ -37,411 +37,414 @@ $this->params['breadcrumbs'][] = $this->title;
         'validateOnBlur' => false,
         'validationUrl' => Url::to(['employee/employee-validation-update', 'id' => (int)$form->targetUser->id]),
     ]) ?>
-    <div class="well">
 
-        <?php if ($form->targetUser->isBlocked()) : ?>
-            <div class="alert alert-warning" role="alert">
-                <i class="fa fa-warning"></i> This user is <strong>Blocked</strong>!
-            </div>
-        <?php endif ?>
+    <?php if ($form->fieldAccess->canShowProfileWithParameters() || $form->targetUser->isBlocked() || $form->targetUser->isDeleted()) : ?>
+        <div class="well">
 
-        <?php if ($form->targetUser->isDeleted()) : ?>
-            <div class="alert alert-danger" role="alert">
-                <i class="fa fa-warning"></i> This user is <strong>Deleted</strong>!
-            </div>
-        <?php endif ?>
-
-        <?php if ($form->fieldAccess->canShow('username') || $form->fieldAccess->canShow('email')) : ?>
-            <div class="row">
-                <?php if ($form->fieldAccess->canShow('username')) : ?>
-                    <div class="col-md-6">
-                        <?= $activeForm->field($form, 'username', [
-                            'options' => [
-                                'class' => 'form-group'
-                            ]
-                        ])->textInput([
-                            'autocomplete' => "new-user",
-                            'readonly' => !$form->fieldAccess->canEdit('username')
-                        ]) ?>
-                    </div>
-                <?php endif; ?>
-                <?php if ($form->fieldAccess->canShow('email')) : ?>
-                    <div class="col-md-6">
-                        <?= $activeForm
-                            ->field($form, 'email', ['options' => ['class' => 'form-group']])
-                            ->input('email', ['readonly' => !$form->fieldAccess->canEdit('email')])
-                        ?>
-                    </div>
-                <?php endif; ?>
-            </div>
-        <?php endif; ?>
-
-        <?php if ($form->fieldAccess->canShow('full_name') || $form->fieldAccess->canShow('password')) : ?>
-            <div class="row">
-                <?php if ($form->fieldAccess->canShow('full_name')) : ?>
-                    <div class="col-md-6">
-                        <?= $activeForm
-                            ->field($form, 'full_name', ['options' => ['class' => 'form-group']])
-                            ->textInput(['readonly' => !$form->fieldAccess->canEdit('full_name')])
-                        ?>
-                    </div>
-                <?php endif; ?>
-                <?php if ($form->fieldAccess->canShow('password')) : ?>
-                    <div class="col-md-6">
-                        <?= $activeForm->field($form, 'password', [
-                            'options' => [
-                                'class' => 'form-group'
-                            ]
-                        ])->passwordInput([
-                            'autocomplete' => 'new-password',
-                            'readonly' => !$form->fieldAccess->canEdit('password')
-                        ]) ?>
-                    </div>
-                <?php endif; ?>
-            </div>
-        <?php endif; ?>
-
-        <?php if ($form->fieldAccess->canShow('nickname')) : ?>
-            <div class="row">
-                <div class="col-md-6">
-                    <?= $activeForm
-                        ->field($form, 'nickname', ['options' => ['class' => 'form-group']])
-                        ->textInput(['readonly' => !$form->fieldAccess->canEdit('nickname')])
-                    ?>
+            <?php if ($form->targetUser->isBlocked()) : ?>
+                <div class="alert alert-warning" role="alert">
+                    <i class="fa fa-warning"></i> This user is <strong>Blocked</strong>!
                 </div>
-            </div>
-        <?php endif; ?>
+            <?php endif ?>
 
-        <?php if ($form->fieldAccess->canShow('form_roles') || $form->fieldAccess->canShow('status')) : ?>
-            <div class="row">
-                <?php if ($form->fieldAccess->canShow('form_roles')) : ?>
+            <?php if ($form->targetUser->isDeleted()) : ?>
+                <div class="alert alert-danger" role="alert">
+                    <i class="fa fa-warning"></i> This user is <strong>Deleted</strong>!
+                </div>
+            <?php endif ?>
+
+            <?php if ($form->fieldAccess->canShow('username') || $form->fieldAccess->canShow('email')) : ?>
+                <div class="row">
+                    <?php if ($form->fieldAccess->canShow('username')) : ?>
+                        <div class="col-md-6">
+                            <?= $activeForm->field($form, 'username', [
+                                'options' => [
+                                    'class' => 'form-group'
+                                ]
+                            ])->textInput([
+                                'autocomplete' => "new-user",
+                                'readonly' => !$form->fieldAccess->canEdit('username')
+                            ]) ?>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($form->fieldAccess->canShow('email')) : ?>
+                        <div class="col-md-6">
+                            <?= $activeForm
+                                ->field($form, 'email', ['options' => ['class' => 'form-group']])
+                                ->input('email', ['readonly' => !$form->fieldAccess->canEdit('email')])
+                            ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($form->fieldAccess->canShow('full_name') || $form->fieldAccess->canShow('password')) : ?>
+                <div class="row">
+                    <?php if ($form->fieldAccess->canShow('full_name')) : ?>
+                        <div class="col-md-6">
+                            <?= $activeForm
+                                ->field($form, 'full_name', ['options' => ['class' => 'form-group']])
+                                ->textInput(['readonly' => !$form->fieldAccess->canEdit('full_name')])
+                            ?>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($form->fieldAccess->canShow('password')) : ?>
+                        <div class="col-md-6">
+                            <?= $activeForm->field($form, 'password', [
+                                'options' => [
+                                    'class' => 'form-group'
+                                ]
+                            ])->passwordInput([
+                                'autocomplete' => 'new-password',
+                                'readonly' => !$form->fieldAccess->canEdit('password')
+                            ]) ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($form->fieldAccess->canShow('nickname')) : ?>
+                <div class="row">
                     <div class="col-md-6">
                         <?= $activeForm
-                            ->field($form, 'form_roles', ['options' => ['class' => 'form-group']])
-                            ->widget(Select2::class, [
-                                'data' => $form->availableList->getRoles(),
+                            ->field($form, 'nickname', ['options' => ['class' => 'form-group']])
+                            ->textInput(['readonly' => !$form->fieldAccess->canEdit('nickname')])
+                        ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($form->fieldAccess->canShow('form_roles') || $form->fieldAccess->canShow('status')) : ?>
+                <div class="row">
+                    <?php if ($form->fieldAccess->canShow('form_roles')) : ?>
+                        <div class="col-md-6">
+                            <?= $activeForm
+                                ->field($form, 'form_roles', ['options' => ['class' => 'form-group']])
+                                ->widget(Select2::class, [
+                                    'data' => $form->availableList->getRoles(),
+                                    'size' => Select2::SMALL,
+                                    'options' => ['placeholder' => 'Select user roles', 'multiple' => true],
+                                    'pluginOptions' => [
+                                        'allowClear' => true,
+                                        'disabled' => !$form->fieldAccess->canEdit('form_roles'),
+                                    ],
+                                ])
+                            ?>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($form->fieldAccess->canShow('status')) : ?>
+                        <div class="col-md-6">
+                            <?= $activeForm
+                                ->field($form, 'status', ['options' => ['class' => 'form-group']])
+                                ->dropDownList(
+                                    $form->availableList->getStatuses(),
+                                    ['disabled' => !$form->fieldAccess->canEdit('status')]
+                                )
+                            ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($form->fieldAccess->canShow('user_groups')) : ?>
+                <div class="row">
+                    <div class="col-md-12">
+                            <?= $activeForm->field(
+                                $form,
+                                'user_groups',
+                                ['options' => ['class' => 'form-group']]
+                            )->widget(Select2::class, [
+                                'data' => $form->availableList->getUserGroups(),
                                 'size' => Select2::SMALL,
-                                'options' => ['placeholder' => 'Select user roles', 'multiple' => true],
+                                'options' => ['placeholder' => 'Select user groups', 'multiple' => true],
                                 'pluginOptions' => [
                                     'allowClear' => true,
-                                    'disabled' => !$form->fieldAccess->canEdit('form_roles'),
+                                    'disabled' => !$form->fieldAccess->canEdit('user_groups')
                                 ],
-                            ])
-                        ?>
+                            ]) ?>
                     </div>
-                <?php endif; ?>
-                <?php if ($form->fieldAccess->canShow('status')) : ?>
-                    <div class="col-md-6">
-                        <?= $activeForm
-                            ->field($form, 'status', ['options' => ['class' => 'form-group']])
-                            ->dropDownList(
-                                $form->availableList->getStatuses(),
-                                ['disabled' => !$form->fieldAccess->canEdit('status')]
-                            )
-                        ?>
-                    </div>
-                <?php endif; ?>
-            </div>
-        <?php endif; ?>
-
-        <?php if ($form->fieldAccess->canShow('user_groups')) : ?>
-            <div class="row">
-                <div class="col-md-12">
-                        <?= $activeForm->field(
-                            $form,
-                            'user_groups',
-                            ['options' => ['class' => 'form-group']]
-                        )->widget(Select2::class, [
-                            'data' => $form->availableList->getUserGroups(),
-                            'size' => Select2::SMALL,
-                            'options' => ['placeholder' => 'Select user groups', 'multiple' => true],
-                            'pluginOptions' => [
-                                'allowClear' => true,
-                                'disabled' => !$form->fieldAccess->canEdit('user_groups')
-                            ],
-                        ]) ?>
                 </div>
-            </div>
-        <?php endif; ?>
+            <?php endif; ?>
 
-        <?php if ($form->fieldAccess->canShow('user_projects')) : ?>
-            <div class="row">
-                <div class="col-md-12">
-                        <?= $activeForm->field(
-                            $form,
-                            'user_projects',
-                            ['options' => ['class' => 'form-group']]
-                        )->widget(Select2::class, [
-                            'data' => $form->availableList->getProjects(),
-                            'size' => Select2::SMALL,
-                            'options' => ['placeholder' => 'Select user projects', 'multiple' => true],
-                            'pluginOptions' => [
-                                'allowClear' => true,
-                                'disabled' => !$form->fieldAccess->canEdit('user_projects')
-                            ],
-                        ]) ?>
-                </div>
-            </div>
-        <?php endif; ?>
-
-        <?php if ($form->fieldAccess->canShow('user_departments')) : ?>
-            <div class="row">
-                <div class="col-md-12">
-                        <?= $activeForm->field(
-                            $form,
-                            'user_departments',
-                            ['options' => ['class' => 'form-group']]
-                        )->widget(Select2::class, [
-                            'data' => $form->availableList->getDepartments(),
-                            'size' => Select2::SMALL,
-                            'options' => ['placeholder' => 'Select departments', 'multiple' => true],
-                            'pluginOptions' => [
-                                'allowClear' => true,
-                                'disabled' => !$form->fieldAccess->canEdit('user_departments')
-                            ],
-                        ]) ?>
-                </div>
-            </div>
-        <?php endif; ?>
-
-        <?php if ($form->fieldAccess->canShow('client_chat_user_channel')) : ?>
-            <div class="row">
-                <div class="col-md-12">
-                        <?= $activeForm->field(
-                            $form,
-                            'client_chat_user_channel',
-                            ['options' => ['class' => 'form-group']]
-                        )->widget(Select2::class, [
-                            'data' => $form->availableList->getClientChatUserChannels(),
-                            'size' => Select2::SMALL,
-                            'options' => ['placeholder' => 'Select Client Chat Chanel', 'multiple' => true],
-                            'pluginOptions' => [
-                                'allowClear' => true,
-                                'disabled' => !$form->fieldAccess->canEdit('client_chat_user_channel')
-                            ],
-                        ]) ?>
-                </div>
-            </div>
-        <?php endif; ?>
-
-        <?php if ($form->fieldAccess->canShow('user_shift_assigns')) : ?>
-            <div class="row">
-                <div class="col-md-12">
-                        <?= $activeForm->field(
-                            $form,
-                            'user_shift_assigns',
-                            ['options' => ['class' => 'form-group']]
-                        )->widget(Select2::class, [
-                            'data' => $form->availableList->getUserShiftAssign(),
-                            'size' => Select2::SMALL,
-                            'options' => ['placeholder' => 'Select Shift', 'multiple' => true],
-                            'pluginOptions' => [
-                                'allowClear' => true,
-                                'disabled' => !$form->fieldAccess->canEdit('user_shift_assigns')
-                            ],
-                        ]) ?>
-                </div>
-            </div>
-        <?php endif; ?>
-
-        <?php if ($form->fieldAccess->canShow('up_work_start_tm') || $form->fieldAccess->canShow('up_work_minutes') || $form->fieldAccess->canShow('up_timezone')) : ?>
-            <div class="row">
-                <?php if ($form->fieldAccess->canShow('up_work_start_tm')) : ?>
-                    <div class="col-md-3">
-                        <?= $activeForm->field(
-                            $form,
-                            'up_work_start_tm',
-                            ['options' => ['class' => 'form-group']]
-                        )->widget(
-                            \kartik\time\TimePicker::class,
-                            [
+            <?php if ($form->fieldAccess->canShow('user_projects')) : ?>
+                <div class="row">
+                    <div class="col-md-12">
+                            <?= $activeForm->field(
+                                $form,
+                                'user_projects',
+                                ['options' => ['class' => 'form-group']]
+                            )->widget(Select2::class, [
+                                'data' => $form->availableList->getProjects(),
+                                'size' => Select2::SMALL,
+                                'options' => ['placeholder' => 'Select user projects', 'multiple' => true],
                                 'pluginOptions' => [
-                                    'showSeconds' => false,
-                                    'showMeridian' => false,
+                                    'allowClear' => true,
+                                    'disabled' => !$form->fieldAccess->canEdit('user_projects')
                                 ],
-                                'disabled' => !$form->fieldAccess->canEdit('up_work_start_tm')
+                            ]) ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($form->fieldAccess->canShow('user_departments')) : ?>
+                <div class="row">
+                    <div class="col-md-12">
+                            <?= $activeForm->field(
+                                $form,
+                                'user_departments',
+                                ['options' => ['class' => 'form-group']]
+                            )->widget(Select2::class, [
+                                'data' => $form->availableList->getDepartments(),
+                                'size' => Select2::SMALL,
+                                'options' => ['placeholder' => 'Select departments', 'multiple' => true],
+                                'pluginOptions' => [
+                                    'allowClear' => true,
+                                    'disabled' => !$form->fieldAccess->canEdit('user_departments')
+                                ],
+                            ]) ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($form->fieldAccess->canShow('client_chat_user_channel')) : ?>
+                <div class="row">
+                    <div class="col-md-12">
+                            <?= $activeForm->field(
+                                $form,
+                                'client_chat_user_channel',
+                                ['options' => ['class' => 'form-group']]
+                            )->widget(Select2::class, [
+                                'data' => $form->availableList->getClientChatUserChannels(),
+                                'size' => Select2::SMALL,
+                                'options' => ['placeholder' => 'Select Client Chat Chanel', 'multiple' => true],
+                                'pluginOptions' => [
+                                    'allowClear' => true,
+                                    'disabled' => !$form->fieldAccess->canEdit('client_chat_user_channel')
+                                ],
+                            ]) ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($form->fieldAccess->canShow('user_shift_assigns')) : ?>
+                <div class="row">
+                    <div class="col-md-12">
+                            <?= $activeForm->field(
+                                $form,
+                                'user_shift_assigns',
+                                ['options' => ['class' => 'form-group']]
+                            )->widget(Select2::class, [
+                                'data' => $form->availableList->getUserShiftAssign(),
+                                'size' => Select2::SMALL,
+                                'options' => ['placeholder' => 'Select Shift', 'multiple' => true],
+                                'pluginOptions' => [
+                                    'allowClear' => true,
+                                    'disabled' => !$form->fieldAccess->canEdit('user_shift_assigns')
+                                ],
+                            ]) ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($form->fieldAccess->canShow('up_work_start_tm') || $form->fieldAccess->canShow('up_work_minutes') || $form->fieldAccess->canShow('up_timezone')) : ?>
+                <div class="row">
+                    <?php if ($form->fieldAccess->canShow('up_work_start_tm')) : ?>
+                        <div class="col-md-3">
+                            <?= $activeForm->field(
+                                $form,
+                                'up_work_start_tm',
+                                ['options' => ['class' => 'form-group']]
+                            )->widget(
+                                \kartik\time\TimePicker::class,
+                                [
+                                    'pluginOptions' => [
+                                        'showSeconds' => false,
+                                        'showMeridian' => false,
+                                    ],
+                                    'disabled' => !$form->fieldAccess->canEdit('up_work_start_tm')
+                                    ]
+                            ) ?>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($form->fieldAccess->canShow('up_work_minutes')) : ?>
+                        <div class="col-md-3">
+                            <?= $activeForm->field($form, 'up_work_minutes', [
+                                'options' => [
+                                    'class' => 'form-group'
                                 ]
-                        ) ?>
-                    </div>
-                <?php endif; ?>
-                <?php if ($form->fieldAccess->canShow('up_work_minutes')) : ?>
-                    <div class="col-md-3">
-                        <?= $activeForm->field($form, 'up_work_minutes', [
-                            'options' => [
-                                'class' => 'form-group'
-                            ]
-                        ])->input(
-                            'number',
-                            ['step' => 10, 'min' => 0, 'readonly' => !$form->fieldAccess->canEdit('up_work_minutes')]
-                        ) ?>
-                    </div>
-                <?php endif; ?>
-                <?php if ($form->fieldAccess->canShow('up_timezone')) : ?>
-                    <div class="col-md-6">
-                        <?= $activeForm->field(
-                            $form,
-                            'up_timezone',
-                            ['options' => ['class' => 'form-group']]
-                        )->widget(Select2::class, [
-                            'data' => $form->availableList->getTimezones(),
-                            'size' => Select2::SMALL,
-                            'options' => ['placeholder' => 'Select TimeZone', 'multiple' => false],
-                            'pluginOptions' => [
-                                'allowClear' => true,
-                                'disabled' => !$form->fieldAccess->canEdit('up_timezone')
-                            ],
-                            ]); ?>
-                    </div>
-                <?php endif; ?>
-            </div>
-        <?php endif; ?>
+                            ])->input(
+                                'number',
+                                ['step' => 10, 'min' => 0, 'readonly' => !$form->fieldAccess->canEdit('up_work_minutes')]
+                            ) ?>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($form->fieldAccess->canShow('up_timezone')) : ?>
+                        <div class="col-md-6">
+                            <?= $activeForm->field(
+                                $form,
+                                'up_timezone',
+                                ['options' => ['class' => 'form-group']]
+                            )->widget(Select2::class, [
+                                'data' => $form->availableList->getTimezones(),
+                                'size' => Select2::SMALL,
+                                'options' => ['placeholder' => 'Select TimeZone', 'multiple' => false],
+                                'pluginOptions' => [
+                                    'allowClear' => true,
+                                    'disabled' => !$form->fieldAccess->canEdit('up_timezone')
+                                ],
+                                ]); ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
 
-        <?php if ($form->fieldAccess->canShow('up_base_amount') || $form->fieldAccess->canShow('up_commission_percent') || $form->fieldAccess->canShow('up_bonus_active') || $form->fieldAccess->canShow('up_leaderboard_enabled')) : ?>
-            <div class="row">
-                <?php if ($form->fieldAccess->canShow('up_base_amount')) : ?>
-                    <div class="col-md-3">
-                        <?= $activeForm->field($form, 'up_base_amount', [
-                            'options' => [
-                                'class' => 'form-group'
-                            ]
-                        ])->input('number', [
-                            'step' => 0.01,
-                            'min' => 0,
-                            'max' => 1000,
-                            'readonly' => !$form->fieldAccess->canEdit('up_base_amount')
-                        ]) ?>
-                    </div>
-                <?php endif; ?>
-                <?php if ($form->fieldAccess->canShow('up_commission_percent')) : ?>
-                    <div class="col-md-3">
-                        <?= $activeForm->field($form, 'up_commission_percent', [
-                            'options' => [
-                                'class' => 'form-group'
-                            ]
-                        ])->input('number', [
-                            'step' => 1,
-                            'max' => 100,
-                            'min' => 0,
-                            'readonly' => !$form->fieldAccess->canEdit('up_commission_percent')
-                        ]) ?>
-                    </div>
-                <?php endif; ?>
-                <?php if ($form->fieldAccess->canShow('up_bonus_active')) : ?>
-                    <div class="col-md-3">
-                        <?= $activeForm->field($form, 'up_bonus_active', [
-                            'options' => [
-                                'class' => 'form-group'
-                            ]
-                        ])->checkbox(['disabled' => !$form->fieldAccess->canEdit('up_bonus_active')]) ?>
-                    </div>
-                <?php endif; ?>
-                <?php if ($form->fieldAccess->canShow('up_leaderboard_enabled')) : ?>
-                    <div class="col-md-3">
-                        <?= $activeForm->field($form, 'up_leaderboard_enabled', [
-                            'options' => [
-                                'class' => 'form-group'
-                            ]
-                        ])->checkbox(['disabled' => !$form->fieldAccess->canEdit('up_leaderboard_enabled')]) ?>
-                    </div>
-                <?php endif; ?>
-            </div>
-        <?php endif; ?>
+            <?php if ($form->fieldAccess->canShow('up_base_amount') || $form->fieldAccess->canShow('up_commission_percent') || $form->fieldAccess->canShow('up_bonus_active') || $form->fieldAccess->canShow('up_leaderboard_enabled')) : ?>
+                <div class="row">
+                    <?php if ($form->fieldAccess->canShow('up_base_amount')) : ?>
+                        <div class="col-md-3">
+                            <?= $activeForm->field($form, 'up_base_amount', [
+                                'options' => [
+                                    'class' => 'form-group'
+                                ]
+                            ])->input('number', [
+                                'step' => 0.01,
+                                'min' => 0,
+                                'max' => 1000,
+                                'readonly' => !$form->fieldAccess->canEdit('up_base_amount')
+                            ]) ?>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($form->fieldAccess->canShow('up_commission_percent')) : ?>
+                        <div class="col-md-3">
+                            <?= $activeForm->field($form, 'up_commission_percent', [
+                                'options' => [
+                                    'class' => 'form-group'
+                                ]
+                            ])->input('number', [
+                                'step' => 1,
+                                'max' => 100,
+                                'min' => 0,
+                                'readonly' => !$form->fieldAccess->canEdit('up_commission_percent')
+                            ]) ?>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($form->fieldAccess->canShow('up_bonus_active')) : ?>
+                        <div class="col-md-3">
+                            <?= $activeForm->field($form, 'up_bonus_active', [
+                                'options' => [
+                                    'class' => 'form-group'
+                                ]
+                            ])->checkbox(['disabled' => !$form->fieldAccess->canEdit('up_bonus_active')]) ?>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($form->fieldAccess->canShow('up_leaderboard_enabled')) : ?>
+                        <div class="col-md-3">
+                            <?= $activeForm->field($form, 'up_leaderboard_enabled', [
+                                'options' => [
+                                    'class' => 'form-group'
+                                ]
+                            ])->checkbox(['disabled' => !$form->fieldAccess->canEdit('up_leaderboard_enabled')]) ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
 
-        <?php if ($form->fieldAccess->canShow('up_inbox_show_limit_leads') || $form->fieldAccess->canShow('up_default_take_limit_leads') || $form->fieldAccess->canShow('up_min_percent_for_take_leads') || $form->fieldAccess->canShow('up_frequency_minutes')) : ?>
-            <hr>
-            <div class="row">
-                <?php if ($form->fieldAccess->canShow('up_inbox_show_limit_leads')) : ?>
-                    <div class="col-md-3">
-                        <?= $activeForm->field($form, 'up_inbox_show_limit_leads', [
-                            'options' => [
-                                'class' => 'form-group'
-                            ]
-                        ])->input('number', [
-                            'step' => 1,
-                            'min' => 0,
-                            'max' => 500,
-                            'readonly' => !$form->fieldAccess->canEdit('up_inbox_show_limit_leads')
-                        ]) ?>
-                    </div>
-                <?php endif; ?>
-                <?php if ($form->fieldAccess->canShow('up_default_take_limit_leads')) : ?>
-                    <div class="col-md-3">
-                        <?= $activeForm->field($form, 'up_default_take_limit_leads', [
-                            'options' => [
-                                'class' => 'form-group'
-                            ]
-                        ])->input('number', [
-                            'step' => 1,
-                            'max' => 100,
-                            'min' => 0,
-                            'readonly' => !$form->fieldAccess->canEdit('up_default_take_limit_leads')
-                        ]) ?>
-                    </div>
-                <?php endif; ?>
-                <?php if ($form->fieldAccess->canShow('up_min_percent_for_take_leads')) : ?>
-                    <div class="col-md-3">
-                        <?= $activeForm->field($form, 'up_min_percent_for_take_leads', [
-                            'options' => [
-                                'class' => 'form-group'
-                            ]
-                        ])->input('number', [
-                            'step' => 1,
-                            'max' => 100,
-                            'min' => 0,
-                            'readonly' => !$form->fieldAccess->canEdit('up_min_percent_for_take_leads')
-                        ]) ?>
-                    </div>
-                <?php endif; ?>
-                <?php if ($form->fieldAccess->canShow('up_frequency_minutes')) : ?>
-                    <div class="col-md-3">
-                        <?= $activeForm->field($form, 'up_frequency_minutes', [
-                            'options' => [
-                                'class' => 'form-group'
-                            ]
-                        ])->input('number', [
-                            'step' => 1,
-                            'max' => 1000,
-                            'min' => 0,
-                            'readonly' => !$form->fieldAccess->canEdit('up_frequency_minutes')
-                        ]) ?>
-                    </div>
-                <?php endif; ?>
-            </div>
-        <?php endif; ?>
+            <?php if ($form->fieldAccess->canShow('up_inbox_show_limit_leads') || $form->fieldAccess->canShow('up_default_take_limit_leads') || $form->fieldAccess->canShow('up_min_percent_for_take_leads') || $form->fieldAccess->canShow('up_frequency_minutes')) : ?>
+                <hr>
+                <div class="row">
+                    <?php if ($form->fieldAccess->canShow('up_inbox_show_limit_leads')) : ?>
+                        <div class="col-md-3">
+                            <?= $activeForm->field($form, 'up_inbox_show_limit_leads', [
+                                'options' => [
+                                    'class' => 'form-group'
+                                ]
+                            ])->input('number', [
+                                'step' => 1,
+                                'min' => 0,
+                                'max' => 500,
+                                'readonly' => !$form->fieldAccess->canEdit('up_inbox_show_limit_leads')
+                            ]) ?>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($form->fieldAccess->canShow('up_default_take_limit_leads')) : ?>
+                        <div class="col-md-3">
+                            <?= $activeForm->field($form, 'up_default_take_limit_leads', [
+                                'options' => [
+                                    'class' => 'form-group'
+                                ]
+                            ])->input('number', [
+                                'step' => 1,
+                                'max' => 100,
+                                'min' => 0,
+                                'readonly' => !$form->fieldAccess->canEdit('up_default_take_limit_leads')
+                            ]) ?>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($form->fieldAccess->canShow('up_min_percent_for_take_leads')) : ?>
+                        <div class="col-md-3">
+                            <?= $activeForm->field($form, 'up_min_percent_for_take_leads', [
+                                'options' => [
+                                    'class' => 'form-group'
+                                ]
+                            ])->input('number', [
+                                'step' => 1,
+                                'max' => 100,
+                                'min' => 0,
+                                'readonly' => !$form->fieldAccess->canEdit('up_min_percent_for_take_leads')
+                            ]) ?>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($form->fieldAccess->canShow('up_frequency_minutes')) : ?>
+                        <div class="col-md-3">
+                            <?= $activeForm->field($form, 'up_frequency_minutes', [
+                                'options' => [
+                                    'class' => 'form-group'
+                                ]
+                            ])->input('number', [
+                                'step' => 1,
+                                'max' => 1000,
+                                'min' => 0,
+                                'readonly' => !$form->fieldAccess->canEdit('up_frequency_minutes')
+                            ]) ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
 
-        <?php if ($form->fieldAccess->canShow('up_call_expert_limit') || $form->fieldAccess->canShow('up_call_user_level')) : ?>
-            <div class="row">
-                <?php if ($form->fieldAccess->canShow('up_call_expert_limit')) : ?>
-                    <div class="col-md-3">
-                        <?= $activeForm->field($form, 'up_call_expert_limit', [
-                            'options' => [
-                                'class' => 'form-group'
-                            ]
-                        ])->input('number', [
-                            'step' => 1,
-                            'min' => -1,
-                            'max' => 1000,
-                            'readonly' => !$form->fieldAccess->canEdit('up_call_expert_limit')
-                        ]) ?>
-                    </div>
-                <?php endif; ?>
-                <?php if ($form->fieldAccess->canShow('up_call_user_level')) : ?>
-                    <div class="col-md-3">
-                        <?= $activeForm->field($form, 'up_call_user_level', [
-                            'options' => [
-                                'class' => 'form-group'
-                            ]
-                        ])->input('number', [
-                            'step' => 1,
-                            'min' => -128,
-                            'max' => 127,
-                            'readonly' => !$form->fieldAccess->canEdit('up_call_user_level')
-                        ]) ?>
-                    </div>
-                <?php endif; ?>
-            </div>
-        <?php endif; ?>
-    </div>
+            <?php if ($form->fieldAccess->canShow('up_call_expert_limit') || $form->fieldAccess->canShow('up_call_user_level')) : ?>
+                <div class="row">
+                    <?php if ($form->fieldAccess->canShow('up_call_expert_limit')) : ?>
+                        <div class="col-md-3">
+                            <?= $activeForm->field($form, 'up_call_expert_limit', [
+                                'options' => [
+                                    'class' => 'form-group'
+                                ]
+                            ])->input('number', [
+                                'step' => 1,
+                                'min' => -1,
+                                'max' => 1000,
+                                'readonly' => !$form->fieldAccess->canEdit('up_call_expert_limit')
+                            ]) ?>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($form->fieldAccess->canShow('up_call_user_level')) : ?>
+                        <div class="col-md-3">
+                            <?= $activeForm->field($form, 'up_call_user_level', [
+                                'options' => [
+                                    'class' => 'form-group'
+                                ]
+                            ])->input('number', [
+                                'step' => 1,
+                                'min' => -128,
+                                'max' => 127,
+                                'readonly' => !$form->fieldAccess->canEdit('up_call_user_level')
+                            ]) ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
 
     <?php if ($form->fieldAccess->canShow('acl_rules_activated')) : ?>
         <div class="well">
