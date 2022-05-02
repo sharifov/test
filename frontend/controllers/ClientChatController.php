@@ -1585,11 +1585,14 @@ class ClientChatController extends FController
                     $selling = sprintf('%0.2f', $data['total']['selling'] ?? 0);
 
                     // In this line, basically, we are multiply the value by `10000`
-                    // Did we had a reason, that didn't allow to do something like this?
+                    //
+                    // 1. Did we had a reason, that didn't allow to do something like this?
                     // $price = (int)str_replace('.', '', $selling . '00');
                     // or:
                     // $price = (int)$selling * 10000;
                     // This both would give the same result
+                    //
+                    // 2. Why we doing it? =) Are actual price measured in another currency/part?
                     $price = (int)(str_replace('.', '', $selling)) * 100;
 
                     $acc[] = ['price' => $price, 'data' => $capture, 'quoteId' => $quote->id];
