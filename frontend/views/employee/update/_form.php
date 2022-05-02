@@ -59,7 +59,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         <div class="col-md-6">
                             <?= $activeForm->field($form, 'username', [
                                 'options' => [
-                                    'class' => 'form-group'
+                                    'class' => 'form-group required'
                                 ]
                             ])->textInput([
                                 'autocomplete' => "new-user",
@@ -69,8 +69,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     <?php endif; ?>
                     <?php if ($form->fieldAccess->canShow('email')) : ?>
                         <div class="col-md-6">
-                            <?= $activeForm
-                                ->field($form, 'email', ['options' => ['class' => 'form-group']])
+                            <?= $activeForm->field($form, 'email', ['options' => ['class' => 'form-group required']])
                                 ->input('email', ['readonly' => !$form->fieldAccess->canEdit('email')])
                             ?>
                         </div>
@@ -83,7 +82,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     <?php if ($form->fieldAccess->canShow('full_name')) : ?>
                         <div class="col-md-6">
                             <?= $activeForm
-                                ->field($form, 'full_name', ['options' => ['class' => 'form-group']])
+                                ->field($form, 'full_name', ['options' => ['class' => 'form-group required']])
                                 ->textInput(['readonly' => !$form->fieldAccess->canEdit('full_name')])
                             ?>
                         </div>
@@ -107,7 +106,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <div class="row">
                     <div class="col-md-6">
                         <?= $activeForm
-                            ->field($form, 'nickname', ['options' => ['class' => 'form-group']])
+                            ->field($form, 'nickname', ['options' => ['class' => 'form-group required']])
                             ->textInput(['readonly' => !$form->fieldAccess->canEdit('nickname')])
                         ?>
                     </div>
@@ -119,7 +118,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     <?php if ($form->fieldAccess->canShow('form_roles')) : ?>
                         <div class="col-md-6">
                             <?= $activeForm
-                                ->field($form, 'form_roles', ['options' => ['class' => 'form-group']])
+                                ->field($form, 'form_roles', ['options' => ['class' => 'form-group required']])
                                 ->widget(Select2::class, [
                                     'data' => $form->availableList->getRoles(),
                                     'size' => Select2::SMALL,
@@ -135,7 +134,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     <?php if ($form->fieldAccess->canShow('status')) : ?>
                         <div class="col-md-6">
                             <?= $activeForm
-                                ->field($form, 'status', ['options' => ['class' => 'form-group']])
+                                ->field($form, 'status', ['options' => ['class' => 'form-group required']])
                                 ->dropDownList(
                                     $form->availableList->getStatuses(),
                                     ['disabled' => !$form->fieldAccess->canEdit('status')]
@@ -253,7 +252,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             <?= $activeForm->field(
                                 $form,
                                 'up_work_start_tm',
-                                ['options' => ['class' => 'form-group']]
+                                ['options' => ['class' => 'form-group required']]
                             )->widget(
                                 \kartik\time\TimePicker::class,
                                 [
@@ -270,7 +269,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         <div class="col-md-3">
                             <?= $activeForm->field($form, 'up_work_minutes', [
                                 'options' => [
-                                    'class' => 'form-group'
+                                    'class' => 'form-group required'
                                 ]
                             ])->input(
                                 'number',
@@ -283,7 +282,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             <?= $activeForm->field(
                                 $form,
                                 'up_timezone',
-                                ['options' => ['class' => 'form-group']]
+                                ['options' => ['class' => 'form-group required']]
                             )->widget(Select2::class, [
                                 'data' => $form->availableList->getTimezones(),
                                 'size' => Select2::SMALL,
