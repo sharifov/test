@@ -135,7 +135,7 @@ $pjaxListId = 'pjax-log';
                     ],
 
                     [
-                        'attribute' => 'timezone_log_time',
+                        'label' => 'Log time with Current Timezone',
                         'value' => static function (\frontend\models\Log $model) {
                             return Yii::$app->formatter->asDatetime($model->log_time, 'php:d-M-Y [H:i:s]');
                         },
