@@ -835,8 +835,10 @@ class EmployeeController extends FController
      * @throws NotFoundHttpException
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\httpclient\Exception
+     *
+     * @deprecated
      */
-    public function actionUpdate()
+    public function oldActionUpdate()
     {
 
         /** @var Employee $user */
@@ -1105,7 +1107,7 @@ class EmployeeController extends FController
         return $this->render('_form', $result);
     }
 
-    public function actionUpdate2()
+    public function actionUpdate()
     {
         $targetUserId = (int)Yii::$app->request->get('id');
         if (!$targetUserId) {
