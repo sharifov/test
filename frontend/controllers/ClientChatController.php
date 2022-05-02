@@ -1550,7 +1550,6 @@ class ClientChatController extends FController
     public function actionSendQuoteGenerate(): string
     {
         $errorMessage = '';
-        $captures = [];
 
         $form = new GenerateImagesForm();
 
@@ -1558,7 +1557,7 @@ class ClientChatController extends FController
             return $this->renderAjax('partial/_send_quote_generate', [
                 'errorMessage' => 'Cant load Data',
                 'form' => $form,
-                'captures' => $captures,
+                'captures' => [],
             ]);
         }
 
@@ -1566,7 +1565,7 @@ class ClientChatController extends FController
             return $this->renderAjax('partial/_send_quote_generate', [
                 'errorMessage' => '',
                 'form' => $form,
-                'captures' => $captures,
+                'captures' => [],
             ]);
         }
 
@@ -1574,29 +1573,30 @@ class ClientChatController extends FController
             if (!$this->sendQuoteCheckAccess($form->chat, Auth::user())) {
                 throw new \DomainException('Access denied.');
             }
-            foreach ($form->quotes as $quote) {
+
+            $captures = array_reduce($form->quotes, function ($acc, $quote) {
                 if ($capture = $this->generateQuoteCapture($quote)) {
                     /** @var Quote $quote */
                     $data = $quote->getPricesData();
-                    $selling = $data['total']['selling'] ?? 0;
-                    if (($pos = strpos($selling, '.')) > 0) {
-                        $str = substr($selling, $pos + 1, 2);
-                        if ($str == '') {
-                            $selling .= '00';
-                        } elseif (strlen($str) === 1) {
-                            $selling .= '0';
-                        }
-                    } else {
-                        $selling .= '.00';
-                    }
+
+                    // In this place were complicated logic with concats & etc.
+                    // Did we had a reason, that didn't allow to use something like `number_format/4` or `sprtintf/2`?
+                    /** @var string $selling */
+                    $selling = sprintf('%0.2f', $data['total']['selling'] ?? 0);
+
+                    // In this line, basically, we are multiply the value by `10000`
+                    // Did we had a reason, that didn't allow to do something like this?
+                    // $price = (int)str_replace('.', '', $selling . '00');
+                    // or:
+                    // $price = (int)$selling * 10000;
+                    // This both would give the same result
                     $price = (int)(str_replace('.', '', $selling)) * 100;
-                    $captures[] = [
-                        'price' => $price,
-                        'data' => $capture,
-                        'quoteId' => $quote->id
-                    ];
+
+                    $acc[] = ['price' => $price, 'data' => $capture, 'quoteId' => $quote->id];
                 }
-            }
+                return $acc;
+            }, []);
+
             if (!$captures) {
                 throw new \DomainException('Not generated captures. Try again.');
             }
