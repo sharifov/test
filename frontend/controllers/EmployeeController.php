@@ -1225,10 +1225,10 @@ class EmployeeController extends FController
 
                 if ($form->fieldAccess->canEdit('user_groups') && $form->isChangedGroups()) {
                     UserGroupAssign::deleteAll(['ugs_user_id' => $targetUser->id]);
-                    foreach ($form->user_groups as $id) {
+                    foreach ($form->user_groups as $groupId) {
                         $uga = new UserGroupAssign();
                         $uga->ugs_user_id = $targetUser->id;
-                        $uga->ugs_group_id = $id;
+                        $uga->ugs_group_id = $groupId;
                         if (!$uga->save()) {
                             throw new UpdateUserException(
                                 $uga->getErrors(),
@@ -1243,10 +1243,10 @@ class EmployeeController extends FController
 
                 if ($form->fieldAccess->canEdit('user_departments') && $form->isChangedDepartments()) {
                     UserDepartment::deleteAll(['ud_user_id' => $targetUser->id]);
-                    foreach ($form->user_departments as $id) {
+                    foreach ($form->user_departments as $departmentId) {
                         $ud = new UserDepartment();
                         $ud->ud_user_id = $targetUser->id;
-                        $ud->ud_dep_id = $id;
+                        $ud->ud_dep_id = $departmentId;
                         if (!$ud->save()) {
                             throw new UpdateUserException(
                                 $ud->getErrors(),
@@ -1261,10 +1261,10 @@ class EmployeeController extends FController
 
                 if ($form->fieldAccess->canEdit('user_projects') && $form->isChangedProjects()) {
                     ProjectEmployeeAccess::deleteAll(['employee_id' => $targetUser->id]);
-                    foreach ($form->user_projects as $id) {
+                    foreach ($form->user_projects as $projectId) {
                         $up = new ProjectEmployeeAccess();
                         $up->employee_id = $targetUser->id;
-                        $up->project_id = $id;
+                        $up->project_id = $projectId;
                         $up->created = date('Y-m-d H:i:s');
                         if (!$up->save()) {
                             throw new UpdateUserException(
@@ -1283,10 +1283,10 @@ class EmployeeController extends FController
                 if ($form->fieldAccess->canEdit('client_chat_user_channel') && $form->isChangedClientChatsChannels()) {
                     ClientChatUserChannel::deleteAll(['ccuc_user_id' => $targetUser->id]);
                     if ($form->client_chat_user_channel) {
-                        foreach ($form->client_chat_user_channel as $id) {
+                        foreach ($form->client_chat_user_channel as $channelId) {
                             $clientChatChanel = new ClientChatUserChannel();
                             $clientChatChanel->ccuc_user_id = $targetUser->id;
-                            $clientChatChanel->ccuc_channel_id = $id;
+                            $clientChatChanel->ccuc_channel_id = $channelId;
                             $clientChatChanel->ccuc_created_dt = date('Y-m-d H:i:s');
                             $clientChatChanel->ccuc_created_user_id = $updaterUser->id;
                             if (!$clientChatChanel->save()) {
@@ -1356,7 +1356,7 @@ class EmployeeController extends FController
                     'targetUserId' => $targetUser->id,
                     'updaterUserId' => $updaterUser->id
                 ], 'EmployeeController:update');
-                Yii::$app->getSession()->setFlash('warning', 'User is not updated');
+                Yii::$app->getSession()->setFlash('warning', 'User is not updated: ' . $e->getMessage());
             } catch (\Throwable $e) {
                 $transaction->rollBack();
                 Yii::error([
@@ -1364,7 +1364,7 @@ class EmployeeController extends FController
                     'targetUserId' => $targetUser->id,
                     'updaterUserId' => $updaterUser->id
                 ], 'EmployeeController:update');
-                Yii::$app->getSession()->setFlash('warning', 'User is not updated');
+                Yii::$app->getSession()->setFlash('warning', 'User is not updated. Server error.');
             }
         }
 

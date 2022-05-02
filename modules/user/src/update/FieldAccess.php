@@ -28,6 +28,35 @@ class FieldAccess
         $this->isNewRecord = $isNewRecord;
     }
 
+    public function canShowProfileWithParameters(): bool
+    {
+        return $this->canShow('username')
+            || $this->canShow('email')
+            || $this->canShow('full_name')
+            || $this->canShow('password')
+            || $this->canShow('nickname')
+            || $this->canShow('form_roles')
+            || $this->canShow('status')
+            || $this->canShow('user_groups')
+            || $this->canShow('user_projects')
+            || $this->canShow('user_departments')
+            || $this->canShow('client_chat_user_channel')
+            || $this->canShow('user_shift_assigns')
+            || $this->canShow('up_work_start_tm')
+            || $this->canShow('up_work_minutes')
+            || $this->canShow('up_timezone')
+            || $this->canShow('up_base_amount')
+            || $this->canShow('up_commission_percent')
+            || $this->canShow('up_bonus_active')
+            || $this->canShow('up_leaderboard_enabled')
+            || $this->canShow('up_inbox_show_limit_leads')
+            || $this->canShow('up_default_take_limit_leads')
+            || $this->canShow('up_min_percent_for_take_leads')
+            || $this->canShow('up_frequency_minutes')
+            || $this->canShow('up_call_expert_limit')
+            || $this->canShow('up_call_user_level');
+    }
+
     public function canShowProfileSettings(): bool
     {
         return $this->canShow('up_join_date')
