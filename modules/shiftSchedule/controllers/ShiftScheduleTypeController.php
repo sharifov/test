@@ -101,6 +101,7 @@ class ShiftScheduleTypeController extends FController
         $model = $this->findModel($sst_id);
         $form = new ShiftScheduleTypeForm();
         $form->isNewRecord = false;
+        $form->sst_id = $model->sst_id;
 
         if ($this->request->isPost && $form->load($this->request->post())) {
             if ($form->validate()) {

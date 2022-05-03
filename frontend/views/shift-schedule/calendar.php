@@ -7,6 +7,7 @@ use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $resourceList array */
+/* @var $groupIds array */
 
 $this->title = 'Users Shift Calendar';
 $this->params['breadcrumbs'][] = $this->title;
@@ -23,8 +24,8 @@ $bundle = \frontend\assets\UserShiftCalendarAsset::register($this);
             ?>
             <?= Html::a(
                 '<i class="fa fa-plus-circle"></i> Add Schedule Event',
-                ['shift-event-add'],
-                ['class' => 'btn btn-success', 'id' => 'btn-shift-event-add']
+                '#',
+                ['class' => 'btn btn-success', 'id' => 'btn-shift-event-add', 'title' => 'Add Schedule Event']
             ) ?>
         <?php endif; ?>
     </p>
@@ -40,12 +41,16 @@ $bundle = \frontend\assets\UserShiftCalendarAsset::register($this);
 <?php
 $ajaxUrl = Url::to(['shift-schedule/calendar-events-ajax']);
 $resourceListJson = Json::encode($resourceList);
-$today = date('Y-m-d');
+$today = date('Y-m-d', strtotime('+1 day'));
+$modalUrl = Url::to(['/shift-schedule/add-event']);
+$groupIdsJson = Json::encode($groupIds);
 
 $js = <<<JS
 var resourceListJson = $resourceListJson;
+var groupIds = $groupIdsJson;
 var calendarEventsAjaxUrl = '$ajaxUrl';
 var today = '$today';
+var modalUrl = '$modalUrl';
 
 mobiscroll.setOptions({
     theme: 'ios',
@@ -54,7 +59,7 @@ mobiscroll.setOptions({
 
 mobiscroll.momentTimezone.moment = moment;
 
-var inst = $('#calendar').mobiscroll().eventcalendar({
+window.inst = $('#calendar').mobiscroll().eventcalendar({
         view: {
             timeline: { type: 'day', size: 2 },
             refDate: today
@@ -64,8 +69,8 @@ var inst = $('#calendar').mobiscroll().eventcalendar({
         displayTimezone: 'local',
         //displayTimezone: 'Europe/Chisinau', //'local',
         timezonePlugin: mobiscroll.momentTimezone,
-        //clickToCreate: true,
-        dragToCreate: true,
+        clickToCreate: true,
+        dragToCreate: false,
         dragToMove: true,
         dragToResize: true,
 //        renderScheduleEvent: function (data) {
@@ -123,7 +128,7 @@ var inst = $('#calendar').mobiscroll().eventcalendar({
             let startDate = year + '-' + month + '-' + day;
             let endDate = endYear + '-' + endMonth + '-' + endDay;
             
-            getCalendarEvents(startDate, endDate);
+            getCalendarEvents(startDate, endDate, groupIds);
         },
         
         
@@ -135,42 +140,43 @@ var inst = $('#calendar').mobiscroll().eventcalendar({
                 addMealPopup();
             }, 100);*/
         },
-        onEventClick: function (args, inst) {
-            oldMeal = $.extend({}, args.event);
-            tempMeal = args.event;
-
-            //if (!popup.isVisible()) {
-                //editMealPopup(args);
-                console.log(args);
-            //}
-        },
+        // onEventClick: function (args, inst) {
+            // oldMeal = $.extend({}, args.event);
+            // tempMeal = args.event;
+            //
+            // //if (!popup.isVisible()) {
+            //     //editMealPopup(args);
+            //     console.log(args);
+            // //}
+        // },
         
-        onEventCreated: function () {
-            mobiscroll.toast({
-                message: 'Event created'
-            });
-        },
-        onEventUpdated: function () {
-            mobiscroll.toast({
-                message: 'Event updated'
-            });
-        },
-        onEventCreateFailed: function (event) {
-            mobiscroll.toast({
-                message: 'Can\'t create event'
-            });
-        },
-        onEventUpdateFailed: function (event) {
-            mobiscroll.toast({
-                message: 'Can\'t move event'
-            });
-        }
+        // onEventCreated: function () {
+        //     mobiscroll.toast({
+        //         message: 'Event created'
+        //     });
+        // },
+        // onEventUpdated: function () {
+        //     mobiscroll.toast({
+        //         message: 'Event updated'
+        //     });
+        // },
+        // onEventCreateFailed: function (event) {
+        //     mobiscroll.toast({
+        //         message: 'Can\'t create event'
+        //     });
+        // },
+        // onEventUpdateFailed: function (event) {
+        //     mobiscroll.toast({
+        //         message: 'Can\'t move event'
+        //     });
+        // }
         
     }).mobiscroll('getInst');
 
 
 
     function createUpdateEvent(event, isNew) {
+            console.log(event);
             mobiscroll.confirm({
                 title: 'Are you sure you want to proceed?',
                 message: 'It looks like someone from the team won\'t be able to join the meeting.',
@@ -179,13 +185,15 @@ var inst = $('#calendar').mobiscroll().eventcalendar({
                 callback: function (res) {
                     if (res) {
                         if (isNew) {
-                            calendar.addEvent(event);
+                            inst.addEvent(event);
                         } else {
-                            calendar.updateEvent(event);
+                            inst.updateEvent(event);
                         }
                             mobiscroll.toast({
                             message: isNew ? 'Event created' : 'Event updated'
                         });
+                    } else {
+                        inst.removeEvent(event)
                     }
                 }
             });
@@ -249,31 +257,52 @@ var inst = $('#calendar').mobiscroll().eventcalendar({
 
 
 
-    function getCalendarEvents(date, endDate) {
-         $.getJSON(calendarEventsAjaxUrl + '?start=' + date + '&end=' + endDate + '&callback', function (data) {
-                // var events = [];
-                //
-                // for (var i = 0; i < data.length; i++) {
-                //     var event = data[i];
-                //     events.push({
-                //         start: event.start,
-                //         end: event.end,
-                //         title: event.title,
-                //         resource: event.resource
-                //     });
-                // }
-        
+    function getCalendarEvents(date, endDate, groups) {
+         let params = groups.join(',');
+         $.getJSON(calendarEventsAjaxUrl + '?start=' + date + '&end=' + endDate + '&callback&groups=' + params, function (data) {
                 inst.resources = data.resources;
-                inst.setEvents(data.data);
+                setTimelineEvents(data.data);
         
                 mobiscroll.toast({
                     message: 'New events loaded'
                 });
             }, 'jsonp');
     }
+    
+    window.setTimelineEvents = function (data)
+    {
+        window.inst.setEvents(data);
+    }
+    
+    window.addTimelineEvent = function (data) {
+        window.inst.addEvent(data);
+    } 
     // $.getJSON(calendarEventsAjaxUrl, function (events) {
     //     inst.setEvents(events);
     // }, 'jsonp');
+    
+    $('#btn-shift-event-add').on('click', function (e) {
+        e.preventDefault(); 
+        let calendarStartDt = window,i
+        let title = $(this).attr('title');
+        let modal = $('#modal-md');
+        modal.find('.modal-body').html('<div style="text-align:center;font-size: 40px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
+        modal.find('.modal-title').html(title);
+        modal.find('.modal-body').load(modalUrl, {}, function( response, status, xhr ) {
+            if (status == 'error') {
+                createNotifyByObject({
+                    'title': 'Error',
+                    'type': 'error',
+                    'text': xhr.statusText
+                })
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
+        });
+    });
 
 JS;
 

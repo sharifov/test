@@ -61,12 +61,16 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
                 'options' => ['style' => 'width:50px']
             ],
-            'stl_params_json',
+           // 'stl_params_json',
             'stl_sort_order',
             'stl_updated_dt:datetime',
             'stl_updated_user_id:username',
         ],
     ]) ?>
+    </div>
+    <div class="col-md-6">
+        <h5><?php echo $model->getAttributeLabel('stl_params_json') ?></h5>
+        <pre><?php echo \yii\helpers\VarDumper::dump($model->stl_params_json, 10, true); ?></pre>
     </div>
 
 </div>

@@ -3,7 +3,10 @@
 namespace frontend\controllers;
 
 use common\models\Employee;
+use common\models\query\UserGroupAssignQuery;
+use common\models\query\UserGroupQuery;
 use common\models\UserGroup;
+use common\models\UserGroupAssign;
 use Exception;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
@@ -11,6 +14,9 @@ use modules\shiftSchedule\src\entities\shiftScheduleTypeLabel\ShiftScheduleTypeL
 use modules\shiftSchedule\src\entities\userShiftAssign\UserShiftAssign;
 use modules\shiftSchedule\src\entities\userShiftSchedule\search\SearchUserShiftSchedule;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
+use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftScheduleQuery;
+use modules\shiftSchedule\src\forms\ShiftScheduleCreateForm;
+use modules\shiftSchedule\src\helpers\UserShiftScheduleHelper;
 use modules\shiftSchedule\src\services\UserShiftScheduleService;
 use src\auth\Auth;
 use src\helpers\app\AppHelper;
@@ -27,6 +33,14 @@ use yii\web\Response;
 
 class ShiftScheduleController extends FController
 {
+    private UserShiftScheduleService $shiftScheduleService;
+
+    public function __construct($id, $module, UserShiftScheduleService $shiftScheduleService, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->shiftScheduleService = $shiftScheduleService;
+    }
+
     public function init(): void
     {
         parent::init();
@@ -42,7 +56,7 @@ class ShiftScheduleController extends FController
                     /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_ACCESS, Access to page shift-schedule/index */
                     [
                         'actions' => ['index', 'my-data-ajax', 'generate-example', 'remove-user-data', 'get-event',
-                            'generate-user-schedule', 'legend-ajax', 'calendar', 'calendar-events-ajax'],
+                            'generate-user-schedule', 'legend-ajax', 'calendar', 'calendar-events-ajax', 'add-event'],
                         'allow' => \Yii::$app->abac->can(
                             null,
                             ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE,
@@ -290,12 +304,14 @@ class ShiftScheduleController extends FController
         $user = Auth::user();
 
         $resourceList = [];
+        $resourceListIds = [];
 
         $userGroups = UserGroup::find()
             ->where(['ug_disable' => false])
-            ->andWhere(['like', 'ug_name', 'test'])
+            ->join('inner join', UserGroupAssign::tableName(), 'ug_id = ugs_group_id')
+            ->andWhere(['ugs_user_id' => Auth::id()])
             ->orderBy(['ug_name' => SORT_ASC])
-            //->limit(2)
+//            ->limit(5)
             ->all();
 
         if ($userGroups) {
@@ -306,7 +322,6 @@ class ShiftScheduleController extends FController
                     'color' => '#1dab2f',
                     'img' => '',
                     'title' => $group->ug_key,
-                    //'collapsed' => true
                 ];
 
                 $users = Employee::find()
@@ -314,7 +329,6 @@ class ShiftScheduleController extends FController
                     ->where(['ugs_group_id' => $group->ug_id])
                     ->andWhere(['status' => Employee::STATUS_ACTIVE])
                     ->orderBy(['username' => SORT_ASC])
-                    ->limit(7)
                     ->all();
                 if ($users) {
                     $userList = [];
@@ -323,7 +337,6 @@ class ShiftScheduleController extends FController
                             'id' => 'us-' . $user->id,
                             'name' => $user->username,
                             'color' => '#1dab2f',
-                            //'img' => $user->getGravatarUrl(),
                             'title' => $user->email
                         ];
                     }
@@ -331,25 +344,13 @@ class ShiftScheduleController extends FController
                     $resource['children'] = $userList;
                 }
                 $resourceList[] = $resource;
+                $groupIds[] = $group->ug_id;
             }
         }
 
-
-//        $users = Employee::find()->all();
-//
-//        foreach ($users as $user) {
-//            $resourceList[] = [
-//                'id' => $user->id,
-//                'name' => $user->username,
-//                'color' => '#1dab2f',
-//                'img' => $user->getGravatarUrl(),
-//                'title' => $user->email
-//            ];
-//        }
-
-
         return $this->render('calendar', [
-            'resourceList' => $resourceList
+            'resourceList' => $resourceList,
+            'groupIds' => $groupIds
         ]);
     }
 
@@ -360,46 +361,38 @@ class ShiftScheduleController extends FController
     {
         \Yii::$app->response->format = Response::FORMAT_JSON;
         $data = [];
-        $resources = [];
 
-        $userId = Auth::id();
         $startDt = Yii::$app->request->get('start', date('Y-m-d', strtotime('-1 day')));
         $endDt = Yii::$app->request->get('end', date('Y-m-d H:i:s', strtotime('+1 day')));
-
-        $timelineList = UserShiftScheduleService::getTimelineListByUser($userId, $startDt, $endDt);
-
-
-//        $users = Employee::find()->all();
-//
-//
-//        foreach ($users as $user) {
-//            $resources[] = ['id' => $user->id, 'name' => $user->username,
-//                'color' => '#1dab2f', 'img' => $user->getGravatarUrl(),
-//                'title' => $user->email
-//            ];
-//        }
-
-
-
-//        $dataItem = [];
-//        $dataItem[] = [
-//            'id' => 987456,
-//            //groupId: '999',
-//            'title' => 'TEST 12:30-15:30 UTC',
-//            'description' => 'TEST',
-//            'start' => date('c', strtotime(date('Y-m-d 12:30:00'))),
-//            'end' => date('c', strtotime(date('Y-m-d 15:30:00'))),
-//            'color' => 'red',
-//
-//            'resource' => 'us-' . $userId, //random_int(1, 1),
-//            'extendedProps' => [
-//                'icon' => 'fa fa-user',
-//            ]
-//        ];
-
-        //$data['resources'] = $resources;
-        $data['data'] = UserShiftScheduleService::getCalendarEventsJsonData($timelineList);
+        $groups = Yii::$app->request->get('groups', '');
+        $groups = explode(',', (string)$groups);
+        $timelineList = UserShiftScheduleQuery::getTimelineListByUser($startDt, $endDt, $groups);
+        $data['data'] = UserShiftScheduleHelper::getCalendarEventsData($timelineList);
 
         return $data;
+    }
+
+    public function actionAddEvent()
+    {
+        $form = new ShiftScheduleCreateForm();
+
+        $usersGroupAssign = [];
+        if ($form->load(Yii::$app->request->post()) && !$form->getUsersByGroups && $form->validate()) {
+            $timelineList = $this->shiftScheduleService->createManual($form, Auth::id(), Auth::user()->timezone ?: null);
+            $data = UserShiftScheduleHelper::getCalendarEventsData($timelineList);
+
+            return '<script>(function() {$("#modal-md").modal("hide");let timelineData = ' . json_encode($data) . ';addTimelineEvent(timelineData);})();</script>';
+        }
+
+        if ($form->userGroups) {
+            $usersGroupAssign = UserGroupAssignQuery::getGroupedDataByGroups($form->userGroups);
+            $usersGroupAssign = ArrayHelper::map($usersGroupAssign, 'userId', 'username', 'groupName');
+        }
+
+        $form->getUsersByGroups = false;
+        return $this->renderAjax('partial/_shift_schedule_create_form', [
+            'model' => $form,
+            'usersGroupAssign' => $usersGroupAssign
+        ]);
     }
 }

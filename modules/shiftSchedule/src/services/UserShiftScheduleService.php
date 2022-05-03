@@ -9,11 +9,22 @@ use modules\shiftSchedule\src\entities\shiftScheduleRule\ShiftScheduleRule;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\shiftScheduleTypeLabelAssign\ShiftScheduleTypeLabelAssign;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
+use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftScheduleQuery;
+use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftScheduleRepository;
+use modules\shiftSchedule\src\forms\ShiftScheduleCreateForm;
+use modules\shiftSchedule\src\helpers\UserShiftScheduleHelper;
 use Yii;
 use yii\helpers\VarDumper;
 
 class UserShiftScheduleService
 {
+    private UserShiftScheduleRepository $repository;
+
+    public function __construct(UserShiftScheduleRepository $repository)
+    {
+        $this->repository = $repository;
+    }
+
     /**
      * @param int $userId
      * @return int
@@ -158,52 +169,6 @@ class UserShiftScheduleService
         }
         return $data;
     }
-
-
-    /**
-     * @param UserShiftSchedule[] $timelineList
-     * @return array
-     */
-    public static function getCalendarEventsJsonData(array $timelineList): array
-    {
-        $data = [];
-        if ($timelineList) {
-            foreach ($timelineList as $item) {
-                $dataItem = [
-                    'id' => $item->uss_id,
-                    //groupId: '999',
-                    'title' => $item->getScheduleTypeKey(), // . '-' . $item->uss_id,
-                    //. ' - ' . date('d H:i', strtotime($item->uss_start_utc_dt)),
-                    'description' => $item->getScheduleTypeTitle() . "\r\n" . '(' . $item->uss_id . ')' . ', duration: ' .
-                        Yii::$app->formatter->asDuration($item->uss_duration * 60),
-                    //. "\r\n" . $item->uss_description,
-                    'start' => date('c', strtotime($item->uss_start_utc_dt)),
-                    'end' => date('c', strtotime($item->uss_end_utc_dt)),
-                    'color' => $item->shiftScheduleType ? $item->shiftScheduleType->sst_color : 'gray',
-
-                    'resource' => 'us-' . $item->uss_user_id, //random_int(1, 1),
-                    //'textColor' => 'black' // an option!
-                    'extendedProps' => [
-                        'icon' => $item->shiftScheduleType->sst_icon_class,
-                    ]
-                ];
-
-                if (
-                    !in_array($item->uss_status_id, [UserShiftSchedule::STATUS_DONE,
-                        UserShiftSchedule::STATUS_APPROVED])
-                ) {
-                    $dataItem['borderColor'] = '#000000';
-                    $dataItem['title'] .= ' (' . $item->getStatusName() . ')';
-                    $dataItem['description'] .= ' (' . $item->getStatusName() . ')';
-                    //$data[$item->uss_id]['extendedProps']['icon'] = 'rgb(255,0,0)';
-                }
-
-                $data[] = $dataItem;
-            }
-        }
-        return $data;
-    }
-
 
     /**
      * @param int $userId
@@ -423,5 +388,31 @@ class UserShiftScheduleService
         }
         $cron = CronExpression::factory($expression);
         return $cron->isDue($currentTime);
+    }
+
+    public function createManual(ShiftScheduleCreateForm $form, int $userId, ?string $userTimeZone)
+    {
+        $startDateTime = new \DateTimeImmutable($form->startDateTime, $userTimeZone ? new \DateTimeZone($userTimeZone) : null);
+        $startDateTime = $startDateTime->setTimezone(new \DateTimeZone('UTC'));
+        $duration = explode(':', $form->duration);
+        $endDateTime = $startDateTime->add(new \DateInterval('PT' . $duration[0] . 'H' . $duration[1] . 'M'));
+        $duration = ($duration[0] * 60) + $duration[1];
+
+        $userShiftScheduleCreatedList = [];
+        foreach ($form->getUsersBatch() as $user) {
+            $userShiftSchedule = UserShiftSchedule::create(
+                $user,
+                $form->description,
+                $startDateTime->format('Y-m-d H:i:s'),
+                $endDateTime->format('Y-m-d H:i:s'),
+                $duration,
+                $form->status,
+                UserShiftSchedule::TYPE_MANUAL,
+                $form->scheduleType
+            );
+            $this->repository->save($userShiftSchedule);
+            $userShiftScheduleCreatedList[] = $userShiftSchedule;
+        }
+        return $userShiftScheduleCreatedList;
     }
 }
