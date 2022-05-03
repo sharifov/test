@@ -101,4 +101,17 @@ class QuoteCommunication extends ActiveRecord
     {
         return $this->hasOne(Quote::class, ['id' => 'qc_quote_id']);
     }
+
+    /**
+     * Generates uid string.
+     *
+     * Required for logic, that sends quote by chat, email, sms etc.
+     *
+     * @return string
+     * @throws \yii\base\Exception
+     */
+    public static function generateUid(): string
+    {
+        return \Yii::$app->security->generateRandomString(5);
+    }
 }
