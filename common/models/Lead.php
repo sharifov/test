@@ -12,6 +12,8 @@ use DateTime;
 use frontend\helpers\JsonHelper;
 use frontend\widgets\notification\NotificationMessage;
 use kivork\search\core\urlsig\UrlSignature;
+use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\lead\src\abac\LeadAbacObject;
 use modules\offer\src\entities\offer\Offer;
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\product\Product;
@@ -1216,6 +1218,11 @@ class Lead extends ActiveRecord implements Objectable
 
         if ($this->isOwner($newOwnerId) && $this->isSold()) {
             throw new \DomainException('Lead is already Sold with this owner.');
+        }
+
+        /** @abac $leadAbacDto, LeadAbacObject::ACT_CHANGE_OWNER, LeadAbacObject::ACTION_UPDATE, change of lead owner */
+        if (!Yii::$app->abac->can(new LeadAbacDto($this, null), LeadAbacObject::ACT_CHANGE_OWNER, LeadAbacObject::ACTION_UPDATE)) {
+            throw new \DomainException('Lead ID: ' . $this->id . ' cannot be changed, because lead in sold status and has its owner');
         }
 
         $this->recordEvent(
