@@ -1226,13 +1226,13 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         Yii::$app->db->createCommand()->delete(ClientChatUserChannel::tableName(), 'ccuc_user_id = :ccuc_user_id', [':ccuc_user_id' => $this->id])->execute();
     }
 
-    public function addClientChatChanels(array $chanels, ?int $createdUserId = null)
+    public function addClientChatChanels(array $channels, ?int $createdUserId = null)
     {
         $data = [];
-        foreach ($chanels as $chanel) {
+        foreach ($channels as $channel) {
             $data[] = [
                 'ccuc_user_id' => $this->id,
-                'ccuc_channel_id' => (int)$chanel,
+                'ccuc_channel_id' => (int)$channel,
                 'ccuc_created_dt' => date('Y-m-d H:i:s'),
                 'ccuc_created_user_id' => $createdUserId,
             ];

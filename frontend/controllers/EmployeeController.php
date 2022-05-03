@@ -223,7 +223,7 @@ class EmployeeController extends FController
      *
      * @return string
      */
-    public function actionList()
+    public function oldActionList()
     {
         $multipleForm = new UserMultipleForm();
         $multipleErrors = [];
@@ -399,7 +399,7 @@ class EmployeeController extends FController
 
         $dataProvider = $searchModel->search($params);
 
-        return $this->render('list', [
+        return $this->render('old_list', [
             'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
             'multipleForm' => $multipleForm,
@@ -407,7 +407,7 @@ class EmployeeController extends FController
         ]);
     }
 
-    public function actionList2()
+    public function actionList()
     {
         $multipleForm = new MultipleUpdateForm(Auth::user());
         $multipleErrors = [];
@@ -436,76 +436,76 @@ class EmployeeController extends FController
                         $uProfileNeedSave = true;
                     }
 
-                    if (is_numeric($multipleForm->up_call_expert_limit)) {
-                        $uParams->up_call_expert_limit = (int) $multipleForm->up_call_expert_limit;
+                    if ($multipleForm->up_call_expert_limit !== null && $multipleForm->fieldAccess->canEdit('up_call_expert_limit')) {
+                        $uParams->up_call_expert_limit = $multipleForm->up_call_expert_limit;
                         $uParamsNeedSave = true;
                     }
 
-                    if ($multipleForm->workStart != "") {
-                        $uParams->up_work_start_tm = $multipleForm->workStart . ':00';
+                    if ($multipleForm->up_work_start_tm !== null && $multipleForm->fieldAccess->canEdit('up_work_start_tm')) {
+                        $uParams->up_work_start_tm = $multipleForm->up_work_start_tm;
                         $uParamsNeedSave = true;
                     }
 
-                    if ($multipleForm->timeZone != "") {
-                        $uParams->up_timezone = $multipleForm->timeZone;
+                    if ($multipleForm->up_timezone !== null && $multipleForm->fieldAccess->canEdit('up_timezone')) {
+                        $uParams->up_timezone = $multipleForm->up_timezone;
                         $uParamsNeedSave = true;
                     }
 
-                    if (is_numeric($multipleForm->workMinutes)) {
-                        $uParams->up_work_minutes = (int)$multipleForm->workMinutes;
+                    if ($multipleForm->up_work_minutes !== null && $multipleForm->fieldAccess->canEdit('up_work_minutes')) {
+                        $uParams->up_work_minutes = $multipleForm->up_work_minutes;
                         $uParamsNeedSave = true;
                     }
 
-                    if (is_numeric($multipleForm->inboxShowLimitLeads)) {
-                        $uParams->up_inbox_show_limit_leads = (int)$multipleForm->inboxShowLimitLeads;
+                    if ($multipleForm->up_inbox_show_limit_leads !== null && $multipleForm->fieldAccess->canEdit('up_inbox_show_limit_leads')) {
+                        $uParams->up_inbox_show_limit_leads = $multipleForm->up_inbox_show_limit_leads;
                         $uParamsNeedSave = true;
                     }
 
-                    if (is_numeric($multipleForm->defaultTakeLimitLeads)) {
-                        $uParams->up_default_take_limit_leads = (int)$multipleForm->defaultTakeLimitLeads;
+                    if ($multipleForm->up_default_take_limit_leads !== null && $multipleForm->fieldAccess->canEdit('up_default_take_limit_leads')) {
+                        $uParams->up_default_take_limit_leads = $multipleForm->up_default_take_limit_leads;
                         $uParamsNeedSave = true;
                     }
 
-                    if (is_numeric($multipleForm->minPercentForTakeLeads)) {
-                        $uParams->up_min_percent_for_take_leads = (int)$multipleForm->minPercentForTakeLeads;
+                    if ($multipleForm->up_min_percent_for_take_leads !== null && $multipleForm->fieldAccess->canEdit('up_min_percent_for_take_leads')) {
+                        $uParams->up_min_percent_for_take_leads = $multipleForm->up_min_percent_for_take_leads;
                         $uParamsNeedSave = true;
                     }
 
-                    if (is_numeric($multipleForm->frequencyMinutes)) {
-                        $uParams->up_frequency_minutes = (int)$multipleForm->frequencyMinutes;
+                    if ($multipleForm->up_frequency_minutes !== null && $multipleForm->fieldAccess->canEdit('up_frequency_minutes')) {
+                        $uParams->up_frequency_minutes = $multipleForm->up_frequency_minutes;
                         $uParamsNeedSave = true;
                     }
 
-                    if (is_numeric($multipleForm->baseAmount)) {
-                        $uParams->up_base_amount = $multipleForm->baseAmount;
+                    if ($multipleForm->up_base_amount !== null && $multipleForm->fieldAccess->canEdit('up_base_amount')) {
+                        $uParams->up_base_amount = $multipleForm->up_base_amount;
                         $uParamsNeedSave = true;
                     }
 
-                    if (is_numeric($multipleForm->autoRedial)) {
-                        $uProfile->up_auto_redial = $multipleForm->autoRedial;
+                    if ($multipleForm->up_auto_redial !== null && $multipleForm->fieldAccess->canEdit('up_auto_redial')) {
+                        $uProfile->up_auto_redial = $multipleForm->up_auto_redial;
                         $uProfileNeedSave = true;
                     }
 
-                    if (is_numeric($multipleForm->kpiEnable)) {
-                        $uProfile->up_kpi_enable = $multipleForm->kpiEnable;
+                    if ($multipleForm->up_kpi_enable !== null && $multipleForm->fieldAccess->canEdit('up_kpi_enable')) {
+                        $uProfile->up_kpi_enable = $multipleForm->up_kpi_enable;
                         $uProfileNeedSave = true;
                     }
 
-                    if (is_numeric($multipleForm->leaderBoardEnabled)) {
-                        $uParams->up_leaderboard_enabled = $multipleForm->leaderBoardEnabled;
+                    if ($multipleForm->up_leaderboard_enabled !== null && $multipleForm->fieldAccess->canEdit('up_leaderboard_enabled')) {
+                        $uParams->up_leaderboard_enabled = $multipleForm->up_leaderboard_enabled;
                         $uParamsNeedSave = true;
                     }
 
-                    if (is_numeric($multipleForm->commissionPercent)) {
-                        $uParams->up_commission_percent = $multipleForm->commissionPercent;
+                    if ($multipleForm->up_commission_percent !== null && $multipleForm->fieldAccess->canEdit('up_commission_percent')) {
+                        $uParams->up_commission_percent = $multipleForm->up_commission_percent;
                         $uParamsNeedSave = true;
                     }
 
-                    if ($multipleForm->userDepartments) {
+                    if ($multipleForm->user_departments && $multipleForm->fieldAccess->canEdit('user_departments')) {
                         $transaction = Yii::$app->db->beginTransaction();
                         try {
                             $user->removeAllDepartments();
-                            $user->addNewDepartments($multipleForm->userDepartments);
+                            $user->addNewDepartments($multipleForm->user_departments);
                             $transaction->commit();
                         } catch (\Throwable $e) {
                             $transaction->rollBack();
@@ -514,17 +514,21 @@ class EmployeeController extends FController
                         }
                     }
 
-                    if ($multipleForm->userClientChatChanels) {
+                    if ($multipleForm->client_chat_user_channel && $multipleForm->fieldAccess->canEdit('client_chat_user_channel')) {
+                        $userClientChatData = UserClientChatData::findOne(['uccd_employee_id' => $user->id]);
                         $transaction = Yii::$app->db->beginTransaction();
                         try {
                             $user->removeAllClientChatChanels();
-                            $user->addClientChatChanels($multipleForm->userClientChatChanels, Auth::id());
-//                                $this->clientChatUserAccessService->disableUserAccessToAllChats($user->id);
-                            $this->clientChatUserAccessService->setUserAccessToAllChatsByChannelIds($multipleForm->userClientChatChanels, $user->id);
+                            $user->addClientChatChanels($multipleForm->client_chat_user_channel, Auth::id());
+                            if ($userClientChatData && $userClientChatData->isRegisteredInRc()) {
+                                $this->clientChatUserAccessService->setUserAccessToAllChatsByChannelIds($multipleForm->client_chat_user_channel, $user->id);
+                            } else {
+                                $this->clientChatUserAccessService->disableUserAccessToAllChats($user->id);
+                            }
                             $transaction->commit();
                         } catch (\Throwable $e) {
                             $transaction->rollBack();
-                            Yii::error($e->getMessage(), 'Employee:list:multipleUpdate:clientChatChanels');
+                            Yii::error($e->getMessage(), 'Employee:list:multipleUpdate:clientChatChannels');
                             $multipleErrors[$user_id][] = $e->getMessage();
                         }
                     }
@@ -539,11 +543,11 @@ class EmployeeController extends FController
                         $multipleErrors[$user_id][] = $uProfile->getErrors();
                     }
 
-                    if ($multipleForm->userRoles) {
+                    if ($multipleForm->form_roles && $multipleForm->fieldAccess->canEdit('form_roles')) {
                         $transaction = Yii::$app->db->beginTransaction();
                         try {
                             $user->removeAllRoles();
-                            $user->addNewRoles($multipleForm->userRoles);
+                            $user->addNewRoles($multipleForm->form_roles);
                             $transaction->commit();
                         } catch (\Throwable $e) {
                             $transaction->rollBack();
@@ -552,11 +556,10 @@ class EmployeeController extends FController
                         }
                     }
 
-                    if (is_numeric($multipleForm->status)) {
+                    if (is_numeric($multipleForm->status) && $multipleForm->fieldAccess->canEdit('status')) {
                         $user->status = $multipleForm->status;
-                        $user->form_roles = ArrayHelper::map(Yii::$app->authManager->getRolesByUser($user->id), 'name', 'name');
-                        if (!$user->save()) {
-                            Yii::error(VarDumper::dumpAsString($user->errors), 'Employee:list:multipleupdate:userParams:save');
+                        if (!$user->save(true, ['status'])) {
+                            Yii::error(VarDumper::dumpAsString($user->errors), 'Employee:list:multipleUpdate:user:save');
                             $multipleErrors[$user_id][] = $user->getErrors();
                         }
                     }
@@ -581,7 +584,7 @@ class EmployeeController extends FController
 
         $dataProvider = $searchModel->search($params);
 
-        return $this->render('list2', [
+        return $this->render('list', [
             'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
             'multipleForm' => $multipleForm,
