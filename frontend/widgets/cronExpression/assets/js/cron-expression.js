@@ -44,7 +44,7 @@ function initCronExpressionApp(id, curValue) {
                 let monthFormat = this.getMonthFormat;
                 let weekdayFormat = this.getWeekdayFormat;
                 // let yearFormat = this.getYearFormat;
-                this.expression = dayFormat + ' ' + monthFormat + ' ' + weekdayFormat; // + ' ' + yearFormat;
+                this.expression = (dayFormat + ' ' + monthFormat + ' ' + weekdayFormat).trim(); // + ' ' + yearFormat;
             },
             parse() {
                 let expression = this.expression.replace(/  +/g, ' ').split(' ');
