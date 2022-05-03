@@ -11,8 +11,8 @@
       tags: common
       become: yes
 
-    - role: bash-scripts
-      tags: bash-scritps
+    - role: bash_scripts
+      tags: bash-scripts
       become: yes
 
     - role: nginx

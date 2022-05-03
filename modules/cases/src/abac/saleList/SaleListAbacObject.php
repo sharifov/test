@@ -20,14 +20,17 @@ class SaleListAbacObject extends AbacBaseModel implements AbacInterface
     /** UI PERMISSION */
 
     public const UI_BLOCK_SALE_LIST = self::NS . 'ui/block/sale-list';
+    public const UI_SALE_ID = self::NS . 'ui/sale-id';
 
     public const OBJECT_LIST = [
         self::UI_BLOCK_SALE_LIST => self::UI_BLOCK_SALE_LIST,
+        self::UI_SALE_ID => self::UI_SALE_ID,
     ];
 
     /** --------------- ACTIONS --------------------------- */
     public const ACTION_ADD_CREDIT_CARD = 'Add Credit Card';
     public const ACTION_SEND_CC_INFO = 'Send CC Info';
+    public const ACTION_READ = 'read';
 
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
@@ -35,6 +38,7 @@ class SaleListAbacObject extends AbacBaseModel implements AbacInterface
             self::ACTION_ADD_CREDIT_CARD,
             self::ACTION_SEND_CC_INFO,
         ],
+        self::UI_SALE_ID => [self::ACTION_READ],
     ];
 
     public const ATTR_CASE_IS_OWNER = [

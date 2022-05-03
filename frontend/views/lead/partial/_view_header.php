@@ -88,15 +88,21 @@ JS;
                         <?php //= Html::a($lead->uid, '#', ['id' => 'view-flow-transition']) ?>
                     </div>
 
-                    <div class="page-header__general-item">
-                        <?php $typeCreate = Lead::TYPE_CREATE_LIST[$lead->l_type_create] ?? '-' ?>
-                        <strong title="<?php echo $typeCreate?>">Market:</strong>
-                        <span>
-                            <?= ($lead->project ? $lead->project->name : '') .
-                                ($lead->source ? ' - <span title="' . $lead->source->id . '/' . $lead->source->cid . '">' . $lead->source->name . '</span>' : '')
-                            ?>
-                        </span>
-                    </div>
+                    <?php
+                        /** @abac new LeadAbacDto($lead, Auth::id()), LeadAbacObject::UI_DISPLAY_MARKETING_SOURCE, LeadAbacObject::ACTION_READ, Access to show Marketing source */
+                        $leadAbacDto = new LeadAbacDto($lead, Auth::id());
+                    ?>
+                    <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_DISPLAY_MARKETING_SOURCE, LeadAbacObject::ACTION_READ)) : ?>
+                        <div class="page-header__general-item">
+                            <?php $typeCreate = Lead::TYPE_CREATE_LIST[$lead->l_type_create] ?? '-' ?>
+                            <strong title="<?php echo $typeCreate?>">Market:</strong>
+                            <span>
+                                <?= ($lead->project ? $lead->project->name : '') .
+                                    ($lead->source ? ' - <span title="' . $lead->source->id . '/' . $lead->source->cid . '">' . $lead->source->name . '</span>' : '')
+                                ?>
+                            </span>
+                        </div>
+                    <?php endif ?>
 
                     <?php if (Yii::$app->user->can('lead/view_HybridUid_View', ['lead' => $lead])) : ?>
                         <div class="page-header__general-item">

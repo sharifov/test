@@ -38,6 +38,7 @@ class ProductQuoteRefundAbacDto extends stdClass
     public bool $isOwner;
     public bool $hasPqrActive;
     public bool $hasPqcActive;
+    public bool $hasPqcAccepted;
     public bool $hasPqcInvoluntaryActive;
 
     public int $prTypeId;
@@ -71,6 +72,7 @@ class ProductQuoteRefundAbacDto extends stdClass
             $this->isOwner = $productQuoteRefund->productQuote->isOwner($userId);
             $this->hasPqrActive = (bool)$productQuoteRefund->productQuote->productQuoteRefundsActive;
             $this->hasPqcActive = (bool)$productQuoteRefund->productQuote->productQuoteChangesActive;
+            $this->hasPqcAccepted = $productQuoteRefund->productQuote->isProductQuoteChangeAccepted();
             $this->hasPqcInvoluntaryActive = (bool)$productQuoteRefund->productQuote->productQuoteInvoluntaryChangesActive;
 
             $this->prTypeId = $productQuoteRefund->productQuote->pqProduct->pr_type_id;

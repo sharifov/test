@@ -184,10 +184,6 @@ class LeadHelper
 
         self::$departments = EmployeeDepartmentAccess::getDepartments($user->identity);
         ksort(self::$departments);
-        self::$departments = array_merge(
-            [0 => '-'],
-            self::$departments,
-        );
 
         return self::$departments;
     }

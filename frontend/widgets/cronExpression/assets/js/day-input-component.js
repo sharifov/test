@@ -36,8 +36,7 @@ const DayInputComponent = {
             type: Object,
         },
         defaultInputRadio: {
-            type: Number,
-            required: true
+            type: [Number, null]
         }
     },
     data () {
@@ -159,6 +158,8 @@ const DayInputComponent = {
         }
     },
     created() {
-        this.selectedRadio = this.defaultInputRadio;
+        if (this.defaultInputRadio !== null) {
+            this.selectedRadio = this.defaultInputRadio;
+        }
     }
 };

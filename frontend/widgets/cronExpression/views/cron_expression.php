@@ -28,7 +28,7 @@ $cronExpressionAppId = 'cron-expression-app-' . $attribute;
     <div class="col-md-4">
       <day-input ref="day" v-bind:day-expression='<?= JsonHelper::encode(DayExpressionDto::EXPRESSION_LIST) ?>'
                  v-bind:expression-format='<?= JsonHelper::encode(DayExpressionDto::EXPRESSION_FORMAT) ?>'
-                 v-bind:default-input-radio="<?= DayExpressionDto::EXPRESSION_EVERY_DAY ?>"
+                 v-bind:default-input-radio="null"
                  v-bind:input-radio-name="'expressionDay<?= $attribute ?>'"
       ></day-input>
     </div>
@@ -36,7 +36,7 @@ $cronExpressionAppId = 'cron-expression-app-' . $attribute;
 
       <month-input ref="month" v-bind:month-expression='<?= JsonHelper::encode(MonthExpressionDto::EXPRESSION_LIST) ?>'
                    v-bind:expression-format='<?= JsonHelper::encode(MonthExpressionDto::EXPRESSION_FORMAT) ?>'
-                   v-bind:default-input-radio="<?= MonthExpressionDto::EXPRESSION_EVERY_MONTH ?>"
+                   v-bind:default-input-radio="null"
                    v-bind:input-radio-name="'expressionMonth<?= $attribute ?>'"
       ></month-input>
     </div>
@@ -44,7 +44,7 @@ $cronExpressionAppId = 'cron-expression-app-' . $attribute;
 
       <weekday-input ref="weekday" v-bind:weekday-expression='<?= JsonHelper::encode(WeekdayExpressionDto::EXPRESSION_LIST) ?>'
                    v-bind:expression-format='<?= JsonHelper::encode(WeekdayExpressionDto::EXPRESSION_FORMAT) ?>'
-                   v-bind:default-input-radio="<?= WeekdayExpressionDto::EXPRESSION_EVERY_WEEKDAY ?>"
+                   v-bind:default-input-radio="null"
                    v-bind:input-radio-name="'expressionWeekday<?= $attribute ?>'"
       ></weekday-input>
     </div>
@@ -52,7 +52,7 @@ $cronExpressionAppId = 'cron-expression-app-' . $attribute;
         <div class="col-md-3">
       <year-input ref="year" v-bind:year-expression='<?= JsonHelper::encode(YearExpressionDto::EXPRESSION_LIST) ?>'
                      v-bind:expression-format='<?= JsonHelper::encode(YearExpressionDto::EXPRESSION_FORMAT) ?>'
-                     v-bind:default-input-radio="<?= YearExpressionDto::EXPRESSION_EVERY_YEAR ?>"
+                     v-bind:default-input-radio="null"
                      v-bind:input-radio-name="'expressionYear<?= $attribute ?>'"
                      v-bind:years='<?= JsonHelper::encode(YearExpressionDto::getYearsRange()) ?>'
       ></year-input>
@@ -61,8 +61,11 @@ $cronExpressionAppId = 'cron-expression-app-' . $attribute;
       </div>
   </div>
 
-  <div class="form-group">
+  <div class="input-group mb-3">
     <input type="text" class="form-control" @keyup="parse" name="<?= $model->formName() . '[' . $attribute . ']' ?>" v-model="expression">
+    <div class="input-group-append">
+      <button class="btn btn-outline-secondary" @click="reset" type="button" style="height: 30px;">Reset</button>
+    </div>
   </div>
 </div>
 

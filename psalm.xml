@@ -12,6 +12,8 @@
         <ignoreFiles>
             <directory name="vendor" />
             <directory name="docker" />
+            <directory name="devops" />
+            <directory name="node_modules" />
             <directory name="webapi/tests" />
         </ignoreFiles>
     </projectFiles>

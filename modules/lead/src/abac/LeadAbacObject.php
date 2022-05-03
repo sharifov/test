@@ -20,18 +20,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
 
     /** ACTION PERMISSION */
     public const ACT_USER_CONVERSION  = self::NS . 'act/user-conversion';
-    //public const ACT_CLIENT_DETAILS  = self::NS . 'act/client-details'; //TODO: To Remove 1
-    //public const ACT_CLIENT_ADD_PHONE  = self::NS . 'act/client-add-phone'; //TODO: To Remove 2
-    //public const ACT_CLIENT_EDIT_PHONE  = self::NS . 'act/client-edit-phone'; //TODO: To Remove 3
-    //public const ACT_USER_SAME_PHONE_INFO  = self::NS . 'act/user-same-phone-info'; //TODO: To Remove 4
-    //public const ACT_CLIENT_ADD_EMAIL  = self::NS . 'act/client-add-email'; //TODO: To Remove 5
-    //public const ACT_CLIENT_EDIT_EMAIL  = self::NS . 'act/client-edit-email'; //TODO: To Remove 6
-    //public const ACT_USER_SAME_EMAIL_INFO  = self::NS . 'act/user-same-email-info'; //TODO: To Remove 7
     public const ACT_TAKE_LEAD = self::NS . 'act/take-lead';
-    //public const ACT_CLIENT_UPDATE  = self::NS . 'act/client-update'; //TODO: To Remove 8
-    //public const ACT_CLIENT_SUBSCRIBE  = self::NS . 'act/client-subscribe'; //TODO: To Remove 9
-    //public const ACT_CLIENT_UNSUBSCRIBE  = self::NS . 'act/client-unsubscribe'; //TODO: To Remove 10
-    //public const ACT_SEARCH_LEADS_BY_IP  = self::NS . 'act/search-leads-by-ip'; //TODO: To Remove 11
     public const ACT_CREATE_FROM_PHONE_WIDGET = self::NS . 'act/create-from-phone-widget';
     public const ACT_LINK_TO_CALL = self::NS . 'act/link-to-call';
     public const ACT_TAKE_LEAD_FROM_CALL = self::NS . 'act/take-from-call';
@@ -40,15 +29,12 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
 
     /** UI PERMISSION */
     public const UI_BLOCK_CLIENT_INFO  = self::NS . 'ui/block/client-info';
-    //public const UI_MENU_CLIENT_INFO  = self::NS . 'ui/menu/client-info'; //TODO: To Remove
-    //public const UI_FIELD_PHONE_FORM_ADD_PHONE = self::NS . 'ui/field/phone'; //TODO: To Remove 12
     public const PHONE_CREATE_FORM = self::NS . 'form/phone_create';
     public const EMAIL_CREATE_FORM = self::NS . 'form/email_create';
     public const CLIENT_CREATE_FORM = self::NS . 'form/client_create';
-    //public const UI_FIELD_EMAIL_FORM_ADD_EMAIL = self::NS . 'ui/field/email'; //TODO: To Remove 13
-    //public const UI_FIELD_LOCALE_FORM_UPDATE_CLIENT = self::NS . 'ui/field/locale'; //TODO: To Remove 14
-    //public const UI_FIELD_MARKETING_COUNTRY = self::NS . 'ui/field/marketing_country'; //TODO: To Remove 15
     public const UI_DISPLAY_QUOTE_SEARCH_PARAMS = self::NS . 'ui/quote/search/params';
+    public const UI_DISPLAY_MARKETING_SOURCE = self::NS . 'ui/block/marketing_source';
+    public const CHANGE_SPLIT_TIPS  = self::NS . 'change_split_tips';
 
     /** LOGIC PERMISSION */
     public const LOGIC_CLIENT_DATA   = self::NS . 'logic/client_data';
@@ -77,26 +63,10 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     /** --------------- OBJECT LIST --------------------------- */
     public const OBJECT_LIST = [
         self::ACT_USER_CONVERSION   => self::ACT_USER_CONVERSION,
-        //self::ACT_CLIENT_DETAILS    => self::ACT_CLIENT_DETAILS,
-        //self::ACT_CLIENT_ADD_PHONE    => self::ACT_CLIENT_ADD_PHONE,
-        //self::ACT_CLIENT_EDIT_PHONE    => self::ACT_CLIENT_EDIT_PHONE,
-        //self::ACT_USER_SAME_PHONE_INFO    => self::ACT_USER_SAME_PHONE_INFO,
-        //self::ACT_CLIENT_ADD_EMAIL    => self::ACT_CLIENT_ADD_EMAIL,
-        //self::ACT_CLIENT_EDIT_EMAIL    => self::ACT_CLIENT_EDIT_EMAIL,
-        //self::ACT_USER_SAME_EMAIL_INFO    => self::ACT_USER_SAME_EMAIL_INFO,
-        //self::ACT_CLIENT_UPDATE    => self::ACT_CLIENT_UPDATE,
-        //self::ACT_CLIENT_SUBSCRIBE    => self::ACT_CLIENT_SUBSCRIBE,
-        //self::ACT_CLIENT_UNSUBSCRIBE    => self::ACT_CLIENT_UNSUBSCRIBE,
         self::ACT_TAKE_LEAD => self::ACT_TAKE_LEAD,
         self::ACT_PRICE_LINK_RESEARCH => self::ACT_PRICE_LINK_RESEARCH,
         self::UI_BLOCK_CLIENT_INFO  => self::UI_BLOCK_CLIENT_INFO,
-        //self::UI_MENU_CLIENT_INFO   => self::UI_MENU_CLIENT_INFO,
-        //self::ACT_SEARCH_LEADS_BY_IP   => self::ACT_SEARCH_LEADS_BY_IP,
         self::LOGIC_CLIENT_DATA   => self::LOGIC_CLIENT_DATA,
-        //self::UI_FIELD_PHONE_FORM_ADD_PHONE   => self::UI_FIELD_PHONE_FORM_ADD_PHONE,
-        //self::UI_FIELD_EMAIL_FORM_ADD_EMAIL   => self::UI_FIELD_EMAIL_FORM_ADD_EMAIL,
-        //self::UI_FIELD_LOCALE_FORM_UPDATE_CLIENT   => self::UI_FIELD_LOCALE_FORM_UPDATE_CLIENT,
-        //self::UI_FIELD_MARKETING_COUNTRY   => self::UI_FIELD_MARKETING_COUNTRY,
         self::QUERY_SOLD_ALL   => self::QUERY_SOLD_ALL,
         self::QUERY_SOLD_PROJECTS   => self::QUERY_SOLD_PROJECTS,
         self::QUERY_SOLD_DEPARTMENTS   => self::QUERY_SOLD_DEPARTMENTS,
@@ -120,6 +90,8 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::OBJ_LEAD_QUOTE_SEARCH => self::OBJ_LEAD_QUOTE_SEARCH,
         self::OBJ_LEAD_QUICK_SEARCH => self::OBJ_LEAD_QUICK_SEARCH,
         self::OBJ_HEAT_MAP_LEAD => self::OBJ_HEAT_MAP_LEAD,
+        self::UI_DISPLAY_MARKETING_SOURCE => self::UI_DISPLAY_MARKETING_SOURCE,
+        self::CHANGE_SPLIT_TIPS  => self::CHANGE_SPLIT_TIPS,
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -162,14 +134,6 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
         self::ACT_USER_CONVERSION  => [self::ACTION_READ, self::ACTION_DELETE, self::ACTION_CREATE],
-        //self::ACT_CLIENT_DETAILS => [self::ACTION_ACCESS],
-        //self::ACT_CLIENT_ADD_PHONE => [self::ACTION_ACCESS, self::ACTION_CREATE],
-        //self::ACT_CLIENT_EDIT_PHONE => [self::ACTION_ACCESS, self::ACTION_UPDATE],
-        //self::ACT_USER_SAME_PHONE_INFO => [self::ACTION_ACCESS],
-        //self::ACT_CLIENT_ADD_EMAIL => [self::ACTION_ACCESS, self::ACTION_CREATE],
-        //self::ACT_CLIENT_EDIT_EMAIL => [self::ACTION_ACCESS, self::ACTION_UPDATE],
-        //self::ACT_USER_SAME_EMAIL_INFO => [self::ACTION_ACCESS],
-        //self::ACT_CLIENT_UPDATE => [self::ACTION_ACCESS],
         self::UI_BLOCK_CLIENT_INFO => [
             self::ACTION_ACCESS,
             self::ACTION_ACCESS_DETAILS,
@@ -200,17 +164,9 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
             self::ACTION_EDIT,
             self::ACTION_VIEW,
         ],
-        //self::UI_MENU_CLIENT_INFO => [self::ACTION_ACCESS],
-        //self::ACT_CLIENT_SUBSCRIBE => [self::ACTION_ACCESS],
-        //self::ACT_CLIENT_UNSUBSCRIBE => [self::ACTION_ACCESS],
-        //self::ACT_SEARCH_LEADS_BY_IP => [self::ACTION_ACCESS],
         self::ACT_TAKE_LEAD => [self::ACTION_ACCESS],
         self::ACT_PRICE_LINK_RESEARCH => [self::ACTION_ACCESS],
         self::LOGIC_CLIENT_DATA  => [self::ACTION_UNMASK],
-        //self::UI_FIELD_PHONE_FORM_ADD_PHONE  => [self::ACTION_CREATE, self::ACTION_UPDATE],
-        //self::UI_FIELD_EMAIL_FORM_ADD_EMAIL  => [self::ACTION_CREATE, self::ACTION_UPDATE],
-        //self::UI_FIELD_LOCALE_FORM_UPDATE_CLIENT  => [self::ACTION_UPDATE],
-        //self::UI_FIELD_MARKETING_COUNTRY  => [self::ACTION_UPDATE],
         self::QUERY_SOLD_ALL  => [self::ACTION_ACCESS],
         self::QUERY_SOLD_PROJECTS  => [self::ACTION_ACCESS],
         self::QUERY_SOLD_DEPARTMENTS  => [self::ACTION_ACCESS],
@@ -231,6 +187,8 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::OBJ_LEAD_QUOTE_SEARCH => [self::ACTION_ACCESS_QUOTE_SEARCH],
         self::OBJ_LEAD_QUICK_SEARCH => [self::ACTION_ACCESS_QUICK_SEARCH],
         self::OBJ_HEAT_MAP_LEAD => [self::ACTION_ACCESS],
+        self::UI_DISPLAY_MARKETING_SOURCE => [self::ACTION_READ],
+        self::CHANGE_SPLIT_TIPS => [self::ACTION_UPDATE],
     ];
 
     public const ATTR_LEAD_IS_OWNER = [
@@ -526,66 +484,6 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
             self::ATTR_LEAD_HAS_OWNER,
             self::ATTR_IS_COMMON_GROUP
         ],
-        /*self::UI_MENU_CLIENT_INFO    => [
-            self::ATTR_LEAD_IS_OWNER,
-            self::ATTR_LEAD_HAS_OWNER,
-            self::ATTR_IS_COMMON_GROUP
-        ],*/
-        /*self::ACT_CLIENT_DETAILS    => [
-            self::ATTR_LEAD_IS_OWNER,
-            self::ATTR_LEAD_HAS_OWNER,
-            self::ATTR_IS_COMMON_GROUP
-        ],*/
-        /*self::ACT_CLIENT_ADD_PHONE    => [
-            self::ATTR_LEAD_IS_OWNER,
-            self::ATTR_LEAD_HAS_OWNER,
-            self::ATTR_IS_COMMON_GROUP
-        ],*/
-        /*self::ACT_CLIENT_ADD_EMAIL    => [
-            self::ATTR_LEAD_IS_OWNER,
-            self::ATTR_LEAD_HAS_OWNER,
-            self::ATTR_IS_COMMON_GROUP
-        ],*/
-        /*self::ACT_CLIENT_UPDATE    => [
-            self::ATTR_LEAD_IS_OWNER,
-            self::ATTR_LEAD_HAS_OWNER,
-            self::ATTR_IS_COMMON_GROUP
-        ],*/
-        /*self::ACT_CLIENT_SUBSCRIBE    => [
-            self::ATTR_LEAD_IS_OWNER,
-            self::ATTR_LEAD_HAS_OWNER,
-            self::ATTR_IS_COMMON_GROUP
-        ],*/
-        /*self::ACT_CLIENT_UNSUBSCRIBE    => [
-            self::ATTR_LEAD_IS_OWNER,
-            self::ATTR_LEAD_HAS_OWNER,
-            self::ATTR_IS_COMMON_GROUP
-        ],*/
-        /*self::ACT_CLIENT_EDIT_PHONE    => [
-            self::ATTR_LEAD_IS_OWNER,
-            self::ATTR_LEAD_HAS_OWNER,
-            self::ATTR_IS_COMMON_GROUP
-        ],*/
-        /*self::ACT_USER_SAME_PHONE_INFO    => [
-            self::ATTR_LEAD_IS_OWNER,
-            self::ATTR_LEAD_HAS_OWNER,
-            self::ATTR_IS_COMMON_GROUP
-        ],*/
-        /*self::ACT_CLIENT_EDIT_EMAIL    => [
-            self::ATTR_LEAD_IS_OWNER,
-            self::ATTR_LEAD_HAS_OWNER,
-            self::ATTR_IS_COMMON_GROUP
-        ],*/
-        /*self::ACT_USER_SAME_EMAIL_INFO    => [
-            self::ATTR_LEAD_IS_OWNER,
-            self::ATTR_LEAD_HAS_OWNER,
-            self::ATTR_IS_COMMON_GROUP
-        ],*/
-        /*self::ACT_SEARCH_LEADS_BY_IP    => [
-            self::ATTR_LEAD_IS_OWNER,
-            self::ATTR_LEAD_HAS_OWNER,
-            self::ATTR_IS_COMMON_GROUP
-        ],*/
 
         self::ACT_TAKE_LEAD    => [
             self::ATTR_IS_EMPLOYEE_SHIFT_TIME,
@@ -621,7 +519,6 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         ],
 
         self::LOGIC_CLIENT_DATA  => [self::ATTR_LEAD_IS_OWNER],
-        //self::UI_FIELD_PHONE_FORM_ADD_PHONE  => [self::ATTR_LEAD_IS_OWNER],
         self::PHONE_CREATE_FORM  => [
             self::ATTR_LEAD_IS_OWNER,
             self::ATTR_IS_NEW_RECORD
@@ -634,7 +531,6 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
             self::ATTR_LEAD_IS_OWNER,
             self::ATTR_IS_NEW_RECORD
         ],
-        //self::UI_FIELD_EMAIL_FORM_ADD_EMAIL  => [self::ATTR_LEAD_IS_OWNER],
         self::QUERY_SOLD_IS_EMPTY_OWNER  => [self::ATTR_LEAD_HAS_OWNER_QUERY],
         self::CMD_AUTO_REDIAL  => [],
         self::ACT_TAKE_LEAD_FROM_CALL  => [],
@@ -715,19 +611,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
 
         $attributeList = self::OBJECT_ATTRIBUTE_LIST;
         $attributeList[self::UI_BLOCK_CLIENT_INFO][] = $attrStatus;
-        //$attributeList[self::UI_MENU_CLIENT_INFO][] = $attrStatus;
-        //$attributeList[self::ACT_CLIENT_DETAILS][] = $attrStatus;
         $attributeList[self::ACT_TAKE_LEAD][] = $attrStatus;
-        //$attributeList[self::ACT_CLIENT_ADD_PHONE][] = $attrStatus;
-        //$attributeList[self::ACT_CLIENT_ADD_EMAIL][] = $attrStatus;
-        //$attributeList[self::ACT_CLIENT_UPDATE][] = $attrStatus;
-        //$attributeList[self::ACT_CLIENT_SUBSCRIBE][] = $attrStatus;
-        //$attributeList[self::ACT_CLIENT_UNSUBSCRIBE][] = $attrStatus;
-        //$attributeList[self::ACT_CLIENT_EDIT_PHONE][] = $attrStatus;
-        //$attributeList[self::ACT_USER_SAME_PHONE_INFO][] = $attrStatus;
-        //$attributeList[self::ACT_CLIENT_EDIT_EMAIL][] = $attrStatus;
-        //$attributeList[self::ACT_USER_SAME_EMAIL_INFO][] = $attrStatus;
-        //$attributeList[self::ACT_SEARCH_LEADS_BY_IP][] = $attrStatus;
         $attributeList[self::ACT_TAKE_LEAD_FROM_CALL][] = $attrStatus;
         $attributeList[self::ACT_PRICE_LINK_RESEARCH][] = $attrStatus;
         $attributeList[self::OBJ_LEAD_PREFERENCES][] = $attrStatus;

@@ -37,7 +37,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 [
                     'attribute' => 'ssr_shift_id',
                     'value' => static function (ShiftScheduleRule $model) {
-                        return \yii\helpers\Html::a(
+                        return $model->shift->getColorLabel() . '&nbsp; ' . \yii\helpers\Html::a(
                             $model->shift->sh_name,
                             Url::to(['/shift-crud/view', 'id' => $model->shift->sh_id]),
                             ['target' => '_blank', 'data-pjax' => 0]
@@ -50,19 +50,43 @@ $this->params['breadcrumbs'][] = $this->title;
                     'value' => static function (
                         ShiftScheduleRule $model
                     ) {
-                        return $model->getScheduleTypeTitle();
+                        return $model->scheduleType ? $model->scheduleType->getColorLabel() . '&nbsp; ' .
+                            $model->getScheduleTypeTitle() : '-';
                     },
+                    'format' => 'raw'
                 ],
                 'ssr_title',
+                'ssr_start_time_utc',
+                'ssr_end_time_utc',
+
                 'ssr_timezone',
-                'ssr_start_time_loc',
-                'ssr_end_time_loc',
                 'ssr_duration_time',
+                //'ssr_start_time_loc',
+                //'ssr_end_time_loc',
+
+                [
+                    'label' => 'Start Loc Time',
+                    'value' => static function (
+                        ShiftScheduleRule $model
+                    ) {
+                        return '<i class="fa fa-clock-o"></i> ' . Yii::$app->formatter->asTime(strtotime($model->ssr_start_time_utc));
+                    },
+                    'format' => 'raw'
+                ],
+                [
+                    'label' => 'End Loc Time',
+                    'value' => static function (
+                        ShiftScheduleRule $model
+                    ) {
+                        return '<i class="fa fa-clock-o"></i> ' . Yii::$app->formatter->asTime(strtotime($model->ssr_end_time_utc));
+                    },
+                    'format' => 'raw'
+                ],
+
                 'ssr_cron_expression',
                 'ssr_cron_expression_exclude',
                 'ssr_enabled:booleanByLabel',
-                'ssr_start_time_utc',
-                'ssr_end_time_utc',
+
                 'ssr_created_dt:byUserDateTime',
                 'ssr_updated_dt:byUserDateTime',
                 'ssr_created_user_id:username',

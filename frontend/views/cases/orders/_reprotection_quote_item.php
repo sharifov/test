@@ -318,7 +318,7 @@ $productQuoteAbacDto->mapOrderAttributes($order);
                                       <thead>
                                         <tr>
                                               <th style="width: 60px;">Nr</th>
-                                              <th style="width: 50px" title="Recommended">Rec</th>
+                                              <th style="width: 50px" title="Product Quote Info">Data</th>
                                               <th>Status</th>
                                               <th style="width: 45px;" title="Product Quote Options">Opt</th>
                                               <th style="width: 130px">Created</th>
@@ -332,6 +332,7 @@ $productQuoteAbacDto->mapOrderAttributes($order);
                                             <?php
                                             $changeQuote = $quoteRelation->pqcrPq;
                                             $isRecommended = $changeQuote->isRecommended();
+                                            $isConfirmed = $changeQuote->isConfirmed();
 
                                             $relatedPrQtAbacDto = new RelatedProductQuoteAbacDto($changeQuote);
                                             $relatedPrQtAbacDto->mapOrderAttributes($order);
@@ -347,7 +348,9 @@ $productQuoteAbacDto->mapOrderAttributes($order);
                                                     <small>Pq <?=($nr + 1)?>.<?=($key + 1)?></small>
                                                 </td>
                                                 <td>
-                                                    <?= $isRecommended ? Html::tag('i', null, ['class' => 'fas fa-star warning', 'title' => 'Recommended']) : '-' ?>
+                                                    <?= $isConfirmed ? Html::tag('i', null, ['class' => 'fas fa-check warning', 'title' => 'Confirmed']) : '' ?>
+                                                    <?= $isRecommended ? Html::tag('i', null, ['class' => 'fas fa-star warning', 'title' => 'Recommended']) : '' ?>
+                                                    <?= !$isRecommended && !$isConfirmed ? '-' : ''?>
                                                 </td>
                                               <td><?= ProductQuoteStatus::asFormat($changeQuote->pq_status_id)?></td>
                                               <td><?= ($changeQuote->getProductQuoteOptionsCount() ?: '-') ?></td>

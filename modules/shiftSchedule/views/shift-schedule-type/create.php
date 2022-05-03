@@ -1,9 +1,10 @@
 <?php
 
+use modules\shiftSchedule\src\forms\ShiftScheduleTypeForm;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType */
+/* @var $model ShiftScheduleTypeForm */
 
 $this->title = 'Create Shift Schedule Type';
 $this->params['breadcrumbs'][] = ['label' => 'Shift Schedule Types', 'url' => ['index']];

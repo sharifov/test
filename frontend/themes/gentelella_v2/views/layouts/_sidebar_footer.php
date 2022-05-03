@@ -37,7 +37,7 @@ $userFeedbackAbacDto = new UserFeedbackAbacDto();
     <?=Html::a(
         '<span class="fa fa-search"></span>',
         null,
-        ['data-toggle' => 'tooltip', 'data-trigger' => 'hover', 'data-placement' => 'top', 'title' => 'Search menu', 'id' => 'btn-search-menu-toggle']
+        ['id' => 'btn-search-menu-toggle']
 ) ?>
 
     <?php /* if ($user->canRoute('/user-connection/index')) :?>
@@ -95,6 +95,7 @@ const sideBarMenuUrl = '$sideBarMenuUrl';
 $('#btn-search-menu-toggle').on('click', function (e) {
     e.preventDefault();
     $('#search-menu-div').toggle();
+     $('#input-search-menu').focus();
 });
 
 

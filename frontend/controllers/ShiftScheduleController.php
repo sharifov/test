@@ -2,18 +2,24 @@
 
 namespace frontend\controllers;
 
+use common\models\Employee;
+use common\models\UserGroup;
 use Exception;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
+use modules\shiftSchedule\src\entities\shiftScheduleTypeLabel\ShiftScheduleTypeLabel;
+use modules\shiftSchedule\src\entities\userShiftAssign\UserShiftAssign;
 use modules\shiftSchedule\src\entities\userShiftSchedule\search\SearchUserShiftSchedule;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\shiftSchedule\src\services\UserShiftScheduleService;
 use src\auth\Auth;
 use src\helpers\app\AppHelper;
+use src\helpers\setting\SettingHelper;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotAcceptableHttpException;
 use yii\web\NotFoundHttpException;
@@ -35,8 +41,13 @@ class ShiftScheduleController extends FController
                 'rules' => [
                     /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_ACCESS, Access to page shift-schedule/index */
                     [
-                        'actions' => ['index', 'my-data-ajax', 'generate-example', 'remove-user-data', 'get-event'],
-                        'allow' => \Yii::$app->abac->can(null, ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_ACCESS),
+                        'actions' => ['index', 'my-data-ajax', 'generate-example', 'remove-user-data', 'get-event',
+                            'generate-user-schedule', 'legend-ajax', 'calendar', 'calendar-events-ajax'],
+                        'allow' => \Yii::$app->abac->can(
+                            null,
+                            ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE,
+                            ShiftAbacObject::ACTION_ACCESS
+                        ),
                         'roles' => ['@'],
                     ],
                 ],
@@ -52,6 +63,7 @@ class ShiftScheduleController extends FController
     {
         $user = Auth::user();
         $scheduleTypeList = null;
+        $scheduleTypeLabelList = null;
 
         $curMonth = mktime(0, 0, 0, date("m"), 1, date("Y"));
         $prevMonth = mktime(0, 0, 0, date("m") - 1, 1, date("Y"));
@@ -72,8 +84,19 @@ class ShiftScheduleController extends FController
             [UserShiftSchedule::STATUS_APPROVED, UserShiftSchedule::STATUS_DONE]
         );
 
+        $labelData = UserShiftScheduleService::getUserShiftScheduleLabelDataStats(
+            $user->id,
+            $minDate,
+            $maxDate,
+            [UserShiftSchedule::STATUS_APPROVED, UserShiftSchedule::STATUS_DONE]
+        );
+
+       // VarDumper::dump($labelData, 10, true); exit;
+
         $scheduleTypeData = [];
+        $scheduleTypeLabelData = [];
         $scheduleSumData = [];
+        $scheduleLabelSumData = [];
 
         if ($data) {
             foreach ($data as $item) {
@@ -82,12 +105,29 @@ class ShiftScheduleController extends FController
                 $scheduleSumData[$item['uss_sst_id']][$month] = $item;
             }
         }
+        unset($data);
+
+        if ($labelData) {
+            foreach ($labelData as $item) {
+                $scheduleTypeLabelData[$item['stl_key']] = $item['stl_key'];
+                $month = $item['uss_year'] . '-' . $item['uss_month'];
+                $scheduleLabelSumData[$item['stl_key']][$month] = $item;
+            }
+        }
+        unset($labelData);
 
         if ($scheduleTypeData) {
             $scheduleTypeList = ShiftScheduleType::find()->where(['sst_id' => $scheduleTypeData])
                 ->orderBy(['sst_sort_order' => SORT_ASC])->all();
         }
 
+        if ($scheduleTypeLabelData) {
+            $scheduleTypeLabelList = ShiftScheduleTypeLabel::find()->where(['stl_key' => $scheduleTypeLabelData])
+                ->orderBy(['stl_sort_order' => SORT_ASC])->all();
+        }
+
+//        VarDumper::dump($scheduleTypeLabelData, 10, true);
+//        exit;
 //
 //        VarDumper::dump($monthList, 10, true); exit;
 //        VarDumper::dump($data, 10, true); exit;
@@ -100,15 +140,24 @@ class ShiftScheduleController extends FController
 
         $dataProvider = $searchModel->searchByUserId(Yii::$app->request->queryParams, $user->id, $startDate, $endDate);
 
+        $assignedShifts = UserShiftAssign::find()->where(['usa_user_id' => $user->id])->all();
+        $subtypeList = ShiftScheduleType::getSubtypeList();
 
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'monthList' => $monthList,
+
             'scheduleTypeList' => $scheduleTypeList,
+            'scheduleTypeLabelList' => $scheduleTypeLabelList,
+
             'scheduleSumData' => $scheduleSumData,
+            'scheduleLabelSumData' => $scheduleLabelSumData,
+
             'userTimeZone' => $userTimeZone,
             'user' => $user,
+            'assignedShifts' => $assignedShifts,
+            'subtypeList' => $subtypeList
         ]);
     }
 
@@ -125,6 +174,21 @@ class ShiftScheduleController extends FController
 
         $timelineList = UserShiftScheduleService::getTimelineListByUser($userId, $startDt, $endDt);
         return UserShiftScheduleService::getCalendarTimelineJsonData($timelineList);
+    }
+
+    /**
+     * @return array
+     */
+    public function actionLegendAjax()
+    {
+        //\Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $scheduleTypes = ShiftScheduleType::find()->where(['sst_enabled' => true])->all();
+
+
+        return $this->renderPartial('partial/_legend', [
+            'scheduleTypes' => $scheduleTypes,
+        ]);
     }
 
 
@@ -153,6 +217,25 @@ class ShiftScheduleController extends FController
         $userId = Auth::id();
         if (UserShiftScheduleService::removeDataByUser($userId)) {
             Yii::$app->session->addFlash('success', 'Successfully: Remove example data UserId (' . $userId . ')!');
+        }
+        return $this->redirect(['index']);
+    }
+
+    /**
+     * @return Response
+     * @throws Exception
+     */
+    public function actionGenerateUserSchedule(): Response
+    {
+        $userId = Auth::id();
+        $limit = SettingHelper::getShiftScheduleDaysLimit();
+        $offset = SettingHelper::getShiftScheduleDaysOffset();
+        $data = UserShiftScheduleService::generateUserSchedule($limit, $offset, null, [$userId]);
+
+        if ($data) {
+            Yii::$app->session->addFlash('success', 'Successfully: Generate User Schedule data (' . count($data) . ')!');
+        } else {
+            Yii::$app->session->addFlash('warning', 'Warning: Generate User Schedule data is empty!');
         }
         return $this->redirect(['index']);
     }
@@ -197,5 +280,126 @@ class ShiftScheduleController extends FController
             Yii::error(AppHelper::throwableLog($e), 'ShiftScheduleController:actionGetEvent:Throwable');
         }
         throw new BadRequestHttpException();
+    }
+
+    /**
+     * @return string
+     */
+    public function actionCalendar(): string
+    {
+        $user = Auth::user();
+
+        $resourceList = [];
+
+        $userGroups = UserGroup::find()
+            ->where(['ug_disable' => false])
+            ->andWhere(['like', 'ug_name', 'test'])
+            ->orderBy(['ug_name' => SORT_ASC])
+            //->limit(2)
+            ->all();
+
+        if ($userGroups) {
+            foreach ($userGroups as $group) {
+                $resource = [
+                    'id' => 'ug-' . $group->ug_id,
+                    'name' => $group->ug_name,
+                    'color' => '#1dab2f',
+                    'img' => '',
+                    'title' => $group->ug_key,
+                    //'collapsed' => true
+                ];
+
+                $users = Employee::find()
+                    ->joinWith(['userGroupAssigns'])
+                    ->where(['ugs_group_id' => $group->ug_id])
+                    ->andWhere(['status' => Employee::STATUS_ACTIVE])
+                    ->orderBy(['username' => SORT_ASC])
+                    ->limit(7)
+                    ->all();
+                if ($users) {
+                    $userList = [];
+                    foreach ($users as $user) {
+                        $userList[] = [
+                            'id' => 'us-' . $user->id,
+                            'name' => $user->username,
+                            'color' => '#1dab2f',
+                            //'img' => $user->getGravatarUrl(),
+                            'title' => $user->email
+                        ];
+                    }
+                    $resource['title'] = 'users: ' . count($userList);
+                    $resource['children'] = $userList;
+                }
+                $resourceList[] = $resource;
+            }
+        }
+
+
+//        $users = Employee::find()->all();
+//
+//        foreach ($users as $user) {
+//            $resourceList[] = [
+//                'id' => $user->id,
+//                'name' => $user->username,
+//                'color' => '#1dab2f',
+//                'img' => $user->getGravatarUrl(),
+//                'title' => $user->email
+//            ];
+//        }
+
+
+        return $this->render('calendar', [
+            'resourceList' => $resourceList
+        ]);
+    }
+
+    /**
+     * @return array
+     */
+    public function actionCalendarEventsAjax(): array
+    {
+        \Yii::$app->response->format = Response::FORMAT_JSON;
+        $data = [];
+        $resources = [];
+
+        $userId = Auth::id();
+        $startDt = Yii::$app->request->get('start', date('Y-m-d', strtotime('-1 day')));
+        $endDt = Yii::$app->request->get('end', date('Y-m-d H:i:s', strtotime('+1 day')));
+
+        $timelineList = UserShiftScheduleService::getTimelineListByUser($userId, $startDt, $endDt);
+
+
+//        $users = Employee::find()->all();
+//
+//
+//        foreach ($users as $user) {
+//            $resources[] = ['id' => $user->id, 'name' => $user->username,
+//                'color' => '#1dab2f', 'img' => $user->getGravatarUrl(),
+//                'title' => $user->email
+//            ];
+//        }
+
+
+
+//        $dataItem = [];
+//        $dataItem[] = [
+//            'id' => 987456,
+//            //groupId: '999',
+//            'title' => 'TEST 12:30-15:30 UTC',
+//            'description' => 'TEST',
+//            'start' => date('c', strtotime(date('Y-m-d 12:30:00'))),
+//            'end' => date('c', strtotime(date('Y-m-d 15:30:00'))),
+//            'color' => 'red',
+//
+//            'resource' => 'us-' . $userId, //random_int(1, 1),
+//            'extendedProps' => [
+//                'icon' => 'fa fa-user',
+//            ]
+//        ];
+
+        //$data['resources'] = $resources;
+        $data['data'] = UserShiftScheduleService::getCalendarEventsJsonData($timelineList);
+
+        return $data;
     }
 }

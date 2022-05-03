@@ -118,4 +118,22 @@ class ProductQuoteData extends \yii\db\ActiveRecord
     {
         return $this->pqd_value === ProductQuoteDataKey::getValueByKey(ProductQuoteDataKey::RECOMMENDED);
     }
+
+    public static function createConfirmed(int $productQuoteId): self
+    {
+        $self = self::create($productQuoteId);
+        $self->setConfirmed();
+        return $self;
+    }
+
+    public function setConfirmed(): void
+    {
+        $this->pqd_key = ProductQuoteDataKey::CONFIRMED;
+        $this->pqd_value = ProductQuoteDataKey::getValueByKey($this->pqd_key);
+    }
+
+    public function isConfirmed(): bool
+    {
+        return $this->pqd_value === ProductQuoteDataKey::getValueByKey(ProductQuoteDataKey::CONFIRMED);
+    }
 }
