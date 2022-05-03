@@ -23,8 +23,8 @@ $bundle = \frontend\assets\UserShiftCalendarAsset::register($this);
             ?>
             <?= Html::a(
                 '<i class="fa fa-plus-circle"></i> Add Schedule Event',
-                ['shift-event-add'],
-                ['class' => 'btn btn-success', 'id' => 'btn-shift-event-add']
+                '#',
+                ['class' => 'btn btn-success', 'id' => 'btn-shift-event-add', 'title' => 'Add Schedule Event']
             ) ?>
         <?php endif; ?>
     </p>
@@ -40,12 +40,14 @@ $bundle = \frontend\assets\UserShiftCalendarAsset::register($this);
 <?php
 $ajaxUrl = Url::to(['shift-schedule/calendar-events-ajax']);
 $resourceListJson = Json::encode($resourceList);
-$today = date('Y-m-d');
+$today = date('Y-m-d', strtotime('+1 day'));
+$modalUrl = Url::to(['/shift-schedule/add-event']);
 
 $js = <<<JS
 var resourceListJson = $resourceListJson;
 var calendarEventsAjaxUrl = '$ajaxUrl';
 var today = '$today';
+var modalUrl = '$modalUrl';
 
 mobiscroll.setOptions({
     theme: 'ios',
@@ -54,7 +56,7 @@ mobiscroll.setOptions({
 
 mobiscroll.momentTimezone.moment = moment;
 
-var inst = $('#calendar').mobiscroll().eventcalendar({
+window.inst = $('#calendar').mobiscroll().eventcalendar({
         view: {
             timeline: { type: 'day', size: 2 },
             refDate: today
@@ -264,16 +266,48 @@ var inst = $('#calendar').mobiscroll().eventcalendar({
                 // }
         
                 inst.resources = data.resources;
-                inst.setEvents(data.data);
+                setTimelineEvents(data.data);
         
                 mobiscroll.toast({
                     message: 'New events loaded'
                 });
             }, 'jsonp');
     }
+    
+    window.setTimelineEvents = function (data)
+    {
+        window.inst.setEvents(data);
+    }
+    
+    window.addTimelineEvent = function (data) {
+        window.inst.addEvent(data);
+    } 
     // $.getJSON(calendarEventsAjaxUrl, function (events) {
     //     inst.setEvents(events);
     // }, 'jsonp');
+    
+    $('#btn-shift-event-add').on('click', function (e) {
+        e.preventDefault(); 
+        let calendarStartDt = window,i
+        let title = $(this).attr('title');
+        let modal = $('#modal-md');
+        modal.find('.modal-body').html('<div style="text-align:center;font-size: 40px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
+        modal.find('.modal-title').html(title);
+        modal.find('.modal-body').load(modalUrl, {}, function( response, status, xhr ) {
+            if (status == 'error') {
+                createNotifyByObject({
+                    'title': 'Error',
+                    'type': 'error',
+                    'text': xhr.statusText
+                })
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
+        });
+    });
 
 JS;
 
