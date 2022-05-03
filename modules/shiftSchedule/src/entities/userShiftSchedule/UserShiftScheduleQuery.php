@@ -2,6 +2,9 @@
 
 namespace modules\shiftSchedule\src\entities\userShiftSchedule;
 
+use common\models\UserGroup;
+use common\models\UserGroupAssign;
+
 class UserShiftScheduleQuery
 {
     public static function manualBatchInsert(
@@ -50,5 +53,23 @@ class UserShiftScheduleQuery
             'uss_created_dt',
             'uss_updated_dt'
         ], $insertData)->execute();
+    }
+
+    /**
+     * @param string $startDt
+     * @param string $endDt
+     * @param array $groupIds
+     * @return UserShiftSchedule[]
+     */
+    public static function getTimelineListByUser(string $startDt, string $endDt, array $groupIds): array
+    {
+        return UserShiftSchedule::find()
+            ->join('inner join', UserGroupAssign::tableName(), 'ugs_user_id = uss_user_id')
+            ->andWhere(['ugs_group_id' => $groupIds])
+            ->andWhere(['AND',
+                ['>=', 'uss_start_utc_dt', date('Y-m-d H:i:s', strtotime($startDt))],
+                ['<=', 'uss_start_utc_dt', date('Y-m-d H:i:s', strtotime($endDt))]
+            ])
+            ->all();
     }
 }

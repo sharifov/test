@@ -14,6 +14,7 @@ use modules\shiftSchedule\src\entities\shiftScheduleTypeLabel\ShiftScheduleTypeL
 use modules\shiftSchedule\src\entities\userShiftAssign\UserShiftAssign;
 use modules\shiftSchedule\src\entities\userShiftSchedule\search\SearchUserShiftSchedule;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
+use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftScheduleQuery;
 use modules\shiftSchedule\src\forms\ShiftScheduleCreateForm;
 use modules\shiftSchedule\src\helpers\UserShiftScheduleHelper;
 use modules\shiftSchedule\src\services\UserShiftScheduleService;
@@ -303,6 +304,7 @@ class ShiftScheduleController extends FController
         $user = Auth::user();
 
         $resourceList = [];
+        $resourceListIds = [];
 
         $userGroups = UserGroup::find()
             ->where(['ug_disable' => false])
@@ -341,11 +343,13 @@ class ShiftScheduleController extends FController
                     $resource['children'] = $userList;
                 }
                 $resourceList[] = $resource;
+                $groupIds[] = $group->ug_id;
             }
         }
 
         return $this->render('calendar', [
-            'resourceList' => $resourceList
+            'resourceList' => $resourceList,
+            'groupIds' => $groupIds
         ]);
     }
 
@@ -356,44 +360,12 @@ class ShiftScheduleController extends FController
     {
         \Yii::$app->response->format = Response::FORMAT_JSON;
         $data = [];
-        $resources = [];
 
-        $userId = Auth::id();
         $startDt = Yii::$app->request->get('start', date('Y-m-d', strtotime('-1 day')));
         $endDt = Yii::$app->request->get('end', date('Y-m-d H:i:s', strtotime('+1 day')));
-
-        $timelineList = UserShiftScheduleService::getTimelineListByUser($userId, $startDt, $endDt);
-
-
-//        $users = Employee::find()->all();
-//
-//
-//        foreach ($users as $user) {
-//            $resources[] = ['id' => $user->id, 'name' => $user->username,
-//                'color' => '#1dab2f', 'img' => $user->getGravatarUrl(),
-//                'title' => $user->email
-//            ];
-//        }
-
-
-
-//        $dataItem = [];
-//        $dataItem[] = [
-//            'id' => 987456,
-//            //groupId: '999',
-//            'title' => 'TEST 12:30-15:30 UTC',
-//            'description' => 'TEST',
-//            'start' => date('c', strtotime(date('Y-m-d 12:30:00'))),
-//            'end' => date('c', strtotime(date('Y-m-d 15:30:00'))),
-//            'color' => 'red',
-//
-//            'resource' => 'us-' . $userId, //random_int(1, 1),
-//            'extendedProps' => [
-//                'icon' => 'fa fa-user',
-//            ]
-//        ];
-
-        //$data['resources'] = $resources;
+        $groups = Yii::$app->request->get('groups', '');
+        $groups = explode(',', (string)$groups);
+        $timelineList = UserShiftScheduleQuery::getTimelineListByUser($startDt, $endDt, $groups);
         $data['data'] = UserShiftScheduleHelper::getCalendarEventsData($timelineList);
 
         return $data;

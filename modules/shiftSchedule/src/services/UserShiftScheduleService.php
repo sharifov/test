@@ -407,6 +407,7 @@ class UserShiftScheduleService
                 $endDateTime->format('Y-m-d H:i:s'),
                 $duration,
                 $form->status,
+                UserShiftSchedule::TYPE_MANUAL,
                 $form->scheduleType
             );
             $this->repository->save($userShiftSchedule);

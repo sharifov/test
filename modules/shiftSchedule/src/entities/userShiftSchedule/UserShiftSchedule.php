@@ -301,6 +301,7 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
         string $endDateTime,
         int $duration,
         int $status,
+        int $type,
         int $scheduleType
     ): self {
         $self = new self();
@@ -310,7 +311,8 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
         $self->uss_end_utc_dt = $endDateTime;
         $self->uss_duration = $duration;
         $self->uss_status_id = $status;
-        $self->uss_type_id = $scheduleType;
+        $self->uss_type_id = $type;
+        $self->uss_sst_id = $scheduleType;
         return $self;
     }
 }

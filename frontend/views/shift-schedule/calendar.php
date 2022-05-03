@@ -7,6 +7,7 @@ use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $resourceList array */
+/* @var $groupIds array */
 
 $this->title = 'Users Shift Calendar';
 $this->params['breadcrumbs'][] = $this->title;
@@ -42,9 +43,11 @@ $ajaxUrl = Url::to(['shift-schedule/calendar-events-ajax']);
 $resourceListJson = Json::encode($resourceList);
 $today = date('Y-m-d', strtotime('+1 day'));
 $modalUrl = Url::to(['/shift-schedule/add-event']);
+$groupIdsJson = Json::encode($groupIds);
 
 $js = <<<JS
 var resourceListJson = $resourceListJson;
+var groupIds = $groupIdsJson;
 var calendarEventsAjaxUrl = '$ajaxUrl';
 var today = '$today';
 var modalUrl = '$modalUrl';
@@ -125,7 +128,7 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
             let startDate = year + '-' + month + '-' + day;
             let endDate = endYear + '-' + endMonth + '-' + endDay;
             
-            getCalendarEvents(startDate, endDate);
+            getCalendarEvents(startDate, endDate, groupIds);
         },
         
         
@@ -251,20 +254,9 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
 
 
 
-    function getCalendarEvents(date, endDate) {
-         $.getJSON(calendarEventsAjaxUrl + '?start=' + date + '&end=' + endDate + '&callback', function (data) {
-                // var events = [];
-                //
-                // for (var i = 0; i < data.length; i++) {
-                //     var event = data[i];
-                //     events.push({
-                //         start: event.start,
-                //         end: event.end,
-                //         title: event.title,
-                //         resource: event.resource
-                //     });
-                // }
-        
+    function getCalendarEvents(date, endDate, groups) {
+         let params = groups.join(',');
+         $.getJSON(calendarEventsAjaxUrl + '?start=' + date + '&end=' + endDate + '&callback&groups=' + params, function (data) {
                 inst.resources = data.resources;
                 setTimelineEvents(data.data);
         
