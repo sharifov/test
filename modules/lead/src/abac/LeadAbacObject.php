@@ -26,6 +26,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     public const ACT_TAKE_LEAD_FROM_CALL = self::NS . 'act/take-from-call';
     public const ACT_PRICE_LINK_RESEARCH = self::NS . 'act/price-link-research';
     public const ACT_ADD_AUTO_QUOTES = self::NS . 'act/auto-add-quotes';
+    public const ACT_CHANGE_OWNER = self::NS . 'act/change-owner';
 
     /** UI PERMISSION */
     public const UI_BLOCK_CLIENT_INFO  = self::NS . 'ui/block/client-info';
@@ -92,6 +93,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::OBJ_HEAT_MAP_LEAD => self::OBJ_HEAT_MAP_LEAD,
         self::UI_DISPLAY_MARKETING_SOURCE => self::UI_DISPLAY_MARKETING_SOURCE,
         self::CHANGE_SPLIT_TIPS  => self::CHANGE_SPLIT_TIPS,
+        self::ACT_CHANGE_OWNER => self::ACT_CHANGE_OWNER,
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -189,6 +191,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::OBJ_HEAT_MAP_LEAD => [self::ACTION_ACCESS],
         self::UI_DISPLAY_MARKETING_SOURCE => [self::ACTION_READ],
         self::CHANGE_SPLIT_TIPS => [self::ACTION_UPDATE],
+        self::ACT_CHANGE_OWNER => [self::ACTION_UPDATE],
     ];
 
     public const ATTR_LEAD_IS_OWNER = [
@@ -556,6 +559,9 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
             self::ATTR_IS_IN_PROJECT,
             self::ATTR_IS_IN_DEPARTMENT,
         ],
+        self::ACT_CHANGE_OWNER => [
+            self::ATTR_LEAD_HAS_OWNER
+        ]
     ];
 
     /**
@@ -627,6 +633,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         $attributeList[self::OBJ_LEAD_QUICK_SEARCH][] = $attrStatus;
         $attributeList[self::ACT_ADD_AUTO_QUOTES][] = self::ATTR_QUOTES_COUNT;
         $attributeList[self::ACT_ADD_AUTO_QUOTES][] = self::ATTR_FLIGHT_SEGMENT_COUNT;
+        $attributeList[self::ACT_CHANGE_OWNER][] = $attrStatus;
 
         return $attributeList;
     }
