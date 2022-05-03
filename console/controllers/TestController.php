@@ -105,28 +105,6 @@ use yii\rbac\Role;
 
 class TestController extends Controller
 {
-    public function actionRr()
-    {
-        $user = Employee::findOne(294);
-        $updatedUser = Employee::findOne(294);
-        $form = new UpdateForm($user, $updatedUser);
-        $form->form_roles = ['admin', 'agent_qw'];
-        $form->validate();
-        VarDumper::dump($form);
-        VarDumper::dump($form->getErrors());
-    }
-
-    public function actionTestWs()
-    {
-        Notifications::publish(
-            'testCommand',
-            ['user_id' => 295],
-            [
-                'data' => 'testData',
-            ]
-        );
-    }
-
     public function actionT()
     {
         VarDumper::dump(CasesAbacObject::getObjectAttributeList());
