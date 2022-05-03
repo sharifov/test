@@ -10,6 +10,7 @@ use common\models\Lead;
 use common\models\Notifications;
 use common\models\Project;
 use common\models\Quote;
+use common\models\QuoteCommunication;
 use common\models\search\LeadSearch;
 use common\models\Sms;
 use common\models\UserConnection;
@@ -1575,14 +1576,15 @@ class ClientChatController extends FController
             }
 
             $captures = array_reduce($form->quotes, function ($acc, $quote) {
-                if ($capture = $this->generateQuoteCapture($quote)) {
-                    /** @var Quote $quote */
-                    $data = $quote->getPricesData();
+                $qc_uid = QuoteCommunication::generateUid();
+                /** @var Quote $quote */
+                if ($capture = $this->generateQuoteCapture($quote, $qc_uid)) {
+                    $quotePricesData = $quote->getPricesData();
 
                     // In this place were complicated logic with concats & etc.
                     // Did we had a reason, that didn't allow to use something like `number_format/4` or `sprtintf/2`?
                     /** @var string $selling */
-                    $selling = sprintf('%0.2f', $data['total']['selling'] ?? 0);
+                    $selling = sprintf('%0.2f', $quotePricesData['total']['selling'] ?? 0);
 
                     // In this line, basically, we are multiply the value by `10000`
                     //
@@ -1595,7 +1597,7 @@ class ClientChatController extends FController
                     // 2. Why we doing it? =) Are actual price measured in another currency/part?
                     $price = (int)(str_replace('.', '', $selling)) * 100;
 
-                    $acc[] = ['price' => $price, 'data' => $capture, 'quoteId' => $quote->id];
+                    $acc[] = ['price' => $price, 'data' => $capture, 'quoteCommunicationUid' => $qc_uid, 'quoteId' => $quote->id];
                 }
                 return $acc;
             }, []);
@@ -1660,9 +1662,15 @@ class ClientChatController extends FController
 
             $quoteIds = ArrayHelper::getColumn($captures, 'quoteId');
             /** @var Quote[] $quoteList */
-            $quoteList = Quote::find()->where(['IN', 'id', $quoteIds])->all();
-            foreach ($quoteList as $quote) {
-                Repo::createForChat($chatId, $quote->id);
+            $quoteList = ArrayHelper::map(Quote::find()->where(['IN', 'id', $quoteIds])->all(), 'id', function ($quote) {
+                return $quote;
+            });
+
+            foreach ($captures as $capture) {
+                $quoteId = $capture['quoteId'];
+                $quoteCommunicationUid = $capture['quoteCommunicationUid'];
+                $quote = $quoteList[$quoteId];
+                Repo::createForChat($chatId, $quoteId, $quoteCommunicationUid);
                 $quote->setStatusSend();
                 if (!$this->quoteRepository->save($quote)) {
                     Yii::error($quote->errors, 'ClientChatController::sendQuote:Quote:save');
@@ -2063,7 +2071,13 @@ class ClientChatController extends FController
         return $lead->getQuotesProvider([], [Quote::STATUS_CREATED, Quote::STATUS_SENT, Quote::STATUS_OPENED]);
     }
 
-    private function generateQuoteCapture(Quote $quote): array
+    /**
+     * @param Quote $quote
+     * @param null|string $qc_uid
+     * @return array
+     * @throws \Exception
+     */
+    private function generateQuoteCapture(Quote $quote, ?string $qc_uid = null): array
     {
         $communication = Yii::$app->communication;
 
@@ -2079,11 +2093,6 @@ class ClientChatController extends FController
             if (count($content_data['quotes']) > 1) {
                 throw new \DomainException('Count quotes > 1');
             }
-//            if (isset($content_data['quotes'][0])) {
-//                $tmp = $content_data['quotes'][0];
-//                unset($content_data['quotes']);
-//                $content_data['quote'] = $tmp;
-//            }
         } else {
             throw new \DomainException('Not found quote');
         }
@@ -2110,7 +2119,7 @@ class ClientChatController extends FController
 
             return [
                 'img' => $mailCapture['data']['img'],
-                'checkoutUrl' => $quote->getCheckoutUrlPage(),
+                'checkoutUrl' => $quote->getCheckoutUrlPage($qc_uid),
             ];
         } catch (\Throwable $e) {
             Yii::error(VarDumper::dumpAsString([
