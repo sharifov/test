@@ -713,48 +713,41 @@ class LeadController extends FController
                     if ($comForm->c_email_tpl_id > 0) {
                         $previewEmailForm->e_email_tpl_id = $comForm->c_email_tpl_id;
 
-                        $tpl = EmailTemplateType::findOne($comForm->c_email_tpl_id);
-                        //$mailSend = $communication->mailSend(7, 'cl_offer', 'test@gmail.com', 'test2@gmail.com', $content_data, $data, 'ru-RU', 10);
-
-                        if ($comForm->offerList) {
-                            $content_data = $lead->getOfferEmailData($comForm->offerList, $projectContactInfo);
-                        } else {
-                            $content_data = $lead->getEmailData2($comForm->quoteList, $projectContactInfo, $lang);
-                        }
-
+                        // Initiate basic state of `$content_data`
+                        $content_data = ($comForm->offerList)
+                            ? $lead->getOfferEmailData($comForm->offerList, $projectContactInfo)
+                            : $lead->getEmailData2($comForm->quoteList, $projectContactInfo, $lang);
                         $content_data['content'] = $comForm->c_email_message;
                         $content_data['subject'] = $comForm->c_email_subject;
-                        $content_data['department'] = [];
-                        if ($department = $lead->lDep) {
-                            $content_data['department']['key'] = $department->dep_key;
-                            $content_data['department']['name'] = $department->dep_name;
-                        }
+                        $content_data['department'] = is_null($lead->lDep) ? [] : ['key' => $lead->lDep->dep_key, 'name' => $lead->lDep->dep_name];
 
                         $previewEmailForm->e_email_subject = $comForm->c_email_subject;
                         $previewEmailForm->e_content_data = $content_data;
 
-                        //echo json_encode($content_data); exit;
-
-                        //echo (Html::encode(json_encode($content_data)));
-                        //VarDumper::dump($content_data, 10 , true); exit;
-
-                        $mailPreview = $communication->mailPreview($lead->project_id, ($tpl ? $tpl->etp_key : ''), $comForm->c_email_from, $comForm->c_email_to, $content_data, $language);
-
+                        $tpl = EmailTemplateType::findOne($comForm->c_email_tpl_id);
+                        $templateType = $tpl ? $tpl->etp_key : '';
                         if ($tpl) {
-                            $tplConfigQuotes = $tpl->etp_params_json['quotes'];
-                            if ($tplConfigQuotes['originalRequired'] === true) {
-                                $checkOriginalQuoteExistence = false;
-                                foreach ($lead->quotes as $quote) {
-                                    if ($quote->type_id === Quote::TYPE_ORIGINAL) {
-                                        $checkOriginalQuoteExistence = true;
-                                    }
-                                }
+                            if (isset($tpl->etp_params_json['quotes']['originalRequired']) && $tpl->etp_params_json['quotes']['originalRequired'] === true) {
+                                return array_merge($lead->quotes, function ($acc, $quote) {
+                                    return $quote->type_id === Quote::TYPE_ORIGINAL ? true : $acc;
+                                }, false);
                             }
                         }
 
+                        $mailPreview = $communication->mailPreview($lead->project_id, $templateType, $comForm->c_email_from, $comForm->c_email_to, $content_data, $language);
                         if ($mailPreview && isset($mailPreview['data'])) {
                             $selectedQuotes = count($comForm->quoteList);
-                            if (isset($mailPreview['error']) && $mailPreview['error']) {
+                            $tplConfigQuotes = $tpl->etp_params_json['quotes']; // << This row can make unexpected behavior
+
+                            /*
+                             * In this case we must use mutually exclusive condition sequence, so the conditions for
+                             * them were taken out as apart variables. I hope this improve readability.
+                             */
+                            $mailPreviewScenario_1 = isset($mailPreview['error']) && $mailPreview['error'];
+                            $mailPreviewScenario_2 = isset($checkOriginalQuoteExistence) && !$checkOriginalQuoteExistence;
+                            $mailPreviewScenario_3 = (!(isset($tplConfigQuotes['minSelectedCount']) && $tplConfigQuotes['minSelectedCount'] <= $selectedQuotes) || !(isset($tplConfigQuotes['maxSelectedCount']) && $tplConfigQuotes['maxSelectedCount'] >= $selectedQuotes)) && $tplConfigQuotes['selectRequired'];
+
+                            if ($mailPreviewScenario_1) {
                                 $errorJson = @json_decode($mailPreview['error'], true);
                                 $comForm->addError('c_email_preview', 'Communication Server response: ' . ($errorJson['message'] ?? $mailPreview['error']));
 
@@ -766,22 +759,15 @@ class LeadController extends FController
                                 }
                                 Yii::error($errorLog, 'LeadController:view:mailPreview');
                                 $comForm->c_preview_email = 0;
-                            } elseif (isset($checkOriginalQuoteExistence) && !$checkOriginalQuoteExistence) {
+                            } elseif ($mailPreviewScenario_2) {
                                 $comForm->addError('originalQuotesRequired', 'Original quote required');
                                 Yii::info('Lead dont have quote with type original', 'info\LeadController:view:mailPreview');
                                 $comForm->c_preview_email = 0;
-                            } elseif ((!(isset($tplConfigQuotes['minSelectedCount']) && $tplConfigQuotes['minSelectedCount'] <= $selectedQuotes) || !(isset($tplConfigQuotes['maxSelectedCount']) && $tplConfigQuotes['maxSelectedCount'] >= $selectedQuotes)) && $tplConfigQuotes['selectRequired']) {
+                            } elseif ($mailPreviewScenario_3) {
                                 $comForm->addError('minMaxSelectedQuotes', 'Allowed quantity of selected quotes is from ' . $tplConfigQuotes['minSelectedCount'] . ' to ' . $tplConfigQuotes['maxSelectedCount'] . ' inclusive. You selected ' . $selectedQuotes . '.');
                                 Yii::info('Allowed quantity of selected quotes is from ' . $tplConfigQuotes['minSelectedCount'] . ' to ' . $tplConfigQuotes['maxSelectedCount'] . ' inclusive. You selected ' . $selectedQuotes . '.', 'info\LeadController:view:mailPreview');
                                 $comForm->c_preview_email = 0;
                             } else {
-//                                if ($comForm->offerList) {
-//                                    $service = Yii::createObject(OfferSendLogService::class);
-//                                    foreach ($comForm->offerList as $offerId) {
-//                                        $service->log(new CreateDto($offerId, OfferSendLogType::EMAIL, $user->id, $comForm->c_email_to));
-//                                    }
-//                                }
-
                                 $emailBodyHtml = EmailService::prepareEmailBody($mailPreview['data']['email_body_html']);
 
                                 $keyCache = md5($emailBodyHtml);
