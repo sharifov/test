@@ -29,11 +29,13 @@ class Repo
     /**
      * @param int $chatId
      * @param int $quoteId
+     * @param null|string $uid
      * @return bool
      */
-    public static function createForChat(int $chatId, int $quoteId): bool
+    public static function createForChat(int $chatId, int $quoteId, ?string $uid = null): bool
     {
         $model = new QuoteCommunication([
+            'qc_uid' => $uid,
             'qc_communication_type' => CommunicationForm::TYPE_CHAT,
             'qc_communication_id' => $chatId,
             'qc_quote_id' => $quoteId
