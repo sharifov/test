@@ -73,12 +73,12 @@ JS;
                     <input type="text" id="input-search" class="form-control" placeholder="Search for..." style="flex: 1;">
                 </div>
             </div>
-            <div style="max-height: 500px; overflow-x: auto">
+            <div id="group-wrapper">
                 <?php $groupName = ''; ?>
                 <ol class="list-group list-group-numbered">
                     <?php foreach ($usersGroupAssign as $groupName => $users) : ?>
                         <li class="list-group-item d-flex justify-content-between align-items-center align-content-center">
-                            <div>
+                            <div style="width: 100%;">
                                 <div class="d-flex align-items-center align-content-center justify-content-between" style="margin-bottom: 10px;">
                                     <div class="d-flex align-items-center align-content-center">
                                       <h6 style="margin-right: 10px; margin-bottom: 0;"><strong><?= $groupName ?></strong></h6>
@@ -88,9 +88,9 @@ JS;
                                       <span class="toggleGroupedUsers" data-check="true" style="margin-right: 10px;cursor: pointer;"><i class="far fa-check-circle"></i> Toggle Users</span>
                                     </div>
                                 </div>
-                                <div class="border" style="padding: 10px;">
+                                <div class="border user-wrapper">
                                     <?php foreach ($users as $userId => $userName) : ?>
-                                        <label class="user-label" data-username="<?= $userName ?>">
+                                        <label class="user-label" data-username="<?= $userName ?>" style="min-width: 125px;">
                                             <?= Html::checkbox('', $model->users ? in_array($userId, $model->getUsersBatch()) : false, ['value' => $userId, 'class' => 'input-users']) ?>
                                             <span class="input-username"><?= $userName ?></span>
                                         </label>
@@ -146,10 +146,11 @@ $('.input-users[value="'+val+'"]').prop("checked", $(this).is(":checked"));
 });
 $(document).off('keyup change', '#input-search').on('keyup change', '#input-search', function (e) {
     let val = $(this).val();
+    $('.user-label').hide();
     if (val === '') {
         $('.user-label').show();
     } else {
-        $('.user-label[data-username*="'+val+'"], .user-label[data-username^="'+val+'"]').hide();
+        $('.user-label[data-username*="'+val+'"], .user-label[data-username^="'+val+'"]').show();
     }
 });
 $(document).off('click', '#submit-add-event').on('click', '#submit-add-event', function (e) {
@@ -161,7 +162,6 @@ $(document).off('click', '#submit-add-event').on('click', '#submit-add-event', f
             users.push($(this).val());
         }
     });
-    console.log(users.join());
     $('#users').val(users.join());
     $('#$formId').submit();
 });

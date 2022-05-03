@@ -48,7 +48,7 @@ class UserGroupAssignQuery extends \yii\db\ActiveQuery
             ->innerJoin(Employee::tableName(), 'ugs_user_id = id')
             ->innerJoin(UserGroup::tableName(), 'ugs_group_id = ug_id')
             ->andWhere(['ugs_group_id' => $groupIds])
-            ->orderBy(['groupName' => SORT_ASC])
+            ->orderBy(['groupName' => SORT_ASC, 'username' => SORT_ASC])
 //            ->groupBy(['ugs_user_id'])
             ->asArray()
             ->all();
