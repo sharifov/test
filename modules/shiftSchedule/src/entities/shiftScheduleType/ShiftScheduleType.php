@@ -3,6 +3,7 @@
 namespace modules\shiftSchedule\src\entities\shiftScheduleType;
 
 use common\models\Employee;
+use frontend\helpers\JsonHelper;
 use modules\shiftSchedule\src\entities\shiftScheduleRule\ShiftScheduleRule;
 use modules\shiftSchedule\src\entities\shiftScheduleTypeLabel\ShiftScheduleTypeLabel;
 use modules\shiftSchedule\src\entities\shiftScheduleTypeLabelAssign\ShiftScheduleTypeLabelAssign;
@@ -68,6 +69,9 @@ class ShiftScheduleType extends \yii\db\ActiveRecord
             [['sst_enabled', 'sst_readonly', 'sst_sort_order',
                 'sst_updated_user_id', 'sst_subtype_id'], 'integer'],
             [['sst_params_json', 'sst_updated_dt'], 'safe'],
+            [['sst_params_json'], 'filter', 'filter' => static function ($value) {
+                return JsonHelper::decode($value);
+            }],
             [['sst_key', 'sst_name', 'sst_icon_class', 'sst_css_class'], 'string', 'max' => 100],
             [['sst_title'], 'string', 'max' => 255],
             [['sst_color'], 'string', 'max' => 20],

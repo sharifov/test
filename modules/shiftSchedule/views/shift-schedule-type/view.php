@@ -75,12 +75,16 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
             ],
             'sst_css_class',
-            'sst_params_json',
+            //'sst_params_json',
             'sst_sort_order',
             'sst_updated_dt:datetime',
             'sst_updated_user_id:username',
         ],
     ]) ?>
+    </div>
+    <div class="col-md-6">
+        <h5><?php echo $model->getAttributeLabel('sst_params_json') ?></h5>
+        <pre><?php echo \yii\helpers\VarDumper::dump($model->sst_params_json, 10, true); ?></pre>
     </div>
 
 </div>

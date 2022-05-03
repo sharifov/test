@@ -3,6 +3,7 @@
 namespace modules\shiftSchedule\src\entities\shiftScheduleTypeLabel;
 
 use common\models\Employee;
+use frontend\helpers\JsonHelper;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\shiftScheduleTypeLabelAssign\ShiftScheduleTypeLabelAssign;
 use Yii;
@@ -41,7 +42,7 @@ class ShiftScheduleTypeLabel extends \yii\db\ActiveRecord
     }
 
     /**
-     * {@inheritdoc}
+     * @return array
      */
     public function rules()
     {
@@ -49,6 +50,9 @@ class ShiftScheduleTypeLabel extends \yii\db\ActiveRecord
             [['stl_key', 'stl_name'], 'required'],
             [['stl_enabled', 'stl_sort_order', 'stl_updated_user_id'], 'integer'],
             [['stl_params_json', 'stl_updated_dt'], 'safe'],
+            [['stl_params_json'], 'filter', 'filter' => static function ($value) {
+                return JsonHelper::decode($value);
+            }],
             [['stl_key', 'stl_name'], 'string', 'max' => 100],
             [['stl_color'], 'string', 'max' => 20],
             [['stl_icon_class'], 'string', 'max' => 50],
