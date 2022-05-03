@@ -304,7 +304,7 @@ class ShiftScheduleController extends FController
         $user = Auth::user();
 
         $resourceList = [];
-        $resourceListIds = [];
+        $groupIds = [];
 
         $userGroups = UserGroup::find()
             ->where(['ug_disable' => false])
