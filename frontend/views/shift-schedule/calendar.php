@@ -69,8 +69,8 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
         displayTimezone: 'local',
         //displayTimezone: 'Europe/Chisinau', //'local',
         timezonePlugin: mobiscroll.momentTimezone,
-        //clickToCreate: true,
-        dragToCreate: true,
+        clickToCreate: true,
+        dragToCreate: false,
         dragToMove: true,
         dragToResize: true,
 //        renderScheduleEvent: function (data) {
@@ -140,42 +140,43 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
                 addMealPopup();
             }, 100);*/
         },
-        onEventClick: function (args, inst) {
-            oldMeal = $.extend({}, args.event);
-            tempMeal = args.event;
-
-            //if (!popup.isVisible()) {
-                //editMealPopup(args);
-                console.log(args);
-            //}
-        },
+        // onEventClick: function (args, inst) {
+            // oldMeal = $.extend({}, args.event);
+            // tempMeal = args.event;
+            //
+            // //if (!popup.isVisible()) {
+            //     //editMealPopup(args);
+            //     console.log(args);
+            // //}
+        // },
         
-        onEventCreated: function () {
-            mobiscroll.toast({
-                message: 'Event created'
-            });
-        },
-        onEventUpdated: function () {
-            mobiscroll.toast({
-                message: 'Event updated'
-            });
-        },
-        onEventCreateFailed: function (event) {
-            mobiscroll.toast({
-                message: 'Can\'t create event'
-            });
-        },
-        onEventUpdateFailed: function (event) {
-            mobiscroll.toast({
-                message: 'Can\'t move event'
-            });
-        }
+        // onEventCreated: function () {
+        //     mobiscroll.toast({
+        //         message: 'Event created'
+        //     });
+        // },
+        // onEventUpdated: function () {
+        //     mobiscroll.toast({
+        //         message: 'Event updated'
+        //     });
+        // },
+        // onEventCreateFailed: function (event) {
+        //     mobiscroll.toast({
+        //         message: 'Can\'t create event'
+        //     });
+        // },
+        // onEventUpdateFailed: function (event) {
+        //     mobiscroll.toast({
+        //         message: 'Can\'t move event'
+        //     });
+        // }
         
     }).mobiscroll('getInst');
 
 
 
     function createUpdateEvent(event, isNew) {
+            console.log(event);
             mobiscroll.confirm({
                 title: 'Are you sure you want to proceed?',
                 message: 'It looks like someone from the team won\'t be able to join the meeting.',
@@ -184,13 +185,15 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
                 callback: function (res) {
                     if (res) {
                         if (isNew) {
-                            calendar.addEvent(event);
+                            inst.addEvent(event);
                         } else {
-                            calendar.updateEvent(event);
+                            inst.updateEvent(event);
                         }
                             mobiscroll.toast({
                             message: isNew ? 'Event created' : 'Event updated'
                         });
+                    } else {
+                        inst.removeEvent(event)
                     }
                 }
             });

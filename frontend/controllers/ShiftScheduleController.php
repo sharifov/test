@@ -308,9 +308,10 @@ class ShiftScheduleController extends FController
 
         $userGroups = UserGroup::find()
             ->where(['ug_disable' => false])
-//            ->andWhere(['like', 'ug_name', 'test'])
+            ->join('inner join', UserGroupAssign::tableName(), 'ug_id = ugs_group_id')
+            ->andWhere(['ugs_user_id' => Auth::id()])
             ->orderBy(['ug_name' => SORT_ASC])
-            ->limit(2)
+//            ->limit(5)
             ->all();
 
         if ($userGroups) {
