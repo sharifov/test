@@ -257,6 +257,17 @@ class Client extends ActiveRecord
         return $this->hasMany(ClientEmail::class, ['client_id' => 'id']);
     }
 
+    public function getOnlyEmails(): array
+    {
+        return $this->hasMany(ClientEmail::class, ['client_id' => 'id'])->select('email')->asArray()->column();
+    }
+
+    public function getOnlyPhones(): array
+    {
+        return $this->hasMany(ClientPhone::class, ['client_id' => 'id'])->select('phone')->asArray()->column();
+    }
+
+
     /**
      * @return ActiveQuery
      */
