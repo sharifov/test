@@ -28,6 +28,27 @@ class FieldAccess
         $this->isNewRecord = $isNewRecord;
     }
 
+    public function canEditOneOfMultipleFields(): bool
+    {
+        return $this->canEdit('user_departments')
+            || $this->canEdit('form_roles')
+            || $this->canEdit('status')
+            || $this->canEdit('up_work_start_tm')
+            || $this->canEdit('up_work_minutes')
+            || $this->canEdit('up_timezone')
+            || $this->canEdit('up_inbox_show_limit_leads')
+            || $this->canEdit('up_default_take_limit_leads')
+            || $this->canEdit('client_chat_user_channel')
+            || $this->canEdit('up_min_percent_for_take_leads')
+            || $this->canEdit('up_frequency_minutes')
+            || $this->canEdit('up_base_amount')
+            || $this->canEdit('up_commission_percent')
+            || $this->canEdit('up_call_expert_limit')
+            || $this->canEdit('up_auto_redial')
+            || $this->canEdit('up_kpi_enable')
+            || $this->canEdit('up_leaderboard_enabled');
+    }
+
     public function canShowProfileWithParameters(): bool
     {
         return $this->canShow('username')
