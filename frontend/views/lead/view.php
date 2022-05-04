@@ -19,6 +19,7 @@
  * @var AbacCallFromNumberList $callFromNumberList
  * @var AbacSmsFromNumberList $smsFromNumberList
  * @var AbacEmailList $emailFromList
+ * @var string $qc_uid
  */
 
 use common\models\Employee;
@@ -81,7 +82,7 @@ $unsubscribedEmails = array_column($lead->project->emailUnsubscribes, 'eu_email'
 
 $leadAbacDto = new LeadAbacDto($lead, Auth::id());
 
-/** @abac new $leadAbacDto, LeadAbacObject::LOGIC_CLIENT_DATA, LeadAbacObject::ACTION_UNMASK, Disable mask client data on Lead view*/
+/** @abac new $leadAbacDto, LeadAbacObject::LOGIC_CLIENT_DATA, LeadAbacObject::ACTION_UNMASK, Disable mask client data on Lead view */
 $disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIENT_DATA, LeadAbacObject::ACTION_UNMASK);
 ?>
 
@@ -91,205 +92,202 @@ $disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIEN
 ]) ?>
 
 
+    <div class="main-sidebars">
+        <div class="panel panel-main">
+            <?= $this->render('partial/_actions', [
+                'leadForm' => $leadForm
+            ]);
+            ?>
 
-<div class="main-sidebars">
-    <div class="panel panel-main">
-        <?= $this->render('partial/_actions', [
-            'leadForm' => $leadForm
-        ]);
-?>
+            <div class="col-md-12">
+                <?= \common\widgets\Alert::widget() ?>
+            </div>
 
-        <div class="col-md-12">
-            <?= \common\widgets\Alert::widget() ?>
-        </div>
+            <div class="col-md-6">
 
-        <div class="col-md-6">
+                <?php yii\widgets\Pjax::begin(['id' => 'pjax-lead-products-wrap', 'enablePushState' => false, 'enableReplaceState' => false, 'timeout' => 5000]) ?>
 
-        <?php yii\widgets\Pjax::begin(['id' => 'pjax-lead-products-wrap', 'enablePushState' => false, 'enableReplaceState' => false, 'timeout' => 5000]) ?>
-
-            <?= $this->render('products/_products', [
-                'lead' => $lead,
-                'itineraryForm' => $itineraryForm,
-                'quotesProvider' => $quotesProvider,
-                'leadForm' => $leadForm,
-                'is_manager' => $is_manager,
-            ]) ?>
-
-            <?php if ($lead->products) : ?>
-                <?= $this->render('offers/lead_offers', [
+                <?= $this->render('products/_products', [
                     'lead' => $lead,
+                    'itineraryForm' => $itineraryForm,
+                    'quotesProvider' => $quotesProvider,
                     'leadForm' => $leadForm,
-                    'dataProviderOffers' => $dataProviderOffers,
                     'is_manager' => $is_manager,
                 ]) ?>
 
-                <?= $this->render('orders/lead_orders', [
-                    'lead' => $lead,
-                    'leadForm' => $leadForm,
-                    'dataProviderOrders' => $dataProviderOrders,
-                    'is_manager' => $is_manager,
-                ]) ?>
-            <?php endif; ?>
-        <?php \yii\widgets\Pjax::end(); ?>
+                <?php if ($lead->products) : ?>
+                    <?= $this->render('offers/lead_offers', [
+                        'lead' => $lead,
+                        'leadForm' => $leadForm,
+                        'dataProviderOffers' => $dataProviderOffers,
+                        'is_manager' => $is_manager,
+                    ]) ?>
 
-        </div>
-        <div class="col-md-6">
+                    <?= $this->render('orders/lead_orders', [
+                        'lead' => $lead,
+                        'leadForm' => $leadForm,
+                        'dataProviderOrders' => $dataProviderOrders,
+                        'is_manager' => $is_manager,
+                    ]) ?>
+                <?php endif; ?>
+                <?php \yii\widgets\Pjax::end(); ?>
 
-            <?php /** @abac $leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS, Give access to Client Info block on lead */ ?>
-            <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS)) : ?>
-                <?= $this->render('client-info/client_info', [
-                    'lead' => $lead,
-                    'leadForm' => $leadForm,
-                    'is_manager' => $is_manager,
-                    'unsubscribe' => $unsubscribe,
-                    'unsubscribedEmails' => $unsubscribedEmails,
-                    'leadAbacDto' => $leadAbacDto,
-                    'disableMasking' => $disableMasking
-                ]) ?>
-            <?php endif; ?>
+            </div>
+            <div class="col-md-6">
 
-            <?php if (Auth::can('lead-view/lead-preferences/view', ['lead' => $lead])) : ?>
-                <div id="lead-preferences">
-                    <?= $this->render('partial/_lead_preferences', [
+                <?php /** @abac $leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS, Give access to Client Info block on lead */ ?>
+                <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS)) : ?>
+                    <?= $this->render('client-info/client_info', [
+                        'lead' => $lead,
+                        'leadForm' => $leadForm,
+                        'is_manager' => $is_manager,
+                        'unsubscribe' => $unsubscribe,
+                        'unsubscribedEmails' => $unsubscribedEmails,
+                        'leadAbacDto' => $leadAbacDto,
+                        'disableMasking' => $disableMasking
+                    ]) ?>
+                <?php endif; ?>
+
+                <?php if (Auth::can('lead-view/lead-preferences/view', ['lead' => $lead])) : ?>
+                    <div id="lead-preferences">
+                        <?= $this->render('partial/_lead_preferences', [
+                            'lead' => $lead
+                        ]) ?>
+                    </div>
+                <?php endif; ?>
+
+                <div id="lead-data">
+                    <?= $this->render('partial/_lead_data', [
                         'lead' => $lead
                     ]) ?>
                 </div>
-            <?php endif; ?>
 
-            <div id="lead-data">
-                <?= $this->render('partial/_lead_data', [
-                    'lead' => $lead
-                ]) ?>
-            </div>
+                <?php /** @abac $leadAbacDto, LeadAbacObject::ACT_USER_CONVERSION, LeadAbacObject::ACTION_READ, View list User Conversation */ ?>
+                <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_USER_CONVERSION, LeadAbacObject::ACTION_READ)) : ?>
+                    <?php echo $this->render('user_conversion/lead_user_conversion', [
+                        'lead' => $lead,
+                        'leadAbacDto' => $leadAbacDto,
+                    ]) ?>
+                <?php endif; ?>
 
-            <?php /** @abac $leadAbacDto, LeadAbacObject::ACT_USER_CONVERSION, LeadAbacObject::ACTION_READ, View list User Conversation */ ?>
-            <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_USER_CONVERSION, LeadAbacObject::ACTION_READ)) : ?>
-                <?php echo $this->render('user_conversion/lead_user_conversion', [
-                    'lead' => $lead,
-                    'leadAbacDto' => $leadAbacDto,
-                ]) ?>
-            <?php endif; ?>
+                <?php if (Auth::can('lead-view/check-list/view', ['lead' => $lead])) : ?>
+                    <?= $this->render('checklist/lead_checklist', [
+                        'lead' => $lead,
+                        'comForm' => $comForm,
+                        'leadId' => $lead->id,
+                        'dataProvider' => $dataProviderChecklist,
+                        'isAdmin' => $is_admin,
+                        'modelLeadChecklist' => $modelLeadChecklist,
+                    ]) ?>
+                <?php endif; ?>
 
-            <?php if (Auth::can('lead-view/check-list/view', ['lead' => $lead])) : ?>
-                <?= $this->render('checklist/lead_checklist', [
-                    'lead' => $lead,
-                    'comForm'       => $comForm,
-                    'leadId'        => $lead->id,
-                    'dataProvider'  => $dataProviderChecklist,
-                    'isAdmin'       => $is_admin,
-                    'modelLeadChecklist'       => $modelLeadChecklist,
-                ]) ?>
-            <?php endif; ?>
+                <?php if (Auth::can('lead-view/task-list/view', ['lead' => $lead])) : ?>
+                    <?= $this->render('partial/_task_list', [
+                        'lead' => $lead
+                    ]) ?>
+                <?php endif; ?>
 
-            <?php if (Auth::can('lead-view/task-list/view', ['lead' => $lead])) : ?>
-                <?= $this->render('partial/_task_list', [
-                    'lead' => $lead
-                ]) ?>
-            <?php endif; ?>
+                <?php if (Auth::can('lead-view/notes/view', ['lead' => $lead])) : ?>
+                    <?= $this->render('notes/agent_notes', [
+                        'lead' => $lead,
+                        'dataProviderNotes' => $dataProviderNotes,
+                        'modelNote' => $modelNote,
+                    ]) ?>
+                <?php endif; ?>
 
-            <?php if (Auth::can('lead-view/notes/view', ['lead' => $lead])) : ?>
-                <?= $this->render('notes/agent_notes', [
-                    'lead' => $lead,
-                    'dataProviderNotes'  => $dataProviderNotes,
-                    'modelNote'  => $modelNote,
-                ]) ?>
-            <?php endif;?>
+                <?php $leadCommunicationBlockAbacDto = new LeadCommunicationBlockAbacDto($lead, [], [], [], $user->id); ?>
+                <?php /** @abac $leadCommunicationBlockAbacDto, LeadCommunicationBlockAbacObject::NS, LeadCommunicationBlockAbacObject::ACTION_VIEW, View communication block on Lead View page */ ?>
+                <?php if (Yii::$app->abac->can($leadCommunicationBlockAbacDto, LeadCommunicationBlockAbacObject::NS, LeadCommunicationBlockAbacObject::ACTION_VIEW, $user)) : ?>
+                    <?= $this->render('communication/lead_communication', [
+                        'qc_uid' => $qc_uid,
+                        'leadForm' => $leadForm,
+                        'previewEmailForm' => $previewEmailForm,
+                        'previewSmsForm' => $previewSmsForm,
+                        'comForm' => $comForm,
+                        'leadId' => $lead->id,
+                        'dataProvider' => $dataProviderCommunicationLog,
+                        'isAdmin' => $is_admin,
+                        'lead' => $lead,
+                        'unsubscribe' => $unsubscribe,
+                        'unsubscribedEmails' => $unsubscribedEmails,
+                        'disableMasking' => $disableMasking,
+                        'callFromNumberList' => $callFromNumberList,
+                        'smsFromNumberList' => $smsFromNumberList,
+                        'emailFromList' => $emailFromList,
+                    ]); ?>
+                <?php endif; ?>
 
-            <?php $leadCommunicationBlockAbacDto = new LeadCommunicationBlockAbacDto($lead, [], [], [], $user->id); ?>
-            <?php /** @abac $leadCommunicationBlockAbacDto, LeadCommunicationBlockAbacObject::NS, LeadCommunicationBlockAbacObject::ACTION_VIEW, View communication block on Lead View page */ ?>
-            <?php if (Yii::$app->abac->can($leadCommunicationBlockAbacDto, LeadCommunicationBlockAbacObject::NS, LeadCommunicationBlockAbacObject::ACTION_VIEW, $user)) : ?>
-                <?= $this->render('communication/lead_communication', [
-                    'leadForm'      => $leadForm,
-                    'previewEmailForm' => $previewEmailForm,
-                    'previewSmsForm' => $previewSmsForm,
-                    'comForm'       => $comForm,
-                    'leadId'        => $lead->id,
-                    'dataProvider'  => $dataProviderCommunicationLog,
-                    'isAdmin'       => $is_admin,
-                    'lead' => $lead,
-                    'unsubscribe' => $unsubscribe,
-                    'unsubscribedEmails' => $unsubscribedEmails,
-                    'disableMasking' => $disableMasking,
-                    'callFromNumberList' => $callFromNumberList,
-                    'smsFromNumberList' => $smsFromNumberList,
-                    'emailFromList' => $emailFromList,
-                ]); ?>
-            <?php endif;?>
+                <?php if (FileStorageSettings::isEnabled() && Auth::can('lead-view/files/view', ['lead' => $lead])) : ?>
+                    <?= FileStorageListWidget::byLead(
+                        $lead->id,
+                        FileStorageAccessService::canLeadUploadWidget($lead)
+                    ) ?>
+                <?php endif; ?>
 
-            <?php if (FileStorageSettings::isEnabled() && Auth::can('lead-view/files/view', ['lead' => $lead])) : ?>
-                <?= FileStorageListWidget::byLead(
-                    $lead->id,
-                    FileStorageAccessService::canLeadUploadWidget($lead)
-                ) ?>
-            <?php endif; ?>
-
-            <?php if (!$lead->client->isExcluded()) : ?>
-                <?php if (Auth::can('lead-view/call-expert/view', ['lead' => $lead])) : ?>
-                    <?php  if (Yii::$app->user->identity->isAllowCallExpert) : ?>
-                        <?= $this->render('call-expert/lead_call_expert', [
-                            'lead' => $lead,
-                            'comForm'       => $comForm,
-                            'leadId'        => $lead->id,
-                            'dataProvider'  => $dataProviderCallExpert,
-                            'isAdmin'       => $is_admin,
-                            'modelLeadCallExpert'       => $modelLeadCallExpert,
-                        ]) ?>
+                <?php if (!$lead->client->isExcluded()) : ?>
+                    <?php if (Auth::can('lead-view/call-expert/view', ['lead' => $lead])) : ?>
+                        <?php if (Yii::$app->user->identity->isAllowCallExpert) : ?>
+                            <?= $this->render('call-expert/lead_call_expert', [
+                                'lead' => $lead,
+                                'comForm' => $comForm,
+                                'leadId' => $lead->id,
+                                'dataProvider' => $dataProviderCallExpert,
+                                'isAdmin' => $is_admin,
+                                'modelLeadCallExpert' => $modelLeadCallExpert,
+                            ]) ?>
+                        <?php endif; ?>
                     <?php endif; ?>
                 <?php endif; ?>
-            <?php endif; ?>
+
+            </div>
+
+            <div class="col-md-6">
+
+                <!--            --><?php //if (!$lead->isNewRecord) :?>
+                <!--                <div class="row">-->
+                <!--                    <div class="col-md-12">-->
+                <!--                        --><?php //if(!$lead->l_answered):?>
+                <!---->
+                <!--                            --><?php //if($lead->isProcessing()):?>
+                <!--                                --><?php //= Html::a(($lead->l_answered ? '<i class="fa fa-commenting-o"></i>Make UnAnswered' : '<i class="fa fa-commenting"></i> Make Answered'), ['lead/update2', 'id' => $lead->id, 'act' => 'answer'], [
+                //                                    'class' => 'btn '.($lead->l_answered ? 'btn-success' : 'btn-info'),
+                //                                    'data-pjax' => false,
+                //                                    'data' => [
+                //                                        'confirm' => 'Are you sure?',
+                //                                        'method' => 'post',
+                //                                        'pjax' => 0
+                //                                    ],
+                //                                ])?>
+                <!--                            --><?php //else:?>
+                <!--                                <span class="badge badge-warning"><i class="fa fa-commenting-o"></i> ANSWERED: false</span>-->
+                <!--                            --><?php //endif;?>
+                <!---->
+                <!--                        --><?php //else:?>
+                <!--                            <span class="badge badge-success"><i class="fa fa-commenting-o"></i> ANSWERED: true</span>-->
+                <!--                        --><?php //endif;?>
+                <!---->
+                <!--                    </div>-->
+                <!---->
+                <!--                </div>-->
+                <!--            --><?php //endif;?>
+
+
+                <!--                --><?php //= $this->render('quotes/quote_list', [
+                //                    'dataProvider' => $quotesProvider,
+                //                    'lead' => $lead,
+                //                    'leadForm' => $leadForm,
+                //                    'is_manager' => $is_manager,
+                //                ]);?>
+
+
+            </div>
+
+            <div class="clearfix"></div>
+            <br/>
+            <br/>
 
         </div>
-
-        <div class="col-md-6">
-
-<!--            --><?php //if (!$lead->isNewRecord) :?>
-<!--                <div class="row">-->
-<!--                    <div class="col-md-12">-->
-<!--                        --><?php //if(!$lead->l_answered):?>
-<!---->
-<!--                            --><?php //if($lead->isProcessing()):?>
-<!--                                --><?php //= Html::a(($lead->l_answered ? '<i class="fa fa-commenting-o"></i>Make UnAnswered' : '<i class="fa fa-commenting"></i> Make Answered'), ['lead/update2', 'id' => $lead->id, 'act' => 'answer'], [
-//                                    'class' => 'btn '.($lead->l_answered ? 'btn-success' : 'btn-info'),
-//                                    'data-pjax' => false,
-//                                    'data' => [
-//                                        'confirm' => 'Are you sure?',
-//                                        'method' => 'post',
-//                                        'pjax' => 0
-//                                    ],
-//                                ])?>
-<!--                            --><?php //else:?>
-<!--                                <span class="badge badge-warning"><i class="fa fa-commenting-o"></i> ANSWERED: false</span>-->
-<!--                            --><?php //endif;?>
-<!---->
-<!--                        --><?php //else:?>
-<!--                            <span class="badge badge-success"><i class="fa fa-commenting-o"></i> ANSWERED: true</span>-->
-<!--                        --><?php //endif;?>
-<!---->
-<!--                    </div>-->
-<!---->
-<!--                </div>-->
-<!--            --><?php //endif;?>
-
-
-
-
-
-<!--                --><?php //= $this->render('quotes/quote_list', [
-//                    'dataProvider' => $quotesProvider,
-//                    'lead' => $lead,
-//                    'leadForm' => $leadForm,
-//                    'is_manager' => $is_manager,
-//                ]);?>
-
-
-        </div>
-
-        <div class="clearfix"></div>
-        <br/>
-        <br/>
-
     </div>
-</div>
 
 <?php
 Modal::begin([

@@ -180,6 +180,7 @@ $canShowEmailData = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_
                                             <?= $previewEmailActiveForm->field($previewEmailForm, 'e_offer_list')->hiddenInput()->label(false); ?>
                                             <?= $previewEmailActiveForm->field($previewEmailForm, 'e_email_message_edited')->hiddenInput(['id' => 'e_email_message_edited'])->label(false); ?>
                                             <?= $previewEmailActiveForm->field($previewEmailForm, 'e_email_subject_origin')->hiddenInput()->label(false); ?>
+                                            <?= $previewEmailActiveForm->field($previewEmailForm, 'e_qc_uid')->hiddenInput(['value' => $qc_uid])->label(false); ?>
                                         </div>
                                         <div class="col-sm-4 form-group">
                                             <?= $previewEmailActiveForm->field($previewEmailForm, 'e_email_to')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => $emailToReadonly]) ?>
@@ -360,8 +361,8 @@ $canShowEmailData = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_
                                 $this->registerJs('$("body").removeClass("modal-open"); $(".modal-backdrop").remove();updateCommunication();');
                             }
 
-                                echo $communicationActiveForm->errorSummary($comForm);
-
+                            echo $communicationActiveForm->errorSummary($comForm);
+                            echo $communicationActiveForm->field($comForm, 'c_qc_uid')->label(false)->hiddenInput(['value' => $qc_uid]);
                             ?>
 
 
