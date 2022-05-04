@@ -163,6 +163,7 @@ class AddQuoteService
             $quotes = array_reverse($quotes);
         }
         foreach ($quotes as $quote) {
+            $quote['createTypeId'] = Quote::CREATE_TYPE_AUTO_SELECT;
             $this->createQuoteFromSearch($quote, $lead, $employee);
         }
     }
