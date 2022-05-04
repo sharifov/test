@@ -298,7 +298,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         'operators' =>  [self::OP_EQUAL2]
     ];
 
-    protected const ATTR_IS_IN_DEPARTMENT = [
+    public const ATTR_IS_IN_DEPARTMENT = [
         'optgroup' => 'User',
         'id' => self::NS . 'isInDepartment',
         'field' => 'isInDepartment',
@@ -311,7 +311,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         'operators' =>  [self::OP_EQUAL2]
     ];
 
-    protected const ATTR_IS_IN_PROJECT = [
+    public const ATTR_IS_IN_PROJECT = [
         'optgroup' => 'User',
         'id' => self::NS . 'isInProject',
         'field' => 'isInProject',

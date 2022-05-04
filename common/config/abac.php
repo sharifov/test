@@ -33,6 +33,7 @@ return [
         'lead-user-conversion' => \src\model\leadUserConversion\abac\LeadUserConversionAbacObject::class,
         'user-feedback' => \modules\user\userFeedback\abac\UserFeedbackAbacObject::class,
         'shift' => \modules\shiftSchedule\src\abac\ShiftAbacObject::class,
+        'lead-queue-business' => \modules\lead\src\abac\queue\LeadQueueBusinessInboxAbacObject::class,
     ],
     'scanDirs' => [
         '/modules/',
