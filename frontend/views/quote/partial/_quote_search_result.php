@@ -133,11 +133,9 @@ if ($quotes && (isset($quotes['count']) && $quotes['count'] > 0)) :
 
     $("#pjax-search-quote-filter").on("pjax:complete", function() {
         $('#pjax-search-quote-filter #quote-search-submit i').removeClass('fa-spin fa-spinner disabled').addClass('fa-check').removeAttr('disabled');
-        $('.search-results__wrapper').removeClass('loading');
-        // get the div position
-    var position = $('#list-view_quote_search_result').position();
-    // scroll modal to position top
-    $("#search-results__modal").scrollTop(position.top);
+        $('.search-results__wrapper').removeClass('loading');        
+        var position = $('#list-view_quote_search_result').position();
+        $("#search-results__modal").scrollTop(position.top);
     });
     
     JS;
