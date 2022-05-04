@@ -2,10 +2,10 @@
 # Dump postgres database
 #
 # Example:
-#   import-pgsql.sh < /tmp/crm-pgsql.sql
+#   import-pgsql.sh < /tmp/pgsql.sql
 #
 
-dotenv="/var/www/crm/.env"
+dotenv="/var/www/app/.env"
 if [ ! -e "$dotenv" ]; then
     echo "Error: cant' locate $dotenv"
     exit 1

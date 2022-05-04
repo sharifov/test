@@ -15,6 +15,6 @@
 
 - name: Ensure beanstalkd is started
   systemd:
-     name: beanstalkd
-     state: started
-     enabled: yes
+    name: beanstalkd
+    state: started
+    enabled: true

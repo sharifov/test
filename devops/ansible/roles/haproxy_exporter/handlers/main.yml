@@ -1,7 +1,0 @@
----
-- name: restart haproxy_exporter
-  become: true
-  systemd:
-    daemon_reload: true
-    name: haproxy_exporter
-    state: restarted
