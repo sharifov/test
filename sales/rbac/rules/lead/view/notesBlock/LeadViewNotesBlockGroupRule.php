@@ -3,7 +3,7 @@
 namespace sales\rbac\rules\lead\view\notesBlock;
 
 use common\models\Lead;
-use sales\access\EmployeeGroupAccess;
+use src\access\EmployeeGroupAccess;
 use yii\rbac\Rule;
 
 class LeadViewNotesBlockGroupRule extends Rule
