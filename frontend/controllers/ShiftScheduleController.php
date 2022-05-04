@@ -16,11 +16,13 @@ use modules\shiftSchedule\src\entities\userShiftSchedule\search\SearchUserShiftS
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftScheduleQuery;
 use modules\shiftSchedule\src\forms\ShiftScheduleCreateForm;
+use modules\shiftSchedule\src\forms\SingleEventCreateForm;
 use modules\shiftSchedule\src\helpers\UserShiftScheduleHelper;
 use modules\shiftSchedule\src\services\UserShiftScheduleService;
 use src\auth\Auth;
 use src\helpers\app\AppHelper;
 use src\helpers\setting\SettingHelper;
+use src\repositories\NotFoundException;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
@@ -56,7 +58,7 @@ class ShiftScheduleController extends FController
                     /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_ACCESS, Access to page shift-schedule/index */
                     [
                         'actions' => ['index', 'my-data-ajax', 'generate-example', 'remove-user-data', 'get-event',
-                            'generate-user-schedule', 'legend-ajax', 'calendar', 'calendar-events-ajax', 'add-event'],
+                            'generate-user-schedule', 'legend-ajax', 'calendar', 'calendar-events-ajax', 'add-event', 'add-single-event'],
                         'allow' => \Yii::$app->abac->can(
                             null,
                             ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE,
@@ -323,13 +325,14 @@ class ShiftScheduleController extends FController
             ->all();
 
         if ($userGroups) {
-            foreach ($userGroups as $group) {
+            foreach ($userGroups as $key => $group) {
                 $resource = [
                     'id' => 'ug-' . $group->ug_id,
                     'name' => $group->ug_name,
                     'color' => '#1dab2f',
                     'img' => '',
                     'title' => $group->ug_key,
+                    'collapsed' => $key !== 0
                 ];
 
                 $users = Employee::find()
@@ -401,6 +404,34 @@ class ShiftScheduleController extends FController
         return $this->renderAjax('partial/_shift_schedule_create_form', [
             'model' => $form,
             'usersGroupAssign' => $usersGroupAssign
+        ]);
+    }
+
+    public function actionAddSingleEvent()
+    {
+        $form = new SingleEventCreateForm();
+
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            $event = $this->shiftScheduleService->createSingleManual($form, Auth::id(), Auth::user()->timezone ?: null);
+            $data = UserShiftScheduleHelper::getCalendarEventsData([$event]);
+            return '<script>(function() {$("#modal-md").modal("hide");let timelineData = ' . json_encode($data) . ';addTimelineEvent(timelineData);})();</script>';
+        }
+
+        if (!Yii::$app->request->isPost) {
+            $userIdCreateFor = Yii::$app->request->get('userId', null);
+            $startDate = Yii::$app->request->get('startDate', null);
+            if (!$user = Employee::findOne(['id' => $userIdCreateFor])) {
+                throw new yii\web\MethodNotAllowedHttpException('User not found by id: ' . $userIdCreateFor, 404);
+            }
+
+            $form->userId = $userIdCreateFor;
+            $form->startDateTime = (new \DateTimeImmutable($startDate))->format('Y-m-d H:i');
+            $form->duration = UserShiftSchedule::DEFAULT_DURATION;
+            $form->status = UserShiftSchedule::STATUS_APPROVED;
+        }
+
+        return $this->renderAjax('partial/_shift_schedule_create_form_single_event', [
+            'singleEventForm' => $form
         ]);
     }
 }

@@ -129,6 +129,39 @@ class TestController extends Controller
         );
     }
 
+    public function actionRr()
+    {
+        $user = Employee::findOne(294);
+        $updatedUser = Employee::findOne(294);
+        $form = new UpdateForm($user, $updatedUser);
+        $form->form_roles = ['admin', 'agent_qw'];
+        $form->validate();
+        VarDumper::dump($form);
+        VarDumper::dump($form->getErrors());
+    }
+
+    public function actionW()
+    {
+        $s = \Yii::createObject(LeadRedialAssigner::class);
+        $s->assign(513249, 295, new \DateTimeImmutable());
+        die;
+        $call = Call::findOne(3386979);
+        $message = (new AcceptCallMessage())->create($call, 295);
+        Notifications::publish('acceptedCall', ['user_id' => 295], $message);
+//        Notifications::publish('acceptedCallHide', ['user_id' => 295], []);
+    }
+
+    public function actionTestWs()
+    {
+        Notifications::publish(
+            'testCommand',
+            ['user_id' => 295],
+            [
+                'data' => 'testData',
+            ]
+        );
+    }
+
     public function actionT()
     {
         VarDumper::dump(CasesAbacObject::getObjectAttributeList());
