@@ -49,7 +49,7 @@ use yii\widgets\ActiveForm;
                 <div class="col-md-4">
                     <div class="row">
                        <?php /** @abac null, SaleListAbacObject::UI_SALE_ID, SaleListAbacObject::ACTION_READ, hide SalesID for certain roles */?>
-                        <?php if (!Yii::$app->abac->can(null, SaleListAbacObject::UI_SALE_ID, SaleListAbacObject::ACTION_READ)) : ?>
+                        <?php if (Yii::$app->abac->can(null, SaleListAbacObject::UI_SALE_ID, SaleListAbacObject::ACTION_READ)) : ?>
                             <div class="col-md-4">
                                 <?= $form->field($model, 'sale_id')->input('number', ['min' => 1]) ?>
                             </div>
