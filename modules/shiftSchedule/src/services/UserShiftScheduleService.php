@@ -2,6 +2,7 @@
 
 namespace modules\shiftSchedule\src\services;
 
+use common\models\Employee;
 use Cron\CronExpression;
 use Exception;
 use modules\shiftSchedule\src\entities\shift\Shift;
@@ -305,6 +306,7 @@ class UserShiftScheduleService
                             $isDue = false;
                         }
                     }
+
                     if ($isDue) {
                         if ($rule->shift && $rule->shift->sh_enabled) {
                             // echo $rule->shift->sh_id . "\r\n";
@@ -320,12 +322,40 @@ class UserShiftScheduleService
                                         'Y-m-d H:i:s',
                                         strtotime($date . ' ' . $rule->ssr_start_time_utc)
                                     );
+
+                                    $timeEnd = date(
+                                        'Y-m-d H:i:s',
+                                        strtotime($date . ' ' . $rule->ssr_end_time_utc)
+                                    );
+
                                     if (isset($timeLineData[$user->usa_user_id][$rule->ssr_id][$timeStart])) {
                                         continue;
                                     }
 
-                                    $data[$date][$user->usa_user_id][$rule->ssr_id] =
-                                        self::createUserTimeLineByRule($rule, $user->usa_user_id, $date);
+                                    $existEvenList = UserShiftScheduleService::getUserEventIdList(
+                                        $user->usa_user_id,
+                                        $timeStart,
+                                        $timeEnd,
+                                        [UserShiftSchedule::STATUS_APPROVED,
+                                            UserShiftSchedule::STATUS_DONE, UserShiftSchedule::STATUS_CANCELED],
+                                        [ShiftScheduleType::SUBTYPE_WORK_TIME, ShiftScheduleType::SUBTYPE_HOLIDAY]
+                                    );
+
+                                    if (empty($existEvenList)) {
+                                        $data[$date][$user->usa_user_id][$rule->ssr_id] =
+                                            self::createUserTimeLineByRule($rule, $user->usa_user_id, $date);
+                                    } else {
+                                        $dataInfo = [
+                                            'message' => 'existEvenList',
+                                            'data' => [
+                                                'userId' => $user->usa_user_id,
+                                                'date' => $date,
+                                                'eventListId' => $existEvenList,
+                                                'rule' => $rule->attributes
+                                            ]
+                                        ];
+                                        Yii::info($dataInfo, 'info\UserShiftScheduleService:existEvenList');
+                                    }
                                     //echo  '['.$date.'] Rule: ' . $rule->ssr_id . ' - shId: ' . $rule->shift->sh_id .
                                     // ' - user: ' . $user->usa_user_id . "\r\n";
                                 }
@@ -414,5 +444,86 @@ class UserShiftScheduleService
             $userShiftScheduleCreatedList[] = $userShiftSchedule;
         }
         return $userShiftScheduleCreatedList;
+    }
+
+    /**
+     * @param int $userId
+     * @param string $startDateTime
+     * @param string $endDateTime
+     * @param array|null $statusListId
+     * @param array|null $subTypeListId
+     * @return array
+     */
+    public static function getExistEventIdList(
+        int $userId,
+        string $startDateTime,
+        string $endDateTime,
+        ?array $statusListId = [],
+        ?array $subTypeListId = []
+    ): array {
+
+        $query = UserShiftSchedule::find();
+        $query->alias('uss');
+        $query->select(['uss.uss_id']);
+        $query->where(['uss.uss_user_id' => $userId]);
+
+        if (!empty($statusListId)) {
+            $query->andWhere(['uss.uss_status_id' => $statusListId]);
+        }
+
+        if (!empty($subTypeListId)) {
+            $query->innerJoin(ShiftScheduleType::tableName() . ' AS sst', 'sst.sst_id = uss.uss_sst_id');
+            $query->andWhere(['sst.sst_subtype_id' => $subTypeListId]);
+        }
+
+        if (!empty($startDateTime) && !empty($endDateTime)) {
+            $query->andWhere([
+                'OR',
+                ['between', 'uss.uss_start_utc_dt', $startDateTime, $endDateTime],
+                ['between', 'uss.uss_end_utc_dt', $startDateTime, $endDateTime],
+                [
+                    'AND',
+                    ['>=', 'uss.uss_start_utc_dt', $startDateTime],
+                    ['<=', 'uss.uss_end_utc_dt', $endDateTime]
+                ],
+                [
+                    'AND',
+                    ['<=', 'uss.uss_start_utc_dt', $startDateTime],
+                    ['>=', 'uss.uss_end_utc_dt', $endDateTime]
+                ]
+            ]);
+        }
+
+        return $query->column();
+    }
+
+    /**
+     * @param int $userId
+     * @param string $startDt
+     * @param string $endDt
+     * @param array|null $statusListId
+     * @param array|null $subTypeListId
+     * @return array
+     */
+    public static function getUserEventIdList(
+        int $userId,
+        string $startDt,
+        string $endDt,
+        ?array $statusListId = [],
+        ?array $subTypeListId = []
+    ): array {
+
+        $startDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($startDt));
+        $endDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($endDt));
+
+        if ($statusListId == null) {
+            $statusListId = [UserShiftSchedule::STATUS_APPROVED, UserShiftSchedule::STATUS_DONE];
+        }
+
+        if ($subTypeListId === null) {
+            $subTypeListId = [ShiftScheduleType::SUBTYPE_WORK_TIME, ShiftScheduleType::SUBTYPE_HOLIDAY];
+        }
+
+        return self::getExistEventIdList($userId, $startDateTime, $endDateTime, $statusListId, $subTypeListId);
     }
 }
