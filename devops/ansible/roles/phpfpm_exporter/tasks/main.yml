@@ -4,15 +4,15 @@
     name: phpfpm_exporter
     shell: /usr/sbin/nologin
     state: present
-    system: yes
+    system: true
     home: /
-    create_home: no
+    create_home: false
 
 - name: Add phpfpm_exporter to fpm group
   user:
     name: phpfpm_exporter
     groups: phpfpm_exporter,nginx
-    append: yes
+    append: true
 
 - name: Check phpfpm_exporter installation
   stat:
@@ -26,7 +26,7 @@
     mode: 0755
     owner: root
     group: root
-  when: not phpfpm_exporter.stat.exists
+  when: falset phpfpm_exporter.stat.exists
 
 - name: Create phpfpm_exporter service
   copy:
@@ -39,6 +39,6 @@
 - name: Ensure phpfpm_exporter is started
   systemd:
     name: phpfpm_exporter
-    daemon_reload: yes
-    enabled: yes
+    daemon_reload: true
+    enabled: true
     state: started

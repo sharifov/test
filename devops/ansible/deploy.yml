@@ -5,6 +5,6 @@
   hosts: app
   remote_user: ubuntu
   gather_facts: false
-  become: yes
+  become: true
   roles:
     - deployment

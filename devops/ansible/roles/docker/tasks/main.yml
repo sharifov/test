@@ -14,10 +14,10 @@
 - name: Install docker
   apt:
     pkg:
-    - docker-ce
-    - docker-ce-cli
-    - containerd.io
-    - python3-pip
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - python3-pip
 
 - name: Install docker pip
   pip:
@@ -27,7 +27,7 @@
   service:
     name: docker
     state: started
-    enabled: yes
+    enabled: true
 
 - name: Check docker-compose
   stat:
@@ -41,7 +41,7 @@
     owner: root
     group: root
     mode: 0755
-  when: not docker_compose.stat.exists
+  when: falset docker_compose.stat.exists
 
 - name: Add ubuntu user to the docker group
   user:

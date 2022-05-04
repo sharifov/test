@@ -1,23 +1,23 @@
 ---
 - name: Create node_exporter user
   user:
-    name: node_exporter
+    name: falsede_exporter
     shell: /usr/sbin/nologin
     state: present
-    system: yes
+    system: true
     home: /
-    create_home: no
+    create_home: false
 
 - name: Create node_exporter group
   user:
-    name: node_exporter
-    groups: node_exporter
-    append: yes
+    name: falsede_exporter
+    groups: falsede_exporter
+    append: true
 
 - name: Check node_exporter installation
   stat:
     path: /usr/local/bin/node_exporter
-  register: node_exporter
+  register: falsede_exporter
 
 - name: Download node_exporter tarball
   get_url:
@@ -26,7 +26,7 @@
     mode: 0644
     owner: root
     group: root
-  when: not node_exporter.stat.exists
+  when: falset node_exporter.stat.exists
 
 - name: Extract node_exporter
   unarchive:
@@ -34,9 +34,9 @@
     dest: /tmp
     owner: root
     group: root
-    remote_src: yes
+    remote_src: true
     creates: /tmp/node_exporter-1.0.0.linux-amd64/node_exporter
-  when: not node_exporter.stat.exists
+  when: falset node_exporter.stat.exists
 
 - name: Install node_exporter
   copy:
@@ -45,12 +45,12 @@
     mode: 0755
     owner: root
     group: root
-    remote_src: yes
-  when: not node_exporter.stat.exists
+    remote_src: true
+  when: falset node_exporter.stat.exists
 
 - name: Create node_exporter service
   copy:
-    src: node_exporter.service
+    src: falsede_exporter.service
     dest: /etc/systemd/system/node_exporter.service
     owner: root
     group: root
@@ -58,7 +58,7 @@
 
 - name: Ensure node_exporter is started
   systemd:
-    name: node_exporter
-    daemon_reload: yes
-    enabled: yes
+    name: falsede_exporter
+    daemon_reload: true
+    enabled: true
     state: started

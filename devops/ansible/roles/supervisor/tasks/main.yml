@@ -17,4 +17,4 @@
   service:
     name: supervisor
     state: started
-    enabled: yes
+    enabled: true

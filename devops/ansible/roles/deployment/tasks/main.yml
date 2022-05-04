@@ -14,7 +14,7 @@
     owner: "{{ web_user }}"
     group: "{{ web_user }}"
     creates: "{{ web_dir }}/{{ app_ver }}/init"
-    remote_src: no
+    remote_src: false
 
 - name: Create dotenv
   template:
@@ -37,7 +37,7 @@
     chdir: "{{ web_dir }}/{{ app_ver }}"
   become: true
   become_user: "{{ web_user }}"
-  run_once: yes
+  run_once: true
   register: result
   changed_when: false
 
@@ -85,7 +85,7 @@
     state: link
     owner: "{{ web_user }}"
     group: "{{ web_user }}"
-    force: yes
+    force: true
 
 - name: Restart supervisord service
   service:

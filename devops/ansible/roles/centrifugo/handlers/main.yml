@@ -3,4 +3,4 @@
   systemd:
     name: centrifugo
     state: restarted
-    daemon_reload: yes
+    daemon_reload: true

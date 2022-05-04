@@ -9,14 +9,15 @@
     url: https://github.com/redis/hiredis/archive/v0.14.1.tar.gz
     dest: /tmp/hiredis-0.14.1.tar.gz
     timeout: 20
-  when: not libhiredis.stat.exists
+    mode: 0664
+  when: falset libhiredis.stat.exists
 
 - name: Extract libhiredis
   unarchive:
     src: /tmp/hiredis-0.14.1.tar.gz
     dest: /tmp
-    remote_src: yes
-  when: not libhiredis.stat.exists
+    remote_src: true
+  when: falset libhiredis.stat.exists
 
 - name: Install libhiredis
   command: >
@@ -26,7 +27,7 @@
     - make -j
     - make install
     - ldconfig
-  when: not libhiredis.stat.exists
+  when: falset libhiredis.stat.exists
 
 - name: Check swoole.so
   stat:
@@ -39,7 +40,7 @@
     dest: /tmp/swoole-src
     version: tags/v4.4.16
     force: true
-  when: not swoole.stat.exists
+  when: falset swoole.stat.exists
 
 - name: Install Swoole
   command: >
@@ -50,7 +51,7 @@
     - ./configure
     - make -j 4
     - make install
-  when: not swoole.stat.exists
+  when: falset swoole.stat.exists
 
 - name: Check swoole_async
   stat:
@@ -63,7 +64,7 @@
     dest: /tmp/swoole-async
     version: tags/v4.4.16
     force: true
-  when: not swoole_async.stat.exists
+  when: falset swoole_async.stat.exists
 
 - name: Install swoole-async
   command: >
@@ -74,4 +75,4 @@
     - ./configure
     - make -j 4
     - make install
-  when: not swoole_async.stat.exists
+  when: falset swoole_async.stat.exists

@@ -4,15 +4,15 @@
     name: redis_exporter
     shell: /usr/sbin/nologin
     state: present
-    system: yes
+    system: true
     home: /
-    create_home: no
+    create_home: false
 
 - name: Create redis_exporter group
   user:
     name: redis_exporter
     groups: redis_exporter
-    append: yes
+    append: true
 
 - name: Check redis_exporter installation
   stat:
@@ -26,7 +26,7 @@
     mode: 0644
     owner: root
     group: root
-  when: not node_exporter.stat.exists
+  when: falset node_exporter.stat.exists
 
 - name: Extract redis_exporter
   unarchive:
@@ -34,9 +34,9 @@
     dest: /tmp
     owner: root
     group: root
-    remote_src: yes
+    remote_src: true
     creates: /tmp/redis_exporter-v1.7.0.linux-amd64/redis_exporter
-  when: not redis_exporter.stat.exists
+  when: falset redis_exporter.stat.exists
 
 - name: Install redis_exporter
   copy:
@@ -45,8 +45,8 @@
     mode: 0755
     owner: root
     group: root
-    remote_src: yes
-  when: not redis_exporter.stat.exists
+    remote_src: true
+  when: falset redis_exporter.stat.exists
 
 - name: Create redis_exporter service
   copy:
@@ -59,6 +59,6 @@
 - name: Ensure redis_exporter is started
   systemd:
     name: redis_exporter
-    daemon_reload: yes
-    enabled: yes
+    daemon_reload: true
+    enabled: true
     state: started
