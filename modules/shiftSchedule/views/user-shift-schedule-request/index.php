@@ -64,11 +64,12 @@ $shiftScheduleTypes = ShiftScheduleType::getList(true);
                         <h2>
                             <?= Yii::t(
                                 'schedule-request',
-                                '{icon} TimeLine Schedule Request List ({clientStartDate} - {clientEndDate})',
+                                '{icon} TimeLine Schedule Request List {dates}',
                                 [
                                     'icon' => '<i class="fa fa-bars"></i>',
-                                    'clientStartDate' => Html::encode($searchModel->clientStartDate),
-                                    'clientEndDate' => Html::encode($searchModel->clientEndDate),
+                                    'dates' => !(empty($searchModel->clientStartDate) || empty($searchModel->clientEndDate)) ?
+                                        '(' . Html::encode($searchModel->clientStartDate) . ' - ' .
+                                        Html::encode($searchModel->clientEndDate) . ')' : '',
                                 ]
                             ) ?>
                         </h2>
@@ -268,7 +269,10 @@ function openModalEventId(id)
 
 function updateTimeLineList(startDate, endDate) 
 {
-    $.pjax.reload({container: '#pjax-user-timeline', push: false, replace: false, timeout: 5000, data: {startDate: startDate, endDate: endDate}});
+    var end = new Date(endDate);
+    end.setDate(end.getDate() - 1);
+    end.setHours(23, 59);
+    $.pjax.reload({container: '#pjax-user-timeline', push: false, replace: false, timeout: 5000, data: {startDate: startDate, endDate: end.toLocaleString()}});
 }
 
 $(document).on('RequestDecision:response', function (e, params) {

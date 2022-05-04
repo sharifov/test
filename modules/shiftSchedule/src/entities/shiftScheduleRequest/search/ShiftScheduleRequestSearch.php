@@ -106,6 +106,13 @@ class ShiftScheduleRequestSearch extends ShiftScheduleRequest
             return $dataProvider;
         }
 
+        if (!empty($startDate)) {
+            $this->clientStartDate = date('Y-m-d', strtotime($startDate));
+        }
+        if (!empty($endDate)) {
+            $this->clientEndDate = date('Y-m-d', strtotime($endDate));
+        }
+
         return new ActiveDataProvider([
             'query' => self::getSearchQuery($userList, $this, $startDate, $endDate),
             'sort' => ['defaultOrder' => ['srh_id' => SORT_DESC]],
@@ -128,10 +135,6 @@ class ShiftScheduleRequestSearch extends ShiftScheduleRequest
         $query->where(['IS NOT', 'srh_uss_id', null]);
         $query->andWhere(['srh_created_user_id' => $userList]);
         if (!empty($startDate) && !empty($endDate)) {
-            if (!empty($model)) {
-                $model->srh_start_utc_dt = $startDate;
-                $model->srh_end_utc_dt = $endDate;
-            }
             $startDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($startDate));
             $endDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($endDate));
         } else {
@@ -176,5 +179,26 @@ class ShiftScheduleRequestSearch extends ShiftScheduleRequest
 
         return static::find()
             ->where(['in', 'srh_id', $query]);
+    }
+
+    /**
+     * @param $startDate
+     * @param $endDate
+     * @return array
+     */
+    public static function processingDates($startDate, $endDate): array
+    {
+        if (!empty($startDate) && !empty($endDate)) {
+            $startDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($startDate));
+            $endDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($endDate));
+        } else {
+            $startDateTime = date('Y-m-d');
+            $endDateTime = date('Y-m-d', strtotime(date("Y-m-d", time()) . " + 365 day"));
+        }
+
+        return [
+            'startDateTime' => $startDateTime,
+            'endDateTime' => $endDateTime,
+        ];
     }
 }

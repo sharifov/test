@@ -64,14 +64,18 @@ $tsEndUtc = strtotime($event->uss_end_utc_dt);
                                 <thead>
                                 <tr style="background: <?= Html::encode($event->shiftScheduleType->sst_color) ?>">
                                     <td style="color: #FFFFFF">
-                                        <?= Yii::$app->formatter->asDatetime($tsStartUtc + (60 * 60 * 0), 'php:H') ?>
+                                        &nbsp;
                                     </td>
                                 </tr>
                                 </thead>
                             </table>
                         </div>
                         <strong>
-                            Duration Time: <?php echo Yii::$app->formatter->asDuration($event->uss_duration * 60) ?>
+                            Duration Time:
+                            <?= $model::getDatesDiff(
+                                Yii::$app->formatter->asDatetime($tsStartUtc, 'php: ' . $model::DATETIME_FORMAT),
+                                Yii::$app->formatter->asDatetime($tsEndUtc, 'php: ' . $model::DATETIME_FORMAT)
+                            ) ?>
                         </strong>
                     </td>
                     <td>

@@ -205,7 +205,7 @@ class ScheduleRequestForm extends Model
         if ($scheduleRequest->save()) {
             $subject = 'Request Status';
             $body = 'Your ' . Html::a('request', Url::to(['shift-schedule/index'])) . ' status was change to “' .
-                    $scheduleRequest::getList()[$scheduleRequest->srh_status_id] . '” ' . "<br>" .
+                $scheduleRequest::getList()[$scheduleRequest->srh_status_id] . '” ' . "<br>" .
                 (!empty($scheduleRequest->srh_description) ? "Description: “" . $scheduleRequest->srh_description . '”' : '');
             if ($ntf = Notifications::create($scheduleRequest->srh_created_user_id, $subject, $body, Notifications::TYPE_INFO)) {
                 $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
@@ -377,5 +377,19 @@ class ScheduleRequestForm extends Model
             $this->getEndDt(),
             $this->endTime
         ));
+    }
+
+    /**
+     * @param string $start
+     * @param string $end
+     * @return string
+     * @throws Exception
+     */
+    public static function getDatesDiff(string $start, string $end): string
+    {
+        $start = new DateTime($start);
+        $end = new DateTime($end);
+        $diff = $end->diff($start);
+        return $diff->format('%d days %i minutes %s seconds');
     }
 }
