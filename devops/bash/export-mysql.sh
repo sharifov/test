@@ -2,10 +2,10 @@
 # Dump mysql database
 #
 # Example:
-#   export-mysql.sh > /tmp/crm-mysql.sql
+#   export-mysql.sh > /tmp/mysql.sql
 #
 
-dotenv="/var/www/crm/.env"
+dotenv="/var/www/app/.env"
 if [ ! -e "$dotenv" ]; then
     echo "Error: cant' locate $dotenv"
     exit 1
