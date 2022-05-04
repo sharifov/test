@@ -2,10 +2,10 @@
 
 namespace modules\shiftSchedule\controllers;
 
+use frontend\controllers\FController;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\search\ShiftScheduleRequestSearch;
 use Yii;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -13,7 +13,7 @@ use yii\web\Response;
 /**
  * ShiftScheduleRequestController implements the CRUD actions for ShiftScheduleRequest model.
  */
-class ShiftScheduleRequestController extends Controller
+class ShiftScheduleRequestController extends FController
 {
     /**
      * @inheritDoc
