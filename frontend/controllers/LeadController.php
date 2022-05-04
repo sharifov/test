@@ -24,6 +24,7 @@ use common\models\LeadTask;
 use common\models\local\LeadAdditionalInformation;
 use common\models\Note;
 use common\models\ProjectEmailTemplate;
+use common\models\QuoteCommunication;
 use common\models\search\LeadCallExpertSearch;
 use common\models\search\LeadChecklistSearch;
 use frontend\models\LeadUserRatingForm;
@@ -161,9 +162,9 @@ class LeadController extends FController
     private $quoteRepository;
     private $transaction;
     private $chatActionPermission;
-    private UrlGenerator $fileStorageUrlGenerator;
-    private UseCaseLeadManageService $useCaseLeadManageService;
-    private EmailReviewQueueManageService $emailReviewQueueManageService;
+private UrlGenerator $fileStorageUrlGenerator;
+private UseCaseLeadManageService $useCaseLeadManageService;
+private EmailReviewQueueManageService $emailReviewQueueManageService;
 
     public function __construct(
         $id,
@@ -182,7 +183,8 @@ class LeadController extends FController
         UseCaseLeadManageService $useCaseLeadManageService,
         EmailReviewQueueManageService $emailReviewQueueManageService,
         $config = []
-    ) {
+    )
+    {
         parent::__construct($id, $module, $config);
         $this->leadManageService = $leadManageService;
         $this->leadAssignService = $leadAssignService;
@@ -274,7 +276,6 @@ class LeadController extends FController
         $isQA = $user->isQa();
         $is_supervision = $user->isSupervision();
         $is_agent = $user->isAgent();
-
 
         if (Yii::$app->request->post('hasEditable')) {
             $value = '';
@@ -418,7 +419,6 @@ class LeadController extends FController
         }
 
 
-
         Yii::$app->cache->delete(sprintf('quick-search-%d-%d', $lead->id, Yii::$app->user->identity->getId()));
         if (!$isQA && !$lead->permissionsView()) {
             throw new UnauthorizedHttpException('Not permissions view lead ID: ' . $lead->id);
@@ -518,7 +518,7 @@ class LeadController extends FController
                     $mail->e_created_dt = date('Y-m-d H:i:s');
                     $mail->e_created_user_id = Yii::$app->user->id;
                     $attachments = [];
-                    /** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_ATTACH_FILES, Restrict access to attach files in lead communication block*/
+                    /** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_ATTACH_FILES, Restrict access to attach files in lead communication block */
                     $canAttachFiles = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_ATTACH_FILES);
                     if ($canAttachFiles && FileStorageSettings::canEmailAttach() && $previewEmailForm->files) {
                         $attachments['files'] = $this->fileStorageUrlGenerator->generateForExternal($previewEmailForm->getFilesPath());
@@ -552,16 +552,16 @@ class LeadController extends FController
                                 }
 
                                 /*
-                                * TODO: The similar logic exist in `\frontend\controllers\EmailReviewQueueController::actionSend`. Need to shrink code duplications.
+                                 * TODO: The similar logic exist in `\frontend\controllers\EmailReviewQueueController::actionSend`. Need to shrink code duplications.
                                  */
                                 /** @var string[] $quoteIds */
                                 $quoteIds = Json::decode($previewEmailForm->e_quote_list);
                                 /** @var Quote[] $quoteObjects */
                                 $quoteObjects = Quote::find()->where(['IN', 'id', $quoteIds])->all();
                                 foreach ($quoteObjects as $quoteObject) {
-                                    Repo::createForEmail($mail->e_id, $quoteObject->id);
+                                    Repo::createForEmail($mail->e_id, $quoteObject->id, $previewEmailForm->e_qc_uid);
                                     $quoteObject->setStatusSend();
-                                    // - Do email should be sent if quote didn't change sxtatus?
+                                    // - Do email should be sent if quote didn't change status?
                                     // - Do we should call saving request in loop? Calling all updates via one request would be better way
                                     if (!$this->quoteRepository->save($quoteObject)) {
                                         Yii::error($quoteObject->errors, 'LeadController:view:Email:Quote:save');
@@ -579,7 +579,7 @@ class LeadController extends FController
                             /** @var Quote[] $quoteObjects */
                             $quoteObjects = Quote::find()->where(['IN', 'id', $quoteIds])->all();
                             foreach ($quoteObjects as $quoteObject) {
-                                Repo::createForEmail($mail->e_id, $quoteObject->id);
+                                Repo::createForEmail($mail->e_id, $quoteObject->id, $previewEmailForm->e_qc_uid);
                                 if (!$this->quoteRepository->save($quoteObject)) {
                                     Yii::error($quoteObject->errors, 'LeadController:view:Email:Quote:save');
                                 }
@@ -717,6 +717,9 @@ class LeadController extends FController
                         $content_data = ($comForm->offerList)
                             ? $lead->getOfferEmailData($comForm->offerList, $projectContactInfo)
                             : $lead->getEmailData2($comForm->quoteList, $projectContactInfo, $lang);
+                        $content_data['quotes'] = array_map(function ($quoteArray) use ($comForm) {
+                            $quoteArray['qc_uid'] = $comForm->c_qc_uid;
+                        }, $content_data['quotes'] ?? []);
                         $content_data['content'] = $comForm->c_email_message;
                         $content_data['subject'] = $comForm->c_email_subject;
                         $content_data['department'] = is_null($lead->lDep) ? [] : ['key' => $lead->lDep->dep_key, 'name' => $lead->lDep->dep_name];
@@ -916,7 +919,7 @@ class LeadController extends FController
             ->from('call_log_lead')
             ->innerJoin('call_log', 'call_log.cl_id = call_log_lead.cll_cl_id')
             ->where(['cll_lead_id' => $lead->id])
-            ->andWhere(['call_log.cl_type_id' => [CallLogType::IN,CallLogType::OUT]])
+            ->andWhere(['call_log.cl_type_id' => [CallLogType::IN, CallLogType::OUT]])
             ->orderBy(['created_dt' => SORT_ASC])
             ->groupBy(['id', 'type', 'lead_id']);
 
@@ -1021,6 +1024,7 @@ class LeadController extends FController
         $tmpl = 'view';
 
         return $this->render($tmpl, [
+            'qc_uid' => QuoteCommunication::generateUid(),
             'leadForm' => $leadForm,
             'previewEmailForm' => $previewEmailForm,
             'previewSmsForm' => $previewSmsForm,
@@ -1035,8 +1039,8 @@ class LeadController extends FController
             'dataProviderNotes' => $dataProviderNotes,
             'modelNote' => $modelNote,
 
-            'dataProviderOffers'    => $dataProviderOffers,
-            'dataProviderOrders'    => $dataProviderOrders,
+            'dataProviderOffers' => $dataProviderOffers,
+            'dataProviderOrders' => $dataProviderOrders,
 
             'callFromNumberList' => $callFromNumberList,
             'smsFromNumberList' => $smsFromNumberList,
@@ -1125,7 +1129,6 @@ class LeadController extends FController
     }
 
 
-
     public function actionSetUserRating()
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
@@ -1143,7 +1146,7 @@ class LeadController extends FController
             $leadId = $form->leadId;
             $lead = Lead::findOne(['id' => $leadId]);
             $leadUserRatingAbacDto = new LeadUserRatingAbacDto($lead, $user->id);
-            /** @abac leadUserRatingAbacDto, LeadUserRatingAbacObject::LEAD_RATING_FORM, LeadUserRatingAbacObject::ACTION_EDIT, Lead User Rating edit  */
+            /** @abac leadUserRatingAbacDto, LeadUserRatingAbacObject::LEAD_RATING_FORM, LeadUserRatingAbacObject::ACTION_EDIT, Lead User Rating edit */
             $can = Yii::$app->abac->can(
                 $leadUserRatingAbacDto,
                 LeadUserRatingAbacObject::LEAD_RATING_FORM,
@@ -1756,7 +1759,6 @@ class LeadController extends FController
                 $isAccessNewLead = $accessLeadByFrequency['access'];
             }
         }
-
 
 
         return $this->render('inbox', [
@@ -2435,7 +2437,7 @@ class LeadController extends FController
                 $clone = $this->leadCloneService->cloneLead($lead, Yii::$app->user->id, Yii::$app->user->id, $form->description);
                 Yii::$app->session->setFlash('success', 'Success');
 
-                if ((int) $lead->employee_id !== $user->getId()) {
+                if ((int)$lead->employee_id !== $user->getId()) {
                     $leadUserConversionService = Yii::createObject(LeadUserConversionService::class);
                     $leadUserConversionService->addAutomate(
                         $clone->id,
@@ -2765,7 +2767,7 @@ class LeadController extends FController
      */
     public function actionExtraQueue(): string
     {
-        $leadAbacDto = new LeadAbacDto(null, (int) Auth::id());
+        $leadAbacDto = new LeadAbacDto(null, (int)Auth::id());
         /** @abac $leadAbacDto, LeadAbacObject::OBJ_EXTRA_QUEUE, LeadAbacObject::ACTION_ACCESS, access to actionExtraQueue */
         $canLeadPoorProcessingLogs = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_EXTRA_QUEUE, LeadAbacObject::ACTION_ACCESS);
 
