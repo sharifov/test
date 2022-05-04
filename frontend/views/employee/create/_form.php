@@ -46,13 +46,6 @@ if ($model->isNewRecord) {
 $this->params['breadcrumbs'][] = ['label' => 'User List', 'url' => ['list']];
 $this->params['breadcrumbs'][] = $this->title;
 
-
-if ($user->isAdmin() || $user->isSuperAdmin() || $user->isUserManager()) {
-    $userList = \common\models\Employee::getList();
-} else {
-    $userList = \common\models\Employee::getListByUserId($user->id);
-}
-
 $projectList = EmployeeProjectAccess::getProjects($user->id);
 
 ?>
