@@ -157,6 +157,14 @@ class ShiftScheduleController extends FController
         $assignedShifts = UserShiftAssign::find()->where(['usa_user_id' => $user->id])->all();
         $subtypeList = ShiftScheduleType::getSubtypeList();
 
+
+//        $ids = UserShiftScheduleService::getUserEventListId($user->id, '2022-05-22 00:00:00', '2022-05-23 00:00:00',
+//            [UserShiftSchedule::STATUS_PENDING],//[]
+//            [ShiftScheduleType::SUBTYPE_HOLIDAY]
+//        );
+//        VarDumper::dump($ids, 10, true);
+        // exit;
+
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
@@ -191,9 +199,9 @@ class ShiftScheduleController extends FController
     }
 
     /**
-     * @return array
+     * @return string
      */
-    public function actionLegendAjax()
+    public function actionLegendAjax(): string
     {
         //\Yii::$app->response->format = Response::FORMAT_JSON;
 
