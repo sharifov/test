@@ -3,7 +3,7 @@
 
 - name: Setup shared server
   hosts: shared
-  remote_user: "{{ ssh_user }}"
+  remote_user: ubuntu
   gather_facts: false
   roles:
     - role: common

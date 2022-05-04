@@ -4,7 +4,7 @@
 - name: Setup application server
   hosts: app
   gather_facts: false
-  remote_user: "{{ ssh_user }}"
+  remote_user: ubuntu
 
   roles:
     - role: common
