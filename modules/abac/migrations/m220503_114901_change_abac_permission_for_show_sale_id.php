@@ -14,21 +14,11 @@ class m220503_114901_change_abac_permission_for_show_sale_id extends Migration
      */
     public function safeUp()
     {
-        $this->updateAbacPolicy();
-    }
-    /**
-     * {@inheritdoc}
-     */
-    public function safeDown()
-    {
-        $this->updateAbacPolicy();
-    }
-
-    private function updateAbacPolicy()
-    {
-        $this->delete('{{%abac_policy}}', ['AND', ['IN', 'ap_object', [
-            'case/case/ui/sale-id',
-        ]], ['IN', 'ap_action', ['(read)']]]);
+        $this->update(
+            '{{%abac_policy}}',
+            ['ap_enabled' => 0],
+            ['AND', ['IN', 'ap_object', ['case/case/ui/sale-id',]], ['IN', 'ap_action', ['(read)']], ['ap_enabled' => 1]]
+        );
 
         $this->insert('{{%abac_policy}}', [
             'ap_rule_type' => 'p',
@@ -43,6 +33,31 @@ class m220503_114901_change_abac_permission_for_show_sale_id extends Migration
             'ap_enabled' => 1,
             'ap_created_dt' => date('Y-m-d H:i:s'),
         ]);
+
+        \Yii::$app->abac->invalidatePolicyCache();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function safeDown()
+    {
+        $this->delete(
+            '{{%abac_policy}}',
+            ['AND', ['IN', 'ap_object', ['case/case/ui/sale-id']], ['IN', 'ap_action', ['(read)']], ['ap_enabled' => 1]]
+        );
+
+        $this->update(
+            '{{%abac_policy}}',
+            ['ap_enabled' => 1],
+            [
+                'AND',
+                ['IN', 'ap_object', ['case/case/ui/sale-id',]],
+                ['IN', 'ap_action', ['(read)']],
+                ['ap_enabled' => 0]
+            ]
+        );
+
         \Yii::$app->abac->invalidatePolicyCache();
     }
 }
