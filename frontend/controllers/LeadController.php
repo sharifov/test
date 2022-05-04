@@ -646,7 +646,7 @@ private EmailReviewQueueManageService $emailReviewQueueManageService;
                         /** @var Quote[] $quoteObjects */
                         $quoteObjects = Quote::find()->where(['IN', 'id', $quoteIds])->all();
                         foreach ($quoteObjects as $quote) {
-                            Repo::createForSms($sms->s_id, $quote->id);
+                            Repo::createForSms($sms->s_id, $quote->id, $previewSmsForm->s_qc_uid);
                             $quote->setStatusSend();
                             if (!$this->quoteRepository->save($quote)) {
                                 Yii::error($quote->errors, 'LeadController:view:Sms:Quote:save');
@@ -1024,7 +1024,6 @@ private EmailReviewQueueManageService $emailReviewQueueManageService;
         $tmpl = 'view';
 
         return $this->render($tmpl, [
-            'qc_uid' => QuoteCommunication::generateUid(),
             'leadForm' => $leadForm,
             'previewEmailForm' => $previewEmailForm,
             'previewSmsForm' => $previewSmsForm,

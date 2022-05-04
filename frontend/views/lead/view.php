@@ -19,7 +19,6 @@
  * @var AbacCallFromNumberList $callFromNumberList
  * @var AbacSmsFromNumberList $smsFromNumberList
  * @var AbacEmailList $emailFromList
- * @var string $qc_uid
  */
 
 use common\models\Employee;
@@ -199,7 +198,6 @@ $disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIEN
                 <?php /** @abac $leadCommunicationBlockAbacDto, LeadCommunicationBlockAbacObject::NS, LeadCommunicationBlockAbacObject::ACTION_VIEW, View communication block on Lead View page */ ?>
                 <?php if (Yii::$app->abac->can($leadCommunicationBlockAbacDto, LeadCommunicationBlockAbacObject::NS, LeadCommunicationBlockAbacObject::ACTION_VIEW, $user)) : ?>
                     <?= $this->render('communication/lead_communication', [
-                        'qc_uid' => $qc_uid,
                         'leadForm' => $leadForm,
                         'previewEmailForm' => $previewEmailForm,
                         'previewSmsForm' => $previewSmsForm,
