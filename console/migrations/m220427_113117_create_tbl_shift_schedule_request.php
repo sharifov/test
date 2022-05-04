@@ -34,6 +34,8 @@ class m220427_113117_create_tbl_shift_schedule_request extends Migration
             'srh_sst_id' => $this->integer(),
             'srh_status_id' => $this->integer()->notNull(),
             'srh_description' => $this->string(1000),
+            'srh_start_utc_dt' => $this->dateTime(),
+            'srh_end_utc_dt' => $this->dateTime(),
             'srh_created_dt' => $this->dateTime(),
             'srh_update_dt' => $this->dateTime(),
             'srh_created_user_id' => $this->integer(),
