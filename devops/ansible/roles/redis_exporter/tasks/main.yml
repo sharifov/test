@@ -26,7 +26,7 @@
     mode: 0644
     owner: root
     group: root
-  when: falset node_exporter.stat.exists
+  when: not node_exporter.stat.exists
 
 - name: Extract redis_exporter
   unarchive:
@@ -36,7 +36,7 @@
     group: root
     remote_src: true
     creates: /tmp/redis_exporter-v1.7.0.linux-amd64/redis_exporter
-  when: falset redis_exporter.stat.exists
+  when: not redis_exporter.stat.exists
 
 - name: Install redis_exporter
   copy:
@@ -46,7 +46,7 @@
     owner: root
     group: root
     remote_src: true
-  when: falset redis_exporter.stat.exists
+  when: not redis_exporter.stat.exists
 
 - name: Create redis_exporter service
   copy:

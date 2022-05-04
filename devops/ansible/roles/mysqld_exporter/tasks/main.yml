@@ -26,7 +26,7 @@
     mode: 0644
     owner: root
     group: root
-  when: falset mysqld_exporter.stat.exists
+  when: not mysqld_exporter.stat.exists
 
 - name: Extract mysqld_exporter
   unarchive:
@@ -36,7 +36,7 @@
     group: root
     remote_src: true
     creates: /tmp/mysqld_exporter-0.12.1.linux-amd64/mysqld_exporter
-  when: falset mysqld_exporter.stat.exists
+  when: not mysqld_exporter.stat.exists
 
 - name: Install mysqld_exporter
   copy:
@@ -46,7 +46,7 @@
     owner: root
     group: root
     remote_src: true
-  when: falset mysqld_exporter.stat.exists
+  when: not mysqld_exporter.stat.exists
 
 - name: Create mysqld_exporter config dir
   file:

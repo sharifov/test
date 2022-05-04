@@ -26,7 +26,7 @@
     mode: 0755
     owner: root
     group: root
-  when: falset phpfpm_exporter.stat.exists
+  when: not phpfpm_exporter.stat.exists
 
 - name: Create phpfpm_exporter service
   copy:

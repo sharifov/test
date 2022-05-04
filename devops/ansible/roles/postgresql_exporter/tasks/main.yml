@@ -26,7 +26,7 @@
     mode: 0644
     owner: root
     group: root
-  when: falset postgres_exporter.stat.exists
+  when: not postgres_exporter.stat.exists
 
 - name: Extract postgres_exporter
   unarchive:
@@ -36,7 +36,7 @@
     group: root
     remote_src: true
     creates: /tmp/postgres_exporter_v0.8.0_linux-amd64/postgres_exporter
-  when: falset postgres_exporter.stat.exists
+  when: not postgres_exporter.stat.exists
 
 - name: Install postgres_exporter
   copy:
@@ -46,7 +46,7 @@
     owner: root
     group: root
     remote_src: true
-  when: falset postgres_exporter.stat.exists
+  when: not postgres_exporter.stat.exists
 
 - name: Create postgres_exporter config dir
   file:

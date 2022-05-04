@@ -41,7 +41,7 @@
     owner: root
     group: root
     mode: 0755
-  when: falset docker_compose.stat.exists
+  when: not docker_compose.stat.exists
 
 - name: Add ubuntu user to the docker group
   user:

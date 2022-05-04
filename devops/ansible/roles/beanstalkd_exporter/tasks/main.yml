@@ -26,7 +26,7 @@
     mode: 0755
     owner: root
     group: root
-  when: falset beanstalkd_exporter.stat.exists
+  when: not beanstalkd_exporter.stat.exists
 
 - name: Create beanstalkd_exporter service
   copy:

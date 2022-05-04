@@ -26,7 +26,7 @@
     owner: root
     group: root
     mode: 0644
-  when: falset beat_exporter.stat.exists
+  when: not beat_exporter.stat.exists
 
 - name: Install beat-exporter
   unarchive:
