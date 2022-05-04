@@ -63,8 +63,9 @@ class EmailTemplateOfferABTestingService extends ABTestingBaseService
             $logData = [
                 'entitiesArray' => $testingEntitiesArray,
                 'templateKey'   => $emailTemplateKey,
+                'emailTemplateId' => $emailTemplateId,
             ];
-            \Yii::info($logData, 'elk\abtesting');
+            \Yii::info($logData, 'elk\EmailOfferABTesting');
             return $emailTemplateId;
         } catch (\DomainException | \RuntimeException $e) {
             $message = AppHelper::throwableLog($e);
@@ -145,7 +146,7 @@ class EmailTemplateOfferABTestingService extends ABTestingBaseService
                     'cacheKey'   => $cacheKey,
                     'cacheValue' => $cacheValue
                 ];
-                \Yii::info($logData, 'elk\abtesting');
+                \Yii::info($logData, 'elk\EmailOfferABTesting');
                 \Yii::$app->cache->set($cacheKey, $cacheValue, self::EMAIL_OFFER_TEMPLATES_COUNTER_CACHE_DURATION);
                 return;
             }
@@ -180,7 +181,7 @@ class EmailTemplateOfferABTestingService extends ABTestingBaseService
                 'cacheKey'   => $cacheKey,
                 'cacheValue' => $cacheValue
             ];
-            \Yii::info($logData, 'elk\abtesting');
+            \Yii::info($logData, 'elk\EmailOfferABTesting');
             \Yii::$app->cache->set($cacheKey, $cacheValue, self::EMAIL_OFFER_TEMPLATES_COUNTER_CACHE_DURATION);
         } catch (\DomainException | \RuntimeException $e) {
             $message = AppHelper::throwableLog($e);
