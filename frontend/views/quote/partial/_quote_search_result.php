@@ -92,6 +92,7 @@ if ($quotes && (isset($quotes['count']) && $quotes['count'] > 0)) :
           </div>
         <?php endif; ?>
         <?= ListView::widget([
+           'id' => 'list-view_quote_search_result',
             'dataProvider' => $dataProvider,
             'emptyText' => '<div class="text-center">Quotes not found!</div><br>',
             'itemView' => function ($resultItem, $key, $index, $widget) use ($locations, $airlines, $flightQuotes, $keyCache, $lead) {
@@ -132,7 +133,9 @@ if ($quotes && (isset($quotes['count']) && $quotes['count'] > 0)) :
 
     $("#pjax-search-quote-filter").on("pjax:complete", function() {
         $('#pjax-search-quote-filter #quote-search-submit i').removeClass('fa-spin fa-spinner disabled').addClass('fa-check').removeAttr('disabled');
-        $('.search-results__wrapper').removeClass('loading');
+        $('.search-results__wrapper').removeClass('loading');        
+        var position = $('#list-view_quote_search_result').position();
+        $("#search-results__modal").scrollTop(position.top);
     });
     
     JS;
