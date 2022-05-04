@@ -44,6 +44,7 @@ $resourceListJson = Json::encode($resourceList);
 $today = date('Y-m-d', strtotime('+1 day'));
 $modalUrl = Url::to(['/shift-schedule/add-event']);
 $groupIdsJson = Json::encode($groupIds);
+$formCreateSingleEventUrl = Url::to(['/shift-schedule/add-single-event']);
 
 $js = <<<JS
 var resourceListJson = $resourceListJson;
@@ -177,26 +178,29 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
 
     function createUpdateEvent(event, isNew) {
             console.log(event);
-            mobiscroll.confirm({
-                title: 'Are you sure you want to proceed?',
-                message: 'It looks like someone from the team won\'t be able to join the meeting.',
-                okText: 'Yes',
-                cancelText: 'No',
-                callback: function (res) {
-                    if (res) {
-                        if (isNew) {
-                            inst.addEvent(event);
-                        } else {
-                            inst.updateEvent(event);
-                        }
-                            mobiscroll.toast({
-                            message: isNew ? 'Event created' : 'Event updated'
-                        });
-                    } else {
-                        inst.removeEvent(event)
-                    }
+            if (isNew) {
+                let userId;
+                if (event.resource.indexOf('us-') === 0) {
+                    userId = event.resource.substring(3);
                 }
-            });
+                let eventStartDate = new Date(event.start);
+                let [year, month, day, hour, minute] = [eventStartDate.getFullYear(), eventStartDate.getMonth()+1, eventStartDate.getDate(), eventStartDate.getHours(), eventStartDate.getMinutes(), eventStartDate];
+                let startDate = year + '-' + month + '-' + day + ' ' + hour + ':' + minute;
+                let modal = $('#modal-md');
+                modal.find('.modal-title').html('Add event for user ');
+                modal.on('hide.bs.modal', function (e) {
+                    inst.removeEvent(event);
+                });
+                modal.modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 40px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
+                $.get('$formCreateSingleEventUrl?userId=' + userId + '&startDate=' + startDate, function(data) {
+                    modal.find('.modal-body').html(data);
+                }).fail(function (xhr) {
+                    setTimeout(function () {
+                        modal.modal('hide');
+                        createNotify('Error', xhr.statusText, 'error');
+                    }, 800);
+                })
+            }
         }
 
 

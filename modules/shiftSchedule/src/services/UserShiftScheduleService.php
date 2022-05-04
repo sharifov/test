@@ -13,6 +13,7 @@ use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftScheduleQuery;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftScheduleRepository;
 use modules\shiftSchedule\src\forms\ShiftScheduleCreateForm;
+use modules\shiftSchedule\src\forms\SingleEventCreateForm;
 use modules\shiftSchedule\src\helpers\UserShiftScheduleHelper;
 use Yii;
 use yii\helpers\VarDumper;
@@ -525,5 +526,27 @@ class UserShiftScheduleService
         }
 
         return self::getExistEventIdList($userId, $startDateTime, $endDateTime, $statusListId, $subTypeListId);
+    }
+
+    public function createSingleManual(SingleEventCreateForm $form, int $userId, ?string $userTimeZone): UserShiftSchedule
+    {
+        $startDateTime = new \DateTimeImmutable($form->startDateTime, $userTimeZone ? new \DateTimeZone($userTimeZone) : null);
+        $startDateTime = $startDateTime->setTimezone(new \DateTimeZone('UTC'));
+        $duration = explode(':', $form->duration);
+        $endDateTime = $startDateTime->add(new \DateInterval('PT' . $duration[0] . 'H' . $duration[1] . 'M'));
+        $duration = ($duration[0] * 60) + $duration[1];
+
+        $userShiftSchedule = UserShiftSchedule::create(
+            $form->userId,
+            $form->description,
+            $startDateTime->format('Y-m-d H:i:s'),
+            $endDateTime->format('Y-m-d H:i:s'),
+            $duration,
+            $form->status,
+            UserShiftSchedule::TYPE_MANUAL,
+            $form->scheduleType
+        );
+        $this->repository->save($userShiftSchedule);
+        return $userShiftSchedule;
     }
 }
