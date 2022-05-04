@@ -3,15 +3,19 @@
 namespace modules\shiftSchedule\src\forms;
 
 use common\models\Employee;
+use common\models\Notifications;
 use DateInterval;
 use DateTime;
 use Exception;
+use frontend\widgets\notification\NotificationMessage;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
 use src\auth\Auth;
 use src\helpers\app\AppHelper;
 use Yii;
 use yii\base\Model;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
+use yii\helpers\Html;
+use yii\helpers\Url;
 use yii\web\Request;
 
 /**
@@ -28,6 +32,8 @@ class ScheduleRequestForm extends Model
     const MIN_DAYS_DURATION = 1;
     const MAX_DAYS_DURATION = 20;
     const DESCRIPTION_MAX_LENGTH = 1000;
+
+    const SCENARIO_DECISION = 'scenario-decision';
 
     /**
      * @var string
@@ -54,6 +60,10 @@ class ScheduleRequestForm extends Model
      * @var string
      */
     public string $description = '';
+    /**
+     * @var int
+     */
+    public int $status = 0;
 
     /**
      * @return void
@@ -83,6 +93,12 @@ class ScheduleRequestForm extends Model
                     'scheduleType',
                     'startTime',
                     'endTime',
+                ],
+                'required',
+            ],
+            [
+                [
+                    'status',
                 ],
                 'required',
             ],
@@ -137,6 +153,22 @@ class ScheduleRequestForm extends Model
     }
 
     /**
+     * @return array
+     */
+    public function scenarios(): array
+    {
+        return array_merge(
+            parent::scenarios(),
+            [
+                self::SCENARIO_DECISION => [
+                    'status',
+                    'description',
+                ]
+            ]
+        );
+    }
+
+    /**
      * Save request to user shift schedule
      * @return bool
      * @throws Exception
@@ -150,10 +182,38 @@ class ScheduleRequestForm extends Model
                 'srh_sst_id' => $this->scheduleType,
                 'srh_status_id' => ShiftScheduleRequest::STATUS_PENDING,
                 'srh_description' => $this->description,
+                'srh_start_utc_dt' => $this->getStartDateTime(),
+                'srh_end_utc_dt' => $this->getEndDateTime(),
             ]);
             $requestModel->save();
             return true;
         }
+        return false;
+    }
+
+    /**
+     * Save Decision request to Shift Schedule Request table
+     * @param ShiftScheduleRequest $model
+     * @return bool
+     */
+    public function saveDecision(ShiftScheduleRequest $model): bool
+    {
+        $scheduleRequest = new ShiftScheduleRequest();
+        $scheduleRequest->attributes = $model->attributes;
+        $scheduleRequest->srh_status_id = $this->status;
+        $scheduleRequest->srh_description = $this->description;
+        if ($scheduleRequest->save()) {
+            $subject = 'Request Status';
+            $body = 'Your ' . Html::a('request', Url::to(['shift-schedule/index'])) . ' status was change to “' .
+                    $scheduleRequest::getList()[$scheduleRequest->srh_status_id] . '” ' . "<br>" .
+                (!empty($scheduleRequest->srh_description) ? "Description: “" . $scheduleRequest->srh_description . '”' : '');
+            if ($ntf = Notifications::create($scheduleRequest->srh_created_user_id, $subject, $body, Notifications::TYPE_INFO)) {
+                $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+                Notifications::publish('getNewNotification', ['user_id' => $scheduleRequest->srh_created_user_id], $dataNotification);
+            }
+            return true;
+        }
+
         return false;
     }
 
