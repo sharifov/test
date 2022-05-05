@@ -1076,6 +1076,6 @@ class Formatter extends \yii\i18n\Formatter
             $thousands_separator
         );
 
-        return $num . ' ' . $code;
+        return $code . ' ' . $num;
     }
 }
