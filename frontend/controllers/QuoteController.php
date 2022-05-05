@@ -304,7 +304,7 @@ class QuoteController extends FController
                             $quote->provider_project_id = $providerProjectId;
                             $quote->q_client_currency = $currency->cur_code;
                             $quote->q_client_currency_rate = $currency->cur_base_rate;
-                            $quote->create_type_id = Quote::CREATE_TYPE_QUOTE_SEARCH;
+                            $quote->q_create_type_id = Quote::CREATE_TYPE_QUOTE_SEARCH;
                             $quote->setMetricLabels(['action' => 'created', 'type_creation' => 'search']);
 
                             if (isset($entry['tickets'])) {
@@ -1069,14 +1069,14 @@ class QuoteController extends FController
                     : Quote::findOne(['id' => $attr['Quote']['id']]);
                 if ($quote->isNewRecord) {
                     $quote->uid = uniqid();
-                    $quote->create_type_id = Quote::CREATE_TYPE_MANUAL;
+                    $quote->q_create_type_id = Quote::CREATE_TYPE_MANUAL;
                 }
                 $changedAttributes = $quote->attributes;
                 $changedAttributes['selling'] = ($quote->isNewRecord)
                     ? 0 : $quote->quotePrice()['selling'];
                 if ($quote !== null) {
                     $quote->attributes = $attr['Quote'];
-                    $quote->create_type_id = Quote::CREATE_TYPE_MANUAL;
+                    $quote->q_create_type_id = Quote::CREATE_TYPE_MANUAL;
 
                     if (!empty($quote->pricing_info)) {
                         $pricing = $quote->parsePriceDump($quote->pricing_info);
@@ -1313,7 +1313,7 @@ class QuoteController extends FController
             }
             $prices = [];
             $quote = new Quote();
-            $quote->create_type_id = Quote::CREATE_TYPE_MANUAL;
+            $quote->q_create_type_id = Quote::CREATE_TYPE_MANUAL;
             if (empty($qId)) {
                 $quote->id = 0;
                 $quote->lead_id = $leadId;

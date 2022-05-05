@@ -24,7 +24,7 @@ class QuoteSearch extends Quote
         return [
             [['datetime_start', 'datetime_end'], 'safe'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
-            [['id', 'lead_id', 'employee_id', 'status', 'check_payment','create_type_id'], 'integer'],
+            [['id', 'lead_id', 'employee_id', 'status', 'check_payment','q_create_type_id'], 'integer'],
             [['uid', 'record_locator', 'pcc', 'cabin', 'gds', 'trip_type', 'main_airline_code', 'reservation_dump', 'fare_type'], 'safe'],
 
             ['type_id', 'integer'],
@@ -94,7 +94,7 @@ class QuoteSearch extends Quote
             'status' => $this->status,
             'check_payment' => $this->check_payment,
             'type_id' => $this->type_id,
-            'create_type_id' => $this->create_type_id,
+            'q_create_type_id' => $this->q_create_type_id,
 
             //'created' => $this->created,
             //'updated' => $this->updated,

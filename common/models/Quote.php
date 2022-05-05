@@ -73,7 +73,7 @@ use yii\helpers\VarDumper;
  * @property Project $providerProject
  * @property QuoteLabel[] $quoteLabel
  * @property Currency|null $clientCurrency
- * @property int|null $create_type_id
+ * @property int|null $q_create_type_id
  */
 class Quote extends \yii\db\ActiveRecord
 {
@@ -215,14 +215,14 @@ class Quote extends \yii\db\ActiveRecord
     public const EXCLUDE_AIRLINE_LOGO = ['6X'];
 
     public const
-        CREATE_TYPE_QUOTE_SEARCH = 0,
-        CREATE_TYPE_SMART_SEARCH = 1,
-        CREATE_TYPE_MANUAL = 2,
-        CREATE_TYPE_EXPERT = 3,
-        CREATE_TYPE_AUTO_SELECT = 4,
-        CREATE_TYPE_AUTO = 5;
+        CREATE_TYPE_QUOTE_SEARCH = 1,
+        CREATE_TYPE_SMART_SEARCH = 2,
+        CREATE_TYPE_MANUAL = 3,
+        CREATE_TYPE_EXPERT = 4,
+        CREATE_TYPE_AUTO_SELECT = 5,
+        CREATE_TYPE_AUTO = 6;
 
-    public const CREATE_TYPE_STATUS_LIST = [
+    public const CREATE_TYPE_LIST = [
         self::CREATE_TYPE_QUOTE_SEARCH => 'Quote Search',
         self::CREATE_TYPE_SMART_SEARCH => 'Smart Search',
         self::CREATE_TYPE_MANUAL => 'Manual',
@@ -310,8 +310,8 @@ class Quote extends \yii\db\ActiveRecord
             ['type_id', 'integer'],
             ['type_id', 'in', 'range' => array_keys(self::TYPE_LIST)],
 
-            ['create_type_id', 'integer'],
-            ['create_type_id', 'in', 'range' => array_keys(self::CREATE_TYPE_STATUS_LIST)],
+            ['q_create_type_id', 'integer'],
+            ['q_create_type_id', 'in', 'range' => array_keys(self::CREATE_TYPE_LIST)],
 
             ['pcc', 'string', 'max' => 50],
 
@@ -370,7 +370,7 @@ class Quote extends \yii\db\ActiveRecord
             'agent_processing_fee' => 'Agent Processing Fee',
             'q_client_currency' => 'Client currency',
             'q_client_currency_rate' => 'Client rate',
-            'create_type_id' => 'Creation type',
+            'q_create_type_id' => 'Creation type',
         ];
     }
 
@@ -432,7 +432,7 @@ class Quote extends \yii\db\ActiveRecord
         $quote->lead_id = $leadId;
         $quote->uid = uniqid('', false);
         $quote->status = self::STATUS_CREATED;
-        $quote->create_type_id = self::CREATE_TYPE_MANUAL;
+        $quote->q_create_type_id = self::CREATE_TYPE_MANUAL;
         return $quote;
     }
 
@@ -458,7 +458,7 @@ class Quote extends \yii\db\ActiveRecord
         $quote->employee_name = $employee->username ?? null;
         $quote->origin_search_data = json_encode($quoteData);
         $quote->gds_offer_id = $quoteData['gdsOfferId'] ?? null;
-        $quote->create_type_id = $quoteData['createTypeId'] ?? null;
+        $quote->q_create_type_id = $quoteData['createTypeId'] ?? null;
 
         $quote->q_client_currency = $currency->cur_code ?? null;
         $quote->q_client_currency_rate = $currency->cur_base_rate ?? null;
@@ -2167,7 +2167,7 @@ class Quote extends \yii\db\ActiveRecord
      */
     public function getCreateTypeName(): string
     {
-        return self::CREATE_TYPE_STATUS_LIST[$this->create_type_id] ?? '-';
+        return self::CREATE_TYPE_LIST[$this->q_create_type_id] ?? '-';
     }
 
     /**

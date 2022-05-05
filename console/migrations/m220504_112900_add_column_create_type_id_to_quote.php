@@ -1,5 +1,6 @@
 <?php
 
+use src\helpers\app\DBHelper;
 use yii\db\Migration;
 
 /**
@@ -12,7 +13,10 @@ class m220504_112900_add_column_create_type_id_to_quote extends Migration
      */
     public function safeUp()
     {
-        $this->addColumn('{{%quotes}}', 'create_type_id', $this->integer());
+        if (!DBHelper::isColumnExist('quotes', 'q_create_type_id')) {
+            $this->addColumn('{{%quotes}}', 'q_create_type_id', $this->integer());
+            Yii::$app->db->getSchema()->refreshTableSchema('{{%quotes}}');
+        }
     }
 
     /**
@@ -20,8 +24,9 @@ class m220504_112900_add_column_create_type_id_to_quote extends Migration
      */
     public function safeDown()
     {
-        echo "m220504_112900_add_column_create_type_id_to_quote cannot be reverted.\n";
-
-        return false;
+        if (DBHelper::isColumnExist('quotes', 'q_create_type_id')) {
+            $this->dropColumn('{{%quotes}}', 'q_create_type_id');
+            Yii::$app->db->getSchema()->refreshTableSchema('{{%quotes}}');
+        }
     }
 }
