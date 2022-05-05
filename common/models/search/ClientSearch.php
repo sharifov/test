@@ -52,7 +52,7 @@ class ClientSearch extends Client
      */
     public function search($params): ActiveDataProvider
     {
-        $query = Client::find()->alias('cl')->with(['leads.employee.ugsGroups'])->joinWith(['project p']);
+        $query = Client::find()->alias('cl')->joinWith(['project p']);
 
         // add conditions that should always apply here
 

@@ -267,6 +267,11 @@ class Client extends ActiveRecord
         return $this->hasMany(ClientPhone::class, ['client_id' => 'id'])->select('phone')->asArray()->column();
     }
 
+    public function getLeadIdsAndRequestIp(): array
+    {
+        return $this->hasMany(Lead::class, ['client_id' => 'id'])->select(['id', 'request_ip'])->asArray()->all();
+    }
+
 
     /**
      * @return ActiveQuery
