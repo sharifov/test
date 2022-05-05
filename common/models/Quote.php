@@ -2664,7 +2664,7 @@ class Quote extends \yii\db\ActiveRecord
 
         if ($this->lead && $this->lead->project && $this->lead->project->link) {
             $urlString = implode('/', [$this->lead->project->link, self::CHECKOUT_URL_PAGE, $this->uid]);
-            $queryParams = (is_null($qc_uid)) ? [] : ['qc_uid' => $qc_uid];
+            $queryParams = (is_null($qc_uid)) ? [] : ['qc' => $qc_uid];
 
             return self::generateUrl($urlString, $queryParams);
         }
