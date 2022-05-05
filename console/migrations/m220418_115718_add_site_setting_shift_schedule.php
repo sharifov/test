@@ -1,5 +1,6 @@
 <?php
 
+use modules\shiftSchedule\src\services\ShiftScheduleDictionary;
 use yii\db\Migration;
 
 /**
@@ -19,9 +20,9 @@ class m220418_115718_add_site_setting_shift_schedule extends Migration
                     's_name'        => 'Shift Schedule',
                     's_type'        => \common\models\Setting::TYPE_ARRAY,
                     's_value'       => json_encode([
-                            'generate_enabled'        => true,
-                            'days_limit'              => 20,
-                            'days_offset'             => 0,
+                            'generate_enabled'        => !ShiftScheduleDictionary::DEFAULT_GENERATE_ENABLED,
+                            'days_limit'              => ShiftScheduleDictionary::DEFAULT_DAYS_LIMIT,
+                            'days_offset'             => ShiftScheduleDictionary::DEFAULT_DAYS_OFFSET,
                         ]),
                     's_updated_dt'  => date('Y-m-d H:i:s'),
                     's_category_id' => $settingCategory->sc_id,

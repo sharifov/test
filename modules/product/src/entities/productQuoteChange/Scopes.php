@@ -31,6 +31,11 @@ class Scopes extends ActiveQuery
         return $this->andWhere(['IS', 'pqc_decision_type_id', null]);
     }
 
+    public function byStatuses(array $statuses): self
+    {
+        return $this->andWhere(['pqc_status_id' => $statuses]);
+    }
+
     public function excludeStatuses(array $statuses): self
     {
         return $this->andWhere(['NOT IN', 'pqc_status_id', $statuses]);

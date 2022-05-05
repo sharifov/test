@@ -115,7 +115,7 @@ $pjaxContainerId = 'pjax-user-shift-assign';
                     return implode(' ', $itemsData);
                 },
                 'format' => 'raw',
-                'filter' => \common\models\Employee::getAllRoles(),
+                'filter' => \common\models\Employee::getAllRoles(\src\auth\Auth::user()),
                 'contentOptions' => ['style' => 'width: 10%; white-space: pre-wrap']
             ],
             [

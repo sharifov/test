@@ -2,6 +2,7 @@
 
 use dosamigos\datepicker\DatePicker;
 use modules\product\src\entities\productType\ProductType;
+use src\auth\Auth;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\ActiveForm;
@@ -137,7 +138,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $roles ? implode(', ', $roles) : '-';
                 },
                 //'format' => 'raw',
-                'filter' => \common\models\Employee::getAllRoles()
+                'filter' => \common\models\Employee::getAllRoles(Auth::user())
             ],
             [
                 'attribute' => 'lce_status_id',

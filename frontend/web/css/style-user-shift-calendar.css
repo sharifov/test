@@ -1,0 +1,62 @@
+/*.ssc-event-cont .mbsc-icon:before {*/
+/*    color: #fff;*/
+/*    font-size: 15px;*/
+/*}*/
+
+/*.ssc .mbsc-timeline-column,*/
+/*.ssc .mbsc-timeline-header-column {*/
+/*    min-width: 100px;*/
+/*}*/
+
+/*.ssc .mbsc-timeline-resource,*/
+/*.ssc .mbsc-timeline-row {*/
+/*    min-height: 100px;*/
+/*}*/
+
+.ssc .mbsc-segmented {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 1px;
+}
+
+.md-work-week-picker {
+  flex: 1 0 auto;
+}
+
+.md-work-week-nav {
+  width: 200px;
+}
+
+/** CALENDAR **/
+#add-event-form .user-wrapper {
+    padding: 10px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+#add-event-form .user-wrapper::-webkit-scrollbar {
+    width: 8px;
+}
+#add-event-form .user-wrapper::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px grey;
+    border-radius: 10px;
+}
+#add-event-form .user-wrapper::-webkit-scrollbar-thumb {
+    background: #909090;
+    border-radius: 10px;
+}
+#group-wrapper {
+    max-height: 500px;
+    overflow-x: auto
+}
+#group-wrapper::-webkit-scrollbar {
+    width: 8px;
+}
+#group-wrapper::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px grey;
+    border-radius: 10px;
+}
+#group-wrapper::-webkit-scrollbar-thumb {
+    background: #909090;
+    border-radius: 10px;
+}
+/** END CALENDAR **/

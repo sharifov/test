@@ -1413,6 +1413,9 @@ class QuoteController extends FController
 
             if ($quotes === false) {
                 $dto = new SearchServiceQuoteDTO($lead);
+                $cid = $lead->project->airSearchCid ?: AddQuoteService::AUTO_ADD_CID;
+                $dto->setCid($cid);
+
                 $quotes = SearchService::getOnlineQuotes($dto);
 
                 if ($quotes && !empty($quotes['data']['results']) && empty($quotes['error'])) {

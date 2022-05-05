@@ -293,4 +293,26 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
     {
         return (!$this->shift || empty($this->shift->sh_title)) ? '-' : $this->shift->sh_title;
     }
+
+    public static function create(
+        int $userId,
+        ?string $description,
+        string $startDateTime,
+        string $endDateTime,
+        int $duration,
+        int $status,
+        int $type,
+        int $scheduleType
+    ): self {
+        $self = new self();
+        $self->uss_user_id = $userId;
+        $self->uss_description = $description;
+        $self->uss_start_utc_dt = $startDateTime;
+        $self->uss_end_utc_dt = $endDateTime;
+        $self->uss_duration = $duration;
+        $self->uss_status_id = $status;
+        $self->uss_type_id = $type;
+        $self->uss_sst_id = $scheduleType;
+        return $self;
+    }
 }

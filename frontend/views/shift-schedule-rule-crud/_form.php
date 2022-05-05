@@ -2,16 +2,16 @@
 
 use common\models\Employee;
 use frontend\widgets\cronExpression\CronExpressionWidget;
+use kartik\select2\Select2;
 use kartik\time\TimePicker;
-use modules\shiftSchedule\src\entities\shiftScheduleRule\ShiftScheduleRule;
+use modules\shiftSchedule\src\entities\shift\ShiftQuery;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
-use modules\shiftSchedule\src\widget\ShiftSelectWidget;
 use yii\bootstrap4\Html;
 use yii\bootstrap4\Tabs;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model ShiftScheduleRule */
+/* @var $model \modules\shiftSchedule\src\forms\ShiftScheduleForm */
 /* @var $form ActiveForm */
 ?>
 
@@ -27,9 +27,25 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'ssr_title')->textInput(['maxlength' => true]) ?>
 
-        <?= $form->field($model, 'ssr_shift_id')->widget(ShiftSelectWidget::class) ?>
+        <?= $form->field($model, 'ssr_shift_id')->widget(Select2::class, [
+            'data' => ShiftQuery::getList(),
+            'pluginOptions' => [
+                'allowClear' => true
+            ],
+            'options' => [
+                'prompt' => '---'
+            ]
+        ]) ?>
 
-        <?= $form->field($model, 'ssr_sst_id')->dropDownList(ShiftScheduleType::getList(), ['prompt' => '-']) ?>
+        <?= $form->field($model, 'ssr_sst_id')->widget(Select2::class, [
+            'data' => ShiftScheduleType::getList(),
+            'pluginOptions' => [
+                'allowClear' => true
+            ],
+            'options' => [
+                'prompt' => '---'
+            ]
+        ]) ?>
 
 
         <div class="row">
@@ -44,6 +60,19 @@ use yii\widgets\ActiveForm;
             ])->label('Start Time (Local)') ?>
             </div>
             <div class="col-md-6">
+<?php
+$inputHtml = <<<HTML
+{label}
+<div class="input-group">
+{input}
+<span class="input-group-addon">
+    <span id="durationTimeHours">{$model->getDurationTimeHours()}</span> Hours
+</span>
+</div>
+{error}
+{hint}
+HTML;
+?>
             <?php /*= $form->field($model, 'ssr_end_time_loc')->widget(TimePicker::class, [
                 'pluginOptions' => [
                     'showSeconds' => true,
@@ -52,16 +81,18 @@ use yii\widgets\ActiveForm;
                     'secondStep' => 5,
                 ]
             ])->label('End Time (Local)');*/ ?>
-                <?= $form->field($model, 'ssr_duration_time')->input('number', ['maxlength' => true, 'min' => 1])
+                <?= $form->field($model, 'ssr_duration_time', [
+                  'template' => $inputHtml
+            ])->input('number', ['maxlength' => true, 'min' => 1, 'id' => 'durationTimeMinutes'])
                 ->label('Duration Time (minutes)')?>
             </div>
         </div>
 
 
         <?php
-        echo $form->field($model, 'ssr_timezone')->widget(\kartik\select2\Select2::class, [
+        echo $form->field($model, 'ssr_timezone')->widget(Select2::class, [
             'data' => Employee::timezoneList(true),
-            'size' => \kartik\select2\Select2::SMALL,
+            'size' => Select2::SMALL,
             'options' => ['placeholder' => 'Select TimeZone', 'multiple' => false],
             'pluginOptions' => ['allowClear' => true],
         ]);
@@ -125,3 +156,19 @@ use yii\widgets\ActiveForm;
   <?php ActiveForm::end(); ?>
 
 </div>
+
+<?php
+
+$js = <<<JS
+$('#durationTimeMinutes').on('keyup change', function () {
+    let val = $(this).val();
+    let hours = (val ? (val / 60) : 0);
+    if (hours % 1 === 0) {
+        hours = Math.trunc(hours);
+    } else {
+        hours = hours.toFixed(2);
+    }
+    $('#durationTimeHours').html(hours);
+});
+JS;
+$this->registerJs($js);

@@ -20,9 +20,14 @@ use yii\httpclient\CurlTransport;
 class BackOffice
 {
     /**
+     * @param string $endpoint
+     * @param string $type
+     * @param string|null $fields
+     * @return mixed
      * @throws \JsonException
+     * @throws \Throwable
      */
-    public static function sendRequest($endpoint, $type = 'GET', $fields = null)
+    public static function sendRequest(string $endpoint, string $type = 'GET', string $fields = null)
     {
         $url = sprintf('%s/%s', Yii::$app->params['backOffice']['serverUrl'], $endpoint);
         $ch = curl_init();
@@ -39,8 +44,17 @@ class BackOffice
             'signature: ' . self::getSignatureBO(Yii::$app->params['backOffice']['apiKey'], Yii::$app->params['backOffice']['ver'])
         ]);
         $result = curl_exec($ch);
-
-        return json_decode($result, true, 512, JSON_THROW_ON_ERROR);
+        try {
+            return json_decode($result, true, 512, JSON_THROW_ON_ERROR);
+        } catch (\Throwable $throwable) {
+            $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), [
+                'result' => $result,
+                'url' => $url,
+                'fields' => $fields,
+            ]);
+            \Yii::error($message, 'BackOffice::sendRequest:Throwable');
+            throw $throwable;
+        }
     }
 
 

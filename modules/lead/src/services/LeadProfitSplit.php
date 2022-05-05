@@ -20,7 +20,7 @@ class LeadProfitSplit
         $profitSplitData = [];
 
         /** @var ProfitSplit $profitSplit */
-        foreach ($lead->profitSplits as $profitSplit) {
+        foreach ($lead->getAllProfitSplits() as $profitSplit) {
             if ($profitSplit->ps_user_id === $newOwnerId) {
                 return;
             }

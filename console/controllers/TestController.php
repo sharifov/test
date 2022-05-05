@@ -12,6 +12,7 @@ use Gnello\Mattermost\Driver;
 use modules\cases\src\abac\CasesAbacObject;
 use modules\lead\src\abac\LeadAbacObject;
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeCreatedEvent;
+use modules\user\src\update\UpdateForm;
 use src\auth\Auth;
 use src\helpers\setting\SettingHelper;
 use src\model\call\socket\CallUpdateMessage;

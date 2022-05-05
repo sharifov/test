@@ -145,7 +145,7 @@ $this->title = 'Home Page'; // . $user->username;
 <!--                    </ul>-->
                     <div class="clearfix"></div>
                 </div>
-                <div class="x_content">
+                <div class="x_content table-responsive">
                     <table class="table table-bordered table-hover">
                         <tr>
                             <th>Project</th>
