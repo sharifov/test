@@ -9,13 +9,14 @@
     url: https://github.com/redis/hiredis/archive/v0.14.1.tar.gz
     dest: /tmp/hiredis-0.14.1.tar.gz
     timeout: 20
+    mode: 0664
   when: not libhiredis.stat.exists
 
 - name: Extract libhiredis
   unarchive:
     src: /tmp/hiredis-0.14.1.tar.gz
     dest: /tmp
-    remote_src: yes
+    remote_src: true
   when: not libhiredis.stat.exists
 
 - name: Install libhiredis

@@ -110,12 +110,12 @@ $pjaxContainerId = 'pjax-user-shift-assign';
                     $items = $model->getRoles();
                     $itemsData = [];
                     foreach ($items as $item) {
-                        $itemsData[] = Html::tag('span', Html::encode($item), ['class' => 'label bg-light text-dark']);
+                        $itemsData[] = Html::tag('span', Html::encode($item), ['class' => 'label bg-light text-dark shadow']);
                     }
                     return implode(' ', $itemsData);
                 },
                 'format' => 'raw',
-                'filter' => \common\models\Employee::getAllRoles(),
+                'filter' => \common\models\Employee::getAllRoles(\src\auth\Auth::user()),
                 'contentOptions' => ['style' => 'width: 10%; white-space: pre-wrap']
             ],
             [
@@ -164,6 +164,16 @@ $pjaxContainerId = 'pjax-user-shift-assign';
     <?php Pjax::end(); ?>
 
 </div>
+
+<?php
+$css = <<<CSS
+    .shadow {
+        -webkit-box-shadow: 1px 1px 1px 2px #000000; 
+        box-shadow: 1px 1px 1px 2px #000000;
+    }
+CSS;
+$this->registerCss($css);
+?>
 
 <?php yii\bootstrap4\Modal::begin([
     'title' => '',

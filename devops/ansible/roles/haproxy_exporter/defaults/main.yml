@@ -1,5 +1,0 @@
----
-haproxy_exporter_version: 0.10.0
-haproxy_exporter_web_listen_address: "0.0.0.0:9101"
-
-haproxy_scrape_url: "http://admin:admin@127.0.0.1:2324/haproxy?stats;csv"

@@ -251,6 +251,18 @@ class ProductQuoteChangeAbacObject extends AbacBaseModel implements AbacInterfac
         'operators' =>  [self::OP_EQUAL2]
     ];
 
+    protected const ATTR_HAS_PQR_ACCEPTED = [
+        'optgroup' => 'PRODUCT QUOTE',
+        'id' => self::NS . 'hasPqrAccepted',
+        'field' => 'hasPqrAccepted',
+        'label' => 'Has accepted refund quote',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
     protected const ATTR_IS_PQ_CHANGEABLE = [
         'optgroup' => 'PRODUCT QUOTE',
         'id' => self::NS . 'isPqChangeable',
@@ -377,6 +389,7 @@ class ProductQuoteChangeAbacObject extends AbacBaseModel implements AbacInterfac
             self::ATTR_MAX_CONFIRMABLE_QUOTES_CNT,
             self::ATTR_HAS_PQC_INVOLUNTARY_ACTIVE,
             self::ATTR_REFUND_ALLOWED,
+            self::ATTR_HAS_PQR_ACCEPTED,
         ],
     ];
 

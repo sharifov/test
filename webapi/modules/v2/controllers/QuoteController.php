@@ -143,7 +143,7 @@ class QuoteController extends ApiBaseController
      *                       "cabin": "Y",
      *                       "ticket_id": 1,
      *                       "baggage": {
-     *                           "": {
+     *                           "ADT": {
      *                               "allowPieces": 2,
      *                               "allowMaxSize": "UP TO 62 LINEAR INCHES/158 LINEAR CENTIMETERS",
      *                               "allowMaxWeight": "UP TO 50 POUNDS/23 KILOGRAMS",
@@ -176,7 +176,7 @@ class QuoteController extends ApiBaseController
      *                       "cabin": "Y",
      *                       "ticket_id": 2,
      *                       "baggage": {
-     *                           "": {
+     *                           "ADT": {
      *                               "allowPieces": 2,
      *                               "allowMaxSize": "UP TO 62 LINEAR INCHES/158 LINEAR CENTIMETERS",
      *                               "allowMaxWeight": "UP TO 50 POUNDS/23 KILOGRAMS",
@@ -209,7 +209,7 @@ class QuoteController extends ApiBaseController
      *                       "cabin": "Y",
      *                       "ticket_id": 2,
      *                       "baggage": {
-     *                           "": {
+     *                           "ADT": {
      *                               "allowPieces": 2,
      *                               "allowMaxSize": "UP TO 62 LINEAR INCHES/158 LINEAR CENTIMETERS",
      *                               "allowMaxWeight": "UP TO 50 POUNDS/23 KILOGRAMS",
@@ -248,7 +248,7 @@ class QuoteController extends ApiBaseController
      *                       "cabin": "Y",
      *                       "ticket_id": 1,
      *                       "baggage": {
-     *                           "": {
+     *                           "ADT": {
      *                               "allowPieces": 1,
      *                               "allowMaxSize": "UP TO 62 LINEAR INCHES/158 LINEAR CENTIMETERS ‡",
      *                               "allowMaxWeight": "UP TO 50 POUNDS/23 ‡ MD« KILOGRAMS",
@@ -281,7 +281,7 @@ class QuoteController extends ApiBaseController
      *                       "cabin": "Y",
      *                       "ticket_id": 2,
      *                       "baggage": {
-     *                           "": {
+     *                           "ADT": {
      *                               "allowPieces": 1,
      *                               "allowMaxSize": "UP TO 62 LINEAR INCHES/158 LINEAR CENTIMETERS ‡",
      *                               "allowMaxWeight": "UP TO 50 POUNDS/23 ‡ MD« KILOGRAMS",
@@ -314,7 +314,7 @@ class QuoteController extends ApiBaseController
      *                       "cabin": "Y",
      *                       "ticket_id": 2,
      *                       "baggage": {
-     *                           "": {
+     *                           "ADT": {
      *                               "allowPieces": 1,
      *                               "allowMaxSize": "UP TO 62 LINEAR INCHES/158 LINEAR CENTIMETERS ‡",
      *                               "allowMaxWeight": "UP TO 50 POUNDS/23 ‡ MD« KILOGRAMS",

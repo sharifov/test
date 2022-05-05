@@ -14,6 +14,7 @@ use src\entities\cases\CaseEventLog;
 use src\interfaces\BoWebhookService;
 use src\repositories\cases\CasesRepository;
 use src\repositories\NotFoundException;
+use src\services\cases\CasesCommunicationService;
 use webapi\src\forms\boWebhook\VoluntaryRefundUpdateForm;
 use yii\base\Model;
 
@@ -24,21 +25,25 @@ use yii\base\Model;
  * @property-read ProductQuoteRefundRepository $productQuoteRefundRepository
  * @property-read CasesRepository $casesRepository
  * @property-read ProductQuoteRepository $productQuoteRepository
+ * @property-read CasesCommunicationService $casesCommunicationService
  */
 class VoluntaryRefundService implements BoWebhookService
 {
     private ProductQuoteRefundRepository $productQuoteRefundRepository;
     private CasesRepository $casesRepository;
     private ProductQuoteRepository $productQuoteRepository;
+    private CasesCommunicationService $casesCommunicationService;
 
     public function __construct(
         ProductQuoteRefundRepository $productQuoteRefundRepository,
         CasesRepository $casesRepository,
-        ProductQuoteRepository $productQuoteRepository
+        ProductQuoteRepository $productQuoteRepository,
+        CasesCommunicationService $casesCommunicationService
     ) {
         $this->productQuoteRefundRepository = $productQuoteRefundRepository;
         $this->casesRepository = $casesRepository;
         $this->productQuoteRepository = $productQuoteRepository;
+        $this->casesCommunicationService = $casesCommunicationService;
     }
 
     /**
@@ -79,6 +84,11 @@ class VoluntaryRefundService implements BoWebhookService
 
             $productQuote->cancelled();
             $this->productQuoteRepository->save($productQuote);
+            if ($case->project->getParams()->object->case->sendFeedback ?? null) {
+                $this->casesCommunicationService
+                    ->sendAutoFeedbackEmail($case, CaseEventLog::VOLUNTARY_REFUND_WH_UPDATE)
+                ;
+            }
         } elseif ($form->isCanceled()) {
             $productQuoteRefund->declined();
             $this->productQuoteRefundRepository->save($productQuoteRefund);

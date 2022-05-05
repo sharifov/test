@@ -5,6 +5,7 @@ namespace modules\shiftSchedule\controllers;
 use frontend\controllers\FController;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\shiftScheduleType\search\ShiftScheduleTypeSearch;
+use modules\shiftSchedule\src\forms\ShiftScheduleTypeForm;
 use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -68,17 +69,23 @@ class ShiftScheduleTypeController extends FController
     public function actionCreate()
     {
         $model = new ShiftScheduleType();
+        $form = new ShiftScheduleTypeForm();
 
-        if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'sst_id' => $model->sst_id]);
+        if ($this->request->isPost && $form->load($this->request->post())) {
+            if ($form->validate()) {
+                $model->attributes = $form->attributes;
+                if ($model->save()) {
+                    $model->updateLabelListAssign($form->sst_label_list ? $form->sst_label_list : []);
+                    return $this->redirect(['view', 'sst_id' => $model->sst_id]);
+                }
             }
         } else {
             $model->loadDefaultValues();
+            $form->attributes = $model->attributes;
         }
 
         return $this->render('create', [
-            'model' => $model,
+            'model' => $form,
         ]);
     }
 
@@ -92,13 +99,25 @@ class ShiftScheduleTypeController extends FController
     public function actionUpdate($sst_id)
     {
         $model = $this->findModel($sst_id);
+        $form = new ShiftScheduleTypeForm();
+        $form->isNewRecord = false;
+        $form->sst_id = $model->sst_id;
 
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'sst_id' => $model->sst_id]);
+        if ($this->request->isPost && $form->load($this->request->post())) {
+            if ($form->validate()) {
+                $model->attributes = $form->attributes;
+                if ($model->save()) {
+                    $model->updateLabelListAssign($form->sst_label_list ? $form->sst_label_list : []);
+                    return $this->redirect(['view', 'sst_id' => $model->sst_id]);
+                }
+            }
+        } else {
+            $form->attributes = $model->attributes;
+            $form->sst_label_list = $model->tlaStlKeys;
         }
 
         return $this->render('update', [
-            'model' => $model,
+            'model' => $form
         ]);
     }
 

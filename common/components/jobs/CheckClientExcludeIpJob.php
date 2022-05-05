@@ -29,6 +29,12 @@ class CheckClientExcludeIpJob extends BaseJob implements JobInterface
         try {
             $checker = \Yii::createObject(ClientExcludeIpChecker::class);
             $checker->check($this->clientId, $this->ip);
+        } catch (\RuntimeException | \DomainException $e) {
+            \Yii::warning([
+                'message' => $e->getMessage(),
+                'clientId' => $this->clientId,
+                'ip' => $this->ip,
+            ], 'CheckClientExcludeIpJob');
         } catch (\Throwable $e) {
             \Yii::error([
                 'message' => $e->getMessage(),

@@ -18,6 +18,7 @@ $n = 1;
                 <th>Color</th>
                 <th>Key</th>
                 <th>Type Name</th>
+                <th>Subtype</th>
             </tr>
             </thead>
         <?php foreach ($scheduleTypes as $item) : ?>
@@ -36,6 +37,9 @@ $n = 1;
                 <td>
                     <?= $item->getIconLabel() ?> &nbsp;
                     <?= Html::encode($item->sst_name) ?>
+                </td>
+                <td>
+                    <?= Html::encode($item->getSubtypeName()) ?>
                 </td>
             </tr>
         <?php endforeach; ?>

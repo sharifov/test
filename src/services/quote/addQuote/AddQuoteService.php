@@ -48,6 +48,8 @@ use yii\helpers\ArrayHelper;
  */
 class AddQuoteService
 {
+    public const AUTO_ADD_CID = 'SAL103';
+
     /**
      * @var TransactionManager
      */

@@ -34,6 +34,9 @@ class CreateRedialCall
                 'call_recording_disabled' => $recordDisabled,
                 'friendly_name' => FriendlyName::next(),
                 'is_redial_call' => true,
+                'project' => $redialCall->projectName,
+                'source' => Call::SOURCE_LIST[Call::SOURCE_REDIAL_CALL],
+                'type' => Call::TYPE_LIST[Call::CALL_TYPE_OUT],
             ])
         );
     }

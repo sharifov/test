@@ -82,7 +82,10 @@ class UserProfile extends \yii\db\ActiveRecord
             [['up_user_id'], 'unique'],
             [['up_telegram_enable', 'up_auto_redial', 'up_kpi_enable', 'up_2fa_enable'], 'boolean'],
             [['up_updated_dt', 'up_join_date'], 'safe'],
-            [['up_telegram'], 'string', 'max' => 20],
+
+            ['up_telegram', 'default', 'value' => null],
+            ['up_telegram', 'string', 'max' => 20],
+
             [['up_2fa_secret'], 'string', 'max' => 50],
             [['up_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['up_user_id' => 'id']],
 
@@ -195,7 +198,7 @@ class UserProfile extends \yii\db\ActiveRecord
     public static function removeTelegramUser(int $userId): void
     {
         if ($profile = self::findOne(['up_user_id' => $userId])) {
-            $profile->up_telegram = '';
+            $profile->up_telegram = null;
             $profile->up_telegram_enable = false;
             $profile->save(false);
         }

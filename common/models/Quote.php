@@ -1716,12 +1716,14 @@ class Quote extends \yii\db\ActiveRecord
                 $baggageInfo = [];
                 if (count($baggages)) {
                     foreach ($baggages as $baggageEntry) {
-                        $baggageInfo[$baggageEntry->qsb_pax_code] = $baggageEntry->getInfo();
+                        $paxCode = $baggageEntry->qsb_pax_code ?: self::PASSENGER_ADULT;
+                        $baggageInfo[$paxCode] = $baggageEntry->getInfo();
                     }
                 }
                 if (count($baggageCharge)) {
                     foreach ($baggageCharge as $baggageChEntry) {
-                        $baggageInfo[$baggageChEntry->qsbc_pax_code]['charge'] = $baggageChEntry->getInfo();
+                        $paxCode = $baggageChEntry->qsbc_pax_code ?: self::PASSENGER_ADULT;
+                        $baggageInfo[$paxCode]['charge'] = $baggageChEntry->getInfo();
                     }
                 }
                 $stops = [];

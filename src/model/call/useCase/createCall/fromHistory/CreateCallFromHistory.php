@@ -132,6 +132,9 @@ class CreateCallFromHistory
                     'source_type_id' => $sourceTypeId,
                     'call_recording_disabled' => $recordDisabled,
                     'friendly_name' => FriendlyName::next(),
+                    'project' => $call->cl_project_id ? $call->project->name : '',
+                    'source' => Call::SOURCE_LIST[$sourceTypeId] ?? '',
+                    'type' => Call::TYPE_LIST[Call::CALL_TYPE_OUT],
                 ])
             );
         } catch (\Throwable $e) {

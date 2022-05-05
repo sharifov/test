@@ -45,12 +45,15 @@ class EmployeeGroupAccess
     }
 
     /**
-     * @param int $searchUserId
+     * @param null|int $searchUserId
      * @param int $userIdExist
      * @return bool
      */
-    public static function isUserInCommonGroup(int $searchUserId, int $userIdExist): bool
+    public static function isUserInCommonGroup(?int $searchUserId, int $userIdExist): bool
     {
+        if (is_null($searchUserId)) {
+            return false;
+        }
         return array_key_exists($userIdExist, self::getUsersIdsInCommonGroups($searchUserId));
     }
 }

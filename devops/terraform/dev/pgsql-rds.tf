@@ -2,7 +2,7 @@
 module "pgsql" {
   source     = "terraform-aws-modules/rds/aws"
   version    = "~> 2.0"
-  identifier = "pgsql-${var.ENV}-${var.PROJECT}"
+  identifier = "pgsql-${var.PROJECT}-${var.ENV}"
 
   engine            = "postgres"
   engine_version    = "12.8"
@@ -33,7 +33,7 @@ module "pgsql" {
   subnet_ids                      = var.PRIVATE_SUBNETS
   family                          = "postgres12"
   major_engine_version            = "12"
-  final_snapshot_identifier       = "pgsql-${var.ENV}-${var.PROJECT}"
+  final_snapshot_identifier       = "pgsql-${var.PROJECT}-${var.ENV}"
   deletion_protection             = false
   skip_final_snapshot             = true
 }

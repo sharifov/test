@@ -3,8 +3,10 @@
 namespace src\model\cases\useCases\cases\updateInfo;
 
 use common\models\Department;
+use common\models\Employee;
 use src\entities\cases\CaseCategory;
 use src\entities\cases\Cases;
+use src\entities\cases\CasesSourceType;
 use yii\base\Model;
 
 /**
@@ -18,6 +20,7 @@ use yii\base\Model;
  * @property string|null $orderUid
  * @property array $departmentList
  * @property array $categoryList
+ * @property FieldAccess $fieldAccess;
  */
 class UpdateInfoForm extends Model
 {
@@ -27,6 +30,7 @@ class UpdateInfoForm extends Model
     public $description;
     public $orderUid;
     public $userId;
+    public FieldAccess $fieldAccess;
 
     private $case;
     private $categoryList = [];
@@ -37,6 +41,7 @@ class UpdateInfoForm extends Model
         array $departmentList,
         array $categoryList,
         int $userId,
+        FieldAccess $fieldAccess,
         $config = []
     ) {
         parent::__construct($config);
@@ -49,6 +54,7 @@ class UpdateInfoForm extends Model
         $this->description = $case->cs_description;
         $this->categoryList = $categoryList;
         $this->userId = $userId;
+        $this->fieldAccess = $fieldAccess;
     }
 
     public function rules(): array
@@ -57,22 +63,46 @@ class UpdateInfoForm extends Model
             ['depId', 'required'],
             ['depId', 'integer'],
             ['depId', 'in', 'range' => array_keys($this->getdepartmentList())],
+            ['depId', 'validateDepartment'],
 
             ['categoryId', 'required'],
             ['categoryId', 'integer'],
             ['categoryId', 'in', 'range' => function () {
                 return $this->getAvailableCategories($this->depId);
             }],
+            ['categoryId', 'validateCategory'],
 
             ['subject', 'string', 'max' => 200],
             ['userId', 'integer'],
 
             ['description', 'string'],
+            ['description', 'validateDescription'],
 
             ['orderUid', 'default', 'value' => null],
             ['orderUid', 'string', 'min' => '5', 'max' => 7],
             ['orderUid', 'match', 'pattern' => '/^[a-zA-Z0-9]+$/'],
         ];
+    }
+
+    public function validateDepartment($attribute)
+    {
+        if (!$this->fieldAccess->canEditDepartment() && $this->depId !== $this->case->getDepartmentId()) {
+            $this->addError($attribute, 'The value is not acceptable.');
+        }
+    }
+
+    public function validateCategory($attribute)
+    {
+        if (!$this->fieldAccess->canEditCategory() && $this->categoryId !== $this->case->cs_category_id) {
+            $this->addError($attribute, 'The value is not acceptable.');
+        }
+    }
+
+    public function validateDescription($attribute)
+    {
+        if (!$this->fieldAccess->canEditDescription() && $this->description !== $this->case->cs_description) {
+            $this->addError($attribute, 'The value is not acceptable.');
+        }
     }
 
     public function attributeLabels(): array

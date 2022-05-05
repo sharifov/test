@@ -1,13 +1,14 @@
 <?php
 
 use common\models\Employee;
+use modules\user\src\update\MultipleUpdateForm;
 use src\auth\Auth;
 use yii\grid\ActionColumn;
 use common\components\grid\DateTimeColumn;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\EmployeeSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
-/* @var $multipleForm \frontend\models\UserMultipleForm */
+/* @var $multipleForm MultipleUpdateForm */
 /* @var $employees [] */
 /* @var array $multipleErrors */
 
@@ -27,14 +28,7 @@ $user = Yii::$app->user->identity;
 
 $isUM = $user->isUserManager();
 $isAdmin = $user->isAdmin() || $user->isSuperAdmin();
-$isOnlyAdmin = $user->isOnlyAdmin();
-$isSuperAdmin = $user->isSuperAdmin();
 
-if ($isAdmin || $isSuperAdmin) {
-    $userList = \common\models\Employee::getList();
-} else {
-    $userList = \common\models\Employee::getListByUserId($user->id);
-}
 $projectList = EmployeeProjectAccess::getProjects($user->id);
 
 ?>
@@ -65,25 +59,6 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
     ]);
     ?>
 
-    <?php /*= Html::label( Yii::t('frontend', 'Page size: '), 'pagesize', array( 'style' => 'margin-left:10px; margin-top:8px;' ) ) ?>
-    <?= Html::dropDownList(
-        'pagesize',
-        ( isset($_GET['pagesize']) ? $_GET['pagesize'] : 20 ),  // set the default value for the dropdown list
-        // set the key and value for the drop down list
-        array(
-            20 => 20,
-            50 => 50,
-            100 => 100),
-        // add the HTML attritutes for the dropdown list
-        // I add pagesize as an id of dropdown list. later on, I will add into the Gridview widget.
-        // so when the form is submitted, I can get the $_POST value in InvoiceSearch model.
-        array(
-            'id' => 'pagesize',
-            'style' => 'margin-left:5px; margin-top:8px;'
-        )
-    )*/
-    ?>
-
     <?php if ($multipleErrors || $multipleForm->getErrors()) : ?>
         <div class="card multiple-update-summary" style="margin-bottom: 10px;">
             <div class="card-header">
@@ -110,7 +85,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
         ?>
     <?php endif;?>
 
-    <?php if ($user->isAdmin() || $user->isSupervision()) : ?>
+    <?php if (($user->isAdmin() || $user->isSupervision()) && $multipleForm->fieldAccess->canEditOneOfMultipleFields()) : ?>
         <p>
             <?php //= Html::a('Create Lead', ['create'], ['class' => 'btn btn-success']) ?>
             <?php // \yii\helpers\Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-warning', 'data-toggle'=> 'modal', 'data-target'=>'#modalUpdate' ])?>
@@ -154,12 +129,6 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             }
         },
         'columns' => [
-//            [
-//                'class' => \kartik\grid\CheckboxColumn::class,
-//                'name' => 'UserMultipleForm[user_list]',
-//                //'pageSummary' => true,
-//                'rowSelectedClass' => \kartik\grid\GridView::TYPE_INFO,
-//            ],
             [
                 'class' => 'yii\grid\CheckboxColumn',
                 'cssClass' => 'multiple-checkbox'
@@ -240,11 +209,10 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                     return $roles ? implode(', ', $roles) : '-';
                 },
                 'format' => 'raw',
-                'filter' => \common\models\Employee::getAllRoles(),
+                'filter' => \common\models\Employee::getAllRoles(Auth::user()),
                 'contentOptions' => ['style' => 'width: 10%; white-space: pre-wrap']
             ],
 
-            //'email:email',
             [
                 'attribute' => 'status',
                 'filter' => $searchModel::STATUS_LIST,
@@ -286,19 +254,6 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 },
                 'format' => 'raw'
             ],
-
-            /*[
-                'label' => 'Last Call Status',
-                'filter' => false,
-                //'filter' => [1 => 'Online', $searchModel::STATUS_DELETED => 'Deleted'],
-                'value' => static function (\common\models\Employee $model) {
-
-                    $call = \common\models\Call::find()->where(['c_created_user_id' => $model->id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
-
-                    return $call ? $call->c_call_status : '-';
-                },
-                'format' => 'raw'
-            ],*/
 
             [
                 'label' => 'User Groups',
@@ -342,52 +297,6 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 'filter' => \common\models\Department::getList()
             ],
 
-
-            /*[
-                'label' => 'Projects access',
-                'attribute' => 'user_project_id',
-                'value' => static function (\common\models\Employee $model) {
-
-                    $projects = $model->projects;
-                    $projectsValueArr = [];
-
-                    if($projects) {
-                        foreach ($projects as $project) {
-                            $projectsValueArr[] = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-list']) . ' ' . Html::encode($project->name), ['class' => 'label label-info']);
-                        }
-                    }
-
-                    $projectsValue = implode(' ', $projectsValueArr);
-
-                    return $projectsValue;
-                },
-                'format' => 'raw',
-                'filter' => $projectList
-            ],*/
-
-//            [
-//                'label' => 'Projects Params',
-//                'attribute' => 'user_params_project_id',
-//                'value' => static function (\common\models\Employee $model) {
-//
-//                    $projects = $model->uppProjects;
-//                    $projectsValueArr = [];
-//
-//                    if($projects) {
-//                        foreach ($projects as $project) {
-//                            $projectsValueArr[] = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-list']) . ' ' . Html::encode($project->name), ['class' => 'label label-default']);
-//                        }
-//                    }
-//
-//                    $projectsValue = implode(' ', $projectsValueArr);
-//
-//                    return $projectsValue;
-//                },
-//                'format' => 'raw',
-//                'filter' => $projectList
-//            ],
-
-
             [
                 'label' => 'Projects Params',
                 'attribute' => 'user_params_project_id',
@@ -421,10 +330,6 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 'filter' => $projectList
             ],
 
-            //'created_at:datetime',
-            //'updated_at:datetime',
-            // 'acl_rules_activated:boolean',
-
             [
                 'label' => 'IP filter',
                 'attribute' => 'acl_rules_activated',
@@ -437,176 +342,10 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 //'visible' => $isAdmin
             ],
 
-            /*[
-                'label' => 'Base Amount',
-                //'attribute' => 'created_at',
-                'value' => function(\common\models\Employee $model) {
-                    return $model->userParams ? '$'.number_format($model->userParams->up_base_amount , 2) : '-';
-                },
-                //'format' => '',
-                'contentOptions' => ['class' => 'text-right'],
-                'visible' => $isAdmin
-            ],*/
-
-            /*[
-                'label' => 'Commission',
-                //'attribute' => 'created_at',
-                'value' => function(\common\models\Employee $model) {
-                    return $model->userParams ? $model->userParams->up_commission_percent. '%' : '-';
-                },
-                //'format' => 'html',
-                'contentOptions' => ['class' => 'text-right'],
-                'visible' => $isAdmin
-            ],*/
-
-            /*[
-                'label' => 'Bonus Active',
-                //'attribute' => 'created_at',
-                'value' => function(\common\models\Employee $model) {
-                return $model->userParams ? $model->userParams->up_bonus_active ? 'Yes':'No' : '-';
-            },
-            //'format' => 'html',
-            'contentOptions' => ['class' => 'text-right'],
-            'visible' => $isAdmin
-            ],*/
-
-            /*[
-                'label' => 'Bonus Profit',
-                //'attribute' => 'created_at',
-                'value' => function(\common\models\Employee $model) {
-                    $bonusProfit = $model->getProfitBonuses();
-                    if(empty($bonusProfit)){
-                        return Html::a('- ', ['profit-bonus/create/?user_id='.$model->id], ['data-pjax' => 0, 'target' => '_blank']);
-                    }
-                    $return = [];
-                    foreach ($bonusProfit as $profit => $bonus){
-                        $return[] = '>= '.$profit."&nbsp;->&nbsp;".$bonus;
-                    }
-                    return Html::a(implode('<br/>', $return), ['profit-bonus/index/?user_id='.$model->id], ['data-pjax' => 0, 'target' => '_blank']);
-                },
-                'format' => 'html',
-                'contentOptions' => ['class' => 'text-left'],
-                'options' => [
-                    'style' => 'width:120px'
-                ],
-                'visible' => $isAdmin
-            ],*/
-
-//            [
-//                'label' => 'Bonuses',
-//                'value' => static function (\common\models\Employee $model) {
-//                    if($params = $model->userParams) {
-//                        $str = '<table class="table table-bordered" style="font-size:10px">';
-//                        $str .= '<tr><td>Bonus Active</td><td>'. ($params->up_bonus_active ? 'Yes':'No') . '</td></tr>';
-//                        $str .= '<tr><td>Commission</td><td>'. ($params->up_commission_percent ? $params->up_commission_percent . '%':'-') . '</td></tr>';
-//                        $str .= '<tr><td>Base Amount</td><td>' . ($params->up_base_amount ? number_format($params->up_base_amount, 2) : '-').'</td></tr>';
-//                        $str .= '</table>';
-//                    } else {
-//                        $str = '-';
-//                    }
-//                    return $str;
-//                },
-//                'format' => 'raw',
-//                'contentOptions' => ['class' => 'text-left'],
-//                'options' => [
-//                    'style' => 'width:240px;'
-//                ],
-//                'visible' => $isAdmin
-//            ],
-
-//            [
-//                'label' => 'Other params',
-//                //'attribute' => 'created_at',
-//                'value' => static function(\common\models\Employee $model) {
-//                    if($params = $model->userParams) {
-//                        $str = '<table class="table table-bordered" style="font-size:10px">';
-//                        $str .= '<tr><td>'.$params->getAttributeLabel('up_inbox_show_limit_leads').'</td><td>'.$params->up_inbox_show_limit_leads.'</td></tr>';
-//                        $str .= '<tr><td>'.$params->getAttributeLabel('up_default_take_limit_leads').'</td><td>'.$params->up_default_take_limit_leads.'</td></tr>';
-//                        $str .= '<tr><td>'.$params->getAttributeLabel('up_min_percent_for_take_leads').'</td><td>'.$params->up_min_percent_for_take_leads.'%</td></tr>';
-//                        $str .= '<tr><td>'.$params->getAttributeLabel('up_frequency_minutes').'</td><td>'.$params->up_frequency_minutes.'</td></tr>';
-//                        $str .= '<tr><td>'.$params->getAttributeLabel('up_call_expert_limit').'</td><td>'.$params->up_call_expert_limit.'</td></tr>';
-//
-//                        $str .= '</table>';
-//                    } else {
-//                        $str = '-';
-//                    }
-//                    return $str;
-//                },
-//                'format' => 'raw',
-//                'contentOptions' => ['class' => 'text-left'],
-//                'options' => [
-//                    'style' => 'width:240px;'
-//                ],
-//                'visible' => $isAdmin
-//            ],
-
-            /*[
-                'attribute' => 'created_at',
-                'value' => function(\common\models\Employee $model) {
-                    return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created_at));
-                },
-                'format' => 'raw',
-            ],*/
-//            [
-//                'label' => 'Work Experience',
-//                'attribute' => 'experienceMonth',
-//                'value' => static function (Employee $model) {
-//                    return $model->userProfile ? $model->userProfile->getExperienceMonth() : 0;
-//                }
-//            ],
-//            [
-//                'attribute' => 'joinDate',
-//                'value' => static function (Employee $model) {
-//                    return $model->userProfile ? $model->userProfile->up_join_date : null;
-//                },
-//                'filter' => DatePicker::widget([
-//                    'model' => $searchModel,
-//                    'attribute' => 'joinDate',
-//                    'clientOptions' => [
-//                        'autoclose' => true,
-//                        'format' => 'yyyy-mm-dd',
-//                    ],
-//                    'options' => [
-//                        'autocomplete' => 'off',
-//                        'placeholder' =>'Choose Date',
-//                        'style' => 'width: 150px'
-//                    ],
-//                ]),
-//            ],
-//            [
-//                'label' => '2FA enable',
-//                'value' => static function (\common\models\Employee $model) {
-//                    return ($model->userProfile && $model->userProfile->up_2fa_enable) ?
-//                        '<span class="label label-success">true</span>' : '<span class="label label-danger">false</span>';
-//                },
-//                'format' => 'raw'
-//            ],
-
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'updated_at'
             ],
-
-            /*[
-                'attribute' => 'updated_at',
-                'value' => static function (\common\models\Employee $model) {
-                    return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated_at));
-                },
-                'format' => 'raw',
-                'filter' => DatePicker::widget([
-                    'model' => $searchModel,
-                    'attribute' => 'updated_at',
-                    'clientOptions' => [
-                        'autoclose' => true,
-                        'format' => 'yyyy-mm-dd',
-                    ],
-                    'options' => [
-                        'autocomplete' => 'off',
-                        'placeholder' =>'Choose Date'
-                    ],
-                ]),
-            ],*/
-
         ]
     ])
 ?>
@@ -634,56 +373,106 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <?= $form->field($multipleForm, 'userDepartments')->widget(\kartik\select2\Select2::class, [
-                                'data' => $multipleForm->getDepartments(),
-                                'size' => \kartik\select2\Select2::SMALL,
-                                'options' => ['placeholder' => 'Select user Departments', 'multiple' => true],
-                                'pluginOptions' => ['allowClear' => true],
-                            ]) ?>
-                            <?= $form->field($multipleForm, 'userRoles')->widget(\kartik\select2\Select2::class, [
-                                'data' => $multipleForm->getRoles(),
-                                'size' => \kartik\select2\Select2::SMALL,
-                                'options' => ['placeholder' => 'Select user roles', 'multiple' => true],
-                                'pluginOptions' => ['allowClear' => true],
-                            ]) ?>
-                            <?= $form->field($multipleForm, 'status')->dropDownList([$searchModel::STATUS_ACTIVE => 'Active', $searchModel::STATUS_DELETED => 'Deleted'], ['prompt' => '']) ?>
-                            <?= $form->field($multipleForm, 'workStart')->widget(
-                                \kartik\time\TimePicker::class,
-                                [
-                                'readonly' => true,
-                                'pluginOptions' => [
-                                    'defaultTime' => false,
-                                    'showSeconds' => false,
-                                    'showMeridian' => false,
-                                ]]
-                            ) ?>
-                            <?= $form->field($multipleForm, 'workMinutes')->input('number', ['step' => 10, 'min' => 0])?>
-                            <?=
-                            $form->field($multipleForm, 'timeZone')->widget(\kartik\select2\Select2::class, [
-                                'data' => \common\models\Employee::timezoneList(true),
-                                'size' => \kartik\select2\Select2::SMALL,
-                                'options' => ['placeholder' => 'Select TimeZone', 'multiple' => false],
-                                'pluginOptions' => ['allowClear' => true],
-                            ]);
-                            ?>
-                            <?= $form->field($multipleForm, 'inboxShowLimitLeads')->input('number', ['step' => 1, 'min' => 0, 'max' => 500]) ?>
-                            <?= $form->field($multipleForm, 'defaultTakeLimitLeads')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
-                            <?= $form->field($multipleForm, 'userClientChatChanels')->widget(\kartik\select2\Select2::class, [
-                                'data' => $multipleForm->getClientChatChanels(),
-                                'size' => \kartik\select2\Select2::SMALL,
-                                'options' => ['placeholder' => 'Select Client Chat Chanels', 'multiple' => true],
-                                'pluginOptions' => ['allowClear' => true],
-                            ]) ?>
+
+                            <?php if ($multipleForm->fieldAccess->canEdit('user_departments')) : ?>
+                                <?= $form->field($multipleForm, 'user_departments')->widget(\kartik\select2\Select2::class, [
+                                    'data' => $multipleForm->availableList->getDepartments(),
+                                    'size' => \kartik\select2\Select2::SMALL,
+                                    'options' => ['placeholder' => 'Select user Departments', 'multiple' => true],
+                                    'pluginOptions' => ['allowClear' => true],
+                                ]) ?>
+                            <?php endif; ?>
+
+                            <?php if ($multipleForm->fieldAccess->canEdit('form_roles')) : ?>
+                                <?= $form->field($multipleForm, 'form_roles')->widget(\kartik\select2\Select2::class, [
+                                    'data' => $multipleForm->availableList->getRoles(),
+                                    'size' => \kartik\select2\Select2::SMALL,
+                                    'options' => ['placeholder' => 'Select user roles', 'multiple' => true],
+                                    'pluginOptions' => ['allowClear' => true],
+                                ]) ?>
+                            <?php endif; ?>
+
+                            <?php if ($multipleForm->fieldAccess->canEdit('status')) : ?>
+                                <?= $form->field($multipleForm, 'status')->dropDownList($multipleForm->availableList->getStatuses(), ['prompt' => '']) ?>
+                            <?php endif; ?>
+
+                            <?php if ($multipleForm->fieldAccess->canEdit('up_work_start_tm')) : ?>
+                                <?= $form->field($multipleForm, 'up_work_start_tm')->widget(
+                                    \kartik\time\TimePicker::class,
+                                    [
+                                    'readonly' => true,
+                                    'pluginOptions' => [
+                                        'defaultTime' => false,
+                                        'showSeconds' => false,
+                                        'showMeridian' => false,
+                                    ]]
+                                ) ?>
+                            <?php endif; ?>
+
+                            <?php if ($multipleForm->fieldAccess->canEdit('up_work_minutes')) : ?>
+                                <?= $form->field($multipleForm, 'up_work_minutes')->input('number', ['step' => 10, 'min' => 0])?>
+                            <?php endif; ?>
+
+                            <?php if ($multipleForm->fieldAccess->canEdit('up_timezone')) : ?>
+                                <?= $form->field($multipleForm, 'up_timezone')->widget(\kartik\select2\Select2::class, [
+                                    'data' => $multipleForm->availableList->getTimezones(),
+                                    'size' => \kartik\select2\Select2::SMALL,
+                                    'options' => ['placeholder' => 'Select TimeZone', 'multiple' => false],
+                                    'pluginOptions' => ['allowClear' => true],
+                                ]) ?>
+                            <?php endif; ?>
+
+                            <?php if ($multipleForm->fieldAccess->canEdit('up_inbox_show_limit_leads')) : ?>
+                                <?= $form->field($multipleForm, 'up_inbox_show_limit_leads')->input('number', ['step' => 1, 'min' => 0, 'max' => 500]) ?>
+                            <?php endif; ?>
+
+                            <?php if ($multipleForm->fieldAccess->canEdit('up_default_take_limit_leads')) : ?>
+                                <?= $form->field($multipleForm, 'up_default_take_limit_leads')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
+                            <?php endif; ?>
+
+                            <?php if ($multipleForm->fieldAccess->canEdit('client_chat_user_channel')) : ?>
+                                <?= $form->field($multipleForm, 'client_chat_user_channel')->widget(\kartik\select2\Select2::class, [
+                                    'data' => $multipleForm->availableList->getClientChatUserChannels(),
+                                    'size' => \kartik\select2\Select2::SMALL,
+                                    'options' => ['placeholder' => 'Select Client Chat Channels', 'multiple' => true],
+                                    'pluginOptions' => ['allowClear' => true],
+                                ]) ?>
+                            <?php endif; ?>
+
                         </div>
                         <div class="col-md-6">
-                            <?= $form->field($multipleForm, 'minPercentForTakeLeads')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
-                            <?= $form->field($multipleForm, 'frequencyMinutes')->input('number', ['step' => 1, 'max' => 1000, 'min' => 0]) ?>
-                            <?= $form->field($multipleForm, 'baseAmount')->input('number', ['step' => 0.01, 'min' => 0, 'max' => 1000]) ?>
-                            <?= $form->field($multipleForm, 'commissionPercent')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
-                            <?= $form->field($multipleForm, 'up_call_expert_limit')->input('number', ['min' => -1, 'max' => 1000]) ?>
-                            <?= $form->field($multipleForm, 'autoRedial')->dropDownList([1 => 'Enable', 0 => 'Disable'], ['prompt' => '']) ?>
-                            <?= $form->field($multipleForm, 'kpiEnable')->dropDownList([1 => 'Enable', 0 => 'Disable'], ['prompt' => '']) ?>
-                            <?= $form->field($multipleForm, 'leaderBoardEnabled')->dropDownList([1 => 'Enable', 0 => 'Disable'], ['prompt' => '']) ?>
+                            <?php if ($multipleForm->fieldAccess->canEdit('up_min_percent_for_take_leads')) : ?>
+                                <?= $form->field($multipleForm, 'up_min_percent_for_take_leads')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
+                            <?php endif; ?>
+
+                            <?php if ($multipleForm->fieldAccess->canEdit('up_frequency_minutes')) : ?>
+                                <?= $form->field($multipleForm, 'up_frequency_minutes')->input('number', ['step' => 1, 'max' => 1000, 'min' => 0]) ?>
+                            <?php endif; ?>
+
+                            <?php if ($multipleForm->fieldAccess->canEdit('up_base_amount')) : ?>
+                                <?= $form->field($multipleForm, 'up_base_amount')->input('number', ['step' => 0.01, 'min' => 0, 'max' => 1000]) ?>
+                            <?php endif; ?>
+
+                            <?php if ($multipleForm->fieldAccess->canEdit('up_commission_percent')) : ?>
+                                <?= $form->field($multipleForm, 'up_commission_percent')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
+                            <?php endif; ?>
+
+                            <?php if ($multipleForm->fieldAccess->canEdit('up_call_expert_limit')) : ?>
+                                <?= $form->field($multipleForm, 'up_call_expert_limit')->input('number', [ 'step' => 1, 'min' => -1, 'max' => 1000,]) ?>
+                            <?php endif; ?>
+
+                            <?php if ($multipleForm->fieldAccess->canEdit('up_auto_redial')) : ?>
+                                <?= $form->field($multipleForm, 'up_auto_redial')->dropDownList([1 => 'Enable', 0 => 'Disable'], ['prompt' => '']) ?>
+                            <?php endif; ?>
+
+                            <?php if ($multipleForm->fieldAccess->canEdit('up_kpi_enable')) : ?>
+                                <?= $form->field($multipleForm, 'up_kpi_enable')->dropDownList([1 => 'Enable', 0 => 'Disable'], ['prompt' => '']) ?>
+                            <?php endif; ?>
+
+                            <?php if ($multipleForm->fieldAccess->canEdit('up_leaderboard_enabled')) : ?>
+                                <?= $form->field($multipleForm, 'up_leaderboard_enabled')->dropDownList([1 => 'Enable', 0 => 'Disable'], ['prompt' => '']) ?>
+                            <?php endif; ?>
+
                             <?= $form->field($multipleForm, 'user_list_json')->hiddenInput(['id' => 'user_list_json'])->label(false) ?>
                         </div>
                         <div class="col-md-12">

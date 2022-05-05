@@ -151,4 +151,9 @@ class ShiftScheduleForm extends Model
         $this->ssr_enabled = true;
         $this->ssr_cron_expression_exclude = '';
     }
+
+    public function getDurationTimeHours(): int
+    {
+        return $this->ssr_duration_time ? ($this->ssr_duration_time / 60) : 0;
+    }
 }

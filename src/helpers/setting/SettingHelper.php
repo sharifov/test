@@ -6,6 +6,7 @@ use common\models\Department;
 use common\models\DepartmentPhoneProject;
 use common\models\Lead;
 use frontend\helpers\JsonHelper;
+use modules\shiftSchedule\src\services\ShiftScheduleDictionary;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
@@ -677,9 +678,19 @@ class SettingHelper
         return self::prePareStatusIds(Yii::$app->params['settings']['active_quote_change_statuses']);
     }
 
+    public static function getAcceptedQuoteChangeStatuses(): array
+    {
+        return self::prePareStatusIds(Yii::$app->params['settings']['accepted_quote_change_statuses']);
+    }
+
     public static function getActiveQuoteRefundStatuses(): array
     {
         return self::prePareStatusIds(Yii::$app->params['settings']['active_quote_refund_statuses']);
+    }
+
+    public static function getAcceptedQuoteRefundStatuses(): array
+    {
+        return self::prePareStatusIds(Yii::$app->params['settings']['accepted_quote_refund_statuses']);
     }
 
     public static function getFinishedQuoteChangeStatuses(): array
@@ -945,24 +956,34 @@ class SettingHelper
     private static function getShiftSchedule(): array
     {
         return Yii::$app->params['settings']['shift_schedule'] ?? [
-                'generate_enabled'        => false,
-                'days_limit'              => 20,
-                'days_offset'             => 0
+                'generate_enabled' => ShiftScheduleDictionary::DEFAULT_GENERATE_ENABLED,
+                'days_limit' => ShiftScheduleDictionary::DEFAULT_DAYS_LIMIT,
+                'days_offset' => ShiftScheduleDictionary::DEFAULT_DAYS_OFFSET
             ];
     }
 
     public static function getShiftScheduleGenerateEnabled(): bool
     {
-        return (bool) (self::getShiftSchedule()['generate_enabled'] ?? false);
+        return (bool)(self::getShiftSchedule()['generate_enabled'] ?? ShiftScheduleDictionary::DEFAULT_GENERATE_ENABLED);
     }
 
     public static function getShiftScheduleDaysLimit(): int
     {
-        return (int) (self::getShiftSchedule()['days_limit'] ?? 20);
+        $daysLimit = (int)(self::getShiftSchedule()['days_limit'] ?? 0);
+
+        if ($daysLimit <= 0) {
+            Yii::warning([
+                'message' => 'Days limit cannot be less or equal to 0',
+                'daysLimit' => $daysLimit,
+            ], 'SettingHelper:getShiftScheduleDaysLimit:DaysLimitIsInvalid');
+
+            return ShiftScheduleDictionary::DEFAULT_DAYS_LIMIT;
+        }
+        return $daysLimit;
     }
 
     public static function getShiftScheduleDaysOffset(): int
     {
-        return (int) (self::getShiftSchedule()['days_offset'] ?? 0);
+        return (int)(self::getShiftSchedule()['days_offset'] ?? ShiftScheduleDictionary::DEFAULT_DAYS_OFFSET);
     }
 }

@@ -178,6 +178,29 @@ class SearchService
     }
 
     /**
+     * @param string $key
+     * @param string $cid
+     * @return array
+     * @throws \yii\httpclient\Exception
+     */
+    public static function getOnlineQuoteByKeySmartSearch(string $key, string $cid): array
+    {
+        $cid = !empty($cid) ? $cid : Yii::$app->getModule('smart-search')->Cid;
+        $response = \Yii::$app->airsearch->searchQuoteByKey($cid, $key);
+
+        if (!$result['data'] = $response['data']) {
+            $result['error'] = $response['error'];
+            \Yii::error(
+                [
+                    'key' => $key,
+                    'message' => $response['error']],
+                'SearchService::getOnlineQuotesByKeySmartSearch'
+            );
+        }
+        return $result;
+    }
+
+    /**
      * @param $result
      * @return array
      * @throws \Exception

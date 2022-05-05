@@ -33,10 +33,10 @@ class Limited implements AllowanceInterface
      */
     public function isAllow(RequestCountLedger $registry): bool
     {
-        if ($this->local > 0 && $this->local < $registry->getLocal()) {
+        if ($this->local > 0 && $this->local <= $registry->getLocal()) {
             return false;
         }
-        if ($this->global > 0 && $this->global < $registry->getGlobal()) {
+        if ($this->global > 0 && $this->global <= $registry->getGlobal()) {
             return false;
         }
         return true;
