@@ -218,7 +218,13 @@ class VoluntaryExchangeConfirmHandler
 
     private function getSale(): CaseSale
     {
-        if (!$caseSale = CaseSale::findOne(['css_cs_id' => $this->case->cs_id, 'css_sale_book_id' => $this->confirmForm->booking_id])) {
+        $caseSale = CaseSale::find()
+            ->where(['css_cs_id' => $this->case->cs_id])
+            ->byBaseBookingId($this->confirmForm->booking_id)
+            ->limit(1)
+            ->one()
+        ;
+        if (!$caseSale) {
             throw new \RuntimeException('CaseSale not found by case(' . $this->case->cs_id . ') and booking(' . $this->confirmForm->booking_id . ')');
         }
         return $caseSale;
