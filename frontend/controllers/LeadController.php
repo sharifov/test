@@ -718,7 +718,7 @@ private EmailReviewQueueManageService $emailReviewQueueManageService;
                             ? $lead->getOfferEmailData($comForm->offerList, $projectContactInfo)
                             : $lead->getEmailData2($comForm->quoteList, $projectContactInfo, $lang);
                         $content_data['quotes'] = array_map(function ($quoteArray) use ($comForm) {
-                            $quoteArray['qc_uid'] = $comForm->c_qc_uid;
+                            $quoteArray['qc'] = $comForm->c_qc_uid;
                         }, $content_data['quotes'] ?? []);
                         $content_data['content'] = $comForm->c_email_message;
                         $content_data['subject'] = $comForm->c_email_subject;
