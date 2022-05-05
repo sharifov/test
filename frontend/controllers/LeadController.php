@@ -2570,11 +2570,6 @@ class LeadController extends FController
                     $errors = ActiveForm::validate($splitForm);
                 }
 
-                /** @abac null, LeadAbacObject::CHANGE_SPLIT_TIPS, LeadAbacObject::ACTION_UPDATE, hide split tips edition */
-                if (!Yii::$app->abac->can(null, LeadAbacObject::CHANGE_SPLIT_TIPS, LeadAbacObject::ACTION_UPDATE)) {
-                    $errors = 'Forbidden';
-                }
-
                 if (empty($errors) && $splitForm->save($errors)) {
                     return $this->redirect(['lead/view', 'gid' => $lead->gid]);
                 }
