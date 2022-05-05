@@ -1455,7 +1455,7 @@ class QuoteController extends FController
             ]);
 
             $addQuoteService = Yii::createObject(AddQuoteService::class);
-            $addQuoteService->autoSelectQuotes($dataProvider->getModels(), $lead, Auth::user(), true);
+            $addQuoteService->autoSelectQuotes($dataProvider->getModels(), $lead, Auth::user(), true, true);
 
             $response['status'] = 1;
             $response['message'] = 'Auto add quotes completed successfully';
