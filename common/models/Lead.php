@@ -1221,9 +1221,9 @@ class Lead extends ActiveRecord implements Objectable
         }
 
         /** @abac $leadAbacDto, LeadAbacObject::ACT_CHANGE_OWNER, LeadAbacObject::ACTION_UPDATE, change of lead owner */
-        if (!Yii::$app->abac->can(new LeadAbacDto($this, null), LeadAbacObject::ACT_CHANGE_OWNER, LeadAbacObject::ACTION_UPDATE)) {
-            throw new \DomainException('Lead cannot be changed, because lead in sold status and has its owner');
-        }
+//        if (!Yii::$app->abac->can(new LeadAbacDto($this, null), LeadAbacObject::ACT_CHANGE_OWNER, LeadAbacObject::ACTION_UPDATE)) {
+//            throw new \DomainException('Lead cannot be changed, because lead in sold status and has its owner');
+//        }
 
         $this->recordEvent(
             new LeadSoldEvent(
