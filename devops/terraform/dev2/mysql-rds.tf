@@ -2,7 +2,7 @@ module "mysql" {
   source  = "terraform-aws-modules/rds/aws"
   version = "~> 2.0"
 
-  identifier        = "mysql-${var.ENV}-${var.PROJECT}"
+  identifier        = "mysql-${var.PROJECT}-${var.ENV}"
   engine            = "mysql"
   engine_version    = "8.0.25"
   instance_class    = var.MYSQL_RDS_INSTANCE_TYPE
@@ -20,7 +20,7 @@ module "mysql" {
   maintenance_window     = "Mon:00:00-Mon:03:00"
   backup_window          = "03:00-06:00"
   monitoring_interval    = "30"
-  monitoring_role_name   = "mysql-${var.ENV}-${var.PROJECT}"
+  monitoring_role_name   = "mysql-${var.PROJECT}-${var.ENV}"
   create_monitoring_role = true
 
   tags = {
