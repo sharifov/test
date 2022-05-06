@@ -922,6 +922,9 @@ class LeadViewController extends FController
             $paxCode = (string)Yii::$app->request->get('paxCode');
             $quote   = Quote::findOne($quoteId);
             if (empty($quote)) {
+                throw new \RuntimeException('Quote not Founded');
+            }
+            if (empty($quote)) {
                 throw new \RuntimeException('Quote not founded');
             }
             $lead = $quote->lead;
