@@ -35,7 +35,9 @@ class UserShiftScheduleHelper
             //'textColor' => 'black' // an option!
             'extendedProps' => [
                 'icon' => $event->shiftScheduleType->sst_icon_class ?? '',
-            ]
+            ],
+            'status' => $event->statusName,
+            'username' => $event->user->username
         ];
 
         if (!in_array($event->uss_status_id, [UserShiftSchedule::STATUS_DONE, UserShiftSchedule::STATUS_APPROVED], true)) {

@@ -58,7 +58,8 @@ class ShiftScheduleController extends FController
                     /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_ACCESS, Access to page shift-schedule/index */
                     [
                         'actions' => ['index', 'my-data-ajax', 'generate-example', 'remove-user-data', 'get-event',
-                            'generate-user-schedule', 'legend-ajax', 'calendar', 'calendar-events-ajax', 'add-event', 'add-single-event'],
+                            'generate-user-schedule', 'legend-ajax', 'calendar', 'calendar-events-ajax', 'add-event', 'add-single-event',
+                            'delete-event'],
                         'allow' => \Yii::$app->abac->can(
                             null,
                             ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE,
@@ -425,13 +426,39 @@ class ShiftScheduleController extends FController
             }
 
             $form->userId = $userIdCreateFor;
-            $form->startDateTime = (new \DateTimeImmutable($startDate))->format('Y-m-d H:i');
-            $form->duration = UserShiftSchedule::DEFAULT_DURATION;
+            $startDateTime = (new \DateTimeImmutable($startDate));
+            $endDateTime = $startDateTime->add(new \DateInterval('PT' . UserShiftSchedule::DEFAULT_DURATION_HOURS . 'H'));
+            $interval = $startDateTime->diff($endDateTime);
+            $form->defaultDuration = $interval->format('%H:%I');
+            $form->dateTimeRange = $startDateTime->format('Y-m-d H:i') . ' - ' . $endDateTime->format('Y-m-d H:i');
             $form->status = UserShiftSchedule::STATUS_APPROVED;
         }
 
         return $this->renderAjax('partial/_shift_schedule_create_form_single_event', [
             'singleEventForm' => $form
+        ]);
+    }
+
+    public function actionDeleteEvent()
+    {
+        $shiftId = Yii::$app->request->post('shiftId');
+
+        $userShiftSchedule = UserShiftSchedule::findOne($shiftId);
+        if (!$userShiftSchedule) {
+            return $this->asJson([
+                'error' => true,
+                'message' => 'Shift not found by id:' . $shiftId
+            ]);
+        }
+        if (!$userShiftSchedule->delete()) {
+            return $this->asJson([
+                'error' => true,
+                'message' => $userShiftSchedule->getErrorSummary(true)[0]
+            ]);
+        }
+        return $this->asJson([
+            'error' => false,
+            'message' => 'Shift deleted successfully'
         ]);
     }
 }
