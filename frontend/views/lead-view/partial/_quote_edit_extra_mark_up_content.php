@@ -122,7 +122,7 @@ $('#extra_mark_up_modal_field').on('change keyup input',function(){
 $('#lead-quote-extra-mark-up-edit-form').on('beforeSubmit', function (e) {
     e.preventDefault();
     let btn = $(this).find('.save_extra_mark_up_btn');
-    let btnTextDefalut = '<i class="fa fa-save"></i> Save Extra MarkUp';
+    let btnTextDefalut = btn.html();
     let btnTextLoading = '<span class="spinner-border spinner-border-sm"></span> Loading';    
     btn.html(btnTextLoading);        
     btn.prop("disabled", true);
