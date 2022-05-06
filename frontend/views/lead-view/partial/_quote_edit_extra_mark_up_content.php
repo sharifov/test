@@ -40,18 +40,18 @@ $extra_mark_up           = (float)$leadQuoteExtraMarkUpForm->extra_mark_up;
                     'qp_client_extra_mark_up',
                     [
                         'template' => '{label} <div class="input-group">{input}<span class="input-group-addon">' . $quote->q_client_currency . '</span></div>{error}{hint}',
-                            'inputOptions' => ['id' => 'qp_client_extra_mark_up_modal_field'],
-                        ]
+                        'inputOptions' => ['id' => 'qp_client_extra_mark_up_modal_field'],
+                    ]
                 )
-                         ->input(
-                             'number',
-                             [
-                                 'min'   => 0,
-                                 'step'  => '0.01',
-                                 'value' => $qp_client_extra_mark_up
-                             ]
-                         )
-                         ->label('Client Currency ' . ' (' . $quote->q_client_currency . ')')
+                    ->input(
+                        'number',
+                        [
+                            'min'   => 0,
+                            'step'  => '0.01',
+                            'value' => $qp_client_extra_mark_up
+                        ]
+                    )
+                    ->label('Client Currency ' . ' (' . $quote->q_client_currency . ')')
                 ?>
                 <?php if ($quote->q_client_currency !== $defaultCurrencyCode) :?>
                     <div class="label label-default" title="Rate: <?= Html::decode(round($quote->q_client_currency_rate, 5))?>
@@ -77,13 +77,13 @@ $extra_mark_up           = (float)$leadQuoteExtraMarkUpForm->extra_mark_up;
                     [
                         'template' => '{label} <div class="input-group">{input}<span class="input-group-addon">' . $defaultCurrencyCode . '</span></div>{error}{hint}',
                         'inputOptions' => ['id' => 'extra_mark_up_modal_field']
-                            ]
+                    ]
                 )
-                         ->input(
-                             'number',
-                             ['min' => 0,  'step'  => '0.01', 'value' => $extra_mark_up]
-                         )
-                         ->label('Base Currency ' . ' (' . $defaultCurrencyCode . ')')
+                    ->input(
+                        'number',
+                        ['min' => 0,  'step'  => '0.01', 'value' => $extra_mark_up]
+                    )
+                    ->label('Base Currency ' . ' (' . $defaultCurrencyCode . ')')
                 ?>
 
                 <?php if ($quote->q_client_currency !== $defaultCurrencyCode) :?>
@@ -120,8 +120,10 @@ $('#extra_mark_up_modal_field').on('change keyup input',function(){
 
 $('#lead-quote-extra-mark-up-edit-form').on('beforeSubmit', function (e) {
     e.preventDefault();
-    let btn = $(this).find('.save_extra_mark_up_btn');    
-    btn.html('<span class="spinner-border spinner-border-sm"></span> Loading');        
+    let btn = $(this).find('.save_extra_mark_up_btn');
+    let btnTextDefalut = '<i class="fa fa-save"></i> Save Extra MarkUp';
+    let btnTextLoading = '<span class="spinner-border spinner-border-sm"></span> Loading';    
+    btn.html(btnTextLoading);        
     btn.prop("disabled", true);
     $.ajax({
        type: $(this).attr('method'),
@@ -134,7 +136,7 @@ $('#lead-quote-extra-mark-up-edit-form').on('beforeSubmit', function (e) {
                 title = 'Lead extra markup savin error error';
                 
             if (data.error) {
-                btn.html('<i class="fa fa-save"></i> Save Extra MarkUp');
+                btn.html(btnTextDefalut);
                 btn.prop("disabled", false); 
             }
             
@@ -155,7 +157,7 @@ $('#lead-quote-extra-mark-up-edit-form').on('beforeSubmit', function (e) {
             });
        },
        error: function (error) {
-           btn.html('<i class="fa fa-save"></i> Save Extra MarkUp');
+           btn.html(btnTextDefalut);
            btn.prop("disabled", false);           
             createNotifyByObject({
                 title: 'Error',
