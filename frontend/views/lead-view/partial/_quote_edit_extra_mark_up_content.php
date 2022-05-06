@@ -100,7 +100,7 @@ $extra_mark_up           = (float)$leadQuoteExtraMarkUpForm->extra_mark_up;
 
         <div style="margin-top: 20px;" class="text-center">
             <?= Html::submitButton('<i class="fa fa-save"></i> Save Extra MarkUp', [
-                'class' => 'btn btn-primary'
+                'class' => 'btn btn-primary save_extra_mark_up_btn'
             ]) ?>
         </div>
         <?php ActiveForm::end(); ?>
@@ -120,14 +120,15 @@ $('#extra_mark_up_modal_field').on('change keyup input',function(){
 
 $('#lead-quote-extra-mark-up-edit-form').on('beforeSubmit', function (e) {
     e.preventDefault();
-    $('#preloader').removeClass('d-none');
+    let btn = $(this).find('.save_extra_mark_up_btn');    
+    btn.html('<span class="spinner-border spinner-border-sm"></span> Loading');        
+    btn.prop("disabled", true);
     $.ajax({
        type: $(this).attr('method'),
        url: $(this).attr('action'),
        data: $(this).serializeArray(),
        dataType: 'json',
        success: function(data) {
-           $('#preloader').addClass('d-none');
             var type = 'error',
                 text = data.message,
                 title = 'Lead extra markup savin error error';
@@ -149,7 +150,8 @@ $('#lead-quote-extra-mark-up-edit-form').on('beforeSubmit', function (e) {
             });
        },
        error: function (error) {
-           $('#preloader').addClass('d-none');
+           btn.html('<i class="fa fa-save"></i> Save Extra MarkUp');
+           btn.prop("disabled", false);           
             createNotifyByObject({
                 title: 'Error',
                 text: 'Internal Server Error. Try again letter.',
