@@ -974,35 +974,35 @@ class LeadViewController extends FController
     public function actionAjaxEditLeadQuoteExtraMarkUp()
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
+        if (!Yii::$app->request->isAjax || !Yii::$app->request->isPost) {
+            throw new \RuntimeException('Wrong method');
+        }
+        $quoteId = (int)Yii::$app->request->get('quoteId');
+        $paxCode = (string)Yii::$app->request->get('paxCode');
+        $quote = Quote::findOne($quoteId);
+        $lead = $quote->lead;
+        $currentUserId = Auth::id();
+        $isOwner = $lead->isOwner($currentUserId);
+        $quoteFlightExtraMarkUpAbacDto = new QuoteFlightExtraMarkupAbacDto($lead, $quote, $isOwner);
+        /** @abac quoteFlightExtraMarkUpAbacDto, QuoteFlightAbacObject::OBJ_EXTRA_MARKUP, QuoteExtraMarkUpChangeAbacObject::ACTION_UPDATE, Access to edit Quote Extra mark-up */
+        $canUpdateExtraMarkUp = Yii::$app->abac->can(
+            $quoteFlightExtraMarkUpAbacDto,
+            QuoteFlightAbacObject::OBJ_EXTRA_MARKUP,
+            QuoteFlightAbacObject::ACTION_UPDATE
+        );
+        if (!$canUpdateExtraMarkUp) {
+            throw new \RuntimeException('Access Denied');
+        }
+        $quotePrices = QuotePriceRepository::getAllByQuoteIdAndPaxCode($quoteId, $paxCode);
+        if (empty($quotePrices)) {
+            throw new \RuntimeException('Quote Prices not founded');
+        }
+        $clientCurrency = $quote->clientCurrency;
+        if (empty($clientCurrency)) {
+            throw new \RuntimeException('Currency not Founded');
+        }
+        $transaction = \Yii::$app->db->beginTransaction();
         try {
-            $transaction = \Yii::$app->db->beginTransaction();
-            if (!Yii::$app->request->isAjax || !Yii::$app->request->isPost) {
-                throw new \RuntimeException('Wrong method');
-            }
-            $quoteId = (int)Yii::$app->request->get('quoteId');
-            $paxCode = (string)Yii::$app->request->get('paxCode');
-            $quote   = Quote::findOne($quoteId);
-            $lead = $quote->lead;
-            $currentUserId = Auth::id();
-            $isOwner = $lead->isOwner($currentUserId);
-            $quoteFlightExtraMarkUpAbacDto = new QuoteFlightExtraMarkupAbacDto($lead, $quote, $isOwner);
-            /** @abac quoteFlightExtraMarkUpAbacDto, QuoteFlightAbacObject::OBJ_EXTRA_MARKUP, QuoteExtraMarkUpChangeAbacObject::ACTION_UPDATE, Access to edit Quote Extra mark-up */
-            $canUpdateExtraMarkUp = Yii::$app->abac->can(
-                $quoteFlightExtraMarkUpAbacDto,
-                QuoteFlightAbacObject::OBJ_EXTRA_MARKUP,
-                QuoteFlightAbacObject::ACTION_UPDATE
-            );
-            if (!$canUpdateExtraMarkUp) {
-                throw new \RuntimeException('Access Denied');
-            }
-            $quotePrices = QuotePriceRepository::getAllByQuoteIdAndPaxCode($quoteId, $paxCode);
-            if (empty($quotePrices)) {
-                throw new \RuntimeException('Quote Prices not founded');
-            }
-            $clientCurrency = $quote->clientCurrency;
-            if (empty($clientCurrency)) {
-                throw new \RuntimeException('Currency not Founded');
-            }
             $form = new LeadQuoteExtraMarkUpForm($quote->q_client_currency_rate);
             $form->load(Yii::$app->request->post());
             if (!$form->validate()) {
