@@ -922,7 +922,7 @@ class LeadViewController extends FController
             $paxCode = (string)Yii::$app->request->get('paxCode');
             $quote   = Quote::findOne($quoteId);
             if (empty($quote)) {
-                throw new \RuntimeException('Quote not founded');
+                throw new \RuntimeException('Quote not Founded');
             }
             $lead = $quote->lead;
             $isOwner = $lead->employee_id = Auth::id();
@@ -974,14 +974,17 @@ class LeadViewController extends FController
     public function actionAjaxEditLeadQuoteExtraMarkUp()
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
+        $transaction = new Transaction(['db' => Yii::$app->db]);
         try {
-            $transaction = \Yii::$app->db->beginTransaction();
             if (!Yii::$app->request->isAjax || !Yii::$app->request->isPost) {
                 throw new \RuntimeException('Wrong method');
             }
             $quoteId = (int)Yii::$app->request->get('quoteId');
             $paxCode = (string)Yii::$app->request->get('paxCode');
-            $quote   = Quote::findOne($quoteId);
+            $quote = Quote::findOne($quoteId);
+            if (empty($quote)) {
+                throw new \RuntimeException('Quote not founded');
+            }
             $lead = $quote->lead;
             $currentUserId = Auth::id();
             $isOwner = $lead->isOwner($currentUserId);
@@ -1011,6 +1014,7 @@ class LeadViewController extends FController
             $clientQuotePriceService = new ClientQuotePriceService($quote);
             $priceData = $clientQuotePriceService->getClientPricesData();
             $sellingOld = $priceData['total']['selling'];
+            $transaction->begin();
             foreach ($quotePrices as $quotePrice) {
                 $quotePrice->extra_mark_up = $form->extra_mark_up;
                 $quotePrice->qp_client_extra_mark_up = $form->qp_client_extra_mark_up;
