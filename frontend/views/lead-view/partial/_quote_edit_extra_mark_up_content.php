@@ -132,7 +132,12 @@ $('#lead-quote-extra-mark-up-edit-form').on('beforeSubmit', function (e) {
             var type = 'error',
                 text = data.message,
                 title = 'Lead extra markup savin error error';
-       
+                
+            if (data.error) {
+                btn.html('<i class="fa fa-save"></i> Save Extra MarkUp');
+                btn.prop("disabled", false); 
+            }
+            
             if (!data.error) {
                 $('#modal-client-manage-info').modal('hide');
                 
