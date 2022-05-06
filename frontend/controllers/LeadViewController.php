@@ -924,9 +924,6 @@ class LeadViewController extends FController
             if (empty($quote)) {
                 throw new \RuntimeException('Quote not Founded');
             }
-            if (empty($quote)) {
-                throw new \RuntimeException('Quote not founded');
-            }
             $lead = $quote->lead;
             $isOwner = $lead->employee_id = Auth::id();
             $quoteFlightExtraMarkUpAbacDto = new QuoteFlightExtraMarkupAbacDto($lead, $quote, $isOwner);
@@ -985,6 +982,9 @@ class LeadViewController extends FController
             $quoteId = (int)Yii::$app->request->get('quoteId');
             $paxCode = (string)Yii::$app->request->get('paxCode');
             $quote = Quote::findOne($quoteId);
+            if (empty($quote)) {
+                throw new \RuntimeException('Quote not founded');
+            }
             $lead = $quote->lead;
             $currentUserId = Auth::id();
             $isOwner = $lead->isOwner($currentUserId);
