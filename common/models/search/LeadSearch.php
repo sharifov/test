@@ -48,6 +48,7 @@ use yii\db\ActiveQuery;
 use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
+use modules\lead\src\abac\queue\LeadQueueBusinessInboxAbacObject;
 
 /**
  * LeadSearch represents the model behind the search form of `common\models\Lead`.
@@ -2884,9 +2885,25 @@ class LeadSearch extends Lead
         ]);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
+        }
+
+        /** @abac null, LeadQueueBusinessInboxAbacObject::QUERY_LISTING, LeadQueueBusinessInboxAbacObject::ACTION_READ_WT_USER_RESTRICTION, Shown leads where user restriction */
+        $canUserRestriction = \Yii::$app->abac->can(
+            null,
+            LeadQueueBusinessInboxAbacObject::QUERY_LISTING,
+            LeadQueueBusinessInboxAbacObject::ACTION_READ_WT_USER_RESTRICTION
+        );
+        if ($canUserRestriction) {
+            $query->leftJoin(ProfitSplit::tableName(), 'ps_lead_id = ' . $leadTable . '.id AND ps_user_id = ' . $user->id);
+            $query->leftJoin(TipsSplit::tableName(), 'ts_lead_id = ' . $leadTable . '.id AND ts_user_id = ' . $user->id);
+            $query->andWhere(['OR',
+                [$leadTable . '.employee_id' => $user->id],
+                ['IS', $leadTable . '.employee_id', null],
+                ['ps_user_id' => $user->id],
+                ['ts_user_id' => $user->id]
+            ]);
         }
 
         // grid filtering conditions
@@ -2905,7 +2922,6 @@ class LeadSearch extends Lead
 
         if ($this->limit > 0) {
             $query->limit($this->limit);
-            //$dataProvider->setTotalCount($this->limit);
         }
 
         $query->with(['client']);
