@@ -31,7 +31,7 @@ use yii\grid\ActionColumn;
                     [
                         'class' => 'btn btn-success btn-xs act-create-upp',
                         'title' => 'Create Project Params',
-                        'data-user_id' => $form->updaterUser->id,
+                        'data-user_id' => $form->targetUser->id ?? 0,
                         'data-pjax' => '0',
                     ]
                 ) ?>
