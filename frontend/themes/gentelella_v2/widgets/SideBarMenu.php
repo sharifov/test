@@ -7,6 +7,7 @@
 namespace frontend\themes\gentelella_v2\widgets;
 
 use common\models\Employee;
+use modules\featureFlag\FFlag;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
@@ -927,6 +928,19 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 'url' => 'javascript:',
                 'icon' => 'ship',
                 'items' => \modules\cruise\CruiseModule::getListMenu()
+            ];
+        }
+
+        /** @fflag FFlag::FF_KEY_OBJECT_SEGMENT_MODULE_ENABLE, Object Segment module enable/disable */
+        if (Yii::$app->ff->can(FFlag::FF_KEY_OBJECT_SEGMENT_MODULE_ENABLE)) {
+            $menuModuleItems[] =  [
+                'label' => 'Object Segment',
+                'url' => 'javascript:',
+                'icon' => 'cogs',
+                'items' => [
+                    ['label' => 'Object Segment List', 'url' => ['/object-segment/object-segment-list']],
+                    ['label' => 'Object Segment Rules', 'url' => ['/object-segment/object-segment-rule']],
+                ],
             ];
         }
 
