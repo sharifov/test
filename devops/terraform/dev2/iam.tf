@@ -29,8 +29,8 @@ data "aws_iam_policy_document" "s3_attachments_write_permissions" {
     resources = [
       "arn:aws:s3:::attachments-${var.PROJECT}-${var.ENV}",
       "arn:aws:s3:::attachments-${var.PROJECT}-${var.ENV}/*",
-      "arn:aws:s3:::attachments-crm-dev",
-      "arn:aws:s3:::attachments-crm-dev/*"
+      "arn:aws:s3:::attachments-crm-dev1",
+      "arn:aws:s3:::attachments-crm-dev1/*"
     ]
   }
 }
