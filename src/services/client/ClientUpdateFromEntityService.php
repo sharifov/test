@@ -71,7 +71,7 @@ class ClientUpdateFromEntityService
 
         $this->transactionManager->wrap(function () use ($client, $form, $case) {
 
-            $this->clientManageService->addEmail($client, new EmailCreateForm(['email' => $form->email, 'type' => ClientEmail::EMAIL_NOT_SET]));
+            $this->clientManageService->addEmail($client, new EmailCreateForm(['email' => $form->email, 'type' => $form->type]));
             $case->updateLastAction();
         });
     }
@@ -95,7 +95,7 @@ class ClientUpdateFromEntityService
 
         $this->transactionManager->wrap(function () use ($client, $form, $case) {
 
-            $this->clientManageService->addPhone($client, new PhoneCreateForm(['phone' => $form->phone, 'type' => ClientPhone::PHONE_NOT_SET]));
+            $this->clientManageService->addPhone($client, new PhoneCreateForm(['phone' => $form->phone, 'type' => $form->type]));
             $case->updateLastAction();
         });
     }
