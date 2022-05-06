@@ -42,7 +42,7 @@ class CasesAddPhoneForm extends Model
             ['phone', InternalPhoneValidator::class, 'allowInternalPhone' => \Yii::$app->params['settings']['allow_contact_internal_phone']],
             ['type', 'integer'],
             ['type', 'default', 'value' => ClientPhone::PHONE_NOT_SET],
-            ['type', 'checkTypeForExistence']
+            ['type', 'in', 'range' => array_keys(ClientPhone::PHONE_TYPE)]
         ];
     }
 
@@ -54,16 +54,5 @@ class CasesAddPhoneForm extends Model
         return [
             'phone' => 'Phone',
         ];
-    }
-
-    /**
-     * @param $attribute
-     * @param $params
-     */
-    public function checkTypeForExistence($attribute, $params): void
-    {
-        if (!ClientPhone::getPhoneType($this->type)) {
-            $this->addError($attribute, 'Type of the phone is not found');
-        }
     }
 }

@@ -43,7 +43,7 @@ class CasesAddEmailForm extends Model
             ['email', InternalEmailValidator::class, 'allowInternalEmail' => \Yii::$app->params['settings']['allow_contact_internal_email']],
             ['type', 'integer'],
             ['type', 'default', 'value' => ClientEmail::EMAIL_NOT_SET],
-            ['type', 'checkTypeForExistence']
+            ['type', 'in', 'range' => array_keys(ClientEmail::EMAIL_TYPE)]
         ];
     }
 
@@ -55,16 +55,5 @@ class CasesAddEmailForm extends Model
         return [
             'email' => 'Email',
         ];
-    }
-
-    /**
-     * @param $attribute
-     * @param $params
-     */
-    public function checkTypeForExistence($attribute, $params): void
-    {
-        if (!isset(ClientEmail::EMAIL_TYPE[$this->type])) {
-            $this->addError($attribute, 'Type of the email is not found');
-        }
     }
 }
