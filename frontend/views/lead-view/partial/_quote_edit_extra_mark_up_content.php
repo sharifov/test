@@ -17,10 +17,10 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
 
-$defaultCurrencyCode     = Currency::getDefaultCurrencyCode();
-$inverseCurrencyRate     = 1 / $quote->q_client_currency_rate;
+$defaultCurrencyCode = Currency::getDefaultCurrencyCode();
+$inverseCurrencyRate = 1 / $quote->q_client_currency_rate;
 $qp_client_extra_mark_up = (float)$leadQuoteExtraMarkUpForm->qp_client_extra_mark_up;
-$extra_mark_up           = (float)$leadQuoteExtraMarkUpForm->extra_mark_up;
+$extra_mark_up = (float)$leadQuoteExtraMarkUpForm->extra_mark_up;
 
 ?>
     <div class="edit-name-modal-content-ghj">
@@ -31,7 +31,7 @@ $extra_mark_up           = (float)$leadQuoteExtraMarkUpForm->extra_mark_up;
             'enableAjaxValidation' => false,
             'validateOnChange' => false,
             'validateOnBlur' => false,
-        ]);?>
+        ]); ?>
         <?= $form->errorSummary($leadQuoteExtraMarkUpForm) ?>
         <div class="row">
             <div class="col-md-12">
@@ -46,18 +46,19 @@ $extra_mark_up           = (float)$leadQuoteExtraMarkUpForm->extra_mark_up;
                     ->input(
                         'number',
                         [
-                            'min'   => 0,
-                            'step'  => '0.01',
+                            'min' => 0,
+                            'step' => '0.01',
                             'value' => $qp_client_extra_mark_up
                         ]
                     )
                     ->label('Client Currency ' . ' (' . $quote->q_client_currency . ')')
                 ?>
-                <?php if ($quote->q_client_currency !== $defaultCurrencyCode) :?>
-                    <div class="label label-default" title="Rate: <?= Html::decode(round($quote->q_client_currency_rate, 5))?>
-                    <?= Html::decode($quote->q_client_currency)?>">
-                        1 <?=$defaultCurrencyCode?> = <?= round($quote->q_client_currency_rate, 4)?>
-                        <?=Html::decode($quote->q_client_currency); ?>
+                <?php if ($quote->q_client_currency !== $defaultCurrencyCode) : ?>
+                    <div class="label label-default"
+                         title="Rate: <?= Html::decode(round($quote->q_client_currency_rate, 5)) ?>
+                    <?= Html::decode($quote->q_client_currency) ?>">
+                        1 <?= $defaultCurrencyCode ?> = <?= round($quote->q_client_currency_rate, 4) ?>
+                        <?= Html::decode($quote->q_client_currency); ?>
                     </div>
                 <?php endif; ?>
             </div>
@@ -81,16 +82,16 @@ $extra_mark_up           = (float)$leadQuoteExtraMarkUpForm->extra_mark_up;
                 )
                     ->input(
                         'number',
-                        ['min' => 0,  'step'  => '0.01', 'value' => $extra_mark_up]
+                        ['min' => 0, 'step' => '0.01', 'value' => $extra_mark_up]
                     )
                     ->label('Base Currency ' . ' (' . $defaultCurrencyCode . ')')
                 ?>
 
-                <?php if ($quote->q_client_currency !== $defaultCurrencyCode) :?>
-                    <span class="label label-default" title="Rate: <?= Html::decode(round($inverseCurrencyRate, 5))?>
-                        <?= Html::decode($defaultCurrencyCode)?>">
-                            1 <?= $quote->q_client_currency?>
-                        = <?=round($inverseCurrencyRate, 4)?> <?= Html::decode($defaultCurrencyCode)?>
+                <?php if ($quote->q_client_currency !== $defaultCurrencyCode) : ?>
+                    <span class="label label-default" title="Rate: <?= Html::decode(round($inverseCurrencyRate, 5)) ?>
+                        <?= Html::decode($defaultCurrencyCode) ?>">
+                            1 <?= $quote->q_client_currency ?>
+                        = <?= round($inverseCurrencyRate, 4) ?> <?= Html::decode($defaultCurrencyCode) ?>
                     </span>
                 <?php endif; ?>
 
