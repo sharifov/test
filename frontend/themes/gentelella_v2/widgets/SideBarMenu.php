@@ -454,6 +454,8 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Quote Price List', 'url' => ['/quote-price/index'], 'icon' => 'list'],
                         ['label' => 'Flight Quote Label List', 'url' => ['/flight-quote-label-list-crud/index'], 'icon' => 'list'],
                         ['label' => 'Quote Label', 'url' => ['/quote-label-crud/index'], 'icon' => 'list'],
+                        ['label' => 'Quote Segment Baggages', 'url' => ['/quote-segment-baggage-crud/index'], 'icon' => 'list'],
+                        ['label' => 'Quote Segment Baggage Charges', 'url' => ['/quote-segment-baggage-charge-crud/index'], 'icon' => 'list'],
                     ],
                 ],
 
