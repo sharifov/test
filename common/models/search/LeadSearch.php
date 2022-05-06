@@ -4442,6 +4442,7 @@ class LeadSearch extends Lead
             $leadTable . '.l_init_price' => $this->l_init_price,
             $leadTable . '.l_call_status_id' => $this->l_call_status_id,
             $leadTable . '.l_type' => $this->l_type,
+            $leadTable . '.l_answered' => $this->l_answered,
         ]);
 
         if ($this->email_status > 0) {
