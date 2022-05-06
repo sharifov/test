@@ -14,12 +14,12 @@ class m220503_065940_add_object_segment_type_lead_record extends Migration
     {
         try {
             $this->insert(
-                '{{%object_segment_type}}',
+                '{{%object_segment_types}}',
                 [
                     'ost_key'         =>    \modules\objectSegment\src\contracts\ObjectSegmentKeyContract::TYPE_KEY_LEAD,
                 ]
             );
-            \Yii::$app->db->getSchema()->refreshTableSchema('{{%object_segment_type}}');
+            \Yii::$app->db->getSchema()->refreshTableSchema('{{%object_segment_types}}');
         } catch (\Throwable $throwable) {
             \Yii::error(
                 \src\helpers\app\AppHelper::throwableLog($throwable),
@@ -34,14 +34,14 @@ class m220503_065940_add_object_segment_type_lead_record extends Migration
     public function safeDown()
     {
         try {
-            $this->delete('{{%object_segment_type}}', [
+            $this->delete('{{%object_segment_types}}', [
                 'IN',
                 'ost_key',
                 [
                     \modules\objectSegment\src\contracts\ObjectSegmentKeyContract::TYPE_KEY_LEAD
                 ]
             ]);
-            \Yii::$app->db->getSchema()->refreshTableSchema('{{%object_segment_type}}');
+            \Yii::$app->db->getSchema()->refreshTableSchema('{{%object_segment_types}}');
         } catch (\Throwable $throwable) {
             \Yii::error(
                 \src\helpers\app\AppHelper::throwableLog($throwable),
