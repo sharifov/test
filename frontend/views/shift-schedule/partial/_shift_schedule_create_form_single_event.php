@@ -7,6 +7,7 @@
 
 use common\models\query\UserGroupQuery;
 use common\models\UserGroup;
+use frontend\extensions\DateRangePicker;
 use frontend\widgets\DateTimePickerWidget;
 use kartik\select2\Select2;
 use kartik\time\TimePicker;
@@ -17,12 +18,25 @@ use src\auth\Auth;
 use yii\bootstrap4\ActiveForm;
 use yii\helpers\Html;
 use yii\helpers\VarDumper;
+use yii\web\JsExpression;
 use yii\widgets\Pjax;
 
 $user = Auth::user();
 
 $pjaxId = 'pjax-add-event-single-user';
 $formId = 'add-event-form-singe-user';
+
+$dateTimeRangeChangeJs = <<<JS
+(event) => {
+    let val = $(event.target).val().split(' - ');
+    if (val) {
+      let startDateTime = val[0] ? moment(new Date(val[0])) : null;
+      let endDateTime = val[1] ? moment(new Date(val[1])) : null;
+      var diff = moment.utc(moment(endDateTime, "HH:mm:ss").diff(moment(startDateTime, "HH:mm:ss"))).format("D [days] HH:mm")
+      $('#add-single-schedule-event-duration').val(diff);
+    }
+}
+JS;
 ?>
 
 <script>pjaxOffFormSubmit('#<?= $pjaxId ?>')</script>
@@ -49,17 +63,26 @@ $formId = 'add-event-form-singe-user';
 
         <div class="row">
             <div class="col-md-6">
-                <?= $form->field($singleEventForm, 'startDateTime')->widget(DateTimePickerWidget::class) ?>
+                <?= $form->field($singleEventForm, 'dateTimeRange')->widget(DateRangePicker::class, [
+                    'presetDropdown' => false,
+                    'hideInput' => true,
+                    'convertFormat' => true,
+                    'pluginOptions' => [
+                        'timePicker' => true,
+                        'timePickerIncrement' => 1,
+                        'timePicker24Hour' => true,
+                        'locale' => [
+                            'format' => 'Y-m-d H:i',
+                            'separator' => ' - '
+                        ]
+                    ],
+                    'pluginEvents' => [
+                        'change' => new JsExpression($dateTimeRangeChangeJs)
+                    ],
+                ]) ?>
             </div>
             <div class="col-md-6">
-                <?= $form->field($singleEventForm, 'duration')->widget(TimePicker::class, [
-                    'pluginOptions' => [
-                        'showSeconds' => false,
-                        'showMeridian' => false,
-                        'minuteStep' => 1,
-                        'defaultTime' => false
-                    ]
-                ]) ?>
+                <?= $form->field($singleEventForm, 'defaultDuration')->textInput(['readonly' => true, 'id' => 'add-single-schedule-event-duration'])->label('Duration')?>
             </div>
         </div>
 
