@@ -29,51 +29,59 @@ class m220427_113117_create_tbl_shift_schedule_request extends Migration
         }
 
         $this->createTable('{{%shift_schedule_request}}', [
-            'srh_id' => $this->primaryKey(),
-            'srh_uss_id' => $this->integer(),
-            'srh_sst_id' => $this->integer(),
-            'srh_status_id' => $this->integer()->notNull(),
-            'srh_description' => $this->string(1000),
-            'srh_start_utc_dt' => $this->dateTime(),
-            'srh_end_utc_dt' => $this->dateTime(),
-            'srh_created_dt' => $this->dateTime(),
-            'srh_update_dt' => $this->dateTime(),
-            'srh_created_user_id' => $this->integer(),
-            'srh_updated_user_id' => $this->integer(),
+            'ssr_id' => $this->primaryKey(),
+            'ssr_uss_id' => $this->integer(),
+            'ssr_sst_id' => $this->integer(),
+            'ssr_status_id' => $this->integer()->notNull(),
+            'ssr_description' => $this->string(1000),
+            'ssr_created_dt' => $this->dateTime(),
+            'ssr_update_dt' => $this->dateTime(),
+            'ssr_created_user_id' => $this->integer(),
+            'ssr_updated_user_id' => $this->integer(),
         ], $tableOptions);
 
         $this->addForeignKey(
-            'FK-shift_schedule_request-srh_uss_id',
+            'FK-shift_schedule_request-ssr_uss_id',
             '{{%shift_schedule_request}}',
-            'srh_uss_id',
+            'ssr_uss_id',
             '{{%user_shift_schedule}}',
             'uss_id',
-            'SET NULL',
-            'SET NULL'
+            'CASCADE',
+            'CASCADE'
         );
 
         $this->addForeignKey(
-            'FK-shift_schedule_request-srh_sst_id',
+            'FK-shift_schedule_request-ssr_sst_id',
             '{{%shift_schedule_request}}',
-            'srh_sst_id',
+            'ssr_sst_id',
             '{{%shift_schedule_type}}',
             'sst_id',
             'SET NULL',
-            'SET NULL'
+            'CASCADE'
         );
 
         $this->addForeignKey(
-            'FK-shift_schedule_request-srh_created_user_id',
+            'FK-shift_schedule_request-ssr_created_user_id',
             '{{%shift_schedule_request}}',
-            'srh_created_user_id',
+            'ssr_created_user_id',
+            '{{%employees}}',
+            'id',
+            'CASCADE',
+            'CASCADE'
+        );
+
+        $this->addForeignKey(
+            'FK-shift_schedule_request-ssr_updated_user_id',
+            '{{%shift_schedule_request}}',
+            'ssr_updated_user_id',
             '{{%employees}}',
             'id',
             'SET NULL',
-            'SET NULL'
+            'CASCADE'
         );
 
-        $this->createIndex('IND-shift_schedule_request-srh_status_id', '{{%shift_schedule_request}}', 'srh_status_id');
-        $this->createIndex('IND-shift_schedule_request-srh_created_user_id', '{{%shift_schedule_request}}', 'srh_created_user_id');
+        $this->createIndex('IND-shift_schedule_request-ssr_status_id', '{{%shift_schedule_request}}', 'ssr_status_id');
+        $this->createIndex('IND-shift_schedule_request-ssr_created_user_id', '{{%shift_schedule_request}}', 'ssr_created_user_id');
 
         (new RbacMigrationService())->up($this->routes, $this->roles);
 
