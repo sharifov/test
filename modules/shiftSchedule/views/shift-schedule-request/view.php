@@ -11,8 +11,8 @@ use yii\web\View;
 use yii\web\YiiAsset;
 use yii\widgets\DetailView;
 
-$this->title = $model->srh_id;
-$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Shift Schedule Requests'), 'url' => ['index']];
+$this->title = $model->ssr_id;
+$this->params['breadcrumbs'][] = ['label' => 'Shift Schedule Requests', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 YiiAsset::register($this);
 ?>
@@ -21,11 +21,11 @@ YiiAsset::register($this);
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a(Yii::t('app', 'Update'), ['update', 'srh_id' => $model->srh_id], ['class' => 'btn btn-primary']) ?>
-        <?= Html::a(Yii::t('app', 'Delete'), ['delete', 'srh_id' => $model->srh_id], [
+        <?= Html::a(Yii::t('app', 'Update'), ['update', 'ssr_id' => $model->ssr_id], ['class' => 'btn btn-primary']) ?>
+        <?= Html::a(Yii::t('app', 'Delete'), ['delete', 'ssr_id' => $model->ssr_id], [
             'class' => 'btn btn-danger',
             'data' => [
-                'confirm' => Yii::t('app', 'Are you sure you want to delete this item?'),
+                'confirm' => 'Are you sure you want to delete this item?',
                 'method' => 'post',
             ],
         ]) ?>
@@ -34,15 +34,15 @@ YiiAsset::register($this);
     <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
-            'srh_id',
-            'srh_uss_id',
-            'srh_sst_id',
-            'srh_status_id',
-            'srh_description',
-            'srh_created_dt',
-            'srh_update_dt',
-            'srh_created_user_id',
-            'srh_updated_user_id',
+            'ssr_id',
+            'ssr_uss_id',
+            'ssr_sst_id',
+            'ssr_status_id',
+            'ssr_description',
+            'ssr_created_dt',
+            'ssr_update_dt',
+            'ssr_created_user_id',
+            'ssr_updated_user_id',
         ],
     ]) ?>
 

@@ -17,24 +17,24 @@ use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'srh_uss_id')->textInput() ?>
+    <?= $form->field($model, 'ssr_uss_id')->textInput() ?>
 
-    <?= $form->field($model, 'srh_sst_id')->textInput() ?>
+    <?= $form->field($model, 'ssr_sst_id')->textInput() ?>
 
-    <?= $form->field($model, 'srh_status_id')->textInput() ?>
+    <?= $form->field($model, 'ssr_status_id')->textInput() ?>
 
-    <?= $form->field($model, 'srh_description')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'ssr_description')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'srh_created_dt')->textInput() ?>
+    <?= $form->field($model, 'ssr_created_dt')->textInput() ?>
 
-    <?= $form->field($model, 'srh_update_dt')->textInput() ?>
+    <?= $form->field($model, 'ssr_update_dt')->textInput() ?>
 
-    <?= $form->field($model, 'srh_created_user_id')->textInput() ?>
+    <?= $form->field($model, 'ssr_created_user_id')->textInput() ?>
 
-    <?= $form->field($model, 'srh_updated_user_id')->textInput() ?>
+    <?= $form->field($model, 'ssr_updated_user_id')->textInput() ?>
 
     <div class="form-group">
-        <?= Html::submitButton(Yii::t('app', 'Save'), ['class' => 'btn btn-success']) ?>
+        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>
 
     <?php ActiveForm::end(); ?>

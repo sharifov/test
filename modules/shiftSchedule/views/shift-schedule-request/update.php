@@ -9,12 +9,10 @@ use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest
 use yii\helpers\Html;
 use yii\web\View;
 
-$this->title = Yii::t('app', 'Update Shift Schedule Request: {name}', [
-    'name' => $model->srh_id,
-]);
-$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Shift Schedule Requests'), 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $model->srh_id, 'url' => ['view', 'srh_id' => $model->srh_id]];
-$this->params['breadcrumbs'][] = Yii::t('app', 'Update');
+$this->title = 'Update Shift Schedule Request: ' . $model->ssr_id;
+$this->params['breadcrumbs'][] = ['label' => 'Shift Schedule Requests', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => $model->ssr_id, 'url' => ['view', 'ssr_id' => $model->ssr_id]];
+$this->params['breadcrumbs'][] = 'Update';
 ?>
 <div class="shift-schedule-request-update">
 

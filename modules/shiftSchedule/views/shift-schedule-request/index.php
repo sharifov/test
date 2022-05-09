@@ -14,7 +14,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\web\View;
 
-$this->title = Yii::t('app', 'Shift Schedule Requests');
+$this->title = 'Shift Schedule Requests';
 $this->params['breadcrumbs'][] = $this->title;
 
 $shiftScheduleTypes = ShiftScheduleType::getList(true);
@@ -31,21 +31,21 @@ $shiftScheduleTypes = ShiftScheduleType::getList(true);
         'filterModel' => $searchModel,
         'columns' => [
             [
-                'attribute' => 'srh_id',
+                'attribute' => 'ssr_id',
                 'options' => [
                     'style' => 'width: 5%',
                 ],
             ],
             [
-                'attribute' => 'srh_uss_id',
+                'attribute' => 'ssr_uss_id',
                 'options' => [
                     'style' => 'width: 10%',
                 ],
             ],
             [
-                'attribute' => 'srh_sst_id',
+                'attribute' => 'ssr_sst_id',
                 'value' => function (ShiftScheduleRequest $model) use ($shiftScheduleTypes) {
-                    return $shiftScheduleTypes[$model->srh_sst_id] ?? $model->srh_sst_id;
+                    return $shiftScheduleTypes[$model->ssr_sst_id] ?? $model->ssr_sst_id;
                 },
                 'options' => [
                     'style' => 'width: 20%',
@@ -53,7 +53,7 @@ $shiftScheduleTypes = ShiftScheduleType::getList(true);
                 'filter' => $shiftScheduleTypes,
             ],
             [
-                'attribute' => 'srh_status_id',
+                'attribute' => 'ssr_status_id',
                 'value' => function (ShiftScheduleRequest $model) {
                     $statusName = $model->getStatusName();
                     if (!empty($statusName)) {
@@ -63,7 +63,7 @@ $shiftScheduleTypes = ShiftScheduleType::getList(true);
                             $statusName
                         );
                     }
-                    return $model->srh_status_id;
+                    return $model->ssr_status_id;
                 },
                 'options' => [
                     'style' => 'width: 10%',
@@ -72,15 +72,15 @@ $shiftScheduleTypes = ShiftScheduleType::getList(true);
                 'format' => 'raw',
             ],
             [
-                'attribute' => 'srh_description',
+                'attribute' => 'ssr_description',
                 'options' => [
                     'style' => 'width: 20%',
                 ],
             ],
-            'srh_created_dt',
-            'srh_update_dt',
-            'srh_created_user_id',
-            'srh_updated_user_id',
+            'ssr_created_dt',
+            'ssr_update_dt',
+            'ssr_created_user_id',
+            'ssr_updated_user_id',
         ],
     ]); ?>
 

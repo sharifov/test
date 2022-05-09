@@ -20,27 +20,27 @@ use yii\widgets\ActiveForm;
         'method' => 'get',
     ]); ?>
 
-    <?= $form->field($model, 'srh_id') ?>
+    <?= $form->field($model, 'ssr_id') ?>
 
-    <?= $form->field($model, 'srh_uss_id') ?>
+    <?= $form->field($model, 'ssr_uss_id') ?>
 
-    <?= $form->field($model, 'srh_sst_id') ?>
+    <?= $form->field($model, 'ssr_sst_id') ?>
 
-    <?= $form->field($model, 'srh_status_id') ?>
+    <?= $form->field($model, 'ssr_status_id') ?>
 
-    <?= $form->field($model, 'srh_description') ?>
+    <?= $form->field($model, 'ssr_description') ?>
 
-    <?php // echo $form->field($model, 'srh_created_dt') ?>
-srh_update_user_id
-    <?php // echo $form->field($model, 'srh_update_dt') ?>
+    <?php // echo $form->field($model, 'ssr_created_dt') ?>
 
-    <?php // echo $form->field($model, 'srh_created_user_id') ?>
+    <?php // echo $form->field($model, 'ssr_update_dt') ?>
 
-    <?php // echo $form->field($model, 'srh_updated_user_id') ?>
+    <?php // echo $form->field($model, 'ssr_created_user_id') ?>
+
+    <?php // echo $form->field($model, 'ssr_updated_user_id') ?>
 
     <div class="form-group">
-        <?= Html::submitButton(Yii::t('app', 'Search'), ['class' => 'btn btn-primary']) ?>
-        <?= Html::resetButton(Yii::t('app', 'Reset'), ['class' => 'btn btn-outline-secondary']) ?>
+        <?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>
+        <?= Html::resetButton('Reset', ['class' => 'btn btn-outline-secondary']) ?>
     </div>
 
     <?php ActiveForm::end(); ?>
