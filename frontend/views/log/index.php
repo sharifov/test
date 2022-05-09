@@ -120,7 +120,7 @@ $pjaxListId = 'pjax-log';
                     [
                         'attribute' => 'log_time',
                         'value' => static function (\frontend\models\Log $model) {
-                            return date('d-M-Y [H:i:s]', $model->log_time);
+                            return '<span title="' . date("d-M-Y [H:i:s]", $model->log_time) . '">' . Yii::$app->formatter->asDatetime($model->log_time, 'php:d-M-Y [H:i:s]') . '</span>';
                         },
                         'format' => 'raw',
                         'filter' => DatePicker::widget([
@@ -131,15 +131,6 @@ $pjaxListId = 'pjax-log';
                                 'format' => 'dd-M-yyyy'
                             ]
                         ]),
-                        'contentOptions' => ['style' => 'width: 180px;text-align:center;']
-                    ],
-
-                    [
-                        'label' => 'Log time with Current Timezone',
-                        'value' => static function (\frontend\models\Log $model) {
-                            return Yii::$app->formatter->asDatetime($model->log_time, 'php:d-M-Y [H:i:s]');
-                        },
-                        'format' => 'raw',
                         'contentOptions' => ['style' => 'width: 180px;text-align:center;']
                     ],
 
