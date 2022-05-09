@@ -78,8 +78,8 @@ class QuoteCommunicationOpenLog extends ActiveRecord
      */
     public static function createByRequestData($data): void
     {
-        if (isset($data['qc_uid'])) {
-            $quoteCommunication = QuoteCommunication::find()->where(['qc_uid' => $data['qc_uid']])->one();
+        if (isset($data['qc'])) {
+            $quoteCommunication = QuoteCommunication::find()->where(['qc_uid' => $data['qc']])->one();
             if (!is_null($quoteCommunication)) {
                 $model = new self();
                 $model->qcol_quote_communication_id = $quoteCommunication->getPrimaryKey();
