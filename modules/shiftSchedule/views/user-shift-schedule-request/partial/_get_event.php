@@ -5,8 +5,10 @@
  * @var UserShiftSchedule $event
  * @var ScheduleRequestForm $model
  * @var bool $success
+ * @var bool $canEditPreviousDate
  */
 
+use common\models\Lead;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\shiftSchedule\src\forms\ScheduleRequestForm;
@@ -72,10 +74,7 @@ $tsEndUtc = strtotime($event->uss_end_utc_dt);
                         </div>
                         <strong>
                             Duration Time:
-                            <?= $model::getDatesDiff(
-                                Yii::$app->formatter->asDatetime($tsStartUtc, 'php: ' . $model::DATETIME_FORMAT),
-                                Yii::$app->formatter->asDatetime($tsEndUtc, 'php: ' . $model::DATETIME_FORMAT)
-                            ) ?>
+                            <?= Lead::diffFormat((new DateTime($event->uss_start_utc_dt))->diff(new DateTime($event->uss_end_utc_dt))) ?>
                         </strong>
                     </td>
                     <td>
@@ -100,69 +99,69 @@ $tsEndUtc = strtotime($event->uss_end_utc_dt);
             </div>
 
         </div>
-
-        <hr>
-        <input type="hidden" value="<?= (bool)$success ?>" id="request-status">
-        <?php $form = ActiveForm::begin([
-            'id' => 'decision-form',
-            'options' => [
-                'data-pjax' => true,
-                'style' => 'position: relative',
-            ],
-        ]); ?>
-        <div class="text-center js-loader"
-             style="display: none; position: absolute;width: 100%;height: 100%;background: rgba(255, 255, 255, .8);z-index: 9999;">
-            <div class="spinner-border m-5" role="status">
-                <span class="sr-only">Loading...</span>
+        <?php if ($canEditPreviousDate) : ?>
+            <hr>
+            <input type="hidden" value="<?= (bool)$success ?>" id="request-status">
+            <?php $form = ActiveForm::begin([
+                'id' => 'decision-form',
+                'options' => [
+                    'data-pjax' => true,
+                    'style' => 'position: relative',
+                ],
+            ]); ?>
+            <div class="text-center js-loader"
+                 style="display: none; position: absolute;width: 100%;height: 100%;background: rgba(255, 255, 255, .8);z-index: 9999;">
+                <div class="spinner-border m-5" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
             </div>
-        </div>
-        <h2>
-            Your decision
-        </h2>
-        <div class="row">
-            <div class="col-md-12">
-                <?= $form->field($model, 'status')
-                    ->radioList(
-                        ShiftScheduleRequest::getList(),
-                        [
-                            'item' => function ($index, $label, $name, $checked, $value) {
-                                $content = Html::radio($name, $checked, [
-                                        'value' => $value,
-                                        'style' => 'opacity: 0; z-index: 0; position: absolute;',
-                                    ]) . $label;
-                                return Html::tag(
-                                    'div',
-                                    $content,
-                                    [
-                                        'class' => [
-                                            'btn',
-                                            'btn-' . ShiftScheduleRequest::getStatusNameColorById($value),
-                                            'js-decision',
-                                            $checked ? 'active' : '',
-                                        ],
-                                    ]
-                                );
-                            },
-                        ]
-                    ) ?>
+            <h2>
+                Your decision
+            </h2>
+            <div class="row">
+                <div class="col-md-12">
+                    <?= $form->field($model, 'status')
+                        ->radioList(
+                            ShiftScheduleRequest::getList(),
+                            [
+                                'item' => function ($index, $label, $name, $checked, $value) {
+                                    $content = Html::radio($name, $checked, [
+                                            'value' => $value,
+                                            'style' => 'opacity: 0; z-index: 0; position: absolute;',
+                                        ]) . $label;
+                                    return Html::tag(
+                                        'div',
+                                        $content,
+                                        [
+                                            'class' => [
+                                                'btn',
+                                                'btn-' . ShiftScheduleRequest::getStatusNameColorById($value),
+                                                'js-decision',
+                                                $checked ? 'active' : '',
+                                            ],
+                                        ]
+                                    );
+                                },
+                            ]
+                        ) ?>
+                </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-md-12">
-                <?= $form->field($model, 'description')
-                    ->textarea([
-                        'rows' => 3,
-                    ]) ?>
+            <div class="row">
+                <div class="col-md-12">
+                    <?= $form->field($model, 'description')
+                        ->textarea([
+                            'rows' => 3,
+                        ]) ?>
+                </div>
             </div>
-        </div>
-        <?= Html::submitButton('Change Status', [
-            'class' => [
-                'btn',
-                'btn-success',
-            ],
-        ]) ?>
-        <?php ActiveForm::end(); ?>
-
+            <?= Html::submitButton('Change Status', [
+                'class' => [
+                    'btn',
+                    'btn-success',
+                ],
+            ]) ?>
+            <?php ActiveForm::end(); ?>
+        <?php endif; ?>
     </div>
 <?php
 Pjax::end();

@@ -21,7 +21,7 @@ use yii\web\View;
 use yii\widgets\Pjax;
 use yii\grid\GridView;
 
-$this->title = Yii::t('schedule-request', 'User Shift Schedule Requests');
+$this->title = 'User Shift Schedule Requests';
 $this->params['breadcrumbs'][] = $this->title;
 $bundle = FullCalendarAsset::register($this);
 $shiftScheduleTypes = ShiftScheduleType::getList(true);
@@ -36,14 +36,8 @@ $shiftScheduleTypes = ShiftScheduleType::getList(true);
                 <div class="x_panel">
                     <div class="x_title">
                         <h2>
-                            <?= Yii::t(
-                                'schedule-request',
-                                '{icon} Schedule Request Calendar (TimeZone: {userTimeZone})',
-                                [
-                                    'icon' => '<i class="fa fa-calendar"></i>',
-                                    'userTimeZone' => Html::encode($userTimeZone),
-                                ]
-                            ) ?>
+                            <i class="fa fa-calendar"></i> Schedule Request Calendar
+                            (TimeZone: <?= Html::encode($userTimeZone) ?>)
                         </h2>
                         <div class="clearfix"></div>
                     </div>
@@ -58,20 +52,26 @@ $shiftScheduleTypes = ShiftScheduleType::getList(true);
             </div>
 
             <div class="col-md-6">
-                <?php Pjax::begin(['id' => 'pjax-user-timeline']); ?>
+                <?php Pjax::begin([
+                    'id' => 'pjax-user-timeline',
+                    'enablePushState' => false,
+                    'enableReplaceState' => false,
+                ]); ?>
                 <div class="x_panel">
                     <div class="x_title">
                         <h2>
-                            <?= Yii::t(
-                                'schedule-request',
-                                '{icon} TimeLine Schedule Request List {dates}',
-                                [
-                                    'icon' => '<i class="fa fa-bars"></i>',
-                                    'dates' => !(empty($searchModel->clientStartDate) || empty($searchModel->clientEndDate)) ?
-                                        '(' . Html::encode($searchModel->clientStartDate) . ' - ' .
-                                        Html::encode($searchModel->clientEndDate) . ')' : '',
-                                ]
-                            ) ?>
+                            <?php
+                            if (!(empty($searchModel->clientStartDate) || empty($searchModel->clientEndDate))) {
+                                $dates = sprintf(
+                                    '(%s - %s)',
+                                    Html::encode($searchModel->clientStartDate),
+                                    Html::encode($searchModel->clientEndDate)
+                                );
+                            } else {
+                                $dates = '';
+                            }
+                            ?>
+                            <i class="fa fa-bars"></i> TimeLine Schedule Request List <?= $dates ?>
                         </h2>
                         <div class="clearfix"></div>
                     </div>
@@ -81,14 +81,14 @@ $shiftScheduleTypes = ShiftScheduleType::getList(true);
                             'filterModel' => $searchModel,
                             'columns' => [
                                 [
-                                    'attribute' => 'srh_uss_id',
+                                    'attribute' => 'ssr_uss_id',
                                     'options' => [
 
                                     ],
                                     'value' => function (ShiftScheduleRequestSearch $model) {
-                                        return $model->srhCreatedUser->nickname;
+                                        return $model->ssrCreatedUser->nickname ?? $model->ssr_created_user_id;
                                     },
-                                    'label' => Yii::t('schedule-request', 'User'),
+                                    'label' => 'User',
                                     // @todo: 'filter' => 'user group'
                                 ],
                                 [
@@ -100,38 +100,42 @@ $shiftScheduleTypes = ShiftScheduleType::getList(true);
 
                                 ],
                                 [
-                                    'attribute' => 'srh_sst_id',
+                                    'attribute' => 'ssr_sst_id',
                                     'value' => function (ShiftScheduleRequestSearch $model) {
                                         return Html::a(
-                                            $model->getScheduleTypeTitle() ?? $model->srh_sst_id,
+                                            $model->getScheduleTypeTitle() ?? $model->ssr_sst_id,
                                             null,
-                                            ['class' => 'btn-open-timeline', 'data-tl_id' => $model->srh_id]
+                                            ['class' => 'btn-open-timeline', 'data-tl_id' => $model->ssr_id]
                                         );
                                     },
                                     'options' => [
                                         'style' => 'width: 20%',
                                     ],
-                                    'label' => Yii::t('schedule-request', 'Schedule Type'),
+                                    'label' => 'Schedule Type',
                                     'filter' => $shiftScheduleTypes,
                                     'format' => 'raw',
                                 ],
                                 [
-                                    'label' => Yii::t('schedule-request', 'Start Date Time'),
+                                    'label' => 'Start Date Time',
                                     'class' => DateTimeColumn::class,
-                                    'attribute' => 'srh_start_utc_dt',
+                                    'value' => function (ShiftScheduleRequestSearch $model) {
+                                        return $model->srhUss->uss_start_utc_dt;
+                                    },
+                                    'format' => 'byUserDateTime',
+                                    'filter' => false,
+                                ],
+                                [
+                                    'label' => 'End Date Time',
+                                    'class' => DateTimeColumn::class,
+                                    'value' => function (ShiftScheduleRequestSearch $model) {
+                                        return $model->srhUss->uss_end_utc_dt;
+                                    },
                                     'format' => 'byUserDateTime',
                                     'filter' => false
                                 ],
                                 [
-                                    'label' => Yii::t('schedule-request', 'End Date Time'),
-                                    'class' => DateTimeColumn::class,
-                                    'attribute' => 'srh_end_utc_dt',
-                                    'format' => 'byUserDateTime',
-                                    'filter' => false
-                                ],
-                                [
-                                    'label' => Yii::t('schedule-request', 'Status'),
-                                    'attribute' => 'srh_status_id',
+                                    'label' => 'Status',
+                                    'attribute' => 'ssr_status_id',
                                     'value' => function (ShiftScheduleRequestSearch $model) {
                                         $statusName = $model->getStatusName();
                                         if (!empty($statusName)) {
@@ -141,7 +145,7 @@ $shiftScheduleTypes = ShiftScheduleType::getList(true);
                                                 $statusName
                                             );
                                         }
-                                        return $model->srh_status_id;
+                                        return $model->ssr_status_id;
                                     },
                                     'options' => [
                                         'style' => 'width: 10%',
@@ -157,6 +161,115 @@ $shiftScheduleTypes = ShiftScheduleType::getList(true);
             </div>
 
         </div>
+
+<!--        <div class="row">-->
+<!--            <div class="col-md-12">-->
+<!--                --><?php //Pjax::begin([
+//                    'id' => 'pjax-user-request-history',
+//                    'enablePushState' => false,
+//                    'enableReplaceState' => false,
+//                ]); ?>
+<!--                <div class="x_title">-->
+<!--                    <h2>-->
+<!--                        <i class="fa fa-bars"></i> TimeLine Schedule Request History-->
+<!--                    </h2>-->
+<!--                    <div class="clearfix"></div>-->
+<!--                </div>-->
+<!--                <div class="x_content">-->
+<!--                    --><?php //echo GridView::widget([
+//                        'dataProvider' => $dataProvider,
+//                        'filterModel' => $searchModel,
+//                        'filterUrl' => Url::to(['user-shift-schedule-request/shedule-request-history']),
+//                        'columns' => [
+//                            [
+//                                'attribute' => 'ssr_uss_id',
+//                                'options' => [
+//
+//                                ],
+//                                'value' => function (ShiftScheduleRequestSearch $model) {
+//                                    return $model->ssrCreatedUser->nickname ?? $model->ssr_created_user_id;
+//                                },
+//                                'label' => 'User create request',
+//                            ],
+//                            [
+//                                'attribute' => 'ssr_uss_id',
+//                                'options' => [
+//
+//                                ],
+//                                'value' => function (ShiftScheduleRequestSearch $model) {
+//                                    return $model->ssrUpdatedUser->nickname ?? $model->ssr_updated_user_id;
+//                                },
+//                                'label' => 'User make decision',
+//                            ],
+//                            [
+//                                'label' => 'Type',
+//                                'value' => static function (ShiftScheduleRequestSearch $model) {
+//                                    return $model->srhSst ? $model->srhSst->getColorLabel() : '-';
+//                                },
+//                                'format' => 'raw',
+//
+//                            ],
+//                            [
+//                                'attribute' => 'ssr_sst_id',
+//                                'value' => function (ShiftScheduleRequestSearch $model) {
+//                                    return Html::a(
+//                                        $model->getScheduleTypeTitle() ?? $model->ssr_sst_id,
+//                                        null,
+//                                        ['class' => 'btn-open-timeline', 'data-tl_id' => $model->ssr_id]
+//                                    );
+//                                },
+//                                'options' => [
+//                                    'style' => 'width: 20%',
+//                                ],
+//                                'label' => 'Schedule Type',
+//                                'filter' => $shiftScheduleTypes,
+//                                'format' => 'raw',
+//                            ],
+//                            [
+//                                'label' => 'Start Date Time',
+//                                'class' => DateTimeColumn::class,
+//                                'value' => function (ShiftScheduleRequestSearch $model) {
+//                                    return $model->srhUss->uss_start_utc_dt;
+//                                },
+//                                'format' => 'byUserDateTime',
+//                                'filter' => false
+//                            ],
+//                            [
+//                                'label' => 'End Date Time',
+//                                'class' => DateTimeColumn::class,
+//                                'value' => function (ShiftScheduleRequestSearch $model) {
+//                                    return $model->srhUss->uss_end_utc_dt;
+//                                },
+//                                'format' => 'byUserDateTime',
+//                                'filter' => false
+//                            ],
+//                            [
+//                                'label' => 'Status',
+//                                'attribute' => 'ssr_status_id',
+//                                'value' => function (ShiftScheduleRequestSearch $model) {
+//                                    $statusName = $model->getStatusName();
+//                                    if (!empty($statusName)) {
+//                                        return sprintf(
+//                                            '<span class="badge badge-%s">%s</span>',
+//                                            $model->getStatusNameColor(),
+//                                            $statusName
+//                                        );
+//                                    }
+//                                    return $model->ssr_status_id;
+//                                },
+//                                'options' => [
+//                                    'style' => 'width: 10%',
+//                                ],
+//                                'filter' => ShiftScheduleRequest::getList(),
+//                                'format' => 'raw',
+//                            ],
+//                            'ssr_description',
+//                        ],
+//                    ]) ?>
+<!--                </div>-->
+<!--                --><?php //Pjax::end(); ?>
+<!--            </div>-->
+<!--        </div>-->
     </div>
 
 <?php
