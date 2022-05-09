@@ -15,19 +15,16 @@ use yii\db\BaseActiveRecord;
 /**
  * This is the model class for table "shift_schedule_request".
  *
- * @property int $srh_id
- * @property int|null $srh_uss_id
- * @property int|null $srh_sst_id
- * @property int $srh_status_id
- * @property string|null $srh_description
- * @property string|null $srh_start_utc_dt
- * @property string|null $srh_end_utc_dt
- * @property string|null $srh_created_dt
- * @property string|null $srh_update_dt
- * @property int|null $srh_created_user_id
- * @property int|null $srh_updated_user_id
+ * @property int $ssr_id
+ * @property int|null $ssr_uss_id
+ * @property int|null $ssr_sst_id
+ * @property int $ssr_status_id
+ * @property string|null $ssr_description
+ * @property string|null $ssr_created_dt
+ * @property string|null $ssr_update_dt
+ * @property int|null $ssr_created_user_id
+ * @property int|null $ssr_updated_user_id
  *
- * @property Employee $srhCreatedUser
  * @property ShiftScheduleType $srhSst
  * @property-read string $statusNameColor
  * @property-read string $statusName
@@ -35,6 +32,8 @@ use yii\db\BaseActiveRecord;
  * @property-read string $scheduleTypeTitle
  * @property-read int $duration
  * @property UserShiftSchedule $srhUss
+ * @property Employee $ssrCreatedUser
+ * @property Employee $ssrUpdatedUser
  */
 class ShiftScheduleRequest extends ActiveRecord
 {
@@ -74,16 +73,15 @@ class ShiftScheduleRequest extends ActiveRecord
             'timestamp' => [
                 'class' => TimestampBehavior::class,
                 'attributes' => [
-                    BaseActiveRecord::EVENT_BEFORE_INSERT => 'srh_created_dt',
-                    BaseActiveRecord::EVENT_BEFORE_UPDATE => 'srh_updated_dt',
+                    BaseActiveRecord::EVENT_BEFORE_INSERT => 'ssr_created_dt',
+                    BaseActiveRecord::EVENT_BEFORE_UPDATE => 'ssr_updated_dt',
                 ],
                 'value' => date('Y-m-d H:i:s'),
             ],
             'user' => [
                 'class' => BlameableBehavior::class,
                 'attributes' => [
-                    BaseActiveRecord::EVENT_BEFORE_INSERT => 'srh_created_user_id',
-                    BaseActiveRecord::EVENT_BEFORE_UPDATE => 'srh_updated_user_id',
+                    BaseActiveRecord::EVENT_BEFORE_INSERT => 'ssr_created_user_id',
                 ]
             ],
         ];
@@ -95,13 +93,14 @@ class ShiftScheduleRequest extends ActiveRecord
     public function rules(): array
     {
         return [
-            [['srh_uss_id', 'srh_sst_id', 'srh_status_id', 'srh_created_user_id', 'srh_updated_user_id'], 'integer'],
-            [['srh_status_id'], 'required'],
-            [['srh_start_utc_dt', 'srh_end_utc_dt', 'srh_created_dt', 'srh_update_dt'], 'safe'],
-            [['srh_description'], 'string', 'max' => 1000],
-            [['srh_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['srh_created_user_id' => 'id']],
-            [['srh_sst_id'], 'exist', 'skipOnError' => true, 'targetClass' => ShiftScheduleType::class, 'targetAttribute' => ['srh_sst_id' => 'sst_id']],
-            [['srh_uss_id'], 'exist', 'skipOnError' => true, 'targetClass' => UserShiftSchedule::class, 'targetAttribute' => ['srh_uss_id' => 'uss_id']],
+            [['ssr_uss_id', 'ssr_sst_id', 'ssr_status_id', 'ssr_created_user_id', 'ssr_updated_user_id'], 'integer'],
+            [['ssr_status_id'], 'required'],
+            [['ssr_created_dt', 'ssr_update_dt'], 'safe'],
+            [['ssr_description'], 'string', 'max' => 1000],
+            [['ssr_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['ssr_created_user_id' => 'id']],
+            [['ssr_sst_id'], 'exist', 'skipOnError' => true, 'targetClass' => ShiftScheduleType::class, 'targetAttribute' => ['ssr_sst_id' => 'sst_id']],
+            [['ssr_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['ssr_updated_user_id' => 'id']],
+            [['ssr_uss_id'], 'exist', 'skipOnError' => true, 'targetClass' => UserShiftSchedule::class, 'targetAttribute' => ['ssr_uss_id' => 'uss_id']],
         ];
     }
 
@@ -111,28 +110,16 @@ class ShiftScheduleRequest extends ActiveRecord
     public function attributeLabels(): array
     {
         return [
-            'srh_id' => Yii::t('app', 'Srh ID'),
-            'srh_uss_id' => Yii::t('app', 'User Shift Schedule ID'),
-            'srh_sst_id' => Yii::t('app', 'Shift Schedule Type ID'),
-            'srh_status_id' => Yii::t('app', 'Status ID'),
-            'srh_description' => Yii::t('app', 'Description'),
-            'srh_start_utc_dt' => Yii::t('app', 'Start Dt'),
-            'srh_end_utc_dt' => Yii::t('app', 'End Dt'),
-            'srh_created_dt' => Yii::t('app', 'Created Dt'),
-            'srh_update_dt' => Yii::t('app', 'Update Dt'),
-            'srh_created_user_id' => Yii::t('app', 'Created User ID'),
-            'srh_updated_user_id' => Yii::t('app', 'Updated User ID'),
+            'ssr_id' => 'Srh ID',
+            'ssr_uss_id' => 'User Shift Schedule ID',
+            'ssr_sst_id' => 'Shift Schedule Type ID',
+            'ssr_status_id' => 'Status ID',
+            'ssr_description' => 'Description',
+            'ssr_created_dt' => 'Created Dt',
+            'ssr_update_dt' => 'Update Dt',
+            'ssr_created_user_id' => 'Created User ID',
+            'ssr_updated_user_id' => 'Updated User ID',
         ];
-    }
-
-    /**
-     * Gets query for [[SrhCreatedUser]].
-     *
-     * @return ActiveQuery
-     */
-    public function getSrhCreatedUser(): ActiveQuery
-    {
-        return $this->hasOne(Employee::class, ['id' => 'srh_created_user_id']);
     }
 
     /**
@@ -142,7 +129,7 @@ class ShiftScheduleRequest extends ActiveRecord
      */
     public function getSrhSst(): ActiveQuery
     {
-        return $this->hasOne(ShiftScheduleType::class, ['sst_id' => 'srh_sst_id']);
+        return $this->hasOne(ShiftScheduleType::class, ['sst_id' => 'ssr_sst_id']);
     }
 
     /**
@@ -152,7 +139,7 @@ class ShiftScheduleRequest extends ActiveRecord
      */
     public function getSrhUss(): ActiveQuery
     {
-        return $this->hasOne(UserShiftSchedule::class, ['uss_id' => 'srh_uss_id']);
+        return $this->hasOne(UserShiftSchedule::class, ['uss_id' => 'ssr_uss_id']);
     }
 
     /**
@@ -160,7 +147,7 @@ class ShiftScheduleRequest extends ActiveRecord
      */
     public function getStatusName(): string
     {
-        return self::STATUS_LIST[$this->srh_status_id] ?? '';
+        return self::STATUS_LIST[$this->ssr_status_id] ?? '';
     }
 
     /**
@@ -168,7 +155,7 @@ class ShiftScheduleRequest extends ActiveRecord
      */
     public function getStatusNameColor(): string
     {
-        return self::STATUS_LIST_COLOR[$this->srh_status_id] ?? '';
+        return self::STATUS_LIST_COLOR[$this->ssr_status_id] ?? '';
     }
 
     /**
@@ -210,7 +197,7 @@ class ShiftScheduleRequest extends ActiveRecord
      */
     public function getDuration(): int
     {
-        return round((strtotime($this->srh_end_utc_dt) - strtotime($this->srh_start_utc_dt)) / (60 * 60 * 24));
+        return round((strtotime($this->srhUss->uss_start_utc_dt) - strtotime($this->srhUss->uss_end_utc_dt)) / (60 * 60 * 24));
     }
 
     /**
@@ -221,10 +208,44 @@ class ShiftScheduleRequest extends ActiveRecord
     public static function getCompatibleStatus(int $statusId): int
     {
         return [
-            self::STATUS_PENDING => UserShiftSchedule::STATUS_PENDING,
-            self::STATUS_APPROVE => UserShiftSchedule::STATUS_APPROVED,
-            self::STATUS_DECLINED => UserShiftSchedule::STATUS_CANCELED,
-            self::STATUS_REMOVED => UserShiftSchedule::STATUS_DELETED,
-        ][$statusId] ?? UserShiftSchedule::STATUS_PENDING;
+                self::STATUS_PENDING => UserShiftSchedule::STATUS_PENDING,
+                self::STATUS_APPROVE => UserShiftSchedule::STATUS_APPROVED,
+                self::STATUS_DECLINED => UserShiftSchedule::STATUS_CANCELED,
+                self::STATUS_REMOVED => UserShiftSchedule::STATUS_DELETED,
+            ][$statusId] ?? UserShiftSchedule::STATUS_PENDING;
+    }
+
+    /**
+     * Gets query for [[SsrCreatedUser]].
+     *
+     * @return ActiveQuery
+     */
+    public function getSsrCreatedUser(): ActiveQuery
+    {
+        return $this->hasOne(Employee::class, ['id' => 'ssr_created_user_id']);
+    }
+
+    /**
+     * Gets query for [[SsrUpdatedUser]].
+     *
+     * @return ActiveQuery
+     */
+    public function getSsrUpdatedUser(): ActiveQuery
+    {
+        return $this->hasOne(Employee::class, ['id' => 'ssr_updated_user_id']);
+    }
+
+    /**
+     * Return if user can edit previous date time
+     * @return bool
+     */
+    public function getIsCanEditPreviousDate(): bool
+    {
+        if (strtotime($this->srhUss->uss_start_utc_dt) < strtotime('now')) {
+            // get abacRules and return;
+            return false;
+        }
+
+        return true;
     }
 }

@@ -3,6 +3,7 @@
 namespace modules\shiftSchedule\src\entities\shiftScheduleRequest\search;
 
 use common\models\Employee;
+use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
@@ -22,8 +23,8 @@ class ShiftScheduleRequestSearch extends ShiftScheduleRequest
     public function rules(): array
     {
         return [
-            [['srh_id', 'srh_uss_id', 'srh_sst_id', 'srh_status_id', 'srh_created_user_id', 'srh_updated_user_id'], 'integer'],
-            [['srh_description', 'srh_created_dt', 'srh_update_dt'], 'safe'],
+            [['ssr_id', 'ssr_uss_id', 'ssr_sst_id', 'ssr_status_id', 'ssr_created_user_id', 'ssr_updated_user_id'], 'integer'],
+            [['ssr_description', 'ssr_created_dt', 'ssr_update_dt', 'clientStartDate', 'clientEndDate'], 'safe'],
         ];
     }
 
@@ -63,19 +64,17 @@ class ShiftScheduleRequestSearch extends ShiftScheduleRequest
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'srh_id' => $this->srh_id,
-            'srh_uss_id' => $this->srh_uss_id,
-            'srh_sst_id' => $this->srh_sst_id,
-            'srh_status_id' => $this->srh_status_id,
-            'srh_start_utc_dt' => $this->srh_start_utc_dt,
-            'srh_end_utc_dt' => $this->srh_end_utc_dt,
-            'srh_created_dt' => $this->srh_created_dt,
-            'srh_update_dt' => $this->srh_update_dt,
-            'srh_created_user_id' => $this->srh_created_user_id,
-            'srh_updated_user_id' => $this->srh_updated_user_id,
+            'ssr_id' => $this->ssr_id,
+            'ssr_uss_id' => $this->ssr_uss_id,
+            'ssr_sst_id' => $this->ssr_sst_id,
+            'ssr_status_id' => $this->ssr_status_id,
+            'ssr_created_dt' => $this->ssr_created_dt,
+            'ssr_update_dt' => $this->ssr_update_dt,
+            'ssr_created_user_id' => $this->ssr_created_user_id,
+            'ssr_updated_user_id' => $this->ssr_updated_user_id,
         ]);
 
-        $query->andFilterWhere(['like', 'srh_description', $this->srh_description]);
+        $query->andFilterWhere(['like', 'ssr_description', $this->ssr_description]);
 
         return $dataProvider;
     }
@@ -93,7 +92,7 @@ class ShiftScheduleRequestSearch extends ShiftScheduleRequest
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort' => ['defaultOrder' => ['srh_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['ssr_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 7,
             ],
@@ -115,7 +114,7 @@ class ShiftScheduleRequestSearch extends ShiftScheduleRequest
 
         return new ActiveDataProvider([
             'query' => self::getSearchQuery($userList, $this, $startDate, $endDate),
-            'sort' => ['defaultOrder' => ['srh_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['ssr_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 7,
             ],
@@ -132,53 +131,56 @@ class ShiftScheduleRequestSearch extends ShiftScheduleRequest
     public static function getSearchQuery(ActiveQuery $userList, ShiftScheduleRequestSearch $model = null, ?string $startDate = null, ?string $endDate = null): ActiveQuery
     {
         $query = ShiftScheduleRequestSearch::find();
-        $query->where(['IS NOT', 'srh_uss_id', null]);
-        $query->andWhere(['srh_created_user_id' => $userList]);
+        $query->where(['IS NOT', 'ssr_uss_id', null]);
+        $query->andWhere(['ssr_created_user_id' => $userList]);
         if (!empty($startDate) && !empty($endDate)) {
             $startDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($startDate));
             $endDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($endDate));
         } else {
-            $startDateTime = date('Y-m-d');
-            $endDateTime = date('Y-m-d', strtotime(date("Y-m-d", time()) . " + 365 day"));
+            $startDateTime = $model->clientStartDate ?? '';
+            $endDateTime = $model->clientEndDate ?? '';
         }
 
-        $query->andWhere([
-            'OR',
-            ['between', 'srh_start_utc_dt', $startDateTime, $endDateTime],
-            ['between', 'srh_end_utc_dt', $startDateTime, $endDateTime],
-            [
-                'AND',
-                ['>=', 'srh_start_utc_dt', $startDateTime],
-                ['<=', 'srh_end_utc_dt', $endDateTime]
-            ],
-            [
-                'AND',
-                ['<=', 'srh_start_utc_dt', $startDateTime],
-                ['>=', 'srh_end_utc_dt', $endDateTime]
-            ]
-        ]);
-
-        if (!empty($model)) {
-            $query->andFilterWhere([
-                'srh_id' => $model->srh_id,
-                'srh_uss_id' => $model->srh_uss_id,
-                'srh_sst_id' => $model->srh_sst_id,
-                'srh_status_id' => $model->srh_status_id,
-                'srh_created_dt' => $model->srh_created_dt,
-                'srh_update_dt' => $model->srh_update_dt,
-                'srh_updated_user_id' => $model->srh_updated_user_id,
+        if (!empty($startDateTime) && !empty($endDateTime)) {
+            $query->joinWith('srhUss');
+            $query->andWhere([
+                'OR',
+                ['between', UserShiftSchedule::tableName() . '.uss_start_utc_dt', $startDateTime, $endDateTime],
+                ['between', UserShiftSchedule::tableName() . '.uss_end_utc_dt', $startDateTime, $endDateTime],
+                [
+                    'AND',
+                    ['>=', UserShiftSchedule::tableName() . '.uss_start_utc_dt', $startDateTime],
+                    ['<=', UserShiftSchedule::tableName() . '.uss_end_utc_dt', $endDateTime]
+                ],
+                [
+                    'AND',
+                    ['<=', UserShiftSchedule::tableName() . '.uss_start_utc_dt', $startDateTime],
+                    ['>=', UserShiftSchedule::tableName() . '.uss_end_utc_dt', $endDateTime]
+                ]
             ]);
         }
 
-        $query->select(['srh_id' => 'MAX(srh_id)', 'srh_uss_id'])
-            ->groupBy(['srh_uss_id']);
+        if (!empty($model)) {
+            $query->andFilterWhere([
+                'ssr_id' => $model->ssr_id,
+                'ssr_uss_id' => $model->ssr_uss_id,
+                'ssr_sst_id' => $model->ssr_sst_id,
+                'ssr_status_id' => $model->ssr_status_id,
+                'ssr_created_dt' => $model->ssr_created_dt,
+                'ssr_update_dt' => $model->ssr_update_dt,
+                'ssr_updated_user_id' => $model->ssr_updated_user_id,
+            ]);
+        }
+
+        $query->select(['ssr_id' => 'MAX(ssr_id)', 'ssr_uss_id'])
+            ->groupBy(['ssr_uss_id']);
 
         $query = static::find()
             ->from($query)
-            ->select('srh_id');
+            ->select('ssr_id');
 
         return static::find()
-            ->where(['in', 'srh_id', $query]);
+            ->where(['in', 'ssr_id', $query]);
     }
 
     /**
