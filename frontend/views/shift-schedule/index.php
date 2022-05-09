@@ -649,9 +649,12 @@ $js = <<<JS
             return url;
         }
 
+        var end = new Date(selectedRange.end);
+        end.setDate(end.getDate() - 1);
+        end.setHours(23, 59);
         var data = {
             start: selectedRange.start,            
-            end: selectedRange.end            
+            end: end.getFullYear() + '-' + ('0' + (end.getMonth() + 1)).slice(-2) + '-' + ('0' + end.getDate()).slice(-2) + ' ' + end.getHours() + ':' + end.getMinutes()           
         };
         
         var prefix = '?';
