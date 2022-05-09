@@ -51,14 +51,14 @@ class ShiftScheduleRequestController extends FController
 
     /**
      * Displays a single ShiftScheduleRequest model.
-     * @param int $srh_id Srh ID
+     * @param int $ssr_id Srh ID
      * @return string
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView(int $srh_id): string
+    public function actionView(int $ssr_id): string
     {
         return $this->render('view', [
-            'model' => $this->findModel($srh_id),
+            'model' => $this->findModel($ssr_id),
         ]);
     }
 
@@ -73,7 +73,7 @@ class ShiftScheduleRequestController extends FController
 
         if ($this->request->isPost) {
             if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'srh_id' => $model->srh_id]);
+                return $this->redirect(['view', 'ssr_id' => $model->ssr_id]);
             }
         } else {
             $model->loadDefaultValues();
@@ -87,16 +87,16 @@ class ShiftScheduleRequestController extends FController
     /**
      * Updates an existing ShiftScheduleRequest model.
      * If update is successful, the browser will be redirected to the 'view' page.
-     * @param int $srh_id Srh ID
+     * @param int $ssr_id Srh ID
      * @return string|Response
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate(int $srh_id)
+    public function actionUpdate(int $ssr_id)
     {
-        $model = $this->findModel($srh_id);
+        $model = $this->findModel($ssr_id);
 
         if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'srh_id' => $model->srh_id]);
+            return $this->redirect(['view', 'ssr_id' => $model->ssr_id]);
         }
 
         return $this->render('update', [
@@ -107,13 +107,13 @@ class ShiftScheduleRequestController extends FController
     /**
      * Deletes an existing ShiftScheduleRequest model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param int $srh_id Srh ID
+     * @param int $ssr_id Srh ID
      * @return Response
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete(int $srh_id): Response
+    public function actionDelete(int $ssr_id): Response
     {
-        $this->findModel($srh_id)->delete();
+        $this->findModel($ssr_id)->delete();
 
         return $this->redirect(['index']);
     }
@@ -121,13 +121,13 @@ class ShiftScheduleRequestController extends FController
     /**
      * Finds the ShiftScheduleRequest model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param int $srh_id Srh ID
+     * @param int $ssr_id Srh ID
      * @return ShiftScheduleRequest the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel(int $srh_id): ShiftScheduleRequest
+    protected function findModel(int $ssr_id): ShiftScheduleRequest
     {
-        if (($model = ShiftScheduleRequest::findOne(['srh_id' => $srh_id])) !== null) {
+        if (($model = ShiftScheduleRequest::findOne(['ssr_id' => $ssr_id])) !== null) {
             return $model;
         }
 

@@ -28,7 +28,7 @@ class ShiftScheduleRequestService
         if ($user->isAdmin() || $user->isSuperAdmin()) {
             return $employee;
         }
-        $userList = $user->ugsGroups->ugsUsers ?? $user->id;
+        $userList = $user->ugsGroups->ugsUsers ?? [$user->id];
 
         return $employee
             ->where(['id' => $userList]);
@@ -65,27 +65,23 @@ class ShiftScheduleRequestService
         if ($timelineList) {
             foreach ($timelineList as $item) {
                 $dataItem = [
-                    'id' => $item->srh_id,
+                    'id' => $item->ssr_id,
                     'title' => sprintf(
                         "%s(%s)",
                         $item->getScheduleTypeKey(),
                         $item->getStatusName()
                     ),
-                    'description' => Yii::t(
-                        'schedule-request',
-                        '{scheduleTypeTitle}{new_line}({userShiftScheduleId}), duration: {duration} ({statusName})',
-                        [
-                            'scheduleTypeTitle' => $item->getScheduleTypeTitle(),
-                            'new_line' => "\r\n",
-                            'userShiftScheduleId' => $item->srh_uss_id,
-                            'duration' => $item->getDuration(),
-                            'statusName' => $item->getStatusName(),
-                        ]
+                    'description' => sprintf(
+                        "%s\r\n(%s), duration: %s (%s)",
+                        $item->getScheduleTypeTitle(),
+                        $item->ssr_uss_id,
+                        $item->getDuration(),
+                        $item->getStatusName()
                     ),
-                    'start' => date('c', strtotime($item->srh_start_utc_dt)),
-                    'end' => date('c', strtotime($item->srh_end_utc_dt)),
+                    'start' => date('c', strtotime($item->srhUss->uss_start_utc_dt)),
+                    'end' => date('c', strtotime($item->srhUss->uss_end_utc_dt)),
 
-                    'resource' => 'us-' . $item->srh_created_user_id,
+                    'resource' => 'us-' . $item->ssr_created_user_id,
                     'extendedProps' => [
                         'icon' => $item->srhSst->sst_icon_class,
                     ],

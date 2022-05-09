@@ -444,7 +444,9 @@ class ShiftScheduleController extends FController
     public function actionScheduleRequestAjax()
     {
         $request = Yii::$app->request;
-        $scheduleRequestModel = new ScheduleRequestForm();
+        $scheduleRequestModel = new ScheduleRequestForm([
+            'scenario' => ScheduleRequestForm::SCENARIO_REQUEST,
+        ]);
         if ($request->isPost) {
             if ($scheduleRequestModel->load($request->post()) && $scheduleRequestModel->validate()) {
                 if ($scheduleRequestModel->saveRequest()) {

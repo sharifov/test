@@ -22,7 +22,7 @@ class UserShiftScheduleRequestController extends FController
     public function actionIndex(): string
     {
         $user = Yii::$app->user->identity;
-        $userTimeZone = Yii::t('shedule-request', 'local');
+        $userTimeZone = 'local'; //'UTC'; //'Europe/Chisinau'; //Auth::user()->userParams->up_timezone ?? 'local';
         $searchModel = new ShiftScheduleRequestSearch();
 
         $startDate = Yii::$app->request->get('startDate');
@@ -35,13 +35,28 @@ class UserShiftScheduleRequestController extends FController
             $endDate
         );
 
+//        $dataProviderHistory = $searchModel->searchByUsers(
+//            [],
+//            ShiftScheduleRequestService::getUserList(Auth::user()),
+//        );
+
         return $this->render('index', [
             'user' => $user,
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'userTimeZone' => $userTimeZone,
+//            'dataProviderHistory' => $dataProviderHistory,
         ]);
     }
+//
+//    public function actionSheduleRequestHistory()
+//    {
+//        $searchModel = new ShiftScheduleRequestSearch();
+//        $dataProvider = $searchModel->searchByUsers(
+//            Yii::$app->request->queryParams,
+//            ShiftScheduleRequestService::getUserList(Auth::user())
+//        );
+//    }
 
     /**
      * @return array
@@ -70,7 +85,7 @@ class UserShiftScheduleRequestController extends FController
             throw new BadRequestHttpException('Invalid request param');
         }
 
-        $model = ShiftScheduleRequest::find()->where(['srh_id' => $eventId])->limit(1)->one();
+        $model = ShiftScheduleRequest::find()->where(['ssr_id' => $eventId])->limit(1)->one();
 
         if (!$model) {
             throw new NotFoundHttpException('Not exist this Shift Schedule (' . $eventId . ')');
@@ -99,13 +114,14 @@ class UserShiftScheduleRequestController extends FController
                     }
                 }
             } else {
-                $formModel->status = $model->srh_status_id;
+                $formModel->status = $model->ssr_status_id;
             }
 
             return $this->renderAjax('partial/_get_event', [
                 'event' => $event,
                 'model' => $formModel,
                 'success' => $success ?? false,
+                'canEditPreviousDate' => $model->getIsCanEditPreviousDate(),
             ]);
         } catch (DomainException $e) {
             Yii::error(AppHelper::throwableLog($e), 'UserShiftScheduleRequestController:actionGetEvent:DomainException');
