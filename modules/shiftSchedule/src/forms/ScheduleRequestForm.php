@@ -4,13 +4,12 @@ namespace modules\shiftSchedule\src\forms;
 
 use common\models\Employee;
 use common\models\Notifications;
-use DateInterval;
 use DateTime;
 use Exception;
 use frontend\widgets\notification\NotificationMessage;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
 use src\auth\Auth;
-use src\helpers\app\AppHelper;
+use src\helpers\DateHelper;
 use Yii;
 use yii\base\Model;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
@@ -27,35 +26,15 @@ use yii\web\Request;
  */
 class ScheduleRequestForm extends Model
 {
-    const DATE_FORMAT = 'Y-m-d';
-    const DATETIME_FORMAT = 'Y-m-d H:i';
-    const MIN_DAYS_DURATION = 1;
-    const MAX_DAYS_DURATION = 20;
     const DESCRIPTION_MAX_LENGTH = 1000;
 
+    const SCENARIO_REQUEST = 'scenario-request';
     const SCENARIO_DECISION = 'scenario-decision';
 
     /**
      * @var string
      */
-    public string $startDt = '';
-    /**
-     * @var string
-     */
     public string $scheduleType = '';
-    /**
-     * @var int|null
-     */
-    public ?int $duration = null;
-
-    /**
-     * @var string
-     */
-    public string $startTime = '';
-    /**
-     * @var string
-     */
-    public string $endTime = '';
     /**
      * @var string
      */
@@ -64,22 +43,18 @@ class ScheduleRequestForm extends Model
      * @var int
      */
     public int $status = 0;
-
     /**
-     * @return void
+     * @var string|null
      */
-    public function init(): void
-    {
-        if (empty($this->startDt)) {
-            $this->startDt = date(self::DATE_FORMAT);
-        }
-        if (empty($this->startTime)) {
-            $this->startTime = '00:00';
-        }
-        if (empty($this->endTime)) {
-            $this->endTime = '23:59';
-        }
-    }
+    public ?string $requestedRangeTime = '';
+    /**
+     * @var string
+     */
+    public string $dateTimeStart = '';
+    /**
+     * @var string
+     */
+    public string $dateTimeEnd = '';
 
     /**
      * @return array
@@ -88,26 +63,12 @@ class ScheduleRequestForm extends Model
     {
         return [
             [
-                [
-                    'startDt',
-                    'scheduleType',
-                    'startTime',
-                    'endTime',
-                ],
+                'scheduleType',
                 'required',
             ],
             [
-                [
-                    'status',
-                ],
+                'status',
                 'required',
-            ],
-            [
-                [
-                    'startDt',
-                ],
-                'validateDates',
-                'skipOnEmpty' => true,
             ],
             [
                 'scheduleType',
@@ -115,39 +76,17 @@ class ScheduleRequestForm extends Model
                 'max' => 100,
             ],
             [
-                'duration',
-                'number',
-                'min' => self::MIN_DAYS_DURATION,
-                'max' => self::MAX_DAYS_DURATION,
-            ],
-            [
-                [
-                    'startTime',
-                    'endTime',
-                ],
-                'string',
-                'length' => 5,
-            ],
-            [
-                [
-                    'startTime',
-                    'endTime',
-                ],
-                'validateTime',
-                'skipOnEmpty' => true,
-            ],
-            [
-                [
-                    'startTime',
-                    'endTime',
-                ],
-                'validateChronologicallyTime',
-                'skipOnEmpty' => true,
-            ],
-            [
                 'description',
                 'string',
                 'max' => self::DESCRIPTION_MAX_LENGTH,
+            ],
+            [
+                'requestedRangeTime',
+                'required',
+            ],
+            [
+                'requestedRangeTime',
+                'convertDateTimeRange'
             ],
         ];
     }
@@ -160,12 +99,41 @@ class ScheduleRequestForm extends Model
         return array_merge(
             parent::scenarios(),
             [
+                self::SCENARIO_REQUEST => [
+                    'requestedRangeTime',
+                    'scheduleType',
+                    'description',
+                ],
                 self::SCENARIO_DECISION => [
                     'status',
                     'description',
                 ]
             ]
         );
+    }
+
+    public function convertDateTimeRange($attribute)
+    {
+        if ($this->requestedRangeTime) {
+            $date = explode(' - ', $this->requestedRangeTime);
+            if (count($date) === 2) {
+                if (DateHelper::checkDateTime($date[0], 'Y-m-d H:i')) {
+                    $this->dateTimeStart = Employee::convertTimeFromUserDtToUTC(strtotime($date[0]));
+                } else {
+                    $this->addError($attribute, 'Date time start incorrect format');
+                    $this->requestedRangeTime = null;
+                }
+                if (DateHelper::checkDateTime($date[1], 'Y-m-d H:i')) {
+                    $this->dateTimeEnd = Employee::convertTimeFromUserDtToUTC(strtotime($date[1]));
+                } else {
+                    $this->addError($attribute, 'Date time end incorrect format');
+                    $this->requestedRangeTime = null;
+                }
+            } else {
+                $this->addError($attribute, 'Requested Range Time is not parsed correctly');
+                $this->requestedRangeTime = null;
+            }
+        }
     }
 
     /**
@@ -178,12 +146,10 @@ class ScheduleRequestForm extends Model
         $userShiftSchedule = new UserShiftSchedule($this->mappingData());
         if ($userShiftSchedule->validate() && $userShiftSchedule->save()) {
             $requestModel = new ShiftScheduleRequest([
-                'srh_uss_id' => $userShiftSchedule->uss_id,
-                'srh_sst_id' => $this->scheduleType,
-                'srh_status_id' => ShiftScheduleRequest::STATUS_PENDING,
-                'srh_description' => $this->description,
-                'srh_start_utc_dt' => $this->getStartDateTime(),
-                'srh_end_utc_dt' => $this->getEndDateTime(),
+                'ssr_uss_id' => $userShiftSchedule->uss_id,
+                'ssr_sst_id' => $this->scheduleType,
+                'ssr_status_id' => ShiftScheduleRequest::STATUS_PENDING,
+                'ssr_description' => $this->description,
             ]);
             $requestModel->save();
             return true;
@@ -200,18 +166,21 @@ class ScheduleRequestForm extends Model
     {
         $scheduleRequest = new ShiftScheduleRequest();
         $scheduleRequest->attributes = $model->attributes;
-        $scheduleRequest->srh_status_id = $this->status;
-        $scheduleRequest->srh_description = $this->description;
-        if ($scheduleRequest->save()) {
-            $subject = 'Request Status';
-            $body = 'Your ' . Html::a('request', Url::to(['shift-schedule/index'])) . ' status was change to “' .
-                $scheduleRequest::getList()[$scheduleRequest->srh_status_id] . '” ' . "<br>" .
-                (!empty($scheduleRequest->srh_description) ? "Description: “" . $scheduleRequest->srh_description . '”' : '');
-            if ($ntf = Notifications::create($scheduleRequest->srh_created_user_id, $subject, $body, Notifications::TYPE_INFO)) {
-                $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-                Notifications::publish('getNewNotification', ['user_id' => $scheduleRequest->srh_created_user_id], $dataNotification);
+        $scheduleRequest->ssr_status_id = $this->status;
+        $scheduleRequest->ssr_description = $this->description;
+        $scheduleRequest->ssr_updated_user_id = Auth::id();
+        if ($scheduleRequest->getIsCanEditPreviousDate()) {
+            if ($scheduleRequest->save()) {
+                $subject = 'Request Status';
+                $body = 'Your ' . Html::a('request', Url::to(['shift-schedule/index'])) . ' status was change to “' .
+                    $scheduleRequest::getList()[$scheduleRequest->ssr_status_id] . '” ' . "<br>" .
+                    (!empty($scheduleRequest->ssr_description) ? "Description: “" . $scheduleRequest->ssr_description . '”' : '');
+                if ($ntf = Notifications::create($scheduleRequest->ssr_created_user_id, $subject, $body, Notifications::TYPE_INFO)) {
+                    $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+                    Notifications::publish('getNewNotification', ['user_id' => $scheduleRequest->ssr_created_user_id], $dataNotification);
+                }
+                return true;
             }
-            return true;
         }
 
         return false;
@@ -229,8 +198,8 @@ class ScheduleRequestForm extends Model
             'uss_sst_id' => $this->scheduleType,
             'uss_status_id' => UserShiftSchedule::STATUS_PENDING,
             'uss_type_id' => UserShiftSchedule::TYPE_MANUAL,
-            'uss_start_utc_dt' => $this->getStartDateTime(),
-            'uss_end_utc_dt' => $this->getEndDateTime(),
+            'uss_start_utc_dt' => $this->dateTimeStart,
+            'uss_end_utc_dt' => $this->dateTimeEnd,
         ];
     }
 
@@ -240,65 +209,10 @@ class ScheduleRequestForm extends Model
     public function attributeLabels(): array
     {
         return [
-            'startDt' => Yii::t('schedule-request', 'Start Date'),
-            'duration' => Yii::t('schedule-request', 'Duration'),
-            'startTime' => Yii::t('schedule-request', 'Start Time'),
-            'endTime' => Yii::t('schedule-request', 'End Time'),
-            'scheduleType' => Yii::t('schedule-request', 'Schedule Type'),
-            'description' => Yii::t('schedule-request', 'Description'),
+            'requestedRangeTime' => 'Date Range From / To',
+            'scheduleType' => 'Schedule Type',
+            'description' => 'Description',
         ];
-    }
-
-    /**
-     * Inline validator for dates
-     * @param string $attribute
-     * @return void
-     */
-    public function validateDates(string $attribute): void
-    {
-        if (strtotime($this->$attribute) < strtotime(date(self::DATE_FORMAT))) {
-            $this->addError($attribute, Yii::t('schedule-request', 'Invalid start date'));
-        }
-    }
-
-    /**
-     * Inline validator for times
-     * @param string $attribute
-     * @return void
-     */
-    public function validateTime(string $attribute): void
-    {
-        $currentDate = date(self::DATE_FORMAT);
-        if (!AppHelper::validateDate($currentDate . ' ' . $this->$attribute, self::DATETIME_FORMAT)) {
-            $this->addError($attribute, Yii::t(
-                'schedule-request',
-                'Invalid {attribute}',
-                [
-                    'attribute' => self::getAttributeLabel($attribute),
-                ]
-            ));
-        }
-    }
-
-    /**
-     * Inline validator for chronologically time
-     * @return void
-     * @throws Exception
-     */
-    public function validateChronologicallyTime(): void
-    {
-        if (AppHelper::validateDate($this->startDt) && !empty($endDate = $this->getEndDt())) {
-            $startDate = new DateTime($this->startDt);
-            $start = $startDate->format(self::DATE_FORMAT) . ' ' . $this->startTime;
-            $end = $endDate . ' ' . $this->endTime;
-            if (AppHelper::validateDate($start, self::DATETIME_FORMAT) && AppHelper::validateDate($end, self::DATETIME_FORMAT)) {
-                if (new DateTime($start) > new DateTime($end)) {
-                    $errorMsg = Yii::t('schedule-request', 'Times are not in the chronologically order');
-                    $this->addError('startTime', $errorMsg);
-                    $this->addError('endTime', $errorMsg);
-                }
-            }
-        }
     }
 
     /**
@@ -309,87 +223,14 @@ class ScheduleRequestForm extends Model
      */
     public function setAttributesRequest(Request $request): void
     {
-        if (!empty($start = $request->get('start'))) {
-            if (AppHelper::validateDate($start, self::DATE_FORMAT)) {
-                $start = new DateTime($start);
-                $this->startDt = $start->format(self::DATE_FORMAT);
-                $this->validate(['startDt']);
-
-                if (!empty($end = $request->get('end'))) {
-                    if (AppHelper::validateDate($end, self::DATE_FORMAT)) {
-                        $end = new DateTime($end);
-                        $this->duration = $end->diff($start)->format("%a");
-                    }
-                }
+        if (!empty($start = $request->get('start')) && !empty($end = $request->get('end'))) {
+            if (DateHelper::checkDateTime($start, 'Y-m-d') && DateHelper::checkDateTime($end, 'Y-m-d H:i')) {
+                $this->requestedRangeTime = sprintf(
+                    '%s - %s',
+                    (new DateTime($start))->format('Y-m-d H:i'),
+                    (new DateTime($end))->format('Y-m-d H:i')
+                );
             }
         }
-    }
-
-    /**
-     * @return string
-     * @throws Exception
-     */
-    public function getEndDt(): string
-    {
-        if (AppHelper::validateDate($this->startDt, self::DATE_FORMAT) && !empty($this->duration)) {
-            $start = new DateTime($this->startDt);
-            $start->add(new DateInterval('P' . ($this->duration - 1) . 'D'));
-            return $start->format(self::DATE_FORMAT);
-        }
-        return '';
-    }
-
-    /**
-     * Convert datetime to UTC
-     * @param string $dateTime
-     * @return string
-     */
-    public function convertToUTC(string $dateTime): string
-    {
-        return Employee::convertToUTC(
-            strtotime($dateTime),
-            Auth::user()->timezone
-        );
-    }
-
-    /**
-     * Return start date with time
-     * @return string
-     */
-    public function getStartDateTime(): string
-    {
-        return $this->convertToUTC(sprintf(
-            '%s %s',
-            $this->startDt,
-            $this->startTime
-        ));
-    }
-
-    /**
-     * Return end date with time
-     * @return string
-     * @throws Exception
-     */
-    public function getEndDateTime(): string
-    {
-        return $this->convertToUTC(sprintf(
-            '%s %s',
-            $this->getEndDt(),
-            $this->endTime
-        ));
-    }
-
-    /**
-     * @param string $start
-     * @param string $end
-     * @return string
-     * @throws Exception
-     */
-    public static function getDatesDiff(string $start, string $end): string
-    {
-        $start = new DateTime($start);
-        $end = new DateTime($end);
-        $diff = $end->diff($start);
-        return $diff->format('%d days %i minutes %s seconds');
     }
 }
