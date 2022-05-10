@@ -531,7 +531,7 @@ class Formatter extends \yii\i18n\Formatter
      * @return string
      * @throws \yii\base\InvalidConfigException
      */
-    public function asDateTimeByUser($dateTime, string $timezone = 'UTC', string $format = 'php:d-M-Y [H:i]'): string
+    public function asDateTimeByUserTimezone($dateTime, string $timezone = 'UTC', string $format = 'php:d-M-Y [H:i]'): string
     {
         if (!$dateTime) {
             return $this->nullDisplay;
