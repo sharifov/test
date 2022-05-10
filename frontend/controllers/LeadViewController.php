@@ -46,6 +46,7 @@ use yii\web\HttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
+use yii\db\Transaction;
 
 /**
  * Class LeadViewController
