@@ -120,6 +120,6 @@ class CreateLeadOnRoomConnected implements RunnableComponentInterface
                 'defaultOrder' => ['price' => SORT_ASC],
             ],
         ]);
-        $this->addQuoteService->autoSelectQuotes($dataProvider->getModels(), $lead, null);
+        $this->addQuoteService->autoSelectQuotes($dataProvider->getModels(), $lead, null, false, true);
     }
 }
