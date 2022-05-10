@@ -131,6 +131,6 @@ class QuoteSegmentBaggageChargeCrudController extends FController
             return $model;
         }
 
-        throw new NotFoundHttpException('The requested page does not exist.');
+        throw new NotFoundHttpException('Quote Segment Baggage Charge not found by ID(' . $qsbc_id . ')');
     }
 }

@@ -135,6 +135,6 @@ class QuoteSegmentCrudController extends FController
             return $model;
         }
 
-        throw new NotFoundHttpException('The requested page does not exist.');
+        throw new NotFoundHttpException('Quote Segment not found by ID(' . $qs_id . ')');
     }
 }

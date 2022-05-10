@@ -131,6 +131,6 @@ class QuoteTripCrudController extends FController
             return $model;
         }
 
-        throw new NotFoundHttpException('The requested page does not exist.');
+        throw new NotFoundHttpException('Quote Trip not found by ID(' . $qt_id . ')');
     }
 }

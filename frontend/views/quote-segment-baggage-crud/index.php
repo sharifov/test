@@ -26,9 +26,8 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'layout' => "{errors}\n{summary}\n{items}\n{pager}",
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
-
             'qsb_pax_code',
             'qsb_segment_id',
             'qsb_airline_code',
