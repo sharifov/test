@@ -11,6 +11,8 @@ use frontend\extensions\DateRangePicker;
 use frontend\widgets\DateTimePickerWidget;
 use kartik\select2\Select2;
 use kartik\time\TimePicker;
+use modules\shiftSchedule\src\abac\dto\ShiftAbacDto;
+use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\shiftSchedule\src\forms\SingleEventCreateForm;
@@ -37,6 +39,24 @@ $dateTimeRangeChangeJs = <<<JS
     }
 }
 JS;
+
+$statusList = [];
+foreach (UserShiftSchedule::getStatusList() as $statusId => $statusName) {
+    $dto = new ShiftAbacDto();
+    $dto->setStatus((int)$statusId);
+    if (Yii::$app->abac->can($dto, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_ACCESS)) {
+        $statusList[$statusId] = $statusName;
+    }
+}
+
+$shiftScheduleTypeList = [];
+foreach (ShiftScheduleType::getList(true) as $typeId => $typeName) {
+    $dto = new ShiftAbacDto();
+    $dto->setScheduleType((int)$typeId);
+    if (Yii::$app->abac->can($dto, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_ACCESS)) {
+        $shiftScheduleTypeList[$typeId] = $typeName;
+    }
+}
 ?>
 
 <script>pjaxOffFormSubmit('#<?= $pjaxId ?>')</script>
@@ -54,10 +74,10 @@ JS;
 
         <div class="row">
             <div class="col-md-6">
-                <?= $form->field($singleEventForm, 'status')->dropdownList(UserShiftSchedule::getStatusList(), ['prompt' => '---']) ?>
+                <?= $form->field($singleEventForm, 'status')->dropdownList($statusList, ['prompt' => '---']) ?>
             </div>
             <div class="col-md-6">
-                <?= $form->field($singleEventForm, 'scheduleType')->dropdownList(ShiftScheduleType::getList(true), ['prompt' => '---']) ?>
+                <?= $form->field($singleEventForm, 'scheduleType')->dropdownList($shiftScheduleTypeList, ['prompt' => '---']) ?>
             </div>
         </div>
 
