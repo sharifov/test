@@ -1047,4 +1047,35 @@ class Formatter extends \yii\i18n\Formatter
         }
         return $number;
     }
+
+    /**
+     * @param $value
+     * @param string $code
+     * @param int $precision
+     * @param int $decimals
+     * @param string|null $decimal_separator
+     * @param string|null $thousands_separator
+     * @return string
+     */
+    public function asNumCurrency(
+        $value,
+        string $code = 'USD',
+        int $precision = 2,
+        int $decimals = 2,
+        ?string $decimal_separator = '.',
+        ?string $thousands_separator = ','
+    ): string {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        $num = number_format(
+            round((float) $value, $precision),
+            $decimals,
+            $decimal_separator,
+            $thousands_separator
+        );
+
+        return $code . ' ' . $num;
+    }
 }

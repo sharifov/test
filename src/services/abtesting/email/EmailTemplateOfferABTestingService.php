@@ -60,6 +60,12 @@ class EmailTemplateOfferABTestingService extends ABTestingBaseService
             $emailTemplateKey     = $this->getExpectedKey(...$testingEntitiesArray);
             $emailTemplateId      = self::getEmailOfferTemplateIdByKey($emailTemplateKey);
             \Yii::$app->cache->set($cacheKey, $emailTemplateId, self::LEAD_EMAIL_OFFER_TEMPLATE_CACHE_DURATION);
+            $logData = [
+                'entitiesArray' => $testingEntitiesArray,
+                'templateKey'   => $emailTemplateKey,
+                'emailTemplateId' => $emailTemplateId,
+            ];
+            \Yii::info($logData, 'elk\Email:Template:abtesting');
             return $emailTemplateId;
         } catch (\DomainException | \RuntimeException $e) {
             $message = AppHelper::throwableLog($e);
@@ -134,9 +140,17 @@ class EmailTemplateOfferABTestingService extends ABTestingBaseService
         try {
             $cacheKey   = sprintf(self::EMAIL_OFFER_TEMPLATES_COUNTER_CACHE_KEY, $templateId, $projectId);
             $cacheValue = \Yii::$app->cache->get($cacheKey);
+            $logData = [
+                'cacheKey'   => $cacheKey,
+                'cacheValue' => $cacheValue,
+                'info'       => 'Start of the method'
+            ];
+            \Yii::info($logData, 'elk\Email:Template:abtesting');
             if ($cacheValue) {
                 $cacheValue++;
                 \Yii::$app->cache->set($cacheKey, $cacheValue, self::EMAIL_OFFER_TEMPLATES_COUNTER_CACHE_DURATION);
+                $logData['info'] = 'key incremented from cache';
+                \Yii::info($logData, 'elk\Email:Template:abtesting');
                 return;
             }
             /** @fflag FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES, A/B testing for email offer templates value */
@@ -166,6 +180,11 @@ class EmailTemplateOfferABTestingService extends ABTestingBaseService
             }
             $cacheValue = self::setDefaultCacheValForEmailTemplate($cacheKey);
             $cacheValue++;
+            $logData = [
+                'cacheKey'   => $cacheKey,
+                'cacheValue' => $cacheValue
+            ];
+            \Yii::info($logData, 'elk\Email:Template:abtesting');
             \Yii::$app->cache->set($cacheKey, $cacheValue, self::EMAIL_OFFER_TEMPLATES_COUNTER_CACHE_DURATION);
         } catch (\DomainException | \RuntimeException $e) {
             $message = AppHelper::throwableLog($e);

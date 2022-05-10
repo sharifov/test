@@ -101,7 +101,7 @@ $canUpdateRating = Yii::$app->abac->can(
             <?php endif ?>
         </div>
         <div class="row">
-            <div class="col-md-7">
+            <div class="col-md-12">
                 <table class="table table-bordered table-condensed">
                     <thead>
                     <tr>
@@ -137,7 +137,7 @@ $canUpdateRating = Yii::$app->abac->can(
                     </tbody>
                 </table>
             </div>
-            <div class="col-md-5">
+            <div class="col-md-12">
                 <table class="table table-bordered table-condensed" style="margin-bottom: 0;">
                     <thead>
                     <tr>

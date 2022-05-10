@@ -304,6 +304,7 @@ class QuoteController extends FController
                             $quote->provider_project_id = $providerProjectId;
                             $quote->q_client_currency = $currency->cur_code;
                             $quote->q_client_currency_rate = $currency->cur_base_rate;
+                            $quote->q_create_type_id = Quote::CREATE_TYPE_QUOTE_SEARCH;
                             $quote->setMetricLabels(['action' => 'created', 'type_creation' => 'search']);
 
                             if (isset($entry['tickets'])) {
@@ -603,6 +604,7 @@ class QuoteController extends FController
 
             $preparedQuoteData = QuoteHelper::formatQuoteData(['results' => [$searchQuoteRequest['data']]]);
             $addQuoteService = Yii::createObject(AddQuoteService::class);
+            $preparedQuoteData['results'][0]['createTypeId'] = Quote::CREATE_TYPE_SMART_SEARCH;
             $quoteUid = $addQuoteService->createByData($preparedQuoteData['results'][0], $lead, $projectProviderId);
 
             Notifications::pub(
@@ -1069,12 +1071,14 @@ class QuoteController extends FController
                     : Quote::findOne(['id' => $attr['Quote']['id']]);
                 if ($quote->isNewRecord) {
                     $quote->uid = uniqid();
+                    $quote->q_create_type_id = Quote::CREATE_TYPE_MANUAL;
                 }
                 $changedAttributes = $quote->attributes;
                 $changedAttributes['selling'] = ($quote->isNewRecord)
                     ? 0 : $quote->quotePrice()['selling'];
                 if ($quote !== null) {
                     $quote->attributes = $attr['Quote'];
+                    $quote->q_create_type_id = Quote::CREATE_TYPE_MANUAL;
 
                     if (!empty($quote->pricing_info)) {
                         $pricing = $quote->parsePriceDump($quote->pricing_info);
@@ -1311,6 +1315,7 @@ class QuoteController extends FController
             }
             $prices = [];
             $quote = new Quote();
+            $quote->q_create_type_id = Quote::CREATE_TYPE_MANUAL;
             if (empty($qId)) {
                 $quote->id = 0;
                 $quote->lead_id = $leadId;
@@ -1413,6 +1418,9 @@ class QuoteController extends FController
 
             if ($quotes === false) {
                 $dto = new SearchServiceQuoteDTO($lead);
+                $cid = $lead->project->airSearchCid ?: AddQuoteService::AUTO_ADD_CID;
+                $dto->setCid($cid);
+
                 $quotes = SearchService::getOnlineQuotes($dto);
 
                 if ($quotes && !empty($quotes['data']['results']) && empty($quotes['error'])) {
@@ -1447,7 +1455,7 @@ class QuoteController extends FController
             ]);
 
             $addQuoteService = Yii::createObject(AddQuoteService::class);
-            $addQuoteService->autoSelectQuotes($dataProvider->getModels(), $lead, Auth::user(), true);
+            $addQuoteService->autoSelectQuotes($dataProvider->getModels(), $lead, Auth::user(), true, true);
 
             $response['status'] = 1;
             $response['message'] = 'Auto add quotes completed successfully';

@@ -786,7 +786,15 @@ class CasesController extends FController
         $query1 = (new \yii\db\Query())
             ->select(['e_id AS id', new Expression('"email" AS type'), 'e_case_id AS case_id', 'e_created_dt AS created_dt'])
             ->from('email')
-            ->where(['e_case_id' => $model->cs_id]);
+            ->where(['e_case_id' => $model->cs_id])
+            ->andWhere(['OR',
+                ['IS NOT', 'e_created_user_id', null],
+                ['AND',
+                    ['IS', 'e_created_user_id', null],
+                    ['e_type_id' => Email::FILTER_TYPE_INBOX]
+                ]
+            ])
+        ;
 
         $query2 = (new \yii\db\Query())
             ->select(['s_id AS id', new Expression('"sms" AS type'), 's_case_id AS case_id', 's_created_dt AS created_dt'])
@@ -833,7 +841,15 @@ class CasesController extends FController
         $query1 = (new \yii\db\Query())
             ->select(['e_id AS id', new Expression('"email" AS type'), 'e_case_id AS case_id', 'e_created_dt AS created_dt'])
             ->from('email')
-            ->where(['e_case_id' => $model->cs_id]);
+            ->where(['e_case_id' => $model->cs_id])
+            ->andWhere(['OR',
+                ['IS NOT', 'e_created_user_id', null],
+                ['AND',
+                    ['IS', 'e_created_user_id', null],
+                    ['e_type_id' => Email::FILTER_TYPE_INBOX]
+                ]
+            ])
+        ;
 
         $query2 = (new \yii\db\Query())
             ->select(['s_id AS id', new Expression('"sms" AS type'), 's_case_id AS case_id', 's_created_dt AS created_dt'])

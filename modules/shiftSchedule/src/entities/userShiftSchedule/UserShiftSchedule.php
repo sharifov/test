@@ -53,6 +53,8 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
     public const STATUS_CANCELED = 6;
     public const STATUS_DELETED = 8;
 
+    public const DEFAULT_DURATION_HOURS = 8;
+
     private const STATUS_LIST = [
         self::STATUS_PENDING => 'Pending',
         self::STATUS_APPROVED => 'Approved',
@@ -292,5 +294,27 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
     public function getShiftTitle(): string
     {
         return (!$this->shift || empty($this->shift->sh_title)) ? '-' : $this->shift->sh_title;
+    }
+
+    public static function create(
+        int $userId,
+        ?string $description,
+        string $startDateTime,
+        string $endDateTime,
+        int $duration,
+        int $status,
+        int $type,
+        int $scheduleType
+    ): self {
+        $self = new self();
+        $self->uss_user_id = $userId;
+        $self->uss_description = $description;
+        $self->uss_start_utc_dt = $startDateTime;
+        $self->uss_end_utc_dt = $endDateTime;
+        $self->uss_duration = $duration;
+        $self->uss_status_id = $status;
+        $self->uss_type_id = $type;
+        $self->uss_sst_id = $scheduleType;
+        return $self;
     }
 }

@@ -49,9 +49,10 @@ class LeadAbacDto extends \stdClass
 
     /**
      * @param Lead|null $lead
-     * @param int $userId
+     * @param int|null $userId
+     * @throws \Exception
      */
-    public function __construct(?Lead $lead, int $userId)
+    public function __construct(?Lead $lead, ?int $userId)
     {
         if ($lead) {
             $this->is_owner = $lead->isOwner($userId);
@@ -87,8 +88,9 @@ class LeadAbacDto extends \stdClass
             }
 
             $this->status_id = $lead->status;
-
-            $this->snoozeCount = LeadQuery::countSnoozeLeadsByOwner($userId);
+            if ($userId) {
+                $this->snoozeCount = LeadQuery::countSnoozeLeadsByOwner($userId);
+            }
         }
     }
 }

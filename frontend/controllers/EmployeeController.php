@@ -21,6 +21,10 @@ use frontend\models\UserFailedLogin;
 use frontend\models\UserMultipleForm;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\entities\userShiftAssign\repository\UserShiftAssignRepository;
+use modules\user\src\update\FieldAccess;
+use modules\user\src\update\MultipleUpdateForm;
+use modules\user\src\update\UpdateForm;
+use modules\user\src\update\UpdateUserException;
 use src\auth\Auth;
 use src\helpers\app\AppHelper;
 use src\model\clientChatUserChannel\entity\ClientChatUserChannel;
@@ -188,25 +192,30 @@ class EmployeeController extends FController
             $model = EmployeeAcl::findOne(['id' => $id]);
         }
 
-        if (Yii::$app->request->isPost) {
-            $attr = Yii::$app->request->post($model->formName());
-            $model->attributes = $attr;
-            if ($model->isNewRecord) {
-                $success = $model->save();
-                Yii::$app->response->format = Response::FORMAT_JSON;
-                $employee = Employee::findOne($model->employee_id);
-                return [
-                    'body' => $this->renderAjax('partial/_aclList', [
-                        'models' => $employee->employeeAcl,
-                    ]),
-                    'success' => $success
-                ];
-            } else {
-                return $model->save();
-            }
+        $fieldAccess = new FieldAccess(Auth::user(), $model->isNewRecord);
+        if (!$fieldAccess->canEdit('acl_rules_activated')) {
+            throw new ForbiddenHttpException('Access denied.');
         }
 
-        return null;
+        if (!Yii::$app->request->isPost) {
+            throw new BadRequestHttpException();
+        }
+
+        $attr = Yii::$app->request->post($model->formName());
+        $model->attributes = $attr;
+        if ($model->isNewRecord) {
+            $success = $model->save();
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            $employee = Employee::findOne($model->employee_id);
+            return [
+                'body' => $this->renderAjax('update/_aclList', [
+                    'models' => $employee->employeeAcl,
+                    'canEditAclRulesActivated' => $fieldAccess->canEdit('acl_rules_activated'),
+                ]),
+                'success' => $success
+            ];
+        }
+        return $model->save();
     }
 
     /**
@@ -214,7 +223,7 @@ class EmployeeController extends FController
      *
      * @return string
      */
-    public function actionList()
+    public function oldActionList()
     {
         $multipleForm = new UserMultipleForm();
         $multipleErrors = [];
@@ -390,6 +399,191 @@ class EmployeeController extends FController
 
         $dataProvider = $searchModel->search($params);
 
+        return $this->render('old_list', [
+            'dataProvider' => $dataProvider,
+            'searchModel' => $searchModel,
+            'multipleForm' => $multipleForm,
+            'multipleErrors' => $multipleErrors,
+        ]);
+    }
+
+    public function actionList()
+    {
+        $multipleForm = new MultipleUpdateForm(Auth::user());
+        $multipleErrors = [];
+
+        if ($multipleForm->load(Yii::$app->request->post()) && $multipleForm->validate()) {
+            if (\is_array($multipleForm->user_list)) {
+                foreach ($multipleForm->user_list as $user_id) {
+                    $user_id = (int) $user_id;
+                    $user = Employee::findOne($user_id);
+                    if (!$user) {
+                        continue;
+                    }
+
+                    if (!$uParams = $user->userParams) {
+                        Yii::error('User Id: ' . $user->id . ' Error. Please create UserParams for this user.', 'Employee:list:multipleUpdate');
+                        $multipleErrors[$user_id][] = 'User Id:' . $user->id . ' Error. Please create UserParams for this user.';
+                        continue;
+                    }
+
+                    $uParamsNeedSave = false;
+                    $uProfileNeedSave = false;
+
+                    if (!$uProfile = $user->userProfile) {
+                        $uProfile = new UserProfile();
+                        $uProfile->up_user_id = $user->id;
+                        $uProfileNeedSave = true;
+                    }
+
+                    if ($multipleForm->up_call_expert_limit !== null && $multipleForm->fieldAccess->canEdit('up_call_expert_limit')) {
+                        $uParams->up_call_expert_limit = $multipleForm->up_call_expert_limit;
+                        $uParamsNeedSave = true;
+                    }
+
+                    if ($multipleForm->up_work_start_tm !== null && $multipleForm->fieldAccess->canEdit('up_work_start_tm')) {
+                        $uParams->up_work_start_tm = $multipleForm->up_work_start_tm;
+                        $uParamsNeedSave = true;
+                    }
+
+                    if ($multipleForm->up_timezone !== null && $multipleForm->fieldAccess->canEdit('up_timezone')) {
+                        $uParams->up_timezone = $multipleForm->up_timezone;
+                        $uParamsNeedSave = true;
+                    }
+
+                    if ($multipleForm->up_work_minutes !== null && $multipleForm->fieldAccess->canEdit('up_work_minutes')) {
+                        $uParams->up_work_minutes = $multipleForm->up_work_minutes;
+                        $uParamsNeedSave = true;
+                    }
+
+                    if ($multipleForm->up_inbox_show_limit_leads !== null && $multipleForm->fieldAccess->canEdit('up_inbox_show_limit_leads')) {
+                        $uParams->up_inbox_show_limit_leads = $multipleForm->up_inbox_show_limit_leads;
+                        $uParamsNeedSave = true;
+                    }
+
+                    if ($multipleForm->up_default_take_limit_leads !== null && $multipleForm->fieldAccess->canEdit('up_default_take_limit_leads')) {
+                        $uParams->up_default_take_limit_leads = $multipleForm->up_default_take_limit_leads;
+                        $uParamsNeedSave = true;
+                    }
+
+                    if ($multipleForm->up_min_percent_for_take_leads !== null && $multipleForm->fieldAccess->canEdit('up_min_percent_for_take_leads')) {
+                        $uParams->up_min_percent_for_take_leads = $multipleForm->up_min_percent_for_take_leads;
+                        $uParamsNeedSave = true;
+                    }
+
+                    if ($multipleForm->up_frequency_minutes !== null && $multipleForm->fieldAccess->canEdit('up_frequency_minutes')) {
+                        $uParams->up_frequency_minutes = $multipleForm->up_frequency_minutes;
+                        $uParamsNeedSave = true;
+                    }
+
+                    if ($multipleForm->up_base_amount !== null && $multipleForm->fieldAccess->canEdit('up_base_amount')) {
+                        $uParams->up_base_amount = $multipleForm->up_base_amount;
+                        $uParamsNeedSave = true;
+                    }
+
+                    if ($multipleForm->up_auto_redial !== null && $multipleForm->fieldAccess->canEdit('up_auto_redial')) {
+                        $uProfile->up_auto_redial = $multipleForm->up_auto_redial;
+                        $uProfileNeedSave = true;
+                    }
+
+                    if ($multipleForm->up_kpi_enable !== null && $multipleForm->fieldAccess->canEdit('up_kpi_enable')) {
+                        $uProfile->up_kpi_enable = $multipleForm->up_kpi_enable;
+                        $uProfileNeedSave = true;
+                    }
+
+                    if ($multipleForm->up_leaderboard_enabled !== null && $multipleForm->fieldAccess->canEdit('up_leaderboard_enabled')) {
+                        $uParams->up_leaderboard_enabled = $multipleForm->up_leaderboard_enabled;
+                        $uParamsNeedSave = true;
+                    }
+
+                    if ($multipleForm->up_commission_percent !== null && $multipleForm->fieldAccess->canEdit('up_commission_percent')) {
+                        $uParams->up_commission_percent = $multipleForm->up_commission_percent;
+                        $uParamsNeedSave = true;
+                    }
+
+                    if ($multipleForm->user_departments && $multipleForm->fieldAccess->canEdit('user_departments')) {
+                        $transaction = Yii::$app->db->beginTransaction();
+                        try {
+                            $user->removeAllDepartments();
+                            $user->addNewDepartments($multipleForm->user_departments);
+                            $transaction->commit();
+                        } catch (\Throwable $e) {
+                            $transaction->rollBack();
+                            Yii::error($e->getMessage(), 'Employee:list:multipleUpdate:userDepartments');
+                            $multipleErrors[$user_id][] = $e->getMessage();
+                        }
+                    }
+
+                    if ($multipleForm->client_chat_user_channel && $multipleForm->fieldAccess->canEdit('client_chat_user_channel')) {
+                        $userClientChatData = UserClientChatData::findOne(['uccd_employee_id' => $user->id]);
+                        $transaction = Yii::$app->db->beginTransaction();
+                        try {
+                            $user->removeAllClientChatChanels();
+                            $user->addClientChatChanels($multipleForm->client_chat_user_channel, Auth::id());
+                            if ($userClientChatData && $userClientChatData->isRegisteredInRc()) {
+                                $this->clientChatUserAccessService->setUserAccessToAllChatsByChannelIds($multipleForm->client_chat_user_channel, $user->id);
+                            } else {
+                                $this->clientChatUserAccessService->disableUserAccessToAllChats($user->id);
+                            }
+                            $transaction->commit();
+                        } catch (\Throwable $e) {
+                            $transaction->rollBack();
+                            Yii::error($e->getMessage(), 'Employee:list:multipleUpdate:clientChatChannels');
+                            $multipleErrors[$user_id][] = $e->getMessage();
+                        }
+                    }
+
+                    if ($uParamsNeedSave && !$uParams->save()) {
+                        Yii::error(VarDumper::dumpAsString($uParams->getErrors()), 'Employee:list:multipleUpdate:userParams:save');
+                        $multipleErrors[$user_id][] = $uParams->getErrors();
+                    }
+
+                    if ($uProfileNeedSave && !$uProfile->save()) {
+                        Yii::error(VarDumper::dumpAsString($uProfile->getErrors()), 'Employee:list:multipleUpdate:userProfile:save');
+                        $multipleErrors[$user_id][] = $uProfile->getErrors();
+                    }
+
+                    if ($multipleForm->form_roles && $multipleForm->fieldAccess->canEdit('form_roles')) {
+                        $transaction = Yii::$app->db->beginTransaction();
+                        try {
+                            $user->removeAllRoles();
+                            $user->addNewRoles($multipleForm->form_roles);
+                            $transaction->commit();
+                        } catch (\Throwable $e) {
+                            $transaction->rollBack();
+                            Yii::error($e->getMessage(), 'Employee:list:multipleUpdate:userRoles');
+                            $multipleErrors[$user_id][] = $e->getMessage();
+                        }
+                    }
+
+                    if (is_numeric($multipleForm->status) && $multipleForm->fieldAccess->canEdit('status')) {
+                        $user->status = $multipleForm->status;
+                        if (!$user->save(true, ['status'])) {
+                            Yii::error(VarDumper::dumpAsString($user->errors), 'Employee:list:multipleUpdate:user:save');
+                            $multipleErrors[$user_id][] = $user->getErrors();
+                        }
+                    }
+                }
+            }
+        }
+
+        $searchModel = new EmployeeSearch();
+        $params = Yii::$app->request->queryParams;
+
+        /** @var Employee $auth */
+        $auth = Yii::$app->user->identity;
+
+        if ($auth->isSupervision()) {
+            $params['EmployeeSearch']['supervision_id'] = $auth->id;
+        }
+
+        if (Yii::$app->request->get('act') === 'select-all') {
+            $data = $searchModel->searchIds(Yii::$app->request->queryParams);
+            return $this->asJson($data);
+        }
+
+        $dataProvider = $searchModel->search($params);
+
         return $this->render('list', [
             'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
@@ -435,7 +629,7 @@ class EmployeeController extends FController
                     // VarDumper::dump($model->form_roles, 10, true); exit;
 
                     if ($model->form_roles) {
-                        $availableRoles = Employee::getAllRoles();
+                        $availableRoles = Employee::getAllRoles(Auth::user());
                         foreach ($model->form_roles as $keyItem => $roleItem) {
                             if (!array_key_exists($roleItem, $availableRoles)) {
                                 unset($model->form_roles[$keyItem]);
@@ -644,8 +838,10 @@ class EmployeeController extends FController
      * @throws NotFoundHttpException
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\httpclient\Exception
+     *
+     * @deprecated
      */
-    public function actionUpdate()
+    public function oldActionUpdate()
     {
 
         /** @var Employee $user */
@@ -733,7 +929,7 @@ class EmployeeController extends FController
 
             if ($model->save()) {
                 if ($model->form_roles) {
-                    $availableRoles = Employee::getAllRoles();
+                    $availableRoles = Employee::getAllRoles(Auth::user());
                     foreach ($model->form_roles as $keyItem => $roleItem) {
                         if (!array_key_exists($roleItem, $availableRoles)) {
                             unset($model->form_roles[$keyItem]);
@@ -912,6 +1108,339 @@ class EmployeeController extends FController
         }
 
         return $this->render('_form', $result);
+    }
+
+    public function actionUpdate()
+    {
+        $targetUserId = (int)Yii::$app->request->get('id');
+        if (!$targetUserId) {
+            throw new BadRequestHttpException('Invalid request');
+        }
+        $targetUser = Employee::findOne($targetUserId);
+        if (!$targetUser) {
+            throw new NotFoundHttpException('The requested user does not exist.');
+        }
+
+        $updaterUser = Auth::user();
+
+        if ($targetUser->isSuperAdmin() && !$updaterUser->isSuperAdmin()) {
+            throw new ForbiddenHttpException('Access denied for Superadmin user' . $targetUser->id);
+        }
+
+        if ($targetUser->isOnlyAdmin() && $updaterUser->isUserManager()) {
+            throw new ForbiddenHttpException('Access denied for Admin user: ' . $targetUser->id);
+        }
+
+        if ($updaterUser->isSupervision()) {
+            if (!$updaterUser->isUserGroupIntersection(array_keys($targetUser->getUserGroupList()))) {
+                throw new ForbiddenHttpException('Access denied for this user (invalid user group)');
+            }
+        }
+
+        if (!$userParams = $targetUser->userParams) {
+            $userParams = new UserParams([
+                'up_user_id' => $targetUser->id,
+                'up_timezone' => 'Europe/Chisinau',
+                'up_work_minutes' => 8 * 60,
+                'up_work_start_tm' => "16:00",
+            ]);
+        }
+        if (!$userProfile = $targetUser->userProfile) {
+            $userProfile = new UserProfile([
+                'up_user_id' => $targetUser->id,
+                'up_join_date' => date('Y-m-d'),
+            ]);
+        }
+
+        $form = new UpdateForm($targetUser, $updaterUser, $userParams, $userProfile);
+
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
+                $userUpdated = false;
+                $updateRC = [];
+
+                $targetUser->setAttributes($form->getValuesOfAvailableAttributes());
+                if (count($targetUser->getDirtyAttributes()) > 0) {
+                    if ($targetUser->isAttributeChanged('email')) {
+                        $updateRC['email'] = $targetUser->email;
+                    }
+                    if ($targetUser->isAttributeChanged('nickname')) {
+                        $updateRC['name'] = $targetUser->nickname;
+                    }
+                    if ($form->password) {
+                        $targetUser->setPassword($form->password);
+                    }
+                    if ($targetUser->save()) {
+                        $userUpdated = true;
+                    } else {
+                        throw new UpdateUserException(
+                            $targetUser->getErrors(),
+                            $targetUser->id,
+                            $updaterUser->id,
+                            "User(Employee) update error."
+                        );
+                    }
+                }
+
+                if ($form->fieldAccess->canEdit('form_roles') && $form->isChangedRoles()) {
+                    try {
+                        $targetUser->updateRoles($form->form_roles);
+                        $userUpdated = true;
+                    } catch (\Throwable $e) {
+                        throw new UpdateUserException(
+                            ['error' => $e->getMessage()],
+                            $targetUser->id,
+                            $updaterUser->id,
+                            "User(Roles) update error"
+                        );
+                    }
+                }
+
+                $userProfile->setAttributes($form->getValuesOfAvailableAttributes());
+                if (count($userProfile->getDirtyAttributes()) > 0) {
+                    $userProfile->up_updated_dt = date('Y-m-d H:i:s');
+                    if ($userProfile->save()) {
+                        $userUpdated = true;
+                    } else {
+                        throw new UpdateUserException(
+                            $userProfile->getErrors(),
+                            $targetUser->id,
+                            $updaterUser->id,
+                            "User(Profile) update error"
+                        );
+                    }
+                }
+
+                $userParams->setAttributes($form->getValuesOfAvailableAttributes());
+                if (count($userParams->getDirtyAttributes()) > 0) {
+                    $userParams->up_updated_user_id = $updaterUser->id;
+                    $userParams->up_updated_dt = date('Y-m-d H:i:s');
+                    if ($userParams->save()) {
+                        $userUpdated = true;
+                    } else {
+                        throw new UpdateUserException(
+                            $userParams->getErrors(),
+                            $targetUser->id,
+                            $updaterUser->id,
+                            "User(Params) update error"
+                        );
+                    }
+                }
+
+                if ($form->fieldAccess->canEdit('user_groups') && $form->isChangedGroups()) {
+                    UserGroupAssign::deleteAll(['ugs_user_id' => $targetUser->id]);
+                    foreach ($form->user_groups as $groupId) {
+                        $uga = new UserGroupAssign();
+                        $uga->ugs_user_id = $targetUser->id;
+                        $uga->ugs_group_id = $groupId;
+                        if (!$uga->save()) {
+                            throw new UpdateUserException(
+                                $uga->getErrors(),
+                                $targetUser->id,
+                                $updaterUser->id,
+                                "User(Groups) update error"
+                            );
+                        }
+                    }
+                    $userUpdated = true;
+                }
+
+                if ($form->fieldAccess->canEdit('user_departments') && $form->isChangedDepartments()) {
+                    UserDepartment::deleteAll(['ud_user_id' => $targetUser->id]);
+                    foreach ($form->user_departments as $departmentId) {
+                        $ud = new UserDepartment();
+                        $ud->ud_user_id = $targetUser->id;
+                        $ud->ud_dep_id = $departmentId;
+                        if (!$ud->save()) {
+                            throw new UpdateUserException(
+                                $ud->getErrors(),
+                                $targetUser->id,
+                                $updaterUser->id,
+                                "User(Departments) update error"
+                            );
+                        }
+                    }
+                    $userUpdated = true;
+                }
+
+                if ($form->fieldAccess->canEdit('user_projects') && $form->isChangedProjects()) {
+                    ProjectEmployeeAccess::deleteAll(['employee_id' => $targetUser->id]);
+                    foreach ($form->user_projects as $projectId) {
+                        $up = new ProjectEmployeeAccess();
+                        $up->employee_id = $targetUser->id;
+                        $up->project_id = $projectId;
+                        $up->created = date('Y-m-d H:i:s');
+                        if (!$up->save()) {
+                            throw new UpdateUserException(
+                                $up->getErrors(),
+                                $targetUser->id,
+                                $updaterUser->id,
+                                "User(Project) update error"
+                            );
+                        }
+                    }
+                    $userUpdated = true;
+                }
+
+                $userClientChatData = UserClientChatData::findOne(['uccd_employee_id' => $targetUser->id]);
+
+                if ($form->fieldAccess->canEdit('client_chat_user_channel') && $form->isChangedClientChatsChannels()) {
+                    ClientChatUserChannel::deleteAll(['ccuc_user_id' => $targetUser->id]);
+                    if ($form->client_chat_user_channel) {
+                        foreach ($form->client_chat_user_channel as $channelId) {
+                            $clientChatChanel = new ClientChatUserChannel();
+                            $clientChatChanel->ccuc_user_id = $targetUser->id;
+                            $clientChatChanel->ccuc_channel_id = $channelId;
+                            $clientChatChanel->ccuc_created_dt = date('Y-m-d H:i:s');
+                            $clientChatChanel->ccuc_created_user_id = $updaterUser->id;
+                            if (!$clientChatChanel->save()) {
+                                throw new UpdateUserException(
+                                    $clientChatChanel->getErrors(),
+                                    $targetUser->id,
+                                    $updaterUser->id,
+                                    "User(ClientChatUserChannel) update error"
+                                );
+                            }
+                        }
+                        if ($userClientChatData && $userClientChatData->isRegisteredInRc()) {
+                            $this->clientChatUserAccessService->setUserAccessToAllChatsByChannelIds($form->client_chat_user_channel, $targetUser->id);
+                        } else {
+                            $this->clientChatUserAccessService->disableUserAccessToAllChats($targetUser->id);
+                        }
+                    } else {
+                        $this->clientChatUserAccessService->disableUserAccessToAllChats($targetUser->id);
+                    }
+                    TagDependency::invalidate(Yii::$app->cache, ClientChatUserChannel::cacheTags($targetUser->id));
+
+                    $userUpdated = true;
+                }
+
+                if ($form->fieldAccess->canEdit('user_shift_assigns') && $form->isChangedUserShiftAssign()) {
+                    UserShiftAssign::deleteAll(['usa_user_id' => $targetUser->id]);
+                    foreach ($form->user_shift_assigns as $shiftId) {
+                        try {
+                            $userShiftAssign = UserShiftAssign::create($targetUser->id, $shiftId);
+                            (new UserShiftAssignRepository($userShiftAssign))->save(true);
+                        } catch (\Throwable $throwable) {
+                            $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), [
+                                'userId' => $targetUser->id,
+                                'shiftId' => $shiftId,
+                            ]);
+                            throw new UpdateUserException(
+                                ['error' => $message],
+                                $targetUser->id,
+                                $updaterUser->id,
+                                "User(Shift) update error"
+                            );
+                        }
+                    }
+                    $userUpdated = true;
+                }
+
+                if (!empty($updateRC) && $userClientChatData && $userClientChatData->isRegisteredInRc()) {
+                    $job = new RocketChatUserUpdateJob();
+                    $job->userId = $userClientChatData->getRcUserId();
+                    $job->data = $updateRC;
+                    $job->userClientChatDataId = $userClientChatData->uccd_id;
+                    Yii::$app->queue_job->priority(10)->push($job);
+                }
+
+                $transaction->commit();
+
+                if ($userUpdated) {
+                    Yii::$app->getSession()->setFlash('success', 'User updated');
+                } else {
+                    Yii::$app->getSession()->setFlash('warning', 'User is not updated');
+                }
+            } catch (UpdateUserException $e) {
+                $transaction->rollBack();
+                Yii::error([
+                    'error' => $e->getMessage(),
+                    'errors' => $e->errors,
+                    'targetUserId' => $targetUser->id,
+                    'updaterUserId' => $updaterUser->id
+                ], 'EmployeeController:update');
+                Yii::$app->getSession()->setFlash('warning', 'User is not updated: ' . $e->getMessage());
+            } catch (\Throwable $e) {
+                $transaction->rollBack();
+                Yii::error([
+                    'error' => $e->getMessage(),
+                    'targetUserId' => $targetUser->id,
+                    'updaterUserId' => $updaterUser->id
+                ], 'EmployeeController:update');
+                Yii::$app->getSession()->setFlash('warning', 'User is not updated. Server error.');
+            }
+        }
+
+        $userProjectParamsSearch = new UserProjectParamsSearch();
+        $params = Yii::$app->request->queryParams;
+        $params['UserProjectParamsSearch']['upp_user_id'] = $targetUser->id;
+        $userProjectParamsDataProvider = $userProjectParamsSearch->search($params);
+
+        $lastFailedLoginDataProvider = new ActiveDataProvider([
+            'query' => UserFailedLogin::find()->andFilterWhere(['ufl_user_id' => $targetUser->id]),
+            'sort' => ['defaultOrder' => ['ufl_id' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 10,
+            ],
+        ]);
+
+        $result = [
+            'form' => $form,
+            'userProjectParamsDataProvider' => $userProjectParamsDataProvider,
+            'lastFailedLoginDataProvider' => $lastFailedLoginDataProvider,
+            'userProductTypeDataProvider' => null,
+        ];
+
+        $userVoiceMailSearch = new UserVoiceMailSearch();
+        $result['userVoiceMailDataProvider'] = $userVoiceMailSearch->search(['UserVoiceMailSearch' => ['uvm_user_id' => $targetUser->id]]);
+
+        if (Auth::can('user-product-type/list')) {
+            $userProductTypeDataProvider = new ActiveDataProvider([
+                'query' => UserProductType::find()->andFilterWhere(['upt_user_id' => $targetUser->id])
+            ]);
+            $result['userProductTypeDataProvider'] = $userProductTypeDataProvider;
+        }
+        return $this->render('update/_form', $result);
+    }
+
+    /**
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function actionEmployeeValidationUpdate(): array
+    {
+        $targetUserId = (int)Yii::$app->request->get('id');
+        if (!$targetUserId) {
+            throw new BadRequestHttpException('Invalid request');
+        }
+        $targetUser = Employee::findOne($targetUserId);
+
+        $updaterUser = Auth::user();
+
+        if (!$userParams = $targetUser->userParams) {
+            $userParams = new UserParams([
+                'up_user_id' => $targetUser->id,
+                'up_timezone' => 'Europe/Chisinau',
+                'up_work_minutes' => 8 * 60,
+                'up_work_start_tm' => "16:00",
+            ]);
+        }
+        if (!$userProfile = $targetUser->userProfile) {
+            $userProfile = new UserProfile([
+                'up_user_id' => $targetUser->id,
+                'up_join_date' => date('Y-m-d'),
+            ]);
+        }
+
+        $form = new UpdateForm($targetUser, $updaterUser, $userParams, $userProfile);
+
+        if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($form);
+        }
+        throw new BadRequestHttpException();
     }
 
     /**

@@ -320,4 +320,20 @@ class CasesCommunicationService
 
         return true;
     }
+
+    public function sendAutoFeedbackEmail(Cases $case, string $caseEventLog)
+    {
+        $statusForm = new CasesChangeStatusForm($case, null);
+        $statusForm->setAttributes([
+            'language' => 'en-US',
+            'sendTo' => $case->client->lastClientEmail,
+        ]);
+        $sent = $this->sendFeedbackEmail($case, $statusForm, null);
+        if ($sent) {
+            $case->addEventLog(
+                $caseEventLog,
+                'Sent Feedback Survey Email By: System'
+            );
+        }
+    }
 }

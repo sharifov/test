@@ -4,15 +4,15 @@
     name: beat_exporter
     shell: /usr/sbin/nologin
     state: present
-    system: yes
+    system: true
     home: /
-    create_home: no
+    create_home: false
 
 - name: Create beat_exporter group
   user:
     name: beat_exporter
     groups: beat_exporter
-    append: yes
+    append: true
 
 - name: Check beat-exporter installation
   stat:
@@ -34,7 +34,7 @@
     dest: /usr/local/bin
     owner: root
     group: root
-    remote_src: yes
+    remote_src: true
     creates: /usr/local/bin/beat-exporter
 
 - name: Create beat-exporter service
@@ -48,6 +48,6 @@
 - name: Ensure beat-exporter is started
   systemd:
     name: beat-exporter
-    daemon_reload: yes
-    enabled: yes
+    daemon_reload: true
+    enabled: true
     state: started

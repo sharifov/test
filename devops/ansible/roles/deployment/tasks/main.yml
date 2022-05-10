@@ -14,7 +14,7 @@
     owner: "{{ web_user }}"
     group: "{{ web_user }}"
     creates: "{{ web_dir }}/{{ app_ver }}/init"
-    remote_src: no
+    remote_src: false
 
 - name: Create dotenv
   template:
@@ -37,7 +37,7 @@
     chdir: "{{ web_dir }}/{{ app_ver }}"
   become: true
   become_user: "{{ web_user }}"
-  run_once: yes
+  run_once: true
   register: result
   changed_when: false
 
@@ -85,7 +85,7 @@
     state: link
     owner: "{{ web_user }}"
     group: "{{ web_user }}"
-    force: yes
+    force: true
 
 - name: Restart supervisord service
   service:
@@ -107,7 +107,7 @@
     path: "{{ item.path }}"
     owner: "{{ web_user }}"
     group: "{{ web_user }}"
-    mode: 755
+    mode: 0664
   with_items: "{{ supervisord_logs.files }}"
 
 - name: Find old releases
@@ -115,7 +115,6 @@
     paths: "{{ web_dir }}"
     file_type: directory
     excludes:
-      - html
       - "{{ sym.stat.lnk_target | basename }}"
   register: result
   when:

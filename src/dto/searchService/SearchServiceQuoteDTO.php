@@ -102,4 +102,10 @@ class SearchServiceQuoteDTO
     {
         return $this->lead->id ?? 0;
     }
+
+    public function setCid(string $cid): SearchServiceQuoteDTO
+    {
+        $this->cid = $cid;
+        return $this;
+    }
 }

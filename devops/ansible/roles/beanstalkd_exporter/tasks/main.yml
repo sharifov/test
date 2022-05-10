@@ -4,15 +4,15 @@
     name: beanstalkd_exporter
     shell: /usr/sbin/nologin
     state: present
-    system: yes
+    system: true
     home: /
-    create_home: no
+    create_home: false
 
 - name: Create beanstalkd_exporter group
   user:
     name: beanstalkd_exporter
     groups: beanstalkd_exporter
-    append: yes
+    append: true
 
 - name: Check node_exporter installation
   stat:
@@ -39,6 +39,6 @@
 - name: Ensure beanstalkd_exporter is started
   systemd:
     name: beanstalkd_exporter
-    daemon_reload: yes
-    enabled: yes
+    daemon_reload: true
+    enabled: true
     state: started

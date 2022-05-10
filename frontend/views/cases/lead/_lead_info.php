@@ -97,8 +97,15 @@ $isAgent = false;
                                     $clientPhones[$key] = \src\helpers\phone\MaskPhoneHelper::masking($element);
                                 }
 
-                                $str = $model->client && $model->client->clientEmails ? ' <i class="fa fa-envelope"></i> ' . implode(' <i class="fa fa-envelope"></i> ', $clientEmails) . '' : '';
-                                $str .= $model->client && $model->client->clientPhones ? ' <i class="fa fa-phone"></i> ' . implode(' <i class="fa fa-phone"></i> ', $clientPhones) . '' : '';
+                                $str = \frontend\widgets\SliceAndShowMoreWidget::widget([
+                                    'data' => $model->client->getOnlyEmails() ?? [],
+                                    'separator' => '<i class="fa fa-envelope"></i> '
+                                ]);
+
+                                $str .= \frontend\widgets\SliceAndShowMoreWidget::widget([
+                                    'data' => $model->client->getOnlyPhones() ?? [],
+                                    'separator' => '<i class="fa fa-phone"></i> '
+                                ]);
                                 return $str ?? '-';
                             },
                         ],
@@ -356,8 +363,15 @@ echo $this->render('_search_lead_form', [
                 if (Auth::id() !== $model->employee_id && Auth::user()->isAgent()) {
                     $str .= '- // - // - // -';
                 } else {
-                    $str .= $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
-                    $str .= $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
+                    $str .= \frontend\widgets\SliceAndShowMoreWidget::widget([
+                        'data' => $model->client->getOnlyEmails() ?? [],
+                        'separator' => '<i class="fa fa-envelope"></i> '
+                    ]);
+
+                    $str .= \frontend\widgets\SliceAndShowMoreWidget::widget([
+                        'data' => $model->client->getOnlyPhones() ?? [],
+                        'separator' => '<i class="fa fa-phone"></i> '
+                    ]);
                 }
 
                 return $str ?? '-';

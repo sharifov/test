@@ -1,8 +1,0 @@
----
-- name: restart_stick_tables_exporter
-  systemd:
-    state: restarted
-    daemon_reload: yes
-    name: stick_tables_exporter
-  become: yes
-  

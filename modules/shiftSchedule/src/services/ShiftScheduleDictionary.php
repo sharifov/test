@@ -1,4 +1,5 @@
 <?php
+
 namespace modules\shiftSchedule\src\services;
 
 class ShiftScheduleDictionary
