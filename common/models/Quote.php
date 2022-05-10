@@ -1631,7 +1631,7 @@ class Quote extends \yii\db\ActiveRecord
     }
 
 
-    public function getLabelByStatus(int $status)
+    public static function getLabelByStatus(int $status)
     {
         $class = self::STATUS_CLASS_LIST[$status];
 
