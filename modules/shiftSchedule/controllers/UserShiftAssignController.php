@@ -130,7 +130,7 @@ class UserShiftAssignController extends FController
 
         $employee->user_shift_assigns = ArrayHelper::map($employee->userShiftAssigns, 'usa_sh_id', 'usa_sh_id');
 
-        return $this->render('assign', [
+        return $this->renderAjax('assign', [
             'model' => $employee,
         ]);
     }

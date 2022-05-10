@@ -142,8 +142,14 @@ $pjaxContainerId = 'pjax-user-shift-assign';
                     'assign' => static function ($url, Employee $model, $key) {
                         return Html::a(
                             '<span class="fa fa-user-plus"></span>',
-                            ['assign', 'id' => $model->id],
-                            ['title' => 'Assign to Shift', 'target' => '_blank', 'data-pjax' => 0,]
+                            '#',
+                            [
+                                'id' => 'js_edit_usha',
+                                'data-modal_id' => 'edit_usha',
+                                'title' => 'Edit User Shift Assign',
+                                'class' => 'showModalButton',
+                                'data-content-url' => Url::to(['assign', 'id' => $model->id]),
+                            ],
                         );
                     },
                 ],
@@ -171,12 +177,15 @@ CSS;
 $this->registerCss($css);
 ?>
 
-<?php yii\bootstrap4\Modal::begin([
-    'title' => '',
-    'id' => 'multiple_assign_modal',
-    'size' => \yii\bootstrap4\Modal::SIZE_SMALL,
-]);
-yii\bootstrap4\Modal::end() ?>
+<?php
+    yii\bootstrap4\Modal::begin([
+        'title' => '',
+        'id' => 'multiple_assign_modal',
+        'size' => \yii\bootstrap4\Modal::SIZE_SMALL,
+    ]);
+    yii\bootstrap4\Modal::end();
+
+?>
 
 <?php
 $storageName = Inflector::variablize($this->title);
@@ -381,7 +390,25 @@ $script = <<< JS
         } else {
             sessionStorage.removeItem(storageName);
         }
-    }   
+    }
+    
+    $(document).on('click', '.showModalButton', function(){
+        let id = $(this).data('modal_id');
+        let url = $(this).data('content-url');
+
+        $('#multiple_assign_modal').html($(this).attr('title'));
+        $('#multiple_assign_modal').modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 40px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
+
+        let modalBodyEl = $('#multiple_assign_modal .modal-body');
+        modalBodyEl.html(dataResponse.data);
+        $('#multiple_assign_modal-label').html('Assign users to shift'); 
+        $('#multiple_assign_modal').modal('show');
+
+        $.get(url, function(data) {
+            let modalBodyEl = $('#multiple_assign_modal .modal-body');
+            modalBodyEl.html(dataResponse.data);
+        });
+    });   
 JS;
 
 $this->registerJs($script);
