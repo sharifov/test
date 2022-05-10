@@ -51,21 +51,15 @@ $pjaxContainerId = 'pjax-user-shift-assign';
                 'cssClass' => 'multiple-checkbox'
             ],
             [
-                'label' => 'User',
-                'class' => Select2Column::class,
-
-                'attribute' => 'userId',
-                'format' => 'raw',
-                'value' => static function (Employee $model) {
-                    return '<span style="white-space: nowrap;"><i class="fa fa-user"></i> ' .
-                        Html::encode($model->username) . ' (' . $model->id . ')' .
-                    '</span>';
-                },
-                'data' => EmployeeQuery::getList(\src\auth\Auth::id()) ?: [],
-                'filter' => true,
-                'id' => 'employee-filter',
-                'options' => ['min-width' => '280px'],
-                'pluginOptions' => ['allowClear' => true],
+                'attribute' => 'id',
+                'filter' => \src\widgets\UserSelect2Widget::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'userId'
+                ]),
+                'format' => 'username',
+                'options' => [
+                    'width' => '150px'
+                ]
             ],
             [
                 'label' => 'Shift',
