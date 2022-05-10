@@ -2,17 +2,16 @@
 
 namespace frontend\controllers;
 
-use common\models\Currency;
-use common\models\QuoteSegmentBaggageCharge;
-use common\models\search\QuoteSegmentBaggageChargeSearch;
+use common\models\QuoteTrip;
+use common\models\search\QuoteTripSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
- * QuoteSegmentBaggageChargeCrudController implements the CRUD actions for QuoteSegmentBaggageCharge model.
+ * QuoteTripCrudController implements the CRUD actions for QuoteTrip model.
  */
-class QuoteSegmentBaggageChargeCrudController extends FController
+class QuoteTripCrudController extends FController
 {
     /**
      * @inheritDoc
@@ -33,13 +32,13 @@ class QuoteSegmentBaggageChargeCrudController extends FController
     }
 
     /**
-     * Lists all QuoteSegmentBaggageCharge models.
+     * Lists all QuoteTrip models.
      *
      * @return string
      */
     public function actionIndex()
     {
-        $searchModel = new QuoteSegmentBaggageChargeSearch();
+        $searchModel = new QuoteTripSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
 
         return $this->render('index', [
@@ -49,31 +48,31 @@ class QuoteSegmentBaggageChargeCrudController extends FController
     }
 
     /**
-     * Displays a single QuoteSegmentBaggageCharge model.
-     * @param int $qsbc_id Qsbc ID
+     * Displays a single QuoteTrip model.
+     * @param int $qt_id Qt ID
      * @return string
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($qsbc_id)
+    public function actionView($qt_id)
     {
         return $this->render('view', [
-            'model' => $this->findModel($qsbc_id),
+            'model' => $this->findModel($qt_id),
         ]);
     }
 
     /**
-     * Creates a new QuoteSegmentBaggageCharge model.
+     * Creates a new QuoteTrip model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return string|\yii\web\Response
      */
     public function actionCreate()
     {
-        $model = new QuoteSegmentBaggageCharge();
-        $model->qsbc_currency = Currency::getDefaultCurrencyCodeByDb();
+        $model = new QuoteTrip();
+        $model->setScenario(QuoteTrip::SCENARIO_CRUD);
 
         if ($this->request->isPost) {
             if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'qsbc_id' => $model->qsbc_id]);
+                return $this->redirect(['view', 'qt_id' => $model->qt_id]);
             }
         } else {
             $model->loadDefaultValues();
@@ -85,18 +84,19 @@ class QuoteSegmentBaggageChargeCrudController extends FController
     }
 
     /**
-     * Updates an existing QuoteSegmentBaggageCharge model.
+     * Updates an existing QuoteTrip model.
      * If update is successful, the browser will be redirected to the 'view' page.
-     * @param int $qsbc_id Qsbc ID
+     * @param int $qt_id Qt ID
      * @return string|\yii\web\Response
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($qsbc_id)
+    public function actionUpdate($qt_id)
     {
-        $model = $this->findModel($qsbc_id);
+        $model = $this->findModel($qt_id);
+        $model->setScenario(QuoteTrip::SCENARIO_CRUD);
 
         if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'qsbc_id' => $model->qsbc_id]);
+            return $this->redirect(['view', 'qt_id' => $model->qt_id]);
         }
 
         return $this->render('update', [
@@ -105,29 +105,29 @@ class QuoteSegmentBaggageChargeCrudController extends FController
     }
 
     /**
-     * Deletes an existing QuoteSegmentBaggageCharge model.
+     * Deletes an existing QuoteTrip model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param int $qsbc_id Qsbc ID
+     * @param int $qt_id Qt ID
      * @return \yii\web\Response
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete($qsbc_id)
+    public function actionDelete($qt_id)
     {
-        $this->findModel($qsbc_id)->delete();
+        $this->findModel($qt_id)->delete();
 
         return $this->redirect(['index']);
     }
 
     /**
-     * Finds the QuoteSegmentBaggageCharge model based on its primary key value.
+     * Finds the QuoteTrip model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param int $qsbc_id Qsbc ID
-     * @return QuoteSegmentBaggageCharge the loaded model
+     * @param int $qt_id Qt ID
+     * @return QuoteTrip the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($qsbc_id)
+    protected function findModel($qt_id)
     {
-        if (($model = QuoteSegmentBaggageCharge::findOne(['qsbc_id' => $qsbc_id])) !== null) {
+        if (($model = QuoteTrip::findOne(['qt_id' => $qt_id])) !== null) {
             return $model;
         }
 

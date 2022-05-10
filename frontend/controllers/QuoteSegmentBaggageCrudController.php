@@ -12,7 +12,7 @@ use yii\filters\VerbFilter;
 /**
  * QuoteSegmentBaggageCrudController implements the CRUD actions for QuoteSegmentBaggage model.
  */
-class QuoteSegmentBaggageCrudController extends Controller
+class QuoteSegmentBaggageCrudController extends FController
 {
     /**
      * @inheritDoc
