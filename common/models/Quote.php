@@ -1714,16 +1714,20 @@ class Quote extends \yii\db\ActiveRecord
                 $baggageCharge = $segment->quoteSegmentBaggageCharges;
 
                 $baggageInfo = [];
+                $quoteSegmentBaggage = [];
+                $quoteSegmentBaggageCharge = [];
                 if (count($baggages)) {
                     foreach ($baggages as $baggageEntry) {
                         $paxCode = $baggageEntry->qsb_pax_code ?: self::PASSENGER_ADULT;
                         $baggageInfo[$paxCode] = $baggageEntry->getInfo();
+                        $quoteSegmentBaggage[] = array_merge($baggageEntry->getInfo(), ['pax_code' => $paxCode]);
                     }
                 }
                 if (count($baggageCharge)) {
                     foreach ($baggageCharge as $baggageChEntry) {
                         $paxCode = $baggageChEntry->qsbc_pax_code ?: self::PASSENGER_ADULT;
                         $baggageInfo[$paxCode]['charge'] = $baggageChEntry->getInfo();
+                        $quoteSegmentBaggageCharge[] = array_merge($baggageChEntry->getInfo(), ['pax_code' => $paxCode]);
                     }
                 }
                 $stops = [];
@@ -1751,6 +1755,11 @@ class Quote extends \yii\db\ActiveRecord
                     'cabin' => $segment->qs_cabin,
                     'ticket_id' => $segment->qs_ticket_id,
                     'baggage' => $baggageInfo,
+                    'baggageAdditionalData' => [
+                        'quoteSegmentBaggage' => $quoteSegmentBaggage,
+                        'quoteSegmentBaggageCharge' => $quoteSegmentBaggageCharge
+
+                    ]
                 ];
             }
             $trips[] = [
