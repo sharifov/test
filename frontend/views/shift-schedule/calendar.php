@@ -60,6 +60,7 @@ $today = date('Y-m-d', strtotime('+1 day'));
 $modalUrl = Url::to(['/shift-schedule/add-event']);
 $groupIdsJson = Json::encode($groupIds);
 $formCreateSingleEventUrl = Url::to(['/shift-schedule/add-single-event']);
+$formUpdateSingleEvent = Url::to(['/shift-schedule/update-single-event']);
 $deleteEventUrl = Url::to(['/shift-schedule/delete-event']);
 $canCreateOnDoubleClick = \Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_CREATE_ON_DOUBLE_CLICK);
 $js = <<<JS
@@ -187,7 +188,6 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
             var button = {};
 
             currentEvent = event;
-            console.log(event);
 
             if (event.confirmed) {
                 button.text = 'Cancel appointment';
@@ -209,7 +209,7 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
 
             tooltip.setOptions({ anchor: args.domEvent.target });
             tooltip.open();
-        }
+        },
         // onEventClick: function (args, inst) {
             // oldMeal = $.extend({}, args.event);
             // tempMeal = args.event;
@@ -225,11 +225,57 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
         //         message: 'Event created'
         //     });
         // },
-        // onEventUpdated: function () {
-        //     mobiscroll.toast({
-        //         message: 'Event updated'
-        //     });
-        // },
+        onEventUpdated: function (args) {
+        
+            let currentUserId;
+            let oldUserId;
+            
+            let event = args.event
+            let oldEvent = args.oldEvent;
+        
+            if (event.resource.indexOf('us-') === 0) {
+                currentUserId = event.resource.substring(3);
+            } else {
+                inst.removeEvent(event);
+                window.inst.addEvent(oldEvent);
+                return false;
+            }
+            if (oldEvent.resource.indexOf('us-') === 0) {
+                oldUserId = oldEvent.resource.substring(3);
+            } else {
+                inst.removeEvent(event);
+                window.inst.addEvent(oldEvent);
+                return false;
+            }
+            
+            let eventStartDate = new Date(event.start);
+            let [year, month, day, hour, minute] = [eventStartDate.getFullYear(), eventStartDate.getMonth()+1, eventStartDate.getDate(), eventStartDate.getHours(), eventStartDate.getMinutes(), eventStartDate];
+            let startDate = year + '-' + month + '-' + day + ' ' + hour + ':' + minute;
+            
+            let eventEndDate = new Date(event.end);
+            let [yearEnd, monthEnd, dayEnd, hourEnd, minuteEnd] = [eventEndDate.getFullYear(), eventEndDate.getMonth()+1, eventEndDate.getDate(), eventEndDate.getHours(), eventEndDate.getMinutes(), eventEndDate];
+            let endDate = yearEnd + '-' + monthEnd + '-' + dayEnd + ' ' + hourEnd + ':' + minuteEnd;
+            
+            console.log(event);
+            
+            let data = {
+                eventId: args.event.id,
+                newUserId: currentUserId,
+                oldUserId: oldUserId,
+                startDate: startDate,
+                endDate: endDate
+            };
+            
+            $.post('$formUpdateSingleEvent', data, function (data) {
+                if (data.error) {
+                    createNotify('Error', data.message, 'error');
+                } else {
+                    mobiscroll.toast({
+                        message: 'Event updated successfully'
+                    });
+                }
+            });
+        },
         // onEventCreateFailed: function (event) {
         //     mobiscroll.toast({
         //         message: 'Can\'t create event'
@@ -255,7 +301,7 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
                 let [year, month, day, hour, minute] = [eventStartDate.getFullYear(), eventStartDate.getMonth()+1, eventStartDate.getDate(), eventStartDate.getHours(), eventStartDate.getMinutes(), eventStartDate];
                 let startDate = year + '-' + month + '-' + day + ' ' + hour + ':' + minute;
                 let modal = $('#modal-md');
-                modal.find('.modal-title').html('Add event for user ');
+                modal.find('.modal-title').html('Add event for user');
                 modal.on('hide.bs.modal', function (e) {
                     inst.removeEvent(event);
                 });
@@ -268,6 +314,9 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
                         createNotify('Error', xhr.statusText, 'error');
                     }, 800);
                 })
+            } else {
+                console.log()
+                // $.post('$formUpdateSingleEvent', {});
             }
         }
 

@@ -58,7 +58,7 @@ class ShiftScheduleController extends FController
                     /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_ACCESS, Access to page shift-schedule/index */
                     [
                         'actions' => ['index', 'my-data-ajax', 'generate-example', 'remove-user-data', 'get-event',
-                            'generate-user-schedule', 'legend-ajax', 'calendar', 'calendar-events-ajax', 'add-event'],
+                            'generate-user-schedule', 'legend-ajax', 'calendar', 'calendar-events-ajax', 'add-event', 'update-single-event'],
                         'allow' => \Yii::$app->abac->can(
                             null,
                             ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE,
@@ -476,6 +476,42 @@ class ShiftScheduleController extends FController
         return $this->asJson([
             'error' => false,
             'message' => 'Shift deleted successfully'
+        ]);
+    }
+
+    public function actionUpdateSingleEvent()
+    {
+        $data = Yii::$app->request->post();
+
+        $event = UserShiftSchedule::findOne((int)$data['eventId']);
+        if (!$event) {
+            return $this->asJson([
+                'error' => true,
+                'message' => 'Event not found: by id: ' . $data['eventId']
+            ]);
+        }
+
+        $timezone = Auth::user()->timezone ?: null;
+
+        $startDateTime = new \DateTimeImmutable($data['startDate'], $timezone ? new \DateTimeZone($timezone) : null);
+        $startDateTime = $startDateTime->setTimezone(new \DateTimeZone('UTC'));
+        $endDateTime = new \DateTimeImmutable($data['endDate'], $timezone ? new \DateTimeZone($timezone) : null);
+        $endDateTime = $endDateTime->setTimezone(new \DateTimeZone('UTC'));
+        $interval = $startDateTime->diff($endDateTime);
+        $diffMinutes = $interval->i + ($interval->h * 60);
+
+        $event->uss_start_utc_dt = $startDateTime->format('Y-m-d H:i:s');
+        $event->uss_end_utc_dt = $endDateTime->format('Y-m-d H:i:s');
+        $event->uss_duration = $diffMinutes;
+        if ($data['newUserId'] !== $data['oldUserId']) {
+            $event->uss_user_id = $data['newUserId'];
+        }
+
+        $event->save();
+
+        return $this->asJson([
+            'error' => false,
+            'message' => ''
         ]);
     }
 }
