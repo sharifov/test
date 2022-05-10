@@ -86,7 +86,13 @@ class MonitorFlowController extends Controller
 
         if ($quoteIds) {
             try {
-                $processedCnt = Quote::updateAll(['status' => Quote::STATUS_DECLINED], ['IN', 'id', $quoteIds]);
+                $quotes = Quote::find()->andWhere(['IN', 'id', $quoteIds])->all();
+                $processedCnt = count($quotes);
+                /** @var Quote $quote */
+                foreach ($quotes as $quote) {
+                    $quote->status = Quote::STATUS_DECLINED;
+                    $quote->update(false);
+                }
             } catch (\Throwable $throwable) {
                 \Yii::error(AppHelper::throwableLog($throwable), 'MonitorFlowController:actionWatchDogDeclineQuote:Throwable');
             }
