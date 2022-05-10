@@ -178,13 +178,12 @@ $this->registerCss($css);
 ?>
 
 <?php
-    yii\bootstrap4\Modal::begin([
-        'title' => '',
-        'id' => 'multiple_assign_modal',
-        'size' => \yii\bootstrap4\Modal::SIZE_SMALL,
-    ]);
-    yii\bootstrap4\Modal::end();
-
+yii\bootstrap4\Modal::begin([
+    'title' => '',
+    'id' => 'multiple_assign_modal',
+    'size' => \yii\bootstrap4\Modal::SIZE_SMALL,
+]);
+yii\bootstrap4\Modal::end();
 ?>
 
 <?php
