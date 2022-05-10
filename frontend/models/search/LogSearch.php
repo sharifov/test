@@ -58,8 +58,7 @@ class LogSearch extends Log
         if (empty($this->log_time) === false) {
             $from = Employee::convertTimeFromUserDtToUTC(strtotime($this->log_time));
             $from = strtotime($from);
-            $to = strtotime(date('Y-m-d 23:59:59', strtotime($this->log_time)));
-            $to = strtotime(Employee::convertTimeFromUserDtToUTC($to));
+            $to = strtotime(Employee::convertTimeFromUserDtToUTC(strtotime($this->log_time) + 3600 * 24));
             $query->andOnCondition('log_time >= :from AND log_time <= :to', array(':from' => $from, ':to' => $to));
         }
         $query->andFilterWhere(['like', 'category', $this->category])
