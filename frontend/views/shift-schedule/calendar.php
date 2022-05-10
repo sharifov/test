@@ -47,7 +47,6 @@ $bundle = \frontend\assets\UserShiftCalendarAsset::register($this);
             Status: <span id="tooltip-event-title" class="md-tooltip-status md-tooltip-text"></span>
         </div>
         <div class="md-tooltip-title">Description: <span id="tooltip-event-description" class="md-tooltip-reason md-tooltip-text"></span></div>
-        <button id="tooltip-event-view" mbsc-button data-color="secondary" class="md-tooltip-view-button">View patient file</button>
         <button id="tooltip-event-delete" mbsc-button data-color="danger" data-variant="outline" class="md-tooltip-delete-button">Delete appointment</button>
     </div>
 </div>
@@ -73,7 +72,6 @@ var currentEvent;
 var timer;
 var \$tooltip = $('#custom-event-tooltip-popup');
 var \$deleteButton = $('#tooltip-event-delete');
-var \$fileButton = $('#tooltip-event-view');
 var \$header = $('#tooltip-event-header');
 var \$data = $('#tooltip-event-name-age');
 var \$time = $('#tooltip-event-time');
@@ -338,14 +336,6 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
         timer = setTimeout(function () {
             tooltip.close();
         }, 200);
-    });
-
-    \$fileButton.on('click', function (ev) {
-        tooltip.close();
-
-        mobiscroll.toast({
-            message: 'View file'
-        });
     });
 
     \$deleteButton.on('click', function (ev) {
