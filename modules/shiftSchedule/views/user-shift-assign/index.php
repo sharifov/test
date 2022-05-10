@@ -51,6 +51,7 @@ $pjaxContainerId = 'pjax-user-shift-assign';
                 'cssClass' => 'multiple-checkbox'
             ],
             [
+                'label' => 'User',
                 'attribute' => 'id',
                 'filter' => \src\widgets\UserSelect2Widget::widget([
                     'model' => $searchModel,
@@ -59,7 +60,8 @@ $pjaxContainerId = 'pjax-user-shift-assign';
                 'format' => 'username',
                 'options' => [
                     'width' => '150px'
-                ]
+                ],
+                'enableSorting' => false,
             ],
             [
                 'label' => 'Shift',
