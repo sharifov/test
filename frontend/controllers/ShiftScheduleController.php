@@ -58,8 +58,7 @@ class ShiftScheduleController extends FController
                     /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_ACCESS, Access to page shift-schedule/index */
                     [
                         'actions' => ['index', 'my-data-ajax', 'generate-example', 'remove-user-data', 'get-event',
-                            'generate-user-schedule', 'legend-ajax', 'calendar', 'calendar-events-ajax', 'add-event', 'add-single-event',
-                            'delete-event'],
+                            'generate-user-schedule', 'legend-ajax', 'calendar', 'calendar-events-ajax', 'add-event'],
                         'allow' => \Yii::$app->abac->can(
                             null,
                             ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE,
@@ -67,6 +66,24 @@ class ShiftScheduleController extends FController
                         ),
                         'roles' => ['@'],
                     ],
+                    [
+                        'actions' => ['delete-event'],
+                        'allow' => \Yii::$app->abac->can(
+                            null,
+                            ShiftAbacObject::OBJ_USER_SHIFT_EVENT,
+                            ShiftAbacObject::ACTION_DELETE
+                        ),
+                        'roles' => ['@'],
+                    ],
+                    [
+                        'actions' => ['add-single-event'],
+                        'allow' => \Yii::$app->abac->can(
+                            null,
+                            ShiftAbacObject::OBJ_USER_SHIFT_EVENT,
+                            ShiftAbacObject::ACTION_CREATE_ON_DOUBLE_CLICK
+                        ),
+                        'roles' => ['@'],
+                    ]
                 ],
             ],
         ];

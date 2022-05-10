@@ -47,7 +47,9 @@ $bundle = \frontend\assets\UserShiftCalendarAsset::register($this);
             Status: <span id="tooltip-event-title" class="md-tooltip-status md-tooltip-text"></span>
         </div>
         <div class="md-tooltip-title">Description: <span id="tooltip-event-description" class="md-tooltip-reason md-tooltip-text"></span></div>
-        <button id="tooltip-event-delete" mbsc-button data-color="danger" data-variant="outline" class="md-tooltip-delete-button">Delete appointment</button>
+        <?php if ($canDeleteEvent = \Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_DELETE)) : ?>
+            <button id="tooltip-event-delete" mbsc-button data-color="danger" data-variant="outline" class="md-tooltip-delete-button">Delete appointment</button>
+        <?php endif; ?>
     </div>
 </div>
 
@@ -59,6 +61,7 @@ $modalUrl = Url::to(['/shift-schedule/add-event']);
 $groupIdsJson = Json::encode($groupIds);
 $formCreateSingleEventUrl = Url::to(['/shift-schedule/add-single-event']);
 $deleteEventUrl = Url::to(['/shift-schedule/delete-event']);
+$canCreateOnDoubleClick = \Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_CREATE_ON_DOUBLE_CLICK);
 $js = <<<JS
 var resourceListJson = $resourceListJson;
 var groupIds = $groupIdsJson;
@@ -66,12 +69,16 @@ var calendarEventsAjaxUrl = '$ajaxUrl';
 var today = '$today';
 var modalUrl = '$modalUrl';
 var events;
+var canDeleteEvent = Boolean('$canDeleteEvent');
+var canCreateOnDoubleClick = Boolean('$canCreateOnDoubleClick');
 
 var formatDate = mobiscroll.util.datetime.formatDate;
 var currentEvent;
 var timer;
 var \$tooltip = $('#custom-event-tooltip-popup');
-var \$deleteButton = $('#tooltip-event-delete');
+if (canDeleteEvent) {
+    var \$deleteButton = $('#tooltip-event-delete');
+}
 var \$header = $('#tooltip-event-header');
 var \$data = $('#tooltip-event-name-age');
 var \$time = $('#tooltip-event-time');
@@ -95,7 +102,7 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
         displayTimezone: 'local',
         //displayTimezone: 'Europe/Chisinau', //'local',
         timezonePlugin: mobiscroll.momentTimezone,
-        clickToCreate: true,
+        clickToCreate: canCreateOnDoubleClick,
         dragToCreate: false,
         dragToMove: true,
         dragToResize: true,
@@ -338,41 +345,43 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
         }, 200);
     });
 
-    \$deleteButton.on('click', function (ev) {
-        mobiscroll.confirm({
-            title: 'Are you sure you want to delete shift?',
-            // message: 'It looks like someone from the team won\'t be able to join the meeting.',
-            okText: 'Yes',
-            cancelText: 'No',
-            callback: function (res) {
-                if (res) {
-                    $.ajax({
-                        url: '$deleteEventUrl',
-                        data: {'shiftId': currentEvent.id},
-                        type: 'post',
-                        cache: false,
-                        dataType: 'json',
-                        success: function (data) {
-                            if (data.error) {
-                                createNotify('Error', data.message, 'error');
-                            } else {
-                                inst.removeEvent(currentEvent);
-                                tooltip.close();
-                                createNotify('Success', data.message, 'success');
+    if (canDeleteEvent) {
+        \$deleteButton.on('click', function (ev) {
+            mobiscroll.confirm({
+                title: 'Are you sure you want to delete shift?',
+                // message: 'It looks like someone from the team won\'t be able to join the meeting.',
+                okText: 'Yes',
+                cancelText: 'No',
+                callback: function (res) {
+                    if (res) {
+                        $.ajax({
+                            url: '$deleteEventUrl',
+                            data: {'shiftId': currentEvent.id},
+                            type: 'post',
+                            cache: false,
+                            dataType: 'json',
+                            success: function (data) {
+                                if (data.error) {
+                                    createNotify('Error', data.message, 'error');
+                                } else {
+                                    inst.removeEvent(currentEvent);
+                                    tooltip.close();
+                                    createNotify('Success', data.message, 'success');
+                                }
+                            },
+                            error: function (xhr) {
+                                createNotify('Error', xhr.responseText, 'error');
                             }
-                        },
-                        error: function (xhr) {
-                            createNotify('Error', xhr.responseText, 'error');
-                        }
-                    })
+                        })
+                    }
                 }
-            }
+            });
+    
+            // mobiscroll.toast({
+            //     message: 'Appointment deleted'
+            // });
         });
-
-        // mobiscroll.toast({
-        //     message: 'Appointment deleted'
-        // });
-    });
+    }
 
 
 
