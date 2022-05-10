@@ -69,7 +69,7 @@ class UserShiftScheduleQuery
             ->andWhere(['ugs_group_id' => $groupIds])
             ->andWhere(['AND',
                 ['>=', 'uss_start_utc_dt', date('Y-m-d H:i:s', strtotime($startDt))],
-                ['<=', 'uss_start_utc_dt', date('Y-m-d H:i:s', strtotime($endDt))]
+                ['<=', 'uss_start_utc_dt', date('Y-m-d 23:59:59', strtotime($endDt))]
             ])
             ->all();
     }

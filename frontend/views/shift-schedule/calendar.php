@@ -166,6 +166,10 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
         
         
          onEventCreate: function (args, inst) {
+            if (args.event.resource.indexOf('us-') !== 0) {
+                inst.removeEvent(args.event);
+                return false;
+            }
             // store temporary event
             createUpdateEvent(args.event, true);
             /*tempMeal = args.event;
