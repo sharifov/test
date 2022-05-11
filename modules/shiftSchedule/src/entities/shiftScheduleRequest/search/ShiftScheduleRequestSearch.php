@@ -160,18 +160,6 @@ class ShiftScheduleRequestSearch extends ShiftScheduleRequest
             ]);
         }
 
-        if (!empty($model)) {
-            $query->andFilterWhere([
-                'ssr_id' => $model->ssr_id,
-                'ssr_uss_id' => $model->ssr_uss_id,
-                'ssr_sst_id' => $model->ssr_sst_id,
-                'ssr_status_id' => $model->ssr_status_id,
-                'ssr_created_dt' => $model->ssr_created_dt,
-                'ssr_update_dt' => $model->ssr_update_dt,
-                'ssr_updated_user_id' => $model->ssr_updated_user_id,
-            ]);
-        }
-
         $query->select(['ssr_id' => 'MAX(ssr_id)', 'ssr_uss_id'])
             ->groupBy(['ssr_uss_id']);
 
@@ -179,8 +167,22 @@ class ShiftScheduleRequestSearch extends ShiftScheduleRequest
             ->from($query)
             ->select('ssr_id');
 
-        return static::find()
+        $queryResult = static::find()
             ->where(['in', 'ssr_id', $query]);
+
+        if (!empty($model)) {
+            $queryResult->andFilterWhere([
+                'ssr_id' => $model->ssr_id,
+                'ssr_uss_id' => $model->ssr_uss_id,
+                'ssr_sst_id' => $model->ssr_sst_id,
+                'ssr_status_id' => $model->ssr_status_id,
+                'ssr_created_dt' => $model->ssr_created_dt,
+                'ssr_updated_dt' => $model->ssr_updated_dt,
+                'ssr_updated_user_id' => $model->ssr_updated_user_id,
+            ]);
+        }
+
+        return $queryResult;
     }
 
     /**
