@@ -19,6 +19,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="col-md-4">
 
         <p>
+            <?= Html::a('go back', ['index'], ['class' => 'btn btn-default']) ?>
             <?= Html::a('Update', ['update', 'pnr_id' => $model->pnr_id], ['class' => 'btn btn-primary']) ?>
             <?= Html::a('Delete', ['delete', 'pnr_id' => $model->pnr_id], [
                 'class' => 'btn btn-danger',

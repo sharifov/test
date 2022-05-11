@@ -2,12 +2,16 @@
 
 namespace frontend\controllers;
 
+use src\model\phoneNumberRedial\abac\PhoneNumberRedialAbacObject;
 use src\model\phoneNumberRedial\PhoneNumberRedialRepository;
 use src\model\phoneNumberRedial\useCase\createMultiple\CreateMultipleForm;
 use Yii;
 use src\model\phoneNumberRedial\entity\PhoneNumberRedial;
 use src\model\phoneNumberRedial\entity\PhoneNumberRedialSearch;
 use frontend\controllers\FController;
+use yii\helpers\VarDumper;
+use yii\web\BadRequestHttpException;
+use yii\web\NotAcceptableHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -45,6 +49,7 @@ class PhoneNumberRedialCrudController extends FController
                     'class' => VerbFilter::class,
                     'actions' => [
                         'delete' => ['POST'],
+                        'delete-selected' => ['POST'],
                     ],
                 ],
             ]
@@ -164,6 +169,48 @@ class PhoneNumberRedialCrudController extends FController
         $this->findModel($pnr_id)->delete();
 
         return $this->redirect(['index']);
+    }
+
+    /**
+     * @return Response
+     * @throws BadRequestHttpException
+     */
+    public function actionSelectAll(): Response
+    {
+        if (Yii::$app->request->isAjax) {
+            $result = (new PhoneNumberRedialSearch())->searchIds(Yii::$app->request->queryParams);
+            return $this->asJson($result);
+        }
+        throw new BadRequestHttpException();
+    }
+
+    public function actionDeleteSelected(): Response
+    {
+        $abac = Yii::$app->abac;
+        if (!$abac->can(null, PhoneNumberRedialAbacObject::OBJ_PHONE_NUMBER_REDIAL, PhoneNumberRedialAbacObject::ACTION_MULTIPLE_DELETE)) {
+            throw new NotAcceptableHttpException('Access denied');
+        }
+
+        $items = Yii::$app->request->post('selection');
+
+        if (Yii::$app->request->isAjax && !empty($items) && is_array($items)) {
+            $result = [];
+            foreach ($items as $value) {
+                if ($phoneNumberRedial = self::findModel($value)) {
+                    try {
+                        $phoneNumberRedial->delete();
+                        $result[] = $value;
+                    } catch (Throwable $throwable) {
+                        Yii::warning(
+                            VarDumper::dumpAsString($throwable),
+                            'PhoneNumberRedialCrudController:actionDeleteSelected'
+                        );
+                    }
+                }
+            }
+            return $this->asJson($result);
+        }
+        throw new BadRequestHttpException();
     }
 
     /**
