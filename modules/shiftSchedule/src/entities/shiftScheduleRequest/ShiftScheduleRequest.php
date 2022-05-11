@@ -5,7 +5,6 @@ namespace modules\shiftSchedule\src\entities\shiftScheduleRequest;
 use common\models\Employee;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
-use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -33,6 +32,7 @@ use yii\db\BaseActiveRecord;
  * @property-read int $duration
  * @property UserShiftSchedule $srhUss
  * @property Employee $ssrCreatedUser
+ * @property-read bool $isCanEditPreviousDate
  * @property Employee $ssrUpdatedUser
  */
 class ShiftScheduleRequest extends ActiveRecord
@@ -54,6 +54,13 @@ class ShiftScheduleRequest extends ActiveRecord
         self::STATUS_APPROVE => 'success',
         self::STATUS_DECLINED => 'danger',
         self::STATUS_REMOVED => 'secondary',
+    ];
+
+    public const STATUS_LIST_COLOR_HEX = [
+        self::STATUS_PENDING => '#f2926b',
+        self::STATUS_APPROVE => '#28a745',
+        self::STATUS_DECLINED => '#e15554',
+        self::STATUS_REMOVED => '#6c757d',
     ];
 
     /**
@@ -151,10 +158,15 @@ class ShiftScheduleRequest extends ActiveRecord
     }
 
     /**
+     * @param bool $hex
      * @return string
      */
-    public function getStatusNameColor(): string
+    public function getStatusNameColor(bool $hex = false): string
     {
+        if ($hex) {
+            return self::STATUS_LIST_COLOR_HEX[$this->ssr_status_id] ?? '';
+        }
+
         return self::STATUS_LIST_COLOR[$this->ssr_status_id] ?? '';
     }
 
@@ -197,7 +209,7 @@ class ShiftScheduleRequest extends ActiveRecord
      */
     public function getDuration(): int
     {
-        return round((strtotime($this->srhUss->uss_start_utc_dt) - strtotime($this->srhUss->uss_end_utc_dt)) / (60 * 60 * 24));
+        return round((strtotime($this->srhUss->uss_start_utc_dt ?? '') - strtotime($this->srhUss->uss_end_utc_dt ?? '')) / (60 * 60 * 24));
     }
 
     /**
@@ -241,7 +253,7 @@ class ShiftScheduleRequest extends ActiveRecord
      */
     public function getIsCanEditPreviousDate(): bool
     {
-        if (strtotime($this->srhUss->uss_start_utc_dt) < strtotime('now')) {
+        if (strtotime($this->srhUss->uss_start_utc_dt ?? '') < strtotime('now')) {
             // get abacRules and return;
             return false;
         }

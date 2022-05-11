@@ -6,7 +6,6 @@ use common\models\Employee;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\search\ShiftScheduleRequestSearch;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
 use src\auth\Auth;
-use Yii;
 use yii\db\ActiveQuery;
 use yii\helpers\ArrayHelper;
 
@@ -64,6 +63,9 @@ class ShiftScheduleRequestService
         $data = [];
         if ($timelineList) {
             foreach ($timelineList as $item) {
+//                $sstColor = $item->srhSst ? $item->srhSst->sst_color : 'gray';
+//                $statusColor = $item->getStatusNameColor(true);
+
                 $dataItem = [
                     'id' => $item->ssr_id,
                     'title' => sprintf(
@@ -78,15 +80,15 @@ class ShiftScheduleRequestService
                         $item->getDuration(),
                         $item->getStatusName()
                     ),
-                    'start' => date('c', strtotime($item->srhUss->uss_start_utc_dt)),
-                    'end' => date('c', strtotime($item->srhUss->uss_end_utc_dt)),
+                    'start' => date('c', strtotime($item->srhUss->uss_start_utc_dt ?? '')),
+                    'end' => date('c', strtotime($item->srhUss->uss_end_utc_dt ?? '')),
 
                     'resource' => 'us-' . $item->ssr_created_user_id,
                     'extendedProps' => [
                         'icon' => $item->srhSst->sst_icon_class,
+//                        'backgroundImage' => 'linear-gradient(45deg, ' . $sstColor . ' 30%, ' . $statusColor . ' 70%)',
                     ],
                     'className' => 'badge-' . $item->getStatusNameColor(),
-                    'borderColor' => $item->srhSst ? $item->srhSst->sst_color : 'gray',
                 ];
 
                 $data[] = $dataItem;
