@@ -56,6 +56,11 @@ class ClientQuotePriceService
         ];
 
         foreach ($priceData['prices'] as $paxCode => $price) {
+            $serviceFeePerPax = $price['service_fee'] ?? 0;
+            if ($serviceFeePerPax) {
+                $serviceFeePerPax = $serviceFeePerPax / $price['tickets'] ?? 1;
+            }
+
             $result['passengers'][$paxCode]['cnt'] = $price['tickets'];
             $result['passengers'][$paxCode]['price'] = round($price['selling'] / $price['tickets'], 2);
             $result['passengers'][$paxCode]['tax'] = round(($price['taxes'] + $price['mark_up'] + $price['extra_mark_up'] + $price['service_fee']) / $price['tickets'], 2);
@@ -63,7 +68,7 @@ class ClientQuotePriceService
             $result['passengers'][$paxCode]['mark_up'] = round($price['mark_up'] / $price['tickets'], 2);
             $result['passengers'][$paxCode]['extra_mark_up'] = round($price['extra_mark_up'] / $price['tickets'], 2);
             $result['passengers'][$paxCode]['baseTax'] = round(($price['taxes']) / $price['tickets'], 2);
-            $result['passengers'][$paxCode]['service_fee'] = round($price['service_fee'] ?? 0, 2);
+            $result['passengers'][$paxCode]['service_fee'] = round($serviceFeePerPax, 2);
 
             $result['prices']['totalTax'] += $result['passengers'][$paxCode]['tax'] * $price['tickets'];
         }

@@ -11,6 +11,7 @@ use common\models\UserDepartment;
 use common\models\UserOnline;
 use common\models\UserParams;
 use common\models\UserProfile;
+use src\access\EmployeeGroupAccess;
 use src\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use src\model\leadRedial\assign\SortUsers;
 use src\model\leadRedial\entity\CallRedialUserAccess;
@@ -21,6 +22,7 @@ use src\model\userData\entity\UserDataKey;
 use src\model\userStatDay\entity\UserStatDayQuery;
 use yii\db\Expression;
 use yii\db\Query;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class EmployeeQuery
@@ -204,8 +206,18 @@ class EmployeeQuery extends \yii\db\ActiveQuery
         return $query;
     }
 
-//    public function supervisorsByGroups(array $groups)
-//  {
-//      return $this->leftJoin('auth_assignment','auth_assignment.user_id = id')->andWhere(['auth_assignment.item_name' => Employee::SUPE])->innerJoin(UserGroup::tableName(), new Expression(''))
-//  }
+    public static function getList(?int $userId = null): array
+    {
+        $query = Employee::find()->select(['id', 'CONCAT(username, " (", id, ")") AS username']);
+        if ($userId !== null) {
+            $query->andWhere(['id' => EmployeeGroupAccess::usersIdsInCommonGroupsSubQuery($userId)]);
+        }
+        $query->orderBy(['username' => SORT_ASC])->asArray()->indexBy('id');
+
+        return ArrayHelper::map(
+            $query->all(),
+            'id',
+            'username'
+        );
+    }
 }

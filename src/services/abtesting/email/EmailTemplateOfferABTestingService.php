@@ -2,6 +2,7 @@
 
 namespace src\services\abtesting\email;
 
+use common\models\Department;
 use common\models\Email;
 use common\models\EmailTemplateType;
 use common\models\Lead;
@@ -22,6 +23,7 @@ class EmailTemplateOfferABTestingService extends ABTestingBaseService
 
 
     private ?Project $project;
+    private ?Department $department;
 
     public function assignEmailOfferTemplateToLead(Lead $lead): ?int
     {
@@ -32,8 +34,12 @@ class EmailTemplateOfferABTestingService extends ABTestingBaseService
                 return $cacheValue;
             }
             $this->project = $lead->project;
+            $this->department = $lead->lDep;
             if (empty($this->project)) {
                 throw new \DomainException('Lead has no project assigned');
+            }
+            if (empty($this->department)) {
+                throw new \DomainException('Lead has no department assigned');
             }
             /** @fflag FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES, A/B testing for email offer templates value */
             $settingsValue            = \Yii::$app->ff->val(FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES);
@@ -42,6 +48,10 @@ class EmailTemplateOfferABTestingService extends ABTestingBaseService
             }
             if (empty($settingsValue['projects']) || !is_array($settingsValue['projects'])) {
                 throw new \DomainException('Projects params must be array');
+            }
+            $departmentParams = $settingsValue['departments'];
+            if (!in_array($this->department->dep_key, $departmentParams)) {
+                return null;
             }
             $projectsParams = $settingsValue['projects'];
             if (empty($projectsParams[$this->project->project_key]) || !is_array($projectsParams[$this->project->project_key])) {
@@ -60,6 +70,15 @@ class EmailTemplateOfferABTestingService extends ABTestingBaseService
             $emailTemplateKey     = $this->getExpectedKey(...$testingEntitiesArray);
             $emailTemplateId      = self::getEmailOfferTemplateIdByKey($emailTemplateKey);
             \Yii::$app->cache->set($cacheKey, $emailTemplateId, self::LEAD_EMAIL_OFFER_TEMPLATE_CACHE_DURATION);
+            $logData = [
+                'leadId' => $lead->id,
+                'templateKey'   => $emailTemplateKey,
+                'emailTemplateId' => $emailTemplateId,
+            ];
+            foreach ($testingEntitiesArray as $ABTestingBaseEntity) {
+                $logData['entities'][] = $ABTestingBaseEntity->toArray();
+            }
+            \Yii::info($logData, 'elk\Email:Template:abtesting');
             return $emailTemplateId;
         } catch (\DomainException | \RuntimeException $e) {
             $message = AppHelper::throwableLog($e);
@@ -83,11 +102,8 @@ class EmailTemplateOfferABTestingService extends ABTestingBaseService
             $cacheKey   = sprintf(self::EMAIL_OFFER_TEMPLATES_COUNTER_CACHE_KEY, $templateId, $this->project->id);
             $counter    = \Yii::$app->cache->get($cacheKey);
             if (!$counter) {
-                $counter = self::setCacheValForEmailTemplate(
-                    $cacheKey,
-                    $startingDateTime,
-                    $templateId,
-                    $this->project->id
+                $counter = self::setDefaultCacheValForEmailTemplate(
+                    $cacheKey
                 );
             }
             $item          = new ABTestingBaseEntity($templateKey, $expectedPercentage, $counter);
@@ -103,35 +119,12 @@ class EmailTemplateOfferABTestingService extends ABTestingBaseService
      * @param int $projectId
      * @return int
      */
-    private static function setCacheValForEmailTemplate(
-        string $cacheKey,
-        string $dateFrom,
-        int $templateTypeId,
-        int $projectId
+    private static function setDefaultCacheValForEmailTemplate(
+        string $cacheKey
     ): int {
-        $count = self::getEmailOfferTemplatesCountFromDate($dateFrom, $templateTypeId, $projectId);
+        $count = 0;
         \Yii::$app->cache->set($cacheKey, $count, self::EMAIL_OFFER_TEMPLATES_COUNTER_CACHE_DURATION);
         return $count;
-    }
-
-    /**
-     * @param string $dateFrom
-     * @param int $templateTypeId
-     * @param int $projectId
-     * @return int
-     */
-    private static function getEmailOfferTemplatesCountFromDate(
-        string $dateFrom,
-        int $templateTypeId,
-        int $projectId
-    ): int {
-        return Email
-            ::find()
-            ->where(['e_template_type_id' => $templateTypeId])
-            ->andWhere(['e_project_id' => $projectId])
-            ->andWhere(['e_status_id' => Email::STATUS_DONE])
-            ->andWhere(['>=', 'e_status_done_dt', $dateFrom])
-            ->count();
     }
 
     /**
@@ -153,16 +146,25 @@ class EmailTemplateOfferABTestingService extends ABTestingBaseService
     /**
      * @param int $templateId
      * @param int $projectId
+     * @param int $departmentId
      * @return void
      */
-    public static function incrementCounterByTemplateAndProjectIds(int $templateId, int $projectId): void
+    public static function incrementCounterByTemplateAndProjectIds(int $templateId, int $projectId, int $departmentId): void
     {
         try {
             $cacheKey   = sprintf(self::EMAIL_OFFER_TEMPLATES_COUNTER_CACHE_KEY, $templateId, $projectId);
             $cacheValue = \Yii::$app->cache->get($cacheKey);
+            $logData = [
+                'cacheKey'   => $cacheKey,
+                'cacheValue' => $cacheValue,
+                'info'       => 'Start of the method'
+            ];
+            \Yii::info($logData, 'elk\Email:Template:abtesting');
             if ($cacheValue) {
                 $cacheValue++;
                 \Yii::$app->cache->set($cacheKey, $cacheValue, self::EMAIL_OFFER_TEMPLATES_COUNTER_CACHE_DURATION);
+                $logData['info'] = 'key incremented from cache';
+                \Yii::info($logData, 'elk\Email:Template:abtesting');
                 return;
             }
             /** @fflag FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES, A/B testing for email offer templates value */
@@ -172,6 +174,14 @@ class EmailTemplateOfferABTestingService extends ABTestingBaseService
             }
             if (empty($settingsValue['projects']) || !is_array($settingsValue['projects'])) {
                 throw new \DomainException('Projects params must be array');
+            }
+            $departmentParams = $settingsValue['departments'];
+            $department = Department::findOne($departmentId);
+            if (empty($department)) {
+                return;
+            }
+            if (!in_array($department->dep_key, $departmentParams)) {
+                return;
             }
             $projectsParams = $settingsValue['projects'];
             $project = Project::findOne($projectId);
@@ -190,8 +200,15 @@ class EmailTemplateOfferABTestingService extends ABTestingBaseService
             if (!isset($expectedPercentagesArray[$emailTemplateKey])) {
                 return;
             }
-            $startingDateTime = ArrayHelper::getValue($settingsValue, 'startingDateTime');
-            self::setCacheValForEmailTemplate($cacheKey, $startingDateTime, $templateId, $projectId);
+            $cacheValue = self::setDefaultCacheValForEmailTemplate($cacheKey);
+            $cacheValue++;
+            $logData = [
+                'cacheKey'   => $cacheKey,
+                'cacheValue' => $cacheValue,
+                'message'    => 'Value Has Been Incremented Successfully',
+            ];
+            \Yii::info($logData, 'elk\Email:Template:abtesting');
+            \Yii::$app->cache->set($cacheKey, $cacheValue, self::EMAIL_OFFER_TEMPLATES_COUNTER_CACHE_DURATION);
         } catch (\DomainException | \RuntimeException $e) {
             $message = AppHelper::throwableLog($e);
             \Yii::warning(
@@ -205,5 +222,20 @@ class EmailTemplateOfferABTestingService extends ABTestingBaseService
                 'EmailTemplateOfferABTestingService:incrementCounterByTemplateAndProjectIds:Throwable'
             );
         }
+    }
+
+    /**
+     * @return int
+     */
+    public function getDefaultOfferTemplateId(): int
+    {
+        $settingsValue            = \Yii::$app->ff->val(FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES);
+        if (!is_array($settingsValue)) {
+            throw new \DomainException('Params must be array');
+        }
+        if (!isset($settingsValue['defaultOfferTemplateKey'])) {
+            throw new \DomainException('Default Offer key should be set');
+        }
+        return $this->getEmailOfferTemplateIdByKey($settingsValue['defaultOfferTemplateKey']);
     }
 }

@@ -41,6 +41,7 @@ class GlobalLog extends ActiveRecord
     public const MODEL_CASES  = 'src\entities\cases\Cases';
     public const MODEL_LPPD  = 'src\model\leadPoorProcessingData\entity\LeadPoorProcessingData';
     public const MODEL_ABAC_POLICY  = 'modules\abac\src\entities\AbacPolicy';
+    public const MODEL_EMPLOYEE         = 'common\models\Employee';
 
     public const MODEL_LIST         = [
         self::MODEL_CLIENT          => 'Client',
@@ -54,6 +55,7 @@ class GlobalLog extends ActiveRecord
         self::MODEL_CASES => 'Cases',
         self::MODEL_LPPD => 'LeadPoorProcessingData',
         self::MODEL_ABAC_POLICY => 'AbacPolicy',
+        self::MODEL_EMPLOYEE        => 'Employee',
     ];
 
     public const APP_CONSOLE    = 'app-console';

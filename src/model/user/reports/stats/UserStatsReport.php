@@ -668,11 +668,11 @@ class UserStatsReport extends Model
         if (Metrics::isGrossProfit($this->metrics)) {
             $data['gross_profit'] = [
                 'Name' => 'Gross Profit',
-                'total' => \Yii::$app->formatter->asCurrency($this->getSumColumn(
+                'total' => \Yii::$app->formatter->asNumCurrency($this->getSumColumn(
                     $results,
                     'gross_profit'
                 )),
-                'average' => \Yii::$app->formatter->asCurrency($this->getAvgValueColumn(
+                'average' => \Yii::$app->formatter->asNumCurrency($this->getAvgValueColumn(
                     $results,
                     'gross_profit'
                 )),
@@ -681,11 +681,11 @@ class UserStatsReport extends Model
         if (Metrics::isTips($this->metrics)) {
             $data['tips'] = [
                 'Name' => 'Tips',
-                'total' => \Yii::$app->formatter->asCurrency($this->getSumColumn(
+                'total' => \Yii::$app->formatter->asNumCurrency($this->getSumColumn(
                     $results,
                     'tips'
                 )),
-                'average' => \Yii::$app->formatter->asCurrency($this->getAvgValueColumn(
+                'average' => \Yii::$app->formatter->asNumCurrency($this->getAvgValueColumn(
                     $results,
                     'tips'
                 )),

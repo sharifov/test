@@ -12,8 +12,10 @@ use Gnello\Mattermost\Driver;
 use modules\cases\src\abac\CasesAbacObject;
 use modules\lead\src\abac\LeadAbacObject;
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeCreatedEvent;
+use modules\user\src\update\UpdateForm;
 use src\auth\Auth;
 use src\helpers\setting\SettingHelper;
+use src\model\call\socket\CallUpdateMessage;
 use src\model\call\useCase\createCall\CreateCallForm;
 use src\model\client\notifications\client\entity\NotificationType;
 use common\components\purifier\Purifier;
@@ -75,6 +77,7 @@ use src\model\conference\useCase\PrepareCurrentCallsForNewCall;
 use src\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackForm;
 use src\model\department\department\DefaultPhoneType;
 use src\model\leadRedial\assign\LeadRedialAccessChecker;
+use src\model\leadRedial\assign\LeadRedialAssigner;
 use src\model\leadRedial\assign\Users;
 use src\model\leadRedial\entity\CallRedialUserAccess;
 use src\model\leadRedial\entity\CallRedialUserAccessRepository;
@@ -104,6 +107,17 @@ use yii\rbac\Role;
 
 class TestController extends Controller
 {
+    public function actionW()
+    {
+        $s = \Yii::createObject(LeadRedialAssigner::class);
+        $s->assign(513249, 295, new \DateTimeImmutable());
+        die;
+        $call = Call::findOne(3386979);
+        $message = (new AcceptCallMessage())->create($call, 295);
+        Notifications::publish('acceptedCall', ['user_id' => 295], $message);
+//        Notifications::publish('acceptedCallHide', ['user_id' => 295], []);
+    }
+
     public function actionTestWs()
     {
         Notifications::publish(
@@ -113,6 +127,17 @@ class TestController extends Controller
                 'data' => 'testData',
             ]
         );
+    }
+
+    public function actionRr()
+    {
+        $user = Employee::findOne(294);
+        $updatedUser = Employee::findOne(294);
+        $form = new UpdateForm($user, $updatedUser);
+        $form->form_roles = ['admin', 'agent_qw'];
+        $form->validate();
+        VarDumper::dump($form);
+        VarDumper::dump($form->getErrors());
     }
 
     public function actionT()

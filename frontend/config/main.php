@@ -29,6 +29,7 @@ use yii\log\FileTarget;
 use yii\web\JqueryAsset;
 use yii\bootstrap\BootstrapAsset;
 use yii\bootstrap\BootstrapPluginAsset;
+use modules\objectSegment\ObjectSegmentModule;
 
 $params = array_merge(
     require __DIR__ . '/../../common/config/params.php',
@@ -354,6 +355,11 @@ return [
             'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
         ],
 
+        'object-segment' => [
+            'class' => ObjectSegmentModule::class,
+            'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
+        ],
+
         'flag' => [
             'class' => FeatureFlagModule::class,
             'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
@@ -421,6 +427,9 @@ return [
         'cruise' => [
             'class' => CruiseModule::class,
             'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
+        ],
+        'smart-search' => [
+            'class' => \kivork\search\SearchModule::class,
         ],
         ],
         'as beforeRequest' => [

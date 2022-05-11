@@ -2011,9 +2011,6 @@ private EmailReviewQueueManageService $emailReviewQueueManageService;
         $form->assignDep(Department::DEPARTMENT_SALES);
         if ($form->load($data['post']) && $form->validate()) {
             try {
-                if ($form->depId === 0) {
-                    $form->depId = null;
-                }
                 if (!$delayedChargeAccess) {
                     $form->delayedCharge = false;
                 }
@@ -2059,9 +2056,6 @@ private EmailReviewQueueManageService $emailReviewQueueManageService;
             $form = new LeadManageForm(0);
             if (Yii::$app->request->isPjax && $form->load($data['post']) && $form->validate()) {
                 try {
-                    if ($form->depId === 0) {
-                        $form->depId = null;
-                    }
                     $leadManageService = Yii::createObject(UseCaseLeadManageService::class);
                     $form->client->projectId = $form->projectId;
                     $form->client->typeCreate = Client::TYPE_CREATE_LEAD;
@@ -2647,6 +2641,11 @@ private EmailReviewQueueManageService $emailReviewQueueManageService;
                 $load = $splitForm->loadModels($data);
                 if ($load) {
                     $errors = ActiveForm::validate($splitForm);
+                }
+
+                /** @abac null, LeadAbacObject::CHANGE_SPLIT_TIPS, LeadAbacObject::ACTION_UPDATE, hide split tips edition */
+                if (!Yii::$app->abac->can(null, LeadAbacObject::CHANGE_SPLIT_TIPS, LeadAbacObject::ACTION_UPDATE)) {
+                    $errors[] = 'Forbidden';
                 }
 
                 if (empty($errors) && $splitForm->save($errors)) {

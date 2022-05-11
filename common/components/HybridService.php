@@ -2,6 +2,7 @@
 
 namespace common\components;
 
+use common\components\hybrid\HybridWhData;
 use common\models\Project;
 use src\helpers\setting\SettingHelper;
 use src\model\project\entity\params\Webhook;
@@ -204,7 +205,7 @@ class HybridService extends Component
 
     public function whReprotection(int $projectId, array $data): ?array
     {
-        return $this->wh($projectId, 'flight/schedule-change', $data);
+        return $this->wh($projectId, HybridWhData::WH_TYPE_FLIGHT_SCHEDULE_CHANGE, $data);
     }
 
     public function whVoluntaryExchangeSuccess(int $projectId, array $data): ?array

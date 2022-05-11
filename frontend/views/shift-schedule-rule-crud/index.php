@@ -33,31 +33,62 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            'ssr_id',
+            ['attribute' => 'ssr_id', 'options' => [
+                'style' => 'width: 80px'
+            ]],
             [
                 'attribute' => 'ssr_shift_id',
                 'value' => static function (ShiftScheduleRule $model) {
-                    return $model->shift->sh_name;
+                    return $model->shift ? $model->shift->getColorLabel() . '&nbsp; ' . Html::a(
+                        $model->shift->sh_name,
+                        ['shift-schedule-rule-crud/view', 'id' => $model->shift->sh_id],
+                        ['data-pjax' => 0]
+                    ) : '-';
                 },
                 'filter' => ShiftSelectWidget::widget(['model' => $searchModel, 'attribute' => 'ssr_shift_id']),
                 'options' => [
-                    'style' => 'width: 100px'
-                ]
+                    'style' => 'width: 120px'
+                ],
+                'format' => 'raw'
             ],
             [
                 'attribute' => 'ssr_sst_id',
                 'value' => static function (
                     ShiftScheduleRule $model
                 ) {
-                    return $model->getScheduleTypeTitle();
+                    return $model->scheduleType ? $model->scheduleType->getColorLabel() . '&nbsp; ' .
+                        $model->getScheduleTypeTitle() : '-';
                 },
-                'filter' => ShiftScheduleType::getList()
+                'filter' => ShiftScheduleType::getList(),
+                'format' => 'raw'
             ],
             'ssr_title',
-            'ssr_timezone',
-            'ssr_start_time_loc',
-            'ssr_end_time_loc',
+            'ssr_start_time_utc',
+            'ssr_end_time_utc',
             'ssr_duration_time',
+
+            [
+                'label' => 'Start Loc Time',
+                'value' => static function (
+                    ShiftScheduleRule $model
+                ) {
+                    return '<i class="fa fa-clock-o"></i> ' . Yii::$app->formatter->asTime(strtotime($model->ssr_start_time_utc));
+                },
+                'format' => 'raw'
+            ],
+            [
+                'label' => 'End Loc Time',
+                'value' => static function (
+                    ShiftScheduleRule $model
+                ) {
+                    return '<i class="fa fa-clock-o"></i> ' . Yii::$app->formatter->asTime(strtotime($model->ssr_end_time_utc));
+                },
+                'format' => 'raw'
+            ],
+            //'ssr_timezone',
+//            'ssr_start_time_loc',
+//            'ssr_end_time_loc',
+
             /*[
                 'class' => DurationColumn::class,
                 'attribute' => 'ssr_duration_time',
@@ -67,25 +98,24 @@ $this->params['breadcrumbs'][] = $this->title;
             'ssr_cron_expression',
             'ssr_cron_expression_exclude',
             ['class' => BooleanColumn::class, 'attribute' => 'ssr_enabled'],
-            'ssr_start_time_utc',
-            'ssr_end_time_utc',
-            [
-                'class' => DateTimeColumn::class,
-                'attribute' => 'ssr_created_dt',
-                'format' => 'byUserDateTime'
-            ],
+
+//            [
+//                'class' => DateTimeColumn::class,
+//                'attribute' => 'ssr_created_dt',
+//                'format' => 'byUserDateTime'
+//            ],
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'ssr_updated_dt',
                 'format' => 'byUserDateTime'
             ],
-            [
-                'class' => UserSelect2Column::class,
-                'attribute' => 'ssr_created_user_id',
-                'relation' => 'createdUser',
-                'format' => 'username',
-                'placeholder' => 'Select User'
-            ],
+//            [
+//                'class' => UserSelect2Column::class,
+//                'attribute' => 'ssr_created_user_id',
+//                'relation' => 'createdUser',
+//                'format' => 'username',
+//                'placeholder' => 'Select User'
+//            ],
             [
                 'class' => UserSelect2Column::class,
                 'attribute' => 'ssr_updated_user_id',

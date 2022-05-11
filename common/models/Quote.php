@@ -73,6 +73,7 @@ use yii\helpers\VarDumper;
  * @property Project $providerProject
  * @property QuoteLabel[] $quoteLabel
  * @property Currency|null $clientCurrency
+ * @property int|null $q_create_type_id
  */
 class Quote extends \yii\db\ActiveRecord
 {
@@ -212,6 +213,23 @@ class Quote extends \yii\db\ActiveRecord
 
     public const EXCLUDE_AIRLINE_LOGO = ['6X'];
 
+    public const
+        CREATE_TYPE_QUOTE_SEARCH = 1,
+        CREATE_TYPE_SMART_SEARCH = 2,
+        CREATE_TYPE_MANUAL = 3,
+        CREATE_TYPE_EXPERT = 4,
+        CREATE_TYPE_AUTO_SELECT = 5,
+        CREATE_TYPE_AUTO = 6;
+
+    public const CREATE_TYPE_LIST = [
+        self::CREATE_TYPE_QUOTE_SEARCH => 'Quote Search',
+        self::CREATE_TYPE_SMART_SEARCH => 'Smart Search',
+        self::CREATE_TYPE_MANUAL => 'Manual',
+        self::CREATE_TYPE_EXPERT => 'Expert',
+        self::CREATE_TYPE_AUTO_SELECT => 'Auto Select',
+        self::CREATE_TYPE_AUTO => 'Auto',
+    ];
+
     /**
      * Quote constructor.
      * @param array $config
@@ -291,6 +309,9 @@ class Quote extends \yii\db\ActiveRecord
             ['type_id', 'integer'],
             ['type_id', 'in', 'range' => array_keys(self::TYPE_LIST)],
 
+            ['q_create_type_id', 'integer'],
+            ['q_create_type_id', 'in', 'range' => array_keys(self::CREATE_TYPE_LIST)],
+
             ['pcc', 'string', 'max' => 50],
 
             ['gds', 'string', 'max' => 1],
@@ -348,6 +369,7 @@ class Quote extends \yii\db\ActiveRecord
             'agent_processing_fee' => 'Agent Processing Fee',
             'q_client_currency' => 'Client currency',
             'q_client_currency_rate' => 'Client rate',
+            'q_create_type_id' => 'Creation type',
         ];
     }
 
@@ -409,6 +431,7 @@ class Quote extends \yii\db\ActiveRecord
         $quote->lead_id = $leadId;
         $quote->uid = uniqid('', false);
         $quote->status = self::STATUS_CREATED;
+        $quote->q_create_type_id = self::CREATE_TYPE_MANUAL;
         return $quote;
     }
 
@@ -435,6 +458,7 @@ class Quote extends \yii\db\ActiveRecord
         $quote->employee_name = $employee->username ?? null;
         $quote->origin_search_data = json_encode($quoteData);
         $quote->gds_offer_id = $quoteData['gdsOfferId'] ?? null;
+        $quote->q_create_type_id = $quoteData['createTypeId'] ?? null;
 
         $quote->q_client_currency = $currency->cur_code ?? null;
         $quote->q_client_currency_rate = $currency->cur_base_rate ?? null;
@@ -1605,7 +1629,7 @@ class Quote extends \yii\db\ActiveRecord
     }
 
 
-    public function getLabelByStatus(int $status)
+    public static function getLabelByStatus(int $status)
     {
         $class = self::STATUS_CLASS_LIST[$status];
 
@@ -1688,14 +1712,20 @@ class Quote extends \yii\db\ActiveRecord
                 $baggageCharge = $segment->quoteSegmentBaggageCharges;
 
                 $baggageInfo = [];
+                $quoteSegmentBaggage = [];
+                $quoteSegmentBaggageCharge = [];
                 if (count($baggages)) {
                     foreach ($baggages as $baggageEntry) {
-                        $baggageInfo[$baggageEntry->qsb_pax_code] = $baggageEntry->getInfo();
+                        $paxCode = $baggageEntry->qsb_pax_code ?: self::PASSENGER_ADULT;
+                        $baggageInfo[$paxCode] = $baggageEntry->getInfo();
+                        $quoteSegmentBaggage[] = array_merge($baggageEntry->getInfo(), ['pax_code' => $paxCode]);
                     }
                 }
                 if (count($baggageCharge)) {
                     foreach ($baggageCharge as $baggageChEntry) {
-                        $baggageInfo[$baggageChEntry->qsbc_pax_code]['charge'] = $baggageChEntry->getInfo();
+                        $paxCode = $baggageChEntry->qsbc_pax_code ?: self::PASSENGER_ADULT;
+                        $baggageInfo[$paxCode]['charge'] = $baggageChEntry->getInfo();
+                        $quoteSegmentBaggageCharge[] = array_merge($baggageChEntry->getInfo(), ['pax_code' => $paxCode]);
                     }
                 }
                 $stops = [];
@@ -1723,6 +1753,11 @@ class Quote extends \yii\db\ActiveRecord
                     'cabin' => $segment->qs_cabin,
                     'ticket_id' => $segment->qs_ticket_id,
                     'baggage' => $baggageInfo,
+                    'baggageAdditionalData' => [
+                        'quoteSegmentBaggage' => $quoteSegmentBaggage,
+                        'quoteSegmentBaggageCharge' => $quoteSegmentBaggageCharge
+
+                    ]
                 ];
             }
             $trips[] = [
@@ -2139,6 +2174,14 @@ class Quote extends \yii\db\ActiveRecord
     /**
      * @return string
      */
+    public function getCreateTypeName(): string
+    {
+        return self::CREATE_TYPE_LIST[$this->q_create_type_id] ?? '-';
+    }
+
+    /**
+     * @return string
+     */
     public function getGdsName2(): string
     {
         return SearchService::GDS_LIST[$this->gds] ?? '-';
@@ -2246,6 +2289,11 @@ class Quote extends \yii\db\ActiveRecord
         ];
 
         foreach ($priceData['prices'] as $paxCode => $price) {
+            $serviceFeePerPax = $price['service_fee'] ?? 0;
+            if ($serviceFeePerPax) {
+                $serviceFeePerPax = $serviceFeePerPax / $price['tickets'] ?? 1;
+            }
+
             $result['passengers'][$paxCode]['cnt'] = $price['tickets'];
             $result['passengers'][$paxCode]['price'] = round($price['selling'] / $price['tickets'], 2);
             $result['passengers'][$paxCode]['tax'] = round(($price['taxes'] + $price['mark_up'] + $price['extra_mark_up'] + $price['service_fee']) / $price['tickets'], 2);
@@ -2253,7 +2301,7 @@ class Quote extends \yii\db\ActiveRecord
             $result['passengers'][$paxCode]['mark_up'] = round($price['mark_up'] / $price['tickets'], 2);
             $result['passengers'][$paxCode]['extra_mark_up'] = round($price['extra_mark_up'] / $price['tickets'], 2);
             $result['passengers'][$paxCode]['baseTax'] = round(($price['taxes']) / $price['tickets'], 2);
-            $result['passengers'][$paxCode]['service_fee'] = round($price['service_fee'] ?? 0, 2);
+            $result['passengers'][$paxCode]['service_fee'] = round($serviceFeePerPax, 2);
 
             $result['prices']['totalTax'] += $result['passengers'][$paxCode]['tax'] * $price['tickets'];
         }

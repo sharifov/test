@@ -55,16 +55,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 'header' => 'Phones',
                 'attribute' => 'client_phone',
                 'value' => function (Client $model) {
-                    $phones = $model->clientPhones;
-                    $data = [];
-                    if ($phones) {
-                        foreach ($phones as $k => $phone) {
-                            $data[] = '<i class="fa fa-phone"></i> <code>' . Html::encode($phone->phone) . '</code>'; //<code>'.Html::a($phone->phone, ['client-phone/view', 'id' => $phone->id], ['target' => '_blank', 'data-pjax' => 0]).'</code>';
-                        }
-                    }
-
-                    $str = implode('<br>', $data);
-                    return '' . $str . '';
+                    return \frontend\widgets\SliceAndShowMoreWidget::widget([
+                        'data' => $model->getOnlyPhones(),
+                        'separator' => ' <i class="fa fa-phone"><code></code></i>'
+                    ]);
                 },
                 'format' => 'raw',
                 'contentOptions' => ['class' => 'text-left'],
@@ -74,16 +68,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 'header' => 'Emails',
                 'attribute' => 'client_email',
                 'value' => function (Client $model) {
-                    $emails = $model->clientEmails;
-                    $data = [];
-                    if ($emails) {
-                        foreach ($emails as $k => $email) {
-                            $data[] = '<i class="fa fa-envelope"></i> <code>' . Html::encode($email->email) . '</code>';
-                        }
-                    }
-
-                    $str = implode('<br>', $data);
-                    return '' . $str . '';
+                    return \frontend\widgets\SliceAndShowMoreWidget::widget([
+                        'data' => $model->getOnlyEmails(),
+                        'separator' => ' <i class="fa fa-phone"><code></code></i>'
+                    ]);
                 },
                 'format' => 'raw',
                 'contentOptions' => ['class' => 'text-left'],
@@ -94,12 +82,16 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'header' => 'Leads',
-                'value' => function (Client $model) {
-                    $leads = $model->leads;
+                'value' => function (Client $model) use ($searchModel){
+                    $limit = $searchModel->getLeadsLimit();
+                    $leads = $model->getLeadIdsAndRequestIp($limit);
                     $data = [];
                     if ($leads) {
                         foreach ($leads as $lead) {
-                            $data[] = '<i class="fa fa-link"></i> ' . Html::a('lead: ' . $lead->id, ['/leads/view', 'id' => $lead->id, 'showInPopUp' => 'modal'], ['title' => 'Lead: ' . $lead->id, 'class' => "show-modal", "data-id" => $lead->id, 'target' => '_blank', 'data-pjax' => 0]) . ' (IP: ' . $lead->request_ip . ')';
+                            $data[] = '<i class="fa fa-link"></i> ' . Html::a('lead: ' . $lead['id'], ['/leads/view', 'id' => $lead['id'], 'showInPopUp' => 'modal'], ['title' => 'Lead: ' . $lead['id'], 'class' => "show-modal", "data-id" => $lead['id'], 'target' => '_blank', 'data-pjax' => 0]) . ' (IP: ' . $lead['request_ip'] . ')';
+                        }
+                        if($model->LeadsCountByClient() > $limit){
+                            $data[] = '<i class="fas fa-eye green"></i> ' . Html::a('Show more', ['/client/view', 'id' => $model->id, '#' => 'pjax-client-leads'], ['title' => 'Show more', 'target' => '_blank', 'data-pjax' => 0]);
                         }
                     }
 

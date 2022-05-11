@@ -41,14 +41,14 @@ $this->title = 'Home Page'; // . $user->username;
     </div>
 
     <div class="row">
-        <div class="col-md-3">
+        <div class="col-md-6 col-lg-3">
             <div class="x_panel">
                 <div class="x_title" >
                     <h2><i class="fa fa-user"></i> User Info</h2>
 
                     <div class="clearfix"></div>
                 </div>
-                <div class="x_content">
+                <div class="x_content table-responsive">
                     <table class="table table-bordered">
                         <tr>
                             <th><i class="fa fa-user"></i> My Username:</th>
@@ -106,13 +106,13 @@ $this->title = 'Home Page'; // . $user->username;
             </div>
         </div>
 
-        <div class="col-md-3">
+        <div class="col-md-6 col-lg-3">
             <div class="x_panel">
                 <div class="x_title" >
                     <h2><i class="fa fa-cog"></i> Settings</h2>
                     <div class="clearfix"></div>
                 </div>
-                <div class="x_content">
+                <div class="x_content table-responsive">
                     <table class="table table-bordered">
                 <tr>
                     <th><i class="fa fa-calendar"></i> Server Date Time (UTC)</th>
@@ -133,7 +133,7 @@ $this->title = 'Home Page'; // . $user->username;
 
 
 
-        <div class="col-md-6">
+        <div class="col-md-12 col-lg-6">
             <?php if ($user->userProjectParams) : ?>
             <div class="x_panel">
                 <div class="x_title" >
@@ -145,7 +145,7 @@ $this->title = 'Home Page'; // . $user->username;
 <!--                    </ul>-->
                     <div class="clearfix"></div>
                 </div>
-                <div class="x_content">
+                <div class="x_content table-responsive">
                     <table class="table table-bordered table-hover">
                         <tr>
                             <th>Project</th>

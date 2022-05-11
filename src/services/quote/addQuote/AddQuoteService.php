@@ -48,6 +48,8 @@ use yii\helpers\ArrayHelper;
  */
 class AddQuoteService
 {
+    public const AUTO_ADD_CID = 'SAL103';
+
     /**
      * @var TransactionManager
      */
@@ -157,12 +159,13 @@ class AddQuoteService
         });
     }
 
-    public function autoSelectQuotes(array $quotes, Lead $lead, ?Employee $employee, bool $isReverse = false): void
+    public function autoSelectQuotes(array $quotes, Lead $lead, ?Employee $employee, bool $isReverse = false, bool $isAuto = false): void
     {
         if ($isReverse) {
             $quotes = array_reverse($quotes);
         }
         foreach ($quotes as $quote) {
+            $quote['createTypeId'] = $isAuto ? Quote::CREATE_TYPE_AUTO : Quote::CREATE_TYPE_AUTO_SELECT;
             $this->createQuoteFromSearch($quote, $lead, $employee);
         }
     }

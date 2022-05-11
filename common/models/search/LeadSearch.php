@@ -48,6 +48,7 @@ use yii\db\ActiveQuery;
 use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
+use modules\lead\src\abac\queue\LeadQueueBusinessInboxAbacObject;
 
 /**
  * LeadSearch represents the model behind the search form of `common\models\Lead`.
@@ -890,9 +891,8 @@ class LeadSearch extends Lead
         if (ArrayHelper::isIn($this->is_conversion, ['1', '0'], false)) {
             $leadIds = LeadUserConversion::find()
                 ->select('luc_lead_id')
-                ->groupBy(['luc_lead_id'])
-                ->indexBy('luc_lead_id')
-                ->column();
+                ->groupBy(['luc_lead_id']);
+
             $command = $this->is_conversion ? 'IN' : 'NOT IN';
 
             $query->andWhere([
@@ -2235,7 +2235,7 @@ class LeadSearch extends Lead
             //$dataProvider->setTotalCount($this->limit);
         }
 
-        $query->with(['client', 'client.clientEmails', 'client.clientPhones']);
+        $query->with(['client']);
 
         return $dataProvider;
     }
@@ -2351,7 +2351,7 @@ class LeadSearch extends Lead
 //            $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
 //        }
 
-        $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'leadChecklists', 'leadChecklists.lcType', 'employee']);
+        $query->with(['client', 'leadChecklists', 'leadChecklists.lcType', 'employee']);
         $query->with([
            'minLpp' => static function (ActiveQuery $query) {
                 $query->joinWith('lppLppd')->andWhere(['lppd_enabled' => 1]);
@@ -2423,7 +2423,7 @@ class LeadSearch extends Lead
         }
 
         if ($user->isAdmin()) {
-            $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'project', 'leadFlightSegments']);
+            $query->with(['client', 'project', 'leadFlightSegments']);
         }
 
         if ($this->expiration_dt) {
@@ -2445,7 +2445,7 @@ class LeadSearch extends Lead
     {
 //        $projectIds = array_keys(EmployeeAccess::getProjects());
         $query = $this->leadBadgesRepository->getFollowUpQuery($user)->with('project');
-        $query->with(['client', 'client.clientEmails', 'client.clientPhones']);
+        $query->with(['client']);
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 
         $leadTable = Lead::tableName();
@@ -2564,8 +2564,6 @@ class LeadSearch extends Lead
 
         $query->with([
             'client',
-            'client.clientEmails',
-            'client.clientPhones',
             'employee',
             'leadFlightSegments' => static function (ActiveQuery $query) {
                 return $query->orderBy(['id' => SORT_ASC]);
@@ -2588,7 +2586,7 @@ class LeadSearch extends Lead
     {
 //        $projectIds = array_keys(EmployeeAccess::getProjects());
         $query = $this->leadBadgesRepository->getBonusQuery($user)->with('project');
-        $query->with(['client', 'client.clientEmails', 'client.clientPhones']);
+        $query->with(['client']);
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 
         $leadTable = Lead::tableName();
@@ -2707,8 +2705,6 @@ class LeadSearch extends Lead
 
         $query->with([
             'client',
-            'client.clientEmails',
-            'client.clientPhones',
             'employee',
             'leadFlightSegments' => static function (ActiveQuery $query) {
                 return $query->orderBy(['id' => SORT_ASC]);
@@ -2889,9 +2885,25 @@ class LeadSearch extends Lead
         ]);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
+        }
+
+        /** @abac null, LeadQueueBusinessInboxAbacObject::QUERY_LISTING, LeadQueueBusinessInboxAbacObject::ACTION_READ_WT_USER_RESTRICTION, Shown leads where user restriction */
+        $canUserRestriction = \Yii::$app->abac->can(
+            null,
+            LeadQueueBusinessInboxAbacObject::QUERY_LISTING,
+            LeadQueueBusinessInboxAbacObject::ACTION_READ_WT_USER_RESTRICTION
+        );
+        if ($canUserRestriction) {
+            $query->leftJoin(ProfitSplit::tableName(), 'ps_lead_id = ' . $leadTable . '.id AND ps_user_id = ' . $user->id);
+            $query->leftJoin(TipsSplit::tableName(), 'ts_lead_id = ' . $leadTable . '.id AND ts_user_id = ' . $user->id);
+            $query->andWhere(['OR',
+                [$leadTable . '.employee_id' => $user->id],
+                ['IS', $leadTable . '.employee_id', null],
+                ['ps_user_id' => $user->id],
+                ['ts_user_id' => $user->id]
+            ]);
         }
 
         // grid filtering conditions
@@ -2910,10 +2922,9 @@ class LeadSearch extends Lead
 
         if ($this->limit > 0) {
             $query->limit($this->limit);
-            //$dataProvider->setTotalCount($this->limit);
         }
 
-        $query->with(['client', 'client.clientEmails', 'client.clientPhones']);
+        $query->with(['client']);
 
         return $dataProvider;
     }
@@ -2957,7 +2968,7 @@ class LeadSearch extends Lead
             $leadTable . '.l_type' => $this->l_type,
         ]);
 
-        $query->with(['client', 'client.clientEmails', 'client.clientPhones']);
+        $query->with(['client']);
 
         return $dataProvider;
     }
@@ -3010,7 +3021,7 @@ class LeadSearch extends Lead
         }
 
         if ($user->isAdmin()) {
-            $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'project', 'leadFlightSegments']);
+            $query->with(['client', 'project', 'leadFlightSegments']);
         }
 
         return $dataProvider;
@@ -3075,7 +3086,7 @@ class LeadSearch extends Lead
         }
 
         if ($user->isAdmin()) {
-            $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'project', 'leadFlightSegments']);
+            $query->with(['client', 'project', 'leadFlightSegments']);
         }
 
         if ($this->expiration_dt) {
@@ -3230,7 +3241,7 @@ class LeadSearch extends Lead
             ]);
         }
 
-        $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'employee']);
+        $query->with(['client',  'employee']);
 
         return $dataProvider;
     }
@@ -3290,7 +3301,7 @@ class LeadSearch extends Lead
 //            $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
 //        }
 
-        $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'employee', 'project']);
+        $query->with(['client', 'employee', 'project']);
 
         return $dataProvider;
     }
@@ -4447,6 +4458,7 @@ class LeadSearch extends Lead
             $leadTable . '.l_init_price' => $this->l_init_price,
             $leadTable . '.l_call_status_id' => $this->l_call_status_id,
             $leadTable . '.l_type' => $this->l_type,
+            $leadTable . '.l_answered' => $this->l_answered,
         ]);
 
         if ($this->email_status > 0) {
@@ -4508,7 +4520,7 @@ class LeadSearch extends Lead
                 ->andFilterWhere(['<=', 'l_last_action_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->l_last_action_dt) + 3600 * 24)]);
         }
 
-        $query->with(['client', 'client.clientEmails', 'client.clientPhones']);
+        $query->with(['client']);
 
         return $dataProvider;
     }

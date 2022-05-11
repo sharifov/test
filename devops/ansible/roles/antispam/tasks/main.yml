@@ -11,18 +11,18 @@
   docker_image:
     name: "{{ docker_registry }}/{{ antispam_image }}:{{ antispam_ver }}"
     source: pull
-    force_source: yes
+    force_source: true
 
 - name: "Run container {{ antispam_image | split('/') | last }}"
   docker_container:
-    detach: yes
+    detach: true
     state: started
     name: "{{ antispam_image | split('/') | last }}"
     image: "{{ docker_registry }}/{{ antispam_image }}:{{ antispam_ver }}"
     restart_policy: unless-stopped
     ports:
-    - 8001:8000
+      - 8001:8000
 
 - name: Prune old images
   docker_prune:
-    images: yes
+    images: true

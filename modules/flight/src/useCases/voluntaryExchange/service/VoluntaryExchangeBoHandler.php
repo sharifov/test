@@ -89,20 +89,11 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
         switch ($form->status) {
             case FlightVoluntaryExchangeUpdateForm::STATUS_EXCHANGED:
                 $this->handleExchanged();
-                $statusForm = new CasesChangeStatusForm($this->case, null);
-                $statusForm->setAttributes([
-                    'language' => 'en-US',
-                    'sendTo' => $this->case->client->lastClientEmail,
-                    'resendFeedbackForm' => true
-                ]);
-                if ($statusForm->isSendFeedback()) {
-                    $sent = $this->objectCollection->getCasesCommunicationService()->sendFeedbackEmail($this->case, $statusForm, null);
-                    if ($sent) {
-                        $this->case->addEventLog(
-                            CaseEventLog::VOLUNTARY_EXCHANGE_WH_UPDATE,
-                            'Sent Feedback Survey Email By: System'
-                        );
-                    }
+                if ($this->case->project->getParams()->object->case->sendFeedback ?? null) {
+                    $this->objectCollection
+                        ->getCasesCommunicationService()
+                        ->sendAutoFeedbackEmail($this->case, CaseEventLog::VOLUNTARY_EXCHANGE_WH_UPDATE)
+                    ;
                 }
                 break;
             case FlightVoluntaryExchangeUpdateForm::STATUS_CANCELED:

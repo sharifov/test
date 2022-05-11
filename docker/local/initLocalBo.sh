@@ -19,17 +19,17 @@ if [ "$useLocalBo" == "true" ]; then
         printf -v boUrl2 "%s\t##%s" "$boUrlLocal2" "$boUrlReal2"
         printf -v boUrl3 "%s\t##%s" "$boUrlLocal3" "$boUrlReal3"
 
-        sed -i "s~$boUrlReal~$boUrl~" ../../.env
-        sed -i "s~$boUrlReal2~$boUrl2~" ../../.env
-        sed -i "s~$boUrlReal3~$boUrl3~" ../../.env
+        sed -i" " "s~$boUrlReal~$boUrl~" ../../.env
+        sed -i" " "s~$boUrlReal2~$boUrl2~" ../../.env
+        sed -i" " "s~$boUrlReal3~$boUrl3~" ../../.env
 
         printf "Init local env\n"
   fi
 else
     if [ "$check" != "" ]; then
-      sed -i "s~$boUrlLocal\t##~~" ../../.env
-      sed -i "s~$boUrlLocal2\t##~$boUrl2~" ../../.env
-      sed -i "s~$boUrlLocal3\t##~$boUrl3~" ../../.env
+      sed -i" " "s~$boUrlLocal\t##~~" ../../.env
+      sed -i" " "s~$boUrlLocal2\t##~$boUrl2~" ../../.env
+      sed -i" " "s~$boUrlLocal3\t##~$boUrl3~" ../../.env
 
       printf "Disabled local env\n"
   fi

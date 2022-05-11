@@ -100,7 +100,7 @@ class SearchAndAutoAddTopFlightQuotes extends BaseJob implements JobInterface
                 ]);
 
                 $addQuoteService = Yii::createObject(AddQuoteService::class);
-                $addQuoteService->autoSelectQuotes($dataProvider->getModels(), $lead, null);
+                $addQuoteService->autoSelectQuotes($dataProvider->getModels(), $lead, null, false, true);
             }
         } catch (\Throwable $e) {
             Yii::error(AppHelper::throwableLog($e, true), 'SearchAndAutoAddTopFlightQuotes::Throwable');

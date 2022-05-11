@@ -8,7 +8,8 @@ function initCronExpressionApp(id, curValue) {
         },
         data() {
             return {
-                expression: ''
+                expression: '',
+                defaultExpression: null
             };
         },
         computed: {
@@ -20,6 +21,18 @@ function initCronExpressionApp(id, curValue) {
             },
             getWeekdayFormat() {
                 return this.$refs.weekday.getFormatByValue(this.$refs.weekday.selectedRadio);
+            },
+            getDayDefaultValue() {
+                let val = this.$refs.day.defaultInputRadio;
+                return val ? val : '';
+            },
+            getMonthDefaultValue() {
+                let val = this.$refs.month.defaultInputRadio;
+                return val ? val : '';
+            },
+            getWeekdayDefaultValue() {
+                let val = this.$refs.weekday.defaultInputRadio;
+                return val ? val : '';
             }
             // getYearFormat() {
             //     return this.$refs.year.getFormatByValue(this.$refs.year.selectedRadio);
@@ -31,7 +44,7 @@ function initCronExpressionApp(id, curValue) {
                 let monthFormat = this.getMonthFormat;
                 let weekdayFormat = this.getWeekdayFormat;
                 // let yearFormat = this.getYearFormat;
-                this.expression = dayFormat + ' ' + monthFormat + ' ' + weekdayFormat; // + ' ' + yearFormat;
+                this.expression = (dayFormat + ' ' + monthFormat + ' ' + weekdayFormat).trim(); // + ' ' + yearFormat;
             },
             parse() {
                 let expression = this.expression.replace(/  +/g, ' ').split(' ');
@@ -39,11 +52,20 @@ function initCronExpressionApp(id, curValue) {
                 this.$refs.month.parse(expression[1] || '');
                 this.$refs.weekday.parse(expression[2] || '');
                 //this.$refs.year.parse(expression[3] || '');
+            },
+            reset() {
+                if (this.defaultExpression !== null) {
+                    this.expression = this.defaultExpression;
+                } else {
+                    this.expression = (this.getDayDefaultValue + ' ' + this.getMonthDefaultValue + ' ' + this.getWeekdayDefaultValue).trim();
+                }
+                this.parse();
             }
         },
         mounted() {
-            if (curValue) {
+            if (curValue.length > 0) {
                 this.expression = curValue;
+                this.defaultExpression = curValue;
                 this.parse();
             } else {
                 this.generate();

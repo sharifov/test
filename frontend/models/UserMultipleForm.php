@@ -4,6 +4,7 @@ namespace frontend\models;
 
 use common\components\validators\IsArrayValidator;
 use common\models\Employee;
+use src\auth\Auth;
 use src\model\clientChatChannel\entity\ClientChatChannel;
 use yii\base\Model;
 
@@ -106,7 +107,7 @@ class UserMultipleForm extends Model
 
     public function getRoles(): array
     {
-        return \common\models\Employee::getAllRoles();
+        return \common\models\Employee::getAllRoles(Auth::user());
     }
 
     public function getDepartments(): array

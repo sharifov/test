@@ -2,6 +2,7 @@
 
 namespace src\model\client\useCase\excludeInfo;
 
+use src\helpers\ErrorsToStringHelper;
 use src\repositories\client\ClientRepository;
 use yii\helpers\VarDumper;
 
@@ -30,10 +31,10 @@ class ClientExcludeIpChecker
 
         $result = new Result();
         if (!$result->load($res)) {
-            throw new \DomainException('Cant load result Data: ' . VarDumper::dumpAsString($res));
+            throw new \DomainException('Cant load result Data');
         }
         if (!$result->validate()) {
-            throw new \DomainException('Result validate Errors: ' . VarDumper::dumpAsString($result->getErrors()));
+            throw new \DomainException('Result validate Errors: ' . ErrorsToStringHelper::extractFromModel($result, ', '));
         }
 
         if (!$result->isExcluded()) {
