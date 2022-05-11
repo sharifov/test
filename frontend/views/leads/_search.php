@@ -75,7 +75,7 @@ use frontend\extensions\DatePicker;
                             <?= $form->field($model, 'excludeExtraQueue')->checkbox([])->label('Exclude Extra Queue'); ?>
                         </div>
                         <div class="col-md-1">
-                            <?= $form->field($model, 'excludeBonusQueue')->checkbox([['label' => 'Exclude Bonus Queue / Follow up Queue']])->label('Exclude Bonus Queue / Follow up Queue'); ?>
+                            <?= $form->field($model, 'excludeBonusQueue')->checkbox(['label' => 'Exclude Bonus Queue / Follow up Queue'])->label('Exclude Bonus Queue / Follow up Queue'); ?>
                         </div>
                     </div>
                 </div>
