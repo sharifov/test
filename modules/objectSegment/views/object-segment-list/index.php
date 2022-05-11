@@ -98,7 +98,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'buttons'  => [
                     'viewSegmentRules' => function ($action, $model, $key) {
                         $url = Url::toRoute(['/object-segment/object-segment-rule/?ObjectSegmentRuleSearch[osr_osl_id]=' . $model->osl_id]);
-                        return Html::a('<i class="fa fa-camera"></i>', $url, ['title' => 'View Rules', 'data-pjax' => 0, 'target' => '_blank']);
+                        return Html::a('<i class="fa fa-toggle-down"></i>', $url, ['title' => 'View Rules', 'data-pjax' => 0, 'target' => '_blank']);
                     },
                 ]
             ],

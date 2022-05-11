@@ -7,7 +7,7 @@ use yii\helpers\Html;
 /* @var $osl \modules\objectSegment\src\entities\ObjectSegmentList */
 
 $this->title = 'Update Policy: "' . $model->osl_title . '" (' . $model->osl_id . ') ';
-$this->params['breadcrumbs'][] = ['label' => 'Object Segment', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Object Segment List', 'url' => ['index']];
 $this->params['breadcrumbs'][] = 'Update';
 ?>
 <div class="abac-policy-update">
