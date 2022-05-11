@@ -2,6 +2,7 @@
 
 namespace webapi\modules\v1\controllers;
 
+use common\components\jobs\AutoAddQuoteJob;
 use common\components\jobs\WebEngageLeadRequestJob;
 use common\components\purifier\Purifier;
 use common\models\Client;
@@ -14,6 +15,7 @@ use common\models\Notifications;
 use common\models\Sources;
 use common\models\VisitorLog;
 use frontend\widgets\notification\NotificationMessage;
+use modules\featureFlag\FFlag;
 use modules\flight\models\FlightQuoteSegment;
 use modules\flight\models\FlightSegment;
 use modules\product\src\useCases\product\api\create\flight\Handler;
@@ -521,6 +523,12 @@ class LeadController extends ApiBaseController
                 (int)$lead->infants,
                 ...$segments
             );
+        }
+
+        /** @fflag FFlag::FF_KEY_ADD_AUTO_QUOTES, Auto add quote */
+        if (Yii::$app->ff->can(FFlag::FF_KEY_ADD_AUTO_QUOTES)) {
+            $autoAddQuoteJob = new AutoAddQuoteJob($lead);
+            Yii::$app->queue_job->push($autoAddQuoteJob);
         }
 
         $leadDataInserted = [];
