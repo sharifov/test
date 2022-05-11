@@ -63,7 +63,6 @@ class QuoteCommunication extends ActiveRecord
             [['qc_communication_id', 'qc_communication_type', 'qc_quote_id', 'qc_created_by'], 'integer'],
             [['qc_uid', 'qc_ext_data'], 'string'],
             [['qc_created_dt', 'qc_ext_data'], 'safe'],
-            ['qc_uid', 'unique', 'targetClass' => self::class, 'message' => 'This uid has already been taken'],
             [['qc_created_by'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['qc_created_by' => 'id']],
             [['qc_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => Quote::class, 'targetAttribute' => ['qc_quote_id' => 'id']],
         ];

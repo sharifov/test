@@ -20,8 +20,6 @@ class m220418_122529_add_uid_and_ext_data_form_quote_communication_table extends
             $quoteCommunication->qc_uid = \Yii::$app->security->generateRandomString(5);
             return $quoteCommunication->save();
         }, QuoteCommunication::find()->all());
-
-        $this->createIndex("IND-quote_communication-qc_uid", '{{%quote_communication}}', '[[qc_uid]]', true);
     }
 
     /**
@@ -29,8 +27,6 @@ class m220418_122529_add_uid_and_ext_data_form_quote_communication_table extends
      */
     public function safeDown()
     {
-        $this->dropIndex("IND-quote_communication-qc_uid", '{{%quote_communication}}');
-
         $this->dropColumn('{{%quote_communication}}', '[[qc_uid]]');
         $this->dropColumn('{{%quote_communication}}', '[[qc_ext_data]]');
     }
