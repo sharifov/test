@@ -50,6 +50,7 @@ use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
+use yii\helpers\Json;
 
 /**
  * EmployeeController controller
@@ -1187,6 +1188,9 @@ class EmployeeController extends FController
                     try {
                         $targetUser->updateRoles($form->form_roles);
                         $userUpdated = true;
+                        $oldAttr = JSON::encode(["roles" => $targetUser->getRoles(true)]);
+                        $newAttr = JSON::encode(["roles" => $form->form_roles]);
+                        $targetUser->addLog($oldAttr, $newAttr);
                     } catch (\Throwable $e) {
                         throw new UpdateUserException(
                             ['error' => $e->getMessage()],

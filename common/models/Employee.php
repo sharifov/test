@@ -41,6 +41,10 @@ use yii\helpers\Html;
 use yii\helpers\VarDumper;
 use yii\web\IdentityInterface;
 use yii\web\NotFoundHttpException;
+use src\logger\db\LogDTO;
+use common\models\GlobalLog;
+use src\logger\db\GlobalLogInterface;
+use src\services\log\GlobalEntityAttributeFormatServiceService;
 
 /**
  * This is the model class for table "employees".
@@ -2927,5 +2931,23 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         }
         $this->userRelations = new UserRelations($this);
         return $this->userRelations;
+    }
+
+    public function addLog($oldAttr, $newAttr)
+    {
+        $globalLogFormatAttrService = \Yii::createObject(GlobalEntityAttributeFormatServiceService::class);
+
+        (\Yii::createObject(GlobalLogInterface::class))->log(
+            new LogDTO(
+                get_class($this),
+                $this->id,
+                \Yii::$app->id,
+                Yii::$app->user->id,
+                $oldAttr,
+                $newAttr,
+                $globalLogFormatAttrService->formatAttr(get_class($this), $oldAttr, $newAttr),
+                GlobalLog::ACTION_TYPE_UPDATE
+            )
+        );
     }
 }
