@@ -155,6 +155,7 @@ class ScheduleRequestForm extends Model
                 'ssr_sst_id' => $this->scheduleType,
                 'ssr_status_id' => ShiftScheduleRequest::STATUS_PENDING,
                 'ssr_description' => $this->description,
+                'ssr_created_user_id' => Auth::id(),
             ]);
             $requestModel->save();
             return true;

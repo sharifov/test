@@ -85,12 +85,6 @@ class ShiftScheduleRequest extends ActiveRecord
                 ],
                 'value' => date('Y-m-d H:i:s'),
             ],
-            'user' => [
-                'class' => BlameableBehavior::class,
-                'attributes' => [
-                    BaseActiveRecord::EVENT_BEFORE_INSERT => 'ssr_created_user_id',
-                ]
-            ],
         ];
     }
 
