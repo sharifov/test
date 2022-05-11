@@ -1,91 +1,48 @@
 <?php
 
-namespace modules\order\src\abac;
+namespace src\model\phoneNumberRedial\abac;
 
+use common\models\Lead;
+use common\models\Quote;
 use modules\abac\components\AbacBaseModel;
 use modules\abac\src\entities\AbacInterface;
-use modules\order\src\entities\order\Order;
-use modules\order\src\entities\order\OrderStatus;
 
 class PhoneNumberRedialAbacObject extends AbacBaseModel implements AbacInterface
 {
     /** NAMESPACE */
-    private const NS = 'order/order/';
+    private const NS = 'phoneNumberRedial/phoneNumberRedial/';
 
-    /** --------------- PERMISSIONS --------------------------- */
-
-
-    /** ACTION PERMISSION */
-    public const ACT_DELETE  = self::NS . 'act/delete';
-
-    /** UI PERMISSION */
-    public const UI_BTN_CREATE      = self::NS . 'ui/btn/create';
-
-
-
-    /** OBJECT PERMISSION */
-    public const OBJ_ALL            = self::NS . 'obj/*';
-
-
-
-    /** --------------- OBJECT LIST --------------------------- */
-    public const OBJECT_LIST = [
-        self::ACT_DELETE    => self::ACT_DELETE,
-        self::UI_BTN_CREATE     => self::UI_BTN_CREATE,
-
-        self::OBJ_ALL       => self::OBJ_ALL,
-    ];
+    public const OBJ_PHONE_NUMBER_REDIAL =  self::NS . 'obj/phone-number-redial';
 
     /** --------------- ACTIONS --------------------------- */
-    public const ACTION_ACCESS  = 'access';
-    public const ACTION_DELETE  = 'delete';
+    public const ACTION_MULTIPLE_DELETE  = 'multiple-delete';
 
-    /** --------------- ACTION LIST --------------------------- */
-    public const OBJECT_ACTION_LIST = [
-        self::ACT_DELETE    => [self::ACTION_ACCESS, self::ACTION_DELETE],
+
+    public const OBJECT_LIST = [
+        self::OBJ_PHONE_NUMBER_REDIAL => self::OBJ_PHONE_NUMBER_REDIAL,
     ];
 
+    public const OBJECT_ACTION_LIST = [
+        self::OBJ_PHONE_NUMBER_REDIAL => [ self::ACTION_MULTIPLE_DELETE ],
+    ];
 
-    /** --------------- ATTRIBUTE LIST --------------------------- */
     public const OBJECT_ATTRIBUTE_LIST = [
-//        self::ACT_CREATE    =>  [
-//        ],
-        self::OBJ_ORDER_ITEM    =>  [
-            self::ATTR_ORDER_N,
-            self::ATTR_ORDER_PROFIT_AMOUNT,
+        self::OBJ_PHONE_NUMBER_REDIAL => [
         ],
     ];
 
-    /**
-     * @return string[]
-     */
     public static function getObjectList(): array
     {
         return self::OBJECT_LIST;
     }
 
-    /**
-     * @return string[]
-     */
     public static function getObjectActionList(): array
     {
         return self::OBJECT_ACTION_LIST;
     }
 
-    /**
-     * @return \array[][]
-     */
     public static function getObjectAttributeList(): array
     {
-        $attrStatus = self::ATTR_ORDER_STATUS;
-        $attrStatus['values'] = OrderStatus::getList();
-
-        $attributeList = self::OBJECT_ATTRIBUTE_LIST;
-        $attributeList[self::OBJ_ORDER_ITEM][] = $attrStatus;
-        $attributeList[self::ACT_COMPLETE][] = $attrStatus;
-
-        //$attributeList[self::OBJ_ORDER_ITEM][] = self::ATTR_ORDER_PROFIT_AMOUNT;
-
-        return $attributeList;
+        return self::OBJECT_ATTRIBUTE_LIST;
     }
 }
