@@ -1430,13 +1430,13 @@ class QuoteController extends FController
                 }
             }
 
-            $form = (new FlightQuoteSearchForm())->setSortBy(Quote::SORT_BY_PRICE_ASC);
+            $models = array_filter($quotes['results'] ?? [], function ($item) {
+                return $item['meta']['auto'] ?? false;
+            });
+
             $dataProvider = new ArrayDataProvider([
-                'allModels' => $quotes['results'] ?? [],
-                'pagination' => [
-                    'pageSize' => Yii::$app->ff->val(FFlag::FF_KEY_ADD_AUTO_QUOTES) ?? 5,
-                    'params' => array_merge(Yii::$app->request->get(), $form->getFilters()),
-                ],
+                'allModels' => $models,
+                'pagination' => false,
                 'sort' => [
                     'defaultOrder' => ['autoSort' => SORT_ASC, 'price' => SORT_ASC],
                     'attributes' => [
