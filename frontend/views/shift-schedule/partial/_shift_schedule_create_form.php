@@ -12,6 +12,8 @@ use frontend\extensions\DateRangePicker;
 use frontend\widgets\DateTimePickerWidget;
 use kartik\select2\Select2;
 use kartik\time\TimePicker;
+use modules\shiftSchedule\src\abac\dto\ShiftAbacDto;
+use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use src\auth\Auth;
@@ -23,10 +25,32 @@ use yii\widgets\Pjax;
 
 $user = Auth::user();
 
-if ($user->isAdmin() || $user->isSuperAdmin()) {
-    $userGroups = UserGroup::getList();
-} else {
-    $userGroups = UserGroupQuery::getListByUser(Auth::id());
+$userGroupsList = UserGroup::getList();
+$userGroups = [];
+foreach ($userGroupsList as $groupId => $groupName) {
+    $dto = new ShiftAbacDto();
+    $dto->setGroup($groupId);
+    if (Yii::$app->abac->can($dto, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_ACCESS)) {
+        $userGroups[$groupId] = $groupName;
+    }
+}
+
+$statusList = [];
+foreach (UserShiftSchedule::getStatusList() as $statusId => $statusName) {
+    $dto = new ShiftAbacDto();
+    $dto->setStatus((int)$statusId);
+    if (Yii::$app->abac->can($dto, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_ACCESS)) {
+        $statusList[$statusId] = $statusName;
+    }
+}
+
+$shiftScheduleTypeList = [];
+foreach (ShiftScheduleType::getList(true) as $typeId => $typeName) {
+    $dto = new ShiftAbacDto();
+    $dto->setScheduleType((int)$typeId);
+    if (Yii::$app->abac->can($dto, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_ACCESS)) {
+        $shiftScheduleTypeList[$typeId] = $typeName;
+    }
 }
 
 $pjaxId = 'pjax-add-event';
@@ -118,10 +142,10 @@ JS;
 
         <div class="row">
             <div class="col-md-6">
-                <?= $form->field($model, 'status')->dropdownList(UserShiftSchedule::getStatusList(), ['prompt' => '---']) ?>
+                <?= $form->field($model, 'status')->dropdownList($statusList, ['prompt' => '---']) ?>
             </div>
             <div class="col-md-6">
-                <?= $form->field($model, 'scheduleType')->dropdownList(ShiftScheduleType::getList(true), ['prompt' => '---']) ?>
+                <?= $form->field($model, 'scheduleType')->dropdownList($shiftScheduleTypeList, ['prompt' => '---']) ?>
             </div>
         </div>
 
