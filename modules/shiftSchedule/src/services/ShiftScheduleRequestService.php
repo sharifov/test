@@ -27,7 +27,20 @@ class ShiftScheduleRequestService
         if ($user->isAdmin() || $user->isSuperAdmin()) {
             return $employee;
         }
-        $userList = $user->ugsGroups->ugsUsers ?? [$user->id];
+        $userList = [];
+        $userGroups = $user->ugsGroups;
+        if (!empty($userGroups)) {
+            foreach ($userGroups as $group) {
+                $userList = array_merge(
+                    $userList,
+                    array_map(function ($userData) {
+                        return $userData->id;
+                    }, $group->ugsUsers)
+                );
+            }
+        } else {
+            $userList = [$user->id];
+        }
 
         return $employee
             ->where(['id' => $userList]);
