@@ -17,7 +17,6 @@ class LeadObjectSegmentObject extends ObjectSegmentBaseModel implements ObjectSe
             self::ATTR_PAX_ADT_COUNT,
             self::ATTR_PAX_CHD_COUNT,
             self::ATTR_PAX_INF_COUNT,
-            self::ATTR_CLIENT_BUDGET,
             self::ATTR_CREATED_DT,
             self::ATTR_FLIGHT_SEGMENTS_COUNT
         ],
@@ -117,46 +116,28 @@ class LeadObjectSegmentObject extends ObjectSegmentBaseModel implements ObjectSe
         ]
     ];
 
-    protected const ATTR_LEAD_PROJECT = [
+    protected const ATTR_LEAD_PROJECT_NAME = [
         'optgroup'  => 'Lead Info and Preferences',
-        'id'        => self::NS . 'lead_project_id',
-        'field'     => 'lead_project_id',
+        'id'        => self::NS . 'lead_project_name',
+        'field'     => 'lead_project_name',
         'label'     => 'Lead Project',
-        'type'      => self::ATTR_TYPE_INTEGER,
+        'type'      => self::ATTR_TYPE_STRING,
         'input'     => self::ATTR_INPUT_SELECT,
-        'multiple'  => false,
+        'multiple' => false,
         'values'    => [],
-        'operators' => [self::OP_IN_ARRAY, self::OP_NOT_IN_ARRAY]
+        'operators' => [self::OP_EQUAL, self::OP_NOT_EQUAL]
     ];
-
 
     protected const ATTR_LEAD_DEPARTMENT_NAME = [
         'optgroup'  => 'Lead Info and Preferences',
-        'id'        => self::NS . 'lead_department_id',
-        'field'     => 'lead_department_id',
-        'label'     => 'Department',
-        'type'      => self::ATTR_TYPE_INTEGER,
-        'input'     => self::ATTR_INPUT_SELECT,
-        'values'    => [],
-        'multiple'  => true,
-        'operators' => [self::OP_IN],
-    ];
-
-    protected const ATTR_CLIENT_BUDGET = [
-        'optgroup'  => 'Lead Info and Preferences',
-        'id'        => self::NS . 'client_budget',
-        'field'     => 'client_budget',
-        'label'     => 'Client Budget',
-        'type'      => self::ATTR_TYPE_DOUBLE,
-        'input'     => self::ATTR_INPUT_NUMBER,
-        'multiple'  => false,
-        'operators' => [
-            self::OP_LESS_OR_EQUAL,
-            self::OP_GREATER_OR_EQUAL,
-            self::OP_EQUAL,
-            self::OP_GREATER,
-            self::OP_LESS
-        ]
+        'id'        => self::NS . 'lead_department_name',
+        'field' => 'lead_department_name',
+        'label' => 'Lead Department',
+        'type' => self::ATTR_TYPE_STRING,
+        'input' => self::ATTR_INPUT_SELECT,
+        'multiple' => false,
+        'values' => [],
+        'operators' => [self::OP_EQUAL, self::OP_NOT_EQUAL]
     ];
 
     protected const ATTR_CREATED_DT = [
@@ -179,7 +160,7 @@ class LeadObjectSegmentObject extends ObjectSegmentBaseModel implements ObjectSe
     public static function getObjectAttributeList(): array
     {
         $attrList                     = self::OBJECT_ATTRIBUTE_LIST;
-        $attrLeadProject              = self::ATTR_LEAD_PROJECT;
+        $attrLeadProject              = self::ATTR_LEAD_PROJECT_NAME;
         $attrLeadProject['values']    = self::getProjectList();
         $attrList[self::NS][]         = $attrLeadProject;
         $attrLeadDepartment           = self::ATTR_LEAD_DEPARTMENT_NAME;
