@@ -6,25 +6,22 @@
  * @var string $userTimeZone
  * @var ActiveDataProvider $dataProvider
  * @var ShiftScheduleRequestSearch $searchModel
+ * @var ActiveDataProvider $dataProviderAll
+ * @var ShiftScheduleRequestSearch $searchModelAll
  */
 
-use common\components\grid\DateTimeColumn;
 use common\models\Employee;
 use frontend\assets\FullCalendarAsset;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\search\ShiftScheduleRequestSearch;
-use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
-use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
 use yii\widgets\Pjax;
-use yii\grid\GridView;
 
 $this->title = 'User Shift Schedule Requests';
 $this->params['breadcrumbs'][] = $this->title;
 $bundle = FullCalendarAsset::register($this);
-$shiftScheduleTypes = ShiftScheduleType::getList(true);
 
 ?>
 
@@ -53,223 +50,29 @@ $shiftScheduleTypes = ShiftScheduleType::getList(true);
 
             <div class="col-md-6">
                 <?php Pjax::begin([
-                    'id' => 'pjax-user-timeline',
+                    'id' => 'pjax-pending-requests',
                     'enablePushState' => false,
                     'enableReplaceState' => false,
                 ]); ?>
-                <div class="x_panel">
-                    <div class="x_title">
-                        <h2>
-                            <?php
-                            if (!(empty($searchModel->clientStartDate) || empty($searchModel->clientEndDate))) {
-                                $dates = sprintf(
-                                    '(%s - %s)',
-                                    Html::encode($searchModel->clientStartDate),
-                                    Html::encode($searchModel->clientEndDate)
-                                );
-                            } else {
-                                $dates = '';
-                            }
-                            ?>
-                            <i class="fa fa-bars"></i> TimeLine Schedule Request List <?= $dates ?>
-                        </h2>
-                        <div class="clearfix"></div>
-                    </div>
-                    <div class="x_content">
-                        <?= GridView::widget([
-                            'dataProvider' => $dataProvider,
-                            'filterModel' => $searchModel,
-                            'columns' => [
-                                [
-                                    'attribute' => 'ssr_uss_id',
-                                    'options' => [
-
-                                    ],
-                                    'value' => function (ShiftScheduleRequestSearch $model) {
-                                        return $model->ssrCreatedUser->nickname ?? $model->ssr_created_user_id;
-                                    },
-                                    'label' => 'User',
-                                    // @todo: 'filter' => 'user group'
-                                ],
-                                [
-                                    'label' => 'Type',
-                                    'value' => static function (ShiftScheduleRequestSearch $model) {
-                                        return $model->srhSst ? $model->srhSst->getColorLabel() : '-';
-                                    },
-                                    'format' => 'raw',
-
-                                ],
-                                [
-                                    'attribute' => 'ssr_sst_id',
-                                    'value' => function (ShiftScheduleRequestSearch $model) {
-                                        return Html::a(
-                                            $model->getScheduleTypeTitle() ?? $model->ssr_sst_id,
-                                            null,
-                                            ['class' => 'btn-open-timeline', 'data-tl_id' => $model->ssr_id]
-                                        );
-                                    },
-                                    'options' => [
-                                        'style' => 'width: 20%',
-                                    ],
-                                    'label' => 'Schedule Type',
-                                    'filter' => $shiftScheduleTypes,
-                                    'format' => 'raw',
-                                ],
-                                [
-                                    'label' => 'Start Date Time',
-                                    'class' => DateTimeColumn::class,
-                                    'value' => function (ShiftScheduleRequestSearch $model) {
-                                        return $model->srhUss->uss_start_utc_dt;
-                                    },
-                                    'format' => 'byUserDateTime',
-                                    'filter' => false,
-                                ],
-                                [
-                                    'label' => 'End Date Time',
-                                    'class' => DateTimeColumn::class,
-                                    'value' => function (ShiftScheduleRequestSearch $model) {
-                                        return $model->srhUss->uss_end_utc_dt;
-                                    },
-                                    'format' => 'byUserDateTime',
-                                    'filter' => false
-                                ],
-                                [
-                                    'label' => 'Status',
-                                    'attribute' => 'ssr_status_id',
-                                    'value' => function (ShiftScheduleRequestSearch $model) {
-                                        $statusName = $model->getStatusName();
-                                        if (!empty($statusName)) {
-                                            return sprintf(
-                                                '<span class="badge badge-%s">%s</span>',
-                                                $model->getStatusNameColor(),
-                                                $statusName
-                                            );
-                                        }
-                                        return $model->ssr_status_id;
-                                    },
-                                    'options' => [
-                                        'style' => 'width: 10%',
-                                    ],
-                                    'filter' => ShiftScheduleRequest::getList(),
-                                    'format' => 'raw',
-                                ],
-                            ],
-                        ]) ?>
-                    </div>
-                </div>
+                <?= $this->render('partial/_pending_requests', [
+                    'searchModel' => $searchModel,
+                    'dataProvider' => $dataProvider,
+                ]) ?>
                 <?php Pjax::end(); ?>
             </div>
-
         </div>
 
-<!--        <div class="row">-->
-<!--            <div class="col-md-12">-->
-<!--                --><?php //Pjax::begin([
-//                    'id' => 'pjax-user-request-history',
-//                    'enablePushState' => false,
-//                    'enableReplaceState' => false,
-//                ]); ?>
-<!--                <div class="x_title">-->
-<!--                    <h2>-->
-<!--                        <i class="fa fa-bars"></i> TimeLine Schedule Request History-->
-<!--                    </h2>-->
-<!--                    <div class="clearfix"></div>-->
-<!--                </div>-->
-<!--                <div class="x_content">-->
-<!--                    --><?php //echo GridView::widget([
-//                        'dataProvider' => $dataProvider,
-//                        'filterModel' => $searchModel,
-//                        'filterUrl' => Url::to(['user-shift-schedule-request/shedule-request-history']),
-//                        'columns' => [
-//                            [
-//                                'attribute' => 'ssr_uss_id',
-//                                'options' => [
-//
-//                                ],
-//                                'value' => function (ShiftScheduleRequestSearch $model) {
-//                                    return $model->ssrCreatedUser->nickname ?? $model->ssr_created_user_id;
-//                                },
-//                                'label' => 'User create request',
-//                            ],
-//                            [
-//                                'attribute' => 'ssr_uss_id',
-//                                'options' => [
-//
-//                                ],
-//                                'value' => function (ShiftScheduleRequestSearch $model) {
-//                                    return $model->ssrUpdatedUser->nickname ?? $model->ssr_updated_user_id;
-//                                },
-//                                'label' => 'User make decision',
-//                            ],
-//                            [
-//                                'label' => 'Type',
-//                                'value' => static function (ShiftScheduleRequestSearch $model) {
-//                                    return $model->srhSst ? $model->srhSst->getColorLabel() : '-';
-//                                },
-//                                'format' => 'raw',
-//
-//                            ],
-//                            [
-//                                'attribute' => 'ssr_sst_id',
-//                                'value' => function (ShiftScheduleRequestSearch $model) {
-//                                    return Html::a(
-//                                        $model->getScheduleTypeTitle() ?? $model->ssr_sst_id,
-//                                        null,
-//                                        ['class' => 'btn-open-timeline', 'data-tl_id' => $model->ssr_id]
-//                                    );
-//                                },
-//                                'options' => [
-//                                    'style' => 'width: 20%',
-//                                ],
-//                                'label' => 'Schedule Type',
-//                                'filter' => $shiftScheduleTypes,
-//                                'format' => 'raw',
-//                            ],
-//                            [
-//                                'label' => 'Start Date Time',
-//                                'class' => DateTimeColumn::class,
-//                                'value' => function (ShiftScheduleRequestSearch $model) {
-//                                    return $model->srhUss->uss_start_utc_dt;
-//                                },
-//                                'format' => 'byUserDateTime',
-//                                'filter' => false
-//                            ],
-//                            [
-//                                'label' => 'End Date Time',
-//                                'class' => DateTimeColumn::class,
-//                                'value' => function (ShiftScheduleRequestSearch $model) {
-//                                    return $model->srhUss->uss_end_utc_dt;
-//                                },
-//                                'format' => 'byUserDateTime',
-//                                'filter' => false
-//                            ],
-//                            [
-//                                'label' => 'Status',
-//                                'attribute' => 'ssr_status_id',
-//                                'value' => function (ShiftScheduleRequestSearch $model) {
-//                                    $statusName = $model->getStatusName();
-//                                    if (!empty($statusName)) {
-//                                        return sprintf(
-//                                            '<span class="badge badge-%s">%s</span>',
-//                                            $model->getStatusNameColor(),
-//                                            $statusName
-//                                        );
-//                                    }
-//                                    return $model->ssr_status_id;
-//                                },
-//                                'options' => [
-//                                    'style' => 'width: 10%',
-//                                ],
-//                                'filter' => ShiftScheduleRequest::getList(),
-//                                'format' => 'raw',
-//                            ],
-//                            'ssr_description',
-//                        ],
-//                    ]) ?>
-<!--                </div>-->
-<!--                --><?php //Pjax::end(); ?>
-<!--            </div>-->
-<!--        </div>-->
+        <?php Pjax::begin([
+            'id' => 'pjax-all-requests',
+            'enablePushState' => false,
+            'enableReplaceState' => false,
+        ]); ?>
+        <?= $this->render('partial/_all_requests', [
+            'searchModelAll' => $searchModelAll,
+            'dataProviderAll' => $dataProviderAll,
+        ]) ?>
+        <?php Pjax::end(); ?>
+
     </div>
 
 <?php
@@ -280,7 +83,6 @@ $js = <<<JS
 var shiftScheduleDataUrl = '$ajaxUrl';
 var openModalEventUrl = '$openModalEventUrl';
 var calendarEl = document.getElementById('calendar');
-var selectedRange = {};
 var calendar = new FullCalendar.Calendar(calendarEl, {
     initialView: 'dayGridMonth',
     height: 800,
@@ -297,6 +99,9 @@ var calendar = new FullCalendar.Calendar(calendarEl, {
         }
         if (info.event.extendedProps.description.length > 0) {
             $(info.el).tooltip({ "title": info.event.extendedProps.description});
+        }
+        if (info.event.extendedProps.backgroundImage && info.event.extendedProps.backgroundImage.length > 0) {
+            $(info.el).css('background-image', info.event.extendedProps.backgroundImage);
         }
     },
     navLinkWeekClick: function(weekStart, jsEvent) {
@@ -348,18 +153,11 @@ var calendar = new FullCalendar.Calendar(calendarEl, {
     ],
       //events: 'https://fullcalendar.io/api/demo-feeds/events.json',
     editable: false,
-    selectable: true,
+    selectable: false,
     eventClick: function(info) {
         info.jsEvent.preventDefault();
         var eventObj = info.event;
         openModalEventId(eventObj.id);
-    },
-    select: function(info) {
-        updateTimeLineList(info.startStr, info.endStr);
-        selectedRange = {
-            start: info.startStr,
-            end: info.endStr
-        }
     }
 });
 
@@ -380,18 +178,21 @@ function openModalEventId(id)
     });
 }
 
-function updateTimeLineList(startDate, endDate) 
+function updatePendingRequests() 
 {
-    var end = new Date(endDate);
-    end.setDate(end.getDate() - 1);
-    end.setHours(23, 59);
-    $.pjax.reload({container: '#pjax-user-timeline', push: false, replace: false, timeout: 5000, data: {startDate: startDate, endDate: end.toLocaleString()}});
+    $.pjax.reload({container: '#pjax-pending-requests', push: false, replace: false, timeout: 5000, async:false});
+}
+
+function updateAllRequests()
+{
+    $.pjax.reload({container: '#pjax-all-requests', push: false, replace: false, timeout: 5000, async:false})
 }
 
 $(document).on('RequestDecision:response', function (e, params) {
     if (params.requestStatus) {
         calendar.refetchEvents();
-        updateTimeLineList(selectedRange.start, selectedRange.end);
+        updateAllRequests();
+        updatePendingRequests();
         $('#modal-md').modal('hide');
     }
 });
