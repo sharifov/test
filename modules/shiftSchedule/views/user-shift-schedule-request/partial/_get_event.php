@@ -121,29 +121,7 @@ $tsEndUtc = strtotime($event->uss_end_utc_dt);
             <div class="row">
                 <div class="col-md-12">
                     <?= $form->field($model, 'status')
-                        ->radioList(
-                            ShiftScheduleRequest::getList(),
-                            [
-                                'item' => function ($index, $label, $name, $checked, $value) {
-                                    $content = Html::radio($name, $checked, [
-                                            'value' => $value,
-                                            'style' => 'opacity: 0; z-index: 0; position: absolute;',
-                                        ]) . $label;
-                                    return Html::tag(
-                                        'div',
-                                        $content,
-                                        [
-                                            'class' => [
-                                                'btn',
-                                                'btn-' . ShiftScheduleRequest::getStatusNameColorById($value),
-                                                'js-decision',
-                                                $checked ? 'active' : '',
-                                            ],
-                                        ]
-                                    );
-                                },
-                            ]
-                        ) ?>
+                        ->dropDownList(ShiftScheduleRequest::getList()) ?>
                 </div>
             </div>
             <div class="row">
