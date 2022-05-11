@@ -40,7 +40,7 @@ YiiAsset::register($this);
             'ssr_status_id',
             'ssr_description',
             'ssr_created_dt',
-            'ssr_update_dt',
+            'ssr_updated_dt',
             'ssr_created_user_id',
             'ssr_updated_user_id',
         ],

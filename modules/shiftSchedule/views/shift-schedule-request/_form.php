@@ -27,7 +27,7 @@ use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest
 
     <?= $form->field($model, 'ssr_created_dt')->textInput() ?>
 
-    <?= $form->field($model, 'ssr_update_dt')->textInput() ?>
+    <?= $form->field($model, 'ssr_updated_dt')->textInput() ?>
 
     <?= $form->field($model, 'ssr_created_user_id')->textInput() ?>
 

@@ -78,7 +78,7 @@ $shiftScheduleTypes = ShiftScheduleType::getList(true);
                 ],
             ],
             'ssr_created_dt',
-            'ssr_update_dt',
+            'ssr_updated_dt',
             'ssr_created_user_id',
             'ssr_updated_user_id',
         ],

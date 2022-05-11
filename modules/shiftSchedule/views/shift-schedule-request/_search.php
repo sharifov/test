@@ -32,7 +32,7 @@ use yii\widgets\ActiveForm;
 
     <?php // echo $form->field($model, 'ssr_created_dt') ?>
 
-    <?php // echo $form->field($model, 'ssr_update_dt') ?>
+    <?php // echo $form->field($model, 'ssr_updated_dt') ?>
 
     <?php // echo $form->field($model, 'ssr_created_user_id') ?>
 

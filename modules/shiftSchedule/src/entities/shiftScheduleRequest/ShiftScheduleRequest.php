@@ -21,7 +21,7 @@ use yii\db\BaseActiveRecord;
  * @property int $ssr_status_id
  * @property string|null $ssr_description
  * @property string|null $ssr_created_dt
- * @property string|null $ssr_update_dt
+ * @property string|null $ssr_updated_dt
  * @property int|null $ssr_created_user_id
  * @property int|null $ssr_updated_user_id
  *
@@ -95,7 +95,7 @@ class ShiftScheduleRequest extends ActiveRecord
         return [
             [['ssr_uss_id', 'ssr_sst_id', 'ssr_status_id', 'ssr_created_user_id', 'ssr_updated_user_id'], 'integer'],
             [['ssr_status_id'], 'required'],
-            [['ssr_created_dt', 'ssr_update_dt'], 'safe'],
+            [['ssr_created_dt', 'ssr_updated_dt'], 'safe'],
             [['ssr_description'], 'string', 'max' => 1000],
             [['ssr_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['ssr_created_user_id' => 'id']],
             [['ssr_sst_id'], 'exist', 'skipOnError' => true, 'targetClass' => ShiftScheduleType::class, 'targetAttribute' => ['ssr_sst_id' => 'sst_id']],
@@ -116,7 +116,7 @@ class ShiftScheduleRequest extends ActiveRecord
             'ssr_status_id' => 'Status ID',
             'ssr_description' => 'Description',
             'ssr_created_dt' => 'Created Dt',
-            'ssr_update_dt' => 'Update Dt',
+            'ssr_updated_dt' => 'Update Dt',
             'ssr_created_user_id' => 'Created User ID',
             'ssr_updated_user_id' => 'Updated User ID',
         ];
