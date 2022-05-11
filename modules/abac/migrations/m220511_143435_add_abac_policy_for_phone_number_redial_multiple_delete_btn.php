@@ -1,5 +1,7 @@
 <?php
 
+namespace modules\abac\migrations;
+
 use yii\db\Migration;
 
 /**
