@@ -1,6 +1,7 @@
 <?php
 
 use common\models\query\EmployeeQuery;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 use yii\grid\CheckboxColumn;
 use common\components\grid\Select2Column;
@@ -144,11 +145,11 @@ $pjaxContainerId = 'pjax-user-shift-assign';
                             '<span class="fa fa-user-plus"></span>',
                             '#',
                             [
-                                'id' => 'js_edit_usha',
-                                'data-modal_id' => 'edit_usha',
+                                'class' => 'js_edit_usha',
                                 'title' => 'Edit User Shift Assign',
-                                'class' => 'showModalButton',
-                                'data-content-url' => Url::to(['assign', 'id' => $model->id]),
+                                'data-url' => Url::to(['assign-form', 'id' => $model->id]),
+                                'data-id' => $model->id,
+                                'data-shifts' => ArrayHelper::map($model->userShiftAssigns, 'usa_sh_id', 'usa_sh_id'),
                             ],
                         );
                     },
@@ -180,7 +181,7 @@ $this->registerCss($css);
 <?php
 yii\bootstrap4\Modal::begin([
     'title' => '',
-    'id' => 'multiple_assign_modal',
+    'id' => 'user_shift_assign_modal',
     'size' => \yii\bootstrap4\Modal::SIZE_SMALL,
 ]);
 yii\bootstrap4\Modal::end();
@@ -288,7 +289,7 @@ $script = <<< JS
             }); 
         }
     });
-    
+
     $(document).on('click', '#js-assign-selected', function() {
         if (!sessionStorage.getItem(storageName)) {
             notifyAlert('Please select items', 'error');
@@ -306,10 +307,10 @@ $script = <<< JS
         })
         .done(function(dataResponse) {
             if (dataResponse.status === 1) {
-                let modalBodyEl = $('#multiple_assign_modal .modal-body');
+                let modalBodyEl = $('#user_shift_assign_modal .modal-body');
                 modalBodyEl.html(dataResponse.data);
-                $('#multiple_assign_modal-label').html('Assign users to shift'); 
-                $('#multiple_assign_modal').modal('show');
+                $('#user_shift_assign_modal-label').html('Assign users to shift'); 
+                $('#user_shift_assign_modal').modal('show');
             } else if (dataResponse.message.length) {
                 createNotify('Error', dataResponse.message, 'error');
             } else {
@@ -391,23 +392,35 @@ $script = <<< JS
         }
     }
     
-    $(document).on('click', '.showModalButton', function(){
-        let id = $(this).data('modal_id');
-        let url = $(this).data('content-url');
+    $(document).on('click', '.js_edit_usha', function() {
+        let urlAssign = $(this).data('url'); 
+        let userId = $(this).data('id');
+        let shftIds = $(this).data('shifts');
 
-        $('#multiple_assign_modal').html($(this).attr('title'));
-        $('#multiple_assign_modal').modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 40px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
-
-        let modalBodyEl = $('#multiple_assign_modal .modal-body');
-        modalBodyEl.html(dataResponse.data);
-        $('#multiple_assign_modal-label').html('Assign users to shift'); 
-        $('#multiple_assign_modal').modal('show');
-
-        $.get(url, function(data) {
-            let modalBodyEl = $('#multiple_assign_modal .modal-body');
-            modalBodyEl.html(dataResponse.data);
-        });
-    });   
+        $.ajax({
+            url: urlAssign,
+            type: 'POST',
+            dataType: 'json',
+            data: {userId : userId, shftIds : shftIds}
+        })
+        .done(function(dataResponse) {
+            if (dataResponse.status === 1) {
+                let modalBodyEl = $('#user_shift_assign_modal .modal-body');
+                modalBodyEl.html(dataResponse.data);
+                $('#user_shift_assign_modal-label').html('User Shift Assign'); 
+                $('#user_shift_assign_modal').modal('show');
+            } else if (dataResponse.message.length) {
+                createNotify('Error', dataResponse.message, 'error');
+            } else {
+                createNotify('Error', 'Error, please check logs', 'error');
+            }
+        })
+        .fail(function(error) {
+            console.error(error);
+            alert('Request Error');
+        })
+        .always(function() {});
+    });
 JS;
 
 $this->registerJs($script);
