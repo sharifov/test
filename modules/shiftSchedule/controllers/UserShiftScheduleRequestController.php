@@ -23,40 +23,64 @@ class UserShiftScheduleRequestController extends FController
     {
         $user = Yii::$app->user->identity;
         $userTimeZone = 'local'; //'UTC'; //'Europe/Chisinau'; //Auth::user()->userParams->up_timezone ?? 'local';
+
+        return $this->render('index', array_merge(
+            [
+                'user' => $user,
+                'userTimeZone' => $userTimeZone,
+            ],
+            $this->getSchedulePendingRequestsParams(),
+            $this->getScheduleAllRequests()
+        ));
+    }
+
+    private function getSchedulePendingRequestsParams(): array
+    {
         $searchModel = new ShiftScheduleRequestSearch();
-
-        $startDate = Yii::$app->request->get('startDate');
-        $endDate = Yii::$app->request->get('endDate');
-
-        $dataProvider = $searchModel->searchByUsers(
+        $queryParams = array_merge_recursive(
             Yii::$app->request->queryParams,
+            [
+                $searchModel->formName() => [
+                    'ssr_status_id' => $searchModel::STATUS_PENDING,
+                ],
+            ]
+        );
+        $dataProvider = $searchModel->searchByUsers(
+            $queryParams,
             ShiftScheduleRequestService::getUserList(Auth::user()),
-            $startDate,
-            $endDate
+            date('Y-m-d', strtotime('now')),
+            date('Y-m-d', strtotime('+1 year'))
         );
 
-//        $dataProviderHistory = $searchModel->searchByUsers(
-//            [],
-//            ShiftScheduleRequestService::getUserList(Auth::user()),
-//        );
-
-        return $this->render('index', [
-            'user' => $user,
+        return [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
-            'userTimeZone' => $userTimeZone,
-//            'dataProviderHistory' => $dataProviderHistory,
-        ]);
+        ];
     }
-//
-//    public function actionSheduleRequestHistory()
-//    {
-//        $searchModel = new ShiftScheduleRequestSearch();
-//        $dataProvider = $searchModel->searchByUsers(
-//            Yii::$app->request->queryParams,
-//            ShiftScheduleRequestService::getUserList(Auth::user())
-//        );
-//    }
+
+    public function actionSchedulePendingRequests(): string
+    {
+        return $this->renderAjax('partial/_pending_requests', $this->getSchedulePendingRequestsParams());
+    }
+
+    private function getScheduleAllRequests(): array
+    {
+        $searchModelAll = new ShiftScheduleRequestSearch();
+        $dataProviderAll = $searchModelAll->searchByUsers(
+            Yii::$app->request->queryParams,
+            ShiftScheduleRequestService::getUserList(Auth::user())
+        );
+
+        return [
+            'searchModelAll' => $searchModelAll,
+            'dataProviderAll' => $dataProviderAll,
+        ];
+    }
+
+    public function actionScheduleAllRequests(): string
+    {
+        return $this->renderAjax('partial/_all_requests', $this->getScheduleAllRequests());
+    }
 
     /**
      * @return array
@@ -79,7 +103,7 @@ class UserShiftScheduleRequestController extends FController
      */
     public function actionGetEvent(): string
     {
-        $eventId = (int) Yii::$app->request->get('id');
+        $eventId = (int)Yii::$app->request->get('id');
 
         if (!$eventId) {
             throw new BadRequestHttpException('Invalid request param');
