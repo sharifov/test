@@ -9,6 +9,8 @@ use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\Client */
+/* @var $leadsDataProvider yii\data\ActiveDataProvider */
+/* @var $casesDataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Client: ' . $model->id;
 $this->params['breadcrumbs'][] = ['label' => 'Client', 'url' => ['index']];
@@ -157,6 +159,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             echo GridView::widget([
                 'dataProvider' => $leadsDataProvider,
+                'showHeader'=> false,
                 'columns' => [
                     [
                     'value' => static function (array $model) {
@@ -178,6 +181,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 echo GridView::widget([
                     'dataProvider' => $casesDataProvider,
+                    'showHeader'=> false,
                     'columns' => [
                         [
                             'value' => static function (array $model) {
