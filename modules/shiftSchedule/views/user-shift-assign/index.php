@@ -52,8 +52,18 @@ $pjaxContainerId = 'pjax-user-shift-assign';
                 'cssClass' => 'multiple-checkbox'
             ],
             [
-                'label' => 'User',
+                'label' => 'User ID',
                 'attribute' => 'id',
+
+
+                'options' => [
+                    'width' => '80px'
+                ],
+                'enableSorting' => false,
+            ],
+            [
+                'label' => 'User',
+                'attribute' => 'username',
                 'filter' => \src\widgets\UserSelect2Widget::widget([
                     'model' => $searchModel,
                     'attribute' => 'userId'
@@ -65,7 +75,7 @@ $pjaxContainerId = 'pjax-user-shift-assign';
                 'enableSorting' => false,
             ],
             [
-                'label' => 'Shift',
+                'label' => 'Shift Name',
                 'attribute' => 'shiftId',
                 'value' => static function (Employee $model) {
                     if (!$model->userShiftAssigns) {
@@ -73,12 +83,16 @@ $pjaxContainerId = 'pjax-user-shift-assign';
                     }
                     $shifts = [];
                     foreach ($model->userShiftAssigns as $item) {
-                        $shifts[] = Html::tag('span', Html::encode($item->shift->sh_name), ['class' => 'label label-default']);
+                        $shifts[] = Html::tag(
+                            'span',
+                            Html::encode($item->shift->sh_name),
+                            ['class' => 'label label-default', 'style' => 'font-size: 11px;']
+                        );
                     }
                     return implode(' ', $shifts);
                 },
                 'format' => 'raw',
-                'contentOptions' => ['class' => 'text-left', 'style' => 'min-width: 320px'],
+                'contentOptions' => ['class' => 'text-left', 'style' => 'min-width: 320px;'],
                 'filter' => \modules\shiftSchedule\src\entities\shift\Shift::getList(),
             ],
             [
@@ -89,7 +103,11 @@ $pjaxContainerId = 'pjax-user-shift-assign';
                     $groups = $model->getUserGroupList();
                     $groupsValueArr = [];
                     foreach ($groups as $group) {
-                        $groupsValueArr[] = Html::tag('span', Html::encode($group), ['class' => 'label label-success']);
+                        $groupsValueArr[] = Html::tag(
+                            'span',
+                            Html::encode($group),
+                            ['class' => 'label label-success', 'style' => 'font-size: 11px;']
+                        );
                     }
                     return implode(' ', $groupsValueArr);
                 },
@@ -107,7 +125,11 @@ $pjaxContainerId = 'pjax-user-shift-assign';
                     $items = $model->getRoles();
                     $itemsData = [];
                     foreach ($items as $item) {
-                        $itemsData[] = Html::tag('span', Html::encode($item), ['class' => 'label bg-light text-dark shadow']);
+                        $itemsData[] = Html::tag(
+                            'span',
+                            Html::encode($item),
+                            ['class' => 'label bg-light text-dark shadow', 'style' => 'font-size: 11px;']
+                        );
                     }
                     return implode(' ', $itemsData);
                 },
@@ -125,7 +147,11 @@ $pjaxContainerId = 'pjax-user-shift-assign';
                     }
                     $projects = [];
                     foreach ($model->projects as $item) {
-                        $projects[] = Html::tag('span', Html::encode($item->name), ['class' => 'label label-info']);
+                        $projects[] = Html::tag(
+                            'span',
+                            Html::encode($item->name),
+                            ['class' => 'label label-info', 'style' => 'font-size: 11px;']
+                        );
                     }
                     return implode(' ', $projects);
                 },

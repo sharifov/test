@@ -514,11 +514,11 @@ class UserShiftScheduleService
         ?array $statusListId = [],
         ?array $subTypeListId = []
     ): array {
+        $employee = Employee::find()->where(['id' => $userId])->limit(1)->one();
+        $startDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($startDt), $employee);
+        $endDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($endDt), $employee);
 
-        $startDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($startDt));
-        $endDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($endDt));
-
-        if ($statusListId == null) {
+        if ($statusListId === null) {
             $statusListId = [UserShiftSchedule::STATUS_APPROVED, UserShiftSchedule::STATUS_DONE];
         }
 
