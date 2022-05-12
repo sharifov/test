@@ -1,6 +1,7 @@
 <?php
 
 use common\models\Employee;
+use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\user\src\update\MultipleUpdateForm;
 use src\auth\Auth;
 use yii\grid\ActionColumn;
@@ -123,7 +124,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
         //'layout'=>'{summary}'.Html::activeDropDownList($searchModel, 'perpage', [10 => 10, 30 => 30, 20 => 20, 50 => 50, 100 => 100],['id'=>'perpage'])."{items}<br/>{pager}",
         //'pjax' => false,
         //'layout' => $template,
-        'rowOptions' => static function (\common\models\Employee $model, $index, $widget, $grid) {
+        'rowOptions' => static function (Employee $model, $index, $widget, $grid) {
             if ($model->isDeleted() || $model->isBlocked()) {
                 return ['class' => 'danger'];
             }
@@ -139,61 +140,93 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             ],
             [
                 'class' => ActionColumn::class,
-                'template' => '{info} {update} {projects} {groups} {switch}',
+                'template' => '{info} {update} {projects} {groups} {switch} {shiftCalendar}',
                 'visibleButtons' => [
                     /*'view' => function ($model, $key, $index) {
                         return User::hasPermission('viewOrder');
                     },*/
-                    'info' => static function (\common\models\Employee $model, $key, $index) {
+                    'info' => static function (Employee $model, $key, $index) {
                         return Auth::can('/user/info');
                     },
-                    'update' => static function (\common\models\Employee $model, $key, $index) use ($isAdmin, $isUM) {
+                    'update' => static function (Employee $model, $key, $index) use ($isAdmin, $isUM) {
                         return (
                             $isAdmin
                             || ($isUM && (!$model->isOnlyAdmin() && !$model->isSuperAdmin()))
                             || !($model->isAdmin() || $model->isSuperAdmin())
                         );
                     },
-                    'projects' => static function (\common\models\Employee $model, $key, $index) use ($isAdmin, $isUM) {
+                    'projects' => static function (Employee $model, $key, $index) use ($isAdmin, $isUM) {
                         return (
                             $isAdmin
                             || ($isUM && (!$model->isOnlyAdmin() && !$model->isSuperAdmin()))
                             || !($model->isAdmin() || $model->isSuperAdmin())
                         );
                     },
-                    'groups' => static function (\common\models\Employee $model, $key, $index) use ($isAdmin, $isUM) {
+                    'groups' => static function (Employee $model, $key, $index) use ($isAdmin, $isUM) {
                         return (
                             $isAdmin
                             || ($isUM && (!$model->isOnlyAdmin() && !$model->isSuperAdmin()))
                             || !($model->isAdmin() || $model->isSuperAdmin())
                         );
                     },
-                    'switch' => static function (\common\models\Employee $model, $key, $index) {
+                    'switch' => static function (Employee $model, $key, $index) {
                         return !$model->isOnlyAdmin() && !$model->isSuperAdmin() && Auth::can('/employee/switch');
+                    },
+                    'shiftCalendar' => static function (Employee $model, $key, $index) {
+                        /** @abac ShiftAbacObject::ACT_USER_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_ACCESS, Access to action user-shift-calendar */
+                        return \Yii::$app->abac->can(
+                            null,
+                            ShiftAbacObject::ACT_USER_SHIFT_SCHEDULE,
+                            ShiftAbacObject::ACTION_ACCESS
+                        );
                     },
                 ],
                 'buttons' => [
-                    'info' => static function ($url, \common\models\Employee $model, $key) {
-                        return Html::a('<span class="fa fa-info-circle"></span>', ['user/info', 'id' => $model->id], ['title' => 'User info', 'target' => '_blank', 'class' => 'text-info']);
+                    'info' => static function ($url, Employee $model, $key) {
+                        return Html::a(
+                            '<span class="fa fa-info-circle"></span>',
+                            ['user/info', 'id' => $model->id],
+                            ['title' => 'User info', 'target' => '_blank', 'class' => 'text-info']
+                        );
                     },
-                    'projects' => static function ($url, \common\models\Employee $model, $key) {
-                        return Html::a('<span class="fa fa-list"></span>', ['user-project-params/index', 'UserProjectParamsSearch[upp_user_id]' => $model->id], ['title' => 'Projects', 'target' => '_blank']);
+                    'projects' => static function ($url, Employee $model, $key) {
+                        return Html::a(
+                            '<span class="fa fa-list"></span>',
+                            ['user-project-params/index', 'UserProjectParamsSearch[upp_user_id]' => $model->id],
+                            ['title' => 'Projects', 'target' => '_blank']
+                        );
                     },
-                    'groups' => static function ($url, \common\models\Employee $model, $key) {
-                        return Html::a('<span class="fa fa-users text-info"></span>', ['user-group-assign/index', 'UserGroupAssignSearch[ugs_user_id]' => $model->id], ['title' => 'User Groups', 'target' => '_blank']);
+                    'groups' => static function ($url, Employee $model, $key) {
+                        return Html::a(
+                            '<span class="fa fa-users text-info"></span>',
+                            ['user-group-assign/index', 'UserGroupAssignSearch[ugs_user_id]' => $model->id],
+                            ['title' => 'User Groups', 'target' => '_blank']
+                        );
                     },
-                    'switch' => static function ($url, \common\models\Employee $model, $key) {
-                        return Html::a('<span class="fa fa-sign-in text-warning"></span>', ['employee/switch', 'id' => $model->id], ['title' => 'switch User', 'data' => [
+                    'switch' => static function ($url, Employee $model, $key) {
+                        return Html::a(
+                            '<span class="fa fa-sign-in text-warning"></span>',
+                            ['employee/switch', 'id' => $model->id],
+                            ['title' => 'switch User', 'data' => [
                             'confirm' => 'Are you sure you want to switch user?',
                             //'method' => 'get',
-                        ],]);
+                            ],
+                            ]
+                        );
+                    },
+                    'shiftCalendar' => static function ($url, Employee $model, $key) {
+                        return Html::a(
+                            '<span class="fa fa-calendar"></span>',
+                            ['shift-schedule/user', 'id' => $model->id],
+                            ['title' => 'User Shift Calendar', 'target' => '_blank']
+                        );
                     },
                 ]
             ],
 
             [
                 'label' => 'Grav',
-                'value' => static function (\common\models\Employee $model) {
+                'value' => static function (Employee $model) {
                     $gravUrl = $model->getGravatarUrl(25);
                     return \yii\helpers\Html::img($gravUrl, ['class' => 'img-circle img-thumbnail']);
                 },
@@ -204,19 +237,19 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             [
                 'attribute' => 'roles',
                 'label' => 'Role',
-                'value' => static function (\common\models\Employee $model) {
+                'value' => static function (Employee $model) {
                     $roles = $model->getRoles();
                     return $roles ? implode(', ', $roles) : '-';
                 },
                 'format' => 'raw',
-                'filter' => \common\models\Employee::getAllRoles(Auth::user()),
+                'filter' => Employee::getAllRoles(Auth::user()),
                 'contentOptions' => ['style' => 'width: 10%; white-space: pre-wrap']
             ],
 
             [
                 'attribute' => 'status',
                 'filter' => $searchModel::STATUS_LIST,
-                'value' => static function (\common\models\Employee $model) {
+                'value' => static function (Employee $model) {
                     return Yii::$app->formatter->asEmployeeStatusLabel($model->status);
                 },
                 'format' => 'raw'
@@ -225,7 +258,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             [
                 'attribute' => 'online',
                 'filter' => [1 => 'Online', 2 => 'Offline'],
-                'value' => static function (\common\models\Employee $model) {
+                'value' => static function (Employee $model) {
                     return $model->userOnline ? '<span class="label label-success">Online</span>' : '<span class="label label-danger">Offline</span>';
                 },
                 'format' => 'raw'
@@ -234,7 +267,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             [
                 'label' => 'Call type',
                 'attribute' => 'user_call_type_id',
-                'value' => static function (\common\models\Employee $model) {
+                'value' => static function (Employee $model) {
                     $call_type_id = '';
                     if ($model->userProfile && is_numeric($model->userProfile->up_call_type_id)) {
                         $call_type_id = $model->userProfile->up_call_type_id;
@@ -249,7 +282,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 'label' => 'Call Ready',
                 'filter' => false,
                 //'filter' => [1 => 'Online', $searchModel::STATUS_DELETED => 'Deleted'],
-                'value' => static function (\common\models\Employee $model) {
+                'value' => static function (Employee $model) {
                     return $model->isCallStatusReady() ? '<span class="label label-success">ON</span>' : '<span class="label label-warning">OFF</span>';
                 },
                 'format' => 'raw'
@@ -258,7 +291,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             [
                 'label' => 'User Groups',
                 'attribute' => 'user_group_id',
-                'value' => static function (\common\models\Employee $model) {
+                'value' => static function (Employee $model) {
 
                     $groups = $model->getUserGroupList();
                     $groupsValueArr = [];
@@ -279,7 +312,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             [
                 'label' => 'User Departments',
                 'attribute' => 'user_department_id',
-                'value' => static function (\common\models\Employee $model) {
+                'value' => static function (Employee $model) {
 
                     $list = $model->getUserDepartmentList();
                     $valueArr = [];
@@ -300,7 +333,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             [
                 'label' => 'Projects Params',
                 'attribute' => 'user_params_project_id',
-                'value' => static function (\common\models\Employee $model) {
+                'value' => static function (Employee $model) {
 
                     $str = '<small><table class="table table-bordered">';
 
@@ -333,7 +366,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             [
                 'label' => 'IP filter',
                 'attribute' => 'acl_rules_activated',
-                'value' => static function (\common\models\Employee $model) {
+                'value' => static function (Employee $model) {
                     return $model->acl_rules_activated ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
                 },
                 'format' => 'raw',

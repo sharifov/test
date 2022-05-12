@@ -164,7 +164,7 @@ $pjaxContainerId = 'pjax-user-shift-assign';
             ],
             [
                 'class' => ActionColumn::class,
-                'template' => '{assign}',
+                'template' => '{assign} {shiftCalendar}',
                 'buttons' => [
                     'assign' => static function ($url, Employee $model, $key) {
                         return Html::a(
@@ -179,11 +179,30 @@ $pjaxContainerId = 'pjax-user-shift-assign';
                             ],
                         );
                     },
+                    'shiftCalendar' => static function ($url, Employee $model, $key) {
+                        return Html::a(
+                            '<span class="fa fa-calendar"></span>',
+                            ['/shift-schedule/user', 'id' => $model->id],
+                            ['title' => 'User Shift Calendar', 'target' => '_blank', 'data-pjax' => 0]
+                        );
+                    },
                 ],
                 'visibleButtons' => [
                     'assign' => static function ($model, $key, $index) {
                         /** @abac ShiftAbacObject::ACT_USER_SHIFT_ASSIGN, ShiftAbacObject::ACTION_UPDATE, Access to button UserShiftAssign */
-                        return \Yii::$app->abac->can(null, ShiftAbacObject::ACT_USER_SHIFT_ASSIGN, ShiftAbacObject::ACTION_UPDATE);
+                        return \Yii::$app->abac->can(
+                            null,
+                            ShiftAbacObject::ACT_USER_SHIFT_ASSIGN,
+                            ShiftAbacObject::ACTION_UPDATE
+                        );
+                    },
+                    'shiftCalendar' => static function (Employee $model, $key, $index) {
+                        /** @abac ShiftAbacObject::ACT_USER_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_ACCESS, Access to action user-shift-calendar */
+                        return \Yii::$app->abac->can(
+                            null,
+                            ShiftAbacObject::ACT_USER_SHIFT_SCHEDULE,
+                            ShiftAbacObject::ACTION_ACCESS
+                        );
                     },
                 ],
             ],
