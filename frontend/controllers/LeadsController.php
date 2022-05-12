@@ -10,12 +10,15 @@ use frontend\widgets;
 use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\entity\fileLead\FileLead;
 use modules\fileStorage\src\entity\fileLead\FileLeadQuery;
+use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\lead\src\abac\LeadAbacObject;
 use src\auth\Auth;
 use Yii;
 use common\models\Lead;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -39,6 +42,11 @@ class LeadsController extends FController
     public function behaviors()
     {
         $behaviors = [
+            'access' => [
+                'allowActions' => [
+                    'view'
+                ],
+            ],
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
@@ -281,6 +289,10 @@ class LeadsController extends FController
     public function actionView($id, $showInPopUp = null)
     {
         $model = $this->findModel($id);
+        /** @abac $abacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_ACCESS, Access to view lead  */
+        if (!Yii::$app->abac->can(new LeadAbacDto($model, Auth::id()), LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access Denied.');
+        }
 
         $searchModel = new QuoteSearch();
         $searchModelSegments = new LeadFlightSegmentSearch();
