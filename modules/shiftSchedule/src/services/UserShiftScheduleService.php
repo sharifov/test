@@ -322,7 +322,7 @@ class UserShiftScheduleService
                                     $timeStartSec = strtotime($date . ' ' . $rule->ssr_start_time_utc);
                                     $timeEndSec = strtotime($date . ' ' . $rule->ssr_end_time_utc);
 
-                                    if ($timeEndSec < $timeStartSec) {
+                                    if ($timeStartSec > $timeEndSec) {
                                         $timeEndSec = $timeEndSec + (24 * 60 * 60);
                                     }
 
@@ -393,6 +393,11 @@ class UserShiftScheduleService
 
         $timeStart = strtotime($date . ' ' . $rule->ssr_start_time_utc);
         $timeEnd = strtotime($date . ' ' . $rule->ssr_end_time_utc);
+
+
+        if ($timeStart > $timeEnd) {
+            $timeEnd = $timeEnd + (24 * 60 * 60);
+        }
 
         $tl->uss_start_utc_dt = date('Y-m-d H:i:s', $timeStart);
         $tl->uss_end_utc_dt = date('Y-m-d H:i:s', $timeEnd);
