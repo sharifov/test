@@ -550,7 +550,7 @@ class ShiftScheduleController extends FController
             $timelineList = $this->shiftScheduleService->createManual($form, Auth::id(), Auth::user()->timezone ?: null);
             $data = UserShiftScheduleHelper::getCalendarEventsData($timelineList);
 
-            return '<script>(function() {$("#modal-md").modal("hide");let timelineData = ' . json_encode($data) . ';addTimelineEvent(timelineData);})();</script>';
+            return '<script>(function() {$("#modal-md").modal("hide");let timelineData = ' . json_encode($data) . ';addTimelineEvent(timelineData);createNotify("Success", "Event created successfully", "success")})();</script>';
         }
 
         if ($form->userGroups) {
