@@ -32,9 +32,16 @@ $this->params['breadcrumbs'][] = $this->title;
             'model' => $model,
             'attributes' => [
                 'qss_id',
-                'qss_location_code',
-                'qss_departure_dt',
-                'qss_arrival_dt',
+                [
+                    'label' => 'Location Code',
+                    'attribute' => 'qss_location_code',
+                    'value' => static function (QuoteSegmentStop $model) {
+                        return Html::tag('span', $model->qss_location_code, ['class' => 'label label-info']);
+                    },
+                    'format' => 'raw',
+                ],
+                'qss_departure_dt:byUserDateTime',
+                'qss_arrival_dt:byUserDateTime',
                 'qss_duration',
                 [
                     'attribute' => 'qss_elapsed_time',

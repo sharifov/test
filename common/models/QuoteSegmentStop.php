@@ -48,8 +48,6 @@ class QuoteSegmentStop extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            ['qss_departure_dt', 'safe'],
-            ['qss_arrival_dt', 'safe'],
             [['qss_departure_dt', 'qss_arrival_dt'], 'datetime', 'format' => 'php:Y-m-d H:i'],
             [['qss_duration', 'qss_elapsed_time', 'qss_segment_id'], 'integer'],
             [['qss_location_code'], 'string', 'max' => 3],

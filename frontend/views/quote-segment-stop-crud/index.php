@@ -26,6 +26,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'layout' => "{errors}\n{summary}\n{items}\n{pager}",
         'columns' => [
             'qss_id',
             [
