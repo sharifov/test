@@ -332,7 +332,7 @@ class ShiftScheduleController extends FController
      * @param int|null $userId
      * @return array
      */
-    public function actionMyDataAjax(?int $userId): array
+    public function actionMyDataAjax(?int $userId = null): array
     {
         \Yii::$app->response->format = Response::FORMAT_JSON;
         $userId = $userId ?: Auth::id();
@@ -445,7 +445,7 @@ class ShiftScheduleController extends FController
             throw new NotFoundHttpException('Not exist this Shift Schedule (' . $eventId . ')');
         }
 
-        if ($event->uss_user_id !== Auth::id()) {
+        if ($event->uss_user_id !== Auth::id() && (!Auth::user()->isAdmin() && !Auth::user()->isSuperAdmin())) {
             throw new NotAcceptableHttpException('Permission Denied (' . $eventId . ')');
         }
 
@@ -468,14 +468,10 @@ class ShiftScheduleController extends FController
     }
 
     /**
-     * @param int|null $userId
      * @return string
-     * @throws NotFoundHttpException
      */
-    public function actionCalendar(?int $userId): string
+    public function actionCalendar(): string
     {
-        $user = $userId ? $this->findUserModel($userId) : Auth::user();
-
         $resourceList = [];
         $groupIds = [];
 
@@ -493,7 +489,6 @@ class ShiftScheduleController extends FController
                     'id' => 'ug-' . $group->ug_id,
                     'name' => $group->ug_name,
                     'color' => '#1dab2f',
-                    'img' => '',
                     'title' => $group->ug_key,
                     'collapsed' => $key !== 0
                 ];
