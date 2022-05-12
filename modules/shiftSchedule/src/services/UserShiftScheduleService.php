@@ -319,14 +319,21 @@ class UserShiftScheduleService
                                         }
                                     }
 
+                                    $timeStartSec = strtotime($date . ' ' . $rule->ssr_start_time_utc);
+                                    $timeEndSec = strtotime($date . ' ' . $rule->ssr_end_time_utc);
+
+                                    if ($timeEndSec < $timeStartSec) {
+                                        $timeEndSec = $timeEndSec + (24 * 60 * 60);
+                                    }
+
                                     $timeStart = date(
                                         'Y-m-d H:i:s',
-                                        strtotime($date . ' ' . $rule->ssr_start_time_utc)
+                                        $timeStartSec
                                     );
 
                                     $timeEnd = date(
                                         'Y-m-d H:i:s',
-                                        strtotime($date . ' ' . $rule->ssr_end_time_utc)
+                                        $timeEndSec
                                     );
 
                                     if (isset($timeLineData[$user->usa_user_id][$rule->ssr_id][$timeStart])) {
