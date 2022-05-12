@@ -572,7 +572,7 @@ class ShiftScheduleController extends FController
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             $event = $this->shiftScheduleService->createSingleManual($form, Auth::id(), Auth::user()->timezone ?: null);
             $data = UserShiftScheduleHelper::getCalendarEventsData([$event]);
-            return '<script>(function() {$("#modal-md").modal("hide");let timelineData = ' . json_encode($data) . ';addTimelineEvent(timelineData);})();</script>';
+            return '<script>(function() {$("#modal-md").modal("hide");let timelineData = ' . json_encode($data) . ';addTimelineEvent(timelineData);createNotify("Success", "Event created successfully", "success")})();</script>';
         }
 
         if (!Yii::$app->request->isPost) {
