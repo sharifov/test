@@ -471,7 +471,6 @@ class Email extends \yii\db\ActiveRecord
                     Yii::info([
                         $this->e_template_type_id,
                         $this->e_project_id,
-                        $this->eLead->l_dep_id
                     ], 'elk\Email:Template:abtesting');
                 }
             }
