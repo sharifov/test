@@ -37,6 +37,21 @@ $bundle = \frontend\assets\UserShiftCalendarAsset::register($this);
     </div>
 </div>
 
+<div id="custom-event-tooltip-popup" class="md-tooltip">
+    <div id="tooltip-event-header" class="md-tooltip-header">
+        <span id="tooltip-event-name-age" class="md-tooltip-name-age"></span>
+        <span id="tooltip-event-time" class="md-tooltip-time"></span>
+    </div>
+    <div class="md-tooltip-info">
+        <div class="md-tooltip-title">
+            Status: <span id="tooltip-event-title" class="md-tooltip-status md-tooltip-text"></span>
+        </div>
+        <div class="md-tooltip-title">Description: <span id="tooltip-event-description" class="md-tooltip-reason md-tooltip-text"></span></div>
+        <?php if ($canDeleteEvent = \Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_DELETE)) : ?>
+            <button id="tooltip-event-delete" mbsc-button data-color="danger" data-variant="outline" class="md-tooltip-delete-button">Delete appointment</button>
+        <?php endif; ?>
+    </div>
+</div>
 
 <?php
 $ajaxUrl = Url::to(['shift-schedule/calendar-events-ajax']);
@@ -45,13 +60,31 @@ $today = date('Y-m-d', strtotime('+1 day'));
 $modalUrl = Url::to(['/shift-schedule/add-event']);
 $groupIdsJson = Json::encode($groupIds);
 $formCreateSingleEventUrl = Url::to(['/shift-schedule/add-single-event']);
-
+$formUpdateSingleEvent = Url::to(['/shift-schedule/update-single-event']);
+$deleteEventUrl = Url::to(['/shift-schedule/delete-event']);
+$canCreateOnDoubleClick = \Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_CREATE_ON_DOUBLE_CLICK);
 $js = <<<JS
 var resourceListJson = $resourceListJson;
 var groupIds = $groupIdsJson;
 var calendarEventsAjaxUrl = '$ajaxUrl';
 var today = '$today';
 var modalUrl = '$modalUrl';
+var events;
+var canDeleteEvent = Boolean('$canDeleteEvent');
+var canCreateOnDoubleClick = Boolean('$canCreateOnDoubleClick');
+
+var formatDate = mobiscroll.util.datetime.formatDate;
+var currentEvent;
+var timer;
+var \$tooltip = $('#custom-event-tooltip-popup');
+if (canDeleteEvent) {
+    var \$deleteButton = $('#tooltip-event-delete');
+}
+var \$header = $('#tooltip-event-header');
+var \$data = $('#tooltip-event-name-age');
+var \$time = $('#tooltip-event-time');
+var \$status = $('#tooltip-event-title');
+var \$description = $('#tooltip-event-description');
 
 mobiscroll.setOptions({
     theme: 'ios',
@@ -70,7 +103,7 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
         displayTimezone: 'local',
         //displayTimezone: 'Europe/Chisinau', //'local',
         timezonePlugin: mobiscroll.momentTimezone,
-        clickToCreate: true,
+        clickToCreate: canCreateOnDoubleClick,
         dragToCreate: false,
         dragToMove: true,
         dragToResize: true,
@@ -134,12 +167,48 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
         
         
          onEventCreate: function (args, inst) {
+            if (args.event.resource.indexOf('us-') !== 0) {
+                inst.removeEvent(args.event);
+                return false;
+            }
             // store temporary event
             createUpdateEvent(args.event, true);
             /*tempMeal = args.event;
             setTimeout(function () {
                 addMealPopup();
             }, 100);*/
+        },
+        
+        onEventClick: function (args, inst) {
+            var event = args.event;
+            // var resource = events.find(function (e) {return e.resource === event.resource});
+            let startDate = new Date(event.start);
+            let endDate = new Date(event.end);
+            var time = formatDate('YYYY-MM-DD H:mm', startDate) + ' - ' + formatDate('YYYY-MM-DD H:mm', endDate);
+            var button = {};
+
+            currentEvent = event;
+
+            if (event.confirmed) {
+                button.text = 'Cancel appointment';
+                button.type = 'warning';
+            } else {
+                button.text = 'Confirm appointment';
+                button.type = 'success';
+            }
+            
+            \$header.css('background-color', event.borderColor || event.color);
+            \$data.text(event.title);
+            \$time.text(time);
+
+            \$status.text(event.status);
+            \$description.text(event.description);
+
+            clearTimeout(timer);
+            timer = null;
+
+            tooltip.setOptions({ anchor: args.domEvent.target });
+            tooltip.open();
         },
         // onEventClick: function (args, inst) {
             // oldMeal = $.extend({}, args.event);
@@ -156,11 +225,57 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
         //         message: 'Event created'
         //     });
         // },
-        // onEventUpdated: function () {
-        //     mobiscroll.toast({
-        //         message: 'Event updated'
-        //     });
-        // },
+        onEventUpdated: function (args) {
+        
+            let currentUserId;
+            let oldUserId;
+            
+            let event = args.event
+            let oldEvent = args.oldEvent;
+        
+            if (event.resource.indexOf('us-') === 0) {
+                currentUserId = event.resource.substring(3);
+            } else {
+                inst.removeEvent(event);
+                window.inst.addEvent(oldEvent);
+                return false;
+            }
+            if (oldEvent.resource.indexOf('us-') === 0) {
+                oldUserId = oldEvent.resource.substring(3);
+            } else {
+                inst.removeEvent(event);
+                window.inst.addEvent(oldEvent);
+                return false;
+            }
+            
+            let eventStartDate = new Date(event.start);
+            let [year, month, day, hour, minute] = [eventStartDate.getFullYear(), eventStartDate.getMonth()+1, eventStartDate.getDate(), eventStartDate.getHours(), eventStartDate.getMinutes(), eventStartDate];
+            let startDate = year + '-' + month + '-' + day + ' ' + hour + ':' + minute;
+            
+            let eventEndDate = new Date(event.end);
+            let [yearEnd, monthEnd, dayEnd, hourEnd, minuteEnd] = [eventEndDate.getFullYear(), eventEndDate.getMonth()+1, eventEndDate.getDate(), eventEndDate.getHours(), eventEndDate.getMinutes(), eventEndDate];
+            let endDate = yearEnd + '-' + monthEnd + '-' + dayEnd + ' ' + hourEnd + ':' + minuteEnd;
+            
+            console.log(event);
+            
+            let data = {
+                eventId: args.event.id,
+                newUserId: currentUserId,
+                oldUserId: oldUserId,
+                startDate: startDate,
+                endDate: endDate
+            };
+            
+            $.post('$formUpdateSingleEvent', data, function (data) {
+                if (data.error) {
+                    createNotify('Error', data.message, 'error');
+                } else {
+                    mobiscroll.toast({
+                        message: 'Event updated successfully'
+                    });
+                }
+            });
+        },
         // onEventCreateFailed: function (event) {
         //     mobiscroll.toast({
         //         message: 'Can\'t create event'
@@ -177,7 +292,6 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
 
 
     function createUpdateEvent(event, isNew) {
-            console.log(event);
             if (isNew) {
                 let userId;
                 if (event.resource.indexOf('us-') === 0) {
@@ -187,7 +301,7 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
                 let [year, month, day, hour, minute] = [eventStartDate.getFullYear(), eventStartDate.getMonth()+1, eventStartDate.getDate(), eventStartDate.getHours(), eventStartDate.getMinutes(), eventStartDate];
                 let startDate = year + '-' + month + '-' + day + ' ' + hour + ':' + minute;
                 let modal = $('#modal-md');
-                modal.find('.modal-title').html('Add event for user ');
+                modal.find('.modal-title').html('Add event for user');
                 modal.on('hide.bs.modal', function (e) {
                     inst.removeEvent(event);
                 });
@@ -200,6 +314,9 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
                         createNotify('Error', xhr.statusText, 'error');
                     }, 800);
                 })
+            } else {
+                console.log()
+                // $.post('$formUpdateSingleEvent', {});
             }
         }
 
@@ -258,6 +375,66 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
                 break;
         }
     });
+    
+    var tooltip = \$tooltip.mobiscroll().popup({
+        display: 'anchored',
+        touchUi: false,
+        showOverlay: false,
+        contentPadding: false,
+        closeOnOverlayClick: false,
+        width: 350
+    }).mobiscroll('getInst');
+
+    \$tooltip.mouseenter(function (ev) {
+        if (timer) {
+            clearTimeout(timer);
+            timer = null;
+        }
+    });
+
+    \$tooltip.mouseleave(function (ev) {
+        timer = setTimeout(function () {
+            tooltip.close();
+        }, 200);
+    });
+
+    if (canDeleteEvent) {
+        \$deleteButton.on('click', function (ev) {
+            mobiscroll.confirm({
+                title: 'Are you sure you want to delete shift?',
+                // message: 'It looks like someone from the team won\'t be able to join the meeting.',
+                okText: 'Yes',
+                cancelText: 'No',
+                callback: function (res) {
+                    if (res) {
+                        $.ajax({
+                            url: '$deleteEventUrl',
+                            data: {'shiftId': currentEvent.id},
+                            type: 'post',
+                            cache: false,
+                            dataType: 'json',
+                            success: function (data) {
+                                if (data.error) {
+                                    createNotify('Error', data.message, 'error');
+                                } else {
+                                    inst.removeEvent(currentEvent);
+                                    tooltip.close();
+                                    createNotify('Success', data.message, 'success');
+                                }
+                            },
+                            error: function (xhr) {
+                                createNotify('Error', xhr.responseText, 'error');
+                            }
+                        })
+                    }
+                }
+            });
+    
+            // mobiscroll.toast({
+            //     message: 'Appointment deleted'
+            // });
+        });
+    }
 
 
 
@@ -276,10 +453,12 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
     window.setTimelineEvents = function (data)
     {
         window.inst.setEvents(data);
+        events = data;
     }
     
     window.addTimelineEvent = function (data) {
         window.inst.addEvent(data);
+        events.push(data);
     } 
     // $.getJSON(calendarEventsAjaxUrl, function (events) {
     //     inst.setEvents(events);

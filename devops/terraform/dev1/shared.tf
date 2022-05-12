@@ -40,7 +40,7 @@ resource "aws_security_group" "shared" {
     from_port   = 11300
     to_port     = 11300
     protocol    = "tcp"
-    cidr_blocks = [var.VPC_CIDR]
+    cidr_blocks = [var.VPC_CIDR, var.INFRA_CIDR]
   }
 
   ingress {
@@ -48,7 +48,7 @@ resource "aws_security_group" "shared" {
     from_port   = 6379
     to_port     = 6379
     protocol    = "tcp"
-    cidr_blocks = [var.VPC_CIDR]
+    cidr_blocks = [var.VPC_CIDR, var.INFRA_CIDR]
   }
 
   ingress {
@@ -56,7 +56,7 @@ resource "aws_security_group" "shared" {
     from_port   = 8000
     to_port     = 8000
     protocol    = "tcp"
-    cidr_blocks = [var.VPC_CIDR]
+    cidr_blocks = [var.VPC_CIDR, var.INFRA_CIDR]
   }
 
   ingress {
@@ -64,7 +64,7 @@ resource "aws_security_group" "shared" {
     from_port   = 8001
     to_port     = 8001
     protocol    = "tcp"
-    cidr_blocks = [var.VPC_CIDR]
+    cidr_blocks = [var.VPC_CIDR, var.INFRA_CIDR]
   }
 
   ingress {

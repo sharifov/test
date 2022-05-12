@@ -2,6 +2,7 @@
 
 namespace src\forms\cases;
 
+use common\models\ClientEmail;
 use src\entities\cases\Cases;
 use src\services\client\InternalEmailValidator;
 use yii\base\Model;
@@ -11,11 +12,13 @@ use yii\base\Model;
  *
  * @property string $email
  * @property string $caseGid
+ * @property int $type
  */
 class CasesAddEmailForm extends Model
 {
     public $email;
     public $caseGid;
+    public $type;
 
     /**
      * CasesChangeStatusForm constructor.
@@ -38,6 +41,9 @@ class CasesAddEmailForm extends Model
             ['email', 'string', 'max' => 160],
             ['email', 'email'],
             ['email', InternalEmailValidator::class, 'allowInternalEmail' => \Yii::$app->params['settings']['allow_contact_internal_email']],
+            ['type', 'integer'],
+            ['type', 'default', 'value' => ClientEmail::EMAIL_NOT_SET],
+            ['type', 'in', 'range' => array_keys(ClientEmail::EMAIL_TYPE)]
         ];
     }
 

@@ -65,18 +65,18 @@ class QuoteSegmentBaggage extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'qsb_id' => 'Qsb ID',
-            'qsb_pax_code' => 'Qsb Pax Code',
-            'qsb_segment_id' => 'Qsb Segment ID',
-            'qsb_airline_code' => 'Qsb Airline Code',
-            'qsb_allow_pieces' => 'Qsb Allow Pieces',
-            'qsb_allow_weight' => 'Qsb Allow Weight',
-            'qsb_allow_unit' => 'Qsb Allow Unit',
-            'qsb_allow_max_weight' => 'Qsb Allow Max Weight',
-            'qsb_allow_max_size' => 'Qsb Allow Max Size',
-            'qsb_created_dt' => 'Qsb Created Dt',
-            'qsb_updated_dt' => 'Qsb Updated Dt',
-            'qsb_updated_user_id' => 'Qsb Updated User ID',
+            'qsb_id' => 'ID',
+            'qsb_pax_code' => 'Pax Code',
+            'qsb_segment_id' => 'Segment ID',
+            'qsb_airline_code' => 'Airline Code',
+            'qsb_allow_pieces' => 'Allow Pieces',
+            'qsb_allow_weight' => 'Allow Weight',
+            'qsb_allow_unit' => 'Allow Unit',
+            'qsb_allow_max_weight' => 'Allow Max Weight',
+            'qsb_allow_max_size' => 'Allow Max Size',
+            'qsb_created_dt' => 'Created Dt',
+            'qsb_updated_dt' => 'Updated Dt',
+            'qsb_updated_user_id' => 'Updated User ID',
             'qsb_carry_one' => 'Carry one',
         ];
     }

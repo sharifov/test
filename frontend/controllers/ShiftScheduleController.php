@@ -59,7 +59,7 @@ class ShiftScheduleController extends FController
                     /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_ACCESS, Access to page shift-schedule/index */
                     [
                         'actions' => ['index', 'my-data-ajax', 'generate-example', 'remove-user-data', 'get-event',
-                            'generate-user-schedule', 'legend-ajax', 'calendar', 'calendar-events-ajax', 'add-event', 'add-single-event',
+                            'generate-user-schedule', 'legend-ajax', 'calendar', 'calendar-events-ajax', 'add-event', 'update-single-event',
                             'schedule-request-ajax'],
                         'allow' => \Yii::$app->abac->can(
                             null,
@@ -68,6 +68,24 @@ class ShiftScheduleController extends FController
                         ),
                         'roles' => ['@'],
                     ],
+                    [
+                        'actions' => ['delete-event'],
+                        'allow' => \Yii::$app->abac->can(
+                            null,
+                            ShiftAbacObject::OBJ_USER_SHIFT_EVENT,
+                            ShiftAbacObject::ACTION_DELETE
+                        ),
+                        'roles' => ['@'],
+                    ],
+                    [
+                        'actions' => ['add-single-event'],
+                        'allow' => \Yii::$app->abac->can(
+                            null,
+                            ShiftAbacObject::OBJ_USER_SHIFT_EVENT,
+                            ShiftAbacObject::ACTION_CREATE_ON_DOUBLE_CLICK
+                        ),
+                        'roles' => ['@'],
+                    ]
                 ],
             ],
         ];
@@ -427,13 +445,75 @@ class ShiftScheduleController extends FController
             }
 
             $form->userId = $userIdCreateFor;
-            $form->startDateTime = (new \DateTimeImmutable($startDate))->format('Y-m-d H:i');
-            $form->duration = UserShiftSchedule::DEFAULT_DURATION;
+            $startDateTime = (new \DateTimeImmutable($startDate));
+            $endDateTime = $startDateTime->add(new \DateInterval('PT' . UserShiftSchedule::DEFAULT_DURATION_HOURS . 'H'));
+            $interval = $startDateTime->diff($endDateTime);
+            $form->defaultDuration = $interval->format('%H:%I');
+            $form->dateTimeRange = $startDateTime->format('Y-m-d H:i') . ' - ' . $endDateTime->format('Y-m-d H:i');
             $form->status = UserShiftSchedule::STATUS_APPROVED;
         }
 
         return $this->renderAjax('partial/_shift_schedule_create_form_single_event', [
             'singleEventForm' => $form
+        ]);
+    }
+
+    public function actionDeleteEvent()
+    {
+        $shiftId = Yii::$app->request->post('shiftId');
+
+        $userShiftSchedule = UserShiftSchedule::findOne($shiftId);
+        if (!$userShiftSchedule) {
+            return $this->asJson([
+                'error' => true,
+                'message' => 'Shift not found by id:' . $shiftId
+            ]);
+        }
+        if (!$userShiftSchedule->delete()) {
+            return $this->asJson([
+                'error' => true,
+                'message' => $userShiftSchedule->getErrorSummary(true)[0]
+            ]);
+        }
+        return $this->asJson([
+            'error' => false,
+            'message' => 'Shift deleted successfully'
+        ]);
+    }
+
+    public function actionUpdateSingleEvent()
+    {
+        $data = Yii::$app->request->post();
+
+        $event = UserShiftSchedule::findOne((int)$data['eventId']);
+        if (!$event) {
+            return $this->asJson([
+                'error' => true,
+                'message' => 'Event not found: by id: ' . $data['eventId']
+            ]);
+        }
+
+        $timezone = Auth::user()->timezone ?: null;
+
+        $startDateTime = new \DateTimeImmutable($data['startDate'], $timezone ? new \DateTimeZone($timezone) : null);
+        $startDateTime = $startDateTime->setTimezone(new \DateTimeZone('UTC'));
+        $endDateTime = new \DateTimeImmutable($data['endDate'], $timezone ? new \DateTimeZone($timezone) : null);
+        $endDateTime = $endDateTime->setTimezone(new \DateTimeZone('UTC'));
+        $interval = $startDateTime->diff($endDateTime);
+        $diffMinutes = $interval->i + ($interval->h * 60);
+
+        $event->uss_start_utc_dt = $startDateTime->format('Y-m-d H:i:s');
+        $event->uss_end_utc_dt = $endDateTime->format('Y-m-d H:i:s');
+        $event->uss_duration = $diffMinutes;
+        if ($data['newUserId'] !== $data['oldUserId']) {
+            $event->uss_user_id = $data['newUserId'];
+        }
+
+        $event->save();
+
+        return $this->asJson([
+            'error' => false,
+            'message' => ''
         ]);
     }
 

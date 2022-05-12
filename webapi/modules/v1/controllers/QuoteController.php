@@ -804,6 +804,7 @@ class QuoteController extends ApiBaseController
             $quote->attributes = $quoteAttributes;
             $quote->lead_id = $lead->id;
             $quote->employee_id = null;
+            $quote->q_create_type_id = Quote::CREATE_TYPE_EXPERT;
             $quote->setMetricLabels(['action' => 'created', 'type_creation' => 'web_api']);
 
             if ($checkPayment = ArrayHelper::getValue($quote, 'check_payment', true)) {

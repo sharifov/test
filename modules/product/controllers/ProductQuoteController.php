@@ -8,13 +8,9 @@ use common\models\Email;
 use common\models\EmailTemplateType;
 use common\models\Notifications;
 use common\models\UserProjectParams;
-use modules\cases\src\abac\CasesAbacObject;
-use modules\cases\src\abac\dto\CasesAbacDto;
 use modules\flight\models\FlightQuoteFlight;
 use modules\flight\src\useCases\reprotectionDecision;
 use modules\order\src\entities\order\Order;
-use modules\product\src\abac\dto\ProductQuoteAbacDto;
-use modules\product\src\abac\ProductQuoteAbacObject;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
@@ -22,7 +18,7 @@ use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
-use modules\product\src\entities\productQuoteData\ProductQuoteData;
+use modules\product\src\entities\productQuoteChange\service\ProductQuoteChangeService;
 use modules\product\src\entities\productQuoteData\service\ProductQuoteDataManageService;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundStatus;
@@ -36,19 +32,16 @@ use src\auth\Auth;
 use src\dispatchers\EventDispatcher;
 use src\entities\cases\CaseEventLog;
 use src\entities\cases\Cases;
-use src\exception\CheckRestrictionException;
 use src\helpers\app\AppHelper;
 use src\helpers\ProjectHashGenerator;
 use src\repositories\cases\CasesRepository;
 use src\repositories\NotFoundException;
 use src\services\cases\CasesCommunicationService;
-use webapi\src\response\behaviors\RequestBehavior;
 use Yii;
 use frontend\controllers\FController;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
-use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
@@ -404,7 +397,7 @@ class ProductQuoteController extends FController
                             $whData = (new HybridWhData())->fillCollectedData(
                                 HybridWhData::WH_TYPE_VOLUNTARY_CHANGE_UPDATE,
                                 [
-                                    'booking_id' => $originQuote->getBookingId(),
+                                    'booking_id' => $case->cs_order_uid,
                                     'product_quote_gid' => $originQuote->pq_gid,
                                     'exchange_gid' => $productQuoteChange->pqc_gid,
                                     'exchange_status' => ProductQuoteChangeStatus::getClientKeyStatusById($productQuoteChange->pqc_status_id),
@@ -967,6 +960,8 @@ class ProductQuoteController extends FController
                     $lastReProtectionQuote->pq_id
                 );
             }
+
+            ProductQuoteChangeService::sendHybridDeclineNotification($productQuoteChange, $changeQuote, $case);
         } catch (\RuntimeException | \DomainException | NotFoundException $e) {
             $result['error'] = true;
             $result['message'] = $e->getMessage();
