@@ -9,6 +9,7 @@ use common\models\search\EmployeeSearch;
 use frontend\models\UserFailedLogin;
 use modules\product\src\entities\productType\ProductType;
 use src\access\EmployeeGroupAccess;
+use src\helpers\app\AppHelper;
 use src\helpers\setting\SettingHelper;
 use src\model\clientChatChannel\entity\ClientChatChannel;
 use src\model\clientChatUserAccess\entity\ClientChatUserAccess;
@@ -2602,16 +2603,16 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      * @param int $time
      * @return string
      */
-    public static function convertTimeFromUserDtToUTC(int $time): string
+    public static function convertTimeFromUserDtToUTC(int $time, ?Employee $employee = null): string
     {
         $dateTime = '';
 
         if ($time >= 0) {
-
-            /** @var Employee $user */
-            $user = \Yii::$app->user->identity;
+            $user = $employee ?: \Yii::$app->user->identity ?? null;
+            if (!$user) {
+                throw new \RuntimeException('User is empty in method convertTimeFromUserDtToUTC');
+            }
             $timezone = $user->timezone;
-
             $dateTime = date('Y-m-d H:i:s', $time);
 
             try {
