@@ -1,7 +1,5 @@
 <?php
 
-use common\models\Airports;
-use frontend\extensions\DatePicker;
 use kartik\select2\Select2;
 use src\widgets\DateTimePicker;
 use yii\helpers\Html;
@@ -76,14 +74,14 @@ use yii\widgets\ActiveForm;
 
 $js = <<<JS
 function formatRepo( repo ) {
-				if (repo.loading) return repo.text;
+    if (repo.loading) return repo.text;
 
-				var markup = "<div class='select2-result-repository clearfix'>" +
-					"<div class='select2-result-repository__meta'>" +
-						"<div class='select2-result-repository__title'>" + repo.text + "</div>";
-				markup +=	"</div></div>";
+    var markup = "<div class='select2-result-repository clearfix'>" +
+        "<div class='select2-result-repository__meta'>" +
+            "<div class='select2-result-repository__title'>" + repo.text + "</div>";
+    markup +=	"</div></div>";
 
-				return markup;
-			}
+    return markup;
+}
 JS;
 $this->registerJs($js, View::POS_HEAD);

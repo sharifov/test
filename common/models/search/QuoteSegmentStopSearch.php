@@ -18,17 +18,9 @@ class QuoteSegmentStopSearch extends QuoteSegmentStop
     {
         return [
             [['qss_id', 'qss_duration', 'qss_elapsed_time', 'qss_segment_id'], 'integer'],
-            [['qss_location_code', 'qss_departure_dt', 'qss_arrival_dt', 'qss_equipment'], 'safe'],
+            [['qss_departure_dt', 'qss_arrival_dt'], 'date', 'format' => 'php:Y-m-d', 'skipOnEmpty' => true],
+            [['qss_location_code', 'qss_equipment'], 'safe'],
         ];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function scenarios()
-    {
-        // bypass scenarios() implementation in the parent class
-        return Model::scenarios();
     }
 
     /**
@@ -52,16 +44,14 @@ class QuoteSegmentStopSearch extends QuoteSegmentStop
         $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
             return $dataProvider;
         }
 
         // grid filtering conditions
         $query->andFilterWhere([
             'qss_id' => $this->qss_id,
-            'qss_departure_dt' => $this->qss_departure_dt,
-            'qss_arrival_dt' => $this->qss_arrival_dt,
+            'DATE(qss_departure_dt)' => $this->qss_departure_dt,
+            'DATE(qss_arrival_dt)' => $this->qss_arrival_dt,
             'qss_duration' => $this->qss_duration,
             'qss_elapsed_time' => $this->qss_elapsed_time,
             'qss_segment_id' => $this->qss_segment_id,
