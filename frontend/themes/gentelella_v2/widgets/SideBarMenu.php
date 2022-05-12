@@ -942,8 +942,8 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 'url' => 'javascript:',
                 'icon' => 'cogs',
                 'items' => [
-                    ['label' => 'Object Segment List', 'url' => ['/object-segment/object-segment-list']],
-                    ['label' => 'Object Segment Rules', 'url' => ['/object-segment/object-segment-rule']],
+                    ['label' => 'Object Segment List', 'url' => ['/object-segment/object-segment-list/index']],
+                    ['label' => 'Object Segment Rules', 'url' => ['/object-segment/object-segment-rule/index']],
                 ],
             ];
         }

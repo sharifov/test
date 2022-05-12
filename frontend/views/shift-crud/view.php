@@ -4,6 +4,7 @@ use common\components\grid\BooleanColumn;
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
 use common\models\Employee;
+use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\entities\shift\Shift;
 use modules\shiftSchedule\src\entities\shiftScheduleRule\search\SearchShiftScheduleRule;
 use modules\shiftSchedule\src\entities\shiftScheduleRule\ShiftScheduleRule;
@@ -11,7 +12,10 @@ use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\widget\ShiftSelectWidget;
 use src\auth\Auth;
 use yii\bootstrap4\Html;
+use yii\grid\ActionColumn;
 use yii\grid\GridView;
+use yii\helpers\ArrayHelper;
+use yii\helpers\Url;
 use yii\widgets\DetailView;
 use yii\widgets\Pjax;
 
@@ -44,7 +48,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ]) ?>
         </p>
 
-    <div class="col-md-4">
+    <div class="col-md-3">
         <?= DetailView::widget([
             'model' => $model,
             'attributes' => [
@@ -74,7 +78,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ]) ?>
 
     </div>
-    <div class="col-md-8">
+    <div class="col-md-9">
 
 
         <?php
@@ -307,6 +311,29 @@ $this->params['breadcrumbs'][] = $this->title;
                             : '<span class="label label-danger">Offline</span>';
                     },
                     'format' => 'raw'
+                ],
+                [
+                    'class' => ActionColumn::class,
+                    'template' => '{shiftCalendar}',
+                    'buttons' => [
+                        'shiftCalendar' => static function ($url, Employee $model, $key) {
+                            return Html::a(
+                                '<span class="fa fa-calendar"></span>',
+                                ['/shift-schedule/user', 'id' => $model->id],
+                                ['title' => 'User Shift Calendar', 'target' => '_blank', 'data-pjax' => 0]
+                            );
+                        },
+                    ],
+                    'visibleButtons' => [
+                        'shiftCalendar' => static function (Employee $model, $key, $index) {
+                            /** @abac ShiftAbacObject::ACT_USER_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_ACCESS, Access to action user-shift-calendar */
+                            return \Yii::$app->abac->can(
+                                null,
+                                ShiftAbacObject::ACT_USER_SHIFT_SCHEDULE,
+                                ShiftAbacObject::ACTION_ACCESS
+                            );
+                        },
+                    ],
                 ],
             ],
         ]); ?>

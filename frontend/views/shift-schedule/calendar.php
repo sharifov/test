@@ -40,13 +40,16 @@ $bundle = \frontend\assets\UserShiftCalendarAsset::register($this);
 <div id="custom-event-tooltip-popup" class="md-tooltip">
     <div id="tooltip-event-header" class="md-tooltip-header">
         <span id="tooltip-event-name-age" class="md-tooltip-name-age"></span>
-        <span id="tooltip-event-time" class="md-tooltip-time"></span>
     </div>
     <div class="md-tooltip-info">
         <div class="md-tooltip-title">
-            Status: <span id="tooltip-event-title" class="md-tooltip-status md-tooltip-text"></span>
+          Title: <span id="tooltip-event-title" class="md-tooltip-title md-tooltip-text"></span>
         </div>
-        <div class="md-tooltip-title">Description: <span id="tooltip-event-description" class="md-tooltip-reason md-tooltip-text"></span></div>
+        <div class="md-tooltip-title">
+            Status: <span id="tooltip-event-status" class="md-tooltip-status md-tooltip-text"></span>
+        </div>
+        <div class="md-tooltip-title">Event Range: <span id="tooltip-event-time" class="md-tooltip-text"></span></div>
+        <button id="tooltip-event-view" mbsc-button data-color="dark" data-variant="outline" class="md-tooltip-view-button">View Details</button>
         <?php if ($canDeleteEvent = \Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_DELETE)) : ?>
             <button id="tooltip-event-delete" mbsc-button data-color="danger" data-variant="outline" class="md-tooltip-delete-button">Delete appointment</button>
         <?php endif; ?>
@@ -63,6 +66,7 @@ $formCreateSingleEventUrl = Url::to(['/shift-schedule/add-single-event']);
 $formUpdateSingleEvent = Url::to(['/shift-schedule/update-single-event']);
 $deleteEventUrl = Url::to(['/shift-schedule/delete-event']);
 $canCreateOnDoubleClick = \Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_CREATE_ON_DOUBLE_CLICK);
+$openModalEventUrl = \yii\helpers\Url::to(['shift-schedule/get-event']);
 $js = <<<JS
 var resourceListJson = $resourceListJson;
 var groupIds = $groupIdsJson;
@@ -72,6 +76,7 @@ var modalUrl = '$modalUrl';
 var events;
 var canDeleteEvent = Boolean('$canDeleteEvent');
 var canCreateOnDoubleClick = Boolean('$canCreateOnDoubleClick');
+var openModalEventUrl = '$openModalEventUrl';
 
 var formatDate = mobiscroll.util.datetime.formatDate;
 var currentEvent;
@@ -83,8 +88,9 @@ if (canDeleteEvent) {
 var \$header = $('#tooltip-event-header');
 var \$data = $('#tooltip-event-name-age');
 var \$time = $('#tooltip-event-time');
-var \$status = $('#tooltip-event-title');
-var \$description = $('#tooltip-event-description');
+var \$status = $('#tooltip-event-status');
+var \$title = $('#tooltip-event-title');
+var \$view = $('#tooltip-event-view');
 
 mobiscroll.setOptions({
     theme: 'ios',
@@ -200,9 +206,9 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
             \$header.css('background-color', event.borderColor || event.color);
             \$data.text(event.title);
             \$time.text(time);
+            \$title.text(event.description);
 
             \$status.text(event.status);
-            \$description.text(event.description);
 
             clearTimeout(timer);
             timer = null;
@@ -397,6 +403,12 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
             tooltip.close();
         }, 200);
     });
+    
+    \$view.on('click', function (e) {
+        e.preventDefault()
+        openModalEventId(currentEvent.id);
+        tooltip.close();
+    });
 
     if (canDeleteEvent) {
         \$deleteButton.on('click', function (ev) {
@@ -486,6 +498,22 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
             }
         });
     });
+    
+    function openModalEventId(id)
+    {
+        let modal = $('#modal-md');
+        let eventUrl = openModalEventUrl + '?id=' + id;
+        //modal.find('.modal-title').html('Offer [' + gid + '] status history');
+        $('#modal-md-label').html('Schedule Event: ' + id);
+        modal.find('.modal-body').html('');
+        modal.find('.modal-body').load(eventUrl, function( response, status, xhr ) {
+            if (status === 'error') {
+                alert(response);
+            } else {
+                modal.modal('show');
+            }
+        });
+    }
 
 JS;
 
