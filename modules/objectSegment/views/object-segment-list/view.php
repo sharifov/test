@@ -8,7 +8,7 @@ use yii\widgets\DetailView;
 /* @var $model \modules\objectSegment\src\entities\ObjectSegmentList */
 
 $this->title                   = $model->osl_title . ' (' . $model->osl_id . ')';
-$this->params['breadcrumbs'][] = ['label' => 'Object Segment ', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Object Segment List', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>

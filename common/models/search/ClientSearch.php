@@ -20,6 +20,8 @@ class ClientSearch extends Client
     public $client_phone;
     public $not_in_client_id;
 
+    private int $leadsLimit = 5;
+
     /**
      * @return array
      */
@@ -221,5 +223,21 @@ class ClientSearch extends Client
         ]);
 
         return $dataProvider;
+    }
+
+    /**
+     * @return int
+     */
+    public function getLeadsLimit(): int
+    {
+        return $this->leadsLimit;
+    }
+
+    /**
+     * @param int $leadsLimit
+     */
+    public function setLeadsLimit(int $leadsLimit): void
+    {
+        $this->leadsLimit = $leadsLimit;
     }
 }
