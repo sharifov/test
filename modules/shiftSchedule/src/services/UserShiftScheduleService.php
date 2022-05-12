@@ -308,9 +308,6 @@ class UserShiftScheduleService
                         }
                     }
 
-                    /* TODO:: FOR DEBUG:: must by remove  */
-                    $isDue = true;
-
                     if ($isDue) {
                         if ($rule->shift && $rule->shift->sh_enabled) {
                             // echo $rule->shift->sh_id . "\r\n";
