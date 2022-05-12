@@ -2782,6 +2782,14 @@ class Quote extends \yii\db\ActiveRecord
         return null;
     }
 
+    public function getKeysInfo(): ?array
+    {
+        if (($originSearchData = $this->getJsonOriginSearchData()) && !empty($originSearchData['keys'])) {
+            return $originSearchData['keys'];
+        }
+        return null;
+    }
+
     public function getJsonOriginSearchData(): ?array
     {
         if (!empty($this->origin_search_data)) {
