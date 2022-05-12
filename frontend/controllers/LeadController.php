@@ -211,7 +211,7 @@ class LeadController extends FController
                     'ajax-create-from-phone-widget',
                     'ajax-create-from-phone-widget-with-invalid-client',
                     'ajax-link-to-call',
-                    'extra-queue'
+                    'extra-queue',
                 ],
                 'rules' => [
                     /** @abac null, LeadAbacObject::OBJ_CLOSED_QUEUE, LeadAbacObject::ACTION_ACCESS, Access to page lead/closed */

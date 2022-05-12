@@ -289,6 +289,7 @@ class LeadsController extends FController
     public function actionView($id, $showInPopUp = null)
     {
         $model = $this->findModel($id);
+
         /** @abac $abacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_ACCESS, Access to view lead  */
         if (!Yii::$app->abac->can(new LeadAbacDto($model, Auth::id()), LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_ACCESS)) {
             throw new ForbiddenHttpException('Access Denied.');
