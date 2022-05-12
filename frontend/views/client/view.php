@@ -159,7 +159,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             echo GridView::widget([
                 'dataProvider' => $leadsDataProvider,
-                'showHeader'=> false,
+                'showHeader' => false,
                 'columns' => [
                     [
                     'value' => static function (array $model) {
@@ -181,7 +181,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 echo GridView::widget([
                     'dataProvider' => $casesDataProvider,
-                    'showHeader'=> false,
+                    'showHeader' => false,
                     'columns' => [
                         [
                             'value' => static function (array $model) {
