@@ -31,6 +31,7 @@ use src\services\lead\calculator\LeadTripTypeCalculator;
 use src\services\lead\calculator\SegmentDTO;
 use src\services\lead\LeadCreateApiService;
 use src\services\lead\LeadHashGenerator;
+use src\services\quote\addQuote\AddQuoteService;
 use src\services\TransactionManager;
 use webapi\models\ApiLead;
 use webapi\models\ApiLeadCallExpert;
@@ -49,6 +50,7 @@ class LeadController extends ApiBaseController
     private $transactionManager;
     private $leadCreateApiService;
     private $createProductFlightHandler;
+    private AddQuoteService $autoQuoteService;
 
     public function __construct(
         $id,
@@ -57,6 +59,7 @@ class LeadController extends ApiBaseController
         LeadRepository $leadRepository,
         TransactionManager $transactionManager,
         LeadCreateApiService $leadCreateApiService,
+        AddQuoteService $autoQuoteService,
         Handler $createProductFlightHandler,
         $config = []
     ) {
@@ -66,6 +69,7 @@ class LeadController extends ApiBaseController
         $this->transactionManager = $transactionManager;
         $this->leadCreateApiService = $leadCreateApiService;
         $this->createProductFlightHandler = $createProductFlightHandler;
+        $this->autoQuoteService = $autoQuoteService;
     }
 
     /**
@@ -525,11 +529,7 @@ class LeadController extends ApiBaseController
             );
         }
 
-        /** @fflag FFlag::FF_KEY_ADD_AUTO_QUOTES, Auto add quote */
-        if (Yii::$app->ff->can(FFlag::FF_KEY_ADD_AUTO_QUOTES)) {
-            $autoAddQuoteJob = new AutoAddQuoteJob($lead);
-            Yii::$app->queue_job->push($autoAddQuoteJob);
-        }
+        $this->autoQuoteService->addAutoQuotesByJob($lead);
 
         $leadDataInserted = [];
         if (!empty($modelLead->lead_data)) {

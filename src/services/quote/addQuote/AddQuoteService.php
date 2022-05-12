@@ -2,6 +2,8 @@
 
 namespace src\services\quote\addQuote;
 
+use common\components\jobs\AutoAddQuoteJob;
+use common\components\SearchService;
 use common\models\Currency;
 use common\models\Employee;
 use common\models\Lead;
@@ -12,6 +14,10 @@ use common\models\QuoteSegmentBaggage;
 use common\models\QuoteSegmentBaggageCharge;
 use common\models\QuoteSegmentStop;
 use common\models\QuoteTrip;
+use frontend\helpers\JsonHelper;
+use frontend\helpers\QuoteHelper;
+use modules\featureFlag\FFlag;
+use src\dto\searchService\SearchServiceQuoteDTO;
 use src\helpers\app\AppHelper;
 use src\helpers\ErrorsToStringHelper;
 use src\helpers\setting\SettingHelper;
@@ -30,6 +36,8 @@ use src\repositories\quote\QuoteTripRepository;
 use src\services\quote\addQuote\price\QuotePriceCreateService;
 use src\services\quote\addQuote\price\QuotePriceSearchForm;
 use src\services\TransactionManager;
+use Yii;
+use yii\data\ArrayDataProvider;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -157,6 +165,61 @@ class AddQuoteService
 
             return $quote->uid;
         });
+    }
+
+    public function addAutoQuotesByJob(Lead $lead)
+    {
+        /** @fflag FFlag::FF_KEY_ADD_AUTO_QUOTES, Auto add quote */
+        if ($lead->quotesCount === 0 && $lead->leadFlightSegmentsCount > 0 && Yii::$app->ff->can(FFlag::FF_KEY_ADD_AUTO_QUOTES)) {
+            $autoAddQuoteJob = new AutoAddQuoteJob($lead->id);
+            Yii::$app->queue_job->push($autoAddQuoteJob);
+        }
+    }
+
+    public function addAutoQuotes(Lead $lead, $gds = '', ?Employee $employee = null)
+    {
+        $keyCache = sprintf('quick-search-new-%d-%s-%s', $lead->id, $gds, $lead->generateLeadKey());
+        $quotes = \Yii::$app->cacheFile->get($keyCache);
+
+        if ($quotes === false) {
+            $dto = new SearchServiceQuoteDTO($lead);
+            $cid = $lead->project->airSearchCid ?: AddQuoteService::AUTO_ADD_CID;
+            $dto->setCid($cid);
+
+            $quotes = SearchService::getOnlineQuotes($dto);
+
+            if ($quotes && !empty($quotes['data']['results']) && empty($quotes['error'])) {
+                \Yii::$app->cacheFile->set($keyCache, $quotes = QuoteHelper::formatQuoteData($quotes['data']), 600);
+            } else {
+                throw new \RuntimeException(!empty($quotes['error']) ? JsonHelper::decode($quotes['error'])['Message'] : 'Search result is empty!');
+            }
+        }
+
+        $models = array_filter($quotes['results'] ?? [], function ($item) {
+            return $item['meta']['auto'] ?? false;
+        });
+
+        $dataProvider = new ArrayDataProvider([
+            'allModels' => $models,
+            'pagination' => false,
+            'sort' => [
+                'defaultOrder' => ['autoSort' => SORT_ASC, 'price' => SORT_ASC],
+                'attributes' => [
+                    'price' => [
+                        'asc' => ['price' => SORT_ASC],
+                        'desc' => ['price' => SORT_DESC],
+                        'default' => SORT_ASC,
+                    ],
+                    'autoSort' => [
+                        'asc' => ['autoSort' => SORT_ASC],
+                        'desc' => ['autoSort' => SORT_DESC],
+                        'default' => SORT_ASC,
+                    ],
+                ],
+            ],
+        ]);
+
+        $this->autoSelectQuotes($dataProvider->getModels(), $lead, $employee, true, true);
     }
 
     public function autoSelectQuotes(array $quotes, Lead $lead, ?Employee $employee, bool $isReverse = false, bool $isAuto = false): void
