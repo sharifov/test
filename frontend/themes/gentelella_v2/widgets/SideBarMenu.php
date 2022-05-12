@@ -943,7 +943,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 'icon' => 'cogs',
                 'items' => [
                     ['label' => 'Object Segment List', 'url' => ['/object-segment/object-segment-list/index']],
-                    ['label' => 'Object Segment Rules', 'url' => ['/object-segment/object-segment-rule/index']],//TODO
+                    ['label' => 'Object Segment Rules', 'url' => ['/object-segment/object-segment-rule/index']],
                 ],
             ];
         }
