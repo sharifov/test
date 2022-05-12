@@ -144,7 +144,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
                 'contentOptions' => ['class' => 'text-center'],
             ],
-
+            [
+                'attribute' => 'q_create_type_id',
+                'value' => function (\common\models\Quote $model) {
+                    return $model->getCreateTypeName();
+                },
+                'filter' => \common\models\Quote::CREATE_TYPE_LIST
+            ],
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'created',

@@ -89,7 +89,7 @@ if ($showReport) {
             'format' => 'raw',
             'value' => function ($model) {
                 $value = ArrayHelper::getValue($model, 'gross_profit');
-                return Yii::$app->formatter->asCurrency($value, 'USD');
+                return Yii::$app->formatter->asNumCurrency($value, 'USD');
             }
         ];
     }
@@ -99,7 +99,7 @@ if ($showReport) {
             'format' => 'raw',
             'value' => function ($model) {
                 $value = ArrayHelper::getValue($model, 'tips');
-                return Yii::$app->formatter->asCurrency($value, 'USD');
+                return Yii::$app->formatter->asNumCurrency($value, 'USD');
             }
         ];
     }

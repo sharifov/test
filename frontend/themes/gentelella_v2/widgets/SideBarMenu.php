@@ -7,6 +7,7 @@
 namespace frontend\themes\gentelella_v2\widgets;
 
 use common\models\Employee;
+use modules\featureFlag\FFlag;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
@@ -454,6 +455,10 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Quote Price List', 'url' => ['/quote-price/index'], 'icon' => 'list'],
                         ['label' => 'Flight Quote Label List', 'url' => ['/flight-quote-label-list-crud/index'], 'icon' => 'list'],
                         ['label' => 'Quote Label', 'url' => ['/quote-label-crud/index'], 'icon' => 'list'],
+                        ['label' => 'Quote Trip', 'url' => ['/quote-trip-crud/index'], 'icon' => 'list'],
+                        ['label' => 'Quote Segment', 'url' => ['/quote-segment-crud/index'], 'icon' => 'list'],
+                        ['label' => 'Quote Segment Baggages', 'url' => ['/quote-segment-baggage-crud/index'], 'icon' => 'list'],
+                        ['label' => 'Quote Segment Baggage Charges', 'url' => ['/quote-segment-baggage-charge-crud/index'], 'icon' => 'list'],
                     ],
                 ],
 
@@ -927,6 +932,19 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 'url' => 'javascript:',
                 'icon' => 'ship',
                 'items' => \modules\cruise\CruiseModule::getListMenu()
+            ];
+        }
+
+        /** @fflag FFlag::FF_KEY_OBJECT_SEGMENT_MODULE_ENABLE, Object Segment module enable/disable */
+        if (Yii::$app->ff->can(FFlag::FF_KEY_OBJECT_SEGMENT_MODULE_ENABLE)) {
+            $menuModuleItems[] =  [
+                'label' => 'Object Segment',
+                'url' => 'javascript:',
+                'icon' => 'cogs',
+                'items' => [
+                    ['label' => 'Object Segment List', 'url' => ['/object-segment/object-segment-list']],
+                    ['label' => 'Object Segment Rules', 'url' => ['/object-segment/object-segment-rule']],
+                ],
             ];
         }
 

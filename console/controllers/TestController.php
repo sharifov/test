@@ -129,6 +129,17 @@ class TestController extends Controller
         );
     }
 
+    public function actionRr()
+    {
+        $user = Employee::findOne(294);
+        $updatedUser = Employee::findOne(294);
+        $form = new UpdateForm($user, $updatedUser);
+        $form->form_roles = ['admin', 'agent_qw'];
+        $form->validate();
+        VarDumper::dump($form);
+        VarDumper::dump($form->getErrors());
+    }
+
     public function actionT()
     {
         VarDumper::dump(CasesAbacObject::getObjectAttributeList());

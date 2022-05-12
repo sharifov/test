@@ -23,10 +23,10 @@
     group: root
     mode: 0644
   notify: restart centrifugo
-  become: yes
+  become: true
 
 - name: Ensure centrifugo is started
   service:
     name: centrifugo
     state: started
-    enabled: yes
+    enabled: true

@@ -12,6 +12,7 @@ class LeadDataKeyDictionary
     public const KEY_WE_FIRST_CALL_NOT_PICKED = 'we_first_call_not_picked';
     public const KEY_LPP_EXCLUDE = 'lpp_exclude';
     public const KEY_CREATED_BY_CALL_ID = 'created_by_call_id';
+    public const KEY_LEAD_OBJECT_SEGMENT = 'lead_object_segment';
 
     public const KEY_LIST = [
         self::KEY_CROSS_SYSTEM_XP => self::KEY_CROSS_SYSTEM_XP,
@@ -19,5 +20,6 @@ class LeadDataKeyDictionary
         self::KEY_WE_FIRST_CALL_NOT_PICKED => self::KEY_WE_FIRST_CALL_NOT_PICKED,
         self::KEY_LPP_EXCLUDE => self::KEY_LPP_EXCLUDE,
         self::KEY_CREATED_BY_CALL_ID => self::KEY_CREATED_BY_CALL_ID,
+        self::KEY_LEAD_OBJECT_SEGMENT => self::KEY_LEAD_OBJECT_SEGMENT,
     ];
 }

@@ -22,6 +22,9 @@ class LeadQueueBusinessInboxAbacObject extends AbacBaseModel implements AbacInte
     public const UI_QUEUE_COLUMN  = self::NS . 'ui/queue_column';
     public const UI_BUTTON_VIEW  = self::NS . 'ui/button/view';
 
+    /** QUERY PERMISSIONS */
+    public const QUERY_LISTING = self::NS . 'query/listing';
+
     /** ACTIONS */
     public const ACTION_READ = 'read';
     public const ACTION_COLUMN_DEPART = 'column_depart';
@@ -31,6 +34,7 @@ class LeadQueueBusinessInboxAbacObject extends AbacBaseModel implements AbacInte
     public const ACTION_COLUMN_REQUEST_IP = 'column_request_ip';
     public const ACTION_COLUMN_CLIENT_TIME = 'column_client_time';
     public const ACTION_COLUMN_PENDING_TIME = 'column_pending_time';
+    public const ACTION_READ_WT_USER_RESTRICTION = 'read_wt_user_restriction';
 
     public const ATTR_LEAD_PROJECT_ID = [
         'optgroup' => 'Lead',
@@ -57,8 +61,9 @@ class LeadQueueBusinessInboxAbacObject extends AbacBaseModel implements AbacInte
     public static function getObjectList(): array
     {
         return [
-            self::UI_QUEUE_COLUMN => self::UI_QUEUE_COLUMN,
             self::UI_BUTTON_VIEW => self::UI_BUTTON_VIEW,
+            self::UI_QUEUE_COLUMN => self::UI_QUEUE_COLUMN,
+            self::QUERY_LISTING => self::QUERY_LISTING,
         ];
     }
 
@@ -75,6 +80,7 @@ class LeadQueueBusinessInboxAbacObject extends AbacBaseModel implements AbacInte
                 self::ACTION_COLUMN_PENDING_TIME,
             ],
             self::UI_BUTTON_VIEW => [self::ACTION_READ],
+            self::QUERY_LISTING => [self::ACTION_READ_WT_USER_RESTRICTION],
         ];
     }
 

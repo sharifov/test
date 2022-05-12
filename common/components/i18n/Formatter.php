@@ -62,6 +62,8 @@ use src\model\phoneList\entity\PhoneList;
 use src\model\phoneList\helpers\formatters\PhoneListFormatter;
 use src\model\user\entity\paymentCategory\UserPaymentCategory;
 use src\model\user\entity\payroll\UserPayroll;
+use yii\helpers\FormatConverter;
+use src\helpers\app\AppHelper;
 use yii\bootstrap4\Html;
 use yii\helpers\Url;
 use yii\helpers\VarDumper;
@@ -521,6 +523,40 @@ class Formatter extends \yii\i18n\Formatter
             return $statusName;
         }
         return '--';
+    }
+
+    /**
+     * @param $dateTime
+     * @param string $format
+     * @return string
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function asDateTimeByUserTimezone($dateTime, string $timezone = 'UTC', string $format = 'php:d-M-Y [H:i]'): string
+    {
+        if (!$dateTime) {
+            return $this->nullDisplay;
+        }
+
+        if (is_numeric($dateTime) && $dateTime >= 0) {
+            if (strncmp($format, 'php:', 4) === 0) {
+                $format = substr($format, 4);
+            } else {
+                $format = FormatConverter::convertDateIcuToPhp($format, "datetime", $this->locale);
+            }
+            try {
+                $dateTime = (new \DateTimeImmutable(date('Y-m-d H:i:s', $dateTime), new \DateTimeZone('UTC')))
+                ->setTimezone(new \DateTimeZone($timezone))
+                ->format($format);
+            } catch (\Throwable $throwable) {
+                $message = AppHelper::throwableLog($throwable);
+                $message['dateTime'] = $dateTime;
+                $message['timezone'] = $timezone;
+                $message['format'] = $format;
+                $dateTime = '';
+                \Yii::warning($message, 'Formatter:asByUserDateTimeSecond');
+            }
+        }
+        return $dateTime;
     }
 
     /**
@@ -1046,5 +1082,36 @@ class Formatter extends \yii\i18n\Formatter
                    '</span>';
         }
         return $number;
+    }
+
+    /**
+     * @param $value
+     * @param string $code
+     * @param int $precision
+     * @param int $decimals
+     * @param string|null $decimal_separator
+     * @param string|null $thousands_separator
+     * @return string
+     */
+    public function asNumCurrency(
+        $value,
+        string $code = 'USD',
+        int $precision = 2,
+        int $decimals = 2,
+        ?string $decimal_separator = '.',
+        ?string $thousands_separator = ','
+    ): string {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        $num = number_format(
+            round((float) $value, $precision),
+            $decimals,
+            $decimal_separator,
+            $thousands_separator
+        );
+
+        return $code . ' ' . $num;
     }
 }

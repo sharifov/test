@@ -1,0 +1,3108 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": 20,
+  "iteration": 1651679323340,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": null,
+      "description": "",
+      "flowchartsData": {
+        "flowcharts": [
+          {
+            "allowDrawio": true,
+            "bgColor": null,
+            "center": true,
+            "csv": "## See more information for the syntax at https://drawio-app.com/import-from-csv-to-drawio/\n##\n## Example CSV. Use ## for comments and # for configuration.\n## The following names are reserved and should not be used (or ignored):\n## id, tooltip, placeholder(s), link and label (see below)\n##\n#\n## Node label with placeholders and HTML.\n## Default is '%name_of_first_column%'.\n#\n# label: %name%<br><i style=\"color:gray;\">%position%</i><br><a href=\"mailto:%email%\">Email</a>\n#\n## Node style (placeholders are replaced once).\n## Default is the current style for nodes.\n#\n# style: label;image=%image%;whiteSpace=wrap;html=1;rounded=1;fillColor=%fill%;strokeColor=%stroke%;\n#\n## Parent style for nodes with child nodes (placeholders are replaced once).\n#\n# parentstyle: swimlane;whiteSpace=wrap;html=1;childLayout=stackLayout;horizontal=1;horizontalStack=0;resizeParent=1;resizeLast=0;collapsible=1;\n#\n## Optional column name that contains a reference to a named style in styles.\n## Default is the current style for nodes.\n#\n# stylename: -\n#\n## JSON for named styles of the form {\"name\": \"style\", \"name\": \"style\"} where style is a cell style with\n## placeholders that are replaced once.\n#\n# styles: -\n#\n## Optional column name that contains a reference to a named label in labels.\n## Default is the current label.\n#\n# labelname: -\n#\n## JSON for named labels of the form {\"name\": \"label\", \"name\": \"label\"} where label is a cell label with\n## placeholders.\n#\n# labels: -\n#\n## Uses the given column name as the identity for cells (updates existing cells).\n## Default is no identity (empty value or -).\n#\n# identity: -\n#\n## Uses the given column name as the parent reference for cells. Default is no parent (empty or -).\n## The identity above is used for resolving the reference so it must be specified.\n#\n# parent: -\n#\n## Adds a prefix to the identity of cells to make sure they do not collide with existing cells (whose\n## IDs are numbers from 0..n, sometimes with a GUID prefix in the context of realtime collaboration).\n## Default is csvimport-.\n#\n# namespace: csvimport-\n#\n## Connections between rows (\"from\": source colum, \"to\": target column).\n## Label, style and invert are optional. Defaults are '', current style and false.\n## If placeholders are used in the style, they are replaced with data from the source.\n## An optional placeholders can be set to target to use data from the target instead.\n## In addition to label, an optional fromlabel and tolabel can be used to name the column\n## that contains the text for the label in the edges source or target (invert ignored).\n## The label is concatenated in the form fromlabel + label + tolabel if all are defined.\n## The target column may contain a comma-separated list of values.\n## Multiple connect entries are allowed.\n#\n# connect: {\"from\": \"manager\", \"to\": \"name\", \"invert\": true, \"label\": \"manages\", \\\n#          \"style\": \"curved=1;endArrow=blockThin;endFill=1;fontSize=11;\"}\n# connect: {\"from\": \"refs\", \"to\": \"id\", \"style\": \"curved=1;fontSize=11;\"}\n#\n## Node x-coordinate. Possible value is a column name. Default is empty. Layouts will\n## override this value.\n#\n# left: \n#\n## Node y-coordinate. Possible value is a column name. Default is empty. Layouts will\n## override this value.\n#\n# top: \n#\n## Node width. Possible value is a number (in px), auto or an @ sign followed by a column\n## name that contains the value for the width. Default is auto.\n#\n# width: auto\n#\n## Node height. Possible value is a number (in px), auto or an @ sign followed by a column\n## name that contains the value for the height. Default is auto.\n#\n# height: auto\n#\n## Padding for autosize. Default is 0.\n#\n# padding: -12\n#\n## Comma-separated list of ignored columns for metadata. (These can be\n## used for connections and styles but will not be added as metadata.)\n#\n# ignore: id,image,fill,stroke,refs,manager\n#\n## Column to be renamed to link attribute (used as link).\n#\n# link: url\n#\n## Spacing between nodes. Default is 40.\n#\n# nodespacing: 40\n#\n## Spacing between levels of hierarchical layouts. Default is 100.\n#\n# levelspacing: 100\n#\n## Spacing between parallel edges. Default is 40. Use 0 to disable.\n#\n# edgespacing: 40\n#\n## Name or JSON of layout. Possible values are auto, none, verticaltree, horizontaltree,\n## verticalflow, horizontalflow, organic, circle or a JSON string as used in Layout, Apply.\n## Default is auto.\n#\n# layout: auto\n#\n## ---- CSV below this line. First line are column names. ----\nname,position,id,location,manager,email,fill,stroke,refs,url,image\nEvan Miller,CFO,emi,Office 1,,me@example.com,#dae8fc,#6c8ebf,,https://www.draw.io,https://cdn3.iconfinder.com/data/icons/user-avatars-1/512/users-9-2-128.png\nEdward Morrison,Brand Manager,emo,Office 2,Evan Miller,me@example.com,#d5e8d4,#82b366,,https://www.draw.io,https://cdn3.iconfinder.com/data/icons/user-avatars-1/512/users-10-3-128.png\nRon Donovan,System Admin,rdo,Office 3,Evan Miller,me@example.com,#d5e8d4,#82b366,\"emo,tva\",https://www.draw.io,https://cdn3.iconfinder.com/data/icons/user-avatars-1/512/users-2-128.png\nTessa Valet,HR Director,tva,Office 4,Evan Miller,me@example.com,#d5e8d4,#82b366,,https://www.draw.io,https://cdn3.iconfinder.com/data/icons/user-avatars-1/512/users-3-128.png\n",
+            "download": false,
+            "editorTheme": "dark",
+            "editorUrl": "https://www.draw.io",
+            "enableAnim": true,
+            "grid": false,
+            "lock": true,
+            "name": "Main",
+            "scale": true,
+            "tooltip": true,
+            "type": "xml",
+            "url": "http://<YourUrl>/<Your XML/drawio file/api>",
+            "xml": "<mxfile host=\"app.diagrams.net\" modified=\"2022-04-20T16:46:50.411Z\" agent=\"5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36\" etag=\"FFPdcku84d8iEGfRlni-\" version=\"17.4.6\" type=\"embed\"><diagram id=\"Ehx_XfK02pjCxttwnBo6\" name=\"Page-1\">7VzbdqM2FP2aPNoLIa6PuXa6VtK6cdtpn7qwUTANRhTwxO7XjzASRkLY2GDwjMcvgSMhQHtv6ehwlBt4v1z/FDvR4gW7KLhRFXd9Ax9uVBUYik3+ZJYNtZiamVu82HepbWeY+v8jalSodeW7KOEqphgHqR/xxjkOQzRPOZsTx/iDr/aGA/6ukeOhimE6d4Kq9bPvpovcaqnmzv4J+d6C3RkY9I2XDqtM3yRZOC7+KLUKH2/gfYxxmh8t1/coyHqP9Ut+3VNNafFgMQrTJhe8zJSV/X7n/bta/Pn6B/B++T16HdFWvjjBir7wjWoEpL27N0yaJU+dbmhXGP+tMCsYJVugbkkFVY3Wu0Jy5NG/21ZmzHD7eUoqPz4XJeRBZ2JtYstvy8wq9wRqjFehi7L3AaT4Y+GnaBo586z0g/CP2BbpMqDFWUv3OMDx9lr4tv1ldj8ISnbNMme2RuxJGuN3VCp52v6K5yj3NOs2FKdoLUJKxIDwEqXxhlRhpTZlAdUBI8XHjlOaTm2LEp8ManMojb2i5R3S5ICCfQTwam/ATybXCflI5yEHVhVzFfaJudYf5j9fJ+aFrvdgXgwFXWMO+4I3G8qvEV1Na6BocCZ0exPvPemg2H9befg6UTYboHw2DQPZvNyqa/kuJG8DTHj2qQ8YfB9CXeLvyPqwmBBbdaLRl1amqwjFX/wEx243YlGORpSI4m4rijoRVZB+0B+tB+08To4mcWxVSwK01gXOZl84Tz4RJ1Z5mrx8Oyif05UtpNsHylK/pu1sQwMN2UsPM0SKvoRshDSVc42QUm9C6NNk4UTZYeCH73wH8kQWuxOt/fSvrGys07O/ac3s+GFdPtmwE+JybPKLgAqYIbsOjBWdne+u3Z5xF09Q7JNuQDGTF+1GowqwqyPLzbTkxY7rI05Ptukqpnka+AlexXPaefvW3KkTeyjdU4+2h1wuNFWlUtkhYVSJUeCk/hc+eiWjCm1ugv3tSLkW2MWcH2DzTeQvSa8qR5uEhuChhvJeqDR0G8fOplQtyiok9Q9s6MJtlL2PJcZhDtUnOt1XnxzkD7xTXYFPMyHqFytETdEEIUJ4ihIvRX3a5asPiiEjWxjrG6tPoLnYTkfig0BQn7ZfTdBU99VvryaZ438ZajJUnVPTN6IkePmi0UxBNLo51k+TjX64qY6Uo2vHKafykl0rR7aU6ko5OxVwGlAOaaBQnAXtkuaKmahed+TkAsSzTyllRWnDiUcXA9bqiTOOcaihroRjWNL71D2XBfV99VsLR5d9Qe1eOArvjBHvzLQueAops5vNIYM4VMIqRBNjtI1nBiA0ZLalN7dUP45zRu+LBtDUzTlqgGeAW8MQ8+IcGcCvNUcM1mPJqlk8WSsho17J2rtP3pis6lFsrWfbKdw93YGQRJHYV6NBhliBbPBUD0I/0M55Akbsq13dU42gua9+a//BOKPjXc/YPkf5ftUhifJ8F+oQPxeIX1bOFNFhX3Vq3eu91durwxpEHTVMPxS0OYXpJSUaZkmLo8LnP2qV28jxka83eXHlXnsvGhGXaBVun+r3FOHUAyI5gZgskPltEHNHMrN58PJs4zYbj8uUHHCNKH4SOp1+dUkvHY/RqsKHQKCyf4wWY41C/daDtDnwIM0HRtSDn4sLMdi2VlbDWLMOeECnDrhDeiAjMkePFajza0sI7LFt6Zqp5D+h2aaUB6LT3prybcZke1AejiRROsNSD7FRFqVjFAUcPfXvkpw8gXTrxE83I6BpY9vgGjOAORaZ3Sch2bvV56fNC0LtUtBYTlclK+02igJ/Trobh8TkLLO0pnCWRNsqih8mqROSObZa5BFuR02z1FK0Tnll8NwPcYgE74CanMD3QnI6J2zLKHiXZUORBw5uacHSd93sNtIELV5/gTNDwZ0zf/e2dvHmgjpreX5EipsQF4CGOgbUKykRH8pSsrrIyLIO7sQ6iivTBekMt8oF/vwHZ1pxxhAdPjlnisTwzjkjW4Qcl/8KbFn+68tm+tuzhBSvD9OmlGAT7XxDploXxbAGwhJnZjmaz7PCUGD56yolzSBGrhxGoFdXKUXy5jB5smLeTRG2Kc+dsh0ioBM+NMiUxXlP3hfbZTPluE6yKGTEFPicyWmCE3874cCHGU5TvJRINMWRTMnl0YCSYbn2sm3CY+cjgWM/qxei9B9JDm6x06OkWmDvha8O8A5gFb8ijgoIy7CaElht2AGq7Xf+yFVOsE29GOVSz/Pd41JO+w/xtxS/LmPJ+cQvW4UL2xiO3h2h87w5zge5Q07mXwTvtbSR7aUQqHSANk4S5cPYm7/ORrDafRP10OclbHN/R66BJeYLAINlkpXZALUxywDmCbGzt+KEbEU8KCekmwuvhRS2dQmksOtXpQOR4hW5fnKFfDC0i+BD/cpzID7chqmfRM7yCikh5vn2Qglyuvs3NHmca/fffODjVw==</diagram></mxfile>",
+            "zoom": "100%"
+          }
+        ]
+      },
+      "format": "short",
+      "graphId": "flowchart_2",
+      "gridPos": {
+        "h": 21,
+        "w": 18,
+        "x": 0,
+        "y": 0
+      },
+      "id": 2,
+      "newFlag": false,
+      "rulesData": {
+        "rulesData": [
+          {
+            "aggregation": "current",
+            "alias": "AWS ELB  DEV3",
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": false,
+            "gradient": true,
+            "hidden": false,
+            "invert": false,
+            "linkData": [
+              {
+                "hidden": false,
+                "linkOn": "a",
+                "linkParams": false,
+                "linkUrl": "https://grafana.infra.travel-dev.com/d/vmIdaerGk/aws-alb-cloudwatch-metrics?orgId=1&refresh=30s",
+                "pattern": "Mb0u9kBgjuhVRU1gNTpR-1"
+              }
+            ],
+            "linkProp": "id",
+            "linkRegEx": false,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 1,
+            "overlayIcon": true,
+            "pattern": "probe_success{env=\"dev3\", instance=\"https://crm.dev3.travel-dev.com\", job=\"availability_api_metabuild\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [
+              "/.*/"
+            ],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              0.1
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "a",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "AWS ELB",
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": false,
+            "gradient": true,
+            "hidden": false,
+            "invert": false,
+            "linkData": [
+              {
+                "hidden": false,
+                "linkOn": "a",
+                "linkParams": false,
+                "linkUrl": "https://grafana.infra.travel-dev.com/d/vmIdaerGk/aws-alb-cloudwatch-metrics?orgId=1&refresh=30s",
+                "pattern": "Mb0u9kBgjuhVRU1gNTpR-1"
+              }
+            ],
+            "linkProp": "id",
+            "linkRegEx": false,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 2,
+            "overlayIcon": true,
+            "pattern": "probe_success{env=\"dev\", instance=\"https://crm.dev.travel-dev.com\", job=\"availability_api_metabuild\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [
+              "/.*/"
+            ],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              0.1
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "a",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "LB pipeline centrifugo DEV3",
+            "colors": [
+              "#E02F44",
+              "#73BF69"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 0,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": true,
+            "gradient": true,
+            "hidden": false,
+            "invert": false,
+            "linkData": [],
+            "linkProp": "id",
+            "linkRegEx": false,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 3,
+            "overlayIcon": true,
+            "pattern": "probe_success{env=\"dev3\", instance=\"https://centrifugo.crm.dev3.travel-dev.com/health\", job=\"availability_api_metabuild\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [
+              {
+                "colorOn": "wc",
+                "hidden": false,
+                "pattern": "27",
+                "style": "strokeColor"
+              }
+            ],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [
+              "/.*/"
+            ],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              0.1
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "a",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "centrifugo-site DEV3",
+            "colors": [
+              "#E02F44",
+              "#73BF69"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 0,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": true,
+            "gradient": true,
+            "hidden": false,
+            "invert": false,
+            "linkData": [
+              {
+                "hidden": false,
+                "linkOn": "a",
+                "linkParams": false,
+                "linkUrl": "https://grafana.infra.travel-dev.com/d/PEW9_fy7k/crm-project-availability-metrics?orgId=1&refresh=30s&var-target=https:%2F%2Fcentrifugo.crm.dev3.travel-dev.com%2Fhealth",
+                "pattern": "4"
+              }
+            ],
+            "linkProp": "id",
+            "linkRegEx": false,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 4,
+            "overlayIcon": true,
+            "pattern": "probe_success{env=\"dev3\", instance=\"https://centrifugo.crm.dev3.travel-dev.com/health\", job=\"availability_api_metabuild\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [
+              {
+                "colorOn": "wc",
+                "hidden": false,
+                "pattern": "4",
+                "style": "fillColor"
+              }
+            ],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [
+              "/.*/"
+            ],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              0.1
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "a",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "pipeline centrifugo DEV3",
+            "colors": [
+              "#E02F44",
+              "#73BF69"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 0,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": true,
+            "gradient": true,
+            "hidden": false,
+            "invert": false,
+            "linkData": [],
+            "linkProp": "id",
+            "linkRegEx": false,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 5,
+            "overlayIcon": true,
+            "pattern": "probe_success{env=\"dev3\", instance=\"https://centrifugo.crm.dev3.travel-dev.com/health\", job=\"availability_api_metabuild\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [
+              {
+                "colorOn": "wc",
+                "hidden": false,
+                "pattern": "68",
+                "style": "strokeColor"
+              }
+            ],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [
+              "/.*/"
+            ],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              0.1
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "a",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "LB pipeline  WS  DEV3",
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": false,
+            "gradient": true,
+            "hidden": false,
+            "invert": false,
+            "linkData": [],
+            "linkProp": "id",
+            "linkRegEx": true,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 6,
+            "overlayIcon": true,
+            "pattern": "probe_success{env=\"dev3\", instance=\"https://ws.crm.dev3.travel-dev.com\", job=\"availability_api_metabuild\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [
+              {
+                "colorOn": "wc",
+                "hidden": false,
+                "pattern": "26",
+                "style": "strokeColor"
+              }
+            ],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [
+              "/.*/"
+            ],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              0.1
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "a",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "WS  DEV3",
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "eventData": [
+              {
+                "eventOn": 0,
+                "hidden": false,
+                "pattern": "3",
+                "style": "blink",
+                "value": "3000"
+              }
+            ],
+            "eventProp": "id",
+            "eventRegEx": false,
+            "gradient": true,
+            "hidden": false,
+            "invert": false,
+            "linkData": [
+              {
+                "hidden": false,
+                "linkOn": "a",
+                "linkParams": false,
+                "linkUrl": "https://grafana.infra.travel-dev.com/d/PEW9_fy7k/crm-project-availability-metrics?orgId=1&refresh=30s&var-target=https:%2F%2Fws.crm.dev.travel-dev.com",
+                "pattern": "3"
+              }
+            ],
+            "linkProp": "id",
+            "linkRegEx": true,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 7,
+            "overlayIcon": true,
+            "pattern": "probe_success{env=\"dev3\", instance=\"https://ws.crm.dev3.travel-dev.com\", job=\"availability_api_metabuild\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [
+              {
+                "colorOn": "wc",
+                "hidden": false,
+                "pattern": "3",
+                "style": "fillColor"
+              }
+            ],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [
+              "/.*/"
+            ],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              0.1
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "a",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "pipeline  WS  DEV3",
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": false,
+            "gradient": true,
+            "hidden": false,
+            "invert": false,
+            "linkData": [],
+            "linkProp": "id",
+            "linkRegEx": true,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 8,
+            "overlayIcon": true,
+            "pattern": "probe_success{env=\"dev3\", instance=\"https://ws.crm.dev3.travel-dev.com\", job=\"availability_api_metabuild\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [
+              {
+                "colorOn": "wc",
+                "hidden": false,
+                "pattern": "72",
+                "style": "strokeColor"
+              }
+            ],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [
+              "/.*/"
+            ],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              0.1
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "a",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "LB  pipeline API DEV3",
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": false,
+            "gradient": true,
+            "hidden": false,
+            "invert": false,
+            "linkData": [],
+            "linkProp": "id",
+            "linkRegEx": true,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 9,
+            "overlayIcon": true,
+            "pattern": "probe_success{env=\"dev3\", instance=\"https://api.crm.dev3.travel-dev.com\", job=\"availability_api_metabuild\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [
+              {
+                "colorOn": "wc",
+                "hidden": false,
+                "pattern": "25",
+                "style": "strokeColor"
+              }
+            ],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [
+              "/.*/"
+            ],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              0.1
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "a",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "API DEV3",
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": false,
+            "gradient": true,
+            "hidden": false,
+            "invert": false,
+            "linkData": [
+              {
+                "hidden": false,
+                "linkOn": "a",
+                "linkParams": false,
+                "linkUrl": "https://grafana.infra.travel-dev.com/d/PEW9_fy7k/crm-project-availability-metrics?orgId=1&refresh=30s&var-target=https:%2F%2Fapi.crm.dev.travel-dev.com",
+                "pattern": "Mb0u9kBgjuhVRU1gNTpR-4"
+              }
+            ],
+            "linkProp": "id",
+            "linkRegEx": true,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 10,
+            "overlayIcon": true,
+            "pattern": "probe_success{env=\"dev3\", instance=\"https://api.crm.dev3.travel-dev.com\", job=\"availability_api_metabuild\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [
+              {
+                "colorOn": "wc",
+                "hidden": false,
+                "pattern": "Mb0u9kBgjuhVRU1gNTpR-4",
+                "style": "fillColor"
+              }
+            ],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [
+              "/.*/"
+            ],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              0.1
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "a",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "pipeline API DEV3",
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": false,
+            "gradient": true,
+            "hidden": false,
+            "invert": false,
+            "linkData": [],
+            "linkProp": "id",
+            "linkRegEx": true,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 11,
+            "overlayIcon": true,
+            "pattern": "probe_success{env=\"dev3\", instance=\"https://api.crm.dev3.travel-dev.com\", job=\"availability_api_metabuild\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [
+              {
+                "colorOn": "wc",
+                "hidden": false,
+                "pattern": "67",
+                "style": "strokeColor"
+              }
+            ],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [
+              "/.*/"
+            ],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              0.1
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "a",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "LB pipeline APP DEV3",
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": false,
+            "gradient": true,
+            "hidden": false,
+            "invert": false,
+            "linkData": [
+              {
+                "hidden": false,
+                "linkOn": "a",
+                "linkParams": false,
+                "linkUrl": "",
+                "pattern": ""
+              }
+            ],
+            "linkProp": "id",
+            "linkRegEx": true,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 12,
+            "overlayIcon": true,
+            "pattern": "probe_success{env=\"dev3\", instance=\"https://crm.dev3.travel-dev.com\", job=\"availability_api_metabuild\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [
+              {
+                "colorOn": "wc",
+                "hidden": false,
+                "pattern": "24",
+                "style": "strokeColor"
+              }
+            ],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [
+              "/.*/"
+            ],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              0.1
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "a",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "APP DEV3",
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": false,
+            "gradient": true,
+            "hidden": false,
+            "invert": false,
+            "linkData": [
+              {
+                "hidden": false,
+                "linkOn": "a",
+                "linkParams": false,
+                "linkUrl": "https://grafana.infra.travel-dev.com/d/PEW9_fy7k/crm-project-availability-metrics?orgId=1&refresh=30s&var-target=https:%2F%2Fcrm.dev.travel-dev.com",
+                "pattern": "Mb0u9kBgjuhVRU1gNTpR-2"
+              }
+            ],
+            "linkProp": "id",
+            "linkRegEx": true,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 13,
+            "overlayIcon": true,
+            "pattern": "probe_success{env=\"dev3\", instance=\"https://crm.dev3.travel-dev.com\", job=\"availability_api_metabuild\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [
+              {
+                "colorOn": "wc",
+                "hidden": false,
+                "pattern": "Mb0u9kBgjuhVRU1gNTpR-2",
+                "style": "fillColor"
+              }
+            ],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [
+              "/.*/"
+            ],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              0.1
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "a",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "pipeline APP DEV3",
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": false,
+            "gradient": true,
+            "hidden": false,
+            "invert": false,
+            "linkData": [
+              {
+                "hidden": false,
+                "linkOn": "a",
+                "linkParams": false,
+                "linkUrl": "",
+                "pattern": ""
+              }
+            ],
+            "linkProp": "id",
+            "linkRegEx": true,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 14,
+            "overlayIcon": true,
+            "pattern": "probe_success{env=\"dev3\", instance=\"https://api.crm.dev3.travel-dev.com\", job=\"availability_api_metabuild\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [
+              {
+                "colorOn": "wc",
+                "hidden": false,
+                "pattern": "66",
+                "style": "strokeColor"
+              }
+            ],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [
+              "/.*/"
+            ],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              0.1
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "a",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "centrifugo DEV3",
+            "colors": [
+              "#F2495C",
+              "#73BF69"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 0,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": true,
+            "gradient": false,
+            "hidden": false,
+            "invert": false,
+            "linkData": [
+              {
+                "hidden": false,
+                "linkOn": "a",
+                "linkParams": true,
+                "linkUrl": "https://grafana.infra.travel-dev.com/d/JQwvpZOMz/centrifugo?orgId=1&refresh=30s",
+                "pattern": "89"
+              }
+            ],
+            "linkProp": "id",
+            "linkRegEx": false,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 15,
+            "overlayIcon": true,
+            "pattern": "probe_success{env=\"dev3\", instance=\"10.0.1.204:8000\", job=\"availability_tcp_connect\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [
+              {
+                "colorOn": "wc",
+                "hidden": false,
+                "pattern": "89",
+                "style": "fillColor"
+              }
+            ],
+            "shapeProp": "id",
+            "shapeRegEx": false,
+            "stringThresholds": [],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": false,
+            "thresholds": [
+              1
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "wc",
+            "tpDirection": "v",
+            "tpGraph": true,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "bar",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "beanstalkd DEV3",
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": false,
+            "gradient": true,
+            "hidden": false,
+            "invert": false,
+            "linkData": [
+              {
+                "hidden": false,
+                "linkOn": "a",
+                "linkParams": false,
+                "linkUrl": "https://grafana.infra.travel-dev.com/d/Dvwr4Amnk/beanstalkd?orgId=1&var-node=shared-crm-dev&var-env=dev3&var-instance=i-0b0f7a25137df1111",
+                "pattern": "88"
+              }
+            ],
+            "linkProp": "id",
+            "linkRegEx": true,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 16,
+            "overlayIcon": true,
+            "pattern": "probe_success{env=\"dev3\", instance=\"10.0.1.204:11300\", job=\"availability_tcp_connect\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [
+              {
+                "colorOn": "wc",
+                "hidden": false,
+                "pattern": "88",
+                "style": "fillColor"
+              }
+            ],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [
+              "/.*/"
+            ],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              0.1
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "a",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "redis DEV3",
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": false,
+            "gradient": true,
+            "hidden": false,
+            "invert": false,
+            "linkData": [
+              {
+                "hidden": false,
+                "linkOn": "a",
+                "linkParams": true,
+                "linkUrl": "https://grafana.infra.travel-dev.com/d/v9flQoink/redis-crm?orgId=1&from=now-24h&to=now&refresh=10s",
+                "pattern": "90"
+              }
+            ],
+            "linkProp": "id",
+            "linkRegEx": true,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 17,
+            "overlayIcon": true,
+            "pattern": "redis_up{env=\"dev3\", instance=\"i-0b0f7a25137df1111\", job=\"redis_crm\", name=\"shared-crm-dev3\", project=\"crm\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [
+              {
+                "colorOn": "wc",
+                "hidden": false,
+                "pattern": "90",
+                "style": "fillColor"
+              }
+            ],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [
+              "/.*/"
+            ],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              0.1
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "a",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "Antispam DEV3",
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": false,
+            "gradient": false,
+            "hidden": false,
+            "invert": false,
+            "linkData": [],
+            "linkProp": "id",
+            "linkRegEx": true,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 18,
+            "overlayIcon": true,
+            "pattern": "probe_success{env=\"dev3\", instance=\"http://10.0.1.204:8001/docs\", job=\"availability_api_metabuild\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [
+              {
+                "colorOn": "wc",
+                "hidden": false,
+                "pattern": "91",
+                "style": "fillColor"
+              }
+            ],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [
+              "/.*/"
+            ],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              0.1
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "a",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "Supervisor DEV3",
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 0,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": false,
+            "gradient": false,
+            "hidden": false,
+            "invert": false,
+            "linkData": [
+              {
+                "hidden": false,
+                "linkOn": "a",
+                "linkParams": false,
+                "linkUrl": "https://grafana.infra.travel-dev.com/d/SYE-uTinz/supervisord?orgId=1&refresh=30s&from=now-24h&to=now&var-env=dev3&var-instance=i-03a2cb0a0889c6a90",
+                "pattern": "16"
+              }
+            ],
+            "linkProp": "id",
+            "linkRegEx": true,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 19,
+            "overlayIcon": true,
+            "pattern": "node_scrape_collector_success{collector=\"supervisord\", env=\"dev3\", instance=\"i-0f65b05050d53b5a7\", job=\"node_crm\", name=\"app0-crm-dev3\", project=\"crm\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [
+              {
+                "colorOn": "wc",
+                "hidden": false,
+                "pattern": "16",
+                "style": "fillColor"
+              }
+            ],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [
+              "/.*/"
+            ],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              1
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "a",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "PHP DEV3",
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 0,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": false,
+            "gradient": true,
+            "hidden": false,
+            "invert": false,
+            "linkData": [
+              {
+                "hidden": false,
+                "linkOn": "a",
+                "linkParams": false,
+                "linkUrl": "https://grafana.infra.travel-dev.com/d/ZGUv9Tm7z/php?orgId=1&from=now-24h&to=now&refresh=30s&var-host=app0-crm-dev1&var-env=dev3&var-instance=i-03a2cb0a0889c6a90",
+                "pattern": "17"
+              }
+            ],
+            "linkProp": "id",
+            "linkRegEx": true,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 20,
+            "overlayIcon": true,
+            "pattern": "phpfpm_up{env=\"dev3\", instance=\"i-0f65b05050d53b5a7\", job=\"phpfpm_crm\", name=\"app0-crm-dev3\", project=\"crm\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [
+              {
+                "colorOn": "wc",
+                "hidden": false,
+                "pattern": "17",
+                "style": "fillColor"
+              }
+            ],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [
+              "/.*/"
+            ],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              0.1
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "a",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "LB pipeline centrifugo",
+            "colors": [
+              "#E02F44",
+              "#73BF69"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": true,
+            "gradient": true,
+            "hidden": false,
+            "invert": false,
+            "linkData": [
+              {
+                "hidden": false,
+                "linkOn": "a",
+                "linkParams": false,
+                "linkUrl": "https://grafana.infra.travel-dev.com/d/JQwvpZOMz/centrifugo?orgId=1&refresh=30s&var-quantile=0.5&var-host=All&var-version=3.1.1&var-env=dev&var-insrance=i-09ee387c650467d50",
+                "pattern": "27"
+              }
+            ],
+            "linkProp": "id",
+            "linkRegEx": false,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 21,
+            "overlayIcon": true,
+            "pattern": "probe_success{env=\"dev\", instance=\"https://centrifugo.crm.dev.travel-dev.com/health\", job=\"availability_api_metabuild\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [
+              {
+                "colorOn": "wc",
+                "hidden": false,
+                "pattern": "27",
+                "style": "strokeColor"
+              }
+            ],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [
+              "/.*/"
+            ],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              0
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "a",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "centrifugo-site  dev",
+            "colors": [
+              "#E02F44",
+              "#73BF69"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": true,
+            "gradient": true,
+            "hidden": false,
+            "invert": false,
+            "linkData": [
+              {
+                "hidden": false,
+                "linkOn": "a",
+                "linkParams": false,
+                "linkUrl": "https://grafana.infra.travel-dev.com/d/PEW9_fy7k/crm-project-availability-metrics?orgId=1&refresh=30s&var-target=https:%2F%2Fcentrifugo.crm.dev3.travel-dev.com%2Fhealth",
+                "pattern": "4"
+              }
+            ],
+            "linkProp": "id",
+            "linkRegEx": false,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 22,
+            "overlayIcon": true,
+            "pattern": "probe_success{env=\"dev\", instance=\"https://centrifugo.crm.dev.travel-dev.com/health\", job=\"availability_api_metabuild\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [
+              {
+                "colorOn": "wc",
+                "hidden": false,
+                "pattern": "4",
+                "style": "fillColor"
+              }
+            ],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [
+              "/.*/"
+            ],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              0
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "a",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "pipeline centrifugo dev",
+            "colors": [
+              "#E02F44",
+              "#73BF69"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": true,
+            "gradient": true,
+            "hidden": false,
+            "invert": false,
+            "linkData": [],
+            "linkProp": "id",
+            "linkRegEx": false,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 23,
+            "overlayIcon": true,
+            "pattern": "probe_success{env=\"dev\", instance=\"https://centrifugo.crm.dev.travel-dev.com/health\", job=\"availability_api_metabuild\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [
+              {
+                "colorOn": "wc",
+                "hidden": false,
+                "pattern": "68",
+                "style": "strokeColor"
+              }
+            ],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [
+              "/.*/"
+            ],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              0
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "a",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "LB pipeline  WS  dev",
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": false,
+            "gradient": true,
+            "hidden": false,
+            "invert": false,
+            "linkData": [],
+            "linkProp": "id",
+            "linkRegEx": true,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 24,
+            "overlayIcon": true,
+            "pattern": "probe_success{env=\"dev\", instance=\"https://ws.crm.dev.travel-dev.com\", job=\"availability_api_metabuild\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [
+              {
+                "colorOn": "wc",
+                "hidden": false,
+                "pattern": "26",
+                "style": "strokeColor"
+              }
+            ],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [
+              "/.*/"
+            ],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              0.1
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "a",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "WS  dev",
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "eventData": [
+              {
+                "eventOn": 0,
+                "hidden": false,
+                "pattern": "3",
+                "style": "blink",
+                "value": "3000"
+              }
+            ],
+            "eventProp": "id",
+            "eventRegEx": false,
+            "gradient": true,
+            "hidden": false,
+            "invert": false,
+            "linkData": [
+              {
+                "hidden": false,
+                "linkOn": "a",
+                "linkParams": false,
+                "linkUrl": "https://grafana.infra.travel-dev.com/d/PEW9_fy7k/crm-project-availability-metrics?orgId=1&refresh=30s&var-target=https:%2F%2Fws.crm.dev.travel-dev.com",
+                "pattern": "3"
+              }
+            ],
+            "linkProp": "id",
+            "linkRegEx": true,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 25,
+            "overlayIcon": true,
+            "pattern": "probe_success{env=\"dev\", instance=\"https://ws.crm.dev.travel-dev.com\", job=\"availability_api_metabuild\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [
+              {
+                "colorOn": "wc",
+                "hidden": false,
+                "pattern": "3",
+                "style": "fillColor"
+              }
+            ],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [
+              "/.*/"
+            ],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              0.1
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "a",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "pipeline WS dev",
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": false,
+            "gradient": true,
+            "hidden": false,
+            "invert": false,
+            "linkData": [],
+            "linkProp": "id",
+            "linkRegEx": true,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 26,
+            "overlayIcon": true,
+            "pattern": "probe_success{env=\"dev\", instance=\"https://ws.crm.dev.travel-dev.com\", job=\"availability_api_metabuild\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [
+              {
+                "colorOn": "wc",
+                "hidden": false,
+                "pattern": "72",
+                "style": "strokeColor"
+              }
+            ],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [
+              "/.*/"
+            ],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              0.1
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "a",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "LB  pipeline API dev",
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": false,
+            "gradient": true,
+            "hidden": false,
+            "invert": false,
+            "linkData": [],
+            "linkProp": "id",
+            "linkRegEx": true,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 27,
+            "overlayIcon": true,
+            "pattern": "probe_success{env=\"dev\", instance=\"https://api.crm.dev.travel-dev.com\", job=\"availability_api_metabuild\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [
+              {
+                "colorOn": "wc",
+                "hidden": false,
+                "pattern": "25",
+                "style": "strokeColor"
+              }
+            ],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [
+              "/.*/"
+            ],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              0.1
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "a",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "API dev",
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": false,
+            "gradient": true,
+            "hidden": false,
+            "invert": false,
+            "linkData": [
+              {
+                "hidden": false,
+                "linkOn": "a",
+                "linkParams": false,
+                "linkUrl": "https://grafana.infra.travel-dev.com/d/PEW9_fy7k/crm-project-availability-metrics?orgId=1&refresh=30s&var-target=https:%2F%2Fapi.crm.dev.travel-dev.com",
+                "pattern": "Mb0u9kBgjuhVRU1gNTpR-4"
+              }
+            ],
+            "linkProp": "id",
+            "linkRegEx": true,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 28,
+            "overlayIcon": true,
+            "pattern": "probe_success{env=\"dev\", instance=\"https://api.crm.dev.travel-dev.com\", job=\"availability_api_metabuild\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [
+              {
+                "colorOn": "wc",
+                "hidden": false,
+                "pattern": "Mb0u9kBgjuhVRU1gNTpR-4",
+                "style": "fillColor"
+              }
+            ],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [
+              "/.*/"
+            ],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              0.1
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "a",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "pipeline API dev",
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": false,
+            "gradient": true,
+            "hidden": false,
+            "invert": false,
+            "linkData": [],
+            "linkProp": "id",
+            "linkRegEx": true,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 29,
+            "overlayIcon": true,
+            "pattern": "probe_success{env=\"dev\", instance=\"https://api.crm.dev.travel-dev.com\", job=\"availability_api_metabuild\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [
+              {
+                "colorOn": "wc",
+                "hidden": false,
+                "pattern": "67",
+                "style": "strokeColor"
+              }
+            ],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [
+              "/.*/"
+            ],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              0.1
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "a",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "LB pipeline APP dev",
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": false,
+            "gradient": true,
+            "hidden": false,
+            "invert": false,
+            "linkData": [
+              {
+                "hidden": false,
+                "linkOn": "a",
+                "linkParams": false,
+                "linkUrl": "",
+                "pattern": ""
+              }
+            ],
+            "linkProp": "id",
+            "linkRegEx": true,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 30,
+            "overlayIcon": true,
+            "pattern": "probe_success{env=\"dev\", instance=\"https://crm.dev.travel-dev.com\", job=\"availability_api_metabuild\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [
+              {
+                "colorOn": "wc",
+                "hidden": false,
+                "pattern": "24",
+                "style": "strokeColor"
+              }
+            ],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [
+              "/.*/"
+            ],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              0.1
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "a",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "APP dev",
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": false,
+            "gradient": true,
+            "hidden": false,
+            "invert": false,
+            "linkData": [
+              {
+                "hidden": false,
+                "linkOn": "a",
+                "linkParams": false,
+                "linkUrl": "https://grafana.infra.travel-dev.com/d/PEW9_fy7k/crm-project-availability-metrics?orgId=1&refresh=30s&var-target=https:%2F%2Fcrm.dev.travel-dev.com",
+                "pattern": "Mb0u9kBgjuhVRU1gNTpR-2"
+              }
+            ],
+            "linkProp": "id",
+            "linkRegEx": true,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 31,
+            "overlayIcon": true,
+            "pattern": "probe_success{env=\"dev\", instance=\"https://crm.dev.travel-dev.com\", job=\"availability_api_metabuild\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [
+              {
+                "colorOn": "wc",
+                "hidden": false,
+                "pattern": "Mb0u9kBgjuhVRU1gNTpR-2",
+                "style": "fillColor"
+              }
+            ],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [
+              "/.*/"
+            ],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              0.1
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "a",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "pipeline APP dev",
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": false,
+            "gradient": true,
+            "hidden": false,
+            "invert": false,
+            "linkData": [
+              {
+                "hidden": false,
+                "linkOn": "a",
+                "linkParams": false,
+                "linkUrl": "",
+                "pattern": ""
+              }
+            ],
+            "linkProp": "id",
+            "linkRegEx": true,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 32,
+            "overlayIcon": true,
+            "pattern": "probe_success{env=\"dev\", instance=\"https://crm.dev.travel-dev.com\", job=\"availability_api_metabuild\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [
+              {
+                "colorOn": "wc",
+                "hidden": false,
+                "pattern": "66",
+                "style": "strokeColor"
+              }
+            ],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [
+              "/.*/"
+            ],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              0.1
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "a",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current_notnull",
+            "alias": "centrifugo dev",
+            "colors": [
+              "#F2495C",
+              "#73BF69"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": true,
+            "gradient": false,
+            "hidden": false,
+            "invert": false,
+            "linkData": [
+              {
+                "hidden": false,
+                "linkOn": "a",
+                "linkParams": true,
+                "linkUrl": "https://grafana.infra.travel-dev.com/d/JQwvpZOMz/centrifugo?orgId=1&refresh=30s",
+                "pattern": "89"
+              }
+            ],
+            "linkProp": "id",
+            "linkRegEx": false,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 33,
+            "overlayIcon": true,
+            "pattern": "probe_success{env=\"dev\", instance=\"10.0.1.131:8000\", job=\"availability_tcp_connect\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [
+              {
+                "colorOn": "wc",
+                "hidden": false,
+                "pattern": "89",
+                "style": "fillColor"
+              }
+            ],
+            "shapeProp": "id",
+            "shapeRegEx": false,
+            "stringThresholds": [],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": false,
+            "thresholds": [
+              0.1
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "wc",
+            "tpDirection": "v",
+            "tpGraph": true,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "bar",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "beanstalkd dev",
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 0,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": false,
+            "gradient": true,
+            "hidden": false,
+            "invert": false,
+            "linkData": [
+              {
+                "hidden": false,
+                "linkOn": "a",
+                "linkParams": false,
+                "linkUrl": "https://grafana.infra.travel-dev.com/d/Dvwr4Amnk/beanstalkd?orgId=1&var-node=shared-crm-dev&var-env=dev&var-instance=i-0b0f7a25137df1111",
+                "pattern": "88"
+              }
+            ],
+            "linkProp": "id",
+            "linkRegEx": true,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 34,
+            "overlayIcon": true,
+            "pattern": "probe_success{env=\"dev\", instance=\"10.0.1.131:11300\", job=\"availability_tcp_connect\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [
+              {
+                "colorOn": "wc",
+                "hidden": false,
+                "pattern": "88",
+                "style": "fillColor"
+              }
+            ],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [
+              "/.*/"
+            ],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              0.1
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "a",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "redis dev",
+            "colors": [
+              "#C4162A",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 0,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": false,
+            "gradient": true,
+            "hidden": false,
+            "invert": false,
+            "linkData": [
+              {
+                "hidden": false,
+                "linkOn": "a",
+                "linkParams": true,
+                "linkUrl": "https://grafana.infra.travel-dev.com/d/v9flQoink/redis-crm?orgId=1&from=now-24h&to=now&refresh=10s",
+                "pattern": "90"
+              }
+            ],
+            "linkProp": "id",
+            "linkRegEx": true,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 35,
+            "overlayIcon": true,
+            "pattern": "redis_up{env=\"dev\", instance=\"i-09ee387c650467d50\", job=\"redis_crm\", name=\"shared-crm-dev\", project=\"crm\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [
+              {
+                "colorOn": "wc",
+                "hidden": false,
+                "pattern": "90",
+                "style": "fillColor"
+              }
+            ],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              0.1
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "wc",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "Antispam",
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": false,
+            "gradient": false,
+            "hidden": false,
+            "invert": false,
+            "linkData": [],
+            "linkProp": "id",
+            "linkRegEx": true,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 36,
+            "overlayIcon": true,
+            "pattern": "probe_success{env=\"dev\", instance=\"http://10.0.1.131:8001/docs\", job=\"availability_api_metabuild\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [
+              {
+                "colorOn": "wc",
+                "hidden": false,
+                "pattern": "91",
+                "style": "fillColor"
+              }
+            ],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [
+              "/.*/"
+            ],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              0.1
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "a",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "pipeline Antispam",
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": false,
+            "gradient": false,
+            "hidden": false,
+            "invert": false,
+            "linkData": [],
+            "linkProp": "id",
+            "linkRegEx": true,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 37,
+            "overlayIcon": true,
+            "pattern": "probe_success{env=\"dev\", instance=\"http://10.0.1.131:8001/docs\", job=\"availability_api_metabuild\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [
+              {
+                "colorOn": "wc",
+                "hidden": false,
+                "pattern": "51",
+                "style": "strokeColor"
+              }
+            ],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [
+              "/.*/"
+            ],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              0.1
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "a",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "PHP dev",
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": false,
+            "gradient": true,
+            "hidden": false,
+            "invert": false,
+            "linkData": [
+              {
+                "hidden": false,
+                "linkOn": "a",
+                "linkParams": false,
+                "linkUrl": "https://grafana.infra.travel-dev.com/d/ZGUv9Tm7z/php?orgId=1&from=now-24h&to=now&refresh=30s",
+                "pattern": "17"
+              }
+            ],
+            "linkProp": "id",
+            "linkRegEx": true,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 38,
+            "overlayIcon": true,
+            "pattern": "phpfpm_up{env=\"dev\", instance=\"i-06800d38c39b99857\", job=\"phpfpm_crm\", name=\"app0-crm-dev\", project=\"crm\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [
+              {
+                "colorOn": "wc",
+                "hidden": false,
+                "pattern": "17",
+                "style": "fillColor"
+              }
+            ],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [
+              "/.*/"
+            ],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              0.1
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "a",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "supervisor dev",
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 100,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": false,
+            "gradient": false,
+            "hidden": false,
+            "invert": false,
+            "linkData": [
+              {
+                "hidden": false,
+                "linkOn": "a",
+                "linkParams": false,
+                "linkUrl": "https://grafana.infra.travel-dev.com/d/SYE-uTinz/supervisord?orgId=1&refresh=30s&from=now-24h&to=now",
+                "pattern": "16"
+              }
+            ],
+            "linkProp": "id",
+            "linkRegEx": true,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 39,
+            "overlayIcon": true,
+            "pattern": "node_scrape_collector_success{collector=\"supervisord\", env=\"dev\", instance=\"i-06800d38c39b99857\", job=\"node_crm\", name=\"app0-crm-dev\", project=\"crm\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [
+              {
+                "colorOn": "wc",
+                "hidden": false,
+                "pattern": "16",
+                "style": "fillColor"
+              }
+            ],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [
+              "/.*/"
+            ],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              1
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "a",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "MySQL RDS",
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": false,
+            "gradient": true,
+            "hidden": false,
+            "invert": false,
+            "linkData": [
+              {
+                "hidden": false,
+                "linkOn": "a",
+                "linkParams": false,
+                "linkUrl": "https://grafana.infra.travel-dev.com/d/AWSRDSdbi/mysql-rds?orgId=1&from=now-24h&to=now&refresh=30s",
+                "pattern": "82"
+              }
+            ],
+            "linkProp": "id",
+            "linkRegEx": true,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 40,
+            "overlayIcon": true,
+            "pattern": "probe_success{env=\"dev\", instance=\"https://crm.dev.travel-dev.com\", job=\"availability_api_metabuild\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [
+              "/.*/"
+            ],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              0.1
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "a",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          },
+          {
+            "aggregation": "current",
+            "alias": "PostgreSQL RDS",
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "column": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "eventData": [],
+            "eventProp": "id",
+            "eventRegEx": false,
+            "gradient": true,
+            "hidden": false,
+            "invert": false,
+            "linkData": [
+              {
+                "hidden": false,
+                "linkOn": "a",
+                "linkParams": false,
+                "linkUrl": "https://grafana.infra.travel-dev.com/d/AWSRDSPostgdbi/postgresql-rds?orgId=1&refresh=30s&from=now-24h&to=now",
+                "pattern": "84"
+              }
+            ],
+            "linkProp": "id",
+            "linkRegEx": true,
+            "mappingType": 1,
+            "metricType": "serie",
+            "order": 41,
+            "overlayIcon": true,
+            "pattern": "probe_success{env=\"dev\", instance=\"https://crm.dev.travel-dev.com\", job=\"availability_api_metabuild\"}",
+            "rangeData": [],
+            "reduce": true,
+            "refId": "A",
+            "sanitize": false,
+            "shapeData": [],
+            "shapeProp": "id",
+            "shapeRegEx": true,
+            "stringThresholds": [
+              "/.*/"
+            ],
+            "textData": [],
+            "textProp": "id",
+            "textRegEx": true,
+            "thresholds": [
+              0.1
+            ],
+            "tooltip": false,
+            "tooltipColors": false,
+            "tooltipLabel": "",
+            "tooltipOn": "a",
+            "tpDirection": "v",
+            "tpGraph": false,
+            "tpGraphHigh": null,
+            "tpGraphLow": null,
+            "tpGraphScale": "linear",
+            "tpGraphSize": "100%",
+            "tpGraphType": "line",
+            "type": "number",
+            "unit": "short",
+            "valueData": []
+          }
+        ]
+      },
+      "targets": [
+        {
+          "exemplar": true,
+          "expr": "redis_up{instance=~\".*\", project=\"crm\", job=\"redis_crm\", env=~\"$env\"} ",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "",
+          "refId": "D"
+        },
+        {
+          "exemplar": true,
+          "expr": "phpfpm_up{project=\"crm\", job=\"phpfpm_crm\", env=~\"$env\"}",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "",
+          "refId": "I"
+        },
+        {
+          "exemplar": true,
+          "expr": "probe_success{env=~\"$env\"}",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        },
+        {
+          "exemplar": true,
+          "expr": "node_scrape_collector_success{name=~\"^app0.*\", collector=\"supervisord\", env=\"$env\"}",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "",
+          "refId": "B"
+        }
+      ],
+      "title": "CRM  Project",
+      "transparent": true,
+      "type": "agenty-flowcharting-panel",
+      "valueName": "current",
+      "version": "0.9.0"
+    },
+    {
+      "datasource": "CloudWatch",
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "light-blue",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 2,
+        "x": 18,
+        "y": 0
+      },
+      "id": 4,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "text": {}
+      },
+      "pluginVersion": "8.2.3",
+      "targets": [
+        {
+          "alias": "Active Connections",
+          "dimensions": {
+            "LoadBalancer": "app/app-crm-dev/608dcc474847ffc6"
+          },
+          "expression": "",
+          "id": "",
+          "matchExact": true,
+          "metricName": "ActiveConnectionCount",
+          "namespace": "AWS/ApplicationELB",
+          "period": "",
+          "refId": "A",
+          "region": "default",
+          "statistic": "Sum"
+        }
+      ],
+      "title": "LB activ connections",
+      "transparent": true,
+      "type": "gauge"
+    },
+    {
+      "datasource": "CloudWatch",
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "light-blue",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 2,
+        "x": 20,
+        "y": 0
+      },
+      "id": 6,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "text": {}
+      },
+      "pluginVersion": "8.2.3",
+      "targets": [
+        {
+          "alias": "",
+          "dimensions": {
+            "LoadBalancer": "app/app-crm-dev/608dcc474847ffc6"
+          },
+          "expression": "",
+          "id": "",
+          "matchExact": true,
+          "metricName": "NewConnectionCount",
+          "namespace": "AWS/ApplicationELB",
+          "period": "",
+          "refId": "A",
+          "region": "default",
+          "statistic": "Sum"
+        }
+      ],
+      "title": "LB new connections",
+      "transparent": true,
+      "type": "gauge"
+    },
+    {
+      "datasource": "CloudWatch",
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "color": "semi-dark-blue",
+                  "index": 0,
+                  "text": "0"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": ""
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 2,
+        "x": 22,
+        "y": 0
+      },
+      "id": 8,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "text": {}
+      },
+      "pluginVersion": "8.2.3",
+      "targets": [
+        {
+          "alias": "HTTP 5XX",
+          "dimensions": {
+            "LoadBalancer": "app/app-crm-dev/608dcc474847ffc6"
+          },
+          "expression": "",
+          "id": "",
+          "matchExact": true,
+          "metricName": "HTTPCode_ELB_5XX_Count",
+          "namespace": "AWS/ApplicationELB",
+          "period": "",
+          "refId": "A",
+          "region": "default",
+          "statistic": "Sum"
+        }
+      ],
+      "title": "LB HTTP 5XX",
+      "transparent": true,
+      "type": "gauge"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 31,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "allValue": null,
+        "current": {
+          "selected": false,
+          "text": "dev",
+          "value": "dev"
+        },
+        "datasource": null,
+        "definition": "label_values(node_exporter_build_info,env)",
+        "description": null,
+        "error": null,
+        "hide": 0,
+        "includeAll": false,
+        "label": "env",
+        "multi": false,
+        "name": "env",
+        "options": [],
+        "query": {
+          "query": "label_values(node_exporter_build_info,env)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "/dev?[v3]$/",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "CRM dynamic scheme",
+  "uid": "Q-hv3E8nz",
+  "version": 28
+}

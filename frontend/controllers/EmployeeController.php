@@ -1390,6 +1390,7 @@ class EmployeeController extends FController
             'form' => $form,
             'userProjectParamsDataProvider' => $userProjectParamsDataProvider,
             'lastFailedLoginDataProvider' => $lastFailedLoginDataProvider,
+            'userProductTypeDataProvider' => null,
         ];
 
         $userVoiceMailSearch = new UserVoiceMailSearch();
@@ -1401,7 +1402,6 @@ class EmployeeController extends FController
             ]);
             $result['userProductTypeDataProvider'] = $userProductTypeDataProvider;
         }
-
         return $this->render('update/_form', $result);
     }
 

@@ -1,6 +1,7 @@
 <?php
 
 use common\models\query\EmployeeQuery;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 use yii\grid\CheckboxColumn;
 use common\components\grid\Select2Column;
@@ -51,8 +52,18 @@ $pjaxContainerId = 'pjax-user-shift-assign';
                 'cssClass' => 'multiple-checkbox'
             ],
             [
-                'label' => 'User',
+                'label' => 'User ID',
                 'attribute' => 'id',
+
+
+                'options' => [
+                    'width' => '80px'
+                ],
+                'enableSorting' => false,
+            ],
+            [
+                'label' => 'User',
+                'attribute' => 'username',
                 'filter' => \src\widgets\UserSelect2Widget::widget([
                     'model' => $searchModel,
                     'attribute' => 'userId'
@@ -64,7 +75,7 @@ $pjaxContainerId = 'pjax-user-shift-assign';
                 'enableSorting' => false,
             ],
             [
-                'label' => 'Shift',
+                'label' => 'Shift Name',
                 'attribute' => 'shiftId',
                 'value' => static function (Employee $model) {
                     if (!$model->userShiftAssigns) {
@@ -72,12 +83,16 @@ $pjaxContainerId = 'pjax-user-shift-assign';
                     }
                     $shifts = [];
                     foreach ($model->userShiftAssigns as $item) {
-                        $shifts[] = Html::tag('span', Html::encode($item->shift->sh_name), ['class' => 'label label-default']);
+                        $shifts[] = Html::tag(
+                            'span',
+                            Html::encode($item->shift->sh_name),
+                            ['class' => 'label label-default', 'style' => 'font-size: 11px;']
+                        );
                     }
                     return implode(' ', $shifts);
                 },
                 'format' => 'raw',
-                'contentOptions' => ['class' => 'text-left', 'style' => 'min-width: 320px'],
+                'contentOptions' => ['class' => 'text-left', 'style' => 'min-width: 320px;'],
                 'filter' => \modules\shiftSchedule\src\entities\shift\Shift::getList(),
             ],
             [
@@ -88,7 +103,11 @@ $pjaxContainerId = 'pjax-user-shift-assign';
                     $groups = $model->getUserGroupList();
                     $groupsValueArr = [];
                     foreach ($groups as $group) {
-                        $groupsValueArr[] = Html::tag('span', Html::encode($group), ['class' => 'label label-success']);
+                        $groupsValueArr[] = Html::tag(
+                            'span',
+                            Html::encode($group),
+                            ['class' => 'label label-success', 'style' => 'font-size: 11px;']
+                        );
                     }
                     return implode(' ', $groupsValueArr);
                 },
@@ -106,7 +125,11 @@ $pjaxContainerId = 'pjax-user-shift-assign';
                     $items = $model->getRoles();
                     $itemsData = [];
                     foreach ($items as $item) {
-                        $itemsData[] = Html::tag('span', Html::encode($item), ['class' => 'label bg-light text-dark shadow']);
+                        $itemsData[] = Html::tag(
+                            'span',
+                            Html::encode($item),
+                            ['class' => 'label bg-light text-dark shadow', 'style' => 'font-size: 11px;']
+                        );
                     }
                     return implode(' ', $itemsData);
                 },
@@ -124,7 +147,11 @@ $pjaxContainerId = 'pjax-user-shift-assign';
                     }
                     $projects = [];
                     foreach ($model->projects as $item) {
-                        $projects[] = Html::tag('span', Html::encode($item->name), ['class' => 'label label-info']);
+                        $projects[] = Html::tag(
+                            'span',
+                            Html::encode($item->name),
+                            ['class' => 'label label-info', 'style' => 'font-size: 11px;']
+                        );
                     }
                     return implode(' ', $projects);
                 },
@@ -142,8 +169,14 @@ $pjaxContainerId = 'pjax-user-shift-assign';
                     'assign' => static function ($url, Employee $model, $key) {
                         return Html::a(
                             '<span class="fa fa-user-plus"></span>',
-                            ['assign', 'id' => $model->id],
-                            ['title' => 'Assign to Shift', 'target' => '_blank', 'data-pjax' => 0,]
+                            '#',
+                            [
+                                'class' => 'js_edit_usha',
+                                'title' => 'Edit User Shift Assign',
+                                'data-url' => Url::to(['assign-form', 'id' => $model->id]),
+                                'data-id' => $model->id,
+                                'data-shifts' => ArrayHelper::map($model->userShiftAssigns, 'usa_sh_id', 'usa_sh_id'),
+                            ],
                         );
                     },
                 ],
@@ -171,12 +204,14 @@ CSS;
 $this->registerCss($css);
 ?>
 
-<?php yii\bootstrap4\Modal::begin([
+<?php
+yii\bootstrap4\Modal::begin([
     'title' => '',
-    'id' => 'multiple_assign_modal',
+    'id' => 'user_shift_assign_modal',
     'size' => \yii\bootstrap4\Modal::SIZE_SMALL,
 ]);
-yii\bootstrap4\Modal::end() ?>
+yii\bootstrap4\Modal::end();
+?>
 
 <?php
 $storageName = Inflector::variablize($this->title);
@@ -280,7 +315,7 @@ $script = <<< JS
             }); 
         }
     });
-    
+
     $(document).on('click', '#js-assign-selected', function() {
         if (!sessionStorage.getItem(storageName)) {
             notifyAlert('Please select items', 'error');
@@ -298,10 +333,10 @@ $script = <<< JS
         })
         .done(function(dataResponse) {
             if (dataResponse.status === 1) {
-                let modalBodyEl = $('#multiple_assign_modal .modal-body');
+                let modalBodyEl = $('#user_shift_assign_modal .modal-body');
                 modalBodyEl.html(dataResponse.data);
-                $('#multiple_assign_modal-label').html('Assign users to shift'); 
-                $('#multiple_assign_modal').modal('show');
+                $('#user_shift_assign_modal-label').html('Assign users to shift'); 
+                $('#user_shift_assign_modal').modal('show');
             } else if (dataResponse.message.length) {
                 createNotify('Error', dataResponse.message, 'error');
             } else {
@@ -381,7 +416,37 @@ $script = <<< JS
         } else {
             sessionStorage.removeItem(storageName);
         }
-    }   
+    }
+    
+    $(document).on('click', '.js_edit_usha', function() {
+        let urlAssign = $(this).data('url'); 
+        let userId = $(this).data('id');
+        let shftIds = $(this).data('shifts');
+
+        $.ajax({
+            url: urlAssign,
+            type: 'POST',
+            dataType: 'json',
+            data: {userId : userId, shftIds : shftIds}
+        })
+        .done(function(dataResponse) {
+            if (dataResponse.status === 1) {
+                let modalBodyEl = $('#user_shift_assign_modal .modal-body');
+                modalBodyEl.html(dataResponse.data);
+                $('#user_shift_assign_modal-label').html('User Shift Assign'); 
+                $('#user_shift_assign_modal').modal('show');
+            } else if (dataResponse.message.length) {
+                createNotify('Error', dataResponse.message, 'error');
+            } else {
+                createNotify('Error', 'Error, please check logs', 'error');
+            }
+        })
+        .fail(function(error) {
+            console.error(error);
+            alert('Request Error');
+        })
+        .always(function() {});
+    });
 JS;
 
 $this->registerJs($script);
