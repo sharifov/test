@@ -10,7 +10,7 @@ use modules\abac\src\entities\AbacInterface;
 class PhoneNumberRedialAbacObject extends AbacBaseModel implements AbacInterface
 {
     /** NAMESPACE */
-    private const NS = 'phoneNumberRedial/phoneNumberRedial/';
+    private const NS = 'phone-number-redial/phone-number-redial/';
 
     public const OBJ_PHONE_NUMBER_REDIAL =  self::NS . 'obj/phone-number-redial';
 
