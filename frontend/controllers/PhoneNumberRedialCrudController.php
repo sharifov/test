@@ -205,7 +205,7 @@ class PhoneNumberRedialCrudController extends FController
             foreach ($items as $value) {
                 if ($phoneNumberRedial = $this->findModel($value)) {
                     try {
-                        $phoneNumberRedial->de9lete();
+                        $phoneNumberRedial->delete();
                         $result[] = $value;
                     } catch (\RuntimeException $throwable) {
                         $messageData = AppHelper::throwableLog($throwable);
