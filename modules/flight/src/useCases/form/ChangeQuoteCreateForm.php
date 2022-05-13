@@ -4,8 +4,6 @@ namespace modules\flight\src\useCases\form;
 
 use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
 use modules\flight\src\useCases\flightQuote\createManually\FlightQuotePaxPriceForm;
-use DateTime;
-use src\helpers\setting\SettingHelper;
 
 /**
  * Class ChangeQuoteCreateForm
@@ -73,14 +71,11 @@ class ChangeQuoteCreateForm extends \yii\base\Model
     }
 
     /**
-     * @param DateTime $date
+     * @param string $date
      * @return void
      */
-    public function setExpirationDate(DateTime $date): void
+    public function setExpirationDate(string $date): void
     {
-        $maxDate = $date->modify(sprintf('-%d hours', SettingHelper::getMinHoursDifferenceOffers()));
-        $date = (new DateTime())->modify(sprintf('+%d days', SettingHelper::getExpirationDaysOfNewOffers()));
-
-        $this->expirationDate = $date > $maxDate ? $maxDate->format('Y-m-d') : $date->format('Y-m-d');
+        $this->expirationDate = $date;
     }
 }

@@ -7,10 +7,8 @@ use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
 use src\entities\cases\Cases;
 use src\helpers\ErrorsToStringHelper;
-use src\helpers\setting\SettingHelper;
 use yii\base\Model;
 use common\components\validators\CheckIsBooleanValidator;
-use DateTime;
 
 /**
  * Class VoluntaryRefundCreateForm
@@ -93,14 +91,11 @@ class VoluntaryRefundCreateForm extends Model
     }
 
     /**
-     * @param DateTime $date
+     * @param string $date
      * @return void
      */
-    public function setExpirationDate(DateTime $date): void
+    public function setExpirationDate(string $date): void
     {
-        $maxDate = $date->modify(sprintf('-%d hours', SettingHelper::getMinHoursDifferenceOffers()));
-        $date = (new DateTime())->modify(sprintf('+%d days', SettingHelper::getExpirationDaysOfNewOffers()));
-
-        $this->expirationDate = $date > $maxDate ? $maxDate->format('Y-m-d') : $date->format('Y-m-d');
+        $this->expirationDate = $date;
     }
 }

@@ -1010,7 +1010,7 @@ class FlightQuoteController extends FController
             $form = new VoluntaryQuoteCreateForm(Auth::id(), $flight, true, $voluntaryExchangeBOService->getServiceFeeAmount());
             $form->setCustomerPackage($voluntaryExchangeBOService->getCustomerPackage());
             $form->setServiceFeeCurrency($voluntaryExchangeBOService->getServiceFeeCurrency());
-            $form->setExpirationDate(FlightQuoteHelper::getLastDepartureDate($originProductQuote->flightQuote));
+            $form->setExpirationDate(FlightQuoteHelper::getExpirationDate($originProductQuote->flightQuote));
         } catch (\RuntimeException | \DomainException $exception) {
             $message = ArrayHelper::merge(AppHelper::throwableLog($exception), $getParams);
             Yii::warning($message, 'FlightQuoteController:actionCreateVoluntaryQuote:Exception');
@@ -1184,7 +1184,7 @@ class FlightQuoteController extends FController
             }
 
             $form = new ReProtectionQuoteCreateForm(Auth::id(), $flightId);
-            $form->setExpirationDate(FlightQuoteHelper::getLastDepartureDate($originProductQuote->flightQuote));
+            $form->setExpirationDate(FlightQuoteHelper::getExpirationDate($originProductQuote->flightQuote));
         } catch (\Throwable $throwable) {
             Yii::warning(AppHelper::throwableLog($throwable), 'FlightQuoteController:actionCreateReProtectionQuote:Throwable');
             return $throwable->getMessage();
@@ -1483,7 +1483,7 @@ class FlightQuoteController extends FController
                 }
 
                 $form = new VoluntaryRefundCreateForm();
-                $form->setExpirationDate(FlightQuoteHelper::getLastDepartureDate($originProductQuote->flightQuote));
+                $form->setExpirationDate(FlightQuoteHelper::getExpirationDate($originProductQuote->flightQuote));
 
                 $boDataRequest = BoRequestDataHelper::getRequestDataForVoluntaryRefundData($project->api_key, $flightQuoteFlight->fqf_booking_id);
                 $result = BackOffice::voluntaryRefund($boDataRequest, 'flight-request/get-refund-data');
