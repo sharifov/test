@@ -21,7 +21,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('Create', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-<!--    --><?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <!--    --><?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -55,7 +55,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => ActionColumn::className(),
                 'urlCreator' => function ($action, QuoteSegmentStop $model, $key, $index, $column) {
                     return Url::toRoute([$action, 'qss_id' => $model->qss_id]);
-                 },
+                },
                 'template' => '{view}',
             ],
         ],
