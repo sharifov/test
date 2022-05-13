@@ -828,6 +828,22 @@ class SettingHelper
         return (bool)(Yii::$app->params['settings']['phone_number_redial_enable'] ?? false);
     }
 
+    /**
+     * @return int
+     */
+    public static function getExpirationDaysOfNewOffers(): int
+    {
+        return (int)(Yii::$app->params['settings']['expiration_days_of_new_offers'] ?? 7);
+    }
+
+    /**
+     * @return int
+     */
+    public static function getMinHoursDifferenceOffers(): int
+    {
+        return (int)(Yii::$app->params['settings']['minimum_hours_difference_between_offers'] ?? 24);
+    }
+
     public static function getRedialLeadExcludeAttributes(): array
     {
         $settings = Yii::$app->params['settings']['redial_lead_exclude_attributes'] ?? [];
