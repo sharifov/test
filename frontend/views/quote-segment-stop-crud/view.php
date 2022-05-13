@@ -17,6 +17,17 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="col-md-4">
         <h1><?= Html::encode($this->title) ?></h1>
 
+        <p>
+            <?= Html::a('Update', ['update', 'qss_id' => $model->qss_id], ['class' => 'btn btn-primary']) ?>
+            <?= Html::a('Delete', ['delete', 'qss_id' => $model->qss_id], [
+                'class' => 'btn btn-danger',
+                'data' => [
+                    'confirm' => 'Are you sure you want to delete this item?',
+                    'method' => 'post',
+                ],
+            ]) ?>
+        </p>
+
         <?= DetailView::widget([
             'model' => $model,
             'attributes' => [

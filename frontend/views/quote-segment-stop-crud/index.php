@@ -38,7 +38,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             'target' => '_blank'
                         ]);
                     }
-                    return $model->qss_segment_id;
+                    return Yii::$app->formatter->nullDisplay;
                 },
                 'format' => 'raw'
             ],
