@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use src\helpers\app\AppHelper;
 use src\model\phoneNumberRedial\abac\PhoneNumberRedialAbacObject;
 use src\model\phoneNumberRedial\PhoneNumberRedialRepository;
 use src\model\phoneNumberRedial\useCase\createMultiple\CreateMultipleForm;
@@ -9,14 +10,12 @@ use Yii;
 use src\model\phoneNumberRedial\entity\PhoneNumberRedial;
 use src\model\phoneNumberRedial\entity\PhoneNumberRedialSearch;
 use frontend\controllers\FController;
-use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotAcceptableHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\db\StaleObjectException;
-use yii\helpers\ArrayHelper;
 
 /**
  * Class PhoneNumberRedialCrudController
@@ -184,6 +183,13 @@ class PhoneNumberRedialCrudController extends FController
         throw new BadRequestHttpException();
     }
 
+    /**
+     * @return Response
+     * @throws BadRequestHttpException
+     * @throws NotAcceptableHttpException
+     * @throws NotFoundHttpException
+     * @throws StaleObjectException
+     */
     public function actionDeleteSelected(): Response
     {
         $abac = Yii::$app->abac;
@@ -196,15 +202,18 @@ class PhoneNumberRedialCrudController extends FController
         if (Yii::$app->request->isAjax && !empty($items) && is_array($items)) {
             $result = [];
             foreach ($items as $value) {
-                if ($phoneNumberRedial = self::findModel($value)) {
+                if ($phoneNumberRedial = $this->findModel($value)) {
                     try {
                         $phoneNumberRedial->delete();
                         $result[] = $value;
+                    } catch (\RuntimeException $throwable) {
+                        $messageData = AppHelper::throwableLog($throwable);
+                        $messageData['items'] = $items;
+                        \Yii::warning($messageData, 'PhoneNumberRedialCrudController:actionDeleteSelected:Exception');
                     } catch (Throwable $throwable) {
-                        Yii::warning(
-                            VarDumper::dumpAsString($throwable),
-                            'PhoneNumberRedialCrudController:actionDeleteSelected'
-                        );
+                        $messageData = AppHelper::throwableLog($throwable);
+                        $messageData['items'] = $items;
+                        \Yii::warning($messageData, 'PhoneNumberRedialCrudController::actionDeleteSelected:Throwable');
                     }
                 }
             }
