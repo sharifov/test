@@ -30,6 +30,7 @@ use src\entities\cases\CaseEventLog;
 use src\exception\BoResponseException;
 use src\helpers\app\AppHelper;
 use src\helpers\app\HttpStatusCodeHelper;
+use src\helpers\product\ProductQuoteHelper;
 use src\helpers\setting\SettingHelper;
 use webapi\src\ApiCodeException;
 use webapi\src\logger\ApiLogger;
@@ -814,6 +815,18 @@ class FlightQuoteExchangeController extends BaseController
      * }
      *
      * @apiErrorExample {json} Error-Response:
+     * HTTP/1.1 410 Gone
+     * {
+     *        "status": 410,
+     *        "message": "Date 2022-05-20 23:59:59 has past",
+     *        "errors": [],
+     *        "code": "13115",
+     *        "technical": {
+     *           ...
+     *        }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response:
      * HTTP/1.1 422 Unprocessable entity
      * {
      *        "status": 422,
@@ -834,6 +847,7 @@ class FlightQuoteExchangeController extends BaseController
      *      13101 - Api User has no related project
      *      13106 - Post has not loaded
      *      13107 - Validation Failed
+     *      13115 - Date is expired
      *
      *      13113 - Product Quote not available for exchange
      *      13130 - Request to Back Office is failed
@@ -895,6 +909,14 @@ class FlightQuoteExchangeController extends BaseController
 
         $changeQuote = ProductQuote::findByGid($voluntaryExchangeConfirmForm->quote_gid);
         if (!empty($changeQuote->pq_id)) {
+            if (!ProductQuoteHelper::checkingExpirationDate($changeQuote)) {
+                return new ErrorResponse(
+                    new StatusCodeMessage(HttpStatusCodeHelper::GONE),
+                    new MessageMessage(sprintf('Date %s has past', $changeQuote->pq_expiration_dt)),
+                    new CodeMessage(ApiCodeException::DATA_EXPIRED)
+                );
+            }
+
             $pQuoteData = ProductQuoteData::createConfirmed($changeQuote->pq_id);
             $this->productQuoteDataRepository->save($pQuoteData);
         }
