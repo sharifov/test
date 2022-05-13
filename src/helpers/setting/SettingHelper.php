@@ -986,4 +986,9 @@ class SettingHelper
     {
         return (int)(self::getShiftSchedule()['days_offset'] ?? ShiftScheduleDictionary::DEFAULT_DAYS_OFFSET);
     }
+
+    public static function isClientChatDebugEnable(): bool
+    {
+        return (bool) (Yii::$app->params['settings']['client_chat_debug_enable'] ?? false);
+    }
 }
