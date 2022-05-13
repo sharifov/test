@@ -144,7 +144,8 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord implements Serializable
         $cid,
         $data,
         $refundCost,
-        $clientRefundCost
+        $clientRefundCost,
+        $expirationDate
     ): self {
         $refund = self::create(
             $orderRefundId,
@@ -166,6 +167,7 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord implements Serializable
         $refund->pqr_cid = $cid;
         $refund->pqr_refund_cost = $refundCost;
         $refund->pqr_client_refund_cost = $clientRefundCost;
+        $refund->pqr_expiration_dt = $expirationDate;
         $refund->detachBehavior('user');
         return $refund;
     }

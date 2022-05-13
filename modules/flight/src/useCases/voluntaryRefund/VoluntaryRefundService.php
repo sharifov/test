@@ -95,7 +95,8 @@ class VoluntaryRefundService
                 null,
                 $form->toArray(),
                 CurrencyHelper::convertToBaseCurrency($form->getRefundForm()->refundCost, $order->orClientCurrency->cur_base_rate),
-                $form->getRefundForm()->refundCost
+                $form->getRefundForm()->refundCost,
+                $form->expirationDate
             );
             $productQuoteRefund->new();
             $this->productQuoteRefundRepository->save($productQuoteRefund);
