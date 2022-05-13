@@ -29,7 +29,6 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php Pjax::begin(['id' => 'pjax-PhoneNumberRedial22']); ?>
 
     <?= $this->render('_search', ['model' => $searchModel]); ?>
-        <p>
         <div class="btn-group">
             <?php echo Html::button('<span class="fa fa-square-o"></span> Check All', ['class' => 'btn btn-default', 'id' => 'btn-check-all']); ?>
 
@@ -44,7 +43,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?= \yii\helpers\Html::a('<i class="fa fa-info text-info"></i> Show Checked IDs', null, ['class' => 'dropdown-item btn-show-checked-ids'])?>
             </div>
         </div>
-        </p>
     <?= GridView::widget([
         'id' => 'pnr-list-grid',
         'dataProvider' => $dataProvider,
