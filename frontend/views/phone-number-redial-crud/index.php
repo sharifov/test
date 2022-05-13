@@ -217,11 +217,18 @@ $script = <<< JS
             data: {selection : data}
         })
         .done(function(dataResponse) {
-            if (dataResponse) {
+            if (dataResponse.deleted) {                
+                notifyAlert('Ids (' + dataResponse.deleted + ') deleted successfully');
+            }
+            if (dataResponse.noDeleted) {
+                $.pjax.reload({container: pjaxContainer});
+                notifyAlert('Failed to delete IDs (' + dataResponse.noDeleted + ')', 'error');
+            }
+            if (dataResponse.success) {
                 sessionStorage.removeItem(storageName);
                 $.pjax.reload({container: pjaxContainer});
-                notifyAlert('Items (' + cnt + ') deleted successfully');
-            }                
+            }
+
         })
         .fail(function(error) {
             console.error(error);
