@@ -201,7 +201,6 @@ class PhoneNumberRedialCrudController extends FController
         if (Yii::$app->request->isAjax && !empty($items) && is_array($items)) {
             $result = [];
             $data = [];
-            $data['success'] = true;
             foreach ($items as $value) {
                 if ($phoneNumberRedial = $this->findModel($value)) {
                     try {
