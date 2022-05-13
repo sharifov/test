@@ -601,6 +601,7 @@ class FlightQuoteManageService implements ProductQuoteService
         return $this->transactionManager->wrap(function () use ($flight, $quote, $userId, $productTypeServiceFee, $orderId, $bookingId, $case, $originProductQuote) {
             $productQuote = ProductQuote::create(new ProductQuoteCreateDTO($flight, $quote, $userId), $productTypeServiceFee);
             $productQuote->pq_order_id = $orderId;
+            $productQuote->pq_expiration_dt = FlightQuoteHelper::getExpirationDate($originProductQuote->flightQuote);
             $this->productQuoteRepository->save($productQuote);
 
             $flightQuote = FlightQuote::create((new FlightQuoteCreateDTO($flight, $productQuote, $quote, $userId)));
