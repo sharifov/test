@@ -44,6 +44,9 @@ class GlobalLog extends ActiveRecord
     public const MODEL_EMPLOYEE         = 'common\models\Employee';
     public const MODEL_USER_PARAMS  = 'common\models\UserParams';
     public const MODEL_USER_PROFILE = 'common\models\UserProfile';
+    public const MODEL_USER_PROJECT_PARAMS = 'common\models\UserProjectParams';
+    public const MODEL_USER_VOICE_MAIL = 'src\model\userVoiceMail\useCase\manage\UserVoiceMailForm';
+    public const MODEL_USER_PRODUCT_TYPE = 'common\models\UserProductType';
 
     public const MODEL_LIST         = [
         self::MODEL_CLIENT          => 'Client',
@@ -60,6 +63,9 @@ class GlobalLog extends ActiveRecord
         self::MODEL_EMPLOYEE        => 'Employee',
         self::MODEL_USER_PARAMS => 'UserParams',
         self::MODEL_USER_PROFILE => 'UserProfile',
+        self::MODEL_USER_PROJECT_PARAMS => 'UserProjectParams',
+        self::MODEL_USER_VOICE_MAIL => 'UserVoiceMailForm',
+        self::MODEL_USER_PRODUCT_TYPE => 'UserProductType',
     ];
 
     public const APP_CONSOLE    = 'app-console';

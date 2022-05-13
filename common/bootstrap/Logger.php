@@ -25,6 +25,9 @@ use yii\db\AfterSaveEvent;
 use common\models\Employee;
 use common\models\UserParams;
 use common\models\UserProfile;
+use common\models\UserProjectParams;
+use src\model\userVoiceMail\useCase\manage\UserVoiceMailForm;
+use common\models\UserProductType;
 
 class Logger implements BootstrapInterface
 {
@@ -44,6 +47,9 @@ class Logger implements BootstrapInterface
         Employee::class,
         UserParams::class,
         UserProfile::class,
+        UserProjectParams::class,
+        UserVoiceMailForm::class,
+        UserProductType::class,
     ];
 
     /**
