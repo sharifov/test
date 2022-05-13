@@ -1187,7 +1187,12 @@ class EmployeeController extends FController
                     try {
                         $targetUser->updateRoles($form->form_roles);
                         $userUpdated = true;
-                        $targetUser->addLog(\Yii::$app->id, Yii::$app->user->id, ["roles" => $targetUser->getRoles(true)], ["roles" => $form->form_roles]);
+                        $targetUser->addLog(
+                            \Yii::$app->id,
+                            Yii::$app->user->id,
+                            ["roles" => $targetUser->getRoles(true)],
+                            ["roles" => $form->form_roles]
+                        );
                     } catch (\Throwable $e) {
                         throw new UpdateUserException(
                             ['error' => $e->getMessage()],
@@ -1246,7 +1251,12 @@ class EmployeeController extends FController
                         }
                     }
 
-                    $targetUser->addLog(\Yii::$app->id, Yii::$app->user->id, ["user_groups" => $oldUserGroups], ["user_groups" => $form->getUserGroups()]);
+                    $targetUser->addLog(
+                        \Yii::$app->id,
+                        Yii::$app->user->id,
+                        ["user_groups" => $oldUserGroups],
+                        ["user_groups" => $form->getUserGroups()]
+                    );
 
                     $userUpdated = true;
                 }
@@ -1267,7 +1277,12 @@ class EmployeeController extends FController
                             );
                         }
                     }
-                    $targetUser->addLog(\Yii::$app->id, Yii::$app->user->id, ["user_departments" => $oldUserDepartmens], ["user_departments" => $form->getUserDepartmens()]);
+                    $targetUser->addLog(
+                        \Yii::$app->id,
+                        Yii::$app->user->id,
+                        ["user_departments" => $oldUserDepartmens],
+                        ["user_departments" => $form->getUserDepartmens()]
+                    );
 
                     $userUpdated = true;
                 }
@@ -1289,7 +1304,12 @@ class EmployeeController extends FController
                             );
                         }
                     }
-                    $targetUser->addLog(\Yii::$app->id, Yii::$app->user->id, ["user_projects" => $oldUserProjects], ["user_projects" => $form->getUserProjects()]);
+                    $targetUser->addLog(
+                        \Yii::$app->id,
+                        Yii::$app->user->id,
+                        ["user_projects" => $oldUserProjects],
+                        ["user_projects" => $form->getUserProjects()]
+                    );
 
                     $userUpdated = true;
                 }
@@ -1316,7 +1336,12 @@ class EmployeeController extends FController
                             }
                         }
 
-                        $targetUser->addLog(\Yii::$app->id, Yii::$app->user->id, ["client_chat_user_channel" => $oldClientChatUserChannel], ["client_chat_user_channel" => $form->getChangedClientChatsChannels()]);
+                        $targetUser->addLog(
+                            \Yii::$app->id,
+                            Yii::$app->user->id,
+                            ["client_chat_user_channel" => $oldClientChatUserChannel],
+                            ["client_chat_user_channel" => $form->getChangedClientChatsChannels()]
+                        );
 
                         if ($userClientChatData && $userClientChatData->isRegisteredInRc()) {
                             $this->clientChatUserAccessService->setUserAccessToAllChatsByChannelIds($form->client_chat_user_channel, $targetUser->id);
@@ -1352,7 +1377,12 @@ class EmployeeController extends FController
                         }
                     }
 
-                    $targetUser->addLog(\Yii::$app->id, Yii::$app->user->id, ["user_shift_assigns" => $oldUserShiftAssign], ["user_shift_assigns" => $form->getChangedUserShiftAssign()]);
+                    $targetUser->addLog(
+                        \Yii::$app->id,
+                        Yii::$app->user->id,
+                        ["user_shift_assigns" => $oldUserShiftAssign],
+                        ["user_shift_assigns" => $form->getChangedUserShiftAssign()]
+                    );
 
                     $userUpdated = true;
                 }

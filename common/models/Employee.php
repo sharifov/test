@@ -2984,7 +2984,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $this->userRelations;
     }
 
-    public function addLog($updaterId, $targetId, $oldAttr, $newAttr)
+    public function addLog($appId, $targetId, $oldAttr, $newAttr)
     {
         $globalLogFormatAttrService = \Yii::createObject(GlobalEntityAttributeFormatServiceService::class);
 
@@ -2992,7 +2992,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             new LogDTO(
                 get_class($this),
                 $this->id,
-                $updaterId,
+                $appId,
                 $targetId,
                 JSON::encode($oldAttr),
                 JSON::encode($newAttr),
