@@ -4,6 +4,8 @@ namespace modules\flight\src\useCases\form;
 
 use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
 use modules\flight\src\useCases\flightQuote\createManually\FlightQuotePaxPriceForm;
+use DateTime;
+use src\helpers\setting\SettingHelper;
 
 /**
  * Class ChangeQuoteCreateForm
@@ -21,6 +23,7 @@ use modules\flight\src\useCases\flightQuote\createManually\FlightQuotePaxPriceFo
  * @property $segment_trip_data
  * @property $keyTripList
  * @property $flightId
+ * @property string|null $expirationDate
  *
  * @property ItineraryDumpDTO[] $itinerary
  * @property array $baggageFormsData
@@ -42,6 +45,7 @@ class ChangeQuoteCreateForm extends \yii\base\Model
     public $segment_trip_data;
     public $keyTripList;
     public $flightId;
+    public ?string $expirationDate = null;
 
     private array $itinerary = [];
     private array $baggageFormsData = [];
@@ -66,5 +70,17 @@ class ChangeQuoteCreateForm extends \yii\base\Model
     public function getFlightQuotePaxPriceForms(): array
     {
         return $this->flightQuotePaxPriceForms;
+    }
+
+    /**
+     * @param DateTime $date
+     * @return void
+     */
+    public function setExpirationDate(DateTime $date): void
+    {
+        $maxDate = $date->modify(sprintf('-%d hours', SettingHelper::getMinHoursDifferenceOffers()));
+        $date = (new DateTime())->modify(sprintf('+%d days', SettingHelper::getExpirationDaysOfNewOffers()));
+
+        $this->expirationDate = $date > $maxDate ? $maxDate->format('Y-m-d') : $date->format('Y-m-d');
     }
 }
