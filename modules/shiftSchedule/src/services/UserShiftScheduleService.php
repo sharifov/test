@@ -319,14 +319,21 @@ class UserShiftScheduleService
                                         }
                                     }
 
+                                    $timeStartSec = strtotime($date . ' ' . $rule->ssr_start_time_utc);
+                                    $timeEndSec = strtotime($date . ' ' . $rule->ssr_end_time_utc);
+
+                                    if ($timeStartSec > $timeEndSec) {
+                                        $timeEndSec = $timeEndSec + (24 * 60 * 60);
+                                    }
+
                                     $timeStart = date(
                                         'Y-m-d H:i:s',
-                                        strtotime($date . ' ' . $rule->ssr_start_time_utc)
+                                        $timeStartSec
                                     );
 
                                     $timeEnd = date(
                                         'Y-m-d H:i:s',
-                                        strtotime($date . ' ' . $rule->ssr_end_time_utc)
+                                        $timeEndSec
                                     );
 
                                     if (isset($timeLineData[$user->usa_user_id][$rule->ssr_id][$timeStart])) {
@@ -386,6 +393,11 @@ class UserShiftScheduleService
 
         $timeStart = strtotime($date . ' ' . $rule->ssr_start_time_utc);
         $timeEnd = strtotime($date . ' ' . $rule->ssr_end_time_utc);
+
+
+        if ($timeStart > $timeEnd) {
+            $timeEnd = $timeEnd + (24 * 60 * 60);
+        }
 
         $tl->uss_start_utc_dt = date('Y-m-d H:i:s', $timeStart);
         $tl->uss_end_utc_dt = date('Y-m-d H:i:s', $timeEnd);
@@ -514,11 +526,11 @@ class UserShiftScheduleService
         ?array $statusListId = [],
         ?array $subTypeListId = []
     ): array {
+        $employee = Employee::find()->where(['id' => $userId])->limit(1)->one();
+        $startDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($startDt), $employee);
+        $endDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($endDt), $employee);
 
-        $startDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($startDt));
-        $endDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($endDt));
-
-        if ($statusListId == null) {
+        if ($statusListId === null) {
             $statusListId = [UserShiftSchedule::STATUS_APPROVED, UserShiftSchedule::STATUS_DONE];
         }
 

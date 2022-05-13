@@ -4223,7 +4223,7 @@
             "source": {
                 "type": "git",
                 "url": "git@bitbucket.org:techork/yii2-search-module.git",
-                "reference": "5fedb3470c9d5b078689d3a4cff505dbe3567507"
+                "reference": "29122dcbcfb87db046be2b70afbfab8142b19692"
             },
             "require": {
                 "kovalenkojuls/yii2-widget-combodate": "*",
