@@ -188,7 +188,6 @@ class PhoneNumberRedialCrudController extends FController
      * @throws BadRequestHttpException
      * @throws NotAcceptableHttpException
      * @throws NotFoundHttpException
-     * @throws StaleObjectException
      */
     public function actionDeleteSelected(): Response
     {
@@ -201,23 +200,28 @@ class PhoneNumberRedialCrudController extends FController
 
         if (Yii::$app->request->isAjax && !empty($items) && is_array($items)) {
             $result = [];
+            $data = [];
+            $data['success'] = true;
             foreach ($items as $value) {
                 if ($phoneNumberRedial = $this->findModel($value)) {
                     try {
-                        $phoneNumberRedial->delete();
+                        $phoneNumberRedial->de9lete();
                         $result[] = $value;
                     } catch (\RuntimeException $throwable) {
                         $messageData = AppHelper::throwableLog($throwable);
-                        $messageData['items'] = $items;
                         \Yii::warning($messageData, 'PhoneNumberRedialCrudController:actionDeleteSelected:Exception');
-                    } catch (Throwable $throwable) {
+                        $data['success'] = false;
+                        $data['noDeleted'] = $value;
+                    } catch (\Throwable $throwable) {
                         $messageData = AppHelper::throwableLog($throwable);
-                        $messageData['items'] = $items;
                         \Yii::warning($messageData, 'PhoneNumberRedialCrudController::actionDeleteSelected:Throwable');
+                        $data['success'] = false;
+                        $data['noDeleted'] = $value;
                     }
                 }
             }
-            return $this->asJson($result);
+            $data['deleted'] = implode(', ', $result);
+            return $this->asJson($data);
         }
         throw new BadRequestHttpException();
     }
