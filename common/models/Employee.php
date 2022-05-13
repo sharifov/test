@@ -552,8 +552,8 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
     public function getClientChatUserChannelList(): array
     {
-        if ($model = $this->clientChatChannel) {
-            return \yii\helpers\ArrayHelper::map($model, 'ccc_id', 'ccc_name');
+        if ($clientChatChannel = $this->clientChatChannel) {
+            return \yii\helpers\ArrayHelper::map($clientChatChannel, 'ccc_id', 'ccc_name');
         }
 
         return [];
@@ -865,8 +865,8 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     */
     public function getUserShiftAssignList(): array
     {
-        if ($model = $this->shifts) {
-            return \yii\helpers\ArrayHelper::map($model, 'sh_id', 'sh_name');
+        if ($shifts = $this->shifts) {
+            return \yii\helpers\ArrayHelper::map($shifts, 'sh_id', 'sh_name');
         }
 
         return [];
@@ -885,8 +885,8 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public function getUserProjectList(): array
     {
-        if ($model = $this->projects) {
-            return \yii\helpers\ArrayHelper::map($model, 'id', 'name');
+        if ($projects = $this->projects) {
+            return \yii\helpers\ArrayHelper::map($projects, 'id', 'name');
         }
 
         return [];
@@ -2984,7 +2984,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $this->userRelations;
     }
 
-    public function addLog($appId, $userId, $oldAttr, $newAttr)
+    public function addLog($updaterId, $targetId, $oldAttr, $newAttr)
     {
         $globalLogFormatAttrService = \Yii::createObject(GlobalEntityAttributeFormatServiceService::class);
 
@@ -2992,8 +2992,8 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             new LogDTO(
                 get_class($this),
                 $this->id,
-                $appId,
-                $userId,
+                $updaterId,
+                $targetId,
                 JSON::encode($oldAttr),
                 JSON::encode($newAttr),
                 $globalLogFormatAttrService->formatAttr(get_class($this), JSON::encode($oldAttr), JSON::encode($newAttr)),
