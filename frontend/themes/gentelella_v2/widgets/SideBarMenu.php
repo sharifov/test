@@ -1092,9 +1092,9 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 [
                     'label' => Yii::t('requestControl', 'Request Control'), 'url' => 'javascript:', 'icon' => 'folder',
                     'items' => [
-                        ['label' => 'User Site Activity', 'url' => ['/requestControl/user-site-activity'], 'icon' => 'bars'],
-                        ['label' => 'User Activity Report', 'url' => ['/requestControl/user-site-activity/report'], 'icon' => 'bar-chart'],
-                        ['label' => 'Request Control Manage', 'url' => ['/requestControl/manage'], 'icon' => 'bars']
+                        ['label' => 'User Site Activity', 'url' => ['/request-control/user-site-activity/index'], 'icon' => 'bars'],
+                        ['label' => 'User Activity Report', 'url' => ['/request-control/user-site-activity/report'], 'icon' => 'bar-chart'],
+                        ['label' => 'Request Control Manage', 'url' => ['/request-control/manage/index'], 'icon' => 'bars']
                     ]
                 ],
                 ['label' => 'Global Model Logs', 'url' => ['/global-log/index'], 'icon' => 'list'],
