@@ -212,7 +212,14 @@ class LeadController extends FController
                     'ajax-create-from-phone-widget-with-invalid-client',
                     'ajax-link-to-call',
                     'extra-queue',
-                    'closed',
+                ],
+                'rules' => [
+                    /** @abac null, LeadAbacObject::OBJ_CLOSED_QUEUE, LeadAbacObject::ACTION_ACCESS, Access to page lead/closed */
+                    [
+                        'actions' => ['closed'],
+                        'allow' => \Yii::$app->abac->can(null, LeadAbacObject::OBJ_CLOSED_QUEUE, LeadAbacObject::ACTION_ACCESS),
+                        'roles' => ['@'],
+                    ],
                 ],
             ],
         ];
@@ -258,7 +265,8 @@ class LeadController extends FController
             throw new NotFoundHttpException('Not found lead ID: ' . $gid);
         }
 
-        if (!Auth::can('lead/view', ['lead' => $lead])) {
+        /** @abac $abacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_ACCESS, Access to view lead  */
+        if (!Yii::$app->abac->can(new LeadAbacDto($lead, Auth::id()), LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_ACCESS)) {
             throw new ForbiddenHttpException('Access Denied.');
         }
 
