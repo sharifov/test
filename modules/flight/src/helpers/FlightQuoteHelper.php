@@ -1283,6 +1283,22 @@ class FlightQuoteHelper
         }
     }
 
+
+    /**
+     * Returns the expiration date for a new quote (exchange, refund)
+     *
+     * @param FlightQuote $flightQuote
+     * @return string
+     */
+    public static function getExpirationDate(FlightQuote $flightQuote): string
+    {
+        $maxDate = self::getLastDepartureDate($flightQuote);
+        $maxDate = $maxDate->modify(sprintf('-%d hours', SettingHelper::getMinHoursDifferenceOffers()));
+        $date = (new DateTime())->modify(sprintf('+%d days', SettingHelper::getExpirationDaysOfNewOffers()));
+
+        return ($date > $maxDate) ? $maxDate->format('Y-m-d') : $date->format('Y-m-d');
+    }
+
     private static function isEqualLocation(string $prevArrivalAirport, string $departureAirport): bool
     {
         return $prevArrivalAirport === $departureAirport;
