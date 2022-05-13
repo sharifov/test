@@ -1,5 +1,6 @@
 <?php
 
+use common\models\QuoteSegment;
 use common\models\QuoteSegmentStop;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -28,6 +29,19 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'layout' => "{errors}\n{summary}\n{items}\n{pager}",
         'columns' => [
+            [
+                'attribute' => 'qss_segment_id',
+                'value' => static function (QuoteSegmentStop $model) {
+                    if ($model->qss_segment_id) {
+                        return Html::a($model->qss_segment_id, ['quote-segment-crud/view', 'qs_id' => $model->qss_segment_id], [
+                            'data-pjax' => 0,
+                            'target' => '_blank'
+                        ]);
+                    }
+                    return $model->qss_segment_id;
+                },
+                'format' => 'raw'
+            ],
             'qss_id',
             [
                 'label' => 'Location Code',
@@ -56,7 +70,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'urlCreator' => function ($action, QuoteSegmentStop $model, $key, $index, $column) {
                     return Url::toRoute([$action, 'qss_id' => $model->qss_id]);
                 },
-                'template' => '{view}',
             ],
         ],
     ]); ?>
