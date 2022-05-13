@@ -50,7 +50,6 @@ use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
-use yii\helpers\Json;
 
 /**
  * EmployeeController controller
@@ -1188,9 +1187,9 @@ class EmployeeController extends FController
                     try {
                         $targetUser->updateRoles($form->form_roles);
                         $userUpdated = true;
-                        $oldAttr = JSON::encode(["roles" => $targetUser->getRoles(true)]);
-                        $newAttr = JSON::encode(["roles" => $form->form_roles]);
-                        $targetUser->addLog($oldAttr, $newAttr);
+                        $oldAttr = ["roles" => $targetUser->getRoles(true)];
+                        $newAttr = ["roles" => $form->form_roles];
+                        $targetUser->addLog(\Yii::$app->id, Yii::$app->user->id, $oldAttr, $newAttr);
                     } catch (\Throwable $e) {
                         throw new UpdateUserException(
                             ['error' => $e->getMessage()],
@@ -1233,6 +1232,7 @@ class EmployeeController extends FController
                 }
 
                 if ($form->fieldAccess->canEdit('user_groups') && $form->isChangedGroups()) {
+                    $oldUserGroups = $targetUser->getUserGroupList();
                     UserGroupAssign::deleteAll(['ugs_user_id' => $targetUser->id]);
                     foreach ($form->user_groups as $groupId) {
                         $uga = new UserGroupAssign();
@@ -1247,10 +1247,16 @@ class EmployeeController extends FController
                             );
                         }
                     }
+
+                    $oldAttr = ["user_groups" => $oldUserGroups];
+                    $newAttr = ["user_groups" => $form->getUserGroups()];
+                    $targetUser->addLog(\Yii::$app->id, Yii::$app->user->id, $oldAttr, $newAttr);
+
                     $userUpdated = true;
                 }
 
                 if ($form->fieldAccess->canEdit('user_departments') && $form->isChangedDepartments()) {
+                    $oldUserDepartmens = $targetUser->getUserDepartmentList();
                     UserDepartment::deleteAll(['ud_user_id' => $targetUser->id]);
                     foreach ($form->user_departments as $departmentId) {
                         $ud = new UserDepartment();
@@ -1265,10 +1271,15 @@ class EmployeeController extends FController
                             );
                         }
                     }
+                    $oldAttr = ["user_departments" => $oldUserDepartmens];
+                    $newAttr = ["user_departments" => $form->getUserDepartmens()];
+                    $targetUser->addLog(\Yii::$app->id, Yii::$app->user->id, $oldAttr, $newAttr);
+
                     $userUpdated = true;
                 }
 
                 if ($form->fieldAccess->canEdit('user_projects') && $form->isChangedProjects()) {
+                    $oldUserProjects = $targetUser->getUserProjectList();
                     ProjectEmployeeAccess::deleteAll(['employee_id' => $targetUser->id]);
                     foreach ($form->user_projects as $projectId) {
                         $up = new ProjectEmployeeAccess();
@@ -1284,12 +1295,17 @@ class EmployeeController extends FController
                             );
                         }
                     }
+                    $oldAttr = ["user_projects" => $oldUserProjects];
+                    $newAttr = ["user_projects" => $form->getUserProjects()];
+                    $targetUser->addLog(\Yii::$app->id, Yii::$app->user->id, $oldAttr, $newAttr);
+
                     $userUpdated = true;
                 }
 
                 $userClientChatData = UserClientChatData::findOne(['uccd_employee_id' => $targetUser->id]);
 
                 if ($form->fieldAccess->canEdit('client_chat_user_channel') && $form->isChangedClientChatsChannels()) {
+                    $oldClientChatUserChannel = $targetUser->getClientChatUserChannelList();
                     ClientChatUserChannel::deleteAll(['ccuc_user_id' => $targetUser->id]);
                     if ($form->client_chat_user_channel) {
                         foreach ($form->client_chat_user_channel as $channelId) {
@@ -1307,6 +1323,10 @@ class EmployeeController extends FController
                                 );
                             }
                         }
+                        $oldAttr = ["client_chat_user_channel" => $oldClientChatUserChannel];
+                        $newAttr = ["client_chat_user_channel" => $form->getChangedClientChatsChannels()];
+                        $targetUser->addLog(\Yii::$app->id, Yii::$app->user->id, $oldAttr, $newAttr);
+
                         if ($userClientChatData && $userClientChatData->isRegisteredInRc()) {
                             $this->clientChatUserAccessService->setUserAccessToAllChatsByChannelIds($form->client_chat_user_channel, $targetUser->id);
                         } else {
@@ -1321,6 +1341,7 @@ class EmployeeController extends FController
                 }
 
                 if ($form->fieldAccess->canEdit('user_shift_assigns') && $form->isChangedUserShiftAssign()) {
+                    $oldUserShiftAssign = $targetUser->getUserShiftAssignList();
                     UserShiftAssign::deleteAll(['usa_user_id' => $targetUser->id]);
                     foreach ($form->user_shift_assigns as $shiftId) {
                         try {
@@ -1339,6 +1360,10 @@ class EmployeeController extends FController
                             );
                         }
                     }
+                    $oldAttr = ["user_shift_assigns" => $oldUserShiftAssign];
+                    $newAttr = ["user_shift_assigns" => $form->getChangedUserShiftAssign()];
+                    $targetUser->addLog(\Yii::$app->id, Yii::$app->user->id, $oldAttr, $newAttr);
+
                     $userUpdated = true;
                 }
 

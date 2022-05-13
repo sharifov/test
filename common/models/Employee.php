@@ -39,12 +39,14 @@ use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\VarDumper;
+use yii\helpers\Json;
 use yii\web\IdentityInterface;
 use yii\web\NotFoundHttpException;
 use src\logger\db\LogDTO;
 use common\models\GlobalLog;
 use src\logger\db\GlobalLogInterface;
 use src\services\log\GlobalEntityAttributeFormatServiceService;
+use modules\shiftSchedule\src\entities\shift\Shift;
 
 /**
  * This is the model class for table "employees".
@@ -98,6 +100,7 @@ use src\services\log\GlobalEntityAttributeFormatServiceService;
  * @property CouponSend[] $couponSend
  * @property LeadUserRating[] $leadUserRatings
  * @property UserShiftAssign[] $userShiftAssigns
+ * @property Shift[] $shifts
  *
  * @property string|bool|null $timezone
  * @property bool $isAllowCallExpert
@@ -541,6 +544,23 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     /**
      * @return ActiveQuery
      */
+    public function getClientChatChannel()
+    {
+        return $this->hasMany(ClientChatChannel::class, ['ccc_id' => 'ccuc_channel_id'])->viaTable('client_chat_user_channel', ['ccuc_user_id' => 'id']);
+    }
+
+    public function getClientChatUserChannelList(): array
+    {
+        if ($model = $this->clientChatChannel) {
+            return \yii\helpers\ArrayHelper::map($model, 'ccc_id', 'ccc_name');
+        }
+
+        return [];
+    }
+
+    /**
+     * @return ActiveQuery
+     */
     public function getUdDeps()
     {
         return $this->hasMany(Department::class, ['dep_id' => 'ud_dep_id'])->viaTable('user_department', ['ud_user_id' => 'id']);
@@ -834,9 +854,41 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     /**
      * @return ActiveQuery
      */
+    public function getShifts()
+    {
+        return $this->hasMany(Shift::class, ['sh_id' => 'usa_sh_id'])->viaTable('user_shift_assign', ['usa_user_id' => 'id']);
+    }
+
+    /**
+    * @return array
+    */
+    public function getUserShiftAssignList(): array
+    {
+        if ($model = $this->shifts) {
+            return \yii\helpers\ArrayHelper::map($model, 'sh_id', 'sh_name');
+        }
+
+        return [];
+    }
+
+    /**
+     * @return ActiveQuery
+     */
     public function getProjects()
     {
         return $this->hasMany(Project::class, ['id' => 'project_id'])->viaTable('project_employee_access', ['employee_id' => 'id']);
+    }
+
+    /**
+     * @return array
+     */
+    public function getUserProjectList(): array
+    {
+        if ($model = $this->projects) {
+            return \yii\helpers\ArrayHelper::map($model, 'id', 'name');
+        }
+
+        return [];
     }
 
     /**
@@ -1441,12 +1493,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public function getUserGroupList(): array
     {
-        $groups = [];
         if ($groupsModel = $this->ugsGroups) {
-            $groups = \yii\helpers\ArrayHelper::map($groupsModel, 'ug_id', 'ug_name');
+            return \yii\helpers\ArrayHelper::map($groupsModel, 'ug_id', 'ug_name');
         }
 
-        return $groups;
+        return [];
     }
 
     /**
@@ -1454,12 +1505,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public function getUserDepartmentList(): array
     {
-        $groups = [];
         if ($model = $this->udDeps) {
-            $groups = \yii\helpers\ArrayHelper::map($model, 'dep_id', 'dep_name');
+            return \yii\helpers\ArrayHelper::map($model, 'dep_id', 'dep_name');
         }
 
-        return $groups;
+        return [];
     }
 
 
@@ -2933,7 +2983,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $this->userRelations;
     }
 
-    public function addLog($oldAttr, $newAttr)
+    public function addLog($appId, $userId, $oldAttr, $newAttr)
     {
         $globalLogFormatAttrService = \Yii::createObject(GlobalEntityAttributeFormatServiceService::class);
 
@@ -2941,11 +2991,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             new LogDTO(
                 get_class($this),
                 $this->id,
-                \Yii::$app->id,
-                Yii::$app->user->id,
-                $oldAttr,
-                $newAttr,
-                $globalLogFormatAttrService->formatAttr(get_class($this), $oldAttr, $newAttr),
+                $appId,
+                $userId,
+                JSON::encode($oldAttr),
+                JSON::encode($newAttr),
+                $globalLogFormatAttrService->formatAttr(get_class($this), JSON::encode($oldAttr), JSON::encode($newAttr)),
                 GlobalLog::ACTION_TYPE_UPDATE
             )
         );
