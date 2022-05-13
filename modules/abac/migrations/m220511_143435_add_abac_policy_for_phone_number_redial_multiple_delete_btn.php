@@ -15,21 +15,13 @@ class m220511_143435_add_abac_policy_for_phone_number_redial_multiple_delete_btn
     public function safeUp()
     {
         try {
-            $this->delete('{{%abac_policy}}', [
-                'IN',
-                'ap_object',
-                [
-                    'phoneNumberRedial/phoneNumberRedial/obj/phone-number-redial',
-                ]
-            ]);
-
             $this->insert('{{%abac_policy}}', [
                 'ap_rule_type'    => 'p',
                 'ap_subject'      => '("admin" in r.sub.env.user.roles)',
-                'ap_subject_json' => '"{\"condition\":\"AND\",\"rules\":[{\"id\":\"env_user_roles\",\"field\":\"env.user.roles\",\"type\":\"string\",\"input\":\"select\",\"operator\":\"in_array\",\"value\":\"admin\"}],\"valid\":true}"',
-                'ap_object'       => 'phoneNumberRedial/phoneNumberRedial/obj/phone-number-redial',
+                'ap_subject_json' => '{"condition":"AND","rules":[{"id":"env_user_roles","field":"env.user.roles","type":"string","input":"select","operator":"in_array","value":"admin"}],"valid":true}',
+                'ap_object'       => 'phone-number-redial/phone-number-redial/obj/phone-number-redial',
                 'ap_action'       => '(multiple-delete)',
-                'ap_action_json'  => "[\"multiple-delete\"]",
+                'ap_action_json'  => json_encode(['multiple-delete']),
                 'ap_effect'       => 1,
                 'ap_title'        => 'Phone number redial access multiple delete',
                 'ap_sort_order'   => 50,
