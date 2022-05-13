@@ -149,7 +149,7 @@ class ReProtectionQuoteManualCreateService
         }
 
         $originFlightQuote = $originProductQuote->flightQuote;
-        $productQuote = $this->copyOriginalProductQuote($originProductQuote, $form->quoteCreator, $form->quoteCreator);
+        $productQuote = $this->copyOriginalProductQuote($originProductQuote, $form);
 
         $quoteData = self::prepareFlightQuoteData($form);
         $flightQuoteCreateDTO = FlightQuoteCreateDTO::fillChangeQuoteManual($flight, $productQuote, $quoteData, Auth::id(), $form);
@@ -307,9 +307,10 @@ class ReProtectionQuoteManualCreateService
         return (int) sprintf('%d%d%d', $diff->y, $diff->m, $diff->d) >= 1;
     }
 
-    private function copyOriginalProductQuote(ProductQuote $originalQuote, ?int $ownerId, ?int $creatorId): ProductQuote
+    private function copyOriginalProductQuote(ProductQuote $originalQuote, ChangeQuoteCreateForm $form): ProductQuote
     {
-        $productQuote = ProductQuote::copy($originalQuote, $ownerId, $creatorId);
+        $productQuote = ProductQuote::copy($originalQuote, $form->quoteCreator, $form->quoteCreator);
+        $productQuote->pq_expiration_dt = $form->expirationDate;
         $this->productQuoteRepository->save($productQuote);
 
         foreach ($originalQuote->productQuoteOptions as $originalProductQuoteOption) {
