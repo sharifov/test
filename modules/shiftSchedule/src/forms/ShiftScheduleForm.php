@@ -67,6 +67,7 @@ class ShiftScheduleForm extends Model
 
             ['ssr_start_time_loc', 'required'],
             [['ssr_start_time_loc', 'ssr_end_time_loc'], 'safe'],
+            ['ssr_end_time_loc','validateLocalTimes'],
 
             ['ssr_start_time_utc', 'required'],
             [['ssr_start_time_utc', 'ssr_end_time_utc'], 'safe'],
@@ -115,13 +116,20 @@ class ShiftScheduleForm extends Model
         return true;
     }
 
+    public function validateLocalTimes()
+    {
+        if (strtotime($this->ssr_end_time_loc) <= strtotime($this->ssr_start_time_loc)) {
+            $this->addError('ssr_start_time_loc', 'Please give correct Start and End time');
+            $this->addError('ssr_end_time_loc', 'Please give correct Start and End time');
+        }
+    }
+
     /**
      * @return void
      */
     public function setTimeComplete(): void
     {
-        $this->ssr_end_time_loc = date('H:i', strtotime($this->ssr_start_time_loc) +
-            ($this->ssr_duration_time * 60));
+        $this->ssr_duration_time = (strtotime($this->ssr_end_time_loc) - strtotime($this->ssr_start_time_loc)) / 60;
 
         if ($this->ssr_timezone) {
             $this->ssr_start_time_utc = Employee::convertToUTC(

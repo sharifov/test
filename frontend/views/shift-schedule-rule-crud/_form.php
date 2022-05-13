@@ -60,31 +60,14 @@ use yii\widgets\ActiveForm;
             ])->label('Start Time (Local)') ?>
             </div>
             <div class="col-md-6">
-<?php
-$inputHtml = <<<HTML
-{label}
-<div class="input-group">
-{input}
-<span class="input-group-addon">
-    <span id="durationTimeHours">{$model->getDurationTimeHours()}</span> Hours
-</span>
-</div>
-{error}
-{hint}
-HTML;
-?>
-            <?php /*= $form->field($model, 'ssr_end_time_loc')->widget(TimePicker::class, [
+            <?= $form->field($model, 'ssr_end_time_loc')->widget(TimePicker::class, [
                 'pluginOptions' => [
-                    'showSeconds' => true,
+                    'showSeconds' => false,
                     'showMeridian' => false,
                     'minuteStep' => 1,
                     'secondStep' => 5,
                 ]
-            ])->label('End Time (Local)');*/ ?>
-                <?= $form->field($model, 'ssr_duration_time', [
-                  'template' => $inputHtml
-            ])->input('number', ['maxlength' => true, 'min' => 1, 'id' => 'durationTimeMinutes'])
-                ->label('Duration Time (minutes)')?>
+            ])->label('End Time (Local)'); ?>
             </div>
         </div>
 
