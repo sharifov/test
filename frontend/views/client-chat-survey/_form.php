@@ -28,6 +28,8 @@ use common\models\ClientChatSurvey;
 
           <?= $form->field($model, 'ccs_requested_for')->textInput() ?>
 
+          <?= $form->field($model, 'ccs_rc_created_dt')->textInput() ?>
+
           <?= $form->field($model, 'ccs_status')->dropDownList(ClientChatSurvey::STATUS_LIST) ?>
 
           <div class="form-group">
