@@ -2,6 +2,7 @@
 
 namespace webapi\modules\v1\controllers;
 
+use common\components\jobs\AutoAddQuoteJob;
 use common\components\jobs\WebEngageLeadRequestJob;
 use common\components\purifier\Purifier;
 use common\models\Client;
@@ -14,6 +15,7 @@ use common\models\Notifications;
 use common\models\Sources;
 use common\models\VisitorLog;
 use frontend\widgets\notification\NotificationMessage;
+use modules\featureFlag\FFlag;
 use modules\flight\models\FlightQuoteSegment;
 use modules\flight\models\FlightSegment;
 use modules\product\src\useCases\product\api\create\flight\Handler;
@@ -29,6 +31,7 @@ use src\services\lead\calculator\LeadTripTypeCalculator;
 use src\services\lead\calculator\SegmentDTO;
 use src\services\lead\LeadCreateApiService;
 use src\services\lead\LeadHashGenerator;
+use src\services\quote\addQuote\AddQuoteService;
 use src\services\TransactionManager;
 use webapi\models\ApiLead;
 use webapi\models\ApiLeadCallExpert;
@@ -47,6 +50,7 @@ class LeadController extends ApiBaseController
     private $transactionManager;
     private $leadCreateApiService;
     private $createProductFlightHandler;
+    private AddQuoteService $autoQuoteService;
 
     public function __construct(
         $id,
@@ -55,6 +59,7 @@ class LeadController extends ApiBaseController
         LeadRepository $leadRepository,
         TransactionManager $transactionManager,
         LeadCreateApiService $leadCreateApiService,
+        AddQuoteService $autoQuoteService,
         Handler $createProductFlightHandler,
         $config = []
     ) {
@@ -64,6 +69,7 @@ class LeadController extends ApiBaseController
         $this->transactionManager = $transactionManager;
         $this->leadCreateApiService = $leadCreateApiService;
         $this->createProductFlightHandler = $createProductFlightHandler;
+        $this->autoQuoteService = $autoQuoteService;
     }
 
     /**
@@ -522,6 +528,8 @@ class LeadController extends ApiBaseController
                 ...$segments
             );
         }
+
+        $this->autoQuoteService->addAutoQuotesByJob($lead);
 
         $leadDataInserted = [];
         if (!empty($modelLead->lead_data)) {

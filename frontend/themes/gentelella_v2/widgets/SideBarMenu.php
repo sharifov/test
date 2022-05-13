@@ -459,6 +459,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Quote Segment', 'url' => ['/quote-segment-crud/index'], 'icon' => 'list'],
                         ['label' => 'Quote Segment Baggages', 'url' => ['/quote-segment-baggage-crud/index'], 'icon' => 'list'],
                         ['label' => 'Quote Segment Baggage Charges', 'url' => ['/quote-segment-baggage-charge-crud/index'], 'icon' => 'list'],
+                        ['label' => 'Quote Segment Stop CRUD', 'url' => ['/quote-segment-stop-crud/index'], 'icon' => 'list'],
                     ],
                 ],
 
@@ -942,8 +943,8 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 'url' => 'javascript:',
                 'icon' => 'cogs',
                 'items' => [
-                    ['label' => 'Object Segment List', 'url' => ['/object-segment/object-segment-list']],
-                    ['label' => 'Object Segment Rules', 'url' => ['/object-segment/object-segment-rule']],
+                    ['label' => 'Object Segment List', 'url' => ['/object-segment/object-segment-list/index']],
+                    ['label' => 'Object Segment Rules', 'url' => ['/object-segment/object-segment-rule/index']],
                 ],
             ];
         }
