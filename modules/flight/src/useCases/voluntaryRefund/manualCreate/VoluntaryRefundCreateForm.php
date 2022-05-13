@@ -2,12 +2,15 @@
 
 namespace modules\flight\src\useCases\voluntaryRefund\manualCreate;
 
+use common\components\validators\NormalizeDateValidator;
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
 use src\entities\cases\Cases;
 use src\helpers\ErrorsToStringHelper;
+use src\helpers\setting\SettingHelper;
 use yii\base\Model;
 use common\components\validators\CheckIsBooleanValidator;
+use DateTime;
 
 /**
  * Class VoluntaryRefundCreateForm
@@ -34,11 +37,12 @@ class VoluntaryRefundCreateForm extends Model
     private ?VoluntaryRefundForm $refundForm = null;
 
     public array $originData = [];
+    public ?string $expirationDate = null;
 
     public function rules(): array
     {
         return [
-            [['bookingId'], 'required'],
+            [['bookingId', 'expirationDate'], 'required'],
             [['bookingId'], 'string', 'max' => 50],
 
 //            [['allow', 'airlineAllow', 'automatic'], 'filter', 'filter' => 'floatval', 'skipOnEmpty' => true],
@@ -50,6 +54,8 @@ class VoluntaryRefundCreateForm extends Model
 
             [['originProductQuoteId', 'orderId', 'caseId'], 'integer'],
             [['caseId'], 'exist', 'targetClass' => Cases::class, 'targetAttribute' => ['caseId' => 'cs_id'], 'skipOnError' => true],
+            ['expirationDate', NormalizeDateValidator::class],
+            ['expirationDate', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
         ];
     }
 
@@ -84,5 +90,17 @@ class VoluntaryRefundCreateForm extends Model
     {
         $this->refundDataReadOnly = false;
         $this->ticketDataReadOnly = false;
+    }
+
+    /**
+     * @param DateTime $date
+     * @return void
+     */
+    public function setExpirationDate(DateTime $date): void
+    {
+        $maxDate = $date->modify(sprintf('-%d hours', SettingHelper::getMinHoursDifferenceOffers()));
+        $date = (new DateTime())->modify(sprintf('+%d days', SettingHelper::getExpirationDaysOfNewOffers()));
+
+        $this->expirationDate = $date > $maxDate ? $maxDate->format('Y-m-d') : $date->format('Y-m-d');
     }
 }
