@@ -1265,6 +1265,24 @@ class FlightQuoteHelper
         return false;
     }
 
+    /**
+     * @param FlightQuote $flightQuote
+     * @return DateTime
+     */
+    public static function getLastDepartureDate(FlightQuote $flightQuote): DateTime
+    {
+        try {
+            $flightQuoteSegments = $flightQuote->flightQuoteSegments;
+            return new DateTime(end($flightQuoteSegments)->fqs_departure_dt);
+        } catch (\Throwable $throwable) {
+            Yii::error(
+                AppHelper::throwableFormatter($throwable),
+                'FlightQuoteHelper:getLastFlightDate:failed'
+            );
+            return new DateTime();
+        }
+    }
+
     private static function isEqualLocation(string $prevArrivalAirport, string $departureAirport): bool
     {
         return $prevArrivalAirport === $departureAirport;
