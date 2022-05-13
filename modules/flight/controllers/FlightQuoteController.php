@@ -1010,6 +1010,7 @@ class FlightQuoteController extends FController
             $form = new VoluntaryQuoteCreateForm(Auth::id(), $flight, true, $voluntaryExchangeBOService->getServiceFeeAmount());
             $form->setCustomerPackage($voluntaryExchangeBOService->getCustomerPackage());
             $form->setServiceFeeCurrency($voluntaryExchangeBOService->getServiceFeeCurrency());
+            $form->setExpirationDate(FlightQuoteHelper::getLastDepartureDate($originProductQuote->flightQuote));
         } catch (\RuntimeException | \DomainException $exception) {
             $message = ArrayHelper::merge(AppHelper::throwableLog($exception), $getParams);
             Yii::warning($message, 'FlightQuoteController:actionCreateVoluntaryQuote:Exception');
@@ -1183,6 +1184,7 @@ class FlightQuoteController extends FController
             }
 
             $form = new ReProtectionQuoteCreateForm(Auth::id(), $flightId);
+            $form->setExpirationDate(FlightQuoteHelper::getLastDepartureDate($originProductQuote->flightQuote));
         } catch (\Throwable $throwable) {
             Yii::warning(AppHelper::throwableLog($throwable), 'FlightQuoteController:actionCreateReProtectionQuote:Throwable');
             return $throwable->getMessage();
@@ -1463,7 +1465,7 @@ class FlightQuoteController extends FController
 
             $message = '';
             $errors = [];
-            $form = new VoluntaryRefundCreateForm();
+
             try {
                 if (!$project = Project::findOne(['id' => $projectId])) {
                     throw new NotFoundException('Project not found');
@@ -1472,6 +1474,16 @@ class FlightQuoteController extends FController
                 if (!$flightQuoteFlight = FlightQuoteFlight::findOne(['fqf_fq_id' => $flightQuoteId])) {
                     throw new NotFoundException('BookingId not found');
                 }
+
+                if (!$originProductQuote = ProductQuote::findOne(['pq_id' => $originProductQuoteId])) {
+                    throw new \RuntimeException('OriginProductQuote not found');
+                }
+                if (!$originProductQuote->flightQuote) {
+                    throw new \RuntimeException('Sorry, Refund quote could not be created because originalQuote does not find a flight');
+                }
+
+                $form = new VoluntaryRefundCreateForm();
+                $form->setExpirationDate(FlightQuoteHelper::getLastDepartureDate($originProductQuote->flightQuote));
 
                 $boDataRequest = BoRequestDataHelper::getRequestDataForVoluntaryRefundData($project->api_key, $flightQuoteFlight->fqf_booking_id);
                 $result = BackOffice::voluntaryRefund($boDataRequest, 'flight-request/get-refund-data');
