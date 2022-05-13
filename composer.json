@@ -113,7 +113,7 @@
         "ext-fileinfo": "*",
         "ext-pgsql": "*",
 		"kivork/yii2-feature-flag": "@dev",
-		"kivork/yii2-search-module": "1.04.*"
+		"kivork/yii2-search-module": "1.07.*"
 	},
 	"require-dev" : {
 		"yiisoft/yii2-debug" : "~2.1",

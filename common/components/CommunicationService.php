@@ -919,9 +919,15 @@ class CommunicationService extends Component implements CommunicationServiceInte
         $callRecordingDisabled,
         $phoneListId,
         $toNumber,
-        $friendlyName
+        $friendlyName,
+        $project,
+        $source,
+        $type
     ): array {
         $data = [
+            'project' => $project,
+            'source' => $source,
+            'type' => $type,
             'call_id' => $id,
             'call_sid' => $sid,
             'to' => $to,
@@ -951,9 +957,15 @@ class CommunicationService extends Component implements CommunicationServiceInte
         $friendlyName,
         $dep_id,
         $oldCallOwnerId,
-        $callGroupId
+        $callGroupId,
+        $project,
+        $source,
+        $type
     ): array {
         $data = [
+            'project' => $project,
+            'source' => $source,
+            'type' => $type,
             'call_id' => $id,
             'call_sid' => $sid,
             'to' => $to,
@@ -1044,9 +1056,15 @@ class CommunicationService extends Component implements CommunicationServiceInte
         bool $callRecordingDisabled,
         ?int $phoneListId,
         ?string $toNumber,
-        ?string $from
+        ?string $from,
+        $project,
+        $source,
+        $type
     ): array {
         $data = [
+            'project' => $project,
+            'source' => $source,
+            'type' => $type,
             'callSid' => $callSid,
             'parentCallSid' => $parentCallSid,
             'friendlyName' => $friendlyName,
@@ -1110,9 +1128,15 @@ class CommunicationService extends Component implements CommunicationServiceInte
         int $user_id,
         bool $callRecordingDisabled,
         ?int $phoneListId,
-        ?string $toNumber
+        ?string $toNumber,
+        $project,
+        $source,
+        $type
     ): array {
         $data = [
+            'project' => $project,
+            'source' => $source,
+            'type' => $type,
             'callSid' => $callSid,
             'conferenceSid' => $conferenceSid,
             'projectId' => $projectId,

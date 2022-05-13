@@ -73,6 +73,7 @@ use frontend\widgets\notification\NotificationWidget;
 use kartik\mpdf\Pdf;
 use modules\attraction\models\AttractionQuote;
 use modules\attraction\src\services\AttractionQuotePdfService;
+use modules\cases\src\abac\saleList\SaleListAbacObject;
 use modules\email\src\helpers\MailHelper;
 use modules\email\src\Notifier;
 use modules\eventManager\src\EventApp;
@@ -2731,5 +2732,11 @@ class TestController extends FController
     {
         echo 'Blameable ' . Auth::employeeId();
         die;
+    }
+
+    public function actionTestAbac()
+    {
+        VarDumper::dump(Yii::$app->abac->can(null, SaleListAbacObject::UI_BLOCK_SALE_LIST, SaleListAbacObject::ACTION_READ));
+        VarDumper::dump(Yii::$app->abac->can(null, SaleListAbacObject::UI_SALE_ID, SaleListAbacObject::ACTION_READ));
     }
 }

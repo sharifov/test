@@ -9,6 +9,7 @@ use common\models\search\EmployeeSearch;
 use frontend\models\UserFailedLogin;
 use modules\product\src\entities\productType\ProductType;
 use src\access\EmployeeGroupAccess;
+use src\helpers\app\AppHelper;
 use src\helpers\setting\SettingHelper;
 use src\model\clientChatChannel\entity\ClientChatChannel;
 use src\model\clientChatUserAccess\entity\ClientChatUserAccess;
@@ -23,6 +24,7 @@ use src\model\user\entity\AccessCache;
 use src\model\user\entity\ShiftTime;
 use src\model\user\entity\StartTime;
 use src\model\user\entity\UserCache;
+use src\model\user\entity\UserRelations;
 use src\model\user\entity\userStatus\UserStatus;
 use src\model\userClientChatData\entity\UserClientChatData;
 use src\model\userData\entity\UserData;
@@ -103,6 +105,8 @@ use yii\web\NotFoundHttpException;
  * @property Access|null $access
  *
  * @property ActiveQuery $productType
+ *
+ * @property UserRelations|null $userRelations
  */
 class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 {
@@ -176,6 +180,8 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
     private $access;
     private $permissionList = [];
+
+    private ?UserRelations $userRelations = null;
 
     public function loadCache(UserCache $cache): void
     {
@@ -407,6 +413,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             [['password'], 'required', 'on' => self::SCENARIO_REGISTER],
             [['email', 'password', 'username', 'full_name', 'nickname'], 'trim'],
             [['password'], 'string', 'min' => 8],
+            [['status'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
             [['status'], 'integer'],
             [['password_hash', 'password_reset_token', 'email'], 'string', 'max' => 255],
             [['username', 'full_name', 'nickname'], 'string', 'min' => 3, 'max' => 50],
@@ -420,11 +427,13 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             [['password_reset_token'], 'unique'],
             [
                 [
-                    'created_at', 'updated_at', 'last_activity', 'acl_rules_activated', 'user_groups',
+                    'created_at', 'updated_at', 'last_activity', 'user_groups',
                     'user_projects', 'deleted', 'user_departments', 'client_chat_user_channel', 'user_shift_assigns',
                 ],
                 'safe',
             ],
+
+            ['acl_rules_activated', 'boolean'],
         ];
     }
 
@@ -937,9 +946,10 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
     /**
+     * @param Employee $user
      * @return array
      */
-    public static function getAllRoles(): array
+    public static function getAllRoles(Employee $user): array
     {
         $auth = \Yii::$app->authManager;
 
@@ -950,8 +960,6 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
         $result = $auth->getRoles();
         $roles = ArrayHelper::map($result, 'name', 'description');
-        /** @var Employee $user */
-        $user = Yii::$app->user->identity;
 
         if ($user->isUserManager()) {
             if (isset($roles[self::ROLE_ADMIN])) {
@@ -1117,6 +1125,18 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         }
     }
 
+    public function updateRoles(array $roles): void
+    {
+        $auth = \Yii::$app->authManager;
+
+        $auth->revokeAll($this->id);
+
+        foreach ($roles as $role) {
+            $authorRole = $auth->getRole($role);
+            $auth->assign($authorRole, $this->id);
+        }
+    }
+
     /**
      * Generates password hash from password and sets it to the model
      *
@@ -1207,13 +1227,13 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         Yii::$app->db->createCommand()->delete(ClientChatUserChannel::tableName(), 'ccuc_user_id = :ccuc_user_id', [':ccuc_user_id' => $this->id])->execute();
     }
 
-    public function addClientChatChanels(array $chanels, ?int $createdUserId = null)
+    public function addClientChatChanels(array $channels, ?int $createdUserId = null)
     {
         $data = [];
-        foreach ($chanels as $chanel) {
+        foreach ($channels as $channel) {
             $data[] = [
                 'ccuc_user_id' => $this->id,
-                'ccuc_channel_id' => (int)$chanel,
+                'ccuc_channel_id' => (int)$channel,
                 'ccuc_created_dt' => date('Y-m-d H:i:s'),
                 'ccuc_created_user_id' => $createdUserId,
             ];
@@ -1401,6 +1421,16 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $this->hasMany(UserGroup::class, ['ug_id' => 'ugs_group_id'])
             ->viaTable('user_group_assign', ['ugs_user_id' => 'id'])
             ->orderBy(['ug_name' => SORT_ASC]);
+    }
+
+    public function isUserGroupIntersection(array $groups): bool
+    {
+        foreach ($this->getUserGroupList() as $groupId => $groupName) {
+            if (in_array($groupId, $groups, true)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -2573,16 +2603,16 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      * @param int $time
      * @return string
      */
-    public static function convertTimeFromUserDtToUTC(int $time): string
+    public static function convertTimeFromUserDtToUTC(int $time, ?Employee $employee = null): string
     {
         $dateTime = '';
 
         if ($time >= 0) {
-
-            /** @var Employee $user */
-            $user = \Yii::$app->user->identity;
+            $user = $employee ?: \Yii::$app->user->identity ?? null;
+            if (!$user) {
+                throw new \RuntimeException('User is empty in method convertTimeFromUserDtToUTC');
+            }
             $timezone = $user->timezone;
-
             $dateTime = date('Y-m-d H:i:s', $time);
 
             try {
@@ -2889,5 +2919,14 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         }
         $sort = SettingHelper::getCallDistributionSort();
         return $sort;
+    }
+
+    public function getRelations(): UserRelations
+    {
+        if ($this->userRelations !== null) {
+            return $this->userRelations;
+        }
+        $this->userRelations = new UserRelations($this);
+        return $this->userRelations;
     }
 }

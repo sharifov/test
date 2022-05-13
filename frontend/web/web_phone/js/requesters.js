@@ -472,7 +472,7 @@
                             window.phoneWidget.notifier.notifiers.phone.reset();
                             PhoneWidget.panes.queue.hide();
                             PhoneWidget.openCallTab();
-                            PhoneWidget.showCallingPanel();
+                            // PhoneWidget.showCallingPanel();
                         }
                     } else {
                         PhoneWidget.audio.incoming.on(key);

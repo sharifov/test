@@ -17,6 +17,8 @@ use Yii;
  */
 class QuoteTrip extends \yii\db\ActiveRecord
 {
+    const SCENARIO_CRUD = 'crud';
+
     public $stops = 0;
 
     /**
@@ -68,6 +70,7 @@ class QuoteTrip extends \yii\db\ActiveRecord
     {
         return [
             [['qt_quote_id'], 'integer'],
+            [['qt_quote_id', 'qt_duration', 'qt_key'], 'required', 'on' => [self::SCENARIO_CRUD]],
             [['qt_key'], 'string', 'max' => 255],
             [['qt_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => Quote::class, 'targetAttribute' => ['qt_quote_id' => 'id']],
             ['qt_duration', 'integer', 'min' => 0, 'message' => 'Can not add Quote with negative segment duration'],
@@ -81,10 +84,10 @@ class QuoteTrip extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'qt_id' => 'Qt ID',
-            'qt_duration' => 'Qt Duration',
-            'qt_key' => 'Qt Key',
-            'qt_quote_id' => 'Qt Quote ID',
+            'qt_id' => 'ID',
+            'qt_duration' => 'Duration (Min)',
+            'qt_key' => 'Key',
+            'qt_quote_id' => 'Quote ID',
         ];
     }
 

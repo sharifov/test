@@ -55,6 +55,7 @@ abstract class BaseApplication extends yii\base\Application
  * @property \kivork\PrometheusClient\components\PrometheusClient $prometheus Prometheus client component
  * @property \sorokinmedia\centrifugo\Client $centrifugo Centrifugo client component
  * @property \modules\abac\components\AbacComponent $abac ABAC component
+ * @property \modules\objectSegment\components\ObjectSegmentComponent $objectSegment Object Segment component
  * @property \common\components\SnowplowService $snowplow Snowplow component
  * @property \common\components\antispam\CallAntiSpamService $callAntiSpam CallAntiSpamService component
  * @property \yii\i18n\Formatter $formatter_search Search Formatter component w/o timezone

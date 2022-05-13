@@ -17,7 +17,7 @@ class ShiftScheduleTypeSearch extends ShiftScheduleType
     public function rules()
     {
         return [
-            [['sst_id', 'sst_enabled', 'sst_readonly', 'sst_work_time', 'sst_sort_order', 'sst_updated_user_id'], 'integer'],
+            [['sst_id', 'sst_enabled', 'sst_readonly', 'sst_subtype_id', 'sst_sort_order', 'sst_updated_user_id'], 'integer'],
             [['sst_key', 'sst_name', 'sst_title', 'sst_color', 'sst_icon_class', 'sst_css_class', 'sst_params_json', 'sst_updated_dt'], 'safe'],
         ];
     }
@@ -61,7 +61,7 @@ class ShiftScheduleTypeSearch extends ShiftScheduleType
             'sst_id' => $this->sst_id,
             'sst_enabled' => $this->sst_enabled,
             'sst_readonly' => $this->sst_readonly,
-            'sst_work_time' => $this->sst_work_time,
+            'sst_subtype_id' => $this->sst_subtype_id,
             'sst_sort_order' => $this->sst_sort_order,
             'sst_updated_dt' => $this->sst_updated_dt,
             'sst_updated_user_id' => $this->sst_updated_user_id,

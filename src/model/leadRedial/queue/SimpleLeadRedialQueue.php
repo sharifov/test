@@ -106,9 +106,13 @@ class SimpleLeadRedialQueue implements LeadRedialQueue
                 $agentPhoneId,
                 $clientPhone,
                 $lead->project_id,
+                $lead->project->name,
                 $lead->l_dep_id,
+                $lead->l_dep_id ? $lead->lDep->dep_name : '',
                 $lead->id,
-                $lead->client_id
+                $lead->client_id,
+                $lead->client_id ? $lead->client->getShortName() : 'ClientName',
+                $lead->client_id && $lead->client->isClient(),
             );
         }
 

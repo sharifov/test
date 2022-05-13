@@ -51,6 +51,7 @@ use yii\db\ActiveRecord;
 class QuoteSegment extends \yii\db\ActiveRecord
 {
     public const SCENARIO_MANUALLY = 'manually';
+    public const SCENARIO_CRUD = 'crud';
 
     public const CABIN_ECONOMY              = 'Y';
     public const CABIN_PREMIUM_ECONOMY      = 'S';
@@ -96,6 +97,7 @@ class QuoteSegment extends \yii\db\ActiveRecord
     {
         return [
             [['qs_departure_time', 'qs_arrival_time', 'qs_created_dt', 'qs_updated_dt'], 'safe'],
+            [['qs_departure_time', 'qs_arrival_time', 'qs_trip_id', 'qs_departure_airport_code', 'qs_arrival_airport_code', 'qs_duration'], 'required', 'on' => [self::SCENARIO_CRUD]],
             [['qs_stop', 'qs_duration', 'qs_mileage', 'qs_trip_id', 'qs_updated_user_id', 'qs_ticket_id', 'qs_cabin_basic'], 'integer'],
             [['qs_flight_number', 'qs_departure_airport_terminal', 'qs_arrival_airport_terminal'], 'string', 'max' => 5],
             [['qs_booking_class', 'qs_cabin'], 'string', 'max' => 1],
@@ -108,9 +110,7 @@ class QuoteSegment extends \yii\db\ActiveRecord
             [['qs_trip_id'], 'exist', 'skipOnError' => true, 'targetClass' => QuoteTrip::class, 'targetAttribute' => ['qs_trip_id' => 'qt_id']],
             [['qs_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['qs_updated_user_id' => 'id']],
             [['qs_recheck_baggage'], 'boolean'],
-
-            [['qs_duration'], 'integer', 'min' => 0, 'on' => [self::SCENARIO_MANUALLY]],
-
+            [['qs_duration'], 'integer', 'min' => 0, 'on' => [self::SCENARIO_MANUALLY, self::SCENARIO_CRUD]],
             [['qs_arrival_airport_code'],
                 'exist', 'skipOnError' => true, 'targetClass' => Airports::class,
                 'targetAttribute' => ['qs_arrival_airport_code' => 'iata'],
@@ -151,7 +151,8 @@ class QuoteSegment extends \yii\db\ActiveRecord
             'qs_created_dt' => 'Created Dt',
             'qs_updated_dt' => 'Updated Dt',
             'qs_updated_user_id' => 'Updated User ID',
-            'qs_ticket_id'  => 'Ticket Id'
+            'qs_ticket_id' => 'Ticket Id',
+             'qs_recheck_baggage' => 'Recheck Baggage'
         ];
     }
 
@@ -347,5 +348,12 @@ class QuoteSegment extends \yii\db\ActiveRecord
             ($segment->qs_stop > 0 ? '(' . $segment->qs_stop . ')' : '') .
             $segment->qs_departure_airport_code . '-' . $segment->qs_arrival_airport_code . ' ' . $segment->qs_departure_time;
         return $segment;
+    }
+
+    public function generateKey()
+    {
+        $this->qs_key = '#' . $this->qs_flight_number .
+            ($this->qs_stop > 0 ? '(' . $this->qs_stop . ')' : '') .
+            $this->qs_departure_airport_code . '-' . $this->qs_arrival_airport_code . ' ' . $this->qs_departure_time;
     }
 }

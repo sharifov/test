@@ -4,43 +4,43 @@
 - name: Setup application server
   hosts: app
   gather_facts: false
-  remote_user: "{{ ssh_user }}"
+  remote_user: ubuntu
 
   roles:
     - role: common
       tags: common
-      become: yes
+      become: true
 
-    - role: bash-scripts
-      tags: bash-scritps
-      become: yes
+    - role: bash_scripts
+      tags: bash-scripts
+      become: true
 
     - role: nginx
       tags: nginx
-      become: yes
+      become: true
 
     - role: phpfpm
       tags: php-fpm
-      become: yes
+      become: true
 
     - role: supervisor
       tags: supervisor
-      become: yes
+      become: true
 
     - role: filebeat
       tags: filebeat
       vars:
-        nginx: yes
-      become: yes
+        nginx: true
+      become: true
 
     - role: node_exporter
       tags: node-exporter
-      become: yes
+      become: true
 
     - role: phpfpm_exporter
       tags: phpfpm-exporter
-      become: yes
+      become: true
 
     - role: beat_exporter
       tags: beat-exporter
-      become: yes
+      become: true

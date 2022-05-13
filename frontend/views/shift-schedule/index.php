@@ -4,10 +4,12 @@ use common\components\grid\DateTimeColumn;
 use common\models\Employee;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
+use modules\shiftSchedule\src\entities\shiftScheduleTypeLabel\ShiftScheduleTypeLabel;
 use modules\shiftSchedule\src\entities\userShiftAssign\UserShiftAssign;
 use modules\shiftSchedule\src\entities\userShiftSchedule\search\SearchUserShiftSchedule;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use src\helpers\setting\SettingHelper;
+use yii\bootstrap4\Tabs;
 use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
@@ -16,7 +18,12 @@ use yii\widgets\Pjax;
 
 /* @var $monthList array */
 /* @var $scheduleTypeList ShiftScheduleType[] */
+/* @var $scheduleTypeLabelList ShiftScheduleTypeLabel[] */
+
 /* @var $scheduleSumData array */
+/* @var $scheduleLabelSumData array */
+
+/* @var $subtypeList array */
 /* @var $userTimeZone string */
 /* @var $user Employee */
 /* @var $searchModel SearchUserShiftSchedule */
@@ -28,6 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 $bundle = \frontend\assets\FullCalendarAsset::register($this);
 $scheduleTotalData = [];
+$subtypeTotalData = [];
 ?>
 <div class="shift-schedule-index">
 
@@ -45,20 +53,25 @@ $scheduleTotalData = [];
             ) ?>
             <?= Html::a(
                 '<i class="fa fa-play-circle"></i> Generate User Schedule (' .
-                (empty(SettingHelper::getShiftSchedule()['days_limit']) ? '-' :
-                    SettingHelper::getShiftSchedule()['days_limit'] . ' days') . ')',
+                SettingHelper::getShiftScheduleDaysLimit() . ' days' . ')',
                 ['generate-user-schedule'],
-                ['class' => 'btn btn-success']
+                ['class' => 'btn btn-success'],
             ) ?>
 
-            <?= Html::a('<i class="fa fa-remove"></i> Remove User Data', ['remove-user-data'], [
+            <?= Html::a('<i class="fa fa-remove"></i> Remove All User Schedule Data', ['remove-user-data'], [
             'class' => 'btn btn-danger',
             'data' => [
             'confirm' => 'Are you sure you want to delete all User Timelines?',
             'method' => 'post',
             ],
-    ]) ?>
+            ]) ?>
         <?php endif; ?>
+        <?= Html::a(
+            '<i class="fa fa-info-circle"></i> Legend',
+            ['legend-ajax'],
+            ['class' => 'btn btn-info', 'id' => 'btn-legend']
+        ) ?>
+
     </p>
 
     <div class="row">
@@ -129,8 +142,7 @@ $scheduleTotalData = [];
                             }?>
                             <tr>
                                 <th title="<?= Html::encode($assignShift->shift->sh_title)?>">
-                                    <i class="fa fa-circle" <?= $assignShift->shift->sh_color ? 'style="color: ' .
-                                        Html::encode($assignShift->shift->sh_color) . '"' : ''?>></i> &nbsp;
+                                    <?= $assignShift->shift->getColorLabel(); ?>&nbsp; &nbsp;
                                     <?= Html::encode($assignShift->shift->sh_name)?>
                                 </th>
                                 <td>
@@ -142,7 +154,7 @@ $scheduleTotalData = [];
                                                     continue;
                                                 }?>
 
-                                                <div class="col-md-1"><?= $rule->scheduleType->getColorLabel()?></div>
+                                                <div class="col-md-1"><?= ($rule->scheduleType ? $rule->scheduleType->getColorLabel() : '') ?></div>
                                                 <div class="col-md-5 text-left" title="Expression: <?= Html::encode($rule->getCronExpression())?>, Exclude: <?= Html::encode($rule->getCronExpressionExclude())?>">
                                                     <?= Html::encode($rule->getScheduleTypeTitle())?>
                                                 </div>
@@ -181,140 +193,50 @@ $scheduleTotalData = [];
             <div class="x_panel">
                 <div class="x_title">
                     <h2><i class="fa fa-bar-chart"></i> My Monthly scheduling statistics</h2>
-                    <!--            <ul class="nav navbar-right panel_toolbox" style="min-width: initial;">-->
-                    <!--                <li>-->
-                    <!--                    <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>-->
-                    <!--                </li>-->
-                    <!--            </ul>-->
                     <div class="clearfix"></div>
                 </div>
                 <div class="x_content" style="display: block">
 
-                    <div class="col-md-12">
-                        <i class="fa fa-info-circle"></i> TimeLine statistics consists of statuses (
-                        <?= Html::encode(UserShiftSchedule::getStatusNameById(UserShiftSchedule::STATUS_APPROVED))?>,
-                        <?= Html::encode(UserShiftSchedule::getStatusNameById(UserShiftSchedule::STATUS_DONE))?>
-                        )</>
+                    <div class="row">
+                        <div class="col-md-12">
+
+                            <div class="text-right">
+                            <i class="fa fa-info-circle"></i> TimeLine statistics consists of statuses (
+                                <?= Html::encode(UserShiftSchedule::getStatusNameById(UserShiftSchedule::STATUS_APPROVED))?>,
+                                <?= Html::encode(UserShiftSchedule::getStatusNameById(UserShiftSchedule::STATUS_DONE))?>
+                            )
+                            </div>
+
+                        <?php
+                        try {
+                            echo Tabs::widget([
+                                'items' => [
+                                    [
+                                        'label' => 'Group by Types',
+                                        'content' => $this->render('partial/_tab_types', [
+                                            'monthList' => $monthList,
+                                            'scheduleTypeList' => $scheduleTypeList,
+                                            'scheduleSumData' => $scheduleSumData,
+                                        ]),
+                                        'active' => true
+                                    ],
+                                    [
+                                        'label' => 'Group by Labels',
+                                        'content' => $this->render('partial/_tab_labels', [
+                                            'monthList' => $monthList,
+                                            'scheduleTypeLabelList' => $scheduleTypeLabelList,
+                                            'scheduleLabelSumData' => $scheduleLabelSumData,
+                                        ]),
+                                    ]
+                                ]
+                            ]);
+                        } catch (Exception $e) {
+                            echo 'Error: ' . $e->getMessage();
+                        }
+                        ?>
+
+                        </div>
                     </div>
-
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr class="text-center bg-info">
-                                <th>Key</th>
-                                <th>Type</th>
-                                <th title="Work Time">WT</th>
-                                <?php foreach ($monthList as $month) : ?>
-                                    <th style="font-size: 16px"><?= Html::encode($month)?></th>
-                                <?php endforeach; ?>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        <?php if ($scheduleTypeList) : ?>
-                            <?php foreach ($scheduleTypeList as $item) : ?>
-                            <tr class="text-center" title="<?= Html::encode($item->sst_title)?>">
-                                <td title="Type Id: <?= $item->sst_id?>">
-                                    <span class="label label-default"><?= Html::encode($item->sst_key)?></span>
-                                </td>
-                                <td class="text-left">
-                                    <?= $item->getColorLabel()?> &nbsp;
-                                    <?= $item->getIconLabel()?> &nbsp;
-                                    <?= Html::encode($item->sst_name)?>
-                                </td>
-                                <td>
-                                    <?php if ($item->sst_work_time) :?>
-                                        <i class="fa fa-check-circle"></i>
-                                    <?php endif; ?>
-                                </td>
-                                <?php foreach ($monthList as $monthId => $month) : ?>
-                                    <?php /*echo $monthId; \yii\helpers\VarDumper::dump($scheduleSumData[$item->sst_id], 10, true)*/ ?>
-                                    <td>
-                                    <?php if (!empty($scheduleSumData[$item->sst_id][$monthId])) :
-                                        $dataItem = $scheduleSumData[$item->sst_id][$monthId];
-
-                                        if ($item->sst_work_time) {
-                                            if (isset($scheduleTotalData[$monthId]['twh'])) {
-                                                $scheduleTotalData[$monthId]['twh'] += $dataItem['uss_duration'];
-                                                $scheduleTotalData[$monthId]['twh_cnt'] += $dataItem['uss_cnt'];
-                                            } else {
-                                                $scheduleTotalData[$monthId]['twh'] = $dataItem['uss_duration'];
-                                                $scheduleTotalData[$monthId]['twh_cnt'] = $dataItem['uss_cnt'];
-                                            }
-                                        } else {
-                                            if (isset($scheduleTotalData[$monthId]['toh'])) {
-                                                $scheduleTotalData[$monthId]['toh'] += $dataItem['uss_duration'];
-                                                $scheduleTotalData[$monthId]['toh_cnt'] += $dataItem['uss_cnt'];
-                                            } else {
-                                                $scheduleTotalData[$monthId]['toh'] = $dataItem['uss_duration'];
-                                                $scheduleTotalData[$monthId]['toh_cnt'] = $dataItem['uss_cnt'];
-                                            }
-                                        }
-
-                                        if (isset($scheduleTotalData[$monthId]['th'])) {
-                                            $scheduleTotalData[$monthId]['th'] += $dataItem['uss_duration'];
-                                            $scheduleTotalData[$monthId]['th_cnt'] += $dataItem['uss_cnt'];
-                                        } else {
-                                            $scheduleTotalData[$monthId]['th'] = $dataItem['uss_duration'];
-                                            $scheduleTotalData[$monthId]['th_cnt'] = $dataItem['uss_cnt'];
-                                        }
-
-
-                                        ?>
-
-                                            <?= round($dataItem['uss_duration'] / 60, 1)?>h
-                                            / <?= Html::encode($dataItem['uss_cnt'])?>
-
-                                    <?php else : ?>
-                                        -
-                                    <?php endif; ?>
-                                    </td>
-                                <?php endforeach; ?>
-                            </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <td colspan="6"></td>
-                            </tr>
-                            <tr class="text-center">
-                                <th></th>
-                                <th class="text-center">Work Hours:</th>
-                                <th></th>
-                                <?php foreach ($monthList as $monthId => $month) : ?>
-                                    <th>
-                                        <?= isset($scheduleTotalData[$monthId]['twh']) ? round($scheduleTotalData[$monthId]['twh'] / 60, 1) . 'h' : '-'?> /
-                                        <?= isset($scheduleTotalData[$monthId]['twh_cnt']) ? ($scheduleTotalData[$monthId]['twh_cnt']) : '-'?>
-                                    </th>
-                                <?php endforeach; ?>
-                            </tr>
-
-                            <tr class="text-center">
-                                <th></th>
-                                <th class="text-center">Other Hours:</th>
-                                <th></th>
-                                <?php foreach ($monthList as $monthId => $month) : ?>
-                                    <th>
-                                        <?= isset($scheduleTotalData[$monthId]['toh']) ? round($scheduleTotalData[$monthId]['toh'] / 60, 1) . 'h' : '-'?> /
-                                        <?= isset($scheduleTotalData[$monthId]['toh_cnt']) ? ($scheduleTotalData[$monthId]['toh_cnt']) : '-'?>
-                                    </th>
-                                <?php endforeach; ?>
-                            </tr>
-
-                            <tr class="text-center">
-                                <th></th>
-                                <th class="text-center">Total Hours:</th>
-                                <th></th>
-                                <?php foreach ($monthList as $monthId => $month) : ?>
-                                    <th>
-                                        <?= isset($scheduleTotalData[$monthId]['th']) ? round($scheduleTotalData[$monthId]['th'] / 60, 1) . 'h' : '-'?> /
-                                        <?= isset($scheduleTotalData[$monthId]['th_cnt']) ? ($scheduleTotalData[$monthId]['th_cnt']) : '-'?>
-                                    </th>
-                                <?php endforeach; ?>
-                            </tr>
-
-                        </tfoot>
-                    </table>
-
 
                 </div>
             </div>
@@ -675,6 +597,23 @@ $js = <<<JS
             }
         });
     }
+    
+    
+    $(document).on('click', '#btn-legend', function(e) {
+        e.preventDefault();
+        let modal = $('#modal-md');
+        let url = $(this).attr('href');
+        $('#modal-md-label').html('<i class="fa fa-info-circle"></i> Schedule Legend');
+        modal.find('.modal-body').html('');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            if (status === 'error') {
+                alert(response);
+            } else {
+                modal.modal('show');
+            }   
+        });
+    });
+    
 
     function updateTimeLineList(startDate, endDate) 
     {

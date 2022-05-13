@@ -140,9 +140,8 @@ class LeadPreferences extends \yii\db\ActiveRecord
         }
     }
 
-    public function createOnlyCurrency($leadId, $currency): self
+    public static function createOnlyCurrency(int $leadId, ?string $currency): self
     {
-        $clone = self::create($leadId, null, null, null, $currency);
-        return $clone;
+        return self::create($leadId, null, null, null, $currency);
     }
 }

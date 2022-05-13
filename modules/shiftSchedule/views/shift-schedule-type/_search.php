@@ -30,7 +30,7 @@ use yii\widgets\ActiveForm;
 
     <?php // echo $form->field($model, 'sst_readonly') ?>
 
-    <?php // echo $form->field($model, 'sst_work_time') ?>
+    <?php // echo $form->field($model, 'sst_subtype_id') ?>
 
     <?php // echo $form->field($model, 'sst_color') ?>
 

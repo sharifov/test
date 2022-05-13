@@ -269,6 +269,7 @@ class QuoteHelper
             $quotes['results'][$key]['totalDuration'] = array_sum($totalDuration);
             $quotes['results'][$key]['topCriteria'] = self::getQuoteTopCriteria($quote);
             $quotes['results'][$key]['rank'] = self::getQuoteRank($quote);
+            $quotes['results'][$key]['autoSort'] = self::getMetaAuto($quote);
         }
 
         asort($connectionAirports);
@@ -444,5 +445,10 @@ class QuoteHelper
             return $quote['meta']['rank'];
         }
         return 0.0;
+    }
+
+    private static function getMetaAuto(array $quote, int $defaultValue = 99): int
+    {
+        return (int) ($quote['meta']['auto'] ?? $defaultValue);
     }
 }

@@ -57,4 +57,14 @@ class ABTestingBaseEntity
             $this->currentPercentage = ($this->counter / $totalCounter) * 100;
         }
     }
+
+    public function toArray(): array
+    {
+        return [
+            'name'               => $this->name,
+            'expectedPercentage' => $this->expectedPercentage,
+            'counter'            => $this->counter,
+            'currentPercentage'  => $this->currentPercentage
+        ];
+    }
 }

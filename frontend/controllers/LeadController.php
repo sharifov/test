@@ -212,7 +212,14 @@ class LeadController extends FController
                     'ajax-create-from-phone-widget-with-invalid-client',
                     'ajax-link-to-call',
                     'extra-queue',
-                    'closed',
+                ],
+                'rules' => [
+                    /** @abac null, LeadAbacObject::OBJ_CLOSED_QUEUE, LeadAbacObject::ACTION_ACCESS, Access to page lead/closed */
+                    [
+                        'actions' => ['closed'],
+                        'allow' => \Yii::$app->abac->can(null, LeadAbacObject::OBJ_CLOSED_QUEUE, LeadAbacObject::ACTION_ACCESS),
+                        'roles' => ['@'],
+                    ],
                 ],
             ],
         ];
@@ -258,7 +265,8 @@ class LeadController extends FController
             throw new NotFoundHttpException('Not found lead ID: ' . $gid);
         }
 
-        if (!Auth::can('lead/view', ['lead' => $lead])) {
+        /** @abac $abacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_ACCESS, Access to view lead  */
+        if (!Yii::$app->abac->can(new LeadAbacDto($lead, Auth::id()), LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_ACCESS)) {
             throw new ForbiddenHttpException('Access Denied.');
         }
 
@@ -2024,9 +2032,6 @@ class LeadController extends FController
         $form->assignDep(Department::DEPARTMENT_SALES);
         if ($form->load($data['post']) && $form->validate()) {
             try {
-                if ($form->depId === 0) {
-                    $form->depId = null;
-                }
                 if (!$delayedChargeAccess) {
                     $form->delayedCharge = false;
                 }
@@ -2072,9 +2077,6 @@ class LeadController extends FController
             $form = new LeadManageForm(0);
             if (Yii::$app->request->isPjax && $form->load($data['post']) && $form->validate()) {
                 try {
-                    if ($form->depId === 0) {
-                        $form->depId = null;
-                    }
                     $leadManageService = Yii::createObject(UseCaseLeadManageService::class);
                     $form->client->projectId = $form->projectId;
                     $form->client->typeCreate = Client::TYPE_CREATE_LEAD;
@@ -2660,6 +2662,11 @@ class LeadController extends FController
                 $load = $splitForm->loadModels($data);
                 if ($load) {
                     $errors = ActiveForm::validate($splitForm);
+                }
+
+                /** @abac null, LeadAbacObject::CHANGE_SPLIT_TIPS, LeadAbacObject::ACTION_UPDATE, hide split tips edition */
+                if (!Yii::$app->abac->can(null, LeadAbacObject::CHANGE_SPLIT_TIPS, LeadAbacObject::ACTION_UPDATE)) {
+                    $errors[] = 'Forbidden';
                 }
 
                 if (empty($errors) && $splitForm->save($errors)) {

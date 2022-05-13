@@ -103,7 +103,7 @@ class PhoneListSearch extends PhoneList
                 ->where(['IN', 'dpp_project_id', $this->projects])
                 ->column();
             $phoneListIds =  array_merge($userProjectEntries, $departmentProjectEntries);
-            $query->where([
+            $query->andWhere([
                 'IN',
                 'pl_id',
                 $phoneListIds
@@ -114,7 +114,7 @@ class PhoneListSearch extends PhoneList
                 ->select(['upp_phone_list_id'])
                 ->where([ 'IN', 'upp_user_id',  $this->user_project_params_users])
                 ->column();
-            $query->where([
+            $query->andWhere([
                 'IN',
                 'pl_id',
                 $phoneListIds
@@ -135,7 +135,7 @@ class PhoneListSearch extends PhoneList
                     ::find()
                     ->select(['dpp_phone_list_id'])
                     ->where(['NOT', ['dpp_phone_list_id' => 'NULL']]);
-                $query->where(['NOT', ['pl_id' => $uppPhoneListQuery]])
+                $query->andWhere(['NOT', ['pl_id' => $uppPhoneListQuery]])
                      ->andWhere(['NOT', ['pl_id' => $dppPhoneListQuery]]);
             } elseif ($this->used_for === self::USED_FOR_GENERAL_AND_PERSONAL) {
                 $query->innerJoinWith(['departmentPhoneProject'])

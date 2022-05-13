@@ -82,4 +82,10 @@ $tsEndUtc = strtotime($event->uss_end_utc_dt);
         </span>
     </div>
 
+    <div class="col-md-12">
+        <?php if ($event->uss_description) : ?>
+          <div>Description: <?= Html::encode($event->uss_description) ?></div>
+        <?php endif; ?>
+    </div>
+
 </div>

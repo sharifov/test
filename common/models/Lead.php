@@ -12,6 +12,8 @@ use DateTime;
 use frontend\helpers\JsonHelper;
 use frontend\widgets\notification\NotificationMessage;
 use kivork\search\core\urlsig\UrlSignature;
+use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\lead\src\abac\LeadAbacObject;
 use modules\offer\src\entities\offer\Offer;
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\product\Product;
@@ -5208,7 +5210,8 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     {
         $url = '/smart/search/';
 
-        $flightSegments = LeadFlightSegment::findAll(['lead_id' => $this->id]);
+        //$flightSegments = LeadFlightSegment::findAll(['lead_id' => $this->id]);
+        $flightSegments = $this->getleadFlightSegments()->orderBy(['departure' => SORT_ASC])->all();
         $segmentsStr = [];
         $signedParams = [];
         $flexParams = [];

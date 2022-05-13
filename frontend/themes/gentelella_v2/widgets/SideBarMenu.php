@@ -7,6 +7,7 @@
 namespace frontend\themes\gentelella_v2\widgets;
 
 use common\models\Employee;
+use modules\featureFlag\FFlag;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
@@ -455,6 +456,11 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Quote Price List', 'url' => ['/quote-price/index'], 'icon' => 'list'],
                         ['label' => 'Flight Quote Label List', 'url' => ['/flight-quote-label-list-crud/index'], 'icon' => 'list'],
                         ['label' => 'Quote Label', 'url' => ['/quote-label-crud/index'], 'icon' => 'list'],
+                        ['label' => 'Quote Trip', 'url' => ['/quote-trip-crud/index'], 'icon' => 'list'],
+                        ['label' => 'Quote Segment', 'url' => ['/quote-segment-crud/index'], 'icon' => 'list'],
+                        ['label' => 'Quote Segment Baggages', 'url' => ['/quote-segment-baggage-crud/index'], 'icon' => 'list'],
+                        ['label' => 'Quote Segment Baggage Charges', 'url' => ['/quote-segment-baggage-charge-crud/index'], 'icon' => 'list'],
+                        ['label' => 'Quote Segment Stop CRUD', 'url' => ['/quote-segment-stop-crud/index'], 'icon' => 'list'],
                     ],
                 ],
 
@@ -646,6 +652,71 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Department Phones Import', 'url' => ['/department-phone-project/import']],
                     ]
                 ],
+
+                [
+                    'label' => 'Shift Schedules',
+                    'url' => 'javascript:',
+                    'icon' => 'calendar',
+                    'items' => [
+
+                        ['label' => 'User Shift Calendar', 'url' => ['/shift-schedule/calendar'],
+                            'icon' => 'calendar',
+                            'title' => 'User Shift Schedule Calendar'
+                        ],
+
+                        ['label' => 'Shift List', 'url' => ['/shift-crud/index'], 'title' => 'Shift CRUD'],
+
+                        ['label' => 'Schedule Rule', 'url' => ['/shift-schedule-rule-crud/index'],
+                            'title' => 'Shift Schedule Rule'],
+
+                        ['label' => 'Shift Events', 'url' => ['/user-shift-schedule-crud/index'],
+                            'title' => 'User Shift Schedule Events'],
+
+
+
+                        /** @abac ShiftAbacObject::ACT_USER_SHIFT_ASSIGN, ShiftAbacObject::ACTION_ACCESS, Access menu UserShiftAssign */
+                        [
+                            'label' => 'User Shift Schedule Assign',
+                            'url' => ['/shift/user-shift-assign/index'],
+                            'title' => 'User Shift Assign',
+                            'icon' => 'user-plus',
+                            'abac'  => [
+                                'dto'    => null,
+                                'object' => ShiftAbacObject::ACT_USER_SHIFT_ASSIGN,
+                                'action' => ShiftAbacObject::ACTION_ACCESS,
+                            ],
+                        ],
+
+                        [
+                            'label' => 'Advanced',
+                            'url' => 'javascript:',
+                            'icon' => 'folder',
+                            'items' => [
+                                ['label' => 'Shift Schedule Type', 'url' => ['/shift/shift-schedule-type/index'],
+                                    'title' => 'Shift Schedule Type'],
+
+                                ['label' => 'User Shift Assign CRUD', 'url' => ['/user-shift-assign-crud/index'],
+                                    'title' => 'Shift Schedule User Assign'],
+
+                                ['label' => 'Shift Category', 'url' => ['/shift-category-crud/index'],
+                                    'title' => 'Shift category CRUD'],
+
+                                ['label' => 'Type Labels',
+                                    'url' => ['/shift/shift-schedule-type-label/index'],
+                                    // 'icon' => 'circle',
+                                    'title' => 'Shift Schedule Type Labels'
+                                ],
+                                ['label' => 'Type Labels Assign',
+                                    'url' => ['/shift/shift-schedule-type-label-assign/index'],
+                                    // 'icon' => 'circle',
+                                    'title' => 'Shift Schedule Type Labels Assign'
+                                ],
+                            ]
+                        ],
+
+
+                    ],
+                ],
                 [
                     'label' => 'Phone Line',
                     'url' => 'javascript:',
@@ -725,36 +796,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
 
                 ['label' => 'Call recording disabled', 'url' => ['/call-recording-disabled/list'], 'icon' => 'list'],
 
-                [
-                    'label' => 'Shift Schedules',
-                    'url' => 'javascript:',
-                    'icon' => 'calendar',
-                    'items' => [
-                        ['label' => 'Shift CRUD', 'url' => ['/shift-crud/index'], 'title' => 'Shift'],
-                        ['label' => 'Shift Category CRUD', 'url' => ['/shift-category-crud/index'],
-                            'title' => 'Shift category CRUD'],
-                        ['label' => 'Shift Schedule Type CRUD', 'url' => ['/shift/shift-schedule-type/index'],
-                            'title' => 'Shift Schedule Type'],
-                        ['label' => 'Shift Schedule Rule CRUD', 'url' => ['/shift-schedule-rule-crud/index'],
-                            'title' => 'Shift Schedule Rule'],
-                        ['label' => 'User Shift Assign CRUD', 'url' => ['/user-shift-assign-crud/index'],
-                            'title' => 'Shift Schedule User Assign'],
-                        ['label' => 'User Shift Schedule CRUD', 'url' => ['/user-shift-schedule-crud/index'],
-                            'title' => 'User Shift Schedule'],
-                        /** @abac ShiftAbacObject::ACT_USER_SHIFT_ASSIGN, ShiftAbacObject::ACTION_ACCESS, Access menu UserShiftAssign */
-                        [
-                            'label' => 'User Shift Assign',
-                            'url' => ['/shift/user-shift-assign/index'],
-                            'title' => 'Shift',
-                            'icon' => 'user-plus',
-                            'abac'  => [
-                                'dto'    => null,
-                                'object' => ShiftAbacObject::ACT_USER_SHIFT_ASSIGN,
-                                'action' => ShiftAbacObject::ACTION_ACCESS,
-                            ],
-                        ],
-                    ],
-                ],
+
             ]
         ];
 
@@ -892,6 +934,19 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 'url' => 'javascript:',
                 'icon' => 'ship',
                 'items' => \modules\cruise\CruiseModule::getListMenu()
+            ];
+        }
+
+        /** @fflag FFlag::FF_KEY_OBJECT_SEGMENT_MODULE_ENABLE, Object Segment module enable/disable */
+        if (Yii::$app->ff->can(FFlag::FF_KEY_OBJECT_SEGMENT_MODULE_ENABLE)) {
+            $menuModuleItems[] =  [
+                'label' => 'Object Segment',
+                'url' => 'javascript:',
+                'icon' => 'cogs',
+                'items' => [
+                    ['label' => 'Object Segment List', 'url' => ['/object-segment/object-segment-list/index']],
+                    ['label' => 'Object Segment Rules', 'url' => ['/object-segment/object-segment-rule/index']],
+                ],
             ];
         }
 

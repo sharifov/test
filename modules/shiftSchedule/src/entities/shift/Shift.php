@@ -7,11 +7,14 @@ use modules\shiftSchedule\src\entities\shiftCategory\ShiftCategory;
 use modules\shiftSchedule\src\entities\shiftScheduleRule\ShiftScheduleRule;
 use modules\shiftSchedule\src\entities\userShiftAssign\UserShiftAssign;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
+use yii\base\InvalidConfigException;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\db\BaseActiveRecord;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
 
 /**
  * This is the model class for table "shift".
@@ -34,6 +37,7 @@ use yii\helpers\ArrayHelper;
  * @property int $sh_category_id [int]
  * @property ShiftCategory $category
  * @property UserShiftAssign[] $userShiftAssigns
+ * @property Employee[] $usaUsers
  */
 class Shift extends ActiveRecord
 {
@@ -45,16 +49,16 @@ class Shift extends ActiveRecord
             'timestamp' => [
                 'class' => TimestampBehavior::class,
                 'attributes' => [
-                    ActiveRecord::EVENT_BEFORE_INSERT => ['sh_created_dt', 'sh_updated_dt'],
-                    ActiveRecord::EVENT_BEFORE_UPDATE => ['sh_updated_dt'],
+                    BaseActiveRecord::EVENT_BEFORE_INSERT => ['sh_created_dt', 'sh_updated_dt'],
+                    BaseActiveRecord::EVENT_BEFORE_UPDATE => ['sh_updated_dt'],
                 ],
                 'value' => date('Y-m-d H:i:s'),
             ],
             'user' => [
                 'class' => BlameableBehavior::class,
                 'attributes' => [
-                    ActiveRecord::EVENT_BEFORE_INSERT => ['sh_created_user_id'],
-                    ActiveRecord::EVENT_BEFORE_UPDATE => ['sh_updated_user_id'],
+                    BaseActiveRecord::EVENT_BEFORE_INSERT => ['sh_created_user_id'],
+                    BaseActiveRecord::EVENT_BEFORE_UPDATE => ['sh_updated_user_id'],
                 ],
                 'defaultValue' => null,
             ],
@@ -83,7 +87,8 @@ class Shift extends ActiveRecord
             ['sh_updated_user_id', 'integer', 'max' => self::MAX_VALUE_INT],
 
             ['sh_category_id', 'integer', 'max' => self::MAX_VALUE_INT],
-            [['sh_category_id'], 'exist', 'skipOnError' => true, 'targetClass' => ShiftCategory::class, 'targetAttribute' => ['sh_category_id' => 'sc_id']],
+            [['sh_category_id'], 'exist', 'skipOnError' => true,
+                'targetClass' => ShiftCategory::class, 'targetAttribute' => ['sh_category_id' => 'sc_id']],
         ];
     }
 
@@ -112,9 +117,21 @@ class Shift extends ActiveRecord
         return $this->hasOne(ShiftCategory::class, ['sc_id' => 'sh_category_id']);
     }
 
-    public function getUserShiftAssigns(): \yii\db\ActiveQuery
+    public function getUserShiftAssigns(): ActiveQuery
     {
         return $this->hasMany(UserShiftAssign::class, ['usa_sh_id' => 'sh_id']);
+    }
+
+    /**
+     * Gets query for [[UsaUsers]].
+     *
+     * @return ActiveQuery
+     * @throws InvalidConfigException
+     */
+    public function getUsaUsers(): ActiveQuery
+    {
+        return $this->hasMany(Employee::class, ['id' => 'usa_user_id'])
+            ->viaTable('user_shift_assign', ['usa_sh_id' => 'sh_id']);
     }
 
     public function attributeLabels(): array
@@ -152,5 +169,17 @@ class Shift extends ActiveRecord
         }
         $data = $query->asArray()->all();
         return ArrayHelper::map($data, 'sh_id', 'sh_name');
+    }
+
+    /**
+     * @return string
+     */
+    public function getColorLabel(): string
+    {
+        return Html::tag(
+            'i',
+            '',
+            ['class' => 'fa fa-circle', 'style' => ($this->sh_color ? 'color: ' . $this->sh_color : 'color: #EAEAEA')]
+        );
     }
 }

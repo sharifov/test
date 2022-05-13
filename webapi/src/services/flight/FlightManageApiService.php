@@ -60,6 +60,7 @@ use src\model\caseOrder\entity\CaseOrderQuery;
 use src\repositories\cases\CasesRepository;
 use src\repositories\NotFoundException;
 use src\repositories\product\ProductQuoteRepository;
+use src\services\cases\CasesCommunicationService;
 use webapi\src\forms\boWebhook\FlightRefundUpdateForm;
 use webapi\src\forms\flight\FlightRequestApiForm;
 use webapi\src\forms\flight\flights\trips\SegmentApiForm;
@@ -94,6 +95,7 @@ use yii\helpers\ArrayHelper;
  * @property ProductQuoteRefundRepository $productQuoteRefundRepository
  * @property CasesRepository $casesRepository
  * @property ProductQuoteChangeRepository $productQuoteChangeRepository
+ * @property CasesCommunicationService $casesCommunicationService
  *
  * @property ProductQuote $productQuote
  * @property FlightRefundUpdateForm $form
@@ -125,6 +127,7 @@ class FlightManageApiService implements BoWebhookService
     private ProductQuoteRefundRepository $productQuoteRefundRepository;
     private CasesRepository $casesRepository;
     private ProductQuoteChangeRepository $productQuoteChangeRepository;
+    private CasesCommunicationService $casesCommunicationService;
     /**
      * @var ProductQuote|null
      */
@@ -165,6 +168,7 @@ class FlightManageApiService implements BoWebhookService
      * @param ProductQuoteRefundRepository $productQuoteRefundRepository
      * @param CasesRepository $casesRepository
      * @param ProductQuoteChangeRepository $productQuoteChangeRepository
+     * @param CasesCommunicationService $casesCommunicationService
      */
     public function __construct(
         FlightQuoteFlightRepository $flightQuoteFlightRepository,
@@ -188,7 +192,8 @@ class FlightManageApiService implements BoWebhookService
         OrderRefundRepository $orderRefundRepository,
         ProductQuoteRefundRepository $productQuoteRefundRepository,
         CasesRepository $casesRepository,
-        ProductQuoteChangeRepository $productQuoteChangeRepository
+        ProductQuoteChangeRepository $productQuoteChangeRepository,
+        CasesCommunicationService $casesCommunicationService
     ) {
         $this->flightQuoteFlightRepository = $flightQuoteFlightRepository;
         $this->flightQuoteBookingRepository = $flightQuoteBookingRepository;
@@ -212,6 +217,7 @@ class FlightManageApiService implements BoWebhookService
         $this->productQuoteRefundRepository = $productQuoteRefundRepository;
         $this->casesRepository = $casesRepository;
         $this->productQuoteChangeRepository = $productQuoteChangeRepository;
+        $this->casesCommunicationService = $casesCommunicationService;
     }
 
     public function ticketIssue(FlightRequestApiForm $flightRequestApiForm): void
@@ -563,6 +569,11 @@ class FlightManageApiService implements BoWebhookService
 
                     $this->productQuote->cancelled();
                     $this->productQuoteRepository->save($this->productQuote);
+                    if ($this->case->project->getParams()->object->case->sendFeedback ?? null) {
+                        $this->casesCommunicationService
+                            ->sendAutoFeedbackEmail($this->case, CaseEventLog::RE_PROTECTION_REFUND)
+                        ;
+                    }
                 }
                 $transaction->commit();
                 $this->hybridWh();

@@ -1,0 +1,8 @@
+---
+- name: Copy bash scripts
+  copy:
+    src: ../../../bash/
+    dest: /usr/local/bin
+    owner: root
+    group: root
+    mode: 0755

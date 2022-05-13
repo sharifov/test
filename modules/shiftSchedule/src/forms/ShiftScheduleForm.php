@@ -51,6 +51,7 @@ class ShiftScheduleForm extends Model
     public function rules(): array
     {
         return [
+            [['ssr_sst_id', 'ssr_duration_time', 'ssr_cron_expression'], 'required'],
             ['ssr_cron_expression', 'string', 'max' => 100],
             ['ssr_cron_expression_exclude', 'string', 'max' => 100],
 
@@ -149,5 +150,10 @@ class ShiftScheduleForm extends Model
         $this->ssr_title = 'Schedule Rule ';
         $this->ssr_enabled = true;
         $this->ssr_cron_expression_exclude = '';
+    }
+
+    public function getDurationTimeHours(): int
+    {
+        return $this->ssr_duration_time ? ($this->ssr_duration_time / 60) : 0;
     }
 }

@@ -2,6 +2,8 @@
 
 namespace modules\product\src\entities\productQuoteChange;
 
+use modules\flight\models\FlightQuote;
+use modules\flight\models\FlightQuoteFlight;
 use modules\product\src\entities\productQuote\ProductQuote;
 use src\dispatchers\EventDispatcher;
 use src\repositories\NotFoundException;
@@ -68,5 +70,21 @@ class ProductQuoteChangeRepository
             throw new \RuntimeException('Saving error.');
         }
         $this->eventDispatcher->dispatchAll($change->releaseEvents());
+    }
+
+    /**
+     * @param string $bookingId
+     * @param array $statuses
+     * @return ProductQuoteChange[]|array
+     */
+    public function findAllByBookingId(string $bookingId, array $statuses): array
+    {
+        return ProductQuoteChange::find()
+            ->innerJoin(FlightQuote::tableName(), 'fq_product_quote_id = pqc_pq_id')
+            ->innerJoin(FlightQuoteFlight::tableName(), 'fqf_fq_id = fq_id')
+            ->where(['fqf_booking_id' => $bookingId])
+            ->byStatuses($statuses)
+            ->orderBy(['pqc_id' => SORT_DESC])
+            ->all();
     }
 }

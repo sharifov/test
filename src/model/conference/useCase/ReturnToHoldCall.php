@@ -85,7 +85,10 @@ class ReturnToHoldCall
                 $conference->isRecordingDisabled(),
                 $call->getDataPhoneListId(),
                 $call->c_to,
-                $call->c_from
+                $call->c_from,
+                $call->c_project_id ? $call->cProject->name : '',
+                $call->getSourceName(),
+                Call::TYPE_LIST[Call::CALL_TYPE_RETURN],
             );
             $isError = (bool)($result['error'] ?? true);
             if ($isError) {

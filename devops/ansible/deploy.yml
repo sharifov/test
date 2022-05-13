@@ -3,8 +3,8 @@
 
 - name: Deploy CRM application
   hosts: app
-  remote_user: "{{ ssh_user }}"
+  remote_user: ubuntu
   gather_facts: false
-  become: yes
+  become: true
   roles:
     - deployment
