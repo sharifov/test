@@ -205,22 +205,20 @@ class PhoneNumberRedialCrudController extends FController
             foreach ($items as $value) {
                 if ($phoneNumberRedial = $this->findModel($value)) {
                     try {
-                        $phoneNumberRedial->delete();
-                        $result[] = $value;
+                        if ($phoneNumberRedial->delete()) {
+                            $data['successDeleted'][] = $value;
+                        } else {
+                            $data['failedDeleted'][] = $value;
+                        }
                     } catch (\RuntimeException $throwable) {
                         $messageData = AppHelper::throwableLog($throwable);
                         \Yii::warning($messageData, 'PhoneNumberRedialCrudController:actionDeleteSelected:Exception');
-                        $data['success'] = false;
-                        $data['noDeleted'] = $value;
                     } catch (\Throwable $throwable) {
                         $messageData = AppHelper::throwableLog($throwable);
                         \Yii::warning($messageData, 'PhoneNumberRedialCrudController::actionDeleteSelected:Throwable');
-                        $data['success'] = false;
-                        $data['noDeleted'] = $value;
                     }
                 }
             }
-            $data['deleted'] = implode(', ', $result);
             return $this->asJson($data);
         }
         throw new BadRequestHttpException();
