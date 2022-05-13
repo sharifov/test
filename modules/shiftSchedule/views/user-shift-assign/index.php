@@ -227,7 +227,7 @@ $this->registerCss($css);
 yii\bootstrap4\Modal::begin([
     'title' => '',
     'id' => 'user_shift_assign_modal',
-    'size' => \yii\bootstrap4\Modal::SIZE_SMALL,
+    'size' => \yii\bootstrap4\Modal::SIZE_DEFAULT,
 ]);
 yii\bootstrap4\Modal::end();
 ?>
