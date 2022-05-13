@@ -361,7 +361,7 @@ class ShiftScheduleController extends FController
      * @return Response
      * @throws Exception
      */
-    public function actionGenerateExample(?int $userId): Response
+    public function actionGenerateExample(?int $userId = null): Response
     {
         if ($userId) {
             $route = ['shift-schedule/user', 'id' => $userId];
@@ -384,7 +384,7 @@ class ShiftScheduleController extends FController
      * @param int|null $userId
      * @return Response
      */
-    public function actionRemoveUserData(?int $userId): Response
+    public function actionRemoveUserData(?int $userId = null): Response
     {
         if ($userId) {
             $route = ['shift-schedule/user', 'id' => $userId];
@@ -403,7 +403,7 @@ class ShiftScheduleController extends FController
      * @param int|null $userId
      * @return Response
      */
-    public function actionGenerateUserSchedule(?int $userId): Response
+    public function actionGenerateUserSchedule(?int $userId = null): Response
     {
 
         if ($userId) {
