@@ -54,11 +54,11 @@ use webapi\src\Messages;
  */
 class ClientChatRequestController extends ApiBaseController
 {
-private ClientChatRequestService $clientChatRequestService;
+    private ClientChatRequestService $clientChatRequestService;
     /**
      * @var ClientChatRequestRepository
      */
-private ClientChatRequestRepository $clientChatRequestRepository;
+    private ClientChatRequestRepository $clientChatRequestRepository;
 
     public function __construct(
         $id,
@@ -66,8 +66,7 @@ private ClientChatRequestRepository $clientChatRequestRepository;
         ClientChatRequestService $clientChatRequestService,
         ClientChatRequestRepository $clientChatRequestRepository,
         $config = []
-    )
-    {
+    ) {
         $this->clientChatRequestService = $clientChatRequestService;
         parent::__construct($id, $module, $config);
         $this->clientChatRequestRepository = $clientChatRequestRepository;

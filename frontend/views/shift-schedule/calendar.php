@@ -14,6 +14,8 @@ $this->params['breadcrumbs'][] = $this->title;
 $bundle = \frontend\assets\UserShiftCalendarAsset::register($this);
 ?>
 
+<?= $this->render('partial/_filter_form') ?>
+
 <div class="shift-schedule-calendar">
     <h1><i class="fa fa-calendar"></i> <?= Html::encode($this->title) ?></h1>
 
@@ -91,6 +93,7 @@ var \$time = $('#tooltip-event-time');
 var \$status = $('#tooltip-event-status');
 var \$title = $('#tooltip-event-title');
 var \$view = $('#tooltip-event-view');
+var dblClickResource;
 
 mobiscroll.setOptions({
     theme: 'ios',
@@ -102,7 +105,7 @@ mobiscroll.momentTimezone.moment = moment;
 window.inst = $('#calendar').mobiscroll().eventcalendar({
         view: {
             timeline: { type: 'day', size: 2 },
-            refDate: today
+            refDate: today,
         },
         timeFormat: 'HH:mm',
         dataTimezone: 'utc',
@@ -131,13 +134,12 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
 //         },
         resources: resourceListJson,
         
-        //  renderResource: function (resource) {
-        //     return '<div class="md-work-week-cont">' +
-        //         '<div class="md-work-week-name">' + resource.name + '</div>' +
-        //         '<div class="md-work-week-title">' + resource.title + '</div>' +
-        //        // '<img class="md-work-week-avatar" src="' + resource.img + '"/>' +
-        //         '</div>';
-        // },
+        renderResource: function (resource) {
+             return '<div class="md-work-week-cont" title="'+resource.title+'">' +
+                 '<div class="md-work-week-name" style="display: flex; justify-content: space-between;"><span>' + resource.name + '</span> <span style="margin-right: 10px;">' + resource.icons.join(" ") + '</span></div>' +
+                 '<div class="md-work-week-description">' + resource.description + '</div>' +
+             '</div>';
+        },
         renderHeader: function () {
             let str = '<div mbsc-calendar-nav class="md-work-week-nav"></div>' +
                 '<div class="md-work-week-picker">' +
@@ -170,9 +172,30 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
             
             getCalendarEvents(startDate, endDate, groupIds);
         },
+        onCellDoubleClick: function (args, inst) {
+            dblClickResource = args.resource;
+        },
+        onCellHoverIn: function (args) {
+            dblClickResource = args.resource;
+            console.log(dblClickResource);
+        },
+        onEventDragStart: function (args) {
+            console.log(args);
+            args.resource = dblClickResource;
+        },
+        onCellClick: function (args) {
+          dblClickResource = args.resource;
+        },
         
         
          onEventCreate: function (args, inst) {
+         
+         console.log('adsads');
+            if (dblClickResource && args.event.resource !== dblClickResource) {
+                args.event.resource = dblClickResource;
+            }
+            dblClickResource = '';
+            
             if (args.event.resource.indexOf('us-') !== 0) {
                 inst.removeEvent(args.event);
                 return false;
@@ -321,7 +344,6 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
                     }, 800);
                 })
             } else {
-                console.log()
                 // $.post('$formUpdateSingleEvent', {});
             }
         }
@@ -340,7 +362,8 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
             case 'month':
                 inst.setOptions({
                     view: {
-                        timeline: { type: 'month', timeCellStep: 360, timeLabelStep: 360 }
+                        timeline: { type: 'month', timeCellStep: 360, timeLabelStep: 360 },
+                        refDate: today
                     }
                 })
                 break;
@@ -348,27 +371,27 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
             case '7day':
                 inst.setOptions({
                     view: {
-                        timeline: { type: 'day', timeCellStep: 360, timeLabelStep: 360, size: 7 }
+                        timeline: { type: 'day', timeCellStep: 360, timeLabelStep: 360, size: 7 },
+                        refDate: today
                     },
-                    refDate: today
                 })
                 break;
                 
             case '30days':
                 inst.setOptions({
                     view: {
-                        timeline: { type: 'day', timeCellStep: 720, timeLabelStep: 720, size: 30 }
+                        timeline: { type: 'day', timeCellStep: 720, timeLabelStep: 720, size: 30 },
+                        refDate: today
                     },
-                    refDate: today
                 })
                 break;
                 
             case 'week':
                 inst.setOptions({
                     view: {
-                        timeline: { type: 'week', timeCellStep: 720, timeLabelStep: 720 }
-                    }/*,
-                    refDate: today*/
+                        timeline: { type: 'week', timeCellStep: 720, timeLabelStep: 720 },
+                        refDate: today
+                    }
                 })
                 break;
             
