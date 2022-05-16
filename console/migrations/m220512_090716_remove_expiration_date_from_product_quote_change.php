@@ -17,6 +17,7 @@ class m220512_090716_remove_expiration_date_from_product_quote_change extends Mi
     {
         if ($this->hasColumn()) {
             $this->dropColumn(self::TABLE, self::COLUM);
+            Yii::$app->db->getSchema()->refreshTableSchema(self::TABLE);
         }
     }
 

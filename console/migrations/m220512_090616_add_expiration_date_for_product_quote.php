@@ -20,6 +20,7 @@ class m220512_090616_add_expiration_date_for_product_quote extends Migration
             self::COLUM,
             $this->dateTime()->defaultValue(null)->after('pq_updated_dt')
         );
+        Yii::$app->db->getSchema()->refreshTableSchema(self::TABLE);
     }
 
     /**
@@ -28,5 +29,6 @@ class m220512_090616_add_expiration_date_for_product_quote extends Migration
     public function safeDown()
     {
         $this->dropColumn(self::TABLE, self::COLUM);
+        Yii::$app->db->getSchema()->refreshTableSchema(self::TABLE);
     }
 }
