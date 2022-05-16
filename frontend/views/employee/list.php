@@ -1,6 +1,7 @@
 <?php
 
 use common\models\Employee;
+use kartik\select2\Select2;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\user\src\update\MultipleUpdateForm;
 use src\auth\Auth;
@@ -425,6 +426,16 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                                 ]) ?>
                             <?php endif; ?>
 
+                            <?php if ($multipleForm->fieldAccess->canEdit('user_groups')) : ?>
+                                <?= $form->field($multipleForm, 'user_groups', ['options' => ['class' => 'form-group']])->widget(Select2::class, [
+                                    'data' => $multipleForm->availableList->getUserGroups(),
+                                    'size' => Select2::SMALL,
+                                    'options' => ['placeholder' => 'Select user groups', 'multiple' => true],
+                                    'pluginOptions' => ['allowClear' => true],
+                                ]); ?>
+
+                                <?= $form->field($multipleForm, 'user_groups_action')->dropDownList([1 => 'add', 2 => 'replace', 3 => 'remove']) ?>
+                            <?php endif; ?>
                             <?php if ($multipleForm->fieldAccess->canEdit('status')) : ?>
                                 <?= $form->field($multipleForm, 'status')->dropDownList($multipleForm->availableList->getStatuses(), ['prompt' => '']) ?>
                             <?php endif; ?>
