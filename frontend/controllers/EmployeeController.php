@@ -504,9 +504,16 @@ class EmployeeController extends FController
                     if ($multipleForm->user_departments && $multipleForm->fieldAccess->canEdit('user_departments')) {
                         $transaction = Yii::$app->db->beginTransaction();
                         try {
+                            $oldUserDepartmens = $user->getUserDepartmentList();
                             $user->removeAllDepartments();
                             $user->addNewDepartments($multipleForm->user_departments);
                             $transaction->commit();
+                            $user->addLog(
+                                \Yii::$app->id,
+                                Yii::$app->user->id,
+                                ["user_departments" => $oldUserDepartmens],
+                                ["user_departments" => $multipleForm->getUserDepartmens()]
+                            );
                         } catch (\Throwable $e) {
                             $transaction->rollBack();
                             Yii::error($e->getMessage(), 'Employee:list:multipleUpdate:userDepartments');
@@ -518,6 +525,7 @@ class EmployeeController extends FController
                         $userClientChatData = UserClientChatData::findOne(['uccd_employee_id' => $user->id]);
                         $transaction = Yii::$app->db->beginTransaction();
                         try {
+                            $oldClientChatUserChannel = $user->getClientChatUserChannelList();
                             $user->removeAllClientChatChanels();
                             $user->addClientChatChanels($multipleForm->client_chat_user_channel, Auth::id());
                             if ($userClientChatData && $userClientChatData->isRegisteredInRc()) {
@@ -526,6 +534,12 @@ class EmployeeController extends FController
                                 $this->clientChatUserAccessService->disableUserAccessToAllChats($user->id);
                             }
                             $transaction->commit();
+                            $user->addLog(
+                                \Yii::$app->id,
+                                Yii::$app->user->id,
+                                ["client_chat_user_channel" => $oldClientChatUserChannel],
+                                ["client_chat_user_channel" => $multipleForm->getChangedClientChatsChannels()]
+                            );
                         } catch (\Throwable $e) {
                             $transaction->rollBack();
                             Yii::error($e->getMessage(), 'Employee:list:multipleUpdate:clientChatChannels');
@@ -549,6 +563,12 @@ class EmployeeController extends FController
                             $user->removeAllRoles();
                             $user->addNewRoles($multipleForm->form_roles);
                             $transaction->commit();
+                            $user->addLog(
+                                \Yii::$app->id,
+                                Yii::$app->user->id,
+                                ["roles" => $user->getRoles(true)],
+                                ["roles" => $multipleForm->form_roles]
+                            );
                         } catch (\Throwable $e) {
                             $transaction->rollBack();
                             Yii::error($e->getMessage(), 'Employee:list:multipleUpdate:userRoles');
