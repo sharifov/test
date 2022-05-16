@@ -32,6 +32,7 @@ class FieldAccess
     {
         return $this->canEdit('user_departments')
             || $this->canEdit('form_roles')
+            || $this->canEdit('user_groups')
             || $this->canEdit('status')
             || $this->canEdit('up_work_start_tm')
             || $this->canEdit('up_work_minutes')
