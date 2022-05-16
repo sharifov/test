@@ -2,6 +2,7 @@
 
 use common\models\Employee;
 use console\migrations\RbacMigrationService;
+use src\helpers\app\DBHelper;
 use yii\db\Migration;
 
 /**
@@ -27,6 +28,8 @@ class m220427_113117_create_tbl_shift_schedule_request extends Migration
         if ($this->db->driverName === 'mysql') {
             $tableOptions = 'CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE=InnoDB';
         }
+
+        DBHelper::dropTableIfExists('{{%shift_schedule_request}}');
 
         $this->createTable('{{%shift_schedule_request}}', [
             'ssr_id' => $this->primaryKey(),
