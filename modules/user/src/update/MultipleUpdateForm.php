@@ -123,7 +123,7 @@ class MultipleUpdateForm extends Model
             ['user_groups', IsArrayValidator::class],
             ['user_groups', 'each', 'rule' => ['in', 'range' => array_keys($this->availableList->getUserGroups())]],
 
-            ['user_groups_action', 'default', 'value' => 1],
+            ['user_groups_action', 'default', 'value' => self::GROUP_ADD],
             ['user_groups_action', 'integer'],
             ['user_groups_action', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
 
