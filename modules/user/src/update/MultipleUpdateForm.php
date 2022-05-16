@@ -4,6 +4,8 @@ namespace modules\user\src\update;
 
 use common\components\validators\IsArrayValidator;
 use common\models\Employee;
+use common\models\Department;
+use src\model\clientChatChannel\entity\ClientChatChannel;
 use yii\base\Model;
 
 /**
@@ -213,6 +215,26 @@ class MultipleUpdateForm extends Model
             'up_auto_redial' => 'Auto redial',
             'up_kpi_enable' => 'KPI enable',
         ];
+    }
+
+    public function getUserDepartmens(): array
+    {
+        $departments = Department::find()->where(['in', 'dep_id', $this->user_departments])->orderBy(['dep_name' => SORT_ASC])->all();
+        if ($departments) {
+            return \yii\helpers\ArrayHelper::map($departments, 'dep_id', 'dep_name');
+        }
+
+        return [];
+    }
+
+    public function getChangedClientChatsChannels(): array
+    {
+        $clientChatChannel = ClientChatChannel::find()->where(['in', 'ccc_id', $this->client_chat_user_channel])->orderBy(['ccc_name' => SORT_ASC])->all();
+        if ($clientChatChannel) {
+            return \yii\helpers\ArrayHelper::map($clientChatChannel, 'ccc_id', 'ccc_name');
+        }
+
+        return [];
     }
 
     public function groupActionIsReplace(): bool
