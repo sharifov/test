@@ -388,6 +388,8 @@ if ($model->isDeclined()) {
                         <?php echo QuoteHelper::formattedPenalties($model->getPenaltiesInfo(), $model->getKeysInfo()) ?>
 
                         <?php echo QuoteHelper::formattedProviderProject($model) ?>
+
+                        <?php echo QuoteHelper::formattedHotels($model->getKeysInfo(), $model->getOriginalSearchDataCurrency()) ?>
                     </div>
             </div>
             <div class="col-md-6">

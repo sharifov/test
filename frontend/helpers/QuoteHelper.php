@@ -81,6 +81,67 @@ class QuoteHelper
         return '';
     }
 
+    public static function formattedHotels(?array $keys, string $currency, string $class = 'quote__badge bg-dark'): string
+    {
+        if (self::checkHotelsInfo($keys)) {
+            return '<span class="' . $class . '"
+                data-toggle="tooltip"
+                data-html="true"
+                title="' . self::innerHotels($keys, $currency) . '">
+                    <i class="fa fa-hotel"></i>
+            </span>';
+        }
+        return '';
+    }
+
+    public static function innerHotels(array $keys, string $currency)
+    {
+        $hotels = [];
+        $out = '';
+        if (empty($keys['hotels'])) {
+            return '';
+        }
+
+        $hotels = $keys['hotels'];
+
+        if (!empty($hotels['options'])) {
+            $out .= "<div class='tooltip_quote_info_box'>";
+            $out .= '<p>Hotels: </p>';
+
+            foreach ($hotels['options'] as $option) {
+                $out .= '<ul>';
+                if ($option['included']) {
+                    if (isset($option['refundable'])) {
+                        $out .= '<li>Refundable : <strong>' . ($option['refundable'] ? 'Yes' : 'No') . '</strong></li>';
+                    }
+                    if (isset($option['totalPrice'])) {
+                        $out .= '<li>Total Price : <strong>' . $option['totalPrice'] . ' ' . $currency . '</strong></li>';
+                    }
+                }
+                $out .= '</ul>';
+            }
+            $out .= '</div>';
+
+            return $out;
+        }
+
+        return '';
+    }
+
+    public static function checkHotelsInfo(array $keys): bool
+    {
+        $info = [];
+        $exits = false;
+        if (!empty($keys['hotels'])) {
+            $info = $keys['hotels'];
+        }
+        if (!empty($info['options'])) {
+            $exits = true;
+        }
+
+        return $exits;
+    }
+
     public static function formattedRanking(?array $meta, string $class = 'quote__badge bg-info'): string
     {
         if (!empty($meta['rank'])) {

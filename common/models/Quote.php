@@ -2790,6 +2790,14 @@ class Quote extends \yii\db\ActiveRecord
         return null;
     }
 
+    public function getOriginalSearchDataCurrency(): ?string
+    {
+        if (($originSearchData = $this->getJsonOriginSearchData()) && !empty($originSearchData['currency'])) {
+            return $originSearchData['currency'];
+        }
+        return null;
+    }
+
     public function getJsonOriginSearchData(): ?array
     {
         if (!empty($this->origin_search_data)) {
