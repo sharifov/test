@@ -36,7 +36,7 @@ use common\components\bootstrap4\activeForm\ActiveForm;
     <?php echo $form->field($leadUserConversionAddForm, 'leadId')->hiddenInput()->label(false) ?>
 
     <?php echo $form->field($leadUserConversionAddForm, 'userId')
-        ->dropDownList($userList, ['prompt' => '-', 'required' => 'required'])
+        ->dropDownList($userList, ['prompt' => '-'])
         ->label('Employee') ?>
 
     <div class="form-group text-center">

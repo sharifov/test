@@ -72,9 +72,6 @@ class LeadUserConversionController extends FController
 
         $form = new LeadUserConversionAddForm($leadId);
         if ($form->load(Yii::$app->request->post())) {
-            if (!$form->userId) {
-                return $this->asJson(['success' => false, 'message' => 'Field cannot be blank.']);
-            }
             if ($form->validate()) {
                 $leadUserConversionRepository = new LeadUserConversionRepository();
                 try {
