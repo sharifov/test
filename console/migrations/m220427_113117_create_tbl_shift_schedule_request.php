@@ -40,15 +40,15 @@ class m220427_113117_create_tbl_shift_schedule_request extends Migration
             'ssr_updated_user_id' => $this->integer(),
         ], $tableOptions);
 
-        $this->addForeignKey(
-            'FK-shift_schedule_request-ssr_uss_id',
-            '{{%shift_schedule_request}}',
-            'ssr_uss_id',
-            '{{%user_shift_schedule}}',
-            'uss_id',
-            'CASCADE',
-            'CASCADE'
-        );
+//        $this->addForeignKey(
+//            'FK-shift_schedule_request-ssr_uss_id',
+//            '{{%shift_schedule_request}}',
+//            'ssr_uss_id',
+//            '{{%user_shift_schedule}}',
+//            'uss_id',
+//            'CASCADE',
+//            'CASCADE'
+//        );
 
         $this->addForeignKey(
             'FK-shift_schedule_request-ssr_sst_id',
