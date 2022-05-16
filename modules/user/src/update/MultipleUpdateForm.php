@@ -65,6 +65,16 @@ class MultipleUpdateForm extends Model
     public FieldAccess $fieldAccess;
     public AvailableList $availableList;
 
+    public const GROUP_ADD = 1;
+    public const GROUP_REPLACE = 2;
+    public const GROUP_DELETE = 3;
+
+    public const GROUPS_ACTION_LIST = [
+        self::GROUP_ADD => 'Add',
+        self::GROUP_REPLACE => 'Replace',
+        self::GROUP_DELETE => 'Remove',
+    ];
+
     public function __construct(Employee $updaterUser, $config = [])
     {
         $this->fieldAccess = new FieldAccess($updaterUser, false);
@@ -203,5 +213,10 @@ class MultipleUpdateForm extends Model
             'up_auto_redial' => 'Auto redial',
             'up_kpi_enable' => 'KPI enable',
         ];
+    }
+
+    public function groupActionIsReplace(): bool
+    {
+        return $this->user_groups_action === self::GROUP_REPLACE;
     }
 }

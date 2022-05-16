@@ -434,7 +434,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                                     'pluginOptions' => ['allowClear' => true],
                                 ]); ?>
 
-                                <?= $form->field($multipleForm, 'user_groups_action')->dropDownList([1 => 'add', 2 => 'replace', 3 => 'remove']) ?>
+                                <?= $form->field($multipleForm, 'user_groups_action')->dropDownList(MultipleUpdateForm::GROUPS_ACTION_LIST) ?>
                             <?php endif; ?>
                             <?php if ($multipleForm->fieldAccess->canEdit('status')) : ?>
                                 <?= $form->field($multipleForm, 'status')->dropDownList($multipleForm->availableList->getStatuses(), ['prompt' => '']) ?>

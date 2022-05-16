@@ -557,17 +557,17 @@ class EmployeeController extends FController
                     }
 
                     if ($multipleForm->fieldAccess->canEdit('user_groups')) {
-                        if (!empty($multipleForm->user_groups) || $multipleForm->user_groups_action === 2) {
+                        if (!empty($multipleForm->user_groups) || $multipleForm->groupActionIsReplace()) {
                             $oldUserGroupsIds = array_keys($user->getUserGroupList());
 
                             $groupsForAdd = [];
                             $groupsForDelete = [];
 
                             switch ($multipleForm->user_groups_action) {
-                                case 1:
+                                case MultipleUpdateForm::GROUP_ADD:
                                     $groupsForAdd = array_diff($multipleForm->user_groups, $oldUserGroupsIds);
                                     break;
-                                case 2:
+                                case MultipleUpdateForm::GROUP_REPLACE:
                                     if (empty($multipleForm->user_groups)) {
                                         $groupsForDelete = $oldUserGroupsIds;
                                     } else {
@@ -575,8 +575,7 @@ class EmployeeController extends FController
                                     }
 
                                     break;
-
-                                case 3:
+                                case MultipleUpdateForm::GROUP_DELETE:
                                     $groupsForDelete = array_intersect($multipleForm->user_groups, $oldUserGroupsIds);
                                     break;
                             }
