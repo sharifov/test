@@ -42,6 +42,8 @@ class MultipleUpdateForm extends Model
     public $status;
 
     public $form_roles;
+    public $user_groups;
+    public $user_groups_action;
     public $user_departments;
     public $client_chat_user_channel;
 
@@ -106,6 +108,14 @@ class MultipleUpdateForm extends Model
             ['form_roles', 'default', 'value' => []],
             ['form_roles', IsArrayValidator::class],
             ['form_roles', 'each', 'rule' => ['in', 'range' => array_keys($this->availableList->getRoles())]],
+
+            ['user_groups', 'default', 'value' => []],
+            ['user_groups', IsArrayValidator::class],
+            ['user_groups', 'each', 'rule' => ['in', 'range' => array_keys($this->availableList->getUserGroups())]],
+
+            ['user_groups_action', 'default', 'value' => 1],
+            ['user_groups_action', 'integer'],
+            ['user_groups_action', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
 
             ['user_departments', 'default', 'value' => []],
             ['user_departments', IsArrayValidator::class],
@@ -176,6 +186,7 @@ class MultipleUpdateForm extends Model
             'user_list_json' => 'Selected Users JSON',
             'status' => 'Status',
             'form_roles' => 'Roles',
+            'user_groups' => 'Assign User Groups',
             'user_departments' => 'Departments',
             'client_chat_user_channel' => 'Client Chat Channels',
             'up_work_start_tm' => 'Work Start Time',
