@@ -139,19 +139,3 @@ use yii\widgets\ActiveForm;
   <?php ActiveForm::end(); ?>
 
 </div>
-
-<?php
-
-$js = <<<JS
-$('#durationTimeMinutes').on('keyup change', function () {
-    let val = $(this).val();
-    let hours = (val ? (val / 60) : 0);
-    if (hours % 1 === 0) {
-        hours = Math.trunc(hours);
-    } else {
-        hours = hours.toFixed(2);
-    }
-    $('#durationTimeHours').html(hours);
-});
-JS;
-$this->registerJs($js);
