@@ -672,7 +672,16 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Shift Events', 'url' => ['/user-shift-schedule-crud/index'],
                             'title' => 'User Shift Schedule Events'],
 
-
+                        [
+                            'label' => 'Shift Requests',
+                            'url' => ['/shift/user-shift-schedule-request/index'],
+                            'title' => 'User Shift Schedule Request',
+                        ],
+                        [
+                            'label' => 'Shift Requests History',
+                            'url' => ['/shift/shift-schedule-request/index'],
+                            'title' => 'User Shift Schedule Request History'
+                        ],
 
                         /** @abac ShiftAbacObject::ACT_USER_SHIFT_ASSIGN, ShiftAbacObject::ACTION_ACCESS, Access menu UserShiftAssign */
                         [

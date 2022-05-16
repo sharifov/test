@@ -71,6 +71,11 @@ $subtypeTotalData = [];
             ['legend-ajax'],
             ['class' => 'btn btn-info', 'id' => 'btn-legend']
         ) ?>
+        <?= Html::a(
+            '<i class="fa fa-info-circle"></i> Schedule Request',
+            ['schedule-request-ajax'],
+            ['class' => 'btn btn-primary', 'id' => 'btn-schedule-request']
+        ) ?>
 
     </p>
 
@@ -405,7 +410,7 @@ $js = <<<JS
     var shiftScheduleDataUrl = '$ajaxUrl';
     var openModalEventUrl = '$openModalEventUrl';
     var calendarEl = document.getElementById('calendar');
-
+    var selectedRange = null;
     var calendar = new FullCalendar.Calendar(calendarEl, {
         //initialView: 'dayGridWeek',
         initialView: 'dayGridMonth',
@@ -574,6 +579,10 @@ $js = <<<JS
             updateTimeLineList(info.startStr, info.endStr);
             // console.log(info);
             // console.log('selected ' + info.startStr + ' to ' + info.endStr);
+            selectedRange = {
+                start: info.startStr,
+                end: info.endStr
+            }
           }
     });
 
@@ -604,16 +613,56 @@ $js = <<<JS
         let modal = $('#modal-md');
         let url = $(this).attr('href');
         $('#modal-md-label').html('<i class="fa fa-info-circle"></i> Schedule Legend');
-        modal.find('.modal-body').html('');
-        modal.find('.modal-body').load(url, function( response, status, xhr ) {
-            if (status === 'error') {
-                alert(response);
-            } else {
-                modal.modal('show');
-            }   
-        });
+        getRequest(modal, url);
     });
     
+    $(document).on('click', '#btn-schedule-request', function(e) {
+        e.preventDefault();
+        let modal = $('#modal-md');
+        let url = processingUrlWithQueryParam($(this).attr('href'));
+        $('#modal-md-label').html('<i class="fa fa-info-circle"></i> Schedule Request');
+        getRequest(modal, url);
+        selectedRange = null;
+    });
+    
+    function getRequest(modal, url) {
+        modal.find('.modal-body').html(loaderTemplate);
+        modal.modal('show');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            if (status === 'error') {
+                modal.modal('hide');
+                alert(response);
+            }   
+        });
+    }
+    
+    function loaderTemplate(modal) {
+        return '<div class="text-center"> \
+                    <div class="spinner-border m-5" role="status"> \
+                        <span class="sr-only">Loading...</span> \
+                    </div> \
+                </div>';
+    }
+    
+    function processingUrlWithQueryParam(url) {
+        if (!selectedRange) {
+            return url;
+        }
+
+        var end = new Date(selectedRange.end);
+        end.setDate(end.getDate() - 1);
+        end.setHours(23, 59);
+        var data = {
+            start: selectedRange.start,            
+            end: end.getFullYear() + '-' + ('0' + (end.getMonth() + 1)).slice(-2) + '-' + ('0' + end.getDate()).slice(-2) + ' ' + end.getHours() + ':' + end.getMinutes()           
+        };
+        
+        var prefix = '?';
+        if (url.indexOf('?') !== -1) {
+            prefix = '&';
+        }
+        return url + prefix + $.param(data);
+    }
 
     function updateTimeLineList(startDate, endDate) 
     {
