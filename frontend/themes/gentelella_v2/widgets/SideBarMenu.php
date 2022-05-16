@@ -381,6 +381,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Visitor Data', 'url' => ['/client-chat-visitor-data-crud/index']],
                         ['label' => 'Client Chat QA', 'url' => ['/client-chat-qa/index']],
                         ['label' => 'Feedback', 'url' => ['/client-chat-feedback-crud/index']],
+                        ['label' => 'Chat Survey', 'url' => ['/client-chat-survey/index']],
                         ['label' => 'Last Message', 'url' => ['/client-chat-last-message-crud/index']],
                         ['label' => 'Hold', 'url' => ['/client-chat-hold-crud/index']],
                         ['label' => 'Unread messages', 'url' => ['/client-chat-unread/index']],
@@ -1101,9 +1102,9 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 [
                     'label' => Yii::t('requestControl', 'Request Control'), 'url' => 'javascript:', 'icon' => 'folder',
                     'items' => [
-                        ['label' => 'User Site Activity', 'url' => ['/requestControl/user-site-activity'], 'icon' => 'bars'],
-                        ['label' => 'User Activity Report', 'url' => ['/requestControl/user-site-activity/report'], 'icon' => 'bar-chart'],
-                        ['label' => 'Request Control Manage', 'url' => ['/requestControl/manage'], 'icon' => 'bars']
+                        ['label' => 'User Site Activity', 'url' => ['/request-control/user-site-activity/index'], 'icon' => 'bars'],
+                        ['label' => 'User Activity Report', 'url' => ['/request-control/user-site-activity/report'], 'icon' => 'bar-chart'],
+                        ['label' => 'Request Control Manage', 'url' => ['/request-control/manage/index'], 'icon' => 'bars']
                     ]
                 ],
                 ['label' => 'Global Model Logs', 'url' => ['/global-log/index'], 'icon' => 'list'],
