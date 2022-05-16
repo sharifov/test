@@ -55,7 +55,7 @@ class ShiftScheduleForm extends Model
             ['ssr_cron_expression', 'string', 'max' => 100],
             ['ssr_cron_expression_exclude', 'string', 'max' => 100],
 
-            ['ssr_duration_time', 'integer', 'max' => self::MAX_VALUE_INT],
+            ['ssr_duration_time', 'datetime', 'format' => 'php:H:i'],
 
             ['ssr_enabled', 'required'],
             ['ssr_enabled', 'integer', 'max' => 1, 'min' => 0],
@@ -66,8 +66,7 @@ class ShiftScheduleForm extends Model
                 'targetClass' => Shift::class, 'targetAttribute' => ['ssr_shift_id' => 'sh_id']],
 
             ['ssr_start_time_loc', 'required'],
-            [['ssr_start_time_loc', 'ssr_end_time_loc'], 'safe'],
-            ['ssr_end_time_loc','validateLocalTimes'],
+            [['ssr_start_time_loc', 'ssr_end_time_loc'], 'datetime', 'format' => 'php:H:i'],
 
             ['ssr_start_time_utc', 'required'],
             [['ssr_start_time_utc', 'ssr_end_time_utc'], 'safe'],
@@ -116,20 +115,13 @@ class ShiftScheduleForm extends Model
         return true;
     }
 
-    public function validateLocalTimes()
-    {
-        if (strtotime($this->ssr_end_time_loc) <= strtotime($this->ssr_start_time_loc)) {
-            $this->addError('ssr_start_time_loc', 'Please give correct Start and End time');
-            $this->addError('ssr_end_time_loc', 'Please give correct Start and End time');
-        }
-    }
-
     /**
      * @return void
      */
     public function setTimeComplete(): void
     {
-        $this->ssr_duration_time = (strtotime($this->ssr_end_time_loc) - strtotime($this->ssr_start_time_loc)) / 60;
+        $this->ssr_duration_time = $this->hoursToMinutes($this->ssr_duration_time);
+        $this->ssr_end_time_loc = date('H:i', strtotime($this->ssr_start_time_loc) + $this->ssr_duration_time * 60);
 
         if ($this->ssr_timezone) {
             $this->ssr_start_time_utc = Employee::convertToUTC(
@@ -163,5 +155,29 @@ class ShiftScheduleForm extends Model
     public function getDurationTimeHours(): int
     {
         return $this->ssr_duration_time ? ($this->ssr_duration_time / 60) : 0;
+    }
+
+    /**
+     * @param $hours
+     * @return int
+     */
+    public function hoursToMinutes($hours): int
+    {
+        $minutes = 0;
+        if (strpos($hours, ':') !== false) {
+            list($hours, $minutes) = explode(':', $hours);
+        }
+        return $hours * 60 + $minutes;
+    }
+
+    /**
+     * @param $minutes
+     * @return string
+     */
+    public static function minutesToHours($minutes): string
+    {
+        $hours = (int)($minutes / 60);
+        $minutes -= $hours * 60;
+        return sprintf("%d:%02.0f", $hours, $minutes);
     }
 }

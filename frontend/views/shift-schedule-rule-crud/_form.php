@@ -6,6 +6,7 @@ use kartik\select2\Select2;
 use kartik\time\TimePicker;
 use modules\shiftSchedule\src\entities\shift\ShiftQuery;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
+use modules\shiftSchedule\src\forms\ShiftScheduleForm;
 use yii\bootstrap4\Html;
 use yii\bootstrap4\Tabs;
 use yii\widgets\ActiveForm;
@@ -13,6 +14,7 @@ use yii\widgets\ActiveForm;
 /* @var $this yii\web\View */
 /* @var $model \modules\shiftSchedule\src\forms\ShiftScheduleForm */
 /* @var $form ActiveForm */
+$model->ssr_duration_time = $model->ssr_duration_time ? ShiftScheduleForm::minutesToHours($model->ssr_duration_time) : 0;
 ?>
 
 <div class="shift-schedule-rule-form">
@@ -50,6 +52,7 @@ use yii\widgets\ActiveForm;
 
         <div class="row">
             <div class="col-md-6">
+                <pre><?php var_dump($model->ssr_start_time_loc);?></pre>
             <?= $form->field($model, 'ssr_start_time_loc')->widget(TimePicker::class, [
                 'pluginOptions' => [
                     'showSeconds' => false,
@@ -60,14 +63,15 @@ use yii\widgets\ActiveForm;
             ])->label('Start Time (Local)') ?>
             </div>
             <div class="col-md-6">
-            <?= $form->field($model, 'ssr_end_time_loc')->widget(TimePicker::class, [
+                <pre><?php var_dump($model->ssr_duration_time);?></pre>
+            <?= $form->field($model, 'ssr_duration_time')->widget(TimePicker::class, [
                 'pluginOptions' => [
                     'showSeconds' => false,
                     'showMeridian' => false,
                     'minuteStep' => 1,
                     'secondStep' => 5,
                 ]
-            ])->label('End Time (Local)'); ?>
+            ])->label('Duration Time (Hours:Minutes)'); ?>
             </div>
         </div>
 
