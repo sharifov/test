@@ -28,6 +28,8 @@ use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
+use yii\helpers\Url;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotAcceptableHttpException;
@@ -489,10 +491,13 @@ class ShiftScheduleController extends FController
             foreach ($userGroups as $key => $group) {
                 $resource = [
                     'id' => 'ug-' . $group->ug_id,
-                    'name' => $group->ug_name,
+                    'name' => '<i class="fa fa-users"></i> ' . $group->ug_name,
                     'color' => '#1dab2f',
                     'title' => $group->ug_key,
-                    'collapsed' => $key !== 0
+                    'collapsed' => $key !== 0,
+                    'isGroup' => true,
+                    'description' => '',
+                    'icons' => []
                 ];
 
                 $users = Employee::find()
@@ -506,12 +511,24 @@ class ShiftScheduleController extends FController
                     foreach ($users as $user) {
                         $userList[] = [
                             'id' => 'us-' . $user->id,
-                            'name' => $user->username,
+                            'name' => '<i class="fa fa-user"></i> ' . $user->username,
                             'color' => '#1dab2f',
-                            'title' => $user->email
+                            'title' => $user->email,
+                            'isGroup' => false,
+                            'icons' => [
+                                Html::a('<i class="fa fa-calendar"></i>', Url::to(['/shift-schedule/user', 'id' => $user->id]), [
+                                    'title' => 'User Shift Calendar',
+                                    'target' => '_blank'
+                                ]),
+                                Html::a('<i class="fa fa fa-user-plus">', Url::to(['/shift/user-shift-assign/index', 'UserShiftAssignListSearch[userId]' => $user->id]), [
+                                    'title' => 'User Shift Assign',
+                                    'target' => '_blank'
+                                ])
+                            ],
+                            'description' => ''
                         ];
                     }
-                    $resource['title'] = 'users: ' . count($userList);
+                    $resource['description'] = 'users: ' . count($userList);
                     $resource['children'] = $userList;
                 }
                 $resourceList[] = $resource;
