@@ -988,7 +988,6 @@ class Quote extends \yii\db\ActiveRecord
                     $flightDuration = intval($flightDuration) + (intval($depCity->dst) * 60) - (intval($arrCity->dst) * 60);
                 } else {
                     $flightDuration = ($arrDateTime->getTimestamp() - $depDateTime->getTimestamp()) / 60;
-                    $flightDuration = intval($flightDuration) + (intval($depCity->dst) * 60) - (intval($arrCity->dst) * 60);
                 }
 
                 $airline = null;
@@ -1285,8 +1284,7 @@ class Quote extends \yii\db\ActiveRecord
                 $flightDuration = ($arrivalTime->getTimestamp() - $departureTime->getTimestamp()) / 60;
                 $trips[$key]['qt_duration'] = intval($flightDuration) + (intval($depCity->dst) * 60) - (intval($arrCity->dst) * 60);
             } else {
-                $flightDuration = ($arrivalTime->getTimestamp() - $departureTime->getTimestamp()) / 60;
-                $trips[$key]['qt_duration'] = intval($flightDuration) + (intval($depCity->dst) * 60) - (intval($arrCity->dst) * 60);
+                $trips[$key]['qt_duration'] = ($arrivalTime->getTimestamp() - $departureTime->getTimestamp()) / 60;
             }
 
             $keySegment = [];
