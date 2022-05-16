@@ -25,12 +25,24 @@ use common\models\GlobalLog;
             </th>
             <td style="width: 40%; word-break: break-word;">
                 <span class="item-new">
-                    <?= isset($data[0]) ? \yii\helpers\Html::encode($data[0]) : '-' ?>
+                    <?php
+                    if (isset($data[0])) {
+                        echo is_array($data[0]) ? '<pre>' . implode(', ', $data[0]) . '</pre>' : \yii\helpers\Html::encode($data[0]);
+                    } else {
+                        echo '-';
+                    }
+                    ?>
                 </span>
             </td>
             <td style="width: 40%; word-break: break-word;">
                 <span class="item-old">
-                    <?= isset($data[1]) ? \yii\helpers\Html::encode($data[1]) : '-' ?>
+                    <?php
+                    if (isset($data[1])) {
+                        echo is_array($data[1]) ? '<pre>' . implode(', ', $data[1]) . '</pre>' : \yii\helpers\Html::encode($data[1]);
+                    } else {
+                        echo '-';
+                    }
+                    ?>
                 </span>
             </td>
         </tr>
