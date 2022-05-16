@@ -4,6 +4,7 @@ namespace modules\shiftSchedule\controllers;
 
 use DomainException;
 use frontend\controllers\FController;
+use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\search\ShiftScheduleRequestSearch;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
 use modules\shiftSchedule\src\forms\ScheduleRequestForm;
@@ -12,6 +13,8 @@ use src\auth\Auth;
 use src\helpers\app\AppHelper;
 use Throwable;
 use Yii;
+use yii\filters\AccessControl;
+use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotAcceptableHttpException;
 use yii\web\NotFoundHttpException;
@@ -19,6 +22,29 @@ use yii\web\Response;
 
 class UserShiftScheduleRequestController extends FController
 {
+    public function behaviors(): array
+    {
+        $behaviors = [
+            'access' => [
+                'class' => AccessControl::class,
+                'rules' => [
+                    /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_ACCESS, Access to page shift-schedule/index */
+                    [
+                        'actions' => ['index', 'schedule-pending-requests', 'schedule-all-requests',
+                            'my-data-ajax', 'get-event', 'get-history'],
+                        'allow' => \Yii::$app->abac->can(
+                            null,
+                            ShiftAbacObject::ACT_USER_SHIFT_SCHEDULE,
+                            ShiftAbacObject::ACTION_ACCESS
+                        ),
+                        'roles' => ['@'],
+                    ],
+                ],
+            ],
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
+
     public function actionIndex(): string
     {
         $user = Yii::$app->user->identity;
