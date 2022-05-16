@@ -156,11 +156,15 @@ $this->params['breadcrumbs'][] = $this->title;
                     'clientOptions' => [
                         'autoclose' => true,
                         'format' => 'yyyy-mm-dd',
+                        'clearBtn' => true
                     ],
                     'options' => [
                         'autocomplete' => 'off',
                         'placeholder' => 'Choose Date'
                     ],
+                    'clientEvents' => [
+                        'clearDate' => 'function (e) {$(e.target).find("input").change();}',
+                    ]
                 ]),
                 'enableSorting' => !$user->isAgent(),
             ],
