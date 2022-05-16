@@ -21,11 +21,11 @@ class UserRole
      */
     public static function getEnvListWOCache(): array
     {
-        $query = (new Query())->select('b.*')
-            ->from(['a' => 'auth_assignment', 'b' => 'auth_item'])
-            ->where('{{a}}.[[item_name]]={{b}}.[[name]]')
-            ->andWhere(['b.type' => 1]);
-        return ArrayHelper::map($query->all(), 'name', 'name');
+        $query = (new Query())->select(['name', 'CONCAT(description, " (", name, ")") as description_name'])
+            ->from('auth_item')
+            ->where(['type' => 1]);
+
+        return ArrayHelper::map($query->all(), 'name', 'description_name');
     }
 
 
