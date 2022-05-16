@@ -6,9 +6,11 @@
  * @var ActiveDataProvider $dataProvider
  */
 
+use common\components\grid\DateTimeColumn;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\search\ShiftScheduleRequestSearch;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
+use src\widgets\UserSelect2Widget;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -36,23 +38,29 @@ $shiftScheduleTypes = ShiftScheduleType::getList(true);
                     'style' => 'width: 5%',
                 ],
             ],
-            [
-                'attribute' => 'ssr_uss_id',
-                'options' => [
-                    'style' => 'width: 10%',
-                ],
-            ],
+//            [
+//                'attribute' => 'ssr_uss_id',
+//                'options' => [
+//                    'style' => 'width: 10%',
+//                ],
+//            ],
             [
                 'attribute' => 'ssr_sst_id',
-                'value' => function (ShiftScheduleRequest $model) use ($shiftScheduleTypes) {
-                    return $shiftScheduleTypes[$model->ssr_sst_id] ?? $model->ssr_sst_id;
+                'value' => function (ShiftScheduleRequest $model) {
+                    return Html::a(
+                        $model->getScheduleTypeTitle() ?? $model->ssr_sst_id,
+                        ['/user-shift-schedule-crud/view', 'id' => $model->ssr_uss_id],
+                    );
                 },
                 'options' => [
                     'style' => 'width: 20%',
                 ],
-                'filter' => $shiftScheduleTypes,
+                'label' => 'Schedule Type',
+                'filter' => ShiftScheduleType::getList(true),
+                'format' => 'raw',
             ],
             [
+                'label' => 'Status',
                 'attribute' => 'ssr_status_id',
                 'value' => function (ShiftScheduleRequest $model) {
                     $statusName = $model->getStatusName();
@@ -77,10 +85,44 @@ $shiftScheduleTypes = ShiftScheduleType::getList(true);
                     'style' => 'width: 20%',
                 ],
             ],
-            'ssr_created_dt',
-            'ssr_updated_dt',
-            'ssr_created_user_id',
-            'ssr_updated_user_id',
+            [
+                'attribute' => 'ssr_created_dt',
+                'label' => 'Created',
+                'class' => DateTimeColumn::class,
+                'value' => function (ShiftScheduleRequest $model) {
+                    return $model->ssr_created_dt ?? '';
+                },
+                'format' => 'byUserDateTime',
+            ],
+//            'ssr_updated_dt',
+            [
+                'attribute' => 'ssr_created_user_id',
+                'options' => [
+
+                ],
+                'value' => function (ShiftScheduleRequest $model) {
+                    return $model->ssrCreatedUser->nickname ?? $model->ssr_created_user_id;
+                },
+                'label' => 'User create request',
+                'filter' => UserSelect2Widget::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'ssr_created_user_id'
+                ]),
+            ],
+            [
+                'attribute' => 'ssr_updated_user_id',
+                'options' => [
+
+                ],
+                'value' => function (ShiftScheduleRequest $model) {
+                    return $model->ssrUpdatedUser->nickname ?? $model->ssr_updated_user_id;
+                },
+                'label' => 'User make decision',
+                'filter' => UserSelect2Widget::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'ssr_updated_user_id'
+                ]),
+            ],
         ],
     ]); ?>
 
