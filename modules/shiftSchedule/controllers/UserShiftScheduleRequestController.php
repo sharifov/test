@@ -154,4 +154,24 @@ class UserShiftScheduleRequestController extends FController
         }
         throw new BadRequestHttpException();
     }
+
+    /**
+     * @param int $id
+     * @return string
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function actionGetHistory(int $id): string
+    {
+        $searchModel = new ShiftScheduleRequestSearch();
+        $dataProvider = $searchModel->search([
+            $searchModel->formName() => [
+                'ssr_uss_id' => $id,
+            ],
+        ]);
+
+        return $this->renderAjax('request-history', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
 }

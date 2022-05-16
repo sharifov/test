@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * @var View $this
  * @var ActiveDataProvider $dataProviderAll
  * @var ShiftScheduleRequestSearch $searchModelAll
  */
@@ -13,9 +14,11 @@ use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use src\widgets\UserSelect2Widget;
 use yii\data\ActiveDataProvider;
+use yii\grid\ActionColumn;
 use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\helpers\Url;
+use yii\web\View;
 
 ?>
 
@@ -89,26 +92,26 @@ use yii\helpers\Url;
                         'format' => 'byUserDateTime',
                         'filter' => false
                     ],
-                    [
-                        'attribute' => 'ssr_created_dt',
-                        'label' => 'Request created',
-                        'value' => static function (ShiftScheduleRequestSearch $model) {
-                            return $model->ssr_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->ssr_created_dt)) : '-';
-                        },
-                        'format' => 'raw',
-                        'filter' => DatePicker::widget([
-                            'model' => $searchModelAll,
-                            'attribute' => 'ssr_created_dt',
-                            'clientOptions' => [
-                                'autoclose' => true,
-                                'format' => 'yyyy-mm-dd',
-                            ],
-                            'options' => [
-                                'autocomplete' => 'off',
-                                'placeholder' => 'Choose Date'
-                            ],
-                        ]),
-                    ],
+//                    [
+//                        'attribute' => 'ssr_created_dt',
+//                        'label' => 'Request created',
+//                        'value' => static function (ShiftScheduleRequestSearch $model) {
+//                            return $model->ssr_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->ssr_created_dt)) : '-';
+//                        },
+//                        'format' => 'raw',
+//                        'filter' => DatePicker::widget([
+//                            'model' => $searchModelAll,
+//                            'attribute' => 'ssr_created_dt',
+//                            'clientOptions' => [
+//                                'autoclose' => true,
+//                                'format' => 'yyyy-mm-dd',
+//                            ],
+//                            'options' => [
+//                                'autocomplete' => 'off',
+//                                'placeholder' => 'Choose Date'
+//                            ],
+//                        ]),
+//                    ],
                     [
                         'attribute' => 'ssr_created_user_id',
                         'options' => [
@@ -158,10 +161,45 @@ use yii\helpers\Url;
                         'format' => 'raw',
                     ],
                     'ssr_description',
+                    [
+                        'class' => ActionColumn::class,
+                        'template' => '{history}',
+                        'buttons' => [
+                            'history' => function ($url, ShiftScheduleRequestSearch $model) {
+                                return Html::a(
+                                    '<i class="glyphicon glyphicon-time"></i>',
+                                    [
+                                        'user-shift-schedule-request/get-history',
+                                        'id' => $model->ssr_uss_id,
+                                    ],
+                                    [
+                                        'title' => 'Request history',
+                                        'class' => 'show-history',
+                                        'data' => [
+                                            'pjax' => false,
+                                        ],
+                                    ]
+                                );
+                            }
+                        ],
+                    ],
                 ],
             ]) ?>
         </div>
     </div>
 </div>
 
-
+<?php
+$js = <<<JS
+    var modal = $('#modal-md');
+    $('.show-history').on('click', function (e) {
+        e.preventDefault();
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('History for selected schedule request');
+        modal.modal('show');
+        modal.find('.modal-body')
+             .load($(this).attr('href'));
+    });
+    
+JS;
+$this->registerJs($js);
