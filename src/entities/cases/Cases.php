@@ -414,7 +414,7 @@ class Cases extends ActiveRecord implements Objectable
         }
         $this->recordEvent(new CasesProcessingStatusEvent($this, $this->cs_status, $userId, $this->cs_user_id, $creatorId, $description));
         if (!$this->isOwner($userId)) {
-            $this->setOwner($userId, $creatorId);
+            $this->setOwner($userId);
         }
         if (!$this->isProcessing()) {
             $this->setStatus(CasesStatus::STATUS_PROCESSING);
@@ -507,7 +507,7 @@ class Cases extends ActiveRecord implements Objectable
     /**
      * @param int $userId
      */
-    private function setOwner(int $userId, ?int $creatorId): void
+    private function setOwner(int $userId): void
     {
         if ($this->isOwner($userId)) {
             throw new \DomainException('This user already is owner');
