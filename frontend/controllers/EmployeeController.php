@@ -607,8 +607,15 @@ class EmployeeController extends FController
                     if (empty($multipleForm->form_roles) && $multipleForm->fieldAccess->canEdit('form_roles') && (int)$multipleForm->form_roles_action === $multipleForm::ROLE_REPLACE) {
                         $transaction = Yii::$app->db->beginTransaction();
                         try {
+                            $oldRoles = $user->getRoles(true);
                             $user->removeAllRoles();
                             $transaction->commit();
+                            $user->addLog(
+                                \Yii::$app->id,
+                                Yii::$app->user->id,
+                                ["roles" => $oldRoles],
+                                ["roles" => $multipleForm->form_roles]
+                            );
                         } catch (\Throwable $e) {
                             $transaction->rollBack();
                             Yii::error($e->getMessage(), 'Employee:list:multipleUpdate:userRoles');
@@ -1331,6 +1338,9 @@ class EmployeeController extends FController
                     }
                 }
 
+                if ($form->up_base_amount != null) {
+                    $form->up_base_amount = number_format($form->up_base_amount, 2);
+                }
                 $userParams->setAttributes($form->getValuesOfAvailableAttributes());
                 if (count($userParams->getDirtyAttributes()) > 0) {
                     $userParams->up_updated_user_id = $updaterUser->id;

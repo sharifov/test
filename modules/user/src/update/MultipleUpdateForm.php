@@ -138,8 +138,7 @@ class MultipleUpdateForm extends Model
 
             ['form_roles_action', 'default', 'value' => self::ROLE_ADD],
             ['form_roles_action', 'integer'],
-            ['form_roles_action', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
-//            ['form_roles_action', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
+            ['form_roles_action', 'in', 'range' => array_keys($this::ROLES_ACTION_LIST)],
 
             ['user_groups', 'default', 'value' => []],
             ['user_groups', IsArrayValidator::class],
