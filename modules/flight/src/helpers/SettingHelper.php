@@ -21,9 +21,7 @@ class SettingHelper
     {
         if (!isset(self::$_cache[__FUNCTION__])) {
             $model = ProductTypeRepository::getById(ProductType::PRODUCT_FLIGHT);
-            self::$_cache[__FUNCTION__] = $model
-                ? json_decode($model->getAttribute('pt_settings'), true) ?? []
-                : [];
+            self::$_cache[__FUNCTION__] = $model && $model->pt_settings ? $model->pt_settings : [];
         }
 
         return self::$_cache[__FUNCTION__];

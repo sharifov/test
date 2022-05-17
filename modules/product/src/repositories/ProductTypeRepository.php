@@ -29,7 +29,7 @@ class ProductTypeRepository
             if ($model && $model->pt_settings) {
                 $model->pt_settings = json_decode($model->getAttribute('pt_settings'), true);
             }
-            return ProductType::findOne($id);
+            return $model;
         }, 3600);
     }
 
