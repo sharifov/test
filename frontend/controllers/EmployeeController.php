@@ -90,6 +90,13 @@ class EmployeeController extends FController
                     'delete' => ['POST'],
                 ],
             ],
+            'access' => [
+                'allowActions' => [
+                    'update',
+                    'employee-validation-update',
+                    'acl-rule'
+                ],
+            ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
@@ -186,22 +193,38 @@ class EmployeeController extends FController
 
     public function actionAclRule($id = 0)
     {
-        if (empty($id)) {
-            $model = new EmployeeAcl();
-        } else {
-            $model = EmployeeAcl::findOne(['id' => $id]);
-        }
-
-        $fieldAccess = new FieldAccess(Auth::user(), $model->isNewRecord);
-        if (!$fieldAccess->canEdit('acl_rules_activated')) {
-            throw new ForbiddenHttpException('Access denied.');
-        }
-
         if (!Yii::$app->request->isPost) {
             throw new BadRequestHttpException();
         }
 
-        $attr = Yii::$app->request->post($model->formName());
+        $attr = Yii::$app->request->post('EmployeeAcl');
+
+        if (empty($id)) {
+            $targetUserId = (int)($attr['employee_id'] ?? null);
+            if (!$targetUserId) {
+                throw new BadRequestHttpException('Invalid request. Target user ID is not found.');
+            }
+            $targetUser = Employee::findOne($targetUserId);
+            if (!$targetUser) {
+                throw new NotFoundHttpException('The requested user does not exist.');
+            }
+            $model = new EmployeeAcl();
+        } else {
+            $model = EmployeeAcl::findOne(['id' => $id]);
+            if (!$model) {
+                throw new NotFoundHttpException();
+            }
+            $targetUser = Employee::findOne($model->employee_id);
+            if (!$targetUser) {
+                throw new NotFoundHttpException('The requested user does not exist.');
+            }
+        }
+
+        $fieldAccess = new FieldAccess(Auth::user(), $targetUser, false);
+        if (!$fieldAccess->canEdit('acl_rules_activated')) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
         $model->attributes = $attr;
         if ($model->isNewRecord) {
             $success = $model->save();
@@ -1123,18 +1146,9 @@ class EmployeeController extends FController
 
         $updaterUser = Auth::user();
 
-        if ($targetUser->isSuperAdmin() && !$updaterUser->isSuperAdmin()) {
-            throw new ForbiddenHttpException('Access denied for Superadmin user' . $targetUser->id);
-        }
-
-        if ($targetUser->isOnlyAdmin() && $updaterUser->isUserManager()) {
-            throw new ForbiddenHttpException('Access denied for Admin user: ' . $targetUser->id);
-        }
-
-        if ($updaterUser->isSupervision()) {
-            if (!$updaterUser->isUserGroupIntersection(array_keys($targetUser->getUserGroupList()))) {
-                throw new ForbiddenHttpException('Access denied for this user (invalid user group)');
-            }
+        $fieldAccess = new FieldAccess($updaterUser, $targetUser, false);
+        if (!$fieldAccess->canShowAnyField()) {
+            throw new ForbiddenHttpException('Access denied');
         }
 
         if (!$userParams = $targetUser->userParams) {
@@ -1152,7 +1166,7 @@ class EmployeeController extends FController
             ]);
         }
 
-        $form = new UpdateForm($targetUser, $updaterUser, $userParams, $userProfile);
+        $form = new UpdateForm($targetUser, $updaterUser, $userParams, $userProfile, $fieldAccess);
 
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             $transaction = Yii::$app->db->beginTransaction();
@@ -1465,8 +1479,17 @@ class EmployeeController extends FController
             throw new BadRequestHttpException('Invalid request');
         }
         $targetUser = Employee::findOne($targetUserId);
+        if (!$targetUser) {
+            throw new NotFoundHttpException('The requested user does not exist.');
+        }
 
         $updaterUser = Auth::user();
+
+        $fieldAccess = new FieldAccess($updaterUser, $targetUser, false);
+        if (!$fieldAccess->canShowAnyField()) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
 
         if (!$userParams = $targetUser->userParams) {
             $userParams = new UserParams([
@@ -1483,12 +1506,13 @@ class EmployeeController extends FController
             ]);
         }
 
-        $form = new UpdateForm($targetUser, $updaterUser, $userParams, $userProfile);
+        $form = new UpdateForm($targetUser, $updaterUser, $userParams, $userProfile, $fieldAccess);
 
         if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             return ActiveForm::validate($form);
         }
+
         throw new BadRequestHttpException();
     }
 

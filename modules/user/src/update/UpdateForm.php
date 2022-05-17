@@ -113,11 +113,11 @@ class UpdateForm extends Model
     public FieldAccess $fieldAccess;
     public AvailableList $availableList;
 
-    public function __construct(Employee $targetUser, Employee $updaterUser, UserParams $userParams, UserProfile $userProfile, $config = [])
+    public function __construct(Employee $targetUser, Employee $updaterUser, UserParams $userParams, UserProfile $userProfile, FieldAccess $fieldAccess, $config = [])
     {
         $this->targetUser = $targetUser;
         $this->updaterUser = $updaterUser;
-        $this->fieldAccess = new FieldAccess($updaterUser, false);
+        $this->fieldAccess = $fieldAccess;
         $this->availableList = new AvailableList($updaterUser);
 
         $this->setAttributes($targetUser->getAttributes(), false);

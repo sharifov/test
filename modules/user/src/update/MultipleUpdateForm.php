@@ -63,9 +63,9 @@ class MultipleUpdateForm extends Model
     public FieldAccess $fieldAccess;
     public AvailableList $availableList;
 
-    public function __construct(Employee $updaterUser, $config = [])
+    public function __construct(Employee $updaterUser, FieldAccess $fieldAccess, $config = [])
     {
-        $this->fieldAccess = new FieldAccess($updaterUser, false);
+        $this->fieldAccess = $fieldAccess;
         $this->availableList = new AvailableList($updaterUser);
 
         parent::__construct($config);
