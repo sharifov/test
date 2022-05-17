@@ -66,7 +66,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'value' => static function (
                         ShiftScheduleRule $model
                     ) {
-                        return  '<i class="fa fa-hourglass-end"></i> ' . TimeConverterHelper::getMinutesToHours($model->ssr_duration_time);
+                        return  '<i class="fa fa-hourglass-end"></i> ' . TimeConverterHelper::minutesToHours($model->ssr_duration_time);
                     },
                     'format' => 'raw'
                 ],
