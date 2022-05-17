@@ -147,8 +147,10 @@ class CasesManageService
         }
 
         $this->processing($caseId, $userId, $creatorId, $description);
-        $eventDispatcher = Yii::createObject(EventDispatcher::class);
-        $eventDispatcher->dispatch(new CasesTakeOverEvent($case, $case->cs_user_id, $userId), 'CasesTakeOverEvent_' . $case->cs_id);
+        if ($case->hasOwner()) {
+            $eventDispatcher = Yii::createObject(EventDispatcher::class);
+            $eventDispatcher->dispatch(new CasesTakeOverEvent($case, $case->cs_user_id, $userId), 'CasesTakeOverEvent_' . $case->cs_id);
+        }
     }
 
     /**
