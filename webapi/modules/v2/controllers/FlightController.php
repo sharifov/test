@@ -7,12 +7,14 @@ use common\helpers\LogHelper;
 use DomainException;
 use modules\flight\models\FlightRequest;
 use modules\flight\src\repositories\flightRequest\FlightRequestRepository;
+use modules\flight\src\useCases\api\exchangeExpired\ExchangeExpiredJob;
 use modules\flight\src\useCases\api\productQuoteGet\ProductQuoteGetForm;
 use modules\flight\src\useCases\flightQuote\createManually\helpers\FlightQuotePaxPriceHelper;
 use modules\flight\src\useCases\reprotectionCreate\form\ReprotectionCreateForm;
 use modules\flight\src\useCases\reprotectionCreate\form\ReprotectionGetForm;
 use modules\flight\src\useCases\reprotectionExchange\form\ReProtectionExchangeForm;
 use modules\flight\src\useCases\reprotectionExchange\service\ReProtectionExchangeService;
+use modules\flight\src\useCases\voluntaryExchange\service\VoluntaryExchangeObjectCollection;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteChange\service\ProductQuoteChangeService;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
@@ -57,6 +59,7 @@ class FlightController extends BaseController
      */
     private ProductQuoteRepository $productQuoteRepository;
     private ReProtectionExchangeService $reProtectionExchangeService;
+    private VoluntaryExchangeObjectCollection $objectCollection;
 
     /**
      * @param $id
@@ -65,6 +68,7 @@ class FlightController extends BaseController
      * @param TransactionManager $transactionManager
      * @param ProductQuoteRepository $productQuoteRepository
      * @param ReProtectionExchangeService $reProtectionExchangeService
+     * @param VoluntaryExchangeObjectCollection $objectCollection
      * @param array $config
      */
     public function __construct(
@@ -74,11 +78,13 @@ class FlightController extends BaseController
         TransactionManager $transactionManager,
         ProductQuoteRepository $productQuoteRepository,
         ReProtectionExchangeService $reProtectionExchangeService,
+        VoluntaryExchangeObjectCollection $objectCollection,
         $config = []
     ) {
         $this->transactionManager = $transactionManager;
         $this->productQuoteRepository = $productQuoteRepository;
         $this->reProtectionExchangeService = $reProtectionExchangeService;
+        $this->objectCollection = $objectCollection;
         parent::__construct($id, $module, $logger, $config);
     }
 
@@ -1262,6 +1268,20 @@ class FlightController extends BaseController
      *        }
      * }
      *
+     * @apiErrorExample {json} Error-Response (Bad Request):
+     * HTTP/1.1 400 Bad Request
+     * {
+     *        "status": 400,
+     *        "message": "Error",
+     *        "errors": [
+     *           "Not found Project with current user: xxx"
+     *        ],
+     *        "code": "13101",
+     *        "technical": {
+     *           ...
+     *        }
+     * }
+     *
      * * @apiErrorExample {json} Error-Response:
      * HTTP/1.1 410 Gone
      * {
@@ -1313,6 +1333,7 @@ class FlightController extends BaseController
      *
      * @apiErrorExample {html} Codes designation
      * [
+     *      13101 - Api User has no related project
      *      13115 - Date is expired
      * ]
      */
@@ -1327,8 +1348,16 @@ class FlightController extends BaseController
                 new ErrorsMessage($throwable->getMessage()),
             );
         }
-        $form = new reprotectionDecision\DecisionForm();
 
+        if (!$project = $this->auth->auProject) {
+            return new ErrorResponse(
+                new StatusCodeMessage(HttpStatusCodeHelper::BAD_REQUEST),
+                new ErrorsMessage('Not found Project with current user: ' . $this->auth->au_api_username),
+                new CodeMessage(ApiCodeException::NOT_FOUND_PROJECT_CURRENT_USER)
+            );
+        }
+
+        $form = new reprotectionDecision\DecisionForm();
         if (!$form->load($post)) {
             return new ErrorResponse(
                 new StatusCodeMessage(400),
@@ -1347,6 +1376,23 @@ class FlightController extends BaseController
         try {
             $productQuote = ProductQuote::findByGid($form->reprotection_quote_gid);
             if ($productQuote && !ProductQuoteHelper::checkingExpirationDate($productQuote)) {
+                $flightRequest = FlightRequest::create(
+                    $form->booking_id,
+                    FlightRequest::TYPE_VOLUNTARY_EXCHANGE_CONFIRM,
+                    $form->toArray(),
+                    $project->id,
+                    $this->auth->getId()
+                );
+                $flightRequest = $this->objectCollection->getFlightRequestRepository()->save($flightRequest);
+
+                $flightRequest->fr_job_id = \Yii::$app->queue_job
+                    ->priority(10)
+                    ->push(new ExchangeExpiredJob(
+                        $flightRequest->fr_id,
+                        $productQuote->pq_id,
+                        ProductQuoteRelation::TYPE_REPROTECTION
+                    ));
+
                 return new ErrorResponse(
                     new StatusCodeMessage(HttpStatusCodeHelper::GONE),
                     new MessageMessage(sprintf('Date %s has past', $productQuote->pq_expiration_dt)),

@@ -5,6 +5,7 @@ namespace webapi\modules\v2\controllers;
 use common\components\jobs\VoluntaryExchangeCreateJob;
 use frontend\helpers\JsonHelper;
 use modules\flight\models\FlightRequest;
+use modules\flight\src\useCases\api\exchangeExpired\ExchangeExpiredJob;
 use modules\flight\src\useCases\voluntaryExchange\codeException\VoluntaryExchangeCodeException;
 use modules\flight\src\useCases\voluntaryExchange\service\BoRequestVoluntaryExchangeService;
 use modules\flight\src\useCases\voluntaryExchange\service\CaseVoluntaryExchangeService as CaseService;
@@ -25,6 +26,7 @@ use modules\product\src\entities\productQuoteData\ProductQuoteData;
 use modules\product\src\entities\productQuoteData\ProductQuoteDataRepository;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundRepository;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundStatus;
+use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\repositories\ProductableRepository;
 use src\entities\cases\CaseEventLog;
 use src\exception\BoResponseException;
@@ -910,6 +912,14 @@ class FlightQuoteExchangeController extends BaseController
         $changeQuote = ProductQuote::findByGid($voluntaryExchangeConfirmForm->quote_gid);
         if (!empty($changeQuote->pq_id)) {
             if (!ProductQuoteHelper::checkingExpirationDate($changeQuote)) {
+                $flightRequest->fr_job_id = \Yii::$app->queue_job
+                    ->priority(10)
+                    ->push(new ExchangeExpiredJob(
+                        $flightRequest->fr_id,
+                        $changeQuote->pq_id,
+                        ProductQuoteRelation::TYPE_VOLUNTARY_EXCHANGE
+                    ));
+
                 return new ErrorResponse(
                     new StatusCodeMessage(HttpStatusCodeHelper::GONE),
                     new MessageMessage(sprintf('Date %s has past', $changeQuote->pq_expiration_dt)),
