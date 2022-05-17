@@ -32,7 +32,6 @@ class FieldAccess
     {
         return $this->canEdit('user_departments')
             || $this->canEdit('form_roles')
-            || $this->canEdit('user_groups')
             || $this->canEdit('status')
             || $this->canEdit('up_work_start_tm')
             || $this->canEdit('up_work_minutes')
@@ -81,7 +80,6 @@ class FieldAccess
 
     public function canShowProfileSettings(): bool
     {
-        return true;
         return $this->canShow('up_join_date')
             || $this->canShow('up_skill')
             || $this->canShow('up_call_type_id')
@@ -97,7 +95,6 @@ class FieldAccess
 
     public function canShow(string $field): bool
     {
-        return true;
         return $this->canView($field) || $this->canEdit($field);
     }
 
@@ -115,7 +112,6 @@ class FieldAccess
 
     public function canEdit(string $field): bool
     {
-        return true;
         if (array_key_exists($field, $this->cache['edit'])) {
             return $this->cache['edit'][$field];
         }
