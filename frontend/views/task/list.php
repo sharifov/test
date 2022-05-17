@@ -129,7 +129,7 @@ $js = <<<JS
       
       //plugins: [ 'dayGridPlugin' ],
         timeZone: 'local',
-        locale: 'en',
+        locale: 'en-GB',
         dayMaxEvents: true, // allow "more" link when too many events
         events: 'https://fullcalendar.io/api/demo-feeds/events.json?overload-day',
         
