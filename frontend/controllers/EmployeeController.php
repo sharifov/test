@@ -547,8 +547,8 @@ class EmployeeController extends FController
                             $user->addLog(
                                 \Yii::$app->id,
                                 Yii::$app->user->id,
-                                ["roles" => $oldDepartmentsIds],
-                                ["roles" => $multipleForm->user_departments]
+                                ["user_departments" => $oldDepartmentsIds],
+                                ["user_departments" => $multipleForm->user_departments]
                             );
                         } catch (\Throwable $e) {
                             $transaction->rollBack();
