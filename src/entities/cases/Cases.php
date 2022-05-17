@@ -513,7 +513,7 @@ class Cases extends ActiveRecord implements Objectable
             throw new \DomainException('This user already is owner');
         }
         /** prob. for logs */
-        $this->recordEvent(new CasesOwnerChangeEvent($this, $this->cs_user_id, $userId, $creatorId));
+        $this->recordEvent(new CasesOwnerChangeEvent($this, $this->cs_user_id, $userId));
         $this->cs_user_id = $userId;
     }
 
