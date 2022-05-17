@@ -6,8 +6,8 @@
 
 use kartik\daterange\DateRangePicker;
 use kartik\select2\Select2;
-use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\forms\ScheduleRequestForm;
+use modules\shiftSchedule\src\helpers\UserShiftScheduleHelper;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
@@ -50,7 +50,7 @@ use yii\widgets\Pjax;
             <div class="row">
                 <div class="col-md-12">
                     <?= $form->field($scheduleRequestModel, 'scheduleType')->widget(Select2::class, [
-                        'data' => ShiftScheduleType::getList(true),
+                        'data' => UserShiftScheduleHelper::getAvailableScheduleTypeList(),
                         'size' => Select2::SMALL,
                         'options' => [
                             'placeholder' => 'Select Schedule Type',
