@@ -14,7 +14,7 @@ use yii\widgets\ActiveForm;
 /* @var $this yii\web\View */
 /* @var $model \modules\shiftSchedule\src\forms\ShiftScheduleForm */
 /* @var $form ActiveForm */
-$model->ssr_duration_time = TimeConverterHelper::getMinutesToHours($model->ssr_duration_time);
+$model->ssr_duration_time = TimeConverterHelper::minutesToHours($model->ssr_duration_time);
 ?>
 
 <div class="shift-schedule-rule-form">
