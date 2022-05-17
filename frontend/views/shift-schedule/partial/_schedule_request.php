@@ -70,12 +70,16 @@ use yii\widgets\Pjax;
                 </div>
             </div>
 
-            <?= Html::submitButton('Send Request', [
-                'class' => [
-                    'btn',
-                    'btn-success',
-                ],
-            ]) ?>
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <?= Html::submitButton('Send Request', [
+                        'class' => [
+                            'btn',
+                            'btn-success',
+                        ],
+                    ]) ?>
+                </div>
+            </div>
 
             <?php ActiveForm::end(); ?>
         </div>

@@ -620,7 +620,7 @@ $js = <<<JS
         e.preventDefault();
         let modal = $('#modal-md');
         let url = processingUrlWithQueryParam($(this).attr('href'));
-        $('#modal-md-label').html('<i class="fa fa-info-circle"></i> Schedule Request');
+        $('#modal-md-label').html('<i class="fa fa-plus-circle"></i> Schedule Request');
         getRequest(modal, url);
         selectedRange = null;
     });
