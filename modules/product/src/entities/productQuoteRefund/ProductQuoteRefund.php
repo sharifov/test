@@ -223,6 +223,26 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord implements Serializable
     }
 
     /**
+     * Sets quote in status "expired"
+     *
+     * @return void
+     */
+    public function expired(): void
+    {
+        $this->pqr_status_id = ProductQuoteRefundStatus::EXPIRED;
+    }
+
+    /**
+     * Returns true if quote is expired
+     *
+     * @return bool
+     */
+    public function isExpired(): bool
+    {
+        return $this->pqr_status_id == ProductQuoteRefundStatus::EXPIRED;
+    }
+
+    /**
      * @return array
      */
     public function behaviors(): array
