@@ -577,6 +577,59 @@ class EmployeeController extends FController
                         }
                     }
 
+                    if ($multipleForm->fieldAccess->canEdit('user_groups')) {
+                        if (!empty($multipleForm->user_groups) || $multipleForm->groupActionIsReplace()) {
+                            $oldUserGroupsIds = array_keys($user->getUserGroupList());
+
+                            $groupsForAdd = [];
+                            $groupsForDelete = [];
+
+                            switch ($multipleForm->user_groups_action) {
+                                case MultipleUpdateForm::GROUP_ADD:
+                                    $groupsForAdd = array_diff($multipleForm->user_groups, $oldUserGroupsIds);
+                                    break;
+                                case MultipleUpdateForm::GROUP_REPLACE:
+                                    if (empty($multipleForm->user_groups)) {
+                                        $groupsForDelete = $oldUserGroupsIds;
+                                    } else {
+                                        $groupsForDelete = array_diff($oldUserGroupsIds, $multipleForm->user_groups);
+                                    }
+
+                                    break;
+                                case MultipleUpdateForm::GROUP_DELETE:
+                                    $groupsForDelete = array_intersect($multipleForm->user_groups, $oldUserGroupsIds);
+                                    break;
+                            }
+
+                            if (!empty($groupsForDelete) || !empty($groupsForAdd)) {
+                                $transaction = Yii::$app->db->beginTransaction();
+
+                                try {
+                                    if (!empty($groupsForDelete)) {
+                                        UserGroupAssign::deleteAll(['and', [ 'ugs_user_id' => $user_id], ['in', 'ugs_group_id', $groupsForDelete]]);
+                                    }
+
+                                    if (!empty($groupsForAdd)) {
+                                        foreach ($groupsForAdd as $groupId) {
+                                            $uga = new UserGroupAssign();
+                                            $uga->ugs_user_id = $user->id;
+                                            $uga->ugs_group_id = $groupId;
+
+                                            if (!$uga->save()) {
+                                                throw new \Exception(VarDumper::dumpAsString($uga->errors));
+                                            }
+                                        }
+                                    }
+
+                                    $transaction->commit();
+                                } catch (\Throwable $e) {
+                                    $transaction->rollBack();
+                                    $multipleErrors[$user_id][] = $e->getMessage();
+                                }
+                            }
+                        }
+                    }
+
                     if (is_numeric($multipleForm->status) && $multipleForm->fieldAccess->canEdit('status')) {
                         $user->status = $multipleForm->status;
                         if (!$user->save(true, ['status'])) {

@@ -419,7 +419,7 @@ class AbacBaseModel
      */
     protected static function getUserRoleList(): array
     {
-        return UserRole::getEnvList();
+        return UserRole::getEnvListWOCache();
     }
 
     /**
