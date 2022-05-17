@@ -102,7 +102,6 @@ class QuoteController extends ApiBaseController
     }
 
     /**
-     *
      * @api {post} /v1/quote/get-info Get Quote
      * @apiVersion 0.1.0
      * @apiName GetQuote
@@ -378,11 +377,11 @@ class QuoteController extends ApiBaseController
      *       "type": "yii\\web\\NotFoundHttpException"
      *   }
      *
-     *
      * @return array
      * @throws BadRequestHttpException
      * @throws NotFoundHttpException
      * @throws UnprocessableEntityHttpException
+     * @throws \yii\base\InvalidConfigException
      */
     public function actionGetInfo(): array
     {
