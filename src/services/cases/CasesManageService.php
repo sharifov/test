@@ -14,7 +14,11 @@ use src\repositories\cases\CaseCategoryRepository;
 use src\repositories\cases\CasesRepository;
 use src\repositories\lead\LeadRepository;
 use src\repositories\user\UserRepository;
+use src\dispatchers\EventDispatcher;
+use src\entities\cases\events\CasesTakeOverEvent;
+use src\entities\cases\events\CasesManualChangeStatusProcessingEvent;
 use src\services\ServiceFinder;
+use Yii;
 
 /**
  * Class CasesManageService
@@ -143,6 +147,8 @@ class CasesManageService
         }
 
         $this->processing($caseId, $userId, $creatorId, $description);
+        $eventDispatcher = Yii::createObject(EventDispatcher::class);
+        $eventDispatcher->dispatch(new CasesTakeOverEvent($case, $case->cs_user_id, $userId), 'CasesTakeOverEvent_' . $case->cs_id);
     }
 
     /**
@@ -178,6 +184,14 @@ class CasesManageService
         $eventDescription .= ' By: ' . ($creator->username ?? 'System.');
         $eventDescription .= ($description ? ' Reason: ' . $description : '');
         $case->addEventLog(CaseEventLog::CASE_STATUS_CHANGED, $eventDescription);
+    }
+
+    public function manualChangeStatusProcessing($caseId, $userId, int $creatorId, ?string $description = ''): void
+    {
+        $case = $this->finder->caseFind($caseId);
+        $this->processing($caseId, $userId, $creatorId, $description);
+        $eventDispatcher = Yii::createObject(EventDispatcher::class);
+        $eventDispatcher->dispatch(new CasesManualChangeStatusProcessingEvent($case, $case->cs_user_id, $userId, $creatorId), 'CasesManualChangeStatusProcessingEvent_' . $case->cs_id);
     }
 
     /**
