@@ -158,6 +158,7 @@ class VoluntaryRefundService
         $productQuoteRefund->pqr_client_processing_fee_amount = $form->totalProcessingFee;
         $productQuoteRefund->pqr_client_penalty_amount = $form->totalAirlinePenalty;
         $productQuoteRefund->pqr_client_refund_amount = $form->totalRefundable;
+        $productQuoteRefund->pqr_expiration_dt = $form->expirationDate;
         $productQuoteRefund->calculateSystemPrices();
 
         $objects = [];
