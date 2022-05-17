@@ -7,7 +7,7 @@ use yii\db\Migration;
  */
 class m220512_144652_add_settings_expiration_new_offer extends Migration
 {
-    public const TABLE_SETTING = '{{%setting}}';
+    public const TABLE_SETTING = '{{%setting%}}';
 
     /**
      * {@inheritdoc}
