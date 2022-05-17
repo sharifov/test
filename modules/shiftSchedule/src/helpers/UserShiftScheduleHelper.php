@@ -2,10 +2,16 @@
 
 namespace modules\shiftSchedule\src\helpers;
 
+use modules\shiftSchedule\src\abac\dto\ShiftAbacDto;
+use modules\shiftSchedule\src\abac\ShiftAbacObject;
+use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
+use Yii;
 
 class UserShiftScheduleHelper
 {
+    private static array $scheduleTypeList = [];
+
     /**
      * @param UserShiftSchedule[] $data
      * @return array
@@ -47,5 +53,23 @@ class UserShiftScheduleHelper
         }
 
         return $dataItem;
+    }
+
+    /**
+     * Getting available schedule type list based on abac policies
+     * @return array
+     */
+    public static function getAvailableScheduleTypeList(): array
+    {
+        if (empty($shiftScheduleTypeList = self::$scheduleTypeList)) {
+            foreach (ShiftScheduleType::getList(true) as $typeId => $typeName) {
+                $dto = new ShiftAbacDto();
+                $dto->setScheduleType((int)$typeId);
+                if (Yii::$app->abac->can($dto, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_ACCESS)) {
+                    $shiftScheduleTypeList[$typeId] = $typeName;
+                }
+            }
+        }
+        return $shiftScheduleTypeList;
     }
 }
