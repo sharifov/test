@@ -261,17 +261,4 @@ class MultipleUpdateForm extends Model
     {
         return $this->user_groups_action === self::GROUP_REPLACE;
     }
-
-    public function isChangedRoles(): bool
-    {
-        if (count($this->updaterUser->getRelations()->getRoles()) !== count($this->form_roles)) {
-            return true;
-        }
-        foreach ($this->updaterUser->getRelations()->getRoles() as $key => $name) {
-            if (!in_array($key, $this->form_roles, true)) {
-                return true;
-            }
-        }
-        return false;
-    }
 }

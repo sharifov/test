@@ -557,7 +557,6 @@ class EmployeeController extends FController
                         $multipleErrors[$user_id][] = $uProfile->getErrors();
                     }
 
-//                    if ($multipleForm->form_roles && $multipleForm->fieldAccess->canEdit('form_roles') && $multipleForm->isChangedRoles()) {
                     if ($multipleForm->form_roles && $multipleForm->fieldAccess->canEdit('form_roles')) {
                         $needToAddRoles = [];
                         $needToRemoveRoles = [];
