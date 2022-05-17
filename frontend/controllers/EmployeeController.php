@@ -504,9 +504,16 @@ class EmployeeController extends FController
                     if ($multipleForm->user_departments && $multipleForm->fieldAccess->canEdit('user_departments')) {
                         $transaction = Yii::$app->db->beginTransaction();
                         try {
+                            $oldUserDepartmens = $user->getUserDepartmentList();
                             $user->removeAllDepartments();
                             $user->addNewDepartments($multipleForm->user_departments);
                             $transaction->commit();
+                            $user->addLog(
+                                \Yii::$app->id,
+                                Yii::$app->user->id,
+                                ["user_departments" => $oldUserDepartmens],
+                                ["user_departments" => $multipleForm->getUserDepartmens()]
+                            );
                         } catch (\Throwable $e) {
                             $transaction->rollBack();
                             Yii::error($e->getMessage(), 'Employee:list:multipleUpdate:userDepartments');
@@ -518,6 +525,7 @@ class EmployeeController extends FController
                         $userClientChatData = UserClientChatData::findOne(['uccd_employee_id' => $user->id]);
                         $transaction = Yii::$app->db->beginTransaction();
                         try {
+                            $oldClientChatUserChannel = $user->getClientChatUserChannelList();
                             $user->removeAllClientChatChanels();
                             $user->addClientChatChanels($multipleForm->client_chat_user_channel, Auth::id());
                             if ($userClientChatData && $userClientChatData->isRegisteredInRc()) {
@@ -526,6 +534,12 @@ class EmployeeController extends FController
                                 $this->clientChatUserAccessService->disableUserAccessToAllChats($user->id);
                             }
                             $transaction->commit();
+                            $user->addLog(
+                                \Yii::$app->id,
+                                Yii::$app->user->id,
+                                ["client_chat_user_channel" => $oldClientChatUserChannel],
+                                ["client_chat_user_channel" => $multipleForm->getChangedClientChatsChannels()]
+                            );
                         } catch (\Throwable $e) {
                             $transaction->rollBack();
                             Yii::error($e->getMessage(), 'Employee:list:multipleUpdate:clientChatChannels');
@@ -543,16 +557,115 @@ class EmployeeController extends FController
                         $multipleErrors[$user_id][] = $uProfile->getErrors();
                     }
 
+//                    if ($multipleForm->form_roles && $multipleForm->fieldAccess->canEdit('form_roles') && $multipleForm->isChangedRoles()) {
                     if ($multipleForm->form_roles && $multipleForm->fieldAccess->canEdit('form_roles')) {
+                        $needToAddRoles = [];
+                        $needToRemoveRoles = [];
+
+                        switch ((int)$multipleForm->form_roles_action) {
+                            case $multipleForm::ROLE_ADD:
+                                foreach ($multipleForm->form_roles as $role) {
+                                    if (!in_array($role, $user->getRoles(true))) {
+                                        $needToAddRoles[] = $role;
+                                    }
+                                }
+
+                                break;
+                            case $multipleForm::ROLE_REPLACE:
+                                $needToRemoveRoles = $user->getRoles(true);
+                                $needToAddRoles = $multipleForm->form_roles;
+                                break;
+                            case $multipleForm::ROLE_REMOVE:
+                                foreach ($multipleForm->form_roles as $role) {
+                                    if (in_array($role, $user->getRoles(true))) {
+                                        $needToRemoveRoles[] = $role;
+                                    }
+                                }
+                                break;
+                        }
+
+                        if (!empty($needToAddRoles) || !empty($needToRemoveRoles)) {
+                            $transaction = Yii::$app->db->beginTransaction();
+                            try {
+                                if ($needToRemoveRoles) {
+                                    $user->removeRoles($needToRemoveRoles);
+                                }
+
+                                if ($needToAddRoles) {
+                                    $user->addNewRoles($needToAddRoles);
+                                }
+
+                                $transaction->commit();
+                            } catch (\Throwable $e) {
+                                $transaction->rollBack();
+                                Yii::error($e->getMessage(), 'Employee:list:multipleUpdate:userRoles');
+                                $multipleErrors[$user_id][] = $e->getMessage();
+                            }
+                        }
+                    }
+
+                    if (empty($multipleForm->form_roles) && $multipleForm->fieldAccess->canEdit('form_roles') && (int)$multipleForm->form_roles_action === $multipleForm::ROLE_REPLACE) {
                         $transaction = Yii::$app->db->beginTransaction();
                         try {
                             $user->removeAllRoles();
-                            $user->addNewRoles($multipleForm->form_roles);
                             $transaction->commit();
                         } catch (\Throwable $e) {
                             $transaction->rollBack();
                             Yii::error($e->getMessage(), 'Employee:list:multipleUpdate:userRoles');
                             $multipleErrors[$user_id][] = $e->getMessage();
+                        }
+                    }
+
+                    if ($multipleForm->fieldAccess->canEdit('user_groups')) {
+                        if (!empty($multipleForm->user_groups) || $multipleForm->groupActionIsReplace()) {
+                            $oldUserGroupsIds = array_keys($user->getUserGroupList());
+
+                            $groupsForAdd = [];
+                            $groupsForDelete = [];
+
+                            switch ($multipleForm->user_groups_action) {
+                                case MultipleUpdateForm::GROUP_ADD:
+                                    $groupsForAdd = array_diff($multipleForm->user_groups, $oldUserGroupsIds);
+                                    break;
+                                case MultipleUpdateForm::GROUP_REPLACE:
+                                    if (empty($multipleForm->user_groups)) {
+                                        $groupsForDelete = $oldUserGroupsIds;
+                                    } else {
+                                        $groupsForDelete = array_diff($oldUserGroupsIds, $multipleForm->user_groups);
+                                    }
+
+                                    break;
+                                case MultipleUpdateForm::GROUP_DELETE:
+                                    $groupsForDelete = array_intersect($multipleForm->user_groups, $oldUserGroupsIds);
+                                    break;
+                            }
+
+                            if (!empty($groupsForDelete) || !empty($groupsForAdd)) {
+                                $transaction = Yii::$app->db->beginTransaction();
+
+                                try {
+                                    if (!empty($groupsForDelete)) {
+                                        UserGroupAssign::deleteAll(['and', [ 'ugs_user_id' => $user_id], ['in', 'ugs_group_id', $groupsForDelete]]);
+                                    }
+
+                                    if (!empty($groupsForAdd)) {
+                                        foreach ($groupsForAdd as $groupId) {
+                                            $uga = new UserGroupAssign();
+                                            $uga->ugs_user_id = $user->id;
+                                            $uga->ugs_group_id = $groupId;
+
+                                            if (!$uga->save()) {
+                                                throw new \Exception(VarDumper::dumpAsString($uga->errors));
+                                            }
+                                        }
+                                    }
+
+                                    $transaction->commit();
+                                } catch (\Throwable $e) {
+                                    $transaction->rollBack();
+                                    $multipleErrors[$user_id][] = $e->getMessage();
+                                }
+                            }
                         }
                     }
 
