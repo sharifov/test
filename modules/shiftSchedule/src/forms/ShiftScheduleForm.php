@@ -4,6 +4,7 @@ namespace modules\shiftSchedule\src\forms;
 
 use common\models\Employee;
 use Cron\CronExpression;
+use frontend\helpers\TimeConverterHelper;
 use modules\shiftSchedule\src\entities\shift\Shift;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use src\auth\Auth;
@@ -68,7 +69,6 @@ class ShiftScheduleForm extends Model
             ['ssr_start_time_loc', 'required'],
             [['ssr_start_time_loc', 'ssr_end_time_loc'], 'datetime', 'format' => 'php:H:i'],
 
-            ['ssr_start_time_utc', 'required'],
             [['ssr_start_time_utc', 'ssr_end_time_utc'], 'safe'],
 
             ['ssr_timezone', 'string', 'max' => 100],
@@ -120,7 +120,7 @@ class ShiftScheduleForm extends Model
      */
     public function setTimeComplete(): void
     {
-        $this->ssr_duration_time = $this->hoursToMinutes($this->ssr_duration_time);
+        $this->ssr_duration_time = TimeConverterHelper::hoursToMinutes($this->ssr_duration_time);
         $this->ssr_end_time_loc = date('H:i', strtotime($this->ssr_start_time_loc) + $this->ssr_duration_time * 60);
 
         if ($this->ssr_timezone) {
@@ -150,34 +150,5 @@ class ShiftScheduleForm extends Model
         $this->ssr_title = 'Schedule Rule ';
         $this->ssr_enabled = true;
         $this->ssr_cron_expression_exclude = '';
-    }
-
-    public function getDurationTimeHours(): int
-    {
-        return $this->ssr_duration_time ? ($this->ssr_duration_time / 60) : 0;
-    }
-
-    /**
-     * @param $hours
-     * @return int
-     */
-    public function hoursToMinutes($hours): int
-    {
-        $minutes = 0;
-        if (strpos($hours, ':') !== false) {
-            list($hours, $minutes) = explode(':', $hours);
-        }
-        return $hours * 60 + $minutes;
-    }
-
-    /**
-     * @param $minutes
-     * @return string
-     */
-    public static function minutesToHours($minutes): string
-    {
-        $hours = (int)($minutes / 60);
-        $minutes -= $hours * 60;
-        return sprintf("%d:%02.0f", $hours, $minutes);
     }
 }
