@@ -4,6 +4,7 @@ namespace webapi\modules\v1\controllers;
 
 use common\components\BackOffice;
 use frontend\helpers\JsonHelper;
+use modules\flight\src\useCases\api\voluntaryRefundExpired\VoluntaryRefundExpiredJob;
 use modules\flight\models\FlightRequest;
 use modules\flight\models\query\FlightRequestQuery;
 use modules\flight\src\repositories\flightRequest\FlightRequestRepository;
@@ -864,6 +865,14 @@ class FlightQuoteRefundController extends ApiBaseController
             }
 
             if (!ProductQuoteRefundHelper::checkingExpirationDate($productQuoteRefund)) {
+                $flightRequest->fr_job_id = \Yii::$app->queue_job
+                    ->priority(10)
+                    ->push(new VoluntaryRefundExpiredJob(
+                        $flightRequest->fr_id,
+                        $productQuoteRefund->pqr_id
+                    ));
+                $this->flightRequestRepository->save($flightRequest);
+
                 return new ErrorResponse(
                     new StatusCodeMessage(HttpStatusCodeHelper::GONE),
                     new MessageMessage(sprintf('Date %s has past', $productQuoteRefund->pqr_expiration_dt)),
