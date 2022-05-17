@@ -67,14 +67,14 @@ $subtypeTotalData = [];
             ]) ?>
         <?php endif; ?>
         <?= Html::a(
+            '<i class="fa fa-plus-circle"></i> Schedule Request',
+            ['schedule-request-ajax'],
+            ['class' => 'btn btn-success', 'id' => 'btn-schedule-request']
+        ) ?>
+        <?= Html::a(
             '<i class="fa fa-info-circle"></i> Legend',
             ['legend-ajax'],
             ['class' => 'btn btn-info', 'id' => 'btn-legend']
-        ) ?>
-        <?= Html::a(
-            '<i class="fa fa-info-circle"></i> Schedule Request',
-            ['schedule-request-ajax'],
-            ['class' => 'btn btn-primary', 'id' => 'btn-schedule-request']
         ) ?>
 
     </p>
