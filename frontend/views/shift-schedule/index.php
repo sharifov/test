@@ -675,6 +675,13 @@ $js = <<<JS
         openModalEventId(id);
     });
     
+    $(document).on('ScheduleRequest:response', function (e, params) {
+        if (params.requestStatus) {
+            calendar.refetchEvents();
+            updateTimeLineList();
+            $('#modal-md').modal('hide');
+        }
+    });
     
 JS;
 

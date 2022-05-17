@@ -2,6 +2,7 @@
 
 /**
  * @var ScheduleRequestForm $scheduleRequestModel
+ * @var bool $success
  */
 
 use kartik\daterange\DateRangePicker;
@@ -28,7 +29,12 @@ use yii\widgets\Pjax;
                     'data-pjax' => true,
                 ],
             ]); ?>
-
+            <div class="text-center js-loader"
+                 style="display: none; position: absolute;width: 100%;height: 100%;background: rgba(255, 255, 255, .8);z-index: 9999;">
+                <div class="spinner-border m-5" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+            </div>
             <div class="row">
                 <div class="col-md-12">
                     <?= $form->field($scheduleRequestModel, 'requestedRangeTime', [
@@ -83,6 +89,23 @@ use yii\widgets\Pjax;
 
             <?php ActiveForm::end(); ?>
         </div>
+        <input type="hidden" value="<?= $success ?>" id="request-status">
     </div>
 
-<?php Pjax::end(); ?>
+<?php
+Pjax::end();
+
+$js = <<<JS
+    $(document).on('pjax:beforeSend', function () {
+        $('.js-loader').show();
+    }).on('pjax:end', function (a, b, c) {
+        $('.js-loader').hide();
+        if (c.container === '#pjax-schedule-request') {
+            $(document).trigger('ScheduleRequest:response', {
+                requestStatus: $('#request-status').val()
+            });
+        }
+    });
+    
+JS;
+$this->registerJs($js);
