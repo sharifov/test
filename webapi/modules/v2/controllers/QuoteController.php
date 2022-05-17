@@ -51,6 +51,7 @@ class QuoteController extends ApiBaseController
      * @apiParam {string}           [clientIP]          Client IP address
      * @apiParam {bool}             [clientUseProxy]    Client Use Proxy
      * @apiParam {string}           [clientUserAgent]   Client User Agent
+     * @apiParam {object}           [queryParams]       Query params, sent to service that calling get-info
      *
      *
      * @apiParamExample {json} Request-Example:
