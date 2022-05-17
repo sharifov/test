@@ -103,4 +103,25 @@ class DBHelper
             ]
         )->queryScalar();
     }
+
+    public static function hasTable($table, ?\yii\db\Connection $db = null): bool
+    {
+        if (!$db) {
+            $db = Yii::$app->db;
+        }
+
+        $tableSchema = $db->getTableSchema($table, true);
+        return !is_null($tableSchema);
+    }
+
+    public static function dropTableIfExists($table, ?\yii\db\Connection $db = null): void
+    {
+        if (!$db) {
+            $db = Yii::$app->db;
+        }
+
+        if (self::hasTable($table, $db)) {
+            $db->createCommand()->dropTable($table)->execute();
+        }
+    }
 }

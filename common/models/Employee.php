@@ -552,8 +552,8 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
     public function getClientChatUserChannelList(): array
     {
-        if ($model = $this->clientChatChannel) {
-            return \yii\helpers\ArrayHelper::map($model, 'ccc_id', 'ccc_name');
+        if ($clientChatChannel = $this->clientChatChannel) {
+            return \yii\helpers\ArrayHelper::map($clientChatChannel, 'ccc_id', 'ccc_name');
         }
 
         return [];
@@ -865,8 +865,8 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     */
     public function getUserShiftAssignList(): array
     {
-        if ($model = $this->shifts) {
-            return \yii\helpers\ArrayHelper::map($model, 'sh_id', 'sh_name');
+        if ($shifts = $this->shifts) {
+            return \yii\helpers\ArrayHelper::map($shifts, 'sh_id', 'sh_name');
         }
 
         return [];
@@ -885,8 +885,8 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public function getUserProjectList(): array
     {
-        if ($model = $this->projects) {
-            return \yii\helpers\ArrayHelper::map($model, 'id', 'name');
+        if ($projects = $this->projects) {
+            return \yii\helpers\ArrayHelper::map($projects, 'id', 'name');
         }
 
         return [];
@@ -1248,16 +1248,24 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         Yii::$app->db->createCommand()->delete('auth_assignment', 'user_id = :user_id', [':user_id' => $this->id])->execute();
     }
 
+    public function removeRoles(array $roles)
+    {
+        foreach ($roles as $role) {
+            Yii::$app->db->createCommand()->delete('auth_assignment', 'user_id = :user_id AND item_name = :item_name', [':user_id' => $this->id, ':item_name' => $role])->execute();
+        }
+    }
+
     public function addNewRoles(array $roles)
     {
         $data = [];
         foreach ($roles as $role) {
             $data[] = [
                 'item_name' => $role,
-                'user_id' => $this->id
+                'user_id' => $this->id,
+                'created_at' => strtotime(date('Y-m-d H:i:s'))
             ];
         }
-        Yii::$app->db->createCommand()->batchInsert('auth_assignment', ['item_name', 'user_id'], $data)->execute();
+        Yii::$app->db->createCommand()->batchInsert('auth_assignment', ['item_name', 'user_id', 'created_at'], $data)->execute();
     }
 
     public function removeAllDepartments()
@@ -2984,7 +2992,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $this->userRelations;
     }
 
-    public function addLog($appId, $userId, $oldAttr, $newAttr)
+    public function addLog($appId, $targetId, $oldAttr, $newAttr)
     {
         $globalLogFormatAttrService = \Yii::createObject(GlobalEntityAttributeFormatServiceService::class);
 
@@ -2993,7 +3001,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
                 get_class($this),
                 $this->id,
                 $appId,
-                $userId,
+                $targetId,
                 JSON::encode($oldAttr),
                 JSON::encode($newAttr),
                 $globalLogFormatAttrService->formatAttr(get_class($this), JSON::encode($oldAttr), JSON::encode($newAttr)),

@@ -165,8 +165,8 @@ class UpdateForm extends Model
     public function getUserGroups(): array
     {
         $groups = UserGroup::find()->where(['in', 'ug_id', $this->user_groups])->orderBy(['ug_name' => SORT_ASC])->all();
-        if ($groupsModel = $groups) {
-            return \yii\helpers\ArrayHelper::map($groupsModel, 'ug_id', 'ug_name');
+        if ($groups) {
+            return \yii\helpers\ArrayHelper::map($groups, 'ug_id', 'ug_name');
         }
 
         return [];
@@ -188,8 +188,8 @@ class UpdateForm extends Model
     public function getUserDepartmens(): array
     {
         $departments = Department::find()->where(['in', 'dep_id', $this->user_departments])->orderBy(['dep_name' => SORT_ASC])->all();
-        if ($departmentsModel = $departments) {
-            return \yii\helpers\ArrayHelper::map($departmentsModel, 'dep_id', 'dep_name');
+        if ($departments) {
+            return \yii\helpers\ArrayHelper::map($departments, 'dep_id', 'dep_name');
         }
 
         return [];
@@ -211,8 +211,8 @@ class UpdateForm extends Model
     public function getUserProjects(): array
     {
         $projects = Project::find()->where(['in', 'id', $this->user_projects])->orderBy(['name' => SORT_ASC])->all();
-        if ($projectsModel = $projects) {
-            return \yii\helpers\ArrayHelper::map($projectsModel, 'id', 'name');
+        if ($projects) {
+            return \yii\helpers\ArrayHelper::map($projects, 'id', 'name');
         }
 
         return [];
@@ -234,8 +234,8 @@ class UpdateForm extends Model
     public function getChangedClientChatsChannels(): array
     {
         $clientChatChannel = ClientChatChannel::find()->where(['in', 'ccc_id', $this->client_chat_user_channel])->orderBy(['ccc_name' => SORT_ASC])->all();
-        if ($clientChatChannelModel = $clientChatChannel) {
-            return \yii\helpers\ArrayHelper::map($clientChatChannelModel, 'ccc_id', 'ccc_name');
+        if ($clientChatChannel) {
+            return \yii\helpers\ArrayHelper::map($clientChatChannel, 'ccc_id', 'ccc_name');
         }
 
         return [];
@@ -257,8 +257,8 @@ class UpdateForm extends Model
     public function getChangedUserShiftAssign(): array
     {
         $changedUserShiftAssign = Shift::find()->where(['in', 'sh_id', $this->user_shift_assigns])->orderBy(['sh_name' => SORT_ASC])->all();
-        if ($changedUserShiftAssignModel = $changedUserShiftAssign) {
-            return \yii\helpers\ArrayHelper::map($changedUserShiftAssignModel, 'sh_id', 'sh_name');
+        if ($changedUserShiftAssign) {
+            return \yii\helpers\ArrayHelper::map($changedUserShiftAssign, 'sh_id', 'sh_name');
         }
         return [];
     }

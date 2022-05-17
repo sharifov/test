@@ -18,6 +18,7 @@ use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftScheduleQuery;
 use modules\shiftSchedule\src\forms\ShiftScheduleCreateForm;
 use modules\shiftSchedule\src\forms\SingleEventCreateForm;
 use modules\shiftSchedule\src\helpers\UserShiftScheduleHelper;
+use modules\shiftSchedule\src\forms\ScheduleRequestForm;
 use modules\shiftSchedule\src\services\UserShiftScheduleService;
 use src\auth\Auth;
 use src\helpers\app\AppHelper;
@@ -27,6 +28,8 @@ use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
+use yii\helpers\Url;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotAcceptableHttpException;
@@ -58,7 +61,8 @@ class ShiftScheduleController extends FController
                     /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_ACCESS, Access to page shift-schedule/index */
                     [
                         'actions' => ['index', 'my-data-ajax', 'generate-example', 'remove-user-data', 'get-event',
-                            'generate-user-schedule', 'legend-ajax', 'calendar', 'calendar-events-ajax', 'add-event', 'update-single-event'],
+                            'generate-user-schedule', 'legend-ajax', 'calendar', 'calendar-events-ajax', 'add-event', 'update-single-event',
+                            'schedule-request-ajax'],
                         'allow' => \Yii::$app->abac->can(
                             null,
                             ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE,
@@ -487,10 +491,13 @@ class ShiftScheduleController extends FController
             foreach ($userGroups as $key => $group) {
                 $resource = [
                     'id' => 'ug-' . $group->ug_id,
-                    'name' => $group->ug_name,
+                    'name' => '<i class="fa fa-users"></i> ' . $group->ug_name,
                     'color' => '#1dab2f',
                     'title' => $group->ug_key,
-                    'collapsed' => $key !== 0
+                    'collapsed' => $key !== 0,
+                    'isGroup' => true,
+                    'description' => '',
+                    'icons' => []
                 ];
 
                 $users = Employee::find()
@@ -504,12 +511,24 @@ class ShiftScheduleController extends FController
                     foreach ($users as $user) {
                         $userList[] = [
                             'id' => 'us-' . $user->id,
-                            'name' => $user->username,
+                            'name' => '<i class="fa fa-user"></i> ' . $user->username,
                             'color' => '#1dab2f',
-                            'title' => $user->email
+                            'title' => $user->email,
+                            'isGroup' => false,
+                            'icons' => [
+                                Html::a('<i class="fa fa-calendar"></i>', Url::to(['/shift-schedule/user', 'id' => $user->id]), [
+                                    'title' => 'User Shift Calendar',
+                                    'target' => '_blank'
+                                ]),
+                                Html::a('<i class="fa fa fa-user-plus">', Url::to(['/shift/user-shift-assign/index', 'UserShiftAssignListSearch[userId]' => $user->id]), [
+                                    'title' => 'User Shift Assign',
+                                    'target' => '_blank'
+                                ])
+                            ],
+                            'description' => ''
                         ];
                     }
-                    $resource['title'] = 'users: ' . count($userList);
+                    $resource['description'] = 'users: ' . count($userList);
                     $resource['children'] = $userList;
                 }
                 $resourceList[] = $resource;
@@ -667,5 +686,30 @@ class ShiftScheduleController extends FController
         }
 
         throw new NotFoundHttpException('The requested User does not exist.');
+    }
+
+    /**
+     * @return string|Response
+     * @throws Exception
+     */
+    public function actionScheduleRequestAjax()
+    {
+        $request = Yii::$app->request;
+        $scheduleRequestModel = new ScheduleRequestForm([
+            'scenario' => ScheduleRequestForm::SCENARIO_REQUEST,
+        ]);
+        if ($request->isPost) {
+            if ($scheduleRequestModel->load($request->post()) && $scheduleRequestModel->validate()) {
+                if ($scheduleRequestModel->saveRequest()) {
+                    return $this->redirect(['shift-schedule/index']);
+                }
+            }
+        } else {
+            $scheduleRequestModel->setAttributesRequest($request);
+        }
+
+        return $this->renderAjax('partial/_schedule_request', [
+            'scheduleRequestModel' => $scheduleRequestModel,
+        ]);
     }
 }

@@ -4,6 +4,8 @@ namespace modules\user\src\update;
 
 use common\components\validators\IsArrayValidator;
 use common\models\Employee;
+use common\models\Department;
+use src\model\clientChatChannel\entity\ClientChatChannel;
 use yii\base\Model;
 
 /**
@@ -14,6 +16,7 @@ use yii\base\Model;
  *
  * @property $status
  * @property $form_roles
+ * @property $form_roles_action
  * @property $user_departments
  * @property $client_chat_user_channel
  *
@@ -33,6 +36,7 @@ use yii\base\Model;
  *
  * @property FieldAccess $fieldAccess
  * @property AvailableList $availableList
+ * @property Employee $updaterUser
  */
 class MultipleUpdateForm extends Model
 {
@@ -42,6 +46,9 @@ class MultipleUpdateForm extends Model
     public $status;
 
     public $form_roles;
+    public $form_roles_action;
+    public $user_groups;
+    public $user_groups_action;
     public $user_departments;
     public $client_chat_user_channel;
 
@@ -62,11 +69,33 @@ class MultipleUpdateForm extends Model
 
     public FieldAccess $fieldAccess;
     public AvailableList $availableList;
+    public Employee $updaterUser;
+
+    public const GROUP_ADD = 1;
+    public const GROUP_REPLACE = 2;
+    public const GROUP_DELETE = 3;
+
+    public const GROUPS_ACTION_LIST = [
+        self::GROUP_ADD => 'Add',
+        self::GROUP_REPLACE => 'Replace',
+        self::GROUP_DELETE => 'Remove',
+    ];
+
+    public const ROLE_ADD = 1;
+    public const ROLE_REPLACE   = 2;
+    public const ROLE_REMOVE = 3;
+
+    public const ROLES_ACTION_LIST = [
+        self::ROLE_ADD => 'Add',
+        self::ROLE_REPLACE => 'Replace',
+        self::ROLE_REMOVE => 'Remove'
+    ];
 
     public function __construct(Employee $updaterUser, $config = [])
     {
         $this->fieldAccess = new FieldAccess($updaterUser, false);
         $this->availableList = new AvailableList($updaterUser);
+        $this->updaterUser = $updaterUser;
 
         parent::__construct($config);
     }
@@ -106,6 +135,18 @@ class MultipleUpdateForm extends Model
             ['form_roles', 'default', 'value' => []],
             ['form_roles', IsArrayValidator::class],
             ['form_roles', 'each', 'rule' => ['in', 'range' => array_keys($this->availableList->getRoles())]],
+
+            ['form_roles_action', 'default', 'value' => self::ROLE_ADD],
+            ['form_roles_action', 'integer'],
+            ['form_roles_action', 'in', 'range' => array_keys($this::ROLES_ACTION_LIST)],
+
+            ['user_groups', 'default', 'value' => []],
+            ['user_groups', IsArrayValidator::class],
+            ['user_groups', 'each', 'rule' => ['in', 'range' => array_keys($this->availableList->getUserGroups())]],
+
+            ['user_groups_action', 'default', 'value' => self::GROUP_ADD],
+            ['user_groups_action', 'integer'],
+            ['user_groups_action', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
 
             ['user_departments', 'default', 'value' => []],
             ['user_departments', IsArrayValidator::class],
@@ -176,6 +217,8 @@ class MultipleUpdateForm extends Model
             'user_list_json' => 'Selected Users JSON',
             'status' => 'Status',
             'form_roles' => 'Roles',
+            'form_roles_action' => 'Roles Action',
+            'user_groups' => 'Assign User Groups',
             'user_departments' => 'Departments',
             'client_chat_user_channel' => 'Client Chat Channels',
             'up_work_start_tm' => 'Work Start Time',
@@ -192,5 +235,43 @@ class MultipleUpdateForm extends Model
             'up_auto_redial' => 'Auto redial',
             'up_kpi_enable' => 'KPI enable',
         ];
+    }
+
+    public function getUserDepartmens(): array
+    {
+        $departments = Department::find()->where(['in', 'dep_id', $this->user_departments])->orderBy(['dep_name' => SORT_ASC])->all();
+        if ($departments) {
+            return \yii\helpers\ArrayHelper::map($departments, 'dep_id', 'dep_name');
+        }
+
+        return [];
+    }
+
+    public function getChangedClientChatsChannels(): array
+    {
+        $clientChatChannel = ClientChatChannel::find()->where(['in', 'ccc_id', $this->client_chat_user_channel])->orderBy(['ccc_name' => SORT_ASC])->all();
+        if ($clientChatChannel) {
+            return \yii\helpers\ArrayHelper::map($clientChatChannel, 'ccc_id', 'ccc_name');
+        }
+
+        return [];
+    }
+
+    public function groupActionIsReplace(): bool
+    {
+        return $this->user_groups_action === self::GROUP_REPLACE;
+    }
+
+    public function isChangedRoles(): bool
+    {
+        if (count($this->updaterUser->getRelations()->getRoles()) !== count($this->form_roles)) {
+            return true;
+        }
+        foreach ($this->updaterUser->getRelations()->getRoles() as $key => $name) {
+            if (!in_array($key, $this->form_roles, true)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -4,6 +4,7 @@ namespace common\components\jobs\clientChat;
 
 use common\components\jobs\BaseJob;
 use src\helpers\app\AppHelper;
+use src\helpers\setting\SettingHelper;
 use src\model\clientChat\entity\ClientChat;
 use src\repositories\NotFoundException;
 use src\services\clientChatService\ClientChatService;
@@ -22,6 +23,14 @@ class ClientChatUserAccessJob extends BaseJob implements \yii\queue\JobInterface
      */
     public function execute($queue)
     {
+        if (SettingHelper::isClientChatDebugEnable()) {
+            \Yii::info([
+                'message' => 'ClientChatUserAccessJob started',
+                'chatId' => $this->chatId,
+                'microTime' => microtime(true),
+                'date' => date('Y-m-d H:i:s'),
+            ], 'info\ClientChatDebug');
+        }
         $this->waitingTimeRegister();
         $service = \Yii::createObject(ClientChatService::class);
 
@@ -33,6 +42,14 @@ class ClientChatUserAccessJob extends BaseJob implements \yii\queue\JobInterface
             }
 
             if (!$chat->isPending() && !$chat->isTransfer() && !$chat->isIdle()) {
+                if (SettingHelper::isClientChatDebugEnable()) {
+                    \Yii::info([
+                        'message' => 'ClientChatUserAccessJob exit because chat is not status (pending, transfer, idle)',
+                        'chatId' => $this->chatId,
+                        'microTime' => microtime(true),
+                        'date' => date('Y-m-d H:i:s'),
+                    ], 'info\ClientChatDebug');
+                }
                 \Yii::$app->redis->del($key);
                 return;
             }
