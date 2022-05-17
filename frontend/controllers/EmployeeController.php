@@ -502,17 +502,53 @@ class EmployeeController extends FController
                     }
 
                     if ($multipleForm->user_departments && $multipleForm->fieldAccess->canEdit('user_departments')) {
+                        $oldDepartmentsIds = array_keys($user->getUserDepartmentList());
+                        $needToAddDepartments = [];
+                        $needToRemoveDepartments = [];
+
+                        switch ((int)$multipleForm->user_departments_action) {
+                            case MultipleUpdateForm::DEPARTMENT_ADD:
+                                $needToAddDepartments = array_diff($multipleForm->user_departments, $oldDepartmentsIds);
+                                break;
+                            case MultipleUpdateForm::DEPARTMENT_REPLACE:
+                                $needToRemoveDepartments = $oldDepartmentsIds;
+                                $needToAddDepartments = $multipleForm->user_departments;
+                                break;
+                            case MultipleUpdateForm::DEPARTMENT_REMOVE:
+                                $needToRemoveDepartments = array_intersect($multipleForm->user_departments, $oldDepartmentsIds);
+                                break;
+                        }
+                        if (!empty($needToAddDepartments) || !empty($needToRemoveDepartments)) {
+                            $transaction = Yii::$app->db->beginTransaction();
+                            try {
+                                if ($needToRemoveDepartments) {
+                                    $user->removeDepartments($needToRemoveDepartments);
+                                }
+
+                                if ($needToAddDepartments) {
+                                    $user->addNewDepartments($needToAddDepartments);
+                                }
+
+                                $transaction->commit();
+                            } catch (\Throwable $e) {
+                                $transaction->rollBack();
+                                Yii::error($e->getMessage(), 'Employee:list:multipleUpdate:userDepartments');
+                                $multipleErrors[$user_id][] = $e->getMessage();
+                            }
+                        }
+                    }
+
+                    if (empty($multipleForm->user_departments) && $multipleForm->fieldAccess->canEdit('user_departments') && (int)$multipleForm->user_departments_action === MultipleUpdateForm::DEPARTMENT_REPLACE) {
                         $transaction = Yii::$app->db->beginTransaction();
                         try {
-                            $oldUserDepartmens = $user->getUserDepartmentList();
+                            $oldDepartmentsIds = $user->getUserDepartmentList();
                             $user->removeAllDepartments();
-                            $user->addNewDepartments($multipleForm->user_departments);
                             $transaction->commit();
                             $user->addLog(
                                 \Yii::$app->id,
                                 Yii::$app->user->id,
-                                ["user_departments" => $oldUserDepartmens],
-                                ["user_departments" => $multipleForm->getUserDepartmens()]
+                                ["roles" => $oldDepartmentsIds],
+                                ["roles" => $multipleForm->user_departments]
                             );
                         } catch (\Throwable $e) {
                             $transaction->rollBack();
@@ -568,7 +604,6 @@ class EmployeeController extends FController
                                         $needToAddRoles[] = $role;
                                     }
                                 }
-
                                 break;
                             case $multipleForm::ROLE_REPLACE:
                                 $needToRemoveRoles = $user->getRoles(true);

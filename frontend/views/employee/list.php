@@ -415,6 +415,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                                     'options' => ['placeholder' => 'Select user Departments', 'multiple' => true],
                                     'pluginOptions' => ['allowClear' => true],
                                 ]) ?>
+                                <?= $form->field($multipleForm, 'user_departments_action')->dropDownList($multipleForm::DEPARTMENTS_ACTION_LIST) ?>
                             <?php endif; ?>
 
                             <?php if ($multipleForm->fieldAccess->canEdit('form_roles')) : ?>
