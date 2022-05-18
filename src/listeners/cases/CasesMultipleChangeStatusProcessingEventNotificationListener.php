@@ -14,14 +14,13 @@ class CasesMultipleChangeStatusProcessingEventNotificationListener
     public function handle(CasesMultipleChangeStatusProcessingEvent $event): void
     {
         try {
-            $user = Employee::findOne($event->newOwner);
             if (!$event->oldOwner) {
-                Yii::warning('test123');
                 return;
             } else {
                 $userNotifyId = $event->oldOwner;
             }
 
+            $user = Employee::findOne($event->newOwner);
             $userCreator = Employee::findOne($event->creatorId);
             $title = 'Case Re-assign';
             $description = 'Your Case (' . Purifier::createCaseShortLink($event->cases) . ') has been re-assigned to ' . $user->username . ' by ' . $userCreator->username;
@@ -30,7 +29,7 @@ class CasesMultipleChangeStatusProcessingEventNotificationListener
                 Notifications::publish('getNewNotification', ['user_id' => $userNotifyId], $dataNotification);
             }
         } catch (\Throwable $e) {
-            Yii::error(['message' => 'Case Status from Awaiting to Solved error', 'e' => $e->getMessage(), 'caseId' => $event->cases->cs_id], 'Listeners:CasesSwitchStatusAwaitingtoSolvedListener');
+            Yii::error(['message' => 'Case Multiple Change Status Processing Notification error', 'e' => $e->getMessage(), 'caseId' => $event->cases->cs_id], 'Listeners:CasesMultipleChangeStatusProcessingEventNotificationListener');
         }
     }
 }

@@ -19,6 +19,7 @@ use src\listeners\cases\CasesFollowUpStatusEventLogListener;
 use src\listeners\cases\CasesNewStatusEventLogListener;
 use src\listeners\cases\CasesPendingStatusEventLogListener;
 use src\listeners\cases\CasesProcessingStatusEventLogListener;
+use src\listeners\cases\CasesProcessingStatusEventNotificationsListener;
 use src\listeners\cases\CasesSolvedStatusEventLogListener;
 use src\listeners\cases\CasesTrashStatusEventLogListener;
 use src\listeners\cases\CasesAwaitingStatusEventLogListener;
@@ -36,7 +37,7 @@ use src\listeners\cases\CasesMultipleChangeStatusProcessingEventNotificationList
 return [
     CasesCreatedEvent::class => [CasesCreateEventLogListener::class],
     CasesPendingStatusEvent::class => [CasesPendingStatusEventLogListener::class],
-    CasesProcessingStatusEvent::class => [CasesProcessingStatusEventLogListener::class],
+    CasesProcessingStatusEvent::class => [CasesProcessingStatusEventLogListener::class, CasesProcessingStatusEventNotificationsListener::class],
     CasesFollowUpStatusEvent::class => [CasesFollowUpStatusEventLogListener::class],
     CasesSolvedStatusEvent::class => [ CasesSolvedStatusEventLogListener::class, CasesSwitchStatusAwaitingtoSolvedListener::class ],
     CasesTrashStatusEvent::class => [CasesTrashStatusEventLogListener::class],

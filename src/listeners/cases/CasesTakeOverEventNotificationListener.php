@@ -23,7 +23,7 @@ class CasesTakeOverEventNotificationListener
                 Notifications::publish('getNewNotification', ['user_id' => $event->oldOwner], $dataNotification);
             }
         } catch (\Throwable $e) {
-            Yii::error(['message' => 'Case Status from Awaiting to Solved error', 'e' => $e->getMessage(), 'caseId' => $event->cases->cs_id], 'Listeners:CasesSwitchStatusAwaitingtoSolvedListener');
+            Yii::error(['message' => 'Case Take Over Notification error', 'e' => $e->getMessage(), 'caseId' => $event->cases->cs_id], 'Listeners:CasesTakeOverEventNotificationListener');
         }
     }
 }
