@@ -65,8 +65,8 @@ class UserShiftScheduleQuery
         $query = UserShiftSchedule::find()
             ->join('inner join', UserGroupAssign::tableName(), 'ugs_user_id = uss_user_id')
             ->andWhere(['ugs_group_id' => $form->userGroups]);
-        if ($form->users) {
-            $query->andWhere(['ugs_user_id' => $form->users]);
+        if ($form->usersIds) {
+            $query->andWhere(['ugs_user_id' => $form->usersIds]);
         }
         if ($form->statuses) {
             $query->andWhere(['uss_status_id' => $form->statuses]);

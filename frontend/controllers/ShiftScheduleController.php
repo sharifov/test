@@ -522,7 +522,7 @@ class ShiftScheduleController extends FController
             $canViewAllEvents = Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_VIEW_ALL_EVENTS);
             $userGroups = UserGroupQuery::findUserGroups(!$canViewAllEvents ? Auth::id() : null, $timelineCalendarFilter->userGroups ?? []);
 
-            [$resourceList] = UserShiftScheduleHelper::prepareResourcesForTimelineCalendar($userGroups, $timelineCalendarFilter->users);
+            [$resourceList] = UserShiftScheduleHelper::prepareResourcesForTimelineCalendar($userGroups, $timelineCalendarFilter->usersIds);
 
             $timelineList = UserShiftScheduleQuery::getTimelineListByUser($timelineCalendarFilter);
             $data['data'] = UserShiftScheduleHelper::getCalendarEventsData($timelineList);

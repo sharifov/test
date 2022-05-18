@@ -200,6 +200,8 @@ $(document).off('click', '#submit-add-event').on('click', '#submit-add-event', f
             users.push($(this).val());
         }
     });
+    console.log(users.join());
+    console.log($('#users'));
     $('#users').val(users.join());
     $('#$formId').submit();
 });
