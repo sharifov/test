@@ -114,7 +114,6 @@ class ClientChatAccessWidget extends Widget
         foreach ($accessItems as $key => $access) {
             $accessItems[$key]['html'] = $this->render('cc_request_item', ['access' => $access, 'formatter' => $formatter, 'user' => $user]);
             $accessItems[$key]['ccua_created_t'] = strtotime($access['ccua_created_dt']);
-            $accessItems[$key]['cch_created_t'] = strtotime($access['cch_created_dt']);
         }
         return $accessItems;
     }
