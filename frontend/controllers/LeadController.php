@@ -162,9 +162,9 @@ class LeadController extends FController
     private $quoteRepository;
     private $transaction;
     private $chatActionPermission;
-private UrlGenerator $fileStorageUrlGenerator;
-private UseCaseLeadManageService $useCaseLeadManageService;
-private EmailReviewQueueManageService $emailReviewQueueManageService;
+    private UrlGenerator $fileStorageUrlGenerator;
+    private UseCaseLeadManageService $useCaseLeadManageService;
+    private EmailReviewQueueManageService $emailReviewQueueManageService;
 
     public function __construct(
         $id,
@@ -183,8 +183,7 @@ private EmailReviewQueueManageService $emailReviewQueueManageService;
         UseCaseLeadManageService $useCaseLeadManageService,
         EmailReviewQueueManageService $emailReviewQueueManageService,
         $config = []
-    )
-    {
+    ) {
         parent::__construct($id, $module, $config);
         $this->leadManageService = $leadManageService;
         $this->leadAssignService = $leadAssignService;

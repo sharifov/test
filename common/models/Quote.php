@@ -440,8 +440,7 @@ class Quote extends \yii\db\ActiveRecord
         Lead $lead,
         ?Employee $employee,
         ?Currency $currency
-    ): Quote
-    {
+    ): Quote {
         $quote = new self();
         $quote->uid = uniqid();
         $quote->lead_id = $lead->id;

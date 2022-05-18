@@ -93,10 +93,7 @@ $disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIEN
 
     <div class="main-sidebars">
         <div class="panel panel-main">
-            <?= $this->render('partial/_actions', [
-                'leadForm' => $leadForm
-            ]);
-            ?>
+            <?= $this->render('partial/_actions', ['leadForm' => $leadForm]); ?>
 
             <div class="col-md-12">
                 <?= \common\widgets\Alert::widget() ?>

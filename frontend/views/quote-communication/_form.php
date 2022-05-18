@@ -25,19 +25,19 @@ use kdn\yii2\JsonEditor;
           <?= $form->field($model, 'qc_quote_id')->textInput() ?>
 
           <?php try {
-              echo $form
-                  ->field($model, 'qc_ext_data')
-                  ->widget(
-                      JsonEditor::class,
-                      [
-                          'clientOptions' => [
-                              'modes' => ['code', 'form', 'tree', 'view'],
-                              'mode' => $model->isNewRecord ? 'code' : 'form'
-                          ],
-                          'expandAll' => ['tree', 'form'],
-                          'value' => (is_null($model->qc_ext_data)) ? '{}' : $model->qc_ext_data
-                      ]
-                  );
+                echo $form
+                    ->field($model, 'qc_ext_data')
+                    ->widget(
+                        JsonEditor::class,
+                        [
+                            'clientOptions' => [
+                                'modes' => ['code', 'form', 'tree', 'view'],
+                                'mode' => $model->isNewRecord ? 'code' : 'form'
+                            ],
+                            'expandAll' => ['tree', 'form'],
+                            'value' => (is_null($model->qc_ext_data)) ? '{}' : $model->qc_ext_data
+                        ]
+                    );
           } catch (Exception $exception) {
               echo $form->field($model, 'qc_ext_data')->textarea(['rows' => 6, 'value' => $model->qc_ext_data]);
           } ?>
