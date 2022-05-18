@@ -19,6 +19,7 @@ use src\model\leadData\services\LeadDataService;
 use src\services\quote\quotePriceService\ClientQuotePriceService;
 use webapi\src\behaviors\ApiUserProjectRelatedAccessBehavior;
 use Yii;
+use yii\base\InvalidConfigException;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\web\BadRequestHttpException;
@@ -57,7 +58,9 @@ class QuoteController extends ApiBaseController
      * @apiParamExample {json} Request-Example:
      * {
      *      "uid": "5b6d03d61f078",
-     *      "queryParams": {},
+     *      "queryParams": {
+     *          "qc": "sk2N5"
+     *      },
      *      "apiKey": "d190c378e131ccfd8a889c8ee8994cb55f22fbeeb93f9b99007e8e7ecc24d0dd"
      * }
      *
@@ -466,6 +469,8 @@ class QuoteController extends ApiBaseController
      *       "status": 404,
      *       "type": "yii\\web\\NotFoundHttpException"
      *   }
+     *
+     * @throws InvalidConfigException
      */
     public function actionGetInfo(): array
     {
@@ -480,7 +485,7 @@ class QuoteController extends ApiBaseController
             throw new BadRequestHttpException('Not found UID on POST request', 1);
         }
 
-        QuoteCommunicationOpenLog::createByRequestData(\Yii::$app->request->params);
+        QuoteCommunicationOpenLog::createByRequestData(\Yii::$app->getRequest()->getBodyParams());
 
         if ($this->apiProject) {
             $projectIds = [$this->apiProject->id];

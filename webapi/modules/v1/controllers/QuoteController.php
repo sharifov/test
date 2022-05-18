@@ -126,7 +126,9 @@ class QuoteController extends ApiBaseController
      * @apiParamExample {json} Request-Example:
      * {
      *      "uid": "5b6d03d61f078",
-     *      "queryParams": {},
+     *      "queryParams": {
+     *          "qc": "sk2N5"
+     *      },
      *      "apiKey": "d190c378e131ccfd8a889c8ee8994cb55f22fbeeb93f9b99007e8e7ecc24d0dd"
      * }
      *
@@ -395,7 +397,7 @@ class QuoteController extends ApiBaseController
             throw new BadRequestHttpException('Not found UID on POST request', 1);
         }
 
-        QuoteCommunicationOpenLog::createByRequestData(\Yii::$app->request->params);
+        QuoteCommunicationOpenLog::createByRequestData(Yii::$app->getRequest()->getBodyParams());
 
         if ($this->apiProject) {
             $projectIds = [$this->apiProject->id];
