@@ -3,6 +3,7 @@
 namespace modules\shiftSchedule\src\helpers;
 
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
+use src\auth\Auth;
 
 class UserShiftScheduleHelper
 {
@@ -47,5 +48,18 @@ class UserShiftScheduleHelper
         }
 
         return $dataItem;
+    }
+
+    public static function getDurationForDates(UserShiftSchedule $userShiftSchedule): int
+    {
+        $timezone = Auth::user()->timezone ?: null;
+
+        $startDateTime = new \DateTimeImmutable($userShiftSchedule->uss_start_utc_dt, $timezone ? new \DateTimeZone($timezone) : null);
+        $startDateTime = $startDateTime->setTimezone(new \DateTimeZone('UTC'));
+        $endDateTime = new \DateTimeImmutable($userShiftSchedule->uss_end_utc_dt, $timezone ? new \DateTimeZone($timezone) : null);
+        $endDateTime = $endDateTime->setTimezone(new \DateTimeZone('UTC'));
+        $interval = $startDateTime->diff($endDateTime);
+
+        return $interval->i + ($interval->h * 60);
     }
 }
