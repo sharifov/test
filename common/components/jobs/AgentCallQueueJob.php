@@ -13,6 +13,7 @@ use common\models\CallUserAccess;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Notifications;
+use common\models\UserGroupAssign;
 use src\forms\lead\PhoneCreateForm;
 use src\helpers\setting\SettingHelper;
 use src\repositories\cases\CasesRepository;
@@ -93,7 +94,23 @@ class AgentCallQueueJob extends BaseJob implements JobInterface
                         if ($user && $user->isOnline() /*&& $user->isCallStatusReady() && $user->isCallFree()*/) {
                             $depListIds = array_keys($user->getUserDepartmentList());
                             if (in_array($call->c_dep_id, $depListIds, true)) {
-                                $isCalled = Call::applyCallToAgentAccess($call, $user->id);
+                                if ($call->cugUgs) {
+                                    $callGroups = ArrayHelper::map($call->cugUgs, 'ug_id', 'ug_id');
+                                    if ($callGroups) {
+                                        $userGroups = UserGroupAssign::find()
+                                            ->select(['ugs_group_id'])
+                                            ->andWhere(['ugs_user_id' => $user->id])
+                                            ->indexBy('ugs_group_id')->column();
+                                        $isGroupAccess = array_intersect_key($callGroups, $userGroups) ? true : false;
+                                        if ($isGroupAccess) {
+                                            $isCalled = Call::applyCallToAgentAccess($call, $user->id);
+                                        }
+                                    } else {
+                                        $isCalled = Call::applyCallToAgentAccess($call, $user->id);
+                                    }
+                                } else {
+                                    $isCalled = Call::applyCallToAgentAccess($call, $user->id);
+                                }
                             }
                         }
                     }
