@@ -9,7 +9,7 @@
 use common\components\grid\DateTimeColumn;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\search\ShiftScheduleRequestSearch;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
-use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
+use modules\shiftSchedule\src\helpers\UserShiftScheduleHelper;
 use src\widgets\UserSelect2Widget;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
@@ -18,8 +18,6 @@ use yii\web\View;
 
 $this->title = 'Shift Schedule Requests';
 $this->params['breadcrumbs'][] = $this->title;
-
-$shiftScheduleTypes = ShiftScheduleType::getList(true);
 
 ?>
 <div class="shift-schedule-request-index">
@@ -56,7 +54,7 @@ $shiftScheduleTypes = ShiftScheduleType::getList(true);
                     'style' => 'width: 20%',
                 ],
                 'label' => 'Schedule Type',
-                'filter' => ShiftScheduleType::getList(true),
+                'filter' => UserShiftScheduleHelper::getAvailableScheduleTypeList(),
                 'format' => 'raw',
             ],
             [

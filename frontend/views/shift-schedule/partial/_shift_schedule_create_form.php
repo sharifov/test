@@ -16,6 +16,7 @@ use modules\shiftSchedule\src\abac\dto\ShiftAbacDto;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
+use modules\shiftSchedule\src\helpers\UserShiftScheduleHelper;
 use src\auth\Auth;
 use yii\bootstrap4\ActiveForm;
 use yii\helpers\Html;
@@ -41,15 +42,6 @@ foreach (UserShiftSchedule::getStatusList() as $statusId => $statusName) {
     $dto->setStatus((int)$statusId);
     if (Yii::$app->abac->can($dto, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_ACCESS)) {
         $statusList[$statusId] = $statusName;
-    }
-}
-
-$shiftScheduleTypeList = [];
-foreach (ShiftScheduleType::getList(true) as $typeId => $typeName) {
-    $dto = new ShiftAbacDto();
-    $dto->setScheduleType((int)$typeId);
-    if (Yii::$app->abac->can($dto, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_ACCESS)) {
-        $shiftScheduleTypeList[$typeId] = $typeName;
     }
 }
 
@@ -145,7 +137,7 @@ JS;
                 <?= $form->field($model, 'status')->dropdownList($statusList, ['prompt' => '---']) ?>
             </div>
             <div class="col-md-6">
-                <?= $form->field($model, 'scheduleType')->dropdownList($shiftScheduleTypeList, ['prompt' => '---']) ?>
+                <?= $form->field($model, 'scheduleType')->dropdownList(UserShiftScheduleHelper::getAvailableScheduleTypeList(), ['prompt' => '---']) ?>
             </div>
         </div>
 
@@ -208,6 +200,8 @@ $(document).off('click', '#submit-add-event').on('click', '#submit-add-event', f
             users.push($(this).val());
         }
     });
+    console.log(users.join());
+    console.log($('#users'));
     $('#users').val(users.join());
     $('#$formId').submit();
 });
