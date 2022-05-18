@@ -25,7 +25,6 @@ $bundle = UserShiftCalendarAsset::register($this);
     ]) ?>
 
     <?php if (!empty($timelineCalendarFilter->userGroups)) : ?>
-    <p>
         <?php
         /** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_CREATE, Create user shift schedule event */
         if (\Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_CREATE)) :
@@ -33,10 +32,37 @@ $bundle = UserShiftCalendarAsset::register($this);
             <?= Html::a(
                 '<i class="fa fa-plus-circle"></i> Add Schedule Event',
                 '#',
-                ['class' => 'btn btn-success', 'id' => 'btn-shift-event-add', 'title' => 'Add Schedule Event']
+                ['class' => 'btn btn-success btn-sm', 'id' => 'btn-shift-event-add', 'title' => 'Add Schedule Event']
             ) ?>
         <?php endif; ?>
-    </p>
+
+        <?= Html::a('<i class="fas fa-th-large"></i> Multiple Manage Mode', '#', ['id' => 'multiple-manage-mode-btn', 'class' => 'btn btn-warning btn-sm']) ?>
+        <div class="btn-group" id="check_uncheck_btns" style="display: none;">
+            <?php echo Html::button('<span class="fa fa-square-o"></span> Check All', ['class' => 'btn btn-sm btn-default', 'id' => 'btn-check-all']); ?>
+
+            <button type="button" class="btn btn-default dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <span class="sr-only">Toggle Dropdown</span>
+            </button>
+            <div class="dropdown-menu">
+              <p>
+                  <?= Html::a('<i class="fa fa-times-circle text-danger"></i> Multiple Close Chats', null, [
+                      'class' => 'dropdown-item btn-multiple-delete-events',
+                          'data' => [
+                              'url' => Url::to(['shift-schedule/multiple-delete']),
+                              'title' => 'Delete Events',
+                          ],
+                      ])
+                    ?>
+              </p>
+              <p>
+                  <?= Html::a('<i class="fas fa-sign-out"></i> Exit Mode', null, [
+                          'class' => 'dropdown-item',
+                          'id' => 'btn-multiple-exit-mode'
+                      ])
+                    ?>
+              </p>
+            </div>
+        </div>
 
     <div class="row">
         <div class="col-md-12" id="calendar-wrapper">
@@ -105,6 +131,8 @@ var \$status = $('#tooltip-event-status');
 var \$title = $('#tooltip-event-title');
 var \$view = $('#tooltip-event-view');
 var dblClickResource;
+
+var multipleMangeMode = false;
 
 mobiscroll.setOptions({
     theme: 'ios',
@@ -193,22 +221,26 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
               });
         },
         onCellDoubleClick: function (args, inst) {
+            if (multipleMangeMode) {
+                return false;
+            }
             dblClickResource = args.resource;
-        },
-        onCellHoverIn: function (args) {
-            dblClickResource = args.resource;
-            console.log(dblClickResource);
         },
         onEventDragStart: function (args) {
-            console.log(args);
             args.resource = dblClickResource;
         },
         onCellClick: function (args) {
-          dblClickResource = args.resource;
+            if (multipleMangeMode) {
+                return false;
+            }
+            dblClickResource = args.resource;
         },
         
         
          onEventCreate: function (args, inst) {
+            if (multipleMangeMode) {
+                return false;
+            }
             if (dblClickResource && args.event.resource !== dblClickResource) {
                 args.event.resource = dblClickResource;
             }
@@ -594,6 +626,33 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
             </div>
         </div>`;
     }
+    
+    var multipleManageBtn = $('#multiple-manage-mode-btn');
+    var checkAllBtn = $('#check_uncheck_btns');
+    var exitModeBtn = $('#btn-multiple-exit-mode');
+    
+    multipleManageBtn.on('click', multipleManageBtn, function () {
+        $(this).hide();
+        checkAllBtn.show();
+        multipleMangeMode = true;
+        inst.setOptions({
+            clickToCreate: false,
+            dragToCreate: false,
+            dragToMove: false,
+            dragToResize: false,
+        })
+    });
+    exitModeBtn.on('click', exitModeBtn, function () {
+        checkAllBtn.hide();
+        multipleManageBtn.show();
+        multipleMangeMode = false;
+        inst.setOptions({
+            clickToCreate: canCreateOnDoubleClick,
+            dragToCreate: false,
+            dragToMove: true,
+            dragToResize: true,
+        })
+    });
 JS;
 
 $this->registerJs($js);
