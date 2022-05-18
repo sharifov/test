@@ -14,9 +14,12 @@ class CasesTakeOverEventNotificationListener
     public function handle(CasesTakeOverEvent $event): void
     {
         try {
-            $user = Employee::findOne($event->newOwner);
+            $newOwner = Employee::findOne($event->newOwner);
+            if (!$newOwner) {
+                return;
+            }
             $title = 'Case Take Over';
-            $description = 'Your Case (' . Purifier::createCaseShortLink($event->cases) . ') has been taken by ' . $user->username;
+            $description = 'Your Case (' . Purifier::createCaseShortLink($event->cases) . ') has been taken by ' . $newOwner->username;
 
             if ($ntf = Notifications::create($event->oldOwner, $title, $description, Notifications::TYPE_WARNING, true)) {
                 $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
