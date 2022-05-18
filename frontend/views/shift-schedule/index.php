@@ -523,7 +523,7 @@ $js = <<<JS
       
       //plugins: [ 'dayGridPlugin' ],
         timeZone: '$userTimeZone',
-        locale: 'en',
+        locale: 'en-GB',
         dayMaxEvents: true, // allow "more" link when too many events
         //events: shiftScheduleDataUrl,
          eventSources: [
