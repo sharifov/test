@@ -17,7 +17,8 @@ use yii\base\Model;
  * @property $status
  * @property $form_roles
  * @property $form_roles_action
- * @property $user_departments
+ * @property array $user_departments
+ * @property $user_departments_action
  * @property $client_chat_user_channel
  *
  * @property $up_work_start_tm
@@ -50,6 +51,7 @@ class MultipleUpdateForm extends Model
     public $user_groups;
     public $user_groups_action;
     public $user_departments;
+    public $user_departments_action;
     public $client_chat_user_channel;
 
     public $up_work_start_tm;
@@ -89,6 +91,16 @@ class MultipleUpdateForm extends Model
         self::ROLE_ADD => 'Add',
         self::ROLE_REPLACE => 'Replace',
         self::ROLE_REMOVE => 'Remove'
+    ];
+
+    public const DEPARTMENT_ADD = 1;
+    public const DEPARTMENT_REPLACE   = 2;
+    public const DEPARTMENT_REMOVE = 3;
+
+    public const DEPARTMENTS_ACTION_LIST = [
+        self::DEPARTMENT_ADD => 'Add',
+        self::DEPARTMENT_REPLACE => 'Replace',
+        self::DEPARTMENT_REMOVE => 'Remove'
     ];
 
     public function __construct(Employee $updaterUser, $config = [])
@@ -138,7 +150,7 @@ class MultipleUpdateForm extends Model
 
             ['form_roles_action', 'default', 'value' => self::ROLE_ADD],
             ['form_roles_action', 'integer'],
-            ['form_roles_action', 'in', 'range' => array_keys($this::ROLES_ACTION_LIST)],
+            ['form_roles_action', 'in', 'range' => array_keys(self::ROLES_ACTION_LIST)],
 
             ['user_groups', 'default', 'value' => []],
             ['user_groups', IsArrayValidator::class],
@@ -152,6 +164,10 @@ class MultipleUpdateForm extends Model
             ['user_departments', IsArrayValidator::class],
             ['user_departments', 'each', 'rule' => ['filter', 'filter' => 'intval']],
             ['user_departments', 'each', 'rule' => ['in', 'range' => array_keys($this->availableList->getDepartments())]],
+
+            ['user_departments_action', 'default', 'value' => self::DEPARTMENT_ADD],
+            ['user_departments_action', 'integer'],
+            ['user_departments_action', 'in', 'range' => array_keys(self::DEPARTMENTS_ACTION_LIST)],
 
             ['client_chat_user_channel', 'default', 'value' => []],
             ['client_chat_user_channel', IsArrayValidator::class],
@@ -220,6 +236,7 @@ class MultipleUpdateForm extends Model
             'form_roles_action' => 'Roles Action',
             'user_groups' => 'Assign User Groups',
             'user_departments' => 'Departments',
+            'user_departments_action' => 'Departments Action',
             'client_chat_user_channel' => 'Client Chat Channels',
             'up_work_start_tm' => 'Work Start Time',
             'up_work_minutes' => 'Work minutes',
@@ -260,18 +277,5 @@ class MultipleUpdateForm extends Model
     public function groupActionIsReplace(): bool
     {
         return $this->user_groups_action === self::GROUP_REPLACE;
-    }
-
-    public function isChangedRoles(): bool
-    {
-        if (count($this->updaterUser->getRelations()->getRoles()) !== count($this->form_roles)) {
-            return true;
-        }
-        foreach ($this->updaterUser->getRelations()->getRoles() as $key => $name) {
-            if (!in_array($key, $this->form_roles, true)) {
-                return true;
-            }
-        }
-        return false;
     }
 }

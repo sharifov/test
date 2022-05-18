@@ -1273,6 +1273,14 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         Yii::$app->db->createCommand()->delete(UserDepartment::tableName(), 'ud_user_id = :ud_user_id', [':ud_user_id' => $this->id])->execute();
     }
 
+    public function removeDepartments(array $departments)
+    {
+        UserDepartment::deleteAll([
+            'ud_user_id' => $this->id,
+            'ud_dep_id' => $departments,
+        ]);
+    }
+
     public function addNewDepartments(array $departments)
     {
         $data = [];
