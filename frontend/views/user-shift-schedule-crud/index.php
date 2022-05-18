@@ -295,14 +295,14 @@ $this->params['breadcrumbs'][] = $this->title;
         $selectAllUrl = Url::current(['act' => 'select-all']);
         ?>
         <script>
-            const selectAllUrl = '<?=$selectAllUrl?>';
+            var selectAllUrl = '<?=$selectAllUrl?>';
         </script>
     <?php Pjax::end(); ?>
 
 </div>
 
 <script>
-
+    sessionStorage.selectedShifts = '{}';
     document.addEventListener('DOMContentLoaded', function() {
         function refreshUserSelectedState() {
             if (sessionStorage.selectedShifts) {
