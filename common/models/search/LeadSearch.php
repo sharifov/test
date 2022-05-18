@@ -889,9 +889,19 @@ class LeadSearch extends Lead
         }
 
         if (ArrayHelper::isIn($this->is_conversion, ['1', '0'], false)) {
-            $leadIds = LeadUserConversion::find()
-                ->select('luc_lead_id')
-                ->groupBy(['luc_lead_id']);
+            if (isset($this->employee_id)) {
+                $leadIds = LeadUserConversion
+                    ::find()
+                    ->select(['luc_lead_id', 'luc_user_id'])
+                    ->where(['luc_user_id' => $this->employee_id])
+                    ->groupBy(['luc_lead_id']);
+            } else {
+                $leadIds = LeadUserConversion
+                    ::find()
+                    ->select('luc_lead_id')
+                    ->groupBy(['luc_lead_id']);
+            }
+
 
             $command = $this->is_conversion ? 'IN' : 'NOT IN';
 
@@ -3227,18 +3237,13 @@ class LeadSearch extends Lead
         ]);
 
         if (ArrayHelper::isIn($this->is_conversion, ['1', '0'], false)) {
-            $leadIds = LeadUserConversion::find()
-                ->select('luc_lead_id')
-                ->groupBy(['luc_lead_id'])
-                ->indexBy('luc_lead_id')
-                ->column();
-            $command = $this->is_conversion ? 'IN' : 'NOT IN';
-
-            $query->andWhere([
-                $command,
-                $leadTable . '.id',
-                $leadIds
-            ]);
+            $lucTableName = LeadUserConversion::tableName();
+            if ($this->is_conversion) {
+                $query->innerJoin($lucTableName . ' AS luc', 'luc.luc_lead_id=id');
+            } else {
+                $query->innerJoin($lucTableName . ' AS luc', 'luc.luc_lead_id=id')
+                      ->andWhere(['luc.luc_lead_id' => new Expression('null')]);
+            }
         }
 
         $query->with(['client',  'employee']);

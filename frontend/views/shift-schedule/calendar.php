@@ -1,24 +1,30 @@
 <?php
 
+use frontend\assets\UserShiftCalendarAsset;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
+use modules\shiftSchedule\src\entities\userShiftSchedule\search\TimelineCalendarFilter;
 use yii\helpers\Html;
-use yii\helpers\Json;
 use yii\helpers\Url;
 
 /* @var $this yii\web\View */
-/* @var $resourceList array */
-/* @var $groupIds array */
+/* @var $timelineCalendarFilter TimelineCalendarFilter */
+/* @var $userGroups array */
 
 $this->title = 'Users Shift Calendar';
 $this->params['breadcrumbs'][] = $this->title;
-$bundle = \frontend\assets\UserShiftCalendarAsset::register($this);
+$bundle = UserShiftCalendarAsset::register($this);
 ?>
 
-<?= $this->render('partial/_filter_form') ?>
 
 <div class="shift-schedule-calendar">
     <h1><i class="fa fa-calendar"></i> <?= Html::encode($this->title) ?></h1>
 
+    <?= $this->render('partial/_filter_form', [
+        'timelineCalendarFilter' => $timelineCalendarFilter,
+        'userGroups' => $userGroups
+    ]) ?>
+
+    <?php if (!empty($timelineCalendarFilter->userGroups)) : ?>
     <p>
         <?php
         /** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_CREATE, Create user shift schedule event */
@@ -33,10 +39,19 @@ $bundle = \frontend\assets\UserShiftCalendarAsset::register($this);
     </p>
 
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-12" id="calendar-wrapper">
             <div id="calendar" class="ssc"></div>
         </div>
     </div>
+    <?php else : ?>
+        <?= \yii\bootstrap4\Alert::widget([
+            'options' => [
+                'class' => 'alert-warning',
+            ],
+            'body' => 'You dont have an associated group. In this case, you cannot view calendar events',
+        ]) ?>
+    <?php endif; ?>
+
 </div>
 
 <div id="custom-event-tooltip-popup" class="md-tooltip">
@@ -60,18 +75,14 @@ $bundle = \frontend\assets\UserShiftCalendarAsset::register($this);
 
 <?php
 $ajaxUrl = Url::to(['shift-schedule/calendar-events-ajax']);
-$resourceListJson = Json::encode($resourceList);
 $today = date('Y-m-d', strtotime('+1 day'));
 $modalUrl = Url::to(['/shift-schedule/add-event']);
-$groupIdsJson = Json::encode($groupIds);
 $formCreateSingleEventUrl = Url::to(['/shift-schedule/add-single-event']);
 $formUpdateSingleEvent = Url::to(['/shift-schedule/update-single-event']);
 $deleteEventUrl = Url::to(['/shift-schedule/delete-event']);
 $canCreateOnDoubleClick = \Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_CREATE_ON_DOUBLE_CLICK);
 $openModalEventUrl = \yii\helpers\Url::to(['shift-schedule/get-event']);
 $js = <<<JS
-var resourceListJson = $resourceListJson;
-var groupIds = $groupIdsJson;
 var calendarEventsAjaxUrl = '$ajaxUrl';
 var today = '$today';
 var modalUrl = '$modalUrl';
@@ -132,7 +143,7 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
 //                 extendedProps: {icon: 'fa fa-folder'}
 //             };
 //         },
-        resources: resourceListJson,
+//         resources: resourceListJson,
         
         renderResource: function (resource) {
              return '<div class="md-work-week-cont" title="'+resource.title+'">' +
@@ -170,7 +181,16 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
             let startDate = year + '-' + month + '-' + day;
             let endDate = endYear + '-' + endMonth + '-' + endDay;
             
-            getCalendarEvents(startDate, endDate, groupIds);
+            $('#startDate').val(startDate);
+            $('#endDate').val(endDate);
+            
+            let btn = $('#filter-calendar-form-btn');
+            let btnHtml = btn.html();
+            btn.html('<span class="spinner-border spinner-border-sm"></span> Loading').prop("disabled", true);
+            getCalendarEvents(getFormFilterData())
+              .finally(() => {
+                  btn.html(btnHtml).prop("disabled", false);
+              });
         },
         onCellDoubleClick: function (args, inst) {
             dblClickResource = args.resource;
@@ -189,8 +209,6 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
         
         
          onEventCreate: function (args, inst) {
-         
-         console.log('adsads');
             if (dblClickResource && args.event.resource !== dblClickResource) {
                 args.event.resource = dblClickResource;
             }
@@ -284,8 +302,6 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
             let eventEndDate = new Date(event.end);
             let [yearEnd, monthEnd, dayEnd, hourEnd, minuteEnd] = [eventEndDate.getFullYear(), eventEndDate.getMonth()+1, eventEndDate.getDate(), eventEndDate.getHours(), eventEndDate.getMinutes(), eventEndDate];
             let endDate = yearEnd + '-' + monthEnd + '-' + dayEnd + ' ' + hourEnd + ':' + minuteEnd;
-            
-            console.log(event);
             
             let data = {
                 eventId: args.event.id,
@@ -471,18 +487,34 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
         });
     }
 
-
-
-    function getCalendarEvents(date, endDate, groups) {
-         let params = groups.join(',');
-         $.getJSON(calendarEventsAjaxUrl + '?start=' + date + '&end=' + endDate + '&callback&groups=' + params, function (data) {
-                inst.resources = data.resources;
-                setTimelineEvents(data.data);
-        
-                mobiscroll.toast({
-                    message: 'New events loaded'
-                });
-            }, 'jsonp');
+    function getCalendarEvents(queryString) {
+        return new Promise(function (resolve, reject) {
+            $.getJSON(calendarEventsAjaxUrl + '?' + queryString, function (data) {
+                    if (data.error) {
+                        createNotify('Error', data.message, 'error');
+                        reject();
+                    } else {
+                        inst.setOptions({
+                            resources: data.resources
+                        });
+                        setTimelineEvents(data.data);
+                
+                        mobiscroll.toast({
+                            message: 'New events loaded'
+                        });
+                        resolve();
+                    }
+                }, 'jsonp');
+            
+        });
+    }
+    
+    function getFormFilterData()
+    {
+        let form = document.getElementById('filter-calendar-form');
+        let formData = new FormData(form);
+        formData.delete('_csrf-frontend');
+        return new URLSearchParams(formData).toString();
     }
     
     window.setTimelineEvents = function (data)
@@ -538,6 +570,30 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
         });
     }
 
+    $('#filter-calendar-form-btn').on('click', function (e) {
+        e.preventDefault();
+        let btn = $(this);
+        let btnHtml = btn.html();
+        btn.html('<span class="spinner-border spinner-border-sm"></span> Loading').prop("disabled", true);        
+        let queryString = getFormFilterData();
+        $('#calendar-wrapper').append(loaderTemplate());
+        getCalendarEvents(queryString)
+        .then(() => {
+            window.history.replaceState(null, null, '?' + queryString + '&appliedFilter=1');  
+        })
+        .finally(() => {
+            btn.html(btnHtml).prop("disabled", false);
+            $('#calendar-wrapper .calendar-filter-overlay').remove();
+        });
+    });
+    
+    function loaderTemplate(modal) {
+        return `<div class="text-center calendar-filter-overlay">
+            <div class="spinner-border m-5" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+        </div>`;
+    }
 JS;
 
 $this->registerJs($js);
