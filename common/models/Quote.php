@@ -1249,6 +1249,9 @@ class Quote extends \yii\db\ActiveRecord
                     $dateFormat = 'jM H:i';
                 }
                 $arrDateTime = \DateTime::createFromFormat($dateFormat, $date);
+                $arrTimezone = $arrCity ? new \DateTimeZone($arrCity->timezone) : null;
+                $arrDateTimeWithTimezone = \DateTime::createFromFormat($dateFormat, $date, $arrTimezone);
+
                 if (
                     /*$now->format('m') > $arrDateTime->format('m')*/
                     $now->getTimestamp() > $arrDateTime->getTimestamp()
@@ -1271,9 +1274,8 @@ class Quote extends \yii\db\ActiveRecord
 
             $rowExpl = explode($depDate, $rowFl);
             $cabin = trim(str_replace($flightNumber, '', trim($rowExpl[0])));
-            if ($depCity !== null && $arrCity !== null && $depCity->dst != $arrCity->dst) {
-                $flightDuration = ($arrDateTime->getTimestamp() - $depDateTime->getTimestamp()) / 60;
-                $flightDuration = intval($flightDuration) + (intval($depCity->dst) * 60) - (intval($arrCity->dst) * 60);
+            if ($depCity !== null && $arrCity !== null) {
+                $flightDuration = ($arrDateTimeWithTimezone->getTimestamp() - $depDateTimeWithTimezone->getTimestamp()) / 60;
             } else {
                 $flightDuration = ($arrDateTime->getTimestamp() - $depDateTime->getTimestamp()) / 60;
             }
