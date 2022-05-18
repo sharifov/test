@@ -26,8 +26,8 @@ abstract class FeedbackFormBase extends Model implements FeedbackFormInterface
     public function rules(): array
     {
         return [
-            [['id', 'rid', 'type', 'template', 'createdAt', 'triggerSource', 'requestedFor'], 'required'],
-            [['id', 'rid', 'type', 'template', 'createdAt', 'triggerSource'], 'string'],
+            [['id', 'rid', 'type', 'createdAt', 'triggerSource', 'requestedFor'], 'required'],
+            [['id', 'rid', 'type', 'createdAt', 'triggerSource', 'template'], 'string'],
             ['rid', 'validateRoomId'],
             ['requestedBy', 'validateRequestedBy'],
             ['requestedFor', 'validateRequestedFor'],
