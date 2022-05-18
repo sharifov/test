@@ -148,8 +148,8 @@ class Quote extends \yii\db\ActiveRecord
 
     public const SORT_ATTRIBUTES_NAME_LIST = [
         self::SORT_BY_PRICE_ASC => 'price',
-        self::SORT_BY_PRICE_DESC    => 'price',
-        self::SORT_BY_DURATION_ASC  => 'duration',
+        self::SORT_BY_PRICE_DESC => 'price',
+        self::SORT_BY_DURATION_ASC => 'duration',
         self::SORT_BY_DURATION_DESC => 'duration',
     ];
 
@@ -207,10 +207,9 @@ class Quote extends \yii\db\ActiveRecord
         self::TYPE_ALTERNATIVE => 'Alternative',
     ];
 
-    public float $serviceFee = 0.035;
-    public float $serviceFeePercent = 3.5;
-
-    private ?float $agentProcessingFee = null;
+    public $serviceFee = 0.035;
+    public $serviceFeePercent = 3.5;
+    private $agentProcessingFee = null;
 
     public const EXCLUDE_AIRLINE_LOGO = ['6X'];
 
@@ -296,7 +295,7 @@ class Quote extends \yii\db\ActiveRecord
         return [
             ['main_airline_code', 'required', 'on' => self::SCENARIO_DEFAULT],
             [['uid', 'reservation_dump', 'gds'], 'required'],
-            [['lead_id', 'status' ], 'integer'],
+            [['lead_id', 'status'], 'integer'],
             [['check_payment'], 'boolean'],
             [['created', 'updated', 'created_by_seller', 'employee_name', 'employee_id', 'last_ticket_date', 'service_fee_percent'], 'safe'],
             [['uid', 'record_locator', 'cabin', 'trip_type', 'main_airline_code', 'fare_type', 'gds_offer_id'], 'string', 'max' => 255],
@@ -364,7 +363,7 @@ class Quote extends \yii\db\ActiveRecord
             'reservation_dump' => 'Reservation Dump',
             'pricing_info' => 'Pricing info',
             'type_id' => 'Type',
-            'tickets'   => 'Tickets JSON',
+            'tickets' => 'Tickets JSON',
             'origin_search_data' => 'Original Search JSON',
             'gds_offer_id' => 'GDS Offer ID',
             'agent_processing_fee' => 'Agent Processing Fee',
@@ -516,7 +515,6 @@ class Quote extends \yii\db\ActiveRecord
     }
 
 
-
     public static function getGDSName($gds = null)
     {
         $mapping = SearchService::GDS_LIST;
@@ -609,14 +607,14 @@ class Quote extends \yii\db\ActiveRecord
         $query = new Query();
 
         $query
-        ->select(['selling' => 'SUM(qp.selling)',
-            'mark_up' => 'SUM(qp.mark_up + qp.extra_mark_up)',
-            'fare_type' => 'q.fare_type',
-            'check_payment' => 'q.check_payment'
-        ])
-        ->from(Quote::tableName() . ' q')
-        ->leftJoin(QuotePrice::tableName() . ' qp', 'q.id = qp.quote_id')
-        ->where(['q.id' => $quoteId]);
+            ->select(['selling' => 'SUM(qp.selling)',
+                'mark_up' => 'SUM(qp.mark_up + qp.extra_mark_up)',
+                'fare_type' => 'q.fare_type',
+                'check_payment' => 'q.check_payment'
+            ])
+            ->from(Quote::tableName() . ' q')
+            ->leftJoin(QuotePrice::tableName() . ' qp', 'q.id = qp.quote_id')
+            ->where(['q.id' => $quoteId]);
 
         return $query->one();
     }
@@ -996,7 +994,7 @@ class Quote extends \yii\db\ActiveRecord
                     $depDateTimeWithTimezone = \DateTime::createFromFormat($dateFormat, $date, $depTimezone);
 
                     if (
-/*$now->format('m') > $depDateTime->format('m')*/
+                        /*$now->format('m') > $depDateTime->format('m')*/
                         $now->getTimestamp() > $depDateTimeWithTimezone->getTimestamp()
                     ) {
                         $date = date('Y') + 1 . $date;
@@ -1012,7 +1010,7 @@ class Quote extends \yii\db\ActiveRecord
                     }
                     $arrDateTime = \DateTime::createFromFormat($dateFormat, $date);
                     if (
-/*$now->format('m') > $arrDateTime->format('m')*/
+                        /*$now->format('m') > $arrDateTime->format('m')*/
                         $now->getTimestamp() > $arrDateTime->getTimestamp()
                     ) {
                         $date = date('Y') + 1 . $date;
@@ -1137,7 +1135,7 @@ class Quote extends \yii\db\ActiveRecord
                         $operatedBy = trim($matches[1]);
                     }
                     if (mb_strlen($operatedBy) > 2) {
-                        $airline = Airline::find()->andWhere(['like' ,'name', $operatedBy ])->one();
+                        $airline = Airline::find()->andWhere(['like', 'name', $operatedBy])->one();
                         if (!empty($airline)) {
                             $operatedBy = $airline->iata;
                         }
@@ -1171,7 +1169,7 @@ class Quote extends \yii\db\ActiveRecord
                     $operatedBy = trim($matches[1]);
                 }
                 if (mb_strlen($operatedBy) > 2) {
-                    $airline = Airline::find()->andWhere(['like' ,'name', $operatedBy ])->one();
+                    $airline = Airline::find()->andWhere(['like', 'name', $operatedBy])->one();
                     if (!empty($airline)) {
                         $operatedBy = $airline->iata;
                     }
@@ -1235,7 +1233,7 @@ class Quote extends \yii\db\ActiveRecord
                 $depDateTimeWithTimezone = \DateTime::createFromFormat($dateFormat, $date, $depTimezone);
 
                 if (
-/*$now->format('m') > $depDateTime->format('m')*/
+                    /*$now->format('m') > $depDateTime->format('m')*/
                     $now->getTimestamp() > $depDateTimeWithTimezone->getTimestamp()
                 ) {
                     $date = date('Y') + 1 . $date;
@@ -1252,7 +1250,7 @@ class Quote extends \yii\db\ActiveRecord
                 }
                 $arrDateTime = \DateTime::createFromFormat($dateFormat, $date);
                 if (
-/*$now->format('m') > $arrDateTime->format('m')*/
+                    /*$now->format('m') > $arrDateTime->format('m')*/
                     $now->getTimestamp() > $arrDateTime->getTimestamp()
                 ) {
                     $date = date('Y') + 1 . $date;
@@ -1309,7 +1307,7 @@ class Quote extends \yii\db\ActiveRecord
             if ($this->trip_type != Lead::TRIP_TYPE_ONE_WAY) {
                 if ($key != 0) {
                     $lastSegment = isset($segments[$key - 1])
-                    ? $segments[$key - 1] : $segments[$key];
+                        ? $segments[$key - 1] : $segments[$key];
                     $isMoreOneDay = $this->isMoreOneDay($lastSegment['qs_arrival_time'], $segment['qs_departure_time']);
                     if ($isMoreOneDay) {
                         $tripIndex = $tripIndex + 1;
@@ -1463,7 +1461,7 @@ class Quote extends \yii\db\ActiveRecord
     {
         if ($originSearchData = $this->getJsonOriginSearchData()) {
             if (!empty($originSearchData['meta']['bags'])) {
-                return (int) $originSearchData['meta']['bags'];
+                return (int)$originSearchData['meta']['bags'];
             }
         }
         return null;
@@ -1505,7 +1503,6 @@ class Quote extends \yii\db\ActiveRecord
 
         return ['carryOn' => $caryOn, 'checked' => $checked];
     }
-
 
 
     public function getBaggageInfoByTrip(QuoteTrip $trip): array
@@ -1622,7 +1619,7 @@ class Quote extends \yii\db\ActiveRecord
 
     public function getStatusSpan()
     {
-        $class = self::STATUS_CLASS_SPAN[$this->status] ??  '';
+        $class = self::STATUS_CLASS_SPAN[$this->status] ?? '';
         $label = self::STATUS_LIST[$this->status] ?? '-';
 
         return '<span id="q-status-' . $this->uid . '" class="quote__status ' . $class . '" title="' . Yii::$app->formatter->asDatetime($this->updated) . '" data-toggle="tooltip"><i class="fa fa-circle"></i> <span>' . $label . '</span></span>';
@@ -1831,7 +1828,7 @@ class Quote extends \yii\db\ActiveRecord
                 'totalDuration' => $trip->qt_duration,
                 'routing' => implode('-', $routing),
                 'title' => $segments[0]['departureCity'] . ' - ' . $segments[count($segments) - 1]['arrivalCity'],
-                ];
+            ];
         }
 
         return $trips;
@@ -2005,14 +2002,14 @@ class Quote extends \yii\db\ActiveRecord
 
     private function getClientCurrencyCode(): ?string
     {
-        return  $this->q_client_currency ?? null;
+        return $this->q_client_currency ?? null;
     }
 
     private function getClientCurrencySymbol(): ?string
     {
         $currency = Currency::find()
-                            ->byCode($this->getClientCurrencyCode())
-                            ->one();
+            ->byCode($this->getClientCurrencyCode())
+            ->one();
         return $currency->cur_symbol ?? null;
     }
 
@@ -2028,7 +2025,7 @@ class Quote extends \yii\db\ActiveRecord
             if ($this->trip_type != Lead::TRIP_TYPE_ONE_WAY) {
                 if ($key != 0) {
                     $lastSegment = isset($segments[$key - 1])
-                    ? $segments[$key - 1] : $segments[$key];
+                        ? $segments[$key - 1] : $segments[$key];
                     $isMoreOneDay = $this->isMoreOneDay($lastSegment['arrivalDateTime'], $segment['departureDateTime']);
                     if ($isMoreOneDay) {
                         $tripIndex = $tripIndex + 1;
@@ -2404,11 +2401,11 @@ class Quote extends \yii\db\ActiveRecord
             $prices[$key]['net'] = round($price['net'], 2);
         }
         return [
-            'prices'              => $prices,
-            'total'               => $total,
+            'prices' => $prices,
+            'total' => $total,
             'service_fee_percent' => $service_fee_percent,
-            'service_fee'         => ($service_fee_percent > 0) ? $total['selling'] * $service_fee_percent / 100 : 0,
-            'processing_fee'      => $this->getProcessingFee()
+            'service_fee' => ($service_fee_percent > 0) ? $total['selling'] * $service_fee_percent / 100 : 0,
+            'processing_fee' => $this->getProcessingFee()
         ];
     }
 
@@ -2521,14 +2518,14 @@ class Quote extends \yii\db\ActiveRecord
 
             if (
                 (stripos($row, "JCB") !== false ||
-                stripos($row, "ADT") !== false ||
-                stripos($row, "PFA") !== false ||
-                stripos($row, "JNN") !== false ||
-                stripos($row, "CNN") !== false ||
-                stripos($row, "CBC") !== false ||
-                stripos($row, "JNF") !== false ||
-                stripos($row, "INF") !== false ||
-                stripos($row, "CBI") !== false) &&
+                    stripos($row, "ADT") !== false ||
+                    stripos($row, "PFA") !== false ||
+                    stripos($row, "JNN") !== false ||
+                    stripos($row, "CNN") !== false ||
+                    stripos($row, "CBC") !== false ||
+                    stripos($row, "JNF") !== false ||
+                    stripos($row, "INF") !== false ||
+                    stripos($row, "CBI") !== false) &&
                 stripos($row, "XT") !== false
             ) {
                 $priceRows[] = $row;
@@ -2557,16 +2554,16 @@ class Quote extends \yii\db\ActiveRecord
                 }
             } elseif (
                 stripos($row, "JNN") !== false ||
-                    stripos($row, "CNN") !== false ||
-                    stripos($row, "CBC") !== false
+                stripos($row, "CNN") !== false ||
+                stripos($row, "CBC") !== false
             ) {
                 if (empty($prices[self::PASSENGER_CHILD])) {
                     $prices[self::PASSENGER_CHILD] = $this->getPrice($row);
                 }
             } elseif (
                 stripos($row, "JNF") !== false ||
-                    stripos($row, "INF") !== false ||
-                    stripos($row, "CBI") !== false
+                stripos($row, "INF") !== false ||
+                stripos($row, "CBI") !== false
             ) {
                 if (empty($prices[self::PASSENGER_INFANT])) {
                     $prices[self::PASSENGER_INFANT] = $this->getPrice($row);
@@ -2701,19 +2698,35 @@ class Quote extends \yii\db\ActiveRecord
     }
 
     /**
+     * @param null|string $qc_uid
      * @return string
      */
-    public function getCheckoutUrlPage(): string
+    public function getCheckoutUrlPage(?string $qc_uid = null): string
     {
-        $url = '#';
         if (($providerProject = $this->providerProject) && $providerProject->link) {
-            return $providerProject->link . '/' . self::CHECKOUT_URL_PAGE . '/' . $this->uid;
-        }
-        if ($this->lead && $this->lead->project && $this->lead->project->link) {
-            $url = $this->lead->project->link . '/' . self::CHECKOUT_URL_PAGE . '/' . $this->uid;
+            return implode('/', [$providerProject->link, self::CHECKOUT_URL_PAGE, $this->uid]);
         }
 
-        return $url;
+        if ($this->lead && $this->lead->project && $this->lead->project->link) {
+            $urlString = implode('/', [$this->lead->project->link, self::CHECKOUT_URL_PAGE, $this->uid]);
+            $queryParams = (is_null($qc_uid)) ? [] : ['qc' => $qc_uid];
+
+            return self::generateUrl($urlString, $queryParams);
+        }
+
+        return '#';
+    }
+
+    /**
+     * Helper method for `getCheckoutUrlPage/1`
+     *
+     * @param string $url
+     * @param array $params
+     * @return string
+     */
+    private static function generateUrl(string $url, array $params = []): string
+    {
+        return (count($params) > 0) ? implode('?', [$url, http_build_query($params)]) : $url;
     }
 
     /**

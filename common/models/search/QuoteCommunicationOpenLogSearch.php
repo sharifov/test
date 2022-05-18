@@ -4,13 +4,13 @@ namespace common\models\search;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use common\models\QuoteCommunication;
+use common\models\QuoteCommunicationOpenLog;
 
 /**
- * Class QuoteCommunicationSearch
+ * Class QuoteCommunicationOpenLogSearch
  * @package common\models\search
  */
-class QuoteCommunicationSearch extends QuoteCommunication
+class QuoteCommunicationOpenLogSearch extends QuoteCommunicationOpenLog
 {
     /**
      * {@inheritdoc}
@@ -18,9 +18,8 @@ class QuoteCommunicationSearch extends QuoteCommunication
     public function rules()
     {
         return [
-            [['qc_communication_id', 'qc_communication_type', 'qc_quote_id', 'qc_created_by'], 'integer'],
-            [['qc_uid', 'qc_ext_data'], 'string'],
-            [['qc_ext_data', 'qc_created_dt'], 'safe'],
+            [['qcol_id', 'qcol_quote_communication_id', 'qcol_created_dt'], 'integer'],
+            [['qcol_id', 'qcol_quote_communication_id', 'qcol_created_dt'], 'safe'],
         ];
     }
 
@@ -42,7 +41,7 @@ class QuoteCommunicationSearch extends QuoteCommunication
      */
     public function search($params)
     {
-        $query = QuoteCommunication::find();
+        $query = QuoteCommunicationOpenLog::find();
 
         // add conditions that should always apply here
 
@@ -50,7 +49,7 @@ class QuoteCommunicationSearch extends QuoteCommunication
             'query' => $query,
             'sort' => [
                 'defaultOrder' => [
-                    'qc_id' => SORT_DESC
+                    'qcol_id' => SORT_DESC
                 ]
             ]
         ]);
@@ -63,27 +62,23 @@ class QuoteCommunicationSearch extends QuoteCommunication
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'qc_id' => $this->qc_id,
-            'qc_uid' => $this->qc_uid,
-            'qc_communication_type' => $this->qc_communication_type,
-            'qc_communication_id' => $this->qc_communication_id,
-            'qc_ext_data' => $this->qc_ext_data,
-            'qc_quote_id' => $this->qc_quote_id,
-            'qc_created_by' => $this->qc_created_by
+            'qcol_id' => $this->qcol_id,
+            'qcol_quote_communication_id' => $this->qcol_quote_communication_id,
+            'qcol_created_dt' => $this->qcol_created_dt
         ]);
 
         /*
-         * If `qc_created_dt` is not empty - we add filtering by this field.
+         * If `qcol_created_dt` is not empty - we add filtering by this field.
          *
-         * I could use something like `$query->andFilterWhere(['DATE(qc_created_dt)' => $this->qc_created_dt])`
+         * I could use something like `$query->andFilterWhere(['DATE(qcol_created_dt)' => $this->qcol_created_dt])`
          * but didn't, because in MySQL the 'DATE/1' function calculates date for every single record in database
          * (including values that not included in the selection), as result - uses more system resources.
          */
-        if ($this->qc_created_dt !== null && $this->qc_created_dt !== "") {
-            $qcCreatedDateTime = \DateTime::createFromFormat('Y-m-d', $this->qc_created_dt);
+        if ($this->qcol_created_dt !== null && $this->qcol_created_dt !== "") {
+            $qcCreatedDateTime = \DateTime::createFromFormat('Y-m-d', $this->qcol_created_dt);
             $qcFromCreatedDateTime = "{$qcCreatedDateTime->format('Y-m-d')} 00:00:00";
             $qcToCreatedDateTime = "{$qcCreatedDateTime->format('Y-m-d')} 23:59:59";
-            $query->andFilterWhere(['BETWEEN', 'qc_created_dt', $qcFromCreatedDateTime, $qcToCreatedDateTime]);
+            $query->andFilterWhere(['BETWEEN', 'qcol_created_dt', $qcFromCreatedDateTime, $qcToCreatedDateTime]);
         }
 
         return $dataProvider;

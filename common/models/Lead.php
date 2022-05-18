@@ -4038,30 +4038,19 @@ Reason: {reason}',
     {
         $project = $this->project;
 
-        $upp = null;
-        if ($project) {
-            $upp = UserProjectParams::find()->where(['upp_project_id' => $project->id, 'upp_user_id' => Yii::$app->user->id])->withEmailList()->withPhoneList()->one();
-            /*if ($upp) {
-                $mailFrom = $upp->upp_email;
-            }*/
-        }
+        $uppQuery = UserProjectParams::find()->where(['upp_project_id' => $project->id, 'upp_user_id' => Yii::$app->user->id])->withEmailList()->withPhoneList();
+        $upp = $this->project ? $uppQuery->one() : null;
 
         if ($quoteIds && is_array($quoteIds)) {
             foreach ($quoteIds as $qid) {
                 $quoteModel = Quote::findOne($qid);
                 if ($quoteModel) {
-                    $cabinClasses = [];
-                    //$quoteItem = $quoteModel->getInfoForEmail2();
                     $quoteItem = [
                         'id' => $quoteModel->id,
                         'uid' => $quoteModel->uid,
                         'cabinClass' => $quoteModel->cabin,
                         'tripType' => $quoteModel->trip_type,
                         'hasSeparates' =>  $quoteModel->getTicketSegments() ? true : false
-
-                        //'airlineCode' => $quoteModel->main_airline_code,
-                        //'offerData' =>  $quoteModel->getInfoForEmail2()
-                        //'shortUrl' => $quoteModel->quotePrice(),
                     ];
 
                     $quoteItem = array_merge($quoteItem, $quoteModel->getInfoForEmail2($lang));

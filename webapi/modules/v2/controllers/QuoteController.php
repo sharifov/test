@@ -9,6 +9,7 @@ use common\models\ClientPhone;
 use common\models\Lead;
 use common\models\Notifications;
 use common\models\Quote;
+use common\models\QuoteCommunicationOpenLog;
 use common\models\UserProjectParams;
 use common\models\VisitorLog;
 use frontend\helpers\JsonHelper;
@@ -50,11 +51,13 @@ class QuoteController extends ApiBaseController
      * @apiParam {string}           [clientIP]          Client IP address
      * @apiParam {bool}             [clientUseProxy]    Client Use Proxy
      * @apiParam {string}           [clientUserAgent]   Client User Agent
+     * @apiParam {object}           [queryParams]       Query params, sent to service that calling get-info
      *
      *
      * @apiParamExample {json} Request-Example:
      * {
      *      "uid": "5b6d03d61f078",
+     *      "queryParams": {},
      *      "apiKey": "d190c378e131ccfd8a889c8ee8994cb55f22fbeeb93f9b99007e8e7ecc24d0dd"
      * }
      *
@@ -464,10 +467,8 @@ class QuoteController extends ApiBaseController
      *       "type": "yii\\web\\NotFoundHttpException"
      *   }
      */
-
     public function actionGetInfo(): array
     {
-
         $this->checkPost();
         $apiLog = $this->startApiLog($this->action->uniqueId);
 
@@ -478,6 +479,8 @@ class QuoteController extends ApiBaseController
         if (!$uid) {
             throw new BadRequestHttpException('Not found UID on POST request', 1);
         }
+
+        QuoteCommunicationOpenLog::createByRequestData(\Yii::$app->request->params);
 
         if ($this->apiProject) {
             $projectIds = [$this->apiProject->id];

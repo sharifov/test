@@ -42,6 +42,7 @@ use vova07\imperavi\Widget;
 use yii\helpers\Url;
 use yii\helpers\VarDumper;
 use common\models\EmailTemplateType;
+use common\models\QuoteCommunication;
 
 $c_type_id = $comForm->c_type_id;
 
@@ -180,6 +181,7 @@ $canShowEmailData = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_
                                             <?= $previewEmailActiveForm->field($previewEmailForm, 'e_offer_list')->hiddenInput()->label(false); ?>
                                             <?= $previewEmailActiveForm->field($previewEmailForm, 'e_email_message_edited')->hiddenInput(['id' => 'e_email_message_edited'])->label(false); ?>
                                             <?= $previewEmailActiveForm->field($previewEmailForm, 'e_email_subject_origin')->hiddenInput()->label(false); ?>
+                                            <?= $previewEmailActiveForm->field($previewEmailForm, 'e_qc_uid')->hiddenInput(['value' => $comForm->c_qc_uid])->label(false); ?>
                                         </div>
                                         <div class="col-sm-4 form-group">
                                             <?= $previewEmailActiveForm->field($previewEmailForm, 'e_email_to')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => $emailToReadonly]) ?>
@@ -288,6 +290,7 @@ $canShowEmailData = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_
                                             <?= $previewSmsActiveForm->field($previewSmsForm, 's_language_id')->hiddenInput()->label(false); ?>
                                             <?= $previewSmsActiveForm->field($previewSmsForm, 's_sms_tpl_id')->hiddenInput()->label(false); ?>
                                             <?= $previewSmsActiveForm->field($previewSmsForm, 's_quote_list')->hiddenInput()->label(false) ?>
+                                            <?= $previewSmsActiveForm->field($previewSmsForm, 's_qc_uid')->hiddenInput(['value' => $comForm->c_qc_uid])->label(false) ?>
                                         </div>
                                         <div class="col-sm-6 form-group">
                                             <?= $previewSmsActiveForm->field($previewSmsForm, 's_phone_to')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => true]) ?>
@@ -360,8 +363,8 @@ $canShowEmailData = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_
                                 $this->registerJs('$("body").removeClass("modal-open"); $(".modal-backdrop").remove();updateCommunication();');
                             }
 
-                                echo $communicationActiveForm->errorSummary($comForm);
-
+                            echo $communicationActiveForm->errorSummary($comForm);
+                            echo $communicationActiveForm->field($comForm, 'c_qc_uid')->label(false)->hiddenInput(['value' => is_null($comForm->c_qc_uid) ? QuoteCommunication::generateUid() : $comForm->c_qc_uid]);
                             ?>
 
 
