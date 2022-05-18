@@ -2,20 +2,21 @@
 
 namespace src\listeners\cases;
 
-use src\entities\cases\events\CasesManualChangeStatusProcessingEvent;
+use src\entities\cases\events\CasesMultipleChangeStatusProcessingEvent;
 use common\models\Notifications;
 use frontend\widgets\notification\NotificationMessage;
 use common\components\purifier\Purifier;
 use common\models\Employee;
 use Yii;
 
-class CasesManualChangeStatusProcessingEventNotificationListener
+class CasesMultipleChangeStatusProcessingEventNotificationListener
 {
-    public function handle(CasesManualChangeStatusProcessingEvent $event): void
+    public function handle(CasesMultipleChangeStatusProcessingEvent $event): void
     {
         try {
             $user = Employee::findOne($event->newOwner);
             if (!$event->oldOwner) {
+                Yii::warning('test123');
                 return;
             } else {
                 $userNotifyId = $event->oldOwner;

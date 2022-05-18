@@ -59,7 +59,7 @@ class MultipleUpdateService
     private function processing(MultipleUpdateForm $form, Cases $case): void
     {
         try {
-            $this->service->manualChangeStatusProcessing($case->cs_id, $form->userId, $form->getCreatorId());
+            $this->service->multipleChangeStatusProcessing($case->cs_id, $form->userId, $form->getCreatorId());
             $this->addSuccessMessage($this->movedProcessingMessage($case));
         } catch (\DomainException $e) {
             $this->addErrorMessage('ID ' . $case->cs_id . ' ' . $e->getMessage());
