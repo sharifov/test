@@ -579,7 +579,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
 
         <?php
         $js = <<<JS
-
+        sessionStorage.selectedUsers = '{}';
    // $(document).ready(function () {
         $(document).on('click', '.btn-multiple-update', function() {
             
