@@ -72,24 +72,6 @@ class ClientChatRequestController extends ApiBaseController
         $this->clientChatRequestRepository = $clientChatRequestRepository;
     }
 
-//    /**
-//     * @return array
-//     * @throws \yii\web\NotAcceptableHttpException
-//     */
-//    public function behaviors(): array
-//    {
-//        $behaviors = [
-//            'HttpCache' => [
-//                'class' => HttpCache::class,
-//                'only' => ['projectConfig'],
-//                'lastModified' => static function () {
-//                    return strtotime(ClientChatProjectConfig::find()->max('ccpc_updated_dt'));
-//                },
-//            ],
-//        ];
-//        return ArrayHelper::merge(parent::behaviors(), $behaviors);
-//    }
-
     /**
      * @return array
      */
@@ -713,6 +695,7 @@ class ClientChatRequestController extends ApiBaseController
      * @apiName ClientChatFeedback
      * @apiGroup ClientChat
      * @apiPermission Authorized User
+     * @apiDescription Action handle the feedback requests.
      *
      * @apiHeader {string} Authorization    Credentials <code>base64_encode(Username:Password)</code>
      * @apiHeaderExample {json} Header-Example:
@@ -721,16 +704,36 @@ class ClientChatRequestController extends ApiBaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
+     * @apiParam {string}   apiKey               Api key, required for accept to endpoint
+     * @apiParam {string}   event                Event, that should be handled. Available values: `FEEDBACK_REQUESTED`, `FEEDBACK_REJECTED` & `FEEDBACK_SUBMITTED`
+     * @apiParam {json}     data                 JSON object with request data
+     * @apiParam {string}   data.id              Mongodb ID of feedback message
+     * @apiParam {string}   data.rid             Room id in rocket chat
+     * @apiParam {string}   data.type            Feedback type. Available values: `fullscreen`, `inline`, `sticky` & `questions`
+     * @apiParam {string}   [data.template]      Template
+     * @apiParam {string}   data.createdAt       Created datetime for data in outer service (ISODate)
+     * @apiParam {string}   data.triggerSource   Trigger source, available values: `agent`, `chat-close` & `bot`
+     * @apiParam {json}     [data.requestedBy]   Agent, who requested feedback. equals to null for feedbacks on chat close or triggered by bot
+     * @apiParam {json}     data.requestedFor    Agent, that will be target for feedback result
+     *
      * @apiParamExample {json} Request-Example LEAVE_FEEDBACK:
      * {
-     *      "event": "LEAVE_FEEDBACK",
+     *      "apiKey": "038ce0121a1666678d4db57cb10e8667b98d8b08c408cdf7c9b04f1430071826",
+     *      "event": "FEEDBACK_REQUESTED",
      *      "data": {
-     *          "rid": "20a20989-4d26-42f4-9a1c-2948ce4c4d56",
-     *          "comment": "Hello, this is my feedback",
-     *          "rating": 4,
-     *          "visitor": {
-     *              "id": "1c1d90ff-5489-45f5-b19b-2181a65ce898",
-     *              "project": "ovago"
+     *          "id": "d95ff567-3ce3-47b9-a937-1e716cae74fc",
+     *          "rid": "b3166811-302b-4de6-bb0f-b969575de4d5",
+     *          "type": "inline",
+     *          "template": "Sales mark",
+     *          "createdAt": "2022-02-23T14:58:37.034Z",
+     *          "triggerSource": "agent",
+     *          "requestedBy": {
+     *              "name": "Administrator",
+     *              "username": "admin"
+     *          },
+     *          "requestedFor": {
+     *              "name": "Administrator",
+     *              "username": "superadmin"
      *          }
      *      }
      * }
@@ -739,17 +742,17 @@ class ClientChatRequestController extends ApiBaseController
      *  HTTP/1.1 200 OK
      *  {
      *     "status": 200
-     *     "message": "Ok"
+     *     "message": "Feedback added to queue (jobId: 1)"
      *  }
      *
      * @apiErrorExample {json} Error-Response (400):
      *
      * HTTP/1.1 400 Bad Request
      * {
-     *  "status":400,
-     *  "message":"Some errors occurred while creating client chat request",
-     *  "code":"13104",
-     *  "errors":["Event is invalid."]
+     *      "status":400,
+     *      "message":"Client Chat validate failed.",
+     *      "errors":["Event is invalid."],
+     *      "code":"13104"
      * }
      *
      * @return ErrorResponse|Response

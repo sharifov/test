@@ -117,8 +117,9 @@ class ClientChatSurvey extends ActiveRecord
     public function rules()
     {
         return [
-            [['ccs_uid', 'ccs_client_chat_id', 'ccs_type', 'ccs_template', 'ccs_trigger_source', 'ccs_requested_for', 'ccs_status', 'ccs_rc_created_dt'], 'required'],
-            [['ccs_uid', 'ccs_type', 'ccs_template', 'ccs_trigger_source'], 'string'],
+            [['ccs_uid', 'ccs_client_chat_id', 'ccs_type', 'ccs_trigger_source', 'ccs_requested_for', 'ccs_status', 'ccs_rc_created_dt'], 'required'],
+            [['ccs_template'], 'string'],
+            [['ccs_uid', 'ccs_type', 'ccs_template', 'ccs_trigger_source'], 'string', 'max' => 64],
             [['ccs_client_chat_id', 'ccs_requested_by', 'ccs_requested_for', 'ccs_status'], 'integer'],
             ['ccs_requested_by', 'exist', 'targetClass' => Employee::class, 'targetAttribute' => 'id', 'skipOnEmpty' => true],
             ['ccs_requested_for', 'exist', 'targetClass' => Employee::class, 'targetAttribute' => 'id', 'skipOnEmpty' => false],
