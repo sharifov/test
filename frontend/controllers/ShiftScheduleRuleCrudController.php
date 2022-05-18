@@ -68,11 +68,10 @@ class ShiftScheduleRuleCrudController extends FController
     {
         $ssrModel = new ShiftScheduleRule();
         $form = new ShiftScheduleForm();
-
-        if ($form->load(Yii::$app->request->post())) {
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             $form->setTimeComplete();
             $ssrModel->attributes = $form->attributes;
-            if ($form->validate() && $ssrModel->save()) {
+            if ($ssrModel->save()) {
                 return $this->redirect(['view', 'id' => $ssrModel->ssr_id]);
             }
         } else {
@@ -89,16 +88,16 @@ class ShiftScheduleRuleCrudController extends FController
      * @return string|Response
      * @throws NotFoundHttpException
      */
-    public function actionUpdate($id)
+    public function actionUpdate(int $id)
     {
         $ssrModel = $this->findModel($id);
         $form = new ShiftScheduleForm();
         $form->ssr_id = $ssrModel->ssr_id;
 
-        if ($form->load(Yii::$app->request->post())) {
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             $form->setTimeComplete();
             $ssrModel->attributes = $form->attributes;
-            if ($form->validate() && $ssrModel->save()) {
+            if ($ssrModel->save()) {
                 return $this->redirect(['view', 'id' => $ssrModel->ssr_id]);
             }
         } else {

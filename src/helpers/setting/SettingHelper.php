@@ -986,4 +986,14 @@ class SettingHelper
     {
         return (int)(self::getShiftSchedule()['days_offset'] ?? ShiftScheduleDictionary::DEFAULT_DAYS_OFFSET);
     }
+
+    public static function isClientChatDebugEnable(): bool
+    {
+        return (bool) (Yii::$app->params['settings']['client_chat_debug_enable'] ?? false);
+    }
+
+    public static function isEnableAgentCallQueueJobAfterChangeCallStatusReady(): bool
+    {
+        return (bool) (Yii::$app->params['settings']['enable_agent_call_queue_job_after_change_call_status_ready'] ?? true);
+    }
 }

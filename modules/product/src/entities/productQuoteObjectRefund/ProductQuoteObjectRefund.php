@@ -253,6 +253,16 @@ class ProductQuoteObjectRefund extends \yii\db\ActiveRecord implements Serializa
         $this->pqor_status_id = ProductQuoteObjectRefundStatus::NEW;
     }
 
+    /**
+     * Sets quote in status "expired"
+     *
+     * @return void
+     */
+    public function expired(): void
+    {
+        $this->pqor_status_id = ProductQuoteObjectRefundStatus::EXPIRED;
+    }
+
     public function serialize(): array
     {
         return (new ProductQuoteObjectRefundSerializer($this))->getData();

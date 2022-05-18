@@ -25,6 +25,7 @@ use src\entities\cases\CaseEventLog;
 use src\entities\cases\Cases;
 use src\forms\CompositeFormHelper;
 use src\helpers\app\AppHelper;
+use src\helpers\DateHelper;
 use src\helpers\ProjectHashGenerator;
 use src\repositories\NotFoundException;
 use src\services\cases\CasesCommunicationService;
@@ -352,7 +353,7 @@ class ProductQuoteRefundController extends \frontend\controllers\FController
 
         if (Yii::$app->request->isAjax) {
             $form = new VoluntaryRefundUpdateForm($productQuoteRefund);
-
+            $form->setExpirationDate(DateHelper::toFormat($productQuoteRefund->pqr_expiration_dt));
             return $this->renderAjax('partial/_voluntary_refund_update', [
                 'refundForm' => $form,
                 'message' => '',

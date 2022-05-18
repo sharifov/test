@@ -13,6 +13,12 @@
 /*    min-height: 100px;*/
 /*}*/
 
+.ssc {
+    max-height: 750px;
+    border-radius: 12px;
+    border: 3px dashed #e4e4e4;
+    overflow: hidden;
+}
 .ssc .mbsc-segmented {
   max-width: 600px;
   margin: 0 auto;
@@ -112,5 +118,20 @@
     position: absolute;
     bottom: 16px;
     right: 16px;
+}
+.calendar-filter-overlay {
+    display: flex;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 10;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0,0,0,0.4);
+    color: #ffc500;
+    margin: 0 10px;
+    border-radius: 13px;
 }
 /** END CALENDAR **/

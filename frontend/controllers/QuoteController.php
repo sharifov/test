@@ -1412,50 +1412,8 @@ class QuoteController extends FController
             if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_ADD_AUTO_QUOTES, LeadAbacObject::ACTION_ACCESS)) {
                 throw new \RuntimeException('Check ABAC(' . LeadAbacObject::ACT_ADD_AUTO_QUOTES . ') access is failed');
             }
-
-            $keyCache = sprintf('quick-search-new-%d-%s-%s', $lead->id, $gds, $lead->generateLeadKey());
-            $quotes = \Yii::$app->cacheFile->get($keyCache);
-
-            if ($quotes === false) {
-                $dto = new SearchServiceQuoteDTO($lead);
-                $cid = $lead->project->airSearchCid ?: AddQuoteService::AUTO_ADD_CID;
-                $dto->setCid($cid);
-
-                $quotes = SearchService::getOnlineQuotes($dto);
-
-                if ($quotes && !empty($quotes['data']['results']) && empty($quotes['error'])) {
-                    \Yii::$app->cacheFile->set($keyCache, $quotes = QuoteHelper::formatQuoteData($quotes['data']), 600);
-                } else {
-                    throw new \RuntimeException(!empty($quotes['error']) ? JsonHelper::decode($quotes['error'])['Message'] : 'Search result is empty!');
-                }
-            }
-
-            $models = array_filter($quotes['results'] ?? [], function ($item) {
-                return $item['meta']['auto'] ?? false;
-            });
-
-            $dataProvider = new ArrayDataProvider([
-                'allModels' => $models,
-                'pagination' => false,
-                'sort' => [
-                    'defaultOrder' => ['autoSort' => SORT_ASC, 'price' => SORT_ASC],
-                    'attributes' => [
-                        'price' => [
-                            'asc' => ['price' => SORT_ASC],
-                            'desc' => ['price' => SORT_DESC],
-                            'default' => SORT_ASC,
-                        ],
-                        'autoSort' => [
-                            'asc' => ['autoSort' => SORT_ASC],
-                            'desc' => ['autoSort' => SORT_DESC],
-                            'default' => SORT_ASC,
-                        ],
-                    ],
-                ],
-            ]);
-
             $addQuoteService = Yii::createObject(AddQuoteService::class);
-            $addQuoteService->autoSelectQuotes($dataProvider->getModels(), $lead, Auth::user(), true, true);
+            $addQuoteService->addAutoQuotes($lead, $gds, Auth::user());
 
             $response['status'] = 1;
             $response['message'] = 'Auto add quotes completed successfully';

@@ -5,6 +5,7 @@ namespace common\models;
 use common\components\jobs\AgentCallQueueJob;
 use common\models\query\UserCallStatusQuery;
 use src\dispatchers\NativeEventDispatcher;
+use src\helpers\setting\SettingHelper;
 use src\model\user\entity\userCallStatus\events\UserCallStatusEvents;
 use src\model\user\entity\userGroup\events\UserGroupEvents;
 use Yii;
@@ -111,12 +112,13 @@ class UserCallStatus extends \yii\db\ActiveRecord
         parent::afterSave($insert, $changedAttributes);
 
         if ((int) $this->us_type_id === self::STATUS_TYPE_READY) {
-            //Call::applyHoldCallToAgent($this->us_user_id);
-            $delayJob = 5;
-            $job = new AgentCallQueueJob();
-            $job->user_id = $this->us_user_id;
-            $job->delayJob = $delayJob;
-            $jobId = Yii::$app->queue_job->delay($delayJob)->priority(150)->push($job);
+            if (SettingHelper::isEnableAgentCallQueueJobAfterChangeCallStatusReady()) {
+                $delayJob = 5;
+                $job = new AgentCallQueueJob();
+                $job->user_id = $this->us_user_id;
+                $job->delayJob = $delayJob;
+                $jobId = Yii::$app->queue_job->delay($delayJob)->priority(150)->push($job);
+            }
         }
 
         if ($insert) {

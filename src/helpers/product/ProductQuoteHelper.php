@@ -8,8 +8,10 @@ use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelationQuery;
 use modules\product\src\entities\productTypePaymentMethod\ProductTypePaymentMethodQuery;
+use src\helpers\app\AppHelper;
 use src\services\CurrencyHelper;
 use yii\helpers\Html;
+use DateTime;
 
 class ProductQuoteHelper
 {
@@ -127,5 +129,19 @@ class ProductQuoteHelper
         $productQuote->pq_app_markup = null;
         $productQuote->pq_agent_markup = null;
         return $productQuote;
+    }
+
+    /**
+     * @param ProductQuote $productQuote
+     * @return bool
+     */
+    public static function checkingExpirationDate(ProductQuote $productQuote): bool
+    {
+        try {
+            return !$productQuote->pq_expiration_dt || (new DateTime($productQuote->pq_expiration_dt)) >= (new DateTime());
+        } catch (\Exception $e) {
+            \Yii::error(AppHelper::throwableFormatter($e), 'ProductQuoteHelper:checkingExpirationDate:failed');
+            return false;
+        }
     }
 }

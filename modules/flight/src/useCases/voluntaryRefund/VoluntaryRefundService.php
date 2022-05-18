@@ -95,7 +95,8 @@ class VoluntaryRefundService
                 null,
                 $form->toArray(),
                 CurrencyHelper::convertToBaseCurrency($form->getRefundForm()->refundCost, $order->orClientCurrency->cur_base_rate),
-                $form->getRefundForm()->refundCost
+                $form->getRefundForm()->refundCost,
+                $form->expirationDate
             );
             $productQuoteRefund->new();
             $this->productQuoteRefundRepository->save($productQuoteRefund);
@@ -157,6 +158,7 @@ class VoluntaryRefundService
         $productQuoteRefund->pqr_client_processing_fee_amount = $form->totalProcessingFee;
         $productQuoteRefund->pqr_client_penalty_amount = $form->totalAirlinePenalty;
         $productQuoteRefund->pqr_client_refund_amount = $form->totalRefundable;
+        $productQuoteRefund->pqr_expiration_dt = $form->expirationDate;
         $productQuoteRefund->calculateSystemPrices();
 
         $objects = [];
