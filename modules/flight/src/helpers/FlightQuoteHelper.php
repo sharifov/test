@@ -24,6 +24,7 @@ use modules\product\src\entities\productQuote\ProductQuote;
 use src\helpers\app\AppHelper;
 use src\helpers\product\ProductQuoteHelper;
 use src\helpers\setting\SettingHelper;
+use modules\flight\src\helpers\SettingHelper as FlightSettingHelper;
 use Yii;
 use yii\base\ErrorException;
 use yii\data\ActiveDataProvider;
@@ -1293,8 +1294,8 @@ class FlightQuoteHelper
     public static function getExpirationDate(FlightQuote $flightQuote): string
     {
         $maxDate = self::getLastDepartureDate($flightQuote);
-        $maxDate = $maxDate->modify(sprintf('-%d hours', SettingHelper::getMinHoursDifferenceOffers()));
-        $date = (new DateTime())->modify(sprintf('+%d days', SettingHelper::getExpirationDaysOfNewOffers()));
+        $maxDate = $maxDate->modify(sprintf('-%d hours', FlightSettingHelper::getMinHoursDifferenceOffers()));
+        $date = (new DateTime())->modify(sprintf('+%d days', FlightSettingHelper::getExpirationDaysOfNewOffers()));
 
         return ($date > $maxDate) ? $maxDate->format('Y-m-d') : $date->format('Y-m-d');
     }
