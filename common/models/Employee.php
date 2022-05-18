@@ -1248,16 +1248,24 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         Yii::$app->db->createCommand()->delete('auth_assignment', 'user_id = :user_id', [':user_id' => $this->id])->execute();
     }
 
+    public function removeRoles(array $roles)
+    {
+        foreach ($roles as $role) {
+            Yii::$app->db->createCommand()->delete('auth_assignment', 'user_id = :user_id AND item_name = :item_name', [':user_id' => $this->id, ':item_name' => $role])->execute();
+        }
+    }
+
     public function addNewRoles(array $roles)
     {
         $data = [];
         foreach ($roles as $role) {
             $data[] = [
                 'item_name' => $role,
-                'user_id' => $this->id
+                'user_id' => $this->id,
+                'created_at' => strtotime(date('Y-m-d H:i:s'))
             ];
         }
-        Yii::$app->db->createCommand()->batchInsert('auth_assignment', ['item_name', 'user_id'], $data)->execute();
+        Yii::$app->db->createCommand()->batchInsert('auth_assignment', ['item_name', 'user_id', 'created_at'], $data)->execute();
     }
 
     public function removeAllDepartments()

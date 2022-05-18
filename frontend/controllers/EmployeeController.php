@@ -557,12 +557,58 @@ class EmployeeController extends FController
                         $multipleErrors[$user_id][] = $uProfile->getErrors();
                     }
 
+//                    if ($multipleForm->form_roles && $multipleForm->fieldAccess->canEdit('form_roles') && $multipleForm->isChangedRoles()) {
                     if ($multipleForm->form_roles && $multipleForm->fieldAccess->canEdit('form_roles')) {
+                        $needToAddRoles = [];
+                        $needToRemoveRoles = [];
+
+                        switch ((int)$multipleForm->form_roles_action) {
+                            case $multipleForm::ROLE_ADD:
+                                foreach ($multipleForm->form_roles as $role) {
+                                    if (!in_array($role, $user->getRoles(true))) {
+                                        $needToAddRoles[] = $role;
+                                    }
+                                }
+
+                                break;
+                            case $multipleForm::ROLE_REPLACE:
+                                $needToRemoveRoles = $user->getRoles(true);
+                                $needToAddRoles = $multipleForm->form_roles;
+                                break;
+                            case $multipleForm::ROLE_REMOVE:
+                                foreach ($multipleForm->form_roles as $role) {
+                                    if (in_array($role, $user->getRoles(true))) {
+                                        $needToRemoveRoles[] = $role;
+                                    }
+                                }
+                                break;
+                        }
+
+                        if (!empty($needToAddRoles) || !empty($needToRemoveRoles)) {
+                            $transaction = Yii::$app->db->beginTransaction();
+                            try {
+                                if ($needToRemoveRoles) {
+                                    $user->removeRoles($needToRemoveRoles);
+                                }
+
+                                if ($needToAddRoles) {
+                                    $user->addNewRoles($needToAddRoles);
+                                }
+
+                                $transaction->commit();
+                            } catch (\Throwable $e) {
+                                $transaction->rollBack();
+                                Yii::error($e->getMessage(), 'Employee:list:multipleUpdate:userRoles');
+                                $multipleErrors[$user_id][] = $e->getMessage();
+                            }
+                        }
+                    }
+
+                    if (empty($multipleForm->form_roles) && $multipleForm->fieldAccess->canEdit('form_roles') && (int)$multipleForm->form_roles_action === $multipleForm::ROLE_REPLACE) {
                         $transaction = Yii::$app->db->beginTransaction();
                         try {
                             $oldRoles = $user->getRoles(true);
                             $user->removeAllRoles();
-                            $user->addNewRoles($multipleForm->form_roles);
                             $transaction->commit();
                             $user->addLog(
                                 \Yii::$app->id,
