@@ -69,7 +69,11 @@ $isAdmin = $user->isAdmin() || $user->isSuperAdmin();
                 <?php
                 foreach ($multipleErrors as $userId => $multipleError) {
                     echo 'UserId: ' . $userId . ' <br>';
-                    echo VarDumper::dumpAsString($multipleError) . ' <br><br>';
+                    echo '<div>';
+                    foreach ($multipleError as $error) {
+                        echo VarDumper::dumpAsString($error) . '<br>';
+                    }
+                    echo '</div><br>';
                 }
                 ?>
                 <?= $multipleForm->getErrors() ? VarDumper::dumpAsString($multipleForm->getErrorSummary(true)) : '' ?>
