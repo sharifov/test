@@ -4,6 +4,7 @@ namespace modules\shiftSchedule\src\entities\userShiftSchedule;
 
 use common\models\UserGroup;
 use common\models\UserGroupAssign;
+use modules\shiftSchedule\src\entities\userShiftSchedule\search\TimelineCalendarFilter;
 
 class UserShiftScheduleQuery
 {
@@ -56,21 +57,40 @@ class UserShiftScheduleQuery
     }
 
     /**
-     * @param string $startDt
-     * @param string $endDt
-     * @param array $groupIds
+     * @param TimelineCalendarFilter $form
      * @return UserShiftSchedule[]
      */
-    public static function getTimelineListByUser(string $startDt, string $endDt, array $groupIds): array
+    public static function getTimelineListByUser(TimelineCalendarFilter $form): array
     {
-        return UserShiftSchedule::find()
+        $query = UserShiftSchedule::find()
             ->join('inner join', UserGroupAssign::tableName(), 'ugs_user_id = uss_user_id')
-            ->with(['user'])
-            ->andWhere(['ugs_group_id' => $groupIds])
-            ->andWhere(['AND',
-                ['>=', 'uss_start_utc_dt', date('Y-m-d H:i:s', strtotime($startDt))],
-                ['<=', 'uss_start_utc_dt', date('Y-m-d 23:59:59', strtotime($endDt))]
-            ])
-            ->all();
+            ->andWhere(['ugs_group_id' => $form->userGroups]);
+        if ($form->users) {
+            $query->andWhere(['ugs_user_id' => $form->users]);
+        }
+        if ($form->statuses) {
+            $query->andWhere(['uss_status_id' => $form->statuses]);
+        }
+        if ($form->scheduleTypes) {
+            $query->andWhere(['uss_sst_id' => $form->scheduleTypes]);
+        }
+        if ($form->duration) {
+            $query->andWhere(['uss_duration' => $form->duration]);
+        }
+        if ($form->startDateTime && $form->startDateTimeCondition) {
+            $query->andWhere([$form->getStartDateTimeConditionOperator(), 'uss_start_utc_dt', date('Y-m-d H:i', strtotime($form->startDateTime))]);
+        } else {
+            $query->andWhere(['>=', 'uss_start_utc_dt', date('Y-m-d H:i:s', strtotime($form->startDate))]);
+        }
+        if ($form->endDateTime && $form->endDateTimeCondition) {
+            $query->andWhere([$form->getEndDateTimeConditionOperator(), 'uss_end_utc_dt', date('Y-m-d H:i', strtotime($form->endDateTime))]);
+        } else {
+            $query->andWhere(['<=', 'uss_start_utc_dt', date('Y-m-d 23:59:59', strtotime($form->endDate))]);
+        }
+        if ($form->shift) {
+            $query->andWhere(['uss_shift_id' => $form->shift]);
+        }
+
+        return $query->all();
     }
 }
