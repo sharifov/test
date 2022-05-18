@@ -42,6 +42,7 @@ class FlightQuoteCreateDTO
     public $originSearchData;
     public $lastTicketDate;
     public $requestHash;
+    public ?string $expirationDate = null;
 
     /**
      * FlightQuoteCreateDTO constructor.
@@ -99,6 +100,7 @@ class FlightQuoteCreateDTO
         $model = new self($flight, $productQuote, $quote, $userId);
         $model->cabinClass = $form->cabin;
         $model->tripTypeId = $form->tripType;
+        $model->expirationDate = $form->expirationDate;
         $model->typeId = FlightQuote::TYPE_REPROTECTION;
         $model->serviceFeePercent = 0;
         return $model;

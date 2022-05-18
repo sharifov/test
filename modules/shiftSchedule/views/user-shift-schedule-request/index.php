@@ -26,7 +26,7 @@ $bundle = FullCalendarAsset::register($this);
 ?>
 
     <div class="shift-schedule-request-index">
-        <h1><i class="fa fa-calendar"></i> <?= Html::encode($this->title) ?></h1>
+        <h1><i class="fa fa-calendar-o"></i> <?= Html::encode($this->title) ?></h1>
 
         <div class="row">
             <div class="col-md-6">
@@ -138,7 +138,7 @@ var calendar = new FullCalendar.Calendar(calendarEl, {
         }
     },
     timeZone: '$userTimeZone',
-    locale: 'en',
+    locale: 'en-GB',
     dayMaxEvents: true, // allow "more" link when too many events
     eventSources: [
         // your event source

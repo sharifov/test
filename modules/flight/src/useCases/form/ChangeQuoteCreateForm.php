@@ -21,6 +21,7 @@ use modules\flight\src\useCases\flightQuote\createManually\FlightQuotePaxPriceFo
  * @property $segment_trip_data
  * @property $keyTripList
  * @property $flightId
+ * @property string|null $expirationDate
  *
  * @property ItineraryDumpDTO[] $itinerary
  * @property array $baggageFormsData
@@ -42,6 +43,7 @@ class ChangeQuoteCreateForm extends \yii\base\Model
     public $segment_trip_data;
     public $keyTripList;
     public $flightId;
+    public ?string $expirationDate = null;
 
     private array $itinerary = [];
     private array $baggageFormsData = [];
@@ -66,5 +68,14 @@ class ChangeQuoteCreateForm extends \yii\base\Model
     public function getFlightQuotePaxPriceForms(): array
     {
         return $this->flightQuotePaxPriceForms;
+    }
+
+    /**
+     * @param string $date
+     * @return void
+     */
+    public function setExpirationDate(string $date): void
+    {
+        $this->expirationDate = $date;
     }
 }

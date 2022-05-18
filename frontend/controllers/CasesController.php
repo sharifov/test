@@ -1394,7 +1394,7 @@ class CasesController extends FController
                         $this->casesManageService->pending($case->cs_id, $user->id, $statusForm->message, $user->username);
                         break;
                     case CasesStatus::STATUS_PROCESSING:
-                        $this->casesManageService->processing($case->cs_id, $statusForm->userId, $user->id, $statusForm->message);
+                        $this->casesManageService->manualChangeStatusProcessing($case->cs_id, $statusForm->userId, $user->id, $statusForm->message);
                         break;
                     case CasesStatus::STATUS_AWAITING:
                         $this->casesManageService->awaiting($case->cs_id, $user->id, $statusForm->message, $user->username);

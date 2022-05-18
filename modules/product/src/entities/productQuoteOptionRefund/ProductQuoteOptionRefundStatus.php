@@ -12,6 +12,7 @@ class ProductQuoteOptionRefundStatus
     public const CANCEL = 4;
     public const DONE = 5;
     public const ERROR = 6;
+    public const EXPIRED = 7;
 
     private const LIST = [
         self::NEW => 'New',
@@ -20,6 +21,7 @@ class ProductQuoteOptionRefundStatus
         self::CANCEL => 'Cancel',
         self::DONE => 'Done',
         self::ERROR => 'Error',
+        self::EXPIRED => 'Expired',
     ];
 
     private const CSS_CLASS_LIST = [
@@ -29,6 +31,7 @@ class ProductQuoteOptionRefundStatus
         self::CANCEL => 'danger',
         self::DONE => 'success',
         self::ERROR => 'danger',
+        self::EXPIRED => 'danger',
     ];
 
     public static function getList()

@@ -24,6 +24,7 @@ use modules\product\src\entities\productQuote\ProductQuote;
 use src\helpers\app\AppHelper;
 use src\helpers\product\ProductQuoteHelper;
 use src\helpers\setting\SettingHelper;
+use modules\flight\src\helpers\SettingHelper as FlightSettingHelper;
 use Yii;
 use yii\base\ErrorException;
 use yii\data\ActiveDataProvider;
@@ -1263,6 +1264,40 @@ class FlightQuoteHelper
             return true;
         }
         return false;
+    }
+
+    /**
+     * @param FlightQuote $flightQuote
+     * @return DateTime
+     */
+    public static function getLastDepartureDate(FlightQuote $flightQuote): DateTime
+    {
+        try {
+            $flightQuoteSegments = $flightQuote->flightQuoteSegments;
+            return new DateTime(end($flightQuoteSegments)->fqs_departure_dt);
+        } catch (\Throwable $throwable) {
+            Yii::error(
+                AppHelper::throwableFormatter($throwable),
+                'FlightQuoteHelper:getLastFlightDate:failed'
+            );
+            return new DateTime();
+        }
+    }
+
+
+    /**
+     * Returns the expiration date for a new quote (exchange, refund)
+     *
+     * @param FlightQuote $flightQuote
+     * @return string
+     */
+    public static function getExpirationDate(FlightQuote $flightQuote): string
+    {
+        $maxDate = self::getLastDepartureDate($flightQuote);
+        $maxDate = $maxDate->modify(sprintf('-%d hours', FlightSettingHelper::getMinHoursDifferenceOffers()));
+        $date = (new DateTime())->modify(sprintf('+%d days', FlightSettingHelper::getExpirationDaysOfNewOffers()));
+
+        return ($date > $maxDate) ? $maxDate->format('Y-m-d') : $date->format('Y-m-d');
     }
 
     private static function isEqualLocation(string $prevArrivalAirport, string $departureAirport): bool

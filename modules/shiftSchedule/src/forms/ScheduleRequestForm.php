@@ -199,6 +199,11 @@ class ScheduleRequestForm extends Model
      */
     private function mappingData(): array
     {
+        $startDateTime = new \DateTimeImmutable($this->dateTimeStart);
+        $endDateTime = new \DateTimeImmutable($this->dateTimeEnd);
+        $interval = $startDateTime->diff($endDateTime);
+        $diffMinutes = $interval->days * 24 * 60 + $interval->i + ($interval->h * 60);
+
         return [
             'uss_user_id' => Auth::user()->id,
             'uss_sst_id' => $this->scheduleType,
@@ -206,6 +211,7 @@ class ScheduleRequestForm extends Model
             'uss_type_id' => UserShiftSchedule::TYPE_MANUAL,
             'uss_start_utc_dt' => $this->dateTimeStart,
             'uss_end_utc_dt' => $this->dateTimeEnd,
+            'uss_duration' => $diffMinutes,
         ];
     }
 

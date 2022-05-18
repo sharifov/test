@@ -14,7 +14,12 @@ use src\repositories\cases\CaseCategoryRepository;
 use src\repositories\cases\CasesRepository;
 use src\repositories\lead\LeadRepository;
 use src\repositories\user\UserRepository;
+use src\dispatchers\EventDispatcher;
+use src\entities\cases\events\CasesTakeOverEvent;
+use src\entities\cases\events\CasesManualChangeStatusProcessingEvent;
+use src\entities\cases\events\CasesMultipleChangeStatusProcessingEvent;
 use src\services\ServiceFinder;
+use Yii;
 
 /**
  * Class CasesManageService
@@ -23,6 +28,7 @@ use src\services\ServiceFinder;
  * @property LeadRepository $leadRepository
  * @property CaseCategoryRepository $caseCategoryRepository
  * @property ServiceFinder $finder
+ * @property EventDispatcher $eventDispatcher
  */
 class CasesManageService
 {
@@ -31,6 +37,7 @@ class CasesManageService
     private $leadRepository;
     private $caseCategoryRepository;
     private $finder;
+    private $eventDispatcher;
 
     /**
      * CasesManageService constructor.
@@ -39,19 +46,22 @@ class CasesManageService
      * @param LeadRepository $leadRepository
      * @param CaseCategoryRepository $caseCategoryRepository
      * @param ServiceFinder $finder
+     * @param EventDispatcher $eventDispatcher
      */
     public function __construct(
         CasesRepository $casesRepository,
         UserRepository $userRepository,
         LeadRepository $leadRepository,
         CaseCategoryRepository $caseCategoryRepository,
-        ServiceFinder $finder
+        ServiceFinder $finder,
+        EventDispatcher $eventDispatcher
     ) {
         $this->casesRepository = $casesRepository;
         $this->userRepository = $userRepository;
         $this->leadRepository = $leadRepository;
         $this->caseCategoryRepository = $caseCategoryRepository;
         $this->finder = $finder;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     public function needAction(int $caseId): void
@@ -143,6 +153,7 @@ class CasesManageService
         }
 
         $this->processing($caseId, $userId, $creatorId, $description);
+        $this->eventDispatcher->dispatch(new CasesTakeOverEvent($case, $case->cs_user_id, $userId));
     }
 
     /**
@@ -178,6 +189,20 @@ class CasesManageService
         $eventDescription .= ' By: ' . ($creator->username ?? 'System.');
         $eventDescription .= ($description ? ' Reason: ' . $description : '');
         $case->addEventLog(CaseEventLog::CASE_STATUS_CHANGED, $eventDescription);
+    }
+
+    public function manualChangeStatusProcessing($caseId, $userId, int $creatorId, ?string $description = ''): void
+    {
+        $case = $this->finder->caseFind($caseId);
+        $this->processing($caseId, $userId, $creatorId, $description);
+        $this->eventDispatcher->dispatch(new CasesManualChangeStatusProcessingEvent($case, $case->cs_user_id, $userId, $creatorId));
+    }
+
+    public function multipleChangeStatusProcessing($caseId, $userId, int $creatorId, ?string $description = ''): void
+    {
+        $case = $this->finder->caseFind($caseId);
+        $this->processing($caseId, $userId, $creatorId, $description);
+        $this->eventDispatcher->dispatch(new CasesMultipleChangeStatusProcessingEvent($case, $case->cs_user_id, $userId, $creatorId));
     }
 
     /**

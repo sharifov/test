@@ -1,6 +1,7 @@
 <?php
 
 use common\models\Employee;
+use frontend\helpers\TimeConverterHelper;
 use frontend\widgets\cronExpression\CronExpressionWidget;
 use kartik\select2\Select2;
 use kartik\time\TimePicker;
@@ -13,6 +14,7 @@ use yii\widgets\ActiveForm;
 /* @var $this yii\web\View */
 /* @var $model \modules\shiftSchedule\src\forms\ShiftScheduleForm */
 /* @var $form ActiveForm */
+$model->ssr_duration_time = TimeConverterHelper::minutesToHours($model->ssr_duration_time);
 ?>
 
 <div class="shift-schedule-rule-form">
@@ -60,31 +62,14 @@ use yii\widgets\ActiveForm;
             ])->label('Start Time (Local)') ?>
             </div>
             <div class="col-md-6">
-<?php
-$inputHtml = <<<HTML
-{label}
-<div class="input-group">
-{input}
-<span class="input-group-addon">
-    <span id="durationTimeHours">{$model->getDurationTimeHours()}</span> Hours
-</span>
-</div>
-{error}
-{hint}
-HTML;
-?>
-            <?php /*= $form->field($model, 'ssr_end_time_loc')->widget(TimePicker::class, [
+            <?= $form->field($model, 'ssr_duration_time')->widget(TimePicker::class, [
                 'pluginOptions' => [
-                    'showSeconds' => true,
+                    'showSeconds' => false,
                     'showMeridian' => false,
                     'minuteStep' => 1,
                     'secondStep' => 5,
                 ]
-            ])->label('End Time (Local)');*/ ?>
-                <?= $form->field($model, 'ssr_duration_time', [
-                  'template' => $inputHtml
-            ])->input('number', ['maxlength' => true, 'min' => 1, 'id' => 'durationTimeMinutes'])
-                ->label('Duration Time (minutes)')?>
+            ])->label('Duration Time (Hours:Minutes)'); ?>
             </div>
         </div>
 
@@ -156,19 +141,3 @@ HTML;
   <?php ActiveForm::end(); ?>
 
 </div>
-
-<?php
-
-$js = <<<JS
-$('#durationTimeMinutes').on('keyup change', function () {
-    let val = $(this).val();
-    let hours = (val ? (val / 60) : 0);
-    if (hours % 1 === 0) {
-        hours = Math.trunc(hours);
-    } else {
-        hours = hours.toFixed(2);
-    }
-    $('#durationTimeHours').html(hours);
-});
-JS;
-$this->registerJs($js);
