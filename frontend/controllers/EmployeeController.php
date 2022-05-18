@@ -1434,7 +1434,7 @@ class EmployeeController extends FController
                 }
 
                 if ($form->fieldAccess->canEdit('user_departments') && $form->isChangedDepartments()) {
-                    $oldUserDepartmens = $targetUser->getUserDepartmentList();
+                    $oldUserDepartments = $targetUser->getUserDepartmentList();
                     UserDepartment::deleteAll(['ud_user_id' => $targetUser->id]);
                     foreach ($form->user_departments as $departmentId) {
                         $ud = new UserDepartment();
@@ -1452,8 +1452,8 @@ class EmployeeController extends FController
                     $targetUser->addLog(
                         \Yii::$app->id,
                         Yii::$app->user->id,
-                        ["user_departments" => $oldUserDepartmens],
-                        ["user_departments" => $form->getUserDepartmens()]
+                        ["user_departments" => $oldUserDepartments],
+                        ["user_departments" => $form->getUserDepartments()]
                     );
 
                     $userUpdated = true;

@@ -185,7 +185,7 @@ class UpdateForm extends Model
         return false;
     }
 
-    public function getUserDepartmens(): array
+    public function getUserDepartments(): array
     {
         $departments = Department::find()->where(['in', 'dep_id', $this->user_departments])->orderBy(['dep_name' => SORT_ASC])->all();
         if ($departments) {
