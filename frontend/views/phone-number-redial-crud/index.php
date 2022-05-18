@@ -38,7 +38,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <div class="dropdown-menu">
 
                 <?php
-                /** @abac PhoneNumberRedialAbacObject::OBJ_PHONE_NUMBER_REDIAL, PhoneNumberRedialAbacObject::ACTION_MULTIPLE_DELETE, Access to action phone-number-redial-crud/* */
+                /** @abac PhoneNumberRedialAbacObject::OBJ_PHONE_NUMBER_REDIAL, PhoneNumberRedialAbacObject::ACTION_MULTIPLE_DELETE, Access to delete-selected phone-number-redial-crud/* */
                 if ($abac->can(null, PhoneNumberRedialAbacObject::OBJ_PHONE_NUMBER_REDIAL, PhoneNumberRedialAbacObject::ACTION_MULTIPLE_DELETE)) : ?>
                     <?= \yii\helpers\Html::a('<i class="fa fa-remove text-danger"></i>  Delete Selected', null, ['id' => 'btn-act-delete-selected', 'class' => 'dropdown-item btn-multiple-update']) ?>
                 <?php endif ?>

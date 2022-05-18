@@ -192,7 +192,7 @@ class PhoneNumberRedialCrudController extends FController
     public function actionDeleteSelected(): Response
     {
         $abac = Yii::$app->abac;
-        /** @abac PhoneNumberRedialAbacObject::OBJ_PHONE_NUMBER_REDIAL, PhoneNumberRedialAbacObject::ACTION_MULTIPLE_DELETE, Access to action phone-number-redial-crud/* */
+        /** @abac PhoneNumberRedialAbacObject::OBJ_PHONE_NUMBER_REDIAL, PhoneNumberRedialAbacObject::ACTION_MULTIPLE_DELETE, Access to delete-selected phone-number-redial-crud/* */
         if (!$abac->can(null, PhoneNumberRedialAbacObject::OBJ_PHONE_NUMBER_REDIAL, PhoneNumberRedialAbacObject::ACTION_MULTIPLE_DELETE)) {
             throw new NotAcceptableHttpException('Access denied');
         }
