@@ -43,28 +43,40 @@ $subtypeTotalData = [];
 
     <p>
         <?php
-            /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_ACCESS, Access to actions shift-schedule/* */
-        if (\Yii::$app->abac->can(null, ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_ACCESS)) :
+        /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_GENERATE_EXAMPLE_DATA, Access to generate-example shift-schedule/* */
+        if (\Yii::$app->abac->can(null, ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_GENERATE_EXAMPLE_DATA)) :
             ?>
             <?= Html::a(
                 '<i class="fa fa-plus-circle"></i> Generate Example Data',
                 ['generate-example'],
                 ['class' => 'btn btn-warning']
             ) ?>
-            <?= Html::a(
-                '<i class="fa fa-play-circle"></i> Generate User Schedule (' .
-                SettingHelper::getShiftScheduleDaysLimit() . ' days' . ')',
-                ['generate-user-schedule'],
-                ['class' => 'btn btn-success'],
-            ) ?>
+        <?php endif; ?>
+        <?php if (SettingHelper::getShiftScheduleGenerateEnabled()) : ?>
+            <?php
+            /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_GENERATE_USER_SCHEDULE, Access to generate-user-schedule shift-schedule/* */
+            if (\Yii::$app->abac->can(null, ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_GENERATE_USER_SCHEDULE)) :
+                ?>
+                <?= Html::a(
+                    '<i class="fa fa-play-circle"></i> Generate User Schedule (' .
+                    SettingHelper::getShiftScheduleDaysLimit() . ' days' . ')',
+                    ['generate-user-schedule'],
+                    ['class' => 'btn btn-success'],
+                ) ?>
+            <?php endif; ?>
+        <?php endif; ?>
 
+        <?php
+        /** @abac hiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_REMOVE_ALL_USER_SCHEDULE, Access to remove-user-data shift-schedule/* */
+        if (\Yii::$app->abac->can(null, ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_REMOVE_ALL_USER_SCHEDULE)) :
+            ?>
             <?= Html::a('<i class="fa fa-remove"></i> Remove All User Schedule Data', ['remove-user-data'], [
             'class' => 'btn btn-danger',
             'data' => [
-            'confirm' => 'Are you sure you want to delete all User Timelines?',
-            'method' => 'post',
+                'confirm' => 'Are you sure you want to delete all User Timelines?',
+                'method' => 'post',
             ],
-            ]) ?>
+        ]) ?>
         <?php endif; ?>
         <?= Html::a(
             '<i class="fa fa-plus-circle"></i> Schedule Request',

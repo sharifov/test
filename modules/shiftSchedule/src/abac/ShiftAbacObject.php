@@ -46,11 +46,19 @@ class ShiftAbacObject extends AbacBaseModel implements AbacInterface
     public const ACTION_DELETE      = 'delete';
     public const ACTION_CREATE_ON_DOUBLE_CLICK = 'createOnDoubleClick';
     public const ACTION_VIEW_ALL_EVENTS = 'viewAllEvents';
+    public const ACTION_GENERATE_EXAMPLE_DATA = 'generateExampleData';
+    public const ACTION_GENERATE_USER_SCHEDULE = 'generateUserSchedule';
+    public const ACTION_REMOVE_ALL_USER_SCHEDULE = 'removeAllUserSchedule';
 
     /** ACTION LIST */
     public const OBJECT_ACTION_LIST = [
         self::ACT_USER_SHIFT_ASSIGN => [self::ACTION_ACCESS, self::ACTION_UPDATE],
-        self::ACT_MY_SHIFT_SCHEDULE => [self::ACTION_ACCESS],
+        self::ACT_MY_SHIFT_SCHEDULE => [
+            self::ACTION_ACCESS,
+            self::ACTION_GENERATE_EXAMPLE_DATA,
+            self::ACTION_GENERATE_USER_SCHEDULE,
+            self::ACTION_REMOVE_ALL_USER_SCHEDULE,
+            ],
         self::ACT_USER_SHIFT_SCHEDULE => [self::ACTION_ACCESS],
         self::OBJ_USER_SHIFT_EVENT => [
             self::ACTION_CREATE,
