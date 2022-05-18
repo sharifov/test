@@ -639,6 +639,7 @@ class EmployeeController extends FController
                                         $groupsForDelete = $oldUserGroupsIds;
                                     } else {
                                         $groupsForDelete = array_diff($oldUserGroupsIds, $multipleForm->user_groups);
+                                        $groupsForAdd = array_diff($multipleForm->user_groups, $oldUserGroupsIds);
                                     }
 
                                     break;
