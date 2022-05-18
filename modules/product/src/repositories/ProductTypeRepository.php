@@ -15,7 +15,7 @@ class ProductTypeRepository
      */
     public static function getCacheKeyById(int $id): string
     {
-        return md5(serialize([__FUNCTION__, $id]));
+        return sprintf('%s_%d', __FUNCTION__, $id);
     }
 
     /**
