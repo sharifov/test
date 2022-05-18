@@ -3,6 +3,7 @@
 namespace modules\product\migrations;
 
 use modules\product\src\entities\productType\ProductType;
+use modules\product\src\repositories\ProductTypeRepository;
 use yii\db\Migration;
 
 /**
@@ -24,6 +25,7 @@ class m220517_121032_add_settings_expiration_date_quote extends Migration
             $settings['minimum_hours_difference_between_offers'] = 24;
             $productType->pt_settings = json_encode($settings);
             $productType->save();
+            ProductTypeRepository::clearCacheById($productType->pt_id);
         }
     }
 
@@ -39,6 +41,7 @@ class m220517_121032_add_settings_expiration_date_quote extends Migration
                 unset($settings['expiration_days_of_new_offers'], $settings['minimum_hours_difference_between_offers']);
                 $productType->pt_settings = json_encode($settings);
                 $productType->save();
+                ProductTypeRepository::clearCacheById($productType->pt_id);
             }
         }
     }
