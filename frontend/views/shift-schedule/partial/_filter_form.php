@@ -76,14 +76,15 @@ use yii\widgets\ActiveForm;
                       <div class="col-md-2">
                           <div class="row">
                               <div class="col-md-12">
-                                  <?= $form->field($timelineCalendarFilter, 'users')->widget(UserSelect2Widget::class, [
+                                  <?= $form->field($timelineCalendarFilter, 'usersIds')->widget(UserSelect2Widget::class, [
                                       'options' => [
                                           'multiple' => true,
                                       ],
                                       'size' => Select2::SMALL,
                                       'pluginOptions' => [
                                           'allowClear' => true,
-                                      ]
+                                      ],
+                                      'id' => 'filter-users'
                                   ]) ?>
 
                                   <?= $form->field($timelineCalendarFilter, 'statuses')->widget(Select2::class, [

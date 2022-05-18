@@ -10,7 +10,7 @@ class TimelineCalendarFilter extends Model
     public $startDate = '';
     public $endDate = '';
     public $userGroups = [];
-    public $users = [];
+    public $usersIds = [];
     public $statuses = [];
     public $scheduleTypes = [];
     public $duration;
@@ -51,8 +51,8 @@ class TimelineCalendarFilter extends Model
             [['endDateTimeCondition'], 'required', 'when' => function (): bool {
                 return !empty($this->endDateTime);
             }],
-            [['users', 'statuses', 'scheduleTypes', 'shift', 'userGroups'], 'default', 'value' => []],
-            [['users', 'statuses', 'scheduleTypes', 'shift', 'userGroups'], IsArrayValidator::class],
+            [['usersIds', 'statuses', 'scheduleTypes', 'shift', 'userGroups'], 'default', 'value' => []],
+            [['usersIds', 'statuses', 'scheduleTypes', 'shift', 'userGroups'], IsArrayValidator::class],
             [['startDateTime', 'endDateTime', 'startDateTimeCondition', 'endDateTimeCondition', 'duration', 'startDate', 'endDate'], 'string'],
             [['startDateTime', 'endDateTime'], 'datetime', 'format' => 'php:Y-m-d H:i'],
             [['startDate', 'endDate'], 'datetime', 'format' => 'php:Y-m-d'],
