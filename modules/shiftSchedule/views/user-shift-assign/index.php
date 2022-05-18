@@ -77,6 +77,7 @@ $pjaxContainerId = 'pjax-user-shift-assign';
             [
                 'label' => 'Shift Name',
                 'attribute' => 'shiftId',
+                'class' => Select2Column::class,
                 'value' => static function (Employee $model) {
                     if (!$model->userShiftAssigns) {
                         return '';
@@ -91,9 +92,12 @@ $pjaxContainerId = 'pjax-user-shift-assign';
                     }
                     return implode(' ', $shifts);
                 },
+                'data' => \modules\shiftSchedule\src\entities\shift\Shift::getList(),
+                'filter' => true,
+                'id' => 'shift-filter',
+                'options' => ['width' => '300px'],
+                'pluginOptions' => ['allowClear' => true],
                 'format' => 'raw',
-                'contentOptions' => ['class' => 'text-left', 'style' => 'min-width: 320px;'],
-                'filter' => \modules\shiftSchedule\src\entities\shift\Shift::getList(),
             ],
             [
                 'label' => 'User Groups',
@@ -120,7 +124,8 @@ $pjaxContainerId = 'pjax-user-shift-assign';
             ],
             [
                 'attribute' => 'role',
-                'label' => 'Role',
+                'label' => 'Roles',
+                'class' => Select2Column::class,
                 'value' => static function (Employee $model) {
                     $items = $model->getRoles();
                     $itemsData = [];
@@ -133,8 +138,14 @@ $pjaxContainerId = 'pjax-user-shift-assign';
                     }
                     return implode(' ', $itemsData);
                 },
+
+                'data' => \common\models\Employee::getAllRoles(\src\auth\Auth::user()),
+                'filter' => true,
+                'id' => 'role-filter',
+                'options' => ['min-width' => '320px'],
+                'pluginOptions' => ['allowClear' => true],
                 'format' => 'raw',
-                'filter' => \common\models\Employee::getAllRoles(\src\auth\Auth::user()),
+//                'filter' => \common\models\Employee::getAllRoles(\src\auth\Auth::user()),
                 'contentOptions' => ['style' => 'width: 10%; white-space: pre-wrap']
             ],
             [
