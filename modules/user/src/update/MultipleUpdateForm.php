@@ -150,7 +150,7 @@ class MultipleUpdateForm extends Model
 
             ['form_roles_action', 'default', 'value' => self::ROLE_ADD],
             ['form_roles_action', 'integer'],
-            ['form_roles_action', 'in', 'range' => array_keys($this::ROLES_ACTION_LIST)],
+            ['form_roles_action', 'in', 'range' => array_keys(self::ROLES_ACTION_LIST)],
 
             ['user_groups', 'default', 'value' => []],
             ['user_groups', IsArrayValidator::class],
@@ -165,9 +165,9 @@ class MultipleUpdateForm extends Model
             ['user_departments', 'each', 'rule' => ['filter', 'filter' => 'intval']],
             ['user_departments', 'each', 'rule' => ['in', 'range' => array_keys($this->availableList->getDepartments())]],
 
-            ['user_departments_action', 'default', 'value' => self::ROLE_ADD],
+            ['user_departments_action', 'default', 'value' => self::DEPARTMENT_ADD],
             ['user_departments_action', 'integer'],
-            ['user_departments_action', 'in', 'range' => array_keys($this::DEPARTMENTS_ACTION_LIST)],
+            ['user_departments_action', 'in', 'range' => array_keys(self::DEPARTMENTS_ACTION_LIST)],
 
             ['client_chat_user_channel', 'default', 'value' => []],
             ['client_chat_user_channel', IsArrayValidator::class],
