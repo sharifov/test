@@ -138,7 +138,7 @@ var calendar = new FullCalendar.Calendar(calendarEl, {
         }
     },
     timeZone: '$userTimeZone',
-    locale: 'en',
+    locale: 'en-GB',
     dayMaxEvents: true, // allow "more" link when too many events
     eventSources: [
         // your event source
