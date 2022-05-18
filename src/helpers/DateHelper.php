@@ -45,4 +45,14 @@ class DateHelper
         $createdDateTime = DateTime::createFromFormat($format, $date);
         return $createdDateTime && $createdDateTime->format($format) === $date;
     }
+
+    /**
+     * @param string $date
+     * @param string $format
+     * @return string
+     */
+    public static function toFormat(string $date, string $format = 'Y-m-d'): string
+    {
+        return date($format, strtotime($date));
+    }
 }

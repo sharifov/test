@@ -76,6 +76,7 @@ use yii\db\ActiveRecord;
  * @property int|null $pq_updated_user_id
  * @property string|null $pq_created_dt
  * @property string|null $pq_updated_dt
+ * @property string|null $pq_expiration_dt
  * @property float|null $pq_profit_amount
  * @property int|null $pq_clone_id
  * @property float|null $pq_app_markup
@@ -149,7 +150,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
             [['pq_product_id', 'pq_order_id', 'pq_owner_user_id', 'pq_created_user_id', 'pq_updated_user_id'], 'integer'],
             [['pq_description'], 'string'],
             [['pq_price', 'pq_origin_price', 'pq_client_price', 'pq_service_fee_sum', 'pq_origin_currency_rate', 'pq_client_currency_rate', 'pq_profit_amount'], 'number'],
-            [['pq_created_dt', 'pq_updated_dt'], 'safe'],
+            [['pq_created_dt', 'pq_updated_dt', 'pq_expiration_dt'], 'safe'],
             [['pq_gid'], 'string', 'max' => 32],
             [['pq_name'], 'string', 'max' => 40],
             [['pq_origin_currency', 'pq_client_currency'], 'string', 'max' => 3],
