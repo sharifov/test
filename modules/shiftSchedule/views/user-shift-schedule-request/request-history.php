@@ -14,8 +14,6 @@ use yii\data\ActiveDataProvider;
 use yii\grid\GridView;
 use yii\web\View;
 
-$shiftScheduleTypes = ShiftScheduleType::getList(true);
-
 ?>
 <div class="shift-schedule-request-index">
 

@@ -673,7 +673,7 @@ class ShiftScheduleController extends FController
         if ($request->isPost) {
             if ($scheduleRequestModel->load($request->post()) && $scheduleRequestModel->validate()) {
                 if ($scheduleRequestModel->saveRequest()) {
-                    return $this->redirect(['shift-schedule/index']);
+                    $success = true;
                 }
             }
         } else {
@@ -682,6 +682,7 @@ class ShiftScheduleController extends FController
 
         return $this->renderAjax('partial/_schedule_request', [
             'scheduleRequestModel' => $scheduleRequestModel,
+            'success' => $success ?? false,
         ]);
     }
 
