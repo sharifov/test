@@ -47,7 +47,7 @@ $c_type_id = $comForm->c_type_id;
 
 $pjaxContainerId = 'pjax-lead-communication-log';
 $unsubscribedEmails = @json_encode($unsubscribedEmails);
-$emailTemplateTypes = EmailTemplateType::getEmailTemplateTypesList(false, \common\models\Department::DEPARTMENT_SALES, $lead->project_id, $lead);
+$emailTemplateTypes = EmailTemplateType::getEmailTemplateTypesList(false, $lead->getDepartmentId(), $lead->project_id, $lead);
 $emailTemplateTypes = @json_encode($emailTemplateTypes);
 
 $abacDto = new EmailPreviewDto($previewEmailForm->e_email_tpl_id, null, null, null, $lead, null);
