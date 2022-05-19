@@ -224,7 +224,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 <?= $form->field($multipleForm, 'uss_sst_id')->widget(Select2::class, [
                                     'data' => ShiftScheduleType::getList(),
                                     'size' => Select2::SMALL,
-                                    'options' => ['placeholder' => 'Select user Departments'],
+                                    'options' => ['placeholder' => 'Select schedule type'],
                                     'pluginOptions' => ['allowClear' => true],
                                 ]) ?>
 
