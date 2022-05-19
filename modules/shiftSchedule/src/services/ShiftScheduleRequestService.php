@@ -101,7 +101,7 @@ class ShiftScheduleRequestService
                         'icon' => $item->srhSst->sst_icon_class,
 //                        'backgroundImage' => 'linear-gradient(45deg, ' . $sstColor . ' 30%, ' . $statusColor . ' 70%)',
                     ],
-                    'className' => 'badge-' . $item->getStatusNameColor(),
+                    'color' => $item->getStatusNameColor(true),
                 ];
 
                 $data[] = $dataItem;
