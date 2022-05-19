@@ -81,12 +81,12 @@ class ShiftScheduleRequestSearch extends ShiftScheduleRequest
 
     /**
      * @param array $params
-     * @param ActiveQuery $userList
+     * @param ActiveQuery|array $userList
      * @param string|null $startDate
      * @param string|null $endDate
      * @return ActiveDataProvider
      */
-    public function searchByUsers(array $params, ActiveQuery $userList, string $startDate = null, string $endDate = null): ActiveDataProvider
+    public function searchByUsers(array $params, $userList, string $startDate = null, string $endDate = null): ActiveDataProvider
     {
         $query = static::find();
 
@@ -122,13 +122,13 @@ class ShiftScheduleRequestSearch extends ShiftScheduleRequest
     }
 
     /**
-     * @param ActiveQuery $userList
+     * @param ActiveQuery|array $userList
      * @param ShiftScheduleRequestSearch|null $model
      * @param string|null $startDate
      * @param string|null $endDate
      * @return ActiveQuery
      */
-    public static function getSearchQuery(ActiveQuery $userList, ShiftScheduleRequestSearch $model = null, ?string $startDate = null, ?string $endDate = null): ActiveQuery
+    public static function getSearchQuery($userList, ShiftScheduleRequestSearch $model = null, ?string $startDate = null, ?string $endDate = null): ActiveQuery
     {
         $query = ShiftScheduleRequestSearch::find();
         $query->where(['IS NOT', 'ssr_uss_id', null]);
