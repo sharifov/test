@@ -1,7 +1,6 @@
 <?php
 
 use common\models\Employee;
-use console\migrations\RbacMigrationService;
 use yii\db\Migration;
 
 /**
@@ -12,10 +11,6 @@ class m220518_134532_add_permission_user_multiple_update extends Migration
     private array $roles = [
         Employee::ROLE_ADMIN,
         Employee::ROLE_SUPER_ADMIN,
-        Employee::ROLE_SALES_SENIOR,
-        Employee::ROLE_EXCHANGE_SENIOR,
-        Employee::ROLE_SUPPORT_SENIOR,
-        Employee::ROLE_SUPERVISION,
     ];
 
     /**
