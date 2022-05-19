@@ -5,6 +5,7 @@ namespace modules\shiftSchedule\src\abac;
 use common\models\UserGroup;
 use modules\abac\components\AbacBaseModel;
 use modules\abac\src\entities\AbacInterface;
+use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 
@@ -25,6 +26,7 @@ class ShiftAbacObject extends AbacBaseModel implements AbacInterface
     public const ACT_USER_SHIFT_SCHEDULE = self::NS . 'act/user_shift_schedule';
 
     public const OBJ_USER_SHIFT_EVENT = self::NS . 'obj/user_shift_event';
+    public const OBJ_USER_SHIFT_REQUEST_EVENT = self::NS . 'obj/user_shift_request_event';
     public const OBJ_USER_SHIFT_CALENDAR = self::NS . 'obj/user_shift_calendar';
 
     /** OBJECT LIST */
@@ -33,6 +35,7 @@ class ShiftAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_MY_SHIFT_SCHEDULE => self::ACT_MY_SHIFT_SCHEDULE,
         self::ACT_USER_SHIFT_SCHEDULE => self::ACT_USER_SHIFT_SCHEDULE,
         self::OBJ_USER_SHIFT_EVENT => self::OBJ_USER_SHIFT_EVENT,
+        self::OBJ_USER_SHIFT_REQUEST_EVENT => self::OBJ_USER_SHIFT_REQUEST_EVENT,
         self::ALL => self::ALL,
         self::OBJ_USER_SHIFT_CALENDAR => self::OBJ_USER_SHIFT_CALENDAR,
     ];
@@ -49,6 +52,7 @@ class ShiftAbacObject extends AbacBaseModel implements AbacInterface
     public const ACTION_GENERATE_EXAMPLE_DATA = 'generateExampleData';
     public const ACTION_GENERATE_USER_SCHEDULE = 'generateUserSchedule';
     public const ACTION_REMOVE_ALL_USER_SCHEDULE = 'removeAllUserSchedule';
+    public const ACTION_MULTIPLE_DELETE_EVENTS = 'multipleDeleteEvents';
 
     /** ACTION LIST */
     public const OBJECT_ACTION_LIST = [
@@ -68,6 +72,9 @@ class ShiftAbacObject extends AbacBaseModel implements AbacInterface
             self::ACTION_ACCESS,
             self::ACTION_CREATE_ON_DOUBLE_CLICK
         ],
+        self::OBJ_USER_SHIFT_REQUEST_EVENT => [
+            self::ACTION_ACCESS,
+        ],
         self::ALL => [
             self::ACTION_ACCESS,
             self::ACTION_CREATE,
@@ -76,7 +83,8 @@ class ShiftAbacObject extends AbacBaseModel implements AbacInterface
             self::ACTION_DELETE
         ],
         self::OBJ_USER_SHIFT_CALENDAR => [
-            self::ACTION_VIEW_ALL_EVENTS
+            self::ACTION_VIEW_ALL_EVENTS,
+            self::ACTION_MULTIPLE_DELETE_EVENTS,
         ]
     ];
 
@@ -97,6 +105,18 @@ class ShiftAbacObject extends AbacBaseModel implements AbacInterface
         'id' => self::NS . 'formSelectStatus',
         'field' => 'formSelectStatus',
         'label' => 'Status',
+        'type' => self::ATTR_TYPE_STRING,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
+        'multiple' => true,
+        'operators' =>  [self::OP_CONTAINS]
+    ];
+
+    public const ATTR_REQUEST_STATUS_FORM_FIELD = [
+        'optgroup' => 'Form',
+        'id' => self::NS . 'formSelectRequestStatus',
+        'field' => 'formSelectRequestStatus',
+        'label' => 'Request Status',
         'type' => self::ATTR_TYPE_STRING,
         'input' => self::ATTR_INPUT_SELECT,
         'values' => [],
@@ -146,6 +166,7 @@ class ShiftAbacObject extends AbacBaseModel implements AbacInterface
 
         $attrUserGroups = self::ATTR_USER_GROUPS_FORM_FIELD;
         $attrStatus = self::ATTR_STATUS_FORM_FIELD;
+        $attrRequestStatus = self::ATTR_REQUEST_STATUS_FORM_FIELD;
         $attrScheduleType = self::ATTR_SCHEDULE_TYPE_FORM_FIELD;
 
         $userGroups = UserGroup::getList();
@@ -157,9 +178,13 @@ class ShiftAbacObject extends AbacBaseModel implements AbacInterface
         $scheduleTypeList = ShiftScheduleType::getList();
         $attrScheduleType['values'] = $scheduleTypeList;
 
+        $requestStatusList = ShiftScheduleRequest::getStatusList();
+        $attrRequestStatus['values'] = $requestStatusList;
+
         $attributeList[self::OBJ_USER_SHIFT_EVENT][] = $attrUserGroups;
         $attributeList[self::OBJ_USER_SHIFT_EVENT][] = $attrStatus;
         $attributeList[self::OBJ_USER_SHIFT_EVENT][] = $attrScheduleType;
+        $attributeList[self::OBJ_USER_SHIFT_REQUEST_EVENT][] = $attrRequestStatus;
 
         return $attributeList;
     }

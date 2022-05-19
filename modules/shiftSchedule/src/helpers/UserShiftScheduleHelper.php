@@ -4,6 +4,7 @@ namespace modules\shiftSchedule\src\helpers;
 
 use modules\shiftSchedule\src\abac\dto\ShiftAbacDto;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
+use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use common\models\Employee;
 use common\models\UserGroup;
@@ -149,5 +150,23 @@ class UserShiftScheduleHelper
         $interval = $startDateTime->diff($endDateTime);
 
         return $interval->i + ($interval->h * 60);
+    }
+
+    /**
+     * Gett request status list after abac processing
+     * @return array
+     */
+    public static function getAvailableRequestStatusList(): array
+    {
+        $statusList = [];
+        foreach (ShiftScheduleRequest::getStatusList() as $statusId => $statusName) {
+            $dto = new ShiftAbacDto();
+            $dto->setRequestStatus((int)$statusId);
+            if (Yii::$app->abac->can($dto, ShiftAbacObject::OBJ_USER_SHIFT_REQUEST_EVENT, ShiftAbacObject::ACTION_ACCESS)) {
+                $statusList[$statusId] = $statusName;
+            }
+        }
+
+        return $statusList;
     }
 }

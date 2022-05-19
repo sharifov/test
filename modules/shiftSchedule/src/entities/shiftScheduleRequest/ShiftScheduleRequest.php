@@ -45,8 +45,8 @@ class ShiftScheduleRequest extends ActiveRecord
     public const STATUS_LIST = [
         self::STATUS_PENDING => 'Pending',
         self::STATUS_APPROVE => 'Approve',
-        self::STATUS_DECLINED => 'Declined',
-        self::STATUS_REMOVED => 'Removed',
+        self::STATUS_DECLINED => 'Decline',
+        self::STATUS_REMOVED => 'Remove',
     ];
 
     public const STATUS_LIST_COLOR = [
@@ -176,7 +176,7 @@ class ShiftScheduleRequest extends ActiveRecord
     /**
      * @return array
      */
-    public static function getList(): array
+    public static function getStatusList(): array
     {
         return self::STATUS_LIST;
     }
