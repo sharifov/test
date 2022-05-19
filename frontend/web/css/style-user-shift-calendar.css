@@ -160,3 +160,7 @@
     border: 2px solid #ff8686;
     border-radius: 100%;
 }
+
+#calendar.multiple-manage-mode {
+    border-color: red;
+}

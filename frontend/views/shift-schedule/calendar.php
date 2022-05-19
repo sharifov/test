@@ -36,8 +36,9 @@ $bundle = UserShiftCalendarAsset::register($this);
             ) ?>
         <?php endif; ?>
 
-        <?= Html::a('<i class="fas fa-th-large"></i> Multiple Manage Mode', '#', ['id' => 'multiple-manage-mode-btn', 'class' => 'btn btn-warning btn-sm']) ?>
-        <div class="btn-group" id="check_uncheck_btns" style="display: none;">
+        <?= Html::a('<i class="fas fa-th-large"></i> Multiple Manage Mode', null, ['id' => 'multiple-manage-mode-btn', 'class' => 'btn btn-warning btn-sm']) ?>
+        <?= Html::a('<i class="fas fa-times-circle"></i> Exit Mode', null, [ 'class' => 'btn btn-danger btn-sm', 'id' => 'btn-multiple-exit-mode', 'style' => 'display: none;']) ?>
+        <div class="btn-group" id="check_uncheck_btns" style="display: none; margin-bottom: 4px; height: 28px; margin-left: 7px;">
             <?php echo Html::button('<span class="fa fa-square-o"></span> Select All', ['class' => 'btn btn-sm btn-default', 'id' => 'btn-check-all']); ?>
 
             <button type="button" class="btn btn-default dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -51,13 +52,6 @@ $bundle = UserShiftCalendarAsset::register($this);
                               'url' => Url::to(['shift-schedule/multiple-delete']),
                               'title' => 'Delete Events',
                           ],
-                      ])
-                    ?>
-              </p>
-              <p>
-                  <?= Html::a('<i class="fas fa-times-circle"></i> Exit Mode', null, [
-                          'class' => 'dropdown-item',
-                          'id' => 'btn-multiple-exit-mode'
                       ])
                     ?>
               </p>
@@ -200,6 +194,11 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
         },
         
         onPageLoading: function (event, inst) {
+            if (multipleMangeMode) {
+                $('.selected-event').remove();
+                selectedEventsIds = [];
+                checkAllBtn.removeClass(['btn-warning', 'checked']).addClass('btn-default').html('<span class="fa fa-square-o"></span> Select All');
+            }
             let year = event.firstDay.getUTCFullYear(),
                 month = event.firstDay.getUTCMonth() + 1,
                 day = event.firstDay.getUTCDate();
@@ -226,6 +225,7 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
         },
         onCellDoubleClick: function (args, inst) {
             if (multipleMangeMode) {
+                createNotify('Warning', 'You cannot add event in multiple manage mode', 'warning');
                 return false;
             }
             dblClickResource = args.resource;
@@ -589,6 +589,10 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
     
     $('#btn-shift-event-add').on('click', function (e) {
         e.preventDefault(); 
+        if (multipleMangeMode) {
+            createNotify('Warning', 'You cannot perform this action in multiple manage mode', 'warning');
+            return false;
+        }
         let calendarStartDt = window,i
         let title = $(this).attr('title');
         let modal = $('#modal-md');
@@ -671,17 +675,20 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
         e.preventDefault();
         $(this).hide();
         checkAllBtnWrapper.show();
+        exitModeBtn.show();
         multipleMangeMode = true;
         inst.setOptions({
             clickToCreate: false,
             dragToCreate: false,
             dragToMove: false,
             dragToResize: false,
-        })
+        });
+        $('#calendar').addClass('multiple-manage-mode');
     });
     exitModeBtn.on('click', function (e) {
         e.preventDefault();
         checkAllBtnWrapper.hide();
+        exitModeBtn.hide();
         multipleManageBtn.show();
         multipleMangeMode = false;
         inst.setOptions({
@@ -693,6 +700,7 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
         $('.selected-event').remove();
         selectedEventsIds = [];
         checkAllBtn.removeClass(['btn-warning', 'checked']).addClass('btn-default').html('<span class="fa fa-square-o"></span> Select All');
+        $('#calendar').removeClass('multiple-manage-mode');
     });
     checkAllBtn.on('click', function (e) {
         e.preventDefault();
@@ -717,7 +725,7 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
             createNotify('Warning', 'You have not selected any events', 'warning');
             return false;
         }
-        
+        $('#calendar-wrapper').append(loaderTemplate());
         $.ajax({
             url: '$multipleDeleteUrl',
             type: 'post',
@@ -740,6 +748,9 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
             },
             error: function (xhr) {
                 createNotify('Error', xhr.responseText, 'error');
+            },
+            complete: function () {
+                $('#calendar-wrapper .calendar-filter-overlay').remove();
             }
         })
     });
