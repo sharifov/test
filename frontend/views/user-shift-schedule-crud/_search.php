@@ -24,6 +24,7 @@ use yii\bootstrap4\Html;
         </div>
         <div class="x_content" style="display: <?=(Yii::$app->request->isPjax) ? 'block' : 'none'?>">
             <?php $form = ActiveForm::begin([
+                'id' => 'search-form',
                 'action' => ['index'],
                 'method' => 'get',
                 'options' => [
@@ -119,7 +120,7 @@ use yii\bootstrap4\Html;
 
             <div class="form-group">
                 <?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>
-                <?= Html::resetButton('Reset', ['class' => 'btn btn-outline-secondary']) ?>
+                <?= Html::a('Reset', ['user-shift-schedule-crud/index'], ['class' => 'btn btn-outline-secondary']) ?>
             </div>
 
             <?php ActiveForm::end(); ?>
