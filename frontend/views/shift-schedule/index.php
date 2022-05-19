@@ -52,22 +52,20 @@ $subtypeTotalData = [];
                 ['class' => 'btn btn-warning']
             ) ?>
         <?php endif; ?>
-        <?php if (SettingHelper::getShiftScheduleGenerateEnabled()) : ?>
-            <?php
-            /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_GENERATE_USER_SCHEDULE, Access to generate-user-schedule shift-schedule/* */
-            if (\Yii::$app->abac->can(null, ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_GENERATE_USER_SCHEDULE)) :
-                ?>
-                <?= Html::a(
-                    '<i class="fa fa-play-circle"></i> Generate User Schedule (' .
-                    SettingHelper::getShiftScheduleDaysLimit() . ' days' . ')',
-                    ['generate-user-schedule'],
-                    ['class' => 'btn btn-success'],
-                ) ?>
-            <?php endif; ?>
+        <?php
+        /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_GENERATE_USER_SCHEDULE, Access to generate-user-schedule shift-schedule/* */
+        if (\Yii::$app->abac->can(null, ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_GENERATE_USER_SCHEDULE)) :
+            ?>
+            <?= Html::a(
+                '<i class="fa fa-play-circle"></i> Generate User Schedule (' .
+                SettingHelper::getShiftScheduleDaysLimit() . ' days' . ')',
+                ['generate-user-schedule'],
+                ['class' => 'btn btn-success'],
+            ) ?>
         <?php endif; ?>
 
         <?php
-        /** @abac hiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_REMOVE_ALL_USER_SCHEDULE, Access to remove-user-data shift-schedule/* */
+        /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_REMOVE_ALL_USER_SCHEDULE, Access to remove-user-data shift-schedule/* */
         if (\Yii::$app->abac->can(null, ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_REMOVE_ALL_USER_SCHEDULE)) :
             ?>
             <?= Html::a('<i class="fa fa-remove"></i> Remove All User Schedule Data', ['remove-user-data'], [
