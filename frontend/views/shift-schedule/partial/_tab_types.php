@@ -66,8 +66,13 @@ $totalData = [];
                             }
                             ?>
 
-                            <?= round($dataItem['uss_duration'] / 60, 1)?>h
-                            / <?= Html::encode($dataItem['uss_cnt'])?>
+                            <?php echo $this->render('__format_duration', [
+                                    'duration' => $dataItem['uss_duration'],
+                                    'count' => $dataItem['uss_cnt']
+                                ])
+                            ?>
+
+
 
                         <?php else : ?>
                             -
@@ -93,9 +98,11 @@ $totalData = [];
                 <th></th>
                 <?php foreach ($monthList as $monthId => $month) : ?>
                     <th>
-                        <?= isset($dataItem[$monthId]['duration']) ?
-                            round($dataItem[$monthId]['duration'] / 60, 1) . 'h' : '-'?> /
-                        <?= isset($dataItem[$monthId]['cnt']) ? ($dataItem[$monthId]['cnt']) : '-'?>
+                        <?php echo $this->render('__format_duration', [
+                            'duration' => $dataItem[$monthId]['duration'] ?? 0,
+                            'count' => $dataItem[$monthId]['cnt'] ?? 0
+                        ])
+                        ?>
                     </th>
                 <?php endforeach; ?>
             </tr>
@@ -108,9 +115,11 @@ $totalData = [];
         <th></th>
         <?php foreach ($monthList as $monthId => $month) : ?>
             <th>
-                <?= isset($totalData[$monthId]['duration']) ?
-                    round($totalData[$monthId]['duration'] / 60, 1) . 'h' : '-'?> /
-                <?= isset($totalData[$monthId]['cnt']) ? ($totalData[$monthId]['cnt']) : '-'?>
+                <?php echo $this->render('__format_duration', [
+                        'duration' => $totalData[$monthId]['duration'] ?? 0,
+                        'count' => $totalData[$monthId]['cnt'] ?? 0
+                    ])
+                ?>
             </th>
         <?php endforeach; ?>
     </tr>
