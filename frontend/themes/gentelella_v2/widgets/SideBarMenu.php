@@ -490,7 +490,6 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Quote Segment Stop CRUD', 'url' => ['/quote-segment-stop-crud/index'], 'icon' => 'list'],
                     ],
                 ],
-
                 ['label' => 'Call User Access', 'url' => ['/call-user-access/index'], 'icon' => 'list'],
                 [
                     'label' => 'Leads',
