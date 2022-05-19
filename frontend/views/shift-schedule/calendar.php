@@ -108,6 +108,7 @@ $formUpdateSingleEvent = Url::to(['/shift-schedule/update-single-event']);
 $deleteEventUrl = Url::to(['/shift-schedule/delete-event']);
 $canCreateOnDoubleClick = \Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_CREATE_ON_DOUBLE_CLICK);
 $openModalEventUrl = \yii\helpers\Url::to(['shift-schedule/get-event']);
+$multipleDeleteUrl = Url::to(['shift-schedule/ajax-multiple-delete']);
 $js = <<<JS
 var calendarEventsAjaxUrl = '$ajaxUrl';
 var today = '$today';
@@ -708,6 +709,39 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
             $('.mbsc-schedule-event').append(selectedEventTemplate());
             btn.removeClass('btn-default').addClass(['btn-warning', 'checked']).html('<span class="fa fa-check-square-o"></span> Uncheck All (' + selectedEventsIds.length + ')');
         }
+    });
+    
+    $('.btn-multiple-delete-events').on('click', function (e) {
+        e.preventDefault();
+        if (!selectedEventsIds.length) {
+            createNotify('Warning', 'You have not selected any events', 'warning');
+            return false;
+        }
+        
+        $.ajax({
+            url: '$multipleDeleteUrl',
+            type: 'post',
+            dataType:' json',
+            cache: false,
+            data: {selectedEvents: selectedEventsIds},
+            success: function (data) {
+                if (data.error) {
+                    createNotify('Error', data.message, 'error');
+                } else {
+                    inst._events.forEach(function (e, i) {
+                        if (selectedEventsIds.indexOf(e.id) !== -1) {
+                            inst.removeEvent(e);
+                        }
+                    });
+                    createNotify('Success', 'Events successfully deleted', 'success');
+                    selectedEventsIds = [];
+                    checkAllBtn.removeClass(['btn-warning', 'checked']).addClass('btn-default').html('<span class="fa fa-square-o"></span> Select All');
+                }
+            },
+            error: function (xhr) {
+                createNotify('Error', xhr.responseText, 'error');
+            }
+        })
     });
 JS;
 

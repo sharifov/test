@@ -46,6 +46,7 @@ class ShiftAbacObject extends AbacBaseModel implements AbacInterface
     public const ACTION_DELETE      = 'delete';
     public const ACTION_CREATE_ON_DOUBLE_CLICK = 'createOnDoubleClick';
     public const ACTION_VIEW_ALL_EVENTS = 'viewAllEvents';
+    public const ACTION_MULTIPLE_DELETE_EVENTS = 'multipleDeleteEvents';
 
     /** ACTION LIST */
     public const OBJECT_ACTION_LIST = [
@@ -68,7 +69,8 @@ class ShiftAbacObject extends AbacBaseModel implements AbacInterface
             self::ACTION_DELETE
         ],
         self::OBJ_USER_SHIFT_CALENDAR => [
-            self::ACTION_VIEW_ALL_EVENTS
+            self::ACTION_VIEW_ALL_EVENTS,
+            self::ACTION_MULTIPLE_DELETE_EVENTS,
         ]
     ];
 

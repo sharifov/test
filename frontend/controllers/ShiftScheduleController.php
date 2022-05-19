@@ -34,6 +34,7 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotAcceptableHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
@@ -60,6 +61,11 @@ class ShiftScheduleController extends FController
             'access' => [
                 'class' => AccessControl::class,
                 'rules' => [
+                    [
+                        'actions' => ['ajax-multiple-delete'],
+                        'allow' => true,
+                        'roles' => ['@']
+                    ],
                     /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_ACCESS, Access to page shift-schedule/index */
                     [
                         'actions' => ['index', 'my-data-ajax', 'generate-example', 'remove-user-data', 'get-event',
@@ -716,6 +722,23 @@ class ShiftScheduleController extends FController
             $out['results'] = ['id' => $id, 'text' => $rule ? $rule->ssr_title : '', 'selection' => $rule ? $rule->ssr_title : ''];
         }
         return $out;
+    }
+
+    public function actionAjaxMultipleDelete(): Response
+    {
+        /** @abac ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_MULTIPLE_DELETE_EVENTS, Access to delete multiple events */
+        if (!Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_MULTIPLE_DELETE_EVENTS)) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
+        $eventIds = Yii::$app->request->post('selectedEvents', []);
+
+        UserShiftSchedule::deleteAll(['uss_id' => $eventIds]);
+
+        return $this->asJson([
+            'error' => false,
+            'message' => ''
+        ]);
     }
 
     /**
