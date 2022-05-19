@@ -467,11 +467,6 @@ class Email extends \yii\db\ActiveRecord
                         $this->e_project_id,
                         $this->eLead->l_dep_id
                     );
-                } else {
-                    Yii::info([
-                        $this->e_template_type_id,
-                        $this->e_project_id,
-                    ], 'elk\Email:Template:abtesting');
                 }
             }
             if ($this->e_id && $this->e_lead_id && LeadPoorProcessingService::checkEmailTemplate($tplType)) {

@@ -14,6 +14,7 @@ use yii\bootstrap4\ActiveForm;
 use yii\helpers\Html;
 use yii\web\View;
 use yii\widgets\Pjax;
+use dosamigos\datepicker\DatePicker;
 
 /**
  * @var View $this
@@ -129,6 +130,20 @@ $pjaxId = 'pjax-container-vc';
                                     ],
                                     'size' => Select2::SIZE_SMALL
                                 ])->label(true) ?>
+
+                                <?= $form->field($createQuoteForm, 'expirationDate', [
+                                    'labelOptions' => ['class' => 'control-label']
+                                ])->widget(DatePicker::class, [
+                                    'inline' => false,
+                                    'clientOptions' => [
+                                        'autoclose' => true,
+                                        'format' => 'yyyy-mm-dd',
+                                    ],
+                                    'options' => [
+                                        'autocomplete' => 'off',
+                                        'placeholder' => 'Choose Date',
+                                    ],
+                                ]) ?>
 
                             </div>
                         </div>

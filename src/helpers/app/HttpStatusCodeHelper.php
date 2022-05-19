@@ -10,6 +10,7 @@ class HttpStatusCodeHelper
     public const BAD_REQUEST = 400;
     public const UNPROCESSABLE_ENTITY = 422;
     public const INTERNAL_SERVER_ERROR = 500;
+    public const GONE = 410;
 
     public const LIST = [
         100 => 'Informational: Continue',
@@ -44,7 +45,7 @@ class HttpStatusCodeHelper
         407 => 'Client Error: Proxy Authentication Required',
         408 => 'Client Error: Request Timeout',
         409 => 'Client Error: Conflict',
-        410 => 'Client Error: Gone',
+        self::GONE => 'Client Error: Gone',
         411 => 'Client Error: Length Required',
         412 => 'Client Error: Precondition Failed',
         413 => 'Client Error: Request Entity Too Large',
@@ -88,7 +89,11 @@ class HttpStatusCodeHelper
         599 => 'Server Error: Network connect timeout error',
     ];
 
-    public static function getName($code)
+    /**
+     * @param $code
+     * @return string
+     */
+    public static function getName($code): string
     {
         return self::LIST[$code] ?? 'Undefined';
     }

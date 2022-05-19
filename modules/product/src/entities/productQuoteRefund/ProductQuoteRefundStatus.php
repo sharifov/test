@@ -16,6 +16,7 @@ class ProductQuoteRefundStatus
     public const PROCESSING = 7;
     public const IN_PROGRESS = 8;
     public const DECLINED = 9;
+    public const EXPIRED = 10;
 
     private const LIST = [
         self::NEW => 'New',
@@ -26,7 +27,8 @@ class ProductQuoteRefundStatus
         self::ERROR => 'Error',
         self::PROCESSING => 'Processing',
         self::IN_PROGRESS => 'In Progress',
-        self::DECLINED => 'Declined'
+        self::DECLINED => 'Declined',
+        self::EXPIRED => 'Expired',
     ];
 
     private const CSS_CLASS_LIST = [
@@ -38,7 +40,8 @@ class ProductQuoteRefundStatus
         self::ERROR => 'danger',
         self::PROCESSING => 'info',
         self::IN_PROGRESS => 'info',
-        self::DECLINED => 'awake'
+        self::DECLINED => 'awake',
+        self::EXPIRED => 'danger',
     ];
 
     private const UNIQUE_KEY_LIST = [
@@ -50,7 +53,8 @@ class ProductQuoteRefundStatus
         self::ERROR => 'error',
         self::PROCESSING => 'processing',
         self::IN_PROGRESS => 'in_progress',
-        self::DECLINED => 'declined'
+        self::DECLINED => 'declined',
+        self::EXPIRED => 'expired',
     ];
 
     public static function getList(): array

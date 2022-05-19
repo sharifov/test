@@ -54,7 +54,7 @@ class LeadBadgesRepository
             return $query;
         }
 
-        return $query->andWhere('0 = 1');
+        return $query->andWhere($this->isOwner($user->id));
     }
 
     /**

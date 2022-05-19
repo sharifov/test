@@ -26,6 +26,7 @@ use yii\web\ForbiddenHttpException;
 use src\access\EmployeeGroupAccess;
 use src\auth\Auth;
 use src\helpers\setting\SettingHelper;
+use src\helpers\product\ProductQuoteRefundHelper;
 
 /**
  * @var Order $order
@@ -322,6 +323,7 @@ $productQuoteAbacDto->mapOrderAttributes($order);
                                               <th>Status</th>
                                               <th style="width: 45px;" title="Product Quote Options">Opt</th>
                                               <th style="width: 130px">Created</th>
+                                              <th>Exp.</th>
                                               <th>Extra Markup, <?php echo Currency::getDefaultCurrencyCodeByDb() ?></th>
                                               <th style="white-space: nowrap;">Price, <?php echo Currency::getDefaultCurrencyCodeByDb() ?></th>
                                               <th style="width: 60px;">Action</th>
@@ -355,6 +357,19 @@ $productQuoteAbacDto->mapOrderAttributes($order);
                                               <td><?= ProductQuoteStatus::asFormat($changeQuote->pq_status_id)?></td>
                                               <td><?= ($changeQuote->getProductQuoteOptionsCount() ?: '-') ?></td>
                                               <td><small><?=$changeQuote->pq_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($changeQuote->pq_created_dt)) : '-'?></small></td>
+                                              <td class="text-center"
+                                                  data-toggle="tooltip"
+                                                  data-original-title="Date expiration: <?= ($dateExpiration = Yii::$app->formatter->asDatetime($changeQuote->pq_expiration_dt)) ?>"
+                                                  title="Date expiration: <?= $dateExpiration ?>"
+                                              >
+                                                  <?= Html::tag(
+                                                      'i',
+                                                      '',
+                                                      [
+                                                          'class' => ['fa', 'fa-clock', (ProductQuoteHelper::checkingExpirationDate($changeQuote) ? 'success' : 'danger')],
+                                                      ]
+                                                  ) ?>
+                                              </td>
                                               <td class="text-right">
                                                 <span style="white-space: nowrap;">
                                                     <?php echo FlightQuotePaxPriceHelper::priceFormat($changeQuote->pq_agent_markup) ?>
@@ -543,6 +558,7 @@ $productQuoteAbacDto->mapOrderAttributes($order);
                         <th>Refund amount</th>
 <!--                        <th>Client currency</th>-->
                         <th style="width: 140px">Created</th>
+                        <th>Exp.</th>
                         <th style="width: 60px">Action</th>
                     </tr>
                     </thead>
@@ -564,6 +580,19 @@ $productQuoteAbacDto->mapOrderAttributes($order);
                             <td><?= $refundItem->getClientRefundAmountPriceFormat() ?></td>
                             <!-- <td><?php // $refundItem->pqr_client_currency ? Html::encode($refundItem->pqr_client_currency) : '-'?></td> -->
                             <td><small><?=$refundItem->pqr_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($refundItem->pqr_created_dt)) : '-'?></small></td>
+                            <td class="text-center"
+                                data-toggle="tooltip"
+                                data-original-title="Date expiration: <?= ($dateExpiration = Yii::$app->formatter->asDatetime($refundItem->pqr_expiration_dt)) ?>"
+                                title="Date expiration: <?= $dateExpiration ?>"
+                            >
+                                <?= Html::tag(
+                                    'i',
+                                    '',
+                                    [
+                                        'class' => ['fa', 'fa-clock', (ProductQuoteRefundHelper::checkingExpirationDate($refundItem) ? 'success' : 'danger')],
+                                    ]
+                                ) ?>
+                            </td>
                             <td>
                               <div class="btn-group">
                                 <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

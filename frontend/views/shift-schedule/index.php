@@ -3,6 +3,7 @@
 use common\components\grid\DateTimeColumn;
 use common\models\Employee;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
+use modules\shiftSchedule\src\entities\shiftScheduleRequest\search\ShiftScheduleRequestSearch;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\shiftScheduleTypeLabel\ShiftScheduleTypeLabel;
 use modules\shiftSchedule\src\entities\userShiftAssign\UserShiftAssign;
@@ -10,6 +11,7 @@ use modules\shiftSchedule\src\entities\userShiftSchedule\search\SearchUserShiftS
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use src\helpers\setting\SettingHelper;
 use yii\bootstrap4\Tabs;
+use yii\data\ActiveDataProvider;
 use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
@@ -29,6 +31,11 @@ use yii\widgets\Pjax;
 /* @var $searchModel SearchUserShiftSchedule */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $assignedShifts UserShiftAssign[] */
+
+/**
+ * @var ShiftScheduleRequestSearch $searchModelPendingRequests
+ * @var ActiveDataProvider $dataProviderPendingRequests
+ */
 
 $this->title = 'My Shift Schedule' . ' (' . $user->username . ')';
 $this->params['breadcrumbs'][] = $this->title;
@@ -67,6 +74,16 @@ $subtypeTotalData = [];
             ]) ?>
         <?php endif; ?>
         <?= Html::a(
+            '<i class="fa fa-plus-circle"></i> Schedule Request',
+            ['schedule-request-ajax'],
+            ['class' => 'btn btn-success', 'id' => 'btn-schedule-request']
+        ) ?>
+        <?= Html::a(
+            '<i class="fa fa-th-list"></i> Schedule Request History',
+            ['schedule-request-history-ajax'],
+            ['class' => 'btn btn-warning', 'id' => 'btn-schedule-request-history']
+        ) ?>
+        <?= Html::a(
             '<i class="fa fa-info-circle"></i> Legend',
             ['legend-ajax'],
             ['class' => 'btn btn-info', 'id' => 'btn-legend']
@@ -94,6 +111,12 @@ $subtypeTotalData = [];
                     </div>
                 </div>
             </div>
+
+            <?= $this->render('partial/_pending_requests', [
+                'dataProviderPendingRequests' => $dataProviderPendingRequests ?? null,
+                    'searchModelPendingRequests' => $searchModelPendingRequests ?? null,
+            ])?>
+
         </div>
         <div class="col-md-6">
 
@@ -405,7 +428,7 @@ $js = <<<JS
     var shiftScheduleDataUrl = '$ajaxUrl';
     var openModalEventUrl = '$openModalEventUrl';
     var calendarEl = document.getElementById('calendar');
-
+    var selectedRange = null;
     var calendar = new FullCalendar.Calendar(calendarEl, {
         //initialView: 'dayGridWeek',
         initialView: 'dayGridMonth',
@@ -518,7 +541,7 @@ $js = <<<JS
       
       //plugins: [ 'dayGridPlugin' ],
         timeZone: '$userTimeZone',
-        locale: 'en',
+        locale: 'en-GB',
         dayMaxEvents: true, // allow "more" link when too many events
         //events: shiftScheduleDataUrl,
          eventSources: [
@@ -574,6 +597,10 @@ $js = <<<JS
             updateTimeLineList(info.startStr, info.endStr);
             // console.log(info);
             // console.log('selected ' + info.startStr + ' to ' + info.endStr);
+            selectedRange = {
+                start: info.startStr,
+                end: info.endStr
+            }
           }
     });
 
@@ -604,20 +631,73 @@ $js = <<<JS
         let modal = $('#modal-md');
         let url = $(this).attr('href');
         $('#modal-md-label').html('<i class="fa fa-info-circle"></i> Schedule Legend');
-        modal.find('.modal-body').html('');
-        modal.find('.modal-body').load(url, function( response, status, xhr ) {
-            if (status === 'error') {
-                alert(response);
-            } else {
-                modal.modal('show');
-            }   
-        });
+        getRequest(modal, url);
     });
     
+    $(document).on('click', '#btn-schedule-request', function(e) {
+        e.preventDefault();
+        let modal = $('#modal-md');
+        let url = processingUrlWithQueryParam($(this).attr('href'));
+        $('#modal-md-label').html('<i class="fa fa-plus-circle"></i> Schedule Request');
+        getRequest(modal, url);
+        selectedRange = null;
+    });
+    
+    $(document).on('click', '#btn-schedule-request-history', function(e) {
+        e.preventDefault();
+        let modal = $('#modal-md');
+        let url = $(this).attr('href');
+        $('#modal-md-label').html('<i class="fa fa-th-list"></i> Schedule Request History');
+        getRequest(modal, url);
+    });
+    
+    function getRequest(modal, url) {
+        modal.find('.modal-body').html(loaderTemplate);
+        modal.modal('show');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            if (status === 'error') {
+                modal.modal('hide');
+                alert(response);
+            }   
+        });
+    }
+    
+    function loaderTemplate(modal) {
+        return '<div class="text-center"> \
+                    <div class="spinner-border m-5" role="status"> \
+                        <span class="sr-only">Loading...</span> \
+                    </div> \
+                </div>';
+    }
+    
+    function processingUrlWithQueryParam(url) {
+        if (!selectedRange) {
+            return url;
+        }
+
+        var end = new Date(selectedRange.end);
+        end.setDate(end.getDate() - 1);
+        end.setHours(23, 59);
+        var data = {
+            start: selectedRange.start,            
+            end: end.getFullYear() + '-' + ('0' + (end.getMonth() + 1)).slice(-2) + '-' + ('0' + end.getDate()).slice(-2) + ' ' + end.getHours() + ':' + end.getMinutes()           
+        };
+        
+        var prefix = '?';
+        if (url.indexOf('?') !== -1) {
+            prefix = '&';
+        }
+        return url + prefix + $.param(data);
+    }
 
     function updateTimeLineList(startDate, endDate) 
     {
         $.pjax.reload({container: '#pjax-user-timeline', push: false, replace: false, timeout: 5000, data: {startDate: startDate, endDate: endDate}});
+    }
+    
+    function updateTimeLinePendingList() 
+    {
+        $.pjax.reload({container: '#pjax-schedule-pending-request', push: false, replace: false, timeout: 5000});
     }
     
     $('body').off('click', '.btn-open-timeline').on('click', '.btn-open-timeline', function (e) {
@@ -626,6 +706,22 @@ $js = <<<JS
         openModalEventId(id);
     });
     
+    $(document).on('ScheduleRequest:response', function (e, params) {
+        if (params.requestStatus) {
+            calendar.refetchEvents();
+            updateTimeLinePendingList();
+            $('#modal-md').modal('hide');
+        }
+    });
+    
+    $(document).on('RequestDecision:response', function (e, params) {
+        if (params.requestStatus) {
+            calendar.refetchEvents();
+            updateTimeLineList();
+            updateTimeLinePendingList();
+            $('#modal-md').modal('hide');
+        }
+    });
     
 JS;
 

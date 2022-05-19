@@ -1114,4 +1114,16 @@ class Formatter extends \yii\i18n\Formatter
 
         return $code . ' ' . $num;
     }
+
+    /**
+     * @param int $minutes
+     * @param string $format
+     * @return string
+     */
+    public function asHoursDuration(int $minutes, string $format = '%02dh %02dm'): string
+    {
+        $partOfHours = intdiv($minutes, 60);
+        $partOfMinutes = $minutes % 60;
+        return sprintf($format, $partOfHours, $partOfMinutes);
+    }
 }

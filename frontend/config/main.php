@@ -335,7 +335,7 @@ return [
             'class' => ProductModule::class
         ],
 
-        'requestControl' => [
+        'request-control' => [
             'class' => RequestControlModule::class,
             'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
         ],

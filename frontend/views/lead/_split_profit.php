@@ -132,8 +132,7 @@ $this->registerJs($js);?>
         e.preventDefault();
         var amoundDiv = $(this).parent('div').prev();
         var percentDiv = $('input', amoundDiv.prev());
-
-        mainAgentProfitVal = mainAgentProfitVal + parseFloat(amoundDiv.text().trim());
+        mainAgentProfitVal = parseFloat(parseFloat(mainAgentProfitVal) + parseFloat(amoundDiv.text().trim())).toFixed(2);
         mainAgentPercentVal = mainAgentPercentVal + parseFloat(percentDiv.val());
         $(this).closest('div.split-row').remove();
         split_k -= 1;

@@ -1,40 +1,79 @@
 <?php
 
+use frontend\assets\UserShiftCalendarAsset;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
+use modules\shiftSchedule\src\entities\userShiftSchedule\search\TimelineCalendarFilter;
 use yii\helpers\Html;
-use yii\helpers\Json;
 use yii\helpers\Url;
 
 /* @var $this yii\web\View */
-/* @var $resourceList array */
-/* @var $groupIds array */
+/* @var $timelineCalendarFilter TimelineCalendarFilter */
+/* @var $userGroups array */
 
 $this->title = 'Users Shift Calendar';
 $this->params['breadcrumbs'][] = $this->title;
-$bundle = \frontend\assets\UserShiftCalendarAsset::register($this);
+$bundle = UserShiftCalendarAsset::register($this);
 ?>
+
 
 <div class="shift-schedule-calendar">
     <h1><i class="fa fa-calendar"></i> <?= Html::encode($this->title) ?></h1>
 
-    <p>
+    <?= $this->render('partial/_filter_form', [
+        'timelineCalendarFilter' => $timelineCalendarFilter,
+        'userGroups' => $userGroups
+    ]) ?>
+
+    <?php if (!empty($timelineCalendarFilter->userGroups)) : ?>
         <?php
         /** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_CREATE, Create user shift schedule event */
         if (\Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_CREATE)) :
             ?>
             <?= Html::a(
                 '<i class="fa fa-plus-circle"></i> Add Schedule Event',
-                '#',
-                ['class' => 'btn btn-success', 'id' => 'btn-shift-event-add', 'title' => 'Add Schedule Event']
+                null,
+                ['class' => 'btn btn-success btn-sm', 'id' => 'btn-shift-event-add', 'title' => 'Add Schedule Event']
             ) ?>
         <?php endif; ?>
-    </p>
+
+        <?php if (Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_MULTIPLE_DELETE_EVENTS)) : ?>
+            <?= Html::a('<i class="fas fa-th-large"></i> Multiple Manage Mode', null, ['id' => 'multiple-manage-mode-btn', 'class' => 'btn btn-warning btn-sm']) ?>
+            <?= Html::a('<i class="fas fa-times-circle"></i> Exit Mode', null, [ 'class' => 'btn btn-danger btn-sm', 'id' => 'btn-multiple-exit-mode', 'style' => 'display: none;']) ?>
+            <div class="btn-group" id="check_uncheck_btns" style="display: none; margin-bottom: 4px; height: 28px; margin-left: 7px;">
+                <?php echo Html::button('<span class="fa fa-square-o"></span> Select All', ['class' => 'btn btn-sm btn-default', 'id' => 'btn-check-all']); ?>
+
+                <button type="button" class="btn btn-default dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <span class="sr-only">Toggle Dropdown</span>
+                </button>
+                <div class="dropdown-menu">
+                  <p>
+                      <?= Html::a('<i class="fas fa-trash-alt text-danger"></i> Delete Events', null, [
+                          'class' => 'dropdown-item btn-multiple-delete-events',
+                              'data' => [
+                                  'url' => Url::to(['shift-schedule/multiple-delete']),
+                                  'title' => 'Delete Events',
+                              ],
+                          ])
+                        ?>
+                  </p>
+                </div>
+            </div>
+        <?php endif; ?>
 
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-12" id="calendar-wrapper">
             <div id="calendar" class="ssc"></div>
         </div>
     </div>
+    <?php else : ?>
+        <?= \yii\bootstrap4\Alert::widget([
+            'options' => [
+                'class' => 'alert-warning',
+            ],
+            'body' => 'You dont have an associated group. In this case, you cannot view calendar events',
+        ]) ?>
+    <?php endif; ?>
+
 </div>
 
 <div id="custom-event-tooltip-popup" class="md-tooltip">
@@ -58,18 +97,15 @@ $bundle = \frontend\assets\UserShiftCalendarAsset::register($this);
 
 <?php
 $ajaxUrl = Url::to(['shift-schedule/calendar-events-ajax']);
-$resourceListJson = Json::encode($resourceList);
 $today = date('Y-m-d', strtotime('+1 day'));
 $modalUrl = Url::to(['/shift-schedule/add-event']);
-$groupIdsJson = Json::encode($groupIds);
 $formCreateSingleEventUrl = Url::to(['/shift-schedule/add-single-event']);
 $formUpdateSingleEvent = Url::to(['/shift-schedule/update-single-event']);
 $deleteEventUrl = Url::to(['/shift-schedule/delete-event']);
 $canCreateOnDoubleClick = \Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_CREATE_ON_DOUBLE_CLICK);
 $openModalEventUrl = \yii\helpers\Url::to(['shift-schedule/get-event']);
+$multipleDeleteUrl = Url::to(['shift-schedule/ajax-multiple-delete']);
 $js = <<<JS
-var resourceListJson = $resourceListJson;
-var groupIds = $groupIdsJson;
 var calendarEventsAjaxUrl = '$ajaxUrl';
 var today = '$today';
 var modalUrl = '$modalUrl';
@@ -91,6 +127,12 @@ var \$time = $('#tooltip-event-time');
 var \$status = $('#tooltip-event-status');
 var \$title = $('#tooltip-event-title');
 var \$view = $('#tooltip-event-view');
+var dblClickResource;
+
+var multipleMangeMode = false;
+var selectedEventsIds = [];
+var checkAllBtn = $('#btn-check-all');
+
 
 mobiscroll.setOptions({
     theme: 'ios',
@@ -102,7 +144,7 @@ mobiscroll.momentTimezone.moment = moment;
 window.inst = $('#calendar').mobiscroll().eventcalendar({
         view: {
             timeline: { type: 'day', size: 2 },
-            refDate: today
+            refDate: today,
         },
         timeFormat: 'HH:mm',
         dataTimezone: 'utc',
@@ -129,15 +171,14 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
 //                 extendedProps: {icon: 'fa fa-folder'}
 //             };
 //         },
-        resources: resourceListJson,
+//         resources: resourceListJson,
         
-        //  renderResource: function (resource) {
-        //     return '<div class="md-work-week-cont">' +
-        //         '<div class="md-work-week-name">' + resource.name + '</div>' +
-        //         '<div class="md-work-week-title">' + resource.title + '</div>' +
-        //        // '<img class="md-work-week-avatar" src="' + resource.img + '"/>' +
-        //         '</div>';
-        // },
+        renderResource: function (resource) {
+             return '<div class="md-work-week-cont" title="'+resource.title+'">' +
+                 '<div class="md-work-week-name" style="display: flex; justify-content: space-between;"><span>' + resource.name + '</span> <span style="margin-right: 10px;">' + resource.icons.join(" ") + '</span></div>' +
+                 '<div class="md-work-week-description">' + resource.description + '</div>' +
+             '</div>';
+        },
         renderHeader: function () {
             let str = '<div mbsc-calendar-nav class="md-work-week-nav"></div>' +
                 '<div class="md-work-week-picker">' +
@@ -155,6 +196,11 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
         },
         
         onPageLoading: function (event, inst) {
+            if (multipleMangeMode) {
+                $('.selected-event').remove();
+                selectedEventsIds = [];
+                checkAllBtn.removeClass(['btn-warning', 'checked']).addClass('btn-default').html('<span class="fa fa-square-o"></span> Select All');
+            }
             let year = event.firstDay.getUTCFullYear(),
                 month = event.firstDay.getUTCMonth() + 1,
                 day = event.firstDay.getUTCDate();
@@ -168,11 +214,44 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
             let startDate = year + '-' + month + '-' + day;
             let endDate = endYear + '-' + endMonth + '-' + endDay;
             
-            getCalendarEvents(startDate, endDate, groupIds);
+            $('#startDate').val(startDate);
+            $('#endDate').val(endDate);
+            
+            let btn = $('#filter-calendar-form-btn');
+            let btnHtml = btn.html();
+            btn.html('<span class="spinner-border spinner-border-sm"></span> Loading').prop("disabled", true);
+            getCalendarEvents(getFormFilterData())
+              .finally(() => {
+                  btn.html(btnHtml).prop("disabled", false);
+              });
+        },
+        onCellDoubleClick: function (args, inst) {
+            if (multipleMangeMode) {
+                createNotify('Warning', 'You cannot add event in multiple manage mode', 'warning');
+                return false;
+            }
+            dblClickResource = args.resource;
+        },
+        onEventDragStart: function (args) {
+            args.resource = dblClickResource;
+        },
+        onCellClick: function (args) {
+            if (multipleMangeMode) {
+                return false;
+            }
+            dblClickResource = args.resource;
         },
         
         
          onEventCreate: function (args, inst) {
+            if (multipleMangeMode) {
+                return false;
+            }
+            if (dblClickResource && args.event.resource !== dblClickResource) {
+                args.event.resource = dblClickResource;
+            }
+            dblClickResource = '';
+            
             if (args.event.resource.indexOf('us-') !== 0) {
                 inst.removeEvent(args.event);
                 return false;
@@ -187,34 +266,54 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
         
         onEventClick: function (args, inst) {
             var event = args.event;
-            // var resource = events.find(function (e) {return e.resource === event.resource});
-            let startDate = new Date(event.start);
-            let endDate = new Date(event.end);
-            var time = formatDate('YYYY-MM-DD H:mm', startDate) + ' - ' + formatDate('YYYY-MM-DD H:mm', endDate);
-            var button = {};
-
-            currentEvent = event;
-
-            if (event.confirmed) {
-                button.text = 'Cancel appointment';
-                button.type = 'warning';
+            if (!multipleMangeMode) {
+                // var resource = events.find(function (e) {return e.resource === event.resource});
+                let startDate = new Date(event.start);
+                let endDate = new Date(event.end);
+                var time = formatDate('YYYY-MM-DD H:mm', startDate) + ' - ' + formatDate('YYYY-MM-DD H:mm', endDate);
+                var button = {};
+    
+                currentEvent = event;
+    
+                if (event.confirmed) {
+                    button.text = 'Cancel appointment';
+                    button.type = 'warning';
+                } else {
+                    button.text = 'Confirm appointment';
+                    button.type = 'success';
+                }
+                
+                \$header.css('background-color', event.borderColor || event.color);
+                \$data.text(event.title);
+                \$time.text(time);
+                \$title.text(event.description);
+    
+                \$status.text(event.status);
+    
+                clearTimeout(timer);
+                timer = null;
+    
+                tooltip.setOptions({ anchor: args.domEvent.target });
+                tooltip.open();
             } else {
-                button.text = 'Confirm appointment';
-                button.type = 'success';
+                let scheduleEvent = $(args.domEvent.target).closest('.mbsc-schedule-event');
+                let selectedEvent = scheduleEvent.find('.selected-event');
+                let index = selectedEventsIds.indexOf(event.id);
+                if (index === -1) {
+                    scheduleEvent.append(selectedEventTemplate());
+                    selectedEventsIds.push(event.id);
+                    checkAllBtn.removeClass('btn-default').addClass(['btn-warning', 'checked']).html('<span class="fa fa-check-square-o"></span> Uncheck All (' + selectedEventsIds.length + ')');
+                } else {
+                    selectedEventsIds.splice(index, 1);
+                    selectedEvent.remove();
+                    if (selectedEventsIds.length) {
+                        checkAllBtn.removeClass('btn-default').addClass(['btn-warning', 'checked']).html('<span class="fa fa-check-square-o"></span> Uncheck All (' + selectedEventsIds.length + ')');
+                    } else {
+                        checkAllBtn.removeClass(['btn-warning', 'checked']).addClass('btn-default').html('<span class="fa fa-square-o"></span> Select All');
+                    }
+                }
+                console.log(selectedEventsIds);
             }
-            
-            \$header.css('background-color', event.borderColor || event.color);
-            \$data.text(event.title);
-            \$time.text(time);
-            \$title.text(event.description);
-
-            \$status.text(event.status);
-
-            clearTimeout(timer);
-            timer = null;
-
-            tooltip.setOptions({ anchor: args.domEvent.target });
-            tooltip.open();
         },
         // onEventClick: function (args, inst) {
             // oldMeal = $.extend({}, args.event);
@@ -232,55 +331,64 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
         //     });
         // },
         onEventUpdated: function (args) {
-        
-            let currentUserId;
-            let oldUserId;
-            
             let event = args.event
             let oldEvent = args.oldEvent;
-        
-            if (event.resource.indexOf('us-') === 0) {
-                currentUserId = event.resource.substring(3);
-            } else {
-                inst.removeEvent(event);
-                window.inst.addEvent(oldEvent);
-                return false;
-            }
-            if (oldEvent.resource.indexOf('us-') === 0) {
-                oldUserId = oldEvent.resource.substring(3);
-            } else {
-                inst.removeEvent(event);
-                window.inst.addEvent(oldEvent);
-                return false;
-            }
-            
-            let eventStartDate = new Date(event.start);
-            let [year, month, day, hour, minute] = [eventStartDate.getFullYear(), eventStartDate.getMonth()+1, eventStartDate.getDate(), eventStartDate.getHours(), eventStartDate.getMinutes(), eventStartDate];
-            let startDate = year + '-' + month + '-' + day + ' ' + hour + ':' + minute;
-            
-            let eventEndDate = new Date(event.end);
-            let [yearEnd, monthEnd, dayEnd, hourEnd, minuteEnd] = [eventEndDate.getFullYear(), eventEndDate.getMonth()+1, eventEndDate.getDate(), eventEndDate.getHours(), eventEndDate.getMinutes(), eventEndDate];
-            let endDate = yearEnd + '-' + monthEnd + '-' + dayEnd + ' ' + hourEnd + ':' + minuteEnd;
-            
-            console.log(event);
-            
-            let data = {
-                eventId: args.event.id,
-                newUserId: currentUserId,
-                oldUserId: oldUserId,
-                startDate: startDate,
-                endDate: endDate
-            };
-            
-            $.post('$formUpdateSingleEvent', data, function (data) {
-                if (data.error) {
-                    createNotify('Error', data.message, 'error');
-                } else {
-                    mobiscroll.toast({
-                        message: 'Event updated successfully'
-                    });
+            mobiscroll.confirm({
+                title: 'Are you sure you want to update event?',
+                okText: 'Yes',
+                cancelText: 'No',
+                callback: function (res) {
+                    if (res) {
+                        let currentUserId;
+                        let oldUserId;
+                        
+                        if (event.resource.indexOf('us-') === 0) {
+                            currentUserId = event.resource.substring(3);
+                        } else {
+                            inst.removeEvent(event);
+                            window.inst.addEvent(oldEvent);
+                            return false;
+                        }
+                        if (oldEvent.resource.indexOf('us-') === 0) {
+                            oldUserId = oldEvent.resource.substring(3);
+                        } else {
+                            inst.removeEvent(event);
+                            window.inst.addEvent(oldEvent);
+                            return false;
+                        }
+                        
+                        let eventStartDate = new Date(event.start);
+                        let [year, month, day, hour, minute] = [eventStartDate.getFullYear(), eventStartDate.getMonth()+1, eventStartDate.getDate(), eventStartDate.getHours(), eventStartDate.getMinutes(), eventStartDate];
+                        let startDate = year + '-' + month + '-' + day + ' ' + hour + ':' + minute;
+                        
+                        let eventEndDate = new Date(event.end);
+                        let [yearEnd, monthEnd, dayEnd, hourEnd, minuteEnd] = [eventEndDate.getFullYear(), eventEndDate.getMonth()+1, eventEndDate.getDate(), eventEndDate.getHours(), eventEndDate.getMinutes(), eventEndDate];
+                        let endDate = yearEnd + '-' + monthEnd + '-' + dayEnd + ' ' + hourEnd + ':' + minuteEnd;
+                        
+                        let data = {
+                            eventId: args.event.id,
+                            newUserId: currentUserId,
+                            oldUserId: oldUserId,
+                            startDate: startDate,
+                            endDate: endDate
+                        };
+                        
+                        $.post('$formUpdateSingleEvent', data, function (data) {
+                            if (data.error) {
+                                createNotify('Error', data.message, 'error');
+                            } else {
+                                mobiscroll.toast({
+                                    message: 'Event updated successfully'
+                                });
+                            }
+                        });
+                    } else {
+                        inst.removeEvent(event);
+                        inst.addEvent(oldEvent);
+                    }
                 }
             });
+        
         },
         // onEventCreateFailed: function (event) {
         //     mobiscroll.toast({
@@ -321,7 +429,6 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
                     }, 800);
                 })
             } else {
-                console.log()
                 // $.post('$formUpdateSingleEvent', {});
             }
         }
@@ -340,7 +447,8 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
             case 'month':
                 inst.setOptions({
                     view: {
-                        timeline: { type: 'month', timeCellStep: 360, timeLabelStep: 360 }
+                        timeline: { type: 'month', timeCellStep: 360, timeLabelStep: 360 },
+                        refDate: today
                     }
                 })
                 break;
@@ -348,27 +456,27 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
             case '7day':
                 inst.setOptions({
                     view: {
-                        timeline: { type: 'day', timeCellStep: 360, timeLabelStep: 360, size: 7 }
+                        timeline: { type: 'day', timeCellStep: 360, timeLabelStep: 360, size: 7 },
+                        refDate: today
                     },
-                    refDate: today
                 })
                 break;
                 
             case '30days':
                 inst.setOptions({
                     view: {
-                        timeline: { type: 'day', timeCellStep: 720, timeLabelStep: 720, size: 30 }
+                        timeline: { type: 'day', timeCellStep: 720, timeLabelStep: 720, size: 30 },
+                        refDate: today
                     },
-                    refDate: today
                 })
                 break;
                 
             case 'week':
                 inst.setOptions({
                     view: {
-                        timeline: { type: 'week', timeCellStep: 720, timeLabelStep: 720 }
-                    }/*,
-                    refDate: today*/
+                        timeline: { type: 'week', timeCellStep: 720, timeLabelStep: 720 },
+                        refDate: today
+                    }
                 })
                 break;
             
@@ -448,18 +556,34 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
         });
     }
 
-
-
-    function getCalendarEvents(date, endDate, groups) {
-         let params = groups.join(',');
-         $.getJSON(calendarEventsAjaxUrl + '?start=' + date + '&end=' + endDate + '&callback&groups=' + params, function (data) {
-                inst.resources = data.resources;
-                setTimelineEvents(data.data);
-        
-                mobiscroll.toast({
-                    message: 'New events loaded'
-                });
-            }, 'jsonp');
+    function getCalendarEvents(queryString) {
+        return new Promise(function (resolve, reject) {
+            $.getJSON(calendarEventsAjaxUrl + '?' + queryString, function (data) {
+                    if (data.error) {
+                        createNotify('Error', data.message, 'error');
+                        reject();
+                    } else {
+                        inst.setOptions({
+                            resources: data.resources
+                        });
+                        setTimelineEvents(data.data);
+                
+                        mobiscroll.toast({
+                            message: 'New events loaded'
+                        });
+                        resolve();
+                    }
+                }, 'jsonp');
+            
+        });
+    }
+    
+    function getFormFilterData()
+    {
+        let form = document.getElementById('filter-calendar-form');
+        let formData = new FormData(form);
+        formData.delete('_csrf-frontend');
+        return new URLSearchParams(formData).toString();
     }
     
     window.setTimelineEvents = function (data)
@@ -478,6 +602,10 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
     
     $('#btn-shift-event-add').on('click', function (e) {
         e.preventDefault(); 
+        if (multipleMangeMode) {
+            createNotify('Warning', 'You cannot perform this action in multiple manage mode', 'warning');
+            return false;
+        }
         let calendarStartDt = window,i
         let title = $(this).attr('title');
         let modal = $('#modal-md');
@@ -515,6 +643,132 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
         });
     }
 
+    $('#filter-calendar-form-btn').on('click', function (e) {
+        e.preventDefault();
+        let btn = $(this);
+        let btnHtml = btn.html();
+        btn.html('<span class="spinner-border spinner-border-sm"></span> Loading').prop("disabled", true);        
+        let queryString = getFormFilterData();
+        $('#calendar-wrapper').append(loaderTemplate());
+        getCalendarEvents(queryString)
+        .then(() => {
+            window.history.replaceState(null, null, '?' + queryString + '&appliedFilter=1');  
+        })
+        .finally(() => {
+            btn.html(btnHtml).prop("disabled", false);
+            $('#calendar-wrapper .calendar-filter-overlay').remove();
+        });
+    });
+    
+    function loaderTemplate(modal) {
+        return `<div class="text-center calendar-filter-overlay">
+            <div class="spinner-border m-5" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+        </div>`;
+    }
+    
+    function selectedEventTemplate()
+    {
+        // return `<div class="selected-event">
+        //     <span>
+        //         <i class="fa fa-flag"></i>
+        //     </span>
+        // </div>`;
+        return `<div class="selected-event">
+               <span class="circle"></span>
+        </div>`;
+    }
+    
+    var multipleManageBtn = $('#multiple-manage-mode-btn');
+    var checkAllBtnWrapper = $('#check_uncheck_btns');
+    var exitModeBtn = $('#btn-multiple-exit-mode');
+    
+    multipleManageBtn.on('click', function (e) {
+        e.preventDefault();
+        $(this).hide();
+        checkAllBtnWrapper.show();
+        exitModeBtn.show();
+        multipleMangeMode = true;
+        inst.setOptions({
+            clickToCreate: false,
+            dragToCreate: false,
+            dragToMove: false,
+            dragToResize: false,
+        });
+        $('#calendar').addClass('multiple-manage-mode');
+    });
+    exitModeBtn.on('click', function (e) {
+        e.preventDefault();
+        checkAllBtnWrapper.hide();
+        exitModeBtn.hide();
+        multipleManageBtn.show();
+        multipleMangeMode = false;
+        inst.setOptions({
+            clickToCreate: canCreateOnDoubleClick,
+            dragToCreate: false,
+            dragToMove: true,
+            dragToResize: true,
+        });
+        $('.selected-event').remove();
+        selectedEventsIds = [];
+        checkAllBtn.removeClass(['btn-warning', 'checked']).addClass('btn-default').html('<span class="fa fa-square-o"></span> Select All');
+        $('#calendar').removeClass('multiple-manage-mode');
+    });
+    checkAllBtn.on('click', function (e) {
+        e.preventDefault();
+        if (!inst._events.length) {
+            createNotify('Warning', 'There are no events. Update the filter or add another event.', 'warning');
+            return false;
+        }
+        let btn = $(this);
+        
+        if (selectedEventsIds.length) {
+            $('.selected-event').remove();
+            selectedEventsIds = [];
+            btn.removeClass(['btn-warning', 'checked']).addClass('btn-default').html('<span class="fa fa-square-o"></span> Select All');
+        } else {
+            inst._events.forEach(function (e, i) {
+                selectedEventsIds.push(e.id);
+            });
+            $('.mbsc-schedule-event').append(selectedEventTemplate());
+            btn.removeClass('btn-default').addClass(['btn-warning', 'checked']).html('<span class="fa fa-check-square-o"></span> Uncheck All (' + selectedEventsIds.length + ')');
+        }
+    });
+    
+    $('.btn-multiple-delete-events').on('click', function (e) {
+        e.preventDefault();
+        if (!selectedEventsIds.length) {
+            createNotify('Warning', 'You have not selected any events', 'warning');
+            return false;
+        }
+        $('#calendar-wrapper').append(loaderTemplate());
+        $.ajax({
+            url: '$multipleDeleteUrl',
+            type: 'post',
+            dataType:' json',
+            cache: false,
+            data: {selectedEvents: selectedEventsIds},
+            success: function (data) {
+                if (data.error) {
+                    createNotify('Error', data.message, 'error');
+                } else {
+                    selectedEventsIds.forEach(function (id, i) {
+                        inst.removeEvent(id);
+                    });
+                    createNotify('Success', 'Events successfully deleted', 'success');
+                    selectedEventsIds = [];
+                    checkAllBtn.removeClass(['btn-warning', 'checked']).addClass('btn-default').html('<span class="fa fa-square-o"></span> Select All');
+                }
+            },
+            error: function (xhr) {
+                createNotify('Error', xhr.responseText, 'error');
+            },
+            complete: function () {
+                $('#calendar-wrapper .calendar-filter-overlay').remove();
+            }
+        })
+    });
 JS;
 
 $this->registerJs($js);

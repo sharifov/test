@@ -272,7 +272,7 @@ class Client extends ActiveRecord
         return $this->hasMany(Lead::class, ['client_id' => 'id'])->select(['id', 'request_ip'])->limit($limit)->asArray()->all();
     }
 
-    public function LeadsCountByClient(): int
+    public function leadsCountByClient(): int
     {
         return $this->hasMany(Lead::class, ['client_id' => 'id'])->count();
     }

@@ -15,6 +15,7 @@ use yii\bootstrap4\Alert;
 use yii\grid\SerialColumn;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
+use dosamigos\datepicker\DatePicker;
 
 ?>
 
@@ -49,6 +50,25 @@ use yii\widgets\Pjax;
     <?php echo $activeForm->errorSummary($refundForm) ?>
 
     <?= \common\widgets\Alert::widget() ?>
+
+    <div class="row">
+        <div class="col-md-4">
+            <?= $activeForm->field($refundForm, 'expirationDate', [
+                'labelOptions' => ['class' => 'control-label']
+            ])->widget(DatePicker::class, [
+                'inline' => false,
+                'clientOptions' => [
+                    'autoclose' => true,
+                    'format' => 'yyyy-mm-dd',
+                ],
+                'options' => [
+                    'autocomplete' => 'off',
+                    'placeholder' => 'Choose Date',
+                ],
+            ]) ?>
+        </div>
+    </div>
+
     <div class="row">
         <div class="col-md-12">
             <?= $activeForm->field($refundForm, 'refundId')->hiddenInput()->label(false) ?>

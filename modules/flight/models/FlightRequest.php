@@ -53,12 +53,14 @@ class FlightRequest extends \yii\db\ActiveRecord
     public const STATUS_PENDING = 2;
     public const STATUS_ERROR = 3;
     public const STATUS_DONE = 4;
+    public const STATUS_EXPIRED = 5;
 
     public const STATUS_LIST = [
         self::STATUS_NEW => 'new',
         self::STATUS_PENDING => 'pending',
         self::STATUS_ERROR => 'error',
         self::STATUS_DONE => 'done',
+        self::STATUS_EXPIRED => 'expired',
     ];
 
     private const ACTIVE_STATUSES_LIST = [
@@ -233,6 +235,15 @@ class FlightRequest extends \yii\db\ActiveRecord
     public function statusToDone(): FlightRequest
     {
         $this->fr_status_id = self::STATUS_DONE;
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function statusToExpired(): FlightRequest
+    {
+        $this->fr_status_id = self::STATUS_EXPIRED;
         return $this;
     }
 

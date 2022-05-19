@@ -39,6 +39,7 @@ use yii\helpers\Html;
  * @property int|null $pqr_updated_user_id
  * @property string|null $pqr_created_dt
  * @property string|null $pqr_updated_dt
+ * @property string|null $pqr_expiration_dt
  * @property int|null $pqr_case_id
  * @property string $pqr_type_id [tinyint unsigned]
  *
@@ -143,7 +144,8 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord implements Serializable
         $cid,
         $data,
         $refundCost,
-        $clientRefundCost
+        $clientRefundCost,
+        $expirationDate
     ): self {
         $refund = self::create(
             $orderRefundId,
@@ -165,6 +167,7 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord implements Serializable
         $refund->pqr_cid = $cid;
         $refund->pqr_refund_cost = $refundCost;
         $refund->pqr_client_refund_cost = $clientRefundCost;
+        $refund->pqr_expiration_dt = $expirationDate;
         $refund->detachBehavior('user');
         return $refund;
     }
@@ -220,6 +223,26 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord implements Serializable
     }
 
     /**
+     * Sets quote in status "expired"
+     *
+     * @return void
+     */
+    public function expired(): void
+    {
+        $this->pqr_status_id = ProductQuoteRefundStatus::EXPIRED;
+    }
+
+    /**
+     * Returns true if quote is expired
+     *
+     * @return bool
+     */
+    public function isExpired(): bool
+    {
+        return $this->pqr_status_id == ProductQuoteRefundStatus::EXPIRED;
+    }
+
+    /**
      * @return array
      */
     public function behaviors(): array
@@ -261,7 +284,7 @@ class ProductQuoteRefund extends \yii\db\ActiveRecord implements Serializable
                 'pqr_client_currency_rate', 'pqr_client_selling_price', 'pqr_client_refund_amount',
                 'pqr_client_penalty_amount', 'pqr_client_processing_fee_amount', 'pqr_refund_cost',
                 'pqr_client_refund_cost'], 'number', 'min' => 0, 'max' => 999999.99],
-            [['pqr_created_dt', 'pqr_updated_dt'], 'safe'],
+            [['pqr_created_dt', 'pqr_updated_dt', 'pqr_expiration_dt'], 'safe'],
             [['pqr_client_currency'], 'string', 'max' => 3],
             [['pqr_client_currency'], 'default', 'value' => null],
 

@@ -50,8 +50,13 @@ $totalData = [];
 //                            }
                             ?>
 
-                            <?= round($dataItem['uss_duration'] / 60, 1)?>h
-                            / <?= Html::encode($dataItem['uss_cnt'])?>
+
+                            <?php echo $this->render('__format_duration', [
+                                    'duration' => $dataItem['uss_duration'],
+                                    'count' => $dataItem['uss_cnt']
+                                ])
+                            ?>
+
 
                         <?php else : ?>
                             -

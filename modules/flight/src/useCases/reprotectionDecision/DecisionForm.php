@@ -34,16 +34,13 @@ class DecisionForm extends Model
     public function rules(): array
     {
         return [
-            ['booking_id', 'required'],
+            [['booking_id', 'reprotection_quote_gid'], 'required'],
             ['booking_id', 'string', 'min' => 7, 'max' => 10],
 
             ['type', 'required'],
             ['type', 'in', 'range' => self::TYPES],
 
             ['reprotection_quote_gid', 'string', 'max' => 32],
-            ['reprotection_quote_gid', 'required', 'when' => function () {
-                return $this->isConfirm();
-            }],
 
             ['flight_product_quote', 'required', 'when' => function () {
                 return $this->isModify();
