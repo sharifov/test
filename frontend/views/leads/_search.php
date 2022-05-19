@@ -132,6 +132,15 @@ use frontend\extensions\DatePicker;
                                 'pluginOptions' => ['allowClear' => true],
                             ]); ?>
                         </div>
+
+                        <div class="col-md-1">
+                            <?php echo $form->field($model, 'userGroupId')->widget(Select2::class, [
+                                'data' => \common\models\UserGroup::getList(),
+                                'size' => Select2::SMALL,
+                                'options' => ['placeholder' => 'Select user', 'multiple' => false],
+                                'pluginOptions' => ['allowClear' => true],
+                            ]); ?>
+                        </div>
                         <div class="col-md-1">
                             <?= $form->field($model, 'bo_flight_id')->input('number', ['min' => 0])->label('Sale ID') ?>
                         </div>
