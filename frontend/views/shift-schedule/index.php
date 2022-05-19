@@ -3,6 +3,7 @@
 use common\components\grid\DateTimeColumn;
 use common\models\Employee;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
+use modules\shiftSchedule\src\entities\shiftScheduleRequest\search\ShiftScheduleRequestSearch;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\shiftScheduleTypeLabel\ShiftScheduleTypeLabel;
 use modules\shiftSchedule\src\entities\userShiftAssign\UserShiftAssign;
@@ -10,6 +11,7 @@ use modules\shiftSchedule\src\entities\userShiftSchedule\search\SearchUserShiftS
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use src\helpers\setting\SettingHelper;
 use yii\bootstrap4\Tabs;
+use yii\data\ActiveDataProvider;
 use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
@@ -29,6 +31,11 @@ use yii\widgets\Pjax;
 /* @var $searchModel SearchUserShiftSchedule */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $assignedShifts UserShiftAssign[] */
+
+/**
+ * @var ShiftScheduleRequestSearch $searchModelPendingRequests
+ * @var ActiveDataProvider $dataProviderPendingRequests
+ */
 
 $this->title = 'My Shift Schedule' . ' (' . $user->username . ')';
 $this->params['breadcrumbs'][] = $this->title;
@@ -99,6 +106,14 @@ $subtypeTotalData = [];
                     </div>
                 </div>
             </div>
+
+            <?php if (!empty($dataProviderPendingRequests->models ?? [])) {
+                echo $this->render('partial/_pending_requests', [
+                    'dataProviderPendingRequests' => $dataProviderPendingRequests ?? null,
+                    'searchModelPendingRequests' => $searchModelPendingRequests ?? null,
+                ]);
+            } ?>
+
         </div>
         <div class="col-md-6">
 
@@ -669,6 +684,11 @@ $js = <<<JS
         $.pjax.reload({container: '#pjax-user-timeline', push: false, replace: false, timeout: 5000, data: {startDate: startDate, endDate: endDate}});
     }
     
+    function updateTimeLinePendingList() 
+    {
+        $.pjax.reload({container: '#pjax-schedule-pending-request', push: false, replace: false, timeout: 5000});
+    }
+    
     $('body').off('click', '.btn-open-timeline').on('click', '.btn-open-timeline', function (e) {
         e.preventDefault();
         let id = $(this).data('tl_id');
@@ -678,7 +698,16 @@ $js = <<<JS
     $(document).on('ScheduleRequest:response', function (e, params) {
         if (params.requestStatus) {
             calendar.refetchEvents();
+            updateTimeLinePendingList();
+            $('#modal-md').modal('hide');
+        }
+    });
+    
+    $(document).on('RequestDecision:response', function (e, params) {
+        if (params.requestStatus) {
+            calendar.refetchEvents();
             updateTimeLineList();
+            updateTimeLinePendingList();
             $('#modal-md').modal('hide');
         }
     });

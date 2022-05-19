@@ -10,6 +10,7 @@ use common\models\UserGroupAssign;
 use Exception;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\entities\shiftScheduleRule\ShiftScheduleRule;
+use modules\shiftSchedule\src\entities\shiftScheduleRequest\search\ShiftScheduleRequestSearch;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\shiftScheduleTypeLabel\ShiftScheduleTypeLabel;
 use modules\shiftSchedule\src\entities\userShiftAssign\UserShiftAssign;
@@ -21,6 +22,7 @@ use modules\shiftSchedule\src\forms\ShiftScheduleCreateForm;
 use modules\shiftSchedule\src\forms\SingleEventCreateForm;
 use modules\shiftSchedule\src\helpers\UserShiftScheduleHelper;
 use modules\shiftSchedule\src\forms\ScheduleRequestForm;
+use modules\shiftSchedule\src\services\ShiftScheduleRequestService;
 use modules\shiftSchedule\src\services\UserShiftScheduleService;
 use src\auth\Auth;
 use src\helpers\app\AppHelper;
@@ -64,7 +66,7 @@ class ShiftScheduleController extends FController
                     [
                         'actions' => ['index', 'my-data-ajax', 'generate-example', 'remove-user-data', 'get-event',
                             'generate-user-schedule', 'legend-ajax', 'calendar', 'calendar-events-ajax', 'add-event', 'update-single-event',
-                            'schedule-request-ajax'],
+                            'schedule-request-ajax', 'schedule-pending-requests'],
                         'allow' => \Yii::$app->abac->can(
                             null,
                             ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE,
@@ -201,22 +203,25 @@ class ShiftScheduleController extends FController
 //        VarDumper::dump($ids, 10, true);
         // exit;
 
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-            'monthList' => $monthList,
+        return $this->render('index', array_merge(
+            [
+                'searchModel' => $searchModel,
+                'dataProvider' => $dataProvider,
+                'monthList' => $monthList,
 
-            'scheduleTypeList' => $scheduleTypeList,
-            'scheduleTypeLabelList' => $scheduleTypeLabelList,
+                'scheduleTypeList' => $scheduleTypeList,
+                'scheduleTypeLabelList' => $scheduleTypeLabelList,
 
-            'scheduleSumData' => $scheduleSumData,
-            'scheduleLabelSumData' => $scheduleLabelSumData,
+                'scheduleSumData' => $scheduleSumData,
+                'scheduleLabelSumData' => $scheduleLabelSumData,
 
-            'userTimeZone' => $userTimeZone,
-            'user' => $user,
-            'assignedShifts' => $assignedShifts,
-            'subtypeList' => $subtypeList
-        ]);
+                'userTimeZone' => $userTimeZone,
+                'user' => $user,
+                'assignedShifts' => $assignedShifts,
+                'subtypeList' => $subtypeList,
+            ],
+            $this->getSchedulePendingRequestsParams(),
+        ));
     }
 
     /**
@@ -726,5 +731,34 @@ class ShiftScheduleController extends FController
     private static function formatText(string $str, string $term): string
     {
         return preg_replace('~' . $term . '~i', '<b style="color: #e15554"><u>$0</u></b>', $str);
+    }
+
+    private function getSchedulePendingRequestsParams(): array
+    {
+        $searchModel = new ShiftScheduleRequestSearch();
+        $queryParams = array_merge_recursive(
+            Yii::$app->request->queryParams,
+            [
+                $searchModel->formName() => [
+                    'ssr_status_id' => $searchModel::STATUS_PENDING,
+                ],
+            ]
+        );
+        $dataProvider = $searchModel->searchByUsers(
+            $queryParams,
+            ShiftScheduleRequestService::getUserList(Auth::user()),
+            date('Y-m-d', strtotime('now')),
+            date('Y-m-d', strtotime('+1 year'))
+        );
+
+        return [
+            'searchModelPendingRequests' => $searchModel,
+            'dataProviderPendingRequests' => $dataProvider,
+        ];
+    }
+
+    public function actionSchedulePendingRequests(): string
+    {
+        return $this->renderAjax('partial/_pending_requests', $this->getSchedulePendingRequestsParams());
     }
 }
