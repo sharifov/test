@@ -18,7 +18,10 @@ class FeedbackRequestedForm extends FeedbackFormBase
      */
     public function syncWithDb(ClientChat $clientChat): bool
     {
-        $requestedByEmployee = Employee::find()->where(['username' => $this->requestedBy['username']])->one();
+        $requestedByUsername = isset($this->requestedBy['username']) ? $this->requestedBy['username'] : null;
+        $requestedByEmployee = !is_null($requestedByUsername)
+            ? Employee::find()->where(['username' => $this->requestedBy['username']])->one()
+            : null;
         $requestedForEmployee = Employee::find()->where(['username' => $this->requestedFor['username']])->one();
 
         $model = new ClientChatSurvey();
