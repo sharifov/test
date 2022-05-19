@@ -9,9 +9,9 @@
  */
 
 use common\models\Lead;
-use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\shiftSchedule\src\forms\ScheduleRequestForm;
+use modules\shiftSchedule\src\helpers\UserShiftScheduleHelper;
 use yii\helpers\Html;
 use yii\web\View;
 use yii\widgets\ActiveForm;
@@ -101,7 +101,7 @@ $tsEndUtc = strtotime($event->uss_end_utc_dt);
         </div>
         <?php if ($canEditPreviousDate) : ?>
             <hr>
-            <input type="hidden" value="<?= (bool)$success ?>" id="request-status">
+            <input type="hidden" value="<?= $success ?>" id="request-status">
             <?php $form = ActiveForm::begin([
                 'id' => 'decision-form',
                 'options' => [
@@ -121,7 +121,12 @@ $tsEndUtc = strtotime($event->uss_end_utc_dt);
             <div class="row">
                 <div class="col-md-12">
                     <?= $form->field($model, 'status')
-                        ->dropDownList(ShiftScheduleRequest::getList()) ?>
+                        ->dropDownList(UserShiftScheduleHelper::getAvailableRequestStatusList(), [
+                            'prompt' => [
+                                'text' => '---',
+                                'options' => ['disabled' => true, 'selected' => true],
+                            ],
+                        ]) ?>
                 </div>
             </div>
             <div class="row">
@@ -132,12 +137,17 @@ $tsEndUtc = strtotime($event->uss_end_utc_dt);
                         ]) ?>
                 </div>
             </div>
-            <?= Html::submitButton('Change Status', [
-                'class' => [
-                    'btn',
-                    'btn-success',
-                ],
-            ]) ?>
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <?= Html::submitButton('Send your decision', [
+                        'class' => [
+                            'btn',
+                            'btn-success',
+                        ],
+                    ]) ?>
+                </div>
+            </div>
+
             <?php ActiveForm::end(); ?>
         <?php endif; ?>
     </div>
