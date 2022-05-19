@@ -36,27 +36,29 @@ $bundle = UserShiftCalendarAsset::register($this);
             ) ?>
         <?php endif; ?>
 
-        <?= Html::a('<i class="fas fa-th-large"></i> Multiple Manage Mode', null, ['id' => 'multiple-manage-mode-btn', 'class' => 'btn btn-warning btn-sm']) ?>
-        <?= Html::a('<i class="fas fa-times-circle"></i> Exit Mode', null, [ 'class' => 'btn btn-danger btn-sm', 'id' => 'btn-multiple-exit-mode', 'style' => 'display: none;']) ?>
-        <div class="btn-group" id="check_uncheck_btns" style="display: none; margin-bottom: 4px; height: 28px; margin-left: 7px;">
-            <?php echo Html::button('<span class="fa fa-square-o"></span> Select All', ['class' => 'btn btn-sm btn-default', 'id' => 'btn-check-all']); ?>
+        <?php if (Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_MULTIPLE_DELETE_EVENTS)) : ?>
+            <?= Html::a('<i class="fas fa-th-large"></i> Multiple Manage Mode', null, ['id' => 'multiple-manage-mode-btn', 'class' => 'btn btn-warning btn-sm']) ?>
+            <?= Html::a('<i class="fas fa-times-circle"></i> Exit Mode', null, [ 'class' => 'btn btn-danger btn-sm', 'id' => 'btn-multiple-exit-mode', 'style' => 'display: none;']) ?>
+            <div class="btn-group" id="check_uncheck_btns" style="display: none; margin-bottom: 4px; height: 28px; margin-left: 7px;">
+                <?php echo Html::button('<span class="fa fa-square-o"></span> Select All', ['class' => 'btn btn-sm btn-default', 'id' => 'btn-check-all']); ?>
 
-            <button type="button" class="btn btn-default dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              <span class="sr-only">Toggle Dropdown</span>
-            </button>
-            <div class="dropdown-menu">
-              <p>
-                  <?= Html::a('<i class="fas fa-trash-alt text-danger"></i> Delete Events', null, [
-                      'class' => 'dropdown-item btn-multiple-delete-events',
-                          'data' => [
-                              'url' => Url::to(['shift-schedule/multiple-delete']),
-                              'title' => 'Delete Events',
-                          ],
-                      ])
-                    ?>
-              </p>
+                <button type="button" class="btn btn-default dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <span class="sr-only">Toggle Dropdown</span>
+                </button>
+                <div class="dropdown-menu">
+                  <p>
+                      <?= Html::a('<i class="fas fa-trash-alt text-danger"></i> Delete Events', null, [
+                          'class' => 'dropdown-item btn-multiple-delete-events',
+                              'data' => [
+                                  'url' => Url::to(['shift-schedule/multiple-delete']),
+                                  'title' => 'Delete Events',
+                              ],
+                          ])
+                        ?>
+                  </p>
+                </div>
             </div>
-        </div>
+        <?php endif; ?>
 
     <div class="row">
         <div class="col-md-12" id="calendar-wrapper">
