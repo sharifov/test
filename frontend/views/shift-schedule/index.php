@@ -79,6 +79,11 @@ $subtypeTotalData = [];
             ['class' => 'btn btn-success', 'id' => 'btn-schedule-request']
         ) ?>
         <?= Html::a(
+            '<i class="fa fa-th-list"></i> Schedule Request History',
+            ['schedule-request-history-ajax'],
+            ['class' => 'btn btn-warning', 'id' => 'btn-schedule-request-history']
+        ) ?>
+        <?= Html::a(
             '<i class="fa fa-info-circle"></i> Legend',
             ['legend-ajax'],
             ['class' => 'btn btn-info', 'id' => 'btn-legend']
@@ -638,6 +643,14 @@ $js = <<<JS
         $('#modal-md-label').html('<i class="fa fa-plus-circle"></i> Schedule Request');
         getRequest(modal, url);
         selectedRange = null;
+    });
+    
+    $(document).on('click', '#btn-schedule-request-history', function(e) {
+        e.preventDefault();
+        let modal = $('#modal-md');
+        let url = $(this).attr('href');
+        $('#modal-md-label').html('<i class="fa fa-th-list"></i> Schedule Request History');
+        getRequest(modal, url);
     });
     
     function getRequest(modal, url) {

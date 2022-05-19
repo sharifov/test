@@ -66,7 +66,7 @@ class ShiftScheduleController extends FController
                     [
                         'actions' => ['index', 'my-data-ajax', 'generate-example', 'remove-user-data', 'get-event',
                             'generate-user-schedule', 'legend-ajax', 'calendar', 'calendar-events-ajax', 'add-event', 'update-single-event',
-                            'schedule-request-ajax', 'schedule-pending-requests'],
+                            'schedule-request-ajax', 'schedule-pending-requests', 'schedule-request-history-ajax'],
                         'allow' => \Yii::$app->abac->can(
                             null,
                             ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE,
@@ -760,5 +760,21 @@ class ShiftScheduleController extends FController
     public function actionSchedulePendingRequests(): string
     {
         return $this->renderAjax('partial/_pending_requests', $this->getSchedulePendingRequestsParams());
+    }
+
+    /**
+     * Show User Request History
+     * @return string|Response
+     * @throws Exception
+     */
+    public function actionScheduleRequestHistoryAjax(): string
+    {
+        $searchModel = new ShiftScheduleRequestSearch();
+        $dataProvider = $searchModel->searchByUsers(Yii::$app->request->queryParams, [Auth::id()]);
+
+        return $this->renderAjax('partial/_request-history', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
     }
 }
