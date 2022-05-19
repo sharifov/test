@@ -137,7 +137,7 @@ use frontend\extensions\DatePicker;
                             <?php echo $form->field($model, 'userGroupId')->widget(Select2::class, [
                                 'data' => \common\models\UserGroup::getList(),
                                 'size' => Select2::SMALL,
-                                'options' => ['placeholder' => 'Select user', 'multiple' => false],
+                                'options' => ['placeholder' => 'Select User Group', 'multiple' => false],
                                 'pluginOptions' => ['allowClear' => true],
                             ]); ?>
                         </div>
