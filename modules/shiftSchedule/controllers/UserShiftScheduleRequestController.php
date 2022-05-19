@@ -198,11 +198,14 @@ class UserShiftScheduleRequestController extends FController
     public function actionGetHistory(int $id): string
     {
         $searchModel = new ShiftScheduleRequestSearch();
-        $dataProvider = $searchModel->search([
-            $searchModel->formName() => [
-                'ssr_uss_id' => $id,
-            ],
-        ]);
+        $dataProvider = $searchModel->search(ArrayHelper::merge(
+            Yii::$app->request->queryParams,
+            [
+                $searchModel->formName() => [
+                    'ssr_uss_id' => $id,
+                ],
+            ]
+        ));
 
         return $this->renderAjax('request-history', [
             'searchModel' => $searchModel,
