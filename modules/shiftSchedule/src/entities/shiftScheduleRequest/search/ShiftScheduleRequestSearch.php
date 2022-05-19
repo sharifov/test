@@ -52,6 +52,9 @@ class ShiftScheduleRequestSearch extends ShiftScheduleRequest
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => [
+                'defaultOrder' => ['ssr_created_dt' => SORT_DESC],
+            ],
         ]);
 
         $this->load($params);
