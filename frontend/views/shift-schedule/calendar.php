@@ -331,53 +331,64 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
         //     });
         // },
         onEventUpdated: function (args) {
-        
-            let currentUserId;
-            let oldUserId;
-            
             let event = args.event
             let oldEvent = args.oldEvent;
-        
-            if (event.resource.indexOf('us-') === 0) {
-                currentUserId = event.resource.substring(3);
-            } else {
-                inst.removeEvent(event);
-                window.inst.addEvent(oldEvent);
-                return false;
-            }
-            if (oldEvent.resource.indexOf('us-') === 0) {
-                oldUserId = oldEvent.resource.substring(3);
-            } else {
-                inst.removeEvent(event);
-                window.inst.addEvent(oldEvent);
-                return false;
-            }
-            
-            let eventStartDate = new Date(event.start);
-            let [year, month, day, hour, minute] = [eventStartDate.getFullYear(), eventStartDate.getMonth()+1, eventStartDate.getDate(), eventStartDate.getHours(), eventStartDate.getMinutes(), eventStartDate];
-            let startDate = year + '-' + month + '-' + day + ' ' + hour + ':' + minute;
-            
-            let eventEndDate = new Date(event.end);
-            let [yearEnd, monthEnd, dayEnd, hourEnd, minuteEnd] = [eventEndDate.getFullYear(), eventEndDate.getMonth()+1, eventEndDate.getDate(), eventEndDate.getHours(), eventEndDate.getMinutes(), eventEndDate];
-            let endDate = yearEnd + '-' + monthEnd + '-' + dayEnd + ' ' + hourEnd + ':' + minuteEnd;
-            
-            let data = {
-                eventId: args.event.id,
-                newUserId: currentUserId,
-                oldUserId: oldUserId,
-                startDate: startDate,
-                endDate: endDate
-            };
-            
-            $.post('$formUpdateSingleEvent', data, function (data) {
-                if (data.error) {
-                    createNotify('Error', data.message, 'error');
-                } else {
-                    mobiscroll.toast({
-                        message: 'Event updated successfully'
-                    });
+            mobiscroll.confirm({
+                title: 'Are you sure you want to update event?',
+                okText: 'Yes',
+                cancelText: 'No',
+                callback: function (res) {
+                    if (res) {
+                        let currentUserId;
+                        let oldUserId;
+                        
+                        if (event.resource.indexOf('us-') === 0) {
+                            currentUserId = event.resource.substring(3);
+                        } else {
+                            inst.removeEvent(event);
+                            window.inst.addEvent(oldEvent);
+                            return false;
+                        }
+                        if (oldEvent.resource.indexOf('us-') === 0) {
+                            oldUserId = oldEvent.resource.substring(3);
+                        } else {
+                            inst.removeEvent(event);
+                            window.inst.addEvent(oldEvent);
+                            return false;
+                        }
+                        
+                        let eventStartDate = new Date(event.start);
+                        let [year, month, day, hour, minute] = [eventStartDate.getFullYear(), eventStartDate.getMonth()+1, eventStartDate.getDate(), eventStartDate.getHours(), eventStartDate.getMinutes(), eventStartDate];
+                        let startDate = year + '-' + month + '-' + day + ' ' + hour + ':' + minute;
+                        
+                        let eventEndDate = new Date(event.end);
+                        let [yearEnd, monthEnd, dayEnd, hourEnd, minuteEnd] = [eventEndDate.getFullYear(), eventEndDate.getMonth()+1, eventEndDate.getDate(), eventEndDate.getHours(), eventEndDate.getMinutes(), eventEndDate];
+                        let endDate = yearEnd + '-' + monthEnd + '-' + dayEnd + ' ' + hourEnd + ':' + minuteEnd;
+                        
+                        let data = {
+                            eventId: args.event.id,
+                            newUserId: currentUserId,
+                            oldUserId: oldUserId,
+                            startDate: startDate,
+                            endDate: endDate
+                        };
+                        
+                        $.post('$formUpdateSingleEvent', data, function (data) {
+                            if (data.error) {
+                                createNotify('Error', data.message, 'error');
+                            } else {
+                                mobiscroll.toast({
+                                    message: 'Event updated successfully'
+                                });
+                            }
+                        });
+                    } else {
+                        inst.removeEvent(event);
+                        inst.addEvent(oldEvent);
+                    }
                 }
             });
+        
         },
         // onEventCreateFailed: function (event) {
         //     mobiscroll.toast({
@@ -706,6 +717,10 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
     });
     checkAllBtn.on('click', function (e) {
         e.preventDefault();
+        if (!inst._events.length) {
+            createNotify('Warning', 'There are no events. Update the filter or add another event.', 'warning');
+            return false;
+        }
         let btn = $(this);
         
         if (selectedEventsIds.length) {
@@ -738,10 +753,8 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
                 if (data.error) {
                     createNotify('Error', data.message, 'error');
                 } else {
-                    inst._events.forEach(function (e, i) {
-                        if (selectedEventsIds.indexOf(e.id) !== -1) {
-                            inst.removeEvent(e);
-                        }
+                    selectedEventsIds.forEach(function (id, i) {
+                        inst.removeEvent(id);
                     });
                     createNotify('Success', 'Events successfully deleted', 'success');
                     selectedEventsIds = [];
