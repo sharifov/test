@@ -255,7 +255,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                 $flightQuote = $flightQuoteManageService->createReProtection(
                     $flight,
                     $flightRequest->getFlightQuoteData(),
-                    null,
+                    $originProductQuote->pq_order_id,
                     null,
                     $case,
                     null,

@@ -2,6 +2,7 @@
 
 namespace modules\flight\src\useCases\voluntaryRefund\manualCreate;
 
+use common\components\validators\NormalizeDateValidator;
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\productQuote\ProductQuote;
 use src\entities\cases\Cases;
@@ -34,11 +35,12 @@ class VoluntaryRefundCreateForm extends Model
     private ?VoluntaryRefundForm $refundForm = null;
 
     public array $originData = [];
+    public ?string $expirationDate = null;
 
     public function rules(): array
     {
         return [
-            [['bookingId'], 'required'],
+            [['bookingId', 'expirationDate'], 'required'],
             [['bookingId'], 'string', 'max' => 50],
 
 //            [['allow', 'airlineAllow', 'automatic'], 'filter', 'filter' => 'floatval', 'skipOnEmpty' => true],
@@ -50,6 +52,8 @@ class VoluntaryRefundCreateForm extends Model
 
             [['originProductQuoteId', 'orderId', 'caseId'], 'integer'],
             [['caseId'], 'exist', 'targetClass' => Cases::class, 'targetAttribute' => ['caseId' => 'cs_id'], 'skipOnError' => true],
+            ['expirationDate', NormalizeDateValidator::class],
+            ['expirationDate', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
         ];
     }
 
@@ -84,5 +88,14 @@ class VoluntaryRefundCreateForm extends Model
     {
         $this->refundDataReadOnly = false;
         $this->ticketDataReadOnly = false;
+    }
+
+    /**
+     * @param string $date
+     * @return void
+     */
+    public function setExpirationDate(string $date): void
+    {
+        $this->expirationDate = $date;
     }
 }

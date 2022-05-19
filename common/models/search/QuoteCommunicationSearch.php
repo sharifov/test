@@ -19,7 +19,8 @@ class QuoteCommunicationSearch extends QuoteCommunication
     {
         return [
             [['qc_communication_id', 'qc_communication_type', 'qc_quote_id', 'qc_created_by'], 'integer'],
-            [['qc_created_dt'], 'safe'],
+            [['qc_uid', 'qc_ext_data'], 'string'],
+            [['qc_ext_data', 'qc_created_dt'], 'safe'],
         ];
     }
 
@@ -63,8 +64,10 @@ class QuoteCommunicationSearch extends QuoteCommunication
         // grid filtering conditions
         $query->andFilterWhere([
             'qc_id' => $this->qc_id,
+            'qc_uid' => $this->qc_uid,
             'qc_communication_type' => $this->qc_communication_type,
             'qc_communication_id' => $this->qc_communication_id,
+            'qc_ext_data' => $this->qc_ext_data,
             'qc_quote_id' => $this->qc_quote_id,
             'qc_created_by' => $this->qc_created_by
         ]);

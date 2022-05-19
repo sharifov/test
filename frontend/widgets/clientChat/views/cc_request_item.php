@@ -14,8 +14,7 @@ use yii\helpers\Html;
 
 $accessUrl = \yii\helpers\Url::to('/client-chat/access-manage');
 $checkAccessActionUrl = \yii\helpers\Url::to('/client-chat/check-access-action');
-
-$date = $access['cch_created_dt'];
+$date = $access['cch_updated_dt'];
 ?>
 <div class="_cc-box-item-wrapper" id="ccr_<?= $access['ccua_cch_id'] ?>_<?= $access['ccua_user_id'] ?>" data-is-transfer="<?= (int)$access['is_transfer'] ?>">
     <div class="_cc-box-item">

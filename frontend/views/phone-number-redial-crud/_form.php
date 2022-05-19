@@ -37,6 +37,7 @@ use yii\widgets\ActiveForm;
 
             <div class="form-group">
                 <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+                <?= Html::a('cancel', $model->isNewRecord ? Yii::$app->getUser()->getReturnUrl('index') : ['view', 'pnr_id' => $model->pnr_id], ['class' => 'btn btn-secondary']) ?>
             </div>
 
           <?php ActiveForm::end(); ?>

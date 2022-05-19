@@ -236,8 +236,8 @@ class SideBarMenu extends \yii\bootstrap\Widget
         }
 
         /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_ACCESS, Access menu My Shift Schedule */
-        $menuItems[] = [
-            'label' => 'My Shift Schedule <sup style="color: red">NEW</sup>',
+        $shiftMenuItems[] = [
+            'label' => 'My Shift',
             'url' => ['/shift-schedule/index'],
             'icon' => 'calendar',
             'abac'  => [
@@ -246,6 +246,31 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 'action' => ShiftAbacObject::ACTION_ACCESS,
             ],
         ];
+
+
+        $shiftMenuItems[] = [
+            'label' => 'Schedule Event Requests',
+            'url' => ['/shift/user-shift-schedule-request/index'],
+            'icon' => 'calendar-o',
+            'title' => 'User Shift Schedule Event Request',
+        ];
+
+        $shiftMenuItems[] = [
+            'label' => 'User Shift Calendar',
+            'url' => ['/shift-schedule/calendar'],
+            'icon' => 'calendar text-warning',
+            'title' => 'User Shift Schedule Calendar'
+        ];
+
+
+        $menuItems[] = [
+            'label' => 'Shift Schedule <sup style="color: red">NEW</sup>',
+            'url' => 'javascript:',
+            'icon' => 'calendar',
+            'items' => $shiftMenuItems
+        ];
+
+
 
         if (!$isUM) {
             // $cntNotifications = \common\models\Notifications::findNewCount(Yii::$app->user->id);
@@ -659,11 +684,6 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     'icon' => 'calendar',
                     'items' => [
 
-                        ['label' => 'User Shift Calendar', 'url' => ['/shift-schedule/calendar'],
-                            'icon' => 'calendar',
-                            'title' => 'User Shift Schedule Calendar'
-                        ],
-
                         ['label' => 'Shift List', 'url' => ['/shift-crud/index'], 'title' => 'Shift CRUD'],
 
                         ['label' => 'Schedule Rule', 'url' => ['/shift-schedule-rule-crud/index'],
@@ -673,6 +693,11 @@ class SideBarMenu extends \yii\bootstrap\Widget
                             'title' => 'User Shift Schedule Events'],
 
 
+                        [
+                            'label' => 'Shift Requests History',
+                            'url' => ['/shift/shift-schedule-request/index'],
+                            'title' => 'User Shift Schedule Request History'
+                        ],
 
                         /** @abac ShiftAbacObject::ACT_USER_SHIFT_ASSIGN, ShiftAbacObject::ACTION_ACCESS, Access menu UserShiftAssign */
                         [
@@ -1093,9 +1118,9 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 [
                     'label' => Yii::t('requestControl', 'Request Control'), 'url' => 'javascript:', 'icon' => 'folder',
                     'items' => [
-                        ['label' => 'User Site Activity', 'url' => ['/requestControl/user-site-activity'], 'icon' => 'bars'],
-                        ['label' => 'User Activity Report', 'url' => ['/requestControl/user-site-activity/report'], 'icon' => 'bar-chart'],
-                        ['label' => 'Request Control Manage', 'url' => ['/requestControl/manage'], 'icon' => 'bars']
+                        ['label' => 'User Site Activity', 'url' => ['/request-control/user-site-activity/index'], 'icon' => 'bars'],
+                        ['label' => 'User Activity Report', 'url' => ['/request-control/user-site-activity/report'], 'icon' => 'bar-chart'],
+                        ['label' => 'Request Control Manage', 'url' => ['/request-control/manage/index'], 'icon' => 'bars']
                     ]
                 ],
                 ['label' => 'Global Model Logs', 'url' => ['/global-log/index'], 'icon' => 'list'],
