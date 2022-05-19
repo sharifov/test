@@ -45,8 +45,8 @@ class ShiftScheduleRequest extends ActiveRecord
     public const STATUS_LIST = [
         self::STATUS_PENDING => 'Pending',
         self::STATUS_APPROVE => 'Approve',
-        self::STATUS_DECLINED => 'Declined',
-        self::STATUS_REMOVED => 'Removed',
+        self::STATUS_DECLINED => 'Decline',
+        self::STATUS_REMOVED => 'Remove',
     ];
 
     public const STATUS_LIST_COLOR = [
