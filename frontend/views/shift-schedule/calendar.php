@@ -31,21 +31,21 @@ $bundle = UserShiftCalendarAsset::register($this);
             ?>
             <?= Html::a(
                 '<i class="fa fa-plus-circle"></i> Add Schedule Event',
-                '#',
+                null,
                 ['class' => 'btn btn-success btn-sm', 'id' => 'btn-shift-event-add', 'title' => 'Add Schedule Event']
             ) ?>
         <?php endif; ?>
 
         <?= Html::a('<i class="fas fa-th-large"></i> Multiple Manage Mode', '#', ['id' => 'multiple-manage-mode-btn', 'class' => 'btn btn-warning btn-sm']) ?>
         <div class="btn-group" id="check_uncheck_btns" style="display: none;">
-            <?php echo Html::button('<span class="fa fa-square-o"></span> Check All', ['class' => 'btn btn-sm btn-default', 'id' => 'btn-check-all']); ?>
+            <?php echo Html::button('<span class="fa fa-square-o"></span> Select All', ['class' => 'btn btn-sm btn-default', 'id' => 'btn-check-all']); ?>
 
             <button type="button" class="btn btn-default dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
               <span class="sr-only">Toggle Dropdown</span>
             </button>
             <div class="dropdown-menu">
               <p>
-                  <?= Html::a('<i class="fa fa-times-circle text-danger"></i> Multiple Close Chats', null, [
+                  <?= Html::a('<i class="fas fa-trash-alt text-danger"></i> Delete Events', null, [
                       'class' => 'dropdown-item btn-multiple-delete-events',
                           'data' => [
                               'url' => Url::to(['shift-schedule/multiple-delete']),
@@ -55,7 +55,7 @@ $bundle = UserShiftCalendarAsset::register($this);
                     ?>
               </p>
               <p>
-                  <?= Html::a('<i class="fas fa-sign-out"></i> Exit Mode', null, [
+                  <?= Html::a('<i class="fas fa-times-circle"></i> Exit Mode', null, [
                           'class' => 'dropdown-item',
                           'id' => 'btn-multiple-exit-mode'
                       ])
@@ -133,6 +133,9 @@ var \$view = $('#tooltip-event-view');
 var dblClickResource;
 
 var multipleMangeMode = false;
+var selectedEventsIds = [];
+var checkAllBtn = $('#btn-check-all');
+
 
 mobiscroll.setOptions({
     theme: 'ios',
@@ -260,34 +263,54 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
         
         onEventClick: function (args, inst) {
             var event = args.event;
-            // var resource = events.find(function (e) {return e.resource === event.resource});
-            let startDate = new Date(event.start);
-            let endDate = new Date(event.end);
-            var time = formatDate('YYYY-MM-DD H:mm', startDate) + ' - ' + formatDate('YYYY-MM-DD H:mm', endDate);
-            var button = {};
-
-            currentEvent = event;
-
-            if (event.confirmed) {
-                button.text = 'Cancel appointment';
-                button.type = 'warning';
+            if (!multipleMangeMode) {
+                // var resource = events.find(function (e) {return e.resource === event.resource});
+                let startDate = new Date(event.start);
+                let endDate = new Date(event.end);
+                var time = formatDate('YYYY-MM-DD H:mm', startDate) + ' - ' + formatDate('YYYY-MM-DD H:mm', endDate);
+                var button = {};
+    
+                currentEvent = event;
+    
+                if (event.confirmed) {
+                    button.text = 'Cancel appointment';
+                    button.type = 'warning';
+                } else {
+                    button.text = 'Confirm appointment';
+                    button.type = 'success';
+                }
+                
+                \$header.css('background-color', event.borderColor || event.color);
+                \$data.text(event.title);
+                \$time.text(time);
+                \$title.text(event.description);
+    
+                \$status.text(event.status);
+    
+                clearTimeout(timer);
+                timer = null;
+    
+                tooltip.setOptions({ anchor: args.domEvent.target });
+                tooltip.open();
             } else {
-                button.text = 'Confirm appointment';
-                button.type = 'success';
+                let scheduleEvent = $(args.domEvent.target).closest('.mbsc-schedule-event');
+                let selectedEvent = scheduleEvent.find('.selected-event');
+                let index = selectedEventsIds.indexOf(event.id);
+                if (index === -1) {
+                    scheduleEvent.append(selectedEventTemplate());
+                    selectedEventsIds.push(event.id);
+                    checkAllBtn.removeClass('btn-default').addClass(['btn-warning', 'checked']).html('<span class="fa fa-check-square-o"></span> Uncheck All (' + selectedEventsIds.length + ')');
+                } else {
+                    selectedEventsIds.splice(index, 1);
+                    selectedEvent.remove();
+                    if (selectedEventsIds.length) {
+                        checkAllBtn.removeClass('btn-default').addClass(['btn-warning', 'checked']).html('<span class="fa fa-check-square-o"></span> Uncheck All (' + selectedEventsIds.length + ')');
+                    } else {
+                        checkAllBtn.removeClass(['btn-warning', 'checked']).addClass('btn-default').html('<span class="fa fa-square-o"></span> Select All');
+                    }
+                }
+                console.log(selectedEventsIds);
             }
-            
-            \$header.css('background-color', event.borderColor || event.color);
-            \$data.text(event.title);
-            \$time.text(time);
-            \$title.text(event.description);
-
-            \$status.text(event.status);
-
-            clearTimeout(timer);
-            timer = null;
-
-            tooltip.setOptions({ anchor: args.domEvent.target });
-            tooltip.open();
         },
         // onEventClick: function (args, inst) {
             // oldMeal = $.extend({}, args.event);
@@ -627,13 +650,26 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
         </div>`;
     }
     
+    function selectedEventTemplate()
+    {
+        // return `<div class="selected-event">
+        //     <span>
+        //         <i class="fa fa-flag"></i>
+        //     </span>
+        // </div>`;
+        return `<div class="selected-event">
+               <span class="circle"></span>
+        </div>`;
+    }
+    
     var multipleManageBtn = $('#multiple-manage-mode-btn');
-    var checkAllBtn = $('#check_uncheck_btns');
+    var checkAllBtnWrapper = $('#check_uncheck_btns');
     var exitModeBtn = $('#btn-multiple-exit-mode');
     
-    multipleManageBtn.on('click', multipleManageBtn, function () {
+    multipleManageBtn.on('click', function (e) {
+        e.preventDefault();
         $(this).hide();
-        checkAllBtn.show();
+        checkAllBtnWrapper.show();
         multipleMangeMode = true;
         inst.setOptions({
             clickToCreate: false,
@@ -642,8 +678,9 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
             dragToResize: false,
         })
     });
-    exitModeBtn.on('click', exitModeBtn, function () {
-        checkAllBtn.hide();
+    exitModeBtn.on('click', function (e) {
+        e.preventDefault();
+        checkAllBtnWrapper.hide();
         multipleManageBtn.show();
         multipleMangeMode = false;
         inst.setOptions({
@@ -651,7 +688,26 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
             dragToCreate: false,
             dragToMove: true,
             dragToResize: true,
-        })
+        });
+        $('.selected-event').remove();
+        selectedEventsIds = [];
+        checkAllBtn.removeClass(['btn-warning', 'checked']).addClass('btn-default').html('<span class="fa fa-square-o"></span> Select All');
+    });
+    checkAllBtn.on('click', function (e) {
+        e.preventDefault();
+        let btn = $(this);
+        
+        if (selectedEventsIds.length) {
+            $('.selected-event').remove();
+            selectedEventsIds = [];
+            btn.removeClass(['btn-warning', 'checked']).addClass('btn-default').html('<span class="fa fa-square-o"></span> Select All');
+        } else {
+            inst._events.forEach(function (e, i) {
+                selectedEventsIds.push(e.id);
+            });
+            $('.mbsc-schedule-event').append(selectedEventTemplate());
+            btn.removeClass('btn-default').addClass(['btn-warning', 'checked']).html('<span class="fa fa-check-square-o"></span> Uncheck All (' + selectedEventsIds.length + ')');
+        }
     });
 JS;
 
