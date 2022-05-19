@@ -179,7 +179,7 @@ class ScheduleRequestForm extends Model
             if ($scheduleRequest->save()) {
                 $subject = 'Request Status';
                 $body = 'Your ' . Html::a('request', Url::to(['shift-schedule/index'])) . ' status was change to “' .
-                    $scheduleRequest::getList()[$scheduleRequest->ssr_status_id] . '” ' . "<br>" .
+                    $scheduleRequest::getStatusList()[$scheduleRequest->ssr_status_id] . '” ' . "<br>" .
                     (!empty($scheduleRequest->ssr_description) ? "Description: “" . $scheduleRequest->ssr_description . '”' : '');
                 if ($ntf = Notifications::create($scheduleRequest->ssr_created_user_id, $subject, $body, Notifications::TYPE_INFO)) {
                     $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];

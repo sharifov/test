@@ -176,7 +176,7 @@ class ShiftScheduleRequest extends ActiveRecord
     /**
      * @return array
      */
-    public static function getList(): array
+    public static function getStatusList(): array
     {
         return self::STATUS_LIST;
     }
