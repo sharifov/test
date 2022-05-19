@@ -376,10 +376,15 @@ class ShiftScheduleController extends FController
     /**
      * @param int|null $userId
      * @return Response
-     * @throws Exception
+     * @throws NotAcceptableHttpException
      */
     public function actionGenerateExample(?int $userId = null): Response
     {
+        $abac = Yii::$app->abac;
+        /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_GENERATE_EXAMPLE_DATA, Access to generate-example shift-schedule/* */
+        if (!$abac->can(null, ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_GENERATE_EXAMPLE_DATA)) {
+            throw new NotAcceptableHttpException('Access denied');
+        }
         if ($userId) {
             $route = ['shift-schedule/user', 'id' => $userId];
         } else {
@@ -400,9 +405,15 @@ class ShiftScheduleController extends FController
     /**
      * @param int|null $userId
      * @return Response
+     * @throws NotAcceptableHttpException
      */
     public function actionRemoveUserData(?int $userId = null): Response
     {
+        $abac = Yii::$app->abac;
+        /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_REMOVE_ALL_USER_SCHEDULE, Access to remove-user-data shift-schedule/* */
+        if (!$abac->can(null, ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_REMOVE_ALL_USER_SCHEDULE)) {
+            throw new NotAcceptableHttpException('Access denied');
+        }
         if ($userId) {
             $route = ['shift-schedule/user', 'id' => $userId];
         } else {
@@ -419,10 +430,15 @@ class ShiftScheduleController extends FController
     /**
      * @param int|null $userId
      * @return Response
+     * @throws NotAcceptableHttpException
      */
     public function actionGenerateUserSchedule(?int $userId = null): Response
     {
-
+        $abac = Yii::$app->abac;
+        /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_GENERATE_USER_SCHEDULE, Access to generate-user-schedule shift-schedule/* */
+        if (!$abac->can(null, ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_GENERATE_USER_SCHEDULE)) {
+            throw new NotAcceptableHttpException('Access denied');
+        }
         if ($userId) {
             $route = ['shift-schedule/user', 'id' => $userId];
         } else {
