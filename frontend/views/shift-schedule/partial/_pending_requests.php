@@ -25,7 +25,7 @@ use yii\widgets\Pjax;
     'enableReplaceState' => false,
 ]); ?>
 
-<div class="x_panel">
+<div class="x_panel" style="display: <?= !empty($dataProviderPendingRequests->models ?? []) ? 'block' : 'none' ?>">
     <div class="x_title">
         <h2>
             <i class="fa fa-bars"></i> Pending Schedule Request List

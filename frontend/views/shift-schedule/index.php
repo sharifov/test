@@ -112,12 +112,10 @@ $subtypeTotalData = [];
                 </div>
             </div>
 
-            <?php if (!empty($dataProviderPendingRequests->models ?? [])) {
-                echo $this->render('partial/_pending_requests', [
-                    'dataProviderPendingRequests' => $dataProviderPendingRequests ?? null,
+            <?= $this->render('partial/_pending_requests', [
+                'dataProviderPendingRequests' => $dataProviderPendingRequests ?? null,
                     'searchModelPendingRequests' => $searchModelPendingRequests ?? null,
-                ]);
-            } ?>
+            ])?>
 
         </div>
         <div class="col-md-6">
