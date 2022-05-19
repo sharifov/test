@@ -157,7 +157,7 @@ use yii\web\View;
                         'options' => [
                             'style' => 'width: 10%',
                         ],
-                        'filter' => ShiftScheduleRequest::getList(),
+                        'filter' => ShiftScheduleRequest::getStatusList(),
                         'format' => 'raw',
                     ],
                     'ssr_description',
