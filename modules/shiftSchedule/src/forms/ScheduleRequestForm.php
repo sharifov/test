@@ -73,7 +73,6 @@ class ScheduleRequestForm extends Model
             [
                 'description',
                 'required',
-                'on' => self::SCENARIO_DECISION,
             ],
             [
                 'scheduleType',
