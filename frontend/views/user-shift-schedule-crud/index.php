@@ -415,5 +415,18 @@ $this->params['breadcrumbs'][] = $this->title;
         });
 
         refreshUserSelectedState();
+
+        $(document).on('reset', '#search-form', function () {
+            let $form = $(this);
+
+            $form.find('input').each(function () {
+                $(this).attr('value', '');
+            });
+
+            $form.find('[data-krajee-select2]').each(function () {
+                $(this).find('[selected]').attr('selected', false);
+                $(this).val('').trigger('change');
+            });
+        });
     });
 </script>

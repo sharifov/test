@@ -24,6 +24,7 @@ use yii\bootstrap4\Html;
         </div>
         <div class="x_content" style="display: <?=(Yii::$app->request->isPjax) ? 'block' : 'none'?>">
             <?php $form = ActiveForm::begin([
+                'id' => 'search-form',
                 'action' => ['index'],
                 'method' => 'get',
                 'options' => [
