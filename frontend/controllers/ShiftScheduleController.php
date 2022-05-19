@@ -64,14 +64,14 @@ class ShiftScheduleController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['ajax-multiple-delete'],
+                        'actions' => ['ajax-multiple-delete', 'add-event'],
                         'allow' => true,
                         'roles' => ['@']
                     ],
                     /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_ACCESS, Access to page shift-schedule/index */
                     [
                         'actions' => ['index', 'my-data-ajax', 'generate-example', 'remove-user-data', 'get-event',
-                            'generate-user-schedule', 'legend-ajax', 'calendar', 'calendar-events-ajax', 'add-event', 'update-single-event',
+                            'generate-user-schedule', 'legend-ajax', 'calendar', 'calendar-events-ajax', 'update-single-event',
                             'schedule-request-ajax', 'schedule-pending-requests', 'schedule-request-history-ajax'],
                         'allow' => \Yii::$app->abac->can(
                             null,
@@ -545,6 +545,11 @@ class ShiftScheduleController extends FController
 
     public function actionAddEvent()
     {
+        /** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_CREATE, Create user shift schedule event */
+        if (!Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_CREATE)) {
+            throw new ForbiddenHttpException('Access Denied');
+        }
+
         $form = new ShiftScheduleCreateForm();
 
         $usersGroupAssign = [];
