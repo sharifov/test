@@ -31,10 +31,19 @@ class UserShiftScheduleRequestController extends FController
                     /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_ACCESS, Access to page shift-schedule/index */
                     [
                         'actions' => ['index', 'schedule-pending-requests', 'schedule-all-requests',
-                            'my-data-ajax', 'get-event', 'get-history'],
+                            'my-data-ajax', 'get-history'],
                         'allow' => \Yii::$app->abac->can(
                             null,
                             ShiftAbacObject::ACT_USER_SHIFT_SCHEDULE,
+                            ShiftAbacObject::ACTION_ACCESS
+                        ),
+                        'roles' => ['@'],
+                    ],
+                    [
+                        'actions' => ['get-event'],
+                        'allow' => \Yii::$app->abac->can(
+                            null,
+                            ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE,
                             ShiftAbacObject::ACTION_ACCESS
                         ),
                         'roles' => ['@'],
