@@ -136,9 +136,24 @@ class ShiftAbacObject extends AbacBaseModel implements AbacInterface
         'operators' =>  [self::OP_CONTAINS]
     ];
 
+    public const ATTR_SHIFT_EVENT_OWNER = [
+        'optgroup' => 'Shift Event',
+        'id' => self::NS . 'isEventOwner',
+        'field' => 'isEventOwner',
+        'label' => 'Is Event Owner',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
     /** ATTRIBUTE LIST */
     public const OBJECT_ATTRIBUTE_LIST = [
-        self::OBJ_USER_SHIFT_EVENT => []
+        self::OBJ_USER_SHIFT_EVENT => [],
+        self::OBJ_USER_SHIFT_EVENT => [
+            self::ATTR_SHIFT_EVENT_OWNER
+        ]
     ];
 
     /**
