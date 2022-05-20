@@ -90,6 +90,13 @@ class EmployeeController extends FController
                     'delete' => ['POST'],
                 ],
             ],
+            'access' => [
+                'allowActions' => [
+                    'update',
+                    'employee-validation-update',
+                    'acl-rule'
+                ],
+            ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
@@ -186,22 +193,38 @@ class EmployeeController extends FController
 
     public function actionAclRule($id = 0)
     {
-        if (empty($id)) {
-            $model = new EmployeeAcl();
-        } else {
-            $model = EmployeeAcl::findOne(['id' => $id]);
-        }
-
-        $fieldAccess = new FieldAccess(Auth::user(), $model->isNewRecord);
-        if (!$fieldAccess->canEdit('acl_rules_activated')) {
-            throw new ForbiddenHttpException('Access denied.');
-        }
-
         if (!Yii::$app->request->isPost) {
             throw new BadRequestHttpException();
         }
 
-        $attr = Yii::$app->request->post($model->formName());
+        $attr = Yii::$app->request->post('EmployeeAcl');
+
+        if (empty($id)) {
+            $targetUserId = (int)($attr['employee_id'] ?? null);
+            if (!$targetUserId) {
+                throw new BadRequestHttpException('Invalid request. Target user ID is not found.');
+            }
+            $targetUser = Employee::findOne($targetUserId);
+            if (!$targetUser) {
+                throw new NotFoundHttpException('The requested user does not exist.');
+            }
+            $model = new EmployeeAcl();
+        } else {
+            $model = EmployeeAcl::findOne(['id' => $id]);
+            if (!$model) {
+                throw new NotFoundHttpException();
+            }
+            $targetUser = Employee::findOne($model->employee_id);
+            if (!$targetUser) {
+                throw new NotFoundHttpException('The requested user does not exist.');
+            }
+        }
+
+        $fieldAccess = new FieldAccess(Auth::user(), $targetUser, false);
+        if (!$fieldAccess->canEdit('acl_rules_activated')) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
         $model->attributes = $attr;
         if ($model->isNewRecord) {
             $success = $model->save();
@@ -412,316 +435,397 @@ class EmployeeController extends FController
         $multipleForm = new MultipleUpdateForm(Auth::user());
         $multipleErrors = [];
 
-        if ($multipleForm->load(Yii::$app->request->post()) && $multipleForm->validate()) {
-            if (\is_array($multipleForm->user_list)) {
-                foreach ($multipleForm->user_list as $user_id) {
-                    $user_id = (int) $user_id;
-                    $user = Employee::findOne($user_id);
-                    if (!$user) {
-                        continue;
-                    }
-
-                    if (!$uParams = $user->userParams) {
-                        Yii::error('User Id: ' . $user->id . ' Error. Please create UserParams for this user.', 'Employee:list:multipleUpdate');
-                        $multipleErrors[$user_id][] = 'User Id:' . $user->id . ' Error. Please create UserParams for this user.';
-                        continue;
-                    }
-
-                    $uParamsNeedSave = false;
-                    $uProfileNeedSave = false;
-
-                    if (!$uProfile = $user->userProfile) {
-                        $uProfile = new UserProfile();
-                        $uProfile->up_user_id = $user->id;
-                        $uProfileNeedSave = true;
-                    }
-
-                    if ($multipleForm->up_call_expert_limit !== null && $multipleForm->fieldAccess->canEdit('up_call_expert_limit')) {
-                        $uParams->up_call_expert_limit = $multipleForm->up_call_expert_limit;
-                        $uParamsNeedSave = true;
-                    }
-
-                    if ($multipleForm->up_work_start_tm !== null && $multipleForm->fieldAccess->canEdit('up_work_start_tm')) {
-                        $uParams->up_work_start_tm = $multipleForm->up_work_start_tm;
-                        $uParamsNeedSave = true;
-                    }
-
-                    if ($multipleForm->up_timezone !== null && $multipleForm->fieldAccess->canEdit('up_timezone')) {
-                        $uParams->up_timezone = $multipleForm->up_timezone;
-                        $uParamsNeedSave = true;
-                    }
-
-                    if ($multipleForm->up_work_minutes !== null && $multipleForm->fieldAccess->canEdit('up_work_minutes')) {
-                        $uParams->up_work_minutes = $multipleForm->up_work_minutes;
-                        $uParamsNeedSave = true;
-                    }
-
-                    if ($multipleForm->up_inbox_show_limit_leads !== null && $multipleForm->fieldAccess->canEdit('up_inbox_show_limit_leads')) {
-                        $uParams->up_inbox_show_limit_leads = $multipleForm->up_inbox_show_limit_leads;
-                        $uParamsNeedSave = true;
-                    }
-
-                    if ($multipleForm->up_default_take_limit_leads !== null && $multipleForm->fieldAccess->canEdit('up_default_take_limit_leads')) {
-                        $uParams->up_default_take_limit_leads = $multipleForm->up_default_take_limit_leads;
-                        $uParamsNeedSave = true;
-                    }
-
-                    if ($multipleForm->up_min_percent_for_take_leads !== null && $multipleForm->fieldAccess->canEdit('up_min_percent_for_take_leads')) {
-                        $uParams->up_min_percent_for_take_leads = $multipleForm->up_min_percent_for_take_leads;
-                        $uParamsNeedSave = true;
-                    }
-
-                    if ($multipleForm->up_frequency_minutes !== null && $multipleForm->fieldAccess->canEdit('up_frequency_minutes')) {
-                        $uParams->up_frequency_minutes = $multipleForm->up_frequency_minutes;
-                        $uParamsNeedSave = true;
-                    }
-
-                    if ($multipleForm->up_base_amount !== null && $multipleForm->fieldAccess->canEdit('up_base_amount')) {
-                        $uParams->up_base_amount = $multipleForm->up_base_amount;
-                        $uParamsNeedSave = true;
-                    }
-
-                    if ($multipleForm->up_auto_redial !== null && $multipleForm->fieldAccess->canEdit('up_auto_redial')) {
-                        $uProfile->up_auto_redial = $multipleForm->up_auto_redial;
-                        $uProfileNeedSave = true;
-                    }
-
-                    if ($multipleForm->up_kpi_enable !== null && $multipleForm->fieldAccess->canEdit('up_kpi_enable')) {
-                        $uProfile->up_kpi_enable = $multipleForm->up_kpi_enable;
-                        $uProfileNeedSave = true;
-                    }
-
-                    if ($multipleForm->up_leaderboard_enabled !== null && $multipleForm->fieldAccess->canEdit('up_leaderboard_enabled')) {
-                        $uParams->up_leaderboard_enabled = $multipleForm->up_leaderboard_enabled;
-                        $uParamsNeedSave = true;
-                    }
-
-                    if ($multipleForm->up_commission_percent !== null && $multipleForm->fieldAccess->canEdit('up_commission_percent')) {
-                        $uParams->up_commission_percent = $multipleForm->up_commission_percent;
-                        $uParamsNeedSave = true;
-                    }
-
-                    if ($multipleForm->user_departments && $multipleForm->fieldAccess->canEdit('user_departments')) {
-                        $oldDepartmentsIds = array_keys($user->getUserDepartmentList());
-                        $needToAddDepartments = [];
-                        $needToRemoveDepartments = [];
-
-                        switch ((int)$multipleForm->user_departments_action) {
-                            case MultipleUpdateForm::DEPARTMENT_ADD:
-                                $needToAddDepartments = array_diff($multipleForm->user_departments, $oldDepartmentsIds);
-                                break;
-                            case MultipleUpdateForm::DEPARTMENT_REPLACE:
-                                $needToRemoveDepartments = $oldDepartmentsIds;
-                                $needToAddDepartments = $multipleForm->user_departments;
-                                break;
-                            case MultipleUpdateForm::DEPARTMENT_REMOVE:
-                                $needToRemoveDepartments = array_intersect($multipleForm->user_departments, $oldDepartmentsIds);
-                                break;
+        if (Auth::can('employee/multipleUpdate')) {
+            if ($multipleForm->load(Yii::$app->request->post()) && $multipleForm->validate()) {
+                if (\is_array($multipleForm->user_list)) {
+                    foreach ($multipleForm->user_list as $user_id) {
+                        $user_id = (int) $user_id;
+                        $user = Employee::findOne($user_id);
+                        if (!$user) {
+                            continue;
                         }
-                        if (!empty($needToAddDepartments) || !empty($needToRemoveDepartments)) {
-                            $transaction = Yii::$app->db->beginTransaction();
-                            try {
-                                if ($needToRemoveDepartments) {
-                                    $user->removeDepartments($needToRemoveDepartments);
-                                }
 
-                                if ($needToAddDepartments) {
-                                    $user->addNewDepartments($needToAddDepartments);
-                                }
-
-                                $transaction->commit();
-                            } catch (\Throwable $e) {
-                                $transaction->rollBack();
-                                Yii::error($e->getMessage(), 'Employee:list:multipleUpdate:userDepartments');
-                                $multipleErrors[$user_id][] = $e->getMessage();
-                            }
+                        if (!$uParams = $user->userParams) {
+                            Yii::error('User Id: ' . $user->id . ' Error. Please create UserParams for this user.', 'Employee:list:multipleUpdate');
+                            $multipleErrors[$user_id][] = 'User Id:' . $user->id . ' Error. Please create UserParams for this user.';
+                            continue;
                         }
-                    }
 
-                    if (empty($multipleForm->user_departments) && $multipleForm->fieldAccess->canEdit('user_departments') && (int)$multipleForm->user_departments_action === MultipleUpdateForm::DEPARTMENT_REPLACE) {
-                        $transaction = Yii::$app->db->beginTransaction();
-                        try {
-                            $oldDepartmentsIds = $user->getUserDepartmentList();
-                            $user->removeAllDepartments();
-                            $transaction->commit();
-                            $user->addLog(
-                                \Yii::$app->id,
-                                Yii::$app->user->id,
-                                ["user_departments" => $oldDepartmentsIds],
-                                ["user_departments" => $multipleForm->user_departments]
-                            );
-                        } catch (\Throwable $e) {
-                            $transaction->rollBack();
-                            Yii::error($e->getMessage(), 'Employee:list:multipleUpdate:userDepartments');
-                            $multipleErrors[$user_id][] = $e->getMessage();
+                        $fieldAccess = new FieldAccess(Auth::user(), $user, false);
+
+                        $uParamsNeedSave = false;
+                        $uProfileNeedSave = false;
+
+                        if (!$uProfile = $user->userProfile) {
+                            $uProfile = new UserProfile();
+                            $uProfile->up_user_id = $user->id;
+                            $uProfileNeedSave = true;
                         }
-                    }
 
-                    if ($multipleForm->client_chat_user_channel && $multipleForm->fieldAccess->canEdit('client_chat_user_channel')) {
-                        $userClientChatData = UserClientChatData::findOne(['uccd_employee_id' => $user->id]);
-                        $transaction = Yii::$app->db->beginTransaction();
-                        try {
-                            $oldClientChatUserChannel = $user->getClientChatUserChannelList();
-                            $user->removeAllClientChatChanels();
-                            $user->addClientChatChanels($multipleForm->client_chat_user_channel, Auth::id());
-                            if ($userClientChatData && $userClientChatData->isRegisteredInRc()) {
-                                $this->clientChatUserAccessService->setUserAccessToAllChatsByChannelIds($multipleForm->client_chat_user_channel, $user->id);
+                        if ($multipleForm->up_call_expert_limit !== null) {
+                            if ($fieldAccess->canEdit('up_call_expert_limit')) {
+                                $uParams->up_call_expert_limit = $multipleForm->up_call_expert_limit;
+                                $uParamsNeedSave = true;
                             } else {
-                                $this->clientChatUserAccessService->disableUserAccessToAllChats($user->id);
-                            }
-                            $transaction->commit();
-                            $user->addLog(
-                                \Yii::$app->id,
-                                Yii::$app->user->id,
-                                ["client_chat_user_channel" => $oldClientChatUserChannel],
-                                ["client_chat_user_channel" => $multipleForm->getChangedClientChatsChannels()]
-                            );
-                        } catch (\Throwable $e) {
-                            $transaction->rollBack();
-                            Yii::error($e->getMessage(), 'Employee:list:multipleUpdate:clientChatChannels');
-                            $multipleErrors[$user_id][] = $e->getMessage();
-                        }
-                    }
-
-                    if ($uParamsNeedSave && !$uParams->save()) {
-                        Yii::error(VarDumper::dumpAsString($uParams->getErrors()), 'Employee:list:multipleUpdate:userParams:save');
-                        $multipleErrors[$user_id][] = $uParams->getErrors();
-                    }
-
-                    if ($uProfileNeedSave && !$uProfile->save()) {
-                        Yii::error(VarDumper::dumpAsString($uProfile->getErrors()), 'Employee:list:multipleUpdate:userProfile:save');
-                        $multipleErrors[$user_id][] = $uProfile->getErrors();
-                    }
-
-                    if ($multipleForm->form_roles && $multipleForm->fieldAccess->canEdit('form_roles')) {
-                        $needToAddRoles = [];
-                        $needToRemoveRoles = [];
-
-                        switch ((int)$multipleForm->form_roles_action) {
-                            case $multipleForm::ROLE_ADD:
-                                foreach ($multipleForm->form_roles as $role) {
-                                    if (!in_array($role, $user->getRoles(true))) {
-                                        $needToAddRoles[] = $role;
-                                    }
-                                }
-                                break;
-                            case $multipleForm::ROLE_REPLACE:
-                                $needToRemoveRoles = $user->getRoles(true);
-                                $needToAddRoles = $multipleForm->form_roles;
-                                break;
-                            case $multipleForm::ROLE_REMOVE:
-                                foreach ($multipleForm->form_roles as $role) {
-                                    if (in_array($role, $user->getRoles(true))) {
-                                        $needToRemoveRoles[] = $role;
-                                    }
-                                }
-                                break;
-                        }
-
-                        if (!empty($needToAddRoles) || !empty($needToRemoveRoles)) {
-                            $transaction = Yii::$app->db->beginTransaction();
-                            try {
-                                if ($needToRemoveRoles) {
-                                    $user->removeRoles($needToRemoveRoles);
-                                }
-
-                                if ($needToAddRoles) {
-                                    $user->addNewRoles($needToAddRoles);
-                                }
-
-                                $transaction->commit();
-                            } catch (\Throwable $e) {
-                                $transaction->rollBack();
-                                Yii::error($e->getMessage(), 'Employee:list:multipleUpdate:userRoles');
-                                $multipleErrors[$user_id][] = $e->getMessage();
+                                $multipleErrors[$user_id][] = 'Update property Call expert limit: access denied';
                             }
                         }
-                    }
 
-                    if (empty($multipleForm->form_roles) && $multipleForm->fieldAccess->canEdit('form_roles') && (int)$multipleForm->form_roles_action === $multipleForm::ROLE_REPLACE) {
-                        $transaction = Yii::$app->db->beginTransaction();
-                        try {
-                            $oldRoles = $user->getRoles(true);
-                            $user->removeAllRoles();
-                            $transaction->commit();
-                            $user->addLog(
-                                \Yii::$app->id,
-                                Yii::$app->user->id,
-                                ["roles" => $oldRoles],
-                                ["roles" => $multipleForm->form_roles]
-                            );
-                        } catch (\Throwable $e) {
-                            $transaction->rollBack();
-                            Yii::error($e->getMessage(), 'Employee:list:multipleUpdate:userRoles');
-                            $multipleErrors[$user_id][] = $e->getMessage();
-                        }
-                    }
-
-                    if ($multipleForm->fieldAccess->canEdit('user_groups')) {
-                        if (!empty($multipleForm->user_groups) || $multipleForm->groupActionIsReplace()) {
-                            $oldUserGroupsIds = array_keys($user->getUserGroupList());
-
-                            $groupsForAdd = [];
-                            $groupsForDelete = [];
-
-                            switch ($multipleForm->user_groups_action) {
-                                case MultipleUpdateForm::GROUP_ADD:
-                                    $groupsForAdd = array_diff($multipleForm->user_groups, $oldUserGroupsIds);
-                                    break;
-                                case MultipleUpdateForm::GROUP_REPLACE:
-                                    if (empty($multipleForm->user_groups)) {
-                                        $groupsForDelete = $oldUserGroupsIds;
-                                    } else {
-                                        $groupsForDelete = array_diff($oldUserGroupsIds, $multipleForm->user_groups);
-                                        $groupsForAdd = array_diff($multipleForm->user_groups, $oldUserGroupsIds);
-                                    }
-
-                                    break;
-                                case MultipleUpdateForm::GROUP_DELETE:
-                                    $groupsForDelete = array_intersect($multipleForm->user_groups, $oldUserGroupsIds);
-                                    break;
+                        if ($multipleForm->up_work_start_tm !== null) {
+                            if ($fieldAccess->canEdit('up_work_start_tm')) {
+                                $uParams->up_work_start_tm = $multipleForm->up_work_start_tm;
+                                $uParamsNeedSave = true;
+                            } else {
+                                $multipleErrors[$user_id][] = 'Update property Work start time: access denied';
                             }
+                        }
 
-                            if (!empty($groupsForDelete) || !empty($groupsForAdd)) {
-                                $transaction = Yii::$app->db->beginTransaction();
+                        if ($multipleForm->up_timezone !== null) {
+                            if ($fieldAccess->canEdit('up_timezone')) {
+                                $uParams->up_timezone = $multipleForm->up_timezone;
+                                $uParamsNeedSave = true;
+                            } else {
+                                $multipleErrors[$user_id][] = 'Update property Timezone: access denied';
+                            }
+                        }
 
-                                try {
-                                    if (!empty($groupsForDelete)) {
-                                        UserGroupAssign::deleteAll(['and', [ 'ugs_user_id' => $user_id], ['in', 'ugs_group_id', $groupsForDelete]]);
-                                    }
+                        if ($multipleForm->up_work_minutes !== null) {
+                            if ($fieldAccess->canEdit('up_work_minutes')) {
+                                $uParams->up_work_minutes = $multipleForm->up_work_minutes;
+                                $uParamsNeedSave = true;
+                            } else {
+                                $multipleErrors[$user_id][] = 'Update property Work minutes: access denied';
+                            }
+                        }
 
-                                    if (!empty($groupsForAdd)) {
-                                        foreach ($groupsForAdd as $groupId) {
-                                            $uga = new UserGroupAssign();
-                                            $uga->ugs_user_id = $user->id;
-                                            $uga->ugs_group_id = $groupId;
+                        if ($multipleForm->up_inbox_show_limit_leads !== null) {
+                            if ($fieldAccess->canEdit('up_inbox_show_limit_leads')) {
+                                $uParams->up_inbox_show_limit_leads = $multipleForm->up_inbox_show_limit_leads;
+                                $uParamsNeedSave = true;
+                            } else {
+                                $multipleErrors[$user_id][] = 'Update property Inbox show limit leads: access denied';
+                            }
+                        }
 
-                                            if (!$uga->save()) {
-                                                throw new \Exception(VarDumper::dumpAsString($uga->errors));
-                                            }
+                        if ($multipleForm->up_default_take_limit_leads !== null) {
+                            if ($fieldAccess->canEdit('up_default_take_limit_leads')) {
+                                $uParams->up_default_take_limit_leads = $multipleForm->up_default_take_limit_leads;
+                                $uParamsNeedSave = true;
+                            } else {
+                                $multipleErrors[$user_id][] = 'Update property Default take limit leads: access denied';
+                            }
+                        }
+
+                        if ($multipleForm->up_min_percent_for_take_leads !== null) {
+                            if ($fieldAccess->canEdit('up_min_percent_for_take_leads')) {
+                                $uParams->up_min_percent_for_take_leads = $multipleForm->up_min_percent_for_take_leads;
+                                $uParamsNeedSave = true;
+                            } else {
+                                $multipleErrors[$user_id][] = 'Update property Min percent for take leads: access denied';
+                            }
+                        }
+
+                        if ($multipleForm->up_frequency_minutes !== null) {
+                            if ($fieldAccess->canEdit('up_frequency_minutes')) {
+                                $uParams->up_frequency_minutes = $multipleForm->up_frequency_minutes;
+                                $uParamsNeedSave = true;
+                            } else {
+                                $multipleErrors[$user_id][] = 'Update property Frequency minutes: access denied';
+                            }
+                        }
+
+                        if ($multipleForm->up_base_amount !== null) {
+                            if ($fieldAccess->canEdit('up_base_amount')) {
+                                $uParams->up_base_amount = $multipleForm->up_base_amount;
+                                $uParamsNeedSave = true;
+                            } else {
+                                $multipleErrors[$user_id][] = 'Update property Base amount: access denied';
+                            }
+                        }
+
+                        if ($multipleForm->up_auto_redial !== null) {
+                            if ($fieldAccess->canEdit('up_auto_redial')) {
+                                $uProfile->up_auto_redial = $multipleForm->up_auto_redial;
+                                $uProfileNeedSave = true;
+                            } else {
+                                $multipleErrors[$user_id][] = 'Update property Auto redial: access denied';
+                            }
+                        }
+
+                        if ($multipleForm->up_kpi_enable !== null) {
+                            if ($fieldAccess->canEdit('up_kpi_enable')) {
+                                $uProfile->up_kpi_enable = $multipleForm->up_kpi_enable;
+                                $uProfileNeedSave = true;
+                            } else {
+                                $multipleErrors[$user_id][] = 'Update property Kpi enable: access denied';
+                            }
+                        }
+
+                        if ($multipleForm->up_leaderboard_enabled !== null) {
+                            if ($fieldAccess->canEdit('up_leaderboard_enabled')) {
+                                $uParams->up_leaderboard_enabled = $multipleForm->up_leaderboard_enabled;
+                                $uParamsNeedSave = true;
+                            } else {
+                                $multipleErrors[$user_id][] = 'Update property Leader board enabled: access denied';
+                            }
+                        }
+
+                        if ($multipleForm->up_commission_percent !== null) {
+                            if ($fieldAccess->canEdit('up_commission_percent')) {
+                                $uParams->up_commission_percent = $multipleForm->up_commission_percent;
+                                $uParamsNeedSave = true;
+                            } else {
+                                $multipleErrors[$user_id][] = 'Update property Commission percent: access denied';
+                            }
+                        }
+
+                        if ($multipleForm->user_departments) {
+                            if ($fieldAccess->canEdit('user_departments')) {
+                                $oldDepartmentsIds = array_keys($user->getUserDepartmentList());
+                                $needToAddDepartments = [];
+                                $needToRemoveDepartments = [];
+
+                                switch ((int)$multipleForm->user_departments_action) {
+                                    case MultipleUpdateForm::DEPARTMENT_ADD:
+                                        $needToAddDepartments = array_diff($multipleForm->user_departments, $oldDepartmentsIds);
+                                        break;
+                                    case MultipleUpdateForm::DEPARTMENT_REPLACE:
+                                        $needToRemoveDepartments = $oldDepartmentsIds;
+                                        $needToAddDepartments = $multipleForm->user_departments;
+                                        break;
+                                    case MultipleUpdateForm::DEPARTMENT_REMOVE:
+                                        $needToRemoveDepartments = array_intersect($multipleForm->user_departments, $oldDepartmentsIds);
+                                        break;
+                                }
+                                if (!empty($needToAddDepartments) || !empty($needToRemoveDepartments)) {
+                                    $transaction = Yii::$app->db->beginTransaction();
+                                    try {
+                                        if ($needToRemoveDepartments) {
+                                            $user->removeDepartments($needToRemoveDepartments);
                                         }
-                                    }
 
+                                        if ($needToAddDepartments) {
+                                            $user->addNewDepartments($needToAddDepartments);
+                                        }
+
+                                        $transaction->commit();
+                                    } catch (\Throwable $e) {
+                                        $transaction->rollBack();
+                                        Yii::error($e->getMessage(), 'Employee:list:multipleUpdate:userDepartments');
+                                        $multipleErrors[$user_id][] = $e->getMessage();
+                                    }
+                                }
+                            } else {
+                                $multipleErrors[$user_id][] = 'Update property Departments: access denied';
+                            }
+                        }
+
+                        if (empty($multipleForm->user_departments) && (int)$multipleForm->user_departments_action === MultipleUpdateForm::DEPARTMENT_REPLACE) {
+                            if ($fieldAccess->canEdit('user_departments')) {
+                                $transaction = Yii::$app->db->beginTransaction();
+                                try {
+                                    $oldDepartmentsIds = $user->getUserDepartmentList();
+                                    $user->removeAllDepartments();
                                     $transaction->commit();
+                                    $user->addLog(
+                                        \Yii::$app->id,
+                                        Yii::$app->user->id,
+                                        ["user_departments" => $oldDepartmentsIds],
+                                        ["user_departments" => $multipleForm->user_departments]
+                                    );
                                 } catch (\Throwable $e) {
                                     $transaction->rollBack();
+                                    Yii::error($e->getMessage(), 'Employee:list:multipleUpdate:userDepartments');
                                     $multipleErrors[$user_id][] = $e->getMessage();
                                 }
+                            } else {
+                                $multipleErrors[$user_id][] = 'Update property Departments: access denied';
                             }
                         }
-                    }
 
-                    if (is_numeric($multipleForm->status) && $multipleForm->fieldAccess->canEdit('status')) {
-                        $user->status = $multipleForm->status;
-                        if (!$user->save(true, ['status'])) {
-                            Yii::error(VarDumper::dumpAsString($user->errors), 'Employee:list:multipleUpdate:user:save');
-                            $multipleErrors[$user_id][] = $user->getErrors();
+                        if ($multipleForm->client_chat_user_channel) {
+                            if ($fieldAccess->canEdit('client_chat_user_channel')) {
+                                $userClientChatData = UserClientChatData::findOne(['uccd_employee_id' => $user->id]);
+                                $transaction = Yii::$app->db->beginTransaction();
+                                try {
+                                    $oldClientChatUserChannel = $user->getClientChatUserChannelList();
+                                    $user->removeAllClientChatChanels();
+                                    $user->addClientChatChanels($multipleForm->client_chat_user_channel, Auth::id());
+                                    if ($userClientChatData && $userClientChatData->isRegisteredInRc()) {
+                                        $this->clientChatUserAccessService->setUserAccessToAllChatsByChannelIds($multipleForm->client_chat_user_channel, $user->id);
+                                    } else {
+                                        $this->clientChatUserAccessService->disableUserAccessToAllChats($user->id);
+                                    }
+                                    $transaction->commit();
+                                    $user->addLog(
+                                        \Yii::$app->id,
+                                        Yii::$app->user->id,
+                                        ["client_chat_user_channel" => $oldClientChatUserChannel],
+                                        ["client_chat_user_channel" => $multipleForm->getChangedClientChatsChannels()]
+                                    );
+                                } catch (\Throwable $e) {
+                                    $transaction->rollBack();
+                                    Yii::error($e->getMessage(), 'Employee:list:multipleUpdate:clientChatChannels');
+                                    $multipleErrors[$user_id][] = $e->getMessage();
+                                }
+                            } else {
+                                $multipleErrors[$user_id][] = 'Update property Client chat channels: access denied';
+                            }
+                        }
+
+                        if ($uParamsNeedSave && !$uParams->save()) {
+                            Yii::error(VarDumper::dumpAsString($uParams->getErrors()), 'Employee:list:multipleUpdate:userParams:save');
+                            $multipleErrors[$user_id][] = $uParams->getErrors();
+                        }
+
+                        if ($uProfileNeedSave && !$uProfile->save()) {
+                            Yii::error(VarDumper::dumpAsString($uProfile->getErrors()), 'Employee:list:multipleUpdate:userProfile:save');
+                            $multipleErrors[$user_id][] = $uProfile->getErrors();
+                        }
+
+                        if ($multipleForm->form_roles) {
+                            if ($fieldAccess->canEdit('form_roles')) {
+                                $needToAddRoles = [];
+                                $needToRemoveRoles = [];
+
+                                switch ((int)$multipleForm->form_roles_action) {
+                                    case MultipleUpdateForm::ROLE_ADD:
+                                        foreach ($multipleForm->form_roles as $role) {
+                                            if (!in_array($role, $user->getRoles(true))) {
+                                                $needToAddRoles[] = $role;
+                                            }
+                                        }
+                                        break;
+                                    case MultipleUpdateForm::ROLE_REPLACE:
+                                        $needToRemoveRoles = $user->getRoles(true);
+                                        $needToAddRoles = $multipleForm->form_roles;
+                                        break;
+                                    case MultipleUpdateForm::ROLE_REMOVE:
+                                        foreach ($multipleForm->form_roles as $role) {
+                                            if (in_array($role, $user->getRoles(true))) {
+                                                $needToRemoveRoles[] = $role;
+                                            }
+                                        }
+                                        break;
+                                }
+
+                                if (!empty($needToAddRoles) || !empty($needToRemoveRoles)) {
+                                    $transaction = Yii::$app->db->beginTransaction();
+                                    try {
+                                        if ($needToRemoveRoles) {
+                                            $user->removeRoles($needToRemoveRoles);
+                                        }
+
+                                        if ($needToAddRoles) {
+                                            $user->addNewRoles($needToAddRoles);
+                                        }
+
+                                        $transaction->commit();
+                                    } catch (\Throwable $e) {
+                                        $transaction->rollBack();
+                                        Yii::error($e->getMessage(), 'Employee:list:multipleUpdate:userRoles');
+                                        $multipleErrors[$user_id][] = $e->getMessage();
+                                    }
+                                }
+                            } else {
+                                $multipleErrors[$user_id][] = 'Update property Roles: access denied';
+                            }
+                        }
+
+                        if (empty($multipleForm->form_roles) && (int)$multipleForm->form_roles_action === $multipleForm::ROLE_REPLACE) {
+                            if ($fieldAccess->canEdit('form_roles')) {
+                                $transaction = Yii::$app->db->beginTransaction();
+                                try {
+                                    $oldRoles = $user->getRoles(true);
+                                    $user->removeAllRoles();
+                                    $transaction->commit();
+                                    $user->addLog(
+                                        \Yii::$app->id,
+                                        Yii::$app->user->id,
+                                        ["roles" => $oldRoles],
+                                        ["roles" => $multipleForm->form_roles]
+                                    );
+                                } catch (\Throwable $e) {
+                                    $transaction->rollBack();
+                                    Yii::error($e->getMessage(), 'Employee:list:multipleUpdate:userRoles');
+                                    $multipleErrors[$user_id][] = $e->getMessage();
+                                }
+                            } else {
+                                $multipleErrors[$user_id][] = 'Update property Roles: access denied';
+                            }
+                        }
+
+                        if (!empty($multipleForm->user_groups) || $multipleForm->groupActionIsReplace()) {
+                            if ($fieldAccess->canEdit('user_groups')) {
+                                $oldUserGroupsIds = array_keys($user->getUserGroupList());
+
+                                $groupsForAdd = [];
+                                $groupsForDelete = [];
+
+                                switch ($multipleForm->user_groups_action) {
+                                    case MultipleUpdateForm::GROUP_ADD:
+                                        $groupsForAdd = array_diff($multipleForm->user_groups, $oldUserGroupsIds);
+                                        break;
+                                    case MultipleUpdateForm::GROUP_REPLACE:
+                                        if (empty($multipleForm->user_groups)) {
+                                            $groupsForDelete = $oldUserGroupsIds;
+                                        } else {
+                                            $groupsForDelete = array_diff($oldUserGroupsIds, $multipleForm->user_groups);
+                                            $groupsForAdd = array_diff($multipleForm->user_groups, $oldUserGroupsIds);
+                                        }
+
+                                        break;
+                                    case MultipleUpdateForm::GROUP_DELETE:
+                                        $groupsForDelete = array_intersect($multipleForm->user_groups, $oldUserGroupsIds);
+                                        break;
+                                }
+
+                                if (!empty($groupsForDelete) || !empty($groupsForAdd)) {
+                                    $transaction = Yii::$app->db->beginTransaction();
+
+                                    try {
+                                        if (!empty($groupsForDelete)) {
+                                            UserGroupAssign::deleteAll(['and', [ 'ugs_user_id' => $user_id], ['in', 'ugs_group_id', $groupsForDelete]]);
+                                        }
+
+                                        if (!empty($groupsForAdd)) {
+                                            foreach ($groupsForAdd as $groupId) {
+                                                $uga = new UserGroupAssign();
+                                                $uga->ugs_user_id = $user->id;
+                                                $uga->ugs_group_id = $groupId;
+
+                                                if (!$uga->save()) {
+                                                    throw new \Exception(VarDumper::dumpAsString($uga->errors));
+                                                }
+                                            }
+                                        }
+
+                                        $transaction->commit();
+                                    } catch (\Throwable $e) {
+                                        $transaction->rollBack();
+                                        $multipleErrors[$user_id][] = $e->getMessage();
+                                    }
+                                }
+                            } else {
+                                $multipleErrors[$user_id][] = 'Update property Groups: access denied';
+                            }
+                        }
+
+                        if (is_numeric($multipleForm->status)) {
+                            if ($fieldAccess->canEdit('status')) {
+                                $user->status = $multipleForm->status;
+                                if (!$user->save(true, ['status'])) {
+                                    Yii::error(VarDumper::dumpAsString($user->errors), 'Employee:list:multipleUpdate:user:save');
+                                    $multipleErrors[$user_id][] = $user->getErrors();
+                                }
+                            } else {
+                                $multipleErrors[$user_id][] = 'Update property Status: access denied';
+                            }
                         }
                     }
                 }
             }
         }
-
         $searchModel = new EmployeeSearch();
         $params = Yii::$app->request->queryParams;
 
@@ -1278,18 +1382,9 @@ class EmployeeController extends FController
 
         $updaterUser = Auth::user();
 
-        if ($targetUser->isSuperAdmin() && !$updaterUser->isSuperAdmin()) {
-            throw new ForbiddenHttpException('Access denied for Superadmin user' . $targetUser->id);
-        }
-
-        if ($targetUser->isOnlyAdmin() && $updaterUser->isUserManager()) {
-            throw new ForbiddenHttpException('Access denied for Admin user: ' . $targetUser->id);
-        }
-
-        if ($updaterUser->isSupervision()) {
-            if (!$updaterUser->isUserGroupIntersection(array_keys($targetUser->getUserGroupList()))) {
-                throw new ForbiddenHttpException('Access denied for this user (invalid user group)');
-            }
+        $fieldAccess = new FieldAccess($updaterUser, $targetUser, false);
+        if (!$fieldAccess->canShowAnyField()) {
+            throw new ForbiddenHttpException('Access denied');
         }
 
         if (!$userParams = $targetUser->userParams) {
@@ -1307,7 +1402,7 @@ class EmployeeController extends FController
             ]);
         }
 
-        $form = new UpdateForm($targetUser, $updaterUser, $userParams, $userProfile);
+        $form = new UpdateForm($targetUser, $updaterUser, $userParams, $userProfile, $fieldAccess);
 
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             $transaction = Yii::$app->db->beginTransaction();
@@ -1420,7 +1515,7 @@ class EmployeeController extends FController
                 }
 
                 if ($form->fieldAccess->canEdit('user_departments') && $form->isChangedDepartments()) {
-                    $oldUserDepartmens = $targetUser->getUserDepartmentList();
+                    $oldUserDepartments = $targetUser->getUserDepartmentList();
                     UserDepartment::deleteAll(['ud_user_id' => $targetUser->id]);
                     foreach ($form->user_departments as $departmentId) {
                         $ud = new UserDepartment();
@@ -1438,8 +1533,8 @@ class EmployeeController extends FController
                     $targetUser->addLog(
                         \Yii::$app->id,
                         Yii::$app->user->id,
-                        ["user_departments" => $oldUserDepartmens],
-                        ["user_departments" => $form->getUserDepartmens()]
+                        ["user_departments" => $oldUserDepartments],
+                        ["user_departments" => $form->getUserDepartments()]
                     );
 
                     $userUpdated = true;
@@ -1623,8 +1718,17 @@ class EmployeeController extends FController
             throw new BadRequestHttpException('Invalid request');
         }
         $targetUser = Employee::findOne($targetUserId);
+        if (!$targetUser) {
+            throw new NotFoundHttpException('The requested user does not exist.');
+        }
 
         $updaterUser = Auth::user();
+
+        $fieldAccess = new FieldAccess($updaterUser, $targetUser, false);
+        if (!$fieldAccess->canShowAnyField()) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
 
         if (!$userParams = $targetUser->userParams) {
             $userParams = new UserParams([
@@ -1641,12 +1745,13 @@ class EmployeeController extends FController
             ]);
         }
 
-        $form = new UpdateForm($targetUser, $updaterUser, $userParams, $userProfile);
+        $form = new UpdateForm($targetUser, $updaterUser, $userParams, $userProfile, $fieldAccess);
 
         if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             return ActiveForm::validate($form);
         }
+
         throw new BadRequestHttpException();
     }
 

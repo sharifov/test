@@ -3017,4 +3017,29 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             )
         );
     }
+
+    public function isSameUser(Employee $user): bool
+    {
+        return $this->id === $user->id;
+    }
+
+    public function isSameUserGroup(array $groups): bool
+    {
+        foreach ($this->getUserGroupList() as $groupId => $groupName) {
+            if (in_array($groupId, $groups, true)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function isSameDepartment(array $departments): bool
+    {
+        foreach ($this->getUserDepartmentList() as $departmentId => $departmentName) {
+            if (in_array($departmentId, $departments, true)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
