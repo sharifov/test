@@ -9,7 +9,6 @@
 use common\components\grid\DateTimeColumn;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\search\ShiftScheduleRequestSearch;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
-use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\helpers\UserShiftScheduleHelper;
 use yii\data\ActiveDataProvider;
 use yii\grid\GridView;
@@ -18,25 +17,27 @@ use yii\widgets\Pjax;
 
 ?>
 <?php Pjax::begin([
-    'id' => 'pjax-shift-schedule-request',
+    'id' => 'pjax-pending-requests-history',
     'enablePushState' => false,
     'enableReplaceState' => false,
 ]); ?>
 <div class="shift-schedule-request-index">
 
     <?= GridView::widget([
-        'id' => 'grid-view-shift-schedule-request',
+        'id' => 'pending-requests-history',
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
             [
-                'attribute' => 'ssr_uss_id',
-                'label' => 'User Shift Schedule Id',
-                'filter' => false,
+                'attribute' => 'ssr_id',
+                'options' => [
+                    'style' => 'width: 5%',
+                ],
+                'label' => 'Id',
             ],
             [
                 'label' => 'Type',
-                'value' => static function (ShiftScheduleRequest $model) {
+                'value' => static function (ShiftScheduleRequestSearch $model) {
                     return $model->srhSst ? $model->srhSst->getColorLabel() : '-';
                 },
                 'format' => 'raw',
@@ -46,6 +47,9 @@ use yii\widgets\Pjax;
                 'value' => function (ShiftScheduleRequest $model) {
                     return $model->getScheduleTypeTitle() ?? $model->ssr_sst_id;
                 },
+                'options' => [
+                    'style' => 'width: 20%',
+                ],
                 'label' => 'Schedule Type',
                 'filter' => UserShiftScheduleHelper::getAvailableScheduleTypeList(),
             ],
@@ -77,33 +81,53 @@ use yii\widgets\Pjax;
                 'label' => 'Description',
             ],
             [
-                'attribute' => 'ssr_created_dt',
-                'label' => 'Created',
+                'label' => 'Start Date Time',
                 'class' => DateTimeColumn::class,
-                'value' => function (ShiftScheduleRequest $model) {
-                    return $model->ssr_created_dt ?? '';
+                'value' => function (ShiftScheduleRequestSearch $model) {
+                    return $model->srhUss->uss_start_utc_dt ?? '';
                 },
                 'format' => 'byUserDateTime',
                 'filter' => false,
             ],
             [
-                'attribute' => 'ssr_created_user_id',
-                'value' => function (ShiftScheduleRequest $model) {
-                    return $model->ssrCreatedUser->nickname ?? $model->ssr_created_user_id;
+                'label' => 'End Date Time',
+                'class' => DateTimeColumn::class,
+                'value' => function (ShiftScheduleRequestSearch $model) {
+                    return $model->srhUss->uss_end_utc_dt ?? '';
                 },
-                'label' => 'User create request',
-                'filter' => false,
+                'format' => 'byUserDateTime',
+                'filter' => false
             ],
-            [
-                'attribute' => 'ssr_updated_user_id',
-                'value' => function (ShiftScheduleRequest $model) {
-                    return $model->ssrUpdatedUser->nickname ?? $model->ssr_updated_user_id;
-                },
-                'label' => 'User make decision',
-                'filter' => false,
-            ],
+//            [
+//                'attribute' => 'ssr_created_dt',
+//                'label' => 'Date',
+//                'class' => DateTimeColumn::class,
+//                'value' => function (ShiftScheduleRequest $model) {
+//                    return $model->ssr_created_dt ?? '';
+//                },
+//                'format' => 'byUserDateTime',
+//            ],
+//            [
+//                'attribute' => 'ssr_created_user_id',
+//                'options' => [
+//
+//                ],
+//                'value' => function (ShiftScheduleRequest $model) {
+//                    return $model->ssrCreatedUser->nickname ?? $model->ssr_created_user_id;
+//                },
+//                'label' => 'User create request',
+//            ],
+//            [
+//                'attribute' => 'ssr_updated_user_id',
+//                'value' => function (ShiftScheduleRequest $model) {
+//                    return $model->ssrUpdatedUser->username ?? $model->ssr_updated_user_id;
+//                },
+//                'filter' => false,
+//                'label' => 'User make decision',
+//            ],
         ],
     ]); ?>
+
 
 </div>
 <?php Pjax::end(); ?>

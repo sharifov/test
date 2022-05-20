@@ -157,7 +157,7 @@ use yii\web\View;
                         'options' => [
                             'style' => 'width: 10%',
                         ],
-                        'filter' => ShiftScheduleRequest::getList(),
+                        'filter' => ShiftScheduleRequest::getStatusList(),
                         'format' => 'raw',
                     ],
                     'ssr_description',
@@ -167,7 +167,7 @@ use yii\web\View;
                         'buttons' => [
                             'history' => function ($url, ShiftScheduleRequestSearch $model) {
                                 return Html::a(
-                                    '<i class="glyphicon glyphicon-time"></i>',
+                                    '<i class="fa fa-th-list"></i>',
                                     [
                                         'user-shift-schedule-request/get-history',
                                         'id' => $model->ssr_uss_id,

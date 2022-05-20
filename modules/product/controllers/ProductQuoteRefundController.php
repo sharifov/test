@@ -353,7 +353,9 @@ class ProductQuoteRefundController extends \frontend\controllers\FController
 
         if (Yii::$app->request->isAjax) {
             $form = new VoluntaryRefundUpdateForm($productQuoteRefund);
-            $form->setExpirationDate(DateHelper::toFormat($productQuoteRefund->pqr_expiration_dt));
+            if ($productQuoteRefund->pqr_expiration_dt) {
+                $form->setExpirationDate(DateHelper::toFormat($productQuoteRefund->pqr_expiration_dt));
+            }
             return $this->renderAjax('partial/_voluntary_refund_update', [
                 'refundForm' => $form,
                 'message' => '',

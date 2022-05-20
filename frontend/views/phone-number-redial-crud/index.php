@@ -36,8 +36,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 <span class="sr-only">Toggle Dropdown</span>
             </button>
             <div class="dropdown-menu">
-                <?php if ($abac->can(null, PhoneNumberRedialAbacObject::OBJ_PHONE_NUMBER_REDIAL, PhoneNumberRedialAbacObject::ACTION_MULTIPLE_DELETE)) : ?>
-                    <?= \yii\helpers\Html::a('<i class="fa fa-remove text-danger"></i>  Delete Selected', null, ['id' => 'btn-act-delete-selected', 'class' => 'dropdown-item btn-multiple-update' ])?>
+
+                <?php
+                /** @abac PhoneNumberRedialAbacObject::OBJ_PHONE_NUMBER_REDIAL, PhoneNumberRedialAbacObject::ACTION_MULTIPLE_DELETE, Access to delete-selected phone-number-redial-crud/* */
+                if ($abac->can(null, PhoneNumberRedialAbacObject::OBJ_PHONE_NUMBER_REDIAL, PhoneNumberRedialAbacObject::ACTION_MULTIPLE_DELETE)) : ?>
+                    <?= \yii\helpers\Html::a('<i class="fa fa-remove text-danger"></i>  Delete Selected', null, ['id' => 'btn-act-delete-selected', 'class' => 'dropdown-item btn-multiple-update']) ?>
                 <?php endif ?>
                 <div class="dropdown-divider"></div>
                 <?= \yii\helpers\Html::a('<i class="fa fa-info text-info"></i> Show Checked IDs', null, ['class' => 'dropdown-item btn-show-checked-ids'])?>

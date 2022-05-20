@@ -1327,12 +1327,18 @@ class Quote extends \yii\db\ActiveRecord
 
             $depCity = Airports::findByIata($firstSegment['qs_departure_airport_code']);
             $arrCity = Airports::findByIata($lastSegment['qs_arrival_airport_code']);
-            $arrivalTime = new \DateTime($lastSegment['qs_arrival_time']);
-            $departureTime = new \DateTime($firstSegment['qs_departure_time']);
 
-            if ($depCity !== null && $arrCity !== null && $depCity->dst != $arrCity->dst) {
-                $flightDuration = ($arrivalTime->getTimestamp() - $departureTime->getTimestamp()) / 60;
-                $trips[$key]['qt_duration'] = intval($flightDuration) + (intval($depCity->dst) * 60) - (intval($arrCity->dst) * 60);
+            $departureTime = new \DateTime($firstSegment['qs_departure_time']);
+            $depTimezone = $depCity ? new \DateTimeZone($depCity->timezone) : null;
+            $depDateTimeWithTimezone = new \DateTime($firstSegment['qs_departure_time'], $depTimezone);
+
+            $arrivalTime = new \DateTime($lastSegment['qs_arrival_time']);
+            $arrTimezone = $arrCity ? new \DateTimeZone($arrCity->timezone) : null;
+            $arrDateTimeWithTimezone = new \DateTime($lastSegment['qs_arrival_time'], $arrTimezone);
+
+            if ($depCity !== null && $arrCity !== null) {
+                $flightDuration = ($arrDateTimeWithTimezone->getTimestamp() - $depDateTimeWithTimezone->getTimestamp()) / 60;
+                $trips[$key]['qt_duration'] = intval($flightDuration);
             } else {
                 $trips[$key]['qt_duration'] = ($arrivalTime->getTimestamp() - $departureTime->getTimestamp()) / 60;
             }
