@@ -794,7 +794,7 @@ class ShiftScheduleController extends FController
         );
         $dataProvider = $searchModel->searchByUsers(
             $queryParams,
-            ShiftScheduleRequestService::getUserList(Auth::user()),
+            [Auth::id()],
             date('Y-m-d', strtotime('now')),
             date('Y-m-d', strtotime('+1 year'))
         );
