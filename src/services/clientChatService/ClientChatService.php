@@ -279,9 +279,17 @@ class ClientChatService
      */
     public function sendRequestToUser(ClientChat $clientChat, int $agentId): void
     {
-        $clientChatUserAccess = ClientChatUserAccess::create($clientChat->cch_id, $agentId);
-        $clientChatUserAccess->pending();
-        $this->clientChatUserAccessRepository->save($clientChatUserAccess, $clientChat);
+        try {
+            $clientChatUserAccess = ClientChatUserAccess::create($clientChat->cch_id, $agentId);
+            $clientChatUserAccess->pending();
+            $this->clientChatUserAccessRepository->save($clientChatUserAccess, $clientChat);
+        } catch (\Throwable $e) {
+            \Yii::error([
+                'agentId' => $agentId,
+                'chatId' => $clientChat->cch_id,
+                'message' => $e->getMessage(),
+            ], 'ClientChatService::sendRequestToUser');
+        }
     }
 
     /**
