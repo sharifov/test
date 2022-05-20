@@ -8,6 +8,7 @@ use common\models\query\UserGroupQuery;
 use common\models\UserGroup;
 use common\models\UserGroupAssign;
 use Exception;
+use modules\shiftSchedule\src\abac\dto\ShiftAbacDto;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\entities\shiftScheduleRule\ShiftScheduleRule;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\search\ShiftScheduleRequestSearch;
@@ -64,13 +65,13 @@ class ShiftScheduleController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['ajax-multiple-delete', 'add-event'],
+                        'actions' => ['ajax-multiple-delete', 'add-event', 'get-event'],
                         'allow' => true,
                         'roles' => ['@']
                     ],
                     /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_ACCESS, Access to page shift-schedule/index */
                     [
-                        'actions' => ['index', 'my-data-ajax', 'generate-example', 'remove-user-data', 'get-event',
+                        'actions' => ['index', 'my-data-ajax', 'generate-example', 'remove-user-data',
                             'generate-user-schedule', 'legend-ajax', 'calendar', 'calendar-events-ajax', 'update-single-event',
                             'schedule-request-ajax', 'schedule-pending-requests', 'schedule-request-history-ajax'],
                         'allow' => \Yii::$app->abac->can(
@@ -478,7 +479,10 @@ class ShiftScheduleController extends FController
             throw new NotFoundHttpException('Not exist this Shift Schedule (' . $eventId . ')');
         }
 
-        if ($event->uss_user_id !== Auth::id() && (!Auth::user()->isAdmin() && !Auth::user()->isSuperAdmin())) {
+
+        $dto = new ShiftAbacDto();
+        $dto->setIsEventOwner($event->isOwner(Auth::id()));
+        if (!Yii::$app->abac->can($dto, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_READ)) {
             throw new NotAcceptableHttpException('Permission Denied (' . $eventId . ')');
         }
 

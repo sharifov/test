@@ -317,4 +317,9 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
         $self->uss_sst_id = $scheduleType;
         return $self;
     }
+
+    public function isOwner(int $userId): bool
+    {
+        return $this->uss_user_id === $userId;
+    }
 }
