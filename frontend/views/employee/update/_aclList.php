@@ -13,11 +13,27 @@ if ($canEditAclRulesActivated) {
     $js = <<<JS
     $('.change-acl-rule-status').change(function() {
         var r = confirm('Are you sure you want to change rule status?');
+        var self = $(this);
         if (r == true) {
-            var value = ($(this).is(':checked')) ? 1 : 0;
-            $.post($(this).data('url'), {'EmployeeAcl[active]': value});
+            var value = (self.is(':checked')) ? 1 : 0;
+            $.ajax({
+                url: self.data('url'),
+                type: 'POST',
+                data: {'EmployeeAcl[active]': value},
+                dataType: 'json'
+            })
+            .done(function(data) {
+            })
+            .fail(function(jqXHR, textStatus, errorThrown) {
+                console.log({
+                    jqXHR : jqXHR,
+                    textStatus : textStatus,
+                    errorThrown : errorThrown
+                });
+                 self.prop('checked', !self.is(':checked'));
+            });
         } else {
-            $(this).prop('checked', !$(this).is(':checked'));
+            self.prop('checked', !self.is(':checked'));
         }
     });
 JS;

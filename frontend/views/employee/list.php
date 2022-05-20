@@ -1,6 +1,8 @@
 <?php
 
 use common\models\Employee;
+use kartik\select2\Select2;
+use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\user\src\update\MultipleUpdateForm;
 use src\auth\Auth;
 use yii\grid\ActionColumn;
@@ -28,8 +30,6 @@ $user = Yii::$app->user->identity;
 
 $isUM = $user->isUserManager();
 $isAdmin = $user->isAdmin() || $user->isSuperAdmin();
-
-$projectList = EmployeeProjectAccess::getProjects($user->id);
 
 ?>
 <div class="employee-index">
@@ -69,7 +69,11 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 <?php
                 foreach ($multipleErrors as $userId => $multipleError) {
                     echo 'UserId: ' . $userId . ' <br>';
-                    echo VarDumper::dumpAsString($multipleError) . ' <br><br>';
+                    echo '<div>';
+                    foreach ($multipleError as $error) {
+                        echo VarDumper::dumpAsString($error) . '<br>';
+                    }
+                    echo '</div><br>';
                 }
                 ?>
                 <?= $multipleForm->getErrors() ? VarDumper::dumpAsString($multipleForm->getErrorSummary(true)) : '' ?>
@@ -85,7 +89,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
         ?>
     <?php endif;?>
 
-    <?php if (($user->isAdmin() || $user->isSupervision()) && $multipleForm->fieldAccess->canEditOneOfMultipleFields()) : ?>
+    <?php if (Auth::can('employee/multipleUpdate')) : ?>
         <p>
             <?php //= Html::a('Create Lead', ['create'], ['class' => 'btn btn-success']) ?>
             <?php // \yii\helpers\Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-warning', 'data-toggle'=> 'modal', 'data-target'=>'#modalUpdate' ])?>
@@ -123,7 +127,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
         //'layout'=>'{summary}'.Html::activeDropDownList($searchModel, 'perpage', [10 => 10, 30 => 30, 20 => 20, 50 => 50, 100 => 100],['id'=>'perpage'])."{items}<br/>{pager}",
         //'pjax' => false,
         //'layout' => $template,
-        'rowOptions' => static function (\common\models\Employee $model, $index, $widget, $grid) {
+        'rowOptions' => static function (Employee $model, $index, $widget, $grid) {
             if ($model->isDeleted() || $model->isBlocked()) {
                 return ['class' => 'danger'];
             }
@@ -131,7 +135,8 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
         'columns' => [
             [
                 'class' => 'yii\grid\CheckboxColumn',
-                'cssClass' => 'multiple-checkbox'
+                'cssClass' => 'multiple-checkbox',
+                'visible' => Auth::can('employee/multipleUpdate'),
             ],
             [
                 'attribute' => 'id',
@@ -139,61 +144,93 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             ],
             [
                 'class' => ActionColumn::class,
-                'template' => '{info} {update} {projects} {groups} {switch}',
+                'template' => '{info} {update} {projects} {groups} {switch} {shiftCalendar}',
                 'visibleButtons' => [
                     /*'view' => function ($model, $key, $index) {
                         return User::hasPermission('viewOrder');
                     },*/
-                    'info' => static function (\common\models\Employee $model, $key, $index) {
+                    'info' => static function (Employee $model, $key, $index) {
                         return Auth::can('/user/info');
                     },
-                    'update' => static function (\common\models\Employee $model, $key, $index) use ($isAdmin, $isUM) {
+                    'update' => static function (Employee $model, $key, $index) use ($isAdmin, $isUM) {
                         return (
                             $isAdmin
                             || ($isUM && (!$model->isOnlyAdmin() && !$model->isSuperAdmin()))
                             || !($model->isAdmin() || $model->isSuperAdmin())
                         );
                     },
-                    'projects' => static function (\common\models\Employee $model, $key, $index) use ($isAdmin, $isUM) {
+                    'projects' => static function (Employee $model, $key, $index) use ($isAdmin, $isUM) {
                         return (
                             $isAdmin
                             || ($isUM && (!$model->isOnlyAdmin() && !$model->isSuperAdmin()))
                             || !($model->isAdmin() || $model->isSuperAdmin())
                         );
                     },
-                    'groups' => static function (\common\models\Employee $model, $key, $index) use ($isAdmin, $isUM) {
+                    'groups' => static function (Employee $model, $key, $index) use ($isAdmin, $isUM) {
                         return (
                             $isAdmin
                             || ($isUM && (!$model->isOnlyAdmin() && !$model->isSuperAdmin()))
                             || !($model->isAdmin() || $model->isSuperAdmin())
                         );
                     },
-                    'switch' => static function (\common\models\Employee $model, $key, $index) {
+                    'switch' => static function (Employee $model, $key, $index) {
                         return !$model->isOnlyAdmin() && !$model->isSuperAdmin() && Auth::can('/employee/switch');
+                    },
+                    'shiftCalendar' => static function (Employee $model, $key, $index) {
+                        /** @abac ShiftAbacObject::ACT_USER_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_ACCESS, Access to action user-shift-calendar */
+                        return \Yii::$app->abac->can(
+                            null,
+                            ShiftAbacObject::ACT_USER_SHIFT_SCHEDULE,
+                            ShiftAbacObject::ACTION_ACCESS
+                        );
                     },
                 ],
                 'buttons' => [
-                    'info' => static function ($url, \common\models\Employee $model, $key) {
-                        return Html::a('<span class="fa fa-info-circle"></span>', ['user/info', 'id' => $model->id], ['title' => 'User info', 'target' => '_blank', 'class' => 'text-info']);
+                    'info' => static function ($url, Employee $model, $key) {
+                        return Html::a(
+                            '<span class="fa fa-info-circle"></span>',
+                            ['user/info', 'id' => $model->id],
+                            ['title' => 'User info', 'target' => '_blank', 'class' => 'text-info']
+                        );
                     },
-                    'projects' => static function ($url, \common\models\Employee $model, $key) {
-                        return Html::a('<span class="fa fa-list"></span>', ['user-project-params/index', 'UserProjectParamsSearch[upp_user_id]' => $model->id], ['title' => 'Projects', 'target' => '_blank']);
+                    'projects' => static function ($url, Employee $model, $key) {
+                        return Html::a(
+                            '<span class="fa fa-list"></span>',
+                            ['user-project-params/index', 'UserProjectParamsSearch[upp_user_id]' => $model->id],
+                            ['title' => 'Projects', 'target' => '_blank']
+                        );
                     },
-                    'groups' => static function ($url, \common\models\Employee $model, $key) {
-                        return Html::a('<span class="fa fa-users text-info"></span>', ['user-group-assign/index', 'UserGroupAssignSearch[ugs_user_id]' => $model->id], ['title' => 'User Groups', 'target' => '_blank']);
+                    'groups' => static function ($url, Employee $model, $key) {
+                        return Html::a(
+                            '<span class="fa fa-users text-info"></span>',
+                            ['user-group-assign/index', 'UserGroupAssignSearch[ugs_user_id]' => $model->id],
+                            ['title' => 'User Groups', 'target' => '_blank']
+                        );
                     },
-                    'switch' => static function ($url, \common\models\Employee $model, $key) {
-                        return Html::a('<span class="fa fa-sign-in text-warning"></span>', ['employee/switch', 'id' => $model->id], ['title' => 'switch User', 'data' => [
+                    'switch' => static function ($url, Employee $model, $key) {
+                        return Html::a(
+                            '<span class="fa fa-sign-in text-warning"></span>',
+                            ['employee/switch', 'id' => $model->id],
+                            ['title' => 'switch User', 'data' => [
                             'confirm' => 'Are you sure you want to switch user?',
                             //'method' => 'get',
-                        ],]);
+                            ],
+                            ]
+                        );
+                    },
+                    'shiftCalendar' => static function ($url, Employee $model, $key) {
+                        return Html::a(
+                            '<span class="fa fa-calendar"></span>',
+                            ['shift-schedule/user', 'id' => $model->id],
+                            ['title' => 'User Shift Calendar', 'target' => '_blank']
+                        );
                     },
                 ]
             ],
 
             [
                 'label' => 'Grav',
-                'value' => static function (\common\models\Employee $model) {
+                'value' => static function (Employee $model) {
                     $gravUrl = $model->getGravatarUrl(25);
                     return \yii\helpers\Html::img($gravUrl, ['class' => 'img-circle img-thumbnail']);
                 },
@@ -204,19 +241,19 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             [
                 'attribute' => 'roles',
                 'label' => 'Role',
-                'value' => static function (\common\models\Employee $model) {
+                'value' => static function (Employee $model) {
                     $roles = $model->getRoles();
                     return $roles ? implode(', ', $roles) : '-';
                 },
                 'format' => 'raw',
-                'filter' => \common\models\Employee::getAllRoles(Auth::user()),
+                'filter' => Employee::getAllRoles(Auth::user()),
                 'contentOptions' => ['style' => 'width: 10%; white-space: pre-wrap']
             ],
 
             [
                 'attribute' => 'status',
                 'filter' => $searchModel::STATUS_LIST,
-                'value' => static function (\common\models\Employee $model) {
+                'value' => static function (Employee $model) {
                     return Yii::$app->formatter->asEmployeeStatusLabel($model->status);
                 },
                 'format' => 'raw'
@@ -225,7 +262,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             [
                 'attribute' => 'online',
                 'filter' => [1 => 'Online', 2 => 'Offline'],
-                'value' => static function (\common\models\Employee $model) {
+                'value' => static function (Employee $model) {
                     return $model->userOnline ? '<span class="label label-success">Online</span>' : '<span class="label label-danger">Offline</span>';
                 },
                 'format' => 'raw'
@@ -234,7 +271,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             [
                 'label' => 'Call type',
                 'attribute' => 'user_call_type_id',
-                'value' => static function (\common\models\Employee $model) {
+                'value' => static function (Employee $model) {
                     $call_type_id = '';
                     if ($model->userProfile && is_numeric($model->userProfile->up_call_type_id)) {
                         $call_type_id = $model->userProfile->up_call_type_id;
@@ -249,7 +286,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 'label' => 'Call Ready',
                 'filter' => false,
                 //'filter' => [1 => 'Online', $searchModel::STATUS_DELETED => 'Deleted'],
-                'value' => static function (\common\models\Employee $model) {
+                'value' => static function (Employee $model) {
                     return $model->isCallStatusReady() ? '<span class="label label-success">ON</span>' : '<span class="label label-warning">OFF</span>';
                 },
                 'format' => 'raw'
@@ -258,7 +295,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             [
                 'label' => 'User Groups',
                 'attribute' => 'user_group_id',
-                'value' => static function (\common\models\Employee $model) {
+                'value' => static function (Employee $model) {
 
                     $groups = $model->getUserGroupList();
                     $groupsValueArr = [];
@@ -279,7 +316,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             [
                 'label' => 'User Departments',
                 'attribute' => 'user_department_id',
-                'value' => static function (\common\models\Employee $model) {
+                'value' => static function (Employee $model) {
 
                     $list = $model->getUserDepartmentList();
                     $valueArr = [];
@@ -300,7 +337,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             [
                 'label' => 'Projects Params',
                 'attribute' => 'user_params_project_id',
-                'value' => static function (\common\models\Employee $model) {
+                'value' => static function (Employee $model) {
 
                     $str = '<small><table class="table table-bordered">';
 
@@ -327,13 +364,13 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                     return $str;
                 },
                 'format' => 'raw',
-                'filter' => $projectList
+                'filter' => EmployeeProjectAccess::getProjects($user->id)
             ],
 
             [
                 'label' => 'IP filter',
                 'attribute' => 'acl_rules_activated',
-                'value' => static function (\common\models\Employee $model) {
+                'value' => static function (Employee $model) {
                     return $model->acl_rules_activated ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
                 },
                 'format' => 'raw',
@@ -362,8 +399,9 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
         <?php
 
         Modal::begin([
-        'title' => 'Multiple update selected Users',
-        'id' => 'modalUpdate'
+            'title' => 'Multiple update selected Users',
+            'id' => 'modalUpdate',
+            'size' => 'modal-md'
         ]);
         ?>
 
@@ -373,106 +411,111 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
+                            <?= $form->field($multipleForm, 'user_departments')->widget(\kartik\select2\Select2::class, [
+                                'data' => $multipleForm->availableList->getDepartments(),
+                                'size' => \kartik\select2\Select2::SMALL,
+                                'options' => ['placeholder' => 'Select user Departments', 'multiple' => true],
+                                'pluginOptions' => ['allowClear' => true],
+                            ]) ?>
+                            <?= $form->field($multipleForm, 'user_departments_action')->dropDownList($multipleForm::DEPARTMENTS_ACTION_LIST) ?>
 
-                            <?php if ($multipleForm->fieldAccess->canEdit('user_departments')) : ?>
-                                <?= $form->field($multipleForm, 'user_departments')->widget(\kartik\select2\Select2::class, [
-                                    'data' => $multipleForm->availableList->getDepartments(),
-                                    'size' => \kartik\select2\Select2::SMALL,
-                                    'options' => ['placeholder' => 'Select user Departments', 'multiple' => true],
-                                    'pluginOptions' => ['allowClear' => true],
-                                ]) ?>
-                            <?php endif; ?>
+                            <?= $form->field($multipleForm, 'form_roles')->widget(\kartik\select2\Select2::class, [
+                                'data' => $multipleForm->availableList->getRoles(),
+                                'size' => \kartik\select2\Select2::SMALL,
+                                'options' => ['placeholder' => 'Select user roles', 'multiple' => true],
+                                'pluginOptions' => ['allowClear' => true],
+                            ]) ?>
+                            <?= $form->field($multipleForm, 'form_roles_action')->dropDownList($multipleForm::ROLES_ACTION_LIST) ?>
 
-                            <?php if ($multipleForm->fieldAccess->canEdit('form_roles')) : ?>
-                                <?= $form->field($multipleForm, 'form_roles')->widget(\kartik\select2\Select2::class, [
-                                    'data' => $multipleForm->availableList->getRoles(),
-                                    'size' => \kartik\select2\Select2::SMALL,
-                                    'options' => ['placeholder' => 'Select user roles', 'multiple' => true],
-                                    'pluginOptions' => ['allowClear' => true],
-                                ]) ?>
-                            <?php endif; ?>
+                            <?= $form->field($multipleForm, 'user_groups', ['options' => ['class' => 'form-group']])->widget(Select2::class, [
+                                'data' => $multipleForm->availableList->getUserGroups(),
+                                'size' => Select2::SMALL,
+                                'options' => ['placeholder' => 'Select user groups', 'multiple' => true],
+                                'pluginOptions' => ['allowClear' => true],
+                            ]) ?>
+                            <?= $form->field($multipleForm, 'user_groups_action')->dropDownList(MultipleUpdateForm::GROUPS_ACTION_LIST) ?>
 
-                            <?php if ($multipleForm->fieldAccess->canEdit('status')) : ?>
-                                <?= $form->field($multipleForm, 'status')->dropDownList($multipleForm->availableList->getStatuses(), ['prompt' => '']) ?>
-                            <?php endif; ?>
-
-                            <?php if ($multipleForm->fieldAccess->canEdit('up_work_start_tm')) : ?>
-                                <?= $form->field($multipleForm, 'up_work_start_tm')->widget(
-                                    \kartik\time\TimePicker::class,
-                                    [
-                                    'readonly' => true,
-                                    'pluginOptions' => [
-                                        'defaultTime' => false,
-                                        'showSeconds' => false,
-                                        'showMeridian' => false,
-                                    ]]
-                                ) ?>
-                            <?php endif; ?>
-
-                            <?php if ($multipleForm->fieldAccess->canEdit('up_work_minutes')) : ?>
-                                <?= $form->field($multipleForm, 'up_work_minutes')->input('number', ['step' => 10, 'min' => 0])?>
-                            <?php endif; ?>
-
-                            <?php if ($multipleForm->fieldAccess->canEdit('up_timezone')) : ?>
-                                <?= $form->field($multipleForm, 'up_timezone')->widget(\kartik\select2\Select2::class, [
-                                    'data' => $multipleForm->availableList->getTimezones(),
-                                    'size' => \kartik\select2\Select2::SMALL,
-                                    'options' => ['placeholder' => 'Select TimeZone', 'multiple' => false],
-                                    'pluginOptions' => ['allowClear' => true],
-                                ]) ?>
-                            <?php endif; ?>
-
-                            <?php if ($multipleForm->fieldAccess->canEdit('up_inbox_show_limit_leads')) : ?>
-                                <?= $form->field($multipleForm, 'up_inbox_show_limit_leads')->input('number', ['step' => 1, 'min' => 0, 'max' => 500]) ?>
-                            <?php endif; ?>
-
-                            <?php if ($multipleForm->fieldAccess->canEdit('up_default_take_limit_leads')) : ?>
-                                <?= $form->field($multipleForm, 'up_default_take_limit_leads')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
-                            <?php endif; ?>
-
-                            <?php if ($multipleForm->fieldAccess->canEdit('client_chat_user_channel')) : ?>
-                                <?= $form->field($multipleForm, 'client_chat_user_channel')->widget(\kartik\select2\Select2::class, [
-                                    'data' => $multipleForm->availableList->getClientChatUserChannels(),
-                                    'size' => \kartik\select2\Select2::SMALL,
-                                    'options' => ['placeholder' => 'Select Client Chat Channels', 'multiple' => true],
-                                    'pluginOptions' => ['allowClear' => true],
-                                ]) ?>
-                            <?php endif; ?>
-
+                            <?= $form->field($multipleForm, 'client_chat_user_channel')->widget(\kartik\select2\Select2::class, [
+                                'data' => $multipleForm->availableList->getClientChatUserChannels(),
+                                'size' => \kartik\select2\Select2::SMALL,
+                                'options' => ['placeholder' => 'Select Client Chat Channels', 'multiple' => true],
+                                'pluginOptions' => ['allowClear' => true],
+                            ]) ?>
                         </div>
+
                         <div class="col-md-6">
-                            <?php if ($multipleForm->fieldAccess->canEdit('up_min_percent_for_take_leads')) : ?>
-                                <?= $form->field($multipleForm, 'up_min_percent_for_take_leads')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
-                            <?php endif; ?>
-
-                            <?php if ($multipleForm->fieldAccess->canEdit('up_frequency_minutes')) : ?>
-                                <?= $form->field($multipleForm, 'up_frequency_minutes')->input('number', ['step' => 1, 'max' => 1000, 'min' => 0]) ?>
-                            <?php endif; ?>
-
-                            <?php if ($multipleForm->fieldAccess->canEdit('up_base_amount')) : ?>
-                                <?= $form->field($multipleForm, 'up_base_amount')->input('number', ['step' => 0.01, 'min' => 0, 'max' => 1000]) ?>
-                            <?php endif; ?>
-
-                            <?php if ($multipleForm->fieldAccess->canEdit('up_commission_percent')) : ?>
-                                <?= $form->field($multipleForm, 'up_commission_percent')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
-                            <?php endif; ?>
-
-                            <?php if ($multipleForm->fieldAccess->canEdit('up_call_expert_limit')) : ?>
-                                <?= $form->field($multipleForm, 'up_call_expert_limit')->input('number', [ 'step' => 1, 'min' => -1, 'max' => 1000,]) ?>
-                            <?php endif; ?>
-
-                            <?php if ($multipleForm->fieldAccess->canEdit('up_auto_redial')) : ?>
-                                <?= $form->field($multipleForm, 'up_auto_redial')->dropDownList([1 => 'Enable', 0 => 'Disable'], ['prompt' => '']) ?>
-                            <?php endif; ?>
-
-                            <?php if ($multipleForm->fieldAccess->canEdit('up_kpi_enable')) : ?>
-                                <?= $form->field($multipleForm, 'up_kpi_enable')->dropDownList([1 => 'Enable', 0 => 'Disable'], ['prompt' => '']) ?>
-                            <?php endif; ?>
-
-                            <?php if ($multipleForm->fieldAccess->canEdit('up_leaderboard_enabled')) : ?>
-                                <?= $form->field($multipleForm, 'up_leaderboard_enabled')->dropDownList([1 => 'Enable', 0 => 'Disable'], ['prompt' => '']) ?>
-                            <?php endif; ?>
-
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <?= $form->field($multipleForm, 'up_min_percent_for_take_leads')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
+                                </div>
+                                <div class="col-md-6">
+                                    <?= $form->field($multipleForm, 'up_frequency_minutes')->input('number', ['step' => 1, 'max' => 1000, 'min' => 0]) ?>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <?= $form->field($multipleForm, 'up_base_amount')->input('number', ['step' => 0.01, 'min' => 0, 'max' => 1000]) ?>
+                                </div>
+                                <div class="col-md-6">
+                                    <?= $form->field($multipleForm, 'up_commission_percent')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <?= $form->field($multipleForm, 'up_call_expert_limit')->input('number', [ 'step' => 1, 'min' => -1, 'max' => 1000,]) ?>
+                                </div>
+                                <div class="col-md-6">
+                                    <?= $form->field($multipleForm, 'up_auto_redial')->dropDownList([1 => 'Enable', 0 => 'Disable'], ['prompt' => '']) ?>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <?= $form->field($multipleForm, 'up_kpi_enable')->dropDownList([1 => 'Enable', 0 => 'Disable'], ['prompt' => '']) ?>
+                                </div>
+                                <div class="col-md-6">
+                                    <?= $form->field($multipleForm, 'up_leaderboard_enabled')->dropDownList([1 => 'Enable', 0 => 'Disable'], ['prompt' => '']) ?>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <?= $form->field($multipleForm, 'up_inbox_show_limit_leads')->input('number', ['step' => 1, 'min' => 0, 'max' => 500]) ?>
+                                </div>
+                                <div class="col-md-6">
+                                    <?= $form->field($multipleForm, 'up_default_take_limit_leads')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <?= $form->field($multipleForm, 'up_work_start_tm')->widget(
+                                        \kartik\time\TimePicker::class,
+                                        [
+                                            'readonly' => true,
+                                            'pluginOptions' => [
+                                                'defaultTime' => false,
+                                                'showSeconds' => false,
+                                                'showMeridian' => false,
+                                            ]]
+                                    ) ?>
+                                </div>
+                                <div class="col-md-6">
+                                    <?= $form->field($multipleForm, 'up_work_minutes')->input('number', ['step' => 10, 'min' => 0])?>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <?= $form->field($multipleForm, 'up_timezone')->widget(\kartik\select2\Select2::class, [
+                                        'data' => $multipleForm->availableList->getTimezones(),
+                                        'size' => \kartik\select2\Select2::SMALL,
+                                        'options' => ['placeholder' => 'Select TimeZone', 'multiple' => false],
+                                        'pluginOptions' => ['allowClear' => true],
+                                    ]) ?>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <?= $form->field($multipleForm, 'status')->dropDownList($multipleForm->availableList->getStatuses(), ['prompt' => '']) ?>
+                                </div>
+                            </div>
                             <?= $form->field($multipleForm, 'user_list_json')->hiddenInput(['id' => 'user_list_json'])->label(false) ?>
                         </div>
                         <div class="col-md-12">
@@ -501,7 +544,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
 
         <?php
         $js = <<<JS
-
+        sessionStorage.selectedUsers = '{}';
    // $(document).ready(function () {
         $(document).on('click', '.btn-multiple-update', function() {
             

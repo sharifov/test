@@ -67,7 +67,7 @@ class UserSiteActivityLog extends Behavior
              * [UserSiteActivityLog_A_001] BEGIN >>>
              */
 
-            $accessControlModule = \Yii::$app->getModule('requestControl');
+            $accessControlModule = \Yii::$app->getModule('request-control');
 
             if ($accessControlModule !== null && isset($settings['user_site_activity_time'])) {
                 /**

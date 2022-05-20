@@ -281,6 +281,7 @@ class VoluntaryQuoteManualCreateService
         $productQuote->pq_origin_price = $sellingSum;
         $productQuote->pq_client_price = $sellingSum;
         $productQuote->pq_client_currency = $form->currencyCode;
+        $productQuote->pq_expiration_dt = $form->expirationDate;
         $this->objectCollection->getProductQuoteRepository()->save($productQuote);
 
         return $productQuote;

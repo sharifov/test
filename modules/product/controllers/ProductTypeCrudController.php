@@ -3,6 +3,8 @@
 namespace modules\product\controllers;
 
 use frontend\controllers\FController;
+use modules\flight\src\helpers\SettingHelper;
+use modules\product\src\repositories\ProductTypeRepository;
 use src\auth\Auth;
 use Yii;
 use modules\product\src\entities\productType\ProductType;
@@ -85,6 +87,7 @@ class ProductTypeCrudController extends FController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            ProductTypeRepository::clearCacheById($model->pt_id);
             return $this->redirect(['view', 'id' => $model->pt_id]);
         }
 
@@ -102,7 +105,9 @@ class ProductTypeCrudController extends FController
      */
     public function actionDelete($id): Response
     {
-        $this->findModel($id)->delete();
+        $model = $this->findModel($id);
+        $model->delete();
+        ProductTypeRepository::clearCacheById($model->pt_id);
 
         return $this->redirect(['index']);
     }

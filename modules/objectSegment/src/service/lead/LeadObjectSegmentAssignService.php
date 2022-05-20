@@ -31,19 +31,21 @@ class LeadObjectSegmentAssignService implements ObjectSegmentAssigmentServiceInt
                     ['ld_field_key' => LeadDataKeyDictionary::KEY_LEAD_OBJECT_SEGMENT]
                 ]
             );
+            $currentDateTime = date('Y-m-d H:i:s');
             $inserts = [];
             foreach ($values as $value) {
                 $inserts[] = [
                     'ld_lead_id' => $lead->id,
                     'ld_field_key' => LeadDataKeyDictionary::KEY_LEAD_OBJECT_SEGMENT,
-                    'ld_field_value' => $value
+                    'ld_field_value' => $value,
+                    'ld_created_dt' => $currentDateTime
                 ];
             }
             if (count($inserts)) {
                 \Yii::$app
                     ->db
                     ->createCommand()
-                    ->batchInsert(LeadData::tableName(), ['ld_lead_id', 'ld_field_key','ld_field_value'], $inserts)
+                    ->batchInsert(LeadData::tableName(), ['ld_lead_id', 'ld_field_key','ld_field_value', 'ld_created_dt'], $inserts)
                     ->execute();
             }
             $transaction->commit();

@@ -44,6 +44,9 @@ class ClientChatRequest extends \yii\db\ActiveRecord
     public const EVENT_TRACK = 10;
     public const EVENT_CREATE_BY_AGENT = 12;
     public const EVENT_LEAVE_FEEDBACK = 13;
+    public const EVENT_FEEDBACK_REQUESTED = 14;
+    public const EVENT_FEEDBACK_SUBMITTED = 15;
+    public const EVENT_FEEDBACK_REJECTED = 16;
 
     private const EVENT_LIST = [
         self::EVENT_GUEST_CONNECTED => 'GUEST_CONNECTED',
@@ -58,6 +61,9 @@ class ClientChatRequest extends \yii\db\ActiveRecord
         self::EVENT_USER_DEPARTMENT_TRANSFER => 'USER_DEPARTMENT_TRANSFER',
         self::EVENT_TRACK => 'TRACK_EVENT',
         self::EVENT_LEAVE_FEEDBACK => 'LEAVE_FEEDBACK',
+        self::EVENT_FEEDBACK_REQUESTED => 'FEEDBACK_REQUESTED',
+        self::EVENT_FEEDBACK_SUBMITTED => 'FEEDBACK_SUBMITTED',
+        self::EVENT_FEEDBACK_REJECTED => 'FEEDBACK_REJECTED',
         self::EVENT_CREATE_BY_AGENT => 'CREATE_BY_AGENT'
     ];
 

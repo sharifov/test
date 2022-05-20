@@ -92,6 +92,7 @@ class ObjectSegmentRuleController extends FController
             }
 
             if ($osr->save()) {
+                Yii::$app->objectSegment->invalidatePolicyCache();
                 return $this->redirect(['view', 'id' => $osr->osr_id]);
             } else {
                 $model->addErrors($osr->errors);
@@ -135,6 +136,7 @@ class ObjectSegmentRuleController extends FController
             $osr->osr_rule_condition_json = \yii\helpers\Json::encode($rulesData);
 
             if ($osr->save()) {
+                Yii::$app->objectSegment->invalidatePolicyCache();
                 return $this->redirect(['view', 'id' => $osr->osr_id]);
             } else {
                 $model->addErrors($osr->errors);
@@ -163,7 +165,7 @@ class ObjectSegmentRuleController extends FController
     public function actionDelete($id)
     {
         $this->findModel($id)->delete();
-
+        Yii::$app->objectSegment->invalidatePolicyCache();
         return $this->redirect(['index']);
     }
 

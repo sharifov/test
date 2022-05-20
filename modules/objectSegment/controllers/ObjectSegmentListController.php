@@ -63,6 +63,7 @@ class ObjectSegmentListController extends FController
             $osl->osl_description = $model->osl_description;
             $osl->osl_enabled     = $model->osl_enabled;
             if ($osl->save()) {
+                Yii::$app->objectSegment->invalidatePolicyCache();
                 return $this->redirect(['view', 'id' => $osl->osl_id]);
             } else {
                 $model->addErrors($osl->errors);
@@ -94,14 +95,17 @@ class ObjectSegmentListController extends FController
             $osl->osl_enabled = $model->osl_enabled;
 
             if ($osl->save()) {
+                Yii::$app->objectSegment->invalidatePolicyCache();
                 return $this->redirect(['view', 'id' => $osl->osl_id]);
             } else {
                 $model->addErrors($osl->errors);
             }
         } else {
-            $model->osl_title   = $osl->osl_title;
-            $model->osl_enabled = $osl->osl_enabled;
-            $model->osl_ost_id  = $osl->osl_ost_id;
+            $model->osl_title       = $osl->osl_title;
+            $model->osl_enabled     = $osl->osl_enabled;
+            $model->osl_ost_id      = $osl->osl_ost_id;
+            $model->osl_description = $osl->osl_description;
+            $model->osl_key         = $osl->osl_key;
         }
 
 
@@ -134,7 +138,7 @@ class ObjectSegmentListController extends FController
     public function actionDelete($id)
     {
         $this->findModel($id)->delete();
-
+        Yii::$app->objectSegment->invalidatePolicyCache();
         return $this->redirect(['index']);
     }
 

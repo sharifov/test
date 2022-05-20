@@ -13,9 +13,8 @@ class LeadObjectSegmentDto implements ObjectSegmentDtoInterface
     public ?int $pax_adt_count         = null;
     public ?int $pax_chd_count         = null;
     public ?int $pax_inf_count         = null;
-    public ?int $lead_project_id       = null;
-    public ?int $lead_department_id    = null;
-    public ?float $client_budget         = null;
+    public ?string $lead_project_name       = null;
+    public ?string $lead_department_name    = null;
     public ?string $created_dt            = null;
     private int $lead_id;
 
@@ -31,11 +30,8 @@ class LeadObjectSegmentDto implements ObjectSegmentDtoInterface
         $this->pax_adt_count = $lead->adults;
         $this->pax_chd_count = $lead->children;
         $this->pax_inf_count = $lead->infants;
-        if (isset($lead->leadPreferences)) {
-            $this->client_budget = $lead->leadPreferences->clients_budget;
-        }
-        $this->lead_project_id    = $lead->project_id;
-        $this->lead_department_id = $lead->getDepartmentId();
+        $this->lead_project_name    = $lead->project->project_key ?? null;
+        $this->lead_department_name = $lead->lDep->dep_key ?? null;
         $this->created_dt         = $lead->created;
     }
 

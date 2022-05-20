@@ -4,6 +4,7 @@ namespace modules\shiftSchedule\src\forms;
 
 use common\models\Employee;
 use Cron\CronExpression;
+use frontend\helpers\TimeConverterHelper;
 use modules\shiftSchedule\src\entities\shift\Shift;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use src\auth\Auth;
@@ -55,7 +56,7 @@ class ShiftScheduleForm extends Model
             ['ssr_cron_expression', 'string', 'max' => 100],
             ['ssr_cron_expression_exclude', 'string', 'max' => 100],
 
-            ['ssr_duration_time', 'integer', 'max' => self::MAX_VALUE_INT],
+            ['ssr_duration_time', 'datetime', 'format' => 'php:H:i'],
 
             ['ssr_enabled', 'required'],
             ['ssr_enabled', 'integer', 'max' => 1, 'min' => 0],
@@ -66,9 +67,8 @@ class ShiftScheduleForm extends Model
                 'targetClass' => Shift::class, 'targetAttribute' => ['ssr_shift_id' => 'sh_id']],
 
             ['ssr_start_time_loc', 'required'],
-            [['ssr_start_time_loc', 'ssr_end_time_loc'], 'safe'],
+            [['ssr_start_time_loc', 'ssr_end_time_loc'], 'datetime', 'format' => 'php:H:i'],
 
-            ['ssr_start_time_utc', 'required'],
             [['ssr_start_time_utc', 'ssr_end_time_utc'], 'safe'],
 
             ['ssr_timezone', 'string', 'max' => 100],
@@ -120,8 +120,8 @@ class ShiftScheduleForm extends Model
      */
     public function setTimeComplete(): void
     {
-        $this->ssr_end_time_loc = date('H:i', strtotime($this->ssr_start_time_loc) +
-            ($this->ssr_duration_time * 60));
+        $this->ssr_duration_time = TimeConverterHelper::hoursToMinutes($this->ssr_duration_time);
+        $this->ssr_end_time_loc = date('H:i', strtotime($this->ssr_start_time_loc) + $this->ssr_duration_time * 60);
 
         if ($this->ssr_timezone) {
             $this->ssr_start_time_utc = Employee::convertToUTC(
@@ -150,10 +150,5 @@ class ShiftScheduleForm extends Model
         $this->ssr_title = 'Schedule Rule ';
         $this->ssr_enabled = true;
         $this->ssr_cron_expression_exclude = '';
-    }
-
-    public function getDurationTimeHours(): int
-    {
-        return $this->ssr_duration_time ? ($this->ssr_duration_time / 60) : 0;
     }
 }

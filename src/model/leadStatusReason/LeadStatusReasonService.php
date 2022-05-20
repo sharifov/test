@@ -154,7 +154,7 @@ class LeadStatusReasonService
             /** @abac new LeadAbacUserConversionAbacDto($lead, Auth::id()), LeadUserConversionAbacObject::OBJ_USER_CONVERSION, LeadUserConversionAbacObject::ACTION_CREATE, Access to create lead user conversion */
             $canAbac = \Yii::$app->abac->can($abacDto, LeadUserConversionAbacObject::OBJ_USER_CONVERSION, LeadUserConversionAbacObject::ACTION_CREATE);
             if ($canAbac) {
-                if (!$this->leadUserConversionRepository->exist($dto->lead->id, $dto->lead->id)) {
+                if (!$this->leadUserConversionRepository->exist($dto->lead->id, $dto->lead->employee_id)) {
                     $leadUserConversion = LeadUserConversion::create(
                         $dto->lead->id,
                         $dto->lead->employee_id,

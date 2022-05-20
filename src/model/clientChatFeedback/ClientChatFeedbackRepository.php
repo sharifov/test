@@ -2,27 +2,20 @@
 
 namespace src\model\clientChatFeedback;
 
-use src\model\clientChatFeedback\entity\ClientChatFeedback;
-use src\repositories\NotFoundException;
+use src\model\clientChat\entity\ClientChat;
+use src\model\clientChatRequest\useCase\api\create\FeedbackFormBase;
 
 /**
  * Class ClientChatFeedbackRepository
+ * @package src\model\clientChatFeedback`
  */
 class ClientChatFeedbackRepository
 {
-    public function save(ClientChatFeedback $clientChatFeedback): ClientChatFeedback
+    public function save(FeedbackFormBase $feedbackForm, ClientChat $clientChat): FeedbackFormBase
     {
-        if (!$clientChatFeedback->save()) {
+        if ($feedbackForm->syncWithDb($clientChat) === false) {
             throw new \RuntimeException('Client Chat Feedback saving failed');
         }
-        return $clientChatFeedback;
-    }
-
-    public function findById(int $id): ClientChatFeedback
-    {
-        if ($clientChatFeedback = ClientChatFeedback::findOne($id)) {
-            return $clientChatFeedback;
-        }
-        throw new NotFoundException('Client chat Feedback is not found');
+        return $feedbackForm;
     }
 }

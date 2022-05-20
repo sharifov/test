@@ -9,22 +9,25 @@ use modules\user\src\abac\UserAbacObject;
 /**
  * Class FieldAccess
  *
- * @property Employee $user
+ * @property Employee $updaterUser
+ * @property TargetUser $targetUser
  * @property bool $isNewRecord
  * @property array $cache
  */
 class FieldAccess
 {
-    private Employee $user;
+    private Employee $updaterUser;
+    private TargetUser $targetUser;
     private bool $isNewRecord;
     private array $cache = [
         'view' => [],
         'edit' => [],
     ];
 
-    public function __construct(Employee $user, bool $isNewRecord)
+    public function __construct(Employee $updaterUser, Employee $targetUser, bool $isNewRecord)
     {
-        $this->user = $user;
+        $this->updaterUser = $updaterUser;
+        $this->targetUser = new TargetUser($targetUser, $updaterUser);
         $this->isNewRecord = $isNewRecord;
     }
 
@@ -32,6 +35,7 @@ class FieldAccess
     {
         return $this->canEdit('user_departments')
             || $this->canEdit('form_roles')
+            || $this->canEdit('user_groups')
             || $this->canEdit('status')
             || $this->canEdit('up_work_start_tm')
             || $this->canEdit('up_work_minutes')
@@ -93,6 +97,11 @@ class FieldAccess
             || $this->canShow('up_call_recording_disabled');
     }
 
+    public function canShowAnyField(): bool
+    {
+        return $this->canShowProfileWithParameters() || $this->canShowProfileSettings() || $this->canShow('acl_rules_activated');
+    }
+
     public function canShow(string $field): bool
     {
         return $this->canView($field) || $this->canEdit($field);
@@ -103,10 +112,19 @@ class FieldAccess
         if (array_key_exists($field, $this->cache['view'])) {
             return $this->cache['view'][$field];
         }
-        $userAbacDto = new UserAbacDto($field);
-        $userAbacDto->isNewRecord = $this->isNewRecord;
+        $userAbacDto = UserAbacDto::createForUpdate(
+            $field,
+            $this->targetUser->isSameUser(),
+            $this->targetUser->isSameGroup(),
+            $this->targetUser->isSameDepartment(),
+            $this->targetUser->getUsername(),
+            $this->targetUser->getRoles(),
+            $this->targetUser->getProjects(),
+            $this->targetUser->getGroups(),
+            $this->targetUser->getDepartments()
+        );
         /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, User field view*/
-        $this->cache['view'][$field] = \Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, $this->user);
+        $this->cache['view'][$field] = \Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, $this->updaterUser);
         return $this->cache['view'][$field];
     }
 
@@ -115,10 +133,19 @@ class FieldAccess
         if (array_key_exists($field, $this->cache['edit'])) {
             return $this->cache['edit'][$field];
         }
-        $userAbacDto = new UserAbacDto($field);
-        $userAbacDto->isNewRecord = $this->isNewRecord;
+        $userAbacDto = UserAbacDto::createForUpdate(
+            $field,
+            $this->targetUser->isSameUser(),
+            $this->targetUser->isSameGroup(),
+            $this->targetUser->isSameDepartment(),
+            $this->targetUser->getUsername(),
+            $this->targetUser->getRoles(),
+            $this->targetUser->getProjects(),
+            $this->targetUser->getGroups(),
+            $this->targetUser->getDepartments()
+        );
         /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, User field edit*/
-        $this->cache['edit'][$field] = \Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, $this->user);
+        $this->cache['edit'][$field] = \Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, $this->updaterUser);
         return $this->cache['edit'][$field];
     }
 }

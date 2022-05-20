@@ -312,37 +312,6 @@ $clientCurrencySymbol = CurrencyHelper::getSymbolByCode($lead->leadPreferences->
 }
 ?>
     </datalist>
-<script>
-    var sliderRank = document.getElementById('search-quote-rank-slider');
-
-    var maxRank = sliderRank.getAttribute('data-max'),
-        minRank = sliderRank.getAttribute('data-min'),
-        stepRank = 0.1;
-
-    noUiSlider.create(sliderRank, {
-        start: ['<?= $ranks[0] ?>', '<?= $ranks[1] ?>'],
-        connect: [false, true, false],
-        tooltips: [
-            {to: function(value) {return value.toFixed(1)}},
-            {to: function(value) {return value.toFixed(1)}}
-        ],
-        step: stepRank,
-        range: {
-            'min': Number(minRank),
-            'max': Number(maxRank)
-        }
-    });
-
-    sliderRank.noUiSlider.on('update', function (values, handle) {
-        $('#search-quote-current-rank-value').html(Number(values[0]).toFixed(1) + ' - ' + Number(values[1]).toFixed(1));
-    });
-
-    sliderRank.noUiSlider.on('end', function(values) {
-        $('#flightquotesearchform-rank').val(Number(values[0]).toFixed(1) + '-' + Number(values[1]).toFixed(1));
-    });
-</script>
-
-
 <?php
 $css = <<<CSS
     .noUi-connect {

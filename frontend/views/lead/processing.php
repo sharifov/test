@@ -144,11 +144,15 @@ $this->registerJs($js);
                 'clientOptions' => [
                     'autoclose' => true,
                     'format' => 'yyyy-mm-dd',
+                    'clearBtn' => true
                 ],
                 'options' => [
                     'autocomplete' => 'off',
                     'placeholder' => 'Choose Date'
                 ],
+                'clientEvents' => [
+                    'clearDate' => 'function (e) {$(e.target).find("input").change();}',
+                ]
             ]),
         ],
 
@@ -285,11 +289,15 @@ $this->registerJs($js);
                 'clientOptions' => [
                     'autoclose' => true,
                     'format' => 'yyyy-mm-dd',
+                    'clearBtn' => true
                 ],
                 'options' => [
                     'autocomplete' => 'off',
                     'placeholder' => 'Choose Date'
                 ],
+                'clientEvents' => [
+                    'clearDate' => 'function (e) {$(e.target).find("input").change();}',
+                ]
             ]),
         ],
 

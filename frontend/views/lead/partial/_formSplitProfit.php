@@ -61,7 +61,7 @@ function calcProfitByPercent(obj, total){
     var preValue = obj.defaultValue;
     var percent = parseInt($(obj).val());
     var diffValue = preValue - percent;
-    var amount = (+(total * percent / 100).toFixed(4));
+    var amount = (total * percent / 100).toFixed(2);
     $(obj).parents('.split-row').find('.profit-amount').html(amount);
 
     var otherPercent = 0;
@@ -70,7 +70,7 @@ function calcProfitByPercent(obj, total){
     })
 
     mainAgentPercentVal = 100 - otherPercent;
-    mainAgentProfitVal = (total * mainAgentPercentVal / 100).toFixed(4);
+    mainAgentProfitVal = (total * mainAgentPercentVal / 100).toFixed(2);
     
     mainAgentProfit();
 }
@@ -112,7 +112,7 @@ $this->registerJs($js);
             <?php endif;?>"
              style="display: flex; width: 70px; border: 1px solid #e4e9ee;
               justify-content: center; align-items: center; height: 30px;">
-            <?= (!empty($split->ps_percent)) ? $totalProfit * $split->ps_percent / 100 : '0'?>
+            <?= (!empty($split->ps_percent)) ? number_format($totalProfit * $split->ps_percent / 100, 2, '.', '') : '0' ?>
         </div>
     </div>
     <div class="col-md-3">

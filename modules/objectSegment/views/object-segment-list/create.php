@@ -6,8 +6,8 @@ use yii\helpers\Html;
 /* @var $model \modules\objectSegment\src\forms\ObjectSegmentListForm */
 /* @var $osl \modules\objectSegment\src\entities\ObjectSegmentList*/
 
-$this->title = 'Create Object Segment Rule';
-$this->params['breadcrumbs'][] = ['label' => 'Object Segments', 'url' => ['index']];
+$this->title = 'Create Object Segment List';
+$this->params['breadcrumbs'][] = ['label' => 'Object Segment List', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="abac-policy-create">

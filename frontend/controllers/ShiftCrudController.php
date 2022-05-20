@@ -4,6 +4,8 @@ namespace frontend\controllers;
 
 use modules\shiftSchedule\src\entities\shift\search\SearchShift;
 use modules\shiftSchedule\src\entities\shift\Shift;
+use modules\shiftSchedule\src\entities\shiftScheduleRule\search\SearchShiftScheduleRule;
+use modules\shiftSchedule\src\entities\userShiftAssign\search\SearchUserShiftAssign;
 use Yii;
 use yii\db\StaleObjectException;
 use yii\filters\VerbFilter;
@@ -53,8 +55,30 @@ class ShiftCrudController extends FController
      */
     public function actionView($id): string
     {
+
+        $model = $this->findModel($id);
+        $searchModelRule = new SearchShiftScheduleRule();
+
+        $searchModelUserAssign = new SearchUserShiftAssign();
+
+        $params = Yii::$app->request->queryParams;
+        //$params['ssr_shift_id'] = $model->sh_id;
+
+        $searchModelRule->ssr_shift_id = $model->sh_id;
+        $searchModelUserAssign->usa_sh_id = $model->sh_id;
+
+        $dataProviderRule = $searchModelRule->search($params);
+        $dataProviderUserAssign = $searchModelUserAssign->searchUsersByShift($params);
+
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $model,
+
+            'searchModelRule' => $searchModelRule,
+            'dataProviderRule' => $dataProviderRule,
+
+            'searchModelUserAssign' => $searchModelUserAssign,
+            'dataProviderUserAssign' => $dataProviderUserAssign,
+
         ]);
     }
 

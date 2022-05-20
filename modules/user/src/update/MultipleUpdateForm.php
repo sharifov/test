@@ -4,6 +4,7 @@ namespace modules\user\src\update;
 
 use common\components\validators\IsArrayValidator;
 use common\models\Employee;
+use src\model\clientChatChannel\entity\ClientChatChannel;
 use yii\base\Model;
 
 /**
@@ -14,7 +15,9 @@ use yii\base\Model;
  *
  * @property $status
  * @property $form_roles
- * @property $user_departments
+ * @property $form_roles_action
+ * @property array $user_departments
+ * @property $user_departments_action
  * @property $client_chat_user_channel
  *
  * @property $up_work_start_tm
@@ -31,7 +34,6 @@ use yii\base\Model;
  * @property $up_auto_redial
  * @property $up_kpi_enable
  *
- * @property FieldAccess $fieldAccess
  * @property AvailableList $availableList
  */
 class MultipleUpdateForm extends Model
@@ -42,7 +44,11 @@ class MultipleUpdateForm extends Model
     public $status;
 
     public $form_roles;
+    public $form_roles_action;
+    public $user_groups;
+    public $user_groups_action;
     public $user_departments;
+    public $user_departments_action;
     public $client_chat_user_channel;
 
     public $up_work_start_tm;
@@ -60,12 +66,40 @@ class MultipleUpdateForm extends Model
     public $up_auto_redial;
     public $up_kpi_enable;
 
-    public FieldAccess $fieldAccess;
     public AvailableList $availableList;
+
+    public const GROUP_ADD = 1;
+    public const GROUP_REPLACE = 2;
+    public const GROUP_DELETE = 3;
+
+    public const GROUPS_ACTION_LIST = [
+        self::GROUP_ADD => 'Add',
+        self::GROUP_REPLACE => 'Replace',
+        self::GROUP_DELETE => 'Remove',
+    ];
+
+    public const ROLE_ADD = 1;
+    public const ROLE_REPLACE   = 2;
+    public const ROLE_REMOVE = 3;
+
+    public const ROLES_ACTION_LIST = [
+        self::ROLE_ADD => 'Add',
+        self::ROLE_REPLACE => 'Replace',
+        self::ROLE_REMOVE => 'Remove'
+    ];
+
+    public const DEPARTMENT_ADD = 1;
+    public const DEPARTMENT_REPLACE   = 2;
+    public const DEPARTMENT_REMOVE = 3;
+
+    public const DEPARTMENTS_ACTION_LIST = [
+        self::DEPARTMENT_ADD => 'Add',
+        self::DEPARTMENT_REPLACE => 'Replace',
+        self::DEPARTMENT_REMOVE => 'Remove'
+    ];
 
     public function __construct(Employee $updaterUser, $config = [])
     {
-        $this->fieldAccess = new FieldAccess($updaterUser, false);
         $this->availableList = new AvailableList($updaterUser);
 
         parent::__construct($config);
@@ -107,10 +141,26 @@ class MultipleUpdateForm extends Model
             ['form_roles', IsArrayValidator::class],
             ['form_roles', 'each', 'rule' => ['in', 'range' => array_keys($this->availableList->getRoles())]],
 
+            ['form_roles_action', 'default', 'value' => self::ROLE_ADD],
+            ['form_roles_action', 'integer'],
+            ['form_roles_action', 'in', 'range' => array_keys(self::ROLES_ACTION_LIST)],
+
+            ['user_groups', 'default', 'value' => []],
+            ['user_groups', IsArrayValidator::class],
+            ['user_groups', 'each', 'rule' => ['in', 'range' => array_keys($this->availableList->getUserGroups())]],
+
+            ['user_groups_action', 'default', 'value' => self::GROUP_ADD],
+            ['user_groups_action', 'integer'],
+            ['user_groups_action', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
+
             ['user_departments', 'default', 'value' => []],
             ['user_departments', IsArrayValidator::class],
             ['user_departments', 'each', 'rule' => ['filter', 'filter' => 'intval']],
             ['user_departments', 'each', 'rule' => ['in', 'range' => array_keys($this->availableList->getDepartments())]],
+
+            ['user_departments_action', 'default', 'value' => self::DEPARTMENT_ADD],
+            ['user_departments_action', 'integer'],
+            ['user_departments_action', 'in', 'range' => array_keys(self::DEPARTMENTS_ACTION_LIST)],
 
             ['client_chat_user_channel', 'default', 'value' => []],
             ['client_chat_user_channel', IsArrayValidator::class],
@@ -176,7 +226,10 @@ class MultipleUpdateForm extends Model
             'user_list_json' => 'Selected Users JSON',
             'status' => 'Status',
             'form_roles' => 'Roles',
+            'form_roles_action' => 'Roles Action',
+            'user_groups' => 'Assign User Groups',
             'user_departments' => 'Departments',
+            'user_departments_action' => 'Departments Action',
             'client_chat_user_channel' => 'Client Chat Channels',
             'up_work_start_tm' => 'Work Start Time',
             'up_work_minutes' => 'Work minutes',
@@ -192,5 +245,20 @@ class MultipleUpdateForm extends Model
             'up_auto_redial' => 'Auto redial',
             'up_kpi_enable' => 'KPI enable',
         ];
+    }
+
+    public function getChangedClientChatsChannels(): array
+    {
+        $clientChatChannel = ClientChatChannel::find()->where(['in', 'ccc_id', $this->client_chat_user_channel])->orderBy(['ccc_name' => SORT_ASC])->all();
+        if ($clientChatChannel) {
+            return \yii\helpers\ArrayHelper::map($clientChatChannel, 'ccc_id', 'ccc_name');
+        }
+
+        return [];
+    }
+
+    public function groupActionIsReplace(): bool
+    {
+        return $this->user_groups_action === self::GROUP_REPLACE;
     }
 }

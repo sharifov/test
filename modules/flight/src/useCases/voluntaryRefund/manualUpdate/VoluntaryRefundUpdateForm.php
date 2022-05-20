@@ -3,6 +3,7 @@
 namespace modules\flight\src\useCases\voluntaryRefund\manualUpdate;
 
 use common\components\validators\CheckIsNumberValidator;
+use common\components\validators\NormalizeDateValidator;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 
 /**
@@ -29,6 +30,7 @@ class VoluntaryRefundUpdateForm extends \src\forms\CompositeForm
     public $totalProcessingFee;
     public $totalAirlinePenalty;
     public $totalRefundable;
+    public ?string $expirationDate = null;
 
     public function __construct(ProductQuoteRefund $productQuoteRefund, $config = [])
     {
@@ -63,7 +65,7 @@ class VoluntaryRefundUpdateForm extends \src\forms\CompositeForm
     public function rules(): array
     {
         return [
-            [['totalProcessingFee', 'totalAirlinePenalty', 'totalRefundable', 'totalPaid'], 'required'],
+            [['totalProcessingFee', 'totalAirlinePenalty', 'totalRefundable', 'totalPaid', 'expirationDate'], 'required'],
 
             [['totalProcessingFee', 'totalAirlinePenalty', 'totalRefundable', 'totalPaid', 'refundCost'], 'number', 'min' => 0],
             [['totalProcessingFee', 'totalAirlinePenalty', 'totalRefundable', 'totalPaid', 'refundCost'], 'filter', 'filter' => 'floatval'],
@@ -72,7 +74,18 @@ class VoluntaryRefundUpdateForm extends \src\forms\CompositeForm
             [['currency', 'bookingId'], 'safe'],
             [['refundId'], 'integer'],
 
-            ['tickets', 'safe']
+            ['tickets', 'safe'],
+            ['expirationDate', NormalizeDateValidator::class],
+            ['expirationDate', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
         ];
+    }
+
+    /**
+     * @param string $date
+     * @return void
+     */
+    public function setExpirationDate(string $date): void
+    {
+        $this->expirationDate = $date;
     }
 }

@@ -8,6 +8,7 @@ use modules\flight\models\FlightQuote;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteData\ProductQuoteDataKey;
 use yii\helpers\Html;
+use src\helpers\product\ProductQuoteHelper;
 
 /* @var $this yii\web\View */
 /* @var $productQuote ProductQuote*/
@@ -22,6 +23,7 @@ use yii\helpers\Html;
             <table class="table table-striped table-bordered">
                 <tr>
                     <th style="width: 50px">Id</th>
+                    <th>Exp.</th>
                     <th>Status</th>
                     <th>Service Fee, USD</th>
                     <th>Markup, USD</th>
@@ -31,6 +33,9 @@ use yii\helpers\Html;
                 </tr>
                 <tr>
                     <td class="text-center"><?= $productQuote->pq_id ?></td>
+                    <td class="text-center <?= (ProductQuoteHelper::checkingExpirationDate($productQuote) ? 'success' : 'danger') ?>">
+                        <?= Yii::$app->formatter->asDatetime($productQuote->pq_expiration_dt) ?>
+                    </td>
                     <td class="text-center"><?= \modules\product\src\entities\productQuote\ProductQuoteStatus::asFormat($productQuote->pq_status_id) ?></td>
                     <td class="text-right" title="Service fee percent: <?= $productQuote->pq_service_fee_percent ?> %">
                         $<?= number_format($productQuote->pq_service_fee_sum, 2) ?>

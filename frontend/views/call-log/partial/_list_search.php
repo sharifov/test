@@ -143,7 +143,7 @@ use common\models\Project;
                 <div class="col-md-12">
                     <div class="form-group text-center">
                         <?= Html::submitButton('<i class="fa fa-search"></i> Search', ['class' => 'btn btn-primary']) ?>
-                        <?= Html::resetButton('<i class="fa fa-close"></i> Reset form', ['class' => 'btn btn-default']) ?>
+                        <?= Html::a('<i class="fa fa-close"></i> Reset form', ['list'], ['class' => 'btn btn-default']) ?>
                     </div>
                 </div>
             </div>

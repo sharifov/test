@@ -57,7 +57,20 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $model->shiftScheduleRules ? Html::a(
                         count($model->shiftScheduleRules),
                         ['shift-schedule-rule-crud/index', 'SearchShiftScheduleRule[ssr_shift_id]' => $model->sh_id],
-                        ['data-pjax' => 0]
+                        ['data-pjax' => 0, 'target' => '_blank']
+                    )
+                        : '-';
+                },
+                'format' => 'raw'
+            ],
+
+            [
+                'label' => 'Users',
+                'value' => static function (Shift $model) {
+                    return $model->userShiftAssigns ? Html::a(
+                        count($model->userShiftAssigns),
+                        ['shift/user-shift-assign/index', 'UserShiftAssignListSearch[shiftId]' => $model->sh_id],
+                        ['data-pjax' => 0, 'target' => '_blank']
                     )
                         : '-';
                 },

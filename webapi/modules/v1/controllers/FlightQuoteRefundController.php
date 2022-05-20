@@ -4,6 +4,7 @@ namespace webapi\modules\v1\controllers;
 
 use common\components\BackOffice;
 use frontend\helpers\JsonHelper;
+use modules\flight\src\useCases\api\voluntaryRefundExpired\VoluntaryRefundExpiredJob;
 use modules\flight\models\FlightRequest;
 use modules\flight\models\query\FlightRequestQuery;
 use modules\flight\src\repositories\flightRequest\FlightRequestRepository;
@@ -27,6 +28,7 @@ use src\entities\cases\CaseEventLog;
 use src\exception\BoResponseException;
 use src\helpers\app\AppHelper;
 use src\helpers\app\HttpStatusCodeHelper;
+use src\helpers\product\ProductQuoteRefundHelper;
 use src\helpers\setting\SettingHelper;
 use src\repositories\product\ProductQuoteRepository;
 use src\services\CurrencyHelper;
@@ -732,6 +734,18 @@ class FlightQuoteRefundController extends ApiBaseController
      *      "errors": []
      *  }
      *
+     * @apiErrorExample {json} Error-Response:
+     * HTTP/1.1 410 Gone
+     * {
+     *        "status": 410,
+     *        "message": "Date 2022-05-20 23:59:59 has past",
+     *        "errors": [],
+     *        "code": "13115",
+     *        "technical": {
+     *           ...
+     *        }
+     * }
+     *
      * @apiErrorExample {json} Error-Response Validation:
      * HTTP/1.1 200 OK
      * {
@@ -764,6 +778,7 @@ class FlightQuoteRefundController extends ApiBaseController
      *      13107 - Validation Failed
      *      13112 - Not found refund in pending status by booking and gid
      *      13113 - Flight Request already processing; This feature helps to handle duplicate requests
+     *      13115 - Date is expired
      *      15411 - Request to BO failed; See tab "Error From BO"
      *      15412 - BO endpoint is not set; This is system crm error
      *      150001 - Flight Request saving failed; This is system crm error
@@ -846,6 +861,22 @@ class FlightQuoteRefundController extends ApiBaseController
                 throw new \RuntimeException(
                     'Not found pending product quote refund by bookingId(' . $voluntaryRefundConfirmForm->bookingId . ') and refund gid (' . $voluntaryRefundConfirmForm->refundGid . ')',
                     ApiCodeException::DATA_NOT_FOUND
+                );
+            }
+
+            if (!ProductQuoteRefundHelper::checkingExpirationDate($productQuoteRefund)) {
+                $flightRequest->fr_job_id = \Yii::$app->queue_job
+                    ->priority(10)
+                    ->push(new VoluntaryRefundExpiredJob(
+                        $flightRequest->fr_id,
+                        $productQuoteRefund->pqr_id
+                    ));
+                $this->flightRequestRepository->save($flightRequest);
+
+                return new ErrorResponse(
+                    new StatusCodeMessage(HttpStatusCodeHelper::GONE),
+                    new MessageMessage(sprintf('Date %s has past', $productQuoteRefund->pqr_expiration_dt)),
+                    new CodeMessage(ApiCodeException::DATA_EXPIRED)
                 );
             }
 

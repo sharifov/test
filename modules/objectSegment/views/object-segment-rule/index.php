@@ -72,6 +72,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'id' => 'object-segment-list-filter',
                 'data' => $objectSegmentList,
                 'format'    => 'raw',
+                'pluginOptions' => ['allowClear' => true],
             ],
             [
                 'attribute' => 'osr_rule_condition',
@@ -102,11 +103,11 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'class' => ActionColumn::class,
-                'template' => '{view} {update} {copy} {delete}',
+                'template' => '{view} {update} {clone} {delete}',
                 'buttons' => [
-                    'copy' => function ($action, $model, $key) {
+                    'clone' => function ($action, $model, $key) {
                         $url = Url::toRoute(['/object-segment/object-segment-rule/create?osr_parent_id=' . $model->osr_id]);
-                        return Html::a('<i class="fa fa-copy"></i>', $url, ['title' => 'Copy']);
+                        return Html::a('<i class="fa fa-copy"></i>', $url, ['title' => 'Clone']);
                     },
                 ]
             ],

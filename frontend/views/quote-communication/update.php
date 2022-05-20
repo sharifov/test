@@ -11,9 +11,9 @@ $this->params['breadcrumbs'][] = ['label' => 'Quote Communication', 'url' => ['i
 $this->params['breadcrumbs'][] = ['label' => $model->qc_id, 'url' => ['view', 'qc_id' => $model->qc_id]];
 $this->params['breadcrumbs'][] = 'Update';
 ?>
-<div class="email-quote-update">
+<div class="quote-communication-update">
 
-    <h1><?= Html::encode($this->title) ?></h1>
+    <?= Html::tag('h1', Html::encode($this->title)) ?>
 
     <?= $this->render('_form', [
         'model' => $model,

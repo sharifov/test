@@ -461,10 +461,13 @@ class Email extends \yii\db\ActiveRecord
             }
             /** @fflag FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES, A/B testing for email offer templates enable/disable */
             if ($this->e_status_id !== self::STATUS_ERROR && Yii::$app->ff->can(FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES)) {
-                EmailTemplateOfferABTestingService::incrementCounterByTemplateAndProjectIds(
-                    $this->e_template_type_id,
-                    $this->e_project_id
-                );
+                if ($this->e_template_type_id && $this->e_project_id && isset($this->eLead)) {
+                    EmailTemplateOfferABTestingService::incrementCounterByTemplateAndProjectIds(
+                        $this->e_template_type_id,
+                        $this->e_project_id,
+                        $this->eLead->l_dep_id
+                    );
+                }
             }
             if ($this->e_id && $this->e_lead_id && LeadPoorProcessingService::checkEmailTemplate($tplType)) {
                 LeadPoorProcessingService::addLeadPoorProcessingRemoverJob(

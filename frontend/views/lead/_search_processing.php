@@ -50,7 +50,7 @@ use yii\widgets\ActiveForm;
             <br>
             <div class="form-group text-center">
                 <?= Html::submitButton('<i class="fa fa-search"></i> Search leads', ['class' => 'btn btn-primary']) ?>
-                <?= Html::resetButton('<i class="fa fa-close"></i> Reset form', ['class' => 'btn btn-warning']) ?>
+                <?= Html::a('<i class="fa fa-close"></i> Reset form', ['queue/processing'], ['class' => 'btn btn-warning']) ?>
             </div>
         </div>
     </div>

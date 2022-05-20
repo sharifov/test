@@ -13,6 +13,12 @@
 /*    min-height: 100px;*/
 /*}*/
 
+.ssc {
+    max-height: 750px;
+    border-radius: 12px;
+    border: 3px dashed #e4e4e4;
+    overflow: hidden;
+}
 .ssc .mbsc-segmented {
   max-width: 600px;
   margin: 0 auto;
@@ -113,4 +119,48 @@
     bottom: 16px;
     right: 16px;
 }
+.calendar-filter-overlay {
+    display: flex;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 10;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0,0,0,0.4);
+    color: #ffc500;
+    margin: 0 10px;
+    border-radius: 13px;
+}
 /** END CALENDAR **/
+
+.selected-event {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+}
+.selected-event span {
+    position: absolute;
+    right: -6px;
+    top: -2px;
+    color: red;
+    font-size: 24px;
+}
+
+.selected-event .circle {
+    width: 15px;
+    height: 15px;
+    background-color: #bb2f2f;
+    border: 2px solid #ff8686;
+    border-radius: 100%;
+}
+
+#calendar.multiple-manage-mode {
+    border-color: red;
+}
