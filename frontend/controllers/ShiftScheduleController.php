@@ -792,9 +792,10 @@ class ShiftScheduleController extends FController
                 ],
             ]
         );
+        $userId = Auth::id();
         $dataProvider = $searchModel->searchByUsers(
             $queryParams,
-            [Auth::id()],
+            [$userId],
             date('Y-m-d', strtotime('now')),
             date('Y-m-d', strtotime('+1 year'))
         );
@@ -818,7 +819,8 @@ class ShiftScheduleController extends FController
     public function actionScheduleRequestHistoryAjax(): string
     {
         $searchModel = new ShiftScheduleRequestSearch();
-        $dataProvider = $searchModel->searchByUsers(Yii::$app->request->queryParams, [Auth::id()]);
+        $userId = Auth::id();
+        $dataProvider = $searchModel->searchByUsers(Yii::$app->request->queryParams, [$userId]);
 
         return $this->renderAjax('partial/_request-history', [
             'searchModel' => $searchModel,
