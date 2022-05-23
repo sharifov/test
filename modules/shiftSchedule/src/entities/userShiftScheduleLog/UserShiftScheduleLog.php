@@ -1,0 +1,113 @@
+<?php
+
+namespace modules\shiftSchedule\src\entities\userShiftScheduleLog;
+
+use common\models\Employee;
+use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
+use yii\behaviors\BlameableBehavior;
+use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
+use yii\db\BaseActiveRecord;
+
+/**
+ * This is the model class for table "user_shift_schedule_log".
+ *
+ * @property int|null $ussl_id
+ * @property int|null $ussl_uss_id
+ * @property string|null $ussl_old_attr
+ * @property string|null $ussl_new_attr
+ * @property string|null $ussl_formatted_attr
+ * @property int|null $ussl_created_user_id
+ * @property string|null $ussl_created_dt
+ * @property int|null $ussl_month_start
+ * @property int|null $ussl_year_start
+ * @property-read \yii\db\ActiveQuery $userShiftSchedule
+ * @property-read \yii\db\ActiveQuery $userCreated
+ */
+class UserShiftScheduleLog extends \yii\db\ActiveRecord
+{
+    /**
+     * {@inheritdoc}
+     */
+    public static function tableName(): string
+    {
+        return 'user_shift_schedule_log';
+    }
+
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    BaseActiveRecord::EVENT_BEFORE_INSERT => ['ussl_created_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s'),
+            ],
+            'user' => [
+                'class' => BlameableBehavior::class,
+                'attributes' => [
+                    BaseActiveRecord::EVENT_BEFORE_INSERT => ['ussl_created_user_id'],
+                ]
+            ],
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function rules(): array
+    {
+        return [
+            [['ussl_uss_id'], 'required'],
+            [['ussl_id', 'ussl_uss_id', 'ussl_created_user_id', 'ussl_month_start', 'ussl_year_start'], 'integer'],
+            [['ussl_old_attr', 'ussl_new_attr', 'ussl_formatted_attr', 'ussl_created_dt'], 'safe'],
+
+            [['ussl_created_user_id'], 'exist', 'skipOnEmpty' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['ussl_created_user_id' => 'id']],
+            [['ussl_uss_id'], 'exist', 'skipOnEmpty' => true, 'targetClass' => UserShiftSchedule::class, 'targetAttribute' => ['ussl_uss_id' => 'uss_id']]
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function attributeLabels(): array
+    {
+        return [
+            'ussl_id' => 'ID',
+            'ussl_uss_id' => 'User Shift Schedule',
+            'ussl_old_attr' => 'Old Attr',
+            'ussl_new_attr' => 'New Attr',
+            'ussl_formatted_attr' => 'Formatted Attr',
+            'ussl_created_user_id' => 'Created User',
+            'ussl_created_dt' => 'Created Dt',
+            'ussl_month_start' => 'Month Start',
+            'ussl_year_start' => 'Year Start',
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     * @return Scopes the active query used by this AR class.
+     */
+    public static function find(): Scopes
+    {
+        return new Scopes(static::class);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getUserShiftSchedule(): ActiveQuery
+    {
+        return $this->hasOne(UserShiftSchedule::class, ['uss_id' => 'ussl_uss_id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getUserCreated(): ActiveQuery
+    {
+        return $this->hasOne(Employee::class, ['id' => 'ussl_created_user_id']);
+    }
+}
