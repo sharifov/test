@@ -620,20 +620,17 @@ class UserStatsReport extends Model
         if (Metrics::isSalesConversion($this->metrics)) {
             $data['conversion_percent'] = [
                 'Name' => 'Conversion Percent',
-                'average' => $this->getAvgValueColumn(
-                    $results,
-                    'conversion_percent'
+                'average' => $this->getConversionPercent(
+                    $results
                 ),
+                'total' => null
             ];
         }
         if (Metrics::isSoldLeads($this->metrics)) {
             $data['sold_leads'] = [
                 'Name' => 'Sold Leads',
+                'average' => null,
                 'total' => $this->getSumColumn(
-                    $results,
-                    'sold_leads'
-                ),
-                'average' => $this->getAvgValueColumn(
                     $results,
                     'sold_leads'
                 ),
@@ -774,6 +771,22 @@ class UserStatsReport extends Model
         $count = count($array);
         if ($count) {
             return round($this->getSumColumn($array, $key) / $count, $precision);
+        }
+        return 0;
+    }
+
+    private function getConversionPercent(array $results): float
+    {
+        $sumSoldLeads           = $this->getSumColumn(
+            $results,
+            'sold_leads'
+        );
+        $sumQualifiedLeadsTaken = $this->getSumColumn(
+            $results,
+            'qualified_leads_taken'
+        );
+        if ($sumQualifiedLeadsTaken) {
+            return $sumSoldLeads / $sumQualifiedLeadsTaken * 100;
         }
         return 0;
     }

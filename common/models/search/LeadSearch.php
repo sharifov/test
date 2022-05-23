@@ -893,7 +893,7 @@ class LeadSearch extends Lead
             if (isset($this->employee_id)) {
                 $leadIds = LeadUserConversion
                     ::find()
-                    ->select(['luc_lead_id', 'luc_user_id'])
+                    ->select(['luc_lead_id'])
                     ->where(['luc_user_id' => $this->employee_id])
                     ->groupBy(['luc_lead_id']);
             } else {
