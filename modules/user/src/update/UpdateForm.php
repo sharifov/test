@@ -113,11 +113,11 @@ class UpdateForm extends Model
     public FieldAccess $fieldAccess;
     public AvailableList $availableList;
 
-    public function __construct(Employee $targetUser, Employee $updaterUser, UserParams $userParams, UserProfile $userProfile, $config = [])
+    public function __construct(Employee $targetUser, Employee $updaterUser, UserParams $userParams, UserProfile $userProfile, FieldAccess $fieldAccess, $config = [])
     {
         $this->targetUser = $targetUser;
         $this->updaterUser = $updaterUser;
-        $this->fieldAccess = new FieldAccess($updaterUser, false);
+        $this->fieldAccess = $fieldAccess;
         $this->availableList = new AvailableList($updaterUser);
 
         $this->setAttributes($targetUser->getAttributes(), false);
@@ -185,7 +185,7 @@ class UpdateForm extends Model
         return false;
     }
 
-    public function getUserDepartmens(): array
+    public function getUserDepartments(): array
     {
         $departments = Department::find()->where(['in', 'dep_id', $this->user_departments])->orderBy(['dep_name' => SORT_ASC])->all();
         if ($departments) {

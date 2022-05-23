@@ -31,8 +31,6 @@ $user = Yii::$app->user->identity;
 $isUM = $user->isUserManager();
 $isAdmin = $user->isAdmin() || $user->isSuperAdmin();
 
-$projectList = EmployeeProjectAccess::getProjects($user->id);
-
 ?>
 <div class="employee-index">
 
@@ -71,7 +69,11 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 <?php
                 foreach ($multipleErrors as $userId => $multipleError) {
                     echo 'UserId: ' . $userId . ' <br>';
-                    echo VarDumper::dumpAsString($multipleError) . ' <br><br>';
+                    echo '<div>';
+                    foreach ($multipleError as $error) {
+                        echo VarDumper::dumpAsString($error) . '<br>';
+                    }
+                    echo '</div><br>';
                 }
                 ?>
                 <?= $multipleForm->getErrors() ? VarDumper::dumpAsString($multipleForm->getErrorSummary(true)) : '' ?>
@@ -87,7 +89,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
         ?>
     <?php endif;?>
 
-    <?php if (($user->isAdmin() || $user->isSupervision()) && $multipleForm->fieldAccess->canEditOneOfMultipleFields()) : ?>
+    <?php if (Auth::can('employee/multipleUpdate')) : ?>
         <p>
             <?php //= Html::a('Create Lead', ['create'], ['class' => 'btn btn-success']) ?>
             <?php // \yii\helpers\Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-warning', 'data-toggle'=> 'modal', 'data-target'=>'#modalUpdate' ])?>
@@ -133,7 +135,8 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
         'columns' => [
             [
                 'class' => 'yii\grid\CheckboxColumn',
-                'cssClass' => 'multiple-checkbox'
+                'cssClass' => 'multiple-checkbox',
+                'visible' => Auth::can('employee/multipleUpdate'),
             ],
             [
                 'attribute' => 'id',
@@ -361,7 +364,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                     return $str;
                 },
                 'format' => 'raw',
-                'filter' => $projectList
+                'filter' => EmployeeProjectAccess::getProjects($user->id)
             ],
 
             [
@@ -408,147 +411,109 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <?php if ($multipleForm->fieldAccess->canEdit('user_departments')) : ?>
-                                <?= $form->field($multipleForm, 'user_departments')->widget(\kartik\select2\Select2::class, [
-                                    'data' => $multipleForm->availableList->getDepartments(),
-                                    'size' => \kartik\select2\Select2::SMALL,
-                                    'options' => ['placeholder' => 'Select user Departments', 'multiple' => true],
-                                    'pluginOptions' => ['allowClear' => true],
-                                ]) ?>
-                                <?= $form->field($multipleForm, 'user_departments_action')->dropDownList($multipleForm::DEPARTMENTS_ACTION_LIST) ?>
-                            <?php endif; ?>
+                            <?= $form->field($multipleForm, 'user_departments')->widget(\kartik\select2\Select2::class, [
+                                'data' => $multipleForm->availableList->getDepartments(),
+                                'size' => \kartik\select2\Select2::SMALL,
+                                'options' => ['placeholder' => 'Select user Departments', 'multiple' => true],
+                                'pluginOptions' => ['allowClear' => true],
+                            ]) ?>
+                            <?= $form->field($multipleForm, 'user_departments_action')->dropDownList($multipleForm::DEPARTMENTS_ACTION_LIST) ?>
 
-                            <?php if ($multipleForm->fieldAccess->canEdit('form_roles')) : ?>
-                                <?= $form->field($multipleForm, 'form_roles')->widget(\kartik\select2\Select2::class, [
-                                    'data' => $multipleForm->availableList->getRoles(),
-                                    'size' => \kartik\select2\Select2::SMALL,
-                                    'options' => ['placeholder' => 'Select user roles', 'multiple' => true],
-                                    'pluginOptions' => ['allowClear' => true],
-                                ]) ?>
+                            <?= $form->field($multipleForm, 'form_roles')->widget(\kartik\select2\Select2::class, [
+                                'data' => $multipleForm->availableList->getRoles(),
+                                'size' => \kartik\select2\Select2::SMALL,
+                                'options' => ['placeholder' => 'Select user roles', 'multiple' => true],
+                                'pluginOptions' => ['allowClear' => true],
+                            ]) ?>
+                            <?= $form->field($multipleForm, 'form_roles_action')->dropDownList($multipleForm::ROLES_ACTION_LIST) ?>
 
-                                <?= $form->field($multipleForm, 'form_roles_action')->dropDownList($multipleForm::ROLES_ACTION_LIST) ?>
-                            <?php endif; ?>
+                            <?= $form->field($multipleForm, 'user_groups', ['options' => ['class' => 'form-group']])->widget(Select2::class, [
+                                'data' => $multipleForm->availableList->getUserGroups(),
+                                'size' => Select2::SMALL,
+                                'options' => ['placeholder' => 'Select user groups', 'multiple' => true],
+                                'pluginOptions' => ['allowClear' => true],
+                            ]) ?>
+                            <?= $form->field($multipleForm, 'user_groups_action')->dropDownList(MultipleUpdateForm::GROUPS_ACTION_LIST) ?>
 
-                            <?php if ($multipleForm->fieldAccess->canEdit('user_groups')) : ?>
-                                <?= $form->field($multipleForm, 'user_groups', ['options' => ['class' => 'form-group']])->widget(Select2::class, [
-                                    'data' => $multipleForm->availableList->getUserGroups(),
-                                    'size' => Select2::SMALL,
-                                    'options' => ['placeholder' => 'Select user groups', 'multiple' => true],
-                                    'pluginOptions' => ['allowClear' => true],
-                                ]); ?>
-
-                                <?= $form->field($multipleForm, 'user_groups_action')->dropDownList(MultipleUpdateForm::GROUPS_ACTION_LIST) ?>
-                            <?php endif; ?>
-
-                            <?php if ($multipleForm->fieldAccess->canEdit('client_chat_user_channel')) : ?>
-                                <?= $form->field($multipleForm, 'client_chat_user_channel')->widget(\kartik\select2\Select2::class, [
-                                    'data' => $multipleForm->availableList->getClientChatUserChannels(),
-                                    'size' => \kartik\select2\Select2::SMALL,
-                                    'options' => ['placeholder' => 'Select Client Chat Channels', 'multiple' => true],
-                                    'pluginOptions' => ['allowClear' => true],
-                                ]) ?>
-                            <?php endif; ?>
+                            <?= $form->field($multipleForm, 'client_chat_user_channel')->widget(\kartik\select2\Select2::class, [
+                                'data' => $multipleForm->availableList->getClientChatUserChannels(),
+                                'size' => \kartik\select2\Select2::SMALL,
+                                'options' => ['placeholder' => 'Select Client Chat Channels', 'multiple' => true],
+                                'pluginOptions' => ['allowClear' => true],
+                            ]) ?>
                         </div>
 
                         <div class="col-md-6">
                             <div class="row">
                                 <div class="col-md-6">
-                                    <?php if ($multipleForm->fieldAccess->canEdit('up_min_percent_for_take_leads')) : ?>
-                                        <?= $form->field($multipleForm, 'up_min_percent_for_take_leads')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
-                                    <?php endif; ?>
+                                    <?= $form->field($multipleForm, 'up_min_percent_for_take_leads')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
                                 </div>
                                 <div class="col-md-6">
-                                    <?php if ($multipleForm->fieldAccess->canEdit('up_frequency_minutes')) : ?>
-                                        <?= $form->field($multipleForm, 'up_frequency_minutes')->input('number', ['step' => 1, 'max' => 1000, 'min' => 0]) ?>
-                                    <?php endif; ?>
+                                    <?= $form->field($multipleForm, 'up_frequency_minutes')->input('number', ['step' => 1, 'max' => 1000, 'min' => 0]) ?>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-md-6">
-                                    <?php if ($multipleForm->fieldAccess->canEdit('up_base_amount')) : ?>
-                                        <?= $form->field($multipleForm, 'up_base_amount')->input('number', ['step' => 0.01, 'min' => 0, 'max' => 1000]) ?>
-                                    <?php endif; ?>
+                                    <?= $form->field($multipleForm, 'up_base_amount')->input('number', ['step' => 0.01, 'min' => 0, 'max' => 1000]) ?>
                                 </div>
                                 <div class="col-md-6">
-                                    <?php if ($multipleForm->fieldAccess->canEdit('up_commission_percent')) : ?>
-                                        <?= $form->field($multipleForm, 'up_commission_percent')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
-                                    <?php endif; ?>
+                                    <?= $form->field($multipleForm, 'up_commission_percent')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-md-6">
-                                    <?php if ($multipleForm->fieldAccess->canEdit('up_call_expert_limit')) : ?>
-                                        <?= $form->field($multipleForm, 'up_call_expert_limit')->input('number', [ 'step' => 1, 'min' => -1, 'max' => 1000,]) ?>
-                                    <?php endif; ?>
+                                    <?= $form->field($multipleForm, 'up_call_expert_limit')->input('number', [ 'step' => 1, 'min' => -1, 'max' => 1000,]) ?>
                                 </div>
                                 <div class="col-md-6">
-                                    <?php if ($multipleForm->fieldAccess->canEdit('up_auto_redial')) : ?>
-                                        <?= $form->field($multipleForm, 'up_auto_redial')->dropDownList([1 => 'Enable', 0 => 'Disable'], ['prompt' => '']) ?>
-                                    <?php endif; ?>
+                                    <?= $form->field($multipleForm, 'up_auto_redial')->dropDownList([1 => 'Enable', 0 => 'Disable'], ['prompt' => '']) ?>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-md-6">
-                                    <?php if ($multipleForm->fieldAccess->canEdit('up_kpi_enable')) : ?>
-                                        <?= $form->field($multipleForm, 'up_kpi_enable')->dropDownList([1 => 'Enable', 0 => 'Disable'], ['prompt' => '']) ?>
-                                    <?php endif; ?>
+                                    <?= $form->field($multipleForm, 'up_kpi_enable')->dropDownList([1 => 'Enable', 0 => 'Disable'], ['prompt' => '']) ?>
                                 </div>
                                 <div class="col-md-6">
-                                    <?php if ($multipleForm->fieldAccess->canEdit('up_leaderboard_enabled')) : ?>
-                                        <?= $form->field($multipleForm, 'up_leaderboard_enabled')->dropDownList([1 => 'Enable', 0 => 'Disable'], ['prompt' => '']) ?>
-                                    <?php endif; ?>
+                                    <?= $form->field($multipleForm, 'up_leaderboard_enabled')->dropDownList([1 => 'Enable', 0 => 'Disable'], ['prompt' => '']) ?>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-md-6">
-                                    <?php if ($multipleForm->fieldAccess->canEdit('up_inbox_show_limit_leads')) : ?>
-                                        <?= $form->field($multipleForm, 'up_inbox_show_limit_leads')->input('number', ['step' => 1, 'min' => 0, 'max' => 500]) ?>
-                                    <?php endif; ?>
+                                    <?= $form->field($multipleForm, 'up_inbox_show_limit_leads')->input('number', ['step' => 1, 'min' => 0, 'max' => 500]) ?>
                                 </div>
                                 <div class="col-md-6">
-                                    <?php if ($multipleForm->fieldAccess->canEdit('up_default_take_limit_leads')) : ?>
-                                        <?= $form->field($multipleForm, 'up_default_take_limit_leads')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
-                                    <?php endif; ?>
+                                    <?= $form->field($multipleForm, 'up_default_take_limit_leads')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-md-6">
-                                    <?php if ($multipleForm->fieldAccess->canEdit('up_work_start_tm')) : ?>
-                                        <?= $form->field($multipleForm, 'up_work_start_tm')->widget(
-                                            \kartik\time\TimePicker::class,
-                                            [
-                                                'readonly' => true,
-                                                'pluginOptions' => [
-                                                    'defaultTime' => false,
-                                                    'showSeconds' => false,
-                                                    'showMeridian' => false,
-                                                ]]
-                                        ) ?>
-                                    <?php endif; ?>
+                                    <?= $form->field($multipleForm, 'up_work_start_tm')->widget(
+                                        \kartik\time\TimePicker::class,
+                                        [
+                                            'readonly' => true,
+                                            'pluginOptions' => [
+                                                'defaultTime' => false,
+                                                'showSeconds' => false,
+                                                'showMeridian' => false,
+                                            ]]
+                                    ) ?>
                                 </div>
                                 <div class="col-md-6">
-                                    <?php if ($multipleForm->fieldAccess->canEdit('up_work_minutes')) : ?>
-                                        <?= $form->field($multipleForm, 'up_work_minutes')->input('number', ['step' => 10, 'min' => 0])?>
-                                    <?php endif; ?>
+                                    <?= $form->field($multipleForm, 'up_work_minutes')->input('number', ['step' => 10, 'min' => 0])?>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-md-12">
-                                    <?php if ($multipleForm->fieldAccess->canEdit('up_timezone')) : ?>
-                                        <?= $form->field($multipleForm, 'up_timezone')->widget(\kartik\select2\Select2::class, [
-                                            'data' => $multipleForm->availableList->getTimezones(),
-                                            'size' => \kartik\select2\Select2::SMALL,
-                                            'options' => ['placeholder' => 'Select TimeZone', 'multiple' => false],
-                                            'pluginOptions' => ['allowClear' => true],
-                                        ]) ?>
-                                    <?php endif; ?>
+                                    <?= $form->field($multipleForm, 'up_timezone')->widget(\kartik\select2\Select2::class, [
+                                        'data' => $multipleForm->availableList->getTimezones(),
+                                        'size' => \kartik\select2\Select2::SMALL,
+                                        'options' => ['placeholder' => 'Select TimeZone', 'multiple' => false],
+                                        'pluginOptions' => ['allowClear' => true],
+                                    ]) ?>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-md-12">
-                                    <?php if ($multipleForm->fieldAccess->canEdit('status')) : ?>
-                                        <?= $form->field($multipleForm, 'status')->dropDownList($multipleForm->availableList->getStatuses(), ['prompt' => '']) ?>
-                                    <?php endif; ?>
+                                    <?= $form->field($multipleForm, 'status')->dropDownList($multipleForm->availableList->getStatuses(), ['prompt' => '']) ?>
                                 </div>
                             </div>
                             <?= $form->field($multipleForm, 'user_list_json')->hiddenInput(['id' => 'user_list_json'])->label(false) ?>

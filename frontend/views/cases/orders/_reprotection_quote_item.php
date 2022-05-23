@@ -359,7 +359,7 @@ $productQuoteAbacDto->mapOrderAttributes($order);
                                               <td><small><?=$changeQuote->pq_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($changeQuote->pq_created_dt)) : '-'?></small></td>
                                               <td class="text-center"
                                                   data-toggle="tooltip"
-                                                  data-original-title="Date expiration: <?= ($dateExpiration = Yii::$app->formatter->asDatetime($changeQuote->pq_expiration_dt)) ?>"
+                                                  data-original-title="Date expiration: <?= ($dateExpiration = $changeQuote->pq_expiration_dt ? Yii::$app->formatter->asDatetime($changeQuote->pq_expiration_dt) : 'No set') ?>"
                                                   title="Date expiration: <?= $dateExpiration ?>"
                                               >
                                                   <?= Html::tag(
@@ -582,7 +582,7 @@ $productQuoteAbacDto->mapOrderAttributes($order);
                             <td><small><?=$refundItem->pqr_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($refundItem->pqr_created_dt)) : '-'?></small></td>
                             <td class="text-center"
                                 data-toggle="tooltip"
-                                data-original-title="Date expiration: <?= ($dateExpiration = Yii::$app->formatter->asDatetime($refundItem->pqr_expiration_dt)) ?>"
+                                data-original-title="Date expiration: <?= ($dateExpiration = $refundItem->pqr_expiration_dt ? Yii::$app->formatter->asDatetime($refundItem->pqr_expiration_dt) : 'No set') ?>"
                                 title="Date expiration: <?= $dateExpiration ?>"
                             >
                                 <?= Html::tag(

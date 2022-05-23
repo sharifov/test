@@ -8,8 +8,10 @@ use common\models\query\UserGroupQuery;
 use common\models\UserGroup;
 use common\models\UserGroupAssign;
 use Exception;
+use modules\shiftSchedule\src\abac\dto\ShiftAbacDto;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\entities\shiftScheduleRule\ShiftScheduleRule;
+use modules\shiftSchedule\src\entities\shiftScheduleRequest\search\ShiftScheduleRequestSearch;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\shiftScheduleTypeLabel\ShiftScheduleTypeLabel;
 use modules\shiftSchedule\src\entities\userShiftAssign\UserShiftAssign;
@@ -21,6 +23,7 @@ use modules\shiftSchedule\src\forms\ShiftScheduleCreateForm;
 use modules\shiftSchedule\src\forms\SingleEventCreateForm;
 use modules\shiftSchedule\src\helpers\UserShiftScheduleHelper;
 use modules\shiftSchedule\src\forms\ScheduleRequestForm;
+use modules\shiftSchedule\src\services\ShiftScheduleRequestService;
 use modules\shiftSchedule\src\services\UserShiftScheduleService;
 use src\auth\Auth;
 use src\helpers\app\AppHelper;
@@ -34,6 +37,7 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotAcceptableHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
@@ -60,11 +64,16 @@ class ShiftScheduleController extends FController
             'access' => [
                 'class' => AccessControl::class,
                 'rules' => [
+                    [
+                        'actions' => ['ajax-multiple-delete', 'add-event', 'get-event'],
+                        'allow' => true,
+                        'roles' => ['@']
+                    ],
                     /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_ACCESS, Access to page shift-schedule/index */
                     [
-                        'actions' => ['index', 'my-data-ajax', 'generate-example', 'remove-user-data', 'get-event',
-                            'generate-user-schedule', 'legend-ajax', 'calendar', 'calendar-events-ajax', 'add-event', 'update-single-event',
-                            'schedule-request-ajax'],
+                        'actions' => ['index', 'my-data-ajax', 'generate-example', 'remove-user-data',
+                            'generate-user-schedule', 'legend-ajax', 'calendar', 'calendar-events-ajax', 'update-single-event',
+                            'schedule-request-ajax', 'schedule-pending-requests', 'schedule-request-history-ajax'],
                         'allow' => \Yii::$app->abac->can(
                             null,
                             ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE,
@@ -201,22 +210,25 @@ class ShiftScheduleController extends FController
 //        VarDumper::dump($ids, 10, true);
         // exit;
 
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-            'monthList' => $monthList,
+        return $this->render('index', array_merge(
+            [
+                'searchModel' => $searchModel,
+                'dataProvider' => $dataProvider,
+                'monthList' => $monthList,
 
-            'scheduleTypeList' => $scheduleTypeList,
-            'scheduleTypeLabelList' => $scheduleTypeLabelList,
+                'scheduleTypeList' => $scheduleTypeList,
+                'scheduleTypeLabelList' => $scheduleTypeLabelList,
 
-            'scheduleSumData' => $scheduleSumData,
-            'scheduleLabelSumData' => $scheduleLabelSumData,
+                'scheduleSumData' => $scheduleSumData,
+                'scheduleLabelSumData' => $scheduleLabelSumData,
 
-            'userTimeZone' => $userTimeZone,
-            'user' => $user,
-            'assignedShifts' => $assignedShifts,
-            'subtypeList' => $subtypeList
-        ]);
+                'userTimeZone' => $userTimeZone,
+                'user' => $user,
+                'assignedShifts' => $assignedShifts,
+                'subtypeList' => $subtypeList,
+            ],
+            $this->getSchedulePendingRequestsParams(),
+        ));
     }
 
     /**
@@ -365,10 +377,15 @@ class ShiftScheduleController extends FController
     /**
      * @param int|null $userId
      * @return Response
-     * @throws Exception
+     * @throws NotAcceptableHttpException
      */
     public function actionGenerateExample(?int $userId = null): Response
     {
+        $abac = Yii::$app->abac;
+        /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_GENERATE_EXAMPLE_DATA, Access to generate-example shift-schedule/* */
+        if (!$abac->can(null, ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_GENERATE_EXAMPLE_DATA)) {
+            throw new NotAcceptableHttpException('Access denied');
+        }
         if ($userId) {
             $route = ['shift-schedule/user', 'id' => $userId];
         } else {
@@ -389,9 +406,15 @@ class ShiftScheduleController extends FController
     /**
      * @param int|null $userId
      * @return Response
+     * @throws NotAcceptableHttpException
      */
     public function actionRemoveUserData(?int $userId = null): Response
     {
+        $abac = Yii::$app->abac;
+        /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_REMOVE_ALL_USER_SCHEDULE, Access to remove-user-data shift-schedule/* */
+        if (!$abac->can(null, ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_REMOVE_ALL_USER_SCHEDULE)) {
+            throw new NotAcceptableHttpException('Access denied');
+        }
         if ($userId) {
             $route = ['shift-schedule/user', 'id' => $userId];
         } else {
@@ -408,10 +431,15 @@ class ShiftScheduleController extends FController
     /**
      * @param int|null $userId
      * @return Response
+     * @throws NotAcceptableHttpException
      */
     public function actionGenerateUserSchedule(?int $userId = null): Response
     {
-
+        $abac = Yii::$app->abac;
+        /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_GENERATE_USER_SCHEDULE, Access to generate-user-schedule shift-schedule/* */
+        if (!$abac->can(null, ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_GENERATE_USER_SCHEDULE)) {
+            throw new NotAcceptableHttpException('Access denied');
+        }
         if ($userId) {
             $route = ['shift-schedule/user', 'id' => $userId];
         } else {
@@ -451,7 +479,10 @@ class ShiftScheduleController extends FController
             throw new NotFoundHttpException('Not exist this Shift Schedule (' . $eventId . ')');
         }
 
-        if ($event->uss_user_id !== Auth::id() && (!Auth::user()->isAdmin() && !Auth::user()->isSuperAdmin())) {
+
+        $dto = new ShiftAbacDto();
+        $dto->setIsEventOwner($event->isOwner(Auth::id()));
+        if (!Yii::$app->abac->can($dto, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_READ)) {
             throw new NotAcceptableHttpException('Permission Denied (' . $eventId . ')');
         }
 
@@ -534,6 +565,11 @@ class ShiftScheduleController extends FController
 
     public function actionAddEvent()
     {
+        /** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_CREATE, Create user shift schedule event */
+        if (!Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_CREATE)) {
+            throw new ForbiddenHttpException('Access Denied');
+        }
+
         $form = new ShiftScheduleCreateForm();
 
         $usersGroupAssign = [];
@@ -718,6 +754,23 @@ class ShiftScheduleController extends FController
         return $out;
     }
 
+    public function actionAjaxMultipleDelete(): Response
+    {
+        /** @abac ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_MULTIPLE_DELETE_EVENTS, Access to delete multiple events */
+        if (!Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_MULTIPLE_DELETE_EVENTS)) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
+        $eventIds = Yii::$app->request->post('selectedEvents', []);
+
+        UserShiftSchedule::deleteAll(['uss_id' => $eventIds]);
+
+        return $this->asJson([
+            'error' => false,
+            'message' => ''
+        ]);
+    }
+
     /**
      * @param string $str
      * @param string $term
@@ -726,5 +779,52 @@ class ShiftScheduleController extends FController
     private static function formatText(string $str, string $term): string
     {
         return preg_replace('~' . $term . '~i', '<b style="color: #e15554"><u>$0</u></b>', $str);
+    }
+
+    private function getSchedulePendingRequestsParams(): array
+    {
+        $searchModel = new ShiftScheduleRequestSearch();
+        $queryParams = array_merge_recursive(
+            Yii::$app->request->queryParams,
+            [
+                $searchModel->formName() => [
+                    'ssr_status_id' => $searchModel::STATUS_PENDING,
+                ],
+            ]
+        );
+        $userId = Auth::id();
+        $dataProvider = $searchModel->searchByUsers(
+            $queryParams,
+            [$userId],
+            date('Y-m-d', strtotime('now')),
+            date('Y-m-d', strtotime('+1 year'))
+        );
+
+        return [
+            'searchModelPendingRequests' => $searchModel,
+            'dataProviderPendingRequests' => $dataProvider,
+        ];
+    }
+
+    public function actionSchedulePendingRequests(): string
+    {
+        return $this->renderAjax('partial/_pending_requests', $this->getSchedulePendingRequestsParams());
+    }
+
+    /**
+     * Show User Request History
+     * @return string|Response
+     * @throws Exception
+     */
+    public function actionScheduleRequestHistoryAjax(): string
+    {
+        $searchModel = new ShiftScheduleRequestSearch();
+        $userId = Auth::id();
+        $dataProvider = $searchModel->searchByUsers(Yii::$app->request->queryParams, [$userId]);
+
+        return $this->renderAjax('partial/_request-history', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
     }
 }

@@ -74,7 +74,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'options' => [
                     'style' => 'width: 10%',
                 ],
-                'filter' => ShiftScheduleRequest::getList(),
+                'filter' => ShiftScheduleRequest::getStatusList(),
                 'format' => 'raw',
             ],
             [

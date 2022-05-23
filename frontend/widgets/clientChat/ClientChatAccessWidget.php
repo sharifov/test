@@ -114,6 +114,7 @@ class ClientChatAccessWidget extends Widget
         foreach ($accessItems as $key => $access) {
             $accessItems[$key]['html'] = $this->render('cc_request_item', ['access' => $access, 'formatter' => $formatter, 'user' => $user]);
             $accessItems[$key]['ccua_created_t'] = strtotime($access['ccua_created_dt']);
+            $accessItems[$key]['cch_updated_t'] = strtotime($access['cch_updated_dt']);
         }
         return $accessItems;
     }
@@ -142,7 +143,7 @@ class ClientChatAccessWidget extends Widget
 
         $accessItem['html'] = $this->render('cc_request_item', ['access' => $accessItem, 'formatter' => $formatter, 'user' => $user]);
         $accessItem['ccua_created_t'] = strtotime($accessItem['ccua_created_dt']);
-        $accessItem['cch_created_t'] = strtotime($accessItem['cch_created_dt']);
+        $accessItem['cch_updated_t'] = strtotime($accessItem['cch_updated_dt']);
 
         return $accessItem;
     }
