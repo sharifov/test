@@ -482,12 +482,12 @@ class UserShiftScheduleService
         $query->where(['uss.uss_user_id' => $userId]);
 
         if (!empty($statusListId)) {
-            $query->andWhere(['IN','uss.uss_status_id', $statusListId]);
+            $query->andWhere(['uss.uss_status_id' => $statusListId]);
         }
 
         if (!empty($subTypeListId)) {
             $query->innerJoin(ShiftScheduleType::tableName() . ' AS sst', 'sst.sst_id = uss.uss_sst_id');
-            $query->andWhere(['IN','sst.sst_subtype_id', $subTypeListId]);
+            $query->andWhere(['sst.sst_subtype_id' => $subTypeListId]);
         }
 
         if (!empty($startDateTime) && !empty($endDateTime)) {
