@@ -8,7 +8,6 @@ use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
 use yii\db\ActiveQuery;
-use yii\helpers\VarDumper;
 
 /**
  * ShiftScheduleRequestSearch represents the model behind the search form of `modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest`.
@@ -79,8 +78,6 @@ class ShiftScheduleRequestSearch extends ShiftScheduleRequest
         ]);
 
         $query->andFilterWhere(['like', 'ssr_description', $this->ssr_description]);
-
-        VarDumper::dump($query->createCommand()->getRawSql(), 10, true);
 
         return $dataProvider;
     }
