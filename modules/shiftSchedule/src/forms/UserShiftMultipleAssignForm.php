@@ -5,7 +5,6 @@ namespace modules\shiftSchedule\src\forms;
 use common\components\validators\IsArrayValidator;
 use common\models\Employee;
 use modules\shiftSchedule\src\entities\shift\Shift;
-use src\dictionary\ActionDictionary;
 use yii\base\Model;
 
 /**
@@ -13,6 +12,16 @@ use yii\base\Model;
  */
 class UserShiftMultipleAssignForm extends Model
 {
+    public const ACTION_ADD = 'add';
+    public const ACTION_REPLACE   = 'replace';
+    public const ACTION_REMOVE = 'remove';
+
+    public const ACTION_LIST = [
+        self::ACTION_ADD => 'Add',
+        self::ACTION_REPLACE => 'Replace',
+        self::ACTION_REMOVE => 'Remove'
+    ];
+
     public $userIds;
     public $shftIds;
     public $formAction;
@@ -29,9 +38,9 @@ class UserShiftMultipleAssignForm extends Model
             [['shftIds'], 'each', 'rule' => ['filter', 'filter' => 'intval']],
             [['shftIds'], 'each', 'rule' => ['exist', 'targetClass' => Shift::class, 'targetAttribute' => 'sh_id']],
 
-            ['formAction', 'default', 'value' => ActionDictionary::ACTION_ADD],
+            ['formAction', 'default', 'value' => self::ACTION_ADD],
             ['formAction', 'string'],
-            ['formAction', 'in', 'range' => array_keys(ActionDictionary::BASE_ACTION_LIST)],
+            ['formAction', 'in', 'range' => array_keys(self::ACTION_LIST)],
         ];
     }
 

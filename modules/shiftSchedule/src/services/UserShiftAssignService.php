@@ -4,26 +4,26 @@ namespace modules\shiftSchedule\src\services;
 
 use modules\shiftSchedule\src\entities\userShiftAssign\repository\UserShiftAssignRepository;
 use modules\shiftSchedule\src\entities\userShiftAssign\UserShiftAssign;
-use src\dictionary\ActionDictionary;
+use modules\shiftSchedule\src\forms\UserShiftMultipleAssignForm;
 
 class UserShiftAssignService
 {
     public function multipleAssign($shiftIds, $userIds, $formAction)
     {
         switch ($formAction) {
-            case ActionDictionary::ACTION_ADD:
+            case UserShiftMultipleAssignForm::ACTION_ADD:
                 if ($shiftIds) {
                     $this->multipleAddAssign($shiftIds, $userIds);
                 }
                 break;
 
-            case ActionDictionary::ACTION_REPLACE:
+            case UserShiftMultipleAssignForm::ACTION_REPLACE:
                 if ($shiftIds) {
                     $this->multipleReplaceAssign($shiftIds, $userIds);
                 }
                 break;
 
-            case ActionDictionary::ACTION_REMOVE:
+            case UserShiftMultipleAssignForm::ACTION_REMOVE:
                 if ($shiftIds) {
                     UserShiftAssign::deleteAll(['usa_user_id' => $userIds, 'usa_sh_id' => $shiftIds]);
                 } else {

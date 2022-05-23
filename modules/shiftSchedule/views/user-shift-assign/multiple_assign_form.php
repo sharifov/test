@@ -43,7 +43,7 @@ use yii\widgets\Pjax;
             'pluginOptions' => ['allowClear' => true],
         ]); ?>
 
-        <?= $form->field($userShiftMultipleAssignForm, 'formAction')->dropDownList(ActionDictionary::BASE_ACTION_LIST) ?>
+        <?= $form->field($userShiftMultipleAssignForm, 'formAction')->dropDownList(UserShiftMultipleAssignForm::ACTION_LIST) ?>
         <br />
         <br />
         <div class="form-group">
