@@ -67,6 +67,13 @@ use yii\widgets\Pjax;
                 ],
                 [
                     'class' => DateTimeColumn::class,
+                    'attribute' => 'pqr_expiration_dt',
+                    'options' => [
+                        'width' => '200px;'
+                    ]
+                ],
+                [
+                    'class' => DateTimeColumn::class,
                     'attribute' => 'pqr_created_dt',
                     'options' => [
                         'width' => '200px;'

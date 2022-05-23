@@ -152,7 +152,7 @@ class UserShiftScheduleService
                     'display' => 'block', // 'list-item' , 'background'
                     //'textColor' => 'black' // an option!
                     'extendedProps' => [
-                        'icon' => $item->shiftScheduleType->sst_icon_class,
+                        'icon' => $item->shiftScheduleType->sst_icon_class ?? '',
                     ]
                 ];
 
@@ -319,14 +319,21 @@ class UserShiftScheduleService
                                         }
                                     }
 
+                                    $timeStartSec = strtotime($date . ' ' . $rule->ssr_start_time_utc);
+                                    $timeEndSec = strtotime($date . ' ' . $rule->ssr_end_time_utc);
+
+                                    if ($timeStartSec > $timeEndSec) {
+                                        $timeEndSec = $timeEndSec + (24 * 60 * 60);
+                                    }
+
                                     $timeStart = date(
                                         'Y-m-d H:i:s',
-                                        strtotime($date . ' ' . $rule->ssr_start_time_utc)
+                                        $timeStartSec
                                     );
 
                                     $timeEnd = date(
                                         'Y-m-d H:i:s',
-                                        strtotime($date . ' ' . $rule->ssr_end_time_utc)
+                                        $timeEndSec
                                     );
 
                                     if (isset($timeLineData[$user->usa_user_id][$rule->ssr_id][$timeStart])) {
@@ -387,6 +394,11 @@ class UserShiftScheduleService
         $timeStart = strtotime($date . ' ' . $rule->ssr_start_time_utc);
         $timeEnd = strtotime($date . ' ' . $rule->ssr_end_time_utc);
 
+
+        if ($timeStart > $timeEnd) {
+            $timeEnd = $timeEnd + (24 * 60 * 60);
+        }
+
         $tl->uss_start_utc_dt = date('Y-m-d H:i:s', $timeStart);
         $tl->uss_end_utc_dt = date('Y-m-d H:i:s', $timeEnd);
         //$duration = (strtotime($tl->uss_end_utc_dt) - strtotime($tl->uss_end_utc_dt)) / 60;
@@ -423,11 +435,12 @@ class UserShiftScheduleService
 
     public function createManual(ShiftScheduleCreateForm $form, int $userId, ?string $userTimeZone)
     {
-        $startDateTime = new \DateTimeImmutable($form->startDateTime, $userTimeZone ? new \DateTimeZone($userTimeZone) : null);
+        $startDateTime = new \DateTimeImmutable($form->dateTimeStart, $userTimeZone ? new \DateTimeZone($userTimeZone) : null);
         $startDateTime = $startDateTime->setTimezone(new \DateTimeZone('UTC'));
-        $duration = explode(':', $form->duration);
-        $endDateTime = $startDateTime->add(new \DateInterval('PT' . $duration[0] . 'H' . $duration[1] . 'M'));
-        $duration = ($duration[0] * 60) + $duration[1];
+        $endDateTime = new \DateTimeImmutable($form->dateTimeEnd, $userTimeZone ? new \DateTimeZone($userTimeZone) : null);
+        $endDateTime = $endDateTime->setTimezone(new \DateTimeZone('UTC'));
+        $interval = $startDateTime->diff($endDateTime);
+        $diffMinutes = $interval->i + ($interval->h * 60);
 
         $userShiftScheduleCreatedList = [];
         foreach ($form->getUsersBatch() as $user) {
@@ -436,7 +449,7 @@ class UserShiftScheduleService
                 $form->description,
                 $startDateTime->format('Y-m-d H:i:s'),
                 $endDateTime->format('Y-m-d H:i:s'),
-                $duration,
+                $diffMinutes,
                 $form->status,
                 UserShiftSchedule::TYPE_MANUAL,
                 $form->scheduleType
@@ -513,11 +526,11 @@ class UserShiftScheduleService
         ?array $statusListId = [],
         ?array $subTypeListId = []
     ): array {
+        $employee = Employee::find()->where(['id' => $userId])->limit(1)->one();
+        $startDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($startDt), $employee);
+        $endDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($endDt), $employee);
 
-        $startDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($startDt));
-        $endDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($endDt));
-
-        if ($statusListId == null) {
+        if ($statusListId === null) {
             $statusListId = [UserShiftSchedule::STATUS_APPROVED, UserShiftSchedule::STATUS_DONE];
         }
 
@@ -530,18 +543,19 @@ class UserShiftScheduleService
 
     public function createSingleManual(SingleEventCreateForm $form, int $userId, ?string $userTimeZone): UserShiftSchedule
     {
-        $startDateTime = new \DateTimeImmutable($form->startDateTime, $userTimeZone ? new \DateTimeZone($userTimeZone) : null);
+        $startDateTime = new \DateTimeImmutable($form->dateTimeStart, $userTimeZone ? new \DateTimeZone($userTimeZone) : null);
         $startDateTime = $startDateTime->setTimezone(new \DateTimeZone('UTC'));
-        $duration = explode(':', $form->duration);
-        $endDateTime = $startDateTime->add(new \DateInterval('PT' . $duration[0] . 'H' . $duration[1] . 'M'));
-        $duration = ($duration[0] * 60) + $duration[1];
+        $endDateTime = new \DateTimeImmutable($form->dateTimeEnd, $userTimeZone ? new \DateTimeZone($userTimeZone) : null);
+        $endDateTime = $endDateTime->setTimezone(new \DateTimeZone('UTC'));
+        $interval = $startDateTime->diff($endDateTime);
+        $diffMinutes = $interval->i + ($interval->h * 60);
 
         $userShiftSchedule = UserShiftSchedule::create(
             $form->userId,
             $form->description,
             $startDateTime->format('Y-m-d H:i:s'),
             $endDateTime->format('Y-m-d H:i:s'),
-            $duration,
+            $diffMinutes,
             $form->status,
             UserShiftSchedule::TYPE_MANUAL,
             $form->scheduleType

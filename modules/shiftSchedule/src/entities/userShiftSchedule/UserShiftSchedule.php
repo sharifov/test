@@ -53,7 +53,7 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
     public const STATUS_CANCELED = 6;
     public const STATUS_DELETED = 8;
 
-    public const DEFAULT_DURATION = '08:00';
+    public const DEFAULT_DURATION_HOURS = 8;
 
     private const STATUS_LIST = [
         self::STATUS_PENDING => 'Pending',
@@ -316,5 +316,10 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
         $self->uss_type_id = $type;
         $self->uss_sst_id = $scheduleType;
         return $self;
+    }
+
+    public function isOwner(int $userId): bool
+    {
+        return $this->uss_user_id === $userId;
     }
 }

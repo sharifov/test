@@ -48,6 +48,7 @@ use yii\db\ActiveQuery;
 use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
+use modules\lead\src\abac\queue\LeadQueueBusinessInboxAbacObject;
 
 /**
  * LeadSearch represents the model behind the search form of `common\models\Lead`.
@@ -279,6 +280,7 @@ class LeadSearch extends Lead
             'callsQtyFrom' => 'Calls From', 'callsQtyTo' => 'Calls To',
             'chatsQtyFrom' => 'Chats From', 'chatsQtyTo' => 'Chats To',
             'projectId' => 'Project',
+            'userGroupId' => 'User Group',
             'quoteTypeId' => 'Quote Type',
             'includedFiles' => 'Included Files',
             'origin_airport' => 'Origin Location Code',
@@ -888,9 +890,19 @@ class LeadSearch extends Lead
         }
 
         if (ArrayHelper::isIn($this->is_conversion, ['1', '0'], false)) {
-            $leadIds = LeadUserConversion::find()
-                ->select('luc_lead_id')
-                ->groupBy(['luc_lead_id']);
+            if (isset($this->employee_id)) {
+                $leadIds = LeadUserConversion
+                    ::find()
+                    ->select(['luc_lead_id', 'luc_user_id'])
+                    ->where(['luc_user_id' => $this->employee_id])
+                    ->groupBy(['luc_lead_id']);
+            } else {
+                $leadIds = LeadUserConversion
+                    ::find()
+                    ->select('luc_lead_id')
+                    ->groupBy(['luc_lead_id']);
+            }
+
 
             $command = $this->is_conversion ? 'IN' : 'NOT IN';
 
@@ -899,6 +911,10 @@ class LeadSearch extends Lead
                 'leads.id',
                 $leadIds
             ]);
+        }
+
+        if ($this->userGroupId) {
+            $query->andWhere(['employee_id' => UserGroupAssign::find()->select(['ugs_user_id'])->andWhere(['ugs_group_id' => $this->userGroupId])]);
         }
 
         return $dataProvider;
@@ -2884,9 +2900,25 @@ class LeadSearch extends Lead
         ]);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
+        }
+
+        /** @abac null, LeadQueueBusinessInboxAbacObject::QUERY_LISTING, LeadQueueBusinessInboxAbacObject::ACTION_READ_WT_USER_RESTRICTION, Shown leads where user restriction */
+        $canUserRestriction = \Yii::$app->abac->can(
+            null,
+            LeadQueueBusinessInboxAbacObject::QUERY_LISTING,
+            LeadQueueBusinessInboxAbacObject::ACTION_READ_WT_USER_RESTRICTION
+        );
+        if ($canUserRestriction) {
+            $query->leftJoin(ProfitSplit::tableName(), 'ps_lead_id = ' . $leadTable . '.id AND ps_user_id = ' . $user->id);
+            $query->leftJoin(TipsSplit::tableName(), 'ts_lead_id = ' . $leadTable . '.id AND ts_user_id = ' . $user->id);
+            $query->andWhere(['OR',
+                [$leadTable . '.employee_id' => $user->id],
+                ['IS', $leadTable . '.employee_id', null],
+                ['ps_user_id' => $user->id],
+                ['ts_user_id' => $user->id]
+            ]);
         }
 
         // grid filtering conditions
@@ -2905,7 +2937,6 @@ class LeadSearch extends Lead
 
         if ($this->limit > 0) {
             $query->limit($this->limit);
-            //$dataProvider->setTotalCount($this->limit);
         }
 
         $query->with(['client']);
@@ -3211,18 +3242,13 @@ class LeadSearch extends Lead
         ]);
 
         if (ArrayHelper::isIn($this->is_conversion, ['1', '0'], false)) {
-            $leadIds = LeadUserConversion::find()
-                ->select('luc_lead_id')
-                ->groupBy(['luc_lead_id'])
-                ->indexBy('luc_lead_id')
-                ->column();
-            $command = $this->is_conversion ? 'IN' : 'NOT IN';
-
-            $query->andWhere([
-                $command,
-                $leadTable . '.id',
-                $leadIds
-            ]);
+            $lucTableName = LeadUserConversion::tableName();
+            if ($this->is_conversion) {
+                $query->innerJoin($lucTableName . ' AS luc', 'luc.luc_lead_id=id');
+            } else {
+                $query->innerJoin($lucTableName . ' AS luc', 'luc.luc_lead_id=id')
+                      ->andWhere(['luc.luc_lead_id' => new Expression('null')]);
+            }
         }
 
         $query->with(['client',  'employee']);

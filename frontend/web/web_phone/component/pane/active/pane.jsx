@@ -226,8 +226,8 @@ function AddInBlacklist(props) {
         <div className="sound-indication">
             <div className="sound-control-wrap">
                 <small className="contact-info-card__call-info btn-add-in-blacklist" data-phone={call.data.contact.phone}>
-                    <i className="fas fa-address-book"/>
-                    <span style={{"marginLeft":"10px", "color": "#fff"}}> Add in black list</span>
+                    <i className="fas fa-ban text-danger"/>
+                    <span style={{"marginLeft":"10px", "color": "#fff"}}> Add in block list</span>
                 </small>
             </div>
         </div>

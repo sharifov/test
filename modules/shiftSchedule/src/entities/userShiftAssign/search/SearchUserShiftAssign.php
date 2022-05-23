@@ -2,6 +2,7 @@
 
 namespace modules\shiftSchedule\src\entities\userShiftAssign\search;
 
+use common\models\Employee;
 use yii\data\ActiveDataProvider;
 use modules\shiftSchedule\src\entities\userShiftAssign\UserShiftAssign;
 
@@ -34,6 +35,36 @@ class SearchUserShiftAssign extends UserShiftAssign
             // $query->where('0=1');
             return $dataProvider;
         }
+
+        $query->andFilterWhere([
+            'usa_user_id' => $this->usa_user_id,
+            'usa_sh_id' => $this->usa_sh_id,
+            'date(usa_created_dt)' => $this->usa_created_dt,
+            'usa_created_user_id' => $this->usa_created_user_id,
+        ]);
+
+        return $dataProvider;
+    }
+
+    public function searchUsersByShift($params): ActiveDataProvider
+    {
+        //$query = static::find();
+
+        $query = Employee::find();
+        $query->alias('u');
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+
+        $query->innerJoin(UserShiftAssign::tableName(), 'usa_user_id = u.id');
 
         $query->andFilterWhere([
             'usa_user_id' => $this->usa_user_id,

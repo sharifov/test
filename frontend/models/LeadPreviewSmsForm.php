@@ -29,8 +29,6 @@ use yii\base\Model;
  * @property AbacSmsFromNumberList $smsFromNumberList
  *
  */
-
-
 class LeadPreviewSmsForm extends Model
 {
     public $s_lead_id;
@@ -41,6 +39,8 @@ class LeadPreviewSmsForm extends Model
     public $s_user_id;
     public $s_language_id;
     public $s_quote_list;
+
+    public $s_qc_uid;
 
     public $is_send;
 
@@ -59,14 +59,14 @@ class LeadPreviewSmsForm extends Model
     public function rules(): array
     {
         return [
-            [['s_lead_id', 's_phone_from', 's_phone_to', 's_sms_message'], 'required'],
+            [['s_lead_id', 's_phone_from', 's_phone_to', 's_sms_message', 's_qc_uid'], 'required'],
             [['s_sms_message'], 'trim'],
             //[['s_type_id'], 'validateType'],
 
             [['s_sms_tpl_id', 's_lead_id', 's_user_id'], 'integer'],
             [['s_sms_message'], 'string', 'min' => 10],
 
-            [['s_quote_list'], 'string'],
+            [['s_quote_list', 's_qc_uid'], 'string'],
 
             [['s_phone_to', 's_phone_from'], 'string', 'max' => 30],
             [['s_phone_to', 's_phone_from'], PhoneInputValidator::class, 'enableClientValidation' => false],
@@ -99,13 +99,14 @@ class LeadPreviewSmsForm extends Model
     public function attributeLabels(): array
     {
         return [
-            's_lead_id'       => 'Lead Id',
-            's_phone_to'  => 'Phone Number To',
-            's_phone_from'  => 'Phone Number From',
-            's_sms_tpl_id'    => 'SMS Template',
-            's_sms_message'   => 'SMS Message',
-            's_language_id'     => 'Language',
-            's_user_id'         => 'Agent ID',
+            's_lead_id' => 'Lead Id',
+            's_phone_to' => 'Phone Number To',
+            's_phone_from' => 'Phone Number From',
+            's_sms_tpl_id' => 'SMS Template',
+            's_sms_message' => 'SMS Message',
+            's_language_id' => 'Language',
+            's_user_id' => 'Agent ID',
+            's_qc_uid' => 'Quote Communication UID'
         ];
     }
 }

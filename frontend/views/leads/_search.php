@@ -72,10 +72,10 @@ use frontend\extensions\DatePicker;
                             <?= $form->field($model, 'lead_type')->dropDownList(Lead::TYPE_LIST, ['prompt' => '-']) ?>
                         </div>
                         <div class="col-md-1">
-                            <?= $form->field($model, 'excludeExtraQueue')->checkbox([])->label('Exclude Extra Queue'); ?>
+                            <?= $form->field($model, 'excludeExtraQueue')->checkbox(['label' => 'Exclude Extra Queue']); ?>
                         </div>
                         <div class="col-md-1">
-                            <?= $form->field($model, 'excludeBonusQueue')->checkbox([])->label('Exclude Bonus Queue / Follow up Queue'); ?>
+                            <?= $form->field($model, 'excludeBonusQueue')->checkbox(['label' => 'Exclude Bonus Queue / Follow up Queue']); ?>
                         </div>
                     </div>
                 </div>
@@ -129,6 +129,15 @@ use frontend\extensions\DatePicker;
                                 'data' => $lists->getEmployees(true),
                                 'size' => Select2::SMALL,
                                 'options' => ['placeholder' => 'Select user', 'multiple' => false],
+                                'pluginOptions' => ['allowClear' => true],
+                            ]); ?>
+                        </div>
+
+                        <div class="col-md-1">
+                            <?php echo $form->field($model, 'userGroupId')->widget(Select2::class, [
+                                'data' => \common\models\UserGroup::getList(),
+                                'size' => Select2::SMALL,
+                                'options' => ['placeholder' => 'Select User Group', 'multiple' => false],
                                 'pluginOptions' => ['allowClear' => true],
                             ]); ?>
                         </div>

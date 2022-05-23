@@ -6,6 +6,11 @@ use common\components\validators\IsArrayValidator;
 use common\models\Employee;
 use common\models\UserParams;
 use common\models\UserProfile;
+use common\models\UserGroup;
+use common\models\Department;
+use common\models\Project;
+use src\model\clientChatChannel\entity\ClientChatChannel;
+use modules\shiftSchedule\src\entities\shift\Shift;
 use yii\base\Model;
 
 /**
@@ -108,11 +113,11 @@ class UpdateForm extends Model
     public FieldAccess $fieldAccess;
     public AvailableList $availableList;
 
-    public function __construct(Employee $targetUser, Employee $updaterUser, UserParams $userParams, UserProfile $userProfile, $config = [])
+    public function __construct(Employee $targetUser, Employee $updaterUser, UserParams $userParams, UserProfile $userProfile, FieldAccess $fieldAccess, $config = [])
     {
         $this->targetUser = $targetUser;
         $this->updaterUser = $updaterUser;
-        $this->fieldAccess = new FieldAccess($updaterUser, false);
+        $this->fieldAccess = $fieldAccess;
         $this->availableList = new AvailableList($updaterUser);
 
         $this->setAttributes($targetUser->getAttributes(), false);
@@ -157,6 +162,16 @@ class UpdateForm extends Model
         return false;
     }
 
+    public function getUserGroups(): array
+    {
+        $groups = UserGroup::find()->where(['in', 'ug_id', $this->user_groups])->orderBy(['ug_name' => SORT_ASC])->all();
+        if ($groups) {
+            return \yii\helpers\ArrayHelper::map($groups, 'ug_id', 'ug_name');
+        }
+
+        return [];
+    }
+
     public function isChangedDepartments(): bool
     {
         if (count($this->targetUser->getRelations()->getDepartments()) !== count($this->user_departments)) {
@@ -168,6 +183,16 @@ class UpdateForm extends Model
             }
         }
         return false;
+    }
+
+    public function getUserDepartments(): array
+    {
+        $departments = Department::find()->where(['in', 'dep_id', $this->user_departments])->orderBy(['dep_name' => SORT_ASC])->all();
+        if ($departments) {
+            return \yii\helpers\ArrayHelper::map($departments, 'dep_id', 'dep_name');
+        }
+
+        return [];
     }
 
     public function isChangedProjects(): bool
@@ -183,6 +208,16 @@ class UpdateForm extends Model
         return false;
     }
 
+    public function getUserProjects(): array
+    {
+        $projects = Project::find()->where(['in', 'id', $this->user_projects])->orderBy(['name' => SORT_ASC])->all();
+        if ($projects) {
+            return \yii\helpers\ArrayHelper::map($projects, 'id', 'name');
+        }
+
+        return [];
+    }
+
     public function isChangedClientChatsChannels(): bool
     {
         if (count($this->targetUser->getRelations()->getClientChatChannels()) !== count($this->client_chat_user_channel)) {
@@ -196,6 +231,16 @@ class UpdateForm extends Model
         return false;
     }
 
+    public function getChangedClientChatsChannels(): array
+    {
+        $clientChatChannel = ClientChatChannel::find()->where(['in', 'ccc_id', $this->client_chat_user_channel])->orderBy(['ccc_name' => SORT_ASC])->all();
+        if ($clientChatChannel) {
+            return \yii\helpers\ArrayHelper::map($clientChatChannel, 'ccc_id', 'ccc_name');
+        }
+
+        return [];
+    }
+
     public function isChangedUserShiftAssign(): bool
     {
         if (count($this->targetUser->getRelations()->getShiftAssigns()) !== count($this->user_shift_assigns)) {
@@ -207,6 +252,15 @@ class UpdateForm extends Model
             }
         }
         return false;
+    }
+
+    public function getChangedUserShiftAssign(): array
+    {
+        $changedUserShiftAssign = Shift::find()->where(['in', 'sh_id', $this->user_shift_assigns])->orderBy(['sh_name' => SORT_ASC])->all();
+        if ($changedUserShiftAssign) {
+            return \yii\helpers\ArrayHelper::map($changedUserShiftAssign, 'sh_id', 'sh_name');
+        }
+        return [];
     }
 
     public function getValuesOfAvailableAttributes(): array

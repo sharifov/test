@@ -213,6 +213,18 @@ class ClientChatService
 
 //        $key = self::getRedisDistributionLogicKey($clientChat->cch_id);
 //        if ($users) {
+
+        if (SettingHelper::isClientChatDebugEnable()) {
+            \Yii::info([
+                'message' => 'Users will be assign to chat',
+                'chatId' => $clientChat->cch_id,
+                'users' => ArrayHelper::getColumn($users, 'id'),
+                'countUsers' => count($users),
+                'microTime' => microtime(true),
+                'date' => date('Y-m-d H:i:s'),
+            ], 'info\ClientChatDebug');
+        }
+
         foreach ($users as $user) {
             $this->sendRequestToUser($clientChat, $user->id);
         }
@@ -267,9 +279,17 @@ class ClientChatService
      */
     public function sendRequestToUser(ClientChat $clientChat, int $agentId): void
     {
-        $clientChatUserAccess = ClientChatUserAccess::create($clientChat->cch_id, $agentId);
-        $clientChatUserAccess->pending();
-        $this->clientChatUserAccessRepository->save($clientChatUserAccess, $clientChat);
+        try {
+            $clientChatUserAccess = ClientChatUserAccess::create($clientChat->cch_id, $agentId);
+            $clientChatUserAccess->pending();
+            $this->clientChatUserAccessRepository->save($clientChatUserAccess, $clientChat);
+        } catch (\Throwable $e) {
+            \Yii::error([
+                'agentId' => $agentId,
+                'chatId' => $clientChat->cch_id,
+                'message' => $e->getMessage(),
+            ], 'ClientChatService::sendRequestToUser');
+        }
     }
 
     /**

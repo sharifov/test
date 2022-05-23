@@ -44,10 +44,6 @@ class RbacMigrationService
                 }
             }
         }
-
-        if (Yii::$app->cache) {
-            Yii::$app->cache->flush();
-        }
     }
 
     /**
@@ -70,10 +66,6 @@ class RbacMigrationService
                     }
                 }
             }
-        }
-
-        if (Yii::$app->cache) {
-            Yii::$app->cache->flush();
         }
     }
 

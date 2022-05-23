@@ -29,6 +29,7 @@ use yii\log\FileTarget;
 use yii\web\JqueryAsset;
 use yii\bootstrap\BootstrapAsset;
 use yii\bootstrap\BootstrapPluginAsset;
+use modules\objectSegment\ObjectSegmentModule;
 
 $params = array_merge(
     require __DIR__ . '/../../common/config/params.php',
@@ -334,7 +335,7 @@ return [
             'class' => ProductModule::class
         ],
 
-        'requestControl' => [
+        'request-control' => [
             'class' => RequestControlModule::class,
             'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
         ],
@@ -351,6 +352,11 @@ return [
 
         'abac' => [
             'class' => AbacModule::class,
+            'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
+        ],
+
+        'object-segment' => [
+            'class' => ObjectSegmentModule::class,
             'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
         ],
 

@@ -5,6 +5,7 @@ namespace webapi\modules\v2\controllers;
 use common\components\jobs\VoluntaryExchangeCreateJob;
 use frontend\helpers\JsonHelper;
 use modules\flight\models\FlightRequest;
+use modules\flight\src\useCases\api\exchangeExpired\ExchangeExpiredJob;
 use modules\flight\src\useCases\voluntaryExchange\codeException\VoluntaryExchangeCodeException;
 use modules\flight\src\useCases\voluntaryExchange\service\BoRequestVoluntaryExchangeService;
 use modules\flight\src\useCases\voluntaryExchange\service\CaseVoluntaryExchangeService as CaseService;
@@ -25,11 +26,13 @@ use modules\product\src\entities\productQuoteData\ProductQuoteData;
 use modules\product\src\entities\productQuoteData\ProductQuoteDataRepository;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundRepository;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundStatus;
+use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use modules\product\src\repositories\ProductableRepository;
 use src\entities\cases\CaseEventLog;
 use src\exception\BoResponseException;
 use src\helpers\app\AppHelper;
 use src\helpers\app\HttpStatusCodeHelper;
+use src\helpers\product\ProductQuoteHelper;
 use src\helpers\setting\SettingHelper;
 use webapi\src\ApiCodeException;
 use webapi\src\logger\ApiLogger;
@@ -814,6 +817,18 @@ class FlightQuoteExchangeController extends BaseController
      * }
      *
      * @apiErrorExample {json} Error-Response:
+     * HTTP/1.1 410 Gone
+     * {
+     *        "status": 410,
+     *        "message": "Date 2022-05-20 23:59:59 has past",
+     *        "errors": [],
+     *        "code": "13115",
+     *        "technical": {
+     *           ...
+     *        }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response:
      * HTTP/1.1 422 Unprocessable entity
      * {
      *        "status": 422,
@@ -834,6 +849,7 @@ class FlightQuoteExchangeController extends BaseController
      *      13101 - Api User has no related project
      *      13106 - Post has not loaded
      *      13107 - Validation Failed
+     *      13115 - Date is expired
      *
      *      13113 - Product Quote not available for exchange
      *      13130 - Request to Back Office is failed
@@ -895,6 +911,22 @@ class FlightQuoteExchangeController extends BaseController
 
         $changeQuote = ProductQuote::findByGid($voluntaryExchangeConfirmForm->quote_gid);
         if (!empty($changeQuote->pq_id)) {
+            if (!ProductQuoteHelper::checkingExpirationDate($changeQuote)) {
+                $flightRequest->fr_job_id = \Yii::$app->queue_job
+                    ->priority(10)
+                    ->push(new ExchangeExpiredJob(
+                        $flightRequest->fr_id,
+                        $changeQuote->pq_id,
+                        ProductQuoteRelation::TYPE_VOLUNTARY_EXCHANGE
+                    ));
+
+                return new ErrorResponse(
+                    new StatusCodeMessage(HttpStatusCodeHelper::GONE),
+                    new MessageMessage(sprintf('Date %s has past', $changeQuote->pq_expiration_dt)),
+                    new CodeMessage(ApiCodeException::DATA_EXPIRED)
+                );
+            }
+
             $pQuoteData = ProductQuoteData::createConfirmed($changeQuote->pq_id);
             $this->productQuoteDataRepository->save($pQuoteData);
         }
