@@ -13,7 +13,7 @@ class m220520_103734_create_user_shift_schedule_log_table extends Migration
     public function safeUp()
     {
         $this->createTable('{{%user_shift_schedule_log}}', [
-            'ussl_id' => $this->integer(),
+            'ussl_id' => $this->integer()->notNull(),
             'ussl_uss_id' => $this->integer()->notNull(),
             'ussl_old_attr' => $this->json(),
             'ussl_new_attr' => $this->json(),
@@ -25,6 +25,7 @@ class m220520_103734_create_user_shift_schedule_log_table extends Migration
         ]);
 
         $this->addPrimaryKey('PK-user_shift_schedule_log', '{{%user_shift_schedule_log}}', ['ussl_id', 'ussl_month_start', 'ussl_year_start']);
+        $this->alterColumn('{{%user_shift_schedule_log}}', 'ussl_id', $this->integer()->notNull() . ' AUTO_INCREMENT');
         $this->createIndex('IND-user_shift_schedule_log-ussl_uss_id', '{{%user_shift_schedule_log}}', 'ussl_uss_id');
         $this->createIndex('IND-user_shift_schedule_log-ussl_created_user_id', '{{%user_shift_schedule_log}}', 'ussl_created_user_id');
 

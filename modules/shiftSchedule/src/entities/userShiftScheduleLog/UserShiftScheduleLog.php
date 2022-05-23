@@ -60,12 +60,23 @@ class UserShiftScheduleLog extends \yii\db\ActiveRecord
     {
         return [
             [['ussl_uss_id'], 'required'],
-            [['ussl_id', 'ussl_uss_id', 'ussl_created_user_id', 'ussl_month_start', 'ussl_year_start'], 'integer'],
+            [['ussl_uss_id', 'ussl_created_user_id', 'ussl_month_start', 'ussl_year_start'], 'integer'],
             [['ussl_old_attr', 'ussl_new_attr', 'ussl_formatted_attr', 'ussl_created_dt'], 'safe'],
 
             [['ussl_created_user_id'], 'exist', 'skipOnEmpty' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['ussl_created_user_id' => 'id']],
             [['ussl_uss_id'], 'exist', 'skipOnEmpty' => true, 'targetClass' => UserShiftSchedule::class, 'targetAttribute' => ['ussl_uss_id' => 'uss_id']]
         ];
+    }
+
+    public function beforeSave($insert): bool
+    {
+        if (!$this->ussl_year_start) {
+            $this->ussl_year_start = (int) date('Y');
+        }
+        if (!$this->ussl_month_start) {
+            $this->ussl_month_start = (int) date('m');
+        }
+        return parent::beforeSave($insert);
     }
 
     /**
