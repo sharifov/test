@@ -166,7 +166,7 @@ JS;
             </div>
         </div>
 
-        <?= $form->field($model, 'description')->textarea(['cols' => 6]) ?>
+        <?= $form->field($model, 'description')->textarea(['cols' => 6, 'style' => 'resize:none; height:100px']) ?>
 
         <div class="modal-footer justify-content-center">
             <?= Html::submitButton('Submit', [
