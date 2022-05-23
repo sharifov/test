@@ -128,7 +128,7 @@ class QuoteHelper
         return '';
     }
 
-    public static function checkHotelsInfo(array $keys): bool
+    public static function checkHotelsInfo(?array $keys): bool
     {
         $info = [];
         $exits = false;
