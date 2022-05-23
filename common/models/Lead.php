@@ -5233,7 +5233,8 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
                 if ($this->isMultiDestination()) {
                     $flexParams['departureFlexd'] .= LeadUrlHelper::formatFlexOptions($entry['flexibility'], $entry['flexibility_type']);
                     if ($key > 1) {
-                        unset($flexParams['departureFlexd']);
+                        //unset($flexParams['departureFlexd']);
+                        $flexParams = ['departureFlexd' => null];
                     }
                 }
             }
