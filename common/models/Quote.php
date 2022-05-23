@@ -465,7 +465,7 @@ class Quote extends \yii\db\ActiveRecord
 
         $quote->setMetricLabels(['action' => 'created', 'type_creation' => 'search']);
 
-        if (isset($entry['tickets'])) {
+        if (isset($quoteData['tickets'])) {
             $quote->tickets = json_encode($quoteData['tickets']);
         }
 
@@ -2778,6 +2778,22 @@ class Quote extends \yii\db\ActiveRecord
     {
         if (($originSearchData = $this->getJsonOriginSearchData()) && !empty($originSearchData['meta'])) {
             return $originSearchData['meta'];
+        }
+        return null;
+    }
+
+    public function getKeysInfo(): ?array
+    {
+        if (($originSearchData = $this->getJsonOriginSearchData()) && !empty($originSearchData['keys'])) {
+            return $originSearchData['keys'];
+        }
+        return null;
+    }
+
+    public function getOriginalSearchDataCurrency(): ?string
+    {
+        if (($originSearchData = $this->getJsonOriginSearchData()) && !empty($originSearchData['currency'])) {
+            return $originSearchData['currency'];
         }
         return null;
     }
