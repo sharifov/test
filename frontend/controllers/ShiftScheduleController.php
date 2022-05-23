@@ -19,6 +19,7 @@ use modules\shiftSchedule\src\entities\userShiftSchedule\search\SearchUserShiftS
 use modules\shiftSchedule\src\entities\userShiftSchedule\search\TimelineCalendarFilter;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftScheduleQuery;
+use modules\shiftSchedule\src\entities\userShiftScheduleLog\search\UserShiftScheduleLogSearch;
 use modules\shiftSchedule\src\forms\ShiftScheduleCreateForm;
 use modules\shiftSchedule\src\forms\SingleEventCreateForm;
 use modules\shiftSchedule\src\helpers\UserShiftScheduleHelper;
@@ -65,7 +66,7 @@ class ShiftScheduleController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['ajax-multiple-delete', 'add-event', 'get-event'],
+                        'actions' => ['ajax-multiple-delete', 'add-event', 'get-event', 'ajax-get-logs'],
                         'allow' => true,
                         'roles' => ['@']
                     ],
@@ -824,5 +825,27 @@ class ShiftScheduleController extends FController
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
+    }
+
+    public function actionAjaxGetLogs($id)
+    {
+        /** @abac ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_VIEW_EVENT_LOG, Access to view event logs */
+        if (!Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_VIEW_EVENT_LOG)) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
+        if (Yii::$app->request->isAjax) {
+            $searchModel = new UserShiftScheduleLogSearch();
+            $params = Yii::$app->request->queryParams;
+            $searchModel->ussl_uss_id = (int)$id;
+            $dataProvider = $searchModel->search($params);
+
+            return $this->renderAjax('partial/_event_logs', [
+                'dataProvider' => $dataProvider,
+                'searchModel' => $searchModel,
+                'id' => $id,
+            ]);
+        }
+        throw new BadRequestHttpException();
     }
 }

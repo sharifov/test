@@ -39,6 +39,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw'
             ],
+            [
+                'attribute' => 'ussl_action_type',
+                'value' => static function (UserShiftScheduleLog $model): string {
+                    return $model->getActionTypeName();
+                },
+                'filter' => UserShiftScheduleLog::ACTION_TYPE_LIST,
+            ],
 //            'ussl_old_attr',
 //            'ussl_new_attr',
 //            'ussl_formatted_attr',

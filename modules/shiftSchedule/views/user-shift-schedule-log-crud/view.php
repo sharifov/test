@@ -1,5 +1,6 @@
 <?php
 
+use modules\shiftSchedule\src\entities\userShiftScheduleLog\UserShiftScheduleLog;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -31,6 +32,12 @@ $this->params['breadcrumbs'][] = $this->title;
         'attributes' => [
             'ussl_id',
             'ussl_uss_id',
+            [
+                'attribute' => 'ussl_action_type',
+                'value' => static function (UserShiftScheduleLog $model): string {
+                    return $model->getActionTypeName();
+                },
+            ],
             'ussl_old_attr',
             'ussl_new_attr',
             'ussl_formatted_attr',

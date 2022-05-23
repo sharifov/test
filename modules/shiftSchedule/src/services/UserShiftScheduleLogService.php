@@ -23,10 +23,11 @@ class UserShiftScheduleLogService
         $this->userShiftScheduleLogRepository = $userShiftScheduleLogRepository;
     }
 
-    public function log(int $userShiftScheduleId, string $oldAttr, string $newAttr, string $formattedAttr, ?int $userId): void
+    public function log(int $userShiftScheduleId, ?int $actionType, ?string $oldAttr, ?string $newAttr, ?string $formattedAttr, ?int $userId): void
     {
         $log = new UserShiftScheduleLog();
         $log->ussl_uss_id = $userShiftScheduleId;
+        $log->ussl_action_type = $actionType;
         $log->ussl_old_attr = $oldAttr;
         $log->ussl_new_attr = $newAttr;
         $log->ussl_formatted_attr = $formattedAttr;

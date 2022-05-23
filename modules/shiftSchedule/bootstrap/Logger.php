@@ -3,8 +3,10 @@
 namespace modules\shiftSchedule\bootstrap;
 
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
+use modules\shiftSchedule\src\entities\userShiftScheduleLog\UserShiftScheduleLog;
 use modules\shiftSchedule\src\services\UserShiftScheduleAttributeFormatService;
 use modules\shiftSchedule\src\services\UserShiftScheduleLogService;
+use src\helpers\app\AppHelper;
 use yii\base\BootstrapInterface;
 use yii\base\Event;
 use yii\db\ActiveRecord;
@@ -17,8 +19,7 @@ class Logger implements BootstrapInterface
      */
     public function bootstrap($app): void
     {
-        Event::on(UserShiftSchedule::class, ActiveRecord::EVENT_AFTER_UPDATE, static function (AfterSaveEvent $event) {
-
+        $function = static function (AfterSaveEvent $event) {
             $oldAttr = self::getOldAttrs($event);
             $newAttr = self::getNewAttrs($event);
 
@@ -31,8 +32,22 @@ class Logger implements BootstrapInterface
             $formatAttributeService = \Yii::createObject(UserShiftScheduleAttributeFormatService::class);
             $formattedAttributes = $formatAttributeService->formatAttr($className, $oldAttr, $newAttr);
             $service = \Yii::createObject(UserShiftScheduleLogService::class);
-            $service->log($event->sender->attributes[$pkName], $oldAttr, $newAttr, $formattedAttributes, \Yii::$app->user->id ?? null);
-        });
+            try {
+                $service->log(
+                    $event->sender->attributes[$pkName],
+                    UserShiftScheduleLog::getTypeIdByAr($event->name),
+                    $oldAttr,
+                    $newAttr,
+                    $formattedAttributes,
+                    \Yii::$app->user->id ?? null
+                );
+            } catch (\Throwable $e) {
+                \Yii::error(AppHelper::throwableLog($e, true), 'ShiftSchedule::Logger');
+            }
+        };
+
+        Event::on(UserShiftSchedule::class, ActiveRecord::EVENT_AFTER_INSERT, $function);
+        Event::on(UserShiftSchedule::class, ActiveRecord::EVENT_AFTER_UPDATE, $function);
     }
 
     /**
