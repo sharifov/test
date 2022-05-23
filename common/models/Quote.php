@@ -465,7 +465,7 @@ class Quote extends \yii\db\ActiveRecord
 
         $quote->setMetricLabels(['action' => 'created', 'type_creation' => 'search']);
 
-        if (isset($entry['tickets'])) {
+        if (isset($quoteData['tickets'])) {
             $quote->tickets = json_encode($quoteData['tickets']);
         }
 
