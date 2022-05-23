@@ -214,10 +214,11 @@ class ClientChatService
 //        $key = self::getRedisDistributionLogicKey($clientChat->cch_id);
 //        if ($users) {
 
-        if (SettingHelper::isClientChatDebugEnable()) {
+        if (SettingHelper::isClientChatDebugEnable() && $clientChat->isTransfer()) {
             \Yii::info([
                 'message' => 'Users will be assign to chat',
                 'chatId' => $clientChat->cch_id,
+                'chatStatus' => $clientChat->getStatusName(),
                 'users' => ArrayHelper::getColumn($users, 'id'),
                 'countUsers' => count($users),
                 'microTime' => microtime(true),
