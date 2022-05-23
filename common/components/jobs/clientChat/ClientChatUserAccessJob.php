@@ -23,14 +23,6 @@ class ClientChatUserAccessJob extends BaseJob implements \yii\queue\JobInterface
      */
     public function execute($queue)
     {
-        if (SettingHelper::isClientChatDebugEnable()) {
-            \Yii::info([
-                'message' => 'ClientChatUserAccessJob started',
-                'chatId' => $this->chatId,
-                'microTime' => microtime(true),
-                'date' => date('Y-m-d H:i:s'),
-            ], 'info\ClientChatDebug');
-        }
         $this->waitingTimeRegister();
         $service = \Yii::createObject(ClientChatService::class);
 
@@ -39,6 +31,15 @@ class ClientChatUserAccessJob extends BaseJob implements \yii\queue\JobInterface
 
             if (!$chat = ClientChat::findOne($this->chatId)) {
                 throw new NotFoundException('Chat not found by id: ' . $this->chatId);
+            }
+
+            if (SettingHelper::isClientChatDebugEnable() && $chat->isTransfer()) {
+                \Yii::info([
+                    'message' => 'ClientChatUserAccessJob started for transfer chat',
+                    'chatId' => $this->chatId,
+                    'microTime' => microtime(true),
+                    'date' => date('Y-m-d H:i:s'),
+                ], 'info\ClientChatDebug');
             }
 
             if (!$chat->isPending() && !$chat->isTransfer() && !$chat->isIdle()) {
