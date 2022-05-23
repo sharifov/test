@@ -12,6 +12,7 @@ use modules\shiftSchedule\src\entities\userShiftAssign\search\UserShiftAssignLis
 use modules\shiftSchedule\src\entities\userShiftAssign\UserShiftAssign;
 use modules\shiftSchedule\src\forms\UserShiftAssignForm;
 use modules\shiftSchedule\src\forms\UserShiftMultipleAssignForm;
+use modules\shiftSchedule\src\services\UserShiftAssignService;
 use src\access\ListsAccess;
 use src\auth\Auth;
 use src\forms\cases\CasesClientUpdateForm;
@@ -29,6 +30,17 @@ use yii\widgets\ActiveForm;
  */
 class UserShiftAssignController extends FController
 {
+    public UserShiftAssignService $userShiftAssignService;
+
+    public function __construct(
+        $id,
+        $module,
+        UserShiftAssignService $userShiftAssignService,
+        $config = []
+    ) {
+        parent::__construct($id, $module, $config);
+        $this->userShiftAssignService = $userShiftAssignService;
+    }
     /**
      * @return array
      */
@@ -257,17 +269,11 @@ class UserShiftAssignController extends FController
                 if (!$userShiftMultipleAssignForm->validate()) {
                     throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($userShiftMultipleAssignForm));
                 }
-
-                foreach ($userShiftMultipleAssignForm->userIds as $userId) {
-                    if ($userShiftMultipleAssignForm->shftIds) {
-                        foreach ($userShiftMultipleAssignForm->shftIds as $shiftId) {
-                            if (!UserShiftAssign::find()->andWhere(['usa_user_id' => $userId, 'usa_sh_id' => (int)$shiftId])->exists()) {
-                                $userShiftAssign = UserShiftAssign::create($userId, (int)$shiftId);
-                                (new UserShiftAssignRepository($userShiftAssign))->save();
-                            }
-                        }
-                    }
-                }
+                $this->userShiftAssignService->multipleAssign(
+                    $userShiftMultipleAssignForm->shftIds,
+                    $userShiftMultipleAssignForm->userIds,
+                    $userShiftMultipleAssignForm->formAction
+                );
 
                 $result['status'] = 1;
                 $result['message'] = 'Shifts assigned';

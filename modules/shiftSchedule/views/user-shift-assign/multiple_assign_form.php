@@ -4,6 +4,7 @@ use common\models\Employee;
 use kartik\select2\Select2;
 use modules\shiftSchedule\src\entities\shift\Shift;
 use modules\shiftSchedule\src\forms\UserShiftMultipleAssignForm;
+use src\dictionary\ActionDictionary;
 use yii\bootstrap4\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
@@ -41,6 +42,8 @@ use yii\widgets\Pjax;
             'options' => ['placeholder' => 'Select Shift', 'multiple' => true],
             'pluginOptions' => ['allowClear' => true],
         ]); ?>
+
+        <?= $form->field($userShiftMultipleAssignForm, 'formAction')->dropDownList(ActionDictionary::BASE_ACTION_LIST) ?>
         <br />
         <br />
         <div class="form-group">
