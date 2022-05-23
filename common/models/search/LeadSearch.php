@@ -280,6 +280,7 @@ class LeadSearch extends Lead
             'callsQtyFrom' => 'Calls From', 'callsQtyTo' => 'Calls To',
             'chatsQtyFrom' => 'Chats From', 'chatsQtyTo' => 'Chats To',
             'projectId' => 'Project',
+            'userGroupId' => 'User Group',
             'quoteTypeId' => 'Quote Type',
             'includedFiles' => 'Included Files',
             'origin_airport' => 'Origin Location Code',
@@ -892,7 +893,7 @@ class LeadSearch extends Lead
             if (isset($this->employee_id)) {
                 $leadIds = LeadUserConversion
                     ::find()
-                    ->select(['luc_lead_id', 'luc_user_id'])
+                    ->select(['luc_lead_id'])
                     ->where(['luc_user_id' => $this->employee_id])
                     ->groupBy(['luc_lead_id']);
             } else {
@@ -910,6 +911,10 @@ class LeadSearch extends Lead
                 'leads.id',
                 $leadIds
             ]);
+        }
+
+        if ($this->userGroupId) {
+            $query->andWhere(['employee_id' => UserGroupAssign::find()->select(['ugs_user_id'])->andWhere(['ugs_group_id' => $this->userGroupId])]);
         }
 
         return $dataProvider;

@@ -173,9 +173,15 @@ class PhoneNumberRedialCrudController extends FController
     /**
      * @return Response
      * @throws BadRequestHttpException
+     * @throws NotAcceptableHttpException
      */
     public function actionSelectAll(): Response
     {
+        $abac = Yii::$app->abac;
+        /** @abac PhoneNumberRedialAbacObject::OBJ_PHONE_NUMBER_REDIAL, PhoneNumberRedialAbacObject::ACTION_MULTIPLE_DELETE, Access to delete-selected phone-number-redial-crud/* */
+        if (!$abac->can(null, PhoneNumberRedialAbacObject::OBJ_PHONE_NUMBER_REDIAL, PhoneNumberRedialAbacObject::ACTION_MULTIPLE_DELETE)) {
+            throw new NotAcceptableHttpException('Access denied');
+        }
         if (Yii::$app->request->isAjax) {
             $result = (new PhoneNumberRedialSearch())->searchIds(Yii::$app->request->queryParams);
             return $this->asJson($result);
@@ -192,6 +198,7 @@ class PhoneNumberRedialCrudController extends FController
     public function actionDeleteSelected(): Response
     {
         $abac = Yii::$app->abac;
+        /** @abac PhoneNumberRedialAbacObject::OBJ_PHONE_NUMBER_REDIAL, PhoneNumberRedialAbacObject::ACTION_MULTIPLE_DELETE, Access to delete-selected phone-number-redial-crud/* */
         if (!$abac->can(null, PhoneNumberRedialAbacObject::OBJ_PHONE_NUMBER_REDIAL, PhoneNumberRedialAbacObject::ACTION_MULTIPLE_DELETE)) {
             throw new NotAcceptableHttpException('Access denied');
         }

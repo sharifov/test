@@ -70,10 +70,110 @@ class UserAbacObject extends AbacBaseModel implements AbacInterface
         'operators' =>  [self::OP_CONTAINS]
     ];
 
+    protected const ATTR_TARGET_USER_SAME_USER = [
+        'optgroup' => 'Target User',
+        'id' => self::NS . 'targetUserIsSameUser',
+        'field' => 'targetUserIsSameUser',
+        'label' => 'Is same user',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
+    protected const ATTR_TARGET_USER_SAME_GROUP = [
+        'optgroup' => 'Target User',
+        'id' => self::NS . 'targetUserIsSameGroup',
+        'field' => 'targetUserIsSameGroup',
+        'label' => 'Is same group',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
+    protected const ATTR_TARGET_USER_SAME_DEPARTMENT = [
+        'optgroup' => 'Target User',
+        'id' => self::NS . 'targetUserIsSameDepartment',
+        'field' => 'targetUserIsSameDepartment',
+        'label' => 'Is same department ',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
+    protected const ATTR_TARGET_USER_USERNAME = [
+        'optgroup' => 'Target User',
+        'id' => self::NS . 'targetUserUsername',
+        'field' => 'targetUserUsername',
+        'label' => 'Target user username',
+        'type' => self::ATTR_TYPE_STRING,
+        'input' => self::ATTR_INPUT_TEXT,
+        'values' => [],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2]
+    ];
+
+    protected const ATTR_TARGET_USER_ROLES = [
+        'optgroup' => 'Target User',
+        'id' => self::NS . 'targetUserRoles',
+        'field' => 'targetUserRoles',
+        'label' => 'Target user roles',
+        'type' => self::ATTR_TYPE_STRING,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
+        'multiple' => false,
+        'operators' =>  [self::OP_IN_ARRAY, self::OP_NOT_IN_ARRAY]
+    ];
+
+    protected const ATTR_TARGET_USER_PROJECTS = [
+        'optgroup' => 'Target User',
+        'id' => self::NS . 'targetUserProjects',
+        'field' => 'targetUserProjects',
+        'label' => 'Target user projects',
+        'type' => self::ATTR_TYPE_STRING,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
+        'multiple' => false,
+        'operators' =>  [self::OP_IN_ARRAY, self::OP_NOT_IN_ARRAY]
+    ];
+
+    protected const ATTR_TARGET_USER_GROUPS = [
+        'optgroup' => 'Target User',
+        'id' => self::NS . 'targetUserGroups',
+        'field' => 'targetUserGroups',
+        'label' => 'Target user groups',
+        'type' => self::ATTR_TYPE_STRING,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
+        'multiple' => false,
+        'operators' =>  [self::OP_IN_ARRAY, self::OP_NOT_IN_ARRAY]
+    ];
+
+    protected const ATTR_TARGET_USER_DEPARTMENTS = [
+        'optgroup' => 'Target User',
+        'id' => self::NS . 'targetUserDepartments',
+        'field' => 'targetUserDepartments',
+        'label' => 'Target user departments',
+        'type' => self::ATTR_TYPE_STRING,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
+        'multiple' => false,
+        'operators' =>  [self::OP_IN_ARRAY, self::OP_NOT_IN_ARRAY]
+    ];
+
     /** --------------- ATTRIBUTE LIST --------------------------- */
     public const OBJECT_ATTRIBUTE_LIST = [
         self::USER_FORM => [
-            self::ATTR_IS_NEW_RECORD
+            self::ATTR_IS_NEW_RECORD,
+            self::ATTR_TARGET_USER_SAME_GROUP,
+            self::ATTR_TARGET_USER_SAME_USER,
+            self::ATTR_TARGET_USER_SAME_DEPARTMENT,
+            self::ATTR_TARGET_USER_USERNAME,
         ]
     ];
 
@@ -136,6 +236,22 @@ class UserAbacObject extends AbacBaseModel implements AbacInterface
         $attrMultiFieldsList['values'] = $formFields;
 
         $attributeList = self::OBJECT_ATTRIBUTE_LIST;
+
+        $targetUserRoles = self::ATTR_TARGET_USER_ROLES;
+        $targetUserRoles['values'] = self::getUserRoleList();
+        $attributeList[self::USER_FORM][] = $targetUserRoles;
+
+        $targetUserProjects = self::ATTR_TARGET_USER_PROJECTS;
+        $targetUserProjects['values'] = self::getProjectList();
+        $attributeList[self::USER_FORM][] = $targetUserProjects;
+
+        $targetUserGroups = self::ATTR_TARGET_USER_GROUPS;
+        $targetUserGroups['values'] = self::getUserGroupList();
+        $attributeList[self::USER_FORM][] = $targetUserGroups;
+
+        $targetUserDepartments = self::ATTR_TARGET_USER_DEPARTMENTS;
+        $targetUserDepartments['values'] = self::getDepartmentList();
+        $attributeList[self::USER_FORM][] = $targetUserDepartments;
 
         $attributeList[self::USER_FORM][] = $attrFieldsList;
         $attributeList[self::USER_FORM][] = $attrMultiFieldsList;

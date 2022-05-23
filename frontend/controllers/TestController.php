@@ -2728,10 +2728,20 @@ class TestController extends FController
         //VarDumper::dump($lead->attributes, 10, true);
     }
 
-    public function actionBlameable()
+    public function actionHourFormat()
     {
-        echo 'Blameable ' . Auth::employeeId();
-        die;
+        $hour = 135.3;
+        echo Yii::$app->formatter->asDuration($hour * 60 * 60);
+
+        $minutes = 1511;
+        echo \Yii::$app->formatter->asHoursDuration($minutes);
+
+
+
+
+      //  echo intdiv($minutes, 60).':'. ($minutes % 60);
+
+        exit;
     }
 
     public function actionTestAbac()

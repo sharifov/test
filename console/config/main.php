@@ -140,6 +140,7 @@ return [
 
         'authManager' => [
             'class' => 'yii\rbac\DbManager',
+            'cache' => 'cache',
         ],
         /*'user' => [
             'class' => 'yii\web\User',
