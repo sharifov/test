@@ -5,6 +5,7 @@ namespace modules\shiftSchedule\src\forms;
 use common\components\validators\IsArrayValidator;
 use common\models\Employee;
 use modules\shiftSchedule\src\entities\shift\Shift;
+use src\dictionary\ActionDictionary;
 use yii\base\Model;
 
 /**
@@ -14,6 +15,7 @@ class UserShiftMultipleAssignForm extends Model
 {
     public $userIds;
     public $shftIds;
+    public $formAction;
 
     public function rules(): array
     {
@@ -26,6 +28,10 @@ class UserShiftMultipleAssignForm extends Model
             [['shftIds'], IsArrayValidator::class],
             [['shftIds'], 'each', 'rule' => ['filter', 'filter' => 'intval']],
             [['shftIds'], 'each', 'rule' => ['exist', 'targetClass' => Shift::class, 'targetAttribute' => 'sh_id']],
+
+            ['formAction', 'default', 'value' => ActionDictionary::ACTION_ADD],
+            ['formAction', 'string'],
+            ['formAction', 'in', 'range' => array_keys(ActionDictionary::BASE_ACTION_LIST)],
         ];
     }
 
@@ -34,6 +40,7 @@ class UserShiftMultipleAssignForm extends Model
         return [
             'userIds' => 'Users',
             'shftIds' => 'Shifts',
+            'formAction' => 'Action',
         ];
     }
 
