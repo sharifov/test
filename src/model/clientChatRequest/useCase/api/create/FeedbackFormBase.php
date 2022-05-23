@@ -79,7 +79,7 @@ abstract class FeedbackFormBase extends Model implements FeedbackFormInterface
         $ownerUsername = (isset($this->requestedFor['username'])) ? $this->requestedFor['username'] : null;
         $repo = \Yii::createObject(ClientChatRepository::class);
         if (is_null($repo->getByRidAndOwnerUsername($this->rid, $ownerUsername))) {
-            $this->addError($attribute, "the chat with room id `{$this->rid}` not found");
+            $this->addError($attribute, "the chat with room id `{$this->rid}` is not exist, or exist but own by another user");
         }
     }
 }
