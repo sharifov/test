@@ -398,6 +398,7 @@ $script = <<< JS
 
     $(pjaxContainer).on('pjax:end', function() { 
        refreshSelectedState();
+        $("#user_shift_assign_modal").modal('hide');
     });
     
     function recalculeteStorageData(storageName) {
