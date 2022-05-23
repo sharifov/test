@@ -117,7 +117,8 @@ class MultipleUpdateService
 
     private function movedProcessingMessage(Cases $case): string
     {
-        return 'ID ' . $case->cs_id .  ' moved to ' . CasesStatus::getName($case->cs_status) . ' with owner: ' . $case->owner->username;
+        $username = $case->owner ? $case->owner->username : '';
+        return 'ID ' . $case->cs_id .  ' moved to ' . CasesStatus::getName($case->cs_status) . ' with owner: ' . $username;
     }
 
     public function formatMessages(Message ...$messages): string
