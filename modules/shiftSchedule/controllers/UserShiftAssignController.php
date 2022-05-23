@@ -259,11 +259,12 @@ class UserShiftAssignController extends FController
                 }
 
                 foreach ($userShiftMultipleAssignForm->userIds as $userId) {
-                    UserShiftAssign::deleteAll(['usa_user_id' => $userId]);
                     if ($userShiftMultipleAssignForm->shftIds) {
                         foreach ($userShiftMultipleAssignForm->shftIds as $shiftId) {
-                            $userShiftAssign = UserShiftAssign::create($userId, (int)$shiftId);
-                            (new UserShiftAssignRepository($userShiftAssign))->save();
+                            if (!UserShiftAssign::find()->andWhere(['usa_user_id' => $userId, 'usa_sh_id' => (int)$shiftId])->exists()) {
+                                $userShiftAssign = UserShiftAssign::create($userId, (int)$shiftId);
+                                (new UserShiftAssignRepository($userShiftAssign))->save();
+                            }
                         }
                     }
                 }
