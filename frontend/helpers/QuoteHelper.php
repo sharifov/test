@@ -27,26 +27,34 @@ class QuoteHelper
     public const TOP_META_BEST = 'best';
     public const TOP_META_FASTEST = 'fastest';
 
-    public static function innerPenalties(array $penalties): string
+    public static function innerPenalties(?array $penalties, ?array $fee = null): string
     {
         $out = '';
-        if ($penalties && self::checkPenaltiesInfo($penalties)) {
+        if (($penalties && self::checkPenaltiesInfo($penalties)) || $fee) {
             $out .= "<div class='tooltip_quote_info_box'>";
             $out .= '<p>Penalties: </p>';
 
-            foreach ($penalties['list'] as $item) {
-                $out .= '<ul>';
-                if (isset($item['permitted']) && $item['permitted']) {
-                    if (!empty($item['type'])) {
-                        $out .= '<li>Type : <strong>' . self::getPenaltyTypeName($item['type']) . '</strong></li>';
+            if ($penalties) {
+                foreach ($penalties['list'] as $item) {
+                    $out .= '<ul>';
+                    if (isset($item['permitted']) && $item['permitted']) {
+                        if (!empty($item['type'])) {
+                            $out .= '<li>Type : <strong>' . self::getPenaltyTypeName($item['type']) . '</strong></li>';
+                        }
+                        if (!empty($item['applicability'])) {
+                            $out .= '<li>Applicability : <strong>' . $item['applicability'] . '</strong></li>';
+                        }
+                        if (isset($item['oAmount']['amount'], $item['oAmount']['currency'])) {
+                            $out .= '<li>Amount : <strong>' . $item['oAmount']['amount'] . ' ' . $item['oAmount']['currency'] . '</strong></li>';
+                        }
                     }
-                    if (!empty($item['applicability'])) {
-                        $out .= '<li>Applicability : <strong>' . $item['applicability'] . '</strong></li>';
-                    }
-                    if (isset($item['oAmount']['amount'], $item['oAmount']['currency'])) {
-                        $out .= '<li>Amount : <strong>' . $item['oAmount']['amount'] . ' ' . $item['oAmount']['currency'] . '</strong></li>';
-                    }
+                    $out .= '</ul>';
                 }
+            }
+
+            if ($fee) {
+                $out .= '<ul>';
+                $out .= '<li>Service Fee : <strong>' . $fee['amount'] . ' ' . ($fee['currency'] ?? '') . '</strong></li>';
                 $out .= '</ul>';
             }
             $out .= '</div>';
@@ -54,17 +62,84 @@ class QuoteHelper
         return $out;
     }
 
-    public static function formattedPenalties(?array $penalties, string $class = 'quote__badge quote__badge--warning'): string
+    public static function formattedPenalties(?array $penalties, ?array $keys = [], string $class = 'quote__badge quote__badge--warning'): string
     {
-        if ($penalties && self::checkPenaltiesInfo($penalties)) {
+        if (!empty($keys['services'])) {
+            $serviceFee = $keys['services']['serviceFee'] ?? null;
+        } else {
+            $serviceFee = null;
+        }
+
+        if (($penalties && self::checkPenaltiesInfo($penalties)) || $serviceFee) {
             return '<span class="' . $class . '"
                 data-toggle="tooltip"
                 data-html="true"
-                title="' . self::innerPenalties($penalties) . '">
+                title="' . self::innerPenalties($penalties, $serviceFee) . '">
                     <i class="fa fa-expand"></i>
             </span>';
         }
         return '';
+    }
+
+    public static function formattedHotels(?array $keys, string $currency, string $class = 'quote__badge bg-dark'): string
+    {
+        if (self::checkHotelsInfo($keys)) {
+            return '<span class="' . $class . '"
+                data-toggle="tooltip"
+                data-html="true"
+                title="' . self::innerHotels($keys, $currency) . '">
+                    <i class="fa fa-hotel"></i>
+            </span>';
+        }
+        return '';
+    }
+
+    public static function innerHotels(array $keys, string $currency)
+    {
+        $hotels = [];
+        $out = '';
+        if (empty($keys['hotels'])) {
+            return '';
+        }
+
+        $hotels = $keys['hotels'];
+
+        if (!empty($hotels['options'])) {
+            $out .= "<div class='tooltip_quote_info_box'>";
+            $out .= '<p>Hotels: </p>';
+
+            foreach ($hotels['options'] as $option) {
+                $out .= '<ul>';
+                if ($option['included']) {
+                    if (isset($option['refundable'])) {
+                        $out .= '<li>Refundable : <strong>' . ($option['refundable'] ? 'Yes' : 'No') . '</strong></li>';
+                    }
+                    if (isset($option['totalPrice'])) {
+                        $out .= '<li>Total Price : <strong>' . $option['totalPrice'] . ' ' . $currency . '</strong></li>';
+                    }
+                }
+                $out .= '</ul>';
+            }
+            $out .= '</div>';
+
+            return $out;
+        }
+
+        return '';
+    }
+
+    public static function checkHotelsInfo(array $keys): bool
+    {
+        $info = [];
+        $exits = false;
+        if (!empty($keys['hotels'])) {
+            $info = $keys['hotels'];
+        }
+        if (!empty($info['options'])) {
+            $exits = true;
+        }
+
+        return $exits;
     }
 
     public static function formattedRanking(?array $meta, string $class = 'quote__badge bg-info'): string
