@@ -230,6 +230,12 @@ $(document).off('pjax:beforeSend', '#{$pjaxId}').on('pjax:beforeSend', '#{$pjaxI
     btnObj.html('<i class="fa fa-spin fa-spinner"></i>');
     btnObj.addClass('disabled').prop('disabled', true);
 });
+$(document).on('click', '#$formId .kv-clear', function (e) {
+    e.preventDefault();
+    let parentForm = $('#$formId');
+    parentForm.find('.range-value').val('');
+    parentForm.find('#add-schedule-event-duration').val('');
+});
 JS;
 $this->registerJs($js);
 ?>
