@@ -35,8 +35,9 @@ class ClientChatUserAccessJob extends BaseJob implements \yii\queue\JobInterface
 
             if (SettingHelper::isClientChatDebugEnable() && $chat->isTransfer()) {
                 \Yii::info([
-                    'message' => 'ClientChatUserAccessJob started for transfer chat',
+                    'message' => 'ClientChatUserAccessJob started',
                     'chatId' => $this->chatId,
+                    'chatStatus' => $chat->getStatusName(),
                     'microTime' => microtime(true),
                     'date' => date('Y-m-d H:i:s'),
                 ], 'info\ClientChatDebug');
@@ -47,6 +48,7 @@ class ClientChatUserAccessJob extends BaseJob implements \yii\queue\JobInterface
                     \Yii::info([
                         'message' => 'ClientChatUserAccessJob exit because chat is not status (pending, transfer, idle)',
                         'chatId' => $this->chatId,
+                        'chatStatus' => $chat->getStatusName(),
                         'microTime' => microtime(true),
                         'date' => date('Y-m-d H:i:s'),
                     ], 'info\ClientChatDebug');

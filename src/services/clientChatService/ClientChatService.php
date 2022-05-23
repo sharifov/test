@@ -216,8 +216,9 @@ class ClientChatService
 
         if (SettingHelper::isClientChatDebugEnable() && $clientChat->isTransfer()) {
             \Yii::info([
-                'message' => 'Users will be assign to chat. Chat is transfer',
+                'message' => 'Users will be assign to chat',
                 'chatId' => $clientChat->cch_id,
+                'chatStatus' => $clientChat->getStatusName(),
                 'users' => ArrayHelper::getColumn($users, 'id'),
                 'countUsers' => count($users),
                 'microTime' => microtime(true),
