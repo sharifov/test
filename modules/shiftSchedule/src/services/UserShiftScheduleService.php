@@ -482,12 +482,12 @@ class UserShiftScheduleService
         $query->where(['uss.uss_user_id' => $userId]);
 
         if (!empty($statusListId)) {
-            $query->andWhere(['uss.uss_status_id' => $statusListId]);
+            $query->andWhere(['IN','uss.uss_status_id', $statusListId]);
         }
 
         if (!empty($subTypeListId)) {
             $query->innerJoin(ShiftScheduleType::tableName() . ' AS sst', 'sst.sst_id = uss.uss_sst_id');
-            $query->andWhere(['sst.sst_subtype_id' => $subTypeListId]);
+            $query->andWhere(['IN','sst.sst_subtype_id', $subTypeListId]);
         }
 
         if (!empty($startDateTime) && !empty($endDateTime)) {
@@ -526,9 +526,6 @@ class UserShiftScheduleService
         ?array $statusListId = [],
         ?array $subTypeListId = []
     ): array {
-        $employee = Employee::find()->where(['id' => $userId])->limit(1)->one();
-        $startDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($startDt), $employee);
-        $endDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($endDt), $employee);
 
         if ($statusListId === null) {
             $statusListId = [UserShiftSchedule::STATUS_APPROVED, UserShiftSchedule::STATUS_DONE];
@@ -538,7 +535,7 @@ class UserShiftScheduleService
             $subTypeListId = [ShiftScheduleType::SUBTYPE_WORK_TIME, ShiftScheduleType::SUBTYPE_HOLIDAY];
         }
 
-        return self::getExistEventIdList($userId, $startDateTime, $endDateTime, $statusListId, $subTypeListId);
+        return self::getExistEventIdList($userId, $startDt, $endDt, $statusListId, $subTypeListId);
     }
 
     public function createSingleManual(SingleEventCreateForm $form, int $userId, ?string $userTimeZone): UserShiftSchedule
