@@ -88,9 +88,12 @@ $bundle = UserShiftCalendarAsset::register($this);
             Status: <span id="tooltip-event-status" class="md-tooltip-status md-tooltip-text"></span>
         </div>
         <div class="md-tooltip-title">Event Range: <span id="tooltip-event-time" class="md-tooltip-text"></span></div>
-        <button id="tooltip-event-view" mbsc-button data-color="dark" data-variant="outline" class="md-tooltip-view-button">View Details</button>
+        <button id="tooltip-event-view" class="btn btn-sm btn-primary" title="View Details"><i class="fa fa-eye"></i></button>
         <?php if ($canDeleteEvent = \Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_DELETE)) : ?>
-            <button id="tooltip-event-delete" mbsc-button data-color="danger" data-variant="outline" class="md-tooltip-delete-button">Delete appointment</button>
+            <button id="tooltip-event-logs" class="btn btn-sm btn-info" title="View Logs"><i class="fas fa-history"></i></button>
+        <?php endif; ?>
+        <?php if ($canDeleteEvent = \Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_DELETE)) : ?>
+            <button id="tooltip-event-delete" class="btn btn-sm btn-danger" title="Delete Event"><i class="fa fa-trash"></i></button>
         <?php endif; ?>
     </div>
 </div>
@@ -104,6 +107,7 @@ $formUpdateSingleEvent = Url::to(['/shift-schedule/update-single-event']);
 $deleteEventUrl = Url::to(['/shift-schedule/delete-event']);
 $canCreateOnDoubleClick = \Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_CREATE_ON_DOUBLE_CLICK);
 $openModalEventUrl = \yii\helpers\Url::to(['shift-schedule/get-event']);
+$viewLogsUrl = \yii\helpers\Url::to(['shift-schedule/ajax-get-logs']);
 $multipleDeleteUrl = Url::to(['shift-schedule/ajax-multiple-delete']);
 $js = <<<JS
 var calendarEventsAjaxUrl = '$ajaxUrl';
@@ -113,6 +117,7 @@ var events;
 var canDeleteEvent = Boolean('$canDeleteEvent');
 var canCreateOnDoubleClick = Boolean('$canCreateOnDoubleClick');
 var openModalEventUrl = '$openModalEventUrl';
+var viewLogsModalUrl = '$viewLogsUrl';
 
 var formatDate = mobiscroll.util.datetime.formatDate;
 var currentEvent;
@@ -127,6 +132,7 @@ var \$time = $('#tooltip-event-time');
 var \$status = $('#tooltip-event-status');
 var \$title = $('#tooltip-event-title');
 var \$view = $('#tooltip-event-view');
+var \$viewLogs = $('#tooltip-event-logs');
 var dblClickResource;
 
 var multipleMangeMode = false;
@@ -517,6 +523,12 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
         openModalEventId(currentEvent.id);
         tooltip.close();
     });
+    
+    \$viewLogs.on('click', function (e) {
+        e.preventDefault()
+        openLogsModal(currentEvent.id);
+        tooltip.close();
+    });
 
     if (canDeleteEvent) {
         \$deleteButton.on('click', function (ev) {
@@ -642,6 +654,22 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
             }
         });
     }
+    
+    function openLogsModal(id)
+    {
+        let modal = $('#modal-lg');
+        let eventUrl = viewLogsModalUrl + '?id=' + id;
+        //modal.find('.modal-title').html('Offer [' + gid + '] status history');
+        $('#modal-md-label').html('Schedule Event Logs: ' + id);
+        modal.find('.modal-body').html('');
+        modal.find('.modal-body').load(eventUrl, function( response, status, xhr ) {
+            if (status === 'error') {
+                createNotify('Error', response, 'error');
+            } else {
+                modal.modal('show');
+            }
+        });
+    } 
 
     $('#filter-calendar-form-btn').on('click', function (e) {
         e.preventDefault();

@@ -297,5 +297,6 @@ return [
         \modules\order\bootstrap\Logger::class,
         \common\bootstrap\FlightQuoteReprotectionDecisionSetup::class,
         \common\bootstrap\LeadRedialSetUp::class,
+        \modules\shiftSchedule\bootstrap\Logger::class
     ],
 ];
