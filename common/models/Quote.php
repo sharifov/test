@@ -2795,7 +2795,7 @@ class Quote extends \yii\db\ActiveRecord
         if (($originSearchData = $this->getJsonOriginSearchData()) && !empty($originSearchData['currency'])) {
             return $originSearchData['currency'];
         }
-        return null;
+        return '';
     }
 
     public function getJsonOriginSearchData(): ?array
