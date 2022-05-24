@@ -17,7 +17,7 @@ class UserShiftScheduleLogSearch extends UserShiftScheduleLog
     public function rules(): array
     {
         return [
-            [['ussl_id', 'ussl_uss_id', 'ussl_created_user_id', 'ussl_month_start', 'ussl_year_start'], 'integer'],
+            [['ussl_id', 'ussl_uss_id', 'ussl_created_user_id', 'ussl_month_start', 'ussl_year_start', 'ussl_action_type'], 'integer'],
             [['ussl_old_attr', 'ussl_new_attr', 'ussl_formatted_attr', 'ussl_created_dt'], 'safe'],
         ];
     }
@@ -64,6 +64,7 @@ class UserShiftScheduleLogSearch extends UserShiftScheduleLog
             'date(ussl_created_dt)' => $this->ussl_created_dt,
             'ussl_month_start' => $this->ussl_month_start,
             'ussl_year_start' => $this->ussl_year_start,
+            'ussl_action_type' => $this->ussl_action_type,
         ]);
 
         $query->andFilterWhere(['like', 'ussl_old_attr', $this->ussl_old_attr])
