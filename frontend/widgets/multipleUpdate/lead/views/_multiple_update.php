@@ -1,6 +1,7 @@
 <?php
 
 use frontend\widgets\multipleUpdate\lead\MultipleUpdateForm;
+use kartik\select2\Select2;
 use yii\bootstrap4\ActiveForm;
 use yii\bootstrap4\Html;
 use yii\helpers\Json;
@@ -54,7 +55,11 @@ $form = ActiveForm::begin([
 
         </div>
 
-        <?= $form->field($updateForm, 'userId')->dropDownList($updateForm->userList(), ['prompt' => 'Select employee']) ?>
+        <?= $form->field($updateForm, 'userId')->widget(Select2::class, [
+            'data' => $updateForm->userList(),
+            'size' => Select2::SMALL,
+            'options' => ['placeholder' => 'Select employee']
+        ]) ?>
 
     </div>
 
