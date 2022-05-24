@@ -3,6 +3,7 @@
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
 use modules\taskList\src\entities\taskList\TaskList;
+use modules\taskList\src\entities\TaskObject;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\ActionColumn;
@@ -50,6 +51,7 @@ $this->params['breadcrumbs'][] = $this->title;
 //            'tl_object',
             [
                 'attribute' => 'tl_object',
+                'filter' => TaskObject::getObjectList()
 //                'value' => static function (TaskList $model) {
 //                    return '<b title="' . Html::encode($model->ff_description) . '" data-toggle="tooltip">' .
 //                        ($model->tl_object ? '<i class="fa fa-info-circle info"></i> ' : '') .
