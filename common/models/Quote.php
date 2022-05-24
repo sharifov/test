@@ -1035,8 +1035,8 @@ class Quote extends \yii\db\ActiveRecord
                 $rowExpl = explode($depDate, $rowFl);
                 $cabin = trim(str_replace($flightNumber, '', trim($rowExpl[0])));
 
-                if ($depCity !== null && $arrCity !== null) {
-                    $flightDuration = ($arrDateTimeWithTimezone->getTimestamp() - $depDateTimeWithTimezone->getTimestamp()) / 60;
+                if ($depCity !== null && $arrCity !== null && isset($depDateTimeWithTimezone) && isset($arrDateTimeWithTimezone)) {
+                    $flightDuration = intval(($arrDateTimeWithTimezone->getTimestamp() - $depDateTimeWithTimezone->getTimestamp()) / 60);
                 } else {
                     $flightDuration = ($arrDateTime->getTimestamp() - $depDateTime->getTimestamp()) / 60;
                 }
@@ -1277,8 +1277,8 @@ class Quote extends \yii\db\ActiveRecord
 
             $rowExpl = explode($depDate, $rowFl);
             $cabin = trim(str_replace($flightNumber, '', trim($rowExpl[0])));
-            if ($depCity !== null && $arrCity !== null) {
-                $flightDuration = ($arrDateTimeWithTimezone->getTimestamp() - $depDateTimeWithTimezone->getTimestamp()) / 60;
+            if ($depCity !== null && $arrCity !== null && isset($depDateTimeWithTimezone) && isset($arrDateTimeWithTimezone)) {
+                $flightDuration = intval(($arrDateTimeWithTimezone->getTimestamp() - $depDateTimeWithTimezone->getTimestamp()) / 60);
             } else {
                 $flightDuration = ($arrDateTime->getTimestamp() - $depDateTime->getTimestamp()) / 60;
             }
@@ -1340,7 +1340,7 @@ class Quote extends \yii\db\ActiveRecord
             $arrDateTimeWithTimezone = new \DateTime($lastSegment['qs_arrival_time'], $arrTimezone);
 
             if ($depCity !== null && $arrCity !== null) {
-                $flightDuration = ($arrDateTimeWithTimezone->getTimestamp() - $depDateTimeWithTimezone->getTimestamp()) / 60;
+                $flightDuration = intval(($arrDateTimeWithTimezone->getTimestamp() - $depDateTimeWithTimezone->getTimestamp()) / 60);
                 $trips[$key]['qt_duration'] = intval($flightDuration);
             } else {
                 $trips[$key]['qt_duration'] = ($arrivalTime->getTimestamp() - $departureTime->getTimestamp()) / 60;
