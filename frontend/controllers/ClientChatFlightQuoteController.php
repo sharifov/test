@@ -450,11 +450,12 @@ class ClientChatFlightQuoteController extends FController
 
                         foreach ($leadQuotes as $quote) {
                             if (json_decode($quote->origin_search_data, true)['key'] == $key && $quote->provider_project_id == $providerProjectId) {
-                                $capture = $this->generateQuoteCapture($quote);
+                                $qcUid = QuoteCommunication::generateUid();
+                                $capture = $this->generateQuoteCapture($quote, $qcUid);
 
                                 $this->sendCapturesQuote($chat, $quote, $capture);
 
-                                Repo::createForChat($chatId, $quote->id, QuoteCommunication::generateUid());
+                                Repo::createForChat($chatId, $quote->id, $qcUid);
 
                                 $createdQuote = true;
                             }
@@ -519,9 +520,11 @@ class ClientChatFlightQuoteController extends FController
      * @param ClientChat $chat
      * @param int|null $providerProjectId
      * @param Employee $user
-     * @param bool $sendQuote
+     * @param bool $sendQuote Determines that will be sent quote or not
      * @param array $exMarkups
+     *
      * @return Quote
+     *
      * @throws \Throwable
      * @throws \Exception
      */
@@ -814,9 +817,12 @@ class ClientChatFlightQuoteController extends FController
 
                 if ($sendQuote) {
                     try {
-                        $capture = $this->generateQuoteCapture($quote);
+                        $communicationUid = QuoteCommunication::generateUid();
+                        $capture = $this->generateQuoteCapture($quote, $communicationUid);
 
                         $this->sendCapturesQuote($chat, $quote, $capture);
+
+                        Repo::createForChat($chat->cch_id, $quote->id, $communicationUid);
                     } catch (\DomainException | \RuntimeException $e) {
                         Yii::warning(AppHelper::throwableLog($e, true), 'ClientChatFlightQuoteController:sendQuoteCapture');
                         $transaction->rollBack();
@@ -836,8 +842,6 @@ class ClientChatFlightQuoteController extends FController
                     \Yii::warning($throwable->getMessage(), 'ClientChatFlightQuoteController:actionCreateQuoteFromSearch:QuoteLabel');
                 }
 
-                Repo::createForChat($chat->cch_id, $quote->id, QuoteCommunication::generateUid());
-
                 $transaction->commit();
                 return $quote;
             }
@@ -847,10 +851,11 @@ class ClientChatFlightQuoteController extends FController
 
     /**
      * @param Quote $quote
+     * @param null|string $qcUid
      * @return array
-     * @throws \Exception
+     * @throws \yii\httpclient\Exception
      */
-    private function generateQuoteCapture(Quote $quote): array
+    private function generateQuoteCapture(Quote $quote, ?string $qcUid = null): array
     {
         $communication = Yii::$app->communication;
 
@@ -891,7 +896,7 @@ class ClientChatFlightQuoteController extends FController
 
         return [
             'img' => $mailCapture['data']['img'],
-            'checkoutUrl' => $quote->getCheckoutUrlPage(),
+            'checkoutUrl' => $quote->getCheckoutUrlPage($qcUid),
         ];
     }
 

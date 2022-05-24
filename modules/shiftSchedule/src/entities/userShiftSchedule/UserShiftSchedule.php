@@ -96,10 +96,10 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
     public function beforeSave($insert): bool
     {
         if (!$this->uss_year_start) {
-            $this->uss_year_start = date('Y', strtotime($this->uss_start_utc_dt));
+            $this->uss_year_start = (int) date('Y');
         }
         if (!$this->uss_month_start) {
-            $this->uss_month_start = (int) date('m', strtotime($this->uss_start_utc_dt));
+            $this->uss_month_start = (int) date('m');
         }
         return parent::beforeSave($insert);
     }
@@ -145,6 +145,12 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
             ['uss_created_user_id', 'integer'],
             ['uss_updated_user_id', 'integer'],
             ['uss_sst_id', 'integer'],
+
+            [['uss_shift_id', 'uss_ssr_id', 'uss_duration',
+                'uss_customized', 'uss_sst_id'], 'default', 'value' => null],
+            [['uss_user_id', 'uss_shift_id', 'uss_ssr_id', 'uss_duration',
+                'uss_status_id', 'uss_type_id', 'uss_customized', 'uss_sst_id'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+
 
             ['uss_year_start', 'integer', 'max' => 2200, 'min' => 2000],
             ['uss_month_start', 'integer', 'max' => 12, 'min' => 1],

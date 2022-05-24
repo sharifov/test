@@ -769,6 +769,11 @@ class SideBarMenu extends \yii\bootstrap\Widget
                                     // 'icon' => 'circle',
                                     'title' => 'Shift Schedule Type Labels Assign'
                                 ],
+                                ['label' => 'User Shift Schedule Log',
+                                    'url' => ['/shift/user-shift-schedule-log-crud/index'],
+                                    // 'icon' => 'circle',
+                                    'title' => 'Shift Schedule Type Labels Assign'
+                                ],
                             ]
                         ],
 

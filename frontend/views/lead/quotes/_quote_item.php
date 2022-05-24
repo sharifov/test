@@ -385,9 +385,11 @@ if ($model->isDeclined()) {
                             <i class="fa fa-exchange"></i>
                         </span>
 
-                        <?php echo QuoteHelper::formattedPenalties($model->getPenaltiesInfo()) ?>
+                        <?php echo QuoteHelper::formattedPenalties($model->getPenaltiesInfo(), $model->getKeysInfo()) ?>
 
                         <?php echo QuoteHelper::formattedProviderProject($model) ?>
+
+                        <?php echo QuoteHelper::formattedHotels($model->getKeysInfo(), $model->getOriginalSearchDataCurrency()) ?>
                     </div>
             </div>
             <div class="col-md-6">

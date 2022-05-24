@@ -5199,11 +5199,10 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     {
         $url = '/smart/search/';
 
-        //$flightSegments = LeadFlightSegment::findAll(['lead_id' => $this->id]);
         $flightSegments = $this->getleadFlightSegments()->orderBy(['departure' => SORT_ASC])->all();
         $segmentsStr = [];
         $signedParams = [];
-        $flexParams = [];
+        $flexParams = ['departureFlexd' => null];
         foreach ($flightSegments as $key => $entry) {
             if ($this->isRoundTrip()) {
                 $trip = '';
@@ -5219,6 +5218,13 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
                 $segmentsStr[] = $entry['origin'] . '-' . $entry['destination'] . '/' . date('Y-m-d', strtotime($entry['departure']));
                 if ($this->isOneWayTrip()) {
                     $flexParams['departureFlexd'] = LeadUrlHelper::formatFlexOptions($entry['flexibility'], $entry['flexibility_type']);
+                }
+                if ($this->isMultiDestination()) {
+                    $flexParams['departureFlexd'] .= LeadUrlHelper::formatFlexOptions($entry['flexibility'], $entry['flexibility_type']);
+                    if ($key > 1) {
+                        //unset($flexParams['departureFlexd']);
+                        $flexParams = ['departureFlexd' => null];
+                    }
                 }
             }
             array_push($signedParams, $entry['origin'], $entry['destination']);

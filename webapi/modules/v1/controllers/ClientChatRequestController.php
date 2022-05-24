@@ -716,7 +716,7 @@ class ClientChatRequestController extends ApiBaseController
      * @apiParam {json}     [data.requestedBy]   Agent, who requested feedback. equals to null for feedbacks on chat close or triggered by bot
      * @apiParam {json}     data.requestedFor    Agent, that will be target for feedback result
      *
-     * @apiParamExample {json} Request-Example LEAVE_FEEDBACK:
+     * @apiParamExample {json} Request-Example FEEDBACK_REQUESTED:
      * {
      *      "apiKey": "038ce0121a1666678d4db57cb10e8667b98d8b08c408cdf7c9b04f1430071826",
      *      "event": "FEEDBACK_REQUESTED",
@@ -735,6 +735,65 @@ class ClientChatRequestController extends ApiBaseController
      *              "name": "Administrator",
      *              "username": "superadmin"
      *          }
+     *      }
+     * }
+     *
+     * @apiParamExample {json} Request-Example FEEDBACK_REJECTED:
+     * {
+     *      "apiKey": "038ce0121a1666678d4db57cb10e8667b98d8b08c408cdf7c9b04f1430071826",
+     *      "event": "FEEDBACK_REJECTED",
+     *      "data": {
+     *          "id": "d95ff567-3ce3-47b9-a937-1e716cae74fc",
+     *          "rid": "b3166811-302b-4de6-bb0f-b969575de4d5",
+     *          "type": "inline",
+     *          "template": "Sales mark",
+     *          "createdAt": "2022-02-23T14:58:37.034Z",
+     *          "triggerSource": "agent",
+     *          "requestedBy": {
+     *              "name": "Administrator",
+     *              "username": "admin"
+     *          },
+     *          "requestedFor": {
+     *              "name": "Administrator",
+     *              "username": "superadmin"
+     *          }
+     *      }
+     * }
+     *
+     * @apiParamExample {json} Request-Example FEEDBACK_SUBMITTED:
+     * {
+     *      "apiKey": "038ce0121a1666678d4db57cb10e8667b98d8b08c408cdf7c9b04f1430071826",
+     *      "event": "FEEDBACK_SUBMITTED",
+     *      "data": {
+     *          "id": "d95ff567-3ce3-47b9-a937-1e716cae74fc",
+     *          "rid": "b3166811-302b-4de6-bb0f-b969575de4d5",
+     *          "type": "inline",
+     *          "template": "Sales mark",
+     *          "createdAt": "2022-02-23T14:58:37.034Z",
+     *          "triggerSource": "agent",
+     *          "requestedBy": {
+     *              "name": "Administrator",
+     *              "username": "admin"
+     *          },
+     *          "requestedFor": {
+     *              "name": "Administrator",
+     *              "username": "superadmin"
+     *          },
+     *          "submittedAt": "2022-02-23T15:35:11.034Z",
+     *          "responses": [
+     *              {
+     *                  "question": "How was our service?",
+     *                  "response": 4
+     *              },
+     *              {
+     *                  "question": "Please rate agent response speed",
+     *                  "response": "good"
+     *              },
+     *              {
+     *                  "question": "Was your problem solved?",
+     *                  "response": true
+     *              }
+     *          ]
      *      }
      * }
      *
