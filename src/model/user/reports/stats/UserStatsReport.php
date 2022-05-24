@@ -629,7 +629,10 @@ class UserStatsReport extends Model
         if (Metrics::isSoldLeads($this->metrics)) {
             $data['sold_leads'] = [
                 'Name' => 'Sold Leads',
-                'average' => null,
+                'average' => $this->getAvgValueColumn(
+                    $results,
+                    'sold_leads'
+                ),
                 'total' => $this->getSumColumn(
                     $results,
                     'sold_leads'
@@ -780,13 +783,16 @@ class UserStatsReport extends Model
         $sumSoldLeads           = $this->getSumColumn(
             $results,
             'sold_leads'
+        ) * $this->getSumColumn(
+            $results,
+            'split_share'
         );
         $sumQualifiedLeadsTaken = $this->getSumColumn(
             $results,
             'qualified_leads_taken'
         );
         if ($sumQualifiedLeadsTaken) {
-            return $sumSoldLeads / $sumQualifiedLeadsTaken * 100;
+            return round($sumSoldLeads / $sumQualifiedLeadsTaken * 100);
         }
         return 0;
     }
