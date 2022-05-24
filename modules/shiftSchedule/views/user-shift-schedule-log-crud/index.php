@@ -65,9 +65,16 @@ $this->params['breadcrumbs'][] = $this->title;
             //'ussl_year_start',
             [
                 'class' => ActionColumn::class,
-                'urlCreator' => function ($action, UserShiftScheduleLog $model, $key, $index, $column) {
-                    return Url::toRoute([$action, 'ussl_id' => $model->ussl_id, 'ussl_month_start' => $model->ussl_month_start, 'ussl_year_start' => $model->ussl_year_start]);
-                }
+                'template' => '{view} {update} {delete}',
+                'buttons' => [
+                    'view' => static function ($url, UserShiftScheduleLog $model) {
+                        return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', ['/user-shift-schedule-crud/view', 'id' => $model->ussl_uss_id, 'breadcrumbsPreviousPage' => 'index'], [
+                            'target' => '_blank',
+                            'data-pjax' => 0,
+                            'title' => 'View',
+                        ]);
+                    },
+                ],
             ],
         ],
     ]); ?>
