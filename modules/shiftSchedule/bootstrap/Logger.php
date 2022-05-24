@@ -48,6 +48,10 @@ class Logger implements BootstrapInterface
 
         Event::on(UserShiftSchedule::class, ActiveRecord::EVENT_AFTER_INSERT, $function);
         Event::on(UserShiftSchedule::class, ActiveRecord::EVENT_AFTER_UPDATE, $function);
+        Event::on(UserShiftSchedule::class, ActiveRecord::EVENT_AFTER_DELETE, function (Event $event) {
+            $pkName = $event->sender::primaryKey()[0];
+            UserShiftScheduleLog::deleteAll(['ussl_uss_id' => $event->sender->attributes[$pkName]]);
+        });
     }
 
     /**
