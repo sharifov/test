@@ -21,7 +21,7 @@ class TimeConverterHelper
 
     /**
      * @param int $minutes
-     * @return string|0
+     * @return string
      */
     public static function minutesToHours(int $minutes): string
     {
