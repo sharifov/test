@@ -116,10 +116,9 @@ $(document).off('pjax:beforeSend', '#{$pjaxId}').on('pjax:beforeSend', '#{$pjaxI
     btnObj.html('<i class="fa fa-spin fa-spinner"></i>');
     btnObj.addClass('disabled').prop('disabled', true);
 });
-
-$(document).on('click', '#$formId .kv-clear', function (e) {
+$(document).on('click', '#{$formId} .kv-clear', function (e) {
     e.preventDefault();
-    let parentForm = $('#$formId');
+    let parentForm = $('#{$formId}');
     parentForm.find('.range-value').val('');
     parentForm.find('#add-single-schedule-event-duration').val('');
 });
