@@ -1057,7 +1057,7 @@ class FlightQuoteHelper
 //          $segment['arrivalDateTime'] = $segment['arrivalDateTime']->format('Y-m-d H:i');
             $trips[$tripIndex]['segments'][] = $segment;
         }
-        Yii::info('my27', 'getTripsFromDump');
+
         foreach ($trips as $key => $trip) {
             $firstSegment = $trip['segments'][0];
             $lastSegment = $trip['segments'][count($trip['segments']) - 1];
