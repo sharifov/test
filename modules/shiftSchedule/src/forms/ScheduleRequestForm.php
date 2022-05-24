@@ -212,6 +212,7 @@ class ScheduleRequestForm extends Model
             'uss_start_utc_dt' => $this->dateTimeStart,
             'uss_end_utc_dt' => $this->dateTimeEnd,
             'uss_duration' => $diffMinutes,
+            'uss_description' => $this->description
         ];
     }
 

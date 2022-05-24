@@ -89,7 +89,10 @@ $bundle = UserShiftCalendarAsset::register($this);
         </div>
         <div class="md-tooltip-title">Event Range: <span id="tooltip-event-time" class="md-tooltip-text"></span></div>
         <button id="tooltip-event-view" class="btn btn-sm btn-primary" title="View Details"><i class="fa fa-eye"></i></button>
-        <?php if ($canDeleteEvent = \Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_DELETE)) : ?>
+        <?php if (\Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_UPDATE)) : ?>
+            <button id="tooltip-event-edit" class="btn btn-sm btn-warning" title="Edit event"><i class="fas fa-pencil-square"></i></button>
+        <?php endif; ?>
+        <?php if ($canViewLogs = \Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_VIEW_EVENT_LOG)) : ?>
             <button id="tooltip-event-logs" class="btn btn-sm btn-info" title="View Logs"><i class="fas fa-history"></i></button>
         <?php endif; ?>
         <?php if ($canDeleteEvent = \Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_DELETE)) : ?>
@@ -109,6 +112,7 @@ $canCreateOnDoubleClick = \Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_
 $openModalEventUrl = \yii\helpers\Url::to(['shift-schedule/get-event']);
 $viewLogsUrl = \yii\helpers\Url::to(['shift-schedule/ajax-get-logs']);
 $multipleDeleteUrl = Url::to(['shift-schedule/ajax-multiple-delete']);
+$editEventUrl = Url::to(['shift-schedule/ajax-edit-event-form']);
 $js = <<<JS
 var calendarEventsAjaxUrl = '$ajaxUrl';
 var today = '$today';
@@ -133,6 +137,7 @@ var \$status = $('#tooltip-event-status');
 var \$title = $('#tooltip-event-title');
 var \$view = $('#tooltip-event-view');
 var \$viewLogs = $('#tooltip-event-logs');
+var \$editBtn = $('#tooltip-event-edit');
 var dblClickResource;
 
 var multipleMangeMode = false;
@@ -524,6 +529,12 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
         tooltip.close();
     });
     
+    \$editBtn.on('click', function (e) {
+        e.preventDefault()
+        openModalEdit(currentEvent.id);
+        tooltip.close();
+    });
+    
     \$viewLogs.on('click', function (e) {
         e.preventDefault()
         openLogsModal(currentEvent.id);
@@ -638,6 +649,27 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
             }
         });
     });
+    
+    function openModalEdit(id)
+    {
+        let modal = $('#modal-md');
+        modal.find('.modal-body').html('<div style="text-align:center;font-size: 40px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
+        modal.find('.modal-title').html('Edit event');
+        modal.find('.modal-body').load('{$editEventUrl}?eventId=' + id, {}, function( response, status, xhr ) {
+            if (status == 'error') {
+                createNotifyByObject({
+                    'title': 'Error',
+                    'type': 'error',
+                    'text': xhr.statusText
+                })
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
+        });
+    }
     
     function openModalEventId(id)
     {

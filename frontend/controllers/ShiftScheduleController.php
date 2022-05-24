@@ -21,6 +21,7 @@ use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftScheduleQuery;
 use modules\shiftSchedule\src\entities\userShiftScheduleLog\search\UserShiftScheduleLogSearch;
 use modules\shiftSchedule\src\forms\ShiftScheduleCreateForm;
+use modules\shiftSchedule\src\forms\ShiftScheduleEditForm;
 use modules\shiftSchedule\src\forms\SingleEventCreateForm;
 use modules\shiftSchedule\src\helpers\UserShiftScheduleHelper;
 use modules\shiftSchedule\src\forms\ScheduleRequestForm;
@@ -66,7 +67,7 @@ class ShiftScheduleController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['ajax-multiple-delete', 'add-event', 'get-event', 'ajax-get-logs'],
+                        'actions' => ['ajax-multiple-delete', 'add-event', 'get-event', 'ajax-get-logs', 'ajax-edit-event-form'],
                         'allow' => true,
                         'roles' => ['@']
                     ],
@@ -575,7 +576,7 @@ class ShiftScheduleController extends FController
 
         $usersGroupAssign = [];
         if ($form->load(Yii::$app->request->post()) && !$form->getUsersByGroups && $form->validate()) {
-            $timelineList = $this->shiftScheduleService->createManual($form, Auth::id(), Auth::user()->timezone ?: null);
+            $timelineList = $this->shiftScheduleService->createManual($form, Auth::user()->timezone ?: null);
             $data = UserShiftScheduleHelper::getCalendarEventsData($timelineList);
 
             return '<script>(function() {$("#modal-md").modal("hide");let timelineData = ' . json_encode($data) . ';addTimelineEvent(timelineData);createNotify("Success", "Event created successfully", "success")})();</script>';
@@ -598,7 +599,7 @@ class ShiftScheduleController extends FController
         $form = new SingleEventCreateForm();
 
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
-            $event = $this->shiftScheduleService->createSingleManual($form, Auth::id(), Auth::user()->timezone ?: null);
+            $event = $this->shiftScheduleService->createSingleManual($form, Auth::user()->timezone ?: null);
             $data = UserShiftScheduleHelper::getCalendarEventsData([$event]);
             return '<script>(function() {$("#modal-md").modal("hide");let timelineData = ' . json_encode($data) . ';addTimelineEvent(timelineData);createNotify("Success", "Event created successfully", "success")})();</script>';
         }
@@ -849,5 +850,40 @@ class ShiftScheduleController extends FController
             ]);
         }
         throw new BadRequestHttpException();
+    }
+
+    public function actionAjaxEditEventForm(): string
+    {
+        /** @abac ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_VIEW_EVENT_LOG, Access to view event logs */
+        if (!Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_UPDATE)) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
+        $form = new ShiftScheduleEditForm();
+
+        if (Yii::$app->request->isPost && Yii::$app->request->isPjax) {
+            if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+                $event = UserShiftSchedule::findOne($form->eventId);
+                if (!$event) {
+                    throw new BadRequestHttpException('Not found event');
+                }
+                $this->shiftScheduleService->edit($form, $event, Auth::user()->timezone ?: null);
+                if (!$form->hasErrors()) {
+                    $eventData = UserShiftScheduleHelper::getDataForCalendar($event);
+                    return '<script>(function() {$("#modal-md").modal("hide");window.inst.removeEvent(' . $event->uss_id . ');let timelineData = ' . json_encode($eventData) . ';addTimelineEvent(timelineData);createNotify("Success", "Event updated successfully", "success")})();</script>';
+                }
+            }
+        } else {
+            $eventId = (int)Yii::$app->request->get('eventId');
+            $event = UserShiftSchedule::findOne($eventId);
+            if (!$event) {
+                throw new BadRequestHttpException('Not found event');
+            }
+
+            $form->fillInByEvent($event, Auth::user()->timezone ?: null);
+        }
+        return $this->renderAjax('partial/_edit_event_form', [
+            'model' => $form,
+        ]);
     }
 }
