@@ -179,7 +179,7 @@ class ShiftScheduleRequestSearch extends ShiftScheduleRequest
                 'ssr_uss_id' => $model->ssr_uss_id,
                 'ssr_sst_id' => $model->ssr_sst_id,
                 'ssr_status_id' => $model->ssr_status_id,
-                'ssr_created_dt' => $model->ssr_created_dt,
+                'DATE(ssr_created_dt)' => $model->ssr_created_dt,
                 'ssr_updated_dt' => $model->ssr_updated_dt,
                 'ssr_updated_user_id' => $model->ssr_updated_user_id,
             ]);
