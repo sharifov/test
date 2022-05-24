@@ -61,7 +61,7 @@ class UserShiftScheduleLogSearch extends UserShiftScheduleLog
             'ussl_id' => $this->ussl_id,
             'ussl_uss_id' => $this->ussl_uss_id,
             'ussl_created_user_id' => $this->ussl_created_user_id,
-            'ussl_created_dt' => $this->ussl_created_dt,
+            'date(ussl_created_dt)' => $this->ussl_created_dt,
             'ussl_month_start' => $this->ussl_month_start,
             'ussl_year_start' => $this->ussl_year_start,
         ]);
