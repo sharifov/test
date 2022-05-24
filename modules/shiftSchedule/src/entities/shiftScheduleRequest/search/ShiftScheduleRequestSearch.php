@@ -187,6 +187,8 @@ class ShiftScheduleRequestSearch extends ShiftScheduleRequest
                 'ssr_updated_dt' => $model->ssr_updated_dt,
                 'ssr_updated_user_id' => $model->ssr_updated_user_id,
             ]);
+
+            $queryResult->andFilterWhere(['like', 'ssr_description', $model->ssr_description]);
         }
 
         return $queryResult;
