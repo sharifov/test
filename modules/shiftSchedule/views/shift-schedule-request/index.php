@@ -99,7 +99,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 ],
                 'value' => function (ShiftScheduleRequest $model) {
-                    return $model->ssrCreatedUser->nickname ?? $model->ssr_created_user_id;
+                    return $model->ssrCreatedUser->username ?? $model->ssr_created_user_id;
                 },
                 'label' => 'User create request',
                 'filter' => UserSelect2Widget::widget([
