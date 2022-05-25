@@ -13,8 +13,6 @@ use src\helpers\DateHelper;
 use Yii;
 use yii\base\Model;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
-use yii\helpers\Html;
-use yii\helpers\Url;
 use yii\web\Request;
 
 /**
@@ -27,9 +25,6 @@ use yii\web\Request;
 class ScheduleRequestForm extends Model
 {
     const DESCRIPTION_MAX_LENGTH = 1000;
-
-    const SCENARIO_REQUEST = 'scenario-request';
-    const SCENARIO_DECISION = 'scenario-decision';
 
     public const NOTIFICATION_TO_AGENT = 'notification_to_agent';
     public const NOTIFICATION_TO_SUPERVISER = 'notification_to_superviser';
@@ -44,10 +39,6 @@ class ScheduleRequestForm extends Model
      * @var string
      */
     public string $description = '';
-    /**
-     * @var int
-     */
-    public int $status = 0;
     /**
      * @var string|null
      */
@@ -68,15 +59,11 @@ class ScheduleRequestForm extends Model
     {
         return [
             [
-                'scheduleType',
-                'required',
-            ],
-            [
-                'status',
-                'required',
-            ],
-            [
-                'description',
+                [
+                    'scheduleType',
+                    'description',
+                    'requestedRangeTime',
+                ],
                 'required',
             ],
             [
@@ -91,34 +78,9 @@ class ScheduleRequestForm extends Model
             ],
             [
                 'requestedRangeTime',
-                'required',
-            ],
-            [
-                'requestedRangeTime',
                 'convertDateTimeRange'
             ],
         ];
-    }
-
-    /**
-     * @return array
-     */
-    public function scenarios(): array
-    {
-        return array_merge(
-            parent::scenarios(),
-            [
-                self::SCENARIO_REQUEST => [
-                    'requestedRangeTime',
-                    'scheduleType',
-                    'description',
-                ],
-                self::SCENARIO_DECISION => [
-                    'status',
-                    'description',
-                ]
-            ]
-        );
     }
 
     public function convertDateTimeRange($attribute)
@@ -166,29 +128,6 @@ class ScheduleRequestForm extends Model
                 return true;
             }
         }
-        return false;
-    }
-
-    /**
-     * Save Decision request to Shift Schedule Request table
-     * @param ShiftScheduleRequest $model
-     * @return bool
-     */
-    public function saveDecision(ShiftScheduleRequest $model): bool
-    {
-        $scheduleRequest = new ShiftScheduleRequest();
-        $scheduleRequest->attributes = $model->attributes;
-        $scheduleRequest->ssr_status_id = $this->status;
-        $scheduleRequest->ssr_description = $this->description;
-        $scheduleRequest->ssr_updated_user_id = Auth::id();
-        if ($scheduleRequest->getIsCanEditPreviousDate()) {
-            if ($scheduleRequest->save()) {
-                $this->sendNotification(self::NOTIFICATION_TO_AGENT, $scheduleRequest);
-                $this->sendNotification(self::NOTIFICATION_TO_SUPERVISER, $scheduleRequest, self::NOTIFICATION_TYPE_UPDATE);
-                return true;
-            }
-        }
-
         return false;
     }
 
