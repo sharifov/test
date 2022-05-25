@@ -121,6 +121,7 @@ class ClientChatSurvey extends ActiveRecord
             [['ccs_template'], 'string'],
             [['ccs_uid', 'ccs_type', 'ccs_template', 'ccs_trigger_source'], 'string', 'max' => 64],
             [['ccs_client_chat_id', 'ccs_requested_by', 'ccs_requested_for', 'ccs_status'], 'integer'],
+            [['ccs_uid'], 'unique'],
             ['ccs_requested_by', 'exist', 'targetClass' => Employee::class, 'targetAttribute' => 'id', 'skipOnEmpty' => true],
             ['ccs_requested_for', 'exist', 'targetClass' => Employee::class, 'targetAttribute' => 'id', 'skipOnEmpty' => false],
             ['ccs_rc_created_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
