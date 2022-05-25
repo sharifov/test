@@ -7,7 +7,9 @@ use common\models\Notifications;
 use frontend\widgets\notification\NotificationMessage;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\search\ShiftScheduleRequestSearch;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
+use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\shiftSchedule\src\forms\ScheduleDecisionForm;
+use modules\shiftSchedule\src\forms\ScheduleRequestForm;
 use src\auth\Auth;
 use Yii;
 use yii\db\ActiveQuery;
@@ -115,6 +117,49 @@ class ShiftScheduleRequestService
             }
         }
         return $data;
+    }
+
+    /**
+     * Save request to user shift schedule and shift schedule request
+     * @param ScheduleRequestForm $requestForm
+     * @return bool
+     * @throws \Exception
+     */
+    public static function saveRequest(ScheduleRequestForm $requestForm): bool
+    {
+        $startDateTime = new \DateTimeImmutable($requestForm->dateTimeStart);
+        $endDateTime = new \DateTimeImmutable($requestForm->dateTimeEnd);
+        $interval = $startDateTime->diff($endDateTime);
+        $diffMinutes = $interval->days * 24 * 60 + $interval->i + ($interval->h * 60);
+        $userShiftSchedule = new UserShiftSchedule([
+            'uss_user_id' => Auth::user()->id,
+            'uss_sst_id' => $requestForm->scheduleType,
+            'uss_status_id' => UserShiftSchedule::STATUS_PENDING,
+            'uss_type_id' => UserShiftSchedule::TYPE_MANUAL,
+            'uss_start_utc_dt' => $requestForm->dateTimeStart,
+            'uss_end_utc_dt' => $requestForm->dateTimeEnd,
+            'uss_duration' => $diffMinutes,
+            'uss_description' => $requestForm->description
+        ]);
+
+        if ($userShiftSchedule->validate() && $userShiftSchedule->save()) {
+            $requestModel = new ShiftScheduleRequest([
+                'ssr_uss_id' => $userShiftSchedule->uss_id,
+                'ssr_sst_id' => $requestForm->scheduleType,
+                'ssr_status_id' => ShiftScheduleRequest::STATUS_PENDING,
+                'ssr_description' => $requestForm->description,
+                'ssr_created_user_id' => Auth::id(),
+            ]);
+            if ($requestModel->save()) {
+                self::sendNotification(
+                    Employee::ROLE_SUPERVISION,
+                    $requestModel,
+                    self::NOTIFICATION_TYPE_CREATE
+                );
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
