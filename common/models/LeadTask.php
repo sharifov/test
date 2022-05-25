@@ -133,32 +133,22 @@ class LeadTask extends \yii\db\ActiveRecord
                             'lt_task_id' => $task->t_id,
                             'lt_user_id' => $user_id,
                             'lt_date' => $lt_date,
-                        ])->exists();
+                        ])->one();
 
-                        if (!$lt) {
+                        if (!isset($lt)) {
                             $lt = new LeadTask();
                             $lt->lt_lead_id = $lead_id;
                             $lt->lt_task_id = $task->t_id;
                             $lt->lt_user_id = $user_id;
                             $lt->lt_date = $lt_date;
                             if (!$lt->save()) {
-                                Yii::error(print_r($lt->errors), 'LeadTask:createTaskList:Task:save');
+                                Yii::error($lt->errors, 'LeadTask:createTaskList:Task:save');
                             }
                         }
                     }
                 }
             }
 
-
-            /*switch ($day) {
-                case 1:
-                case 2:
-                case 3:
-                    $taskList = ['call1', 'call2', 'voice-mail', 'email'];
-                    break;
-                default:
-                    $taskList = [];
-            }*/
 
             if ($task_list) {
                 foreach ($taskList as $taskKey) {
@@ -171,16 +161,16 @@ class LeadTask extends \yii\db\ActiveRecord
                             'lt_task_id' => $task->t_id,
                             'lt_user_id' => $user_id,
                             'lt_date' => $lt_date,
-                        ])->exists();
+                        ])->one();
 
-                        if (!$lt) {
+                        if (!isset($lt)) {
                             $lt = new LeadTask();
                             $lt->lt_lead_id = $lead_id;
                             $lt->lt_task_id = $task->t_id;
                             $lt->lt_user_id = $user_id;
                             $lt->lt_date = $lt_date;
                             if (!$lt->save()) {
-                                Yii::error(print_r($lt->errors), 'LeadTask:createTaskList:Task:save');
+                                Yii::error($lt->errors, 'LeadTask:createTaskList:Task:save');
                             }
                         }
                     }
