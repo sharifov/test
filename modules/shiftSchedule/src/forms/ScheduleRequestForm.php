@@ -3,14 +3,12 @@
 namespace modules\shiftSchedule\src\forms;
 
 use common\models\Employee;
-use common\models\Notifications;
 use DateTime;
 use Exception;
-use frontend\widgets\notification\NotificationMessage;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
+use modules\shiftSchedule\src\services\ShiftScheduleRequestService;
 use src\auth\Auth;
 use src\helpers\DateHelper;
-use Yii;
 use yii\base\Model;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use yii\web\Request;
@@ -25,11 +23,6 @@ use yii\web\Request;
 class ScheduleRequestForm extends Model
 {
     const DESCRIPTION_MAX_LENGTH = 1000;
-
-    public const NOTIFICATION_TO_AGENT = 'notification_to_agent';
-    public const NOTIFICATION_TO_SUPERVISER = 'notification_to_superviser';
-    public const NOTIFICATION_TYPE_CREATE = 'notification_create';
-    public const NOTIFICATION_TYPE_UPDATE = 'notification_update';
 
     /**
      * @var string
@@ -124,7 +117,11 @@ class ScheduleRequestForm extends Model
                 'ssr_created_user_id' => Auth::id(),
             ]);
             if ($requestModel->save()) {
-                $this->sendNotification(self::NOTIFICATION_TO_SUPERVISER, $requestModel, self::NOTIFICATION_TYPE_CREATE);
+                ShiftScheduleRequestService::sendNotification(
+                    Employee::ROLE_SUPERVISION,
+                    $requestModel,
+                    ShiftScheduleRequestService::NOTIFICATION_TYPE_CREATE
+                );
                 return true;
             }
         }
@@ -182,57 +179,6 @@ class ScheduleRequestForm extends Model
                     (new DateTime($start))->format('Y-m-d H:i'),
                     (new DateTime($end))->format('Y-m-d H:i')
                 );
-            }
-        }
-    }
-
-    /**
-     * Send Notification
-     * @param string $whom
-     * @param ShiftScheduleRequest $scheduleRequest
-     * @param string|null $notificationType
-     * @return void
-     */
-    public function sendNotification(string $whom, ShiftScheduleRequest $scheduleRequest, ?string $notificationType = null): void
-    {
-        $subject = 'Request Status';
-        $authUser = Auth::user();
-        $startTime = date('Y-m-d H:i:s', strtotime($scheduleRequest->srhUss->uss_start_utc_dt ?? ''));
-        $endTime = date('Y-m-d H:i:s', strtotime($scheduleRequest->srhUss->uss_end_utc_dt ?? ''));
-        if ($whom === self::NOTIFICATION_TO_AGENT) {
-            $body = sprintf(
-                'Your %s request for %s - %s was %s by %s',
-                $scheduleRequest->getScheduleTypeTitle(),
-                $startTime,
-                $endTime,
-                $scheduleRequest->getStatusName(),
-                $authUser->username
-            );
-            $publishUserIds = [$scheduleRequest->ssr_created_user_id];
-        } elseif ($whom === self::NOTIFICATION_TO_SUPERVISER) {
-            if ($notificationType === self::NOTIFICATION_TYPE_CREATE) {
-                $content = '%s request for %s - %s was created by %s';
-            } elseif ($notificationType === self::NOTIFICATION_TYPE_UPDATE) {
-                $content = '%s request for %s - %s was updated by %s';
-            } else {
-                $content = '%s request for %s - %s by %s';
-            }
-            $body = sprintf(
-                $content,
-                $scheduleRequest->getScheduleTypeTitle(),
-                $startTime,
-                $endTime,
-                $authUser->username
-            );
-            $publishUserIds = $authUser->getSupervisionIdsByCurrentUser();
-        }
-
-        if (!empty($body) && !empty($publishUserIds)) {
-            foreach ($publishUserIds as $userId) {
-                if ($ntf = Notifications::create($userId, $subject, $body, Notifications::TYPE_INFO)) {
-                    $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-                    Notifications::publish('getNewNotification', ['user_id' => $userId], $dataNotification);
-                }
             }
         }
     }
