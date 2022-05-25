@@ -848,6 +848,10 @@ class LeadController extends FController
 
                         $content_data = $lead->getEmailData2($comForm->quoteList, $projectContactInfo);
                         $content_data['content'] = $comForm->c_sms_message;
+                        $content_data['quotes'] = array_map(function ($quoteArray) use ($comForm) {
+                            $quoteArray['qc'] = $comForm->c_qc_uid;
+                            return $quoteArray;
+                        }, $content_data['quotes'] ?? []);
 
                         //VarDumper::dump($content_data, 10, true); exit;
 
