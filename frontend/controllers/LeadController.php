@@ -214,14 +214,6 @@ class LeadController extends FController
                     'ajax-link-to-call',
                     'extra-queue',
                 ],
-                'rules' => [
-                    /** @abac null, LeadAbacObject::OBJ_CLOSED_QUEUE, LeadAbacObject::ACTION_ACCESS, Access to page lead/closed */
-                    [
-                        'actions' => ['closed'],
-                        'allow' => \Yii::$app->abac->can(null, LeadAbacObject::OBJ_CLOSED_QUEUE, LeadAbacObject::ACTION_ACCESS),
-                        'roles' => ['@'],
-                    ],
-                ],
             ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
@@ -1925,6 +1917,11 @@ class LeadController extends FController
 
     public function actionClosed(): string
     {
+        /** @abac null, LeadAbacObject::OBJ_CLOSED_QUEUE, LeadAbacObject::ACTION_ACCESS, Access to page lead/closed */
+        if (!\Yii::$app->abac->can(null, LeadAbacObject::OBJ_CLOSED_QUEUE, LeadAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access Denied.');
+        }
+
         $searchModel = new LeadSearch();
 
         $user = Auth::user();
