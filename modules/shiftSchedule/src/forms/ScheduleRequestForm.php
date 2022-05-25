@@ -31,6 +31,11 @@ class ScheduleRequestForm extends Model
     const SCENARIO_REQUEST = 'scenario-request';
     const SCENARIO_DECISION = 'scenario-decision';
 
+    public const NOTIFICATION_TO_AGENT = 'notification_to_agent';
+    public const NOTIFICATION_TO_SUPERVISER = 'notification_to_superviser';
+    public const NOTIFICATION_TYPE_CREATE = 'notification_create';
+    public const NOTIFICATION_TYPE_UPDATE = 'notification_update';
+
     /**
      * @var string
      */
@@ -156,8 +161,10 @@ class ScheduleRequestForm extends Model
                 'ssr_description' => $this->description,
                 'ssr_created_user_id' => Auth::id(),
             ]);
-            $requestModel->save();
-            return true;
+            if ($requestModel->save()) {
+                $this->sendNotification(self::NOTIFICATION_TO_SUPERVISER, $requestModel, self::NOTIFICATION_TYPE_CREATE);
+                return true;
+            }
         }
         return false;
     }
@@ -176,14 +183,8 @@ class ScheduleRequestForm extends Model
         $scheduleRequest->ssr_updated_user_id = Auth::id();
         if ($scheduleRequest->getIsCanEditPreviousDate()) {
             if ($scheduleRequest->save()) {
-                $subject = 'Request Status';
-                $body = 'Your ' . Html::a('request', Url::to(['shift-schedule/index'])) . ' status was change to “' .
-                    $scheduleRequest::getStatusList()[$scheduleRequest->ssr_status_id] . '” ' . "<br>" .
-                    (!empty($scheduleRequest->ssr_description) ? "Description: “" . $scheduleRequest->ssr_description . '”' : '');
-                if ($ntf = Notifications::create($scheduleRequest->ssr_created_user_id, $subject, $body, Notifications::TYPE_INFO)) {
-                    $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-                    Notifications::publish('getNewNotification', ['user_id' => $scheduleRequest->ssr_created_user_id], $dataNotification);
-                }
+                $this->sendNotification(self::NOTIFICATION_TO_AGENT, $scheduleRequest);
+                $this->sendNotification(self::NOTIFICATION_TO_SUPERVISER, $scheduleRequest, self::NOTIFICATION_TYPE_UPDATE);
                 return true;
             }
         }
@@ -242,6 +243,57 @@ class ScheduleRequestForm extends Model
                     (new DateTime($start))->format('Y-m-d H:i'),
                     (new DateTime($end))->format('Y-m-d H:i')
                 );
+            }
+        }
+    }
+
+    /**
+     * Send Notification
+     * @param string $whom
+     * @param ShiftScheduleRequest $scheduleRequest
+     * @param string|null $notificationType
+     * @return void
+     */
+    public function sendNotification(string $whom, ShiftScheduleRequest $scheduleRequest, ?string $notificationType = null): void
+    {
+        $subject = 'Request Status';
+        $authUser = Auth::user();
+        $startTime = date('Y-m-d H:i:s', strtotime($scheduleRequest->srhUss->uss_start_utc_dt ?? ''));
+        $endTime = date('Y-m-d H:i:s', strtotime($scheduleRequest->srhUss->uss_end_utc_dt ?? ''));
+        if ($whom === self::NOTIFICATION_TO_AGENT) {
+            $body = sprintf(
+                'Your %s request for %s - %s was %s by %s',
+                $scheduleRequest->getScheduleTypeTitle(),
+                $startTime,
+                $endTime,
+                $scheduleRequest->getStatusName(),
+                $authUser->username
+            );
+            $publishUserIds = [$scheduleRequest->ssr_created_user_id];
+        } elseif ($whom === self::NOTIFICATION_TO_SUPERVISER) {
+            if ($notificationType === self::NOTIFICATION_TYPE_CREATE) {
+                $content = '%s request for %s - %s was created by %s';
+            } elseif ($notificationType === self::NOTIFICATION_TYPE_UPDATE) {
+                $content = '%s request for %s - %s was updated by %s';
+            } else {
+                $content = '%s request for %s - %s by %s';
+            }
+            $body = sprintf(
+                $content,
+                $scheduleRequest->getScheduleTypeTitle(),
+                $startTime,
+                $endTime,
+                $authUser->username
+            );
+            $publishUserIds = $authUser->getSupervisionIdsByCurrentUser();
+        }
+
+        if (!empty($body) && !empty($publishUserIds)) {
+            foreach ($publishUserIds as $userId) {
+                if ($ntf = Notifications::create($userId, $subject, $body, Notifications::TYPE_INFO)) {
+                    $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+                    Notifications::publish('getNewNotification', ['user_id' => $userId], $dataNotification);
+                }
             }
         }
     }

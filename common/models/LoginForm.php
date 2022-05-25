@@ -184,7 +184,7 @@ class LoginForm extends Model
 
     public function afterValidate(): void
     {
-        if ($this->hasErrors()) {
+        if ($this->hasErrors() && !$this->_user->isBlocked()) {
             $user = $this->_user ?? Employee::findOne(['username' => $this->username]);
             $userFailedLogin = UserFailedLogin::create(
                 $this->username,
@@ -199,7 +199,8 @@ class LoginForm extends Model
                     'LoginForm:afterValidate:saveFailed'
                 );
             }
-
+        }
+        if ($this->hasErrors()) {
             if ($this->_user) {
                 (new AntiBruteForceService())->checkAttempts($this->_user);
             }

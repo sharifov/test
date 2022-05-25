@@ -2,11 +2,16 @@
 
 namespace modules\shiftSchedule\src\entities\shiftScheduleRule\search;
 
+use modules\shiftSchedule\src\entities\shift\Shift;
+use modules\shiftSchedule\src\entities\shiftCategory\ShiftCategory;
 use modules\shiftSchedule\src\entities\shiftScheduleRule\ShiftScheduleRule;
 use yii\data\ActiveDataProvider;
 
 class SearchShiftScheduleRule extends ShiftScheduleRule
 {
+    public ?string $shift_name = null;
+    public ?string $shift_category = null;
+
     public function rules(): array
     {
         return [
@@ -24,6 +29,8 @@ class SearchShiftScheduleRule extends ShiftScheduleRule
             ['ssr_start_time_utc', 'safe'],
             ['ssr_timezone', 'safe'],
             ['ssr_title', 'safe'],
+            ['shift_name', 'safe'],
+            ['shift_category', 'safe'],
             ['ssr_updated_dt', 'safe'],
             ['ssr_updated_user_id', 'integer'],
             ['ssr_sst_id', 'integer'],
@@ -32,7 +39,10 @@ class SearchShiftScheduleRule extends ShiftScheduleRule
 
     public function search($params): ActiveDataProvider
     {
-        $query = static::find();
+        $query = static::find()
+            ->select('*')
+            ->leftJoin(Shift::tableName(), 'shift_schedule_rule.ssr_shift_id = shift.sh_id')
+            ->leftJoin(ShiftCategory::tableName(), 'shift.sh_category_id = shift_category.sc_id');
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -41,6 +51,16 @@ class SearchShiftScheduleRule extends ShiftScheduleRule
                 'pageSize' => 30,
             ],
         ]);
+
+        $dataProvider->sort->attributes['shift_name'] = [
+            'asc' => ['shift.sh_name' => SORT_ASC],
+            'desc' => ['shift.sh_name' => SORT_DESC],
+        ];
+
+        $dataProvider->sort->attributes['shift_category'] = [
+            'asc' => ['shift_category.sc_name' => SORT_ASC],
+            'desc' => ['shift_category.sc_name' => SORT_DESC],
+        ];
 
         $this->load($params);
 
@@ -65,7 +85,9 @@ class SearchShiftScheduleRule extends ShiftScheduleRule
             'ssr_sst_id' => $this->ssr_sst_id,
         ]);
 
-        $query->andFilterWhere(['like', 'ssr_title', $this->ssr_title])
+        $query->andFilterWhere(['like', 'shift.sh_name', $this->shift_name])
+            ->andFilterWhere(['like', 'shift_category.sc_id', $this->shift_category])
+            ->andFilterWhere(['like', 'ssr_title', $this->ssr_title])
             ->andFilterWhere(['like', 'ssr_timezone', $this->ssr_timezone])
             ->andFilterWhere(['like', 'ssr_cron_expression', $this->ssr_cron_expression])
             ->andFilterWhere(['like', 'ssr_cron_expression_exclude', $this->ssr_cron_expression_exclude]);

@@ -222,7 +222,7 @@ $isAdmin = $user->isAdmin() || $user->isSuperAdmin();
                         return Html::a(
                             '<span class="fa fa-calendar"></span>',
                             ['shift-schedule/user', 'id' => $model->id],
-                            ['title' => 'User Shift Calendar', 'target' => '_blank']
+                            ['title' => 'User Shift Calendar', 'target' => '_blank', 'data-pjax' => 0]
                         );
                     },
                 ]
