@@ -43,7 +43,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $model->shift ? $model->shift->getColorLabel() . '&nbsp; '
                         . Html::a(
                             $model->shift->sh_name,
-                            ['shift-schedule-rule-crud/view', 'id' => $model->shift->sh_id],
+                            ['shift-crud/view', 'id' => $model->shift->sh_id],
                             ['data-pjax' => 0]
                         ) : '-';
                 },
