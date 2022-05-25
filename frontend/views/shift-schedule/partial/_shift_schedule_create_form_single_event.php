@@ -153,6 +153,7 @@ $(document).on('change', '#add-single-schedule-event-duration', function() {
                     },
                     opens: 'right'
                 });
+                $('#datetimerange').val(startDateTime + ' - ' + newEndDateTime);
             }
             $(this).css('background', 'transparent');
             submitButton.prop('disabled', false);
