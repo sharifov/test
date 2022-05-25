@@ -22,6 +22,7 @@ use src\model\clientChatRequest\repository\ClientChatRequestRepository;
 use src\model\clientChatRequest\useCase\api\create\ClientChatRequestApiForm;
 use src\model\clientChatRequest\useCase\api\create\ClientChatRequestFeedbackSubForm;
 use src\model\clientChatRequest\useCase\api\create\ClientChatRequestService;
+use src\model\clientChatRequest\useCase\api\create\FeedbackFormBase;
 use src\model\clientChatRequest\useCase\api\create\FeedbackRejectedForm;
 use src\model\clientChatRequest\useCase\api\create\FeedbackRequestedForm;
 use src\model\clientChatRequest\useCase\api\create\FeedbackSubmittedForm;
@@ -861,13 +862,13 @@ class ClientChatRequestController extends ApiBaseController
         }
 
         switch ($form->event) {
-            case 'FEEDBACK_REQUESTED':
+            case FeedbackFormBase::EVENT_FEEDBACK_REQUESTED:
                 $feedbackForm = new FeedbackRequestedForm();
                 break;
-            case 'FEEDBACK_REJECTED':
+            case FeedbackFormBase::EVENT_FEEDBACK_REJECTED:
                 $feedbackForm = new FeedbackRejectedForm();
                 break;
-            case 'FEEDBACK_SUBMITTED':
+            case FeedbackFormBase::EVENT_FEEDBACK_SUBMITTED:
                 $feedbackForm = new FeedbackSubmittedForm();
                 break;
             default:

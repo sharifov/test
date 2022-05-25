@@ -13,6 +13,28 @@ use src\model\clientChat\entity\ClientChat;
 class FeedbackRequestedForm extends FeedbackFormBase
 {
     /**
+     * @return array
+     */
+    public function rules(): array
+    {
+        return array_merge(parent::rules(), [
+            ['id', 'validateChatId']
+        ]);
+    }
+
+    /**
+     * @param $attribute
+     * @param $params
+     * @param $validator
+     */
+    public function validateChatId($attribute, $params, $validator)
+    {
+        if (ClientChatSurvey::find()->where(['ccs_uid' => $this->id])->exists()) {
+            $this->addError($attribute, 'current `id` already been taken');
+        }
+    }
+
+    /**
      * @param ClientChat $clientChat
      * @return bool
      */
