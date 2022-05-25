@@ -1,5 +1,7 @@
 <?php
 
+use modules\cases\src\abac\saleSearch\CaseSaleSearchAbacDto;
+use modules\cases\src\abac\saleSearch\CaseSaleSearchAbacObject;
 use yii\helpers\Html;
 use yii\web\View;
 use yii\widgets\ActiveForm;
@@ -25,11 +27,14 @@ use yii\widgets\ActiveForm;
 
     <div class="row">
         <div class="col-md-6">
-
             <div class="row">
-                <div class="col-md-4">
-                    <?= $form->field($model, 'sale_id')->input('number', ['min' => 1]) ?>
-                </div>
+                <?php $caseSaleSearchAbacDto = new CaseSaleSearchAbacDto($caseModel, \src\auth\Auth::id()) ?>
+                <?php /** @abac new $caseSaleSearchAbacDto, CaseSaleSearchAbacObject::FORM_SALE_ID, CaseSaleSearchAbacObject::ACTION_ACCESS, Show Sale ID input */ ?>
+                <?php if (Yii::$app->abac->can($caseSaleSearchAbacDto, CaseSaleSearchAbacObject::FORM_SALE_ID, CaseSaleSearchAbacObject::ACTION_ACCESS)) : ?>
+                    <div class="col-md-4">
+                        <?= $form->field($model, 'sale_id')->input('number', ['min' => 1]) ?>
+                    </div>
+                <?php endif ?>
                 <div class="col-md-4">
                     <?= $form->field($model, 'ticket_number')->textInput(['maxlength' => true]) ?>
                 </div>
