@@ -82,7 +82,7 @@ class QuoteCommunicationOpenLog extends ActiveRecord
             $quoteCommunication = QuoteCommunication::find()
                 ->alias('t')
                 ->join('LEFT OUTER JOIN', ['q' => Quote::tableName()], 't.qc_quote_id=q.id')
-                ->where('t.qc_uid=:qcUid AND q.uid=:quoteUid', [':qcUid' => $data['queryParams']['qc'], ':quoteUid' => $data['uid']])
+                ->where(['t.qc_uid' => $data['queryParams']['qc'], 'q.uid' => $data['uid']])
                 ->one();
             if (!is_null($quoteCommunication)) {
                 $model = new self();
