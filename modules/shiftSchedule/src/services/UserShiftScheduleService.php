@@ -5,6 +5,7 @@ namespace modules\shiftSchedule\src\services;
 use common\models\Employee;
 use Cron\CronExpression;
 use Exception;
+use frontend\helpers\TimeConverterHelper;
 use modules\shiftSchedule\src\entities\shift\Shift;
 use modules\shiftSchedule\src\entities\shiftScheduleRule\ShiftScheduleRule;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
@@ -13,8 +14,10 @@ use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftScheduleQuery;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftScheduleRepository;
 use modules\shiftSchedule\src\forms\ShiftScheduleCreateForm;
+use modules\shiftSchedule\src\forms\ShiftScheduleEditForm;
 use modules\shiftSchedule\src\forms\SingleEventCreateForm;
 use modules\shiftSchedule\src\helpers\UserShiftScheduleHelper;
+use src\auth\Auth;
 use Yii;
 use yii\helpers\VarDumper;
 
@@ -433,14 +436,9 @@ class UserShiftScheduleService
         return $cron->isDue($currentTime);
     }
 
-    public function createManual(ShiftScheduleCreateForm $form, int $userId, ?string $userTimeZone)
+    public function createManual(ShiftScheduleCreateForm $form, ?string $userTimeZone): array
     {
-        $startDateTime = new \DateTimeImmutable($form->dateTimeStart, $userTimeZone ? new \DateTimeZone($userTimeZone) : null);
-        $startDateTime = $startDateTime->setTimezone(new \DateTimeZone('UTC'));
-        $endDateTime = new \DateTimeImmutable($form->dateTimeEnd, $userTimeZone ? new \DateTimeZone($userTimeZone) : null);
-        $endDateTime = $endDateTime->setTimezone(new \DateTimeZone('UTC'));
-        $interval = $startDateTime->diff($endDateTime);
-        $diffMinutes = $interval->i + ($interval->h * 60);
+        [$startDateTime, $endDateTime, $diffMinutes] = $this->generateEventTimeValues($form->dateTimeStart, $form->dateTimeEnd, $userTimeZone);
 
         $userShiftScheduleCreatedList = [];
         foreach ($form->getUsersBatch() as $user) {
@@ -538,14 +536,9 @@ class UserShiftScheduleService
         return self::getExistEventIdList($userId, $startDt, $endDt, $statusListId, $subTypeListId);
     }
 
-    public function createSingleManual(SingleEventCreateForm $form, int $userId, ?string $userTimeZone): UserShiftSchedule
+    public function createSingleManual(SingleEventCreateForm $form, ?string $userTimeZone): UserShiftSchedule
     {
-        $startDateTime = new \DateTimeImmutable($form->dateTimeStart, $userTimeZone ? new \DateTimeZone($userTimeZone) : null);
-        $startDateTime = $startDateTime->setTimezone(new \DateTimeZone('UTC'));
-        $endDateTime = new \DateTimeImmutable($form->dateTimeEnd, $userTimeZone ? new \DateTimeZone($userTimeZone) : null);
-        $endDateTime = $endDateTime->setTimezone(new \DateTimeZone('UTC'));
-        $interval = $startDateTime->diff($endDateTime);
-        $diffMinutes = $interval->i + ($interval->h * 60);
+        [$startDateTime, $endDateTime, $diffMinutes] = $this->generateEventTimeValues($form->dateTimeStart, $form->dateTimeEnd, $userTimeZone);
 
         $userShiftSchedule = UserShiftSchedule::create(
             $form->userId,
@@ -559,5 +552,36 @@ class UserShiftScheduleService
         );
         $this->repository->save($userShiftSchedule);
         return $userShiftSchedule;
+    }
+
+    public function edit(ShiftScheduleEditForm $form, UserShiftSchedule $event, ?string $timezone): void
+    {
+        [$startDateTime, $endDateTime, $diffMinutes] = $this->generateEventTimeValues($form->dateTimeStart, $form->dateTimeEnd, $timezone);
+
+        $event->editFromCalendar(
+            $form->status,
+            $form->scheduleType,
+            $startDateTime,
+            $endDateTime,
+            $diffMinutes,
+            $form->description
+        );
+
+        try {
+            $this->repository->save($event);
+        } catch (\RuntimeException $e) {
+            $form->addError('general', $e->getMessage());
+        }
+    }
+
+    private function generateEventTimeValues(string $startDateTime, string $endDateTime, ?string $timezone): array
+    {
+        $startDateTime = new \DateTimeImmutable($startDateTime, $timezone ? new \DateTimeZone($timezone) : null);
+        $startDateTime = $startDateTime->setTimezone(new \DateTimeZone('UTC'));
+        $endDateTime = new \DateTimeImmutable($endDateTime, $timezone ? new \DateTimeZone($timezone) : null);
+        $endDateTime = $endDateTime->setTimezone(new \DateTimeZone('UTC'));
+        $interval = $startDateTime->diff($endDateTime);
+        $diffMinutes = $interval->i + ($interval->h * 60);
+        return [$startDateTime, $endDateTime, $diffMinutes];
     }
 }
