@@ -215,6 +215,7 @@ class LeadController extends FController
                     'extra-queue',
                 ],
                 'rules' => [
+                    /** @abac null, LeadAbacObject::OBJ_CLOSED_QUEUE, LeadAbacObject::ACTION_ACCESS, Access to page lead/closed */
                     [
                         'actions' => ['closed'],
                         'allow' => \Yii::$app->abac->can(null, LeadAbacObject::OBJ_CLOSED_QUEUE, LeadAbacObject::ACTION_ACCESS),
