@@ -166,6 +166,7 @@ class UserShiftScheduleRequestController extends FController
             if (Yii::$app->request->isPost) {
                 if ($formModel->load(Yii::$app->request->post()) && $formModel->validate()) {
                     $event->uss_status_id = $model->getCompatibleStatus($formModel->status);
+                    $event->uss_description = $formModel->description;
                     if ($event->save()) {
                         $success = $formModel->saveDecision($model);
                     }
