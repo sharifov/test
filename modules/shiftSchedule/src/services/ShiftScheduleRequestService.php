@@ -7,6 +7,7 @@ use common\models\Notifications;
 use frontend\widgets\notification\NotificationMessage;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\search\ShiftScheduleRequestSearch;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
+use modules\shiftSchedule\src\forms\ScheduleDecisionForm;
 use src\auth\Auth;
 use Yii;
 use yii\db\ActiveQuery;
@@ -114,6 +115,38 @@ class ShiftScheduleRequestService
             }
         }
         return $data;
+    }
+
+    /**
+     * Save Decision request to Shift Schedule Request table
+     * @param ShiftScheduleRequest $requestModel
+     * @param ScheduleDecisionForm $decisionForm
+     * @return bool
+     */
+    public static function saveDecision(ShiftScheduleRequest $requestModel, ScheduleDecisionForm $decisionForm): bool
+    {
+        $scheduleRequest = new ShiftScheduleRequest();
+        $scheduleRequest->attributes = $requestModel->attributes;
+        $scheduleRequest->ssr_status_id = $decisionForm->status;
+        $scheduleRequest->ssr_description = $decisionForm->description;
+        $scheduleRequest->ssr_updated_user_id = Auth::id();
+        if ($scheduleRequest->getIsCanEditPreviousDate()) {
+            if ($scheduleRequest->save()) {
+                self::sendNotification(
+                    Employee::ROLE_AGENT,
+                    $scheduleRequest,
+                    self::NOTIFICATION_TYPE_CREATE
+                );
+                self::sendNotification(
+                    Employee::ROLE_SUPERVISION,
+                    $scheduleRequest,
+                    self::NOTIFICATION_TYPE_UPDATE
+                );
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
