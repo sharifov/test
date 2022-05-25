@@ -105,9 +105,18 @@ class SideBarMenu extends \yii\bootstrap\Widget
 //            ];
 //        }
 
-        if (Auth::can('createLead')) {
-            $menuLItems[] = ['label' => 'Create Lead', 'url' => ['/lead/create'], 'icon' => 'plus'];
-        }
+        /** @abac null, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CREATE, Access to create lead */
+        $menuLItems[] = [
+            'label' => 'Create Lead',
+            'url' => ['/lead/create'],
+            'icon' => 'plus',
+            'abac' => [
+                'dto' => null,
+                'object' => LeadAbacObject::OBJ_LEAD,
+                'action' => LeadAbacObject::ACTION_CREATE
+            ],
+        ];
+
         $menuLItems[] = ['label' => 'Create New Lead', 'url' => ['/lead/create2'], 'icon' => 'plus', 'attributes' => ['data-ajax-link' => true, 'data-modal-title' => 'Create New Lead']];
 
         $menuLItems[] = ['label' => 'Search Leads', 'url' => ['/leads/index'], 'icon' => 'search'];

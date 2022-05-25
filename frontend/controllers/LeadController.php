@@ -213,15 +213,7 @@ class LeadController extends FController
                     'ajax-create-from-phone-widget-with-invalid-client',
                     'ajax-link-to-call',
                     'extra-queue',
-                ],
-                'rules' => [
-                    /** @abac null, LeadAbacObject::OBJ_CLOSED_QUEUE, LeadAbacObject::ACTION_ACCESS, Access to page lead/closed */
-                    [
-                        'actions' => ['closed'],
-                        'allow' => \Yii::$app->abac->can(null, LeadAbacObject::OBJ_CLOSED_QUEUE, LeadAbacObject::ACTION_ACCESS),
-                        'roles' => ['@'],
-                    ],
-                ],
+                ]
             ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
@@ -2008,13 +2000,18 @@ class LeadController extends FController
      */
     public function actionCreate()
     {
+        /** @abac null, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CREATE, Access to create lead */
+        if (!Yii::$app->abac->can(null, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CREATE)) {
+            throw new ForbiddenHttpException('Access Denied.');
+        }
+
         $data = CompositeFormHelper::prepareDataForMultiInput(
             Yii::$app->request->post(),
             'LeadCreateForm',
             ['emails' => 'EmailCreateForm', 'phones' => 'PhoneCreateForm', 'segments' => 'SegmentCreateForm']
         );
         $dto = new LeadAbacDto(null, Auth::id());
-        $delayedChargeAccess = Yii::$app->abac->can($dto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CREATE, Auth::user());
+        $delayedChargeAccess = Yii::$app->abac->can($dto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CREATE_DELAY_CHARGE, Auth::user());
         $form = new LeadCreateForm(count($data['post']['EmailCreateForm']), count($data['post']['PhoneCreateForm']), count($data['post']['SegmentCreateForm']));
         $form->assignDep(Department::DEPARTMENT_SALES);
         if ($form->load($data['post']) && $form->validate()) {
@@ -2306,7 +2303,7 @@ class LeadController extends FController
         );
 
         $dto = new LeadAbacDto(null, Auth::id());
-        $delayedChargeAccess = Yii::$app->abac->can($dto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CREATE, Auth::user());
+        $delayedChargeAccess = Yii::$app->abac->can($dto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CREATE_DELAY_CHARGE, Auth::user());
 
         $form = new LeadCreateForm(count($data['post']['EmailCreateForm']), count($data['post']['PhoneCreateForm']), count($data['post']['SegmentCreateForm']));
         $form->assignCase($case->cs_gid);
