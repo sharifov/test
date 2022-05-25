@@ -132,6 +132,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     public const ACTION_ACCESS_SMART_SEARCH = 'accessSmartSearch';
     public const ACTION_ACCESS_QUOTE_SEARCH = 'accessQuoteSearch';
     public const ACTION_ACCESS_QUICK_SEARCH = 'accessQuickSearch';
+    public const ACTION_CREATE_DELAY_CHARGE  = 'createDelayCharge';
 
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
@@ -181,7 +182,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_LINK_TO_CALL => [self::ACTION_ACCESS],
         self::ACT_TAKE_LEAD_FROM_CALL => [self::ACTION_ACCESS],
         self::OBJ_LEAD_PREFERENCES => [self::ACTION_SET_DELAY_CHARGE, self::ACTION_MANAGE_LEAD_PREF_CURRENCY],
-        self::OBJ_LEAD => [self::ACTION_CREATE, self::ACTION_CLONE, self::ACTION_SNOOZE, self::ACTION_CLOSE, self::ACTION_TRASH, self::ACTION_TO_QA_LIST, self::ACTION_ACCESS],
+        self::OBJ_LEAD => [self::ACTION_CREATE, self::ACTION_CREATE_DELAY_CHARGE, self::ACTION_CLONE, self::ACTION_SNOOZE, self::ACTION_CLOSE, self::ACTION_TRASH, self::ACTION_TO_QA_LIST, self::ACTION_ACCESS],
         self::OBJ_EXTRA_QUEUE => [self::ACTION_ACCESS],
         self::OBJ_CLOSED_QUEUE => [self::ACTION_ACCESS],
         self::OBJ_LEAD_SMART_SEARCH => [self::ACTION_ACCESS_SMART_SEARCH],
