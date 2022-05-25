@@ -135,10 +135,10 @@ class ShiftScheduleRequestSearch extends ShiftScheduleRequest
     {
         $query = ShiftScheduleRequestSearch::find();
         $query->where(['IS NOT', 'ssr_uss_id', null]);
-        if ($model->ssr_created_user_id ?? false) {
-            $query->andWhere(['ssr_created_user_id' => $model->ssr_created_user_id]);
-        } else {
+        if (empty($model->ssr_created_user_id)) {
             $query->andWhere(['ssr_created_user_id' => $userList]);
+        } else {
+            $query->andWhere(['ssr_created_user_id' => $model->ssr_created_user_id]);
         }
         if (!empty($startDate) && !empty($endDate)) {
             $startDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($startDate));
