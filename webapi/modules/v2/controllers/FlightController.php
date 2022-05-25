@@ -1460,13 +1460,15 @@ class FlightController extends BaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {string{32}}           product_quote_gid            Product Quote gid
-     * @apiParam {string[]}             [with]                       Array ("quote_list", "last_change")
+     * @apiParam {string{32}}   product_quote_gid       Product Quote gid
+     * @apiParam {string[]}     [with]                  Array ("quote_list", "last_change")
+     * @apiParam {int[]=4, 5}   [onlyRelationTypes]     Only available with param "with" (4 - reprotection, 5 - voluntary exchange)
      *
      * @apiParamExample {json} Request-Example:
      *   {
      *      "product_quote_gid": "2bd12377691f282e11af12937674e3d1",
      *      "with": ["quote_list", "last_change"],
+     *      "onlyRelationTypes": [4, 5],
      *  }
      *
      * @apiSuccessExample {json} Success-Response:
@@ -2068,7 +2070,7 @@ class FlightController extends BaseController
                     ->innerJoin(ProductQuote::tableName(), 'pqr_related_pq_id = pq_id')
                     ->leftJoinRecommended()
                     ->byParentQuoteId($productQuote->pq_id)
-                    ->byType([ProductQuoteRelation::TYPE_REPROTECTION, ProductQuoteRelation::TYPE_VOLUNTARY_EXCHANGE])
+                    ->byType($form->getQuoteTypes())
                     ->orderByRecommendedDesc()
                     ->andWhere(['IN', 'pq_status_id', SettingHelper::getExchangeQuoteConfirmStatusList()])
                     ->all();

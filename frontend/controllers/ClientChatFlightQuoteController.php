@@ -7,6 +7,7 @@ use common\models\Currency;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\Quote;
+use common\models\QuoteCommunication;
 use common\models\QuotePrice;
 use common\models\QuoteSegment;
 use common\models\QuoteSegmentBaggage;
@@ -35,6 +36,7 @@ use src\model\leadUserConversion\service\LeadUserConversionDictionary;
 use src\model\leadUserConversion\service\LeadUserConversionService;
 use src\model\quoteLabel\service\QuoteLabelService;
 use src\model\userClientChatData\service\UserClientChatDataService;
+use src\quoteCommunication\Repo;
 use src\repositories\NotFoundException;
 use src\repositories\quote\QuoteRepository;
 use src\services\lead\LeadManageService;
@@ -407,7 +409,7 @@ class ClientChatFlightQuoteController extends FController
     /**
      * @param $leadId
      * @return array
-     * @throws \yii\db\Exception
+     * @throws ForbiddenHttpException
      */
     public function actionSendQuoteFromSearch($leadId)
     {
@@ -445,11 +447,15 @@ class ClientChatFlightQuoteController extends FController
                     try {
                         $createdQuote = false;
                         $leadQuotes = $lead->quotes;
+
                         foreach ($leadQuotes as $quote) {
                             if (json_decode($quote->origin_search_data, true)['key'] == $key && $quote->provider_project_id == $providerProjectId) {
-                                $capture = $this->generateQuoteCapture($quote);
+                                $qcUid = QuoteCommunication::generateUid();
+                                $capture = $this->generateQuoteCapture($quote, $qcUid);
 
                                 $this->sendCapturesQuote($chat, $quote, $capture);
+
+                                Repo::createForChat($chatId, $quote->id, $qcUid);
 
                                 $createdQuote = true;
                             }
@@ -506,6 +512,22 @@ class ClientChatFlightQuoteController extends FController
         return $lead;
     }
 
+    /**
+     * @param string $keyCache
+     * @param array $resultSearch
+     * @param string $key
+     * @param Lead $lead
+     * @param ClientChat $chat
+     * @param int|null $providerProjectId
+     * @param Employee $user
+     * @param bool $sendQuote Determines that will be sent quote or not
+     * @param array $exMarkups
+     *
+     * @return Quote
+     *
+     * @throws \Throwable
+     * @throws \Exception
+     */
     private function createQuote(
         string $keyCache,
         array $resultSearch,
@@ -795,9 +817,12 @@ class ClientChatFlightQuoteController extends FController
 
                 if ($sendQuote) {
                     try {
-                        $capture = $this->generateQuoteCapture($quote);
+                        $communicationUid = QuoteCommunication::generateUid();
+                        $capture = $this->generateQuoteCapture($quote, $communicationUid);
 
                         $this->sendCapturesQuote($chat, $quote, $capture);
+
+                        Repo::createForChat($chat->cch_id, $quote->id, $communicationUid);
                     } catch (\DomainException | \RuntimeException $e) {
                         Yii::warning(AppHelper::throwableLog($e, true), 'ClientChatFlightQuoteController:sendQuoteCapture');
                         $transaction->rollBack();
@@ -824,7 +849,13 @@ class ClientChatFlightQuoteController extends FController
         throw new \RuntimeException('Not found quote in cache search result by key: ' . $key);
     }
 
-    private function generateQuoteCapture(Quote $quote): array
+    /**
+     * @param Quote $quote
+     * @param null|string $qcUid
+     * @return array
+     * @throws \yii\httpclient\Exception
+     */
+    private function generateQuoteCapture(Quote $quote, ?string $qcUid = null): array
     {
         $communication = Yii::$app->communication;
 
@@ -840,11 +871,6 @@ class ClientChatFlightQuoteController extends FController
             if (count($content_data['quotes']) > 1) {
                 throw new \DomainException('Count quotes > 1');
             }
-//            if (isset($content_data['quotes'][0])) {
-//                $tmp = $content_data['quotes'][0];
-//                unset($content_data['quotes']);
-//                $content_data['quote'] = $tmp;
-//            }
         } else {
             throw new \DomainException('Not found quote');
         }
@@ -870,7 +896,7 @@ class ClientChatFlightQuoteController extends FController
 
         return [
             'img' => $mailCapture['data']['img'],
-            'checkoutUrl' => $quote->getCheckoutUrlPage(),
+            'checkoutUrl' => $quote->getCheckoutUrlPage($qcUid),
         ];
     }
 

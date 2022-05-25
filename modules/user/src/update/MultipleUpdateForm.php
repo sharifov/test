@@ -4,7 +4,6 @@ namespace modules\user\src\update;
 
 use common\components\validators\IsArrayValidator;
 use common\models\Employee;
-use common\models\Department;
 use src\model\clientChatChannel\entity\ClientChatChannel;
 use yii\base\Model;
 
@@ -35,9 +34,7 @@ use yii\base\Model;
  * @property $up_auto_redial
  * @property $up_kpi_enable
  *
- * @property FieldAccess $fieldAccess
  * @property AvailableList $availableList
- * @property Employee $updaterUser
  */
 class MultipleUpdateForm extends Model
 {
@@ -69,9 +66,7 @@ class MultipleUpdateForm extends Model
     public $up_auto_redial;
     public $up_kpi_enable;
 
-    public FieldAccess $fieldAccess;
     public AvailableList $availableList;
-    public Employee $updaterUser;
 
     public const GROUP_ADD = 1;
     public const GROUP_REPLACE = 2;
@@ -105,9 +100,7 @@ class MultipleUpdateForm extends Model
 
     public function __construct(Employee $updaterUser, $config = [])
     {
-        $this->fieldAccess = new FieldAccess($updaterUser, false);
         $this->availableList = new AvailableList($updaterUser);
-        $this->updaterUser = $updaterUser;
 
         parent::__construct($config);
     }
@@ -252,16 +245,6 @@ class MultipleUpdateForm extends Model
             'up_auto_redial' => 'Auto redial',
             'up_kpi_enable' => 'KPI enable',
         ];
-    }
-
-    public function getUserDepartmens(): array
-    {
-        $departments = Department::find()->where(['in', 'dep_id', $this->user_departments])->orderBy(['dep_name' => SORT_ASC])->all();
-        if ($departments) {
-            return \yii\helpers\ArrayHelper::map($departments, 'dep_id', 'dep_name');
-        }
-
-        return [];
     }
 
     public function getChangedClientChatsChannels(): array

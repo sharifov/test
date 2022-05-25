@@ -158,23 +158,18 @@
     }
 
     Chat.prototype.displayOneRequest = function (request) {
-        if (parseInt(request.is_transfer)) {
-            let oneTransferElem = $('#_client_chat_access_widget ._cc-box-item-wrapper[data-is-transfer="1"]').last();
-            if (oneTransferElem.length) {
-                oneTransferElem.after(request.html);
-            } else {
-                boxBody.prepend(request.html);
-            }
-        } else {
-            boxBody.append(request.html);
+        if (this.db.data.length) {
+            boxBody.html('');
+            this.db.data.forEach((item) => {boxBody.append(item.html)});
+            this.numberItems();
+            accessWg.attr('total-items', this.db.data.length).removeClass('inactive');
+            $('._cc_total_request_wrapper', accessWg).html(this.totalItems);
+            boxHeader.addClass('active');
+            circleWrapper.addClass('active');
+            wrapLoadMoreRequests.addClass('active');
+            this.updateRequestsRelativeTime();
+            this.refreshLoadMoreBtn();
         }
-        accessWg.attr('total-items', this.db.data.length).removeClass('inactive');
-        $('._cc_total_request_wrapper', accessWg).html(this.totalItems);
-        boxHeader.addClass('active');
-        circleWrapper.addClass('active');
-        wrapLoadMoreRequests.addClass('active');
-        this.refreshLoadMoreBtn();
-        this.numberItems();
         if (this.totalItems == this.db.data.length) {
             this.disableLoadMoreBtn();
         }

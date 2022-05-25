@@ -280,6 +280,7 @@ class LeadSearch extends Lead
             'callsQtyFrom' => 'Calls From', 'callsQtyTo' => 'Calls To',
             'chatsQtyFrom' => 'Chats From', 'chatsQtyTo' => 'Chats To',
             'projectId' => 'Project',
+            'userGroupId' => 'User Group',
             'quoteTypeId' => 'Quote Type',
             'includedFiles' => 'Included Files',
             'origin_airport' => 'Origin Location Code',
@@ -910,6 +911,10 @@ class LeadSearch extends Lead
                 'leads.id',
                 $leadIds
             ]);
+        }
+
+        if ($this->userGroupId) {
+            $query->andWhere(['employee_id' => UserGroupAssign::find()->select(['ugs_user_id'])->andWhere(['ugs_group_id' => $this->userGroupId])]);
         }
 
         return $dataProvider;

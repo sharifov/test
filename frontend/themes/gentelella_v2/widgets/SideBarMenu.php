@@ -477,6 +477,8 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     'url' => 'javascript:',
                     'icon' => 'folder',
                     'items' => [
+                        ['label' => 'Quote Communication', 'url' => ['/quote-communication/index'], 'icon' => 'list'],
+                        ['label' => 'Quote Communication Open Log', 'url' => ['/quote-communication-open-log/index'], 'icon' => 'list'],
                         ['label' => 'Quote List', 'url' => ['/quotes/index'], 'icon' => 'list'],
                         ['label' => 'Quote Price List', 'url' => ['/quote-price/index'], 'icon' => 'list'],
                         ['label' => 'Flight Quote Label List', 'url' => ['/flight-quote-label-list-crud/index'], 'icon' => 'list'],
@@ -488,7 +490,6 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Quote Segment Stop CRUD', 'url' => ['/quote-segment-stop-crud/index'], 'icon' => 'list'],
                     ],
                 ],
-
                 ['label' => 'Call User Access', 'url' => ['/call-user-access/index'], 'icon' => 'list'],
                 [
                     'label' => 'Leads',
@@ -733,6 +734,11 @@ class SideBarMenu extends \yii\bootstrap\Widget
                                 ],
                                 ['label' => 'Type Labels Assign',
                                     'url' => ['/shift/shift-schedule-type-label-assign/index'],
+                                    // 'icon' => 'circle',
+                                    'title' => 'Shift Schedule Type Labels Assign'
+                                ],
+                                ['label' => 'User Shift Schedule Log',
+                                    'url' => ['/shift/user-shift-schedule-log-crud/index'],
                                     // 'icon' => 'circle',
                                     'title' => 'Shift Schedule Type Labels Assign'
                                 ],

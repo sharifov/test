@@ -57,6 +57,8 @@ class LeadPreviewEmailForm extends Model
     public $e_quote_list;
     public $e_offer_list;
 
+    public $e_qc_uid;
+
     public $is_send;
     public $keyCache;
 
@@ -75,14 +77,14 @@ class LeadPreviewEmailForm extends Model
     public function rules(): array
     {
         return [
-            [['e_lead_id', 'e_email_from', 'e_email_to', 'e_email_message', 'e_email_subject'], 'required'],
+            [['e_lead_id', 'e_email_from', 'e_email_to', 'e_email_message', 'e_email_subject', 'e_qc_uid'], 'required'],
             [['e_email_subject', 'e_email_message'], 'trim'],
             //[['e_type_id'], 'validateType'],
             [['e_email_to', 'e_email_from'], 'email'],
             [['e_email_tpl_id', 'e_lead_id'], 'integer'],
             [['e_email_message_edited'], 'boolean'],
             [['e_email_message_edited'], 'default', 'value' => false],
-            [['e_email_message', 'e_email_subject_origin', 'e_quote_list', 'e_offer_list'], 'string'],
+            [['e_email_message', 'e_email_subject_origin', 'e_quote_list', 'e_offer_list', 'e_qc_uid'], 'string'],
             [['e_email_subject'], 'string', 'max' => 200, 'min' => 5],
             [['e_email_from_name', 'e_email_to_name'], 'string', 'max' => 50],
             [['e_language_id'], 'string', 'max' => 5],
@@ -128,6 +130,7 @@ class LeadPreviewEmailForm extends Model
             'e_email_subject'   => 'Subject',
             'e_language_id'     => 'Language',
             'e_user_id'         => 'Agent ID',
+            'e_qc_uid'         => 'Quote Communication UID',
         ];
     }
 

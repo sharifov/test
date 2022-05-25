@@ -12,8 +12,19 @@ use yii\base\Model;
  */
 class UserShiftMultipleAssignForm extends Model
 {
+    public const ACTION_ADD = 'add';
+    public const ACTION_REPLACE = 'replace';
+    public const ACTION_REMOVE = 'remove';
+
+    public const ACTION_LIST = [
+        self::ACTION_ADD => 'Add',
+        self::ACTION_REPLACE => 'Replace',
+        self::ACTION_REMOVE => 'Remove'
+    ];
+
     public $userIds;
     public $shftIds;
+    public $formAction;
 
     public function rules(): array
     {
@@ -26,6 +37,12 @@ class UserShiftMultipleAssignForm extends Model
             [['shftIds'], IsArrayValidator::class],
             [['shftIds'], 'each', 'rule' => ['filter', 'filter' => 'intval']],
             [['shftIds'], 'each', 'rule' => ['exist', 'targetClass' => Shift::class, 'targetAttribute' => 'sh_id']],
+            [['shftIds'], 'required', 'when' => function ($model) {
+                return self::ACTION_REPLACE == $this->formAction;
+            }],
+            ['formAction', 'default', 'value' => self::ACTION_ADD],
+            ['formAction', 'string'],
+            ['formAction', 'in', 'range' => array_keys(self::ACTION_LIST)],
         ];
     }
 
@@ -34,6 +51,7 @@ class UserShiftMultipleAssignForm extends Model
         return [
             'userIds' => 'Users',
             'shftIds' => 'Shifts',
+            'formAction' => 'Action',
         ];
     }
 

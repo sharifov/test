@@ -14,11 +14,13 @@ class Repo
     /**
      * @param int $emailId
      * @param int $quoteId
+     * @param null|string $uid
      * @return bool
      */
-    public static function createForEmail(int $emailId, int $quoteId): bool
+    public static function createForEmail(int $emailId, int $quoteId, ?string $uid = null): bool
     {
         $model = new QuoteCommunication([
+            'qc_uid' => $uid,
             'qc_communication_type' => CommunicationForm::TYPE_EMAIL,
             'qc_communication_id' => $emailId,
             'qc_quote_id' => $quoteId
@@ -29,11 +31,13 @@ class Repo
     /**
      * @param int $chatId
      * @param int $quoteId
+     * @param null|string $uid
      * @return bool
      */
-    public static function createForChat(int $chatId, int $quoteId): bool
+    public static function createForChat(int $chatId, int $quoteId, ?string $uid = null): bool
     {
         $model = new QuoteCommunication([
+            'qc_uid' => $uid,
             'qc_communication_type' => CommunicationForm::TYPE_CHAT,
             'qc_communication_id' => $chatId,
             'qc_quote_id' => $quoteId
@@ -44,11 +48,13 @@ class Repo
     /**
      * @param int $smsId
      * @param int $quoteId
+     * @param null|string $uid
      * @return bool
      */
-    public static function createForSms(int $smsId, int $quoteId): bool
+    public static function createForSms(int $smsId, int $quoteId, ?string $uid = null): bool
     {
         $model = new QuoteCommunication([
+            'qc_uid' => $uid,
             'qc_communication_type' => CommunicationForm::TYPE_SMS,
             'qc_communication_id' => $smsId,
             'qc_quote_id' => $quoteId

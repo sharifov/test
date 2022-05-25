@@ -99,7 +99,7 @@ foreach (UserShiftSchedule::getStatusList() as $statusId => $statusName) {
             </div>
         </div>
 
-        <?= $form->field($singleEventForm, 'description')->textarea(['cols' => 6]) ?>
+        <?= $form->field($singleEventForm, 'description')->textarea(['cols' => 6, 'style' => 'resize:none; height:100px']) ?>
 
         <div class="modal-footer justify-content-center">
             <?= Html::submitButton('Submit', [
@@ -115,6 +115,12 @@ $(document).off('pjax:beforeSend', '#{$pjaxId}').on('pjax:beforeSend', '#{$pjaxI
     let btnObj = $('#submit-add-event-single-user');
     btnObj.html('<i class="fa fa-spin fa-spinner"></i>');
     btnObj.addClass('disabled').prop('disabled', true);
+});
+$(document).on('click', '#{$formId} .kv-clear', function (e) {
+    e.preventDefault();
+    let parentForm = $('#{$formId}');
+    parentForm.find('.range-value').val('');
+    parentForm.find('#add-single-schedule-event-duration').val('');
 });
 JS;
         $this->registerJs($js);

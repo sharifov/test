@@ -224,7 +224,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 <?= $form->field($multipleForm, 'uss_sst_id')->widget(Select2::class, [
                                     'data' => ShiftScheduleType::getList(),
                                     'size' => Select2::SMALL,
-                                    'options' => ['placeholder' => 'Select user Departments'],
+                                    'options' => ['placeholder' => 'Select schedule type'],
                                     'pluginOptions' => ['allowClear' => true],
                                 ]) ?>
 
@@ -295,14 +295,14 @@ $this->params['breadcrumbs'][] = $this->title;
         $selectAllUrl = Url::current(['act' => 'select-all']);
         ?>
         <script>
-            const selectAllUrl = '<?=$selectAllUrl?>';
+            var selectAllUrl = '<?=$selectAllUrl?>';
         </script>
     <?php Pjax::end(); ?>
 
 </div>
 
 <script>
-
+    sessionStorage.selectedShifts = '{}';
     document.addEventListener('DOMContentLoaded', function() {
         function refreshUserSelectedState() {
             if (sessionStorage.selectedShifts) {

@@ -71,7 +71,7 @@ class ShiftScheduleRequestSearch extends ShiftScheduleRequest
             'ssr_uss_id' => $this->ssr_uss_id,
             'ssr_sst_id' => $this->ssr_sst_id,
             'ssr_status_id' => $this->ssr_status_id,
-            'ssr_created_dt' => $this->ssr_created_dt,
+            'DATE(ssr_created_dt)' => $this->ssr_created_dt,
             'ssr_updated_dt' => $this->ssr_updated_dt,
             'ssr_created_user_id' => $this->ssr_created_user_id,
             'ssr_updated_user_id' => $this->ssr_updated_user_id,
