@@ -53,7 +53,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw'
             ],
             [
-                'attribute' => 'shift_category_id',
+                'attribute' => 'shift_category',
                 'value' => function (ShiftScheduleRule $model) {
                     return $model->shift->category->sc_name ?? null;
                 },

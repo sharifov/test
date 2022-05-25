@@ -10,7 +10,7 @@ use yii\data\ActiveDataProvider;
 class SearchShiftScheduleRule extends ShiftScheduleRule
 {
     public ?string $shift_name = null;
-    public ?string $shift_category_id = null;
+    public ?string $shift_category = null;
 
     public function rules(): array
     {
@@ -30,7 +30,7 @@ class SearchShiftScheduleRule extends ShiftScheduleRule
             ['ssr_timezone', 'safe'],
             ['ssr_title', 'safe'],
             ['shift_name', 'safe'],
-            ['shift_category_id', 'safe'],
+            ['shift_category', 'safe'],
             ['ssr_updated_dt', 'safe'],
             ['ssr_updated_user_id', 'integer'],
             ['ssr_sst_id', 'integer'],
@@ -53,11 +53,11 @@ class SearchShiftScheduleRule extends ShiftScheduleRule
         ]);
 
         $dataProvider->sort->attributes['shift_name'] = [
-            'asc' => ['shift.sh_name' => SORT_ASC, ],
+            'asc' => ['shift.sh_name' => SORT_ASC],
             'desc' => ['shift.sh_name' => SORT_DESC],
         ];
 
-        $dataProvider->sort->attributes['shift_category_id'] = [
+        $dataProvider->sort->attributes['shift_category'] = [
             'asc' => ['shift_category.sc_name' => SORT_ASC],
             'desc' => ['shift_category.sc_name' => SORT_DESC],
         ];
@@ -86,7 +86,7 @@ class SearchShiftScheduleRule extends ShiftScheduleRule
         ]);
 
         $query->andFilterWhere(['like', 'shift.sh_name', $this->shift_name])
-            ->andFilterWhere(['like', 'shift_category.sc_id', $this->shift_category_id])
+            ->andFilterWhere(['like', 'shift_category.sc_id', $this->shift_category])
             ->andFilterWhere(['like', 'ssr_title', $this->ssr_title])
             ->andFilterWhere(['like', 'ssr_timezone', $this->ssr_timezone])
             ->andFilterWhere(['like', 'ssr_cron_expression', $this->ssr_cron_expression])
