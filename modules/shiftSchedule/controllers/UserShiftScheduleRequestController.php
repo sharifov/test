@@ -7,7 +7,7 @@ use frontend\controllers\FController;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\search\ShiftScheduleRequestSearch;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
-use modules\shiftSchedule\src\forms\ScheduleRequestForm;
+use modules\shiftSchedule\src\forms\ScheduleDecisionForm;
 use modules\shiftSchedule\src\services\ShiftScheduleRequestService;
 use src\auth\Auth;
 use src\helpers\app\AppHelper;
@@ -160,9 +160,7 @@ class UserShiftScheduleRequestController extends FController
             throw new NotAcceptableHttpException('Permission Denied (' . $eventId . ')');
         }
 
-        $formModel = new ScheduleRequestForm([
-            'scenario' => ScheduleRequestForm::SCENARIO_DECISION,
-        ]);
+        $formModel = new ScheduleDecisionForm();
 
         try {
             if (Yii::$app->request->isPost) {
