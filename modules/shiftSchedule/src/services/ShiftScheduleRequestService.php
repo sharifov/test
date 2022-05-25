@@ -3,14 +3,20 @@
 namespace modules\shiftSchedule\src\services;
 
 use common\models\Employee;
+use common\models\Notifications;
+use frontend\widgets\notification\NotificationMessage;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\search\ShiftScheduleRequestSearch;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
 use src\auth\Auth;
+use Yii;
 use yii\db\ActiveQuery;
 use yii\helpers\ArrayHelper;
 
 class ShiftScheduleRequestService
 {
+    public const NOTIFICATION_TYPE_CREATE = 'notification_create';
+    public const NOTIFICATION_TYPE_UPDATE = 'notification_update';
+
     /**
      * Get User List activeQuery
      * @param Employee|null $user
@@ -108,5 +114,56 @@ class ShiftScheduleRequestService
             }
         }
         return $data;
+    }
+
+    /**
+     * Send Notification
+     * @param string $whom
+     * @param ShiftScheduleRequest $scheduleRequest
+     * @param string|null $notificationType
+     * @return void
+     */
+    public static function sendNotification(string $whom, ShiftScheduleRequest $scheduleRequest, ?string $notificationType = null): void
+    {
+        $subject = 'Request Status';
+        $authUser = Auth::user();
+        $startTime = date('Y-m-d H:i:s', strtotime($scheduleRequest->srhUss->uss_start_utc_dt ?? ''));
+        $endTime = date('Y-m-d H:i:s', strtotime($scheduleRequest->srhUss->uss_end_utc_dt ?? ''));
+        if ($whom === Employee::ROLE_AGENT) {
+            $body = sprintf(
+                'Your %s request for %s - %s was %s by %s',
+                $scheduleRequest->getScheduleTypeTitle(),
+                $startTime,
+                $endTime,
+                $scheduleRequest->getStatusName(),
+                $authUser->username
+            );
+            $publishUserIds = [$scheduleRequest->ssr_created_user_id];
+        } elseif ($whom === Employee::ROLE_SUPERVISION) {
+            if ($notificationType === self::NOTIFICATION_TYPE_CREATE) {
+                $content = '%s request for %s - %s was created by %s';
+            } elseif ($notificationType === self::NOTIFICATION_TYPE_UPDATE) {
+                $content = '%s request for %s - %s was updated by %s';
+            } else {
+                $content = '%s request for %s - %s by %s';
+            }
+            $body = sprintf(
+                $content,
+                $scheduleRequest->getScheduleTypeTitle(),
+                $startTime,
+                $endTime,
+                $authUser->username
+            );
+            $publishUserIds = $authUser->getSupervisionIdsByCurrentUser();
+        }
+
+        if (!empty($body) && !empty($publishUserIds)) {
+            foreach ($publishUserIds as $userId) {
+                if ($ntf = Notifications::create($userId, $subject, $body, Notifications::TYPE_INFO)) {
+                    $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+                    Notifications::publish('getNewNotification', ['user_id' => $userId], $dataNotification);
+                }
+            }
+        }
     }
 }
