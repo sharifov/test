@@ -50,7 +50,7 @@ class ShiftScheduleEditForm extends Model
     public function fillInByEvent(UserShiftSchedule $event, ?string $userTimeZone): void
     {
         $this->eventId = $event->uss_id;
-        $this->scheduleType = $event->uss_type_id;
+        $this->scheduleType = $event->uss_sst_id;
         $this->status = $event->uss_status_id;
         $this->description = $event->uss_description;
 
