@@ -5,20 +5,13 @@ namespace modules\shiftSchedule\src\forms;
 use common\models\Employee;
 use DateTime;
 use Exception;
-use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
-use modules\shiftSchedule\src\services\ShiftScheduleRequestService;
-use src\auth\Auth;
 use src\helpers\DateHelper;
 use yii\base\Model;
-use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use yii\web\Request;
 
 /**
  *
  * @property-write Request $attributesRequest
- * @property-read string $endDateTime
- * @property-read string $startDateTime
- * @property-read string $endDt
  */
 class ScheduleRequestForm extends Model
 {
@@ -98,58 +91,6 @@ class ScheduleRequestForm extends Model
                 $this->requestedRangeTime = null;
             }
         }
-    }
-
-    /**
-     * Save request to user shift schedule
-     * @return bool
-     * @throws Exception
-     */
-    public function saveRequest(): bool
-    {
-        $userShiftSchedule = new UserShiftSchedule($this->mappingData());
-        if ($userShiftSchedule->validate() && $userShiftSchedule->save()) {
-            $requestModel = new ShiftScheduleRequest([
-                'ssr_uss_id' => $userShiftSchedule->uss_id,
-                'ssr_sst_id' => $this->scheduleType,
-                'ssr_status_id' => ShiftScheduleRequest::STATUS_PENDING,
-                'ssr_description' => $this->description,
-                'ssr_created_user_id' => Auth::id(),
-            ]);
-            if ($requestModel->save()) {
-                ShiftScheduleRequestService::sendNotification(
-                    Employee::ROLE_SUPERVISION,
-                    $requestModel,
-                    ShiftScheduleRequestService::NOTIFICATION_TYPE_CREATE
-                );
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Mapping form data with UserShiftSchedule props, before save
-     * @return array
-     * @throws Exception
-     */
-    private function mappingData(): array
-    {
-        $startDateTime = new \DateTimeImmutable($this->dateTimeStart);
-        $endDateTime = new \DateTimeImmutable($this->dateTimeEnd);
-        $interval = $startDateTime->diff($endDateTime);
-        $diffMinutes = $interval->days * 24 * 60 + $interval->i + ($interval->h * 60);
-
-        return [
-            'uss_user_id' => Auth::user()->id,
-            'uss_sst_id' => $this->scheduleType,
-            'uss_status_id' => UserShiftSchedule::STATUS_PENDING,
-            'uss_type_id' => UserShiftSchedule::TYPE_MANUAL,
-            'uss_start_utc_dt' => $this->dateTimeStart,
-            'uss_end_utc_dt' => $this->dateTimeEnd,
-            'uss_duration' => $diffMinutes,
-            'uss_description' => $this->description
-        ];
     }
 
     /**
