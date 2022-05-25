@@ -3042,4 +3042,26 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         }
         return false;
     }
+
+    /**
+     * Get all supervision ids by current user
+     * @return array
+     */
+    public function getSupervisionIdsByCurrentUser(): array
+    {
+        $userList = [];
+        if (!($this->isSupervision() || $this->isAdmin())) {
+            foreach ($this->ugsGroups as $group) {
+                foreach ($group->ugsUsers as $userInGroup) {
+                    if ($userInGroup->isSupervision()) {
+                        $userList[] = $userInGroup->id;
+                    }
+                }
+            }
+        } else {
+            $userList[] = $this->id;
+        }
+
+        return $userList;
+    }
 }
