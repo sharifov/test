@@ -184,7 +184,7 @@ class LoginForm extends Model
 
     public function afterValidate(): void
     {
-        if ($this->hasErrors() && !$this->_user->isBlocked()) {
+        if ($this->hasErrors() && (isset($this->_user) && !$this->_user->isBlocked() || !isset($this->_user))) {
             $user = $this->_user ?? Employee::findOne(['username' => $this->username]);
             $userFailedLogin = UserFailedLogin::create(
                 $this->username,
