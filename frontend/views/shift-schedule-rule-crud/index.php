@@ -3,6 +3,7 @@
 use common\components\grid\BooleanColumn;
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
+use modules\shiftSchedule\src\entities\shiftCategory\ShiftCategoryQuery;
 use modules\shiftSchedule\src\entities\shiftScheduleRule\search\SearchShiftScheduleRule;
 use modules\shiftSchedule\src\entities\shiftScheduleRule\ShiftScheduleRule;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
@@ -27,7 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <?php Pjax::begin(['id' => 'pjax-shift-schedule-rule', 'scrollTo' => 0]); ?>
-        <?php // echo $this->render('_search', ['model' => $searchModel]);?>
+    <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -37,19 +38,27 @@ $this->params['breadcrumbs'][] = $this->title;
                 'style' => 'width: 80px'
             ]],
             [
-                'attribute' => 'ssr_shift_id',
+                'attribute' => 'shift_name',
                 'value' => static function (ShiftScheduleRule $model) {
-                    return $model->shift ? $model->shift->getColorLabel() . '&nbsp; ' . Html::a(
-                        $model->shift->sh_name,
-                        ['shift-schedule-rule-crud/view', 'id' => $model->shift->sh_id],
-                        ['data-pjax' => 0]
-                    ) : '-';
+                    return $model->shift ? $model->shift->getColorLabel() . '&nbsp; '
+                        . Html::a(
+                            $model->shift->sh_name,
+                            ['shift-schedule-rule-crud/view', 'id' => $model->shift->sh_id],
+                            ['data-pjax' => 0]
+                        ) : '-';
                 },
-                'filter' => ShiftSelectWidget::widget(['model' => $searchModel, 'attribute' => 'ssr_shift_id']),
                 'options' => [
                     'style' => 'width: 120px'
                 ],
                 'format' => 'raw'
+            ],
+            [
+                'attribute' => 'shift_category_id',
+                'value' => function (ShiftScheduleRule $model) {
+                    return $model->shift->category->sc_name ?? null;
+                },
+                'filter' => ShiftCategoryQuery::getList(),
+                'label' => 'Shift Category'
             ],
             [
                 'attribute' => 'ssr_sst_id',
