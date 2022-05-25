@@ -87,6 +87,15 @@
     group: "{{ web_user }}"
     force: true
 
+- name: "Create {{ app_console_logfile_path }}"
+  file:
+    path: "{{ app_console_logfile_path }}"
+    owner: "{{ web_user }}"
+    group: "{{ web_user }}"
+    recurse: yes
+    state: directory
+    mode: '0777'
+
 - name: Create socket-server.log
   file:
     path: "{{ app_console_logfile_path }}/socket-server.log"
