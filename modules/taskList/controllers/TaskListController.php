@@ -93,8 +93,12 @@ class TaskListController extends FController
     {
         $model = $this->findModel($tl_id);
 
+
         if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
             return $this->redirect(['view', 'tl_id' => $model->tl_id]);
+        } elseif (\Yii::$app->request->get('object')) {
+            $model->tl_object = \Yii::$app->request->get('object');
+            //exit;
         }
 
         return $this->render('update', [

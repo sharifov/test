@@ -8,20 +8,51 @@ use common\models\Project;
 
 class CallTaskObject extends BaseTaskObject implements TaskObjectInterface
 {
-    public const OPTGROUP = 'Call';
+    /** NAMESPACE */
+    private const NS = 'call/';
+
+    public const OPTGROUP_CALL = 'Call';
+
+    public const OBJ_CALL = 'call';
+
+    public const FIELD_PROJECT_ID       = self::OBJ_CALL . '.' . 'project_id';
+    public const FIELD_DEPARTMENT_ID    = self::OBJ_CALL . '.' . 'department_id';
+    public const FIELD_DURATION         = self::OBJ_CALL . '.' . 'duration';
 
 
     public string $duration;
 
 
+    protected const ATTR_PROJECT_ID = [
+        'optgroup' => self::OPTGROUP_CALL,
+        'id' => self::NS . self::FIELD_PROJECT_ID,
+        'field' => self::FIELD_PROJECT_ID,
+        'label' => 'Call Project',
+        'type' => self::ATTR_TYPE_INTEGER,
+        'input' => self::ATTR_INPUT_SELECT,
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_IN, self::OP_NOT_IN],
+        'icon' => 'fa fa-list',
+    ];
+
+    protected const ATTR_DEPARTMENT_ID = [
+        'optgroup' => self::OPTGROUP_CALL,
+        'id' => self::NS . self::FIELD_DEPARTMENT_ID,
+        'field' => self::FIELD_DEPARTMENT_ID,
+        'label' => 'Call Department',
+        'type' => self::ATTR_TYPE_INTEGER,
+        'input' => self::ATTR_INPUT_SELECT,
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_IN, self::OP_NOT_IN],
+        'icon' => 'fa fa-list',
+    ];
+
     public const ATTR_DURATION = [
-        'optgroup' => self::OPTGROUP,
-        'id' => 'duration',
-        'field' => 'duration',
-        'label' => 'Duration',
+        'optgroup' => self::OPTGROUP_CALL,
+        'id' => self::FIELD_DURATION,
+        'field' => self::FIELD_DURATION,
+        'label' => 'Call Duration',
         'type' => self::ATTR_TYPE_INTEGER,
         'input' => self::ATTR_INPUT_NUMBER,
-        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, '>=', '<=', '>', '<', self::OP_IN, self::OP_NOT_IN],
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, '>=', '<=', '>', '<'], //, self::OP_IN, self::OP_NOT_IN
         'validation' => ['min' => 0, 'max' => 100000, 'step' => 1],
         'description' => 'Call Duration',
 
@@ -36,7 +67,9 @@ class CallTaskObject extends BaseTaskObject implements TaskObjectInterface
 
     /** --------------- ATTRIBUTE LIST --------------------------- */
     public const OBJECT_ATTRIBUTE_LIST = [
-         'Duration' => self::ATTR_DURATION
+        0 => self::ATTR_DURATION,
+        1 => self::ATTR_PROJECT_ID,
+        2 => self::ATTR_DEPARTMENT_ID
     ];
 
     /**
@@ -46,17 +79,18 @@ class CallTaskObject extends BaseTaskObject implements TaskObjectInterface
     {
         /*$templateKey = self::ATTR_TEMPLATE_KEY;
         $templateKey['values'] = EmailTemplateType::getList(false, null);
+        */
 
         $project = self::ATTR_PROJECT_ID;
         $project['values'] = Project::getList();
 
         $department = self::ATTR_DEPARTMENT_ID;
-        $department['values'] = Department::getList();*/
+        $department['values'] = Department::getList();
 
         $attributeList = self::OBJECT_ATTRIBUTE_LIST;
-        /*$attributeList[self::OBJ_PREVIEW_EMAIL][] = $templateKey;
-        $attributeList[self::OBJ_PREVIEW_EMAIL][] = $project;
-        $attributeList[self::OBJ_PREVIEW_EMAIL][] = $department;*/
+
+        $attributeList[1] = $project;
+        $attributeList[2] = $department;
         return $attributeList;
     }
 }

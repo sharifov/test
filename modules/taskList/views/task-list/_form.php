@@ -3,6 +3,7 @@
 use kartik\select2\Select2;
 use modules\taskList\src\entities\taskList\TaskList;
 use modules\taskList\src\entities\TaskObject;
+use modules\taskList\src\objects\BaseTaskObject;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
@@ -13,15 +14,18 @@ use yii\widgets\Pjax;
 
 \frontend\assets\QueryBuilderAsset::register($this);
 
-//$rulesData = @json_decode($model->ap_subject_json);
-//$rulesDataStr = json_encode($rulesData);
+$rulesData = @json_decode($model->tl_condition_json);
+$rulesDataStr = json_encode($rulesData);
 //$filtersData = $model->getObjectAttributeList();
-//$filtersDataStr = json_encode($filtersData);
-//$operators = json_encode(\modules\abac\components\AbacBaseModel::getOperators());
 
-
-$list = TaskObject::getAttributeListByObject('call');
-\yii\helpers\VarDumper::dump($list, 10, true);
+$operators = json_encode(BaseTaskObject::getOperators());
+if ($model->tl_object) {
+    $filtersData = TaskObject::getAttributeListByObject($model->tl_object);
+} else {
+    $filtersData = [];
+}
+$filtersDataStr = json_encode($filtersData);
+//\yii\helpers\VarDumper::dump($list, 10, true);
 
 ?>
 <style>
@@ -84,20 +88,48 @@ $list = TaskObject::getAttributeListByObject('call');
                     <?= $form->field($model, 'tl_sort_order')->input('number', ['min' => 0]) ?>
                 </div>
             </div>
+
+
+            <div class="row">
+                <div class="col-md-6">
+                <?php
+
+                try {
+                    echo $form->field($model, 'tl_params_json')->widget(
+                        \kdn\yii2\JsonEditor::class,
+                        [
+                            'clientOptions' => [
+                                'modes' => ['code', 'form', 'tree', 'view'], //'text',
+                                'mode' => $model->isNewRecord ? 'code' : 'form'
+                            ],
+                            //'collapseAll' => ['view'],
+                            'expandAll' => ['tree', 'form'],
+                            'value' => $model->tl_params_json ? json_encode($model->tl_params_json) : ''
+                        ]
+                    );
+                } catch (Exception $exception) {
+                    echo $form->field($model, 'tl_params_json')
+                        ->textarea(['rows' => 6, 'value' => json_encode($model->tl_params_json)]);
+                }
+
+                ?>
+                </div>
+            </div>
+
         </div>
         <div class="col-md-6">
 
             <?php Pjax::begin(['id' => 'pjax-task-list-form']); ?>
+
                 <?php if ($model->tl_object) : ?>
-                    <h2>Object</h2>
-                    <pre><b><?php echo Html::encode($model->tl_object) ?></b></pre>
+                    <h3>Task object "<?php echo Html::encode($model->tl_object) ?>"</h3>
 
-
-
-
-
-                    <h2>Policy Rules</h2>
-                    <?php echo Html::a('Show / hide Attribute List', null, ['class' => 'btn btn-sm btn-default', 'id' => 'btn-div-attr-list']) ?>
+                    <h2>Rules / Conditions</h2>
+                    <?php echo Html::a(
+                        'Show / hide Attribute List',
+                        null,
+                        ['class' => 'btn btn-sm btn-default', 'id' => 'btn-div-attr-list']
+                    ) ?>
                     <div id="div-attr-list" style="display: none">
                         <pre><?php \yii\helpers\VarDumper::dump($filtersData, 10, true)?></pre>
                     </div>
@@ -105,11 +137,19 @@ $list = TaskObject::getAttributeListByObject('call');
                     <?php if ($filtersData) : ?>
                         <div id="builder" style="width: 100%"></div>
                         <br>
-                        <?php echo Html::a('Show / hide JSON rules', null, ['class' => 'btn btn-sm btn-default', 'id' => 'btn-div-json-rules']) ?>
-                        <?=Html::button('<i class="fa fa-check-square-o"></i> Validate rules', ['class' => 'btn btn-sm btn-warning', 'id' => 'btn-getcode'])?>
+                        <?php echo Html::a(
+                            'Show / hide JSON rules',
+                            null,
+                            ['class' => 'btn btn-sm btn-default', 'id' => 'btn-div-json-rules']
+                        ) ?>
+                        <?=Html::button(
+                            '<i class="fa fa-check-square-o"></i> Validate rules',
+                            ['class' => 'btn btn-sm btn-warning', 'id' => 'btn-getcode']
+                        )?>
 
                         <div id="div-json-rules" style="display: none">
-                            <?= $form->field($model, 'tl_condition_json')->textarea(['rows' => 8, 'id' => 'tl_condition_json', 'readonly' => true]) ?>
+                            <?= $form->field($model, 'tl_condition_json')
+                                ->textarea(['rows' => 8, 'id' => 'tl_condition_json', 'readonly' => true]) ?>
                         </div>
                     <?php else : ?>
                         <div class="alert alert-warning" role="alert">
@@ -160,32 +200,12 @@ $list = TaskObject::getAttributeListByObject('call');
                 <?php endif; ?>
             <?php Pjax::end(); ?>
 
-            <?= $form->field($model, 'tl_condition')->textInput(['maxlength' => true]) ?>
+            <?php /*= $form->field($model, 'tl_condition')->textInput(['maxlength' => true])*/ ?>
 
-            <?= $form->field($model, 'tl_condition_json')->textInput() ?>
+            <?php /*= $form->field($model, 'tl_condition_json')->textInput()*/ ?>
 
 
-            <?php
 
-            try {
-                echo $form->field($model, 'tl_params_json')->widget(
-                    \kdn\yii2\JsonEditor::class,
-                    [
-                        'clientOptions' => [
-                            'modes' => ['code', 'form', 'tree', 'view'], //'text',
-                            'mode' => $model->isNewRecord ? 'code' : 'form'
-                        ],
-                        //'collapseAll' => ['view'],
-                        'expandAll' => ['tree', 'form'],
-                        'value' => $model->tl_params_json ? json_encode($model->tl_params_json) : ''
-                    ]
-                );
-            } catch (Exception $exception) {
-                echo $form->field($model, 'tl_params_json')
-                    ->textarea(['rows' => 6, 'value' => json_encode($model->tl_params_json)]);
-            }
-
-            ?>
 
         </div>
     </div>
@@ -229,7 +249,7 @@ $jsCode2 = <<<JS
         var result = $('#builder').queryBuilder('getRules');
         if (!$.isEmptyObject(result)) {
             var json = JSON.stringify(result, null);
-            $('#ap_subject_json').val(json);
+            $('#tl_condition_json').val(json);
             if(result.valid) return true;
         }
         return false;

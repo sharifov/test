@@ -3,6 +3,7 @@
 namespace modules\taskList\src\entities\taskList;
 
 use common\models\Employee;
+use modules\taskList\src\services\TaskListService;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -59,6 +60,7 @@ class TaskList extends ActiveRecord
         self::ET_DISABLED_CONDITION     => 'default',
         self::ET_ENABLED_CONDITION      => 'warning',
     ];
+
 
     /**
      * @return string
@@ -134,6 +136,19 @@ class TaskList extends ActiveRecord
         ];
     }
 
+    public function beforeSave($insert): bool
+    {
+        if (!parent::beforeSave($insert)) {
+            return false;
+        }
+
+        if ($this->tl_condition_json) {
+            $this->tl_condition = $this->getDecodeCode();
+        }
+
+        return true;
+    }
+
     /**
      * Gets query for [[TlUpdatedUser]].
      *
@@ -161,13 +176,6 @@ class TaskList extends ActiveRecord
         return self::ET_LIST;
     }
 
-    /**
-     * @return string[]
-     */
-    public static function getTypeList(): array
-    {
-        return self::TYPE_LIST;
-    }
 
     /**
      * @return string
@@ -182,7 +190,7 @@ class TaskList extends ActiveRecord
      */
     public function getEnableTypeClass(): string
     {
-        return self::ET_CLASS_LIST[$this->ff_enable_type] ?? '';
+        return self::ET_CLASS_LIST[$this->tl_enable_type] ?? '';
     }
 
     /**
@@ -193,5 +201,23 @@ class TaskList extends ActiveRecord
         $class = $this->getEnableTypeClass();
         $name = $this->getEnableTypeName();
         return Html::tag('span', $name, ['class' => $class ? 'label label-' . $class : null]);
+    }
+
+    /**
+     * @param bool $human
+     * @return string
+     */
+    public function getDecodeCode(bool $human = false): string
+    {
+        $code = '';
+        $rules = @json_decode($this->tl_condition_json, true);
+        if (is_array($rules)) {
+            $code = TaskListService::conditionDecode($rules);
+
+            if ($human) {
+                $code = TaskListService::humanConditionCode($code);
+            }
+        }
+        return $code;
     }
 }
