@@ -213,7 +213,14 @@ class LeadController extends FController
                     'ajax-create-from-phone-widget-with-invalid-client',
                     'ajax-link-to-call',
                     'extra-queue',
-                ]
+                ],
+                'rules' => [
+                    [
+                        'actions' => ['closed'],
+                        'allow' => \Yii::$app->abac->can(null, LeadAbacObject::OBJ_CLOSED_QUEUE, LeadAbacObject::ACTION_ACCESS),
+                        'roles' => ['@'],
+                    ],
+                ],
             ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
