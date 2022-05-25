@@ -36,7 +36,11 @@ class UserShiftAssignListSearch extends Employee
      */
     public function search($params): ActiveDataProvider
     {
-        $query = Employee::find();
+        $query = Employee::find()->where([
+            '<>',
+            'employees.status',
+            Employee::STATUS_DELETED
+        ]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
