@@ -213,6 +213,8 @@ class LeadController extends FController
                     'ajax-create-from-phone-widget-with-invalid-client',
                     'ajax-link-to-call',
                     'extra-queue',
+                    'closed',
+                    'create'
                 ],
             ],
         ];
