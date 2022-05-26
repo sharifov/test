@@ -16,6 +16,7 @@ use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftScheduleReposi
 use modules\shiftSchedule\src\forms\ShiftScheduleCreateForm;
 use modules\shiftSchedule\src\forms\ShiftScheduleEditForm;
 use modules\shiftSchedule\src\forms\SingleEventCreateForm;
+use modules\shiftSchedule\src\forms\UserShiftCalendarMultipleUpdateForm;
 use modules\shiftSchedule\src\helpers\UserShiftScheduleHelper;
 use src\auth\Auth;
 use Yii;
@@ -565,6 +566,29 @@ class UserShiftScheduleService
             $endDateTime,
             $diffMinutes,
             $form->description
+        );
+
+        try {
+            $this->repository->save($event);
+        } catch (\RuntimeException $e) {
+            $form->addError('general', $e->getMessage());
+        }
+    }
+
+    public function editMultiple(UserShiftCalendarMultipleUpdateForm $form, UserShiftSchedule $event, ?string $timezone): void
+    {
+        $start = $form->dateTimeStart ?: $event->uss_start_utc_dt;
+        $end = $form->dateTimeEnd ?: $event->uss_end_utc_dt;
+
+        [$startDateTime, $endDateTime, $diffMinutes] = $this->generateEventTimeValues($start, $end, $timezone);
+
+        $event->editMultipleFromCalendar(
+            $form->status ?: $event->uss_status_id,
+            $form->scheduleType ?: $event->uss_sst_id,
+            $startDateTime,
+            $endDateTime,
+            $diffMinutes,
+            $form->description ?: $event->uss_description,
         );
 
         try {

@@ -344,4 +344,20 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
         $this->uss_duration = $duration;
         $this->uss_description = $description;
     }
+
+    public function editMultipleFromCalendar(
+        int $status,
+        int $scheduleType,
+        \DateTimeImmutable $startDateTime,
+        \DateTimeImmutable $endDateTime,
+        int $duration,
+        ?string $description
+    ): void {
+        $this->uss_status_id = $status;
+        $this->uss_sst_id = $scheduleType;
+        $this->uss_start_utc_dt = $startDateTime->format('Y-m-d H:i:s');
+        $this->uss_end_utc_dt = $endDateTime->format('Y-m-d H:i:s');
+        $this->uss_duration = $duration;
+        $this->uss_description = $description;
+    }
 }
