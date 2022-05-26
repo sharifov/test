@@ -5,7 +5,6 @@ use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\entities\userShiftSchedule\search\TimelineCalendarFilter;
 use yii\helpers\Html;
 use yii\helpers\Url;
-use yii\bootstrap4\Modal;
 
 /* @var $this yii\web\View */
 /* @var $timelineCalendarFilter TimelineCalendarFilter */
