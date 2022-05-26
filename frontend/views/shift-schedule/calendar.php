@@ -5,6 +5,7 @@ use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\entities\userShiftSchedule\search\TimelineCalendarFilter;
 use yii\helpers\Html;
 use yii\helpers\Url;
+use yii\bootstrap4\Modal;
 
 /* @var $this yii\web\View */
 /* @var $timelineCalendarFilter TimelineCalendarFilter */
@@ -36,7 +37,10 @@ $bundle = UserShiftCalendarAsset::register($this);
             ) ?>
         <?php endif; ?>
 
-        <?php if (Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_MULTIPLE_DELETE_EVENTS)) : ?>
+        <?php
+        $canDelete = Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_MULTIPLE_DELETE_EVENTS);
+        $canUpdate = Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_MULTIPLE_UPDATE_EVENTS);
+        if ($canDelete || $canUpdate) : ?>
             <?= Html::a('<i class="fas fa-th-large"></i> Multiple Manage Mode', null, ['id' => 'multiple-manage-mode-btn', 'class' => 'btn btn-warning btn-sm']) ?>
             <?= Html::a('<i class="fas fa-times-circle"></i> Exit Mode', null, [ 'class' => 'btn btn-danger btn-sm', 'id' => 'btn-multiple-exit-mode', 'style' => 'display: none;']) ?>
             <div class="btn-group" id="check_uncheck_btns" style="display: none; margin-bottom: 4px; height: 28px; margin-left: 7px;">
@@ -46,16 +50,26 @@ $bundle = UserShiftCalendarAsset::register($this);
                   <span class="sr-only">Toggle Dropdown</span>
                 </button>
                 <div class="dropdown-menu">
-                  <p>
-                      <?= Html::a('<i class="fas fa-trash-alt text-danger"></i> Delete Events', null, [
-                          'class' => 'dropdown-item btn-multiple-delete-events',
-                              'data' => [
-                                  'url' => Url::to(['shift-schedule/multiple-delete']),
-                                  'title' => 'Delete Events',
-                              ],
-                          ])
-                        ?>
-                  </p>
+                    <p>
+                        <?php if ($canUpdate) : ?>
+                            <?= Html::a('<i class="fa fa-edit text-warning"></i> Multiple update', null, [
+                                'class' => 'dropdown-item btn-multiple-update-events',
+                                'data-toggle' => 'modal',
+                                'data-target' => '#modalMultipleUpdate'
+                            ])
+                            ?>
+                        <?php endif; ?>
+                        <?php if ($canDelete) : ?>
+                            <?= Html::a('<i class="fas fa-trash-alt text-danger"></i> Delete Events', null, [
+                                'class' => 'dropdown-item btn-multiple-delete-events',
+                                'data' => [
+                                    'url' => Url::to(['shift-schedule/multiple-delete']),
+                                    'title' => 'Delete Events',
+                                ],
+                            ])
+                            ?>
+                        <?php endif; ?>
+                    </p>
                 </div>
             </div>
         <?php endif; ?>
@@ -102,6 +116,13 @@ $bundle = UserShiftCalendarAsset::register($this);
 </div>
 
 <?php
+Modal::begin([
+    'title' => 'Multiple update selected Shift(s)',
+    'id' => 'modalMultipleUpdate',
+    'size' => 'modal-md'
+]);
+Modal::end();
+
 $ajaxUrl = Url::to(['shift-schedule/calendar-events-ajax']);
 $today = date('Y-m-d', strtotime('+1 day'));
 $modalUrl = Url::to(['/shift-schedule/add-event']);
@@ -112,6 +133,7 @@ $canCreateOnDoubleClick = \Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_
 $openModalEventUrl = \yii\helpers\Url::to(['shift-schedule/get-event']);
 $viewLogsUrl = \yii\helpers\Url::to(['shift-schedule/ajax-get-logs']);
 $multipleDeleteUrl = Url::to(['shift-schedule/ajax-multiple-delete']);
+$multipleUpdateUrl = Url::to(['/shift-schedule/ajax-multiple-update']);
 $editEventUrl = Url::to(['shift-schedule/ajax-edit-event-form']);
 $js = <<<JS
 var calendarEventsAjaxUrl = '$ajaxUrl';
@@ -619,6 +641,13 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
         window.inst.addEvent(data);
         events.push(data);
     } 
+    
+    window.addTimelineEvents = function (data) {
+        data.forEach(function (event, i) {
+            window.inst.addEvent(event);
+            events.push(event);
+        });
+    } 
     // $.getJSON(calendarEventsAjaxUrl, function (events) {
     //     inst.setEvents(events);
     // }, 'jsonp');
@@ -828,6 +857,40 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
                 $('#calendar-wrapper .calendar-filter-overlay').remove();
             }
         })
+    });
+    
+    $('.btn-multiple-update-events').on('click', function (e) {
+        e.preventDefault();
+        if (!selectedEventsIds.length) {
+            createNotify('Warning', 'You have not selected any events', 'warning');
+            return false;
+        }
+    });
+    
+    $('#modalMultipleUpdate').on('show.bs.modal', function () {
+        let modal = $(this);
+        modal.find('.modal-body').html('<div style="text-align:center;font-size: 40px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
+        modal.find('.modal-body').load('$multipleUpdateUrl', {}, function( response, status, xhr ) {
+            if (status == 'error') {
+                createNotifyByObject({
+                    'title': 'Error',
+                    'type': 'error',
+                    'text': xhr.statusText
+                })
+            } else {
+                modal.modal({
+                  backdrop: 'static',
+                  show: true
+                });
+            }
+        });
+    });
+    
+    $(document).on('submit','form#multiple-update-events-form', function(){
+        $('#eventIds').val(JSON.stringify(selectedEventsIds));
+        let btnObj = $('#submit-multiple-update-events');
+        btnObj.html('<i class="fa fa-spin fa-spinner"></i>');
+        btnObj.addClass('disabled').prop('disabled', true);
     });
 JS;
 
