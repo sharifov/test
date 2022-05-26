@@ -241,7 +241,6 @@ $(document).on('click', '#{$formId} .kv-clear', function (e) {
     parentForm.find('#add-schedule-event-duration').val('');
 });
 $(document).on('change', '#add-schedule-event-duration', function() {
-    console.log('adsasd');
     let parentForm = $('#{$formId}');
     let dateTimeRangeInput = parentForm.find('.range-value');
     let submitButton =  $('#submit-add-event');
