@@ -41,7 +41,7 @@ server {
     location /voip-records/ {
         internal;
         proxy_buffering off;
-        proxy_pass https://{{ common_config_main_components_communication_host }};
+        proxy_pass https://{{ common_config_main_components_communication_host }}/;
     }
 
     location ~ ^/.+\.php(/|$) {
