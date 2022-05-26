@@ -12,7 +12,7 @@ pipeline {
           sh 'composer install --no-interaction --ignore-platform-reqs'
         }
         sh '''
-          tar --exclude=./devops \
+          tar --exclude=./devops --exclude=./.git \
             -czf devops/ansible/roles/deployment/files/build.tar.gz .
         '''
       }
