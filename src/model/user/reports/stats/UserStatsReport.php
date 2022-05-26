@@ -782,7 +782,7 @@ class UserStatsReport extends Model
         $soldLeadsColumn = array_column($results, 'sold_leads');
         $splitShareColumn = array_column($results, 'split_share');
         foreach ($soldLeadsColumn as $key => $value) {
-            $sumSoldLeads += $value * $splitShareColumn[$key] * 0.01;
+            $sumSoldLeads += $value * $splitShareColumn[$key];
         }
         $sumQualifiedLeadsTaken = $this->getSumColumn(
             $results,
@@ -799,16 +799,13 @@ class UserStatsReport extends Model
         if (Metrics::isLeadsCreated($metrics)) {
             $query->addSelect(['sum(leads_created) as leads_created']);
         }
-        if (Metrics::isSalesConversion($metrics)) {
+        if (Metrics::isSalesConversion($metrics) || Metrics::isSplitShare($metrics)) {
             //$query->addSelect(['round(sum(conversion_percent)/(count(*)), 2) as conversion_percent']);
             $query->addSelect(['if ((round(sum(c_share) / sum(cc_cnt), 2) IS NULL OR round(sum(c_share) / sum(cc_cnt), 2) = 0), 0, round(sum(c_share) / sum(cc_cnt), 2)) as conversion_percent']);
             $query->addSelect(['round(sum(split_share)/(count(*)), 2) as split_share']);
         }
         if (Metrics::isSoldLeads($metrics)) {
             $query->addSelect(['sum(sold_leads) as sold_leads']);
-        }
-        if (Metrics::isSplitShare($metrics)) {
-            $query->addSelect(['round(sum(split_share)/(count(*)), 2) as split_share']);
         }
         if (Metrics::isQualifiedLeadsTaken($metrics)) {
             $query->addSelect(['sum(qualified_leads_taken) as qualified_leads_taken']);
