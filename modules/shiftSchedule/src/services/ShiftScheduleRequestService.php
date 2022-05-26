@@ -10,6 +10,7 @@ use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\shiftSchedule\src\forms\ScheduleDecisionForm;
 use modules\shiftSchedule\src\forms\ScheduleRequestForm;
+use modules\shiftSchedule\src\helpers\UserShiftScheduleHelper;
 use src\auth\Auth;
 use Yii;
 use yii\db\ActiveQuery;
@@ -213,14 +214,18 @@ class ShiftScheduleRequestService
     {
         $subject = 'Request Status';
         if ($whom === Employee::ROLE_AGENT) {
-            $publishUserIds = [$scheduleRequest->ssr_created_user_id];
+            $publishUserIds = [Employee::findIdentity($scheduleRequest->ssr_created_user_id)];
         } elseif ($whom === Employee::ROLE_SUPERVISION) {
-            $publishUserIds = $user->getSupervisionIdsByCurrentUser();
+            if ($notificationType === self::NOTIFICATION_TYPE_UPDATE) {
+                $publishUserIds = [Employee::findIdentity($user->id)];
+            } else {
+                $publishUserIds = UserShiftScheduleHelper::getSupervisionByUsers($user->id);
+            }
         }
 
         if (!empty($publishUserIds)) {
-            foreach ($publishUserIds as $userId) {
-                $timezone = Employee::findIdentity($userId)->timezone ?? null;
+            foreach ($publishUserIds as $userModel) {
+                $timezone = $userModel->timezone ?? null;
                 $startTime = Yii::$app->formatter->asDateTimeByUserTimezone(
                     strtotime($scheduleRequest->srhUss->uss_start_utc_dt ?? ''),
                     $timezone
@@ -243,9 +248,9 @@ class ShiftScheduleRequestService
                     $timezone
                 );
 
-                if ($ntf = Notifications::create($userId, $subject, $body, Notifications::TYPE_INFO)) {
+                if ($ntf = Notifications::create($userModel->id, $subject, $body, Notifications::TYPE_INFO)) {
                     $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-                    Notifications::publish('getNewNotification', ['user_id' => $userId], $dataNotification);
+                    Notifications::publish('getNewNotification', ['user_id' => $userModel->id], $dataNotification);
                 }
             }
         }
