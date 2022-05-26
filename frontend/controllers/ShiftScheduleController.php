@@ -7,6 +7,7 @@ use common\models\query\UserGroupAssignQuery;
 use common\models\query\UserGroupQuery;
 use common\models\UserGroup;
 use common\models\UserGroupAssign;
+use DateTime;
 use Exception;
 use modules\shiftSchedule\src\abac\dto\ShiftAbacDto;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
@@ -23,6 +24,7 @@ use modules\shiftSchedule\src\entities\userShiftScheduleLog\search\UserShiftSche
 use modules\shiftSchedule\src\forms\ShiftScheduleCreateForm;
 use modules\shiftSchedule\src\forms\ShiftScheduleEditForm;
 use modules\shiftSchedule\src\forms\SingleEventCreateForm;
+use modules\shiftSchedule\src\forms\UserShiftCalendarMultipleUpdateForm;
 use modules\shiftSchedule\src\helpers\UserShiftScheduleHelper;
 use modules\shiftSchedule\src\forms\ScheduleRequestForm;
 use modules\shiftSchedule\src\services\ShiftScheduleRequestService;
@@ -32,6 +34,7 @@ use src\helpers\app\AppHelper;
 use src\helpers\setting\SettingHelper;
 use src\repositories\NotFoundException;
 use Yii;
+use yii\db\Transaction;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
@@ -67,7 +70,7 @@ class ShiftScheduleController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['ajax-multiple-delete', 'add-event', 'get-event', 'ajax-get-logs', 'ajax-edit-event-form'],
+                        'actions' => ['ajax-multiple-delete', 'add-event', 'get-event', 'ajax-get-logs', 'ajax-edit-event-form', 'ajax-multiple-update'],
                         'allow' => true,
                         'roles' => ['@']
                     ],
@@ -768,6 +771,58 @@ class ShiftScheduleController extends FController
         return $this->asJson([
             'error' => false,
             'message' => ''
+        ]);
+    }
+
+    public function actionAjaxMultipleUpdate()
+    {
+        /** @abac ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_MULTIPLE_UPDATE_EVENTS, Access to update multiple events */
+        if (!Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_MULTIPLE_UPDATE_EVENTS)) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
+        $multipleUpdateForm = new UserShiftCalendarMultipleUpdateForm();
+
+        if ($multipleUpdateForm->load(Yii::$app->request->post()) && $multipleUpdateForm->validate()) {
+            $eventIds = \yii\helpers\Json::decode($multipleUpdateForm['eventIds']);
+
+            if (!is_array($eventIds)) {
+                throw new BadRequestHttpException('Invalid JSON data for decode');
+            }
+
+            $transaction = Yii::$app->db->beginTransaction();
+            $returnEventsData = [];
+            try {
+                foreach ($eventIds as $eventId) {
+                    $event = UserShiftSchedule::findOne((int)$eventId);
+                    if (!$event) {
+                        throw new BadRequestHttpException('Not found event');
+                    }
+                    $this->shiftScheduleService->editMultiple($multipleUpdateForm, $event, Auth::user()->timezone ?: null);
+                    if (!$multipleUpdateForm->hasErrors()) {
+                        $returnEventsData[] = UserShiftScheduleHelper::getDataForCalendar($event);
+                    }
+                }
+            } catch (\Throwable $e) {
+                $transaction->rollBack();
+                $jsCode = '';
+                foreach ($eventIds as $eventId) {
+                    $jsCode .= 'window.inst.removeEvent(' . $eventId . ');';
+                }
+                return '<script>(function() {$("#modalMultipleUpdate").modal("hide");' . $jsCode . ';let timelinesData = ' . json_encode($returnEventsData) . ';addTimelineEvents(timelinesData);$("#btn-multiple-exit-mode").trigger("click");createNotify("Danger", "' . $e->getMessage() . '", "danger")})();</script>';
+            }
+            $transaction->commit();
+
+            $jsCode = '';
+            foreach ($eventIds as $eventId) {
+                $jsCode .= 'window.inst.removeEvent(' . $eventId . ');';
+            }
+
+            return '<script>(function() {$("#modalMultipleUpdate").modal("hide");' . $jsCode . ';let timelinesData = ' . json_encode($returnEventsData) . ';addTimelineEvents(timelinesData);$("#btn-multiple-exit-mode").trigger("click");createNotify("Success", "Event(s) updated successfully", "success")})();</script>';
+        }
+
+        return $this->renderAjax('partial/_multiple_update_events_form', [
+            'multipleUpdateForm' => $multipleUpdateForm
         ]);
     }
 
