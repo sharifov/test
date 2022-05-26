@@ -26,6 +26,7 @@ use yii\widgets\Pjax;
             <?php $form = ActiveForm::begin([
                 'id' => 'schedule-request-form',
                 'options' => [
+                    'autocomplete' => 'off',
                     'data-pjax' => true,
                 ],
             ]); ?>
