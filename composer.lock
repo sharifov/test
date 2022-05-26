@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4c9d1c6a540bcefe150223794cad3bab",
+    "content-hash": "e9e70fe5a6ab9de2f45587c5ef809ca5",
     "packages": [
         {
             "name": "2amigos/2fa-library",
@@ -4046,11 +4046,11 @@
         },
         {
             "name": "kivork/yii2-feature-flag",
-            "version": "dev-master",
+            "version": "1.0.1",
             "source": {
                 "type": "git",
                 "url": "git@bitbucket.org:techork/yii2-feature-flag.git",
-                "reference": "7cc4a7c2cc0d976bfc1714e7fcd162d3164d5d22"
+                "reference": "6074f3aa7c8170e796d1c0ed042f2c4d7d43a057"
             },
             "require": {
                 "ext-json": "*",
@@ -4063,7 +4063,6 @@
             "require-dev": {
                 "roave/security-advisories": "dev-master"
             },
-            "default-branch": true,
             "type": "yii2-extension",
             "autoload": {
                 "psr-4": {
@@ -15523,7 +15522,6 @@
         "kivork/yii2-virtual-cron": 20,
         "kivork/yii2-prometheus-client": 20,
         "kartik-v/yii2-widget-fileinput": 20,
-        "kivork/yii2-feature-flag": 20,
         "eaglewu/swoole-ide-helper": 20,
         "redcomponent/teststatistics": 20
     },
