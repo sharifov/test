@@ -141,6 +141,14 @@ use yii\widgets\Pjax;
                             },
                             'format' => 'raw'
                         ],
+
+                        [
+                            'label' => 'Allow Call Transfer',
+                            'value' => function (\common\models\UserProjectParams $model) {
+                                return $model->upp_allow_transfer == 1 ? '<i class="fa fa-check-square-o"></i>' : '<i class="fa fa-close"></i>';
+                            },
+                            'format' => 'raw'
+                        ],
                     ]
                 ]); ?>
             </div>
