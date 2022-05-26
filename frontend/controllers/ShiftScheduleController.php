@@ -7,7 +7,6 @@ use common\models\query\UserGroupAssignQuery;
 use common\models\query\UserGroupQuery;
 use common\models\UserGroup;
 use common\models\UserGroupAssign;
-use DateTime;
 use Exception;
 use modules\shiftSchedule\src\abac\dto\ShiftAbacDto;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
@@ -803,22 +802,22 @@ class ShiftScheduleController extends FController
                         $returnEventsData[] = UserShiftScheduleHelper::getDataForCalendar($event);
                     }
                 }
-            } catch (\Throwable $e) {
-                $transaction->rollBack();
+                $transaction->commit();
+
                 $jsCode = '';
                 foreach ($eventIds as $eventId) {
                     $jsCode .= 'window.inst.removeEvent(' . $eventId . ');';
                 }
-                return '<script>(function() {$("#modalMultipleUpdate").modal("hide");' . $jsCode . ';let timelinesData = ' . json_encode($returnEventsData) . ';addTimelineEvents(timelinesData);$("#btn-multiple-exit-mode").trigger("click");createNotify("Danger", "' . $e->getMessage() . '", "danger")})();</script>';
-            }
-            $transaction->commit();
 
-            $jsCode = '';
-            foreach ($eventIds as $eventId) {
-                $jsCode .= 'window.inst.removeEvent(' . $eventId . ');';
+                return '<script>(function() {$("#modalMultipleUpdate").modal("hide");' . $jsCode . ';let timelinesData = ' . json_encode($returnEventsData) . ';addTimelineEvents(timelinesData);$("#btn-check-all").trigger("click");createNotify("Success", "Event(s) updated successfully", "success")})();</script>';
+            } catch (\RuntimeException $e) {
+                $transaction->rollBack();
+                $multipleUpdateForm->addError('general', $e->getMessage());
+            } catch (\Throwable $throwable) {
+                $transaction->rollBack();
+                Yii::error(AppHelper::throwableLog($throwable), 'ShiftScheduleController:actionAjaxMultipleUpdate:Throwable');
+                $multipleUpdateForm->addError('general', 'Internal Server Error');
             }
-
-            return '<script>(function() {$("#modalMultipleUpdate").modal("hide");' . $jsCode . ';let timelinesData = ' . json_encode($returnEventsData) . ';addTimelineEvents(timelinesData);$("#btn-multiple-exit-mode").trigger("click");createNotify("Success", "Event(s) updated successfully", "success")})();</script>';
         }
 
         return $this->renderAjax('partial/_multiple_update_events_form', [

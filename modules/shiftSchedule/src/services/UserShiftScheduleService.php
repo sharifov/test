@@ -591,11 +591,7 @@ class UserShiftScheduleService
             $form->description ?: $event->uss_description,
         );
 
-        try {
-            $this->repository->save($event);
-        } catch (\RuntimeException $e) {
-            $form->addError('general', $e->getMessage());
-        }
+        $this->repository->save($event);
     }
 
     private function generateEventTimeValues(string $startDateTime, string $endDateTime, ?string $timezone): array
