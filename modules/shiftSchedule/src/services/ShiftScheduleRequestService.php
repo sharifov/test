@@ -122,17 +122,18 @@ class ShiftScheduleRequestService
     /**
      * Save request to user shift schedule and shift schedule request
      * @param ScheduleRequestForm $requestForm
+     * @param Employee $user
      * @return bool
      * @throws \Exception
      */
-    public static function saveRequest(ScheduleRequestForm $requestForm): bool
+    public static function saveRequest(ScheduleRequestForm $requestForm, Employee $user): bool
     {
         $startDateTime = new \DateTimeImmutable($requestForm->dateTimeStart);
         $endDateTime = new \DateTimeImmutable($requestForm->dateTimeEnd);
         $interval = $startDateTime->diff($endDateTime);
         $diffMinutes = $interval->days * 24 * 60 + $interval->i + ($interval->h * 60);
         $userShiftSchedule = new UserShiftSchedule([
-            'uss_user_id' => Auth::user()->id,
+            'uss_user_id' => $user->id,
             'uss_sst_id' => $requestForm->scheduleType,
             'uss_status_id' => UserShiftSchedule::STATUS_PENDING,
             'uss_type_id' => UserShiftSchedule::TYPE_MANUAL,
@@ -148,13 +149,14 @@ class ShiftScheduleRequestService
                 'ssr_sst_id' => $requestForm->scheduleType,
                 'ssr_status_id' => ShiftScheduleRequest::STATUS_PENDING,
                 'ssr_description' => $requestForm->description,
-                'ssr_created_user_id' => Auth::id(),
+                'ssr_created_user_id' => $user->id,
             ]);
             if ($requestModel->save()) {
                 self::sendNotification(
                     Employee::ROLE_SUPERVISION,
                     $requestModel,
-                    self::NOTIFICATION_TYPE_CREATE
+                    self::NOTIFICATION_TYPE_CREATE,
+                    $user
                 );
                 return true;
             }
@@ -166,26 +168,29 @@ class ShiftScheduleRequestService
      * Save Decision request to Shift Schedule Request table
      * @param ShiftScheduleRequest $requestModel
      * @param ScheduleDecisionForm $decisionForm
+     * @param Employee $user
      * @return bool
      */
-    public static function saveDecision(ShiftScheduleRequest $requestModel, ScheduleDecisionForm $decisionForm): bool
+    public static function saveDecision(ShiftScheduleRequest $requestModel, ScheduleDecisionForm $decisionForm, Employee $user): bool
     {
         $scheduleRequest = new ShiftScheduleRequest();
         $scheduleRequest->attributes = $requestModel->attributes;
         $scheduleRequest->ssr_status_id = $decisionForm->status;
         $scheduleRequest->ssr_description = $decisionForm->description;
-        $scheduleRequest->ssr_updated_user_id = Auth::id();
+        $scheduleRequest->ssr_updated_user_id = $user->id;
         if ($scheduleRequest->getIsCanEditPreviousDate()) {
             if ($scheduleRequest->save()) {
                 self::sendNotification(
                     Employee::ROLE_AGENT,
                     $scheduleRequest,
-                    self::NOTIFICATION_TYPE_CREATE
+                    self::NOTIFICATION_TYPE_CREATE,
+                    $user
                 );
                 self::sendNotification(
                     Employee::ROLE_SUPERVISION,
                     $scheduleRequest,
-                    self::NOTIFICATION_TYPE_UPDATE
+                    self::NOTIFICATION_TYPE_UPDATE,
+                    $user
                 );
                 return true;
             }
@@ -199,12 +204,12 @@ class ShiftScheduleRequestService
      * @param string $whom
      * @param ShiftScheduleRequest $scheduleRequest
      * @param string|null $notificationType
+     * @param Employee $user
      * @return void
      */
-    public static function sendNotification(string $whom, ShiftScheduleRequest $scheduleRequest, ?string $notificationType = null): void
+    public static function sendNotification(string $whom, ShiftScheduleRequest $scheduleRequest, ?string $notificationType = null, Employee $user): void
     {
         $subject = 'Request Status';
-        $authUser = Auth::user();
         $startTime = date('Y-m-d H:i:s', strtotime($scheduleRequest->srhUss->uss_start_utc_dt ?? ''));
         $endTime = date('Y-m-d H:i:s', strtotime($scheduleRequest->srhUss->uss_end_utc_dt ?? ''));
         if ($whom === Employee::ROLE_AGENT) {
@@ -214,7 +219,7 @@ class ShiftScheduleRequestService
                 $startTime,
                 $endTime,
                 $scheduleRequest->getStatusName(),
-                $authUser->username
+                $user->username
             );
             $publishUserIds = [$scheduleRequest->ssr_created_user_id];
         } elseif ($whom === Employee::ROLE_SUPERVISION) {
@@ -230,9 +235,9 @@ class ShiftScheduleRequestService
                 $scheduleRequest->getScheduleTypeTitle(),
                 $startTime,
                 $endTime,
-                $authUser->username
+                $user->username
             );
-            $publishUserIds = $authUser->getSupervisionIdsByCurrentUser();
+            $publishUserIds = $user->getSupervisionIdsByCurrentUser();
         }
 
         if (!empty($body) && !empty($publishUserIds)) {
