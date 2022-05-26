@@ -31,7 +31,7 @@ class ValidatorsController extends BaseController
     }
 
     /**
-     * @api {post} /v2/validators/phone Validator Phone number
+     * @api {get} /v2/validators/phone Validator Phone number
      * @apiVersion 0.2.0
      * @apiName ValidatorPhoneV1
      * @apiGroup Validators
