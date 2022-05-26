@@ -106,7 +106,7 @@ class UserShiftScheduleHelper
             $users = Employee::find()
                 ->joinWith(['userGroupAssigns'])
                 ->where(['ugs_group_id' => $group->ug_id])
-                ->andWhere(['status' => Employee::STATUS_ACTIVE])
+                ->andWhere(['<>', 'status', Employee::STATUS_DELETED])
                 ->orderBy(['username' => SORT_ASC])
                 ->andFilterWhere(['id' => $usersIds])
                 ->all();
