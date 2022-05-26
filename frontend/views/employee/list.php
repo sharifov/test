@@ -355,6 +355,12 @@ $isAdmin = $user->isAdmin() || $user->isSuperAdmin();
                                 $str .= '<td><span class="label label-danger">No</span></td>';
                             }
 
+                            if ($projectParam->upp_allow_transfer) {
+                                $str .= '<td><span class="label label-success">Yes</span></td>';
+                            } else {
+                                $str .= '<td><span class="label label-danger">No</span></td>';
+                            }
+
                             $str .= '</tr>';
                         }
                     }

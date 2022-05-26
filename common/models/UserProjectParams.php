@@ -42,6 +42,7 @@ use yii\db\ActiveRecord;
  * @property PhoneList $phoneList
  * @property EmailList $emailList
  * @property UserVoiceMail $voiceMail
+ * @property bool $upp_allow_transfer [tinyint(1)]
  */
 class UserProjectParams extends \yii\db\ActiveRecord
 {
@@ -96,7 +97,7 @@ class UserProjectParams extends \yii\db\ActiveRecord
 //            ['upp_tw_phone_number', 'unique', 'targetAttribute' => ['upp_tw_phone_number']], //, 'message' => 'Twillio Phone Number must be unique'],
 //            ['upp_tw_phone_number', 'string', 'max' => 30],
 
-            ['upp_allow_general_line', 'boolean'],
+            [['upp_allow_general_line', 'upp_allow_transfer'], 'boolean'],
 
             ['upp_phone_list_id', 'integer'],
             ['upp_phone_list_id', 'unique'],
@@ -155,6 +156,7 @@ class UserProjectParams extends \yii\db\ActiveRecord
             'upp_updated_dt' => 'Updated Dt',
             'upp_updated_user_id' => 'Updated User',
             'upp_allow_general_line' => 'Allow General Line',
+            'upp_allow_transfer' => 'Allow Call Transfer',
             'upp_dep_id' => 'Department',
             'upp_phone_list_id' => 'Phone List',
             'phoneList.pl_phone_number' => 'Phone List',

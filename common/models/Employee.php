@@ -2594,7 +2594,12 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         }
 
         $query->andWhere(['up.up_call_type_id' => UserProfile::CALL_TYPE_WEB]);
-        $query->andWhere(['upp.upp_allow_general_line' => true, 'upp.upp_project_id' => $project_id]);
+        if ($call->isTransfer()) {
+            $query->andWhere(['upp.upp_allow_transfer' => true]);
+        } else {
+            $query->andWhere(['upp.upp_allow_general_line' => true]);
+        }
+        $query->andWhere(['upp.upp_project_id' => $project_id]);
 
         if ($exceptUserIds) {
             $query->andWhere(['NOT IN', 'uo.uo_user_id', $exceptUserIds]);
