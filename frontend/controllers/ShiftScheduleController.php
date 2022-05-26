@@ -708,7 +708,7 @@ class ShiftScheduleController extends FController
         $scheduleRequestModel = new ScheduleRequestForm();
         if ($request->isPost) {
             if ($scheduleRequestModel->load($request->post()) && $scheduleRequestModel->validate()) {
-                if (ShiftScheduleRequestService::saveRequest($scheduleRequestModel)) {
+                if (ShiftScheduleRequestService::saveRequest($scheduleRequestModel, Auth::user())) {
                     $success = true;
                 }
             }

@@ -168,7 +168,7 @@ class UserShiftScheduleRequestController extends FController
                     $event->uss_status_id = $requestModel->getCompatibleStatus($decisionFormModel->status);
                     $event->uss_description = $decisionFormModel->description;
                     if ($event->save()) {
-                        $success = ShiftScheduleRequestService::saveDecision($requestModel, $decisionFormModel);
+                        $success = ShiftScheduleRequestService::saveDecision($requestModel, $decisionFormModel, Auth::user());
                     }
                 }
             } else {
