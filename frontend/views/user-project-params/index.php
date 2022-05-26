@@ -76,6 +76,7 @@ if ($user->isAdmin()) {
                 'relation' => 'phoneList',
             ],
             ['class' => BooleanColumn::class, 'attribute' => 'upp_allow_general_line'],
+            ['class' => BooleanColumn::class, 'attribute' => 'upp_allow_transfer'],
             ['class' => BooleanColumn::class, 'attribute' => 'upp_vm_enabled'],
             [
                 'attribute' => 'upp_vm_user_status_id',
