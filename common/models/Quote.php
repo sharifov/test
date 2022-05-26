@@ -2728,7 +2728,10 @@ class Quote extends \yii\db\ActiveRecord
     public function getCheckoutUrlPage(?string $qc_uid = null): string
     {
         if (($providerProject = $this->providerProject) && $providerProject->link) {
-            return implode('/', [$providerProject->link, self::CHECKOUT_URL_PAGE, $this->uid]);
+            $urlString = implode('/', [$providerProject->link, self::CHECKOUT_URL_PAGE, $this->uid]);
+            $queryParams = (is_null($qc_uid)) ? [] : ['qc' => $qc_uid];
+
+            return self::generateUrl($urlString, $queryParams);
         }
 
         if ($this->lead && $this->lead->project && $this->lead->project->link) {
