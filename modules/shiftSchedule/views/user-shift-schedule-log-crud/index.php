@@ -35,7 +35,10 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'ussl_uss_id',
                 'value' => static function (UserShiftScheduleLog $model) {
-                    return Html::a('<i class="fa fa-link"></i> ' . $model->ussl_uss_id, Url::to(['/user-shift-schedule-crud/view', 'id' => $model->ussl_uss_id, 'target' => '_blank']));
+                    return Html::a('<i class="fa fa-link"></i> ' . $model->ussl_uss_id, Url::to(['/user-shift-schedule-crud/view', 'id' => $model->ussl_uss_id]), [
+                        'target' => '_blank',
+                        'data-pjax' => 0
+                    ]);
                 },
                 'format' => 'raw'
             ],

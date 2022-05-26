@@ -3,6 +3,8 @@
 namespace common\models;
 
 use common\models\query\LeadTaskQuery;
+use src\helpers\app\AppHelper;
+use src\helpers\ErrorsToStringHelper;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
 use Yii;
 
@@ -109,9 +111,8 @@ class LeadTask extends \yii\db\ActiveRecord
      * @param array $task_list
      * @return bool
      */
-    public static function createTaskList(int $lead_id, int $user_id, int $day = 1, string $date = '', int $category_id = 0, array $task_list = [])
+    public static function createTaskList(int $lead_id, int $user_id, int $day = 1, string $date = '', int $category_id = 0)
     {
-
         if ($day < 1) {
             $day = 1;
         }
@@ -126,67 +127,50 @@ class LeadTask extends \yii\db\ActiveRecord
 
                 if ($taskList) {
                     foreach ($taskList as $task) {
-                        $lt_date = date('Y-m-d', strtotime($date . " +" . ($day - 1) . " days"));
+                        try {
+                            $lt_date = date('Y-m-d', strtotime($date . " +" . ($day - 1) . " days"));
 
-                        $lt = LeadTask::find()->where([
-                            'lt_lead_id' => $lead_id,
-                            'lt_task_id' => $task->t_id,
-                            'lt_user_id' => $user_id,
-                            'lt_date' => $lt_date,
-                        ])->exists();
-
-                        if (!$lt) {
-                            $lt = new LeadTask();
+                            $ltQuery = LeadTask::find()->where([
+                                'lt_lead_id' => $lead_id,
+                                'lt_task_id' => $task->t_id,
+                                'lt_user_id' => $user_id,
+                                'lt_date'    => $lt_date,
+                            ]);
+                            if ($ltQuery->exists()) {
+                                throw new \RuntimeException('LeadTask already exist');
+                            }
+                            $lt             = new LeadTask();
                             $lt->lt_lead_id = $lead_id;
                             $lt->lt_task_id = $task->t_id;
                             $lt->lt_user_id = $user_id;
-                            $lt->lt_date = $lt_date;
+                            $lt->lt_date    = $lt_date;
                             if (!$lt->save()) {
-                                Yii::error(print_r($lt->errors), 'LeadTask:createTaskList:Task:save');
+                                throw new \Exception(ErrorsToStringHelper::extractFromModel($lt));
                             }
+                        } catch (\RuntimeException | \DomainException $throwable) {
+                            $message            = AppHelper::throwableLog($throwable, true);
+                            $message['lead_id'] = $lead_id;
+                            $message['user_id'] = $user_id;
+                            $message['lt_date'] = $lt_date;
+                            $message['task']    = $task;
+                            if (isset($ltQuery)) {
+                                $message['ltExistQuery'] = $ltQuery->sql;
+                            }
+                            \Yii::warning($message, 'LeadTask:createTaskList:Task:save:Exception');
+                        } catch (\Throwable $throwable) {
+                            $message            = AppHelper::throwableLog($throwable, true);
+                            $message['lead_id'] = $lead_id;
+                            $message['user_id'] = $user_id;
+                            $message['lt_date'] = $lt_date;
+                            $message['task']    = $task;
+                            if (isset($ltQuery)) {
+                                $message['ltExistQuery'] = $ltQuery->sql;
+                            }
+                            \Yii::error($message, 'LeadTask:createTaskList:Task:save:Throwable');
                         }
                     }
                 }
             }
-
-
-            /*switch ($day) {
-                case 1:
-                case 2:
-                case 3:
-                    $taskList = ['call1', 'call2', 'voice-mail', 'email'];
-                    break;
-                default:
-                    $taskList = [];
-            }*/
-
-            if ($task_list) {
-                foreach ($taskList as $taskKey) {
-                    $task = Task::find()->select(['t_id'])->where(['t_key' => $taskKey])->one();
-                    if ($task) {
-                        $lt_date = date('Y-m-d', strtotime($date . " +" . ($day - 1) . " days"));
-
-                        $lt = LeadTask::find()->where([
-                            'lt_lead_id' => $lead_id,
-                            'lt_task_id' => $task->t_id,
-                            'lt_user_id' => $user_id,
-                            'lt_date' => $lt_date,
-                        ])->exists();
-
-                        if (!$lt) {
-                            $lt = new LeadTask();
-                            $lt->lt_lead_id = $lead_id;
-                            $lt->lt_task_id = $task->t_id;
-                            $lt->lt_user_id = $user_id;
-                            $lt->lt_date = $lt_date;
-                            if (!$lt->save()) {
-                                Yii::error(print_r($lt->errors), 'LeadTask:createTaskList:Task:save');
-                            }
-                        }
-                    }
-                }
-            }
-
             return true;
         }
         return false;

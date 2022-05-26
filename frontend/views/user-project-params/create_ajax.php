@@ -73,6 +73,7 @@ use borales\extensions\phoneInput\PhoneInput;
     ]) ?>
 
     <?= $form->field($model, 'upp_allow_general_line')->checkbox() ?>
+    <?= $form->field($model, 'upp_allow_transfer')->checkbox() ?>
 
     <?= $form->field($model, 'upp_vm_enabled')->checkbox() ?>
     <?= $form->field($model, 'upp_vm_user_status_id')->dropDownList(UserProjectParams::VM_USER_STATUS_LIST, ['prompt' => 'Select user status']) ?>

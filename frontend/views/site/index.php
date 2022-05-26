@@ -166,6 +166,7 @@ $this->title = 'Home Page'; // . $user->username;
                                 <td><?= Yii::$app->formatter->asPhoneList($projectParam->phoneList) ?></td>
                                 <td><?=($projectParam->uppDep ? $projectParam->uppDep->dep_name : '-')?></td>
                                 <td><?=$projectParam->upp_allow_general_line ? '<i class="fa fa-check-square-o"> </i>' : '-'; ?></span></td>
+                                <td><?=$projectParam->upp_allow_transfer ? '<i class="fa fa-check-square-o"> </i>' : '-'; ?></span></td>
                                 <td><?= $projectParam->upp_vm_enabled ? '<i class="fa fa-check-square-o"> </i>' : '-'; ?></td>
                                 <td><?= UserProjectParams::VM_USER_STATUS_LIST[$projectParam->upp_vm_user_status_id] ?? '<span class="not-set">(not set)</span>'; ?></td>
                                 <td><?= $projectParam->upp_vm_id ? $projectParam->voiceMail->uvm_name : '<span class="not-set">(not set)</span>'; ?></td>

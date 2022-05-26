@@ -55,7 +55,8 @@ class UserShiftScheduleMultipleUpdateForm extends Model
                 }
             }],
 
-            ['uss_sst_id', 'integer'],
+            [['uss_sst_id'], 'default', 'value' => null],
+            [['uss_sst_id'], 'integer'],
             [['uss_sst_id'], 'exist', 'skipOnError' => true, 'targetClass' => ShiftScheduleType::class, 'targetAttribute' => ['uss_sst_id' => 'sst_id']],
 
             ['uss_shift_id', 'default', 'value' => null],

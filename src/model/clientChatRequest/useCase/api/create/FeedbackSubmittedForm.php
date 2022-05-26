@@ -22,7 +22,22 @@ class FeedbackSubmittedForm extends FeedbackFormBase
      */
     public function rules(): array
     {
-        return array_merge(parent::rules(), [['responses', 'validateResponses']]);
+        return array_merge(parent::rules(), [
+            ['responses', 'validateResponses'],
+            ['id', 'validateRocketChatId']
+        ]);
+    }
+
+    /**
+     * @param $attribute
+     * @param $params
+     * @param $validator
+     */
+    public function validateRocketChatId($attribute, $params, $validator): void
+    {
+        if (!ClientChatSurvey::find()->where(['ccs_uid' => $this->id])->exists()) {
+            $this->addError($attribute, 'feedback with current id not exists');
+        }
     }
 
     /**
@@ -69,7 +84,12 @@ class FeedbackSubmittedForm extends FeedbackFormBase
         $transaction = \Yii::$app->db->beginTransaction();
 
         /** @var ClientChatSurvey $model */
-        $model = ClientChatSurvey::find()->where(['ccs_client_chat_id' => $clientChat->cch_id])->one();
+        $model = ClientChatSurvey::find()->where(['ccs_uid' => $this->id])->one();
+
+        if (is_null($model)) {
+            return false;
+        }
+
         $model->ccs_status = ClientChatSurvey::STATUS_SUBMITTED;
         $columns = ['ccsr_client_chat_survey_id', 'ccsr_question', 'ccsr_response', 'ccsr_created_dt'];
         $rows = array_map(function ($response) use ($model) {

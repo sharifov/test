@@ -267,6 +267,7 @@ $(document).on('change', '#add-schedule-event-duration', function() {
                     },
                     opens: 'right'
                 });
+                $('#shiftschedulecreateform-datetimerange').val(startDateTime + ' - ' + newEndDateTime);
             }
             $(this).css('background', 'transparent');
             submitButton.prop('disabled', false);

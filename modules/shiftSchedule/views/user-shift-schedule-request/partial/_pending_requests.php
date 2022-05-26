@@ -107,25 +107,29 @@ use yii\helpers\Url;
                         'clientOptions' => [
                             'autoclose' => true,
                             'format' => 'yyyy-mm-dd',
+                            'clearBtn' => true,
                         ],
                         'options' => [
                             'autocomplete' => 'off',
                             'placeholder' => 'Choose Date'
                         ],
+                        'clientEvents' => [
+                            'clearDate' => 'function (e) {$(e.target).find("input").change();}',
+                        ],
                     ]),
                 ],
                 [
-                    'attribute' => 'ssr_uss_id',
+                    'attribute' => 'ssr_created_user_id',
                     'options' => [
-
+                        'style' => 'width: 200px',
                     ],
                     'value' => function (ShiftScheduleRequestSearch $model) {
-                        return $model->ssrCreatedUser->nickname ?? $model->ssr_created_user_id;
+                        return $model->ssrCreatedUser->username ?? $model->ssr_created_user_id;
                     },
                     'label' => 'User',
                     'filter' => UserSelect2Widget::widget([
                         'model' => $searchModel,
-                        'attribute' => 'ssr_uss_id'
+                        'attribute' => 'ssr_created_user_id'
                     ]),
                 ],
                 [

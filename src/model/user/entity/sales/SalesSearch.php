@@ -215,8 +215,8 @@ class SalesSearch extends Model
         }
 
         if ($this->dateFrom && $this->dateTo) {
-            $query->andWhere(['>=', 'DATE(luc_created_dt)', $this->dateFrom]);
-            $query->andWhere(['<=', 'DATE(luc_created_dt)', $this->dateTo]);
+            $query->andWhere(['>=', 'luc_created_dt', $this->dateFrom]);
+            $query->andWhere(['<=', 'luc_created_dt', $this->dateTo]);
         }
 
         $query->andFilterWhere([
