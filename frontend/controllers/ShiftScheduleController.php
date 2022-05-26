@@ -783,7 +783,7 @@ class ShiftScheduleController extends FController
         $multipleUpdateForm = new UserShiftCalendarMultipleUpdateForm();
 
         if ($multipleUpdateForm->load(Yii::$app->request->post()) && $multipleUpdateForm->validate()) {
-            $eventIds = \yii\helpers\Json::decode($multipleUpdateForm['eventIds']);
+            $eventIds = \yii\helpers\Json::decode($multipleUpdateForm->eventIds);
 
             if (!is_array($eventIds)) {
                 throw new BadRequestHttpException('Invalid JSON data for decode');
