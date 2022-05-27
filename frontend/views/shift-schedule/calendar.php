@@ -55,7 +55,7 @@ $bundle = UserShiftCalendarAsset::register($this);
                             <?= Html::a('<i class="fa fa-edit text-warning"></i> Multiple update', null, [
                                 'class' => 'dropdown-item btn-multiple-update-events',
                                 'data-toggle' => 'modal',
-                                'data-target' => '#modalMultipleUpdate'
+                                'data-target' => '#modal-md'
                             ])
                             ?>
                         <?php endif; ?>
@@ -116,13 +116,6 @@ $bundle = UserShiftCalendarAsset::register($this);
 </div>
 
 <?php
-Modal::begin([
-    'title' => 'Multiple update selected Shift(s)',
-    'id' => 'modalMultipleUpdate',
-    'size' => 'modal-md'
-]);
-Modal::end();
-
 $ajaxUrl = Url::to(['shift-schedule/calendar-events-ajax']);
 $today = date('Y-m-d', strtotime('+1 day'));
 $modalUrl = Url::to(['/shift-schedule/add-event']);
@@ -867,8 +860,9 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
         }
     });
     
-    $('#modalMultipleUpdate').on('show.bs.modal', function () {
+    $('#modal-md').on('show.bs.modal', function () {
         let modal = $(this);
+        modal.find('.modal-title').html('Multiple update selected Shift(s)')
         modal.find('.modal-body').html('<div style="text-align:center;font-size: 40px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
         modal.find('.modal-body').load('$multipleUpdateUrl', {}, function( response, status, xhr ) {
             if (status == 'error') {

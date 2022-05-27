@@ -2,6 +2,8 @@
 
 namespace modules\shiftSchedule\src\forms;
 
+use common\components\validators\CheckJsonValidator;
+use frontend\helpers\JsonHelper;
 use kartik\daterange\DateRangeBehavior;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
@@ -35,14 +37,14 @@ class UserShiftCalendarMultipleUpdateForm extends Model
     public function rules(): array
     {
         return [
-            ['eventIds', 'required'],
-            ['eventIds', 'safe'],
+            [['eventIds'], 'required'],
+            [['eventIds'], CheckJsonValidator::class],
             [['scheduleType'], 'integer'],
             [['scheduleType'], 'in', 'range' => array_keys(ShiftScheduleType::getList(true))],
             [['status'], 'in', 'range' => array_keys(UserShiftSchedule::getStatusList())],
             [['description'], 'string', 'max' => 500],
             [['dateTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
-            [['dateTimeStart', 'dateTimeEnd', 'defaultDuration'], 'safe'],
+            [['defaultDuration'], 'match', 'pattern' => '/^(\d+):[0-5][0-9]$/'],
             [['dateTimeStart', 'dateTimeEnd'], 'datetime', 'format' => 'php:Y-m-d H:i'],
         ];
     }

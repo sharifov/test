@@ -790,8 +790,12 @@ class ShiftScheduleController extends FController
             }
 
             $transaction = Yii::$app->db->beginTransaction();
-            $returnEventsData = [];
             try {
+                $returnEventsData = [];
+                $form = $multipleUpdateForm;
+                if (empty($form->scheduleType) && empty($form->description) && empty($form->status) && empty($form->dateTimeRange)) {
+                    throw new \RuntimeException('Please fill/change at least one field');
+                }
                 foreach ($eventIds as $eventId) {
                     $event = UserShiftSchedule::findOne((int)$eventId);
                     if (!$event) {
@@ -809,7 +813,7 @@ class ShiftScheduleController extends FController
                     $jsCode .= 'window.inst.removeEvent(' . $eventId . ');';
                 }
 
-                return '<script>(function() {$("#modalMultipleUpdate").modal("hide");' . $jsCode . ';let timelinesData = ' . json_encode($returnEventsData) . ';addTimelineEvents(timelinesData);$("#btn-check-all").trigger("click");createNotify("Success", "Event(s) updated successfully", "success")})();</script>';
+                return '<script>(function() {$("#modal-md").modal("hide");' . $jsCode . ';let timelinesData = ' . json_encode($returnEventsData) . ';addTimelineEvents(timelinesData);$("#btn-check-all").trigger("click");createNotify("Success", "Event(s) updated successfully", "success")})();</script>';
             } catch (\RuntimeException $e) {
                 $transaction->rollBack();
                 $multipleUpdateForm->addError('general', $e->getMessage());

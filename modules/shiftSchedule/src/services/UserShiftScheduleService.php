@@ -577,19 +577,27 @@ class UserShiftScheduleService
 
     public function editMultiple(UserShiftCalendarMultipleUpdateForm $form, UserShiftSchedule $event, ?string $timezone): void
     {
-        $start = $form->dateTimeStart ?: $event->uss_start_utc_dt;
-        $end = $form->dateTimeEnd ?: $event->uss_end_utc_dt;
+        if (!empty($form->dateTimeStart && $form->dateTimeEnd)) {
+            $start = $form->dateTimeStart;
+            $end = $form->dateTimeEnd;
+            [$startDateTime, $endDateTime, $diffMinutes] = $this->generateEventTimeValues($start, $end, $timezone);
 
-        [$startDateTime, $endDateTime, $diffMinutes] = $this->generateEventTimeValues($start, $end, $timezone);
+            $event->uss_start_utc_dt = $startDateTime->format('Y-m-d H:i:s');
+            $event->uss_end_utc_dt = $endDateTime->format('Y-m-d H:i:s');
+            $event->uss_duration = $diffMinutes;
+        }
 
-        $event->editMultipleFromCalendar(
-            $form->status ?: $event->uss_status_id,
-            $form->scheduleType ?: $event->uss_sst_id,
-            $startDateTime,
-            $endDateTime,
-            $diffMinutes,
-            $form->description ?: $event->uss_description,
-        );
+        if (!empty($form->status)) {
+            $event->uss_status_id = $form->status;
+        }
+
+        if (!empty($form->scheduleType)) {
+            $event->uss_sst_id = $form->scheduleType;
+        }
+
+        if (!empty($form->description)) {
+            $event->uss_description = $form->description;
+        }
 
         $this->repository->save($event);
     }
