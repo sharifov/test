@@ -629,7 +629,13 @@ class ShiftScheduleController extends FController
 
     public function actionDeleteEvent()
     {
+        /** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_DELETE, Access to soft delete event in calendar widget */
+        if (!Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_DELETE)) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
         $shiftId = Yii::$app->request->post('shiftId');
+        $deletePermanently = Yii::$app->request->post('deletePermanently');
 
         $userShiftSchedule = UserShiftSchedule::findOne($shiftId);
         if (!$userShiftSchedule) {
@@ -638,16 +644,32 @@ class ShiftScheduleController extends FController
                 'message' => 'Shift not found by id:' . $shiftId
             ]);
         }
-        if (!$userShiftSchedule->delete()) {
+
+        if ($deletePermanently == 1) {
+            /** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_PERMANENTLY_DELETE, Access to permanently delete event in calendar widget */
+            if (!Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_PERMANENTLY_DELETE)) {
+                throw new ForbiddenHttpException('Access denied');
+            }
+            if (!$userShiftSchedule->delete()) {
+                return $this->asJson([
+                    'error' => true,
+                    'message' => $userShiftSchedule->getErrorSummary(true)[0]
+                ]);
+            }
             return $this->asJson([
-                'error' => true,
-                'message' => $userShiftSchedule->getErrorSummary(true)[0]
+                'error' => false,
+                'message' => 'Shift deleted successfully',
+            ]);
+        } else {
+            $userShiftSchedule->uss_status_id = UserShiftSchedule::STATUS_DELETED;
+            $userShiftSchedule->save();
+            $userShiftScheduleData = UserShiftScheduleHelper::getDataForCalendar($userShiftSchedule);
+            return $this->asJson([
+                'error' => false,
+                'message' => 'Shift deleted successfully',
+                'timelineData' => json_encode($userShiftScheduleData)
             ]);
         }
-        return $this->asJson([
-            'error' => false,
-            'message' => 'Shift deleted successfully'
-        ]);
     }
 
     public function actionUpdateSingleEvent()
