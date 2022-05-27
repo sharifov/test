@@ -47,6 +47,7 @@ class ShiftAbacObject extends AbacBaseModel implements AbacInterface
     public const ACTION_CREATE      = 'create';
     public const ACTION_READ        = 'read';
     public const ACTION_DELETE      = 'delete';
+    public const ACTION_PERMANENTLY_DELETE      = 'permanentlyDelete';
     public const ACTION_CREATE_ON_DOUBLE_CLICK = 'createOnDoubleClick';
     public const ACTION_VIEW_ALL_EVENTS = 'viewAllEvents';
     public const ACTION_GENERATE_EXAMPLE_DATA = 'generateExampleData';
@@ -71,6 +72,7 @@ class ShiftAbacObject extends AbacBaseModel implements AbacInterface
             self::ACTION_READ,
             self::ACTION_UPDATE,
             self::ACTION_DELETE,
+            self::ACTION_PERMANENTLY_DELETE,
             self::ACTION_ACCESS,
             self::ACTION_CREATE_ON_DOUBLE_CLICK
         ],
@@ -82,7 +84,8 @@ class ShiftAbacObject extends AbacBaseModel implements AbacInterface
             self::ACTION_CREATE,
             self::ACTION_READ,
             self::ACTION_UPDATE,
-            self::ACTION_DELETE
+            self::ACTION_DELETE,
+            self::ACTION_PERMANENTLY_DELETE
         ],
         self::OBJ_USER_SHIFT_CALENDAR => [
             self::ACTION_VIEW_ALL_EVENTS,

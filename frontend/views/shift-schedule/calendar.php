@@ -121,18 +121,21 @@ $modalUrl = Url::to(['/shift-schedule/add-event']);
 $formCreateSingleEventUrl = Url::to(['/shift-schedule/add-single-event']);
 $formUpdateSingleEvent = Url::to(['/shift-schedule/update-single-event']);
 $deleteEventUrl = Url::to(['/shift-schedule/delete-event']);
+$permanentlyDeleteEventUrl = Url::to(['/shift-schedule/permanently-delete-event']);
 $canCreateOnDoubleClick = \Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_CREATE_ON_DOUBLE_CLICK);
 $openModalEventUrl = \yii\helpers\Url::to(['shift-schedule/get-event']);
 $viewLogsUrl = \yii\helpers\Url::to(['shift-schedule/ajax-get-logs']);
 $multipleDeleteUrl = Url::to(['shift-schedule/ajax-multiple-delete']);
 $multipleUpdateUrl = Url::to(['/shift-schedule/ajax-multiple-update']);
 $editEventUrl = Url::to(['shift-schedule/ajax-edit-event-form']);
+$canPermanentlyDeleteEvent = \Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_PERMANENTLY_DELETE);
 $js = <<<JS
 var calendarEventsAjaxUrl = '$ajaxUrl';
 var today = '$today';
 var modalUrl = '$modalUrl';
 var events;
 var canDeleteEvent = Boolean('$canDeleteEvent');
+var canPermanentlyDeleteEvent = Boolean('$canPermanentlyDeleteEvent');
 var canCreateOnDoubleClick = Boolean('$canCreateOnDoubleClick');
 var openModalEventUrl = '$openModalEventUrl';
 var viewLogsModalUrl = '$viewLogsUrl';
@@ -557,16 +560,31 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
 
     if (canDeleteEvent) {
         \$deleteButton.on('click', function (ev) {
+            let deletePermanently = false;
+            if(canPermanentlyDeleteEvent) {
+                setTimeout(function (args) {
+                    let html = '' +
+                    '<label>'+
+                        '<input type="checkbox" id="delete_permanently" mbsc-checkbox data-label="Delete Permanently" data-color="danger" />'+
+                    '</label>';
+                    var messageContent = $('.mbsc-alert-message');
+                    messageContent.html(html);
+                    mobiscroll.enhance(messageContent[0]);
+                }, 100);
+            }
+            
             mobiscroll.confirm({
                 title: 'Are you sure you want to delete shift?',
-                // message: 'It looks like someone from the team won\'t be able to join the meeting.',
+                message: '',
                 okText: 'Yes',
                 cancelText: 'No',
                 callback: function (res) {
                     if (res) {
+                        deletePermanently = $('#delete_permanently').is(':checked');
+                        let url = deletePermanently ? '$permanentlyDeleteEventUrl' : '$deleteEventUrl';
                         $.ajax({
-                            url: '$deleteEventUrl',
-                            data: {'shiftId': currentEvent.id},
+                            url: url,
+                            data: {'shiftId': currentEvent.id, 'deletePermanently' : deletePermanently},
                             type: 'post',
                             cache: false,
                             dataType: 'json',
@@ -574,7 +592,14 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
                                 if (data.error) {
                                     createNotify('Error', data.message, 'error');
                                 } else {
-                                    inst.removeEvent(currentEvent);
+                                    if(!deletePermanently) {
+                                        // createUpdateEvent(currentEvent);
+                                        mobiscroll.toast({
+                                            message: 'Event updated successfully'
+                                        });
+                                    } else {
+                                        inst.removeEvent(currentEvent);
+                                    }
                                     tooltip.close();
                                     createNotify('Success', data.message, 'success');
                                 }
@@ -857,10 +882,8 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
             createNotify('Warning', 'You have not selected any events', 'warning');
             return false;
         }
-    });
-    
-    $('#modal-md').on('show.bs.modal', function () {
-        let modal = $(this);
+        
+        let modal = $('#modal-md');
         modal.find('.modal-title').html('Multiple update selected Shift(s)')
         modal.find('.modal-body').html('<div style="text-align:center;font-size: 40px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
         modal.find('.modal-body').load('$multipleUpdateUrl', {}, function( response, status, xhr ) {
