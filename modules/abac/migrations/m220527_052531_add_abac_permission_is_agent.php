@@ -18,13 +18,13 @@ class m220527_052531_add_abac_permission_is_agent extends Migration
      */
     public function safeUp()
     {
-        list($apSubject, $apSubjectJson) = RbacMoveToAbacService::getAbacSubjectsByRbacPermission($this->permissionName);
+        $service = new RbacMoveToAbacService($this->permissionName);
 
-        if (!empty($apSubject)) {
+        if (!empty($service->getApSubject())) {
             $this->insert('{{%abac_policy}}', [
                 'ap_rule_type' => 'p',
-                'ap_subject' => $apSubject,
-                'ap_subject_json' => $apSubjectJson,
+                'ap_subject' => $service->getApSubject(),
+                'ap_subject_json' => $service->getApSubjectJson(),
                 'ap_object' => 'lead/search/simple_search',
                 'ap_action' => '(access)',
                 'ap_action_json' => "[\"access\"]",

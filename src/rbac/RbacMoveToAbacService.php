@@ -6,15 +6,22 @@ use Yii;
 
 class RbacMoveToAbacService
 {
-    const TEMPLATE_SUBJECT = '("{role}" in r.sub.env.user.roles)';
-    const TEMPLATE_SUBJECT_JSON = '{"id":"env_user_roles","field":"env.user.roles","type":"string","input":"select","operator":"in_array","value":"{role}"}';
-    const MAIN_TEMPLATE_SUBJECT_JSON = '{"condition":"OR","rules":[{apSubjectJson}],"valid":true}';
+    private const TEMPLATE_SUBJECT = '("{role}" in r.sub.env.user.roles)';
+    private const TEMPLATE_SUBJECT_JSON = '{"id":"env_user_roles","field":"env.user.roles","type":"string","input":"select","operator":"in_array","value":"{role}"}';
+    private const MAIN_TEMPLATE_SUBJECT_JSON = '{"condition":"OR","rules":[{apSubjectJson}],"valid":true}';
+
+    private ?string $apSubject;
+    private string $apSubjectJson;
+
+    public function __construct(string $permission)
+    {
+        $this->getAbacSubjectsByRbacPermission($permission);
+    }
 
     /**
-     * @param $permissionName
-     * @return array
+     * @param string $permissionName
      */
-    public static function getAbacSubjectsByRbacPermission($permissionName): array
+    private function getAbacSubjectsByRbacPermission(string $permissionName)
     {
         $roles = self::getRolesByPermission($permissionName);
         $apSubject = $apSubjectJson = [];
@@ -23,18 +30,15 @@ class RbacMoveToAbacService
             $apSubject[] = Yii::t('app', self::TEMPLATE_SUBJECT, ['role' => $role]);
             $apSubjectJson[] = Yii::t('app', self::TEMPLATE_SUBJECT_JSON, ['role' => $role]);
         }
-
-        return [
-            implode(' || ', $apSubject),
-            Yii::t('app', self::MAIN_TEMPLATE_SUBJECT_JSON, ['apSubjectJson' =>  implode(',', $apSubjectJson)])
-        ];
+        $this->apSubjectJson = Yii::t('app', self::MAIN_TEMPLATE_SUBJECT_JSON, ['apSubjectJson' => implode(',', $apSubjectJson)]);
+        $this->apSubject = implode(' || ', $apSubject);
     }
 
     /**
      * @param $permissionName
      * @return array
      */
-    private static function getRolesByPermission($permissionName): array
+    private function getRolesByPermission(string $permissionName): array
     {
         $roleList = [];
         $roles = \Yii::$app->authManager->getRoles();
@@ -45,5 +49,15 @@ class RbacMoveToAbacService
             }
         }
         return $roleList;
+    }
+
+    public function getApSubject(): ?string
+    {
+        return $this->apSubject;
+    }
+
+    public function getApSubjectJson(): string
+    {
+        return $this->apSubjectJson;
     }
 }
