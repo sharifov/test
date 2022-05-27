@@ -116,21 +116,22 @@ use yii\web\View;
                         [
                             'attribute' => 'ssr_created_user_id',
                             'options' => [
-
+                                'style' => 'width: 200px',
                             ],
                             'value' => function (ShiftScheduleRequestSearch $model) {
                                 return $model->ssrCreatedUser->username ?? $model->ssr_created_user_id;
                             },
                             'label' => 'User create request',
                             'filter' => UserSelect2Widget::widget([
-                                'model' => $searchModelAll,
-                                'attribute' => 'ssr_created_user_id'
+                                'id' => 'gridview-filter-all-requests-user-id-test',
+                                'name' =>  sprintf('%s[ssr_created_user_id]', $searchModelAll->formName()),
+                                'value' => $searchModelAll->ssr_created_user_id ?? null
                             ]),
                         ],
                         [
                             'attribute' => 'ssr_updated_user_id',
                             'options' => [
-
+                                'style' => 'width: 200px',
                             ],
                             'value' => function (ShiftScheduleRequestSearch $model) {
                                 return $model->ssrUpdatedUser->username ?? $model->ssr_updated_user_id;
@@ -138,7 +139,7 @@ use yii\web\View;
                             'label' => 'User make decision',
                             'filter' => UserSelect2Widget::widget([
                                 'model' => $searchModelAll,
-                                'attribute' => 'ssr_updated_user_id'
+                                'attribute' => 'ssr_updated_user_id',
                             ]),
                         ],
                         [
