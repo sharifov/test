@@ -560,7 +560,7 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
 
     if (canDeleteEvent) {
         \$deleteButton.on('click', function (ev) {
-            let deletePermanently = false;
+            let deletePermanently = 1;
             if(canPermanentlyDeleteEvent) {
                 setTimeout(function (args) {
                     let html = '' +
@@ -580,10 +580,9 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
                 cancelText: 'No',
                 callback: function (res) {
                     if (res) {
-                        deletePermanently = $('#delete_permanently').is(':checked');
-                        let url = deletePermanently ? '$permanentlyDeleteEventUrl' : '$deleteEventUrl';
+                        deletePermanently = $('#delete_permanently').is(':checked') ? 1 : 2;
                         $.ajax({
-                            url: url,
+                            url: '$deleteEventUrl',
                             data: {'shiftId': currentEvent.id, 'deletePermanently' : deletePermanently},
                             type: 'post',
                             cache: false,
@@ -592,13 +591,9 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
                                 if (data.error) {
                                     createNotify('Error', data.message, 'error');
                                 } else {
-                                    if(!deletePermanently) {
-                                        // createUpdateEvent(currentEvent);
-                                        mobiscroll.toast({
-                                            message: 'Event updated successfully'
-                                        });
-                                    } else {
-                                        inst.removeEvent(currentEvent);
+                                    inst.removeEvent(currentEvent.id);
+                                    if(data.timelineData){
+                                        addTimelineEvent(JSON.parse(data.timelineData))
                                     }
                                     tooltip.close();
                                     createNotify('Success', data.message, 'success');
