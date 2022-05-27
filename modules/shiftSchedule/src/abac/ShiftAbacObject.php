@@ -53,6 +53,7 @@ class ShiftAbacObject extends AbacBaseModel implements AbacInterface
     public const ACTION_GENERATE_USER_SCHEDULE = 'generateUserSchedule';
     public const ACTION_REMOVE_ALL_USER_SCHEDULE = 'removeAllUserSchedule';
     public const ACTION_MULTIPLE_DELETE_EVENTS = 'multipleDeleteEvents';
+    public const ACTION_MULTIPLE_UPDATE_EVENTS = 'multipleUpdateEvents';
     public const ACTION_VIEW_EVENT_LOG = 'viewEventLogs';
 
     /** ACTION LIST */
@@ -86,6 +87,7 @@ class ShiftAbacObject extends AbacBaseModel implements AbacInterface
         self::OBJ_USER_SHIFT_CALENDAR => [
             self::ACTION_VIEW_ALL_EVENTS,
             self::ACTION_MULTIPLE_DELETE_EVENTS,
+            self::ACTION_MULTIPLE_UPDATE_EVENTS,
             self::ACTION_VIEW_EVENT_LOG
         ]
     ];

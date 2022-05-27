@@ -23,6 +23,7 @@ use modules\shiftSchedule\src\entities\userShiftScheduleLog\search\UserShiftSche
 use modules\shiftSchedule\src\forms\ShiftScheduleCreateForm;
 use modules\shiftSchedule\src\forms\ShiftScheduleEditForm;
 use modules\shiftSchedule\src\forms\SingleEventCreateForm;
+use modules\shiftSchedule\src\forms\UserShiftCalendarMultipleUpdateForm;
 use modules\shiftSchedule\src\helpers\UserShiftScheduleHelper;
 use modules\shiftSchedule\src\forms\ScheduleRequestForm;
 use modules\shiftSchedule\src\services\ShiftScheduleRequestService;
@@ -32,6 +33,7 @@ use src\helpers\app\AppHelper;
 use src\helpers\setting\SettingHelper;
 use src\repositories\NotFoundException;
 use Yii;
+use yii\db\Transaction;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
@@ -67,7 +69,7 @@ class ShiftScheduleController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['ajax-multiple-delete', 'add-event', 'get-event', 'ajax-get-logs', 'ajax-edit-event-form'],
+                        'actions' => ['ajax-multiple-delete', 'add-event', 'get-event', 'ajax-get-logs', 'ajax-edit-event-form', 'ajax-multiple-update'],
                         'allow' => true,
                         'roles' => ['@']
                     ],
@@ -768,6 +770,62 @@ class ShiftScheduleController extends FController
         return $this->asJson([
             'error' => false,
             'message' => ''
+        ]);
+    }
+
+    public function actionAjaxMultipleUpdate()
+    {
+        /** @abac ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_MULTIPLE_UPDATE_EVENTS, Access to update multiple events */
+        if (!Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_MULTIPLE_UPDATE_EVENTS)) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
+        $multipleUpdateForm = new UserShiftCalendarMultipleUpdateForm();
+
+        if ($multipleUpdateForm->load(Yii::$app->request->post()) && $multipleUpdateForm->validate()) {
+            $eventIds = \yii\helpers\Json::decode($multipleUpdateForm->eventIds);
+
+            if (!is_array($eventIds)) {
+                throw new BadRequestHttpException('Invalid JSON data for decode');
+            }
+
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
+                $returnEventsData = [];
+                $form = $multipleUpdateForm;
+                if (empty($form->scheduleType) && empty($form->description) && empty($form->status) && empty($form->dateTimeRange)) {
+                    throw new \RuntimeException('Please fill/change at least one field');
+                }
+                foreach ($eventIds as $eventId) {
+                    $event = UserShiftSchedule::findOne((int)$eventId);
+                    if (!$event) {
+                        throw new BadRequestHttpException('Not found event');
+                    }
+                    $this->shiftScheduleService->editMultiple($multipleUpdateForm, $event, Auth::user()->timezone ?: null);
+                    if (!$multipleUpdateForm->hasErrors()) {
+                        $returnEventsData[] = UserShiftScheduleHelper::getDataForCalendar($event);
+                    }
+                }
+                $transaction->commit();
+
+                $jsCode = '';
+                foreach ($eventIds as $eventId) {
+                    $jsCode .= 'window.inst.removeEvent(' . $eventId . ');';
+                }
+
+                return '<script>(function() {$("#modal-md").modal("hide");' . $jsCode . ';let timelinesData = ' . json_encode($returnEventsData) . ';addTimelineEvents(timelinesData);$("#btn-check-all").trigger("click");createNotify("Success", "Event(s) updated successfully", "success")})();</script>';
+            } catch (\RuntimeException $e) {
+                $transaction->rollBack();
+                $multipleUpdateForm->addError('general', $e->getMessage());
+            } catch (\Throwable $throwable) {
+                $transaction->rollBack();
+                Yii::error(AppHelper::throwableLog($throwable), 'ShiftScheduleController:actionAjaxMultipleUpdate:Throwable');
+                $multipleUpdateForm->addError('general', 'Internal Server Error');
+            }
+        }
+
+        return $this->renderAjax('partial/_multiple_update_events_form', [
+            'multipleUpdateForm' => $multipleUpdateForm
         ]);
     }
 
