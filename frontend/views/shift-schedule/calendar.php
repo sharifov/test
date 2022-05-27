@@ -857,10 +857,7 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
             createNotify('Warning', 'You have not selected any events', 'warning');
             return false;
         }
-    });
-    
-    $('#modal-md').on('show.bs.modal', function () {
-        let modal = $(this);
+        let modal = $('#modal-md');
         modal.find('.modal-title').html('Multiple update selected Shift(s)')
         modal.find('.modal-body').html('<div style="text-align:center;font-size: 40px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
         modal.find('.modal-body').load('$multipleUpdateUrl', {}, function( response, status, xhr ) {
