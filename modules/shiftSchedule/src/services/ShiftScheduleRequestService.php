@@ -10,6 +10,7 @@ use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\shiftSchedule\src\forms\ScheduleDecisionForm;
 use modules\shiftSchedule\src\forms\ScheduleRequestForm;
+use modules\shiftSchedule\src\helpers\UserShiftScheduleHelper;
 use src\auth\Auth;
 use Yii;
 use yii\db\ActiveQuery;
@@ -180,18 +181,20 @@ class ShiftScheduleRequestService
         $scheduleRequest->ssr_updated_user_id = $user->id;
         if ($scheduleRequest->getIsCanEditPreviousDate()) {
             if ($scheduleRequest->save()) {
-                self::sendNotification(
-                    Employee::ROLE_AGENT,
-                    $scheduleRequest,
-                    self::NOTIFICATION_TYPE_CREATE,
-                    $user
-                );
-                self::sendNotification(
-                    Employee::ROLE_SUPERVISION,
-                    $scheduleRequest,
-                    self::NOTIFICATION_TYPE_UPDATE,
-                    $user
-                );
+                if ($requestModel->oldAttributes['ssr_status_id'] !== $decisionForm->status) {
+                    self::sendNotification(
+                        Employee::ROLE_AGENT,
+                        $scheduleRequest,
+                        self::NOTIFICATION_TYPE_CREATE,
+                        $user
+                    );
+                    self::sendNotification(
+                        Employee::ROLE_SUPERVISION,
+                        $scheduleRequest,
+                        self::NOTIFICATION_TYPE_UPDATE,
+                        $user
+                    );
+                }
                 return true;
             }
         }
@@ -210,41 +213,46 @@ class ShiftScheduleRequestService
     public static function sendNotification(string $whom, ShiftScheduleRequest $scheduleRequest, ?string $notificationType = null, Employee $user): void
     {
         $subject = 'Request Status';
-        $startTime = date('Y-m-d H:i:s', strtotime($scheduleRequest->srhUss->uss_start_utc_dt ?? ''));
-        $endTime = date('Y-m-d H:i:s', strtotime($scheduleRequest->srhUss->uss_end_utc_dt ?? ''));
         if ($whom === Employee::ROLE_AGENT) {
-            $body = sprintf(
-                'Your %s request for %s - %s was %s by %s',
-                $scheduleRequest->getScheduleTypeTitle(),
-                $startTime,
-                $endTime,
-                $scheduleRequest->getStatusName(),
-                $user->username
-            );
-            $publishUserIds = [$scheduleRequest->ssr_created_user_id];
+            $publishUserIds = [Employee::findIdentity($scheduleRequest->ssr_created_user_id)];
         } elseif ($whom === Employee::ROLE_SUPERVISION) {
-            if ($notificationType === self::NOTIFICATION_TYPE_CREATE) {
-                $content = '%s request for %s - %s was created by %s';
-            } elseif ($notificationType === self::NOTIFICATION_TYPE_UPDATE) {
-                $content = '%s request for %s - %s was updated by %s';
+            if ($notificationType === self::NOTIFICATION_TYPE_UPDATE) {
+                $publishUserIds = [Employee::findIdentity($user->id)];
             } else {
-                $content = '%s request for %s - %s by %s';
+                $publishUserIds = UserShiftScheduleHelper::getSupervisionByUsers($user->id);
             }
-            $body = sprintf(
-                $content,
-                $scheduleRequest->getScheduleTypeTitle(),
-                $startTime,
-                $endTime,
-                $user->username
-            );
-            $publishUserIds = $user->getSupervisionIdsByCurrentUser();
         }
 
-        if (!empty($body) && !empty($publishUserIds)) {
-            foreach ($publishUserIds as $userId) {
-                if ($ntf = Notifications::create($userId, $subject, $body, Notifications::TYPE_INFO)) {
+        if (!empty($publishUserIds)) {
+            foreach ($publishUserIds as $userModel) {
+                $timezone = $userModel->timezone ?? null;
+                $startTime = Yii::$app->formatter->asDateTimeByUserTimezone(
+                    strtotime($scheduleRequest->srhUss->uss_start_utc_dt ?? ''),
+                    $timezone
+                );
+                $endTime = Yii::$app->formatter->asDateTimeByUserTimezone(
+                    strtotime($scheduleRequest->srhUss->uss_end_utc_dt ?? ''),
+                    $timezone
+                );
+
+                $dateTime = new \DateTime($scheduleRequest->srhUss->uss_start_utc_dt ?? '', new \DateTimeZone($timezone));
+                $body = sprintf(
+                    "%s %s request (Id: %s) for %s - %s (%s %s) was %s by %s \n<br>Description: %s",
+                    ($whom === Employee::ROLE_AGENT ? 'Your' : ($scheduleRequest->ssrCreatedUser->username ?? '')),
+                    $scheduleRequest->getScheduleTypeTitle(),
+                    $scheduleRequest->ssr_uss_id,
+                    $startTime,
+                    $endTime,
+                    $timezone,
+                    $dateTime->format('P'),
+                    $scheduleRequest->getStatusNamePasteTense(),
+                    $user->username,
+                    $scheduleRequest->ssr_description
+                );
+
+                if ($ntf = Notifications::create($userModel->id, $subject, $body, Notifications::TYPE_INFO)) {
                     $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-                    Notifications::publish('getNewNotification', ['user_id' => $userId], $dataNotification);
+                    Notifications::publish('getNewNotification', ['user_id' => $userModel->id], $dataNotification);
                 }
             }
         }

@@ -63,6 +63,13 @@ class ShiftScheduleRequest extends ActiveRecord
         self::STATUS_REMOVED => '#6c757d',
     ];
 
+    public const STATUS_LIST_PAST_TENSE = [
+        self::STATUS_PENDING => 'pending',
+        self::STATUS_APPROVE => 'approved',
+        self::STATUS_DECLINED => 'declined',
+        self::STATUS_REMOVED => 'removed',
+    ];
+
     /**
      * {@inheritdoc}
      */
@@ -253,5 +260,13 @@ class ShiftScheduleRequest extends ActiveRecord
         }
 
         return true;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatusNamePasteTense(): string
+    {
+        return self::STATUS_LIST_PAST_TENSE[$this->ssr_status_id] ?? '';
     }
 }
