@@ -235,17 +235,19 @@ class ShiftScheduleRequestService
                     $timezone
                 );
 
+                $dateTime = new \DateTime($scheduleRequest->srhUss->uss_start_utc_dt ?? '', new \DateTimeZone($timezone));
                 $body = sprintf(
-                    "%s %s request (Id: %s) for %s - %s was %s by %s \n<br>Description: %s <br>%s",
+                    "%s %s request (Id: %s) for %s - %s (%s %s) was %s by %s \n<br>Description: %s",
                     ($whom === Employee::ROLE_AGENT ? 'Your' : ($scheduleRequest->ssrCreatedUser->username ?? '')),
                     $scheduleRequest->getScheduleTypeTitle(),
                     $scheduleRequest->ssr_uss_id,
                     $startTime,
                     $endTime,
+                    $timezone,
+                    $dateTime->format('P'),
                     $scheduleRequest->getStatusNamePasteTense(),
                     $user->username,
-                    $scheduleRequest->ssr_description,
-                    $timezone
+                    $scheduleRequest->ssr_description
                 );
 
                 if ($ntf = Notifications::create($userModel->id, $subject, $body, Notifications::TYPE_INFO)) {
