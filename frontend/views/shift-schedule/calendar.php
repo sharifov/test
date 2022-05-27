@@ -121,13 +121,13 @@ $modalUrl = Url::to(['/shift-schedule/add-event']);
 $formCreateSingleEventUrl = Url::to(['/shift-schedule/add-single-event']);
 $formUpdateSingleEvent = Url::to(['/shift-schedule/update-single-event']);
 $deleteEventUrl = Url::to(['/shift-schedule/delete-event']);
-$permanentlyDeleteEventUrl = Url::to(['/shift-schedule/permanently-delete-event']);
 $canCreateOnDoubleClick = \Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_CREATE_ON_DOUBLE_CLICK);
 $openModalEventUrl = \yii\helpers\Url::to(['shift-schedule/get-event']);
 $viewLogsUrl = \yii\helpers\Url::to(['shift-schedule/ajax-get-logs']);
 $multipleDeleteUrl = Url::to(['shift-schedule/ajax-multiple-delete']);
 $multipleUpdateUrl = Url::to(['/shift-schedule/ajax-multiple-update']);
 $editEventUrl = Url::to(['shift-schedule/ajax-edit-event-form']);
+/** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_PERMANENTLY_DELETE, Access to permanently delete event in calendar widget */
 $canPermanentlyDeleteEvent = \Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_PERMANENTLY_DELETE);
 $js = <<<JS
 var calendarEventsAjaxUrl = '$ajaxUrl';
@@ -560,7 +560,6 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
 
     if (canDeleteEvent) {
         \$deleteButton.on('click', function (ev) {
-            let deletePermanently = 1;
             if(canPermanentlyDeleteEvent) {
                 setTimeout(function (args) {
                     let html = '' +
@@ -580,7 +579,7 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
                 cancelText: 'No',
                 callback: function (res) {
                     if (res) {
-                        deletePermanently = $('#delete_permanently').is(':checked') ? 1 : 2;
+                        let deletePermanently = $('#delete_permanently').is(':checked') ? 1 : 2;
                         $.ajax({
                             url: '$deleteEventUrl',
                             data: {'shiftId': currentEvent.id, 'deletePermanently' : deletePermanently},

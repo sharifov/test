@@ -660,16 +660,15 @@ class ShiftScheduleController extends FController
                 'error' => false,
                 'message' => 'Shift deleted successfully',
             ]);
-        } else {
-            $userShiftSchedule->uss_status_id = UserShiftSchedule::STATUS_DELETED;
-            $userShiftSchedule->save();
-            $userShiftScheduleData = UserShiftScheduleHelper::getDataForCalendar($userShiftSchedule);
-            return $this->asJson([
-                'error' => false,
-                'message' => 'Shift deleted successfully',
-                'timelineData' => json_encode($userShiftScheduleData)
-            ]);
         }
+        $userShiftSchedule->uss_status_id = UserShiftSchedule::STATUS_DELETED;
+        $userShiftSchedule->save();
+        $userShiftScheduleData = UserShiftScheduleHelper::getDataForCalendar($userShiftSchedule);
+        return $this->asJson([
+            'error' => false,
+            'message' => 'Shift deleted successfully',
+            'timelineData' => json_encode($userShiftScheduleData)
+        ]);
     }
 
     public function actionUpdateSingleEvent()
