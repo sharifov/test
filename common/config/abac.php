@@ -36,6 +36,7 @@ return [
         'lead-queue-business' => \modules\lead\src\abac\queue\LeadQueueBusinessInboxAbacObject::class,
         'phoneNumberRedial' => \src\model\phoneNumberRedial\abac\PhoneNumberRedialAbacObject::class,
         'case-sale-search' => \modules\cases\src\abac\saleSearch\CaseSaleSearchAbacObject::class,
+        'lead-search' => \modules\lead\src\abac\LeadSearchAbacObject::class,
     ],
     'scanDirs' => [
         '/modules/',
