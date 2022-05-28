@@ -213,7 +213,7 @@ class ObjectSegmentComponent
     /**
      * @return string
      */
-    final private function getPolicyListContentWOCache(string $segmentKey): array
+    private function getPolicyListContentWOCache(string $segmentKey): array
     {
         return $this->objectSegmentListService->getTransformedRulesListByTypeKey($segmentKey);
     }
