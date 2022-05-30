@@ -17,6 +17,7 @@ use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftScheduleReposi
 use modules\shiftSchedule\src\forms\ShiftScheduleCreateForm;
 use modules\shiftSchedule\src\forms\ShiftScheduleEditForm;
 use modules\shiftSchedule\src\forms\SingleEventCreateForm;
+use modules\shiftSchedule\src\forms\UserShiftCalendarMultipleUpdateForm;
 use modules\shiftSchedule\src\helpers\UserShiftScheduleHelper;
 use src\auth\Auth;
 use Yii;
@@ -599,6 +600,33 @@ class UserShiftScheduleService
         }
     }
 
+    public function editMultiple(UserShiftCalendarMultipleUpdateForm $form, UserShiftSchedule $event, ?string $timezone): void
+    {
+        if (!empty($form->dateTimeStart && $form->dateTimeEnd)) {
+            $start = $form->dateTimeStart;
+            $end = $form->dateTimeEnd;
+            [$startDateTime, $endDateTime, $diffMinutes] = $this->generateEventTimeValues($start, $end, $timezone);
+
+            $event->uss_start_utc_dt = $startDateTime->format('Y-m-d H:i:s');
+            $event->uss_end_utc_dt = $endDateTime->format('Y-m-d H:i:s');
+            $event->uss_duration = $diffMinutes;
+        }
+
+        if (!empty($form->status)) {
+            $event->uss_status_id = $form->status;
+        }
+
+        if (!empty($form->scheduleType)) {
+            $event->uss_sst_id = $form->scheduleType;
+        }
+
+        if (!empty($form->description)) {
+            $event->uss_description = $form->description;
+        }
+
+        $this->repository->save($event);
+    }
+
     private function generateEventTimeValues(string $startDateTime, string $endDateTime, ?string $timezone): array
     {
         $startDateTime = new \DateTimeImmutable($startDateTime, $timezone ? new \DateTimeZone($timezone) : null);
@@ -606,7 +634,7 @@ class UserShiftScheduleService
         $endDateTime = new \DateTimeImmutable($endDateTime, $timezone ? new \DateTimeZone($timezone) : null);
         $endDateTime = $endDateTime->setTimezone(new \DateTimeZone('UTC'));
         $interval = $startDateTime->diff($endDateTime);
-        $diffMinutes = $interval->i + ($interval->h * 60);
+        $diffMinutes = $interval->days * 24 * 60 + $interval->i + ($interval->h * 60);
         return [$startDateTime, $endDateTime, $diffMinutes];
     }
 }

@@ -2,18 +2,16 @@
 
 namespace modules\shiftSchedule\src\forms;
 
-use common\models\Employee;
+use common\components\validators\CheckJsonValidator;
+use frontend\helpers\JsonHelper;
 use kartik\daterange\DateRangeBehavior;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
-use src\validators\DateTimeRangeValidator;
 use yii\base\Model;
 
-class SingleEventCreateForm extends Model
+class UserShiftCalendarMultipleUpdateForm extends Model
 {
-    private const SEPARATOR_DATE_RANGE = ' - ';
-
-    public $userId;
+    public $eventIds;
     public $scheduleType;
     public $description;
     public $status;
@@ -39,21 +37,15 @@ class SingleEventCreateForm extends Model
     public function rules(): array
     {
         return [
-            [['userId', 'status', 'scheduleType', 'dateTimeRange'], 'required'],
-            [['scheduleType', 'userId'], 'integer'],
+            [['eventIds'], 'required'],
+            [['eventIds'], CheckJsonValidator::class],
+            [['scheduleType'], 'integer'],
             [['scheduleType'], 'in', 'range' => array_keys(ShiftScheduleType::getList(true))],
             [['status'], 'in', 'range' => array_keys(UserShiftSchedule::getStatusList())],
             [['description'], 'string', 'max' => 500],
             [['dateTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
-            ['dateTimeRange', DateTimeRangeValidator::className(), 'separator' => self::SEPARATOR_DATE_RANGE],
-            [['dateTimeStart', 'dateTimeEnd', 'defaultDuration'], 'safe'],
+            [['defaultDuration'], 'match', 'pattern' => '/^(\d+):[0-5][0-9]$/'],
             [['dateTimeStart', 'dateTimeEnd'], 'datetime', 'format' => 'php:Y-m-d H:i'],
-            [['userId'], 'exist', 'skipOnError' => true, 'skipOnEmpty' => false, 'targetClass' => Employee::class, 'targetAttribute' => 'id']
         ];
-    }
-
-    public function formName(): string
-    {
-        return '';
     }
 }

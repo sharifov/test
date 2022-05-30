@@ -1959,7 +1959,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      * @param int $userID
      * @return int
      */
-    public static function getLeadCountByStatusSupervision(array $statusList = [], string $startDate = null, string $endDate = null, int $userID): int
+    public static function getLeadCountByStatusSupervision(array $statusList = [], string $startDate = null, string $endDate = null, int $userID = 0): int
     {
         if ($startDate) {
             $startDate = Employee::convertTimeFromUserDtToUTC(strtotime($startDate));
@@ -3046,27 +3046,5 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             }
         }
         return false;
-    }
-
-    /**
-     * Get all supervision ids by current user
-     * @return array
-     */
-    public function getSupervisionIdsByCurrentUser(): array
-    {
-        $userList = [];
-        if (!($this->isSupervision() || $this->isAdmin())) {
-            foreach ($this->ugsGroups as $group) {
-                foreach ($group->ugsUsers as $userInGroup) {
-                    if ($userInGroup->isSupervision()) {
-                        $userList[] = $userInGroup->id;
-                    }
-                }
-            }
-        } else {
-            $userList[] = $this->id;
-        }
-
-        return $userList;
     }
 }

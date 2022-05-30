@@ -2,15 +2,14 @@
 
 /**
  * @var $this \yii\web\View
- * @var $model ShiftScheduleEditForm
+ * @var $multipleUpdateForm UserShiftCalendarMultipleUpdateForm
  */
 
-use common\models\UserGroup;
 use kartik\daterange\DateRangePicker;
 use modules\shiftSchedule\src\abac\dto\ShiftAbacDto;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
-use modules\shiftSchedule\src\forms\ShiftScheduleEditForm;
+use modules\shiftSchedule\src\forms\UserShiftCalendarMultipleUpdateForm;
 use modules\shiftSchedule\src\helpers\UserShiftScheduleHelper;
 use src\auth\Auth;
 use yii\helpers\Html;
@@ -19,17 +18,6 @@ use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
 
 $user = Auth::user();
-
-$userGroupsList = UserGroup::getList();
-$userGroups = [];
-foreach ($userGroupsList as $groupId => $groupName) {
-    $dto = new ShiftAbacDto();
-    $dto->setGroup($groupId);
-    if (Yii::$app->abac->can($dto, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_ACCESS)) {
-        $userGroups[$groupId] = $groupName;
-    }
-}
-
 $statusList = [];
 foreach (UserShiftSchedule::getStatusList() as $statusId => $statusName) {
     $dto = new ShiftAbacDto();
@@ -39,8 +27,8 @@ foreach (UserShiftSchedule::getStatusList() as $statusId => $statusName) {
     }
 }
 
-$pjaxId = 'pjax-edit-event';
-$formId = 'edit-event-form';
+$pjaxId = 'pjax-update-events';
+$formId = 'multiple-update-events-form';
 
 $dateTimeRangeChangeJs = <<<JS
 (event) => {
@@ -48,11 +36,11 @@ $dateTimeRangeChangeJs = <<<JS
     if (val) {
         let startDateTime = val[0] ? moment(new Date(val[0])) : null;
         let endDateTime = val[1] ? moment(new Date(val[1])) : null;
-        var diffInHours = moment.duration(moment.duration(endDateTime.diff(startDateTime)).asHours(), 'hours');
-        var hours = Math.floor(diffInHours.asHours());
-        var minutes  = Math.floor(diffInHours.asMinutes()) - hours * 60;
-        var duration = ((hours > 9) ? hours : ('0' + hours)) + ':' + ((minutes > 9) ? minutes : ('0' + minutes));
-        $('#add-schedule-event-duration').val(duration);
+        let diffInHours = moment.duration(moment.duration(endDateTime.diff(startDateTime)).asHours(), 'hours');
+        let hours = Math.floor(diffInHours.asHours());
+        let minutes  = Math.floor(diffInHours.asMinutes()) - hours * 60;
+        let duration = ((hours > 9) ? hours : ('0' + hours)) + ':' + ((minutes > 9) ? minutes : ('0' + minutes));
+        $('#multiple-update-schedule-event-duration').val(duration);
     }
 }
 JS;
@@ -67,22 +55,22 @@ JS;
             'data-pjax' => 1
         ], 'enableAjaxValidation' => false, 'enableClientValidation' => false]); ?>
 
-        <?= $form->errorSummary($model) ?>
+        <?= $form->errorSummary($multipleUpdateForm) ?>
 
-        <?= $form->field($model, 'eventId')->hiddenInput()->label(false); ?>
+        <?= $form->field($multipleUpdateForm, 'eventIds')->hiddenInput(['id' => 'eventIds'])->label(false) ?>
 
         <div class="row">
             <div class="col-md-6">
-                <?= $form->field($model, 'status')->dropdownList($statusList, ['prompt' => '---']) ?>
+                <?= $form->field($multipleUpdateForm, 'status')->dropdownList($statusList, ['prompt' => '---']) ?>
             </div>
             <div class="col-md-6">
-                <?= $form->field($model, 'scheduleType')->dropdownList(UserShiftScheduleHelper::getAvailableScheduleTypeList(), ['prompt' => '---']) ?>
+                <?= $form->field($multipleUpdateForm, 'scheduleType')->dropdownList(UserShiftScheduleHelper::getAvailableScheduleTypeList(), ['prompt' => '---']) ?>
             </div>
         </div>
 
         <div class="row">
             <div class="col-md-6">
-                <?= $form->field($model, 'dateTimeRange')->widget(DateRangePicker::class, [
+                <?= $form->field($multipleUpdateForm, 'dateTimeRange')->widget(DateRangePicker::class, [
                     'presetDropdown' => false,
                     'hideInput' => true,
                     'convertFormat' => true,
@@ -101,16 +89,16 @@ JS;
                 ]) ?>
             </div>
             <div class="col-md-6">
-                <?= $form->field($model, 'duration')->textInput(['id' => 'add-schedule-event-duration'])->label('Duration (HH:MM)')?>
+                <?= $form->field($multipleUpdateForm, 'defaultDuration')->textInput(['id' => 'multiple-update-schedule-event-duration'])->label('Duration (HH:MM)')?>
             </div>
         </div>
 
-        <?= $form->field($model, 'description')->textarea(['cols' => 6, 'style' => 'resize:none; height:100px']) ?>
+        <?= $form->field($multipleUpdateForm, 'description')->textarea(['cols' => 6, 'style' => 'resize:none; height:100px']) ?>
 
         <div class="modal-footer justify-content-center">
             <?= Html::submitButton('Submit', [
                 'class' => 'btn btn-success',
-                'id' => 'submit-edit-event'
+                'id' => 'submit-multiple-update-events'
             ]) ?>
         </div>
 
@@ -126,17 +114,16 @@ $(document).off('pjax:beforeSend', '#{$pjaxId}').on('pjax:beforeSend', '#{$pjaxI
     btnObj.html('<i class="fa fa-spin fa-spinner"></i>');
     btnObj.addClass('disabled').prop('disabled', true);
 });
-
 $(document).on('click', '#{$formId} .kv-clear', function (e) {
     e.preventDefault();
     let parentForm = $('#{$formId}');
     parentForm.find('.range-value').val('');
-    parentForm.find('#add-schedule-event-duration').val('');
+    parentForm.find('#multiple-update-schedule-event-duration').val('');
 });
-$(document).on('change', '#add-schedule-event-duration', function() {
+$(document).on('change', '#multiple-update-schedule-event-duration', function() {
     let parentForm = $('#{$formId}');
     let dateTimeRangeInput = parentForm.find('.range-value');
-    let submitButton =  $('#submit-edit-event');
+    let submitButton =  $('#submit-multiple-update-events');
     if($(this).val().trim()){
         let validTime = $(this).val().match(/^(\d+):[0-5][0-9]$/);
         if (!validTime) {
@@ -159,7 +146,7 @@ $(document).on('change', '#add-schedule-event-duration', function() {
                 },
                 opens: 'right'
             });
-            $('#shiftscheduleeditform-datetimerange').val(startDateTime + ' - ' + newEndDateTime);
+            $('#usershiftcalendarmultipleupdateform-datetimerange').val(startDateTime + ' - ' + newEndDateTime);
             $(this).css('background', 'transparent');
             submitButton.prop('disabled', false);
         }
