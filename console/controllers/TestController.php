@@ -781,7 +781,7 @@ JSON;
                 464 . '-desk',
                 'Call - Long Queue Time',
                 '<strong>Hello World</strong> Hello World',
-                'info',
+                Notifications::getNotifyType(Notifications::TYPE_WARNING),
                 $message,
                 true
             )
