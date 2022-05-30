@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use common\models\Employee;
+use common\models\Notifications;
 use common\models\query\UserGroupAssignQuery;
 use common\models\query\UserGroupQuery;
 use common\models\UserGroup;
@@ -642,6 +643,13 @@ class ShiftScheduleController extends FController
                 'message' => $userShiftSchedule->getErrorSummary(true)[0]
             ]);
         }
+        Notifications::createAndPublish(
+            $userShiftSchedule->uss_user_id,
+            'Shift event was deleted',
+            'Shift event scheduled for: ' . Yii::$app->formatter->asByUserDateTime($userShiftSchedule->uss_start_utc_dt) . ' was removed from your shift',
+            Notifications::TYPE_INFO,
+            false
+        );
         return $this->asJson([
             'error' => false,
             'message' => 'Shift deleted successfully'
@@ -675,7 +683,6 @@ class ShiftScheduleController extends FController
         if ($data['newUserId'] !== $data['oldUserId']) {
             $event->uss_user_id = $data['newUserId'];
         }
-
         $event->save();
 
         return $this->asJson([

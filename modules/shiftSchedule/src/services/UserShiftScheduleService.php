@@ -3,6 +3,7 @@
 namespace modules\shiftSchedule\src\services;
 
 use common\models\Employee;
+use common\models\Notifications;
 use Cron\CronExpression;
 use Exception;
 use frontend\helpers\TimeConverterHelper;
@@ -454,6 +455,14 @@ class UserShiftScheduleService
             );
             $this->repository->save($userShiftSchedule);
             $userShiftScheduleCreatedList[] = $userShiftSchedule;
+
+            Notifications::createAndPublish(
+                $userShiftSchedule->uss_user_id,
+                'Shift event was created',
+                'New shift event scheduled for: ' . Yii::$app->formatter->asByUserDateTime($userShiftSchedule->uss_start_utc_dt),
+                Notifications::TYPE_INFO,
+                false
+            );
         }
         return $userShiftScheduleCreatedList;
     }
@@ -551,6 +560,13 @@ class UserShiftScheduleService
             $form->scheduleType
         );
         $this->repository->save($userShiftSchedule);
+        Notifications::createAndPublish(
+            $userShiftSchedule->uss_user_id,
+            'Shift event was created',
+            'New shift event scheduled for: ' . Yii::$app->formatter->asByUserDateTime($userShiftSchedule->uss_start_utc_dt),
+            Notifications::TYPE_INFO,
+            false
+        );
         return $userShiftSchedule;
     }
 
@@ -558,6 +574,7 @@ class UserShiftScheduleService
     {
         [$startDateTime, $endDateTime, $diffMinutes] = $this->generateEventTimeValues($form->dateTimeStart, $form->dateTimeEnd, $timezone);
 
+        $oldEvent = clone $event;
         $event->editFromCalendar(
             $form->status,
             $form->scheduleType,
@@ -569,6 +586,14 @@ class UserShiftScheduleService
 
         try {
             $this->repository->save($event);
+
+            Notifications::createAndPublish(
+                $event->uss_user_id,
+                'Shift event was updated',
+                'Shift event scheduled for: ' . Yii::$app->formatter->asByUserDateTime($oldEvent->uss_start_utc_dt) . ' was updated',
+                Notifications::TYPE_INFO,
+                false
+            );
         } catch (\RuntimeException $e) {
             $form->addError('general', $e->getMessage());
         }
