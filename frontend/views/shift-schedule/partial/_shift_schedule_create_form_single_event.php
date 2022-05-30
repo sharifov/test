@@ -124,6 +124,7 @@ $(document).on('click', '#{$formId} .kv-clear', function (e) {
     e.preventDefault();
     let parentForm = $('#{$formId}');
     parentForm.find('.range-value').val('');
+    parentForm.find('#datetimerange').val('');
     parentForm.find('#add-single-schedule-event-duration').val('');
 });
 $(document).on('change', '#add-single-schedule-event-duration', function() {

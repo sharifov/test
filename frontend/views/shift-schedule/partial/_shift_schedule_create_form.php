@@ -238,6 +238,7 @@ $(document).on('click', '#{$formId} .kv-clear', function (e) {
     e.preventDefault();
     let parentForm = $('#{$formId}');
     parentForm.find('.range-value').val('');
+    parentForm.find('#shiftschedulecreateform-datetimerange').val('');
     parentForm.find('#add-schedule-event-duration').val('');
 });
 $(document).on('change', '#add-schedule-event-duration', function() {

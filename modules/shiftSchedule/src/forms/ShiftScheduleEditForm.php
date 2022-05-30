@@ -43,7 +43,6 @@ class ShiftScheduleEditForm extends Model
             [['dateTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['dateTimeStart', 'dateTimeEnd', 'defaultDuration'], 'safe'],
             [['dateTimeStart', 'dateTimeEnd'], 'datetime', 'format' => 'php:Y-m-d H:i'],
-            [['dateTimeStart', 'dateTimeEnd'], 'required'],
         ];
     }
 
