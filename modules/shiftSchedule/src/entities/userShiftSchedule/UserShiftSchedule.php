@@ -338,7 +338,7 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
         ?string $description
     ): void {
         $this->uss_status_id = $status;
-        $this->uss_type_id = $type;
+        $this->uss_sst_id = $type;
         $this->uss_start_utc_dt = $startDateTime->format('Y-m-d H:i:s');
         $this->uss_end_utc_dt = $endDateTime->format('Y-m-d H:i:s');
         $this->uss_duration = $duration;
