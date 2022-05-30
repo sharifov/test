@@ -118,6 +118,7 @@ $(document).on('click', '#{$formId} .kv-clear', function (e) {
     e.preventDefault();
     let parentForm = $('#{$formId}');
     parentForm.find('.range-value').val('');
+    parentForm.find('#usershiftcalendarmultipleupdateform-datetimerange').val('');
     parentForm.find('#multiple-update-schedule-event-duration').val('');
 });
 $(document).on('change', '#multiple-update-schedule-event-duration', function() {
