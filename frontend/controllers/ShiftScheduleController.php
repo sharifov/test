@@ -688,7 +688,7 @@ class ShiftScheduleController extends FController
         $userShiftScheduleData = UserShiftScheduleHelper::getDataForCalendar($userShiftSchedule);
         return $this->asJson([
             'error' => false,
-            'message' => 'Shift deleted successfully',
+            'message' => 'Event deleted successfully',
             'timelineData' => json_encode($userShiftScheduleData)
         ]);
     }
