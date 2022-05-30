@@ -664,13 +664,27 @@ class ShiftScheduleController extends FController
                     'message' => $userShiftSchedule->getErrorSummary(true)[0]
                 ]);
             }
+            Notifications::createAndPublish(
+                $userShiftSchedule->uss_user_id,
+                'Shift event was removed',
+                'Shift event scheduled for: ' . Yii::$app->formatter->asByUserDateTime($userShiftSchedule->uss_start_utc_dt) . ' was removed from your shift',
+                Notifications::TYPE_INFO,
+                false
+            );
             return $this->asJson([
                 'error' => false,
-                'message' => 'Shift deleted successfully',
+                'message' => 'Shift removed successfully',
             ]);
         }
         $userShiftSchedule->uss_status_id = UserShiftSchedule::STATUS_DELETED;
         $userShiftSchedule->save();
+        Notifications::createAndPublish(
+            $userShiftSchedule->uss_user_id,
+            'Shift event was removed',
+            'Shift event scheduled for: ' . Yii::$app->formatter->asByUserDateTime($userShiftSchedule->uss_start_utc_dt) . ' was removed from your shift',
+            Notifications::TYPE_INFO,
+            false
+        );
         $userShiftScheduleData = UserShiftScheduleHelper::getDataForCalendar($userShiftSchedule);
         return $this->asJson([
             'error' => false,
@@ -793,9 +807,18 @@ class ShiftScheduleController extends FController
         }
 
         $eventIds = Yii::$app->request->post('selectedEvents', []);
+        $events = UserShiftSchedule::findAll(['uss_id' => $eventIds]);
 
-        UserShiftSchedule::deleteAll(['uss_id' => $eventIds]);
-
+        foreach ($events as $event) {
+            $event->delete();
+            Notifications::createAndPublish(
+                $event->uss_user_id,
+                'Shift event was removed',
+                'Shift event scheduled for: ' . Yii::$app->formatter->asByUserDateTime($event->uss_start_utc_dt) . ' was removed from your shift',
+                Notifications::TYPE_INFO,
+                false
+            );
+        }
         return $this->asJson([
             'error' => false,
             'message' => ''

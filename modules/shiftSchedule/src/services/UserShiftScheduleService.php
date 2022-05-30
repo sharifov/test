@@ -602,6 +602,7 @@ class UserShiftScheduleService
 
     public function editMultiple(UserShiftCalendarMultipleUpdateForm $form, UserShiftSchedule $event, ?string $timezone): void
     {
+        $oldEvent = clone $event;
         if (!empty($form->dateTimeStart && $form->dateTimeEnd)) {
             $start = $form->dateTimeStart;
             $end = $form->dateTimeEnd;
@@ -625,6 +626,14 @@ class UserShiftScheduleService
         }
 
         $this->repository->save($event);
+
+        Notifications::createAndPublish(
+            $oldEvent->uss_user_id,
+            'Shift event was updated',
+            'Shift event scheduled for: ' . Yii::$app->formatter->asByUserDateTime($oldEvent->uss_start_utc_dt) . ' was updated',
+            Notifications::TYPE_INFO,
+            false
+        );
     }
 
     private function generateEventTimeValues(string $startDateTime, string $endDateTime, ?string $timezone): array
