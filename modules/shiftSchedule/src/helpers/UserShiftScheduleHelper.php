@@ -9,6 +9,7 @@ use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use common\models\Employee;
 use common\models\UserGroup;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
+use src\access\EmployeeGroupAccess;
 use Yii;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -106,7 +107,7 @@ class UserShiftScheduleHelper
             $users = Employee::find()
                 ->joinWith(['userGroupAssigns'])
                 ->where(['ugs_group_id' => $group->ug_id])
-                ->andWhere(['status' => Employee::STATUS_ACTIVE])
+                ->andWhere(['<>', 'status', Employee::STATUS_DELETED])
                 ->orderBy(['username' => SORT_ASC])
                 ->andFilterWhere(['id' => $usersIds])
                 ->all();
@@ -173,5 +174,25 @@ class UserShiftScheduleHelper
         }
 
         return $statusList;
+    }
+
+    /**
+     * Apply abac policy on users list and return processed users
+     * @param int $userId
+     * @return array
+     */
+    public static function getSupervisionByUsers(int $userId): array
+    {
+        $userList = [];
+        $userGroupAssignList = EmployeeGroupAccess::usersIdsInCommonGroupsSubQuery($userId)->all();
+        foreach ($userGroupAssignList as $user) {
+            if (empty($user->ugsUser) || $user->ugsUser->id === $userId) {
+                continue;
+            }
+            if (\Yii::$app->abac->can(null, ShiftAbacObject::ACT_SEND_SUPERVISION_NOTIFICATION, ShiftAbacObject::ACTION_ACCESS, $user->ugsUser)) {
+                $userList[] = $user->ugsUser;
+            }
+        }
+        return $userList;
     }
 }

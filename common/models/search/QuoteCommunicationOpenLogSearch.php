@@ -18,7 +18,7 @@ class QuoteCommunicationOpenLogSearch extends QuoteCommunicationOpenLog
     public function rules()
     {
         return [
-            [['qcol_id', 'qcol_quote_communication_id', 'qcol_created_dt'], 'integer'],
+            [['qcol_id', 'qcol_quote_communication_id'], 'integer'],
             [['qcol_id', 'qcol_quote_communication_id', 'qcol_created_dt'], 'safe'],
         ];
     }
@@ -63,8 +63,7 @@ class QuoteCommunicationOpenLogSearch extends QuoteCommunicationOpenLog
         // grid filtering conditions
         $query->andFilterWhere([
             'qcol_id' => $this->qcol_id,
-            'qcol_quote_communication_id' => $this->qcol_quote_communication_id,
-            'qcol_created_dt' => $this->qcol_created_dt
+            'qcol_quote_communication_id' => $this->qcol_quote_communication_id
         ]);
 
         /*

@@ -74,6 +74,16 @@ use yii\grid\ActionColumn;
                         }
                     ],
                     [
+                        'attribute' => 'upp_allow_transfer',
+                        'format' => 'raw',
+                        'value' => function (\common\models\UserProjectParams $model) {
+                            if ($model->upp_allow_transfer) {
+                                return '<i class="fa fa-check-square-o"></i>';
+                            }
+                            return '-';
+                        }
+                    ],
+                    [
                         'attribute' => 'upp_vm_enabled',
                         'format' => 'raw',
                         'value' => function (\common\models\UserProjectParams $model) {
@@ -127,7 +137,7 @@ use yii\grid\ActionColumn;
                     [
                         'class' => 'btn btn-success btn-xs add-voice-mail',
                         'title' => 'Add Voice Mail',
-                        'data-user_id' => $form->updaterUser->id,
+                        'data-user_id' => $form->targetUser->id,
                         'data-pjax' => '0',
                     ]
                 ) ?>
@@ -183,8 +193,8 @@ use yii\grid\ActionColumn;
                             [
                                 'class' => 'btn btn-success btn-xs add-product-type',
                                 'title' => 'Add Product Type',
-                                'data-user_id' => $form->updaterUser->id,
-                                'data-user_name' => $form->updaterUser->username,
+                                'data-user_id' => $form->targetUser->id,
+                                'data-user_name' => $form->targetUser->username,
                                 'data-pjax' => '0',
                             ]
                         ) ?>

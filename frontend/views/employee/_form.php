@@ -876,6 +876,16 @@ JS;
                         }
                     ],
                     [
+                        'attribute' => 'upp_allow_transfer',
+                        'format' => 'raw',
+                        'value' => function (\common\models\UserProjectParams $model) {
+                            if ($model->upp_allow_transfer) {
+                                return '<i class="fa fa-check-square-o"></i>';
+                            }
+                            return '-';
+                        }
+                    ],
+                    [
                         'attribute' => 'upp_vm_enabled',
                         'format' => 'raw',
                         'value' => function (\common\models\UserProjectParams $model) {

@@ -71,6 +71,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
         ]) ?>
 
         <?= $form->field($model, 'upp_allow_general_line')->checkbox() ?>
+        <?= $form->field($model, 'upp_allow_transfer')->checkbox() ?>
 
         <?php if (!$model->isNewRecord) : ?>
             <?= $form->field($model, 'upp_vm_enabled')->checkbox() ?>
