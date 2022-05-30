@@ -615,7 +615,7 @@ class ShiftScheduleController extends FController
 
             $form->userId = $userIdCreateFor;
             $startDateTime = (new \DateTimeImmutable($startDate));
-            $nowDateTime = new \DateTimeImmutable('', ($timezone = Auth::user()->timezone) ? new \DateTimeZone($timezone) : null);
+            $nowDateTime = new \DateTimeImmutable('now', ($timezone = Auth::user()->timezone) ? new \DateTimeZone($timezone) : null);
             $startDateTimeWithTimezone = new \DateTimeImmutable($startDate, ($timezone = Auth::user()->timezone) ? new \DateTimeZone($timezone) : null);
 
             if ($startDateTimeWithTimezone < $nowDateTime) {

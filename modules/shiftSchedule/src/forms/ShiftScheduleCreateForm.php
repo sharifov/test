@@ -78,7 +78,7 @@ class ShiftScheduleCreateForm extends Model
         }
 
         $startDateTime = new \DateTimeImmutable($dates[0], ($timezone = Auth::user()->timezone) ? new \DateTimeZone($timezone) : null);
-        $nowDateTime = new \DateTimeImmutable('', ($timezone = Auth::user()->timezone) ? new \DateTimeZone($timezone) : null);
+        $nowDateTime = new \DateTimeImmutable('now', ($timezone = Auth::user()->timezone) ? new \DateTimeZone($timezone) : null);
         if ($startDateTime < $nowDateTime) {
             $this->addError($attribute, 'Start DateTime must be more than now');
         }
