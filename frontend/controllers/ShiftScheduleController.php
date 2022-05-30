@@ -697,7 +697,7 @@ class ShiftScheduleController extends FController
         $endDateTime = new \DateTimeImmutable($data['endDate'], $timezone ? new \DateTimeZone($timezone) : null);
         $endDateTime = $endDateTime->setTimezone(new \DateTimeZone('UTC'));
         $interval = $startDateTime->diff($endDateTime);
-        $diffMinutes = $interval->i + ($interval->h * 60);
+        $diffMinutes = $interval->days * 24 * 60 + $interval->i + ($interval->h * 60);
 
         $event->uss_start_utc_dt = $startDateTime->format('Y-m-d H:i:s');
         $event->uss_end_utc_dt = $endDateTime->format('Y-m-d H:i:s');
