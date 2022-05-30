@@ -573,7 +573,7 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
             }
             
             mobiscroll.confirm({
-                title: 'Are you sure you want to delete shift?',
+                title: 'Are you sure you want to delete event?',
                 message: '',
                 okText: 'Yes',
                 cancelText: 'No',
