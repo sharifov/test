@@ -35,10 +35,10 @@ RUN pecl install -o -f redis \
     && rm -rf /tmp/pear \
     && docker-php-ext-enable redis
 
-RUN runtimeRequirements="libgeoip-dev" \
-    && apt-get update && apt-get install -y ${runtimeRequirements} \
-    && pecl install geoip-1.1.1 \
-    && docker-php-ext-enable geoip \
-    && rm -rf /var/lib/apt/lists/*
+#RUN runtimeRequirements="libgeoip-dev" \
+#    && apt-get update && apt-get install -y ${runtimeRequirements} \
+#    && pecl install geoip-1.1.1 \
+#    && docker-php-ext-enable geoip \
+#    && rm -rf /var/lib/apt/lists/*
 
 RUN mv $PHP_INI_DIR/php.ini-development $PHP_INI_DIR/php.ini

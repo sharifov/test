@@ -1959,7 +1959,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      * @param int $userID
      * @return int
      */
-    public static function getLeadCountByStatusSupervision(array $statusList = [], string $startDate = null, string $endDate = null, int $userID): int
+    public static function getLeadCountByStatusSupervision(array $statusList = [], string $startDate = null, string $endDate = null, int $userID = 0): int
     {
         if ($startDate) {
             $startDate = Employee::convertTimeFromUserDtToUTC(strtotime($startDate));
