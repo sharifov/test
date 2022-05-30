@@ -61,7 +61,7 @@ use yii\widgets\Pjax;
                             return Html::a(
                                 $model->getScheduleTypeTitle() ?? $model->ssr_sst_id,
                                 null,
-                                ['class' => 'btn-open-timeline-pending', 'data-tl_id' => $model->ssr_id]
+                                ['class' => 'btn-open-timeline-pending', 'data-tl_id' => $model->ssr_id, 'data-uss_id' => $model->ssr_uss_id]
                             );
                         },
                         'options' => [
@@ -152,11 +152,11 @@ use yii\widgets\Pjax;
 $openModalPendingEventUrl = Url::to(['shift/user-shift-schedule-request/get-event']);
 $js = <<<JS
     var openModalPendingEventUrl = '$openModalPendingEventUrl';
-    function openModalPendingEventId(id)
+    function openModalPendingEventId(id, ussId)
     {
         let modal = $('#modal-md');
         let eventUrl = openModalPendingEventUrl + '?id=' + id;
-        $('#modal-md-label').html('Schedule Event: ' + id);
+        $('#modal-md-label').html('Schedule Event: ' + (ussId || id));
         modal.find('.modal-body').html('');
         modal.find('.modal-body').load(eventUrl, function( response, status, xhr ) {
             if (status === 'error') {
@@ -171,7 +171,8 @@ $js = <<<JS
         .on('click', '.btn-open-timeline-pending', function (e) {
             e.preventDefault();
             let id = $(this).data('tl_id');
-            openModalPendingEventId(id);
+            let ussId = $(this).data('uss_id');
+            openModalPendingEventId(id, ussId);
         });
 JS;
 

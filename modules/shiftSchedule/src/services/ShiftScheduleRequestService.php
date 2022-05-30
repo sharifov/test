@@ -117,6 +117,7 @@ class ShiftScheduleRequestService
                     'resource' => 'us-' . $item->ssr_created_user_id,
                     'extendedProps' => [
                         'icon' => $item->srhSst->sst_icon_class,
+                        'ussId' => $item->ssr_uss_id,
 //                        'backgroundImage' => 'linear-gradient(45deg, ' . $sstColor . ' 30%, ' . $statusColor . ' 70%)',
                     ],
                     'color' => $item->getStatusNameColor(true),

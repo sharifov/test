@@ -54,7 +54,7 @@ use yii\helpers\Url;
                         return Html::a(
                             $model->getScheduleTypeTitle() ?? $model->ssr_sst_id,
                             null,
-                            ['class' => 'btn-open-timeline', 'data-tl_id' => $model->ssr_id]
+                            ['class' => 'btn-open-timeline', 'data-tl_id' => $model->ssr_id, 'data-uss_id' => $model->ssr_uss_id]
                         );
                     },
                     'options' => [
