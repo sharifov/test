@@ -4,8 +4,8 @@ namespace modules\shiftSchedule\src\forms;
 
 use frontend\helpers\TimeConverterHelper;
 use kartik\daterange\DateRangeBehavior;
-use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
+use modules\shiftSchedule\src\helpers\UserShiftScheduleHelper;
 use yii\base\Model;
 
 class ShiftScheduleEditForm extends Model
@@ -36,14 +36,14 @@ class ShiftScheduleEditForm extends Model
     public function rules(): array
     {
         return [
-            [['eventId'], 'required'],
-            [['scheduleType', 'eventId', 'status'], 'integer', 'skipOnEmpty' => false],
-            [['scheduleType'], 'in', 'range' => array_keys(ShiftScheduleType::getList(true))],
-            [['status'], 'in', 'range' => array_keys(UserShiftSchedule::getStatusList())],
+            [['eventId', 'scheduleType', 'status', 'dateTimeRange'], 'required'],
+            ['scheduleType', 'in', 'range' => array_keys(UserShiftScheduleHelper::getAvailableScheduleTypeList())],
+            ['status', 'in', 'range' => array_keys(UserShiftScheduleHelper::getAvailableStatusList())],
             [['description'], 'string', 'max' => 500],
             [['dateTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['dateTimeStart', 'dateTimeEnd', 'defaultDuration'], 'safe'],
             [['dateTimeStart', 'dateTimeEnd'], 'datetime', 'format' => 'php:Y-m-d H:i'],
+            [['dateTimeStart', 'dateTimeEnd'], 'required'],
         ];
     }
 
