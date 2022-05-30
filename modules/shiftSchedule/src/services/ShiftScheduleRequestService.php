@@ -79,9 +79,10 @@ class ShiftScheduleRequestService
 
     /**
      * @param ShiftScheduleRequest[] $timelineList
+     * @param string $userTimeZone
      * @return array
      */
-    public static function getCalendarTimelineJsonData(array $timelineList): array
+    public static function getCalendarTimelineJsonData(array $timelineList, string $userTimeZone): array
     {
         $data = [];
         if ($timelineList) {
@@ -103,9 +104,16 @@ class ShiftScheduleRequestService
                         $item->getDuration(),
                         $item->getStatusName()
                     ),
-                    'start' => date('c', strtotime($item->srhUss->uss_start_utc_dt ?? '')),
-                    'end' => date('c', strtotime($item->srhUss->uss_end_utc_dt ?? '')),
-
+                    'start' => Yii::$app->formatter->asDateTimeByUserTimezone(
+                        strtotime($item->srhUss->uss_start_utc_dt ?? ''),
+                        $userTimeZone,
+                        'php: c'
+                    ),
+                    'end' => Yii::$app->formatter->asDateTimeByUserTimezone(
+                        strtotime($item->srhUss->uss_end_utc_dt ?? ''),
+                        $userTimeZone,
+                        'php: c'
+                    ),
                     'resource' => 'us-' . $item->ssr_created_user_id,
                     'extendedProps' => [
                         'icon' => $item->srhSst->sst_icon_class,

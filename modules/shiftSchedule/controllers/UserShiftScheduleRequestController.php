@@ -57,7 +57,7 @@ class UserShiftScheduleRequestController extends FController
     public function actionIndex(): string
     {
         $user = Yii::$app->user->identity;
-        $userTimeZone = 'local'; //'UTC'; //'Europe/Chisinau'; //Auth::user()->userParams->up_timezone ?? 'local';
+        $userTimeZone = $user->timezone ?? 'local'; //'UTC'; //'Europe/Chisinau'; //Auth::user()->userParams->up_timezone ?? 'local';
 
         return $this->render('index', array_merge(
             [
@@ -127,7 +127,8 @@ class UserShiftScheduleRequestController extends FController
             ShiftScheduleRequestService::getUserList(Auth::user()),
             Yii::$app->request->get('start', date('Y-m-d'))
         );
-        return ShiftScheduleRequestService::getCalendarTimelineJsonData($timelineList);
+        $userTimeZone = Auth::user()->timezone;
+        return ShiftScheduleRequestService::getCalendarTimelineJsonData($timelineList, $userTimeZone);
     }
 
     /**
@@ -174,12 +175,13 @@ class UserShiftScheduleRequestController extends FController
             } else {
                 $decisionFormModel->status = $requestModel->ssr_status_id;
             }
-
+            $userTimeZone = Auth::user()->timezone;
             return $this->renderAjax('partial/_get_event', [
                 'event' => $event,
                 'model' => $decisionFormModel,
                 'success' => $success ?? false,
                 'canEditPreviousDate' => $requestModel->getIsCanEditPreviousDate(),
+                'userTimeZone' => $userTimeZone,
             ]);
         } catch (DomainException $e) {
             Yii::error(AppHelper::throwableLog($e), 'UserShiftScheduleRequestController:actionGetEvent:DomainException');
