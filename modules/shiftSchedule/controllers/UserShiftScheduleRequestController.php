@@ -57,7 +57,7 @@ class UserShiftScheduleRequestController extends FController
     public function actionIndex(): string
     {
         $user = Yii::$app->user->identity;
-        $userTimeZone = $user->timezone ?? 'local'; //'UTC'; //'Europe/Chisinau'; //Auth::user()->userParams->up_timezone ?? 'local';
+        $userTimeZone = $user->timezone ?: 'UTC'; //'UTC'; //'Europe/Chisinau'; //Auth::user()->userParams->up_timezone ?? 'local';
 
         return $this->render('index', array_merge(
             [

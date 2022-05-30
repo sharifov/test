@@ -195,7 +195,7 @@ class ShiftScheduleController extends FController
 //        VarDumper::dump($monthList, 10, true); exit;
 //        VarDumper::dump($data, 10, true); exit;
 
-        $userTimeZone = $user->timezone ?? 'local'; //'UTC'; //'Europe/Chisinau'; //Auth::user()->userParams->up_timezone ?? 'local';
+        $userTimeZone = $user->timezone ?: 'UTC'; //'UTC'; //'Europe/Chisinau'; //Auth::user()->userParams->up_timezone ?? 'local';
         $searchModel = new SearchUserShiftSchedule();
 
         $startDate = Yii::$app->request->get('startDate', date('Y-m-d'));

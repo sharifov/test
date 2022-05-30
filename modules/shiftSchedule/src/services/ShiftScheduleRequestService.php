@@ -234,7 +234,7 @@ class ShiftScheduleRequestService
 
         if (!empty($publishUserIds)) {
             foreach ($publishUserIds as $userModel) {
-                $timezone = $userModel->timezone ?? null;
+                $timezone = $userModel->timezone ?: 'UTC';
                 $startTime = Yii::$app->formatter->asDateTimeByUserTimezone(
                     strtotime($scheduleRequest->srhUss->uss_start_utc_dt ?? ''),
                     $timezone
