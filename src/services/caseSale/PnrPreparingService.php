@@ -15,9 +15,9 @@ class PnrPreparingService
     public function __construct(string $sourcePnr, string $pattern = '/([A-Z\d]{6})/', string $separator = ',')
     {
         $this->sourcePnr = $sourcePnr;
-        $this->setSeparator($separator)
-            ->setPattern($pattern)
-            ->preparePnr();
+        $this->separator = $separator;
+        $this->pattern = $pattern;
+        $this->preparePnr();
     }
 
     private function preparePnr(): void
@@ -32,17 +32,5 @@ class PnrPreparingService
     public function getPnr(): ?string
     {
         return $this->pnr;
-    }
-
-    private function setSeparator(string $separator): PnrPreparingService
-    {
-        $this->separator = $separator;
-        return $this;
-    }
-
-    private function setPattern(string $pattern): PnrPreparingService
-    {
-        $this->pattern = $pattern;
-        return $this;
     }
 }
