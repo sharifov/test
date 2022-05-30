@@ -39,6 +39,7 @@ use src\model\leadUserRating\entity\LeadUserRating;
 use src\model\leadUserRating\entity\LeadUserRatingQuery;
 use src\model\quoteLabel\entity\QuoteLabel;
 use src\repositories\lead\LeadBadgesRepository;
+use src\services\caseSale\PnrPreparingService;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -201,7 +202,7 @@ class LeadSearch extends Lead
             [['email_status', 'quote_status', 'l_is_test', 'l_type'], 'integer'],
             [['lfOwnerId', 'userGroupId', 'departmentId', 'projectId', 'createdType', 'lead_type'], 'integer'],
 
-            [['client_name', 'client_email', 'quote_pnr', 'gid', 'origin_country', 'destination_country', 'l_request_hash'], 'string'],
+            [['client_name', 'client_email', 'gid', 'origin_country', 'destination_country', 'l_request_hash'], 'string'],
 
             [['origin_airport', 'destination_airport'], 'safe'],
 
@@ -233,7 +234,13 @@ class LeadSearch extends Lead
             ['l_is_test', 'in', 'range' => [0,1]],
             ['l_call_status_id', 'integer'],
             [['defaultUserTz', 'reportTimezone', 'timeFrom', 'timeTo'], 'string'],
-            [['quote_pnr'], 'string', 'min' => 5],
+
+            [['quote_pnr'], 'string', 'min' => 5, 'max' => 6],
+            [['quote_pnr'], 'trim', 'skipOnEmpty' => true],
+            [['quote_pnr'], 'filter', 'filter' => static function ($value) {
+                return empty($value) ? $value : (new PnrPreparingService($value, '/([a-zA-Z\d]{5,6})/'))->getPnr();
+            }],
+
             [
                 [
                     'emailsQtyFrom', 'emailsQtyTo', 'smsQtyFrom', 'smsQtyTo',
