@@ -41,10 +41,23 @@ use yii\web\View;
                     'columns' => [
                         [
                             'attribute' => 'ssr_id',
+                            'value' => function (ShiftScheduleRequestSearch $model) {
+                                return Html::tag('span', $model->ssr_id, [
+                                    'data-toggle' => 'tooltip',
+                                    'data-html' => 'true',
+                                    'data-original-title' => sprintf(
+                                        'Schedule Request Id: %s<br> Schedule Event Id: %s',
+                                        $model->ssr_id,
+                                        $model->ssr_uss_id
+                                    ),
+                                    'style' => 'border-bottom: 1px dotted #000; cursor: help;',
+                                ]);
+                            },
                             'options' => [
                                 'style' => 'width: 55px',
                             ],
-                            'label' => 'Id'
+                            'label' => 'Id',
+                            'format' => 'raw',
                         ],
 //                    [
 //                        'label' => 'Type',
