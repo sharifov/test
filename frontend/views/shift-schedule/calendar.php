@@ -129,6 +129,7 @@ $multipleUpdateUrl = Url::to(['/shift-schedule/ajax-multiple-update']);
 $editEventUrl = Url::to(['shift-schedule/ajax-edit-event-form']);
 /** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_PERMANENTLY_DELETE, Access to permanently delete event in calendar widget */
 $canPermanentlyDeleteEvent = \Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_PERMANENTLY_DELETE);
+$canMultiplePermanentlyDeleteEvents = Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_MULTIPLE_PERMANENTLY_DELETE_EVENTS);
 $js = <<<JS
 var calendarEventsAjaxUrl = '$ajaxUrl';
 var today = '$today';
@@ -136,6 +137,7 @@ var modalUrl = '$modalUrl';
 var events;
 var canDeleteEvent = Boolean('$canDeleteEvent');
 var canPermanentlyDeleteEvent = Boolean('$canPermanentlyDeleteEvent');
+var canMultiplePermanentlyDeleteEvents = Boolean('$canMultiplePermanentlyDeleteEvents');
 var canCreateOnDoubleClick = Boolean('$canCreateOnDoubleClick');
 var openModalEventUrl = '$openModalEventUrl';
 var viewLogsModalUrl = '$viewLogsUrl';
@@ -842,32 +844,60 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
             createNotify('Warning', 'You have not selected any events', 'warning');
             return false;
         }
-        $('#calendar-wrapper').append(loaderTemplate());
-        $.ajax({
-            url: '$multipleDeleteUrl',
-            type: 'post',
-            dataType:' json',
-            cache: false,
-            data: {selectedEvents: selectedEventsIds},
-            success: function (data) {
-                if (data.error) {
-                    createNotify('Error', data.message, 'error');
-                } else {
-                    selectedEventsIds.forEach(function (id, i) {
-                        inst.removeEvent(id);
-                    });
-                    createNotify('Success', 'Events successfully deleted', 'success');
-                    selectedEventsIds = [];
-                    checkAllBtn.removeClass(['btn-warning', 'checked']).addClass('btn-default').html('<span class="fa fa-square-o"></span> Select All');
+        if(canMultiplePermanentlyDeleteEvents) {
+            setTimeout(function (args) {
+                let html = '' +
+                '<label>'+
+                    '<input type="checkbox" id="delete_permanently" mbsc-checkbox data-label="Delete Permanently" data-color="danger" />'+
+                '</label>';
+                var messageContent = $('.mbsc-alert-message');
+                messageContent.html(html);
+                mobiscroll.enhance(messageContent[0]);
+            }, 100);
+        }
+            
+        mobiscroll.confirm({
+            title: 'Are you sure you want to delete event(s)?',
+            message: '',
+            okText: 'Yes',
+            cancelText: 'No',
+            callback: function (res) {
+                if (res) {                    
+                    let deletePermanently = $('#delete_permanently').is(':checked') ? 1 : 2;
+                    $('#calendar-wrapper').append(loaderTemplate());
+                    $.ajax({
+                        url: '$multipleDeleteUrl',
+                        type: 'post',
+                        dataType: 'json',
+                        cache: false,
+                        data: {selectedEvents: selectedEventsIds, 'deletePermanently' : deletePermanently},
+                        success: function (data) {
+                            if (data.error) {
+                                createNotify('Error', data.message, 'error');
+                            } else {
+                                selectedEventsIds.forEach(function (id, i) {
+                                    inst.removeEvent(id);
+                                });
+                                
+                                if(data.timelineData){
+                                    addTimelineEvent(JSON.parse(data.timelineData))
+                                }
+                                $('.selected-event').remove();
+                                createNotify('Success', 'Event(s) successfully deleted', 'success');
+                                selectedEventsIds = [];
+                                checkAllBtn.removeClass(['btn-warning', 'checked']).addClass('btn-default').html('<span class="fa fa-square-o"></span> Select All');
+                            }
+                        },
+                        error: function (xhr) {
+                            createNotify('Error', xhr.responseText, 'error');
+                        },
+                        complete: function () {
+                            $('#calendar-wrapper .calendar-filter-overlay').remove();
+                        }
+                    })
                 }
-            },
-            error: function (xhr) {
-                createNotify('Error', xhr.responseText, 'error');
-            },
-            complete: function () {
-                $('#calendar-wrapper .calendar-filter-overlay').remove();
             }
-        })
+        });
     });
     
     $('.btn-multiple-update-events').on('click', function (e) {

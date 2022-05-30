@@ -808,22 +808,56 @@ class ShiftScheduleController extends FController
         }
 
         $eventIds = Yii::$app->request->post('selectedEvents', []);
+        $deletePermanently = Yii::$app->request->post('deletePermanently');
         $events = UserShiftSchedule::findAll(['uss_id' => $eventIds]);
 
-        foreach ($events as $event) {
-            $event->delete();
-            Notifications::createAndPublish(
-                $event->uss_user_id,
-                'Shift event was removed',
-                'Shift event scheduled for: ' . Yii::$app->formatter->asByUserDateTime($event->uss_start_utc_dt) . ' was removed from your shift',
-                Notifications::TYPE_INFO,
-                false
-            );
+        $canDeletePermanently = Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_MULTIPLE_PERMANENTLY_DELETE_EVENTS);
+        if ($deletePermanently == 1 && !$canDeletePermanently) {
+            throw new ForbiddenHttpException('Access denied');
         }
-        return $this->asJson([
-            'error' => false,
-            'message' => ''
-        ]);
+
+        $transaction = Yii::$app->db->beginTransaction();
+        try {
+            $eventsData = [];
+            foreach ($events as $event) {
+                if ($deletePermanently == 1) {
+                    $event->delete();
+                } else {
+                    $event->uss_status_id = UserShiftSchedule::STATUS_DELETED;
+                    $event->save();
+
+                    $eventsData[] = UserShiftScheduleHelper::getDataForCalendar($event);
+                }
+
+                Notifications::createAndPublish(
+                    $event->uss_user_id,
+                    'Shift event was removed',
+                    'Shift event scheduled for: ' . Yii::$app->formatter->asByUserDateTime($event->uss_start_utc_dt) . ' was removed from your shift',
+                    Notifications::TYPE_INFO,
+                    false
+                );
+            }
+
+            $transaction->commit();
+            return $this->asJson([
+                'error' => false,
+                'message' => '',
+                'timelineData' => json_encode($eventsData)
+            ]);
+        } catch (\RuntimeException $e) {
+            $transaction->rollBack();
+            return $this->asJson([
+                'error' => true,
+                'message' => $e->getMessage(),
+            ]);
+        } catch (\Throwable $throwable) {
+            $transaction->rollBack();
+            Yii::error(AppHelper::throwableLog($throwable), 'ShiftScheduleController:actionAjaxMultipleDelete:Throwable');
+            return $this->asJson([
+                'error' => true,
+                'message' => 'Internal Server Error',
+            ]);
+        }
     }
 
     public function actionAjaxMultipleUpdate()
