@@ -127,7 +127,7 @@ class UserShiftScheduleRequestController extends FController
             ShiftScheduleRequestService::getUserList(Auth::user()),
             Yii::$app->request->get('start', date('Y-m-d'))
         );
-        $userTimeZone = Auth::user()->timezone;
+        $userTimeZone = Auth::user()->timezone ?: 'UTC';
         return ShiftScheduleRequestService::getCalendarTimelineJsonData($timelineList, $userTimeZone);
     }
 
@@ -175,7 +175,7 @@ class UserShiftScheduleRequestController extends FController
             } else {
                 $decisionFormModel->status = $requestModel->ssr_status_id;
             }
-            $userTimeZone = Auth::user()->timezone;
+            $userTimeZone = Auth::user()->timezone ?: 'UTC';
             return $this->renderAjax('partial/_get_event', [
                 'event' => $event,
                 'model' => $decisionFormModel,

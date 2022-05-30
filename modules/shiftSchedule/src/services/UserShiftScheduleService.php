@@ -137,7 +137,7 @@ class UserShiftScheduleService
      * @param string $userTimeZone
      * @return array
      */
-    public static function getCalendarTimelineJsonData(array $timelineList, $userTimeZone): array
+    public static function getCalendarTimelineJsonData(array $timelineList, string $userTimeZone): array
     {
         $data = [];
         if ($timelineList) {

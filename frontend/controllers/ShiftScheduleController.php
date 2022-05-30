@@ -363,7 +363,7 @@ class ShiftScheduleController extends FController
         $endDt = Yii::$app->request->get('end', date('Y-m-d'));
 
         $timelineList = UserShiftScheduleService::getTimelineListByUser($userId, $startDt, $endDt);
-        $userTimeZone = Auth::user()->timezone;
+        $userTimeZone = Auth::user()->timezone ?: 'UTC';
         return UserShiftScheduleService::getCalendarTimelineJsonData($timelineList, $userTimeZone);
     }
 
@@ -492,7 +492,7 @@ class ShiftScheduleController extends FController
         }
 
         try {
-            $userTimeZone = Auth::user()->timezone;
+            $userTimeZone = Auth::user()->timezone ?: 'UTC';
             return $this->renderAjax('partial/_get_event', [
                 'event' => $event,
                 'userTimeZone' => $userTimeZone,
