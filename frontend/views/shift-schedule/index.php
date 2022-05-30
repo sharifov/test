@@ -732,7 +732,9 @@ $js = <<<JS
             $('#modal-md').modal('hide');
         }
     });
-    
+     $(document).on('pjax:end', function() {
+         $('[data-toggle="tooltip"]').tooltip();
+    });
 JS;
 
 $this->registerJs($js);

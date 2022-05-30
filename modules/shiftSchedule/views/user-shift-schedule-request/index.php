@@ -204,6 +204,9 @@ $('body').off('click', '.btn-open-timeline').on('click', '.btn-open-timeline', f
     openModalEventId(id, ussId);
 });
 
+ $(document).on('pjax:end', function() {
+     $('[data-toggle="tooltip"]').tooltip();
+});
 JS;
 
 $this->registerJs($js);
