@@ -5,7 +5,7 @@ group = {{ web_user }}
 
 listen.owner = {{ web_user }}
 listen.group = {{ web_user }}
-listen = /run/php/php7.4-fpm.sock
+listen = /run/php/php8.0-fpm.sock
 
 pm = dynamic
 pm.max_children = 150
@@ -15,5 +15,5 @@ pm.max_spare_servers = 100
 pm.max_requests = 500
 
 pm.status_path = /status
-slowlog = /var/log/php7.4-fpm.slow.log
+slowlog = /var/log/php8.0-fpm.slow.log
 request_slowlog_timeout = 10
