@@ -18,6 +18,7 @@ use src\auth\Auth;
 class UserShiftScheduleHelper
 {
     private static array $scheduleTypeList = [];
+    private static array $statusList = [];
 
     /**
      * @param UserShiftSchedule[] $data
@@ -78,6 +79,24 @@ class UserShiftScheduleHelper
             }
         }
         return $shiftScheduleTypeList;
+    }
+
+    /**
+     * Getting available status list based on abac policies
+     * @return array
+     */
+    public static function getAvailableStatusList(): array
+    {
+        if (empty($statusList = self::$statusList)) {
+            foreach (UserShiftSchedule::getStatusList() as $statusId => $statusName) {
+                $dto = new ShiftAbacDto();
+                $dto->setStatus((int)$statusId);
+                if (Yii::$app->abac->can($dto, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_ACCESS)) {
+                    $statusList[$statusId] = $statusName;
+                }
+            }
+        }
+        return $statusList;
     }
 
     /**
