@@ -37,7 +37,7 @@ class ShiftScheduleEditForm extends Model
     {
         return [
             [['eventId'], 'required'],
-            [['scheduleType', 'eventId'], 'integer'],
+            [['scheduleType', 'eventId', 'status'], 'integer', 'skipOnEmpty' => false],
             [['scheduleType'], 'in', 'range' => array_keys(ShiftScheduleType::getList(true))],
             [['status'], 'in', 'range' => array_keys(UserShiftSchedule::getStatusList())],
             [['description'], 'string', 'max' => 500],

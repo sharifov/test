@@ -39,7 +39,7 @@ class UserShiftCalendarMultipleUpdateForm extends Model
         return [
             [['eventIds'], 'required'],
             [['eventIds'], CheckJsonValidator::class],
-            [['scheduleType'], 'integer'],
+            [['scheduleType', 'status'], 'integer', 'skipOnEmpty' => false],
             [['scheduleType'], 'in', 'range' => array_keys(ShiftScheduleType::getList(true))],
             [['status'], 'in', 'range' => array_keys(UserShiftSchedule::getStatusList())],
             [['description'], 'string', 'max' => 500],
