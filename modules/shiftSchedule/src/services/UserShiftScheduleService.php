@@ -134,9 +134,10 @@ class UserShiftScheduleService
 
     /**
      * @param UserShiftSchedule[] $timelineList
+     * @param string $userTimeZone
      * @return array
      */
-    public static function getCalendarTimelineJsonData(array $timelineList): array
+    public static function getCalendarTimelineJsonData(array $timelineList, string $userTimeZone): array
     {
         $data = [];
         if ($timelineList) {
@@ -149,8 +150,16 @@ class UserShiftScheduleService
                     'description' => $item->getScheduleTypeTitle() . "\r\n" . '(' . $item->uss_id . ')' . ', duration: ' .
                         Yii::$app->formatter->asDuration($item->uss_duration * 60),
                     //. "\r\n" . $item->uss_description,
-                    'start' => date('c', strtotime($item->uss_start_utc_dt)),
-                    'end' => date('c', strtotime($item->uss_end_utc_dt)),
+                    'start' => Yii::$app->formatter->asDateTimeByUserTimezone(
+                        strtotime($item->uss_start_utc_dt ?? ''),
+                        $userTimeZone,
+                        'php: c'
+                    ),
+                    'end' => Yii::$app->formatter->asDateTimeByUserTimezone(
+                        strtotime($item->uss_end_utc_dt ?? ''),
+                        $userTimeZone,
+                        'php: c'
+                    ),
                     'color' => $item->shiftScheduleType ? $item->shiftScheduleType->sst_color : 'gray',
 
                     'display' => 'block', // 'list-item' , 'background'

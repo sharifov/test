@@ -195,7 +195,7 @@ class ShiftScheduleController extends FController
 //        VarDumper::dump($monthList, 10, true); exit;
 //        VarDumper::dump($data, 10, true); exit;
 
-        $userTimeZone = 'local'; //'UTC'; //'Europe/Chisinau'; //Auth::user()->userParams->up_timezone ?? 'local';
+        $userTimeZone = $user->timezone ?: 'UTC'; //'UTC'; //'Europe/Chisinau'; //Auth::user()->userParams->up_timezone ?? 'local';
         $searchModel = new SearchUserShiftSchedule();
 
         $startDate = Yii::$app->request->get('startDate', date('Y-m-d'));
@@ -363,7 +363,8 @@ class ShiftScheduleController extends FController
         $endDt = Yii::$app->request->get('end', date('Y-m-d'));
 
         $timelineList = UserShiftScheduleService::getTimelineListByUser($userId, $startDt, $endDt);
-        return UserShiftScheduleService::getCalendarTimelineJsonData($timelineList);
+        $userTimeZone = Auth::user()->timezone ?: 'UTC';
+        return UserShiftScheduleService::getCalendarTimelineJsonData($timelineList, $userTimeZone);
     }
 
     /**
@@ -491,11 +492,11 @@ class ShiftScheduleController extends FController
         }
 
         try {
-            //$userTimeZone = Auth::user()->userParams->up_timezone ?? 'local';
+            $userTimeZone = Auth::user()->timezone ?: 'UTC';
             return $this->renderAjax('partial/_get_event', [
                 'event' => $event,
+                'userTimeZone' => $userTimeZone,
                 //'user' => Auth::user(),
-                //'userTimeZone' => $userTimeZone
             ]);
         } catch (\DomainException $e) {
 //            return $this->renderAjax('_error', [

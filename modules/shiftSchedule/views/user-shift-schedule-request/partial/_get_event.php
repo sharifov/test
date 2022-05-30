@@ -6,6 +6,7 @@
  * @var ScheduleRequestForm $model
  * @var bool $success
  * @var bool $canEditPreviousDate
+ * @var string $userTimeZone
  */
 
 use common\models\Lead;
@@ -57,8 +58,16 @@ $tsEndUtc = strtotime($event->uss_end_utc_dt);
                 <tbody>
                 <tr class="text-center">
                     <td>
-                        <h6><?= Yii::$app->formatter->asDatetime($tsStartUtc, 'php: d-M-Y') ?></h6>
-                        <h4><i class="fa fa-clock-o"></i> <?= Yii::$app->formatter->asTime($tsStartUtc) ?></h4>
+                        <h6><?= Yii::$app->formatter->asDateTimeByUserTimezone(
+                            $tsStartUtc,
+                            $userTimeZone,
+                            'php: d-M-Y'
+                        )?></h6>
+                        <h4><i class="fa fa-clock-o"></i> <?= Yii::$app->formatter->asDateTimeByUserTimezone(
+                            $tsStartUtc,
+                            $userTimeZone,
+                            'php: H:i'
+                        )?></h4>
                     </td>
                     <td style="width: 400px">
                         <div class="table-responsive" style="width: 400px">
@@ -78,8 +87,16 @@ $tsEndUtc = strtotime($event->uss_end_utc_dt);
                         </strong>
                     </td>
                     <td>
-                        <h6><?= Yii::$app->formatter->asDatetime($tsEndUtc, 'php: d-M-Y') ?></h6>
-                        <h4><i class="fa fa-clock-o"></i> <?= Yii::$app->formatter->asTime($tsEndUtc) ?></h4>
+                        <h6><?= Yii::$app->formatter->asDateTimeByUserTimezone(
+                            $tsEndUtc,
+                            $userTimeZone,
+                            'php: d-M-Y'
+                        )?></h6>
+                        <h4><i class="fa fa-clock-o"></i> <?= Yii::$app->formatter->asDateTimeByUserTimezone(
+                            $tsEndUtc,
+                            $userTimeZone,
+                            'php: H:i'
+                        )?></h4>
                     </td>
                 </tr>
                 </tbody>

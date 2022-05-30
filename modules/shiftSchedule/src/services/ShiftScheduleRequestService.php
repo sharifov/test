@@ -79,9 +79,10 @@ class ShiftScheduleRequestService
 
     /**
      * @param ShiftScheduleRequest[] $timelineList
+     * @param string $userTimeZone
      * @return array
      */
-    public static function getCalendarTimelineJsonData(array $timelineList): array
+    public static function getCalendarTimelineJsonData(array $timelineList, string $userTimeZone): array
     {
         $data = [];
         if ($timelineList) {
@@ -103,12 +104,20 @@ class ShiftScheduleRequestService
                         $item->getDuration(),
                         $item->getStatusName()
                     ),
-                    'start' => date('c', strtotime($item->srhUss->uss_start_utc_dt ?? '')),
-                    'end' => date('c', strtotime($item->srhUss->uss_end_utc_dt ?? '')),
-
+                    'start' => Yii::$app->formatter->asDateTimeByUserTimezone(
+                        strtotime($item->srhUss->uss_start_utc_dt ?? ''),
+                        $userTimeZone,
+                        'php: c'
+                    ),
+                    'end' => Yii::$app->formatter->asDateTimeByUserTimezone(
+                        strtotime($item->srhUss->uss_end_utc_dt ?? ''),
+                        $userTimeZone,
+                        'php: c'
+                    ),
                     'resource' => 'us-' . $item->ssr_created_user_id,
                     'extendedProps' => [
                         'icon' => $item->srhSst->sst_icon_class,
+                        'ussId' => $item->ssr_uss_id,
 //                        'backgroundImage' => 'linear-gradient(45deg, ' . $sstColor . ' 30%, ' . $statusColor . ' 70%)',
                     ],
                     'color' => $item->getStatusNameColor(true),
@@ -225,7 +234,7 @@ class ShiftScheduleRequestService
 
         if (!empty($publishUserIds)) {
             foreach ($publishUserIds as $userModel) {
-                $timezone = $userModel->timezone ?? null;
+                $timezone = $userModel->timezone ?: 'UTC';
                 $startTime = Yii::$app->formatter->asDateTimeByUserTimezone(
                     strtotime($scheduleRequest->srhUss->uss_start_utc_dt ?? ''),
                     $timezone
@@ -236,19 +245,33 @@ class ShiftScheduleRequestService
                 );
 
                 $dateTime = new \DateTime($scheduleRequest->srhUss->uss_start_utc_dt ?? '', new \DateTimeZone($timezone));
-                $body = sprintf(
-                    "%s %s request (Id: %s) for %s - %s (%s %s) was %s by %s \n<br>Description: %s",
-                    ($whom === Employee::ROLE_AGENT ? 'Your' : ($scheduleRequest->ssrCreatedUser->username ?? '')),
-                    $scheduleRequest->getScheduleTypeTitle(),
-                    $scheduleRequest->ssr_uss_id,
-                    $startTime,
-                    $endTime,
-                    $timezone,
-                    $dateTime->format('P'),
-                    $scheduleRequest->getStatusNamePasteTense(),
-                    $user->username,
-                    $scheduleRequest->ssr_description
-                );
+                if ($whom === Employee::ROLE_SUPERVISION && $notificationType === self::NOTIFICATION_TYPE_CREATE) {
+                    $body = sprintf(
+                        "%s sent %s request (Id: %s) for %s - %s (%s %s) \n<br>Description: %s",
+                        $scheduleRequest->ssrCreatedUser->username ?? '',
+                        $scheduleRequest->getScheduleTypeTitle(),
+                        $scheduleRequest->ssr_uss_id,
+                        $startTime,
+                        $endTime,
+                        $timezone,
+                        $dateTime->format('P'),
+                        $scheduleRequest->ssr_description
+                    );
+                } else {
+                    $body = sprintf(
+                        "%s %s request (Id: %s) for %s - %s (%s %s) was %s by %s \n<br>Description: %s",
+                        ($whom === Employee::ROLE_AGENT ? 'Your' : ($scheduleRequest->ssrCreatedUser->username ?? '')),
+                        $scheduleRequest->getScheduleTypeTitle(),
+                        $scheduleRequest->ssr_uss_id,
+                        $startTime,
+                        $endTime,
+                        $timezone,
+                        $dateTime->format('P'),
+                        $scheduleRequest->getStatusNamePasteTense(),
+                        $user->username,
+                        $scheduleRequest->ssr_description
+                    );
+                }
 
                 if ($ntf = Notifications::create($userModel->id, $subject, $body, Notifications::TYPE_INFO)) {
                     $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
