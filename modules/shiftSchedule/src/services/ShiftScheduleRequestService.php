@@ -244,19 +244,33 @@ class ShiftScheduleRequestService
                 );
 
                 $dateTime = new \DateTime($scheduleRequest->srhUss->uss_start_utc_dt ?? '', new \DateTimeZone($timezone));
-                $body = sprintf(
-                    "%s %s request (Id: %s) for %s - %s (%s %s) was %s by %s \n<br>Description: %s",
-                    ($whom === Employee::ROLE_AGENT ? 'Your' : ($scheduleRequest->ssrCreatedUser->username ?? '')),
-                    $scheduleRequest->getScheduleTypeTitle(),
-                    $scheduleRequest->ssr_uss_id,
-                    $startTime,
-                    $endTime,
-                    $timezone,
-                    $dateTime->format('P'),
-                    $scheduleRequest->getStatusNamePasteTense(),
-                    $user->username,
-                    $scheduleRequest->ssr_description
-                );
+                if ($whom === Employee::ROLE_SUPERVISION && $notificationType === self::NOTIFICATION_TYPE_CREATE) {
+                    $body = sprintf(
+                        "%s sent %s request (Id: %s) for %s - %s (%s %s) \n<br>Description: %s",
+                        $scheduleRequest->ssrCreatedUser->username ?? '',
+                        $scheduleRequest->getScheduleTypeTitle(),
+                        $scheduleRequest->ssr_uss_id,
+                        $startTime,
+                        $endTime,
+                        $timezone,
+                        $dateTime->format('P'),
+                        $scheduleRequest->ssr_description
+                    );
+                } else {
+                    $body = sprintf(
+                        "%s %s request (Id: %s) for %s - %s (%s %s) was %s by %s \n<br>Description: %s",
+                        ($whom === Employee::ROLE_AGENT ? 'Your' : ($scheduleRequest->ssrCreatedUser->username ?? '')),
+                        $scheduleRequest->getScheduleTypeTitle(),
+                        $scheduleRequest->ssr_uss_id,
+                        $startTime,
+                        $endTime,
+                        $timezone,
+                        $dateTime->format('P'),
+                        $scheduleRequest->getStatusNamePasteTense(),
+                        $user->username,
+                        $scheduleRequest->ssr_description
+                    );
+                }
 
                 if ($ntf = Notifications::create($userModel->id, $subject, $body, Notifications::TYPE_INFO)) {
                     $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
