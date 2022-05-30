@@ -9,13 +9,15 @@ class PnrPreparingService
 {
     private string $sourcePnr;
     private ?string $pnr = null;
-    private string $separator = ',';
-    private string $pattern = '/([A-Z\d]{6})/';
+    private string $separator;
+    private string $pattern;
 
-    public function __construct(string $sourcePnr)
+    public function __construct(string $sourcePnr, string $pattern = '/([A-Z\d]{6})/', string $separator = ',')
     {
         $this->sourcePnr = $sourcePnr;
-        $this->preparePnr();
+        $this->setSeparator($separator)
+            ->setPattern($pattern)
+            ->preparePnr();
     }
 
     private function preparePnr(): void
@@ -32,13 +34,13 @@ class PnrPreparingService
         return $this->pnr;
     }
 
-    public function setSeparator(string $separator): PnrPreparingService
+    private function setSeparator(string $separator): PnrPreparingService
     {
         $this->separator = $separator;
         return $this;
     }
 
-    public function setPattern(string $pattern): PnrPreparingService
+    private function setPattern(string $pattern): PnrPreparingService
     {
         $this->pattern = $pattern;
         return $this;
