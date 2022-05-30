@@ -38,17 +38,18 @@ class FController extends Controller
     {
 //       $this->layout = '@frontend/themes/gentelella_v2/views/layouts/main.php';
 
-        if (!\Yii::$app->user->isGuest && !\Yii::$app->request->isAjax) {
-            /** @var Employee $user */
-            $user = \Yii::$app->user->identity;
-
+        /** @var Employee $user */
+        $user = \Yii::$app->user->identity;
+        if ($user) {
             $timezone = $user->userParams ? $user->userParams->up_timezone : null;
             if ($timezone) {
                 \Yii::$app->formatter->timeZone = $timezone;
             }
+        }
 
-            unset($user, $timezone);
+        unset($user, $timezone);
 
+        if (!\Yii::$app->user->isGuest && !\Yii::$app->request->isAjax) {
             $limitUserConnection = SettingHelper::getLimitUserConnection() ?: \Yii::$app->params['limitUserConnections'];
 
             if ($limitUserConnection > 0) {
