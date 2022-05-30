@@ -121,6 +121,7 @@ class ShiftScheduleRequestService
 //                        'backgroundImage' => 'linear-gradient(45deg, ' . $sstColor . ' 30%, ' . $statusColor . ' 70%)',
                     ],
                     'color' => $item->getStatusNameColor(true),
+                    'display' => 'block',
                 ];
 
                 $data[] = $dataItem;
