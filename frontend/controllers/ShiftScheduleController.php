@@ -811,6 +811,7 @@ class ShiftScheduleController extends FController
         $deletePermanently = Yii::$app->request->post('deletePermanently');
         $events = UserShiftSchedule::findAll(['uss_id' => $eventIds]);
 
+        /** @abac ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_MULTIPLE_PERMANENTLY_DELETE_EVENTS, Access to delete multiple events permanently */
         $canDeletePermanently = Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_MULTIPLE_PERMANENTLY_DELETE_EVENTS);
         if ($deletePermanently == 1 && !$canDeletePermanently) {
             throw new ForbiddenHttpException('Access denied');

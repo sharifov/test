@@ -129,6 +129,7 @@ $multipleUpdateUrl = Url::to(['/shift-schedule/ajax-multiple-update']);
 $editEventUrl = Url::to(['shift-schedule/ajax-edit-event-form']);
 /** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_PERMANENTLY_DELETE, Access to permanently delete event in calendar widget */
 $canPermanentlyDeleteEvent = \Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_PERMANENTLY_DELETE);
+/** @abac ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_MULTIPLE_PERMANENTLY_DELETE_EVENTS, Access to delete multiple events permanently */
 $canMultiplePermanentlyDeleteEvents = Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_MULTIPLE_PERMANENTLY_DELETE_EVENTS);
 $js = <<<JS
 var calendarEventsAjaxUrl = '$ajaxUrl';
