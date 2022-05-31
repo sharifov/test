@@ -621,7 +621,7 @@ class ShiftScheduleController extends FController
             $startDateTimeWithTimezone = new \DateTimeImmutable($startDate, ($timezone = Auth::user()->timezone) ? new \DateTimeZone($timezone) : null);
 
             if ($startDateTimeWithTimezone < $nowDateTime) {
-                throw new BadRequestHttpException('Start DateTime must be more than now');
+                return '<script>(function() {setTimeout(function() {$("#modal-md").modal("hide")}, 800);createNotify("Error", "Event cannot be created in the past", "error")})();</script>';
             }
 
             $endDateTime = $startDateTime->add(new \DateInterval('PT' . UserShiftSchedule::DEFAULT_DURATION_HOURS . 'H'));
