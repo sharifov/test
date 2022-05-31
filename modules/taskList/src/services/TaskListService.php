@@ -5,6 +5,8 @@ namespace modules\taskList\src\services;
 use modules\taskList\src\entities\taskList\TaskList;
 use modules\taskList\src\entities\TaskObject;
 use modules\taskList\src\objects\BaseTaskObject;
+use yii\base\InvalidConfigException;
+use yii\helpers\VarDumper;
 
 class TaskListService
 {
@@ -18,6 +20,7 @@ class TaskListService
     /**
      * @param string|null $object
      * @return array
+     * @throws InvalidConfigException
      */
     final public function getAttributeListByObject(?string $object = null): array
     {
@@ -35,6 +38,62 @@ class TaskListService
 
         return array_merge($objList, $defaultList);
     }
+
+    /**
+     * @param string|null $objectName
+     * @return array
+     * @throws InvalidConfigException
+     */
+    public static function getOptionListByObject(?string $objectName = null): array
+    {
+        $list = [];
+        if (!empty($objectName)) {
+            $object = TaskObject::getByName($objectName);
+            if ($object) {
+                $list = $object::getObjectOptionList();
+            }
+        }
+        return $list;
+    }
+
+
+    /**
+     * @param string|null $objectName
+     * @return array
+     * @throws InvalidConfigException
+     */
+    public static function getTargetObjectListByObject(?string $objectName = null): array
+    {
+        $list = [];
+        if (!empty($objectName)) {
+            $object = TaskObject::getByName($objectName);
+            if ($object) {
+                $list = $object::getTargetObjectList();
+            }
+        }
+        return $list;
+    }
+
+
+
+    /**
+     * @param string|null $objectName
+     * @return array
+     * @throws InvalidConfigException
+     */
+    public static function getDefaultOptionDataByObject(?string $objectName = null): array
+    {
+        $data = [];
+        $optionList = self::getOptionListByObject($objectName);
+        if (!empty($optionList)) {
+            foreach ($optionList as $name => $item) {
+                $data[$name] = $item['value'] ?? null;
+            }
+        }
+        return $data;
+    }
+
+
 
 
 

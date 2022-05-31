@@ -3,9 +3,9 @@
 use yii\db\Migration;
 
 /**
- * Class m220506_093441_create_tbl_task_list
+ * Class m220531_093441_create_tbl_task_list
  */
-class m220506_093441_create_tbl_task_list extends Migration
+class m220531_093441_create_tbl_task_list extends Migration
 {
     /**
      * @return void
@@ -22,11 +22,12 @@ class m220506_093441_create_tbl_task_list extends Migration
             'tl_id' => $this->primaryKey(),
             'tl_title' => $this->string(255)->notNull(),
             'tl_object' => $this->string(255)->notNull(),
+            'tl_target_object_id' => $this->smallInteger()->unsigned()->notNull(),
             'tl_condition' => $this->string(1000),
             'tl_condition_json' => $this->json(),
             'tl_params_json' => $this->json(),
-            'tl_work_start_time_utc' => $this->time(),
-            'tl_work_end_time_utc' => $this->time(),
+            //'tl_work_start_time_utc' => $this->time(),
+            //'tl_work_end_time_utc' => $this->time(),
             'tl_duration_min' => $this->integer()->unsigned(),
             'tl_enable_type' => $this->tinyInteger(1)->notNull(),
             'tl_cron_expression' => $this->string(100),

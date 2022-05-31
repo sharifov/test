@@ -4,6 +4,7 @@ use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
 use modules\taskList\src\entities\taskList\TaskList;
 use modules\taskList\src\entities\TaskObject;
+use modules\taskList\src\objects\TargetObjectList;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\ActionColumn;
@@ -52,20 +53,21 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'tl_object',
                 'filter' => TaskObject::getObjectList()
-//                'value' => static function (TaskList $model) {
-//                    return '<b title="' . Html::encode($model->ff_description) . '" data-toggle="tooltip">' .
-//                        ($model->tl_object ? '<i class="fa fa-info-circle info"></i> ' : '') .
-//                        Html::encode($model->tl_object) . '</b>';
-//                },
-//                'format' => 'raw',
             ],
+
+            [
+                'attribute' => 'tl_target_object_id',
+                'filter' => TargetObjectList::getAllTargetObjectList(),
+                'value' => static function (TaskList $model) {
+                    return $model->getTargetObjectName();
+                }
+            ],
+
+
             'tl_condition',
             //'tl_condition_json',
             //'tl_params_json',
-            'tl_work_start_time_utc',
-            'tl_work_end_time_utc',
             'tl_duration_min',
-//            'tl_enabled',
             [
                 'attribute' => 'tl_enable_type',
                 'value' => static function (TaskList $model) {

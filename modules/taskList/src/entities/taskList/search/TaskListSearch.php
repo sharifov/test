@@ -17,8 +17,8 @@ class TaskListSearch extends TaskList
     public function rules()
     {
         return [
-            [['tl_id', 'tl_duration_min', 'tl_enable_type', 'tl_sort_order', 'tl_updated_user_id'], 'integer'],
-            [['tl_title', 'tl_object', 'tl_condition', 'tl_condition_json', 'tl_params_json', 'tl_work_start_time_utc', 'tl_work_end_time_utc', 'tl_cron_expression', 'tl_updated_dt'], 'safe'],
+            [['tl_id', 'tl_duration_min', 'tl_enable_type', 'tl_sort_order', 'tl_updated_user_id', 'tl_target_object_id'], 'integer'],
+            [['tl_title', 'tl_object', 'tl_condition', 'tl_condition_json', 'tl_params_json', 'tl_cron_expression', 'tl_updated_dt'], 'safe'],
         ];
     }
 
@@ -59,8 +59,7 @@ class TaskListSearch extends TaskList
         // grid filtering conditions
         $query->andFilterWhere([
             'tl_id' => $this->tl_id,
-            'tl_work_start_time_utc' => $this->tl_work_start_time_utc,
-            'tl_work_end_time_utc' => $this->tl_work_end_time_utc,
+            'tl_target_object_id' => $this->tl_target_object_id,
             'tl_duration_min' => $this->tl_duration_min,
             'tl_enable_type' => $this->tl_enable_type,
             'tl_sort_order' => $this->tl_sort_order,

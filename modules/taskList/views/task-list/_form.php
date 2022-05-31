@@ -4,7 +4,9 @@ use kartik\select2\Select2;
 use modules\taskList\src\entities\taskList\TaskList;
 use modules\taskList\src\entities\TaskObject;
 use modules\taskList\src\objects\BaseTaskObject;
+use modules\taskList\src\services\TaskListService;
 use yii\helpers\Html;
+use yii\helpers\Json;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
 
@@ -14,18 +16,25 @@ use yii\widgets\Pjax;
 
 \frontend\assets\QueryBuilderAsset::register($this);
 
-$rulesData = @json_decode($model->tl_condition_json);
-$rulesDataStr = json_encode($rulesData);
+//$rulesData = @json_decode($model->tl_condition_json);
+
+//\yii\helpers\VarDumper::dump($model->tl_condition_json); exit;
+$model->tl_condition_json = Json::encode($model->tl_condition_json);
+
+//$rulesDataStr = \yii\helpers\Json::encode($model->tl_condition_json);
+$rulesDataStr = $model->tl_condition_json;
 //$filtersData = $model->getObjectAttributeList();
 
 $operators = json_encode(BaseTaskObject::getOperators());
-if ($model->tl_object) {
+if (!empty($model->tl_object)) {
     $filtersData = TaskObject::getAttributeListByObject($model->tl_object);
+    $defaultOptionList = TaskListService::getOptionListByObject($model->tl_object);
 } else {
     $filtersData = [];
+    $defaultOptionList = [];
 }
 $filtersDataStr = json_encode($filtersData);
-//\yii\helpers\VarDumper::dump($list, 10, true);
+//  \yii\helpers\VarDumper::dump($targetObjectList, 10, true);
 
 ?>
 <style>
@@ -38,7 +47,7 @@ $filtersDataStr = json_encode($filtersData);
     <?= $form->errorSummary($model) ?>
     <div class="row">
         <div class="col-md-6">
-            <?= $form->field($model, 'tl_title')->textInput(['maxlength' => true]) ?>
+
 
 
             <div class="row">
@@ -53,12 +62,22 @@ $filtersDataStr = json_encode($filtersData);
                         'pluginOptions' => ['allowClear' => true],
                     ]) ?>
                 </div>
+                <div class="col-md-6">
+                    <?= $form->field($model, 'tl_enable_type')
+                        ->dropDownList(
+                            TaskList::getEnableTypeList(),
+                            ['prompt' => '-']
+                        ) ?>
+                </div>
             </div>
+
+            <?= $form->field($model, 'tl_title')->textInput(['maxlength' => true]) ?>
 
 
             <?php /* $form->field($model, 'tl_object')
                 ->dropDownList(TaskObject::getObjectList(), ['prompt' => '-'])*/ ?>
 
+            <?php /*
             <div class="row">
                 <div class="col-md-6">
                     <?= $form->field($model, 'tl_work_start_time_utc')->input('time') ?>
@@ -66,55 +85,29 @@ $filtersDataStr = json_encode($filtersData);
                 <div class="col-md-6">
                     <?= $form->field($model, 'tl_work_end_time_utc')->input('time') ?>
                 </div>
-            </div>
+            </div> */ ?>
 
             <div class="row">
                 <div class="col-md-6">
-                <?= $form->field($model, 'tl_duration_min')->textInput() ?>
-                    </div>
-                    <div class="col-md-6">
-                <?= $form->field($model, 'tl_enable_type')
-                    ->dropDownList(
-                        TaskList::getEnableTypeList(),
-                        ['prompt' => '-']
-                    ) ?>
+                    <?= $form->field($model, 'tl_duration_min')->input('number', ['min' => 0, 'step' => 1]) ?>
                 </div>
-            </div>
-
-            <?= $form->field($model, 'tl_cron_expression')->textInput(['maxlength' => true]) ?>
-
-            <div class="row">
-                <div class="col-md-3">
-                    <?= $form->field($model, 'tl_sort_order')->input('number', ['min' => 0]) ?>
+                <div class="col-md-6">
                 </div>
             </div>
 
 
             <div class="row">
                 <div class="col-md-6">
-                <?php
-
-                try {
-                    echo $form->field($model, 'tl_params_json')->widget(
-                        \kdn\yii2\JsonEditor::class,
-                        [
-                            'clientOptions' => [
-                                'modes' => ['code', 'form', 'tree', 'view'], //'text',
-                                'mode' => $model->isNewRecord ? 'code' : 'form'
-                            ],
-                            //'collapseAll' => ['view'],
-                            'expandAll' => ['tree', 'form'],
-                            'value' => $model->tl_params_json ? json_encode($model->tl_params_json) : ''
-                        ]
-                    );
-                } catch (Exception $exception) {
-                    echo $form->field($model, 'tl_params_json')
-                        ->textarea(['rows' => 6, 'value' => json_encode($model->tl_params_json)]);
-                }
-
-                ?>
+                    <?= $form->field($model, 'tl_cron_expression')->textInput(['maxlength' => true]) ?>
+                </div>
+                <div class="col-md-6">
+                    <?= $form->field($model, 'tl_sort_order')->dropDownList(array_combine(range(0, 100), range(0, 100))) ?>
+                    <?php /* $form->field($model, 'tl_sort_order')->input('number', ['min' => 0, 'step' => 1])*/ ?>
                 </div>
             </div>
+
+
+
 
         </div>
         <div class="col-md-6">
@@ -122,6 +115,14 @@ $filtersDataStr = json_encode($filtersData);
             <?php Pjax::begin(['id' => 'pjax-task-list-form']); ?>
 
                 <?php if ($model->tl_object) : ?>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <?php $targetObjectList = TaskListService::getTargetObjectListByObject($model->tl_object); ?>
+                            <?= $form->field($model, 'tl_target_object_id')->dropDownList($targetObjectList, ['prompt' => '---']) ?>
+                        </div>
+                    </div>
+
+
                     <h3>Task object "<?php echo Html::encode($model->tl_object) ?>"</h3>
 
                     <h2>Rules / Conditions</h2>
@@ -157,6 +158,67 @@ $filtersDataStr = json_encode($filtersData);
                         </div>
                     <?php endif; ?>
 
+                    <div class="row">
+                        <div class="col-md-6">
+                            <?php
+
+                            try {
+                                echo $form->field($model, 'tl_params_json')->widget(
+                                    \kdn\yii2\JsonEditor::class,
+                                    [
+                                        'clientOptions' => [
+                                            'modes' => ['code', 'form', 'tree', 'view'], //'text',
+                                            'mode' => $model->isNewRecord ? 'form' : 'code'
+                                        ],
+                                        //'collapseAll' => ['view'],
+                                        'expandAll' => ['tree', 'form'],
+                                        'value' => $model->tl_params_json ?
+                                            Json::encode($model->tl_params_json) : Json::encode([])
+                                    ]
+                                );
+                            } catch (Exception $exception) {
+                                echo $form->field($model, 'tl_params_json')
+                                    ->textarea(['rows' => 6,
+                                        'value' => Json::encode($model->tl_params_json)]);
+                                echo '<div class="danger">' . $exception->getMessage() . '</div>';
+                            }
+
+                            ?>
+                        </div>
+                        <div class="col-md-6">
+                            <?php if ($defaultOptionList) : ?>
+                                <h4>Default "<?=Html::encode($model->tl_object)?>" params:</h4>
+                                <table class="table table-bordered table-hover">
+
+                                    <tr>
+                                        <th>Key</th>
+                                        <th>Label</th>
+                                        <th>Type</th>
+                                        <th>Default</th>
+                                    </tr>
+                                
+                                <?php foreach ($defaultOptionList as $optKey => $optItem) : ?>
+                                    <tr>
+                                        <td>
+                                            <?= Html::encode($optKey)?>
+                                        </td>
+                                        <td>
+                                            <?= Html::encode($optItem['label'] ?? '')?>
+                                        </td>
+                                        <td>
+                                            <?= Html::encode($optItem['type'] ?? '')?>
+                                        </td>
+                                        <td>
+                                            <?= Html::encode($optItem['value'] ?? '')?>
+                                        </td>
+                                    </tr>
+
+                                <?php endforeach; ?>
+                                </table>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
                     <?php
                     $jsCode = <<<JS
     
@@ -182,7 +244,7 @@ $filtersDataStr = json_encode($filtersData);
             //'not-group'
         ],
         filters: filtersData,
-        rules: rulesData
+            rules: rulesData
     });
     JS;
 

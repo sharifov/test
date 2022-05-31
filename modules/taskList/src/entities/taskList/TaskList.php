@@ -2,7 +2,9 @@
 
 namespace modules\taskList\src\entities\taskList;
 
+use common\components\validators\CheckJsonValidator;
 use common\models\Employee;
+use modules\taskList\src\objects\TargetObjectList;
 use modules\taskList\src\services\TaskListService;
 use Yii;
 use yii\behaviors\BlameableBehavior;
@@ -11,6 +13,7 @@ use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\db\BaseActiveRecord;
 use yii\helpers\Html;
+use yii\helpers\Json;
 
 /**
  * This is the model class for table "task_list".
@@ -18,11 +21,10 @@ use yii\helpers\Html;
  * @property int $tl_id
  * @property string $tl_title
  * @property string $tl_object
+ * @property int $tl_target_object_id
  * @property string|null $tl_condition
  * @property string|null $tl_condition_json
  * @property string|null $tl_params_json
- * @property string|null $tl_work_start_time_utc
- * @property string|null $tl_work_end_time_utc
  * @property int|null $tl_duration_min
  * @property int $tl_enable_type
  * @property string|null $tl_cron_expression
@@ -76,13 +78,13 @@ class TaskList extends ActiveRecord
     public function rules()
     {
         return [
-            [['tl_title', 'tl_object', 'tl_enable_type'], 'required'],
-            [['tl_condition_json', 'tl_params_json', 'tl_work_start_time_utc',
-                'tl_work_end_time_utc', 'tl_updated_dt'], 'safe'],
-            [['tl_duration_min', 'tl_enable_type', 'tl_sort_order', 'tl_updated_user_id'], 'integer'],
+            [['tl_title', 'tl_object', 'tl_enable_type', 'tl_target_object_id'], 'required'],
+            [['tl_condition_json', 'tl_params_json', 'tl_updated_dt'], 'safe'],
+            [['tl_duration_min', 'tl_enable_type', 'tl_sort_order', 'tl_updated_user_id', 'tl_target_object_id'], 'integer'],
             [['tl_title', 'tl_object'], 'string', 'max' => 255],
             [['tl_condition'], 'string', 'max' => 1000],
             [['tl_cron_expression'], 'string', 'max' => 100],
+            [['tl_params_json'], CheckJsonValidator::class, 'skipOnEmpty' => true],
             [['tl_updated_user_id'], 'exist', 'skipOnError' => true,
                 'targetClass' => Employee::class, 'targetAttribute' => ['tl_updated_user_id' => 'id']],
         ];
@@ -97,14 +99,13 @@ class TaskList extends ActiveRecord
             'tl_id' => 'ID',
             'tl_title' => 'Title',
             'tl_object' => 'Object',
+            'tl_target_object_id' => 'Target Object',
             'tl_condition' => 'Condition',
             'tl_condition_json' => 'Condition Json',
             'tl_params_json' => 'Params Json',
-            'tl_work_start_time_utc' => 'Work Start Time Utc',
-            'tl_work_end_time_utc' => 'Work End Time Utc',
-            'tl_duration_min' => 'Duration Min',
+            'tl_duration_min' => 'Duration (Minutes)',
             'tl_enable_type' => 'Enable type',
-            'tl_cron_expression' => 'Cron Expression',
+            'tl_cron_expression' => 'CRON Expression',
             'tl_sort_order' => 'Sort Order',
             'tl_updated_dt' => 'Updated Dt',
             'tl_updated_user_id' => 'Updated User ID',
@@ -136,13 +137,25 @@ class TaskList extends ActiveRecord
         ];
     }
 
+    /**
+     * @param $insert
+     * @return bool
+     */
     public function beforeSave($insert): bool
     {
         if (!parent::beforeSave($insert)) {
             return false;
         }
 
+        if ($this->tl_params_json && is_string($this->tl_condition_json)) {
+            $this->tl_params_json = Json::decode($this->tl_params_json);
+        }
+
         if ($this->tl_condition_json) {
+            if (is_string($this->tl_condition_json)) {
+                $this->tl_condition_json = Json::decode($this->tl_condition_json);
+            }
+
             $this->tl_condition = $this->getDecodeCode();
         }
 
@@ -210,7 +223,12 @@ class TaskList extends ActiveRecord
     public function getDecodeCode(bool $human = false): string
     {
         $code = '';
-        $rules = @json_decode($this->tl_condition_json, true);
+        if (is_string($this->tl_condition_json)) {
+            $rules = Json::decode($this->tl_condition_json);
+        } else {
+            $rules = $this->tl_condition_json;
+        }
+
         if (is_array($rules)) {
             $code = TaskListService::conditionDecode($rules);
 
@@ -219,5 +237,13 @@ class TaskList extends ActiveRecord
             }
         }
         return $code;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTargetObjectName(): string
+    {
+        return TargetObjectList::getTargetName($this->tl_target_object_id);
     }
 }
