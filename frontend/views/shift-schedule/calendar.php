@@ -880,11 +880,14 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
                                     inst.removeEvent(id);
                                 });
                                 
-                                if(data.timelineData){
-                                    addTimelineEvent(JSON.parse(data.timelineData))
+                                let messasgePart = 'removed';
+                                let timeLineData = JSON.parse(data.timelineData);
+                                if(timeLineData.length){
+                                    addTimelineEvent(timeLineData);
+                                    messasgePart = 'deleted';
                                 }
                                 $('.selected-event').remove();
-                                createNotify('Success', 'Event(s) successfully deleted', 'success');
+                                createNotify('Success', 'Event(s) successfully ' + messasgePart, 'success');
                                 selectedEventsIds = [];
                                 checkAllBtn.removeClass(['btn-warning', 'checked']).addClass('btn-default').html('<span class="fa fa-square-o"></span> Select All');
                             }
