@@ -595,8 +595,9 @@ class UserShiftScheduleService
         );
 
         try {
+            $changedAttributes = $event->getDirtyAttributes();
             $this->repository->save($event);
-            ShiftScheduleRequestService::createDueToEventChange($event, $oldEvent, Auth::user());
+            ShiftScheduleRequestService::createDueToEventChange($event, $oldEvent, $changedAttributes, Auth::user());
 
             Notifications::createAndPublish(
                 $event->uss_user_id,
@@ -634,9 +635,9 @@ class UserShiftScheduleService
         if (!empty($form->description)) {
             $event->uss_description = $form->description;
         }
-
+        $changedAttributes = $event->getDirtyAttributes();
         $this->repository->save($event);
-        ShiftScheduleRequestService::createDueToEventChange($event, $oldEvent, Auth::user());
+        ShiftScheduleRequestService::createDueToEventChange($event, $oldEvent, $changedAttributes, Auth::user());
 
         Notifications::createAndPublish(
             $oldEvent->uss_user_id,

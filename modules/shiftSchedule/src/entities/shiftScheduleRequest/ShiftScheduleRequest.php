@@ -151,6 +151,27 @@ class ShiftScheduleRequest extends ActiveRecord
     }
 
     /**
+     * @param int $ssr_uss_id
+     * @param int $ssr_sst_id
+     * @param int $ssr_status_id
+     * @param string|null $ssr_description
+     * @param int|null $ssr_created_user_id
+     * @param int|null $ssr_updated_user_id
+     * @return ShiftScheduleRequest
+     */
+    public static function create(int $ssr_uss_id, int $ssr_sst_id, int $ssr_status_id, ?string $ssr_description, ?int $ssr_created_user_id, ?int $ssr_updated_user_id): ShiftScheduleRequest
+    {
+        $model = new self();
+        $model->ssr_uss_id = $ssr_uss_id;
+        $model->ssr_sst_id = $ssr_sst_id;
+        $model->ssr_status_id = $ssr_status_id;
+        $model->ssr_description = $ssr_description;
+        $model->ssr_created_user_id = $ssr_created_user_id;
+        $model->ssr_updated_user_id = $ssr_updated_user_id;
+        return $model;
+    }
+
+    /**
      * @return string
      */
     public function getStatusName(): string
@@ -268,5 +289,15 @@ class ShiftScheduleRequest extends ActiveRecord
     public function getStatusNamePasteTense(): string
     {
         return self::STATUS_LIST_PAST_TENSE[$this->ssr_status_id] ?? '';
+    }
+
+    public function isStatusPending(): bool
+    {
+        return $this->ssr_status_id === self::STATUS_PENDING;
+    }
+
+    public function isStatusDeclined(): bool
+    {
+        return $this->ssr_status_id === self::STATUS_DECLINED;
     }
 }

@@ -5,8 +5,10 @@ namespace modules\shiftSchedule\src\services;
 use common\models\Employee;
 use common\models\Notifications;
 use frontend\widgets\notification\NotificationMessage;
+use modules\shiftSchedule\src\entities\shiftScheduleRequest\repository\ShiftScheduleRequestRepository;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\search\ShiftScheduleRequestSearch;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
+use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\shiftSchedule\src\forms\ScheduleDecisionForm;
 use modules\shiftSchedule\src\forms\ScheduleRequestForm;
@@ -218,8 +220,11 @@ class ShiftScheduleRequestService
      * @param Employee $user
      * @return void
      */
-    public static function createDueToEventChange(UserShiftSchedule $event, UserShiftSchedule $oldEvent, Employee $user)
+    public static function createDueToEventChange(UserShiftSchedule $event, UserShiftSchedule $oldEvent, array $changedAttributes, Employee $user)
     {
+        $neededAttributes = self::getNeededAttributesWithMessage($oldEvent, $changedAttributes);
+
+        /** @var ShiftScheduleRequest $requestModel */
         $requestModel = ShiftScheduleRequest::find()
             ->select('ssr_status_id')
             ->andWhere(['ssr_uss_id' => $event->uss_id])
@@ -228,37 +233,37 @@ class ShiftScheduleRequestService
 
         if (
             !$requestModel
-            || $requestModel->ssr_status_id === ShiftScheduleRequest::STATUS_DECLINED
-            || $requestModel->ssr_status_id !== ShiftScheduleRequest::STATUS_PENDING
-            || !self::existsChangeAttribute($event, $oldEvent)
+            || $requestModel->isStatusDeclined()
+            || !$requestModel->isStatusPending()
+            || count($neededAttributes) == 0
         ) {
             return;
         }
 
-        $scheduleRequest = new ShiftScheduleRequest([
-            'ssr_uss_id' => $event->uss_id,
-            'ssr_sst_id' => $event->uss_sst_id,
-            'ssr_status_id' => ShiftScheduleRequest::STATUS_DECLINED,
-            'ssr_description' => 'Shift event was updated',
-            'ssr_updated_user_id' => $user->id,
-            'ssr_created_user_id' => $event->uss_user_id
-        ]);
+        $scheduleRequest = ShiftScheduleRequest::create(
+            $event->uss_id,
+            $event->uss_sst_id,
+            ShiftScheduleRequest::STATUS_DECLINED,
+            'Shift event was updated (' . implode(',', $neededAttributes) . ')',
+            $event->uss_user_id,
+            $user->id
+        );
 
-        if ($scheduleRequest->save()) {
-            self::sendNotification(
-                Employee::ROLE_AGENT,
-                $scheduleRequest,
-                self::NOTIFICATION_TYPE_CREATE,
-                $user
-            );
+        (new ShiftScheduleRequestRepository($scheduleRequest))->save(true);
 
-            self::sendNotification(
-                Employee::ROLE_SUPERVISION,
-                $scheduleRequest,
-                self::NOTIFICATION_TYPE_UPDATE,
-                $user
-            );
-        }
+        self::sendNotification(
+            Employee::ROLE_AGENT,
+            $scheduleRequest,
+            self::NOTIFICATION_TYPE_CREATE,
+            $user
+        );
+
+        self::sendNotification(
+            Employee::ROLE_SUPERVISION,
+            $scheduleRequest,
+            self::NOTIFICATION_TYPE_UPDATE,
+            $user
+        );
     }
 
     /**
@@ -331,16 +336,43 @@ class ShiftScheduleRequestService
         }
     }
 
-    /**
-     * @param UserShiftSchedule $event
-     * @param UserShiftSchedule $oldEvent
-     * @return bool
-     */
-    private static function existsChangeAttribute(UserShiftSchedule $event, UserShiftSchedule $oldEvent): bool
+
+    private static function getNeededAttributesWithMessage(UserShiftSchedule $oldEvent, array $changedAttributes): array
     {
-        return $event->uss_status_id !== $oldEvent->uss_status_id ||
-            $event->uss_sst_id !== $oldEvent->uss_sst_id ||
-            $event->uss_start_utc_dt !== $oldEvent->uss_start_utc_dt ||
-            $event->uss_end_utc_dt !== $oldEvent->uss_end_utc_dt;
+        $newAttributes = [];
+
+        foreach ($changedAttributes as $key => $value) {
+            switch ($key) {
+                case 'uss_status_id':
+                    $newAttributes[$key] =
+                        Yii::t('app', 'Status from {oldAttr} to {newAttr}', [
+                            'oldAttr' => UserShiftSchedule::getStatusList()[$oldEvent->uss_status_id],
+                            'newAttr' => UserShiftSchedule::getStatusList()[$value]
+                        ]);
+                    break;
+                case 'uss_sst_id':
+                    $newAttributes[$key] =
+                        Yii::t('app', 'ShiftScheduleType from {oldAttr} to {newAttr}', [
+                            'oldAttr' => $oldEvent->shiftScheduleType->sst_name ?? '',
+                            'newAttr' => ($shiftScheduleType = ShiftScheduleType::findOne($value)) ? $shiftScheduleType->sst_name : ''
+                        ]);
+                    break;
+
+                case 'uss_start_utc_dt':
+                    $newAttributes[$key] = Yii::t('app', 'Start DateTime (UTC) from {oldAttr} to {newAttr}', [
+                        'oldAttr' => $oldEvent->{$key},
+                        'newAttr' => $value
+                    ]);
+                    break;
+
+                case 'uss_end_utc_dt':
+                    $newAttributes[$key] = Yii::t('app', 'End DateTime (UTC) from {oldAttr} to {newAttr}', [
+                        'oldAttr' => $oldEvent->{$key},
+                        'newAttr' => $value
+                    ]);
+                    break;
+            }
+        }
+        return $newAttributes;
     }
 }
