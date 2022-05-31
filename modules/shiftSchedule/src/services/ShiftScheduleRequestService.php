@@ -5,8 +5,10 @@ namespace modules\shiftSchedule\src\services;
 use common\models\Employee;
 use common\models\Notifications;
 use frontend\widgets\notification\NotificationMessage;
+use modules\shiftSchedule\src\entities\shiftScheduleRequest\repository\ShiftScheduleRequestRepository;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\search\ShiftScheduleRequestSearch;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
+use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\shiftSchedule\src\forms\ScheduleDecisionForm;
 use modules\shiftSchedule\src\forms\ScheduleRequestForm;
@@ -213,6 +215,58 @@ class ShiftScheduleRequestService
     }
 
     /**
+     * @param UserShiftSchedule $event
+     * @param UserShiftSchedule $oldEvent
+     * @param Employee $user
+     * @return void
+     */
+    public static function createDueToEventChange(UserShiftSchedule $event, UserShiftSchedule $oldEvent, array $changedAttributes, Employee $user)
+    {
+        $neededAttributes = self::getNeededAttributesWithMessage($oldEvent, $changedAttributes);
+
+        /** @var ShiftScheduleRequest $requestModel */
+        $requestModel = ShiftScheduleRequest::find()
+            ->select('ssr_status_id')
+            ->andWhere(['ssr_uss_id' => $event->uss_id])
+            ->orderBy(['ssr_created_dt' => SORT_DESC])
+            ->one();
+
+        if (
+            !$requestModel
+            || $requestModel->isStatusDeclined()
+            || !$requestModel->isStatusPending()
+            || count($neededAttributes) == 0
+        ) {
+            return;
+        }
+
+        $scheduleRequest = ShiftScheduleRequest::create(
+            $event->uss_id,
+            $event->uss_sst_id,
+            ShiftScheduleRequest::STATUS_DECLINED,
+            'Shift event was updated (' . implode(',', $neededAttributes) . ')',
+            $event->uss_user_id,
+            $user->id
+        );
+
+        (new ShiftScheduleRequestRepository($scheduleRequest))->save(true);
+
+        self::sendNotification(
+            Employee::ROLE_AGENT,
+            $scheduleRequest,
+            self::NOTIFICATION_TYPE_CREATE,
+            $user
+        );
+
+        self::sendNotification(
+            Employee::ROLE_SUPERVISION,
+            $scheduleRequest,
+            self::NOTIFICATION_TYPE_UPDATE,
+            $user
+        );
+    }
+
+    /**
      * Send Notification
      * @param string $whom
      * @param ShiftScheduleRequest $scheduleRequest
@@ -280,5 +334,45 @@ class ShiftScheduleRequestService
                 }
             }
         }
+    }
+
+
+    private static function getNeededAttributesWithMessage(UserShiftSchedule $oldEvent, array $changedAttributes): array
+    {
+        $newAttributes = [];
+
+        foreach ($changedAttributes as $key => $value) {
+            switch ($key) {
+                case 'uss_status_id':
+                    $newAttributes[$key] =
+                        Yii::t('app', 'Status from {oldAttr} to {newAttr}', [
+                            'oldAttr' => UserShiftSchedule::getStatusList()[$oldEvent->uss_status_id],
+                            'newAttr' => UserShiftSchedule::getStatusList()[$value]
+                        ]);
+                    break;
+                case 'uss_sst_id':
+                    $newAttributes[$key] =
+                        Yii::t('app', 'ShiftScheduleType from {oldAttr} to {newAttr}', [
+                            'oldAttr' => $oldEvent->shiftScheduleType->sst_name ?? '',
+                            'newAttr' => ($shiftScheduleType = ShiftScheduleType::findOne($value)) ? $shiftScheduleType->sst_name : ''
+                        ]);
+                    break;
+
+                case 'uss_start_utc_dt':
+                    $newAttributes[$key] = Yii::t('app', 'Start DateTime (UTC) from {oldAttr} to {newAttr}', [
+                        'oldAttr' => $oldEvent->{$key},
+                        'newAttr' => $value
+                    ]);
+                    break;
+
+                case 'uss_end_utc_dt':
+                    $newAttributes[$key] = Yii::t('app', 'End DateTime (UTC) from {oldAttr} to {newAttr}', [
+                        'oldAttr' => $oldEvent->{$key},
+                        'newAttr' => $value
+                    ]);
+                    break;
+            }
+        }
+        return $newAttributes;
     }
 }
