@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\components\TwoFactorService;
 use common\models\ApiLog;
 use common\models\Employee;
 use common\models\Lead;
@@ -12,6 +13,7 @@ use common\models\UserBonusRules;
 use common\models\UserCommissionRules;
 use common\models\UserConnection;
 use common\models\UserParams;
+use Endroid\QrCode\Builder\Builder;
 use frontend\models\form\UserProfileForm;
 use frontend\themes\gentelella_v2\widgets\SideBarMenu;
 use src\auth\Auth;
@@ -31,10 +33,6 @@ use common\models\LoginForm;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
-use Da\QrCode\QrCode;
-use Da\TwoFA\Manager;
-use Da\TwoFA\Service\TOTPSecretKeyUriGeneratorService;
-use Da\TwoFA\Service\QrCodeDataUriGeneratorService;
 use yii\web\Response;
 use yii\captcha\CaptchaAction;
 
@@ -204,13 +202,7 @@ class SiteController extends FController
             $session->remove('auth_client_source_id');
             return $this->goHome();
         }
-
-        $totpUri = (new TOTPSecretKeyUriGeneratorService(
-            Yii::$app->params['settings']['two_factor_company_name'],
-            $userName,
-            $twoFactorAuthKey
-        ))->run();
-        $qrcodeSrc = (new QrCodeDataUriGeneratorService($totpUri))->run();
+        $qrcodeSrc = (new TwoFactorService())->getBase64($twoFactorAuthKey, $userName);
 
         return $this->render('step-two', [
             'qrcodeSrc' => $qrcodeSrc,
@@ -295,10 +287,13 @@ class SiteController extends FController
         if (Yii::$app->telegram && !empty(Yii::$app->telegram->botUsername)) {
             $url = 'https://telegram.me/' . trim(Yii::$app->telegram->botUsername) . '?start=' . $code;
 
-            $qrCode = (new QrCode($url))
-                ->setSize(160)
-                ->setMargin(5);
-            $qrCodeData = $qrCode->writeDataUri();
+            $result = Builder::create()
+                ->data($url)
+                ->size(170)
+                ->margin(0)
+                ->build();
+
+            $qrCodeData = $result->getDataUri();
         } else {
             $qrCodeData = null;
         }
@@ -467,10 +462,8 @@ class SiteController extends FController
 
     protected function redirectToTwoFactorAuth(Employee $user, LoginForm $model): Response
     {
-        $twoFaManager = new Manager();
-        $twoFaManager->setCounter(SettingHelper::getTwoFactorAuthCounter());
         $twoFactorAuthSecretKey = empty($user->userProfile->up_2fa_secret) ?
-            $twoFaManager->generateSecretKey() : $user->userProfile->up_2fa_secret;
+            (new TwoFactorService())->getSecret() : $user->userProfile->up_2fa_secret;
 
         $session = Yii::$app->session;
         $session->set('two_factor_email', $user->email);
