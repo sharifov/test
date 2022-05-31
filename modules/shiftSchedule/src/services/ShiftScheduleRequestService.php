@@ -213,6 +213,55 @@ class ShiftScheduleRequestService
     }
 
     /**
+     * @param UserShiftSchedule $event
+     * @param UserShiftSchedule $oldEvent
+     * @param Employee $user
+     * @return void
+     */
+    public static function createDueToEventChange(UserShiftSchedule $event, UserShiftSchedule $oldEvent, Employee $user)
+    {
+        $requestModel = ShiftScheduleRequest::find()
+            ->select('ssr_status_id')
+            ->andWhere(['ssr_uss_id' => $event->uss_id])
+            ->orderBy(['ssr_created_dt' => SORT_DESC])
+            ->one();
+
+        if (
+            !$requestModel
+            || $requestModel->ssr_status_id === ShiftScheduleRequest::STATUS_DECLINED
+            || $requestModel->ssr_status_id !== ShiftScheduleRequest::STATUS_PENDING
+            || !self::existsChangeAttribute($event, $oldEvent)
+        ) {
+            return;
+        }
+
+        $scheduleRequest = new ShiftScheduleRequest([
+            'ssr_uss_id' => $event->uss_id,
+            'ssr_sst_id' => $event->uss_sst_id,
+            'ssr_status_id' => ShiftScheduleRequest::STATUS_DECLINED,
+            'ssr_description' => 'Shift event was updated',
+            'ssr_updated_user_id' => $user->id,
+            'ssr_created_user_id' => $event->uss_user_id
+        ]);
+
+        if ($scheduleRequest->save()) {
+            self::sendNotification(
+                Employee::ROLE_AGENT,
+                $scheduleRequest,
+                self::NOTIFICATION_TYPE_CREATE,
+                $user
+            );
+
+            self::sendNotification(
+                Employee::ROLE_SUPERVISION,
+                $scheduleRequest,
+                self::NOTIFICATION_TYPE_UPDATE,
+                $user
+            );
+        }
+    }
+
+    /**
      * Send Notification
      * @param string $whom
      * @param ShiftScheduleRequest $scheduleRequest
@@ -280,5 +329,18 @@ class ShiftScheduleRequestService
                 }
             }
         }
+    }
+
+    /**
+     * @param UserShiftSchedule $event
+     * @param UserShiftSchedule $oldEvent
+     * @return bool
+     */
+    private static function existsChangeAttribute(UserShiftSchedule $event, UserShiftSchedule $oldEvent): bool
+    {
+        return $event->uss_status_id !== $oldEvent->uss_status_id ||
+            $event->uss_sst_id !== $oldEvent->uss_sst_id ||
+            $event->uss_start_utc_dt !== $oldEvent->uss_start_utc_dt ||
+            $event->uss_end_utc_dt !== $oldEvent->uss_end_utc_dt;
     }
 }

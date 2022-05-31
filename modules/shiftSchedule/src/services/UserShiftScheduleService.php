@@ -596,6 +596,7 @@ class UserShiftScheduleService
 
         try {
             $this->repository->save($event);
+            ShiftScheduleRequestService::createDueToEventChange($event, $oldEvent, Auth::user());
 
             Notifications::createAndPublish(
                 $event->uss_user_id,
@@ -635,6 +636,7 @@ class UserShiftScheduleService
         }
 
         $this->repository->save($event);
+        ShiftScheduleRequestService::createDueToEventChange($event, $oldEvent, Auth::user());
 
         Notifications::createAndPublish(
             $oldEvent->uss_user_id,
