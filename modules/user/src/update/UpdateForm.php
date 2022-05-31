@@ -449,6 +449,7 @@ class UpdateForm extends Model
 
             ['up_2fa_secret', 'default', 'value' => null],
             ['up_2fa_secret', 'string', 'max' => 50],
+            ['up_2fa_secret', 'match', 'pattern' => '/^[A-Z2-7]+=*$/'],
 
             ['up_2fa_enable', 'default', 'value' => null],
             ['up_2fa_enable', 'boolean'],
