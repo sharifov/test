@@ -984,7 +984,15 @@ class SettingHelper
 
     public static function getShiftScheduleDaysOffset(): int
     {
-        return (int)(self::getShiftSchedule()['days_offset'] ?? ShiftScheduleDictionary::DEFAULT_DAYS_OFFSET);
+        $daysOffset = (int) (self::getShiftSchedule()['days_offset'] ?? ShiftScheduleDictionary::DEFAULT_DAYS_OFFSET);
+        if ($daysOffset < 0) {
+            Yii::warning([
+                'message' => 'DaysOffset cannot be less to 0',
+                'daysOffset' => $daysOffset,
+            ], 'SettingHelper:getShiftScheduleDaysOffset:DaysOffsetLimitIsInvalid');
+            return ShiftScheduleDictionary::DEFAULT_DAYS_OFFSET;
+        }
+        return $daysOffset;
     }
 
     public static function isClientChatDebugEnable(): bool
