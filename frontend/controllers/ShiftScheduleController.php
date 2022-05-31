@@ -674,7 +674,7 @@ class ShiftScheduleController extends FController
             );
             return $this->asJson([
                 'error' => false,
-                'message' => 'Shift removed successfully',
+                'message' => 'Event deleted successfully',
             ]);
         }
         $userShiftSchedule->uss_status_id = UserShiftSchedule::STATUS_DELETED;
