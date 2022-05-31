@@ -158,7 +158,6 @@ var \$title = $('#tooltip-event-title');
 var \$view = $('#tooltip-event-view');
 var \$viewLogs = $('#tooltip-event-logs');
 var \$editBtn = $('#tooltip-event-edit');
-var dblClickResource;
 
 var multipleMangeMode = false;
 var selectedEventsIds = [];
@@ -183,7 +182,7 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
         //displayTimezone: 'Europe/Chisinau', //'local',
         timezonePlugin: mobiscroll.momentTimezone,
         clickToCreate: canCreateOnDoubleClick,
-        dragToCreate: false,
+        dragToCreate: true,
         dragToMove: true,
         dragToResize: true,
 //        renderScheduleEvent: function (data) {
@@ -261,16 +260,13 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
                 createNotify('Warning', 'You cannot add event in multiple manage mode', 'warning');
                 return false;
             }
-            dblClickResource = args.resource;
         },
         onEventDragStart: function (args) {
-            args.resource = dblClickResource;
         },
         onCellClick: function (args) {
             if (multipleMangeMode) {
                 return false;
             }
-            dblClickResource = args.resource;
         },
         
         
@@ -278,10 +274,6 @@ window.inst = $('#calendar').mobiscroll().eventcalendar({
             if (multipleMangeMode) {
                 return false;
             }
-            if (dblClickResource && args.event.resource !== dblClickResource) {
-                args.event.resource = dblClickResource;
-            }
-            dblClickResource = '';
             
             if (args.event.resource.indexOf('us-') !== 0) {
                 inst.removeEvent(args.event);
