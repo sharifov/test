@@ -23,6 +23,7 @@ use yii\data\ActiveDataProvider;
 use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\validators\DateValidator;
 
 /**
@@ -242,7 +243,7 @@ class UserStatsReport extends Model
             $query->leftJoin(['user_data2' => UserData::tableName()], "users.id = user_data2.ud_user_id AND user_data2.ud_key = '" . UserDataKey::GROSS_PROFIT . "'");
         }
 
-        if (Metrics::isSalesConversion($this->metrics)) {
+        if (Metrics::isSalesConversion($this->metrics) || Metrics::isSplitShare($this->metrics)) {
             $query->addSelect([
                 'conversion_percent' =>
                     new Expression('if ((conversion_conversion_cnt is null or conversion_conversion_cnt = 0 or conversion_share is null or conversion_share = 0), 0, round((conversion_share / conversion_conversion_cnt), 2))'),
@@ -274,6 +275,22 @@ class UserStatsReport extends Model
                     ], 'conversion_counter.luc_user_id = ps_user_id')
                     ->groupBy(['conversion_user_id'])
             ], 'conversion.conversion_user_id = users.id');
+            $query->addSelect([
+                'split_share' =>
+                    new Expression('if ((split_share_share IS NULL OR split_share_share = 0), 0, split_share_share)')
+            ]);
+            $query->leftJoin([
+                'splitShare' => (new Query())
+                    ->select([
+                        'ps_user_id as split_share_user_id',
+                        'sum(ROUND((ps_percent / 100), 2)) as split_share_share',
+                    ])
+                    ->from(Lead::tableName())
+                    ->innerJoin(ProfitSplit::tableName(), 'ps_lead_id = id')
+                    ->andWhere(['status' => Lead::STATUS_SOLD])
+                    ->andWhere(['BETWEEN', 'l_status_dt', $from, $to])
+                    ->groupBy(['split_share_user_id'])
+            ], 'splitShare.split_share_user_id = users.id');
         }
 
         if (Metrics::isSoldLeads($this->metrics)) {
@@ -293,25 +310,6 @@ class UserStatsReport extends Model
                     ->andWhere(['BETWEEN', 'l_status_dt', $from, $to])
                     ->groupBy(['sold_leads_user_id'])
             ], 'soldLeads.sold_leads_user_id = users.id');
-        }
-
-        if (Metrics::isSplitShare($this->metrics)) {
-            $query->addSelect([
-                'split_share' =>
-                    new Expression('if ((split_share_share IS NULL OR split_share_share = 0), 0, split_share_share)')
-            ]);
-            $query->leftJoin([
-                'splitShare' => (new Query())
-                    ->select([
-                        'ps_user_id as split_share_user_id',
-                        'sum(ROUND((ps_percent / 100), 2)) as split_share_share',
-                    ])
-                    ->from(Lead::tableName())
-                    ->innerJoin(ProfitSplit::tableName(), 'ps_lead_id = id')
-                    ->andWhere(['status' => Lead::STATUS_SOLD])
-                    ->andWhere(['BETWEEN', 'l_status_dt', $from, $to])
-                    ->groupBy(['split_share_user_id'])
-            ], 'splitShare.split_share_user_id = users.id');
         }
 
         if (Metrics::isQualifiedLeadsTaken($this->metrics)) {
@@ -629,7 +627,10 @@ class UserStatsReport extends Model
         if (Metrics::isSoldLeads($this->metrics)) {
             $data['sold_leads'] = [
                 'Name' => 'Sold Leads',
-                'average' => null,
+                'average' => $this->getAvgValueColumn(
+                    $results,
+                    'sold_leads'
+                ),
                 'total' => $this->getSumColumn(
                     $results,
                     'sold_leads'
@@ -777,16 +778,18 @@ class UserStatsReport extends Model
 
     private function getConversionPercent(array $results): float
     {
-        $sumSoldLeads           = $this->getSumColumn(
-            $results,
-            'sold_leads'
-        );
+        $sumSoldLeads = 0;
+        $soldLeadsColumn = array_column($results, 'sold_leads');
+        $splitShareColumn = array_column($results, 'split_share');
+        foreach ($soldLeadsColumn as $key => $value) {
+            $sumSoldLeads += $value * $splitShareColumn[$key];
+        }
         $sumQualifiedLeadsTaken = $this->getSumColumn(
             $results,
             'qualified_leads_taken'
         );
         if ($sumQualifiedLeadsTaken) {
-            return $sumSoldLeads / $sumQualifiedLeadsTaken * 100;
+            return round(($sumSoldLeads / $sumQualifiedLeadsTaken) * 100);
         }
         return 0;
     }
@@ -796,15 +799,13 @@ class UserStatsReport extends Model
         if (Metrics::isLeadsCreated($metrics)) {
             $query->addSelect(['sum(leads_created) as leads_created']);
         }
-        if (Metrics::isSalesConversion($metrics)) {
+        if (Metrics::isSalesConversion($metrics) || Metrics::isSplitShare($metrics)) {
             //$query->addSelect(['round(sum(conversion_percent)/(count(*)), 2) as conversion_percent']);
             $query->addSelect(['if ((round(sum(c_share) / sum(cc_cnt), 2) IS NULL OR round(sum(c_share) / sum(cc_cnt), 2) = 0), 0, round(sum(c_share) / sum(cc_cnt), 2)) as conversion_percent']);
+            $query->addSelect(['round(sum(split_share)/(count(*)), 2) as split_share']);
         }
         if (Metrics::isSoldLeads($metrics)) {
             $query->addSelect(['sum(sold_leads) as sold_leads']);
-        }
-        if (Metrics::isSplitShare($metrics)) {
-            $query->addSelect(['round(sum(split_share)/(count(*)), 2) as split_share']);
         }
         if (Metrics::isQualifiedLeadsTaken($metrics)) {
             $query->addSelect(['sum(qualified_leads_taken) as qualified_leads_taken']);

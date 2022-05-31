@@ -35,8 +35,11 @@ $dateTimeRangeChangeJs = <<<JS
     if (val) {
       let startDateTime = val[0] ? moment(new Date(val[0])) : null;
       let endDateTime = val[1] ? moment(new Date(val[1])) : null;
-      var diff = moment.utc(moment(endDateTime, "HH:mm:ss").diff(moment(startDateTime, "HH:mm:ss"))).format("D [days] HH:mm")
-      $('#add-single-schedule-event-duration').val(diff);
+      var diffInHours = moment.duration(moment.duration(endDateTime.diff(startDateTime)).asHours(), 'hours');
+      var hours = Math.floor(diffInHours.asHours());
+      var minutes  = Math.floor(diffInHours.asMinutes()) - hours * 60;
+      var duration = ((hours > 9) ? hours : ('0' + hours)) + ':' + ((minutes > 9) ? minutes : ('0' + minutes));
+      $('#add-single-schedule-event-duration').val(duration);
     }
 }
 JS;
@@ -87,7 +90,8 @@ foreach (UserShiftSchedule::getStatusList() as $statusId => $statusName) {
                         'locale' => [
                             'format' => 'Y-m-d H:i',
                             'separator' => ' - '
-                        ]
+                        ],
+                        'opens' => 'right'
                     ],
                     'pluginEvents' => [
                         'change' => new JsExpression($dateTimeRangeChangeJs)
@@ -95,7 +99,7 @@ foreach (UserShiftSchedule::getStatusList() as $statusId => $statusName) {
                 ]) ?>
             </div>
             <div class="col-md-6">
-                <?= $form->field($singleEventForm, 'defaultDuration')->textInput(['readonly' => true, 'id' => 'add-single-schedule-event-duration'])->label('Duration')?>
+                <?= $form->field($singleEventForm, 'defaultDuration')->textInput(['id' => 'add-single-schedule-event-duration'])->label('Duration (HH:MM)') ?>
             </div>
         </div>
 
@@ -121,6 +125,41 @@ $(document).on('click', '#{$formId} .kv-clear', function (e) {
     let parentForm = $('#{$formId}');
     parentForm.find('.range-value').val('');
     parentForm.find('#add-single-schedule-event-duration').val('');
+});
+$(document).on('change', '#add-single-schedule-event-duration', function() {
+    let parentForm = $('#{$formId}');
+    let dateTimeRangeInput = parentForm.find('.range-value');
+    let submitButton =  $('#submit-add-event-single-user');
+    if($(this).val().trim()){
+        let validTime = $(this).val().match(/^(\d+):[0-5][0-9]$/);
+        if (!validTime) {
+            $(this).val($(this).val()).focus().css('background', '#fdd');
+            submitButton.prop('disabled', true);
+        } else {
+            let val = dateTimeRangeInput.val().split(' - ');
+            let durationInSeconds = moment.duration($(this).val()).asSeconds()
+            let startDateTime = val[0] ? moment(new Date(val[0])).format('YYYY-MM-DD HH:mm') : moment(new Date()).format('YYYY-MM-DD HH:mm');
+            var newEndDateTime = moment(startDateTime, 'YYYY-MM-DD HH:mm').add(durationInSeconds, 'seconds').format('YYYY-MM-DD HH:mm');
+            $('.range-value').daterangepicker({
+                timePicker: true,
+                startDate: startDateTime,
+                endDate: newEndDateTime,
+                timePickerIncrement: 1,
+                timePicker24Hour: true,
+                locale: {
+                    format: 'YYYY-MM-DD HH:mm',
+                    separator: ' - '
+                },
+                opens: 'right'
+            });
+            $('#datetimerange').val(startDateTime + ' - ' + newEndDateTime);
+            $(this).css('background', 'transparent');
+            submitButton.prop('disabled', false);
+        }
+    } else {
+        $(this).css('background', 'transparent');
+        submitButton.prop('disabled', false);
+    }
 });
 JS;
         $this->registerJs($js);

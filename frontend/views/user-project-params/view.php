@@ -52,6 +52,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'upp_tw_phone_number',
             'phoneList.pl_phone_number',
             'upp_allow_general_line:booleanByLabel',
+            'upp_allow_transfer:booleanByLabel',
             'upp_vm_enabled:booleanByLabel',
             [
                 'attribute' => 'upp_vm_user_status_id',

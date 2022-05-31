@@ -18,7 +18,7 @@ class QuoteCommunicationSearch extends QuoteCommunication
     public function rules()
     {
         return [
-            [['qc_communication_id', 'qc_communication_type', 'qc_quote_id', 'qc_created_by'], 'integer'],
+            [['qc_id', 'qc_communication_id', 'qc_communication_type', 'qc_quote_id', 'qc_created_by'], 'integer'],
             [['qc_uid', 'qc_ext_data'], 'string'],
             [['qc_ext_data', 'qc_created_dt'], 'safe'],
         ];

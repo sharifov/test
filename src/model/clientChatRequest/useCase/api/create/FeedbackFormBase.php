@@ -11,6 +11,10 @@ use yii\base\Model;
  */
 abstract class FeedbackFormBase extends Model implements FeedbackFormInterface
 {
+    const EVENT_FEEDBACK_REQUESTED = 'FEEDBACK_REQUESTED';
+    const EVENT_FEEDBACK_REJECTED = 'FEEDBACK_REJECTED';
+    const EVENT_FEEDBACK_SUBMITTED = 'FEEDBACK_SUBMITTED';
+
     public $id;
     public $rid;
     public $type;

@@ -222,7 +222,7 @@ $isAdmin = $user->isAdmin() || $user->isSuperAdmin();
                         return Html::a(
                             '<span class="fa fa-calendar"></span>',
                             ['shift-schedule/user', 'id' => $model->id],
-                            ['title' => 'User Shift Calendar', 'target' => '_blank']
+                            ['title' => 'User Shift Calendar', 'target' => '_blank', 'data-pjax' => 0]
                         );
                     },
                 ]
@@ -355,6 +355,12 @@ $isAdmin = $user->isAdmin() || $user->isSuperAdmin();
                                 $str .= '<td><span class="label label-danger">No</span></td>';
                             }
 
+                            if ($projectParam->upp_allow_transfer) {
+                                $str .= '<td><span class="label label-success">Yes</span></td>';
+                            } else {
+                                $str .= '<td><span class="label label-danger">No</span></td>';
+                            }
+
                             $str .= '</tr>';
                         }
                     }
@@ -414,7 +420,7 @@ $isAdmin = $user->isAdmin() || $user->isSuperAdmin();
                             <?= $form->field($multipleForm, 'user_departments')->widget(\kartik\select2\Select2::class, [
                                 'data' => $multipleForm->availableList->getDepartments(),
                                 'size' => \kartik\select2\Select2::SMALL,
-                                'options' => ['placeholder' => 'Select user Departments', 'multiple' => true],
+                                'options' => ['placeholder' => 'Select user Departments', 'multiple' => true, 'class' => 'input_select2'],
                                 'pluginOptions' => ['allowClear' => true],
                             ]) ?>
                             <?= $form->field($multipleForm, 'user_departments_action')->dropDownList($multipleForm::DEPARTMENTS_ACTION_LIST) ?>
@@ -422,7 +428,7 @@ $isAdmin = $user->isAdmin() || $user->isSuperAdmin();
                             <?= $form->field($multipleForm, 'form_roles')->widget(\kartik\select2\Select2::class, [
                                 'data' => $multipleForm->availableList->getRoles(),
                                 'size' => \kartik\select2\Select2::SMALL,
-                                'options' => ['placeholder' => 'Select user roles', 'multiple' => true],
+                                'options' => ['placeholder' => 'Select user roles', 'multiple' => true, 'class' => 'input_select2'],
                                 'pluginOptions' => ['allowClear' => true],
                             ]) ?>
                             <?= $form->field($multipleForm, 'form_roles_action')->dropDownList($multipleForm::ROLES_ACTION_LIST) ?>
@@ -430,7 +436,7 @@ $isAdmin = $user->isAdmin() || $user->isSuperAdmin();
                             <?= $form->field($multipleForm, 'user_groups', ['options' => ['class' => 'form-group']])->widget(Select2::class, [
                                 'data' => $multipleForm->availableList->getUserGroups(),
                                 'size' => Select2::SMALL,
-                                'options' => ['placeholder' => 'Select user groups', 'multiple' => true],
+                                'options' => ['placeholder' => 'Select user groups', 'multiple' => true, 'class' => 'input_select2'],
                                 'pluginOptions' => ['allowClear' => true],
                             ]) ?>
                             <?= $form->field($multipleForm, 'user_groups_action')->dropDownList(MultipleUpdateForm::GROUPS_ACTION_LIST) ?>
@@ -438,7 +444,7 @@ $isAdmin = $user->isAdmin() || $user->isSuperAdmin();
                             <?= $form->field($multipleForm, 'client_chat_user_channel')->widget(\kartik\select2\Select2::class, [
                                 'data' => $multipleForm->availableList->getClientChatUserChannels(),
                                 'size' => \kartik\select2\Select2::SMALL,
-                                'options' => ['placeholder' => 'Select Client Chat Channels', 'multiple' => true],
+                                'options' => ['placeholder' => 'Select Client Chat Channels', 'multiple' => true, 'class' => 'input_select2'],
                                 'pluginOptions' => ['allowClear' => true],
                             ]) ?>
                         </div>
@@ -506,7 +512,7 @@ $isAdmin = $user->isAdmin() || $user->isSuperAdmin();
                                     <?= $form->field($multipleForm, 'up_timezone')->widget(\kartik\select2\Select2::class, [
                                         'data' => $multipleForm->availableList->getTimezones(),
                                         'size' => \kartik\select2\Select2::SMALL,
-                                        'options' => ['placeholder' => 'Select TimeZone', 'multiple' => false],
+                                        'options' => ['placeholder' => 'Select TimeZone', 'multiple' => false, 'class' => 'input_select2'],
                                         'pluginOptions' => ['allowClear' => true],
                                     ]) ?>
                                 </div>
@@ -679,13 +685,13 @@ $isAdmin = $user->isAdmin() || $user->isSuperAdmin();
        sessionStorage.selectedUsers = JSON.stringify(data);
        refreshUserSelectedState();
     });
-    
+
     refreshUserSelectedState();
 
-    /*$(document).on('pjax:end', function() {
-         $('[data-toggle="tooltip"]').tooltip();
-    });*/
-
+    $('body').on('click', '.close', function(e) {
+        $('#user-list-update-form').trigger('reset');
+        $('.input_select2').val('').trigger('change');
+    });
 JS;
 
         $this->registerJs($js, \yii\web\View::POS_READY);

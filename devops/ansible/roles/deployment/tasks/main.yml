@@ -5,7 +5,7 @@
     state: directory
     owner: "{{ web_user }}"
     group: "{{ web_user }}"
-    mode: 0755
+    mode: '0755'
 
 - name: Download and extract application
   unarchive:
@@ -22,7 +22,7 @@
     dest: "{{ web_dir }}/{{ app_ver }}/.env"
     owner: "{{ web_user }}"
     group: "{{ web_user }}"
-    mode: 0644
+    mode: '0644'
 
 - name: Init application
   command: "php init --env={{ env_name }} --overwrite=All"
@@ -87,28 +87,37 @@
     group: "{{ web_user }}"
     force: true
 
+- name: "Create {{ app_console_logfile_path }}"
+  file:
+    path: "{{ app_console_logfile_path }}"
+    owner: "{{ web_user }}"
+    group: "{{ web_user }}"
+    recurse: yes
+    state: directory
+    mode: '0777'
+
+- name: Create logs for supervisord
+  file:
+    path: "{{ app_console_logfile_path }}/{{ item }}"
+    owner: "{{ web_user }}"
+    group: "{{ web_user }}"
+    state: touch
+    mode: '0664'
+  with_items:
+    - queue-client-chat-job.log
+    - queue-email-job.log
+    - queue-job.log
+    - queue-lead-redial.log
+    - queue-phone-check.log
+    - queue-sms-job.log
+    - queue-system-services.log
+    - queue-virtual-cron-worker.log
+    - socket-server.log
+
 - name: Restart supervisord service
   service:
     name: supervisor
     state: restarted
-
-- name: Wait for queue-job.log
-  wait_for:
-    path: "{{ app_console_logfile_path }}/queue-job.log"
-
-- name: Find supervisord logs
-  find:
-    paths: "{{ app_console_logfile_path }}"
-    patterns: "*.log"
-  register: supervisord_logs
-
-- name: Chown supervisord logs
-  file:
-    path: "{{ item.path }}"
-    owner: "{{ web_user }}"
-    group: "{{ web_user }}"
-    mode: 0664
-  with_items: "{{ supervisord_logs.files }}"
 
 - name: Find old releases
   find:

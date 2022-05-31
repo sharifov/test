@@ -213,14 +213,8 @@ class LeadController extends FController
                     'ajax-create-from-phone-widget-with-invalid-client',
                     'ajax-link-to-call',
                     'extra-queue',
-                ],
-                'rules' => [
-                    /** @abac null, LeadAbacObject::OBJ_CLOSED_QUEUE, LeadAbacObject::ACTION_ACCESS, Access to page lead/closed */
-                    [
-                        'actions' => ['closed'],
-                        'allow' => \Yii::$app->abac->can(null, LeadAbacObject::OBJ_CLOSED_QUEUE, LeadAbacObject::ACTION_ACCESS),
-                        'roles' => ['@'],
-                    ],
+                    'closed',
+                    'create'
                 ],
             ],
         ];
@@ -848,6 +842,10 @@ class LeadController extends FController
 
                         $content_data = $lead->getEmailData2($comForm->quoteList, $projectContactInfo);
                         $content_data['content'] = $comForm->c_sms_message;
+                        $content_data['quotes'] = array_map(function ($quoteArray) use ($comForm) {
+                            $quoteArray['qc'] = $comForm->c_qc_uid;
+                            return $quoteArray;
+                        }, $content_data['quotes'] ?? []);
 
                         //VarDumper::dump($content_data, 10, true); exit;
 
@@ -1925,6 +1923,11 @@ class LeadController extends FController
 
     public function actionClosed(): string
     {
+        /** @abac null, LeadAbacObject::OBJ_CLOSED_QUEUE, LeadAbacObject::ACTION_ACCESS, Access to page lead/closed */
+        if (!\Yii::$app->abac->can(null, LeadAbacObject::OBJ_CLOSED_QUEUE, LeadAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access Denied.');
+        }
+
         $searchModel = new LeadSearch();
 
         $user = Auth::user();
@@ -2008,13 +2011,18 @@ class LeadController extends FController
      */
     public function actionCreate()
     {
+        /** @abac null, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CREATE, Access to create lead */
+        if (!Yii::$app->abac->can(null, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CREATE)) {
+            throw new ForbiddenHttpException('Access Denied.');
+        }
+
         $data = CompositeFormHelper::prepareDataForMultiInput(
             Yii::$app->request->post(),
             'LeadCreateForm',
             ['emails' => 'EmailCreateForm', 'phones' => 'PhoneCreateForm', 'segments' => 'SegmentCreateForm']
         );
         $dto = new LeadAbacDto(null, Auth::id());
-        $delayedChargeAccess = Yii::$app->abac->can($dto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CREATE, Auth::user());
+        $delayedChargeAccess = Yii::$app->abac->can($dto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CREATE_DELAY_CHARGE, Auth::user());
         $form = new LeadCreateForm(count($data['post']['EmailCreateForm']), count($data['post']['PhoneCreateForm']), count($data['post']['SegmentCreateForm']));
         $form->assignDep(Department::DEPARTMENT_SALES);
         if ($form->load($data['post']) && $form->validate()) {
@@ -2306,7 +2314,7 @@ class LeadController extends FController
         );
 
         $dto = new LeadAbacDto(null, Auth::id());
-        $delayedChargeAccess = Yii::$app->abac->can($dto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CREATE, Auth::user());
+        $delayedChargeAccess = Yii::$app->abac->can($dto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CREATE_DELAY_CHARGE, Auth::user());
 
         $form = new LeadCreateForm(count($data['post']['EmailCreateForm']), count($data['post']['PhoneCreateForm']), count($data['post']['SegmentCreateForm']));
         $form->assignCase($case->cs_gid);

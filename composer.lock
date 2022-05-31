@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4c9d1c6a540bcefe150223794cad3bab",
+    "content-hash": "e9e70fe5a6ab9de2f45587c5ef809ca5",
     "packages": [
         {
             "name": "2amigos/2fa-library",
@@ -728,16 +728,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.222.17",
+            "version": "3.222.18",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "dfcaf44f64be4f844b44515f31d9f6d9293244a4"
+                "reference": "223ca25ed10b4d4a3b1e986795b5aa86f3c04466"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/dfcaf44f64be4f844b44515f31d9f6d9293244a4",
-                "reference": "dfcaf44f64be4f844b44515f31d9f6d9293244a4",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/223ca25ed10b4d4a3b1e986795b5aa86f3c04466",
+                "reference": "223ca25ed10b4d4a3b1e986795b5aa86f3c04466",
                 "shasum": ""
             },
             "require": {
@@ -813,9 +813,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.222.17"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.222.18"
             },
-            "time": "2022-05-20T18:23:52+00:00"
+            "time": "2022-05-23T18:16:59+00:00"
         },
         {
             "name": "bacon/bacon-qr-code",
@@ -1002,7 +1002,7 @@
             "version": "3.3.11",
             "source": {
                 "type": "git",
-                "url": "https://github.com/RobinHerbots/Inputmask.git",
+                "url": "git@github.com:RobinHerbots/Inputmask.git",
                 "reference": "5e670ad62f50c738388d4dcec78d2888505ad77b"
             },
             "dist": {
@@ -4046,11 +4046,11 @@
         },
         {
             "name": "kivork/yii2-feature-flag",
-            "version": "dev-master",
+            "version": "1.0.1",
             "source": {
                 "type": "git",
                 "url": "git@bitbucket.org:techork/yii2-feature-flag.git",
-                "reference": "7cc4a7c2cc0d976bfc1714e7fcd162d3164d5d22"
+                "reference": "6074f3aa7c8170e796d1c0ed042f2c4d7d43a057"
             },
             "require": {
                 "ext-json": "*",
@@ -4063,7 +4063,6 @@
             "require-dev": {
                 "roave/security-advisories": "dev-master"
             },
-            "default-branch": true,
             "type": "yii2-extension",
             "autoload": {
                 "psr-4": {
@@ -15523,7 +15522,6 @@
         "kivork/yii2-virtual-cron": 20,
         "kivork/yii2-prometheus-client": 20,
         "kartik-v/yii2-widget-fileinput": 20,
-        "kivork/yii2-feature-flag": 20,
         "eaglewu/swoole-ide-helper": 20,
         "redcomponent/teststatistics": 20
     },
@@ -15545,5 +15543,5 @@
         "ext-pgsql": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.0.0"
 }

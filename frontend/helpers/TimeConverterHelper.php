@@ -21,7 +21,7 @@ class TimeConverterHelper
 
     /**
      * @param int $minutes
-     * @return string|0
+     * @return string
      */
     public static function minutesToHours(int $minutes): string
     {
@@ -30,6 +30,6 @@ class TimeConverterHelper
         }
         $hours = (int)($minutes / 60);
         $minutes -= $hours * 60;
-        return sprintf("%d:%02.0f", $hours, $minutes);
+        return sprintf("%02d:%02d", $hours, $minutes);
     }
 }

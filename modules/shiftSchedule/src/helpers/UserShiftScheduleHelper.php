@@ -90,6 +90,7 @@ class UserShiftScheduleHelper
         $groupIds = [];
 
         foreach ($userGroups as $key => $group) {
+            $childrenIds = [];
             $resource = [
                 'id' => 'ug-' . $group->ug_id,
                 'name' => '<i class="fa fa-users"></i> ' . $group->ug_name,
@@ -98,21 +99,23 @@ class UserShiftScheduleHelper
                 'collapsed' => $key !== 0,
                 'isGroup' => true,
                 'description' => '',
-                'icons' => []
+                'icons' => [],
+                'childrenIds' => []
             ];
 
             $users = Employee::find()
                 ->joinWith(['userGroupAssigns'])
                 ->where(['ugs_group_id' => $group->ug_id])
-                ->andWhere(['status' => Employee::STATUS_ACTIVE])
+                ->andWhere(['<>', 'status', Employee::STATUS_DELETED])
                 ->orderBy(['username' => SORT_ASC])
                 ->andFilterWhere(['id' => $usersIds])
                 ->all();
             if ($users) {
                 $userList = [];
                 foreach ($users as $i => $user) {
+                    $userResourceId = 'us-' . $user->id;
                     $userList[] = [
-                        'id' => 'us-' . $user->id,
+                        'id' => $userResourceId,
                         'name' => '#' . ($i + 1) . ' <i class="fa fa-user"></i> ' . $user->username,
                         'color' => '#1dab2f',
                         'title' => '(' . $user->id . ') ' . $user->email,
@@ -129,9 +132,11 @@ class UserShiftScheduleHelper
                         ],
                         'description' => ''
                     ];
+                    $childrenIds[] = $userResourceId;
                 }
                 $resource['name'] .= ' <sup>' . count($userList) . '</sup>';
                 $resource['children'] = $userList;
+                $resource['childrenIds'] = $childrenIds;
             }
             $resourceList[] = $resource;
             $groupIds[] = $group->ug_id;

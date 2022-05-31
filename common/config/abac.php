@@ -35,6 +35,7 @@ return [
         'shift' => \modules\shiftSchedule\src\abac\ShiftAbacObject::class,
         'lead-queue-business' => \modules\lead\src\abac\queue\LeadQueueBusinessInboxAbacObject::class,
         'phoneNumberRedial' => \src\model\phoneNumberRedial\abac\PhoneNumberRedialAbacObject::class,
+        'case-sale-search' => \modules\cases\src\abac\saleSearch\CaseSaleSearchAbacObject::class,
     ],
     'scanDirs' => [
         '/modules/',

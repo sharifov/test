@@ -112,8 +112,8 @@
 		"textalk/websocket": "^1.5",
         "ext-fileinfo": "*",
         "ext-pgsql": "*",
-		"kivork/yii2-feature-flag": "@dev",
-		"kivork/yii2-search-module": "1.08.*"
+		"kivork/yii2-search-module": "1.08.*",
+		"kivork/yii2-feature-flag": "1.0.1"
 	},
 	"require-dev" : {
 		"yiisoft/yii2-debug" : "~2.1",

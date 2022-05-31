@@ -1,7 +1,7 @@
 CRM: Ansible Playbooks
 -------------------------------------------
 
-# Provision CRM application server (12 minutes):
+# Provision CRM application server (12 minutes)
 
 ```
 ansible-playbook app.yml \
@@ -10,7 +10,7 @@ ansible-playbook app.yml \
     --private-key $HOME/.ssh/aws-dev-ssh.pem
 ```
 
-# Provision CRM shared server (12 minutes):
+# Provision CRM shared server (12 minutes)
 
 ```
 ansible-playbook shared.yml \
@@ -19,7 +19,7 @@ ansible-playbook shared.yml \
     --private-key $HOME/.ssh/aws-dev-ssh.pem
 ```
 
-# Deploy a test release (2 minutes):
+# Deploy a test release (2 minutes)
 
 ```
 # Go to application root directory
@@ -43,7 +43,7 @@ ansible-playbook deploy.yml \
     -e app_ver=test
 ```
 
-# Update dotenv for dev environment:
+# Update dotenv for dev environment
 
 ```
 ansible-vault edit inventories/dev/group_vars/all/secrets.yml \

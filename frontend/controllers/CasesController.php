@@ -30,6 +30,8 @@ use frontend\helpers\JsonHelper;
 use frontend\models\CaseCommunicationForm;
 use frontend\models\CasePreviewEmailForm;
 use frontend\models\CasePreviewSmsForm;
+use modules\cases\src\abac\saleSearch\CaseSaleSearchAbacDto;
+use modules\cases\src\abac\saleSearch\CaseSaleSearchAbacObject;
 use modules\email\src\abac\dto\EmailPreviewDto;
 use modules\email\src\abac\EmailAbacObject;
 use modules\fileStorage\FileStorageSettings;
@@ -695,6 +697,7 @@ class CasesController extends FController
 
         try {
             if (Auth::can('cases/update', ['case' => $model])) {
+                $params = self::prePareSearchSaleParams($params, $model, $saleSearchModel);
                 $saleDataProvider = $saleSearchModel->search($params);
             } else {
                 $saleDataProvider = new ArrayDataProvider();
@@ -704,7 +707,6 @@ class CasesController extends FController
             Yii::error(VarDumper::dumpAsString([$exception->getFile(), $exception->getCode(), $exception->getMessage()]), 'SaleController:actionSearch');
             Yii::$app->session->setFlash('error', $exception->getMessage());
         }
-
 
         // Sale List
         $csSearchModel = new CaseSaleSearch();
@@ -2014,5 +2016,21 @@ class CasesController extends FController
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
+    }
+
+    private static function prePareSearchSaleParams(
+        array $params,
+        Cases $case,
+        SaleSearch $saleSearch
+    ): array {
+        $caseSaleSearchAbacDto = new CaseSaleSearchAbacDto($case, \src\auth\Auth::id());
+        /** @abac new $caseSaleSearchAbacDto, CaseSaleSearchAbacObject::FORM_SALE_ID, CaseSaleSearchAbacObject::ACTION_ACCESS, Search by Sale ID */
+        if (
+            !empty($params['SaleSearch']['sale_id']) &&
+            !Yii::$app->abac->can($caseSaleSearchAbacDto, CaseSaleSearchAbacObject::FORM_SALE_ID, CaseSaleSearchAbacObject::ACTION_ACCESS)
+        ) {
+            $params[$saleSearch->formName()]['sale_id'] = '';
+        }
+        return $params;
     }
 }
