@@ -3,6 +3,7 @@
 namespace modules\shiftSchedule\src\services;
 
 use common\models\Employee;
+use common\models\Notifications;
 use Cron\CronExpression;
 use Exception;
 use frontend\helpers\TimeConverterHelper;
@@ -134,9 +135,10 @@ class UserShiftScheduleService
 
     /**
      * @param UserShiftSchedule[] $timelineList
+     * @param string $userTimeZone
      * @return array
      */
-    public static function getCalendarTimelineJsonData(array $timelineList): array
+    public static function getCalendarTimelineJsonData(array $timelineList, string $userTimeZone): array
     {
         $data = [];
         if ($timelineList) {
@@ -149,8 +151,16 @@ class UserShiftScheduleService
                     'description' => $item->getScheduleTypeTitle() . "\r\n" . '(' . $item->uss_id . ')' . ', duration: ' .
                         Yii::$app->formatter->asDuration($item->uss_duration * 60),
                     //. "\r\n" . $item->uss_description,
-                    'start' => date('c', strtotime($item->uss_start_utc_dt)),
-                    'end' => date('c', strtotime($item->uss_end_utc_dt)),
+                    'start' => Yii::$app->formatter->asDateTimeByUserTimezone(
+                        strtotime($item->uss_start_utc_dt ?? ''),
+                        $userTimeZone,
+                        'php: c'
+                    ),
+                    'end' => Yii::$app->formatter->asDateTimeByUserTimezone(
+                        strtotime($item->uss_end_utc_dt ?? ''),
+                        $userTimeZone,
+                        'php: c'
+                    ),
                     'color' => $item->shiftScheduleType ? $item->shiftScheduleType->sst_color : 'gray',
 
                     'display' => 'block', // 'list-item' , 'background'
@@ -455,6 +465,14 @@ class UserShiftScheduleService
             );
             $this->repository->save($userShiftSchedule);
             $userShiftScheduleCreatedList[] = $userShiftSchedule;
+
+            Notifications::createAndPublish(
+                $userShiftSchedule->uss_user_id,
+                'Shift event was created',
+                'New shift event scheduled for: ' . Yii::$app->formatter->asByUserDateTime($userShiftSchedule->uss_start_utc_dt),
+                Notifications::TYPE_INFO,
+                false
+            );
         }
         return $userShiftScheduleCreatedList;
     }
@@ -552,6 +570,13 @@ class UserShiftScheduleService
             $form->scheduleType
         );
         $this->repository->save($userShiftSchedule);
+        Notifications::createAndPublish(
+            $userShiftSchedule->uss_user_id,
+            'Shift event was created',
+            'New shift event scheduled for: ' . Yii::$app->formatter->asByUserDateTime($userShiftSchedule->uss_start_utc_dt),
+            Notifications::TYPE_INFO,
+            false
+        );
         return $userShiftSchedule;
     }
 
@@ -559,6 +584,7 @@ class UserShiftScheduleService
     {
         [$startDateTime, $endDateTime, $diffMinutes] = $this->generateEventTimeValues($form->dateTimeStart, $form->dateTimeEnd, $timezone);
 
+        $oldEvent = clone $event;
         $event->editFromCalendar(
             $form->status,
             $form->scheduleType,
@@ -570,6 +596,14 @@ class UserShiftScheduleService
 
         try {
             $this->repository->save($event);
+
+            Notifications::createAndPublish(
+                $event->uss_user_id,
+                'Shift event was updated',
+                'Shift event scheduled for: ' . Yii::$app->formatter->asByUserDateTime($oldEvent->uss_start_utc_dt) . ' was updated',
+                Notifications::TYPE_INFO,
+                false
+            );
         } catch (\RuntimeException $e) {
             $form->addError('general', $e->getMessage());
         }
@@ -577,6 +611,7 @@ class UserShiftScheduleService
 
     public function editMultiple(UserShiftCalendarMultipleUpdateForm $form, UserShiftSchedule $event, ?string $timezone): void
     {
+        $oldEvent = clone $event;
         if (!empty($form->dateTimeStart && $form->dateTimeEnd)) {
             $start = $form->dateTimeStart;
             $end = $form->dateTimeEnd;
@@ -600,6 +635,14 @@ class UserShiftScheduleService
         }
 
         $this->repository->save($event);
+
+        Notifications::createAndPublish(
+            $oldEvent->uss_user_id,
+            'Shift event was updated',
+            'Shift event scheduled for: ' . Yii::$app->formatter->asByUserDateTime($oldEvent->uss_start_utc_dt) . ' was updated',
+            Notifications::TYPE_INFO,
+            false
+        );
     }
 
     private function generateEventTimeValues(string $startDateTime, string $endDateTime, ?string $timezone): array
@@ -609,7 +652,7 @@ class UserShiftScheduleService
         $endDateTime = new \DateTimeImmutable($endDateTime, $timezone ? new \DateTimeZone($timezone) : null);
         $endDateTime = $endDateTime->setTimezone(new \DateTimeZone('UTC'));
         $interval = $startDateTime->diff($endDateTime);
-        $diffMinutes = $interval->i + ($interval->h * 60);
+        $diffMinutes = $interval->days * 24 * 60 + $interval->i + ($interval->h * 60);
         return [$startDateTime, $endDateTime, $diffMinutes];
     }
 }
