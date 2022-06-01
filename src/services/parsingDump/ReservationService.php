@@ -79,7 +79,16 @@ class ReservationService
                     $this->parseResult[$i]['departureCity'],
                     $this->parseResult[$i]['arrivalCity']
                 );
+                if ($this->parseResult[$i]['flightDuration'] <= 0) {
+                    \Yii::warning('Negative or zero flight duration (' . $this->parseResult[$i]['flightDuration'] . ' sec) for dump: ' . $string, 'ReservationService:parseReservation:flightDuration');
+                    $this->parseResult[$i]['flightDuration'] = 0;
+                }
+
                 $this->parseResult[$i]['layoverDuration'] = $this->getLayoverDuration($this->parseResult, $i);
+                if ($this->parseResult[$i]['layoverDuration'] < 0) {
+                    \Yii::warning('Negative layover duration (' . $this->parseResult[$i]['layoverDuration'] . ' sec) for dump: ' . $string, 'ReservationService:parseReservation:layoverDuration');
+                    $this->parseResult[$i]['layoverDuration'] = 0;
+                }
 
                 $this->parseResult[$i]['operatingAirline'] = $operatedCode = $parseData['operated'] ?? null;
                 $this->parseResult[$i]['operatingAirlineObj'] = $operatingAirlineObj = ($operatedCode) ? $operatingAirline = Airline::findIdentity($operatedCode) : null;
@@ -135,7 +144,7 @@ class ReservationService
      */
     private function getFlightDuration(DateTime $departureDateTime, DateTime $arrivalDateTime, ?Airports $departureCity, ?Airports $arrivalCity)
     {
-        return ($arrivalDateTime->getTimestamp() - $departureDateTime->getTimestamp()) / 60;
+        return intval(($arrivalDateTime->getTimestamp() - $departureDateTime->getTimestamp()) / 60);
     }
 
     /**
@@ -146,7 +155,7 @@ class ReservationService
     private function getLayoverDuration(array $data, int $index)
     {
         if (isset($data[$index - 1])) {
-            $result = ($data[$index]['departureDateTime']->getTimestamp() - $data[$index - 1]['arrivalDateTime']->getTimestamp()) / 60;
+            $result = intval(($data[$index]['departureDateTime']->getTimestamp() - $data[$index - 1]['arrivalDateTime']->getTimestamp()) / 60);
         }
         return $result ?? 0;
     }
