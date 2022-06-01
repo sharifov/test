@@ -640,10 +640,7 @@ class UserStatsReport extends Model
         if (Metrics::isSplitShare($this->metrics)) {
             $data['split_share'] = [
                 'Name' => 'Split Share',
-                'total' => $this->getSumColumn(
-                    $results,
-                    'split_share'
-                ),
+                'total' => null,
                 'average' => $this->getAvgValueColumn(
                     $results,
                     'split_share'
