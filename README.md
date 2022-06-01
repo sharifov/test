@@ -11,7 +11,7 @@ sudo apt-get install php7.4 php7.4-fpm php-pear php-imagick php7.4-intl php7.4-z
 ```
 Or Install PHP 8.0 and redis-server
 ```sh
-sudo apt-get install php8.0 php8.0-dev php8.0-fpm php-pear php-imagick php8.0-intl php8.0-zip php8.0-curl php8.0-gd php8.0-mysql php8.0-xml php8.0-mbstring php8.0-pgsql php8.0-xmlrpc php8.0-sqlite3 php8.0-soap php8.0-tidy php8.0-pspell php8.0-imap php8.0-bcmath php-redis php-ssh2
+sudo apt-get install php8.0 php8.0-dev php8.0-fpm php-pear php-imagick php8.0-intl php8.0-zip php8.0-curl php8.0-gd php8.0-mysql php8.0-xml php8.0-mbstring php8.0-pgsql php8.0-xmlrpc php8.0-sqlite3 php8.0-soap php8.0-tidy php8.0-pspell php8.0-imap php8.0-bcmath php8.0-redis php-ssh2
 
 # set default php CLI version
 sudo update-alternatives --config php
