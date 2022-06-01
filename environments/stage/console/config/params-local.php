@@ -4,8 +4,8 @@ return [
     'webSocketServer' => [
         'host' => env('CONSOLE_CONFIG_PARAMS_WEBSOCKETSERVER_HOST'),
         'port' => env('CONSOLE_CONFIG_PARAMS_WEBSOCKETSERVER_PORT'),
-        'mode' => SWOOLE_PROCESS,
-        'sockType' => SWOOLE_SOCK_TCP,
+        'mode' => 3, //SWOOLE_PROCESS,
+        'sockType' => 1, //SWOOLE_SOCK_TCP,
         'settings' => [
             'pid_file' => __DIR__ . '/../runtime/swoole.pid',
             'worker_num' => 1,
