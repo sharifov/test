@@ -5,6 +5,7 @@ namespace modules\shiftSchedule\src\entities\shiftScheduleRequest;
 use common\models\Employee;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
+use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -227,11 +228,12 @@ class ShiftScheduleRequest extends ActiveRecord
     }
 
     /**
-     * @return int
+     * @return string
      */
-    public function getDuration(): int
+    public function getDuration(): string
     {
-        return round((strtotime($this->srhUss->uss_start_utc_dt ?? '') - strtotime($this->srhUss->uss_end_utc_dt ?? '')) / (60 * 60 * 24));
+        $duration = strtotime($this->srhUss->uss_end_utc_dt ?? 0) - strtotime($this->srhUss->uss_start_utc_dt ?? 0);
+        return Yii::$app->formatter->asDuration($duration);
     }
 
     /**
