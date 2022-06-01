@@ -232,8 +232,8 @@ class ShiftScheduleRequest extends ActiveRecord
      */
     public function getDuration(): string
     {
-        $minutes = abs(strtotime($this->srhUss->uss_end_utc_dt ?? 0) - strtotime($this->srhUss->uss_start_utc_dt ?? 0)) / 60;
-        return Yii::$app->formatter->asDuration($minutes * 60);
+        $duration = strtotime($this->srhUss->uss_end_utc_dt ?? 0) - strtotime($this->srhUss->uss_start_utc_dt ?? 0);
+        return Yii::$app->formatter->asDuration($duration);
     }
 
     /**
