@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use common\models\Employee;
+use common\models\Notifications;
 use common\models\query\UserGroupAssignQuery;
 use common\models\query\UserGroupQuery;
 use common\models\UserGroup;
@@ -195,7 +196,7 @@ class ShiftScheduleController extends FController
 //        VarDumper::dump($monthList, 10, true); exit;
 //        VarDumper::dump($data, 10, true); exit;
 
-        $userTimeZone = 'local'; //'UTC'; //'Europe/Chisinau'; //Auth::user()->userParams->up_timezone ?? 'local';
+        $userTimeZone = $user->timezone ?: 'UTC'; //'UTC'; //'Europe/Chisinau'; //Auth::user()->userParams->up_timezone ?? 'local';
         $searchModel = new SearchUserShiftSchedule();
 
         $startDate = Yii::$app->request->get('startDate', date('Y-m-d'));
@@ -363,7 +364,8 @@ class ShiftScheduleController extends FController
         $endDt = Yii::$app->request->get('end', date('Y-m-d'));
 
         $timelineList = UserShiftScheduleService::getTimelineListByUser($userId, $startDt, $endDt);
-        return UserShiftScheduleService::getCalendarTimelineJsonData($timelineList);
+        $userTimeZone = Auth::user()->timezone ?: 'UTC';
+        return UserShiftScheduleService::getCalendarTimelineJsonData($timelineList, $userTimeZone);
     }
 
     /**
@@ -491,11 +493,11 @@ class ShiftScheduleController extends FController
         }
 
         try {
-            //$userTimeZone = Auth::user()->userParams->up_timezone ?? 'local';
+            $userTimeZone = Auth::user()->timezone ?: 'UTC';
             return $this->renderAjax('partial/_get_event', [
                 'event' => $event,
+                'userTimeZone' => $userTimeZone,
                 //'user' => Auth::user(),
-                //'userTimeZone' => $userTimeZone
             ]);
         } catch (\DomainException $e) {
 //            return $this->renderAjax('_error', [
@@ -615,6 +617,13 @@ class ShiftScheduleController extends FController
 
             $form->userId = $userIdCreateFor;
             $startDateTime = (new \DateTimeImmutable($startDate));
+            $nowDateTime = new \DateTimeImmutable('now', ($timezone = Auth::user()->timezone) ? new \DateTimeZone($timezone) : null);
+            $startDateTimeWithTimezone = new \DateTimeImmutable($startDate, ($timezone = Auth::user()->timezone) ? new \DateTimeZone($timezone) : null);
+
+            if ($startDateTimeWithTimezone < $nowDateTime) {
+                return '<script>(function() {setTimeout(function() {$("#modal-md").modal("hide")}, 800);createNotify("Error", "Event cannot be created in the past", "error")})();</script>';
+            }
+
             $endDateTime = $startDateTime->add(new \DateInterval('PT' . UserShiftSchedule::DEFAULT_DURATION_HOURS . 'H'));
             $interval = $startDateTime->diff($endDateTime);
             $form->defaultDuration = $interval->format('%H:%I');
@@ -629,7 +638,13 @@ class ShiftScheduleController extends FController
 
     public function actionDeleteEvent()
     {
+        /** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_DELETE, Access to soft delete event in calendar widget */
+        if (!Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_DELETE)) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
         $shiftId = Yii::$app->request->post('shiftId');
+        $deletePermanently = Yii::$app->request->post('deletePermanently');
 
         $userShiftSchedule = UserShiftSchedule::findOne($shiftId);
         if (!$userShiftSchedule) {
@@ -638,15 +653,44 @@ class ShiftScheduleController extends FController
                 'message' => 'Shift not found by id:' . $shiftId
             ]);
         }
-        if (!$userShiftSchedule->delete()) {
+
+        if ($deletePermanently == 1) {
+            /** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_PERMANENTLY_DELETE, Access to permanently delete event in calendar widget */
+            if (!Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_PERMANENTLY_DELETE)) {
+                throw new ForbiddenHttpException('Access denied');
+            }
+            if (!$userShiftSchedule->delete()) {
+                return $this->asJson([
+                    'error' => true,
+                    'message' => $userShiftSchedule->getErrorSummary(true)[0]
+                ]);
+            }
+            Notifications::createAndPublish(
+                $userShiftSchedule->uss_user_id,
+                'Shift event was removed',
+                'Shift event scheduled for: ' . Yii::$app->formatter->asByUserDateTime($userShiftSchedule->uss_start_utc_dt) . ' was removed from your shift',
+                Notifications::TYPE_INFO,
+                false
+            );
             return $this->asJson([
-                'error' => true,
-                'message' => $userShiftSchedule->getErrorSummary(true)[0]
+                'error' => false,
+                'message' => 'Event removed successfully',
             ]);
         }
+        $userShiftSchedule->uss_status_id = UserShiftSchedule::STATUS_DELETED;
+        $userShiftSchedule->save();
+        Notifications::createAndPublish(
+            $userShiftSchedule->uss_user_id,
+            'Shift event was removed',
+            'Shift event scheduled for: ' . Yii::$app->formatter->asByUserDateTime($userShiftSchedule->uss_start_utc_dt) . ' was removed from your shift',
+            Notifications::TYPE_INFO,
+            false
+        );
+        $userShiftScheduleData = UserShiftScheduleHelper::getDataForCalendar($userShiftSchedule);
         return $this->asJson([
             'error' => false,
-            'message' => 'Shift deleted successfully'
+            'message' => 'Event deleted successfully',
+            'timelineData' => json_encode($userShiftScheduleData)
         ]);
     }
 
@@ -669,7 +713,7 @@ class ShiftScheduleController extends FController
         $endDateTime = new \DateTimeImmutable($data['endDate'], $timezone ? new \DateTimeZone($timezone) : null);
         $endDateTime = $endDateTime->setTimezone(new \DateTimeZone('UTC'));
         $interval = $startDateTime->diff($endDateTime);
-        $diffMinutes = $interval->i + ($interval->h * 60);
+        $diffMinutes = $interval->days * 24 * 60 + $interval->i + ($interval->h * 60);
 
         $event->uss_start_utc_dt = $startDateTime->format('Y-m-d H:i:s');
         $event->uss_end_utc_dt = $endDateTime->format('Y-m-d H:i:s');
@@ -764,13 +808,57 @@ class ShiftScheduleController extends FController
         }
 
         $eventIds = Yii::$app->request->post('selectedEvents', []);
+        $deletePermanently = Yii::$app->request->post('deletePermanently');
+        $events = UserShiftSchedule::findAll(['uss_id' => $eventIds]);
 
-        UserShiftSchedule::deleteAll(['uss_id' => $eventIds]);
+        /** @abac ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_MULTIPLE_PERMANENTLY_DELETE_EVENTS, Access to delete multiple events permanently */
+        $canDeletePermanently = Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_MULTIPLE_PERMANENTLY_DELETE_EVENTS);
+        if ($deletePermanently == 1 && !$canDeletePermanently) {
+            throw new ForbiddenHttpException('Access denied');
+        }
 
-        return $this->asJson([
-            'error' => false,
-            'message' => ''
-        ]);
+        $transaction = Yii::$app->db->beginTransaction();
+        try {
+            $eventsData = [];
+            foreach ($events as $event) {
+                if ($deletePermanently == 1) {
+                    $event->delete();
+                } else {
+                    $event->uss_status_id = UserShiftSchedule::STATUS_DELETED;
+                    $event->save();
+
+                    $eventsData[] = UserShiftScheduleHelper::getDataForCalendar($event);
+                }
+
+                Notifications::createAndPublish(
+                    $event->uss_user_id,
+                    'Shift event was removed',
+                    'Shift event scheduled for: ' . Yii::$app->formatter->asByUserDateTime($event->uss_start_utc_dt) . ' was removed from your shift',
+                    Notifications::TYPE_INFO,
+                    false
+                );
+            }
+
+            $transaction->commit();
+            return $this->asJson([
+                'error' => false,
+                'message' => '',
+                'timelineData' => json_encode($eventsData)
+            ]);
+        } catch (\RuntimeException $e) {
+            $transaction->rollBack();
+            return $this->asJson([
+                'error' => true,
+                'message' => $e->getMessage(),
+            ]);
+        } catch (\Throwable $throwable) {
+            $transaction->rollBack();
+            Yii::error(AppHelper::throwableLog($throwable), 'ShiftScheduleController:actionAjaxMultipleDelete:Throwable');
+            return $this->asJson([
+                'error' => true,
+                'message' => 'Internal Server Error',
+            ]);
+        }
     }
 
     public function actionAjaxMultipleUpdate()

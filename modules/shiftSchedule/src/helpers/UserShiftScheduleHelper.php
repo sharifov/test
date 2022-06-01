@@ -9,6 +9,7 @@ use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use common\models\Employee;
 use common\models\UserGroup;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
+use src\access\EmployeeGroupAccess;
 use Yii;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -17,6 +18,7 @@ use src\auth\Auth;
 class UserShiftScheduleHelper
 {
     private static array $scheduleTypeList = [];
+    private static array $statusList = [];
 
     /**
      * @param UserShiftSchedule[] $data
@@ -77,6 +79,24 @@ class UserShiftScheduleHelper
             }
         }
         return $shiftScheduleTypeList;
+    }
+
+    /**
+     * Getting available status list based on abac policies
+     * @return array
+     */
+    public static function getAvailableStatusList(): array
+    {
+        if (empty($statusList = self::$statusList)) {
+            foreach (UserShiftSchedule::getStatusList() as $statusId => $statusName) {
+                $dto = new ShiftAbacDto();
+                $dto->setStatus((int)$statusId);
+                if (Yii::$app->abac->can($dto, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_ACCESS)) {
+                    $statusList[$statusId] = $statusName;
+                }
+            }
+        }
+        return $statusList;
     }
 
     /**
@@ -173,5 +193,25 @@ class UserShiftScheduleHelper
         }
 
         return $statusList;
+    }
+
+    /**
+     * Apply abac policy on users list and return processed users
+     * @param int $userId
+     * @return array
+     */
+    public static function getSupervisionByUsers(int $userId): array
+    {
+        $userList = [];
+        $userGroupAssignList = EmployeeGroupAccess::usersIdsInCommonGroupsSubQuery($userId)->all();
+        foreach ($userGroupAssignList as $user) {
+            if (empty($user->ugsUser) || $user->ugsUser->id === $userId) {
+                continue;
+            }
+            if (\Yii::$app->abac->can(null, ShiftAbacObject::ACT_SEND_SUPERVISION_NOTIFICATION, ShiftAbacObject::ACTION_ACCESS, $user->ugsUser)) {
+                $userList[] = $user->ugsUser;
+            }
+        }
+        return $userList;
     }
 }

@@ -3,10 +3,8 @@
 namespace modules\shiftSchedule\src\forms;
 
 use common\components\validators\CheckJsonValidator;
-use frontend\helpers\JsonHelper;
 use kartik\daterange\DateRangeBehavior;
-use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
-use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
+use modules\shiftSchedule\src\helpers\UserShiftScheduleHelper;
 use yii\base\Model;
 
 class UserShiftCalendarMultipleUpdateForm extends Model
@@ -39,9 +37,8 @@ class UserShiftCalendarMultipleUpdateForm extends Model
         return [
             [['eventIds'], 'required'],
             [['eventIds'], CheckJsonValidator::class],
-            [['scheduleType'], 'integer'],
-            [['scheduleType'], 'in', 'range' => array_keys(ShiftScheduleType::getList(true))],
-            [['status'], 'in', 'range' => array_keys(UserShiftSchedule::getStatusList())],
+            ['scheduleType', 'in', 'range' => array_keys(UserShiftScheduleHelper::getAvailableScheduleTypeList())],
+            ['status', 'in', 'range' => array_keys(UserShiftScheduleHelper::getAvailableStatusList())],
             [['description'], 'string', 'max' => 500],
             [['dateTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['defaultDuration'], 'match', 'pattern' => '/^(\d+):[0-5][0-9]$/'],

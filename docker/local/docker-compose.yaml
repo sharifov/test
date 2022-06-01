@@ -194,7 +194,7 @@ services:
       - redis
       - beanstalkd
     restart: on-failure
-    command: ./yii websocket-server/start
+    command: ./yii websocket-server-v3/start
     networks:
       - backend
 

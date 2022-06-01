@@ -157,17 +157,17 @@ var calendar = new FullCalendar.Calendar(calendarEl, {
     eventClick: function(info) {
         info.jsEvent.preventDefault();
         var eventObj = info.event;
-        openModalEventId(eventObj.id);
+        openModalEventId(eventObj.id, eventObj.extendedProps.ussId);
     }
 });
 
 calendar.render();
 
-function openModalEventId(id)
+function openModalEventId(id, ussId)
 {
     let modal = $('#modal-md');
     let eventUrl = openModalEventUrl + '?id=' + id;
-    $('#modal-md-label').html('Schedule Event: ' + id);
+    $('#modal-md-label').html('Schedule Event: ' + (ussId || id)); // todo: add ssr_sst_id
     modal.find('.modal-body').html('');
     modal.find('.modal-body').load(eventUrl, function( response, status, xhr ) {
         if (status === 'error') {
@@ -200,9 +200,13 @@ $(document).on('RequestDecision:response', function (e, params) {
 $('body').off('click', '.btn-open-timeline').on('click', '.btn-open-timeline', function (e) {
     e.preventDefault();
     let id = $(this).data('tl_id');
-    openModalEventId(id);
+    let ussId = $(this).data('uss_id');
+    openModalEventId(id, ussId);
 });
 
+ $(document).on('pjax:end', function() {
+     $('[data-toggle="tooltip"]').tooltip();
+});
 JS;
 
 $this->registerJs($js);

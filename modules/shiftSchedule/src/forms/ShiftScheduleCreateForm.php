@@ -3,14 +3,17 @@
 namespace modules\shiftSchedule\src\forms;
 
 use common\components\validators\IsArrayValidator;
-use common\models\Employee;
 use kartik\daterange\DateRangeBehavior;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
+use src\validators\DateTimeRangeValidator;
+use Yii;
 use yii\base\Model;
 
 class ShiftScheduleCreateForm extends Model
 {
+    private const SEPARATOR_DATE_RANGE = ' - ';
+
     public $userGroups;
     public $users;
     public $scheduleType;
@@ -30,6 +33,7 @@ class ShiftScheduleCreateForm extends Model
             [
                 'class' => DateRangeBehavior::class,
                 'attribute' => 'dateTimeRange',
+                'separator' => self::SEPARATOR_DATE_RANGE,
                 'dateStartAttribute' => 'dateTimeStart',
                 'dateEndAttribute' => 'dateTimeEnd',
                 'dateStartFormat' => 'Y-m-d H:i',
@@ -51,6 +55,7 @@ class ShiftScheduleCreateForm extends Model
             [['status'], 'in', 'range' => array_keys(UserShiftSchedule::getStatusList())],
             [['description'], 'string', 'max' => 500],
             [['dateTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
+            ['dateTimeRange', DateTimeRangeValidator::className(), 'separator' => self::SEPARATOR_DATE_RANGE],
             [['dateTimeStart', 'dateTimeEnd', 'defaultDuration'], 'safe'],
             [['dateTimeStart', 'dateTimeEnd'], 'datetime', 'format' => 'php:Y-m-d H:i'],
             [['getUsersByGroups'], 'boolean'],
