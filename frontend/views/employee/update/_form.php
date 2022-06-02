@@ -1,6 +1,7 @@
 <?php
 
 use common\models\EmployeeAcl;
+use kartik\password\PasswordInput;
 use kartik\select2\Select2;
 use modules\user\src\update\UpdateForm;
 use yii\bootstrap\ActiveForm;
@@ -93,10 +94,9 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'options' => [
                                     'class' => 'form-group'
                                 ]
-                            ])->passwordInput([
-                                'autocomplete' => 'new-password',
+                            ])->widget(PasswordInput::class, [
                                 'readonly' => !$form->fieldAccess->canEdit('password')
-                            ]) ?>
+                            ]); ?>
                         </div>
                     <?php endif; ?>
                 </div>

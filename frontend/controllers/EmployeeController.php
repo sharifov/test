@@ -1411,7 +1411,8 @@ class EmployeeController extends FController
                 $updateRC = [];
 
                 $targetUser->setAttributes($form->getValuesOfAvailableAttributes());
-                if (count($targetUser->getDirtyAttributes()) > 0) {
+
+                if (count($targetUser->getDirtyAttributes()) > 0 || !empty($form->password)) {
                     if ($targetUser->isAttributeChanged('email')) {
                         $updateRC['email'] = $targetUser->email;
                     }
