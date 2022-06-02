@@ -135,7 +135,11 @@ class ShiftScheduleRequestSearch extends ShiftScheduleRequest
     {
         $query = ShiftScheduleRequestSearch::find();
         $query->where(['IS NOT', 'ssr_uss_id', null]);
-        $query->andWhere(['ssr_created_user_id' => $userList]);
+        if (empty($model->ssr_created_user_id)) {
+            $query->andWhere(['ssr_created_user_id' => $userList]);
+        } else {
+            $query->andWhere(['ssr_created_user_id' => $model->ssr_created_user_id]);
+        }
         if (!empty($startDate) && !empty($endDate)) {
             $startDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($startDate));
             $endDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($endDate));
@@ -179,10 +183,12 @@ class ShiftScheduleRequestSearch extends ShiftScheduleRequest
                 'ssr_uss_id' => $model->ssr_uss_id,
                 'ssr_sst_id' => $model->ssr_sst_id,
                 'ssr_status_id' => $model->ssr_status_id,
-                'ssr_created_dt' => $model->ssr_created_dt,
+                'DATE(ssr_created_dt)' => $model->ssr_created_dt,
                 'ssr_updated_dt' => $model->ssr_updated_dt,
                 'ssr_updated_user_id' => $model->ssr_updated_user_id,
             ]);
+
+            $queryResult->andFilterWhere(['like', 'ssr_description', $model->ssr_description]);
         }
 
         return $queryResult;

@@ -62,8 +62,11 @@ $dateTimeRangeChangeJs = <<<JS
     if (val) {
       let startDateTime = val[0] ? moment(new Date(val[0])) : null;
       let endDateTime = val[1] ? moment(new Date(val[1])) : null;
-      var diff = moment.utc(moment(endDateTime, "HH:mm:ss").diff(moment(startDateTime, "HH:mm:ss"))).format("D [days] HH:mm")
-      $('#add-schedule-event-duration').val(diff);
+      var diffInHours = moment.duration(moment.duration(endDateTime.diff(startDateTime)).asHours(), 'hours');
+      var hours = Math.floor(diffInHours.asHours());
+      var minutes  = Math.floor(diffInHours.asMinutes()) - hours * 60;
+      var duration = ((hours > 9) ? hours : ('0' + hours)) + ':' + ((minutes > 9) ? minutes : ('0' + minutes));
+      $('#add-schedule-event-duration').val(duration);
     }
 }
 JS;
@@ -154,7 +157,8 @@ JS;
                         'locale' => [
                             'format' => 'Y-m-d H:i',
                             'separator' => ' - '
-                        ]
+                        ],
+                        'opens' => 'right'
                     ],
                     'pluginEvents' => [
                         'change' => new JsExpression($dateTimeRangeChangeJs)
@@ -162,7 +166,7 @@ JS;
                 ]) ?>
             </div>
             <div class="col-md-6">
-                <?= $form->field($model, 'defaultDuration')->textInput(['readonly' => true, 'id' => 'add-schedule-event-duration'])->label('Duration')?>
+                <?= $form->field($model, 'defaultDuration')->textInput(['id' => 'add-schedule-event-duration'])->label('Duration (HH:MM)') ?>
             </div>
         </div>
 
@@ -234,7 +238,43 @@ $(document).on('click', '#{$formId} .kv-clear', function (e) {
     e.preventDefault();
     let parentForm = $('#{$formId}');
     parentForm.find('.range-value').val('');
+    parentForm.find('#shiftschedulecreateform-datetimerange').val('');
     parentForm.find('#add-schedule-event-duration').val('');
+});
+$(document).on('change', '#add-schedule-event-duration', function() {
+    let parentForm = $('#{$formId}');
+    let dateTimeRangeInput = parentForm.find('.range-value');
+    let submitButton =  $('#submit-add-event');
+    if($(this).val().trim()){
+        let validTime = $(this).val().match(/^(\d+):[0-5][0-9]$/);
+        if (!validTime) {
+            $(this).val($(this).val()).focus().css('background', '#fdd');
+            submitButton.prop('disabled', true);
+        } else {
+            let val = dateTimeRangeInput.val().split(' - ');
+            let startDateTime = val[0] ? moment(new Date(val[0])).format('YYYY-MM-DD HH:mm') : moment(new Date()).format('YYYY-MM-DD HH:mm');
+            let durationInSeconds = moment.duration($(this).val()).asSeconds()
+            let newEndDateTime = moment(startDateTime, 'YYYY-MM-DD HH:mm').add(durationInSeconds, 'seconds').format('YYYY-MM-DD HH:mm');
+            $('.range-value').daterangepicker({
+                timePicker: true,
+                startDate: startDateTime,
+                endDate: newEndDateTime,
+                timePickerIncrement: 1,
+                timePicker24Hour: true,
+                locale: {
+                    format: 'YYYY-MM-DD HH:mm',
+                    separator: ' - '
+                },
+                opens: 'right'
+            });
+            $('#shiftschedulecreateform-datetimerange').val(startDateTime + ' - ' + newEndDateTime);
+            $(this).css('background', 'transparent');
+            submitButton.prop('disabled', false);
+        }
+    } else {
+        $(this).css('background', 'transparent');
+        submitButton.prop('disabled', false);
+    }
 });
 JS;
 $this->registerJs($js);

@@ -35,10 +35,23 @@ use yii\helpers\Url;
             'columns' => [
                 [
                     'attribute' => 'ssr_id',
+                    'value' => function (ShiftScheduleRequestSearch $model) {
+                        return Html::tag('span', $model->ssr_id, [
+                            'data-toggle' => 'tooltip',
+                            'data-html' => 'true',
+                            'data-original-title' => sprintf(
+                                'Schedule Request Id: %s<br> Schedule Event Id: %s',
+                                $model->ssr_id,
+                                $model->ssr_uss_id
+                            ),
+                            'style' => 'border-bottom: 1px dotted #000; cursor: help;',
+                        ]);
+                    },
                     'options' => [
                         'style' => 'width: 55px',
                     ],
-                    'label' => 'Id'
+                    'label' => 'Id',
+                    'format' => 'raw',
                 ],
 //                [
 //                    'label' => 'Type',
@@ -54,7 +67,7 @@ use yii\helpers\Url;
                         return Html::a(
                             $model->getScheduleTypeTitle() ?? $model->ssr_sst_id,
                             null,
-                            ['class' => 'btn-open-timeline', 'data-tl_id' => $model->ssr_id]
+                            ['class' => 'btn-open-timeline', 'data-tl_id' => $model->ssr_id, 'data-uss_id' => $model->ssr_uss_id]
                         );
                     },
                     'options' => [
@@ -107,25 +120,29 @@ use yii\helpers\Url;
                         'clientOptions' => [
                             'autoclose' => true,
                             'format' => 'yyyy-mm-dd',
+                            'clearBtn' => true,
                         ],
                         'options' => [
                             'autocomplete' => 'off',
                             'placeholder' => 'Choose Date'
                         ],
+                        'clientEvents' => [
+                            'clearDate' => 'function (e) {$(e.target).find("input").change();}',
+                        ],
                     ]),
                 ],
                 [
-                    'attribute' => 'ssr_uss_id',
+                    'attribute' => 'ssr_created_user_id',
                     'options' => [
-
+                        'style' => 'width: 200px',
                     ],
                     'value' => function (ShiftScheduleRequestSearch $model) {
-                        return $model->ssrCreatedUser->nickname ?? $model->ssr_created_user_id;
+                        return $model->ssrCreatedUser->username ?? $model->ssr_created_user_id;
                     },
                     'label' => 'User',
                     'filter' => UserSelect2Widget::widget([
                         'model' => $searchModel,
-                        'attribute' => 'ssr_uss_id'
+                        'attribute' => 'ssr_created_user_id'
                     ]),
                 ],
                 [

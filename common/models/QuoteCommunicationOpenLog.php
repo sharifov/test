@@ -78,8 +78,12 @@ class QuoteCommunicationOpenLog extends ActiveRecord
      */
     public static function createByRequestData($data): void
     {
-        if (isset($data['queryParams']['qc'])) {
-            $quoteCommunication = QuoteCommunication::find()->where(['qc_uid' => $data['queryParams']['qc']])->one();
+        if (isset($data['queryParams']['qc']) && isset($data['uid'])) {
+            $quoteCommunication = QuoteCommunication::find()
+                ->alias('t')
+                ->join('LEFT OUTER JOIN', ['q' => Quote::tableName()], 't.qc_quote_id=q.id')
+                ->where(['t.qc_uid' => $data['queryParams']['qc'], 'q.uid' => $data['uid']])
+                ->one();
             if (!is_null($quoteCommunication)) {
                 $model = new self();
                 $model->qcol_quote_communication_id = $quoteCommunication->getPrimaryKey();

@@ -2,9 +2,9 @@
 
 namespace common\models;
 
+use common\components\TwoFactorService;
 use Yii;
 use yii\base\Model;
-use Da\TwoFA\Manager;
 
 /**
  * Class LoginStepTwoForm
@@ -43,15 +43,12 @@ class LoginStepTwoForm extends Model
     /**
      * @param $attribute
      * @param $params
-     * @throws \Da\TwoFA\Exception\InvalidCharactersException
-     * @throws \Da\TwoFA\Exception\InvalidSecretKeyException
+     * @return void
      */
     public function validateKey($attribute, $params): void
     {
         if (!$this->hasErrors()) {
-            $valid = (new Manager())
-                ->setCycles($this->twoFactorAuthCycles)
-                ->verify($this->secret_key, $this->twoFactorAuthKey);
+            $valid = (new TwoFactorService())->verifyCode($this->twoFactorAuthKey, $this->secret_key);
 
             if (!$valid) {
                 $this->addError($attribute, 'Wrong verification code. Please verify your secret code and try again.');

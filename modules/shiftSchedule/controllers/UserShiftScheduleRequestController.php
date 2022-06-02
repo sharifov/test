@@ -7,7 +7,7 @@ use frontend\controllers\FController;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\search\ShiftScheduleRequestSearch;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
-use modules\shiftSchedule\src\forms\ScheduleRequestForm;
+use modules\shiftSchedule\src\forms\ScheduleDecisionForm;
 use modules\shiftSchedule\src\services\ShiftScheduleRequestService;
 use src\auth\Auth;
 use src\helpers\app\AppHelper;
@@ -57,7 +57,7 @@ class UserShiftScheduleRequestController extends FController
     public function actionIndex(): string
     {
         $user = Yii::$app->user->identity;
-        $userTimeZone = 'local'; //'UTC'; //'Europe/Chisinau'; //Auth::user()->userParams->up_timezone ?? 'local';
+        $userTimeZone = $user->timezone ?: 'UTC'; //'UTC'; //'Europe/Chisinau'; //Auth::user()->userParams->up_timezone ?? 'local';
 
         return $this->render('index', array_merge(
             [
@@ -127,7 +127,8 @@ class UserShiftScheduleRequestController extends FController
             ShiftScheduleRequestService::getUserList(Auth::user()),
             Yii::$app->request->get('start', date('Y-m-d'))
         );
-        return ShiftScheduleRequestService::getCalendarTimelineJsonData($timelineList);
+        $userTimeZone = Auth::user()->timezone ?: 'UTC';
+        return ShiftScheduleRequestService::getCalendarTimelineJsonData($timelineList, $userTimeZone);
     }
 
     /**
@@ -144,13 +145,13 @@ class UserShiftScheduleRequestController extends FController
             throw new BadRequestHttpException('Invalid request param');
         }
 
-        $model = ShiftScheduleRequest::find()->where(['ssr_id' => $eventId])->limit(1)->one();
+        $requestModel = ShiftScheduleRequest::find()->where(['ssr_id' => $eventId])->limit(1)->one();
 
-        if (!$model) {
+        if (!$requestModel) {
             throw new NotFoundHttpException('Not exist this Shift Schedule (' . $eventId . ')');
         }
 
-        $event = $model->srhUss;
+        $event = $requestModel->srhUss;
 
         if (!$event) {
             throw new NotFoundHttpException('Not exist this Shift Schedule (' . $eventId . ')');
@@ -160,27 +161,27 @@ class UserShiftScheduleRequestController extends FController
             throw new NotAcceptableHttpException('Permission Denied (' . $eventId . ')');
         }
 
-        $formModel = new ScheduleRequestForm([
-            'scenario' => ScheduleRequestForm::SCENARIO_DECISION,
-        ]);
+        $decisionFormModel = new ScheduleDecisionForm();
 
         try {
             if (Yii::$app->request->isPost) {
-                if ($formModel->load(Yii::$app->request->post()) && $formModel->validate()) {
-                    $event->uss_status_id = $model->getCompatibleStatus($formModel->status);
+                if ($decisionFormModel->load(Yii::$app->request->post()) && $decisionFormModel->validate()) {
+                    $event->uss_status_id = $requestModel->getCompatibleStatus($decisionFormModel->status);
+                    $event->uss_description = $decisionFormModel->description;
                     if ($event->save()) {
-                        $success = $formModel->saveDecision($model);
+                        $success = ShiftScheduleRequestService::saveDecision($requestModel, $decisionFormModel, Auth::user());
                     }
                 }
             } else {
-                $formModel->status = $model->ssr_status_id;
+                $decisionFormModel->status = $requestModel->ssr_status_id;
             }
-
+            $userTimeZone = Auth::user()->timezone ?: 'UTC';
             return $this->renderAjax('partial/_get_event', [
                 'event' => $event,
-                'model' => $formModel,
+                'model' => $decisionFormModel,
                 'success' => $success ?? false,
-                'canEditPreviousDate' => $model->getIsCanEditPreviousDate(),
+                'canEditPreviousDate' => $requestModel->getIsCanEditPreviousDate(),
+                'userTimeZone' => $userTimeZone,
             ]);
         } catch (DomainException $e) {
             Yii::error(AppHelper::throwableLog($e), 'UserShiftScheduleRequestController:actionGetEvent:DomainException');

@@ -41,10 +41,23 @@ use yii\web\View;
                     'columns' => [
                         [
                             'attribute' => 'ssr_id',
+                            'value' => function (ShiftScheduleRequestSearch $model) {
+                                return Html::tag('span', $model->ssr_id, [
+                                    'data-toggle' => 'tooltip',
+                                    'data-html' => 'true',
+                                    'data-original-title' => sprintf(
+                                        'Schedule Request Id: %s<br> Schedule Event Id: %s',
+                                        $model->ssr_id,
+                                        $model->ssr_uss_id
+                                    ),
+                                    'style' => 'border-bottom: 1px dotted #000; cursor: help;',
+                                ]);
+                            },
                             'options' => [
                                 'style' => 'width: 55px',
                             ],
-                            'label' => 'Id'
+                            'label' => 'Id',
+                            'format' => 'raw',
                         ],
 //                    [
 //                        'label' => 'Type',
@@ -59,7 +72,7 @@ use yii\web\View;
                                 return Html::a(
                                     $model->getScheduleTypeTitle() ?? $model->ssr_sst_id,
                                     null,
-                                    ['class' => 'btn-open-timeline', 'data-tl_id' => $model->ssr_id]
+                                    ['class' => 'btn-open-timeline', 'data-tl_id' => $model->ssr_id, 'data-uss_id' => $model->ssr_uss_id]
                                 );
                             },
                             'options' => [
@@ -116,29 +129,30 @@ use yii\web\View;
                         [
                             'attribute' => 'ssr_created_user_id',
                             'options' => [
-
+                                'style' => 'width: 200px',
                             ],
                             'value' => function (ShiftScheduleRequestSearch $model) {
-                                return $model->ssrCreatedUser->nickname ?? $model->ssr_created_user_id;
+                                return $model->ssrCreatedUser->username ?? $model->ssr_created_user_id;
                             },
                             'label' => 'User create request',
                             'filter' => UserSelect2Widget::widget([
-                                'model' => $searchModelAll,
-                                'attribute' => 'ssr_created_user_id'
+                                'id' => 'gridview-filter-all-requests-user-id-test',
+                                'name' =>  sprintf('%s[ssr_created_user_id]', $searchModelAll->formName()),
+                                'value' => $searchModelAll->ssr_created_user_id ?? null
                             ]),
                         ],
                         [
                             'attribute' => 'ssr_updated_user_id',
                             'options' => [
-
+                                'style' => 'width: 200px',
                             ],
                             'value' => function (ShiftScheduleRequestSearch $model) {
-                                return $model->ssrUpdatedUser->nickname ?? $model->ssr_updated_user_id;
+                                return $model->ssrUpdatedUser->username ?? $model->ssr_updated_user_id;
                             },
                             'label' => 'User make decision',
                             'filter' => UserSelect2Widget::widget([
                                 'model' => $searchModelAll,
-                                'attribute' => 'ssr_updated_user_id'
+                                'attribute' => 'ssr_updated_user_id',
                             ]),
                         ],
                         [

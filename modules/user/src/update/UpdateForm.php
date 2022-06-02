@@ -449,6 +449,7 @@ class UpdateForm extends Model
 
             ['up_2fa_secret', 'default', 'value' => null],
             ['up_2fa_secret', 'string', 'max' => 50],
+            ['up_2fa_secret', 'match', 'pattern' => '/^[A-Z2-7]+=*$/'],
 
             ['up_2fa_enable', 'default', 'value' => null],
             ['up_2fa_enable', 'boolean'],
@@ -491,6 +492,11 @@ class UpdateForm extends Model
         if (Employee::find()->andWhere(['email' => $this->email])->andWhere(['<>', 'id', $this->targetUser->id])->exists()) {
             $this->addError('email', 'Email is already exist');
         }
+    }
+
+    public function needUpdatePassword(): bool
+    {
+        return in_array('password', $this->activeAttributes()) && $this->password;
     }
 
     public function attributeLabels(): array
