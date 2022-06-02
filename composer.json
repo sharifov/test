@@ -31,8 +31,8 @@
 			"role": "Developer"
 		}
 	],
-	"version": "3.36.0",
-	"time": "2022-04-18",
+	"version": "3.52.0",
+	"time": "2022-06-01",
 	"minimum-stability" : "dev",
 	"prefer-stable": true,
 	"require" : {
@@ -57,7 +57,6 @@
 		"ext-gd" : "*",
 		"ext-zip" : "*",
 		"ext-pdo" : "*",
-		"ext-geoip" : "*",
 		"ext-intl" : "*",
 		"ext-redis": "*",
 		"ext-zlib": "*",
@@ -77,7 +76,6 @@
 		"pda/pheanstalk": "^3.2",
 		"index0h/yii2-log": "0.0.3",
 		"twilio/sdk": "^5.42",
-		"2amigos/qrcode-library": "^2.0",
 		"aki/yii2-bot-telegram": "*",
 		"yii2mod/yii2-rbac": "*",
 		"unclead/yii2-multiple-input": "~2.0",
@@ -90,7 +88,6 @@
 		"webmozart/assert": "^1.9",
 		"thamtech/yii2-uuid": "^1.2",
 		"kivork/yii2-rbac-export-import": "@dev",
-		"2amigos/2fa-library": "^2.0",
 		"yiisoft/yii2-redis": "~2.0.0",
 		"kivork/yii2-bootstrap4-glyphicons": "*",
 		"2amigos/yii2-multi-select-widget": "*",
@@ -113,7 +110,10 @@
         "ext-fileinfo": "*",
         "ext-pgsql": "*",
 		"kivork/yii2-search-module": "1.08.*",
-		"kivork/yii2-feature-flag": "1.0.1"
+		"kivork/yii2-feature-flag": "1.0.1",
+		"geoip/geoip": "~1.16",
+		"endroid/qr-code": "4.4.9",
+		"jp3cki/totp": "2.0.0"
 	},
 	"require-dev" : {
 		"yiisoft/yii2-debug" : "~2.1",
@@ -124,10 +124,10 @@
 		"codeception/module-asserts": "^1.3",
 		"codeception/module-yii2": "^1.1",
 		"codeception/module-filesystem": "^1.0",
-		"codeception/verify": "~0.5.0 || ~1.1.0",
-		"symfony/browser-kit": ">=2.7 <=4.2.4",
-		"codeception/phpunit-wrapper": "^7.8",
-		"phpunit/phpunit": "^7.5",
+		"codeception/verify": "2.1.1",
+		"symfony/browser-kit": "5.4.3",
+		"codeception/phpunit-wrapper": "^9.0",
+		"phpunit/phpunit": "^9.3",
 		"vimeo/psalm": "^3.18",
 		"phpstan/phpstan": "^0.12.76",
 		"friendsofphp/php-cs-fixer": ">=2.19.0",
@@ -139,7 +139,8 @@
 		"codeception/module-rest": "^1.2",
 		"codeception/module-phpbrowser": "^1.0",
 		"fakerphp/faker": "^1.14",
-		"redcomponent/teststatistics": "dev-master"
+		"redcomponent/teststatistics": "dev-master",
+		"phpcompatibility/php-compatibility": "dev-develop"
 	},
 	"autoload-dev": {
 		"psr-2": {
@@ -230,7 +231,8 @@
 			"cghooks update"
 		],
         "apidoc-gen": "apidoc -c ./apidoc.json -i \"./webapi/modules/\" -i \"./webapi/controllers/\" -o \"./webapi/web/doc\" -f \".*\\\\.php$\"",
-        "phpdoc": "phpDocumentor"
+        "phpdoc": "phpDocumentor",
+		"php-compatibility": "phpcs -p ./frontend --standard=vendor/phpcompatibility/php-compatibility/PHPCompatibility --report-full=report.txt --extensions=php --runtime-set testVersion 8.0"
 	},
 	"extra": {
 		"hooks": {

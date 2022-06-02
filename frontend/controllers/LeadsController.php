@@ -12,6 +12,7 @@ use modules\fileStorage\src\entity\fileLead\FileLead;
 use modules\fileStorage\src\entity\fileLead\FileLeadQuery;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
+use modules\lead\src\abac\LeadSearchAbacObject;
 use src\auth\Auth;
 use Yii;
 use common\models\Lead;
@@ -116,18 +117,14 @@ class LeadsController extends FController
 
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
-
-        if ($user->isAgent()) {
-            $isAgent = true;
-        } else {
-            $isAgent = false;
-        }
+        /** @abac null, LeadSearchAbacObject::SIMPLE_SEARCH, LeadSearchAbacObject::ACTION_ACCESS, Access to Simple Search Lead  */
+        $accessSimpleSearch = Yii::$app->abac->can(null, LeadSearchAbacObject::SIMPLE_SEARCH, LeadSearchAbacObject::ACTION_ACCESS);
 
         if ($user->isSupervision()) {
             $params['LeadSearch']['supervision_id'] = $user->id;
         }
 
-        if (!$params && $isAgent) {
+        if (!$params && $accessSimpleSearch) {
             $params['LeadSearch']['employee_id'] = $user->id;
         }
 
@@ -135,7 +132,7 @@ class LeadsController extends FController
             $params['LeadSearch']['l_is_test'] = '0';
         }
 
-        if ($isAgent) {
+        if ($accessSimpleSearch) {
             $dataProvider = $searchModel->searchAgent($params, Auth::user());
         } else {
             $dataProvider = $searchModel->search($params, Auth::user());
@@ -168,7 +165,7 @@ class LeadsController extends FController
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
-            'isAgent' => $isAgent,
+            'accessSimpleSearch' => $accessSimpleSearch,
         ]);
     }
 

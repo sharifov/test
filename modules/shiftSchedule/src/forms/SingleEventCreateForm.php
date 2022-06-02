@@ -6,10 +6,13 @@ use common\models\Employee;
 use kartik\daterange\DateRangeBehavior;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
+use src\validators\DateTimeRangeValidator;
 use yii\base\Model;
 
 class SingleEventCreateForm extends Model
 {
+    private const SEPARATOR_DATE_RANGE = ' - ';
+
     public $userId;
     public $scheduleType;
     public $description;
@@ -42,6 +45,7 @@ class SingleEventCreateForm extends Model
             [['status'], 'in', 'range' => array_keys(UserShiftSchedule::getStatusList())],
             [['description'], 'string', 'max' => 500],
             [['dateTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
+            ['dateTimeRange', DateTimeRangeValidator::className(), 'separator' => self::SEPARATOR_DATE_RANGE],
             [['dateTimeStart', 'dateTimeEnd', 'defaultDuration'], 'safe'],
             [['dateTimeStart', 'dateTimeEnd'], 'datetime', 'format' => 'php:Y-m-d H:i'],
             [['userId'], 'exist', 'skipOnError' => true, 'skipOnEmpty' => false, 'targetClass' => Employee::class, 'targetAttribute' => 'id']

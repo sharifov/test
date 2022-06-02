@@ -96,36 +96,28 @@
     state: directory
     mode: '0777'
 
-- name: Create socket-server.log
+- name: Create logs for supervisord
   file:
-    path: "{{ app_console_logfile_path }}/socket-server.log"
+    path: "{{ app_console_logfile_path }}/{{ item }}"
     owner: "{{ web_user }}"
     group: "{{ web_user }}"
     state: touch
     mode: '0664'
+  with_items:
+    - queue-client-chat-job.log
+    - queue-email-job.log
+    - queue-job.log
+    - queue-lead-redial.log
+    - queue-phone-check.log
+    - queue-sms-job.log
+    - queue-system-services.log
+    - queue-virtual-cron-worker.log
+    - socket-server.log
 
 - name: Restart supervisord service
   service:
     name: supervisor
     state: restarted
-
-- name: Wait for queue-job.log
-  wait_for:
-    path: "{{ app_console_logfile_path }}/queue-job.log"
-
-- name: Find supervisord logs
-  find:
-    paths: "{{ app_console_logfile_path }}"
-    patterns: "*.log"
-  register: supervisord_logs
-
-- name: Chown supervisord logs
-  file:
-    path: "{{ item.path }}"
-    owner: "{{ web_user }}"
-    group: "{{ web_user }}"
-    mode: '0664'
-  with_items: "{{ supervisord_logs.files }}"
 
 - name: Find old releases
   find:

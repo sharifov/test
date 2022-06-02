@@ -278,7 +278,8 @@ class VoluntaryRefundService
                 $voluntaryRefundCreateForm->refundForm->orderId,
                 $voluntaryRefundCreateForm->toArray(),
                 CurrencyHelper::convertToBaseCurrency($voluntaryRefundCreateForm->getPaymentRequestForm()->amount ?? 0, $order->orClientCurrency->cur_base_rate),
-                $voluntaryRefundCreateForm->getPaymentRequestForm()->amount ?? 0
+                $voluntaryRefundCreateForm->getPaymentRequestForm()->amount ?? 0,
+                null
             );
             $productQuoteRefund->pending();
             $this->productQuoteRefundRepository->save($productQuoteRefund);

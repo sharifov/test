@@ -124,6 +124,7 @@ $(document).on('click', '#{$formId} .kv-clear', function (e) {
     e.preventDefault();
     let parentForm = $('#{$formId}');
     parentForm.find('.range-value').val('');
+    parentForm.find('#datetimerange').val('');
     parentForm.find('#add-single-schedule-event-duration').val('');
 });
 $(document).on('change', '#add-single-schedule-event-duration', function() {
@@ -136,25 +137,23 @@ $(document).on('change', '#add-single-schedule-event-duration', function() {
             $(this).val($(this).val()).focus().css('background', '#fdd');
             submitButton.prop('disabled', true);
         } else {
-            if (dateTimeRangeInput.val().trim() !== '') {
-                let val = dateTimeRangeInput.val().split(' - ');
-                let durationInSeconds = moment.duration($(this).val()).asSeconds()
-                let startDateTime = val[0] ? moment(new Date(val[0])).format('YYYY-MM-DD HH:mm') : null;
-                var newEndDateTime = moment(startDateTime, 'YYYY-MM-DD HH:mm').add(durationInSeconds, 'seconds').format('YYYY-MM-DD HH:mm');
-                $('.range-value').daterangepicker({
-                    timePicker: true,
-                    startDate: startDateTime,
-                    endDate: newEndDateTime,
-                    timePickerIncrement: 1,
-                    timePicker24Hour: true,
-                    locale: {
-                        format: 'YYYY-MM-DD HH:mm',
-                        separator: ' - '
-                    },
-                    opens: 'right'
-                });
-                $('#datetimerange').val(startDateTime + ' - ' + newEndDateTime);
-            }
+            let val = dateTimeRangeInput.val().split(' - ');
+            let durationInSeconds = moment.duration($(this).val()).asSeconds()
+            let startDateTime = val[0] ? moment(new Date(val[0])).format('YYYY-MM-DD HH:mm') : moment(new Date()).format('YYYY-MM-DD HH:mm');
+            var newEndDateTime = moment(startDateTime, 'YYYY-MM-DD HH:mm').add(durationInSeconds, 'seconds').format('YYYY-MM-DD HH:mm');
+            $('.range-value').daterangepicker({
+                timePicker: true,
+                startDate: startDateTime,
+                endDate: newEndDateTime,
+                timePickerIncrement: 1,
+                timePicker24Hour: true,
+                locale: {
+                    format: 'YYYY-MM-DD HH:mm',
+                    separator: ' - '
+                },
+                opens: 'right'
+            });
+            $('#datetimerange').val(startDateTime + ' - ' + newEndDateTime);
             $(this).css('background', 'transparent');
             submitButton.prop('disabled', false);
         }

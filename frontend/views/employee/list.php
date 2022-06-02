@@ -688,9 +688,16 @@ $isAdmin = $user->isAdmin() || $user->isSuperAdmin();
 
     refreshUserSelectedState();
 
-    $('body').on('click', '.close', function(e) {
+    function resetForm() {
         $('#user-list-update-form').trigger('reset');
         $('.input_select2').val('').trigger('change');
+    }
+
+    $('body').on('click', '.close', function(e) {
+        resetForm();
+    });
+    $("#user-pjax-list").on("pjax:complete", function() {
+        resetForm();
     });
 JS;
 

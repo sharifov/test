@@ -44,7 +44,7 @@
                     $message = str_replace("\n", '', $message);
                     $message = str_replace('"', '\"', $message);
 
-                    $type = $item->getNotifyType();
+                    $type = \common\models\Notifications::getNotifyType($item->n_type_id);
 
                     if ($n === 0) {
                         $js2 = '

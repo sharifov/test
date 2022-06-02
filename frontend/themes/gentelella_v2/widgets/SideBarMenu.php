@@ -689,6 +689,38 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ],
 
                 [
+                    'label' => 'Task List',
+                    'url' => 'javascript:',
+                    'icon' => 'list',
+                    'items' => [
+
+                        ['label' => 'Task List', 'url' => ['/task/task-list/index'],
+                            //'icon' => '',
+                            'title' => 'Task List'
+                        ],
+
+                        [
+                            'label' => 'Advanced',
+                            'url' => 'javascript:',
+                            'icon' => 'folder',
+                            'items' => [
+//                                ['label' => 'Shift Schedule Type', 'url' => ['/shift/shift-schedule-type/index'],
+//                                    'title' => 'Shift Schedule Type'],
+//
+//
+//                                ['label' => 'Type Labels Assign',
+//                                    'url' => ['/shift/shift-schedule-type-label-assign/index'],
+//                                    // 'icon' => 'circle',
+//                                    'title' => 'Shift Schedule Type Labels Assign'
+//                                ],
+                            ]
+                        ],
+
+
+                    ],
+                ],
+
+                [
                     'label' => 'Shift Schedules',
                     'url' => 'javascript:',
                     'icon' => 'calendar',

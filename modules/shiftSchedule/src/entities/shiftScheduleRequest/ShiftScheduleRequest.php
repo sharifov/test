@@ -5,6 +5,7 @@ namespace modules\shiftSchedule\src\entities\shiftScheduleRequest;
 use common\models\Employee;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
+use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -61,6 +62,13 @@ class ShiftScheduleRequest extends ActiveRecord
         self::STATUS_APPROVE => '#28a745',
         self::STATUS_DECLINED => '#e15554',
         self::STATUS_REMOVED => '#6c757d',
+    ];
+
+    public const STATUS_LIST_PAST_TENSE = [
+        self::STATUS_PENDING => 'pending',
+        self::STATUS_APPROVE => 'approved',
+        self::STATUS_DECLINED => 'declined',
+        self::STATUS_REMOVED => 'removed',
     ];
 
     /**
@@ -144,6 +152,27 @@ class ShiftScheduleRequest extends ActiveRecord
     }
 
     /**
+     * @param int $ssr_uss_id
+     * @param int $ssr_sst_id
+     * @param int $ssr_status_id
+     * @param string|null $ssr_description
+     * @param int|null $ssr_created_user_id
+     * @param int|null $ssr_updated_user_id
+     * @return ShiftScheduleRequest
+     */
+    public static function create(int $ssr_uss_id, int $ssr_sst_id, int $ssr_status_id, ?string $ssr_description, ?int $ssr_created_user_id, ?int $ssr_updated_user_id): ShiftScheduleRequest
+    {
+        $model = new self();
+        $model->ssr_uss_id = $ssr_uss_id;
+        $model->ssr_sst_id = $ssr_sst_id;
+        $model->ssr_status_id = $ssr_status_id;
+        $model->ssr_description = $ssr_description;
+        $model->ssr_created_user_id = $ssr_created_user_id;
+        $model->ssr_updated_user_id = $ssr_updated_user_id;
+        return $model;
+    }
+
+    /**
      * @return string
      */
     public function getStatusName(): string
@@ -199,11 +228,12 @@ class ShiftScheduleRequest extends ActiveRecord
     }
 
     /**
-     * @return int
+     * @return string
      */
-    public function getDuration(): int
+    public function getDuration(): string
     {
-        return round((strtotime($this->srhUss->uss_start_utc_dt ?? '') - strtotime($this->srhUss->uss_end_utc_dt ?? '')) / (60 * 60 * 24));
+        $duration = strtotime($this->srhUss->uss_end_utc_dt ?? 0) - strtotime($this->srhUss->uss_start_utc_dt ?? 0);
+        return Yii::$app->formatter->asDuration($duration);
     }
 
     /**
@@ -253,5 +283,23 @@ class ShiftScheduleRequest extends ActiveRecord
         }
 
         return true;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatusNamePasteTense(): string
+    {
+        return self::STATUS_LIST_PAST_TENSE[$this->ssr_status_id] ?? '';
+    }
+
+    public function isStatusPending(): bool
+    {
+        return $this->ssr_status_id === self::STATUS_PENDING;
+    }
+
+    public function isStatusDeclined(): bool
+    {
+        return $this->ssr_status_id === self::STATUS_DECLINED;
     }
 }

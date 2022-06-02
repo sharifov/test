@@ -5,6 +5,7 @@ use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $event UserShiftSchedule */
+/* @var $userTimeZone string */
 
 $hours = round($event->uss_duration / 60) ?: 1;
 $tsStartUtc = strtotime($event->uss_start_utc_dt);
@@ -40,8 +41,16 @@ $tsEndUtc = strtotime($event->uss_end_utc_dt);
         <tbody>
             <tr class="text-center">
                 <td>
-                    <h6><?= Yii::$app->formatter->asDatetime($tsStartUtc, 'php: d-M-Y')?></h6>
-                    <h4><i class="fa fa-clock-o"></i> <?= Yii::$app->formatter->asTime($tsStartUtc)?></h4>
+                    <h6><?= Yii::$app->formatter->asDateTimeByUserTimezone(
+                        $tsStartUtc,
+                        $userTimeZone,
+                        'php: d-M-Y'
+                    )?></h6>
+                    <h4><i class="fa fa-clock-o"></i> <?= Yii::$app->formatter->asDateTimeByUserTimezone(
+                        $tsStartUtc,
+                        $userTimeZone,
+                        'php: H:i'
+                    )?></h4>
                 </td>
                 <td style="width: 400px">
                     <div class="table-responsive" style="width: 400px">
@@ -50,7 +59,7 @@ $tsEndUtc = strtotime($event->uss_end_utc_dt);
                             <tr style="background: <?=Html::encode($event->shiftScheduleType->sst_color)?>">
                                 <?php for ($i = 0; $i < $hours; $i++) : ?>
                                 <td style="color: #FFFFFF">
-                                    <?= Yii::$app->formatter->asDatetime($tsStartUtc + (60 * 60 * $i), 'php:H') ?>
+                                    <?= Yii::$app->formatter->asDateTimeByUserTimezone($tsStartUtc + (60 * 60 * $i), $userTimeZone, 'php:H') ?>
                                 </td>
                                 <?php endfor; ?>
                             </tr>
@@ -62,8 +71,16 @@ $tsEndUtc = strtotime($event->uss_end_utc_dt);
                     </strong>
                 </td>
                 <td>
-                    <h6><?= Yii::$app->formatter->asDatetime($tsEndUtc, 'php: d-M-Y')?></h6>
-                    <h4><i class="fa fa-clock-o"></i> <?= Yii::$app->formatter->asTime($tsEndUtc)?></h4>
+                    <h6><?= Yii::$app->formatter->asDateTimeByUserTimezone(
+                        $tsEndUtc,
+                        $userTimeZone,
+                        'php: d-M-Y'
+                    )?></h6>
+                    <h4><i class="fa fa-clock-o"></i> <?= Yii::$app->formatter->asDateTimeByUserTimezone(
+                        $tsEndUtc,
+                        $userTimeZone,
+                        'php: H:i'
+                    )?></h4>
                 </td>
             </tr>
         </tbody>

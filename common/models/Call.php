@@ -2072,7 +2072,7 @@ class Call extends \yii\db\ActiveRecord
         }
 
         $region = $state ?: $city ?: '';
-        $timezone = geoip_time_zone_by_country_and_region($country, $region);
+        $timezone = get_time_zone($country, $region);
         $timezone = $timezone ?: self::getTimezoneByCountryCode($country) ?: false;
 
         if (!$timezone) {

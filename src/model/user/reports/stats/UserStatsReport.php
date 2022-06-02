@@ -283,7 +283,7 @@ class UserStatsReport extends Model
                 'splitShare' => (new Query())
                     ->select([
                         'ps_user_id as split_share_user_id',
-                        'sum(ROUND((ps_percent / 100), 2)) as split_share_share',
+                        'SUM(ROUND((ps_percent / 100), 2)) as split_share_share',
                     ])
                     ->from(Lead::tableName())
                     ->innerJoin(ProfitSplit::tableName(), 'ps_lead_id = id')
@@ -618,9 +618,7 @@ class UserStatsReport extends Model
         if (Metrics::isSalesConversion($this->metrics)) {
             $data['conversion_percent'] = [
                 'Name' => 'Conversion Percent',
-                'average' => $this->getConversionPercent(
-                    $results
-                ),
+                'average' => null, //TODO
                 'total' => null
             ];
         }
@@ -640,10 +638,7 @@ class UserStatsReport extends Model
         if (Metrics::isSplitShare($this->metrics)) {
             $data['split_share'] = [
                 'Name' => 'Split Share',
-                'total' => $this->getSumColumn(
-                    $results,
-                    'split_share'
-                ),
+                'total' => null,
                 'average' => $this->getAvgValueColumn(
                     $results,
                     'split_share'
@@ -789,7 +784,7 @@ class UserStatsReport extends Model
             'qualified_leads_taken'
         );
         if ($sumQualifiedLeadsTaken) {
-            return round(($sumSoldLeads / $sumQualifiedLeadsTaken) * 100);
+            return round(($sumSoldLeads / $sumQualifiedLeadsTaken) * 100, 2);
         }
         return 0;
     }
