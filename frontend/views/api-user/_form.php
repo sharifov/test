@@ -34,7 +34,7 @@ use yii\widgets\ActiveForm;
                                 ]
                             ])->widget(PasswordInput::class, [
                                 'options' => [
-                                    'autocomplete' => 'off',
+                                    'autocomplete' => 'new-password',
                                 ],
                             ]); ?>
                         </div>

@@ -553,7 +553,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                             'format' => 'yyyy-mm-dd',
                                         ],
                                         'options' => [
-                                            'autocomplete' => 'off',
+                                            'autocomplete' => 'new-password',
                                             'placeholder' => 'Choose Date',
                                             'disabled' => !$form->fieldAccess->canEdit('up_join_date')
                                         ],
