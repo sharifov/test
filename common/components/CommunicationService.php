@@ -1542,7 +1542,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
     public function ping(): bool
     {
         $response = $this->sendRequest('application-status/ping', [], 'get');
-        if ($response->isOk && isset($response['availability']) && $response['availability'] === true) {
+        if ($response->isOk && !empty($response['availability'])) {
             return true;
         }
         return false;
