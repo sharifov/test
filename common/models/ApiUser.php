@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\models\query\ApiUserQuery;
+use kartik\password\StrengthValidator;
 use webapi\models\ApiUserAllowance;
 use Yii;
 use yii\db\ActiveRecord;
@@ -51,7 +52,7 @@ class ApiUser extends ActiveRecord implements IdentityInterface, RateLimitInterf
 
 
             [['au_api_password'], 'required', 'on' => 'insert'],
-            [['au_api_password'], 'string', 'min' => 7, 'skipOnEmpty' => true],
+            ['au_api_password', StrengthValidator::class, 'preset' => StrengthValidator::MEDIUM, 'userAttribute' => 'au_api_username'],
 
             [['au_project_id'], 'integer'],
 

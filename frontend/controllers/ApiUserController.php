@@ -73,12 +73,12 @@ class ApiUserController extends FController
         $model = new ApiUser();
         $model->scenario = 'insert';
 
-        if ($model->load(Yii::$app->request->post())) {
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             $model->setPassword($model->au_api_password);
             $model->au_updated_dt = date('Y-m-d H:i:s');
             $model->au_updated_user_id = Yii::$app->user->id;
 
-            if ($model->save()) {
+            if ($model->save(false)) {
                 return $this->redirect(['view', 'id' => $model->au_id]);
             }
         }
