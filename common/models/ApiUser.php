@@ -52,7 +52,7 @@ class ApiUser extends ActiveRecord implements IdentityInterface, RateLimitInterf
 
 
             [['au_api_password'], 'required', 'on' => 'insert'],
-            ['au_api_password', StrengthValidator::class, 'preset' => StrengthValidator::MEDIUM, 'userAttribute' => 'au_api_username'],
+            ['au_api_password', StrengthValidator::class, 'preset' => StrengthValidator::MEDIUM, 'userAttribute' => 'au_api_username', 'min' => 10],
 
             [['au_project_id'], 'integer'],
 
