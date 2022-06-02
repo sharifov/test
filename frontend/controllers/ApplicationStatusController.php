@@ -48,8 +48,6 @@ class ApplicationStatusController extends Controller
      *     'availability' => true,
      *     'datetime' => '2022-06-27 16:28:15'
      * }
-     *
-     * @return array|string
      */
     public function actionPing()
     {
@@ -346,8 +344,6 @@ class ApplicationStatusController extends Controller
      *         "status": "error"
      *     }
      * ]
-     *
-     * @return array
      */
     public function actionHealth(): array
     {
