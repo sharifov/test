@@ -113,7 +113,8 @@
 		"kivork/yii2-feature-flag": "1.0.1",
 		"geoip/geoip": "~1.16",
 		"endroid/qr-code": "4.4.9",
-		"jp3cki/totp": "2.0.0"
+		"jp3cki/totp": "2.0.0",
+		"kartik-v/yii2-password": "1.5.7"
 	},
 	"require-dev" : {
 		"yiisoft/yii2-debug" : "~2.1",
