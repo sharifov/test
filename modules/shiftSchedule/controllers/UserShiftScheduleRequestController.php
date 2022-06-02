@@ -122,13 +122,22 @@ class UserShiftScheduleRequestController extends FController
      */
     public function actionMyDataAjax(): array
     {
+        $jsonData = [];
         Yii::$app->response->format = Response::FORMAT_JSON;
-        $timelineList = ShiftScheduleRequestService::getTimelineListByUserList(
-            ShiftScheduleRequestService::getUserList(Auth::user()),
-            Yii::$app->request->get('start', date('Y-m-d'))
-        );
-        $userTimeZone = Auth::user()->timezone ?: 'UTC';
-        return ShiftScheduleRequestService::getCalendarTimelineJsonData($timelineList, $userTimeZone);
+        $startDate = Yii::$app->request->get('start');
+        $endDate = Yii::$app->request->get('end');
+
+        if (!empty($startDate) && !empty($endDate)) {
+            $timelineList = ShiftScheduleRequestService::getTimelineListByUserList(
+                ShiftScheduleRequestService::getUserList(Auth::user()),
+                $startDate,
+                $endDate
+            );
+            $userTimeZone = Auth::user()->timezone ?: 'UTC';
+            $jsonData = ShiftScheduleRequestService::getCalendarTimelineJsonData($timelineList, $userTimeZone);
+        }
+
+        return $jsonData;
     }
 
     /**
