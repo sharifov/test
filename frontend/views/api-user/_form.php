@@ -32,7 +32,11 @@ use yii\widgets\ActiveForm;
                                 'options' => [
                                     'class' => 'form-group'
                                 ]
-                            ])->widget(PasswordInput::class); ?>
+                            ])->widget(PasswordInput::class, [
+                                'options' => [
+                                    'autocomplete' => 'off',
+                                ],
+                            ]); ?>
                         </div>
                     </div>
 

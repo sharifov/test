@@ -95,6 +95,9 @@ $this->params['breadcrumbs'][] = $this->title;
                                     'class' => 'form-group'
                                 ]
                             ])->widget(PasswordInput::class, [
+                                'options' => [
+                                    'autocomplete' => 'off',
+                                ],
                                 'readonly' => !$form->fieldAccess->canEdit('password')
                             ]); ?>
                         </div>
