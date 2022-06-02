@@ -18,7 +18,7 @@ use yii\widgets\ActiveForm;
             <div class="panel-body panel-collapse collapse show">
                 <?php $form = ActiveForm::begin(); ?>
 
-                <div class="col-md-4">
+                <div class="col-md-6">
 
                     <?= $form->field($model, 'au_name')->textInput(['maxlength' => true]) ?>
 
