@@ -79,13 +79,13 @@ class ReservationService
                     $this->parseResult[$i]['departureCity'],
                     $this->parseResult[$i]['arrivalCity']
                 );
-                if ($this->parseResult[$i]['flightDuration'] <= 0) {
+                if ($this->parseResult[$i]['flightDuration'] <= 0 && $validation) {
                     \Yii::warning('Negative or zero flight duration (' . $this->parseResult[$i]['flightDuration'] . ' sec) for dump row: ' . $row, 'ReservationService:parseReservation:flightDuration');
                     $this->parseResult[$i]['flightDuration'] = 0;
                 }
 
                 $this->parseResult[$i]['layoverDuration'] = $this->getLayoverDuration($this->parseResult, $i);
-                if ($this->parseResult[$i]['layoverDuration'] < 0) {
+                if ($this->parseResult[$i]['layoverDuration'] < 0 && $validation) {
                     \Yii::warning('Negative layover duration (' . $this->parseResult[$i]['layoverDuration'] . ' sec) for dump row: ' . $row, 'ReservationService:parseReservation:layoverDuration');
                     $this->parseResult[$i]['layoverDuration'] = 0;
                 }

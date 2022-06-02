@@ -495,6 +495,11 @@ class UpdateForm extends Model
         }
     }
 
+    public function needUpdatePassword(): bool
+    {
+        return in_array('password', $this->activeAttributes()) && $this->password;
+    }
+
     public function attributeLabels(): array
     {
         return [
