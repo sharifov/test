@@ -385,6 +385,11 @@ return [
             'class' => \modules\shiftSchedule\ShiftScheduleModule::class,
             'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
         ],
+
+        'task' => [
+            'class' => \modules\taskList\TaskListModule::class,
+            'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
+        ],
         'rbac-import-export' => [
             'class' => RbacImportExportModule::class,
             'as access' => [

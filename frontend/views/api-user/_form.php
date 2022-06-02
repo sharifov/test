@@ -1,5 +1,6 @@
 <?php
 
+use kartik\password\PasswordInput;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -22,13 +23,20 @@ use yii\widgets\ActiveForm;
                     <?= $form->field($model, 'au_name')->textInput(['maxlength' => true]) ?>
 
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <?= $form->field($model, 'au_api_username')
                                 ->textInput(['maxlength' => true, 'autocomplete' => 'new-user']) ?>
                         </div>
-                        <div class="col-md-6">
-                            <?= $form->field($model, 'au_api_password')
-                                ->passwordInput(['maxlength' => true, 'autocomplete' => 'new-password']) ?>
+                        <div class="col-md-8">
+                            <?= $form->field($model, 'au_api_password', [
+                                'options' => [
+                                    'class' => 'form-group'
+                                ]
+                            ])->widget(PasswordInput::class, [
+                                'options' => [
+                                    'autocomplete' => 'new-password',
+                                ],
+                            ]); ?>
                         </div>
                     </div>
 

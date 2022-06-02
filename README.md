@@ -11,12 +11,13 @@ sudo apt-get install php7.4 php7.4-fpm php-pear php-imagick php7.4-intl php7.4-z
 ```
 Or Install PHP 8.0 and redis-server
 ```sh
-sudo apt-get install php8.0 php8.0-dev php8.0-fpm php-pear php-imagick php8.0-intl php8.0-zip php8.0-curl php8.0-gd php8.0-mysql php8.0-xml php8.0-mbstring php8.0-pgsql php8.0-xmlrpc php8.0-sqlite3 php8.0-soap php8.0-tidy php8.0-pspell php8.0-imap php8.0-bcmath php-redis php-ssh2
+sudo apt-get install php8.0 php8.0-dev php8.0-fpm php-pear php-imagick php8.0-intl php8.0-zip php8.0-curl php8.0-gd php8.0-mysql php8.0-xml php8.0-mbstring php8.0-pgsql php8.0-xmlrpc php8.0-sqlite3 php8.0-soap php8.0-tidy php8.0-pspell php8.0-imap php8.0-bcmath php8.0-redis php-ssh2
 
 # set default php CLI version
 sudo update-alternatives --config php
 ```
 
+### Install Swoole 4.4.16 for PHP7.4
 1.1) INSTALL swoole 4.4.16 & ext-async v4.4.16 for swoole_redis
 ```sh
 cd ~
@@ -35,7 +36,7 @@ make -j 4 && sudo make install
 git clone https://github.com/swoole/ext-async
 cd ext-async/
 git checkout tags/v4.4.16
-phpize8.0 && ./configure
+phpize && ./configure
 make -j 4 && sudo make install
 ``` 
 
@@ -44,6 +45,28 @@ Add this in “Dynamic Extensions” section if php-cli config file located at  
 extension=swoole
 extension=swoole_async
 ```
+### Install Swoole 4.8.9 for PHP8.0
+```sh
+cd ~
+sudo rm -r hiredis 
+git clone https://github.com/redis/hiredis && cd hiredis/ 
+git checkout tags/v1.0.2
+make -j && sudo make install
+sudo ldconfig
+cd ..
+
+sudo rm -r swoole-src 
+git clone https://github.com/swoole/swoole-src
+cd swoole-src/
+git checkout tags/v4.8.9
+phpize8.0 && ./configure
+make -j 4 && sudo make install
+```
+Add this in “Dynamic Extensions” section if php-cli config file located at  `/ect/php/8.0/cli/php.ini`
+```
+extension=swoole
+```
+
 
 2). Composer INSTALL:
 ```sh
