@@ -71,11 +71,12 @@ class ShiftScheduleRequestService
     /**
      * @param ActiveQuery $userList
      * @param string $startDate
+     * @param string $endDate
      * @return array
      */
-    public static function getTimelineListByUserList(ActiveQuery $userList, string $startDate): array
+    public static function getTimelineListByUserList(ActiveQuery $userList, string $startDate, string $endDate): array
     {
-        $query = ShiftScheduleRequestSearch::getSearchQuery($userList, null, $startDate);
+        $query = ShiftScheduleRequestSearch::getSearchQuery($userList, null, $startDate, $endDate);
         return $query->all();
     }
 
