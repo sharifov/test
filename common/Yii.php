@@ -62,9 +62,7 @@ abstract class BaseApplication extends yii\base\Application
  * @property \yii\authclient\Collection $authClientCollection Auth Client Collection
  * @property \kivork\FeatureFlag\components\FeatureFlagComponent $ff FeatureFlag component
  * @property \modules\eventManager\components\EventManagerComponent $event Event component
- *
- *
- *
+ * @property \common\components\ApplicationStatus $applicationStatus application status component
  */
 class WebApplication extends yii\web\Application
 {

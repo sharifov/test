@@ -90,4 +90,12 @@ class GaRequestService extends Component
         }
         return $this->curlRequest->send();
     }
+
+    /**
+     * @return bool
+     */
+    public function ping(): bool
+    {
+        return false;
+    }
 }
