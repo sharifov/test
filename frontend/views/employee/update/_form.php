@@ -96,7 +96,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 ]
                             ])->widget(PasswordInput::class, [
                                 'options' => [
-                                    'autocomplete' => 'off',
+                                    'autocomplete' => 'new-password',
                                 ],
                                 'readonly' => !$form->fieldAccess->canEdit('password')
                             ]); ?>
@@ -553,7 +553,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                             'format' => 'yyyy-mm-dd',
                                         ],
                                         'options' => [
-                                            'autocomplete' => 'new-password',
+                                            'autocomplete' => 'off',
                                             'placeholder' => 'Choose Date',
                                             'disabled' => !$form->fieldAccess->canEdit('up_join_date')
                                         ],
