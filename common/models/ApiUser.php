@@ -63,8 +63,8 @@ class ApiUser extends ActiveRecord implements IdentityInterface, RateLimitInterf
             [['au_name', 'au_api_username', 'au_api_password'], 'string', 'max' => 100],
             [['au_email'], 'string', 'max' => 160],
 
-            [['au_api_username'], 'unique'],
             [['au_api_username'], 'match' ,'pattern' => '/^[a-z0-9_\-\.]+$/i', 'message' => 'Username can contain only characters ("a-z", "0-9", "_", "-", ".")'],
+            [['au_api_username'], 'unique'],
 
             [['au_project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['au_project_id' => 'id']],
 
