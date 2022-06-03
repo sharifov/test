@@ -337,7 +337,7 @@ class UpdateForm extends Model
             ['full_name', 'string', 'min' => 3, 'max' => 50],
 
             ['password', 'default', 'value' => null],
-            ['password', StrengthValidator::class, 'preset' => StrengthValidator::MEDIUM, 'userAttribute' => 'username'],
+            ['password', StrengthValidator::class, 'userAttribute' => 'username', 'min' => 10],
 
             ['nickname', 'required', 'when' => fn () => $this->fieldAccess->canEdit('nickname')],
             ['nickname', 'trim'],
