@@ -5,6 +5,8 @@ namespace common\models;
 use common\components\ChartTools;
 use common\components\CommunicationService;
 use common\models\query\EmailQuery;
+use common\models\DepartmentEmailProject;
+use common\models\UserProjectParams;
 use DateTime;
 use modules\featureFlag\FFlag;
 use src\behaviors\metric\MetricEmailCounterBehavior;
