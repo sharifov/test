@@ -474,12 +474,12 @@ class ApplicationStatusController extends Controller
                 'service' => 'centrifugo',
                 'status' => \Yii::$app->applicationStatus->centrifugoStatus()
             ],
-//            [
-//                'app' => 'app',
-//                'type' => 'component',
-//                'service' => 'callAntiSpam',
-//                'status' => \Yii::$app->applicationStatus->callAntiSpamStatus()
-//            ],
+            [
+                'app' => 'app',
+                'type' => 'component',
+                'service' => 'callAntiSpam',
+                'status' => \Yii::$app->applicationStatus->callAntiSpamStatus()
+            ],
         ];
 
         $notWorkingComponentsList = array_filter($result, function ($item) {

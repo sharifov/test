@@ -146,9 +146,11 @@ class CallAntiSpamService extends Component
 
     /**
      * @return bool
+     * @throws Exception
      */
     public function ping(): bool
     {
-        return false;
+        $response = $this->sendRequest('/docs', [], 'get');
+        return $response->isOk;
     }
 }
