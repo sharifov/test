@@ -402,12 +402,12 @@ class ApplicationStatusController extends Controller
                 'service' => 'chatBot',
                 'status' => \Yii::$app->applicationStatus->chatBotStatus()
             ],
-//            [
-//                'app' => 'app',
-//                'type' => 'component',
-//                'service' => 'travelServices',
-//                'status' => \Yii::$app->applicationStatus->travelServicesStatus()
-//            ],
+            [
+                'app' => 'app',
+                'type' => 'component',
+                'service' => 'travelServices',
+                'status' => \Yii::$app->applicationStatus->travelServicesStatus()
+            ],
             [
                 'app' => 'app',
                 'type' => 'component',
