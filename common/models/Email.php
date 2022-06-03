@@ -850,9 +850,9 @@ class Email extends \yii\db\ActiveRecord
             return $dep->dep_project_id;
         } else if ($upp = UserProjectParams::find()->byEmail($emailTo)->one()) {
             return $upp->upp_project_id;
-        } else {
-            return null;
         }
+
+        return null;
     }
 
     public function afterSave($insert, $changedAttributes)
