@@ -17,6 +17,8 @@ use yii\db\Exception;
 
 class DBHelper
 {
+    private const YEAR_PARTITION_TPL = 'PARTITION y%s VALUES LESS THAN (%s) ENGINE = InnoDB,' . PHP_EOL;
+
     /**
      * Calculate from and to dates from a given date.
      * Given date -> from = start of the month, to = next month start date
@@ -123,5 +125,31 @@ class DBHelper
         if (self::hasTable($table, $db)) {
             $db->createCommand()->dropTable($table)->execute();
         }
+    }
+
+    public static function generateYearMonthPartition(
+        string $table,
+        string $yearColumn,
+        string $monthColumn,
+        \DateTimeImmutable $dateStart,
+        int $defaultYears = 5
+    ): string {
+        $result = 'ALTER TABLE `' . $table . '` PARTITION BY RANGE (`' . $yearColumn . '`)' . PHP_EOL;
+        $result .= 'SUBPARTITION BY LINEAR HASH (`' . $monthColumn . '`)' . PHP_EOL;
+        $result .= 'SUBPARTITIONS 12' . PHP_EOL;
+        $result .= '(' . PHP_EOL;
+        $result .= sprintf(
+            self::YEAR_PARTITION_TPL,
+            $dateStart->format('Y'),
+            $dateStart->modify('+ 1 years')->format('Y')
+        );
+        for ($i = 1; $i < $defaultYears; $i++) {
+            $year = $dateStart->modify('+ ' . $i . ' years')->format('Y');
+            $nextYear = $dateStart->modify('+ ' . ($i + 1) . ' years')->format('Y');
+            $result .= sprintf(self::YEAR_PARTITION_TPL, $year, $nextYear);
+        }
+        $result .= 'PARTITION y VALUES LESS THAN MAXVALUE' . PHP_EOL;
+        $result .= ');';
+        return $result;
     }
 }
