@@ -1,5 +1,7 @@
 <?php
 
+use frontend\helpers\PasswordHelper;
+use kartik\password\PasswordInput;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -17,18 +19,27 @@ use yii\widgets\ActiveForm;
             <div class="panel-body panel-collapse collapse show">
                 <?php $form = ActiveForm::begin(); ?>
 
-                <div class="col-md-4">
+                <div class="col-md-6">
 
                     <?= $form->field($model, 'au_name')->textInput(['maxlength' => true]) ?>
 
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <?= $form->field($model, 'au_api_username')
                                 ->textInput(['maxlength' => true, 'autocomplete' => 'new-user']) ?>
                         </div>
-                        <div class="col-md-6">
-                            <?= $form->field($model, 'au_api_password')
-                                ->passwordInput(['maxlength' => true, 'autocomplete' => 'new-password']) ?>
+                        <div class="col-md-8">
+                            <?= $form->field($model, 'au_api_password', [
+                                'options' => [
+                                    'class' => 'form-group'
+                                ]
+                            ])->widget(PasswordInput::class, [
+                                'options' => [
+                                    'autocomplete' => 'new-password',
+                                ],
+                            ])->label(
+                                PasswordHelper::getLabelWithTooltip($model, 'au_api_password')
+                            ); ?>
                         </div>
                     </div>
 

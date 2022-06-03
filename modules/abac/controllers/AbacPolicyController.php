@@ -13,6 +13,7 @@ use modules\abac\src\entities\search\AbacPolicySearch;
 use yii\base\BaseObject;
 use yii\data\ArrayDataProvider;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -65,13 +66,14 @@ class AbacPolicyController extends FController
 
         $importCount = count($this->getImportData());
 
-
+        $duplicatePolicyIds = AbacPolicy::getDuplicateListId();
 
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'importCount' => $importCount,
-            'abacObjectList' => $abacObjectList
+            'abacObjectList' => $abacObjectList,
+            'duplicatePolicyIds' => $duplicatePolicyIds
         ]);
     }
 
@@ -133,8 +135,8 @@ class AbacPolicyController extends FController
                 $subjectData = @json_decode($model->ap_subject_json);
             }
 
-            $ap->ap_action_json = \yii\helpers\Json::encode($actionData);
-            $ap->ap_subject_json = \yii\helpers\Json::encode($subjectData);
+            $ap->ap_action_json = Json::encode($actionData);
+            $ap->ap_subject_json = Json::encode($subjectData);
 
             //VarDumper::dump($model->ap_action_list, 10, true); exit;
 
@@ -195,8 +197,8 @@ class AbacPolicyController extends FController
                 $subjectData = @json_decode($model->ap_subject_json);
             }
 
-            $ap->ap_action_json = \yii\helpers\Json::encode($actionData);
-            $ap->ap_subject_json = \yii\helpers\Json::encode($subjectData);
+            $ap->ap_action_json = Json::encode($actionData);
+            $ap->ap_subject_json = Json::encode($subjectData);
 
             //VarDumper::dump($model->ap_action_list, 10, true); exit;
 
@@ -214,12 +216,91 @@ class AbacPolicyController extends FController
             $model->ap_action_list = @json_decode($ap->ap_action_json);
             $model->ap_subject_json = $ap->ap_subject_json;
             $model->ap_enabled = $ap->ap_enabled;
+            $model->ap_hash_code = $ap->ap_hash_code;
         }
 
 
         return $this->render('update', [
             'model' => $model,
             'ap' => $ap,
+        ]);
+    }
+
+
+    /**
+     * @param $id
+     * @return string|\yii\web\Response
+     * @throws NotFoundHttpException
+     */
+    public function actionCopy($id)
+    {
+        $ap = $this->findModel($id);
+
+        $newPolicy = new AbacPolicy();
+        $model = new AbacPolicyForm();
+
+        if (Yii::$app->request->isPjax) {
+            $object = Yii::$app->request->get('object');
+            if (!empty($object)) {
+                $newPolicy->ap_object = $object;
+                $model->ap_object = $object;
+                //echo $object; exit;
+            }
+        } else {
+            if (empty($model->ap_object)) {
+                $model->ap_object = $ap->ap_object;
+                $newPolicy->ap_object = $ap->ap_object;
+            }
+        }
+
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $newPolicy->ap_effect = $model->ap_effect;
+            $newPolicy->ap_sort_order = $model->ap_sort_order;
+            $newPolicy->ap_title = $model->ap_title;
+            $newPolicy->ap_enabled = $model->ap_enabled;
+            $newPolicy->ap_object = $model->ap_object;
+
+            $actionData = [];
+            $subjectData = [];
+
+            if ($model->ap_action_list) {
+                $actionList = $model->ap_action_list;
+
+                if ($actionList && is_array($actionList)) {
+                    foreach ($actionList as $actionId) {
+                        $actionData[] = $actionId;
+                    }
+                }
+                //$ap->ap_action_json = @json_encode($model->ap_action_list);
+            }
+
+            if ($model->ap_subject_json) {
+                $subjectData = @json_decode($model->ap_subject_json);
+            }
+
+            $newPolicy->ap_action_json = Json::encode($actionData);
+            $newPolicy->ap_subject_json = Json::encode($subjectData);
+
+
+
+            if ($newPolicy->save()) {
+                return $this->redirect(['view', 'id' => $newPolicy->ap_id]);
+            } else {
+                $model->addErrors($newPolicy->errors);
+            }
+        } else {
+            $model->ap_sort_order = $ap->ap_sort_order;
+            $model->ap_effect = $ap->ap_effect;
+            $model->ap_object = $newPolicy->ap_object;
+            $model->ap_title = trim($ap->ap_title . ' (Copy of ID: ' . $ap->ap_id . ')');
+            $model->ap_action_list = Json::decode($ap->ap_action_json);
+            $model->ap_subject_json = $ap->ap_subject_json;
+            $model->ap_enabled = $ap->ap_enabled;
+        }
+
+        return $this->render('copy', [
+            'model' => $model,
+            'ap' => $newPolicy,
         ]);
     }
 
