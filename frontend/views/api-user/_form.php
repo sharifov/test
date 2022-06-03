@@ -1,5 +1,6 @@
 <?php
 
+use frontend\helpers\PasswordHelper;
 use kartik\password\PasswordInput;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
@@ -36,7 +37,9 @@ use yii\widgets\ActiveForm;
                                 'options' => [
                                     'autocomplete' => 'new-password',
                                 ],
-                            ]); ?>
+                            ])->label(
+                                PasswordHelper::getLabelWithTooltip($model, 'au_api_password')
+                            ); ?>
                         </div>
                     </div>
 
