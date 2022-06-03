@@ -69,7 +69,6 @@ class TravelServices extends Component
         return false;
     }
 
-
     /**
      * @param string $action
      * @param array $data
@@ -112,8 +111,6 @@ class TravelServices extends Component
         return $response;
     }
 
-
-
     /**
      * @param int $lastUpdate
      * @param int $limit
@@ -155,13 +152,7 @@ class TravelServices extends Component
         return $out;
     }
 
-    public function airportExportLocalized(
-        int $lastUpdate = 0,
-        int $pageLimit = 99999,
-        int $pageIndex = 0,
-        string $lang = '',
-        string $format = 'json'
-    ): array {
+    public function airportExportLocalized(int $lastUpdate = 0, int $pageLimit = 99999, int $pageIndex = 0, string $lang = '', string $format = 'json'): array {
         $out = ['error' => false, 'data' => []];
 
         $data = [];
@@ -230,4 +221,12 @@ class TravelServices extends Component
         }
         return $out;
     }
+
+//    /**
+//     * @return bool
+//     */
+//    public function ping(): bool
+//    {
+//        return false;
+//    }
 }
