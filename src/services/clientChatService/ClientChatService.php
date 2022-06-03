@@ -433,7 +433,12 @@ class ClientChatService
                 throw new \DomainException('Client already has active chat in this department');
             }
 
-            $clientChat->transfer($user->id, ClientChatStatusLog::ACTION_TRANSFER, $form->reasonId, $form->comment);
+            $clientChat->transfer(
+                $user->id,
+                $form->isAgentTransfer() ? ClientChatStatusLog::ACTION_DIRECT_TRANSFER : ClientChatStatusLog::ACTION_TRANSFER,
+                $form->reasonId,
+                $form->comment
+            );
             $clientChat->cch_channel_id = $clientChatChannel->ccc_id;
             $this->clientChatRepository->save($clientChat);
 
