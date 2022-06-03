@@ -5,7 +5,9 @@ use common\models\EmployeeAcl;
 use common\models\UserParams;
 use common\models\UserProductType;
 use common\models\UserProjectParams;
+use frontend\helpers\PasswordHelper;
 use frontend\models\UserFailedLogin;
+use kartik\password\PasswordInput;
 use kartik\select2\Select2;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\entities\shift\Shift;
@@ -57,7 +59,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
 
 ?>
 
-<div class="col-sm-5">
+<div class="col-sm-6">
     <?php $form = ActiveForm::begin([
         'successCssClass' => '',
         'id' => sprintf('%s-ID', $model->formName()),
@@ -152,11 +154,18 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                     <div class="col-md-6">
                     <?php endif; ?>
                         <?= $form->field($model, 'password', [
-                                'options' => [
-                                    'hidden' => ($edit ? !$edit : !$view),
-                                    'class' => 'form-group'
-                                ]
-                            ])->passwordInput(['autocomplete' => 'new-password', 'readonly' => !$edit])?>
+                            'options' => [
+                                'class' => 'form-group'
+                            ]
+                        ])->widget(PasswordInput::class, [
+                            'options' => [
+                                'autocomplete' => 'new-password',
+                                'hidden' => ($edit ? !$edit : !$view),
+                            ],
+                            'readonly' => !$edit
+                        ])->label(
+                            PasswordHelper::getLabelWithTooltip($model, 'password')
+                        ); ?>
                     <?php if ($view || $edit) :?>
                     </div>
                     <?php endif; ?>
