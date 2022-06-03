@@ -93,9 +93,11 @@ class GaRequestService extends Component
 
     /**
      * @return bool
+     * @throws \yii\httpclient\Exception
      */
     public function ping(): bool
     {
-        return false;
+        $response = $this->sendRequest([], 'get');
+        return $response->statusCode === '401';
     }
 }

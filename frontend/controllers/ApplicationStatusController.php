@@ -462,12 +462,12 @@ class ApplicationStatusController extends Controller
                 'service' => 'telegram',
                 'status' => \Yii::$app->applicationStatus->telegramStatus()
             ],
-//            [
-//                'app' => 'app',
-//                'type' => 'component',
-//                'service' => 'gaRequestService',
-//                'status' => \Yii::$app->applicationStatus->gaRequestServiceStatus()
-//            ],
+            [
+                'app' => 'app',
+                'type' => 'component',
+                'service' => 'gaRequestService',
+                'status' => \Yii::$app->applicationStatus->gaRequestServiceStatus()
+            ],
             [
                 'app' => 'app',
                 'type' => 'component',
