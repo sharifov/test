@@ -35,6 +35,9 @@ class GaRequestService extends Component
         $this->initRequest();
     }
 
+    /**
+     * @return bool
+     */
     private function initRequest(): bool
     {
         try {
@@ -58,9 +61,8 @@ class GaRequestService extends Component
      * @param string $method
      * @param array $headers
      * @param array $options
-     * @param string|null $format
+     * @param null|string $format
      * @return Response
-     * @throws \yii\httpclient\Exception
      */
     public function sendRequest(
         array $data = [],
@@ -93,7 +95,6 @@ class GaRequestService extends Component
 
     /**
      * @return bool
-     * @throws \yii\httpclient\Exception
      */
     public function ping(): bool
     {
