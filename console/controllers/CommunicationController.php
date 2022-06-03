@@ -147,13 +147,7 @@ class CommunicationController extends Controller
                 $email->e_email_to = $mail['ei_email_to'];
                 $email->e_email_from = $mail['ei_email_from'];
                 $email->e_email_subject = $mail['ei_email_subject'];
-                if ($dep = DepartmentEmailProject::find()->byEmail($mail['ei_email_to'])->one()) {
-                    $email->e_project_id = $dep->dep_project_id;
-                } else if ($upp = UserProjectParams::find()->byEmail($mail['ei_email_to'])->one()) {
-                    $email->e_project_id = $upp->upp_project_id;
-                } else {
-                    $email->e_project_id = null;
-                }
+                $email->e_project_id = Email::getProjectIdByDepOrUpp($mail['ei_email_to']);
                 $email->body_html = $mail['ei_email_text'];
                 $email->e_created_dt = $mail['ei_created_dt'];
 

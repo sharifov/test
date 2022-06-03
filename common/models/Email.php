@@ -842,6 +842,17 @@ class Email extends \yii\db\ActiveRecord
         return $emailStats;
     }
 
+    public static function getProjectIdByDepOrUpp($emailTo)
+    {
+        if ($dep = DepartmentEmailProject::find()->byEmail($emailTo)->one()) {
+            return $dep->dep_project_id;
+        } else if ($upp = UserProjectParams::find()->byEmail($emailTo)->one()) {
+            return $upp->upp_project_id;
+        } else {
+            return null;
+        }
+    }
+
     public function afterSave($insert, $changedAttributes)
     {
         parent::afterSave($insert, $changedAttributes);
