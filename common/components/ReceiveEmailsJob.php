@@ -180,12 +180,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                         if (isset($mail['ei_email_subject'])) {
                             $email->e_email_subject = $this->filter($mail['ei_email_subject']);
                         }
-                        if ($mail['ei_project_id'] > 0) {
-                            $project = Project::findOne($mail['ei_project_id']);
-                            if ($project) {
-                                $email->e_project_id = $project->id;
-                            }
-                        }
+                        $email->e_project_id = Email::getProjectIdByDepOrUpp($mail['ei_email_to']);
                         $email->body_html = $mail['ei_email_text'];
                         $email->e_created_dt = $mail['ei_created_dt'];
 

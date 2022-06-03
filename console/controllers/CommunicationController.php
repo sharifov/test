@@ -147,7 +147,7 @@ class CommunicationController extends Controller
                 $email->e_email_to = $mail['ei_email_to'];
                 $email->e_email_from = $mail['ei_email_from'];
                 $email->e_email_subject = $mail['ei_email_subject'];
-                $email->e_project_id = $mail['ei_project_id'];
+                $email->e_project_id = Email::getProjectIdByDepOrUpp($mail['ei_email_to']);
                 $email->body_html = $mail['ei_email_text'];
                 $email->e_created_dt = $mail['ei_created_dt'];
 

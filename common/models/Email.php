@@ -5,6 +5,8 @@ namespace common\models;
 use common\components\ChartTools;
 use common\components\CommunicationService;
 use common\models\query\EmailQuery;
+use common\models\DepartmentEmailProject;
+use common\models\UserProjectParams;
 use DateTime;
 use modules\featureFlag\FFlag;
 use src\behaviors\metric\MetricEmailCounterBehavior;
@@ -840,6 +842,17 @@ class Email extends \yii\db\ActiveRecord
             $done = $error = 0;
         }
         return $emailStats;
+    }
+
+    public static function getProjectIdByDepOrUpp($emailTo)
+    {
+        if ($dep = DepartmentEmailProject::find()->byEmail($emailTo)->one()) {
+            return $dep->dep_project_id;
+        } else if ($upp = UserProjectParams::find()->byEmail($emailTo)->one()) {
+            return $upp->upp_project_id;
+        }
+
+        return null;
     }
 
     public function afterSave($insert, $changedAttributes)
