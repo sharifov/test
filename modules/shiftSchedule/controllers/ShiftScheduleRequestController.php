@@ -6,11 +6,21 @@ use frontend\controllers\FController;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\search\ShiftScheduleRequestSearch;
+use modules\shiftSchedule\src\entities\shiftScheduleRequestHistory\search\ShiftScheduleRequestHistorySearch;
+use modules\shiftSchedule\src\forms\ScheduleDecisionForm;
+use modules\shiftSchedule\src\services\ShiftScheduleRequestService;
+use src\auth\Auth;
+use src\helpers\app\AppHelper;
 use Yii;
+use yii\base\InvalidConfigException;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
+use yii\web\BadRequestHttpException;
+use yii\web\NotAcceptableHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
+use DomainException;
+use Throwable;
 
 /**
  * ShiftScheduleRequestController implements the CRUD actions for ShiftScheduleRequest model.
@@ -28,7 +38,7 @@ class ShiftScheduleRequestController extends FController
                 'rules' => [
                     /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_ACCESS, Access to page shift-schedule/index */
                     [
-                        'actions' => ['index', 'view', 'create', 'update', 'delete'],
+                        'actions' => ['index', 'view', 'create', 'update', 'delete', 'get-event', 'get-history'],
                         'allow' => \Yii::$app->abac->can(
                             null,
                             ShiftAbacObject::ACT_USER_SHIFT_SCHEDULE,
@@ -141,5 +151,77 @@ class ShiftScheduleRequestController extends FController
         }
 
         throw new NotFoundHttpException(Yii::t('app', 'The requested page does not exist.'));
+    }
+
+    /**
+     * @param int $id
+     * @return string
+     * @throws InvalidConfigException
+     */
+    public function actionGetHistory(int $id): string
+    {
+        $searchModel = new ShiftScheduleRequestHistorySearch();
+        $dataProvider = $searchModel->search(ArrayHelper::merge(
+            Yii::$app->request->queryParams,
+            [
+                $searchModel->formName() => [
+                    'ssrh_ssr_id' => $id,
+                ],
+            ]
+        ));
+
+        return $this->renderAjax('request-history', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    /**
+     * @return string
+     * @throws BadRequestHttpException
+     * @throws NotAcceptableHttpException
+     * @throws NotFoundHttpException
+     */
+    public function actionGetEvent(): string
+    {
+        $eventId = (int)Yii::$app->request->get('id');
+
+        if (!$eventId) {
+            throw new BadRequestHttpException('Invalid request param');
+        }
+
+        $requestModel = ShiftScheduleRequest::find()->where(['ssr_id' => $eventId])->limit(1)->one();
+
+        if (!$requestModel) {
+            throw new NotFoundHttpException('Not exist this Shift Schedule (' . $eventId . ')');
+        }
+
+        $event = $requestModel->srhUss;
+
+        if (!$event) {
+            throw new NotFoundHttpException('Not exist this Shift Schedule (' . $eventId . ')');
+        }
+
+        if (!in_array($event->uss_user_id, ShiftScheduleRequestService::getUserListArray())) {
+            throw new NotAcceptableHttpException('Permission Denied (' . $eventId . ')');
+        }
+
+        $decisionFormModel = new ScheduleDecisionForm();
+
+        try {
+            $decisionFormModel->status = $requestModel->ssr_status_id;
+            $userTimeZone = Auth::user()->timezone ?: 'UTC';
+            return $this->renderAjax('partial/_get_event', [
+                'event' => $event,
+                'model' => $decisionFormModel,
+                'success' => $success ?? false,
+                'userTimeZone' => $userTimeZone,
+            ]);
+        } catch (DomainException $e) {
+            Yii::error(AppHelper::throwableLog($e), 'UserShiftScheduleRequestController:actionGetEvent:DomainException');
+        } catch (Throwable $e) {
+            Yii::error(AppHelper::throwableLog($e), 'UserShiftScheduleRequestController:actionGetEvent:Throwable');
+        }
+        throw new BadRequestHttpException();
     }
 }
