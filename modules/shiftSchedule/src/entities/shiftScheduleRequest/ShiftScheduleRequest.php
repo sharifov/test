@@ -302,4 +302,19 @@ class ShiftScheduleRequest extends ActiveRecord
     {
         return $this->ssr_status_id === self::STATUS_DECLINED;
     }
+
+    /**
+     * Reutrn custom value of attributes
+     * @return array
+     */
+    public function getCustomValueAttributes(): array
+    {
+        $attr = $this->attributes;
+        $attr['ssr_status_id'] = sprintf(
+            '%s (%s)',
+            $this->getStatusName(),
+            $this->ssr_status_id
+        );
+        return $attr;
+    }
 }
