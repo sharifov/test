@@ -1,6 +1,7 @@
 <?php
 
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
+use modules\shiftSchedule\src\services\UserShiftScheduleAttributeFormatService;
 use yii\db\Migration;
 
 /**
@@ -25,24 +26,32 @@ class m220603_084648_move_data_shift_schedule_request_to_history extends Migrati
                 if (empty($parentRequest) || $parentRequest->ssr_uss_id !== $request->ssr_uss_id) {
                     $parentRequest = $request;
                     $preventRequest = $request;
+                    $oldAttr = null;
+                    $newAttr = json_encode($request->getCustomValueAttributes());
+                    $formatAttributeService = \Yii::createObject(UserShiftScheduleAttributeFormatService::class);
+                    $formattedAttr = $formatAttributeService->formatAttr($request::className(), $oldAttr, $newAttr);
+
                     $values[] = [
                         $parentRequest->ssr_id,
-                        null,
-                        $parentRequest->ssr_status_id,
-                        null,
-                        $parentRequest->ssr_description,
+                        $oldAttr,
+                        $newAttr,
+                        $formattedAttr,
                         $parentRequest->ssr_created_dt,
                         null,
                         $parentRequest->ssr_created_user_id,
                         null,
                     ];
                 } else {
+                    $oldAttr = json_encode($preventRequest->getCustomValueAttributes());
+                    $newAttr = json_encode($request->getCustomValueAttributes());
+                    $formatAttributeService = \Yii::createObject(UserShiftScheduleAttributeFormatService::class);
+                    $formattedAttr = $formatAttributeService->formatAttr($request::className(), $oldAttr, $newAttr);
+
                     $values[] = [
-                        $preventRequest->ssr_id,
-                        $preventRequest->ssr_status_id,
-                        $request->ssr_status_id,
-                        $preventRequest->ssr_description,
-                        $request->ssr_description,
+                        $parentRequest->ssr_id,
+                        $oldAttr,
+                        $newAttr,
+                        $formattedAttr,
                         $preventRequest->ssr_created_dt,
                         null,
                         $request->ssr_updated_user_id ?: $parentRequest->ssr_created_user_id,
@@ -62,10 +71,9 @@ class m220603_084648_move_data_shift_schedule_request_to_history extends Migrati
                 '{{%shift_schedule_request_history}}',
                 [
                     'ssrh_ssr_id',
-                    'ssrh_from_status_id',
-                    'ssrh_to_status_id',
-                    'ssrh_from_description',
-                    'ssrh_to_description',
+                    'ssrh_old_attr',
+                    'ssrh_new_attr',
+                    'ssrh_formatted_attr',
                     'ssrh_created_dt',
                     'ssrh_updated_dt',
                     'ssrh_created_user_id',
