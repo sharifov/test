@@ -23,10 +23,9 @@ class m220603_080625_create_tbl_shift_schedule_request_history extends Migration
         $this->createTable('{{%shift_schedule_request_history}}', [
             'ssrh_id' => $this->primaryKey(),
             'ssrh_ssr_id' => $this->integer(),
-            'ssrh_from_status_id' => $this->integer(),
-            'ssrh_to_status_id' => $this->integer(),
-            'ssrh_from_description' => $this->string(1000),
-            'ssrh_to_description' => $this->string(1000),
+            'ssrh_old_attr' => $this->json(),
+            'ssrh_new_attr' => $this->json(),
+            'ssrh_formatted_attr' => $this->json(),
             'ssrh_created_dt' => $this->dateTime(),
             'ssrh_updated_dt' => $this->dateTime(),
             'ssrh_created_user_id' => $this->integer(),
