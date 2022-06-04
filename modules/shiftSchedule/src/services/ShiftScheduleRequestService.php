@@ -187,23 +187,21 @@ class ShiftScheduleRequestService
      */
     public static function saveDecision(ShiftScheduleRequest $requestModel, ScheduleDecisionForm $decisionForm, Employee $user): bool
     {
-        $scheduleRequest = new ShiftScheduleRequest();
-        $scheduleRequest->attributes = $requestModel->attributes;
-        $scheduleRequest->ssr_status_id = $decisionForm->status;
-        $scheduleRequest->ssr_description = $decisionForm->description;
-        $scheduleRequest->ssr_updated_user_id = $user->id;
-        if ($scheduleRequest->getIsCanEditPreviousDate()) {
-            if ($scheduleRequest->save()) {
+        $requestModel->ssr_status_id = $decisionForm->status;
+        $requestModel->ssr_description = $decisionForm->description;
+        $requestModel->ssr_updated_user_id = $user->id;
+        if ($requestModel->getIsCanEditPreviousDate()) {
+            if ($requestModel->save()) {
                 if ($requestModel->oldAttributes['ssr_status_id'] !== $decisionForm->status) {
                     self::sendNotification(
                         Employee::ROLE_AGENT,
-                        $scheduleRequest,
+                        $requestModel,
                         self::NOTIFICATION_TYPE_CREATE,
                         $user
                     );
                     self::sendNotification(
                         Employee::ROLE_SUPERVISION,
-                        $scheduleRequest,
+                        $requestModel,
                         self::NOTIFICATION_TYPE_UPDATE,
                         $user
                     );
