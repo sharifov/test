@@ -4,8 +4,11 @@ namespace modules\shiftSchedule\src\entities\shiftScheduleRequestHistory;
 
 use common\models\Employee;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
+use yii\behaviors\BlameableBehavior;
+use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\db\BaseActiveRecord;
 
 /**
  * This is the model class for table "shift_schedule_request_history".
@@ -26,6 +29,30 @@ use yii\db\ActiveRecord;
  */
 class ShiftScheduleRequestHistory extends ActiveRecord
 {
+    /**
+     * @return array[]
+     */
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    BaseActiveRecord::EVENT_BEFORE_INSERT => 'ssrh_created_dt',
+                    BaseActiveRecord::EVENT_BEFORE_UPDATE => 'ssrh_updated_dt',
+                ],
+                'value' => date('Y-m-d H:i:s'),
+            ],
+            'user' => [
+                'class' => BlameableBehavior::class,
+                'attributes' => [
+                    BaseActiveRecord::EVENT_BEFORE_INSERT => ['ssrh_created_user_id'],
+                    BaseActiveRecord::EVENT_BEFORE_UPDATE => ['ssrh_updated_user_id'],
+                ],
+            ],
+        ];
+    }
+
     /**
      * {@inheritdoc}
      */
