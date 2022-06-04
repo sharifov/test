@@ -7,12 +7,15 @@ use frontend\controllers\FController;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\search\ShiftScheduleRequestSearch;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
+use modules\shiftSchedule\src\entities\shiftScheduleRequestHistory\search\ShiftScheduleRequestHistorySearch;
+use modules\shiftSchedule\src\entities\shiftScheduleRequestHistory\ShiftScheduleRequestHistory;
 use modules\shiftSchedule\src\forms\ScheduleDecisionForm;
 use modules\shiftSchedule\src\services\ShiftScheduleRequestService;
 use src\auth\Auth;
 use src\helpers\app\AppHelper;
 use Throwable;
 use Yii;
+use yii\base\InvalidConfigException;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
@@ -203,16 +206,16 @@ class UserShiftScheduleRequestController extends FController
     /**
      * @param int $id
      * @return string
-     * @throws \yii\base\InvalidConfigException
+     * @throws InvalidConfigException
      */
     public function actionGetHistory(int $id): string
     {
-        $searchModel = new ShiftScheduleRequestSearch();
+        $searchModel = new ShiftScheduleRequestHistorySearch();
         $dataProvider = $searchModel->search(ArrayHelper::merge(
             Yii::$app->request->queryParams,
             [
                 $searchModel->formName() => [
-                    'ssr_uss_id' => $id,
+                    'ssrh_ssr_id' => $id,
                 ],
             ]
         ));
