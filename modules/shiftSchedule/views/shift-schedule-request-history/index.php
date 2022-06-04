@@ -33,10 +33,9 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'ssrh_id',
             'ssrh_ssr_id',
-            'ssrh_from_status_id',
-            'ssrh_to_status_id',
-            'ssrh_from_description',
-            //'ssrh_to_description',
+            'ssrh_old_attr',
+            'ssrh_new_attr',
+            'ssrh_formatted_attr',
             //'ssrh_created_dt',
             //'ssrh_updated_dt',
             //'ssrh_created_user_id',

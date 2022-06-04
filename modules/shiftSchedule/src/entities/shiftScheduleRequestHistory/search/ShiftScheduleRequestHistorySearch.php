@@ -17,8 +17,8 @@ class ShiftScheduleRequestHistorySearch extends ShiftScheduleRequestHistory
     public function rules(): array
     {
         return [
-            [['ssrh_id', 'ssrh_ssr_id', 'ssrh_from_status_id', 'ssrh_to_status_id', 'ssrh_created_user_id', 'ssrh_updated_user_id'], 'integer'],
-            [['ssrh_from_description', 'ssrh_to_description', 'ssrh_created_dt', 'ssrh_updated_dt'], 'safe'],
+            [['ssrh_id', 'ssrh_ssr_id', 'ssrh_created_user_id', 'ssrh_updated_user_id'], 'integer'],
+            [['ssrh_old_attr', 'ssrh_new_attr', 'ssrh_formatted_attr', 'ssrh_created_dt', 'ssrh_updated_dt'], 'safe'],
         ];
     }
 
@@ -60,16 +60,15 @@ class ShiftScheduleRequestHistorySearch extends ShiftScheduleRequestHistory
         $query->andFilterWhere([
             'ssrh_id' => $this->ssrh_id,
             'ssrh_ssr_id' => $this->ssrh_ssr_id,
-            'ssrh_from_status_id' => $this->ssrh_from_status_id,
-            'ssrh_to_status_id' => $this->ssrh_to_status_id,
             'ssrh_created_dt' => $this->ssrh_created_dt,
             'ssrh_updated_dt' => $this->ssrh_updated_dt,
             'ssrh_created_user_id' => $this->ssrh_created_user_id,
             'ssrh_updated_user_id' => $this->ssrh_updated_user_id,
         ]);
 
-        $query->andFilterWhere(['like', 'ssrh_from_description', $this->ssrh_from_description])
-            ->andFilterWhere(['like', 'ssrh_to_description', $this->ssrh_to_description]);
+        $query->andFilterWhere(['like', 'ssrh_old_attr', $this->ssrh_old_attr])
+            ->andFilterWhere(['like', 'ssrh_new_attr', $this->ssrh_new_attr])
+            ->andFilterWhere(['like', 'ssrh_formatted_attr', $this->ssrh_formatted_attr]);
 
         return $dataProvider;
     }

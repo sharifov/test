@@ -14,13 +14,11 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'ssrh_ssr_id')->textInput() ?>
 
-    <?= $form->field($model, 'ssrh_from_status_id')->textInput() ?>
+    <?= $form->field($model, 'ssrh_old_attr')->textInput() ?>
 
-    <?= $form->field($model, 'ssrh_to_status_id')->textInput() ?>
+    <?= $form->field($model, 'ssrh_new_attr')->textInput() ?>
 
-    <?= $form->field($model, 'ssrh_from_description')->textInput(['maxlength' => true]) ?>
-
-    <?= $form->field($model, 'ssrh_to_description')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'ssrh_formatted_attr')->textInput() ?>
 
     <?= $form->field($model, 'ssrh_created_dt')->textInput() ?>
 

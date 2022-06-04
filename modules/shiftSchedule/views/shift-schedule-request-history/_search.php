@@ -22,13 +22,11 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'ssrh_ssr_id') ?>
 
-    <?= $form->field($model, 'ssrh_from_status_id') ?>
+    <?= $form->field($model, 'ssrh_old_attr') ?>
 
-    <?= $form->field($model, 'ssrh_to_status_id') ?>
+    <?= $form->field($model, 'ssrh_new_attr') ?>
 
-    <?= $form->field($model, 'ssrh_from_description') ?>
-
-    <?php // echo $form->field($model, 'ssrh_to_description') ?>
+    <?= $form->field($model, 'ssrh_formatted_attr') ?>
 
     <?php // echo $form->field($model, 'ssrh_created_dt') ?>
 
