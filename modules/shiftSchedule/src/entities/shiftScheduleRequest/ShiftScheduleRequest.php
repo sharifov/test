@@ -3,10 +3,12 @@
 namespace modules\shiftSchedule\src\entities\shiftScheduleRequest;
 
 use common\models\Employee;
+use modules\shiftSchedule\src\entities\shiftScheduleRequestHistory\ShiftScheduleRequestHistory;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
+use modules\shiftSchedule\src\services\UserShiftScheduleAttributeFormatService;
 use Yii;
-use yii\behaviors\BlameableBehavior;
+use yii\base\Event;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -97,6 +99,16 @@ class ShiftScheduleRequest extends ActiveRecord
     }
 
     /**
+     * @return void
+     */
+    public function init(): void
+    {
+        $this->on(self::EVENT_AFTER_INSERT, [$this, 'saveRequestHistory']);
+        $this->on(self::EVENT_AFTER_UPDATE, [$this, 'saveRequestHistory']);
+        parent::init();
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function rules(): array
@@ -178,6 +190,15 @@ class ShiftScheduleRequest extends ActiveRecord
     public function getStatusName(): string
     {
         return self::STATUS_LIST[$this->ssr_status_id] ?? '';
+    }
+
+    /**
+     * @param int $statusId
+     * @return string
+     */
+    public static function getStatusNameById(int $statusId): string
+    {
+        return self::STATUS_LIST[$statusId] ?? '';
     }
 
     /**
@@ -316,5 +337,57 @@ class ShiftScheduleRequest extends ActiveRecord
             $this->ssr_status_id
         );
         return $attr;
+    }
+
+    /**
+     * @param Event $event
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function saveRequestHistory(Event $event): void
+    {
+        if ($event->name === BaseActiveRecord::EVENT_AFTER_INSERT) {
+            $oldAttr = null;
+        } else {
+            $changedAttributes = $event->changedAttributes;
+            VarDumper::dump($changedAttributes, 10, true);
+            if (!empty($changedAttributes['ssr_status_id'])) {
+                $changedAttributes['ssr_status_id'] = sprintf(
+                    '%s (%s)',
+                    $event->sender::getStatusNameById($changedAttributes['ssr_status_id']),
+                    $changedAttributes['ssr_status_id']
+                );
+                $oldAttr = json_encode($changedAttributes);
+            } else {
+                $oldAttr = '';
+            }
+        }
+
+        $newAttr = [];
+        foreach ($event->changedAttributes as $key => $attribute) {
+            if (array_key_exists($key, $event->sender->customValueAttributes)) {
+                $newAttr[$key] = $event->sender->customValueAttributes[$key];
+            }
+        }
+
+        if (is_array($oldAttr)) {
+            $oldAttr = json_encode($oldAttr);
+        }
+        if (is_array($newAttr)) {
+            $newAttr = json_encode($newAttr);
+        }
+
+        $formatAttributeService = \Yii::createObject(UserShiftScheduleAttributeFormatService::class);
+        $formattedAttr = $formatAttributeService->formatAttr(ShiftScheduleRequest::class, $oldAttr, $newAttr);
+
+        $history = new ShiftScheduleRequestHistory([
+            'ssrh_ssr_id' => $event->sender->ssr_id,
+            'ssrh_old_attr' => $oldAttr,
+            'ssrh_new_attr' => $newAttr,
+            'ssrh_formatted_attr' => $formattedAttr,
+            'ssrh_updated_dt' => null,
+            'ssrh_updated_user_id' => null,
+        ]);
+
+        $history->save();
     }
 }
