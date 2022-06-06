@@ -579,7 +579,7 @@ class LeadController extends Controller
         $dateRule = $currentDT->modify('-' . $scheduledCommunicationRuleService->getIntervalHour() . ' hours');
         $startDate = '2022-02-22 08:00:00';
 
-        if (($leadCreatedDT = Yii::$app->ff->val(FFlag::FF_KEY_LPP_LEAD_CREATED)) && DateHelper::checkDateTime($leadCreatedDT)) {
+        if (($leadCreatedDT = Yii::$app->ff->getValue(FFlag::FF_KEY_LPP_LEAD_CREATED)) && DateHelper::checkDateTime($leadCreatedDT)) {
             $startDate = $leadCreatedDT;
         }
 
@@ -740,7 +740,7 @@ class LeadController extends Controller
                                               ') not enabled %n'), PHP_EOL;
             exit();
         }
-        if (!($leadCreatedDT = Yii::$app->ff->val(FFlag::FF_KEY_LPP_LEAD_CREATED)) || !DateHelper::checkDateTime($leadCreatedDT)) {
+        if (!($leadCreatedDT = Yii::$app->ff->getValue(FFlag::FF_KEY_LPP_LEAD_CREATED)) || !DateHelper::checkDateTime($leadCreatedDT)) {
             echo Console::renderColoredString('Last Created DT is not set'), PHP_EOL;
             exit();
         }
@@ -793,7 +793,7 @@ class LeadController extends Controller
         }
         $time_start     = microtime(true);
 
-        $maxDaysInExtraQueue =  Yii::$app->ff->val(FFlag::FF_KEY_LPP_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT);
+        $maxDaysInExtraQueue =  Yii::$app->ff->getValue(FFlag::FF_KEY_LPP_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT);
         $thresholdDate = new \DateTimeImmutable(date('Y-m-d H:i:s'));
         $thresholdDate = $thresholdDate->modify('-' . $maxDaysInExtraQueue . ' days');
         $leads = Lead::find()

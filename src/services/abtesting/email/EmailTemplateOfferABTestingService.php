@@ -42,7 +42,7 @@ class EmailTemplateOfferABTestingService extends ABTestingBaseService
                 return null;
             }
             /** @fflag FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES, A/B testing for email offer templates value */
-            $settingsValue            = \Yii::$app->ff->val(FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES);
+            $settingsValue            = \Yii::$app->ff->getValue(FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES);
             if (!is_array($settingsValue)) {
                 throw new \DomainException('Params must be array');
             }
@@ -151,7 +151,7 @@ class EmailTemplateOfferABTestingService extends ABTestingBaseService
                 return;
             }
             /** @fflag FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES, A/B testing for email offer templates value */
-            $settingsValue            = \Yii::$app->ff->val(FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES);
+            $settingsValue            = \Yii::$app->ff->getValue(FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES);
             if (!is_array($settingsValue)) {
                 throw new \DomainException('Params must be array');
             }
@@ -206,7 +206,7 @@ class EmailTemplateOfferABTestingService extends ABTestingBaseService
      */
     public function getDefaultOfferTemplateId(): int
     {
-        $settingsValue            = \Yii::$app->ff->val(FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES);
+        $settingsValue            = \Yii::$app->ff->getValue(FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES);
         if (!is_array($settingsValue)) {
             throw new \DomainException('Params must be array');
         }
