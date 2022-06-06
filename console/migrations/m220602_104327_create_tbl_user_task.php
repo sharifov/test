@@ -30,6 +30,7 @@ class m220602_104327_create_tbl_user_task extends Migration
             'ut_end_dt' => $this->dateTime()->notNull(),
             'ut_priority' => $this->tinyInteger()->unsigned(),
             'ut_status_id' => $this->tinyInteger()->unsigned(),
+            'ut_created_dt' => $this->dateTime(),
             'ut_year' => $this->smallInteger()->unsigned()->notNull(),
             'ut_month' => $this->tinyInteger()->unsigned()->notNull(),
         ], $tableOptions);
@@ -49,9 +50,12 @@ class m220602_104327_create_tbl_user_task extends Migration
             $this->tableUserTask,
             'ut_year',
             'ut_month',
-            (new \DateTimeImmutable())
+            //(new \DateTimeImmutable()), //
+            (new \DateTimeImmutable())->modify('- 1 years'),
+            1,// TODO:: FOR DEBUG:: must by change to 5
+            false
         );
-        Yii::$app->db->createCommand($partitions);
+        Yii::$app->db->createCommand($partitions)->execute();
 
         $this->createTable('{{%' . $this->tableShiftTask . '}}', [
             'sset_event_id' => $this->integer()->notNull(),
@@ -60,15 +64,6 @@ class m220602_104327_create_tbl_user_task extends Migration
         ], $tableOptions);
 
         $this->addPrimaryKey('PK-shift_schedule_event_task', '{{%' . $this->tableShiftTask . '}}', ['sset_event_id', 'sset_user_task_id']);
-        $this->addForeignKey(
-            'FK-shift_schedule_event_task-sset_user_task_id',
-            '{{%' . $this->tableShiftTask . '}}',
-            'sset_user_task_id',
-            '{{%' . $this->tableUserTask . '}}',
-            'ut_id',
-            'CASCADE',
-            'CASCADE'
-        );
     }
 
     /**

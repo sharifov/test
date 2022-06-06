@@ -17,7 +17,7 @@ use yii\db\Exception;
 
 class DBHelper
 {
-    private const YEAR_PARTITION_TPL = 'PARTITION y%s VALUES LESS THAN (%s) ENGINE = InnoDB,' . PHP_EOL;
+    private const YEAR_PARTITION_TPL = 'PARTITION y%s VALUES LESS THAN (%s) ENGINE = InnoDB';
 
     /**
      * Calculate from and to dates from a given date.
@@ -132,24 +132,39 @@ class DBHelper
         string $yearColumn,
         string $monthColumn,
         \DateTimeImmutable $dateStart,
-        int $defaultYears = 5
+        int $partitionYears = 5,
+        bool $isAddMaxPartition = true
     ): string {
         $result = 'ALTER TABLE `' . $table . '` PARTITION BY RANGE (`' . $yearColumn . '`)' . PHP_EOL;
         $result .= 'SUBPARTITION BY LINEAR HASH (`' . $monthColumn . '`)' . PHP_EOL;
         $result .= 'SUBPARTITIONS 12' . PHP_EOL;
         $result .= '(' . PHP_EOL;
+
         $result .= sprintf(
             self::YEAR_PARTITION_TPL,
             $dateStart->format('Y'),
             $dateStart->modify('+ 1 years')->format('Y')
         );
-        for ($i = 1; $i < $defaultYears; $i++) {
+        $result .= $partitionYears > 1 ? ','  . PHP_EOL : '';
+
+        for ($i = 1; $i < $partitionYears; $i++) {
             $year = $dateStart->modify('+ ' . $i . ' years')->format('Y');
             $nextYear = $dateStart->modify('+ ' . ($i + 1) . ' years')->format('Y');
             $result .= sprintf(self::YEAR_PARTITION_TPL, $year, $nextYear);
+            $result .= $i + 1 < $partitionYears ? ','  . PHP_EOL : '';
         }
-        $result .= 'PARTITION y VALUES LESS THAN MAXVALUE' . PHP_EOL;
+
+        $result .= $isAddMaxPartition ? ',' . PHP_EOL . 'PARTITION y VALUES LESS THAN MAXVALUE' . PHP_EOL : '';
         $result .= ');';
         return $result;
+    }
+
+    public static function generateAddPartitionYear(string $table, \DateTimeImmutable $dateYear): string
+    {
+        $partYear = $dateYear->format('Y');
+        $nextYear = $dateYear->modify('+ 1 year')->format('Y');
+        $partition = sprintf(self::YEAR_PARTITION_TPL, $partYear, $nextYear);
+
+        return 'ALTER TABLE `' . $table . '` ADD PARTITION (' . $partition . ');';
     }
 }
