@@ -4,7 +4,7 @@ use kivork\FeatureFlag\Components\FeatureFlagComponent;
 
 return [
     'class' => FeatureFlagComponent::class,
-    'cacheEnable' => true,
+    'cache' => 'cache',
     'scanDirs' => [
         '@root/modules/',
         '@frontend/',
