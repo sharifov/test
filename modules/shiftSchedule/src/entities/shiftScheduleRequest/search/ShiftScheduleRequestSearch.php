@@ -167,18 +167,8 @@ class ShiftScheduleRequestSearch extends ShiftScheduleRequest
             ]);
         }
 
-        $query->select(['ssr_id' => 'MAX(ssr_id)', 'ssr_uss_id'])
-            ->groupBy(['ssr_uss_id']);
-
-        $query = static::find()
-            ->from($query)
-            ->select('ssr_id');
-
-        $queryResult = static::find()
-            ->where(['in', 'ssr_id', $query]);
-
         if (!empty($model)) {
-            $queryResult->andFilterWhere([
+            $query->andFilterWhere([
                 'ssr_id' => $model->ssr_id,
                 'ssr_uss_id' => $model->ssr_uss_id,
                 'ssr_sst_id' => $model->ssr_sst_id,
@@ -188,10 +178,10 @@ class ShiftScheduleRequestSearch extends ShiftScheduleRequest
                 'ssr_updated_user_id' => $model->ssr_updated_user_id,
             ]);
 
-            $queryResult->andFilterWhere(['like', 'ssr_description', $model->ssr_description]);
+            $query->andFilterWhere(['like', 'ssr_description', $model->ssr_description]);
         }
 
-        return $queryResult;
+        return $query;
     }
 
     /**

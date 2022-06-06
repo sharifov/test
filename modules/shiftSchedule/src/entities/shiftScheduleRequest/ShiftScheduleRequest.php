@@ -3,9 +3,12 @@
 namespace modules\shiftSchedule\src\entities\shiftScheduleRequest;
 
 use common\models\Employee;
+use modules\shiftSchedule\src\entities\shiftScheduleRequestLog\ShiftScheduleRequestLog;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
-use yii\behaviors\BlameableBehavior;
+use modules\shiftSchedule\src\services\UserShiftScheduleAttributeFormatService;
+use Yii;
+use yii\base\Event;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -96,6 +99,16 @@ class ShiftScheduleRequest extends ActiveRecord
     }
 
     /**
+     * @return void
+     */
+    public function init(): void
+    {
+        $this->on(self::EVENT_AFTER_INSERT, [$this, 'saveRequestLog']);
+        $this->on(self::EVENT_AFTER_UPDATE, [$this, 'saveRequestLog']);
+        parent::init();
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function rules(): array
@@ -180,6 +193,15 @@ class ShiftScheduleRequest extends ActiveRecord
     }
 
     /**
+     * @param int $statusId
+     * @return string
+     */
+    public static function getStatusNameById(int $statusId): string
+    {
+        return self::STATUS_LIST[$statusId] ?? '';
+    }
+
+    /**
      * @param bool $hex
      * @return string
      */
@@ -227,11 +249,12 @@ class ShiftScheduleRequest extends ActiveRecord
     }
 
     /**
-     * @return int
+     * @return string
      */
-    public function getDuration(): int
+    public function getDuration(): string
     {
-        return round((strtotime($this->srhUss->uss_start_utc_dt ?? '') - strtotime($this->srhUss->uss_end_utc_dt ?? '')) / (60 * 60 * 24));
+        $duration = strtotime($this->srhUss->uss_end_utc_dt ?? 0) - strtotime($this->srhUss->uss_start_utc_dt ?? 0);
+        return Yii::$app->formatter->asDuration($duration);
     }
 
     /**
@@ -299,5 +322,71 @@ class ShiftScheduleRequest extends ActiveRecord
     public function isStatusDeclined(): bool
     {
         return $this->ssr_status_id === self::STATUS_DECLINED;
+    }
+
+    /**
+     * Reutrn custom value of attributes
+     * @return array
+     */
+    public function getCustomValueAttributes(): array
+    {
+        $attr = $this->attributes;
+        $attr['ssr_status_id'] = sprintf(
+            '%s (%s)',
+            $this->getStatusName(),
+            $this->ssr_status_id
+        );
+        return $attr;
+    }
+
+    /**
+     * @param Event $event
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function saveRequestLog(Event $event): void
+    {
+        if ($event->name === BaseActiveRecord::EVENT_AFTER_INSERT) {
+            $oldAttr = null;
+        } else {
+            $changedAttributes = $event->changedAttributes;
+            if (!empty($changedAttributes['ssr_status_id'])) {
+                $changedAttributes['ssr_status_id'] = sprintf(
+                    '%s (%s)',
+                    $event->sender::getStatusNameById($changedAttributes['ssr_status_id']),
+                    $changedAttributes['ssr_status_id']
+                );
+                $oldAttr = json_encode($changedAttributes);
+            } else {
+                $oldAttr = '';
+            }
+        }
+
+        $newAttr = [];
+        foreach ($event->changedAttributes as $key => $attribute) {
+            if (array_key_exists($key, $event->sender->customValueAttributes)) {
+                $newAttr[$key] = $event->sender->customValueAttributes[$key];
+            }
+        }
+
+        if (is_array($oldAttr)) {
+            $oldAttr = json_encode($oldAttr);
+        }
+        if (is_array($newAttr)) {
+            $newAttr = json_encode($newAttr);
+        }
+
+        $formatAttributeService = \Yii::createObject(UserShiftScheduleAttributeFormatService::class);
+        $formattedAttr = $formatAttributeService->formatAttr(ShiftScheduleRequest::class, $oldAttr, $newAttr);
+
+        $history = new ShiftScheduleRequestLog([
+            'ssrh_ssr_id' => $event->sender->ssr_id,
+            'ssrh_old_attr' => $oldAttr,
+            'ssrh_new_attr' => $newAttr,
+            'ssrh_formatted_attr' => $formattedAttr,
+            'ssrh_updated_dt' => null,
+            'ssrh_updated_user_id' => null,
+        ]);
+
+        $history->save();
     }
 }

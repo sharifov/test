@@ -2,10 +2,11 @@
 
 use common\components\logger\FilebeatTarget;
 use common\helpers\LogHelper;
+use common\components\ApplicationStatus;
 
 $commonParams = yii\helpers\ArrayHelper::merge(
     require __DIR__ . '/../../common/config/params.php',
-    require __DIR__ . '/../../common/config/params-local.php',
+    require __DIR__ . '/../../common/config/params-local.php'
 );
 
 return [
@@ -16,6 +17,9 @@ return [
     'vendorPath' => dirname(dirname(__DIR__)) . '/vendor',
     'timeZone' => 'UTC',
     'components' => [
+        'applicationStatus' => [
+            'class' => ApplicationStatus::class
+        ],
         'db' => [
             'class' => 'yii\db\Connection',
             'dsn' => '',
@@ -69,10 +73,6 @@ return [
                     },
                     'logFile' => '@runtime/logs/stash.log'
                 ],
-//                [
-//                    'class' => 'yii\log\DbTarget',
-//                    'levels' => ['error', 'warning'],
-//                ]
             ],
         ],
         'formatter_search' => [
@@ -260,12 +260,6 @@ return [
         'objectSegment' => require __DIR__ . '/objectSegment.php',
         'event' => require __DIR__ . '/event.php',
         'ff' => require __DIR__ . '/featureFlag.php',
-//        'abac' => [
-//            'class' => \modules\abac\components\AbacComponent::class,
-//            'modules' => [
-//                'order' => \modules\order\src\abac\OrderAbacObject::class
-//            ],
-//        ],
         'snowplow' => [
             'class' => \common\components\SnowplowService::class,
             'collectorUrl' => 'sp.ovago.com',

@@ -3,6 +3,7 @@
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
 use modules\abac\src\entities\AbacPolicy;
+use yii\grid\ActionColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -12,17 +13,25 @@ use yii\widgets\Pjax;
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $importCount int */
 /* @var $abacObjectList array */
+/* @var $duplicatePolicyIds array */
 
-$this->title = 'Abac Policies';
+$this->title = 'ABAC Policies';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="abac-policy-index">
+<p class="abac-policy-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
-
     <p>
-        <?= Html::a('<i class="fa fa-plus"></i> Create Abac Policy', ['create'], ['class' => 'btn btn-success']) ?>
-        <?= Html::a('<i class="fa fa-list"></i> Policy list content', ['list-content'], ['class' => 'btn btn-default']) ?>
+        <?= Html::a(
+            '<i class="fa fa-plus"></i> Create Abac Policy',
+            ['create'],
+            ['class' => 'btn btn-success']
+        ) ?>
+        <?= Html::a(
+            '<i class="fa fa-list"></i> Policy list content',
+            ['list-content'],
+            ['class' => 'btn btn-default']
+        ) ?>
 
         <?= Html::a('<i class="fa fa-upload"></i> Export File', ['export'], [
             'class' => 'btn btn-default',
@@ -32,14 +41,53 @@ $this->params['breadcrumbs'][] = $this->title;
         ]) ?>
 
         <?php if ($importCount) : ?>
-            <?= Html::a('<i class="fa fa-download"></i> Continue Import (' . $importCount . ')', ['import'], ['class' => 'btn btn-warning']) ?>
+            <?= Html::a(
+                '<i class="fa fa-download"></i> Continue Import (' . $importCount . ')',
+                ['import'],
+                ['class' => 'btn btn-warning']
+            ) ?>
         <?php else : ?>
-            <?= Html::a('<i class="fa fa-download"></i> Import File', ['import'], ['class' => 'btn btn-default']) ?>
+            <?= Html::a(
+                '<i class="fa fa-download"></i> Import File',
+                ['import'],
+                ['class' => 'btn btn-default']
+            ) ?>
         <?php endif; ?>
+
+        <?= Html::a('<i class="fa fa-download"></i> Import from Dump', ['dump-in'], [
+            'class' => 'btn btn-warning',
+            'id' => 'btn-dump-import'
+        ]) ?>
+    </p>
+
+    <p>
+        <i class="fa fa-info-circle"></i> <code>HashCode = md5(Object + Action + Subject + Effect)</code>
     </p>
 
     <?php Pjax::begin(['scrollTo' => 0]); ?>
+
     <?php // echo $this->render('_search', ['model' => $searchModel]);?>
+
+
+    <?php if ($duplicatePolicyIds) : ?>
+    <p>
+        <div title="<?= implode(', ', $duplicatePolicyIds)?>">
+            <i class="fa fa-warning text-warning"></i>
+            Find duplicate policy item (<?php echo count($duplicatePolicyIds) ?>). Hash list:
+            <?php
+                $data = [];
+            foreach ($duplicatePolicyIds as $hashCode) {
+                $data[] = Html::a(
+                    $hashCode,
+                    ['/abac/abac-policy/index', 'AbacPolicySearch[ap_hash_code]' => $hashCode]
+                );
+            }
+            ?>
+            <?= implode(', ', $data)?>
+        </div>
+    </p>
+    <?php endif; ?>
+
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -63,12 +111,57 @@ $this->params['breadcrumbs'][] = $this->title;
                     'style' => 'width:80px'
                 ],
             ],
-            ['class' => 'yii\grid\ActionColumn'],
+            //['class' => 'yii\grid\ActionColumn'],
+
+            [
+                'class' => ActionColumn::class,
+                'template' => '{view} {update} {delete} {copy} {dump}',
+                'buttons' => [
+                    'copy' => static function ($url, AbacPolicy $model, $key) {
+                        return Html::a(
+                            '<span class="fa fa-copy"></span>',
+                            ['copy', 'id' => $model->ap_id],
+                            ['title' => 'Copy', 'target' => '_blank', 'data-pjax' => 0,
+                                'data' => [
+                                    'confirm' => 'Are you sure you want to copy this item?',
+                                    'method' => 'post',
+                                ],
+                            ]
+                        );
+                    },
+                    'dump' => static function ($url, AbacPolicy $model, $key) {
+                        return Html::a(
+                            '<span class="fa fa-upload"></span>',
+                            ['dump', 'id' => $model->ap_id],
+                            ['title' => 'Dump', 'target' => '_blank', 'data-pjax' => 0,
+                                'class' => 'btn-abac-policy-dump']
+                        );
+                    },
+                ],
+                'visibleButtons' => [
+                    'copy' => static function ($model, $key, $index) {
+                        return true;
+                    },
+                    'dump' => static function ($model, $key, $index) {
+                        return true;
+                    },
+                ],
+            ],
+
+            [
+                'attribute' => 'ap_hash_code',
+                'value' => static function (AbacPolicy $model) {
+                    return $model->ap_hash_code;
+                },
+                'options' => [
+                    'style' => 'width:100px'
+                ],
+            ],
 
             //'ap_object',
             [
                 'label' => 'Status',
-                'value' => static function (AbacPolicy $model) use ($abacObjectList) {
+                'value' => static function (AbacPolicy $model) use ($abacObjectList, $duplicatePolicyIds) {
                     $exist = in_array($model->ap_object, $abacObjectList);
                     if (!$exist) {
                         return '<span class="badge badge-danger" title="Invalid object (not exists)">Error</span>';
@@ -84,24 +177,52 @@ $this->params['breadcrumbs'][] = $this->title;
                             }
                         }
                     }
+                    if ($duplicatePolicyIds && in_array($model->ap_hash_code, $duplicatePolicyIds)) {
+                        return '<span class="badge badge-warning" title="Duplicate (' . Html::encode($model->ap_hash_code) . ')">Duplicate</span>';
+                    }
+
                     return '';
                 },
                 'format' => 'raw',
             ],
 
+
             [
                 'attribute' => 'ap_object',
                 'value' => static function (AbacPolicy $model) {
-                    return $model->ap_object ? '<span class="badge badge-light">' . Html::encode($model->ap_object) . '</span>' : '-';
+                    return $model->ap_object ? '<span class="badge badge-primary">' . Html::encode($model->ap_object) . '</span>' : '-';
                 },
                 'format' => 'raw',
             ],
 
             [
-                'attribute' => 'ap_sort_order',
-                'options' => [
-                    'style' => 'width:80px'
-                ],
+                'attribute' => 'ap_effect',
+                'value' => static function (AbacPolicy $model) {
+                    return $model->getEffectLabel();
+                },
+                'format' => 'raw',
+                'filter' => AbacPolicy::getEffectList()
+            ],
+
+            'ap_title',
+
+
+
+            //'ap_action',
+
+            [
+                'attribute' => 'ap_action',
+                'value' => static function (AbacPolicy $model) {
+                    $list = $model->getActionList();
+                    $data = [];
+                    if ($list) {
+                        foreach ($list as $item) {
+                            $data[] = Html::tag('span', $item, ['class' => 'badge badge-light']);
+                        }
+                    }
+                    return implode(' ', $data);
+                },
+                'format' => 'raw',
             ],
 
             //'ap_rule_type',
@@ -112,19 +233,21 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw',
             ],
+
+
+            [
+                'attribute' => 'ap_sort_order',
+                'options' => [
+                    'style' => 'width:80px'
+                ],
+            ],
+
             //'ap_subject_json',
 
-            'ap_action',
+
             //'ap_action_json',
             //'ap_effect',
-            [
-                'attribute' => 'ap_effect',
-                'value' => static function (AbacPolicy $model) {
-                    return $model->getEffectLabel();
-                },
-                'format' => 'raw',
-                'filter' => AbacPolicy::getEffectList()
-            ],
+
             'ap_enabled:boolean',
             //'ap_title',
 
@@ -164,3 +287,57 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php Pjax::end(); ?>
 
 </div>
+
+
+<?php
+
+$js = <<<JS
+$(document).on('click', '.btn-abac-policy-dump', function(e) {        
+    e.preventDefault();
+    let url = $(this).attr('href');
+    //let gid = $(this).data('gid');
+    let modal = $('#modal-md');
+      
+    modal.find('.modal-body').html('');
+    modal.find('.modal-title').html('Policy Dump');
+    modal.find('.modal-body').load(url, function( response, status, xhr ) {
+        //$('#preloader').addClass('d-none');
+        if (status == 'error') {
+            alert(response);
+        } else {
+            modal.modal({
+              backdrop: 'static',
+              show: true
+            });
+        }
+    });
+ });
+
+
+$(document).on('click', '#btn-dump-import', function(e) {        
+    e.preventDefault();
+    let url = $(this).attr('href');
+    //let gid = $(this).data('gid');
+    let modal = $('#modal-md');
+      
+    modal.find('.modal-body').html('');
+    modal.find('.modal-title').html('Import Policy from Dump');
+    modal.find('.modal-body').load(url, function( response, status, xhr ) {
+        //$('#preloader').addClass('d-none');
+        if (status == 'error') {
+            alert(response);
+        } else {
+            modal.modal({
+              backdrop: 'static',
+              show: true
+            });
+        }
+    });
+ });
+
+
+
+
+JS;
+
+$this->registerJs($js, \yii\web\View::POS_READY, 'abac-index');

@@ -375,4 +375,9 @@ class CommunicationForm extends Model
             'c_offers'          => 'Checked Offers',
         ];
     }
+
+    public function isEmailBlankType(): bool
+    {
+        return $this->c_email_tpl_key === self::TPL_TYPE_EMAIL_BLANK_KEY;
+    }
 }

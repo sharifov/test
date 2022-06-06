@@ -3,6 +3,10 @@
 namespace modules\abac\src;
 
 use modules\abac\components\AbacBaseModel;
+use modules\abac\src\entities\AbacPolicy;
+use src\helpers\app\AppHelper;
+use yii\base\Exception;
+use yii\helpers\Json;
 use yii\helpers\VarDumper;
 
 class AbacService
@@ -237,5 +241,127 @@ class AbacService
         $code = str_replace('||', 'OR', $code);
         $code = str_replace('==', '=', $code);
         return $code;
+    }
+
+    /**
+     * @param string $dump
+     * @return AbacPolicy|null
+     * @throws \yii\db\Exception
+     */
+    public static function convertDumpToObject(string $dump): ?AbacPolicy
+    {
+        $object = null;
+        $errors = [];
+        $data = Json::decode(base64_decode($dump), false);
+
+        if ($data) {
+            if (empty($data->ap_subject)) {
+                $errors[] = 'Empty subject field';
+            }
+            if (empty($data->ap_subject_json)) {
+                $errors[] = 'Empty subject_json field';
+            }
+
+            if (empty($data->ap_object)) {
+                $errors[] = 'Empty ap_object field';
+            }
+            if (empty($data->ap_action)) {
+                $errors[] = 'Empty action field';
+            }
+
+            if (empty($data->ap_action_json)) {
+                $errors[] = 'Empty action_json field';
+            }
+
+            if (!isset($data->ap_effect)) {
+                $errors[] = 'Not isset effect field';
+            }
+
+            if (empty($errors)) {
+                $policy = new AbacPolicy();
+                $policy->ap_subject = $data->ap_subject;
+                $policy->ap_subject_json = $data->ap_subject_json;
+                $policy->ap_object = $data->ap_object;
+                $policy->ap_action = $data->ap_action;
+                $policy->ap_action_json = $data->ap_action_json;
+                $policy->ap_effect = $data->ap_effect;
+                $policy->ap_enabled = isset($data->ap_enabled) ? (bool) $data->ap_enabled : true;
+                $policy->ap_sort_order = $data->ap_sort_order ?? 50;
+                $policy->ap_rule_type = $data->ap_rule_type ?? 'p';
+                $policy->ap_title = $data->ap_title ?? 'Import from dump';
+
+                $object = $policy;
+                unset($policy);
+            } else {
+                throw new \yii\db\Exception(implode(', ', $errors));
+            }
+        }
+        return $object;
+    }
+
+    /**
+     * @param string $dump
+     * @param bool|null $enabled
+     * @return bool
+     */
+    public static function importPolicyFromDump(string $dump, ?bool $enabled = null): bool
+    {
+        try {
+            $policyModel = self::convertDumpToObject($dump);
+            if (!empty($policyModel)) {
+                if ($enabled !== null) {
+                    $policyModel->ap_enabled = $enabled;
+                }
+
+                if (!$policyModel->save()) {
+                    $data['error'] = $policyModel->errors;
+                    $data['attributes'] = $policyModel->attributes;
+                    \Yii::error($data, 'AbacService:importPolicyFromDump:save');
+                } else {
+                    return true;
+                }
+            }
+        } catch (\Throwable $throwable) {
+            $data = AppHelper::throwableLog($throwable);
+            $data['dump'] = $dump;
+            \Yii::error($data, 'AbacService:importPolicyFromDump:Throwable');
+        }
+        return false;
+    }
+
+
+    /**
+     * @param string $dump
+     * @return bool
+     */
+    public static function removePolicyFromDump(string $dump): bool
+    {
+
+        try {
+            $policyModel = self::convertDumpToObject($dump);
+            if (!empty($policyModel)) {
+                $policy = self::findByHash($policyModel->generateHashCode());
+                if ($policy) {
+                    $policy->delete();
+                    return true;
+                }
+            }
+        } catch (\Throwable $throwable) {
+            $data = AppHelper::throwableLog($throwable);
+            $data['dump'] = $dump;
+            \Yii::error($data, 'AbacService:importPolicyFromDump:Throwable');
+        }
+
+        return false;
+    }
+
+    /**
+     * @param string $hashCode
+     * @return array|\yii\db\ActiveRecord|null
+     */
+    public static function findByHash(string $hashCode)
+    {
+        return AbacPolicy::find()->where(['ap_hash_code' => $hashCode])
+            ->orderBy(['ap_id' => SORT_DESC])->limit(1)->one();
     }
 }

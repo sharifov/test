@@ -342,4 +342,13 @@ class ChatBot extends Component
         }
         return ['message' => strip_tags($response->content)];
     }
+
+    /**
+     * @return bool
+     */
+    public function ping(): bool
+    {
+        $result = $this->getUserInfo($this->username);
+        return isset($result['data']);
+    }
 }

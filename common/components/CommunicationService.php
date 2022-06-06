@@ -1533,4 +1533,18 @@ class CommunicationService extends Component implements CommunicationServiceInte
 
         throw new \DomainException('Make Call Client Notification error.');
     }
+
+    /**
+     * Returns communication app availability
+     *
+     * @throws Exception
+     */
+    public function ping(): bool
+    {
+        $response = $this->sendRequest('application-status/ping', [], 'get');
+        if ($response->isOk && !empty($response['availability'])) {
+            return true;
+        }
+        return false;
+    }
 }

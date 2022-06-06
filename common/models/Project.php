@@ -228,8 +228,17 @@ class Project extends \yii\db\ActiveRecord
      */
     public static function getList(): array
     {
-        $data = self::find()->orderBy(['name' => SORT_ASC])->asArray()->all();
+        $data = self::find()->select(['id', 'name'])->orderBy(['name' => SORT_ASC])->asArray()->all();
         return ArrayHelper::map($data, 'id', 'name');
+    }
+
+    /**
+     * @return array
+     */
+    public static function getKeyList(): array
+    {
+        $data = self::find()->select(['project_key', 'name'])->orderBy(['name' => SORT_ASC])->asArray()->all();
+        return ArrayHelper::map($data, 'project_key', 'name');
     }
 
     public static function getListExcludeIds(array $ids): array

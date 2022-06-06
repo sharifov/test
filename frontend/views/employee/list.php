@@ -642,6 +642,8 @@ $isAdmin = $user->isAdmin() || $user->isSuperAdmin();
                 btn.removeClass(['btn-warning', 'checked']).addClass('btn-default').html('<span class="fa fa-square-o"></span> Check All');
                 $('.select-on-check-all').prop('checked', false);
             }
+        } else {
+             sessionStorage.selectedUsers = '{}';
         }
     }
     
@@ -665,7 +667,7 @@ $isAdmin = $user->isAdmin() || $user->isSuperAdmin();
     $('body').on('change', '.select-on-check-all', function(e) {
         let checked = $('#user-list-grid').yiiGridView('getSelectedRows');
         let unchecked = $("input[name='selection[]']:not(:checked)").map(function () { return this.value; }).get();
-        let data = [];
+        let data = {};
         if (sessionStorage.selectedUsers) {
             data = jQuery.parseJSON( sessionStorage.selectedUsers );
         }
