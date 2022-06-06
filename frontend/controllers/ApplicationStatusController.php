@@ -402,12 +402,12 @@ class ApplicationStatusController extends Controller
                 'service' => 'chatBot',
                 'status' => \Yii::$app->applicationStatus->chatBotStatus()
             ],
-//            [
-//                'app' => 'app',
-//                'type' => 'component',
-//                'service' => 'travelServices',
-//                'status' => \Yii::$app->applicationStatus->travelServicesStatus()
-//            ],
+            [
+                'app' => 'app',
+                'type' => 'component',
+                'service' => 'travelServices',
+                'status' => \Yii::$app->applicationStatus->travelServicesStatus()
+            ],
             [
                 'app' => 'app',
                 'type' => 'component',
@@ -462,24 +462,24 @@ class ApplicationStatusController extends Controller
                 'service' => 'telegram',
                 'status' => \Yii::$app->applicationStatus->telegramStatus()
             ],
-//            [
-//                'app' => 'app',
-//                'type' => 'component',
-//                'service' => 'gaRequestService',
-//                'status' => \Yii::$app->applicationStatus->gaRequestServiceStatus()
-//            ],
+            [
+                'app' => 'app',
+                'type' => 'component',
+                'service' => 'gaRequestService',
+                'status' => \Yii::$app->applicationStatus->gaRequestServiceStatus()
+            ],
             [
                 'app' => 'app',
                 'type' => 'component',
                 'service' => 'centrifugo',
                 'status' => \Yii::$app->applicationStatus->centrifugoStatus()
             ],
-//            [
-//                'app' => 'app',
-//                'type' => 'component',
-//                'service' => 'callAntiSpam',
-//                'status' => \Yii::$app->applicationStatus->callAntiSpamStatus()
-//            ],
+            [
+                'app' => 'app',
+                'type' => 'component',
+                'service' => 'callAntiSpam',
+                'status' => \Yii::$app->applicationStatus->callAntiSpamStatus()
+            ],
         ];
 
         $notWorkingComponentsList = array_filter($result, function ($item) {

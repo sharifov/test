@@ -29,6 +29,7 @@ class AbacPolicyForm extends Model
     public $ap_title;
     public $ap_sort_order;
     public $ap_enabled;
+    public $ap_hash_code;
 
     /**
      * @return array
@@ -60,6 +61,7 @@ class AbacPolicyForm extends Model
             'ap_title' => 'Title',
             'ap_sort_order' => 'Sort Order',
             'ap_enabled' => 'Enabled',
+            'ap_hash_code' => 'Hash Code',
         ];
     }
 

@@ -64,6 +64,12 @@ $this->params['breadcrumbs'][] = $this->title;
         <i class="fa fa-info-circle"></i> <code>HashCode = md5(Object + Action + Subject + Effect)</code>
     </p>
 
+    <p>
+        <i class="fa fa-info-circle"></i> <code>HashCode = md5(Object + Action + Subject + Effect)</code>
+
+
+    </p>
+
     <?php Pjax::begin(['scrollTo' => 0]); ?>
 
     <?php // echo $this->render('_search', ['model' => $searchModel]);?>

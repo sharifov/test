@@ -23,7 +23,15 @@ class PasswordHelper
             return [];
         }
 
-        $rules = ['Password cannot contain the username'];
+        $rules = [];
+
+        if ($strengthValidator->hasUser === true) {
+            $rules[] = "Password cannot contain the username";
+        }
+
+        if ($strengthValidator->hasEmail === true) {
+            $rules[] = "Password cannot contain an email address";
+        }
 
         if ($strengthValidator->min > 0) {
             $rules[] = "Minimum password length is {$strengthValidator->min} characters";
@@ -43,6 +51,10 @@ class PasswordHelper
 
         if ($strengthValidator->special > 0) {
             $rules[] = "Password must contain at least {$strengthValidator->special} special characters";
+        }
+
+        if ($strengthValidator->allowSpaces === false) {
+            $rules[] = "Password cannot contain any spaces";
         }
 
         return $rules;

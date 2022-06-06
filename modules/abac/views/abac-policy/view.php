@@ -33,6 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'attributes' => [
             'ap_id',
+            'ap_hash_code',
             'ap_subject',
             //'ap_subject_json',
             //'ap_object',
