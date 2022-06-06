@@ -5,9 +5,9 @@ use modules\shiftSchedule\src\services\UserShiftScheduleAttributeFormatService;
 use yii\db\Migration;
 
 /**
- * Class m220603_084648_move_data_shift_schedule_request_to_history
+ * Class m220603_084648_move_data_shift_schedule_request_to_log
  */
-class m220603_084648_move_data_shift_schedule_request_to_history extends Migration
+class m220603_084648_move_data_shift_schedule_request_to_log extends Migration
 {
     /**
      * {@inheritdoc}
@@ -24,6 +24,9 @@ class m220603_084648_move_data_shift_schedule_request_to_history extends Migrati
             $values = [];
             foreach ($requestBatch as $request) {
                 if (empty($parentRequest) || $parentRequest->ssr_uss_id !== $request->ssr_uss_id) {
+                    if (!empty($parentRequest)) {
+                        $parentRequest::updateAll($parentRequest->attributes, ['ssr_id' => $parentRequest->ssr_id]);
+                    }
                     $parentRequest = $request;
                     $preventRequest = $request;
                     $oldAttr = null;
@@ -61,14 +64,15 @@ class m220603_084648_move_data_shift_schedule_request_to_history extends Migrati
                     // Update parent request
                     $parentRequest->ssr_status_id = $request->ssr_status_id;
                     $parentRequest->ssr_description = $request->ssr_description;
-                    $parentRequest->save();
                     // Remove request
                     $request->delete();
                 }
             }
-
+            if (!empty($parentRequest)) {
+                $parentRequest::updateAll($parentRequest->attributes, ['ssr_id' => $parentRequest->ssr_id]);
+            }
             $this->batchInsert(
-                '{{%shift_schedule_request_history}}',
+                '{{%shift_schedule_request_log}}',
                 [
                     'ssrh_ssr_id',
                     'ssrh_old_attr',
@@ -90,6 +94,6 @@ class m220603_084648_move_data_shift_schedule_request_to_history extends Migrati
      */
     public function safeDown()
     {
-        $this->truncateTable('{{%shift_schedule_request_history}}');
+        $this->truncateTable('{{%shift_schedule_request_log}}');
     }
 }

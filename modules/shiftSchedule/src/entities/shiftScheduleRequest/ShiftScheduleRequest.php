@@ -3,7 +3,7 @@
 namespace modules\shiftSchedule\src\entities\shiftScheduleRequest;
 
 use common\models\Employee;
-use modules\shiftSchedule\src\entities\shiftScheduleRequestHistory\ShiftScheduleRequestHistory;
+use modules\shiftSchedule\src\entities\shiftScheduleRequestLog\ShiftScheduleRequestLog;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\shiftSchedule\src\services\UserShiftScheduleAttributeFormatService;
@@ -103,8 +103,8 @@ class ShiftScheduleRequest extends ActiveRecord
      */
     public function init(): void
     {
-        $this->on(self::EVENT_AFTER_INSERT, [$this, 'saveRequestHistory']);
-        $this->on(self::EVENT_AFTER_UPDATE, [$this, 'saveRequestHistory']);
+        $this->on(self::EVENT_AFTER_INSERT, [$this, 'saveRequestLog']);
+        $this->on(self::EVENT_AFTER_UPDATE, [$this, 'saveRequestLog']);
         parent::init();
     }
 
@@ -343,13 +343,12 @@ class ShiftScheduleRequest extends ActiveRecord
      * @param Event $event
      * @throws \yii\base\InvalidConfigException
      */
-    public function saveRequestHistory(Event $event): void
+    public function saveRequestLog(Event $event): void
     {
         if ($event->name === BaseActiveRecord::EVENT_AFTER_INSERT) {
             $oldAttr = null;
         } else {
             $changedAttributes = $event->changedAttributes;
-            VarDumper::dump($changedAttributes, 10, true);
             if (!empty($changedAttributes['ssr_status_id'])) {
                 $changedAttributes['ssr_status_id'] = sprintf(
                     '%s (%s)',
@@ -379,7 +378,7 @@ class ShiftScheduleRequest extends ActiveRecord
         $formatAttributeService = \Yii::createObject(UserShiftScheduleAttributeFormatService::class);
         $formattedAttr = $formatAttributeService->formatAttr(ShiftScheduleRequest::class, $oldAttr, $newAttr);
 
-        $history = new ShiftScheduleRequestHistory([
+        $history = new ShiftScheduleRequestLog([
             'ssrh_ssr_id' => $event->sender->ssr_id,
             'ssrh_old_attr' => $oldAttr,
             'ssrh_new_attr' => $newAttr,

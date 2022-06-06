@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model modules\shiftSchedule\src\entities\shiftScheduleRequestHistory\ShiftScheduleRequestHistory */
+/* @var $model modules\shiftSchedule\src\entities\shiftScheduleRequestLog\ShiftScheduleRequestLog */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 

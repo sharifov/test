@@ -1,10 +1,10 @@
 <?php
 
 /**
- * @var ShiftScheduleRequestHistory $model
+ * @var ShiftScheduleRequestLog $model
  */
 
-use modules\shiftSchedule\src\entities\shiftScheduleRequestHistory\ShiftScheduleRequestHistory;
+use modules\shiftSchedule\src\entities\shiftScheduleRequestLog\ShiftScheduleRequestLog;
 
 ?>
 

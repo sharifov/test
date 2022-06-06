@@ -4,9 +4,9 @@ use src\helpers\app\DBHelper;
 use yii\db\Migration;
 
 /**
- * Class m220603_080625_create_tbl_shift_schedule_request_history
+ * Class m220603_080625_create_tbl_shift_schedule_request_log
  */
-class m220603_080625_create_tbl_shift_schedule_request_history extends Migration
+class m220603_080625_create_tbl_shift_schedule_request_log extends Migration
 {
     /**
      * {@inheritdoc}
@@ -18,9 +18,9 @@ class m220603_080625_create_tbl_shift_schedule_request_history extends Migration
             $tableOptions = 'CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE=InnoDB';
         }
 
-        DBHelper::dropTableIfExists('{{%shift_schedule_request_history}}');
+        DBHelper::dropTableIfExists('{{%shift_schedule_request_log}}');
 
-        $this->createTable('{{%shift_schedule_request_history}}', [
+        $this->createTable('{{%shift_schedule_request_log}}', [
             'ssrh_id' => $this->primaryKey(),
             'ssrh_ssr_id' => $this->integer(),
             'ssrh_old_attr' => $this->json(),
@@ -33,8 +33,8 @@ class m220603_080625_create_tbl_shift_schedule_request_history extends Migration
         ], $tableOptions);
 
         $this->addForeignKey(
-            'FK-shift_schedule_request_history-ssrh_ssr_id',
-            '{{%shift_schedule_request_history}}',
+            'FK-shift_schedule_request_log-ssrh_ssr_id',
+            '{{%shift_schedule_request_log}}',
             'ssrh_ssr_id',
             '{{%shift_schedule_request}}',
             'ssr_id',
@@ -43,8 +43,8 @@ class m220603_080625_create_tbl_shift_schedule_request_history extends Migration
         );
 
         $this->addForeignKey(
-            'FK-shift_schedule_request_history-ssrh_created_user_id',
-            '{{%shift_schedule_request_history}}',
+            'FK-shift_schedule_request_log-ssrh_created_user_id',
+            '{{%shift_schedule_request_log}}',
             'ssrh_created_user_id',
             '{{%employees}}',
             'id',
@@ -53,8 +53,8 @@ class m220603_080625_create_tbl_shift_schedule_request_history extends Migration
         );
 
         $this->addForeignKey(
-            'FK-shift_schedule_request_history-ssrh_updated_user_id',
-            '{{%shift_schedule_request_history}}',
+            'FK-shift_schedule_request_log-ssrh_updated_user_id',
+            '{{%shift_schedule_request_log}}',
             'ssrh_updated_user_id',
             '{{%employees}}',
             'id',
@@ -68,6 +68,6 @@ class m220603_080625_create_tbl_shift_schedule_request_history extends Migration
      */
     public function safeDown()
     {
-        $this->dropTable('{{%shift_schedule_request_history}}');
+        $this->dropTable('{{%shift_schedule_request_log}}');
     }
 }

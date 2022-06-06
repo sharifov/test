@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\shiftSchedule\src\entities\shiftScheduleRequestHistory;
+namespace modules\shiftSchedule\src\entities\shiftScheduleRequestLog;
 
 use common\models\Employee;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
@@ -11,7 +11,7 @@ use yii\db\ActiveRecord;
 use yii\db\BaseActiveRecord;
 
 /**
- * This is the model class for table "shift_schedule_request_history".
+ * This is the model class for table "shift_schedule_request_log".
  *
  * @property int $ssrh_id
  * @property int|null $ssrh_ssr_id
@@ -27,7 +27,7 @@ use yii\db\BaseActiveRecord;
  * @property ShiftScheduleRequest $scheduleRequest
  * @property Employee $whoUpdated
  */
-class ShiftScheduleRequestHistory extends ActiveRecord
+class ShiftScheduleRequestLog extends ActiveRecord
 {
     /**
      * @return array[]
@@ -58,7 +58,7 @@ class ShiftScheduleRequestHistory extends ActiveRecord
      */
     public static function tableName(): string
     {
-        return 'shift_schedule_request_history';
+        return 'shift_schedule_request_log';
     }
 
     /**

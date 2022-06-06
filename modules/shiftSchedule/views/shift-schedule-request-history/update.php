@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model modules\shiftSchedule\src\entities\shiftScheduleRequestHistory\ShiftScheduleRequestHistory */
+/* @var $model modules\shiftSchedule\src\entities\shiftScheduleRequestLog\ShiftScheduleRequestLog */
 
 $this->title = 'Update Shift Schedule Request History: ' . $model->ssrh_id;
 $this->params['breadcrumbs'][] = ['label' => 'Shift Schedule Request Histories', 'url' => ['index']];

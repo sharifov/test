@@ -2,11 +2,11 @@
 
 /**
  * @var View $this
- * @var ShiftScheduleRequestHistory $searchModel
+ * @var ShiftScheduleRequestLog $searchModel
  * @var ActiveDataProvider $dataProvider
  */
 
-use modules\shiftSchedule\src\entities\shiftScheduleRequestHistory\ShiftScheduleRequestHistory;
+use modules\shiftSchedule\src\entities\shiftScheduleRequestLog\ShiftScheduleRequestLog;
 use yii\data\ActiveDataProvider;
 use yii\grid\GridView;
 use yii\helpers\Html;
@@ -36,7 +36,7 @@ $view = $this;
             [
                 'header' => 'Who made the changes',
                 'attribute' => 'ssrh_created_user_id',
-                'value' => static function (ShiftScheduleRequestHistory $model) {
+                'value' => static function (ShiftScheduleRequestLog $model) {
                     $template = '';
                     if ($model->ssrh_created_user_id) {
                         $template .= '<i class="fa fa-user"></i> ';
@@ -55,7 +55,7 @@ $view = $this;
             [
                 'header' => 'Changed Attributes',
                 'attribute' => 'ssrh_formatted_attr',
-                'value' => static function (ShiftScheduleRequestHistory $model) use ($view) {
+                'value' => static function (ShiftScheduleRequestLog $model) use ($view) {
                     if ($model->ssrh_formatted_attr) {
                         return $view->render('partial/_formatted_attributes', [
                             'model' => $model

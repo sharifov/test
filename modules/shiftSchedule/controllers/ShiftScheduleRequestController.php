@@ -6,7 +6,7 @@ use frontend\controllers\FController;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\search\ShiftScheduleRequestSearch;
-use modules\shiftSchedule\src\entities\shiftScheduleRequestHistory\search\ShiftScheduleRequestHistorySearch;
+use modules\shiftSchedule\src\entities\shiftScheduleRequestLog\search\ShiftScheduleRequestLogSearch;
 use modules\shiftSchedule\src\forms\ScheduleDecisionForm;
 use modules\shiftSchedule\src\services\ShiftScheduleRequestService;
 use src\auth\Auth;
@@ -160,7 +160,7 @@ class ShiftScheduleRequestController extends FController
      */
     public function actionGetHistory(int $id): string
     {
-        $searchModel = new ShiftScheduleRequestHistorySearch();
+        $searchModel = new ShiftScheduleRequestLogSearch();
         $dataProvider = $searchModel->search(ArrayHelper::merge(
             Yii::$app->request->queryParams,
             [

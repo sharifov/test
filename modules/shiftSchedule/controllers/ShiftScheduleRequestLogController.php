@@ -2,17 +2,17 @@
 
 namespace modules\shiftSchedule\controllers;
 
-use modules\shiftSchedule\src\entities\shiftScheduleRequestHistory\ShiftScheduleRequestHistory;
-use modules\shiftSchedule\src\entities\shiftScheduleRequestHistory\search\ShiftScheduleRequestHistorySearch;
+use modules\shiftSchedule\src\entities\shiftScheduleRequestLog\ShiftScheduleRequestLog;
+use modules\shiftSchedule\src\entities\shiftScheduleRequestLog\search\ShiftScheduleRequestLogSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
 
 /**
- * ShiftScheduleRequestHistoryController implements the CRUD actions for ShiftScheduleRequestHistory model.
+ * ShiftScheduleRequestLogController implements the CRUD actions for ShiftScheduleRequestLog model.
  */
-class ShiftScheduleRequestHistoryController extends Controller
+class ShiftScheduleRequestLogController extends Controller
 {
     /**
      * @inheritDoc
@@ -33,13 +33,13 @@ class ShiftScheduleRequestHistoryController extends Controller
     }
 
     /**
-     * Lists all ShiftScheduleRequestHistory models.
+     * Lists all ShiftScheduleRequestLog models.
      *
      * @return string
      */
     public function actionIndex(): string
     {
-        $searchModel = new ShiftScheduleRequestHistorySearch();
+        $searchModel = new ShiftScheduleRequestLogSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
 
         return $this->render('index', [
@@ -49,7 +49,7 @@ class ShiftScheduleRequestHistoryController extends Controller
     }
 
     /**
-     * Displays a single ShiftScheduleRequestHistory model.
+     * Displays a single ShiftScheduleRequestLog model.
      * @param int $ssrh_id Ssrh ID
      * @return string
      * @throws NotFoundHttpException if the model cannot be found
@@ -62,13 +62,13 @@ class ShiftScheduleRequestHistoryController extends Controller
     }
 
     /**
-     * Creates a new ShiftScheduleRequestHistory model.
+     * Creates a new ShiftScheduleRequestLog model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return string|Response
      */
     public function actionCreate()
     {
-        $model = new ShiftScheduleRequestHistory();
+        $model = new ShiftScheduleRequestLog();
 
         if ($this->request->isPost) {
             if ($model->load($this->request->post()) && $model->save()) {
@@ -84,7 +84,7 @@ class ShiftScheduleRequestHistoryController extends Controller
     }
 
     /**
-     * Updates an existing ShiftScheduleRequestHistory model.
+     * Updates an existing ShiftScheduleRequestLog model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param int $ssrh_id Ssrh ID
      * @return string|Response
@@ -104,7 +104,7 @@ class ShiftScheduleRequestHistoryController extends Controller
     }
 
     /**
-     * Deletes an existing ShiftScheduleRequestHistory model.
+     * Deletes an existing ShiftScheduleRequestLog model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param int $ssrh_id Ssrh ID
      * @return Response
@@ -118,15 +118,15 @@ class ShiftScheduleRequestHistoryController extends Controller
     }
 
     /**
-     * Finds the ShiftScheduleRequestHistory model based on its primary key value.
+     * Finds the ShiftScheduleRequestLog model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param int $ssrh_id Ssrh ID
-     * @return ShiftScheduleRequestHistory the loaded model
+     * @return ShiftScheduleRequestLog the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel(int $ssrh_id): ShiftScheduleRequestHistory
+    protected function findModel(int $ssrh_id): ShiftScheduleRequestLog
     {
-        if (($model = ShiftScheduleRequestHistory::findOne(['ssrh_id' => $ssrh_id])) !== null) {
+        if (($model = ShiftScheduleRequestLog::findOne(['ssrh_id' => $ssrh_id])) !== null) {
             return $model;
         }
 

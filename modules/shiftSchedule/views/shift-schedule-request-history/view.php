@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model modules\shiftSchedule\src\entities\shiftScheduleRequestHistory\ShiftScheduleRequestHistory */
+/* @var $model modules\shiftSchedule\src\entities\shiftScheduleRequestLog\ShiftScheduleRequestLog */
 
 $this->title = $model->ssrh_id;
 $this->params['breadcrumbs'][] = ['label' => 'Shift Schedule Request Histories', 'url' => ['index']];

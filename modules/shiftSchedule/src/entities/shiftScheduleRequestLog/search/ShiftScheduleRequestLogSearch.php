@@ -1,15 +1,15 @@
 <?php
 
-namespace modules\shiftSchedule\src\entities\shiftScheduleRequestHistory\search;
+namespace modules\shiftSchedule\src\entities\shiftScheduleRequestLog\search;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use modules\shiftSchedule\src\entities\shiftScheduleRequestHistory\ShiftScheduleRequestHistory;
+use modules\shiftSchedule\src\entities\shiftScheduleRequestLog\ShiftScheduleRequestLog;
 
 /**
- * ShiftScheduleRequestHistorySearch represents the model behind the search form of `modules\shiftSchedule\src\entities\shiftScheduleRequestHistory\ShiftScheduleRequestHistory`.
+ * ShiftScheduleRequestLogSearch represents the model behind the search form of `modules\shiftSchedule\src\entities\shiftScheduleRequestLog\ShiftScheduleRequestLog`.
  */
-class ShiftScheduleRequestHistorySearch extends ShiftScheduleRequestHistory
+class ShiftScheduleRequestLogSearch extends ShiftScheduleRequestLog
 {
     /**
      * {@inheritdoc}
@@ -40,7 +40,7 @@ class ShiftScheduleRequestHistorySearch extends ShiftScheduleRequestHistory
      */
     public function search(array $params): ActiveDataProvider
     {
-        $query = ShiftScheduleRequestHistory::find();
+        $query = ShiftScheduleRequestLog::find();
 
         // add conditions that should always apply here
 

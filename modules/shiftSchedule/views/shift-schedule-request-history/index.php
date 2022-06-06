@@ -1,6 +1,6 @@
 <?php
 
-use modules\shiftSchedule\src\entities\shiftScheduleRequestHistory\ShiftScheduleRequestHistory;
+use modules\shiftSchedule\src\entities\shiftScheduleRequestLog\ShiftScheduleRequestLog;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\ActionColumn;
@@ -8,7 +8,7 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel modules\shiftSchedule\src\entities\shiftScheduleRequestHistory\search\ShiftScheduleRequestHistorySearch */
+/* @var $searchModel modules\shiftSchedule\src\entities\shiftScheduleRequestLog\search\ShiftScheduleRequestLogSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Shift Schedule Request Histories';
@@ -42,7 +42,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'ssrh_updated_user_id',
             [
                 'class' => ActionColumn::class,
-                'urlCreator' => function ($action, ShiftScheduleRequestHistory $model, $key, $index, $column) {
+                'urlCreator' => function ($action, ShiftScheduleRequestLog $model, $key, $index, $column) {
                     return Url::toRoute([$action, 'ssrh_id' => $model->ssrh_id]);
                 }
             ],
