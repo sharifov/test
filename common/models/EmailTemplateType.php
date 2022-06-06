@@ -332,7 +332,7 @@ class EmailTemplateType extends \yii\db\ActiveRecord
             $query->orHaving(['=', 'COUNT(ettp_project_id)', 0]);
         }
         /** @fflag FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES, A/B testing for email offer templates enable/disable */
-        if (Yii::$app->ff->isEnable(FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES) && $lead) {
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES) && $lead) {
             $emailAbTestingService = new EmailTemplateOfferABTestingService();
             $etpId = $emailAbTestingService->assignEmailOfferTemplateToLead($lead);
             if ($etpId) {

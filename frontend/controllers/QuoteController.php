@@ -1400,7 +1400,7 @@ class QuoteController extends FController
 
         try {
             /** @fflag FFlag::FF_KEY_ADD_AUTO_QUOTES, Auto add quote */
-            if (!Yii::$app->ff->isEnable(FFlag::FF_KEY_ADD_AUTO_QUOTES)) {
+            if (!Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_ADD_AUTO_QUOTES)) {
                 throw new \RuntimeException('Auto add quote is disabled');
             }
             $lead = Lead::findOne($leadId);

@@ -51,7 +51,7 @@ use yii\widgets\Pjax;
 
 <?php
 /** @fflag FFlag::FF_KEY_BADGE_COUNT_ENABLE, Badge Count Enable/Disable */
-if (Yii::$app->ff->isEnable(FFlag::FF_KEY_BADGE_COUNT_ENABLE)) :
+if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BADGE_COUNT_ENABLE)) :
     $js = <<<JS
         let badgesCollection = [];
 JS;

@@ -78,7 +78,7 @@ class LeadPoorProcessingService
                     }
                 } catch (\RuntimeException | \DomainException $throwable) {
                     /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
-                    if (Yii::$app->ff->isEnable(FFlag::FF_KEY_DEBUG)) {
+                    if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_DEBUG)) {
                         $message = ArrayHelper::merge(AppHelper::throwableLog($throwable, true), $logData);
                         \Yii::warning($message, 'LeadPoorProcessingService:removeFromLead:Exception');
                     }
@@ -121,7 +121,7 @@ class LeadPoorProcessingService
             $leadPoorProcessingLogRepository->save(true);
         } catch (\RuntimeException | \DomainException $throwable) {
             /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
-            if (Yii::$app->ff->isEnable(FFlag::FF_KEY_DEBUG)) {
+            if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_DEBUG)) {
                 $message = ArrayHelper::merge(AppHelper::throwableLog($throwable, true), $logData);
                 \Yii::info($message, 'info\LeadPoorProcessingService:removeFromLeadAndKey:Exception');
             }
@@ -138,7 +138,7 @@ class LeadPoorProcessingService
         int $priority = 100
     ): void {
         /** @fflag FFlag::FF_LPP_ENABLE, Lead Poor Processing Enable/Disable */
-        if (!Yii::$app->ff->isEnable(FFlag::FF_KEY_LPP_ENABLE)) {
+        if (!Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_LPP_ENABLE)) {
             return;
         }
 
@@ -171,7 +171,7 @@ class LeadPoorProcessingService
         int $priority = 100
     ): void {
         /** @fflag FFlag::FF_LPP_ENABLE, Lead Poor Processing Enable/Disable */
-        if (!Yii::$app->ff->isEnable(FFlag::FF_KEY_LPP_ENABLE)) {
+        if (!Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_LPP_ENABLE)) {
             return;
         }
 

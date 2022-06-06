@@ -25,7 +25,7 @@ class m220511_051458_change_ff_auto_add_quote extends Migration
                     FFlag::FF_KEY_ADD_AUTO_QUOTES,
                     ['ff_value' => 0, 'ff_description' => 'Auto add quotes in create Flight Request processing (not used as limit)']
                 );
-                Yii::$app->ff->invalidateCache();
+                Yii::$app->featureFlag->invalidateCache();
             }
         } catch (\Throwable $throwable) {
             \Yii::error(AppHelper::throwableLog($throwable), 'm220511_051458_change_ff_auto_add_quote:safeUp:Throwable');
@@ -47,7 +47,7 @@ class m220511_051458_change_ff_auto_add_quote extends Migration
                     FFlag::FF_KEY_ADD_AUTO_QUOTES,
                     ['ff_value' => 5, 'ff_description' => 'Auto add quotes in create Flight Request processing']
                 );
-                Yii::$app->ff->invalidateCache();
+                Yii::$app->featureFlag->invalidateCache();
             }
         } catch (\Throwable $throwable) {
             \Yii::error(AppHelper::throwableLog($throwable), 'm220511_051458_change_ff_auto_add_quote:safeDown:Throwable');
