@@ -250,8 +250,10 @@ return [
                     'class' => Microsoft::class,
                     'clientId' => env('FRONTEND_CONFIG_MAIN_COMPONENTS_AUTHCLIENTCOLLECTION_CLIENTS_MICROSOFT_CLIENTID'),
                     'clientSecret' => env('FRONTEND_CONFIG_MAIN_COMPONENTS_AUTHCLIENTCOLLECTION_CLIENTS_MICROSOFT_CLIENTSECRET'),
-                    'authUrl' => 'https://login.microsoftonline.com/' . env('FRONTEND_CONFIG_MAIN_COMPONENTS_AUTHCLIENTCOLLECTION_CLIENTS_MICROSOFT_TENANTID') . '/oauth2/v2.0/authorize',
-                    'tokenUrl' => 'https://login.microsoftonline.com/' . env('FRONTEND_CONFIG_MAIN_COMPONENTS_AUTHCLIENTCOLLECTION_CLIENTS_MICROSOFT_TENANTID') . '/oauth2/v2.0/token',
+                    'tenantId' => env('FRONTEND_CONFIG_MAIN_COMPONENTS_AUTHCLIENTCOLLECTION_CLIENTS_MICROSOFT_TENANTID'),
+                    'host' => 'https://login.microsoftonline.com/',
+                    'authUrl' => '/oauth2/v2.0/authorize',
+                    'tokenUrl' => '/oauth2/v2.0/token',
                     'apiBaseUrl' => 'https://graph.microsoft.com/v1.0',
                     'scope' => 'User.Read'
                 ],

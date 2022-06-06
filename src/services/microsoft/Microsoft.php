@@ -6,25 +6,20 @@ use yii\authclient\OAuth2;
 
 class Microsoft extends OAuth2
 {
-    /**
-     * {@inheritdoc}
-     */
-    public $authUrl = 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize';
-    /**
-     * {@inheritdoc}
-     */
-    public $tokenUrl = 'https://login.microsoftonline.com/common/oauth2/v2.0/token';
-    /**
-     * {@inheritdoc}
-     */
-    public $apiBaseUrl = 'https://graph.microsoft.com/v1.0';
-
+    public string $host;
+    public string $tenantId;
+    public $authUrl;
+    public $tokenUrl;
+    public $apiBaseUrl;
 
     /**
      * {@inheritdoc}
      */
     public function init()
     {
+        $this->authUrl = $this->host . $this->tenantId . $this->authUrl;
+        $this->tokenUrl = $this->host . $this->tenantId . $this->tokenUrl;
+
         parent::init();
         if ($this->scope === null) {
             $this->scope = implode(',', [
