@@ -66,7 +66,7 @@ use yii\helpers\Url;
                             ],
                         ],
                     ]) ?>
-                        <div class="d-flex justify-content-center" style>
+                        <div class="d-flex justify-content-center flex-wrap" style>
                             <?php foreach ($authChoice->getClients() as $client) : ?>
                                 <?= $authChoice->clientLink(
                                     $client,

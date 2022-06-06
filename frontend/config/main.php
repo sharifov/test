@@ -2,6 +2,7 @@
 
 use modules\abac\AbacModule;
 use kivork\FeatureFlag\FeatureFlagModule;
+use src\services\microsoft\Microsoft;
 use yii\authclient\clients\Google;
 use yii\authclient\Collection;
 use common\components\logger\FilebeatTarget;
@@ -244,6 +245,15 @@ return [
                     'class' => Google::class,
                     'clientId' => env('FRONTEND_CONFIG_MAIN_COMPONENTS_AUTHCLIENTCOLLECTION_CLIENTS_GOOGLE_CLIENTID'),
                     'clientSecret' => env('FRONTEND_CONFIG_MAIN_COMPONENTS_AUTHCLIENTCOLLECTION_CLIENTS_GOOGLE_CLIENTSECRET')
+                ],
+                'microsoft' => [
+                    'class' => Microsoft::class,
+                    'clientId' => env('FRONTEND_CONFIG_MAIN_COMPONENTS_AUTHCLIENTCOLLECTION_CLIENTS_MICROSOFT_CLIENTID'),
+                    'clientSecret' => env('FRONTEND_CONFIG_MAIN_COMPONENTS_AUTHCLIENTCOLLECTION_CLIENTS_MICROSOFT_CLIENTSECRET'),
+                    'authUrl' => 'https://login.microsoftonline.com/' . env('FRONTEND_CONFIG_MAIN_COMPONENTS_AUTHCLIENTCOLLECTION_CLIENTS_MICROSOFT_TENANTID') . '/oauth2/v2.0/authorize',
+                    'tokenUrl' => 'https://login.microsoftonline.com/' . env('FRONTEND_CONFIG_MAIN_COMPONENTS_AUTHCLIENTCOLLECTION_CLIENTS_MICROSOFT_TENANTID') . '/oauth2/v2.0/token',
+                    'apiBaseUrl' => 'https://graph.microsoft.com/v1.0',
+                    'scope' => 'User.Read'
                 ],
             ],
         ]
