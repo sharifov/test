@@ -2,38 +2,45 @@
 
 namespace src\repositories;
 
-use src\dispatchers\EventDispatcher;
-use src\helpers\ErrorsToStringHelper;
-use Yii;
+use src\helpers\app\DBHelper;
 
 /**
- * Class AbstractRepositoryWithEvent
- *
- * @property EventDispatcher|null $eventDispatcher
+ * Class AbstractRepositoryYearMonthPartition
  */
-abstract class AbstractRepositoryWithEvent extends AbstractBaseRepository
+abstract class AbstractRepositoryYearMonthPartition extends AbstractRepositoryWithEvent
 {
-    private ?EventDispatcher $eventDispatcher = null;
-
-    public function setEventDispatcher(EventDispatcher $eventDispatcher): void
+    /**
+     * @throws \yii\db\Exception
+     * @throws \Throwable
+     */
+    public function save(bool $runValidation = false, string $glue = ' ', int $attempts = 0): AbstractBaseRepository
     {
-        $this->eventDispatcher = $eventDispatcher;
-    }
+        try {
+            parent::save($runValidation, $glue);
+        } catch (\Throwable $e) {
+            if (strpos($e->getMessage(), 'Table has no partition')) {
+                if ($attempts > 0) {
+                    throw new \RuntimeException('Unable to create UserTask partition. ' . $e->getMessage());
+                }
+                try {
+                    $partitionCommand = DBHelper::generateAddPartitionYear($this->getModel()::tableName(), (new \DateTimeImmutable()));
+                    \Yii::$app->db->createCommand($partitionCommand)->execute();
+                    \Yii::info(
+                        [
+                            'message' => 'Partition created',
+                            'table' => $this->getModel()::tableName(),
+                            'partitionCommand' => $partitionCommand,
+                        ],
+                        'info\UserTaskRepository:Partition:Created'
+                    );
+                } catch (\Throwable $throwable) {
+                    throw $e;
+                }
 
-    public function getEventDispatcher(): EventDispatcher
-    {
-        return $this->eventDispatcher ?? ($this->eventDispatcher = Yii::createObject(
-            EventDispatcher::class
-        ));
-    }
-
-    public function save(bool $runValidation = false, string $glue = ' '): AbstractBaseRepository
-    {
-        if (!$this->model->save($runValidation)) {
-            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($this->model, $glue));
-        }
-        if (method_exists($this->model, 'releaseEvents')) {
-            $this->getEventDispatcher()->dispatchAll($this->model->releaseEvents());
+                $this->save($runValidation, $glue, ++$attempts);
+            } else {
+                throw $e;
+            }
         }
         return $this;
     }

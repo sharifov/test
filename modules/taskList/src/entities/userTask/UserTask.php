@@ -145,8 +145,9 @@ class UserTask extends \yii\db\ActiveRecord
         return $model::fillSystemFields($model);
     }
 
-    private static function fillSystemFields(UserTask $model, \DateTimeImmutable $nowDT = (new \DateTimeImmutable())): UserTask
+    private static function fillSystemFields(UserTask $model): UserTask
     {
+        $nowDT = (new \DateTimeImmutable());
         $model->ut_created_dt = $nowDT->format('Y-m-d H:i:s');
         $model->ut_year = $nowDT->format('Y');
         $model->ut_month = $nowDT->format('m');

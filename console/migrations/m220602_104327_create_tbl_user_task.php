@@ -50,9 +50,8 @@ class m220602_104327_create_tbl_user_task extends Migration
             $this->tableUserTask,
             'ut_year',
             'ut_month',
-            //(new \DateTimeImmutable()), //
-            (new \DateTimeImmutable())->modify('- 1 years'),
-            1,// TODO:: FOR DEBUG:: must by change to 5
+            (new \DateTimeImmutable()),
+            5,
             false
         );
         Yii::$app->db->createCommand($partitions)->execute();
