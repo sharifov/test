@@ -2250,6 +2250,11 @@ class Call extends \yii\db\ActiveRecord
         return $this->c_source_type_id === self::SOURCE_REDIRECT_CALL;
     }
 
+    public function isGeneralLine(): bool
+    {
+        return $this->c_source_type_id === self::SOURCE_GENERAL_LINE;
+    }
+
 
     /**
      * @param string $statusName

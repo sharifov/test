@@ -23,7 +23,7 @@ use src\helpers\setting\SettingHelper;
  */
 class CaseSettings
 {
-    public bool $createOnCall;
+    public CreateOnCallSetting $createOnCall;
     public bool $createOnSms;
     public int $trashActiveDaysLimit;
     public bool $sendFeedback;
@@ -39,7 +39,7 @@ class CaseSettings
 
     public function __construct(array $params)
     {
-        $this->createOnCall = (bool)($params['createOnCall'] ?? false);
+        $this->createOnCall = new CreateOnCallSetting($params['createOnCall'] ?? []);
         $this->createOnSms = (bool)($params['createOnSms'] ?? false);
         $this->trashActiveDaysLimit = (int)($params['trashActiveDaysLimit'] ?? SettingHelper::getTrashActiveDaysLimitGlobal());
         $this->sendFeedback = (bool)($params['sendFeedback'] ?? false);
