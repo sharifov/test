@@ -14,7 +14,6 @@ use yii\bootstrap4\Html;
 use yii\bootstrap4\Modal;
 use yii\grid\GridView;
 use yii\helpers\Url;
-use yii\helpers\VarDumper;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
@@ -76,7 +75,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'username',
                 'placeholder' => 'Select User'
             ],
-            //'uss_shift_id',
             //'uss_sst_id',
             [
                 'attribute' => 'uss_sst_id',
@@ -111,7 +109,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => static function (
                     UserShiftSchedule $model
                 ) {
-                    return $model->getShiftTitle();
+                    return $model->getShiftName();
                 },
                 'filter' => Shift::getList()
             ],
