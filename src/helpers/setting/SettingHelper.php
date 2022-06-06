@@ -874,9 +874,17 @@ class SettingHelper
             return [];
         }
 
+        if (array_key_exists('sources', $settings) && is_array($settings['sources'])) {
+            $sources = $settings['sources'];
+        } else {
+            self::leadRedialExcludeAttributesErrorLog('sources');
+            return [];
+        }
+
         return [
             'projects' => $projects,
             'departments' => $departments,
+            'sources' => $sources,
             'cabins' => $cabins,
             'noFlightDetails' => $noFlightDetails,
             'isTest' => $isTest
