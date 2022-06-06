@@ -5,6 +5,7 @@ namespace modules\abac\controllers;
 use frontend\controllers\FController;
 use modules\abac\src\entities\search\AbacPolicyImportSearch;
 use modules\abac\src\forms\AbacPolicyForm;
+use modules\abac\src\forms\AbacPolicyImportDumpForm;
 use modules\abac\src\forms\AbacPolicyImportForm;
 use src\auth\Auth;
 use Yii;
@@ -18,6 +19,7 @@ use yii\helpers\VarDumper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
 use yii\web\UploadedFile;
 
 /**
@@ -36,6 +38,7 @@ class AbacPolicyController extends FController
                 'class' => VerbFilter::class,
                 'actions' => [
                     'delete-ajax' => ['POST'],
+                    //'dump-in' => ['POST'],
                 ],
             ],
         ];
@@ -87,6 +90,47 @@ class AbacPolicyController extends FController
     {
         return $this->render('view', [
             'model' => $this->findModel($id),
+        ]);
+    }
+
+    /**
+     * @param $id
+     * @return string
+     * @throws NotFoundHttpException
+     */
+    public function actionDump($id)
+    {
+        return $this->renderPartial('_dump_out', [
+            'model' => $this->findModel($id),
+        ]);
+    }
+
+    /**
+     * @return string|Response
+     */
+    public function actionDumpIn()
+    {
+
+        $model = new AbacPolicyImportDumpForm();
+
+        if ($model->load(Yii::$app->request->post())) {
+            if ($model->validate()) {
+                $policyModel = $model->getPolicyModel();
+                if ($policyModel) {
+                    if ($policyModel->save()) {
+                        Yii::$app->session->setFlash('success', 'Success Import Policy ID: ' . $policyModel->ap_id);
+                        return $this->redirect(['index']);
+                    } else {
+                        $model->addError('dump', $policyModel->firstErrors);
+                    }
+                }
+            }
+        } else {
+            $model->enabled = true;
+        }
+
+        return $this->renderAjax('_dump_in', [
+            'model' => $model
         ]);
     }
 
@@ -229,7 +273,7 @@ class AbacPolicyController extends FController
 
     /**
      * @param $id
-     * @return string|\yii\web\Response
+     * @return string|Response
      * @throws NotFoundHttpException
      */
     public function actionCopy($id)
@@ -347,7 +391,7 @@ class AbacPolicyController extends FController
     }
 
     /**
-     * @return \yii\web\Response
+     * @return Response
      */
     public function actionInvalidateCache()
     {
@@ -409,7 +453,7 @@ class AbacPolicyController extends FController
     }
 
     /**
-     * @return \yii\web\Response
+     * @return Response
      */
     public function actionImportIds()
     {

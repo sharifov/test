@@ -300,7 +300,7 @@ class AbacComponent extends Component
 
                 $row = [];
                 $row[] = $policy->ap_rule_type;
-                $row[] = $policy->ap_subject;
+                $row[] = empty($policy->ap_subject) ? 'true' : $policy->ap_subject;
                 $row[] = $policy->ap_object;
                 $row[] = $policy->ap_action;
                 $row[] = $policy->getEffectName();
