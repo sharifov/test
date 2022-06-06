@@ -251,11 +251,11 @@ return [
                     'clientId' => env('FRONTEND_CONFIG_MAIN_COMPONENTS_AUTHCLIENTCOLLECTION_CLIENTS_MICROSOFT_CLIENTID'),
                     'clientSecret' => env('FRONTEND_CONFIG_MAIN_COMPONENTS_AUTHCLIENTCOLLECTION_CLIENTS_MICROSOFT_CLIENTSECRET'),
                     'tenantId' => env('FRONTEND_CONFIG_MAIN_COMPONENTS_AUTHCLIENTCOLLECTION_CLIENTS_MICROSOFT_TENANTID'),
-                    'host' => 'https://login.microsoftonline.com/',
-                    'authUrl' => '/oauth2/v2.0/authorize',
-                    'tokenUrl' => '/oauth2/v2.0/token',
-                    'apiBaseUrl' => 'https://graph.microsoft.com/v1.0',
-                    'scope' => 'User.Read'
+                    'host' => env('FRONTEND_CONFIG_MAIN_COMPONENTS_AUTHCLIENTCOLLECTION_CLIENTS_MICROSOFT_HOST'),
+                    'authUrl' => env('FRONTEND_CONFIG_MAIN_COMPONENTS_AUTHCLIENTCOLLECTION_CLIENTS_MICROSOFT_AUTH_URL'),
+                    'tokenUrl' => env('FRONTEND_CONFIG_MAIN_COMPONENTS_AUTHCLIENTCOLLECTION_CLIENTS_MICROSOFT_TOKEN_URL'),
+                    'apiBaseUrl' => env('FRONTEND_CONFIG_MAIN_COMPONENTS_AUTHCLIENTCOLLECTION_CLIENTS_MICROSOFT_API_BASE_URL'),
+                    'scope' => env('FRONTEND_CONFIG_MAIN_COMPONENTS_AUTHCLIENTCOLLECTION_CLIENTS_MICROSOFT_SCOPE')
                 ],
             ],
         ]
