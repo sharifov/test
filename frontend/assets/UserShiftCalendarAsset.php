@@ -24,9 +24,13 @@ class UserShiftCalendarAsset extends AssetBundle
 //        // '/css/style-user-shift-calendar.css',
 //    ];
 //
-//    public $js = [
-//        // '/js/mobiscroll/js/mobiscroll.jquery.min.js',
-//    ];
+    public $js = [
+        // '/js/mobiscroll/js/mobiscroll.jquery.min.js',
+        '/js/shift/calendar/timeline-multiple-manage.js',
+        '/js/shift/calendar/timeline-form-filter.js',
+        '/js/shift/calendar/timeline-tooltip.js',
+        '/js/shift/calendar/timeline.js',
+    ];
 
     public $depends = [
         MobiscrollCalendarAsset::class,

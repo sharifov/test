@@ -559,11 +559,12 @@ class ShiftScheduleController extends FController
             $canViewAllEvents = Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_VIEW_ALL_EVENTS);
             $userGroups = UserGroupQuery::findUserGroups(!$canViewAllEvents ? Auth::id() : null, $timelineCalendarFilter->userGroups ?? []);
 
-            [$resourceList] = UserShiftScheduleHelper::prepareResourcesForTimelineCalendar($userGroups, $timelineCalendarFilter->usersIds);
+            [$resourceList, $firstLevelResources] = UserShiftScheduleHelper::prepareResourcesForTimelineCalendar($userGroups, $timelineCalendarFilter->usersIds);
 
             $timelineList = UserShiftScheduleQuery::getTimelineListByUser($timelineCalendarFilter);
             $data['data'] = UserShiftScheduleHelper::getCalendarEventsData($timelineList);
             $data['resources'] = $resourceList;
+            $data['firstLevelResources'] = $firstLevelResources;
         }
 
         return $data;
@@ -583,7 +584,7 @@ class ShiftScheduleController extends FController
             $timelineList = $this->shiftScheduleService->createManual($form, Auth::user()->timezone ?: null);
             $data = UserShiftScheduleHelper::getCalendarEventsData($timelineList);
 
-            return '<script>(function() {$("#modal-md").modal("hide");let timelineData = ' . json_encode($data) . ';addTimelineEvent(timelineData);createNotify("Success", "Event created successfully", "success")})();</script>';
+            return '<script>(function() {$("#modal-md").modal("hide");let timelineData = ' . json_encode($data) . ';window._timeline.addEvents(timelineData);createNotify("Success", "Event created successfully", "success")})();</script>';
         }
 
         if ($form->userGroups) {
@@ -605,14 +606,14 @@ class ShiftScheduleController extends FController
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             $event = $this->shiftScheduleService->createSingleManual($form, Auth::user()->timezone ?: null);
             $data = UserShiftScheduleHelper::getCalendarEventsData([$event]);
-            return '<script>(function() {$("#modal-md").modal("hide");let timelineData = ' . json_encode($data) . ';addTimelineEvent(timelineData);createNotify("Success", "Event created successfully", "success")})();</script>';
+            return '<script>(function() {$("#modal-md").modal("hide");let timelineData = ' . json_encode($data) . ';window._timeline.addEvent(timelineData);createNotify("Success", "Event created successfully", "success")})();</script>';
         }
 
         if (!Yii::$app->request->isPost) {
             $userIdCreateFor = Yii::$app->request->get('userId', null);
             $startDate = Yii::$app->request->get('startDate', null);
             if (!$user = Employee::findOne(['id' => $userIdCreateFor])) {
-                throw new yii\web\MethodNotAllowedHttpException('User not found by id: ' . $userIdCreateFor, 404);
+                throw new BadRequestHttpException('User not found by id: ' . $userIdCreateFor, 404);
             }
 
             $form->userId = $userIdCreateFor;
@@ -870,20 +871,22 @@ class ShiftScheduleController extends FController
 
         $multipleUpdateForm = new UserShiftCalendarMultipleUpdateForm();
 
-        if ($multipleUpdateForm->load(Yii::$app->request->post()) && $multipleUpdateForm->validate()) {
+        if ($multipleUpdateForm->load(Yii::$app->request->post()) && $multipleUpdateForm->validate() && !$multipleUpdateForm->showForm) {
             $eventIds = \yii\helpers\Json::decode($multipleUpdateForm->eventIds);
 
             if (!is_array($eventIds)) {
                 throw new BadRequestHttpException('Invalid JSON data for decode');
             }
 
-            $transaction = Yii::$app->db->beginTransaction();
+            $transaction = new Transaction(['db' => Yii::$app->db]);
             try {
                 $returnEventsData = [];
                 $form = $multipleUpdateForm;
                 if (empty($form->scheduleType) && empty($form->description) && empty($form->status) && empty($form->dateTimeRange)) {
                     throw new \RuntimeException('Please fill/change at least one field');
                 }
+
+                $transaction->begin();
                 foreach ($eventIds as $eventId) {
                     $event = UserShiftSchedule::findOne((int)$eventId);
                     if (!$event) {
@@ -898,10 +901,10 @@ class ShiftScheduleController extends FController
 
                 $jsCode = '';
                 foreach ($eventIds as $eventId) {
-                    $jsCode .= 'window.inst.removeEvent(' . $eventId . ');';
+                    $jsCode .= 'window._timeline.removeEvent(' . $eventId . ');';
                 }
 
-                return '<script>(function() {$("#modal-md").modal("hide");' . $jsCode . ';let timelinesData = ' . json_encode($returnEventsData) . ';addTimelineEvents(timelinesData);$("#btn-check-all").trigger("click");createNotify("Success", "Event(s) updated successfully", "success")})();</script>';
+                return '<script>(function() {$("#modal-md").modal("hide");' . $jsCode . ';let timelinesData = ' . json_encode($returnEventsData) . ';window._timeline.addEvents(timelinesData);window._timeline.multipleManageModule.resetSelectedEvents();createNotify("Success", "Event(s) updated successfully", "success")})();</script>';
             } catch (\RuntimeException $e) {
                 $transaction->rollBack();
                 $multipleUpdateForm->addError('general', $e->getMessage());
@@ -1014,7 +1017,7 @@ class ShiftScheduleController extends FController
                 $this->shiftScheduleService->edit($form, $event, Auth::user()->timezone ?: null);
                 if (!$form->hasErrors()) {
                     $eventData = UserShiftScheduleHelper::getDataForCalendar($event);
-                    return '<script>(function() {$("#modal-md").modal("hide");window.inst.removeEvent(' . $event->uss_id . ');let timelineData = ' . json_encode($eventData) . ';addTimelineEvent(timelineData);createNotify("Success", "Event updated successfully", "success")})();</script>';
+                    return '<script>(function() {$("#modal-md").modal("hide");window._timeline.removeEvent(' . $event->uss_id . ');let timelineData = ' . json_encode($eventData) . ';window._timeline.addEvent(timelineData);createNotify("Success", "Event updated successfully", "success")})();</script>';
                 }
             }
         } else {

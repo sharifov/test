@@ -45,7 +45,7 @@ class UserShiftScheduleHelper
             'start' => date('c', strtotime($event->uss_start_utc_dt)),
             'end' => date('c', strtotime($event->uss_end_utc_dt)),
             'color' => $event->shiftScheduleType ? $event->shiftScheduleType->sst_color : 'gray',
-            'resource' => 'us-' . $event->uss_user_id,
+            'resource' => $event->uss_user_id,
             //'textColor' => 'black' // an option!
             'extendedProps' => [
                 'icon' => $event->shiftScheduleType->sst_icon_class ?? '',
@@ -133,7 +133,7 @@ class UserShiftScheduleHelper
             if ($users) {
                 $userList = [];
                 foreach ($users as $i => $user) {
-                    $userResourceId = 'us-' . $user->id;
+                    $userResourceId = $user->id;
                     $userList[] = [
                         'id' => $userResourceId,
                         'name' => '#' . ($i + 1) . ' <i class="fa fa-user"></i> ' . $user->username,
@@ -145,7 +145,7 @@ class UserShiftScheduleHelper
                                 'title' => 'User Shift Calendar',
                                 'target' => '_blank'
                             ]),
-                            Html::a('<i class="fa fa fa-user-plus">', Url::to(['/shift/user-shift-assign/index', 'UserShiftAssignListSearch[userId]' => $user->id]), [
+                            Html::a('<i class="fa fa fa-user-plus"></i>', Url::to(['/shift/user-shift-assign/index', 'UserShiftAssignListSearch[userId]' => $user->id]), [
                                 'title' => 'User Shift Assign',
                                 'target' => '_blank'
                             ])
@@ -159,7 +159,7 @@ class UserShiftScheduleHelper
                 $resource['childrenIds'] = $childrenIds;
             }
             $resourceList[] = $resource;
-            $groupIds[] = $group->ug_id;
+            $groupIds[] = 'ug-' . $group->ug_id;
         }
         return [$resourceList, $groupIds];
     }
