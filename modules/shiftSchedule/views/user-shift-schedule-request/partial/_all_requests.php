@@ -185,7 +185,7 @@ use yii\web\View;
                                         '<i class="fa fa-th-list"></i>',
                                         [
                                             'user-shift-schedule-request/get-history',
-                                            'id' => $model->ssr_uss_id,
+                                            'id' => $model->ssr_id,
                                         ],
                                         [
                                             'title' => 'Request history',

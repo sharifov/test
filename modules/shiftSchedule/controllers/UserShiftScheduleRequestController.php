@@ -7,12 +7,15 @@ use frontend\controllers\FController;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\search\ShiftScheduleRequestSearch;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
+use modules\shiftSchedule\src\entities\shiftScheduleRequestLog\search\ShiftScheduleRequestLogSearch;
+use modules\shiftSchedule\src\entities\shiftScheduleRequestLog\ShiftScheduleRequestLog;
 use modules\shiftSchedule\src\forms\ScheduleDecisionForm;
 use modules\shiftSchedule\src\services\ShiftScheduleRequestService;
 use src\auth\Auth;
 use src\helpers\app\AppHelper;
 use Throwable;
 use Yii;
+use yii\base\InvalidConfigException;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
@@ -122,13 +125,22 @@ class UserShiftScheduleRequestController extends FController
      */
     public function actionMyDataAjax(): array
     {
+        $jsonData = [];
         Yii::$app->response->format = Response::FORMAT_JSON;
-        $timelineList = ShiftScheduleRequestService::getTimelineListByUserList(
-            ShiftScheduleRequestService::getUserList(Auth::user()),
-            Yii::$app->request->get('start', date('Y-m-d'))
-        );
-        $userTimeZone = Auth::user()->timezone ?: 'UTC';
-        return ShiftScheduleRequestService::getCalendarTimelineJsonData($timelineList, $userTimeZone);
+        $startDate = Yii::$app->request->get('start');
+        $endDate = Yii::$app->request->get('end');
+
+        if (!empty($startDate) && !empty($endDate)) {
+            $timelineList = ShiftScheduleRequestService::getTimelineListByUserList(
+                ShiftScheduleRequestService::getUserList(Auth::user()),
+                $startDate,
+                $endDate
+            );
+            $userTimeZone = Auth::user()->timezone ?: 'UTC';
+            $jsonData = ShiftScheduleRequestService::getCalendarTimelineJsonData($timelineList, $userTimeZone);
+        }
+
+        return $jsonData;
     }
 
     /**
@@ -194,16 +206,16 @@ class UserShiftScheduleRequestController extends FController
     /**
      * @param int $id
      * @return string
-     * @throws \yii\base\InvalidConfigException
+     * @throws InvalidConfigException
      */
     public function actionGetHistory(int $id): string
     {
-        $searchModel = new ShiftScheduleRequestSearch();
+        $searchModel = new ShiftScheduleRequestLogSearch();
         $dataProvider = $searchModel->search(ArrayHelper::merge(
             Yii::$app->request->queryParams,
             [
                 $searchModel->formName() => [
-                    'ssr_uss_id' => $id,
+                    'ssrh_ssr_id' => $id,
                 ],
             ]
         ));

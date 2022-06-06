@@ -76,7 +76,7 @@ $bundle = FullCalendarAsset::register($this);
     </div>
 
 <?php
-$ajaxUrl = Url::to(['user-shift-schedule-request/my-data-ajax', 'start' => date('Y-m-d'), 'end' => date('Y-m-d', strtotime('+100 days'))]);
+$ajaxUrl = Url::to(['user-shift-schedule-request/my-data-ajax']);
 $openModalEventUrl = Url::to(['user-shift-schedule-request/get-event']);
 
 $js = <<<JS
