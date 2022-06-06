@@ -170,7 +170,7 @@ class AddQuoteService
     public function addAutoQuotesByJob(Lead $lead)
     {
         /** @fflag FFlag::FF_KEY_ADD_AUTO_QUOTES, Auto add quote */
-        if ($lead->quotesCount === 0 && $lead->leadFlightSegmentsCount > 0 && Yii::$app->ff->can(FFlag::FF_KEY_ADD_AUTO_QUOTES)) {
+        if ($lead->quotesCount === 0 && $lead->leadFlightSegmentsCount > 0 && Yii::$app->ff->isEnable(FFlag::FF_KEY_ADD_AUTO_QUOTES)) {
             $autoAddQuoteJob = new AutoAddQuoteJob($lead->id);
             Yii::$app->queue_job->push($autoAddQuoteJob);
         }

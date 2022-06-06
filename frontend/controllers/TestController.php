@@ -2172,7 +2172,7 @@ class TestController extends FController
         echo 'Feature Flag Test<br><br>';
 
         /** @fflag FFlag::FF_KEY_LPP_ENABLE, Lead Poor Processing Enable/Disable */
-        if (Yii::$app->ff->can(FFlag::FF_KEY_LPP_ENABLE)) {
+        if (Yii::$app->ff->isEnable(FFlag::FF_KEY_LPP_ENABLE)) {
             VarDumper::dump(Yii::$app->ff->getValue(FFlag::FF_KEY_LPP_ENABLE), 10, true);
         } else {
             echo 'NO1';
@@ -2610,7 +2610,7 @@ class TestController extends FController
         echo 'Feature Flag Test<br><br>';
 
         /** @fflag FFlag::FF_TEST_FLAG1, Username field1 */
-        if (Yii::$app->ff->can('ff_test_example')) {
+        if (Yii::$app->ff->isEnable('ff_test_example')) {
             VarDumper::dump(Yii::$app->ff->getValue('ff_test_example'), 10, true);
         } else {
             echo 'NO1';

@@ -283,7 +283,7 @@ $csrf_token = Yii::$app->request->csrfToken;
 
 DeviceAsset::register($this);
 $phoneDeviceRemoteLogsEnabled = SettingHelper::phoneDeviceLogsEnabled() ? 'true' : 'false';
-$enableAcceptedPanel = Yii::$app->ff->can(FFlag::FF_KEY_PHONE_WIDGET_ACCEPTED_PANEL_ENABLED) ? 'true' : 'false';
+$enableAcceptedPanel = Yii::$app->ff->isEnable(FFlag::FF_KEY_PHONE_WIDGET_ACCEPTED_PANEL_ENABLED) ? 'true' : 'false';
 
 $js = <<<JS
 

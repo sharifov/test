@@ -492,7 +492,7 @@ class LeadController extends Controller
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
 
         /** @fflag FFlag::FF_LPP_ENABLE, Lead Poor Processing Enable/Disable */
-        if (!Yii::$app->ff->can(FFlag::FF_KEY_LPP_ENABLE)) {
+        if (!Yii::$app->ff->isEnable(FFlag::FF_KEY_LPP_ENABLE)) {
             echo Console::renderColoredString('%y --- Feature Flag (' . FFlag::FF_KEY_LPP_ENABLE . ') not enabled %n'), PHP_EOL;
             exit();
         }
@@ -530,7 +530,7 @@ class LeadController extends Controller
                 Console::updateProgress($processed, $count);
             } catch (\RuntimeException | \DomainException $throwable) {
                 /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
-                if (Yii::$app->ff->can(FFlag::FF_KEY_DEBUG)) {
+                if (Yii::$app->ff->isEnable(FFlag::FF_KEY_DEBUG)) {
                     $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $item);
                     \Yii::warning($message, 'LeadController:actionToExtraQueue:Exception');
                 }
@@ -558,7 +558,7 @@ class LeadController extends Controller
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
 
         /** @fflag FFlag::FF_LPP_ENABLE, Lead Poor Processing Enable/Disable */
-        if (!Yii::$app->ff->can(FFlag::FF_KEY_LPP_ENABLE)) {
+        if (!Yii::$app->ff->isEnable(FFlag::FF_KEY_LPP_ENABLE)) {
             echo Console::renderColoredString('%y --- Feature Flag (' . FFlag::FF_KEY_LPP_ENABLE . ') not enabled %n'), PHP_EOL;
             exit();
         }
@@ -691,7 +691,7 @@ class LeadController extends Controller
                 Console::updateProgress($processed, $count);
             } catch (\RuntimeException | \DomainException $throwable) {
                 /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
-                if (Yii::$app->ff->can(FFlag::FF_KEY_DEBUG)) {
+                if (Yii::$app->ff->isEnable(FFlag::FF_KEY_DEBUG)) {
                     $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
                     \Yii::info($message, 'LeadController:actionLppScheduledCommunication:Exception');
                 }
@@ -725,7 +725,7 @@ class LeadController extends Controller
     public function actionToLastActionLpp()
     {
         /** @fflag FFlag::FF_LPP_ENABLE, Lead Poor Processing Enable/Disable */
-        if (!Yii::$app->ff->can(FFlag::FF_KEY_LPP_ENABLE)) {
+        if (!Yii::$app->ff->isEnable(FFlag::FF_KEY_LPP_ENABLE)) {
             echo Console::renderColoredString('%y --- Feature Flag (' . FFlag::FF_KEY_LPP_ENABLE . ') not enabled %n'), PHP_EOL;
             exit();
         }
@@ -766,7 +766,7 @@ class LeadController extends Controller
                 Console::updateProgress($processed, $count);
             } catch (\RuntimeException | \DomainException $throwable) {
                 /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
-                if (Yii::$app->ff->can(FFlag::FF_KEY_DEBUG)) {
+                if (Yii::$app->ff->isEnable(FFlag::FF_KEY_DEBUG)) {
                     $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
                     \Yii::info($message, 'LeadController:actionToLastActionLpp:Exception');
                 }
@@ -787,7 +787,7 @@ class LeadController extends Controller
     public function actionToClosedFromExtra()
     {
         /** @fflag FFlag::FF_KEY_LPP_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT, Lead Poor Processing to Closing transferring enable/Disable */
-        if (!Yii::$app->ff->can(FFlag::FF_KEY_LPP_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT)) {
+        if (!Yii::$app->ff->isEnable(FFlag::FF_KEY_LPP_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT)) {
             echo Console::renderColoredString('%y --- Feature Flag (' . FFlag::FF_KEY_LPP_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT . ') not enabled %n'), PHP_EOL;
             exit();
         }
@@ -810,7 +810,7 @@ class LeadController extends Controller
                 Console::updateProgress($processed, $count);
             } catch (\RuntimeException | \DomainException $throwable) {
                 /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
-                if (Yii::$app->ff->can(FFlag::FF_KEY_DEBUG)) {
+                if (Yii::$app->ff->isEnable(FFlag::FF_KEY_DEBUG)) {
                     $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
                     \Yii::info($message, 'LeadController:actionToClosedFromExtra:Exception');
                 }

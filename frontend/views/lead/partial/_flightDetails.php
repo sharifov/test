@@ -241,7 +241,7 @@ $itineraryForm->getLead()->refresh();
 $leadAbacDto = new LeadAbacDto($itineraryForm->getLead(), Auth::id());
 if (
     $isCreatedFlightRequest &&
-    Yii::$app->ff->can(FFlag::FF_KEY_ADD_AUTO_QUOTES) &&
+    Yii::$app->ff->isEnable(FFlag::FF_KEY_ADD_AUTO_QUOTES) &&
     Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_ADD_AUTO_QUOTES, LeadAbacObject::ACTION_ACCESS)
 ) {
     $autoAddQuoteUrl = Url::toRoute('/quote/auto-adding-quotes');

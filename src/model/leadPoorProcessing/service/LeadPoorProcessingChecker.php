@@ -34,7 +34,7 @@ class LeadPoorProcessingChecker
     public function check(): void
     {
         /** @fflag FFlag::FF_LPP_ENABLE, Lead Poor Processing Enable/Disable */
-        if (!Yii::$app->ff->can(FFlag::FF_KEY_LPP_ENABLE)) {
+        if (!Yii::$app->ff->isEnable(FFlag::FF_KEY_LPP_ENABLE)) {
             throw new \RuntimeException('Feature Flag (' . FFlag::FF_KEY_LPP_ENABLE . ') not enabled');
         }
         if (!$this->rule->isEnabled()) {

@@ -462,7 +462,7 @@ class Email extends \yii\db\ActiveRecord
                 $out['error'] = $this->e_error_message;
             }
             /** @fflag FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES, A/B testing for email offer templates enable/disable */
-            if ($this->e_status_id !== self::STATUS_ERROR && Yii::$app->ff->can(FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES)) {
+            if ($this->e_status_id !== self::STATUS_ERROR && Yii::$app->ff->isEnable(FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES)) {
                 if ($this->e_template_type_id && $this->e_project_id && isset($this->eLead)) {
                     EmailTemplateOfferABTestingService::incrementCounterByTemplateAndProjectIds(
                         $this->e_template_type_id,
