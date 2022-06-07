@@ -16,6 +16,7 @@ use Yii;
 use yii\console\Controller;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Console;
+use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use yii\web\IdentityInterface;
 
@@ -32,7 +33,6 @@ class WebsocketServerV3Controller extends Controller
             \Yii::$app->log->targets['file-fb-error']->exportInterval = 1;
         }
     }
-
 
     public function actionStart()
     {
@@ -224,6 +224,154 @@ class WebsocketServerV3Controller extends Controller
             });
         });
 
+        $server->on('request', static function (\Swoole\Http\Request $request, \Swoole\Http\Response $response) {
+            $response->header('Content-Type', 'application/json');
+
+            $result = [
+                [
+                    'app' => 'app',
+                    'type' => 'component',
+                    'service' => 'db',
+                    'status' => \Yii::$app->applicationStatus->dbStatus()
+                ],
+                [
+                    'app' => 'app',
+                    'type' => 'component',
+                    'service' => 'db_slave',
+                    'status' => \Yii::$app->applicationStatus->dbSlaveStatus()
+                ],
+                [
+                    'app' => 'app',
+                    'type' => 'component',
+                    'service' => 'db_postgres',
+                    'status' => \Yii::$app->applicationStatus->dbPostgresStatus()
+                ],
+                [
+                    'app' => 'app',
+                    'type' => 'component',
+                    'service' => 'redis',
+                    'status' => \Yii::$app->applicationStatus->redisStatus()
+                ],
+                [
+                    'app' => 'app',
+                    'type' => 'component',
+                    'service' => 'mailer',
+                    'status' => \Yii::$app->applicationStatus->mailerStatus()
+                ],
+                [
+                    'app' => 'app',
+                    'type' => 'component',
+                    'service' => 'communication',
+                    'status' => \Yii::$app->applicationStatus->communicationStatus()
+                ],
+                [
+                    'app' => 'app',
+                    'type' => 'component',
+                    'service' => 'airSearch',
+                    'status' => \Yii::$app->applicationStatus->airSearchStatus()
+                ],
+                [
+                    'app' => 'app',
+                    'type' => 'component',
+                    'service' => 'rChat',
+                    'status' => \Yii::$app->applicationStatus->rChatStatus()
+                ],
+                [
+                    'app' => 'app',
+                    'type' => 'component',
+                    'service' => 'chatBot',
+                    'status' => \Yii::$app->applicationStatus->chatBotStatus()
+                ],
+                [
+                    'app' => 'app',
+                    'type' => 'component',
+                    'service' => 'travelServices',
+                    'status' => \Yii::$app->applicationStatus->travelServicesStatus()
+                ],
+                [
+                    'app' => 'app',
+                    'type' => 'component',
+                    'service' => 'queueSmsJob',
+                    'status' => \Yii::$app->applicationStatus->queueSmsJobStatus()
+                ],
+                [
+                    'app' => 'app',
+                    'type' => 'component',
+                    'service' => 'queueEmailJob',
+                    'status' => \Yii::$app->applicationStatus->queueEmailJobStatus()
+                ],
+                [
+                    'app' => 'app',
+                    'type' => 'component',
+                    'service' => 'queuePhoneCheck',
+                    'status' => \Yii::$app->applicationStatus->queuePhoneCheckStatus()
+                ],
+                [
+                    'app' => 'app',
+                    'type' => 'component',
+                    'service' => 'queueJob',
+                    'status' => \Yii::$app->applicationStatus->queueJobStatus()
+                ],
+                [
+                    'app' => 'app',
+                    'type' => 'component',
+                    'service' => 'queueSystemServices',
+                    'status' => \Yii::$app->applicationStatus->queueSystemServicesStatus()
+                ],
+                [
+                    'app' => 'app',
+                    'type' => 'component',
+                    'service' => 'queueClientChatJob',
+                    'status' => \Yii::$app->applicationStatus->queueClientChatJobStatus()
+                ],
+                [
+                    'app' => 'app',
+                    'type' => 'component',
+                    'service' => 'queueVirtualCron',
+                    'status' => \Yii::$app->applicationStatus->queueVirtualCronStatus()
+                ],
+                [
+                    'app' => 'app',
+                    'type' => 'component',
+                    'service' => 'queueLeadRedial',
+                    'status' => \Yii::$app->applicationStatus->queueLeadRedialStatus()
+                ],
+                [
+                    'app' => 'app',
+                    'type' => 'component',
+                    'service' => 'telegram',
+                    'status' => \Yii::$app->applicationStatus->telegramStatus()
+                ],
+                [
+                    'app' => 'app',
+                    'type' => 'component',
+                    'service' => 'gaRequestService',
+                    'status' => \Yii::$app->applicationStatus->gaRequestServiceStatus()
+                ],
+                [
+                    'app' => 'app',
+                    'type' => 'component',
+                    'service' => 'centrifugo',
+                    'status' => \Yii::$app->applicationStatus->centrifugoStatus()
+                ],
+                [
+                    'app' => 'app',
+                    'type' => 'component',
+                    'service' => 'callAntiSpam',
+                    'status' => \Yii::$app->applicationStatus->callAntiSpamStatus()
+                ],
+            ];
+
+            $notWorkingComponentsList = array_filter($result, function ($item) {
+                return isset($item['status']) && $item['status'] !== 'ok';
+            });
+
+            if (count($notWorkingComponentsList) > 0) {
+                $response->status(500);
+            }
+            $response->end(Json::encode($result));
+        });
+
         $server->on('open', static function (Server $server, \Swoole\Http\Request $request) use ($frontendConfig, $thisClass, $redisConfig, $redisSubscribe) {
             echo '+ ' . date('m-d H:i:s') . " +{$request->fd}";
 
@@ -388,8 +536,6 @@ class WebsocketServerV3Controller extends Controller
                 } catch (\Throwable $e) {
                     \Yii::error(AppHelper::throwableLog($e, true), 'ws:open:InitConnection:push');
                 }
-
-
 
                 if ($subList) {
                     foreach ($subList as $k => $value) {
@@ -592,6 +738,14 @@ class WebsocketServerV3Controller extends Controller
         return $out;
     }
 
+
+    /**
+     * @param string $controllerName
+     * @param string $actionName
+     * @return callable|null
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
+     */
     private function resolveController(string $controllerName, string $actionName): ?callable
     {
         $controllerClass = '\console\socket\controllers' . '\\' . $controllerName . 'Controller';
@@ -603,7 +757,6 @@ class WebsocketServerV3Controller extends Controller
         }
         return null;
     }
-
 
     /**
      * @param \Swoole\Http\Request $request
