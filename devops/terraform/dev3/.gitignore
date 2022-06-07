@@ -20,3 +20,6 @@ override.tf.json
 # Ignore cli configuration files
 .terraformrc
 terraform.rc
+
+# Ignore variables.tf
+variables.tf
