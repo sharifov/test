@@ -434,7 +434,7 @@ class CommunicationController extends ApiBaseController
                         $departmentPhone->dpp_source_id = $source->id;
                     }
                 }
-                if ($postCall['flow_department']) {
+                if (!empty($postCall['flow_department'])) {
                     $departmentId = Department::find()->select('dep_id')->andWhere(['dep_key' => $postCall['flow_department']])->scalar();
                     if ($departmentId) {
                         $departmentId = (int)$departmentId;
@@ -570,7 +570,7 @@ class CommunicationController extends ApiBaseController
 
                 $callModel->c_source_type_id = Call::SOURCE_GENERAL_LINE;
 
-                if ($postCall['flow_department']) {
+                if (!empty($postCall['flow_department'])) {
                     return $this->ivrFlowFinish($callModel, $departmentPhone);
                 }
 
