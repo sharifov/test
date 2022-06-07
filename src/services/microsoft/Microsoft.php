@@ -6,8 +6,8 @@ use yii\authclient\OAuth2;
 
 class Microsoft extends OAuth2
 {
-    public string $host;
-    public string $tenantId;
+    public ?string $host;
+    public ?string $tenantId;
     public $authUrl;
     public $tokenUrl;
     public $apiBaseUrl;
