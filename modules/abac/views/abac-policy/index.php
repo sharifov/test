@@ -53,12 +53,15 @@ $this->params['breadcrumbs'][] = $this->title;
                 ['class' => 'btn btn-default']
             ) ?>
         <?php endif; ?>
+
+        <?= Html::a('<i class="fa fa-download"></i> Import from Dump', ['dump-in'], [
+            'class' => 'btn btn-warning',
+            'id' => 'btn-dump-import'
+        ]) ?>
     </p>
 
     <p>
         <i class="fa fa-info-circle"></i> <code>HashCode = md5(Object + Action + Subject + Effect)</code>
-
-
     </p>
 
     <?php Pjax::begin(['scrollTo' => 0]); ?>
@@ -112,7 +115,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'class' => ActionColumn::class,
-                'template' => '{view} {update} {delete} {copy}',
+                'template' => '{view} {update} {delete} {copy} {dump}',
                 'buttons' => [
                     'copy' => static function ($url, AbacPolicy $model, $key) {
                         return Html::a(
@@ -126,9 +129,20 @@ $this->params['breadcrumbs'][] = $this->title;
                             ]
                         );
                     },
+                    'dump' => static function ($url, AbacPolicy $model, $key) {
+                        return Html::a(
+                            '<span class="fa fa-upload"></span>',
+                            ['dump', 'id' => $model->ap_id],
+                            ['title' => 'Dump', 'target' => '_blank', 'data-pjax' => 0,
+                                'class' => 'btn-abac-policy-dump']
+                        );
+                    },
                 ],
                 'visibleButtons' => [
                     'copy' => static function ($model, $key, $index) {
+                        return true;
+                    },
+                    'dump' => static function ($model, $key, $index) {
                         return true;
                     },
                 ],
@@ -273,3 +287,57 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php Pjax::end(); ?>
 
 </div>
+
+
+<?php
+
+$js = <<<JS
+$(document).on('click', '.btn-abac-policy-dump', function(e) {        
+    e.preventDefault();
+    let url = $(this).attr('href');
+    //let gid = $(this).data('gid');
+    let modal = $('#modal-md');
+      
+    modal.find('.modal-body').html('');
+    modal.find('.modal-title').html('Policy Dump');
+    modal.find('.modal-body').load(url, function( response, status, xhr ) {
+        //$('#preloader').addClass('d-none');
+        if (status == 'error') {
+            alert(response);
+        } else {
+            modal.modal({
+              backdrop: 'static',
+              show: true
+            });
+        }
+    });
+ });
+
+
+$(document).on('click', '#btn-dump-import', function(e) {        
+    e.preventDefault();
+    let url = $(this).attr('href');
+    //let gid = $(this).data('gid');
+    let modal = $('#modal-md');
+      
+    modal.find('.modal-body').html('');
+    modal.find('.modal-title').html('Import Policy from Dump');
+    modal.find('.modal-body').load(url, function( response, status, xhr ) {
+        //$('#preloader').addClass('d-none');
+        if (status == 'error') {
+            alert(response);
+        } else {
+            modal.modal({
+              backdrop: 'static',
+              show: true
+            });
+        }
+    });
+ });
+
+
+
+
+JS;
+
+$this->registerJs($js, \yii\web\View::POS_READY, 'abac-index');

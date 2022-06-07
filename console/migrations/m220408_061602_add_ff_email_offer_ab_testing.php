@@ -52,7 +52,7 @@ class m220408_061602_add_ff_email_offer_ab_testing extends Migration
                 "
                 ]
             );
-            Yii::$app->ff->invalidateCache();
+            Yii::$app->featureFlag->invalidateCache();
         } catch (\Throwable $throwable) {
             \Yii::error(\src\helpers\app\AppHelper::throwableLog($throwable), 'm220408_061602_add_ff_email_offer_ab_testing:safeUp:Throwable');
         }
@@ -69,7 +69,7 @@ class m220408_061602_add_ff_email_offer_ab_testing extends Migration
             }
             $featureFlagService = new \kivork\FeatureFlag\Services\FeatureFlagService();
             $featureFlagService::delete(\modules\featureFlag\FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES);
-            Yii::$app->ff->invalidateCache();
+            Yii::$app->featureFlag->invalidateCache();
         } catch (\Throwable $throwable) {
             \Yii::error(\src\helpers\app\AppHelper::throwableLog($throwable), 'm220408_061602_add_ff_email_offer_ab_testing:safeDown:Throwable');
         }

@@ -159,7 +159,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             $client,
                             '<button type="button" class="login-with-btn login-with-' . $client->getName() . '-btn">Assign ' . $client->getTitle() . '</button>',
                             [
-                                'style' => 'margin: 0'
+                                'style' => 'margin-left: 5px'
                             ]
                         ) ?>
                     <?php endforeach; ?>

@@ -259,7 +259,7 @@ return [
         'abac' => require __DIR__ . '/abac.php',
         'objectSegment' => require __DIR__ . '/objectSegment.php',
         'event' => require __DIR__ . '/event.php',
-        'ff' => require __DIR__ . '/featureFlag.php',
+        'featureFlag' => require __DIR__ . '/featureFlag.php',
         'snowplow' => [
             'class' => \common\components\SnowplowService::class,
             'collectorUrl' => 'sp.ovago.com',

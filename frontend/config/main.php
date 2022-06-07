@@ -2,6 +2,7 @@
 
 use modules\abac\AbacModule;
 use kivork\FeatureFlag\FeatureFlagModule;
+use src\services\microsoft\Microsoft;
 use yii\authclient\clients\Google;
 use yii\authclient\Collection;
 use common\components\logger\FilebeatTarget;
@@ -244,6 +245,17 @@ return [
                     'class' => Google::class,
                     'clientId' => env('FRONTEND_CONFIG_MAIN_COMPONENTS_AUTHCLIENTCOLLECTION_CLIENTS_GOOGLE_CLIENTID'),
                     'clientSecret' => env('FRONTEND_CONFIG_MAIN_COMPONENTS_AUTHCLIENTCOLLECTION_CLIENTS_GOOGLE_CLIENTSECRET')
+                ],
+                'microsoft' => [
+                    'class' => Microsoft::class,
+                    'clientId' => env('FRONTEND_CONFIG_MAIN_COMPONENTS_AUTHCLIENTCOLLECTION_CLIENTS_MICROSOFT_CLIENTID'),
+                    'clientSecret' => env('FRONTEND_CONFIG_MAIN_COMPONENTS_AUTHCLIENTCOLLECTION_CLIENTS_MICROSOFT_CLIENTSECRET'),
+                    'tenantId' => env('FRONTEND_CONFIG_MAIN_COMPONENTS_AUTHCLIENTCOLLECTION_CLIENTS_MICROSOFT_TENANTID'),
+                    'host' => env('FRONTEND_CONFIG_MAIN_COMPONENTS_AUTHCLIENTCOLLECTION_CLIENTS_MICROSOFT_HOST'),
+                    'authUrl' => env('FRONTEND_CONFIG_MAIN_COMPONENTS_AUTHCLIENTCOLLECTION_CLIENTS_MICROSOFT_AUTH_URL'),
+                    'tokenUrl' => env('FRONTEND_CONFIG_MAIN_COMPONENTS_AUTHCLIENTCOLLECTION_CLIENTS_MICROSOFT_TOKEN_URL'),
+                    'apiBaseUrl' => env('FRONTEND_CONFIG_MAIN_COMPONENTS_AUTHCLIENTCOLLECTION_CLIENTS_MICROSOFT_API_BASE_URL'),
+                    'scope' => env('FRONTEND_CONFIG_MAIN_COMPONENTS_AUTHCLIENTCOLLECTION_CLIENTS_MICROSOFT_SCOPE')
                 ],
             ],
         ]

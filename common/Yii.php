@@ -60,7 +60,7 @@ abstract class BaseApplication extends yii\base\Application
  * @property \common\components\antispam\CallAntiSpamService $callAntiSpam CallAntiSpamService component
  * @property \yii\i18n\Formatter $formatter_search Search Formatter component w/o timezone
  * @property \yii\authclient\Collection $authClientCollection Auth Client Collection
- * @property \kivork\FeatureFlag\components\FeatureFlagComponent $ff FeatureFlag component
+ * @property \kivork\FeatureFlag\components\FeatureFlagComponent $featureFlag FeatureFlag component
  * @property \modules\eventManager\components\EventManagerComponent $event Event component
  * @property \common\components\ApplicationStatus $applicationStatus application status component
  */

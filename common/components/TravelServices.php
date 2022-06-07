@@ -167,7 +167,8 @@ class TravelServices extends Component
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\di\NotInstantiableException
      */
-    public function airportExportLocalized(int $lastUpdate = 0, int $pageLimit = 99999, int $pageIndex = 0, string $lang = '', string $format = 'json'): array {
+    public function airportExportLocalized(int $lastUpdate = 0, int $pageLimit = 99999, int $pageIndex = 0, string $lang = '', string $format = 'json'): array
+    {
         $out = ['error' => false, 'data' => []];
 
         $data = [];

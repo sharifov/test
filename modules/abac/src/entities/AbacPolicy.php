@@ -11,6 +11,8 @@ use yii\behaviors\TimestampBehavior;
 use yii\caching\TagDependency;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\db\BaseActiveRecord;
+use yii\helpers\Json;
 
 /**
  * This is the model class for table "abac_policy".
@@ -86,8 +88,8 @@ class AbacPolicy extends ActiveRecord
             'timestamp' => [
                 'class' => TimestampBehavior::class,
                 'attributes' => [
-                    ActiveRecord::EVENT_BEFORE_INSERT => ['ap_created_dt', 'ap_updated_dt'],
-                    ActiveRecord::EVENT_BEFORE_UPDATE => ['ap_updated_dt'],
+                    BaseActiveRecord::EVENT_BEFORE_INSERT => ['ap_created_dt', 'ap_updated_dt'],
+                    BaseActiveRecord::EVENT_BEFORE_UPDATE => ['ap_updated_dt'],
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
@@ -302,5 +304,13 @@ class AbacPolicy extends ActiveRecord
         return self::find()->select(['ap_hash_code'])
             ->groupBy(['ap_hash_code'])
             ->having('COUNT(*) > 1')->column();
+    }
+
+    /**
+     * @return string
+     */
+    public function getDump(): string
+    {
+        return base64_encode(Json::encode($this->attributes));
     }
 }
