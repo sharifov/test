@@ -20,7 +20,7 @@ use yii\helpers\ArrayHelper;
 /**
  * @property-read UserAuthClientRepository $repository
  */
-class GoogleHandler implements ClientHandler
+class MicrosoftHandler implements ClientHandler
 {
     private UserAuthClientRepository $repository;
 
@@ -40,6 +40,7 @@ class GoogleHandler implements ClientHandler
     public function handle(AuthAction $authAction, ClientInterface $client): void
     {
         $userAttributes = $client->getUserAttributes();
+
         $sourceId = ArrayHelper::getValue($userAttributes, 'id');
         $source = UserAuthClientSources::getIdByValue($client->getId());
         $authClients = UserAuthClient::find()->with('user')->where([
@@ -54,7 +55,7 @@ class GoogleHandler implements ClientHandler
         } elseif ($countAuthClients === 1 && $authClients[0]) {
             $this->login($authClients[0]->user);
         } else {
-            $email = ArrayHelper::getValue($client->getUserAttributes(), 'email');
+            $email = ArrayHelper::getValue($userAttributes, 'mail');
 
             $user = Employee::findOne(['email' => $email]);
             if ($user) {
@@ -65,13 +66,13 @@ class GoogleHandler implements ClientHandler
                     \Yii::$app->request->remoteIP,
                     \Yii::$app->request->userAgent
                 );
-                $authClient->setGoogleSource();
+                $authClient->setMicrosoftSource();
                 try {
                     $this->repository->save($authClient);
                     $this->login($user);
                     Notifications::create($user->id, 'Auth client assigned', 'Source: ' . UserAuthClientSources::getName($authClient->uac_source) . ' was assigned to your account.', Notifications::TYPE_INFO, true);
                 } catch (\RuntimeException $e) {
-                    \Yii::warning(AppHelper::throwableLog($e), 'auth:GoogleHandler:handle:RuntimeException');
+                    \Yii::warning(AppHelper::throwableLog($e), 'auth:MicrosoftHandler:handle:RuntimeException');
                     \Yii::$app->session->setFlash('error', 'Login failed');
                 }
             } else {
@@ -90,7 +91,7 @@ class GoogleHandler implements ClientHandler
             'uac_source' => $source,
             'uac_source_id' => $sourceId
         ])->one();
-        $email = ArrayHelper::getValue($client->getUserAttributes(), 'email');
+        $email = ArrayHelper::getValue($userAttributes, 'mail');
         if (!$authClients) {
             $authClient = UserAuthClient::create(
                 $userId,
@@ -99,13 +100,13 @@ class GoogleHandler implements ClientHandler
                 \Yii::$app->request->remoteIP,
                 \Yii::$app->request->userAgent
             );
-            $authClient->setGoogleSource();
+            $authClient->setMicrosoftSource();
             try {
                 $this->repository->save($authClient);
                 Notifications::create($userId, 'Auth client assigned', 'Source: ' . UserAuthClientSources::getName($authClient->uac_source) . ' was assigned to your account.', Notifications::TYPE_INFO, true);
                 \Yii::$app->session->setFlash('success', 'User with email: ' . $email . ' successfully assigned to your profile');
             } catch (\RuntimeException $e) {
-                \Yii::warning(AppHelper::throwableLog($e), 'auth:GoogleHandler:handleAssign:RuntimeException');
+                \Yii::warning(AppHelper::throwableLog($e), 'auth:MicrosoftHandler:handleAssign:RuntimeException');
                 \Yii::$app->session->setFlash('error', 'Assigning client failed');
             }
         } else {
