@@ -28,7 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <?php Pjax::begin(['id' => 'pjax-UserTask']); ?>
-    <?php echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php // echo $this->render('_search', ['model' => $searchModel]); /* TODO:: dateRange */ ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -74,11 +74,13 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'class' => DateTimeColumn::class,
+                'limitEndDay' => false,
                 'attribute' => 'ut_start_dt',
                 'format' => 'byUserDateTime',
             ],
             [
                 'class' => DateTimeColumn::class,
+                'limitEndDay' => false,
                 'attribute' => 'ut_end_dt',
                 'format' => 'byUserDateTime',
             ],
