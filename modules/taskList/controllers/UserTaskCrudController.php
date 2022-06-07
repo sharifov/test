@@ -77,7 +77,7 @@ class UserTaskCrudController extends FController
                 try {
                     (new UserTaskRepository($model))->save();
                 } catch (\Throwable $throwable) {
-                    \Yii::error(AppHelper::throwableLog($throwable),'UserTaskCrudController:actionCreate:save');
+                    \Yii::error(AppHelper::throwableLog($throwable), 'UserTaskCrudController:actionCreate:save');
                     Yii::$app->getSession()->setFlash('error', $throwable->getMessage());
                 }
                 return $this->redirect(['view', 'ut_id' => $model->ut_id, 'ut_year' => $model->ut_year, 'ut_month' => $model->ut_month]);
