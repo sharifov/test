@@ -25,7 +25,7 @@ class m220511_082249_add_ff_ab_testing_offer_departments_config extends Migratio
             $value['departments'] = ['sales'];
             $fFlag->ff_value = json_encode($value);
             $fFlag->save();
-            Yii::$app->ff->invalidateCache();
+            Yii::$app->featureFlag->invalidateCache();
         } catch (\Throwable $throwable) {
             \Yii::error(\src\helpers\app\AppHelper::throwableLog($throwable), 'm220511_082249_add_ff_ab_testing_offer_departments_config:safeUp:Throwable');
         }
@@ -48,7 +48,7 @@ class m220511_082249_add_ff_ab_testing_offer_departments_config extends Migratio
             unset($value['departments']);
             $fFlag->ff_value = json_encode($value);
             $fFlag->save();
-            Yii::$app->ff->invalidateCache();
+            Yii::$app->featureFlag->invalidateCache();
         } catch (\Throwable $throwable) {
             \Yii::error(\src\helpers\app\AppHelper::throwableLog($throwable), 'm220511_082249_add_ff_ab_testing_offer_departments_config:safeDown:Throwable');
         }

@@ -2172,8 +2172,8 @@ class TestController extends FController
         echo 'Feature Flag Test<br><br>';
 
         /** @fflag FFlag::FF_KEY_LPP_ENABLE, Lead Poor Processing Enable/Disable */
-        if (Yii::$app->ff->can(FFlag::FF_KEY_LPP_ENABLE)) {
-            VarDumper::dump(Yii::$app->ff->val(FFlag::FF_KEY_LPP_ENABLE), 10, true);
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_LPP_ENABLE)) {
+            VarDumper::dump(Yii::$app->featureFlag->getValue(FFlag::FF_KEY_LPP_ENABLE), 10, true);
         } else {
             echo 'NO1';
         }
@@ -2610,15 +2610,15 @@ class TestController extends FController
         echo 'Feature Flag Test<br><br>';
 
         /** @fflag FFlag::FF_TEST_FLAG1, Username field1 */
-        if (Yii::$app->ff->can('ff_test_example')) {
-            VarDumper::dump(Yii::$app->ff->val('ff_test_example'), 10, true);
+        if (Yii::$app->featureFlag->isEnable('ff_test_example')) {
+            VarDumper::dump(Yii::$app->featureFlag->getValue('ff_test_example'), 10, true);
         } else {
             echo 'NO1';
         }
 
         echo '<br><br>';
 
-        if (Yii::$app->ff->isDue(\kivork\FeatureFlag\Models\FeatureFlag::ET_DISABLED_CONDITION, '59 * * * * *')) {
+        if (Yii::$app->featureFlag->isDue(\kivork\FeatureFlag\Models\FeatureFlag::ET_DISABLED_CONDITION, '59 * * * * *')) {
             echo 'YES3';
         } else {
             echo 'NO3';

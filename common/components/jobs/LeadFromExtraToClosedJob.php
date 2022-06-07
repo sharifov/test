@@ -35,7 +35,7 @@ class LeadFromExtraToClosedJob extends BaseJob implements JobInterface
                 $service->transferLeadFromExtraToClosed($this->lead);
             } catch (\RuntimeException | \DomainException $throwable) {
                 /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
-                if (\Yii::$app->ff->can(FFlag::FF_KEY_DEBUG)) {
+                if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_DEBUG)) {
                     $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
                     \Yii::warning($message, 'LeadFromExtraToClosedJob:execute:Exception');
                 }
