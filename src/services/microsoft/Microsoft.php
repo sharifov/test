@@ -8,8 +8,8 @@ class Microsoft extends OAuth2
 {
     public ?string $url;
     public ?string $tenantId;
-    public $authUrl;
-    public $tokenUrl;
+    public ?string $authUri;
+    public ?string $tokenUri;
     public $apiBaseUrl;
 
     /**
@@ -17,8 +17,8 @@ class Microsoft extends OAuth2
      */
     public function init()
     {
-        $this->authUrl = $this->url . $this->tenantId . $this->authUrl;
-        $this->tokenUrl = $this->url . $this->tenantId . $this->tokenUrl;
+        $this->authUrl = $this->url . $this->tenantId . $this->authUri;
+        $this->tokenUrl = $this->url . $this->tenantId . $this->tokenUri;
 
         parent::init();
         if ($this->scope === null) {
