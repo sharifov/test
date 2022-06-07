@@ -2,11 +2,11 @@
 
 namespace src\model\userAuthClient\handler;
 
+use common\components\TwoFactorService;
 use common\models\Employee;
 use common\models\LoginForm;
 use common\models\Notifications;
 use common\models\UserConnection;
-use Da\TwoFA\Manager;
 use src\helpers\app\AppHelper;
 use src\helpers\setting\SettingHelper;
 use src\model\userAuthClient\entity\UserAuthClient;
@@ -150,10 +150,8 @@ class MicrosoftHandler implements ClientHandler
 
     protected function redirectToTwoFactorAuth(Employee $user, LoginForm $model): void
     {
-        $twoFaManager = new Manager();
-        $twoFaManager->setCounter(SettingHelper::getTwoFactorAuthCounter());
         $twoFactorAuthSecretKey = empty($user->userProfile->up_2fa_secret) ?
-            $twoFaManager->generateSecretKey() : $user->userProfile->up_2fa_secret;
+            (new TwoFactorService())->getSecret() : $user->userProfile->up_2fa_secret;
 
         $session = \Yii::$app->session;
         $session->set('two_factor_email', $user->email);
