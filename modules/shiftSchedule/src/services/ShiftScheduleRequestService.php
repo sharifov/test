@@ -225,41 +225,30 @@ class ShiftScheduleRequestService
 
         /** @var ShiftScheduleRequest $requestModel */
         $requestModel = ShiftScheduleRequest::find()
-            ->select('ssr_status_id')
             ->andWhere(['ssr_uss_id' => $event->uss_id])
-            ->orderBy(['ssr_created_dt' => SORT_DESC])
+            ->andWhere(['ssr_status_id' => ShiftScheduleRequest::STATUS_PENDING])
             ->one();
 
-        if (
-            !$requestModel
-            || $requestModel->isStatusDeclined()
-            || !$requestModel->isStatusPending()
-            || count($neededAttributes) == 0
-        ) {
+        if (!$requestModel || count($neededAttributes) == 0) {
             return;
         }
 
-        $scheduleRequest = ShiftScheduleRequest::create(
-            $event->uss_id,
-            $event->uss_sst_id,
-            ShiftScheduleRequest::STATUS_DECLINED,
-            'Shift event was updated (' . implode(',', $neededAttributes) . ')',
-            $event->uss_user_id,
-            $user->id
-        );
+        $requestModel->ssr_status_id = ShiftScheduleRequest::STATUS_DECLINED;
+        $requestModel->ssr_description = 'Shift event was updated (' . implode(',', $neededAttributes) . ')';
+        $requestModel->ssr_updated_user_id = $user->id;
 
-        (new ShiftScheduleRequestRepository($scheduleRequest))->save(true);
+        (new ShiftScheduleRequestRepository($requestModel))->save(true);
 
         self::sendNotification(
             Employee::ROLE_AGENT,
-            $scheduleRequest,
+            $requestModel,
             self::NOTIFICATION_TYPE_CREATE,
             $user
         );
 
         self::sendNotification(
             Employee::ROLE_SUPERVISION,
-            $scheduleRequest,
+            $requestModel,
             self::NOTIFICATION_TYPE_UPDATE,
             $user
         );
