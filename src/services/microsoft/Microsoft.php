@@ -6,7 +6,7 @@ use yii\authclient\OAuth2;
 
 class Microsoft extends OAuth2
 {
-    public ?string $host;
+    public ?string $url;
     public ?string $tenantId;
     public $authUrl;
     public $tokenUrl;
@@ -17,8 +17,8 @@ class Microsoft extends OAuth2
      */
     public function init()
     {
-        $this->authUrl = $this->host . $this->tenantId . $this->authUrl;
-        $this->tokenUrl = $this->host . $this->tenantId . $this->tokenUrl;
+        $this->authUrl = $this->url . $this->tenantId . $this->authUrl;
+        $this->tokenUrl = $this->url . $this->tenantId . $this->tokenUrl;
 
         parent::init();
         if ($this->scope === null) {
