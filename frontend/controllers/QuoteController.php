@@ -152,7 +152,7 @@ class QuoteController extends FController
             $lead = Lead::findOne(['id' => $leadId]);
 
             $leadAbacDto = new LeadAbacDto($lead, Auth::id());
-            /** @abac new $leadAbacDto, LeadAbacObject::OBJ_LEAD_QUOTE_SEARCH, LeadAbacObject::ACTION_ACCESS_QUOTE_SEARCH, Access Quote Search*/
+            /** @abac new $leadAbacDto, LeadAbacObject::OBJ_LEAD_QUOTE_SEARCH, LeadAbacObject::ACTION_ACCESS_QUOTE_SEARCH, Access Quote Search */
             if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_LEAD_QUOTE_SEARCH, LeadAbacObject::ACTION_ACCESS_QUOTE_SEARCH)) {
                 throw new ForbiddenHttpException('Access Denied.');
             }
