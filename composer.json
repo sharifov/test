@@ -168,7 +168,8 @@
 		},
 		"optimize-autoloader": true,
 		"allow-plugins": {
-			"yiisoft/yii2-composer": true
+			"yiisoft/yii2-composer": true,
+			"dealerdirect/phpcodesniffer-composer-installer": false
 		}
 	},
 	"repositories" : [
