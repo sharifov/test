@@ -6,6 +6,7 @@ use common\models\Employee;
 use modules\taskList\src\entities\shiftScheduleEventTask\ShiftScheduleEventTask;
 use modules\taskList\src\entities\TargetObject;
 use modules\taskList\src\entities\taskList\TaskList;
+use yii\db\ActiveQuery;
 
 /**
  * This is the model class for table "user_task".
@@ -24,6 +25,8 @@ use modules\taskList\src\entities\taskList\TaskList;
  * @property int $ut_month
  *
  * @property ShiftScheduleEventTask[] $shiftScheduleEventTasks
+ * @property Employee $user
+ * @property TaskList $taskList
  */
 class UserTask extends \yii\db\ActiveRecord
 {
@@ -74,7 +77,8 @@ class UserTask extends \yii\db\ActiveRecord
             [['ut_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['ut_user_id' => 'id']],
 
             [['ut_start_dt', 'ut_end_dt'], 'required'],
-            [['ut_start_dt', 'ut_end_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],  /* TODO:: check ut_end_dt > ut_start_dt */
+            [['ut_start_dt', 'ut_end_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+            [['ut_start_dt'], 'compare', 'compareAttribute' => 'ut_end_dt', 'operator' => '<='],
 
             [['ut_created_dt'], 'default', 'value' => date('Y-m-d H:i:s')],
             [['ut_created_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
@@ -89,9 +93,19 @@ class UserTask extends \yii\db\ActiveRecord
         ];
     }
 
-    public function getShiftScheduleEventTasks(): \yii\db\ActiveQuery
+    public function getShiftScheduleEventTasks(): ActiveQuery
     {
         return $this->hasMany(ShiftScheduleEventTask::class, ['sset_user_task_id' => 'ut_id']);
+    }
+
+    public function getUser(): ActiveQuery
+    {
+        return $this->hasOne(Employee::class, ['id' => 'ut_user_id']);
+    }
+
+    public function getTaskList(): ActiveQuery
+    {
+        return $this->hasOne(TaskList::class, ['tl_id' => 'ut_task_list_id']);
     }
 
     public function attributeLabels(): array
@@ -101,11 +115,11 @@ class UserTask extends \yii\db\ActiveRecord
             'ut_user_id' => 'User ID',
             'ut_target_object' => 'Target Object',
             'ut_target_object_id' => 'Target Object ID',
-            'ut_task_list_id' => 'Task List ID',
+            'ut_task_list_id' => 'Task List',
             'ut_start_dt' => 'Start Dt',
             'ut_end_dt' => 'End Dt',
             'ut_priority' => 'Priority',
-            'ut_status_id' => 'Status ID',
+            'ut_status_id' => 'Status',
             'ut_created_dt' => 'Created Dt',
             'ut_year' => 'Year',
             'ut_month' => 'Month',
@@ -152,5 +166,15 @@ class UserTask extends \yii\db\ActiveRecord
         $model->ut_year = $nowDT->format('Y');
         $model->ut_month = $nowDT->format('m');
         return $model;
+    }
+
+    public static function getStatusName(?int $statusId): string
+    {
+        return self::STATUS_LIST[$statusId] ?? '-';
+    }
+
+    public static function getPriorityName(?int $priorityId): string
+    {
+        return self::PRIORITY_LIST[$priorityId] ?? '-';
     }
 }

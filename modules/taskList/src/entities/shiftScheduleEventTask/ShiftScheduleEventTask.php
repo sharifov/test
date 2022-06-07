@@ -21,14 +21,15 @@ class ShiftScheduleEventTask extends \yii\db\ActiveRecord
         return [
             [['sset_event_id', 'sset_user_task_id'], 'unique', 'targetAttribute' => ['sset_event_id', 'sset_user_task_id']],
 
-            ['sset_created_dt', 'safe'],
+            [['sset_created_dt'], 'safe'],
 
-            ['sset_event_id', 'required'],
-            ['sset_event_id', 'integer'],
+            [['sset_event_id'], 'required'],
+            [['sset_event_id'], 'integer'],
+            [['sset_event_id'], 'exist', 'skipOnError' => true, 'targetClass' => UserTask::class, 'targetAttribute' => ['sset_event_id' => 'ut_id']],
 
-            ['sset_user_task_id', 'required'],
-            ['sset_user_task_id', 'integer'],
-            ['sset_user_task_id', 'exist', 'skipOnError' => true, 'targetClass' => UserTask::class, 'targetAttribute' => ['sset_user_task_id' => 'ut_id']],
+            [['sset_user_task_id'], 'required'],
+            [['sset_user_task_id'], 'integer'],
+            [['sset_user_task_id'], 'exist', 'skipOnError' => true, 'targetClass' => UserTask::class, 'targetAttribute' => ['sset_user_task_id' => 'ut_id']],
         ];
     }
 

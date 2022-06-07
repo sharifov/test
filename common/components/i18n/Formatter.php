@@ -632,7 +632,11 @@ class Formatter extends \yii\i18n\Formatter
         }
 
         if (is_string($value)) {
-            $name = $value;
+            if ($entity = Employee::find()->select(['username', 'id'])->where(['username' => $value])->cache(3600)->one()) {
+                $name = $entity->username . ' (' . $entity->id . ')';
+            } else {
+                $name = $value;
+            }
         } elseif ($value instanceof Employee) {
             $name = $value->username . ' (' . $value->id . ')';
         } elseif (is_int($value)) {
