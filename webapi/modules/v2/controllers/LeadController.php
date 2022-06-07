@@ -142,6 +142,14 @@ class LeadController extends BaseController
      *               {
      *                  "field_key": "example_key",
      *                  "field_value": "example_value"
+     *              },
+     *               {
+     *                  "field_key": "cross_system_xp",
+     *                  "field_value": "wpl5.0"
+     *              },
+     *               {
+     *                  "field_key": "cross_system_xp",
+     *                  "field_value": "wpl6.2"
      *              }
      *          ],
      *          "client_data": [
