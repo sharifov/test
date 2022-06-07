@@ -100,7 +100,7 @@ class AbacPolicyController extends FController
      */
     public function actionDump($id)
     {
-        return $this->renderPartial('_dump_out', [
+        return $this->renderAjax('_dump_out', [
             'model' => $this->findModel($id),
         ]);
     }
