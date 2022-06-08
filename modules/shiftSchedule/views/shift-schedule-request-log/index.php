@@ -29,9 +29,17 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
-
             'ssrh_id',
+            [
+                'attribute' => 'ssrh_ssr_id',
+                'value' => static function (ShiftScheduleRequestLog $model) {
+                    return Html::a('<i class="fa fa-link"></i> ' . $model->ssrh_ssr_id, Url::to(['/user-shift-schedule-crud/view', 'id' => $model->ssrh_ssr_id]), [
+                        'target' => '_blank',
+                        'data-pjax' => 0
+                    ]);
+                },
+                'format' => 'raw'
+            ],
             'ssrh_ssr_id',
             'ssrh_old_attr',
             'ssrh_new_attr',

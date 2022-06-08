@@ -99,6 +99,6 @@ class GaRequestService extends Component
     public function ping(): bool
     {
         $response = $this->sendRequest([], 'get');
-        return $response->statusCode === '401';
+        return $response->statusCode === '401' || $response->statusCode === '200';
     }
 }

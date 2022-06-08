@@ -5,7 +5,6 @@
  * @var UserShiftSchedule $event
  * @var ScheduleRequestForm $model
  * @var bool $success
- * @var bool $canEditPreviousDate
  * @var string $userTimeZone
  */
 

@@ -35,7 +35,6 @@ use yii\db\BaseActiveRecord;
  * @property-read int $duration
  * @property UserShiftSchedule $srhUss
  * @property Employee $ssrCreatedUser
- * @property-read bool $isCanEditPreviousDate
  * @property Employee $ssrUpdatedUser
  */
 class ShiftScheduleRequest extends ActiveRecord
@@ -290,20 +289,6 @@ class ShiftScheduleRequest extends ActiveRecord
     public function getSsrUpdatedUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'ssr_updated_user_id']);
-    }
-
-    /**
-     * Return if user can edit previous date time
-     * @return bool
-     */
-    public function getIsCanEditPreviousDate(): bool
-    {
-        if (strtotime($this->srhUss->uss_start_utc_dt ?? '') < strtotime('now')) {
-            // get abacRules and return;
-            return false;
-        }
-
-        return true;
     }
 
     /**

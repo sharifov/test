@@ -250,13 +250,17 @@ class TravelServices extends Component
 
     /**
      * @return bool
-     * @throws Exception
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\di\NotInstantiableException
      */
     public function ping(): bool
     {
-        $response = $this->sendRequest('hc/', [], 'get');
-        return $response->isOk && !empty($response->data);
+        $parsedUrl = parse_url($this->url);
+        if (isset($parsedUrl['scheme'], $parsedUrl['host'])) {
+            $curl = curl_init();
+            curl_setopt($curl, CURLOPT_URL, "{$parsedUrl['scheme']}://{$parsedUrl['host']}/hc");
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_exec($curl);
+            return (bool)!curl_errno($curl);
+        }
+        return false;
     }
 }

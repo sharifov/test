@@ -42,7 +42,7 @@ class LeadExcluderSettings
 
     private static function createInvalidSettings(): self
     {
-        return new self([], [], [], false, false, false);
+        return new self([], [], [], false, [], false, false);
     }
 
     public static function fromArray(array $settings): self
