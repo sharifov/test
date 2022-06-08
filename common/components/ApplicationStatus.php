@@ -179,6 +179,7 @@ class ApplicationStatus extends Component
     {
         try {
             \Yii::$app->queue_sms_job->getStatsTube();
+            return 'ok';
         } catch (\Throwable $e) {
             return 'error';
         }
@@ -191,6 +192,7 @@ class ApplicationStatus extends Component
     {
         try {
             \Yii::$app->queue_email_job->getStatsTube();
+            return 'ok';
         } catch (\Throwable $e) {
             return 'error';
         }
@@ -203,6 +205,7 @@ class ApplicationStatus extends Component
     {
         try {
             \Yii::$app->queue_phone_check->getStatsTube();
+            return 'ok';
         } catch (\Throwable $e) {
             return 'error';
         }
@@ -215,6 +218,7 @@ class ApplicationStatus extends Component
     {
         try {
             \Yii::$app->queue_job->getStatsTube();
+            return 'ok';
         } catch (\Throwable $e) {
             return 'error';
         }
@@ -227,6 +231,7 @@ class ApplicationStatus extends Component
     {
         try {
             \Yii::$app->queue_system_services->getStatsTube();
+            return 'ok';
         } catch (\Throwable $e) {
             return 'error';
         }
@@ -239,6 +244,7 @@ class ApplicationStatus extends Component
     {
         try {
             \Yii::$app->queue_client_chat_job->getStatsTube();
+            return 'ok';
         } catch (\Throwable $e) {
             return 'error';
         }
@@ -251,6 +257,7 @@ class ApplicationStatus extends Component
     {
         try {
             \Yii::$app->queue_virtual_cron->getStatsTube();
+            return 'ok';
         } catch (\Throwable $e) {
             return 'error';
         }
@@ -263,6 +270,7 @@ class ApplicationStatus extends Component
     {
         try {
             \Yii::$app->queue_lead_redial->getStatsTube();
+            return 'ok';
         } catch (\Throwable $e) {
             return 'error';
         }
