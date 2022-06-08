@@ -4,22 +4,29 @@ module "pgsql" {
   version    = "~> 2.0"
   identifier = "pgsql-${var.PROJECT}-${var.ENV}"
 
-  engine            = "postgres"
-  engine_version    = "12.8"
-  instance_class    = var.PGSQL_RDS_INSTANCE_TYPE
-  allocated_storage = 5
-  storage_encrypted = true
-  multi_az          = false
+  engine                = "postgres"
+  engine_version        = "12.8"
+  instance_class        = var.PGSQL_RDS_INSTANCE_TYPE
+  allocated_storage     = 5
+  max_allocated_storage = 500
+  storage_encrypted     = true
+  multi_az              = false
 
   name     = var.PGSQL_RDS_DATABASE
   username = var.PGSQL_RDS_USERNAME
   password = var.PGSQL_RDS_PASSWORD
   port     = 5432
 
-  vpc_security_group_ids  = [aws_security_group.pgsql.id]
-  maintenance_window      = "Mon:00:00-Mon:03:00"
-  backup_window           = "03:00-06:00"
-  backup_retention_period = 0
+  vpc_security_group_ids              = [aws_security_group.pgsql.id]
+  iam_database_authentication_enabled = true
+
+  maintenance_window           = "Mon:00:00-Mon:03:00"
+  backup_retention_period      = 7
+  backup_window                = "03:00-06:00"
+  performance_insights_enabled = true
+  monitoring_interval          = 30
+  monitoring_role_name         = "pgsql-${var.PROJECT}-${var.ENV}"
+  create_monitoring_role       = true
 
   tags = {
     Terraform   = "true"

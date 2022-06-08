@@ -1,40 +1,48 @@
+# MySQL RDS Instance
 module "mysql" {
-  source  = "terraform-aws-modules/rds/aws"
-  version = "~> 2.0"
+  source     = "terraform-aws-modules/rds/aws"
+  version    = "~> 2.0"
+  identifier = "mysql-${var.PROJECT}-${var.ENV}"
 
-  identifier        = "mysql-${var.PROJECT}-${var.ENV}"
-  engine            = "mysql"
-  engine_version    = "8.0.25"
-  instance_class    = var.MYSQL_RDS_INSTANCE_TYPE
-  allocated_storage = 50
-  storage_encrypted = true
+  engine                = "mysql"
+  engine_version        = "8.0.25"
+  instance_class        = var.MYSQL_RDS_INSTANCE_TYPE
+  allocated_storage     = 50
+  max_allocated_storage = 500
+  storage_encrypted     = true
+  multi_az              = false
 
   name     = var.MYSQL_RDS_DATABASE
   username = var.MYSQL_RDS_USERNAME
   password = var.MYSQL_RDS_PASSWORD
-  port     = "3306"
+  port     = 3306
 
   vpc_security_group_ids              = [aws_security_group.mysql.id]
   iam_database_authentication_enabled = true
 
-  maintenance_window     = "Mon:00:00-Mon:03:00"
-  backup_window          = "03:00-06:00"
-  monitoring_interval    = "30"
-  monitoring_role_name   = "mysql-${var.PROJECT}-${var.ENV}"
-  create_monitoring_role = true
+  maintenance_window           = "Mon:00:00-Mon:03:00"
+  backup_retention_period      = 7
+  backup_window                = "03:00-06:00"
+  performance_insights_enabled = true
+  monitoring_interval          = 30
+  monitoring_role_name         = "mysql-${var.PROJECT}-${var.ENV}"
+  create_monitoring_role       = true
 
   tags = {
-    Project     = var.PROJECT
+    Terraform   = "true"
     Environment = var.ENV
+    Project     = var.PROJECT
     Ns          = var.NAMESPACE
     Domain      = var.DOMAIN
   }
 
-  subnet_ids           = var.PRIVATE_SUBNETS
-  family               = "mysql8.0"
-  major_engine_version = "8.0"
-  deletion_protection  = false
-  skip_final_snapshot  = true
+  enabled_cloudwatch_logs_exports = ["slowquery"]
+  subnet_ids                      = var.PRIVATE_SUBNETS
+  family                          = "mysql8.0"
+  major_engine_version            = "8.0"
+  final_snapshot_identifier       = "mysql-${var.PROJECT}-${var.ENV}"
+  deletion_protection             = false
+  skip_final_snapshot             = true
 
   parameters = [
     {
