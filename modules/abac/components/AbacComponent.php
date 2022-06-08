@@ -43,6 +43,8 @@ class AbacComponent extends Component
 {
     public array $modules = [];
     public bool $cacheEnable = true;
+    public bool $cacheEnforceEnable = true;
+    public int $cacheEnforceDuration = 3600 * 24;
     public string $cacheKey = 'abac-policy';
     public string $cacheTagDependency = 'abac-tag-dependency';
     public string $abacModelPath = '@common/config/casbin/abac_model.conf';
@@ -96,7 +98,9 @@ class AbacComponent extends Component
         $user = new \stdClass();
         $user->id = $me->id;
         $user->username = $me->username;
+
         $user->roles =  $me->getRoles(true);
+
         $user->projects = $me->access->getAllProjects('key'); //getProjects();
         $user->groups = $me->access->getAllGroups();
         $user->departments = $me->access->getAllDepartments();
@@ -145,28 +149,44 @@ class AbacComponent extends Component
             $subject = new \stdClass();
         }
         try {
-//            if (!$user && (Yii::$app instanceof \yii\web\Application) && Yii::$app->id === 'app-frontend') {
-//                $user = Auth::user();
-//            }
             if (!$user) {
                 $user = Auth::user();
             }
 
             $subject->env = $this->getEnv($user);
-            //$sub->data = $subject;
+            $enforserObj = $this->enforser;
 
-            if ($this->enforser->enforce($subject, $object, $action) === true) {
-                return true;
+            if ($this->cacheEnforceEnable) {
+                $keyCache = self::cacheCanGenerate($subject, $object, $action);
+                return Yii::$app->cache->getOrSet($keyCache, static function () use ($enforserObj, $subject, $object, $action) {
+                    return self::canEnforce($enforserObj, $subject, $object, $action);
+                }, $this->cacheEnforceDuration, new TagDependency([
+                    'tags' => [AbacPolicy::CACHE_KEY . $object, AbacPolicy::CACHE_KEY],
+                ]));
             }
+
+            return self::canEnforce($enforserObj, $subject, $object, $action);
         } catch (\Throwable $throwable) {
             Yii::error(AppHelper::throwableLog($throwable, true), 'AbacComponent::can');
-            //VarDumper::dump(AppHelper::throwableLog($throwable), 10, true);
             return null;
         }
-
-        return false;
     }
 
+    /**
+     * @throws \Casbin\Exceptions\CasbinException
+     */
+    private static function canEnforce(Enforcer $enforserObj, \stdClass $subject, string $object, string $action): bool
+    {
+        return $enforserObj->enforce($subject, $object, $action) === true;
+    }
+
+    private static function cacheCanGenerate(\stdClass $subject, string $object, string $action, string $algo = 'md4'): string
+    {
+        return hash(
+            $algo,
+            \src\helpers\text\HashHelper::generateHashFromObject($object) . $object . $action
+        );
+    }
 
     /**
      * @return array
