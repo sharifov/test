@@ -3,10 +3,10 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model common\models\DateSensitive */
+/* @var $model common\models\DbDateSensitive */
 
-$this->title = 'Create Date Sensitive';
-$this->params['breadcrumbs'][] = ['label' => 'Date Sensitive', 'url' => ['index']];
+$this->title = 'Create DB Date Sensitive';
+$this->params['breadcrumbs'][] = ['label' => 'Db Date Sensitive', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="date-sensitive-create">

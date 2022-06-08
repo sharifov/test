@@ -2,22 +2,22 @@
 
 namespace frontend\controllers;
 
-use common\models\DateSensitive;
-use common\models\DateSensitiveView;
+use common\models\DbDateSensitive;
+use common\models\DbDateSensitiveView;
 use src\helpers\app\AppHelper;
-use src\services\dateSensitive\DateSensitiveService;
+use src\services\dbDateSensitive\DbDateSensitiveService;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 
-class DateSensitiveController extends FController
+class DbDateSensitiveController extends FController
 {
-    private DateSensitiveService $dateSensitiveService;
+    private DbDateSensitiveService $dbDateSensitiveService;
 
-    public function __construct($id, $module, DateSensitiveService $dateSensitiveService, $config = [])
+    public function __construct($id, $module, DbDateSensitiveService $dbDateSensitiveService, $config = [])
     {
         parent::__construct($id, $module, $config);
-        $this->dateSensitiveService = $dateSensitiveService;
+        $this->dbDateSensitiveService = $dbDateSensitiveService;
     }
 
     /**
@@ -48,9 +48,9 @@ class DateSensitiveController extends FController
      */
     public function actionCreateViews($id)
     {
-        $dateSensitive = $this->findModel($id);
-        $this->dateSensitiveService->createViews($dateSensitive);
-        \Yii::$app->session->setFlash('success', 'Success');
+        $dbDateSensitive = $this->findModel($id);
+        $this->dbDateSensitiveService->createViews($dbDateSensitive);
+        \Yii::$app->session->setFlash('success', 'Views creation has been successful');
         return $this->redirect(\Yii::$app->request->referrer);
     }
 
@@ -61,9 +61,9 @@ class DateSensitiveController extends FController
      */
     public function actionDropViews($id)
     {
-        $dateSensitive = $this->findModel($id);
-        $this->dateSensitiveService->dropViews($dateSensitive);
-        \Yii::$app->session->setFlash('success', 'Success');
+        $dbDateSensitive = $this->findModel($id);
+        $this->dbDateSensitiveService->dropViews($dbDateSensitive);
+        \Yii::$app->session->setFlash('success', 'Views deletion has been successful');
         return $this->redirect(\Yii::$app->request->referrer);
     }
 
@@ -75,16 +75,16 @@ class DateSensitiveController extends FController
      */
     public function actionDropView($viewName)
     {
-        $dateSensitiveView = $this->findDateSensitiveView($viewName);
+        $dbDateSensitiveView = $this->findDbDateSensitiveView($viewName);
         try {
-            $this->dateSensitiveService->dropViewByDateSensitiveView($dateSensitiveView);
-            \Yii::$app->session->setFlash('success', 'Success');
+            $this->dbDateSensitiveService->dropViewByDbDateSensitiveView($dbDateSensitiveView);
+            \Yii::$app->session->setFlash('success', 'View deletion has been successful');
         } catch (\RuntimeException | \DomainException $e) {
             $message = ArrayHelper::merge(AppHelper::throwableLog($e), ['DateSensitiveViewName' => $viewName]);
-            \Yii::warning($message, 'DateSensitiveController:actionDropView:Exception');
+            \Yii::warning($message, 'DbDateSensitiveController:actionDropView:Exception');
         } catch (\Throwable $throwable) {
             $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['DateSensitiveViewName' => $viewName]);
-            \Yii::error($message, 'DateSensitiveController:actionDropView:Throwable');
+            \Yii::error($message, 'DbDateSensitiveController:actionDropView:Throwable');
         }
 
         return $this->redirect(\Yii::$app->request->referrer);
@@ -92,12 +92,12 @@ class DateSensitiveController extends FController
 
     /**
      * @param $id
-     * @return DateSensitive|null
+     * @return DbDateSensitive|null
      * @throws NotFoundHttpException
      */
     protected function findModel($id)
     {
-        if (($model = DateSensitive::findOne(['da_id' => $id])) !== null) {
+        if (($model = DbDateSensitive::findOne(['dda_id' => $id])) !== null) {
             return $model;
         }
         throw new NotFoundHttpException('Date Sensitive not found by ID(' . $id . ')');
@@ -105,12 +105,12 @@ class DateSensitiveController extends FController
 
     /**
      * @param $viewName
-     * @return DateSensitiveView|null
+     * @return DbDateSensitiveView|null
      * @throws NotFoundHttpException
      */
-    protected function findDateSensitiveView($viewName)
+    protected function findDbDateSensitiveView($viewName)
     {
-        if (($model = DateSensitiveView::findOne(['dv_view_name' => $viewName])) !== null) {
+        if (($model = DbDateSensitiveView::findOne(['ddv_view_name' => $viewName])) !== null) {
             return $model;
         }
         throw new NotFoundHttpException('Date Sensitive View not found by View Name(' . $viewName . ')');

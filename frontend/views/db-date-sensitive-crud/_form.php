@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model common\models\DateSensitive */
+/* @var $model common\models\DbDateSensitive */
 /* @var $form yii\widgets\ActiveForm */
 
 ?>
@@ -15,13 +15,13 @@ use yii\widgets\ActiveForm;
     <div class="col-md-6">
         <?php $form = ActiveForm::begin(); ?>
 
-        <?= $form->field($model, 'da_key')->textInput() ?>
+        <?= $form->field($model, 'dda_key')->textInput() ?>
 
-        <?= $form->field($model, 'da_name')->textInput() ?>
+        <?= $form->field($model, 'dda_name')->textInput() ?>
 
         <?php
         try {
-            echo $form->field($model, 'da_source')->widget(
+            echo $form->field($model, 'dda_source')->widget(
                 \kdn\yii2\JsonEditor::class,
                 [
                     'clientOptions' => [
@@ -33,7 +33,7 @@ use yii\widgets\ActiveForm;
                 ]
             );
         } catch (Exception $exception) {
-            echo $form->field($model, 'da_source')->textarea(['rows' => 5]);
+            echo $form->field($model, 'dda_source')->textarea(['rows' => 5]);
         }
 
         ?>

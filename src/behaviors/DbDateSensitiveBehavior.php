@@ -2,16 +2,16 @@
 
 namespace src\behaviors;
 
-use common\models\DateSensitive;
-use src\services\dateSensitive\DateSensitiveService;
+use common\models\DbDateSensitive;
+use src\services\dbDateSensitive\DbDateSensitiveService;
 use yii\base\Behavior;
 use yii\base\Event;
 use yii\db\ActiveRecord;
 
-class DateSensitiveBehavior extends Behavior
+class DbDateSensitiveBehavior extends Behavior
 {
     /**
-     * @var DateSensitive the owner of this behavior
+     * @var DbDateSensitive the owner of this behavior
      */
     public $owner;
 
@@ -36,13 +36,13 @@ class DateSensitiveBehavior extends Behavior
             return;
         }
 
-        $service = \Yii::createObject(DateSensitiveService::class);
+        $service = \Yii::createObject(DbDateSensitiveService::class);
         $service->createViews($this->owner);
     }
 
     public function dropViews(Event $event)
     {
-        $service = \Yii::createObject(DateSensitiveService::class);
+        $service = \Yii::createObject(DbDateSensitiveService::class);
         $service->dropViews($this->owner);
     }
 }

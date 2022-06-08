@@ -2,7 +2,7 @@
 
 namespace src\services\system;
 
-use common\models\DateSensitiveView;
+use common\models\DbDateSensitiveView;
 use src\helpers\setting\SettingHelper;
 use yii\db\Connection;
 
@@ -59,7 +59,7 @@ class DbViewCryptService
 
     public function getDropSql(): string
     {
-        DateSensitiveView::deleteAll(['dv_view_name' => $this->getViewName()]);
+        DbDateSensitiveView::deleteAll(['ddv_view_name' => $this->getViewName()]);
         return "DROP VIEW IF EXISTS {$this->viewName}; ";
     }
 

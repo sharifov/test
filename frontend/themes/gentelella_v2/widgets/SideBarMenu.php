@@ -1179,7 +1179,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => Yii::t('menu', 'Check Exclude IP'), 'url' => ['/tools/check-exclude-ip']],
                         ['label' => Yii::t('menu', 'Stash Log Files'), 'url' => ['/tools/stash-log-file']],
                         ['label' => Yii::t('menu', 'DB Info'), 'url' => ['/tools/db-info']],
-                        ['label' => Yii::t('menu', 'Date Sensitive'), 'url' => ['/date-sensitive-crud/index'], 'icon' => 'database'],
+                        ['label' => Yii::t('menu', 'Db Date Sensitive'), 'url' => ['/db-date-sensitive-crud/index'], 'icon' => 'database'],
                         ['label' => Yii::t('menu', 'Composer Info'), 'url' => ['/tools/composer-info']],
                         ['label' => 'Check phone', 'url' => ['/tools/check-phone'], 'icon' => 'volume-control-phone'],
                         ['label' => 'Import phones', 'url' => ['/tools/import-phone'], 'icon' => 'caret-square-o-up'],

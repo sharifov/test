@@ -2,15 +2,15 @@
 
 namespace frontend\controllers;
 
-use common\models\DateSensitive;
-use common\models\search\DateSensitiveSearch;
+use common\models\DbDateSensitive;
+use common\models\search\DbDateSensitiveSearch;
 use yii\filters\VerbFilter;
 use yii\web\NotFoundHttpException;
 
 /**
- * DateSensitiveCrudController implements the CRUD actions for DateSensitive model.
+ * DbDateSensitiveCrudController implements the CRUD actions for DbDateSensitive model.
  */
-class DateSensitiveCrudController extends FController
+class DbDateSensitiveCrudController extends FController
 {
     /**
      * @inheritDoc
@@ -32,13 +32,13 @@ class DateSensitiveCrudController extends FController
 
 
     /**
-     * Lists all DateSensitive models.
+     * Lists all DbDateSensitive models.
      *
      * @return string
      */
     public function actionIndex()
     {
-        $searchModel = new DateSensitiveSearch();
+        $searchModel = new DbDateSensitiveSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
 
         return $this->render('index', [
@@ -48,7 +48,7 @@ class DateSensitiveCrudController extends FController
     }
 
     /**
-     * Displays a single DateSensitive model.
+     * Displays a single DbDateSensitive model.
      * @param $id
      * @return string
      * @throws NotFoundHttpException if the model cannot be found
@@ -61,16 +61,16 @@ class DateSensitiveCrudController extends FController
     }
 
     /**
-     * Creates a new DateSensitive model.
+     * Creates a new DbDateSensitive model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return string|\yii\web\Response
      */
     public function actionCreate()
     {
-        $model = new DateSensitive();
+        $model = new DbDateSensitive();
 
         if ($model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->da_id]);
+            return $this->redirect(['view', 'id' => $model->dda_id]);
         }
 
         return $this->render('create', [
@@ -79,9 +79,9 @@ class DateSensitiveCrudController extends FController
     }
 
     /**
-     * Updates an existing DateSensitive model.
+     * Updates an existing DbDateSensitive model.
      * If update is successful, the browser will be redirected to the 'view' page.
-     * @param int $qs_id ID
+     * @param $id
      * @return string|\yii\web\Response
      * @throws NotFoundHttpException if the model cannot be found
      */
@@ -90,7 +90,7 @@ class DateSensitiveCrudController extends FController
         $model = $this->findModel($id);
 
         if ($model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->da_id]);
+            return $this->redirect(['view', 'id' => $model->dda_id]);
         }
 
         return $this->render('update', [
@@ -99,7 +99,7 @@ class DateSensitiveCrudController extends FController
     }
 
     /**
-     * Deletes an existing DateSensitive model.
+     * Deletes an existing DbDateSensitive model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param $id
      * @return \yii\web\Response
@@ -114,18 +114,18 @@ class DateSensitiveCrudController extends FController
     }
 
     /**
-     * Finds the DateSensitive model based on its primary key value.
+     * Finds the DbDateSensitive model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param $id
-     * @return DateSensitive the loaded model
+     * @return DbDateSensitive the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = DateSensitive::findOne(['da_id' => $id])) !== null) {
+        if (($model = DbDateSensitive::findOne(['dda_id' => $id])) !== null) {
             return $model;
         }
 
-        throw new NotFoundHttpException('Date Sensitive not found by ID(' . $id . ')');
+        throw new NotFoundHttpException('Db Date Sensitive not found by ID(' . $id . ')');
     }
 }
