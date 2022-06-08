@@ -22,9 +22,9 @@ class CleanCacheBehavior extends Behavior
     public function events(): array
     {
         return [
-            ActiveRecord::EVENT_AFTER_INSERT => 'cleanCache',
-            ActiveRecord::EVENT_AFTER_UPDATE => 'cleanCache',
-            ActiveRecord::EVENT_AFTER_DELETE => 'cleanCache',
+            ActiveRecord::EVENT_BEFORE_INSERT => 'cleanCache',
+            ActiveRecord::EVENT_BEFORE_UPDATE => 'cleanCache',
+            ActiveRecord::EVENT_BEFORE_DELETE => 'cleanCache',
         ];
     }
 

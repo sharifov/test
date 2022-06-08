@@ -58,6 +58,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'class' => 'btn btn-warning',
             'id' => 'btn-dump-import'
         ]) ?>
+
+        <?= Html::a('<i class="fa fa-times"></i> Clear cache', ['clear-cache'], [
+            'class' => 'btn btn-default',
+            'data' => [
+                'confirm' => 'Are you sure you want to clear cache all ABAC policy rules?',
+            ],
+        ]) ?>
     </p>
 
     <p>
