@@ -271,20 +271,6 @@ class ApplicationStatus extends Component
     /**
      * @return string
      */
-    public function telegramStatus(): string
-    {
-        try {
-            $response = \Yii::$app->telegram->getMe();
-            $result = $response->getResult();
-            return isset($result['user']) ? 'ok' : 'error';
-        } catch (\Throwable $e) {
-            return 'error';
-        }
-    }
-
-    /**
-     * @return string
-     */
     public function gaRequestServiceStatus(): string
     {
         try {
