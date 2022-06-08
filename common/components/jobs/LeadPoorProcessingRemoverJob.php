@@ -52,7 +52,7 @@ class LeadPoorProcessingRemoverJob extends BaseJob implements JobInterface
             }
         } catch (\RuntimeException | \DomainException $throwable) {
             /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
-            if (Yii::$app->ff->can(FFlag::FF_KEY_DEBUG)) {
+            if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_DEBUG)) {
                 $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
                 \Yii::info($message, 'LeadPoorProcessingRemoverJob:execute:Exception');
             }

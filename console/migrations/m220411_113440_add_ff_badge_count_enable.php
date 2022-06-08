@@ -33,7 +33,7 @@ class m220411_113440_add_ff_badge_count_enable extends Migration
                     'ff_description' => 'Badge Count Enable/Disable'
                 ]
             );
-            Yii::$app->ff->invalidateCache();
+            Yii::$app->featureFlag->invalidateCache();
         } catch (\Throwable $throwable) {
             \Yii::error(AppHelper::throwableLog($throwable), 'm220411_113440_add_ff_badge_count_enable:safeUp:Throwable');
         }
@@ -50,7 +50,7 @@ class m220411_113440_add_ff_badge_count_enable extends Migration
             }
             $featureFlagService = new \kivork\FeatureFlag\Services\FeatureFlagService();
             $featureFlagService::delete(FFlag::FF_KEY_BADGE_COUNT_ENABLE);
-            Yii::$app->ff->invalidateCache();
+            Yii::$app->featureFlag->invalidateCache();
         } catch (\Throwable $throwable) {
             \Yii::error(AppHelper::throwableLog($throwable), 'm220411_113440_add_ff_badge_count_enable:safeDown:Throwable');
         }

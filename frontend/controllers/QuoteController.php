@@ -54,6 +54,7 @@ use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Json;
+use yii\web\ForbiddenHttpException;
 use yii\web\Response;
 use yii\web\BadRequestHttpException;
 use common\models\Employee;
@@ -80,6 +81,7 @@ class QuoteController extends FController
             'access' => [
                 'allowActions' => [
                     'auto-adding-quotes',
+                    'ajax-search-quotes',
                 ],
             ],
         ];
@@ -148,6 +150,13 @@ class QuoteController extends FController
     {
         try {
             $lead = Lead::findOne(['id' => $leadId]);
+
+            $leadAbacDto = new LeadAbacDto($lead, Auth::id());
+            /** @abac new $leadAbacDto, LeadAbacObject::OBJ_LEAD_QUOTE_SEARCH, LeadAbacObject::ACTION_ACCESS_QUOTE_SEARCH, Access Quote Search */
+            if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_LEAD_QUOTE_SEARCH, LeadAbacObject::ACTION_ACCESS_QUOTE_SEARCH)) {
+                throw new ForbiddenHttpException('Access Denied.');
+            }
+
             $gds = Yii::$app->request->post('gds', '');
 //            $pjaxId = Yii::$app->request->post('pjaxId', '');
 
@@ -1400,7 +1409,7 @@ class QuoteController extends FController
 
         try {
             /** @fflag FFlag::FF_KEY_ADD_AUTO_QUOTES, Auto add quote */
-            if (!Yii::$app->ff->can(FFlag::FF_KEY_ADD_AUTO_QUOTES)) {
+            if (!Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_ADD_AUTO_QUOTES)) {
                 throw new \RuntimeException('Auto add quote is disabled');
             }
             $lead = Lead::findOne($leadId);

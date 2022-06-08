@@ -33,7 +33,7 @@ class m220214_113718_add_ff_debug extends Migration
                     'ff_description' => 'Debug'
                 ]
             );
-            Yii::$app->ff->invalidateCache();
+            Yii::$app->featureFlag->invalidateCache();
         } catch (\Throwable $throwable) {
             \Yii::error(AppHelper::throwableLog($throwable), 'm220214_113718_add_ff_debug:safeUp:Throwable');
         }
@@ -50,7 +50,7 @@ class m220214_113718_add_ff_debug extends Migration
             }
             $featureFlagService = new \kivork\FeatureFlag\Services\FeatureFlagService();
             $featureFlagService::delete(FFlag::FF_KEY_DEBUG);
-            Yii::$app->ff->invalidateCache();
+            Yii::$app->featureFlag->invalidateCache();
         } catch (\Throwable $throwable) {
             \Yii::error(AppHelper::throwableLog($throwable), 'm220214_113718_add_ff_debug:safeDown:Throwable');
         }

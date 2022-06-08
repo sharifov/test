@@ -20,12 +20,14 @@ class LeadExcluderSettings
     private bool $noFlightDetails;
     private bool $isTest;
     private bool $valid;
+    private array $sources;
 
     private function __construct(
         array $projects,
         array $departments,
         array $cabins,
         bool $noFlightDetails,
+        array $sources,
         bool $isTest,
         bool $valid
     ) {
@@ -33,13 +35,14 @@ class LeadExcluderSettings
         $this->departments = $departments;
         $this->cabins = $cabins;
         $this->noFlightDetails = $noFlightDetails;
+        $this->sources = $sources;
         $this->isTest = $isTest;
         $this->valid = $valid;
     }
 
     private static function createInvalidSettings(): self
     {
-        return new self([], [], [], false, false, false);
+        return new self([], [], [], false, [], false, false);
     }
 
     public static function fromArray(array $settings): self
@@ -50,6 +53,7 @@ class LeadExcluderSettings
             || !array_key_exists('cabins', $settings)
             || !array_key_exists('noFlightDetails', $settings)
             || !array_key_exists('isTest', $settings)
+            || !array_key_exists('sources', $settings)
         ) {
             return self::createInvalidSettings();
         }
@@ -59,6 +63,7 @@ class LeadExcluderSettings
             $settings['departments'],
             $settings['cabins'],
             $settings['noFlightDetails'],
+            $settings['sources'],
             $settings['isTest'],
             true
         );
@@ -72,6 +77,11 @@ class LeadExcluderSettings
     public function inDepartments(string $department): bool
     {
         return in_array($department, $this->departments, true);
+    }
+
+    public function inSources(string $source): bool
+    {
+        return in_array($source, $this->sources, true);
     }
 
     public function inCabins(string $cabin): bool
