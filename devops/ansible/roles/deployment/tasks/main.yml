@@ -114,6 +114,13 @@
     - queue-virtual-cron-worker.log
     - socket-server.log
 
+- name: Enable websocket-v3 for php8 only
+  replace:
+    path: "/var/www/crm/common/config/supervisor/socket-server.conf"
+    regexp: 'websocket-server'
+    replace: 'websocket-server-v3'
+  when: env == "dev2"
+
 - name: Restart supervisord service
   service:
     name: supervisor
