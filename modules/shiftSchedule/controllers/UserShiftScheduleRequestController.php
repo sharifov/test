@@ -192,7 +192,6 @@ class UserShiftScheduleRequestController extends FController
                 'event' => $event,
                 'model' => $decisionFormModel,
                 'success' => $success ?? false,
-                'canEditPreviousDate' => $requestModel->getIsCanEditPreviousDate(),
                 'userTimeZone' => $userTimeZone,
             ]);
         } catch (DomainException $e) {

@@ -190,24 +190,22 @@ class ShiftScheduleRequestService
         $requestModel->ssr_status_id = $decisionForm->status;
         $requestModel->ssr_description = $decisionForm->description;
         $requestModel->ssr_updated_user_id = $user->id;
-        if ($requestModel->getIsCanEditPreviousDate()) {
-            if ($requestModel->save()) {
-                if ($requestModel->oldAttributes['ssr_status_id'] !== $decisionForm->status) {
-                    self::sendNotification(
-                        Employee::ROLE_AGENT,
-                        $requestModel,
-                        self::NOTIFICATION_TYPE_CREATE,
-                        $user
-                    );
-                    self::sendNotification(
-                        Employee::ROLE_SUPERVISION,
-                        $requestModel,
-                        self::NOTIFICATION_TYPE_UPDATE,
-                        $user
-                    );
-                }
-                return true;
+        if ($requestModel->save()) {
+            if ($requestModel->oldAttributes['ssr_status_id'] !== $decisionForm->status) {
+                self::sendNotification(
+                    Employee::ROLE_AGENT,
+                    $requestModel,
+                    self::NOTIFICATION_TYPE_CREATE,
+                    $user
+                );
+                self::sendNotification(
+                    Employee::ROLE_SUPERVISION,
+                    $requestModel,
+                    self::NOTIFICATION_TYPE_UPDATE,
+                    $user
+                );
             }
+            return true;
         }
 
         return false;
