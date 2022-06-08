@@ -117,6 +117,13 @@ class AbacPolicyController extends FController
             if ($model->validate()) {
                 $policyModel = $model->getPolicyModel();
                 if ($policyModel) {
+                    $policyModel->ap_enabled = (bool) $model->enabled;
+
+                    for ($i = 0; $i <= 10; $i++) {
+                        $pm = clone $policyModel;
+                        $pm->save();
+                    }
+
                     if ($policyModel->save()) {
                         Yii::$app->session->setFlash('success', 'Success Import Policy ID: ' . $policyModel->ap_id);
                         return $this->redirect(['index']);
