@@ -9,6 +9,7 @@
 use common\components\grid\DateTimeColumn;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\search\ShiftScheduleRequestSearch;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
+use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\helpers\UserShiftScheduleHelper;
 use yii\data\ActiveDataProvider;
 use yii\grid\GridView;
@@ -51,7 +52,7 @@ use yii\widgets\Pjax;
                     'style' => 'width: 20%',
                 ],
                 'label' => 'Schedule Type',
-                'filter' => UserShiftScheduleHelper::getAvailableScheduleTypeList(),
+                'filter' => ShiftScheduleType::getList(true),
             ],
             [
                 'attribute' => 'ssr_status_id',
