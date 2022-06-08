@@ -2,6 +2,7 @@
 
 namespace modules\taskList\src\entities\userTask;
 
+use kartik\daterange\DateRangeBehavior;
 use yii\data\ActiveDataProvider;
 use modules\taskList\src\entities\userTask\UserTask;
 
@@ -10,7 +11,34 @@ use modules\taskList\src\entities\userTask\UserTask;
  */
 class UserTaskSearch extends UserTask
 {
-    /* TODO:: add dateRange logic */
+    public $createTimeRange;
+    public $createTimeStart;
+    public $createTimeEnd;
+
+    public function __construct(int $defaultMonth = 3, array $config = [])
+    {
+        /* TODO:: add dateRange logic */
+
+        /* TODO::
+            * сгененрировать дефолтные значения $defaultDTStart $defaultDTEnd
+            * если не приходит createTimeRange или любой из других параметров - включается $defaultDTStart $defaultDTEnd
+            * на основе createTimeRange или $defaultDTStart $defaultDTEnd - геренировать ut_year + ut_month
+         */
+
+        parent::__construct($config);
+    }
+
+    public function behaviors(): array
+    {
+        return [
+            [
+                'class' => DateRangeBehavior::class,
+                'attribute' => 'createTimeRange',
+                'dateStartAttribute' => 'createTimeStart',
+                'dateEndAttribute' => 'createTimeEnd',
+            ],
+        ];
+    }
 
     public function rules(): array
     {
@@ -20,13 +48,15 @@ class UserTaskSearch extends UserTask
             ['ut_target_object', 'safe'],
 
             ['ut_id', 'integer'],
-            ['ut_month', 'integer'],
+
             ['ut_priority', 'integer'],
             ['ut_status_id', 'integer'],
             ['ut_target_object_id', 'integer'],
             ['ut_task_list_id', 'integer'],
             ['ut_user_id', 'integer'],
+
             ['ut_year', 'integer'],
+            ['ut_month', 'integer'],/* TODO::  */
         ];
     }
 

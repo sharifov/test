@@ -18,29 +18,7 @@ use common\components\bootstrap4\activeForm\ActiveForm;
         ],
     ]); ?>
 
-    <?= $form->field($model, 'ut_id') ?>
-
-    <?= $form->field($model, 'ut_user_id') ?>
-
-    <?= $form->field($model, 'ut_target_object') ?>
-
-    <?= $form->field($model, 'ut_target_object_id') ?>
-
-    <?= $form->field($model, 'ut_task_list_id') ?>
-
-    <?php // echo $form->field($model, 'ut_start_dt') ?>
-
-    <?php // echo $form->field($model, 'ut_end_dt') ?>
-
-    <?php // echo $form->field($model, 'ut_priority') ?>
-
-    <?php // echo $form->field($model, 'ut_status_id') ?>
-
-    <?php // echo $form->field($model, 'ut_created_dt') ?>
-
-    <?php // echo $form->field($model, 'ut_year') ?>
-
-    <?php // echo $form->field($model, 'ut_month') ?>
+    <?php echo $form->field($model, 'ut_id')/* TODO:: DTRange calendar */ ?>
 
     <div class="form-group">
         <?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>
