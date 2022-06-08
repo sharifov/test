@@ -17,7 +17,7 @@ class HashHelper
      * @param $object
      * @return string
      */
-    public static function generateHashFromObject($object): string
+    public static function generateHashFromObject(object $object): string
     {
         return spl_object_hash($object);
     }

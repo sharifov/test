@@ -148,6 +148,7 @@ class AbacComponent extends Component
         if (!$subject) {
             $subject = new \stdClass();
         }
+
         try {
             if (!$user) {
                 $user = Auth::user();
@@ -184,7 +185,7 @@ class AbacComponent extends Component
     {
         return hash(
             $algo,
-            \src\helpers\text\HashHelper::generateHashFromObject($object) . $object . $action
+            \src\helpers\text\HashHelper::generateHashFromObject($subject) . $object . $action
         );
     }
 
