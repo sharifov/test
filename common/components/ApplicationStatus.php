@@ -178,7 +178,7 @@ class ApplicationStatus extends Component
     public function queueSmsJobStatus(): string
     {
         try {
-            \Yii::$app->queue_sms_job->getStatusTube();
+            \Yii::$app->queue_sms_job->getStatsTube();
         } catch (\Throwable $e) {
             return 'error';
         }
@@ -190,7 +190,7 @@ class ApplicationStatus extends Component
     public function queueEmailJobStatus(): string
     {
         try {
-            \Yii::$app->queue_email_job->getStatusTube();
+            \Yii::$app->queue_email_job->getStatsTube();
         } catch (\Throwable $e) {
             return 'error';
         }
@@ -202,7 +202,7 @@ class ApplicationStatus extends Component
     public function queuePhoneCheckStatus(): string
     {
         try {
-            \Yii::$app->queue_phone_check->getStatusTube();
+            \Yii::$app->queue_phone_check->getStatsTube();
         } catch (\Throwable $e) {
             return 'error';
         }
@@ -214,7 +214,7 @@ class ApplicationStatus extends Component
     public function queueJobStatus(): string
     {
         try {
-            \Yii::$app->queue_job->getStatusTube();
+            \Yii::$app->queue_job->getStatsTube();
         } catch (\Throwable $e) {
             return 'error';
         }
@@ -226,7 +226,7 @@ class ApplicationStatus extends Component
     public function queueSystemServicesStatus(): string
     {
         try {
-            \Yii::$app->queue_system_services->getStatusTube();
+            \Yii::$app->queue_system_services->getStatsTube();
         } catch (\Throwable $e) {
             return 'error';
         }
@@ -238,7 +238,7 @@ class ApplicationStatus extends Component
     public function queueClientChatJobStatus(): string
     {
         try {
-            \Yii::$app->queue_client_chat_job->getStatusTube();
+            \Yii::$app->queue_client_chat_job->getStatsTube();
         } catch (\Throwable $e) {
             return 'error';
         }
@@ -250,7 +250,7 @@ class ApplicationStatus extends Component
     public function queueVirtualCronStatus(): string
     {
         try {
-            \Yii::$app->queue_virtual_cron->getStatusTube();
+            \Yii::$app->queue_virtual_cron->getStatsTube();
         } catch (\Throwable $e) {
             return 'error';
         }
@@ -262,7 +262,7 @@ class ApplicationStatus extends Component
     public function queueLeadRedialStatus(): string
     {
         try {
-            \Yii::$app->queue_lead_redial->getStatusTube();
+            \Yii::$app->queue_lead_redial->getStatsTube();
         } catch (\Throwable $e) {
             return 'error';
         }
