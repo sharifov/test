@@ -9,7 +9,6 @@
 
 namespace common\components;
 
-use frostealth\yii2\aws\s3\Service;
 use yii\base\Component;
 use yii\swiftmailer\Mailer;
 
@@ -53,7 +52,8 @@ class ApplicationStatus extends Component
     public function dbStatus(): string
     {
         try {
-            return \Yii::$app->db->isActive ? 'ok' : 'error';
+            \Yii::$app->db->open();
+            return 'ok';
         } catch (\Throwable $e) {
             return 'error';
         }
@@ -65,7 +65,8 @@ class ApplicationStatus extends Component
     public function dbSlaveStatus(): string
     {
         try {
-            return \Yii::$app->db_slave->isActive ? 'ok' : 'error';
+            \Yii::$app->db_slave->open();
+            return 'ok';
         } catch (\Throwable $e) {
             return 'error';
         }
@@ -77,7 +78,8 @@ class ApplicationStatus extends Component
     public function dbPostgresStatus(): string
     {
         try {
-            return \Yii::$app->db_postgres->isActive ? 'ok' : 'error';
+            \Yii::$app->db_postgres->open();
+            return 'ok';
         } catch (\Throwable $e) {
             return 'error';
         }
@@ -89,7 +91,8 @@ class ApplicationStatus extends Component
     public function redisStatus(): string
     {
         try {
-            return \Yii::$app->redis->isActive ? 'ok' : 'error';
+            \Yii::$app->redis->open();
+            return 'ok';
         } catch (\Throwable $e) {
             return 'error';
         }
@@ -175,7 +178,7 @@ class ApplicationStatus extends Component
     public function queueSmsJobStatus(): string
     {
         try {
-            \Yii::$app->queue_sms_job->getStatusTube();
+            \Yii::$app->queue_sms_job->getStatsTube();
         } catch (\Throwable $e) {
             return 'error';
         }
@@ -187,7 +190,7 @@ class ApplicationStatus extends Component
     public function queueEmailJobStatus(): string
     {
         try {
-            \Yii::$app->queue_email_job->getStatusTube();
+            \Yii::$app->queue_email_job->getStatsTube();
         } catch (\Throwable $e) {
             return 'error';
         }
@@ -199,7 +202,7 @@ class ApplicationStatus extends Component
     public function queuePhoneCheckStatus(): string
     {
         try {
-            \Yii::$app->queue_phone_check->getStatusTube();
+            \Yii::$app->queue_phone_check->getStatsTube();
         } catch (\Throwable $e) {
             return 'error';
         }
@@ -211,7 +214,7 @@ class ApplicationStatus extends Component
     public function queueJobStatus(): string
     {
         try {
-            \Yii::$app->queue_job->getStatusTube();
+            \Yii::$app->queue_job->getStatsTube();
         } catch (\Throwable $e) {
             return 'error';
         }
@@ -223,7 +226,7 @@ class ApplicationStatus extends Component
     public function queueSystemServicesStatus(): string
     {
         try {
-            \Yii::$app->queue_system_services->getStatusTube();
+            \Yii::$app->queue_system_services->getStatsTube();
         } catch (\Throwable $e) {
             return 'error';
         }
@@ -235,7 +238,7 @@ class ApplicationStatus extends Component
     public function queueClientChatJobStatus(): string
     {
         try {
-            \Yii::$app->queue_client_chat_job->getStatusTube();
+            \Yii::$app->queue_client_chat_job->getStatsTube();
         } catch (\Throwable $e) {
             return 'error';
         }
@@ -247,7 +250,7 @@ class ApplicationStatus extends Component
     public function queueVirtualCronStatus(): string
     {
         try {
-            \Yii::$app->queue_virtual_cron->getStatusTube();
+            \Yii::$app->queue_virtual_cron->getStatsTube();
         } catch (\Throwable $e) {
             return 'error';
         }
@@ -259,21 +262,7 @@ class ApplicationStatus extends Component
     public function queueLeadRedialStatus(): string
     {
         try {
-            \Yii::$app->queue_lead_redial->getStatusTube();
-        } catch (\Throwable $e) {
-            return 'error';
-        }
-    }
-
-    /**
-     * @return string
-     */
-    public function telegramStatus(): string
-    {
-        try {
-            $response = \Yii::$app->telegram->getMe();
-            $result = $response->getResult();
-            return isset($result['user']) ? 'ok' : 'error';
+            \Yii::$app->queue_lead_redial->getStatsTube();
         } catch (\Throwable $e) {
             return 'error';
         }
@@ -284,6 +273,7 @@ class ApplicationStatus extends Component
      */
     public function gaRequestServiceStatus(): string
     {
+        \Yii::$app->gaRequestService->ping();
         try {
             return \Yii::$app->gaRequestService->ping() ? 'ok' : 'error';
         } catch (\Throwable $e) {
