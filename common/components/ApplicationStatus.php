@@ -273,6 +273,7 @@ class ApplicationStatus extends Component
      */
     public function gaRequestServiceStatus(): string
     {
+        \Yii::$app->gaRequestService->ping();
         try {
             return \Yii::$app->gaRequestService->ping() ? 'ok' : 'error';
         } catch (\Throwable $e) {
