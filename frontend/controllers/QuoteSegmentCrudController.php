@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use common\models\QuoteSegment;
 use common\models\search\QuoteSegmentSearch;
+use common\models\search\QuoteSegmentStopSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -55,8 +56,15 @@ class QuoteSegmentCrudController extends FController
      */
     public function actionView($qs_id)
     {
+        $searchModel = new QuoteSegmentStopSearch();
+        $queryParams = $this->request->queryParams;
+        $queryParams['QuoteSegmentStopSearch']['qss_segment_id'] = $qs_id;
+        $dataProvider = $searchModel->search($queryParams);
+
         return $this->render('view', [
             'model' => $this->findModel($qs_id),
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider
         ]);
     }
 
