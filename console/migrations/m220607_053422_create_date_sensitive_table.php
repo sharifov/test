@@ -171,7 +171,7 @@ class m220607_053422_create_date_sensitive_table extends Migration
             '{{%date_sensitive}}',
             [
                 'da_key' => self::DEFAULT_KEY,
-                'da_name' => 'Advanced',
+                'da_name' => 'Default',
                 'da_source' => json_encode(self::SOURCE),
                 'da_created_dt' => date('Y-m-d H:i:s')
             ]

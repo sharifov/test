@@ -3,6 +3,7 @@
 namespace common\models\search;
 
 use common\models\DateSensitive;
+use common\models\Employee;
 use yii\data\ActiveDataProvider;
 
 /**
@@ -16,8 +17,9 @@ class DateSensitiveSearch extends DateSensitive
     public function rules()
     {
         return [
-            [['da_created_user_id', 'da_updated_user_id'], 'integer'],
-            [['da_name', 'da_key'], 'safe'],
+            [['da_updated_user_id'], 'integer'],
+            [['da_name', 'da_key', 'da_updated_dt'], 'safe'],
+            [['da_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -44,8 +46,12 @@ class DateSensitiveSearch extends DateSensitive
             return $dataProvider;
         }
 
+        if ($this->da_updated_dt) {
+            $query->andFilterWhere(['>=', 'da_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->da_updated_dt))])
+                ->andFilterWhere(['<=', 'da_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->da_updated_dt) + 3600 * 24)]);
+        }
+
         $query->andFilterWhere([
-            'da_created_user_id' => $this->da_created_user_id,
             'da_updated_user_id' => $this->da_updated_user_id,
         ]);
 

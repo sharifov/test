@@ -1,8 +1,5 @@
 <?php
 
-use common\models\Airline;
-use dosamigos\datetimepicker\DateTimePicker;
-use kartik\select2\Select2;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -22,12 +19,29 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'da_name')->textInput() ?>
 
+        <?php
+        try {
+            echo $form->field($model, 'da_source')->widget(
+                \kdn\yii2\JsonEditor::class,
+                [
+                    'clientOptions' => [
+                        'modes' => ['code', 'form', 'tree', 'view'], //'text',
+                        'mode' => 'tree'
+                    ],
+                    //'collapseAll' => ['view'],
+                    'expandAll' => ['tree', 'form'],
+                ]
+            );
+        } catch (Exception $exception) {
+            echo $form->field($model, 'da_source')->textarea(['rows' => 5]);
+        }
+
+        ?>
+
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
         </div>
 
         <?php ActiveForm::end(); ?>
     </div>
-
-
 </div>

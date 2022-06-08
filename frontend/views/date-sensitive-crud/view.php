@@ -33,10 +33,34 @@ $this->params['breadcrumbs'][] = $this->title;
             'da_key',
             'da_name',
             'da_source',
-            'da_created_user_id',
-            'da_updated_user_id',
-            'da_created_dt',
-            'da_updated_dt',
+            [
+                'attribute' => 'da_created_user_id',
+                'value' => static function (\common\models\DateSensitive $model) {
+                    return $model->daCreatedUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->daCreatedUser->username) : $model->da_created_user_id;
+                },
+                'format' => 'raw',
+            ],
+            [
+                'attribute' => 'da_updated_user_id',
+                'value' => static function (\common\models\DateSensitive $model) {
+                    return $model->daUpdatedUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->daUpdatedUser->username) : $model->da_updated_user_id;
+                },
+                'format' => 'raw',
+            ],
+            [
+                'attribute' => 'da_created_dt',
+                'value' => static function (\common\models\DateSensitive $model) {
+                    return $model->da_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->da_created_dt)) : '-';
+                },
+                'format' => 'raw'
+            ],
+            [
+                'attribute' => 'da_updated_dt',
+                'value' => static function (\common\models\DateSensitive $model) {
+                    return $model->da_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->da_updated_dt)) : '-';
+                },
+                'format' => 'raw'
+            ],
         ],
     ]) ?>
 

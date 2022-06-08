@@ -4,6 +4,7 @@ namespace console\controllers;
 
 use common\models\Airline;
 use common\models\ClientPhone;
+use common\models\DateSensitive;
 use common\models\Department;
 use common\models\DepartmentPhoneProject;
 use common\models\Email;
@@ -24,6 +25,7 @@ use src\helpers\email\TextConvertingHelper;
 use src\logger\db\GlobalLogInterface;
 use src\logger\db\LogDTO;
 use src\model\project\entity\projectLocale\ProjectLocale;
+use src\services\dateSensitive\DateSensitiveService;
 use src\services\lead\qcall\CalculateDateService;
 use src\services\log\GlobalEntityAttributeFormatServiceService;
 use src\services\system\DbViewCryptDictionary;
@@ -37,6 +39,7 @@ use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Console;
+use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use src\model\airline\service\AirlineService;
 
@@ -56,6 +59,7 @@ class DbController extends Controller
      * @var GlobalEntityAttributeFormatServiceService
      */
     private $globalLogFormatAttrService;
+    private DateSensitiveService $dateSensitiveService;
 
     /**
      * DbController constructor.
@@ -64,10 +68,11 @@ class DbController extends Controller
      * @param GlobalEntityAttributeFormatServiceService $globalLogFormatAttrService
      * @param array $config
      */
-    public function __construct($id, $module, GlobalEntityAttributeFormatServiceService $globalLogFormatAttrService, $config = [])
+    public function __construct($id, $module, GlobalEntityAttributeFormatServiceService $globalLogFormatAttrService, DateSensitiveService $dateSensitiveService, $config = [])
     {
         parent::__construct($id, $module, $config);
         $this->globalLogFormatAttrService = $globalLogFormatAttrService;
+        $this->dateSensitiveService = $dateSensitiveService;
     }
 
     public function actionUpdateCaseLastAction()
@@ -166,7 +171,6 @@ class DbController extends Controller
         }
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
     }
-
 
 
     /**
@@ -1448,27 +1452,26 @@ ORDER BY lf.lead_id, id';
         $timeStart = microtime(true);
 
         $db = Yii::$app->getDb();
-        $data = DbViewCryptDictionary::getSources();
+        /** @var DateSensitive[] $dateSensitives */
+        $dateSensitives = DateSensitive::find()->all();
 
-        foreach ($data as $tableName => $columns) {
-            try {
-                $dbViewCryptService = new DbViewCryptService($db, $tableName, $columns);
-                $db->createCommand($dbViewCryptService->getReInitSql())->execute();
-
-                if (!$db->createCommand("SELECT 1 FROM {$dbViewCryptService->getViewName()}")->execute()) {
-                    throw new \RuntimeException('View created, but is empty');
+        foreach ($dateSensitives as $dateSensitive) {
+            $data = Json::decode($dateSensitive->da_source);
+            foreach ($data as $tableName => $columns) {
+                try {
+                    $this->dateSensitiveService->createView($db, $tableName, $dateSensitive->da_key, $columns);
+                    echo Console::renderColoredString('%g --- Created : %w[' . $tableName . '_' . $dateSensitive->da_key . ']%n'), PHP_EOL;
+                } catch (\RuntimeException | \DomainException $throwable) {
+                    echo Console::renderColoredString('%y --- Warning : %c[' . $tableName . ']: ' . $throwable->getMessage() . ' %n'), PHP_EOL;
+                } catch (\Throwable $throwable) {
+                    $message = AppHelper::throwableLog($throwable);
+                    $message['tableName'] = $tableName;
+                    Yii::error($message, 'DbController:actionInitView:Throwable');
+                    echo Console::renderColoredString('%r --- Error : %p[' . $tableName . ']: ' . $throwable->getMessage() . ' %n'), PHP_EOL;
                 }
-
-                echo Console::renderColoredString('%g --- Created : %w[' . $dbViewCryptService->getViewName() . ']%n'), PHP_EOL;
-            } catch (\RuntimeException | \DomainException $throwable) {
-                echo Console::renderColoredString('%y --- Warning : %c[' . $tableName . ']: ' . $throwable->getMessage() . ' %n'), PHP_EOL;
-            } catch (\Throwable $throwable) {
-                $message = AppHelper::throwableLog($throwable);
-                $message['tableName'] = $tableName;
-                Yii::error($message, 'DbController:actionInitView:Throwable');
-                echo Console::renderColoredString('%r --- Error : %p[' . $tableName . ']: ' . $throwable->getMessage() . ' %n'), PHP_EOL;
             }
         }
+
 
         $resultInfo = 'Execute Time: ' . number_format(round(microtime(true) - $timeStart, 2), 2);
         $this->printInfo($resultInfo, $this->action->id);
@@ -1485,11 +1488,11 @@ ORDER BY lf.lead_id, id';
         }
 
         $db = Yii::$app->getDb();
-        $tableName = str_replace(DbViewCryptDictionary::VIEW_POST_FIX, '', $viewName);
+
+        $viewNames = explode('_', $viewName);
 
         try {
-            $dbViewCryptService = new DbViewCryptService($db, $tableName, []);
-            $db->createCommand($dbViewCryptService->getDropSql())->execute();
+            $this->dateSensitiveService->dropView($db, $tableName);
         } catch (\Throwable $throwable) {
             $message = AppHelper::throwableLog($throwable);
             $message['viewName'] = $viewName;

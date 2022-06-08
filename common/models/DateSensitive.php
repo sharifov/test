@@ -48,8 +48,32 @@ class DateSensitive extends \yii\db\ActiveRecord
             [['da_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::className(), 'targetAttribute' => ['da_updated_user_id' => 'id']],
             ['da_key', 'filter', 'filter' => static function ($value) {
                 return Inflector::slug($value, '_');
-            }]
+            }],
+            ['da_source', 'validateSource'],
         ];
+    }
+
+
+    public function validateSource($attribute, $params)
+    {
+        $tables = json_decode($this->{$attribute}, true);
+
+        if (count($tables) === 0) {
+            $this->addError($attribute, 'Source cannot be blank.');
+        }
+
+        foreach ($tables as $tableName => $fields) {
+            $schema = Yii::$app->db->schema->getTableSchema($tableName);
+            if (!$schema) {
+                $this->addError($attribute, $tableName . " table not doesn't exist.");
+            }
+
+            foreach ($fields as $field) {
+                if (!isset($schema->columns[$field])) {
+                    $this->addError($attribute, $tableName . " table doesn't have " . $field . " field.");
+                }
+            }
+        }
     }
 
     public function behaviors(): array
@@ -81,10 +105,10 @@ class DateSensitive extends \yii\db\ActiveRecord
             'da_key' => 'Key',
             'da_name' => 'Name',
             'da_source' => 'Source',
-            'da_created_dt' => 'Da Created Dt',
-            'da_updated_dt' => 'Da Updated Dt',
-            'da_created_user_id' => 'Da Created User ID',
-            'da_updated_user_id' => 'Da Updated User ID',
+            'da_created_dt' => 'Created Date',
+            'da_updated_dt' => 'Updated Date',
+            'da_created_user_id' => 'Created User',
+            'da_updated_user_id' => 'Updated User',
         ];
     }
 

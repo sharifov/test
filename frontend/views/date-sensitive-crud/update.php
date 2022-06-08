@@ -7,7 +7,7 @@ use yii\helpers\Html;
 
 $this->title = 'Update Date Sensitive: ' . $model->da_name;
 $this->params['breadcrumbs'][] = ['label' => 'Date Sensitive', 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $model->da_name, 'url' => ['view', 'qs_id' => $model->da_id]];
+$this->params['breadcrumbs'][] = ['label' => $model->da_name, 'url' => ['view', 'id' => $model->da_id]];
 $this->params['breadcrumbs'][] = 'Update';
 ?>
 <div class="date-sensitive-update">

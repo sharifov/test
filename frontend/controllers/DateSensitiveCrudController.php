@@ -69,13 +69,8 @@ class DateSensitiveCrudController extends FController
     {
         $model = new DateSensitive();
 
-        if ($this->request->isPost && $model->load($this->request->post())) {
-//            $model->generateKey();
-//            if ($model->save()) {
-//                return $this->redirect(['view', 'qs_id' => $model->qs_id]);
-//            }
-        } else {
-            $model->loadDefaultValues();
+        if ($model->load($this->request->post()) && $model->save()) {
+            return $this->redirect(['view', 'id' => $model->da_id]);
         }
 
         return $this->render('create', [
@@ -94,11 +89,8 @@ class DateSensitiveCrudController extends FController
     {
         $model = $this->findModel($id);
 
-        if ($this->request->isPost && $model->load($this->request->post())) {
-//            $model->generateKey();
-//            if ($model->save()) {
-//                return $this->redirect(['view', 'qs_id' => $model->qs_id]);
-//            }
+        if ($model->load($this->request->post()) && $model->save()) {
+            return $this->redirect(['view', 'id' => $model->da_id]);
         }
 
         return $this->render('update', [

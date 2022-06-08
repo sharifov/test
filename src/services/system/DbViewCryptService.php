@@ -18,6 +18,8 @@ use yii\db\Connection;
  */
 class DbViewCryptService
 {
+    public const VIEW_SEPARATOR = '_';
+
     private ?string $settingBlockEncryptionMode;
     private ?string $settingKeyStr;
     private ?string $settingInitVector;
@@ -32,12 +34,12 @@ class DbViewCryptService
      * @param string $tableName
      * @param array $cryptColumns
      */
-    public function __construct(Connection $db, string $tableName, array $cryptColumns)
+    public function __construct(Connection $db, string $tableName, string $postFix, array $cryptColumns)
     {
         $this->db = $db;
         $this->tableName = $tableName;
         $this->cryptColumns = $cryptColumns;
-        $this->viewName = $this->tableName . DbViewCryptDictionary::VIEW_POST_FIX;
+        $this->viewName = $this->tableName . self::VIEW_SEPARATOR . $postFix;
         $this->settingBlockEncryptionMode = SettingHelper::getDbCryptBlockEncryptionMode();
         $this->settingKeyStr = hash('sha256', SettingHelper::getDbCryptKeyStr());
         $this->settingInitVector = SettingHelper::getDbCryptInitVector();
