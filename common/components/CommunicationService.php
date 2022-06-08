@@ -1541,9 +1541,12 @@ class CommunicationService extends Component implements CommunicationServiceInte
      */
     public function ping(): bool
     {
-        $response = $this->sendRequest('application-status/ping', [], 'get');
-        if ($response->isOk && !empty($response['availability'])) {
-            return true;
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, "https://{$this->host}/application-status/ping");
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        $result = curl_exec($curl);
+        if (!curl_errno($curl) && $resultJson = Json::decode($result)) {
+            return !empty($resultJson['availability']);
         }
         return false;
     }
