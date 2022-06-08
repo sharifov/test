@@ -157,13 +157,21 @@ class AbacComponent extends Component
             $subject->env = $this->getEnv($user);
             $enforserObj = $this->enforser;
 
+
             if ($this->cacheEnforceEnable) {
-                $keyCache = self::cacheCanGenerate($subject, $object, $action);
-                return Yii::$app->cache->getOrSet($keyCache, static function () use ($enforserObj, $subject, $object, $action) {
-                    return self::canEnforce($enforserObj, $subject, $object, $action);
-                }, $this->cacheEnforceDuration, new TagDependency([
-                    'tags' => [AbacPolicy::CACHE_KEY . $object, AbacPolicy::CACHE_KEY],
-                ]));
+                $preparedSubject = self::prepareSubject($subject);
+                $keyCache = self::cacheCanGenerate($preparedSubject, $object, $action);
+
+                $data = Yii::$app->cache->get($keyCache);
+                if ($data === false) {
+                    $data = (string) self::canEnforce($enforserObj, $subject, $object, $action);
+                    $dependency = new TagDependency([
+                        'tags' => [AbacPolicy::CACHE_KEY . $object, AbacPolicy::CACHE_KEY],
+                    ]);
+                    Yii::$app->cache->set($keyCache, $data, $this->cacheEnforceDuration, $dependency);
+                    unset($dependency);
+                }
+                return (bool) $data;
             }
 
             return self::canEnforce($enforserObj, $subject, $object, $action);
@@ -171,6 +179,21 @@ class AbacComponent extends Component
             Yii::error(AppHelper::throwableLog($throwable, true), 'AbacComponent::can');
             return null;
         }
+    }
+
+    private static function prepareSubject(\stdClass $origSubject): \stdClass
+    {
+        $subject = clone $origSubject;
+        if ($subject->env->dt->time ?? null) {
+            unset($subject->env->dt->time);
+        }
+        if ($subject->env->dt->hour ?? null) {
+            unset($subject->env->dt->hour);
+        }
+        if ($subject->env->dt->min ?? null) {
+            unset($subject->env->dt->min);
+        }
+        return $subject;
     }
 
     /**
