@@ -52,7 +52,8 @@ class ApplicationStatus extends Component
     public function dbStatus(): string
     {
         try {
-            return \Yii::$app->db->isActive ? 'ok' : 'error';
+            \Yii::$app->db->open();
+            return 'ok';
         } catch (\Throwable $e) {
             return 'error';
         }
@@ -77,7 +78,8 @@ class ApplicationStatus extends Component
     public function dbPostgresStatus(): string
     {
         try {
-            return \Yii::$app->db_postgres->isActive ? 'ok' : 'error';
+            \Yii::$app->db_postgres->open();
+            return 'ok';
         } catch (\Throwable $e) {
             return 'error';
         }
@@ -89,7 +91,8 @@ class ApplicationStatus extends Component
     public function redisStatus(): string
     {
         try {
-            return \Yii::$app->redis->isActive ? 'ok' : 'error';
+            \Yii::$app->redis->open();
+            return 'ok';
         } catch (\Throwable $e) {
             return 'error';
         }
