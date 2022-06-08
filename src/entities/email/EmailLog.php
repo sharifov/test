@@ -46,7 +46,7 @@ class EmailLog extends \yii\db\ActiveRecord
         ];
     }
 
-    public function getElEmail(): \yii\db\ActiveQuery
+    public function getEmail(): \yii\db\ActiveQuery
     {
         return $this->hasOne(Email::class, ['e_id' => 'el_email_id']);
     }

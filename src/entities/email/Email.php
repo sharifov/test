@@ -231,5 +231,4 @@ class Email extends ActiveRecord
 
         return $email;
     }
-
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace src\services\email;
 
 use src\entities\email\EmailAddress;
@@ -16,7 +17,6 @@ use src\entities\email\EmailLog;
 
 class EmailsNormalizeService
 {
-
     public $emailBody;
     public $emailBlob;
     public $emailContacts;
@@ -36,7 +36,7 @@ class EmailsNormalizeService
         $this->email = Email::createFromEmailObject($emailOld);
         $this->email->save();
 
-        if($this->email) {
+        if ($this->email) {
             echo 'Email created<br/>';
             $this
                 ->fillEmailParams($emailOld->e_priority, $emailOld->e_template_type_id, $emailOld->e_language_id)
@@ -48,10 +48,22 @@ class EmailsNormalizeService
                     $emailOld->e_email_from_name,
                     $emailOld->e_email_to_name,
                     $emailOld->e_email_cc,
-                    $emailOld->e_email_bc)
-                /*->linkClient($emailOld->e_client_id)
+                    $emailOld->e_email_bc
+                )
+                ->fillEmailLog(
+                    $emailOld->e_communication_id,
+                    $emailOld->e_message_id,
+                    $emailOld->e_error_message,
+                    $emailOld->e_status_done_dt,
+                    $emailOld->e_read_dt,
+                    $emailOld->e_ref_message_id,
+                    $emailOld->e_inbox_created_dt,
+                    $emailOld->e_inbox_email_id
+                )
+                /* ->linkClient($emailOld->e_client_id)
                 ->linkCase($emailOld->e_case_id)
-                ->linkLead($emailOld->e_lead_id) */;
+                ->linkLead($emailOld->e_lead_id) */
+            ;
         }
 
         return $this;
@@ -82,8 +94,8 @@ class EmailsNormalizeService
         ?string $readDt,
         ?string $refMessageId,
         ?string $inboxCreatedDt,
-        ?int $inboxEmailId)
-    {
+        ?int $inboxEmailId
+    ) {
         $attributes = [
             'el_status_done_dt' => $statusDoneDt,
             'el_read_dt' => $readDt,
@@ -218,7 +230,7 @@ class EmailsNormalizeService
         return $this;
     }
 
-    public function getAddress(string $email,?string $name): EmailAddress
+    public function getAddress(string $email, ?string $name): EmailAddress
     {
         $attributes = [
             'ea_email' => $email,
