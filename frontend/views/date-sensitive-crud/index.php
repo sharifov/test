@@ -50,14 +50,18 @@ $this->params['breadcrumbs'][] = $this->title;
                 'template' => '{create-view} {drop-view} {view} {update} {delete} ',
                 'buttons' => [
                     'create-view' => function ($url, DateSensitive $model, $key) {
-                        return Html::a('<i class="fa fa-database" style="font-size: 100%"></i>', ['/date-sensitive/create-view', 'id' => $model->da_id], [
-                            'title' => 'Create View',
+                        return Html::a('<i class="fa fa-database" style="font-size: 100%"></i>', ['/date-sensitive/create-views', 'id' => $model->da_id], [
+                            'title' => 'Create All Views',
+                            'data-pjax' => 0,
+                            'data-method' => 'post',
+                            'data-confirm' => 'Are you sure you want to reinit views?'
                         ]);
                     },
                     'drop-view' => function ($url, DateSensitive $model, $key) {
-                        return Html::a('<i class="fa fa-times" style="font-size: 120%"></i>', ['/date-sensitive/drop-view', 'id' => $model->da_id], [
-                            'title' => 'Drop View',
+                        return Html::a('<i class="fa fa-times" style="font-size: 120%"></i>', ['/date-sensitive/drop-views', 'id' => $model->da_id], [
+                            'title' => 'Drop All Views',
                             'data-pjax' => 0,
+                            'data-method' => 'post',
                             'data-confirm' => 'Are you sure you want to delete views?'
                         ]);
                     }

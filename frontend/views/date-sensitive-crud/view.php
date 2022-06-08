@@ -1,5 +1,6 @@
 <?php
 
+use src\services\system\DbViewCryptService;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -64,4 +65,38 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
     ]) ?>
 
+
+    <div class="row">
+        <div class="col-md-6">
+            <h6>View List:</h6>
+            <?php if (count($model->dateSensitiveViews) > 0) : ?>
+                <table class="table table-bordered table-hover table-striped">
+                    <tr>
+                        <th>Nr</th>
+                        <th>Name</th>
+                        <th>Create time</th>
+                        <th>Action</th>
+                    </tr>
+                    <?php foreach ($model->dateSensitiveViews as $n => $table) : ?>
+                        <tr>
+                            <td><?php echo($n + 1) ?></td>
+                            <td>
+                                <b><?php echo Html::encode($table->dv_view_name) ?></b>
+                            </td>
+                            <td><?php echo Html::encode($table->dv_created_dt) ?></td>
+
+                            <td><?=
+                                Html::a('<i class="fa fa-trash" style="font-size: 100%"></i>', ['/date-sensitive/drop-view', 'viewName' => $table->dv_view_name], [
+                                    'title' => 'Delete',
+                                    'data-pjax' => 0,
+                                    'data-method' => 'post',
+                                    'data-confirm' => 'Are you sure you want to delete this item?'
+                                ]);
+                                ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </table>
+            <?php endif; ?>
+        </div>
+    </div>
 </div>

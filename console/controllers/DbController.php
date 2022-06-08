@@ -5,6 +5,7 @@ namespace console\controllers;
 use common\models\Airline;
 use common\models\ClientPhone;
 use common\models\DateSensitive;
+use common\models\DateSensitiveView;
 use common\models\Department;
 use common\models\DepartmentPhoneProject;
 use common\models\Email;
@@ -1459,7 +1460,7 @@ ORDER BY lf.lead_id, id';
             $data = Json::decode($dateSensitive->da_source);
             foreach ($data as $tableName => $columns) {
                 try {
-                    $this->dateSensitiveService->createView($db, $tableName, $dateSensitive->da_key, $columns);
+                    $this->dateSensitiveService->createView($db, $dateSensitive, $tableName, $columns);
                     echo Console::renderColoredString('%g --- Created : %w[' . $tableName . '_' . $dateSensitive->da_key . ']%n'), PHP_EOL;
                 } catch (\RuntimeException | \DomainException $throwable) {
                     echo Console::renderColoredString('%y --- Warning : %c[' . $tableName . ']: ' . $throwable->getMessage() . ' %n'), PHP_EOL;
@@ -1482,22 +1483,18 @@ ORDER BY lf.lead_id, id';
         $this->printInfo('Start', $this->action->id);
         $timeStart = microtime(true);
 
-        if (empty($viewName)) {
+        if (empty($viewName) || !($dateSensitiveView = DateSensitiveView::findOne(['dv_view_name' => $viewName]))) {
             echo Console::renderColoredString('%r --- Error : %p "viewName" is required %n'), PHP_EOL;
             exit();
         }
 
-        $db = Yii::$app->getDb();
-
-        $viewNames = explode('_', $viewName);
-
         try {
-            $this->dateSensitiveService->dropView($db, $tableName);
+            $this->dateSensitiveService->dropViewByDateSensitiveView($dateSensitiveView);
         } catch (\Throwable $throwable) {
             $message = AppHelper::throwableLog($throwable);
             $message['viewName'] = $viewName;
             Yii::error($message, 'DbController:actionDropView:Throwable');
-            echo Console::renderColoredString('%r --- Error : %p[' . $tableName . ']: ' . $throwable->getMessage() . ' %n'), PHP_EOL;
+            echo Console::renderColoredString('%r --- Error : %p[' . $dateSensitiveView->dv_table_name . ']: ' . $throwable->getMessage() . ' %n'), PHP_EOL;
         }
 
         $resultInfo = 'Execute Time: ' . number_format(round(microtime(true) - $timeStart, 2), 2);

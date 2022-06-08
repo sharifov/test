@@ -22,7 +22,6 @@ class DateSensitiveService
     /**
      * @param DateSensitive $dateSensitive
      * @return void
-     * @throws \yii\db\Exception
      */
     public function createViews(DateSensitive $dateSensitive)
     {
@@ -33,11 +32,33 @@ class DateSensitiveService
             try {
                 $this->createView($db, $dateSensitive, $tableName, $columns);
             } catch (\RuntimeException | \DomainException $e) {
-                $message = ArrayHelper::merge(AppHelper::throwableLog($e), ['DateSensitiveId' => $dateSensitive->da_id]);
-                \Yii::warning($message, 'DateSensitiveController:actionCreateView:Exception');
+                $message = ArrayHelper::merge(AppHelper::throwableLog($e), ['DateSensitiveId' => $dateSensitive->da_id, 'tableName' => $tableName]);
+                \Yii::warning($message, 'DateSensitiveService:createViews:Exception');
             } catch (\Throwable $throwable) {
-                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['DateSensitiveId' => $dateSensitive->da_id]);
-                \Yii::error($message, 'DateSensitiveController:actionCreateView:Throwable');
+                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['DateSensitiveId' => $dateSensitive->da_id, 'tableName' => $tableName]);
+                \Yii::error($message, 'DateSensitiveService:createViews:Throwable');
+            }
+        }
+    }
+
+    /**
+     * @param DateSensitive $dateSensitive
+     * @return void
+     */
+    public function dropViews(DateSensitive $dateSensitive)
+    {
+        $sources = Json::decode($dateSensitive->da_source);
+        $db = Yii::$app->getDb();
+
+        foreach ($sources as $tableName => $columns) {
+            try {
+                $this->dropView($db, $tableName, $dateSensitive->da_key);
+            } catch (\RuntimeException | \DomainException $e) {
+                $message = ArrayHelper::merge(AppHelper::throwableLog($e), ['DateSensitiveId' => $dateSensitive->da_id, 'tableName' => $tableName]);
+                \Yii::warning($message, 'DateSensitiveService:dropViews:Exception');
+            } catch (\Throwable $throwable) {
+                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['DateSensitiveId' => $dateSensitive->da_id, 'tableName' => $tableName]);
+                \Yii::error($message, 'DateSensitiveService:dropViews:Throwable');
             }
         }
     }
@@ -54,35 +75,18 @@ class DateSensitiveService
     {
         $dbViewCryptService = new DbViewCryptService($db, $tableName, $dateSensitive->da_key, $cryptColumns);
         $db->createCommand($dbViewCryptService->getReInitSql())->execute();
-
-        if (!$db->createCommand("SELECT 1 FROM {$dbViewCryptService->getViewName()}")->execute()) {
-            throw new \RuntimeException($tableName . ' View created, but is empty');
-        }
         $dateSensitiveView = DateSensitiveView::create($dateSensitive->da_id, $dbViewCryptService->getViewName(), $tableName);
         (new DateSensitiveViewRepository($dateSensitiveView))->save(true);
     }
 
     /**
-     * @param DateSensitive $dateSensitive
+     * @param DateSensitiveView $dateSensitiveView
      * @return void
      * @throws \yii\db\Exception
      */
-    public function dropViews(DateSensitive $dateSensitive)
+    public function dropViewByDateSensitiveView(DateSensitiveView $dateSensitiveView)
     {
-        $sources = Json::decode($dateSensitive->da_source);
-        $db = Yii::$app->getDb();
-
-        foreach ($sources as $tableName => $columns) {
-            try {
-                $this->dropView($db, $tableName, $dateSensitive->da_key);
-            } catch (\RuntimeException | \DomainException $e) {
-                $message = ArrayHelper::merge(AppHelper::throwableLog($e), ['DateSensitiveId' => $dateSensitive->da_id]);
-                \Yii::warning($message, 'DateSensitiveController:actionDropView:Exception');
-            } catch (\Throwable $throwable) {
-                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['DateSensitiveId' => $dateSensitive->da_id]);
-                \Yii::error($message, 'DateSensitiveController:actionDropView:Throwable');
-            }
-        }
+        $this->dropView(Yii::$app->getDb(), $dateSensitiveView->dv_table_name, $dateSensitiveView->dateSensitive->da_key ?? '');
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use src\behaviors\DateSensitiveBehavior;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -22,6 +23,7 @@ use yii\helpers\Inflector;
  *
  * @property Employee $daCreatedUser
  * @property Employee $daUpdatedUser
+ * @property DateSensitiveView[] $dateSensitiveViews
  */
 class DateSensitive extends \yii\db\ActiveRecord
 {
@@ -68,9 +70,13 @@ class DateSensitive extends \yii\db\ActiveRecord
                 $this->addError($attribute, $tableName . " table not doesn't exist.");
             }
 
-            foreach ($fields as $field) {
-                if (!isset($schema->columns[$field])) {
-                    $this->addError($attribute, $tableName . " table doesn't have " . $field . " field.");
+            if (!is_array($fields)) {
+                $this->addError($attribute, $tableName . " table columns must be array");
+            } else {
+                foreach ($fields as $field) {
+                    if (!isset($schema->columns[$field])) {
+                        $this->addError($attribute, $tableName . " table doesn't have " . $field . " field.");
+                    }
                 }
             }
         }
@@ -91,6 +97,9 @@ class DateSensitive extends \yii\db\ActiveRecord
                 'class' => BlameableBehavior::class,
                 'createdByAttribute' => 'da_created_user_id',
                 'updatedByAttribute' => 'da_updated_user_id',
+            ],
+            'views' => [
+                'class' => DateSensitiveBehavior::class,
             ],
         ];
     }
@@ -120,6 +129,17 @@ class DateSensitive extends \yii\db\ActiveRecord
     public function getDaCreatedUser()
     {
         return $this->hasOne(Employee::className(), ['id' => 'da_created_user_id']);
+    }
+
+
+    /**
+     * Gets query for [[DaCreatedUser]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getDateSensitiveViews()
+    {
+        return $this->hasMany(DateSensitiveView::className(), ['dv_da_id' => 'da_id']);
     }
 
     /**

@@ -9,13 +9,12 @@ use yii\db\ActiveRecord;
 /**
  * This is the model class for table "date_sensitive_view".
  *
- * @property int $dv_id
  * @property int|null $dv_da_id
  * @property string|null $dv_view_name
  * @property string|null $dv_table_name
  * @property string|null $dv_created_dt
  *
- * @property DateSensitive $dvDa
+ * @property DateSensitive $dateSensitive
  */
 class DateSensitiveView extends \yii\db\ActiveRecord
 {
@@ -74,7 +73,6 @@ class DateSensitiveView extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'dv_id' => 'Dv ID',
             'dv_da_id' => 'Dv Da ID',
             'dv_view_name' => 'Dv View Name',
             'dv_table_name' => 'Dv Table Name',
@@ -87,7 +85,7 @@ class DateSensitiveView extends \yii\db\ActiveRecord
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getDvDa()
+    public function getDateSensitive()
     {
         return $this->hasOne(DateSensitive::className(), ['da_id' => 'dv_da_id']);
     }
