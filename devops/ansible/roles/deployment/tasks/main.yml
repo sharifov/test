@@ -92,7 +92,7 @@
     path: "{{ app_console_logfile_path }}"
     owner: "{{ web_user }}"
     group: "{{ web_user }}"
-    recurse: yes
+    recurse: true
     state: directory
     mode: '0777'
 
