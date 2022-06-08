@@ -25,11 +25,6 @@ class m220606_110027_email_normalization extends Migration
 
         $this->createIndex('UNIQ-email', '{{%email_address}}', 'ea_email', true);
 
-        $this->createTable('{{%email_blob}}', [
-            'embb_id' => $this->primaryKey(),
-            'embb_email_body_blob' => 'MEDIUMBLOB',
-        ], $tableOptions);
-
         $this->createTable('{{%email_body}}', [
             'embd_id' => $this->primaryKey(),
             'embd_email_subject' => $this->string(255),
@@ -37,6 +32,15 @@ class m220606_110027_email_normalization extends Migration
             'embd_email_data' => $this->json(),
             'embd_hash' => $this->string(32),
         ], $tableOptions);
+
+
+        $this->createTable('{{%email_blob}}', [
+            'embb_id' => $this->primaryKey(),
+            'embb_body_id' => $this->integer(),
+            'embb_email_body_blob' => 'MEDIUMBLOB',
+        ], $tableOptions);
+
+        $this->createIndex('IDX-embb_body_id', '{{%email_blob}}', 'embb_body_id');
 
         $this->createTable('{{%email_params}}', [
             'ep_id' => $this->primaryKey(),
@@ -64,7 +68,7 @@ class m220606_110027_email_normalization extends Migration
 
         $this->addForeignKey('FK-e_project_id', '{{%email_norm}}', ['e_project_id'], '{{%projects}}', ['id'], 'SET NULL', 'CASCADE');
         $this->addForeignKey('FK-e_departament_id', '{{%email_norm}}', ['e_departament_id'], '{{%department}}', ['dep_id'], 'SET NULL', 'CASCADE');
-        $this->addForeignKey('FK-e_created_user_id', '{{%email_norm}}', ['e_created_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
+        //$this->addForeignKey('FK-e_created_user_id', '{{%email_norm}}', ['e_created_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
 
         $this->createTable('{{%email_log}}', [
             'el_id' => $this->primaryKey(),
@@ -72,8 +76,8 @@ class m220606_110027_email_normalization extends Migration
             'el_status_done_dt' => $this->dateTime(),
             'el_read_dt' => $this->dateTime(),
             'el_error_message' => $this->string(500),
-            'el_message_id' => $this->integer(),
-            'el_ref_message_id' => $this->integer(),
+            'el_message_id' => $this->string(500),
+            'el_ref_message_id' => 'mediumtext',
             'el_inbox_created_dt' => $this->dateTime(),
             'el_inbox_email_id' => $this->integer(),
             'el_communication_id' => $this->integer(),
