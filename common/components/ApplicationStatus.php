@@ -9,7 +9,6 @@
 
 namespace common\components;
 
-use frostealth\yii2\aws\s3\Service;
 use yii\base\Component;
 use yii\swiftmailer\Mailer;
 
@@ -65,7 +64,8 @@ class ApplicationStatus extends Component
     public function dbSlaveStatus(): string
     {
         try {
-            return \Yii::$app->db_slave->isActive ? 'ok' : 'error';
+            \Yii::$app->db_slave->open();
+            return 'ok';
         } catch (\Throwable $e) {
             return 'error';
         }
