@@ -2,7 +2,7 @@
 
 use modules\abac\AbacModule;
 use kivork\FeatureFlag\FeatureFlagModule;
-use src\services\microsoft\Microsoft;
+use src\model\userAuthClient\service\MicrosoftOAuthClient;
 use yii\authclient\clients\Google;
 use yii\authclient\Collection;
 use common\components\logger\FilebeatTarget;
@@ -247,7 +247,7 @@ return [
                     'clientSecret' => env('FRONTEND_CONFIG_MAIN_COMPONENTS_AUTHCLIENTCOLLECTION_CLIENTS_GOOGLE_CLIENTSECRET')
                 ],
                 'microsoft' => [
-                    'class' => Microsoft::class,
+                    'class' => MicrosoftOAuthClient::class,
                     'clientId' => env('FRONTEND_CONFIG_MAIN_COMPONENTS_AUTHCLIENTCOLLECTION_CLIENTS_MICROSOFT_CLIENTID'),
                     'clientSecret' => env('FRONTEND_CONFIG_MAIN_COMPONENTS_AUTHCLIENTCOLLECTION_CLIENTS_MICROSOFT_CLIENTSECRET'),
                     'tenantId' => env('FRONTEND_CONFIG_MAIN_COMPONENTS_AUTHCLIENTCOLLECTION_CLIENTS_MICROSOFT_TENANTID'),
