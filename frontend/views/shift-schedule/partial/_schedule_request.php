@@ -43,6 +43,7 @@ use yii\widgets\Pjax;
                     ])->widget(DateRangePicker::class, [
                         'convertFormat' => true,
                         'pluginOptions' => [
+                            'minDate' => date('Y-m-d'),
                             'timePicker' => true,
                             'timePickerIncrement' => 1,
                             'timePicker24Hour' => true,

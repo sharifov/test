@@ -85,9 +85,7 @@ class UserShiftScheduleRequestController extends FController
         );
         $dataProvider = $searchModel->searchByUsers(
             $queryParams,
-            ShiftScheduleRequestService::getUserList(Auth::user()),
-            date('Y-m-d', strtotime('now')),
-            date('Y-m-d', strtotime('+1 year'))
+            ShiftScheduleRequestService::getUserList(Auth::user())
         );
 
         return [
@@ -192,7 +190,6 @@ class UserShiftScheduleRequestController extends FController
                 'event' => $event,
                 'model' => $decisionFormModel,
                 'success' => $success ?? false,
-                'canEditPreviousDate' => $requestModel->getIsCanEditPreviousDate(),
                 'userTimeZone' => $userTimeZone,
             ]);
         } catch (DomainException $e) {
