@@ -124,10 +124,10 @@ class RbacRoleManagementController extends FController
                 }
                 \Yii::$app->session->setFlash('success', 'Form Saved');
             } catch (\RuntimeException | \DomainException $e) {
-                \Yii::warning(AppHelper::throwableFormatter($e), 'RbacRoleManagementController::actionClone:exception');
+                \Yii::warning(AppHelper::throwableFormatter($e), 'RbacRoleManagementController::actionMerge:exception');
                 \Yii::$app->session->setFlash('error', $e->getMessage());
             } catch (\Throwable $e) {
-                \Yii::error(AppHelper::throwableLog($e), 'RbacRoleManagementController:actionClone:Throwable');
+                \Yii::error(AppHelper::throwableLog($e), 'RbacRoleManagementController:actionMerge:Throwable');
                 \Yii::$app->session->setFlash('error', 'Server Error');
             }
         }
@@ -160,10 +160,10 @@ class RbacRoleManagementController extends FController
                 }
                 \Yii::$app->session->setFlash('success', 'Form Saved');
             } catch (\RuntimeException | \DomainException $e) {
-                \Yii::warning(AppHelper::throwableFormatter($e), 'RbacRoleManagementController::actionClone:exception');
+                \Yii::warning(AppHelper::throwableFormatter($e), 'RbacRoleManagementController::actionExclude:exception');
                 \Yii::$app->session->setFlash('error', $e->getMessage());
             } catch (\Throwable $e) {
-                \Yii::error(AppHelper::throwableLog($e), 'RbacRoleManagementController:actionClone:Throwable');
+                \Yii::error(AppHelper::throwableLog($e), 'RbacRoleManagementController:actionExclude:Throwable');
                 \Yii::$app->session->setFlash('error', 'Server Error');
             }
         }
