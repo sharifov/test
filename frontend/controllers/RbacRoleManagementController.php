@@ -115,7 +115,6 @@ class RbacRoleManagementController extends FController
         if (\Yii::$app->request->isPost) {
             try {
                 $model->load(\Yii::$app->request->post());
-                \Yii::error($model->toArray());
                 if (!$model->validate()) {
                     throw new \RuntimeException(implode(', ', $model->getErrorSummary(true)));
                 }
@@ -152,7 +151,6 @@ class RbacRoleManagementController extends FController
         if (\Yii::$app->request->isPost) {
             try {
                 $model->load(\Yii::$app->request->post());
-                \Yii::error($model->toArray());
                 if (!$model->validate()) {
                     throw new \RuntimeException(implode(', ', $model->getErrorSummary(true)));
                 }
