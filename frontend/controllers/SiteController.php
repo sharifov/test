@@ -213,11 +213,11 @@ class SiteController extends FController
 
 
     /**
-     * @return string
+     * @return string|Response
      * @throws ForbiddenHttpException
      * @throws NotFoundHttpException
      */
-    public function actionProfile(): string
+    public function actionProfile()
     {
         if (Yii::$app->user->isGuest) {
             throw new ForbiddenHttpException();
@@ -229,6 +229,7 @@ class SiteController extends FController
         }
 
         $userProfileForm = new UserProfileForm();
+        $userProfileForm->username = $model->username;
         $userProfileForm->email = $model->email;
         $userProfileForm->full_name = $model->full_name;
         $userProfileForm->password = '';
@@ -269,7 +270,7 @@ class SiteController extends FController
                 }
             }
             if ($updated) {
-                $this->redirect('/site/profile');
+                return $this->redirect('/site/profile');
             }
         }
 
