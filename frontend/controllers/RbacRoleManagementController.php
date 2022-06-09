@@ -46,7 +46,7 @@ class RbacRoleManagementController extends FController
                         [
                             'allow'   => true,
                             'actions' => ['index', 'clone', 'merge', 'exclude'],
-                            'roles'   => [Employee::ROLE_ADMIN ,Employee::ROLE_SUPER_ADMIN],
+                            'roles'   => [Employee::ROLE_ADMIN, Employee::ROLE_SUPER_ADMIN],
                         ],
                     ],
                 ]
