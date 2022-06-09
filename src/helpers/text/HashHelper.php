@@ -14,11 +14,11 @@ class HashHelper
     }
 
     /**
-     * @param $object
+     * @param object $object
      * @return string
      */
     public static function generateHashFromObject(object $object): string
     {
-        return spl_object_hash($object);
+        return self::generateHashFromArray((array) $object);
     }
 }

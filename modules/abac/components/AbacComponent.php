@@ -148,7 +148,6 @@ class AbacComponent extends Component
         if (!$subject) {
             $subject = new \stdClass();
         }
-
         try {
             if (!$user) {
                 $user = Auth::user();
@@ -157,14 +156,13 @@ class AbacComponent extends Component
             $subject->env = $this->getEnv($user);
             $enforserObj = $this->enforser;
 
-
             if ($this->cacheEnforceEnable) {
                 $preparedSubject = self::prepareSubject($subject);
                 $keyCache = self::cacheCanGenerate($preparedSubject, $object, $action);
-
                 $data = Yii::$app->cache->get($keyCache);
+
                 if ($data === false) {
-                    $data = (string) self::canEnforce($enforserObj, $subject, $object, $action);
+                    $data = (int) self::canEnforce($enforserObj, $subject, $object, $action);
                     $dependency = new TagDependency([
                         'tags' => [AbacPolicy::CACHE_KEY . $object, AbacPolicy::CACHE_KEY],
                     ]);
