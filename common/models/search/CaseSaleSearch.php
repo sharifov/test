@@ -8,13 +8,11 @@ use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\CaseSale;
 use yii\db\Expression;
-use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 
 /**
  * CaseSaleSearch represents the model behind the search form of `common\models\CaseSale`.
- * @property array $page
  */
 class CaseSaleSearch extends CaseSale
 {
@@ -34,7 +32,7 @@ class CaseSaleSearch extends CaseSale
     {
         return [
             [['css_cs_id', 'css_sale_id', 'css_sale_pax', 'css_created_user_id', 'css_updated_user_id'], 'integer'],
-            [['css_sale_book_id', 'css_sale_pnr', 'css_sale_data','nextId','prevId','cursor','cursorId'], 'safe'],
+            [['css_sale_book_id', 'css_sale_pnr', 'css_sale_data','nextId','prevId','cursor'], 'safe'],
             [['css_sale_created_dt', 'css_created_dt', 'css_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
 
             [['css_need_sync_bo'], 'boolean'],
@@ -60,7 +58,6 @@ class CaseSaleSearch extends CaseSale
     public function search($params)
     {
         $query = CaseSale::find();
-        //->limit(10);
         // add conditions that should always apply here
 
         $dataProvider = new BigActiveDataProvider([
