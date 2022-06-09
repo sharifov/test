@@ -28,7 +28,6 @@ class RbacRoleManagementService
                 ->from(['a' => 'auth_item_child'])
                 ->where(['a.parent' => $donorRoleName])
                 ->column();
-            \Yii::error($donorRows);
             array_walk($donorRows, function (&$item) use ($recipientRoleName) {
                 $newItem = [];
                 $newItem['child']  = $item;
