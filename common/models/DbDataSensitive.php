@@ -2,7 +2,8 @@
 
 namespace common\models;
 
-use src\behaviors\DbDateSensitiveBehavior;
+use src\behaviors\DbDataSensitiveBehavior;
+use src\behaviors\StringToJsonBehavior;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -23,16 +24,16 @@ use yii\helpers\Inflector;
  *
  * @property Employee $createdUser
  * @property Employee $updatedUser
- * @property DbDateSensitiveView[] $dbDateSensitiveViews
+ * @property DbDataSensitiveView[] $dbDataSensitiveViews
  */
-class DbDateSensitive extends \yii\db\ActiveRecord
+class DbDataSensitive extends \yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'db_date_sensitive';
+        return 'db_data_sensitive';
     }
 
     /**
@@ -99,7 +100,11 @@ class DbDateSensitive extends \yii\db\ActiveRecord
                 'updatedByAttribute' => 'dda_updated_user_id',
             ],
             'views' => [
-                'class' => DbDateSensitiveBehavior::class,
+                'class' => DbDataSensitiveBehavior::class,
+            ],
+            'stringToJson' => [
+                'class' => StringToJsonBehavior::class,
+                'jsonColumn' => 'dda_source'
             ],
         ];
     }
@@ -137,9 +142,9 @@ class DbDateSensitive extends \yii\db\ActiveRecord
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getDbDateSensitiveViews()
+    public function getDbDataSensitiveViews()
     {
-        return $this->hasMany(DbDateSensitiveView::className(), ['ddv_dda_id' => 'dda_id']);
+        return $this->hasMany(DbDataSensitiveView::className(), ['ddv_dda_id' => 'dda_id']);
     }
 
     /**

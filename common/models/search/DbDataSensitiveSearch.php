@@ -2,14 +2,14 @@
 
 namespace common\models\search;
 
-use common\models\DbDateSensitive;
+use common\models\DbDataSensitive;
 use common\models\Employee;
 use yii\data\ActiveDataProvider;
 
 /**
- * DbDateSensitiveSearch represents the model behind the search form of `common\models\DbDateSensitive`.
+ * DbDataSensitiveSearch represents the model behind the search form of `common\models\DbDataSensitive`.
  */
-class DbDateSensitiveSearch extends DbDateSensitive
+class DbDataSensitiveSearch extends DbDataSensitive
 {
     /**
      * {@inheritdoc}
@@ -32,7 +32,7 @@ class DbDateSensitiveSearch extends DbDateSensitive
      */
     public function search($params)
     {
-        $query = DbDateSensitive::find();
+        $query = DbDataSensitive::find();
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,

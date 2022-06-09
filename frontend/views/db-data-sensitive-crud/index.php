@@ -2,7 +2,7 @@
 
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
-use common\models\DbDateSensitive;
+use common\models\DbDataSensitive;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\ActionColumn;
@@ -10,10 +10,10 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel common\models\search\DbDateSensitiveSearch */
+/* @var $searchModel common\models\search\DbDataSensitiveSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'DB Date Sensitive';
+$this->title = 'DB Data Sensitive';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="date-sensitive-index">
@@ -44,21 +44,21 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'class' => ActionColumn::className(),
-                'urlCreator' => function ($action, DbDateSensitive $model, $key, $index, $column) {
+                'urlCreator' => function ($action, DbDataSensitive $model, $key, $index, $column) {
                     return Url::toRoute([$action, 'id' => $model->dda_id]);
                 },
                 'template' => '{create-view} {drop-view} {view} {update} {delete} ',
                 'buttons' => [
-                    'create-view' => function ($url, DbDateSensitive $model, $key) {
-                        return Html::a('<i class="fa fa-database" style="font-size: 100%"></i>', ['/db-date-sensitive/create-views', 'id' => $model->dda_id], [
+                    'create-view' => function ($url, DbDataSensitive $model, $key) {
+                        return Html::a('<i class="fa fa-database" style="font-size: 100%"></i>', ['/db-data-sensitive/create-views', 'id' => $model->dda_id], [
                             'title' => 'Create All Views',
                             'data-pjax' => 0,
                             'data-method' => 'post',
                             'data-confirm' => 'Are you sure you want to reinit views?'
                         ]);
                     },
-                    'drop-view' => function ($url, DbDateSensitive $model, $key) {
-                        return Html::a('<i class="fa fa-times" style="font-size: 120%"></i>', ['/db-date-sensitive/drop-views', 'id' => $model->dda_id], [
+                    'drop-view' => function ($url, DbDataSensitive $model, $key) {
+                        return Html::a('<i class="fa fa-times" style="font-size: 120%"></i>', ['/db-data-sensitive/drop-views', 'id' => $model->dda_id], [
                             'title' => 'Drop All Views',
                             'data-pjax' => 0,
                             'data-method' => 'post',

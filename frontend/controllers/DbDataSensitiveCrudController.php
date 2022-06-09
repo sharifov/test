@@ -2,15 +2,15 @@
 
 namespace frontend\controllers;
 
-use common\models\DbDateSensitive;
-use common\models\search\DbDateSensitiveSearch;
+use common\models\DbDataSensitive;
+use common\models\search\DbDataSensitiveSearch;
 use yii\filters\VerbFilter;
 use yii\web\NotFoundHttpException;
 
 /**
- * DbDateSensitiveCrudController implements the CRUD actions for DbDateSensitive model.
+ * DbDataSensitiveCrudController implements the CRUD actions for DbDataSensitive model.
  */
-class DbDateSensitiveCrudController extends FController
+class DbDataSensitiveCrudController extends FController
 {
     /**
      * @inheritDoc
@@ -32,13 +32,13 @@ class DbDateSensitiveCrudController extends FController
 
 
     /**
-     * Lists all DbDateSensitive models.
+     * Lists all DbDataSensitive models.
      *
      * @return string
      */
     public function actionIndex()
     {
-        $searchModel = new DbDateSensitiveSearch();
+        $searchModel = new DbDataSensitiveSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
 
         return $this->render('index', [
@@ -48,7 +48,7 @@ class DbDateSensitiveCrudController extends FController
     }
 
     /**
-     * Displays a single DbDateSensitive model.
+     * Displays a single DbDataSensitive model.
      * @param $id
      * @return string
      * @throws NotFoundHttpException if the model cannot be found
@@ -61,13 +61,13 @@ class DbDateSensitiveCrudController extends FController
     }
 
     /**
-     * Creates a new DbDateSensitive model.
+     * Creates a new DbDataSensitive model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return string|\yii\web\Response
      */
     public function actionCreate()
     {
-        $model = new DbDateSensitive();
+        $model = new DbDataSensitive();
 
         if ($model->load($this->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->dda_id]);
@@ -79,7 +79,7 @@ class DbDateSensitiveCrudController extends FController
     }
 
     /**
-     * Updates an existing DbDateSensitive model.
+     * Updates an existing DbDataSensitive model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param $id
      * @return string|\yii\web\Response
@@ -99,7 +99,7 @@ class DbDateSensitiveCrudController extends FController
     }
 
     /**
-     * Deletes an existing DbDateSensitive model.
+     * Deletes an existing DbDataSensitive model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param $id
      * @return \yii\web\Response
@@ -114,15 +114,15 @@ class DbDateSensitiveCrudController extends FController
     }
 
     /**
-     * Finds the DbDateSensitive model based on its primary key value.
+     * Finds the DbDataSensitive model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param $id
-     * @return DbDateSensitive the loaded model
+     * @return DbDataSensitive the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = DbDateSensitive::findOne(['dda_id' => $id])) !== null) {
+        if (($model = DbDataSensitive::findOne(['dda_id' => $id])) !== null) {
             return $model;
         }
 

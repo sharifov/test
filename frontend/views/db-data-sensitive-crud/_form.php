@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model common\models\DbDateSensitive */
+/* @var $model common\models\DbDataSensitive */
 /* @var $form yii\widgets\ActiveForm */
 
 ?>
@@ -21,6 +21,7 @@ use yii\widgets\ActiveForm;
 
         <?php
         try {
+            $model->dda_source = \frontend\helpers\JsonHelper::encode($model->dda_source);
             echo $form->field($model, 'dda_source')->widget(
                 \kdn\yii2\JsonEditor::class,
                 [

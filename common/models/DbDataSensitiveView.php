@@ -14,16 +14,16 @@ use yii\db\ActiveRecord;
  * @property string|null $ddv_table_name
  * @property string|null $ddv_created_dt
  *
- * @property DbDateSensitive $dbDateSensitive
+ * @property DbDataSensitive $dbDataSensitive
  */
-class DbDateSensitiveView extends \yii\db\ActiveRecord
+class DbDataSensitiveView extends \yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'db_date_sensitive_view';
+        return 'db_data_sensitive_view';
     }
 
     public function behaviors(): array
@@ -48,7 +48,7 @@ class DbDateSensitiveView extends \yii\db\ActiveRecord
             [['ddv_dda_id'], 'integer'],
             [['ddv_created_dt'], 'safe'],
             [['ddv_view_name', 'ddv_table_name'], 'string', 'max' => 255],
-            [['ddv_dda_id'], 'exist', 'skipOnError' => true, 'targetClass' => DbDateSensitive::className(), 'targetAttribute' => ['ddv_dda_id' => 'dda_id']],
+            [['ddv_dda_id'], 'exist', 'skipOnError' => true, 'targetClass' => DbDataSensitive::className(), 'targetAttribute' => ['ddv_dda_id' => 'dda_id']],
         ];
     }
 
@@ -56,9 +56,9 @@ class DbDateSensitiveView extends \yii\db\ActiveRecord
      * @param int $ddv_dda_id
      * @param string $ddv_view_name
      * @param string $ddv_table_name
-     * @return DbDateSensitiveView
+     * @return DbDataSensitiveView
      */
-    public static function create(int $ddv_dda_id, string $ddv_view_name, string $ddv_table_name): DbDateSensitiveView
+    public static function create(int $ddv_dda_id, string $ddv_view_name, string $ddv_table_name): DbDataSensitiveView
     {
         $model = new self();
         $model->ddv_dda_id = $ddv_dda_id;
@@ -87,6 +87,6 @@ class DbDateSensitiveView extends \yii\db\ActiveRecord
      */
     public function getDbDateSensitive()
     {
-        return $this->hasOne(DbDateSensitive::className(), ['dda_id' => 'ddv_dda_id']);
+        return $this->hasOne(DbDataSensitive::className(), ['dda_id' => 'ddv_dda_id']);
     }
 }

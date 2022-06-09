@@ -1,11 +1,12 @@
 <?php
 
+use frontend\helpers\JsonHelper;
 use yii\db\Migration;
 
 /**
- * Handles the creation of table `{{%date_sensitive}}`.
+ * Handles the creation of table `{{%data_sensitive}}`.
  */
-class m220607_053422_create_db_date_sensitive_table extends Migration
+class m220607_053422_create_db_data_sensitive_table extends Migration
 {
     private const DEFAULT_KEY = 'view';
     private const SOURCE = [
@@ -154,7 +155,7 @@ class m220607_053422_create_db_date_sensitive_table extends Migration
      */
     public function safeUp()
     {
-        $this->createTable('{{%db_date_sensitive}}', [
+        $this->createTable('{{%db_data_sensitive}}', [
             'dda_id' => $this->primaryKey(),
             'dda_key' => $this->string(50)->notNull()->unique(),
             'dda_name' => $this->string(50)->notNull(),
@@ -164,15 +165,15 @@ class m220607_053422_create_db_date_sensitive_table extends Migration
             'dda_created_user_id' => $this->integer(),
             'dda_updated_user_id' => $this->integer(),
         ]);
-        $this->addForeignKey('FK-db_date_sensitive-dda_created_user_id', '{{%db_date_sensitive}}', 'dda_created_user_id', '{{%employees}}', 'id', 'SET NULL');
-        $this->addForeignKey('FK-db_date_sensitive-dda_updated_user_id', '{{%db_date_sensitive}}', 'dda_updated_user_id', '{{%employees}}', 'id', 'SET NULL');
+        $this->addForeignKey('FK-db_data_sensitive-dda_created_user_id', '{{%db_data_sensitive}}', 'dda_created_user_id', '{{%employees}}', 'id', 'SET NULL');
+        $this->addForeignKey('FK-db_data_sensitive-dda_updated_user_id', '{{%db_data_sensitive}}', 'dda_updated_user_id', '{{%employees}}', 'id', 'SET NULL');
 
         $this->insert(
-            '{{%db_date_sensitive}}',
+            '{{%db_data_sensitive}}',
             [
                 'dda_key' => self::DEFAULT_KEY,
                 'dda_name' => 'Default',
-                'dda_source' => json_encode(self::SOURCE),
+                'dda_source' =>  JsonHelper::encode(self::SOURCE),
                 'dda_created_dt' => date('Y-m-d H:i:s')
             ]
         );
@@ -183,6 +184,6 @@ class m220607_053422_create_db_date_sensitive_table extends Migration
      */
     public function safeDown()
     {
-        $this->dropTable('{{%db_date_sensitive}}');
+        $this->dropTable('{{%db_data_sensitive}}');
     }
 }
