@@ -10,10 +10,10 @@ use yii\base\Model;
  */
 class UserProfileForm extends Model
 {
-    public ?string $username = null;
-    public ?string $email = null;
-    public ?string $password = null;
-    public ?string $full_name = null;
+    public $username = null;
+    public $email = null;
+    public $password = null;
+    public $full_name = null;
 
     /**
      * @return array
