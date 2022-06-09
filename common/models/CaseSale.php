@@ -277,4 +277,28 @@ class CaseSale extends \yii\db\ActiveRecord
             );
         }, $duration);
     }
+    public static function getPrevModels($prevId, $limit, $filters = null): array
+    {
+        if (isset($filters)) {
+            $mainQuery = CaseSale::find()
+                ->where(['>', 'css_cs_id', $prevId])
+                ->andFilterWhere($filters)
+                ->orderBy(['css_cs_id' => SORT_ASC])
+                ->limit($limit + 1);
+            return CaseSale::find()
+                ->from(['C' => $mainQuery])
+                ->orderBy(['css_cs_id' => SORT_DESC])
+                ->all();
+        }
+
+        $mainQuery = CaseSale::find()
+            ->where(['>', 'css_cs_id', $prevId])
+            ->orderBy(['css_cs_id' => SORT_ASC])
+            ->limit($limit + 1);
+        return CaseSale::find()
+            ->from(['C' => $mainQuery])
+            ->orderBy(['css_cs_id' => SORT_DESC])
+            ->limit($limit + 1)
+            ->all();
+    }
 }

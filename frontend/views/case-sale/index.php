@@ -3,6 +3,7 @@
 use common\models\CaseSale;
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\helpers\Url;
 use yii\widgets\Pjax;
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
@@ -28,6 +29,8 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'filterUrl' => Url::to(['case-sale/index']),
+        'layout' => "{items}",
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
 
@@ -141,6 +144,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>
+    <?php  echo $this->render('_pagination', ['model' => $searchModel]); ?>
 
     <?php Pjax::end(); ?>
 

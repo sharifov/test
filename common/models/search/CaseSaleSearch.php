@@ -3,18 +3,30 @@
 namespace common\models\search;
 
 use common\models\Employee;
+use common\models\query\BigActiveDataProvider;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\CaseSale;
 use yii\db\Expression;
+use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 
 /**
  * CaseSaleSearch represents the model behind the search form of `common\models\CaseSale`.
+ * @property array $page
  */
 class CaseSaleSearch extends CaseSale
 {
+    /**
+     * @var mixed|null
+     */
+    public $reset;
+    public $nextId;
+    public $prevId;
+    public $lastPage;
+    public $cursor;
+
     /**
      * {@inheritdoc}
      */
@@ -22,7 +34,7 @@ class CaseSaleSearch extends CaseSale
     {
         return [
             [['css_cs_id', 'css_sale_id', 'css_sale_pax', 'css_created_user_id', 'css_updated_user_id'], 'integer'],
-            [['css_sale_book_id', 'css_sale_pnr', 'css_sale_data'], 'safe'],
+            [['css_sale_book_id', 'css_sale_pnr', 'css_sale_data','nextId','prevId','cursor','cursorId'], 'safe'],
             [['css_sale_created_dt', 'css_created_dt', 'css_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
 
             [['css_need_sync_bo'], 'boolean'],
@@ -48,11 +60,26 @@ class CaseSaleSearch extends CaseSale
     public function search($params)
     {
         $query = CaseSale::find();
-
+        //->limit(10);
         // add conditions that should always apply here
 
-        $dataProvider = new ActiveDataProvider([
+        $dataProvider = new BigActiveDataProvider([
             'query' => $query,
+            'pagination' => [
+                'pageSize' => 20,
+            ],
+        ]);
+        $dataProvider->setSort([
+            'attributes' => [
+                'css_cs_id' => [
+                    'asc' => ['css_cs_id' => SORT_ASC],
+                    'desc' => ['css_cs_id' => SORT_DESC],
+                    'default' => SORT_DESC,
+                ],
+            ],
+            'defaultOrder' => [
+                'css_cs_id' => SORT_DESC
+            ]
         ]);
 
         $this->load($params);
@@ -61,6 +88,19 @@ class CaseSaleSearch extends CaseSale
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
             return $dataProvider;
+        }
+
+        if ($this->cursor == 1) {
+            $this->nextId = null;
+        } else if ($this->cursor == 2) {
+            $this->prevId = null;
+        }
+
+        if ($this->nextId) {
+            $query->andFilterWhere(['<', 'css_cs_id', $this->nextId]);
+        }
+        if ($this->prevId) {
+            $query->andFilterWhere(['<', 'css_cs_id', $this->prevId]);
         }
 
         if ($this->css_sale_created_dt) {
@@ -96,6 +136,86 @@ class CaseSaleSearch extends CaseSale
         if (ArrayHelper::isIn($this->css_need_sync_bo, ['1', '0'], false)) {
             $query->andWhere(['css_need_sync_bo' => $this->css_need_sync_bo]);
         }
+
+        $tableIdColName = 'css_cs_id';
+        $filters = $query->where;
+        if ($filters) {
+            foreach ($filters as $filter) {
+                if (is_array($filter)) {
+                    $key = array_search($tableIdColName, $filter);
+                    if ($key) {
+                        unset($filters[$key]);
+                    }
+                }
+            }
+            if (in_array($tableIdColName, $filters)) {
+                $filters = null;
+            }
+        }
+
+        $limit = $dataProvider->pagination->getLimit();
+
+        //Next Button
+        if (count($dataProvider->models) > $limit) {
+            $models = $dataProvider->models;
+            array_pop($models);
+            $modelKeys = [];
+            foreach ($models as $value) {
+                $modelKeys[][$tableIdColName] = $value;
+            }
+            $dataProvider->setModels($models);
+            $dataProvider->setKeys($modelKeys);
+
+            $next = $dataProvider->models;
+            $next = array_pop($next);
+            $this->nextId = $next[$tableIdColName];
+        } else {
+            $this->nextId = null;
+        }
+
+        //Prev Button
+        $newModelCol = array_column($dataProvider->getModels(), $tableIdColName);
+        $modelKeys = [];
+        foreach ($newModelCol as $value) {
+            $modelKeys[][$tableIdColName] = $value;
+        }
+        $lastId = array_shift($modelKeys);
+        $prevLimit = null;
+        if (!isset($lastId[$tableIdColName])) {
+            $lastId[$tableIdColName] = $this->prevId;
+        }
+
+        $prevLimit = CaseSale::getPrevModels($lastId[$tableIdColName], $limit, $filters);
+
+        if (isset($prevLimit) && count($prevLimit) >= $limit) {
+            $this->prevId = $lastId[$tableIdColName];
+            if (count($prevLimit) > $limit) {
+                array_pop($prevLimit);
+            }
+        }
+
+        //recharge dataprovider when prev
+        if ($this->cursor == 1) {
+            $dataProvider->setModels($prevLimit);
+            $newModelCol = array_column($dataProvider->getModels(), $tableIdColName);
+            $modelKeys = [];
+            foreach ($newModelCol as $value) {
+                $modelKeys[][$tableIdColName] = $value;
+            }
+            $dataProvider->setKeys($modelKeys);
+            $lastId = array_shift($modelKeys);
+            $prevModels = null;
+            if ($lastId) {
+                $prevModels = CaseSale::getPrevModels($lastId[$tableIdColName], $limit, $filters);
+            }
+
+            $this->prevId = $prevModels ? $lastId[$tableIdColName] : null;
+
+            $next = $dataProvider->models;
+            $next = array_pop($next);
+            $this->nextId = $next[$tableIdColName];
+        }
+        $this->reset = true;
 
         return $dataProvider;
     }
