@@ -135,7 +135,8 @@ class ClientProjectController extends FController
     public function actionUnsubscribeClientAjax(): Response
     {
         $data = Yii::$app->request->get();
-        $leadAbacDto = new LeadAbacDto(Lead::findOne($data['leadID']), Auth::id());
+        $leadId = !empty($data['leadID']) ? $data['leadID'] : null;
+        $leadAbacDto = new LeadAbacDto(Lead::findOne($leadId), Auth::id());
 
         /** @abac $leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS, Access to action client unsubscribe*/
         if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_UNSUBSCRIBE)) {
