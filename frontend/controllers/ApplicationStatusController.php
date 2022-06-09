@@ -185,12 +185,6 @@ class ApplicationStatusController extends Controller
      *     {
      *         "app": "app",
      *         "type": "component",
-     *         "service": "telegram",
-     *         "status": "ok"
-     *     },
-     *     {
-     *         "app": "app",
-     *         "type": "component",
      *         "service": "gaRequestService",
      *         "status": "ok"
      *     },
@@ -317,12 +311,6 @@ class ApplicationStatusController extends Controller
      *         "app": "app",
      *         "type": "component",
      *         "service": "queueLeadRedial",
-     *         "status": "error"
-     *     },
-     *     {
-     *         "app": "app",
-     *         "type": "component",
-     *         "service": "telegram",
      *         "status": "error"
      *     },
      *     {
@@ -455,12 +443,6 @@ class ApplicationStatusController extends Controller
                 'type' => 'component',
                 'service' => 'queueLeadRedial',
                 'status' => \Yii::$app->applicationStatus->queueLeadRedialStatus()
-            ],
-            [
-                'app' => 'app',
-                'type' => 'component',
-                'service' => 'telegram',
-                'status' => \Yii::$app->applicationStatus->telegramStatus()
             ],
             [
                 'app' => 'app',

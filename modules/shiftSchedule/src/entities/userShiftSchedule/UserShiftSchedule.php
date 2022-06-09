@@ -297,9 +297,9 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
     /**
      * @return string
      */
-    public function getShiftTitle(): string
+    public function getShiftName(): string
     {
-        return (!$this->shift || empty($this->shift->sh_title)) ? '-' : $this->shift->sh_title;
+        return $this->shift ? $this->shift->sh_name : '-';
     }
 
     public static function create(

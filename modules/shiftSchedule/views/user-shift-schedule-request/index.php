@@ -66,6 +66,7 @@ $bundle = FullCalendarAsset::register($this);
             'id' => 'pjax-all-requests',
             'enablePushState' => false,
             'enableReplaceState' => false,
+            'timeout' => 15000,
         ]); ?>
         <?= $this->render('partial/_all_requests', [
             'searchModelAll' => $searchModelAll,

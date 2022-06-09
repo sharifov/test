@@ -738,10 +738,11 @@ class RocketChat extends Component
 
     /**
      * @return bool
+     * @throws Exception
      */
     public function ping(): bool
     {
-        $result = $this->me($this->currentUserId, $this->currentAuthToken);
-        return isset($result['data']);
+        $login = $this->login($this->username, $this->password);
+        return !empty($login['data']);
     }
 }

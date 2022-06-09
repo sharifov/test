@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use common\models\QuoteTrip;
+use common\models\search\QuoteSegmentSearch;
 use common\models\search\QuoteTripSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -55,8 +56,15 @@ class QuoteTripCrudController extends FController
      */
     public function actionView($qt_id)
     {
+        $searchModel = new QuoteSegmentSearch();
+        $queryParams = $this->request->queryParams;
+        $queryParams['QuoteSegmentSearch']['qs_trip_id'] = $qt_id;
+        $dataProvider = $searchModel->search($queryParams);
+
         return $this->render('view', [
             'model' => $this->findModel($qt_id),
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
         ]);
     }
 

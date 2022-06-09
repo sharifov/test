@@ -1,10 +1,10 @@
 <?php
 
-namespace src\services\microsoft;
+namespace src\model\userAuthClient\service;
 
 use yii\authclient\OAuth2;
 
-class Microsoft extends OAuth2
+class MicrosoftOAuthClient extends OAuth2
 {
     public ?string $url;
     public ?string $tenantId;

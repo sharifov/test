@@ -11,7 +11,7 @@ use yii\grid\GridView;
 /* @var $searchModel common\models\search\QuoteSegmentStopSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Quote Segment Stop';
+$this->title = 'Quote Segment Technical Stop';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="quote-segment-stop-index">

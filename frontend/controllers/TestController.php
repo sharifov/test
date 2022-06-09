@@ -2746,7 +2746,12 @@ class TestController extends FController
 
     public function actionTestAbac()
     {
-        VarDumper::dump(Yii::$app->abac->can(null, SaleListAbacObject::UI_BLOCK_SALE_LIST, SaleListAbacObject::ACTION_READ));
-        VarDumper::dump(Yii::$app->abac->can(null, SaleListAbacObject::UI_SALE_ID, SaleListAbacObject::ACTION_READ));
+        $time_start = microtime(true);
+        for ($i = 0; $i <= 1000; $i++) {
+            Yii::$app->abac->can(null, SaleListAbacObject::UI_BLOCK_SALE_LIST, SaleListAbacObject::ACTION_READ);
+            //Yii::$app->abac->can(null, SaleListAbacObject::UI_SALE_ID, SaleListAbacObject::ACTION_READ);
+        }
+        $time_end = microtime(true);
+        echo 'Time: ' . round($time_end - $time_start, 6) . '';
     }
 }

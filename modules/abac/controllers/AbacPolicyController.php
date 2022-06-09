@@ -12,6 +12,7 @@ use Yii;
 use modules\abac\src\entities\AbacPolicy;
 use modules\abac\src\entities\search\AbacPolicySearch;
 use yii\base\BaseObject;
+use yii\caching\TagDependency;
 use yii\data\ArrayDataProvider;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
@@ -117,6 +118,7 @@ class AbacPolicyController extends FController
             if ($model->validate()) {
                 $policyModel = $model->getPolicyModel();
                 if ($policyModel) {
+                    $policyModel->ap_enabled = (bool) $model->enabled;
                     if ($policyModel->save()) {
                         Yii::$app->session->setFlash('success', 'Success Import Policy ID: ' . $policyModel->ap_id);
                         return $this->redirect(['index']);
@@ -450,6 +452,12 @@ class AbacPolicyController extends FController
             }
         }
         return false;
+    }
+
+    public function actionClearCache(): Response
+    {
+        TagDependency::invalidate(Yii::$app->cache, [AbacPolicy::CACHE_KEY]);
+        return $this->redirect(['/abac/abac-policy']);
     }
 
     /**
