@@ -64,7 +64,7 @@ class QuoteTripCrudController extends FController
         return $this->render('view', [
             'model' => $this->findModel($qt_id),
             'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider
+            'dataProvider' => $dataProvider,
         ]);
     }
 

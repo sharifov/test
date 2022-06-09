@@ -75,7 +75,12 @@ $this->params['breadcrumbs'][] = $this->title;
                         'attribute' => 'qss_id',
                         'format' => 'raw',
                         'value' => function (QuoteSegmentStop $model) {
-                            return '<i class="fa fa-link"></i> ' . Html::a($model->qss_id, ['/quote-segment-stop-crud/index', 'QuoteSegmentStopSearch[qss_id]' => $model->qss_id], ['title' => 'Show', 'target' => '_blank', 'data-pjax' => 0]);
+                            return '<i class="fa fa-link"></i> ' .
+                                Html::a(
+                                    $model->qss_id,
+                                    ['/quote-segment-stop-crud/index', 'QuoteSegmentStopSearch[qss_id]' => $model->qss_id],
+                                    ['title' => 'Show', 'target' => '_blank', 'data-pjax' => 0]
+                                );
                         }
                     ],
                     [

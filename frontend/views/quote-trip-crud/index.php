@@ -33,15 +33,19 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'qt_quote_id',
                 'format' => 'raw',
                 'value' => function (QuoteTrip $model) {
-                    return '<i class="fa fa-link"></i> ' . Html::a($model->qt_quote_id, ['/quotes/index', 'QuoteSearch[id]' => $model->qt_quote_id], ['title' => 'Show', 'target' => '_blank', 'data-pjax' => 0]);
+                    return '<i class="fa fa-link"></i> ' .
+                        Html::a(
+                            $model->qt_quote_id,
+                            ['/quotes/index', 'QuoteSearch[id]' => $model->qt_quote_id],
+                            ['title' => 'Show', 'target' => '_blank', 'data-pjax' => 0]
+                        );
                 }
             ],
             [
                 'header' => 'Segment(s)',
                 'format' => 'raw',
                 'value' => function (QuoteTrip $model) {
-                    $segments = $model->getQuoteSegments()->all();
-                    return $segments ? count($segments) : 0;
+                    return $model->getQuoteSegments()->count();
                 }
             ],
             'qt_duration',

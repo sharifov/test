@@ -55,7 +55,12 @@ $this->params['breadcrumbs'][] = $this->title;
                         'attribute' => 'qs_id',
                         'format' => 'raw',
                         'value' => function (QuoteSegment $model) {
-                            return '<i class="fa fa-link"></i> ' . Html::a($model->qs_id, ['/quote-segment-crud/index', 'QuoteSegmentSearch[qs_id]' => $model->qs_id], ['title' => 'Show', 'target' => '_blank', 'data-pjax' => 0]);
+                            return '<i class="fa fa-link"></i> ' .
+                                Html::a(
+                                    $model->qs_id,
+                                    ['/quote-segment-crud/index', 'QuoteSegmentSearch[qs_id]' => $model->qs_id],
+                                    ['title' => 'Show', 'target' => '_blank', 'data-pjax' => 0]
+                                );
                         }
                     ],
                     'qs_departure_time',

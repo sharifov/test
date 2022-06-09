@@ -64,7 +64,7 @@ class QuoteSegmentCrudController extends FController
         return $this->render('view', [
             'model' => $this->findModel($qs_id),
             'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider
+            'dataProvider' => $dataProvider,
         ]);
     }
 
