@@ -10,22 +10,14 @@ use yii\web\AssetBundle;
  */
 class UserShiftCalendarAsset extends AssetBundle
 {
-//    public $basePath = '@webroot';
-//    public $baseUrl = '@web';
+    public $basePath = '@webroot';
+    public $baseUrl = '@web';
 
-    public function init()
-    {
-        parent::init();
-        $version = Yii::$app->params['release']['version'] ?? '' ;
-        $this->css[] = ['/css/style-user-shift-calendar.css?v=' . $version];
-    }
+    public $css = [
+        '/css/style-user-shift-calendar.css'
+    ];
 
-//    public $css = [
-//        // '/css/style-user-shift-calendar.css',
-//    ];
-//
     public $js = [
-        // '/js/mobiscroll/js/mobiscroll.jquery.min.js',
         '/js/shift/calendar/timeline-multiple-manage.js',
         '/js/shift/calendar/timeline-form-filter.js',
         '/js/shift/calendar/timeline-tooltip.js',

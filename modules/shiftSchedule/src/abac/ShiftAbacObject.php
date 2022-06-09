@@ -49,15 +49,11 @@ class ShiftAbacObject extends AbacBaseModel implements AbacInterface
     public const ACTION_CREATE      = 'create';
     public const ACTION_READ        = 'read';
     public const ACTION_DELETE      = 'delete';
-    public const ACTION_PERMANENTLY_DELETE      = 'permanentlyDelete';
-    public const ACTION_CREATE_ON_DOUBLE_CLICK = 'createOnDoubleClick';
+    public const ACTION_SOFT_DELETE = 'softDelete';
     public const ACTION_VIEW_ALL_EVENTS = 'viewAllEvents';
     public const ACTION_GENERATE_EXAMPLE_DATA = 'generateExampleData';
     public const ACTION_GENERATE_USER_SCHEDULE = 'generateUserSchedule';
     public const ACTION_REMOVE_ALL_USER_SCHEDULE = 'removeAllUserSchedule';
-    public const ACTION_MULTIPLE_DELETE_EVENTS = 'multipleDeleteEvents';
-    public const ACTION_MULTIPLE_PERMANENTLY_DELETE_EVENTS = 'multiplePermanentlyDeleteEvents';
-    public const ACTION_MULTIPLE_UPDATE_EVENTS = 'multipleUpdateEvents';
     public const ACTION_VIEW_EVENT_LOG = 'viewEventLogs';
 
     /** ACTION LIST */
@@ -76,9 +72,10 @@ class ShiftAbacObject extends AbacBaseModel implements AbacInterface
             self::ACTION_READ,
             self::ACTION_UPDATE,
             self::ACTION_DELETE,
-            self::ACTION_PERMANENTLY_DELETE,
+            self::ACTION_SOFT_DELETE,
             self::ACTION_ACCESS,
-            self::ACTION_CREATE_ON_DOUBLE_CLICK
+            self::ACTION_VIEW_EVENT_LOG,
+            self::ACTION_VIEW_ALL_EVENTS
         ],
         self::OBJ_USER_SHIFT_REQUEST_EVENT => [
             self::ACTION_ACCESS,
@@ -89,15 +86,8 @@ class ShiftAbacObject extends AbacBaseModel implements AbacInterface
             self::ACTION_READ,
             self::ACTION_UPDATE,
             self::ACTION_DELETE,
-            self::ACTION_PERMANENTLY_DELETE
+            self::ACTION_SOFT_DELETE
         ],
-        self::OBJ_USER_SHIFT_CALENDAR => [
-            self::ACTION_VIEW_ALL_EVENTS,
-            self::ACTION_MULTIPLE_DELETE_EVENTS,
-            self::ACTION_MULTIPLE_PERMANENTLY_DELETE_EVENTS,
-            self::ACTION_MULTIPLE_UPDATE_EVENTS,
-            self::ACTION_VIEW_EVENT_LOG
-        ]
     ];
 
     public const ATTR_USER_GROUPS_FORM_FIELD = [

@@ -70,14 +70,15 @@ class ShiftScheduleController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['ajax-multiple-delete', 'add-event', 'get-event', 'ajax-get-logs', 'ajax-edit-event-form', 'ajax-multiple-update'],
+                        'actions' => ['ajax-multiple-delete', 'add-multiple-events', 'ajax-event-details', 'ajax-get-logs',
+                            'ajax-edit-event-form', 'ajax-multiple-update', 'ajax-update-event', 'add-event', 'delete-event'],
                         'allow' => true,
                         'roles' => ['@']
                     ],
                     /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_ACCESS, Access to page shift-schedule/index */
                     [
                         'actions' => ['index', 'my-data-ajax', 'generate-example', 'remove-user-data',
-                            'generate-user-schedule', 'legend-ajax', 'calendar', 'calendar-events-ajax', 'update-single-event',
+                            'generate-user-schedule', 'legend-ajax', 'calendar', 'ajax-get-events',
                             'schedule-request-ajax', 'schedule-pending-requests', 'schedule-request-history-ajax'],
                         'allow' => \Yii::$app->abac->can(
                             null,
@@ -96,24 +97,6 @@ class ShiftScheduleController extends FController
                         ),
                         'roles' => ['@'],
                     ],
-                    [
-                        'actions' => ['delete-event'],
-                        'allow' => \Yii::$app->abac->can(
-                            null,
-                            ShiftAbacObject::OBJ_USER_SHIFT_EVENT,
-                            ShiftAbacObject::ACTION_DELETE
-                        ),
-                        'roles' => ['@'],
-                    ],
-                    [
-                        'actions' => ['add-single-event'],
-                        'allow' => \Yii::$app->abac->can(
-                            null,
-                            ShiftAbacObject::OBJ_USER_SHIFT_EVENT,
-                            ShiftAbacObject::ACTION_CREATE_ON_DOUBLE_CLICK
-                        ),
-                        'roles' => ['@'],
-                    ]
                 ],
             ],
         ];
@@ -471,7 +454,7 @@ class ShiftScheduleController extends FController
      * @throws NotAcceptableHttpException
      * @throws NotFoundHttpException
      */
-    public function actionGetEvent(): string
+    public function actionAjaxEventDetails(): string
     {
         $eventId = (int) Yii::$app->request->get('id');
 
@@ -488,6 +471,7 @@ class ShiftScheduleController extends FController
 
         $dto = new ShiftAbacDto();
         $dto->setIsEventOwner($event->isOwner(Auth::id()));
+        /** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_READ, Access to view event details */
         if (!Yii::$app->abac->can($dto, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_READ)) {
             throw new NotAcceptableHttpException('Permission Denied (' . $eventId . ')');
         }
@@ -520,8 +504,8 @@ class ShiftScheduleController extends FController
         $timelineCalendarFilter->load(Yii::$app->request->queryParams);
         $timelineCalendarFilter->userId = $userId ?? Auth::id();
 
-        /** @abac ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_VIEW_ALL_EVENTS, Access to view all events in calendar widget */
-        $canViewAllEvents = Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_VIEW_ALL_EVENTS);
+        /** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_VIEW_ALL_EVENTS, Access to view all events in calendar widget */
+        $canViewAllEvents = Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_VIEW_ALL_EVENTS);
         if ($canViewAllEvents) {
             $userGroups = UserGroupQuery::getList();
         } else {
@@ -539,7 +523,7 @@ class ShiftScheduleController extends FController
     /**
      * @return array
      */
-    public function actionCalendarEventsAjax(): array
+    public function actionAjaxGetEvents(): array
     {
         \Yii::$app->response->format = Response::FORMAT_JSON;
         $data = [
@@ -555,8 +539,8 @@ class ShiftScheduleController extends FController
             $data['error'] = true;
             $data['message'] = $timelineCalendarFilter->getErrorSummary(true)[0];
         } else {
-            /** @abac ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_VIEW_ALL_EVENTS, Access to view all events in calendar widget */
-            $canViewAllEvents = Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_VIEW_ALL_EVENTS);
+            /** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_VIEW_ALL_EVENTS, Access to view all events in calendar widget */
+            $canViewAllEvents = Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_VIEW_ALL_EVENTS);
             $userGroups = UserGroupQuery::findUserGroups(!$canViewAllEvents ? Auth::id() : null, $timelineCalendarFilter->userGroups ?? []);
 
             [$resourceList, $firstLevelResources] = UserShiftScheduleHelper::prepareResourcesForTimelineCalendar($userGroups, $timelineCalendarFilter->usersIds);
@@ -570,7 +554,7 @@ class ShiftScheduleController extends FController
         return $data;
     }
 
-    public function actionAddEvent()
+    public function actionAddMultipleEvents()
     {
         /** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_CREATE, Create user shift schedule event */
         if (!Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_CREATE)) {
@@ -599,8 +583,13 @@ class ShiftScheduleController extends FController
         ]);
     }
 
-    public function actionAddSingleEvent()
+    public function actionAddEvent()
     {
+        /** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_CREATE, Create user shift schedule event */
+        if (!Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_CREATE)) {
+            throw new ForbiddenHttpException('Access Denied');
+        }
+
         $form = new SingleEventCreateForm();
 
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
@@ -639,8 +628,12 @@ class ShiftScheduleController extends FController
 
     public function actionDeleteEvent()
     {
-        /** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_DELETE, Access to soft delete event in calendar widget */
-        if (!Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_DELETE)) {
+        /** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_SOFT_DELETE, Access to soft delete event in calendar widget */
+        $canDelete = Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_SOFT_DELETE);
+        /** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_DELETE, Access to delete event in calendar widget */
+        $canSoftDelete = Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_DELETE);
+
+        if (!$canDelete && !$canSoftDelete) {
             throw new ForbiddenHttpException('Access denied');
         }
 
@@ -656,8 +649,7 @@ class ShiftScheduleController extends FController
         }
 
         if ($deletePermanently == 1) {
-            /** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_PERMANENTLY_DELETE, Access to permanently delete event in calendar widget */
-            if (!Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_PERMANENTLY_DELETE)) {
+            if (!$canDelete) {
                 throw new ForbiddenHttpException('Access denied');
             }
             if (!$userShiftSchedule->delete()) {
@@ -695,8 +687,13 @@ class ShiftScheduleController extends FController
         ]);
     }
 
-    public function actionUpdateSingleEvent()
+    public function actionAjaxUpdateEvent()
     {
+        /** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_UPDATE, Access to update event */
+        if (!Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_UPDATE)) {
+            throw new ForbiddenHttpException('Access Denied');
+        }
+
         $data = Yii::$app->request->post();
 
         $event = UserShiftSchedule::findOne((int)$data['eventId']);
@@ -803,8 +800,11 @@ class ShiftScheduleController extends FController
 
     public function actionAjaxMultipleDelete(): Response
     {
-        /** @abac ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_MULTIPLE_DELETE_EVENTS, Access to delete multiple events */
-        if (!Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_MULTIPLE_DELETE_EVENTS)) {
+        /** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_SOFT_DELETE, Access to soft delete event in calendar widget */
+        $canSoftDelete = Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_SOFT_DELETE);
+        /** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_DELETE, Access to delete event in calendar widget */
+        $canDelete = Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_DELETE);
+        if (!$canDelete && !$canSoftDelete) {
             throw new ForbiddenHttpException('Access denied');
         }
 
@@ -812,9 +812,7 @@ class ShiftScheduleController extends FController
         $deletePermanently = Yii::$app->request->post('deletePermanently');
         $events = UserShiftSchedule::findAll(['uss_id' => $eventIds]);
 
-        /** @abac ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_MULTIPLE_PERMANENTLY_DELETE_EVENTS, Access to delete multiple events permanently */
-        $canDeletePermanently = Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_MULTIPLE_PERMANENTLY_DELETE_EVENTS);
-        if ($deletePermanently == 1 && !$canDeletePermanently) {
+        if ($deletePermanently == 1 && !$canDelete) {
             throw new ForbiddenHttpException('Access denied');
         }
 
@@ -864,8 +862,8 @@ class ShiftScheduleController extends FController
 
     public function actionAjaxMultipleUpdate()
     {
-        /** @abac ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_MULTIPLE_UPDATE_EVENTS, Access to update multiple events */
-        if (!Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_MULTIPLE_UPDATE_EVENTS)) {
+        /** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_UPDATE, Access to update multiple events */
+        if (!Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_UPDATE)) {
             throw new ForbiddenHttpException('Access denied');
         }
 
@@ -979,8 +977,8 @@ class ShiftScheduleController extends FController
 
     public function actionAjaxGetLogs($id)
     {
-        /** @abac ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_VIEW_EVENT_LOG, Access to view event logs */
-        if (!Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_VIEW_EVENT_LOG)) {
+        /** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_VIEW_EVENT_LOG, Access to view event logs */
+        if (!Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_VIEW_EVENT_LOG)) {
             throw new ForbiddenHttpException('Access denied');
         }
 
@@ -1001,7 +999,7 @@ class ShiftScheduleController extends FController
 
     public function actionAjaxEditEventForm(): string
     {
-        /** @abac ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_VIEW_EVENT_LOG, Access to view event logs */
+        /** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_VIEW_EVENT_LOG, Access to view event logs */
         if (!Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_UPDATE)) {
             throw new ForbiddenHttpException('Access denied');
         }

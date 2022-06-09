@@ -8,8 +8,8 @@
     function TimelineTooltip(
         canUpdateEvent,
         canViewEventLog,
-        canDeleteEvent,
-        canPermanentlyDeleteEvent,
+        canSoftDelete,
+        canDelete,
         openModalEventDetailsUrl,
         openModalEventLogsUrl,
         openModalEventEditUrl,
@@ -17,8 +17,8 @@
     ) {
         this.canUpdateEvent = canUpdateEvent;
         this.canViewEventLog = canViewEventLog;
-        this.canDeleteEvent = canDeleteEvent;
-        this.canPermanentlyDeleteEvent = canPermanentlyDeleteEvent;
+        this.canSoftDelete = canSoftDelete;
+        this.canDelete = canDelete;
         this.openModalEventDetailsUrl = openModalEventDetailsUrl;
         this.openModalEventLogsUrl = openModalEventLogsUrl;
         this.openModalEventEditUrl = openModalEventEditUrl;
@@ -147,7 +147,7 @@
 
     function deleteEventBtnTemplate()
     {
-        return this.canDeleteEvent ? `<button id="tooltip-event-delete" class="btn btn-sm btn-danger" title="Delete Event"><i class="fa fa-trash"></i></button>` : '';
+        return this.canSoftDelete ? `<button id="tooltip-event-delete" class="btn btn-sm btn-danger" title="Delete Event"><i class="fa fa-trash"></i></button>` : '';
     }
 
     function deletePermanentlyCheckboxTemplate()
@@ -199,7 +199,7 @@
                     'title': 'Error',
                     'type': 'error',
                     'text': xhr.statusText
-                })
+                });
             } else {
                 modal.modal({
                     backdrop: 'static',
@@ -211,7 +211,7 @@
 
     function openModalEventDelete()
     {
-        if(this.canPermanentlyDeleteEvent) {
+        if(this.canDelete) {
             setTimeout(function (args) {
                 var messageContent = $('.mbsc-alert-message');
                 messageContent.html(deletePermanentlyCheckboxTemplate());

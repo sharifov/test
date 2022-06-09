@@ -13,8 +13,8 @@
     function MultipleManageModule(
         canMultipleAdd,
         canMultipleUpdate,
-        canMultipleDelete,
-        canMultiplePermanentlyDelete,
+        canSoftDelete,
+        canDelete,
         multipleAddUrl,
         multipleUpdateUrl,
         multipleDeleteUrl
@@ -23,8 +23,8 @@
         this.selectedEventsIds = [];
         this.canMultipleAdd = canMultipleAdd;
         this.canMultipleUpdate = canMultipleUpdate;
-        this.canMultipleDelete = canMultipleDelete;
-        this.canMultiplePermanentlyDelete = canMultiplePermanentlyDelete;
+        this.canSoftDelete = canSoftDelete;
+        this.canDelete = canDelete;
         this.multipleAddUrl = multipleAddUrl;
         this.multipleUpdateUrl = multipleUpdateUrl;
         this.multipleDeleteUrl = multipleDeleteUrl;
@@ -114,9 +114,9 @@
         return canMultipleUpdate ? `<a class="dropdown-item" id="btn-multiple-update-events"><i class="fa fa-edit text-warning"></i> Update Events</a>` : '';
     }
 
-    function multipleDeleteBtnTemplate(canMultipleDelete)
+    function multipleDeleteBtnTemplate(canSoftDelete)
     {
-        return canMultipleDelete ? `<a class="dropdown-item" id="btn-multiple-delete-events"><i class="fa fa-trash text-danger"></i> Delete Events</a>` : '';
+        return canSoftDelete ? `<a class="dropdown-item" id="btn-multiple-delete-events"><i class="fa fa-trash text-danger"></i> Delete Events</a>` : '';
     }
 
     function multipleAddBtnTemplate(canMultipleAdd)
@@ -244,7 +244,7 @@
             return false;
         }
 
-        if(this.canMultiplePermanentlyDelete) {
+        if(this.canDelete) {
             setTimeout(function (args) {
                 let html = '' +
                     '<label>'+

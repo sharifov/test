@@ -3,6 +3,7 @@
 use frontend\assets\UserShiftCalendarAsset;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\entities\userShiftSchedule\search\TimelineCalendarFilter;
+use src\auth\Auth;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
@@ -43,49 +44,40 @@ $bundle = UserShiftCalendarAsset::register($this);
 </div>
 
 <?php
-$userTimeZone = \src\auth\Auth::user()->timezone;
+$userTimeZone = Auth::user()->timezone;
 $today = date('Y-m-d', strtotime('+1 day'));
 
-$getEventsAjaxUrl           = Url::to(['shift-schedule/calendar-events-ajax']);
-$modalUrl                   = Url::to(['/shift-schedule/add-event']);
-$formCreateSingleEventUrl   = Url::to(['/shift-schedule/add-single-event']);
-$formUpdateSingleEvent      = Url::to(['/shift-schedule/update-single-event']);
+$getEventsAjaxUrl           = Url::to(['/shift-schedule/ajax-get-events']);
+$addMultipleEventsUrl       = Url::to(['/shift-schedule/add-multiple-events']);
+$addEventUrl                = Url::to(['/shift-schedule/add-event']);
+$updateEventUrl             = Url::to(['/shift-schedule/ajax-update-event']);
 $deleteEventUrl             = Url::to(['/shift-schedule/delete-event']);
-$openModalEventUrl          = Url::to(['shift-schedule/get-event']);
-$viewLogsUrl                = Url::to(['shift-schedule/ajax-get-logs']);
-$multipleDeleteUrl          = Url::to(['shift-schedule/ajax-multiple-delete']);
+$eventDetailsUrl            = Url::to(['/shift-schedule/ajax-event-details']);
+$viewLogsUrl                = Url::to(['/shift-schedule/ajax-get-logs']);
+$multipleDeleteUrl          = Url::to(['/shift-schedule/ajax-multiple-delete']);
 $multipleUpdateUrl          = Url::to(['/shift-schedule/ajax-multiple-update']);
-$editEventUrl               = Url::to(['shift-schedule/ajax-edit-event-form']);
+$editEventUrl               = Url::to(['/shift-schedule/ajax-edit-event-form']);
 
 /** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_CREATE, Create user shift schedule event */
-$canMultipleAdd = \Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_CREATE);
-/** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_CREATE_ON_DOUBLE_CLICK, Access to create event on double click */
-$canCreateOnDoubleClick = \Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_CREATE_ON_DOUBLE_CLICK);
-/** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_PERMANENTLY_DELETE, Access to permanently delete event in calendar widget */
-$canPermanentlyDeleteEvent = \Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_PERMANENTLY_DELETE);
-/** @abac ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_MULTIPLE_PERMANENTLY_DELETE_EVENTS, Access to delete multiple events permanently */
-$canMultiplePermanentlyDeleteEvents = Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_MULTIPLE_PERMANENTLY_DELETE_EVENTS);
-/** @abac ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_MULTIPLE_UPDATE_EVENTS, Access to multiple update events */
-$canMultipleUpdate = Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_MULTIPLE_UPDATE_EVENTS);
-/** @abac ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_MULTIPLE_DELETE_EVENTS, Access to multiple delete events */
-$canMultipleDelete = Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_MULTIPLE_DELETE_EVENTS);
-/** @abac ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_MULTIPLE_DELETE_EVENTS, Access to update event */
+$canCreate = \Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_CREATE);
+/** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_DELETE, Access to delete event in calendar widget */
+$canDelete = \Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_DELETE);
+/** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_UPDATE, Access to update event */
 $canUpdate = \Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_UPDATE);
-/** @abac ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_MULTIPLE_DELETE_EVENTS, Access to view event logs event */
-$canViewLogs = \Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_VIEW_EVENT_LOG);
-/** @abac ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_MULTIPLE_DELETE_EVENTS, Access to delete event event */
-$canDeleteEvent = \Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_DELETE);
-
+/** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_VIEW_EVENT_LOG, Access to view event logs event */
+$canViewLogs = \Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_VIEW_EVENT_LOG);
+/** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_SOFT_DELETE, Access to soft delete event event */
+$canSoftDelete = \Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_SOFT_DELETE);
 
 $js = <<<JS
 $(document).ready( function () {
     var App = window.App;
     var multipleModule = new App.MultipleManageModule(
-        Boolean('$canMultipleAdd'), 
-        Boolean('$canMultipleDelete'), 
-        Boolean('$canMultipleDelete'), 
-        Boolean('$canMultiplePermanentlyDeleteEvents'), 
-        '$modalUrl',
+        Boolean('$canCreate'), 
+        Boolean('$canUpdate'), 
+        Boolean('$canSoftDelete'), 
+        Boolean('$canDelete'), 
+        '$addMultipleEventsUrl',
         '$multipleUpdateUrl',
         '$multipleDeleteUrl'
     );
@@ -93,9 +85,9 @@ $(document).ready( function () {
     var tooltip = new App.TimelineTooltip(
         Boolean('$canUpdate'), 
         Boolean('$canViewLogs'), 
-        Boolean('$canDeleteEvent'),
-        Boolean('$canPermanentlyDeleteEvent'),
-        '$openModalEventUrl',
+        Boolean('$canSoftDelete'),
+        Boolean('$canDelete'),
+        '$eventDetailsUrl',
         '$viewLogsUrl',
         '$editEventUrl',
         '$deleteEventUrl'
@@ -107,15 +99,15 @@ $(document).ready( function () {
         formFilter,
         multipleModule,
         '$getEventsAjaxUrl',
-        '$formCreateSingleEventUrl',
-        '$formUpdateSingleEvent',
+        '$addEventUrl',
+        '$updateEventUrl',
         tooltip,
         '$today'
     );
     window._timeline.init({
         userTimeZone: '$userTimeZone',
-        canCreate: Boolean('$canCreateOnDoubleClick'),
-        dragToCreate: Boolean('$canCreateOnDoubleClick'),
+        canCreate: Boolean('$canCreate'),
+        dragToCreate: Boolean('$canCreate'),
         canUpdate: Boolean('$canUpdate'),
         dragToResize: Boolean('$canUpdate'),
         tooltipElementSelectorId: 'calendar-tooltip-wrapper',
