@@ -14,6 +14,7 @@ use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 
 /**
@@ -136,6 +137,9 @@ class ClientProjectController extends FController
     {
         $data = Yii::$app->request->get();
         $leadId = !empty($data['leadID']) ? $data['leadID'] : null;
+        if (empty($data['clientID']) || empty($data['projectID']) || !isset($data['action'])) {
+            throw new BadRequestHttpException('The parameters clientID, projectID, action are required ');
+        }
         $leadAbacDto = new LeadAbacDto(Lead::findOne($leadId), Auth::id());
 
         /** @abac $leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS, Access to action client unsubscribe*/
@@ -151,7 +155,11 @@ class ClientProjectController extends FController
     public function actionSubscribeClientAjax(): Response
     {
         $data = Yii::$app->request->get();
-        $leadAbacDto = new LeadAbacDto(Lead::findOne($data['leadID']), Auth::id());
+        $leadId = !empty($data['leadID']) ? $data['leadID'] : null;
+        if (empty($data['clientID']) || empty($data['projectID']) || !isset($data['action'])) {
+            throw new BadRequestHttpException('The parameters clientID, projectID, action are required ');
+        }
+        $leadAbacDto = new LeadAbacDto(Lead::findOne($leadId), Auth::id());
 
         /** @abac $leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_SUBSCRIBE, Access to action client subscribe*/
         if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_SUBSCRIBE)) {
