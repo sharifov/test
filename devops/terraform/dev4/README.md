@@ -44,3 +44,11 @@ terraform plan
 ```
 terraform apply
 ```
+
+##### 6. Generate keys for s3 bucket
+
+```
+aws iam create-access-key \
+    --user-name attachments-crm-dev4 \
+    --profile aws-dev4-infra
+```
