@@ -1205,6 +1205,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'Route', 'url' => ['/rbac/route']],
                 ['label' => 'Permission', 'url' => ['/rbac/permission']],
                 ['label' => 'Role', 'url' => ['/rbac/role']],
+                ['label' => 'RBAC Role Management', 'url' => ['/rbac-role-management/index/']],
                 ['label' => 'Import / Export', 'url' => ['/rbac-import-export/log']],
             ],
         ];
