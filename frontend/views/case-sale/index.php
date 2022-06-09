@@ -34,7 +34,10 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
 
-            'css_cs_id',
+            [
+                'attribute' => 'css_cs_id',
+                'enableSorting' => false,
+            ],
             'css_sale_id',
             'css_sale_book_id',
             'css_sale_pnr',
