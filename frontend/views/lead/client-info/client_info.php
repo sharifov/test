@@ -116,9 +116,9 @@ $formId = sprintf('%s-form', $leadForm->getClient()->formName());
                                     'id' => 'client-unsubscribe-button',
                                     'title' => 'Restrict communication with client',
                                     'data-unsubscribe-url' => Url::to(['client-project/unsubscribe-client-ajax',
-                                        'clientID' => $lead->client_id,
-                                        'projectID' => $lead->project_id,
-                                        'leadID' => $lead->id,
+                                        'clientId' => $lead->client_id,
+                                        'projectId' => $lead->project_id,
+                                        'leadId' => $lead->id,
                                         'action' => true
                                     ]),
                                 ])?>
