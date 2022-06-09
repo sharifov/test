@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\models\Employee;
 use src\helpers\app\AppHelper;
 use src\rbac\form\RbacRoleManagementForm;
 use src\rbac\services\RbacQueryService;
@@ -45,7 +46,7 @@ class RbacRoleManagementController extends FController
                         [
                             'allow'   => true,
                             'actions' => ['index', 'clone', 'merge', 'exclude'],
-                            'roles'   => ['admin' , 'superadmin'],
+                            'roles'   => [Employee::ROLE_ADMIN ,Employee::ROLE_SUPER_ADMIN],
                         ],
                     ],
                 ]
