@@ -274,13 +274,6 @@ class SiteController extends FController
         }
 
         $secureCode = md5(Yii::$app->user->id . '|' . Yii::$app->user->identity->username . '|' . date('Y-m-d'));
-
-
-        //$host = (Yii::$app->request->isSecureConnection ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
-
-        //$url = \yii\helpers\Url::to(['site/telegram-activate', 'id' => Yii::$app->user->id, 'code' => $secureCode]);
-
-        //echo $host.$url; exit;
         $code = base64_encode(Yii::$app->user->id . '|' . $secureCode);
 
 
@@ -298,37 +291,9 @@ class SiteController extends FController
             $qrCodeData = null;
         }
 
-
-
-
         $expMonth = $modelUserParams->upUser->userProfile->getExperienceMonth();
         $userCommissionRulesValue = UserCommissionRules::find()->getCommissionValueByExpMonth($expMonth);
         $userBonusRulesValue = UserBonusRules::find()->getBonusValueByExpMonth($expMonth);
-
-
-        /*$qrCode = (new QrCode('https://2amigos.us'))
-            ->useLogo(__DIR__ . '/data/logo.png')
-            ->useForegroundColor(51, 153, 255)
-            ->useBackgroundColor(200, 220, 210)
-            ->useEncoding('UTF-8')
-            ->setErrorCorrectionLevel(ErrorCorrectionLevelInterface::HIGH)
-            ->setLogoWidth(60)
-            ->setSize(300)
-            ->setMargin(5)
-            ->setLabel($label);*/
-
-        //$qrCode->writeFile(__DIR__ . '/codes/my-code.png');
-
-        // now we can display the qrcode in many ways
-        // saving the result to a file:
-
-        //$qrCode->writeFile(__DIR__ . '/code.png'); // writer defaults to PNG when none is specified
-
-        // display directly to the browser
-        //header('Content-Type: '.$qrCode->getContentType());
-        //echo $qrCode->writeString();
-        //echo $qrCode->writeDataUri();
-        //exit;
 
         $sourcesDataProvider = new ActiveDataProvider();
         if (SettingHelper::isEnabledAuthClients()) {
