@@ -16,13 +16,13 @@ CRM: Terraform
 
 ##### 1. Configure AWS access profile
 ```
-aws configure --profile aws-dev-infra
+aws configure --profile aws-stage-infra
 ```
 
 ##### 2. Decrypt terraform variable file with sops
 
 ````
-export SOPS_AGE_KEY_FILE="$HOME/.sops/aws-dev-age"
+export SOPS_AGE_KEY_FILE="$HOME/.sops/aws-stage-age"
 export SOPS_AGE_RECIPIENTS="age13svya8dz2uwhw4j8qy93hvyc3q7u03y2xqj5fgda7uc89gmsvcqqh62nf0"
 sops -d enc.variables > variables.tf
 ```
@@ -49,6 +49,7 @@ terraform apply
 
 ```
 aws iam create-access-key \
-    --user-name attachments-crm-dev1 \
-    --profile aws-dev1-infra
+    --user-name attachments-crm-stage \
+    --profile aws-stage-infra
 ```
+
