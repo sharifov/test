@@ -9,17 +9,17 @@ use yii\base\Model;
 /**
  * This is the model Form class for table "client_project".
  *
- * @property int|null $leadID
- * @property int $clientID
+ * @property int|null $leadId
+ * @property int $clientId
  * @property int $projectID
  * @property bool $action
  *
  */
 class ClientProjectForm extends Model
 {
-    public $leadID;
-    public $clientID;
-    public $projectID;
+    public $leadId;
+    public $clientId;
+    public $projectId;
     public $action;
 
     /**
@@ -28,10 +28,10 @@ class ClientProjectForm extends Model
     public function rules()
     {
         return [
-            [['clientID', 'projectID', 'action'], 'required'],
-            [['leadID', 'clientID', 'projectID'], 'integer'],
-            [['projectID'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['projectID' => 'id']],
-            [['clientID'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['clientID' => 'id']],
+            [['clientId', 'projectId', 'action'], 'required'],
+            [['leadId', 'clientId', 'projectId'], 'integer'],
+            [['projectId'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['projectId' => 'id']],
+            [['clientId'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['clientId' => 'id']],
             [['action'], 'boolean'],
         ];
     }
