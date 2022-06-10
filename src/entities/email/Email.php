@@ -14,6 +14,8 @@ use src\behaviors\metric\MetricEmailCounterBehavior;
 use yii\db\ActiveRecord;
 use src\auth\Auth;
 use common\models\Email as EmailOld;
+use common\models\EmailTemplateType;
+use common\models\Language;
 
 /**
  * This is the model class for table "email_norm".
@@ -40,37 +42,11 @@ use common\models\Email as EmailOld;
  * @property Client[] $clients
  * @property Lead[] $leads
  * @property EmailContact[] $emailContacts
+ * @property EmailAddress $emailFrom
+ * @property EmailAddress $emailTo
  */
 class Email extends ActiveRecord
 {
-    public const TYPE_DRAFT     = 0;
-    public const TYPE_OUTBOX    = 1;
-    public const TYPE_INBOX     = 2;
-
-    public const TYPE_LIST = [
-        self::TYPE_DRAFT    => 'Draft',
-        self::TYPE_OUTBOX   => 'Outbox',
-        self::TYPE_INBOX    => 'Inbox',
-    ];
-
-    public const STATUS_NEW     = 1;
-    public const STATUS_PENDING = 2;
-    public const STATUS_PROCESS = 3;
-    public const STATUS_CANCEL  = 4;
-    public const STATUS_DONE    = 5;
-    public const STATUS_ERROR   = 6;
-    public const STATUS_REVIEW  = 7;
-
-    public const STATUS_LIST = [
-        self::STATUS_NEW        => 'New',
-        self::STATUS_PENDING    => 'Pending',
-        self::STATUS_PROCESS    => 'Process',
-        self::STATUS_CANCEL     => 'Cancel',
-        self::STATUS_DONE       => 'Done',
-        self::STATUS_ERROR      => 'Error',
-        self::STATUS_REVIEW     => 'Review'
-    ];
-
     public function rules(): array
     {
         return [
@@ -120,6 +96,16 @@ class Email extends ActiveRecord
         return $this->hasOne(EmailParams::class, ['ep_id' => 'e_params_id']);
     }
 
+    public function getLanguage(): \yii\db\ActiveQuery
+    {
+        return $this->hasOne(Language::class, ['language_id' => 'ep_language_id'])->viaTable('email_params', ['ep_id' => 'e_params_id']);
+    }
+
+    public function getTemplateType(): \yii\db\ActiveQuery
+    {
+        return $this->hasOne(EmailTemplateType::class, ['etp_id' => 'ep_template_type_id'])->viaTable('email_params', ['ep_id' => 'e_params_id']);
+    }
+
     public function getEmailBody(): \yii\db\ActiveQuery
     {
         return $this->hasOne(EmailBody::class, ['embd_id' => 'e_body_id']);
@@ -143,6 +129,30 @@ class Email extends ActiveRecord
     public function getEmailLog(): \yii\db\ActiveQuery
     {
         return $this->hasOne(EmailLog::class, ['el_email_id' => 'e_id']);
+    }
+
+    public function getEmailFrom(): \yii\db\ActiveQuery
+    {
+        return $this->hasOne(EmailAddress::class, ['ea_id' => 'ec_address_id'])
+            ->viaTable(
+                'email_contact',
+                ['ec_email_id' => 'e_id'],
+                function($query) {
+                    $query->onCondition(['ec_type_id' => EmailContact::TYPE_FROM]);
+                }
+            );
+    }
+
+    public function getEmailTo(): \yii\db\ActiveQuery
+    {
+        return $this->hasOne(EmailAddress::class, ['ea_id' => 'ec_address_id'])
+        ->viaTable(
+            'email_contact',
+            ['ec_email_id' => 'e_id'],
+            function($query) {
+                $query->onCondition(['ec_type_id' => EmailContact::TYPE_TO]);
+            }
+            );
     }
 
     public function attributeLabels(): array
@@ -204,6 +214,14 @@ class Email extends ActiveRecord
         return $message;
     }
 
+    public static function findOrNew(array $criteria = [], array $values = [])
+    {
+        $model = self::find()->where($criteria)->limit(1)->one() ?? new self($criteria);
+        $model->load($values, '');
+
+        return $model;
+    }
+
     /**
      * @return static
      */
@@ -218,7 +236,8 @@ class Email extends ActiveRecord
 
     public static function createFromEmailObject(EmailOld $emailOld)
     {
-        $email = self::create();
+        $email = self::findOrNew(['e_id' => $emailOld->e_id]);
+
         $email->e_id = $emailOld->e_id;
         $email->e_type_id = $emailOld->e_type_id;
         $email->e_status_id = $emailOld->e_status_id;
