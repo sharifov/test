@@ -15,18 +15,25 @@ use src\entities\cases\Cases;
 use common\models\Lead;
 use src\entities\email\EmailLog;
 
+/**
+ *
+ * Class EmailsNormalizeService
+ *
+ * @property Email $email
+ * @property EmailLog $emailLog
+ * @property EmailParams $emailParams
+ * @property EmailBody $emailBody
+ * @property EmailBlob $emailBlob
+ * @property EmailContact[] $emailContacts
+ * @property bool $isNew
+ *
+ */
 class EmailsNormalizeService
 {
+    public $isNew;
     public $emailBody;
     public $emailBlob;
     public $emailContacts;
-    public $emailCases;
-    public $emailLeads;
-    public $emailClients;
-    /**
-     *
-     * @var Email
-     */
     public $email;
     public $emailLog;
     public $emailParams;
@@ -34,10 +41,10 @@ class EmailsNormalizeService
     public function createEmailFromOld(EmailOld $emailOld)
     {
         $this->email = Email::createFromEmailObject($emailOld);
+        $this->isNew = $this->email->isNewRecord;
         $this->email->save();
 
         if ($this->email) {
-            echo 'Email created<br/>';
             $this
                 ->fillEmailParams($emailOld->e_priority, $emailOld->e_template_type_id, $emailOld->e_language_id)
                 ->fillEmailBody($emailOld->e_email_subject, $emailOld->e_email_body_text, $emailOld->e_email_data)
@@ -60,9 +67,9 @@ class EmailsNormalizeService
                     $emailOld->e_inbox_created_dt,
                     $emailOld->e_inbox_email_id
                 )
-                /* ->linkClient($emailOld->e_client_id)
+                ->linkClient($emailOld->e_client_id)
                 ->linkCase($emailOld->e_case_id)
-                ->linkLead($emailOld->e_lead_id) */
+                ->linkLead($emailOld->e_lead_id)
             ;
         }
 
@@ -77,7 +84,7 @@ class EmailsNormalizeService
             'ep_priority' => $priority,
         ];
 
-        $this->emailParams = new EmailParams();
+        $this->emailParams = $this->email->params ?? new EmailParams();
         $this->emailParams->attributes = $attributes;
         $this->emailParams->save();
 
@@ -87,8 +94,8 @@ class EmailsNormalizeService
     }
 
     public function fillEmailLog(
-        int $communicationId,
-        string $messageId,
+        ?int $communicationId,
+        ?string $messageId,
         ?string $errorMessage,
         ?string $statusDoneDt,
         ?string $readDt,
@@ -107,7 +114,7 @@ class EmailsNormalizeService
             'el_communication_id' => $communicationId,
         ];
 
-        $this->emailLog = new EmailLog();
+        $this->emailLog = $this->email->emailLog ?? new EmailLog();
         $this->emailLog->attributes = $attributes;
         $this->emailLog->save();
 
@@ -125,7 +132,7 @@ class EmailsNormalizeService
             'embd_hash' => hash('crc32b', join(' | ', [$subject, $body])),
         ];
 
-        $this->emailBody = new EmailBody();
+        $this->emailBody = $this->email->emailBody ?? new EmailBody();
         $this->emailBody->attributes = $attributes;
         $this->emailBody->save();
 
@@ -146,14 +153,13 @@ class EmailsNormalizeService
     }
 
     //call after fill Email
-
-
     public function linkClient(?int $clientId)
     {
         if ($clientId !== null) {
             $client = Client::findOne(['id' => $clientId]);
             if ($client) {
                 $this->email->link('clients', $client);
+                echo 'clients id: '.$clientId.' to email : '.$this->email->e_id.'<br/>';
             }
         }
         return $this;
@@ -163,8 +169,9 @@ class EmailsNormalizeService
     {
         if ($caseId !== null) {
             $case = Cases::findOne(['cs_id' => $caseId]);
-            if ($caseId) {
-                $this->email->link('cases', $caseId);
+            if ($case) {
+                $this->email->link('cases', $case);
+                echo 'Cases id: '.$caseId.' to email : '.$this->email->e_id.'<br/>';
             }
         }
         return $this;
@@ -174,8 +181,9 @@ class EmailsNormalizeService
     {
         if ($leadId !== null) {
             $lead = Lead::findOne(['id' => $leadId]);
-            if ($leadId) {
-                $this->email->link('leads', $leadId);
+            if ($lead) {
+                $this->email->link('leads', $lead);
+                echo 'Lead id: '.$leadId.' to email : '.$this->email->e_id.'<br/>';
             }
         }
         return $this;
