@@ -344,4 +344,9 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
         $this->uss_duration = $duration;
         $this->uss_description = $description;
     }
+
+    public function setNewOwner(int $id): void
+    {
+        $this->uss_user_id = $id;
+    }
 }

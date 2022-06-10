@@ -292,8 +292,7 @@
     function createEvent(event) {
         let userId = event.resource;
         let eventStartDate = new Date(event.start);
-        let [year, month, day, hour, minute] = [eventStartDate.getFullYear(), eventStartDate.getMonth()+1, eventStartDate.getDate(), eventStartDate.getHours(), eventStartDate.getMinutes(), eventStartDate];
-        let startDate = year + '-' + month + '-' + day + ' ' + hour + ':' + minute;
+        let startDate = getDateTimeFormatted(eventStartDate);
         let modal = $('#modal-md');
         modal.find('.modal-title').html('Add event for user');
         modal.on('hide.bs.modal', function (e) {
@@ -345,19 +344,17 @@
                     oldUserId = oldEvent.resource;
 
                     let eventStartDate = new Date(event.start);
-                    let [year, month, day, hour, minute] = [eventStartDate.getFullYear(), eventStartDate.getMonth()+1, eventStartDate.getDate(), eventStartDate.getHours(), eventStartDate.getMinutes(), eventStartDate];
-                    let startDate = year + '-' + month + '-' + day + ' ' + hour + ':' + minute;
+                    let startDate = getDateTimeFormatted(eventStartDate);
 
                     let eventEndDate = new Date(event.end);
-                    let [yearEnd, monthEnd, dayEnd, hourEnd, minuteEnd] = [eventEndDate.getFullYear(), eventEndDate.getMonth()+1, eventEndDate.getDate(), eventEndDate.getHours(), eventEndDate.getMinutes(), eventEndDate];
-                    let endDate = yearEnd + '-' + monthEnd + '-' + dayEnd + ' ' + hourEnd + ':' + minuteEnd;
+                    let endDate = getDateTimeFormatted(eventEndDate);
 
                     let data = {
                         eventId: args.event.id,
                         newUserId: currentUserId,
                         oldUserId: oldUserId,
-                        startDate: startDate,
-                        endDate: endDate
+                        dateTimeStart: startDate,
+                        dateTimeEnd: endDate
                     };
 
                     $.post(this.updateEventUrl, data, function (data) {
@@ -375,6 +372,16 @@
                 }
             }.bind(this)
         });
+    }
+
+    function getDateTimeFormatted(dateTime)
+    {
+        let [year, month, day] = [dateTime.getFullYear(), dateTime.getMonth()+1, dateTime.getDate()];
+        let hour = dateTime.getHours();
+        hour = (hour < 10 ? '0' : '') + hour;
+        let minute = dateTime.getMinutes();
+        minute = (minute < 10 ? '0' : '') + minute;
+        return year + '-' + month + '-' + day + ' ' + hour + ':' + minute;
     }
 
     App.ShiftTimeline = ShiftTimeline;

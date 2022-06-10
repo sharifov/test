@@ -124,14 +124,14 @@ class ShiftScheduleController extends FController
         $maxDate = date('Y-m-d H:i:s', mktime(0, 0, 0, date("m") + 2, 1, date("Y")));
 
 
-        $data = UserShiftScheduleService::getUserShiftScheduleDataStats(
+        $data = UserShiftScheduleQuery::getUserShiftScheduleDataStats(
             $user->id,
             $minDate,
             $maxDate,
             [UserShiftSchedule::STATUS_APPROVED, UserShiftSchedule::STATUS_DONE]
         );
 
-        $labelData = UserShiftScheduleService::getUserShiftScheduleLabelDataStats(
+        $labelData = UserShiftScheduleQuery::getUserShiftScheduleLabelDataStats(
             $user->id,
             $minDate,
             $maxDate,
@@ -242,14 +242,14 @@ class ShiftScheduleController extends FController
         $maxDate = date('Y-m-d H:i:s', mktime(0, 0, 0, date("m") + 2, 1, date("Y")));
 
 
-        $data = UserShiftScheduleService::getUserShiftScheduleDataStats(
+        $data = UserShiftScheduleQuery::getUserShiftScheduleDataStats(
             $user->id,
             $minDate,
             $maxDate,
             [UserShiftSchedule::STATUS_APPROVED, UserShiftSchedule::STATUS_DONE]
         );
 
-        $labelData = UserShiftScheduleService::getUserShiftScheduleLabelDataStats(
+        $labelData = UserShiftScheduleQuery::getUserShiftScheduleLabelDataStats(
             $user->id,
             $minDate,
             $maxDate,
@@ -346,9 +346,9 @@ class ShiftScheduleController extends FController
         $startDt = Yii::$app->request->get('start', date('Y-m-d'));
         $endDt = Yii::$app->request->get('end', date('Y-m-d'));
 
-        $timelineList = UserShiftScheduleService::getTimelineListByUser($userId, $startDt, $endDt);
+        $timelineList = UserShiftScheduleQuery::getTimelineListByUser($userId, $startDt, $endDt);
         $userTimeZone = Auth::user()->timezone ?: 'UTC';
-        return UserShiftScheduleService::getCalendarTimelineJsonData($timelineList, $userTimeZone);
+        return UserShiftScheduleQuery::getCalendarTimelineJsonData($timelineList, $userTimeZone);
     }
 
     /**
@@ -411,7 +411,7 @@ class ShiftScheduleController extends FController
             $route = ['shift-schedule/index'];
         }
 
-        if (UserShiftScheduleService::removeDataByUser($userId)) {
+        if (UserShiftScheduleQuery::removeDataByUser($userId)) {
             Yii::$app->session->addFlash('success', 'Successfully: Remove example data UserId (' . $userId . ')!');
         }
         return $this->redirect($route);
@@ -545,7 +545,7 @@ class ShiftScheduleController extends FController
 
             [$resourceList, $firstLevelResources] = UserShiftScheduleHelper::prepareResourcesForTimelineCalendar($userGroups, $timelineCalendarFilter->usersIds);
 
-            $timelineList = UserShiftScheduleQuery::getTimelineListByUser($timelineCalendarFilter);
+            $timelineList = UserShiftScheduleQuery::getCalendarTimelineListByUser($timelineCalendarFilter);
             $data['data'] = UserShiftScheduleHelper::getCalendarEventsData($timelineList);
             $data['resources'] = $resourceList;
             $data['firstLevelResources'] = $firstLevelResources;
@@ -684,47 +684,6 @@ class ShiftScheduleController extends FController
             'error' => false,
             'message' => 'Event deleted successfully',
             'timelineData' => json_encode($userShiftScheduleData)
-        ]);
-    }
-
-    public function actionAjaxUpdateEvent()
-    {
-        /** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_UPDATE, Access to update event */
-        if (!Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_UPDATE)) {
-            throw new ForbiddenHttpException('Access Denied');
-        }
-
-        $data = Yii::$app->request->post();
-
-        $event = UserShiftSchedule::findOne((int)$data['eventId']);
-        if (!$event) {
-            return $this->asJson([
-                'error' => true,
-                'message' => 'Event not found: by id: ' . $data['eventId']
-            ]);
-        }
-
-        $timezone = Auth::user()->timezone ?: null;
-
-        $startDateTime = new \DateTimeImmutable($data['startDate'], $timezone ? new \DateTimeZone($timezone) : null);
-        $startDateTime = $startDateTime->setTimezone(new \DateTimeZone('UTC'));
-        $endDateTime = new \DateTimeImmutable($data['endDate'], $timezone ? new \DateTimeZone($timezone) : null);
-        $endDateTime = $endDateTime->setTimezone(new \DateTimeZone('UTC'));
-        $interval = $startDateTime->diff($endDateTime);
-        $diffMinutes = $interval->days * 24 * 60 + $interval->i + ($interval->h * 60);
-
-        $event->uss_start_utc_dt = $startDateTime->format('Y-m-d H:i:s');
-        $event->uss_end_utc_dt = $endDateTime->format('Y-m-d H:i:s');
-        $event->uss_duration = $diffMinutes;
-        if ($data['newUserId'] !== $data['oldUserId']) {
-            $event->uss_user_id = $data['newUserId'];
-        }
-
-        $event->save();
-
-        return $this->asJson([
-            'error' => false,
-            'message' => ''
         ]);
     }
 
@@ -999,7 +958,7 @@ class ShiftScheduleController extends FController
 
     public function actionAjaxEditEventForm(): string
     {
-        /** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_VIEW_EVENT_LOG, Access to view event logs */
+        /** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_UPDATE, Access to update event */
         if (!Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_UPDATE)) {
             throw new ForbiddenHttpException('Access denied');
         }
@@ -1029,6 +988,47 @@ class ShiftScheduleController extends FController
         }
         return $this->renderAjax('partial/_edit_event_form', [
             'model' => $form,
+        ]);
+    }
+
+    public function actionAjaxUpdateEvent()
+    {
+        /** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_UPDATE, Access to update event */
+        if (!Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_UPDATE)) {
+            throw new ForbiddenHttpException('Access Denied');
+        }
+
+        $data = Yii::$app->request->post();
+
+        $form = new ShiftScheduleEditForm();
+        $form->setScenario(ShiftScheduleEditForm::SCENARIO_EDIT_DRAG_N_DROP);
+
+        $eventId = $data['eventId'] ?? 0;
+        $event = UserShiftSchedule::findOne($eventId);
+        if (!$event) {
+            return $this->asJson([
+                'error' => true,
+                'message' => 'Event not found: by id: ' . $eventId
+            ]);
+        }
+
+        $timezone = Auth::user()->timezone ?: null;
+
+        $form->fillInByEvent($event, $timezone);
+        if ($form->load($data) && $form->validate()) {
+            $this->shiftScheduleService->edit($form, $event, $timezone);
+
+            if (!$form->hasErrors()) {
+                return $this->asJson([
+                    'error' => false,
+                    'message' => ''
+                ]);
+            }
+        }
+
+        return $this->asJson([
+            'error' => true,
+            'message' => $form->getErrorSummary(true)[0]
         ]);
     }
 }
