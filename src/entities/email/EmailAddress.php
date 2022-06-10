@@ -3,6 +3,7 @@
 namespace src\entities\email;
 
 use Yii;
+use src\helpers\email\MaskEmailHelper;
 
 /**
  * This is the model class for table "email_address".
@@ -29,6 +30,16 @@ class EmailAddress extends \yii\db\ActiveRecord
     public function getEmailContacts(): \yii\db\ActiveQuery
     {
         return $this->hasMany(EmailContact::class, ['ec_address_id' => 'ea_id']);
+    }
+
+    public function getEmail($masking = false)
+    {
+        return $masking ? MaskEmailHelper::masking($this->ea_email): $this->ea_email;
+    }
+
+    public function getName()
+    {
+        return $this->ea_name;
     }
 
     public function attributeLabels(): array
