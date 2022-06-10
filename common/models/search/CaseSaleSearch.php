@@ -63,7 +63,7 @@ class CaseSaleSearch extends CaseSale
         $dataProvider = new BigActiveDataProvider([
             'query' => $query,
             'pagination' => [
-                'pageSize' => 5,
+                'pageSize' => 20,
             ],
         ]);
         $dataProvider->setSort([
