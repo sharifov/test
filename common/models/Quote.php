@@ -3021,13 +3021,4 @@ class Quote extends \yii\db\ActiveRecord
         }
         return $airlineLogo;
     }
-
-    public static function getAmountQuoteByLeadIdAndStatusesAndCreateTypes(int $leadId, array $statuses, array $createdTypes): int
-    {
-        return (int)Quote::find()
-            ->andWhere(['lead_id' => $leadId])
-            ->andWhere(['status' => $statuses])
-            ->andWhere(['q_create_type_id' => $createdTypes])
-            ->count();
-    }
 }

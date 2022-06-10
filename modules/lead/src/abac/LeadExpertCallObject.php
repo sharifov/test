@@ -12,19 +12,19 @@ class LeadExpertCallObject extends AbacBaseModel implements AbacInterface
     public const NS = 'lead/expert_call/';
 
     /** ACTION PERMISSION */
-    public const ACT_NEW_CALL = self::NS . 'act/new_call';
+    public const ACT_CALL = self::NS . 'act/new_call';
 
     /** --------------- ACTIONS --------------------------- */
     public const ACTION_ACCESS = 'access';
 
     /** --------------- OBJECT LIST --------------------------- */
     public const OBJECT_LIST = [
-        self::ACT_NEW_CALL => self::ACT_NEW_CALL,
+        self::ACT_CALL => self::ACT_CALL,
     ];
 
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
-        self::ACT_NEW_CALL => [self::ACTION_ACCESS],
+        self::ACT_CALL => [self::ACTION_ACCESS],
     ];
 
     public const ATTR_LEAD_STATUS = [
@@ -135,7 +135,7 @@ class LeadExpertCallObject extends AbacBaseModel implements AbacInterface
 
     /** --------------- ATTRIBUTE LIST --------------------------- */
     public const OBJECT_ATTRIBUTE_LIST = [
-        self::ACT_NEW_CALL   => [
+        self::ACT_CALL   => [
             self::ATTR_HAS_FLIGHT_SEGMENT,
             self::ATTR_QUOTE_COUNT,
             self::ATTR_CALL_COUNT,
@@ -164,7 +164,7 @@ class LeadExpertCallObject extends AbacBaseModel implements AbacInterface
         $attrStatus['values'] = $leadStatuses;
 
         $attributeList = self::OBJECT_ATTRIBUTE_LIST;
-        $attributeList[self::ACT_NEW_CALL][] = $attrStatus;
+        $attributeList[self::ACT_CALL][] = $attrStatus;
 
         return $attributeList;
     }
