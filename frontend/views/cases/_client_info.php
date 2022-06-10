@@ -46,9 +46,9 @@ use src\helpers\phone\MaskPhoneHelper;
                         <?php if (Auth::can('client-project/subscribe-client-ajax')) : ?>
                             <li>
                                 <?=Html::a('<i class="far fa-bell-slash info"></i> Subscribe', '#', [
-                                    'id' => 'client-unsubscribe-button',
+                                    'id' => 'client-subscribe-button',
                                     'title' => 'Allow communication with client',
-                                    'data-unsubscribe-url' => Url::to(['client-project/subscribe-client-ajax',
+                                    'data-subscribe-url' => Url::to(['client-project/subscribe-client-ajax',
                                         'clientId' => $caseModel->cs_client_id,
                                         'projectId' => $caseModel->cs_project_id,
                                         'action' => false

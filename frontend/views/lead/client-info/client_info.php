@@ -97,9 +97,9 @@ $formId = sprintf('%s-form', $leadForm->getClient()->formName());
                         <?php if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_SUBSCRIBE)) : ?>
                             <li>
                                 <?=Html::a('<i class="far fa-bell-slash info"></i> Subscribe', '#', [
-                                    'id' => 'client-unsubscribe-button',
+                                    'id' => 'client-subscribe-button',
                                     'title' => 'Allow communication with client',
-                                    'data-unsubscribe-url' => Url::to(['client-project/subscribe-client-ajax',
+                                    'data-subscribe-url' => Url::to(['client-project/subscribe-client-ajax',
                                         'clientId' => $lead->client_id,
                                         'projectId' => $lead->project_id,
                                         'leadId' => $lead->id,
