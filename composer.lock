@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a70c540e631b305362f57240f92d230a",
+    "content-hash": "191bd74723724cdb8d5ebc8161add850",
     "packages": [
         {
             "name": "2amigos/yii2-arrayquery-component",
@@ -1084,26 +1084,27 @@
         },
         {
             "name": "casbin/casbin",
-            "version": "v3.7.0",
+            "version": "v3.20.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-casbin/php-casbin.git",
-                "reference": "a3d99663905d8211b9e4510578ed6c5800efb29b"
+                "reference": "509d5833634901d3fc9b186c5b922a04b2b360b0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-casbin/php-casbin/zipball/a3d99663905d8211b9e4510578ed6c5800efb29b",
-                "reference": "a3d99663905d8211b9e4510578ed6c5800efb29b",
+                "url": "https://api.github.com/repos/php-casbin/php-casbin/zipball/509d5833634901d3fc9b186c5b922a04b2b360b0",
+                "reference": "509d5833634901d3fc9b186c5b922a04b2b360b0",
                 "shasum": ""
             },
             "require": {
                 "php": ">=7.1.0",
                 "s1lentium/iptools": "^1.1",
-                "symfony/expression-language": "^3.4|^4.0|^5.0"
+                "symfony/expression-language": "^3.4|^4.0|^5.0|^6.0"
             },
             "require-dev": {
+                "mockery/mockery": "^1.2",
                 "php-coveralls/php-coveralls": "^2.1",
-                "phpstan/phpstan": "^0.12",
+                "phpstan/phpstan": "^1.2",
                 "phpunit/phpunit": "~7.0|~8.0|~9.0"
             },
             "type": "library",
@@ -1134,7 +1135,7 @@
             ],
             "support": {
                 "issues": "https://github.com/php-casbin/php-casbin/issues",
-                "source": "https://github.com/php-casbin/php-casbin/tree/v3.7.0"
+                "source": "https://github.com/php-casbin/php-casbin/tree/v3.20.3"
             },
             "funding": [
                 {
@@ -1142,7 +1143,7 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2021-08-09T11:57:38+00:00"
+            "time": "2022-02-17T07:57:54+00:00"
         },
         {
             "name": "cebe/markdown",
@@ -11336,21 +11337,21 @@
         },
         {
             "name": "codeception/verify",
-            "version": "2.1.1",
+            "version": "2.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Codeception/Verify.git",
-                "reference": "1cdac1867c33801ae8e4833015153766ef403c92"
+                "reference": "5fc4c9675c82e11e0f04801da00a99b2493d5408"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Codeception/Verify/zipball/1cdac1867c33801ae8e4833015153766ef403c92",
-                "reference": "1cdac1867c33801ae8e4833015153766ef403c92",
+                "url": "https://api.github.com/repos/Codeception/Verify/zipball/5fc4c9675c82e11e0f04801da00a99b2493d5408",
+                "reference": "5fc4c9675c82e11e0f04801da00a99b2493d5408",
                 "shasum": ""
             },
             "require": {
                 "ext-dom": "*",
-                "php": "^7.3 || ^8.0",
+                "php": "^7.4 || ^8.0",
                 "phpunit/phpunit": "^9.3"
             },
             "type": "library",
@@ -11379,9 +11380,9 @@
             "description": "BDD assertion library for PHPUnit",
             "support": {
                 "issues": "https://github.com/Codeception/Verify/issues",
-                "source": "https://github.com/Codeception/Verify/tree/2.1.1"
+                "source": "https://github.com/Codeception/Verify/tree/2.2.0"
             },
-            "time": "2020-12-18T16:18:31+00:00"
+            "time": "2021-11-21T23:53:33+00:00"
         },
         {
             "name": "composer/package-versions-deprecated",
@@ -16258,5 +16259,5 @@
         "ext-pgsql": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.0.0"
+    "plugin-api-version": "2.3.0"
 }
