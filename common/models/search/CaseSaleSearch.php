@@ -57,7 +57,7 @@ class CaseSaleSearch extends CaseSale
      */
     public function search($params)
     {
-        $query = CaseSale::find();
+        $query = CaseSale::find()->orderBy(['css_cs_id' => SORT_DESC]);
         // add conditions that should always apply here
 
         $dataProvider = new BigActiveDataProvider([

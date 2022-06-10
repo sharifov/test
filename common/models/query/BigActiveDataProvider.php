@@ -21,8 +21,7 @@ class BigActiveDataProvider extends ActiveDataProvider
         $query = clone $this->query;
 
         if (($pagination = $this->getPagination()) !== false) {
-            $query->orderBy(['css_cs_id' => SORT_DESC])
-                ->limit((int)($pagination->getLimit() + 1));
+            $query->limit((int)($pagination->getLimit() + 1));
         }
         $res = $query->all($this->db);
         if (($pagination = $this->getPagination()) !== false) {
