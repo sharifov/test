@@ -78,9 +78,8 @@ class UserShiftScheduleLog extends \yii\db\ActiveRecord
             [['ussl_uss_id', 'ussl_created_user_id', 'ussl_month_start', 'ussl_year_start', 'ussl_action_type'], 'integer'],
             ['ussl_year_start', 'compare', 'compareValue' => date('Y'), 'operator' => '>='],
             ['ussl_month_start', 'integer', 'min' => '1', 'max' => '12'],
-            [['ussl_old_attr', 'ussl_new_attr', 'ussl_formatted_attr', 'ussl_created_dt'], 'safe'],
+            [['ussl_old_attr', 'ussl_new_attr', 'ussl_formatted_attr'], 'string', 'max' => 5000],
             [['ussl_action_type'], 'in', 'range' => array_keys(self::ACTION_TYPE_LIST)],
-
             [['ussl_created_user_id'], 'exist', 'skipOnEmpty' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['ussl_created_user_id' => 'id']],
             [['ussl_uss_id'], 'exist', 'skipOnEmpty' => true, 'targetClass' => UserShiftSchedule::class, 'targetAttribute' => ['ussl_uss_id' => 'uss_id']]
         ];
