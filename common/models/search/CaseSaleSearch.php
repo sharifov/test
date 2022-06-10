@@ -3,7 +3,7 @@
 namespace common\models\search;
 
 use common\models\Employee;
-use common\models\query\BigActiveDataProvider;
+use src\yii\data\BigActiveDataProvider;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\CaseSale;
@@ -63,7 +63,7 @@ class CaseSaleSearch extends CaseSale
         $dataProvider = new BigActiveDataProvider([
             'query' => $query,
             'pagination' => [
-                'pageSize' => 20,
+                'pageSize' => 5,
             ],
         ]);
         $dataProvider->setSort([
@@ -156,10 +156,11 @@ class CaseSaleSearch extends CaseSale
         if (count($dataProvider->models) > $limit) {
             $models = $dataProvider->models;
             array_pop($models);
-            $modelKeys = [];
+            $modelKeys = $dataProvider->prepareKeys($models);
+            /*$modelKeys = [];
             foreach ($models as $value) {
-                $modelKeys[][$tableIdColName] = $value;
-            }
+                $modelKeys[][$tableIdColName] = $value[$tableIdColName];
+            }*/
             $dataProvider->setModels($models);
             $dataProvider->setKeys($modelKeys);
 
@@ -194,11 +195,8 @@ class CaseSaleSearch extends CaseSale
         //recharge dataprovider when prev
         if ($this->cursor == 1) {
             $dataProvider->setModels($prevLimit);
-            $newModelCol = array_column($dataProvider->getModels(), $tableIdColName);
-            $modelKeys = [];
-            foreach ($newModelCol as $value) {
-                $modelKeys[][$tableIdColName] = $value;
-            }
+            $models = $dataProvider->getModels();
+            $modelKeys = $dataProvider->prepareKeys($models);
             $dataProvider->setKeys($modelKeys);
             $lastId = array_shift($modelKeys);
             $prevModels = null;
@@ -212,6 +210,7 @@ class CaseSaleSearch extends CaseSale
             $next = array_pop($next);
             $this->nextId = $next[$tableIdColName];
         }
+
         $this->reset = true;
 
         return $dataProvider;
