@@ -64,8 +64,7 @@ $user = Yii::$app->user->identity;
                     ],
                     'ranges' => \Yii::$app->params['dateRangePicker']['configs']['default']
                 ]
-            ]);
-            ?>
+            ]);?>
         </div>
 
         <div class="form-group">
