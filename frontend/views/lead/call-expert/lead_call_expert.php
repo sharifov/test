@@ -18,9 +18,8 @@ use yii\widgets\ActiveForm;
 
 $user = Yii::$app->user->identity;
 $expertCallAbacDto = (new AbacLeadExpertCallService($lead, $user))->getLeadExpertCallDto();
-
-/** @abac $expertCallAbacDto, LeadExpertCallObject::ACT_CALL, LeadExpertCallObject::ACTION_ACCESS, access new expert call */
-$abacActNewExpertCall = \Yii::$app->abac->can($expertCallAbacDto, LeadExpertCallObject::ACT_CALL, LeadExpertCallObject::ACTION_ACCESS);
+/** @abac $expertCallAbacDto, LeadExpertCallObject::ACT_NEW_CALL, LeadExpertCallObject::ACTION_ACCESS, access new expert call */
+$abacActNewExpertCall = \Yii::$app->abac->can($expertCallAbacDto, LeadExpertCallObject::ACT_NEW_CALL, LeadExpertCallObject::ACTION_ACCESS);
 ?>
 <?php yii\widgets\Pjax::begin(['id' => 'pjax-lead-call-expert', 'enablePushState' => false, 'timeout' => 10000]) ?>
 <div class="x_panel">
