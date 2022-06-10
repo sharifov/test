@@ -66,4 +66,12 @@ class EmailContact extends \yii\db\ActiveRecord
     {
         return 'email_contact';
     }
+
+    /**
+     * @return EmailContactQuery
+     */
+    public static function find(): EmailContactQuery
+    {
+        return new EmailContactQuery(get_called_class());
+    }
 }
