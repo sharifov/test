@@ -12,7 +12,7 @@ class LeadExpertCallObject extends AbacBaseModel implements AbacInterface
     public const NS = 'lead/expert_call/';
 
     /** ACTION PERMISSION */
-    public const ACT_CALL = self::NS . 'act/new_call';
+    public const ACT_CALL = self::NS . 'act/call';
 
     /** --------------- ACTIONS --------------------------- */
     public const ACTION_ACCESS = 'access';
