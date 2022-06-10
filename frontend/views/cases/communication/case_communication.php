@@ -9,6 +9,7 @@
  * @var $previewSmsForm CasePreviewSmsForm
  * @var $isCommunicationLogEnabled bool
  * @var array $unsubscribedEmails
+ * @var $unsubscribe
  * @var $disableMasking bool
  * @var AbacCallFromNumberList $callFromNumberList
  * @var AbacSmsFromNumberList $smsFromNumberList
@@ -115,7 +116,14 @@ $canShowEmailData = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_
                 </div>
 
                 <?php yii\widgets\Pjax::begin(['id' => $pjaxContainerIdForm, 'timeout' => 6000, 'enablePushState' => false]) ?>
-
+                <?php if ($unsubscribe) : ?>
+                    <div class="chat__form panel">
+                        <div class="alert alert-warning" role="alert">
+                            <h4 class="alert-heading">Warning!</h4>
+                            <p>Client communication restricted. By client request...</p>
+                        </div>
+                    </div>
+                <?php endif; ?>
                 <?php
                 $typeList = [];
                 $call_type = \common\models\UserProfile::find()->select('up_call_type_id')->where(['up_user_id' => Yii::$app->user->id])->one();

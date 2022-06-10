@@ -204,6 +204,7 @@ $unsubscribedEmails =  array_column($model->project->emailUnsubscribes, 'eu_emai
                         'comForm'       => $comForm,
                         'dataProvider'  => (bool)Yii::$app->params['settings']['new_communication_block_case'] ? $dataProviderCommunicationLog : $dataProviderCommunication,
                         'isCommunicationLogEnabled' => Yii::$app->params['settings']['new_communication_block_case'],
+                        'unsubscribe' => $unsubscribe,
                         'unsubscribedEmails' => $unsubscribedEmails,
                         'disableMasking' => $disableMasking,
                         'callFromNumberList' => $callFromNumberList,
