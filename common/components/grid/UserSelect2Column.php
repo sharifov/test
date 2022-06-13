@@ -20,12 +20,12 @@ use yii\helpers\Url;
  * @property array $data
  *
  * Ex.
-    [
-        'class' => \common\components\grid\UserSelect2Column::class,
-        'attribute' => 'ugs_updated_user_id',
-        'relation' => 'updatedUser',
-        'url' => 'employee/list-ajax',
-    ],
+ * [
+ * 'class' => \common\components\grid\UserSelect2Column::class,
+ * 'attribute' => 'ugs_updated_user_id',
+ * 'relation' => 'updatedUser',
+ * 'url' => 'employee/list-ajax',
+ * ],
  *
  */
 class UserSelect2Column extends DataColumn
@@ -36,6 +36,7 @@ class UserSelect2Column extends DataColumn
     public $minimumInputLength = 1;
     public $delay = 300;
     public $placeholder = '';
+    public $id = '';
     public $data = [];
 
 
@@ -55,7 +56,7 @@ class UserSelect2Column extends DataColumn
         //VarDumper::dump($attr, 10 , true); exit;
 
         if ($this->filter !== false && $model instanceof Model && $this->attribute !== null && $model->isAttributeActive($this->attribute)) {
-            $userId = (int) $model->getAttribute($this->attribute);
+            $userId = (int)$model->getAttribute($this->attribute);
             if ($userId) {
                 $user = Employee::find()->select(['id', 'username'])->where(['id' => $userId])->cache(3600)->one();
                 if ($user) {
@@ -104,6 +105,10 @@ class UserSelect2Column extends DataColumn
             ],
             'options' => ['placeholder' => $this->placeholder],
         ];
+
+        if (!empty($this->id)) {
+            $widgetOptions['options']['id'] = $this->id;
+        }
 
         return UserSelect2Widget::widget($widgetOptions);
     }
