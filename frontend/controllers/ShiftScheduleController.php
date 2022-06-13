@@ -71,15 +71,14 @@ class ShiftScheduleController extends FController
                 'rules' => [
                     [
                         'actions' => ['ajax-multiple-delete', 'add-multiple-events', 'ajax-event-details', 'ajax-get-logs',
-                            'ajax-edit-event-form', 'ajax-multiple-update', 'ajax-update-event', 'add-event', 'delete-event'],
+                            'ajax-edit-event-form', 'ajax-multiple-update', 'ajax-edit-event', 'add-event', 'delete-event'],
                         'allow' => true,
                         'roles' => ['@']
                     ],
                     /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_ACCESS, Access to page shift-schedule/index */
                     [
                         'actions' => ['index', 'my-data-ajax', 'generate-example', 'remove-user-data',
-                            'generate-user-schedule', 'legend-ajax', 'calendar', 'ajax-get-events',
-                            'schedule-request-ajax', 'schedule-pending-requests', 'schedule-request-history-ajax'],
+                            'generate-user-schedule', 'legend-ajax', 'schedule-request-ajax', 'schedule-pending-requests', 'schedule-request-history-ajax'],
                         'allow' => \Yii::$app->abac->can(
                             null,
                             ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE,
@@ -93,6 +92,16 @@ class ShiftScheduleController extends FController
                         'allow' => \Yii::$app->abac->can(
                             null,
                             ShiftAbacObject::ACT_USER_SHIFT_SCHEDULE,
+                            ShiftAbacObject::ACTION_ACCESS
+                        ),
+                        'roles' => ['@'],
+                    ],
+                    /** @abac ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR, ShiftAbacObject::ACTION_ACCESS, Access to shift calendar page */
+                    [
+                        'actions' => ['calendar', 'ajax-get-events'],
+                        'allow' => \Yii::$app->abac->can(
+                            null,
+                            ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR,
                             ShiftAbacObject::ACTION_ACCESS
                         ),
                         'roles' => ['@'],
@@ -487,9 +496,9 @@ class ShiftScheduleController extends FController
 //            return $this->renderAjax('_error', [
 //                'error' => $e->getMessage()
 //            ]);
-            Yii::error(AppHelper::throwableLog($e), 'ShiftScheduleController:actionGetEvent:DomainException');
+            Yii::error(AppHelper::throwableLog($e), 'ShiftScheduleController:actionAjaxEventDetails:DomainException');
         } catch (\Throwable $e) {
-            Yii::error(AppHelper::throwableLog($e), 'ShiftScheduleController:actionGetEvent:Throwable');
+            Yii::error(AppHelper::throwableLog($e), 'ShiftScheduleController:actionAjaxEventDetails:Throwable');
         }
         throw new BadRequestHttpException();
     }
@@ -497,6 +506,7 @@ class ShiftScheduleController extends FController
     /**
      * @param int|null $userId
      * @return string
+     * @throws ForbiddenHttpException
      */
     public function actionCalendar(?int $userId = null): string
     {
@@ -512,8 +522,6 @@ class ShiftScheduleController extends FController
             $userGroups = UserGroupQuery::getListByUser($timelineCalendarFilter->userId);
         }
 
-        $timelineCalendarFilter->userGroups = array_keys($userGroups);
-
         return $this->render('calendar', [
             'timelineCalendarFilter' => $timelineCalendarFilter,
             'userGroups' => $userGroups
@@ -522,6 +530,7 @@ class ShiftScheduleController extends FController
 
     /**
      * @return array
+     * @throws ForbiddenHttpException
      */
     public function actionAjaxGetEvents(): array
     {
@@ -541,13 +550,20 @@ class ShiftScheduleController extends FController
         } else {
             /** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_VIEW_ALL_EVENTS, Access to view all events in calendar widget */
             $canViewAllEvents = Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_VIEW_ALL_EVENTS);
-            $userGroups = UserGroupQuery::findUserGroups(!$canViewAllEvents ? Auth::id() : null, $timelineCalendarFilter->userGroups ?? []);
+            if ($canViewAllEvents) {
+                $userGroups = array_keys(UserGroupQuery::getList());
+            } else {
+                $userGroups = array_keys(UserGroupQuery::getListByUser($timelineCalendarFilter->userId));
+            }
 
-            [$resourceList, $firstLevelResources] = UserShiftScheduleHelper::prepareResourcesForTimelineCalendar($userGroups, $timelineCalendarFilter->usersIds);
+            $timelineCalendarFilter->userGroups = $timelineCalendarFilter->userGroups ?: $userGroups;
+            $userGroups = UserGroupQuery::findUserGroupsAndAssignedUsers($timelineCalendarFilter->userGroups, $timelineCalendarFilter->usersIds);
+
+            [$resourceList, $firstLevelResources] = UserShiftScheduleHelper::prepareResourcesForTimelineCalendar($userGroups);
 
             $timelineList = UserShiftScheduleQuery::getCalendarTimelineListByUser($timelineCalendarFilter);
             $data['data'] = UserShiftScheduleHelper::getCalendarEventsData($timelineList);
-            $data['resources'] = $resourceList;
+            $data['resources'] = array_values($resourceList);
             $data['firstLevelResources'] = $firstLevelResources;
         }
 
@@ -991,7 +1007,7 @@ class ShiftScheduleController extends FController
         ]);
     }
 
-    public function actionAjaxUpdateEvent()
+    public function actionAjaxEditEvent()
     {
         /** @abac ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_UPDATE, Access to update event */
         if (!Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_UPDATE)) {

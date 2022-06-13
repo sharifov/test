@@ -23,7 +23,7 @@ $bundle = UserShiftCalendarAsset::register($this);
         'userGroups' => $userGroups
     ]) ?>
 
-    <?php if (!empty($timelineCalendarFilter->userGroups)) : ?>
+<!--    --><?php //if (!empty($timelineCalendarFilter->userGroups)) : ?>
         <div id="calendar-multiple-module-wrapper"></div>
 
         <div class="row">
@@ -33,14 +33,14 @@ $bundle = UserShiftCalendarAsset::register($this);
         </div>
 
         <div id="calendar-tooltip-wrapper"></div>
-    <?php else : ?>
-        <?= \yii\bootstrap4\Alert::widget([
-            'options' => [
-                'class' => 'alert-warning',
-            ],
-            'body' => 'You dont have an associated group. In this case, you cannot view calendar events',
-        ]) ?>
-    <?php endif; ?>
+<!--    --><?php //else : ?>
+<!--        --><?//= \yii\bootstrap4\Alert::widget([
+//            'options' => [
+//                'class' => 'alert-warning',
+//            ],
+//            'body' => 'You dont have an associated group. In this case, you cannot view calendar events',
+//        ]) ?>
+<!--    --><?php //endif; ?>
 </div>
 
 <?php
@@ -50,7 +50,7 @@ $today = date('Y-m-d', strtotime('+1 day'));
 $getEventsAjaxUrl           = Url::to(['/shift-schedule/ajax-get-events']);
 $addMultipleEventsUrl       = Url::to(['/shift-schedule/add-multiple-events']);
 $addEventUrl                = Url::to(['/shift-schedule/add-event']);
-$updateEventUrl             = Url::to(['/shift-schedule/ajax-update-event']);
+$updateEventUrl             = Url::to(['/shift-schedule/ajax-edit-event']);
 $deleteEventUrl             = Url::to(['/shift-schedule/delete-event']);
 $eventDetailsUrl            = Url::to(['/shift-schedule/ajax-event-details']);
 $viewLogsUrl                = Url::to(['/shift-schedule/ajax-get-logs']);

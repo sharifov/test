@@ -2,6 +2,7 @@
 
 namespace common\models\query;
 
+use common\models\Employee;
 use common\models\UserGroup;
 use common\models\UserGroupAssign;
 use yii\helpers\ArrayHelper;
@@ -58,5 +59,28 @@ class UserGroupQuery extends \yii\db\ActiveQuery
             $query->andWhere(['ug_id' => $groupIds]);
         }
         return $query->all();
+    }
+
+    /**
+     * @param array $groupIds
+     * @param array $usersIds
+     * @return UserGroup[]
+     */
+    public static function findUserGroupsAndAssignedUsers(array $groupIds = [], array $usersIds = []): array
+    {
+        $query = UserGroup::find()
+            ->select(['ug_id', 'ug_key', 'ug_name', 'ugs_user_id', 'username', 'email'])
+            ->join('inner join', UserGroupAssign::tableName(), 'ug_id = ugs_group_id')
+            ->join('inner join', Employee::tableName(), 'ugs_user_id = id')
+            ->andWhere(['<>', 'status', Employee::STATUS_DELETED])
+            ->enabled()
+            ->orderBy(['ug_name' => SORT_ASC]);
+        if ($groupIds) {
+            $query->andWhere(['ug_id' => $groupIds]);
+        }
+        if ($usersIds) {
+            $query->andWhere(['ugs_user_id' => $usersIds]);
+        }
+        return $query->asArray()->createCommand()->queryAll();
     }
 }

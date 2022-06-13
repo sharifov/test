@@ -6,6 +6,7 @@ use common\models\UserGroupAssign;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\shiftScheduleTypeLabelAssign\ShiftScheduleTypeLabelAssign;
 use modules\shiftSchedule\src\entities\userShiftSchedule\search\TimelineCalendarFilter;
+use Yii;
 
 class UserShiftScheduleQuery
 {
@@ -64,8 +65,10 @@ class UserShiftScheduleQuery
     public static function getCalendarTimelineListByUser(TimelineCalendarFilter $form): array
     {
         $query = UserShiftSchedule::find()
-            ->join('inner join', UserGroupAssign::tableName(), 'ugs_user_id = uss_user_id')
-            ->andWhere(['ugs_group_id' => $form->userGroups]);
+            ->join('inner join', UserGroupAssign::tableName(), 'ugs_user_id = uss_user_id');
+        if ($form->userGroups) {
+            $query->andWhere(['ugs_group_id' => $form->userGroups]);
+        }
         if ($form->usersIds) {
             $query->andWhere(['ugs_user_id' => $form->usersIds]);
         }
@@ -271,5 +274,54 @@ class UserShiftScheduleQuery
         }
 
         return $query->column();
+    }
+
+    /**
+     * @param UserShiftSchedule[] $timelineList
+     * @param string $userTimeZone
+     * @return array
+     */
+    public static function getCalendarTimelineJsonData(array $timelineList, string $userTimeZone): array
+    {
+        $data = [];
+        if ($timelineList) {
+            foreach ($timelineList as $item) {
+                $dataItem = [
+                    'id' => $item->uss_id,
+                    'title' => $item->getScheduleTypeKey(),
+                    'description' => $item->getScheduleTypeTitle() . "\r\n" . '(' . $item->uss_id . ')' . ', duration: ' .
+                        Yii::$app->formatter->asDuration($item->uss_duration * 60),
+                    'start' => Yii::$app->formatter->asDateTimeByUserTimezone(
+                        strtotime($item->uss_start_utc_dt ?? ''),
+                        $userTimeZone,
+                        'php: c'
+                    ),
+                    'end' => Yii::$app->formatter->asDateTimeByUserTimezone(
+                        strtotime($item->uss_end_utc_dt ?? ''),
+                        $userTimeZone,
+                        'php: c'
+                    ),
+                    'color' => $item->shiftScheduleType ? $item->shiftScheduleType->sst_color : 'gray',
+                    'display' => 'block',
+                    'extendedProps' => [
+                        'icon' => $item->shiftScheduleType->sst_icon_class ?? '',
+                    ]
+                ];
+
+                if (
+                    !in_array($item->uss_status_id, [
+                        UserShiftSchedule::STATUS_DONE,
+                        UserShiftSchedule::STATUS_APPROVED
+                    ], true)
+                ) {
+                    $dataItem['borderColor'] = '#000000';
+                    $dataItem['title'] .= ' (' . $item->getStatusName() . ')';
+                    $dataItem['description'] .= ' (' . $item->getStatusName() . ')';
+                }
+
+                $data[] = $dataItem;
+            }
+        }
+        return $data;
     }
 }

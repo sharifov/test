@@ -100,68 +100,64 @@ class UserShiftScheduleHelper
     }
 
     /**
-     * @param UserGroup[] $userGroups
-     * @param array $usersIds
+     * @param array $userGroups
      * @return array
      */
-    public static function prepareResourcesForTimelineCalendar(array $userGroups, array $usersIds = []): array
+    public static function prepareResourcesForTimelineCalendar(array $userGroups): array
     {
         $resourceList = [];
         $groupIds = [];
 
+        $userCount = 0;
         foreach ($userGroups as $key => $group) {
-            $childrenIds = [];
-            $resource = [
-                'id' => 'ug-' . $group->ug_id,
-                'name' => '<i class="fa fa-users"></i> ' . $group->ug_name,
-                'color' => '#1dab2f',
-                'title' => $group->ug_key,
-                'collapsed' => $key !== 0,
-                'isGroup' => true,
-                'description' => '',
-                'icons' => [],
-                'childrenIds' => []
-            ];
-
-            $users = Employee::find()
-                ->joinWith(['userGroupAssigns'])
-                ->where(['ugs_group_id' => $group->ug_id])
-                ->andWhere(['<>', 'status', Employee::STATUS_DELETED])
-                ->orderBy(['username' => SORT_ASC])
-                ->andFilterWhere(['id' => $usersIds])
-                ->all();
-            if ($users) {
-                $userList = [];
-                foreach ($users as $i => $user) {
-                    $userResourceId = $user->id;
-                    $userList[] = [
-                        'id' => $userResourceId,
-                        'name' => '#' . ($i + 1) . ' <i class="fa fa-user"></i> ' . $user->username,
-                        'color' => '#1dab2f',
-                        'title' => '(' . $user->id . ') ' . $user->email,
-                        'isGroup' => false,
-                        'icons' => [
-                            Html::a('<i class="fa fa-calendar"></i>', Url::to(['/shift-schedule/user', 'id' => $user->id]), [
-                                'title' => 'User Shift Calendar',
-                                'target' => '_blank'
-                            ]),
-                            Html::a('<i class="fa fa fa-user-plus"></i>', Url::to(['/shift/user-shift-assign/index', 'UserShiftAssignListSearch[userId]' => $user->id]), [
-                                'title' => 'User Shift Assign',
-                                'target' => '_blank'
-                            ])
-                        ],
-                        'description' => ''
-                    ];
-                    $childrenIds[] = $userResourceId;
-                }
-                $resource['name'] .= ' <sup>' . count($userList) . '</sup>';
-                $resource['children'] = $userList;
-                $resource['childrenIds'] = $childrenIds;
+            if (!isset($resourceList[$group['ug_id']])) {
+                $resourceList[$group['ug_id']] = self::mainResource($group, $key !== 0);
+                $groupIds[] = 'ug-' . $group['ug_id'];
+                $userCount = 0;
             }
-            $resourceList[] = $resource;
-            $groupIds[] = 'ug-' . $group->ug_id;
+
+            $resourceList[$group['ug_id']]['children'][] = self::childResource($group, $userCount++);
+            $resourceList[$group['ug_id']]['childrenIds'][] = $group['ugs_user_id'];
         }
         return [$resourceList, $groupIds];
+    }
+
+    private static function mainResource(array $data, bool $collapsed): array
+    {
+        return [
+            'id' => 'ug-' . $data['ug_id'],
+            'name' => '<i class="fa fa-users"></i> ' . $data['ug_name'],
+            'color' => '#1dab2f',
+            'title' => $data['ug_key'],
+            'collapsed' => $collapsed,
+            'isGroup' => true,
+            'description' => '',
+            'icons' => [],
+            'childrenIds' => [],
+            'children' => []
+        ];
+    }
+
+    private static function childResource(array $data, int $itemNum): array
+    {
+        return [
+            'id' => $data['ugs_user_id'],
+            'name' => '#' . ($itemNum + 1) . ' <i class="fa fa-user"></i> ' . $data['username'],
+            'color' => '#1dab2f',
+            'title' => '(' . $data['ugs_user_id'] . ') ' . $data['email'],
+            'isGroup' => false,
+            'icons' => [
+                Html::a('<i class="fa fa-calendar"></i>', Url::to(['/shift-schedule/user', 'id' => $data['ugs_user_id']]), [
+                    'title' => 'User Shift Calendar',
+                    'target' => '_blank'
+                ]),
+                Html::a('<i class="fa fa fa-user-plus"></i>', Url::to(['/shift/user-shift-assign/index', 'UserShiftAssignListSearch[userId]' => $data['ugs_user_id']]), [
+                    'title' => 'User Shift Assign',
+                    'target' => '_blank'
+                ])
+            ],
+            'description' => ''
+        ];
     }
 
     public static function getDurationForDates(UserShiftSchedule $userShiftSchedule): int

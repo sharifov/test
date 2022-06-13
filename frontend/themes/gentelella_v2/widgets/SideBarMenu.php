@@ -268,7 +268,12 @@ class SideBarMenu extends \yii\bootstrap\Widget
             'label' => 'User Shift Calendar',
             'url' => ['/shift-schedule/calendar'],
             'icon' => 'calendar text-warning',
-            'title' => 'User Shift Schedule Calendar'
+            'title' => 'User Shift Schedule Calendar',
+            'abac'  => [
+                'dto'    => null,
+                'object' => ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR,
+                'action' => ShiftAbacObject::ACTION_ACCESS,
+            ],
         ];
 
 

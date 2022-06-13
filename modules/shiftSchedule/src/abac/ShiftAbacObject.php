@@ -88,6 +88,9 @@ class ShiftAbacObject extends AbacBaseModel implements AbacInterface
             self::ACTION_DELETE,
             self::ACTION_SOFT_DELETE
         ],
+        self::OBJ_USER_SHIFT_CALENDAR => [
+            self::ACTION_ACCESS
+        ]
     ];
 
     public const ATTR_USER_GROUPS_FORM_FIELD = [
