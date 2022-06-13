@@ -24,6 +24,7 @@ class CaseSaleSearch extends CaseSale
     public $prevId;
     public $lastPage;
     public $cursor;
+    public $filterCount;
 
     /**
      * {@inheritdoc}
@@ -150,6 +151,10 @@ class CaseSaleSearch extends CaseSale
             }
         }
 
+        if (!empty($filters)) {
+            $this->filterCount = CaseSale::find()->andFilterWhere($filters)->count();
+        }
+
         $limit = $dataProvider->pagination->getLimit();
 
         //Next Button
@@ -157,10 +162,7 @@ class CaseSaleSearch extends CaseSale
             $models = $dataProvider->models;
             array_pop($models);
             $modelKeys = $dataProvider->prepareKeys($models);
-            /*$modelKeys = [];
-            foreach ($models as $value) {
-                $modelKeys[][$tableIdColName] = $value[$tableIdColName];
-            }*/
+
             $dataProvider->setModels($models);
             $dataProvider->setKeys($modelKeys);
 

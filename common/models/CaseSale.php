@@ -280,22 +280,22 @@ class CaseSale extends \yii\db\ActiveRecord
     public static function getPrevModels($prevId, $limit, $filters = null): array
     {
         if (isset($filters)) {
-            $mainQuery = CaseSale::find()
+            $mainQuery = self::find()
                 ->where(['>', 'css_cs_id', $prevId])
                 ->andFilterWhere($filters)
                 ->orderBy(['css_cs_id' => SORT_ASC])
                 ->limit($limit + 1);
-            return CaseSale::find()
+            return self::find()
                 ->from(['C' => $mainQuery])
                 ->orderBy(['css_cs_id' => SORT_DESC])
                 ->all();
         }
 
-        $mainQuery = CaseSale::find()
+        $mainQuery = self::find()
             ->where(['>', 'css_cs_id', $prevId])
             ->orderBy(['css_cs_id' => SORT_ASC])
             ->limit($limit + 1);
-        return CaseSale::find()
+        return self::find()
             ->from(['C' => $mainQuery])
             ->orderBy(['css_cs_id' => SORT_DESC])
             ->limit($limit + 1)

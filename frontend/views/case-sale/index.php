@@ -24,7 +24,10 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <?php Pjax::begin(['timeout' => 5000, 'scrollTo' => 0]); ?>
+
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+
+    <?= $searchModel->filterCount ? 'Find <b>' . $searchModel->filterCount . '</b> items' : null ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -147,6 +150,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>
+
     <?php  echo $this->render('_pagination', ['model' => $searchModel]); ?>
 
     <?php Pjax::end(); ?>

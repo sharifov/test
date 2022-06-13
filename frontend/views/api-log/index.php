@@ -6,6 +6,7 @@ use src\services\cleaner\form\DbCleanerParamsForm;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\helpers\StringHelper;
+use yii\helpers\Url;
 use yii\helpers\VarDumper;
 use yii\widgets\Pjax;
 use kartik\daterange\DateRangePicker;
@@ -44,17 +45,23 @@ $pjaxListId = 'pjax-api-log';
 
     <?php Pjax::begin(['id' => $pjaxListId, 'scrollTo' => 0]); ?>
 
+    <?php  echo $this->render('_pagination', ['model' => $searchModel]);?>
+
+    <?= $searchModel->filterCount ? 'Find <b>' . $searchModel->filterCount . '</b> items' : null ?>
+
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
-        'layout' => "{errors}\n{pager}\n{summary}\n{items}\n{pager}",
+        'filterUrl' => Url::to(['api-log/index']),
+        'layout' => "{errors}\n{items}",
         'columns' => [
             [
                 'attribute' => 'al_id',
                 'value' => function (\common\models\ApiLog $model) {
                     return $model->al_id;
                 },
-                'options' => ['style' => 'width:100px']
+                'options' => ['style' => 'width:100px'],
+                'enableSorting' => false,
             ],
             [
                 'attribute' => 'al_action',
@@ -171,6 +178,9 @@ $pjaxListId = 'pjax-api-log';
             ['class' => ActionColumn::class],
         ],
     ]); ?>
+
+    <?php  echo $this->render('_pagination', ['model' => $searchModel]);?>
+
     <?php Pjax::end(); ?>
 </div>
 
