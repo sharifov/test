@@ -805,7 +805,25 @@ class SettingHelper
 
     public static function isEnabledAuthClients(): bool
     {
-        return (bool) (Yii::$app->params['settings']['enable_auth_clients'] ?? false);
+        $issetAuthGoogle = isset(Yii::$app->params['settings']['enable_auth_clients']['auth_google']);
+        $issetAuthMicrosoft = isset(Yii::$app->params['settings']['enable_auth_clients']['auth_microsoft']);
+
+        return ($issetAuthGoogle && Yii::$app->params['settings']['enable_auth_clients']['auth_google'] === true)
+            || ($issetAuthMicrosoft && Yii::$app->params['settings']['enable_auth_clients']['auth_microsoft'] === true);
+    }
+
+    public static function isEnabledGoogleAuthClient(): bool
+    {
+        $issetAuthGoogle = isset(Yii::$app->params['settings']['enable_auth_clients']['auth_google']);
+
+        return ($issetAuthGoogle && Yii::$app->params['settings']['enable_auth_clients']['auth_google'] === true);
+    }
+
+    public static function isEnabledMicrosoftAuthClient(): bool
+    {
+        $issetAuthMicrosoft = isset(Yii::$app->params['settings']['enable_auth_clients']['auth_microsoft']);
+
+        return ($issetAuthMicrosoft && Yii::$app->params['settings']['enable_auth_clients']['auth_microsoft'] === true);
     }
 
     public static function getCleanLeadPoorProcessingLogAfterDays(): int

@@ -455,6 +455,14 @@ class SiteController extends FController
             throw new ForbiddenHttpException('Access denied');
         }
 
+        if ($client->getName() == 'google' && !SettingHelper::isEnabledGoogleAuthClient()) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
+        if ($client->getName() == 'microsoft' && !SettingHelper::isEnabledMicrosoftAuthClient()) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
         $source = UserAuthClientSources::clientSourceFactory($client->getId());
         $source->handleAssign(Auth::id(), $this->action, $client);
         return $this->action->redirect($source->getRedirectUrl());
