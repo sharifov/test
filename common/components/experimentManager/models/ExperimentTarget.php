@@ -81,5 +81,4 @@ class ExperimentTarget extends ActiveRecord
     {
         return self::EXT_TYPE_LIST;
     }
-
 }
