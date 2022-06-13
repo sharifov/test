@@ -23,10 +23,12 @@ class RbacRoleManagementService
                 ->createCommand()
                 ->delete('auth_item_child', ['parent' => $recipientRoleName])
                 ->execute();
+            $roleList  = RbacQueryService::getRolesList();
             $donorRows = (new Query())
                 ->select('a.child')
                 ->from(['a' => 'auth_item_child'])
                 ->where(['a.parent' => $donorRoleName])
+                ->andWhere(['NOT IN', 'a.child', $roleList])
                 ->column();
             array_walk($donorRows, function (&$item) use ($recipientRoleName) {
                 $newItem = [];
@@ -69,11 +71,13 @@ class RbacRoleManagementService
                 ->from(['a' => 'auth_item_child'])
                 ->where(['a.parent' => $recipientRoleName])
                 ->column();
+            $roleList  = RbacQueryService::getRolesList();
             $donorRows = (new Query())
                 ->select('a.child')
                 ->from(['a' => 'auth_item_child'])
                 ->where(['a.parent' => $donorRoleName])
                 ->andWhere(['NOT IN','a.child', $recipientRows])
+                ->andWhere(['NOT IN', 'a.child', $roleList])
                 ->column();
             array_walk($donorRows, function (&$item) use ($recipientRoleName) {
                 $newItem = [];
