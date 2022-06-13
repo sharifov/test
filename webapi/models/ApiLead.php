@@ -57,6 +57,7 @@ use yii\base\Model;
  * @property string|null $expire_at
  * @property array|null $lead_data
  * @property array|null $client_data
+ * @property array|null $experiments
  * @property string|null $currency_code
  */
 class ApiLead extends Model
@@ -105,6 +106,7 @@ class ApiLead extends Model
     public $expire_at;
     public $lead_data;
     public $client_data;
+    public $experiments;
 
     public $currency_code;
 
@@ -175,7 +177,7 @@ class ApiLead extends Model
             ['clientUuid', UuidValidator::class],
             [['expire_at'], 'datetime', 'format' => 'php:Y-m-d H:i:s', 'skipOnEmpty' => true],
 
-            [['lead_data', 'client_data'], IsArrayValidator::class, 'skipOnEmpty' => true, 'skipOnError' => true],
+            [['lead_data', 'client_data', 'experiments'], IsArrayValidator::class, 'skipOnEmpty' => true, 'skipOnError' => true],
 
             [['currency_code'], 'string', 'max' => 3],
             [['currency_code'], 'trim'],
