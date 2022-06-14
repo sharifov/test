@@ -75,7 +75,7 @@ use common\models\Project;
                                         'options' => ['class' => 'form-group']
                                     ])->widget(PhoneSelect2Widget::class, [
                                         'data' => $model->getPhoneListNumber()
-                                    ]); ?>
+                                    ])->label('Phone List'); ?>
                                 </div>
 
                                 <div class="col-md-2">
@@ -114,7 +114,7 @@ use common\models\Project;
                                             'size' => Select2::SMALL,
                                             'options' => ['placeholder' => 'Select User Group'],
                                             'pluginOptions' => ['allowClear' => true, 'multiple' => true],
-                                        ]); ?>
+                                        ])->label('User Group'); ?>
                                 </div>
                                 <div class="col-md-2">
                                     <?php echo $form->field($model, 'userDepartmentIds')
@@ -123,7 +123,7 @@ use common\models\Project;
                                             'size' => Select2::SMALL,
                                             'options' => ['placeholder' => 'Select Department'],
                                             'pluginOptions' => ['allowClear' => true, 'multiple' => true],
-                                        ]); ?>
+                                        ])->label('User Department'); ?>
                                 </div>
 
                                 <div class="col-md-2">

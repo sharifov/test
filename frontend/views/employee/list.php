@@ -35,6 +35,11 @@ $isUM = $user->isUserManager();
 $isAdmin = $user->isAdmin() || $user->isSuperAdmin();
 
 ?>
+<style>
+    #user-list-grid .select2-selection__rendered {
+        width: 150px
+    }
+</style>
 <div class="employee-index">
 
     <?php $status = Yii::$app->params['settings']['two_factor_authentication_enable'] ?
@@ -310,17 +315,17 @@ $isAdmin = $user->isAdmin() || $user->isSuperAdmin();
                     'label' => 'User Groups',
                     'attribute' => 'userGroupIds',
                     'value' => static function (Employee $model) {
+                        $list = $model->getUserGroupList();
+                        $groups = [];
 
-                        $groups = $model->getUserGroupList();
-                        $groupsValueArr = [];
-
-                        foreach ($groups as $group) {
-                            $groupsValueArr[] = '<div class="col-md-4">' . Html::tag('div', /*Html::tag('i', '', ['class' => 'fa fa-users']) . ' ' .*/ Html::encode($group), ['class' => 'label label-info']) . '</div>';
+                        foreach ($list as $item) {
+                            $groups[] = Html::tag(
+                                'span',
+                                Html::encode($item),
+                                ['class' => 'label label-info', 'style' => 'font-size: 11px;']
+                            );
                         }
-
-                        $groupsValue = '<div class="row">' . implode(' ', $groupsValueArr) . '</div>';
-
-                        return $groupsValue;
+                        return implode(' ', $groups);
                     },
                     'format' => 'raw',
                     'contentOptions' => ['class' => 'text-left', 'style' => 'width: 40px!important'],
@@ -334,17 +339,18 @@ $isAdmin = $user->isAdmin() || $user->isSuperAdmin();
                     'label' => 'Departments',
                     'attribute' => 'userDepartmentIds',
                     'value' => static function (Employee $model) {
-
                         $list = $model->getUserDepartmentList();
-                        $valueArr = [];
+                        $departments = [];
 
                         foreach ($list as $item) {
-                            $valueArr[] = '<div class="col-md-4">' . Html::tag('div', /*Html::tag('i', '', ['class' => 'fa fa-users']) . ' ' .*/ Html::encode($item), ['class' => 'label label-default']) . '</div>';
+                            $departments[] = Html::tag(
+                                'span',
+                                Html::encode($item),
+                                ['class' => 'label label-default', 'style' => 'font-size: 11px;']
+                            );
                         }
 
-                        $value = '<div class="row">' . implode(' ', $valueArr) . '</div>';
-
-                        return $value;
+                        return implode(' ', $departments);
                     },
                     'format' => 'raw',
                     'contentOptions' => ['class' => 'text-left', 'style' => 'width: 40px!important'],
