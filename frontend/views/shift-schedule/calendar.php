@@ -33,14 +33,6 @@ $bundle = UserShiftCalendarAsset::register($this);
         </div>
 
         <div id="calendar-tooltip-wrapper"></div>
-<!--    --><?php //else : ?>
-<!--        --><?//= \yii\bootstrap4\Alert::widget([
-//            'options' => [
-//                'class' => 'alert-warning',
-//            ],
-//            'body' => 'You dont have an associated group. In this case, you cannot view calendar events',
-//        ]) ?>
-<!--    --><?php //endif; ?>
 </div>
 
 <?php
