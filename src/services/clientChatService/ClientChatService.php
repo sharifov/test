@@ -211,31 +211,18 @@ class ClientChatService
         $limit = $channel->getSystemUserLimit();
         $users = $employeeSearch->searchAvailableAgentsForChatRequests($clientChat, $limit, $channel->getSortParameters());
 
-//        $key = self::getRedisDistributionLogicKey($clientChat->cch_id);
-//        if ($users) {
+        $key = self::getRedisDistributionLogicKey($clientChat->cch_id);
+        if ($users) {
+            foreach ($users as $user) {
+                $this->sendRequestToUser($clientChat, $user->id);
+            }
 
-        if (SettingHelper::isClientChatDebugEnable() && $clientChat->isTransfer()) {
-            \Yii::info([
-                'message' => 'Users will be assign to chat',
-                'chatId' => $clientChat->cch_id,
-                'chatStatus' => $clientChat->getStatusName(),
-                'users' => ArrayHelper::getColumn($users, 'id'),
-                'countUsers' => count($users),
-                'microTime' => microtime(true),
-                'date' => date('Y-m-d H:i:s'),
-            ], 'info\ClientChatDebug');
+            if ($limit) {
+                $this->createUserAccessDistributionLogicJob($clientChat->cch_id, $channel->getSystemRepeatDelaySeconds());
+            }
+        } elseif (\Yii::$app->redis->exists($key)) {
+            \Yii::$app->redis->del($key);
         }
-
-        foreach ($users as $user) {
-            $this->sendRequestToUser($clientChat, $user->id);
-        }
-
-//            if ($limit) {
-        $this->createUserAccessDistributionLogicJob($clientChat->cch_id, $channel->getSystemRepeatDelaySeconds());
-//            }
-//        } elseif (\Yii::$app->redis->exists($key)) {
-//            \Yii::$app->redis->del($key);
-//        }
     }
 
     public function createUserAccessDistributionLogicJob(int $chatId, int $delay = 0): void
