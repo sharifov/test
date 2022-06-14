@@ -43,7 +43,7 @@ class TimelineCalendarFilter extends Model
     public function rules()
     {
         return [
-            [['userGroups', 'userId'], 'required'],
+            [['userId'], 'required'],
             [['userId'], 'integer'],
             [['startDateTimeCondition'], 'required', 'when' => function (): bool {
                 return !empty($this->startDateTime);
