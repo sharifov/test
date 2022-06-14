@@ -137,16 +137,6 @@ use common\models\Project;
                                     ])->label('User Project Access') ?>
                                 </div>
                                 <div class="col-md-2">
-                                    <?= $form->field($model, 'projectParamsIds', [
-                                        'options' => ['class' => 'form-group']
-                                    ])->widget(Select2::class, [
-                                        'data' => Project::getList(),
-                                        'size' => Select2::SMALL,
-                                        'options' => ['placeholder' => 'Select Project', 'multiple' => true],
-                                        'pluginOptions' => ['allowClear' => true],
-                                    ])->label('User Project Params') ?>
-                                </div>
-                                <div class="col-md-2">
                                     <?php echo $form->field($model, 'assignedShifts')
                                         ->widget(Select2::class, [
                                             'data' => \yii\helpers\ArrayHelper::map(UserShiftAssign::getAssignedShits(), 'sh_id', 'sh_name'),
