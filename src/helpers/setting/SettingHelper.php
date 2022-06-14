@@ -1009,4 +1009,9 @@ class SettingHelper
     {
         return (bool) (Yii::$app->params['settings']['call_is_override_phone_to_forwarded_from'] ?? false);
     }
+
+    public static function isSyncOverridePhoneToEnable(): bool
+    {
+        return (bool) (Yii::$app->params['settings']['call_sync_override_phone_to_enable'] ?? false);
+    }
 }

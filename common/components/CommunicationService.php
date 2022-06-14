@@ -1533,4 +1533,23 @@ class CommunicationService extends Component implements CommunicationServiceInte
 
         throw new \DomainException('Make Call Client Notification error.');
     }
+
+    public function getOriginalForwardedFromNumber(string $callSid): ?string
+    {
+        $response = $this->sendRequest('twilio/get-original-forwarded-from-number', [
+            'callSid' => $callSid,
+        ]);
+
+        if ($response->isOk) {
+            if (isset($response->data['forwardedNumber'])) {
+                return $response->data['forwardedNumber'];
+            }
+        } else {
+            \Yii::error([
+                'message' => 'Response is error',
+                'response' => VarDumper::dumpAsString($response->content),
+            ], 'CommunicationService::getOriginalForwardedFromNumber');
+        }
+        return null;
+    }
 }
