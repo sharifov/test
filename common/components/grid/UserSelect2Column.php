@@ -36,7 +36,7 @@ class UserSelect2Column extends DataColumn
     public $minimumInputLength = 1;
     public $delay = 300;
     public $placeholder = '';
-    public $id = '';
+    public ?string $id = null;
     public $data = [];
 
 
