@@ -64,6 +64,14 @@ class UserAuthClientController extends FController
             ];
 
             $authClient = $this->repository->find($authClientId);
+
+            if ($authClient->uac_source == UserAuthClientSources::GOOGLE && !SettingHelper::isEnabledGoogleAuthClient()) {
+                throw new ForbiddenHttpException('Access denied');
+            }
+            if ($authClient->uac_source == UserAuthClientSources::MICROSOFT && !SettingHelper::isEnabledMicrosoftAuthClient()) {
+                throw new ForbiddenHttpException('Access denied');
+            }
+
             if (!$authClient->delete()) {
                 throw new \RuntimeException('Cannot delete auth client:' . $authClient->getErrorSummary(true)[0]);
             }
