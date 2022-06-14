@@ -33,6 +33,7 @@ use src\model\userData\entity\UserDataKey;
 use src\validators\SlugValidator;
 use Yii;
 use yii\base\NotSupportedException;
+use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -66,6 +67,9 @@ use modules\shiftSchedule\src\entities\shift\Shift;
  * @property string $updated_at
  * @property string $last_activity
  * @property boolean $acl_rules_activated
+ * @property int|null $e_created_user_id
+ * @property int|null $e_updated_user_id
+ * @property string $last_login_dt
  *
  * @property bool $make_user_project_params
  *
@@ -115,6 +119,8 @@ use modules\shiftSchedule\src\entities\shift\Shift;
  * @property ActiveQuery $productType
  *
  * @property UserRelations|null $userRelations
+ * @property Employee $createdUser
+ * @property Employee $updatedUser
  */
 class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 {
@@ -422,7 +428,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             [['email', 'password', 'username', 'full_name', 'nickname'], 'trim'],
             ['password', StrengthValidator::class, 'userAttribute' => 'username', 'min' => 10],
             [['status'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
-            [['status'], 'integer'],
+            [['status', 'e_created_user_id', 'e_updated_user_id'], 'integer'],
             [['password_hash', 'password_reset_token', 'email'], 'string', 'max' => 255],
             [['username', 'full_name', 'nickname'], 'string', 'min' => 3, 'max' => 50],
             [['auth_key'], 'string', 'max' => 32],
@@ -435,12 +441,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             [['password_reset_token'], 'unique'],
             [
                 [
-                    'created_at', 'updated_at', 'last_activity', 'user_groups',
+                    'created_at', 'updated_at', 'last_activity', 'user_groups', 'last_login_dt',
                     'user_projects', 'deleted', 'user_departments', 'client_chat_user_channel', 'user_shift_assigns',
                 ],
                 'safe',
             ],
-
             ['acl_rules_activated', 'boolean'],
         ];
     }
@@ -468,6 +473,8 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             'full_name' => 'Full Name',
             'client_chat_user_channel' => 'Client chat user channel',
             'user_shift_assigns' => 'User Shift Assign',
+            'e_created_user_id' => 'Created User',
+            'e_updated_user_id' => 'Updated User',
         ];
     }
 
@@ -483,6 +490,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
+            'user' => [
+                'class' => BlameableBehavior::class,
+                'createdByAttribute' => 'e_created_user_id',
+                'updatedByAttribute' => 'e_updated_user_id',
+            ],
         ];
     }
 
@@ -495,6 +507,23 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     {
         return $this->hasOne(UserOnline::class, ['uo_user_id' => 'id']);
     }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getCreatedUser()
+    {
+        return $this->hasOne(Employee::className(), ['id' => 'e_created_user_id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getUpdatedUser()
+    {
+        return $this->hasOne(Employee::className(), ['id' => 'e_updated_user_id']);
+    }
+
 
     /**
      * Gets query for [[UserStatus]].
@@ -2690,7 +2719,6 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             }
             $timezone = $user->timezone;
             $dateTime = date('Y-m-d H:i:s', $time);
-
             try {
                 if ($timezone) {
                     $date = new \DateTime($dateTime, new \DateTimeZone($timezone));
