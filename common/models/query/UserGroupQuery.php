@@ -70,8 +70,8 @@ class UserGroupQuery extends \yii\db\ActiveQuery
     {
         $query = UserGroup::find()
             ->select(['ug_id', 'ug_key', 'ug_name', 'ugs_user_id', 'username', 'email'])
-            ->join('inner join', UserGroupAssign::tableName(), 'ug_id = ugs_group_id')
-            ->join('inner join', Employee::tableName(), 'ugs_user_id = id')
+            ->innerJoin(UserGroupAssign::tableName(), 'ug_id = ugs_group_id')
+            ->innerJoin(Employee::tableName(), 'ugs_user_id = id')
             ->andWhere(['<>', 'status', Employee::STATUS_DELETED])
             ->enabled()
             ->orderBy(['ug_name' => SORT_ASC]);
