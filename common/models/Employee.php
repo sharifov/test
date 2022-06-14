@@ -69,6 +69,7 @@ use modules\shiftSchedule\src\entities\shift\Shift;
  * @property boolean $acl_rules_activated
  * @property int|null $e_created_user_id
  * @property int|null $e_updated_user_id
+ * @property string $last_login_dt
  *
  * @property bool $make_user_project_params
  *
@@ -440,7 +441,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             [['password_reset_token'], 'unique'],
             [
                 [
-                    'created_at', 'updated_at', 'last_activity', 'user_groups',
+                    'created_at', 'updated_at', 'last_activity', 'user_groups', 'last_login_dt',
                     'user_projects', 'deleted', 'user_departments', 'client_chat_user_channel', 'user_shift_assigns',
                 ],
                 'safe',

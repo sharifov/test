@@ -497,7 +497,12 @@ $isAdmin = $user->isAdmin() || $user->isSuperAdmin();
                     'data' => ClientChatChannel::getList(),
                     'visible' => $searchModel->show_fields && in_array('chatChannels', $searchModel->show_fields, true),
                 ],
-
+                [
+                    'class' => DateTimeColumn::class,
+                    'attribute' => 'last_login_dt',
+                    'filter' => false,
+                    'visible' => $searchModel->show_fields && in_array('last_login_dt', $searchModel->show_fields, true),
+                ],
                 [
                     'class' => UserSelect2Column::class,
                     'attribute' => 'e_created_user_id',

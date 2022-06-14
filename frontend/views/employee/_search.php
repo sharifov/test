@@ -214,6 +214,23 @@ use common\models\Project;
                                 <div class="col-md-2">
                                     <?php echo $form->field($model, 'useTelegram')->dropDownList(['' => '', 1 => 'Yes', 0 => 'No']) ?>
                                 </div>
+
+                                <div class="col-md-2">
+                                    <?= $form->field($model, 'lastLoginRangeTime', [
+                                        'options' => ['class' => 'form-group']
+                                    ])->widget(\kartik\daterange\DateRangePicker::class, [
+                                        'presetDropdown' => false,
+                                        'hideInput' => true,
+                                        'convertFormat' => true,
+                                        'pluginOptions' => [
+                                            'locale' => [
+                                                'format' => 'd-M-Y',
+                                                'separator' => ' - '
+                                            ]
+                                        ]
+                                    ])->label('Last Login Date From / To');
+                                    ?>
+                                </div>
                                 <div class="col-md-2">
                                     <?= $form->field($model, 'createdRangeTime', [
                                         'options' => ['class' => 'form-group']
@@ -236,10 +253,10 @@ use common\models\Project;
                                     ])->widget(\kartik\daterange\DateRangePicker::class, [
                                         'presetDropdown' => false,
                                         'hideInput' => true,
-                                        'convertFormat' => true,
+                                       'convertFormat' => true,
                                         'pluginOptions' => [
                                             'locale' => [
-                                                'format' => 'd-M-Y H:i',
+                                                'format' => 'd-M-Y',
                                                 'separator' => ' - '
                                             ]
                                         ]

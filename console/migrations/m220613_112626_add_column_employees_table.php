@@ -14,6 +14,7 @@ class m220613_112626_add_column_employees_table extends Migration
     {
         $this->addColumn('{{%employees}}', 'e_created_user_id', $this->integer());
         $this->addColumn('{{%employees}}', 'e_updated_user_id', $this->integer());
+        $this->addColumn('{{%employees}}', 'last_login_dt', $this->string());
 
         $this->addForeignKey('FK-employees-e_created_user_id', '{{%employees}}', 'e_created_user_id', '{{%employees}}', 'id', 'SET NULL');
         $this->addForeignKey('FK-employees-e_updated_user_id', '{{%employees}}', 'e_updated_user_id', '{{%employees}}', 'id', 'SET NULL');
@@ -29,5 +30,6 @@ class m220613_112626_add_column_employees_table extends Migration
 
         $this->dropColumn('{{%employees}}', 'e_created_user_id');
         $this->dropColumn('{{%employees}}', 'e_updated_user_id');
+        $this->dropColumn('{{%employees}}', 'last_login_dt');
     }
 }

@@ -15,6 +15,7 @@ use common\models\UserParams;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
 use modules\shiftSchedule\src\entities\userShiftAssign\UserShiftAssign;
+use src\helpers\DateHelper;
 use src\model\clientChat\entity\ClientChat;
 use src\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use src\model\clientChatUserChannel\entity\ClientChatUserChannel;
@@ -53,6 +54,7 @@ class EmployeeSearch extends Employee
     public $callReady;
     public $createdRangeTime;
     public $updatedRangeTime;
+    public $lastLoginRangeTime;
     public $phoneListId;
     public $grav;
 
@@ -97,7 +99,7 @@ class EmployeeSearch extends Employee
             ['telegramEnabled', 'in', 'range' => [0, 1]],
             ['skills', 'each', 'rule' => ['in', 'range' => array_keys(UserProfile::SKILL_TYPE_LIST)]],
             ['userTimezones', 'each', 'rule' => ['in', 'range' => UserParams::getActiveTimezones()]],
-            [['createdRangeTime', 'updatedRangeTime'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
+            [['createdRangeTime', 'updatedRangeTime', 'lastLoginRangeTime'], 'convertDateTimeRange'],
             ['show_fields', 'filter', 'filter' => static function ($value) {
                 return is_array($value) ? $value : [];
             }, 'skipOnEmpty' => true],
@@ -266,6 +268,16 @@ class EmployeeSearch extends Employee
             }
             if ($updatedRange[1]) {
                 $query->andFilterWhere(['<=', 'employees.updated_at', Employee::convertTimeFromUserDtToUTC(strtotime($updatedRange[1]))]);
+            }
+        }
+
+        if ($this->lastLoginRangeTime) {
+            $lastLogin = explode(" - ", $this->lastLoginRangeTime);
+            if ($lastLogin[0]) {
+                $query->andFilterWhere(['>=', 'employees.last_login_dt', Employee::convertTimeFromUserDtToUTC(strtotime($lastLogin[0]))]);
+            }
+            if ($lastLogin[1]) {
+                $query->andFilterWhere(['<=', 'employees.last_login_dt', Employee::convertTimeFromUserDtToUTC(strtotime($lastLogin[1]))]);
             }
         }
 
@@ -706,9 +718,27 @@ class EmployeeSearch extends Employee
             'e_updated_user_id' => 'Updated User',
             'created_at' => 'Created DateTime',
             'updated_at' => 'Updated DateTime',
+            'last_login_dt' => 'Last Login DateTime',
             'useTelegram' => 'Use Telegram',
             'telegramEnabled' => 'Telegram Enabled',
             'grav' => 'Grav',
         ];
+    }
+
+    public function convertDateTimeRange($attribute)
+    {
+        if ($this->{$attribute}) {
+            $date = explode(' - ', $this->{$attribute});
+            if (count($date) === 2) {
+                if (!DateHelper::checkDateTime($date[0], 'd-M-Y')) {
+                    $this->addError($attribute, 'Date time start incorrect format');
+                }
+                if (!DateHelper::checkDateTime($date[1], 'd-M-Y')) {
+                    $this->addError($attribute, 'Date time end incorrect format');
+                }
+            } else {
+                $this->addError($attribute, 'Range Time is not parsed correctly');
+            }
+        }
     }
 }
