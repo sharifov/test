@@ -4,17 +4,21 @@ namespace src\model\userAuthClient\entity;
 
 use src\model\userAuthClient\handler\ClientHandler;
 use src\model\userAuthClient\handler\GoogleHandler;
+use src\model\userAuthClient\handler\MicrosoftHandler;
 
 class UserAuthClientSources
 {
     public const GOOGLE = 1;
+    public const MICROSOFT = 2;
 
     private const LIST = [
-        self::GOOGLE => 'google'
+        self::GOOGLE => 'google',
+        self::MICROSOFT => 'microsoft',
     ];
 
     private const FACTORY = [
-        self::GOOGLE => GoogleHandler::class
+        self::GOOGLE => GoogleHandler::class,
+        self::MICROSOFT => MicrosoftHandler::class
     ];
 
     public static function getList(): array

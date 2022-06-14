@@ -23,7 +23,7 @@ class m220214_064709_add_ff_lppEnable extends Migration
             $featureFlagService::delete('testFlag2');
             $featureFlagService::delete('testFlag3');
             $featureFlagService::delete('testFlag4');
-            Yii::$app->ff->invalidateCache();
+            Yii::$app->featureFlag->invalidateCache();
         } catch (\Throwable $throwable) {
             \Yii::error(AppHelper::throwableLog($throwable), 'm220214_064709_add_ff_lppEnable:safeDown:Throwable');
         }
@@ -47,7 +47,7 @@ class m220214_064709_add_ff_lppEnable extends Migration
                     'ff_description' => 'Lead Poor Processing Enable/Disable'
                 ]
             );
-            Yii::$app->ff->invalidateCache();
+            Yii::$app->featureFlag->invalidateCache();
         } catch (\Throwable $throwable) {
             \Yii::error(AppHelper::throwableLog($throwable), 'm220214_064709_add_ff_lppEnable:safeUp:Throwable');
         }
@@ -64,7 +64,7 @@ class m220214_064709_add_ff_lppEnable extends Migration
             }
             $featureFlagService = new \kivork\FeatureFlag\Services\FeatureFlagService();
             $featureFlagService::delete(FFlag::FF_KEY_LPP_ENABLE);
-            Yii::$app->ff->invalidateCache();
+            Yii::$app->featureFlag->invalidateCache();
         } catch (\Throwable $throwable) {
             \Yii::error(AppHelper::throwableLog($throwable), 'm220214_064709_add_ff_lppEnable:safeDown:Throwable');
         }

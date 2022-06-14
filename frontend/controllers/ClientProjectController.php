@@ -9,11 +9,13 @@ use src\auth\Auth;
 use Yii;
 use common\models\ClientProject;
 use common\models\search\ClientProjectSearch;
+use frontend\models\form\ClientProjectForm;
 use yii\base\Response;
 use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 
 /**
@@ -134,32 +136,38 @@ class ClientProjectController extends FController
 
     public function actionUnsubscribeClientAjax(): Response
     {
-        $data = Yii::$app->request->get();
-        $leadAbacDto = new LeadAbacDto(Lead::findOne($data['leadID']), Auth::id());
+        $form = new ClientProjectForm();
+        if ($form->load(Yii::$app->request->get(), "") && $form->validate()) {
+            $leadAbacDto = new LeadAbacDto(Lead::findOne($form->leadId), Auth::id());
+            /** @abac $leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS, Access to action client unsubscribe*/
+            if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_UNSUBSCRIBE)) {
+                throw new ForbiddenHttpException('Access denied.');
+            }
 
-        /** @abac $leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_ACCESS, Access to action client unsubscribe*/
-        if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_UNSUBSCRIBE)) {
-            throw new ForbiddenHttpException('Access denied.');
+            ClientProject::unSubScribe($form->clientId, $form->projectId, $form->action);
+
+            return $this->asJson(['data' => ['action' => $form->action]]);
         }
-
-        ClientProject::unSubScribe($data['clientID'], $data['projectID'], $data['action']);
-
-        return $this->asJson(['data' => ['action' => $data['action']]]);
+        throw new BadRequestHttpException('The parameters clientId, projectId, action are required ');
     }
 
     public function actionSubscribeClientAjax(): Response
     {
-        $data = Yii::$app->request->get();
-        $leadAbacDto = new LeadAbacDto(Lead::findOne($data['leadID']), Auth::id());
+        $form = new ClientProjectForm();
+        if ($form->load(Yii::$app->request->get(), "") && $form->validate()) {
+            $leadAbacDto = new LeadAbacDto(Lead::findOne($form->leadId), Auth::id());
 
-        /** @abac $leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_SUBSCRIBE, Access to action client subscribe*/
-        if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_SUBSCRIBE)) {
-            throw new ForbiddenHttpException('Access denied.');
+            /** @abac $leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_SUBSCRIBE, Access to action client subscribe*/
+            if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::UI_BLOCK_CLIENT_INFO, LeadAbacObject::ACTION_SUBSCRIBE)) {
+                throw new ForbiddenHttpException('Access denied.');
+            }
+
+            ClientProject::unSubScribe($form->clientId, $form->projectId, $form->action);
+
+            return $this->asJson(['data' => ['action' => $form->action]]);
         }
 
-        ClientProject::unSubScribe($data['clientID'], $data['projectID'], $data['action']);
-
-        return $this->asJson(['data' => ['action' => $data['action']]]);
+        throw new BadRequestHttpException('The parameters clientId, projectId, action are required ');
     }
 
     /**

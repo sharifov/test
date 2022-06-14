@@ -874,9 +874,17 @@ class SettingHelper
             return [];
         }
 
+        if (array_key_exists('sources', $settings) && is_array($settings['sources'])) {
+            $sources = $settings['sources'];
+        } else {
+            self::leadRedialExcludeAttributesErrorLog('sources');
+            return [];
+        }
+
         return [
             'projects' => $projects,
             'departments' => $departments,
+            'sources' => $sources,
             'cabins' => $cabins,
             'noFlightDetails' => $noFlightDetails,
             'isTest' => $isTest
@@ -1003,5 +1011,10 @@ class SettingHelper
     public static function isEnableAgentCallQueueJobAfterChangeCallStatusReady(): bool
     {
         return (bool) (Yii::$app->params['settings']['enable_agent_call_queue_job_after_change_call_status_ready'] ?? true);
+    }
+
+    public static function isOverridePhoneToForwarderFrom(): bool
+    {
+        return (bool) (Yii::$app->params['settings']['call_is_override_phone_to_forwarded_from'] ?? false);
     }
 }

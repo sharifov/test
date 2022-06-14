@@ -873,7 +873,7 @@ class EmployeeController extends FController
             try {
                 if ($model->save()) {
                     //if (Auth::user()->isAdmin()) {
-                        $modelProfile->up_user_id = $model->id;
+                    $modelProfile->up_user_id = $model->id;
                     if ($modelProfile->load(Yii::$app->request->post())) {
                         $modelProfile->up_updated_dt = date('Y-m-d H:i:s');
                         if (!$modelProfile->save()) {
@@ -1411,15 +1411,16 @@ class EmployeeController extends FController
                 $updateRC = [];
 
                 $targetUser->setAttributes($form->getValuesOfAvailableAttributes());
-                if (count($targetUser->getDirtyAttributes()) > 0) {
+                if ($form->needUpdatePassword() || count($targetUser->getDirtyAttributes()) > 0) {
+                    if ($form->needUpdatePassword()) {
+                        $targetUser->setPassword($form->password);
+                        $form->password = null;
+                    }
                     if ($targetUser->isAttributeChanged('email')) {
                         $updateRC['email'] = $targetUser->email;
                     }
                     if ($targetUser->isAttributeChanged('nickname')) {
                         $updateRC['name'] = $targetUser->nickname;
-                    }
-                    if ($form->password) {
-                        $targetUser->setPassword($form->password);
                     }
                     if ($targetUser->save()) {
                         $userUpdated = true;

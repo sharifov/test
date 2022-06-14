@@ -5,8 +5,8 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model common\models\QuoteSegmentStop */
 
-$this->title = 'Create Quote Segment Stop';
-$this->params['breadcrumbs'][] = ['label' => 'Quote Segment Stops', 'url' => ['index']];
+$this->title = 'Create Quote Segment Technical Stop';
+$this->params['breadcrumbs'][] = ['label' => 'Quote Segment Technical Stops', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="quote-segment-stop-create">

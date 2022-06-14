@@ -1533,4 +1533,25 @@ class CommunicationService extends Component implements CommunicationServiceInte
 
         throw new \DomainException('Make Call Client Notification error.');
     }
+
+    /**
+     * Returns communication app availability
+     *
+     * @throws Exception
+     */
+    public function ping(): bool
+    {
+        $parsedUrl = parse_url($this->url);
+        if (isset($parsedUrl['scheme'], $parsedUrl['host'])) {
+            $curl = curl_init();
+            curl_setopt($curl, CURLOPT_URL, "{$parsedUrl['scheme']}://{$parsedUrl['host']}/application-status/ping");
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            $result = curl_exec($curl);
+            if (!curl_errno($curl) && $resultJson = Json::decode($result)) {
+                return !empty($resultJson['availability']);
+            }
+            return false;
+        }
+        return false;
+    }
 }

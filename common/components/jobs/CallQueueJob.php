@@ -109,8 +109,12 @@ class CallQueueJob extends BaseJob implements JobInterface
 
                                 if (
                                     !$lead &&
-                                    $departmentParams->object->lead->createOnCall &&
                                     $projectParams->object->lead->allow_auto_lead_create &&
+                                    (
+                                        $departmentParams->object->lead->createOnCall->createOnDirectCall && $call->isDirect() ||
+                                        $departmentParams->object->lead->createOnCall->createOnRedirectCall && $call->isRedirectCall() ||
+                                        $departmentParams->object->lead->createOnCall->createOnGeneralLineCall && $call->isGeneralLine()
+                                    ) &&
                                     !ContactPhoneListService::isAutoCreateLeadOff($call->c_from)
                                 ) {
                                     if ($call->isDirect() || $call->isRedirectCall()) {
@@ -182,7 +186,11 @@ class CallQueueJob extends BaseJob implements JobInterface
                             $allowAutoCreateByProject = $projectParams->object->case->allow_auto_case_create;
                             $createCaseOnIncoming = (
                                 $allowAutoCreateByProject &&
-                                $departmentParams->object->case->createOnCall &&
+                                (
+                                    $departmentParams->object->case->createOnCall->createOnDirectCall && $call->isDirect() ||
+                                    $departmentParams->object->case->createOnCall->createOnRedirectCall && $call->isRedirectCall() ||
+                                    $departmentParams->object->case->createOnCall->createOnGeneralLineCall && $call->isGeneralLine()
+                                ) &&
                                 !ContactPhoneListService::isAutoCreateCaseOff($call->c_from)
                             );
 

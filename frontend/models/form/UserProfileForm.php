@@ -2,6 +2,7 @@
 
 namespace frontend\models\form;
 
+use kartik\password\StrengthValidator;
 use yii\base\Model;
 
 /**
@@ -9,21 +10,22 @@ use yii\base\Model;
  */
 class UserProfileForm extends Model
 {
-    public $email;
-    public $password;
-    public $full_name;
+    public $username = null;
+    public $email = null;
+    public $password = null;
+    public $full_name = null;
 
     /**
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['email'], 'required'],
             [['email', 'password', 'full_name'], 'trim'],
             ['email', 'email'],
-            [['password'], 'string', 'min' => 6],
-            [['email', 'password', 'full_name'], 'string', 'max' => 255],
+            ['password', StrengthValidator::class, 'userAttribute' => 'username', 'min' => 10],
+            [['email', 'password', 'full_name', 'username'], 'string', 'max' => 255],
         ];
     }
 

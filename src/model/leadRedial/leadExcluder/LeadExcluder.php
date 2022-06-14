@@ -33,6 +33,10 @@ class LeadExcluder
             return true;
         }
 
+        if ($this->settings->inSources($lead->source->cid ?? '')) {
+            return true;
+        }
+
         if ($this->settings->inCabins($lead->cabin ?? '')) {
             return true;
         }

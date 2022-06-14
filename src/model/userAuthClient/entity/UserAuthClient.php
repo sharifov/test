@@ -119,4 +119,9 @@ class UserAuthClient extends \yii\db\ActiveRecord
     {
         $this->uac_source = UserAuthClientSources::GOOGLE;
     }
+
+    public function setMicrosoftSource(): void
+    {
+        $this->uac_source = UserAuthClientSources::MICROSOFT;
+    }
 }

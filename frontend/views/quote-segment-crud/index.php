@@ -29,12 +29,30 @@ $this->params['breadcrumbs'][] = $this->title;
         'layout' => "{errors}\n{summary}\n{items}\n{pager}",
         'columns' => [
             'qs_id',
+            [
+                'attribute' => 'qs_trip_id',
+                'format' => 'raw',
+                'value' => function (QuoteSegment $model) {
+                    return '<i class="fa fa-link"></i> ' .
+                        Html::a(
+                            $model->qs_trip_id,
+                            ['/quote-trip-crud/index', 'QuoteTripSearch[qt_id]' => $model->qs_trip_id],
+                            ['title' => 'Show', 'target' => '_blank', 'data-pjax' => 0]
+                        );
+                }
+            ],
+            [
+                'header' => 'Stop(s)',
+                'format' => 'raw',
+                'value' => function (QuoteSegment $model) {
+                    return $model->getQuoteSegmentStops()->count();
+                }
+            ],
             'qs_departure_time',
             'qs_arrival_time',
             'qs_flight_number',
             'qs_departure_airport_code',
             'qs_arrival_airport_code',
-            'qs_trip_id',
             [
                 'class' => ActionColumn::className(),
                 'urlCreator' => function ($action, QuoteSegment $model, $key, $index, $column) {

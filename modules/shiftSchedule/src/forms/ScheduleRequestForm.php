@@ -89,6 +89,9 @@ class ScheduleRequestForm extends Model
                 if (strtotime($date[0]) >= strtotime($date[1])) {
                     $this->addError($attribute, 'Date time end must be more than Date time start');
                 }
+                if (!empty($this->dateTimeStart) && strtotime($this->dateTimeStart) < strtotime('now')) {
+                    $this->addError($attribute, 'Start date must be after the date now');
+                }
             } else {
                 $this->addError($attribute, 'Requested Range Time is not parsed correctly');
                 $this->requestedRangeTime = null;

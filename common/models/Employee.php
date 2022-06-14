@@ -7,6 +7,7 @@ use common\components\BackOffice;
 use common\models\query\EmployeeQuery;
 use common\models\search\EmployeeSearch;
 use frontend\models\UserFailedLogin;
+use kartik\password\StrengthValidator;
 use modules\product\src\entities\productType\ProductType;
 use src\access\EmployeeGroupAccess;
 use src\helpers\app\AppHelper;
@@ -419,7 +420,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             [['username', 'auth_key', 'password_hash', 'email', 'form_roles', 'full_name', 'nickname'], 'required'],
             [['password'], 'required', 'on' => self::SCENARIO_REGISTER],
             [['email', 'password', 'username', 'full_name', 'nickname'], 'trim'],
-            [['password'], 'string', 'min' => 8],
+            ['password', StrengthValidator::class, 'userAttribute' => 'username', 'min' => 10],
             [['status'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
             [['status'], 'integer'],
             [['password_hash', 'password_reset_token', 'email'], 'string', 'max' => 255],

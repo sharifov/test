@@ -694,6 +694,38 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ],
 
                 [
+                    'label' => 'Task List',
+                    'url' => 'javascript:',
+                    'icon' => 'list',
+                    'items' => [
+
+                        ['label' => 'Task List', 'url' => ['/task/task-list/index'],
+                            //'icon' => '',
+                            'title' => 'Task List'
+                        ],
+
+                        [
+                            'label' => 'Advanced',
+                            'url' => 'javascript:',
+                            'icon' => 'folder',
+                            'items' => [
+//                                ['label' => 'Shift Schedule Type', 'url' => ['/shift/shift-schedule-type/index'],
+//                                    'title' => 'Shift Schedule Type'],
+//
+//
+//                                ['label' => 'Type Labels Assign',
+//                                    'url' => ['/shift/shift-schedule-type-label-assign/index'],
+//                                    // 'icon' => 'circle',
+//                                    'title' => 'Shift Schedule Type Labels Assign'
+//                                ],
+                            ]
+                        ],
+
+
+                    ],
+                ],
+
+                [
                     'label' => 'Shift Schedules',
                     'url' => 'javascript:',
                     'icon' => 'calendar',
@@ -983,7 +1015,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
         }
 
         /** @fflag FFlag::FF_KEY_OBJECT_SEGMENT_MODULE_ENABLE, Object Segment module enable/disable */
-        if (Yii::$app->ff->can(FFlag::FF_KEY_OBJECT_SEGMENT_MODULE_ENABLE)) {
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_OBJECT_SEGMENT_MODULE_ENABLE)) {
             $menuModuleItems[] =  [
                 'label' => 'Object Segment',
                 'url' => 'javascript:',
@@ -1152,7 +1184,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => Yii::t('menu', 'Check Exclude IP'), 'url' => ['/tools/check-exclude-ip']],
                         ['label' => Yii::t('menu', 'Stash Log Files'), 'url' => ['/tools/stash-log-file']],
                         ['label' => Yii::t('menu', 'DB Info'), 'url' => ['/tools/db-info']],
-                        ['label' => Yii::t('menu', 'DB View'), 'url' => ['/tools/db-view'], 'icon' => 'database'],
+                        ['label' => Yii::t('menu', 'Db Data Sensitive'), 'url' => ['/db-data-sensitive-crud/index'], 'icon' => 'database'],
                         ['label' => Yii::t('menu', 'Composer Info'), 'url' => ['/tools/composer-info']],
                         ['label' => 'Check phone', 'url' => ['/tools/check-phone'], 'icon' => 'volume-control-phone'],
                         ['label' => 'Import phones', 'url' => ['/tools/import-phone'], 'icon' => 'caret-square-o-up'],
@@ -1178,6 +1210,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'Route', 'url' => ['/rbac/route']],
                 ['label' => 'Permission', 'url' => ['/rbac/permission']],
                 ['label' => 'Role', 'url' => ['/rbac/role']],
+                ['label' => 'RBAC Role Management', 'url' => ['/rbac-role-management/index/']],
                 ['label' => 'Import / Export', 'url' => ['/rbac-import-export/log']],
             ],
         ];

@@ -9,6 +9,7 @@ use common\models\UserProfile;
 use common\models\UserGroup;
 use common\models\Department;
 use common\models\Project;
+use kartik\password\StrengthValidator;
 use src\model\clientChatChannel\entity\ClientChatChannel;
 use modules\shiftSchedule\src\entities\shift\Shift;
 use yii\base\Model;
@@ -336,7 +337,7 @@ class UpdateForm extends Model
             ['full_name', 'string', 'min' => 3, 'max' => 50],
 
             ['password', 'default', 'value' => null],
-            ['password', 'string', 'min' => 8],
+            ['password', StrengthValidator::class, 'userAttribute' => 'username', 'min' => 10],
 
             ['nickname', 'required', 'when' => fn () => $this->fieldAccess->canEdit('nickname')],
             ['nickname', 'trim'],
@@ -449,6 +450,7 @@ class UpdateForm extends Model
 
             ['up_2fa_secret', 'default', 'value' => null],
             ['up_2fa_secret', 'string', 'max' => 50],
+            ['up_2fa_secret', 'match', 'pattern' => '/^[A-Z2-7]+=*$/'],
 
             ['up_2fa_enable', 'default', 'value' => null],
             ['up_2fa_enable', 'boolean'],
@@ -491,6 +493,11 @@ class UpdateForm extends Model
         if (Employee::find()->andWhere(['email' => $this->email])->andWhere(['<>', 'id', $this->targetUser->id])->exists()) {
             $this->addError('email', 'Email is already exist');
         }
+    }
+
+    public function needUpdatePassword(): bool
+    {
+        return in_array('password', $this->activeAttributes()) && $this->password;
     }
 
     public function attributeLabels(): array

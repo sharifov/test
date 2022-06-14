@@ -6118,6 +6118,13 @@ td.selected-cell {
     background-repeat: no-repeat;
     background-position: 12px 14px;
 }
+
+.login-with-microsoft-btn {
+  background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNDggNDgiIHdpZHRoPSIxOHB4IiBoZWlnaHQ9IjE4cHgiPjxwYXRoIGZpbGw9IiNmZjU3MjIiIGQ9Ik02IDZIMjJWMjJINnoiIHRyYW5zZm9ybT0icm90YXRlKC0xODAgMTQgMTQpIi8+PHBhdGggZmlsbD0iIzRjYWY1MCIgZD0iTTI2IDZINDJWMjJIMjZ6IiB0cmFuc2Zvcm09InJvdGF0ZSgtMTgwIDM0IDE0KSIvPjxwYXRoIGZpbGw9IiNmZmMxMDciIGQ9Ik0yNiAyNkg0MlY0MkgyNnoiIHRyYW5zZm9ybT0icm90YXRlKC0xODAgMzQgMzQpIi8+PHBhdGggZmlsbD0iIzAzYTlmNCIgZD0iTTYgMjZIMjJWNDJINnoiIHRyYW5zZm9ybT0icm90YXRlKC0xODAgMTQgMzQpIi8+PC9zdmc+);
+  background-color: white;
+  background-repeat: no-repeat;
+  background-position: 12px 14px;
+}
 .login-with-btn:hover {
     box-shadow: 0 -1px 0 rgba(0, 0, 0, .04), 0 2px 4px rgba(0, 0, 0, .25);
 }

@@ -33,6 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'attributes' => [
             'ap_id',
+            'ap_hash_code',
             'ap_subject',
             //'ap_subject_json',
             //'ap_object',
@@ -56,6 +57,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'ap_updated_user_id:username',
         ],
     ]) ?>
+        <h2>Dump</h2>
+        <?php echo Html::textarea('dump', $model->getDump(), ['rows' => 8, 'style' => 'width: 100%']) ?>
     </div>
         <div class="col-md-6">
             <h2>Object</h2>

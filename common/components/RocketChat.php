@@ -735,4 +735,14 @@ class RocketChat extends Component
         }
         return $errorMessage;
     }
+
+    /**
+     * @return bool
+     * @throws Exception
+     */
+    public function ping(): bool
+    {
+        $login = $this->login($this->username, $this->password);
+        return !empty($login['data']);
+    }
 }

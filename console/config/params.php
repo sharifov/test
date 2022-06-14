@@ -6,8 +6,8 @@ return [
     'webSocketServer' => [
         'host' => 'localhost',
         'port' => 8080,
-        'mode' => SWOOLE_PROCESS,
-        'sockType' => SWOOLE_SOCK_TCP,
+        'mode' => 3, //SWOOLE_PROCESS,
+        'sockType' => 1, //SWOOLE_SOCK_TCP,
         'settings' => [
             // https://www.swoole.co.uk/docs/modules/swoole-server/configuration
             'pid_file' => __DIR__ . '/../runtime/swoole.pid',

@@ -59,6 +59,7 @@ use src\model\emailList\entity\EmailList;
 use src\model\leadRedial\assign\LeadRedialUnAssigner;
 use src\model\leadRedial\queue\AutoTakeJob;
 use src\model\phoneList\entity\PhoneList;
+use src\model\phoneList\services\InternalPhones;
 use src\model\sms\entity\smsDistributionList\SmsDistributionList;
 use src\model\user\entity\userStatus\UserStatus;
 use src\model\userVoiceMail\entity\UserVoiceMail;
@@ -434,9 +435,30 @@ class CommunicationController extends ApiBaseController
                         $departmentPhone->dpp_source_id = $source->id;
                     }
                 }
+                if (!empty($postCall['flow_department'])) {
+                    $departmentId = Department::find()->select('dep_id')->andWhere(['dep_key' => $postCall['flow_department']])->scalar();
+                    if ($departmentId) {
+                        $departmentId = (int)$departmentId;
+                    } else {
+                        $departmentId = null;
+                        Yii::error([
+                            'message' => 'Not found department',
+                            'callSid' => $callSid,
+                            'flow_department' => $postCall['flow_department'],
+                        ], 'CommunicationController:voiceIncoming');
+                    }
+                } elseif ($departmentPhone->dpp_dep_id) {
+                    $departmentId = $departmentPhone->dpp_dep_id;
+                } else {
+                    $departmentId = null;
+                    Yii::error([
+                        'message' => 'Not found department',
+                        'callSid' => $callSid,
+                    ], 'CommunicationController:voiceIncoming');
+                }
 
                 $call_project_id = $departmentPhone->dpp_project_id;
-                $call_dep_id = $departmentPhone->dpp_dep_id;
+                $call_dep_id = $departmentId;
                 $call_source_id = $departmentPhone->dpp_source_id;
                 $call_language_id = $departmentPhone->dpp_language_id;
 
@@ -548,6 +570,10 @@ class CommunicationController extends ApiBaseController
                 }
 
                 $callModel->c_source_type_id = Call::SOURCE_GENERAL_LINE;
+
+                if (!empty($postCall['flow_department'])) {
+                    return $this->ivrFlowFinish($callModel, $departmentPhone);
+                }
 
                 if ($ivrEnable) {
                     $ivrSelectedDigit = isset($postCall['Digits']) ? (int)$postCall['Digits'] : null;
@@ -1385,7 +1411,11 @@ class CommunicationController extends ApiBaseController
             $call->c_is_new = true;
             $call->c_created_dt = date('Y-m-d H:i:s');
             $call->c_from = $calData['From'];
-            $call->c_to = $calData['To']; //Called
+            if (!empty($calData['ForwardedFrom']) && SettingHelper::isOverridePhoneToForwarderFrom() && InternalPhones::isExist($calData['ForwardedFrom'])) {
+                $call->c_to = $calData['ForwardedFrom'];
+            } else {
+                $call->c_to = $calData['To'];
+            }
             $call->c_created_user_id = null;
 
             if ($clientId) {
@@ -2156,6 +2186,92 @@ class CommunicationController extends ApiBaseController
                 'message' => ''
             ];
             $responseData['data']['response'] = $response;
+        } catch (\Throwable $e) {
+            $responseTwml = new VoiceResponse();
+            $responseTwml->reject(['reason' => 'busy']);
+            $response['twml'] = (string) $responseTwml;
+            $responseData = [
+                'status' => 404,
+                'name' => 'Error',
+                'code' => 404,
+                'message' => 'Sales Communication error: ' . $e->getMessage() . "\n" . $e->getFile() . ':' . $e->getLine(),
+            ];
+            $responseData['data']['response'] = $response;
+        }
+        return $responseData;
+    }
+
+    protected function ivrFlowFinish(Call $callModel, DepartmentPhoneProject $departmentPhoneProject): array
+    {
+        $response = [];
+
+        try {
+            $dParams = @json_decode($departmentPhoneProject->dpp_params, true);
+            $ivrParams = $dParams['ivr'] ?? [];
+            $repeatParams = $dParams['queue_repeat'] ?? [];
+            $queueLongTimeParams = new QueueLongTimeNotificationParams(empty($dParams['queue_long_time_notification']) ? [] : $dParams['queue_long_time_notification']);
+
+            $delayJob = 7;
+            $job = new CallQueueJob();
+            $job->call_id = $callModel->c_id;
+            $job->source_id = $departmentPhoneProject->dpp_source_id;
+            $job->delay = 0;
+            $job->delayJob = $delayJob;
+            $jobId = Yii::$app->queue_job->delay($delayJob)->priority(100)->push($job);
+
+            try {
+                if (!$jobId) {
+                    throw new \DomainException('Not created CallQueueJob');
+                }
+                if ($repeatParams) {
+                    (new RepeatMessageCallJobCreator())->create($callModel, $departmentPhoneProject->dpp_id, $repeatParams);
+                }
+                if ($queueLongTimeParams->isActive()) {
+                    (new QueueLongTimeNotificationJobCreator())->create($callModel, $departmentPhoneProject->dpp_id, $queueLongTimeParams->getDelay() + 7);
+                }
+            } catch (\Throwable $e) {
+                Yii::error([
+                    'message' => 'Create call job Error.',
+                    'useCase' => 'Processing Incoming call. ivrFlowFinish',
+                    'error' => $e->getMessage(),
+                    'call' => $callModel->getAttributes(),
+                ], 'CallQueueStartCallService::JobsCreate');
+            }
+
+            $responseTwml = new VoiceResponse();
+
+            if (!empty($ivrParams['entry_pause'])) {
+                $responseTwml->pause(['length' => (int)$ivrParams['entry_pause']]);
+            }
+            if (!empty($ivrParams['entry_phrase'])) {
+                $company = '';
+                if ($callModel->cProject && $callModel->cProject->name) {
+                    $company = ' ' . strtolower($callModel->cProject->name);
+                }
+                $entryPhrase = str_replace('{{project}}', $company, $ivrParams['entry_phrase']);
+                $sayParams = [];
+                if (!empty($ivrParams['entry_language'])) {
+                    $sayParams['language'] = $ivrParams['entry_language'];
+                }
+                if (!empty($ivrParams['entry_voice'])) {
+                    $sayParams['voice'] = $ivrParams['entry_voice'];
+                }
+                $responseTwml->say($entryPhrase, $sayParams);
+            }
+
+            if (!empty($ivrParams['hold_play'])) {
+                $responseTwml->play($ivrParams['hold_play'], ['loop' => 0]);
+            }
+
+            $response = [];
+            $response['twml'] = (string) $responseTwml;
+            $responseData = [
+                'status' => 200,
+                'name' => 'Success',
+                'code' => 0,
+                'message' => '',
+                'data' => ['response' => $response]
+            ];
         } catch (\Throwable $e) {
             $responseTwml = new VoiceResponse();
             $responseTwml->reject(['reason' => 'busy']);

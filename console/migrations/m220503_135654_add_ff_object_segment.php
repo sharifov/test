@@ -32,7 +32,7 @@ class m220503_135654_add_ff_object_segment extends Migration
                     'ff_description' =>   'Module Object Segment enable\disable',
                 ]
             );
-            Yii::$app->ff->invalidateCache();
+            Yii::$app->featureFlag->invalidateCache();
         } catch (\Throwable $throwable) {
             \Yii::error(\src\helpers\app\AppHelper::throwableLog($throwable), 'm220503_135654_add_ff_object_segment:safeUp:Throwable');
         }
@@ -49,7 +49,7 @@ class m220503_135654_add_ff_object_segment extends Migration
             }
             $featureFlagService = new \kivork\FeatureFlag\Services\FeatureFlagService();
             $featureFlagService::delete(\modules\featureFlag\FFlag::FF_KEY_OBJECT_SEGMENT_MODULE_ENABLE);
-            Yii::$app->ff->invalidateCache();
+            Yii::$app->featureFlag->invalidateCache();
         } catch (\Throwable $throwable) {
             \Yii::error(\src\helpers\app\AppHelper::throwableLog($throwable), 'm220503_135654_add_ff_object_segment:safeDown:Throwable');
         }
