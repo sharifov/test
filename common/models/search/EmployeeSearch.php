@@ -221,9 +221,9 @@ class EmployeeSearch extends Employee
             $query->leftJoin('user_profile', 'employees.id = user_profile.up_user_id');
 
             if ($this->useTelegram == 0) {
-                $query->andWhere(['or',
+                $query->andWhere(['OR',
                     ['user_profile.up_telegram' => ''],
-                    ['is', 'user_profile.up_telegram', new \yii\db\Expression('null')]]);
+                    ['IS', 'user_profile.up_telegram', new \yii\db\Expression('null')]]);
             } else {
                 $query->andWhere(['!=', 'user_profile.up_telegram', '']);
             }
@@ -233,9 +233,9 @@ class EmployeeSearch extends Employee
             $query->leftJoin('user_profile', 'employees.id = user_profile.up_user_id');
 
             if ($this->telegramEnabled == 0) {
-                $query->andWhere(['or',
+                $query->andWhere(['OR',
                     ['user_profile.up_telegram_enable' => 0],
-                    ['is', 'user_profile.up_telegram_enable', new \yii\db\Expression('null')]]);
+                    ['IS', 'user_profile.up_telegram_enable', new \yii\db\Expression('null')]]);
             } else {
                 $query->andWhere(['user_profile.up_telegram_enable' => 1]);
             }
@@ -306,7 +306,6 @@ class EmployeeSearch extends Employee
             $query->andWhere(['IN', 'employees.id', $subQuery]);
         }
 
-
         if ($this->projectAccessIds) {
             $subQuery = ProjectEmployeeAccess::find()->select(['DISTINCT(employee_id)'])->where(['project_id' => $this->projectAccessIds]);
             $query->andWhere(['IN', 'employees.id', $subQuery]);
@@ -346,8 +345,8 @@ class EmployeeSearch extends Employee
         if (ArrayHelper::isIn($this->callReady, ['1', '0'], false)) {
             $query->leftJoin('user_status', 'employees.id = user_status.us_user_id');
             if ($this->callReady == 0) {
-                $query->andWhere(['or', ['user_status.us_call_phone_status' => $this->callReady],
-                    ['is', 'user_status.us_call_phone_status', new \yii\db\Expression('null')]]);
+                $query->andWhere(['OR', ['user_status.us_call_phone_status' => $this->callReady],
+                    ['IS', 'user_status.us_call_phone_status', new \yii\db\Expression('null')]]);
             } else {
                 $query->andWhere(['user_status.us_call_phone_status' => $this->callReady]);
             }
@@ -360,7 +359,7 @@ class EmployeeSearch extends Employee
                     ->orWhere(['like', 'el_title', $this->email])
                 ]);
             $query->andWhere([
-                'or',
+                'OR',
                 ['like', 'email', $this->email],
                 ['IN', 'employees.id', $subQuery]
             ]);
