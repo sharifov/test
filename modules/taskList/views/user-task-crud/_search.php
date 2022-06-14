@@ -1,11 +1,11 @@
 <?php
 
-use yii\bootstrap4\Html;
-use common\components\bootstrap4\activeForm\ActiveForm;
+use yii\helpers\Html;
+use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
 /* @var $model modules\taskList\src\entities\userTask\UserTaskSearch */
-/* @var $form common\components\bootstrap4\activeForm\ActiveForm */
+/* @var $form yii\widgets\ActiveForm */
 ?>
 
 <div class="user-task-search">
@@ -18,11 +18,32 @@ use common\components\bootstrap4\activeForm\ActiveForm;
         ],
     ]); ?>
 
-    <?php echo $form->field($model, 'ut_id')/* TODO:: DTRange calendar */ ?>
+    <div class="row">
+        <div class="col-md-2">
+            <?php echo $form->field($model, 'createTimeRange', [
+                    'options' => ['class' => 'form-group']
+                ])->widget(\kartik\daterange\DateRangePicker::class, [
+                    'useWithAddon' => true,
+                    'presetDropdown' => true,
+                    'hideInput' => true,
+                    'convertFormat' => true,
+                    'startAttribute' => 'createTimeStart',
+                    'endAttribute' => 'createTimeEnd',
+                    'pluginOptions' => [
+                        'locale' => [
+                            'format' => 'Y-m-d',
+                            'separator' => ' - '
+                        ],
+                        'ranges' => \Yii::$app->params['dateRangePicker']['configs']['default']
+                    ],
+                    'id' => 'createTimeRange'
+                ])->label('Created DateTime Range');
+            ?>
+        </div>
+    </div>
 
     <div class="form-group">
         <?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>
-        <?= Html::resetButton('Reset', ['class' => 'btn btn-outline-secondary']) ?>
     </div>
 
     <?php ActiveForm::end(); ?>

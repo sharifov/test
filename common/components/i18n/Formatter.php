@@ -573,6 +573,22 @@ class Formatter extends \yii\i18n\Formatter
         return Html::tag('i', '', ['class' => 'fa fa-calendar']) . ' ' . $this->asDatetime(strtotime($dateTime), $format);
     }
 
+    /**
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function asByUserDateTimeAndUTC($dateTime, $format = 'php:d-M-Y [H:i]', string $timeZone = 'UTC'): string
+    {
+        if (!$dateTime) {
+            return $this->nullDisplay;
+        }
+
+        return Html::tag(
+            'span',
+            $this->asByUserDateTime($dateTime, $format),
+            ['title' => $this->asDateTimeByUserTimezone($dateTime, $timeZone, $format) . ' ' . Html::encode($timeZone)]
+        );
+    }
+
     public function asByUserDate($dateTime, $format = 'php:d-M-Y'): string
     {
         if (!$dateTime) {

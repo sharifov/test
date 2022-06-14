@@ -1,14 +1,13 @@
 <?php
 
 use common\components\grid\DateTimeColumn;
-use common\components\grid\UserColumn;
 use common\components\grid\UserSelect2Column;
 use modules\taskList\src\entities\TargetObject;
 use modules\taskList\src\entities\userTask\UserTask;
+use modules\taskList\src\entities\userTask\UserTaskHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\ActionColumn;
-use yii\grid\SerialColumn;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
@@ -27,7 +26,8 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('Create User Task', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-    <?php Pjax::begin(['id' => 'pjax-UserTask']); ?>
+    <?php Pjax::begin(['id' => 'pjax-user-task-index', 'timeout' => 5000, 'enablePushState' => true]); ?>
+
     <?php echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([
@@ -76,21 +76,18 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => DateTimeColumn::class,
                 'limitEndDay' => false,
                 'attribute' => 'ut_start_dt',
-                'format' => 'byUserDateTime',
+                'format' => 'byUserDateTimeAndUTC',
             ],
             [
                 'class' => DateTimeColumn::class,
                 'limitEndDay' => false,
                 'attribute' => 'ut_end_dt',
-                'format' => 'byUserDateTime',
+                'format' => 'byUserDateTimeAndUTC',
             ],
             [
                 'attribute' => 'ut_priority',
                 'value' => static function (UserTask $model) {
-                    if (!$model->ut_priority) {
-                        return Yii::$app->formatter->nullDisplay;
-                    }
-                    return UserTask::getPriorityName($model->ut_priority);
+                    return UserTaskHelper::priorityLabel($model->ut_priority);
                 },
                 'format' => 'raw',
                 'filter' => UserTask::PRIORITY_LIST,
@@ -98,15 +95,17 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'ut_status_id',
                 'value' => static function (UserTask $model) {
-                    if (!$model->ut_status_id) {
-                        return Yii::$app->formatter->nullDisplay;
-                    }
-                    return UserTask::getStatusName($model->ut_status_id);
+                    return UserTaskHelper::statusLabel($model->ut_status_id);
                 },
                 'format' => 'raw',
                 'filter' => UserTask::STATUS_LIST,
             ],
-            //'ut_created_dt',
+            [
+                'class' => DateTimeColumn::class,
+                'limitEndDay' => false,
+                'attribute' => 'ut_created_dt',
+                'format' => 'byUserDateTimeAndUTC',
+            ],
             //'ut_year',
             //'ut_month',
             [

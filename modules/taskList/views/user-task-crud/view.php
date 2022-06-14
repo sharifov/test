@@ -1,6 +1,8 @@
 <?php
 
-use yii\bootstrap4\Html;
+use modules\taskList\src\entities\userTask\UserTask;
+use modules\taskList\src\entities\userTask\UserTaskHelper;
+use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
@@ -13,39 +15,68 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="user-task-view">
 
-    <h1><?= Html::encode($this->title) ?></h1>
-
     <div class="col-md-4">
 
-        <p>
-            <?= Html::a('Update', ['update', 'ut_id' => $model->ut_id, 'ut_year' => $model->ut_year, 'ut_month' => $model->ut_month], ['class' => 'btn btn-primary']) ?>
-            <?= Html::a('Delete', ['delete', 'ut_id' => $model->ut_id, 'ut_year' => $model->ut_year, 'ut_month' => $model->ut_month], [
-                'class' => 'btn btn-danger',
-                'data' => [
-                    'confirm' => 'Are you sure you want to delete this item?',
-                    'method' => 'post',
-                ],
-            ]) ?>
-        </p>
+    <h1><?= Html::encode($this->title) ?></h1>
 
-        <?= DetailView::widget([
-            'model' => $model,
-            'attributes' => [
-                'ut_id',
-                'ut_user_id',
-                'ut_target_object',
-                'ut_target_object_id',
-                'ut_task_list_id',
-                'ut_start_dt',
-                'ut_end_dt',
-                'ut_priority',
-                'ut_status_id',
-                'ut_created_dt',
-                'ut_year',
-                'ut_month',
+    <p>
+        <?= Html::a('Update', ['update', 'ut_id' => $model->ut_id, 'ut_year' => $model->ut_year, 'ut_month' => $model->ut_month], ['class' => 'btn btn-primary']) ?>
+        <?= Html::a('Delete', ['delete', 'ut_id' => $model->ut_id, 'ut_year' => $model->ut_year, 'ut_month' => $model->ut_month], [
+            'class' => 'btn btn-danger',
+            'data' => [
+                'confirm' => 'Are you sure you want to delete this item?',
+                'method' => 'post',
             ],
         ]) ?>
+    </p>
+
+    <?= DetailView::widget([
+        'model' => $model,
+        'attributes' => [
+            'ut_id',
+            'ut_user_id:userNameWithId',
+            'ut_target_object',
+            'ut_target_object_id',
+            [
+                'attribute' => 'ut_task_list_id',
+                'value' => static function (UserTask $model) {
+                    if (!$model->ut_task_list_id) {
+                        return Yii::$app->formatter->nullDisplay;
+                    }
+                    return Html::a(
+                        $model->taskList->tl_title . ' (' . $model->ut_task_list_id . ')' ?? '-',
+                        [
+                            'task-list/view',
+                            'tl_id' => $model->ut_task_list_id
+                        ],
+                        ['target' => '_blank', 'data-pjax' => 0]
+                    );
+                },
+                'format' => 'raw',
+            ],
+            'ut_start_dt:byUserDateTimeAndUTC',
+            'ut_end_dt:byUserDateTimeAndUTC',
+            [
+                'attribute' => 'ut_priority',
+                'value' => static function (UserTask $model) {
+                    return UserTaskHelper::priorityLabel($model->ut_priority);
+                },
+                'format' => 'raw',
+                'filter' => UserTask::PRIORITY_LIST,
+            ],
+            [
+                'attribute' => 'ut_status_id',
+                'value' => static function (UserTask $model) {
+                    return UserTaskHelper::statusLabel($model->ut_status_id);
+                },
+                'format' => 'raw',
+                'filter' => UserTask::STATUS_LIST,
+            ],
+            'ut_created_dt:byUserDateTimeAndUTC',
+            'ut_year',
+            'ut_month',
+        ],
+    ]) ?>
 
     </div>
-
 </div>

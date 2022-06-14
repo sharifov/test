@@ -1,6 +1,6 @@
 <?php
 
-use yii\bootstrap4\Html;
+use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $model modules\taskList\src\entities\userTask\UserTask */

@@ -167,4 +167,23 @@ class DBHelper
 
         return 'ALTER TABLE `' . $table . '` ADD PARTITION (' . $partition . ');';
     }
+
+    public static function yearMonthRestrictionQuery(
+        \DateTimeImmutable $startDT,
+        \DateTime $endDt,
+        string $yearColumn,
+        string $monthColumn
+    ): string {
+        $preparedYearMonth[(int) $endDt->format('Y')][] = (int) $endDt->format('n');
+        while ($endDt->modify('-1 months') > $startDT) {
+            $preparedYearMonth[(int) $endDt->format('Y')][] = (int) $endDt->format('n');
+        }
+
+        $queryWhereDT = [];
+        foreach ($preparedYearMonth as $year => $months) {
+            $queryWhereDT[] = '((' . $yearColumn . ' = ' . $year . ') AND (' . $monthColumn . ' IN (' . implode(',', $months) . ')))';
+        }
+
+        return implode(' OR ', $queryWhereDT);
+    }
 }

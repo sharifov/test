@@ -78,16 +78,14 @@ class UserTask extends \yii\db\ActiveRecord
 
             [['ut_start_dt', 'ut_end_dt'], 'required'],
             [['ut_start_dt', 'ut_end_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
-            [['ut_start_dt'], 'compare', 'compareAttribute' => 'ut_end_dt', 'operator' => '<='],
+            [['ut_start_dt'], 'compare', 'compareAttribute' => 'ut_end_dt', 'operator' => '<=', 'enableClientValidation' => false],
 
             [['ut_created_dt'], 'default', 'value' => date('Y-m-d H:i:s')],
             [['ut_created_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
 
-            [['ut_year'], 'required'],
             [['ut_year'], 'integer'],
             [['ut_year'], 'default', 'value' => date('Y')],
 
-            [['ut_month'], 'required'],
             [['ut_month'], 'integer'],
             [['ut_month'], 'default', 'value' => date('m')],
         ];
@@ -168,7 +166,6 @@ class UserTask extends \yii\db\ActiveRecord
         return $model;
     }
 
-    /* TODO:: add class helper */
     public static function getStatusName(?int $statusId): string
     {
         return self::STATUS_LIST[$statusId] ?? '-';

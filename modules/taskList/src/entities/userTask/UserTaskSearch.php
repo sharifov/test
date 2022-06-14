@@ -2,12 +2,17 @@
 
 namespace modules\taskList\src\entities\userTask;
 
+use common\models\Employee;
 use kartik\daterange\DateRangeBehavior;
+use src\helpers\app\AppHelper;
+use src\helpers\app\DBHelper;
+use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use modules\taskList\src\entities\userTask\UserTask;
+use yii\helpers\ArrayHelper;
 
 /**
- * Class UserTaskSearch
+ * UserTaskSearch
  */
 class UserTaskSearch extends UserTask
 {
@@ -15,15 +20,14 @@ class UserTaskSearch extends UserTask
     public $createTimeStart;
     public $createTimeEnd;
 
-    public function __construct(int $defaultMonth = 3, array $config = [])
-    {
-        /* TODO:: add dateRange logic */
+    private string $defaultDTStart;
+    private string $defaultDTEnd;
 
-        /* TODO::
-            * сгененрировать дефолтные значения $defaultDTStart $defaultDTEnd
-            * если не приходит createTimeRange или любой из других параметров - включается $defaultDTStart $defaultDTEnd
-            * на основе createTimeRange или $defaultDTStart $defaultDTEnd - геренировать ut_year + ut_month
-         */
+    public function __construct(int $defaultMonth = 1, string $formatDt = 'Y-m-d', array $config = [])
+    {
+        $this->defaultDTEnd = (new \DateTime())->format($formatDt);
+        $this->defaultDTStart = (new \DateTimeImmutable())
+            ->modify('-' . abs($defaultMonth) . ' months')->format($formatDt);
 
         parent::__construct($config);
     }
@@ -56,13 +60,25 @@ class UserTaskSearch extends UserTask
             ['ut_user_id', 'integer'],
 
             ['ut_year', 'integer'],
-            ['ut_month', 'integer'],/* TODO::  */
+            ['ut_month', 'integer'],
+
+            [['createTimeRange'], 'default', 'value' => $this->defaultDTStart . ' - ' . $this->defaultDTEnd],
+
+            [['createTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
+            [['createTimeStart', 'createTimeEnd'], 'safe'],
         ];
     }
 
-    public function search($params): ActiveDataProvider
+    /**
+     * Creates data provider instance with search query applied
+     *
+     * @param array $params
+     *
+     * @return ActiveDataProvider
+     */
+    public function search($params)
     {
-        $query = static::find();
+        $query = UserTask::find();
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -77,19 +93,52 @@ class UserTaskSearch extends UserTask
             return $dataProvider;
         }
 
+        if ($this->createTimeRange) {
+            try {
+                $dTStart = new \DateTimeImmutable(date('Y-m-d 00:00:00', $this->createTimeStart));
+                $dTEnd = new \DateTime(date('Y-m-d 23:59:59', $this->createTimeEnd));
+                $sqlDTRestriction = DBHelper::yearMonthRestrictionQuery(
+                    $dTStart,
+                    $dTEnd,
+                    'ut_year',
+                    'ut_month'
+                );
+                $query->where($sqlDTRestriction);
+            } catch (\RuntimeException | \DomainException $throwable) {
+                $message = AppHelper::throwableLog($throwable);
+                $message['model'] = ArrayHelper::toArray($this);
+                \Yii::warning($message, 'UserTaskSearch:search:Exception');
+            } catch (\Throwable $throwable) {
+                $message = AppHelper::throwableLog($throwable);
+                $message['model'] = ArrayHelper::toArray($this);
+                \Yii::error($message, 'UserTaskSearch:search:Throwable');
+            }
+        }
+
+        // grid filtering conditions
         $query->andFilterWhere([
             'ut_id' => $this->ut_id,
             'ut_user_id' => $this->ut_user_id,
             'ut_target_object_id' => $this->ut_target_object_id,
             'ut_task_list_id' => $this->ut_task_list_id,
-            'DATE(ut_start_dt)' => $this->ut_start_dt,
-            'DATE(ut_end_dt)' => $this->ut_end_dt,
             'ut_priority' => $this->ut_priority,
             'ut_status_id' => $this->ut_status_id,
-            'DATE(ut_created_dt)' => $this->ut_created_dt,
             'ut_year' => $this->ut_year,
             'ut_month' => $this->ut_month,
         ]);
+
+        if ($this->ut_start_dt) {
+            $query->andFilterWhere(['>=', 'ut_start_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_start_dt))])
+                ->andFilterWhere(['<=', 'ut_start_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_start_dt) + 3600 * 24)]);
+        }
+        if ($this->ut_end_dt) {
+            $query->andFilterWhere(['>=', 'ut_end_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_end_dt))])
+                ->andFilterWhere(['<=', 'ut_end_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_end_dt) + 3600 * 24)]);
+        }
+        if ($this->ut_created_dt) {
+            $query->andFilterWhere(['>=', 'ut_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_created_dt))])
+                ->andFilterWhere(['<=', 'ut_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_created_dt) + 3600 * 24)]);
+        }
 
         $query->andFilterWhere(['like', 'ut_target_object', $this->ut_target_object]);
 

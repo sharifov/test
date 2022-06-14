@@ -2,18 +2,18 @@
 
 namespace modules\taskList\controllers;
 
+use frontend\controllers\FController;
 use modules\taskList\src\entities\userTask\repository\UserTaskRepository;
-use src\helpers\app\AppHelper;
-use Yii;
 use modules\taskList\src\entities\userTask\UserTask;
 use modules\taskList\src\entities\userTask\UserTaskSearch;
-use frontend\controllers\FController;
+use src\helpers\app\AppHelper;
+use src\helpers\ErrorsToStringHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-use yii\web\Response;
-use yii\db\StaleObjectException;
-use yii\helpers\ArrayHelper;
 
+/**
+ * UserTaskCrudController implements the CRUD actions for UserTask model.
+ */
 class UserTaskCrudController extends FController
 {
     public function init(): void
@@ -22,7 +22,10 @@ class UserTaskCrudController extends FController
         $this->layoutCrud();
     }
 
-    public function behaviors(): array
+    /**
+     * @inheritDoc
+     */
+    public function behaviors()
     {
         return array_merge(
             parent::behaviors(),
@@ -38,12 +41,14 @@ class UserTaskCrudController extends FController
     }
 
     /**
+     * Lists all UserTask models.
+     *
      * @return string
      */
-    public function actionIndex(): string
+    public function actionIndex()
     {
         $searchModel = new UserTaskSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dataProvider = $searchModel->search($this->request->queryParams);
 
         return $this->render('index', [
             'searchModel' => $searchModel,
@@ -52,13 +57,14 @@ class UserTaskCrudController extends FController
     }
 
     /**
+     * Displays a single UserTask model.
      * @param int $ut_id ID
      * @param int $ut_year Year
      * @param int $ut_month Month
      * @return string
-     * @throws NotFoundHttpException
+     * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($ut_id, $ut_year, $ut_month): string
+    public function actionView($ut_id, $ut_year, $ut_month)
     {
         return $this->render('view', [
             'model' => $this->findModel($ut_id, $ut_year, $ut_month),
@@ -66,24 +72,32 @@ class UserTaskCrudController extends FController
     }
 
     /**
-     * @return string|Response
+     * Creates a new UserTask model.
+     * If creation is successful, the browser will be redirected to the 'view' page.
+     * @return string|\yii\web\Response
      */
     public function actionCreate()
     {
         $model = new UserTask();
 
         if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->validate()) {
-                try {
-                    (new UserTaskRepository($model))->save();
-                } catch (\Throwable $throwable) {
-                    \Yii::error(AppHelper::throwableLog($throwable), 'UserTaskCrudController:actionCreate:save');
-                    Yii::$app->getSession()->setFlash('error', $throwable->getMessage());
+            try {
+                if (!$model->load($this->request->post())) {
+                    throw new \RuntimeException('UserTask not loaded');
                 }
+                if (!$model->validate()) {
+                    throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($model, ' '));
+                }
+                (new UserTaskRepository($model))->save();
                 return $this->redirect(['view', 'ut_id' => $model->ut_id, 'ut_year' => $model->ut_year, 'ut_month' => $model->ut_month]);
+            } catch (\RuntimeException | \DomainException $throwable) {
+                \Yii::error(AppHelper::throwableLog($throwable), 'UserTaskCrudController:actionCreate:Exception');
+                \Yii::$app->getSession()->setFlash('warning', $throwable->getMessage());
+
+            } catch (\Throwable $throwable) {
+                \Yii::error(AppHelper::throwableLog($throwable), 'UserTaskCrudController:actionCreate:Throwable');
+                \Yii::$app->getSession()->setFlash('error', $throwable->getMessage());
             }
-        } else {
-            $model->loadDefaultValues();
         }
 
         return $this->render('create', [
@@ -92,11 +106,13 @@ class UserTaskCrudController extends FController
     }
 
     /**
+     * Updates an existing UserTask model.
+     * If update is successful, the browser will be redirected to the 'view' page.
      * @param int $ut_id ID
      * @param int $ut_year Year
      * @param int $ut_month Month
-     * @return string|Response
-     * @throws NotFoundHttpException
+     * @return string|\yii\web\Response
+     * @throws NotFoundHttpException if the model cannot be found
      */
     public function actionUpdate($ut_id, $ut_year, $ut_month)
     {
@@ -112,15 +128,15 @@ class UserTaskCrudController extends FController
     }
 
     /**
+     * Deletes an existing UserTask model.
+     * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param int $ut_id ID
      * @param int $ut_year Year
      * @param int $ut_month Month
-     * @return Response
-     * @throws NotFoundHttpException
-     * @throws \Throwable
-     * @throws StaleObjectException
+     * @return \yii\web\Response
+     * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete($ut_id, $ut_year, $ut_month): Response
+    public function actionDelete($ut_id, $ut_year, $ut_month)
     {
         $this->findModel($ut_id, $ut_year, $ut_month)->delete();
 
@@ -128,13 +144,15 @@ class UserTaskCrudController extends FController
     }
 
     /**
+     * Finds the UserTask model based on its primary key value.
+     * If the model is not found, a 404 HTTP exception will be thrown.
      * @param int $ut_id ID
      * @param int $ut_year Year
      * @param int $ut_month Month
-     * @return UserTask
-     * @throws NotFoundHttpException
+     * @return UserTask the loaded model
+     * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($ut_id, $ut_year, $ut_month): UserTask
+    protected function findModel($ut_id, $ut_year, $ut_month)
     {
         if (($model = UserTask::findOne(['ut_id' => $ut_id, 'ut_year' => $ut_year, 'ut_month' => $ut_month])) !== null) {
             return $model;
