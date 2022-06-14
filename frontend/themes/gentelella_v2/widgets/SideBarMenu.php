@@ -698,6 +698,14 @@ class SideBarMenu extends \yii\bootstrap\Widget
                             //'icon' => '',
                             'title' => 'Task List'
                         ],
+                        [
+                            'label' => 'User Task',
+                            'url' => ['/task/user-task-crud/index'],
+                        ],
+                        [
+                            'label' => 'Shift schedule event task',
+                            'url' => ['/task/shift-schedule-event-task-crud/index'],
+                        ],
 
                         [
                             'label' => 'Advanced',

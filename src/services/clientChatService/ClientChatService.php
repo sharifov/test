@@ -211,9 +211,6 @@ class ClientChatService
         $limit = $channel->getSystemUserLimit();
         $users = $employeeSearch->searchAvailableAgentsForChatRequests($clientChat, $limit, $channel->getSortParameters());
 
-//        $key = self::getRedisDistributionLogicKey($clientChat->cch_id);
-//        if ($users) {
-
         if (SettingHelper::isClientChatDebugEnable() && $clientChat->isTransfer()) {
             \Yii::info([
                 'message' => 'Users will be assign to chat',
@@ -226,16 +223,18 @@ class ClientChatService
             ], 'info\ClientChatDebug');
         }
 
-        foreach ($users as $user) {
-            $this->sendRequestToUser($clientChat, $user->id);
-        }
+        $key = self::getRedisDistributionLogicKey($clientChat->cch_id);
+        if ($users) {
+            foreach ($users as $user) {
+                $this->sendRequestToUser($clientChat, $user->id);
+            }
 
-//            if ($limit) {
-        $this->createUserAccessDistributionLogicJob($clientChat->cch_id, $channel->getSystemRepeatDelaySeconds());
-//            }
-//        } elseif (\Yii::$app->redis->exists($key)) {
-//            \Yii::$app->redis->del($key);
-//        }
+            if ($limit) {
+                $this->createUserAccessDistributionLogicJob($clientChat->cch_id, $channel->getSystemRepeatDelaySeconds());
+            }
+        } elseif (\Yii::$app->redis->exists($key)) {
+            \Yii::$app->redis->del($key);
+        }
     }
 
     public function createUserAccessDistributionLogicJob(int $chatId, int $delay = 0): void
