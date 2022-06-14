@@ -93,7 +93,6 @@ class UserTaskCrudController extends FController
             } catch (\RuntimeException | \DomainException $throwable) {
                 \Yii::error(AppHelper::throwableLog($throwable), 'UserTaskCrudController:actionCreate:Exception');
                 \Yii::$app->getSession()->setFlash('warning', $throwable->getMessage());
-
             } catch (\Throwable $throwable) {
                 \Yii::error(AppHelper::throwableLog($throwable), 'UserTaskCrudController:actionCreate:Throwable');
                 \Yii::$app->getSession()->setFlash('error', $throwable->getMessage());
