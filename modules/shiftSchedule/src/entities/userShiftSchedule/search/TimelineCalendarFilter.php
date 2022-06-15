@@ -21,6 +21,7 @@ class TimelineCalendarFilter extends Model
     public $shift = [];
     public $userId;
     public $appliedFilter;
+    public bool $displayUsersWithoutEvents = true;
 
     public array $parsedUserGroups = [];
 
@@ -57,7 +58,8 @@ class TimelineCalendarFilter extends Model
             [['startDateTime', 'endDateTime'], 'datetime', 'format' => 'php:Y-m-d H:i'],
             [['startDate', 'endDate'], 'datetime', 'format' => 'php:Y-m-d'],
             [['appliedFilter'], 'boolean'],
-            [['appliedFilter'], 'default', 'value' => false]
+            [['appliedFilter'], 'default', 'value' => false],
+            [['displayUsersWithoutEvents'], 'boolean']
         ];
     }
 
