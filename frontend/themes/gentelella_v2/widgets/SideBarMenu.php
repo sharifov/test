@@ -268,7 +268,12 @@ class SideBarMenu extends \yii\bootstrap\Widget
             'label' => 'User Shift Calendar',
             'url' => ['/shift-schedule/calendar'],
             'icon' => 'calendar text-warning',
-            'title' => 'User Shift Schedule Calendar'
+            'title' => 'User Shift Schedule Calendar',
+            'abac'  => [
+                'dto'    => null,
+                'object' => ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR,
+                'action' => ShiftAbacObject::ACTION_ACCESS,
+            ],
         ];
 
 
@@ -697,6 +702,14 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Task List', 'url' => ['/task/task-list/index'],
                             //'icon' => '',
                             'title' => 'Task List'
+                        ],
+                        [
+                            'label' => 'User Task',
+                            'url' => ['/task/user-task-crud/index'],
+                        ],
+                        [
+                            'label' => 'Shift schedule event task',
+                            'url' => ['/task/shift-schedule-event-task-crud/index'],
                         ],
 
                         [

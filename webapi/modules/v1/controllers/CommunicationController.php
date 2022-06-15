@@ -59,6 +59,7 @@ use src\model\emailList\entity\EmailList;
 use src\model\leadRedial\assign\LeadRedialUnAssigner;
 use src\model\leadRedial\queue\AutoTakeJob;
 use src\model\phoneList\entity\PhoneList;
+use src\model\phoneList\services\InternalPhones;
 use src\model\sms\entity\smsDistributionList\SmsDistributionList;
 use src\model\user\entity\userStatus\UserStatus;
 use src\model\userVoiceMail\entity\UserVoiceMail;
@@ -1410,7 +1411,13 @@ class CommunicationController extends ApiBaseController
             $call->c_is_new = true;
             $call->c_created_dt = date('Y-m-d H:i:s');
             $call->c_from = $calData['From'];
-            $call->c_to = $calData['To']; //Called
+            if (!empty($calData['ForwardedFrom']) && SettingHelper::isOverridePhoneToForwarderFrom() && ($forwardedPhoneListId = PhoneList::find()->select(['pl_id'])->byPhone($calData['ForwardedFrom'])->scalar())) {
+                $call->c_to = $calData['ForwardedFrom'];
+                $call->setDataPhoneListId((int)$forwardedPhoneListId);
+            } else {
+                $call->c_to = $calData['To'];
+                $call->setDataPhoneListId($phoneListId);
+            }
             $call->c_created_user_id = null;
 
             if ($clientId) {
@@ -1429,7 +1436,6 @@ class CommunicationController extends ApiBaseController
             $call->c_recording_disabled = (bool)($calData['call_recording_disabled'] ?? false);
             $call->setDataPriority($priority);
             $call->setDataCreatedParams($calData);
-            $call->setDataPhoneListId($phoneListId);
             $call->setDataCreatorType((int)($calData['creator_type_id'] ?? null));
 
             if (!$call->save()) {

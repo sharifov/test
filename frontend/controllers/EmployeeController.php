@@ -1652,6 +1652,8 @@ class EmployeeController extends FController
                 $transaction->commit();
 
                 if ($userUpdated) {
+                    $targetUser->updated_at = date('Y-m-d H:i:s');
+                    $targetUser->save();
                     Yii::$app->getSession()->setFlash('success', 'User updated');
                 } else {
                     Yii::$app->getSession()->setFlash('warning', 'User is not updated');

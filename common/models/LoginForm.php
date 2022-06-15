@@ -94,6 +94,7 @@ class LoginForm extends Model
 
             $isLogin = Yii::$app->user->login($user, $this->rememberMe ? 3600 * 24 * 30 : 0);
             if ($isLogin) {
+                Employee::updateAll(['last_login_dt' => date('Y-m-d H:i:s')], ['id' => $user->id]);
                 self::sendWsIdentityCookie(Yii::$app->user->identity, $this->rememberMe ? 3600 * 24 * 30 : 0);
             }
             return $isLogin;

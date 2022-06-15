@@ -428,7 +428,7 @@ $jsCode = <<<JS
 
 $(document).on('click','#client-unsubscribe-button', function (e) {
         e.preventDefault();
-        let url = $(this).data('unsubscribe-url');        
+        let url = $(this).data('unsubscribe-url');
         $.ajax({
             url: url,               
             success: function(response){
@@ -438,7 +438,24 @@ $(document).on('click','#client-unsubscribe-button', function (e) {
                 } else {
                     createNotifyByObject({title: "Communication", type: "info", text: 'Client communication allowed', hide: true});
                 }
-                updateCommunication();                
+                updateCommunication();
+            }
+        });
+    });
+
+    $(document).on('click','#client-subscribe-button', function (e) {
+        e.preventDefault();
+        let url = $(this).data('subscribe-url');
+        $.ajax({
+            url: url,               
+            success: function(response){
+                $.pjax.reload({container: '#pjax-client-info', timeout: 10000, async: false});
+                if (Boolean(Number(response.data.action))){
+                    createNotifyByObject({title: "Communication", type: "info", text: 'Client communication restricted', hide: true});
+                } else {
+                    createNotifyByObject({title: "Communication", type: "info", text: 'Client communication allowed', hide: true});
+                }
+                updateCommunication();
             }
         });
     });

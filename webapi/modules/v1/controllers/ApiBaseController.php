@@ -102,10 +102,15 @@ class ApiBaseController extends Controller
                     return null;
                 }
 
-
                 if (!$apiUser->au_enabled) {
                     throw new NotAcceptableHttpException('ApiUser is disabled', 10);
                 }
+
+                Yii::info(['message' => 'API: Auth API User completed successful', 'username' => $username,
+                    'endpoint' => $this->action->uniqueId,
+                    'RemoteIP' => Yii::$app->request->getRemoteIP(),
+                    'UserIP' => Yii::$app->request->getUserIP()], 'elk\API:v1:HttpBasicAuth:ApiUser');
+
                 $apiProject = Project::findOne($apiUser->au_project_id);
 
                 $this->apiUser = $apiUser;

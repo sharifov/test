@@ -80,7 +80,7 @@ class CallQueueLongTimeNotificationJob extends BaseJob implements JobInterface
                 $userId,
                 'Call - Long Queue Time',
                 $message,
-                Notifications::TYPE_WARNING,
+                Notifications::getNotifyType(Notifications::TYPE_WARNING),
                 true
             );
             if ($notification) {
@@ -100,7 +100,7 @@ class CallQueueLongTimeNotificationJob extends BaseJob implements JobInterface
                     $userId . '-desk',
                     'Call - Long Queue Time',
                     $message,
-                    Notifications::TYPE_WARNING,
+                    Notifications::getNotifyType(Notifications::TYPE_WARNING),
                     $message,
                     true
                 )

@@ -71,6 +71,11 @@ $dateTimeRangeChangeJs = <<<JS
 }
 JS;
 ?>
+<style>
+    .daterangepicker{
+        z-index: 9999;
+    }
+</style>
 
 <script>pjaxOffFormSubmit('#<?= $pjaxId ?>')</script>
 <div class="row">
@@ -158,7 +163,8 @@ JS;
                             'format' => 'Y-m-d H:i',
                             'separator' => ' - '
                         ],
-                        'opens' => 'right'
+                        'opens' => 'right',
+                        'parentEl' => 'body .modal.show .modal-content > .modal-body'
                     ],
                     'pluginEvents' => [
                         'change' => new JsExpression($dateTimeRangeChangeJs)
