@@ -416,29 +416,4 @@ class ApiLog extends \yii\db\ActiveRecord
         Yii::info($logData, $prefix . '/' . $this->al_action);
         unset($logData, $reqData, $respData);
     }
-
-    public static function getPrevModels($prevId, $limit, $filters = null): array
-    {
-        if (isset($filters)) {
-            $mainQuery = self::find()
-                ->where(['>', 'al_id', $prevId])
-                ->andFilterWhere($filters)
-                ->orderBy(['al_id' => SORT_ASC])
-                ->limit($limit + 1);
-            return self::find()
-                ->from(['C' => $mainQuery])
-                ->orderBy(['al_id' => SORT_DESC])
-                ->all();
-        }
-
-        $mainQuery = self::find()
-            ->where(['>', 'al_id', $prevId])
-            ->orderBy(['al_id' => SORT_ASC])
-            ->limit($limit + 1);
-        return self::find()
-            ->from(['C' => $mainQuery])
-            ->orderBy(['al_id' => SORT_DESC])
-            ->limit($limit + 1)
-            ->all();
-    }
 }
