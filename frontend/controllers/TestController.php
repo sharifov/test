@@ -77,6 +77,8 @@ use modules\cases\src\abac\saleList\SaleListAbacObject;
 use modules\email\src\helpers\MailHelper;
 use modules\email\src\Notifier;
 use modules\eventManager\src\EventApp;
+use modules\featureFlag\debug\DebugFeatureFlag;
+use modules\featureFlag\debug\DebugFeatureFlagDTO;
 use modules\featureFlag\FFlag;
 use modules\featureFlag\src\entities\FeatureFlag;
 use modules\flight\models\FlightQuote;
@@ -2607,22 +2609,32 @@ class TestController extends FController
 
     public function actionFf()
     {
-        echo 'Feature Flag Test<br><br>';
+        echo 'Feature Flag "' . FFlag::FF_KEY_DEBUG . '"<br><br>';
 
-        /** @fflag FFlag::FF_TEST_FLAG1, Username field1 */
-        if (Yii::$app->featureFlag->isEnable('ff_test_example')) {
-            VarDumper::dump(Yii::$app->featureFlag->getValue('ff_test_example'), 10, true);
+
+        $debugDTO = new DebugFeatureFlagDTO();
+        $debugDTO->department_id = 1;
+        $debugDTO->project_key = 'ovago';
+        $debugDTO->app_type = Yii::$app->params['serviceType'] ?? null;
+
+        VarDumper::dump([DebugFeatureFlag::OBJ_DEBUG => $debugDTO], 10, true);
+
+        /** @fflag FFlag::FF_KEY_DEBUG, Username field1 */
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_DEBUG, [DebugFeatureFlag::OBJ_DEBUG => $debugDTO])) {
+            echo 'Enable<br>';
+            echo 'Value: ';
+            VarDumper::dump(Yii::$app->featureFlag->getValue(FFlag::FF_KEY_DEBUG), 10, true);
         } else {
-            echo 'NO1';
+            echo 'Disable';
         }
-
-        echo '<br><br>';
-
-        if (Yii::$app->featureFlag->isDue(\kivork\FeatureFlag\Models\FeatureFlag::ET_DISABLED_CONDITION, '59 * * * * *')) {
-            echo 'YES3';
-        } else {
-            echo 'NO3';
-        }
+//
+//        echo '<br><br>';
+//
+//        if (Yii::$app->featureFlag->isDue(\kivork\FeatureFlag\Models\FeatureFlag::ET_DISABLED_CONDITION, '59 * * * * *')) {
+//            echo 'YES3';
+//        } else {
+//            echo 'NO3';
+//        }
 
         echo '<br><br>';
         return date('Y-m-d H:i:s');
