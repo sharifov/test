@@ -146,7 +146,7 @@ class ClientChatRequestSearch extends ClientChatRequest
         }
 
         //recharge dataprovider when prev
-        if ($this->cursor == 1) {
+        if ($this->cursor == 1  && $this->prevId != null) {
             $dataProvider->setModels($prevLimit);
             $models = $dataProvider->getModels();
             $modelKeys = $dataProvider->prepareKeys($models);
