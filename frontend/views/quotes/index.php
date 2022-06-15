@@ -69,7 +69,9 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>
 
     <?php  echo $this->render('_pagination', ['model' => $searchModel]);?>
+
     <?= $searchModel->filterCount ? 'Find <b>' . $searchModel->filterCount . '</b> items' : null ?>
+
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
@@ -172,5 +174,8 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'yii\grid\ActionColumn', 'template' => '{view}'],
         ],
     ]); ?>
+
+    <?php  echo $this->render('_pagination', ['model' => $searchModel]);?>
+
     <?php Pjax::end(); ?>
 </div>

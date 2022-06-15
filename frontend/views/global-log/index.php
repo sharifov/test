@@ -105,6 +105,8 @@ $pjaxListId = 'pjax-global-log';
         ],
     ]); ?>
 
+    <?php  echo $this->render('_pagination', ['model' => $searchModel]);?>
+
     <?php Pjax::end(); ?>
 
 </div>
