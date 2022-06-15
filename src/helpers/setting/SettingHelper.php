@@ -805,7 +805,17 @@ class SettingHelper
 
     public static function isEnabledAuthClients(): bool
     {
-        return (bool) (Yii::$app->params['settings']['enable_auth_clients'] ?? false);
+        return (self::isEnabledGoogleAuthClient() || self::isEnabledMicrosoftAuthClient());
+    }
+
+    public static function isEnabledGoogleAuthClient(): bool
+    {
+        return (bool) (Yii::$app->params['settings']['enable_auth_clients']['auth_google'] ?? false);
+    }
+
+    public static function isEnabledMicrosoftAuthClient(): bool
+    {
+        return (bool) (Yii::$app->params['settings']['enable_auth_clients']['auth_microsoft'] ?? false);
     }
 
     public static function getCleanLeadPoorProcessingLogAfterDays(): int
@@ -1011,5 +1021,15 @@ class SettingHelper
     public static function isEnableAgentCallQueueJobAfterChangeCallStatusReady(): bool
     {
         return (bool) (Yii::$app->params['settings']['enable_agent_call_queue_job_after_change_call_status_ready'] ?? true);
+    }
+
+    public static function isSyncOverridePhoneToEnable(): bool
+    {
+        return (bool) (Yii::$app->params['settings']['call_sync_override_phone_to_enable'] ?? false);
+    }
+
+    public static function isOverridePhoneToForwarderFrom(): bool
+    {
+        return (bool) (Yii::$app->params['settings']['call_is_override_phone_to_forwarded_from'] ?? false);
     }
 }

@@ -9,15 +9,18 @@
  */
 
 use common\models\LeadCallExpert;
+use modules\lead\src\abac\LeadExpertCallObject;
+use modules\lead\src\abac\services\AbacLeadExpertCallService;
 use modules\product\src\entities\product\Product;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 $user = Yii::$app->user->identity;
-
+$expertCallAbacDto = (new AbacLeadExpertCallService($lead, $user))->getLeadExpertCallDto();
+/** @abac $expertCallAbacDto, LeadExpertCallObject::ACT_CALL, LeadExpertCallObject::ACTION_ACCESS, access new expert call */
+$abacActNewExpertCall = \Yii::$app->abac->can($expertCallAbacDto, LeadExpertCallObject::ACT_CALL, LeadExpertCallObject::ACTION_ACCESS);
 ?>
-
 <?php yii\widgets\Pjax::begin(['id' => 'pjax-lead-call-expert', 'enablePushState' => false, 'timeout' => 10000]) ?>
 <div class="x_panel">
     <div class="x_title">
@@ -64,16 +67,11 @@ $user = Yii::$app->user->identity;
 
             </li>
             <li>
-                <?php //=Html::a('<i class="fa fa-comment"></i>', ['lead/view', 'gid' => $lead->gid, 'act' => 'call-expert-message'], ['class' => ''])?>
-                <?php if ($lead->leadFlightSegmentsCount) :?>
                     <?php if (!$lastModel || $lastModel->lce_status_id === LeadCallExpert::STATUS_DONE) :?>
-                        <?php if ($user->isEnableCallExpert() && $lead->isProcessing()) : ?>
+                        <?php if ($user->isEnableCallExpert() && $abacActNewExpertCall) : ?>
                             <?=Html::a('<i class="fa fa-plus-circle success"></i> New Call', null, ['id' => 'btn-call-expert-form'])?>
                         <?php endif; ?>
                     <?php endif; ?>
-                <?php else : ?>
-                    <?php //<span class="badge badge-warning"><i class="fa fa-warning"></i> Warning: Flight Segments is empty!</span> ?>
-                <?php endif; ?>
             </li>
             <li>
                 <a class="collapse-link"><i class="fa fa-chevron-down"></i></a>

@@ -35,6 +35,8 @@ use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\services\url\UrlGenerator;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
+use modules\lead\src\abac\LeadExpertCallObject;
+use modules\lead\src\abac\services\AbacLeadExpertCallService;
 use modules\offer\src\entities\offer\search\OfferSearch;
 use modules\offer\src\entities\offerSendLog\CreateDto;
 use modules\offer\src\entities\offerSendLog\OfferSendLogType;
@@ -951,8 +953,10 @@ class LeadController extends FController
         }
 
         $modelLeadCallExpert = new LeadCallExpert();
-
-        if (!$lead->client->isExcluded()) {
+        $expertCallAbacDto = (new AbacLeadExpertCallService($lead, $user))->getLeadExpertCallDto();
+        /** @abac $expertCallAbacDto, LeadExpertCallObject::ACT_CALL, LeadExpertCallObject::ACTION_ACCESS, access new expert call */
+        $abacActNewExpertCall = \Yii::$app->abac->can($expertCallAbacDto, LeadExpertCallObject::ACT_CALL, LeadExpertCallObject::ACTION_ACCESS);
+        if (!$lead->client->isExcluded() && $abacActNewExpertCall) {
             if ($modelLeadCallExpert->load(Yii::$app->request->post())) {
                 $modelLeadCallExpert->lce_agent_user_id = Yii::$app->user->id;
                 $modelLeadCallExpert->lce_lead_id = $lead->id;

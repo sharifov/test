@@ -46,7 +46,7 @@ class UserParams extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['up_user_id','up_work_minutes', 'up_work_start_tm','up_timezone'], 'required'],
+            [['up_user_id', 'up_work_minutes', 'up_work_start_tm', 'up_timezone'], 'required'],
             [['up_user_id', 'up_commission_percent', 'up_updated_user_id', 'up_bonus_active', 'up_work_minutes', 'up_inbox_show_limit_leads', 'up_default_take_limit_leads', 'up_min_percent_for_take_leads', 'up_frequency_minutes', 'up_call_expert_limit', 'up_leaderboard_enabled'], 'integer'],
             [['up_base_amount'], 'number'],
             [['up_updated_dt'], 'safe'],
@@ -79,8 +79,8 @@ class UserParams extends \yii\db\ActiveRecord
             'up_default_take_limit_leads' => 'Default take limit leads',
             'up_min_percent_for_take_leads' => 'Min percent for take leads',
             'up_frequency_minutes' => 'Take Frequency Minutes',
-            'up_call_expert_limit'  => 'Call Expert limit',
-            'up_leaderboard_enabled'  => 'Leader Board Enabled',
+            'up_call_expert_limit' => 'Call Expert limit',
+            'up_leaderboard_enabled' => 'Leader Board Enabled',
             'up_call_user_level' => 'Call Priority Level'
         ];
     }
@@ -122,5 +122,10 @@ class UserParams extends \yii\db\ActiveRecord
     public static function find()
     {
         return new UserParamsQuery(static::class);
+    }
+
+    public static function getActiveTimezones(): array
+    {
+        return self::find()->select('up_timezone')->indexBy('up_timezone')->column();
     }
 }

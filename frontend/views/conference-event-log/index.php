@@ -3,6 +3,7 @@
 use common\components\grid\DateTimeColumn;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
+use yii\helpers\Url;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
@@ -23,11 +24,20 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php Pjax::begin(['scrollTo' => 0]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
+    <?php  echo $this->render('_pagination', ['model' => $searchModel]);?>
+
+    <?= $searchModel->filterCount ? 'Find <b>' . $searchModel->filterCount . '</b> items' : null ?>
+
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'filterUrl' => Url::to(['conference-event-log/index']),
+        'layout' => "{items}",
         'columns' => [
-            'cel_id',
+            [
+                'attribute' => 'cel_id',
+                'enableSorting' => false,
+            ],
             'cel_event_type',
             'cel_conference_sid',
             'cel_sequence_number',

@@ -3,13 +3,16 @@
 namespace modules\shiftSchedule\src\forms;
 
 use common\components\validators\CheckJsonValidator;
+use common\components\validators\IsArrayValidator;
 use kartik\daterange\DateRangeBehavior;
 use modules\shiftSchedule\src\helpers\UserShiftScheduleHelper;
 use yii\base\Model;
+use yii\helpers\Json;
 
 class UserShiftCalendarMultipleUpdateForm extends Model
 {
     public $eventIds;
+    public $showForm;
     public $scheduleType;
     public $description;
     public $status;
@@ -43,6 +46,13 @@ class UserShiftCalendarMultipleUpdateForm extends Model
             [['dateTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['defaultDuration'], 'match', 'pattern' => '/^(\d+):[0-5][0-9]$/'],
             [['dateTimeStart', 'dateTimeEnd'], 'datetime', 'format' => 'php:Y-m-d H:i'],
+            [['showForm'], 'boolean'],
+            [['showForm'], 'default', 'value' => false]
         ];
+    }
+
+    public function formName(): string
+    {
+        return '';
     }
 }

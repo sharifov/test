@@ -14,7 +14,6 @@ use Casbin\Persist\AdapterHelper;
 use Casbin\Model\Model;
 use Casbin\Persist\Adapters\Filter;
 use Exception;
-use yii\helpers\VarDumper;
 
 /**
  * Class CasbinCacheAdapter
@@ -66,6 +65,21 @@ class CasbinCacheAdapter implements Adapter
             }
         }
         unset($lines);
+    }
+
+    public function loadPolicyLine(string $line, Model $model, ?int $i = null): void
+    {
+        if ('' == $line) {
+            return;
+        }
+
+        if ('#' == substr($line, 0, 1)) {
+            return;
+        }
+
+        $tokens = array_map("trim", explode(", ", $line));
+
+        $this->loadPolicyArray($tokens, $model);
     }
 
     /**
