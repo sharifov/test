@@ -1,0 +1,5 @@
+p, ("admin" in r.sub.env.user.roles), lead/lead/obj/lead, (create), allow
+p, ("admin" in r.sub.env.user.roles), lead/lead/obj/lead, (read), deny
+p, ("agent" in r.sub.env.user.roles) || ("test_group" in r.sub.env.user.groups), lead/lead/obj/lead, (clone), allow
+p, ("ovago" in r.sub.env.user.projects), lead/lead/obj/lead, (delete), allow
+p, ("test_group" in r.sub.env.user.groups), lead/lead/obj/lead, (unmask), deny
