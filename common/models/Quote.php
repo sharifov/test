@@ -602,7 +602,7 @@ class Quote extends \yii\db\ActiveRecord
         return $this->hasMany(QuoteTrip::class, ['qt_quote_id' => 'id']);
     }
 
-    public function getDataForProfit($quoteId)
+    public static function getDataForProfit($quoteId)
     {
         $query = new Query();
 
@@ -612,7 +612,7 @@ class Quote extends \yii\db\ActiveRecord
                 'fare_type' => 'q.fare_type',
                 'check_payment' => 'q.check_payment'
             ])
-            ->from(Quote::tableName() . ' q')
+            ->from(self::tableName() . ' q')
             ->leftJoin(QuotePrice::tableName() . ' qp', 'q.id = qp.quote_id')
             ->where(['q.id' => $quoteId]);
 
