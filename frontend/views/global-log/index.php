@@ -4,6 +4,7 @@ use src\auth\Auth;
 use src\services\cleaner\form\DbCleanerParamsForm;
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\helpers\Url;
 use yii\widgets\Pjax;
 use common\components\grid\DateTimeColumn;
 
@@ -35,13 +36,21 @@ $pjaxListId = 'pjax-global-log';
     <?php Pjax::begin(['id' => $pjaxListId, 'timeout' => 8000, 'scrollTo' => 0]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
+    <?php  echo $this->render('_pagination', ['model' => $searchModel]);?>
+
+    <?= $searchModel->filterCount ? 'Find <b>' . $searchModel->filterCount . '</b> items' : null ?>
+
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'filterUrl' => Url::to(['global-log/index']),
+        'layout' => "{items}",
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
-
-            'gl_id',
+            [
+                'attribute' => 'gl_id',
+                'enableSorting' => false,
+            ],
             // 'gl_app_id',
             [
                 'attribute' => 'gl_app_id',

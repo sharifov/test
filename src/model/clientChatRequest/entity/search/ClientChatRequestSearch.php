@@ -2,11 +2,20 @@
 
 namespace src\model\clientChatRequest\entity\search;
 
+use src\yii\data\BigActiveDataProvider;
 use yii\data\ActiveDataProvider;
 use src\model\clientChatRequest\entity\ClientChatRequest;
 
 class ClientChatRequestSearch extends ClientChatRequest
 {
+    public $reset;
+    public $nextId;
+    public $prevId;
+    public $lastPage;
+    public $cursor;
+    public $filterCount;
+
+
     public function rules(): array
     {
         return [
@@ -16,23 +25,34 @@ class ClientChatRequestSearch extends ClientChatRequest
 
             ['ccr_id', 'integer'],
 
-            ['ccr_json_data', 'safe'],
+            [['ccr_json_data','nextId','prevId','cursor'], 'safe'],
 
             [['ccr_rid'], 'string', 'max' => 150],
             [['ccr_visitor_id'], 'string', 'max' => 100],
         ];
     }
 
-    public function search($params): ActiveDataProvider
+    public function search($params): BigActiveDataProvider
     {
-        $query = static::find()->distinct();
+        $query = static::find()->orderBy(['ccr_id' => SORT_DESC])->distinct();
 
-        $dataProvider = new ActiveDataProvider([
+        $dataProvider = new BigActiveDataProvider([
             'query' => $query,
-            'sort' => ['defaultOrder' => ['ccr_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],
+        ]);
+        $dataProvider->setSort([
+            'attributes' => [
+                'ccr_id' => [
+                    'asc' => ['ccr_id' => SORT_ASC],
+                    'desc' => ['ccr_id' => SORT_DESC],
+                    'default' => SORT_DESC,
+                ],
+            ],
+            'defaultOrder' => [
+                'ccr_id' => SORT_DESC
+            ]
         ]);
 
         $this->load($params);
@@ -40,6 +60,19 @@ class ClientChatRequestSearch extends ClientChatRequest
         if (!$this->validate()) {
             $query->where('0=1');
             return $dataProvider;
+        }
+
+        if ($this->cursor == 1) {
+            $this->nextId = null;
+        } else if ($this->cursor == 2) {
+            $this->prevId = null;
+        }
+
+        if ($this->nextId) {
+            $query->andFilterWhere(['<', 'ccr_id', $this->nextId]);
+        }
+        if ($this->prevId) {
+            $query->andFilterWhere(['<', 'ccr_id', $this->prevId]);
         }
 
         $query->andFilterWhere([
@@ -52,6 +85,88 @@ class ClientChatRequestSearch extends ClientChatRequest
         $query->andFilterWhere(['ccr_event' => $this->ccr_event]);
 
         $query->andFilterWhere(['like', 'ccr_json_data', $this->ccr_json_data]);
+
+        $tableIdColName = 'ccr_id';
+        $filters = $query->where;
+        if ($filters) {
+            foreach ($filters as $filter) {
+                if (is_array($filter)) {
+                    $key = array_search($tableIdColName, $filter);
+                    if ($key) {
+                        unset($filters[$key]);
+                    }
+                }
+            }
+            if (in_array($tableIdColName, $filters)) {
+                $filters = null;
+            }
+        }
+
+        if (!empty($filters)) {
+            $this->filterCount = ClientChatRequest::find()->andFilterWhere($filters)->count();
+        }
+
+        $limit = $dataProvider->pagination->getLimit();
+
+        //Next Button
+        if (count($dataProvider->models) > $limit) {
+            $models = $dataProvider->models;
+            array_pop($models);
+            $modelKeys = $dataProvider->prepareKeys($models);
+
+            $dataProvider->setModels($models);
+            $dataProvider->setKeys($modelKeys);
+
+            $next = $dataProvider->models;
+            $next = array_pop($next);
+            $this->nextId = $next[$tableIdColName];
+        } else {
+            $this->nextId = null;
+        }
+
+        //Prev Button
+        $newModelCol = array_column($dataProvider->getModels(), $tableIdColName);
+        $modelKeys = [];
+        foreach ($newModelCol as $value) {
+            $modelKeys[][$tableIdColName] = $value;
+        }
+        $lastId = array_shift($modelKeys);
+        $prevLimit = null;
+        if (!isset($lastId[$tableIdColName])) {
+            $lastId[$tableIdColName] = $this->prevId;
+        }
+
+        $prevLimit = ClientChatRequest::getPrevModels($lastId[$tableIdColName], $limit, $filters);
+
+        if (isset($prevLimit) && count($prevLimit) >= $limit) {
+            $this->prevId = $lastId[$tableIdColName];
+            if (count($prevLimit) > $limit) {
+                array_pop($prevLimit);
+            }
+        }
+
+        //recharge dataprovider when prev
+        if ($this->cursor == 1) {
+            $dataProvider->setModels($prevLimit);
+            $models = $dataProvider->getModels();
+            $modelKeys = $dataProvider->prepareKeys($models);
+
+            $dataProvider->setKeys($modelKeys);
+            $lastId = array_shift($modelKeys);
+
+            $prevModels = null;
+            if ($lastId) {
+                $prevModels = static::getPrevModels($lastId, $limit, $filters);
+            }
+
+            $this->prevId = $prevModels ? $lastId : null;
+
+            $next = $dataProvider->models;
+            $next = array_pop($next);
+            $this->nextId = $next[$tableIdColName];
+        }
+
+        $this->reset = true;
 
         return $dataProvider;
     }
