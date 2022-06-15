@@ -1,8 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
-namespace common\components\experimentManager\models;
+namespace modules\experiment\models;
 
 use Yii;
 use yii\db\ActiveQuery;
@@ -44,8 +42,8 @@ class Experiment extends ActiveRecord
     public function attributeLabels(): array
     {
         return [
-            'ex_id'   => Yii::t('experiment-manager', 'ID'),
-            'ex_code' => Yii::t('experiment-manager', 'Code'),
+            'ex_id'   => Yii::t('experiment-crud', 'ID'),
+            'ex_code' => Yii::t('experiment-crud', 'Code'),
         ];
     }
 

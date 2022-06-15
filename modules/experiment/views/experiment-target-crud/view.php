@@ -1,11 +1,11 @@
 <?php
 
-use common\components\experimentManager\models\ExperimentTarget;
+use modules\experiment\models\ExperimentTarget;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model common\components\experimentManager\models\ExperimentTarget */
+/* @var $model modules\experiment\models\ExperimentTarget */
 
 $this->title = $model->ext_id;
 $this->params['breadcrumbs'][] = ['label' => 'Experiment Targets', 'url' => ['index']];

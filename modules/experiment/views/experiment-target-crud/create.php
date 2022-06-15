@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model common\components\experimentManager\models\ExperimentTarget */
+/* @var $model modules\experiment\models\ExperimentTarget */
 
 $this->title = 'Create Experiment Target';
 $this->params['breadcrumbs'][] = ['label' => 'Experiment Targets', 'url' => ['index']];

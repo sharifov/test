@@ -1,13 +1,13 @@
 <?php
 
-namespace common\models\search;
+namespace modules\experiment\models\search;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use common\components\experimentManager\models\Experiment;
+use modules\experiment\models\Experiment;
 
 /**
- * ExperimentSearch represents the model behind the search form of `common\components\experimentManager\models\Experiment`.
+ * ExperimentSearch represents the model behind the search form of `modules\experiment\models\Experiment`.
  */
 class ExperimentSearch extends Experiment
 {

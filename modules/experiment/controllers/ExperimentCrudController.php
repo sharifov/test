@@ -1,9 +1,10 @@
 <?php
 
-namespace frontend\controllers;
+namespace modules\experiment\controllers;
 
-use common\components\experimentManager\models\Experiment;
-use common\models\search\ExperimentSearch;
+use modules\experiment\models\Experiment;
+use modules\experiment\models\search\ExperimentSearch;
+use frontend\controllers\FController;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -11,7 +12,7 @@ use yii\filters\VerbFilter;
 /**
  * ExperimentCrudController implements the CRUD actions for Experiment model.
  */
-class ExperimentCrudController extends Controller
+class ExperimentCrudController extends FController
 {
     /**
      * @inheritDoc
@@ -22,7 +23,7 @@ class ExperimentCrudController extends Controller
             parent::behaviors(),
             [
                 'verbs' => [
-                    'class' => VerbFilter::className(),
+                    'class' => VerbFilter::class,
                     'actions' => [
                         'delete' => ['POST'],
                     ],

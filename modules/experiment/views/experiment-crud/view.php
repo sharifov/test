@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model common\components\experimentManager\models\Experiment */
+/* @var $model modules\experiment\models\Experiment */
 
 $this->title = $model->ex_id;
 $this->params['breadcrumbs'][] = ['label' => 'Experiments', 'url' => ['index']];

@@ -1,13 +1,13 @@
 <?php
 
-use common\components\experimentManager\models\ExperimentTarget;
+use modules\experiment\models\ExperimentTarget;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\ActionColumn;
 use yii\grid\GridView;
 
 /* @var $this yii\web\View */
-/* @var $searchModel common\models\search\ExperimentTargetSearch */
+/* @var $searchModel modules\experiment\models\search\ExperimentTargetSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Experiment Targets';

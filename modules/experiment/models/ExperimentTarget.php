@@ -1,8 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
-namespace common\components\experimentManager\models;
+namespace modules\experiment\models;
 
 use common\models\Lead;
 use Yii;

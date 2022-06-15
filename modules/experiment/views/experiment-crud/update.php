@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model common\components\experimentManager\models\Experiment */
+/* @var $model modules\experiment\models\Experiment */
 
 $this->title = 'Update Experiment: ' . $model->ex_id;
 $this->params['breadcrumbs'][] = ['label' => 'Experiments', 'url' => ['index']];

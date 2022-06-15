@@ -1,9 +1,9 @@
 <?php
 
-namespace frontend\controllers;
+namespace modules\experiment\controllers;
 
-use common\components\experimentManager\models\ExperimentTarget;
-use common\models\search\ExperimentTargetSearch;
+use modules\experiment\models\ExperimentTarget;
+use modules\experiment\models\search\ExperimentTargetSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
