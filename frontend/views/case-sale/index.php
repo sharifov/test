@@ -27,6 +27,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
+    <?php  echo $this->render('_pagination', ['model' => $searchModel]);?>
+
     <?= $searchModel->filterCount ? 'Find <b>' . $searchModel->filterCount . '</b> items' : null ?>
 
     <?= GridView::widget([
