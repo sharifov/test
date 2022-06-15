@@ -4425,7 +4425,7 @@
             "source": {
                 "type": "git",
                 "url": "git@bitbucket.org:techork/yii2-search-module.git",
-                "reference": "07cdc98d5f3bdd7a4b015338103649d1f24edaf4"
+                "reference": "f12b812f58789641228bba511b7a308285fde51e"
             },
             "require": {
                 "kovalenkojuls/yii2-widget-combodate": "*",
@@ -16256,5 +16256,5 @@
         "ext-pgsql": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.0.0"
+    "plugin-api-version": "2.3.0"
 }
