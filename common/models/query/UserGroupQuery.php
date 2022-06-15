@@ -5,6 +5,8 @@ namespace common\models\query;
 use common\models\Employee;
 use common\models\UserGroup;
 use common\models\UserGroupAssign;
+use modules\shiftSchedule\src\entities\userShiftSchedule\search\TimelineCalendarFilter;
+use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -62,11 +64,11 @@ class UserGroupQuery extends \yii\db\ActiveQuery
     }
 
     /**
-     * @param array $groupIds
-     * @param array $usersIds
+     * @param TimelineCalendarFilter $form
      * @return UserGroup[]
+     * @throws \yii\db\Exception
      */
-    public static function findUserGroupsAndAssignedUsers(array $groupIds = [], array $usersIds = []): array
+    public static function findUserGroupsAndAssignedUsers(TimelineCalendarFilter $form): array
     {
         $query = UserGroup::find()
             ->select(['ug_id', 'ug_key', 'ug_name', 'ugs_user_id', 'username', 'email'])
@@ -75,11 +77,25 @@ class UserGroupQuery extends \yii\db\ActiveQuery
             ->andWhere(['<>', 'status', Employee::STATUS_DELETED])
             ->enabled()
             ->orderBy(['ug_name' => SORT_ASC]);
-        if ($groupIds) {
-            $query->andWhere(['ug_id' => $groupIds]);
+        if ($form->userGroups) {
+            $query->andWhere(['ug_id' => $form->userGroups]);
         }
-        if ($usersIds) {
-            $query->andWhere(['ugs_user_id' => $usersIds]);
+        if ($form->usersIds) {
+            $query->andWhere(['ugs_user_id' => $form->usersIds]);
+        }
+        if (!$form->displayUsersWithoutEvents) {
+            $query->innerJoin(UserShiftSchedule::tableName(), 'uss_user_id = id');
+            if ($form->startDateTime && $form->startDateTimeCondition) {
+                $query->andWhere([$form->getStartDateTimeConditionOperator(), 'uss_start_utc_dt', date('Y-m-d H:i', strtotime($form->startDateTime))]);
+            } else {
+                $query->andWhere(['>=', 'uss_start_utc_dt', date('Y-m-d H:i:s', strtotime($form->startDate))]);
+            }
+            if ($form->endDateTime && $form->endDateTimeCondition) {
+                $query->andWhere([$form->getEndDateTimeConditionOperator(), 'uss_end_utc_dt', date('Y-m-d H:i', strtotime($form->endDateTime))]);
+            } else {
+                $query->andWhere(['<=', 'uss_start_utc_dt', date('Y-m-d 23:59:59', strtotime($form->endDate))]);
+            }
+            $query->groupBy(['ug_id', 'ugs_user_id', 'ug_name']);
         }
         return $query->asArray()->createCommand()->queryAll();
     }

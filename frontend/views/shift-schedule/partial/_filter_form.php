@@ -123,6 +123,8 @@ use yii\widgets\ActiveForm;
                                   'defaultTime' => false
                               ],
                           ]) ?>
+
+                          <?= $form->field($timelineCalendarFilter, 'displayUsersWithoutEvents')->checkbox() ?>
                       </div>
                       <div class="col-md-5">
                           <?= $form->field($timelineCalendarFilter, 'userGroups')->widget(Select2::class, [

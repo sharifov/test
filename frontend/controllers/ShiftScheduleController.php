@@ -557,7 +557,7 @@ class ShiftScheduleController extends FController
             }
 
             $timelineCalendarFilter->userGroups = $timelineCalendarFilter->userGroups ?: $userGroups;
-            $userGroups = UserGroupQuery::findUserGroupsAndAssignedUsers($timelineCalendarFilter->userGroups, $timelineCalendarFilter->usersIds);
+            $userGroups = UserGroupQuery::findUserGroupsAndAssignedUsers($timelineCalendarFilter);
 
             [$resourceList, $firstLevelResources] = UserShiftScheduleHelper::prepareResourcesForTimelineCalendar($userGroups);
 

@@ -270,7 +270,7 @@
 
         let year = event.firstDay.getUTCFullYear(),
             month = event.firstDay.getUTCMonth() + 1,
-            day = event.firstDay.getUTCDate();
+            day = event.firstDay.getUTCDate() + 1;
 
         let endYear = event.lastDay.getUTCFullYear(),
             endMonth = event.lastDay.getUTCMonth() + 1,
