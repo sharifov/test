@@ -25,6 +25,7 @@ class ShiftAbacObject extends AbacBaseModel implements AbacInterface
     public const ACT_MY_SHIFT_SCHEDULE = self::NS . 'act/my_shift_schedule';
     public const ACT_USER_SHIFT_SCHEDULE = self::NS . 'act/user_shift_schedule';
     public const ACT_SEND_SUPERVISION_NOTIFICATION = self::NS . 'act/send_supervision_notification';
+    public const ACT_CREATE_PAST_EVENT = self::NS . 'act/create_past_event';
 
     public const OBJ_USER_SHIFT_EVENT = self::NS . 'obj/user_shift_event';
     public const OBJ_USER_SHIFT_REQUEST_EVENT = self::NS . 'obj/user_shift_request_event';
@@ -40,6 +41,7 @@ class ShiftAbacObject extends AbacBaseModel implements AbacInterface
         self::OBJ_USER_SHIFT_REQUEST_EVENT => self::OBJ_USER_SHIFT_REQUEST_EVENT,
         self::ALL => self::ALL,
         self::OBJ_USER_SHIFT_CALENDAR => self::OBJ_USER_SHIFT_CALENDAR,
+        self::ACT_CREATE_PAST_EVENT => self::ACT_CREATE_PAST_EVENT,
     ];
 
     /** ACTIONS */
@@ -90,7 +92,8 @@ class ShiftAbacObject extends AbacBaseModel implements AbacInterface
         ],
         self::OBJ_USER_SHIFT_CALENDAR => [
             self::ACTION_ACCESS
-        ]
+        ],
+        self::ACT_CREATE_PAST_EVENT => [self::ACTION_ACCESS],
     ];
 
     public const ATTR_USER_GROUPS_FORM_FIELD = [

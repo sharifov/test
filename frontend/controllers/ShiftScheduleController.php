@@ -626,7 +626,11 @@ class ShiftScheduleController extends FController
             $nowDateTime = new \DateTimeImmutable('now', ($timezone = Auth::user()->timezone) ? new \DateTimeZone($timezone) : null);
             $startDateTimeWithTimezone = new \DateTimeImmutable($startDate, ($timezone = Auth::user()->timezone) ? new \DateTimeZone($timezone) : null);
 
-            if ($startDateTimeWithTimezone < $nowDateTime) {
+            /** @abac null, ShiftAbacObject::ACT_CREATE_PAST_EVENT, ShiftAbacObject::ACTION_ACCESS, Access to create past event */
+            if (
+                $startDateTimeWithTimezone < $nowDateTime &&
+                !Yii::$app->abac->can(null, ShiftAbacObject::ACT_CREATE_PAST_EVENT, ShiftAbacObject::ACTION_ACCESS)
+            ) {
                 return '<script>(function() {setTimeout(function() {$("#modal-md").modal("hide")}, 800);createNotify("Error", "Event cannot be created in the past", "error")})();</script>';
             }
 
