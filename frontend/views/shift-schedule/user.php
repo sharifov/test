@@ -398,7 +398,7 @@ $subtypeTotalData = [];
 <?php
 
 $ajaxUrl = \yii\helpers\Url::to(['shift-schedule/my-data-ajax', 'userId' => $user->id]);
-$openModalEventUrl = \yii\helpers\Url::to(['shift-schedule/get-event']);
+$openModalEventUrl = \yii\helpers\Url::to(['shift-schedule/ajax-get-events']);
 // 'https://fullcalendar.io/api/demo-feeds/events.json?overload-day',
 
 $js = <<<JS
