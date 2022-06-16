@@ -39,8 +39,8 @@ class GlobalLogSearch extends GlobalLog
     public function rules()
     {
         return [
-            [['gl_id', 'gl_app_user_id', 'gl_obj_id', 'leadId', 'caseId', 'gl_action_type'], 'integer'],
-            [['gl_app_id', 'gl_model', 'gl_old_attr', 'gl_new_attr','nextId','prevId','cursor'], 'safe'],
+            [['gl_id', 'gl_app_user_id', 'gl_obj_id', 'leadId', 'caseId', 'gl_action_type','nextId','prevId','cursor'], 'integer'],
+            [['gl_app_id', 'gl_model', 'gl_old_attr', 'gl_new_attr'], 'safe'],
             [['gl_created_at'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
