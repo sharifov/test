@@ -85,7 +85,7 @@ class ConferenceEventLogSearch extends ConferenceEventLog
             'cel_conference_sid' => $this->cel_conference_sid,
         ]);
 
-        $tableIdColName = 'gl_id';
+        $tableIdColName = 'cel_id';
         $filters = $query->where;
         if ($filters) {
             foreach ($filters as $filter) {
