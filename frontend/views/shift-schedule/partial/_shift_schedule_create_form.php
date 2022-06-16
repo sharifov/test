@@ -142,19 +142,8 @@ JS;
 
         <div class="row">
             <div class="col-md-6">
-                <?= $form->field($model, 'status')->dropdownList($statusList, ['prompt' => '---']) ?>
-            </div>
-            <div class="col-md-6">
-                <?= $form->field($model, 'scheduleType')->dropdownList(UserShiftScheduleHelper::getAvailableScheduleTypeList(), ['prompt' => '---']) ?>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-6">
                 <?= $form->field($model, 'dateTimeRange')->widget(DateRangePicker::class, [
                     'presetDropdown' => false,
-                    'hideInput' => true,
-                    'convertFormat' => true,
                     'pluginOptions' => [
                         'timePicker' => true,
                         'timePickerIncrement' => 1,
@@ -173,6 +162,16 @@ JS;
             </div>
             <div class="col-md-6">
                 <?= $form->field($model, 'defaultDuration')->textInput(['id' => 'add-schedule-event-duration'])->label('Duration (HH:MM)') ?>
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <?= $form->field($model, 'status')->dropdownList($statusList, ['prompt' => '---']) ?>
+            </div>
+            <div class="col-md-6">
+                <?= $form->field($model, 'scheduleType')->dropdownList(UserShiftScheduleHelper::getAvailableScheduleTypeList(), ['prompt' => '---']) ?>
             </div>
         </div>
 
