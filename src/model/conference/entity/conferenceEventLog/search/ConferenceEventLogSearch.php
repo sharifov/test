@@ -27,6 +27,8 @@ class ConferenceEventLogSearch extends ConferenceEventLog
 
             ['cel_id', 'integer'],
 
+            [['nextId','prevId','cursor'], 'safe'],
+
             ['cel_sequence_number', 'integer'],
         ];
     }
