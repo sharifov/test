@@ -735,7 +735,7 @@ class LeadController extends FController
                         $templateType = $tpl ? $tpl->etp_key : '';
                         if ($tpl) {
                             if (isset($tpl->etp_params_json['quotes']['originalRequired']) && $tpl->etp_params_json['quotes']['originalRequired'] === true) {
-                                return array_merge($lead->quotes, function ($acc, $quote) {
+                                return array_reduce($lead->quotes, function ($acc, $quote) {
                                     return $quote->type_id === Quote::TYPE_ORIGINAL ? true : $acc;
                                 }, false);
                             }
