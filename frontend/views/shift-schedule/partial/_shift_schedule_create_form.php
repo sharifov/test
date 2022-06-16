@@ -88,6 +88,32 @@ JS;
 
         <?= $form->errorSummary($model) ?>
 
+        <div class="row">
+            <div class="col-md-6">
+                <?= $form->field($model, 'dateTimeRange')->widget(DateRangePicker::class, [
+                    'presetDropdown' => false,
+                    'pluginOptions' => [
+                        'timePicker' => true,
+                        'timePickerIncrement' => 1,
+                        'timePicker24Hour' => true,
+                        'locale' => [
+                            'format' => 'Y-m-d H:i',
+                            'separator' => ' - '
+                        ],
+                        'opens' => 'right',
+                        'parentEl' => 'body .modal.show .modal-content > .modal-body'
+                    ],
+                    'pluginEvents' => [
+                        'change' => new JsExpression($dateTimeRangeChangeJs)
+                    ]
+                ]) ?>
+            </div>
+            <div class="col-md-6">
+                <?= $form->field($model, 'defaultDuration')->textInput(['id' => 'add-schedule-event-duration'])->label('Duration (HH:MM)') ?>
+            </div>
+
+        </div>
+
         <?= $form->field($model, 'getUsersByGroups')->hiddenInput(['id' => 'getUsersByGroups'])->label(false); ?>
         <?= $form->field($model, 'users')->hiddenInput(['id' => 'users'])->label(false); ?>
 
@@ -139,32 +165,6 @@ JS;
                 </ol>
             </div>
         <?php endif; ?>
-
-        <div class="row">
-            <div class="col-md-6">
-                <?= $form->field($model, 'dateTimeRange')->widget(DateRangePicker::class, [
-                    'presetDropdown' => false,
-                    'pluginOptions' => [
-                        'timePicker' => true,
-                        'timePickerIncrement' => 1,
-                        'timePicker24Hour' => true,
-                        'locale' => [
-                            'format' => 'Y-m-d H:i',
-                            'separator' => ' - '
-                        ],
-                        'opens' => 'right',
-                        'parentEl' => 'body .modal.show .modal-content > .modal-body'
-                    ],
-                    'pluginEvents' => [
-                        'change' => new JsExpression($dateTimeRangeChangeJs)
-                    ]
-                ]) ?>
-            </div>
-            <div class="col-md-6">
-                <?= $form->field($model, 'defaultDuration')->textInput(['id' => 'add-schedule-event-duration'])->label('Duration (HH:MM)') ?>
-            </div>
-
-        </div>
 
         <div class="row">
             <div class="col-md-6">
