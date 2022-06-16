@@ -298,7 +298,7 @@ class AbacPolicy extends ActiveRecord
         $data[] = $this->ap_action;
         $data[] = $this->ap_subject;
         $data[] = $this->ap_effect;
-        return substr(md5(implode('|', $data)), 0, 10);
+        return AbacService::generateHashCode($data);
     }
 
     /**
