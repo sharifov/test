@@ -3,9 +3,11 @@
 namespace common\models;
 
 use common\models\query\CurrencyQuery;
+use frontend\helpers\QuoteHelper;
 use src\helpers\ErrorsToStringHelper;
 use Yii;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
@@ -125,6 +127,46 @@ class Currency extends ActiveRecord
         $currencyHistory = (new CurrencyHistory())->fillByCurrency($this);
         if (!$currencyHistory->save(false)) {
             Yii::error($currencyHistory->ch_code . ': ' . VarDumper::dumpAsString($currencyHistory->errors), 'Currency:synchronization:CurrencyHistory:save');
+        }
+
+        if (isset($changedAttributes['cur_enabled']) && boolval($this->cur_enabled) === false) {
+            /** @var LeadPreferences[] $leadPreferences */
+            $leadPreferences = LeadPreferences::find()
+                ->joinWith([
+                    'lead' => function (ActiveQuery $query) {
+                        $query->onCondition(['leads.status' => Lead::STATUS_PROCESSING]);
+                    },
+                ], true, 'RIGHT JOIN')
+                ->where([
+                    'pref_currency' => $this->cur_code
+                ])
+                ->all();
+
+            if (count($leadPreferences) > 0) {
+                $defaultCurrencyCode = self::getDefaultCurrency()->cur_code;
+                $employees = [];
+
+                foreach ($leadPreferences as $leadPreference) {
+                    $employeeID = $leadPreference->lead->employee_id;
+                    $leadPreference->pref_currency = $defaultCurrencyCode;
+
+                    if ($leadPreference->save(false) === true) {
+                        QuoteHelper::clearSearchCache($leadPreference->lead);
+
+                        if (in_array($employeeID, $employees) === false) {
+                            Notifications::createAndPublish(
+                                $employeeID,
+                                'Currency changed',
+                                "WARNING! The currency selected in Currency Preference has been disabled by the system administrator and can no longer be used for Price Quotes generation. All further Price Quotes will be generated in {$defaultCurrencyCode}.",
+                                Notifications::TYPE_INFO,
+                                true
+                            );
+
+                            $employees[] = $employeeID;
+                        }
+                    }
+                }
+            }
         }
     }
 
