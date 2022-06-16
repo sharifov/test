@@ -602,7 +602,7 @@ class Quote extends \yii\db\ActiveRecord
         return $this->hasMany(QuoteTrip::class, ['qt_quote_id' => 'id']);
     }
 
-    public function getDataForProfit($quoteId)
+    public static function getDataForProfit($quoteId)
     {
         $query = new Query();
 
