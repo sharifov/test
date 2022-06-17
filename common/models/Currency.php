@@ -2,10 +2,13 @@
 
 namespace common\models;
 
+use common\components\jobs\UpdateLeadPreferencesCurrencyJob;
 use common\models\query\CurrencyQuery;
+use frontend\helpers\QuoteHelper;
 use src\helpers\ErrorsToStringHelper;
 use Yii;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
@@ -136,6 +139,11 @@ class Currency extends ActiveRecord
         $currencyHistory = (new CurrencyHistory())->fillByCurrency($this);
         if (!$currencyHistory->save(false)) {
             Yii::error($currencyHistory->ch_code . ': ' . VarDumper::dumpAsString($currencyHistory->errors), 'Currency:synchronization:CurrencyHistory:save');
+        }
+
+        if (isset($changedAttributes['cur_enabled']) && boolval($this->cur_enabled) === false) {
+            $updateLeadPreferencesJob = new UpdateLeadPreferencesCurrencyJob($this->cur_code);
+            Yii::$app->queue_job->push($updateLeadPreferencesJob);
         }
     }
 
