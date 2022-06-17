@@ -22,7 +22,8 @@ use yii\widgets\ActiveForm;
         <?= $form->field($model, 'cur_symbol')->textInput(['maxlength' => true]) ?>
 
         <?= $form->field($model, 'cur_enabled')->checkbox([
-            'disabled' => $model->cur_code === Currency::getDefaultCurrencyCode()
+            'disabled' => $model->cur_code === Currency::getDefaultCurrencyCode(),
+            'label' => $model->getLabelForCurEnabled()
         ]) ?>
         </div>
         <div class="col-md-2">
