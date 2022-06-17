@@ -6,6 +6,7 @@ use common\models\Airline;
 use common\models\Airports;
 use DateTime;
 use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
+use modules\flight\src\helpers\FlightQuoteHelper;
 use src\helpers\app\AppHelper;
 use src\services\lead\calculator\LeadTripTypeCalculator;
 use src\services\lead\calculator\SegmentDTO;
@@ -154,7 +155,7 @@ class ReservationService
      */
     private function getLayoverDuration(array $data, int $index)
     {
-        if (isset($data[$index - 1])) {
+        if (isset($data[$index - 1]) && !FlightQuoteHelper::isNextTrip($data[$index - 1], $data[$index])) {
             $result = intval(($data[$index]['departureDateTime']->getTimestamp() - $data[$index - 1]['arrivalDateTime']->getTimestamp()) / 60);
         }
         return $result ?? 0;
