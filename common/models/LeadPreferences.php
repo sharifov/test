@@ -144,4 +144,22 @@ class LeadPreferences extends \yii\db\ActiveRecord
     {
         return self::create($leadId, null, null, null, $currency);
     }
+
+    /**
+     * @param string $currencyCode
+     * @return LeadPreferences[]
+     */
+    public static function getListByCurrencyCodeWhereLeadIsProcessed(string $currencyCode): array
+    {
+        return LeadPreferences::find()
+            ->joinWith([
+                'lead' => function (ActiveQuery $query) {
+                    $query->onCondition(['leads.status' => Lead::STATUS_PROCESSING]);
+                },
+            ], true, 'RIGHT JOIN')
+            ->where([
+                'pref_currency' => $currencyCode
+            ])
+            ->all();
+    }
 }
