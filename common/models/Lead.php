@@ -14,6 +14,7 @@ use frontend\widgets\notification\NotificationMessage;
 use kivork\search\core\urlsig\UrlSignature;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
+use modules\lead\src\services\LeadCallExpertChangeService;
 use modules\offer\src\entities\offer\Offer;
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\product\Product;
@@ -21,6 +22,7 @@ use src\auth\Auth;
 use src\behaviors\metric\MetricLeadCounterBehavior;
 use src\entities\EventTrait;
 use src\events\lead\LeadBookedEvent;
+use src\events\lead\LeadCallExpertChangedEvent;
 use src\events\lead\LeadCallExpertRequestEvent;
 use src\events\lead\LeadCallStatusChangeEvent;
 use src\events\lead\LeadCloseEvent;
@@ -1129,6 +1131,10 @@ class Lead extends ActiveRecord implements Objectable
 
         if ($this->isCalledExpert() && in_array($status, [self::STATUS_TRASH, self::STATUS_FOLLOW_UP, self::STATUS_SNOOZE, self::STATUS_PROCESSING], true)) {
             $this->recordEvent(new LeadCallExpertRequestEvent($this));
+        }
+
+        if (LeadHelper::checkCallExpertNeededChange($this)) {
+            $this->recordEvent(new LeadCallExpertChangedEvent($this->id));
         }
 
         $this->status = $status;
