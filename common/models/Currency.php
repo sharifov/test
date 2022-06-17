@@ -105,6 +105,17 @@ class Currency extends ActiveRecord
         ];
     }
 
+    public function getLabelForCurEnabled(): string
+    {
+        $label = $this->getAttributeLabel('cur_enabled');
+
+        if ($this->cur_code === self::getDefaultCurrencyCode()) {
+            $label .= ' (default currency)';
+        }
+
+        return $label;
+    }
+
     /**
      * {@inheritdoc}
      * @return CurrencyQuery the active query used by this AR class.
