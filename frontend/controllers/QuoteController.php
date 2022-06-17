@@ -1441,7 +1441,7 @@ class QuoteController extends FController
 
     private function logQuote(Quote $quote): void
     {
-        $data = (new Quote())->getDataForProfit($quote->id);
+        $data = Quote::getDataForProfit($quote->id);
         (\Yii::createObject(GlobalLogInterface::class))->log(
             new LogDTO(
                 get_class($quote),

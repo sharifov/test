@@ -94,7 +94,7 @@ class UserShiftScheduleQuery
         if ($form->shift) {
             $query->andWhere(['uss_shift_id' => $form->shift]);
         }
-
+        $query->groupBy(['uss_id']);
         return $query->all();
     }
 

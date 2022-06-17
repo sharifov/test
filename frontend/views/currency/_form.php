@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Currency;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -20,9 +21,10 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'cur_symbol')->textInput(['maxlength' => true]) ?>
 
-        <?= $form->field($model, 'cur_enabled')->checkbox() ?>
-
-        <?= $form->field($model, 'cur_default')->checkbox() ?>
+        <?= $form->field($model, 'cur_enabled')->checkbox([
+            'disabled' => $model->cur_code === Currency::getDefaultCurrencyCode(),
+            'label' => $model->getLabelForCurEnabled()
+        ]) ?>
         </div>
         <div class="col-md-2">
 

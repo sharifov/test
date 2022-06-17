@@ -20,6 +20,7 @@ use modules\shiftSchedule\src\helpers\UserShiftScheduleHelper;
 use src\auth\Auth;
 use yii\bootstrap4\ActiveForm;
 use yii\helpers\Html;
+use yii\helpers\Inflector;
 use yii\helpers\VarDumper;
 use yii\web\JsExpression;
 use yii\widgets\Pjax;
@@ -72,7 +73,7 @@ $dateTimeRangeChangeJs = <<<JS
 JS;
 ?>
 <style>
-    .daterangepicker{
+    .daterangepicker {
         z-index: 9999;
     }
 </style>
@@ -88,73 +89,10 @@ JS;
 
         <?= $form->errorSummary($model) ?>
 
-        <?= $form->field($model, 'getUsersByGroups')->hiddenInput(['id' => 'getUsersByGroups'])->label(false); ?>
-        <?= $form->field($model, 'users')->hiddenInput(['id' => 'users'])->label(false); ?>
-
-        <?= $form->field($model, 'userGroups')->widget(Select2::class, [
-            'data' => $userGroups,
-            'options' => [
-                'multiple' => true,
-            ],
-            'size' => Select2::SMALL,
-            'pluginEvents' => [
-                'change' => new JsExpression($changeJs)
-            ],
-        ]) ?>
-
-        <?php if ($usersGroupAssign) : ?>
-            <div class="d-flex align-items-center justify-content-between" style="margin-bottom: 10px;">
-                <label for="">Select Users</label>
-                <div class="d-flex align-items-center align-content-center">
-                    <span id="toggleAllUsers" data-check="true" style="margin-right: 10px;cursor: pointer;"><i class="far fa-check-circle"></i> Toggle All Users</span>
-                    <input type="text" id="input-search" class="form-control" placeholder="Search for..." style="flex: 1;">
-                </div>
-            </div>
-            <div id="group-wrapper">
-                <?php $groupName = ''; ?>
-                <ol class="list-group list-group-numbered">
-                    <?php foreach ($usersGroupAssign as $groupName => $users) : ?>
-                        <li class="list-group-item d-flex justify-content-between align-items-center align-content-center">
-                            <div style="width: 100%;">
-                                <div class="d-flex align-items-center align-content-center justify-content-between" style="margin-bottom: 10px;">
-                                    <div class="d-flex align-items-center align-content-center">
-                                      <h6 style="margin-right: 10px; margin-bottom: 0;"><strong><?= $groupName ?></strong></h6>
-                                      <span class="badge badge-primary badge-pill"><?= count($usersGroupAssign[$groupName]) ?></span>
-                                    </div>
-                                    <div>
-                                      <span class="toggleGroupedUsers" data-check="true" style="margin-right: 10px;cursor: pointer;"><i class="far fa-check-circle"></i> Toggle Users</span>
-                                    </div>
-                                </div>
-                                <div class="border user-wrapper">
-                                    <?php foreach ($users as $userId => $userName) : ?>
-                                        <label class="user-label" data-username="<?= $userName ?>" style="min-width: 125px;">
-                                            <?= Html::checkbox('', $model->users ? in_array($userId, $model->getUsersBatch()) : false, ['value' => $userId, 'class' => 'input-users']) ?>
-                                            <span class="input-username"><?= $userName ?></span>
-                                        </label>
-                                    <?php endforeach; ?>
-                                </div>
-                            </div>
-                        </li>
-                    <?php endforeach; ?>
-                </ol>
-            </div>
-        <?php endif; ?>
-
-        <div class="row">
-            <div class="col-md-6">
-                <?= $form->field($model, 'status')->dropdownList($statusList, ['prompt' => '---']) ?>
-            </div>
-            <div class="col-md-6">
-                <?= $form->field($model, 'scheduleType')->dropdownList(UserShiftScheduleHelper::getAvailableScheduleTypeList(), ['prompt' => '---']) ?>
-            </div>
-        </div>
-
         <div class="row">
             <div class="col-md-6">
                 <?= $form->field($model, 'dateTimeRange')->widget(DateRangePicker::class, [
                     'presetDropdown' => false,
-                    'hideInput' => true,
-                    'convertFormat' => true,
                     'pluginOptions' => [
                         'timePicker' => true,
                         'timePickerIncrement' => 1,
@@ -174,6 +112,74 @@ JS;
             <div class="col-md-6">
                 <?= $form->field($model, 'defaultDuration')->textInput(['id' => 'add-schedule-event-duration'])->label('Duration (HH:MM)') ?>
             </div>
+
+        </div>
+
+        <?= $form->field($model, 'getUsersByGroups')->hiddenInput(['id' => 'getUsersByGroups'])->label(false); ?>
+
+        <?= $form->field($model, 'userGroups')->widget(Select2::class, [
+            'data' => $userGroups,
+            'options' => [
+                'multiple' => true,
+            ],
+            'size' => Select2::SMALL,
+            'pluginEvents' => [
+                'change' => new JsExpression($changeJs)
+            ],
+        ]) ?>
+
+        <?php if ($usersGroupAssign) : ?>
+            <div class="d-flex align-items-center justify-content-between" style="margin-bottom: 10px;">
+                <label for="">Select Users</label>
+                <div class="d-flex align-items-center align-content-center">
+                    <span id="toggleAllUsers" data-check="true" style="margin-right: 10px;cursor: pointer;"><i
+                                class="far fa-check-circle"></i> Toggle All Users</span>
+                </div>
+            </div>
+            <div id="group-wrapper">
+                <?php $groupName = ''; ?>
+                <ol class="list-group list-group-numbered">
+                    <?php foreach ($usersGroupAssign as $groupName => $users) : ?>
+                        <li class="list-group-item d-flex justify-content-between align-items-center align-content-center">
+                            <div style="width: 100%;">
+                                <div class="d-flex align-items-center align-content-center justify-content-between" style="margin-bottom: 10px;">
+                                    <div class="d-flex align-items-center align-content-center">
+                                      <h6 style="margin-right: 10px; margin-bottom: 0;"><strong><?= $groupName ?></strong></h6>
+                                      <span class="badge badge-primary badge-pill"><?= count($usersGroupAssign[$groupName]) ?></span>
+                                    </div>
+                                </div>
+                                <div class="block">
+                                    <?php
+                                    echo Select2::widget([
+                                        'name' => 'users',
+                                        'data' => $users,
+                                        'value' => explode(",", $model->users),
+                                        'options' => [
+                                            'placeholder' => 'Select user',
+                                            'multiple' => true,
+                                            'size' => Select2::SMALL,
+                                            'class' => 'js-select-users',
+                                            'id' => 'user_select_' . Inflector::slug($groupName, '_'),
+                                            'disable' => true
+                                        ],
+                                    ]);
+                                    ?>
+
+                                </div>
+                            </div>
+                        </li>
+                    <?php endforeach; ?>
+                </ol>
+            </div>
+        <?php endif; ?>
+        <?= $form->field($model, 'users')->hiddenInput(['id' => 'users'])->label(false); ?>
+        <div class="row">
+            <div class="col-md-6">
+                <?= $form->field($model, 'status')->dropdownList($statusList, ['prompt' => '---']) ?>
+            </div>
+            <div class="col-md-6">
+                <?= $form->field($model, 'scheduleType')->dropdownList(UserShiftScheduleHelper::getAvailableScheduleTypeList(), ['prompt' => '---']) ?>
+            </div>
         </div>
 
         <?= $form->field($model, 'description')->textarea(['cols' => 6, 'style' => 'resize:none; height:100px']) ?>
@@ -186,39 +192,37 @@ JS;
         </div>
 
         <?php ActiveForm::end(); ?>
-<?php
-$js = <<<JS
-$(document).off('change click', '.input-users').on('change click', '.input-users', function (e) {
-let val = $(this).val();
-$('.input-users[value="'+val+'"]').prop("checked", $(this).is(":checked"));
-});
-$(document).off('keyup change', '#input-search').on('keyup change', '#input-search', function (e) {
-    let val = $(this).val();
-    $('.user-label').hide();
-    if (val === '') {
-        $('.user-label').show();
-    } else {
-        $('.user-label[data-username*="'+val+'"], .user-label[data-username^="'+val+'"]').show();
-    }
-});
+        <?php
+        $js = <<<JS
 $(document).off('click', '#submit-add-event').on('click', '#submit-add-event', function (e) {
     e.preventDefault();
     let users = [];
-    $.each($("input.input-users:checked"), function(){
-        let val = $(this).val();
-        if (!users.includes(val)) {
-            users.push($(this).val());
+    $.each($("select.js-select-users"), function(){
+        let vals = $(this).val();
+        if($.isArray(vals)){
+           $.each(vals, function(index, val) {
+                 if (!users.includes(val)) {
+                    users.push(val);
+                 }
+            });
         }
     });
-    console.log(users.join());
-    console.log($('#users'));
     $('#users').val(users.join());
     $('#$formId').submit();
 });
 $(document).off('click', '#toggleAllUsers').on('click', '#toggleAllUsers', function (e) {
     e.preventDefault();
     let isToggleCheck = $(this).data('check');
-    $('.input-users').prop('checked', isToggleCheck);
+     $.each($("select.js-select-users"), function(){
+         var selectedItems = []
+         if(isToggleCheck) {
+            var allOptions = $(this).find('option');
+            allOptions.each(function() {
+                  selectedItems.push( $(this).val() );
+            });
+         }
+         $(this).val(selectedItems).trigger("change");
+    });
     $(this).data('check', !isToggleCheck);
     $(this).find('i').toggleClass('far').toggleClass('fas');
     $('.toggleGroupedUsers').data('check', !isToggleCheck);
@@ -228,12 +232,33 @@ $(document).off('click', '#toggleAllUsers').on('click', '#toggleAllUsers', funct
         $('.toggleGroupedUsers').find('i').removeClass('far').addClass('fas');     
     }
 });
-$(document).off('click', '.toggleGroupedUsers').on('click', '.toggleGroupedUsers', function (e) {
-    e.preventDefault();
-    let isToggleCheck = $(this).data('check');
-    $(this).closest('li').find('.input-users').prop('checked', isToggleCheck);
-    $(this).data('check', !isToggleCheck);
-    $(this).find('i').toggleClass('far').toggleClass('fas');
+$('.js-select-users').on("select2:select", function(e) {
+    let currentValues = $(this).val();
+    let currentId = $(this).attr('id');
+    
+    $.each($("select.js-select-users"), function(){
+        if($(this).attr('id') != currentId){
+              var selectedItems = $(this).val();
+              $.each(currentValues, function( index, value ) {
+                   if (!selectedItems.includes(value)) {
+                       selectedItems.push(value);
+                   }
+                });
+              $(this).val(selectedItems).trigger("change");
+        }
+    })
+});
+
+$('.js-select-users').on("select2:unselect", function(e) {
+     let currentValue = e.params.data.id;
+     let currentId = $(this).attr('id');
+     $.each($("select.js-select-users"), function(){
+        if($(this).attr('id') != currentId){
+              var selectedItems = $(this).val();
+              let items = selectedItems.filter(v => currentValue != v);
+              $(this).val(items).trigger("change");
+        }
+    })
 });
 $(document).off('pjax:beforeSend', '#{$pjaxId}').on('pjax:beforeSend', '#{$pjaxId}', function (obj, xhr, data) {
     let btnObj = $('#submit-add-event');
@@ -283,9 +308,8 @@ $(document).on('change', '#add-schedule-event-duration', function() {
     }
 });
 JS;
-$this->registerJs($js);
-?>
-
+        $this->registerJs($js);
+        ?>
         <?php Pjax::end() ?>
     </div>
 </div>

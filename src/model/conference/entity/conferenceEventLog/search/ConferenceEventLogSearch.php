@@ -25,7 +25,7 @@ class ConferenceEventLogSearch extends ConferenceEventLog
 
             ['cel_event_type', 'string'],
 
-            ['cel_id', 'integer'],
+            [['cel_id', 'nextId','prevId','cursor'], 'integer'],
 
             ['cel_sequence_number', 'integer'],
         ];
@@ -85,7 +85,7 @@ class ConferenceEventLogSearch extends ConferenceEventLog
             'cel_conference_sid' => $this->cel_conference_sid,
         ]);
 
-        $tableIdColName = 'gl_id';
+        $tableIdColName = 'cel_id';
         $filters = $query->where;
         if ($filters) {
             foreach ($filters as $filter) {
@@ -145,7 +145,7 @@ class ConferenceEventLogSearch extends ConferenceEventLog
         }
 
         //recharge dataprovider when prev
-        if ($this->cursor == 1) {
+        if ($this->cursor == 1 && $this->prevId != null) {
             $dataProvider->setModels($prevLimit);
             $models = $dataProvider->getModels();
             $modelKeys = $dataProvider->prepareKeys($models);

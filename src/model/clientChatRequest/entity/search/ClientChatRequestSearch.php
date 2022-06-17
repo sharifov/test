@@ -23,9 +23,9 @@ class ClientChatRequestSearch extends ClientChatRequest
 
             ['ccr_event', 'safe'],
 
-            ['ccr_id', 'integer'],
+            [['ccr_id','nextId','prevId','cursor'], 'integer'],
 
-            [['ccr_json_data','nextId','prevId','cursor'], 'safe'],
+            [['ccr_json_data'], 'safe'],
 
             [['ccr_rid'], 'string', 'max' => 150],
             [['ccr_visitor_id'], 'string', 'max' => 100],
@@ -146,7 +146,7 @@ class ClientChatRequestSearch extends ClientChatRequest
         }
 
         //recharge dataprovider when prev
-        if ($this->cursor == 1) {
+        if ($this->cursor == 1  && $this->prevId != null) {
             $dataProvider->setModels($prevLimit);
             $models = $dataProvider->getModels();
             $modelKeys = $dataProvider->prepareKeys($models);

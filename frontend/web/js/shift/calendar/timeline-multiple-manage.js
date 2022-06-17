@@ -216,10 +216,9 @@
             createNotify('Warning', 'You cannot perform this action in multiple manage mode', 'warning');
             return false;
         }
-        let title = $(this).attr('title');
         let modal = $('#modal-md');
+        modal.find('.modal-title').html('Add Multiple Events');
         modal.find('.modal-body').html('<div style="text-align:center;font-size: 40px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
-        modal.find('.modal-title').html(title);
         modal.find('.modal-body').load(this.multipleAddUrl, {}, function( response, status, xhr ) {
             if (status == 'error') {
                 createNotifyByObject({

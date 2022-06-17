@@ -33,8 +33,8 @@ class QuoteSearch extends Quote
         return [
             [['datetime_start', 'datetime_end'], 'safe'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
-            [['id', 'lead_id', 'employee_id', 'status', 'check_payment','q_create_type_id'], 'integer'],
-            [['uid', 'record_locator', 'pcc', 'cabin', 'gds', 'trip_type', 'main_airline_code', 'reservation_dump', 'fare_type','nextId','prevId','cursor'], 'safe'],
+            [['id', 'lead_id', 'employee_id', 'status', 'check_payment','q_create_type_id','nextId','prevId','cursor'], 'integer'],
+            [['uid', 'record_locator', 'pcc', 'cabin', 'gds', 'trip_type', 'main_airline_code', 'reservation_dump', 'fare_type'], 'safe'],
 
             ['type_id', 'integer'],
             ['type_id', 'in', 'range' => array_keys(Quote::TYPE_LIST)],
@@ -203,7 +203,7 @@ class QuoteSearch extends Quote
         }
 
         //recharge dataprovider when prev
-        if ($this->cursor == 1) {
+        if ($this->cursor == 1 && $this->prevId != null) {
             $dataProvider->setModels($prevLimit);
             $models = $dataProvider->getModels();
             $modelKeys = $dataProvider->prepareKeys($models);

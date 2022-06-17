@@ -32,8 +32,8 @@ class CaseSaleSearch extends CaseSale
     public function rules()
     {
         return [
-            [['css_cs_id', 'css_sale_id', 'css_sale_pax', 'css_created_user_id', 'css_updated_user_id'], 'integer'],
-            [['css_sale_book_id', 'css_sale_pnr', 'css_sale_data','nextId','prevId','cursor'], 'safe'],
+            [['css_cs_id', 'css_sale_id', 'css_sale_pax', 'css_created_user_id', 'css_updated_user_id','nextId','prevId','cursor'], 'integer'],
+            [['css_sale_book_id', 'css_sale_pnr', 'css_sale_data'], 'safe'],
             [['css_sale_created_dt', 'css_created_dt', 'css_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
 
             [['css_need_sync_bo'], 'boolean'],
@@ -195,7 +195,7 @@ class CaseSaleSearch extends CaseSale
         }
 
         //recharge dataprovider when prev
-        if ($this->cursor == 1) {
+        if ($this->cursor == 1 && $this->prevId != null) {
             $dataProvider->setModels($prevLimit);
             $models = $dataProvider->getModels();
             $modelKeys = $dataProvider->prepareKeys($models);
