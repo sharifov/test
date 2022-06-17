@@ -6,6 +6,8 @@ use common\models\Department;
 use common\models\Project;
 use kivork\FeatureFlag\Models\BaseFeatureFlagObject;
 use kivork\FeatureFlag\Models\FeatureFlagInterface;
+use kivork\FeatureFlag\Models\flags\dateTime\DateTimeFeatureFlag;
+use modules\featureFlag\models\user\UserFeatureFlag;
 use src\helpers\app\AppHelper;
 use yii\helpers\ArrayHelper;
 
@@ -14,11 +16,11 @@ class DebugFeatureFlag extends BaseFeatureFlagObject implements FeatureFlagInter
     private const NAME = 'Debug';
     private const TITLE = 'Debug Feature Flag';
 
-    public const OBJ_DEBUG = 'debug';
+    public const OBJ = 'debug';
 
-    public const FIELD_PROJECT_KEY       = self::OBJ_DEBUG . '.' . 'project_key';
-    public const FIELD_DEPARTMENT_ID    = self::OBJ_DEBUG . '.' . 'department_id';
-    public const FIELD_APP_TYPE         = self::OBJ_DEBUG . '.' . 'app_type';
+    public const FIELD_PROJECT_KEY       = self::OBJ . '.' . 'project_key';
+    public const FIELD_DEPARTMENT_ID    = self::OBJ . '.' . 'department_id';
+    public const FIELD_APP_TYPE         = self::OBJ . '.' . 'app_type';
 
 
     public const OPTGROUP = 'DATA';
@@ -97,12 +99,13 @@ class DebugFeatureFlag extends BaseFeatureFlagObject implements FeatureFlagInter
 
         $attributeList = self::OBJECT_ATTRIBUTE_LIST;
 
-        $defaultAttributeList = self::getDefaultAttributeList();
+        $dateTimeAttributeList = DateTimeFeatureFlag::getAttributeList();
+        $userAttributeList = UserFeatureFlag::getAttributeList();
 
         $attributeList[0] = $appType;
         $attributeList[1] = $project;
         $attributeList[2] = $department;
-        return array_merge($attributeList, $defaultAttributeList);
+        return array_merge($attributeList, $dateTimeAttributeList, $userAttributeList);
     }
 
     /**
