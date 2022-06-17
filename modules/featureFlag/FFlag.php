@@ -2,7 +2,9 @@
 
 namespace modules\featureFlag;
 
+use kivork\FeatureFlag\Models\flags\dateTime\DateTimeFeatureFlag;
 use modules\featureFlag\models\debug\DebugFeatureFlag;
+use modules\featureFlag\models\user\UserFeatureFlag;
 use yii\base\InvalidConfigException;
 
 class FFlag
@@ -32,7 +34,8 @@ class FFlag
 
     public const FF_OBJECT_LIST = [
         self::FF_KEY_DEBUG => DebugFeatureFlag::class,
-        //self::FF_KEY_LPP_ENABLE => DebugFeatureFlag::class,
+        //self::FF_KEY_LPP_LEAD_CREATED => UserFeatureFlag::class,
+        //self::FF_KEY_PHONE_WIDGET_ACCEPTED_PANEL_ENABLED => DateTimeFeatureFlag::class
     ];
 
 
