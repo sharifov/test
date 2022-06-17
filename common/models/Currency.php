@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\components\jobs\UpdateLeadPreferencesCurrencyJob;
 use common\models\query\CurrencyQuery;
 use frontend\helpers\QuoteHelper;
 use src\helpers\ErrorsToStringHelper;
@@ -130,43 +131,8 @@ class Currency extends ActiveRecord
         }
 
         if (isset($changedAttributes['cur_enabled']) && boolval($this->cur_enabled) === false) {
-            /** @var LeadPreferences[] $leadPreferences */
-            $leadPreferences = LeadPreferences::find()
-                ->joinWith([
-                    'lead' => function (ActiveQuery $query) {
-                        $query->onCondition(['leads.status' => Lead::STATUS_PROCESSING]);
-                    },
-                ], true, 'RIGHT JOIN')
-                ->where([
-                    'pref_currency' => $this->cur_code
-                ])
-                ->all();
-
-            if (count($leadPreferences) > 0) {
-                $defaultCurrencyCode = self::getDefaultCurrency()->cur_code;
-                $employees = [];
-
-                foreach ($leadPreferences as $leadPreference) {
-                    $employeeID = $leadPreference->lead->employee_id;
-                    $leadPreference->pref_currency = $defaultCurrencyCode;
-
-                    if ($leadPreference->save(false) === true) {
-                        QuoteHelper::clearSearchCache($leadPreference->lead);
-
-                        if (in_array($employeeID, $employees) === false) {
-                            Notifications::createAndPublish(
-                                $employeeID,
-                                'Currency changed',
-                                "WARNING! The currency selected in Currency Preference has been disabled by the system administrator and can no longer be used for Price Quotes generation. All further Price Quotes will be generated in {$defaultCurrencyCode}.",
-                                Notifications::TYPE_INFO,
-                                true
-                            );
-
-                            $employees[] = $employeeID;
-                        }
-                    }
-                }
-            }
+            $updateLeadPreferencesJob = new UpdateLeadPreferencesCurrencyJob($this->cur_code);
+            Yii::$app->queue_job->push($updateLeadPreferencesJob);
         }
     }
 
