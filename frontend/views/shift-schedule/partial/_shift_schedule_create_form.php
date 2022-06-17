@@ -260,13 +260,6 @@ $('.js-select-users').on("select2:unselect", function(e) {
         }
     })
 });
-// $(document).off('click', '.toggleGroupedUsers').on('click', '.toggleGroupedUsers', function (e) {
-//     e.preventDefault();
-//     let isToggleCheck = $(this).data('check');
-//     $(this).closest('li').find('.input-users').prop('checked', isToggleCheck);
-//     $(this).data('check', !isToggleCheck);
-//     $(this).find('i').toggleClass('far').toggleClass('fas');
-// });
 $(document).off('pjax:beforeSend', '#{$pjaxId}').on('pjax:beforeSend', '#{$pjaxId}', function (obj, xhr, data) {
     let btnObj = $('#submit-add-event');
     btnObj.html('<i class="fa fa-spin fa-spinner"></i>');
