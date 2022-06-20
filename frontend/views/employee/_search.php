@@ -14,6 +14,13 @@ use common\models\Project;
 /* @var $model common\models\search\EmployeeSearch */
 /* @var $form yii\widgets\ActiveForm */
 ?>
+<style>
+    .brief{
+        padding: 5px 10px;
+        background: #F2F5F7;
+        margin-bottom: 5px
+    }
+</style>
 
 <div class="employee-search">
     <div class="x_panel">
@@ -50,11 +57,11 @@ use common\models\Project;
             ]); ?>
             <div class="row">
                 <div class="col-md-12 col-sm-12 profile_details">
-                    <div class="well profile_view">
+                    <div class="well profile_view clearfix" style="display: block">
+                        <h4 class="brief"><i>User common</i></h4>
                         <div class="col-sm-12">
-                            <h4 class="brief"><i>User common</i></h4>
                             <div class="row">
-                                <div class="col-md-1">
+                                <div class="col-md-2">
                                     <?= $form->field($model, 'id') ?>
                                 </div>
 
@@ -88,7 +95,7 @@ use common\models\Project;
                                         ]); ?>
                                 </div>
 
-                                <div class="col-md-1">
+                                <div class="col-md-2">
                                     <?php echo $form->field($model, 'status')->dropDownList(
                                         \common\models\Employee::STATUS_LIST,
                                         ['prompt' => '---']
@@ -96,18 +103,16 @@ use common\models\Project;
                                 </div>
                             </div>
                         </div>
-                        <div class=" profile-bottom text-center">
-                        </div>
                     </div>
                 </div>
 
 
                 <div class="col-md-12 col-sm-12 profile_details">
-                    <div class="well profile_view">
+                    <div class="well profile_view clearfix" style="display: block">
+                        <h4 class="brief"><i>User profile</i></h4>
                         <div class="col-sm-12">
-                            <h4 class="brief"><i>User profile</i></h4>
                             <div class="row">
-                                <div class="col-md-2">
+                                <div class="col-md-3">
                                     <?php echo $form->field($model, 'userGroupIds')
                                         ->widget(Select2::class, [
                                             'data' => \common\models\UserGroup::getList(),
@@ -116,7 +121,7 @@ use common\models\Project;
                                             'pluginOptions' => ['allowClear' => true, 'multiple' => true],
                                         ])->label('User Group'); ?>
                                 </div>
-                                <div class="col-md-2">
+                                <div class="col-md-3">
                                     <?php echo $form->field($model, 'userDepartmentIds')
                                         ->widget(Select2::class, [
                                             'data' => \common\models\Department::getList(),
@@ -126,7 +131,7 @@ use common\models\Project;
                                         ])->label('User Department'); ?>
                                 </div>
 
-                                <div class="col-md-2">
+                                <div class="col-md-3">
                                     <?= $form->field($model, 'projectAccessIds', [
                                         'options' => ['class' => 'form-group']
                                     ])->widget(Select2::class, [
@@ -136,7 +141,7 @@ use common\models\Project;
                                         'pluginOptions' => ['allowClear' => true],
                                     ])->label('User Project Access') ?>
                                 </div>
-                                <div class="col-md-2">
+                                <div class="col-md-3">
                                     <?php echo $form->field($model, 'assignedShifts')
                                         ->widget(Select2::class, [
                                             'data' => \yii\helpers\ArrayHelper::map(UserShiftAssign::getAssignedShits(), 'sh_id', 'sh_name'),
@@ -145,8 +150,9 @@ use common\models\Project;
                                             'pluginOptions' => ['allowClear' => true, 'multiple' => true],
                                         ]); ?>
                                 </div>
-
-                                <div class="col-md-2">
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
                                     <?php echo $form->field($model, 'chatChannels')
                                         ->widget(Select2::class, [
                                             'data' => ClientChatChannel::getList(),
@@ -157,19 +163,15 @@ use common\models\Project;
                                 </div>
                             </div>
                         </div>
-                        <div class=" profile-bottom text-center">
-                        </div>
                     </div>
                 </div>
 
 
                 <div class="col-md-12 col-sm-12 profile_details">
-                    <div class="well profile_view">
-                        <div class="col-sm-12">
-                            <h4 class="brief"><i>User params</i></h4>
+                      <div class="well profile_view clearfix" style="display: block">
+                          <h4 class="brief"><i>User params</i></h4>
+                          <div class="col-sm-12">
                             <div class="row">
-
-
                                 <div class="col-md-2">
                                     <?php echo $form->field($model, 'twoFaEnable')->dropDownList([1 => 'Enable', 0 => 'Disable'], ['prompt' => '---']) ?>
                                 </div>
@@ -191,13 +193,13 @@ use common\models\Project;
                                             'pluginOptions' => ['allowClear' => true, 'multiple' => true],
                                         ]); ?>
                                 </div>
-                                <div class="col-md-1">
+                                <div class="col-md-2">
                                     <?php echo $form->field($model, 'acl_rules_activated')->dropDownList(['' => '', 1 => 'Yes', 0 => 'No'])->label('IP filter') ?>
                                 </div>
-                                <div class="col-md-1">
+                                <div class="col-md-2">
                                     <?php echo $form->field($model, 'online')->dropDownList([1 => 'Online', 2 => 'Offline'], ['prompt' => '---']) ?>
                                 </div>
-                                <div class="col-md-1">
+                                <div class="col-md-2">
                                     <?php echo $form->field($model, 'callReady')->dropDownList(['' => '', 0 => 'Off', 1 => 'On'])->label('Call Ready') ?>
                                 </div>
 
@@ -243,7 +245,7 @@ use common\models\Project;
                                     ])->widget(\kartik\daterange\DateRangePicker::class, [
                                         'presetDropdown' => false,
                                         'hideInput' => true,
-                                       'convertFormat' => true,
+                                        'convertFormat' => true,
                                         'pluginOptions' => [
                                             'locale' => [
                                                 'format' => 'd-M-Y',
@@ -269,9 +271,7 @@ use common\models\Project;
                                     ]); ?>
                                 </div>
                             </div>
-                        </div>
-                        <div class=" profile-bottom text-center">
-                        </div>
+                          </div>
                     </div>
                 </div>
 
