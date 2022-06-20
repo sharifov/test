@@ -1132,12 +1132,12 @@ class Lead extends ActiveRecord implements Objectable
             $this->recordEvent(new LeadCallExpertRequestEvent($this));
         }
 
+        $this->status = $status;
+        $this->l_status_dt = date('Y-m-d H:i:s');
+
         if (LeadHelper::checkCallExpertNeededChange($this)) {
             $this->recordEvent(new LeadCallExpertChangedEvent($this->id));
         }
-
-        $this->status = $status;
-        $this->l_status_dt = date('Y-m-d H:i:s');
     }
 
     /**
