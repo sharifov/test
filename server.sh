@@ -77,6 +77,14 @@ createTemporallyDirectories () {
   printf "\n"
 }
 
+createDefaultCentrifugoConfig () {
+  cp "$dockerFolder/centrifugo/config.json.example" "$dockerFolder/centrifugo/config.json"
+}
+
+removeDefaultCentrifugoConfig () {
+  sudo rm "$dockerFolder/centrifugo/config.json"
+}
+
 removeTemporallyDirectories () {
   printf "\nRemove temporally directories"
   for str in ${tmpDirs[@]}; do
@@ -87,6 +95,7 @@ removeTemporallyDirectories () {
       sudo rm -r $str
     fi
   done
+  removeDefaultCentrifugoConfig
   ls -d -1 "$dockerFolder/nginx/certs/mkcert/"*.* | xargs rm
   printf "\n"
 }
@@ -252,6 +261,7 @@ initConfig () {
     && rm "common/config/supervisor/socket-server.conf" \
     && cp ".docker/pre-commit.sh" "docker-pre-commit.sh" \
     && chmod +x "docker-pre-commit.sh"
+  createDefaultCentrifugoConfig
   printf "\nDone - Init config \n\n"
 }
 
