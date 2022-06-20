@@ -36,7 +36,7 @@ class AbacLeadExpertCallService
 
         $quoteCount = $quoteRepository->getAmountQuoteByLeadIdAndStatusesAndCreateTypes(
             $lead->id,
-            [Quote::STATUS_SENT, Quote::STATUS_DECLINED],
+            [Quote::STATUS_SENT, Quote::STATUS_DECLINED, Quote::STATUS_OPENED],
             [Quote::CREATE_TYPE_AUTO, Quote::CREATE_TYPE_AUTO_SELECT, Quote::CREATE_TYPE_SMART_SEARCH]
         );
 
