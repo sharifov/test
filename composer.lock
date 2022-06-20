@@ -4478,7 +4478,7 @@
             "source": {
                 "type": "git",
                 "url": "git@bitbucket.org:techork/yii2-virtual-cron.git",
-                "reference": "e32b4aeee984e33814fb42290dbf81ec03575df5"
+                "reference": "7ff7eebaf17165da11461df4417f330810f31e8f"
             },
             "require": {
                 "mtdowling/cron-expression": "^1.2",
