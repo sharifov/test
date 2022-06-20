@@ -1,0 +1,10 @@
+{
+	"token_hmac_secret_key": "secret",
+	"admin_password": "password",
+	"admin_secret": "secret",
+	"api_key": "my_api_key",
+	"admin": true,
+	"allowed_origins": [
+		"https://crm.local"
+	]
+}

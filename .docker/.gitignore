@@ -1,0 +1,9 @@
+/.env
+/api-nginx/logs
+/mysql/data
+/psql/data
+/centrifugo/logs
+/centrifugo-nginx/logs
+/frontend-nginx/logs
+/ws-nginx/logs
+/console/.composer

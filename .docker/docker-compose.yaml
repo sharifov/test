@@ -1,0 +1,261 @@
+version: '3.9'
+
+services:
+  redis:
+    container_name: crm-redis
+    image: redis:${REDIS_VERSION}
+    ports:
+      - ${REDIS_HOST_PORT}:6379
+    restart: on-failure
+    networks:
+      - backend
+
+  mysql:
+    container_name: crm-mysql
+    image: ${MYSQL_IMAGE}:${MYSQL_VERSION}
+    ports:
+      - ${MYSQL_HOST_PORT}:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    volumes:
+      - /var/www/sales/docker/mysql/db:/var/lib/mysql
+#      - ./mysql/data:/var/lib/mysql
+    security_opt:
+      - seccomp:unconfined
+    restart: on-failure
+    networks:
+      - backend
+
+  psql:
+    container_name: crm-psql
+    image: postgres:${POSTGRES_VERSION}
+    ports:
+      - ${POSTGRES_HOST_PORT}:5432
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - /var/www/sales/docker/psql/db:/var/lib/postgresql/data
+#      - ./psql/data:/var/lib/postgresql/data
+    restart: on-failure
+    networks:
+      - backend
+
+  beanstalkd:
+    container_name: crm-beanstalkd
+    build:
+      context: ./beanstalkd
+      args:
+        version: ${BEANSTALKD_VERSION}
+    ports:
+      - ${BEANSTALKD_HOST_PORT}:11300
+    restart: on-failure
+    networks:
+      - backend
+
+  centrifugo:
+    container_name: crm-centrifugo
+    image: centrifugo/centrifugo:${CENTRIFUGO_VERSION}
+    volumes:
+      - ./centrifugo/config.json:/centrifugo/config.json
+      - ./centrifugo/logs:/var/log/centrifugo
+    command: centrifugo -c config.json --health
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
+    restart: on-failure
+    networks:
+      - backend
+
+  centrifugo-nginx:
+    container_name: crm-centrifugo-nginx
+    image: ${REGISTRY}crm-nginx:${NGINX_IMAGE_TAG}
+    environment:
+      - CENTRIFUGO_HOST=${CENTRIFUGO_HOST}
+    volumes:
+      - ./nginx/certs/:/etc/nginx/certs/:ro
+      - ./centrifugo-nginx/templates:/etc/nginx/templates
+      - ./centrifugo-nginx/logs:/var/log/nginx
+    depends_on:
+      - centrifugo
+    restart: on-failure
+    networks:
+      - backend
+      - kivork-reverse-proxy
+
+  frontend-php-fpm:
+    container_name: crm-frontend-php-fpm
+    image: ${REGISTRY}crm-php-fpm:${PHP_FPM_IMAGE_TAG}
+    volumes:
+      - ./../:/var/www/app
+    working_dir: /var/www/app
+    depends_on:
+      - redis
+      - mysql
+      - psql
+      - beanstalkd
+      - centrifugo
+#      - queue
+    restart: on-failure
+    networks:
+      - backend
+      - kivork-network
+
+  frontend-nginx:
+    container_name: crm-frontend-nginx
+    image: ${REGISTRY}crm-nginx:${NGINX_IMAGE_TAG}
+    environment:
+      - FILE_STORAGE_PATH=${FILE_STORAGE_PATH}
+      - VIRTUAL_HOST=${VIRTUAL_HOST}
+      - VOIP_RECORDS_PROXY_URL=${VOIP_RECORDS_PROXY_URL}
+    volumes:
+      - ./nginx/certs/:/etc/nginx/certs/:ro
+      - ./frontend-nginx/templates:/etc/nginx/templates
+      - ./frontend-nginx/logs:/var/log/nginx
+      - ${FILE_STORAGE_PATH}:${FILE_STORAGE_PATH}
+      - ./../:/var/www/app
+    depends_on:
+      - frontend-php-fpm
+      - centrifugo-nginx
+    restart: on-failure
+    networks:
+      - backend
+      - kivork-reverse-proxy
+
+  api-php-fpm:
+    container_name: crm-api-php-fpm
+    image: ${REGISTRY}crm-php-fpm:${PHP_FPM_IMAGE_TAG}
+    volumes:
+      - ./../:/var/www/app
+    working_dir: /var/www/app
+    depends_on:
+      - redis
+      - mysql
+      - psql
+      - beanstalkd
+      - centrifugo
+#      - queue
+    restart: on-failure
+    networks:
+      - backend
+      - kivork-network
+
+  api-nginx:
+    container_name: crm-api-nginx
+    image: ${REGISTRY}crm-nginx:${NGINX_IMAGE_TAG}
+    environment:
+      - HOST_API=${HOST_API}
+    volumes:
+      - ./api-nginx/templates:/etc/nginx/templates
+      - ./api-nginx/logs:/var/log/nginx
+      - ./../:/var/www/app
+    depends_on:
+      - api-php-fpm
+    restart: on-failure
+    networks:
+      backend:
+      kivork-reverse-proxy:
+      kivork-network:
+        aliases:
+          - ${HOST_API}
+
+  ws-nginx:
+    container_name: crm-ws-nginx
+    image: ${REGISTRY}crm-nginx:${NGINX_IMAGE_TAG}
+    environment:
+      - WEB_SOCKET_SERVER_HOST=${WEB_SOCKET_SERVER_HOST}
+      - WEB_SOCKET_SERVER_INTERNAL_PORT=${WEB_SOCKET_SERVER_INTERNAL_PORT}
+    volumes:
+      - ./nginx/certs/:/etc/nginx/certs/:ro
+      - ./ws-nginx/templates:/etc/nginx/templates
+      - ./ws-nginx/logs:/var/log/nginx
+      - ./../:/var/www/app
+    depends_on:
+      - ws
+    restart: on-failure
+    networks:
+      - backend
+      - kivork-reverse-proxy
+
+  ws:
+    container_name: crm-ws
+    image: ${REGISTRY}crm-swoole:${SWOOLE_IMAGE_TAG}
+    volumes:
+      - ./../:/var/www/app
+    working_dir: /var/www/app
+    depends_on:
+      - redis
+      - mysql
+      - psql
+      - beanstalkd
+      - centrifugo
+#      - queue
+    restart: on-failure
+    command: ./yii websocket-server/start
+    networks:
+      - backend
+
+#  queue:
+#    container_name: crm-queue
+#    build:
+#      context: ./queue
+#      args:
+#        REGISTRY: ${REGISTRY}
+#        SWOOLE_IMAGE_TAG: ${SWOOLE_IMAGE_TAG}
+#    volumes:
+#      - ./../:/var/www/app
+#    working_dir: /var/www/app
+#    depends_on:
+#      - redis
+#      - mysql
+#      - psql
+#      - beanstalkd
+#      - centrifugo
+#    restart: on-failure
+#    networks:
+#      - backend
+#      - kivork-proxy
+
+  console:
+    container_name: crm-console
+    build:
+      context: ./console
+      args:
+        REGISTRY: ${REGISTRY}
+        SWOOLE_IMAGE_TAG: ${SWOOLE_IMAGE_TAG}
+        USER_NAME: ${USER_NAME}
+        USER_ID: ${USER_ID}
+        USER_GID: ${USER_GID}
+        SSH_KEY: ${SSH_KEY}
+        SSH_KEY_PUB: ${SSH_KEY_PUB}
+    environment:
+      SSH_AUTH_SOCK: /ssh-agent
+    volumes:
+      - ./../:/var/www/app
+      - ./console/.composer/cache:/home/${USER_NAME}/.composer/cache
+      - $SSH_AUTH_SOCK:/ssh-agent # Forward local machine SSH key to docker
+    working_dir: /var/www/app
+    depends_on:
+      - redis
+      - mysql
+      - psql
+      - beanstalkd
+      - centrifugo
+    networks:
+      - backend
+      - kivork-network
+
+networks:
+  frontend:
+  backend:
+  kivork-reverse-proxy:
+    external: true
+    name: kivork-reverse-proxy
+  kivork-network:
+    external: true
+    name: kivork-network
