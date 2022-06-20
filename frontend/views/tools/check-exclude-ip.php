@@ -21,7 +21,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="row">
         <div class="col-md-2">
 
-            <?= Html::beginForm(null, 'get', [
+            <?= Html::beginForm('', 'get', [
                 'data-pjax' => 1
             ]) ?>
             <?= Html::label('IP Address:') ?>
