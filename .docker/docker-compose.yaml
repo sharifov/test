@@ -100,7 +100,7 @@ services:
       - psql
       - beanstalkd
       - centrifugo
-#      - queue
+      - queue
     restart: on-failure
     networks:
       - backend
@@ -140,7 +140,7 @@ services:
       - psql
       - beanstalkd
       - centrifugo
-#      - queue
+      - queue
     restart: on-failure
     networks:
       - backend
@@ -198,7 +198,7 @@ services:
       - psql
       - beanstalkd
       - centrifugo
-#      - queue
+      - queue
     restart: on-failure
     command: ./yii websocket-server-v3/start
     networks:
