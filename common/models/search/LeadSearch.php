@@ -4549,8 +4549,9 @@ class LeadSearch extends Lead
     public function searchSoldLeadWithoutProfitSplit($params): ActiveDataProvider
     {
         $query = Lead::find()
-            ->andWhere(['status' => self::STATUS_SOLD])
-            ->andWhere(['NOT IN', 'id', ProfitSplit::find()->select('ps_lead_id')]);
+            ->leftJoin('profit_split', 'profit_split.ps_lead_id = leads.id')
+            ->where(['status' => Lead::STATUS_SOLD])
+            ->andWhere(['IS', 'profit_split.ps_lead_id', new \yii\db\Expression('null')]);
 
         $leadTable = Lead::tableName();
         $dataProvider = new ActiveDataProvider([
