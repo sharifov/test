@@ -86,7 +86,7 @@ services:
     restart: on-failure
     networks:
       - backend
-      - kivork-reverse-proxy
+      - kivork-network
 
   frontend-php-fpm:
     container_name: crm-frontend-php-fpm
@@ -122,10 +122,11 @@ services:
     depends_on:
       - frontend-php-fpm
       - centrifugo-nginx
+      - ws-nginx
     restart: on-failure
     networks:
       - backend
-      - kivork-reverse-proxy
+      - kivork-network
 
   api-php-fpm:
     container_name: crm-api-php-fpm
@@ -159,7 +160,6 @@ services:
     restart: on-failure
     networks:
       backend:
-      kivork-reverse-proxy:
       kivork-network:
         aliases:
           - ${HOST_API}
@@ -180,11 +180,15 @@ services:
     restart: on-failure
     networks:
       - backend
-      - kivork-reverse-proxy
+      - kivork-network
 
   ws:
     container_name: crm-ws
-    image: ${REGISTRY}crm-swoole:${SWOOLE_IMAGE_TAG}
+    build:
+      context: ./swoole
+      args:
+        REGISTRY: ${REGISTRY}
+        PHP_CLI_IMAGE_TAG: ${PHP_CLI_IMAGE_TAG}
     volumes:
       - ./../:/var/www/app
     working_dir: /var/www/app
@@ -196,30 +200,30 @@ services:
       - centrifugo
 #      - queue
     restart: on-failure
-    command: ./yii websocket-server/start
+    command: ./yii websocket-server-v3/start
     networks:
       - backend
 
-#  queue:
-#    container_name: crm-queue
-#    build:
-#      context: ./queue
-#      args:
-#        REGISTRY: ${REGISTRY}
-#        SWOOLE_IMAGE_TAG: ${SWOOLE_IMAGE_TAG}
-#    volumes:
-#      - ./../:/var/www/app
-#    working_dir: /var/www/app
-#    depends_on:
-#      - redis
-#      - mysql
-#      - psql
-#      - beanstalkd
-#      - centrifugo
-#    restart: on-failure
-#    networks:
-#      - backend
-#      - kivork-proxy
+  queue:
+    container_name: crm-queue
+    build:
+      context: ./queue
+      args:
+        REGISTRY: ${REGISTRY}
+        PHP_CLI_IMAGE_TAG: ${PHP_CLI_IMAGE_TAG}
+    volumes:
+      - ./../:/var/www/app
+    working_dir: /var/www/app
+    depends_on:
+      - redis
+      - mysql
+      - psql
+      - beanstalkd
+      - centrifugo
+    restart: on-failure
+    networks:
+      - backend
+      - kivork-network
 
   console:
     container_name: crm-console
@@ -227,7 +231,7 @@ services:
       context: ./console
       args:
         REGISTRY: ${REGISTRY}
-        SWOOLE_IMAGE_TAG: ${SWOOLE_IMAGE_TAG}
+        PHP_CLI_IMAGE_TAG: ${PHP_CLI_IMAGE_TAG}
         USER_NAME: ${USER_NAME}
         USER_ID: ${USER_ID}
         USER_GID: ${USER_GID}
@@ -238,7 +242,7 @@ services:
     volumes:
       - ./../:/var/www/app
       - ./console/.composer/cache:/home/${USER_NAME}/.composer/cache
-      - $SSH_AUTH_SOCK:/ssh-agent # Forward local machine SSH key to docker
+      - $SSH_AUTH_SOCK:/ssh-agent
     working_dir: /var/www/app
     depends_on:
       - redis
@@ -251,11 +255,7 @@ services:
       - kivork-network
 
 networks:
-  frontend:
   backend:
-  kivork-reverse-proxy:
-    external: true
-    name: kivork-reverse-proxy
   kivork-network:
     external: true
     name: kivork-network

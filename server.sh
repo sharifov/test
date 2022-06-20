@@ -27,8 +27,6 @@ fi
 
 REGISTRY=$(getEnvVar "REGISTRY")
 
-APP_PATH=$(getEnvVar "APP_PATH")
-
 VIRTUAL_HOST=$(getEnvVar "VIRTUAL_HOST")
 
 NGINX_IMAGE_TAG=$(getEnvVar "NGINX_IMAGE_TAG")
@@ -39,8 +37,6 @@ PHP_FPM_VERSION=$(getEnvVar "PHP_FPM_VERSION")
 
 PHP_CLI_IMAGE_TAG=$(getEnvVar "PHP_CLI_IMAGE_TAG")
 PHP_CLI_VERSION=$(getEnvVar "PHP_CLI_VERSION")
-
-SWOOLE_IMAGE_TAG=$(getEnvVar "SWOOLE_IMAGE_TAG")
 
 MYSQL_IMAGE=$(getEnvVar "MYSQL_IMAGE")
 MYSQL_VERSION=$(getEnvVar "MYSQL_VERSION")
@@ -182,29 +178,22 @@ restart () {
   start
 }
 
-createKivorkNetworks () {
+createKivorkNetwork () {
   if [ -z $(docker network ls -f name=kivork-network -q) ]; then
     printf "\nStart - Create kivork-network network \n\n"
     docker network create kivork-network
     printf "\nDone - Create kivork-network network \n\n"
   fi
-
-  if [ -z $(docker network ls -f name=kivork-reverse-proxy -q) ]; then
-    printf "\nStart - Create kivork-reverse-proxy network \n\n"
-    docker network create kivork-reverse-proxy
-    printf "\nDone - Create kivork-reverse-proxy network \n\n"
-  fi
 }
 
 build () {
   down
-  createKivorkNetworks
+  createKivorkNetwork
 
   printf "\nStart - Build \n\n"
-  docker build --build-arg NGINX_VERSION=$NGINX_VERSION --build-arg USER_NAME=$CURRENT_USER --build-arg USER_ID=$CURRENT_UID --build-arg USER_GID=$CURRENT_GROUP_ID --file="$dockerFolder/nginx/Dockerfile" --tag=crm-nginx:$NGINX_IMAGE_TAG $dockerFolder/nginx
-	docker build --build-arg PHP_FPM_VERSION=$PHP_FPM_VERSION --build-arg USER_NAME=$CURRENT_USER --build-arg USER_ID=$CURRENT_UID --build-arg USER_GID=$CURRENT_GROUP_ID --file="$dockerFolder/php-fpm/Dockerfile" --tag=crm-php-fpm:$PHP_FPM_IMAGE_TAG $dockerFolder/php-fpm
-	docker build --build-arg PHP_CLI_VERSION=$PHP_CLI_VERSION --file="$dockerFolder/php-cli/Dockerfile" --tag=crm-php-cli:$PHP_CLI_IMAGE_TAG $dockerFolder/php-cli
-	docker build --build-arg REGISTRY=$REGISTRY --build-arg PHP_CLI_IMAGE_TAG=$PHP_CLI_IMAGE_TAG --file="$dockerFolder/swoole/Dockerfile" --tag=crm-swoole:$SWOOLE_IMAGE_TAG $dockerFolder/swoole
+  docker build --build-arg NGINX_VERSION=$NGINX_VERSION --build-arg USER_NAME=$CURRENT_USER --build-arg USER_ID=$CURRENT_UID --build-arg USER_GID=$CURRENT_GROUP_ID --file="$dockerFolder/nginx/Dockerfile" --tag="${REGISTRY}"crm-nginx:$NGINX_IMAGE_TAG $dockerFolder/nginx
+	docker build --build-arg PHP_FPM_VERSION=$PHP_FPM_VERSION --build-arg USER_NAME=$CURRENT_USER --build-arg USER_ID=$CURRENT_UID --build-arg USER_GID=$CURRENT_GROUP_ID --file="$dockerFolder/php-fpm/Dockerfile" --tag="${REGISTRY}"crm-php-fpm:$PHP_FPM_IMAGE_TAG $dockerFolder/php-fpm
+	docker build --build-arg PHP_CLI_VERSION=$PHP_CLI_VERSION --file="$dockerFolder/php-cli/Dockerfile" --tag="${REGISTRY}"crm-php-cli:$PHP_CLI_IMAGE_TAG $dockerFolder/php-cli
   docker-compose -f "$dockerComposeFile" build
   printf "\nDone - Build \n\n"
 }
@@ -254,7 +243,7 @@ npmInstall () {
 
 initConfig () {
   printf "Start - Init config \n"
-	docker run --rm -v $APP_PATH:/var/www/app \
+	docker run --rm -v $PWD:/var/www/app \
     --workdir /var/www/app \
     --user $CURRENT_UID:$CURRENT_GROUP_ID \
     crm-php-cli:$PHP_CLI_IMAGE_TAG \
@@ -386,17 +375,14 @@ elif [ "$whatDo" == "up" ]; then
 elif [ "$whatDo" == "down" ]; then
   down
 
-elif [ "$whatDo" == "test" ]; then
-  printf "Test"
-
-elif [ "$whatDo" == "stop-all" ]; then
-  docker stop $(docker ps -q)
+elif [ "$whatDo" == "start" ]; then
+  start
 
 elif [ "$whatDo" == "stop" ]; then
   stop
 
-elif [ "$whatDo" == "start" ]; then
-  start
+elif [ "$whatDo" == "stop-all" ]; then
+  docker stop $(docker ps -q)
 
 elif [ "$whatDo" == "restart" ]; then
  restart
@@ -415,11 +401,21 @@ elif [ "$whatDo" == "composer" ]; then
     docker-compose -f "$dockerComposeFile" run --no-deps --rm console composer $params
     printf "Done - Composer\n"
 
+elif [ "$whatDo" == "npm" ]; then
+    if [ "$2" == "" ]; then
+        params=" help"
+    else
+        params="$2"
+    fi
+
+    printf "Start - Npm \n"
+    docker-compose -f "$dockerComposeFile" run --no-deps --rm console npm $params
+    printf "Done - Npm\n"
+
 elif [ "$whatDo" == "docker-install" ]; then
   dockerInstall
 
 elif [ "$whatDo" == 'yii' ]; then
-#  need check
   params="$@"
   docker-compose -f "$dockerComposeFile" run --rm console /bin/sh -c "./$params"
 
@@ -461,6 +457,8 @@ elif [ "$whatDo" == 'cert-install' ] || [ "$whatDo" == 'cert-update' ]; then
   else
     printf "Mkcert has been already installed\n"
   fi
+elif [ "$whatDo" == "test" ]; then
+  printf "Test"
 else
   printf "Unknown command\n"
 fi

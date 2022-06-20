@@ -1,9 +1,9 @@
 ARG REGISTRY
-ARG SWOOLE_IMAGE_TAG
+ARG PHP_CLI_IMAGE_TAG
 
-FROM ${REGISTRY}crm-swoole:${SWOOLE_IMAGE_TAG}
+FROM ${REGISTRY}crm-php-cli:${PHP_CLI_IMAGE_TAG}
 
-RUN apt-get update && apt-get install -y openssh-client git
+RUN apt-get update && apt-get install -y openssh-client
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/bin --version=2.0.9 --filename=composer && composer clear-cache
 
