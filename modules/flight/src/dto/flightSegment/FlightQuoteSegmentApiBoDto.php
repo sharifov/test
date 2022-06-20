@@ -81,7 +81,7 @@ class FlightQuoteSegmentApiBoDto
         }
 
         $response = array_filter(SearchService::CABIN_LIST, function ($item) use ($cabin) {
-            return mb_strtolower($cabin) == mb_strtolower($item);
+            return mb_strtolower($cabin) === mb_strtolower($item);
         });
         if (count($response)) {
             return key($response);
