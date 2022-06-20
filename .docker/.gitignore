@@ -3,6 +3,7 @@
 /mysql/data
 /psql/data
 /centrifugo/logs
+/centrifugo/config.json
 /centrifugo-nginx/logs
 /frontend-nginx/logs
 /ws-nginx/logs

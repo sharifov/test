@@ -374,7 +374,7 @@ logoutRoot
 initCurrentUserVars
 
 if [ "$whatDo" == "application-install" ]; then
-    applicationInstall
+  applicationInstall
 
 elif [ "$whatDo" == "application-uninstall" ]; then
   applicationUninstall
