@@ -55,7 +55,7 @@ class LeadExpertCallObject extends AbacBaseModel implements AbacInterface
         'optgroup' => 'Lead',
         'id' => self::NS . 'quoteCount',
         'field' => 'quoteCount',
-        'label' => 'Amount SS or Auto Quote in Status: Send,Decline',
+        'label' => 'Amount SS or Auto Quote in Status: Send,Decline,Opened',
         'type' => self::ATTR_TYPE_INTEGER,
         'input' => self::ATTR_INPUT_TEXT,
         'values' => [],

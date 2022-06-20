@@ -840,6 +840,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'API Users', 'url' => ['/api-user/index'], 'icon' => 'users'],
                 ['label' => 'Tasks', 'url' => ['/task/index'], 'icon' => 'list'],
                 ['label' => 'Lead Tasks', 'url' => ['/lead-task/index'], 'icon' => 'list'],
+                ['label' => 'Profit Split', 'url' => ['/profit-split-crud/index'], 'icon' => 'money'],
 
                 ['label' => 'Check List Types', 'url' => ['/lead-checklist-type/index'], 'icon' => 'list', 'visible' => Yii::$app->user->can('manageLeadChecklistType')],
 
