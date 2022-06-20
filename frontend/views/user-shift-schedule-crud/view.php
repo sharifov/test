@@ -42,7 +42,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'value' => static function (
                         UserShiftSchedule $model
                     ) {
-                        return $model->getShiftTitle();
+                        return $model->getShiftName();
                     },
                 ],
 

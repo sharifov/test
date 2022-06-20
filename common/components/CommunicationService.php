@@ -1541,10 +1541,36 @@ class CommunicationService extends Component implements CommunicationServiceInte
      */
     public function ping(): bool
     {
-        $response = $this->sendRequest('application-status/ping', [], 'get');
-        if ($response->isOk && !empty($response['availability'])) {
-            return true;
+        $parsedUrl = parse_url($this->url);
+        if (isset($parsedUrl['scheme'], $parsedUrl['host'])) {
+            $curl = curl_init();
+            curl_setopt($curl, CURLOPT_URL, "{$parsedUrl['scheme']}://{$parsedUrl['host']}/application-status/ping");
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            $result = curl_exec($curl);
+            if (!curl_errno($curl) && $resultJson = Json::decode($result)) {
+                return !empty($resultJson['availability']);
+            }
+            return false;
         }
         return false;
+    }
+
+    public function getOriginalForwardedFromNumber(string $callSid): ?string
+    {
+        $response = $this->sendRequest('twilio/get-original-forwarded-from-number', [
+            'callSid' => $callSid,
+        ]);
+
+        if ($response->isOk) {
+            if (isset($response->data['forwardedNumber'])) {
+                return $response->data['forwardedNumber'];
+            }
+        } else {
+            \Yii::error([
+                'message' => 'Response is error',
+                'response' => VarDumper::dumpAsString($response->content),
+            ], 'CommunicationService::getOriginalForwardedFromNumber');
+        }
+        return null;
     }
 }

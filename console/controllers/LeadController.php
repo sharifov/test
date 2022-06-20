@@ -492,7 +492,7 @@ class LeadController extends Controller
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
 
         /** @fflag FFlag::FF_LPP_ENABLE, Lead Poor Processing Enable/Disable */
-        if (!Yii::$app->ff->can(FFlag::FF_KEY_LPP_ENABLE)) {
+        if (!Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_LPP_ENABLE)) {
             echo Console::renderColoredString('%y --- Feature Flag (' . FFlag::FF_KEY_LPP_ENABLE . ') not enabled %n'), PHP_EOL;
             exit();
         }
@@ -530,7 +530,7 @@ class LeadController extends Controller
                 Console::updateProgress($processed, $count);
             } catch (\RuntimeException | \DomainException $throwable) {
                 /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
-                if (Yii::$app->ff->can(FFlag::FF_KEY_DEBUG)) {
+                if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_DEBUG)) {
                     $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $item);
                     \Yii::warning($message, 'LeadController:actionToExtraQueue:Exception');
                 }
@@ -558,7 +558,7 @@ class LeadController extends Controller
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
 
         /** @fflag FFlag::FF_LPP_ENABLE, Lead Poor Processing Enable/Disable */
-        if (!Yii::$app->ff->can(FFlag::FF_KEY_LPP_ENABLE)) {
+        if (!Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_LPP_ENABLE)) {
             echo Console::renderColoredString('%y --- Feature Flag (' . FFlag::FF_KEY_LPP_ENABLE . ') not enabled %n'), PHP_EOL;
             exit();
         }
@@ -579,7 +579,7 @@ class LeadController extends Controller
         $dateRule = $currentDT->modify('-' . $scheduledCommunicationRuleService->getIntervalHour() . ' hours');
         $startDate = '2022-02-22 08:00:00';
 
-        if (($leadCreatedDT = Yii::$app->ff->val(FFlag::FF_KEY_LPP_LEAD_CREATED)) && DateHelper::checkDateTime($leadCreatedDT)) {
+        if (($leadCreatedDT = Yii::$app->featureFlag->getValue(FFlag::FF_KEY_LPP_LEAD_CREATED)) && DateHelper::checkDateTime($leadCreatedDT)) {
             $startDate = $leadCreatedDT;
         }
 
@@ -691,7 +691,7 @@ class LeadController extends Controller
                 Console::updateProgress($processed, $count);
             } catch (\RuntimeException | \DomainException $throwable) {
                 /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
-                if (Yii::$app->ff->can(FFlag::FF_KEY_DEBUG)) {
+                if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_DEBUG)) {
                     $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
                     \Yii::info($message, 'LeadController:actionLppScheduledCommunication:Exception');
                 }
@@ -725,7 +725,7 @@ class LeadController extends Controller
     public function actionToLastActionLpp()
     {
         /** @fflag FFlag::FF_LPP_ENABLE, Lead Poor Processing Enable/Disable */
-        if (!Yii::$app->ff->can(FFlag::FF_KEY_LPP_ENABLE)) {
+        if (!Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_LPP_ENABLE)) {
             echo Console::renderColoredString('%y --- Feature Flag (' . FFlag::FF_KEY_LPP_ENABLE . ') not enabled %n'), PHP_EOL;
             exit();
         }
@@ -740,7 +740,7 @@ class LeadController extends Controller
                                               ') not enabled %n'), PHP_EOL;
             exit();
         }
-        if (!($leadCreatedDT = Yii::$app->ff->val(FFlag::FF_KEY_LPP_LEAD_CREATED)) || !DateHelper::checkDateTime($leadCreatedDT)) {
+        if (!($leadCreatedDT = Yii::$app->featureFlag->getValue(FFlag::FF_KEY_LPP_LEAD_CREATED)) || !DateHelper::checkDateTime($leadCreatedDT)) {
             echo Console::renderColoredString('Last Created DT is not set'), PHP_EOL;
             exit();
         }
@@ -766,7 +766,7 @@ class LeadController extends Controller
                 Console::updateProgress($processed, $count);
             } catch (\RuntimeException | \DomainException $throwable) {
                 /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
-                if (Yii::$app->ff->can(FFlag::FF_KEY_DEBUG)) {
+                if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_DEBUG)) {
                     $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
                     \Yii::info($message, 'LeadController:actionToLastActionLpp:Exception');
                 }
@@ -787,13 +787,13 @@ class LeadController extends Controller
     public function actionToClosedFromExtra()
     {
         /** @fflag FFlag::FF_KEY_LPP_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT, Lead Poor Processing to Closing transferring enable/Disable */
-        if (!Yii::$app->ff->can(FFlag::FF_KEY_LPP_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT)) {
+        if (!Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_LPP_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT)) {
             echo Console::renderColoredString('%y --- Feature Flag (' . FFlag::FF_KEY_LPP_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT . ') not enabled %n'), PHP_EOL;
             exit();
         }
         $time_start     = microtime(true);
 
-        $maxDaysInExtraQueue =  Yii::$app->ff->val(FFlag::FF_KEY_LPP_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT);
+        $maxDaysInExtraQueue =  Yii::$app->featureFlag->getValue(FFlag::FF_KEY_LPP_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT);
         $thresholdDate = new \DateTimeImmutable(date('Y-m-d H:i:s'));
         $thresholdDate = $thresholdDate->modify('-' . $maxDaysInExtraQueue . ' days');
         $leads = Lead::find()
@@ -810,7 +810,7 @@ class LeadController extends Controller
                 Console::updateProgress($processed, $count);
             } catch (\RuntimeException | \DomainException $throwable) {
                 /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
-                if (Yii::$app->ff->can(FFlag::FF_KEY_DEBUG)) {
+                if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_DEBUG)) {
                     $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
                     \Yii::info($message, 'LeadController:actionToClosedFromExtra:Exception');
                 }

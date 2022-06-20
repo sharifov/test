@@ -102,7 +102,7 @@
 		"kartik-v/yii2-widget-fileinput": "@dev",
 		"kartik-v/yii2-mpdf": "^1.0",
 		"pixel418/markdownify": "^2.3",
-		"casbin/casbin": "3.7",
+		"casbin/casbin": "3.20.3",
 		"snowplow/snowplow-tracker": "0.4.0",
 		"vlucas/phpdotenv": "^5.3",
 		"yiisoft/yii2-authclient": "^2.2",
@@ -110,11 +110,11 @@
         "ext-fileinfo": "*",
         "ext-pgsql": "*",
 		"kivork/yii2-search-module": "1.08.*",
-		"kivork/yii2-feature-flag": "1.0.1",
 		"geoip/geoip": "~1.16",
 		"endroid/qr-code": "4.4.9",
 		"jp3cki/totp": "2.0.0",
-		"kartik-v/yii2-password": "1.5.7"
+		"kartik-v/yii2-password": "1.5.7",
+		"kivork/yii2-feature-flag": "1.1.0"
 	},
 	"require-dev" : {
 		"yiisoft/yii2-debug" : "~2.1",
@@ -168,7 +168,8 @@
 		},
 		"optimize-autoloader": true,
 		"allow-plugins": {
-			"yiisoft/yii2-composer": true
+			"yiisoft/yii2-composer": true,
+			"dealerdirect/phpcodesniffer-composer-installer": false
 		}
 	},
 	"repositories" : [

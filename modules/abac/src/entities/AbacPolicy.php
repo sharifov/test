@@ -5,6 +5,8 @@ namespace modules\abac\src\entities;
 use BaconQrCode\Renderer\Text\Html;
 use common\models\Employee;
 use modules\abac\src\AbacService;
+use src\behaviors\cache\CleanCacheBehavior;
+use src\helpers\app\AppHelper;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -47,7 +49,7 @@ class AbacPolicy extends ActiveRecord
         self::EFFECT_ALLOW => 'allow',
     ];
 
-
+    public const CACHE_KEY = 'abac-policy-model';
 
     /**
      * @return string
@@ -97,6 +99,11 @@ class AbacPolicy extends ActiveRecord
                 'class' => BlameableBehavior::class,
                 'createdByAttribute' => 'ap_created_user_id',
                 'updatedByAttribute' => 'ap_updated_user_id',
+                'defaultValue' => null,
+            ],
+            'cleanCache' => [
+                'class' => CleanCacheBehavior::class,
+                'tags' => [self::CACHE_KEY . $this->ap_object],
             ],
         ];
     }
@@ -136,8 +143,8 @@ class AbacPolicy extends ActiveRecord
             $this->ap_action = $this->getActionListById();
         }
 
-        if ($this->ap_subject_json) {
-            $this->ap_subject = $this->getDecodeCode();
+        if ($this->ap_subject_json && $subject = $this->getDecodeCode()) {
+            $this->ap_subject = $subject;
         }
         $this->ap_hash_code = $this->generateHashCode();
         return true;
@@ -293,7 +300,7 @@ class AbacPolicy extends ActiveRecord
         $data[] = $this->ap_action;
         $data[] = $this->ap_subject;
         $data[] = $this->ap_effect;
-        return substr(md5(implode('|', $data)), 0, 10);
+        return AbacService::generateHashCode($data);
     }
 
     /**

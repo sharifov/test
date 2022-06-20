@@ -14,6 +14,7 @@ use webapi\src\logger\behaviors\filters\creditCard\CreditCardFilter;
 use webapi\src\logger\behaviors\filters\creditCard\V5;
 use Yii;
 use yii\base\Exception;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\httpclient\CurlTransport;
 

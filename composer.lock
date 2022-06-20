@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "842b9631b09f08f3852970ff64392a0c",
+    "content-hash": "30f83d4db02feedcff4d5426371ea1df",
     "packages": [
         {
             "name": "2amigos/yii2-arrayquery-component",
@@ -1084,26 +1084,27 @@
         },
         {
             "name": "casbin/casbin",
-            "version": "v3.7.0",
+            "version": "v3.20.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-casbin/php-casbin.git",
-                "reference": "a3d99663905d8211b9e4510578ed6c5800efb29b"
+                "reference": "509d5833634901d3fc9b186c5b922a04b2b360b0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-casbin/php-casbin/zipball/a3d99663905d8211b9e4510578ed6c5800efb29b",
-                "reference": "a3d99663905d8211b9e4510578ed6c5800efb29b",
+                "url": "https://api.github.com/repos/php-casbin/php-casbin/zipball/509d5833634901d3fc9b186c5b922a04b2b360b0",
+                "reference": "509d5833634901d3fc9b186c5b922a04b2b360b0",
                 "shasum": ""
             },
             "require": {
                 "php": ">=7.1.0",
                 "s1lentium/iptools": "^1.1",
-                "symfony/expression-language": "^3.4|^4.0|^5.0"
+                "symfony/expression-language": "^3.4|^4.0|^5.0|^6.0"
             },
             "require-dev": {
+                "mockery/mockery": "^1.2",
                 "php-coveralls/php-coveralls": "^2.1",
-                "phpstan/phpstan": "^0.12",
+                "phpstan/phpstan": "^1.2",
                 "phpunit/phpunit": "~7.0|~8.0|~9.0"
             },
             "type": "library",
@@ -1134,7 +1135,7 @@
             ],
             "support": {
                 "issues": "https://github.com/php-casbin/php-casbin/issues",
-                "source": "https://github.com/php-casbin/php-casbin/tree/v3.7.0"
+                "source": "https://github.com/php-casbin/php-casbin/tree/v3.20.3"
             },
             "funding": [
                 {
@@ -1142,7 +1143,7 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2021-08-09T11:57:38+00:00"
+            "time": "2022-02-17T07:57:54+00:00"
         },
         {
             "name": "cebe/markdown",
@@ -4249,17 +4250,17 @@
         },
         {
             "name": "kivork/yii2-feature-flag",
-            "version": "1.0.1",
+            "version": "1.1.0",
             "source": {
                 "type": "git",
                 "url": "git@bitbucket.org:techork/yii2-feature-flag.git",
-                "reference": "6074f3aa7c8170e796d1c0ed042f2c4d7d43a057"
+                "reference": "00e57b35b50e8d0cd9dd57394924494a969e363f"
             },
             "require": {
                 "ext-json": "*",
                 "kdn/yii2-json-editor": "*",
                 "mtdowling/cron-expression": "^1.2",
-                "php": ">=7.2",
+                "php": ">=7.4",
                 "yiisoft/yii2": "~2.0.10",
                 "yiisoft/yii2-bootstrap": "^2.0.10"
             },

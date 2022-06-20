@@ -9,7 +9,7 @@ use yii\widgets\DetailView;
 /* @var $model common\models\QuoteSegmentStop */
 
 $this->title = $model->qss_id;
-$this->params['breadcrumbs'][] = ['label' => 'Quote Segment Stops', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Quote Segment Technical Stops', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>

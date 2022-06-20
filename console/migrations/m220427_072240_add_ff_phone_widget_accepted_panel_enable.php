@@ -33,7 +33,7 @@ class m220427_072240_add_ff_phone_widget_accepted_panel_enable extends Migration
                     'ff_description' => 'Voip'
                 ]
             );
-            Yii::$app->ff->invalidateCache();
+            Yii::$app->featureFlag->invalidateCache();
         } catch (\Throwable $throwable) {
             \Yii::error(AppHelper::throwableLog($throwable), 'm220427_072240_add_ff_phone_widget_accepted_panel_enable:safeUp:Throwable');
         }
@@ -50,7 +50,7 @@ class m220427_072240_add_ff_phone_widget_accepted_panel_enable extends Migration
             }
             $featureFlagService = new \kivork\FeatureFlag\Services\FeatureFlagService();
             $featureFlagService::delete(FFlag::FF_KEY_PHONE_WIDGET_ACCEPTED_PANEL_ENABLED);
-            Yii::$app->ff->invalidateCache();
+            Yii::$app->featureFlag->invalidateCache();
         } catch (\Throwable $throwable) {
             \Yii::error(AppHelper::throwableLog($throwable), 'm220427_072240_add_ff_phone_widget_accepted_panel_enable:safeDown:Throwable');
         }

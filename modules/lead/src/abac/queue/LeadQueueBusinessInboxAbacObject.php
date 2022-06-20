@@ -34,6 +34,7 @@ class LeadQueueBusinessInboxAbacObject extends AbacBaseModel implements AbacInte
     public const ACTION_COLUMN_REQUEST_IP = 'column_request_ip';
     public const ACTION_COLUMN_CLIENT_TIME = 'column_client_time';
     public const ACTION_COLUMN_PENDING_TIME = 'column_pending_time';
+    public const ACTION_COLUMN_LEAD_ID = 'column_lead_id';
     public const ACTION_READ_WT_USER_RESTRICTION = 'read_wt_user_restriction';
 
     public const ATTR_LEAD_PROJECT_ID = [
@@ -78,6 +79,7 @@ class LeadQueueBusinessInboxAbacObject extends AbacBaseModel implements AbacInte
                 self::ACTION_COLUMN_REQUEST_IP,
                 self::ACTION_COLUMN_CLIENT_TIME,
                 self::ACTION_COLUMN_PENDING_TIME,
+                self::ACTION_COLUMN_LEAD_ID,
             ],
             self::UI_BUTTON_VIEW => [self::ACTION_READ],
             self::QUERY_LISTING => [self::ACTION_READ_WT_USER_RESTRICTION],

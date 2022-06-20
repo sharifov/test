@@ -29,9 +29,27 @@ $this->params['breadcrumbs'][] = $this->title;
         'layout' => "{errors}\n{summary}\n{items}\n{pager}",
         'columns' => [
             'qt_id',
+            [
+                'attribute' => 'qt_quote_id',
+                'format' => 'raw',
+                'value' => function (QuoteTrip $model) {
+                    return '<i class="fa fa-link"></i> ' .
+                        Html::a(
+                            $model->qt_quote_id,
+                            ['/quotes/index', 'QuoteSearch[id]' => $model->qt_quote_id],
+                            ['title' => 'Show', 'target' => '_blank', 'data-pjax' => 0]
+                        );
+                }
+            ],
+            [
+                'header' => 'Segment(s)',
+                'format' => 'raw',
+                'value' => function (QuoteTrip $model) {
+                    return $model->getQuoteSegments()->count();
+                }
+            ],
             'qt_duration',
             'qt_key',
-            'qt_quote_id',
             [
                 'class' => ActionColumn::className(),
                 'urlCreator' => function ($action, QuoteTrip $model, $key, $index, $column) {

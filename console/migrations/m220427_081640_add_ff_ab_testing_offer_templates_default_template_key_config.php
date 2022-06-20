@@ -25,7 +25,7 @@ class m220427_081640_add_ff_ab_testing_offer_templates_default_template_key_conf
             $value['defaultOfferTemplateKey'] = 'cl_offer';
             $fFlag->ff_value = json_encode($value);
             $fFlag->save();
-            Yii::$app->ff->invalidateCache();
+            Yii::$app->featureFlag->invalidateCache();
         } catch (\Throwable $throwable) {
             \Yii::error(\src\helpers\app\AppHelper::throwableLog($throwable), 'm220427_081640_add_ff_ab_testing_offer_templates_default_template_key_config:safeUp:Throwable');
         }
@@ -48,7 +48,7 @@ class m220427_081640_add_ff_ab_testing_offer_templates_default_template_key_conf
             unset($value['defaultOfferTemplateKey']);
             $fFlag->ff_value = json_encode($value);
             $fFlag->save();
-            Yii::$app->ff->invalidateCache();
+            Yii::$app->featureFlag->invalidateCache();
         } catch (\Throwable $throwable) {
             \Yii::error(\src\helpers\app\AppHelper::throwableLog($throwable), 'm220427_081640_add_ff_ab_testing_offer_templates_default_template_key_config:safeDown:Throwable');
         }

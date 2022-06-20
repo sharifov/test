@@ -268,7 +268,12 @@ class SideBarMenu extends \yii\bootstrap\Widget
             'label' => 'User Shift Calendar',
             'url' => ['/shift-schedule/calendar'],
             'icon' => 'calendar text-warning',
-            'title' => 'User Shift Schedule Calendar'
+            'title' => 'User Shift Schedule Calendar',
+            'abac'  => [
+                'dto'    => null,
+                'object' => ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR,
+                'action' => ShiftAbacObject::ACTION_ACCESS,
+            ],
         ];
 
 
@@ -698,6 +703,14 @@ class SideBarMenu extends \yii\bootstrap\Widget
                             //'icon' => '',
                             'title' => 'Task List'
                         ],
+                        [
+                            'label' => 'User Task',
+                            'url' => ['/task/user-task-crud/index'],
+                        ],
+                        [
+                            'label' => 'Shift schedule event task',
+                            'url' => ['/task/shift-schedule-event-task-crud/index'],
+                        ],
 
                         [
                             'label' => 'Advanced',
@@ -827,6 +840,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'API Users', 'url' => ['/api-user/index'], 'icon' => 'users'],
                 ['label' => 'Tasks', 'url' => ['/task/index'], 'icon' => 'list'],
                 ['label' => 'Lead Tasks', 'url' => ['/lead-task/index'], 'icon' => 'list'],
+                ['label' => 'Profit Split', 'url' => ['/profit-split-crud/index'], 'icon' => 'money'],
 
                 ['label' => 'Check List Types', 'url' => ['/lead-checklist-type/index'], 'icon' => 'list', 'visible' => Yii::$app->user->can('manageLeadChecklistType')],
 
@@ -1010,7 +1024,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
         }
 
         /** @fflag FFlag::FF_KEY_OBJECT_SEGMENT_MODULE_ENABLE, Object Segment module enable/disable */
-        if (Yii::$app->ff->can(FFlag::FF_KEY_OBJECT_SEGMENT_MODULE_ENABLE)) {
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_OBJECT_SEGMENT_MODULE_ENABLE)) {
             $menuModuleItems[] =  [
                 'label' => 'Object Segment',
                 'url' => 'javascript:',
@@ -1179,7 +1193,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => Yii::t('menu', 'Check Exclude IP'), 'url' => ['/tools/check-exclude-ip']],
                         ['label' => Yii::t('menu', 'Stash Log Files'), 'url' => ['/tools/stash-log-file']],
                         ['label' => Yii::t('menu', 'DB Info'), 'url' => ['/tools/db-info']],
-                        ['label' => Yii::t('menu', 'DB View'), 'url' => ['/tools/db-view'], 'icon' => 'database'],
+                        ['label' => Yii::t('menu', 'Db Data Sensitive'), 'url' => ['/db-data-sensitive-crud/index'], 'icon' => 'database'],
                         ['label' => Yii::t('menu', 'Composer Info'), 'url' => ['/tools/composer-info']],
                         ['label' => 'Check phone', 'url' => ['/tools/check-phone'], 'icon' => 'volume-control-phone'],
                         ['label' => 'Import phones', 'url' => ['/tools/import-phone'], 'icon' => 'caret-square-o-up'],
@@ -1205,6 +1219,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'Route', 'url' => ['/rbac/route']],
                 ['label' => 'Permission', 'url' => ['/rbac/permission']],
                 ['label' => 'Role', 'url' => ['/rbac/role']],
+                ['label' => 'RBAC Role Management', 'url' => ['/rbac-role-management/index/']],
                 ['label' => 'Import / Export', 'url' => ['/rbac-import-export/log']],
             ],
         ];

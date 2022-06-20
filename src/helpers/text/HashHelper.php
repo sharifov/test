@@ -12,4 +12,13 @@ class HashHelper
         ksort($data, SORT_STRING);
         return md5(serialize($data));
     }
+
+    /**
+     * @param object $object
+     * @return string
+     */
+    public static function generateHashFromObject(object $object): string
+    {
+        return self::generateHashFromArray((array) $object);
+    }
 }

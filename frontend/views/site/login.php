@@ -66,15 +66,20 @@ use yii\helpers\Url;
                             ],
                         ],
                     ]) ?>
-                        <div class="d-flex justify-content-center" style>
+                        <div class="d-flex justify-content-center flex-wrap" style>
                             <?php foreach ($authChoice->getClients() as $client) : ?>
-                                <?= $authChoice->clientLink(
-                                    $client,
-                                    '<button type="button" class="login-with-btn login-with-' . $client->getName() . '-btn">Sign in with ' . $client->getTitle() . '</button>',
-                                    [
-                                        'style' => 'margin: 0'
-                                    ]
-                                ) ?>
+                                <?php
+                                $googleEnabled = SettingHelper::isEnabledGoogleAuthClient();
+                                $microsoftEnabled = SettingHelper::isEnabledMicrosoftAuthClient();
+                                if (($client->getName() == 'google' && $googleEnabled) || ($client->getName() == 'microsoft' && $microsoftEnabled)) : ?>
+                                    <?= $authChoice->clientLink(
+                                        $client,
+                                        '<button type="button" class="login-with-btn login-with-' . $client->getName() . '-btn">Sign in with ' . $client->getTitle() . '</button>',
+                                        [
+                                            'style' => 'margin: 0'
+                                        ]
+                                    ) ?>
+                                <?php endif; ?>
                             <?php endforeach; ?>
                         </div>
                     <?php AuthChoice::end() ?>
