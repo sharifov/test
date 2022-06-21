@@ -19,6 +19,7 @@ use yii\helpers\ArrayHelper;
  * @property string $osl_title
  * @property string $osl_description
  * @property bool $osl_enabled
+ * @property bool $osl_is_system
  * @property int $osl_updated_user_id
  * @property string $osl_updated_dt
  * @property string $osl_created_dt
@@ -49,7 +50,7 @@ class ObjectSegmentList extends \yii\db\ActiveRecord
             [['osl_key', 'osl_ost_id'], 'unique', 'targetAttribute' => ['osl_key', 'osl_ost_id']],
             [['osl_key', 'osl_title'], 'string', 'max' => 100],
             [['osl_description'], 'string', 'max' => 1000],
-            ['osl_enabled', 'boolean'],
+            [['osl_enabled', 'osl_is_system'], 'boolean'],
         ];
     }
 
@@ -106,6 +107,7 @@ class ObjectSegmentList extends \yii\db\ActiveRecord
             'osl_updated_user_id' => 'Updated User ID',
             'osl_created_dt'      => 'Created Dt',
             'osl_updated_dt'      => 'Updated Dt',
+            'osl_is_system' => 'Is System',
         ];
     }
 
