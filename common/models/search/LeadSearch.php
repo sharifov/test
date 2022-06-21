@@ -4541,4 +4541,40 @@ class LeadSearch extends Lead
 
         return $dataProvider;
     }
+
+    /**
+     * @param $params
+     * @return ActiveDataProvider
+     */
+    public function searchSoldLeadWithoutProfitSplit($params): ActiveDataProvider
+    {
+        $query = Lead::find()
+            ->leftJoin('profit_split', 'profit_split.ps_lead_id = leads.id')
+            ->where(['status' => Lead::STATUS_SOLD])
+            ->andWhere(['IS', 'profit_split.ps_lead_id', new \yii\db\Expression('null')]);
+
+        $leadTable = Lead::tableName();
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort' => ['defaultOrder' => ['id' => SORT_DESC]]
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            $query->where('0=1');
+            return $dataProvider;
+        }
+
+        $query->andFilterWhere([
+            $leadTable . '.id' => $this->id,
+            $leadTable . '.project_id' => $this->project_id,
+            $leadTable . '.source_id' => $this->source_id,
+            $leadTable . '.client_id' => $this->client_id,
+            $leadTable . '.cabin' => $this->cabin,
+            $leadTable . '.uid' => $this->uid,
+            $leadTable . '.employee_id' => $this->employee_id,
+        ]);
+        return $dataProvider;
+    }
 }
