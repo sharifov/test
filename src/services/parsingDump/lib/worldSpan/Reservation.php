@@ -80,7 +80,7 @@ class Reservation implements ParseDumpInterface, ParseReservationInterface
             \s{1}([A-Z]{3})([A-Z]{3}) # Airport codes from+to
             \s{1}.{3}\s{1,2}(\d{2})(\d{2}) # Departure Time HHMM 
             \s{1,2}(\d{2})(\d{2}) # Arrival Time HHMM  
-            (.*?)\/\X|\/\O\ # Arrival offset           
+            (.*?)\/\X|\/O # Arrival offset           
             /x';
     }
 
