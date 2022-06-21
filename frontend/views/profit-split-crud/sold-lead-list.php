@@ -144,12 +144,25 @@ $this->params['breadcrumbs'][] = $this->title;
                 'pluginOptions' => ['allowClear' => true]
             ],
             [
-                'attribute' => 'created',
+                'attribute' => 'createdRangeTime',
                 'value' => static function (Lead $model) {
                     return $model->created ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created)) : '-';
                 },
                 'format' => 'raw',
-                'filter' => false
+                'label' => 'Created Date From / To',
+                'filter' => \kartik\daterange\DateRangePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'createdRangeTime',
+                    'presetDropdown' => false,
+                    'hideInput' => false,
+                    'convertFormat' => true,
+                    'pluginOptions' => [
+                        'locale' => [
+                            'format' => 'd-M-Y',
+                            'separator' => ' - '
+                        ]
+                    ]
+                ])
             ],
         ],
     ]); ?>
