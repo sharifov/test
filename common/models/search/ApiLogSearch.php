@@ -97,8 +97,8 @@ class ApiLogSearch extends ApiLog
         }
 
         if (!$this->createTimeRange) {
-            $this->createTimeStart = date('Y-m-d 00:00');
-            $this->createTimeEnd = date('Y-m-d 23:59', strtotime('-7 days'));
+            $this->createTimeStart = date('Y-m-d 00:00', strtotime('-7 days'));
+            $this->createTimeEnd = date('Y-m-d H:i');
             $this->createTimeRange = $this->createTimeStart . ' - ' . $this->createTimeEnd;
         }
 
