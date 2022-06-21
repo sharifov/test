@@ -2,50 +2,50 @@
 
 namespace common\components\email;
 
+use common\components\email\dto\EmailDto;
+use src\helpers\app\AppHelper;
 use yii\base\Component;
+use yii\base\InvalidArgumentException;
 
 class EmailComponent extends Component
 {
-    public bool $isActive = false;
-    private ?EmailService $service = null;
+    public ?string $defaultFromEmail = null;
 
-    /**
-     * @return EmailService|null
-     */
-    public function getService(): ?EmailService
-    {
-        return $this->service;
-    }
-
-    /**
-     * @param EmailService|null $service
-     */
-    public function setService(?EmailService $service): void
-    {
-        $this->service = $service;
-    }
-
-    /**
-     * @return void
-     */
-    public function init(): void
+    public function init()
     {
         parent::init();
-        if (empty($this->service)) {
-            $this->setService(new EmailService($this));
+
+        if (empty($this->defaultFromEmail)) {
+            throw new InvalidArgumentException();
         }
     }
 
     /**
-     * Getting email_from property from SiteSettings
-     * @return string
+     * @param EmailDto $emailData
+     * @return bool
      */
-    public function getEmailFrom(): string
+    public function send(EmailDto $emailData): bool
     {
-        $email = \Yii::$app->params['settings']['email_component']['email_from'] ?? '';
-        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            return $email;
+        if (!empty($swiftMailer = \Yii::$app->mailer)) {
+            try {
+                $isSend = $swiftMailer
+                    ->compose()
+                    ->setTo($emailData->to)
+                    ->setFrom($emailData->from ?: $this->defaultFromEmail)
+                    ->setSubject($emailData->title)
+                    ->setHtmlBody($emailData->body)
+                    ->send();
+                if ($isSend) {
+                    return true;
+                }
+                \Yii::warning(sprintf("Email '%s' send failed", $emailData->to), 'EmailComponent->send()');
+            } catch (\Throwable $ex) {
+                \Yii::error(AppHelper::throwableLog($ex, true), 'EmailComponent->send()');
+            }
+        } else {
+            \Yii::warning("Component mailer doesn't exist", 'EmailComponent->send()');
         }
-        return '';
+
+        return false;
     }
 }
