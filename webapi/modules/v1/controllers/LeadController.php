@@ -1461,6 +1461,7 @@ class LeadController extends ApiBaseController
 
         try {
             $response['lead'] = $lead;
+            $response['experiment_ids'] = $modelLead->experimentsIds;
             $response['flights'] = $lead->leadFlightSegments;
             $response['emails'] = $lead->client->clientEmails;
             $response['phones'] = $lead->client->clientPhones;
