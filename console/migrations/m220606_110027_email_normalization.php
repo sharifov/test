@@ -33,7 +33,6 @@ class m220606_110027_email_normalization extends Migration
             'embd_hash' => $this->string(32),
         ], $tableOptions);
 
-
         $this->createTable('{{%email_blob}}', [
             'embb_id' => $this->primaryKey(),
             'embb_body_id' => $this->integer(),
@@ -41,16 +40,6 @@ class m220606_110027_email_normalization extends Migration
         ], $tableOptions);
 
         $this->createIndex('IDX-embb_body_id', '{{%email_blob}}', 'embb_body_id');
-
-        $this->createTable('{{%email_params}}', [
-            'ep_id' => $this->primaryKey(),
-            'ep_template_type_id' => $this->integer(),
-            'ep_language_id' => $this->string(5),
-            'ep_priority' => $this->tinyInteger(1)->defaultValue(2)->notNull(),
-        ], $tableOptions);
-
-        $this->addForeignKey('FK-ep_template_type_id', '{{%email_params}}', ['ep_template_type_id'], '{{%email_template_type}}', ['etp_id'], 'SET NULL', 'CASCADE');
-        $this->addForeignKey('FK-ep_language_id', '{{%email_params}}', ['ep_language_id'], '{{%language}}', ['language_id'], 'SET NULL', 'CASCADE');
 
         $this->createTable('{{%email_norm}}', [
             'e_id' => $this->primaryKey(),
@@ -62,13 +51,25 @@ class m220606_110027_email_normalization extends Migration
             'e_created_user_id' => $this->integer(),
             'e_created_dt' => $this->dateTime(),
             'e_updated_dt' => $this->dateTime(),
-            'e_params_id' => $this->integer(),
             'e_body_id' => $this->integer(),
         ], $tableOptions);
 
         $this->addForeignKey('FK-e_project_id', '{{%email_norm}}', ['e_project_id'], '{{%projects}}', ['id'], 'SET NULL', 'CASCADE');
         $this->addForeignKey('FK-e_departament_id', '{{%email_norm}}', ['e_departament_id'], '{{%department}}', ['dep_id'], 'SET NULL', 'CASCADE');
-        //$this->addForeignKey('FK-e_created_user_id', '{{%email_norm}}', ['e_created_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
+        $this->addForeignKey('FK-e_created_user_id', '{{%email_norm}}', ['e_created_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
+
+
+        $this->createTable('{{%email_params}}', [
+            'ep_id' => $this->primaryKey(),
+            'ep_email_id' => $this->integer(),
+            'ep_template_type_id' => $this->integer(),
+            'ep_language_id' => $this->string(5),
+            'ep_priority' => $this->tinyInteger(1)->defaultValue(2)->notNull(),
+        ], $tableOptions);
+
+        $this->addForeignKey('FK-ep_template_type_id', '{{%email_params}}', ['ep_template_type_id'], '{{%email_template_type}}', ['etp_id'], 'SET NULL', 'CASCADE');
+        $this->addForeignKey('FK-ep_language_id', '{{%email_params}}', ['ep_language_id'], '{{%language}}', ['language_id'], 'SET NULL', 'CASCADE');
+        $this->addForeignKey('FK-ep_email_id', '{{%email_params}}', ['ep_email_id'], '{{%email_norm}}', 'e_id', 'CASCADE', 'CASCADE');
 
         $this->createTable('{{%email_log}}', [
             'el_id' => $this->primaryKey(),
@@ -94,6 +95,8 @@ class m220606_110027_email_normalization extends Migration
 
         $this->addForeignKey('FK-ec_email_id', '{{%email_contact}}', ['ec_email_id'], '{{%email_norm}}', 'e_id', 'CASCADE', 'CASCADE');
         $this->addForeignKey('FK-ec_address_id', '{{%email_contact}}', ['ec_address_id'], '{{%email_address}}', 'ea_id', 'CASCADE', 'CASCADE');
+        $this->createIndex('UNIQ-email-address-type', '{{%email_contact}}', ['ec_email_id', 'ec_address_id', 'ec_type_id'], true);
+
     }
 
     /**
