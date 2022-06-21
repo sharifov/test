@@ -181,10 +181,6 @@ start () {
   printf "Server is started\n"
 }
 
-up () {
-  docker-compose -f "$dockerComposeFile" up -d --remove-orphans
-}
-
 down () {
   docker-compose -f "$dockerComposeFile" down --remove-orphans
 }
@@ -385,9 +381,6 @@ if [ "$whatDo" == "application-install" ]; then
 
 elif [ "$whatDo" == "application-uninstall" ]; then
   applicationUninstall
-
-elif [ "$whatDo" == "up" ]; then
-  up
 
 elif [ "$whatDo" == "down" ]; then
   down
