@@ -6,6 +6,7 @@ use common\models\Employee;
 use Yii;
 use yii\behaviors\AttributeBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\caching\TagDependency;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 
@@ -27,6 +28,8 @@ use yii\helpers\ArrayHelper;
  */
 class ObjectSegmentList extends \yii\db\ActiveRecord
 {
+    public const CACHE_TAG = 'object-segment-list-tag-dependency';
+
     public static function tableName(): string
     {
         return 'object_segment_list';
@@ -84,6 +87,13 @@ class ObjectSegmentList extends \yii\db\ActiveRecord
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+
+        TagDependency::invalidate(Yii::$app->cache, self::CACHE_TAG);
+    }
+
     public function attributeLabels(): array
     {
         return [
@@ -97,5 +107,25 @@ class ObjectSegmentList extends \yii\db\ActiveRecord
             'osl_created_dt'      => 'Created Dt',
             'osl_updated_dt'      => 'Updated Dt',
         ];
+    }
+
+    public static function getList(): array
+    {
+        $query = self::find()->select(['osl_id', 'osl_title']);
+
+        return ArrayHelper::map(
+            $query->all(),
+            'osl_id',
+            'osl_title'
+        );
+    }
+
+    public static function getListCache(int $duration = 60 * 60): array
+    {
+        return Yii::$app->cache->getOrSet(self::CACHE_TAG, static function () {
+            return self::getList();
+        }, $duration, new TagDependency([
+            'tags' => self::CACHE_TAG,
+        ]));
     }
 }
