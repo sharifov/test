@@ -131,6 +131,24 @@ class Email extends ActiveRecord
         return $this->hasMany(Lead::class, ['id' => 'el_lead_id'])->viaTable('email_lead', ['el_email_id' => 'e_id']);
     }
 
+    public function getLeadsIds()
+    {
+        $ids = ArrayHelper::map($this->leads, 'id', 'id');
+        return $ids ? join(', ', $ids) : null;
+    }
+
+    public function getClientsIds()
+    {
+        $ids = ArrayHelper::map($this->clients, 'id', 'id');
+        return $ids ? join(', ', $ids) : null;
+    }
+
+    public function getCasesIds()
+    {
+        $ids = ArrayHelper::map($this->cases, 'cs_id', 'cs_id');
+        return $ids ? join(', ', $ids) : null;
+    }
+
     public function getContactFrom(): \yii\db\ActiveQuery
     {
         return $this->hasOne(EmailAddress::class, ['ea_id' => 'ec_address_id'])
