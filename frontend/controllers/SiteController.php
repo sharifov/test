@@ -87,7 +87,7 @@ class SiteController extends FController
                 'minLength' => 5,
                 'transparent' => true,
                 'offset' => 3,
-                'foreColor' => '596b7d',
+                'foreColor' => hexdec('596b7d'),
             ],
             'auth' => [
                 'class' => AuthAction::class,
