@@ -23,6 +23,8 @@ $pjaxListId = 'pjax-api-log';
 
     <h1><i class="fa fa-list"></i> <?= Html::encode($this->title) ?></h1>
 
+    <?php // echo $this->render('_search', ['model' => $searchModel]);?>
+
     <p>
         <?= Html::a('<i class="fa fa-remove"></i> Truncate ApiLog table', ['delete-all'], [
             'class' => 'btn btn-danger',
@@ -42,13 +44,10 @@ $pjaxListId = 'pjax-api-log';
 
     <?php Pjax::begin(['id' => $pjaxListId, 'scrollTo' => 0]); ?>
 
-    <?php  echo $this->render('_search', ['model' => $searchModel]);?>
-
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'layout' => "{errors}\n{pager}\n{summary}\n{items}\n{pager}",
-        'summary' => 'Showing <b>{begin}-{end}</b> of <b>{totalCount}</b> items.</br>From <b>' . $searchModel->createTimeStart . ' </b> to <b>' . $searchModel->createTimeEnd . ' </b>',
         'columns' => [
             [
                 'attribute' => 'al_id',
