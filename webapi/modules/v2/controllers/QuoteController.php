@@ -443,8 +443,12 @@ class QuoteController extends ApiBaseController
      *      ],
      *      "lead_data": [
      *          {
-     *              "ld_field_key": "kayakclickid",
-     *              "ld_field_value": "example_value132"
+     *              "ld_field_key": "cross_system_xp",
+     *              "ld_field_value": "wpl5.0"
+     *          },
+     *          {
+     *              "ld_field_key": "cross_system_xp",
+     *              "ld_field_value": "wpl6.2"
      *          }
      *      ],
      *      "department_key": "chat",

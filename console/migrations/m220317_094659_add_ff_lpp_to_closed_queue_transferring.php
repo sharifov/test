@@ -31,7 +31,7 @@ class m220317_094659_add_ff_lpp_to_closed_queue_transferring extends Migration
                     'ff_description' => 'Lead Poor Processing transferring From Extra to Closed days count'
                 ]
             );
-            Yii::$app->ff->invalidateCache();
+            Yii::$app->featureFlag->invalidateCache();
         } catch (\Throwable $throwable) {
             \Yii::error(\src\helpers\app\AppHelper::throwableLog($throwable), 'm220317_094659_add_ff_lpp_to_closed_queue_transferring:safeUp:Throwable');
         }
@@ -48,7 +48,7 @@ class m220317_094659_add_ff_lpp_to_closed_queue_transferring extends Migration
             }
             $featureFlagService = new \kivork\FeatureFlag\Services\FeatureFlagService();
             $featureFlagService::delete(\modules\featureFlag\FFlag::FF_KEY_LPP_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT);
-            Yii::$app->ff->invalidateCache();
+            Yii::$app->featureFlag->invalidateCache();
         } catch (\Throwable $throwable) {
             \Yii::error(\src\helpers\app\AppHelper::throwableLog($throwable), 'm220317_094659_add_ff_lpp_to_closed_queue_transferring:safeDown:Throwable');
         }

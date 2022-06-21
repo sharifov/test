@@ -271,4 +271,17 @@ class AirSearchService extends Component
         }
         return $result;
     }
+
+    /**
+     * @return bool
+     * @throws Exception
+     */
+    public function ping(): bool
+    {
+        $response = $this->sendRequest('meta/health', [], 'get');
+        if ($response->statusCode === '200') {
+            return true;
+        }
+        return false;
+    }
 }

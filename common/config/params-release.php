@@ -12,7 +12,7 @@ if (file_exists($file)) {
 }
 
 return [
-    'version' => '3.52.1',
+    'version' => '3.53.0',
     'git_branch' => $gitBranch,
     'git_hash' => $gitHash,
 ];

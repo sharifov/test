@@ -87,7 +87,7 @@ class SiteController extends FController
                 'minLength' => 5,
                 'transparent' => true,
                 'offset' => 3,
-                'foreColor' => '596b7d',
+                'foreColor' => hexdec('596b7d'),
             ],
             'auth' => [
                 'class' => AuthAction::class,
@@ -452,6 +452,14 @@ class SiteController extends FController
     public function onAuthAssignSuccess(ClientInterface $client)
     {
         if (!SettingHelper::isEnabledAuthClients()) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
+        if ($client->getName() == 'google' && !SettingHelper::isEnabledGoogleAuthClient()) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
+        if ($client->getName() == 'microsoft' && !SettingHelper::isEnabledMicrosoftAuthClient()) {
             throw new ForbiddenHttpException('Access denied');
         }
 

@@ -5,7 +5,6 @@
  * @var UserShiftSchedule $event
  * @var ScheduleRequestForm $model
  * @var bool $success
- * @var bool $canEditPreviousDate
  * @var string $userTimeZone
  */
 
@@ -116,57 +115,56 @@ $tsEndUtc = strtotime($event->uss_end_utc_dt);
             </div>
 
         </div>
-        <?php if ($canEditPreviousDate) : ?>
-            <hr>
-            <input type="hidden" value="<?= $success ?>" id="request-status">
-            <?php $form = ActiveForm::begin([
-                'id' => 'decision-form',
-                'options' => [
-                    'data-pjax' => true,
-                    'style' => 'position: relative',
-                ],
-            ]); ?>
-            <div class="text-center js-loader"
-                 style="display: none; position: absolute;width: 100%;height: 100%;background: rgba(255, 255, 255, .8);z-index: 9999;">
-                <div class="spinner-border m-5" role="status">
-                    <span class="sr-only">Loading...</span>
-                </div>
+
+        <hr>
+        <input type="hidden" value="<?= $success ?>" id="request-status">
+        <?php $form = ActiveForm::begin([
+            'id' => 'decision-form',
+            'options' => [
+                'data-pjax' => true,
+                'style' => 'position: relative',
+            ],
+        ]); ?>
+        <div class="text-center js-loader"
+             style="display: none; position: absolute;width: 100%;height: 100%;background: rgba(255, 255, 255, .8);z-index: 9999;">
+            <div class="spinner-border m-5" role="status">
+                <span class="sr-only">Loading...</span>
             </div>
-            <h2>
-                Your decision
-            </h2>
-            <div class="row">
-                <div class="col-md-12">
-                    <?= $form->field($model, 'status')
-                        ->dropDownList(UserShiftScheduleHelper::getAvailableRequestStatusList(), [
-                            'prompt' => [
-                                'text' => '---',
-                                'options' => ['disabled' => true, 'selected' => true],
-                            ],
-                        ]) ?>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <?= $form->field($model, 'description')
-                        ->textarea([
-                            'rows' => 3,
-                        ]) ?>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12 text-center">
-                    <?= Html::submitButton('Send your decision', [
-                        'class' => [
-                            'btn',
-                            'btn-success',
+        </div>
+        <h2>
+            Your decision
+        </h2>
+        <div class="row">
+            <div class="col-md-12">
+                <?= $form->field($model, 'status')
+                    ->dropDownList(UserShiftScheduleHelper::getAvailableRequestStatusList(), [
+                        'prompt' => [
+                            'text' => '---',
+                            'options' => ['disabled' => true, 'selected' => true],
                         ],
                     ]) ?>
-                </div>
             </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <?= $form->field($model, 'description')
+                    ->textarea([
+                        'rows' => 3,
+                    ]) ?>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <?= Html::submitButton('Send your decision', [
+                    'class' => [
+                        'btn',
+                        'btn-success',
+                    ],
+                ]) ?>
+            </div>
+        </div>
 
-            <?php ActiveForm::end(); ?>
-        <?php endif; ?>
+        <?php ActiveForm::end(); ?>
     </div>
 <?php
 Pjax::end();

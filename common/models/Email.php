@@ -5,6 +5,8 @@ namespace common\models;
 use common\components\ChartTools;
 use common\components\CommunicationService;
 use common\models\query\EmailQuery;
+use common\models\DepartmentEmailProject;
+use common\models\UserProjectParams;
 use DateTime;
 use modules\featureFlag\FFlag;
 use src\behaviors\metric\MetricEmailCounterBehavior;
@@ -460,7 +462,7 @@ class Email extends \yii\db\ActiveRecord
                 $out['error'] = $this->e_error_message;
             }
             /** @fflag FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES, A/B testing for email offer templates enable/disable */
-            if ($this->e_status_id !== self::STATUS_ERROR && Yii::$app->ff->can(FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES)) {
+            if ($this->e_status_id !== self::STATUS_ERROR && Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES)) {
                 if ($this->e_template_type_id && $this->e_project_id && isset($this->eLead)) {
                     EmailTemplateOfferABTestingService::incrementCounterByTemplateAndProjectIds(
                         $this->e_template_type_id,
@@ -840,6 +842,17 @@ class Email extends \yii\db\ActiveRecord
             $done = $error = 0;
         }
         return $emailStats;
+    }
+
+    public static function getProjectIdByDepOrUpp($emailTo)
+    {
+        if ($dep = DepartmentEmailProject::find()->byEmail($emailTo)->one()) {
+            return $dep->dep_project_id;
+        } else if ($upp = UserProjectParams::find()->byEmail($emailTo)->one()) {
+            return $upp->upp_project_id;
+        }
+
+        return null;
     }
 
     public function afterSave($insert, $changedAttributes)

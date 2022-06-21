@@ -2172,8 +2172,8 @@ class TestController extends FController
         echo 'Feature Flag Test<br><br>';
 
         /** @fflag FFlag::FF_KEY_LPP_ENABLE, Lead Poor Processing Enable/Disable */
-        if (Yii::$app->ff->can(FFlag::FF_KEY_LPP_ENABLE)) {
-            VarDumper::dump(Yii::$app->ff->val(FFlag::FF_KEY_LPP_ENABLE), 10, true);
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_LPP_ENABLE)) {
+            VarDumper::dump(Yii::$app->featureFlag->getValue(FFlag::FF_KEY_LPP_ENABLE), 10, true);
         } else {
             echo 'NO1';
         }
@@ -2610,15 +2610,15 @@ class TestController extends FController
         echo 'Feature Flag Test<br><br>';
 
         /** @fflag FFlag::FF_TEST_FLAG1, Username field1 */
-        if (Yii::$app->ff->can('ff_test_example')) {
-            VarDumper::dump(Yii::$app->ff->val('ff_test_example'), 10, true);
+        if (Yii::$app->featureFlag->isEnable('ff_test_example')) {
+            VarDumper::dump(Yii::$app->featureFlag->getValue('ff_test_example'), 10, true);
         } else {
             echo 'NO1';
         }
 
         echo '<br><br>';
 
-        if (Yii::$app->ff->isDue(\kivork\FeatureFlag\Models\FeatureFlag::ET_DISABLED_CONDITION, '59 * * * * *')) {
+        if (Yii::$app->featureFlag->isDue(\kivork\FeatureFlag\Models\FeatureFlag::ET_DISABLED_CONDITION, '59 * * * * *')) {
             echo 'YES3';
         } else {
             echo 'NO3';
@@ -2746,7 +2746,12 @@ class TestController extends FController
 
     public function actionTestAbac()
     {
-        VarDumper::dump(Yii::$app->abac->can(null, SaleListAbacObject::UI_BLOCK_SALE_LIST, SaleListAbacObject::ACTION_READ));
-        VarDumper::dump(Yii::$app->abac->can(null, SaleListAbacObject::UI_SALE_ID, SaleListAbacObject::ACTION_READ));
+        $time_start = microtime(true);
+        for ($i = 0; $i <= 1000; $i++) {
+            Yii::$app->abac->can(null, SaleListAbacObject::UI_BLOCK_SALE_LIST, SaleListAbacObject::ACTION_READ);
+            //Yii::$app->abac->can(null, SaleListAbacObject::UI_SALE_ID, SaleListAbacObject::ACTION_READ);
+        }
+        $time_end = microtime(true);
+        echo 'Time: ' . round($time_end - $time_start, 6) . '';
     }
 }

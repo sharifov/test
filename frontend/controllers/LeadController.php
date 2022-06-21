@@ -781,7 +781,7 @@ class LeadController extends FController
                                 $previewEmailForm->e_email_message = $emailBodyHtml;
                                 $previewEmailForm->e_email_message_edited = false;
 
-                                if (isset($mailPreview['data']['email_subject']) && $mailPreview['data']['email_subject']) {
+                                if (isset($mailPreview['data']['email_subject']) && $mailPreview['data']['email_subject'] && $comForm->isEmailBlankType() === false) {
                                     $previewEmailForm->e_email_subject = $mailPreview['data']['email_subject'];
                                     $previewEmailForm->e_email_subject_origin = $previewEmailForm->e_email_subject;
                                 }

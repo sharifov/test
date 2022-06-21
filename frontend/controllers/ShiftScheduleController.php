@@ -621,7 +621,7 @@ class ShiftScheduleController extends FController
             $startDateTimeWithTimezone = new \DateTimeImmutable($startDate, ($timezone = Auth::user()->timezone) ? new \DateTimeZone($timezone) : null);
 
             if ($startDateTimeWithTimezone < $nowDateTime) {
-                throw new BadRequestHttpException('Start DateTime must be more than now');
+                return '<script>(function() {setTimeout(function() {$("#modal-md").modal("hide")}, 800);createNotify("Error", "Event cannot be created in the past", "error")})();</script>';
             }
 
             $endDateTime = $startDateTime->add(new \DateInterval('PT' . UserShiftSchedule::DEFAULT_DURATION_HOURS . 'H'));
@@ -674,7 +674,7 @@ class ShiftScheduleController extends FController
             );
             return $this->asJson([
                 'error' => false,
-                'message' => 'Event deleted successfully',
+                'message' => 'Event removed successfully',
             ]);
         }
         $userShiftSchedule->uss_status_id = UserShiftSchedule::STATUS_DELETED;
@@ -941,9 +941,7 @@ class ShiftScheduleController extends FController
         $userId = Auth::id();
         $dataProvider = $searchModel->searchByUsers(
             $queryParams,
-            [$userId],
-            date('Y-m-d', strtotime('now')),
-            date('Y-m-d', strtotime('+1 year'))
+            [$userId]
         );
 
         return [

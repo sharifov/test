@@ -602,7 +602,7 @@ class Quote extends \yii\db\ActiveRecord
         return $this->hasMany(QuoteTrip::class, ['qt_quote_id' => 'id']);
     }
 
-    public function getDataForProfit($quoteId)
+    public static function getDataForProfit($quoteId)
     {
         $query = new Query();
 
@@ -612,7 +612,7 @@ class Quote extends \yii\db\ActiveRecord
                 'fare_type' => 'q.fare_type',
                 'check_payment' => 'q.check_payment'
             ])
-            ->from(Quote::tableName() . ' q')
+            ->from(self::tableName() . ' q')
             ->leftJoin(QuotePrice::tableName() . ' qp', 'q.id = qp.quote_id')
             ->where(['q.id' => $quoteId]);
 
@@ -1040,6 +1040,10 @@ class Quote extends \yii\db\ActiveRecord
                 } else {
                     $flightDuration = ($arrDateTime->getTimestamp() - $depDateTime->getTimestamp()) / 60;
                 }
+                if ($flightDuration <= 0) {
+                    Yii::warning('Negative or zero flight duration (' . $flightDuration . ' sec) for dump: ' . $string, 'Quote:parseDump');
+                    $flightDuration = 0;
+                }
 
                 $airline = null;
                 if (!$onView) {
@@ -1282,6 +1286,10 @@ class Quote extends \yii\db\ActiveRecord
             } else {
                 $flightDuration = ($arrDateTime->getTimestamp() - $depDateTime->getTimestamp()) / 60;
             }
+            if ($flightDuration <= 0) {
+                Yii::warning('Negative or zero flight duration (' . $flightDuration . ' sec) for dump: ' . $this->reservation_dump, 'Quote:getTripsSegmentsData:flight');
+                $flightDuration = 0;
+            }
 
             $airline = Airline::findIdentity($carrier);
 
@@ -1344,6 +1352,10 @@ class Quote extends \yii\db\ActiveRecord
                 $trips[$key]['qt_duration'] = intval($flightDuration);
             } else {
                 $trips[$key]['qt_duration'] = ($arrivalTime->getTimestamp() - $departureTime->getTimestamp()) / 60;
+            }
+            if ($trips[$key]['qt_duration'] <= 0) {
+                Yii::warning('Negative or zero trip duration (' . $trips[$key]['qt_duration'] . ' sec) for dump: ' . $this->reservation_dump, 'Quote:getTripsSegmentsData:trip');
+                $trips[$key]['qt_duration'] = 0;
             }
 
             $keySegment = [];
@@ -2081,6 +2093,10 @@ class Quote extends \yii\db\ActiveRecord
             } else {
                 $trips[$key]['duration'] = ($arrDt->getTimestamp() - $depDt->getTimestamp()) / 60;
             }
+            if ($trips[$key]['duration'] <= 0) {
+                Yii::warning('Negative or zero trip duration (' . $trips[$key]['duration'] . ' sec) for dump: ' . $this->reservation_dump, 'Quote:getTripsFromDumpLikeSearch');
+                $trips[$key]['duration'] = 0;
+            }
         }
         return $trips;
     }
@@ -2138,7 +2154,10 @@ class Quote extends \yii\db\ActiveRecord
             } else {
                 $trips[$key]['totalDuration'] = ($lastSegment['arrivalDateTime']->getTimestamp() - $firstSegment['departureDateTime']->getTimestamp()) / 60;
             }
-
+            if ($trips[$key]['totalDuration'] <= 0) {
+                Yii::warning('Negative or zero trip total duration (' . $trips[$key]['totalDuration'] . ' sec) for dump: ' . $this->reservation_dump, 'Quote:getTripsFromDump');
+                $trips[$key]['totalDuration'] = 0;
+            }
             foreach ($trip['segments'] as $segment) {
                 $routing[] = $segment['arrivalAirport'];
             }

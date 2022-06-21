@@ -618,7 +618,7 @@ class UserStatsReport extends Model
         if (Metrics::isSalesConversion($this->metrics)) {
             $data['conversion_percent'] = [
                 'Name' => 'Conversion Percent',
-                'average' => null, //TODO
+                'average' => $this->getConversionPercent($results),
                 'total' => null
             ];
         }
@@ -638,7 +638,10 @@ class UserStatsReport extends Model
         if (Metrics::isSplitShare($this->metrics)) {
             $data['split_share'] = [
                 'Name' => 'Split Share',
-                'total' => null,
+                'total' => $this->getSumColumn(
+                    $results,
+                    'split_share'
+                ),
                 'average' => $this->getAvgValueColumn(
                     $results,
                     'split_share'
@@ -773,18 +776,16 @@ class UserStatsReport extends Model
 
     private function getConversionPercent(array $results): float
     {
-        $sumSoldLeads = 0;
-        $soldLeadsColumn = array_column($results, 'sold_leads');
-        $splitShareColumn = array_column($results, 'split_share');
-        foreach ($soldLeadsColumn as $key => $value) {
-            $sumSoldLeads += $value * $splitShareColumn[$key];
-        }
+        $sumSplitShare = $this->getSumColumn(
+            $results,
+            'split_share'
+        );
         $sumQualifiedLeadsTaken = $this->getSumColumn(
             $results,
             'qualified_leads_taken'
         );
         if ($sumQualifiedLeadsTaken) {
-            return round(($sumSoldLeads / $sumQualifiedLeadsTaken) * 100, 2);
+            return round(($sumSplitShare / $sumQualifiedLeadsTaken) * 100, 2);
         }
         return 0;
     }

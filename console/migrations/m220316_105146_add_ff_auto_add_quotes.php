@@ -32,7 +32,7 @@ class m220316_105146_add_ff_auto_add_quotes extends Migration
                         'ff_description' => 'Auto add quotes in create Flight Request processing'
                     ]
                 );
-                Yii::$app->ff->invalidateCache();
+                Yii::$app->featureFlag->invalidateCache();
             }
         } catch (\Throwable $throwable) {
             \Yii::error(AppHelper::throwableLog($throwable), 'm220316_105146_add_ff_auto_add_quotes:safeUp:Throwable');
@@ -50,7 +50,7 @@ class m220316_105146_add_ff_auto_add_quotes extends Migration
             }
             $featureFlagService = new \kivork\FeatureFlag\Services\FeatureFlagService();
             $featureFlagService::delete(FFlag::FF_KEY_ADD_AUTO_QUOTES);
-            Yii::$app->ff->invalidateCache();
+            Yii::$app->featureFlag->invalidateCache();
         } catch (\Throwable $throwable) {
             \Yii::error(AppHelper::throwableLog($throwable), 'm220316_105146_add_ff_auto_add_quotes:safeDown:Throwable');
         }

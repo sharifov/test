@@ -34,49 +34,49 @@ pipeline {
   post {
     success {
       script {
-        msg1 = "Job ${env.JOB_NAME} has succeeded"
-        msg2 = "${currentBuild.getBuildCauses()[0].shortDescription}"
-        msg3 = "Build: <${env.BUILD_URL}display/redirect|${env.BUILD_NUMBER}>"
-        msg4 = "Env: ${env.ENV}"
-        msg5 = "Branch: ${env.GIT_BRANCH}"
-        msg6 = "Ver: ${GIT_COMMIT[0..6]}"
-        msg7 = "Time: ${currentBuild.durationString.minus(' and counting')}"
-        msg = "${msg1}\n${msg2}\n${msg3}\n${msg4}\n${msg5}\n${msg6}\n${msg7}"
         if (env.ENV == 'prod') {
-          mattermostSend(
-            color: 'good',
-            channel: 'deploys',
-            icon: 'https://i.pinimg.com/564x/e3/ba/82/e3ba820967cd9642403064f684a9afb2.jpg',
-            message: msg,
-            endpoint: 'https://chat.travel-dev.com/hooks/wfkq819uzjnx8ne3htjnw9pimr'
+          office365ConnectorSend(
+            color: '#00ff00',
+            message: "${currentBuild.getBuildCauses()[0].shortDescription}",
+            factDefinitions: [
+              [ name: "Status", template: "${currentBuild.result}"],
+              [ name: "Build", template: "[${env.BUILD_NUMBER}](${env.BUILD_URL}display/redirect)"],
+              [ name: "Env", template: "${env.ENV}"],
+              [ name: "Branch", template: "${GIT_BRANCH.replaceFirst(/^.*\//, '')}"],
+              [ name: "Version", template: "${GIT_COMMIT[0..6]}"],
+              [ name: "Time", template: "${currentBuild.durationString.minus(' and counting')}"]
+            ],
+            webhookUrl: 'https://kivdev.webhook.office.com/webhookb2/821ecf73-6ea0-447a-acc9-033615a3af1e@7e49a909-af00-4220-a5f9-ba8c5979078f/JenkinsCI/6b0a3c740e4a44548bf47708b2ab1562/5852b332-1191-4d8c-a325-d4d3e50904c6'
           )
         }
       }
-      mattermostSend(
-        color: 'good',
-        channel: 'crm-deploys',
-        icon: 'https://i.pinimg.com/564x/e3/ba/82/e3ba820967cd9642403064f684a9afb2.jpg',
-        message: msg,
-        endpoint: 'https://chat.travel-dev.com/hooks/wfkq819uzjnx8ne3htjnw9pimr'
+      office365ConnectorSend(
+        color: '#00ff00',
+        message: "${currentBuild.getBuildCauses()[0].shortDescription}",
+        factDefinitions: [
+          [ name: "Status", template: "${currentBuild.result}"],
+          [ name: "Build", template: "[${env.BUILD_NUMBER}](${env.BUILD_URL}display/redirect)"],
+          [ name: "Env", template: "${env.ENV}"],
+          [ name: "Branch", template: "${GIT_BRANCH.replaceFirst(/^.*\//, '')}"],
+          [ name: "Version", template: "${GIT_COMMIT[0..6]}"],
+          [ name: "Time", template: "${currentBuild.durationString.minus(' and counting')}"]
+        ],
+        webhookUrl: 'https://kivdev.webhook.office.com/webhookb2/821ecf73-6ea0-447a-acc9-033615a3af1e@7e49a909-af00-4220-a5f9-ba8c5979078f/JenkinsCI/16048d8f33194886840802182fd7cb74/5852b332-1191-4d8c-a325-d4d3e50904c6'
       )
     }
     failure {
-      script {
-        msg1 = "Job ${env.JOB_NAME} has failed"
-        msg2 = "${currentBuild.getBuildCauses()[0].shortDescription}"
-        msg3 = "Build: <${env.BUILD_URL}display/redirect|${env.BUILD_NUMBER}>"
-        msg4 = "Env: ${env.ENV}"
-        msg5 = "Branch: ${env.GIT_BRANCH}"
-        msg6 = "Ver: ${GIT_COMMIT[0..6]}"
-        msg7 = "Time: ${currentBuild.durationString.minus(' and counting')}"
-        msg = "${msg1}\n${msg2}\n${msg3}\n${msg4}\n${msg5}\n${msg6}\n${msg7}"
-      }
-      mattermostSend(
-        color: 'danger',
-        channel: 'crm-deploys',
-        icon: 'https://i.pinimg.com/564x/e3/ba/82/e3ba820967cd9642403064f684a9afb2.jpg',
-        message: msg,
-        endpoint: 'https://chat.travel-dev.com/hooks/wfkq819uzjnx8ne3htjnw9pimr'
+      office365ConnectorSend(
+        color: '#ff0000',
+        message: "${currentBuild.getBuildCauses()[0].shortDescription}",
+        factDefinitions: [
+          [ name: "Status", template: "${currentBuild.result}"],
+          [ name: "Build", template: "[${env.BUILD_NUMBER}](${env.BUILD_URL}display/redirect)"],
+          [ name: "Env", template: "${env.ENV}"],
+          [ name: "Branch", template: "${GIT_BRANCH.replaceFirst(/^.*\//, '')}"],
+          [ name: "Version", template: "${GIT_COMMIT[0..6]}"],
+          [ name: "Time", template: "${currentBuild.durationString.minus(' and counting')}"]
+        ],
+        webhookUrl: 'https://kivdev.webhook.office.com/webhookb2/821ecf73-6ea0-447a-acc9-033615a3af1e@7e49a909-af00-4220-a5f9-ba8c5979078f/JenkinsCI/16048d8f33194886840802182fd7cb74/5852b332-1191-4d8c-a325-d4d3e50904c6'
       )
     }
     always {
