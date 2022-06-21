@@ -2,13 +2,15 @@
 
 namespace modules\experiment\models;
 
+use src\model\leadData\entity\LeadData;
+use src\traits\FieldsTrait;
 use Yii;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\helpers\VarDumper;
 
 /**
  * This is the model class for table "experiment".
- * @todo Maybe is need to add created_date and created_user
  * @property int $ex_id
  * @property string $ex_code
  *
@@ -16,6 +18,8 @@ use yii\db\ActiveRecord;
  */
 class Experiment extends ActiveRecord
 {
+//    use FieldsTrait;
+
     /**
      * {@inheritdoc}
      */

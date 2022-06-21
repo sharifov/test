@@ -16,6 +16,7 @@ use common\models\Sources;
 use common\models\VisitorLog;
 use frontend\helpers\RedisHelper;
 use frontend\widgets\notification\NotificationMessage;
+use modules\experiment\models\ExperimentTarget;
 use modules\featureFlag\FFlag;
 use modules\flight\models\FlightQuoteSegment;
 use modules\flight\models\FlightSegment;
@@ -542,11 +543,16 @@ class LeadController extends ApiBaseController
         $this->autoQuoteService->addAutoQuotesByJob($lead);
 
         $leadDataInserted = [];
+
         if (!empty($modelLead->lead_data)) {
             $leadDataService = new LeadDataCreateService();
             $leadDataService->createFromApi($modelLead->lead_data, $lead->id);
             $warnings = ArrayHelper::merge($warnings, $leadDataService->getErrors());
             $leadDataInserted = $leadDataService->getInserted();
+        }
+
+        if (!empty($modelLead->experiments) && is_array($modelLead->experiments)) {
+            ExperimentTarget::saveExperimentList(Lead::class, $lead->id, $modelLead->experiments);
         }
 
         $clientDataInserted = [];

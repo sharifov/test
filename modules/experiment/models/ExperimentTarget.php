@@ -10,7 +10,6 @@ use yii\helpers\VarDumper;
 
 /**
  * This is the model class for table "experiment_target".
- * * @todo Maybe is need to add created_date and created_user
  *
  * @property int $ext_id
  * @property int $ext_target_id
@@ -31,6 +30,7 @@ class ExperimentTarget extends ActiveRecord
         self::EXT_TYPE_CHAT           => 'Chat',
         self::EXT_TYPE_CALL           => 'Call'
     ];
+
     /**
      * {@inheritdoc}
      */
@@ -78,5 +78,27 @@ class ExperimentTarget extends ActiveRecord
     public static function getList(): array
     {
         return self::EXT_TYPE_LIST;
+    }
+
+    /**
+     * @return array
+     */
+    public static function saveExperimentList(string $class, int $targetId, array $experimentCodes = []): void
+    {
+        $mergedExperimentCodes = array_unique(array_column($experimentCodes, 'ex_code'));
+//        VarDumper::dump($class); die;
+        foreach ($mergedExperimentCodes as $ex_code) {
+            self::saveExperiment($class, $targetId, $ex_code);
+        }
+    }
+
+    public static function saveExperiment(string $class, int $targetId, string $experimentCode): void
+    {
+        $experimentRecord = Experiment::getExperimentByCode($experimentCode);
+        if (empty($experimentRecord)) {
+            $experimentRecord = new Experiment(['ex_code' => $experimentCode]);
+            $experimentRecord->save();
+        }
+        $experimentRecord->addTarget($class, $targetId);
     }
 }
