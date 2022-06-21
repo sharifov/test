@@ -20,6 +20,14 @@ $this->title = 'Sold Lead without Profit Split';
 $this->params['breadcrumbs'][] = ['label' => 'Profit Split', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
+<style>
+    .left-ind, .right-ind{
+        top: 3px !important;
+    }
+    .kv-clear{
+        top: 0.4rem !important;
+    }
+</style>
 <div class="profit-split-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
@@ -154,7 +162,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'model' => $searchModel,
                     'attribute' => 'createdRangeTime',
                     'presetDropdown' => false,
-                    'hideInput' => false,
+                    'hideInput' => true,
                     'convertFormat' => true,
                     'pluginOptions' => [
                         'locale' => [
@@ -168,3 +176,14 @@ $this->params['breadcrumbs'][] = $this->title;
     ]); ?>
     <?php Pjax::end(); ?>
 </div>
+<?php
+$js = <<<JS
+$(document).on('click', '.kv-clear', function (e) {
+     let parent = $(this).closest('#leadsearch-createdrangetime-container');
+     let input = parent.find('input')
+     input.val('');
+});
+
+JS;
+
+$this->registerJs($js, \yii\web\View::POS_READY);?>
