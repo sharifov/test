@@ -8,10 +8,18 @@ Email component for sending direct mails without communication, using `mailer` f
             'class' => 'yii\swiftmailer\Mailer',
             'viewPath' => '@common/mail',
             'useFileTransport' => true,
+            'transport' => [
+                'class' => 'Swift_SmtpTransport',
+                'host' => '',
+                'port' => '',
+                'username' => '',
+                'password' => '',
+                'encryption' => '',
+            ],
         ],
         'email' => [
             'class' => 'common\components\email\EmailComponent',
-            'isActive' => true,
+            'defaultFromEmail' => '',
         ],
 ```
 
@@ -30,6 +38,10 @@ Email component for sending direct mails without communication, using `mailer` f
                 'encryption' => env('COMMON_CONFIG_MAIN_COMPONENTS_MAILER_ENCRYPTION'),
             ],
         ],
+        'email' => [
+            'class' => 'common\components\email\EmailComponent',
+            'defaultFromEmail' => env('COMMON_CONFIG_MAIN_COMPONENTS_EMAIL_DEFAULTFROMEMAIL'),
+        ],
 ```
 
 #### 3. Copy from .env.example block to .env
@@ -40,13 +52,15 @@ COMMON_CONFIG_MAIN_COMPONENTS_MAILER_PORT=
 COMMON_CONFIG_MAIN_COMPONENTS_MAILER_USERNAME=
 COMMON_CONFIG_MAIN_COMPONENTS_MAILER_PASSWORD=
 COMMON_CONFIG_MAIN_COMPONENTS_MAILER_ENCRYPTION=
+
+# Email settings
+COMMON_CONFIG_MAIN_COMPONENTS_EMAIL_DEFAULTFROMEMAIL=
 ```
 
+#### 4. make init-config
+
 ## Using component
-#### Example sending Email code verification:
+#### Example sending:
 ```php
-    Yii::$app
-        ->email
-        ->getService()
-        ->sendEmailCodeVerification('2354234', Yii::$app->user->identity);
+    Yii::$app->email->send($emailDto);
 ```
