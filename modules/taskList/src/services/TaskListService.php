@@ -331,4 +331,15 @@ class TaskListService
         $code = str_replace('==', '=', $code);
         return $code;
     }
+
+    public static function getTaskObjectList(): array
+    {
+        $result = [];
+
+        foreach (TaskList::find()->all() as $item) {
+            $result[$item->tl_id] = $item->tl_title;
+        }
+
+        return $result;
+    }
 }
