@@ -72,25 +72,23 @@ use common\models\Project;
                         <div class="col-sm-12">
                             <div class="row">
                                 <div class="col-md-2">
-                                    <?= $form->field($model, 'id',
-                                        ['template' => "{label}\n{input}<span class='js-clear-input'>×</span>\n{hint}\n{error}"
-                                    ])->textInput(['class' => 'form-control form-control-with-close']) ?>
+                                    <?= $form->field($model, 'id', ['template' => "{label}\n{input}<span class='js-clear-input'>×</span>\n{hint}\n{error}"])
+                                        ->textInput(['class' => 'form-control form-control-with-close']) ?>
                                 </div>
 
                                 <div class="col-md-2">
-                                    <?= $form->field($model, 'username',
-                                        ['template' => "{label}\n{input}<span class='js-clear-input'>×</span>\n{hint}\n{error}"
-                                        ])->textInput(['class' => 'form-control form-control-with-close']) ?>
+                                    <?= $form->field($model, 'username', ['template' => "{label}\n{input}<span class='js-clear-input'>×</span>\n{hint}\n{error}"])
+                                        ->textInput(['class' => 'form-control form-control-with-close']) ?>
                                 </div>
 
                                 <div class="col-md-2">
-                                    <?= $form->field($model, 'nickname',
-                                        ['template' => "{label}\n{input}<span class='js-clear-input'>×</span>\n{hint}\n{error}"
-                                        ])->textInput(['class' => 'form-control form-control-with-close']) ?>
+                                    <?= $form->field($model, 'nickname', ['template' => "{label}\n{input}<span class='js-clear-input'>×</span>\n{hint}\n{error}"])
+                                        ->textInput(['class' => 'form-control form-control-with-close']) ?>
                                 </div>
 
                                 <div class="col-md-2">
-                                    <?php echo $form->field($model, 'email', ['template' => "{label}\n{input}<span class='js-clear-input'>×</span>\n{hint}\n{error}"]) ?>
+                                    <?php echo $form->field($model, 'email', ['template' => "{label}\n{input}<span class='js-clear-input'>×</span>\n{hint}\n{error}"])
+                                        ->textInput(['class' => 'form-control form-control-with-close']) ?>
                                 </div>
 
                                 <div class="col-md-2">
