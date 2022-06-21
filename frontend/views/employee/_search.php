@@ -62,7 +62,7 @@ use common\models\Project;
                         <div class="col-sm-12">
                             <div class="row">
                                 <div class="col-md-2">
-                                    <?= $form->field($model, 'id') ?>
+                                    <?= $form->field($model, 'id', ['template' => "{label}\n{input}<span>×</span>\n{hint}\n{error}"]) ?>
                                 </div>
 
                                 <div class="col-md-2">

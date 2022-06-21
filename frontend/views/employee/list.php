@@ -738,6 +738,12 @@ $isAdmin = $user->isAdmin() || $user->isSuperAdmin();
         refreshUserSelectedState();
     });
     
+  $(document).on('click', '.kv-clear', function (e) {
+     let parent = $(this).closest('.form-group');
+     let input = parent.find('input')
+     input.val('');
+    });
+    
     
     $('body').on('click', '#btn-check-all',  function (e) {
         let btn = $(this);
