@@ -3,31 +3,24 @@
 namespace frontend\controllers;
 
 use common\components\CommunicationService;
+use common\models\Email;
 use common\models\Employee;
+use common\models\search\EmailSearch;
 use common\models\UserProjectParams;
 use frontend\widgets\newWebPhone\email\form\EmailSendForm;
 use http\Url;
 use modules\email\src\abac\dto\EmailAbacDto;
 use modules\email\src\abac\EmailAbacObject;
 use src\auth\Auth;
-use src\entities\cases\Cases;
-use src\helpers\email\TextConvertingHelper;
 use src\model\email\useCase\send\EmailSenderService;
 use src\model\emailList\entity\EmailList;
 use Yii;
-use common\models\Email;
-use common\models\search\EmailSearch;
-use yii\filters\AccessControl;
+use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
 use yii\web\Response;
-use yii\db\Query;
-use src\entities\email\EmailAddress;
-use src\services\email\EmailsNormalizeService;
-use src\entities\email\EmailSearch as EmailNormalizedSearch;
 
 /**
  * EmailController implements the CRUD actions for Email model.
@@ -465,23 +458,4 @@ class EmailController extends FController
 
         return $this->asJson($result);
     }
-
-    public function actionNormalized()
-    {
-        $searchModel = new EmailNormalizedSearch();
-
-        $params = Yii::$app->request->queryParams;
-        if (Yii::$app->user->identity->canRole('supervision')) {
-            $params['EmailSearch']['supervision_id'] = Yii::$app->user->id;
-        }
-        $searchModel->date_range = null;
-
-        $dataProvider = $searchModel->search($params);
-
-        return $this->render('normalized', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-        ]);
-    }
-
 }
