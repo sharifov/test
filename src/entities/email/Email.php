@@ -173,6 +173,26 @@ class Email extends ActiveRecord
             );
     }
 
+    public function getEmailFrom() : string
+    {
+        return $this->contactFrom->getEmail(EmailType::isInbox($this->e_type_id));
+    }
+
+    public function getEmailTo() : string
+    {
+        return $this->contactTo->getEmail(EmailType::isOutbox($this->e_type_id)) ?? null;
+    }
+
+    public function getCommunicationId()
+    {
+        return $this->emailLog->el_communication_id ?? null;
+    }
+
+    public function getStatusName() : string
+    {
+        return EmailStatus::getName($this->e_status_id);
+    }
+
     public function attributeLabels(): array
     {
         return [
