@@ -81,6 +81,11 @@ class ObjectSegmentTask extends \yii\db\ActiveRecord
         ];
     }
 
+    public static function find(): ObjectSegmentTaskScope
+    {
+        return new ObjectSegmentTaskScope(static::class);
+    }
+
     /**
      * Gets query for [[OstlCreatedUser]].
      *

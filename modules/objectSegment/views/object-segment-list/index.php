@@ -82,6 +82,11 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'osl_enabled:boolean',
             [
+                'attribute' => 'osl_is_system',
+                'format' => 'booleanByLabel',
+                'filter' =>  [1 => 'Yes', 0 => 'No']
+            ],
+            [
                 'class'       => UserSelect2Column::class,
                 'attribute'   => 'osl_updated_user_id',
                 'relation'    => 'oslUpdatedUser',
@@ -99,6 +104,11 @@ $this->params['breadcrumbs'][] = $this->title;
                     'viewSegmentRules' => function ($action, $model, $key) {
                         $url = Url::toRoute(['/object-segment/object-segment-rule/?ObjectSegmentRuleSearch[osr_osl_id]=' . $model->osl_id]);
                         return Html::a('<i class="fa fa-toggle-down"></i>', $url, ['title' => 'View Rules', 'data-pjax' => 0, 'target' => '_blank']);
+                    },
+                ],
+                'visibleButtons' => [
+                    'delete' => static function (ObjectSegmentList $model) {
+                        return !$model->osl_is_system;
                     },
                 ]
             ],

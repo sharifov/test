@@ -137,8 +137,15 @@ class ObjectSegmentListController extends FController
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
-        Yii::$app->objectSegment->invalidatePolicyCache();
+        $model = $this->findModel($id);
+
+        if (!$model->osl_is_system) {
+            $model->delete();
+            Yii::$app->objectSegment->invalidatePolicyCache();
+        } else {
+            Yii::$app->session->setFlash('error', 'You can\'t delete system item');
+        }
+
         return $this->redirect(['index']);
     }
 

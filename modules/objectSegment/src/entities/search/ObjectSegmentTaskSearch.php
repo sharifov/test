@@ -46,13 +46,16 @@ class ObjectSegmentTaskSearch extends ObjectSegmentTask
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => ['defaultOrder' => ['ostl_created_dt' => SORT_DESC]],
+            'pagination' => ['pageSize' => 30],
         ]);
 
         $this->load($params);
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $query->where('0=1');
+
             return $dataProvider;
         }
 
