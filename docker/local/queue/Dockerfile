@@ -1,7 +1,7 @@
 ARG REGISTRY
 ARG IMAGE_TAG
 
-FROM ${REGISTRY}crm-swoole:${IMAGE_TAG}
+FROM ${REGISTRY}crm-php-cli:${IMAGE_TAG}
 
 RUN apt-get update && apt-get install -y supervisor \
     && mkdir -p /var/log/supervisor \

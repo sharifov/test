@@ -1,12 +1,12 @@
 ---
 plugin: aws_ec2
 # uncomment this to run localy
-# boto_profile: aws-prod-infra
+#boto_profile: aws-prod-infra
 cache: false
 regions:
   - us-east-1
 filters:
-  tag:Env:
+  tag:Environment:
     - prod
   tag:Project:
     - crm
@@ -19,7 +19,7 @@ keyed_groups:
     key: tags['Kind']
 
 compose:
-  ansible_host: public_ip_address
+  ansible_host: private_ip_address
   private_ip: private_ip_address
 
 hostnames:

@@ -18,13 +18,16 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <p>
         <?= Html::a('<i class="fa fa-edit"></i> Update', ['update', 'id' => $model->osl_id], ['class' => 'btn btn-primary']) ?>
-        <?= Html::a('<i class="fa fa-remove"></i> Delete', ['delete', 'id' => $model->osl_id], [
-            'class' => 'btn btn-danger',
-            'data'  => [
-                'confirm' => 'Are you sure you want to delete this item?',
-                'method'  => 'post',
-            ],
-        ]) ?>
+
+        <?php if (!$model->osl_is_system) : ?>
+            <?= Html::a('<i class="fa fa-remove"></i> Delete', ['delete', 'id' => $model->osl_id], [
+                'class' => 'btn btn-danger',
+                'data'  => [
+                    'confirm' => 'Are you sure you want to delete this item?',
+                    'method'  => 'post',
+                ],
+            ]) ?>
+        <?php endif ?>
     </p>
 
     <div class="col-md-6">
