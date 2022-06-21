@@ -3,6 +3,10 @@
 initEnv () {
   if [ ! -e "$dockerFolder/.env" ]; then
     cp "$dockerFolder/.env.example" "$dockerFolder/.env"
+    printf "docker/ENV file is created\n"
+  fi
+  if [ ! -e ".env" ]; then
+    cp ".env.example" ".env"
     printf "ENV file is created\n"
   fi
 }
@@ -21,6 +25,9 @@ if [ "$whatDo" == "init-env" ]; then
   initEnv
   exit;
 elif [ ! -e "$dockerFolder/.env" ]; then
+  printf "Not found .docker/.env Please run init-env command\n"
+  exit;
+elif [ ! -e ".env" ]; then
   printf "Not found .env Please run init-env command\n"
   exit;
 fi
@@ -320,8 +327,8 @@ applicationInstall () {
   applicationUninstall
   createTemporallyDirectories
   build
-  initChown
   initConfig
+  initChown
 #  initMysql
 #  initPsql
   composerInstall
