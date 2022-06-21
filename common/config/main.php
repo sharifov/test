@@ -121,6 +121,10 @@ return [
             'viewPath' => '@common/mail',
             'useFileTransport' => true,
         ],
+        'email' => [
+            'class' => 'common\components\email\EmailComponent',
+            'isActive' => true,
+        ],
         'communication' => [
             'class' => \common\components\CommunicationService::class,
             'url' => 'https://communication.api.travelinsides.com/v1/',
