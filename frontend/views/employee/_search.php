@@ -20,6 +20,16 @@ use common\models\Project;
         background: #F2F5F7;
         margin-bottom: 5px
     }
+    .js-clear-input{
+        position: absolute;
+        top: 28px;
+        right: 10px;
+        cursor: pointer;
+        padding: 5px 10px;
+    }
+    .form-control-with-close{
+        padding-right: 25px;
+    }
 </style>
 
 <div class="employee-search">
@@ -62,19 +72,25 @@ use common\models\Project;
                         <div class="col-sm-12">
                             <div class="row">
                                 <div class="col-md-2">
-                                    <?= $form->field($model, 'id', ['template' => "{label}\n{input}<span>×</span>\n{hint}\n{error}"]) ?>
+                                    <?= $form->field($model, 'id',
+                                        ['template' => "{label}\n{input}<span class='js-clear-input'>×</span>\n{hint}\n{error}"
+                                    ])->textInput(['class' => 'form-control form-control-with-close']) ?>
                                 </div>
 
                                 <div class="col-md-2">
-                                    <?= $form->field($model, 'username') ?>
+                                    <?= $form->field($model, 'username',
+                                        ['template' => "{label}\n{input}<span class='js-clear-input'>×</span>\n{hint}\n{error}"
+                                        ])->textInput(['class' => 'form-control form-control-with-close']) ?>
                                 </div>
 
                                 <div class="col-md-2">
-                                    <?= $form->field($model, 'nickname') ?>
+                                    <?= $form->field($model, 'nickname',
+                                        ['template' => "{label}\n{input}<span class='js-clear-input'>×</span>\n{hint}\n{error}"
+                                        ])->textInput(['class' => 'form-control form-control-with-close']) ?>
                                 </div>
 
                                 <div class="col-md-2">
-                                    <?php echo $form->field($model, 'email') ?>
+                                    <?php echo $form->field($model, 'email', ['template' => "{label}\n{input}<span class='js-clear-input'>×</span>\n{hint}\n{error}"]) ?>
                                 </div>
 
                                 <div class="col-md-2">
@@ -312,3 +328,21 @@ use common\models\Project;
     </div>
 
 </div>
+
+<?php
+$js = <<<JS
+$(document).on('click', '.kv-clear', function (e) {
+     let parent = $(this).closest('.form-group');
+     let input = parent.find('input')
+     input.val('');
+});
+
+$(document).on('click', '.js-clear-input', function (e) {
+     let parent = $(this).closest('.form-group');
+     let input = parent.find('input')
+     input.val('');
+});
+JS;
+
+$this->registerJs($js, \yii\web\View::POS_READY);?>
+
