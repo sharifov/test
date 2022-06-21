@@ -88,7 +88,7 @@ class EmailsNormalizeService
         $this->emailParams->attributes = $attributes;
         $this->emailParams->save();
 
-        $this->email->link('params', $this->emailParams);
+        $this->emailParams->link('email', $this->email);
 
         return $this;
     }

@@ -16,6 +16,9 @@ use src\auth\Auth;
 use common\models\Email as EmailOld;
 use common\models\EmailTemplateType;
 use common\models\Language;
+use yii\helpers\ArrayHelper;
+use src\entities\email\helpers\EmailType;
+use src\entities\email\helpers\EmailStatus;
 
 /**
  * This is the model class for table "email_norm".
@@ -29,7 +32,6 @@ use common\models\Language;
  * @property int|null $e_created_user_id
  * @property string|null $e_created_dt
  * @property string|null $e_updated_dt
- * @property int|null $e_params_id
  * @property int|null $e_body_id
  *
  * @property Employee $createdUser
@@ -42,11 +44,12 @@ use common\models\Language;
  * @property Client[] $clients
  * @property Lead[] $leads
  * @property EmailContact[] $emailContacts
- * @property EmailAddress $emailFrom
- * @property EmailAddress $emailTo
+ * @property EmailAddress $contactFrom
+ * @property EmailAddress $contactTo
  */
 class Email extends ActiveRecord
 {
+
     public function rules(): array
     {
         return [
@@ -61,9 +64,6 @@ class Email extends ActiveRecord
             ['e_departament_id', 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['e_departament_id' => 'dep_id']],
 
             ['e_is_deleted', 'integer'],
-
-            ['e_params_id', 'integer'],
-            ['e_params_id', 'exist', 'skipOnError' => true, 'targetClass' => EmailParams::class, 'targetAttribute' => ['e_params_id' => 'ep_id']],
 
             ['e_project_id', 'integer'],
             ['e_project_id', 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['e_project_id' => 'id']],
@@ -93,17 +93,22 @@ class Email extends ActiveRecord
 
     public function getParams(): \yii\db\ActiveQuery
     {
-        return $this->hasOne(EmailParams::class, ['ep_id' => 'e_params_id']);
+        return $this->hasOne(EmailParam::class, ['ep_email_id' => 'e_id']);
+    }
+
+    public function getEmailLog(): \yii\db\ActiveQuery
+    {
+        return $this->hasOne(EmailLog::class, ['el_email_id' => 'e_id']);
     }
 
     public function getLanguage(): \yii\db\ActiveQuery
     {
-        return $this->hasOne(Language::class, ['language_id' => 'ep_language_id'])->viaTable('email_params', ['ep_id' => 'e_params_id']);
+        return $this->hasOne(Language::class, ['language_id' => 'ep_language_id'])->viaTable('email_params', ['ep_email_id' => 'e_id']);
     }
 
     public function getTemplateType(): \yii\db\ActiveQuery
     {
-        return $this->hasOne(EmailTemplateType::class, ['etp_id' => 'ep_template_type_id'])->viaTable('email_params', ['ep_id' => 'e_params_id']);
+        return $this->hasOne(EmailTemplateType::class, ['etp_id' => 'ep_template_type_id'])->viaTable('email_params', ['ep_email_id' => 'e_id']);
     }
 
     public function getEmailBody(): \yii\db\ActiveQuery
@@ -126,12 +131,7 @@ class Email extends ActiveRecord
         return $this->hasMany(Lead::class, ['id' => 'el_lead_id'])->viaTable('email_lead', ['el_email_id' => 'e_id']);
     }
 
-    public function getEmailLog(): \yii\db\ActiveQuery
-    {
-        return $this->hasOne(EmailLog::class, ['el_email_id' => 'e_id']);
-    }
-
-    public function getEmailFrom(): \yii\db\ActiveQuery
+    public function getContactFrom(): \yii\db\ActiveQuery
     {
         return $this->hasOne(EmailAddress::class, ['ea_id' => 'ec_address_id'])
             ->viaTable(
@@ -143,7 +143,7 @@ class Email extends ActiveRecord
             );
     }
 
-    public function getEmailTo(): \yii\db\ActiveQuery
+    public function getContactTo(): \yii\db\ActiveQuery
     {
         return $this->hasOne(EmailAddress::class, ['ea_id' => 'ec_address_id'])
         ->viaTable(
@@ -167,7 +167,6 @@ class Email extends ActiveRecord
             'e_created_user_id' => 'Created User ID',
             'e_created_dt' => 'Created Dt',
             'e_updated_dt' => 'Updated Dt',
-            'e_params_id' => 'Params ID',
             'e_body_id' => 'Body ID',
         ];
     }
@@ -183,14 +182,14 @@ class Email extends ActiveRecord
     public function behaviors(): array
     {
         return [
-            'timestamp' => [
+            /* 'timestamp' => [
                 'class' => TimestampBehavior::class,
                 'attributes' => [
                     ActiveRecord::EVENT_BEFORE_INSERT => ['e_created_dt'],
                     ActiveRecord::EVENT_BEFORE_UPDATE => ['e_updated_dt'],
                 ],
                 'value' => date('Y-m-d H:i:s')
-            ],
+            ], */
             'metric' => [
                 'class' => MetricEmailCounterBehavior::class,
             ],
