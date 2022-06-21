@@ -104,6 +104,10 @@ return [
                 'encryption' => env('COMMON_CONFIG_MAIN_COMPONENTS_MAILER_ENCRYPTION'),
             ],
         ],
+        'email' => [
+            'class' => 'common\components\email\EmailComponent',
+            'defaultFromEmail' => env('COMMON_CONFIG_MAIN_COMPONENTS_EMAIL_DEFAULTFROMEMAIL'),
+        ],
         'communication' => [
             'class' => \common\components\CommunicationService::class,
             'host' => env('COMMON_CONFIG_MAIN_COMPONENTS_COMMUNICATION_HOST'),
