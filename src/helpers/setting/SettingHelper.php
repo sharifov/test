@@ -1032,4 +1032,16 @@ class SettingHelper
     {
         return (bool) (Yii::$app->params['settings']['call_is_override_phone_to_forwarded_from'] ?? false);
     }
+
+    /**
+     * @return string
+     */
+    public static function getEmailFrom(): string
+    {
+        $email = \Yii::$app->params['settings']['email_component']['email_from'] ?? '';
+        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return $email;
+        }
+        return '';
+    }
 }
