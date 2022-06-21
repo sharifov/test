@@ -11,10 +11,6 @@ initEnv () {
   fi
 }
 
-getEnvVar () {
-  echo $(cat "$dockerFolder/.env" | grep "$1=" | cut -d "=" -f 2 );
-}
-
 dirName=$(dirname "$0")
 currentDir=$(cd "$dirName" && pwd)
 dockerFolder="$currentDir/.docker"
@@ -31,6 +27,10 @@ elif [ ! -e ".env" ]; then
   printf "Not found .env Please run init-env command\n"
   exit;
 fi
+
+getEnvVar () {
+  echo $(cat "$dockerFolder/.env" | grep "$1=" | cut -d "=" -f 2 );
+}
 
 REGISTRY=$(getEnvVar "REGISTRY")
 
