@@ -4566,6 +4566,16 @@ class LeadSearch extends Lead
             return $dataProvider;
         }
 
+        if ($this->createdRangeTime) {
+            $createdRange = explode(" - ", $this->createdRangeTime);
+            if ($createdRange[0]) {
+                $query->andFilterWhere(['>=', 'leads.created', Employee::convertTimeFromUserDtToUTC(strtotime($createdRange[0]))]);
+            }
+            if ($createdRange[1]) {
+                $query->andFilterWhere(['<=', 'leads.created', Employee::convertTimeFromUserDtToUTC(strtotime($createdRange[1]) + 86399)]);
+            }
+        }
+
         $query->andFilterWhere([
             $leadTable . '.id' => $this->id,
             $leadTable . '.project_id' => $this->project_id,
