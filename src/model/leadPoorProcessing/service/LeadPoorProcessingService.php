@@ -7,6 +7,7 @@ use common\components\jobs\LeadPoorProcessingRemoverJob;
 use common\models\EmailTemplateType;
 use common\models\Employee;
 use common\models\Lead;
+use frontend\helpers\RedisHelper;
 use modules\featureFlag\FFlag;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
@@ -143,7 +144,7 @@ class LeadPoorProcessingService
         }
 
         $idKey = 'adder_' . $leadId . '_' . implode('_', $dataKeys);
-        if (!self::checkDuplicate($idKey)) {
+        if (RedisHelper::checkDuplicate($idKey)) {
             return;
         }
 
@@ -176,7 +177,7 @@ class LeadPoorProcessingService
         }
 
         $idKey = 'remover_' . $leadId . '_' . implode('_', $dataKeys);
-        if (!self::checkDuplicate($idKey)) {
+        if (RedisHelper::checkDuplicate($idKey)) {
             return;
         }
 
@@ -207,15 +208,5 @@ class LeadPoorProcessingService
             throw new \RuntimeException('EmailTemplateType not found by(' . $templateKey . ')');
         }
         return (bool) ArrayHelper::getValue($tpl->etp_params_json, 'quotes.selectRequired', false);
-    }
-
-    public static function checkDuplicate(string $idKey, int $pauseSecond = 10): bool
-    {
-        $redis = Yii::$app->redis;
-        if (!$redis->get($idKey)) {
-            $redis->setex($idKey, $pauseSecond, true);
-            return true;
-        }
-        return false;
     }
 }
