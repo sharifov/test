@@ -19,6 +19,8 @@ use common\models\Language;
 use yii\helpers\ArrayHelper;
 use src\entities\email\helpers\EmailType;
 use src\entities\email\helpers\EmailStatus;
+use src\entities\EventTrait;
+use src\entities\email\events\EmailDeletedEvent;
 
 /**
  * This is the model class for table "email_norm".
@@ -49,6 +51,7 @@ use src\entities\email\helpers\EmailStatus;
  */
 class Email extends ActiveRecord
 {
+    use EventTrait;
 
     public function rules(): array
     {
@@ -191,6 +194,14 @@ class Email extends ActiveRecord
     public function getStatusName() : string
     {
         return EmailStatus::getName($this->e_status_id);
+    }
+
+    public function delete()
+    {
+        $emailBody = $this->emailBody;
+        if (parent::delete()) {
+            $this->recordEvent(new EmailDeletedEvent($emailBody));
+        }
     }
 
     public function attributeLabels(): array
