@@ -37,7 +37,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     [
                         'attribute' => 'ostl_tl_id',
-                        'value' => $model->ostlTl->tl_title
+                        'value' => $model->taskList->tl_title
                     ],
                     'ostl_created_dt',
                     'ostl_created_user_id:username',
