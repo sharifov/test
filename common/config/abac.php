@@ -43,7 +43,6 @@ return [
         '/modules/',
         '/frontend/',
         '/common/',
-        '/sales/',
         '/src/',
     ],
     'scanExtMask' => ['*.php'],

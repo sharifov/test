@@ -205,6 +205,14 @@ class ShiftScheduleRequestService
                     $user,
                     self::NOTIFICATION_TYPE_UPDATE
                 );
+
+                Notifications::pub(
+                    ['user-' . $requestModel->ssr_created_user_id],
+                    'reloadShitScheduleRequest',
+                    [
+                        'data' => [],
+                    ],
+                );
             }
             return true;
         }
@@ -250,6 +258,14 @@ class ShiftScheduleRequestService
             $requestModel,
             $user,
             self::NOTIFICATION_TYPE_UPDATE
+        );
+
+        Notifications::pub(
+            ['user-' . $requestModel->ssr_created_user_id],
+            'reloadShitScheduleRequest',
+            [
+                'data' => [],
+            ],
         );
     }
 
