@@ -593,6 +593,9 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                             windowObjectReference.focus();
                         }
                     }
+                    if (obj.cmd === 'reloadShitScheduleRequest') {
+                       
+                    }
                 }
                 // onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');
             } catch (error) {
