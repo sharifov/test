@@ -48,7 +48,7 @@ class EmailsNormalizeService
             $this
                 ->fillEmailParams($emailOld->e_priority, $emailOld->e_template_type_id, $emailOld->e_language_id)
                 ->fillEmailBody($emailOld->e_email_subject, $emailOld->e_email_body_text, $emailOld->e_email_data)
-                ->fillEmailBlob($emailOld->e_email_body_blob)
+                ->fillEmailBlob($emailOld->e_email_body_blob, true)
                 ->fillEmailContacts(
                     $emailOld->e_email_from,
                     $emailOld->e_email_to,
@@ -70,6 +70,7 @@ class EmailsNormalizeService
                 ->linkClient($emailOld->e_client_id)
                 ->linkCase($emailOld->e_case_id)
                 ->linkLead($emailOld->e_lead_id)
+                ->linkReply($emailOld->e_reply_id)
             ;
         }
 
@@ -141,10 +142,10 @@ class EmailsNormalizeService
         return $this;
     }
 
-    public function fillEmailBlob(string $body)
+    public function fillEmailBlob(string $body, $compressed = false)
     {
         $this->emailBlob = new EmailBlob();
-        $this->emailBlob->attributes = ['embb_email_body_blob' => TextConvertingHelper::compress($body)];
+        $this->emailBlob->attributes = ['embb_email_body_blob' => $compressed ? $body : TextConvertingHelper::compress($body)];
         $this->emailBlob->save();
 
         $this->emailBlob->link('emailBody', $this->emailBody);
@@ -156,7 +157,7 @@ class EmailsNormalizeService
     public function linkClient(?int $clientId)
     {
         if ($clientId !== null) {
-            $client = Client::findOne(['id' => $clientId]);
+            $client = Client::findOne($clientId);
             if ($client) {
                 $this->email->link('clients', $client);
                 echo 'clients id: '.$clientId.' to email : '.$this->email->e_id.'<br/>';
@@ -168,7 +169,7 @@ class EmailsNormalizeService
     public function linkCase(?int $caseId)
     {
         if ($caseId !== null) {
-            $case = Cases::findOne(['cs_id' => $caseId]);
+            $case = Cases::findOne($caseId);
             if ($case) {
                 $this->email->link('cases', $case);
                 echo 'Cases id: '.$caseId.' to email : '.$this->email->e_id.'<br/>';
@@ -180,10 +181,21 @@ class EmailsNormalizeService
     public function linkLead(?int $leadId)
     {
         if ($leadId !== null) {
-            $lead = Lead::findOne(['id' => $leadId]);
+            $lead = Lead::findOne($leadId);
             if ($lead) {
                 $this->email->link('leads', $lead);
                 echo 'Lead id: '.$leadId.' to email : '.$this->email->e_id.'<br/>';
+            }
+        }
+        return $this;
+    }
+
+    public function linkReply(?int $replyId)
+    {
+        if ($replyId !== null) {
+            $reply = Email::findOne($replyId);
+            if ($reply) {
+                $this->email->link('reply', $reply);
             }
         }
         return $this;
