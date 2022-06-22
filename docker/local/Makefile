@@ -45,8 +45,18 @@ build:
 	    --build-arg USER_NAME=${USER_NAME} \
 	    --build-arg USER_ID=${USER_ID}  \
 	    --build-arg USER_GID=${USER_GID} \
+	    --build-arg PHP_XDEBUG_ENABLED=${PHP_XDEBUG_ENABLED} \
+	    --build-arg XDEBUG_CLIENT_HOST=${XDEBUG_CLIENT_HOST} \
+	    --build-arg XDEBUG_CLIENT_PORT=${XDEBUG_CLIENT_PORT} \
+	    --build-arg XDEBUG_IDE_KEY=${XDEBUG_IDE_KEY} \
 	    --file=php-fpm/Dockerfile --tag=${REGISTRY}crm-php-fpm:${IMAGE_TAG} php-fpm
-	docker build --build-arg PHP_CLI_VERSION=${PHP_CLI_VERSION} --file=php-cli/Dockerfile --tag=${REGISTRY}crm-php-cli:${IMAGE_TAG} php-cli
+	docker build \
+        --build-arg PHP_XDEBUG_ENABLED=${PHP_XDEBUG_ENABLED} \
+        --build-arg XDEBUG_CLIENT_HOST=${XDEBUG_CLIENT_HOST} \
+        --build-arg XDEBUG_CLIENT_PORT=${XDEBUG_CLIENT_PORT} \
+        --build-arg XDEBUG_IDE_KEY=${XDEBUG_IDE_KEY} \
+        --build-arg PHP_CLI_VERSION=${PHP_CLI_VERSION} \
+        --file=php-cli/Dockerfile --tag=${REGISTRY}crm-php-cli:${IMAGE_TAG} php-cli
 	docker-compose build
 
 init-config:
