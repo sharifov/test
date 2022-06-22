@@ -13,6 +13,9 @@ use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
+use modules\email\src\abac\dto\EmailAbacDto;
+use modules\email\src\abac\EmailAbacObject;
+use yii\web\ForbiddenHttpException;
 
 /**
  * EmailNormalizedController implements the CRUD actions for Email model.
@@ -72,6 +75,30 @@ class EmailNormalizedController extends FController
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    /**
+     * @param $id
+     * @return string
+     * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
+     */
+    public function actionView($id): string
+    {
+        $model = $this->findModel($id);
+        /** @abac new EmailAbacDto($model), EmailAbacObject::ACT_VIEW, EmailAbacObject::ACTION_ACCESS, Restrict access to view emails on case or lead*/
+
+/*         if (!Yii::$app->abac->can(new EmailAbacDto($model), EmailAbacObject::ACT_VIEW, EmailAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+ */
+        if (Yii::$app->request->get('preview')) {
+            return $model->getEmailBodyHtml() ?: '';
+        }
+
+        return $this->render('view', [
+            'model' => $model,
         ]);
     }
 
