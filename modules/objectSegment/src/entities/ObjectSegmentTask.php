@@ -21,7 +21,7 @@ use yii\helpers\VarDumper;
  * @property int|null $ostl_created_user_id
  *
  * @property Employee $ostlCreatedUser
- * @property ObjectSegmentList $ostlOsl
+ * @property ObjectSegmentList $objectSegmentList
  * @property TaskList $taskList
  */
 class ObjectSegmentTask extends \yii\db\ActiveRecord
@@ -103,7 +103,7 @@ class ObjectSegmentTask extends \yii\db\ActiveRecord
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getOstlOsl()
+    public function getObjectSegmentList()
     {
         return $this->hasOne(ObjectSegmentList::class, ['osl_id' => 'ostl_osl_id']);
     }
@@ -131,6 +131,11 @@ class ObjectSegmentTask extends \yii\db\ActiveRecord
     public static function getAssignedTaskIds(int $id): array
     {
         return self::find()->select(['ostl_tl_id'])->where(['ostl_osl_id' => $id])->column();
+    }
+
+    public static function getAssignedObjectSegmentIdsByTaskId(int $id): array
+    {
+        return self::find()->select(['ostl_osl_id'])->where(['ostl_tl_id' => $id])->column();
     }
 
     public static function create(int $objectSegmentListId, int $taskListId): self
@@ -162,6 +167,33 @@ class ObjectSegmentTask extends \yii\db\ActiveRecord
         if (!empty($addList)) {
             foreach ($addList as $item) {
                 $objectSegmentTask = self::create($id, $item);
+                (new ObjectSegmentTaskRepository($objectSegmentTask))->save();
+            }
+        }
+
+        return true;
+    }
+
+    public static function deleteOrAddObjectSegments(int $id, array $segmentIds = []): bool
+    {
+        $currentItems = self::getAssignedObjectSegmentIdsByTaskId($id);
+        $addList = [];
+        $removeList = [];
+
+        if (empty($segmentIds) && !empty($currentItems)) {
+            $removeList = $currentItems;
+        } else {
+            $removeList = array_diff($currentItems, $segmentIds);
+            $addList = array_diff($segmentIds, $currentItems);
+        }
+
+        if (!empty($removeList)) {
+            self::deleteAll(['AND', ['ostl_tl_id' => $id], ['IN', 'ostl_osl_id', $removeList]]);
+        }
+
+        if (!empty($addList)) {
+            foreach ($addList as $item) {
+                $objectSegmentTask = self::create($item, $id);
                 (new ObjectSegmentTaskRepository($objectSegmentTask))->save();
             }
         }
