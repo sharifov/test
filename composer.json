@@ -152,7 +152,6 @@
 			"frontend/models/",
 			"common/components/",
 			"vendor/yiisoft/yii2/Yii.php",
-			"sales/",
 			"src/"
 		],
 		"exclude-from-classmap": [
