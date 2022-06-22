@@ -9,6 +9,7 @@ use common\models\local\LeadAdditionalInformation;
 use common\models\query\LeadQuery;
 use common\models\query\SourcesQuery;
 use DateTime;
+use frontend\helpers\RedisHelper;
 use frontend\helpers\JsonHelper;
 use frontend\widgets\notification\NotificationMessage;
 use kivork\search\core\urlsig\UrlSignature;
@@ -2259,6 +2260,19 @@ class Lead extends ActiveRecord implements Objectable
 
     public function updateLastAction(?string $description = null): int
     {
+        $idKey = 'update_last_action_' . $this->id;
+
+        if (RedisHelper::checkDuplicate($idKey, 5)) {
+            \Yii::info(
+                [
+                    'message' => 'Checked Duplicate Update Last Action in Lead',
+                    'leadId' => $this->id
+                ],
+                'Lead:updateLastAction:checkDuplicate'
+            );
+            return 0;
+        }
+
         $result = self::updateAll(['l_last_action_dt' => date('Y-m-d H:i:s')], ['id' => $this->id]);
 
         if ($this->isProcessing()) {

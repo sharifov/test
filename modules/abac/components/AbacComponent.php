@@ -428,6 +428,7 @@ class AbacComponent extends Component
             TagDependency::invalidate(Yii::$app->cache, $cacheTagDependency);
             return true;
         }
+        TagDependency::invalidate(Yii::$app->cache, [AbacPolicy::CACHE_KEY]);
         return false;
     }
 }

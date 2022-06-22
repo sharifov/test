@@ -8,6 +8,7 @@ use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\helpers\Json;
+use yii\helpers\Url;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
@@ -64,7 +65,6 @@ $userCanDeleteSaleData = Auth::can('/sale/delete-ajax');
                     <?php if ($caseModel->isProcessing()) : ?>
                         <td>Update to B/O</td>
                     <?php endif; ?>
-
                     <?php if ($userCanRefresh) : ?>
                         <td>Refresh Data From B/O</td>
                     <?php endif; ?>
@@ -74,6 +74,8 @@ $userCanDeleteSaleData = Auth::can('/sale/delete-ajax');
                     <?php if ($userCanDeleteSaleData) : ?>
                         <td>Remove Sale</td>
                     <?php endif; ?>
+                    <td>Cancel Sale</td>
+                    <td>Resend Tickets</td>
                 </tr>
             </table>
 
@@ -84,6 +86,12 @@ $userCanDeleteSaleData = Auth::can('/sale/delete-ajax');
             $itemColls = [];
             if ($items = $dataProvider->getModels()) {
                 foreach ($items as $itemKey => $item) {
+                    $dataSale = JsonHelper::decode($item->css_sale_data_updated);
+                    $saleStatus = '';
+                    if (is_array($dataSale)) {
+                        $saleStatus = mb_strtolower($dataSale['saleStatus']);
+                    }
+
                     $label = '<table class="table table-bordered table-striped" style="margin: 0; color: #0d3349; font-size: 14px"><tr>
                         <td style="width: 10%">Id: ' . Html::encode($item->css_sale_id) . '</td>
                         <td style="width: 15%">' . Html::encode($item->css_sale_book_id) . '</td>
@@ -108,7 +116,7 @@ $userCanDeleteSaleData = Auth::can('/sale/delete-ajax');
                     }
                     if ($userCanRefresh) {
                         $label .= '<td>' . Html::button('<i class="fa fa-refresh"></i> Refresh', [
-                                'class' => 'refresh-from-bo btn btn-info',
+                                'class' => 'refresh-from-bo btn btn-info refresh-fr-0',
                                 'data-case-id' => $item->css_cs_id,
                                 'data-case-sale-id' => $item->css_sale_id,
                                 'check-fare-rules' => 0,
@@ -117,27 +125,41 @@ $userCanDeleteSaleData = Auth::can('/sale/delete-ajax');
                     }
                     if ($userCanCheckFareRules) {
                         $label .= '<td>' . Html::button('<i class="fa fa-refresh"></i> Check Fare rules', [
-                                'class' => 'refresh-from-bo btn btn-info',
+                                'class' => 'refresh-from-bo btn btn-info refresh-fr-1',
                                 'data-case-id' => $item->css_cs_id,
                                 'data-case-sale-id' => $item->css_sale_id,
                                 'check-fare-rules' => 1,
                                 'title' => 'Check Fare rules',
                         ]) . '</td>';
                     }
-                    $label .= '<td>';
                     if ($userCanDeleteSaleData && Auth::can('cases/update', ['case' => $caseModel])) {
-                        $label .= Html::button('<i class="fa fa-warning"></i> Remove', [
-                            'class' => 'remove-sale btn btn-warning',
+                        $label .= '<td>' . Html::button('<i class="fa fa-warning"></i> Remove', [
+                            'class' => 'remove-sale btn btn-danger',
                             'data-case-id' => $item->css_cs_id,
                             'data-case-sale-id' => $item->css_sale_id,
                             'title' => 'Remove Sale',
-                        ]);
+                        ]) . '</td>';
                     }
-                    $label .= '</td>';
+
+                    $label .= '<td>' . Html::button('<i class="fa fa-minus-circle"></i> Cancel', [
+                        'class' => 'cancel-sale btn btn-warning',
+                        'disabled' => $saleStatus !== 'pending' && $saleStatus !== 'processing',
+                        'data-case-id' => $item->css_cs_id,
+                        'data-case-sale-id' => $item->css_sale_id,
+                        'title' => 'Cancel Sale',
+                    ]) . '</td>';
+
+                    $label .= '<td>' . Html::button('<i class="fa fa-share fa-rotate-0"></i> Resend', [
+                        'class' => 'resend-tickets btn btn-success',
+                        'disabled' => $saleStatus !== 'close',
+                        'data-case-id' => $item->css_cs_id,
+                        'data-case-sale-id' => $item->css_sale_id,
+                        'title' => 'Resend Tickets Sale',
+                    ]) . '</td>';
+
                     $label .= '</tr></table>';
 
                     $content = '';
-                    $dataSale = JsonHelper::decode($item->css_sale_data_updated);
 
                     if (is_array($dataSale)) {
                         $dataProviderCc = new ActiveDataProvider([
@@ -145,14 +167,14 @@ $userCanDeleteSaleData = Auth::can('/sale/delete-ajax');
                         ]);
 
                         $content = $this->render('/sale/view', [
-                                'data' => $dataSale,
-                                'csId' => $caseModel->cs_id,
-                                'caseSaleModel' => $item,
-                                'itemKey' => $itemKey,
-                                'dataProviderCc' => $dataProviderCc,
-                                'caseModel' => $caseModel,
-                                'additionalData' => [],
-                                'disableMasking' => $disableMasking
+                            'data' => $dataSale,
+                            'csId' => $caseModel->cs_id,
+                            'caseSaleModel' => $item,
+                            'itemKey' => $itemKey,
+                            'dataProviderCc' => $dataProviderCc,
+                            'caseModel' => $caseModel,
+                            'additionalData' => [],
+                            'disableMasking' => $disableMasking
                         ]);
                     }
 
@@ -234,9 +256,13 @@ $jsCode = <<<JS
 JS;
 
 $this->registerJs($jsCode, \yii\web\View::POS_READY);
-$urlRefresh = \yii\helpers\Url::to(['/cases/ajax-refresh-sale-info']);
+$urlRefresh = Url::to(['/cases/ajax-refresh-sale-info']);
+$urlSalePrepareResendTickets = Url::to(['/sale/prepare-resend-tickets']);
+$urlSalePrepareCancelSale = Url::to(['/sale/prepare-cancel-sale']);
 
 $js = <<<JS
+
+let userCanRefresh = "$userCanRefresh";
 document.activateButtonSync = function(data) {
     if (data.output === '' && data.message === '' && data.sync) {
         $('#update-to-bo-'+data.caseSaleId).removeAttr('disabled').removeClass('btn-default').addClass('btn-success');
@@ -267,7 +293,8 @@ $(document).on('click', '.refresh-from-bo', function (e) {
     let obj = $(this),
         caseId = obj.attr('data-case-id'),
         caseSaleId = obj.attr('data-case-sale-id'),
-        checkFareRules = obj.attr('check-fare-rules');
+        checkFareRules = obj.attr('check-fare-rules'),
+        loader = $('#preloader');
         
     if (typeof checkFareRules === typeof undefined) {
         checkFareRules = 0;    
@@ -281,6 +308,7 @@ $(document).on('click', '.refresh-from-bo', function (e) {
         beforeSend: function () {
             obj.attr('disabled', true).find('i').toggleClass('fa-spin');
             $(obj).closest('.panel').find('.error-dump').html();
+            loader.removeClass('d-none');
         },
         success: function (data) {
             if (data.error) {
@@ -320,29 +348,76 @@ $(document).on('click', '.refresh-from-bo', function (e) {
         complete: function () {
             obj.removeAttr('disabled').find('i').toggleClass('fa-spin');
             $(obj).closest('.panel').find('.error-dump').html();
+            loader.addClass('d-none');
         }
     });
 });
 
 $(document).on('click', '.sale-ticket-generate-email-btn', function (e) {
-        e.preventDefault();
-        var btn = $(this);
-        var url = btn.attr('href');
-        var creditCardExist = btn.attr('data-credit-card-exist');
-        
-        if (creditCardExist == 0 && !confirm('Use same CC?')) {
-            return false;
+    e.preventDefault();
+    var btn = $(this);
+    var url = btn.attr('href');
+    var creditCardExist = btn.attr('data-credit-card-exist');
+    
+    if (creditCardExist == 0 && !confirm('Use same CC?')) {
+        return false;
+    }
+    
+    btn.attr('disabled', true).find('i').addClass('fa-spin').removeClass('fa-envelope').addClass('fa-refresh');
+    $.get(url, function(data) {
+        if (data.error) {
+            createNotify('Error', data.message, 'error');
+        } else {
+            createNotify('Success', data.message, 'success');
         }
-        
-        btn.attr('disabled', true).find('i').addClass('fa-spin').removeClass('fa-envelope').addClass('fa-refresh');
-        $.get(url, function(data) {
-            if (data.error) {
-                createNotify('Error', data.message, 'error');
-            } else {
-                createNotify('Success', data.message, 'success');
-            }
-            btn.find('i').removeClass('fa-spin').removeClass('fa-refresh').addClass('fa-envelope');
-        });
+        btn.find('i').removeClass('fa-spin').removeClass('fa-refresh').addClass('fa-envelope');
     });
+});
+
+$(document).on('click', '.resend-tickets', function(e){  
+    e.preventDefault();
+    
+    let btn = $(this);
+    let caseId = btn.data('case-id');
+    let caseSaleId = btn.data('case-sale-id');
+    let url = "$urlSalePrepareResendTickets?caseId=" + caseId + '&caseSaleId=' + caseSaleId;
+    let modal = $('#modal-md');
+    let btnClass = btn.find('i').attr('class');
+      
+    btn.addClass('disabled').find('i').attr('class', 'fas fa-spinner fa-spin');
+    modal.find('.modal-body').html('');
+    modal.find('.modal-title').html('Resend Tickets');
+    
+    modal.find('.modal-body').load(url, function( response, status, xhr ) {
+        modal.modal({
+          backdrop: 'static',
+          show: true
+        });
+        btn.removeClass('disabled').find('i').attr('class', btnClass);
+    });
+});
+
+$(document).on('click', '.cancel-sale', function (e) {
+    e.preventDefault();
+    
+    let btn = $(this);
+    let caseId = btn.data('case-id');
+    let caseSaleId = btn.data('case-sale-id');
+    let url = "$urlSalePrepareCancelSale?caseId=" + caseId + '&caseSaleId=' + caseSaleId;
+    let modal = $('#modal-sm');
+    let btnClass = btn.find('i').attr('class');
+    
+    btn.addClass('disabled').find('i').attr('class', 'fas fa-spinner fa-spin');
+    modal.find('.modal-body').html('');
+    modal.find('.modal-title').html('Cancel Sale');
+    
+    modal.find('.modal-body').load(url, function( response, status, xhr ) {
+        modal.modal({
+          backdrop: 'static',
+          show: true
+        });
+        btn.removeClass('disabled').find('i').attr('class', btnClass);
+    });
+});
 JS;
 $this->registerJs($js);

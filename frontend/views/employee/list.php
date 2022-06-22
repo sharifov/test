@@ -738,7 +738,6 @@ $isAdmin = $user->isAdmin() || $user->isSuperAdmin();
         refreshUserSelectedState();
     });
     
-    
     $('body').on('click', '#btn-check-all',  function (e) {
         let btn = $(this);
         
