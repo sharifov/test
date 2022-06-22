@@ -4,6 +4,7 @@ namespace modules\taskList\src\entities\taskList;
 
 use common\components\validators\CheckJsonValidator;
 use common\models\Employee;
+use modules\objectSegment\src\entities\ObjectSegmentTask;
 use modules\taskList\src\objects\TargetObjectList;
 use modules\taskList\src\services\TaskListService;
 use Yii;
@@ -35,6 +36,7 @@ use yii\helpers\Json;
  * @property int|null $tl_updated_user_id
  *
  * @property Employee $tlUpdatedUser
+ * @property ObjectSegmentTask[] $objectSegmentTaskAssigns
  */
 class TaskList extends ActiveRecord
 {
@@ -182,6 +184,12 @@ class TaskList extends ActiveRecord
     public function getTlUpdatedUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'tl_updated_user_id']);
+    }
+
+
+    public function getObjectSegmentTaskAssigns(): ActiveQuery
+    {
+        return $this->hasMany(ObjectSegmentTask::class, ['ostl_tl_id' => 'tl_id']);
     }
 
     /**
