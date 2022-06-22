@@ -20,6 +20,14 @@ $this->title = 'Sold Lead without Profit Split';
 $this->params['breadcrumbs'][] = ['label' => 'Profit Split', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
+<style>
+    .left-ind, .right-ind{
+        top: 3px !important;
+    }
+    .kv-clear{
+        top: 0.4rem !important;
+    }
+</style>
 <div class="profit-split-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
@@ -144,12 +152,25 @@ $this->params['breadcrumbs'][] = $this->title;
                 'pluginOptions' => ['allowClear' => true]
             ],
             [
-                'attribute' => 'created',
+                'attribute' => 'createdRangeTime',
                 'value' => static function (Lead $model) {
                     return $model->created ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created)) : '-';
                 },
                 'format' => 'raw',
-                'filter' => false
+                'label' => 'Created Date From / To',
+                'filter' => \src\widgets\DateRangePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'createdRangeTime',
+                    'presetDropdown' => false,
+                    'hideInput' => true,
+                    'convertFormat' => true,
+                    'pluginOptions' => [
+                        'locale' => [
+                            'format' => 'd-M-Y',
+                            'separator' => ' - '
+                        ]
+                    ]
+                ])
             ],
         ],
     ]); ?>

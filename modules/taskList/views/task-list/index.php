@@ -1,7 +1,9 @@
 <?php
 
 use common\components\grid\DateTimeColumn;
+use common\components\grid\Select2Column;
 use common\components\grid\UserSelect2Column;
+use modules\objectSegment\src\entities\ObjectSegmentList;
 use modules\taskList\src\entities\taskList\TaskList;
 use modules\taskList\src\entities\TaskObject;
 use modules\taskList\src\objects\TargetObjectList;
@@ -26,7 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('<i class="fa fa-plus"></i> Create Task List Item', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-    <?php Pjax::begin(); ?>
+    <?php Pjax::begin(['id' => 'task-list-pjax']); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([
@@ -49,6 +51,32 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             //'tl_id',
             'tl_title',
+            [
+                'label' => 'Object Segment Assigned',
+                'attribute' => 'objectSegmentAssigned',
+                'class' => Select2Column::class,
+                'value' => function (TaskList $model) {
+                    $objectSegments = [];
+
+                    if (!empty($model->objectSegmentTaskAssigns)) {
+                        foreach ($model->objectSegmentTaskAssigns as $item) {
+                            $objectSegments[] = Html::tag(
+                                'span',
+                                Html::encode($item->objectSegmentList->osl_title),
+                                ['class' => 'label label-default', 'style' => 'font-size: 11px;']
+                            );
+                        }
+                    }
+
+                    return implode(' ', $objectSegments);
+                },
+                'data' => ObjectSegmentList::getListCache(),
+                'filter' => true,
+                'id' => 'assign-filter',
+                'options' => ['width' => '300px'],
+                'pluginOptions' => ['allowClear' => true],
+                'format' => 'raw',
+            ],
 //            'tl_object',
             [
                 'attribute' => 'tl_object',
@@ -99,9 +127,25 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'class' => ActionColumn::class,
+                'template' => '{view} {update} {assign} {delete}',
                 'urlCreator' => function ($action, TaskList $model, $key, $index, $column) {
                     return Url::toRoute([$action, 'tl_id' => $model->tl_id]);
-                }
+                },
+                'buttons'  => [
+                    'assign' => static function ($url, TaskList $model, $key) {
+                        return Html::a(
+                            '<span class="fa fa-user-plus"></span>',
+                            '#',
+                            [
+                                'class' => 'js_edit_tl',
+                                'title' => 'Edit Task List Assign',
+                                'data-url' => Url::to(['assign-form']),
+                                'data-id' => $model->tl_id,
+                                'data-type-id' => $model->tl_target_object_id,
+                            ],
+                        );
+                    },
+                ],
             ],
         ],
     ]); ?>
@@ -109,3 +153,43 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php Pjax::end(); ?>
 
 </div>
+
+<?php
+yii\bootstrap4\Modal::begin([
+    'title' => '',
+    'id' => 'task_list_assign_modal',
+    'size' => \yii\bootstrap4\Modal::SIZE_DEFAULT,
+]);
+yii\bootstrap4\Modal::end();
+?>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        $(document).on('click', '.js_edit_tl', function() {
+            let urlAssign = $(this).data('url'),
+                taskListId = $(this).data('id'),
+                objectTypeId = $(this).data('type-id');
+
+            $.ajax({
+                url: urlAssign,
+                type: 'POST',
+                dataType: 'json',
+                data: {taskListId: taskListId, objectTypeId: objectTypeId}
+            }).done(function(dataResponse) {
+                if (dataResponse.status === 1) {
+                    let modalBodyEl = $('#task_list_assign_modal .modal-body');
+                    modalBodyEl.html(dataResponse.data);
+                    $('#task_list_assign_modal-label').html('Object Segment List Assign');
+                    $('#task_list_assign_modal').modal('show');
+                } else if (dataResponse.message.length) {
+                    createNotify('Error', dataResponse.message, 'error');
+                } else {
+                    createNotify('Error', 'Error, please check logs', 'error');
+                }
+            }).fail(function(error) {
+                console.error(error);
+                alert('Request Error');
+            }).always(function() {});
+        });
+    });
+</script>

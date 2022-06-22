@@ -187,11 +187,12 @@ class ShiftScheduleRequestService
      */
     public static function saveDecision(ShiftScheduleRequest $requestModel, ScheduleDecisionForm $decisionForm, Employee $user): bool
     {
+        $oldStatus = $requestModel->ssr_status_id;
         $requestModel->ssr_status_id = $decisionForm->status;
         $requestModel->ssr_description = $decisionForm->description;
         $requestModel->ssr_updated_user_id = $user->id;
         if ($requestModel->save()) {
-            if ($requestModel->oldAttributes['ssr_status_id'] !== $decisionForm->status) {
+            if ($requestModel->isChangedStatus($oldStatus)) {
                 self::sendNotification(
                     Employee::ROLE_AGENT,
                     $requestModel,

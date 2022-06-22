@@ -708,6 +708,10 @@ class SideBarMenu extends \yii\bootstrap\Widget
                             'url' => ['/task/user-task-crud/index'],
                         ],
                         [
+                            'label' => 'Object Segment Tasks',
+                            'url' => ['/object-segment/object-segment-task-crud/index'],
+                        ],
+                        [
                             'label' => 'Shift schedule event task',
                             'url' => ['/task/shift-schedule-event-task-crud/index'],
                         ],
