@@ -74,6 +74,7 @@ class m220606_110027_email_normalization extends Migration
         $this->createTable('{{%email_log}}', [
             'el_id' => $this->primaryKey(),
             'el_email_id' => $this->integer(),
+            'el_is_new' => $this->boolean()->defaultValue(false),
             'el_status_done_dt' => $this->dateTime(),
             'el_read_dt' => $this->dateTime(),
             'el_error_message' => $this->string(500),
@@ -97,6 +98,14 @@ class m220606_110027_email_normalization extends Migration
         $this->addForeignKey('FK-ec_address_id', '{{%email_contact}}', ['ec_address_id'], '{{%email_address}}', 'ea_id', 'CASCADE', 'CASCADE');
         $this->createIndex('UNIQ-email-address-type', '{{%email_contact}}', ['ec_email_id', 'ec_address_id', 'ec_type_id'], true);
 
+        $this->createTable('{{%email_relation}}', [
+            'er_email_id' => $this->integer(),
+            'er_reply_id' => $this->integer(),
+        ]);
+        $this->addPrimaryKey('PK-email_relation', '{{%email_relation}}', ['er_email_id', 'er_reply_id']);
+        $this->addForeignKey('FK-email_relation-er_email_id', '{{%email_relation}}', 'er_email_id', '{{%email_norm}}', 'e_id', 'CASCADE', 'CASCADE');
+        $this->addForeignKey('FK-email_relation-er_reply_id', '{{%email_relation}}', 'er_reply_id', '{{%email_norm}}', 'e_id', 'CASCADE', 'CASCADE');
+
     }
 
     /**
@@ -104,6 +113,7 @@ class m220606_110027_email_normalization extends Migration
      */
     public function safeDown()
     {
+        $this->dropTable('{{%email_relation}}');
         $this->dropTable('{{%email_log}}');
         $this->dropTable('{{%email_contact}}');
         $this->dropTable('{{%email_params}}');
