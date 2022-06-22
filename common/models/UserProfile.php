@@ -32,6 +32,9 @@ use yii\caching\TagDependency;
  * @property string $up_rc_token_expired
  * @property bool $up_call_recording_disabled
  *
+ * @property string|null $up_otp_hashed_code
+ * @property string|null $up_otp_expired_dt
+ *
  * @property Employee $upUser
  */
 class UserProfile extends \yii\db\ActiveRecord
@@ -100,6 +103,10 @@ class UserProfile extends \yii\db\ActiveRecord
 
             ['up_call_recording_disabled', 'default', 'value' => false],
             ['up_call_recording_disabled', 'boolean'],
+
+            ['up_otp_hashed_code', 'string', 'max' => 32],
+            ['up_otp_expired_dt', 'string'],
+            ['up_otp_expired_dt',  'datetime', 'format' => 'php:Y-m-d H:i:s'],
         ];
     }
 
