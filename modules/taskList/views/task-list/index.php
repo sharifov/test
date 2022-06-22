@@ -4,6 +4,7 @@ use common\components\grid\DateTimeColumn;
 use common\components\grid\Select2Column;
 use common\components\grid\UserSelect2Column;
 use modules\objectSegment\src\entities\ObjectSegmentList;
+use modules\taskList\abac\TaskListAbacObject;
 use modules\taskList\src\entities\taskList\TaskList;
 use modules\taskList\src\entities\TaskObject;
 use modules\taskList\src\objects\TargetObjectList;
@@ -143,6 +144,16 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'data-id' => $model->tl_id,
                                 'data-type-id' => $model->tl_target_object_id,
                             ],
+                        );
+                    },
+                ],
+                'visibleButtons' => [
+                    'assign' => static function ($model, $key, $index) {
+                        /** @abac TaskListAbacObject::UI_ASSIGN, TaskListAbacObject::ACTION_ACCESS, Access to button Object Segment List assign */
+                        return \Yii::$app->abac->can(
+                            null,
+                            TaskListAbacObject::UI_ASSIGN,
+                            TaskListAbacObject::ACTION_ACCESS
                         );
                     },
                 ],

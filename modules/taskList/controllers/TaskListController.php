@@ -5,6 +5,7 @@ namespace modules\taskList\controllers;
 use common\components\bootstrap4\activeForm\ActiveForm;
 use frontend\controllers\FController;
 use modules\objectSegment\src\entities\ObjectSegmentTask;
+use modules\taskList\abac\TaskListAbacObject;
 use modules\taskList\src\entities\taskList\TaskList;
 use modules\taskList\src\entities\taskList\search\TaskListSearch;
 use modules\taskList\src\forms\TaskListAssignForm;
@@ -18,6 +19,7 @@ use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -61,6 +63,11 @@ class TaskListController extends FController
 
     public function actionAssignForm(): Response
     {
+        /** @abac TaskListAbacObject::UI_ASSIGN, TaskListAbacObject::ACTION_ACCESS, Access to action assign-form (TaskListController) */
+        if (Yii::$app->abac->can(null, TaskListAbacObject::UI_ASSIGN, TaskListAbacObject::ACTION_ACCESS) === false) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
         $result = ['message' => '', 'status' => 0, 'data' => ''];
         $modelForm = new TaskListAssignForm();
 
@@ -95,6 +102,11 @@ class TaskListController extends FController
 
     public function actionAssignValidation(): Response
     {
+        /** @abac TaskListAbacObject::UI_ASSIGN, TaskListAbacObject::ACTION_ACCESS, Access to action assign-validation (TaskListController) */
+        if (Yii::$app->abac->can(null, TaskListAbacObject::UI_ASSIGN, TaskListAbacObject::ACTION_ACCESS) === false) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
         try {
             $objectSegmentListAssignForm = new TaskListAssignForm();
 
@@ -112,6 +124,11 @@ class TaskListController extends FController
 
     public function actionAssign(): Response
     {
+        /** @abac TaskListAbacObject::UI_ASSIGN, TaskListAbacObject::ACTION_ACCESS, Access to action assign (TaskListController) */
+        if (Yii::$app->abac->can(null, TaskListAbacObject::UI_ASSIGN, TaskListAbacObject::ACTION_ACCESS) === false) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
         $result = ['message' => '', 'status' => 0];
         $objectSegmentListAssignForm = new TaskListAssignForm();
         $postData = (array) Yii::$app->request->post();
