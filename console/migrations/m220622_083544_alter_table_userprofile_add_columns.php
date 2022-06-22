@@ -34,7 +34,7 @@ class m220622_083544_alter_table_userprofile_add_columns extends Migration
     public function safeDown()
     {
         $schemaRefresh = false;
-        if (DBHelper::isColumnExist('{{%user_profile}}', 'up_otp_expired_dt')) {
+        if (DBHelper::isColumnExist('{{%user_profile}}', 'up_otp_hashed_code')) {
             $this->dropColumn('{{%user_profile}}', 'up_otp_hashed_code');
             $schemaRefresh = true;
         }
