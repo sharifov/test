@@ -6,6 +6,7 @@ use common\models\Department;
 use common\models\DepartmentPhoneProject;
 use common\models\Lead;
 use frontend\helpers\JsonHelper;
+use http\Exception\InvalidArgumentException;
 use modules\shiftSchedule\src\services\ShiftScheduleDictionary;
 use Yii;
 use yii\helpers\ArrayHelper;
@@ -1042,6 +1043,6 @@ class SettingHelper
         if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return $email;
         }
-        return '';
+        throw new InvalidArgumentException('Invalid email_from address');
     }
 }
