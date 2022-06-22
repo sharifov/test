@@ -297,9 +297,9 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
     /**
      * @return string
      */
-    public function getShiftTitle(): string
+    public function getShiftName(): string
     {
-        return (!$this->shift || empty($this->shift->sh_title)) ? '-' : $this->shift->sh_title;
+        return $this->shift ? $this->shift->sh_name : '-';
     }
 
     public static function create(
@@ -343,5 +343,10 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
         $this->uss_end_utc_dt = $endDateTime->format('Y-m-d H:i:s');
         $this->uss_duration = $duration;
         $this->uss_description = $description;
+    }
+
+    public function setNewOwner(int $id): void
+    {
+        $this->uss_user_id = $id;
     }
 }

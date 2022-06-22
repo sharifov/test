@@ -37,7 +37,13 @@ $this->params['breadcrumbs'][] = $this->title;
             },
             'options' => [
                 'style' => 'width:80px'
-            ]
+            ],
+            /** @abac LeadQueueBusinessInboxAbacObject::UI_QUEUE_COLUMN, LeadQueueBusinessInboxAbacObject::ACTION_COLUMN_LEAD_ID, Show lead id */
+            'visible' => \Yii::$app->abac->can(
+                null,
+                LeadQueueBusinessInboxAbacObject::UI_QUEUE_COLUMN,
+                LeadQueueBusinessInboxAbacObject::ACTION_COLUMN_LEAD_ID
+            ),
         ],
 
         [

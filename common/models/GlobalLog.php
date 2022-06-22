@@ -100,6 +100,31 @@ class GlobalLog extends ActiveRecord
         return 'global_log';
     }
 
+    public static function getPrevModels($prevId, $limit, $filters = null): array
+    {
+        if (isset($filters)) {
+            $mainQuery = self::find()
+                ->where(['>', 'gl_id', $prevId])
+                ->andFilterWhere($filters)
+                ->orderBy(['gl_id' => SORT_ASC])
+                ->limit($limit + 1);
+            return self::find()
+                ->from(['C' => $mainQuery])
+                ->orderBy(['gl_id' => SORT_DESC])
+                ->all();
+        }
+
+        $mainQuery = self::find()
+            ->where(['>', 'gl_id', $prevId])
+            ->orderBy(['gl_id' => SORT_ASC])
+            ->limit($limit + 1);
+        return self::find()
+            ->from(['C' => $mainQuery])
+            ->orderBy(['gl_id' => SORT_DESC])
+            ->limit($limit + 1)
+            ->all();
+    }
+
     /**
      * {@inheritdoc}
      */

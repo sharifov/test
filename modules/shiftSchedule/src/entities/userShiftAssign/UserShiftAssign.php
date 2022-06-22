@@ -104,4 +104,12 @@ class UserShiftAssign extends \yii\db\ActiveRecord
     {
         return 'user_shift_assign';
     }
+
+    public static function getAssignedShits(): array
+    {
+        return Shift::find()->select(['shift.sh_id', 'shift.sh_name'])
+            ->andWhere(["IN", 'shift.sh_id', UserShiftAssign::find()->select('usa_sh_id')])
+            ->asArray()
+            ->all();
+    }
 }

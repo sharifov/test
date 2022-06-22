@@ -21,15 +21,16 @@ class AutoAddQuoteJob extends BaseJob implements JobInterface
 
     public function execute($queue)
     {
+        $this->waitingTimeRegister();
         try {
             $lead = $this->findLead();
             $autoQuoteService = \Yii::createObject(AddQuoteService::class);
             $autoQuoteService->addAutoQuotes($lead);
         } catch (\RuntimeException | \DomainException $throwable) {
-            $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['lead_id' => $this->lead->id]);
+            $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['lead_id' => $this->leadId]);
             Yii::warning($message, 'AutoAddQuoteJob::execute::Exception');
         } catch (\Throwable $throwable) {
-            $message = ArrayHelper::merge(AppHelper::throwableLog($throwable, true), ['lead_id' => $this->lead->id]);
+            $message = ArrayHelper::merge(AppHelper::throwableLog($throwable, true), ['lead_id' => $this->leadId]);
             Yii::warning($message, 'AutoAddQuoteJob::execute::Throwable');
         }
     }

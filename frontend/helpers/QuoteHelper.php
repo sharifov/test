@@ -5,6 +5,7 @@ namespace frontend\helpers;
 use common\models\Quote;
 use common\models\Airports;
 use common\models\Lead;
+use Yii;
 use yii\helpers\VarDumper;
 
 /**
@@ -525,5 +526,14 @@ class QuoteHelper
     private static function getMetaAuto(array $quote, int $defaultValue = 99): int
     {
         return (int) ($quote['meta']['auto'] ?? $defaultValue);
+    }
+
+    public static function clearSearchCache(Lead $lead): void
+    {
+        $keyCache = sprintf('quick-search-new-%d-%s-%s', $lead->id, '', $lead->generateLeadKey());
+
+        if (Yii::$app->cacheFile->get($keyCache) !== false) {
+            Yii::$app->cacheFile->delete($keyCache);
+        }
     }
 }

@@ -21,6 +21,7 @@ use src\auth\Auth;
 use src\behaviors\metric\MetricLeadCounterBehavior;
 use src\entities\EventTrait;
 use src\events\lead\LeadBookedEvent;
+use src\events\lead\LeadCallExpertChangedEvent;
 use src\events\lead\LeadCallExpertRequestEvent;
 use src\events\lead\LeadCallStatusChangeEvent;
 use src\events\lead\LeadCloseEvent;
@@ -1133,6 +1134,10 @@ class Lead extends ActiveRecord implements Objectable
 
         $this->status = $status;
         $this->l_status_dt = date('Y-m-d H:i:s');
+
+        if (LeadHelper::checkCallExpertNeededChange($this)) {
+            $this->recordEvent(new LeadCallExpertChangedEvent($this->id));
+        }
     }
 
     /**

@@ -37,6 +37,7 @@ return [
         'phoneNumberRedial' => \src\model\phoneNumberRedial\abac\PhoneNumberRedialAbacObject::class,
         'case-sale-search' => \modules\cases\src\abac\saleSearch\CaseSaleSearchAbacObject::class,
         'lead-search' => \modules\lead\src\abac\LeadSearchAbacObject::class,
+        'lead-expert-call' => \modules\lead\src\abac\LeadExpertCallObject::class,
     ],
     'scanDirs' => [
         '/modules/',

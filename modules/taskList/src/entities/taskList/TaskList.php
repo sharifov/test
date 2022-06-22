@@ -9,9 +9,11 @@ use modules\taskList\src\services\TaskListService;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\caching\TagDependency;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\db\BaseActiveRecord;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Json;
 
@@ -62,6 +64,8 @@ class TaskList extends ActiveRecord
         self::ET_DISABLED_CONDITION     => 'default',
         self::ET_ENABLED_CONDITION      => 'warning',
     ];
+
+    public const CACHE_TAG = 'task-list-tag-dependency';
 
 
     /**
@@ -162,6 +166,14 @@ class TaskList extends ActiveRecord
         return true;
     }
 
+
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+
+        TagDependency::invalidate(Yii::$app->cache, self::CACHE_TAG);
+    }
+
     /**
      * Gets query for [[TlUpdatedUser]].
      *
@@ -245,5 +257,25 @@ class TaskList extends ActiveRecord
     public function getTargetObjectName(): string
     {
         return TargetObjectList::getTargetName($this->tl_target_object_id);
+    }
+
+    public static function getList(): array
+    {
+        $query = self::find()->select(['tl_id', 'tl_title']);
+
+        return ArrayHelper::map(
+            $query->all(),
+            'tl_id',
+            'tl_title'
+        );
+    }
+
+    public static function getListCache(int $duration = 60 * 60): array
+    {
+        return Yii::$app->cache->getOrSet(self::CACHE_TAG, static function () {
+            return self::getList();
+        }, $duration, new TagDependency([
+            'tags' => self::CACHE_TAG,
+        ]));
     }
 }

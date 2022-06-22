@@ -20,6 +20,7 @@ class ObjectSegmentListSearch extends ObjectSegmentList
                     'osl_title',
                     'osl_enabled',
                     'osl_description',
+                    'osl_is_system',
                 ],
                 'safe'
             ],
@@ -76,6 +77,7 @@ class ObjectSegmentListSearch extends ObjectSegmentList
             'date_format(osl_updated_dt, "%Y-%m-%d")' => $this->osl_updated_dt,
             'osl_updated_user_id'                     => $this->osl_updated_user_id,
             'osl_enabled'                             => $this->osl_enabled,
+            'osl_is_system'                           => $this->osl_is_system
         ]);
         $query
             ->andFilterWhere(['like', 'osl_title', $this->osl_title]);

@@ -451,10 +451,6 @@ class CommunicationController extends ApiBaseController
                     $departmentId = $departmentPhone->dpp_dep_id;
                 } else {
                     $departmentId = null;
-                    Yii::error([
-                        'message' => 'Not found department',
-                        'callSid' => $callSid,
-                    ], 'CommunicationController:voiceIncoming');
                 }
 
                 $call_project_id = $departmentPhone->dpp_project_id;
