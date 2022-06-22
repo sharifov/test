@@ -6,6 +6,7 @@ use common\models\Department;
 use common\models\DepartmentPhoneProject;
 use common\models\Lead;
 use frontend\helpers\JsonHelper;
+use http\Exception\InvalidArgumentException;
 use modules\shiftSchedule\src\services\ShiftScheduleDictionary;
 use Yii;
 use yii\helpers\ArrayHelper;
@@ -1031,5 +1032,17 @@ class SettingHelper
     public static function isOverridePhoneToForwarderFrom(): bool
     {
         return (bool) (Yii::$app->params['settings']['call_is_override_phone_to_forwarded_from'] ?? false);
+    }
+
+    /**
+     * @return string
+     */
+    public static function getEmailFrom(): string
+    {
+        $email = \Yii::$app->params['settings']['email_component']['email_from'] ?? '';
+        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return $email;
+        }
+        throw new InvalidArgumentException('Invalid email_from address');
     }
 }

@@ -120,6 +120,18 @@ return [
             'class' => 'yii\swiftmailer\Mailer',
             'viewPath' => '@common/mail',
             'useFileTransport' => true,
+            'transport' => [
+                'class' => 'Swift_SmtpTransport',
+                'host' => '',
+                'port' => '',
+                'username' => '',
+                'password' => '',
+                'encryption' => '',
+            ],
+        ],
+        'email' => [
+            'class' => 'common\components\email\EmailComponent',
+            'defaultFromEmail' => '',
         ],
         'communication' => [
             'class' => \common\components\CommunicationService::class,
