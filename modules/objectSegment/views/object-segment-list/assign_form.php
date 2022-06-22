@@ -68,7 +68,7 @@ $('#js_osl_form').on('beforeSubmit', function (e) {
        dataType: 'json',
        success: function(dataResponse) {
             if (dataResponse.status === 1) {
-                //$.pjax.reload({container: '#pjax-user-shift-assign', timeout: 10000, async: false});
+                $.pjax.reload({container: '#object-segment-list-pjax', timeout: 10000, async: false});
                 
                 $('#object_segment_list_assign_modal').modal('hide');
                 createNotify('Success', dataResponse.message, 'success');

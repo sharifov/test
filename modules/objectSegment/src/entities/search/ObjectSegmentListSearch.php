@@ -3,11 +3,13 @@
 namespace modules\objectSegment\src\entities\search;
 
 use modules\objectSegment\src\entities\ObjectSegmentList;
+use modules\objectSegment\src\entities\ObjectSegmentTask;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 
 class ObjectSegmentListSearch extends ObjectSegmentList
 {
+    public $taskAssigned;
     /**
      * {@inheritdoc}
      */
@@ -21,6 +23,7 @@ class ObjectSegmentListSearch extends ObjectSegmentList
                     'osl_enabled',
                     'osl_description',
                     'osl_is_system',
+                    'taskAssigned',
                 ],
                 'safe'
             ],
@@ -68,6 +71,19 @@ class ObjectSegmentListSearch extends ObjectSegmentList
             $query->where('0=1');
             return $dataProvider;
         }
+
+        $ostTableName = ObjectSegmentTask::tableName();
+        $query->innerJoin(
+            $ostTableName,
+            "osl_id = {$ostTableName}.ostl_osl_id",
+        );
+
+        if (!empty($this->taskAssigned)) {
+            $query->andWhere([
+                'in', "{$ostTableName}.ostl_tl_id", $this->taskAssigned,
+            ]);
+        }
+
 
         $query->andFilterWhere([
             'osl_id'                                  => $this->osl_id,

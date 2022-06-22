@@ -21,7 +21,7 @@ use yii\helpers\VarDumper;
  *
  * @property Employee $ostlCreatedUser
  * @property ObjectSegmentList $ostlOsl
- * @property TaskList $ostlTl
+ * @property TaskList $taskList
  */
 class ObjectSegmentTask extends \yii\db\ActiveRecord
 {
@@ -112,7 +112,7 @@ class ObjectSegmentTask extends \yii\db\ActiveRecord
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getOstlTl()
+    public function getTaskList()
     {
         return $this->hasOne(TaskList::class, ['tl_id' => 'ostl_tl_id']);
     }
@@ -122,7 +122,7 @@ class ObjectSegmentTask extends \yii\db\ActiveRecord
         return Yii::$app->objectSegment->getObjectList();
     }
 
-    public function getTaskList(): array
+    public function getTaskListAsKeyValue(): array
     {
         return TaskListService::getTaskObjectList();
     }

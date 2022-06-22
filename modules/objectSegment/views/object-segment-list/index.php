@@ -38,7 +38,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('<i class="fa fa-remove"></i> Reset Cache', ['invalidate-cache'], ['class' => 'btn btn-warning']) ?>
     </p>
 
-    <?php Pjax::begin(['scrollTo' => 0]); ?>
+    <?php Pjax::begin(['scrollTo' => 0, 'id' => 'object-segment-list-pjax']); ?>
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel'  => $searchModel,
@@ -57,6 +57,32 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'osl_title',
+            ],
+            [
+                'label' => 'Task List Assigned',
+                'attribute' => 'taskAssigned',
+                'class' => Select2Column::class,
+                'value' => function (ObjectSegmentList $model) {
+                    $tasks = [];
+
+                    if (!empty($model->objectSegmentTaskAssigns)) {
+                        foreach ($model->objectSegmentTaskAssigns as $item) {
+                            $tasks[] = Html::tag(
+                                'span',
+                                Html::encode($item->taskList->tl_title),
+                                ['class' => 'label label-default', 'style' => 'font-size: 11px;']
+                            );
+                        }
+                    }
+
+                    return implode(' ', $tasks);
+                },
+                'data' => \modules\taskList\src\services\TaskListService::getTaskObjectList(),
+                'filter' => true,
+                'id' => 'shift-filter',
+                'options' => ['width' => '300px'],
+                'pluginOptions' => ['allowClear' => true],
+                'format' => 'raw',
             ],
             [
                 'label'  => 'Status',
