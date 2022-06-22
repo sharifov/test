@@ -6,6 +6,7 @@ use src\auth\Auth;
 use src\model\clientChatChannel\entity\ClientChatChannel;
 use src\widgets\PhoneSelect2Widget;
 use yii\helpers\Html;
+use yii\web\JsExpression;
 use yii\widgets\ActiveForm;
 use kartik\select2\Select2;
 use common\models\Project;
@@ -15,19 +16,20 @@ use common\models\Project;
 /* @var $form yii\widgets\ActiveForm */
 ?>
 <style>
-    .brief{
+    .brief {
         padding: 5px 10px;
         background: #F2F5F7;
         margin-bottom: 5px
     }
-    .js-clear-input{
+    .js-clear-input {
         position: absolute;
-        top: 28px;
+        top: 25px;
         right: 10px;
         cursor: pointer;
         padding: 5px 10px;
+        font-size: 1.1rem;
     }
-    .form-control-with-close{
+    .form-control-with-close {
         padding-right: 25px;
     }
 </style>
@@ -182,9 +184,9 @@ use common\models\Project;
 
 
                 <div class="col-md-12 col-sm-12 profile_details">
-                      <div class="well profile_view clearfix" style="display: block">
-                          <h4 class="brief"><i>User params</i></h4>
-                          <div class="col-sm-12">
+                    <div class="well profile_view clearfix" style="display: block">
+                        <h4 class="brief"><i>User params</i></h4>
+                        <div class="col-sm-12">
                             <div class="row">
                                 <div class="col-md-2">
                                     <?php echo $form->field($model, 'twoFaEnable')->dropDownList([1 => 'Enable', 0 => 'Disable'], ['prompt' => '---']) ?>
@@ -224,7 +226,7 @@ use common\models\Project;
                                 <div class="col-md-2">
                                     <?= $form->field($model, 'lastLoginRangeTime', [
                                         'options' => ['class' => 'form-group']
-                                    ])->widget(\kartik\daterange\DateRangePicker::class, [
+                                    ])->widget(\src\widgets\DateRangePicker::class, [
                                         'presetDropdown' => false,
                                         'hideInput' => true,
                                         'convertFormat' => true,
@@ -240,7 +242,7 @@ use common\models\Project;
                                 <div class="col-md-2">
                                     <?= $form->field($model, 'createdRangeTime', [
                                         'options' => ['class' => 'form-group']
-                                    ])->widget(\kartik\daterange\DateRangePicker::class, [
+                                    ])->widget(\src\widgets\DateRangePicker::class, [
                                         'presetDropdown' => false,
                                         'hideInput' => true,
                                         'convertFormat' => true,
@@ -256,7 +258,7 @@ use common\models\Project;
                                 <div class="col-md-2">
                                     <?= $form->field($model, 'updatedRangeTime', [
                                         'options' => ['class' => 'form-group']
-                                    ])->widget(\kartik\daterange\DateRangePicker::class, [
+                                    ])->widget(\src\widgets\DateRangePicker::class, [
                                         'presetDropdown' => false,
                                         'hideInput' => true,
                                         'convertFormat' => true,
@@ -285,7 +287,7 @@ use common\models\Project;
                                     ]); ?>
                                 </div>
                             </div>
-                          </div>
+                        </div>
                     </div>
                 </div>
 
@@ -329,11 +331,6 @@ use common\models\Project;
 
 <?php
 $js = <<<JS
-$(document).on('click', '.kv-clear', function (e) {
-     let parent = $(this).closest('.form-group');
-     let input = parent.find('input')
-     input.val('');
-});
 
 $(document).on('click', '.js-clear-input', function (e) {
      let parent = $(this).closest('.form-group');
@@ -342,5 +339,5 @@ $(document).on('click', '.js-clear-input', function (e) {
 });
 JS;
 
-$this->registerJs($js, \yii\web\View::POS_READY);?>
+$this->registerJs($js, \yii\web\View::POS_READY); ?>
 
