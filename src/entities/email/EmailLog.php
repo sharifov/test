@@ -17,6 +17,7 @@ use Yii;
  * @property string|null $el_inbox_created_dt
  * @property int|null $el_inbox_email_id
  * @property int|null $el_communication_id
+ * @property int|null $el_is_new
  *
  * @property Email $email
  */
@@ -35,6 +36,8 @@ class EmailLog extends \yii\db\ActiveRecord
             ['el_inbox_created_dt', 'safe'],
 
             ['el_inbox_email_id', 'integer'],
+
+            ['el_is_new', 'integer'],
 
             ['el_message_id', 'string', 'max' => 500],
 
@@ -56,11 +59,12 @@ class EmailLog extends \yii\db\ActiveRecord
         return [
             'el_id' => 'ID',
             'el_email_id' => 'Email ID',
+            'el_is_new' => 'Is New',
             'el_status_done_dt' => 'Status Done Dt',
             'el_read_dt' => 'Read Dt',
             'el_error_message' => 'Error Message',
             'el_message_id' => 'Message ID',
-            'el_ref_message_id' => 'Ref Message ID',
+            'el_ref_message_id' => 'Reference Message ID',
             'el_inbox_created_dt' => 'Inbox Created Dt',
             'el_inbox_email_id' => 'Inbox Email ID',
             'el_communication_id' => 'Communication ID',
