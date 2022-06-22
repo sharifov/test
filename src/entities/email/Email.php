@@ -21,6 +21,7 @@ use src\entities\email\helpers\EmailType;
 use src\entities\email\helpers\EmailStatus;
 use src\entities\EventTrait;
 use src\entities\email\events\EmailDeletedEvent;
+use src\helpers\email\TextConvertingHelper;
 
 /**
  * This is the model class for table "email_norm".
@@ -48,6 +49,7 @@ use src\entities\email\events\EmailDeletedEvent;
  * @property EmailContact[] $emailContacts
  * @property EmailAddress $contactFrom
  * @property EmailAddress $contactTo
+ * @property Email $reply
  */
 class Email extends ActiveRecord
 {
@@ -96,7 +98,7 @@ class Email extends ActiveRecord
 
     public function getParams(): \yii\db\ActiveQuery
     {
-        return $this->hasOne(EmailParam::class, ['ep_email_id' => 'e_id']);
+        return $this->hasOne(EmailParams::class, ['ep_email_id' => 'e_id']);
     }
 
     public function getEmailLog(): \yii\db\ActiveQuery
@@ -132,6 +134,11 @@ class Email extends ActiveRecord
     public function getLeads(): \yii\db\ActiveQuery
     {
         return $this->hasMany(Lead::class, ['id' => 'el_lead_id'])->viaTable('email_lead', ['el_email_id' => 'e_id']);
+    }
+
+    public function getReply(): \yii\db\ActiveQuery
+    {
+        return $this->hasOne(Email::class, ['e_id' => 'er_reply_id'])->viaTable('email_relation', ['er_email_id' => 'e_id']);
     }
 
     public function getLeadsIds(): array
@@ -173,12 +180,12 @@ class Email extends ActiveRecord
             );
     }
 
-    public function getEmailFrom() : string
+    public function getEmailFrom(): string
     {
         return $this->contactFrom->getEmail(EmailType::isInbox($this->e_type_id));
     }
 
-    public function getEmailTo() : string
+    public function getEmailTo(): string
     {
         return $this->contactTo->getEmail(EmailType::isOutbox($this->e_type_id)) ?? null;
     }
@@ -188,9 +195,14 @@ class Email extends ActiveRecord
         return $this->emailLog->el_communication_id ?? null;
     }
 
-    public function getStatusName() : string
+    public function getStatusName(): string
     {
         return EmailStatus::getName($this->e_status_id);
+    }
+
+    public function getEmailSubject(): string
+    {
+        return $this->emailBody->embd_email_subject;
     }
 
     public function delete()
@@ -214,6 +226,9 @@ class Email extends ActiveRecord
             'e_created_dt' => 'Created Dt',
             'e_updated_dt' => 'Updated Dt',
             'e_body_id' => 'Body ID',
+            'reply.e_id' => 'Reply ID',
+            'contactFrom.ea_name' => 'From Name',
+            'contactTo.ea_name' => 'To Name',
         ];
     }
 
@@ -240,6 +255,19 @@ class Email extends ActiveRecord
                 'class' => MetricEmailCounterBehavior::class,
             ],
         ];
+    }
+
+    /**
+     * @return string
+     */
+    public function getEmailBodyHtml(): ?string
+    {
+        if (!empty($this->emailBody->emailBlob->embb_email_body_blob)) {
+            $value = TextConvertingHelper::unCompress($this->emailBody->emailBlob->embb_email_body_blob);
+        } else {
+            $value = '';
+        }
+        return $value;
     }
 
     /**
