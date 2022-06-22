@@ -21,6 +21,7 @@ class m220622_083544_alter_table_userprofile_add_columns extends Migration
 
         if (!DBHelper::isColumnExist('{{%user_profile}}', 'up_otp_expired_dt')) {
             $this->addColumn('{{%user_profile}}', 'up_otp_expired_dt', $this->dateTime());
+            $schemaRefresh = true;
         }
 
         if ($schemaRefresh) {
