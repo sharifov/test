@@ -9,6 +9,7 @@ use Yii;
 use yii\behaviors\AttributeBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\VarDumper;
 
 /**
  * This is the model class for table "object_segment_task".
@@ -124,5 +125,42 @@ class ObjectSegmentTask extends \yii\db\ActiveRecord
     public function getTaskList(): array
     {
         return TaskListService::getTaskObjectList();
+    }
+
+    public static function getAssignedTaskIds(int $id): array
+    {
+        return self::find()->select(['ostl_tl_id'])->where(['ostl_osl_id' => $id])->column();
+    }
+
+    public static function deleteOrAddTasks(int $id, array $taskIds = []): bool
+    {
+        $currentItems = self::getAssignedTaskIds($id);
+        $addList = [];
+        $removeList = [];
+
+        if (empty($taskIds) && !empty($currentItems)) {
+            $removeList = $currentItems;
+        } else {
+            $removeList = array_diff($currentItems, $taskIds);
+            $addList = array_diff($taskIds, $currentItems);
+        }
+
+        if (!empty($removeList)) {
+            self::deleteAll(['and', ['ostl_osl_id' => $id], ['in', 'ostl_tl_id', $removeList]]);
+        }
+
+        if (!empty($addList)) {
+            foreach ($addList as $item) {
+                $objectSegmentTask = new self();
+                $objectSegmentTask->ostl_osl_id = $id;
+                $objectSegmentTask->ostl_tl_id = $item;
+
+                if (!$objectSegmentTask->save()) {
+                    throw new \Exception(VarDumper::dumpAsString($objectSegmentTask->errors));
+                }
+            }
+        }
+
+        return true;
     }
 }

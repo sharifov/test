@@ -99,11 +99,24 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'class'    => ActionColumn::class,
-                'template' => '{view} {update} {viewSegmentRules} {delete}',
+                'template' => '{view} {update} {viewSegmentRules} {assign} {delete}',
                 'buttons'  => [
                     'viewSegmentRules' => function ($action, $model, $key) {
                         $url = Url::toRoute(['/object-segment/object-segment-rule/?ObjectSegmentRuleSearch[osr_osl_id]=' . $model->osl_id]);
                         return Html::a('<i class="fa fa-toggle-down"></i>', $url, ['title' => 'View Rules', 'data-pjax' => 0, 'target' => '_blank']);
+                    },
+                    'assign' => static function ($url, ObjectSegmentList $model, $key) {
+                        return Html::a(
+                            '<span class="fa fa-user-plus"></span>',
+                            '#',
+                            [
+                                'class' => 'js_edit_usha',
+                                'title' => 'Edit User Shift Assign',
+                                'data-url' => Url::to(['assign-form', 'id' => $model->osl_id]),
+                                'data-id' => $model->osl_id,
+                                'data-type-id' => $model->oslObjectSegmentType->ost_id,
+                            ],
+                        );
                     },
                 ],
                 'visibleButtons' => [
@@ -118,3 +131,42 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php Pjax::end(); ?>
 
 </div>
+<?php
+yii\bootstrap4\Modal::begin([
+    'title' => '',
+    'id' => 'object_segment_list_assign_modal',
+    'size' => \yii\bootstrap4\Modal::SIZE_DEFAULT,
+]);
+yii\bootstrap4\Modal::end();
+?>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        $(document).on('click', '.js_edit_usha', function() {
+            let urlAssign = $(this).data('url'),
+                objectSegmentId = $(this).data('id'),
+                taskIds = $(this).data('tasks'),
+                objectTypeId = $(this).data('type-id');
+
+            $.ajax({
+                url: urlAssign,
+                type: 'POST',
+                dataType: 'json',
+                data: {objectSegmentId: objectSegmentId, objectTypeId: objectTypeId, taskIds: taskIds}
+            }).done(function(dataResponse) {
+                if (dataResponse.status === 1) {
+                    let modalBodyEl = $('#object_segment_list_assign_modal .modal-body');
+                    modalBodyEl.html(dataResponse.data);
+                    $('#object_segment_list_assign_modal-label').html('Object Segment List Assign');
+                    $('#object_segment_list_assign_modal').modal('show');
+                } else if (dataResponse.message.length) {
+                    createNotify('Error', dataResponse.message, 'error');
+                } else {
+                    createNotify('Error', 'Error, please check logs', 'error');
+                }
+            }).fail(function(error) {
+                console.error(error);
+                alert('Request Error');
+            }).always(function() {});
+        });
+    });
+</script>
