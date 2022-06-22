@@ -146,7 +146,7 @@ class ObjectSegmentTask extends \yii\db\ActiveRecord
         }
 
         if (!empty($removeList)) {
-            self::deleteAll(['and', ['ostl_osl_id' => $id], ['in', 'ostl_tl_id', $removeList]]);
+            self::deleteAll(['AND', ['ostl_osl_id' => $id], ['IN', 'ostl_tl_id', $removeList]]);
         }
 
         if (!empty($addList)) {

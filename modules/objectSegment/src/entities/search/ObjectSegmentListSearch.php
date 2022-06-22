@@ -80,7 +80,7 @@ class ObjectSegmentListSearch extends ObjectSegmentList
                 $ostTableName,
                 "osl_id = {$ostTableName}.ostl_osl_id",
             )->andWhere([
-                'in', "{$ostTableName}.ostl_tl_id", $this->taskAssigned,
+                'IN', "{$ostTableName}.ostl_tl_id", $this->taskAssigned,
             ]);
         }
 
