@@ -72,14 +72,14 @@ class ObjectSegmentListSearch extends ObjectSegmentList
             return $dataProvider;
         }
 
-        $ostTableName = ObjectSegmentTask::tableName();
-        $query->innerJoin(
-            $ostTableName,
-            "osl_id = {$ostTableName}.ostl_osl_id",
-        );
+
 
         if (!empty($this->taskAssigned)) {
-            $query->andWhere([
+            $ostTableName = ObjectSegmentTask::tableName();
+            $query->innerJoin(
+                $ostTableName,
+                "osl_id = {$ostTableName}.ostl_osl_id",
+            )->andWhere([
                 'in', "{$ostTableName}.ostl_tl_id", $this->taskAssigned,
             ]);
         }
