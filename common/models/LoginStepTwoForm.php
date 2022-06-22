@@ -14,7 +14,6 @@ use yii\base\Model;
  * @property bool $rememberMe
  * @property string $twoFactorAuthKey
  * @property int $twoFactorAuthCycles
- * @property mixed $twoFactorTimestamp
  */
 class LoginStepTwoForm extends Model
 {
@@ -24,7 +23,6 @@ class LoginStepTwoForm extends Model
     private $rememberMe;
     private $twoFactorAuthKey;
     private $twoFactorAuthCycles = 2;
-    private $twoFactorTimestamp;
 
     /**
      * @return array
@@ -81,7 +79,6 @@ class LoginStepTwoForm extends Model
     {
         $userProfile = $user->userProfile;
         $userProfile->up_2fa_secret = $this->twoFactorAuthKey;
-        $userProfile->up_2fa_timestamp = $this->twoFactorTimestamp;
         $userProfile->save();
     }
 

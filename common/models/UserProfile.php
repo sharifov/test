@@ -20,7 +20,6 @@ use yii\caching\TagDependency;
  * @property boolean $up_kpi_enable
  * @property boolean $up_2fa_enable
  * @property string|null $up_2fa_secret
- * @property mixed|null $up_2fa_timestamp
  * @property int $up_skill
  * @property boolean $up_show_in_contact_list
  *
