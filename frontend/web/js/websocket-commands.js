@@ -594,7 +594,7 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                         }
                     }
                     if (obj.cmd === 'reloadShitScheduleRequest') {
-                       
+                        $(document).trigger('reloadShitScheduleRequest')
                     }
                 }
                 // onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');
