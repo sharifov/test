@@ -3,6 +3,7 @@
 namespace modules\objectSegment\src\entities;
 
 use common\models\Employee;
+use modules\objectSegment\src\repositories\ObjectSegmentTaskRepository;
 use modules\taskList\src\entities\taskList\TaskList;
 use modules\taskList\src\services\TaskListService;
 use Yii;
@@ -132,6 +133,15 @@ class ObjectSegmentTask extends \yii\db\ActiveRecord
         return self::find()->select(['ostl_tl_id'])->where(['ostl_osl_id' => $id])->column();
     }
 
+    public static function create(int $objectSegmentListId, int $taskListId): self
+    {
+        $self = new self();
+        $self->ostl_osl_id = $objectSegmentListId;
+        $self->ostl_tl_id = $taskListId;
+
+        return $self;
+    }
+
     public static function deleteOrAddTasks(int $id, array $taskIds = []): bool
     {
         $currentItems = self::getAssignedTaskIds($id);
@@ -151,13 +161,8 @@ class ObjectSegmentTask extends \yii\db\ActiveRecord
 
         if (!empty($addList)) {
             foreach ($addList as $item) {
-                $objectSegmentTask = new self();
-                $objectSegmentTask->ostl_osl_id = $id;
-                $objectSegmentTask->ostl_tl_id = $item;
-
-                if (!$objectSegmentTask->save()) {
-                    throw new \Exception(VarDumper::dumpAsString($objectSegmentTask->errors));
-                }
+                $objectSegmentTask = self::create($id, $item);
+                (new ObjectSegmentTaskRepository($objectSegmentTask))->save();
             }
         }
 
