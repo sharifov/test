@@ -44,8 +44,12 @@ use src\model\visitorSubscription\event\VisitorSubscriptionEnabled;
 use src\model\visitorSubscription\listener\FindChatsAndRunDistributionLogic;
 use src\events\quote\QuoteExtraMarkUpChangeEvent;
 use src\listeners\quote\QuoteExtraMarkUpChangeEventListener;
+use src\entities\email\events\EmailDeletedEvent;
+use src\listeners\email\EmailDeletedEventListener;
 
 return [
+    EmailDeletedEvent::class => [EmailDeletedEventListener::class],
+
     UserProfitCalculateByOrderTipsUserProfitsEvent::class => [UserProfitCalculateByOrderTipsUserProfitsEventListener::class],
     QuoteSendEvent::class => [QuoteSendEventListener::class],
     QuoteExtraMarkUpChangeEvent::class => [
@@ -111,4 +115,5 @@ return [
     CallRedialAccessRemovedEvent::class => [
         RemoveRedialCallUserNotificationListener::class,
     ],
+
 ];
