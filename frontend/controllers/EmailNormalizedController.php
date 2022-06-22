@@ -6,6 +6,7 @@ use common\models\search\EmailSearch;
 use src\entities\email\Email;
 use src\entities\email\EmailSearch as EmailNormalizedSearch;
 use src\model\email\useCase\send\EmailSenderService;
+use src\dispatchers\EventDispatcher;
 use src\services\email\EmailsNormalizeService;
 use Yii;
 use yii\filters\VerbFilter;
@@ -17,15 +18,21 @@ use yii\web\Response;
  * EmailNormalizedController implements the CRUD actions for Email model.
  *
  * @property EmailSenderService $emailSender
+ * @property EventDispatcher $eventDispatcher
  */
 class EmailNormalizedController extends FController
 {
     private $emailSender;
+    /**
+     * @var EventDispatcher
+     */
+    private $eventDispatcher;
 
-    public function __construct($id, $module, EmailSenderService $emailSender, $config = [])
+    public function __construct($id, $module, EmailSenderService $emailSender, EventDispatcher $eventDispatcher, $config = [])
     {
         parent::__construct($id, $module, $config);
         $this->emailSender = $emailSender;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     public function behaviors()
@@ -75,9 +82,11 @@ class EmailNormalizedController extends FController
      * @throws \Throwable
      * @throws \yii\db\StaleObjectException
      */
-    public function actionDelete($id)//: \yii\web\Response
+    public function actionDelete($id): \yii\web\Response
     {
-        $this->findModel($id)->delete();
+        $email = $this->findModel($id);
+        $email->delete();
+        $this->eventDispatcher->dispatchAll($email->releaseEvents());
 
         return $this->redirect(['index']);
     }
