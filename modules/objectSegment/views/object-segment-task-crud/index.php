@@ -45,7 +45,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'ostl_tl_id',
                 'value' => function (ObjectSegmentTask $model) {
-                    return $model->ostlTl->tl_title;
+                    return $model->taskList->tl_title;
                 },
                 'filter' => TaskList::getListCache(),
             ],
