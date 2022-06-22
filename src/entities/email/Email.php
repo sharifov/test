@@ -134,22 +134,19 @@ class Email extends ActiveRecord
         return $this->hasMany(Lead::class, ['id' => 'el_lead_id'])->viaTable('email_lead', ['el_email_id' => 'e_id']);
     }
 
-    public function getLeadsIds()
+    public function getLeadsIds(): array
     {
-        $ids = ArrayHelper::map($this->leads, 'id', 'id');
-        return $ids ? join(', ', $ids) : null;
+        return ArrayHelper::map($this->leads, 'id', 'id');
     }
 
-    public function getClientsIds()
+    public function getClientsIds(): array
     {
-        $ids = ArrayHelper::map($this->clients, 'id', 'id');
-        return $ids ? join(', ', $ids) : null;
+        return ArrayHelper::map($this->clients, 'id', 'id');
     }
 
-    public function getCasesIds()
+    public function getCasesIds(): array
     {
-        $ids = ArrayHelper::map($this->cases, 'cs_id', 'cs_id');
-        return $ids ? join(', ', $ids) : null;
+        return ArrayHelper::map($this->cases, 'cs_id', 'cs_id');
     }
 
     public function getContactFrom(): \yii\db\ActiveQuery
@@ -246,7 +243,6 @@ class Email extends ActiveRecord
     }
 
     /**
-     * TODO: fix message id using normalized data
      * @return string
      */
     public function generateMessageId(): string
@@ -254,9 +250,9 @@ class Email extends ActiveRecord
         $arr[] = 'kiv';
         $arr[] = $this->e_id;
         $arr[] = $this->e_project_id;
-       // $arr[] = $this->e_lead_id;
-      //  $arr[] = $this->e_email_from;
-      //  $arr[] = $this->e_case_id;
+        $arr[] = join('_', $this->getLeadsIds());
+        $arr[] = $this->getEmailFrom();
+        $arr[] = join('_', $this->getCasesIds());
 
         $message = '<' . implode('.', $arr) . '>';
         return $message;
