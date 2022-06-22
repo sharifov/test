@@ -158,7 +158,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw',
                 'label' => 'Created Date From / To',
-                'filter' => \kartik\daterange\DateRangePicker::widget([
+                'filter' => \src\widgets\DateRangePicker::widget([
                     'model' => $searchModel,
                     'attribute' => 'createdRangeTime',
                     'presetDropdown' => false,
@@ -176,14 +176,3 @@ $this->params['breadcrumbs'][] = $this->title;
     ]); ?>
     <?php Pjax::end(); ?>
 </div>
-<?php
-$js = <<<JS
-$(document).on('click', '.kv-clear', function (e) {
-     let parent = $(this).closest('#leadsearch-createdrangetime-container');
-     let input = parent.find('input')
-     input.val('');
-});
-
-JS;
-
-$this->registerJs($js, \yii\web\View::POS_READY);?>
