@@ -301,7 +301,7 @@ class EmployeeSearch extends Employee
             $query->andWhere(['IN', 'employees.id', $subQuery]);
         }
 
-        if (strlen($this->twoFaEnable) > 0) {
+        if (intval($this->twoFaEnable) > 0) {
             $subQuery = UserProfile::find()->select(['DISTINCT(up_user_id)'])->where(['=', 'up_2fa_enable', $this->twoFaEnable]);
             $query->andWhere(['IN', 'employees.id', $subQuery]);
         }
