@@ -170,6 +170,8 @@ class CasesController extends FController
     private FlightFromSaleService $flightFromSaleService;
     private EmailReviewQueueManageService $emailReviewQueueManageService;
 
+    public const DIFFERENT_PROJECT = 'different-project';
+
     public function __construct(
         $id,
         $module,
@@ -965,14 +967,14 @@ class CasesController extends FController
             }
 
             $caseProjectApiKey = $project->api_key;
-            $saleProjectApiKey = $saleData['projectApiKey'];
+            $saleProjectApiKey = $saleData['projectApiKey'] ?? null;
 
             if (trim($caseProjectApiKey) !== trim($saleProjectApiKey)) {
                 throw new \DomainException('[Different Project] Case Id (' . $model->cs_id . ') Case project (' . $project->name . ') Sale project (' . $saleData['project'] . ')');
             }
         } catch (\Throwable $exception) {
             $out['error'] = $exception->getMessage();
-            $out['error_type'] = 'wrong_project';
+            $out['error_type'] = self::DIFFERENT_PROJECT;
             \Yii::error(VarDumper::dumpAsString($exception, 10), 'CasesController::actionAddSale:Exception');
             return $out;
         }
