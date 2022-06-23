@@ -38,7 +38,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'ostl_osl_id',
                 'value' => function (ObjectSegmentTask $model) {
-                    return $model->ostlOsl->osl_title;
+                    return $model->objectSegmentList->osl_title;
                 },
                 'filter' => ObjectSegmentList::getListCache(),
             ],
