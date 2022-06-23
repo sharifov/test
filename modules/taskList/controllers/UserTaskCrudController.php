@@ -91,7 +91,7 @@ class UserTaskCrudController extends FController
                 (new UserTaskRepository($model))->save();
                 return $this->redirect(['view', 'ut_id' => $model->ut_id, 'ut_year' => $model->ut_year, 'ut_month' => $model->ut_month]);
             } catch (\RuntimeException | \DomainException $throwable) {
-                \Yii::error(AppHelper::throwableLog($throwable), 'UserTaskCrudController:actionCreate:Exception');
+                \Yii::warning(AppHelper::throwableLog($throwable), 'UserTaskCrudController:actionCreate:Exception');
                 \Yii::$app->getSession()->setFlash('warning', $throwable->getMessage());
             } catch (\Throwable $throwable) {
                 \Yii::error(AppHelper::throwableLog($throwable), 'UserTaskCrudController:actionCreate:Throwable');
