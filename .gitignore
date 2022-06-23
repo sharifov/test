@@ -67,5 +67,4 @@ cghooks.lock
 # PHPDoc
 .phpdoc
 
-/Makefile
 /docker-pre-commit.sh

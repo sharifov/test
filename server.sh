@@ -35,6 +35,7 @@ getEnvVar () {
 REGISTRY=$(getEnvVar "REGISTRY")
 
 VIRTUAL_HOST=$(getEnvVar "VIRTUAL_HOST")
+VIRTUAL_HOST_PORT=$(getEnvVar "VIRTUAL_HOST_PORT")
 
 NGINX_IMAGE_TAG=$(getEnvVar "NGINX_IMAGE_TAG")
 NGINX_VERSION=$(getEnvVar "NGINX_VERSION")
@@ -56,8 +57,6 @@ POSTGRES_VERSION=$(getEnvVar "POSTGRES_VERSION")
 POSTGRES_USER=$(getEnvVar "POSTGRES_USER")
 POSTGRES_PASSWORD=$(getEnvVar "POSTGRES_PASSWORD")
 POSTGRES_DB=$(getEnvVar "POSTGRES_DB")
-
-KIVORK_PROXY_REVERSE_DIR=$(getEnvVar "KIVORK_PROXY_REVERSE_DIR")
 
 tmpDirs=(
   "$dockerFolder/api-nginx/logs"
@@ -138,19 +137,6 @@ initCurrentUserVars() {
     esac
 }
 
-kivorkReverseProxyRestart () {
-  kivorkReverseProxyDown
-  kivorkReverseProxyUp
-}
-
-kivorkReverseProxyUp () {
-  docker-compose -f "$KIVORK_PROXY_REVERSE_DIR/docker-compose.yaml" up -d --remove-orphans
-}
-
-kivorkReverseProxyDown () {
-  docker-compose -f "$KIVORK_PROXY_REVERSE_DIR/docker-compose.yaml" down --remove-orphans
-}
-
 logoutRoot() {
     if [ "$EUID" -eq 0 ]; then
       printf "\nRoot user has been logout\n"
@@ -175,9 +161,7 @@ start () {
   docker-compose -f "$dockerComposeFile" up -d --remove-orphans
   runMigrate
 
-  kivorkReverseProxyRestart
-
-  printf "Open URL: https://$VIRTUAL_HOST \n"
+  printf "Open URL: https://$VIRTUAL_HOST:$VIRTUAL_HOST_PORT \n"
   printf "Server is started\n"
 }
 
@@ -191,10 +175,10 @@ restart () {
 }
 
 createKivorkNetwork () {
-  if [ -z $(docker network ls -f name=kivork-network -q) ]; then
-    printf "\nStart - Create kivork-network network \n\n"
-    docker network create kivork-network
-    printf "\nDone - Create kivork-network network \n\n"
+  if [ -z $(docker network ls -f name=kivork-proxy -q) ]; then
+    printf "\nStart - Create kivork-proxy network \n\n"
+    docker network create kivork-proxy
+    printf "\nDone - Create kivork-proxy network \n\n"
   fi
 }
 
