@@ -7489,7 +7489,6 @@ CREATE TABLE `user_profile` (
   `up_skill` tinyint DEFAULT '0',
   `up_2fa_enable` tinyint(1) DEFAULT '0',
   `up_2fa_secret` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `up_2fa_timestamp` timestamp NULL DEFAULT NULL,
   `up_join_date` date DEFAULT NULL,
   `up_show_in_contact_list` tinyint(1) DEFAULT '0',
   `up_rc_auth_token` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,

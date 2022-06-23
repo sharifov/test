@@ -153,7 +153,7 @@ class SiteController extends FController
         $model = new LoginForm();
 
         if ($model->load(Yii::$app->request->post()) && $user = $model->checkedUser()) {
-            if (SettingHelper::isTwoFactorAuthEnabled() && $user->userProfile && $user->userProfile->is2faEnable()) {
+            if (SettingHelper::isTwoFactorAuthEnabled() && $user->userProfile /*&& $user->userProfile->is2faEnable()*/) {
                 return $this->redirectToTwoFactorAuth($user, $model);
             }
 
