@@ -1,8 +1,42 @@
 #!/bin/bash
 
+initCurrentUserVars() {
+    unameOut="$(uname -s)"
+    case "${unameOut}" in
+        Linux*)     machine=Linux;;
+        Darwin*)    machine=Mac;;
+        CYGWIN*)    machine=Cygwin;;
+        MINGW*)     machine=MinGw;;
+        *)          machine="UNKNOWN:${unameOut}"
+    esac
+
+    case $machine in
+      Mac)
+        CURRENT_UID="$(id -u)"
+        CURRENT_USER="$(id -un)"
+        CURRENT_GROUP_ID="$(id -g)"
+        CURRENT_GROUP="$(id -gn)"
+#        echo -n "user_id:"  ${CURRENT_UID} " user_name:"  ${CURRENT_USER} " group_id:"  ${CURRENT_GROUP_ID} " "
+        ;;
+      Linux)
+        CURRENT_UID=${UID}
+        CURRENT_USER=${USER}
+        CURRENT_GROUP_ID=${UID}
+        CURRENT_GROUP=${USER}
+        ;;
+      *)
+        printf "Required variables were not initialized\n"
+        exit
+        ;;
+    esac
+}
+
+initCurrentUserVars
+
 initEnv () {
   if [ ! -e "$dockerFolder/.env" ]; then
     cp "$dockerFolder/.env.example" "$dockerFolder/.env"
+    printf "\n\n# User info\nUSER_NAME=%s\nUSER_ID=%s\nUSER_GID=%s" "$CURRENT_USER" "$CURRENT_UID" "$CURRENT_GROUP_ID" >> "$dockerFolder/.env"
     printf "docker/ENV file is created\n"
   fi
   if [ ! -e ".env" ]; then
@@ -104,37 +138,6 @@ removeTemporallyDirectories () {
   removeDefaultCentrifugoConfig
   ls -d -1 "$dockerFolder/nginx/certs/mkcert/"*.* | xargs rm
   printf "\n"
-}
-
-initCurrentUserVars() {
-    unameOut="$(uname -s)"
-    case "${unameOut}" in
-        Linux*)     machine=Linux;;
-        Darwin*)    machine=Mac;;
-        CYGWIN*)    machine=Cygwin;;
-        MINGW*)     machine=MinGw;;
-        *)          machine="UNKNOWN:${unameOut}"
-    esac
-
-    case $machine in
-      Mac)
-        CURRENT_UID="$(id -u)"
-        CURRENT_USER="$(id -un)"
-        CURRENT_GROUP_ID="$(id -g)"
-        CURRENT_GROUP="$(id -gn)"
-#        echo -n "user_id:"  ${CURRENT_UID} " user_name:"  ${CURRENT_USER} " group_id:"  ${CURRENT_GROUP_ID} " "
-        ;;
-      Linux)
-        CURRENT_UID=${UID}
-        CURRENT_USER=${USER}
-        CURRENT_GROUP_ID=${UID}
-        CURRENT_GROUP=${USER}
-        ;;
-      *)
-        printf "Required variables were not initialized\n"
-        exit
-        ;;
-    esac
 }
 
 logoutRoot() {
@@ -358,7 +361,6 @@ dockerInstall () {
 }
 
 logoutRoot
-initCurrentUserVars
 
 if [ "$whatDo" == "application-install" ]; then
   applicationInstall
