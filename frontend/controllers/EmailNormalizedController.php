@@ -16,6 +16,7 @@ use yii\web\Response;
 use modules\email\src\abac\dto\EmailAbacDto;
 use modules\email\src\abac\EmailAbacObject;
 use yii\web\ForbiddenHttpException;
+use yii\bootstrap\Html;
 
 /**
  * EmailNormalizedController implements the CRUD actions for Email model.
@@ -145,5 +146,29 @@ class EmailNormalizedController extends FController
         $model->e_is_deleted = (int) ! $model->e_is_deleted;
         $model->save();
         return $this->redirect(Yii::$app->request->referrer);
+    }
+
+    public function actionNormalize($id)
+    {
+        $result = [
+            'success' => false,
+            'errors' => [],
+        ];
+
+        if (($emailOld = \common\models\Email::findOne($id)) !== null) {
+            $service = new EmailsNormalizeService();
+            $service->createEmailFromOld($emailOld);
+
+            if ($service->email !== null) {
+                $result['success'] =  true;
+                $result['html'] = Html::a('<span class="label label-success">yes</span>', ['email-normalized/view', 'id' => $service->email->e_id], ['target' => '_blank', 'data-pjax' => 0]);
+            }
+            else {
+                $result['errors'] = $service->getErrors();
+            }
+        }
+
+
+        return $this->asJson($result);
     }
 }
