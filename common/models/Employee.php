@@ -1742,12 +1742,12 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
     /**
+     * @param int $userID
      * @param string|null $start_dt
      * @param string|null $end_dt
-     * @param int $userID
      * @return string
      */
-    public static function getTaskStatsSupervision(string $start_dt = null, string $end_dt = null, int $userID): string
+    public static function getTaskStatsSupervision(int $userID, ?string $start_dt = null, ?string $end_dt = null): string
     {
         if ($start_dt) {
             $start_dt = date('Y-m-d', strtotime($start_dt));

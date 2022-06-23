@@ -174,8 +174,8 @@ if ($user->isAdmin() || $user->isSupervision()) {
             'attribute' => 'clientTime',
             'label' => 'Client Time',
             'visible' => !in_array($queueType, ['booked', 'sold']),
-            'value' => static function ($model) {
-                return Lead::getClientTime($model['id']);
+            'value' => static function (Lead $model) {
+                return $model->getClientTime($model['id']);
             },
             'format' => 'raw'
         ],
@@ -308,8 +308,8 @@ if ($user->isAdmin() || $user->isSupervision()) {
         [
             'label' => 'Status',
             'visible' => !in_array($queueType, ['sold']),
-            'value' => static function ($model) {
-                return Lead::getStatusLabel($model['status']);
+            'value' => static function (Lead $model) {
+                return $model->getStatusLabel($model['status']);
             },
             'format' => 'raw'
         ],

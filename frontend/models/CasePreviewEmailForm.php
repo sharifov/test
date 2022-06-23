@@ -191,4 +191,9 @@ class CasePreviewEmailForm extends Model
     {
         return strcmp($this->e_email_subject_origin, $this->e_email_subject) !== 0;
     }
+
+    public function countLettersInEmailMessage(): int
+    {
+        return !empty($this->e_email_message) ? mb_strlen($this->e_email_message) : 0;
+    }
 }

@@ -4478,7 +4478,7 @@
             "source": {
                 "type": "git",
                 "url": "git@bitbucket.org:techork/yii2-virtual-cron.git",
-                "reference": "e63dd51ee5f85d30cc99c2383074eb6c4c8e6dbf"
+                "reference": "7ff7eebaf17165da11461df4417f330810f31e8f"
             },
             "require": {
                 "mtdowling/cron-expression": "^1.2",
@@ -11257,21 +11257,21 @@
         },
         {
             "name": "codeception/verify",
-            "version": "2.1.1",
+            "version": "2.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Codeception/Verify.git",
-                "reference": "1cdac1867c33801ae8e4833015153766ef403c92"
+                "reference": "5fc4c9675c82e11e0f04801da00a99b2493d5408"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Codeception/Verify/zipball/1cdac1867c33801ae8e4833015153766ef403c92",
-                "reference": "1cdac1867c33801ae8e4833015153766ef403c92",
+                "url": "https://api.github.com/repos/Codeception/Verify/zipball/5fc4c9675c82e11e0f04801da00a99b2493d5408",
+                "reference": "5fc4c9675c82e11e0f04801da00a99b2493d5408",
                 "shasum": ""
             },
             "require": {
                 "ext-dom": "*",
-                "php": "^7.3 || ^8.0",
+                "php": "^7.4 || ^8.0",
                 "phpunit/phpunit": "^9.3"
             },
             "type": "library",
@@ -11300,9 +11300,9 @@
             "description": "BDD assertion library for PHPUnit",
             "support": {
                 "issues": "https://github.com/Codeception/Verify/issues",
-                "source": "https://github.com/Codeception/Verify/tree/2.1.1"
+                "source": "https://github.com/Codeception/Verify/tree/2.2.0"
             },
-            "time": "2020-12-18T16:18:31+00:00"
+            "time": "2021-11-21T23:53:33+00:00"
         },
         {
             "name": "composer/package-versions-deprecated",

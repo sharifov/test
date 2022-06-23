@@ -257,7 +257,7 @@ class EmployeeSearch extends Employee
                 $query->andFilterWhere(['>=', 'employees.created_at', Employee::convertTimeFromUserDtToUTC(strtotime($createdRange[0]))]);
             }
             if ($createdRange[1]) {
-                $query->andFilterWhere(['<=', 'employees.created_at', Employee::convertTimeFromUserDtToUTC(strtotime($createdRange[1]))]);
+                $query->andFilterWhere(['<=', 'employees.created_at', Employee::convertTimeFromUserDtToUTC(strtotime($createdRange[1]) + 3600 * 24 - 1)]);
             }
         }
 
@@ -267,7 +267,7 @@ class EmployeeSearch extends Employee
                 $query->andFilterWhere(['>=', 'employees.updated_at', Employee::convertTimeFromUserDtToUTC(strtotime($updatedRange[0]))]);
             }
             if ($updatedRange[1]) {
-                $query->andFilterWhere(['<=', 'employees.updated_at', Employee::convertTimeFromUserDtToUTC(strtotime($updatedRange[1]))]);
+                $query->andFilterWhere(['<=', 'employees.updated_at', Employee::convertTimeFromUserDtToUTC(strtotime($updatedRange[1]) + 3600 * 24 - 1)]);
             }
         }
 
@@ -277,7 +277,7 @@ class EmployeeSearch extends Employee
                 $query->andFilterWhere(['>=', 'employees.last_login_dt', Employee::convertTimeFromUserDtToUTC(strtotime($lastLogin[0]))]);
             }
             if ($lastLogin[1]) {
-                $query->andFilterWhere(['<=', 'employees.last_login_dt', Employee::convertTimeFromUserDtToUTC(strtotime($lastLogin[1]))]);
+                $query->andFilterWhere(['<=', 'employees.last_login_dt', Employee::convertTimeFromUserDtToUTC(strtotime($lastLogin[1]) + 3600 * 24 - 1)]);
             }
         }
 
@@ -301,7 +301,7 @@ class EmployeeSearch extends Employee
             $query->andWhere(['IN', 'employees.id', $subQuery]);
         }
 
-        if (strlen($this->twoFaEnable) > 0) {
+        if (intval($this->twoFaEnable) > 0) {
             $subQuery = UserProfile::find()->select(['DISTINCT(up_user_id)'])->where(['=', 'up_2fa_enable', $this->twoFaEnable]);
             $query->andWhere(['IN', 'employees.id', $subQuery]);
         }

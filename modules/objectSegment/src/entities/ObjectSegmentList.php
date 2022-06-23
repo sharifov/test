@@ -118,9 +118,13 @@ class ObjectSegmentList extends \yii\db\ActiveRecord
         ];
     }
 
-    public static function getList(): array
+    public static function getList(?int $objectTypeId = null): array
     {
         $query = self::find()->select(['osl_id', 'osl_title']);
+
+        if ($objectTypeId !== null) {
+            $query->where(['osl_ost_id' => $objectTypeId]);
+        }
 
         return ArrayHelper::map(
             $query->all(),

@@ -157,7 +157,7 @@ $operators = json_encode(\modules\abac\components\AbacBaseModel::getOperators())
     var rulesData = $rulesDataStr;
     var filtersData = $filtersDataStr;
     var operators = $operators;
-    if(!rulesData.valid) {
+    if(rulesData !== null && !rulesData.valid) {
         $('#rules-info-block').append('<div class="alert alert-warning" role="alert"><strong>Warning</strong>: Current Json Rules are invalid!</div>');
         rulesData = JSON.parse('[]');
     }

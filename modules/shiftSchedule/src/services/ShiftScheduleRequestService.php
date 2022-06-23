@@ -169,8 +169,8 @@ class ShiftScheduleRequestService
                 self::sendNotification(
                     Employee::ROLE_SUPERVISION,
                     $requestModel,
-                    self::NOTIFICATION_TYPE_CREATE,
-                    $user
+                    $user,
+                    self::NOTIFICATION_TYPE_CREATE
                 );
                 return true;
             }
@@ -196,14 +196,22 @@ class ShiftScheduleRequestService
                 self::sendNotification(
                     Employee::ROLE_AGENT,
                     $requestModel,
-                    self::NOTIFICATION_TYPE_CREATE,
-                    $user
+                    $user,
+                    self::NOTIFICATION_TYPE_CREATE
                 );
                 self::sendNotification(
                     Employee::ROLE_SUPERVISION,
                     $requestModel,
-                    self::NOTIFICATION_TYPE_UPDATE,
-                    $user
+                    $user,
+                    self::NOTIFICATION_TYPE_UPDATE
+                );
+
+                Notifications::pub(
+                    ['user-' . $requestModel->ssr_created_user_id],
+                    'reloadShitScheduleRequest',
+                    [
+                        'data' => [],
+                    ],
                 );
             }
             return true;
@@ -241,27 +249,35 @@ class ShiftScheduleRequestService
         self::sendNotification(
             Employee::ROLE_AGENT,
             $requestModel,
-            self::NOTIFICATION_TYPE_CREATE,
-            $user
+            $user,
+            self::NOTIFICATION_TYPE_CREATE
         );
 
         self::sendNotification(
             Employee::ROLE_SUPERVISION,
             $requestModel,
-            self::NOTIFICATION_TYPE_UPDATE,
-            $user
+            $user,
+            self::NOTIFICATION_TYPE_UPDATE
+        );
+
+        Notifications::pub(
+            ['user-' . $requestModel->ssr_created_user_id],
+            'reloadShitScheduleRequest',
+            [
+                'data' => [],
+            ],
         );
     }
 
     /**
-     * Send Notification
      * @param string $whom
      * @param ShiftScheduleRequest $scheduleRequest
-     * @param string|null $notificationType
      * @param Employee $user
+     * @param string|null $notificationType
      * @return void
+     * @throws \Exception
      */
-    public static function sendNotification(string $whom, ShiftScheduleRequest $scheduleRequest, ?string $notificationType = null, Employee $user): void
+    public static function sendNotification(string $whom, ShiftScheduleRequest $scheduleRequest, Employee $user, ?string $notificationType = null): void
     {
         $subject = 'Request Status';
         if ($whom === Employee::ROLE_AGENT) {

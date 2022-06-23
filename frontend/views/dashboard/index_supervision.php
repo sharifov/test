@@ -290,7 +290,7 @@ JS;
                     [
                         'label' => 'Tasks Result for Period',
                         'value' => function ($model) use ($searchModel) {
-                            return Employee::getTaskStatsSupervision($searchModel->timeStart, $searchModel->timeEnd, $model['id']);
+                            return Employee::getTaskStatsSupervision($model['id'], $searchModel->timeStart, $searchModel->timeEnd);
                         },
                         'format' => 'raw',
                         'contentOptions' => ['class' => 'text-left', 'style' => 'width:30%;'],

@@ -785,6 +785,15 @@ class CasesController extends FController
      */
     private function getCommunicationDataProvider(Cases $model): ActiveDataProvider
     {
+        $emailTemplate = EmailTemplateType::find()
+            ->where(['etp_key' => 'feedback_appr_supp'])
+            ->limit(1)
+            ->one();
+
+        $condition = $emailTemplate
+            ? ['<>', 'e_template_type_id', $emailTemplate->etp_id]
+            : ['IS NOT', 'e_template_type_id', null];
+
         $query1 = (new \yii\db\Query())
             ->select(['e_id AS id', new Expression('"email" AS type'), 'e_case_id AS case_id', 'e_created_dt AS created_dt'])
             ->from('email')
@@ -793,7 +802,13 @@ class CasesController extends FController
                 ['IS NOT', 'e_created_user_id', null],
                 ['AND',
                     ['IS', 'e_created_user_id', null],
-                    ['e_type_id' => Email::FILTER_TYPE_INBOX]
+                    ['e_type_id' => Email::TYPE_INBOX],
+                    ['IS', 'e_template_type_id', null]
+                ],
+                ['AND',
+                    ['IS', 'e_created_user_id', null],
+                    ['e_type_id' => Email::TYPE_OUTBOX],
+                    $condition
                 ]
             ])
         ;
@@ -840,6 +855,15 @@ class CasesController extends FController
 
     private function getCommunicationLogDataProvider(Cases $model): ActiveDataProvider
     {
+        $emailTemplate = EmailTemplateType::find()
+            ->where(['etp_key' => 'feedback_appr_supp'])
+            ->limit(1)
+            ->one();
+
+        $condition = $emailTemplate
+            ? ['<>', 'e_template_type_id', $emailTemplate->etp_id]
+            : ['IS NOT', 'e_template_type_id', null];
+
         $query1 = (new \yii\db\Query())
             ->select(['e_id AS id', new Expression('"email" AS type'), 'e_case_id AS case_id', 'e_created_dt AS created_dt'])
             ->from('email')
@@ -848,7 +872,13 @@ class CasesController extends FController
                 ['IS NOT', 'e_created_user_id', null],
                 ['AND',
                     ['IS', 'e_created_user_id', null],
-                    ['e_type_id' => Email::FILTER_TYPE_INBOX]
+                    ['e_type_id' => Email::TYPE_INBOX],
+                    ['IS', 'e_template_type_id', null]
+                ],
+                ['AND',
+                    ['IS', 'e_created_user_id', null],
+                    ['e_type_id' => Email::TYPE_OUTBOX],
+                    $condition
                 ]
             ])
         ;
