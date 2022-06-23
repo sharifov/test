@@ -170,6 +170,8 @@ class CasesController extends FController
     private FlightFromSaleService $flightFromSaleService;
     private EmailReviewQueueManageService $emailReviewQueueManageService;
 
+    public const DIFFERENT_PROJECT = 'different-project';
+
     public function __construct(
         $id,
         $module,
@@ -952,6 +954,28 @@ class CasesController extends FController
         } catch (\Throwable $throwable) {
             Yii::info(AppHelper::throwableLog($throwable), 'info\CasesController::actionAddSale:RequestToBackOffice');
             $out['error'] = $throwable->getMessage();
+            return $out;
+        }
+
+        try {
+            $project = $model->project;
+            if (!$project) {
+                throw new \DomainException('Not found Project. Id ' . $model->cs_project_id);
+            }
+            if (!$project->api_key) {
+                throw new \DomainException('Not found API KEY. Project. Id ' . $model->cs_project_id);
+            }
+
+            $caseProjectApiKey = $project->api_key;
+            $saleProjectApiKey = $saleData['projectApiKey'] ?? null;
+
+            if (trim($caseProjectApiKey) !== trim($saleProjectApiKey)) {
+                throw new \DomainException('[Different Project] Case Id (' . $model->cs_id . ') Case project (' . $project->name . ') Sale project (' . $saleData['project'] . ')');
+            }
+        } catch (\Throwable $exception) {
+            $out['error'] = $exception->getMessage();
+            $out['error_type'] = self::DIFFERENT_PROJECT;
+            \Yii::error(VarDumper::dumpAsString($exception, 10), 'CasesController::actionAddSale:Exception');
             return $out;
         }
 
