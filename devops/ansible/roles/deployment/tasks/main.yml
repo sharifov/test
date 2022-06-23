@@ -5,16 +5,36 @@
     state: directory
     owner: "{{ web_user }}"
     group: "{{ web_user }}"
-    mode: '0755'
+    mode: 0755
 
-- name: Download and extract application
+- name: Check local build
+  stat:
+    path: "{{ web_dir }}/{{ app_ver }}/init"
+  register: build
+
+- name: Pull build artifact
+  aws_s3:
+    bucket: "{{ s3_artifact_bucket }}"
+    object: "{{ project }}/{{ app_ver }}.tar.gz"
+    dest: "/tmp/{{ app_ver }}.tar.gz"
+    mode: get
+    aws_access_key: "{{ s3_artifact_access_key }}"
+    aws_secret_key: "{{ s3_artifact_secret_key }}"
+  when: not build.stat.exists
+
+- name: Extract application artifact
   unarchive:
-    src: build.tar.gz
+    src: "/tmp/{{ app_ver }}.tar.gz"
     dest: "{{ web_dir }}/{{ app_ver }}"
     owner: "{{ web_user }}"
     group: "{{ web_user }}"
     creates: "{{ web_dir }}/{{ app_ver }}/init"
-    remote_src: false
+    remote_src: true
+
+- name: Delete build artifact
+  file:
+    path: "/tmp/{{ app_ver }}.tar.gz"
+    state: absent
 
 - name: Create dotenv
   template:
@@ -22,7 +42,7 @@
     dest: "{{ web_dir }}/{{ app_ver }}/.env"
     owner: "{{ web_user }}"
     group: "{{ web_user }}"
-    mode: '0644'
+    mode: 0644
 
 - name: Init application
   command: "php init --env={{ env_name }} --overwrite=All"
@@ -98,7 +118,7 @@
 
 - name: Create logs for supervisord
   file:
-    path: "{{ app_console_logfile_path }}/{{ item }}"
+    path: "{{ web_dir }}/{{ app_ver }}/console/runtime/logs/{{ item }}"
     owner: "{{ web_user }}"
     group: "{{ web_user }}"
     state: touch
@@ -113,13 +133,6 @@
     - queue-system-services.log
     - queue-virtual-cron-worker.log
     - socket-server.log
-
-- name: Enable websocket-v3 for php8 only
-  replace:
-    path: "/var/www/crm/common/config/supervisor/socket-server.conf"
-    regexp: 'websocket-server'
-    replace: 'websocket-server-v3'
-  when: env == "dev2"
 
 - name: Restart supervisord service
   service:

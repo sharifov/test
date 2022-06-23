@@ -173,7 +173,7 @@ class CreditCardController extends FController
             }
         } else {
             $modelForm->attributes = $modelCc->attributes;
-            $modelForm->cc_number = str_replace('*', '0', $modelCc->cc_display_number); // $modelCc->initNumber;
+            $modelForm->cc_number = str_replace('*', '0', ($modelCc->cc_display_number ?? '')); // $modelCc->initNumber;
             $modelForm->cc_cvv = ''; // $modelCc->initCvv;
             $modelForm->cc_expiration = date('m / y', strtotime($modelCc->cc_expiration_year . '-' . $modelCc->cc_expiration_month . '-01'));
         }

@@ -92,6 +92,7 @@ class Logger implements BootstrapInterface
 
         Event::on(ActiveRecord::class, ActiveRecord::EVENT_AFTER_UPDATE, $func);
         Event::on(ActiveRecord::class, ActiveRecord::EVENT_AFTER_INSERT, $func);
+        (new DeleteLogger())->log();
     }
 
     /**

@@ -224,7 +224,7 @@ $canShowEmailData = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_
 
                     <div class="row">
                         <div class="col-md-12">
-                            <?php $messageSize = mb_strlen($previewEmailForm->e_email_message) ?>
+                            <?php $messageSize = $previewEmailForm->countLettersInEmailMessage() ?>
                             <b>Content size: <?=Yii::$app->formatter->asShortSize($messageSize, 1) ?></b>
                             <?php if ($messageSize > 102 * 1024) : ?>
                                     &nbsp;&nbsp;&nbsp;<span class="danger">Warning: recommended MAX content size: <b><?=Yii::$app->formatter->asShortSize(102 * 1024, 1) ?></b>.</span>

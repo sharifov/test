@@ -1356,9 +1356,9 @@ class FlightQuoteController extends FController
 
                         if ($isNextTrip) {
                             ++$tripIndex;
-                            $trips[$tripIndex]['duration'] = $segment['flightDuration'];
+                            $trips[$tripIndex]['duration'] = $segment['flightDuration'] + $segment['layoverDuration'];
                         } else {
-                            $trips[$tripIndex]['duration'] += $segment['flightDuration'];
+                            $trips[$tripIndex]['duration'] += $segment['flightDuration'] + $segment['layoverDuration'];
                         }
                         $segment['tripIndex'] = $tripIndex;
                         $trips[$tripIndex]['segments'][] = $segment;

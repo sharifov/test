@@ -544,7 +544,7 @@ class Formatter extends \yii\i18n\Formatter
                 $format = FormatConverter::convertDateIcuToPhp($format, "datetime", $this->locale);
             }
             try {
-                $dateTime = (new \DateTimeImmutable(date('Y-m-d H:i:s', $dateTime), new \DateTimeZone('UTC')))
+                $dateTime = (new \DateTimeImmutable(date('Y-m-d H:i:s', intval($dateTime)), new \DateTimeZone('UTC')))
                 ->setTimezone(new \DateTimeZone($timezone))
                 ->format($format);
             } catch (\Throwable $throwable) {
