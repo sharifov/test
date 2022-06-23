@@ -37,6 +37,7 @@ class EmailsNormalizeService
     public $email;
     public $emailLog;
     public $emailParams;
+    public $errors = [];
 
     public function createEmailFromOld(EmailOld $emailOld)
     {
@@ -160,7 +161,6 @@ class EmailsNormalizeService
             $client = Client::findOne($clientId);
             if ($client) {
                 $this->email->link('clients', $client);
-                echo 'clients id: '.$clientId.' to email : '.$this->email->e_id.'<br/>';
             }
         }
         return $this;
@@ -172,7 +172,6 @@ class EmailsNormalizeService
             $case = Cases::findOne($caseId);
             if ($case) {
                 $this->email->link('cases', $case);
-                echo 'Cases id: '.$caseId.' to email : '.$this->email->e_id.'<br/>';
             }
         }
         return $this;
@@ -184,7 +183,6 @@ class EmailsNormalizeService
             $lead = Lead::findOne($leadId);
             if ($lead) {
                 $this->email->link('leads', $lead);
-                echo 'Lead id: '.$leadId.' to email : '.$this->email->e_id.'<br/>';
             }
         }
         return $this;
@@ -262,5 +260,28 @@ class EmailsNormalizeService
         }
 
         return $address;
+    }
+
+    public static function getOldTotal()
+    {
+        return EmailOld::find()->count();
+    }
+
+    public static function getTotalConnectedWithOld()
+    {
+        $connection = \Yii::$app->getDb();
+        $command = $connection->createCommand(
+            "SELECT COUNT(*) as total
+             FROM `".Email::tableName()."` emn
+            LEFT JOIN `".EmailOld::tableName()."` emo ON emo.e_id = emn.e_id"
+            );
+        $result = $command->queryAll();
+
+        return  $result[0]['total'];
+    }
+
+    public function getErrors()
+    {
+        return $this->errors;
     }
 }
