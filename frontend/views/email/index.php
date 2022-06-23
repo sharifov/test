@@ -8,6 +8,8 @@ use yii\grid\GridView;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
 use src\helpers\email\MaskEmailHelper;
+use modules\featureFlag\FFlag;
+use src\services\email\EmailsNormalizeService;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\EmailSearch */
@@ -29,6 +31,17 @@ $user = Yii::$app->user->identity;
         'scrollTo' => 0
     ]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]);?>
+
+    <?php if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_EMAIL_NORMALIZED_FORM_ENABLE)) : ?>
+    	<?php $normalizedTotal = EmailsNormalizeService::getTotalConnectedWithOld();
+    	   $oldTotal = EmailsNormalizeService::getOldTotal();
+    	   $alertClass = ($normalizedTotal < $oldTotal) ? 'warning' : 'info';
+    	?>
+        <div class="alert alert-<?= $alertClass?> alert-dismissible" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <i class="fa fa-info-circle"></i> Normalized emails <?=  $normalizedTotal?> from <?=  $oldTotal?>
+        </div>
+    <?php endif ?>
 
     <div class="row">
         <?php $form = ActiveForm::begin([
@@ -81,6 +94,25 @@ $user = Yii::$app->user->identity;
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
             'e_id',
+            [
+                'attribute' => 'normalized',
+                'visible' => Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_EMAIL_NORMALIZED_FORM_ENABLE),
+                'value' => static function (\common\models\Email $model) {
+                    return $model->normalized ?
+                        Html::a('<span class="label label-success">yes</span>', ['email-normalized/view', 'id' => $model->normalized->e_id], ['target' => '_blank', 'data-pjax' => 0]) :
+                        Html::button('<i class="fa fa-refresh"></i> Normalize', [
+                            'class' => 'btn btn-warning btn-xs take-processing-btn js_email_normalize',
+                            'data-url' => \yii\helpers\Url::to(['email-normalized/normalize', 'id' => $model->e_id]),
+                        ]);
+                },
+                'format' => 'raw',
+                'options' => [
+                    'style' => 'width:80px'
+                ],
+                'contentOptions' => [
+                    'class' => 'text-center'
+                ]
+            ],
             ['class' => 'yii\grid\ActionColumn',
                 'template' => '{view} {update} {delete}',
                 'visibleButtons' => [
@@ -312,3 +344,25 @@ $user = Yii::$app->user->identity;
 
     </script>
 </div>
+
+<?php
+$jsCode = <<<JS
+    $(document).on('click', '.js_email_normalize', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        var url = $(this).data('url');
+        var elm = $(this);
+        elm.html('<i class="fa fa-sync fa-spin"></i>');
+
+        $.post( url, function() {})
+          .done(function(data) {
+            elm.parent().html(data.html);
+          })
+          .fail(function(data) {
+            elm.html('<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>');
+          });
+    });
+JS;
+
+$this->registerJs($jsCode, \yii\web\View::POS_READY);
