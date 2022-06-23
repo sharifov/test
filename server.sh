@@ -37,6 +37,7 @@ initEnv () {
   if [ ! -e "$dockerFolder/.env" ]; then
     cp "$dockerFolder/.env.example" "$dockerFolder/.env"
     printf "\n\n# User info\nUSER_NAME=%s\nUSER_ID=%s\nUSER_GID=%s" "$CURRENT_USER" "$CURRENT_UID" "$CURRENT_GROUP_ID" >> "$dockerFolder/.env"
+    printf "\n\n# Ssh info\nSSH_KEY=%s\nSSH_KEY_PUB=%s\n" "/home/$CURRENT_USER/.ssh/id_rsa" "/home/$CURRENT_USER/.ssh/id_rsa.pub" >> "$dockerFolder/.env"
     printf "docker/ENV file is created\n"
   fi
   if [ ! -e ".env" ]; then

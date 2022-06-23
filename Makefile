@@ -10,3 +10,5 @@ cert-update:
 	./server.sh cert-update
 install:
 	./server.sh application-install
+restart:
+	./server.sh restart
