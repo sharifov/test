@@ -26,6 +26,7 @@ use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
+use src\entities\email\Email as EmailNormalized;
 
 /**
  * This is the model class for table "email".
@@ -341,6 +342,14 @@ class Email extends \yii\db\ActiveRecord
     public function getClient(): \yii\db\ActiveQuery
     {
         return $this->hasOne(Client::class, ['id' => 'e_client_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getNormalized()
+    {
+        return $this->hasOne(EmailNormalized::class, ['e_id' => 'e_id']);
     }
 
     /**
