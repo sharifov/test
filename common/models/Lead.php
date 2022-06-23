@@ -5231,6 +5231,9 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
                     $flexParams['departureFlexd'] = LeadUrlHelper::formatFlexOptions($entry['flexibility'], $entry['flexibility_type']);
                 }
                 if ($key == 1) {
+                    if ($flightSegments[0]['origin'] !== $flightSegments[1]['destination']) {
+                        $trip = $entry['origin'] . '-' . $entry['destination'] . '/';
+                    }
                     $flexParams['returnFlexd'] = LeadUrlHelper::formatFlexOptions($entry['flexibility'], $entry['flexibility_type']);
                 }
                 $segmentsStr[] = $trip . date('Y-m-d', strtotime($entry['departure']));
