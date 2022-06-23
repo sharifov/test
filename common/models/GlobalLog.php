@@ -80,10 +80,12 @@ class GlobalLog extends ActiveRecord
 
     public const ACTION_TYPE_CREATE = 1;
     public const ACTION_TYPE_UPDATE = 2;
+    public const ACTION_TYPE_DELETE = 3;
 
     public const ACTION_TYPE_LIST = [
         self::ACTION_TYPE_CREATE => 'Create',
-        self::ACTION_TYPE_UPDATE => 'Update'
+        self::ACTION_TYPE_UPDATE => 'Update',
+        self::ACTION_TYPE_DELETE => 'Delete'
     ];
 
     public const ACTION_TYPE_AR = [
