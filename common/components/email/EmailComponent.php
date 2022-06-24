@@ -16,7 +16,7 @@ class EmailComponent extends Component
         parent::init();
 
         if (empty($this->defaultFromEmail)) {
-            throw new InvalidArgumentException();
+            throw new InvalidArgumentException('Default From email is not set');
         }
     }
 

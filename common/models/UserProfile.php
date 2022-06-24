@@ -215,4 +215,28 @@ class UserProfile extends \yii\db\ActiveRecord
             $profile->save(false);
         }
     }
+
+    public function updateOtpData(string $code, \DateTimeImmutable $expiredDateTime): void
+    {
+        $this->up_otp_hashed_code = $code;
+        $this->up_otp_expired_dt = $expiredDateTime->format('Y-m-d H:i:s');
+    }
+
+    public function isOtpExpiredDateTime(): bool
+    {
+        return $this->getOtpSecondsLeft() <= 0;
+    }
+
+    public function getOtpSecondsLeft(): int
+    {
+        $curDateTime = new \DateTimeImmutable();
+        $expiredDateTime = new \DateTimeImmutable($this->up_otp_expired_dt);
+        return $expiredDateTime->getTimestamp() - $curDateTime->getTimestamp();
+    }
+
+    public function removeOtpData(): void
+    {
+        $this->up_otp_hashed_code = null;
+        $this->up_otp_expired_dt = null;
+    }
 }

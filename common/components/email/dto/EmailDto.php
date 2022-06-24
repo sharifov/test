@@ -2,12 +2,22 @@
 
 namespace common\components\email\dto;
 
-use yii\base\BaseObject;
-
-class EmailDto extends BaseObject
+class EmailDto
 {
     public string $to = '';
     public string $from = '';
     public string $title = '';
     public string $body = '';
+
+    public function __construct(
+        string $to,
+        string $from,
+        string $title,
+        string $body
+    ) {
+        $this->to = $to;
+        $this->from = $from;
+        $this->title = $title;
+        $this->body = $body;
+    }
 }
