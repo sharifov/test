@@ -31,11 +31,6 @@ class TelegramController extends Controller
      * @apiName Index
      * @apiGroup Telegram
      *
-     * @apiParam {Array}                                    message                         Message data array
-     * @apiParam {string{11}=bot_command}     message.entities.0.type         Type
-     * @apiParam {String}                                   message.chat.first_name         Frist Name
-     * @apiParam {String}                                   message.chat.username           User Name
-     *
      * @return mixed
      */
     public function actionIndex()
