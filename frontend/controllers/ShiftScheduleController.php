@@ -147,8 +147,6 @@ class ShiftScheduleController extends FController
             [UserShiftSchedule::STATUS_APPROVED, UserShiftSchedule::STATUS_DONE]
         );
 
-        // VarDumper::dump($labelData, 10, true); exit;
-
         $scheduleTypeData = [];
         $scheduleTypeLabelData = [];
         $scheduleSumData = [];
