@@ -31,7 +31,6 @@ class TelegramController extends Controller
      * @apiName Index
      * @apiGroup Telegram
      *
-     * @return mixed
      */
     public function actionIndex()
     {
