@@ -33,7 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attributes' => [
                     [
                         'attribute' => 'ostl_osl_id',
-                        'value' => $model->ostlOsl->osl_title
+                        'value' => $model->objectSegmentList->osl_title
                     ],
                     [
                         'attribute' => 'ostl_tl_id',
