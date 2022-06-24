@@ -38,7 +38,7 @@ use yii\helpers\ArrayHelper;
  * @property AbacEmailList $emailFromList
  *
  */
-class LeadPreviewEmailForm extends Model
+class LeadPreviewEmailForm extends Model implements EmailPreviewFromInterface
 {
     public $e_lead_id;
     public $e_email_from;
