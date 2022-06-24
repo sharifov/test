@@ -42,7 +42,7 @@ use yii\helpers\ArrayHelper;
  *
  */
 
-class CasePreviewEmailForm extends Model
+class CasePreviewEmailForm extends Model implements EmailPreviewFromInterface
 {
     public $e_case_id;
     public $e_email_from;
