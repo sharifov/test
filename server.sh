@@ -456,6 +456,10 @@ elif [ "$whatDo" == 'cert-install' ] || [ "$whatDo" == 'cert-update' ]; then
   fi
 elif [ "$whatDo" == "app-console" ]; then
   docker-compose -f "$dockerComposeFile" run --rm console bash
+
+elif [ "$whatDo" == "apidoc-gen" ]; then
+  docker-compose -f "$dockerComposeFile" run --rm --no-deps console composer apidoc-gen
+
 elif [ "$whatDo" == "test" ]; then
   printf "Test"
 else
