@@ -454,6 +454,8 @@ elif [ "$whatDo" == 'cert-install' ] || [ "$whatDo" == 'cert-update' ]; then
   else
     printf "Mkcert has been already installed\n"
   fi
+elif [ "$whatDo" == "app-console" ]; then
+  docker-compose -f "$dockerComposeFile" run --rm console bash
 elif [ "$whatDo" == "test" ]; then
   printf "Test"
 else

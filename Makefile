@@ -1,3 +1,5 @@
+app-console:
+	./server.sh app-console
 down:
 	./server.sh down
 build:
