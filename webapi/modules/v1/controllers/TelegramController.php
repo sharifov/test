@@ -23,8 +23,18 @@ class TelegramController extends Controller
         $this->enableCsrfValidation = false;
     }
 
+    //apiDoc was missing and recreated briefly todo double check carefully
     /**
-     * Displays homepage.
+     *
+     * @api {post} v1/telegram/index Telegram index action
+     * @apiVersion 0.1.0
+     * @apiName Index
+     * @apiGroup Telegram
+     *
+     * @apiParam {Array}                                    message                         Message data array
+     * @apiParam {string{11}=bot_command}     message.entities.0.type         Type
+     * @apiParam {String}                                   message.chat.first_name         Frist Name
+     * @apiParam {String}                                   message.chat.username           User Name
      *
      * @return mixed
      */
@@ -34,6 +44,7 @@ class TelegramController extends Controller
         exit;
     }
 
+    //apiDoc was missing and recreated briefly todo double check carefully
     /**
      * @api {post} v1/telegram/webhook Send Message To Telegram
      * @apiVersion 0.1.0
