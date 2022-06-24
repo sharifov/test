@@ -26,10 +26,15 @@ class UserShiftScheduleHelper
      */
     public static function getCalendarEventsData(array $eventList): array
     {
+        /** @abac null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_HIDE_SOFT_DELETED_EVENTS, Hide Soft Deleted Schedule Events */
+        $canHideSoftDeleted = \Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_HIDE_SOFT_DELETED_EVENTS);
+
         $data = [];
         if ($eventList) {
             foreach ($eventList as $item) {
-                $data[] = self::getDataForCalendar($item);
+                if (!($item->isDeletedStatus() && $canHideSoftDeleted)) {
+                    $data[] = self::getDataForCalendar($item);
+                }
             }
         }
         return $data;
