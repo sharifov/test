@@ -178,7 +178,9 @@ class EmployeeSearch extends Employee
      */
     private function filterQuery(EmployeeQuery $query)
     {
-        $query->leftJoin('user_profile', 'employees.id = user_profile.up_user_id');
+        if (ArrayHelper::isIn($this->telegramEnabled, ['1', '0'], false) || ArrayHelper::isIn($this->useTelegram, ['1', '0'], false)) {
+            $query->leftJoin('user_profile', 'employees.id = user_profile.up_user_id');
+        }
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
