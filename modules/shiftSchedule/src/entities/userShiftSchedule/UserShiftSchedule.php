@@ -349,4 +349,9 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
     {
         $this->uss_user_id = $id;
     }
+
+    public function isDeletedStatus(): bool
+    {
+        return $this->uss_status_id === self::STATUS_DELETED;
+    }
 }

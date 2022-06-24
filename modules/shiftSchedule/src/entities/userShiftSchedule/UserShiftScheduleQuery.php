@@ -3,6 +3,7 @@
 namespace modules\shiftSchedule\src\entities\userShiftSchedule;
 
 use common\models\UserGroupAssign;
+use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\shiftScheduleTypeLabelAssign\ShiftScheduleTypeLabelAssign;
 use modules\shiftSchedule\src\entities\userShiftSchedule\search\TimelineCalendarFilter;
@@ -94,6 +95,12 @@ class UserShiftScheduleQuery
         if ($form->shift) {
             $query->andWhere(['uss_shift_id' => $form->shift]);
         }
+
+        /** @abac null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_HIDE_SOFT_DELETED_EVENTS, Hide Soft Deleted Schedule Events */
+        if (Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_HIDE_SOFT_DELETED_EVENTS)) {
+            $query->excludeDeleteStatus();
+        }
+
         $query->groupBy(['uss_id']);
         return $query->all();
     }
@@ -106,13 +113,19 @@ class UserShiftScheduleQuery
      */
     public static function getTimelineListByUser(int $userId, string $startDt, string $endDt): array
     {
-        return UserShiftSchedule::find()
+        $query = UserShiftSchedule::find()
             ->where(['uss_user_id' => $userId])
             ->andWhere(['AND',
                 ['>=', 'uss_start_utc_dt', date('Y-m-d H:i:s', strtotime($startDt))],
                 ['<=', 'uss_start_utc_dt', date('Y-m-d H:i:s', strtotime($endDt))]
-            ])
-            ->all();
+            ]);
+
+        /** @abac null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_HIDE_SOFT_DELETED_EVENTS, Hide Soft Deleted Schedule Events */
+        if (Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_HIDE_SOFT_DELETED_EVENTS)) {
+            $query->excludeDeleteStatus();
+        }
+
+        return $query->all();
     }
 
     /**

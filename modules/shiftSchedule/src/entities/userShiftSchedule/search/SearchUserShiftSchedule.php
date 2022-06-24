@@ -3,6 +3,7 @@
 namespace modules\shiftSchedule\src\entities\userShiftSchedule\search;
 
 use common\models\Employee;
+use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\entities\userShiftSchedule\Scopes;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use yii\data\ActiveDataProvider;
@@ -144,6 +145,11 @@ class SearchUserShiftSchedule extends UserShiftSchedule
     ): ActiveDataProvider {
         $query = static::find();
 
+        /** @abac null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_HIDE_SOFT_DELETED_EVENTS, Hide Soft Deleted Schedule Events */
+        if (\Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_HIDE_SOFT_DELETED_EVENTS)) {
+            $query->excludeDeleteStatus();
+        }
+
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort' => ['defaultOrder' => ['uss_id' => SORT_DESC]],
@@ -159,7 +165,7 @@ class SearchUserShiftSchedule extends UserShiftSchedule
             return $dataProvider;
         }
 
-        $query->where(['uss_user_id' => $userId]);
+        $query->andWhere(['uss_user_id' => $userId]);
 
         if (!empty($startDate) && !empty($endDate)) {
             $this->clientStartDate = $startDate;

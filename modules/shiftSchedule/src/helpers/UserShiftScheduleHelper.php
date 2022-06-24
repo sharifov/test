@@ -37,6 +37,11 @@ class UserShiftScheduleHelper
 
     public static function getDataForCalendar(UserShiftSchedule $event)
     {
+        /** @abac null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_HIDE_SOFT_DELETED_EVENTS, Hide Soft Deleted Schedule Events */
+        if ($event->isDeletedStatus() && \Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_HIDE_SOFT_DELETED_EVENTS)) {
+            return [];
+        }
+
         $dataItem = [
             'id' => $event->uss_id,
             'title' => $event->getScheduleTypeKey(), // . '-' . $item->uss_id,
