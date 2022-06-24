@@ -676,7 +676,7 @@ class TwilioController extends ApiBaseNoAuthController
      * @apiGroup Twilio
      *
      *
-     **@apiErrorExample Error-Response:
+     *@apiErrorExample Error-Response:
      *     HTTP/1.1 200
      *
      *     <?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Response><Say language=\"en-US\" voice=\"alice\">Sorry, connection failed. Action Redirect Call</Say></Response>\n
@@ -758,8 +758,11 @@ class TwilioController extends ApiBaseNoAuthController
      * @apiName ConferenceStatusCallback
      * @apiGroup Twilio
      *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     *  <?xml version="1.0" encoding="UTF-8"?>
+     *  <Response/>
      *
-     * @return mixed
      */
     public function actionConferenceStatusCallback(): array
     {
@@ -1391,14 +1394,11 @@ class TwilioController extends ApiBaseNoAuthController
 
     //ApiDoc was missing and recreated briefly todo double check carefully
     /**
-     *@api {post} /v1/twilio/voice-status-callback Voice Status Callback
+     * @api {post} /v1/twilio/voice-status-callback Voice Status Callback
      * @apiVersion 0.1.0
      * @apiName VoiceStatusCallback
      * @apiGroup Twilio
      *
-     * @return mixed
-     * @return MessagingResponse|null
-     * @throws BadRequestHttpException
      */
     public function actionVoiceStatusCallback(): ?array
     {
