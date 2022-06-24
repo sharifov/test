@@ -447,20 +447,20 @@ class TwilioController extends ApiBaseNoAuthController
 
         try {
             if (!$callData) {
+                throw new Exception('Params "CallData" is empty', 1);
             }
-            throw new Exception('Params "CallData" is empty', 1);
 
             if (!$sid) {
+                throw new Exception('Params "CallData.CallSid" is empty', 2);
             }
-            throw new Exception('Params "CallData.CallSid" is empty', 2);
 
             if (!$id) {
+                throw new Exception('Params "id" is empty', 3);
             }
-            throw new Exception('Params "id" is empty', 3);
 
             if (!$type) {
+                throw new Exception('Params "type" is empty', 4);
             }
-            throw new Exception('Params "type" is empty', 4);
 
 //            if ($sid) {
                 //$call = $this->findOrCreateCallByData($callData); //Call::find()->where(['c_call_sid' => $sid])->limit(1)->one();
