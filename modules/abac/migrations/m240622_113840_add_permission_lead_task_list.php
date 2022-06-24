@@ -7,22 +7,23 @@ use modules\abac\src\entities\AbacPolicy;
 use yii\db\Migration;
 
 /**
- * Class m220622_125940_add_permission_for_access_assign_task_list
+ * Class m240622_113840_add_permission_lead_task_list
  */
-class m220622_125940_add_permission_for_access_assign_task_list extends Migration
+class m240622_113840_add_permission_lead_task_list extends Migration
 {
-    private const AP_SUBJECT = '("admin" in r.sub.env.user.roles)';
-    private const AP_OBJECT = 'task-list/task-list/ui/access';
+    private const AP_SUBJECT = '(hasActiveLeadObjectSegment == true) && (has_owner == true) && (statusId in [1,2,16])';
+    private const AP_OBJECT = 'lead/lead/task_list/assign_task';
     private const AP_ACTION = '(access)';
     private const AP_EFFECT = 1;
-    private const AP_SUBJECT_JSON = '{"condition":"AND","rules":[{"id":"env_user_roles","field":"env.user.roles","type":"string","input":"select","operator":"in_array","value":"admin"}],"not":false,"valid":true}';
+    private const AP_SUBJECT_JSON = '{"condition":"AND","rules":[{"id":"lead/lead/task_list/hasActiveLeadObjectSegment","field":"hasActiveLeadObjectSegment","type":"boolean","input":"radio","operator":"==","value":true},{"id":"lead/lead/has_owner","field":"has_owner","type":"boolean","input":"radio","operator":"==","value":true},{"id":"lead/lead/task_list/statusId","field":"statusId","type":"integer","input":"select","operator":"in","value":[1,2,16]}],"not":false,"valid":true}';
 
     private const GENERATE_HASH_DATA = [
         self::AP_OBJECT,
         self::AP_ACTION,
         self::AP_SUBJECT,
-        self::AP_EFFECT
+        self::AP_EFFECT,
     ];
+
     /**
      * {@inheritdoc}
      */
@@ -36,7 +37,7 @@ class m220622_125940_add_permission_for_access_assign_task_list extends Migratio
             'ap_action' => self::AP_ACTION,
             'ap_action_json' => "[\"access\"]",
             'ap_effect' => self::AP_EFFECT,
-            'ap_title' => 'Access to assign object segment list on task list',
+            'ap_title' => 'Access to assign task list to lead',
             'ap_hash_code' => AbacService::generateHashCode(self::GENERATE_HASH_DATA),
             'ap_sort_order' => 50,
             'ap_enabled' => 1,
@@ -51,7 +52,7 @@ class m220622_125940_add_permission_for_access_assign_task_list extends Migratio
      */
     public function safeDown()
     {
-        if (AbacPolicy::deleteAll(['AND', ['IN', 'ap_object', [self::AP_OBJECT]], ['IN', 'ap_action', [self::AP_ACTION]]])) {
+        if (AbacPolicy::deleteAll(['ap_object' => self::AP_OBJECT, 'ap_action' => self::AP_ACTION])) {
             \Yii::$app->abac->invalidatePolicyCache();
         }
     }
