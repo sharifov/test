@@ -116,4 +116,9 @@ class CaseCouponPreviewEmailForm extends Model
             'e_user_id'         => 'Agent ID',
         ];
     }
+
+    public function countLettersInEmailMessage(): int
+    {
+        return !empty($this->e_email_message) ? mb_strlen($this->e_email_message) : 0;
+    }
 }
