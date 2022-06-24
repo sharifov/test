@@ -21,6 +21,7 @@ class SearchUserShiftSchedule extends UserShiftSchedule
     public $shiftIds = [];
     public string $startedDateRange = '';
     public string $endedDateRange = '';
+    private bool $excludeDeleteStatus = false;
 
     public function rules(): array
     {
@@ -145,8 +146,7 @@ class SearchUserShiftSchedule extends UserShiftSchedule
     ): ActiveDataProvider {
         $query = static::find();
 
-        /** @abac null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_HIDE_SOFT_DELETED_EVENTS, Hide Soft Deleted Schedule Events */
-        if (\Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_HIDE_SOFT_DELETED_EVENTS)) {
+        if ($this->excludeDeleteStatus) {
             $query->excludeDeleteStatus();
         }
 
@@ -224,5 +224,10 @@ class SearchUserShiftSchedule extends UserShiftSchedule
         $this->filterSearchQuery($query);
 
         return ArrayHelper::map($query->asArray()->all(), 'uss_id', 'uss_id');
+    }
+
+    public function enableExcludeDeleteStatus()
+    {
+        $this->excludeDeleteStatus = true;
     }
 }

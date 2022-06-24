@@ -113,19 +113,20 @@ class UserShiftScheduleQuery
      */
     public static function getTimelineListByUser(int $userId, string $startDt, string $endDt): array
     {
-        $query = UserShiftSchedule::find()
-            ->where(['uss_user_id' => $userId])
-            ->andWhere(['AND',
-                ['>=', 'uss_start_utc_dt', date('Y-m-d H:i:s', strtotime($startDt))],
-                ['<=', 'uss_start_utc_dt', date('Y-m-d H:i:s', strtotime($endDt))]
-            ]);
+        return self::getQueryTimelineListByUser($userId, $startDt, $endDt)->all();
+    }
 
-        /** @abac null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_HIDE_SOFT_DELETED_EVENTS, Hide Soft Deleted Schedule Events */
-        if (Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_HIDE_SOFT_DELETED_EVENTS)) {
-            $query->excludeDeleteStatus();
-        }
-
-        return $query->all();
+    /**
+     * @param int $userId
+     * @param string $startDt
+     * @param string $endDt
+     * @return array|UserShiftSchedule[]
+     */
+    public static function getTimelineListByUserExcludeDeletedEvents(int $userId, string $startDt, string $endDt): array
+    {
+        return self::getQueryTimelineListByUser($userId, $startDt, $endDt)
+            ->excludeDeleteStatus()
+            ->all();
     }
 
     /**
@@ -336,5 +337,21 @@ class UserShiftScheduleQuery
             }
         }
         return $data;
+    }
+
+    /**
+     * @param int $userId
+     * @param string $startDt
+     * @param string $endDt
+     * @return Scopes
+     */
+    private static function getQueryTimelineListByUser(int $userId, string $startDt, string $endDt): Scopes
+    {
+        return UserShiftSchedule::find()
+            ->where(['uss_user_id' => $userId])
+            ->andWhere(['AND',
+                ['>=', 'uss_start_utc_dt', date('Y-m-d H:i:s', strtotime($startDt))],
+                ['<=', 'uss_start_utc_dt', date('Y-m-d H:i:s', strtotime($endDt))]
+            ]);
     }
 }
