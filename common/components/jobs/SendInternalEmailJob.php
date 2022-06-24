@@ -50,7 +50,7 @@ class SendInternalEmailJob extends BaseJob implements JobInterface
             }
 
             $emailDto = new EmailDto(
-                'alex.grub@techork.com',
+                $this->emailTo,
                 $this->emailFrom,
                 $emailData['data']['email_subject'],
                 $emailData['data']['email_body_html']

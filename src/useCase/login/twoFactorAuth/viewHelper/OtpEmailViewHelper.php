@@ -44,10 +44,10 @@ class OtpEmailViewHelper extends View implements TwoFactorViewHelperInterface
             );
             \Yii::$app->queue_email_job->push($job);
         }
-
-        return $this->render('/site/2fa/otp_email', [
+        return $this->renderAjax('/site/2fa/otp_email', [
             'model' => $model,
-            'form' => $form
+            'form' => $form,
+            'secondsRemain' => $userProfile->getOtpSecondsLeft() ?? 0,
         ]);
     }
 }

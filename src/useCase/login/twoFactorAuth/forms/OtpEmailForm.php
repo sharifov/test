@@ -59,7 +59,7 @@ class OtpEmailForm extends Model implements TwoFactorFormInterface
                 $this->addError($attribute, 'Wrong verification code. Please verify your secret code and try again.');
                 return false;
             }
-            $otpExpiredDt = new \DateTimeImmutable(strtotime($userProfile->up_otp_expired_dt));
+            $otpExpiredDt = new \DateTimeImmutable($userProfile->up_otp_expired_dt);
             $curDateTime = new \DateTimeImmutable();
             if ($curDateTime > $otpExpiredDt) {
                 $this->addError($attribute, 'Wrong verification code. Code has expired.');

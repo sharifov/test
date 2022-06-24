@@ -203,7 +203,6 @@ class SiteController extends FController
         if ($model->load(Yii::$app->request->post()) && !Yii::$app->request->isPjax && $model->validate()) {
             $twoFactorAuthForm = (TwoFactorAuthFactory::getFormByMethod($model->twoFactorMethod))->setUser($user);
             $twoFactorAuthForm->load(Yii::$app->request->post());
-            $twoFactorAuthForm->login((bool)$model->rememberMe);
             if (($twoFactorAuthForm->validate() && $twoFactorAuthForm->login((bool)$model->rememberMe))) {
                 $session->remove('auth_client_source');
                 $session->remove('auth_client_source_id');
