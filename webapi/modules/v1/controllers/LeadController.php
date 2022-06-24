@@ -1499,197 +1499,6 @@ class LeadController extends ApiBaseController
         return $responseData;
     }
 
-
-    public function actionSoldUpdate()
-    {
-        $this->checkPost();
-        $this->startApiLog($this->action->uniqueId);
-
-        $leadAttributes = Yii::$app->request->post((new Lead())->formName());
-        if (empty($leadAttributes)) {
-            throw new BadRequestHttpException((new Lead())->formName() . ' is required', 1);
-        }
-
-        $lead = Lead::findOne([
-            'uid' => $leadAttributes['uid'],
-            'source_id' => $leadAttributes['market_info_id']
-        ]);
-        if (!$lead) {
-            throw new NotFoundHttpException('Not found Lead UID: ' . $leadAttributes['uid'], 2);
-        }
-
-        $response = [
-            'status' => 'Failed',
-            'errors' => []
-        ];
-
-        try {
-            $isSold = $lead->isSold();
-            $isReject = $lead->isReject();
-            $lastStatus = $lead->status;
-
-            $lead->attributes = $leadAttributes;
-
-            if (!$lead->validate()) {
-                $response['errors'][] = $lead->getErrors();
-            } else {
-                $result = $this->transactionManager->wrap(function () use ($lead, $leadAttributes, $isSold, $isReject, $lastStatus) {
-                    $response = [];
-
-                    if (!$isSold && $lead->isSold()) {
-                        $lead->status = $lastStatus;
-                        $lead->sold($lead->employee_id, null);
-                    } elseif (!$isReject && $lead->isReject()) {
-                        $lead->status = $lastStatus;
-                        $lead->reject($lead->employee_id, null, 'BO rejected');
-                    }
-//                    elseif (!isset($leadAttributes['status'])) {
-//                        Yii::warning('Lead: ' . $lead->id . ' Void Status', 'API:LeadSoldUpdate:Status');
-//                    }
-
-                    $this->leadRepository->save($lead);
-
-                    if (
-                        !empty($leadAttributes['additional_information']) &&
-                        !empty($leadAttributes['additional_information'][0]['pnr'])
-                    ) {
-                        $aplliend = $lead->getAppliedAlternativeQuotes();
-                        if ($aplliend !== null) {
-                            $aplliend->record_locator = $leadAttributes['additional_information'][0]['pnr'];
-                            $aplliend->save(false);
-                            if ($aplliend->hasErrors()) {
-                                $response['errors'] = $aplliend->getErrors();
-                            }
-                        }
-
-                        $notifMessage = '';
-                        $leadAdditionalInformation = $lead->additionalInformationFormFirstElement;
-                        $leadOldAdditionalInformation = $lead->oldAdditionalInformationFormFirstElement;
-                        foreach ($leadAttributes['additional_information'] as $additionalInformation) {
-                            if (
-                                isset($additionalInformation['tkt_processed']) && (bool)$additionalInformation['tkt_processed'] === false
-                                && $leadAdditionalInformation->tkt_processed !== $leadOldAdditionalInformation->tkt_processed
-                            ) {
-                                $linkToLead = Purifier::createLeadShortLink($lead);
-                                $notifMessage .= 'Flight ticket (PNR: ' . $additionalInformation['pnr'] . ') has been voided. Lead UID - ' . $linkToLead . PHP_EOL;
-                            }
-                        }
-
-                        if ($notifMessage) {
-                            Notifications::createAndPublish(
-                                $lead->employee_id,
-                                'Flight ticket has been voided',
-                                $notifMessage,
-                                Notifications::TYPE_INFO,
-                                true
-                            );
-                        }
-                    }
-
-                    $lead->sendNotifOnProcessingStatusChanged();
-
-//                    if (!empty($leadAttributes['info_tickets'])) {
-//                        $result = $lead->sendSoldEmail($leadAttributes['info_tickets']);
-//                        if (!$result['status']) {
-//                            $response['errors'][] = $result['errors'];
-//                            $transaction->rollBack();
-//                        }
-//                    }
-
-                    if (empty($response['errors'])) {
-                        $response['status'] = 'Success';
-                    }
-
-                    return $response;
-                });
-
-                if (isset($result['status'])) {
-                    $response['status'] = $result['status'];
-                }
-
-                if (isset($result['errors'])) {
-                    $response['errors'][] = $result['errors'];
-                }
-            }
-        } catch (\Throwable $e) {
-            Yii::error($e->getTraceAsString(), 'API:LeadSoldUpdate:try');
-            if (Yii::$app->request->get('debug')) {
-                $message = ($e->getTraceAsString());
-            } else {
-                $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
-            }
-            $response['error'] = $message;
-            $response['error_code'] = 30;
-        }
-
-
-//        $transaction = Yii::$app->db->beginTransaction();
-//        try {
-//
-//            $lead->attributes = $leadAttributes;
-//            if (!$lead->save()) {
-//                $response['errors'][] = $lead->getErrors();
-//                $transaction->rollBack();
-//            } else {
-//
-//                if (!empty($leadAttributes['additional_information']) &&
-//                    !empty($leadAttributes['additional_information']['pnr'])
-//                ) {
-//                    $aplliend = $lead->getAppliedAlternativeQuotes();
-//                    if ($aplliend !== null) {
-//                        $aplliend->record_locator = $leadAttributes['additional_information']['pnr'];
-//                        $aplliend->save(false);
-//                        if ($aplliend->hasErrors()) {
-//                            $response['errors'][] = $aplliend->getErrors();
-//                        }
-//                    }
-//                }
-//
-//                if (!empty($leadAttributes['info_tickets'])) {
-//                    $result = $lead->sendSoldEmail($leadAttributes['info_tickets']);
-//                    if (!$result['status']) {
-//                        $response['errors'][] = $result['errors'];
-//                        $transaction->rollBack();
-//                    }
-//                }
-//
-//                if (empty($response['errors'])) {
-//                    $response['status'] = 'Success';
-//                    $transaction->commit();
-//                }
-//            }
-//
-//        } catch (\Throwable $e) {
-//
-//            Yii::error($e->getTraceAsString(), 'API:Quote:create:try');
-//            if (Yii::$app->request->get('debug')) $message = ($e->getTraceAsString());
-//            else $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
-//
-//            $response['error'] = $message;
-//            $response['errors'] = $message;
-//            $response['error_code'] = 30;
-//
-//            $transaction->rollBack();
-//        }
-
-        $responseData = $response;
-        $responseData = $this->apiLog->endApiLog($responseData);
-
-        if (isset($response['error']) && $response['error']) {
-            $json = @json_encode($response['error']);
-            if (isset($response['error_code']) && $response['error_code']) {
-                $error_code = $response['error_code'];
-            } else {
-                $error_code = 0;
-            }
-            throw new UnprocessableEntityHttpException($json, $error_code);
-        }
-
-
-        return $responseData;
-    }
-
-
     /**
      * @api {post} /v1/lead/call-expert Update Lead Call Expert
      * @apiVersion 0.1.0
@@ -1903,6 +1712,283 @@ class LeadController extends ApiBaseController
             $error_code = $response['error_code'] ?? 0;
             throw new UnprocessableEntityHttpException($response['error'], $error_code);
         }
+
+        return $responseData;
+    }
+
+
+    /**
+     *
+     * @api {post} v1/lead/sold-update Update Sold Lead
+     * @apiVersion 0.1.0
+     * @apiName SoldUpdate
+     * @apiGroup Leads
+     * @apiPermission Authorized User
+     *
+     * @apiHeader {string} Authorization    Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParam {string}           [apiKey]   API Key for Project (if not use Basic-Authorization)
+     * @apiParam {object}           lead                                               Lead data array
+     * @apiParam {int}                  lead.source_id                                 Source ID
+     * @apiParam {string}               lead.uid                                       Uid
+     *
+     * @apiParamExample {json} Request-Example:
+     * {
+     *      "apiKey": "YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Lead":
+     *      {
+     *          "uid": "62b2d69124dd1",
+     *          "market_info_id": 32,
+     *          "bo_flight_id": 32,
+     *          "final_profit": -46.02,
+     *          "tips": 0,
+     *          "additional_information": [
+     *          {
+     *              "pnr": "GEQGANQ",
+     *              "bo_sale_id": 32,
+     *              "vtf_processed": false,
+     *              "tkt_processed": true,
+     *              "exp_processed": true,
+     *              "bkk_processed": false,
+     *              "passengers": ["Smith/Thomas (ADT)"],
+     *              "paxInfo": [
+     *              {
+     *                  "pax": "Smith/Thomas (ADT)",
+     *                  "dob": "1900-02-12",
+     *                  "sex": "M"
+     *              }]
+     *          }],
+     *          "status": 10
+     *       },
+     *       "received_microtime": 1655892930.0878
+     * }
+     *
+     * @apiSuccess {Integer} response_id    Response Id
+     * @apiSuccess {DateTime} request_dt    Request Date & Time
+     * @apiSuccess {DateTime} response_dt   Response Date & Time
+     *
+     * @apiSuccessExample Success-Response:
+     * HTTP/1.1 200 OK
+     * {
+    "status": "Success",
+    "errors": [],
+    "action": "v1/lead/sold-update",
+    "response_id": 75,
+    "request_dt": "2022-06-23 12:39:24",
+    "response_dt": "2022-06-23 12:39:24",
+    "execution_time": 0.101,
+    "memory_usage": 1215976
+    }
+     *
+     * @apiError UserNotFound The id of the User was not found.
+     *
+     * @apiErrorExample Error-Response:
+     *      HTTP/1.1 404 Not Found
+     *      {
+     *          "name": "Not Found",
+     *          "message": "Not found Lead UID: WD6q51209s9879",
+     *          "code": 2,
+     *          "status": 404,
+     *          "type": "yii\\web\\NotFoundHttpException"
+     *      }
+     *
+     *
+     * @return mixed
+     * @throws BadRequestHttpException
+     * @throws NotFoundHttpException
+     * @throws UnprocessableEntityHttpException
+     */
+
+    public function actionSoldUpdate()
+    {
+        $this->checkPost();
+        $this->startApiLog($this->action->uniqueId);
+
+        $leadAttributes = Yii::$app->request->post((new Lead())->formName());
+        if (empty($leadAttributes)) {
+            throw new BadRequestHttpException((new Lead())->formName() . ' is required', 1);
+        }
+
+        $lead = Lead::findOne([
+            'uid' => $leadAttributes['uid'],
+            'source_id' => $leadAttributes['market_info_id']
+        ]);
+        if (!$lead) {
+            throw new NotFoundHttpException('Not found Lead UID: ' . $leadAttributes['uid'], 2);
+        }
+
+        $response = [
+            'status' => 'Failed',
+            'errors' => []
+        ];
+
+        try {
+            $isSold = $lead->isSold();
+            $isReject = $lead->isReject();
+            $lastStatus = $lead->status;
+
+            $lead->attributes = $leadAttributes;
+
+            if (!$lead->validate()) {
+                $response['errors'][] = $lead->getErrors();
+            } else {
+                $result = $this->transactionManager->wrap(function () use ($lead, $leadAttributes, $isSold, $isReject, $lastStatus) {
+                    $response = [];
+
+                    if (!$isSold && $lead->isSold()) {
+                        $lead->status = $lastStatus;
+                        $lead->sold($lead->employee_id, null);
+                    } elseif (!$isReject && $lead->isReject()) {
+                        $lead->status = $lastStatus;
+                        $lead->reject($lead->employee_id, null, 'BO rejected');
+                    }
+//                    elseif (!isset($leadAttributes['status'])) {
+//                        Yii::warning('Lead: ' . $lead->id . ' Void Status', 'API:LeadSoldUpdate:Status');
+//                    }
+
+                    $this->leadRepository->save($lead);
+
+                    if (
+                        !empty($leadAttributes['additional_information']) &&
+                        !empty($leadAttributes['additional_information'][0]['pnr'])
+                    ) {
+                        $aplliend = $lead->getAppliedAlternativeQuotes();
+                        if ($aplliend !== null) {
+                            $aplliend->record_locator = $leadAttributes['additional_information'][0]['pnr'];
+                            $aplliend->save(false);
+                            if ($aplliend->hasErrors()) {
+                                $response['errors'] = $aplliend->getErrors();
+                            }
+                        }
+
+                        $notifMessage = '';
+                        $leadAdditionalInformation = $lead->additionalInformationFormFirstElement;
+                        $leadOldAdditionalInformation = $lead->oldAdditionalInformationFormFirstElement;
+                        foreach ($leadAttributes['additional_information'] as $additionalInformation) {
+                            if (
+                                isset($additionalInformation['tkt_processed']) && (bool)$additionalInformation['tkt_processed'] === false
+                                && $leadAdditionalInformation->tkt_processed !== $leadOldAdditionalInformation->tkt_processed
+                            ) {
+                                $linkToLead = Purifier::createLeadShortLink($lead);
+                                $notifMessage .= 'Flight ticket (PNR: ' . $additionalInformation['pnr'] . ') has been voided. Lead UID - ' . $linkToLead . PHP_EOL;
+                            }
+                        }
+
+                        if ($notifMessage) {
+                            Notifications::createAndPublish(
+                                $lead->employee_id,
+                                'Flight ticket has been voided',
+                                $notifMessage,
+                                Notifications::TYPE_INFO,
+                                true
+                            );
+                        }
+                    }
+
+                    $lead->sendNotifOnProcessingStatusChanged();
+
+//                    if (!empty($leadAttributes['info_tickets'])) {
+//                        $result = $lead->sendSoldEmail($leadAttributes['info_tickets']);
+//                        if (!$result['status']) {
+//                            $response['errors'][] = $result['errors'];
+//                            $transaction->rollBack();
+//                        }
+//                    }
+
+                    if (empty($response['errors'])) {
+                        $response['status'] = 'Success';
+                    }
+
+                    return $response;
+                });
+
+                if (isset($result['status'])) {
+                    $response['status'] = $result['status'];
+                }
+
+                if (isset($result['errors'])) {
+                    $response['errors'][] = $result['errors'];
+                }
+            }
+        } catch (\Throwable $e) {
+            Yii::error($e->getTraceAsString(), 'API:LeadSoldUpdate:try');
+            if (Yii::$app->request->get('debug')) {
+                $message = ($e->getTraceAsString());
+            } else {
+                $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
+            }
+            $response['error'] = $message;
+            $response['error_code'] = 30;
+        }
+
+
+//        $transaction = Yii::$app->db->beginTransaction();
+//        try {
+//
+//            $lead->attributes = $leadAttributes;
+//            if (!$lead->save()) {
+//                $response['errors'][] = $lead->getErrors();
+//                $transaction->rollBack();
+//            } else {
+//
+//                if (!empty($leadAttributes['additional_information']) &&
+//                    !empty($leadAttributes['additional_information']['pnr'])
+//                ) {
+//                    $aplliend = $lead->getAppliedAlternativeQuotes();
+//                    if ($aplliend !== null) {
+//                        $aplliend->record_locator = $leadAttributes['additional_information']['pnr'];
+//                        $aplliend->save(false);
+//                        if ($aplliend->hasErrors()) {
+//                            $response['errors'][] = $aplliend->getErrors();
+//                        }
+//                    }
+//                }
+//
+//                if (!empty($leadAttributes['info_tickets'])) {
+//                    $result = $lead->sendSoldEmail($leadAttributes['info_tickets']);
+//                    if (!$result['status']) {
+//                        $response['errors'][] = $result['errors'];
+//                        $transaction->rollBack();
+//                    }
+//                }
+//
+//                if (empty($response['errors'])) {
+//                    $response['status'] = 'Success';
+//                    $transaction->commit();
+//                }
+//            }
+//
+//        } catch (\Throwable $e) {
+//
+//            Yii::error($e->getTraceAsString(), 'API:Quote:create:try');
+//            if (Yii::$app->request->get('debug')) $message = ($e->getTraceAsString());
+//            else $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
+//
+//            $response['error'] = $message;
+//            $response['errors'] = $message;
+//            $response['error_code'] = 30;
+//
+//            $transaction->rollBack();
+//        }
+
+        $responseData = $response;
+        $responseData = $this->apiLog->endApiLog($responseData);
+
+        if (isset($response['error']) && $response['error']) {
+            $json = @json_encode($response['error']);
+            if (isset($response['error_code']) && $response['error_code']) {
+                $error_code = $response['error_code'];
+            } else {
+                $error_code = 0;
+            }
+            throw new UnprocessableEntityHttpException($json, $error_code);
+        }
+
 
         return $responseData;
     }

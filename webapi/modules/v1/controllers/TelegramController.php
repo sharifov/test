@@ -35,7 +35,17 @@ class TelegramController extends Controller
     }
 
     /**
+     * @api {post} v1/telegram/webhook Send Message To Telegram
+     * @apiVersion 0.1.0
+     * @apiName Webhook
+     * @apiGroup Telegram
      *
+     * @apiParam {Array}                                    message                         Message data array
+     * @apiParam {string{11}=bot_command}     message.entities.0.type         Type
+     * @apiParam {String}                                   message.chat.first_name         Frist Name
+     * @apiParam {String}                                   message.chat.username           User Name
+     *
+     * @apiSuccess {String} message    Message Status
      */
     public function actionWebhook()
     {
