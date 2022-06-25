@@ -102,7 +102,10 @@ $user = Yii::$app->user->identity;
                 },
                 'filter' => EmailType::getList()
             ],
-            'templateType.etp_name',
+            [
+                'attribute' => 'template_type_name',
+                'value' => 'templateType.etp_name'
+            ],
             [
                 'attribute' => 'language_id',
                 'value' => static function (Email $model) {

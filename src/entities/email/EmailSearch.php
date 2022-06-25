@@ -21,7 +21,7 @@ class EmailSearch extends Email
 {
     public $email_type_id;
     public $supervision_id;
-    public $e_template_type_name;
+    public $template_type_name;
 
     public $datetime_start;
     public $datetime_end;
@@ -31,11 +31,13 @@ class EmailSearch extends Email
     public $communication_id;
     public $email_from;
     public $email_to;
+    public $language_id;
 
     public function rules(): array
     {
         return [
-            [['datetime_start', 'datetime_end', 'communication_id', 'email_from', 'email_to'], 'safe'],
+            [['datetime_start', 'datetime_end', 'communication_id', 'email_from', 'email_to', 'language_id'], 'safe'],
+            [['template_type_name'], 'string'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['e_id', 'e_project_id', 'e_type_id', 'e_is_deleted', 'e_status_id', 'e_created_user_id', 'supervision_id'], 'integer'],
         ];
@@ -70,7 +72,7 @@ class EmailSearch extends Email
     }
 
     public function search($params) {
-        $query = self::find();
+        $query = self::find()->joinWith(['contactFrom', 'contactTo', 'params']);
 
         $query->addSelect([
             'e_id',
@@ -88,6 +90,15 @@ class EmailSearch extends Email
                 'pageSize' => 30,
             ],
         ]);
+
+        $dataProvider->sort->attributes['email_from'] = [
+            'asc' => ['email_address.ea_email' => SORT_ASC],
+            'desc' => ['email_address.ea_email' => SORT_DESC],
+        ];
+        $dataProvider->sort->attributes['email_to'] = [
+            'asc' => ['email_address.ea_email' => SORT_ASC],
+            'desc' => ['email_address.ea_email' => SORT_DESC],
+        ];
 
         if (!($this->load($params) && $this->validate())) {
             return $dataProvider;
@@ -124,10 +135,10 @@ class EmailSearch extends Email
             }]);
         }
 
-        if ($this->e_template_type_name) {
-            $templateIds = EmailTemplateType::find()->select(['DISTINCT(etp_id) as e_template_type_id'])->where(['like', 'etp_name', $this->e_template_type_name])->asArray()->all();
+        if ($this->template_type_name) {
+            $templateIds = EmailTemplateType::find()->select(['DISTINCT(etp_id) as ep_template_type_id'])->where(['like', 'etp_name', $this->template_type_name])->asArray()->all();
             if ($templateIds) {
-                $query->andFilterWhere(['e_template_type_id' => $templateIds]);
+                $query->andFilterWhere(['ep_template_type_id' => $templateIds]);
             }
         }
         if ($this->email_from) {
@@ -138,6 +149,11 @@ class EmailSearch extends Email
         if ($this->email_to) {
             $query->joinWith(['contactTo' => function ($q) {
                 $q->andFilterWhere(['like', 'ea_email', $this->email_to]);
+            }]);
+        }
+        if ($this->language_id) {
+            $query->joinWith(['params' => function ($q) {
+                $q->andFilterWhere(['like', 'ep_language_id', $this->language_id]);
             }]);
         }
 
