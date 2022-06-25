@@ -28,20 +28,18 @@ class EmailSearch extends Email
     public $date_range;
     public const CREATE_TIME_START_DEFAULT_RANGE = '-6 days';
 
-    /**
-     * {@inheritdoc}
-     */
-   /*  public function rules()
+    public $communication_id;
+    public $email_from;
+    public $email_to;
+
+    public function rules(): array
     {
         return [
-            [['datetime_start', 'datetime_end'], 'safe'],
+            [['datetime_start', 'datetime_end', 'communication_id', 'email_from', 'email_to'], 'safe'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
-            [['e_id', 'e_project_id', 'e_type_id', 'e_is_deleted', 'e_status_id', 'e_created_user_id',  'email_type_id', 'supervision_id'], 'integer'],
-            //[['e_template_type_name'], 'string'],
-           // [['e_email_from', 'e_email_to', 'e_email_cc', 'e_email_bc', 'e_email_subject', 'e_email_body_text', 'e_attach', 'e_email_data', 'e_language_id', 'e_status_done_dt', 'e_read_dt', 'e_error_message', 'e_message_id', 'e_ref_message_id', 'e_inbox_created_dt'], 'safe'],
-           // [['e_created_dt', 'e_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
+            [['e_id', 'e_project_id', 'e_type_id', 'e_is_deleted', 'e_status_id', 'e_created_user_id', 'supervision_id'], 'integer'],
         ];
-    } */
+    }
 
     public function __construct($config = [])
     {
@@ -49,6 +47,17 @@ class EmailSearch extends Email
         $userTimezone = Auth::user()->userParams->up_timezone ?? 'UTC';
         $currentDate = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->setTimezone(new \DateTimeZone($userTimezone));
         $this->date_range = ($currentDate->modify(self::CREATE_TIME_START_DEFAULT_RANGE))->format('Y-m-d') . ' 00:00:00 - ' . $currentDate->format('Y-m-d') . ' 23:59:59';
+    }
+
+
+
+    public function attributeLabels(): array
+    {
+        $labels = [
+            'communication_id' => 'Communication ID',
+        ];
+
+        return array_merge(parent::attributeLabels(), $labels);
     }
 
     /**
@@ -60,35 +69,17 @@ class EmailSearch extends Email
         return Model::scenarios();
     }
 
-    /**
-     * Creates data provider instance with search query applied
-     *
-     * @param array $params
-     *
-     * @return ActiveDataProvider
-     */
-    public function search($params)
-    {
-        $query = self::find()->with('createdUser', 'project', 'templateType');
+    public function search($params) {
+        $query = self::find();
 
         $query->addSelect([
             'e_id',
-            //'e_lead_id',
-            //'e_case_id',
             'e_project_id',
-            //'e_email_from',
-            //'e_email_to',
             'e_type_id',
-           // 'e_template_type_id',
-           // 'e_language_id',
-           // 'e_communication_id',
             'e_status_id',
             'e_created_user_id',
             'e_created_dt',
-            //'e_client_id'
         ]);
-
-        // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -98,11 +89,7 @@ class EmailSearch extends Email
             ],
         ]);
 
-        $this->load($params);
-
-        if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+        if (!($this->load($params) && $this->validate())) {
             return $dataProvider;
         }
 
@@ -124,30 +111,18 @@ class EmailSearch extends Email
         // grid filtering conditions
         $query->andFilterWhere([
             'e_id' => $this->e_id,
-            //'e_reply_id' => $this->e_reply_id,
-            //'e_lead_id' => $this->e_lead_id,
-            //'e_case_id' => $this->e_case_id,
             'e_project_id' => $this->e_project_id,
             'e_type_id' => $this->e_type_id,
-            //            'e_template_type_id' => $this->e_template_type_id,
-           // 'e_communication_id' => $this->e_communication_id,
             'e_is_deleted' => $this->e_is_deleted,
-           // 'e_is_new' => $this->e_is_new,
-            //'e_delay' => $this->e_delay,
-            //'e_priority' => $this->e_priority,
             'e_status_id' => $this->e_status_id,
-           // 'e_status_done_dt' => $this->e_status_done_dt,
-           // 'e_read_dt' => $this->e_read_dt,
             'e_created_user_id' => $this->e_created_user_id,
-           // 'e_updated_user_id' => $this->e_updated_user_id,
-           // 'e_updated_dt' => $this->e_updated_dt,
-           // 'e_inbox_created_dt' => $this->e_inbox_created_dt,
-           // 'e_inbox_email_id' => $this->e_inbox_email_id,
-           // 'e_email_from' => $this->e_email_from,
-           // 'e_email_to' => $this->e_email_to,
-           // 'e_language_id' => $this->e_language_id,
-            //'e_client_id' => $this->e_client_id,
         ]);
+
+        if ($this->communication_id) {
+            $query->joinWith(['emailLog' => function ($q) {
+                $q->andFilterWhere(['like', 'el_communication_id', $this->communication_id]);
+            }]);
+        }
 
         if ($this->e_template_type_name) {
             $templateIds = EmailTemplateType::find()->select(['DISTINCT(etp_id) as e_template_type_id'])->where(['like', 'etp_name', $this->e_template_type_name])->asArray()->all();
@@ -155,20 +130,20 @@ class EmailSearch extends Email
                 $query->andFilterWhere(['e_template_type_id' => $templateIds]);
             }
         }
-
-       /*  $query
-        ->andFilterWhere(['like', 'e_email_cc', $this->e_email_cc])
-        ->andFilterWhere(['like', 'e_email_bc', $this->e_email_bc])
-        ->andFilterWhere(['like', 'e_email_subject', $this->e_email_subject])
-        ->andFilterWhere(['like', 'e_email_body_text', $this->e_email_body_text])
-        ->andFilterWhere(['like', 'e_attach', $this->e_attach])
-        ->andFilterWhere(['like', 'e_email_data', $this->e_email_data])
-        ->andFilterWhere(['like', 'e_error_message', $this->e_error_message])
-        ->andFilterWhere(['like', 'e_message_id', $this->e_message_id])
-        ->andFilterWhere(['like', 'e_ref_message_id', $this->e_ref_message_id]); */
+        if ($this->email_from) {
+            $query->joinWith(['contactFrom' => function ($q) {
+                $q->andFilterWhere(['like', 'ea_email', $this->email_from]);
+            }]);
+        }
+        if ($this->email_to) {
+            $query->joinWith(['contactTo' => function ($q) {
+                $q->andFilterWhere(['like', 'ea_email', $this->email_to]);
+            }]);
+        }
 
         $dataProvider->totalCount = $query->count('distinct e_id');
 
         return $dataProvider;
     }
+
 }

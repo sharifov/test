@@ -7,7 +7,6 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
-use src\helpers\email\MaskEmailHelper;
 use kartik\daterange\DateRangePicker;
 use src\entities\email\Email;
 use common\models\Language;
@@ -79,16 +78,7 @@ $user = Yii::$app->user->identity;
         'columns' => [
             'e_id',
             ['class' => 'yii\grid\ActionColumn',
-                'template' => '{view} {update} {delete}',
-                'visibleButtons' => [
-                    'update' => static function ($model, $key, $index) use ($user) {
-                        return $user->isAdmin();
-                    },
-
-                    'delete' => static function ($model, $key, $index) use ($user) {
-                        return $user->isAdmin();
-                    },
-                ],
+                'template' => '{view} {delete}',
             ],
             [
                 'class' => \common\components\grid\project\ProjectColumn::class,
@@ -97,18 +87,14 @@ $user = Yii::$app->user->identity;
             ],
             [
                 'attribute' => 'email_from',
-                'value' => static function (Email $model) {
-                    return $model->emailFrom->getEmail(EmailType::isInbox($model->e_type_id));
-                },
+                'value' => 'emailFrom'
             ],
             [
                 'attribute' => 'email_to',
-                'value' => static function (Email $model) {
-                    return $model->emailTo->getEmail(EmailType::isOutbox($model->e_type_id));
-                },
+                'value' => 'emailTo'
             ],
-            'e_lead_id',
-            'e_case_id',
+            'leads:leads',
+            'cases:cases',
             [
                 'attribute' => 'e_type_id',
                 'value' => static function (Email $model) {
@@ -116,21 +102,18 @@ $user = Yii::$app->user->identity;
                 },
                 'filter' => EmailType::getList()
             ],
+            'templateType.etp_name',
             [
-                'attribute' => 'e_template_type_name',
+                'attribute' => 'language_id',
                 'value' => static function (Email $model) {
-                    return $model->templateType ? $model->templateType->etp_name : '-';
-                },
-                'label' => 'Template Name'
-            ],
-            [
-                'attribute' => 'e_language_id',
-                'value' => static function (Email $model) {
-                    return $model->language;
+                    return $model->params->ep_language_id ?? null;
                 },
                 'filter' => Language::getLanguages(true)
             ],
-            'e_communication_id',
+            [
+                'attribute' => 'communication_id',
+                'value' => 'emailLog.el_communication_id'
+            ],
             [
                 'attribute' => 'e_status_id',
                 'value' => static function (Email $model) {
@@ -138,7 +121,7 @@ $user = Yii::$app->user->identity;
                 },
                 'filter' => EmailStatus::getList()
             ],
-            'attribute' => 'e_client_id:client',
+            'clientsIds:clients',
             [
                 'class' => UserSelect2Column::class,
                 'attribute' => 'e_created_user_id',
@@ -149,8 +132,6 @@ $user = Yii::$app->user->identity;
                 'class' => DateTimeColumn::class,
                 'attribute' => 'e_created_dt'
             ],
-
-
         ],
     ]); ?>
     <?php Pjax::end(); ?>
