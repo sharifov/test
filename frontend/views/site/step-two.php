@@ -24,8 +24,8 @@ $this->title = 'Login Step Two';
 
                 <?= $form->errorSummary($model) ?>
 
-                <?= $form->field($model, 'twoFactorMethod')->dropDownList(TwoFactorAuthFactory::LIST, [
-                    'id' => 'twoFactorMethod'
+                <?= $form->field($model, 'twoFactorMethod')->dropDownList(TwoFactorAuthFactory::getValidatedList($user), [
+                    'id' => 'twoFactorMethod',
                 ]) ?>
 
                 <?= $viewHelper->renderView($form, $user) ?>

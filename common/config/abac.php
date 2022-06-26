@@ -38,6 +38,7 @@ return [
         'case-sale-search' => \modules\cases\src\abac\saleSearch\CaseSaleSearchAbacObject::class,
         'lead-search' => \modules\lead\src\abac\LeadSearchAbacObject::class,
         'lead-expert-call' => \modules\lead\src\abac\LeadExpertCallObject::class,
+        'two-factor' => \src\useCase\login\twoFactorAuth\abac\TwoFactorAuthAbacObject::class,
     ],
     'scanDirs' => [
         '/modules/',

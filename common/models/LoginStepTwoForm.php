@@ -30,7 +30,8 @@ class LoginStepTwoForm extends Model
         return [
             [['twoFactorMethod'], 'required'],
             [['twoFactorMethod'], 'integer'],
-            [['twoFactorMethod'], 'in', 'range' => array_keys(TwoFactorAuthFactory::LIST)]
+            [['twoFactorMethod'], 'in', 'range' => array_keys(TwoFactorAuthFactory::LIST)],
+            [['twoFactorMethod'], 'validateThroughAbac'],
         ];
     }
 
@@ -108,5 +109,16 @@ class LoginStepTwoForm extends Model
     {
         $this->user = $user;
         return $this;
+    }
+
+    public function validateThroughAbac($attribute): bool
+    {
+        if (!$this->hasErrors()) {
+            if (!TwoFactorAuthFactory::getGuard($this->twoFactorMethod)->guardMethod($this->user)) {
+                $this->addError($attribute, 'You dont have access to login through ' . (TwoFactorAuthFactory::LIST[$this->twoFactorMethod]));
+                return false;
+            }
+        }
+        return true;
     }
 }

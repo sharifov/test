@@ -201,7 +201,7 @@ class SiteController extends FController
             ->setRememberMe($session->get('two_factor_remember_me'));
 
         if ($model->load(Yii::$app->request->post()) && !Yii::$app->request->isPjax && $model->validate()) {
-            $twoFactorAuthForm = (TwoFactorAuthFactory::getFormByMethod($model->twoFactorMethod))->setUser($user);
+            $twoFactorAuthForm = (TwoFactorAuthFactory::getForm($model->twoFactorMethod))->setUser($user);
             $twoFactorAuthForm->load(Yii::$app->request->post());
             if (($twoFactorAuthForm->validate() && $twoFactorAuthForm->login((bool)$model->rememberMe))) {
                 $session->remove('auth_client_source');
@@ -211,7 +211,15 @@ class SiteController extends FController
             $model->addError('general', $twoFactorAuthForm->getErrorSummary(true)[0]);
         }
 
-        $helper = TwoFactorAuthFactory::getViewHelperByMethod($model->twoFactorMethod ?? TwoFactorAuthFactory::DEFAULT);
+        if (empty($model->twoFactorMethod)) {
+            $model->twoFactorMethod = TwoFactorAuthFactory::getDefaultAuthMethod($user);
+            if (empty($model->twoFactorMethod)) {
+                Yii::$app->session->removeAll();
+                Yii::$app->session->setFlash('error', 'You do not have access to any two-factor authentication method.');
+                return $this->redirect(['/site/login']);
+            }
+        }
+        $helper = TwoFactorAuthFactory::getViewHelper($model->twoFactorMethod);
         return $this->render('step-two', [
             'model' => $model,
             'viewHelper' => $helper,
