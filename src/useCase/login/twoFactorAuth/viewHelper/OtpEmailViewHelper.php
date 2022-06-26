@@ -31,7 +31,7 @@ class OtpEmailViewHelper extends View implements TwoFactorViewHelperInterface
         if (empty($userProfile->up_otp_hashed_code) || $userProfile->isOtpExpiredDateTime()) {
             $code = $this->service->generateSecretCode();
             $curDateTime = new \DateTimeImmutable();
-            $dateInterval = new \DateInterval('PT120S');
+            $dateInterval = new \DateInterval('PT' . SettingHelper::getOtpEmailCodeLifeTime() . 'S');
             $userProfile->updateOtpData($this->service->hashKey((string)$code), $curDateTime->add($dateInterval));
             $userProfile->save();
 

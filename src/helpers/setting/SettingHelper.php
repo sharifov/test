@@ -1045,4 +1045,9 @@ class SettingHelper
         }
         throw new InvalidArgumentException('Invalid email_from address');
     }
+
+    public static function getOtpEmailCodeLifeTime(): int
+    {
+        return (int)(Yii::$app->params['settings']['otp_email_code_life_time'] ?? 120);
+    }
 }
