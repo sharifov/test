@@ -1778,15 +1778,15 @@ class LeadController extends ApiBaseController
      * @apiSuccessExample Success-Response:
      * HTTP/1.1 200 OK
      * {
-    "status": "Success",
-    "errors": [],
-    "action": "v1/lead/sold-update",
-    "response_id": 75,
-    "request_dt": "2022-06-23 12:39:24",
-    "response_dt": "2022-06-23 12:39:24",
-    "execution_time": 0.101,
-    "memory_usage": 1215976
-    }
+     *        "status": "Success",
+     *        "errors": [],
+     *        "action": "v1/lead/sold-update",
+     *        "response_id": 75,
+     *        "request_dt": "2022-06-23 12:39:24",
+     *        "response_dt": "2022-06-23 12:39:24",
+     *        "execution_time": 0.101,
+     *        "memory_usage": 1215976
+     *        }
      *
      * @apiError UserNotFound The id of the User was not found.
      *
@@ -1798,6 +1798,15 @@ class LeadController extends ApiBaseController
      *          "code": 2,
      *          "status": 404,
      *          "type": "yii\\web\\NotFoundHttpException"
+     *      }
+     *
+     *      HTTP/1.1 400 Bad Request
+     *      {
+     *          "name": "Bad Request",
+     *          "message": "This request with params has already been sent. Lead UID: 62668a051c07c",
+     *          "code": 0,
+     *          "status": 400,
+     *          "type": "yii\\web\\BadRequestHttpException"
      *      }
      *
      *
@@ -1828,7 +1837,7 @@ class LeadController extends ApiBaseController
         $idKey = 'action_sold_update_' . HashHelper::generateHashFromArray(Yii::$app->request->post());
 
         if (RedisHelper::checkDuplicate($idKey, 5)) {
-            throw new BadRequestHttpException('This request with params has already been sent');
+            throw new BadRequestHttpException('This request with params has already been sent. Lead UID: ' . $leadAttributes['uid']);
         }
 
         $response = [
