@@ -424,7 +424,7 @@ class SiteController extends FController
                 $form->setUser($authClient->user);
                 $form->setUserChecked(true);
 
-                if (SettingHelper::isTwoFactorAuthEnabled() && $authClient->user->userProfile && $authClient->user->userProfile->is2faEnable()) {
+                if (SettingHelper::isTwoFactorAuthEnabled() && $authClient->user->userProfile) {
                     return $this->redirectToTwoFactorAuth($authClient->user, $form);
                 }
 
