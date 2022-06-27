@@ -36,6 +36,8 @@ class SendInternalEmailJob extends BaseJob implements JobInterface
      */
     public function execute($queue)
     {
+        $this->waitingTimeRegister();
+
         $emailData = \Yii::$app->communication->mailPreview(
             $this->projectId,
             $this->templateType,

@@ -38,12 +38,12 @@ class EmailComponent extends Component
                 if ($isSend) {
                     return true;
                 }
-                \Yii::warning(sprintf("Email '%s' send failed", $emailData->to), 'EmailComponent->send()');
+                \Yii::warning("Email " . $emailData->to . " send failed", 'EmailComponent:send');
             } catch (\Throwable $ex) {
-                \Yii::error(AppHelper::throwableLog($ex, true), 'EmailComponent->send()');
+                \Yii::error(AppHelper::throwableLog($ex, true), 'EmailComponent:send');
             }
         } else {
-            \Yii::warning("Component mailer doesn't exist", 'EmailComponent->send()');
+            \Yii::warning("Component mailer doesn't exist", 'EmailComponent:send');
         }
 
         return false;
