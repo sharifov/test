@@ -7,6 +7,7 @@ use common\models\ApiLog;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\LoginStepTwoForm;
+use common\models\query\EmployeeQuery;
 use common\models\search\EmployeeSearch;
 use common\models\search\LeadTaskSearch;
 use common\models\UserBonusRules;
@@ -22,6 +23,7 @@ use src\helpers\setting\SettingHelper;
 use src\model\userAuthClient\entity\UserAuthClientQuery;
 use src\model\userAuthClient\entity\UserAuthClientSources;
 use src\model\user\entity\monitor\UserMonitor;
+use src\useCase\login\twoFactorAuth\TwoFactorAuthFactory;
 use Yii;
 use yii\authclient\AuthAction;
 use yii\authclient\ClientInterface;
@@ -184,30 +186,44 @@ class SiteController extends FController
         $this->layout = '@frontend/themes/gentelella_v2/views/layouts/login';
         $session = Yii::$app->session;
 
-        if (!$session->has('two_factor_email') || !$session->has('two_factor_key')) {
+        if (!$session->has('two_factor_email')) {
+            return $this->redirect(['site/login']);
+        }
+        $userEmail = $session->get('two_factor_email');
+
+        $user = EmployeeQuery::findByEmail($userEmail);
+        if (!$user && !$user->userProfile) {
             return $this->redirect(['site/login']);
         }
 
-        $userEmail = $session->get('two_factor_email');
-        $userName = $session->get('two_factor_username');
-        $twoFactorAuthKey = $session->get('two_factor_key');
-
         $model = (new LoginStepTwoForm())
-            ->setUserEmail($userEmail)
-            ->setTwoFactorAuthKey($twoFactorAuthKey)
+            ->setUser($user)
             ->setRememberMe($session->get('two_factor_remember_me'));
 
-        if ($model->load(Yii::$app->request->post()) && $model->login()) {
-            $session->remove('auth_client_source');
-            $session->remove('auth_client_source_id');
-            return $this->goHome();
+        if ($model->load(Yii::$app->request->post()) && !Yii::$app->request->isPjax && $model->validate()) {
+            $twoFactorAuthForm = (TwoFactorAuthFactory::getForm($model->twoFactorMethod))->setUser($user);
+            $twoFactorAuthForm->load(Yii::$app->request->post());
+            if (($twoFactorAuthForm->validate() && $twoFactorAuthForm->login((bool)$model->rememberMe))) {
+                $session->remove('auth_client_source');
+                $session->remove('auth_client_source_id');
+                return $this->goHome();
+            }
+            $model->addError('general', $twoFactorAuthForm->getErrorSummary(true)[0]);
         }
-        $qrcodeSrc = (new TwoFactorService())->getBase64($twoFactorAuthKey, $userName);
 
+        if (empty($model->twoFactorMethod)) {
+            $model->twoFactorMethod = TwoFactorAuthFactory::getDefaultAuthMethod($user);
+            if (empty($model->twoFactorMethod)) {
+                Yii::$app->session->removeAll();
+                Yii::$app->session->setFlash('error', 'You do not have access to any two-factor authentication method.');
+                return $this->redirect(['/site/login']);
+            }
+        }
+        $helper = TwoFactorAuthFactory::getViewHelper($model->twoFactorMethod);
         return $this->render('step-two', [
-            'qrcodeSrc' => $qrcodeSrc,
             'model' => $model,
-            'twoFactorKeyExist' => $session->get('two_factor_key_exist'),
+            'viewHelper' => $helper,
+            'user' => $user
         ]);
     }
 
@@ -436,14 +452,14 @@ class SiteController extends FController
 
     protected function redirectToTwoFactorAuth(Employee $user, LoginForm $model): Response
     {
-        $twoFactorAuthSecretKey = empty($user->userProfile->up_2fa_secret) ?
-            (new TwoFactorService())->getSecret() : $user->userProfile->up_2fa_secret;
+//        $twoFactorAuthSecretKey = empty($user->userProfile->up_2fa_secret) ?
+//            (new TwoFactorService())->getSecret() : $user->userProfile->up_2fa_secret;
 
         $session = Yii::$app->session;
         $session->set('two_factor_email', $user->email);
-        $session->set('two_factor_username', $user->username);
-        $session->set('two_factor_key_exist', !empty($user->userProfile->up_2fa_secret));
-        $session->set('two_factor_key', $twoFactorAuthSecretKey);
+//        $session->set('two_factor_username', $user->username);
+//        $session->set('two_factor_key_exist', !empty($user->userProfile->up_2fa_secret));
+//        $session->set('two_factor_key', $twoFactorAuthSecretKey);
         $session->set('two_factor_remember_me', $model->rememberMe);
         return $this->redirect(['site/step-two']);
     }
