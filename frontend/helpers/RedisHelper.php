@@ -18,8 +18,8 @@ class RedisHelper
         }
 
         $redis = Yii::$app->redis;
-        $checkSetValue = $redis->setnx($idKey, $newValue);
-        if ($checkSetValue) {
+        $isSetValue = $redis->setnx($idKey, $newValue);
+        if ($isSetValue) {
             $redis->expire($idKey, $pauseSecond);
             return false;
         } else {
