@@ -11,6 +11,8 @@ use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use yii\db\Query;
+use src\entities\email\helpers\EmailFilterType;
+use src\entities\email\helpers\EmailType;
 
 /**
  * EmailSearch
@@ -50,8 +52,6 @@ class EmailSearch extends Email
         $currentDate = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->setTimezone(new \DateTimeZone($userTimezone));
         $this->date_range = ($currentDate->modify(self::CREATE_TIME_START_DEFAULT_RANGE))->format('Y-m-d') . ' 00:00:00 - ' . $currentDate->format('Y-m-d') . ' 23:59:59';
     }
-
-
 
     public function attributeLabels(): array
     {
@@ -158,6 +158,60 @@ class EmailSearch extends Email
         }
 
         $dataProvider->totalCount = $query->count('distinct e_id');
+
+        return $dataProvider;
+    }
+
+    /**
+     * @param $params
+     * @return ActiveDataProvider
+     */
+    public function searchEmails($params)
+    {
+        $query = self::find();
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort' => ['defaultOrder' => ['e_id' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 12,
+            ],
+        ]);
+
+        if (isset($params['email_type_id']) && $params['email_type_id'] > 0) {
+            $this->email_type_id = (int) $params['email_type_id'];
+
+            if (EmailFilterType::isAll($this->email_type_id)) {
+                $query->where(['e_is_deleted' => false]);
+            } elseif (EmailFilterType::isInbox($this->email_type_id)) {
+                $query->where(['e_type_id' => EmailType::INBOX, 'e_is_deleted' => false]);
+            } elseif (EmailFilterType::isOutbox($this->email_type_id)) {
+                $query->where(['e_type_id' => EmailType::OUTBOX, 'e_is_deleted' => false]);
+            } elseif (EmailFilterType::isDraft($this->email_type_id)) {
+                $query->where(['e_type_id' => EmailType::DRAFT, 'e_is_deleted' => false]);
+            } elseif (EmailFilterType::isTrash($this->email_type_id)) {
+                $query->where(['e_is_deleted' => true]);
+            }
+        }
+
+        if (isset($params['EmailSearch']['user_id']) && $params['EmailSearch']['user_id'] > 0) {
+            $query->andWhere([
+                'or',
+                ['=', 'e_created_user_id', $params['EmailSearch']['user_id']],
+            ]);
+        }
+
+        if (isset($params['EmailSearch']['email']) && $params['EmailSearch']['email']) {
+            $params['EmailSearch']['email'] = strtolower(trim($params['EmailSearch']['email']));
+            $query->andWhere(['or', ['e_email_from' => $params['EmailSearch']['email']], ['and', ['e_email_to' => $params['EmailSearch']['email']], ['e_type_id' => Email::TYPE_INBOX]]]);
+        }
+
+        if (!($this->load($params) && $this->validate())) {
+            $dataProvider->setTotalCount(QueryHelper::getQueryCountInvalidModel($this, static::class . 'searchEmails' . $params['EmailSearch']['user_id'], $query, 60));
+            return $dataProvider;
+        }
+
+        $dataProvider->setTotalCount(QueryHelper::getQueryCountValidModel($this, static::class . 'searchEmails' . $params['EmailSearch']['user_id'], $query, 60));
 
         return $dataProvider;
     }
