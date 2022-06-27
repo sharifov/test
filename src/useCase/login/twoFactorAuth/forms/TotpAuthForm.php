@@ -46,7 +46,7 @@ class TotpAuthForm extends Model implements TwoFactorFormInterface
     public function validateKey($attribute, $params): void
     {
         if (!$this->hasErrors()) {
-            $valid = (new TwoFactorService())->verifyCode($this->service->getOrSetSecretAuthKey($this->user), $this->secretKey);
+            $valid = (new TwoFactorService())->verifyCode($this->service->getOrSetSecretAuthKey($this->user), $this->secretKey, 0);
 
             if (!$valid) {
                 $this->addError($attribute, 'Wrong verification code. Please verify your secret code and try again.');
