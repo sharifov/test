@@ -11,7 +11,7 @@ class RedisHelper
      * @param int $pauseSecond
      * @return bool
      */
-    public static function checkDuplicate(string $idKey, int $pauseSecond = 10, string $newValue = null): bool
+    public static function checkDuplicate(string $idKey, int $pauseSecond = 10, ?string $newValue = null): bool
     {
         if (empty($newValue)) {
             $newValue = Yii::$app->security->generateRandomString(6);
