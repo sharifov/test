@@ -35,4 +35,17 @@ class LeadDataService
         }
         return $result;
     }
+
+    /**
+     * @param int $leadId
+     * @param string $key
+     * @return LeadData[]
+     */
+    public static function getByKey(int $leadId, string $key): array
+    {
+        return LeadData::find()
+            ->where(['ld_lead_id' => $leadId])
+            ->andWhere(['ld_field_key' => $key])
+            ->all();
+    }
 }

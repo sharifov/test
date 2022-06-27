@@ -23,7 +23,7 @@ class LeadTaskListAbacDto extends \stdClass
             $this->is_owner = $lead->isOwner($userId);
             $this->statusId = $lead->status;
             $this->projectId = $lead->project_id;
-            $this->hasActiveLeadObjectSegment = LeadTaskListService::hasActiveLeadObjectSegment($lead);
+            $this->hasActiveLeadObjectSegment = (new LeadTaskListService($lead))->hasActiveLeadObjectSegment();
         }
     }
 }
