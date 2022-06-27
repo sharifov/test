@@ -210,6 +210,14 @@ class Email extends ActiveRecord
         return $this->emailBody->embd_email_subject;
     }
 
+    /**
+     * @return EmailQuery
+     */
+    public static function find(): EmailQuery
+    {
+        return new EmailQuery(get_called_class());
+    }
+
     public function delete()
     {
         $emailBody = $this->emailBody;
