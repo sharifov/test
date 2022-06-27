@@ -14,6 +14,7 @@ use common\models\LeadFlightSegment;
 use common\models\Notifications;
 use common\models\Sources;
 use common\models\VisitorLog;
+use frontend\helpers\RedisHelper;
 use frontend\widgets\notification\NotificationMessage;
 use modules\featureFlag\FFlag;
 use modules\flight\models\FlightQuoteSegment;
@@ -22,6 +23,7 @@ use modules\product\src\useCases\product\api\create\flight\Handler;
 use modules\webEngage\settings\WebEngageDictionary;
 use modules\webEngage\src\service\webEngageEventData\lead\eventData\LeadCreatedEventData;
 use src\helpers\app\AppHelper;
+use src\helpers\text\HashHelper;
 use src\model\clientData\service\ClientDataService;
 use src\model\leadData\entity\LeadData;
 use src\model\leadData\services\LeadDataCreateService;
@@ -1821,6 +1823,12 @@ class LeadController extends ApiBaseController
         ]);
         if (!$lead) {
             throw new NotFoundHttpException('Not found Lead UID: ' . $leadAttributes['uid'], 2);
+        }
+
+        $idKey = 'action_sold_update' . HashHelper::generateHashFromArray(Yii::$app->request->post());
+
+        if (RedisHelper::checkDuplicate($idKey, 5)) {
+            throw new BadRequestHttpException('This request with params has already been sent');
         }
 
         $response = [
