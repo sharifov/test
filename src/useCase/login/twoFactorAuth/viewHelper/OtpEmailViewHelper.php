@@ -36,8 +36,8 @@ class OtpEmailViewHelper extends View implements TwoFactorViewHelperInterface
             $userProfile->save();
 
             $job = new SendInternalEmailJob(
-                2,
-                'two_factor_auth',
+                SettingHelper::getOtpEmailProjectId(),
+                SettingHelper::getOtpEmailTemplateType(),
                 SettingHelper::getEmailFrom(),
                 $user->email,
                 ['code' => $code, 'secondsRemain' => $userProfile->getOtpSecondsLeft()]
