@@ -14,6 +14,7 @@ use common\models\LeadFlightSegment;
 use common\models\Notifications;
 use common\models\Sources;
 use common\models\VisitorLog;
+use frontend\helpers\RedisHelper;
 use frontend\widgets\notification\NotificationMessage;
 use modules\featureFlag\FFlag;
 use modules\flight\models\FlightQuoteSegment;
@@ -22,6 +23,7 @@ use modules\product\src\useCases\product\api\create\flight\Handler;
 use modules\webEngage\settings\WebEngageDictionary;
 use modules\webEngage\src\service\webEngageEventData\lead\eventData\LeadCreatedEventData;
 use src\helpers\app\AppHelper;
+use src\helpers\text\HashHelper;
 use src\model\clientData\service\ClientDataService;
 use src\model\leadData\entity\LeadData;
 use src\model\leadData\services\LeadDataCreateService;
@@ -1776,15 +1778,15 @@ class LeadController extends ApiBaseController
      * @apiSuccessExample Success-Response:
      * HTTP/1.1 200 OK
      * {
-    "status": "Success",
-    "errors": [],
-    "action": "v1/lead/sold-update",
-    "response_id": 75,
-    "request_dt": "2022-06-23 12:39:24",
-    "response_dt": "2022-06-23 12:39:24",
-    "execution_time": 0.101,
-    "memory_usage": 1215976
-    }
+     *        "status": "Success",
+     *        "errors": [],
+     *        "action": "v1/lead/sold-update",
+     *        "response_id": 75,
+     *        "request_dt": "2022-06-23 12:39:24",
+     *        "response_dt": "2022-06-23 12:39:24",
+     *        "execution_time": 0.101,
+     *        "memory_usage": 1215976
+     *        }
      *
      * @apiError UserNotFound The id of the User was not found.
      *
@@ -1796,6 +1798,15 @@ class LeadController extends ApiBaseController
      *          "code": 2,
      *          "status": 404,
      *          "type": "yii\\web\\NotFoundHttpException"
+     *      }
+     *
+     *      HTTP/1.1 400 Bad Request
+     *      {
+     *          "name": "Bad Request",
+     *          "message": "This request with params has already been sent. Lead UID: 62668a051c07c",
+     *          "code": 0,
+     *          "status": 400,
+     *          "type": "yii\\web\\BadRequestHttpException"
      *      }
      *
      *
@@ -1821,6 +1832,12 @@ class LeadController extends ApiBaseController
         ]);
         if (!$lead) {
             throw new NotFoundHttpException('Not found Lead UID: ' . $leadAttributes['uid'], 2);
+        }
+
+        $idKey = 'action_sold_update_' . HashHelper::generateHashFromArray(Yii::$app->request->post());
+
+        if (RedisHelper::checkDuplicate($idKey, 5)) {
+            throw new BadRequestHttpException('This request with params has already been sent. Lead UID: ' . $leadAttributes['uid']);
         }
 
         $response = [

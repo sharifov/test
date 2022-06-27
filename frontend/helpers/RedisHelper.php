@@ -11,13 +11,18 @@ class RedisHelper
      * @param int $pauseSecond
      * @return bool
      */
-    public static function checkDuplicate(string $idKey, int $pauseSecond = 10): bool
+    public static function checkDuplicate(string $idKey, int $pauseSecond = 10, ?string $newValue = null): bool
     {
-        $redis = Yii::$app->redis;
-        if (!$redis->get($idKey)) {
-            $redis->setex($idKey, $pauseSecond, true);
-            return false;
+        if (empty($newValue)) {
+            $newValue = Yii::$app->security->generateRandomString(6);
         }
-        return true;
+
+        $redis = Yii::$app->redis;
+        if ($redis->setnx($idKey, $newValue)) {
+            $redis->expire($idKey, $pauseSecond);
+            return false;
+        } else {
+            return true;
+        }
     }
 }
