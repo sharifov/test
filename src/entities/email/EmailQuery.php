@@ -4,6 +4,7 @@ namespace src\entities\email;
 
 use yii\db\ActiveQuery;
 use yii\helpers\ArrayHelper;
+use src\entities\email\helpers\EmailType;
 
 class EmailQuery extends ActiveQuery
 {
@@ -15,6 +16,21 @@ class EmailQuery extends ActiveQuery
     public function deleted()
     {
         return $this->andWhere(['e_is_deleted' => true]);
+    }
+
+    public function inbox()
+    {
+        return $this->andWhere(['e_type_id' => EmailType::INBOX]);
+    }
+
+    public function outbox()
+    {
+        return $this->andWhere(['e_type_id' => EmailType::OUTBOX]);
+    }
+
+    public function draft()
+    {
+        return $this->andWhere(['e_type_id' => EmailType::DRAFT]);
     }
 
     public function unread()
