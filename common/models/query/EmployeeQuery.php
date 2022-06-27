@@ -220,4 +220,9 @@ class EmployeeQuery extends \yii\db\ActiveQuery
             'username'
         );
     }
+
+    public static function findByEmail(string $email): ?Employee
+    {
+        return Employee::findOne(['email' => $email]);
+    }
 }
