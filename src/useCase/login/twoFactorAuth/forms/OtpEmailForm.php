@@ -53,7 +53,10 @@ class OtpEmailForm extends Model implements TwoFactorFormInterface
     public function validateKey($attribute): bool
     {
         if (!$this->hasErrors()) {
-            $userProfile = $this->user->userProfile;
+            if (!$userProfile = $this->user->userProfile) {
+                $this->addError($attribute, 'Wrong verification code. User Profile is not set');
+                return false;
+            }
 
             if (empty($userProfile->up_otp_hashed_code) || $this->service->hashKey($this->secretKey) !== $userProfile->up_otp_hashed_code) {
                 $this->addError($attribute, 'Wrong verification code. Please verify your secret code and try again.');
