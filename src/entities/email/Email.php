@@ -156,6 +156,11 @@ class Email extends ActiveRecord
         return ArrayHelper::map($this->cases, 'cs_id', 'cs_id');
     }
 
+    public function getHash(): array
+    {
+        return $this->emailBody->embd_hash;
+    }
+
     public function getContactFrom(): \yii\db\ActiveQuery
     {
         return $this->hasOne(EmailAddress::class, ['ea_id' => 'ec_address_id'])
@@ -213,6 +218,16 @@ class Email extends ActiveRecord
         }
     }
 
+    public function isDeleted()
+    {
+        return $this->e_is_deleted;
+    }
+
+    public function isNew()
+    {
+        return $this->emailLog->el_is_new;
+    }
+
     public function attributeLabels(): array
     {
         return [
@@ -229,6 +244,7 @@ class Email extends ActiveRecord
             'reply.e_id' => 'Reply ID',
             'contactFrom.ea_name' => 'From Name',
             'contactTo.ea_name' => 'To Name',
+            'templateType.etp_name' => 'Template Name',
         ];
     }
 
