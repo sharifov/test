@@ -2,24 +2,29 @@
 
 namespace src\entities\email\helpers;
 
+use src\entities\email\Email;
+
 /**
- * Class EmailType
+ * Class EmailFilterType
  *
  * @package common\models\helpers
  */
-class EmailType
+class EmailFilterType
 {
-    public const DRAFT     = 0;
-    public const OUTBOX    = 1;
-    public const INBOX     = 2;
-
+    public const ALL        = 1;
+    public const INBOX      = 2;
+    public const OUTBOX     = 3;
+    public const DRAFT      = 4;
+    public const TRASH      = 5;
 
     public static function getList(): array
     {
         return [
-            self::DRAFT    => 'Draft',
-            self::OUTBOX   => 'Outbox',
-            self::INBOX    => 'Inbox',
+            self::ALL    => 'ALL',
+            self::INBOX   => 'INBOX',
+            self::OUTBOX    => 'OUTBOX',
+            self::DRAFT    => 'DRAFT',
+            self::TRASH    => 'TRASH',
         ];
     }
 
@@ -27,6 +32,11 @@ class EmailType
     {
         $map = self::getList();
         return $map[$type] ?? null;
+    }
+
+    public static function isAll(int $type): bool
+    {
+        return $type === self::ALL;
     }
 
     public static function isInbox(int $type): bool
@@ -44,8 +54,8 @@ class EmailType
         return $type === self::DRAFT;
     }
 
-    public static function isDraftOrOutbox(int $type): bool
+    public static function isTrash(int $type): bool
     {
-        return in_array($type, [self::DRAFT, self::OUTBOX]);
+        return $type === self::TRASH;
     }
 }
