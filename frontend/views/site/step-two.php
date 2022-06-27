@@ -5,6 +5,7 @@
 /* @var $model LoginStepTwoForm */
 /* @var $viewHelper TwoFactorViewHelperInterface */
 /* @var $user \common\models\Employee */
+/* @var array $attemptsRemain */
 
 use common\models\LoginStepTwoForm;
 use src\useCase\login\twoFactorAuth\TwoFactorAuthFactory;
@@ -29,6 +30,14 @@ $this->title = 'Login Step Two';
                 ]) ?>
 
                 <?= $viewHelper->renderView($form, $user) ?>
+
+                <?php if ($attemptsRemain['show']) : ?>
+                    <div class="form-group">
+                        <p class="text-danger">
+                            Remain <?= $attemptsRemain['remain'] ?> attempts
+                        </p>
+                    </div>
+                <?php endif; ?>
 
                 <div class="form-group">
                     <?= Html::submitButton('Login', ['class' => 'btn btn-default', 'name' => 'login-button']) ?>
