@@ -799,9 +799,14 @@ class SettingHelper
         return (bool) (Yii::$app->params['settings']['two_factor_authentication_enable'] ?? false);
     }
 
-    public static function getTwoFactorAuthCounter(): int
+    public static function getTwoFactorAuthMaxAttempts(): int
     {
-        return (int) (Yii::$app->params['settings']['two_factor_counter'] ?? 60);
+        return (int) (Yii::$app->params['settings']['two_factor_attempts_settings']['max_attempts'] ?? 60);
+    }
+
+    public static function getTwoFactorAuthWarningAttemptsRemain(): int
+    {
+        return (int) (Yii::$app->params['settings']['two_factor_attempts_settings']['show_warning_attempts_remain'] ?? 3);
     }
 
     public static function isEnabledAuthClients(): bool
