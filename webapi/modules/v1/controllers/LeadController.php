@@ -1825,7 +1825,7 @@ class LeadController extends ApiBaseController
             throw new NotFoundHttpException('Not found Lead UID: ' . $leadAttributes['uid'], 2);
         }
 
-        $idKey = 'action_sold_update' . HashHelper::generateHashFromArray(Yii::$app->request->post());
+        $idKey = 'action_sold_update_' . HashHelper::generateHashFromArray(Yii::$app->request->post());
 
         if (RedisHelper::checkDuplicate($idKey, 5)) {
             throw new BadRequestHttpException('This request with params has already been sent');
