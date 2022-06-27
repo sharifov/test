@@ -40,6 +40,10 @@ class m220627_083113_rename_site_settings_property_two_factor_counter extends Mi
      */
     public function safeDown()
     {
+        $this->delete('{{%setting}}', [
+            's_key' => 'two_factor_attempts_settings',
+        ]);
+
         $this->insert('{{%setting}}', [
             's_key' => 'two_factor_counter',
             's_name' => 'Two factor auth counter',
