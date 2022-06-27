@@ -63,6 +63,7 @@ abstract class BaseApplication extends yii\base\Application
  * @property \kivork\FeatureFlag\components\FeatureFlagComponent $featureFlag FeatureFlag component
  * @property \modules\eventManager\components\EventManagerComponent $event Event component
  * @property \common\components\ApplicationStatus $applicationStatus application status component
+ * @property \common\components\email\EmailComponent $email application status component
  */
 class WebApplication extends yii\web\Application
 {

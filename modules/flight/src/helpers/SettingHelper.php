@@ -50,4 +50,14 @@ class SettingHelper
     {
         return (int) (self::getSettings()['expiration_days_of_new_offers'] ?? 24);
     }
+
+    /**
+     * Returns the number days diff for next trip
+     *
+     * @return int
+     */
+    public static function getDaysDiffForNextTrip(): int
+    {
+        return (int) (self::getSettings()['days_diff_for_next_trip'] ?? 2);
+    }
 }

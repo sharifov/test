@@ -52,6 +52,8 @@ class AgentActivitySearch extends Call
         return [
             [['date_range','date_from', 'date_to', 'user_groups', 'id', 'username', 'c_project_id','c_call_type_id','s_type_id','s_project_id','project_id'], 'safe'],
             [['to_status', 'from_status'], 'safe'],
+            [['date_from', 'date_to'], 'default', 'value' => date('Y-m-d H:i')],
+
 
             [['lf_owner_id'], 'integer'],
             [['isExtraQLostLeads'], 'boolean'],

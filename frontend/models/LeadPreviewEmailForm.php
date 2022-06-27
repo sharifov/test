@@ -38,7 +38,7 @@ use yii\helpers\ArrayHelper;
  * @property AbacEmailList $emailFromList
  *
  */
-class LeadPreviewEmailForm extends Model
+class LeadPreviewEmailForm extends Model implements EmailPreviewFromInterface
 {
     public $e_lead_id;
     public $e_email_from;
@@ -176,5 +176,10 @@ class LeadPreviewEmailForm extends Model
     public function isSubjectEdited(): bool
     {
         return strcmp($this->e_email_subject_origin, $this->e_email_subject) !== 0;
+    }
+
+    public function countLettersInEmailMessage(): int
+    {
+        return !empty($this->e_email_message) ? mb_strlen($this->e_email_message) : 0;
     }
 }

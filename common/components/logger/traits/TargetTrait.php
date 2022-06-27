@@ -280,7 +280,7 @@ trait TargetTrait
         list($text, $level, $category, $timestamp) = $message;
 
         $level = Logger::getLevelName($level);
-        $timestamp = date('c', $timestamp);
+        $timestamp = date('c', intval($timestamp));
 
         //$txt = $this->parseText($text);
         //чVarDumper::dump($text, 10, true); exit;

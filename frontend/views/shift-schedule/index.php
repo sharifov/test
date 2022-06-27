@@ -732,6 +732,11 @@ $js = <<<JS
             $('#modal-md').modal('hide');
         }
     });
+    
+    $(document).on('reloadShitScheduleRequest', function (e, params) {
+          calendar.refetchEvents();
+    });
+    
      $(document).on('pjax:end', function() {
          $('[data-toggle="tooltip"]').tooltip();
     });

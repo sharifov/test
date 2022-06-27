@@ -456,6 +456,10 @@ class AbacPolicyController extends FController
 
     public function actionClearCache(): Response
     {
+        $cacheTagDependency = Yii::$app->abac->getCacheTagDependency();
+        if ($cacheTagDependency) {
+            TagDependency::invalidate(Yii::$app->cache, $cacheTagDependency);
+        }
         TagDependency::invalidate(Yii::$app->cache, [AbacPolicy::CACHE_KEY]);
         return $this->redirect(['/abac/abac-policy']);
     }

@@ -78,7 +78,7 @@ class SaleTicket extends \yii\db\ActiveRecord
 
     public function beforeValidate()
     {
-        if (preg_match('/^[+-]?\d+(?:\.\d+)?$/', $this->st_penalty_amount)) {
+        if (preg_match('/^[+-]?\d+(?:\.\d+)?$/', ($this->st_penalty_amount ?? ''))) {
             $this->st_penalty_amount = (string)((float)$this->st_penalty_amount);
         }
 
@@ -235,7 +235,7 @@ class SaleTicket extends \yii\db\ActiveRecord
 
     private function getPenaltyAmountNumberValue(): float
     {
-        if (preg_match('/^[+-]?\d+(?:\.\d+)?$/', $this->st_penalty_amount)) {
+        if (preg_match('/^[+-]?\d+(?:\.\d+)?$/', ($this->st_penalty_amount ?? ''))) {
             return (float)$this->st_penalty_amount;
         }
         return 0.00;

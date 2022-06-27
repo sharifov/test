@@ -28,6 +28,7 @@ use frontend\assets\overridden\LajaxLanguageItemPluginAsset;
 use frontend\assets\PageLoaderAsset;
 use frontend\assets\Timeline2Asset;
 use frontend\assets\TimelineAsset;
+use frontend\assets\UserShiftCalendarAsset;
 use frontend\assets\WebAudioRecorder;
 use frontend\assets\WebPhoneAsset;
 use frontend\themes\gentelella_v2\assets\BootstrapProgressbar;
@@ -189,7 +190,8 @@ return [
 
         SwitcheryAsset::class,
 
-        UserFlowWidgetAsset::class
+        UserFlowWidgetAsset::class,
+        UserShiftCalendarAsset::class
 
 //        MomentAsset::class
     ],
@@ -809,7 +811,15 @@ return [
             'js' => 'userflow.min.js',
             'css' => 'userflow.min.css',
             'depends' => [ UserFlowWidgetAsset::class ],
-        ]
+        ],
+        'UserShiftCalendarAsset' => [
+            'class' => UserShiftCalendarAsset::class,
+            'basePath' => '@webroot/all_shared/build',
+            'baseUrl' => '@web/all_shared/build',
+            'js' => 'timeline.min.js',
+            'css' => 'timeline.min.css',
+            'depends' => [ UserShiftCalendarAsset::class ],
+        ],
     ],
 
     'assetManager' => [

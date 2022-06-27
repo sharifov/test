@@ -66,10 +66,16 @@ class ShiftScheduleCreateForm extends Model
     public function load($data, $formName = null): bool
     {
         $parentLoad = parent::load($data, $formName);
-        $users = explode(',', $this->users);
-        if (!empty($users)) {
-            $this->_usersBatch = $users;
+
+        if (!empty($this->users)) {
+            $users = explode(',', $this->users);
+
+            if (!empty($users)) {
+                $this->_usersBatch = $users;
+            }
         }
+
+
         return $parentLoad;
     }
 
