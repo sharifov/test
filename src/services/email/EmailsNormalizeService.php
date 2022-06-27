@@ -206,7 +206,7 @@ class EmailsNormalizeService
         $contactFrom->attributes = [
             'ec_address_id' => $addressFrom->ea_id,
             'ec_email_id' => $this->email->e_id,
-            'ec_type_id' => EmailContact::TYPE_FROM
+            'ec_type_id' => EmailContactType::FROM
         ];
         $contactFrom->save();
         $this->emailContacts[] = $contactFrom;
@@ -216,7 +216,7 @@ class EmailsNormalizeService
         $contactTo->attributes = [
             'ec_address_id' => $addressTo->ea_id,
             'ec_email_id' => $this->email->e_id,
-            'ec_type_id' => EmailContact::TYPE_TO
+            'ec_type_id' => EmailContactType::TO
         ];
         $contactTo->save();
         $this->emailContacts[] = $contactTo;
@@ -227,7 +227,7 @@ class EmailsNormalizeService
             $contactCc->attributes = [
                 'ec_address_id' => $addressCc->ea_id,
                 'ec_email_id' => $this->email->e_id,
-                'ec_type_id' => EmailContact::TYPE_CC
+                'ec_type_id' => EmailContactType::CC
             ];
             $contactCc->save();
             $this->emailContacts[] = $contactCc;
@@ -239,7 +239,7 @@ class EmailsNormalizeService
             $contactBcc->attributes = [
                 'ec_address_id' => $addressCc->ea_id,
                 'ec_email_id' => $this->email->e_id,
-                'ec_type_id' => EmailContact::TYPE_BCC
+                'ec_type_id' => EmailContactType::BCC
             ];
             $contactBcc->save();
             $this->emailContacts[] = $contactBcc;
@@ -283,5 +283,44 @@ class EmailsNormalizeService
     public function getErrors()
     {
         return $this->errors;
+    }
+
+    /**
+     * @param string $str
+     * @return string
+     */
+    public static function reSubject($str = ''): string
+    {
+        $str = trim($str);
+        if (strpos($str, 'Re:', 0) === false && strpos($str, 'Re[', 0) === false) {
+            return 'Re:' . $str;
+        } else {
+            preg_match_all('/Re\[([\d]+)\]:/i', $str, $m);
+            if ($m && is_array($m) && isset($m[0], $m[1])) {
+                if (count($m[0]) > 1) {
+                    $cnt = 0;
+                    foreach ($m[0] as $repl) {
+                        if (isset($m[0][$cnt + 1])) {
+                            $from = '/' . preg_quote($repl, '/') . '/';
+                            $str = preg_replace($from, '', $str, 1);
+                            $str = preg_replace("/(.*?)$repl/i", '', $str, 1);
+                        }
+                        $cnt++;
+                    }
+                }
+            }
+            $str = preg_replace("/(.*?)Re\[([\d]+)\]:/i", 'Re[$2]: ', $str, 1);
+            if (mb_substr($str, 0, 3, 'utf-8') === 'Re:') {
+                $str = preg_replace("/(Re:)/i", 'Re[1]:', $str, 1);
+            } elseif (preg_match('/Re\[([\d]+)\]:/i', $str, $matches)) {
+                if (isset($matches[0], $matches[1])) {
+                    $newVal = $matches[1] + 1;
+                    $str = preg_replace('/Re\[([\d]+)\]:/i', 'Re[' . $newVal . ']:', $str, 1);
+                }
+            }
+        }
+        $str = preg_replace("/ {2,}/", " ", $str);
+
+        return trim($str);
     }
 }

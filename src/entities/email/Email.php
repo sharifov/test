@@ -22,6 +22,7 @@ use src\entities\email\helpers\EmailStatus;
 use src\entities\EventTrait;
 use src\entities\email\events\EmailDeletedEvent;
 use src\helpers\email\TextConvertingHelper;
+use src\entities\email\helpers\EmailContactType;
 
 /**
  * This is the model class for table "email_norm".
@@ -174,7 +175,7 @@ class Email extends ActiveRecord
                 'email_contact',
                 ['ec_email_id' => 'e_id'],
                 function($query) {
-                    $query->onCondition(['ec_type_id' => EmailContact::TYPE_FROM]);
+                    $query->onCondition(['ec_type_id' => EmailContactType::FROM]);
                 }
             );
     }
@@ -186,7 +187,7 @@ class Email extends ActiveRecord
             'email_contact',
             ['ec_email_id' => 'e_id'],
             function($query) {
-                $query->onCondition(['ec_type_id' => EmailContact::TYPE_TO]);
+                $query->onCondition(['ec_type_id' => EmailContactType::TO]);
             }
             );
     }

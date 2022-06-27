@@ -3,26 +3,27 @@
 namespace src\entities\email;
 
 use yii\db\ActiveQuery;
+use src\entities\email\helpers\EmailContactType;
 
 class EmailContactQuery extends ActiveQuery
 {
-    public function isFrom()
+    public function from()
     {
-        return $this->andOnCondition(['ec_type_id' => EmailContact::TYPE_FROM]);
+        return $this->andOnCondition(['ec_type_id' => EmailContactType::FROM]);
     }
 
-    public function isTo()
+    public function to()
     {
-        return $this->andOnCondition(['ec_type_id' => EmailContact::TYPE_TO]);
+        return $this->andOnCondition(['ec_type_id' => EmailContactType::TO]);
     }
 
-    public function isCc()
+    public function cc()
     {
-        return $this->andOnCondition(['ec_type_id' => EmailContact::TYPE_CC]);
+        return $this->andOnCondition(['ec_type_id' => EmailContactType::CC]);
     }
 
-    public function isBcc()
+    public function bcc()
     {
-        return $this->andOnCondition(['ec_type_id' => EmailContact::TYPE_BCC]);
+        return $this->andOnCondition(['ec_type_id' => EmailContactType::BCC]);
     }
 }
