@@ -5,6 +5,7 @@ namespace src\entities\email;
 use yii\db\ActiveQuery;
 use yii\helpers\ArrayHelper;
 use src\entities\email\helpers\EmailType;
+use yii\db\Expression;
 
 class EmailQuery extends ActiveQuery
 {
@@ -31,6 +32,11 @@ class EmailQuery extends ActiveQuery
     public function draft()
     {
         return $this->andWhere(['e_type_id' => EmailType::DRAFT]);
+    }
+
+    public function createdToday()
+    {
+        return $this->andWhere(['DATE(e_created_dt)' => new Expression('DATE(NOW())')]);
     }
 
     public function unread()
