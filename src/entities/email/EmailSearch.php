@@ -203,13 +203,25 @@ class EmailSearch extends Email
 
         if (isset($params['EmailSearch']['email']) && $params['EmailSearch']['email']) {
             $params['EmailSearch']['email'] = strtolower(trim($params['EmailSearch']['email']));
-            $query->andWhere(['or', ['e_email_from' => $params['EmailSearch']['email']], ['and', ['e_email_to' => $params['EmailSearch']['email']], ['e_type_id' => Email::TYPE_INBOX]]]);
+            $query->joinWith(['contacts' => function ($q) use ($params) {
+                $q->andFilterWhere(['like', 'ea_email', $params['EmailSearch']['email']]);
+            }]);
         }
 
         if (!($this->load($params) && $this->validate())) {
             $dataProvider->setTotalCount(QueryHelper::getQueryCountInvalidModel($this, static::class . 'searchEmails' . $params['EmailSearch']['user_id'], $query, 60));
             return $dataProvider;
         }
+
+        // grid filtering conditions
+        $query->andFilterWhere([
+            'e_id' => $this->e_id,
+            'e_project_id' => $this->e_project_id,
+            'e_type_id' => $this->e_type_id,
+            'e_is_deleted' => $this->e_is_deleted,
+            'e_status_id' => $this->e_status_id,
+            'e_created_user_id' => $this->e_created_user_id,
+        ]);
 
         $dataProvider->setTotalCount(QueryHelper::getQueryCountValidModel($this, static::class . 'searchEmails' . $params['EmailSearch']['user_id'], $query, 60));
 

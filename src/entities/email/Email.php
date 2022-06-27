@@ -46,7 +46,7 @@ use src\helpers\email\TextConvertingHelper;
  * @property Case[] $cases
  * @property Client[] $clients
  * @property Lead[] $leads
- * @property EmailContact[] $emailContacts
+ * @property EmailAddress[] $contacts
  * @property EmailAddress $contactFrom
  * @property EmailAddress $contactTo
  * @property Email $reply
@@ -160,6 +160,12 @@ class Email extends ActiveRecord
     {
         return $this->emailBody->embd_hash;
     }
+
+    public function getContacts(): \yii\db\ActiveQuery
+    {
+        return $this->hasMany(EmailAddress::class, ['ea_id' => 'ec_address_id'])->viaTable('email_contact', ['ec_email_id' => 'e_id']);
+    }
+
 
     public function getContactFrom(): \yii\db\ActiveQuery
     {
