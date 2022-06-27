@@ -55,7 +55,7 @@ class LeadPoorProcessingJob extends BaseJob implements JobInterface
 
         foreach ($this->ruleKeys as $key) {
             $idRuleKey = 'job_rule_key_' . $this->leadId . '_' . $key;
-            if (RedisHelper::checkDuplicate($idKey, 20)) {
+            if (RedisHelper::checkDuplicate($idRuleKey, 20)) {
                 \Yii::info(
                     [
                         'message' => 'Checked Duplicate RuleKey',
