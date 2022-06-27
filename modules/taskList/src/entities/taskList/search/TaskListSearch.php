@@ -2,6 +2,7 @@
 
 namespace modules\taskList\src\entities\taskList\search;
 
+use modules\objectSegment\src\entities\ObjectSegmentTask;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use modules\taskList\src\entities\taskList\TaskList;
@@ -11,6 +12,7 @@ use modules\taskList\src\entities\taskList\TaskList;
  */
 class TaskListSearch extends TaskList
 {
+    public $objectSegmentAssigned;
     /**
      * {@inheritdoc}
      */
@@ -18,7 +20,7 @@ class TaskListSearch extends TaskList
     {
         return [
             [['tl_id', 'tl_duration_min', 'tl_enable_type', 'tl_sort_order', 'tl_updated_user_id', 'tl_target_object_id'], 'integer'],
-            [['tl_title', 'tl_object', 'tl_condition', 'tl_condition_json', 'tl_params_json', 'tl_cron_expression', 'tl_updated_dt'], 'safe'],
+            [['tl_title', 'tl_object', 'tl_condition', 'tl_condition_json', 'tl_params_json', 'tl_cron_expression', 'tl_updated_dt', 'objectSegmentAssigned'], 'safe'],
         ];
     }
 
@@ -54,6 +56,16 @@ class TaskListSearch extends TaskList
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
             return $dataProvider;
+        }
+
+        if (!empty($this->objectSegmentAssigned)) {
+            $ostTableName = ObjectSegmentTask::tableName();
+            $query->innerJoin(
+                $ostTableName,
+                "tl_id = {$ostTableName}.ostl_tl_id",
+            )->andWhere([
+                'IN', "{$ostTableName}.ostl_osl_id", $this->objectSegmentAssigned,
+            ]);
         }
 
         // grid filtering conditions

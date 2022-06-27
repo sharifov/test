@@ -52,7 +52,6 @@ class AbacComponent extends Component
         '/modules/',
         '/frontend/',
         '/common/',
-        '/sales/',
         '/src/',
     ];
     public array $scanExtMask = ['*.php'];

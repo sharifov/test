@@ -79,6 +79,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         $labels[] = $model['disabled'] ? '<i class="fa fa-ban text-danger" title="Disabled"></i>' : '';
                         return implode('&nbsp;&nbsp;&nbsp;', $labels);
                     },
+                    'label' => '',
                     'format' => 'raw',
                     'options' => [
                         'style' => 'width:100px'

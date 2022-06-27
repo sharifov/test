@@ -297,6 +297,7 @@ return [
         \common\bootstrap\SetUp::class,
         \common\bootstrap\SetUpListeners::class,
         \common\bootstrap\Logger::class,
+        \common\bootstrap\DeleteLogger::class,
         \common\bootstrap\FileStorage::class,
         \common\bootstrap\PaymentSetup::class,
         \common\bootstrap\OrderProcessManagerQueue::class,

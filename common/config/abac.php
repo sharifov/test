@@ -38,12 +38,12 @@ return [
         'case-sale-search' => \modules\cases\src\abac\saleSearch\CaseSaleSearchAbacObject::class,
         'lead-search' => \modules\lead\src\abac\LeadSearchAbacObject::class,
         'lead-expert-call' => \modules\lead\src\abac\LeadExpertCallObject::class,
+        'task-list' => \modules\taskList\abac\TaskListAbacObject::class
     ],
     'scanDirs' => [
         '/modules/',
         '/frontend/',
         '/common/',
-        '/sales/',
         '/src/',
     ],
     'scanExtMask' => ['*.php'],

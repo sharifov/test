@@ -56,6 +56,7 @@ class ShiftAbacObject extends AbacBaseModel implements AbacInterface
     public const ACTION_REMOVE_ALL_USER_SCHEDULE = 'removeAllUserSchedule';
     public const ACTION_VIEW_EVENT_LOG = 'viewEventLogs';
     public const ACTION_CREATE_PAST_EVENT = 'createPastEvent';
+    public const ACTION_HIDE_SOFT_DELETED_EVENTS = 'hideSoftDeletedEvents';
 
     /** ACTION LIST */
     public const OBJECT_ACTION_LIST = [
@@ -77,7 +78,8 @@ class ShiftAbacObject extends AbacBaseModel implements AbacInterface
             self::ACTION_ACCESS,
             self::ACTION_VIEW_EVENT_LOG,
             self::ACTION_VIEW_ALL_EVENTS,
-            self::ACTION_CREATE_PAST_EVENT
+            self::ACTION_CREATE_PAST_EVENT,
+            self::ACTION_HIDE_SOFT_DELETED_EVENTS,
         ],
         self::OBJ_USER_SHIFT_REQUEST_EVENT => [
             self::ACTION_ACCESS,
