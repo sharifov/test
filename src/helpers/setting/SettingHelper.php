@@ -1053,6 +1053,16 @@ class SettingHelper
 
     public static function getOtpEmailCodeLifeTime(): int
     {
-        return (int)(Yii::$app->params['settings']['otp_email_code_life_time'] ?? 120);
+        return (int)(Yii::$app->params['settings']['otp_email_settings']['code_life_time'] ?? 120);
+    }
+
+    public static function getOtpEmailProjectId(): int
+    {
+        return (int)(Yii::$app->params['settings']['otp_email_settings']['project_id'] ?? 2);
+    }
+
+    public static function getOtpEmailTemplateType(): string
+    {
+        return Yii::$app->params['settings']['otp_email_settings']['template_type'] ?? 'two_factor_auth';
     }
 }
