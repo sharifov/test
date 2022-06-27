@@ -20,6 +20,7 @@ use frontend\themes\gentelella_v2\widgets\SideBarMenu;
 use src\auth\Auth;
 use src\helpers\app\AppHelper;
 use src\helpers\setting\SettingHelper;
+use src\helpers\twoFactorAuth\TwoFactorAuthHelper;
 use src\model\userAuthClient\entity\UserAuthClientQuery;
 use src\model\userAuthClient\entity\UserAuthClientSources;
 use src\model\user\entity\monitor\UserMonitor;
@@ -32,6 +33,7 @@ use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use common\models\LoginForm;
+use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
@@ -200,13 +202,38 @@ class SiteController extends FController
             ->setUser($user)
             ->setRememberMe($session->get('two_factor_remember_me'));
 
+        $attemptsRemain = TwoFactorAuthHelper::getAuthAttempts();
         if ($model->load(Yii::$app->request->post()) && !Yii::$app->request->isPjax && $model->validate()) {
             $twoFactorAuthForm = (TwoFactorAuthFactory::getForm($model->twoFactorMethod))->setUser($user);
             $twoFactorAuthForm->load(Yii::$app->request->post());
             if (($twoFactorAuthForm->validate() && $twoFactorAuthForm->login((bool)$model->rememberMe))) {
+                TwoFactorAuthHelper::removeAuthAttempts();
                 $session->remove('auth_client_source');
                 $session->remove('auth_client_source_id');
                 return $this->goHome();
+            } else {
+                if (--$attemptsRemain > 0) {
+                    Yii::warning(
+                        'Wrong step two code for user: ' . $user->id,
+                        'SiteController:actionStepTwo',
+                    );
+                    TwoFactorAuthHelper::setAuthAttempts($attemptsRemain);
+                } else {
+                    $user->setBlocked();
+                    if (!$user->save(false)) {
+                        \Yii::error(
+                            VarDumper::dumpAsString($user->getErrors(), 10),
+                            'SiteController:actionStepTwo'
+                        );
+                    } else {
+                        Yii::warning(
+                            'Step two attempts exceeded for user: ' . $user->id,
+                            'SiteController:actionStepTwo',
+                        );
+                    }
+                    TwoFactorAuthHelper::removeAuthAttempts();
+                    return $this->redirect(['site/login']);
+                }
             }
             $model->addError('general', $twoFactorAuthForm->getErrorSummary(true)[0]);
         }
@@ -223,7 +250,11 @@ class SiteController extends FController
         return $this->render('step-two', [
             'model' => $model,
             'viewHelper' => $helper,
-            'user' => $user
+            'user' => $user,
+            'attemptsRemain' => [
+                'show' => TwoFactorAuthHelper::showWarningAttemptsRemain(),
+                'remain' => TwoFactorAuthHelper::getAuthAttempts(),
+            ],
         ]);
     }
 
