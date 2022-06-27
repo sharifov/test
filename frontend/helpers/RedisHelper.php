@@ -14,10 +14,13 @@ class RedisHelper
     public static function checkDuplicate(string $idKey, int $pauseSecond = 10): bool
     {
         $redis = Yii::$app->redis;
-        if (!$redis->get($idKey)) {
-            $redis->setex($idKey, $pauseSecond, true);
-            return false;
+
+        if ($redis->exists($idKey)) {
+            return true;
         }
-        return true;
+
+        $redis->set($idKey, true);
+        $redis->expire($idKey, $pauseSecond);
+        return false;
     }
 }
