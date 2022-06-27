@@ -24,6 +24,7 @@ use src\entities\email\helpers\EmailStatus;
 use src\entities\email\helpers\EmailType;
 use src\entities\email\helpers\EmailFilterType;
 use common\models\Project;
+use src\entities\email\EmailRepository;
 
 /**
  * EmailNormalizedController implements the CRUD actions for Email model.
@@ -34,16 +35,14 @@ use common\models\Project;
 class EmailNormalizedController extends FController
 {
     private $emailSender;
-    /**
-     * @var EventDispatcher
-     */
-    private $eventDispatcher;
 
-    public function __construct($id, $module, EmailSenderService $emailSender, EventDispatcher $eventDispatcher, $config = [])
+    private $emailRepository;
+
+    public function __construct($id, $module, EmailSenderService $emailSender, EmailRepository $emailRepository, $config = [])
     {
         parent::__construct($id, $module, $config);
         $this->emailSender = $emailSender;
-        $this->eventDispatcher = $eventDispatcher;
+        $this->emailRepository = $emailRepository;
     }
 
     public function behaviors()
@@ -267,6 +266,14 @@ class EmailNormalizedController extends FController
             $action = 'reply';
         }
 
+        $stats = [
+            'unread' => $this->emailRepository->getUnreadCount($mailList),
+            'inboxToday' => $this->emailRepository->getInboxTodayCount($mailList),
+            'outboxToday' => $this->emailRepository->getOutboxTodayCount($mailList),
+            'draft' => $this->emailRepository->getDraftCount($mailList),
+            'trash' => $this->emailRepository->getTrashCount($mailList),
+        ];
+
         return $this->render('inbox', [
             'createform'        => $form,
             'mailList'          => $mailList,
@@ -275,7 +282,8 @@ class EmailNormalizedController extends FController
             'modelEmailView'    => $modelEmailView,
             'modelNewEmail'     => $modelNewEmail,
             'selectedId'        => Yii::$app->request->get('id'),
-            'action'            => $action
+            'action'            => $action,
+            'stats'             => $stats,
         ]);
     }
 
@@ -312,9 +320,7 @@ class EmailNormalizedController extends FController
      */
     public function actionDelete($id): \yii\web\Response
     {
-        $email = $this->findModel($id);
-        $email->delete();
-        $this->eventDispatcher->dispatchAll($email->releaseEvents());
+        $this->emailRepository->deleteByIds($id);
 
         return $this->redirect(['index']);
     }
