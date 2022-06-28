@@ -3,6 +3,10 @@
 namespace modules\experiment\models;
 
 use common\models\Lead;
+use src\entities\cases\Cases;
+use src\model\clientChat\entity\ClientChat;
+use common\models\Call;
+use common\models\CallLog;
 use Yii;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -20,17 +24,24 @@ use yii\helpers\VarDumper;
  */
 class ExperimentTarget extends ActiveRecord
 {
-    public const EXT_TYPE_LEAD = 'common\models\Lead';
-    public const EXT_TYPE_CASE = 'src\entities\cases\Cases';
-    public const EXT_TYPE_CHAT = 'src\model\clientChat\entity\ClientChat';
-    public const EXT_TYPE_CALL = 'common\models\Call';
-    public const EXT_TYPE_CALL_LOG = 'common\models\CallLog';
+    public const EXT_TYPE_LEAD     = 1;
+    public const EXT_TYPE_CASE     = 2;
+    public const EXT_TYPE_CHAT     = 3;
+    public const EXT_TYPE_CALL     = 4;
+    public const EXT_TYPE_CALL_LOG = 5;
     public const EXT_TYPE_LIST = [
-        1           => 'Lead',
-        2           => 'Case',
-        3           => 'Chat',
-        4           => 'Call',
-        5           => 'Call log'
+        EXT_TYPE_LEAD     => 'Lead',
+        EXT_TYPE_CASE     => 'Case',
+        EXT_TYPE_CHAT     => 'Chat',
+        EXT_TYPE_CALL     => 'Call',
+        EXT_TYPE_CALL_LOG => 'Call log'
+    ];
+    public const EXT_TYPE_NAMESPACES = [
+        EXT_TYPE_LEAD     => Lead::class,
+        EXT_TYPE_CASE     => Cases::class,
+        EXT_TYPE_CHAT     => ClientChat::class,
+        EXT_TYPE_CALL     => Call::class,
+        EXT_TYPE_CALL_LOG => CallLog::class
     ];
 
     /**
@@ -49,7 +60,6 @@ class ExperimentTarget extends ActiveRecord
             [['ext_target_id', 'ext_target_type_id', 'ext_experiment_id'], 'required'],
             [['ext_target_id', 'ext_experiment_id'], 'integer'],
             [['ext_target_type_id'], 'integer', 'max' => 255],
-            [['ext_target_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['ext_target_id' => 'id'], 'message' => 'Target object instance (with this ID and type) not found in DB'],
             [['ext_experiment_id'], 'exist', 'skipOnError' => true, 'targetClass' => Experiment::class, 'targetAttribute' => ['ext_experiment_id' => 'ex_id']],
         ];
     }
