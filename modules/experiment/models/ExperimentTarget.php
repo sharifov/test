@@ -30,18 +30,18 @@ class ExperimentTarget extends ActiveRecord
     public const EXT_TYPE_CALL     = 4;
     public const EXT_TYPE_CALL_LOG = 5;
     public const EXT_TYPE_LIST = [
-        EXT_TYPE_LEAD     => 'Lead',
-        EXT_TYPE_CASE     => 'Case',
-        EXT_TYPE_CHAT     => 'Chat',
-        EXT_TYPE_CALL     => 'Call',
-        EXT_TYPE_CALL_LOG => 'Call log'
+        self::EXT_TYPE_LEAD     => 'Lead',
+        self::EXT_TYPE_CASE     => 'Case',
+        self::EXT_TYPE_CHAT     => 'Chat',
+        self::EXT_TYPE_CALL     => 'Call',
+        self::EXT_TYPE_CALL_LOG => 'Call log'
     ];
     public const EXT_TYPE_NAMESPACES = [
-        EXT_TYPE_LEAD     => Lead::class,
-        EXT_TYPE_CASE     => Cases::class,
-        EXT_TYPE_CHAT     => ClientChat::class,
-        EXT_TYPE_CALL     => Call::class,
-        EXT_TYPE_CALL_LOG => CallLog::class
+        self::EXT_TYPE_LEAD     => Lead::class,
+        self::EXT_TYPE_CASE     => Cases::class,
+        self::EXT_TYPE_CHAT     => ClientChat::class,
+        self::EXT_TYPE_CALL     => Call::class,
+        self::EXT_TYPE_CALL_LOG => CallLog::class
     ];
 
     /**
