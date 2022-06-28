@@ -313,8 +313,8 @@ applicationInstall () {
   build
   initConfig
   initChown
-#  initMysql
-#  initPsql
+  initMysql
+  initPsql
   composerInstall
   npmInstall
   printf "Done - Application install\n"
@@ -460,8 +460,6 @@ elif [ "$whatDo" == "app-console" ]; then
 elif [ "$whatDo" == "apidoc-gen" ]; then
   docker-compose -f "$dockerComposeFile" run --rm --no-deps console composer apidoc-gen
 
-elif [ "$whatDo" == "test" ]; then
-  printf "Test"
 else
   printf "Unknown command\n"
 fi

@@ -21,8 +21,7 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
     volumes:
-      - /var/www/sales/docker/mysql/db:/var/lib/mysql
-#      - ./mysql/data:/var/lib/mysql
+      - ${MYSQL_HOST_PATH_DB}:/var/lib/mysql
     security_opt:
       - seccomp:unconfined
     restart: on-failure
@@ -39,8 +38,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
-      - /var/www/sales/docker/psql/db:/var/lib/postgresql/data
-#      - ./psql/data:/var/lib/postgresql/data
+      - ${POSTGRES_HOST_PATH_DB}:/var/lib/postgresql/data
     restart: on-failure
     networks:
       - backend

@@ -1,9 +1,12 @@
 #!/bin/bash
 
-dumpFile="/dump/dump.sql"
+dumpGzFile="/dump/dump.gz"
+dumpSqlFile="/dump/dump.sql"
 
-if [ ! -e "$dumpFile" ]; then
-  printf "Dump was not found. Path $dumpFile"
+if [ -e "$dumpGzFile" ]; then
+  gunzip < "$dumpGzFile" | mysql -u root -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" --force
+elif [ -e "$dumpSqlFile" ]; then
+  mysql -v -u root -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" < "$dumpSqlFile" 2> /dev/null
 else
-  mysql -v -u root -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" < "$dumpFile" 2> /dev/null
+  printf "Dumps was not found. Path $dumpGzFile and $dumpSqlFile\n"
 fi
