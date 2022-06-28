@@ -284,43 +284,4 @@ class EmailsNormalizeService
     {
         return $this->errors;
     }
-
-    /**
-     * @param string $str
-     * @return string
-     */
-    public static function reSubject($str = ''): string
-    {
-        $str = trim($str);
-        if (strpos($str, 'Re:', 0) === false && strpos($str, 'Re[', 0) === false) {
-            return 'Re:' . $str;
-        } else {
-            preg_match_all('/Re\[([\d]+)\]:/i', $str, $m);
-            if ($m && is_array($m) && isset($m[0], $m[1])) {
-                if (count($m[0]) > 1) {
-                    $cnt = 0;
-                    foreach ($m[0] as $repl) {
-                        if (isset($m[0][$cnt + 1])) {
-                            $from = '/' . preg_quote($repl, '/') . '/';
-                            $str = preg_replace($from, '', $str, 1);
-                            $str = preg_replace("/(.*?)$repl/i", '', $str, 1);
-                        }
-                        $cnt++;
-                    }
-                }
-            }
-            $str = preg_replace("/(.*?)Re\[([\d]+)\]:/i", 'Re[$2]: ', $str, 1);
-            if (mb_substr($str, 0, 3, 'utf-8') === 'Re:') {
-                $str = preg_replace("/(Re:)/i", 'Re[1]:', $str, 1);
-            } elseif (preg_match('/Re\[([\d]+)\]:/i', $str, $matches)) {
-                if (isset($matches[0], $matches[1])) {
-                    $newVal = $matches[1] + 1;
-                    $str = preg_replace('/Re\[([\d]+)\]:/i', 'Re[' . $newVal . ']:', $str, 1);
-                }
-            }
-        }
-        $str = preg_replace("/ {2,}/", " ", $str);
-
-        return trim($str);
-    }
 }
