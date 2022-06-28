@@ -13,7 +13,7 @@ use yii\helpers\VarDumper;
  *
  * @property int $ext_id
  * @property int $ext_target_id
- * @property string $ext_target_type
+ * @property string $ext_target_type_id
  * @property int $ext_experiment_id
  *
  * @property Experiment $experiment
@@ -24,11 +24,13 @@ class ExperimentTarget extends ActiveRecord
     public const EXT_TYPE_CASE = 'src\entities\cases\Cases';
     public const EXT_TYPE_CHAT = 'src\model\clientChat\entity\ClientChat';
     public const EXT_TYPE_CALL = 'common\models\Call';
-    public const EXT_TYPE_LIST = [
-        self::EXT_TYPE_LEAD           => 'Lead',
-        self::EXT_TYPE_CASE           => 'Case',
-        self::EXT_TYPE_CHAT           => 'Chat',
-        self::EXT_TYPE_CALL           => 'Call'
+    public const EXT_TYPE_CALL_LOG = 'common\models\CallLog';
+    public const EXT_TYPES = [
+        1           => 'Lead',
+        2           => 'Case',
+        3           => 'Chat',
+        4           => 'Call',
+        5           => 'Call log'
     ];
 
     /**
@@ -44,9 +46,9 @@ class ExperimentTarget extends ActiveRecord
     public function rules(): array
     {
         return [
-            [['ext_target_id', 'ext_target_type', 'ext_experiment_id'], 'required'],
+            [['ext_target_id', 'ext_target_type_id', 'ext_experiment_id'], 'required'],
             [['ext_target_id', 'ext_experiment_id'], 'integer'],
-            [['ext_target_type'], 'string', 'max' => 255],
+            [['ext_target_type_id'], 'integer', 'max' => 255],
             [['ext_target_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['ext_target_id' => 'id'], 'message' => 'Target object instance (with this ID and type) not found in DB'],
             [['ext_experiment_id'], 'exist', 'skipOnError' => true, 'targetClass' => Experiment::class, 'targetAttribute' => ['ext_experiment_id' => 'ex_id']],
         ];
@@ -59,7 +61,7 @@ class ExperimentTarget extends ActiveRecord
         return [
             'ext_id' => Yii::t('experiment-manager', 'ID'),
             'ext_target_id' => Yii::t('experiment-manager', 'Target instance ID'),
-            'ext_target_type' => Yii::t('experiment-manager', 'Target instance Type'),
+            'ext_target_type_id' => Yii::t('experiment-manager', 'Target instance Type ID'),
             'ext_experiment_id' => Yii::t('experiment-manager', 'Experiment ID'),
         ];
     }
@@ -77,7 +79,7 @@ class ExperimentTarget extends ActiveRecord
      */
     public static function getList(): array
     {
-        return self::EXT_TYPE_LIST;
+        return self::EXT_TYPES;
     }
 
     /**
@@ -85,10 +87,11 @@ class ExperimentTarget extends ActiveRecord
      */
     public static function saveExperimentList(string $class, int $targetId, array $experimentCodes = []): void
     {
-        $mergedExperimentCodes = array_unique(array_column($experimentCodes, 'ex_code'));
-//        VarDumper::dump($class); die;
+        $mergedExperimentCodes = array_unique(array_column($experimentCodes, 'cross_ex_code'));
         foreach ($mergedExperimentCodes as $ex_code) {
-            self::saveExperiment($class, $targetId, $ex_code);
+            if ($ex_code != '') {
+                self::saveExperiment($class, $targetId, $ex_code);
+            }
         }
     }
 

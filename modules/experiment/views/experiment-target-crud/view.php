@@ -32,9 +32,9 @@ $this->params['breadcrumbs'][] = $this->title;
         'attributes' => [
             'ext_target_id',
             [
-                'attribute' => 'ext_target_type',
+                'attribute' => 'ext_target_type_id',
                 'value' => static function (ExperimentTarget $model) {
-                    return ExperimentTarget::EXT_TYPE_LIST[$model->ext_target_type];
+                    return ExperimentTarget::EXT_TYPES[$model->ext_target_type_id];
                 }
             ],
             'ext_experiment_id',

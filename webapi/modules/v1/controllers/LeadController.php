@@ -143,6 +143,7 @@ class LeadController extends ApiBaseController
      * @apiParam {string{50}}           [lead.lead_data.field_key]               Lead Data Key
      * @apiParam {string{500}}          [lead.lead_data.field_value]             Lead Data Value
      * @apiParam {object[]}             [lead.client_data]                       Array of Client Data
+     * @apiParam {object[]}             [lead.experiments]                       Array of Experiment codes
      * @apiParam {string{50}}           [lead.client_data.field_key]             Client Data Key
      * @apiParam {string{500}}          [lead.client_data.field_value]           Client Data Value
      * @apiParam {datetime{YYYY-MM-DD HH:mm:ss}}  lead.visitor_log.vl_visit_dt
@@ -200,6 +201,10 @@ class LeadController extends ApiBaseController
      *                  "field_value": "wpl6.1"
      *              }
      *        ],
+     *       "experiments": [
+     *           { "cross_ex_code": "123.1" },
+     *           { "cross_ex_code": "123.4" }
+     *       ]
      *       "client_data": [
      *               {
      *                  "field_key": "example_key",
@@ -1379,6 +1384,10 @@ class LeadController extends ApiBaseController
                         "cl_marketing_country": null,
                         "cl_call_recording_disabled": 0
                     },
+                    "experiment_ids": [
+                        123,
+                        124
+                   ],
                    "lead_preferences": {
                             "id": 155398,
                             "lead_id": 371058,

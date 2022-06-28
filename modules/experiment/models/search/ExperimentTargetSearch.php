@@ -18,7 +18,7 @@ class ExperimentTargetSearch extends ExperimentTarget
     {
         return [
             [['ext_id', 'ext_target_id', 'ext_experiment_id'], 'integer'],
-            [['ext_target_type'], 'safe'],
+            [['ext_target_type_id'], 'safe'],
         ];
     }
 
@@ -63,7 +63,7 @@ class ExperimentTargetSearch extends ExperimentTarget
             'ext_experiment_id' => $this->ext_experiment_id,
         ]);
 
-        $query->andFilterWhere(['like', 'ext_target_type', $this->ext_target_type]);
+        $query->andFilterWhere(['like', 'ext_target_type_id', $this->ext_target_type_id]);
 
         return $dataProvider;
     }

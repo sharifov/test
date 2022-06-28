@@ -73,16 +73,16 @@ class Experiment extends ActiveRecord
      * @param int $targetId
      * @return bool
      */
-    public function addTarget(string $targetType, int $targetId): bool
+    public function addTarget(string $targetTypeId, int $targetId): bool
     {
         if (
             !$this->getExperimentTargets()->where([
-                                                      'ext_target_type' => $targetType,
+                                                      'ext_target_type_id' => $targetTypeId,
                                                       'ext_target_id'   => $targetId
                                                   ])->exists()
         ) {
             $experimentTarget = new ExperimentTarget([
-                                                         'ext_target_type'   => $targetType,
+                                                         'ext_target_type_id'   => $targetTypeId,
                                                          'ext_target_id'     => $targetId,
                                                          'ext_experiment_id' => $this->ex_id
                                                      ]);

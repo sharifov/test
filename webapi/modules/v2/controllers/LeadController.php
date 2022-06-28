@@ -88,6 +88,7 @@ class LeadController extends BaseController
      * @apiParam {bool}                 [lead.is_test]                              Is test lead (default false)
      * @apiParam {datetime{YYYY-MM-DD HH:mm:ss}}  [lead.expire_at]                  Expire at
      * @apiParam {object[]}             [lead.lead_data]                            Array of Lead Data
+     * @apiParam {object[]}             [lead.experiments]                          Array of Experiment codes
      * @apiParam {string{50}}           [lead.lead_data.field_key]                  Lead Data Key
      * @apiParam {string{500}}          [lead.lead_data.field_value]                Lead Data Value
      * @apiParam {object[]}             [lead.client_data]                          Array of Client Data
@@ -142,16 +143,12 @@ class LeadController extends BaseController
      *               {
      *                  "field_key": "example_key",
      *                  "field_value": "example_value"
-     *              },
-     *              {
-     *                  "field_key": "cross_system_xp",
-     *                  "field_value": "wpl5.0"
-     *              },
-     *              {
-     *                  "field_key": "cross_system_xp",
-     *                  "field_value": "wpl6.1"
      *              }
      *          ],
+     *          "experiments": [
+     *              { "cross_ex_code": "123.1" },
+     *              { "cross_ex_code": "123.4" }
+     *          ]
      *          "client_data": [
      *               {
      *                  "field_key": "example_key",
