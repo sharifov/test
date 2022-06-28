@@ -307,17 +307,24 @@ runMigrate () {
 }
 
 applicationInstall () {
-  printf "Start - Application install\n"
-  applicationUninstall
-  createTemporallyDirectories
-  build
-  initConfig
-  initChown
-  initMysql
-  initPsql
-  composerInstall
-  npmInstall
-  printf "Done - Application install\n"
+printf "If you have already run the command before, running the command again \n";
+printf "will recreate the directories and delete the existing files and database\n";
+read -p "Continue (y/n)? " answer
+case ${answer:0:1} in
+    y|Y )
+          printf "Start - Application install\n"
+          applicationUninstall
+          createTemporallyDirectories
+          build
+          initConfig
+          initChown
+          initMysql
+          initPsql
+          composerInstall
+          npmInstall
+          printf "Done - Application install\n"
+    ;;
+esac
 }
 
 dockerInstall () {
