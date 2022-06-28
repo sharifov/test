@@ -72,7 +72,7 @@ class ExperimentTarget extends ActiveRecord
             'ext_id' => 'ID',
             'ext_target_id' => 'Target object ID',
             'ext_target_type_id' => 'Target object Type',
-            'ext_experiment_id' => 'Experiment',
+            'ext_experiment_id' => 'Experiment ID',
         ];
     }
 
