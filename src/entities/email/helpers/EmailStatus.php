@@ -36,4 +36,9 @@ class EmailStatus
         $map = self::getList();
         return $map[$status] ?? null;
     }
+
+    public static function notError(int $status): bool
+    {
+        return $status !== self::ERROR;
+    }
 }

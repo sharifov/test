@@ -2,27 +2,31 @@
 
 namespace src\entities\email;
 
-use Yii;
 use common\models\Client;
-use common\models\Employee;
 use common\models\Department;
-use common\models\Project;
-use src\entities\cases\Cases;
-use common\models\Lead;
-use yii\behaviors\TimestampBehavior;
-use src\behaviors\metric\MetricEmailCounterBehavior;
-use yii\db\ActiveRecord;
-use src\auth\Auth;
 use common\models\Email as EmailOld;
 use common\models\EmailTemplateType;
+use common\models\Employee;
 use common\models\Language;
-use yii\helpers\ArrayHelper;
-use src\entities\email\helpers\EmailType;
-use src\entities\email\helpers\EmailStatus;
-use src\entities\EventTrait;
+use common\models\Lead;
+use common\models\Project;
+use src\auth\Auth;
+use src\behaviors\metric\MetricEmailCounterBehavior;
+use src\entities\cases\Cases;
 use src\entities\email\events\EmailDeletedEvent;
-use src\helpers\email\TextConvertingHelper;
 use src\entities\email\helpers\EmailContactType;
+use src\entities\email\helpers\EmailStatus;
+use src\entities\email\helpers\EmailType;
+use src\entities\EventTrait;
+use Yii;
+use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
+use common\components\CommunicationService;
+use src\services\abtesting\email\EmailTemplateOfferABTestingService;
+use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
+use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
+use src\model\leadUserData\repository\LeadUserDataRepository;
+use yii\helpers\VarDumper;
 
 /**
  * This is the model class for table "email_norm".
@@ -47,12 +51,14 @@ use src\entities\email\helpers\EmailContactType;
  * @property Case[] $cases
  * @property Client[] $clients
  * @property Lead[] $leads
+ * @property Lead $lead
  * @property EmailAddress[] $contacts
  * @property EmailAddress $contactFrom
  * @property EmailAddress $contactTo
  * @property EmailContact $emailContactFrom
  * @property EmailContact $emailContactTo
  * @property Email $reply
+ * @property EmailTemplateType $templateType
  */
 class Email extends ActiveRecord
 {
@@ -132,6 +138,12 @@ class Email extends ActiveRecord
     public function getClients(): \yii\db\ActiveQuery
     {
         return $this->hasMany(Client::class, ['id' => 'ecl_client_id'])->viaTable('email_client', ['ecl_email_id' => 'e_id']);
+    }
+
+    //first Lead
+    public function getLead(): \yii\db\ActiveQuery
+    {
+        return $this->hasOne(Lead::class, ['id' => 'el_lead_id'])->viaTable('email_lead', ['el_email_id' => 'e_id']);
     }
 
     public function getLeads(): \yii\db\ActiveQuery
@@ -299,17 +311,14 @@ class Email extends ActiveRecord
         ];
     }
 
-    /**
-     * @return string
-     */
-    public function getEmailBodyHtml(): ?string
+    public function statusToError($errorMessage)
     {
-        if (!empty($this->emailBody->emailBlob->embb_email_body_blob)) {
-            $value = TextConvertingHelper::unCompress($this->emailBody->emailBlob->embb_email_body_blob);
-        } else {
-            $value = '';
-        }
-        return $value;
+        $this->e_status_id = EmailStatus::ERROR;
+        $this->emailLog->el_error_message = $errorMessage;
+        $this->emailLog->save(false);
+        $this->save(false);
+
+        return $this;
     }
 
     /**
@@ -326,6 +335,101 @@ class Email extends ActiveRecord
 
         $message = '<' . implode('.', $arr) . '>';
         return $message;
+    }
+
+    //TODO: move to service
+    public function sendMail(array $data = []): array
+    {
+        $out = ['error' => false];
+
+        /** @var CommunicationService $communication */
+        $communication = Yii::$app->communication;
+        $data['project_id'] = $this->e_project_id;
+
+        $content_data['email_body_html'] = $this->emailBody->getBodyHtml();
+        $content_data['email_body_text'] = $this->emailBody->embd_email_body_text;
+        $content_data['email_subject'] = $this->emailBody->embd_email_subject;
+        $content_data['email_reply_to'] = $this->emailFrom;
+        //$content_data['email_cc'] = $this->e_email_cc;
+        //$content_data['email_bcc'] = $this->e_email_bc;
+        if ($this->contactFrom->ea_name) {
+            $content_data['email_from_name'] = $this->contactFrom->ea_name;
+        }
+        if ($this->contactTo->ea_name) {
+            $content_data['email_to_name'] = $this->contactTo->ea_name;
+        }
+        if ($this->emailLog->el_message_id) {
+            $content_data['email_message_id'] = $this->emailLog->el_message_id;
+        }
+
+        $tplType = $this->templateType ? $this->templateType->etp_key : null;
+
+        try {
+            $request = $communication->mailSend($this->e_project_id, $tplType, $this->emailFrom, $this->emailTo, $content_data, $data, ($this->params->ep_language_id ?: 'en-US'), 0);
+
+            if ($request && isset($request['data']['eq_status_id'])) {
+                $this->e_status_id = $request['data']['eq_status_id'];
+                $this->e_type_id = EmailType::isDraft($this->e_type_id) ? EmailType::OUTBOX : $this->e_type_id;
+                $this->emailLog->el_communication_id = $request['data']['eq_id'];
+                $this->emailLog->save(false);
+                $this->save();
+            }
+
+            //VarDumper::dump($request, 10, true); exit;
+
+            if ($request && isset($request['error']) && $request['error']) {
+                $errorData = @json_decode($request['error'], true);
+                $errorMessage =  'Communication error: ' . ($errorData['message'] ?: $request['error']);
+                $out['error'] = $errorMessage;
+                $this->statusToError($errorMessage);
+            }
+            /** @fflag FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES, A/B testing for email offer templates enable/disable */
+            if (EmailStatus::notError($this->e_status_id) && Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES)) {
+                if ($this->e_template_type_id && $this->e_project_id && isset($this->lead)) {
+                    EmailTemplateOfferABTestingService::incrementCounterByTemplateAndProjectIds(
+                        $this->e_template_type_id,
+                        $this->e_project_id,
+                        $this->e_departament_id
+                        );
+                }
+            }
+            if ($this->e_id && $this->lead && LeadPoorProcessingService::checkEmailTemplate($tplType)) {
+                LeadPoorProcessingService::addLeadPoorProcessingRemoverJob(
+                    $this->lead->id,
+                    [
+                        LeadPoorProcessingDataDictionary::KEY_NO_ACTION,
+                        LeadPoorProcessingDataDictionary::KEY_EXPERT_IDLE,
+                        LeadPoorProcessingDataDictionary::KEY_SEND_SMS_OFFER,
+                    ],
+                    LeadPoorProcessingLogStatus::REASON_EMAIL
+                    );
+
+                if (($lead = $this->lead) && $lead->employee_id && $lead->isProcessing()) {
+                    try {
+                        $leadUserData = LeadUserData::create(
+                            LeadUserDataDictionary::TYPE_EMAIL_OFFER,
+                            $lead->id,
+                            $lead->employee_id,
+                            (new \DateTimeImmutable())
+                            );
+                        (new LeadUserDataRepository($leadUserData))->save(true);
+                    } catch (\RuntimeException | \DomainException $throwable) {
+                        $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['emailId' => $this->e_id]);
+                        \Yii::warning($message, 'Email:LeadUserData:Exception');
+                    } catch (\Throwable $throwable) {
+                        $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['emailId' => $this->e_id]);
+                        \Yii::error($message, 'Email:LeadUserData:Throwable');
+                    }
+                }
+            }
+        } catch (\Throwable $exception) {
+            $error = VarDumper::dumpAsString($exception->getMessage());
+            $out['error'] = $error;
+            \Yii::error($error, 'Email:sendMail:mailSend:exception');
+            $this->statusToError('Communication error: ' . $error);
+        }
+
+        return $out;
     }
 
     public static function findOrNew(array $criteria = [], array $values = [])
