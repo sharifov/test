@@ -13,7 +13,7 @@ use yii\helpers\VarDumper;
  *
  * @property int $ext_id
  * @property int $ext_target_id
- * @property string $ext_target_type_id
+ * @property int $ext_target_type_id
  * @property int $ext_experiment_id
  *
  * @property Experiment $experiment
