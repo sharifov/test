@@ -146,8 +146,12 @@ class LeadController extends BaseController
      *              }
      *          ],
      *          "experiments": [
-     *              { "cross_ex_code": "123.1" },
-     *              { "cross_ex_code": "123.4" }
+     *              {
+     *                  "cross_ex_code": "wpl5.0"
+     *              },
+     *              {
+     *                  "cross_ex_code": "wpl6.2"
+     *              }
      *          ]
      *          "client_data": [
      *               {

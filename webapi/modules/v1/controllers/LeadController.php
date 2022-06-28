@@ -193,17 +193,17 @@ class LeadController extends ApiBaseController
      *                  "field_value": "example_value"
      *              },
      *              {
-     *                  "field_key": "cross_system_xp",
-     *                  "field_value": "wpl5.0"
+     *                  "field_key": "example_key",
+     *                  "field_value": "example_value"
      *              },
-     *              {
-     *                  "field_key": "cross_system_xp",
-     *                  "field_value": "wpl6.1"
-     *              }
      *        ],
      *       "experiments": [
-     *           { "cross_ex_code": "123.1" },
-     *           { "cross_ex_code": "123.4" }
+     *           {
+     *              "cross_ex_code": "wpl5.0"
+     *           },
+     *           {
+     *              "cross_ex_code": "wpl6.2"
+     *           }
      *       ]
      *       "client_data": [
      *               {
@@ -1384,9 +1384,13 @@ class LeadController extends ApiBaseController
                         "cl_marketing_country": null,
                         "cl_call_recording_disabled": 0
                     },
-                    "experiment_ids": [
-                        123,
-                        124
+                    "experiments": [
+                        {
+                          "cross_ex_code": "wpl5.0"
+                        },
+                        {
+                          "cross_ex_code": "wpl6.2"
+                        }
                    ],
                    "lead_preferences": {
                             "id": 155398,
@@ -1401,7 +1405,7 @@ class LeadController extends ApiBaseController
                    },
                    "lead_data": [
                         {
-                            "key": "cross_system_xp",
+                            "key": "field_key",
                             "value": "example123"
                         }
                    ]

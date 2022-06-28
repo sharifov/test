@@ -352,12 +352,20 @@ class QuoteController extends ApiBaseController
      *      ],
      *      "lead_data": [
      *          {
-     *              "ld_field_key": "cross_system_xp",
-     *              "ld_field_value": "wpl5.0"
+     *              "ld_field_key": "example_key",
+     *              "ld_field_value": "example_value"
      *          },
      *          {
-     *              "ld_field_key": "cross_system_xp",
-     *              "ld_field_value": "wpl6.2"
+     *              "ld_field_key": "example_key",
+     *              "ld_field_value": "example_value"
+     *          }
+     *      ],
+     *      "experiments": [
+     *          {
+     *              "cross_ex_code": "wpl5.0",
+     *          },
+     *          {
+     *              "cross_ex_code": "wpl6.2",
      *          }
      *      ],
      *      "department_key": "chat",
