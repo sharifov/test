@@ -55,7 +55,7 @@ pipeline {
       }
       slackSend(
         color: 'good',
-        tokenCredentialId: 'slack-${PROJECT}-deploys',
+        tokenCredentialId: "slack-${PROJECT}-deploys",
         message: "*${env.JOB_NAME}*\n${currentBuild.getBuildCauses()[0].shortDescription}\nStatus: ${currentBuild.result}\nBuild: <${BUILD_URL}display/redirect|${BUILD_NUMBER}>\nEnv: ${ENV}\nBranch: ${GIT_BRANCH.replaceFirst(/^.*\//, '')}\nVersion: ${VER}\nTime: ${currentBuild.durationString.minus(' and counting')}"
       )
     }
