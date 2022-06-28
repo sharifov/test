@@ -59,10 +59,10 @@ class ExperimentTarget extends ActiveRecord
     public function attributeLabels(): array
     {
         return [
-            'ext_id' => Yii::t('experiment-manager', 'ID'),
-            'ext_target_id' => Yii::t('experiment-manager', 'Target instance ID'),
-            'ext_target_type_id' => Yii::t('experiment-manager', 'Target instance Type'),
-            'ext_experiment_id' => Yii::t('experiment-manager', 'Experiment'),
+            'ext_id' => 'ID',
+            'ext_target_id' => 'Target object ID',
+            'ext_target_type_id' => 'Target object Type',
+            'ext_experiment_id' => 'Experiment',
         ];
     }
 

@@ -46,8 +46,8 @@ class Experiment extends ActiveRecord
     public function attributeLabels(): array
     {
         return [
-            'ex_id'   => Yii::t('experiment-crud', 'ID'),
-            'ex_code' => Yii::t('experiment-crud', 'Code'),
+            'ex_id'   => 'ID',
+            'ex_code' => 'Code',
         ];
     }
 
