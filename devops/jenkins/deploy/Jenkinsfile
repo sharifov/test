@@ -10,8 +10,6 @@ pipeline {
     GIT_KEY = 'git-crm'
     S3 = 'jenkins-infra-traveldev'
     VER = "${GIT_COMMIT[0..6]}"
-    LE_WEBHOOK = 'https://kivdev.webhook.office.com/webhookb2/821ecf73-6ea0-447a-acc9-033615a3af1e@7e49a909-af00-4220-a5f9-ba8c5979078f/JenkinsCI/16048d8f33194886840802182fd7cb74/5852b332-1191-4d8c-a325-d4d3e50904c6'
-    PROD_WEBHOOK = 'https://kivdev.webhook.office.com/webhookb2/821ecf73-6ea0-447a-acc9-033615a3af1e@7e49a909-af00-4220-a5f9-ba8c5979078f/JenkinsCI/6b0a3c740e4a44548bf47708b2ab1562/5852b332-1191-4d8c-a325-d4d3e50904c6'
   }
   stages {
     stage('Build') {
@@ -48,48 +46,24 @@ pipeline {
     success {
       script {
         if (env.ENV == 'prod') {
-          office365ConnectorSend(
-            color: '#00ff00',
-            message: "${currentBuild.getBuildCauses()[0].shortDescription}",
-            factDefinitions: [
-              [ name: "Status", template: "${currentBuild.result}"],
-              [ name: "Build", template: "[${env.BUILD_NUMBER}](${env.BUILD_URL}display/redirect)"],
-              [ name: "Env", template: "${env.ENV}"],
-              [ name: "Branch", template: "${GIT_BRANCH.replaceFirst(/^.*\//, '')}"],
-              [ name: "Version", template: "${VER}"],
-              [ name: "Time", template: "${currentBuild.durationString.minus(' and counting')}"]
-            ],
-            webhookUrl: "$PROD_WEBHOOK"
+          slackSend(
+            color: 'good',
+            tokenCredentialId: 'slack-deploys',
+            message: "*${env.JOB_NAME}*\n${currentBuild.getBuildCauses()[0].shortDescription}\nStatus: ${currentBuild.result}\nBuild: <${BUILD_URL}display/redirect|${BUILD_NUMBER}>\nEnv: ${ENV}\nBranch: ${GIT_BRANCH.replaceFirst(/^.*\//, '')}\nVersion: ${VER}\nTime: ${currentBuild.durationString.minus(' and counting')}"
           )
         }
       }
-      office365ConnectorSend(
-        color: '#00ff00',
-        message: "${currentBuild.getBuildCauses()[0].shortDescription}",
-        factDefinitions: [
-          [ name: "Status", template: "${currentBuild.result}"],
-          [ name: "Build", template: "[${env.BUILD_NUMBER}](${env.BUILD_URL}display/redirect)"],
-          [ name: "Env", template: "${env.ENV}"],
-          [ name: "Branch", template: "${GIT_BRANCH.replaceFirst(/^.*\//, '')}"],
-          [ name: "Version", template: "${VER}"],
-          [ name: "Time", template: "${currentBuild.durationString.minus(' and counting')}"]
-        ],
-        webhookUrl: "$LE_WEBHOOK"
+      slackSend(
+        color: 'good',
+        tokenCredentialId: 'slack-crm-deploys',
+        message: "*${env.JOB_NAME}*\n${currentBuild.getBuildCauses()[0].shortDescription}\nStatus: ${currentBuild.result}\nBuild: <${BUILD_URL}display/redirect|${BUILD_NUMBER}>\nEnv: ${ENV}\nBranch: ${GIT_BRANCH.replaceFirst(/^.*\//, '')}\nVersion: ${VER}\nTime: ${currentBuild.durationString.minus(' and counting')}"
       )
     }
     failure {
-      office365ConnectorSend(
-        color: '#ff0000',
-        message: "${currentBuild.getBuildCauses()[0].shortDescription}",
-        factDefinitions: [
-          [ name: "Status", template: "${currentBuild.result}"],
-          [ name: "Build", template: "[${env.BUILD_NUMBER}](${env.BUILD_URL}display/redirect)"],
-          [ name: "Env", template: "${env.ENV}"],
-          [ name: "Branch", template: "${GIT_BRANCH.replaceFirst(/^.*\//, '')}"],
-          [ name: "Version", template: "${VER}"],
-          [ name: "Time", template: "${currentBuild.durationString.minus(' and counting')}"]
-        ],
-        webhookUrl: "$LE_WEBHOOK"
+      slackSend(
+        color: 'danger',
+        tokenCredentialId: 'slack-crm-deploys',
+        message: "*${env.JOB_NAME}*\n${currentBuild.getBuildCauses()[0].shortDescription}\nStatus: ${currentBuild.result}\nBuild: <${BUILD_URL}display/redirect|${BUILD_NUMBER}>\nEnv: ${ENV}\nBranch: ${GIT_BRANCH.replaceFirst(/^.*\//, '')}\nVersion: ${VER}\nTime: ${currentBuild.durationString.minus(' and counting')}"
       )
     }
     always {
