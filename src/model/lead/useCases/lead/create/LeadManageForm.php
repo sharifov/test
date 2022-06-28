@@ -119,6 +119,7 @@ class LeadManageForm extends CompositeForm
             }],
 
             ['depId', 'integer'],
+            ['depId', 'required'],
             ['depId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
         ];
     }
