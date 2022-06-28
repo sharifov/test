@@ -7,22 +7,22 @@ use src\entities\email\helpers\EmailContactType;
 
 class EmailContactQuery extends ActiveQuery
 {
-    public function from()
+    public function isFrom()
     {
         return $this->andOnCondition(['ec_type_id' => EmailContactType::FROM]);
     }
 
-    public function to()
+    public function isTo()
     {
         return $this->andOnCondition(['ec_type_id' => EmailContactType::TO]);
     }
 
-    public function cc()
+    public function isCc()
     {
         return $this->andOnCondition(['ec_type_id' => EmailContactType::CC]);
     }
 
-    public function bcc()
+    public function isBcc()
     {
         return $this->andOnCondition(['ec_type_id' => EmailContactType::BCC]);
     }
