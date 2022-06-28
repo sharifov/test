@@ -119,7 +119,7 @@ createTemporallyDirectories () {
 }
 
 createDefaultCentrifugoConfig () {
-  cp "$dockerFolder/centrifugo/config.json.example" "$dockerFolder/centrifugo/config.json"
+  cp -l "$dockerFolder/centrifugo/config.json.example" "$dockerFolder/centrifugo/config.json"
 }
 
 removeDefaultCentrifugoConfig () {
@@ -459,6 +459,9 @@ elif [ "$whatDo" == "app-console" ]; then
 
 elif [ "$whatDo" == "apidoc-gen" ]; then
   docker-compose -f "$dockerComposeFile" run --rm --no-deps console composer apidoc-gen
+
+elif [ "$whatDo" == "migrate" ]; then
+  runMigrate
 
 else
   printf "Unknown command\n"
