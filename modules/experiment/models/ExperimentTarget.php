@@ -25,7 +25,7 @@ class ExperimentTarget extends ActiveRecord
     public const EXT_TYPE_CHAT = 'src\model\clientChat\entity\ClientChat';
     public const EXT_TYPE_CALL = 'common\models\Call';
     public const EXT_TYPE_CALL_LOG = 'common\models\CallLog';
-    public const EXT_TYPES = [
+    public const EXT_TYPE_LIST = [
         1           => 'Lead',
         2           => 'Case',
         3           => 'Chat',
@@ -61,8 +61,8 @@ class ExperimentTarget extends ActiveRecord
         return [
             'ext_id' => Yii::t('experiment-manager', 'ID'),
             'ext_target_id' => Yii::t('experiment-manager', 'Target instance ID'),
-            'ext_target_type_id' => Yii::t('experiment-manager', 'Target instance Type ID'),
-            'ext_experiment_id' => Yii::t('experiment-manager', 'Experiment ID'),
+            'ext_target_type_id' => Yii::t('experiment-manager', 'Target instance Type'),
+            'ext_experiment_id' => Yii::t('experiment-manager', 'Experiment'),
         ];
     }
 
@@ -79,7 +79,7 @@ class ExperimentTarget extends ActiveRecord
      */
     public static function getList(): array
     {
-        return self::EXT_TYPES;
+        return self::EXT_TYPE_LIST;
     }
 
     /**

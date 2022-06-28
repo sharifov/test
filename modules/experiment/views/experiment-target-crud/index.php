@@ -1,5 +1,6 @@
 <?php
 
+use modules\experiment\models\Experiment;
 use modules\experiment\models\ExperimentTarget;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -32,11 +33,16 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'ext_target_type_id',
                 'value' => static function (ExperimentTarget $model) {
-                    return ExperimentTarget::EXT_TYPES[$model->ext_target_type_id] ?? '';
+                    return ExperimentTarget::EXT_TYPE_LIST[$model->ext_target_type_id] ?? '';
                 },
-                'filter' => ExperimentTarget::EXT_TYPES
+                'filter' => ExperimentTarget::EXT_TYPE_LIST
             ],
-            'ext_experiment_id',
+            [
+                'attribute' => 'ext_experiment_id',
+                'value' => static function (ExperimentTarget $model) {
+                    return Experiment::getExperimentById($model->ext_experiment_id)['ex_code'] . ' (ID ' . $model->ext_experiment_id . ')';
+                }
+            ],
             [
                 'class' => ActionColumn::class,
                 'urlCreator' => function ($action, ExperimentTarget $model, $key, $index, $column) {

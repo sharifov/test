@@ -69,6 +69,15 @@ class Experiment extends ActiveRecord
     }
 
     /**
+     * @param int $ex_id
+     * @return ActiveRecord|array|null
+     */
+    public static function getExperimentById(int $ex_id)
+    {
+        return self::find()->where(['ex_id' => $ex_id])->limit(1)->one();
+    }
+
+    /**
      * @param string $targetType
      * @param int $targetId
      * @return bool

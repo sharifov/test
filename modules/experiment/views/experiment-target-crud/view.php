@@ -1,10 +1,12 @@
 <?php
 
+use modules\experiment\models\Experiment;
 use modules\experiment\models\ExperimentTarget;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
+/* @var $model modules\experiment\models\Experiment */
 /* @var $model modules\experiment\models\ExperimentTarget */
 
 $this->title = $model->ext_id;
@@ -34,10 +36,15 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'ext_target_type_id',
                 'value' => static function (ExperimentTarget $model) {
-                    return ExperimentTarget::EXT_TYPES[$model->ext_target_type_id];
+                    return ExperimentTarget::EXT_TYPE_LIST[$model->ext_target_type_id];
                 }
             ],
-            'ext_experiment_id',
+            [
+                'attribute' => 'ext_experiment_id',
+                'value' => static function (ExperimentTarget $model) {
+                    return Experiment::getExperimentById($model->ext_experiment_id)['ex_code'] . ' (ID ' . $model->ext_experiment_id . ')';
+                }
+            ],
         ],
     ]) ?>
 
