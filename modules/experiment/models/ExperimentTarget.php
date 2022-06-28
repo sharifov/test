@@ -85,23 +85,23 @@ class ExperimentTarget extends ActiveRecord
     /**
      * @return array
      */
-    public static function saveExperimentList(string $class, int $targetId, array $experimentCodes = []): void
+    public static function saveExperimentList(string $target_type_id, int $targetId, array $experimentCodes = []): void
     {
         $mergedExperimentCodes = array_unique(array_column($experimentCodes, 'cross_ex_code'));
         foreach ($mergedExperimentCodes as $ex_code) {
             if ($ex_code != '') {
-                self::saveExperiment($class, $targetId, $ex_code);
+                self::saveExperiment($target_type_id, $targetId, $ex_code);
             }
         }
     }
 
-    public static function saveExperiment(string $class, int $targetId, string $experimentCode): void
+    public static function saveExperiment(string $target_type_id, int $targetId, string $experimentCode): void
     {
         $experimentRecord = Experiment::getExperimentByCode($experimentCode);
         if (empty($experimentRecord)) {
             $experimentRecord = new Experiment(['ex_code' => $experimentCode]);
             $experimentRecord->save();
         }
-        $experimentRecord->addTarget($class, $targetId);
+        $experimentRecord->addTarget($target_type_id, $targetId);
     }
 }
