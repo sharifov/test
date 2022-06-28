@@ -705,8 +705,12 @@ class ShiftScheduleController extends FController
                 'message' => 'Event removed successfully',
             ]);
         }
+        $oldEvent = clone $userShiftSchedule;
         $userShiftSchedule->uss_status_id = UserShiftSchedule::STATUS_DELETED;
+        $changedAttributes = $userShiftSchedule->getDirtyAttributes();
         $userShiftSchedule->save();
+        ShiftScheduleRequestService::changeDueToEventChange($userShiftSchedule, $oldEvent, $changedAttributes, Auth::user());
+
         Notifications::createAndPublish(
             $userShiftSchedule->uss_user_id,
             'Shift event was removed',
@@ -825,8 +829,11 @@ class ShiftScheduleController extends FController
                 if ($deletePermanently == 1) {
                     $event->delete();
                 } else {
+                    $oldEvent = clone $event;
                     $event->uss_status_id = UserShiftSchedule::STATUS_DELETED;
+                    $changedAttributes = $event->getDirtyAttributes();
                     $event->save();
+                    ShiftScheduleRequestService::changeDueToEventChange($event, $oldEvent, $changedAttributes, Auth::user());
 
                     if (!$canHideSoftDeleted) {
                         $eventsData[] = UserShiftScheduleHelper::getDataForCalendar($event);

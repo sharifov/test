@@ -4,6 +4,7 @@ namespace modules\shiftSchedule\src\entities\userShiftSchedule;
 
 use common\models\Employee;
 use modules\shiftSchedule\src\entities\shift\Shift;
+use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
 use modules\shiftSchedule\src\entities\shiftScheduleRule\ShiftScheduleRule;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use yii\behaviors\BlameableBehavior;
@@ -102,6 +103,12 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
             $this->uss_month_start = (int) date('m');
         }
         return parent::beforeSave($insert);
+    }
+
+    public function afterDelete(): void
+    {
+        parent::afterDelete();
+        ShiftScheduleRequest::deleteAll(['ssr_uss_id' => $this->uss_id]);
     }
 
     public function rules(): array

@@ -226,7 +226,7 @@ class ShiftScheduleRequestService
      * @param Employee $user
      * @return void
      */
-    public static function createDueToEventChange(UserShiftSchedule $event, UserShiftSchedule $oldEvent, array $changedAttributes, Employee $user)
+    public static function changeDueToEventChange(UserShiftSchedule $event, UserShiftSchedule $oldEvent, array $changedAttributes, Employee $user)
     {
         $neededAttributes = self::getNeededAttributesWithMessage($oldEvent, $changedAttributes);
 
