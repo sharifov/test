@@ -50,6 +50,8 @@ use src\entities\email\helpers\EmailContactType;
  * @property EmailAddress[] $contacts
  * @property EmailAddress $contactFrom
  * @property EmailAddress $contactTo
+ * @property EmailContact $emailContactFrom
+ * @property EmailContact $emailContactTo
  * @property Email $reply
  */
 class Email extends ActiveRecord
@@ -167,6 +169,15 @@ class Email extends ActiveRecord
         return $this->hasMany(EmailAddress::class, ['ea_id' => 'ec_address_id'])->viaTable('email_contact', ['ec_email_id' => 'e_id']);
     }
 
+    public function getEmailContactFrom()
+    {
+        return $this->hasOne(EmailContact::class, ['ec_email_id' => 'e_id'])->onCondition(['ec_type_id' => EmailContactType::FROM]);
+    }
+
+    public function getEmailContactTo()
+    {
+        return $this->hasOne(EmailContact::class, ['ec_email_id' => 'e_id'])->onCondition(['ec_type_id' => EmailContactType::TO]);
+    }
 
     public function getContactFrom(): \yii\db\ActiveQuery
     {
