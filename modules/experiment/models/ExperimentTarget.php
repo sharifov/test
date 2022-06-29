@@ -108,7 +108,7 @@ class ExperimentTarget extends ActiveRecord
     /**
      * @return array
      */
-    public static function getExperimentList(string $target_type_id, int $targetId): array
+    public static function getExperimentArray(string $target_type_id, int $targetId): array
     {
         $targetExperiments = self::find()
                              ->select('ex_code')
@@ -116,7 +116,7 @@ class ExperimentTarget extends ActiveRecord
                              ->where(['ext_target_type_id' => $target_type_id, 'ext_target_id' => $targetId])->asArray()->all();
         $experiment_array = [];
         foreach ($targetExperiments as $experiment) {
-            $experiment_array[] = ['cross_ex_code' => $experiment['ex_code']];
+            $experiment_array[] = ['ex_code' => $experiment['ex_code']];
         }
 
         return $experiment_array;
@@ -127,7 +127,7 @@ class ExperimentTarget extends ActiveRecord
      */
     public static function saveExperimentList(string $target_type_id, int $targetId, array $experimentCodes = []): void
     {
-        $mergedExperimentCodes = array_unique(array_column($experimentCodes, 'cross_ex_code'));
+        $mergedExperimentCodes = array_unique(array_column($experimentCodes, 'ex_code'));
         foreach ($mergedExperimentCodes as $ex_code) {
             if ($ex_code != '') {
                 self::saveExperiment($target_type_id, $targetId, $ex_code);
