@@ -14,6 +14,8 @@ use common\models\Email as EmailOld;
 use src\entities\cases\Cases;
 use common\models\Lead;
 use src\entities\email\EmailLog;
+use src\entities\email\form\EmailCreateForm;
+use src\auth\Auth;
 
 /**
  *
@@ -38,6 +40,11 @@ class EmailsNormalizeService
     public $emailLog;
     public $emailParams;
     public $errors = [];
+
+    public static function newInstance()
+    {
+        return new static();
+    }
 
     public function createEmailFromOld(EmailOld $emailOld)
     {
@@ -254,8 +261,9 @@ class EmailsNormalizeService
             'ea_email' => $email,
             'ea_name' => preg_replace('~\"(.*)\"~iU', "$1", $name),
         ];
-        $address = EmailAddress::findOrNew(['ea_email' => $email], $attributes);
+        $address = EmailAddress::findOneOrNew(['ea_email' => $email]);
         if ($address->isNewRecord) {
+            $address->attributes = $attributes;
             $address->save();
         }
 
@@ -283,5 +291,74 @@ class EmailsNormalizeService
     public function getErrors()
     {
         return $this->errors;
+    }
+
+    public function create(EmailCreateForm $form)
+    {
+        $transaction = \Yii::$app->db->beginTransaction();
+
+        try {
+            //=Email
+            $emailData = [
+                'e_type_id' => $form->type,
+                'e_status_id' => $form->status,
+                'e_project_id' => $form->projectId,
+                'e_departament_id' => $form->depId,
+                'e_created_user_id' => $form->getUserId() ?? Auth::id(),
+            ];
+            $email = Email::create($emailData);
+            //=!Email
+
+            //=EmailParams
+            if (!$form->params->isEmpty()) {
+                $paramsData = [
+                    'ep_template_type_id' => $form->params->templateType,
+                    'ep_language_id' => $form->params->language,
+                    'ep_priority' => $form->params->priority,
+                    'ep_email_id' => $email->e_id,
+                ];
+                EmailParams::create($paramsData);
+            }
+            //=!EmailParams
+
+            //=EmailBody
+            $bodyText = $form->body->getText();
+            $bodyData = [
+                'embd_email_subject' => $form->body->subject,
+                'embd_email_body_text' => $bodyText,
+                'embd_email_data' => $form->body->data,
+                'embd_hash' => hash('crc32b', join(' | ', [$form->body->subject, $bodyText])),
+            ];
+            $emailBody = EmailBody::create($bodyData);
+            $email->link('emailBody', $emailBody);
+            //=!EmailBody
+
+            //=EmailBlob
+            EmailBlob::create([
+                'embb_email_body_blob' => $form->body->getBodyHtml(),
+                'embb_body_id' => $emailBody->embd_id
+            ]);
+            //=!EmailBlob
+
+            //=EmailContacts
+            foreach ($form->contacts as $contactForm)
+            {
+                $address = $this->getAddress($contactForm->email, $contactForm->name);
+                EmailContact::create([
+                    'ec_address_id' => $address->ea_id,
+                    'ec_email_id' => $email->e_id,
+                    'ec_type_id' => $contactForm->type
+                ]);
+            }
+            //=!EmailContacts
+
+            $transaction->commit();
+
+        }catch (\Throwable $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
+
+        return $email;
     }
 }
