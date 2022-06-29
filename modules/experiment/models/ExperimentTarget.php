@@ -125,12 +125,14 @@ class ExperimentTarget extends ActiveRecord
     /**
      * @return array
      */
-    public static function saveExperimentList(string $target_type_id, int $targetId, array $experimentCodes = []): void
+    public static function saveExperimentList(string $target_type_id, int $targetId, array $experimentCodes): void
     {
-        $mergedExperimentCodes = array_unique(array_column($experimentCodes, 'ex_code'));
-        foreach ($mergedExperimentCodes as $ex_code) {
-            if ($ex_code != '') {
-                self::saveExperiment($target_type_id, $targetId, $ex_code);
+        if (!empty($experimentCodes)) {
+            $mergedExperimentCodes = array_unique(array_column($experimentCodes, 'ex_code'));
+            foreach ($mergedExperimentCodes as $ex_code) {
+                if ($ex_code != '') {
+                    self::saveExperiment($target_type_id, $targetId, $ex_code);
+                }
             }
         }
     }
