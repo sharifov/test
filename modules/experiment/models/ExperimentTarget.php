@@ -87,9 +87,39 @@ class ExperimentTarget extends ActiveRecord
     /**
      * @return array
      */
-    public static function getList(): array
+    public static function getTypeList(): array
     {
         return self::EXT_TYPE_LIST;
+    }
+
+    /**
+     * @return array
+     */
+    public static function getExperimentIds(string $target_type_id, int $targetId): array
+    {
+        $targetExperiments = self::findAll(['ext_target_type_id' => $target_type_id, 'ext_target_id' => $targetId]);
+        $experiment_array  = [];
+        foreach ($targetExperiments as $experiment) {
+            $experiment_array[] = $experiment->ext_experiment_id;
+        }
+        return $experiment_array;
+    }
+
+    /**
+     * @return array
+     */
+    public static function getExperimentList(string $target_type_id, int $targetId): array
+    {
+        $targetExperiments = self::find()
+                             ->select('ex_code')
+                             ->joinWith(Experiment::tableName())
+                             ->where(['ext_target_type_id' => $target_type_id, 'ext_target_id' => $targetId])->asArray()->all();
+        $experiment_array = [];
+        foreach ($targetExperiments as $experiment) {
+            $experiment_array[] = ['cross_ex_code' => $experiment['ex_code']];
+        }
+
+        return $experiment_array;
     }
 
     /**

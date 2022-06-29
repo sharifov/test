@@ -15,7 +15,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'ext_target_id')->textInput() ?>
 
-    <?= $form->field($model, 'ext_target_type_id')->dropDownList(ExperimentTarget::getList(), ['prompt' => '---'])?>
+    <?= $form->field($model, 'ext_target_type_id')->dropDownList(ExperimentTarget::getTypeList(), ['prompt' => '---'])?>
 
     <?= $form->field($model, 'ext_experiment_id')->textInput() ?>
 
