@@ -1203,6 +1203,7 @@ class LeadController extends FController
                 if ($allowRbac) {
                     $user = Auth::user();
                     $leadAbacDto = new LeadAbacDto($lead, $user->getId());
+                    /** @abac $leadAbacDto, LeadAbacObject::ACT_TAKE_LEAD, LeadAbacObject::ACTION_ACCESS, Access to take lead */
                     if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_TAKE_LEAD, LeadAbacObject::ACTION_ACCESS)) {
                         $lead->processing($user->getId(), Yii::$app->user->getId(), 'Take');
 
@@ -1541,7 +1542,7 @@ class LeadController extends FController
         $limit = null;
 
         if ($user->isAgent()) {
-            $checkShiftTime = $user->checkShiftTime();
+         //   $checkShiftTime = $user->checkShiftTime();
             $userParams = $user->userParams;
             if ($userParams) {
                 if ($userParams->up_inbox_show_limit_leads > 0) {
