@@ -45,8 +45,8 @@ if (!$mailList || !is_array($mailList)) {
             <div class="tile-stats">
                 <div class="icon"><i class="fa fa-envelope-o"></i></div>
                 <div class="count">
-               		<?= $stats['outboxToday']?>
-				</div>
+                    <?= $stats['outboxToday']?>
+                </div>
                 <h3>Today Outbox</h3>
                 <p>Today outbox count of Email messages</p>
             </div>
