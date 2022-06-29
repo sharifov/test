@@ -419,7 +419,7 @@ class CallLogTransferService
 
             $departmentPhone = DepartmentPhoneProject::find()->byPhone($log->cl_phone_to, false)->enabled()->limit(1)->one();
             if ($departmentPhone) {
-                $departmentPhoneProjectParamsService = new DepartmentPhoneProjectParamsService();
+                $departmentPhoneProjectParamsService = new DepartmentPhoneProjectParamsService($departmentPhone);
                 $departmentPhoneProjectParamsService->updateExperimentList(ExperimentTarget::EXT_TYPE_CALL, ExperimentTarget::EXT_TYPE_CALL_LOG, $log->cl_id);
             }
 

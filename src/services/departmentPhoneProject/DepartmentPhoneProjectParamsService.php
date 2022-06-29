@@ -32,12 +32,12 @@ class DepartmentPhoneProjectParamsService
         return array_unique(array_column(ArrayHelper::getValue(JsonHelper::decode($this->departmentPhoneProject->dpp_params), 'experiments', []), 'ex_code'));
     }
 
-    public function saveExperimentList(int $targetTypeId, int $callId): array
+    public function saveExperimentList(int $targetTypeId, int $callId): void
     {
         ExperimentTarget::saveExperimentList($targetTypeId, $callId, $this->getPhoneExperimentList());
     }
 
-    public function updateExperimentList(int $oldTargetTypeId, int $newTargetTypeId, int $callId): array
+    public function updateExperimentList(int $oldTargetTypeId, int $newTargetTypeId, int $callId): void
     {
         ExperimentTarget::updateAll(['ext_target_type_id' => $newTargetTypeId], ['ext_target_type_id' => $oldTargetTypeId, 'ext_target_id' => $callId]);
     }
