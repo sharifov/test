@@ -27,7 +27,7 @@ class TwoFactorAuthHelper
      */
     public static function setAuthAttempts($value): void
     {
-        Yii::$app->session->get(self::AUTH_ATTEMPTS_KEY, $value);
+        Yii::$app->session->set(self::AUTH_ATTEMPTS_KEY, $value);
     }
 
     /**
