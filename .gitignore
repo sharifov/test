@@ -69,3 +69,6 @@ cghooks.lock
 
 /Makefile
 /docker-pre-commit.sh
+
+var/*
+!var/.gitkeep
