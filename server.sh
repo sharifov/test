@@ -269,8 +269,8 @@ initConfig () {
     php init --env=Local --overwrite=All \
     && rm "common/config/supervisor/centrifugo.conf" \
     && rm "common/config/supervisor/socket-server.conf" \
-    && cp ".docker/pre-commit.sh" "docker-pre-commit.sh" \
-    && chmod +x "docker-pre-commit.sh"
+    && cp ".docker/pre-commit.sh" "docker-pre-commit-new.sh" \
+    && chmod +x "docker-pre-commit-new.sh"
   createDefaultCentrifugoConfig
   printf "\nDone - Init config \n\n"
 }
