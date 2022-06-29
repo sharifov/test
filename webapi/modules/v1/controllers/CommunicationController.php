@@ -29,6 +29,7 @@ use frontend\helpers\JsonHelper;
 use frontend\widgets\newWebPhone\call\socket\RemoveIncomingRequestMessage;
 use frontend\widgets\newWebPhone\sms\socket\Message;
 use frontend\widgets\notification\NotificationMessage;
+use modules\experiment\models\ExperimentTarget;
 use src\entities\cases\Cases;
 use src\forms\lead\PhoneCreateForm;
 use src\guards\call\CallRedialGuard;
@@ -412,7 +413,6 @@ class CommunicationController extends ApiBaseController
                     $departmentPhoneProjectParamsService = new DepartmentPhoneProjectParamsService($departmentPhone);
                     $callFilterGuardService = new CallFilterGuardService($client_phone_number, $departmentPhoneProjectParamsService, $this->callService);
                     $logExecutionTime->end();
-
                     if (!$isTrustStirCall && $callFilterGuardService->isEnable() && !$callFilterGuardService->isTrusted()) {
                         $logExecutionTime->start('CallFilterGuardService:runRepression');
                         $callFilterGuardService->runRepression($postCall);
@@ -472,6 +472,8 @@ class CommunicationController extends ApiBaseController
                     $departmentPhone->dpp_priority,
                     $departmentPhone->dpp_phone_list_id
                 );
+
+                $departmentPhoneProjectParamsService->saveExperimentList(ExperimentTarget::EXT_TYPE_CALL, $callModel->c_id);
 
                 if (!$isTrustStirCall && SettingHelper::isEnableCallLogFilterGuard()) {
                     try {
@@ -1431,6 +1433,7 @@ class CommunicationController extends ApiBaseController
 
             $call->c_recording_disabled = (bool)($calData['call_recording_disabled'] ?? false);
             $call->setDataPriority($priority);
+//            $call->saveExperiments();
             $call->setDataCreatedParams($calData);
             $call->setDataCreatorType((int)($calData['creator_type_id'] ?? null));
 

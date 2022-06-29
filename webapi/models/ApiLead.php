@@ -17,6 +17,7 @@ use modules\experiment\models\ExperimentTarget;
 use thamtech\uuid\validators\UuidValidator;
 use Yii;
 use yii\base\Model;
+use yii\helpers\VarDumper;
 
 /**
  * This is the model class for table "leads".
@@ -401,21 +402,5 @@ class ApiLead extends Model
         if (empty($this->currency_code) || !CurrencyQuery::existsByCurrencyCode((string)$this->currency_code)) {
             $this->currency_code = Currency::getDefaultCurrencyCodeByDb();
         }
-    }
-
-    /**
-     * @return array
-     */
-    public function getExperimentsIds(): array
-    {
-        $exp_array = [];
-
-        $exps = ExperimentTarget::findAll(['ext_target_id' => $this->lead_id, 'ext_target_type' => Lead::class]);
-//                                ->leftJoin(Experiment::tableName(), Experiment::tableName() . '.exp_id=' . ExperimentTarget::tableName() . 'ext_experiment_id');
-        foreach ($exps as $exp) {
-            $exp_array[] = $exp["ext_experiment_id"];
-        }
-
-        return $exp_array;
     }
 }
