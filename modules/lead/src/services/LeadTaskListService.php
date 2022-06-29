@@ -8,10 +8,18 @@ use modules\lead\src\abac\taskLIst\LeadTaskListAbacDto;
 use modules\lead\src\abac\taskLIst\LeadTaskListAbacObject;
 use modules\objectSegment\src\contracts\ObjectSegmentKeyContract;
 use modules\objectSegment\src\entities\ObjectSegmentList;
+use modules\objectSegment\src\entities\ObjectSegmentTask;
 use modules\objectSegment\src\entities\ObjectSegmentType;
+use modules\taskList\src\entities\TargetObject;
+use modules\taskList\src\entities\taskList\TaskList;
+use modules\taskList\src\entities\userTask\repository\UserTaskRepository;
+use modules\taskList\src\entities\userTask\UserTask;
+use src\helpers\app\AppHelper;
 use src\model\leadData\entity\LeadData;
+use src\model\leadData\services\LeadDataService;
 use src\model\leadDataKey\services\LeadDataKeyDictionary;
 use yii\db\Expression;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class LeadTaskListService
@@ -19,6 +27,7 @@ use yii\db\Expression;
 class LeadTaskListService
 {
     private Lead $lead;
+    private ?array $leadDataObjectSegments = null;
 
     public function __construct(Lead $lead)
     {
@@ -28,11 +37,81 @@ class LeadTaskListService
     public function assign()
     {
         /* TODO::  */
+        /*if ($objectSegmentLists = $this->getObjectSegmentLists()) {
+            foreach ($objectSegmentLists as $objectSegmentList) {
+
+            }
+        }*/
     }
 
     public function assignReAssign()
     {
-        /* TODO::  */
+        if ($taskLists = $this->getTaskList()) {
+            foreach ($taskLists as $taskList) {
+
+                try {
+                    $userTask = UserTask::create(
+                        $this->lead->employee_id,
+                        TargetObject::TARGET_OBJ_LEAD,
+                        $this->lead->id,
+                        $taskList->tl_id,
+                        date('Y-m-d H:i:s'),
+                        date('Y-m-d H:i:s')
+                    );
+                    (new UserTaskRepository($userTask))->save();
+
+
+
+                } catch (\RuntimeException | \DomainException $throwable) {
+                    $message = AppHelper::throwableLog($throwable);
+                    if ($userTask ?? null) {
+                        $message['userTask'] = ArrayHelper::toArray($userTask);
+                    }
+                    \Yii::warning($message, 'LeadTaskListService:assignReAssign:Exception');
+                } catch (\Throwable $throwable) {
+                    $message = AppHelper::throwableLog($throwable);
+                    if ($userTask ?? null) {
+                        $message['userTask'] = ArrayHelper::toArray($userTask);
+                    }
+                    \Yii::error($message, 'LeadTaskListService:assignReAssign:Throwable');
+                }
+            }
+        }
+    }
+
+    /**
+     * @return TaskList[]
+     */
+    public function getTaskList(): array
+    {
+        return TaskList::find()
+            ->alias('task_list')
+            ->select('task_list.*')
+            ->innerJoin([
+                'object_segment_task_query' => ObjectSegmentTask::find()
+                    ->select(['ostl_tl_id'])
+                    ->innerJoin([
+                        'object_segment_list_query' => ObjectSegmentList::find()
+                            ->select(['osl_id'])
+                            ->innerJoin(
+                                ObjectSegmentType::tableName(),
+                                'osl_ost_id = ost_id AND ost_key = :keyLead',
+                                ['keyLead' => ObjectSegmentKeyContract::TYPE_KEY_LEAD]
+                            )
+                            ->innerJoin([
+                                'lead_data_query' => LeadData::find()
+                                    ->select(['ld_field_value'])
+                                    ->andWhere(['ld_lead_id' => $this->lead->id])
+                                    ->groupBy(['ld_field_value'])
+                            ], 'lead_data_query.ld_field_value = object_segment_list.osl_key')
+                            ->andWhere(['osl_enabled' => true])
+                            ->distinct()
+                    ], 'osl_id = ostl_osl_id')
+                    ->groupBy(['ostl_tl_id'])
+            ], 'object_segment_task_query.ostl_tl_id = task_list.tl_id')
+            ->where(['tl_enable_type' => 1])
+            ->distinct()
+            ->all();
     }
 
     public function hasActiveLeadObjectSegment(): bool
@@ -43,9 +122,10 @@ class LeadTaskListService
                     ->select(['osl_key'])
                     ->innerJoin(
                         ObjectSegmentType::tableName(),
-                        'osl_ost_id = ost_id AND ost_key = ' . new Expression(ObjectSegmentKeyContract::TYPE_KEY_LEAD)
+                        'osl_ost_id = ost_id AND ost_key = :keyLead',
+                        ['keyLead' => ObjectSegmentKeyContract::TYPE_KEY_LEAD]
                     )
-                    ->andWhere(['osl_enabled' => true])
+                    ->where(['osl_enabled' => true])
                     ->groupBy(['osl_key'])
             ], 'object_segment_list_query.osl_key = ld_field_value')
             ->where(['ld_lead_id' => $this->lead->id])
@@ -70,12 +150,23 @@ class LeadTaskListService
         if (!$can) {
             return false;
         }
-
-        return true;
+        /* TODO:: add? hasActiveLeadObjectSegment */
+        return $can;
     }
 
     public function getLead(): Lead
     {
         return $this->lead;
+    }
+
+    public function getLeadDataObjectSegments(): ?array
+    {
+        if (!$this->leadDataObjectSegments === null) {
+            return $this->leadDataObjectSegments;
+        }
+        return $this->leadDataObjectSegments = LeadDataService::getByLeadAndKey(
+            $this->lead->id,
+            LeadDataKeyDictionary::KEY_LEAD_OBJECT_SEGMENT
+        );
     }
 }
