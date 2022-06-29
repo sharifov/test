@@ -5,6 +5,7 @@ namespace src\services\parsingDump;
 use common\models\Airline;
 use common\models\Airports;
 use DateTime;
+use modules\flight\models\FlightQuoteSegment;
 use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
 use modules\flight\src\helpers\FlightQuoteHelper;
 use src\helpers\app\AppHelper;
@@ -121,7 +122,13 @@ class ReservationService
         return $this->parseResult;
     }
 
-    public function parseSegment($pastParsedSegments, $index, $segment): array
+    /**
+     * @param array $pastParsedSegments
+     * @param int $index
+     * @param FlightQuoteSegment $segment
+     * @return array
+     */
+    public function parseSegment(array $pastParsedSegments, int $index, FlightQuoteSegment $segment): array
     {
         $departureTimeZone = null;
         if ($departureAirport = Airports::findByIata($segment->fqs_departure_airport_iata)) {
