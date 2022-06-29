@@ -364,8 +364,8 @@ class UserShiftScheduleService
 
         try {
             $changedAttributes = $event->getDirtyAttributes();
+            $event->recordChangeEvent($oldEvent, $changedAttributes, Auth::user());
             (new UserShiftScheduleRepository($event))->save(true);
-            $this->requestService->changeDueToEventChange($event, $oldEvent, $changedAttributes, Auth::user());
 
             Notifications::createAndPublish(
                 $event->uss_user_id,
@@ -404,8 +404,8 @@ class UserShiftScheduleService
             $event->uss_description = $form->description;
         }
         $changedAttributes = $event->getDirtyAttributes();
+        $event->recordChangeEvent($oldEvent, $changedAttributes, Auth::user());
         (new UserShiftScheduleRepository($event))->save(true);
-        $this->requestService->changeDueToEventChange($event, $oldEvent, $changedAttributes, Auth::user());
 
         Notifications::createAndPublish(
             $oldEvent->uss_user_id,
