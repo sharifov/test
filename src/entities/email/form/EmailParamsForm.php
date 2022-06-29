@@ -45,6 +45,11 @@ class EmailParamsForm extends Model
         return $instance;
     }
 
+    public function isEmpty()
+    {
+        return empty($this->id) && empty($this->priority) && empty($this->language) && empty($this->templateType);
+    }
+
     public function rules(): array
     {
         return [

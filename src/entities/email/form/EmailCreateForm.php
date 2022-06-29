@@ -142,6 +142,11 @@ class EmailCreateForm extends CompositeForm
         return Project::getListByUser($this->userId);
     }
 
+    public function getUserId(): int
+    {
+        return $this->userId;
+    }
+
     public function internalForms(): array
     {
         return ['params', 'body', 'contacts'];

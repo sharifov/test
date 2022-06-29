@@ -4,6 +4,7 @@ namespace src\entities\email\form;
 
 use yii\base\Model;
 use src\entities\email\EmailBody;
+use src\helpers\email\TextConvertingHelper;
 
 class EmailBodyForm extends Model
 {
@@ -47,6 +48,16 @@ class EmailBodyForm extends Model
         $instance->id = $body->embd_id;
 
         return $instance;
+    }
+
+    public function getText() : string
+    {
+        return ($this->text) ?? TextConvertingHelper::htmlToText($this->bodyHtml);
+    }
+
+    public function getBodyHtml() : string
+    {
+        return TextConvertingHelper::compress($this->bodyHtml);
     }
 
     public function rules(): array
