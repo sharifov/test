@@ -40,10 +40,18 @@ class AbacLeadExpertCallService
             [Quote::CREATE_TYPE_AUTO, Quote::CREATE_TYPE_AUTO_SELECT, Quote::CREATE_TYPE_SMART_SEARCH]
         );
 
+        $statistics = (new StatisticsHelper($lead->id, StatisticsHelper::TYPE_LEAD))->setCallCount();
+        $callCount = $statistics->callCount;
+
+        $call_type = UserProfile::find()->select('up_call_type_id')->where(['up_user_id' => $user->id])->one();
+        $canMakeCall = $call_type && $call_type->up_call_type_id && (new AbacCallFromNumberList($user, $lead))->canMakeCall();
+
         $this->dto = new LeadExpertCallAbacDto(
             $leadStatus,
             $hasFlightSegment,
-            $quoteCount
+            $quoteCount,
+            $callCount,
+            $canMakeCall
         );
     }
 }

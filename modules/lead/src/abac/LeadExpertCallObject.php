@@ -62,11 +62,37 @@ class LeadExpertCallObject extends AbacBaseModel implements AbacInterface
         'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, '<', '>', '<=', '>=']
     ];
 
+
+    public const ATTR_CALL_COUNT = [
+        'optgroup' => 'Lead',
+        'id' => self::NS . 'callCount',
+        'field' => 'callCount',
+        'label' => 'Call amount',
+        'type' => self::ATTR_TYPE_INTEGER,
+        'input' => self::ATTR_INPUT_TEXT,
+        'values' => [],
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, '<', '>', '<=', '>=']
+    ];
+
+    protected const ATTR_CAN_MAKE_CALL = [
+        'optgroup' => 'User',
+        'id' => self::NS . 'canMakeCall',
+        'field' => 'canMakeCall',
+        'label' => 'Can Make Call',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' => [self::OP_EQUAL2]
+    ];
+
     /** --------------- ATTRIBUTE LIST --------------------------- */
     public const OBJECT_ATTRIBUTE_LIST = [
         self::ACT_CALL   => [
             self::ATTR_HAS_FLIGHT_SEGMENT,
-            self::ATTR_QUOTE_COUNT
+            self::ATTR_QUOTE_COUNT,
+            self::ATTR_CALL_COUNT,
+            self::ATTR_CAN_MAKE_CALL
         ],
     ];
 
