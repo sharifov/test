@@ -180,6 +180,7 @@ class LeadCreateForm extends CompositeForm
             }],
 
             ['depId', 'integer'],
+            ['depId', 'required'],
             ['depId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
 
             ['delayedCharge', 'boolean'],
