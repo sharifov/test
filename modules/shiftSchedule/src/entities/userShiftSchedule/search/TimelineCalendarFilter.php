@@ -22,8 +22,10 @@ class TimelineCalendarFilter extends Model
     public $userId;
     public $appliedFilter;
     public bool $displayUsersWithoutEvents = true;
+    public $collapsedResources;
 
     public array $parsedUserGroups = [];
+    public ?array $parsedCollapsedResources = null;
 
     public const LESS_THEN_OR_EQUAL = 1;
     public const MORE_THEN_OR_EQUAL = 2;
@@ -54,7 +56,8 @@ class TimelineCalendarFilter extends Model
             }],
             [['usersIds', 'statuses', 'scheduleTypes', 'shift', 'userGroups'], 'default', 'value' => []],
             [['usersIds', 'statuses', 'scheduleTypes', 'shift', 'userGroups'], IsArrayValidator::class],
-            [['startDateTime', 'endDateTime', 'startDateTimeCondition', 'endDateTimeCondition', 'duration', 'startDate', 'endDate'], 'string'],
+            [['startDateTime', 'endDateTime', 'startDateTimeCondition', 'endDateTimeCondition', 'duration', 'startDate', 'endDate', 'collapsedResources'], 'string'],
+            [['collapsedResources'], 'default', 'value' => null],
             [['startDateTime', 'endDateTime'], 'datetime', 'format' => 'php:Y-m-d H:i'],
             [['startDate', 'endDate'], 'datetime', 'format' => 'php:Y-m-d'],
             [['appliedFilter'], 'boolean'],
@@ -81,5 +84,13 @@ class TimelineCalendarFilter extends Model
     public function getEndDateTimeConditionOperator(): string
     {
         return self::CONDITION_LIST[$this->endDateTimeCondition] ?? '=';
+    }
+
+    public function getParsedResources(): array
+    {
+        if ($this->parsedCollapsedResources === null) {
+            $this->parsedCollapsedResources = $this->collapsedResources ? explode(',', $this->collapsedResources) : [];
+        }
+        return $this->parsedCollapsedResources;
     }
 }
