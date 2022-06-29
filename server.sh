@@ -467,6 +467,9 @@ elif [ "$whatDo" == "app-console" ]; then
 elif [ "$whatDo" == "apidoc-gen" ]; then
   docker-compose -f "$dockerComposeFile" run --rm --no-deps console composer apidoc-gen
 
+elif [ "$whatDo" == "init-config" ]; then
+  initConfig
+
 elif [ "$whatDo" == "migrate" ]; then
   runMigrate
 
