@@ -19,7 +19,6 @@ use src\entities\email\helpers\EmailStatus;
 use src\entities\email\helpers\EmailType;
 use src\entities\EventTrait;
 use Yii;
-use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 use common\components\CommunicationService;
 use src\services\abtesting\email\EmailTemplateOfferABTestingService;
@@ -27,6 +26,10 @@ use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadUserData\repository\LeadUserDataRepository;
 use yii\helpers\VarDumper;
+use src\exceptions\CreateModelException;
+use src\model\BaseActiveRecord;
+use yii\db\ActiveRecord;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "email_norm".
@@ -60,7 +63,7 @@ use yii\helpers\VarDumper;
  * @property Email $reply
  * @property EmailTemplateType $templateType
  */
-class Email extends ActiveRecord
+class Email extends BaseActiveRecord
 {
     use EventTrait;
 
@@ -263,7 +266,7 @@ class Email extends ActiveRecord
 
     public function isNew()
     {
-        return $this->emailLog->el_is_new;
+        return $this->emailLog->el_is_new ?? false;
     }
 
     public function attributeLabels(): array
@@ -297,14 +300,14 @@ class Email extends ActiveRecord
     public function behaviors(): array
     {
         return [
-            /* 'timestamp' => [
+            'timestamp' => [
                 'class' => TimestampBehavior::class,
                 'attributes' => [
                     ActiveRecord::EVENT_BEFORE_INSERT => ['e_created_dt'],
                     ActiveRecord::EVENT_BEFORE_UPDATE => ['e_updated_dt'],
                 ],
                 'value' => date('Y-m-d H:i:s')
-            ], */
+            ],
             'metric' => [
                 'class' => MetricEmailCounterBehavior::class,
             ],
@@ -432,25 +435,17 @@ class Email extends ActiveRecord
         return $out;
     }
 
-    public static function findOrNew(array $criteria = [], array $values = [])
-    {
-        $model = self::find()->where($criteria)->limit(1)->one() ?? new self($criteria);
-        $model->load($values, '');
-
-        return $model;
-    }
-
     /**
      * @return static
      */
-    private static function create(): self
+/*     private static function create(): self
     {
         $email = new static();
         $email->e_created_dt = date('Y-m-d H:i:s');
         $email->e_created_user_id = Auth::employeeId();
 
         return $email;
-    }
+    } */
 
     public static function createFromEmailObject(EmailOld $emailOld)
     {

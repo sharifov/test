@@ -3,6 +3,7 @@
 namespace src\entities\email;
 
 use Yii;
+use src\model\BaseActiveRecord;
 
 /**
  * This is the model class for table "email_contact".
@@ -15,20 +16,8 @@ use Yii;
  * @property EmailAddress $address
  * @property Email $email
  */
-class EmailContact extends \yii\db\ActiveRecord
+class EmailContact extends BaseActiveRecord
 {
-    public const TYPE_FROM  = 1;
-    public const TYPE_TO    = 2;
-    public const TYPE_CC    = 3;
-    public const TYPE_BCC   = 4;
-
-    public const TYPE_LIST = [
-        self::TYPE_FROM     => 'From',
-        self::TYPE_TO       => 'To',
-        self::TYPE_CC       => 'Cc',
-        self::TYPE_BCC      => 'Bcc',
-    ];
-
     public function rules(): array
     {
         return [

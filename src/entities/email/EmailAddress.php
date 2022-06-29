@@ -4,6 +4,7 @@ namespace src\entities\email;
 
 use Yii;
 use src\helpers\email\MaskEmailHelper;
+use src\model\BaseActiveRecord;
 
 /**
  * This is the model class for table "email_address".
@@ -14,7 +15,7 @@ use src\helpers\email\MaskEmailHelper;
  *
  * @property EmailContact[] $emailContacts
  */
-class EmailAddress extends \yii\db\ActiveRecord
+class EmailAddress extends BaseActiveRecord
 {
     public function rules(): array
     {
@@ -54,13 +55,5 @@ class EmailAddress extends \yii\db\ActiveRecord
     public static function tableName(): string
     {
         return 'email_address';
-    }
-
-    public static function findOrNew(array $criteria = [], array $values = [])
-    {
-        $model = self::find()->where($criteria)->limit(1)->one() ?? new self($criteria);
-        $model->load($values, '');
-
-        return $model;
     }
 }

@@ -5,6 +5,7 @@ namespace src\entities\email;
 use Yii;
 use common\models\Language;
 use common\models\EmailTemplateType;
+use src\model\BaseActiveRecord;
 
 /**
  * This is the model class for table "email_params".
@@ -19,7 +20,7 @@ use common\models\EmailTemplateType;
  * @property Language $language
  * @property EmailTemplateType $templateType
  */
-class EmailParams extends \yii\db\ActiveRecord
+class EmailParams extends BaseActiveRecord
 {
     public function rules(): array
     {

@@ -5,6 +5,7 @@ namespace src\entities\email;
 use Yii;
 use src\helpers\email\TextConvertingHelper;
 use yii\helpers\Html;
+use src\model\BaseActiveRecord;
 
 /**
  * This is the model class for table "email_body".
@@ -18,7 +19,7 @@ use yii\helpers\Html;
  * @property EmailBlob $emailBlob
  * @property Email $email
  */
-class EmailBody extends \yii\db\ActiveRecord
+class EmailBody extends BaseActiveRecord
 {
     public function rules(): array
     {

@@ -3,6 +3,7 @@
 namespace src\entities\email;
 
 use Yii;
+use src\model\BaseActiveRecord;
 
 /**
  * This is the model class for table "email_blob".
@@ -13,7 +14,7 @@ use Yii;
  *
  * @property EmailBody $emailBody
  */
-class EmailBlob extends \yii\db\ActiveRecord
+class EmailBlob extends BaseActiveRecord
 {
     public function rules(): array
     {
