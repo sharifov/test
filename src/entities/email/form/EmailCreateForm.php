@@ -82,7 +82,7 @@ class EmailCreateForm extends CompositeForm
         $instance->depId = $email->e_departament_id;
         $instance->emailId = $email->e_id ?? null;
 
-        $instance->params = EmailParamsForm::fromModel($email->params, $config);
+        $instance->params = $email->params ? EmailParamsForm::fromModel($email->params, $config) : new EmailParamsForm();
         $instance->body = EmailBodyForm::fromModel($email->emailBody, $config);
 
         $from = EmailContactForm::fromModel($email->emailContactFrom);
