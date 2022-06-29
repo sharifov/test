@@ -10,7 +10,7 @@ use yii\db\Migration;
  */
 class m220627_114625_change_abac_permission_call_expert extends Migration
 {
-    private const AP_SUBJECT = '(r.sub.hasFlightSegment == true) && (r.sub.quoteCount > 0) && (r.sub.leadStatus == 2)';
+    private const AP_SUBJECT = '(r.sub.hasFlightSegment == true) && (r.sub.quoteCount > 0) && (r.sub.leadStatus == 2) && (((r.sub.canMakeCall == true) && (r.sub.callCount > 0)) || (r.sub.canMakeCall == false))';
     private const AP_OBJECT = 'lead/expert_call/act/call';
     private const AP_ACTION = '(access)';
     private const AP_EFFECT = 1;
@@ -36,7 +36,7 @@ class m220627_114625_change_abac_permission_call_expert extends Migration
         $this->insert('{{%abac_policy}}', [
             'ap_rule_type' => 'p',
             'ap_subject' => self::AP_SUBJECT,
-            'ap_subject_json' => '{"condition":"AND","rules":[{"id":"lead/expert_call/hasFlightSegment","field":"hasFlightSegment","type":"boolean","input":"radio","operator":"==","value":true},{"id":"lead/expert_call/quoteCount","field":"quoteCount","type":"integer","input":"text","operator":">","value":0},{"id":"lead/expert_call/leadStatus","field":"leadStatus","type":"integer","input":"select","operator":"==","value":2}],"not":false,"valid":true}',
+            'ap_subject_json' => '{"condition":"AND","rules":[{"id":"lead/expert_call/hasFlightSegment","field":"hasFlightSegment","type":"boolean","input":"radio","operator":"==","value":true},{"id":"lead/expert_call/quoteCount","field":"quoteCount","type":"integer","input":"text","operator":">","value":0},{"id":"lead/expert_call/leadStatus","field":"leadStatus","type":"integer","input":"select","operator":"==","value":2},{"condition":"OR","rules":[{"condition":"AND","rules":[{"id":"lead/expert_call/canMakeCall","field":"canMakeCall","type":"boolean","input":"radio","operator":"==","value":true},{"id":"lead/expert_call/callCount","field":"callCount","type":"integer","input":"text","operator":">","value":0}],"not":false},{"id":"lead/expert_call/canMakeCall","field":"canMakeCall","type":"boolean","input":"radio","operator":"==","value":false}],"not":false}],"not":false,"valid":true}',
             'ap_object' => self::AP_OBJECT,
             'ap_action' => self::AP_ACTION,
             'ap_action_json' => "[\"access\"]",
