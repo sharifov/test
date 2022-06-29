@@ -1241,6 +1241,7 @@ class CasesQSearch extends Cases
             'cs_status' => $this->cs_status,
         ]);
 
+        $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
         $query->andFilterWhere(['like', 'cl_locale', $this->client_locale]);
 
         return $dataProvider;
