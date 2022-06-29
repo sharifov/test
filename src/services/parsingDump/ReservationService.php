@@ -121,6 +121,57 @@ class ReservationService
         return $this->parseResult;
     }
 
+    public function parseSegment($pastParsedSegments, $index, $segment): array
+    {
+        $departureTimeZone = null;
+        if ($departureAirport = Airports::findByIata($segment->fqs_departure_airport_iata)) {
+            $departureTimeZone = new \DateTimeZone($departureAirport->timezone);
+        }
+
+        $departureDateTime = DateTime::createFromFormat('Y-m-d H:i:s', $segment->fqs_departure_dt, $departureTimeZone);
+        $arrivalDateTime = DateTime::createFromFormat('Y-m-d H:i:s', $segment->fqs_arrival_dt, $departureTimeZone);
+        $departureCity = Airports::findByIata($segment->fqs_departure_airport_iata);
+        $arrivalCity = Airports::findByIata($segment->fqs_arrival_airport_iata);
+        $airline = Airline::find()->where(['iata' => $segment->fqs_operating_airline])->limit(1)->one() ?? null;
+        $flightDuration = $this->getFlightDuration(
+            $departureDateTime,
+            $arrivalDateTime,
+            $departureCity,
+            $arrivalCity
+        );
+        if ($flightDuration <= 0) {
+            \Yii::warning('Negative or zero flight duration (' . $flightDuration . ' sec) for fqs_id: ' . $segment->fqs_id, 'ReservationService:parseSegment:flightDuration');
+            $flightDuration = 0;
+        }
+
+        $layoverDuration = $this->getLayoverDuration($pastParsedSegments, $index);
+        if ($layoverDuration < 0) {
+            \Yii::warning('Negative layover duration (' . $layoverDuration . ' sec) for fqs_id: ' . $segment->fqs_id, 'ReservationService:parseSegment:layoverDuration');
+            $layoverDuration = 0;
+        }
+
+        return [
+            'carrier' => $segment->fqs_operating_airline,
+            'airlineObj' => $airline,
+            'airlineName' => $airline->name ?? $segment->fqs_operating_airline,
+            'departureAirport' => $segment->fqs_departure_airport_iata,
+            'arrivalAirport' => $segment->fqs_arrival_airport_iata,
+            'segmentIata' => $segment->fqs_departure_airport_iata . $segment->fqs_arrival_airport_iata,
+            'departureDateTime' => $departureDateTime,
+            'arrivalDateTime' => $arrivalDateTime,
+            'flightNumber' => $segment->fqs_flight_number,
+            'bookingClass' => $segment->fqs_booking_class,
+            'departureCity' => $departureCity,
+            'arrivalCity' => $arrivalCity,
+            'flightDuration' => $flightDuration,
+            'layoverDuration' => $layoverDuration,
+            'operatingAirline' => null,
+            'operatingAirlineObj' => null,
+            'operatingAirlineName' => null,
+            'cabin' => $airline ? $airline->getCabinByClass($segment->fqs_booking_class) : null,
+        ];
+    }
+
     /**
      * @return string|null
      */
