@@ -199,10 +199,10 @@ class LeadController extends ApiBaseController
      *        ],
      *       "experiments": [
      *           {
-     *              "cross_ex_code": "wpl5.0"
+     *              "ex_code": "wpl5.0"
      *           },
      *           {
-     *              "cross_ex_code": "wpl6.2"
+     *              "ex_code": "wpl6.2"
      *           }
      *       ]
      *       "client_data": [
@@ -835,6 +835,7 @@ class LeadController extends ApiBaseController
 
         try {
             $response['lead'] = $lead;
+            $response['experiments'] = $modelLead->experiments;
             $response['flights'] = $modelLead->flights;
             $response['emails'] = $modelLead->emails;
             $response['phones'] = $modelLead->phones;
@@ -938,6 +939,7 @@ class LeadController extends ApiBaseController
      * @apiParam {string{1}=E-ECONOMY,B-BUSINESS,F-FIRST,P-PREMIUM}        lead.cabin                                         Cabin
      * @apiParam {array[]}              lead.emails                                         Array of Emails (string)
      * @apiParam {array[]}              lead.phones                                         Array of Phones (string)
+     * @apiParam {object[]}             lead.experiments                                    Array of new Experiment codes (existed will be deleted)
      * @apiParam {object[]}             lead.flights                                        Array of Flights
      * @apiParam {string{3}}                                lead.flights.origin                 Flight Origin location Airport IATA-code
      * @apiParam {string{3}}                                lead.flights.destination            Flight Destination location Airport IATA-code
@@ -984,6 +986,14 @@ class LeadController extends ApiBaseController
      *        "phones": [
      *          "+373-69-487523",
      *          "022-45-7895-89",
+     *        ],
+     *        "experiments": [
+     *            {
+     *              "ex_code": "wpl5.0"
+     *            },
+     *            {
+     *              "ex_code": "wpl6.2"
+     *            }
      *        ],
      *        "source_id": 38,
      *        "adults": 1,
@@ -1101,6 +1111,10 @@ class LeadController extends ApiBaseController
                 throw new UnprocessableEntityHttpException($this->errorToString($modelLead->errors), 8);
             }
 
+            if ($modelLead->experiments && is_array($modelLead->experiments)) {
+                ExperimentTarget::deleteAll(['ext_target_id' => $lead->id, 'ext_target_type_id' => ExperimentTarget::EXT_TYPE_LEAD]);
+                ExperimentTarget::saveExperimentList(ExperimentTarget::EXT_TYPE_LEAD, $lead->id, $modelLead->experiments);
+            }
 
             if ($modelLead->flights) {
                 LeadFlightSegment::deleteAll(['lead_id' => $lead->id]);
@@ -1157,6 +1171,7 @@ class LeadController extends ApiBaseController
             //$transaction->commit();
 
             $response['lead'] = $lead;
+            $response['experiments'] = $modelLead->experiments;
             $response['flights'] = $lead->leadFlightSegments;
             $response['emails'] = $lead->client->clientEmails;
             $response['phones'] = $lead->client->clientPhones;
@@ -1386,10 +1401,10 @@ class LeadController extends ApiBaseController
                     },
                     "experiments": [
                         {
-                          "cross_ex_code": "wpl5.0"
+                          "ex_code": "wpl5.0"
                         },
                         {
-                          "cross_ex_code": "wpl6.2"
+                          "ex_code": "wpl6.2"
                         }
                    ],
                    "lead_preferences": {
@@ -1474,7 +1489,7 @@ class LeadController extends ApiBaseController
 
         try {
             $response['lead'] = $lead;
-            $response['experiment_ids'] = $modelLead->experimentsIds;
+            $response['experiments'] = ExperimentTarget::getExperimentArray(ExperimentTarget::EXT_TYPE_LEAD, $modelLead->lead_id);
             $response['flights'] = $lead->leadFlightSegments;
             $response['emails'] = $lead->client->clientEmails;
             $response['phones'] = $lead->client->clientPhones;

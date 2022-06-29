@@ -5,6 +5,7 @@ namespace src\model\callLog\services;
 use common\models\Call;
 use common\models\CallUserAccess;
 use common\models\Client;
+use common\models\DepartmentPhoneProject;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\Notifications;
@@ -29,6 +30,8 @@ use src\model\leadData\entity\LeadData;
 use src\model\leadDataKey\services\LeadDataKeyDictionary;
 use src\model\phoneList\entity\PhoneList;
 use src\model\voip\phoneDevice\device\VoipDevice;
+use modules\experiment\models\ExperimentTarget;
+use src\services\departmentPhoneProject\DepartmentPhoneProjectParamsService;
 use Yii;
 use yii\db\Expression;
 use yii\helpers\VarDumper;
@@ -412,6 +415,12 @@ class CallLogTransferService
 
             if (!$log->save()) {
                 throw new \RuntimeException(VarDumper::dumpAsString(['model' => $log->toArray(), 'message' => $log->getErrors()]));
+            }
+
+            $departmentPhone = DepartmentPhoneProject::find()->byPhone($log->cl_phone_to, false)->enabled()->limit(1)->one();
+            if ($departmentPhone) {
+                $departmentPhoneProjectParamsService = new DepartmentPhoneProjectParamsService();
+                $departmentPhoneProjectParamsService->updateExperimentList(ExperimentTarget::EXT_TYPE_CALL, ExperimentTarget::EXT_TYPE_CALL_LOG, $log->cl_id);
             }
 
             if (($parentId = $this->call['c_parent_id'] ?? null) && $callLogFilterGuard = CallLogFilterGuardService::checkCallLog($parentId)) {

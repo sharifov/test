@@ -6,7 +6,7 @@ use common\models\Lead;
 use src\entities\cases\Cases;
 use src\model\clientChat\entity\ClientChat;
 use common\models\Call;
-use common\models\CallLog;
+use src\model\callLog\entity\callLog\CallLog;
 use Yii;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;

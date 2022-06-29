@@ -34,12 +34,14 @@ use yii\helpers\VarDumper;
  * @property LeadPreferencesRepository $leadPreferencesRepository
  *
  * @property array $leadDataInserted
+ * @property array $experiments
  * @property array $clientDataInserted
  * @property array $warnings
  */
 class LeadCreateHandler
 {
     private array $leadDataInserted = [];
+    private array $experiments = [];
     private array $clientDataInserted = [];
     private array $warnings = [];
 
@@ -144,9 +146,8 @@ class LeadCreateHandler
 
             $this->createFlightSegments($leadId, $form->flightsForm);
 
-            if (!empty($form->experiments) && is_array($form->experiments)) {
-                ExperimentTarget::saveExperimentList(Lead::class, $leadId, $form->experiments);
-            }
+            ExperimentTarget::saveExperimentList(ExperimentTarget::EXT_TYPE_LEAD, $leadId, $form->experiments);
+            $this->experiments = $form->experiments;
 
             if (!empty($form->lead_data)) {
                 $leadDataService = new LeadDataCreateService();
@@ -225,6 +226,11 @@ class LeadCreateHandler
     public function getLeadDataInserted(): array
     {
         return $this->leadDataInserted;
+    }
+
+    public function getExperiments(): array
+    {
+        return $this->experiments;
     }
 
     public function getWarnings(): array

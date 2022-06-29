@@ -362,10 +362,10 @@ class QuoteController extends ApiBaseController
      *      ],
      *      "experiments": [
      *          {
-     *              "cross_ex_code": "wpl5.0",
+     *              "ex_code": "wpl5.0",
      *          },
      *          {
-     *              "cross_ex_code": "wpl6.2",
+     *              "ex_code": "wpl6.2",
      *          }
      *      ],
      *      "department_key": "chat",

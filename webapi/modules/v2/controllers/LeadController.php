@@ -147,10 +147,10 @@ class LeadController extends BaseController
      *          ],
      *          "experiments": [
      *              {
-     *                  "cross_ex_code": "wpl5.0"
+     *                  "ex_code": "wpl5.0"
      *              },
      *              {
-     *                  "cross_ex_code": "wpl6.2"
+     *                  "ex_code": "wpl6.2"
      *              }
      *          ]
      *          "client_data": [
@@ -391,6 +391,7 @@ class LeadController extends BaseController
                                 ]
                             ),
                         ],
+                        'experiments' => $this->leadCreateHandler->getExperiments(),
                         'leadDataInserted' => $this->leadCreateHandler->getLeadDataInserted(),
                         'clientDataInserted' => $this->leadCreateHandler->getClientDataInserted(),
                         'warnings' => $this->leadCreateHandler->getWarnings(),
