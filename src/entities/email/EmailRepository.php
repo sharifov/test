@@ -33,7 +33,7 @@ class EmailRepository
 
     public function read(Email $email): void
     {
-        if ($email->emailLog->el_is_new === true) {
+        if ($email->emailLog && $email->emailLog->el_is_new === true) {
             $email->emailLog->el_is_new = false;
             $email->emailLog->el_read_dt = date('Y-m-d H:i:s');
             $email->emailLog->save(false);
@@ -44,18 +44,18 @@ class EmailRepository
     public function delete(Email $email): int
     {
         $id = $email->e_id;
-        if (!$email->delete()) {
+        if ($email->delete() === false) {
             throw new \RuntimeException('Removing error');
         }
-        $this->eventDispatcher->dispatchAll($order->releaseEvents());
+        $this->eventDispatcher->dispatchAll($email->releaseEvents());
         return $id;
     }
 
-    public function deleteByIds(array $id): array
+    public function deleteByIds($id): array
     {
         $removedIds = [];
         foreach (Email::findAll(['e_id' => $id]) as $model) {
-            $removedIds[] = $this->remove($model);
+            $removedIds[] = $this->delete($model);
         }
         return $removedIds;
     }
