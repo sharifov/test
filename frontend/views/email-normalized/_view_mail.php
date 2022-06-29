@@ -16,7 +16,7 @@ use src\entities\email\helpers\EmailStatus;
             <div class="btn-group">
 
                 <?php if (EmailType::isDraftOrOutbox($model->e_type_id)) : ?>
-                    <?= Html::a('<i class="fa fa-edit"></i> Edit', Url::current(['reply_id' => null, 'id' => null, 'edit_id' => $model->e_id]), [
+                    <?= Html::a('<i class="fa fa-edit"></i> Edit', Url::current(['action' => 'update', 'id' => $model->e_id]), [
                         'class' => 'btn btn-sm btn-warning',
                         'data-placement' => 'top',
                         'data-toggle' => 'tooltip',
@@ -24,7 +24,7 @@ use src\entities\email\helpers\EmailStatus;
                     ]) ?>
                 <?php endif; ?>
                 <?php if (EmailType::isInbox($model->e_type_id)) : ?>
-                    <?= Html::a('<i class="fa fa-reply"></i> Reply', Url::current(['id' => null, 'reply_id' => $model->e_id, 'edit_id' => null]), [
+                    <?= Html::a('<i class="fa fa-reply"></i> Reply', Url::current(['action' => 'reply', 'id' => $model->e_id]), [
                         'class' => 'btn btn-sm btn-primary',
                         'data-placement' => 'top',
                         'data-toggle' => 'tooltip',
