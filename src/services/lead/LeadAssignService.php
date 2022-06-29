@@ -76,8 +76,8 @@ class LeadAssignService
 
         $leadAbacDto = new LeadAbacDto($lead, $user->getId());
         /** @abac $leadAbacDto, LeadAbacObject::ACT_TAKE_LEAD, LeadAbacObject::ACTION_ACCESS, Access to take lead */
-        if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_TAKE_LEAD, LeadAbacObject::ACTION_ACCESS)) {
-            throw new \DomainException('Access is denied');
+        if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_TAKE_LEAD, LeadAbacObject::ACTION_ACCESS)) {
+            throw new \DomainException('Access to Take Lead is denied');
         }
 
         $lead->processing($user->id, $creatorId, $reason);
