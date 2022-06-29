@@ -7,17 +7,21 @@ use modules\abac\src\entities\AbacPolicy;
 use src\logger\db\GlobalLogInterface;
 use src\logger\db\LogDTO;
 use src\services\log\GlobalEntityAttributeFormatServiceService;
+use yii\base\BootstrapInterface;
 use yii\base\Event;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 
-class DeleteLogger
+class DeleteLogger implements BootstrapInterface
 {
     private const CLASSES = [
         AbacPolicy::class => AbacPolicy::class
     ];
 
-    public function log()
+    /**
+     * @param \yii\base\Application $app
+     */
+    public function bootstrap($app): void
     {
         $funcDelete = static function (Event $event) {
             if (ArrayHelper::keyExists(get_class($event->sender), self::CLASSES)) {

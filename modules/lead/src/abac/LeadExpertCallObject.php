@@ -63,29 +63,6 @@ class LeadExpertCallObject extends AbacBaseModel implements AbacInterface
     ];
 
 
-    public const ATTR_SMS_COUNT = [
-        'optgroup' => 'Lead',
-        'id' => self::NS . 'smsCount',
-        'field' => 'smsCount',
-        'label' => 'Sms amount',
-        'type' => self::ATTR_TYPE_INTEGER,
-        'input' => self::ATTR_INPUT_TEXT,
-        'values' => [],
-        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, '<', '>', '<=', '>=']
-    ];
-
-    public const ATTR_EMAIL_COUNT = [
-        'optgroup' => 'Lead',
-        'id' => self::NS . 'emailCount',
-        'field' => 'emailCount',
-        'label' => 'Email amount',
-        'type' => self::ATTR_TYPE_INTEGER,
-        'input' => self::ATTR_INPUT_TEXT,
-        'values' => [],
-        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, '<', '>', '<=', '>=']
-    ];
-
-
     public const ATTR_CALL_COUNT = [
         'optgroup' => 'Lead',
         'id' => self::NS . 'callCount',
@@ -109,41 +86,13 @@ class LeadExpertCallObject extends AbacBaseModel implements AbacInterface
         'operators' => [self::OP_EQUAL2]
     ];
 
-    protected const ATTR_CAN_SEND_EMAIL = [
-        'optgroup' => 'User',
-        'id' => self::NS . 'canSendEmail',
-        'field' => 'canSendEmail',
-        'label' => 'Can Send Email',
-        'type' => self::ATTR_TYPE_BOOLEAN,
-        'input' => self::ATTR_INPUT_RADIO,
-        'values' => ['true' => 'True', 'false' => 'False'],
-        'multiple' => false,
-        'operators' => [self::OP_EQUAL2]
-    ];
-
-    protected const ATTR_CAN_SEND_SMS = [
-        'optgroup' => 'User',
-        'id' => self::NS . 'canSendSms',
-        'field' => 'canSendSms',
-        'label' => 'Can Send SMS',
-        'type' => self::ATTR_TYPE_BOOLEAN,
-        'input' => self::ATTR_INPUT_RADIO,
-        'values' => ['true' => 'True', 'false' => 'False'],
-        'multiple' => false,
-        'operators' => [self::OP_EQUAL2]
-    ];
-
     /** --------------- ATTRIBUTE LIST --------------------------- */
     public const OBJECT_ATTRIBUTE_LIST = [
         self::ACT_CALL   => [
             self::ATTR_HAS_FLIGHT_SEGMENT,
             self::ATTR_QUOTE_COUNT,
             self::ATTR_CALL_COUNT,
-            self::ATTR_SMS_COUNT,
-            self::ATTR_EMAIL_COUNT,
-            self::ATTR_CAN_SEND_EMAIL,
-            self::ATTR_CAN_SEND_SMS,
-            self::ATTR_CAN_MAKE_CALL,
+            self::ATTR_CAN_MAKE_CALL
         ],
     ];
 

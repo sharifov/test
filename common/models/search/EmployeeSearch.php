@@ -178,6 +178,9 @@ class EmployeeSearch extends Employee
      */
     private function filterQuery(EmployeeQuery $query)
     {
+        if (ArrayHelper::isIn($this->telegramEnabled, ['1', '0'], false) || ArrayHelper::isIn($this->useTelegram, ['1', '0'], false)) {
+            $query->leftJoin('user_profile', 'employees.id = user_profile.up_user_id');
+        }
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
@@ -218,8 +221,6 @@ class EmployeeSearch extends Employee
         }
 
         if (ArrayHelper::isIn($this->useTelegram, ['1', '0'], false)) {
-            $query->leftJoin('user_profile', 'employees.id = user_profile.up_user_id');
-
             if ($this->useTelegram == 0) {
                 $query->andWhere(['OR',
                     ['user_profile.up_telegram' => ''],
@@ -230,8 +231,6 @@ class EmployeeSearch extends Employee
         }
 
         if (ArrayHelper::isIn($this->telegramEnabled, ['1', '0'], false)) {
-            $query->leftJoin('user_profile', 'employees.id = user_profile.up_user_id');
-
             if ($this->telegramEnabled == 0) {
                 $query->andWhere(['OR',
                     ['user_profile.up_telegram_enable' => 0],

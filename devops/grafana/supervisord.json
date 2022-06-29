@@ -3,7 +3,10 @@
     "list": [
       {
         "builtIn": 1,
-        "datasource": "-- Grafana --",
+        "datasource": {
+          "type": "datasource",
+          "uid": "grafana"
+        },
         "enable": true,
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
@@ -20,15 +23,17 @@
   },
   "editable": true,
   "fiscalYearStartMonth": 0,
-  "gnetId": null,
   "graphTooltip": 0,
-  "id": 29,
-  "iteration": 1651679917751,
+  "id": 13,
+  "iteration": 1655374569215,
   "links": [],
   "liveNow": false,
   "panels": [
     {
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
       "description": "",
       "fieldConfig": {
         "defaults": {
@@ -95,23 +100,28 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.2.3",
+      "pluginVersion": "8.5.0",
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
           "exemplar": true,
-          "expr": "sum(node_supervisord_up{env=~\"$env\", instance=~\".*\", name=~\".*crm.*\"}) by (name, instance)",
+          "expr": "sum(node_supervisord_up{env=~\"$env\", instance=~\"$instance\", name=~\".*crm.*\"}) by (name, instance)",
           "interval": "",
           "legendFormat": "{{name}}",
           "refId": "A"
         }
       ],
-      "timeFrom": null,
-      "timeShift": null,
       "title": "Status",
       "type": "stat"
     },
     {
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -158,23 +168,28 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "8.2.3",
+      "pluginVersion": "8.5.0",
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
           "exemplar": true,
-          "expr": "sum(node_supervisord_up{env=~\"$env\", instance=~\".*\", name=~\".*crm.*\"}) by (name, instance)",
+          "expr": "sum(node_supervisord_up{env=~\"$env\", instance=~\"$instance\", name=~\".*crm.*\"}) by (name, instance)",
           "interval": "",
           "legendFormat": "{{name}}",
           "refId": "A"
         }
       ],
-      "timeFrom": null,
-      "timeShift": null,
       "title": "supervisor job up",
       "type": "stat"
     },
     {
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -219,11 +234,15 @@
         "text": {},
         "textMode": "name"
       },
-      "pluginVersion": "8.2.3",
+      "pluginVersion": "8.5.0",
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
           "exemplar": true,
-          "expr": "sum(node_supervisord_up{env=~\"$env\", instance=~\".*\", name=~\".*crm.*\"}) by (name, instance)",
+          "expr": "sum(node_supervisord_up{env=~\"$env\", instance=~\"$instance\", name=~\".*crm.*\"}) by (name, instance)",
           "interval": "",
           "legendFormat": "{{name}}",
           "refId": "A"
@@ -237,7 +256,10 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
       "fieldConfig": {
         "defaults": {
           "links": []
@@ -274,7 +296,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.2.3",
+      "pluginVersion": "8.5.0",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -284,17 +306,19 @@
       "steppedLine": false,
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
           "exemplar": true,
-          "expr": "changes(node_supervisord_start_time_seconds{env=\"$env\", project=\"crm\", job=\"node_crm\"}[5m])",
+          "expr": "changes(node_supervisord_start_time_seconds{env=\"$env\",instance=\"$instance\", project=\"crm\", job=\"$job\"}[5m])",
           "interval": "",
           "legendFormat": "{{name}} - {{exported_name}}",
           "refId": "B"
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "supervisor restarts / 5 min",
       "tooltip": {
         "shared": true,
@@ -303,33 +327,24 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
       "yaxes": [
         {
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": true
         },
         {
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": true
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
@@ -337,7 +352,10 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
       "description": "Process States\n--------------\n0=STOPPED, 10=STARTING,\n20=RUNNING, 30=BACKOFF,\n40=STOPPING, 100=EXITED,\n200=FATAL, 1000=UNKNOWN",
       "fieldConfig": {
         "defaults": {
@@ -373,7 +391,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.2.3",
+      "pluginVersion": "8.5.0",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -383,17 +401,19 @@
       "steppedLine": false,
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
           "exemplar": true,
-          "expr": "node_supervisord_state{env=~\"$env\", job=\"node_crm\", name=~\".*crm.*\"}",
+          "expr": "node_supervisord_state{env=~\"$env\", job=\"$job\",instance=\"$instance\", name=~\".*crm.*\"}",
           "interval": "",
           "legendFormat": "{{name}} - {{exported_name}}",
           "refId": "B"
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "supervisor job state",
       "tooltip": {
         "shared": true,
@@ -403,38 +423,29 @@
       "transformations": [],
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
       "yaxes": [
         {
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": true
         },
         {
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": true
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     }
   ],
   "refresh": "",
-  "schemaVersion": 31,
+  "schemaVersion": 36,
   "style": "dark",
   "tags": [],
   "templating": {
@@ -442,14 +453,15 @@
       {
         "allValue": ".*",
         "current": {
-          "selected": false,
-          "text": "dev",
-          "value": "dev"
+          "selected": true,
+          "text": "prod",
+          "value": "prod"
         },
-        "datasource": "Prometheus",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "PBFA97CFB590B2093"
+        },
         "definition": "label_values(node_exporter_build_info,env)",
-        "description": null,
-        "error": null,
         "hide": 0,
         "includeAll": false,
         "label": "env",
@@ -470,16 +482,16 @@
         "useTags": false
       },
       {
-        "allValue": null,
         "current": {
           "selected": false,
-          "text": "i-06800d38c39b99857",
-          "value": "i-06800d38c39b99857"
+          "text": "i-02cdf27613caba89c",
+          "value": "i-02cdf27613caba89c"
         },
-        "datasource": null,
+        "datasource": {
+          "type": "prometheus",
+          "uid": "PBFA97CFB590B2093"
+        },
         "definition": "label_values(node_supervisord_up{env=~\"$env\",  name=~\".*crm.*\"},instance) ",
-        "description": null,
-        "error": null,
         "hide": 0,
         "includeAll": false,
         "label": "instance",
@@ -488,6 +500,33 @@
         "options": [],
         "query": {
           "query": "label_values(node_supervisord_up{env=~\"$env\",  name=~\".*crm.*\"},instance) ",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "node_crm_prod",
+          "value": "node_crm_prod"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "PBFA97CFB590B2093"
+        },
+        "definition": "label_values(node_supervisord_up{env=\"$env\",project=\"crm\"}, job)",
+        "hide": 2,
+        "includeAll": false,
+        "label": "job",
+        "multi": false,
+        "name": "job",
+        "options": [],
+        "query": {
+          "query": "label_values(node_supervisord_up{env=\"$env\",project=\"crm\"}, job)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
@@ -518,5 +557,6 @@
   "timezone": "",
   "title": "Supervisord",
   "uid": "SYE-uTinz",
-  "version": 1
+  "version": 2,
+  "weekStart": ""
 }
