@@ -1542,7 +1542,7 @@ class LeadController extends FController
         $limit = null;
 
         if ($user->isAgent()) {
-         //   $checkShiftTime = $user->checkShiftTime();
+            $checkShiftTime = $user->checkShiftTime();
             $userParams = $user->userParams;
             if ($userParams) {
                 if ($userParams->up_inbox_show_limit_leads > 0) {
