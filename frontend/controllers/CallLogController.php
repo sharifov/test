@@ -15,6 +15,10 @@ use yii\filters\VerbFilter;
 use yii\web\Response;
 use src\model\call\abac\CallAbacObject;
 
+/**
+ * Class CallLogController
+ * @package frontend\controllers
+ */
 class CallLogController extends FController
 {
     public function behaviors()
@@ -32,6 +36,7 @@ class CallLogController extends FController
 
     /**
      * @return string
+     * @throws \Exception
      */
     public function actionIndex(): string
     {
@@ -48,13 +53,14 @@ class CallLogController extends FController
      * @param $id
      * @param string $breadcrumbsPreviousPage
      * @return string
+     * @throws ForbiddenHttpException
      * @throws NotFoundHttpException
      */
     public function actionView($id, $breadcrumbsPreviousPage = 'list'): string
     {
         $breadcrumbsPreviousLabel = $breadcrumbsPreviousPage === 'index' ? 'Call Logs' : 'My Call Logs';
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $this->getAvailableModel($id),
             'breadcrumbsPreviousPage' => $breadcrumbsPreviousPage,
             'breadcrumbsPreviousLabel' => $breadcrumbsPreviousLabel
         ]);
@@ -79,6 +85,7 @@ class CallLogController extends FController
     /**
      * @param $id
      * @return string|Response
+     * @throws ForbiddenHttpException
      * @throws NotFoundHttpException
      */
     public function actionUpdate($id)
@@ -88,7 +95,7 @@ class CallLogController extends FController
             throw new ForbiddenHttpException('Access denied.');
         }
 
-        $model = $this->findModel($id);
+        $model = $this->getAvailableModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->cl_id]);
@@ -99,6 +106,10 @@ class CallLogController extends FController
         ]);
     }
 
+    /**
+     * @return Response
+     * @throws BadRequestHttpException
+     */
     public function actionAjaxGetCallHistory()
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
@@ -142,11 +153,14 @@ class CallLogController extends FController
             throw new ForbiddenHttpException('Access denied.');
         }
 
-        $this->findModel($id)->delete();
+        $this->getAvailableModel($id)->delete();
 
         return $this->redirect(['index']);
     }
 
+    /**
+     * @return string
+     */
     public function actionList()
     {
         $searchModel = new CallLogSearch();
@@ -163,11 +177,15 @@ class CallLogController extends FController
     /**
      * @param $id
      * @return CallLog
+     * @throws ForbiddenHttpException
      * @throws NotFoundHttpException
      */
-    protected function findModel($id): CallLog
+    protected function getAvailableModel($id): CallLog
     {
         if (($model = CallLog::findOne(['cl_id' => $id])) !== null) {
+            if (!$model->isAvailableForUser(Auth::user())) {
+                throw new ForbiddenHttpException('This record is not available for you');
+            }
             return $model;
         }
 
