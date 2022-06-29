@@ -20,6 +20,7 @@ use modules\shiftSchedule\src\entities\userShiftSchedule\search\SearchUserShiftS
 use modules\shiftSchedule\src\entities\userShiftSchedule\search\TimelineCalendarFilter;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftScheduleQuery;
+use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftScheduleRepository;
 use modules\shiftSchedule\src\entities\userShiftScheduleLog\search\UserShiftScheduleLogSearch;
 use modules\shiftSchedule\src\forms\ShiftScheduleCreateForm;
 use modules\shiftSchedule\src\forms\ShiftScheduleEditForm;
@@ -705,8 +706,9 @@ class ShiftScheduleController extends FController
                 'message' => 'Event removed successfully',
             ]);
         }
-        $userShiftSchedule->uss_status_id = UserShiftSchedule::STATUS_DELETED;
-        $userShiftSchedule->save();
+        $userShiftSchedule->setStatusDelete();
+        (new UserShiftScheduleRepository($userShiftSchedule))->save(true);
+
         Notifications::createAndPublish(
             $userShiftSchedule->uss_user_id,
             'Shift event was removed',
@@ -825,8 +827,8 @@ class ShiftScheduleController extends FController
                 if ($deletePermanently == 1) {
                     $event->delete();
                 } else {
-                    $event->uss_status_id = UserShiftSchedule::STATUS_DELETED;
-                    $event->save();
+                    $event->setStatusDelete();
+                    (new UserShiftScheduleRepository($event))->save(true);
 
                     if (!$canHideSoftDeleted) {
                         $eventsData[] = UserShiftScheduleHelper::getDataForCalendar($event);

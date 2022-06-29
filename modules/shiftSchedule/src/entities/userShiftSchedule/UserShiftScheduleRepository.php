@@ -2,13 +2,17 @@
 
 namespace modules\shiftSchedule\src\entities\userShiftSchedule;
 
-class UserShiftScheduleRepository
+use src\repositories\AbstractRepositoryWithEvent;
+
+class UserShiftScheduleRepository extends AbstractRepositoryWithEvent
 {
-    public function save(UserShiftSchedule $model): int
+    public function __construct(UserShiftSchedule $model)
     {
-        if (!$model->save()) {
-            throw new \RuntimeException($model->getErrorSummary(false)[0]);
-        }
-        return $model->uss_id;
+        parent::__construct($model);
+    }
+
+    public function getModel(): UserShiftSchedule
+    {
+        return $this->model;
     }
 }
