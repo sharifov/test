@@ -172,8 +172,14 @@ class EmailNormalizedController extends FController
         if (Yii::$app->request->isPost) {
             $emailForm = new EmailCreateForm($user->id);
             if ($emailForm->load(Yii::$app->request->post()) && $emailForm->validate()) {
+                try {
+                    $email = EmailsNormalizeService::newInstance()->create($emailForm);
 
-                if (!$emailForm->hasErrors()) {
+                    Yii::$app->session->setFlash('success', 'New Email was created.');
+                } catch (\Throwable $e) {
+                    Yii::$app->session->setFlash('error', $e->getMessage());
+                }
+
                     /* $error = '';
 
                     if (Yii::$app->request->post('e_send')) {
@@ -190,7 +196,8 @@ class EmailNormalizedController extends FController
                     } else {
                         return $this->redirect(['inbox', 'id' => $modelNewEmail->e_id]);
                     } */
-                }
+            } else {
+                Yii::$app->session->setFlash('error', $emailForm->getErrorSummary(true));
             }
         } else {
             if ($action == 'create') {
