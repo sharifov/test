@@ -20,6 +20,7 @@ use modules\shiftSchedule\src\entities\userShiftSchedule\search\SearchUserShiftS
 use modules\shiftSchedule\src\entities\userShiftSchedule\search\TimelineCalendarFilter;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftScheduleQuery;
+use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftScheduleRepository;
 use modules\shiftSchedule\src\entities\userShiftScheduleLog\search\UserShiftScheduleLogSearch;
 use modules\shiftSchedule\src\forms\ShiftScheduleCreateForm;
 use modules\shiftSchedule\src\forms\ShiftScheduleEditForm;
@@ -705,11 +706,8 @@ class ShiftScheduleController extends FController
                 'message' => 'Event removed successfully',
             ]);
         }
-        $oldEvent = clone $userShiftSchedule;
-        $userShiftSchedule->uss_status_id = UserShiftSchedule::STATUS_DELETED;
-        $changedAttributes = $userShiftSchedule->getDirtyAttributes();
-        $userShiftSchedule->save();
-        ShiftScheduleRequestService::changeDueToEventChange($userShiftSchedule, $oldEvent, $changedAttributes, Auth::user());
+        $userShiftSchedule->setStatusDelete();
+        (new UserShiftScheduleRepository($userShiftSchedule))->save(true);
 
         Notifications::createAndPublish(
             $userShiftSchedule->uss_user_id,
@@ -829,11 +827,8 @@ class ShiftScheduleController extends FController
                 if ($deletePermanently == 1) {
                     $event->delete();
                 } else {
-                    $oldEvent = clone $event;
-                    $event->uss_status_id = UserShiftSchedule::STATUS_DELETED;
-                    $changedAttributes = $event->getDirtyAttributes();
-                    $event->save();
-                    ShiftScheduleRequestService::changeDueToEventChange($event, $oldEvent, $changedAttributes, Auth::user());
+                    $event->setStatusDelete();
+                    (new UserShiftScheduleRepository($event))->save(true);
 
                     if (!$canHideSoftDeleted) {
                         $eventsData[] = UserShiftScheduleHelper::getDataForCalendar($event);

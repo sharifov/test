@@ -1,5 +1,7 @@
 <?php
 
+use modules\shiftSchedule\src\events\ShiftScheduleEventChangedEvent;
+use modules\shiftSchedule\src\listeners\ShiftScheduleEventChangedListener;
 use src\events\lead\LeadBookedEvent;
 use src\events\lead\LeadCallExpertChangedEvent;
 use src\events\lead\LeadCallExpertRequestEvent;
@@ -174,5 +176,8 @@ return [
     ],
     LeadCallExpertChangedEvent::class => [
         LeadCallExpertChangedListener::class
+    ],
+    ShiftScheduleEventChangedEvent::class => [
+        ShiftScheduleEventChangedListener::class
     ]
 ];

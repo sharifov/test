@@ -7,6 +7,9 @@ use modules\shiftSchedule\src\entities\shift\Shift;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
 use modules\shiftSchedule\src\entities\shiftScheduleRule\ShiftScheduleRule;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
+use modules\shiftSchedule\src\events\ShiftScheduleEventChangedEvent;
+use src\auth\Auth;
+use src\entities\EventTrait;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -46,6 +49,8 @@ use yii\db\BaseActiveRecord;
  */
 class UserShiftSchedule extends \yii\db\ActiveRecord
 {
+    use EventTrait;
+
     private const MAX_VALUE_INT = 2147483647;
 
     public const STATUS_PENDING = 1;
@@ -360,5 +365,13 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
     public function isDeletedStatus(): bool
     {
         return $this->uss_status_id === self::STATUS_DELETED;
+    }
+
+    public function setStatusDelete()
+    {
+        $oldEvent = clone $this;
+        $this->uss_status_id = UserShiftSchedule::STATUS_DELETED;
+        $changedAttributes = $this->getDirtyAttributes();
+        $this->recordEvent(new ShiftScheduleEventChangedEvent($this, $oldEvent, $changedAttributes, Auth::user()));
     }
 }
