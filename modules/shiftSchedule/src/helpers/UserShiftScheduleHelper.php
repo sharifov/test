@@ -101,9 +101,10 @@ class UserShiftScheduleHelper
 
     /**
      * @param array $userGroups
+     * @param array $collapsedResources
      * @return array
      */
-    public static function prepareResourcesForTimelineCalendar(array $userGroups): array
+    public static function prepareResourcesForTimelineCalendar(array $userGroups, array $collapsedResources = []): array
     {
         $resourceList = [];
         $groupIds = [];
@@ -111,7 +112,15 @@ class UserShiftScheduleHelper
         $userCount = 0;
         foreach ($userGroups as $key => $group) {
             if (!isset($resourceList[$group['ug_id']])) {
-                $resourceList[$group['ug_id']] = self::mainResource($group, $key !== 0);
+                $collapsed = $key !== 0;
+                if (!empty($collapsedResources)) {
+                    if (in_array($group['ug_id'], $collapsedResources, true)) {
+                        $collapsed = false;
+                    } else {
+                        $collapsed = true;
+                    }
+                }
+                $resourceList[$group['ug_id']] = self::mainResource($group, $collapsed);
                 $groupIds[] = 'ug-' . $group['ug_id'];
                 $userCount = 0;
             }
@@ -134,7 +143,8 @@ class UserShiftScheduleHelper
             'description' => '',
             'icons' => [],
             'childrenIds' => [],
-            'children' => []
+            'children' => [],
+            'mainId' => $data['ug_id']
         ];
     }
 
