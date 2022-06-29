@@ -37,18 +37,12 @@ class LeadTaskListService
     public function assign()
     {
         /* TODO::  */
-        /*if ($objectSegmentLists = $this->getObjectSegmentLists()) {
-            foreach ($objectSegmentLists as $objectSegmentList) {
-
-            }
-        }*/
     }
 
     public function assignReAssign()
     {
         if ($taskLists = $this->getTaskList()) {
             foreach ($taskLists as $taskList) {
-
                 try {
                     $userTask = UserTask::create(
                         $this->lead->employee_id,
@@ -58,10 +52,7 @@ class LeadTaskListService
                         date('Y-m-d H:i:s'),
                         date('Y-m-d H:i:s')
                     );
-                    (new UserTaskRepository($userTask))->save();
-
-
-
+                    (new UserTaskRepository($userTask))->save();/* TODO::  */
                 } catch (\RuntimeException | \DomainException $throwable) {
                     $message = AppHelper::throwableLog($throwable);
                     if ($userTask ?? null) {
