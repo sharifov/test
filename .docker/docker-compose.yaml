@@ -90,16 +90,9 @@ services:
 
   frontend-php-fpm:
     container_name: crm-frontend-php-fpm
-    build:
-      context: ./frontend-php-fpm
-      args:
-        REGISTRY: ${REGISTRY}
-        PHP_FPM_IMAGE_TAG: ${PHP_FPM_IMAGE_TAG}
-        PHP_IDE_CONFIG_FRONTEND: ${PHP_IDE_CONFIG_FRONTEND}
-        PHP_XDEBUG_ENABLED: ${PHP_XDEBUG_ENABLED}
-        XDEBUG_CLIENT_HOST: ${XDEBUG_CLIENT_HOST}
-        XDEBUG_CLIENT_PORT: ${XDEBUG_CLIENT_PORT}
-        XDEBUG_IDE_KEY: ${XDEBUG_IDE_KEY}
+    image: ${REGISTRY}crm-php-fpm:${PHP_FPM_IMAGE_TAG}
+    environment:
+      - PHP_IDE_CONFIG=${PHP_IDE_CONFIG_FRONTEND}
     volumes:
       - ./../:/var/www/app
     working_dir: /var/www/app
@@ -141,16 +134,9 @@ services:
 
   api-php-fpm:
     container_name: crm-api-php-fpm
-    build:
-      context: ./api-php-fpm
-      args:
-        REGISTRY: ${REGISTRY}
-        PHP_FPM_IMAGE_TAG: ${PHP_FPM_IMAGE_TAG}
-        PHP_IDE_CONFIG_API: ${PHP_IDE_CONFIG_API}
-        PHP_XDEBUG_ENABLED: ${PHP_XDEBUG_ENABLED}
-        XDEBUG_CLIENT_HOST: ${XDEBUG_CLIENT_HOST}
-        XDEBUG_CLIENT_PORT: ${XDEBUG_CLIENT_PORT}
-        XDEBUG_IDE_KEY: ${XDEBUG_IDE_KEY}
+    image: ${REGISTRY}crm-php-fpm:${PHP_FPM_IMAGE_TAG}
+    environment:
+      - PHP_IDE_CONFIG=${PHP_IDE_CONFIG_API}
     volumes:
       - ./../:/var/www/app
     working_dir: /var/www/app

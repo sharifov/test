@@ -30,7 +30,7 @@ ARG XDEBUG_CLIENT_PORT
 ARG XDEBUG_IDE_KEY
 
 RUN if [ ${PHP_XDEBUG_ENABLED} = true ]; then \
-    pecl install xdebug && docker-php-ext-enable xdebug \
+    install-php-extensions xdebug \
     && echo "xdebug.mode=debug" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
     && echo "xdebug.remote_connect_back=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
     && echo "xdebug.client_host=${XDEBUG_CLIENT_HOST}" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \

@@ -191,9 +191,28 @@ build () {
   createKivorkNetwork
 
   printf "\nStart - Build \n\n"
-  docker build --build-arg NGINX_VERSION=$NGINX_VERSION --build-arg USER_NAME=$CURRENT_USER --build-arg USER_ID=$CURRENT_UID --build-arg USER_GID=$CURRENT_GROUP_ID --file="$dockerFolder/nginx/Dockerfile" --tag="${REGISTRY}"crm-nginx:$NGINX_IMAGE_TAG $dockerFolder/nginx
-	docker build --build-arg PHP_FPM_VERSION=$PHP_FPM_VERSION --build-arg USER_NAME=$CURRENT_USER --build-arg USER_ID=$CURRENT_UID --build-arg USER_GID=$CURRENT_GROUP_ID --file="$dockerFolder/php-fpm/Dockerfile" --tag="${REGISTRY}"crm-php-fpm:$PHP_FPM_IMAGE_TAG $dockerFolder/php-fpm
-	docker build --build-arg PHP_CLI_VERSION=$PHP_CLI_VERSION --file="$dockerFolder/php-cli/Dockerfile" --tag="${REGISTRY}"crm-php-cli:$PHP_CLI_IMAGE_TAG $dockerFolder/php-cli
+  docker build --build-arg NGINX_VERSION=$NGINX_VERSION \
+        --build-arg USER_NAME=$CURRENT_USER \
+        --build-arg USER_ID=$CURRENT_UID \
+        --build-arg USER_GID=$CURRENT_GROUP_ID \
+        --file="$dockerFolder/nginx/Dockerfile" \
+        --tag="${REGISTRY}"crm-nginx:$NGINX_IMAGE_TAG $dockerFolder/nginx
+
+	docker build --build-arg PHP_FPM_VERSION=$PHP_FPM_VERSION \
+	      --build-arg PHP_XDEBUG_ENABLED=$PHP_XDEBUG_ENABLED \
+	      --build-arg XDEBUG_CLIENT_HOST=$XDEBUG_CLIENT_HOST \
+	      --build-arg XDEBUG_CLIENT_PORT=$XDEBUG_CLIENT_PORT \
+	      --build-arg XDEBUG_IDE_KEY=$XDEBUG_IDE_KEY \
+	      --build-arg USER_NAME=$CURRENT_USER \
+	      --build-arg USER_ID=$CURRENT_UID \
+	      --build-arg USER_GID=$CURRENT_GROUP_ID \
+	      --file="$dockerFolder/php-fpm/Dockerfile" \
+	      --tag="${REGISTRY}"crm-php-fpm:$PHP_FPM_IMAGE_TAG $dockerFolder/php-fpm
+
+	docker build --build-arg PHP_CLI_VERSION=$PHP_CLI_VERSION \
+	      --file="$dockerFolder/php-cli/Dockerfile" \
+	      --tag="${REGISTRY}"crm-php-cli:$PHP_CLI_IMAGE_TAG $dockerFolder/php-cli
+
   docker-compose -f "$dockerComposeFile" build
   printf "\nDone - Build \n\n"
 }
