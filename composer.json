@@ -231,14 +231,14 @@
 		"post-update-cmd": [
 			"cghooks update"
 		],
-        "apidoc-gen": "apidoc -c ./apidoc.json -i \"./webapi/modules/\" -i \"./webapi/controllers/\" -o \"./webapi/web/doc\" -f \".*\\\\.php$\"",
+        "apidoc-gen": "node_modules/apidoc/bin/apidoc -c ./apidoc.json -i \"./webapi/modules/\" -i \"./webapi/controllers/\" -o \"./webapi/web/doc\" -f \".*\\\\.php$\"",
         "phpdoc": "phpDocumentor",
 		"php-compatibility": "phpcs -p ./frontend --standard=vendor/phpcompatibility/php-compatibility/PHPCompatibility --report-full=report.txt --extensions=php --runtime-set testVersion 8.0"
 	},
 	"extra": {
 		"hooks": {
 			"pre-commit": [
-				"if [ -e \"docker-pre-commit.sh\" ]; then\n    docker-compose -f docker/local/docker-compose.yaml run --rm console bash -c \"./docker-pre-commit.sh\"\nelse\n    bash pre-commit.sh\nfi"
+				"if [ -e \"docker-pre-commit-new.sh\" ]; then\n    docker-compose -f .docker/docker-compose.yaml run --rm console bash -c \"./docker-pre-commit-new.sh\"\nelif [ -e \"docker-pre-commit.sh\" ]; then\n docker-compose -f docker/local/docker-compose.yaml run --rm console bash -c \"./docker-pre-commit.sh\"\nelse\n bash pre-commit.sh\nfi"
 			]
 		}
 	}
