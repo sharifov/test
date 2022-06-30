@@ -130,4 +130,28 @@ class AddQuoteManualService
 
         return array_merge($pastSegmentTripFormData, $updatedSegmentsTrip);
     }
+
+    public static function updateKeyTripList($form, $totalPastTrips): string
+    {
+        if ($totalPastTrips > 0) {
+            while ($totalPastTrips > 0) {
+                $receivedTrips = explode(',', $form->keyTripList);
+                $addTrip = count($receivedTrips) + 1;
+                $form->keyTripList = $form->keyTripList . ',' . $addTrip;
+                $totalPastTrips--;
+            }
+        }
+
+        return $form->keyTripList;
+    }
+
+    public static function updateFormAndMergeSegments($form, $totalPastTrips, $pastSegmentsItinerary, $itinerary, $pastSegments, $segments): array
+    {
+        $form->keyTripList = self::updateKeyTripList($form, $totalPastTrips);
+        $form->itinerary = array_merge($pastSegmentsItinerary, $itinerary);
+        $mergedSegments = array_merge($pastSegments, $segments);
+        $totalTrips = count(explode(',', $form->keyTripList));
+
+        return [$form, $mergedSegments, $totalTrips];
+    }
 }
