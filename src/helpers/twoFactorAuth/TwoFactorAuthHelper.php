@@ -43,6 +43,6 @@ class TwoFactorAuthHelper
      */
     public static function showWarningAttemptsRemain(): bool
     {
-        return (SettingHelper::getTwoFactorAuthWarningAttemptsRemain() - self::getAuthAttempts()) > 0;
+        return (SettingHelper::getTwoFactorAuthWarningAttemptsRemain() - self::getAuthAttempts()) >= 0;
     }
 }

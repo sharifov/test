@@ -107,7 +107,7 @@ class EmployeeQuery extends \yii\db\ActiveQuery
     /**
      * @param bool $leadIsBusiness
      * @param int $projectId
-     * @param int $departmentId
+     * @param int|null $departmentId
      * @param int $redialUserAccessExpiredSeconds
      * @param int $limit
      * @return array []
@@ -116,7 +116,7 @@ class EmployeeQuery extends \yii\db\ActiveQuery
     public static function getAgentsForRedialCallByLead(
         bool $leadIsBusiness,
         int $projectId,
-        int $departmentId,
+        ?int $departmentId,
         int $redialUserAccessExpiredSeconds,
         int $limit
     ): array {
@@ -160,11 +160,13 @@ class EmployeeQuery extends \yii\db\ActiveQuery
         $query->join('join', [
             'ud' => UserDepartment::tableName()
         ], $joinedField . ' = ud.ud_user_id');
-        $query->join('join', [
-            'd' => Department::tableName()
-        ], 'ud.ud_dep_id = d.dep_id and d.dep_id = :departmentId', [
-            'departmentId' => $departmentId
-        ]);
+        if ($departmentId !== null) {
+            $query->join('join', [
+                'd' => Department::tableName()
+            ], 'ud.ud_dep_id = d.dep_id and d.dep_id = :departmentId', [
+                'departmentId' => $departmentId
+            ]);
+        }
 
         $query->leftJoin([
             'crua' => CallRedialUserAccess::tableName()

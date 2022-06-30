@@ -1788,6 +1788,7 @@ class LeadController extends ApiBaseController
      *        "memory_usage": 1215976
      *        }
      *
+     *
      * @apiError UserNotFound The id of the User was not found.
      *
      * @apiErrorExample Error-Response:
@@ -1800,14 +1801,18 @@ class LeadController extends ApiBaseController
      *          "type": "yii\\web\\NotFoundHttpException"
      *      }
      *
-     *      HTTP/1.1 400 Bad Request
+     *      HTTP/1.1 200 OK
      *      {
-     *          "name": "Bad Request",
-     *          "message": "This request with params has already been sent. Lead UID: 62668a051c07c",
-     *          "code": 0,
-     *          "status": 400,
-     *          "type": "yii\\web\\BadRequestHttpException"
-     *      }
+     *        "status": "Failed",
+     *        "errors": ["This request with params has already been sent. Lead UID: 62668a051c07c"],
+     *        "action": "v1/lead/sold-update",
+     *        "response_id": 316,
+     *        "request_dt": "2022-06-23 12:39:24",
+     *        "response_dt": "2022-06-23 12:39:24",
+     *        "execution_time": 0.101,
+     *        "memory_usage": 1215976
+     *        }
+     *
      *
      *
      * @return mixed
@@ -1836,14 +1841,16 @@ class LeadController extends ApiBaseController
 
         $idKey = 'action_sold_update_' . HashHelper::generateHashFromArray(Yii::$app->request->post());
 
-        if (RedisHelper::checkDuplicate($idKey, 5)) {
-            throw new BadRequestHttpException('This request with params has already been sent. Lead UID: ' . $leadAttributes['uid']);
-        }
-
         $response = [
             'status' => 'Failed',
             'errors' => []
         ];
+
+        if (RedisHelper::checkDuplicate($idKey, 5)) {
+            $response['errors'][] = 'This request with params has already been sent. Lead UID: ' . $leadAttributes['uid'];
+            $responseData = $response;
+            return $this->apiLog->endApiLog($responseData);
+        }
 
         try {
             $isSold = $lead->isSold();
