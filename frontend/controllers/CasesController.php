@@ -170,6 +170,8 @@ class CasesController extends FController
     private FlightFromSaleService $flightFromSaleService;
     private EmailReviewQueueManageService $emailReviewQueueManageService;
 
+    public const DIFFERENT_PROJECT = 'different-project';
+
     public function __construct(
         $id,
         $module,
@@ -785,6 +787,15 @@ class CasesController extends FController
      */
     private function getCommunicationDataProvider(Cases $model): ActiveDataProvider
     {
+        $emailTemplate = EmailTemplateType::find()
+            ->where(['etp_key' => 'feedback_appr_supp'])
+            ->limit(1)
+            ->one();
+
+        $condition = $emailTemplate
+            ? ['<>', 'e_template_type_id', $emailTemplate->etp_id]
+            : ['IS NOT', 'e_template_type_id', null];
+
         $query1 = (new \yii\db\Query())
             ->select(['e_id AS id', new Expression('"email" AS type'), 'e_case_id AS case_id', 'e_created_dt AS created_dt'])
             ->from('email')
@@ -793,7 +804,13 @@ class CasesController extends FController
                 ['IS NOT', 'e_created_user_id', null],
                 ['AND',
                     ['IS', 'e_created_user_id', null],
-                    ['e_type_id' => Email::FILTER_TYPE_INBOX]
+                    ['e_type_id' => Email::TYPE_INBOX],
+                    ['IS', 'e_template_type_id', null]
+                ],
+                ['AND',
+                    ['IS', 'e_created_user_id', null],
+                    ['e_type_id' => Email::TYPE_OUTBOX],
+                    $condition
                 ]
             ])
         ;
@@ -840,6 +857,15 @@ class CasesController extends FController
 
     private function getCommunicationLogDataProvider(Cases $model): ActiveDataProvider
     {
+        $emailTemplate = EmailTemplateType::find()
+            ->where(['etp_key' => 'feedback_appr_supp'])
+            ->limit(1)
+            ->one();
+
+        $condition = $emailTemplate
+            ? ['<>', 'e_template_type_id', $emailTemplate->etp_id]
+            : ['IS NOT', 'e_template_type_id', null];
+
         $query1 = (new \yii\db\Query())
             ->select(['e_id AS id', new Expression('"email" AS type'), 'e_case_id AS case_id', 'e_created_dt AS created_dt'])
             ->from('email')
@@ -848,7 +874,13 @@ class CasesController extends FController
                 ['IS NOT', 'e_created_user_id', null],
                 ['AND',
                     ['IS', 'e_created_user_id', null],
-                    ['e_type_id' => Email::FILTER_TYPE_INBOX]
+                    ['e_type_id' => Email::TYPE_INBOX],
+                    ['IS', 'e_template_type_id', null]
+                ],
+                ['AND',
+                    ['IS', 'e_created_user_id', null],
+                    ['e_type_id' => Email::TYPE_OUTBOX],
+                    $condition
                 ]
             ])
         ;
@@ -922,6 +954,28 @@ class CasesController extends FController
         } catch (\Throwable $throwable) {
             Yii::info(AppHelper::throwableLog($throwable), 'info\CasesController::actionAddSale:RequestToBackOffice');
             $out['error'] = $throwable->getMessage();
+            return $out;
+        }
+
+        try {
+            $project = $model->project;
+            if (!$project) {
+                throw new \DomainException('Not found Project. Id ' . $model->cs_project_id);
+            }
+            if (!$project->api_key) {
+                throw new \DomainException('Not found API KEY. Project. Id ' . $model->cs_project_id);
+            }
+
+            $caseProjectApiKey = $project->api_key;
+            $saleProjectApiKey = $saleData['projectApiKey'] ?? null;
+
+            if (trim($caseProjectApiKey) !== trim($saleProjectApiKey)) {
+                throw new \DomainException('[Different Project] Case Id (' . $model->cs_id . ') Case project (' . $project->name . ') Sale project (' . $saleData['project'] . ')');
+            }
+        } catch (\Throwable $exception) {
+            $out['error'] = $exception->getMessage();
+            $out['error_type'] = self::DIFFERENT_PROJECT;
+            \Yii::error(VarDumper::dumpAsString($exception, 10), 'CasesController::actionAddSale:Exception');
             return $out;
         }
 

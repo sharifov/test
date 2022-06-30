@@ -332,11 +332,16 @@ class TaskListService
         return $code;
     }
 
-    public static function getTaskObjectList(): array
+    public static function getTaskObjectList(?int $typeID = null): array
     {
         $result = [];
+        $taskList = TaskList::find();
 
-        foreach (TaskList::find()->all() as $item) {
+        if ($typeID !== null) {
+            $taskList->where(['tl_target_object_id' => $typeID]);
+        }
+
+        foreach ($taskList->all() as $item) {
             $result[$item->tl_id] = $item->tl_title;
         }
 

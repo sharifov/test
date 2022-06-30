@@ -89,6 +89,7 @@ class FieldAccess
             || $this->canShow('up_call_type_id')
             || $this->canShow('up_2fa_secret')
             || $this->canShow('up_2fa_enable')
+            || $this->canShow('up_2fa_reset')
             || $this->canShow('up_telegram')
             || $this->canShow('up_telegram_enable')
             || $this->canShow('up_auto_redial')

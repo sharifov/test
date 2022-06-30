@@ -178,6 +178,9 @@ class EmployeeSearch extends Employee
      */
     private function filterQuery(EmployeeQuery $query)
     {
+        if (ArrayHelper::isIn($this->telegramEnabled, ['1', '0'], false) || ArrayHelper::isIn($this->useTelegram, ['1', '0'], false)) {
+            $query->leftJoin('user_profile', 'employees.id = user_profile.up_user_id');
+        }
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
@@ -218,8 +221,6 @@ class EmployeeSearch extends Employee
         }
 
         if (ArrayHelper::isIn($this->useTelegram, ['1', '0'], false)) {
-            $query->leftJoin('user_profile', 'employees.id = user_profile.up_user_id');
-
             if ($this->useTelegram == 0) {
                 $query->andWhere(['OR',
                     ['user_profile.up_telegram' => ''],
@@ -230,8 +231,6 @@ class EmployeeSearch extends Employee
         }
 
         if (ArrayHelper::isIn($this->telegramEnabled, ['1', '0'], false)) {
-            $query->leftJoin('user_profile', 'employees.id = user_profile.up_user_id');
-
             if ($this->telegramEnabled == 0) {
                 $query->andWhere(['OR',
                     ['user_profile.up_telegram_enable' => 0],
@@ -257,7 +256,7 @@ class EmployeeSearch extends Employee
                 $query->andFilterWhere(['>=', 'employees.created_at', Employee::convertTimeFromUserDtToUTC(strtotime($createdRange[0]))]);
             }
             if ($createdRange[1]) {
-                $query->andFilterWhere(['<=', 'employees.created_at', Employee::convertTimeFromUserDtToUTC(strtotime($createdRange[1]))]);
+                $query->andFilterWhere(['<=', 'employees.created_at', Employee::convertTimeFromUserDtToUTC(strtotime($createdRange[1]) + 3600 * 24 - 1)]);
             }
         }
 
@@ -267,7 +266,7 @@ class EmployeeSearch extends Employee
                 $query->andFilterWhere(['>=', 'employees.updated_at', Employee::convertTimeFromUserDtToUTC(strtotime($updatedRange[0]))]);
             }
             if ($updatedRange[1]) {
-                $query->andFilterWhere(['<=', 'employees.updated_at', Employee::convertTimeFromUserDtToUTC(strtotime($updatedRange[1]))]);
+                $query->andFilterWhere(['<=', 'employees.updated_at', Employee::convertTimeFromUserDtToUTC(strtotime($updatedRange[1]) + 3600 * 24 - 1)]);
             }
         }
 
@@ -277,7 +276,7 @@ class EmployeeSearch extends Employee
                 $query->andFilterWhere(['>=', 'employees.last_login_dt', Employee::convertTimeFromUserDtToUTC(strtotime($lastLogin[0]))]);
             }
             if ($lastLogin[1]) {
-                $query->andFilterWhere(['<=', 'employees.last_login_dt', Employee::convertTimeFromUserDtToUTC(strtotime($lastLogin[1]))]);
+                $query->andFilterWhere(['<=', 'employees.last_login_dt', Employee::convertTimeFromUserDtToUTC(strtotime($lastLogin[1]) + 3600 * 24 - 1)]);
             }
         }
 
@@ -301,7 +300,7 @@ class EmployeeSearch extends Employee
             $query->andWhere(['IN', 'employees.id', $subQuery]);
         }
 
-        if (strlen($this->twoFaEnable) > 0) {
+        if (intval($this->twoFaEnable) > 0) {
             $subQuery = UserProfile::find()->select(['DISTINCT(up_user_id)'])->where(['=', 'up_2fa_enable', $this->twoFaEnable]);
             $query->andWhere(['IN', 'employees.id', $subQuery]);
         }

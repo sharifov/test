@@ -26,10 +26,15 @@ class UserShiftScheduleHelper
      */
     public static function getCalendarEventsData(array $eventList): array
     {
+        /** @abac null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_HIDE_SOFT_DELETED_EVENTS, Hide Soft Deleted Schedule Events */
+        $canHideSoftDeleted = \Yii::$app->abac->can(null, ShiftAbacObject::OBJ_USER_SHIFT_EVENT, ShiftAbacObject::ACTION_HIDE_SOFT_DELETED_EVENTS);
+
         $data = [];
         if ($eventList) {
             foreach ($eventList as $item) {
-                $data[] = self::getDataForCalendar($item);
+                if (!($item->isDeletedStatus() && $canHideSoftDeleted)) {
+                    $data[] = self::getDataForCalendar($item);
+                }
             }
         }
         return $data;
@@ -101,9 +106,10 @@ class UserShiftScheduleHelper
 
     /**
      * @param array $userGroups
+     * @param array $collapsedResources
      * @return array
      */
-    public static function prepareResourcesForTimelineCalendar(array $userGroups): array
+    public static function prepareResourcesForTimelineCalendar(array $userGroups, array $collapsedResources = []): array
     {
         $resourceList = [];
         $groupIds = [];
@@ -111,7 +117,15 @@ class UserShiftScheduleHelper
         $userCount = 0;
         foreach ($userGroups as $key => $group) {
             if (!isset($resourceList[$group['ug_id']])) {
-                $resourceList[$group['ug_id']] = self::mainResource($group, $key !== 0);
+                $collapsed = $key !== 0;
+                if (!empty($collapsedResources)) {
+                    if (in_array($group['ug_id'], $collapsedResources, true)) {
+                        $collapsed = false;
+                    } else {
+                        $collapsed = true;
+                    }
+                }
+                $resourceList[$group['ug_id']] = self::mainResource($group, $collapsed);
                 $groupIds[] = 'ug-' . $group['ug_id'];
                 $userCount = 0;
             }
@@ -134,7 +148,8 @@ class UserShiftScheduleHelper
             'description' => '',
             'icons' => [],
             'childrenIds' => [],
-            'children' => []
+            'children' => [],
+            'mainId' => $data['ug_id']
         ];
     }
 

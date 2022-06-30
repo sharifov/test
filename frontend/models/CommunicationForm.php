@@ -125,7 +125,7 @@ class CommunicationForm extends Model
      * @param string $languageId
      * @param array $config
      */
-    public function __construct(?string $languageId = null, AbacSmsFromNumberList $smsFromNumberList, AbacEmailList $emailFromList, $config = [])
+    public function __construct(AbacSmsFromNumberList $smsFromNumberList, AbacEmailList $emailFromList, ?string $languageId = null, $config = [])
     {
         $this->c_language_id = self::getDefaultLanguage($languageId);
         parent::__construct($config);

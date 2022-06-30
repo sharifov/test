@@ -22,7 +22,7 @@ use yii\widgets\ActiveForm;
                 ]) ?>
 
                 <?= $form->field($model, 'ostl_tl_id', [])->widget(Select2::class, [
-                    'data' => $model->getTaskList(),
+                    'data' => $model->getTaskListAsKeyValue(),
                     'size' => Select2::SMALL,
                     'options' => ['placeholder' => 'Select Task Object'],
                     'pluginOptions' => ['allowClear' => true],

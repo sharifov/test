@@ -374,4 +374,13 @@ class ShiftScheduleRequest extends ActiveRecord
 
         $history->save();
     }
+
+    /**
+     * @param int $oldStatus
+     * @return bool
+     */
+    public function isChangedStatus(int $oldStatus): bool
+    {
+        return $this->ssr_status_id !== $oldStatus;
+    }
 }

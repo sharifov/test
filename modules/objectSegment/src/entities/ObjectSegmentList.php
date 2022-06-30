@@ -7,6 +7,7 @@ use Yii;
 use yii\behaviors\AttributeBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\caching\TagDependency;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 
@@ -25,6 +26,7 @@ use yii\helpers\ArrayHelper;
  * @property string $osl_created_dt
  * @property ObjectSegmentType $oslObjectSegmentType
  * @property Employee $oslUpdatedUser
+ * @property ObjectSegmentTask[] $objectSegmentTaskAssigns
  *
  */
 class ObjectSegmentList extends \yii\db\ActiveRecord
@@ -62,6 +64,11 @@ class ObjectSegmentList extends \yii\db\ActiveRecord
     public function getOslUpdatedUser()
     {
         return $this->hasOne(Employee::class, ['id' => 'osl_updated_user_id']);
+    }
+
+    public function getObjectSegmentTaskAssigns(): ActiveQuery
+    {
+        return $this->hasMany(ObjectSegmentTask::class, ['ostl_osl_id' => 'osl_id']);
     }
 
 
@@ -111,9 +118,13 @@ class ObjectSegmentList extends \yii\db\ActiveRecord
         ];
     }
 
-    public static function getList(): array
+    public static function getList(?int $objectTypeId = null): array
     {
         $query = self::find()->select(['osl_id', 'osl_title']);
+
+        if ($objectTypeId !== null) {
+            $query->where(['osl_ost_id' => $objectTypeId]);
+        }
 
         return ArrayHelper::map(
             $query->all(),

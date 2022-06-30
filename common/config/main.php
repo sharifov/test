@@ -119,7 +119,19 @@ return [
         'mailer' => [
             'class' => 'yii\swiftmailer\Mailer',
             'viewPath' => '@common/mail',
-            'useFileTransport' => true,
+            'useFileTransport' => false,
+            'transport' => [
+                'class' => 'Swift_SmtpTransport',
+                'host' => '',
+                'port' => '',
+                'username' => '',
+                'password' => '',
+                'encryption' => '',
+            ],
+        ],
+        'email' => [
+            'class' => 'common\components\email\EmailComponent',
+            'defaultFromEmail' => '',
         ],
         'communication' => [
             'class' => \common\components\CommunicationService::class,
@@ -285,6 +297,7 @@ return [
         \common\bootstrap\SetUp::class,
         \common\bootstrap\SetUpListeners::class,
         \common\bootstrap\Logger::class,
+        \common\bootstrap\DeleteLogger::class,
         \common\bootstrap\FileStorage::class,
         \common\bootstrap\PaymentSetup::class,
         \common\bootstrap\OrderProcessManagerQueue::class,

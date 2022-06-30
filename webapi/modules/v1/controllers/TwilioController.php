@@ -85,8 +85,17 @@ class TwilioController extends ApiBaseNoAuthController
         $this->recordingStatusCallbackUrl = $host . '/v1/twilio/recording-status-callback';
     }
 
+    //apiDoc was missing and recreated briefly todo double check carefully
     /**
-     * Displays homepage.
+     * @api {get, post} /v1/twilio/index Twilio index action
+     * @apiVersion 0.1.0
+     * @apiName index
+     * @apiGroup Twilio
+     *
+     * @apiSuccessExample Success-Response:
+     *  HTTP/1.1 200 OK
+     *  <h1>API - Telegram - 127.0.0.1</h1> 2022-06-23 15:01:52
+     *
      *
      * @return mixed
      */
@@ -96,6 +105,19 @@ class TwilioController extends ApiBaseNoAuthController
         exit;
     }
 
+    //ApiDoc was missing and recreated briefly todo double check carefully
+    /**
+     * @api {get, post} /v1/twilio/callback Twilio callback action
+     * @apiVersion 0.1.0
+     * @apiName Callback
+     * @apiGroup Twilio
+     * @apiSuccessExample Success-Response:
+     *  HTTP/1.1 200 OK
+     *  null
+     *
+     *
+     * @return array
+     */
     public function actionCallback()
     {
 
@@ -120,6 +142,21 @@ class TwilioController extends ApiBaseNoAuthController
         Yii::warning(VarDumper::dumpAsString($out), 'Twilio Callback');
     }
 
+    //ApiDoc was missing and recreated briefly todo double check carefully
+    /**
+     * @api {post} /v1/twilio/messaging-request Messaging Request action
+     * @apiVersion 0.1.0
+     * @apiName MessagingRequest
+     * @apiGroup Twilio
+     *
+     * @apiSuccessExample Success-Response:
+     *  HTTP/1.1 200 OK
+     *  <?xml version="1.0" encoding="UTF-8"?>
+     *  <Response/>
+     *
+     *
+     * @return MessagingResponse
+     */
     public function actionMessagingRequest(): MessagingResponse
     {
         $this->smsCommunicationService->newSmsMessagesReceived(Yii::$app->request->post());
@@ -130,6 +167,27 @@ class TwilioController extends ApiBaseNoAuthController
         return $response;
     }
 
+    //ApiDoc was missing and recreated briefly todo double check carefully
+    /**
+     * @api {post} /v1/twilio/messaging-status-callback Messaging status callback action
+     * @apiVersion 0.1.0
+     * @apiName MessagingStatusCallback
+     * @apiGroup Twilio
+     *
+     * @apiParam {string}           [SmsSid]   SMS ID
+     * @apiParam {string}           [SmsSid]   SMS status
+     *
+     * @apiSuccess {String} message    Response Id
+     * @apiSuccess {String} id    SMS ID
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     * {
+            "message": "ok",
+            "id": "1a3d5",
+        }
+     *
+     */
     public function actionMessagingStatusCallback(): array
     {
         $sms_sid = Yii::$app->request->post('SmsSid');
@@ -178,6 +236,26 @@ class TwilioController extends ApiBaseNoAuthController
         return ['message' => 'ok', 'id' => $sms_sid];
     }
 
+    //ApiDoc was missing and recreated briefly todo double check carefully
+    /**
+     * @api {post} /v1/twilio/messaging-fallback Messaging status fallback
+     * @apiVersion 0.1.0
+     * @apiName MessagingFallback
+     * @apiGroup Twilio
+     *
+     * @apiParam {string}           SmsSid   SMS ID
+     *
+     * @apiSuccess {String}     message    Response Id
+     * @apiSuccess {String}     id    SMS ID
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     * {
+            "message": "ok",
+            "id": "1a3d5",
+        }
+     *
+     */
     public function actionMessagingFallback()
     {
         // Yii::info('actionMessagingFallback ' . VarDumper::dumpAsString(Yii::$app->request->post(), 10), 'info\API:Twilio:MessagingFallback:post');
@@ -200,6 +278,19 @@ class TwilioController extends ApiBaseNoAuthController
         return ['message' => 'ok', 'id' => $sms_sid];
     }
 
+    //ApiDoc was missing and recreated briefly todo double check carefully
+    /**
+     * @api {get, post} /v1/twilio/request Request
+     * @apiVersion 0.1.0
+     * @apiName Request
+     * @apiGroup Twilio
+     *
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     * XML
+     *
+     */
     public function actionRequest()
     {
 
@@ -239,7 +330,15 @@ class TwilioController extends ApiBaseNoAuthController
         exit;
     }
 
-
+    //ApiDoc was missing and recreated briefly todo double check carefully
+    /**
+     * @api {get, post} /v1/twilio/fallback Fallback
+     * @apiVersion 0.1.0
+     * @apiName fallback
+     * @apiGroup Twilio
+     *
+     *
+     */
     public function actionFallback()
     {
 
@@ -266,8 +365,64 @@ class TwilioController extends ApiBaseNoAuthController
     }
 
 
+    //ApiDoc was missing and recreated briefly todo double check carefully
     /**
-     * @return mixed
+     * @api {post} /v1/twilio/redirect-call Call redirect action
+     * @apiVersion 0.1.0
+     * @apiName RedirectCall
+     * @apiGroup Twilio
+     *
+     * @apiParam {Integer}          id                              User ID
+     * @apiParam {String}           type                            Type
+     * @apiParam {Array}            CallData                        Call data array
+     * @apiParam {String}               CallData.CallSid            Call id
+     *
+     * * @apiParamExample {json} Request-Example:
+     * {
+     *      "id": "1",
+     *      "type": "department",
+     *      "isTransfer": "1",
+     *      "sid": "CA5f9021ea6f3866sad8e4dasdfcbcc2",
+     *      "CallData": {
+     *          "AccountSid": "ACccda29b38659fc9d75a2a0b",
+     *          "ApiVersion": "2000-04-01",
+     *          "CallSid": "CA5f9021ea6f3866b6f4678e4fdafcbcc2",
+     *          "CallStatus": "in-progress",
+     *          "Called": "+123456789",
+     *          "CalledCity": "",
+     *          "CalledCountry": "US",
+     *          "CalledState": "",
+     *          "CalledZip": "",
+     *          "Caller": "+123456789",
+     *          "CallerCity": "San Francisco",
+     *          "CallerCountry": "US",
+     *          "CallerState": "CA",
+     *          "CallerZip": "",
+     *          "Direction": "inbound",
+     *          "From": "+123456789",
+     *          "FromCity": "San Francisco",
+     *          "FromCountry": "US",
+     *          "FromState": "CA",
+     *          "FromZip": "",
+     *          "To": "+123456789",
+     *          "ToCity": "",
+     *          "ToCountry": "US",
+     *          "ToState": "",
+     *          "ToZip": ""
+     *      }
+     * }
+     * @apiSuccess {String} responseTwml    Xml Response
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     * {
+     *      "responseTwml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Response><Say language=\"en-US\" voice=\"alice\"></Say></Response>\n"
+     * }
+     **@apiErrorExample Error-Response:
+     *     HTTP/1.1 200
+     * {
+     *      "responseTwml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Response><Say language=\"en-US\" voice=\"alice\">Sorry, communication error</Say></Response>\n"
+     * }
      */
     public function actionRedirectCall()
     {
@@ -513,6 +668,20 @@ class TwilioController extends ApiBaseNoAuthController
         return $responseData;
     }
 
+    //ApiDoc was missing and recreated briefly todo double check carefully
+    /**
+     * @api {get, post} /v1/twilio/redirect-call-middleware Redirect Call Middleware
+     * @apiVersion 0.1.0
+     * @apiName RedirectCallMiddleware
+     * @apiGroup Twilio
+     *
+     *
+     *@apiErrorExample Error-Response:
+     *     HTTP/1.1 200
+     *
+     *     <?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Response><Say language=\"en-US\" voice=\"alice\">Sorry, connection failed. Action Redirect Call</Say></Response>\n
+     * @return mixed
+     */
     public function actionRedirectCallMiddleware(): string
     {
         Yii::info(VarDumper::dumpAsString(['post' => Yii::$app->request->post(), 'get' => Yii::$app->request->get()]), 'info\API:TwilioController:actionRedirectCall');
@@ -582,6 +751,19 @@ class TwilioController extends ApiBaseNoAuthController
         return (string)$voiceResponse;
     }
 
+    //ApiDoc was missing and recreated briefly todo double check carefully
+    /**
+     * @api {get, post} /v1/twilio/conference-status-callback Conference Status Callback
+     * @apiVersion 0.1.0
+     * @apiName ConferenceStatusCallback
+     * @apiGroup Twilio
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     *  <?xml version="1.0" encoding="UTF-8"?>
+     *  <Response/>
+     *
+     */
     public function actionConferenceStatusCallback(): array
     {
         $apiLog = $this->startApiLog($this->action->uniqueId);
@@ -679,6 +861,25 @@ class TwilioController extends ApiBaseNoAuthController
         return $responseData;
     }
 
+    //ApiDoc was missing and recreated briefly todo double check carefully
+    /**
+     * @api {post} /v1/twilio/conference-recording-status-callback Conference Recording Status Callback
+     * @apiVersion 0.1.0
+     * @apiName ConferenceRecordingStatusCallback
+     * @apiGroup Twilio
+     *
+     * @apiParam {Integer}          CallSid                         Call id
+     * @apiParam {String}           [ConferenceSid]                   Conference id
+     * @apiParam {String}           [RecordingSid]                    Recording id
+     * @apiParam {String}           [RecordingUrl]                    Recording Url
+     * @apiParam {String}           [RecordingDuration]               Recording Duration
+     *
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     *  <?xml version="1.0" encoding="UTF-8"?>
+     *  <Response/>
+     */
     public function actionConferenceRecordingStatusCallback()
     {
         $apiLog = $this->startApiLog($this->action->uniqueId);
@@ -731,6 +932,31 @@ class TwilioController extends ApiBaseNoAuthController
     }
 
     /**
+     * @api {post} /v1/twilio/cancel-call Cancel Call
+     * @apiVersion 0.1.0
+     * @apiName CancelCall
+     * @apiGroup Twilio
+     *
+     * @apiParam {Integer}          c_id                         Call id
+     * @apiParam {String}           [ConferenceSid]                   Conference id
+     * @apiParam {String}           [RecordingSid]                    Recording id
+     * @apiParam {String}           [RecordingUrl]                    Recording Url
+     * @apiParam {String}           [RecordingDuration]               Recording Duration
+     *
+     *
+     * @apiSuccess {String} responseTwml    Xml Response
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     * {
+     *      "responseTwml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Response><Say language=\"en-US\" voice=\"alice\"></Say></Response>\n"
+     * }
+     **@apiErrorExample Error-Response:
+     *     HTTP/1.1 200
+     * {
+     *      "responseTwml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Response><Say language=\"en-US\" voice=\"alice\">Sorry, communication error</Say></Response>\n"
+     * }
+     *
      * @return mixed
      */
     public function actionCancelCall()
@@ -802,6 +1028,29 @@ class TwilioController extends ApiBaseNoAuthController
         return $responseData;
     }
 
+    //ApiDoc was missing and recreated briefly todo double check carefully
+    /**
+     * @return mixed
+     *@api {post} /v1/twilio/call-request Call Request
+     * @apiVersion 0.1.0
+     * @apiName CallRequest
+     * @apiGroup Twilio
+     *
+     * @apiParam {String}           [from_number]                   number
+     * @apiParam {String}           [number]                        number
+     *
+     *
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     * <?xml version="1.0" encoding="UTF-8"?>
+     *      <Response>
+     *          <Dial recordingStatusCallbackMethod="POST" callerId="" record="record-from-answer-dual" recordingStatusCallback="https://api.sales/v1/twilio/recording-status-callback">
+     *                  <Number statusCallbackEvent="ringing answered completed" statusCallback="https://api.sales/v1/twilio/voice-status-callback" statusCallbackMethod="POST"/>
+     *          </Dial>
+    * </Response>
+     *
+     */
     public function actionCallRequest(): VoiceResponse
     {
         $responseData = [];
@@ -846,6 +1095,27 @@ class TwilioController extends ApiBaseNoAuthController
         return  $response;
     }
 
+    //ApiDoc was missing and recreated briefly todo double check carefully
+    /**
+     * @return mixed
+     *@api {post} /v1/twilio/voice-request Voice Request
+     * @apiVersion 0.1.0
+     * @apiName VoiceRequest
+     * @apiGroup Twilio
+     *
+     * @apiParam {DTO}           RequestDataDTO                   RequestData
+     * @apiParam {String}           RequestDataDTO.To               Request to
+     *
+     *
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     * <?xml version="1.0" encoding="UTF-8"?>
+     *      <Response>
+     *         <Reject reason="busy"/>
+     *      </Response>
+     *
+     */
     public function actionVoiceRequest()
     {
         $responseData = [];
@@ -962,6 +1232,15 @@ class TwilioController extends ApiBaseNoAuthController
         return $response;
     }
 
+    //ApiDoc was missing and recreated briefly todo double check carefully
+    /**
+     * @return mixed
+     *@api {post} /v1/twilio/voice-gather Voice Gather
+     * @apiVersion 0.1.0
+     * @apiName Voice Gather
+     * @apiGroup Twilio
+     *
+     */
     public function actionVoiceGather()
     {
         $responseData = [];
@@ -1026,7 +1305,28 @@ class TwilioController extends ApiBaseNoAuthController
         return $response;
     }
 
+    //ApiDoc was missing and recreated briefly todo double check carefully
     /**
+     *@api {post} /v1/twilio/recording-status-callback Recording Status Callback
+     * @apiVersion 0.1.0
+     * @apiName RecordingStatusCallback
+     * @apiGroup Twilio
+     *
+     * @apiParam {String}           CallSid                   Call ID
+     * @apiParam {String}           RecordingSid              Recording ID
+     *
+     *
+     *
+     * @apiErrorExample Error-Response:
+     *      HTTP/1.1 400 Bad Request
+     * {
+     *      "name": "Bad Request",
+     *      "message": "Not found Call by SID",
+     *      "code": 0,
+     *      "status": 400,
+     *      "type": "yii\\web\\BadRequestHttpException"
+     * }
+     * @return mixed
      * @return MessagingResponse|null
      * @throws BadRequestHttpException
      */
@@ -1092,6 +1392,14 @@ class TwilioController extends ApiBaseNoAuthController
         throw new BadRequestHttpException('Not found Call or RecordingSID');
     }
 
+    //ApiDoc was missing and recreated briefly todo double check carefully
+    /**
+     * @api {post} /v1/twilio/voice-status-callback Voice Status Callback
+     * @apiVersion 0.1.0
+     * @apiName VoiceStatusCallback
+     * @apiGroup Twilio
+     *
+     */
     public function actionVoiceStatusCallback(): ?array
     {
         $apiLog = $this->startApiLog($this->action->uniqueId);
@@ -1241,6 +1549,26 @@ class TwilioController extends ApiBaseNoAuthController
         }
     }
 
+    //ApiDoc was missing and recreated briefly todo double check carefully
+    /**
+     * @api {post} /v1/twilio/redirect-to Redirect To
+     * @apiVersion 0.1.0
+     * @apiName RedirectTo
+     * @apiGroup Twilio
+     *
+     * @apiParam {String}       from        From
+     * @apiParam {String}       to          To
+     * @apiParam {String}       type        Type
+     *
+     *
+     * @apiErrorExample Error-Response:
+     *      HTTP/1.1 200 OK
+     * <?xml version="1.0" encoding="UTF-8"?>
+     * <Response>
+     *      <Say>Sorry, application error</Say>
+     *      <Reject reason="busy"/>
+     * </Response>
+     */
     public function actionRedirectTo(): string
     {
         $get = Yii::$app->request->get();
@@ -1318,6 +1646,24 @@ class TwilioController extends ApiBaseNoAuthController
         return (string) $responseVoiceResponse;
     }
 
+    /**
+     * @api {post} /v1/twilio/check-out-number Check Out Number
+     * @apiVersion 0.1.0
+     * @apiName CheckOutNumber
+     * @apiGroup Twilio
+     *
+     * @apiParam {String}       number        Number
+     ** @apiParamExample {json} Request-Example:
+     * {
+     *      "available": false
+     * }
+     *
+     * @apiErrorExample Error-Response:
+     *      HTTP/1.1 200 OK
+     * {
+     *      "error": "Not found number"
+     * }
+     */
     public function actionCheckOutNumber(): array
     {
         $number = (string)Yii::$app->request->post('number');

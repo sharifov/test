@@ -33,11 +33,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attributes' => [
                     [
                         'attribute' => 'ostl_osl_id',
-                        'value' => $model->ostlOsl->osl_title
+                        'value' => $model->objectSegmentList->osl_title
                     ],
                     [
                         'attribute' => 'ostl_tl_id',
-                        'value' => $model->ostlTl->tl_title
+                        'value' => $model->taskList->tl_title
                     ],
                     'ostl_created_dt',
                     'ostl_created_user_id:username',

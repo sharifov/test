@@ -3,12 +3,14 @@
 namespace modules\objectSegment\src\entities;
 
 use common\models\Employee;
+use modules\objectSegment\src\repositories\ObjectSegmentTaskRepository;
 use modules\taskList\src\entities\taskList\TaskList;
 use modules\taskList\src\services\TaskListService;
 use Yii;
 use yii\behaviors\AttributeBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\VarDumper;
 
 /**
  * This is the model class for table "object_segment_task".
@@ -19,8 +21,8 @@ use yii\db\ActiveRecord;
  * @property int|null $ostl_created_user_id
  *
  * @property Employee $ostlCreatedUser
- * @property ObjectSegmentList $ostlOsl
- * @property TaskList $ostlTl
+ * @property ObjectSegmentList $objectSegmentList
+ * @property TaskList $taskList
  */
 class ObjectSegmentTask extends \yii\db\ActiveRecord
 {
@@ -101,7 +103,7 @@ class ObjectSegmentTask extends \yii\db\ActiveRecord
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getOstlOsl()
+    public function getObjectSegmentList()
     {
         return $this->hasOne(ObjectSegmentList::class, ['osl_id' => 'ostl_osl_id']);
     }
@@ -111,7 +113,7 @@ class ObjectSegmentTask extends \yii\db\ActiveRecord
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getOstlTl()
+    public function getTaskList()
     {
         return $this->hasOne(TaskList::class, ['tl_id' => 'ostl_tl_id']);
     }
@@ -121,8 +123,81 @@ class ObjectSegmentTask extends \yii\db\ActiveRecord
         return Yii::$app->objectSegment->getObjectList();
     }
 
-    public function getTaskList(): array
+    public function getTaskListAsKeyValue(): array
     {
         return TaskListService::getTaskObjectList();
+    }
+
+    public static function getAssignedTaskIds(int $id): array
+    {
+        return self::find()->select(['ostl_tl_id'])->where(['ostl_osl_id' => $id])->column();
+    }
+
+    public static function getAssignedObjectSegmentIdsByTaskId(int $id): array
+    {
+        return self::find()->select(['ostl_osl_id'])->where(['ostl_tl_id' => $id])->column();
+    }
+
+    public static function create(int $objectSegmentListId, int $taskListId): self
+    {
+        $self = new self();
+        $self->ostl_osl_id = $objectSegmentListId;
+        $self->ostl_tl_id = $taskListId;
+
+        return $self;
+    }
+
+    public static function deleteOrAddTasks(int $id, array $taskIds = []): bool
+    {
+        $currentItems = self::getAssignedTaskIds($id);
+        $addList = [];
+        $removeList = [];
+
+        if (empty($taskIds) && !empty($currentItems)) {
+            $removeList = $currentItems;
+        } else {
+            $removeList = array_diff($currentItems, $taskIds);
+            $addList = array_diff($taskIds, $currentItems);
+        }
+
+        if (!empty($removeList)) {
+            self::deleteAll(['AND', ['ostl_osl_id' => $id], ['IN', 'ostl_tl_id', $removeList]]);
+        }
+
+        if (!empty($addList)) {
+            foreach ($addList as $item) {
+                $objectSegmentTask = self::create($id, $item);
+                (new ObjectSegmentTaskRepository($objectSegmentTask))->save();
+            }
+        }
+
+        return true;
+    }
+
+    public static function deleteOrAddObjectSegments(int $id, array $segmentIds = []): bool
+    {
+        $currentItems = self::getAssignedObjectSegmentIdsByTaskId($id);
+        $addList = [];
+        $removeList = [];
+
+        if (empty($segmentIds) && !empty($currentItems)) {
+            $removeList = $currentItems;
+        } else {
+            $removeList = array_diff($currentItems, $segmentIds);
+            $addList = array_diff($segmentIds, $currentItems);
+        }
+
+        if (!empty($removeList)) {
+            self::deleteAll(['AND', ['ostl_tl_id' => $id], ['IN', 'ostl_osl_id', $removeList]]);
+        }
+
+        if (!empty($addList)) {
+            foreach ($addList as $item) {
+                $objectSegmentTask = self::create($item, $id);
+                (new ObjectSegmentTaskRepository($objectSegmentTask))->save();
+            }
+        }
+
+        return true;
     }
 }

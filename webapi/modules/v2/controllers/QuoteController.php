@@ -653,7 +653,6 @@ class QuoteController extends ApiBaseController
                             }
                         }
                     }
-                    //exec(dirname(Yii::getAlias('@app')) . '/yii quote/send-opened-notification '.$uid.'  > /dev/null 2>&1 &');
                 }
             }
         } catch (\Throwable $e) {

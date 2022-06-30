@@ -52,7 +52,6 @@ class AbacComponent extends Component
         '/modules/',
         '/frontend/',
         '/common/',
-        '/sales/',
         '/src/',
     ];
     public array $scanExtMask = ['*.php'];
@@ -428,6 +427,7 @@ class AbacComponent extends Component
             TagDependency::invalidate(Yii::$app->cache, $cacheTagDependency);
             return true;
         }
+        TagDependency::invalidate(Yii::$app->cache, [AbacPolicy::CACHE_KEY]);
         return false;
     }
 }

@@ -18,7 +18,7 @@ abstract class EntityAttributeFormatService
     protected function formatByFormatter(Formatter $formatter, array &$formattedAttr, ?string $oldAttr, ?string $newAttr): void
     {
         if ($newAttr) {
-            $oldAttr = json_decode($oldAttr, true);
+            $oldAttr = ($oldAttr !== null) ? json_decode($oldAttr, true) : [];
             $newAttr = json_decode($newAttr, true);
             foreach ($newAttr as $attr => $value) {
                 if (!in_array($attr, $formatter->getExceptedAttributes(), false)) {
@@ -40,7 +40,7 @@ abstract class EntityAttributeFormatService
     protected function formatByModel(ActiveRecord $model, array &$formattedAttr, ?string $oldAttr, ?string $newAttr): void
     {
         if ($newAttr) {
-            $oldAttr = json_decode($oldAttr, true);
+            $oldAttr = ($oldAttr !== null) ? json_decode($oldAttr, true) : [];
             $newAttr = json_decode($newAttr, true);
             foreach ($newAttr as $attr => $value) {
                 $formattedAttr[$model->getAttributeLabel($attr)][1] = $value;

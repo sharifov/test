@@ -10,6 +10,7 @@ use Yii;
 use src\model\phoneNumberRedial\entity\PhoneNumberRedial;
 use src\model\phoneNumberRedial\entity\PhoneNumberRedialSearch;
 use frontend\controllers\FController;
+use yii\filters\AccessControl;
 use yii\web\BadRequestHttpException;
 use yii\web\NotAcceptableHttpException;
 use yii\web\NotFoundHttpException;
@@ -49,8 +50,19 @@ class PhoneNumberRedialCrudController extends FController
                     'actions' => [
                         'delete' => ['POST'],
                         'delete-selected' => ['POST'],
+                        'select-all' => ['POST']
                     ],
                 ],
+                'access' => [
+                    'class' => AccessControl::class,
+                    'only' => ['select-all'],
+                    'rules' => [
+                        [
+                            'allow' => true,
+                            'actions' => ['select-all'],
+                        ],
+                    ],
+                ]
             ]
         );
     }
