@@ -3,9 +3,11 @@
 namespace modules\flight\controllers;
 
 use common\components\BackOffice;
+use common\models\Airports;
 use common\models\Currency;
 use common\models\Notifications;
 use common\models\Project;
+use DateTime;
 use frontend\helpers\JsonHelper;
 use modules\cases\src\abac\CasesAbacObject;
 use modules\cases\src\abac\dto\CasesAbacDto;
@@ -16,6 +18,7 @@ use modules\flight\models\FlightPax;
 use modules\flight\models\FlightQuoteFlight;
 use modules\flight\models\query\FlightQuoteTicketQuery;
 use modules\flight\src\dto\flightQuoteSearchDTO\FlightQuoteSearchDTO;
+use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
 use modules\flight\src\helpers\FlightQuoteHelper;
 use modules\flight\src\repositories\flight\FlightRepository;
 use modules\flight\src\repositories\flightQuotePaxPriceRepository\FlightQuotePaxPriceRepository;
@@ -60,6 +63,7 @@ use src\repositories\lead\LeadRepository;
 use src\repositories\NotFoundException;
 use src\services\parsingDump\BaggageService;
 use src\services\parsingDump\ReservationService;
+use src\services\quote\addQuote\AddQuoteManualService;
 use src\services\quote\addQuote\guard\GdsByQuoteGuard;
 use src\services\TransactionManager;
 use webapi\src\request\BoRequestDataHelper;
@@ -1077,16 +1081,26 @@ class FlightQuoteController extends FController
                     $segments = $reservationService->parseResult;
                 }
 
+                [$pastSegmentsItinerary, $pastSegments, $totalPastTrips] = AddQuoteManualService::getPastSegmentsByProductQuote($gds, $originProductQuote);
+
+                $form->keyTripList = $this->updateKeyTripList($form, $totalPastTrips);
+                $form->itinerary = array_merge($pastSegmentsItinerary, $itinerary);
+                $mergedSegments = array_merge($pastSegments, $segments);
+                $totalTrips = count(explode(',', $form->keyTripList));
+
+                $updatedSegmentTripFormData = AddQuoteManualService::updateSegmentTripFormsData($form, $totalTrips, $pastSegmentsItinerary);
+                $form->setSegmentTripFormsData($updatedSegmentTripFormData);
+
                 $userId = Auth::id();
                 $flightQuote = Yii::createObject(TransactionManager::class)
-                    ->wrap(function () use ($flight, $originProductQuote, $form, $userId, $segments, $changeId) {
+                    ->wrap(function () use ($flight, $originProductQuote, $form, $userId, $mergedSegments, $changeId) {
                         return $this->voluntaryQuoteManualCreateService->createProcessing(
                             $flight,
                             $originProductQuote,
                             $form,
                             $userId,
-                            $segments,
-                            $changeId
+                            $mergedSegments,
+                            $changeId,
                         );
                     });
 
@@ -1203,6 +1217,20 @@ class FlightQuoteController extends FController
         return $this->render('partial/_add_re_protection_manual', $params);
     }
 
+    public function updateKeyTripList($form, $totalPastTrips)
+    {
+        if ($totalPastTrips > 0) {
+            while ($totalPastTrips > 0) {
+                $receivedTrips = explode(',', $form->keyTripList);
+                $addTrip = count($receivedTrips) + 1;
+                $form->keyTripList = $form->keyTripList . ',' . $addTrip;
+                $totalPastTrips--;
+            }
+        }
+
+        return $form->keyTripList;
+    }
+
     public function actionAjaxSaveReProtection(): array
     {
         if (Yii::$app->request->isAjax) {
@@ -1258,16 +1286,26 @@ class FlightQuoteController extends FController
                     $segments = $reservationService->parseResult;
                 }
 
+                [$pastSegmentsItinerary, $pastSegments, $totalPastTrips] = AddQuoteManualService::getPastSegmentsByProductQuote($gds, $originProductQuote);
+
+                $form->keyTripList = $this->updateKeyTripList($form, $totalPastTrips);
+                $form->itinerary = array_merge($pastSegmentsItinerary, $itinerary);
+                $mergedSegments = array_merge($pastSegments, $segments);
+                $totalTrips = count(explode(',', $form->keyTripList));
+
+                $updatedSegmentTripFormData = AddQuoteManualService::updateSegmentTripFormsData($form, $totalTrips, $pastSegmentsItinerary);
+                $form->setSegmentTripFormsData($updatedSegmentTripFormData);
+
                 $userId = Auth::id();
                 $flightQuote = Yii::createObject(TransactionManager::class)
-                    ->wrap(function () use ($flight, $originProductQuote, $form, $userId, $segments, $changeId) {
+                    ->wrap(function () use ($flight, $originProductQuote, $form, $userId, $mergedSegments, $changeId) {
                         return $this->reProtectionQuoteManualCreateService->createReProtectionManual(
                             $flight,
                             $originProductQuote,
                             $form,
                             $userId,
-                            $segments,
-                            $changeId
+                            $mergedSegments,
+                            $changeId,
                         );
                     });
 
