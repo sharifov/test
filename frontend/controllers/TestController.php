@@ -2175,33 +2175,6 @@ class TestController extends FController
 
     public function actionZ()
     {
-        $dt = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')));
-        $x = UserShiftScheduleQuery::getNextTimeLineByUser(Auth::id(), $dt);
-
-        \yii\helpers\VarDumper::dump($x, 20, true); exit();
-        /* FOR DEBUG:: must by remove */
-
-
-        //$accessSimpleSearch = Yii::$app->abac->can(null, LeadSearchAbacObject::SIMPLE_SEARCH, LeadSearchAbacObject::ACTION_ACCESS);
-        //\yii\helpers\VarDumper::dump($accessSimpleSearch, 20, true); exit();
-
-        //$zzz = \Yii::$app->abac->can(null, ShiftAbacObject::ACT_USER_SHIFT_ASSIGN, ShiftAbacObject::ACTION_UPDATE);
-        //\yii\helpers\VarDumper::dump($zzz, 20, true); exit();
-        /* FOR DEBUG:: must by remove */
-
-        $leadId = 371112; // 371112 , 371065
-        $lead = Lead::find()->where(['id' => $leadId])->limit(1)->one();
-
-        $leadTaskListService = new LeadTaskListService($lead);
-        $allowed = $leadTaskListService->isProcessAllowed();
-        $taskList = $leadTaskListService->getTaskList();
-
-        \yii\helpers\VarDumper::dump([
-            '$allowed' => $allowed,
-            '$taskList' => $taskList,
-        ], 20, true); exit();
-        /* FOR DEBUG:: must by remove */
-
         echo 'Feature Flag Test<br><br>';
 
         /** @fflag FFlag::FF_KEY_LPP_ENABLE, Lead Poor Processing Enable/Disable */

@@ -394,8 +394,8 @@ class UserShiftScheduleQuery
         return UserShiftSchedule::find()
             ->alias('user_shift_schedule')
             ->innerJoin(
-                 ShiftScheduleType::tableName() . ' AS shift_schedule_type',
-                 'shift_schedule_type.sst_id = user_shift_schedule.uss_sst_id',
+                ShiftScheduleType::tableName() . ' AS shift_schedule_type',
+                'shift_schedule_type.sst_id = user_shift_schedule.uss_sst_id',
             )
             ->where(['uss_user_id' => $userId])
             ->andWhere(['uss_year_start' => $startDt->format('Y')])

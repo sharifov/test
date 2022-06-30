@@ -44,7 +44,6 @@ class LeadTaskListService
         $dtNow = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')));
 
         if ($taskLists = $this->getTaskList()) {
-
             if (!$userShiftSchedule = UserShiftScheduleQuery::getNextTimeLineByUser($this->lead->employee_id, $dtNow)) {
                 throw new \RuntimeException('UserShiftSchedule not found by EmployeeId (' . $this->lead->employee_id . ')');
             }
