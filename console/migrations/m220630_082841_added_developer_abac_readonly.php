@@ -16,7 +16,7 @@ class m220630_082841_added_developer_abac_readonly extends Migration
     ];
 
     private array $roles = [
-        Employee::ROLE_DEVELOPER,
+        'developer',
     ];
 
     /**
