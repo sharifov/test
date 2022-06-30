@@ -61,7 +61,7 @@ class Experiment extends ActiveRecord
 
     /**
      * @param string $code
-     * @return ActiveRecord|array|null
+     * @return array|Experiment|ActiveRecord|null
      */
     public static function getExperimentByCode(string $code)
     {
@@ -70,7 +70,7 @@ class Experiment extends ActiveRecord
 
     /**
      * @param int $ex_id
-     * @return ActiveRecord|array|null
+     * @return array|Experiment|ActiveRecord|null
      */
     public static function getExperimentById(int $ex_id)
     {
@@ -78,7 +78,7 @@ class Experiment extends ActiveRecord
     }
 
     /**
-     * @param string $targetType
+     * @param string $targetTypeId
      * @param int $targetId
      * @return bool
      */

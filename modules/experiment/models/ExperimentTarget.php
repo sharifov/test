@@ -85,7 +85,7 @@ class ExperimentTarget extends ActiveRecord
     }
 
     /**
-     * @return array
+     * @return string[]
      */
     public static function getTypeList(): array
     {
@@ -93,6 +93,8 @@ class ExperimentTarget extends ActiveRecord
     }
 
     /**
+     * @param string $target_type_id
+     * @param int $targetId
      * @return array
      */
     public static function getExperimentIds(string $target_type_id, int $targetId): array
@@ -106,6 +108,8 @@ class ExperimentTarget extends ActiveRecord
     }
 
     /**
+     * @param string $target_type_id
+     * @param int $targetId
      * @return array
      */
     public static function getExperimentArray(string $target_type_id, int $targetId): array
@@ -123,13 +127,15 @@ class ExperimentTarget extends ActiveRecord
     }
 
     /**
-     * @return array
+     * @param string $target_type_id
+     * @param int $targetId
+     * @param array $experimentCodesArray
+     * @return void
      */
-    public static function saveExperimentList(string $target_type_id, int $targetId, array $experimentCodes): void
+    public static function saveExperimentCodesArray(string $target_type_id, int $targetId, array $experimentCodesArray): void
     {
-        if (!empty($experimentCodes)) {
-            $mergedExperimentCodes = array_unique(array_column($experimentCodes, 'ex_code'));
-            foreach ($mergedExperimentCodes as $ex_code) {
+        if (!empty($experimentCodesArray)) {
+            foreach ($experimentCodesArray as $ex_code) {
                 if ($ex_code != '') {
                     self::saveExperiment($target_type_id, $targetId, $ex_code);
                 }
@@ -137,6 +143,25 @@ class ExperimentTarget extends ActiveRecord
         }
     }
 
+    /**
+     * @param string $target_type_id
+     * @param int $targetId
+     * @param array $experimentObjects
+     * @return void
+     */
+    public static function saveExperimentObjects(string $target_type_id, int $targetId, array $experimentObjects): void
+    {
+        if (!empty($experimentObjects)) {
+            self::saveExperimentCodesArray(array_unique(array_column($experimentObjects, 'ex_code')));
+        }
+    }
+
+    /**
+     * @param string $target_type_id
+     * @param int $targetId
+     * @param string $experimentCode
+     * @return void
+     */
     public static function saveExperiment(string $target_type_id, int $targetId, string $experimentCode): void
     {
         $experimentRecord = Experiment::getExperimentByCode($experimentCode);

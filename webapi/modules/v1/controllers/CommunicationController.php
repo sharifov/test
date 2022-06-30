@@ -473,7 +473,7 @@ class CommunicationController extends ApiBaseController
                     $departmentPhone->dpp_phone_list_id
                 );
 
-                $departmentPhoneProjectParamsService->saveExperimentList(ExperimentTarget::EXT_TYPE_CALL, $callModel->c_id);
+                $departmentPhoneProjectParamsService->saveExperiments(ExperimentTarget::EXT_TYPE_CALL, $callModel->c_id);
 
                 if (!$isTrustStirCall && SettingHelper::isEnableCallLogFilterGuard()) {
                     try {

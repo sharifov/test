@@ -557,7 +557,7 @@ class LeadController extends ApiBaseController
         }
 
         if (!empty($modelLead->experiments) && is_array($modelLead->experiments)) {
-            ExperimentTarget::saveExperimentList(Lead::class, $lead->id, $modelLead->experiments);
+            ExperimentTarget::saveExperimentObjects(Lead::class, $lead->id, $modelLead->experiments);
         }
 
         $clientDataInserted = [];
@@ -1113,7 +1113,7 @@ class LeadController extends ApiBaseController
 
             if ($modelLead->experiments && is_array($modelLead->experiments)) {
                 ExperimentTarget::deleteAll(['ext_target_id' => $lead->id, 'ext_target_type_id' => ExperimentTarget::EXT_TYPE_LEAD]);
-                ExperimentTarget::saveExperimentList(ExperimentTarget::EXT_TYPE_LEAD, $lead->id, $modelLead->experiments);
+                ExperimentTarget::saveExperimentObjects(ExperimentTarget::EXT_TYPE_LEAD, $lead->id, $modelLead->experiments);
             }
 
             if ($modelLead->flights) {
