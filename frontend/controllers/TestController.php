@@ -90,8 +90,12 @@ use modules\hotel\models\HotelList;
 use modules\hotel\models\HotelQuote;
 use modules\hotel\src\services\hotelQuote\CommunicationDataService;
 use modules\hotel\src\services\hotelQuote\HotelQuotePdfService;
+use modules\lead\src\abac\LeadSearchAbacObject;
+use modules\lead\src\abac\taskLIst\LeadTaskListAbacDto;
+use modules\lead\src\abac\taskLIst\LeadTaskListAbacObject;
 use modules\lead\src\entities\lead\LeadQuery;
 use modules\lead\src\events\LeadEvents;
+use modules\lead\src\services\LeadTaskListService;
 use modules\order\src\abac\OrderAbacObject;
 use modules\order\src\entities\order\Order;
 use modules\order\src\events\OrderFileGeneratedEvent;
@@ -115,6 +119,8 @@ use modules\qaTask\src\useCases\qaTask\QaTaskActions;
 use modules\qaTask\src\useCases\qaTask\takeOver\QaTaskTakeOverForm;
 use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
 use modules\rentCar\src\services\RentCarQuotePdfService;
+use modules\shiftSchedule\src\abac\ShiftAbacObject;
+use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftScheduleQuery;
 use modules\webEngage\form\WebEngageEventForm;
 use modules\webEngage\settings\WebEngageDictionary;
 use modules\webEngage\src\service\webEngageEventData\lead\LeadEventDataService;
@@ -2169,6 +2175,33 @@ class TestController extends FController
 
     public function actionZ()
     {
+        $dt = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')));
+        $x = UserShiftScheduleQuery::getNextTimeLineByUser(Auth::id(), $dt);
+
+        \yii\helpers\VarDumper::dump($x, 20, true); exit();
+        /* FOR DEBUG:: must by remove */
+
+
+        //$accessSimpleSearch = Yii::$app->abac->can(null, LeadSearchAbacObject::SIMPLE_SEARCH, LeadSearchAbacObject::ACTION_ACCESS);
+        //\yii\helpers\VarDumper::dump($accessSimpleSearch, 20, true); exit();
+
+        //$zzz = \Yii::$app->abac->can(null, ShiftAbacObject::ACT_USER_SHIFT_ASSIGN, ShiftAbacObject::ACTION_UPDATE);
+        //\yii\helpers\VarDumper::dump($zzz, 20, true); exit();
+        /* FOR DEBUG:: must by remove */
+
+        $leadId = 371112; // 371112 , 371065
+        $lead = Lead::find()->where(['id' => $leadId])->limit(1)->one();
+
+        $leadTaskListService = new LeadTaskListService($lead);
+        $allowed = $leadTaskListService->isProcessAllowed();
+        $taskList = $leadTaskListService->getTaskList();
+
+        \yii\helpers\VarDumper::dump([
+            '$allowed' => $allowed,
+            '$taskList' => $taskList,
+        ], 20, true); exit();
+        /* FOR DEBUG:: must by remove */
+
         echo 'Feature Flag Test<br><br>';
 
         /** @fflag FFlag::FF_KEY_LPP_ENABLE, Lead Poor Processing Enable/Disable */

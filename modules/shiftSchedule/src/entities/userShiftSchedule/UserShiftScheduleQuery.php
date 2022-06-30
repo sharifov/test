@@ -8,6 +8,7 @@ use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\shiftScheduleTypeLabelAssign\ShiftScheduleTypeLabelAssign;
 use modules\shiftSchedule\src\entities\userShiftSchedule\search\TimelineCalendarFilter;
 use Yii;
+use yii\base\DynamicModel;
 
 class UserShiftScheduleQuery
 {
@@ -382,5 +383,29 @@ class UserShiftScheduleQuery
                 AND ussDone.uss_sst_id IN (1, 2)"
             )
             ->all();
+    }
+
+    public static function getNextTimeLineByUser(
+        int $userId,
+        \DateTimeImmutable $startDt,
+        array $status = [UserShiftSchedule::STATUS_APPROVED],
+        array $shiftScheduleType = [ShiftScheduleType::SUBTYPE_WORK_TIME]
+    ): ?UserShiftSchedule {
+        return UserShiftSchedule::find()
+            ->alias('user_shift_schedule')
+            ->innerJoin(
+                 ShiftScheduleType::tableName() . ' AS shift_schedule_type',
+                 'shift_schedule_type.sst_id = user_shift_schedule.uss_sst_id',
+            )
+            ->where(['uss_user_id' => $userId])
+            ->andWhere(['uss_year_start' => $startDt->format('Y')])
+            ->andWhere(['uss_month_start' => $startDt->format('m')])
+            ->andWhere(['>=', 'uss_start_utc_dt', $startDt->format('Y-m-d H:i:s')])
+            ->andWhere(['IN', 'uss_status_id', $status])
+            ->andWhere(['IN', 'shift_schedule_type.sst_subtype_id', $shiftScheduleType])
+            ->orderBy(['uss_end_utc_dt' => SORT_ASC])
+            ->limit(1)
+            ->one()
+        ;
     }
 }
