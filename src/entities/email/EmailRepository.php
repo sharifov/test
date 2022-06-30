@@ -34,10 +34,10 @@ class EmailRepository
     public function read(Email $email): void
     {
         if ($email->emailLog && $email->emailLog->el_is_new === true) {
-            $email->emailLog->el_is_new = false;
-            $email->emailLog->el_read_dt = date('Y-m-d H:i:s');
-            $email->emailLog->save(false);
-            //TODO: maybe need refresh
+            $email->saveEmailLog([
+                'el_is_new' => false,
+                'el_read_dt' => date('Y-m-d H:i:s')
+            ]);
         }
     }
 

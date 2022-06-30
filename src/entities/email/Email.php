@@ -314,12 +314,51 @@ class Email extends BaseActiveRecord
         ];
     }
 
+    /**
+     *
+     * @param unknown $errorMessage
+     * @return \src\entities\email\Email
+     */
     public function statusToError($errorMessage)
     {
-        $this->e_status_id = EmailStatus::ERROR;
-        $this->emailLog->el_error_message = $errorMessage;
-        $this->emailLog->save(false);
-        $this->save(false);
+        $this->saveEmailLog(['el_error_message' => $errorMessage]);
+        $this->updateAttributes(['e_status_id' => EmailStatus::ERROR]);
+
+        return $this;
+    }
+
+    /**
+     *
+     * @param array $attributes
+     * @return \src\entities\email\Email
+     * @throws \src\exception\CreateModelException
+     */
+    public function saveEmailLog(array $attributes)
+    {
+        if (!$this->emailLog) {
+            $attributes = array_merge($attributes, ['el_email_id' => $this->e_id]);
+            EmailLog::create($attributes);
+        } else {
+            $this->emailLog->updateAttributes($attributes);
+        }
+
+        return $this;
+    }
+
+    /**
+     *
+     * @param array $attributes
+     * @return \src\entities\email\Email
+     * @throws \src\exception\CreateModelException
+     */
+    public function saveParams(array $attributes)
+    {
+        if (!$this->params) {
+            $attributes = array_merge($attributes, ['ep_email_id' => $this->e_id]);
+            EmailParams::create($attributes);
+        } else {
+            $this->params->updateAttributes($attributes);
+        }
 
         return $this;
     }
