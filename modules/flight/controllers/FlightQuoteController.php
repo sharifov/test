@@ -1082,11 +1082,7 @@ class FlightQuoteController extends FController
                 }
 
                 [$pastSegmentsItinerary, $pastSegments, $totalPastTrips] = AddQuoteManualService::getPastSegmentsByProductQuote($gds, $originProductQuote);
-
-                $form->keyTripList = $this->updateKeyTripList($form, $totalPastTrips);
-                $form->itinerary = array_merge($pastSegmentsItinerary, $itinerary);
-                $mergedSegments = array_merge($pastSegments, $segments);
-                $totalTrips = count(explode(',', $form->keyTripList));
+                [$form, $mergedSegments, $totalTrips] = AddQuoteManualService::updateFormAndMergeSegments($form, $totalPastTrips, $pastSegmentsItinerary, $itinerary, $pastSegments, $segments);
 
                 $updatedSegmentTripFormData = AddQuoteManualService::updateSegmentTripFormsData($form, $totalTrips, $pastSegmentsItinerary);
                 $form->setSegmentTripFormsData($updatedSegmentTripFormData);
@@ -1217,20 +1213,6 @@ class FlightQuoteController extends FController
         return $this->render('partial/_add_re_protection_manual', $params);
     }
 
-    public function updateKeyTripList($form, $totalPastTrips)
-    {
-        if ($totalPastTrips > 0) {
-            while ($totalPastTrips > 0) {
-                $receivedTrips = explode(',', $form->keyTripList);
-                $addTrip = count($receivedTrips) + 1;
-                $form->keyTripList = $form->keyTripList . ',' . $addTrip;
-                $totalPastTrips--;
-            }
-        }
-
-        return $form->keyTripList;
-    }
-
     public function actionAjaxSaveReProtection(): array
     {
         if (Yii::$app->request->isAjax) {
@@ -1287,11 +1269,7 @@ class FlightQuoteController extends FController
                 }
 
                 [$pastSegmentsItinerary, $pastSegments, $totalPastTrips] = AddQuoteManualService::getPastSegmentsByProductQuote($gds, $originProductQuote);
-
-                $form->keyTripList = $this->updateKeyTripList($form, $totalPastTrips);
-                $form->itinerary = array_merge($pastSegmentsItinerary, $itinerary);
-                $mergedSegments = array_merge($pastSegments, $segments);
-                $totalTrips = count(explode(',', $form->keyTripList));
+                [$form, $mergedSegments, $totalTrips] = AddQuoteManualService::updateFormAndMergeSegments($form, $totalPastTrips, $pastSegmentsItinerary, $itinerary, $pastSegments, $segments);
 
                 $updatedSegmentTripFormData = AddQuoteManualService::updateSegmentTripFormsData($form, $totalTrips, $pastSegmentsItinerary);
                 $form->setSegmentTripFormsData($updatedSegmentTripFormData);

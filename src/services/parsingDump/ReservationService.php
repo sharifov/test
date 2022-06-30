@@ -140,21 +140,21 @@ class ReservationService
         $departureCity = Airports::findByIata($segment->fqs_departure_airport_iata);
         $arrivalCity = Airports::findByIata($segment->fqs_arrival_airport_iata);
         $airline = Airline::find()->where(['iata' => $segment->fqs_operating_airline])->limit(1)->one() ?? null;
-        $flightDuration = $this->getFlightDuration(
-            $departureDateTime,
-            $arrivalDateTime,
-            $departureCity,
-            $arrivalCity
-        );
-        if ($flightDuration <= 0) {
-            \Yii::warning('Negative or zero flight duration (' . $flightDuration . ' sec) for fqs_id: ' . $segment->fqs_id, 'ReservationService:parseSegment:flightDuration');
-            $flightDuration = 0;
-        }
 
         $layoverDuration = $this->getLayoverDuration($pastParsedSegments, $index);
         if ($layoverDuration < 0) {
             \Yii::warning('Negative layover duration (' . $layoverDuration . ' sec) for fqs_id: ' . $segment->fqs_id, 'ReservationService:parseSegment:layoverDuration');
             $layoverDuration = 0;
+        }
+
+        $flightDuration = $this->getFlightDurationWithLayover(
+            $departureDateTime,
+            $arrivalDateTime,
+            $layoverDuration
+        );
+        if ($flightDuration <= 0) {
+            \Yii::warning('Negative or zero flight duration (' . $flightDuration . ' sec) for fqs_id: ' . $segment->fqs_id, 'ReservationService:parseSegment:flightDuration');
+            $flightDuration = 0;
         }
 
         return [
@@ -170,7 +170,7 @@ class ReservationService
             'bookingClass' => $segment->fqs_booking_class,
             'departureCity' => $departureCity,
             'arrivalCity' => $arrivalCity,
-            'flightDuration' => $flightDuration,
+            'flightDuration' => $segment->fqs_duration ?? $flightDuration,
             'layoverDuration' => $layoverDuration,
             'operatingAirline' => null,
             'operatingAirlineObj' => null,
@@ -204,6 +204,17 @@ class ReservationService
     private function getFlightDuration(DateTime $departureDateTime, DateTime $arrivalDateTime, ?Airports $departureCity, ?Airports $arrivalCity)
     {
         return intval(($arrivalDateTime->getTimestamp() - $departureDateTime->getTimestamp()) / 60);
+    }
+
+    /**
+     * @param DateTime $departureDateTime
+     * @param DateTime $arrivalDateTime
+     * @param int $layover
+     * @return float|int
+     */
+    private function getFlightDurationWithLayover(DateTime $departureDateTime, DateTime $arrivalDateTime, int $layover)
+    {
+        return intval(($arrivalDateTime->getTimestamp() - $departureDateTime->getTimestamp()) / 60 - $layover);
     }
 
     /**
