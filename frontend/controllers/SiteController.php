@@ -496,8 +496,13 @@ class SiteController extends FController
         return $this->redirect(['site/step-two']);
     }
 
-    protected function get2FAAbacAccess($user): bool
+    protected function get2FAAbacAccess(Employee $user): bool
     {
-        return \Yii::$app->abac->can(null, TwoFactorAuthAbacObject::TWO_FACTOR_AUTH, TwoFactorAuthAbacObject::ACTION_ACCESS, $user);
+        return !$user->isSuperAdmin() && (bool)\Yii::$app->abac->can(
+            null,
+            TwoFactorAuthAbacObject::TWO_FACTOR_AUTH,
+            TwoFactorAuthAbacObject::ACTION_ACCESS,
+            $user
+        );
     }
 }
