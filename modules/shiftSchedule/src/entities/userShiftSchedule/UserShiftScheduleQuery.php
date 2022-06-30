@@ -393,6 +393,7 @@ class UserShiftScheduleQuery
     ): ?UserShiftSchedule {
         return UserShiftSchedule::find()
             ->alias('user_shift_schedule')
+            ->select('user_shift_schedule.*')
             ->innerJoin(
                 ShiftScheduleType::tableName() . ' AS shift_schedule_type',
                 'shift_schedule_type.sst_id = user_shift_schedule.uss_sst_id',

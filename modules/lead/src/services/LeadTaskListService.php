@@ -55,8 +55,8 @@ class LeadTaskListService
                         TargetObject::TARGET_OBJ_LEAD,
                         $this->lead->id,
                         $taskList->tl_id,
-                        date('Y-m-d H:i:s'), /* TODO::  */
-                        date('Y-m-d H:i:s') /* TODO::  */
+                        $dtNow->format('Y-m-d H:i:s'),
+                        $userShiftSchedule->uss_end_utc_dt
                     );
                     if (!$userTask->validate()) {
                         throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($userTask, ' '));
