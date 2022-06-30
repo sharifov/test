@@ -17,10 +17,18 @@ use yii\base\Component;
  */
 class CallLogAccessRule extends Component
 {
-    public $action;
+    /**
+     * @var string value with object, that will be passed into abac component for access checking
+     */
     public $object;
+    /**
+     * @var string value with action, that will be passed into abac component for access checking
+     */
+    public $action;
 
     /**
+     * Checks whether the Web user is allowed to perform the specified action (from point of abac).
+     *
      * @param $user
      * @return bool
      */

@@ -15,18 +15,67 @@ use yii\web\ForbiddenHttpException;
 use yii\web\User;
 
 /**
- * Class CallLogAccessControl
+ * Class CallLogAccessControl provides simple access control based on a set of rules.
+ *
+ * This class similar of `yii\filters\AccessControl` but appear the special filter implementation
+ * for `src\model\callLog\abac\CallLogAbacObject` class;
+ *
+ * To use AccessControl, declare it in the `behaviors()` method of your controller class.
+ * For example, the following declarations will check user access for `index` page in `abac` and will return
+ * ForbiddenHttpException if not.
+ *
+ * ```php
+ * ...
+ * public function behaviors()
+ * {
+ *      return [
+ *          'abac-access' => [
+ *              'class' => CallLogAccessControl::class,
+ *              'rules' => [
+ *                  'index' => [
+ *                      'object' => CallLogAbacObject::OBJECT_ACT_INDEX,
+ *                      'action' => CallLogAbacObject::ACTION_ACCESS
+ *                  ]
+ *              ]
+ *          ]
+ *      ];
+ * }
+ * ...
+ * ```
+ *
+ * In this example you can see that:
+ *      - `index` is `id` of action
+ *      - `object` is an object, that will be checked in abac module
+ *      - `action` is an action, that will be used in access checking in abac module
+ *
  * @package src\model\callLog\abac
  */
 class CallLogAccessControl extends ActionFilter
 {
+    /**
+     * @var array the default configuration of access rules. Individual rule configurations
+     * specified via [[rules]] will take precedence when the same property of the rule is configured.
+     */
     protected $ruleConfig = [
         'class' => 'src\model\callLog\abac\CallLogAccessRule'
     ];
+    /**
+     * @var array a list of access rule objects or configuration arrays for creating the rule objects.
+     * If a rule is specified via a configuration array, it will be merged with [[ruleConfig]] first
+     * before it is used for creating the rule object.
+     * @see ruleConfig
+     */
     public $rules;
+    /**
+     * @var User|array|string|false the user object representing the authentication status or the ID of the user application component.
+     * Starting from version 2.0.2, this can also be a configuration array for creating the object.
+     * Starting from version 2.0.12, you can set it to `false` to explicitly switch this component support off for the filter.
+     */
     public $user = 'user';
 
     /**
+     * Initializes the [[rules]] array by instantiating rule objects from configurations & user;
+     *
      * @throws \yii\base\InvalidConfigException
      */
     public function init()

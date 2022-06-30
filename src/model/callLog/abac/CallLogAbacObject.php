@@ -17,10 +17,8 @@ class CallLogAbacObject extends AbacBaseModel implements AbacInterface
     /** NAMESPACE */
     private const NS = 'call-log/';
 
-    /** ALL PERMISSIONS */
+    /** ABAC OBJECTS */
     public const ALL = self::NS . '*';
-
-    /** ACTION PERMISSION */
     public const OBJECT_ACT_ALL = self::NS . 'act/*';
     public const OBJECT_ACT_INDEX = self::NS . 'act/index';
     public const OBJECT_ACT_CREATE = self::NS . 'act/create';
