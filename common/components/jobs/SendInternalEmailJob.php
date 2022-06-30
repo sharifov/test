@@ -8,27 +8,24 @@ use yii\queue\JobInterface;
 
 class SendInternalEmailJob extends BaseJob implements JobInterface
 {
-    private $projectId;
-    private $templateType;
     private $emailFrom;
     private $emailTo;
-    private $emailData;
+    private $emailSubject;
+    private $emailTemplate;
 
     public function __construct(
-        int $projectId,
-        string $templateType,
         string $emailFrom,
         string $emailTo,
-        array $emailData,
+        string $emailTemplate,
+        string $emailSubject,
         ?float $timeStart = null,
         $config = []
     ) {
         parent::__construct($timeStart, $config);
-        $this->projectId = $projectId;
-        $this->templateType = $templateType;
         $this->emailFrom = $emailFrom;
         $this->emailTo = $emailTo;
-        $this->emailData = $emailData;
+        $this->emailTemplate = $emailTemplate;
+        $this->emailSubject = $emailSubject;
     }
 
     /**
@@ -38,24 +35,12 @@ class SendInternalEmailJob extends BaseJob implements JobInterface
     {
         $this->waitingTimeRegister();
 
-        $emailData = \Yii::$app->communication->mailPreview(
-            $this->projectId,
-            $this->templateType,
-            $this->emailFrom,
-            $this->emailTo,
-            $this->emailData
-        );
-
         try {
-            if ($emailData['error'] !== false) {
-                throw new \DomainException($emailData['error']);
-            }
-
             $emailDto = new EmailDto(
                 $this->emailTo,
                 $this->emailFrom,
-                $emailData['data']['email_subject'],
-                $emailData['data']['email_body_html']
+                $this->emailSubject,
+                $this->emailTemplate
             );
 
             \Yii::$app->email->send($emailDto);
