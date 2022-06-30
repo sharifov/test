@@ -4,6 +4,8 @@ namespace frontend\controllers;
 
 use src\auth\Auth;
 use src\helpers\call\CallHelper;
+use src\model\callLog\abac\CallLogAbacObject;
+use src\model\callLog\abac\CallLogAccessControl;
 use Yii;
 use src\model\callLog\entity\callLog\CallLog;
 use src\model\callLog\entity\callLog\search\CallLogSearch;
@@ -30,6 +32,31 @@ class CallLogController extends FController
                     'delete' => ['POST'],
                 ],
             ],
+            'abac-access' => [
+                'class' => CallLogAccessControl::class,
+                'rules' => [
+                    'index' => [
+                        'object' => CallLogAbacObject::OBJECT_ACT_INDEX,
+                        'action' => CallLogAbacObject::ACTION_ACCESS
+                    ],
+                    'view' => [
+                        'object' => CallLogAbacObject::OBJECT_ACT_VIEW,
+                        'action' => CallLogAbacObject::ACTION_ACCESS
+                    ],
+                    'create' => [
+                        'object' => CallLogAbacObject::OBJECT_ACT_CREATE,
+                        'action' => CallLogAbacObject::ACTION_ACCESS
+                    ],
+                    'update' => [
+                        'object' => CallLogAbacObject::OBJECT_ACT_UPDATE,
+                        'action' => CallLogAbacObject::ACTION_ACCESS
+                    ],
+                    'delete' => [
+                        'object' => CallLogAbacObject::OBJECT_ACT_DELETE,
+                        'action' => CallLogAbacObject::ACTION_ACCESS
+                    ]
+                ]
+            ]
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
