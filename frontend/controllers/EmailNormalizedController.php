@@ -169,33 +169,21 @@ class EmailNormalizedController extends FController
 
         $action = $getParams['action'];
 
-        if (Yii::$app->request->isPost) {
+        //TODO: write logic for edit
+        if (Yii::$app->request->isPost && in_array($action, ['create', 'reply'])) {
             $emailForm = new EmailCreateForm($user->id);
             if ($emailForm->load(Yii::$app->request->post()) && $emailForm->validate()) {
                 try {
                     $email = EmailsNormalizeService::newInstance()->create($emailForm);
+                    EmailsNormalizeService::newInstance()->sendMail($email);
 
                     Yii::$app->session->setFlash('success', 'New Email was created.');
+
+                    return $this->redirect(['inbox', 'id' => $email->e_id]);
+
                 } catch (\Throwable $e) {
-                    Yii::$app->session->setFlash('error', $e->getMessage());
+                    Yii::$app->session->setFlash('error', $e->getMessage()/* .'<br/>'.$e->getTraceAsString() */);
                 }
-
-                    /* $error = '';
-
-                    if (Yii::$app->request->post('e_send')) {
-                        $out = $modelNewEmail->sendMail();
-
-                        if (isset($out['error']) && $out['error']) {
-                            $error = $out['error'];
-                        }
-                    }
-
-                    if ($error) {
-                        $modelNewEmail->addError('c_email_preview', 'Communication Server response: ' . $error);
-                        Yii::error($error, 'EmailController:inbox:sendMail');
-                    } else {
-                        return $this->redirect(['inbox', 'id' => $modelNewEmail->e_id]);
-                    } */
             } else {
                 Yii::$app->session->setFlash('error', $emailForm->getErrorSummary(true));
             }
