@@ -39,7 +39,7 @@ class CallLogAbacObject extends AbacBaseModel implements AbacInterface
     ];
 
     /** --------------- ACTIONS --------------------------- */
-    public const ACTION_ACCESS  = 'access';
+    public const ACTION_ACCESS = 'access';
     public const ACTION_LISTEN = 'listen';
 
     /** --------------- ACTION LIST --------------------------- */
@@ -75,6 +75,46 @@ class CallLogAbacObject extends AbacBaseModel implements AbacInterface
      */
     public static function getObjectAttributeList(): array
     {
-        return self::OBJECT_ATTRIBUTE_LIST;
+        $attributes = self::OBJECT_ATTRIBUTE_LIST;
+        $attributes[self::OBJECT_ACT_INDEX] = array_merge(
+            self::getExistAttributeList($attributes, self::OBJECT_ACT_INDEX),
+            [
+                [
+                    'optgroup' => 'Call',
+                    'id' => self::NS . 'is_call_owner',
+                    'field' => 'is_call_owner',
+                    'label' => 'Is Record Owner',
+                    'type' => self::ATTR_TYPE_BOOLEAN,
+                    'input' => self::ATTR_INPUT_RADIO,
+                    'multiple' => false,
+                    'default_value' => true,
+                    'vertical' => true,
+                    'values' => ['true' => 'True', 'false' => 'False'],
+                    'operators' =>  [self::OP_EQUAL2]
+                ],
+                [
+                    'optgroup' => 'Call',
+                    'id' => self::NS . 'record_departments',
+                    'field' => 'record_departments',
+                    'label' => 'Department',
+                    'type' => self::ATTR_TYPE_STRING,
+                    'input' => self::ATTR_INPUT_SELECT,
+                    'multiple' => false,
+                    'values' => self::getDepartmentList(),
+                    'operators' =>  [self::OP_IN_ARRAY, self::OP_NOT_IN_ARRAY]
+                ]
+            ]);
+
+        return $attributes;
+    }
+
+    /**
+     * @param array $list
+     * @param String $action
+     * @return array
+     */
+    protected static function getExistAttributeList(array $list, String $action): array
+    {
+        return isset($list[$action]) ? $list[$action] : [];
     }
 }
