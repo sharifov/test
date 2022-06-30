@@ -16,6 +16,21 @@ use common\models\Lead;
 use src\entities\email\EmailLog;
 use src\entities\email\form\EmailCreateForm;
 use src\auth\Auth;
+use common\components\CommunicationService;
+use yii\helpers\VarDumper;
+use src\entities\email\helpers\EmailStatus;
+use modules\featureFlag\FFlag;
+use src\services\abtesting\email\EmailTemplateOfferABTestingService;
+use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
+use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
+use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
+use src\model\leadUserData\entity\LeadUserData;
+use src\model\leadUserData\entity\LeadUserDataDictionary;
+use src\model\leadUserData\repository\LeadUserDataRepository;
+use yii\helpers\ArrayHelper;
+use src\helpers\app\AppHelper;
+use Yii;
+use src\entities\email\helpers\EmailType;
 
 /**
  *
@@ -352,6 +367,14 @@ class EmailsNormalizeService
             }
             //=!EmailContacts
 
+            //=link Client
+            $email->refresh();
+            $clientId = (Yii::createObject(EmailService::class))->detectClientId($email->emailTo);
+            if ($client = Client::findOne($clientId)) {
+                $email->link('clients', $client);
+            }
+            //=!ink Client
+
             $transaction->commit();
 
         }catch (\Throwable $e) {
@@ -360,5 +383,102 @@ class EmailsNormalizeService
         }
 
         return $email;
+    }
+
+    /**
+     *
+     * @param Email $email
+     * @param array $data
+     * @throws \RuntimeException
+     */
+    public function sendMail(Email $email, array $data = [])
+    {
+        /** @var CommunicationService $communication */
+        $communication = Yii::$app->communication;
+        $data['project_id'] = $email->e_project_id;
+
+        $content_data['email_body_html'] = $email->emailBody->getBodyHtml();
+        $content_data['email_body_text'] = $email->emailBody->embd_email_body_text;
+        $content_data['email_subject'] = $email->emailBody->embd_email_subject;
+        $content_data['email_reply_to'] = $email->emailFrom;
+        //TODO: to write cc bcc logic
+        //$content_data['email_cc'] = $this->e_email_cc;
+        //$content_data['email_bcc'] = $this->e_email_bc;
+        if ($email->contactFrom->ea_name) {
+            $content_data['email_from_name'] = $email->contactFrom->ea_name;
+        }
+        if ($email->contactTo->ea_name) {
+            $content_data['email_to_name'] = $email->contactTo->ea_name;
+        }
+        if ($email->emailLog && $email->emailLog->el_message_id) {
+            $content_data['email_message_id'] = $email->emailLog->el_message_id;
+        }
+
+        $tplType = $email->templateType ? $email->templateType->etp_key : null;
+
+        try {
+            $language = $email->params->ep_language_id ?? 'en-US';
+            if (is_null($email->params)) {
+                $email->saveParams(['ep_language_id' => $language]);
+            }
+            $request = $communication->mailSend($email->e_project_id, $tplType, $email->emailFrom, $email->emailTo, $content_data, $data, $language, 0);
+
+            if ($request && isset($request['data']['eq_status_id'])) {
+                $email->e_status_id = $request['data']['eq_status_id'];
+                $email->e_type_id = EmailType::isDraft($email->e_type_id) ? EmailType::OUTBOX : $email->e_type_id;
+                $email->saveEmailLog(['el_communication_id' => $request['data']['eq_id']]);
+                $email->save();
+            }
+
+            if ($request && isset($request['error']) && $request['error']) {
+                $errorData = @json_decode($request['error'], true);
+                $errorMessage = $errorData['message'] ?: $request['error'];
+                throw new \Exception($errorMessage);
+            }
+            /** @fflag FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES, A/B testing for email offer templates enable/disable */
+            if (EmailStatus::notError($email->e_status_id) && Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES)) {
+                if ($email->e_template_type_id && $email->e_project_id && isset($email->lead)) {
+                    EmailTemplateOfferABTestingService::incrementCounterByTemplateAndProjectIds(
+                        $email->e_template_type_id,
+                        $email->e_project_id,
+                        $email->e_departament_id
+                        );
+                }
+            }
+            if ($email->e_id && $email->lead && LeadPoorProcessingService::checkEmailTemplate($tplType)) {
+                LeadPoorProcessingService::addLeadPoorProcessingRemoverJob(
+                    $email->lead->id,
+                    [
+                        LeadPoorProcessingDataDictionary::KEY_NO_ACTION,
+                        LeadPoorProcessingDataDictionary::KEY_EXPERT_IDLE,
+                        LeadPoorProcessingDataDictionary::KEY_SEND_SMS_OFFER,
+                    ],
+                    LeadPoorProcessingLogStatus::REASON_EMAIL
+                    );
+
+                if (($lead = $email->lead) && $lead->employee_id && $lead->isProcessing()) {
+                    try {
+                        $leadUserData = LeadUserData::create(
+                            LeadUserDataDictionary::TYPE_EMAIL_OFFER,
+                            $lead->id,
+                            $lead->employee_id,
+                            (new \DateTimeImmutable())
+                            );
+                        (new LeadUserDataRepository($leadUserData))->save(true);
+                    } catch (\RuntimeException | \DomainException $throwable) {
+                        $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['emailId' => $email->e_id]);
+                        \Yii::warning($message, 'EmailsNormalizeService:LeadUserData:Exception');
+                    } catch (\Throwable $throwable) {
+                        $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['emailId' => $email->e_id]);
+                        \Yii::error($message, 'EmailsNormalizeService:LeadUserData:Throwable');
+                    }
+                }
+            }
+        } catch (\Throwable $exception) {
+            $error = VarDumper::dumpAsString($exception->getMessage());
+            \Yii::error($error, 'EmailsNormalizeService:sendMail:mailSend:exception');
+            $email->statusToError('Communication error: ' . $error);
+            throw new \RuntimeException($error);
+        }
     }
 }
