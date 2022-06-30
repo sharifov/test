@@ -375,6 +375,8 @@ class EmailsNormalizeService
             }
             //=!ink Client
 
+            $email->setMessageId();
+
             $transaction->commit();
 
         }catch (\Throwable $e) {

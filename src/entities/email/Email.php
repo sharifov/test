@@ -379,6 +379,11 @@ class Email extends BaseActiveRecord
         return $message;
     }
 
+    public function setMessageId()
+    {
+        return $this->saveEmailLog(['el_message_id' => $this->generateMessageId()]);
+    }
+
     //TODO: move to service
     public function sendMail(array $data = []): array
     {
