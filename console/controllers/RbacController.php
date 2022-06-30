@@ -127,17 +127,13 @@ class RbacController extends Controller
     {
         $subDir = 'src';
         (new RbacMoveToSrc())->move(env('APP_PATH') . DIRECTORY_SEPARATOR . $subDir . DIRECTORY_SEPARATOR . 'rbac', $subDir);
-        if (Yii::$app->cache) {
-            Yii::$app->cache->flush();
-        }
+        Yii::$app->authManager->invalidateCache();
     }
 
     public function actionMoveRulesToSales()
     {
         $subDir = 'sales';
         (new RbacMoveToSrc())->move(env('APP_PATH') . DIRECTORY_SEPARATOR . $subDir . DIRECTORY_SEPARATOR . 'rbac', $subDir);
-        if (Yii::$app->cache) {
-            Yii::$app->cache->flush();
-        }
+        Yii::$app->authManager->invalidateCache();
     }
 }
