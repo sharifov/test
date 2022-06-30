@@ -63,6 +63,7 @@ use src\repositories\lead\LeadRepository;
 use src\repositories\NotFoundException;
 use src\services\parsingDump\BaggageService;
 use src\services\parsingDump\ReservationService;
+use src\services\quote\addQuote\AddQuoteManualService;
 use src\services\quote\addQuote\guard\GdsByQuoteGuard;
 use src\services\TransactionManager;
 use webapi\src\request\BoRequestDataHelper;
@@ -1080,14 +1081,14 @@ class FlightQuoteController extends FController
                     $segments = $reservationService->parseResult;
                 }
 
-                [$pastSegmentsItinerary, $pastSegments, $totalPastTrips] = $this->getPastSegmentsByProductQuote($gds, $originProductQuote);
+                [$pastSegmentsItinerary, $pastSegments, $totalPastTrips] = AddQuoteManualService::getPastSegmentsByProductQuote($gds, $originProductQuote);
 
                 $form->keyTripList = $this->updateKeyTripList($form, $totalPastTrips);
                 $form->itinerary = array_merge($pastSegmentsItinerary, $itinerary);
                 $mergedSegments = array_merge($pastSegments, $segments);
                 $totalTrips = count(explode(',', $form->keyTripList));
 
-                $updatedSegmentTripFormData = $this->updateSegmentTripFormsData($form, $totalTrips, $pastSegmentsItinerary);
+                $updatedSegmentTripFormData = AddQuoteManualService::updateSegmentTripFormsData($form, $totalTrips, $pastSegmentsItinerary);
                 $form->setSegmentTripFormsData($updatedSegmentTripFormData);
 
                 $userId = Auth::id();
@@ -1216,68 +1217,6 @@ class FlightQuoteController extends FController
         return $this->render('partial/_add_re_protection_manual', $params);
     }
 
-    public function getPastSegmentsByProductQuote($gds, $productQuote): array
-    {
-        $reservationService = new ReservationService($gds);
-        $productFlightQuote = $productQuote->flightQuote;
-        $countPastTrips = 0;
-        $pastSegmentsItinerary = $pastParsedSegments = [];
-        $countTrips = count($productFlightQuote->flightQuoteTrips);
-        if ($countTrips) {
-            foreach ($productFlightQuote->flightQuoteTrips as $trip) {
-                $issetPastSegments = false;
-                if (count($trip->flightQuoteSegments)) {
-                    foreach ($trip->flightQuoteSegments as $key => $segment) {
-                        $departureTimeZone = null;
-                        if ($departureAirport = Airports::findByIata($segment->fqs_departure_airport_iata)) {
-                            $departureTimeZone = new \DateTimeZone($departureAirport->timezone);
-                        }
-                        $departureDateTime = DateTime::createFromFormat('Y-m-d H:i:s', $segment->fqs_departure_dt, $departureTimeZone);
-                        $now = new DateTime('now', $departureTimeZone);
-
-                        if ($now->getTimestamp() >= $departureDateTime->getTimestamp()) {
-                            $issetPastSegments = true;
-                            $segment = $reservationService->parseSegment($pastParsedSegments, $key + 1, $segment);
-                            $pastParsedSegments[] = $segment;
-                            $pastSegmentsItinerary[] = (new ItineraryDumpDTO([]))
-                                ->feelByParsedReservationDump($segment);
-                        }
-                    }
-                }
-                if ($issetPastSegments) {
-                    $countPastTrips++;
-                }
-            }
-        }
-
-        return [$pastSegmentsItinerary, $pastParsedSegments, $countPastTrips];
-    }
-
-    public function updateSegmentTripFormsData($form, $totalTrips, $pastSegmentsItinerary): array
-    {
-        $newSegmentTripFormData = $form->getSegmentTripFormsData();
-        $updatedSegmentsTrip = $pastSegmentTripFormData = [];
-
-        foreach ($pastSegmentsItinerary as $item) {
-            $pastSegmentTripFormData['SegmentTripForm_' . $item->departureAirportCode . $item->destinationAirportCode] = [
-                'segment_iata' => $item->departureAirportCode . $item->destinationAirportCode,
-                'segment_trip_key' => '1'
-            ];
-        }
-
-        foreach ($newSegmentTripFormData as $keyTripForm => $value) {
-            if (!is_array($value) || !array_key_exists('segment_iata', $value) || !array_key_exists('segment_trip_key', $value)) {
-                continue;
-            }
-            $updatedSegmentsTrip[$keyTripForm] = [
-                'segment_iata' => $value['segment_iata'],
-                'segment_trip_key' => $totalTrips,
-            ];
-        }
-
-        return array_merge($pastSegmentTripFormData, $updatedSegmentsTrip);
-    }
-
     public function updateKeyTripList($form, $totalPastTrips)
     {
         if ($totalPastTrips > 0) {
@@ -1347,14 +1286,14 @@ class FlightQuoteController extends FController
                     $segments = $reservationService->parseResult;
                 }
 
-                [$pastSegmentsItinerary, $pastSegments, $totalPastTrips] = $this->getPastSegmentsByProductQuote($gds, $originProductQuote);
+                [$pastSegmentsItinerary, $pastSegments, $totalPastTrips] = AddQuoteManualService::getPastSegmentsByProductQuote($gds, $originProductQuote);
 
                 $form->keyTripList = $this->updateKeyTripList($form, $totalPastTrips);
                 $form->itinerary = array_merge($pastSegmentsItinerary, $itinerary);
                 $mergedSegments = array_merge($pastSegments, $segments);
                 $totalTrips = count(explode(',', $form->keyTripList));
 
-                $updatedSegmentTripFormData = $this->updateSegmentTripFormsData($form, $totalTrips, $pastSegmentsItinerary);
+                $updatedSegmentTripFormData = AddQuoteManualService::updateSegmentTripFormsData($form, $totalTrips, $pastSegmentsItinerary);
                 $form->setSegmentTripFormsData($updatedSegmentTripFormData);
 
                 $userId = Auth::id();
