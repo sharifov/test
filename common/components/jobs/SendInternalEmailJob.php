@@ -58,9 +58,7 @@ class SendInternalEmailJob extends BaseJob implements JobInterface
                 $emailData['data']['email_body_html']
             );
 
-            $sendResult = \Yii::$app->email->send($emailDto);
-            \Yii::info($emailData, 'info\emaildata');
-            \Yii::info(['send' => $sendResult], 'info\emaildata');
+            \Yii::$app->email->send($emailDto);
         } catch (\Throwable $e) {
             \Yii::error(AppHelper::throwableLog($e, true), 'SendInternalEmailJob');
         }
