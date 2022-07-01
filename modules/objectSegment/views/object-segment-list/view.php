@@ -20,7 +20,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <p>
         <?= Html::a('<i class="fa fa-edit"></i> Update', ['update', 'id' => $model->osl_id], ['class' => 'btn btn-primary']) ?>
 
-        <?php if (!($model->osl_is_system || in_array($model->osl_key, ObjectSegmentListContract::KEYS_LIST))) : ?>
+        <?php if (!$model->osl_is_system) : ?>
             <?= Html::a('<i class="fa fa-remove"></i> Delete', ['delete', 'id' => $model->osl_id], [
                 'class' => 'btn btn-danger',
                 'data'  => [

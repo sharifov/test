@@ -31,7 +31,8 @@ class m220630_235618_add_lead_business_type_object_segment_list_record extends M
                     'osl_title' => 'Business Lead',
                     'osl_key'         =>    \modules\objectSegment\src\contracts\ObjectSegmentListContract::OBJECT_SEGMENT_LIST_KEY_LEAD_TYPE_BUSINESS,
                     'osl_enabled' => true,
-                    'osl_description' => 'Business Lead type'
+                    'osl_description' => 'Business Lead type',
+                    'osl_is_system' => true,
                 ]
             );
             \Yii::$app->db->getSchema()->refreshTableSchema('{{%object_segment_list}}');
