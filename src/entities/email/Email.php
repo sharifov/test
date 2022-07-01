@@ -364,6 +364,24 @@ class Email extends BaseActiveRecord
     }
 
     /**
+     *
+     * @param array $attributes
+     * @return \src\entities\email\Email
+     * @throws \src\exception\CreateModelException
+     */
+    public function saveLog(array $attributes)
+    {
+        if (!$this->emailLog) {
+            $attributes = array_merge($attributes, ['el_email_id' => $this->e_id]);
+            EmailLog::create($attributes);
+        } else {
+            $this->emailLog->updateAttributes($attributes);
+        }
+
+        return $this;
+    }
+
+    /**
      * @return string
      */
     public function generateMessageId(): string
