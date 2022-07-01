@@ -35,12 +35,17 @@ class OtpEmailViewHelper extends View implements TwoFactorViewHelperInterface
             $userProfile->updateOtpData($this->service->hashKey((string)$code), $curDateTime->add($dateInterval));
             $userProfile->save();
 
+            $emailTemplate = $this->renderAjax('/site/2fa/email_template', [
+                'code' => $code,
+                'secondsRemain' => $userProfile->getOtpSecondsLeft(),
+                'emailSubject' => SettingHelper::getOtpEmailTemplateType()
+            ]);
+
             $job = new SendInternalEmailJob(
-                SettingHelper::getOtpEmailProjectId(),
-                SettingHelper::getOtpEmailTemplateType(),
                 SettingHelper::getEmailFrom(),
                 $user->email,
-                ['code' => $code, 'secondsRemain' => $userProfile->getOtpSecondsLeft()]
+                $emailTemplate,
+                SettingHelper::getOtpEmailTemplateSubject(),
             );
             \Yii::$app->queue_email_job->push($job);
         }

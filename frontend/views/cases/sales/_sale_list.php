@@ -89,7 +89,7 @@ $userCanDeleteSaleData = Auth::can('/sale/delete-ajax');
                     $dataSale = JsonHelper::decode($item->css_sale_data_updated);
                     $saleStatus = '';
                     if (is_array($dataSale)) {
-                        $saleStatus = mb_strtolower($dataSale['saleStatus']);
+                        $saleStatus = isset($dataSale['saleStatus']) ? mb_strtolower($dataSale['saleStatus']) : '';
                     }
 
                     $label = '<table class="table table-bordered table-striped" style="margin: 0; color: #0d3349; font-size: 14px"><tr>
