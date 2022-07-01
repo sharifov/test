@@ -46,6 +46,8 @@ class EmailCreateForm extends CompositeForm
     public $leads;
     public $createdDt;
     public $updatedDt;
+    public $isDeleted;
+    public $replyId;
 
     private $userId;
 
@@ -64,7 +66,6 @@ class EmailCreateForm extends CompositeForm
             'to' => new EmailContactForm(EmailContactType::TO),
         ];
 
-
         parent::__construct($config);
     }
 
@@ -77,9 +78,12 @@ class EmailCreateForm extends CompositeForm
         $instance->projectId = $data['projectId'] ?? null;
         $instance->depId = $data['depId'] ?? null;
         $instance->emailId = $data['emailId'] ?? null;
+        $instance->isDeleted = $data['isDeleted'] ?? null;
         $instance->clients = $data['clientsIds'] ?? null;
         $instance->cases = $data['casesIds'] ?? null;
         $instance->leads = $data['leadsIds'] ?? null;
+        $instance->createdDt = $data['createdDt'] ?? null;
+        $instance->updatedDt = $data['updatedDt'] ?? null;
 
         $instance->params = EmailParamsForm::fromArray($data['params'] ?? []);
         $instance->body = EmailBodyForm::fromArray($data['body'] ?? []);
@@ -107,6 +111,8 @@ class EmailCreateForm extends CompositeForm
         $instance->clients = $email->clientsIds ?? null;
         $instance->cases = $email->casesIds ?? null;
         $instance->leads = $email->leadsIds ?? null;
+        $instance->createdDt = $email->e_created_dt ?? null;
+        $instance->updatedDt = $email->e_updated_dt_dt ?? null;
 
         $instance->params = $email->params ? EmailParamsForm::fromModel($email->params, $config) : new EmailParamsForm();
         $instance->body = EmailBodyForm::fromModel($email->emailBody, $config);
@@ -128,6 +134,7 @@ class EmailCreateForm extends CompositeForm
         $instance = new static($user->id, $config);
         $instance->projectId = $email->e_project_id;
         $instance->depId = $email->e_departament_id;
+        $instance->replyId = $email->e_id;
 
         $instance->params = $email->params ? EmailParamsForm::replyFromModel($email->params, $config) : new EmailParamsForm();
         $instance->body = EmailBodyForm::replyFromModel($email->emailBody, $user->username, $config);
@@ -155,8 +162,8 @@ class EmailCreateForm extends CompositeForm
     public function rules(): array
     {
         return [
-            [['clients', 'cases', 'leads'], 'integer'],
-            [['type', 'status', 'projectId', 'depId', 'emailId'], 'integer'],
+            [['clients', 'cases', 'leads', 'createdDt', 'updatedDt'], 'safe'],
+            [['type', 'status', 'projectId', 'depId', 'emailId', 'isDeleted', 'replyId'], 'integer'],
             [['type', 'status', 'projectId'], 'required'],
         ];
     }
