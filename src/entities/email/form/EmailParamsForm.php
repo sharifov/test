@@ -60,11 +60,32 @@ class EmailParamsForm extends Model
         return ['language', 'priority', 'templateType', 'id'];
     }
 
+
+    public function fields()
+    {
+        return [
+            'ep_language_id' => 'language',
+            'ep_priority' => 'priority',
+            'ep_template_type_id' => 'templateType',
+            'ep_id' => 'id'
+        ];
+    }
+
+    public function getAttributesForModel()
+    {
+        $result = [];
+        foreach ($this->fields() as $index => $name) {
+            $key = is_int($index) ? $name : $index;
+            $result[$key] = $this->$name;
+        }
+        return $result;
+    }
+
     public function rules(): array
     {
         return [
             ['language', 'string', 'max' => 5],
-            [['priority','templateType','id'], 'integer'],
+            [['priority', 'templateType', 'id'], 'integer'],
         ];
     }
 }

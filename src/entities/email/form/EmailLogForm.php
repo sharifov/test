@@ -80,6 +80,32 @@ class EmailLogForm extends Model
         ];
     }
 
+    public function fields()
+    {
+        return [
+            'el_communication_id' => 'communicationId',
+            'el_inbox_email_id' => 'inboxEmailId',
+            'el_is_new' => 'isNew',
+            'el_error_message' => 'errorMessage',
+            'el_message_id' => 'messageId',
+            'el_ref_message_id' => 'refMessageId',
+            'el_inbox_created_dt' => 'inboxCreatedDt',
+            'el_read_dt' => 'readDt',
+            'el_status_done_dt' => 'statusDoneDt',
+            'el_id' => 'id',
+        ];
+    }
+
+    public function getAttributesForModel()
+    {
+        $result = [];
+        foreach ($this->fields() as $index => $name) {
+            $key = is_int($index) ? $name : $index;
+            $result[$key] = $this->$name;
+        }
+        return $result;
+    }
+
     public function rules(): array
     {
 
