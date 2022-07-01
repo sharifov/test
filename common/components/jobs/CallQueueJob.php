@@ -147,7 +147,7 @@ class CallQueueJob extends BaseJob implements JobInterface
 
                                 $call->c_lead_id = $lead->id ?? null;
 
-                                if ($call->isGeneralLine()) { // (make isTransfer? )
+                                if ($call->isGeneralLine()) {
                                     $departmentPhone = DepartmentPhoneProject::find()->byPhone($call->c_to, false)->enabled()->limit(1)->one();
                                     if ($departmentPhone) {
                                         $departmentPhoneProjectParamsService = new DepartmentPhoneProjectParamsService($departmentPhone);
@@ -214,15 +214,14 @@ class CallQueueJob extends BaseJob implements JobInterface
                             );
                             $call->c_case_id = $case->cs_id ?? null;
 
-                            $departmentPhone = DepartmentPhoneProject::find()->byPhone($call->c_to, false)->enabled()->limit(1)->one();
-                            if ($departmentPhone) {
-                                $departmentPhoneProjectParamsService = new DepartmentPhoneProjectParamsService($departmentPhone);
-                                $departmentPhoneProjectParamsService->processExperiments(ExperimentTarget::EXT_TYPE_CASE, $call->c_case_id);
-
-//                            \Yii::error($call); die;
-//                            \Yii::warning($call->c_case_id);
-//                            \Yii::error($call); die;
+                            if ($call->isGeneralLine()) {
+                                $departmentPhone = DepartmentPhoneProject::find()->byPhone($call->c_to, false)->enabled()->limit(1)->one();
+                                if ($departmentPhone) {
+                                    $departmentPhoneProjectParamsService = new DepartmentPhoneProjectParamsService($departmentPhone);
+                                    $departmentPhoneProjectParamsService->processExperiments(ExperimentTarget::EXT_TYPE_CASE, $call->c_case_id);
+                                }
                             }
+
                             if (!$departmentParams->object->case->createOnCall && !$allowAutoCreateByProject) {
                                 $clientForm = ClientCreateForm::createWidthDefaultName();
                                 $clientForm->projectId = $call->c_project_id;

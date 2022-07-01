@@ -417,12 +417,6 @@ class CallLogTransferService
                 throw new \RuntimeException(VarDumper::dumpAsString(['model' => $log->toArray(), 'message' => $log->getErrors()]));
             }
 
-            $departmentPhone = DepartmentPhoneProject::find()->byPhone($log->cl_phone_to, false)->enabled()->limit(1)->one();
-            if ($departmentPhone) {
-                $departmentPhoneProjectParamsService = new DepartmentPhoneProjectParamsService($departmentPhone);
-                $departmentPhoneProjectParamsService->updateExperiments(ExperimentTarget::EXT_TYPE_CALL, ExperimentTarget::EXT_TYPE_CALL_LOG, $log->cl_id);
-            }
-
             if (($parentId = $this->call['c_parent_id'] ?? null) && $callLogFilterGuard = CallLogFilterGuardService::checkCallLog($parentId)) {
                 $callLogFilterGuard->clfg_call_log_id = $log->cl_id;
                 (new CallLogFilterGuardRepository($callLogFilterGuard))->save();
@@ -482,6 +476,15 @@ class CallLogTransferService
                     }
                 }
             }
+
+            if ($this->call['phone_list_id']) {
+                $departmentPhone = DepartmentPhoneProject::find()->where(['dpp_phone_list_id' => $this->call['phone_list_id']])->enabled()->limit(1)->one();
+                if ($departmentPhone) {
+                    $departmentPhoneProjectParamsService = new DepartmentPhoneProjectParamsService($departmentPhone);
+                    $departmentPhoneProjectParamsService->processExperiments(ExperimentTarget::EXT_TYPE_PHONE_LIST, $this->call['phone_list_id']);
+                }
+            }
+
 
             $transaction->commit();
 

@@ -24,7 +24,7 @@ class DepartmentPhoneProjectParamsService
         $this->departmentPhoneProject = $departmentPhoneProject;
     }
 
-    public function getPhoneExperimentArray(): array
+    public function getPhoneExperiments(): array
     {
         if (empty($this->departmentPhoneProject->dpp_params)) {
             return [];
@@ -32,9 +32,9 @@ class DepartmentPhoneProjectParamsService
         return array_unique(array_column(ArrayHelper::getValue(JsonHelper::decode($this->departmentPhoneProject->dpp_params), 'experiments', []), 'ex_code'));
     }
 
-    public function processExperiments(int $targetTypeId, int $callId): void
+    public function processExperiments(int $targetTypeId, int $phoneListId): void
     {
-        ExperimentTarget::processExperimentsCodes($targetTypeId, $callId, $this->getPhoneExperimentArray());
+        ExperimentTarget::processExperimentsCodes($targetTypeId, $phoneListId, $this->getPhoneExperiments());
     }
 
     public function updateExperiments(int $oldTargetTypeId, int $newTargetTypeId, int $callId): void

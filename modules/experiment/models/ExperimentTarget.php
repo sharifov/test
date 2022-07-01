@@ -5,8 +5,7 @@ namespace modules\experiment\models;
 use common\models\Lead;
 use src\entities\cases\Cases;
 use src\model\clientChat\entity\ClientChat;
-use common\models\Call;
-use src\model\callLog\entity\callLog\CallLog;
+use src\model\phoneList\entity\PhoneList;
 use Yii;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -27,21 +26,19 @@ class ExperimentTarget extends ActiveRecord
     public const EXT_TYPE_LEAD     = 1;
     public const EXT_TYPE_CASE     = 2;
     public const EXT_TYPE_CHAT     = 3;
-    public const EXT_TYPE_CALL     = 4;
-    public const EXT_TYPE_CALL_LOG = 5;
+    public const EXT_TYPE_PHONE_LIST   = 4;
+
     public const EXT_TYPE_LIST = [
-        self::EXT_TYPE_LEAD     => 'Lead',
-        self::EXT_TYPE_CASE     => 'Case',
-        self::EXT_TYPE_CHAT     => 'Chat',
-        self::EXT_TYPE_CALL     => 'Call',
-        self::EXT_TYPE_CALL_LOG => 'Call log'
+        self::EXT_TYPE_LEAD         => 'Lead',
+        self::EXT_TYPE_CASE         => 'Case',
+        self::EXT_TYPE_CHAT         => 'Chat',
+        self::EXT_TYPE_PHONE_LIST   => 'Phone List'
     ];
     public const EXT_TYPE_NAMESPACES = [
-        self::EXT_TYPE_LEAD     => Lead::class,
-        self::EXT_TYPE_CASE     => Cases::class,
-        self::EXT_TYPE_CHAT     => ClientChat::class,
-        self::EXT_TYPE_CALL     => Call::class,
-        self::EXT_TYPE_CALL_LOG => CallLog::class
+        self::EXT_TYPE_LEAD           => Lead::class,
+        self::EXT_TYPE_CASE           => Cases::class,
+        self::EXT_TYPE_CHAT           => ClientChat::class,
+        self::EXT_TYPE_PHONE_LIST     => PhoneList::class
     ];
 
     /**
@@ -171,6 +168,6 @@ class ExperimentTarget extends ActiveRecord
             $experimentRecord = new Experiment(['ex_code' => $experimentsCodes]);
             $experimentRecord->save();
         }
-        $experimentRecord->processTarget($target_type_id, $targetId);
+        $experimentRecord->saveTarget($target_type_id, $targetId);
     }
 }
