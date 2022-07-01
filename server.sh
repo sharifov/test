@@ -112,6 +112,7 @@ tmpDirs=(
 )
 
 createTemporallyDirectories () {
+  logoutRoot
   printf "\nCreate temporally directories"
   for str in ${tmpDirs[@]}; do
     if [ ! -e $str ]; then
