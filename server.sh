@@ -103,6 +103,7 @@ tmpDirs=(
   "$dockerFolder/mysql/data"
   "$dockerFolder/psql/data"
   "$dockerFolder/ws-nginx/logs"
+  "$currentDir/var/fileStorage"
 )
 
 createTemporallyDirectories () {
@@ -227,15 +228,8 @@ destroy () {
 
 applicationUninstall () {
   destroy
-
-#  if [ -e "$currentDir/.docker/mysql/data" ]; then
-#    sudo rm -r -d "$currentDir/.docker/mysql/data"
-#    logoutRoot
-#  fi
-
   removeTemporallyDirectories
   logoutRoot
-
   printf "Server is destroyed\n"
 }
 
@@ -246,6 +240,7 @@ initChown () {
     sudo chown -R "$CURRENT_USER":"$CURRENT_GROUP" "$currentDir/webapi/runtime/"
     sudo chown -R "$CURRENT_USER":"$CURRENT_GROUP" "$currentDir/yii"
     sudo chown -R "$CURRENT_USER":"$CURRENT_GROUP" "$currentDir/yii_test"
+    sudo chown -R "$CURRENT_USER":"$CURRENT_GROUP" "$currentDir/var/fileStorage"
 }
 
 composerInstall () {
@@ -491,6 +486,9 @@ elif [ "$whatDo" == "init-config" ]; then
 
 elif [ "$whatDo" == "migrate" ]; then
   runMigrate
+
+elif [ "$whatDo" == "create-temporally-directories" ]; then
+  createTemporallyDirectories
 
 elif [ "$whatDo" == "init-local-bo" ]; then
   useLocalBo=$(cat $dockerFolder/.env | grep 'USE_LOCAL_BO' | cut -d "=" -f 2)

@@ -86,7 +86,6 @@ services:
     restart: on-failure
     networks:
       - backend
-      - kivork-proxy
 
   frontend-php-fpm:
     container_name: crm-frontend-php-fpm
@@ -130,7 +129,6 @@ services:
     restart: on-failure
     networks:
       - backend
-      - kivork-proxy
 
   api-php-fpm:
     container_name: crm-api-php-fpm
@@ -190,7 +188,6 @@ services:
     restart: on-failure
     networks:
       - backend
-      - kivork-proxy
 
   ws:
     container_name: crm-ws
