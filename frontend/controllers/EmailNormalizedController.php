@@ -182,7 +182,7 @@ class EmailNormalizedController extends FController
                     return $this->redirect(['inbox', 'id' => $email->e_id]);
 
                 } catch (\Throwable $e) {
-                    Yii::$app->session->setFlash('error', $e->getMessage()/* .'<br/>'.$e->getTraceAsString() */);
+                    Yii::$app->session->setFlash('error', $e->getMessage().'<br/>'.$e->getTraceAsString());
                 }
             } else {
                 Yii::$app->session->setFlash('error', $emailForm->getErrorSummary(true));
@@ -225,9 +225,9 @@ class EmailNormalizedController extends FController
         //search provider
         $params = Yii::$app->request->queryParams;
         $params['email_type_id'] = $getParams['email_type_id'] ?? EmailFilterType::ALL;
-        $params['EmailSearch']['e_project_id'] = $getParams['email_project_id'];
+        $params['EmailSearch']['e_project_id'] = empty($getParams['email_project_id']) ? null : $getParams['email_project_id'];
         $params['EmailSearch']['user_id'] = $user->id;
-        $params['EmailSearch']['email'] = $getParams['email_email'];
+        $params['EmailSearch']['email'] = empty($getParams['email_email']) ? null : $getParams['email_email'];
 
         $dataProvider = $searchModel->searchEmails($params);
         //==
