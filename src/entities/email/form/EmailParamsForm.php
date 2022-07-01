@@ -47,7 +47,17 @@ class EmailParamsForm extends Model
 
     public function isEmpty()
     {
-        return empty($this->id) && empty($this->priority) && empty($this->language) && empty($this->templateType);
+        foreach ($this->attributes() as $attribute) {
+            if (!empty($this->$attribute)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public function attributes()
+    {
+        return ['language', 'priority', 'templateType', 'id'];
     }
 
     public function rules(): array
