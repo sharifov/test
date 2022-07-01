@@ -36,8 +36,7 @@ $bundle = \frontend\assets\TimerAsset::register($this);
                     <?php
                     $js = <<<JS
   $('.enable-timer-lpp').each( function (i, e) {
-      let seconds = $(e).attr('data-seconds'),
-          self = this;
+      let seconds = $(e).attr('data-seconds');
       if (seconds < 0) {
           var params = {format: '%d %H:%M:%S', seconds: Math.abs(seconds)};
       } else {
