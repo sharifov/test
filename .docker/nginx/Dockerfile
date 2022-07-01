@@ -8,11 +8,11 @@ ARG USER_NAME
 ARG USER_ID
 ARG USER_GID
 
-RUN groupadd --gid $USER_GID $USER_NAME \
-    && useradd --uid $USER_ID --gid $USER_GID -m $USER_NAME \
-    && mkdir -p /var/run/nginx /var/tmp/nginx \
-    && chown -R $USER_NAME:$USER_NAME /etc/nginx/conf.d /usr/share/nginx /var/run/nginx /var/tmp/nginx
+RUN mkdir -p /var/run/nginx /var/tmp/nginx
+
+RUN set -x \
+    && groupmod -g "${USER_GID}" nginx \
+    && usermod -u "${USER_ID}" -g "${USER_GID}" nginx
+
 
 COPY nginx.conf /etc/nginx/nginx.conf
-
-USER $USER_NAME
