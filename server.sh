@@ -58,7 +58,7 @@ if [ "$whatDo" == "init-env" ]; then
 elif [ ! -e "$dockerFolder/.env" ]; then
   printf "Not found .docker/.env Please run init-env command\n"
   exit;
-elif [ ! -e ".env" ]; then
+elif [ ! -e "$currentDir/.env" ]; then
   printf "Not found .env Please run init-env command\n"
   exit;
 fi
