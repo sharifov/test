@@ -59,20 +59,20 @@ class m220630_134933_add_abac_2fa_access_permissions extends Migration
                 'ap_created_dt' => date('Y-m-d H:i:s'),
             ]);
 
-            $this->insert('{{%abac_policy}}', [
-                'ap_rule_type' => 'p',
-                'ap_subject' => self::AP_SUBJECT_DENY,
-                'ap_subject_json' => self::AP_SUBJECT_JSON_DENY,
-                'ap_object' => self::AP_OBJECT,
-                'ap_action' => self::AP_ACTION,
-                'ap_action_json' => "[\"access\"]",
-                'ap_effect' => self::AP_EFFECT_DENY,
-                'ap_title' => 'Two Factor Access Permissions For Superuser Admin',
-                'ap_hash_code' => AbacService::generateHashCode(self::GENERATE_HASH_DATA_DENY),
-                'ap_sort_order' => 10,
-                'ap_enabled' => 1,
-                'ap_created_dt' => date('Y-m-d H:i:s'),
-            ]);
+//            $this->insert('{{%abac_policy}}', [
+//                'ap_rule_type' => 'p',
+//                'ap_subject' => self::AP_SUBJECT_DENY,
+//                'ap_subject_json' => self::AP_SUBJECT_JSON_DENY,
+//                'ap_object' => self::AP_OBJECT,
+//                'ap_action' => self::AP_ACTION,
+//                'ap_action_json' => "[\"access\"]",
+//                'ap_effect' => self::AP_EFFECT_DENY,
+//                'ap_title' => 'Two Factor Access Permissions For Superuser Admin',
+//                'ap_hash_code' => AbacService::generateHashCode(self::GENERATE_HASH_DATA_DENY),
+//                'ap_sort_order' => 10,
+//                'ap_enabled' => 1,
+//                'ap_created_dt' => date('Y-m-d H:i:s'),
+//            ]);
             $isInvalidate = true;
         }
 
