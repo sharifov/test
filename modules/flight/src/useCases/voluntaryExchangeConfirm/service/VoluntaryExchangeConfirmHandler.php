@@ -94,7 +94,23 @@ class VoluntaryExchangeConfirmHandler
         $request['billing'] = BoRequestDataHelper::fillBillingData($this->confirmForm->getBillingInfoForm());
         $request['payment'] = BoRequestDataHelper::fillPaymentData($this->confirmForm->getPaymentRequestForm());
         $request['exchange'] = $this->prepareExchange();
+        $request['additionalInfo'] = $this->prepareAdditionalInfo($this->confirmForm->changeQuote);
         return $request;
+    }
+
+    public function prepareAdditionalInfo(ProductQuote $changeQuote): array
+    {
+        $createdBy = $changeQuote->getPqCreatedUser()->limit(1)->one();
+        return [
+            'user' => [
+                'name' => $createdBy->full_name ?? null,
+                'email' => $createdBy->email ?? null,
+            ],
+            'quote' => [
+                'created' => $changeQuote->pq_created_dt ?? null,
+                'expire' => $changeQuote->pq_expiration_dt ?? null,
+            ],
+        ];
     }
 
     private function prepareExchange(): array
