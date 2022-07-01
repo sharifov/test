@@ -381,7 +381,7 @@ class Email extends BaseActiveRecord
 
     public function getMessageId()
     {
-        return $this->emailLog->el_message_id;
+        return $this->emailLog ? $this->emailLog->el_message_id : null;
     }
 
     public function setMessageId()
