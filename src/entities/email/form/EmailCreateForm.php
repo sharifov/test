@@ -18,7 +18,20 @@ use common\models\Employee;
  *
  * @property EmailParamsForm $params
  * @property EmailBodyForm $body
+ * @property EmailLogForm $log
  * @property EmailContactForm[] $contacts
+ *
+ * @property int $type
+ * @property int $status
+ * @property int $projectId
+ * @property int $depId
+ * @property int $emailId
+ * @property array $cases
+ * @property array $clients
+ * @property array $leads
+ * @property string $createdDt
+ * @property string $updatedDt
+ * @property int $userId
  *
  */
 class EmailCreateForm extends CompositeForm
@@ -28,6 +41,11 @@ class EmailCreateForm extends CompositeForm
     public $projectId;
     public $depId;
     public $emailId;
+    public $cases;
+    public $clients;
+    public $leads;
+    public $createdDt;
+    public $updatedDt;
 
     private $userId;
 
@@ -39,6 +57,7 @@ class EmailCreateForm extends CompositeForm
 
         $this->params = new EmailParamsForm();
         $this->body = new EmailBodyForm();
+        $this->log = new EmailLogForm();
 
         $this->contacts = [
             'from' => new EmailContactForm(EmailContactType::FROM),
@@ -58,9 +77,13 @@ class EmailCreateForm extends CompositeForm
         $instance->projectId = $data['projectId'] ?? null;
         $instance->depId = $data['depId'] ?? null;
         $instance->emailId = $data['emailId'] ?? null;
+        $instance->clients = $data['clientsIds'] ?? null;
+        $instance->cases = $data['casesIds'] ?? null;
+        $instance->leads = $data['leadsIds'] ?? null;
 
         $instance->params = EmailParamsForm::fromArray($data['params'] ?? []);
         $instance->body = EmailBodyForm::fromArray($data['body'] ?? []);
+        $instance->log = EmailLogForm::fromArray($data['log'] ?? []);
 
         $from = (isset($data['contacts']['from'])) ? EmailContactForm::fromArray($data['contacts']['from']) : new EmailContactForm(EmailContactType::FROM);
         $to = (isset($data['contacts']['to'])) ? EmailContactForm::fromArray($data['contacts']['to']) : new EmailContactForm(EmailContactType::TO);
@@ -81,9 +104,13 @@ class EmailCreateForm extends CompositeForm
         $instance->projectId = $email->e_project_id;
         $instance->depId = $email->e_departament_id;
         $instance->emailId = $email->e_id ?? null;
+        $instance->clients = $email->clientsIds ?? null;
+        $instance->cases = $email->casesIds ?? null;
+        $instance->leads = $email->leadsIds ?? null;
 
         $instance->params = $email->params ? EmailParamsForm::fromModel($email->params, $config) : new EmailParamsForm();
         $instance->body = EmailBodyForm::fromModel($email->emailBody, $config);
+        $instance->log = $email->emailLog ? EmailLogForm::fromModel($email->emailLog, $config) : new EmailLogForm();
 
         $from = EmailContactForm::fromModel($email->emailContactFrom);
         $to = EmailContactForm::fromModel($email->emailContactTo);
@@ -102,8 +129,9 @@ class EmailCreateForm extends CompositeForm
         $instance->projectId = $email->e_project_id;
         $instance->depId = $email->e_departament_id;
 
-        $instance->params = EmailParamsForm::replyFromModel($email->params, $config);
+        $instance->params = $email->params ? EmailParamsForm::replyFromModel($email->params, $config) : new EmailParamsForm();
         $instance->body = EmailBodyForm::replyFromModel($email->emailBody, $user->username, $config);
+        $instance->log = $email->emailLog ? EmailLogForm::replyFromModel($email->emailLog, $config) : new EmailLogForm();
 
         $from = EmailContactForm::fromArray([
             'email' => $email->emailContactTo->address->ea_email,
@@ -127,6 +155,7 @@ class EmailCreateForm extends CompositeForm
     public function rules(): array
     {
         return [
+            [['clients', 'cases', 'leads'], 'integer'],
             [['type', 'status', 'projectId', 'depId', 'emailId'], 'integer'],
             [['type', 'status', 'projectId'], 'required'],
         ];
@@ -149,6 +178,6 @@ class EmailCreateForm extends CompositeForm
 
     public function internalForms(): array
     {
-        return ['params', 'body', 'contacts'];
+        return ['params', 'body', 'contacts', 'log'];
     }
 }
