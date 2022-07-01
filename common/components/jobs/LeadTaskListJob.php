@@ -13,12 +13,12 @@ use yii\queue\JobInterface;
 class LeadTaskListJob extends BaseJob implements JobInterface
 {
     private int $leadId;
-    private bool $isUserChanged;
+    private bool $isNewOwner;
 
-    public function __construct(int $leadId, bool $isUserChanged, ?float $timeStart = null, array $config = [])
+    public function __construct(int $leadId, bool $isNewOwner = true, ?float $timeStart = null, array $config = [])
     {
         $this->leadId = $leadId;
-        $this->isUserChanged = $isUserChanged;
+        $this->isNewOwner = $isNewOwner;
 
         parent::__construct($timeStart, $config);
     }
@@ -35,17 +35,21 @@ class LeadTaskListJob extends BaseJob implements JobInterface
                 throw new \RuntimeException('Lead not found');
             }
 
-            $leadTaskListService = new LeadTaskListService($lead);
-            // $leadTaskListService-> /* TODO:: add method handler */
+            $leadTaskListService = new LeadTaskListService($lead, $this->isNewOwner);
+            if (!$leadTaskListService->isProcessAllowed()) {
+                return;
+            }
+
+            $leadTaskListService->assign();
         } catch (\RuntimeException | \DomainException $throwable) {
             $message = AppHelper::throwableLog($throwable);
             $message['leadId'] = $this->leadId;
-            $message['isUserChanged'] = $this->isUserChanged;
+            $message['isNewOwner'] = $this->isNewOwner;
             \Yii::warning($message, 'LeadTaskListJob:execute:Exception');
         } catch (\Throwable $throwable) {
             $message = AppHelper::throwableLog($throwable);
             $message['leadId'] = $this->leadId;
-            $message['isUserChanged'] = $this->isUserChanged;
+            $message['isNewOwner'] = $this->isNewOwner;
             \Yii::error($message, 'LeadTaskListJob:execute:Throwable');
         }
     }

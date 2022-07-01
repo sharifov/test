@@ -15,11 +15,14 @@ class LeadTaskListListener
     public function handle(LeadOwnerChangedEvent $event): void
     {
         try {
+            if ((int) $event->newOwnerId === (int) $event->oldOwnerId) {
+                return;
+            }
             if (!(new LeadTaskListService($event->getLead()))->isProcessAllowed(false)) {
                 return;
             }
 
-            $job = new LeadTaskListJob($event->lead->id, ((int) $event->newOwnerId !== (int) $event->oldOwnerId));
+            $job = new LeadTaskListJob($event->lead->id, empty($event->oldOwnerId));
             \Yii::$app->queue_job->priority(100)->push($job);
         } catch (\RuntimeException | \DomainException $throwable) {
             \Yii::warning(AppHelper::throwableLog($throwable), 'LeadTaskListListener:handle:Exception');

@@ -32,10 +32,12 @@ use yii\helpers\ArrayHelper;
 class LeadTaskListService
 {
     private Lead $lead;
+    private bool $isNewOwner;
 
-    public function __construct(Lead $lead)
+    public function __construct(Lead $lead, bool $isNewOwner = true)
     {
         $this->lead = $lead;
+        $this->isNewOwner = $isNewOwner;
     }
 
     public function assign(): void
