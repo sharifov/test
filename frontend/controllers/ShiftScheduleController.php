@@ -706,7 +706,7 @@ class ShiftScheduleController extends FController
                 'message' => 'Event removed successfully',
             ]);
         }
-        $userShiftSchedule->setStatusDelete(Auth::user()->getId());
+        $userShiftSchedule->setStatusDelete(Auth::id());
         (new UserShiftScheduleRepository($userShiftSchedule))->save(true);
 
         Notifications::createAndPublish(
@@ -827,7 +827,7 @@ class ShiftScheduleController extends FController
                 if ($deletePermanently == 1) {
                     $event->delete();
                 } else {
-                    $event->setStatusDelete(Auth::user()->getId());
+                    $event->setStatusDelete(Auth::id());
                     (new UserShiftScheduleRepository($event))->save(true);
 
                     if (!$canHideSoftDeleted) {
