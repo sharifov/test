@@ -379,121 +379,19 @@ class Email extends BaseActiveRecord
         return $message;
     }
 
+    public function getMessageId()
+    {
+        return $this->emailLog->el_message_id;
+    }
+
     public function setMessageId()
     {
         return $this->saveEmailLog(['el_message_id' => $this->generateMessageId()]);
     }
 
-    //TODO: move to service
-    public function sendMail(array $data = []): array
-    {
-        $out = ['error' => false];
-
-        /** @var CommunicationService $communication */
-        $communication = Yii::$app->communication;
-        $data['project_id'] = $this->e_project_id;
-
-        $content_data['email_body_html'] = $this->emailBody->getBodyHtml();
-        $content_data['email_body_text'] = $this->emailBody->embd_email_body_text;
-        $content_data['email_subject'] = $this->emailBody->embd_email_subject;
-        $content_data['email_reply_to'] = $this->emailFrom;
-        //$content_data['email_cc'] = $this->e_email_cc;
-        //$content_data['email_bcc'] = $this->e_email_bc;
-        if ($this->contactFrom->ea_name) {
-            $content_data['email_from_name'] = $this->contactFrom->ea_name;
-        }
-        if ($this->contactTo->ea_name) {
-            $content_data['email_to_name'] = $this->contactTo->ea_name;
-        }
-        if ($this->emailLog->el_message_id) {
-            $content_data['email_message_id'] = $this->emailLog->el_message_id;
-        }
-
-        $tplType = $this->templateType ? $this->templateType->etp_key : null;
-
-        try {
-            $request = $communication->mailSend($this->e_project_id, $tplType, $this->emailFrom, $this->emailTo, $content_data, $data, ($this->params->ep_language_id ?: 'en-US'), 0);
-
-            if ($request && isset($request['data']['eq_status_id'])) {
-                $this->e_status_id = $request['data']['eq_status_id'];
-                $this->e_type_id = EmailType::isDraft($this->e_type_id) ? EmailType::OUTBOX : $this->e_type_id;
-                $this->emailLog->el_communication_id = $request['data']['eq_id'];
-                $this->emailLog->save(false);
-                $this->save();
-            }
-
-            //VarDumper::dump($request, 10, true); exit;
-
-            if ($request && isset($request['error']) && $request['error']) {
-                $errorData = @json_decode($request['error'], true);
-                $errorMessage =  'Communication error: ' . ($errorData['message'] ?: $request['error']);
-                $out['error'] = $errorMessage;
-                $this->statusToError($errorMessage);
-            }
-            /** @fflag FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES, A/B testing for email offer templates enable/disable */
-            if (EmailStatus::notError($this->e_status_id) && Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES)) {
-                if ($this->e_template_type_id && $this->e_project_id && isset($this->lead)) {
-                    EmailTemplateOfferABTestingService::incrementCounterByTemplateAndProjectIds(
-                        $this->e_template_type_id,
-                        $this->e_project_id,
-                        $this->e_departament_id
-                        );
-                }
-            }
-            if ($this->e_id && $this->lead && LeadPoorProcessingService::checkEmailTemplate($tplType)) {
-                LeadPoorProcessingService::addLeadPoorProcessingRemoverJob(
-                    $this->lead->id,
-                    [
-                        LeadPoorProcessingDataDictionary::KEY_NO_ACTION,
-                        LeadPoorProcessingDataDictionary::KEY_EXPERT_IDLE,
-                        LeadPoorProcessingDataDictionary::KEY_SEND_SMS_OFFER,
-                    ],
-                    LeadPoorProcessingLogStatus::REASON_EMAIL
-                    );
-
-                if (($lead = $this->lead) && $lead->employee_id && $lead->isProcessing()) {
-                    try {
-                        $leadUserData = LeadUserData::create(
-                            LeadUserDataDictionary::TYPE_EMAIL_OFFER,
-                            $lead->id,
-                            $lead->employee_id,
-                            (new \DateTimeImmutable())
-                            );
-                        (new LeadUserDataRepository($leadUserData))->save(true);
-                    } catch (\RuntimeException | \DomainException $throwable) {
-                        $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['emailId' => $this->e_id]);
-                        \Yii::warning($message, 'Email:LeadUserData:Exception');
-                    } catch (\Throwable $throwable) {
-                        $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['emailId' => $this->e_id]);
-                        \Yii::error($message, 'Email:LeadUserData:Throwable');
-                    }
-                }
-            }
-        } catch (\Throwable $exception) {
-            $error = VarDumper::dumpAsString($exception->getMessage());
-            $out['error'] = $error;
-            \Yii::error($error, 'Email:sendMail:mailSend:exception');
-            $this->statusToError('Communication error: ' . $error);
-        }
-
-        return $out;
-    }
-
-    /**
-     * @return static
-     */
-/*     private static function create(): self
-    {
-        $email = new static();
-        $email->e_created_dt = date('Y-m-d H:i:s');
-        $email->e_created_user_id = Auth::employeeId();
-
-        return $email;
-    } */
-
     public static function createFromEmailObject(EmailOld $emailOld)
     {
-        $email = self::findOrNew(['e_id' => $emailOld->e_id]);
+        $email = self::findOneOrNew(['e_id' => $emailOld->e_id]);
 
         $email->e_id = $emailOld->e_id;
         $email->e_type_id = $emailOld->e_type_id;
