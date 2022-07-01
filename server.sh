@@ -93,6 +93,11 @@ POSTGRES_USER=$(getEnvVar "POSTGRES_USER")
 POSTGRES_PASSWORD=$(getEnvVar "POSTGRES_PASSWORD")
 POSTGRES_DB=$(getEnvVar "POSTGRES_DB")
 
+PHP_XDEBUG_ENABLED=$(getEnvVar "PHP_XDEBUG_ENABLED")
+XDEBUG_CLIENT_HOST=$(getEnvVar "XDEBUG_CLIENT_HOST")
+XDEBUG_CLIENT_PORT=$(getEnvVar "XDEBUG_CLIENT_PORT")
+XDEBUG_IDE_KEY=$(getEnvVar "XDEBUG_IDE_KEY")
+
 tmpDirs=(
   "$dockerFolder/api-nginx/logs"
   "$dockerFolder/centrifugo/logs"
