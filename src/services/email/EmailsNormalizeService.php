@@ -192,15 +192,13 @@ class EmailsNormalizeService
 
             //=EmailParams
             if (!$form->params->isEmpty()) {
-                $paramsData = array_merge($form->params->getAttributesForModel(), ['ep_email_id' => $email->e_id]);
-                EmailParams::create($paramsData);
+                $email->saveParams($form->params->getAttributesForModel());
             }
             //=!EmailParams
 
             //=EmailLog
             if (!$form->log->isEmpty()) {
-                $logData = array_merge($form->log->getAttributesForModel(), ['el_email_id' => $email->e_id]);
-                EmailLog::create($logData);
+                $email->saveLog($form->log->getAttributesForModel());
             }
             //=!EmailParams
 
