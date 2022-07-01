@@ -10,6 +10,7 @@ use common\models\Department;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\Project;
+use common\models\UserDepartment;
 use src\entities\cases\Cases;
 use src\model\callLog\entity\callLogCase\CallLogCase;
 use src\model\callLog\entity\callLogLead\CallLogLead;
@@ -293,5 +294,20 @@ class CallLog extends \yii\db\ActiveRecord
     public function isClientNotification(): bool
     {
         return $this->cl_category_id === Call::SOURCE_CLIENT_NOTIFICATION;
+    }
+
+    /**
+     * Checks current object for availability by received user
+     *
+     * Function useful for checking that user can view, update and/or delete current object
+     *
+     * @param Employee $user
+     * @return bool
+     */
+    public function isAvailableForUser(Employee $user): bool
+    {
+        return UserDepartment::find()
+            ->where(['ud_user_id' => $user->getPrimaryKey(), 'ud_dep_id' => $this->cl_department_id])
+            ->exists();
     }
 }
