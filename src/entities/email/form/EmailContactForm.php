@@ -5,7 +5,6 @@ namespace src\entities\email\form;
 use yii\base\Model;
 use src\entities\email\helpers\EmailContactType;
 use src\entities\email\EmailContact;
-use src\entities\email\EmailAddress;
 
 class EmailContactForm extends Model
 {
