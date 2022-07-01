@@ -63,7 +63,23 @@ class BoRequestDataHelper
         if ($form->paymentRequestForm) {
             $data['refund']['refundCost'] = $form->paymentRequestForm->amount;
         }
+        $data['additionalInfo'] = self::getAdditionalDataForVoluntaryRefundConfirm($productQuoteRefund);
         return $data;
+    }
+
+    public static function getAdditionalDataForVoluntaryRefundConfirm(ProductQuoteRefund $productQuoteRefund): array
+    {
+        $createdBy = $productQuoteRefund->getCreatedUser()->limit(1)->one();
+        return [
+            'user' => [
+                'name' => $createdBy->full_name ?? null,
+                'email' => $createdBy->email ?? null,
+            ],
+            'quote' => [
+                'created' => $productQuoteRefund->pqr_created_dt ?? null,
+                'expire' => $productQuoteRefund->pqr_expiration_dt ?? null,
+            ],
+        ];
     }
 
     /**
