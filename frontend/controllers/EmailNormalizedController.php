@@ -344,18 +344,15 @@ class EmailNormalizedController extends FController
         ];
 
         if (($emailOld = \common\models\Email::findOne($id)) !== null) {
-            $service = new EmailsNormalizeService();
-            $service->createEmailFromOld($emailOld);
+            try {
+                $email = EmailsNormalizeService::newInstance()->createEmailFromOld($emailOld);
 
-            if ($service->email !== null) {
-                $result['success'] =  true;
-                $result['html'] = Html::a('<span class="label label-success">yes</span>', ['email-normalized/view', 'id' => $service->email->e_id], ['target' => '_blank', 'data-pjax' => 0]);
-            }
-            else {
-                $result['errors'] = $service->getErrors();
+                $result['html'] = Html::a('<span class="label label-success">yes</span>', ['email-normalized/view', 'id' => $email->e_id], ['target' => '_blank', 'data-pjax' => 0]);
+
+            } catch (\Throwable $e) {
+                $result['errors'] =  $e->getMessage() .'<br/>'.$e->getTraceAsString();
             }
         }
-
 
         return $this->asJson($result);
     }
